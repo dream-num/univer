@@ -22,7 +22,7 @@ import type { IInsertRangeMoveRightCommandParams } from '../../commands/commands
 import type { IInsertColCommandParams, IInsertRowCommandParams } from '../../commands/commands/insert-row-col.command';
 import type { IMoveRangeCommandParams } from '../../commands/commands/move-range.command';
 import type { IMoveColsCommandParams, IMoveRowsCommandParams } from '../../commands/commands/move-rows-cols.command';
-import type { IRemoveRowColCommandParams } from '../../commands/commands/remove-row-col.command';
+import type { IRemoveRowColCommandInterceptParams } from '../../commands/commands/remove-row-col.command';
 import type { IReorderRangeCommandParams } from '../../commands/commands/reorder-range.command';
 import type { IMoveRangeMutationParams } from '../../commands/mutations/move-range.mutation';
 import type { ISheetCommandSharedParams } from '../../commands/utils/interface';
@@ -286,7 +286,7 @@ export class RefRangeService extends Disposable {
                             return this._checkRange([effectRange], unitId, subUnitId);
                         }
                         case EffectRefRangId.RemoveRowCommandId: {
-                            const params = command.params as IRemoveRowColCommandParams;
+                            const params = command.params as IRemoveRowColCommandInterceptParams;
                             const target = getSheetCommandTarget(this._univerInstanceService, params);
                             if (!target) return [];
 
@@ -302,7 +302,7 @@ export class RefRangeService extends Disposable {
                             return this._checkRange([effectRange], unitId, subUnitId);
                         }
                         case EffectRefRangId.RemoveColCommandId: {
-                            const params = command.params as IRemoveRowColCommandParams;
+                            const params = command.params as IRemoveRowColCommandInterceptParams;
                             const target = getSheetCommandTarget(this._univerInstanceService, params);
                             if (!target) return [];
 

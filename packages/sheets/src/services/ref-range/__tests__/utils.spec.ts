@@ -2107,16 +2107,16 @@ describe('test ref-range move', () => {
 
             it('should be delete', () => {
                 const targetRange: IRange = { startRow: 5, endRow: 7, startColumn: 1, endColumn: 1 };
-                const resultRange = handleRemoveRowCommon({ range: { ...targetRange } }, targetRange);
+                const resultRange = handleRemoveRowCommon({ range: { ...targetRange }, unitId: '', subUnitId: '' }, targetRange);
                 expect(resultRange.length).toBe(0);
 
-                const resultRange2 = handleRemoveRowCommon({ range: { ...targetRange } }, { ...targetRange, startRow: 4 });
+                const resultRange2 = handleRemoveRowCommon({ range: { ...targetRange }, unitId: '', subUnitId: '' }, { ...targetRange, startRow: 4 });
                 expect(resultRange2).toEqual([{ startRow: 4, endRow: 4, startColumn: 1, endColumn: 1 }]);
             });
 
             it('should not be delete ', () => {
                 const targetRange: IRange = { startRow: 5, endRow: 7, startColumn: 1, endColumn: 1 };
-                const resultRange = handleRemoveRowCommon({ range: { ...targetRange }, ranges: [{ startRow: 5, endRow: 5, startColumn: 1, endColumn: 1 }, { startRow: 6, endRow: 6, startColumn: 1, endColumn: 1 }] }, targetRange);
+                const resultRange = handleRemoveRowCommon({ range: { ...targetRange }, unitId: '', subUnitId: '', ranges: [{ startRow: 5, endRow: 5, startColumn: 1, endColumn: 1 }, { startRow: 6, endRow: 6, startColumn: 1, endColumn: 1 }] }, targetRange);
                 expect(resultRange).toEqual([{ startRow: 5, endRow: 5, startColumn: 1, endColumn: 1 }]);
             });
         });

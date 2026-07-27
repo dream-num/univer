@@ -50,6 +50,8 @@ export interface IRemoveRowColCommandParams extends Partial<ISheetCommandSharedP
 }
 
 export interface IRemoveRowColCommandInterceptParams extends IRemoveRowColCommandParams {
+    unitId: string;
+    subUnitId: string;
     ranges?: IRange[];
 }
 
@@ -126,7 +128,7 @@ export const RemoveRowByRangeCommand: ICommand<IRemoveRowByRangeCommandParams> =
             undoMutations.unshift(...undos);
         });
 
-        const interceptorParams: IRemoveRowColCommandParams = { range, unitId, subUnitId };
+        const interceptorParams: IRemoveRowColCommandInterceptParams = params;
         const intercepted = sheetInterceptorService.onCommandExecute({
             id: RemoveRowCommandId,
             params: interceptorParams,
@@ -203,7 +205,7 @@ export const RemoveRowCommand: ICommand<IRemoveRowColCommandParams> = {
 
         const canPerform = await sheetInterceptorService.beforeCommandExecute({
             id: RemoveRowCommand.id,
-            params: { range, unitId, subUnitId } as IRemoveRowColCommandParams,
+            params: { range, unitId, subUnitId },
         });
 
         if (!canPerform) {
@@ -249,7 +251,7 @@ export const RemoveColByRangeCommand: ICommand<IRemoveColByRangeCommandParams> =
             cellValue: removedCols.getMatrix(),
         };
 
-        const interceptorParams: IRemoveRowColCommandParams = { range, unitId, subUnitId };
+        const interceptorParams: IRemoveRowColCommandInterceptParams = params;
         const intercepted = sheetInterceptorService.onCommandExecute({
             id: RemoveColCommandId,
             params: interceptorParams,
@@ -326,7 +328,7 @@ export const RemoveColCommand: ICommand = {
 
         const canPerform = await sheetInterceptorService.beforeCommandExecute({
             id: RemoveColCommand.id,
-            params: { range, unitId, subUnitId } as IRemoveRowColCommandParams,
+            params: { range, unitId, subUnitId },
         });
 
         if (!canPerform) {

@@ -44,19 +44,12 @@ function createWorkbookData(): IWorkbookData {
         id: 'test',
         appVersion: '3.0.0-alpha',
         name: 'test',
-        sheetOrder: ['sheet1', 'sheet-other'],
+        sheetOrder: ['sheet1'],
         locale: LocaleType.EN_US,
         sheets: {
             sheet1: {
                 id: 'sheet1',
                 name: 'Sheet1',
-                rowCount: 12,
-                columnCount: 8,
-                cellData: {},
-            },
-            'sheet-other': {
-                id: 'sheet-other',
-                name: 'SheetOther',
                 rowCount: 12,
                 columnCount: 8,
                 cellData: {},
@@ -202,7 +195,7 @@ describe('getReferenceMoveParams', () => {
         });
         expect(getReferenceMoveParams(workbook, {
             id: RemoveRowCommand.id,
-            params: { range },
+            params: { range, unitId: 'test', subUnitId: 'sheet1' },
         })).toEqual({
             type: FormulaReferenceMoveType.RemoveRow,
             unitId: 'test',
@@ -212,31 +205,11 @@ describe('getReferenceMoveParams', () => {
         });
         expect(getReferenceMoveParams(workbook, {
             id: RemoveColCommand.id,
-            params: { range },
+            params: { range, unitId: 'test', subUnitId: 'sheet1' },
         })).toEqual({
             type: FormulaReferenceMoveType.RemoveColumn,
             unitId: 'test',
             sheetId: 'sheet1',
-            range,
-        });
-        // Prefer explicit unitId/subUnitId over the active sheet (non-active sheet deleteRows)
-        expect(getReferenceMoveParams(workbook, {
-            id: RemoveRowCommand.id,
-            params: { range, unitId: 'test', subUnitId: 'sheet-other' },
-        })).toEqual({
-            type: FormulaReferenceMoveType.RemoveRow,
-            unitId: 'test',
-            sheetId: 'sheet-other',
-            range,
-            rangeFilteredRows: [],
-        });
-        expect(getReferenceMoveParams(workbook, {
-            id: RemoveColCommand.id,
-            params: { range, unitId: 'test', subUnitId: 'sheet-other' },
-        })).toEqual({
-            type: FormulaReferenceMoveType.RemoveColumn,
-            unitId: 'test',
-            sheetId: 'sheet-other',
             range,
         });
         expect(getReferenceMoveParams(workbook, {

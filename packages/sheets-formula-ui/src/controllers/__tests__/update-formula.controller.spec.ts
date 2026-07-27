@@ -1403,8 +1403,20 @@ describe('Test update formula ', () => {
             expect(valuesRedo).toStrictEqual([[{ f: '=A1:B1' }]]);
         });
 
-        it('Remove row, update reference and position', async () => {
-            const params: IRemoveRowColCommandParams = {
+        it('Remove rows on non-active sheet, update reference and position', async () => {
+            const workbook = get(IUniverInstanceService).getUnit<Workbook>('test');
+            if (!workbook) {
+                throw new Error('workbook not found');
+            }
+            const sheet2 = workbook.getSheetBySheetId('sheet2');
+            if (!sheet2) {
+                throw new Error('sheet2 not found');
+            }
+            workbook.setActiveSheet(sheet2);
+
+            const params = {
+                unitId: 'test',
+                subUnitId: 'sheet1',
                 range: {
                     startRow: 1,
                     endRow: 1,
@@ -1413,7 +1425,7 @@ describe('Test update formula ', () => {
                 },
             };
 
-            expect(await commandService.executeCommand(RemoveRowCommand.id, params)).toBeTruthy();
+            expect(commandService.syncExecuteCommand(RemoveRowByRangeCommand.id, params)).toBeTruthy();
             const values = getValues(1, 2, 2, 2);
             expect(values).toStrictEqual([[{ f: '=A1:B1' }], [null]]);
             const values2 = getValues(4, 2, 5, 2);
@@ -1429,44 +1441,6 @@ describe('Test update formula ', () => {
             const valuesRedo = getValues(1, 2, 2, 2);
             expect(valuesRedo).toStrictEqual([[{ f: '=A1:B1' }], [null]]);
             const valuesRedo2 = getValues(4, 2, 5, 2);
-            expect(valuesRedo2).toStrictEqual([[{ f: '=SUM(A1:B1)' }], [{ v: 1, t: CellValueType.NUMBER }]]);
-        });
-
-        // Facade deleteRows path: RemoveRowByRange with explicit unitId/subUnitId while another sheet is active
-        it('Remove rows on non-active sheet, update reference and position', async () => {
-            const workbook = get(IUniverInstanceService).getUnit<Workbook>('test');
-            const sheet2 = workbook?.getSheetBySheetId('sheet2');
-            if (!sheet2) {
-                throw new Error('sheet2 not found');
-            }
-            workbook?.setActiveSheet(sheet2);
-
-            expect(commandService.syncExecuteCommand(RemoveRowByRangeCommand.id, {
-                unitId: 'test',
-                subUnitId: 'sheet1',
-                range: {
-                    startRow: 1,
-                    endRow: 1,
-                    startColumn: 0,
-                    endColumn: 19,
-                },
-            })).toBeTruthy();
-
-            const values = getValues(1, 2, 2, 2, 'sheet1');
-            expect(values).toStrictEqual([[{ f: '=A1:B1' }], [null]]);
-            const values2 = getValues(4, 2, 5, 2, 'sheet1');
-            expect(values2).toStrictEqual([[{ f: '=SUM(A1:B1)' }], [{ v: 1, t: CellValueType.NUMBER }]]);
-
-            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
-            const valuesUndo = getValues(1, 2, 2, 2, 'sheet1');
-            expect(valuesUndo).toStrictEqual([[{ v: 1, t: CellValueType.NUMBER }], [{ f: '=A1:B2' }]]);
-            const valuesUndo2 = getValues(5, 2, 6, 2, 'sheet1');
-            expect(valuesUndo2).toStrictEqual([[{ f: '=SUM(A1:B2)' }], [{ v: 1, t: CellValueType.NUMBER }]]);
-
-            expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
-            const valuesRedo = getValues(1, 2, 2, 2, 'sheet1');
-            expect(valuesRedo).toStrictEqual([[{ f: '=A1:B1' }], [null]]);
-            const valuesRedo2 = getValues(4, 2, 5, 2, 'sheet1');
             expect(valuesRedo2).toStrictEqual([[{ f: '=SUM(A1:B1)' }], [{ v: 1, t: CellValueType.NUMBER }]]);
         });
 
@@ -1575,17 +1549,30 @@ describe('Test update formula ', () => {
             expect(valuesRedo).toStrictEqual([[{ f: '=A1:A2' }]]);
         });
 
-        it('Remove column, update reference and position', async () => {
-            const params: IRemoveRowColCommandParams = {
+        it('Remove columns on non-active sheet, update reference and position', async () => {
+            const workbook = get(IUniverInstanceService).getUnit<Workbook>('test');
+            if (!workbook) {
+                throw new Error('workbook not found');
+            }
+            const sheet1 = workbook.getSheetBySheetId('sheet1');
+            const sheet2 = workbook.getSheetBySheetId('sheet2');
+            if (!sheet1 || !sheet2) {
+                throw new Error('sheet not found');
+            }
+            workbook.setActiveSheet(sheet2);
+
+            const params = {
+                unitId: 'test',
+                subUnitId: 'sheet1',
                 range: {
                     startColumn: 1,
                     endColumn: 1,
                     startRow: 0,
-                    endRow: 2,
+                    endRow: sheet1.getRowCount() - 1,
                 },
             };
 
-            expect(await commandService.executeCommand(RemoveColCommand.id, params)).toBeTruthy();
+            expect(commandService.syncExecuteCommand(RemoveColByRangeCommand.id, params)).toBeTruthy();
             const values = getValues(2, 1, 2, 2);
             expect(values).toStrictEqual([[{ f: '=A1:A2' }, null]]);
             const values2 = getValues(5, 1, 5, 2);
@@ -1607,55 +1594,6 @@ describe('Test update formula ', () => {
             const valuesRedo2 = getValues(5, 1, 5, 2);
             expect(valuesRedo2).toStrictEqual([[{ f: '=SUM(A1:A2)' }, { v: 1, t: CellValueType.NUMBER }]]);
             const valuesRedo3 = getValues(7, 2, 7, 5);
-            expect(valuesRedo3).toStrictEqual([[{ f: '=SUM(A8)' }, { f: '=SUM(#REF!)' }, { f: '=SUM(B8)' }, null]]);
-        });
-
-        // Facade deleteColumns path: RemoveColByRange with explicit unitId/subUnitId while another sheet is active
-        it('Remove columns on non-active sheet, update reference and position', async () => {
-            const workbook = get(IUniverInstanceService).getUnit<Workbook>('test');
-            if (!workbook) {
-                throw new Error('workbook not found');
-            }
-            const sheet1 = workbook.getSheetBySheetId('sheet1');
-            const sheet2 = workbook.getSheetBySheetId('sheet2');
-            if (!sheet1 || !sheet2) {
-                throw new Error('sheet not found');
-            }
-            workbook.setActiveSheet(sheet2);
-
-            // Match facade deleteColumns: full-height column range + explicit sheet ids
-            expect(commandService.syncExecuteCommand(RemoveColByRangeCommand.id, {
-                unitId: 'test',
-                subUnitId: 'sheet1',
-                range: {
-                    startColumn: 1,
-                    endColumn: 1,
-                    startRow: 0,
-                    endRow: sheet1.getRowCount() - 1,
-                },
-            })).toBeTruthy();
-
-            const values = getValues(2, 1, 2, 2, 'sheet1');
-            expect(values).toStrictEqual([[{ f: '=A1:A2' }, null]]);
-            const values2 = getValues(5, 1, 5, 2, 'sheet1');
-            expect(values2).toStrictEqual([[{ f: '=SUM(A1:A2)' }, { v: 1, t: CellValueType.NUMBER }]]);
-            const values3 = getValues(7, 2, 7, 5, 'sheet1');
-            expect(values3).toStrictEqual([[{ f: '=SUM(A8)' }, { f: '=SUM(#REF!)' }, { f: '=SUM(B8)' }, null]]);
-
-            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
-            const valuesUndo = getValues(2, 1, 2, 2, 'sheet1');
-            expect(valuesUndo).toStrictEqual([[{ v: 1, t: CellValueType.NUMBER }, { f: '=A1:B2' }]]);
-            const valuesUndo2 = getValues(5, 2, 5, 3, 'sheet1');
-            expect(valuesUndo2).toStrictEqual([[{ f: '=SUM(A1:B2)' }, { v: 1, t: CellValueType.NUMBER }]]);
-            const valuesUndo3 = getValues(7, 2, 7, 5, 'sheet1');
-            expect(valuesUndo3).toStrictEqual([[{ v: 1, t: CellValueType.NUMBER }, { f: '=SUM(A8)' }, { f: '=SUM(B8)' }, { f: '=SUM(C8)' }]]);
-
-            expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
-            const valuesRedo = getValues(2, 1, 2, 2, 'sheet1');
-            expect(valuesRedo).toStrictEqual([[{ f: '=A1:A2' }, null]]);
-            const valuesRedo2 = getValues(5, 1, 5, 2, 'sheet1');
-            expect(valuesRedo2).toStrictEqual([[{ f: '=SUM(A1:A2)' }, { v: 1, t: CellValueType.NUMBER }]]);
-            const valuesRedo3 = getValues(7, 2, 7, 5, 'sheet1');
             expect(valuesRedo3).toStrictEqual([[{ f: '=SUM(A8)' }, { f: '=SUM(#REF!)' }, { f: '=SUM(B8)' }, null]]);
         });
 

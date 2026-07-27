@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Dependency, IOperation, IWorkbookData, Workbook } from '@univerjs/core';
+import type { IOperation, IWorkbookData, Workbook } from '@univerjs/core';
 import type { ISetSheetsFilterRangeMutationParams } from '@univerjs/sheets-filter';
 import type { IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';
 import {
@@ -29,19 +29,6 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-import {
-    ActiveDirtyManagerService,
-    IActiveDirtyManagerService,
-    ISheetRowFilteredService,
-    SheetRowFilteredService,
-} from '@univerjs/engine-formula';
-import {
-    RefRangeService,
-    SheetInterceptorService,
-    SheetRangeThemeModel,
-    SheetsSelectionsService,
-    ZebraCrossingCacheController,
-} from '@univerjs/sheets';
 import { FilterBy, SetSheetsFilterRangeMutation, UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ISheetsFilterPanelService, SheetsFilterPanelService } from '../../../services/sheets-filter-panel.service';
@@ -101,16 +88,7 @@ function createFilterOperationTestBed() {
         }
 
         override onStarting(): void {
-            ([
-                [SheetInterceptorService],
-                [ISheetsFilterPanelService, { useClass: SheetsFilterPanelService }],
-                [RefRangeService],
-                [SheetsSelectionsService],
-                [SheetRangeThemeModel],
-                [ZebraCrossingCacheController],
-                [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
-                [ISheetRowFilteredService, { useClass: SheetRowFilteredService }],
-            ] as Dependency[]).forEach((d) => this._injector.add(d));
+            this._injector.add([ISheetsFilterPanelService, { useClass: SheetsFilterPanelService }]);
         }
     }
 

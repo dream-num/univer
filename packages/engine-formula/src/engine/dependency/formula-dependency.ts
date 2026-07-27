@@ -296,8 +296,9 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
                 }
 
                 const sheetSize = this._currentConfigService.getSheetRowColumnCount(unitId, subUnitId);
-                const rowCount = sheetSize.rowCount > 0 ? sheetSize.rowCount : Infinity;
-                const columnCount = sheetSize.columnCount > 0 ? sheetSize.columnCount : Infinity;
+                // A non-sheet other formula uses one virtual result slot at (0, 0).
+                const rowCount = sheetSize.rowCount > 0 ? sheetSize.rowCount : 1;
+                const columnCount = sheetSize.columnCount > 0 ? sheetSize.columnCount : 1;
 
                 const subFormulaDataKeys = Object.keys(subFormulaData);
                 for (const subFormulaDataId of subFormulaDataKeys) {

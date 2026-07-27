@@ -14,50 +14,48 @@
  * limitations under the License.
  */
 
-import { ReorderRangeCommand, SetRangeValuesMutation } from '@univerjs/sheets';
-import { describe, expect, it, vi } from 'vitest';
+import type { IWorkbookData } from '@univerjs/core';
+import { LocaleType } from '@univerjs/core';
+import { ReorderRangeCommand, SetRangeValuesMutation, SheetInterceptorService } from '@univerjs/sheets';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { FormulaReorderController } from '../formula-reorder.controller';
+import { createCommandTestBed } from './create-command-test-bed';
 
-function createController(options?: { worksheet?: any }) {
-    let interceptor: any;
-    const disposable = { dispose: vi.fn() };
-    const sheetInterceptorService = {
-        interceptCommand: vi.fn((registeredInterceptor) => {
-            interceptor = registeredInterceptor;
-            return disposable;
-        }),
-    };
-    const workbook = {
-        getSheetBySheetId: vi.fn(() => options?.worksheet ?? null),
-    };
-    const controller = new FormulaReorderController(
-        sheetInterceptorService as any,
-        { getUnit: vi.fn(() => workbook) } as any,
-        { getFormulaStringByCell: vi.fn(() => '=A2') } as any,
-        { moveFormulaRefOffset: vi.fn(() => '=A1') } as any
-    );
-
-    return { controller, interceptor, disposable };
-}
+const WORKBOOK_DATA: IWorkbookData = {
+    id: 'unit',
+    appVersion: '3.0.0-alpha',
+    locale: LocaleType.EN_US,
+    name: 'Test workbook',
+    styles: {},
+    sheetOrder: ['sheet'],
+    sheets: {
+        sheet: {
+            id: 'sheet',
+            name: 'Sheet 1',
+            cellData: {
+                0: { 0: { v: 'old-row' } },
+                1: { 0: { f: '=A2', si: 'shared' } },
+            },
+        },
+    },
+};
 
 describe('FormulaReorderController', () => {
-    it('creates redo and undo mutations with formula references shifted to the reordered row', () => {
-        const matrix = {
-            getValue: vi.fn((row: number, col: number) => {
-                if (row === 1 && col === 0) {
-                    return { f: '=A2', si: 'shared' };
-                }
-                if (row === 0 && col === 0) {
-                    return { v: 'old-row' };
-                }
-                return { v: `cell-${row}-${col}` };
-            }),
-        };
-        const { controller, interceptor, disposable } = createController({
-            worksheet: { getCellMatrix: vi.fn(() => matrix) },
-        });
+    let univer: ReturnType<typeof createCommandTestBed>['univer'];
+    let controller: FormulaReorderController;
+    let sheetInterceptorService: SheetInterceptorService;
 
-        const result = interceptor.getMutations({
+    beforeEach(() => {
+        const testBed = createCommandTestBed(WORKBOOK_DATA, [[FormulaReorderController]]);
+        univer = testBed.univer;
+        controller = testBed.get(FormulaReorderController);
+        sheetInterceptorService = testBed.get(SheetInterceptorService);
+    });
+
+    afterEach(() => univer.dispose());
+
+    it('creates redo and undo mutations with formula references shifted to the reordered row', () => {
+        const result = sheetInterceptorService.onCommandExecute({
             id: ReorderRangeCommand.id,
             params: {
                 unitId: 'unit',
@@ -93,25 +91,23 @@ describe('FormulaReorderController', () => {
         }]);
 
         controller.dispose();
-        expect(disposable.dispose).toHaveBeenCalled();
+        expect(sheetInterceptorService.onCommandExecute({ id: ReorderRangeCommand.id, params: {} })).toEqual({
+            preUndos: [],
+            undos: [],
+            preRedos: [],
+            redos: [],
+        });
     });
 
     it('returns empty mutations for non-reorder commands, missing worksheets and ranges without formulas', () => {
-        const { interceptor } = createController();
-        expect(interceptor.getMutations({ id: 'other-command', params: {} })).toEqual({ redos: [], undos: [] });
-        expect(interceptor.getMutations({
+        expect(sheetInterceptorService.onCommandExecute({ id: 'other-command', params: {} })).toMatchObject({ redos: [], undos: [] });
+        expect(sheetInterceptorService.onCommandExecute({
             id: ReorderRangeCommand.id,
             params: { unitId: 'unit', subUnitId: 'missing', range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }, order: {} },
-        })).toEqual({ redos: [], undos: [] });
-
-        const noFormula = createController({
-            worksheet: {
-                getCellMatrix: vi.fn(() => ({ getValue: vi.fn(() => ({ v: 'plain' })) })),
-            },
-        });
-        expect(noFormula.interceptor.getMutations({
+        })).toMatchObject({ redos: [], undos: [] });
+        expect(sheetInterceptorService.onCommandExecute({
             id: ReorderRangeCommand.id,
             params: { unitId: 'unit', subUnitId: 'sheet', range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }, order: {} },
-        })).toEqual({ redos: [], undos: [] });
+        })).toMatchObject({ redos: [], undos: [] });
     });
 });

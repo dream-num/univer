@@ -14,15 +14,23 @@
  * limitations under the License.
  */
 
-import { DataValidationStatus, DataValidationType } from '@univerjs/core';
-import { INTERCEPTOR_POINT } from '@univerjs/sheets';
+import type { IWorkbookData, Workbook } from '@univerjs/core';
+import { DataValidationStatus, DataValidationType, InterceptorEffectEnum, LocaleType, Univer, UniverInstanceType } from '@univerjs/core';
+import { DataValidatorRegistryService } from '@univerjs/data-validation';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
+import { DataValidationCacheService, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
+import { AutoHeightController } from '@univerjs/sheets-ui';
+import { IMenuManagerService } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
+import { DataValidationDropdownManagerService } from '../../services/dropdown-manager.service';
 import { SheetsDataValidationRenderController } from '../dv-render.controller';
 
 describe('SheetsDataValidationRenderController', () => {
     it('adds invalid markers, dropdown canvas renderer and list-cell layout behavior through the cell interceptor', () => {
-        let interceptor: any;
+        const univer = new Univer();
+        const injector = univer.__getInjector();
         const canvasRender = {
             calcCellAutoHeight: vi.fn(() => 36),
             calcCellAutoWidth: vi.fn(() => 120),
@@ -32,25 +40,28 @@ describe('SheetsDataValidationRenderController', () => {
             getStyles: vi.fn(() => ({ getStyleByCell: vi.fn(() => ({ fs: 11 })) })),
             getCellWithCoordByIndex: vi.fn(() => ({ startX: 10, startY: 20 })),
         };
-        const controller = new SheetsDataValidationRenderController(
-            { executeCommand: vi.fn() } as never,
-            { mergeMenu: vi.fn() } as never,
-            {
+
+        injector.add([IMenuManagerService, { useValue: { mergeMenu: vi.fn() } as never }]);
+        injector.add([IRenderManagerService, {
+            useValue: {
                 getRenderUnitById: vi.fn(() => ({
                     with: vi.fn(() => ({
                         getSkeletonParam: vi.fn(() => ({ skeleton })),
                     })),
                 })),
             } as never,
-            { getUnit: vi.fn() } as never,
-            { getUndoRedoParamsOfAutoHeight: vi.fn(() => ({ redos: [] })) } as never,
-            { activeDropdown: null, hideDropdown: vi.fn(), showDropdown: vi.fn() } as never,
-            {
+        }]);
+        injector.add([AutoHeightController, { useValue: { getUndoRedoParamsOfAutoHeight: vi.fn(() => ({ redos: [], undos: [] })) } as never }]);
+        injector.add([DataValidationDropdownManagerService, { useValue: { activeDropdown: null, hideDropdown: vi.fn(), showDropdown: vi.fn() } as never }]);
+        injector.add([SheetDataValidationModel, {
+            useValue: {
                 getRuleIdByLocation: vi.fn(() => 'rule-1'),
                 getRuleById: vi.fn(() => ({ uid: 'rule-1', type: DataValidationType.LIST })),
                 ruleChange$: new Subject(),
             } as never,
-            {
+        }]);
+        injector.add([DataValidatorRegistryService, {
+            useValue: {
                 getValidatorItem: vi.fn(() => ({
                     canvasRender,
                     dropdownType: 'list',
@@ -58,20 +69,33 @@ describe('SheetsDataValidationRenderController', () => {
                     getExtraStyle: vi.fn(() => ({ bg: { rgb: '#fff3cd' } })),
                 })),
             } as never,
-            {
-                intercept: vi.fn((point, config) => {
-                    expect(point).toBe(INTERCEPTOR_POINT.CELL_CONTENT);
-                    interceptor = config;
-                    return { dispose: vi.fn() };
-                }),
-            } as never,
-            { getValue: vi.fn(() => DataValidationStatus.INVALID) } as never
-        );
-        const rawCell = { v: 'bad', markers: { bl: { size: 1 } }, coverable: true };
-        const workbook = { getStyles: vi.fn(() => ({ get: vi.fn(() => ({ fs: 10 })) })) };
-        const worksheet = { getMergedCell: vi.fn(() => null) };
+        }]);
+        injector.add([SheetInterceptorService]);
+        injector.add([DataValidationCacheService, { useValue: { getValue: vi.fn(() => DataValidationStatus.INVALID) } as never }]);
+        injector.add([SheetsDataValidationRenderController]);
 
-        const result = interceptor.handler(rawCell, {
+        const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+            id: 'unit-1',
+            appVersion: '3.0.0-alpha',
+            locale: LocaleType.EN_US,
+            name: 'Test workbook',
+            styles: {},
+            sheetOrder: ['sheet-1'],
+            sheets: {
+                'sheet-1': {
+                    id: 'sheet-1',
+                    name: 'Sheet 1',
+                    cellData: { 1: { 2: { v: 'bad' } } },
+                },
+            },
+        });
+        const worksheet = workbook.getSheetBySheetId('sheet-1')!;
+        const controller = injector.get(SheetsDataValidationRenderController);
+        const rawCell = { v: 'bad', markers: { bl: { size: 1 } }, coverable: true } as never;
+        const result = injector.get(SheetInterceptorService).fetchThroughInterceptors(
+            INTERCEPTOR_POINT.CELL_CONTENT,
+            InterceptorEffectEnum.Style
+        )(rawCell, {
             row: 1,
             col: 2,
             unitId: 'unit-1',
@@ -79,20 +103,22 @@ describe('SheetsDataValidationRenderController', () => {
             rawData: rawCell,
             workbook,
             worksheet,
-        }, (cell: unknown) => cell);
+        });
+        const intercepted = result!;
 
-        expect(result).not.toBe(rawCell);
-        expect(result.markers).toEqual(expect.objectContaining({
+        expect(intercepted).not.toBe(rawCell);
+        expect(intercepted.markers).toEqual(expect.objectContaining({
             bl: { size: 1 },
             tr: { size: 6, color: '#fe4b4b' },
         }));
-        expect(result.customRender).toContain(canvasRender);
-        expect(result.fontRenderExtension.isSkip).toBe(true);
-        expect(result.interceptorStyle).toEqual({ bg: { rgb: '#fff3cd' } });
-        expect(result.coverable).toBe(false);
-        expect(result.interceptorAutoHeight()).toBe(36);
-        expect(result.interceptorAutoWidth()).toBe(120);
+        expect(intercepted.customRender).toContain(canvasRender);
+        expect(intercepted.fontRenderExtension?.isSkip).toBe(true);
+        expect(intercepted.interceptorStyle).toEqual({ bg: { rgb: '#fff3cd' } });
+        expect(intercepted.coverable).toBe(false);
+        expect(intercepted.interceptorAutoHeight?.()).toBe(36);
+        expect(intercepted.interceptorAutoWidth?.()).toBe(120);
 
         controller.dispose();
+        univer.dispose();
     });
 });

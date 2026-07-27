@@ -49,7 +49,7 @@ import { collectBackgroundGlyphRuns } from './extensions/background-runs';
 import { getTableIdAndSliceIndex } from './layout/block/table';
 import { documentSkeletonTableIterator } from './layout/tools';
 import { Liquid } from './liquid';
-import { getDocsTableRenderViewport, hasDocsTableHorizontalViewport } from './table-render-viewport';
+import { getDocsTableRenderViewport, getDocsTableViewportLeft, hasDocsTableHorizontalViewport } from './table-render-viewport';
 import './extensions';
 
 const DEFAULT_BORDER_COLOR: ITableCellBorder = {
@@ -167,6 +167,7 @@ export class Documents extends DocComponent {
         const localCoord = this.getInverseCoord(coord);
         const { pages, skeHeaders, skeFooters } = skeletonData;
         const unitId = this._getRenderUnitId();
+        const { docsLeft } = this.getOffsetConfig();
         return documentSkeletonTableIterator(pages, {
             includeCells: false,
             pageMarginTop: this.pageMarginTop,
@@ -178,7 +179,11 @@ export class Documents extends DocComponent {
             const sourceTableId = getTableIdAndSliceIndex(tableId).tableId;
             const viewport = getDocsTableRenderViewport(unitId, sourceTableId);
             const projectedLeft = hasDocsTableHorizontalViewport(viewport)
-                ? tableRect.left - (viewport.leadingInsetLeft ?? 0)
+                ? getDocsTableViewportLeft(
+                    viewport,
+                    tableRect.left - (viewport.leadingInsetLeft ?? 0),
+                    docsLeft
+                )
                 : tableRect.left;
             const projectedRight = hasDocsTableHorizontalViewport(viewport)
                 ? projectedLeft + viewport.viewportWidth

@@ -40,7 +40,7 @@ import {
     NamedStyleType,
 } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
-import { getDocsTableRenderViewport, getTableIdAndSliceIndex } from '@univerjs/engine-render';
+import { getDocsTableRenderViewport, getDocsTableViewportLeft, getTableIdAndSliceIndex } from '@univerjs/engine-render';
 import { DOCS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 
 const PLACEHOLDER_COLOR = 'rgba(0, 0, 0, 0.35)';
@@ -74,6 +74,7 @@ interface IParagraphPlaceholderLocale {
 }
 
 interface IParagraphPlaceholderLayoutOptions {
+    docsLeft?: number;
     unitId?: string;
 }
 
@@ -126,7 +127,10 @@ export class DocParagraphPlaceholderRenderController extends Disposable implemen
             pageLeft,
             pageTop,
             activeRange.startOffset,
-            { unitId: this._context.unitId }
+            {
+                docsLeft: (this._context.mainComponent as Documents | undefined)?.getOffsetConfig().docsLeft,
+                unitId: this._context.unitId,
+            }
         );
         if (!placeholders.length) {
             return;
@@ -210,7 +214,11 @@ export function getParagraphPlaceholderLayouts(
             (viewport.trailingInsetRight ?? 0) > viewport.viewportWidth;
         const tableLeft = pageLeft + page.marginLeft + table.left;
         const tableViewportLeft = hasHorizontalViewport
-            ? tableLeft - (viewport.leadingInsetLeft ?? 0)
+            ? getDocsTableViewportLeft(
+                viewport,
+                tableLeft - (viewport.leadingInsetLeft ?? 0),
+                options?.docsLeft
+            )
             : tableLeft;
         const tableViewportRight = tableViewportLeft +
             (hasHorizontalViewport ? viewport.viewportWidth : table.width);

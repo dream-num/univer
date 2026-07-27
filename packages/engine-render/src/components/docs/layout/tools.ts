@@ -78,7 +78,7 @@ import { DEFAULT_DOCUMENT_FONTSIZE } from '../../../basics/const';
 import { GlyphType, LineType } from '../../../basics/i-document-skeleton-cached';
 import { getFontStyleString, isFunction, ptToPixel } from '../../../basics/tools';
 import { getDocumentCompatibilityPolicy } from '../document-compatibility';
-import { getDocsTableRenderViewport, hasDocsTableHorizontalViewport } from '../table-render-viewport';
+import { getDocsTableRenderViewport, getDocsTableViewportLeft, hasDocsTableHorizontalViewport } from '../table-render-viewport';
 import { updateInlineDrawingPosition } from './block/paragraph/layout-ruler';
 import { getCustomDecorationStyle } from './style/custom-decoration';
 import { getCustomRangeStyle } from './style/custom-range';
@@ -860,7 +860,7 @@ export function documentSkeletonLineIterator(
             const sourceTableId = getSourceTableId(table.tableId);
             const viewport = getDocsTableRenderViewport(unitId, sourceTableId);
             const hasHorizontalViewport = hasDocsTableHorizontalViewport(viewport);
-            const tableViewportLeft = getTableViewportLeft(pageLeft, table.left, viewport, docsLeft);
+            const tableViewportLeft = getDocsTableViewportLeft(viewport, pageLeft + table.left, docsLeft);
             const tableViewportRight = tableViewportLeft + (hasHorizontalViewport ? viewport.viewportWidth : table.width);
             const tableScrollLeft = hasHorizontalViewport ? viewport.scrollLeft : 0;
 
@@ -1094,7 +1094,7 @@ function collectPageTables(options: ICollectPageTablesOptions): void {
         const sourceTableId = getSourceTableId(effectiveTableId);
         const viewport = resolveViewport ? getDocsTableRenderViewport(unitId, sourceTableId) : null;
         const hasHorizontalViewport = hasDocsTableHorizontalViewport(viewport);
-        const tableViewportLeft = getTableViewportLeft(pageLeft, table.left, viewport, docsLeft);
+        const tableViewportLeft = getDocsTableViewportLeft(viewport, pageLeft + table.left, docsLeft);
         const tableViewportRight = tableViewportLeft + (hasHorizontalViewport ? viewport.viewportWidth : table.width);
         const tableScrollLeft = hasHorizontalViewport ? viewport.scrollLeft : 0;
         const cells: IDocumentSkeletonTableCellGeometry[] = [];
@@ -1165,13 +1165,6 @@ function collectPageTables(options: ICollectPageTablesOptions): void {
             },
         });
     });
-}
-
-function getTableViewportLeft(pageLeft: number, tableLeft: number, viewport: unknown, docsLeft: number): number {
-    const viewportLeft = (viewport as Nullable<{ viewportLeft?: number }>)?.viewportLeft;
-    return viewportLeft != null
-        ? viewportLeft - docsLeft
-        : pageLeft + tableLeft;
 }
 
 function getSourceTableId(tableId: string): string {

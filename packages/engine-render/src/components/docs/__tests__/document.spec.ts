@@ -424,13 +424,14 @@ describe('documents render', () => {
                 contentWidth: 260,
                 leadingInsetLeft: 80,
                 scrollLeft: 0,
+                viewportLeft: -20,
                 viewportWidth: 200,
             }
             : null);
 
         expect(documents.isHit(Vector2.create(-40, 50))).toBe(true);
         expect(documents.isHit(Vector2.create(-40, 12))).toBe(true);
-        expect(documents.isHit(Vector2.create(-90, 50))).toBe(false);
+        expect(documents.isHit(Vector2.create(-70, 50))).toBe(false);
 
         documents.dispose();
     });

@@ -342,15 +342,19 @@ describe('doc paragraph placeholder render controller', () => {
             contentWidth: 500,
             leadingInsetLeft: 30,
             scrollLeft: 250,
+            viewportLeft: 120,
             viewportWidth: 220,
         }));
 
-        const placeholders = getParagraphPlaceholderLayouts(page, body, locale, 10, 0, 0);
+        const placeholders = getParagraphPlaceholderLayouts(page, body, locale, 10, 0, 0, {
+            docsLeft: 100,
+            unitId: 'doc-1',
+        });
 
         expect(placeholders).toMatchObject([{
             clipLeft: 206,
-            clipRight: 275,
-            maxWidth: 69,
+            clipRight: 240,
+            maxWidth: 34,
             x: 206,
         }]);
     });

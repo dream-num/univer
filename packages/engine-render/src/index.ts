@@ -64,6 +64,7 @@ export type {
 } from './components/docs/table-render-viewport';
 export {
     getDocsTableRenderViewport,
+    getDocsTableViewportLeft,
     setDocsTableRenderViewportProvider,
 } from './components/docs/table-render-viewport';
 export { DataStreamTreeNode } from './components/docs/view-model/data-stream-tree-node';

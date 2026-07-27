@@ -89,11 +89,16 @@ export interface IDocClipboardCopyContentContext {
     unitId: string;
 }
 
+export interface IDocClipboardPasteContext {
+    documentData: Partial<IDocumentData>;
+    targetUnitId: string;
+}
+
 export interface IDocClipboardHook {
     onCopyDocData?(doc: Partial<IDocumentData>, context: IDocClipboardCopyDocDataContext): Partial<IDocumentData>;
     onCopyProperty?(start: number, end: number): IClipboardPropertyItem;
     onCopyContent?(start: number, end: number, context: IDocClipboardCopyContentContext): string;
-    onBeforePaste?: (body: IDocumentBody) => IDocumentBody;
+    onBeforePaste?: (body: IDocumentBody, context: IDocClipboardPasteContext) => IDocumentBody;
     onBeforePasteImage?: (file: File) => Promise<{ source: string; imageSourceType: ImageSourceType } | null>;
 }
 
@@ -326,12 +331,19 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
 
         this._clipboardHooks.forEach((hook) => {
             if (hook.onBeforePaste) {
-                body = hook.onBeforePaste(body);
+                body = hook.onBeforePaste(body, {
+                    documentData: docData,
+                    targetUnitId: currentDocument.getUnitId(),
+                });
             }
         });
 
         // copy custom ranges
-        body.customRanges = body.customRanges?.map(BuildTextUtils.customRange.copyCustomRange);
+        const customRangeMappings = body.customRanges?.map((sourceRange) => {
+            const targetRange = BuildTextUtils.customRange.copyCustomRange(sourceRange);
+            return { sourceRange, targetRange };
+        }) ?? [];
+        body.customRanges = customRangeMappings.map(({ targetRange }) => targetRange);
 
         body.paragraphs?.forEach((copy) => {
             if (copy.paragraphStyle?.headingId) {
@@ -384,6 +396,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
                     ...docData,
                     body,
                 },
+                customRangeMappings,
                 segmentId,
                 textRanges,
             });

@@ -203,6 +203,7 @@ export { IDocClipboardService } from './services/clipboard/clipboard.service';
 export type {
     IDocClipboardCopyContentContext,
     IDocClipboardHook,
+    IDocClipboardPasteContext,
 } from './services/clipboard/clipboard.service';
 export {
     DocClipboardPasteAdapterService,
@@ -212,6 +213,7 @@ export type {
     IDocClipboardPasteAdapter,
     IDocClipboardPasteBlockRangeMapping,
     IDocClipboardPasteCustomBlockMapping,
+    IDocClipboardPasteCustomRangeMapping,
     IDocClipboardPasteMutationInfoParams,
     IDocClipboardPasteMutationInfos,
 } from './services/clipboard/doc-paste-mutation-adapter.service';

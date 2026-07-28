@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
+import type { IUnitRange, Nullable } from '@univerjs/core';
 import type { ArrayValueObject } from '../value-object/array-value-object';
 import type { BaseValueObject, ErrorValueObject } from '../value-object/base-value-object';
 import { createNewArray } from '../utils/array-object';
@@ -22,6 +22,11 @@ import { NullValueObject } from '../value-object/primitive-object';
 import { BaseReferenceObject } from './base-reference-object';
 
 export type MultiAreaValue = BaseReferenceObject | ErrorValueObject;
+
+export enum MultiAreaArrayMode {
+    FIRST_CELL_GRID = 'first-cell-grid',
+    STACK_AREAS = 'stack-areas',
+}
 
 export class MultiAreaReferenceObject extends BaseReferenceObject {
     /**
@@ -31,7 +36,11 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
      */
     private _areas: MultiAreaValue[][] = [];
 
-    constructor(token: string, areas: MultiAreaValue[][] = []) {
+    constructor(
+        token: string,
+        areas: MultiAreaValue[][] = [],
+        private readonly _arrayMode = MultiAreaArrayMode.FIRST_CELL_GRID
+    ) {
         // The parent class's rangeData becomes meaningless for multi-area.
         // We only reuse the generic infrastructure from BaseReferenceObject.
         super(token);
@@ -108,7 +117,10 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
     // ------------------------------------------------------------
 
     override getRowCount(): number {
-        // Total rows across all areas
+        if (this._arrayMode === MultiAreaArrayMode.FIRST_CELL_GRID) {
+            return this._areas.length;
+        }
+
         let total = 0;
         for (const a of this._flatAreas()) {
             if (a.isError()) {
@@ -120,17 +132,14 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
     }
 
     override getColumnCount(): number {
-        // Column count is ambiguous across disjoint areas.
-        // Excel usually treats multi-area as NOT having a single column count.
-        // Returning the sum is the safest for aggregations.
-        let total = 0;
-        for (const a of this._flatAreas()) {
-            if (a.isError()) {
-                continue;
-            }
-            total += (a as BaseReferenceObject).getColumnCount();
+        if (this._arrayMode === MultiAreaArrayMode.FIRST_CELL_GRID) {
+            return this._areas.reduce((max, row) => Math.max(max, row.length), 0);
         }
-        return total;
+
+        return this._flatAreas().reduce(
+            (max, area) => area.isError() ? max : Math.max(max, (area as BaseReferenceObject).getColumnCount()),
+            0
+        );
     }
 
     override isExceedRange(): boolean {
@@ -252,6 +261,10 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
      * - inner `_areas[row]` dimension => columns
      */
     override toArrayValueObject(): ArrayValueObject {
+        if (this._arrayMode === MultiAreaArrayMode.STACK_AREAS) {
+            return this._stackAreas();
+        }
+
         const rows = this._areas.length;
 
         if (rows === 0) {
@@ -259,20 +272,18 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
             return createNewArray([], 0, 0);
         }
 
-        // Use the first row's length as the column count (assuming rows are consistent; otherwise fill extras later)
-        const cols = this._areas[0]?.length ?? 0;
+        const cols = this.getColumnCount();
 
         const result: BaseValueObject[][] = [];
 
         for (let r = 0; r < rows; r++) {
-            const rowAreas = this._areas[r];
-            if (!rowAreas) continue;
-
-            result[r] = result[r] || [];
+            const rowAreas = this._areas[r] ?? [];
+            result[r] = [];
 
             for (let c = 0; c < cols; c++) {
                 const area = rowAreas[c];
                 if (!area) {
+                    result[r][c] = NullValueObject.create();
                     continue;
                 }
 
@@ -293,15 +304,38 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
 
                 if (firstValue != null) {
                     result[r][c] = firstValue as BaseValueObject;
+                } else {
+                    result[r][c] = NullValueObject.create();
                 }
-                // If firstValue is also null, depending on needs:
-                // - keep it empty (ArrayValueObject's default empty value)
-                // - or fill a NullValueObject / EmptyValueObject
-                result[r][c] = NullValueObject.create();
             }
         }
 
         return createNewArray(result, rows, cols);
+    }
+
+    private _stackAreas(): ArrayValueObject {
+        const result: BaseValueObject[][] = [];
+        const cols = this.getColumnCount();
+
+        for (const area of this._flatAreas()) {
+            if (area.isError()) {
+                const row = new Array<BaseValueObject>(cols).fill(NullValueObject.create());
+                row[0] = area as ErrorValueObject;
+                result.push(row);
+                continue;
+            }
+
+            const array = (area as BaseReferenceObject).toArrayValueObject(false);
+            for (let r = 0; r < array.getRowCount(); r++) {
+                const row: BaseValueObject[] = [];
+                for (let c = 0; c < cols; c++) {
+                    row[c] = array.getRealValue(r, c) ?? NullValueObject.create();
+                }
+                result.push(row);
+            }
+        }
+
+        return createNewArray(result, result.length, cols);
     }
 
     override getRangePosition() {
@@ -371,6 +405,12 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
             sheetId: this.getSheetId(),
             unitId: this.getUnitId(),
         };
+    }
+
+    override toUnitRanges(): IUnitRange[] {
+        return this._flatAreas()
+            .filter((area): area is BaseReferenceObject => !area.isError())
+            .flatMap((area) => area.toUnitRanges());
     }
 
     override getRangeData() {

@@ -17,8 +17,11 @@
 import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
 import { ErrorType } from '../../basics/error-type';
 import { matchToken } from '../../basics/token';
+import { IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { IFunctionService } from '../../services/function.service';
 import { LexerNode } from '../analysis/lexer-node';
+import { MultiAreaArrayMode, MultiAreaReferenceObject } from '../reference-object/multi-area-reference-object';
+import { RangeReferenceObject } from '../reference-object/range-reference-object';
 import { getRangeReferenceObjectFromCache } from '../utils/value-object';
 import { ErrorValueObject } from '../value-object/base-value-object';
 import { BaseAstNode } from './base-ast-node';
@@ -28,7 +31,10 @@ import { NODE_ORDER_MAP, NodeType } from './node-type';
 // const UNION_EXECUTOR_NAME = 'UNION';
 
 export class UnionNode extends BaseAstNode {
-    constructor(operatorString: string) {
+    constructor(
+        operatorString: string,
+        private readonly _currentConfigService: IFormulaCurrentConfigService
+    ) {
         super(operatorString);
     }
 
@@ -51,11 +57,87 @@ export class UnionNode extends BaseAstNode {
 
         let result: FunctionVariantType;
         if (this.getToken() === matchToken.COLON) {
-            result = this._unionFunction(leftNode, rightNode) as FunctionVariantType;
+            result = this._createThreeDimensionalReference(leftChild.getToken(), rightNode)
+                ?? this._unionFunction(leftNode, rightNode) as FunctionVariantType;
         } else {
             result = ErrorValueObject.create(ErrorType.NAME);
         }
         this.setValue(result);
+    }
+
+    private _createThreeDimensionalReference(
+        firstSheetToken: string,
+        rightNode: FunctionVariantType
+    ): MultiAreaReferenceObject | undefined {
+        if (!rightNode.isReferenceObject()) {
+            return;
+        }
+
+        const source = rightNode as BaseReferenceObject;
+        const firstSheetName = this._normalizeSheetName(firstSheetToken);
+        const lastSheetName = this._normalizeSheetName(source.getForcedSheetName());
+        if (!firstSheetName || !lastSheetName) {
+            return;
+        }
+
+        const { sheetOrder, sheetNameMap } = this._currentConfigService.getSheetsInfo();
+        const sheetIdsByName = new Map(
+            Object.entries(sheetNameMap).map(([sheetId, sheetName]) => [sheetName.toLocaleLowerCase(), sheetId])
+        );
+        const firstSheetId = sheetIdsByName.get(firstSheetName.toLocaleLowerCase());
+        const lastSheetId = sheetIdsByName.get(lastSheetName.toLocaleLowerCase());
+        const firstIndex = firstSheetId == null ? -1 : sheetOrder.indexOf(firstSheetId);
+        const lastIndex = lastSheetId == null ? -1 : sheetOrder.indexOf(lastSheetId);
+        if (firstIndex < 0 || lastIndex < 0) {
+            return;
+        }
+
+        const startIndex = Math.min(firstIndex, lastIndex);
+        const endIndex = Math.max(firstIndex, lastIndex);
+        const areas = sheetOrder.slice(startIndex, endIndex + 1).map((sheetId) => {
+            const reference = new RangeReferenceObject(source.getRangeData(), sheetId, source.getUnitId());
+            this._copyReferenceContext(source, reference);
+            reference.setForcedSheetIdDirect(sheetId);
+            reference.setForcedSheetName(sheetNameMap[sheetId] ?? '');
+            return [reference];
+        });
+
+        return new MultiAreaReferenceObject(
+            `${firstSheetToken}:${source.getToken()}`,
+            areas,
+            MultiAreaArrayMode.STACK_AREAS
+        );
+    }
+
+    private _normalizeSheetName(token: string): string {
+        const trimmed = token.trim();
+        if (trimmed.startsWith("'") && trimmed.endsWith("'")) {
+            return trimmed.slice(1, -1).replace(/''/g, "'");
+        }
+        return trimmed;
+    }
+
+    private _copyReferenceContext(source: BaseReferenceObject, target: BaseReferenceObject): void {
+        target.setDefaultUnitId(source.getDefaultUnitId());
+        target.setDefaultSheetId(source.getDefaultSheetId());
+        target.setUnitData(source.getUnitData());
+        target.setUnitStylesData(source.getUnitStylesData());
+        target.setFilteredOutRows(source.getFilteredOutRows());
+        target.setRuntimeData(source.getRuntimeData());
+        target.setArrayFormulaCellData(source.getArrayFormulaCellData());
+        target.setArrayFormulaRange(source.getArrayFormulaRange());
+        target.setRuntimeArrayFormulaCellData(source.getRuntimeArrayFormulaCellData());
+        target.setRuntimeArrayFormulaRange(source.getRuntimeArrayFormulaRange());
+        target.setRuntimeFeatureCellData(source.getRuntimeFeatureCellData());
+
+        const currentRow = source.getCurrentRow();
+        const currentColumn = source.getCurrentColumn();
+        if (currentRow != null && currentColumn != null) {
+            target.setCurrentRowAndColumn(currentRow, currentColumn);
+        }
+
+        const { x, y } = source.getRefOffset();
+        target.setRefOffset(x, y);
     }
 
     private _unionFunction(variant1: FunctionVariantType, variant2: FunctionVariantType) {
@@ -90,7 +172,10 @@ export class UnionNode extends BaseAstNode {
 }
 
 export class UnionNodeFactory extends BaseAstNodeFactory {
-    constructor(@IFunctionService private readonly _functionService: IFunctionService) {
+    constructor(
+        @IFunctionService private readonly _functionService: IFunctionService,
+        @IFormulaCurrentConfigService private readonly _currentConfigService: IFormulaCurrentConfigService
+    ) {
         super();
     }
 
@@ -99,7 +184,7 @@ export class UnionNodeFactory extends BaseAstNodeFactory {
     }
 
     override create(param: string): BaseAstNode {
-        return new UnionNode(param);
+        return new UnionNode(param, this._currentConfigService);
     }
 
     override checkAndCreateNodeType(param: LexerNode | string) {

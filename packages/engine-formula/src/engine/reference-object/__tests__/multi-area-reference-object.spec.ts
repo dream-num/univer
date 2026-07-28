@@ -15,8 +15,9 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
+import { createNewArray } from '../../utils/array-object';
 import { NumberValueObject } from '../../value-object/primitive-object';
-import { MultiAreaReferenceObject } from '../multi-area-reference-object';
+import { MultiAreaArrayMode, MultiAreaReferenceObject } from '../multi-area-reference-object';
 
 function createAreaStub(config?: {
     rowCount?: number;
@@ -33,6 +34,11 @@ function createAreaStub(config?: {
     const range = config?.range ?? { startRow: 0, startColumn: 0, endRow: 0, endColumn: 0 };
     const rangeData = config?.rangeData ?? range;
     const iteratorValue = config?.iteratorValue ?? 1;
+    const unitRange = {
+        unitId: config?.unitId ?? 'unit-1',
+        sheetId: config?.sheetId ?? 'sheet-1',
+        range,
+    };
 
     return {
         dispose: vi.fn(),
@@ -49,6 +55,16 @@ function createAreaStub(config?: {
         getFirstCell: () => NumberValueObject.create(iteratorValue),
         getRangePosition: () => range,
         getRangeData: () => rangeData,
+        toArrayValueObject: () => createNewArray(
+            Array.from(
+                { length: rowCount },
+                () => Array.from({ length: columnCount }, () => NumberValueObject.create(iteratorValue))
+            ),
+            rowCount,
+            columnCount
+        ),
+        toUnitRange: () => unitRange,
+        toUnitRanges: () => [unitRange],
     };
 }
 
@@ -74,8 +90,8 @@ describe('MultiAreaReferenceObject', () => {
         expect(multi.isRow()).toBe(false);
         expect(multi.isColumn()).toBe(false);
         expect(multi.getAreas().length).toBe(3);
-        expect(multi.getRowCount()).toBe(2 + 4 + 2 + 4);
-        expect(multi.getColumnCount()).toBe(3 + 5 + 3 + 5);
+        expect(multi.getRowCount()).toBe(3);
+        expect(multi.getColumnCount()).toBe(2);
     });
 
     it('should ignore error areas in count, range and sheet inference', () => {
@@ -132,9 +148,8 @@ describe('MultiAreaReferenceObject', () => {
         const array = multi.toArrayValueObject();
         expect(array.getRowCount()).toBe(1);
         expect(array.getColumnCount()).toBe(2);
-        // Current implementation always normalizes to NullValueObject after first-cell extraction.
-        expect(array.get(0, 0)?.isNull()).toBe(true);
-        expect(array.get(0, 1)?.isNull()).toBe(true);
+        expect(array.get(0, 0)?.getValue()).toBe(9);
+        expect(array.get(0, 1)?.getValue()).toBe(5);
 
         expect(multi.getRangePosition()).toEqual({
             startRow: 0,
@@ -159,6 +174,38 @@ describe('MultiAreaReferenceObject', () => {
             },
         });
         expect(multi.getFirstCell().getValue()).toBe(9);
+    });
+
+    it('should stack every value and preserve every sheet range in stack mode', () => {
+        const area1 = createAreaStub({
+            rowCount: 2,
+            columnCount: 2,
+            unitId: 'u1',
+            sheetId: 'jan',
+            iteratorValue: 1,
+        });
+        const area2 = createAreaStub({
+            rowCount: 1,
+            columnCount: 2,
+            unitId: 'u1',
+            sheetId: 'feb',
+            iteratorValue: 2,
+        });
+        const multi = new MultiAreaReferenceObject(
+            'Jan:Feb!A1:B2',
+            [[area1 as never], [area2 as never]],
+            MultiAreaArrayMode.STACK_AREAS
+        );
+
+        const array = multi.toArrayValueObject();
+        expect(multi.getRowCount()).toBe(3);
+        expect(multi.getColumnCount()).toBe(2);
+        expect(array.getArrayValue().map((row) => row.map((value) => value?.getValue()))).toEqual([
+            [1, 1],
+            [1, 1],
+            [2, 2],
+        ]);
+        expect(multi.toUnitRanges().map(({ sheetId }) => sheetId)).toEqual(['jan', 'feb']);
     });
 
     it('should fallback to parent behavior when all areas are invalid', () => {

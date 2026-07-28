@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IRange, Nullable } from '@univerjs/core';
+import type { ICellData, IRange, IUnitRange, Nullable } from '@univerjs/core';
 import type { IArrayFormulaRangeType, IRuntimeUnitDataType, IUnitData, IUnitSheetNameMap, IUnitStylesData } from '../../basics/common';
 import type { BaseValueObject, IArrayValueObject } from '../value-object/base-value-object';
 import { CellValueType, isNullCell, isTextFormat, moveRangeByOffset, ObjectMatrix } from '@univerjs/core';
@@ -687,6 +687,10 @@ export class BaseReferenceObject extends ObjectClassType {
             sheetId: this.getSheetId(),
             unitId: this.getUnitId(),
         };
+    }
+
+    toUnitRanges(): IUnitRange[] {
+        return [this.toUnitRange()];
     }
 
     private _checkIfWorksheetMiss() {

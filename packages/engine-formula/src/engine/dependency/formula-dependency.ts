@@ -965,11 +965,7 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
 
             const value: BaseReferenceObject = await this._executeNode(node, refOffsetX, refOffsetY);
 
-            const gridRange = value.toUnitRange();
-
-            // const token = serializeRangeToRefString({ ...gridRange, sheetName: this._currentConfigService.getSheetName(gridRange.unitId, gridRange.sheetId) });
-
-            rangeList.push(gridRange);
+            rangeList.push(...value.toUnitRanges());
 
             node.setValue(null);
         }
@@ -1202,11 +1198,7 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
             const node = referenceFunctionList[i];
             const value: BaseReferenceObject = await this._executeNode(node, refOffsetX, refOffsetY);
 
-            const gridRange = value.toUnitRange();
-
-            // const token = serializeRangeToRefString({ ...gridRange, sheetName: this._currentConfigService.getSheetName(gridRange.unitId, gridRange.sheetId) });
-
-            rangeList.push(gridRange);
+            rangeList.push(...value.toUnitRanges());
 
             node.setValue(null);
         }

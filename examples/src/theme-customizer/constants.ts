@@ -1,5 +1,6 @@
 import type { IThemePreset, ThemeScaleKey, ThemeShadeKey, TokenDensity } from './types';
-import { defaultTheme, greenTheme, orangeTheme, purpleTheme, redTheme } from '@univerjs/themes';
+
+import { defaultTheme, greenTheme, orangeTheme, purpleTheme, redTheme, yellowTheme } from '@univerjs/themes';
 
 export const PREVIEW_CONTAINER_ID = 'theme-customizer-preview';
 
@@ -21,6 +22,7 @@ export const THEME_PRESETS: IThemePreset[] = [
     { key: 'orange', label: 'orangeTheme', theme: orangeTheme },
     { key: 'red', label: 'redTheme', theme: redTheme },
     { key: 'purple', label: 'purpleTheme', theme: purpleTheme },
+    { key: 'yellow', label: 'yellowTheme', theme: yellowTheme },
 ];
 
 export const TOKEN_DENSITY_LABELS: Record<TokenDensity, string> = {

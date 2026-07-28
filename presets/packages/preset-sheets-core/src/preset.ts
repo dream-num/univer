@@ -57,7 +57,7 @@ export type * from '@univerjs/ui/facade';
 
 export interface IUniverSheetsCorePresetConfig extends
     Pick<IUniverUIConfig, 'container' | 'header' | 'toolbar' | 'ribbonType' | 'menu' | 'contextMenu' | 'disableAutoFocus' | 'customFontFamily'>,
-    Pick<IUniverSheetsUIConfig, 'formulaBar' | 'statusBarStatistic' | 'footer'>,
+    Pick<IUniverSheetsUIConfig, 'formulaBar' | 'footer'>,
     IUniverSheetsNumfmtConfig {
 
     /**

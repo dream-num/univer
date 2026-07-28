@@ -15,7 +15,6 @@
  */
 
 import type {
-    CommandListener,
     DocumentDataModel,
     IDisposable,
     IDocumentData,
@@ -57,7 +56,6 @@ import { FDoc } from './f-doc';
 import { FEnum } from './f-enum';
 import { FEventName } from './f-event';
 import { FEventRegistry } from './f-event-registry';
-import { FHooks } from './f-hooks';
 import { FUserManager } from './f-usermanager';
 import { FUtil } from './f-util';
 
@@ -444,30 +442,6 @@ export class FUniver extends Disposable {
     }
 
     /**
-     * Register a callback that will be triggered before invoking a command.
-     * @deprecated use `univerAPI.addEvent(univerAPI.Event.BeforeCommandExecute, (event) => {})` instead.
-     * @param {CommandListener} callback The callback.
-     * @returns {IDisposable} The disposable instance.
-     */
-    onBeforeCommandExecute(callback: CommandListener): IDisposable {
-        return this._commandService.beforeCommandExecuted((command, options?: IExecutionOptions) => {
-            callback(command, options);
-        });
-    }
-
-    /**
-     * Register a callback that will be triggered when a command is invoked.
-     * @deprecated use `univerAPI.addEvent(univerAPI.Event.CommandExecuted, (event) => {})` instead.
-     * @param {CommandListener} callback The callback.
-     * @returns {IDisposable} The disposable instance.
-     */
-    onCommandExecuted(callback: CommandListener): IDisposable {
-        return this._commandService.onCommandExecuted((command, options?: IExecutionOptions) => {
-            callback(command, options);
-        });
-    }
-
-    /**
      * Execute a command with the given id and parameters.
      * @param id Identifier of the command.
      * @param params Parameters of this execution.
@@ -511,15 +485,6 @@ export class FUniver extends Disposable {
         options?: IExecutionOptions
     ): R {
         return this._commandService.syncExecuteCommand(id, params, options);
-    }
-
-    /**
-     * Get hooks.
-     * @deprecated use `addEvent` instead.
-     * @returns {FHooks} FHooks instance
-     */
-    getHooks(): FHooks {
-        return this._injector.createInstance(FHooks);
     }
 
     get Enum(): FEnum {

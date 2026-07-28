@@ -39,7 +39,7 @@ import {
     IFunctionService,
     LexerTreeBuilder,
 } from '@univerjs/engine-formula';
-import { Engine, IRenderingEngine, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
+import { Engine, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import {
     RangeProtectionRuleModel,
     RefRangeService,
@@ -140,7 +140,6 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
             injector.add([SheetInterceptorService]);
 
             injector.add([IFunctionService, { useClass: FunctionService }]);
-            injector.add([IRenderingEngine, { useFactory: () => new Engine() }]);
             injector.add([IRenderManagerService, { useClass: RenderManagerServiceTestBed }]);
             injector.add([SheetSkeletonService]);
             injector.add([FormulaDataModel]);

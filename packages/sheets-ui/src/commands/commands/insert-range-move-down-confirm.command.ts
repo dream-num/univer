@@ -16,7 +16,7 @@
 
 import type { ICommand, IRange } from '@univerjs/core';
 import type { LocaleKey } from '../../locale/types';
-import { CommandType, ICommandService, IConfirmService, IUniverInstanceService, LocaleService, Rectangle } from '@univerjs/core';
+import { CommandType, getIntersectRange, ICommandService, IConfirmService, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { getSheetCommandTarget, InsertRangeMoveDownCommand, SheetsSelectionsService } from '@univerjs/sheets';
 
 export const InsertRangeMoveDownConfirmCommand: ICommand = {
@@ -61,7 +61,7 @@ export const InsertRangeMoveDownConfirmCommand: ICommand = {
 
         const getColLength = (range: IRange) => range.endColumn - range.startColumn;
         const mergeData = worksheet.getMergeData().find((mergeRange) => {
-            const interSectedRange = Rectangle.getIntersects(mergeRange, range);
+            const interSectedRange = getIntersectRange(mergeRange, range);
             return interSectedRange ? getColLength(mergeRange) > getColLength(interSectedRange) : false;
         });
 

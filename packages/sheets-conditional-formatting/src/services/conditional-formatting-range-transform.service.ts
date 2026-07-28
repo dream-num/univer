@@ -15,7 +15,7 @@
  */
 
 import type { IRange } from '@univerjs/core';
-import { Rectangle } from '@univerjs/core';
+import { getIntersectRange, Rectangle } from '@univerjs/core';
 
 export interface IRangeAnchor {
     row: number;
@@ -45,7 +45,7 @@ export class ConditionalFormattingRangeTransformService {
         const fragments: IRange[] = [];
 
         sourceRanges.forEach((range) => {
-            const intersect = Rectangle.getIntersects(range, sourceRange);
+            const intersect = getIntersectRange(range, sourceRange);
             if (!intersect) {
                 return;
             }

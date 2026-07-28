@@ -151,6 +151,6 @@ describe('FRangeSheetsThreadCommentMixin', () => {
 
         expect(range.getComment()).toBeNull();
         expect(range.getComments()).toEqual([]);
-        await expect(range.clearComment()).resolves.toBe(true);
+        await expect(range.clearCommentAsync()).resolves.toBe(true);
     });
 });

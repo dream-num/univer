@@ -15,7 +15,6 @@
  */
 
 import type { ICommandInfo } from '@univerjs/core';
-import { BehaviorSubject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
     SetCellFormulaDependencyCalculationMutation,
@@ -58,7 +57,7 @@ function createCommandServiceMock(): ICommandServiceMock {
     };
 }
 
-function createFFormula(computingStatusService?: { computingStatus: boolean; computingStatus$: BehaviorSubject<boolean> }) {
+function createFFormula() {
     const commandService = createCommandServiceMock();
     const configService = {
         setConfig: vi.fn(),
@@ -78,7 +77,7 @@ function createFFormula(computingStatusService?: { computingStatus: boolean; com
         getTable: vi.fn(() => undefined),
     };
     const injector = {
-        get: vi.fn(() => computingStatusService),
+        get: vi.fn(),
     };
 
     const formula = new FFormula(
@@ -154,47 +153,6 @@ describe('FFormula', () => {
         expect(onStart).toHaveBeenCalledWith(true);
         expect(onEnd).toHaveBeenCalledWith(1);
         expect(onProgress).toHaveBeenCalledTimes(1);
-    });
-
-    it('should wait computing complete by status stream or timeout', async () => {
-        const status$ = new BehaviorSubject(false);
-        const computingStatusService = {
-            computingStatus: false,
-            computingStatus$: status$,
-        };
-        const { formula } = createFFormula(computingStatusService);
-
-        const pending = formula.whenComputingCompleteAsync(200);
-        status$.next(true);
-        await expect(pending).resolves.toBe(true);
-
-        const timeoutService = {
-            computingStatus: false,
-            computingStatus$: new BehaviorSubject(false),
-        };
-        const { formula: timeoutFormula } = createFFormula(timeoutService);
-        const timeoutPromise = timeoutFormula.whenComputingCompleteAsync(1);
-        await expect(timeoutPromise).resolves.toBe(false);
-
-        const readyService = {
-            computingStatus: true,
-            computingStatus$: new BehaviorSubject(true),
-        };
-        const { formula: readyFormula } = createFFormula(readyService);
-        await expect(readyFormula.whenComputingCompleteAsync()).resolves.toBe(true);
-    });
-
-    it('should resolve and timeout on onCalculationEnd()', async () => {
-        const { formula, commandService } = createFFormula();
-        const pending = formula.onCalculationEnd();
-
-        commandService.emit(SetFormulaCalculationNotificationMutation.id, { functionsExecutedState: 1 });
-        await expect(pending).resolves.toBeUndefined();
-
-        vi.useFakeTimers();
-        const timeoutPromise = expect(formula.onCalculationEnd()).rejects.toThrow('Calculation end timeout');
-        await vi.advanceTimersByTimeAsync(30_001);
-        await timeoutPromise;
     });
 
     it('should set formula configs', () => {

@@ -188,62 +188,6 @@ function collectTopLevelReplaceAction(
     }
 }
 
-interface IReplaceContentCommandParams {
-    unitId: string;
-    body: IDocumentBody; // Do not contain `\r\n` at the end.
-    textRanges: ITextRangeWithStyle[];
-    segmentId?: string;
-    options: { [key: string]: boolean };
-}
-
-// Replace all content with new body, and reserve undo/redo stack.
-/**
- * @deprecated please use ReplaceSnapshotCommand instead.
- */
-export const ReplaceContentCommand: ICommand<IReplaceContentCommandParams> = {
-    id: 'doc.command-replace-content',
-
-    type: CommandType.COMMAND,
-
-    handler: async (accessor, params: IReplaceContentCommandParams) => {
-        const { unitId, body, textRanges, segmentId = '', options } = params;
-        const univerInstanceService = accessor.get(IUniverInstanceService);
-        const commandService = accessor.get(ICommandService);
-        const docSelectionManagerService = accessor.get(DocSelectionManagerService);
-
-        const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
-        const prevBody = docDataModel?.getSelfOrHeaderFooterModel(segmentId)?.getBody();
-
-        if (docDataModel == null || prevBody == null) {
-            return false;
-        }
-
-        const doMutation = getMutationParams(unitId, segmentId, docDataModel, prevBody, body);
-
-        doMutation.params.textRanges = textRanges;
-        if (options) {
-            doMutation.params.options = options;
-        }
-
-        // Handle body is equal to prevBody.
-        if (doMutation.params.actions == null && textRanges) {
-            docSelectionManagerService.replaceDocRanges(textRanges, {
-                unitId,
-                subUnitId: unitId,
-            }, false);
-
-            return true;
-        }
-
-        const result = commandService.syncExecuteCommand<
-            IRichTextEditingMutationParams,
-            IRichTextEditingMutationParams
-        >(doMutation.id, doMutation.params);
-
-        return Boolean(result);
-    },
-};
-
 interface ICoverContentCommandParams {
     unitId: string;
     body: IDocumentBody; // Do not contain `\r\n` at the end.
@@ -379,11 +323,19 @@ export const ReplaceSelectionCommand: ICommand<IReplaceSelectionCommandParams> =
     },
 };
 
-export const ReplaceTextRunsCommand: ICommand<IReplaceContentCommandParams> = {
+interface IReplaceTextRunsCommandParams {
+    unitId: string;
+    body: IDocumentBody; // Do not contain `\r\n` at the end.
+    textRanges: ITextRangeWithStyle[];
+    segmentId?: string;
+    options: { [key: string]: boolean };
+}
+
+export const ReplaceTextRunsCommand: ICommand<IReplaceTextRunsCommandParams> = {
     id: 'doc.command.replace-text-runs',
     type: CommandType.COMMAND,
 
-    handler: (accessor, params: IReplaceContentCommandParams) => {
+    handler: (accessor, params: IReplaceTextRunsCommandParams) => {
         const { unitId, body, textRanges, segmentId = '', options } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);

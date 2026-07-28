@@ -39,10 +39,6 @@ export interface IFDocumentTextRangeDescription extends IFDocumentTextRange {
     explicitTextStyleRuns: IFDocumentTextStyleRun[];
     /** Top-level explicit style properties common to the complete range. */
     commonExplicitTextStyle: ITextStyle;
-    /** @deprecated Use `explicitTextStyleRuns`. */
-    textStyleRuns: IFDocumentTextStyleRun[];
-    /** @deprecated Use `commonExplicitTextStyle`. */
-    commonTextStyle: ITextStyle;
 }
 
 /**
@@ -115,11 +111,6 @@ export class FDocumentTextRange extends FBaseInitialable {
             }));
     }
 
-    /** @deprecated Use `getExplicitTextStyleRuns()` to distinguish stored styles from effective styles. */
-    getTextStyleRuns(): IFDocumentTextStyleRun[] {
-        return this.getExplicitTextStyleRuns();
-    }
-
     /**
      * Returns top-level style properties that have the same explicit value
      * across the complete range. Unstyled gaps make a property non-common.
@@ -148,11 +139,6 @@ export class FDocumentTextRange extends FBaseInitialable {
         return common;
     }
 
-    /** @deprecated Use `getCommonExplicitTextStyle()` to distinguish stored styles from effective styles. */
-    getCommonTextStyle(): ITextStyle {
-        return this.getCommonExplicitTextStyle();
-    }
-
     /**
      * Returns a serializable summary suitable for an agent/tool response.
      * @example
@@ -171,8 +157,6 @@ export class FDocumentTextRange extends FBaseInitialable {
             length: this._endOffset - this._startOffset,
             explicitTextStyleRuns,
             commonExplicitTextStyle,
-            textStyleRuns: explicitTextStyleRuns,
-            commonTextStyle: commonExplicitTextStyle,
         };
     }
 

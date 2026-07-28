@@ -48,7 +48,7 @@ import {
     SheetSkeletonService,
 } from '@univerjs/sheets';
 import { BehaviorSubject, map, switchMap } from 'rxjs';
-import { ISheetSelectionRenderService } from './selection/base-selection-render.service';
+import { getViewportByCell } from '../common/utils';
 
 export interface IEditorBridgeServiceVisibleParam {
     visible: boolean;
@@ -105,7 +105,7 @@ export interface IEditorBridgeService {
     // Gets the DocumentDataModel of the latest table cell based on the latest cell contents
     getLatestEditCellState(): Readonly<Nullable<IEditorBridgeServiceParam>>;
     /**
-     * @deprecated do not use it directly, use command SetCellEditVisibleOperation as instead.
+     * Do not use it directly. Use the `SetCellEditVisibleOperation` command instead.
      */
     changeVisible(param: IEditorBridgeServiceVisibleParam): void;
     changeEditorDirty(dirtyStatus: boolean): void;
@@ -216,7 +216,9 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         let { startX, startY, endX, endY } = actualRangeWithCoord;
 
         const { scaleX, scaleY } = scene.getAncestorScale();
-        const scrollXY = scene.getViewportScrollXY(renderUnit.with(ISheetSelectionRenderService).getViewPort());
+        const viewport = getViewportByCell(primary.startRow, primary.startColumn, scene, worksheet);
+        if (!viewport) return;
+        const scrollXY = scene.getViewportScrollXY(viewport);
 
         startX = convertTransformToOffsetX(startX, scaleX, scrollXY);
         startY = convertTransformToOffsetY(startY, scaleY, scrollXY);
@@ -334,7 +336,9 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         let { startX, startY, endX, endY } = actualRangeWithCoord;
 
         const { scaleX, scaleY } = scene.getAncestorScale();
-        const scrollXY = scene.getViewportScrollXY(renderUnit.with(ISheetSelectionRenderService).getViewPort());
+        const viewport = getViewportByCell(startRow, startColumn, scene, worksheet);
+        if (!viewport) return;
+        const scrollXY = scene.getViewportScrollXY(viewport);
 
         startX = convertTransformToOffsetX(startX, scaleX, scrollXY);
         startY = convertTransformToOffsetY(startY, scaleY, scrollXY);

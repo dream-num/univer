@@ -16,14 +16,12 @@
 
 import type { Nullable } from '@univerjs/core';
 import type { ComponentType } from 'react';
-import type { IUniverSheetsUIConfig } from '../../config/config';
 import type { IStatusBarServiceStatus } from '../../services/status-bar.service';
 import type { IStatisticItem } from './CopyableStatisticItem';
 import { debounce } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
-import { useConfigValue, useDependency } from '@univerjs/ui';
+import { useDependency } from '@univerjs/ui';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { IStatusBarService } from '../../services/status-bar.service';
 import { CopyableStatisticItem } from './CopyableStatisticItem';
 
@@ -31,8 +29,6 @@ const SINGLE_MODE_WIDTH = 800;
 const ROW_COUNT_THRESHOLD = 3;
 
 export const StatusBar = () => {
-    const showStatistic = useConfigValue<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY)?.statusBarStatistic ?? true;
-
     const [isSingle, setIsSingle] = useState(window.innerWidth < SINGLE_MODE_WIDTH);
 
     const statusBarService = useDependency(IStatusBarService);
@@ -48,8 +44,7 @@ export const StatusBar = () => {
     const useStatistics = (
         initialItems: IStatisticItem[],
         statusBarService: IStatusBarService,
-        isSingle: boolean,
-        showStatistic: boolean
+        isSingle: boolean
     ) => {
         const [statistics, setStatistics] = useState<IStatisticItem[]>(initialItems);
         const [show, setShow] = useState(true);
@@ -82,12 +77,10 @@ export const StatusBar = () => {
         }, []);
 
         useEffect(() => {
-            if (!showStatistic) return;
-
             const subscription = statusBarService.state$.subscribe(updateStatistics);
 
             return () => subscription.unsubscribe();
-        }, [showStatistic, statusBarService, updateStatistics]);
+        }, [statusBarService, updateStatistics]);
 
         return {
             statistics,
@@ -99,8 +92,7 @@ export const StatusBar = () => {
     const { showList, show } = useStatistics(
         items,
         statusBarService,
-        isSingle,
-        showStatistic
+        isSingle
     );
     const handleResize = debounce(() => {
         const newSingleState = window.innerWidth < SINGLE_MODE_WIDTH;
@@ -122,7 +114,6 @@ export const StatusBar = () => {
         rowCountThreshold: number,
         CopyableStatisticItem: ComponentType<IStatisticItem>
     ) => {
-        if (!showStatistic) return null;
         if (showList.length > rowCountThreshold) {
             const doubleLineList = showList.reduce<IStatisticItem[][]>((acc, _, index) => {
                 if (index % 2 === 0) {

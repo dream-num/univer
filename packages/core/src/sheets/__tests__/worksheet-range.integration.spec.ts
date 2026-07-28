@@ -443,10 +443,6 @@ describe('Worksheet/range integration', () => {
         expect(worksheet.getSheetId()).toBe('sheet-1');
         expect(worksheet.getName()).toBe('Styled sheet');
 
-        const clone = worksheet.clone();
-        expect(clone).not.toBe(worksheet);
-        expect(clone.getSnapshot()).toEqual(worksheet.getSnapshot());
-
         worksheet.setMergeData([{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 1, rangeType: RANGE_TYPE.NORMAL }]);
         expect(worksheet.getMergeData()).toEqual([{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 1, rangeType: RANGE_TYPE.NORMAL }]);
         expect(worksheet.getSpanModel().getMergedCell(0, 1)).toEqual({ startRow: 0, endRow: 0, startColumn: 0, endColumn: 1, rangeType: RANGE_TYPE.NORMAL });

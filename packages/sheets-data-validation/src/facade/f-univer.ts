@@ -77,14 +77,6 @@ export interface IFUniverSheetsDataValidationMixin {
 }
 
 export class FUniverSheetsDataValidationMixin extends FUniver implements IFUniverSheetsDataValidationMixin {
-    /**
-     * @deprecated use `univerAPI.newDataValidation()` as instead.
-     * @returns {FDataValidationBuilder} A new instance of the FDataValidationBuilder class
-     */
-    static override newDataValidation(): FDataValidationBuilder {
-        return new FDataValidationBuilder();
-    }
-
     override newDataValidation(): FDataValidationBuilder {
         return new FDataValidationBuilder();
     }
@@ -337,18 +329,6 @@ export class FUniverSheetsDataValidationMixin extends FUniver implements IFUnive
 
 FUniver.extend(FUniverSheetsDataValidationMixin);
 declare module '@univerjs/core/facade' {
-    /**
-     * @ignore
-     */
-    // eslint-disable-next-line ts/no-namespace
-    namespace FUniver {
-        /**
-         * @deprecated use `univerAPI.newDataValidation()` as instead.
-         * @returns {FDataValidationBuilder} A new instance of the FDataValidationBuilder class
-         */
-        function newDataValidation(): FDataValidationBuilder;
-    }
-
     // eslint-disable-next-line ts/naming-convention
     interface FUniver extends IFUniverSheetsDataValidationMixin {}
 }

@@ -21,7 +21,6 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
     buildReplaceSnapshotActions,
     CoverContentCommand,
-    ReplaceContentCommand,
     ReplaceSelectionCommand,
     ReplaceSnapshotCommand,
     ReplaceTextRunsCommand,
@@ -69,7 +68,6 @@ describe('replace or cover content of document', () => {
         get = testBed.get;
 
         commandService = get(ICommandService);
-        commandService.registerCommand(ReplaceContentCommand);
         commandService.registerCommand(CoverContentCommand);
         commandService.registerCommand(ReplaceSelectionCommand);
         commandService.registerCommand(ReplaceSnapshotCommand);
@@ -95,34 +93,6 @@ describe('replace or cover content of document', () => {
 
     afterEach(() => {
         univer.dispose();
-    });
-
-    describe('replace content of document and reserve undo and redo stack', () => {
-        it('Should pass the test case when replace content', async () => {
-            expect(getDataStream().length).toBe(13);
-            const commandParams = {
-                unitId: 'test-doc',
-                body: {
-                    dataStream: '=AVERAGE(A4:B8)',
-                }, // Do not contain `\r\n` at the end.
-                textRanges: [],
-                segmentId: '',
-            };
-
-            await commandService.executeCommand(ReplaceContentCommand.id, commandParams);
-
-            expect(getDataStream().length).toBe(17);
-            await commandService.executeCommand(UndoCommand.id);
-
-            expect(getDataStream().length).toBe(13);
-
-            await commandService.executeCommand(RedoCommand.id);
-
-            expect(getDataStream().length).toBe(17);
-
-            // recovery the doc.
-            await commandService.executeCommand(UndoCommand.id);
-        });
     });
 
     describe('cover content of document and clear undo and redo stack', () => {

@@ -32,7 +32,7 @@ import {
 } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import { DefinedNamesService, FormulaDataModel, FunctionService, IDefinedNamesService, IFunctionService, ISuperTableService, LexerTreeBuilder, SuperTableService } from '@univerjs/engine-formula';
-import { Engine, IRenderingEngine, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
+import { Engine, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { ISocketService, WebSocketService } from '@univerjs/network';
 import {
     RangeProtectionRuleModel,
@@ -137,7 +137,6 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
 
             injector.add([IFunctionService, { useClass: FunctionService }]);
             injector.add([ISocketService, { useClass: WebSocketService }]);
-            injector.add([IRenderingEngine, { useFactory: () => new Engine() }]);
             injector.add([IRenderManagerService, { useClass: RenderManagerServiceTestBed }]);
             injector.add([SheetSkeletonService]);
             injector.add([FormulaDataModel]);

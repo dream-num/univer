@@ -22,8 +22,8 @@ import {
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     EDITOR_ACTIVATED,
-    FOCUSING_EDITOR_BUT_HIDDEN,
     FOCUSING_FX_BAR_EDITOR,
+    FOCUSING_UNIVER_EDITOR,
     ICommandService,
     IContextService,
     Inject,
@@ -135,7 +135,7 @@ export class FormulaEditorController extends RxDisposable {
     private _listenFxBtnClick() {
         this._formulaEditorManagerService.fxBtnClick$.pipe(takeUntil(this.dispose$)).subscribe(() => {
             const isFocusButHidden =
-                this._contextService.getContextValue(FOCUSING_EDITOR_BUT_HIDDEN) &&
+                this._contextService.getContextValue(FOCUSING_UNIVER_EDITOR) &&
                 !this._contextService.getContextValue(EDITOR_ACTIVATED);
 
             if (isFocusButHidden) {

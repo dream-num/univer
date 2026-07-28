@@ -30,12 +30,12 @@ function createController(options: { cancelResize?: boolean; sheetEditor?: boole
         cancelDefaultResizeListener: options.cancelResize ?? false,
         render: { scene, mainComponent },
         getBoundingClientRect: vi.fn(() => ({ width: 120, height: 80 })),
-        params: { scrollBar: false },
         isSheetEditor: vi.fn(() => options.sheetEditor ?? false),
     };
     const editorService = {
         getAllEditor: vi.fn(() => [editor]),
         getEditor: vi.fn(() => editor),
+        getEditorRenderConfig: vi.fn(() => ({ canvasStyle: {}, scrollBar: false })),
         isSheetEditor: vi.fn((unitId: string) => unitId === 'sheet-editor'),
         blur$,
         blur: vi.fn(),

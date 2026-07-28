@@ -29,6 +29,7 @@ import { Editor } from './editor';
 export interface IEditorRenderConfig {
     canvasStyle: IEditorCanvasStyle;
     scrollBar?: boolean;
+    backScrollOffset?: number;
 }
 
 /**
@@ -178,7 +179,8 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         }
 
         this._univerInstanceService.setCurrentUnitForType(editorUnitId);
-        const valueCount = editor.getValue().length;
+        const dataStream = editor.getDocumentData().body?.dataStream ?? '';
+        const valueCount = dataStream.replace(/\r?\n/g, '').length;
 
         this._contextService.setContextValue(EDITOR_ACTIVATED, true);
 
@@ -215,14 +217,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
 
     getEditorRenderConfig(editorUnitId: string): Nullable<IEditorRenderConfig> {
         const editor = this._editors.get(editorUnitId);
-        if (editor) {
-            return {
-                canvasStyle: editor.params.canvasStyle ?? {},
-                scrollBar: editor.params.scrollBar,
-            };
-        }
-
-        return this._editorRenderConfigs.get(editorUnitId) ?? null;
+        return this._editorRenderConfigs.get(editorUnitId) ?? editor?.getRenderConfig() ?? null;
     }
 
     register(config: IEditorConfigParams, container: HTMLDivElement): IDisposable {
@@ -231,6 +226,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         this._editorRenderConfigs.set(editorUnitId, {
             canvasStyle,
             scrollBar: config.scrollBar,
+            ...(config.backScrollOffset === undefined ? {} : { backScrollOffset: config.backScrollOffset }),
         });
 
         const documentDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(editorUnitId, UniverInstanceType.UNIVER_DOC);
@@ -245,12 +241,11 @@ export class EditorService extends Disposable implements IEditorService, IDispos
 
         let render = this._renderManagerService.getRenderUnitById(editorUnitId);
         if (render == null) {
-            this._renderManagerService.create(editorUnitId);
-            render = this._renderManagerService.getRenderUnitById(editorUnitId);
+            render = this._renderManagerService.createRender(editorUnitId);
         }
 
         if (render) {
-            render.engine.setContainer(container);
+            render.engine.mount(container);
 
             const editor = new Editor(
                 { ...config, render, editorDom: container, canvasStyle },

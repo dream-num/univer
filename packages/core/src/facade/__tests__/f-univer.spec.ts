@@ -231,7 +231,7 @@ describe('FUniver integration', () => {
         redoEvent.dispose();
     });
 
-    it('should expose extension hooks, locale getters, command hooks, and builder factories', async () => {
+    it('should expose extension hooks, locale getters, command events, and builder factories', async () => {
         const injector = univer.__getInjector();
         const commandService = injector.get(ICommandService);
         const observed: string[] = [];
@@ -262,8 +262,8 @@ describe('FUniver integration', () => {
         } as ICommand<{ value: string }, boolean>);
 
         const hookEvents: string[] = [];
-        const beforeDisposable = extendedAPI.onBeforeCommandExecute((command, options) => hookEvents.push(`before:${command.id}:${options ? options.fromCollab : undefined}`));
-        const afterDisposable = extendedAPI.onCommandExecuted((command, options) => hookEvents.push(`after:${command.id}:${options ? options.fromCollab : undefined}`));
+        const beforeDisposable = extendedAPI.addEvent(extendedAPI.Event.BeforeCommandExecute, ({ id, options }) => hookEvents.push(`before:${id}:${options ? options.fromCollab : undefined}`));
+        const afterDisposable = extendedAPI.addEvent(extendedAPI.Event.CommandExecuted, ({ id, options }) => hookEvents.push(`after:${id}:${options ? options.fromCollab : undefined}`));
 
         await expect(extendedAPI.executeCommand('facade.hook.command', { value: 'ok' }, { fromCollab: true })).resolves.toBe(true);
         expect(extendedAPI.syncExecuteCommand('facade.hook.command', { value: 'ok' }, { fromCollab: false })).toBe(true);

@@ -66,13 +66,13 @@ interface IFUniverNetworkMixin {
      *   console.log('websocket error', error);
      * });
      *
-     * univerAPI.onCommandExecuted((command, options) => {
+     * univerAPI.addEvent(univerAPI.Event.CommandExecuted, ({ id, type, params, options }) => {
      *   // Only synchronize local mutations
-     *   if (command.type !== 2 || options?.fromCollab || options?.onlyLocal || command.id === 'doc.mutation.rich-text-editing') {
+     *   if (type !== univerAPI.Enum.CommandType.MUTATION || options?.fromCollab || options?.onlyLocal || id === 'doc.mutation.rich-text-editing') {
      *     return;
      *   }
      *
-     *   const commandInfo = JSON.stringify({ command, options: { fromCollab: true } });
+     *   const commandInfo = JSON.stringify({ command: { id, type, params }, options: { fromCollab: true } });
      *   ws.send(commandInfo);
      * });
      * ```

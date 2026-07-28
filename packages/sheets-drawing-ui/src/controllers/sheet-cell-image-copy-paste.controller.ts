@@ -104,7 +104,6 @@ export class SheetCellImageCopyPasteController extends Disposable {
                                     label: this._localeService.t<LocaleKey>('sheets-drawing-ui.cell-image.pasteContent'),
                                 },
                                 width: 320,
-                                destroyOnClose: true,
                                 onClose: handleCloseDialog,
                                 showOk: true,
                                 showCancel: true,

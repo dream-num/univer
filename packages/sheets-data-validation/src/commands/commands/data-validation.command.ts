@@ -302,7 +302,7 @@ export function getDataValidationDiffMutations(
             params: {
                 unitId,
                 subUnitId,
-                cellValue: redoMatrix.getData(),
+                cellValue: redoMatrix.clone(),
             } as ISetRangeValuesMutationParams,
         };
 
@@ -512,7 +512,7 @@ export const UpdateSheetDataValidationSettingCommand: ICommand<IUpdateSheetDataV
                         params: {
                             unitId,
                             subUnitId,
-                            cellValue: redoMatrix.getData(),
+                            cellValue: redoMatrix.clone(),
                         } as ISetRangeValuesMutationParams,
                     };
 

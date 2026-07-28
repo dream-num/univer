@@ -16,7 +16,6 @@
 
 import type { BBox } from 'rbush';
 import type { IRange, IRectLTRB } from '../sheets/typedef';
-import type { Nullable } from './types';
 import RBush from 'rbush';
 import { AbsoluteRefType, RANGE_TYPE } from '../sheets/typedef';
 import { MAX_COLUMN_COUNT, MAX_ROW_COUNT } from './max-row-column';
@@ -191,83 +190,6 @@ export class Rectangle {
         const rbush = new RBush<BBox>();
         rbush.load(src.map((r) => ({ minX: r.startColumn, minY: r.startRow, maxX: r.endColumn, maxY: r.endRow })));
         return target.some((r) => rbush.search({ minX: r.startColumn, minY: r.startRow, maxX: r.endColumn, maxY: r.endRow }).length > 0);
-    }
-
-    /**
-     * Gets the intersection range between two ranges
-     * @param src
-     * @param target
-     * @deprecated use `getIntersectRange` instead
-     * @example
-     * ```typescript
-     * const range1 = { startRow: 0, startColumn: 0, endRow: 2, endColumn: 2 };
-     * const range2 = { startRow: 1, startColumn: 1, endRow: 3, endColumn: 3 };
-     * const intersection = Rectangle.getIntersects(range1, range2);
-     * // intersection = { startRow: 1, startColumn: 1, endRow: 2, endColumn: 2 }
-     * ```
-     */
-    static getIntersects(src: IRange, target: IRange): Nullable<IRange> {
-        const currentStartRow = src.startRow;
-        const currentEndRow = src.endRow;
-        const currentStartColumn = src.startColumn;
-        const currentEndColumn = src.endColumn;
-
-        const incomingStartRow = target.startRow;
-        const incomingEndRow = target.endRow;
-        const incomingStartColumn = target.startColumn;
-        const incomingEndColumn = target.endColumn;
-
-        let startColumn;
-        let startRow;
-        let endColumn;
-        let endRow;
-        if (incomingStartRow <= currentEndRow) {
-            if (incomingStartRow >= currentStartRow) {
-                startRow = incomingStartRow;
-            } else {
-                startRow = currentStartRow;
-            }
-        } else {
-            return null;
-        }
-
-        if (incomingEndRow >= currentStartRow) {
-            if (incomingEndRow >= currentEndRow) {
-                endRow = currentEndRow;
-            } else {
-                endRow = incomingEndRow;
-            }
-        } else {
-            return null;
-        }
-
-        if (incomingStartColumn <= currentEndColumn) {
-            if (incomingStartColumn > currentStartColumn) {
-                startColumn = incomingStartColumn;
-            } else {
-                startColumn = currentStartColumn;
-            }
-        } else {
-            return null;
-        }
-
-        if (incomingEndColumn >= currentStartColumn) {
-            if (incomingEndColumn >= currentEndColumn) {
-                endColumn = currentEndColumn;
-            } else {
-                endColumn = incomingEndColumn;
-            }
-        } else {
-            return null;
-        }
-
-        return {
-            startRow,
-            endRow,
-            startColumn,
-            endColumn,
-            rangeType: RANGE_TYPE.NORMAL, // TODO: this may not be accurate
-        };
     }
 
     /**

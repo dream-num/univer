@@ -37,8 +37,6 @@ export interface ICellRenderContext {
 /**
  * @debt This shouldn't exist in core package.
  * @ignore
- *
- * @deprecated This interface is subject to change in the future.
  */
 export interface ICellCustomRender {
     drawWith(ctx: CanvasRenderingContext2D, info: ICellRenderContext, skeleton: any, spreadsheets: any): void;

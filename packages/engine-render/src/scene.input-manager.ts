@@ -18,7 +18,7 @@ import type { Nullable } from '@univerjs/core';
 import type { PointerEvent } from 'react';
 import type { Subscription } from 'rxjs';
 import type { BaseObject } from './base-object';
-import type { IDragEvent, IEvent, IKeyboardEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './basics/i-events';
+import type { IDragEvent, IEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './basics/i-events';
 import type { ISceneInputControlOptions, Scene } from './scene';
 import { Disposable, toDisposable } from '@univerjs/core';
 import { RENDER_CLASS_TYPE } from './basics/const';
@@ -82,8 +82,6 @@ export class InputManager extends Disposable {
         this._onPointerEnter = null as unknown as (evt: IPointerEvent) => void;
         this._onPointerLeave = null as unknown as (evt: IPointerEvent) => void;
         this._onMouseWheel = null as unknown as (evt: IWheelEvent) => void;
-        this._onKeyDown = null as unknown as (evt: IKeyboardEvent) => void;
-        this._onKeyUp = null as unknown as (evt: IKeyboardEvent) => void;
         this._onDragEnter = null as unknown as (evt: IDragEvent) => void;
         this._onDragLeave = null as unknown as (evt: IDragEvent) => void;
         this._onDragOver = null as unknown as (evt: IDragEvent) => void;
@@ -236,16 +234,6 @@ export class InputManager extends Disposable {
         }
     }
 
-    _onKeyDown(evt: IKeyboardEvent) {
-        // currently nobody using this. use `fromEvent('keydown')` from rx.js instead.
-        this._scene.onKeyDown$.emitEvent(evt);
-    }
-
-    _onKeyUp(evt: IKeyboardEvent) {
-        // currently nobody using this. use `fromEvent('keyup')` from rx.js instead.
-        this._scene.onKeyUp$.emitEvent(evt);
-    }
-
     _onDragEnter(evt: IDragEvent) {
         this._currentObject = this._getObjectAtPos(evt.offsetX, evt.offsetY);
         this._currentObject?.triggerDragOver(evt);
@@ -294,17 +282,6 @@ export class InputManager extends Disposable {
         // eslint-disable-next-line complexity, max-lines-per-function
         this._onInput$ = engine.onInputChanged$.subscribeEvent((eventData: IEvent) => {
             const evt: IEvent = eventData;
-            if (eventData.deviceType === DeviceType.Keyboard) {
-                switch (eventData.type) {
-                    case 'keydown':
-                        this._onKeyDown(evt as IKeyboardEvent);
-                        break;
-                    case 'keyup':
-                        this._onKeyUp(evt as IKeyboardEvent);
-                        break;
-                }
-            }
-
             // Pointer Events
             if (eventData.deviceType === DeviceType.Mouse || eventData.deviceType === DeviceType.Touch) {
                 switch (eventData.type) {

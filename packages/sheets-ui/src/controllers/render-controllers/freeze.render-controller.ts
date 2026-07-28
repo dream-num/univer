@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IFreeze, IRange, IWorksheetData, Nullable, Workbook } from '@univerjs/core';
+import type { ICommandInfo, IFreeze, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, Viewport } from '@univerjs/engine-render';
 import type {
     IInsertColCommandParams,
@@ -1627,16 +1627,11 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
     }
 
     private _getFreeze() {
-        const config: IWorksheetData | undefined = this._sheetSkeletonManagerService
+        return this._sheetSkeletonManagerService
             .getCurrentParam()
             ?.skeleton
-            .getWorksheetConfig();
-
-        if (config == null) {
-            return;
-        }
-
-        return config.freeze;
+            .worksheet
+            .getFreeze();
     }
 
     private _getSheetObject() {

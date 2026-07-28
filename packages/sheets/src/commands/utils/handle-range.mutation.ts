@@ -384,7 +384,7 @@ export const DeleteRangeUndoMutationFactory = (
 
     return {
         ...Tools.deepClone(params),
-        cellValue: undoData.getData(),
+        cellValue: undoData.clone(),
     };
 };
 

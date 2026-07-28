@@ -136,7 +136,6 @@ function createControllerTestBed(initialFormulaComputing = CalculationMode.WHEN_
         commandService,
         formulaDataModel: injector.get(FormulaDataModel),
         activeDirtyManagerService: injector.get(IActiveDirtyManagerService),
-        registerOtherFormulaService: injector.get(RegisterOtherFormulaService),
         executedCommands,
         executedDisposable,
     };
@@ -156,8 +155,6 @@ describe('TriggerCalculationController', () => {
         const testBed = createControllerTestBed();
 
         await Promise.resolve();
-
-        expect(testBed.registerOtherFormulaService.calculateStarted$.getValue()).toBe(true);
 
         testBed.executedCommands.length = 0;
 
@@ -189,7 +186,6 @@ describe('TriggerCalculationController', () => {
 
         await Promise.resolve();
 
-        expect(testBed.registerOtherFormulaService.calculateStarted$.getValue()).toBe(true);
         expect(testBed.executedCommands.some(({ id }) => id === SetTriggerFormulaCalculationStartMutation.id)).toBe(false);
 
         testBed.executedDisposable.dispose();
@@ -197,7 +193,7 @@ describe('TriggerCalculationController', () => {
     });
 
     it('should merge dirty data from real active-dirty registrations and skip style-triggered range updates', async () => {
-        const testBed = createControllerTestBed();
+        const testBed = createControllerTestBed(CalculationMode.NO_CALCULATION);
 
         testBed.activeDirtyManagerService.register('formula.test-dirty-1', {
             commandId: 'formula.test-dirty-1',
@@ -265,7 +261,7 @@ describe('TriggerCalculationController', () => {
     });
 
     it('should stop and restart calculation through real notification flow', async () => {
-        const testBed = createControllerTestBed();
+        const testBed = createControllerTestBed(CalculationMode.NO_CALCULATION);
 
         testBed.activeDirtyManagerService.register('formula.test-dirty-restart', {
             commandId: 'formula.test-dirty-restart',

@@ -44,7 +44,6 @@ import {
     FormulaDataModel,
     FormulaExecutedStateType,
     FormulaExecuteStageType,
-    RegisterOtherFormulaService,
     SetFormulaCalculationNotificationMutation,
     SetFormulaCalculationStartMutation,
     SetFormulaCalculationStopMutation,
@@ -133,8 +132,7 @@ export class TriggerCalculationController extends Disposable {
         @ILogService private readonly _logService: ILogService,
         @IConfigService private readonly _configService: IConfigService,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
-        @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @Inject(RegisterOtherFormulaService) private readonly _registerOtherFormulaService: RegisterOtherFormulaService
+        @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         super();
 
@@ -306,8 +304,6 @@ export class TriggerCalculationController extends Disposable {
             const params = this._getDirtyDataByCalculationMode(calculationMode);
             this._commandService.executeCommand(SetTriggerFormulaCalculationStartMutation.id, params, lo);
         }
-
-        this._registerOtherFormulaService.calculateStarted$.next(true);
     }
 
     private _getDirtyDataByCalculationMode(calculationMode: CalculationMode): IFormulaDirtyData {

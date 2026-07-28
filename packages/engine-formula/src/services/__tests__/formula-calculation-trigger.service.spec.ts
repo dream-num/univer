@@ -29,6 +29,7 @@ function createTestBed(start = true) {
     let listener: ((command: ICommandInfo, options?: IExecutionOptions) => void) | undefined;
     const executed: Array<{ id: string; params: unknown; options: unknown }> = [];
     const conversions = new Map<string, { commandId: string; shouldTrigger?: () => boolean; getDirtyData: (command: ICommandInfo) => object }>();
+    const calculateStartedNext = vi.fn();
     const commandService = {
         onCommandExecuted: vi.fn((callback: typeof listener) => {
             listener = callback;
@@ -42,8 +43,15 @@ function createTestBed(start = true) {
     } as unknown as ICommandService;
     const activeDirtyManagerService = {
         get: (id: string) => conversions.get(id),
+        register: (id: string, conversion: { commandId: string; shouldTrigger?: () => boolean; getDirtyData: (command: ICommandInfo) => object }) => {
+            conversions.set(id, conversion);
+        },
     };
-    const service = new FormulaCalculationTriggerService(commandService, activeDirtyManagerService as never);
+    const service = new FormulaCalculationTriggerService(
+        commandService,
+        activeDirtyManagerService as never,
+        { calculateStarted$: { next: calculateStartedNext } } as never
+    );
     if (start) {
         service.start();
     }
@@ -52,6 +60,7 @@ function createTestBed(start = true) {
         service,
         executed,
         conversions,
+        calculateStartedNext,
         emit: (command: ICommandInfo, options?: IExecutionOptions) => listener?.(command, options),
     };
 }
@@ -61,6 +70,53 @@ describe('FormulaCalculationTriggerService', () => {
     afterEach(() => {
         vi.useRealTimers();
         vi.restoreAllMocks();
+    });
+
+    it('enables Other Formula registration when global calculation scheduling starts', () => {
+        const testBed = createTestBed(false);
+
+        expect(testBed.calculateStartedNext).not.toHaveBeenCalled();
+        testBed.service.start();
+        expect(testBed.calculateStartedNext).toHaveBeenCalledExactlyOnceWith(true);
+
+        testBed.service.start();
+        expect(testBed.calculateStartedNext).toHaveBeenCalledOnce();
+        testBed.service.dispose();
+    });
+
+    it('owns explicit recalculation dirty conversion without a Sheet plugin', async () => {
+        const testBed = createTestBed();
+
+        testBed.emit({
+            id: SetTriggerFormulaCalculationStartMutation.id,
+            params: {
+                forceCalculation: true,
+                dirtyUnitOtherFormulaMap: {
+                    'doc-unit': {
+                        'shape-unit': {
+                            'formula-id': true,
+                        },
+                    },
+                },
+            },
+        } as ICommandInfo);
+        await vi.advanceTimersByTimeAsync(10);
+
+        expect(testBed.executed).toHaveLength(1);
+        expect(testBed.executed[0]).toMatchObject({
+            id: SetFormulaCalculationStartMutation.id,
+            params: {
+                forceCalculation: true,
+                dirtyUnitOtherFormulaMap: {
+                    'doc-unit': {
+                        'shape-unit': {
+                            'formula-id': true,
+                        },
+                    },
+                },
+            },
+        });
+        testBed.service.dispose();
     });
 
     it('collects changeset dirty data before start and merges it with the initial trigger', async () => {

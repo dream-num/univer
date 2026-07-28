@@ -18,7 +18,7 @@ import type { ICommandInfo, IUnitRange, Nullable } from '@univerjs/core';
 import type { IDirtyUnitFeatureMap } from '../basics/common';
 import type { ISetFormulaCalculationNotificationMutation } from '../commands/mutations/set-formula-calculation.mutation';
 import type { IFormulaDirtyData } from './current-data.service';
-import { Disposable, ICommandService, Rectangle } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, Rectangle } from '@univerjs/core';
 import {
     SetFormulaCalculationNotificationMutation,
     SetFormulaCalculationStartMutation,
@@ -26,6 +26,7 @@ import {
     SetTriggerFormulaCalculationStartMutation,
 } from '../commands/mutations/set-formula-calculation.mutation';
 import { IActiveDirtyManagerService } from './active-dirty-manager.service';
+import { RegisterOtherFormulaService } from './register-other-formula.service';
 import { FormulaExecutedStateType } from './runtime.service';
 
 const LOCAL_ONLY = { onlyLocal: true };
@@ -50,9 +51,16 @@ export class FormulaCalculationTriggerService extends Disposable {
 
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
-        @IActiveDirtyManagerService private readonly _activeDirtyManagerService: IActiveDirtyManagerService
+        @IActiveDirtyManagerService private readonly _activeDirtyManagerService: IActiveDirtyManagerService,
+        @Inject(RegisterOtherFormulaService) private readonly _registerOtherFormulaService: RegisterOtherFormulaService
     ) {
         super();
+        this._activeDirtyManagerService.register(SetTriggerFormulaCalculationStartMutation.id, {
+            commandId: SetTriggerFormulaCalculationStartMutation.id,
+            getDirtyData: (command) => ({
+                ...(command.params as IFormulaDirtyData),
+            }),
+        });
         this._initialize();
     }
 
@@ -62,6 +70,7 @@ export class FormulaCalculationTriggerService extends Disposable {
         }
 
         this._started = true;
+        this._registerOtherFormulaService.calculateStarted$.next(true);
         this._scheduleFlush();
     }
 

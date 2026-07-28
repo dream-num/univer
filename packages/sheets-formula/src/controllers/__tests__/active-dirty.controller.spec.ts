@@ -25,7 +25,6 @@ import {
     IActiveDirtyManagerService,
     RemoveDefinedNameMutation,
     SetDefinedNameMutation,
-    SetTriggerFormulaCalculationStartMutation,
 } from '@univerjs/engine-formula';
 import {
     InsertSheetMutation,
@@ -338,27 +337,6 @@ describe('ActiveDirtyController', () => {
                 name: 'Added Sheet',
             },
         } as IInsertSheetMutationParams;
-
-        expect(getDirtyData(testBed, {
-            id: SetTriggerFormulaCalculationStartMutation.id,
-            params: {
-                forceCalculation: true,
-                dirtyRanges: [],
-                dirtyNameMap: { test: { sheet1: 'Sheet1' } },
-                dirtyDefinedNameMap: {},
-                dirtyUnitFeatureMap: {},
-                dirtyUnitOtherFormulaMap: {},
-                clearDependencyTreeCache: {},
-            },
-        } as ICommandInfo)).toEqual({
-            forceCalculation: true,
-            dirtyRanges: [],
-            dirtyNameMap: { test: { sheet1: 'Sheet1' } },
-            dirtyDefinedNameMap: {},
-            dirtyUnitFeatureMap: {},
-            dirtyUnitOtherFormulaMap: {},
-            clearDependencyTreeCache: {},
-        });
 
         expect(getDirtyData(testBed, {
             id: RemoveSheetMutation.id,

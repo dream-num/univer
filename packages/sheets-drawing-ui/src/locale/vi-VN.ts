@@ -78,11 +78,11 @@ const locale: typeof enUS = {
         },
         shortcut: {
             'drawing-view': 'Chế độ xem bản vẽ',
-            'drawing-move-down': 'Move Drawing down',
-            'drawing-move-up': 'Move Drawing up',
-            'drawing-move-left': 'Move Drawing left',
-            'drawing-move-right': 'Move Drawing right',
-            'drawing-delete': 'Delete Drawing',
+            'drawing-move-down': 'Di chuyển hình vẽ xuống',
+            'drawing-move-up': 'Di chuyển hình vẽ lên',
+            'drawing-move-left': 'Di chuyển hình vẽ sang trái',
+            'drawing-move-right': 'Di chuyển hình vẽ sang phải',
+            'drawing-delete': 'Xóa hình vẽ',
         },
     },
 };

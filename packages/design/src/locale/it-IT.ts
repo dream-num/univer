@@ -30,13 +30,13 @@ const locale: typeof enUS = {
         },
         Confirm: {
             cancel: 'annulla',
-            confirm: 'ok',
+            confirm: 'OK',
         },
         CascaderList: {
             empty: 'Nessuno',
         },
         Calendar: {
-            year: '',
+            year: 'Anno',
             weekDays: ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'],
             months: [
                 'Gen',
@@ -65,7 +65,7 @@ const locale: typeof enUS = {
         ColorPicker: {
             more: 'Altri Colori',
             cancel: 'annulla',
-            confirm: 'ok',
+            confirm: 'OK',
         },
         GradientColorPicker: {
             linear: 'Lineare',

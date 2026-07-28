@@ -255,8 +255,6 @@ const locale: typeof enUS = {
             notChangeMerge: 'لا يمكنك إجراء تغييرات جزئية على الخلايا المدمجة',
             detailUpdate: 'مفتوح حديثاً',
             detailSave: 'تم استعادة ذاكرة التخزين المؤقت المحلية',
-            row: '',
-            column: '',
             loading: 'جارٍ التحميل...',
             copy: 'نسخ',
             return: 'خروج',

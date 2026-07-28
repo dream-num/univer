@@ -21,7 +21,7 @@ const locale: typeof enUS = {
         title: 'جدول',
         selectRange: 'انتخاب محدوده جدول',
         rename: 'تغییر نام جدول',
-        renamePlaceholder: 'Enter table name',
+        renamePlaceholder: 'نام جدول را وارد کنید',
         updateRange: 'به‌روزرسانی محدوده جدول',
         tableRangeWithMergeError: 'محدوده جدول نمی‌تواند با سلول‌های ادغام‌شده همپوشانی داشته باشد',
         tableRangeWithOtherTableError: 'محدوده جدول نمی‌تواند با جداول دیگر همپوشانی داشته باشد',
@@ -43,9 +43,9 @@ const locale: typeof enUS = {
         tablePrefix: 'جدول',
         tableNameError: 'لا يمكن أن يحتوي اسم الجدول على مسافات، ولا يمكن أن يبدأ برقم، ولا يمكن أن يتكرر مع أسماء الجداول الموجودة',
         columnMenu: {
-            'insert-left': 'Insert 1 table column left',
-            'insert-right': 'Insert 1 table column right',
-            delete: 'Delete table column',
+            'insert-left': 'درج ۱ ستون جدول در سمت چپ',
+            'insert-right': 'درج ۱ ستون جدول در سمت راست',
+            delete: 'حذف ستون جدول',
         },
 
         sort: {

@@ -255,8 +255,6 @@ const locale: typeof enUS = {
             notChangeMerge: 'Nie je možné vykonať čiastočné zmeny v zlúčených bunkách',
             detailUpdate: 'Práve otvorené',
             detailSave: 'Obnovená miestna vyrovnávacia pamäť',
-            row: '',
-            column: '',
             loading: 'Načítava sa...',
             copy: 'Kopírovať',
             return: 'Ukončiť',

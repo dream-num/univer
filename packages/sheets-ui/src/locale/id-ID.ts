@@ -85,7 +85,7 @@ const locale: typeof enUS = {
             insert: 'Sisipkan',
             prevPage: 'Sebelumnya',
             nextPage: 'Berikutnya',
-            total: 'total:',
+            total: 'Total:',
         },
         borderLine: {
             borderTop: 'Batas atas',
@@ -255,8 +255,6 @@ const locale: typeof enUS = {
             notChangeMerge: 'Anda tidak dapat melakukan perubahan sebagian pada sel yang digabungkan',
             detailUpdate: 'Baru dibuka',
             detailSave: 'Cache lokal dipulihkan',
-            row: '',
-            column: '',
             loading: 'Memuat...',
             copy: 'Salin',
             return: 'Keluar',

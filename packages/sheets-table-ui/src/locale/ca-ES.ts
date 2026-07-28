@@ -21,7 +21,7 @@ const locale: typeof enUS = {
         title: 'Taula',
         selectRange: 'Selecciona el rang de la taula',
         rename: 'Reanomena la taula',
-        renamePlaceholder: 'Enter table name',
+        renamePlaceholder: 'Introdueix el nom de la taula',
         updateRange: 'Actualitza el rang de la taula',
         tableRangeWithMergeError: 'El rang de la taula no es pot superposar amb cel·les combinades',
         tableRangeWithOtherTableError: 'El rang de la taula no es pot superposar amb altres taules',

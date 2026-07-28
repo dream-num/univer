@@ -255,8 +255,6 @@ const locale: typeof enUS = {
             notChangeMerge: 'Sie können an verbundenen Zellen keine Teiländerungen vornehmen',
             detailUpdate: 'Neu geöffnet',
             detailSave: 'Lokaler Cache wiederhergestellt',
-            row: '',
-            column: '',
             loading: 'Wird geladen...',
             copy: 'Kopieren',
             return: 'Beenden',

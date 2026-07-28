@@ -36,7 +36,7 @@ const locale: typeof enUS = {
             empty: 'Tidak ada',
         },
         Calendar: {
-            year: '',
+            year: 'Tahun',
             weekDays: ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
             months: [
                 'Jan',

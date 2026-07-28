@@ -255,8 +255,6 @@ const locale: typeof enUS = {
             notChangeMerge: 'Không thể thay đổi một phần của ô hợp nhất',
             detailUpdate: 'Mở mới',
             detailSave: 'Đã khôi phục từ bộ nhớ đệm cục bộ',
-            row: 'Hàng',
-            column: 'Cột',
             loading: 'Đang render···',
             copy: 'Bản sao',
             return: 'Quay lại',

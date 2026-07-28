@@ -93,7 +93,7 @@ const locale: typeof enUS = {
                 notBetween: 'Nie między',
                 above: 'Powyżej',
                 below: 'Poniżej',
-                topN: 'Top {0}',
+                topN: 'Górne {0}',
             },
         },
         date: {

@@ -21,7 +21,7 @@ const locale: typeof enUS = {
         title: '表格',
         selectRange: '選擇表格範圍',
         rename: '重命名表格',
-        renamePlaceholder: 'Enter table name',
+        renamePlaceholder: '輸入表格名稱',
         updateRange: '更新表格範圍',
         tableRangeWithMergeError: '表格範圍不能與合併儲存格重疊',
         tableRangeWithOtherTableError: '表格範圍不能與其他表格重疊',

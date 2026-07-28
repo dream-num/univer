@@ -36,7 +36,7 @@ const locale: typeof enUS = {
             empty: 'Cap',
         },
         Calendar: {
-            year: '',
+            year: 'Año',
             weekDays: ['Dg', 'Dl', 'Dt', 'Dc', 'Dj', 'Dv', 'Ds'],
             months: [
                 'Gener',

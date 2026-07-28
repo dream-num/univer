@@ -18,60 +18,60 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'slides-ui': {
-        append: 'Append Slide',
+        append: 'Добавить слайд',
 
         text: {
             insert: {
-                title: 'Insert Text',
+                title: 'Вставить текст',
             },
         },
 
         shape: {
             insert: {
-                title: 'Insert Shape',
-                rectangle: 'Insert Rectangle',
-                ellipse: 'Insert Ellipse',
+                title: 'Вставить фигуру',
+                rectangle: 'Вставить прямоугольник',
+                ellipse: 'Вставить эллипс',
             },
         },
 
         image: {
             insert: {
-                title: 'Insert Image',
-                float: 'Insert Float Image',
+                title: 'Вставить изображение',
+                float: 'Вставить плавающее изображение',
             },
         },
 
         popup: {
-            edit: 'Edit',
-            delete: 'Delete',
+            edit: 'Изменить',
+            delete: 'Удалить',
         },
 
         sidebar: {
-            text: 'Edit Text',
-            shape: 'Edit Shape',
-            image: 'Edit Image',
+            text: 'Изменить текст',
+            shape: 'Изменить фигуру',
+            image: 'Изменить изображение',
         },
 
         'image-panel': {
             arrange: {
-                title: 'Arrange',
-                forward: 'Bring Forward',
-                backward: 'Send Backward',
-                front: 'Bring to Front',
-                back: 'Send to Back',
+                title: 'Упорядочить',
+                forward: 'Переложить вперёд',
+                backward: 'Переложить назад',
+                front: 'На передний план',
+                back: 'На задний план',
             },
             transform: {
-                title: 'Transform',
-                width: 'Width (px)',
-                height: 'Height (px)',
-                x: 'X (px)',
-                y: 'Y (px)',
-                rotate: 'Rotate (°)',
+                title: 'Преобразование',
+                width: 'Ширина (пкс)',
+                height: 'Высота (пкс)',
+                x: 'X (пкс)',
+                y: 'Y (пкс)',
+                rotate: 'Повернуть (°)',
             },
         },
         panel: {
             fill: {
-                title: 'Fill Color',
+                title: 'Цвет заливки',
             },
         },
     },

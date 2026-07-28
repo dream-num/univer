@@ -170,7 +170,7 @@ const locale: typeof enUS = {
         errorMessage: {
             notBlank: 'شرط نمی‌تواند خالی باشد',
             formulaError: 'فرمول اشتباه',
-            rangeError: 'Bad selection',
+            rangeError: 'انتخاب نامعتبر',
         },
         permission: {
             dialog: {

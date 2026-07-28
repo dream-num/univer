@@ -253,8 +253,6 @@ const locale = {
             notChangeMerge: 'You cannot make partial changes to the merged cells',
             detailUpdate: 'New opened',
             detailSave: 'Local cache restored',
-            row: '',
-            column: '',
             loading: 'Loading...',
             copy: 'Copy',
             return: 'Exit',

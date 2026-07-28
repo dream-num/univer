@@ -255,8 +255,6 @@ const locale: typeof enUS = {
             notChangeMerge: 'Nie możesz wprowadzać częściowych zmian w scalonych komórkach',
             detailUpdate: 'Nowo otwarty',
             detailSave: 'Przywrócono lokalną pamięć podręczną',
-            row: '',
-            column: '',
             loading: 'Ładowanie...',
             copy: 'Kopiuj',
             return: 'Wyjdź',

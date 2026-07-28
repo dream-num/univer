@@ -30,13 +30,13 @@ const locale: typeof enUS = {
         },
         Confirm: {
             cancel: 'cancel·la',
-            confirm: 'ok',
+            confirm: 'D\'acord',
         },
         CascaderList: {
             empty: 'Cap',
         },
         Calendar: {
-            year: '',
+            year: 'Any',
             weekDays: ['dg', 'dl', 'dt', 'dc', 'dj', 'dv', 'ds'],
             months: [
                 'gener',
@@ -65,7 +65,7 @@ const locale: typeof enUS = {
         ColorPicker: {
             more: 'Més colors',
             cancel: 'cancel·la',
-            confirm: 'ok',
+            confirm: 'D\'acord',
         },
         GradientColorPicker: {
             linear: 'Lineal',

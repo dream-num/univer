@@ -22,7 +22,7 @@ import {
     DOC_CUSTOM_RANGE_CHROME_RADIUS,
     drawDocCustomRangeChrome,
     resolveDocCustomRangeChromeTheme,
-} from './doc-custom-range-chrome';
+} from '../doc-custom-range-chrome';
 
 describe('Doc custom range chrome', () => {
     it('derives a subtle background and border from the current primary theme token', () => {

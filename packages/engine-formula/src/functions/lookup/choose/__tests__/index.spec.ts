@@ -64,6 +64,22 @@ describe('Test choose function', () => {
             expect(getObjectValue(resultObject)).toStrictEqual([[11, 'second', ErrorType.VALUE]]);
         });
 
+        it('combines two vertical dynamic arrays into columns', () => {
+            const indexNum = ArrayValueObject.create('{1,2}');
+            const values = ArrayValueObject.create('{"Red";"Green";"Blue";"Purple";"White"}');
+            const counts = ArrayValueObject.create('{4;3;2;2;1}');
+
+            const resultObject = testFunction.calculate(indexNum, values, counts);
+
+            expect(getObjectValue(resultObject)).toStrictEqual([
+                ['Red', 4],
+                ['Green', 3],
+                ['Blue', 2],
+                ['Purple', 2],
+                ['White', 1],
+            ]);
+        });
+
         it('Index num number, value1 array', async () => {
             const indexNum = NumberValueObject.create(1.9);
 

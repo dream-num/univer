@@ -92,6 +92,28 @@ describe('docs line extension', () => {
         expect(ctx.beginPath).toHaveBeenCalled();
     });
 
+    it('draws accounting underline across the cell view bound once', () => {
+        const line = new Line();
+        (line as any).extensionOffset = {};
+
+        const ctx = createCtx();
+        const glyph = createGlyph();
+        glyph.ts.ul.t = TextDecoration.DOUBLE_ACCOUNTING;
+        glyph.parent.parent.divides = [glyph.parent];
+        glyph.parent.glyphGroup = [glyph, { ...glyph }];
+
+        line.draw(ctx, { scaleX: 1, scaleY: 1 } as any, glyph, undefined, {
+            viewBound: { left: 0, top: 0, right: 40, bottom: 20 },
+        } as any);
+
+        expect(ctx.moveTo.mock.calls[0][0]).toBeCloseTo(0);
+        expect(ctx.moveTo.mock.calls[0][1]).toBeCloseTo(7.2);
+        expect(ctx.lineTo.mock.calls[0][0]).toBeCloseTo(40);
+        expect(ctx.lineTo.mock.calls[0][1]).toBeCloseTo(7.2);
+        expect(ctx.lineTo.mock.calls[1][0]).toBeCloseTo(40);
+        expect(ctx.lineTo.mock.calls[1][1]).toBeCloseTo(9.2);
+    });
+
     it('covers private line helpers and line type switch', () => {
         const line = new Line() as any;
         line.extensionOffset = {};
@@ -132,7 +154,10 @@ describe('docs line extension', () => {
         expect(line._isWave(TextDecoration.WAVE)).toBe(true);
         expect(line._isWave(TextDecoration.SINGLE)).toBe(false);
         expect(line._isDouble(TextDecoration.WAVY_DOUBLE)).toBe(true);
+        expect(line._isDouble(TextDecoration.DOUBLE_ACCOUNTING)).toBe(true);
         expect(line._isDouble(TextDecoration.DASH)).toBe(false);
+        expect(line._isAccounting(TextDecoration.SINGLE_ACCOUNTING)).toBe(true);
+        expect(line._isAccounting(TextDecoration.SINGLE)).toBe(false);
     });
 
     it('clears cache state', () => {

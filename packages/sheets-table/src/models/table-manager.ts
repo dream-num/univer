@@ -472,6 +472,7 @@ export class TableManager extends Disposable {
                     range: table.range,
                     tableName: table.name,
                     tableId: table.id,
+                    tableStyleId: table.options?.tableStyleId,
                 });
             });
         });

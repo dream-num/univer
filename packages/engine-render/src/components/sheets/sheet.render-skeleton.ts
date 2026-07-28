@@ -52,9 +52,11 @@ import {
     Inject,
     Injector,
     isCellCoverable,
+    isDefaultFormat,
     isNullCell,
     isWhiteColor,
     LocaleService,
+    numfmt,
     ObjectMatrix,
     Range,
     searchArray,
@@ -104,6 +106,46 @@ export function getShrinkToFitScale(contentWidth: number, availableWidth: number
     }
 
     return Math.max(1 / fontSize, availableWidth / contentWidth);
+}
+
+export function getGeneralNumberDisplayText(
+    value: number,
+    displayText: string,
+    fontString: string,
+    availableWidth: number
+): string {
+    if (availableWidth <= 0) {
+        return displayText;
+    }
+
+    const excelGeneralReserve = FontCache.getMeasureText('0', fontString).width;
+    if (FontCache.getMeasureText(displayText, fontString).width + excelGeneralReserve <= availableWidth) {
+        return displayText;
+    }
+
+    let bestFit = '';
+    for (let decimalPlaces = 0; decimalPlaces <= 9; decimalPlaces++) {
+        const pattern = decimalPlaces === 0 ? '0E+00' : `0.${'#'.repeat(decimalPlaces)}E+00`;
+        const candidate = numfmt.format(pattern, value);
+        if (FontCache.getMeasureText(candidate, fontString).width + excelGeneralReserve > availableWidth) {
+            break;
+        }
+        bestFit = candidate;
+    }
+
+    if (bestFit) {
+        return bestFit;
+    }
+
+    if (Math.abs(value) < 1 && FontCache.getMeasureText('0', fontString).width < availableWidth) {
+        return '0';
+    }
+
+    const hashWidth = FontCache.getMeasureText('#', fontString).width;
+    if (hashWidth <= 0) {
+        return '#';
+    }
+    return '#'.repeat(Math.max(1, Math.floor(availableWidth / hashWidth)));
 }
 
 export function scaleDocumentDataForShrinkToFit(documentData: IDocumentData, scale: number, fallbackFontSize: number): IDocumentData {
@@ -1364,6 +1406,41 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         }
     }
 
+    private _applyGeneralNumberDisplay(row: number, col: number, fontCache: IFontCacheItem, style: IStyleData): void {
+        const cellData = fontCache.cellData;
+        if (!cellData || style.stf === BooleanNumber.TRUE || fontCache.documentSkeleton) {
+            return;
+        }
+        if (!isDefaultFormat(style.n?.pattern)) {
+            return;
+        }
+        if (cellData.t !== CellValueType.NUMBER && (Tools.isDefine(cellData.t) || typeof cellData.v !== 'number')) {
+            return;
+        }
+
+        const value = Number(cellData.v);
+        if (!Number.isFinite(value)) {
+            return;
+        }
+
+        const cellInfo = this.getCellWithCoordByIndex(row, col, false);
+        const startX = cellInfo.isMergedMainCell ? cellInfo.mergeInfo.startX : cellInfo.startX;
+        const endX = cellInfo.isMergedMainCell ? cellInfo.mergeInfo.endX : cellInfo.endX;
+        const padding = style.pd ?? DEFAULT_PADDING_DATA;
+        const extension = cellData.fontRenderExtension;
+        const availableWidth = endX - startX
+            - (padding.l ?? DEFAULT_PADDING_DATA.l)
+            - (padding.r ?? DEFAULT_PADDING_DATA.r)
+            - (extension?.leftOffset ?? 0)
+            - (extension?.rightOffset ?? 0);
+        fontCache.displayText = getGeneralNumberDisplayText(
+            value,
+            fontCache.displayText ?? getDisplayValueFromCell(cellData),
+            fontCache.fontString,
+            availableWidth
+        );
+    }
+
     _setFontStylesCache(row: number, col: number, cellData: Nullable<ICellDataForSheetInterceptor>, style: IStyleData, hasMergeData = true) {
         if (isNullCell(cellData)) return;
 
@@ -1379,6 +1456,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             const cacheItem = cacheValue as IFontCacheItem;
             cacheItem.cellData = cellData;
             setRenderTextCache(cacheItem, cellData);
+            this._applyGeneralNumberDisplay(row, col, cacheItem, style);
             this._stylesCache.fontMatrix.setValue(row, col, cacheValue as IFontCacheItem);
             return;
         }
@@ -1430,6 +1508,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         }
         const fontCacheItem = config as IFontCacheItem;
         setRenderTextCache(fontCacheItem, cellData);
+        this._applyGeneralNumberDisplay(row, col, fontCacheItem, style);
         this._applyShrinkToFit(row, col, fontCacheItem, style);
         this._calculateOverflowCell(row, col, fontCacheItem, hasMergeData);
         this._stylesCache.fontMatrix.setValue(row, col, fontCacheItem);

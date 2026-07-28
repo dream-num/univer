@@ -26,6 +26,7 @@ import { FUNCTION_NAMES_LOGICAL } from '../../../functions/logical/function-name
 import { Groupby } from '../../../functions/logical/groupby';
 import { If } from '../../../functions/logical/if';
 import { Percentof } from '../../../functions/logical/percentof';
+import { Filter } from '../../../functions/lookup/filter';
 import { FUNCTION_NAMES_LOOKUP } from '../../../functions/lookup/function-names';
 import { Hstack } from '../../../functions/lookup/hstack';
 import { Indirect } from '../../../functions/lookup/indirect';
@@ -39,6 +40,7 @@ import { Divided } from '../../../functions/meta/divided';
 import { FUNCTION_NAMES_META } from '../../../functions/meta/function-names';
 import { Minus } from '../../../functions/meta/minus';
 import { Plus } from '../../../functions/meta/plus';
+import { Average } from '../../../functions/statistical/average';
 import { Counta } from '../../../functions/statistical/counta';
 import { Countif } from '../../../functions/statistical/countif';
 import { FUNCTION_NAMES_STATISTICAL } from '../../../functions/statistical/function-names';
@@ -46,6 +48,7 @@ import { StdevP } from '../../../functions/statistical/stdev-p';
 import { FUNCTION_NAMES_TEXT } from '../../../functions/text/function-names';
 import { Regexmatch } from '../../../functions/text/regexmatch';
 import { IFormulaCurrentConfigService } from '../../../services/current-data.service';
+import { IDefinedNamesService } from '../../../services/defined-names.service';
 import { IFunctionService } from '../../../services/function.service';
 import { IFormulaRuntimeService } from '../../../services/runtime.service';
 import { ISuperTableService } from '../../../services/super-table.service';
@@ -160,12 +163,14 @@ describe('Test indirect', () => {
             new Counta(FUNCTION_NAMES_STATISTICAL.COUNTA),
             new StdevP(FUNCTION_NAMES_STATISTICAL.STDEV_P),
             new Regexmatch(FUNCTION_NAMES_TEXT.REGEXMATCH),
+            new Filter(FUNCTION_NAMES_LOOKUP.FILTER),
             new Hstack(FUNCTION_NAMES_LOOKUP.HSTACK),
             new Indirect(FUNCTION_NAMES_LOOKUP.INDIRECT),
             new Offset(FUNCTION_NAMES_LOOKUP.OFFSET),
             new Groupby(FUNCTION_NAMES_LOGICAL.GROUPBY),
             new If(FUNCTION_NAMES_LOGICAL.IF),
-            new Percentof(FUNCTION_NAMES_LOGICAL.PERCENTOF)
+            new Percentof(FUNCTION_NAMES_LOGICAL.PERCENTOF),
+            new Average(FUNCTION_NAMES_STATISTICAL.AVERAGE)
         );
 
         superTableService.registerTable(testBed.unitId, 'Table1', {
@@ -208,6 +213,26 @@ describe('Test indirect', () => {
     });
 
     describe('normal', () => {
+        it('averages the full FILTER result when defined names expand to ranges', () => {
+            const definedNamesService = get(IDefinedNamesService);
+            definedNamesService.registerDefinedName('test', {
+                id: 'data',
+                name: 'data',
+                formulaOrRefString: 'Main!$A$1:$B$2',
+            });
+            definedNamesService.registerDefinedName('test', {
+                id: 'group',
+                name: 'group',
+                formulaOrRefString: 'Main!$A$1:$A$2',
+            });
+
+            const lexerNode = lexer.treeBuilder('=AVERAGE(FILTER(data,group=1))');
+            const astNode = astTreeBuilder.parse(lexerNode as LexerNode) as BaseAstNode;
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode));
+
+            expect((result as BaseValueObject).getValue()).toBe(1.5);
+        });
+
         it('preserves xleta aggregator tokens inside GROUPBY', () => {
             const lexerNode = lexer.treeBuilder(
                 '=_xlfn.GROUPBY(A1:A3,A1:A3,_xlfn.HSTACK(_xleta.COUNTA,_xleta.PERCENTOF),0)'

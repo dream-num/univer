@@ -18,6 +18,10 @@ import type { ICustomRangeForInterceptor, ITextStyle, Nullable } from '@univerjs
 import { BooleanNumber, CustomRangeType } from '@univerjs/core';
 
 export function getCustomRangeStyle(customRange: ICustomRangeForInterceptor): Nullable<ITextStyle> {
+    if (customRange.properties?._xlsxPreserveCellStyle === true) {
+        return null;
+    }
+
     if (
         customRange.rangeType === CustomRangeType.HYPERLINK ||
         customRange.rangeType === CustomRangeType.MENTION ||

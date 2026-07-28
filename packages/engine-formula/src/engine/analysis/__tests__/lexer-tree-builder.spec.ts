@@ -82,6 +82,16 @@ describe('lexer nodeMaker test', () => {
             );
         });
 
+        it.each([
+            '=LET(value,A1,value+1)',
+            '=_xlfn.LAMBDA(value,value+1)(A1)',
+        ])('returns a fresh mutable lexer tree for %s', (formula) => {
+            const first = lexerTreeBuilder.treeBuilder(formula);
+            const second = lexerTreeBuilder.treeBuilder(formula);
+
+            expect(second).not.toBe(first);
+        });
+
         it('REDUCE', () => {
             const node = lexerTreeBuilder.treeBuilder('=REDUCE(1, A1:C2, LAMBDA(a,b,a+b^2))') as LexerNode;
             expect(JSON.stringify(node.serialize())).toStrictEqual(

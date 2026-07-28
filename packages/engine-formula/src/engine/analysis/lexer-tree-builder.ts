@@ -699,7 +699,10 @@ export class LexerTreeBuilder extends Disposable {
         transformSuffix = true,
         injectDefinedNameParam?: IInjectDefinedNameParam
     ) {
-        if (transformSuffix === true) {
+        // Parsing LET/LAMBDA rewrites the lexer tree with runtime parameter bindings.
+        // Reusing that mutated tree would bind the next AST to the previous AST's nodes.
+        const isCacheable = !/\b(?:LET|LAMBDA)\s*\(/iu.test(formulaString);
+        if (transformSuffix === true && isCacheable) {
             const lexerNode = FormulaLexerNodeCache.get(formulaString);
             const simpleCheckDefinedNameResult = injectDefinedNameParam && this._simpleCheckDefinedName?.(formulaString, injectDefinedNameParam);
             if (lexerNode && !simpleCheckDefinedNameResult) {
@@ -753,7 +756,9 @@ export class LexerTreeBuilder extends Disposable {
             if (!isValid) {
                 return ErrorType.VALUE;
             }
-            FormulaLexerNodeCache.set(formulaString, this._currentLexerNode);
+            if (isCacheable) {
+                FormulaLexerNodeCache.set(formulaString, this._currentLexerNode);
+            }
         }
 
         if (currentHasDefinedName) {

@@ -20,7 +20,14 @@ import type {
     ICancelMarkDirtyRowAutoHeightOperationParams,
     IMarkDirtyRowAutoHeightOperationParams,
 } from '@univerjs/sheets';
-import { createIdentifier, Disposable, ICommandService, Inject, Rectangle } from '@univerjs/core';
+import {
+    BooleanNumber,
+    createIdentifier,
+    Disposable,
+    ICommandService,
+    Inject,
+    Rectangle,
+} from '@univerjs/core';
 import {
     CancelMarkDirtyRowAutoHeightOperation,
     MarkDirtyRowAutoHeightOperation,
@@ -82,12 +89,39 @@ export class AutoHeightService extends Disposable implements IRenderModule {
 
     constructor(
         private _context: IRenderContext<Workbook>,
-        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
+        @Inject(SheetSkeletonManagerService)
+        private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
 
         this._initMarkDirty();
+        this._initInitialAutoHeight();
+    }
+
+    private _initInitialAutoHeight() {
+        this.disposeWithMe(
+            this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
+                if (!param) {
+                    return;
+                }
+                const rowData = param.skeleton.worksheet.getRowManager().getRowData();
+                const ranges = Object.entries(rowData)
+                    .filter(([, row]) => row?.ia === BooleanNumber.TRUE && row.ah === undefined)
+                    .map(([row]) => {
+                        const rowIndex = Number(row);
+                        return { startRow: rowIndex, endRow: rowIndex, startColumn: 0, endColumn: 0 };
+                    });
+                if (ranges.length) {
+                    this.startAutoHeightTask({
+                        ranges,
+                        sheetId: param.sheetId,
+                        id: `initial-auto-height-${param.sheetId}`,
+                        maxTime: 10_000,
+                    });
+                }
+            })
+        );
     }
 
     private _initMarkDirty() {
@@ -193,13 +227,15 @@ export class AutoHeightService extends Disposable implements IRenderModule {
             return;
         }
 
-        task.ranges = Rectangle.mergeRanges(task.ranges.map((range) => {
-            return {
-                ...range,
-                startColumn: 0,
-                endColumn: 0,
-            };
-        }));
+        task.ranges = Rectangle.mergeRanges(
+            task.ranges.map((range) => {
+                return {
+                    ...range,
+                    startColumn: 0,
+                    endColumn: 0,
+                };
+            })
+        );
 
         const remainRanges = Rectangle.subtractMulti(
             task.ranges,

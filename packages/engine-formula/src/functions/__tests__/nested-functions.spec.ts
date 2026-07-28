@@ -27,6 +27,7 @@ import { generateExecuteAstNodeData } from '../../engine/utils/ast-node-tool';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { IFunctionService } from '../../services/function.service';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
+import { ISuperTableService } from '../../services/super-table.service';
 import { DateFunction } from '../date/date';
 import { Day } from '../date/day';
 import { Edate } from '../date/edate';
@@ -45,6 +46,8 @@ import { Hyperlink } from '../lookup/hyperlink';
 import { Index } from '../lookup/index/index';
 import { Match } from '../lookup/match';
 import { Row } from '../lookup/row';
+import { Sort } from '../lookup/sort';
+import { Unique } from '../lookup/unique';
 import { Xlookup } from '../lookup/xlookup';
 import { Xmatch } from '../lookup/xmatch';
 import { Fact } from '../math/fact';
@@ -520,6 +523,19 @@ const getFunctionsTestWorkbookData = (): IWorkbookData => {
                             t: CellValueType.STRING,
                         },
                     },
+                    69: { 10: { v: 'data', t: CellValueType.STRING } },
+                    70: { 10: { v: 'Red', t: CellValueType.STRING } },
+                    71: { 10: { v: 'Blue', t: CellValueType.STRING } },
+                    72: { 10: { v: 'Red', t: CellValueType.STRING } },
+                    73: { 10: { v: 'Green', t: CellValueType.STRING } },
+                    74: { 10: { v: 'Purple', t: CellValueType.STRING } },
+                    75: { 10: { v: 'Red', t: CellValueType.STRING } },
+                    76: { 10: { v: 'White', t: CellValueType.STRING } },
+                    77: { 10: { v: 'Green', t: CellValueType.STRING } },
+                    78: { 10: { v: 'Blue', t: CellValueType.STRING } },
+                    79: { 10: { v: 'Red', t: CellValueType.STRING } },
+                    80: { 10: { v: 'Green', t: CellValueType.STRING } },
+                    81: { 10: { v: 'Purple', t: CellValueType.STRING } },
                     58: {
                         1: {
                             v: '2026-01-08 10:28:46 UTC',
@@ -574,6 +590,7 @@ describe('Test nested functions', () => {
         const formulaCurrentConfigService = get(IFormulaCurrentConfigService);
 
         const formulaRuntimeService = get(IFormulaRuntimeService);
+        const superTableService = get(ISuperTableService);
 
         formulaCurrentConfigService.load({
             formulaData: {},
@@ -624,6 +641,8 @@ describe('Test nested functions', () => {
             new Concatenate(FUNCTION_NAMES_TEXT.CONCATENATE),
             new Sum(FUNCTION_NAMES_MATH.SUM),
             new Choose(FUNCTION_NAMES_LOOKUP.CHOOSE),
+            new Sort(FUNCTION_NAMES_LOOKUP.SORT),
+            new Unique(FUNCTION_NAMES_LOOKUP.UNIQUE),
             new Len(FUNCTION_NAMES_TEXT.LEN),
             new Compare(FUNCTION_NAMES_META.COMPARE),
             new Divided(FUNCTION_NAMES_META.DIVIDED),
@@ -639,6 +658,17 @@ describe('Test nested functions', () => {
             new Countif(FUNCTION_NAMES_STATISTICAL.COUNTIF),
             new Left(FUNCTION_NAMES_TEXT.LEFT)
         );
+
+        superTableService.registerTable(testBed.unitId, 'data', {
+            sheetId: testBed.sheetId,
+            titleMap: new Map([['data', 10]]),
+            range: {
+                startRow: 69,
+                endRow: 81,
+                startColumn: 10,
+                endColumn: 10,
+            },
+        });
 
         calculate = (formula: string) => {
             const lexerNode = lexer.treeBuilder(formula);
@@ -666,6 +696,32 @@ describe('Test nested functions', () => {
     });
 
     describe('Normal', () => {
+        it('LET combines unique values and counts before descending sort', () => {
+            const result = calculate('=LET(u,UNIQUE(data[]),SORT(CHOOSE({1,2},u,COUNTIF(data[],u)),2,-1))');
+
+            expect(result).toStrictEqual([
+                ['Red', 4],
+                ['Green', 3],
+                ['Blue', 2],
+                ['Purple', 2],
+                ['White', 1],
+            ]);
+        });
+
+        it('keeps LET parameter bindings when the same formula is parsed again', () => {
+            const formula = '=LET(u,UNIQUE(data[]),SORT(CHOOSE({1,2},u,COUNTIF(data[],u)),2,-1))';
+            const expected = [
+                ['Red', 4],
+                ['Green', 3],
+                ['Blue', 2],
+                ['Purple', 2],
+                ['White', 1],
+            ];
+
+            expect(calculate(formula)).toStrictEqual(expected);
+            expect(calculate(formula)).toStrictEqual(expected);
+        });
+
         it('Nested functions IFERROR,XLOOKUP,MAX,SUMIFS,EDATE,TODAY,DAY,PLUS,Minus,CONCATENATE', () => {
             const result = calculate('=IFERROR(XLOOKUP(MAX(SUMIFS(C2:C10, A2:A10, ">="&EDATE(TODAY(),-1)+1-DAY(TODAY()), A2:A10, "<"&TODAY()-DAY(TODAY())+1)), SUMIFS(C2:C10, A2:A10, ">="&EDATE(TODAY(),-1)+1-DAY(TODAY()), A2:A10, "<"&TODAY()-DAY(TODAY())+1), B2:B10, "No Data"), "No Data")');
 

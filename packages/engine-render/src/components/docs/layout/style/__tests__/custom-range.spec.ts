@@ -48,4 +48,11 @@ describe('custom range style', () => {
     it('does not style unsupported custom range types', () => {
         expect(getCustomRangeStyle({ rangeType: CustomRangeType.COMMENT } as never)).toBeNull();
     });
+
+    it('preserves imported XLSX cell styling for hyperlinks', () => {
+        expect(getCustomRangeStyle({
+            rangeType: CustomRangeType.HYPERLINK,
+            properties: { _xlsxPreserveCellStyle: true },
+        } as never)).toBeNull();
+    });
 });

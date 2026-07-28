@@ -164,6 +164,40 @@ describe('Test xlookup', () => {
             expect(getObjectValue(resultObject)).toBe(20);
         });
 
+        it('Reference-derived lookup array should stay an array in a dynamic array formula', async () => {
+            const positionedFunction = new Xlookup(FUNCTION_NAMES_LOOKUP.XLOOKUP);
+            positionedFunction.setRefInfo('unit', 'summary', 2, 5, 3, 1);
+
+            const lookupValue = ArrayValueObject.createByArray([
+                ['A'],
+                ['B'],
+                ['C'],
+            ]);
+            lookupValue.setUnitId('unit');
+            lookupValue.setSheetId('source');
+            lookupValue.setCurrent(1, 1);
+
+            const resultObject = positionedFunction.calculate(
+                lookupValue,
+                ArrayValueObject.createByArray([
+                    ['A'],
+                    ['B'],
+                    ['C'],
+                ]),
+                ArrayValueObject.createByArray([
+                    [10],
+                    [20],
+                    [30],
+                ])
+            ) as BaseValueObject;
+
+            expect(getObjectValue(resultObject)).toStrictEqual([
+                [10],
+                [20],
+                [30],
+            ]);
+        });
+
         it('Reference-derived single-cell lookup value should use the cell value directly', async () => {
             const positionedFunction = new Xlookup(FUNCTION_NAMES_LOOKUP.XLOOKUP);
             positionedFunction.setRefInfo('unit', 'summary', 8, 6);

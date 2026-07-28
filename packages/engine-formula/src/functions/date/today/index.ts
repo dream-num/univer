@@ -25,7 +25,9 @@ export class Today extends BaseFunction {
 
     override calculate() {
         const now = new Date();
-        const utcNow = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+        // Excel TODAY follows the user's local calendar day. Convert that day to a UTC
+        // midnight carrier before calculating the timezone-independent Excel serial.
+        const utcNow = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
         const currentSerial = excelDateSerial(utcNow);
         const valueObject = NumberValueObject.create(currentSerial, DEFAULT_DATE_FORMAT);
         return valueObject;

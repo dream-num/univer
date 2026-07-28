@@ -19,7 +19,7 @@ import type { ISetFormulaCalculationNotificationMutation } from '@univerjs/engin
 import type { IAfterRender$Info, IBasicFrameInfo, IExtendFrameInfo, IRenderContext, IRenderModule, IScrollBarProps, ISummaryFrameInfo, ISummaryMetric, ITimeMetric, IViewportInfos, Scene } from '@univerjs/engine-render';
 import type { IUniverSheetsUIConfig } from '../../config/config';
 import { CommandType, ICommandService, IConfigService, Inject, Optional, Rectangle, RxDisposable } from '@univerjs/core';
-import { SetFormulaCalculationNotificationMutation } from '@univerjs/engine-formula';
+import { IDefinedNamesService, SetFormulaCalculationNotificationMutation } from '@univerjs/engine-formula';
 
 import {
     Rect,
@@ -42,6 +42,10 @@ import {
 import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { SheetsRenderService } from '../../services/sheets-render.service';
+import {
+    PageBreakPreviewBackgroundExtension,
+    PageBreakPreviewOverlayExtension,
+} from '../../views/page-break-preview/extensions/page-break-preview.render';
 
 interface ISetWorksheetMutationParams {
     unitId: string;
@@ -67,7 +71,8 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @Inject(SheetsRenderService) private readonly _sheetRenderService: SheetsRenderService,
         @ICommandService private readonly _commandService: ICommandService,
-        @Optional(ITelemetryService) private readonly _telemetryService?: ITelemetryService
+        @Optional(ITelemetryService) private readonly _telemetryService?: ITelemetryService,
+        @Optional(IDefinedNamesService) private readonly _definedNamesService?: IDefinedNamesService
     ) {
         super();
         this._addNewRender();
@@ -231,6 +236,10 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
 
         const worksheet = workbook.getActiveSheet();
         const spreadsheet = new Spreadsheet(SHEET_VIEW_KEY.MAIN);
+        if (this._definedNamesService) {
+            spreadsheet.register(new PageBreakPreviewBackgroundExtension(this._definedNamesService));
+            spreadsheet.register(new PageBreakPreviewOverlayExtension(this._definedNamesService));
+        }
         this._addViewport(worksheet);
 
         const spreadsheetRowHeader = new SpreadsheetRowHeader(SHEET_VIEW_KEY.ROW);

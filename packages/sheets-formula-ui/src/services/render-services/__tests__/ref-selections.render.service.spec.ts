@@ -172,6 +172,7 @@ function createFakeScene(viewportMap: Map<unknown, ReturnType<typeof createFakeV
 function createFakeSkeleton(options?: {
     getLocation?: () => [string, string];
     worksheet?: {
+        getFreeze: () => { startRow: number; startColumn: number; xSplit: number; ySplit: number };
         getRowCount: () => number;
         getColumnCount: () => number;
         getSheetId: () => string;
@@ -224,9 +225,9 @@ function createFakeSkeleton(options?: {
         },
         getColumnCount: () => 20,
         getRowCount: () => 20,
-        getWorksheetConfig: () => ({ freeze: { startRow: 0, startColumn: 0, xSplit: 0, ySplit: 0 } }),
         getLocation: options?.getLocation ?? (() => ['test', 'sheet1'] as [string, string]),
         worksheet: options?.worksheet ?? {
+            getFreeze: () => ({ startRow: 0, startColumn: 0, xSplit: 0, ySplit: 0 }),
             getRowCount: () => 20,
             getColumnCount: () => 20,
             getSheetId: () => 'sheet1',
@@ -492,6 +493,7 @@ describe('RefSelectionsRenderService', () => {
         const sheet2Skeleton = createFakeSkeleton({
             getLocation: () => [workbook.getUnitId(), 'sheet2'],
             worksheet: {
+                getFreeze: () => ({ startRow: 0, startColumn: 0, xSplit: 0, ySplit: 0 }),
                 getRowCount: () => 20,
                 getColumnCount: () => 20,
                 getSheetId: () => 'sheet2',

@@ -149,7 +149,7 @@ function createControllerFixture(options?: {
             addLayer: vi.fn(),
             addObjects: vi.fn(),
             enableLayerCache: vi.fn(),
-            resize: vi.fn(),
+            transformByState: vi.fn(),
         },
         engine: {
             canvasColorService,

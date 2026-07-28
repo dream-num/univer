@@ -201,7 +201,7 @@ export class SheetsDataValidationRenderController extends RxDisposable {
 
                             const info: ICellRenderContext = {
                                 data: cell,
-                                style: skeleton.getStyles().getStyleByCell(cell),
+                                style: workbook.getStyles().getStyleByCell(cell),
                                 primaryWithCoord: skeleton.getCellWithCoordByIndex(mergeCell?.startRow ?? row, mergeCell?.startColumn ?? col),
                                 unitId,
                                 subUnitId,
@@ -224,7 +224,7 @@ export class SheetsDataValidationRenderController extends RxDisposable {
 
                             const info: ICellRenderContext = {
                                 data: cell,
-                                style: skeleton.getStyles().getStyleByCell(cell),
+                                style: workbook.getStyles().getStyleByCell(cell),
                                 primaryWithCoord: skeleton.getCellWithCoordByIndex(mergeCell?.startRow ?? row, mergeCell?.startColumn ?? col),
                                 unitId,
                                 subUnitId,
@@ -355,7 +355,7 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
 
                             const info: ICellRenderContext = {
                                 data: cell,
-                                style: skeleton.getStyles().getStyleByCell(cell),
+                                style: workbook.getStyles().getStyleByCell(cell),
                                 primaryWithCoord: skeleton.getCellWithCoordByIndex(mergeCell?.startRow ?? row, mergeCell?.startColumn ?? col),
                                 unitId,
                                 subUnitId,
@@ -378,7 +378,7 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
 
                             const info: ICellRenderContext = {
                                 data: cell,
-                                style: skeleton.getStyles().getStyleByCell(cell),
+                                style: workbook.getStyles().getStyleByCell(cell),
                                 primaryWithCoord: skeleton.getCellWithCoordByIndex(mergeCell?.startRow ?? row, mergeCell?.startColumn ?? col),
                                 unitId,
                                 subUnitId,

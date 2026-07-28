@@ -307,7 +307,7 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
 
         // REFACTOR: @JOCS show not use scrollBar to indicate it's a Zen Editor.
         if (!editorRenderConfig || editorRenderConfig.scrollBar) {
-            scene.resize(width, height);
+            scene.transformByState({ width, height });
         }
     }
 

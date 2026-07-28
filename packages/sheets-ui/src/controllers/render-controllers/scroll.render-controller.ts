@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IFreeze, IRange, IWorksheetData, Nullable, Workbook } from '@univerjs/core';
+import type { IFreeze, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, IScrollObserverParam, IWheelEvent, Viewport } from '@univerjs/engine-render';
 import type { IScrollToCellOperationParams, ISetSelectionsOperationParams, SheetsSelectionsService } from '@univerjs/sheets';
 import type { IScrollCommandParams } from '../../commands/commands/set-scroll.command';
@@ -473,12 +473,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
     }
 
     private _getFreeze(): Nullable<IFreeze> {
-        const snapshot: IWorksheetData | undefined = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton.getWorksheetConfig();
-        if (snapshot == null) {
-            return;
-        }
-
-        return snapshot.freeze;
+        return this._sheetSkeletonManagerService.getCurrentParam()?.skeleton.worksheet.getFreeze();
     }
 
     private _getSheetObject() {

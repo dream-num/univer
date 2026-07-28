@@ -104,7 +104,7 @@ export class FormulaDataModel extends Disposable {
                 });
 
                 if (this._arrayFormulaCellData[unitId]) {
-                    this._arrayFormulaCellData[unitId]![sheetId] = arrayFormulaCellMatrixData.getData();
+                    this._arrayFormulaCellData[unitId]![sheetId] = arrayFormulaCellMatrixData.clone();
                 }
             });
         });
@@ -157,7 +157,7 @@ export class FormulaDataModel extends Disposable {
                 });
 
                 if (this._arrayFormulaCellData[unitId]) {
-                    this._arrayFormulaCellData[unitId]![sheetId] = arrayFormulaCellMatrixData.getData();
+                    this._arrayFormulaCellData[unitId]![sheetId] = arrayFormulaCellMatrixData.clone();
                 }
             });
         });
@@ -295,7 +295,7 @@ export class FormulaDataModel extends Disposable {
                 });
 
                 if (this._arrayFormulaRange[unitId]) {
-                    this._arrayFormulaRange[unitId]![sheetId] = rangeMatrix.getData();
+                    this._arrayFormulaRange[unitId]![sheetId] = rangeMatrix.clone();
                 }
             });
         });
@@ -343,7 +343,7 @@ export class FormulaDataModel extends Disposable {
             rangeMatrixData.realDeleteValue(row, column);
 
             if (this._arrayFormulaRange[unitId]) {
-                this._arrayFormulaRange[unitId]![sheetId] = rangeMatrixData.getData();
+                this._arrayFormulaRange[unitId]![sheetId] = rangeMatrixData.clone();
             }
         }
     }
@@ -603,7 +603,7 @@ export class FormulaDataModel extends Disposable {
         });
 
         if (changed && this._arrayFormulaRange[unitId]) {
-            this._arrayFormulaRange[unitId]![sheetId] = arrayFormulaRangeMatrix.getData();
+            this._arrayFormulaRange[unitId]![sheetId] = arrayFormulaRangeMatrix.clone();
         }
 
         return changed;
@@ -636,7 +636,7 @@ export class FormulaDataModel extends Disposable {
         });
 
         if (changed && this._arrayFormulaCellData[unitId]) {
-            this._arrayFormulaCellData[unitId]![sheetId] = arrayFormulaCellDataMatrix.getData();
+            this._arrayFormulaCellData[unitId]![sheetId] = arrayFormulaCellDataMatrix.clone();
         }
 
         return changed;
@@ -857,10 +857,10 @@ export class FormulaDataModel extends Disposable {
         });
 
         if (arrayFormulaRangeMatrix && this._arrayFormulaRange[unitId]) {
-            this._arrayFormulaRange[unitId]![sheetId] = arrayFormulaRangeMatrix.getData();
+            this._arrayFormulaRange[unitId]![sheetId] = arrayFormulaRangeMatrix.clone();
         }
         if (arrayFormulaCellDataMatrix && this._arrayFormulaCellData[unitId]) {
-            this._arrayFormulaCellData[unitId]![sheetId] = arrayFormulaCellDataMatrix.getData();
+            this._arrayFormulaCellData[unitId]![sheetId] = arrayFormulaCellDataMatrix.clone();
         }
     }
 }

@@ -91,7 +91,6 @@ class TestCanvas {
 }
 
 class TestRenderManagerService {
-    readonly createRender$ = new Subject<string>();
     readonly created$ = new Subject<{ unitId: string; engine: { getCanvas: () => TestCanvas; canvasColorService: undefined } }>();
     readonly createdUnitIds: string[] = [];
     readonly removedUnitIds: string[] = [];

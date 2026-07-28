@@ -36,7 +36,7 @@ import {
 } from '@univerjs/engine-formula';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { SetRangeValuesMutation } from '../../../commands/mutations/set-range-values.mutation';
-import { createFunctionTestBed } from './create-function-test-bed';
+import { createFunctionTestBed, waitForCalculationEnd } from './create-function-test-bed';
 
 import '@univerjs/engine-formula/facade';
 
@@ -146,7 +146,7 @@ describe('Test inverted index cache 6', () => {
         );
 
         commandService.syncExecuteCommand(SetFormulaCalculationStartMutation.id, { forceCalculation: true }, { onlyLocal: true });
-        await formulaEngine.onCalculationEnd();
+        await waitForCalculationEnd(formulaEngine);
 
         getCellValue = (row: number, column: number) => {
             return worksheet.getCellRaw(row, column)?.v;

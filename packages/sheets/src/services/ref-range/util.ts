@@ -44,7 +44,7 @@ import type {
     IRemoveRowColCommand,
     IReorderRangeCommand,
 } from './type';
-import { Direction, IUniverInstanceService, MAX_COLUMN_COUNT, MAX_ROW_COUNT, mergeIntervals, ObjectMatrix, queryObjectMatrix, Range, RANGE_TYPE, Rectangle } from '@univerjs/core';
+import { Direction, getIntersectRange, IUniverInstanceService, MAX_COLUMN_COUNT, MAX_ROW_COUNT, mergeIntervals, ObjectMatrix, queryObjectMatrix, Range, RANGE_TYPE, Rectangle } from '@univerjs/core';
 import { DeleteRangeMoveLeftCommand } from '../../commands/commands/delete-range-move-left.command';
 import { DeleteRangeMoveUpCommand } from '../../commands/commands/delete-range-move-up.command';
 import { InsertRangeMoveDownCommand } from '../../commands/commands/insert-range-move-down.command';
@@ -421,7 +421,7 @@ export const handleMoveRangeCommon = (param: IMoveRangeCommand, targetRange: IRa
     });
 
     const fromMatrix = new ObjectMatrix();
-    const loopFromRange = Rectangle.getIntersects(fromRange, targetRange);
+    const loopFromRange = getIntersectRange(fromRange, targetRange);
 
     loopFromRange && Range.foreach(loopFromRange, (row, col) => {
         if (matrix.getValue(row, col)) {
@@ -466,7 +466,7 @@ export const handleBaseRemoveRange = (_removeRange: IRange, _targetRange: IRange
             // 6
             (targetRange.startColumn < removeRange.startColumn && targetRange.endColumn >= removeRange.endColumn)
         ) {
-            const intersectedRange = Rectangle.getIntersects(targetRange, removeRange);
+            const intersectedRange = getIntersectRange(targetRange, removeRange);
             if (intersectedRange) {
                 const length = -getLength(intersectedRange);
                 return { step: 0, length };
@@ -486,7 +486,7 @@ export const handleBaseRemoveRange = (_removeRange: IRange, _targetRange: IRange
             targetRange.startColumn <= removeRange.endColumn &&
             targetRange.endColumn > removeRange.endColumn
         ) {
-            const intersectedRange = Rectangle.getIntersects(targetRange, removeRange);
+            const intersectedRange = getIntersectRange(targetRange, removeRange);
             if (intersectedRange) {
                 const length = -getLength(intersectedRange);
                 const step = -(getLength(removeRange) - getLength(intersectedRange));
@@ -763,7 +763,7 @@ export const handleInsertRangeMoveDownCommon = (param: IInsertRangeMoveDownComma
     };
 
     const noMoveRanges = Rectangle.subtract(targetRange, bottomRange);
-    const targetMoveRange = Rectangle.getIntersects(bottomRange, targetRange);
+    const targetMoveRange = getIntersectRange(bottomRange, targetRange);
 
     if (!targetMoveRange) {
         return [targetRange];
@@ -814,7 +814,7 @@ export const handleInsertRangeMoveRightCommon = (param: IInsertRangeMoveRightCom
     };
 
     const noMoveRanges = Rectangle.subtract(targetRange, bottomRange);
-    const targetMoveRange = Rectangle.getIntersects(bottomRange, targetRange);
+    const targetMoveRange = getIntersectRange(bottomRange, targetRange);
 
     if (!targetMoveRange) {
         return [targetRange];
@@ -873,10 +873,10 @@ export const handleDeleteRangeMoveLeftCommon = (param: IDeleteRangeMoveLeftComma
 
     const moveCount = range.endColumn - range.startColumn + 1;
     // this range need delete
-    const targetDeleteRange = Rectangle.getIntersects(range, targetRange);
+    const targetDeleteRange = getIntersectRange(range, targetRange);
 
     const noMoveRanges = Rectangle.subtract(targetRange, rightRange);
-    const targetMoveRange = Rectangle.getIntersects(rightRange, targetRange);
+    const targetMoveRange = getIntersectRange(rightRange, targetRange);
 
     if (!targetDeleteRange && !targetMoveRange) {
         return [targetRange];
@@ -936,10 +936,10 @@ export const handleDeleteRangeMoveUpCommon = (param: IDeleteRangeMoveUpCommand, 
 
     const moveCount = range.endRow - range.startRow + 1;
     // this range need delete
-    const targetDeleteRange = Rectangle.getIntersects(range, targetRange);
+    const targetDeleteRange = getIntersectRange(range, targetRange);
 
     const noMoveRanges = Rectangle.subtract(targetRange, bottomRange);
-    const targetMoveRange = Rectangle.getIntersects(bottomRange, targetRange);
+    const targetMoveRange = getIntersectRange(bottomRange, targetRange);
 
     if (!targetDeleteRange && !targetMoveRange) {
         return [targetRange];

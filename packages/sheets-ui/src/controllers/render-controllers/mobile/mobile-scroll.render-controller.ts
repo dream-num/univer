@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IFreeze, IRange, IWorksheetData, Nullable, Workbook } from '@univerjs/core';
+import type { IFreeze, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { IMouseEvent, IPoint, IPointerEvent, IRenderContext, IRenderModule, IScrollObserverParam } from '@univerjs/engine-render';
 import type { IScrollToCellOperationParams, ISheetSkeletonManagerParam } from '@univerjs/sheets';
 import type { IExpandSelectionCommandParams } from '../../../commands/commands/set-selection.command';
@@ -153,12 +153,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
     }
 
     private _getFreeze(): Nullable<IFreeze> {
-        const snapshot: IWorksheetData | undefined = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton.getWorksheetConfig();
-        if (snapshot == null) {
-            return;
-        }
-
-        return snapshot.freeze;
+        return this._sheetSkeletonManagerService.getCurrentParam()?.skeleton.worksheet.getFreeze();
     }
 
     // eslint-disable-next-line max-lines-per-function

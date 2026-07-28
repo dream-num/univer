@@ -65,17 +65,9 @@ export interface ISheetSelectionRenderService {
         RANGE_FILL_PERMISSION_CHECK: IInterceptor<boolean, { x: number; y: number; skeleton: SpreadsheetSkeleton; scene: Scene }>;
     }>;
 
-    /** @deprecated This should not be provided by the selection render service. */
-    getViewPort(): Viewport; // AutoFill
-
     getSkeleton(): SpreadsheetSkeleton;
 
     getSelectionControls(): SelectionControl[];
-
-    /**
-     * @deprecated Please use `getCellWithCoordByOffset` instead.
-     */
-    getSelectionCellByPosition(x: number, y: number): ICellWithCoord;
 
     getCellWithCoordByOffset(x: number, y: number, skeleton?: SpreadsheetSkeleton): Nullable<ICellWithCoord>; // drawing
 
@@ -247,11 +239,6 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     //     this._setSelectionStyle(genNormalSelectionStyle(this._themeService));
     // }
 
-    /** @deprecated This should not be provided by the selection render service. */
-    getViewPort(): Viewport {
-        return this._activeViewport!;
-    }
-
     setSingleSelectionEnabled(enabled: boolean = false): void {
         this._singleSelectionEnabled = enabled;
     }
@@ -401,7 +388,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     }
 
     protected _getFreeze(): Nullable<IFreeze> {
-        const freeze = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton.getWorksheetConfig().freeze;
+        const freeze = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton.worksheet.getFreeze();
         return freeze;
     }
 
@@ -669,13 +656,6 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
             //#endregion
         });
         // #endregion
-    }
-
-    /**
-     * @deprecated Please use `getCellWithCoordByOffset` instead.
-     */
-    getSelectionCellByPosition(x: number, y: number): ICellWithCoord {
-        return this.getCellWithCoordByOffset(x, y);
     }
 
     getCellWithCoordByOffset(x: number, y: number, skeletonParam?: SpreadsheetSkeleton): ICellWithCoord {
@@ -955,12 +935,6 @@ export function getTopLeftSelectionOfCurrSheet(skeleton: SpreadsheetSkeleton): I
         endColumn: 0,
     });
 }
-
-/**
- * @deprecated use `getTopLeftSelectionOfCurrSheet` instead
- */
-const getTopLeftSelection = getTopLeftSelectionOfCurrSheet;
-export { getTopLeftSelection };
 
 export function genSelectionByRange(skeleton: SpreadsheetSkeleton, range: IRange): ISelectionWithStyle {
     const topLeftCell = skeleton.worksheet.getCellInfoInMergeData(range.startRow, range.startColumn);

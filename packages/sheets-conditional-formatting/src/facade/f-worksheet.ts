@@ -54,14 +54,6 @@ export interface IFWorksheetConditionalFormattingMixin {
     getConditionalFormattingRules(): IConditionFormattingRule[];
 
     /**
-     * @deprecated use `newConditionalFormattingRule` instead.
-     * Creates a constructor for conditional formatting
-     * @returns {FConditionalFormattingBuilder} The conditional formatting builder
-     * @memberof IFWorksheetConditionalFormattingMixin
-     */
-    createConditionalFormattingRule(): FConditionalFormattingBuilder;
-
-    /**
      * Creates a constructor for conditional formatting
      * @returns {FConditionalFormattingBuilder} The conditional formatting builder
      * @memberof IFWorksheetConditionalFormattingMixin
@@ -205,10 +197,6 @@ export class FWorksheetConditionalFormattingMixin extends FWorksheet implements 
     override getConditionalFormattingRules(): IConditionFormattingRule[] {
         const rules = this._getConditionalFormattingRuleModel().getSubunitRules(this._workbook.getUnitId(), this._worksheet.getSheetId()) || [];
         return [...rules];
-    }
-
-    override createConditionalFormattingRule(): FConditionalFormattingBuilder {
-        return new FConditionalFormattingBuilder();
     }
 
     override newConditionalFormattingRule(): FConditionalFormattingBuilder {

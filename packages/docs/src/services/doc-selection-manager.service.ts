@@ -150,20 +150,6 @@ export class DocSelectionManagerService extends RxDisposable {
         return textRanges.find((textRange) => textRange.isActive);
     }
 
-    /**
-     *
-     * @deprecated
-     */
-    getActiveRectRange(): Nullable<ITextRangeWithStyle> {
-        const selectionInfo = this._getTextRanges(this._currentSelection);
-        if (selectionInfo == null) {
-            return;
-        }
-
-        const { rectRanges } = selectionInfo;
-        return rectRanges.find((rectRange) => rectRange.isActive);
-    }
-
     // **Only used in test case** because this does not go through the render layer.
     __TEST_ONLY_add(textRanges: ITextRangeWithStyle[], isEditing = true) {
         if (this._currentSelection == null) {
@@ -179,23 +165,6 @@ export class DocSelectionManagerService extends RxDisposable {
             isEditing,
             style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE, // mock style.
         });
-    }
-
-    // Use to replace the current editor selection.
-    /**
-     * @deprecated pls use replaceDocRanges.
-     */
-    replaceTextRanges(
-        docRanges: ISuccinctDocRangeParam[],
-        isEditing = true,
-        options?: { [key: string]: boolean }
-    ) {
-        return this.replaceDocRanges(
-            docRanges,
-            this._currentSelection,
-            isEditing,
-            options
-        );
     }
 
     replaceDocRanges(

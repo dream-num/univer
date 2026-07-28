@@ -16,7 +16,7 @@
 
 import type { Nullable } from '@univerjs/core';
 import type { BaseObject } from './base-object';
-import type { IDragEvent, IKeyboardEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './basics/i-events';
+import type { IDragEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './basics/i-events';
 import type { ISceneTransformState, ITransformChangeState } from './basics/interfaces';
 import type { ITransformerConfig } from './basics/transformer-config';
 import type { Vector2 } from './basics/vector2';
@@ -88,16 +88,6 @@ export class Scene extends Disposable {
     onDblclick$ = new EventSubject<IPointerEvent | IMouseEvent>();
     onTripleClick$ = new EventSubject<IPointerEvent | IMouseEvent>();
     onMouseWheel$ = new EventSubject<IWheelEvent>();
-
-    /**
-     * @deprecated  use `fromGlobalEvent('keydown')` from rx.js instead.
-     */
-    onKeyDown$ = new EventSubject<IKeyboardEvent>();
-
-    /**
-     * @deprecated  use `fromGlobalEvent('keyup')` from rx.js instead.
-     */
-    onKeyUp$ = new EventSubject<IKeyboardEvent>();
 
     private _beforeRender$ = new BehaviorSubject<Nullable<Canvas>>(null);
     readonly beforeRender$ = this._beforeRender$.asObservable();
@@ -333,35 +323,6 @@ export class Scene extends Disposable {
     setDefaultCursor(val: CURSOR_TYPE) {
         this._defaultCursor = val;
         this.resetCursor();
-    }
-
-    /**
-     * @deprecated use transformByState instead.
-     * @param width
-     * @param height
-     */
-    resize(width?: number, height?: number) {
-        const preWidth = this.width;
-        if (width !== undefined) {
-            this.width = width;
-        }
-
-        const preHeight = this.height;
-        if (height !== undefined) {
-            this.height = height;
-        }
-
-        this._transformHandler();
-        this.onTransformChange$.emitEvent({
-            type: TRANSFORM_CHANGE_OBSERVABLE_TYPE.resize,
-            value: {
-                width: this.width,
-                height: this.height,
-            },
-            preValue: { width: preWidth, height: preHeight },
-        });
-
-        return this;
     }
 
     /**
@@ -809,15 +770,6 @@ export class Scene extends Disposable {
     }
 
     /**
-     * @deprecated use `getScrollXYInfoByViewport` instead.
-     * @param pos
-     * @param viewPort
-     */
-    getVpScrollXYInfoByPosToVp(pos: Vector2, viewPort?: Viewport) {
-        return this.getScrollXYInfoByViewport(pos, viewPort);
-    }
-
-    /**
      * getViewportScrollXYInfo by viewport under cursor position
      * prev getScrollXYByRelativeCoords
      * @param pos
@@ -847,15 +799,6 @@ export class Scene extends Disposable {
             x,
             y,
         };
-    }
-
-    /**
-     * @deprecated use `getCoordRelativeToViewport` instead
-     * @param coord
-     * @returns
-     */
-    getRelativeToViewportCoord(coord: Vector2) {
-        return this.getCoordRelativeToViewport(coord);
     }
 
     /**
@@ -963,8 +906,6 @@ export class Scene extends Disposable {
         this.onDblclick$.complete();
         this.onTripleClick$.complete();
         this.onMouseWheel$.complete();
-        this.onKeyDown$.complete();
-        this.onKeyUp$.complete();
         this._addObject$.complete();
 
         super.dispose();

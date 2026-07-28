@@ -28,7 +28,7 @@ import {
 } from '@univerjs/engine-formula';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { SetRangeValuesMutation } from '../../../commands/mutations/set-range-values.mutation';
-import { createFunctionTestBed } from './create-function-test-bed';
+import { createFunctionTestBed, waitForCalculationEnd } from './create-function-test-bed';
 
 import '@univerjs/engine-formula/facade';
 
@@ -99,7 +99,7 @@ describe('Array formula SPILL with real formula calculation', () => {
 
     async function calculate() {
         commandService.syncExecuteCommand(SetFormulaCalculationStartMutation.id, { forceCalculation: true }, { onlyLocal: true });
-        await formulaEngine.onCalculationEnd();
+        await waitForCalculationEnd(formulaEngine);
     }
 
     async function setCell(row: number, column: number, value: number) {

@@ -66,13 +66,6 @@ export interface IDialogProps {
     defaultPosition?: { x: number; y: number };
 
     /**
-     * Whether the dialog should be destroyed on close.
-     * @deprecated
-     * @default false
-     */
-    destroyOnClose?: boolean;
-
-    /**
      * Whether the dialog should preserve its position on destroy.
      * @default false
      */

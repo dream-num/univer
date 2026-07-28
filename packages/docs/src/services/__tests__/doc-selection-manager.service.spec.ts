@@ -70,14 +70,13 @@ describe('DocSelectionManagerService', () => {
 
         service.__TEST_ONLY_add([{ startOffset: 1, endOffset: 1, collapsed: true }] as never);
         service.refreshSelection();
-        service.replaceTextRanges([{ startOffset: 2, endOffset: 2 }]);
+        service.replaceDocRanges([{ startOffset: 2, endOffset: 2 }]);
 
         expect(service.__getCurrentSelection()).toBeNull();
         expect(service.getSelectionInfo()).toBeUndefined();
         expect(service.getTextRanges()).toBeUndefined();
         expect(service.getRectRanges()).toBeUndefined();
         expect(service.getActiveTextRange()).toBeUndefined();
-        expect(service.getActiveRectRange()).toBeUndefined();
         expect(service.getDocRanges()).toEqual([]);
     });
 
@@ -87,7 +86,7 @@ describe('DocSelectionManagerService', () => {
         const sub = service.refreshSelection$.subscribe((value) => refreshes.push(value));
         service.__TEST_ONLY_setCurrentSelection({ unitId: 'doc-1', subUnitId: 'doc-1' });
 
-        service.replaceTextRanges([{ startOffset: 2, endOffset: 4 }], false, { keepVisible: true });
+        service.replaceDocRanges([{ startOffset: 2, endOffset: 4 }], undefined, false, { keepVisible: true });
 
         expect(refreshes.at(-1)).toEqual({
             unitId: 'doc-1',
@@ -116,7 +115,7 @@ describe('DocSelectionManagerService', () => {
 
         expect(service.getTextRanges()?.map((range) => range.startOffset)).toEqual([8]);
         expect(service.getRectRanges()?.map((range) => range.startOffset)).toEqual([2]);
-        expect(service.getActiveRectRange()?.startOffset).toBe(2);
+        expect(service.getRectRanges()?.find((range) => range.isActive)?.startOffset).toBe(2);
         expect(service.getDocRanges().map((range) => range.startOffset)).toEqual([2, 8]);
         expect(selections.at(-1)).toMatchObject({
             unitId: 'doc-1',

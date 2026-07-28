@@ -42,6 +42,7 @@ import type {
 } from '../../services/clipboard/type';
 import type { IScrollStateWithSearchParam } from '../../services/scroll-manager.service';
 import {
+    createDocumentModelWithStyle,
     DEFAULT_WORKSHEET_COLUMN_WIDTH,
     DEFAULT_WORKSHEET_COLUMN_WIDTH_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
@@ -529,8 +530,7 @@ export class SheetClipboardController extends RxDisposable {
             return null;
         }
 
-        const { skeleton } = currentSkeleton;
-        const documentModel = skeleton.getBlankCellDocumentModel()?.documentModel;
+        const documentModel = createDocumentModelWithStyle('', {});
         const p = documentModel?.getSnapshot();
         const documentData = { ...p, ...snapshot };
         documentModel?.reset(documentData);
@@ -794,7 +794,7 @@ export class SheetClipboardController extends RxDisposable {
                 const setValuesMutation: ISetRangeValuesMutationParams = {
                     unitId,
                     subUnitId,
-                    cellValue: valueMatrix.getData(),
+                    cellValue: valueMatrix.clone(),
                 };
 
                 redoMutationsInfo.push({

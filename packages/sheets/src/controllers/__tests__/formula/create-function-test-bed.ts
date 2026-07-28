@@ -16,8 +16,9 @@
 
 /* eslint-disable max-lines-per-function */
 
-import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
+import type { Dependency, IDisposable, IWorkbookData, Workbook } from '@univerjs/core';
 import type { ISheetData } from '@univerjs/engine-formula';
+import type { FFormula } from '@univerjs/engine-formula/facade';
 import {
     CellValueType,
     ILogService,
@@ -280,6 +281,16 @@ export function createFunctionTestBed(workbookData?: IWorkbookData, dependencies
         sheetId,
         sheetData,
     };
+}
+
+export function waitForCalculationEnd(formulaEngine: FFormula): Promise<void> {
+    return new Promise((resolve) => {
+        let disposable: IDisposable | undefined;
+        disposable = formulaEngine.calculationEnd(() => {
+            disposable?.dispose();
+            resolve();
+        });
+    });
 }
 
 export function stripArrayValue(array: (string | number | boolean | null)[][]) {

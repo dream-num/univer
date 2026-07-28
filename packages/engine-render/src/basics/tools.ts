@@ -15,8 +15,6 @@
  */
 
 import type {
-    ICellInfo,
-    ICellWithCoord,
     IPosition,
     IRange,
     IRangeWithCoord,
@@ -31,7 +29,6 @@ import {
     ColorKit,
     DEFAULT_STYLES,
     FontStyleType,
-    getCellInfoInMergeData,
     Rectangle,
     Tools,
 } from '@univerjs/core';
@@ -535,119 +532,6 @@ export function getCellPositionByIndex(
         startX,
         endX,
     };
-}
-
-/**
- * @deprecated use same function in @univerjs/core
- * @description Get the cell position information of the specified row and column, including the position information of the cell and the merge information of the cell
- * @param {number} row The row index of the cell
- * @param {number} column The column index of the cell
- * @param {number[]} rowHeightAccumulation The accumulated height of each row
- * @param {number[]} columnWidthAccumulation The accumulated width of each column
- * @param {ICellInfo} mergeDataInfo The merge information of the cell
- * @returns {ICellWithCoord} The cell position information of the specified row and column, including the position information of the cell and the merge information of the cell
- */
-function getCellWithCoordByIndexCore(
-    row: number,
-    column: number,
-    rowHeightAccumulation: number[],
-    columnWidthAccumulation: number[],
-    mergeDataInfo: ICellInfo
-): ICellWithCoord {
-    row = Tools.clamp(row, 0, rowHeightAccumulation.length - 1);
-    column = Tools.clamp(column, 0, columnWidthAccumulation.length - 1);
-    // eslint-disable-next-line prefer-const
-    let { startY, endY, startX, endX } = getCellPositionByIndex(
-        row,
-        column,
-        rowHeightAccumulation,
-        columnWidthAccumulation
-    );
-
-    const { isMerged, isMergedMainCell, startRow, startColumn, endRow, endColumn } = mergeDataInfo;
-
-    let mergeInfo = {
-        startRow,
-        startColumn,
-        endRow,
-        endColumn,
-
-        startY: 0,
-        endY: 0,
-        startX: 0,
-        endX: 0,
-    };
-
-    const rowAccumulationCount = rowHeightAccumulation.length - 1;
-    const columnAccumulationCount = columnWidthAccumulation.length - 1;
-
-    if (isMerged && startRow !== -1 && startColumn !== -1) {
-        const mergeStartY = rowHeightAccumulation[startRow - 1] || 0;
-        const mergeEndY = rowHeightAccumulation[endRow] || rowHeightAccumulation[rowAccumulationCount];
-
-        const mergeStartX = columnWidthAccumulation[startColumn - 1] || 0;
-        const mergeEndX = columnWidthAccumulation[endColumn] || columnWidthAccumulation[columnAccumulationCount];
-        mergeInfo = {
-            ...mergeInfo,
-            startY: mergeStartY,
-            endY: mergeEndY,
-            startX: mergeStartX,
-            endX: mergeEndX,
-        };
-    } else if (!isMerged && endRow !== -1 && endColumn !== -1) {
-        const mergeEndY = rowHeightAccumulation[endRow] || rowHeightAccumulation[rowAccumulationCount];
-        const mergeEndX = columnWidthAccumulation[endColumn] || columnWidthAccumulation[columnAccumulationCount];
-
-        mergeInfo = {
-            ...mergeInfo,
-            startY,
-            endY: mergeEndY,
-            startX,
-            endX: mergeEndX,
-        };
-    }
-
-    return {
-        isMerged,
-        isMergedMainCell,
-        actualRow: row,
-        actualColumn: column,
-        startY,
-        endY,
-        startX,
-        endX,
-        mergeInfo,
-    };
-}
-
-/**
- * @deprecated please use getCellWithCoordByIndexCore in @univerjs/core instead
- */
-const getCellByIndexWithMergeInfo = getCellWithCoordByIndexCore;
-export { getCellByIndexWithMergeInfo };
-
-/**
- * Determine whether there are any cells in a row that are not in the merged cells, mainly used for the calculation of auto height
- * @deprecated please use SpreadsheetSkeleton@_hasUnMergedCellInRow
- */
-export function hasUnMergedCellInRow(
-    row: number,
-    startColumn: number,
-    endColumn: number,
-    mergeData: IRange[]
-): boolean {
-    // In the selection area, if a cell is not in the merged cell, the automatic height of the row needs to be calculated.
-    let hasUnMergedCell = false;
-    for (let colIndex = startColumn; colIndex <= endColumn; colIndex++) {
-        const { isMerged, isMergedMainCell } = getCellInfoInMergeData(row, colIndex, mergeData);
-
-        if (!isMerged && !isMergedMainCell) {
-            hasUnMergedCell = true;
-            break;
-        }
-    }
-
-    return hasUnMergedCell;
 }
 
 export function mergeInfoOffset(mergeInfo: IRangeWithCoord, offsetX: number, offsetY: number) {

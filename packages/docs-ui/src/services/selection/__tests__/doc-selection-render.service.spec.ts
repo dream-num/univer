@@ -1340,7 +1340,7 @@ describe('DocSelectionRenderService', () => {
             onScrollAfter$: scrollAfter$,
             onScrollEnd$: scrollEnd$,
             getAbsoluteVector: () => ({ x: 4, y: 8 }),
-            getBounding: () => ({
+            calcViewportInfo: () => ({
                 viewBound: {
                     left: 0,
                     top: 0,

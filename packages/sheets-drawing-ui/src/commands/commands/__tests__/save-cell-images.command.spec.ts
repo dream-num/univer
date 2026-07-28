@@ -146,10 +146,6 @@ class TestBatchSaveImagesService implements IBatchSaveImagesService {
     getSelectionColumnIndices(): Set<number> {
         return new Set([0, 1]);
     }
-
-    registerURLImageDownloader(): IDisposable {
-        return toDisposable(() => undefined);
-    }
 }
 
 function createImage(imageId: string, cellAddress: string): ICellImageInfo {

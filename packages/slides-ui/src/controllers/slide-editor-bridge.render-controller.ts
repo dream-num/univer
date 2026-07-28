@@ -177,8 +177,6 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
         curRichText.refreshDocumentByDocData();
         curRichText.resizeToContentSize();
 
-        this._editorBridgeService.endEditing$.next(curRichText);
-
         const richText: Record<string, any> = {
             bl: 1,
             fs: curRichText.fs,

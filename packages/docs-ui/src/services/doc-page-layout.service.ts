@@ -79,7 +79,7 @@ export class DocPageLayoutService extends Disposable implements IRenderModule {
             sceneHeight = docsHeight + pageMarginTop * 2;
         }
 
-        scene.resize(sceneWidth, sceneHeight);
+        scene.transformByState({ width: sceneWidth, height: sceneHeight });
 
         // the engine width is 1, when engine has no container.
         // Use to fix flickering issues into the page.

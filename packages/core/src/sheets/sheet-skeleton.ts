@@ -131,8 +131,8 @@ export interface IGetRowColByPosOptions {
 
 export class SheetSkeleton extends Skeleton {
     /**
-     * @deprecated avoid use `IWorksheetData` directly, use API provided by `Worksheet`, otherwise
-     * `ViewModel` will be not working.
+     * Avoid using `IWorksheetData` directly when an API is provided by `Worksheet`, otherwise
+     * `ViewModel` will not work.
      */
     protected _worksheetData: IWorksheetData;
     protected _renderRawFormula = false;
@@ -166,13 +166,6 @@ export class SheetSkeleton extends Skeleton {
     }
 
     resetCache() {
-    }
-
-    /**
-     * @deprecated should never expose a property that is provided by another module!
-     */
-    getWorksheetConfig(): IWorksheetData {
-        return this._worksheetData;
     }
 
     /**

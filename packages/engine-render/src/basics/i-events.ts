@@ -142,12 +142,6 @@ export interface IKeyboardEvent extends IUIEvent {
     altKey: boolean;
 
     /**
-     * Unicode value of character pressed
-     * @deprecated
-     */
-    charCode?: number;
-
-    /**
      * Code for key based on layout
      */
     code: string;
@@ -161,11 +155,6 @@ export interface IKeyboardEvent extends IUIEvent {
      * String representation of key
      */
     key: string;
-    /* *
-     * ASCII value of key
-     * @deprecated
-     */
-    keyCode: number;
 
     /**
      * Status of Meta key (eg. Windows key) being pressed

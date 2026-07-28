@@ -337,8 +337,8 @@ export class Range {
     getObjectValues(options: IValueOptionsType = {}): IObjectMatrixPrimitiveType<Nullable<ICellData>> {
         const { startRow, endRow, startColumn, endColumn } = this._range;
 
-        // get object values from sheet matrix, or use this.getMatrix() create a new matrix then this.getMatrix().getData()
-        const values = this._worksheet.getCellMatrix().getFragment(startRow, endRow, startColumn, endColumn).getData();
+        // get object values from sheet matrix, or use this.getMatrix() create a new matrix then this.getMatrix().clone()
+        const values = this._worksheet.getCellMatrix().getFragment(startRow, endRow, startColumn, endColumn).clone();
 
         if (options.isIncludeStyle) {
             const style = this._deps.getStyles();

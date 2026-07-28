@@ -91,11 +91,6 @@ export interface IUniverSheetsUIConfig {
         };
     };
 
-    /**
-     * @deprecated Use `footer.statisticBar` instead.
-     */
-    statusBarStatistic?: boolean;
-
     clipboardConfig?: {
         hidePasteOptions?: boolean;
     };
@@ -147,7 +142,6 @@ export interface IUniverSheetsUIConfig {
 
 export const defaultPluginConfig: IUniverSheetsUIConfig = {
     formulaBar: true,
-    statusBarStatistic: true,
     protectedRangeShadow: true,
     maxAutoHeightCount: 1000,
 };

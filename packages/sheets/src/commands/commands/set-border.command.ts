@@ -570,7 +570,7 @@ export const SetBorderCommand: ICommand = {
         const setRangeValuesMutationParams: ISetRangeValuesMutationParams = {
             unitId,
             subUnitId,
-            cellValue: mr.getData(),
+            cellValue: mr.clone(),
         };
 
         const undoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(

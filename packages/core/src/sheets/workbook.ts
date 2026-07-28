@@ -144,11 +144,6 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
         return this._snapshot;
     }
 
-    /** @deprecated use use name property instead */
-    getName(): string {
-        return this._snapshot.name;
-    }
-
     setName(name: string): void {
         this._name$.next(name);
         this._snapshot.name = name;

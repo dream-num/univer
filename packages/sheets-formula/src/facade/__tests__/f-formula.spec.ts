@@ -88,17 +88,11 @@ describe('sheets-formula facade mixins', () => {
         disposeUniver();
     });
 
-    it('registers functions through FUniver and FFormula and triggers a debounced recalculation command', async () => {
+    it('registers functions through FFormula and triggers a debounced recalculation command', async () => {
         vi.useFakeTimers();
 
         const functionService = get(IFunctionService);
         const executeCommandSpy = vi.spyOn(commandService, 'executeCommand').mockResolvedValue(true);
-
-        const univerDisposable = univerAPI.registerFunction({
-            calculate: [
-                [() => 1, 'UNIVER_SIDE', 'Registered from FUniver'],
-            ],
-        });
 
         const formula = univerAPI.getFormula();
         const formulaDisposable = formula.registerFunction('FORMULA_SIDE', (value) => Number(value) + 1, 'Registered from FFormula');
@@ -107,7 +101,6 @@ describe('sheets-formula facade mixins', () => {
         await vi.advanceTimersByTimeAsync(11);
 
         expect(get(IRegisterFunctionService)).toBeDefined();
-        expect(functionService.hasExecutor('UNIVER_SIDE')).toBe(true);
         expect(functionService.hasExecutor('FORMULA_SIDE')).toBe(true);
         expect(functionService.hasExecutor('FORMULA_ASYNC')).toBe(true);
         expect(executeCommandSpy).toHaveBeenCalledWith(
@@ -121,11 +114,9 @@ describe('sheets-formula facade mixins', () => {
             }
         );
 
-        univerDisposable.dispose();
         formulaDisposable.dispose();
         asyncDisposable.dispose();
 
-        expect(functionService.hasExecutor('UNIVER_SIDE')).toBe(false);
         expect(functionService.hasExecutor('FORMULA_SIDE')).toBe(false);
         expect(functionService.hasExecutor('FORMULA_ASYNC')).toBe(false);
     });

@@ -16,7 +16,7 @@
 
 import type { ICommand, IRange } from '@univerjs/core';
 import type { LocaleKey } from '../../locale/types';
-import { CommandType, ICommandService, IConfirmService, IUniverInstanceService, LocaleService, Rectangle } from '@univerjs/core';
+import { CommandType, getIntersectRange, ICommandService, IConfirmService, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { DeleteRangeMoveLeftCommand, getSheetCommandTarget, SheetsSelectionsService } from '@univerjs/sheets';
 
 export const DeleteRangeMoveLeftConfirmCommand: ICommand = {
@@ -47,7 +47,7 @@ export const DeleteRangeMoveLeftConfirmCommand: ICommand = {
 
         const getRowLength = (range: IRange) => range.endRow - range.startRow;
         const mergeData = worksheet.getMergeData().find((mergeRange) => {
-            const interSectedRange = Rectangle.getIntersects(mergeRange, range);
+            const interSectedRange = getIntersectRange(mergeRange, range);
             return interSectedRange ? getRowLength(mergeRange) > getRowLength(interSectedRange) : false;
         });
 

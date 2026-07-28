@@ -205,20 +205,18 @@ describe('FDocumentParagraph', () => {
         const range = document.getTextRange(2, 8);
 
         expect(range.getText()).toBe('pha\rBe');
-        expect(range.getTextStyleRuns()).toEqual([
+        expect(range.getExplicitTextStyleRuns()).toEqual([
             { startOffset: 2, endOffset: 5, textStyle: { cl: { rgb: '#FF0000' }, bl: 1 } },
             { startOffset: 5, endOffset: 8, textStyle: { cl: { rgb: '#FF0000' }, it: 1 } },
         ]);
-        expect(range.getCommonTextStyle()).toEqual({ cl: { rgb: '#FF0000' } });
-        expect(range.getExplicitTextStyleRuns()).toEqual(range.getTextStyleRuns());
-        expect(range.getCommonExplicitTextStyle()).toEqual(range.getCommonTextStyle());
-        expect(range.describe()).toMatchObject({
+        expect(range.getCommonExplicitTextStyle()).toEqual({ cl: { rgb: '#FF0000' } });
+        expect(range.describe()).toEqual({
             startOffset: 2,
             endOffset: 8,
             segmentId: '',
             length: 6,
             text: 'pha\rBe',
-            explicitTextStyleRuns: range.getTextStyleRuns(),
+            explicitTextStyleRuns: range.getExplicitTextStyleRuns(),
             commonExplicitTextStyle: { cl: { rgb: '#FF0000' } },
         });
 

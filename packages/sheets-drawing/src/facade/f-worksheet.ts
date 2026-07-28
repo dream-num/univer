@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-import type { IDrawingParam } from '@univerjs/core';
+/* eslint-disable import/consistent-type-specifier-style -- Keep type and value imports from one package in one declaration. */
 import type { IFBlobSource } from '@univerjs/core/facade';
-import type { IDrawingGroupUpdateParam, IDrawingJsonUndo1 } from '@univerjs/drawing';
-import type { ISheetDrawing, ISheetImage } from '@univerjs/sheets-drawing';
-import { DrawingTypeEnum, generateRandomId, ImageSourceType, IUndoRedoService } from '@univerjs/core';
-import { isGroupableDrawingType } from '@univerjs/drawing';
+import { DrawingTypeEnum, generateRandomId, type IDrawingParam, ImageSourceType, IUndoRedoService } from '@univerjs/core';
+import { type IDrawingGroupUpdateParam, type IDrawingJsonUndo1, isGroupableDrawingType } from '@univerjs/drawing';
 import { getGroupState, transformObjectOutOfGroup } from '@univerjs/engine-render';
-import { DrawingApplyType, InsertSheetDrawingCommand, ISheetDrawingService, RemoveSheetDrawingCommand, SetDrawingApplyMutation, SetSheetDrawingCommand } from '@univerjs/sheets-drawing';
+import { DrawingApplyType, getSheetDrawingPlacement, InsertSheetDrawingCommand, type ISheetDrawing, type ISheetDrawingPlacement, ISheetDrawingService, type ISheetImage, RemoveSheetDrawingCommand, SetDrawingApplyMutation, SetSheetDrawingCommand, SetSheetDrawingPlacementCommand } from '@univerjs/sheets-drawing';
 import { FWorksheet } from '@univerjs/sheets/facade';
 import { FOverGridImage, FOverGridImageBuilder } from './f-over-grid-image';
 
@@ -184,6 +182,69 @@ export interface IFWorksheetDrawingMixin {
      * ```
      */
     updateImages(sheetImages: ISheetImage[]): FWorksheet;
+
+    /**
+     * Get the placement of any drawing on this sheet.
+     *
+     * Image, Shape, Chart, and Group use the same placement contract.
+     * @param {string} drawingId Drawing id.
+     * @returns {ISheetDrawingPlacement | null} The placement, or `null` when the drawing does not exist.
+     * @example
+     * ```ts
+     * const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const placement = sheet.getDrawingPlacement('drawing-id');
+     * if (placement?.kind === univerAPI.Enum.SheetDrawingAnchorKind.TwoCell) {
+     *   console.log(placement.from, placement.to);
+     * }
+     * ```
+     */
+    getDrawingPlacement(drawingId: string): ISheetDrawingPlacement | null;
+
+    /**
+     * Set the placement of any drawing on this sheet through the drawing command.
+     *
+     * @param {string} drawingId Drawing id.
+     * @param {ISheetDrawingPlacement} placement Explicit OneCell, TwoCell, or Absolute placement.
+     * @returns {boolean} `true` when the command succeeds.
+     * @example OneCell: move with cells, keep pixel size
+     * ```ts
+     * const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const drawingId = sheet.getImages()[0]?.getId();
+     * if (!drawingId) throw new Error('No drawing found.');
+     * const changed = sheet.setDrawingPlacement(drawingId, {
+     *   kind: univerAPI.Enum.SheetDrawingAnchorKind.OneCell,
+     *   from: { row: 2, column: 2, rowOffset: 8, columnOffset: 8 },
+     *   width: 240,
+     *   height: 120,
+     * });
+     * console.log(changed);
+     * ```
+     * @example TwoCell: move and resize with both cell markers
+     * ```ts
+     * const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const drawingId = sheet.getImages()[0]?.getId();
+     * if (!drawingId) throw new Error('No drawing found.');
+     * sheet.setDrawingPlacement(drawingId, {
+     *   kind: univerAPI.Enum.SheetDrawingAnchorKind.TwoCell,
+     *   from: { row: 2, column: 2, rowOffset: 8, columnOffset: 8 },
+     *   to: { row: 8, column: 6, rowOffset: 0, columnOffset: 0 },
+     * });
+     * ```
+     * @example Absolute: do not move or resize after row or column changes
+     * ```ts
+     * const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const drawingId = sheet.getImages()[0]?.getId();
+     * if (!drawingId) throw new Error('No drawing found.');
+     * sheet.setDrawingPlacement(drawingId, {
+     *   kind: univerAPI.Enum.SheetDrawingAnchorKind.Absolute,
+     *   left: 640,
+     *   top: 96,
+     *   width: 240,
+     *   height: 120,
+     * });
+     * ```
+     */
+    setDrawingPlacement(drawingId: string, placement: ISheetDrawingPlacement): boolean;
 
     /**
      * Get the current selected images.
@@ -486,6 +547,23 @@ export class FWorksheetDrawingMixin extends FWorksheet implements IFWorksheetDra
     override updateImages(sheetImages: ISheetImage[]): FWorksheet {
         this._commandService.syncExecuteCommand(SetSheetDrawingCommand.id, { unitId: this._fWorkbook.getId(), drawings: sheetImages });
         return this;
+    }
+
+    override getDrawingPlacement(drawingId: string): ISheetDrawingPlacement | null {
+        const drawing = this._injector.get(ISheetDrawingService).getDrawingByParam({
+            unitId: this._fWorkbook.getId(),
+            subUnitId: this.getSheetId(),
+            drawingId,
+        });
+        return drawing ? getSheetDrawingPlacement(drawing) : null;
+    }
+
+    override setDrawingPlacement(drawingId: string, placement: ISheetDrawingPlacement): boolean {
+        return this._commandService.syncExecuteCommand(SetSheetDrawingPlacementCommand.id, {
+            unitId: this._fWorkbook.getId(),
+            subUnitId: this.getSheetId(),
+            drawings: [{ drawingId, placement }],
+        });
     }
 
     override newOverGridImage(): FOverGridImageBuilder {

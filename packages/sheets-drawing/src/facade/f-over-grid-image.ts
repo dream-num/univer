@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-import type { IRotationSkewFlipTransform, ISize } from '@univerjs/core';
+/* eslint-disable import/consistent-type-specifier-style -- Keep type and value imports from one package in one declaration. */
 import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
-import type { ICellOverGridPosition } from '@univerjs/sheets';
-import type { ISheetImage, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
 import {
     ArrangeTypeEnum,
     DrawingTypeEnum,
@@ -26,11 +24,26 @@ import {
     ImageSourceType,
     Inject,
     Injector,
+    type IRotationSkewFlipTransform,
+    type ISize,
 } from '@univerjs/core';
 import { FBase } from '@univerjs/core/facade';
 import { getImageSize } from '@univerjs/drawing';
-import { convertPositionCellToSheetOverGrid, convertPositionSheetOverGridToAbsolute, SheetSkeletonService } from '@univerjs/sheets';
-import { RemoveSheetDrawingCommand, SetDrawingArrangeCommand, SetSheetDrawingCommand, transformToAxisAlignPosition } from '@univerjs/sheets-drawing';
+import { convertPositionCellToSheetOverGrid, convertPositionSheetOverGridToAbsolute, type ICellOverGridPosition, SheetSkeletonService } from '@univerjs/sheets';
+import {
+    applySheetDrawingPlacement,
+    getSheetDrawingPlacement,
+    type ISheetDrawingPlacement,
+    ISheetDrawingService,
+    type ISheetImage,
+    RemoveSheetDrawingCommand,
+    SetDrawingArrangeCommand,
+    SetSheetDrawingCommand,
+    SetSheetDrawingPlacementCommand,
+    SheetDrawingAnchorKind,
+    type SheetDrawingAnchorType,
+    transformToAxisAlignPosition,
+} from '@univerjs/sheets-drawing';
 
 export interface IFOverGridImage extends Omit<ISheetImage, 'sheetTransform' | 'transform'>, ICellOverGridPosition, IRotationSkewFlipTransform, Required<ISize> {
 
@@ -124,6 +137,7 @@ function convertFOverGridImageToSheetImage(fOverGridImage: IFOverGridImage, shee
  */
 export class FOverGridImageBuilder {
     private _image: IFOverGridImage;
+    private _placement?: ISheetDrawingPlacement;
     constructor(
         unitId: string,
         subUnitId: string,
@@ -502,6 +516,61 @@ export class FOverGridImageBuilder {
     }
 
     /**
+     * Set an explicit OneCell, TwoCell, or Absolute placement for the image.
+     *
+     * This placement takes precedence over the individual row, column, size,
+     * and anchor type builder fields.
+     * @param {ISheetDrawingPlacement} placement Image placement.
+     * @returns {FOverGridImageBuilder} This builder.
+     * @example
+     * ```ts
+     * const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const image = await sheet.newOverGridImage()
+     *   .setSource('https://avatars.githubusercontent.com/u/61444807?s=96&v=4')
+     *   .setPlacement({
+     *     kind: univerAPI.Enum.SheetDrawingAnchorKind.OneCell,
+     *     from: { row: 2, column: 2, rowOffset: 8, columnOffset: 8 },
+     *     width: 240,
+     *     height: 120,
+     *   })
+     *   .buildAsync();
+     * sheet.insertImages([image]);
+     * ```
+     * @example TwoCell
+     * ```ts
+     * const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const image = await sheet.newOverGridImage()
+     *   .setSource('https://avatars.githubusercontent.com/u/61444807?s=96&v=4')
+     *   .setPlacement({
+     *     kind: univerAPI.Enum.SheetDrawingAnchorKind.TwoCell,
+     *     from: { row: 2, column: 2, rowOffset: 8, columnOffset: 8 },
+     *     to: { row: 8, column: 6, rowOffset: 0, columnOffset: 0 },
+     *   })
+     *   .buildAsync();
+     * sheet.insertImages([image]);
+     * ```
+     * @example Absolute
+     * ```ts
+     * const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const image = await sheet.newOverGridImage()
+     *   .setSource('https://avatars.githubusercontent.com/u/61444807?s=96&v=4')
+     *   .setPlacement({
+     *     kind: univerAPI.Enum.SheetDrawingAnchorKind.Absolute,
+     *     left: 640,
+     *     top: 96,
+     *     width: 240,
+     *     height: 120,
+     *   })
+     *   .buildAsync();
+     * sheet.insertImages([image]);
+     * ```
+     */
+    setPlacement(placement: ISheetDrawingPlacement): FOverGridImageBuilder {
+        this._placement = placement;
+        return this;
+    }
+
+    /**
      * Set the cropping region of the image by defining the top edges, thereby displaying the specific part of the image you want.
      * @param {number} top - The number of pixels to crop from the top of the image
      * @returns {FOverGridImageBuilder} The `FOverGridImageBuilder` for chaining
@@ -654,7 +723,7 @@ export class FOverGridImageBuilder {
     async buildAsync(): Promise<ISheetImage> {
         const sheetSkeletonService = this._injector.get(SheetSkeletonService);
 
-        if (this._image.width === 0 || this._image.height === 0) {
+        if (!this._placement && (this._image.width === 0 || this._image.height === 0)) {
             const size = await getImageSize(this._image.source);
             const width = size.width;
             const height = size.height;
@@ -668,7 +737,48 @@ export class FOverGridImageBuilder {
             }
         }
 
-        return convertFOverGridImageToSheetImage(this._image, sheetSkeletonService);
+        if (this._placement?.kind === SheetDrawingAnchorKind.Absolute) {
+            const { left, top, width, height } = this._placement;
+            const sheetTransform = {
+                from: {
+                    column: 0,
+                    columnOffset: left,
+                    row: 0,
+                    rowOffset: top,
+                },
+                to: {
+                    column: 0,
+                    columnOffset: left + width,
+                    row: 0,
+                    rowOffset: top + height,
+                },
+            };
+            const image: ISheetImage = {
+                ...this._image,
+                transform: {
+                    left,
+                    top,
+                    width,
+                    height,
+                    flipY: this._image.flipY,
+                    flipX: this._image.flipX,
+                    angle: this._image.angle,
+                    skewX: this._image.skewX,
+                    skewY: this._image.skewY,
+                },
+                sheetTransform,
+                axisAlignSheetTransform: sheetTransform,
+            };
+            return applySheetDrawingPlacement(image, this._placement);
+        }
+
+        const image = convertFOverGridImageToSheetImage(this._image, sheetSkeletonService);
+        if (!this._placement) {
+            return image;
+        }
+
+        const skeleton = sheetSkeletonService.ensureSkeleton(image.unitId, image.subUnitId);
+        return applySheetDrawingPlacement(image, this._placement, skeleton);
     }
 }
 
@@ -679,7 +789,8 @@ export class FOverGridImage extends FBase {
     constructor(
         private _image: ISheetImage,
         @ICommandService protected readonly _commandService: ICommandService,
-        @Inject(Injector) protected readonly _injector: Injector
+        @Inject(Injector) protected readonly _injector: Injector,
+        @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService
     ) {
         super();
     }
@@ -718,6 +829,67 @@ export class FOverGridImage extends FBase {
      */
     getType(): DrawingTypeEnum {
         return this._image.drawingType;
+    }
+
+    /**
+     * Get this image's explicit placement.
+     * @returns {ISheetDrawingPlacement} OneCell, TwoCell, or Absolute placement.
+     * @example
+     * ```ts
+     * const image = univerAPI.getActiveWorkbook().getActiveSheet().getImages()[0];
+     * console.log(image.getPlacement());
+     * ```
+     */
+    getPlacement(): ISheetDrawingPlacement {
+        const current = this._sheetDrawingService.getDrawingByParam({
+            unitId: this._image.unitId,
+            subUnitId: this._image.subUnitId,
+            drawingId: this._image.drawingId,
+        });
+        return getSheetDrawingPlacement(current ?? this._image);
+    }
+
+    /**
+     * Set this image's explicit placement through the drawing command.
+     * @param {ISheetDrawingPlacement} placement OneCell, TwoCell, or Absolute placement.
+     * @returns {boolean} `true` when the command succeeds.
+     * @example OneCell
+     * ```ts
+     * const image = univerAPI.getActiveWorkbook().getActiveSheet().getImages()[0];
+     * image.setPlacement({
+     *   kind: univerAPI.Enum.SheetDrawingAnchorKind.OneCell,
+     *   from: { row: 4, column: 3, rowOffset: 8, columnOffset: 8 },
+     *   width: 320,
+     *   height: 180,
+     * });
+     * ```
+     * @example TwoCell
+     * ```ts
+     * const image = univerAPI.getActiveWorkbook().getActiveSheet().getImages()[0];
+     * image.setPlacement({
+     *   kind: univerAPI.Enum.SheetDrawingAnchorKind.TwoCell,
+     *   from: { row: 4, column: 3, rowOffset: 8, columnOffset: 8 },
+     *   to: { row: 10, column: 8, rowOffset: 0, columnOffset: 0 },
+     * });
+     * ```
+     * @example Absolute
+     * ```ts
+     * const image = univerAPI.getActiveWorkbook().getActiveSheet().getImages()[0];
+     * image.setPlacement({
+     *   kind: univerAPI.Enum.SheetDrawingAnchorKind.Absolute,
+     *   left: 640,
+     *   top: 96,
+     *   width: 320,
+     *   height: 180,
+     * });
+     * ```
+     */
+    setPlacement(placement: ISheetDrawingPlacement): boolean {
+        return this._commandService.syncExecuteCommand(SetSheetDrawingPlacementCommand.id, {
+            unitId: this._image.unitId,
+            subUnitId: this._image.subUnitId,
+            drawings: [{ drawingId: this._image.drawingId, placement }],
+        });
     }
 
     /**

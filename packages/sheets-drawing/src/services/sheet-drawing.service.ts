@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import type { IDrawingParam, IRotationSkewFlipTransform, Serializable } from '@univerjs/core';
-import type { IImageData, IUnitDrawingService } from '@univerjs/drawing';
+/* eslint-disable import/consistent-type-specifier-style -- Keep type and value imports from one package in one declaration. */
 import type { ISheetOverGridPosition } from '@univerjs/sheets';
-import { createIdentifier } from '@univerjs/core';
-import { UnitDrawingService } from '@univerjs/drawing';
+import { createIdentifier, type IDrawingParam, type IRotationSkewFlipTransform, type Serializable } from '@univerjs/core';
+import { type IDrawingJsonUndo1, type IImageData, type IUnitDrawingService, UnitDrawingService } from '@univerjs/drawing';
 
 export enum SheetDrawingAnchorType {
     /**
@@ -81,6 +80,8 @@ export type ISheetUpdateDrawing = OptionalField<ISheetImage | ISheetShape, 'shee
 
 export class SheetDrawingService extends UnitDrawingService<ISheetDrawing> { }
 
-export interface ISheetDrawingService extends IUnitDrawingService<ISheetDrawing> { }
+export interface ISheetDrawingService extends IUnitDrawingService<ISheetDrawing> {
+    getBatchUpdateOp(updateParams: ISheetDrawing[]): IDrawingJsonUndo1;
+}
 
 export const ISheetDrawingService = createIdentifier<ISheetDrawingService>('sheets-drawing.sheet-drawing.service');

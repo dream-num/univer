@@ -14,23 +14,27 @@
  * limitations under the License.
  */
 
-import type { Injector, Univer, Workbook } from '@univerjs/core';
+/* eslint-disable import/consistent-type-specifier-style -- Keep type and value imports from one package in one declaration. */
 import type { FWorkbook } from '@univerjs/sheets/facade';
-import type { ISheetDrawing } from '../../services/sheet-drawing.service';
 import {
     DrawingTypeEnum,
     ICommandService,
     ImageSourceType,
+    type Injector,
     IUniverInstanceService,
     RedoCommand,
     UndoCommand,
+    type Univer,
     UniverInstanceType,
+    type Workbook,
 } from '@univerjs/core';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { SheetSkeletonService } from '@univerjs/sheets';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createSheetsDrawingTestBed } from '../../__tests__/create-sheets-drawing-test-bed';
 import { InsertSheetDrawingCommand } from '../../commands/commands/insert-sheet-drawing.command';
 import { resolveSheetDrawingRotateEnabled } from '../../common/rotate-enabled';
-import { ISheetDrawingService } from '../../services/sheet-drawing.service';
+import { type ISheetDrawingPlacement, SheetDrawingAnchorKind } from '../../services/sheet-drawing-placement';
+import { type ISheetDrawing, ISheetDrawingService } from '../../services/sheet-drawing.service';
 import { FWorksheetDrawingMixin } from '../f-worksheet';
 
 describe('FWorksheetDrawingMixin group drawings', () => {
@@ -217,6 +221,46 @@ describe('FWorksheetDrawingMixin group drawings', () => {
         expect(fWorksheet.deleteImages(images)).toBe(fWorksheet);
         expect(fWorksheet.getImageById(image.drawingId)).toBeNull();
         expect(fWorksheet.getImages()).toEqual([]);
+    });
+
+    it('builds and round-trips an Absolute image placement without a Sheet skeleton', async () => {
+        const fWorksheet = createFacade(injector);
+        const ensureSkeleton = vi.spyOn(injector.get(SheetSkeletonService), 'ensureSkeleton')
+            .mockImplementation(() => {
+                throw new Error('SKELETON_MUST_NOT_BE_READ');
+            });
+        const placement: ISheetDrawingPlacement = {
+            kind: SheetDrawingAnchorKind.Absolute,
+            left: 640,
+            top: 96,
+            width: 320,
+            height: 180,
+        };
+
+        const image = await fWorksheet.newOverGridImage()
+            .setSource('https://example.com/absolute.png', ImageSourceType.URL)
+            .setPlacement(placement)
+            .buildAsync();
+
+        expect(ensureSkeleton).not.toHaveBeenCalled();
+        expect(image.transform).toEqual(expect.objectContaining({
+            left: placement.left,
+            top: placement.top,
+            width: placement.width,
+            height: placement.height,
+        }));
+
+        fWorksheet.insertImages([image]);
+        expect(fWorksheet.getDrawingPlacement(image.drawingId)).toEqual(placement);
+        expect(fWorksheet.getImageById(image.drawingId)?.getPlacement()).toEqual(placement);
+
+        const moved: ISheetDrawingPlacement = {
+            ...placement,
+            left: 720,
+            top: 128,
+        };
+        expect(fWorksheet.setDrawingPlacement(image.drawingId, moved)).toBe(true);
+        expect(fWorksheet.getDrawingPlacement(image.drawingId)).toEqual(moved);
     });
 
     it('returns only images from sheet drawing data and exposes active images from the drawing selection', () => {

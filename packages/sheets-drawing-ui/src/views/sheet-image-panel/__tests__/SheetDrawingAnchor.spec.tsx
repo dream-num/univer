@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import type { ISheetDrawing } from '@univerjs/sheets-drawing';
-import type { Root } from 'react-dom/client';
+/* eslint-disable import/consistent-type-specifier-style -- Keep type and value imports from one package in one declaration. */
 import { DrawingTypeEnum, ImageSourceType } from '@univerjs/core';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { InsertSheetDrawingCommand, ISheetDrawingService, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
+import { SheetSkeletonService } from '@univerjs/sheets';
+import { InsertSheetDrawingCommand, type ISheetDrawing, ISheetDrawingService, SheetDrawingAnchorType, transformToDrawingPosition } from '@univerjs/sheets-drawing';
 import { RediContext } from '@univerjs/ui';
 import { act } from 'react';
-import { createRoot } from 'react-dom/client';
+import { createRoot, type Root } from 'react-dom/client';
 import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it } from 'vitest';
 import { createSheetsDrawingUiTestBed } from '../../../__tests__/create-sheets-drawing-ui-test-bed';
@@ -87,6 +87,12 @@ class TestRenderManagerService {
     }
 }
 
+function createTestBed() {
+    return createSheetsDrawingUiTestBed(undefined, [
+        [IRenderManagerService, { useClass: TestRenderManagerService }],
+    ]);
+}
+
 describe('SheetDrawingAnchor', () => {
     let root: Root | undefined;
     let container: HTMLDivElement | undefined;
@@ -101,9 +107,7 @@ describe('SheetDrawingAnchor', () => {
     });
 
     it('updates every focused sheet image when the anchor mode changes', async () => {
-        const testBed = createSheetsDrawingUiTestBed(undefined, [
-            [IRenderManagerService, { useClass: TestRenderManagerService as never }],
-        ]);
+        const testBed = createTestBed();
         const sheetDrawingService = testBed.get(ISheetDrawingService);
         const drawingManagerService = testBed.get(IDrawingManagerService);
         const drawings = [
@@ -156,10 +160,63 @@ describe('SheetDrawingAnchor', () => {
         testBed.univer.dispose();
     });
 
+    it('recomputes cell markers when Absolute changes to OneCell', async () => {
+        const testBed = createTestBed();
+        const sheetDrawingService = testBed.get(ISheetDrawingService);
+        const drawingManagerService = testBed.get(IDrawingManagerService);
+        const drawing = createSheetDrawing('absolute-drawing', SheetDrawingAnchorType.None);
+        drawing.transform = { ...drawing.transform, left: 320, top: 220 };
+
+        await testBed.commandService.executeCommand(InsertSheetDrawingCommand.id, {
+            unitId: testBed.unitId,
+            drawings: [drawing],
+        });
+        const skeleton = testBed.get(SheetSkeletonService).ensureSkeleton(testBed.unitId, testBed.subUnitId);
+        const transform = sheetDrawingService.getDrawingByParam({
+            unitId: drawing.unitId,
+            subUnitId: drawing.subUnitId,
+            drawingId: drawing.drawingId,
+        })?.transform;
+        if (!transform || !skeleton) {
+            throw new Error('Sheet drawing test fixture is incomplete.');
+        }
+        const expected = transformToDrawingPosition(transform, skeleton);
+        drawingManagerService.focusDrawing([{
+            unitId: drawing.unitId,
+            subUnitId: drawing.subUnitId,
+            drawingId: drawing.drawingId,
+        }]);
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        const mountedRoot = createRoot(container);
+        root = mountedRoot;
+        await act(async () => {
+            mountedRoot.render(
+                <RediContext.Provider value={{ injector: testBed.injector }}>
+                    <SheetDrawingAnchor drawings={[drawing]} />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        const oneCellOption = container.querySelectorAll<HTMLInputElement>('input[type="radio"]')[1];
+        await act(async () => {
+            oneCellOption.click();
+            await Promise.resolve();
+        });
+
+        const updated = sheetDrawingService.getDrawingByParam({
+            unitId: drawing.unitId,
+            subUnitId: drawing.subUnitId,
+            drawingId: drawing.drawingId,
+        });
+        expect(updated?.anchorType).toBe(SheetDrawingAnchorType.Position);
+        expect(updated?.sheetTransform.from).toEqual(expected.from);
+        testBed.univer.dispose();
+    });
+
     it('hides anchor controls when the transformer clears the sheet image selection', async () => {
-        const testBed = createSheetsDrawingUiTestBed(undefined, [
-            [IRenderManagerService, { useClass: TestRenderManagerService as never }],
-        ]);
+        const testBed = createTestBed();
         const renderManagerService = testBed.get(IRenderManagerService) as unknown as TestRenderManagerService;
         const drawings = [
             createSheetDrawing('drawing-a', SheetDrawingAnchorType.Position),
@@ -191,9 +248,7 @@ describe('SheetDrawingAnchor', () => {
     });
 
     it('syncs the selected anchor mode when the transformer starts editing another sheet image', async () => {
-        const testBed = createSheetsDrawingUiTestBed(undefined, [
-            [IRenderManagerService, { useClass: TestRenderManagerService as never }],
-        ]);
+        const testBed = createTestBed();
         const renderManagerService = testBed.get(IRenderManagerService) as unknown as TestRenderManagerService;
         const drawings = [
             createSheetDrawing('drawing-a', SheetDrawingAnchorType.Both),

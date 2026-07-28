@@ -7,7 +7,7 @@ export type EditorMode = 'tokens' | 'json';
 export type TokenDensity = 'core' | 'full';
 
 export interface IThemePreset {
-    key: 'default' | 'green' | 'red' | 'purple' | 'orange';
+    key: 'default' | 'green' | 'red' | 'purple' | 'orange' | 'yellow';
     label: string;
     theme: Theme;
 }

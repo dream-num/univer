@@ -20,3 +20,4 @@ export { default as greenTheme } from './green';
 export { default as orangeTheme } from './orange';
 export { default as purpleTheme } from './purple';
 export { default as redTheme } from './red';
+export { default as yellowTheme } from './yellow';

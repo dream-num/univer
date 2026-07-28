@@ -49,16 +49,11 @@ export interface IFRangeSheetsThreadCommentMixin {
      * const range = fWorksheet.getActiveRange();
      * const comments = range.getComments();
      * comments.forEach((comment) => {
-     *   console.log(comment.getContent());
+     *   console.log(comment.getRichText());
      * });
      * ```
      */
     getComments(): FThreadComment[];
-
-    /**
-     * @deprecated use `addCommentAsync` as instead.
-     */
-    addComment(content: IDocumentBody | FTheadCommentBuilder): Promise<boolean>;
 
     /**
      * Add a comment to the start cell in the current range.
@@ -83,21 +78,11 @@ export interface IFRangeSheetsThreadCommentMixin {
      */
     addCommentAsync(content: IDocumentBody | FTheadCommentBuilder): Promise<boolean>;
 
-    /**
-     * @deprecated use `clearCommentAsync` as instead.
-     */
-    clearComment(): Promise<boolean>;
-
      /**
       * Clear the comment of the start cell in the current range.
       * @returns Whether the comment is cleared successfully.
       */
     clearCommentAsync(): Promise<boolean>;
-
-    /**
-     * @deprecated use `clearCommentsAsync` as instead.
-     */
-    clearComments(): Promise<boolean>;
 
     /**
      * Clear all of the comments in the current range.
@@ -154,7 +139,7 @@ export class FRangeSheetsThreadCommentMixin extends FRange implements IFRangeShe
         return comments;
     }
 
-    override addComment(content: IDocumentBody | FTheadCommentBuilder): Promise<boolean> {
+    override addCommentAsync(content: IDocumentBody | FTheadCommentBuilder): Promise<boolean> {
         const injector = this._injector;
         const currentComment = this.getComment()?.getCommentData();
         const commentService = injector.get(ICommandService);
@@ -183,7 +168,7 @@ export class FRangeSheetsThreadCommentMixin extends FRange implements IFRangeShe
         });
     }
 
-    override clearComment(): Promise<boolean> {
+    override clearCommentAsync(): Promise<boolean> {
         const injector = this._injector;
         const currentComment = this.getComment()?.getCommentData();
         const commentService = injector.get(ICommandService);
@@ -202,23 +187,11 @@ export class FRangeSheetsThreadCommentMixin extends FRange implements IFRangeShe
         return Promise.resolve(true);
     }
 
-    override clearComments(): Promise<boolean> {
+    override clearCommentsAsync(): Promise<boolean> {
         const comments = this.getComments();
         const promises = comments.map((comment) => comment.deleteAsync());
 
         return Promise.all(promises).then(() => true);
-    }
-
-    override addCommentAsync(content: IDocumentBody | FTheadCommentBuilder): Promise<boolean> {
-        return this.addComment(content);
-    }
-
-    override clearCommentAsync(): Promise<boolean> {
-        return this.clearComment();
-    }
-
-    override clearCommentsAsync(): Promise<boolean> {
-        return this.clearComments();
     }
 }
 

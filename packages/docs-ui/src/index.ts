@@ -17,7 +17,7 @@
 import './global.css';
 
 export type { IDocObjectParam } from './basics/component-tools';
-export { getDocObject, getDocObjectById, neoGetDocObject } from './basics/component-tools';
+export { getDocObjectById, neoGetDocObject } from './basics/component-tools';
 export {
     DOC_CUSTOM_RANGE_CHROME_BACKGROUND_ALPHA,
     DOC_CUSTOM_RANGE_CHROME_RADIUS,
@@ -102,7 +102,6 @@ export {
 export { ReplaceTextRunsCommand } from './commands/commands/replace-content.command';
 export {
     CoverContentCommand,
-    ReplaceContentCommand,
     ReplaceSelectionCommand,
     ReplaceSnapshotCommand,
 } from './commands/commands/replace-content.command';

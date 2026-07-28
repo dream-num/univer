@@ -121,7 +121,7 @@ export function getDrawingSizeByCell(
     if (skeleton == null) {
         return false;
     }
-    const cellInfo = skeleton.getCellByIndex(location.row, location.col);
+    const cellInfo = skeleton.getCellWithCoordByIndex(location.row, location.col);
 
     const cellWidth = cellInfo.mergeInfo.endX - cellInfo.mergeInfo.startX - 2;
     const cellHeight = cellInfo.mergeInfo.endY - cellInfo.mergeInfo.startY - 2;

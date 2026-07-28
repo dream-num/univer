@@ -440,9 +440,6 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     }
 
     // FIXME: for editor cell editor we don't need to blur the input element
-    /**
-     * @deprecated
-     */
     deactivate() {
         this._container.style.left = '0px';
         this._container.style.top = '0px';
@@ -1210,7 +1207,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
                 return;
             }
 
-            const bounds = viewport.getBounding();
+            const bounds = viewport.calcViewportInfo();
 
             const activeRangeInstance = this._getActiveRangeInstance();
 

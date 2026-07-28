@@ -278,7 +278,12 @@ describe('Array formula SPILL with worker formula calculation', () => {
         });
         testBed.workerInjector.get(CalculateController);
 
-        const calculationEnd = testBed.workerFormulaEngine.onCalculationEnd();
+        const calculationEnd = new Promise<void>((resolve) => {
+            const disposable = testBed.workerFormulaEngine.calculationEnd(() => {
+                disposable.dispose();
+                resolve();
+            });
+        });
 
         // Also wait for the calculation result to be synced back to the main thread.
         const resultSyncedToMain = new Promise<void>((resolve) => {

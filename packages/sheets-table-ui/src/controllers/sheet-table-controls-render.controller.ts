@@ -349,7 +349,6 @@ export class SheetTableControlsRenderController extends Disposable implements IR
             id: SHEET_TABLE_RENAME_DIALOG_ID,
             title: { title: this._localeService.t<LocaleKey>('sheets-table-ui.rename') },
             draggable: true,
-            destroyOnClose: true,
             mask: true,
             children: {
                 label: {

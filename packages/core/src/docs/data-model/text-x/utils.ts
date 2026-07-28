@@ -17,6 +17,7 @@
 import type { ICustomBlock, ICustomColumnGroup, ICustomDecoration, ICustomRange, IDocumentBlockRange, IDocumentBody, IParagraph, ISectionBreak, ITextRun } from '../../../types/interfaces/i-document-data';
 import type { DocumentDataModel } from '../../data-model';
 import type { IRetainAction } from './action-types';
+import { merge } from '../../../common/lodash';
 import { UpdateDocsAttributeType } from '../../../shared/command-enum';
 import { Tools } from '../../../shared/tools';
 import { PRESERVE_INSERTED_PARAGRAPH_IDS } from './action-types';
@@ -611,7 +612,7 @@ export function composeBody(
         const { startIndex: otherStart } = otherParagraph;
 
         if (thisStart === otherStart) {
-            paragraphs.push(Tools.deepMerge(thisParagraph, otherParagraph));
+            paragraphs.push(merge(thisParagraph, otherParagraph));
             thisIndex++;
             otherIndex++;
         } else if (thisStart < otherStart) {

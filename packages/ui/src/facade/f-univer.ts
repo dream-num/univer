@@ -225,14 +225,6 @@ export interface IFUniverUIMixin {
 
     /**
      * Open a sidebar.
-     * @deprecated Please use `univerAPI.openSidebar` instead.
-     * @param {ISidebarMethodOptions} params the sidebar options
-     * @returns {IDisposable} the disposable object
-     */
-    openSiderbar(params: ISidebarMethodOptions): IDisposable;
-
-    /**
-     * Open a sidebar.
      * @param {ISidebarMethodOptions} params the sidebar options
      * @returns {IDisposable} the disposable object
      * @example
@@ -473,13 +465,9 @@ export class FUniverUIMixin extends FUniver implements IFUniverUIMixin {
         return this._injector.createInstance(FSubmenu, submenuItem);
     }
 
-    override openSiderbar(params: ISidebarMethodOptions): IDisposable {
+    override openSidebar(params: ISidebarMethodOptions): IDisposable {
         const sideBarService = this._injector.get(ISidebarService);
         return sideBarService.open(params);
-    }
-
-    override openSidebar(params: ISidebarMethodOptions): IDisposable {
-        return this.openSiderbar(params);
     }
 
     override openDialog(dialog: IDialogPartMethodOptions): IDisposable {

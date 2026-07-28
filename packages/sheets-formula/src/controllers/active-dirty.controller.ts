@@ -355,9 +355,9 @@ export class ActiveDirtyController extends Disposable {
 
         const dirtyRanges: IUnitRange[] = [];
 
-        const sourceMatrix = this._rangeToMatrix(sourceRange).getData();
+        const sourceMatrix = this._rangeToMatrix(sourceRange).clone();
 
-        const targetMatrix = this._rangeToMatrix(targetRange).getData();
+        const targetMatrix = this._rangeToMatrix(targetRange).clone();
 
         dirtyRanges.push(...this._getDirtyRangesByCellValue(unitId, sheetId, sourceMatrix));
 
@@ -370,7 +370,7 @@ export class ActiveDirtyController extends Disposable {
 
     private _getReorderRangeMutationDirtyRange(params: IReorderRangeMutationParams) {
         const { unitId, subUnitId: sheetId, range } = params;
-        const matrix = this._rangeToMatrix(range).getData();
+        const matrix = this._rangeToMatrix(range).clone();
         const dirtyRanges: IUnitRange[] = [];
         dirtyRanges.push(...this._getDirtyRangesByCellValue(unitId, sheetId, matrix));
         dirtyRanges.push(...this._getDirtyRangesForArrayFormula(unitId, sheetId, matrix));
@@ -409,7 +409,7 @@ export class ActiveDirtyController extends Disposable {
             });
         }
 
-        const matrixData = matrix.getData();
+        const matrixData = matrix.clone();
 
         dirtyRanges.push(...this._getDirtyRangesByCellValue(unitId, sheetId, matrixData));
 

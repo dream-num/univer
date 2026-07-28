@@ -105,7 +105,7 @@ describe('Test conditional formatting facade', () => {
         const workbook = univerAPI.getActiveWorkbook();
         const worksheet = workbook?.getActiveSheet();
         const range = worksheet?.getRange(0, 0, 2, 2);
-        const rule = worksheet?.createConditionalFormattingRule()
+        const rule = worksheet?.newConditionalFormattingRule()
             .whenCellNotEmpty()
             .setRanges([range!.getRange()])
             .setBold(true)
@@ -266,7 +266,7 @@ describe('Test conditional formatting facade', () => {
     it('Creates rule and add', () => {
         const workbook = univerAPI.getActiveWorkbook();
         const worksheet = workbook?.getActiveSheet();
-        const rule = worksheet?.createConditionalFormattingRule()
+        const rule = worksheet?.newConditionalFormattingRule()
             .whenCellNotEmpty()
             .setRanges([{ startRow: 0, endRow: 100, startColumn: 0, endColumn: 100 }])
             .setItalic(true)
@@ -400,33 +400,6 @@ describe('Test conditional formatting facade', () => {
         expect(afterEditRule?.ranges).toEqual([]);
     });
 
-    it('Uses range facade APIs to add, update, reprioritize, and delete rules on the active selection', () => {
-        const workbook = univerAPI.getActiveWorkbook()!;
-        const worksheet = workbook.getActiveSheet();
-        const range = worksheet.getRange('A1:B2');
-        const rule = range.createConditionalFormattingRule()
-            .whenTextContains('paid')
-            .setBackground('#00ff00')
-            .build();
-
-        range.addConditionalFormattingRule(rule);
-        expect(range.getConditionalFormattingRules().some((item) => item.cfId === rule.cfId)).toBe(true);
-
-        const updatedRule = range.createConditionalFormattingRule()
-            .whenTextContains('overdue')
-            .setBackground('#ff0000')
-            .build();
-        range.setConditionalFormattingRule(rule.cfId, { ...updatedRule, cfId: rule.cfId });
-        expect(worksheet.getConditionalFormattingRules().find((item) => item.cfId === rule.cfId)?.rule).toMatchObject({ value: 'overdue' });
-
-        const firstRule = worksheet.getConditionalFormattingRules()[0];
-        range.moveConditionalFormattingRule(rule.cfId, firstRule.cfId, 'before');
-        expect(worksheet.getConditionalFormattingRules()[0].cfId).toBe(rule.cfId);
-
-        range.deleteConditionalFormattingRule(rule.cfId);
-        expect(worksheet.getConditionalFormattingRules().some((item) => item.cfId === rule.cfId)).toBe(false);
-    });
-
     it('Clears conditional formatting from a range without removing unrelated sheet rules', () => {
         const workbook = univerAPI.getActiveWorkbook()!;
         const worksheet = workbook.getActiveSheet();
@@ -436,7 +409,7 @@ describe('Test conditional formatting facade', () => {
             .setBackground('#ff0000')
             .build();
 
-        range.addConditionalFormattingRule(rule);
+        worksheet.addConditionalFormattingRule(rule);
         expect(range.getConditionalFormattingRules().map((item) => item.cfId)).toContain(rule.cfId);
 
         range.clearConditionalFormatRules();

@@ -232,8 +232,6 @@ export function handleRefStringInfo(refString: string) {
         refBody,
         sheetName,
         unitQualifier,
-        /** @deprecated Use unitQualifier. Kept for reference-grid compatibility. */
-        unitId: unitQualifier,
     };
 }
 

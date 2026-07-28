@@ -203,7 +203,7 @@ describe('Test insert function operation', () => {
                     },
                 });
                 await commandService.executeCommand(SetRangeValuesCommand.id, {
-                    value: cellMatrix.getData(),
+                    value: cellMatrix.clone(),
                     sheetId: 'sheet1',
                     range,
                 });

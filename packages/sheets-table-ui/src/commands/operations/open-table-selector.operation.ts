@@ -96,7 +96,6 @@ export async function openRangeSelector(
             id: TABLE_SELECTOR_DIALOG,
             title: { title: localeService.t<LocaleKey>('sheets-table-ui.selectRange') },
             draggable: true,
-            destroyOnClose: true,
             mask: false,
             maskClosable: false,
             children: {

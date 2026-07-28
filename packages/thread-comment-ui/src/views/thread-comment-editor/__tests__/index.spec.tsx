@@ -260,7 +260,6 @@ class TestEditorService {
 }
 
 class TestRenderManagerService {
-    readonly createRender$ = new Subject<string>();
     readonly created$ = new Subject<unknown>();
     readonly disposed$ = new Subject<string>();
     readonly defaultEngine = {};

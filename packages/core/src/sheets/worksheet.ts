@@ -29,7 +29,6 @@ import { createRowColIter } from '../shared/row-col-iter';
 import { DEFAULT_STYLES } from '../types/const';
 import { CellValueType } from '../types/enum';
 import { DocumentFlavor } from '../types/interfaces';
-import { cloneWorksheetData } from './clone';
 import { ColumnManager } from './column-manager';
 import { Range } from './range';
 import { RowManager } from './row-manager';
@@ -451,18 +450,6 @@ export class Worksheet {
      */
     getName(): string {
         return this._snapshot.name;
-    }
-
-    /**
-     * Returns WorkSheet Clone Object
-     * @returns WorkSheet Clone Object
-     * @deprecated
-     */
-    clone(): Worksheet {
-        const { _snapshot: _config } = this;
-        const copy = cloneWorksheetData(_config);
-
-        return new Worksheet(this.unitId, copy, this._styles);
     }
 
     /**

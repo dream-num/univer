@@ -54,7 +54,7 @@ import {
     SheetRowFilteredService,
     SuperTableService,
 } from '@univerjs/engine-formula';
-import { Engine, IRenderingEngine, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
+import { Engine, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import {
     RefRangeService,
     SheetInterceptorService,
@@ -162,7 +162,6 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
             const injector = this._injector;
             injector.add([SheetsSelectionsService]);
             injector.add([SheetInterceptorService]);
-            injector.add([IRenderingEngine, { useFactory: () => new Engine() }]);
             injector.add([IRenderManagerService, { useClass: RenderManagerServiceTestBed }]);
             injector.add([SheetSkeletonService]);
             injector.add([FormulaDataModel]);

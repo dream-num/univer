@@ -15,20 +15,11 @@
  */
 
 import type { IUniverEngineRenderConfig } from './config/config';
-import { createIdentifier, IConfigService, Inject, Injector, merge, Plugin, registerDependencies } from '@univerjs/core';
+import { IConfigService, Inject, Injector, merge, Plugin, registerDependencies } from '@univerjs/core';
 import pkg from '../package.json';
 import { defaultPluginConfig, ENGINE_RENDER_PLUGIN_CONFIG_KEY } from './config/config';
-import { Engine } from './engine';
 import { IRenderManagerService, RenderManagerService } from './render-manager/render-manager.service';
 import { CanvasColorService, ICanvasColorService } from './services/canvas-color.service';
-import { UniverRenderConfigService } from './services/render-config.service';
-
-/**
- * The global rendering engine.
- *
- * @deprecated There will be no more default global render engine in the future.
- */
-export const IRenderingEngine = createIdentifier<Engine>('univer.render-engine');
 
 const PLUGIN_NAME = 'UNIVER_RENDER_ENGINE_PLUGIN';
 
@@ -55,9 +46,7 @@ export class UniverRenderEnginePlugin extends Plugin {
 
     override onStarting(): void {
         registerDependencies(this._injector, [
-            [UniverRenderConfigService],
             [ICanvasColorService, { useClass: CanvasColorService }],
-            [IRenderingEngine, { useClass: Engine }],
             [IRenderManagerService, { useClass: RenderManagerService }],
         ]);
     }

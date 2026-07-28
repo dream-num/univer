@@ -14,10 +14,16 @@
  * limitations under the License.
  */
 
-import type { IAccessor } from '@univerjs/core';
-import { IContextService } from '@univerjs/core';
+import type { IAccessor, IRange } from '@univerjs/core';
+import { IContextService, Rectangle } from '@univerjs/core';
 import { IRefSelectionsService } from '../../services/selections/ref-selections.service';
 import { REF_SELECTIONS_ENABLED, SheetsSelectionsService } from '../../services/selections/selection.service';
+
+export function hasOverlappingRanges(ranges: readonly IRange[]): boolean {
+    return ranges.some((range, index) =>
+        ranges.slice(index + 1).some((other) => Rectangle.simpleRangesIntersect(range, other))
+    );
+}
 
 export function getSelectionsService(
     accessor: IAccessor,

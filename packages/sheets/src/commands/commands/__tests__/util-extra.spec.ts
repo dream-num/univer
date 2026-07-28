@@ -26,6 +26,7 @@ import {
     handleInsertRangeMutation,
     InsertRangeUndoMutationFactory,
 } from '../../utils/handle-range.mutation';
+import { hasOverlappingRanges } from '../../utils/selection-command-util';
 import { countCells, getSuitableRangesInView } from '../util';
 import {
     alignToMergedCellsBorders,
@@ -41,6 +42,17 @@ import {
 } from '../utils/selection-utils';
 
 describe('sheets command util', () => {
+    it('should detect overlapping ranges', () => {
+        expect(hasOverlappingRanges([
+            { startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 },
+            { startRow: 1, endRow: 2, startColumn: 1, endColumn: 2 },
+        ])).toBe(true);
+        expect(hasOverlappingRanges([
+            { startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 },
+            { startRow: 2, endRow: 3, startColumn: 2, endColumn: 3 },
+        ])).toBe(false);
+    });
+
     it('should select nearest ranges and split overflow range by max visible row quota', () => {
         const ranges = [
             { startRow: 50, endRow: 749, startColumn: 0, endColumn: 2 },

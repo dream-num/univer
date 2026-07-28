@@ -34,7 +34,7 @@ import {
 } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { UpdateDrawingDocTransformCommand } from '@univerjs/docs-drawing';
-import { DocSelectionRenderService, getAnchorBounding, getDocObject, getOneTextSelectionRange, NodePositionConvertToCursor, TEXT_RANGE_LAYER_INDEX } from '@univerjs/docs-ui';
+import { DocSelectionRenderService, getAnchorBounding, getOneTextSelectionRange, neoGetDocObject, NodePositionConvertToCursor, TEXT_RANGE_LAYER_INDEX } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { DocumentSkeletonPageType, getColor, IRenderManagerService, Liquid, PageLayoutType, Rect, Vector2 } from '@univerjs/engine-render';
 import { IMoveInlineDrawingCommand, ITransformNonInlineDrawingCommand } from '../commands/commands/update-doc-drawing.command';
@@ -454,9 +454,9 @@ export class DocDrawingTransformerController extends Disposable {
         }
 
         const nodePosition = skeleton?.findPositionByGlyph(glyphAnchor, segmentPageIndex);
-        const docObject = this._getDocObject();
+        const docObject = neoGetDocObject(currentRender);
 
-        if (nodePosition == null || skeleton == null || docObject == null) {
+        if (nodePosition == null || skeleton == null) {
             return;
         }
 
@@ -665,8 +665,8 @@ export class DocDrawingTransformerController extends Disposable {
         }
 
         const nodePosition = skeleton?.findPositionByGlyph(glyphAnchor, segmentPage);
-        const docObject = this._getDocObject();
-        if (nodePosition == null || skeleton == null || docObject == null) {
+        const docObject = neoGetDocObject(currentRender);
+        if (nodePosition == null || skeleton == null) {
             return;
         }
 
@@ -904,10 +904,6 @@ export class DocDrawingTransformerController extends Disposable {
         this._anchorShape = anchor;
 
         scene.addObject(anchor, TEXT_RANGE_LAYER_INDEX);
-    }
-
-    private _getDocObject() {
-        return getDocObject(this._univerInstanceService, this._renderManagerService);
     }
 
     private _getPageContentSize(drawing: IDocDrawingBase) {

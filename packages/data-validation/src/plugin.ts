@@ -19,13 +19,6 @@ import type { IUniverDataValidationConfig } from './config/config';
 import { ICommandService, IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
 import pkg from '../package.json';
 import {
-    AddDataValidationCommand,
-    RemoveAllDataValidationCommand,
-    RemoveDataValidationCommand,
-    UpdateDataValidationOptionsCommand,
-    UpdateDataValidationSettingCommand,
-} from './commands/commands/data-validation.command';
-import {
     AddDataValidationMutation,
     RemoveDataValidationMutation,
     UpdateDataValidationMutation,
@@ -66,13 +59,6 @@ export class UniverDataValidationPlugin extends Plugin {
         ] as Dependency[]).forEach((d) => this._injector.add(d));
 
         [
-            // command
-            AddDataValidationCommand,
-            RemoveAllDataValidationCommand,
-            UpdateDataValidationOptionsCommand,
-            UpdateDataValidationSettingCommand,
-            RemoveDataValidationCommand,
-
             // mutation
             AddDataValidationMutation,
             UpdateDataValidationMutation,

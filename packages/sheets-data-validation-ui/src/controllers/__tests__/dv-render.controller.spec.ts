@@ -37,7 +37,6 @@ describe('SheetsDataValidationRenderController', () => {
         };
         const skeleton = {
             worksheet: { getMergedCell: vi.fn(() => null) },
-            getStyles: vi.fn(() => ({ getStyleByCell: vi.fn(() => ({ fs: 11 })) })),
             getCellWithCoordByIndex: vi.fn(() => ({ startX: 10, startY: 20 })),
         };
 

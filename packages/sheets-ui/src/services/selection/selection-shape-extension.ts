@@ -139,8 +139,8 @@ export class SelectionShapeExtension {
         )
             ?.getCurrentParam()
             ?.skeleton
-            .getWorksheetConfig()
-            .freeze;
+            .worksheet
+            .getFreeze();
         return freeze;
     }
 

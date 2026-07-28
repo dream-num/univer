@@ -658,7 +658,7 @@ export class UpdateFormulaController extends Disposable {
                 });
 
                 if (newFormulaData[unitId]) {
-                    newFormulaData[unitId]![sheetId] = newFormulaDataItem.getData();
+                    newFormulaData[unitId]![sheetId] = newFormulaDataItem.clone();
                 }
             }
         }

@@ -18,8 +18,8 @@ import {
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     EDITOR_ACTIVATED,
-    FOCUSING_EDITOR_BUT_HIDDEN,
     FOCUSING_FX_BAR_EDITOR,
+    FOCUSING_UNIVER_EDITOR,
 } from '@univerjs/core';
 import { CoverContentCommand, VIEWPORT_KEY } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
@@ -33,9 +33,9 @@ function createController() {
     const position = { width: 240, height: 40 };
     let focusEditorId = DOCS_NORMAL_EDITOR_UNIT_ID_KEY;
     const contextValues = new Map<string, unknown>([
-        [FOCUSING_EDITOR_BUT_HIDDEN, true],
         [EDITOR_ACTIVATED, false],
         [FOCUSING_FX_BAR_EDITOR, false],
+        [FOCUSING_UNIVER_EDITOR, true],
     ]);
     const scrollBar = { dispose: vi.fn() };
     const viewport = {

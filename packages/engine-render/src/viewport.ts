@@ -267,7 +267,7 @@ export class Viewport {
         this._isWheelPreventDefaultY = props?.isWheelPreventDefaultY || false;
 
         this.resetCanvasSizeAndUpdateScroll();
-        this.getBounding();
+        this.calcViewportInfo();
 
         this._transformChangeSubscription = this.scene.getEngine()?.onTransformChange$.subscribeEvent(() => {
             this.markForceDirty(true);
@@ -937,14 +937,6 @@ export class Viewport {
                 this.updatePrevCacheBounds(viewbound);
             },
         } satisfies IViewportInfo;
-    }
-
-    /**
-     * Get viewport info
-     * @deprecated use `calcViewportInfo`
-     */
-    getBounding() {
-        return this.calcViewportInfo();
     }
 
     /**

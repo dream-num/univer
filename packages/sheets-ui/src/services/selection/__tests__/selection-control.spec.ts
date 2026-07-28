@@ -164,6 +164,12 @@ function createFakeSkeleton(options?: { merged?: boolean }) {
         rowHeaderWidthAndMarginLeft: 46,
         columnHeaderHeightAndMarginTop: 20,
         worksheet: {
+            getFreeze: () => ({
+                startRow: 2,
+                startColumn: 2,
+                xSplit: 0,
+                ySplit: 0,
+            }),
             getCellInfoInMergeData: (row: number, column: number) => ({
                 actualRow: row,
                 actualColumn: column,
@@ -174,14 +180,6 @@ function createFakeSkeleton(options?: { merged?: boolean }) {
             }),
             getMergedCellRange: () => options?.merged ? [toRange(1, 1, 2, 1)] : [],
         },
-        getWorksheetConfig: () => ({
-            freeze: {
-                startRow: 2,
-                startColumn: 2,
-                xSplit: 0,
-                ySplit: 0,
-            },
-        }),
         getRowCount: () => 20,
         getColumnCount: () => 20,
         getCellIndexByOffset: (offsetX: number, offsetY: number) => ({

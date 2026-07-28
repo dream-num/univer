@@ -48,7 +48,6 @@ import {
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     EDITOR_ACTIVATED,
-    FOCUSING_EDITOR_BUT_HIDDEN,
     FOCUSING_EDITOR_INPUT_FORMULA,
     FOCUSING_EDITOR_STANDALONE,
     FOCUSING_FX_BAR_EDITOR,
@@ -345,7 +344,6 @@ export class EditingRenderController extends Disposable {
                 snapshot: (documentModel!.getSnapshot()),
             });
 
-            this._contextService.setContextValue(FOCUSING_EDITOR_BUT_HIDDEN, true);
             this._textSelectionManagerService.replaceDocRanges(
                 [{
                     startOffset: 0,
@@ -729,7 +727,6 @@ export class EditingRenderController extends Disposable {
     private _exitInput(param: IEditorBridgeServiceVisibleParam) {
         this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, false);
         this._contextService.setContextValue(EDITOR_ACTIVATED, false);
-        this._contextService.setContextValue(FOCUSING_EDITOR_BUT_HIDDEN, false);
         this._contextService.setContextValue(FOCUSING_FX_BAR_EDITOR, false);
         this._cellEditorManagerService.setState({
             show: param.visible,

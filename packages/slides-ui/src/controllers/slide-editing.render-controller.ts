@@ -41,7 +41,6 @@ import {
     Disposable,
     DisposableCollection,
     EDITOR_ACTIVATED,
-    FOCUSING_EDITOR_BUT_HIDDEN,
     FOCUSING_EDITOR_STANDALONE,
     FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE,
     HorizontalAlign,
@@ -261,8 +260,7 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
                 });
             }
             this._instanceSrv.setCurrentUnitForType(editorUnitId);
-            this._contextService.setContextValue(FOCUSING_EDITOR_BUT_HIDDEN, true);
-            this._textSelectionManagerService.replaceTextRanges([{
+            this._textSelectionManagerService.replaceDocRanges([{
                 startOffset: 0,
                 endOffset: 0,
             }]);
@@ -624,7 +622,7 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
             viewportScrollX: Number.POSITIVE_INFINITY,
         });
 
-        this._textSelectionManagerService.replaceTextRanges([
+        this._textSelectionManagerService.replaceDocRanges([
             {
                 startOffset: cursor,
                 endOffset: cursor,

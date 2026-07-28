@@ -86,7 +86,7 @@ export class Custom extends SheetExtension {
 
                 const renderInfo = {
                     data: cellData,
-                    style: skeleton.getStyles().getStyleByCell(cellData),
+                    style: worksheet.getComposedCellStyleByCellData(mergeInfo.startRow, mergeInfo.startColumn, cellData),
                     primaryWithCoord,
                     subUnitId,
                     row,

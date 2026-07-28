@@ -65,16 +65,6 @@ export interface IRenderManagerService extends IDisposable {
     getRenderAll(): Map<string, IRender>;
     defaultEngine: Engine;
 
-    // DEPT@Jocs
-    // Editor should not be coupled in docs-ui. It should be an common service resident in @univerjs/ui.
-    // However, currently the refactor is not completed so we have to throw an event and let
-    // docs-ui to create the editor's renderer.
-
-    /** @deprecated */
-    createRender$: Observable<string>;
-    /** @deprecated this design is very very weird! Remove it. */
-    create(unitId: string): void;
-
     created$: Observable<IRender>;
     disposed$: Observable<string>;
 
@@ -96,10 +86,6 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
     private _defaultEngine!: Engine;
 
     private _renderMap: Map<string, IRender> = new Map();
-
-    private readonly _createRender$ = new Subject<string>();
-    /** @deprecated */
-    readonly createRender$ = this._createRender$.asObservable();
 
     private readonly _renderCreated$ = new Subject<IRender>();
     readonly created$ = this._renderCreated$.asObservable();
@@ -202,10 +188,6 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
                 });
             });
         }));
-    }
-
-    create(unitId: string) {
-        this._createRender$.next(unitId);
     }
 
     /**

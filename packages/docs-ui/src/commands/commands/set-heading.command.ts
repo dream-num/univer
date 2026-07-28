@@ -157,10 +157,10 @@ function insertNamedStyleParagraph(
     }));
 
     if (success) {
-        accessor.get(DocSelectionManagerService).replaceTextRanges([{
+        accessor.get(DocSelectionManagerService).replaceDocRanges([{
             startOffset,
             endOffset: startOffset,
-        }], false);
+        }], undefined, false);
     }
 
     return success;

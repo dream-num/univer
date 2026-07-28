@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IDisposable, IRange, Nullable, Workbook } from '@univerjs/core';
+import type { ICellData, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { IImageData } from '@univerjs/drawing';
 import { createIdentifier, Disposable, IImageIoService, ImageSourceType, Inject, IUniverInstanceService, IURLImageService, UniverInstanceType } from '@univerjs/core';
 import { SheetsSelectionsService } from '@univerjs/sheets';
@@ -143,13 +143,6 @@ export interface IBatchSaveImagesService {
      * Get all column indices that are within the current selection
      */
     getSelectionColumnIndices(): Set<number>;
-
-    /**
-     * Register a custom image downloader for URL images
-     * @param downloader The downloader function that takes a URL and returns a base64 string
-     * @returns A disposable object to unregister the downloader
-     */
-    registerURLImageDownloader(downloader: (url: string) => Promise<string>): IDisposable;
 }
 
 export const IBatchSaveImagesService = createIdentifier<IBatchSaveImagesService>('sheets-drawing-ui.batch-save-images.service');
@@ -259,13 +252,6 @@ export class BatchSaveImagesService extends Disposable implements IBatchSaveImag
         @IURLImageService private readonly _urlImageService: IURLImageService
     ) {
         super();
-    }
-
-    /**
-     * @deprecated Use IURLImageService directly
-     */
-    registerURLImageDownloader(downloader: (url: string) => Promise<string>): IDisposable {
-        return this._urlImageService.registerURLImageDownloader(downloader);
     }
 
     getCellImagesInSelection(): ICellImageInfo[] {

@@ -422,14 +422,6 @@ export class FThreadComment {
     }
 
     /**
-     * @deprecated Use `getRichText` instead.
-     * @returns {IDocumentBody} The comment content.
-     */
-    getContent(): IDocumentBody {
-        return this._thread.text;
-    }
-
-    /**
      * Get the rich text of the comment
      * @returns {RichTextValue} The rich text of the comment
      * @example
@@ -472,23 +464,6 @@ export class FThreadComment {
                 subUnitId: this._thread.subUnitId,
             } as IDeleteCommentCommandParams
         );
-    }
-
-    /**
-     * @deprecated Use `deleteAsync` instead.
-     * @returns {Promise<boolean>} Whether the comment is deleted successfully.
-     */
-    delete(): Promise<boolean> {
-        return this.deleteAsync();
-    }
-
-    /**
-     * @deprecated Use `updateAsync` instead.
-     * @param {IDocumentBody} content The new content of the comment.
-     * @returns {Promise<boolean>} Whether the comment is updated successfully.
-     */
-    async update(content: IDocumentBody): Promise<boolean> {
-        return this.updateAsync(content);
     }
 
     /**
@@ -536,15 +511,6 @@ export class FThreadComment {
         );
 
         return res;
-    }
-
-    /**
-     * @deprecated Use `resolveAsync` instead.
-     * @param {boolean} [resolved] Whether the comment is resolved.
-     * @returns {Promise<boolean>} Set the comment to resolved or not operation result.
-     */
-    resolve(resolved?: boolean): Promise<boolean> {
-        return this.resolveAsync(resolved);
     }
 
     /**

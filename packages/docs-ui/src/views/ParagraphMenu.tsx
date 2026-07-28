@@ -1019,7 +1019,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
             return;
         }
 
-        docSelectionManagerService.replaceTextRanges([range], false);
+        docSelectionManagerService.replaceDocRanges([range], undefined, false);
     };
 
     const getCurrentTextRangesSnapshot = () => {
@@ -1031,7 +1031,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
             return;
         }
 
-        docSelectionManagerService.replaceTextRanges(ranges, false);
+        docSelectionManagerService.replaceDocRanges(ranges, undefined, false);
     };
 
     const executeResolvedCommand = (option: IValueOption, targetRange?: ITextRangeWithStyle | null) => {
@@ -1481,16 +1481,16 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
                                     }
 
                                     if (commandId === DocPasteCommand.id) {
-                                        docSelectionManagerService.replaceTextRanges([afterTableRange], false);
+                                        docSelectionManagerService.replaceDocRanges([afterTableRange], undefined, false);
                                         await commandService.executeCommand(DocPasteCommand.id);
                                         finishParagraphMenuCommand(docParagraphMenuService, layoutService, handleHideMenu);
                                         return;
                                     }
 
                                     if (commandId === DocTableDeleteTableCommand.id) {
-                                        docSelectionManagerService.replaceTextRanges([tableRange], false);
+                                        docSelectionManagerService.replaceDocRanges([tableRange], undefined, false);
                                     } else if (params.id === INSERT_BELLOW_MENU_ID || commandId !== INSERT_BELLOW_MENU_ID) {
-                                        docSelectionManagerService.replaceTextRanges([afterTableRange], false);
+                                        docSelectionManagerService.replaceDocRanges([afterTableRange], undefined, false);
                                     }
 
                                     if (commandService && commandId) {

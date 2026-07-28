@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
-import type { ReactNode, RefObject } from 'react';
 import type { Observable } from 'rxjs';
 import type { IUniverUIConfig } from '../../../config/config';
 import { IConfigService, LocaleService } from '@univerjs/core';
@@ -33,7 +31,7 @@ interface IAbsolutePosition {
     bottom: number;
 }
 
-const RectPopupContext = createContext<RefObject<IAbsolutePosition | undefined>>({ current: undefined });
+const RectPopupContext = createContext<React.RefObject<IAbsolutePosition | undefined>>({ current: undefined });
 
 export type RectPopupDirection =
     | 'left'
@@ -62,13 +60,13 @@ export type RectPopupDirection =
     | 'horizontal-center';
 
 export interface IRectPopupProps {
-    children?: ReactNode;
+    children?: React.ReactNode;
 
     /**
      * the anchor element bounding rect
      */
     anchorRect$: Observable<IAbsolutePosition>;
-    excludeRects?: RefObject<Nullable<IAbsolutePosition[]>>;
+    excludeRects?: React.RefObject<IAbsolutePosition[] | null | undefined | void>;
     direction?: RectPopupDirection;
     hidden?: boolean;
     // #region closing behavior
@@ -89,6 +87,8 @@ export interface IRectPopupProps {
     noPushMinimumGap?: boolean;
 
     autoRelayout?: boolean;
+    boundaryElement?: HTMLElement;
+    disableAnimation?: boolean;
 }
 
 export interface IPopupLayoutInfo extends Pick<IRectPopupProps, 'direction'> {
@@ -97,6 +97,7 @@ export interface IPopupLayoutInfo extends Pick<IRectPopupProps, 'direction'> {
     height: number;
     containerWidth: number;
     containerHeight: number;
+    boundary?: IAbsolutePosition;
     noPushMinimumGap?: boolean;
 }
 
@@ -104,12 +105,32 @@ export interface IPopupLayoutInfo extends Pick<IRectPopupProps, 'direction'> {
 const PUSHING_MINIMUM_GAP = 8;
 
 function calcPopupPosition(layout: IPopupLayoutInfo): { top: number; left: number } {
-    const { position, width, height, containerHeight, containerWidth, direction = 'vertical', noPushMinimumGap = false } = layout;
-
-    const minTop = noPushMinimumGap ? -Infinity : PUSHING_MINIMUM_GAP;
-    const maxTop = noPushMinimumGap ? Infinity : containerHeight - height - PUSHING_MINIMUM_GAP;
-    const minLeft = noPushMinimumGap ? -Infinity : PUSHING_MINIMUM_GAP;
-    const maxLeft = noPushMinimumGap ? Infinity : containerWidth - width - PUSHING_MINIMUM_GAP;
+    const { position: anchorPosition, width, height, containerHeight, containerWidth, direction = 'vertical', noPushMinimumGap = false } = layout;
+    const boundary = layout.boundary ?? {
+        left: 0,
+        right: containerWidth,
+        top: 0,
+        bottom: containerHeight,
+    };
+    const clippedPosition = {
+        left: Math.max(anchorPosition.left, boundary.left),
+        right: Math.min(anchorPosition.right, boundary.right),
+        top: Math.max(anchorPosition.top, boundary.top),
+        bottom: Math.min(anchorPosition.bottom, boundary.bottom),
+    };
+    const position = layout.boundary &&
+        clippedPosition.left <= clippedPosition.right &&
+        clippedPosition.top <= clippedPosition.bottom
+        ? clippedPosition
+        : anchorPosition;
+    const minTop = noPushMinimumGap ? -Infinity : boundary.top + PUSHING_MINIMUM_GAP;
+    const maxTop = noPushMinimumGap
+        ? Infinity
+        : Math.max(minTop, boundary.bottom - height - PUSHING_MINIMUM_GAP);
+    const minLeft = noPushMinimumGap ? -Infinity : boundary.left + PUSHING_MINIMUM_GAP;
+    const maxLeft = noPushMinimumGap
+        ? Infinity
+        : Math.max(minLeft, boundary.right - width - PUSHING_MINIMUM_GAP);
 
     // In y-axis
     if (direction === 'vertical' || direction.indexOf('top') === 0 || direction.indexOf('bottom') === 0) {
@@ -126,7 +147,7 @@ function calcPopupPosition(layout: IPopupLayoutInfo): { top: number; left: numbe
             const rectWidth = endX - startX;
             const offsetX = (rectWidth - width) / 2;
 
-            horizontalStyle = (Math.max(startX + offsetX, minLeft) + width) > containerWidth
+            horizontalStyle = (Math.max(startX + offsetX, minLeft) + width) > boundary.right
                 ? { left: Math.max(Math.min(maxLeft, endX - width - offsetX), minLeft) }
                 : { left: Math.max(minLeft, Math.min(startX + offsetX, maxLeft)) };
         } else if (direction.includes('right')) {
@@ -135,7 +156,7 @@ function calcPopupPosition(layout: IPopupLayoutInfo): { top: number; left: numbe
             horizontalStyle = { left: Math.max(Math.min(startX, maxLeft), minLeft) };
         } else {
             // If the popup element exceed the visible area. We should "push" it back.
-            horizontalStyle = (startX + width) > containerWidth
+            horizontalStyle = (startX + width) > boundary.right
                 ? Math.max(endX - width, minLeft) < PUSHING_MINIMUM_GAP
                     ? { left: Math.max(Math.min(startX, maxLeft), minLeft) }
                     : { left: Math.max(Math.min(endX - width, maxLeft), minLeft) } // on left
@@ -147,7 +168,7 @@ function calcPopupPosition(layout: IPopupLayoutInfo): { top: number; left: numbe
 
     // In x-axis
     const { left: startX, top: startY, right: endX, bottom: endY } = position;
-    // const horizontalStyle = ((endX + width) > containerWidth || direction === 'left')
+    // const horizontalStyle = ((endX + width) > boundary.right || direction === 'left')
     const horizontalStyle = direction.includes('left')
         ? { left: Math.max(Math.min(startX - width, maxLeft), minLeft) } // on left
         : { left: Math.max(Math.min(endX, maxLeft), minLeft) }; // on right
@@ -158,7 +179,7 @@ function calcPopupPosition(layout: IPopupLayoutInfo): { top: number; left: numbe
         const rectHeight = endY - startY;
         const offsetY = (rectHeight - height) / 2;
 
-        verticalStyle = (Math.max(startY + offsetY, minTop) + height) > containerHeight
+        verticalStyle = (Math.max(startY + offsetY, minTop) + height) > boundary.bottom
             ? { top: Math.max(Math.min(maxTop, endY - height - offsetY), minTop) }
             : { top: Math.max(minTop, Math.min(startY + offsetY, maxTop)) };
     } else if (direction.includes('top')) {
@@ -171,7 +192,7 @@ function calcPopupPosition(layout: IPopupLayoutInfo): { top: number; left: numbe
         };
     } else {
         // If the popup element exceed the visible area. We should "push" it back.
-        verticalStyle = ((startY + height) > containerHeight)
+        verticalStyle = ((startY + height) > boundary.bottom)
             ? Math.max(endY - height, minTop) < PUSHING_MINIMUM_GAP
                 ? { top: Math.max(Math.min(startY, maxTop), minTop) }
                 : { top: Math.max(Math.min(endY - height, maxTop), minTop) } // on top
@@ -201,6 +222,8 @@ function RectPopup(props: IRectPopupProps) {
         onMaskClick,
         noPushMinimumGap,
         autoRelayout = true,
+        boundaryElement,
+        disableAnimation = false,
     } = props;
     const nodeRef = useRef<HTMLElement>(null);
     const clickOtherFn = useEvent(onClickOutside ?? (() => { /* empty */ }));
@@ -220,8 +243,13 @@ function RectPopup(props: IRectPopupProps) {
             if (!nodeRef.current) return;
 
             const { clientWidth, clientHeight } = nodeRef.current;
+            // Async popup content can temporarily render an empty shell. When
+            // animations are disabled, keep it offscreen until it can be positioned once.
+            if (disableAnimation && (clientWidth === 0 || clientHeight === 0)) return;
+
             const innerWidth = window.innerWidth;
             const innerHeight = window.innerHeight;
+            const boundaryRect = boundaryElement?.getBoundingClientRect();
 
             positionRef.current = calcPopupPosition(
                 {
@@ -230,6 +258,14 @@ function RectPopup(props: IRectPopupProps) {
                     height: clientHeight,
                     containerWidth: innerWidth,
                     containerHeight: innerHeight,
+                    boundary: boundaryRect
+                        ? {
+                            left: boundaryRect.left,
+                            right: boundaryRect.right,
+                            top: boundaryRect.top,
+                            bottom: boundaryRect.bottom,
+                        }
+                        : undefined,
                     direction,
                     noPushMinimumGap,
                 }
@@ -250,12 +286,28 @@ function RectPopup(props: IRectPopupProps) {
             });
 
             observer.observe(nodeRef.current);
+            if (boundaryElement) {
+                observer.observe(boundaryElement);
+            }
         }
 
         return () => {
             observer?.disconnect();
         };
-    }, [nodeRef.current, autoRelayout]);
+    }, [autoRelayout, boundaryElement, updatePosition]);
+
+    useEffect(() => {
+        const handleWindowResize = () => {
+            if (!autoRelayout || !anchorRectRef.current) {
+                return;
+            }
+
+            updatePosition(anchorRectRef.current);
+        };
+
+        window.addEventListener('resize', handleWindowResize);
+        return () => window.removeEventListener('resize', handleWindowResize);
+    }, [autoRelayout, boundaryElement, updatePosition]);
 
     useEffect(() => {
         const anchorRectSub = anchorRect$.subscribe((anchorRect) => {
@@ -264,7 +316,7 @@ function RectPopup(props: IRectPopupProps) {
         });
 
         return () => anchorRectSub.unsubscribe();
-    }, [anchorRect$, direction]);
+    }, [anchorRect$, direction, updatePosition]);
 
     useEffect(() => {
         const handleClickOther = (e: MouseEvent) => {
@@ -332,7 +384,7 @@ function RectPopup(props: IRectPopupProps) {
                   univer-pointer-events-auto univer-fixed univer-left-[-9999px] univer-top-[-9999px] univer-z-[1020]
                 `, {
                     'univer-hidden': hidden,
-                    'univer-animate-in univer-fade-in-70': !hidden,
+                    'univer-animate-in univer-fade-in-70': !hidden && !disableAnimation,
                 })}
                 style={{ ...positionRef.current, zIndex }}
                 onPointerDown={(e) => e.stopPropagation()}

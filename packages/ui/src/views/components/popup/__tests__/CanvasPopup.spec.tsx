@@ -122,7 +122,11 @@ describe('CanvasPopup', () => {
 
         expect(await screen.findByRole('button', { name: 'Cell comment' })).toBeTruthy();
 
-        const popupElement = document.querySelector('[data-u-comp="rect-popup"]') as HTMLElement;
+        const popupElement = document.querySelector<HTMLElement>('[data-u-comp="rect-popup"]');
+        expect(popupElement).not.toBeNull();
+        if (!popupElement) {
+            throw new Error('Expected rect popup to render');
+        }
         await waitFor(() => {
             expect(popupElement.style.left).toBe('36px');
             expect(popupElement.style.top).toBe('76px');
@@ -140,6 +144,50 @@ describe('CanvasPopup', () => {
 
         await waitFor(() => {
             expect(screen.queryByRole('button', { name: 'Cell comment' })).toBeNull();
+        });
+
+        rendered.dispose();
+    });
+
+    it('keeps a top-center popup inside its canvas boundary', async () => {
+        const rendered = renderWithDependencies(<CanvasPopup />);
+        const popupService = rendered.injector.get(ICanvasPopupService);
+        const anchorRect$ = new BehaviorSubject({ left: -400, top: 100, right: 900, bottom: 180 });
+        const canvasElement = createCanvasElement(new DOMRect(100, 80, 400, 300));
+
+        act(() => {
+            popupService.addPopup({
+                unitId: 'slide-1',
+                subUnitId: 'page-1',
+                componentKey: 'test-popup',
+                anchorRect$,
+                canvasElement,
+                boundaryElement: canvasElement,
+                direction: 'top-center',
+                offset: [0, 16],
+                extraProps: { label: 'Shape tools' },
+            });
+        });
+
+        expect(await screen.findByRole('button', { name: 'Shape tools' })).toBeTruthy();
+
+        const popupElement = document.querySelector<HTMLElement>('[data-u-comp="rect-popup"]');
+        expect(popupElement).not.toBeNull();
+        if (!popupElement) {
+            throw new Error('Expected rect popup to render');
+        }
+        Object.defineProperties(popupElement, {
+            clientWidth: { configurable: true, value: 200 },
+            clientHeight: { configurable: true, value: 40 },
+        });
+
+        act(() => {
+            anchorRect$.next({ left: -400, top: 100, right: 900, bottom: 180 });
+        });
+
+        await waitFor(() => {
+            expect(popupElement.style.left).toBe('200px');
+            expect(popupElement.style.top).toBe('88px');
         });
 
         rendered.dispose();

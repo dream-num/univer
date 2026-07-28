@@ -37,7 +37,7 @@ const locale: typeof enUS = {
             nameInput: 'Nom de l\'objet',
             description: 'Description',
             descriptionPlaceholder: 'Ajouter une description',
-            details: 'Details',
+            details: 'Détails',
             locate: 'Localiser',
             expand: 'Développer',
             collapse: 'Réduire',

@@ -37,10 +37,6 @@ export interface IArrayValueObject {
 export class BaseValueObject extends ObjectClassType {
     private _customData: CustomData;
 
-    constructor(private _rawValue: string | number | boolean) {
-        super();
-    }
-
     override isValueObject() {
         return true;
     }
@@ -531,7 +527,7 @@ export class ErrorValueObject extends BaseValueObject {
         private _errorType: ErrorType,
         private _errorContent: string = ''
     ) {
-        super(_errorType);
+        super();
     }
 
     override getValue() {

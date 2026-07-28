@@ -16,10 +16,11 @@
 
 import type { IOffset, IScale, ISize, Nullable } from '@univerjs/core';
 import type { IObjectFullState } from '../basics/interfaces';
-import type { IViewportInfo, Vector2 } from '../basics/vector2';
+import type { IBoundRectNoAngle, IViewportInfo, Vector2 } from '../basics/vector2';
 import type { UniverRenderingContext } from '../context';
 import { BASE_OBJECT_ARRAY, BaseObject, ObjectType } from '../base-object';
 import { SHAPE_TYPE } from '../basics/const';
+import { Canvas } from '../canvas';
 
 export type LineJoin = 'round' | 'bevel' | 'miter';
 export type LineCap = 'butt' | 'round' | 'square';
@@ -88,6 +89,10 @@ export const SHAPE_OBJECT_ARRAY = [
 ];
 
 export abstract class Shape<T extends IShapeProps> extends BaseObject {
+    private _renderCacheCanvas: Nullable<Canvas>;
+    private _renderCacheBounds: Nullable<IBoundRectNoAngle>;
+    private _renderCachePixelRatio = 0;
+
     private _hoverCursor: Nullable<string>;
 
     private _moveCursor: string | null = null;
@@ -387,6 +392,73 @@ export abstract class Shape<T extends IShapeProps> extends BaseObject {
         };
     }
 
+    protected _renderWithCache(
+        ctx: UniverRenderingContext,
+        bounds: IBoundRectNoAngle,
+        draw: (cacheContext: UniverRenderingContext) => void
+    ): void {
+        const transform = ctx.getTransform();
+        const scaleX = Math.hypot(transform.a, transform.b);
+        const scaleY = Math.hypot(transform.c, transform.d);
+        const pixelRatio = Math.max(scaleX, scaleY);
+        if (pixelRatio <= Number.EPSILON) {
+            return;
+        }
+
+        const width = Math.ceil((bounds.right - bounds.left) * pixelRatio) / pixelRatio;
+        const height = Math.ceil((bounds.bottom - bounds.top) * pixelRatio) / pixelRatio;
+        if (width <= 0 || height <= 0) {
+            return;
+        }
+
+        const cacheBoundsChanged =
+            this._renderCacheBounds?.left !== bounds.left ||
+            this._renderCacheBounds?.top !== bounds.top ||
+            this._renderCacheBounds?.right !== bounds.right ||
+            this._renderCacheBounds?.bottom !== bounds.bottom;
+        const cacheSizeChanged =
+            this._renderCacheCanvas?.getWidth() !== width ||
+            this._renderCacheCanvas?.getHeight() !== height ||
+            this._renderCachePixelRatio !== pixelRatio;
+
+        if (!this._renderCacheCanvas) {
+            this._renderCacheCanvas = new Canvas({
+                colorService: this.getEngine()?.canvasColorService,
+                width,
+                height,
+                pixelRatio,
+            });
+        } else if (cacheSizeChanged) {
+            this._renderCacheCanvas.setSize(width, height, pixelRatio);
+        }
+
+        if (this.isDirty() || cacheBoundsChanged || cacheSizeChanged) {
+            const cacheContext = this._renderCacheCanvas.getContext();
+            this._renderCacheCanvas.clear();
+            cacheContext.save();
+            cacheContext.translate(-bounds.left, -bounds.top);
+            draw(cacheContext);
+            cacheContext.restore();
+            this._renderCacheBounds = { ...bounds };
+            this._renderCachePixelRatio = pixelRatio;
+        }
+
+        ctx.drawImage(
+            this._renderCacheCanvas.getCanvasEle(),
+            bounds.left,
+            bounds.top,
+            width,
+            height
+        );
+    }
+
+    protected _releaseRenderCache(): void {
+        this._renderCacheCanvas?.dispose();
+        this._renderCacheCanvas = null;
+        this._renderCacheBounds = null;
+        this._renderCachePixelRatio = 0;
+    }
+
     protected _draw(ctx: UniverRenderingContext, bounds?: IViewportInfo) {
         /** abstract */
     }
@@ -440,5 +512,10 @@ export abstract class Shape<T extends IShapeProps> extends BaseObject {
         }
 
         this.makeDirty(true);
+    }
+
+    override dispose(): void {
+        this._releaseRenderCache();
+        super.dispose();
     }
 }

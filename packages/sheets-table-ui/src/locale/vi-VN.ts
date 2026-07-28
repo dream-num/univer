@@ -21,7 +21,7 @@ const locale: typeof enUS = {
         title: 'Bảng',
         selectRange: 'Chọn phạm vi bảng',
         rename: 'Đổi tên bảng',
-        renamePlaceholder: 'Enter table name',
+        renamePlaceholder: 'Nhập tên bảng',
         updateRange: 'Cập nhật phạm vi bảng',
         tableRangeWithMergeError: 'Phạm vi bảng không thể chồng lấp với các ô đã được hợp nhất',
         tableRangeWithOtherTableError: 'Phạm vi bảng không thể chồng lấp với các bảng khác',
@@ -43,9 +43,9 @@ const locale: typeof enUS = {
         tablePrefix: 'Bảng',
         tableNameError: 'Tên bảng không thể chứa khoảng trắng, không được bắt đầu bằng số và không được trùng với tên bảng đã có',
         columnMenu: {
-            'insert-left': 'Insert 1 table column left',
-            'insert-right': 'Insert 1 table column right',
-            delete: 'Delete table column',
+            'insert-left': 'Chèn 1 cột bảng bên trái',
+            'insert-right': 'Chèn 1 cột bảng bên phải',
+            delete: 'Xóa cột bảng',
         },
 
         sort: {
@@ -95,7 +95,7 @@ const locale: typeof enUS = {
                 notBetween: 'Không trong khoảng',
                 above: 'Lớn hơn',
                 below: 'Nhỏ hơn',
-                topN: 'Top {0}',
+                topN: 'Trên cùng {0}',
             },
         },
         date: {

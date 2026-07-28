@@ -85,7 +85,7 @@ const locale: typeof enUS = {
             insert: 'Insertar',
             prevPage: 'Anterior',
             nextPage: 'Siguiente',
-            total: 'total:',
+            total: 'Total:',
         },
         borderLine: {
             borderTop: 'bordeSuperior',
@@ -255,8 +255,6 @@ const locale: typeof enUS = {
             notChangeMerge: 'No puedes realizar cambios parciales en las celdas combinadas',
             detailUpdate: 'Nuevo abierto',
             detailSave: 'Caché local restaurada',
-            row: '',
-            column: '',
             loading: 'Cargando...',
             copy: 'Copiar',
             return: 'Salir',

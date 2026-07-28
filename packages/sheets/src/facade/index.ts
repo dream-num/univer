@@ -21,7 +21,6 @@ export * from './f-enum';
 export * from './f-event';
 export { FRange } from './f-range';
 export { FSelection } from './f-selection';
-export type { FSheetEmbedUnitFacadeMapAugmentation } from './f-types';
 export type * from './f-univer';
 export { FWorkbook } from './f-workbook';
 export { FWorksheet } from './f-worksheet';

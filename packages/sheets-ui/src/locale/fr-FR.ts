@@ -255,8 +255,6 @@ const locale: typeof enUS = {
             notChangeMerge: 'Vous ne pouvez pas apporter de modifications partielles aux cellules fusionnées',
             detailUpdate: 'Nouvellement ouvert',
             detailSave: 'Cache local restauré',
-            row: 'Ligne',
-            column: 'Colonne',
             loading: 'Chargement...',
             copy: 'Copier',
             return: 'Quitter',

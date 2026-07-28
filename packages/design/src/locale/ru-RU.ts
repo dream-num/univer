@@ -39,7 +39,7 @@ const locale: typeof enUS = {
             empty: 'Нет',
         },
         Calendar: {
-            year: '',
+            year: 'Год',
             weekDays: ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
             months: [
                 'Январь',

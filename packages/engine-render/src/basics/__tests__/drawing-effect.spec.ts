@@ -18,6 +18,7 @@ import { describe, expect, it } from 'vitest';
 import {
     combineDrawingEffectFilter,
     createDrawingEffectFilter,
+    expandDrawingEffectBounds,
     resolveDrawingEffectMasks,
     resolveGlowEffect,
     resolveOuterShadowEffect,
@@ -76,5 +77,18 @@ describe('drawing effect', () => {
             { color: '#5b9bd5', blurRadius: 2, offsetX: 0, offsetY: 0 },
             { color: '#000000', blurRadius: 3, offsetX: 0, offsetY: 0 },
         ]);
+    });
+
+    it('expands cache bounds for the sequential glow and shadow filter chain', () => {
+        expect(expandDrawingEffectBounds(
+            { left: 0, top: 0, right: 100, bottom: 50 },
+            { color: '#5b9bd5', radius: 4 },
+            { color: '#000000', blurRadius: 3, distance: 2, direction: 0 }
+        )).toEqual({
+            left: -13,
+            top: -15,
+            right: 117,
+            bottom: 65,
+        });
     });
 });

@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-import type { IGlowEffect, IShadowEffect } from '@univerjs/core';
-import { ColorKit } from '@univerjs/core';
+import type { IBoundRectNoAngle } from './vector2';
+// eslint-disable-next-line import/consistent-type-specifier-style -- Keep type and value imports from one package together.
+import { ColorKit, type IGlowEffect, type IShadowEffect } from '@univerjs/core';
 
 // Canvas blur visually spans about twice the DrawingML glow radius. This factor is verified against PowerPoint output.
 const DRAWINGML_GLOW_BLUR_SCALE = 0.5;
+// Canvas drop-shadow uses a Gaussian blur. Three standard deviations retain the visible effect without clipping.
+const GAUSSIAN_BLUR_BOUND_SCALE = 3;
 
 export interface IResolvedDrawingShadow {
     color: string;
@@ -103,6 +106,37 @@ export function resolveDrawingEffectMasks(
     }
 
     return effects;
+}
+
+export function expandDrawingEffectBounds(
+    bounds: IBoundRectNoAngle,
+    glow: IGlowEffect | undefined,
+    outerShadow: IShadowEffect | undefined
+): IBoundRectNoAngle {
+    let expandedBounds = { ...bounds };
+    const effects = [resolveGlowEffect(glow), resolveOuterShadowEffect(outerShadow)];
+
+    for (const effect of effects) {
+        if (!effect) {
+            continue;
+        }
+
+        const blurBound = effect.blurRadius * GAUSSIAN_BLUR_BOUND_SCALE;
+        const shadowBounds = {
+            left: expandedBounds.left + effect.offsetX - blurBound,
+            top: expandedBounds.top + effect.offsetY - blurBound,
+            right: expandedBounds.right + effect.offsetX + blurBound,
+            bottom: expandedBounds.bottom + effect.offsetY + blurBound,
+        };
+        expandedBounds = {
+            left: Math.min(expandedBounds.left, shadowBounds.left),
+            top: Math.min(expandedBounds.top, shadowBounds.top),
+            right: Math.max(expandedBounds.right, shadowBounds.right),
+            bottom: Math.max(expandedBounds.bottom, shadowBounds.bottom),
+        };
+    }
+
+    return expandedBounds;
 }
 
 export function createDrawingEffectFilter(

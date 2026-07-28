@@ -255,8 +255,6 @@ const locale: typeof enUS = {
             notChangeMerge: 'شما نمی‌توانید تغییرات جزئی در سلول‌های ادغام شده ایجاد کنید',
             detailUpdate: 'جدید باز شد',
             detailSave: 'پنهانگاه محلی بازیابی شد',
-            row: '',
-            column: '',
             loading: 'در حال بارگیری...',
             copy: 'کپی',
             return: 'خروج',

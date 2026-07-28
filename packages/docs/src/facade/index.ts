@@ -25,6 +25,5 @@ export type { FDocumentSectionPageSetup, IFDocumentSectionColumnOptions, IFDocum
 export { FDocumentTextRange } from './f-document-text-range';
 export type { IFDocumentTextRangeDescription, IFDocumentTextStyleRun } from './f-document-text-range';
 export * from './f-enum';
-export type { FDocEmbedUnitFacadeMapAugmentation } from './f-types';
 export type { IFDocumentTextRange } from './utils';
 export { stripBlockTokens } from './utils';

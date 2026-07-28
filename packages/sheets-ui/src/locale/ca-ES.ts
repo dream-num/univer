@@ -85,7 +85,7 @@ const locale: typeof enUS = {
             insert: 'Inserir',
             prevPage: 'Anterior',
             nextPage: 'Següent',
-            total: 'total:',
+            total: 'Total:',
         },
         borderLine: {
             borderTop: 'voraSuperior',
@@ -255,8 +255,6 @@ const locale: typeof enUS = {
             notChangeMerge: 'No podeu fer canvis parcials a les cel·les combinades',
             detailUpdate: 'Obert de nou',
             detailSave: 'Memòria cau local restaurada',
-            row: '',
-            column: '',
             loading: 'S\'està carregant...',
             copy: 'Copiar',
             return: 'Sortir',

@@ -33,7 +33,7 @@ export class NullValueObject extends BaseValueObject {
     private static _instance: NullValueObject;
 
     static create() {
-        this._instance = this._instance || new NullValueObject(0);
+        this._instance = this._instance || new NullValueObject();
         return this._instance;
     }
 
@@ -229,7 +229,7 @@ export class BooleanValueObject extends BaseValueObject {
     }
 
     constructor(rawValue: boolean) {
-        super(rawValue);
+        super();
 
         this._value = rawValue;
     }
@@ -448,7 +448,7 @@ export class NumberValueObject extends BaseValueObject {
     }
 
     constructor(rawValue: number) {
-        super(rawValue);
+        super();
 
         this._value = Number(rawValue);
     }
@@ -1433,7 +1433,7 @@ export class StringValueObject extends BaseValueObject {
     };
 
     constructor(rawValue: string) {
-        super(rawValue);
+        super();
         this._value = rawValue;
     }
 

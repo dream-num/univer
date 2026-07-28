@@ -66,7 +66,7 @@ export class LambdaValueObjectObject extends BaseValueObject {
 
         private _lambdaPrivacyVarKeys: string[]
     ) {
-        super(0);
+        super();
         this._lambdaPrivacyValueMap.clear();
     }
 

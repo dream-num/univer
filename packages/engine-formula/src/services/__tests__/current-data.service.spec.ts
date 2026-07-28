@@ -36,6 +36,11 @@ function createService() {
     const univerInstanceService = {
         getCurrentUnitOfType: vi.fn(() => workbookForCurrentType),
         getUnit: vi.fn((unitId: string) => workbookById.get(unitId)),
+        getUnitType: vi.fn((unitId: string) =>
+            workbookById.has(unitId)
+                ? UniverInstanceType.UNIVER_SHEET
+                : UniverInstanceType.UNRECOGNIZED
+        ),
     };
     const localeService = {
         getCurrentLocale: vi.fn(() => 'zhCN'),
@@ -58,6 +63,7 @@ function createService() {
     class TestUniverInstanceService {
         getCurrentUnitOfType = univerInstanceService.getCurrentUnitOfType;
         getUnit = univerInstanceService.getUnit;
+        getUnitType = univerInstanceService.getUnitType;
     }
 
     class TestLocaleService {
@@ -219,6 +225,7 @@ describe('FormulaCurrentConfigService', () => {
 
         expect(service.getSheetRowColumnCount('unit-size', 'sheet-size')).toEqual({ rowCount: 22, columnCount: 8 });
         expect(service.getSheetRowColumnCount('unit-size', 'missing')).toEqual({ rowCount: 0, columnCount: 0 });
+        expect(service.getSheetRowColumnCount('doc-unit', 'doc-unit')).toEqual({ rowCount: 0, columnCount: 0 });
         expect(service.getFilteredOutRows('unit-size', 'sheet-size', 1, 5)).toEqual([2, 4]);
 
         formulaDataModel.getCalculateData.mockReturnValue({

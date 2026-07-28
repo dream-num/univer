@@ -327,6 +327,10 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
     }
 
     getSheetRowColumnCount(unitId: string, sheetId: string) {
+        if (this._univerInstanceService.getUnitType(unitId) !== UniverInstanceType.UNIVER_SHEET) {
+            return { rowCount: 0, columnCount: 0 };
+        }
+
         const workbook = this._univerInstanceService.getUnit<Workbook>(unitId);
         const worksheet = workbook?.getSheetBySheetId(sheetId);
         const snapshot = worksheet?.getSnapshot();

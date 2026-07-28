@@ -1705,6 +1705,10 @@ describe('selection utils', () => {
             direction: 'FORWARD',
             segmentId: 'body',
             segmentPage: -1,
+            style: {
+                fill: 'transparent',
+                strokeWidth: 0,
+            },
             isActive: () => true,
         } as never;
         expect(serializeTextRange(textRange)).toMatchObject({
@@ -1712,6 +1716,10 @@ describe('selection utils', () => {
             endOffset: 3,
             isActive: true,
             segmentId: 'body',
+            style: {
+                fill: 'transparent',
+                strokeWidth: 0,
+            },
         });
 
         const rectRange = {

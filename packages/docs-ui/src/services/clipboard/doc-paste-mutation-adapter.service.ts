@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IDocumentBlockRange, IDocumentBody, IDocumentData, IDrawingParam, IMutationInfo } from '@univerjs/core';
-import { createIdentifier, toDisposable } from '@univerjs/core';
+import type { ICustomRange, IDisposable, IDocumentBlockRange, IDocumentBody, IDocumentData, IDrawingParam, IMutationInfo } from '@univerjs/core';
+import {
+    createIdentifier,
+    toDisposable,
+} from '@univerjs/core';
 
 export interface IDocClipboardPasteCustomBlockMapping {
     sourceBlockId: string;
@@ -29,6 +32,11 @@ export interface IDocClipboardPasteBlockRangeMapping {
     targetBlockRange: IDocumentBlockRange;
 }
 
+export interface IDocClipboardPasteCustomRangeMapping {
+    sourceRange: ICustomRange;
+    targetRange: ICustomRange;
+}
+
 export interface IDocClipboardPasteMutationInfoParams {
     unitId: string;
     segmentId: string;
@@ -36,6 +44,7 @@ export interface IDocClipboardPasteMutationInfoParams {
     sourceBody: IDocumentBody;
     targetBody: IDocumentBody;
     blockRangeMappings: IDocClipboardPasteBlockRangeMapping[];
+    customRangeMappings?: IDocClipboardPasteCustomRangeMapping[];
     customBlockMappings: IDocClipboardPasteCustomBlockMapping[];
 }
 

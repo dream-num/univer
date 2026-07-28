@@ -15,7 +15,6 @@
  */
 
 import { ICommandService } from '@univerjs/core';
-import { OtherFormulaMarkDirty } from '@univerjs/engine-formula';
 import { afterEach, describe, expect, it } from 'vitest';
 import { InsertFunctionCommand } from '../../commands/commands/insert-function.command';
 import { QuickSumCommand } from '../../commands/commands/quick-sum.command';
@@ -33,13 +32,11 @@ describe('FormulaController', () => {
 
         expect(commandService.hasCommand(InsertFunctionCommand.id)).toBe(false);
         expect(commandService.hasCommand(QuickSumCommand.id)).toBe(false);
-        expect(commandService.hasCommand(OtherFormulaMarkDirty.id)).toBe(false);
 
         testBed.injector.get(FormulaController);
 
         expect(commandService.hasCommand(InsertFunctionCommand.id)).toBe(true);
         expect(commandService.hasCommand(QuickSumCommand.id)).toBe(true);
-        expect(commandService.hasCommand(OtherFormulaMarkDirty.id)).toBe(true);
 
         testBed.univer.dispose();
     });

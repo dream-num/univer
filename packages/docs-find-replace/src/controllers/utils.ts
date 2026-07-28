@@ -15,6 +15,7 @@
  */
 
 import type { IDocumentBody } from '@univerjs/core';
+import type { IResolvedDocText } from '@univerjs/docs';
 import type { IFindQuery } from '@univerjs/find-replace';
 import { regexp } from '@univerjs/core';
 
@@ -24,26 +25,51 @@ export interface IDocFindRange {
     replaceable: boolean;
 }
 
-export function findDocRanges(body: IDocumentBody, query: IFindQuery, disabled: boolean): IDocFindRange[] {
+export function findDocRanges(
+    body: IDocumentBody,
+    query: IFindQuery,
+    disabled: boolean,
+    resolved: IResolvedDocText = {
+        text: body.dataStream,
+        characters: Array.from({ length: body.dataStream.length }, (_value, index) => ({
+            startOffset: index,
+            endOffset: index + 1,
+            replaceable: true,
+        })),
+    }
+): IDocFindRange[] {
     if (!query.findString) return [];
 
     const expression = regexp.createLiteralRegExp(query.findString, query.caseSensitive ? 'gu' : 'giu');
     const wordRanges = query.matchesTheWholeWord
-        ? new Set(Array.from(new Intl.Segmenter(undefined, { granularity: 'word' }).segment(body.dataStream))
+        ? new Set(Array.from(new Intl.Segmenter(undefined, { granularity: 'word' }).segment(resolved.text))
             .filter((item) => item.isWordLike)
             .map((item) => `${item.index}:${item.index + item.segment.length}`))
         : null;
-    return Array.from(body.dataStream.matchAll(expression))
+    return Array.from(resolved.text.matchAll(expression))
         .filter((match) => {
             return wordRanges?.has(`${match.index}:${match.index + match[0].length}`) ?? true;
         })
-        .map((match) => {
-            const startOffset = match.index;
-            const endOffset = startOffset + match[0].length;
+        .flatMap((match) => {
+            const characters = resolved.characters.slice(
+                match.index,
+                match.index + match[0].length
+            );
+            if (!characters.length) {
+                return [];
+            }
+            const startOffset = Math.min(...characters.map((character) => character.startOffset));
+            const endOffset = Math.max(...characters.map((character) => character.endOffset));
             const overlapsWholeEntity = body.customRanges?.some((range) =>
                 range.wholeEntity && range.startIndex < endOffset && range.endIndex + 1 > startOffset
             ) ?? false;
 
-            return { startOffset, endOffset, replaceable: !disabled && !overlapsWholeEntity };
+            return [{
+                startOffset,
+                endOffset,
+                replaceable: !disabled &&
+                    !overlapsWholeEntity &&
+                    characters.every((character) => character.replaceable),
+            }];
         });
 }

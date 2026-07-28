@@ -20,7 +20,7 @@ import { FormulaDataModel } from '../../models/formula-data.model';
 import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from '../current-data.service';
 import { ISheetRowFilteredService } from '../sheet-row-filtered.service';
 
-function createService() {
+function createService(withCurrentWorkbook = true) {
     const workbookForCurrentType = {
         getUnitId: vi.fn(() => 'unit-current'),
         getActiveSheet: vi.fn(() => ({
@@ -34,8 +34,13 @@ function createService() {
 
     const workbookById = new Map<string, unknown>();
     const univerInstanceService = {
-        getCurrentUnitOfType: vi.fn(() => workbookForCurrentType),
+        getCurrentUnitOfType: vi.fn(() => withCurrentWorkbook ? workbookForCurrentType : undefined),
         getUnit: vi.fn((unitId: string) => workbookById.get(unitId)),
+        getUnitType: vi.fn((unitId: string) =>
+            workbookById.has(unitId)
+                ? UniverInstanceType.UNIVER_SHEET
+                : UniverInstanceType.UNRECOGNIZED
+        ),
     };
     const localeService = {
         getCurrentLocale: vi.fn(() => 'zhCN'),
@@ -58,6 +63,7 @@ function createService() {
     class TestUniverInstanceService {
         getCurrentUnitOfType = univerInstanceService.getCurrentUnitOfType;
         getUnit = univerInstanceService.getUnit;
+        getUnitType = univerInstanceService.getUnitType;
     }
 
     class TestLocaleService {
@@ -219,6 +225,7 @@ describe('FormulaCurrentConfigService', () => {
 
         expect(service.getSheetRowColumnCount('unit-size', 'sheet-size')).toEqual({ rowCount: 22, columnCount: 8 });
         expect(service.getSheetRowColumnCount('unit-size', 'missing')).toEqual({ rowCount: 0, columnCount: 0 });
+        expect(service.getSheetRowColumnCount('doc-unit', 'doc-unit')).toEqual({ rowCount: 0, columnCount: 0 });
         expect(service.getFilteredOutRows('unit-size', 'sheet-size', 1, 5)).toEqual([2, 4]);
 
         formulaDataModel.getCalculateData.mockReturnValue({
@@ -234,6 +241,15 @@ describe('FormulaCurrentConfigService', () => {
         expect(service.getFormulaData()).toEqual({ unitLite: { sheetLite: { 1: { 1: { f: '=A1' } } } } });
         expect(service.getArrayFormulaRange()).toEqual({ unitLite: { sheetLite: { key: 'range' } } });
         expect(service.getUnitData().unitLite.sheetLite.rowData).toEqual({ 1: { h: 30 } });
+    });
+
+    it('returns empty sheet metadata when formula calculation runs without Sheets', () => {
+        const { service } = createService(false);
+
+        expect(service.getSheetsInfo()).toEqual({
+            sheetOrder: [],
+            sheetNameMap: {},
+        });
     });
 
     it('should update dirty ranges/register data and cleanup all caches on dispose', () => {

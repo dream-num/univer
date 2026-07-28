@@ -18,7 +18,7 @@ import type { ICommand } from '@univerjs/core';
 import type { Documents, DocumentSkeleton, ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IFindQuery } from '@univerjs/find-replace';
 import { ICommandService } from '@univerjs/core';
-import { DocSelectionManagerService, DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { DocSelectionManagerService, DocSkeletonManagerService, DocTextResolverService, RichTextEditingMutation } from '@univerjs/docs';
 import { DocBackScrollRenderController, getTextRangeFromCharIndex } from '@univerjs/docs-ui';
 import { createCommandTestBed } from '@univerjs/docs-ui/commands/commands/__tests__/create-command-test-bed';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -55,7 +55,10 @@ function createModelTestBed(dataStream = 'cat xx cat\r\n') {
     const scrollToRange = vi.fn();
     const testBed = createCommandTestBed(
         { id: 'test-doc', body: { dataStream }, documentStyle: {} },
-        [[DocBackScrollRenderController, { useValue: { scrollToRange } }]]
+        [
+            [DocBackScrollRenderController, { useValue: { scrollToRange } }],
+            [DocTextResolverService],
+        ]
     );
     const commandService = testBed.get(ICommandService);
     commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
@@ -150,6 +153,20 @@ describe('DocsFindModel', () => {
         await vi.advanceTimersByTimeAsync(250);
         expect(await update).toEqual(model.getMatches());
         expect(model.getMatches()).toHaveLength(1);
+        model.dispose();
+        univer.dispose();
+    });
+
+    it('rescans when a consumer-facing text projection changes', async () => {
+        vi.useFakeTimers();
+        const { get, model, univer } = createModelTestBed();
+        model.start(docsQuery('cat'));
+        const update = firstValueFrom(model.matchesUpdate$);
+
+        get(DocTextResolverService).notifyTextChanged('test-doc');
+        await vi.advanceTimersByTimeAsync(250);
+
+        expect(await update).toEqual(model.getMatches());
         model.dispose();
         univer.dispose();
     });

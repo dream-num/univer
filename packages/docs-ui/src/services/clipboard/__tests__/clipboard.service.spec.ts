@@ -16,6 +16,7 @@
 
 import type { DocumentDataModel, IDocumentBody, IDocumentData } from '@univerjs/core';
 import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
+import type { IDocClipboardPasteAdapter } from '../doc-paste-mutation-adapter.service';
 import {
     BooleanNumber,
     DataStreamTreeTokenType,
@@ -33,6 +34,10 @@ import { describe, expect, it, vi } from 'vitest';
 import { createCommandTestBed } from '../../../commands/commands/__tests__/create-command-test-bed';
 import { CutContentCommand, InnerPasteCommand } from '../../../commands/commands/clipboard.inner.command';
 import { DocClipboardService, getTableClipboardBodySlice, IDocClipboardService } from '../clipboard.service';
+import {
+    DocClipboardPasteAdapterService,
+    IDocClipboardPasteAdapterService,
+} from '../doc-paste-mutation-adapter.service';
 import {
     createInternalClipboardFragment,
     DOC_INTERNAL_FRAGMENT_MIME,
@@ -841,6 +846,138 @@ describe('DocClipboardService table copy helpers', () => {
         const univerInstanceService = testBed.get(IUniverInstanceService);
         const documentModel = univerInstanceService.getUnit<DocumentDataModel>('empty-paste-doc', UniverInstanceType.UNIVER_DOC)!;
         expect(documentModel.getBody()?.dataStream).toBe('Body\r\n');
+
+        testBed.univer.dispose();
+    });
+});
+
+describe('DocClipboardService copy text hooks', () => {
+    it('uses onCopyContent for plain text while preserving the internal document fragment', async () => {
+        const clipboard = new TestClipboardInterfaceService();
+        const documentData: IDocumentData = {
+            id: 'copy-content-hook-doc',
+            body: {
+                dataStream: 'A\uFFFCC\r\n',
+                paragraphs: [{
+                    paragraphId: 'para_docs_ui_clipboard_copy_hook',
+                    startIndex: 3,
+                }],
+                customRanges: [{
+                    startIndex: 1,
+                    endIndex: 1,
+                    rangeId: 'formula-1',
+                    rangeType: 0,
+                    wholeEntity: true,
+                }],
+            },
+            documentStyle: {},
+        };
+        const testBed = createCommandTestBed(documentData, [
+            [IClipboardInterfaceService, { useValue: clipboard }],
+            [IDocClipboardService, { useClass: DocClipboardService }],
+        ]);
+        const selectionManager = testBed.get(DocSelectionManagerService);
+        selectionManager.__TEST_ONLY_setCurrentSelection({
+            unitId: documentData.id,
+            subUnitId: '',
+        });
+        const service = testBed.get(IDocClipboardService);
+        service.addClipboardHook({
+            onCopyContent: (start, end, context) => {
+                expect([start, end]).toEqual([0, 3]);
+                expect(context.unitId).toBe(documentData.id);
+                expect(context.segmentId).toBe('');
+                expect(context.body.dataStream).toBe(documentData.body?.dataStream);
+                return 'A42C';
+            },
+        });
+
+        expect(await service.copy(SliceBodyType.copy, [{
+            startOffset: 0,
+            endOffset: 3,
+            collapsed: false,
+            segmentId: '',
+        }])).toBe(true);
+        expect(clipboard.writes[0].text).toBe('A42C');
+        const internalJson = clipboard.writes[0].custom?.[DOC_INTERNAL_FRAGMENT_MIME];
+        expect(parseInternalClipboardFragment(internalJson)?.body?.dataStream)
+            .toContain('\uFFFC');
+
+        testBed.univer.dispose();
+    });
+
+    it('passes source-to-target Custom Range identity mappings to paste adapters', async () => {
+        const clipboard = new TestClipboardInterfaceService();
+        const documentData: IDocumentData = {
+            id: 'custom-range-mapping-doc',
+            body: {
+                dataStream: '\uFFFC\r\n',
+                paragraphs: [{
+                    paragraphId: 'para_docs_ui_clipboard_mapping',
+                    startIndex: 1,
+                }],
+                customRanges: [{
+                    startIndex: 0,
+                    endIndex: 0,
+                    rangeId: 'source-range',
+                    rangeType: 0,
+                    wholeEntity: true,
+                }],
+            },
+            documentStyle: {},
+        };
+        const testBed = createCommandTestBed(documentData, [
+            [IClipboardInterfaceService, { useValue: clipboard }],
+            [IDocClipboardService, { useClass: DocClipboardService }],
+            [IDocClipboardPasteAdapterService, {
+                useClass: DocClipboardPasteAdapterService,
+            }],
+        ]);
+        const commandService = testBed.get(ICommandService);
+        commandService.registerCommand(InnerPasteCommand);
+        commandService.registerCommand(RichTextEditingMutation);
+        commandService.registerCommand(SetTextSelectionsOperation);
+        const mappings = vi.fn<
+            NonNullable<IDocClipboardPasteAdapter['getPasteMutationInfos']>
+        >(() => ({
+            redoMutations: [],
+            undoMutations: [],
+        }));
+        testBed.get(IDocClipboardPasteAdapterService).registerAdapter({
+            getPasteMutationInfos: mappings,
+        });
+        const selectionManager = testBed.get(DocSelectionManagerService);
+        selectionManager.__TEST_ONLY_setCurrentSelection({
+            unitId: documentData.id,
+            subUnitId: '',
+        });
+        const service = testBed.get(IDocClipboardService);
+
+        expect(await service.copy(SliceBodyType.copy, [{
+            startOffset: 0,
+            endOffset: 1,
+            collapsed: false,
+            segmentId: '',
+        }])).toBe(true);
+        selectionManager.__TEST_ONLY_add([{
+            startOffset: 1,
+            endOffset: 1,
+            collapsed: true,
+            isActive: true,
+            segmentId: '',
+        }]);
+        expect(await service.paste()).toBe(true);
+
+        const firstCall = mappings.mock.calls[0];
+        if (!firstCall) {
+            throw new Error('Expected the paste adapter to be called.');
+        }
+        const mapping = firstCall[0].customRangeMappings?.[0];
+        if (!mapping) {
+            throw new Error('Expected one Custom Range mapping.');
+        }
+        expect(mapping.sourceRange.rangeId).toBe('source-range');
+        expect(mapping.targetRange.rangeId).not.toBe('source-range');
 
         testBed.univer.dispose();
     });

@@ -72,7 +72,10 @@ export { DocContentInsertService } from './services/doc-content-insert.service';
 export type { IDocContentInsertRange } from './services/doc-content-insert.service';
 export { DocInterceptorService } from './services/doc-interceptor/doc-interceptor.service';
 export { DOC_INTERCEPTOR_POINT } from './services/doc-interceptor/interceptor-const';
-export { DocSelectionManagerService } from './services/doc-selection-manager.service';
+export {
+    DOC_SELECTION_OPTION_PRESERVE_CARET,
+    DocSelectionManagerService,
+} from './services/doc-selection-manager.service';
 export { DocSkeletonManagerService } from './services/doc-skeleton-manager.service';
 export {
     DocStateChangeManagerService,
@@ -80,6 +83,13 @@ export {
 } from './services/doc-state-change-manager.service';
 export type { IDocStateChangeInfo, IDocStateChangeParams } from './services/doc-state-emit.service';
 export { DocStateEmitService } from './services/doc-state-emit.service';
+export { DocTextResolverService } from './services/doc-text-resolver.service';
+export type {
+    IDocTextReplacement,
+    IDocTextResolver,
+    IResolvedDocText,
+    IResolvedDocTextCharacter,
+} from './services/doc-text-resolver.service';
 export {
     addCustomRangeBySelectionFactory,
     addCustomRangeFactory,

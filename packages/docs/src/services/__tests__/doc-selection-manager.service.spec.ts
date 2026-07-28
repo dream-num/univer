@@ -27,6 +27,7 @@ import {
     IUniverInstanceService,
     UniverInstanceService,
 } from '@univerjs/core';
+import { NORMAL_TEXT_SELECTION_PLUGIN_STYLE } from '@univerjs/engine-render';
 import { describe, expect, it } from 'vitest';
 import { SetTextSelectionsOperation } from '../../commands/operations/text-selection.operation';
 import { DocSelectionManagerService } from '../doc-selection-manager.service';
@@ -95,6 +96,34 @@ describe('DocSelectionManagerService', () => {
             isEditing: false,
             options: { keepVisible: true },
         });
+        sub.unsubscribe();
+    });
+
+    it('preserves selection options when refreshing an existing render selection', () => {
+        const service = createService();
+        const refreshes: unknown[] = [];
+        const sub = service.refreshSelection$.subscribe((value) => refreshes.push(value));
+        service.__TEST_ONLY_setCurrentSelection({ unitId: 'doc-1', subUnitId: 'doc-1' });
+        service.__replaceTextRangesWithNoRefresh({
+            textRanges: [{ startOffset: 2, endOffset: 2, collapsed: true }],
+            rectRanges: [],
+            segmentId: '',
+            segmentPage: -1,
+            isEditing: false,
+            style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+            options: { preserveCaret: true },
+        }, { unitId: 'doc-1', subUnitId: 'doc-1' });
+
+        service.refreshSelection();
+
+        expect(refreshes.at(-1)).toEqual(expect.objectContaining({
+            docRanges: [expect.objectContaining({
+                startOffset: 2,
+                endOffset: 2,
+                collapsed: true,
+            })],
+            options: { preserveCaret: true },
+        }));
         sub.unsubscribe();
     });
 

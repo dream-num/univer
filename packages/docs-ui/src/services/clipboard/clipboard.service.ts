@@ -83,11 +83,22 @@ export interface IDocClipboardCopyDocDataContext {
     sourceDocuments: IDocumentData[];
 }
 
+export interface IDocClipboardCopyContentContext {
+    body: IDocumentBody;
+    segmentId?: string;
+    unitId: string;
+}
+
+export interface IDocClipboardPasteContext {
+    documentData: Partial<IDocumentData>;
+    targetUnitId: string;
+}
+
 export interface IDocClipboardHook {
     onCopyDocData?(doc: Partial<IDocumentData>, context: IDocClipboardCopyDocDataContext): Partial<IDocumentData>;
     onCopyProperty?(start: number, end: number): IClipboardPropertyItem;
-    onCopyContent?(start: number, end: number): string;
-    onBeforePaste?: (body: IDocumentBody) => IDocumentBody;
+    onCopyContent?(start: number, end: number, context: IDocClipboardCopyContentContext): string;
+    onBeforePaste?: (body: IDocumentBody, context: IDocClipboardPasteContext) => IDocumentBody;
     onBeforePasteImage?: (file: File) => Promise<{ source: string; imageSourceType: ImageSourceType } | null>;
 }
 
@@ -170,7 +181,13 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
     }
 
     async copy(sliceType: SliceBodyType = SliceBodyType.copy, ranges?: ITextRangeWithStyle[]): Promise<boolean> {
-        const { newSnapshotList = [], needCache = false, snapshot, ranges: allRanges } = this._getDocumentBodyInRanges(sliceType, ranges) ?? {};
+        const {
+            newSnapshotList = [],
+            needCache = false,
+            plainTextList,
+            snapshot,
+            ranges: allRanges,
+        } = this._getDocumentBodyInRanges(sliceType, ranges) ?? {};
 
         if (newSnapshotList.length === 0 || snapshot == null) {
             return false;
@@ -179,7 +196,11 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         try {
             const isCopyInHeaderFooter = !!allRanges?.[0]?.segmentId;
 
-            await this._setClipboardData(newSnapshotList, !isCopyInHeaderFooter && needCache);
+            await this._setClipboardData(
+                newSnapshotList,
+                !isCopyInHeaderFooter && needCache,
+                plainTextList
+            );
         } catch (e) {
             this._logService.error('[DocClipboardService] copy failed', e);
             return false;
@@ -310,12 +331,19 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
 
         this._clipboardHooks.forEach((hook) => {
             if (hook.onBeforePaste) {
-                body = hook.onBeforePaste(body);
+                body = hook.onBeforePaste(body, {
+                    documentData: docData,
+                    targetUnitId: currentDocument.getUnitId(),
+                });
             }
         });
 
         // copy custom ranges
-        body.customRanges = body.customRanges?.map(BuildTextUtils.customRange.copyCustomRange);
+        const customRangeMappings = body.customRanges?.map((sourceRange) => {
+            const targetRange = BuildTextUtils.customRange.copyCustomRange(sourceRange);
+            return { sourceRange, targetRange };
+        }) ?? [];
+        body.customRanges = customRangeMappings.map(({ targetRange }) => targetRange);
 
         body.paragraphs?.forEach((copy) => {
             if (copy.paragraphStyle?.headingId) {
@@ -368,6 +396,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
                     ...docData,
                     body,
                 },
+                customRangeMappings,
                 segmentId,
                 textRanges,
             });
@@ -377,12 +406,18 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         }
     }
 
-    private async _setClipboardData(documentList: IDocumentData[], needCache = true): Promise<void> {
+    private async _setClipboardData(
+        documentList: IDocumentData[],
+        needCache = true,
+        plainTextList?: readonly string[]
+    ): Promise<void> {
         const copyId = generateRandomId(6);
         const text =
-            (documentList.length > 1
-                ? documentList.map((doc) => doc.body?.dataStream || '').join('\n')
-                : documentList[0].body?.dataStream || '')
+            (plainTextList
+                ? plainTextList.join('\n')
+                : documentList.length > 1
+                    ? documentList.map((doc) => doc.body?.dataStream || '').join('\n')
+                    : documentList[0].body?.dataStream || '')
                 .replaceAll(DataStreamTreeTokenType.TABLE_START, '')
                 .replaceAll(DataStreamTreeTokenType.TABLE_END, '')
                 .replaceAll(DataStreamTreeTokenType.TABLE_ROW_START, '')
@@ -446,6 +481,8 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         const allRanges = ranges ?? this._docSelectionManagerService.getDocRanges();
 
         const results: IDocumentData['body'][] = [];
+        const plainTextResults: string[] = [];
+        const copyContentHook = this._clipboardHooks.find((hook) => hook.onCopyContent)?.onCopyContent;
         let needCache = true;
 
         if (docDataModel == null || allRanges.length === 0) {
@@ -475,6 +512,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
                 const bodySlice = getTableClipboardBodySlice(body, range as IRectRangeWithStyle);
 
                 results.push(bodySlice);
+                plainTextResults.push(bodySlice.dataStream);
 
                 continue;
             }
@@ -487,10 +525,23 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             }
 
             results.push(docBody);
+            plainTextResults.push(
+                copyContentHook?.(
+                    deleteRange.startOffset,
+                    deleteRange.endOffset,
+                    {
+                        body,
+                        segmentId,
+                        unitId: docDataModel.getUnitId(),
+                    }
+                ) ??
+                docBody.dataStream
+            );
         }
         return {
             newSnapshotList: results.map((e) => ({ ...snapshot, body: e })),
             needCache,
+            plainTextList: plainTextResults,
             snapshot,
             ranges: allRanges,
         };

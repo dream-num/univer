@@ -23,6 +23,16 @@ export {
     addCustomDecorationFactory,
     deleteCustomDecorationFactory,
 } from './basics/custom-decoration-factory';
+export {
+    DOC_CUSTOM_RANGE_CHROME_BACKGROUND_ALPHA,
+    DOC_CUSTOM_RANGE_CHROME_RADIUS,
+    drawDocCustomRangeChrome,
+    resolveDocCustomRangeChromeTheme,
+} from './basics/doc-custom-range-chrome';
+export type {
+    IDocCustomRangeChromeRect,
+    IDocCustomRangeChromeTheme,
+} from './basics/doc-custom-range-chrome';
 export * from './basics/docs-view-key';
 export { hasParagraphInTable } from './basics/paragraph';
 export { AfterSpaceCommand, EnterCommand, TabCommand } from './commands/commands/auto-format.command';
@@ -199,7 +209,11 @@ export { menuSchema as DocsUIMenuSchema } from './menu/schema';
 export { UniverDocsUIPlugin } from './plugin';
 export * from './services';
 export { IDocClipboardService } from './services/clipboard/clipboard.service';
-export type { IDocClipboardHook } from './services/clipboard/clipboard.service';
+export type {
+    IDocClipboardCopyContentContext,
+    IDocClipboardHook,
+    IDocClipboardPasteContext,
+} from './services/clipboard/clipboard.service';
 export {
     DocClipboardPasteAdapterService,
     IDocClipboardPasteAdapterService,
@@ -208,6 +222,7 @@ export type {
     IDocClipboardPasteAdapter,
     IDocClipboardPasteBlockRangeMapping,
     IDocClipboardPasteCustomBlockMapping,
+    IDocClipboardPasteCustomRangeMapping,
     IDocClipboardPasteMutationInfoParams,
     IDocClipboardPasteMutationInfos,
 } from './services/clipboard/doc-paste-mutation-adapter.service';

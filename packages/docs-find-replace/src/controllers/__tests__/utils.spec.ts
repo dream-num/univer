@@ -74,4 +74,31 @@ describe('findDocRanges', () => {
             { startOffset: 4, endOffset: 7, replaceable: false },
         ]);
     });
+
+    it('maps matches in consumer-facing replacement text back to the native entity', () => {
+        const body: IDocumentBody = {
+            dataStream: 'A\uFFFCC\r\n',
+            customRanges: [{
+                startIndex: 1,
+                endIndex: 1,
+                rangeId: 'formula-1',
+                rangeType: CustomRangeType.CUSTOM,
+                wholeEntity: true,
+            }],
+        };
+
+        expect(findDocRanges(body, query('42'), false, {
+            text: 'A42C\r\n',
+            characters: [
+                { startOffset: 0, endOffset: 1, replaceable: true },
+                { startOffset: 1, endOffset: 2, replaceable: false },
+                { startOffset: 1, endOffset: 2, replaceable: false },
+                { startOffset: 2, endOffset: 3, replaceable: true },
+                { startOffset: 3, endOffset: 4, replaceable: true },
+                { startOffset: 4, endOffset: 5, replaceable: true },
+            ],
+        })).toEqual([
+            { startOffset: 1, endOffset: 2, replaceable: false },
+        ]);
+    });
 });

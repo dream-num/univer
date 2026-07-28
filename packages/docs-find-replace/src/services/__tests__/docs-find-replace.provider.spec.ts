@@ -17,7 +17,7 @@
 import type { UnitModel } from '@univerjs/core';
 import type { IFindQuery } from '@univerjs/find-replace';
 import { UniverInstanceType } from '@univerjs/core';
-import { DocSkeletonManagerService } from '@univerjs/docs';
+import { DocSkeletonManagerService, DocTextResolverService } from '@univerjs/docs';
 import { createCommandTestBed } from '@univerjs/docs-ui/commands/commands/__tests__/create-command-test-bed';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { FindBy, FindDirection, FindScope } from '@univerjs/find-replace';
@@ -37,7 +37,10 @@ const query: IFindQuery = {
 
 describe('DocsFindReplaceProvider', () => {
     it('supports Docs and creates one model for the current document', async () => {
-        const testBed = createCommandTestBed({ id: 'test-doc', body: { dataStream: 'cat\r\n' }, documentStyle: {} });
+        const testBed = createCommandTestBed(
+            { id: 'test-doc', body: { dataStream: 'cat\r\n' }, documentStyle: {} },
+            [[DocTextResolverService]]
+        );
         const skeleton = testBed.get(IRenderManagerService).getRenderUnitById('test-doc')!.with(DocSkeletonManagerService);
         vi.spyOn(skeleton, 'getSkeleton').mockReturnValue(null as never);
         testBed.injector.add([DocsFindReplaceProvider]);

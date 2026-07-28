@@ -14,22 +14,10 @@
  * limitations under the License.
  */
 
-import type {
-    DocumentDataModel,
-    IAccessor,
-    ICommand,
-    ICustomTable,
-    IDisposable,
-    IDocumentData,
-    IDrawingParam,
-    IMutationInfo,
-    ITextRange,
-    JSONXActions,
-    Nullable,
-} from '@univerjs/core';
+import type { DocumentDataModel, IAccessor, ICommand, ICustomTable, IDisposable, IDocumentData, IDrawingParam, IMutationInfo, ITextRange, JSONXActions, Nullable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { DocumentViewModel, IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
-import type { IDocClipboardPasteBlockRangeMapping, IDocClipboardPasteCustomBlockMapping } from '../../services/clipboard/doc-paste-mutation-adapter.service';
+import type { IDocClipboardPasteBlockRangeMapping, IDocClipboardPasteCustomBlockMapping, IDocClipboardPasteCustomRangeMapping } from '../../services/clipboard/doc-paste-mutation-adapter.service';
 import {
     BuildTextUtils,
     CommandType,
@@ -65,6 +53,7 @@ export interface IInnerPasteCommandParams {
     segmentId: string;
     doc: Partial<IDocumentData>;
     textRanges: ITextRangeWithStyle[];
+    customRangeMappings?: IDocClipboardPasteCustomRangeMapping[];
 }
 
 const UNITS = SHEET_EDITOR_UNITS;
@@ -75,7 +64,12 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
 
     // eslint-disable-next-line max-lines-per-function, complexity
     handler: async (accessor, params: IInnerPasteCommandParams) => {
-        const { segmentId, textRanges, doc } = params;
+        const {
+            customRangeMappings = [],
+            segmentId,
+            textRanges,
+            doc,
+        } = params;
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
@@ -145,6 +139,15 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
             const cloneBody = Tools.deepClone(body);
             const blockRangeMappings: IDocClipboardPasteBlockRangeMapping[] = [];
             const customBlockMappings: IDocClipboardPasteCustomBlockMapping[] = [];
+            const selectionCustomRangeMappings = customRangeMappings.map(({ sourceRange }) => ({
+                sourceRange,
+                targetRange: BuildTextUtils.customRange.copyCustomRange(sourceRange),
+            }));
+            if (selectionCustomRangeMappings.length > 0) {
+                cloneBody.customRanges = selectionCustomRangeMappings.map(
+                    ({ targetRange }) => targetRange
+                );
+            }
 
             if (hasBlockRange) {
                 cloneBody.blockRanges!.forEach((targetBlockRange, index) => {
@@ -201,7 +204,14 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
                 });
             }
 
-            if ((blockRangeMappings.length > 0 || customBlockMappings.length > 0) && pasteAdapterService) {
+            if (
+                (
+                    blockRangeMappings.length > 0 ||
+                    customBlockMappings.length > 0 ||
+                    selectionCustomRangeMappings.length > 0
+                ) &&
+                pasteAdapterService
+            ) {
                 const mutationInfos = pasteAdapterService.getPasteMutationInfos({
                     unitId,
                     segmentId,
@@ -209,6 +219,7 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
                     sourceBody: body,
                     targetBody: cloneBody,
                     blockRangeMappings,
+                    customRangeMappings: selectionCustomRangeMappings,
                     customBlockMappings,
                 });
 

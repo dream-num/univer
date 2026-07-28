@@ -19,6 +19,7 @@ export * from './basics';
 export {
     combineDrawingEffectFilter,
     createDrawingEffectFilter,
+    expandDrawingEffectBounds,
     resolveDrawingEffectMasks,
     resolveGlowEffect,
     resolveOuterShadowEffect,

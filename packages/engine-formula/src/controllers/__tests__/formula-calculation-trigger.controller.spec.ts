@@ -26,30 +26,37 @@ describe('FormulaCalculationTriggerController', () => {
     it('starts immediately in Node.js', () => {
         vi.spyOn(core, 'isNodeEnv').mockReturnValue(true);
         const start = vi.fn();
+        const calculateStarted$ = new BehaviorSubject(false);
         const lifecycle$ = new BehaviorSubject(LifecycleStages.Ready);
 
         const controller = new FormulaCalculationTriggerController(
             { start } as never,
+            { calculateStarted$ } as never,
             { lifecycle$ } as never
         );
 
         expect(start).toHaveBeenCalledOnce();
+        expect(calculateStarted$.getValue()).toBe(true);
         controller.dispose();
     });
 
     it('starts after rendering in the browser', () => {
         vi.spyOn(core, 'isNodeEnv').mockReturnValue(false);
         const start = vi.fn();
+        const calculateStarted$ = new BehaviorSubject(false);
         const lifecycle$ = new BehaviorSubject(LifecycleStages.Ready);
 
         const controller = new FormulaCalculationTriggerController(
             { start } as never,
+            { calculateStarted$ } as never,
             { lifecycle$ } as never
         );
 
         expect(start).not.toHaveBeenCalled();
+        expect(calculateStarted$.getValue()).toBe(false);
         lifecycle$.next(LifecycleStages.Rendered);
         expect(start).toHaveBeenCalledOnce();
+        expect(calculateStarted$.getValue()).toBe(true);
 
         lifecycle$.next(LifecycleStages.Steady);
         expect(start).toHaveBeenCalledOnce();

@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-import type {
-    ICustomRange,
-    IDisposable,
-    IDocumentBlockRange,
-    IDocumentBody,
-    IDocumentData,
-    IDrawingParam,
-    IMutationInfo,
+import {
+    createIdentifier,
+    type ICustomRange,
+    type IDisposable,
+    type IDocumentBlockRange,
+    type IDocumentBody,
+    type IDocumentData,
+    type IDrawingParam,
+    type IMutationInfo,
+    toDisposable,
 } from '@univerjs/core';
-import { createIdentifier, toDisposable } from '@univerjs/core';
 
 export interface IDocClipboardPasteCustomBlockMapping {
     sourceBlockId: string;

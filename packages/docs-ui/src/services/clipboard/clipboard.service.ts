@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDisposable, IDocumentBody, IDocumentData } from '@univerjs/core';
 import type { IDocImage } from '@univerjs/docs-drawing';
 import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
 import {
@@ -23,12 +22,16 @@ import {
     createParagraphId,
     DataStreamTreeTokenType,
     Disposable,
+    type DocumentDataModel,
     DOC_RANGE_TYPE,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     DrawingTypeEnum,
     generateRandomId,
     getBodySlice,
     ICommandService,
+    type IDisposable,
+    type IDocumentBody,
+    type IDocumentData,
     ILogService,
     ImageSourceType,
     Inject,

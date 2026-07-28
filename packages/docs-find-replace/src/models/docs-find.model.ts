@@ -14,29 +14,28 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ITextRange, Nullable } from '@univerjs/core';
-import type { DocSkeletonManagerService } from '@univerjs/docs';
-import type { Documents, ITextSelectionStyle } from '@univerjs/engine-render';
-import type { IFindMatch, IFindMoveParams, IFindQuery, IReplaceAllResult } from '@univerjs/find-replace';
-import type { IDocsReplaceCommandParams } from '../commands/commands/docs-replace.command';
 import {
     ColorKit,
+    type DocumentDataModel,
     fromCallback,
     ICommandService,
+    type ITextRange,
     Inject,
+    type Nullable,
     ThemeService,
     toDisposable,
 } from '@univerjs/core';
 import {
     DocSelectionManagerService,
+    type DocSkeletonManagerService,
     DocTextResolverService,
     RichTextEditingMutation,
 } from '@univerjs/docs';
 import { DocBackScrollRenderController, getTextRangeFromCharIndex } from '@univerjs/docs-ui';
-import { IRenderManagerService } from '@univerjs/engine-render';
-import { FindModel } from '@univerjs/find-replace';
+import { type Documents, IRenderManagerService, type ITextSelectionStyle } from '@univerjs/engine-render';
+import { FindModel, type IFindMatch, type IFindMoveParams, type IFindQuery, type IReplaceAllResult } from '@univerjs/find-replace';
 import { debounceTime, filter, Subject } from 'rxjs';
-import { DocsReplaceCommand } from '../commands/commands/docs-replace.command';
+import { DocsReplaceCommand, type IDocsReplaceCommandParams } from '../commands/commands/docs-replace.command';
 import { findDocRanges } from '../controllers/utils';
 
 export const DOCS_FIND_REPLACE_PROVIDER = 'docs-find-replace-provider';

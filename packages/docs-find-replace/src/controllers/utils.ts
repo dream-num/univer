@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody } from '@univerjs/core';
 import type { IResolvedDocText } from '@univerjs/docs';
 import type { IFindQuery } from '@univerjs/find-replace';
-import { regexp } from '@univerjs/core';
+import { type IDocumentBody, regexp } from '@univerjs/core';
 
 export interface IDocFindRange {
     startOffset: number;

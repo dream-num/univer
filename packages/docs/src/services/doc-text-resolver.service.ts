@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IDocumentBody } from '@univerjs/core';
-import { Disposable, toDisposable } from '@univerjs/core';
+import { Disposable, type IDisposable, type IDocumentBody, toDisposable } from '@univerjs/core';
 
 export interface IDocTextReplacement {
     endOffset: number;

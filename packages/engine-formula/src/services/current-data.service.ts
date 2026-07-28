@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { BaseDataModel, ITableSnapshot, IUnitRange, LocaleType, Nullable, Workbook } from '@univerjs/core';
 import type {
     IArrayFormulaRangeType,
     IDirtyUnitDefinedNameMap,
@@ -35,13 +34,19 @@ import type {
     IUnitStylesData,
 } from '../basics/common';
 import {
+    type BaseDataModel,
     createIdentifier,
     Disposable,
+    type ITableSnapshot,
+    type IUnitRange,
     Inject,
     IUniverInstanceService,
+    type LocaleType,
     LocaleService,
+    type Nullable,
     ObjectMatrix,
     UniverInstanceType,
+    type Workbook,
 } from '@univerjs/core';
 import { convertUnitDataToRuntime } from '../basics/runtime';
 import { FormulaDataModel } from '../models/formula-data.model';

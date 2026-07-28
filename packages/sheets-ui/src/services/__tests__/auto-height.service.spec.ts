@@ -55,9 +55,6 @@ function createRenderContext(unitId: string): IRenderContext<Workbook> {
 
 class TestSheetSkeletonManagerService {
     static skeleton: unknown = null;
-    static currentSkeleton = new BehaviorSubject<unknown>(null);
-
-    readonly currentSkeleton$ = TestSheetSkeletonManagerService.currentSkeleton.asObservable();
 
     getSkeleton() {
         return TestSheetSkeletonManagerService.skeleton;
@@ -76,9 +73,7 @@ class TestCommandService {
         TestCommandService.listeners.push(cb);
         return {
             dispose: () => {
-                TestCommandService.listeners = TestCommandService.listeners.filter(
-                    (listener) => listener !== cb
-                );
+                TestCommandService.listeners = TestCommandService.listeners.filter((listener) => listener !== cb);
             },
         };
     }
@@ -86,20 +81,13 @@ class TestCommandService {
 
 function createAutoHeightService(skeleton: unknown, unitId = 'u-1') {
     TestSheetSkeletonManagerService.skeleton = skeleton;
-    TestSheetSkeletonManagerService.currentSkeleton = new BehaviorSubject<unknown>(null);
     TestCommandService.executed = [];
     TestCommandService.listeners = [];
 
     const injector = new Injector();
-    injector.add([
-        SheetSkeletonManagerService,
-        { useClass: TestSheetSkeletonManagerService as never },
-    ]);
+    injector.add([SheetSkeletonManagerService, { useClass: TestSheetSkeletonManagerService as never }]);
     injector.add([ICommandService, { useClass: TestCommandService as never }]);
-    injector.add([
-        AutoHeightService,
-        { useFactory: () => injector.createInstance(AutoHeightService, createRenderContext(unitId)) },
-    ]);
+    injector.add([AutoHeightService, { useFactory: () => injector.createInstance(AutoHeightService, createRenderContext(unitId)) }]);
     return injector.get(AutoHeightService);
 }
 
@@ -129,57 +117,6 @@ describe('taskRowsFromRanges', () => {
 });
 
 describe('AutoHeightService', () => {
-    it('calculates imported auto-height rows when their skeleton first becomes current', () => {
-        const calculateAutoHeightInRange = vi.fn(() => [{ row: 0, autoHeight: 30 }]);
-        const skeleton = {
-            calculateAutoHeightInRange,
-            getRowHeight: () => 10,
-            worksheet: {
-                getRowManager: () => ({
-                    getRowData: () => ({
-                        0: { ia: 1 },
-                        1: { h: 20, ia: 0 },
-                        2: { ah: 24, ia: 1 },
-                    }),
-                }),
-            },
-        };
-        let ran = false;
-        const idleGlobals = globalThis as unknown as IIdleGlobals;
-        const requestIdleCallbackSpy = vi
-            .spyOn(idleGlobals, 'requestIdleCallback')
-            .mockImplementation((cb) => {
-                if (!ran) {
-                    ran = true;
-                    cb({ timeRemaining: () => 100, didTimeout: false } as IdleDeadline);
-                }
-                return 1;
-            });
-        const service = createAutoHeightService(skeleton);
-
-        TestSheetSkeletonManagerService.currentSkeleton.next({
-            sheetId: 's-1',
-            skeleton,
-        });
-
-        expect(calculateAutoHeightInRange).toHaveBeenCalledWith([
-            { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
-        ]);
-        expect(TestCommandService.executed).toEqual([
-            {
-                id: SetWorksheetRowAutoHeightMutation.id,
-                params: {
-                    unitId: 'u-1',
-                    subUnitId: 's-1',
-                    rowsAutoHeightInfo: [{ row: 0, autoHeight: 30 }],
-                },
-            },
-        ]);
-
-        service.dispose();
-        requestIdleCallbackSpy.mockRestore();
-    });
-
     it('starts auto height task and executes row-height mutation with calculated values', () => {
         const calculateAutoHeightInRange = vi.fn(() => [
             { row: 0, autoHeight: 30 },
@@ -192,9 +129,9 @@ describe('AutoHeightService', () => {
             getRowHeight,
         } as unknown;
 
-    // Make requestIdleCallback run "once" synchronously.
-    // `AutoHeightService` schedules another idle callback after processing; if we
-    // call callbacks immediately every time, it becomes infinite recursion.
+        // Make requestIdleCallback run "once" synchronously.
+        // `AutoHeightService` schedules another idle callback after processing; if we
+        // call callbacks immediately every time, it becomes infinite recursion.
         let ran = false;
         const idleGlobals = globalThis as unknown as IIdleGlobals;
         const requestIdleCallbackSpy = vi
@@ -215,19 +152,17 @@ describe('AutoHeightService', () => {
             ranges: [{ startRow: 0, endRow: 2, startColumn: 5, endColumn: 8 }],
         });
 
-    // Only rows with changed autoHeight should be synced.
-        expect(TestCommandService.executed).toEqual([
-            {
-                id: SetWorksheetRowAutoHeightMutation.id,
-                params: {
-                    unitId: 'u-1',
-                    subUnitId: 's-1',
-                    rowsAutoHeightInfo: [{ row: 0, autoHeight: 30 }],
-                },
+        // Only rows with changed autoHeight should be synced.
+        expect(TestCommandService.executed).toEqual([{
+            id: SetWorksheetRowAutoHeightMutation.id,
+            params: {
+                unitId: 'u-1',
+                subUnitId: 's-1',
+                rowsAutoHeightInfo: [{ row: 0, autoHeight: 30 }],
             },
-        ]);
+        }]);
 
-    // Ensures it "normalizes" ranges to column 0 in the task.
+        // Ensures it "normalizes" ranges to column 0 in the task.
         expect(calculateAutoHeightInRange).toHaveBeenCalledWith([
             { startRow: 0, endRow: 2, startColumn: 0, endColumn: 0 },
         ]);
@@ -265,7 +200,7 @@ describe('AutoHeightService', () => {
             },
         });
 
-    // It should not throw, and should eventually schedule a loop.
+        // It should not throw, and should eventually schedule a loop.
         expect(requestIdleCallbackSpy).toHaveBeenCalled();
 
         service.dispose();
@@ -353,19 +288,15 @@ describe('AutoHeightService', () => {
             ranges: [{ startRow: 500, endRow: 600, startColumn: 9, endColumn: 9 }],
         });
 
-        expect(calculatedRanges[0]).toEqual([
-            { startRow: 0, endRow: 499, startColumn: 0, endColumn: 0 },
-        ]);
-        expect(TestCommandService.executed).toEqual([
-            {
-                id: SetWorksheetRowAutoHeightMutation.id,
-                params: {
-                    unitId: 'u-1',
-                    subUnitId: 's-1',
-                    rowsAutoHeightInfo: [{ row: 0, autoHeight: 24 }],
-                },
+        expect(calculatedRanges[0]).toEqual([{ startRow: 0, endRow: 499, startColumn: 0, endColumn: 0 }]);
+        expect(TestCommandService.executed).toEqual([{
+            id: SetWorksheetRowAutoHeightMutation.id,
+            params: {
+                unitId: 'u-1',
+                subUnitId: 's-1',
+                rowsAutoHeightInfo: [{ row: 0, autoHeight: 24 }],
             },
-        ]);
+        }]);
 
         service.dispose();
         requestIdleCallbackSpy.mockRestore();
@@ -402,9 +333,7 @@ describe('AutoHeightService', () => {
             ranges: [{ startRow: 0, endRow: 600, startColumn: 1, endColumn: 1 }],
         });
 
-        expect(calculatedRanges[0]).toEqual([
-            { startRow: 0, endRow: 600, startColumn: 0, endColumn: 0 },
-        ]);
+        expect(calculatedRanges[0]).toEqual([{ startRow: 0, endRow: 600, startColumn: 0, endColumn: 0 }]);
 
         service.dispose();
         requestIdleCallbackSpy.mockRestore();

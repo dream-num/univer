@@ -25,8 +25,12 @@ describe('General number display', () => {
 
     it('uses the most precise scientific notation that fits a narrow Excel column', () => {
         vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text) => ({
+            fontBoundingBoxAscent: 0,
+            fontBoundingBoxDescent: 0,
+            actualBoundingBoxAscent: 0,
+            actualBoundingBoxDescent: 0,
             width: text.length * 7,
-        }) as ReturnType<typeof FontCache.getMeasureText>);
+        }));
 
         expect(getGeneralNumberDisplayText(148706409, '148706409', '13.33px SimSun', 66)).toBe('1.49E+08');
         expect(getGeneralNumberDisplayText(209501025, '209501025', '13.33px SimSun', 66)).toBe('2.1E+08');

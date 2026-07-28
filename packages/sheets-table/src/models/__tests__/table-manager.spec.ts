@@ -14,23 +14,46 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
+import type { IWorkbookData, UnitModel } from '@univerjs/core';
+import { LocaleType, Univer, UniverInstanceType } from '@univerjs/core';
+import { afterEach, describe, expect, it } from 'vitest';
 import { TableManager } from '../table-manager';
 
 describe('TableManager', () => {
+    let univer: Univer | undefined;
+
+    afterEach(() => {
+        univer?.dispose();
+    });
+
     it('preserves the table style id in add events emitted during deserialization', () => {
-        const worksheet = {
-            getCell: () => ({ v: 'Name' }),
-            getSheetId: () => 'sheet-1',
-        };
-        const workbook = {
-            getSheetBySheetId: () => worksheet,
-            getUnitId: () => 'unit-1',
-        };
-        const univerInstanceService = {
-            getUnit: () => workbook,
-        };
-        const manager = new TableManager(univerInstanceService as never, {} as never);
+        univer = new Univer();
+        univer.createUnit<IWorkbookData, UnitModel<IWorkbookData>>(
+            UniverInstanceType.UNIVER_SHEET,
+            {
+                id: 'unit-1',
+                appVersion: '3.0.0-alpha',
+                locale: LocaleType.EN_US,
+                name: 'table test',
+                sheetOrder: ['sheet-1'],
+                sheets: {
+                    'sheet-1': {
+                        id: 'sheet-1',
+                        name: 'Sheet1',
+                        rowCount: 2,
+                        columnCount: 1,
+                        cellData: {
+                            0: {
+                                0: { v: 'Name' },
+                            },
+                        },
+                    },
+                },
+                styles: {},
+            }
+        );
+
+        const manager = univer.__getInjector().createInstance(TableManager);
         const events: Array<{ tableStyleId?: string }> = [];
         manager.tableAdd$.subscribe((event) => events.push(event));
 

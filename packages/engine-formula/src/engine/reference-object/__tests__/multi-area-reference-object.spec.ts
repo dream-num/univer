@@ -14,12 +14,17 @@
  * limitations under the License.
  */
 
+import type { Nullable } from '@univerjs/core';
+import type { BaseValueObject } from '../../value-object/base-value-object';
 import { describe, expect, it, vi } from 'vitest';
+import { ErrorType } from '../../../basics/error-type';
 import { createNewArray } from '../../utils/array-object';
+import { ErrorValueObject } from '../../value-object/base-value-object';
 import { NumberValueObject } from '../../value-object/primitive-object';
+import { BaseReferenceObject } from '../base-reference-object';
 import { MultiAreaArrayMode, MultiAreaReferenceObject } from '../multi-area-reference-object';
 
-function createAreaStub(config?: {
+interface ITestReferenceConfig {
     rowCount?: number;
     columnCount?: number;
     exceed?: boolean;
@@ -28,61 +33,95 @@ function createAreaStub(config?: {
     range?: { startRow: number; startColumn: number; endRow: number; endColumn: number };
     rangeData?: { startRow: number; startColumn: number; endRow: number; endColumn: number };
     iteratorValue?: number;
-}) {
-    const rowCount = config?.rowCount ?? 1;
-    const columnCount = config?.columnCount ?? 1;
-    const range = config?.range ?? { startRow: 0, startColumn: 0, endRow: 0, endColumn: 0 };
-    const rangeData = config?.rangeData ?? range;
-    const iteratorValue = config?.iteratorValue ?? 1;
-    const unitRange = {
-        unitId: config?.unitId ?? 'unit-1',
-        sheetId: config?.sheetId ?? 'sheet-1',
-        range,
-    };
+}
 
-    return {
-        dispose: vi.fn(),
-        isError: () => false,
-        getRowCount: () => rowCount,
-        getColumnCount: () => columnCount,
-        isExceedRange: () => !!config?.exceed,
-        setRefOffset: vi.fn(),
-        getUnitId: () => config?.unitId ?? 'unit-1',
-        getSheetId: () => config?.sheetId ?? 'sheet-1',
-        getActiveSheetRowCount: () => 100,
-        getActiveSheetColumnCount: () => 26,
-        iterator: (callback: (v: any, row: number, col: number) => any) => callback(NumberValueObject.create(iteratorValue), 0, 0),
-        getFirstCell: () => NumberValueObject.create(iteratorValue),
-        getRangePosition: () => range,
-        getRangeData: () => rangeData,
-        toArrayValueObject: () => createNewArray(
+class TestReferenceObject extends BaseReferenceObject {
+    override readonly dispose = vi.fn(() => super.dispose());
+    override readonly setRefOffset = vi.fn((x = 0, y = 0) => super.setRefOffset(x, y));
+
+    constructor(private readonly _config: ITestReferenceConfig = {}) {
+        super('test-reference');
+    }
+
+    override getRowCount(): number {
+        return this._config.rowCount ?? 1;
+    }
+
+    override getColumnCount(): number {
+        return this._config.columnCount ?? 1;
+    }
+
+    override isExceedRange(): boolean {
+        return this._config.exceed ?? false;
+    }
+
+    override getUnitId(): string {
+        return this._config.unitId ?? 'unit-1';
+    }
+
+    override getSheetId(): string {
+        return this._config.sheetId ?? 'sheet-1';
+    }
+
+    override getActiveSheetRowCount(): number {
+        return 100;
+    }
+
+    override getActiveSheetColumnCount(): number {
+        return 26;
+    }
+
+    override iterator(
+        callback: (value: Nullable<BaseValueObject>, row: number, column: number) => Nullable<boolean>
+    ): void {
+        callback(NumberValueObject.create(this._config.iteratorValue ?? 1), 0, 0);
+    }
+
+    override getFirstCell(): BaseValueObject {
+        return NumberValueObject.create(this._config.iteratorValue ?? 1);
+    }
+
+    override getRangePosition() {
+        return this._config.range ?? { startRow: 0, startColumn: 0, endRow: 0, endColumn: 0 };
+    }
+
+    override getRangeData() {
+        return this._config.rangeData ?? this.getRangePosition();
+    }
+
+    override toArrayValueObject() {
+        const rowCount = this.getRowCount();
+        const columnCount = this.getColumnCount();
+        return createNewArray(
             Array.from(
                 { length: rowCount },
-                () => Array.from({ length: columnCount }, () => NumberValueObject.create(iteratorValue))
+                () => Array.from(
+                    { length: columnCount },
+                    () => NumberValueObject.create(this._config.iteratorValue ?? 1)
+                )
             ),
             rowCount,
             columnCount
-        ),
-        toUnitRange: () => unitRange,
-        toUnitRanges: () => [unitRange],
-    };
+        );
+    }
 }
 
-function createErrorAreaStub() {
-    return {
-        dispose: vi.fn(),
-        isError: () => true,
-    };
+function createAreaStub(config?: ITestReferenceConfig): TestReferenceObject {
+    return new TestReferenceObject(config);
+}
+
+function createErrorAreaStub(): ErrorValueObject {
+    return ErrorValueObject.create(ErrorType.REF);
 }
 
 describe('MultiAreaReferenceObject', () => {
     it('should manage areas and multi-area flags', () => {
         const areaA = createAreaStub({ rowCount: 2, columnCount: 3 });
         const areaB = createAreaStub({ rowCount: 4, columnCount: 5 });
-        const multi = new MultiAreaReferenceObject('token', [[areaA as never]]);
+        const multi = new MultiAreaReferenceObject('token', [[areaA]]);
 
-        multi.addArea(areaB as never);
-        multi.addArea([areaA as never, areaB as never]);
+        multi.addArea(areaB);
+        multi.addArea([areaA, areaB]);
 
         expect(multi.isMultiArea()).toBe(true);
         expect(multi.isRange()).toBe(false);
@@ -101,7 +140,7 @@ describe('MultiAreaReferenceObject', () => {
             range: { startRow: 2, startColumn: 3, endRow: 4, endColumn: 5 },
         });
         const errorArea = createErrorAreaStub();
-        const multi = new MultiAreaReferenceObject('token', [[errorArea as never, area as never]]);
+        const multi = new MultiAreaReferenceObject('token', [[errorArea, area]]);
 
         expect(multi.getUnitId()).toBe('unit-A');
         expect(multi.getSheetId()).toBe('sheet-A');
@@ -114,7 +153,7 @@ describe('MultiAreaReferenceObject', () => {
     it('should propagate offset and iterate in row-major order with stop signal', () => {
         const area1 = createAreaStub({ iteratorValue: 1 });
         const area2 = createAreaStub({ iteratorValue: 2 });
-        const multi = new MultiAreaReferenceObject('token', [[area1 as never, area2 as never]]);
+        const multi = new MultiAreaReferenceObject('token', [[area1, area2]]);
 
         multi.setRefOffset(2, 3);
         expect(area1.setRefOffset).toHaveBeenCalledWith(2, 3);
@@ -122,7 +161,10 @@ describe('MultiAreaReferenceObject', () => {
 
         const values: number[] = [];
         multi.iterator((v) => {
-            values.push(v?.getValue() as number);
+            const value = v?.getValue();
+            if (typeof value === 'number') {
+                values.push(value);
+            }
             return values.length < 1;
         });
         expect(values).toEqual([1]);
@@ -143,7 +185,7 @@ describe('MultiAreaReferenceObject', () => {
             sheetId: 's1',
             iteratorValue: 5,
         });
-        const multi = new MultiAreaReferenceObject('token', [[area1 as never, area2 as never]]);
+        const multi = new MultiAreaReferenceObject('token', [[area1, area2]]);
 
         const array = multi.toArrayValueObject();
         expect(array.getRowCount()).toBe(1);
@@ -193,7 +235,7 @@ describe('MultiAreaReferenceObject', () => {
         });
         const multi = new MultiAreaReferenceObject(
             'Jan:Feb!A1:B2',
-            [[area1 as never], [area2 as never]],
+            [[area1], [area2]],
             MultiAreaArrayMode.STACK_AREAS
         );
 
@@ -223,7 +265,7 @@ describe('MultiAreaReferenceObject', () => {
                 endColumn: Number.NEGATIVE_INFINITY,
             },
         });
-        const multi = new MultiAreaReferenceObject('token', [[invalidArea as never]]);
+        const multi = new MultiAreaReferenceObject('token', [[invalidArea]]);
 
         expect(multi.getRangePosition()).toEqual({
             startRow: -1,
@@ -242,7 +284,7 @@ describe('MultiAreaReferenceObject', () => {
     it('should dispose all areas', () => {
         const area1 = createAreaStub();
         const area2 = createAreaStub();
-        const multi = new MultiAreaReferenceObject('token', [[area1 as never, area2 as never]]);
+        const multi = new MultiAreaReferenceObject('token', [[area1, area2]]);
 
         multi.dispose();
         expect(area1.dispose).toHaveBeenCalledTimes(1);

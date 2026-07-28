@@ -94,7 +94,7 @@ describe('docs line extension', () => {
 
     it('draws accounting underline across the cell view bound once', () => {
         const line = new Line();
-        (line as any).extensionOffset = {};
+        line.extensionOffset = {};
 
         const ctx = createCtx();
         const glyph = createGlyph();
@@ -102,9 +102,11 @@ describe('docs line extension', () => {
         glyph.parent.parent.divides = [glyph.parent];
         glyph.parent.glyphGroup = [glyph, { ...glyph }];
 
-        line.draw(ctx, { scaleX: 1, scaleY: 1 } as any, glyph, undefined, {
+        line.draw(ctx, { scaleX: 1, scaleY: 1 }, glyph, undefined, {
+            viewRanges: [],
+            viewportKey: '',
             viewBound: { left: 0, top: 0, right: 40, bottom: 20 },
-        } as any);
+        });
 
         expect(ctx.moveTo.mock.calls[0][0]).toBeCloseTo(0);
         expect(ctx.moveTo.mock.calls[0][1]).toBeCloseTo(7.2);

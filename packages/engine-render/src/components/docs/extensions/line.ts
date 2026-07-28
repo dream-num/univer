@@ -30,9 +30,6 @@ import { docExtension } from '../doc-extension';
 const UNIQUE_KEY = 'DefaultDocsLineExtension';
 
 const DOC_EXTENSION_Z_INDEX = 40;
-const TEXT_DECORATION_SINGLE_ACCOUNTING = 18 as TextDecoration;
-const TEXT_DECORATION_DOUBLE_ACCOUNTING = 19 as TextDecoration;
-
 export class Line extends docExtension {
     override uKey = UNIQUE_KEY;
 
@@ -194,8 +191,8 @@ export class Line extends docExtension {
         switch (style) {
             case TextDecoration.SINGLE:
             case TextDecoration.DOUBLE:
-            case TEXT_DECORATION_SINGLE_ACCOUNTING:
-            case TEXT_DECORATION_DOUBLE_ACCOUNTING:
+            case TextDecoration.SINGLE_ACCOUNTING:
+            case TextDecoration.DOUBLE_ACCOUNTING:
                 ctx.lineWidth = 1;
                 ctx.setLineDash([0]);
                 return;
@@ -261,11 +258,11 @@ export class Line extends docExtension {
     }
 
     private _isDouble(lineType?: TextDecoration): boolean {
-        return lineType === TextDecoration.DOUBLE || lineType === TextDecoration.WAVY_DOUBLE || lineType === TEXT_DECORATION_DOUBLE_ACCOUNTING;
+        return lineType === TextDecoration.DOUBLE || lineType === TextDecoration.WAVY_DOUBLE || lineType === TextDecoration.DOUBLE_ACCOUNTING;
     }
 
     private _isAccounting(lineType?: TextDecoration): boolean {
-        return lineType === TEXT_DECORATION_SINGLE_ACCOUNTING || lineType === TEXT_DECORATION_DOUBLE_ACCOUNTING;
+        return lineType === TextDecoration.SINGLE_ACCOUNTING || lineType === TextDecoration.DOUBLE_ACCOUNTING;
     }
 
     private _isFirstAccountingGlyph(glyph: IDocumentSkeletonGlyph): boolean {

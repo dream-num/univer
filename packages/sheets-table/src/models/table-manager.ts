@@ -37,7 +37,9 @@ import type {
 import { Disposable, generateRandomId, Inject, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { getSheetCommandTarget } from '@univerjs/sheets';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { IRangeOperationTypeEnum } from '../types/type';
+import {
+    IRangeOperationTypeEnum,
+} from '../types/type';
 import { convertCellDataToString, getColumnName } from '../util';
 import { Table } from './table';
 import { TableColumn } from './table-column';

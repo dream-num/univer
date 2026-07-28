@@ -387,20 +387,8 @@ export class FunctionNode extends BaseAstNode {
 
     private _setRefInfo() {
         const { currentUnitId, currentSubUnitId, currentRow, currentColumn, currentRowCount, currentColumnCount } = this._runtimeService;
-        const token = this.getToken();
-        const parentToken = this.getParent()?.getToken();
-        const preserveArrayContext =
-            (token === 'XLOOKUP' && parentToken === 'GROUPBY') ||
-            (token === 'IF' && ['MIN', 'MAX', 'SMALL', 'LARGE'].includes(parentToken ?? ''));
 
-        this._functionExecutor.setRefInfo(
-            currentUnitId,
-            currentSubUnitId,
-            currentRow,
-            currentColumn,
-            preserveArrayContext ? Math.max(currentRowCount, 2) : currentRowCount,
-            currentColumnCount
-        );
+        this._functionExecutor.setRefInfo(currentUnitId, currentSubUnitId, currentRow, currentColumn, currentRowCount, currentColumnCount);
 
         if (this._functionExecutor.needsSheetRowColumnCount) {
             const { rowCount, columnCount } = this._currentConfigService.getSheetRowColumnCount(currentUnitId, currentSubUnitId);

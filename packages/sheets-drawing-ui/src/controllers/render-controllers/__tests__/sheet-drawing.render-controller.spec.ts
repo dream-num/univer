@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { ISheetDrawing } from '@univerjs/sheets-drawing';
 import { DrawingTypeEnum } from '@univerjs/core';
 import { drawingPositionToTransform } from '@univerjs/sheets-drawing';
 import { describe, expect, it, vi } from 'vitest';
@@ -30,45 +31,45 @@ vi.mock('@univerjs/sheets-drawing', async (importOriginal) => {
 
 describe('SheetsDrawingRenderController', () => {
     it('initializes sheet drawing data and materializes sheet transforms for render objects', () => {
-        const drawingWithSheetTransform = {
+        const drawingWithSheetTransform: Partial<ISheetDrawing> = {
             unitId: 'unit-1',
             subUnitId: 'sheet-1',
             drawingId: 'drawing-1',
             sheetTransform: {
-                from: { row: 1, column: 2 },
-                to: { row: 3, column: 4 },
+                from: { row: 1, column: 2, rowOffset: 0, columnOffset: 0 },
+                to: { row: 3, column: 4, rowOffset: 0, columnOffset: 0 },
             },
-        } as any;
-        const drawingWithoutSkeleton = {
+        };
+        const drawingWithoutSkeleton: Partial<ISheetDrawing> = {
             unitId: 'unit-1',
             subUnitId: 'missing-sheet',
             drawingId: 'drawing-2',
             sheetTransform: {
-                from: { row: 5, column: 6 },
-                to: { row: 7, column: 8 },
+                from: { row: 5, column: 6, rowOffset: 0, columnOffset: 0 },
+                to: { row: 7, column: 8, rowOffset: 0, columnOffset: 0 },
             },
         };
-        const groupedDrawing = {
+        const groupedDrawing: Partial<ISheetDrawing> = {
             unitId: 'unit-1',
             subUnitId: 'sheet-1',
             drawingId: 'drawing-4',
             groupId: 'group-1',
             transform: { left: 2, top: 3, width: 40, height: 50 },
             sheetTransform: {
-                from: { row: 1, column: 2 },
-                to: { row: 3, column: 4 },
+                from: { row: 1, column: 2, rowOffset: 0, columnOffset: 0 },
+                to: { row: 3, column: 4, rowOffset: 0, columnOffset: 0 },
             },
         };
-        const drawingGroup = {
+        const drawingGroup: Partial<ISheetDrawing> = {
             unitId: 'unit-1',
             subUnitId: 'sheet-1',
             drawingId: 'drawing-5',
             drawingType: DrawingTypeEnum.DRAWING_GROUP,
             sheetTransform: {
-                from: { row: 1, column: 2 },
-                to: { row: 3, column: 4 },
+                from: { row: 1, column: 2, rowOffset: 0, columnOffset: 0 },
+                to: { row: 3, column: 4, rowOffset: 0, columnOffset: 0 },
             },
-        } as any;
+        };
         const drawingData = {
             'sheet-1': {
                 data: {

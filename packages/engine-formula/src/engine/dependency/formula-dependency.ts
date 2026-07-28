@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
-import type { IRange, IUnitRange, Nullable, Workbook } from '@univerjs/core';
+import type {
+    IRange,
+    IUnitRange,
+    Nullable,
+    Workbook,
+} from '@univerjs/core';
 import type {
     IFeatureDirtyRangeType,
     IFormulaData,
@@ -23,7 +28,9 @@ import type {
     IUnitData,
 } from '../../basics/common';
 import type { IFormulaDirtyData } from '../../services/current-data.service';
-import type { IFeatureCalculationManagerParam } from '../../services/feature-calculation-manager.service';
+import type {
+    IFeatureCalculationManagerParam,
+} from '../../services/feature-calculation-manager.service';
 import type { IAllRuntimeData } from '../../services/runtime.service';
 import type { FunctionNode, PrefixNode, SuffixNode } from '../ast-node';
 import type { BaseAstNode } from '../ast-node/base-ast-node';
@@ -48,7 +55,9 @@ import {
 import { prefixToken, suffixToken } from '../../basics/token';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { IDependencyManagerService } from '../../services/dependency-manager.service';
-import { IFeatureCalculationManagerService } from '../../services/feature-calculation-manager.service';
+import {
+    IFeatureCalculationManagerService,
+} from '../../services/feature-calculation-manager.service';
 import { IOtherFormulaManagerService } from '../../services/other-formula-manager.service';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
 import { Lexer } from '../analysis/lexer';

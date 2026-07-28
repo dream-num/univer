@@ -14,10 +14,23 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICustomRange, IDocumentData, IHyperLinkCustomRange, Injector, IWorkbookData, Nullable } from '@univerjs/core';
+import type {
+    ICellData,
+    ICustomRange,
+    IDocumentData,
+    IHyperLinkCustomRange,
+    Injector,
+    IWorkbookData,
+    Nullable,
+} from '@univerjs/core';
 import type { LexerNode } from '../../engine/analysis/lexer-node';
 import type { BaseAstNode } from '../../engine/ast-node/base-ast-node';
-import { CellValueType, CustomRangeType, LocaleType, RichTextValue } from '@univerjs/core';
+import {
+    CellValueType,
+    CustomRangeType,
+    LocaleType,
+    RichTextValue,
+} from '@univerjs/core';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { ErrorType } from '../../basics/error-type';
 import { Lexer } from '../../engine/analysis/lexer';

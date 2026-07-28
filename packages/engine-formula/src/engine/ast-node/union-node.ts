@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
+import type { FunctionVariantType } from '../reference-object/base-reference-object';
 import { ErrorType } from '../../basics/error-type';
 import { matchToken } from '../../basics/token';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { IFunctionService } from '../../services/function.service';
 import { LexerNode } from '../analysis/lexer-node';
+import { BaseReferenceObject } from '../reference-object/base-reference-object';
 import { MultiAreaArrayMode, MultiAreaReferenceObject } from '../reference-object/multi-area-reference-object';
 import { RangeReferenceObject } from '../reference-object/range-reference-object';
 import { getRangeReferenceObjectFromCache } from '../utils/value-object';
@@ -33,7 +34,7 @@ import { NODE_ORDER_MAP, NodeType } from './node-type';
 export class UnionNode extends BaseAstNode {
     constructor(
         operatorString: string,
-        private readonly _currentConfigService: IFormulaCurrentConfigService
+        private readonly _currentConfigService: Pick<IFormulaCurrentConfigService, 'getSheetsInfo'>
     ) {
         super(operatorString);
     }
@@ -58,7 +59,7 @@ export class UnionNode extends BaseAstNode {
         let result: FunctionVariantType;
         if (this.getToken() === matchToken.COLON) {
             result = this._createThreeDimensionalReference(leftChild.getToken(), rightNode)
-                ?? this._unionFunction(leftNode, rightNode) as FunctionVariantType;
+                ?? this._unionFunction(leftNode, rightNode);
         } else {
             result = ErrorValueObject.create(ErrorType.NAME);
         }
@@ -69,11 +70,11 @@ export class UnionNode extends BaseAstNode {
         firstSheetToken: string,
         rightNode: FunctionVariantType
     ): MultiAreaReferenceObject | undefined {
-        if (!rightNode.isReferenceObject()) {
+        if (!(rightNode instanceof BaseReferenceObject)) {
             return;
         }
 
-        const source = rightNode as BaseReferenceObject;
+        const source = rightNode;
         const firstSheetName = this._normalizeSheetName(firstSheetToken);
         const lastSheetName = this._normalizeSheetName(source.getForcedSheetName());
         if (!firstSheetName || !lastSheetName) {
@@ -140,18 +141,17 @@ export class UnionNode extends BaseAstNode {
         target.setRefOffset(x, y);
     }
 
-    private _unionFunction(variant1: FunctionVariantType, variant2: FunctionVariantType) {
+    private _unionFunction(
+        variant1: FunctionVariantType,
+        variant2: FunctionVariantType
+    ): FunctionVariantType {
         if (variant1.isError() || variant2.isError()) {
             return ErrorValueObject.create(ErrorType.REF);
         }
 
-        if (!variant1.isReferenceObject() || !variant2.isReferenceObject()) {
+        if (!(variant1 instanceof BaseReferenceObject) || !(variant2 instanceof BaseReferenceObject)) {
             return ErrorValueObject.create(ErrorType.REF);
         }
-
-        variant1 = variant1 as BaseReferenceObject;
-
-        variant2 = variant2 as BaseReferenceObject;
 
         return getRangeReferenceObjectFromCache(variant1, variant2);
 

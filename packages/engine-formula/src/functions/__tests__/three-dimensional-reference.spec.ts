@@ -16,13 +16,13 @@
 
 import type { IUnitRange, IWorkbookData } from '@univerjs/core';
 import type { ISheetData } from '../../basics/common';
-import type { LexerNode } from '../../engine/analysis/lexer-node';
-import type { BaseAstNode } from '../../engine/ast-node/base-ast-node';
 import type { IFormulaDependencyTree } from '../../engine/dependency/dependency-tree';
 import { CellValueType, LocaleType } from '@univerjs/core';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { Lexer } from '../../engine/analysis/lexer';
+import { LexerNode } from '../../engine/analysis/lexer-node';
 import { AstTreeBuilder } from '../../engine/analysis/parser';
+import { BaseAstNode } from '../../engine/ast-node/base-ast-node';
 import { FormulaDependencyTree } from '../../engine/dependency/dependency-tree';
 import { IFormulaDependencyGenerator } from '../../engine/dependency/formula-dependency';
 import { Interpreter } from '../../engine/interpreter/interpreter';
@@ -152,7 +152,11 @@ describe('three-dimensional sheet reference', () => {
         const interpreter = testBed.get(Interpreter);
         currentConfigService = testBed.get(IFormulaCurrentConfigService);
         dependencyGenerator = testBed.get(IFormulaDependencyGenerator);
-        dependencyManager = testBed.get(IDependencyManagerService) as CapturingDependencyManagerService;
+        const manager = testBed.get(IDependencyManagerService);
+        if (!(manager instanceof CapturingDependencyManagerService)) {
+            throw new TypeError('Expected CapturingDependencyManagerService');
+        }
+        dependencyManager = manager;
         const runtimeService = testBed.get(IFormulaRuntimeService);
         unitId = testBed.unitId;
         activeSheetId = testBed.sheetId;
@@ -194,8 +198,14 @@ describe('three-dimensional sheet reference', () => {
 
         calculate = (formula: string) => {
             const lexerNode = lexer.treeBuilder(formula);
-            const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
-            const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
+            if (!(lexerNode instanceof LexerNode)) {
+                throw new TypeError(`Failed to parse formula: ${formula}`);
+            }
+            const astNode = astTreeBuilder.parse(lexerNode);
+            if (!(astNode instanceof BaseAstNode)) {
+                throw new TypeError(`Failed to build AST: ${formula}`);
+            }
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode));
             return getObjectValue(result);
         };
     });
@@ -261,8 +271,10 @@ describe('three-dimensional sheet reference', () => {
                 item instanceof FormulaDependencyTree && item.formula === '=SUM(Jan:Mar!B2)'
         );
 
-        expect(tree).toBeDefined();
-        expect(dependencyManager.capturedRanges.get(tree!.treeId)?.map(({ sheetId }) => sheetId)).toEqual([
+        if (!tree) {
+            throw new TypeError('Expected a dependency tree for the 3D reference');
+        }
+        expect(dependencyManager.capturedRanges.get(tree.treeId)?.map(({ sheetId }) => sheetId)).toEqual([
             'jan',
             'feb',
             'mar',

@@ -33,9 +33,15 @@ function createService() {
     };
 
     const workbookById = new Map<string, unknown>();
+    const unitTypeById = new Map<string, UniverInstanceType>();
     const univerInstanceService = {
         getCurrentUnitOfType: vi.fn(() => workbookForCurrentType),
-        getUnit: vi.fn((unitId: string) => workbookById.get(unitId)),
+        getUnit: vi.fn((unitId: string, unitType?: UniverInstanceType) => {
+            if (unitType != null && unitTypeById.get(unitId) !== unitType) {
+                return undefined;
+            }
+            return workbookById.get(unitId);
+        }),
     };
     const localeService = {
         getCurrentLocale: vi.fn(() => 'zhCN'),
@@ -86,6 +92,7 @@ function createService() {
     return {
         service,
         workbookById,
+        unitTypeById,
         univerInstanceService,
         localeService,
         formulaDataModel,
@@ -204,8 +211,9 @@ describe('FormulaCurrentConfigService', () => {
     });
 
     it('should resolve sheet size, filtered rows and lightweight data loading', () => {
-        const { service, workbookById, formulaDataModel } = createService();
+        const { service, workbookById, unitTypeById, formulaDataModel } = createService();
 
+        unitTypeById.set('unit-size', UniverInstanceType.UNIVER_SHEET);
         workbookById.set('unit-size', {
             getSheetBySheetId: (sheetId: string) => {
                 if (sheetId === 'sheet-size') {
@@ -219,6 +227,9 @@ describe('FormulaCurrentConfigService', () => {
 
         expect(service.getSheetRowColumnCount('unit-size', 'sheet-size')).toEqual({ rowCount: 22, columnCount: 8 });
         expect(service.getSheetRowColumnCount('unit-size', 'missing')).toEqual({ rowCount: 0, columnCount: 0 });
+        unitTypeById.set('doc-unit', UniverInstanceType.UNIVER_DOC);
+        workbookById.set('doc-unit', {});
+        expect(service.getSheetRowColumnCount('doc-unit', 'doc-unit')).toEqual({ rowCount: 0, columnCount: 0 });
         expect(service.getFilteredOutRows('unit-size', 'sheet-size', 1, 5)).toEqual([2, 4]);
 
         formulaDataModel.getCalculateData.mockReturnValue({

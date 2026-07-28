@@ -21,6 +21,7 @@ import type { IInnerCutCommandParams, IInnerPasteCommandParams } from '../clipbo
 import {
     BooleanNumber,
     CustomDecorationType,
+    CustomRangeType,
     DataStreamTreeTokenType,
     DOC_RANGE_TYPE,
     EDITOR_ACTIVATED,
@@ -390,6 +391,44 @@ describe('test cases in clipboard', () => {
             expect(getTextByPosition(0, 6)).toBe('univer');
             expect(getTextByPosition(11, 17)).toBe('univer');
             expect(getFormatValueAt('bl', 0)).toBe(BooleanNumber.TRUE);
+
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+        });
+
+        it('creates independent Custom Range ids for every pasted selection', async () => {
+            const sourceRange = {
+                startIndex: 0,
+                endIndex: 0,
+                rangeId: 'source-range',
+                rangeType: CustomRangeType.CUSTOM,
+                wholeEntity: true,
+            };
+            const initialTargetRange = {
+                ...sourceRange,
+                rangeId: 'initial-target-range',
+            };
+
+            await commandService.executeCommand(InnerPasteCommand.id, {
+                segmentId: '',
+                doc: {
+                    body: {
+                        dataStream: 'x',
+                        customRanges: [initialTargetRange],
+                    },
+                },
+                customRangeMappings: [{
+                    sourceRange,
+                    targetRange: initialTargetRange,
+                }],
+                textRanges: [],
+            } satisfies IInnerPasteCommandParams);
+
+            const pastedRangeIds = getDocumentSnapshot()?.body?.customRanges
+                ?.map((range) => range.rangeId) ?? [];
+            expect(pastedRangeIds).toHaveLength(2);
+            expect(new Set(pastedRangeIds).size).toBe(2);
+            expect(pastedRangeIds).not.toContain(sourceRange.rangeId);
+            expect(pastedRangeIds).not.toContain(initialTargetRange.rangeId);
 
             expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
         });

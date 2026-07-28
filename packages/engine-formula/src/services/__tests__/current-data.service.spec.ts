@@ -20,7 +20,7 @@ import { FormulaDataModel } from '../../models/formula-data.model';
 import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from '../current-data.service';
 import { ISheetRowFilteredService } from '../sheet-row-filtered.service';
 
-function createService() {
+function createService(withCurrentWorkbook = true) {
     const workbookForCurrentType = {
         getUnitId: vi.fn(() => 'unit-current'),
         getActiveSheet: vi.fn(() => ({
@@ -34,7 +34,7 @@ function createService() {
 
     const workbookById = new Map<string, unknown>();
     const univerInstanceService = {
-        getCurrentUnitOfType: vi.fn(() => workbookForCurrentType),
+        getCurrentUnitOfType: vi.fn(() => withCurrentWorkbook ? workbookForCurrentType : undefined),
         getUnit: vi.fn((unitId: string) => workbookById.get(unitId)),
         getUnitType: vi.fn((unitId: string) =>
             workbookById.has(unitId)
@@ -241,6 +241,15 @@ describe('FormulaCurrentConfigService', () => {
         expect(service.getFormulaData()).toEqual({ unitLite: { sheetLite: { 1: { 1: { f: '=A1' } } } } });
         expect(service.getArrayFormulaRange()).toEqual({ unitLite: { sheetLite: { key: 'range' } } });
         expect(service.getUnitData().unitLite.sheetLite.rowData).toEqual({ 1: { h: 30 } });
+    });
+
+    it('returns empty sheet metadata when formula calculation runs without Sheets', () => {
+        const { service } = createService(false);
+
+        expect(service.getSheetsInfo()).toEqual({
+            sheetOrder: [],
+            sheetNameMap: {},
+        });
     });
 
     it('should update dirty ranges/register data and cleanup all caches on dispose', () => {

@@ -34,7 +34,7 @@ import {
 import { DocBackScrollRenderController, getTextRangeFromCharIndex } from '@univerjs/docs-ui';
 import { type Documents, IRenderManagerService, type ITextSelectionStyle } from '@univerjs/engine-render';
 import { FindModel, type IFindMatch, type IFindMoveParams, type IFindQuery, type IReplaceAllResult } from '@univerjs/find-replace';
-import { debounceTime, filter, Subject } from 'rxjs';
+import { debounceTime, filter, merge, Subject } from 'rxjs';
 import { DocsReplaceCommand, type IDocsReplaceCommandParams } from '../commands/commands/docs-replace.command';
 import { findDocRanges } from '../controllers/utils';
 
@@ -71,10 +71,14 @@ export class DocsFindModel extends FindModel {
         super();
         this.unitId = _doc.getUnitId();
 
-        this.disposeWithMe(toDisposable(fromCallback(this._commandService.onCommandExecuted.bind(this._commandService))
+        this.disposeWithMe(toDisposable(merge(
+            fromCallback(this._commandService.onCommandExecuted.bind(this._commandService))
+                .pipe(filter(([command]) => command.id === RichTextEditingMutation.id &&
+                    getUnitId(command.params) === this.unitId)),
+            this._textResolverService.textChanged$
+                .pipe(filter((unitId) => unitId === this.unitId))
+        )
             .pipe(
-                filter(([command]) => command.id === RichTextEditingMutation.id &&
-                    (command.params as { unitId?: string })?.unitId === this.unitId),
                 debounceTime(220)
             )
             .subscribe(() => this._scan(true))));
@@ -281,4 +285,13 @@ export class DocsFindModel extends FindModel {
         this._highlights.forEach((highlight) => highlight.dispose());
         this._highlights = [];
     }
+}
+
+function getUnitId(params: unknown): string | undefined {
+    return params != null &&
+        typeof params === 'object' &&
+        'unitId' in params &&
+        typeof params.unitId === 'string'
+        ? params.unitId
+        : undefined;
 }

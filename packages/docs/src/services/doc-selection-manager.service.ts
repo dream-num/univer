@@ -31,6 +31,12 @@ interface IDocSelectionManagerSearchParam {
     subUnitId: string;
 }
 
+/**
+ * Keeps a programmatically restored collapsed caret from being promoted back
+ * into a neighboring whole-entity selection by feature-specific UI.
+ */
+export const DOC_SELECTION_OPTION_PRESERVE_CARET = 'preserveCaret';
+
 export interface IRefreshSelectionParam extends IDocSelectionManagerSearchParam {
     docRanges: ISuccinctDocRangeParam[];
     isEditing: boolean;
@@ -289,7 +295,7 @@ export class DocSelectionManagerService extends RxDisposable {
             return;
         }
 
-        const { textRanges, rectRanges } = allTextSelectionInfo;
+        const { textRanges, rectRanges, options } = allTextSelectionInfo;
 
         const docRanges = [...textRanges, ...rectRanges];
 
@@ -300,6 +306,7 @@ export class DocSelectionManagerService extends RxDisposable {
             subUnitId,
             docRanges,
             isEditing: false,
+            options,
         });
     }
 

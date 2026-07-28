@@ -53,6 +53,7 @@ export class FormulaCalculationTriggerService extends Disposable {
         @IActiveDirtyManagerService private readonly _activeDirtyManagerService: IActiveDirtyManagerService
     ) {
         super();
+        this._registerGenericDirtyConversions();
         this._initialize();
     }
 
@@ -96,6 +97,15 @@ export class FormulaCalculationTriggerService extends Disposable {
             this._waitingCommandQueue.push(command);
             this._scheduleFlush();
         }));
+    }
+
+    private _registerGenericDirtyConversions(): void {
+        this._activeDirtyManagerService.register(SetTriggerFormulaCalculationStartMutation.id, {
+            commandId: SetTriggerFormulaCalculationStartMutation.id,
+            getDirtyData: (command) => ({
+                ...command.params,
+            }),
+        });
     }
 
     private _scheduleFlush(): void {

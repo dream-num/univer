@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICommandInfo, IObjectMatrixPrimitiveType, IRange, IUnitRange, Nullable, Workbook } from '@univerjs/core';
-import type { IDirtyUnitDefinedNameMap, IDirtyUnitSheetNameMap, IFormulaDirtyData, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import type {
     IInsertColMutationParams,
     IInsertRowMutationParams,
@@ -33,12 +31,19 @@ import type {
 } from '@univerjs/sheets';
 import {
     Disposable,
+    type ICellData,
+    type ICommandInfo,
+    type IObjectMatrixPrimitiveType,
+    type IRange,
+    type IUnitRange,
     Inject,
     IUniverInstanceService,
+    type Nullable,
     ObjectMatrix,
     UniverInstanceType,
+    type Workbook,
 } from '@univerjs/core';
-import { FormulaDataModel, IActiveDirtyManagerService, RemoveDefinedNameMutation, SetDefinedNameMutation, SetTriggerFormulaCalculationStartMutation } from '@univerjs/engine-formula';
+import { FormulaDataModel, IActiveDirtyManagerService, type IDirtyUnitDefinedNameMap, type IDirtyUnitSheetNameMap, type ISetDefinedNameMutationParam, RemoveDefinedNameMutation, SetDefinedNameMutation } from '@univerjs/engine-formula';
 import {
     ClearSelectionFormatCommand,
     InsertColMutation,
@@ -257,16 +262,6 @@ export class ActiveDirtyController extends Disposable {
     }
 
     private _initialSheet() {
-        this._activeDirtyManagerService.register(SetTriggerFormulaCalculationStartMutation.id, {
-            commandId: SetTriggerFormulaCalculationStartMutation.id,
-            getDirtyData: (command: ICommandInfo) => {
-                const params = command.params as IFormulaDirtyData;
-                return {
-                    ...params,
-                };
-            },
-        });
-
         this._activeDirtyManagerService.register(RemoveSheetMutation.id, {
             commandId: RemoveSheetMutation.id,
             getDirtyData: (command: ICommandInfo) => {

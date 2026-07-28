@@ -322,12 +322,18 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
     }
 
     getSheetsInfo() {
-        const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        if (!workbook) {
+            return {
+                sheetOrder: [],
+                sheetNameMap: {},
+            };
+        }
         const { id, sheetOrder } = workbook.getSnapshot();
 
         return {
             sheetOrder,
-            sheetNameMap: this._sheetIdToNameMap[id] as { [sheetId: string]: string },
+            sheetNameMap: this._sheetIdToNameMap[id] ?? {},
         };
     }
 

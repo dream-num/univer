@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, ICommandService, IExecutionOptions } from '@univerjs/core';
+import { CommandType, type ICommandInfo, type ICommandService, type IExecutionOptions } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
     SetFormulaCalculationNotificationMutation,
@@ -22,13 +22,15 @@ import {
     SetFormulaCalculationStopMutation,
     SetTriggerFormulaCalculationStartMutation,
 } from '../../commands/mutations/set-formula-calculation.mutation';
+import { ActiveDirtyManagerService } from '../active-dirty-manager.service';
 import { FormulaCalculationTriggerService } from '../formula-calculation-trigger.service';
 import { FormulaExecutedStateType } from '../runtime.service';
 
 function createTestBed(start = true) {
     let listener: ((command: ICommandInfo, options?: IExecutionOptions) => void) | undefined;
     const executed: Array<{ id: string; params: unknown; options: unknown }> = [];
-    const conversions = new Map<string, { commandId: string; shouldTrigger?: () => boolean; getDirtyData: (command: ICommandInfo) => object }>();
+    const activeDirtyManagerService = new ActiveDirtyManagerService();
+    const conversions = activeDirtyManagerService.getDirtyConversionMap();
     const commandService = {
         onCommandExecuted: vi.fn((callback: typeof listener) => {
             listener = callback;
@@ -40,10 +42,7 @@ function createTestBed(start = true) {
             return true;
         }),
     } as unknown as ICommandService;
-    const activeDirtyManagerService = {
-        get: (id: string) => conversions.get(id),
-    };
-    const service = new FormulaCalculationTriggerService(commandService, activeDirtyManagerService as never);
+    const service = new FormulaCalculationTriggerService(commandService, activeDirtyManagerService);
     if (start) {
         service.start();
     }
@@ -71,17 +70,16 @@ describe('FormulaCalculationTriggerService', () => {
                 dirtyRanges: [{ unitId: 'sheet-unit', sheetId: 'sheet-1', range: { startRow: 0, startColumn: 0, endRow: 0, endColumn: 0 } }],
             }),
         });
-        testBed.conversions.set(SetTriggerFormulaCalculationStartMutation.id, {
-            commandId: SetTriggerFormulaCalculationStartMutation.id,
-            getDirtyData: () => ({ forceCalculation: true }),
-        });
-
         testBed.emit({ id: 'sheet-dirty' } as ICommandInfo, { fromChangeset: true });
         await vi.advanceTimersByTimeAsync(10);
         expect(testBed.executed).toEqual([]);
 
         testBed.service.start();
-        testBed.emit({ id: SetTriggerFormulaCalculationStartMutation.id } as ICommandInfo);
+        testBed.emit({
+            id: SetTriggerFormulaCalculationStartMutation.id,
+            type: CommandType.MUTATION,
+            params: { forceCalculation: true },
+        });
         await vi.advanceTimersByTimeAsync(10);
 
         expect(testBed.executed).toHaveLength(1);
@@ -236,11 +234,6 @@ describe('FormulaCalculationTriggerService', () => {
             commandId: 'empty-dirty',
             getDirtyData: () => ({}),
         });
-        testBed.conversions.set(SetTriggerFormulaCalculationStartMutation.id, {
-            commandId: SetTriggerFormulaCalculationStartMutation.id,
-            getDirtyData: () => ({}),
-        });
-
         testBed.emit({ id: 'empty-dirty' } as ICommandInfo);
         await vi.advanceTimersByTimeAsync(10);
         expect(testBed.executed).toEqual([]);

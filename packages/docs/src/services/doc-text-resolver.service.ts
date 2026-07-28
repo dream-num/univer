@@ -15,6 +15,7 @@
  */
 
 import { Disposable, type IDisposable, type IDocumentBody, toDisposable } from '@univerjs/core';
+import { Subject } from 'rxjs';
 
 export interface IDocTextReplacement {
     endOffset: number;
@@ -48,10 +49,17 @@ export interface IResolvedDocText {
  */
 export class DocTextResolverService extends Disposable {
     private readonly _resolvers = new Set<IDocTextResolver>();
+    private readonly _textChanged$ = new Subject<string>();
+
+    readonly textChanged$ = this._textChanged$.asObservable();
 
     register(resolver: IDocTextResolver): IDisposable {
         this._resolvers.add(resolver);
         return toDisposable(() => this._resolvers.delete(resolver));
+    }
+
+    notifyTextChanged(unitId: string): void {
+        this._textChanged$.next(unitId);
     }
 
     resolve(unitId: string, body: IDocumentBody): IResolvedDocText {
@@ -121,5 +129,10 @@ export class DocTextResolverService extends Disposable {
             previousEnd = candidate.endOffset;
         }
         return replacements;
+    }
+
+    override dispose(): void {
+        this._textChanged$.complete();
+        super.dispose();
     }
 }

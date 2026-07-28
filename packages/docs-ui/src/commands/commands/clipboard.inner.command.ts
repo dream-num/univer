@@ -147,6 +147,15 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
             const cloneBody = Tools.deepClone(body);
             const blockRangeMappings: IDocClipboardPasteBlockRangeMapping[] = [];
             const customBlockMappings: IDocClipboardPasteCustomBlockMapping[] = [];
+            const selectionCustomRangeMappings = customRangeMappings.map(({ sourceRange }) => ({
+                sourceRange,
+                targetRange: BuildTextUtils.customRange.copyCustomRange(sourceRange),
+            }));
+            if (selectionCustomRangeMappings.length > 0) {
+                cloneBody.customRanges = selectionCustomRangeMappings.map(
+                    ({ targetRange }) => targetRange
+                );
+            }
 
             if (hasBlockRange) {
                 cloneBody.blockRanges!.forEach((targetBlockRange, index) => {
@@ -207,7 +216,7 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
                 (
                     blockRangeMappings.length > 0 ||
                     customBlockMappings.length > 0 ||
-                    customRangeMappings.length > 0
+                    selectionCustomRangeMappings.length > 0
                 ) &&
                 pasteAdapterService
             ) {
@@ -218,7 +227,7 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
                     sourceBody: body,
                     targetBody: cloneBody,
                     blockRangeMappings,
-                    customRangeMappings,
+                    customRangeMappings: selectionCustomRangeMappings,
                     customBlockMappings,
                 });
 

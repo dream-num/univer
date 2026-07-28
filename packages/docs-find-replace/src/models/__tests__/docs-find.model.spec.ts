@@ -154,6 +154,20 @@ describe('DocsFindModel', () => {
         univer.dispose();
     });
 
+    it('rescans when a consumer-facing text projection changes', async () => {
+        vi.useFakeTimers();
+        const { get, model, univer } = createModelTestBed();
+        model.start(docsQuery('cat'));
+        const update = firstValueFrom(model.matchesUpdate$);
+
+        get(DocTextResolverService).notifyTextChanged('test-doc');
+        await vi.advanceTimersByTimeAsync(250);
+
+        expect(await update).toEqual(model.getMatches());
+        model.dispose();
+        univer.dispose();
+    });
+
     it('disposes every TextRange highlight', () => {
         const { model, skeletonManager, get, univer } = createModelTestBed();
         vi.mocked(skeletonManager.getSkeleton).mockReturnValue({} as DocumentSkeleton);

@@ -554,7 +554,7 @@ export function getParagraphInfoByGlyph(node: IDocumentSkeletonGlyph) {
 }
 
 export function serializeTextRange(textRange: IDocRange): ITextRangeWithStyle {
-    const { startOffset, endOffset, collapsed, rangeType, startNodePosition, endNodePosition, direction, segmentId, segmentPage } = textRange;
+    const { startOffset, endOffset, collapsed, rangeType, startNodePosition, endNodePosition, direction, segmentId, segmentPage, style } = textRange;
     const serializedTextRange: ITextRangeWithStyle = {
         startOffset: startOffset!,
         endOffset: endOffset!,
@@ -565,6 +565,7 @@ export function serializeTextRange(textRange: IDocRange): ITextRangeWithStyle {
         direction,
         segmentId,
         segmentPage,
+        style,
         isActive: textRange.isActive(),
     };
 

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { ICellData, ICommandInfo, IObjectMatrixPrimitiveType, IRange, IUnitRange, Nullable, Workbook } from '@univerjs/core';
+import type { IDirtyUnitDefinedNameMap, IDirtyUnitSheetNameMap, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import type {
     IInsertColMutationParams,
     IInsertRowMutationParams,
@@ -31,19 +33,12 @@ import type {
 } from '@univerjs/sheets';
 import {
     Disposable,
-    type ICellData,
-    type ICommandInfo,
-    type IObjectMatrixPrimitiveType,
-    type IRange,
-    type IUnitRange,
     Inject,
     IUniverInstanceService,
-    type Nullable,
     ObjectMatrix,
     UniverInstanceType,
-    type Workbook,
 } from '@univerjs/core';
-import { FormulaDataModel, IActiveDirtyManagerService, type IDirtyUnitDefinedNameMap, type IDirtyUnitSheetNameMap, type ISetDefinedNameMutationParam, RemoveDefinedNameMutation, SetDefinedNameMutation } from '@univerjs/engine-formula';
+import { FormulaDataModel, IActiveDirtyManagerService, RemoveDefinedNameMutation, SetDefinedNameMutation } from '@univerjs/engine-formula';
 import {
     ClearSelectionFormatCommand,
     InsertColMutation,

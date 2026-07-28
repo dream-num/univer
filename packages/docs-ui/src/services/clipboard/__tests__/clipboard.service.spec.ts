@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel, IDocumentBody, IDocumentData } from '@univerjs/core';
 import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
+import type { IDocClipboardPasteAdapter } from '../doc-paste-mutation-adapter.service';
 import {
     BooleanNumber,
     DataStreamTreeTokenType,
-    type DocumentDataModel,
     DOC_RANGE_TYPE,
     DocumentBlockRangeType,
-    type IDocumentBody,
-    type IDocumentData,
     ICommandService,
     ImageSourceType,
     IUniverInstanceService,
@@ -37,7 +36,6 @@ import { CutContentCommand, InnerPasteCommand } from '../../../commands/commands
 import { DocClipboardService, getTableClipboardBodySlice, IDocClipboardService } from '../clipboard.service';
 import {
     DocClipboardPasteAdapterService,
-    type IDocClipboardPasteAdapter,
     IDocClipboardPasteAdapterService,
 } from '../doc-paste-mutation-adapter.service';
 import {

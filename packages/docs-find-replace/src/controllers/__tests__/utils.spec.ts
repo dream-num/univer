@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import { CustomRangeType, DataStreamTreeTokenType, type IDocumentBody } from '@univerjs/core';
-import { FindBy, FindDirection, type IFindQuery, FindScope } from '@univerjs/find-replace';
+import type { IDocumentBody } from '@univerjs/core';
+import type { IFindQuery } from '@univerjs/find-replace';
+import { CustomRangeType, DataStreamTreeTokenType } from '@univerjs/core';
+import { FindBy, FindDirection, FindScope } from '@univerjs/find-replace';
 import { describe, expect, it } from 'vitest';
 import { findDocRanges } from '../utils';
 

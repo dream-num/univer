@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import { type UnitModel, UniverInstanceType } from '@univerjs/core';
+import type { UnitModel } from '@univerjs/core';
+import type { IFindQuery } from '@univerjs/find-replace';
+import { UniverInstanceType } from '@univerjs/core';
 import { DocSkeletonManagerService, DocTextResolverService } from '@univerjs/docs';
 import { createCommandTestBed } from '@univerjs/docs-ui/commands/commands/__tests__/create-command-test-bed';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { FindBy, FindDirection, type IFindQuery, FindScope } from '@univerjs/find-replace';
+import { FindBy, FindDirection, FindScope } from '@univerjs/find-replace';
 import { describe, expect, it, vi } from 'vitest';
 import { DocsFindReplaceProvider } from '../docs-find-replace.provider';
 

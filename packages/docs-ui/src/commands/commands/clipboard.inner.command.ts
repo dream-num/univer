@@ -14,23 +14,16 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel, IAccessor, ICommand, ICustomTable, IDisposable, IDocumentData, IDrawingParam, IMutationInfo, ITextRange, JSONXActions, Nullable } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import type { DocumentViewModel, IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
+import type { IDocClipboardPasteBlockRangeMapping, IDocClipboardPasteCustomBlockMapping, IDocClipboardPasteCustomRangeMapping } from '../../services/clipboard/doc-paste-mutation-adapter.service';
 import {
     BuildTextUtils,
     CommandType,
-    type DocumentDataModel,
     generateRandomId,
     getCustomBlockIdsInSelections,
     getRichTextEditPath,
-    type IAccessor,
-    type ICommand,
-    type ICustomTable,
-    type IDisposable,
-    type IDocumentData,
-    type IDrawingParam,
-    type IMutationInfo,
-    type ITextRange,
-    type JSONXActions,
-    type Nullable,
     ICommandService,
     IUndoRedoService,
     IUniverInstanceService,
@@ -42,10 +35,9 @@ import {
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
-import { DocSelectionManagerService, type IRichTextEditingMutationParams, RichTextEditingMutation } from '@univerjs/docs';
-import type { DocumentViewModel, IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
+import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { getCustomDecorationAtPosition, getCustomRangeAtPosition } from '../../basics/paragraph';
-import { type IDocClipboardPasteBlockRangeMapping, IDocClipboardPasteAdapterService, type IDocClipboardPasteCustomBlockMapping, type IDocClipboardPasteCustomRangeMapping } from '../../services/clipboard/doc-paste-mutation-adapter.service';
+import { IDocClipboardPasteAdapterService } from '../../services/clipboard/doc-paste-mutation-adapter.service';
 import { getCommandSkeleton } from '../util';
 import { getDeleteRowContentActionParams, getDeleteRowsActionsParams, getDeleteTableActionParams } from './table/table';
 

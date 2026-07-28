@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import type { Dependency, ICommand } from '@univerjs/core';
+import type { IUniverDocsConfig } from './config/config';
 import {
-    type Dependency,
-    type ICommand,
     ICommandService,
     IConfigService,
     Inject,
@@ -34,7 +34,7 @@ import { DeleteDocumentSectionBreakCommand, InsertDocumentColumnBreakCommand, In
 import { RichTextEditingMutation } from './commands/mutations/core-editing.mutation';
 import { DocsRenameMutation } from './commands/mutations/docs-rename.mutation';
 import { SetTextSelectionsOperation } from './commands/operations/text-selection.operation';
-import { defaultPluginConfig, DOCS_PLUGIN_CONFIG_KEY, type IUniverDocsConfig } from './config/config';
+import { defaultPluginConfig, DOCS_PLUGIN_CONFIG_KEY } from './config/config';
 import { DocCustomRangeController } from './controllers/custom-range.controller';
 import { DocBlockMoveValidatorService } from './services/doc-block-move-validator.service';
 import { DocContentInsertService } from './services/doc-content-insert.service';

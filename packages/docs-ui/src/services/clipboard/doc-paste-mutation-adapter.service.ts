@@ -14,15 +14,9 @@
  * limitations under the License.
  */
 
+import type { ICustomRange, IDisposable, IDocumentBlockRange, IDocumentBody, IDocumentData, IDrawingParam, IMutationInfo } from '@univerjs/core';
 import {
     createIdentifier,
-    type ICustomRange,
-    type IDisposable,
-    type IDocumentBlockRange,
-    type IDocumentBody,
-    type IDocumentData,
-    type IDrawingParam,
-    type IMutationInfo,
     toDisposable,
 } from '@univerjs/core';
 

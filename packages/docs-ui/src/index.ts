@@ -19,6 +19,11 @@ import './global.css';
 export type { IDocObjectParam } from './basics/component-tools';
 export { getDocObjectById, neoGetDocObject } from './basics/component-tools';
 export {
+    addCustomDecorationBySelectionFactory,
+    addCustomDecorationFactory,
+    deleteCustomDecorationFactory,
+} from './basics/custom-decoration-factory';
+export {
     DOC_CUSTOM_RANGE_CHROME_BACKGROUND_ALPHA,
     DOC_CUSTOM_RANGE_CHROME_RADIUS,
     drawDocCustomRangeChrome,
@@ -28,11 +33,6 @@ export type {
     IDocCustomRangeChromeRect,
     IDocCustomRangeChromeTheme,
 } from './basics/doc-custom-range-chrome';
-export {
-    addCustomDecorationBySelectionFactory,
-    addCustomDecorationFactory,
-    deleteCustomDecorationFactory,
-} from './basics/custom-decoration-factory';
 export * from './basics/docs-view-key';
 export { hasParagraphInTable } from './basics/paragraph';
 export { AfterSpaceCommand, EnterCommand, TabCommand } from './commands/commands/auto-format.command';

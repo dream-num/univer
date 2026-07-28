@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { Disposable, type IDisposable, type IDocumentBody, toDisposable } from '@univerjs/core';
+import type { IDisposable, IDocumentBody } from '@univerjs/core';
+import { Disposable, toDisposable } from '@univerjs/core';
 import { Subject } from 'rxjs';
 
 export interface IDocTextReplacement {

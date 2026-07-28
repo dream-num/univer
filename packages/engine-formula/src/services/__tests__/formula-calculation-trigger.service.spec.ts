@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { CommandType, type ICommandInfo, type ICommandService, type IExecutionOptions } from '@univerjs/core';
+import type { ICommandInfo, ICommandService, IExecutionOptions } from '@univerjs/core';
+import { CommandType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
     SetFormulaCalculationNotificationMutation,

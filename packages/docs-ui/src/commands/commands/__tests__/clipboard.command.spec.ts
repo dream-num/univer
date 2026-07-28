@@ -423,8 +423,7 @@ describe('test cases in clipboard', () => {
                 textRanges: [],
             } satisfies IInnerPasteCommandParams);
 
-            const pastedRangeIds = getDocumentSnapshot()?.body?.customRanges
-                ?.map((range) => range.rangeId) ?? [];
+            const pastedRangeIds = getDocumentSnapshot()?.body?.customRanges?.map((range) => range.rangeId) ?? [];
             expect(pastedRangeIds).toHaveLength(2);
             expect(new Set(pastedRangeIds).size).toBe(2);
             expect(pastedRangeIds).not.toContain(sourceRange.rangeId);

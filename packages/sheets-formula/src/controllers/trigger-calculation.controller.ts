@@ -14,21 +14,19 @@
  * limitations under the License.
  */
 
+import type { ICommandInfo, IUnitRange, Nullable, Workbook } from '@univerjs/core';
+import type { IDirtyUnitDefinedNameMap, IDirtyUnitFeatureMap, IDirtyUnitOtherFormulaMap, IDirtyUnitSheetNameMap, IDirtyUnitSuperTableMap, IExecutionInProgressParams, IFormulaDirtyData, ISetFormulaCalculationNotificationMutation, ISetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import type { IUniverSheetsFormulaBaseConfig } from '../config/config';
 import type { LocaleKey } from '../locale/types';
 import {
     Disposable,
-    type ICommandInfo,
     ICommandService,
     IConfigService,
-    type IUnitRange,
     ILogService,
     Inject,
     IUniverInstanceService,
     LocaleService,
-    type Nullable,
     UniverInstanceType,
-    type Workbook,
 } from '@univerjs/core';
 import {
     ENGINE_FORMULA_CYCLE_REFERENCE_COUNT,
@@ -36,15 +34,6 @@ import {
     FormulaDataModel,
     FormulaExecutedStateType,
     FormulaExecuteStageType,
-    type IDirtyUnitDefinedNameMap,
-    type IDirtyUnitFeatureMap,
-    type IDirtyUnitOtherFormulaMap,
-    type IDirtyUnitSheetNameMap,
-    type IDirtyUnitSuperTableMap,
-    type IExecutionInProgressParams,
-    type IFormulaDirtyData,
-    type ISetFormulaCalculationNotificationMutation,
-    type ISetFormulaCalculationStartMutation,
     SetFormulaCalculationNotificationMutation,
     SetFormulaCalculationStartMutation,
     SetFormulaCalculationStopMutation,

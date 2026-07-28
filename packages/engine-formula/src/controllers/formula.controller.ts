@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+import type { Ctor } from '@univerjs/core';
 import type { IFunctionNames } from '../basics/function';
+import type { IUniverEngineFormulaConfig } from '../config/config';
 import type { BaseFunction } from '../functions/base-function';
-import { type Ctor, Disposable, ICommandService, IConfigService, Inject, Optional } from '@univerjs/core';
+import { Disposable, ICommandService, IConfigService, Inject, Optional } from '@univerjs/core';
 import { DataSyncPrimaryController } from '@univerjs/rpc';
 import { OtherFormulaMarkDirty } from '../commands/mutations/formula.mutation';
 import { RegisterFunctionMutation } from '../commands/mutations/register-function.mutation';
@@ -44,7 +46,7 @@ import { SetFormulaDataMutation } from '../commands/mutations/set-formula-data.m
 import { SetImageFormulaDataMutation } from '../commands/mutations/set-image-formula-data.mutation';
 import { RemoveOtherFormulaMutation, SetOtherFormulaMutation } from '../commands/mutations/set-other-formula.mutation';
 import { RemoveSuperTableMutation, SetSuperTableMutation, SetSuperTableOptionMutation } from '../commands/mutations/set-super-table.mutation';
-import { ENGINE_FORMULA_PLUGIN_CONFIG_KEY, type IUniverEngineFormulaConfig } from '../config/config';
+import { ENGINE_FORMULA_PLUGIN_CONFIG_KEY } from '../config/config';
 import { ALL_IMPLEMENTED_FUNCTIONS } from '../functions';
 import { IFunctionService } from '../services/function.service';
 import { RegisterOtherFormulaService } from '../services/register-other-formula.service';

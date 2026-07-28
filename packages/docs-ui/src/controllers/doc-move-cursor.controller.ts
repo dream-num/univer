@@ -1475,5 +1475,4 @@ export class DocMoveCursorController extends Disposable {
             collapsed: true,
         });
     }
-
 }

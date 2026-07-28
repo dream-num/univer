@@ -16,7 +16,7 @@
 
 /* eslint-disable max-lines-per-function */
 
-import type { Dependency, IDisposable, IWorkbookData, Workbook } from '@univerjs/core';
+import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
 import type { ISheetData } from '@univerjs/engine-formula';
 import type { FFormula } from '@univerjs/engine-formula/facade';
 import {
@@ -285,9 +285,8 @@ export function createFunctionTestBed(workbookData?: IWorkbookData, dependencies
 
 export function waitForCalculationEnd(formulaEngine: FFormula): Promise<void> {
     return new Promise((resolve) => {
-        let disposable: IDisposable | undefined;
-        disposable = formulaEngine.calculationEnd(() => {
-            disposable?.dispose();
+        const disposable = formulaEngine.calculationEnd(() => {
+            disposable.dispose();
             resolve();
         });
     });

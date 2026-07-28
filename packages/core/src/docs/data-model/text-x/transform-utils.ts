@@ -19,6 +19,7 @@
 import type { Nullable } from '../../../shared';
 import type { ICustomDecoration, ICustomRange, IDocumentBlockRange, IDocumentBody, IParagraph, IParagraphStyle, ITextRun, ITextStyle } from '../../../types/interfaces';
 import type { IRetainAction } from './action-types';
+import { merge } from '../../../common/lodash';
 import { Tools, UpdateDocsAttributeType } from '../../../shared';
 import { CustomDecorationType } from '../../../types/interfaces';
 import { normalizeTextRuns } from './apply-utils/common';
@@ -551,6 +552,6 @@ function transformBlockRanges(thisBlockRanges: IDocumentBlockRange[], otherBlock
 
     return otherBlockRanges.map((otherBlockRange) => {
         const thisBlockRange = thisBlockRanges.find((blockRange) => blockRange.blockId === otherBlockRange.blockId);
-        return thisBlockRange && priority ? Tools.deepMerge(otherBlockRange, thisBlockRange) : otherBlockRange;
+        return thisBlockRange && priority ? merge(otherBlockRange, thisBlockRange) : otherBlockRange;
     });
 }

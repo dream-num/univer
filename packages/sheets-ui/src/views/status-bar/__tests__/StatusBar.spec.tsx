@@ -17,13 +17,12 @@
 import type { IDisposable } from '@univerjs/core';
 import type { IMessageProps } from '@univerjs/design';
 import type { ReactElement } from 'react';
-import { ConfigService, IConfigService, Injector, LocaleService } from '@univerjs/core';
+import { Injector, LocaleService } from '@univerjs/core';
 import { FUNCTION_NAMES_MATH, FUNCTION_NAMES_STATISTICAL } from '@univerjs/engine-formula';
 import { IClipboardInterfaceService, IMessageService, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { afterEach, describe, expect, it } from 'vitest';
-import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../../config/config';
 import { IStatusBarService, StatusBarService } from '../../../services/status-bar.service';
 import { CopyableStatisticItem } from '../CopyableStatisticItem';
 import { StatusBar } from '../StatusBar';
@@ -87,13 +86,10 @@ function setViewportWidth(width: number) {
 
 function createStatusBarInjector() {
     const injector = new Injector();
-    injector.add([IConfigService, { useClass: ConfigService }]);
     injector.add([LocaleService, { useClass: TestLocaleService as never }]);
     injector.add([IStatusBarService, { useClass: StatusBarService }]);
     injector.add([IClipboardInterfaceService, { useClass: TestClipboardService as never }]);
     injector.add([IMessageService, { useClass: TestMessageService as never }]);
-
-    injector.get(IConfigService).setConfig(SHEETS_UI_PLUGIN_CONFIG_KEY, { statusBarStatistic: true });
 
     return injector;
 }

@@ -248,7 +248,7 @@ describe('engine scene viewport extra', () => {
         scene.setDefaultCursor(CURSOR_TYPE.CELL);
         expect(scene.getCursor()).toBe(CURSOR_TYPE.CELL);
 
-        scene.resize(720, 520);
+        scene.transformByState({ width: 720, height: 520 });
         scene.scale(1.3, 1.2);
         scene.scaleBy(0.2, 0.2);
 
@@ -904,11 +904,11 @@ describe('engine scene viewport extra', () => {
         expect(scene.removeViewport('temp-vp')).toBe(tempViewport);
         expect(scene.getViewport('temp-vp')).toBeUndefined();
 
-        expect(scene.getVpScrollXYInfoByPosToVp(Vector2.FromArray([1, 1]), viewport)).toEqual({
+        expect(scene.getScrollXYInfoByViewport(Vector2.FromArray([1, 1]), viewport)).toEqual({
             x: expect.any(Number),
             y: expect.any(Number),
         });
-        expect(scene.getRelativeToViewportCoord(Vector2.FromArray([2, 3]))).toEqual(expect.any(Object));
+        expect(scene.getCoordRelativeToViewport(Vector2.FromArray([2, 3]))).toEqual(expect.any(Object));
         expect(scene.getPrecisionScale().scaleX).toBeGreaterThan(0);
         expect(scene.getPrecisionScale().scaleY).toBeGreaterThan(0);
 

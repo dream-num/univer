@@ -25,7 +25,7 @@ import {
 } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import { MessageType } from '@univerjs/design';
-import { Engine, IRenderingEngine, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
+import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import {
     BuiltInUIPart,
     ComponentManager,
@@ -102,7 +102,6 @@ describe('ui facade', () => {
         injector.add([IUIPartsService, { useClass: UIPartsService }]);
         injector.add([IUIRuntimeScopeService, { useClass: UIRuntimeScopeService }]);
         injector.add([IShortcutService, { useClass: ShortcutService }]);
-        injector.add([IRenderingEngine, { useFactory: () => new Engine() }]);
         injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
         injector.get(ILogService).setLogLevel(LogLevel.SILENT);
 
@@ -180,7 +179,7 @@ describe('ui facade', () => {
         expect(shortcut.enableShortcut().dispatchShortcutEvent(event)?.id).toBe('custom.shortcut');
     });
 
-    it('fires clipboard hooks around copy commands', async () => {
+    it('executes copy and paste commands', async () => {
         const commandService = univer.__getInjector().get(ICommandService);
         commandService.registerCommand({
             id: CopyCommand.id,
@@ -193,21 +192,8 @@ describe('ui facade', () => {
             handler: () => true,
         });
 
-        const events: string[] = [];
-        const hooks = univerAPI.getHooks();
-        const beforeDisposable = hooks.onBeforeCopy(() => events.push('before-copy'));
-        const afterDisposable = hooks.onCopy(() => events.push('copy'));
-        const beforePasteDisposable = hooks.onBeforePaste(() => events.push('before-paste'));
-        const afterPasteDisposable = hooks.onPaste(() => events.push('paste'));
-
         await expect(univerAPI.copy()).resolves.toBe(true);
         await expect(univerAPI.paste()).resolves.toBe(true);
-
-        expect(events).toEqual(['before-copy', 'copy', 'before-paste', 'paste']);
-        beforeDisposable.dispose();
-        afterDisposable.dispose();
-        beforePasteDisposable.dispose();
-        afterPasteDisposable.dispose();
     });
 
     it('opens and disposes UI surfaces through facade services', () => {

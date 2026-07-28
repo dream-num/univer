@@ -19,7 +19,7 @@ export function useUnits() {
     useEffect(() => {
         const sheets = univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         const options = sheets.map((sheet) => ({
-            label: sheet.getName() || sheet.getUnitId(),
+            label: sheet.name || sheet.getUnitId(),
             value: sheet.getUnitId(),
         }));
 

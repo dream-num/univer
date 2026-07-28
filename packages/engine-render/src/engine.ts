@@ -276,30 +276,6 @@ export class Engine extends Disposable {
      * @param {true} [resize] If should perform resize when mounted and observe resize event.
      */
     mount(element: HTMLElement, resize = true): void {
-        this.setContainer(element, resize);
-    }
-
-    /**
-     * Unmount the canvas without disposing it so it can be mounted again.
-     */
-    unmount(): void {
-        this._clearResizeListener();
-
-        if (!this._container) {
-            throw new Error('[Engine]: cannot unmount when container is not set!');
-        }
-
-        this._container.removeChild(this.getCanvasElement());
-        this._container = null;
-    }
-
-    /**
-     * Mount the canvas to the element so it would be rendered on UI.
-     * @deprecated Please use `mount` instead.
-     * @param {HTMLElement} element - The element the canvas will mount on.
-     * @param {true} [resize] If should perform resize when mounted and observe resize event.
-     */
-    setContainer(element: HTMLElement, resize = true) {
         if (this._container === element) {
             return;
         }
@@ -328,6 +304,20 @@ export class Engine extends Disposable {
                 if (timer !== undefined) window.cancelIdleCallback(timer);
             });
         }
+    }
+
+    /**
+     * Unmount the canvas without disposing it so it can be mounted again.
+     */
+    unmount(): void {
+        this._clearResizeListener();
+
+        if (!this._container) {
+            throw new Error('[Engine]: cannot unmount when container is not set!');
+        }
+
+        this._container.removeChild(this.getCanvasElement());
+        this._container = null;
     }
 
     private _clearResizeListener(): void {

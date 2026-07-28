@@ -79,7 +79,7 @@ export class DocCustomRangeController extends Disposable {
                 }
                 const transformedRanges = ranges.map((range) => this._transformCustomRange(doc, range));
                 if (transformedRanges.some((range, i) => ranges[i] !== range)) {
-                    this._textSelectionManagerService.replaceTextRanges(transformedRanges, isEditing);
+                    this._textSelectionManagerService.replaceDocRanges(transformedRanges, undefined, isEditing);
                 }
             }
         }));

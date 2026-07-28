@@ -26,7 +26,7 @@ import type {
     IUniverSheetCopyDataModel,
 } from '../type';
 import type { IAfterProcessRule, IPastePlugin } from './paste-plugins/type';
-import { createParagraphId, CustomRangeType, DEFAULT_WORKSHEET_ROW_HEIGHT, generateRandomId, getNumfmtParseValueFilter, isDefaultFormat, isSafeUrl, numfmt, ObjectMatrix, skipParseTagNames } from '@univerjs/core';
+import { createDocumentModelWithStyle, createParagraphId, CustomRangeType, DEFAULT_WORKSHEET_ROW_HEIGHT, generateRandomId, getNumfmtParseValueFilter, isDefaultFormat, isSafeUrl, numfmt, ObjectMatrix, skipParseTagNames } from '@univerjs/core';
 import { handleStringToStyle, textTrim } from '@univerjs/ui';
 import { extractNodeStyle } from './parse-node-style';
 import parseToDom, { convertToCellStyle, generateParagraphs } from './utils';
@@ -645,7 +645,7 @@ export class HtmlToUSMService {
             };
             // Rich text parsing method, refer to the doc
             this._parseCellHtml(null, cell.childNodes, newDocBody, undefined, styleStr);
-            const documentModel = skeleton.getBlankCellDocumentModel()?.documentModel;
+            const documentModel = createDocumentModelWithStyle('', {});
             const p = documentModel?.getSnapshot();
             const singleDataStream = `${newDocBody.dataStream}\r\n`;
             const documentData = {
@@ -675,8 +675,7 @@ export class HtmlToUSMService {
         if (currentSkeleton == null) {
             return null;
         }
-        const { skeleton } = currentSkeleton;
-        const documentModel = skeleton.getBlankCellDocumentModel()?.documentModel;
+        const documentModel = createDocumentModelWithStyle('', {});
         const p = documentModel?.getSnapshot();
         const documentData = { ...p, ...snapshot };
         documentModel?.reset(documentData);

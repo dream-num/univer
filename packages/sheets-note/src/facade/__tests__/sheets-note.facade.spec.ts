@@ -40,7 +40,7 @@ import {
     IFunctionService,
     LexerTreeBuilder,
 } from '@univerjs/engine-formula';
-import { Engine, IRenderingEngine, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
+import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { ISocketService, WebSocketService } from '@univerjs/network';
 import {
     RangeProtectionRuleModel,
@@ -111,7 +111,6 @@ function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?: Depend
             this._injector.add([SheetInterceptorService]);
             this._injector.add([IFunctionService, { useClass: FunctionService }]);
             this._injector.add([ISocketService, { useClass: WebSocketService }]);
-            this._injector.add([IRenderingEngine, { useFactory: () => new Engine() }]);
             this._injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
             this._injector.add([FormulaDataModel]);
             this._injector.add([LexerTreeBuilder]);

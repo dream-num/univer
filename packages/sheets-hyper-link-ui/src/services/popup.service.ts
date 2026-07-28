@@ -313,7 +313,7 @@ export class SheetsHyperLinkPopupService extends Disposable {
             }
             customRange = customRangeInfo.customRange;
             label = customRangeInfo.label;
-            this._textSelectionManagerService.replaceTextRanges([
+            this._textSelectionManagerService.replaceDocRanges([
                 {
                     startOffset: customRange.startIndex,
                     endOffset: customRange.endIndex + 1,

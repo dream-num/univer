@@ -15,7 +15,7 @@
  */
 
 import type { IRange } from '@univerjs/core';
-import { RANGE_TYPE, Rectangle } from '@univerjs/core';
+import { getIntersectRange, RANGE_TYPE, Rectangle } from '@univerjs/core';
 
 export class CrossHairRangeCollection {
     private _selectedRanges: IRange[] = [];
@@ -55,7 +55,7 @@ export class CrossHairRangeCollection {
     private _getIntersects(addRange: IRange) {
         const intersects = [];
         for (const range of this._ranges) {
-            const intersect = Rectangle.getIntersects(range, addRange);
+            const intersect = getIntersectRange(range, addRange);
             if (intersect) {
                 intersects.push(intersect);
             }

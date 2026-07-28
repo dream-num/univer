@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel } from '@univerjs/core';
-import type { IRenderContext } from '@univerjs/engine-render';
+import type { IRenderContext, ISceneTransformState } from '@univerjs/engine-render';
 import type { IDocFitToWidthOptions } from '../../config/config';
 import { Injector } from '@univerjs/core';
 import { beforeEach, describe, expect, it } from 'vitest';
@@ -71,9 +71,13 @@ class TestScene {
         this.scaleY = scaleY;
     }
 
-    resize(width: number, height: number) {
-        this.width = width;
-        this.height = height;
+    transformByState(state: ISceneTransformState) {
+        if (state.width !== undefined) {
+            this.width = state.width;
+        }
+        if (state.height !== undefined) {
+            this.height = state.height;
+        }
     }
 
     getParent() {

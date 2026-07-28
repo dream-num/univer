@@ -130,9 +130,9 @@ describe('test "HTTPService"', () => {
         await expect(secondRequest).resolves.toMatchObject({ body: { step: 2 } });
     });
 
-    it('streams progress events before the final response when using getSSE', async () => {
+    it('streams progress events before the final response', async () => {
         const sentRequestPromise = firstValueFrom(httpImplementation.newRequest$);
-        const eventsPromise = firstValueFrom(httpService.getSSE<string>('GET', 'http://example.com/sse'));
+        const eventsPromise = firstValueFrom(httpService.stream<string>('GET', 'http://example.com/sse'));
         const sentRequest = await sentRequestPromise;
 
         expect(sentRequest.responseType).toBe('json');

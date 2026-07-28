@@ -17,14 +17,12 @@
 import type {
     BorderStyleTypes,
     IBorderStyleData,
-    ICellData,
     ICellDataForSheetInterceptor,
     ICellInfo,
     ICellWithCoord,
     IColAutoWidthInfo,
     IColumnRange,
     IDocumentData,
-    IGetRowColByPosOptions,
     IPaddingData,
     IRange,
     IRowAutoHeightInfo,
@@ -42,12 +40,10 @@ import type { IBoundRectNoAngle, IPoint, IViewportInfo } from '../../basics/vect
 import type { Scene } from '../../scene';
 import type { IBorderCache, IFontCacheItem, IStylesCache } from './interfaces';
 import {
-    addLinkToDocumentModel,
     BooleanNumber,
     CellValueType,
     DEFAULT_STYLES,
     DocumentDataModel,
-    extractPureTextFromCell,
     getColorStyle,
     getDisplayValueFromCell,
     HorizontalAlign,
@@ -79,19 +75,6 @@ import { columnIterator } from '../docs/layout/tools';
 import { DocumentViewModel } from '../docs/view-model/document-view-model';
 import { EXPAND_SIZE_FOR_RENDER_OVERFLOW, MEASURE_EXTENT, MEASURE_EXTENT_FOR_PARAGRAPH } from './constants';
 import { SHEET_VIEWPORT_KEY } from './interfaces';
-import { createDocumentModelWithStyle, extractOtherStyle, getFontFormat } from './util';
-
-interface ICellDocumentModelOption {
-    isDeepClone?: boolean;
-    displayRawFormula?: boolean;
-    ignoreTextRotation?: boolean;
-}
-
-const DEFAULT_CELL_DOCUMENT_MODEL_OPTION: ICellDocumentModelOption = {
-    isDeepClone: false,
-    displayRawFormula: false,
-    ignoreTextRotation: false,
-};
 
 interface IRowColumnRange extends IRowRange, IColumnRange { }
 
@@ -358,13 +341,6 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         this._handleBgMatrix.reset();
         this._handleBorderMatrix.reset();
         this._overflowCache.reset();
-    }
-
-    /**
-     * @deprecated should never expose a property that is provided by another module!
-     */
-    getStyles(): Styles {
-        return this._styles;
     }
 
     setOverflowCache(value: ObjectMatrix<IRange>): void {
@@ -965,14 +941,6 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
     };
     //#endregion
 
-    /**
-     * @deprecated use `getRangeByViewport` instead.
-     * @param bounds
-     */
-    getRangeByBounding(bounds?: IViewportInfo): IRange {
-        return this._getRangeByViewBounding(this.rowHeightAccumulation, this.columnWidthAccumulation, bounds?.cacheBound);
-    }
-
     getRangeByViewport(vpInfo?: IViewportInfo): IRange {
         return this._getRangeByViewBounding(this.rowHeightAccumulation, this.columnWidthAccumulation, vpInfo?.viewBound);
     }
@@ -1051,231 +1019,9 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         return !isCellCoverable(adjacentCell) || (hasMergeData && this.intersectMergeRange(row, adjacentColumn));
     }
 
-    /**
-     * Get cell by pos(offsetX, offsetY).
-     * @deprecated Please use `getCellWithCoordByOffset` instead.
-     */
-    calculateCellIndexByPosition(
-        offsetX: number,
-        offsetY: number,
-        scaleX: number,
-        scaleY: number,
-        scrollXY: { x: number; y: number }
-    ): Nullable<ICellWithCoord> {
-        return this.getCellWithCoordByOffset(offsetX, offsetY, scaleX, scaleY, scrollXY);
-    }
-
-    /**
-     * This method has the same implementation as `getCellIndexByOffset`,
-     * but uses a different name to maintain backward compatibility with previous calls.
-     *
-     * @deprecated Please use `getCellIndexByOffset` method instead.
-     */
-    getCellPositionByOffset(
-        offsetX: number,
-        offsetY: number,
-        scaleX: number,
-        scaleY: number,
-        scrollXY: { x: number; y: number },
-        options?: IGetRowColByPosOptions
-    ): { row: number; column: number } {
-        return this.getCellIndexByOffset(offsetX, offsetY, scaleX, scaleY, scrollXY, options);
-    }
-
     getCellWithMergeInfoByIndex(row: number, column: number): Nullable<ICellInfo> {
         const selectionCell = this.worksheet.getCellInfoInMergeData(row, column);
         return selectionCell;
-    }
-
-    /**
-     * Same as getColumnIndexByOffsetX
-     * @deprecated Please use `getColumnIndexByOffsetX` method instead.
-     */
-    getColumnPositionByOffsetX(offsetX: number, scaleX: number, scrollXY: { x: number; y: number }, options?: IGetRowColByPosOptions): number {
-        return this.getColumnIndexByOffsetX(offsetX, scaleX, scrollXY, options);
-    }
-
-    /**
-     * Same as getRowIndexByOffsetY
-     * @deprecated Please use `getRowIndexByOffsetY` method instead.
-     */
-    getRowPositionByOffsetY(offsetY: number, scaleY: number, scrollXY: { x: number; y: number }, options?: IGetRowColByPosOptions): number {
-        return this.getRowIndexByOffsetY(offsetY, scaleY, scrollXY, options);
-    }
-
-    /**
-     * Same as getCellWithCoordByIndex, but uses a different name to maintain backward compatibility with previous calls.
-     * @deprecated Please use `getCellWithCoordByIndex` instead.
-     */
-    getCellByIndex(row: number, column: number): ICellWithCoord {
-        return this.getCellWithCoordByIndex(row, column);
-    }
-
-    /**
-     * @deprecated Please use `getCellWithCoordByIndex(row, col, false)` instead.
-     * @param row
-     * @param column
-     */
-    getCellByIndexWithNoHeader(row: number, column: number) {
-        return this.getCellWithCoordByIndex(row, column, false);
-    }
-
-    /**
-     * Only used for cell edit, and no need to rotate text when edit cell content!
-     * @deprecated use same method in worksheet.
-     * @param cell
-     */
-    getBlankCellDocumentModel(cell: Nullable<ICellData>): IDocumentLayoutObject {
-        const documentModelObject = this._getCellDocumentModel(cell, { ignoreTextRotation: true });
-
-        const style = this._styles.getStyleByCell(cell);
-        const textStyle = getFontFormat(style);
-
-        if (documentModelObject != null) {
-            if (documentModelObject.documentModel == null) {
-                documentModelObject.documentModel = createDocumentModelWithStyle('', textStyle);
-            }
-            return documentModelObject;
-        }
-
-        const content = '';
-
-        let fontString = 'document';
-
-        const textRotation: ITextRotation = DEFAULT_STYLES.tr;
-        const horizontalAlign: HorizontalAlign = DEFAULT_STYLES.ht;
-        const verticalAlign: VerticalAlign = DEFAULT_STYLES.vt;
-        const wrapStrategy: WrapStrategy = DEFAULT_STYLES.tb;
-        const paddingData: IPaddingData = DEFAULT_PADDING_DATA;
-
-        fontString = getFontStyleString({}).fontCache;
-
-        const documentModel = createDocumentModelWithStyle(content, textStyle);
-
-        return {
-            documentModel,
-            fontString,
-            textRotation,
-            wrapStrategy,
-            verticalAlign,
-            horizontalAlign,
-            paddingData,
-        };
-    }
-
-    /**
-     * Only used for cell edit, and no need to rotate text when edit cell content!
-     * @deprecated use same method in worksheet.
-     * @param cell
-     */
-    getCellDocumentModelWithFormula(cell: ICellData): Nullable<IDocumentLayoutObject> {
-        return this._getCellDocumentModel(cell, {
-            isDeepClone: true,
-            displayRawFormula: true,
-            ignoreTextRotation: true,
-        });
-    }
-
-    /**
-     * This method generates a document model based on the cell's properties and handles the associated styles and configurations.
-     * If the cell does not exist, it will return null.
-     *
-     * @deprecated use same method in worksheet.
-     * PS: This method has significant impact on performance.
-     * @param cell
-     * @param options
-     */
-    // eslint-disable-next-line complexity, max-lines-per-function
-    private _getCellDocumentModel(
-        cell: Nullable<ICellDataForSheetInterceptor>,
-        options: ICellDocumentModelOption = DEFAULT_CELL_DOCUMENT_MODEL_OPTION
-    ): Nullable<IDocumentLayoutObject> {
-        const { isDeepClone, displayRawFormula, ignoreTextRotation } = {
-            ...DEFAULT_CELL_DOCUMENT_MODEL_OPTION,
-            ...options,
-        };
-
-        const style = this._styles.getStyleByCell(cell);
-
-        if (!cell) return;
-
-        let documentModel: Nullable<DocumentDataModel>;
-        let fontString = 'document';
-        const cellOtherConfig = extractOtherStyle(style);
-
-        const textRotation: ITextRotation = ignoreTextRotation
-            ? DEFAULT_STYLES.tr
-            : cellOtherConfig.textRotation || DEFAULT_STYLES.tr;
-        let horizontalAlign: HorizontalAlign = cellOtherConfig.horizontalAlign || DEFAULT_STYLES.ht;
-        const verticalAlign: VerticalAlign = cellOtherConfig.verticalAlign || DEFAULT_STYLES.vt;
-        const wrapStrategy: WrapStrategy = cellOtherConfig.wrapStrategy || DEFAULT_STYLES.tb;
-        const paddingData: IPaddingData = cellOtherConfig.paddingData || DEFAULT_PADDING_DATA;
-
-        if (cell.f && displayRawFormula) {
-            // The formula does not detect horizontal alignment and rotation.
-            documentModel = createDocumentModelWithStyle(cell.f.toString(), {}, { verticalAlign });
-            horizontalAlign = DEFAULT_STYLES.ht;
-        } else if (cell.p) {
-            const { centerAngle, vertexAngle } = convertTextRotation(textRotation);
-            documentModel = this._updateConfigAndGetDocumentModel(
-                isDeepClone ? Tools.deepClone(cell.p) : cell.p,
-                horizontalAlign,
-                paddingData,
-                {
-                    horizontalAlign,
-                    verticalAlign,
-                    centerAngle,
-                    vertexAngle,
-                    wrapStrategy,
-                    zeroWidthParagraphBreak: 1,
-                }
-            );
-        } else if (cell.v != null) {
-            const textStyle = getFontFormat(style);
-            fontString = getFontStyleString(textStyle).fontCache;
-
-            let cellText = extractPureTextFromCell(cell);
-
-            // Add a single quotation mark to the force string type. Don't add single quotation mark in extractPureTextFromCell, because copy and paste will be affected.
-            // edit mode when displayRawFormula is true
-            if (cell.t === CellValueType.FORCE_STRING && displayRawFormula) {
-                cellText = `'${cellText}`;
-            }
-            documentModel = createDocumentModelWithStyle(cellText, textStyle, {
-                ...cellOtherConfig,
-                textRotation,
-                cellValueType: cell.t!,
-            });
-        }
-
-        // This is a compatible code. cc @weird94
-        if (documentModel && cell.linkUrl && cell.linkId) {
-            addLinkToDocumentModel(documentModel, cell.linkUrl, cell.linkId);
-        }
-
-        /**
-         * the alignment mode is returned with respect to the offset of the sheet cell,
-         * because the document needs to render the layout for cells and
-         * support alignment across multiple cells (e.g., horizontal alignment of long text in overflow mode).
-         * The alignment mode of the document itself cannot meet this requirement,
-         * so an additional renderConfig needs to be added during the rendering of the document component.
-         * This means that there are two coexisting alignment modes.
-         * In certain cases, such as in an editor, conflicts may arise,
-         * requiring only one alignment mode to be retained.
-         * By removing the relevant configurations in renderConfig,
-         * the alignment mode of the sheet cell can be modified.
-         * The alternative alignment mode is applied to paragraphs within the document.
-         */
-        return {
-            documentModel,
-            fontString,
-            textRotation,
-            wrapStrategy,
-            verticalAlign,
-            horizontalAlign,
-            paddingData,
-            fill: style?.bg?.rgb,
-        };
     }
 
     /**
@@ -1928,30 +1674,6 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             }
         }
         return hiddenCols;
-    }
-
-    /**
-     * @deprecated use function `convertTransformToOffsetX` in same package.
-     */
-    convertTransformToOffsetX(
-        offsetX: number,
-        scaleX: number,
-        scrollXY: { x: number; y: number }
-    ): number {
-        const { x: scrollX } = scrollXY;
-        return (offsetX - scrollX) * scaleX;
-    }
-
-    /**
-     * @deprecated use function `convertTransformToOffsetY` in same package.
-     */
-    convertTransformToOffsetY(
-        offsetY: number,
-        scaleY: number,
-        scrollXY: { x: number; y: number }
-    ): number {
-        const { y: scrollY } = scrollXY;
-        return (offsetY - scrollY) * scaleY;
     }
 }
 

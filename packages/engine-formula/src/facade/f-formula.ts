@@ -39,7 +39,6 @@ import {
     ENGINE_FORMULA_CYCLE_REFERENCE_COUNT,
     ENGINE_FORMULA_RETURN_DEPENDENCY_TREE,
     FormulaCalculationSessionService,
-    GlobalComputingStatusService,
     IDefinedNamesService,
     IFunctionService,
     ISuperTableService,
@@ -59,7 +58,6 @@ import {
     SetQueryFormulaDependencyResultMutation,
     SetTriggerFormulaCalculationStartMutation,
 } from '@univerjs/engine-formula';
-import { filter, firstValueFrom, map, race, timer } from 'rxjs';
 
 /**
  * This interface class provides methods to modify the behavior of the operation formula.
@@ -231,40 +229,6 @@ export class FFormula extends FBase {
      */
     onCalculationResultApplied(timeout?: number): Promise<void> {
         return this._injector.get(FormulaCalculationSessionService).waitForLatestApplied(timeout);
-    }
-
-    /**
-     * @deprecated Use `onCalculationResultApplied` instead.
-     * @param {number} [timeout] The timeout in milliseconds. Defaults to 30000.
-     * @returns {Promise<boolean>} Whether computing completed before timeout.
-     */
-    whenComputingCompleteAsync(timeout?: number): Promise<boolean> {
-        const gcss = this._injector.get(GlobalComputingStatusService);
-        if (gcss.computingStatus) return Promise.resolve(true);
-
-        return firstValueFrom(race(
-            gcss.computingStatus$.pipe(filter((computing) => computing)),
-            timer(timeout ?? 30_000).pipe(map(() => false))
-        ));
-    }
-
-    /**
-     * @deprecated Use `onCalculationResultApplied` instead.
-     * @returns {Promise<void>} A promise that resolves when calculation ends.
-     */
-    onCalculationEnd(): Promise<void> {
-        return new Promise((resolve, reject) => {
-            const timer = setTimeout(() => {
-                reject(new Error('Calculation end timeout'));
-            }, 30_000);
-
-            const disposable = this.calculationEnd(() => {
-                clearTimeout(timer);
-                disposable.dispose();
-
-                resolve();
-            });
-        });
     }
 
     /**

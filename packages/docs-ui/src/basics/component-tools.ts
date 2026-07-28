@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IUniverInstanceService, Nullable } from '@univerjs/core';
-import type { DocBackground, Documents, Engine, IRenderContext, IRenderManagerService, Scene } from '@univerjs/engine-render';
-import { UniverInstanceType } from '@univerjs/core';
+import type { DocumentDataModel, Nullable } from '@univerjs/core';
+import type { DocBackground, Documents, Engine, IRender, IRenderContext, IRenderManagerService, Scene } from '@univerjs/engine-render';
 import { DOCS_VIEW_KEY } from './docs-view-key';
 
 export interface IDocObjectParam {
@@ -26,36 +25,8 @@ export interface IDocObjectParam {
     engine: Engine;
 }
 
-export function neoGetDocObject(renderContext: IRenderContext<DocumentDataModel>) {
+export function neoGetDocObject(renderContext: IRender | IRenderContext<DocumentDataModel>) {
     const { mainComponent, scene, engine, components } = renderContext;
-    const document = mainComponent as Documents;
-    const docBackground = components.get(DOCS_VIEW_KEY.BACKGROUND) as DocBackground;
-
-    return {
-        document,
-        docBackground,
-        scene,
-        engine,
-    };
-}
-
-/** @deprecated After migrating to `RenderUnit`, use `neoGetDocObject` instead. */
-export function getDocObject(
-    univerInstanceService: IUniverInstanceService,
-    renderManagerService: IRenderManagerService
-): Nullable<IDocObjectParam> {
-    const documentModel = univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_DOC);
-    if (!documentModel) {
-        return null;
-    }
-
-    const unitId = documentModel.getUnitId();
-    const currentRender = renderManagerService.getRenderUnitById(unitId);
-    if (currentRender == null) {
-        return;
-    }
-
-    const { mainComponent, scene, engine, components } = currentRender;
     const document = mainComponent as Documents;
     const docBackground = components.get(DOCS_VIEW_KEY.BACKGROUND) as DocBackground;
 

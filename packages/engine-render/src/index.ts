@@ -81,7 +81,7 @@ export type { IDrawingGroupShadow } from './drawing-group';
 export * from './engine';
 export * from './group';
 export * from './layer';
-export { IRenderingEngine, UniverRenderEnginePlugin } from './plugin';
+export { UniverRenderEnginePlugin } from './plugin';
 export {
     getCurrentTypeOfRenderer,
     IRenderManagerService,

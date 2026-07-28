@@ -18,7 +18,6 @@ import type {
     DocumentDataModel,
     ICommandService,
     IDocumentData,
-    IDocumentStyle,
     Injector,
     IPosition,
     IUndoRedoService,
@@ -249,7 +248,7 @@ export class Editor extends Disposable implements IEditor {
     }
 
     /**
-     * @deprecated use `IEditorService.focus` as instead. this is for internal usage.
+     * Focus the input element directly. This is for internal usage.
      */
     focus() {
         const curDoc = this._univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_DOC);
@@ -265,7 +264,7 @@ export class Editor extends Disposable implements IEditor {
     }
 
     /**
-     * @deprecated use `IEditorService.blur` as instead. this is for internal usage.
+     * Blur the input element directly. This is for internal usage.
      */
     blur(): void {
         const docSelectionRenderService = this._param.render.with(DocSelectionRenderService);
@@ -379,22 +378,16 @@ export class Editor extends Disposable implements IEditor {
         docDataModel?.dispose();
     }
 
-    /**
-     * @deprecated use getEditorId.
-     */
-    get editorUnitId() {
-        return this._param.editorUnitId;
-    }
-
-    /**
-     * @deprecated @TODO: @JOCS remove this in the future.
-     */
-    get params() {
-        return this._param;
-    }
-
     get cancelDefaultResizeListener() {
         return this._param.cancelDefaultResizeListener;
+    }
+
+    getRenderConfig() {
+        return {
+            canvasStyle: this._param.canvasStyle ?? {},
+            scrollBar: this._param.scrollBar,
+            ...(this._param.backScrollOffset === undefined ? {} : { backScrollOffset: this._param.backScrollOffset }),
+        };
     }
 
     get render() {
@@ -424,55 +417,6 @@ export class Editor extends Disposable implements IEditor {
 
     isSheetEditor() {
         return isInternalEditorID(this._getEditorId());
-    }
-
-    /**
-     * @deprecated use getDocumentData.
-     */
-    getValue() {
-        const docDataModel = this._getDocDataModel()!;
-        const value = docDataModel.getBody()?.dataStream || '';
-        return value.replace(/\r\n/g, '').replace(/\n/g, '').replace(/\n/g, '');
-    }
-
-    /**
-     * @deprecated use getDocumentData.
-     */
-    getBody() {
-        const docDataModel = this._getDocDataModel()!;
-        return docDataModel.getBody();
-    }
-
-    /**
-     * @deprecated.
-     */
-    update(param: Partial<IEditorOptions>) {
-        this._param = {
-            ...this._param,
-            ...param,
-        };
-    }
-
-    /**
-     * @deprecated.
-     */
-    updateCanvasStyle() {
-        const docDataModel = this._getDocDataModel();
-        if (docDataModel == null) {
-            return;
-        }
-
-        const documentStyle: IDocumentStyle = {};
-
-        if (this._param.canvasStyle?.fontSize) {
-            if (documentStyle.textStyle == null) {
-                documentStyle.textStyle = {};
-            }
-
-            documentStyle.textStyle.fs = this._param.canvasStyle.fontSize;
-        }
-
-        docDataModel.updateDocumentStyle(documentStyle);
     }
 
     private _getDocDataModel() {

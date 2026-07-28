@@ -86,7 +86,6 @@ export class SheetPermissionCheckUIController extends Disposable {
                 errorMsg,
             },
             width: 320,
-            destroyOnClose: true,
             showOk: true,
             onClose: () => {
                 this._dialogService.close(UNIVER_SHEET_PERMISSION_ALERT_DIALOG_ID);

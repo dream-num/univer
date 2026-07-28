@@ -87,7 +87,6 @@ describe('background extension', () => {
             columnWidthAccumulation: [40],
             columnTotalWidth: 40,
             rowTotalHeight: 20,
-            getCellByIndexWithNoHeader: vi.fn(() => createCellInfo()),
             getCellWithCoordByIndex: vi.fn(() => createCellInfo()),
         };
 
@@ -153,7 +152,6 @@ describe('background extension', () => {
             columnWidthAccumulation: [40],
             columnTotalWidth: 40,
             rowTotalHeight: 20,
-            getCellByIndexWithNoHeader: vi.fn(() => createCellInfo()),
             getCellWithCoordByIndex: vi.fn(() => createCellInfo()),
         } as any;
 
@@ -168,7 +166,7 @@ describe('background extension', () => {
             } as any
         );
 
-        expect(skeleton.getCellByIndexWithNoHeader).not.toHaveBeenCalled();
+        expect(skeleton.getCellWithCoordByIndex).not.toHaveBeenCalled();
         expect(ctx.fill).toHaveBeenCalled();
     });
 
@@ -195,7 +193,6 @@ describe('background extension', () => {
             columnWidthAccumulation: [40],
             columnTotalWidth: 40,
             rowTotalHeight: 20,
-            getCellByIndexWithNoHeader: vi.fn(() => createCellInfo()),
             getCellWithCoordByIndex: vi.fn(() => createCellInfo()),
         } as any;
 
@@ -239,7 +236,6 @@ describe('background extension', () => {
             columnWidthAccumulation: [40, 80],
             columnTotalWidth: 80,
             rowTotalHeight: 40,
-            getCellByIndexWithNoHeader: vi.fn(() => createCellInfo()),
             getCellWithCoordByIndex: vi.fn(() => createCellInfo()),
         } as any;
 
@@ -281,7 +277,6 @@ describe('background extension', () => {
             columnWidthAccumulation: [40],
             columnTotalWidth: 40,
             rowTotalHeight: 20,
-            getCellByIndexWithNoHeader: vi.fn(() => createCellInfo()),
             getCellWithCoordByIndex: vi.fn(() => createCellInfo({ isMergedMainCell: true })),
         } as any;
 

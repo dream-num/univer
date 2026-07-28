@@ -106,7 +106,6 @@ import {
 } from './commands/commands/paragraph-align.command';
 import {
     CoverContentCommand,
-    ReplaceContentCommand,
     ReplaceSelectionCommand,
     ReplaceSnapshotCommand,
     ReplaceTextRunsCommand,
@@ -350,7 +349,6 @@ export class UniverDocsUIPlugin extends Plugin {
             DocParagraphSettingCommand,
             InnerPasteCommand,
             CutContentCommand,
-            ReplaceContentCommand,
             ReplaceSnapshotCommand,
             CoverContentCommand,
             SetDocZoomRatioCommand,

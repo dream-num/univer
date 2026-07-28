@@ -28,7 +28,7 @@ import { FDataValidation } from './f-data-validation';
 export interface IFRangeSheetsDataValidationMixin {
     /**
      * Set a data validation rule to current range. if rule is null, clear data validation rule.
-     * @param {Nullable<FDataValidation>} rule data validation rule, build by `FUniver.newDataValidation`
+     * @param {Nullable<FDataValidation>} rule data validation rule, built by `univerAPI.newDataValidation()`
      * @returns current range
      * @example
      * ```ts

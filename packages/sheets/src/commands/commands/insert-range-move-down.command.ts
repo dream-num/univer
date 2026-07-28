@@ -38,6 +38,7 @@ import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-
 import { InsertRowMutation, InsertRowMutationUndoFactory } from '../mutations/insert-row-col.mutation';
 import { RemoveRowMutation } from '../mutations/remove-row-col.mutation';
 import { getInsertRangeMutations } from '../utils/handle-range.mutation';
+import { hasOverlappingRanges } from '../utils/selection-command-util';
 import { followSelectionOperation } from './utils/selection-utils';
 import { getSheetCommandTarget } from './utils/target-util';
 
@@ -63,7 +64,7 @@ export const InsertRangeMoveDownCommand: ICommand = {
         const errorService = accessor.get(ErrorService);
         const localeService = accessor.get(LocaleService);
 
-        if (selectionManagerService.isOverlapping()) {
+        if (hasOverlappingRanges(selectionManagerService.getCurrentSelections().map(({ range }) => range))) {
             errorService.emit(localeService.t<LocaleKey>('sheets.info.overlappingSelections'));
             return false;
         }

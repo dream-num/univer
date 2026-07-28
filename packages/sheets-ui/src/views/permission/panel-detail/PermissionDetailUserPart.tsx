@@ -75,7 +75,6 @@ export const PermissionDetailUserPart = (props: IPermissionDetailUserPartProps) 
             title: { title: '' },
             children: { label: UNIVER_SHEET_PERMISSION_USER_DIALOG },
             width: 'auto',
-            destroyOnClose: true,
             closable: false,
             onClose: () => dialogService.close(UNIVER_SHEET_PERMISSION_USER_DIALOG_ID),
             className: 'sheet-permission-user-dialog',

@@ -14,12 +14,8 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IExecutionOptions } from '@univerjs/core';
-import type { CommentUpdate, IAddCommentCommandParams, IDeleteCommentCommandParams, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
-import { toDisposable } from '@univerjs/core';
 import { FWorkbook } from '@univerjs/sheets/facade';
-import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, ThreadCommentModel, UpdateCommentCommand } from '@univerjs/thread-comment';
-import { filter } from 'rxjs';
+import { ThreadCommentModel } from '@univerjs/thread-comment';
 import { FThreadComment } from './f-thread-comment';
 
 /**
@@ -60,35 +56,6 @@ export interface IFWorkbookSheetsThreadCommentMixin {
      * ```
      */
     clearComments(): Promise<boolean>;
-
-    /**
-     * @deprecated use `univerAPI.addEvent(univerAPI.Event.CommentUpdated, (params) => {})` as instead
-     */
-    onThreadCommentChange(callback: (commentUpdate: CommentUpdate) => void | false): IDisposable;
-
-    /**
-     * @deprecated use `univerAPI.addEvent(univerAPI.Event.BeforeCommentAdd, (params) => {})` as instead
-     */
-    onBeforeAddThreadComment(
-        this: FWorkbook,
-        callback: (params: IAddCommentCommandParams, options: IExecutionOptions | undefined) => void | false
-    ): IDisposable;
-
-    /**
-     * @deprecated use `univerAPI.addEvent(univerAPI.Event.BeforeCommentUpdate, (params) => {})` as instead
-     */
-    onBeforeUpdateThreadComment(
-        this: FWorkbook,
-        callback: (params: IUpdateCommentCommandParams, options: IExecutionOptions | undefined) => void | false
-    ): IDisposable;
-
-    /**
-     * @deprecated use `univerAPI.addEvent(univerAPI.Event.BeforeCommentDelete, (params) => {})` as instead
-     */
-    onBeforeDeleteThreadComment(
-        this: FWorkbook,
-        callback: (params: IDeleteCommentCommandParams, options: IExecutionOptions | undefined) => void | false
-    ): IDisposable;
 }
 
 /**
@@ -117,74 +84,6 @@ export class FWorkbookSheetsThreadCommentMixin extends FWorkbook implements IFWo
         const promises = comments.map((comment) => comment.deleteAsync());
 
         return Promise.all(promises).then(() => true);
-    }
-
-    /**
-     * @param callback
-     * @returns {IDisposable} A disposable used to remove the listener.
-     * @deprecated
-     */
-    override onThreadCommentChange(callback: (commentUpdate: CommentUpdate) => void | false): IDisposable {
-        return toDisposable(this._threadCommentModel.commentUpdate$
-            .pipe(filter((change) => change.unitId === this._workbook.getUnitId()))
-            .subscribe(callback));
-    }
-
-    /**
-     * @param callback
-     * @returns {IDisposable} A disposable used to remove the listener.
-     * @deprecated
-     */
-    override onBeforeAddThreadComment(callback: (params: IAddCommentCommandParams, options: IExecutionOptions | undefined) => void | false): IDisposable {
-        return toDisposable(this._commandService.beforeCommandExecuted((commandInfo, options) => {
-            const params = commandInfo.params as IAddCommentCommandParams;
-            if (commandInfo.id === AddCommentCommand.id) {
-                if (params.unitId !== this._workbook.getUnitId()) {
-                    return;
-                }
-                if (callback(params, options) === false) {
-                    throw new Error('Command is stopped by the hook onBeforeAddThreadComment');
-                }
-            }
-        }));
-    }
-
-    /**
-     * @param callback
-     * @returns {IDisposable} A disposable used to remove the listener.
-     * @deprecated
-     */
-    override onBeforeUpdateThreadComment(callback: (params: IUpdateCommentCommandParams, options: IExecutionOptions | undefined) => void | false): IDisposable {
-        return toDisposable(this._commandService.beforeCommandExecuted((commandInfo, options) => {
-            const params = commandInfo.params as IUpdateCommentCommandParams;
-            if (commandInfo.id === UpdateCommentCommand.id) {
-                if (params.unitId !== this._workbook.getUnitId()) {
-                    return;
-                }
-                if (callback(params, options) === false) {
-                    throw new Error('Command is stopped by the hook onBeforeUpdateThreadComment');
-                }
-            }
-        }));
-    }
-
-    /**
-     * @param callback
-     * @returns {IDisposable} A disposable used to remove the listener.
-     * @deprecated
-     */
-    override onBeforeDeleteThreadComment(callback: (params: IDeleteCommentCommandParams, options: IExecutionOptions | undefined) => void | false): IDisposable {
-        return toDisposable(this._commandService.beforeCommandExecuted((commandInfo, options) => {
-            const params = commandInfo.params as IDeleteCommentCommandParams;
-            if (commandInfo.id === DeleteCommentCommand.id || commandInfo.id === DeleteCommentTreeCommand.id) {
-                if (params.unitId !== this._workbook.getUnitId()) {
-                    return;
-                }
-                if (callback(params, options) === false) {
-                    throw new Error('Command is stopped by the hook onBeforeDeleteThreadComment');
-                }
-            }
-        }));
     }
 }
 

@@ -32,7 +32,6 @@ export const SheetPermissionOpenDialogOperation: ICommand = {
             title: { title: 'sheets-ui.permission.dialog.allowedPermissionType' },
             children: { label: UNIVER_SHEET_PERMISSION_DIALOG },
             width: 393,
-            destroyOnClose: true,
             onClose: () => dialogService.close(UNIVER_SHEET_PERMISSION_DIALOG_ID),
         });
         return true;

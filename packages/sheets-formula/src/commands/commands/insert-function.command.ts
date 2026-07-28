@@ -85,7 +85,7 @@ export const InsertFunctionCommand: ICommand = {
         }
 
         const setRangeValuesParams: ISetRangeValuesCommandParams = {
-            value: cellMatrix.getData(),
+            value: cellMatrix.clone(),
         };
 
         return commandService.executeCommand(SetRangeValuesCommand.id, setRangeValuesParams);

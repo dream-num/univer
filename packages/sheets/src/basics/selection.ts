@@ -22,7 +22,6 @@ import type {
     ISelectionCell,
     Nullable,
 } from '@univerjs/core';
-import { getCellInfoInMergeData, makeCellRangeToRangeData } from '@univerjs/core';
 
 export const SELECTION_CONTROL_BORDER_BUFFER_WIDTH = 1.5; // The draggable range of the selection is too thin, making it easy for users to miss. Therefore, a buffer gap is provided to make it easier for users to select.
 
@@ -209,33 +208,5 @@ export function convertPrimaryWithCoordToPrimary(primaryWithCoord: ICellWithCoor
         startColumn,
         endRow,
         endColumn,
-    };
-}
-
-/**
- * @deprecated Use worksheet.getCellInfoInMergeData or SpreadsheetSkeleton.getCellByIndex instead
- * Convert the coordinates of a single cell into a selection data.
- * @param row Specified Row Coordinate
- * @param column Specified Column Coordinate
- * @param mergeData  Obtain the data of merged cells through the worksheet object.
- * @returns ISelectionWithStyle
- */
-export function transformCellDataToSelectionData(
-    row: number,
-    column: number,
-    mergeData: IRange[]
-): Nullable<ISelectionWithStyle> {
-    const newCellRange = getCellInfoInMergeData(row, column, mergeData);
-
-    const newSelectionData = makeCellRangeToRangeData(newCellRange);
-
-    if (!newSelectionData) {
-        return;
-    }
-
-    return {
-        range: newSelectionData,
-        primary: newCellRange,
-        style: null,
     };
 }

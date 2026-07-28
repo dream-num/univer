@@ -378,15 +378,6 @@ export class ObjectMatrix<T> {
         objectArray[column] = value;
     }
 
-    /**
-     * ！！
-     * Please +1 ‘！’, who fell into this pit.
-     * @deprecated use `realDelete` or `splice`
-     */
-    deleteValue(row: number, column: number): void {
-        delete this._matrix?.[row]?.[column];
-    }
-
     realDeleteValue(row: number, column: number): void {
         delete this._matrix?.[row]?.[column];
 
@@ -658,22 +649,7 @@ export class ObjectMatrix<T> {
         return array;
     }
 
-    /**
-     * @deprecated Use getMatrix as a substitute.
-     */
-    toJSON(): IObjectMatrixPrimitiveType<T> {
-        return this._matrix;
-    }
-
     clone(): IObjectMatrixPrimitiveType<T> {
-        const json = JSON.stringify(this._matrix);
-        return JSON.parse(json);
-    }
-
-    /**
-     * @deprecated Use clone as a substitute.
-     */
-    getData(): IObjectMatrixPrimitiveType<T> {
         const json = JSON.stringify(this._matrix);
         return JSON.parse(json);
     }
@@ -703,7 +679,7 @@ export class ObjectMatrix<T> {
             });
         });
 
-        return objectMatrix.getData();
+        return objectMatrix.clone();
     }
 
     /**

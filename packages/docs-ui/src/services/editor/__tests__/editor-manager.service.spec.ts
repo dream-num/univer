@@ -121,7 +121,7 @@ class TestRegisterRender extends TestRender {
     container: HTMLDivElement | null = null;
     readonly engine = {
         canvasColorService: {},
-        setContainer: (container: HTMLDivElement) => {
+        mount: (container: HTMLDivElement) => {
             this.container = container;
         },
         getCanvas: () => ({
@@ -141,8 +141,10 @@ class TestRegisterRenderManagerService {
     static readonly renders = new Map<string, TestRegisterRender>();
     static readonly removedRenderIds: string[] = [];
 
-    create(unitId: string) {
-        TestRegisterRenderManagerService.renders.set(unitId, new TestRegisterRender(new TestDocSelectionRenderService()));
+    createRender(unitId: string) {
+        const render = new TestRegisterRender(new TestDocSelectionRenderService());
+        TestRegisterRenderManagerService.renders.set(unitId, render);
+        return render;
     }
 
     getRenderUnitById(unitId: string) {
@@ -156,7 +158,9 @@ class TestRegisterRenderManagerService {
 }
 
 class TestMissingRenderManagerService {
-    create() {}
+    createRender() {
+        return null;
+    }
 
     getRenderUnitById() {
         return null;
@@ -257,7 +261,7 @@ describe('EditorService', () => {
         service.focus$.subscribe((range) => focusRanges.push(range));
         service.blur$.subscribe((value) => blurs.push(value));
         service.getAllEditor().set('editor-1', {
-            getValue: () => 'abc',
+            getDocumentData: () => ({ body: { dataStream: 'abc\r\n' } }),
             focus: () => editorFocused++,
             blur: () => editorBlurred++,
             isSheetEditor: () => false,
@@ -505,6 +509,7 @@ describe('EditorService', () => {
             },
             canvasStyle: { backgroundColor: '#ffffff' },
             scrollBar: false,
+            backScrollOffset: 12,
         }, container);
         const render = TestRegisterRenderManagerService.renders.get(editorUnitId)!;
 
@@ -513,6 +518,7 @@ describe('EditorService', () => {
         expect(service.getEditorRenderConfig(editorUnitId)).toEqual({
             canvasStyle: { backgroundColor: '#ffffff' },
             scrollBar: false,
+            backScrollOffset: 12,
         });
         expect(render.container).toBe(container);
         expect(render.viewport.disposed).toBe(true);
@@ -567,7 +573,7 @@ describe('EditorService', () => {
         const { service } = createService();
         let blurred = 0;
         service.getAllEditor().set(EDITOR_ID, {
-            getValue: () => 'abc',
+            getDocumentData: () => ({ body: { dataStream: 'abc\r\n' } }),
             focus: () => {},
             blur: () => blurred++,
             isSheetEditor: () => false,
@@ -587,7 +593,7 @@ describe('EditorService', () => {
         const { service } = createService();
         let standaloneBlurred = 0;
         service.getAllEditor().set(EDITOR_ID, {
-            getValue: () => 'abc',
+            getDocumentData: () => ({ body: { dataStream: 'abc\r\n' } }),
             focus: () => {},
             blur: () => standaloneBlurred++,
             isSheetEditor: () => false,
@@ -604,7 +610,7 @@ describe('EditorService', () => {
         expect(service.getFocusId()).toBe(EDITOR_ID);
 
         service.getAllEditor().set(EDITOR_ID, {
-            getValue: () => 'cell',
+            getDocumentData: () => ({ body: { dataStream: 'cell\r\n' } }),
             focus: () => {},
             blur: () => standaloneBlurred++,
             isSheetEditor: () => true,

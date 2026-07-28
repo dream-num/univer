@@ -53,7 +53,7 @@ export class SelectionRenderModel implements IRangeWithCoord {
     get rangeType() { return this._rangeType; }
 
     /**
-     * @deprecated, Duplicate with `Rectangle`
+     * Compares row and column bounds only.
      */
     isEqual(rangeWithCoord: IRangeWithCoord) {
         const { startColumn, startRow, endColumn, endRow } = this;

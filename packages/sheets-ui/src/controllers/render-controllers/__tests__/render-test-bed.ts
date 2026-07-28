@@ -337,9 +337,9 @@ export interface IFakeSkeleton {
     getOffsetByColumn(col: number): number;
     getOffsetRelativeToRowCol(viewportScrollX: number, viewportScrollY: number): { row: number; column: number; rowOffset: number; columnOffset: number };
     getRangeByViewBound(_viewBound: unknown): { startRow: number; startColumn: number; endRow: number; endColumn: number };
-    getWorksheetConfig(): { freeze: any };
     getLocation(): [string, string];
     worksheet: {
+        getFreeze: () => any;
         getRowCount: () => number;
         getColumnCount: () => number;
         getSheetId: () => string;
@@ -400,9 +400,9 @@ export function createFakeSkeleton(options?: Partial<IFakeSkeleton>): IFakeSkele
             };
         },
         getRangeByViewBound: () => ({ startRow: 0, startColumn: 0, endRow: 20, endColumn: 10 }),
-        getWorksheetConfig: () => ({ freeze: { startRow: 0, startColumn: 0, xSplit: 0, ySplit: 0 } }),
         getLocation: () => ['test', 'sheet1'],
         worksheet: {
+            getFreeze: () => ({ startRow: 0, startColumn: 0, xSplit: 0, ySplit: 0 }),
             getRowCount: () => 200,
             getColumnCount: () => 50,
             getSheetId: () => 'sheet1',

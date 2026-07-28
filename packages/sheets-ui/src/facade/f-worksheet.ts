@@ -202,29 +202,9 @@ export interface IFWorksheetUIMixin {
     getSkeleton(): Nullable<SpreadsheetSkeleton>;
 
     /**
-     * Sets the width of the given column to fit its contents.
-     * @param {number} columnPosition - The position of the given column to resize. index starts at 0.
-     * @returns {FWorksheet} - The FWorksheet instance for chaining.
-     * @example
-     * ```ts
-     * const fWorkbook = univerAPI.getActiveWorkbook();
-     * const fWorksheet = fWorkbook.getSheetByName('Sheet1');
-     * if (!fWorksheet) return;
-     *
-     * // Set the long text value in cell A1
-     * const fRange = fWorksheet.getRange('A1');
-     * fRange.setValue('Whenever it is a damp, drizzly November in my soul...');
-     *
-     * // Set the column A to a width which fits the text
-     * fWorksheet.autoResizeColumn(0);
-     * ```
-     */
-    autoResizeColumn(columnPosition: number): FWorksheet;
-
-    /**
      * Sets the width of all columns starting at the given column position to fit their contents.
      * @param {number} startColumn - The position of the first column to resize. index starts at 0.
-     * @param {number} numColumns - The number of columns to auto-resize.
+     * @param {number} [numColumns] - The number of columns to auto-resize. Default is 1.
      * @returns {FWorksheet} - The FWorksheet instance for chaining.
      * @example
      * ```ts
@@ -236,21 +216,12 @@ export interface IFWorksheetUIMixin {
      * fWorksheet.autoResizeColumns(0, 3);
      * ```
      */
-    autoResizeColumns(startColumn: number, numColumns: number): FWorksheet;
-
-    /**
-     * Sets the width of all columns starting at the given column position to fit their contents.
-     * @deprecated use `autoResizeColumns` instead
-     * @param {number} columnPosition - The position of the first column to resize. index starts at 0.
-     * @param {number} numColumn - The number of columns to auto-resize.
-     * @returns {FWorksheet} - The FWorksheet instance for chaining.
-     */
-    setColumnAutoWidth(columnPosition: number, numColumn: number): FWorksheet;
+    autoResizeColumns(startColumn: number, numColumns?: number): FWorksheet;
 
     /**
      * Sets the height of all rows starting at the given row position to fit their contents.
      * @param {number} startRow - The position of the first row to resize. index starts at 0.
-     * @param {number} numRows - The number of rows to auto-resize.
+     * @param {number} [numRows] - The number of rows to auto-resize. Default is 1.
      * @returns {FWorksheet} - The FWorksheet instance for chaining.
      * @example
      * ```ts
@@ -262,7 +233,7 @@ export interface IFWorksheetUIMixin {
      * fWorksheet.autoResizeRows(0, 3);
      * ```
      */
-    autoResizeRows(startRow: number, numRows: number): FWorksheet;
+    autoResizeRows(startRow: number, numRows?: number): FWorksheet;
 
     /**
      * Customize the column header of the worksheet.
@@ -460,11 +431,7 @@ export class FWorksheetUIMixin extends FWorksheet implements IFWorksheetUIMixin 
         return service?.getSkeleton(this._worksheet.getSheetId());
     }
 
-    override autoResizeColumn(columnPosition: number): FWorksheet {
-        return this.autoResizeColumns(columnPosition, 1);
-    }
-
-    override autoResizeColumns(startColumn: number, numColumns: number): FWorksheet {
+    override autoResizeColumns(startColumn: number, numColumns: number = 1): FWorksheet {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
         const ranges = [
@@ -485,11 +452,7 @@ export class FWorksheetUIMixin extends FWorksheet implements IFWorksheetUIMixin 
         return this;
     }
 
-    override setColumnAutoWidth(columnPosition: number, numColumn: number): FWorksheet {
-        return this.autoResizeColumns(columnPosition, numColumn);
-    }
-
-    override autoResizeRows(startRow: number, numRows: number): FWorksheet {
+    override autoResizeRows(startRow: number, numRows: number = 1): FWorksheet {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
         const ranges = [

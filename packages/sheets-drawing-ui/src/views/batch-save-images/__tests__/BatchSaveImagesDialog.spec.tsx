@@ -188,10 +188,6 @@ class TestBatchSaveImagesService implements IBatchSaveImagesService {
     getSelectionColumnIndices(): Set<number> {
         return new Set([1]);
     }
-
-    registerURLImageDownloader(): IDisposable {
-        return toDisposable(() => undefined);
-    }
 }
 
 class TestEmptyBatchSaveImagesService extends TestBatchSaveImagesService {

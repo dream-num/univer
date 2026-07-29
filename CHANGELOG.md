@@ -1,5 +1,70 @@
 # Changelog
 
+## [1.0.0-alpha.8](https://github.com/dream-num/univer/compare/v1.0.0-alpha.7...v1.0.0-alpha.8) (2026-07-29)
+
+### Bug Fixes
+
+* **sheets-crosshair-highlight:** add overlay padding ([#7369](https://github.com/dream-num/univer/issues/7369)) ([ca5a81f](https://github.com/dream-num/univer/commit/ca5a81fc3f9ec4bd0bb5359028b07a470cddb109))
+* **sheets:** skip snapshot preview before workbench ready ([#7368](https://github.com/dream-num/univer/issues/7368)) ([20e605f](https://github.com/dream-num/univer/commit/20e605f4536c7470af3923377b54fd1ebbf5efd4))
+* keep range selector documents structurally valid ([#7365](https://github.com/dream-num/univer/issues/7365)) ([39323d2](https://github.com/dream-num/univer/commit/39323d26abe9c26e094b178888a41c136f375a30))
+* sync and clean up locale files ([#7354](https://github.com/dream-num/univer/issues/7354)) ([4993532](https://github.com/dream-num/univer/commit/499353215a12243bfbca1b358e9046494f0a2777))
+* **docs:** align overflow table interactions ([#7347](https://github.com/dream-num/univer/issues/7347)) ([d5e3fdf](https://github.com/dream-num/univer/commit/d5e3fdf2f9a9726219e7f0ea6da33d29db706a22))
+* **docs-find-replace:** register plugin config and fix dependency order ([#7348](https://github.com/dream-num/univer/issues/7348)) ([afb61c2](https://github.com/dream-num/univer/commit/afb61c22973f62be9e32bb027bc083a6d7317f02))
+* **ui:** scope ResizeObserver to hook to prevent detached DOM retention ([#7345](https://github.com/dream-num/univer/issues/7345)) ([55aac7e](https://github.com/dream-num/univer/commit/55aac7e02798a2ddb0c9002c678d59170a7fa3f4))
+* **sheets-table:** keep super table mutations local ([#7344](https://github.com/dream-num/univer/issues/7344)) ([ac9ac0e](https://github.com/dream-num/univer/commit/ac9ac0e1d58f877f65c9e05e3b3afdb7fe8af25d))
+* **formula:** bound non-sheet other formulas ([#7340](https://github.com/dream-num/univer/issues/7340)) ([3543b5b](https://github.com/dream-num/univer/commit/3543b5b54f3ef553d41db278de973a76cc75d285))
+* **sheets-formula:** update formula refs when deleting rows on inactive sheet ([#7306](https://github.com/dream-num/univer/issues/7306)) ([22472c3](https://github.com/dream-num/univer/commit/22472c3652ddaed77bd46de4d7574d79bed2534b))
+* **engine-render:** clip cache blit source rect to canvas bounds for Safari < 18 ([#7331](https://github.com/dream-num/univer/issues/7331)) ([fe2d205](https://github.com/dream-num/univer/commit/fe2d2052f9060416894d087b1240c1392eae78bd))
+* route embedded editor shortcuts explicitly ([#7337](https://github.com/dream-num/univer/issues/7337)) ([d4c32e5](https://github.com/dream-num/univer/commit/d4c32e5909b3d0eb7dd733d88fb52307e335e9be))
+* **docs-drawing:** arrange drawings from document model ([#7328](https://github.com/dream-num/univer/issues/7328)) ([f185abc](https://github.com/dream-num/univer/commit/f185abc377e58dad1c7c7028296d721b7f89cb07))
+* **thread-comment-ui:** use RegionService for comment timestamps ([#7326](https://github.com/dream-num/univer/issues/7326)) ([7876071](https://github.com/dream-num/univer/commit/7876071f723d9f569e7a39380cbad71743461804))
+* **docs-drawing:** skip intrinsic loading for explicit image size ([#7320](https://github.com/dream-num/univer/issues/7320)) ([ac8201a](https://github.com/dream-num/univer/commit/ac8201a47cec8c2e76f9eae28a8521eed2c21d94))
+
+### Features
+
+* **docs:** support inline formula custom ranges ([#7360](https://github.com/dream-num/univer/issues/7360)) ([9da46c4](https://github.com/dream-num/univer/commit/9da46c43657368486bd59447178abff604d7270e))
+* **themes:** add yellow theme ([#7351](https://github.com/dream-num/univer/issues/7351)) ([24aa8ff](https://github.com/dream-num/univer/commit/24aa8ff89e9d9c28e6dd3bf7a82d2b0fda69d50c))
+* **docs-find-replace:** add find/replace plugin for Univer Docs ([#7346](https://github.com/dream-num/univer/issues/7346)) ([bb932c2](https://github.com/dream-num/univer/commit/bb932c2f67267f22446014ef711dc3e4fc74e8a4))
+* **formula:** add host external reference contract ([#7338](https://github.com/dream-num/univer/issues/7338)) ([618bf13](https://github.com/dream-num/univer/commit/618bf1345925e4b523750e669e135c956d8d4143))
+* **engine-render:** add reusable line primitive ([#7339](https://github.com/dream-num/univer/issues/7339)) ([0793534](https://github.com/dream-num/univer/commit/0793534d6846a9035c01bf44e88a89b79e3f36c2))
+* unify drawing glow and shadow effects ([#7336](https://github.com/dream-num/univer/issues/7336)) ([6bad31a](https://github.com/dream-num/univer/commit/6bad31acf8df5aeaedaa453e96382512c5064dbf))
+* **docs:** add Word-compatible pagination ([#7334](https://github.com/dream-num/univer/issues/7334)) ([a6d281f](https://github.com/dream-num/univer/commit/a6d281f36ce3ba9c4793766667fde0804697575b))
+* **ui:** add workbench skeleton service and disabled UI parts API ([#7332](https://github.com/dream-num/univer/issues/7332)) ([2201594](https://github.com/dream-num/univer/commit/2201594311da016298f02b456aca674a22f47ef8))
+* **core:** define Base attachment value type ([#7317](https://github.com/dream-num/univer/issues/7317)) ([1c2f4a3](https://github.com/dream-num/univer/commit/1c2f4a3ba1a1b29ee2a4c61be746bd1e230a72ca))
+* **docs:** add agent-friendly text range lookup ([#7329](https://github.com/dream-num/univer/issues/7329)) ([b273f47](https://github.com/dream-num/univer/commit/b273f475e176c6a58e9a6cd482a2af633eb8f3aa))
+* **docs:** complete traditional document sections ([#7324](https://github.com/dream-num/univer/issues/7324)) ([70286a3](https://github.com/dream-num/univer/commit/70286a3cbd9394926b190cb2461db5f003d30bc4))
+
+### Performance Improvements
+
+* **render:** cache shape shadows and glows ([#7353](https://github.com/dream-num/univer/issues/7353)) ([45fee6f](https://github.com/dream-num/univer/commit/45fee6f37575d1aa9aaa25615bd1546ec6264a87))
+
+### Other Changes (chore)
+
+* **test:** normalize test file layout ([#7366](https://github.com/dream-num/univer/issues/7366)) ([d38f51e](https://github.com/dream-num/univer/commit/d38f51e5f15a0ee750b0a776fe1cbc99018e30f3))
+* upgrade React and consolidate tests ([#7323](https://github.com/dream-num/univer/issues/7323)) ([cbf705f](https://github.com/dream-num/univer/commit/cbf705fa08bd7c466b856281055da0cc838158d2))
+
+### Other Changes (ci)
+
+* improve workflow caching ([7a31b61](https://github.com/dream-num/univer/commit/7a31b6198dab32a983503c114de984a92848db16))
+* remove useless workflows ([3260d45](https://github.com/dream-num/univer/commit/3260d45f4e543e44f3be59b02427cbd9c334915b))
+
+### Other Changes (docs)
+
+* **drawing:** clarify document wrapping behavior ([#7330](https://github.com/dream-num/univer/issues/7330)) ([e7ecb0f](https://github.com/dream-num/univer/commit/e7ecb0f6ad3f615e122fbaf4de4a7fc1490b7bc4))
+
+### Other Changes (refactor)
+
+* **engine-render:** remove unused opentype shaping ([#7367](https://github.com/dream-num/univer/issues/7367)) ([3ffd9c4](https://github.com/dream-num/univer/commit/3ffd9c4e8a4f175027e486699599fc86ba6a4183))
+* remove deprecated APIs ([#7358](https://github.com/dream-num/univer/issues/7358)) ([62f4011](https://github.com/dream-num/univer/commit/62f4011a02b68ccd8935f0f9c41292c0ba6676c9))
+* remove obsolete value state ([#7356](https://github.com/dream-num/univer/issues/7356)) ([3d53e78](https://github.com/dream-num/univer/commit/3d53e787b7a8e1101249721f921c1c12256f39c1))
+* **core:** remove deprecated changeDoc API ([#7349](https://github.com/dream-num/univer/issues/7349)) ([b2c844a](https://github.com/dream-num/univer/commit/b2c844ac726f2e463a925e8dcb95242b7fa152c2))
+* **core:** remove getUniverSheetInstance ([#7343](https://github.com/dream-num/univer/issues/7343)) ([098bea0](https://github.com/dream-num/univer/commit/098bea0f424e5c1eaf2c7ee6e27d61455a1fc679))
+* **design:** replace react-transition-group with tailwind transitions ([#7341](https://github.com/dream-num/univer/issues/7341)) ([4298074](https://github.com/dream-num/univer/commit/429807437d58b499772485f3feb9d745ee608a40))
+* **engine-render:** remove deprecated getRenderById ([#7335](https://github.com/dream-num/univer/issues/7335)) ([382c361](https://github.com/dream-num/univer/commit/382c3614a619f5dd5a993e4b7576f4a882fcd62f))
+* **sheets-ui:** adjust ribbon layout to make protection entry a labeled vertical control ([#7327](https://github.com/dream-num/univer/issues/7327)) ([99d436c](https://github.com/dream-num/univer/commit/99d436cea8283dd3b75b2e86b1a5280cc86b05ca))
+* **formula:** merge formula plugin into engine ([#7322](https://github.com/dream-num/univer/issues/7322)) ([1df25c9](https://github.com/dream-num/univer/commit/1df25c94f026df60818d13487ccf1e4d6db0613f))
+* consolidate formula packages into engine-formula ([#7321](https://github.com/dream-num/univer/issues/7321)) ([d34421a](https://github.com/dream-num/univer/commit/d34421a8e94c1cd7e60671dd03d47152d86a9f26))
+
 ## [1.0.0-alpha.7](https://github.com/dream-num/univer/compare/v1.0.0-alpha.6...v1.0.0-alpha.7) (2026-07-23)
 
 ### Bug Fixes

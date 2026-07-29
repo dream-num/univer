@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/preset-docs-core",
-    "version": "1.0.0-alpha.7",
+    "version": "1.0.0-alpha.8",
     "private": false,
     "description": "Preset for core Univer Docs editing and UI features.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

@@ -19,8 +19,6 @@ import { BooleanNumber, CustomRangeType, DataStreamTreeTokenType, PositionedObje
 import { describe, expect, it, vi } from 'vitest';
 import { Lang } from '../../../hyphenation/lang';
 import { createSkeletonLetterGlyph } from '../../../model/glyph';
-import { fontLibrary } from '../../../shaping-engine/font-library';
-import * as textShapingModule from '../../../shaping-engine/text-shaping';
 import { shaping } from '../shaping';
 import { createParagraphLayoutTestBed } from './create-paragraph-layout-test-bed';
 
@@ -432,125 +430,6 @@ describe('shaping', () => {
         expect(customBlockGlyph).toBeDefined();
         expect(customBlockGlyph!.width).toBe(0);
         expect(customBlockGlyph!.bBox.ba + customBlockGlyph!.bBox.bd).toBe(0);
-    });
-
-    it('shapes text with useOpenType when font library is ready', () => {
-        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('Hello');
-        const originalIsReady = fontLibrary.isReady;
-        fontLibrary.isReady = true;
-
-        try {
-            const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig, true);
-            expect(result.length).toBeGreaterThan(0);
-        } finally {
-            fontLibrary.isReady = originalIsReady;
-        }
-    });
-
-    it('shapes a measured whole entity atomically with useOpenType', () => {
-        const source = String.raw`x+y`;
-        const prefix = 'A ';
-        const content = `${prefix}${source} B`;
-        const range: ICustomRangeForInterceptor = {
-            startIndex: prefix.length,
-            endIndex: prefix.length + source.length - 1,
-            rangeId: 'formula-1',
-            rangeType: CustomRangeType.CUSTOM,
-            wholeEntity: true,
-            show: false,
-            glyphAscentEm: 1,
-            glyphDescentEm: 0.25,
-            glyphWidthEm: 2,
-        };
-        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed(content, {
-            body: { customRanges: [range] },
-        });
-        vi.spyOn(viewModel, 'getCustomRange').mockImplementation((index) =>
-            index >= range.startIndex && index <= range.endIndex ? range : undefined
-        );
-        const originalIsReady = fontLibrary.isReady;
-        fontLibrary.isReady = true;
-        const spy = vi.spyOn(textShapingModule, 'textShape').mockReturnValue(
-            `${content}${DataStreamTreeTokenType.PARAGRAPH}`.split('').map((char, start) => ({
-                char,
-                start,
-                end: start + 1,
-                glyph: null,
-                font: null,
-                kerning: 0,
-                boundingBox: null,
-            }))
-        );
-
-        try {
-            const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig, true);
-            const formulaGlyphs = result.flatMap((item) => item.glyphs).filter((glyph) => glyph.raw === source);
-
-            expect(formulaGlyphs).toHaveLength(1);
-            expect(formulaGlyphs[0].count).toBe(source.length);
-            expect(formulaGlyphs[0].content).toBe('\u200B');
-        } finally {
-            spy.mockRestore();
-            fontLibrary.isReady = originalIsReady;
-        }
-    });
-
-    it('shapes tab with useOpenType when font library is ready', () => {
-        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('Hello\tworld');
-        const originalIsReady = fontLibrary.isReady;
-        fontLibrary.isReady = true;
-
-        const spy = vi.spyOn(textShapingModule, 'textShape').mockReturnValue([
-            { char: 'H', start: 0, end: 1, glyph: null, font: null, kerning: 0, boundingBox: null },
-            { char: 'e', start: 1, end: 2, glyph: null, font: null, kerning: 0, boundingBox: null },
-            { char: 'l', start: 2, end: 3, glyph: null, font: null, kerning: 0, boundingBox: null },
-            { char: 'l', start: 3, end: 4, glyph: null, font: null, kerning: 0, boundingBox: null },
-            { char: 'o', start: 4, end: 5, glyph: null, font: null, kerning: 0, boundingBox: null },
-            { char: '\t', start: 5, end: 6, glyph: null, font: null, kerning: 0, boundingBox: null },
-            { char: 'w', start: 6, end: 7, glyph: null, font: null, kerning: 0, boundingBox: null },
-            { char: 'o', start: 7, end: 8, glyph: null, font: null, kerning: 0, boundingBox: null },
-            { char: 'r', start: 8, end: 9, glyph: null, font: null, kerning: 0, boundingBox: null },
-            { char: 'l', start: 9, end: 10, glyph: null, font: null, kerning: 0, boundingBox: null },
-            { char: 'd', start: 10, end: 11, glyph: null, font: null, kerning: 0, boundingBox: null },
-            { char: '\r', start: 11, end: 12, glyph: null, font: null, kerning: 0, boundingBox: null },
-        ]);
-
-        try {
-            const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig, true);
-            const allGlyphs = result.flatMap((r) => r.glyphs);
-            const tabGlyph = allGlyphs.find((g) => g.content === '\t');
-            expect(tabGlyph).toBeDefined();
-        } finally {
-            spy.mockRestore();
-            fontLibrary.isReady = originalIsReady;
-        }
-    });
-
-    it('shapes emoji with useOpenType when font library is ready', () => {
-        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('Hello \uD83D\uDE00');
-        const originalIsReady = fontLibrary.isReady;
-        fontLibrary.isReady = true;
-
-        const spy = vi.spyOn(textShapingModule, 'textShape').mockReturnValue([
-            { char: 'H', start: 0, end: 1, glyph: null, font: null, kerning: 0, boundingBox: null },
-            { char: 'e', start: 1, end: 2, glyph: null, font: null, kerning: 0, boundingBox: null },
-            { char: 'l', start: 2, end: 3, glyph: null, font: null, kerning: 0, boundingBox: null },
-            { char: 'l', start: 3, end: 4, glyph: null, font: null, kerning: 0, boundingBox: null },
-            { char: 'o', start: 4, end: 5, glyph: null, font: null, kerning: 0, boundingBox: null },
-            { char: ' ', start: 5, end: 6, glyph: null, font: null, kerning: 0, boundingBox: null },
-            { char: '\uD83D\uDE00', start: 6, end: 8, glyph: null, font: null, kerning: 0, boundingBox: null },
-            { char: '\r', start: 8, end: 9, glyph: null, font: null, kerning: 0, boundingBox: null },
-        ]);
-
-        try {
-            const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig, true);
-            const allGlyphs = result.flatMap((r) => r.glyphs);
-            const emojiGlyph = allGlyphs.find((g) => g.content === '\uD83D\uDE00');
-            expect(emojiGlyph).toBeDefined();
-        } finally {
-            spy.mockRestore();
-            fontLibrary.isReady = originalIsReady;
-        }
     });
 
     it('loads hyphen pattern when language pattern is not available', () => {

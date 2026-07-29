@@ -1,6 +1,11 @@
 name: Node Setup
 description: Node.js setup for CI, including cache configuration
 
+inputs:
+    save-cache:
+        description: Save a new pnpm store cache entry from this job
+        default: 'false'
+
 runs:
     using: composite
     steps:
@@ -13,8 +18,28 @@ runs:
           uses: actions/setup-node@v6
           with:
               node-version: 24.3.0
-              cache: pnpm
+
+        - name: Get pnpm store path
+          id: pnpm-store
+          shell: bash
+          run: echo "path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
+
+        - name: Restore pnpm store
+          id: pnpm-cache
+          uses: actions/cache/restore@v6
+          with:
+              path: ${{ steps.pnpm-store.outputs.path }}
+              key: pnpm-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('package.json', 'pnpm-lock.yaml', 'pnpm-workspace.yaml') }}
+              restore-keys: |
+                  pnpm-${{ runner.os }}-${{ runner.arch }}-
 
         - name: Install dependencies
-          run: pnpm install
+          run: pnpm install --frozen-lockfile
           shell: bash
+
+        - name: Save pnpm store
+          if: inputs.save-cache == 'true' && github.ref_name == github.event.repository.default_branch && steps.pnpm-cache.outputs.cache-hit != 'true'
+          uses: actions/cache/save@v6
+          with:
+              path: ${{ steps.pnpm-store.outputs.path }}
+              key: pnpm-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('package.json', 'pnpm-lock.yaml', 'pnpm-workspace.yaml') }}

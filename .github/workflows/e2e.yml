@@ -17,7 +17,6 @@ concurrency:
 permissions:
     contents: read
     pull-requests: write
-    actions: write
 
 env:
     TURBO_TELEMETRY_DISABLED: '1'
@@ -27,9 +26,9 @@ jobs:
         name: e2e-test shard (${{ matrix.shard-index }}/${{ matrix.shard-total }})
         if: github.repository == 'dream-num/univer' && (github.event_name != 'pull_request' || !github.event.pull_request.draft)
         runs-on: ubuntu-latest
+        timeout-minutes: 15
 
         strategy:
-            fail-fast: false
             matrix:
                 shard-index: [1, 2, 3, 4]
                 shard-total: [4]
@@ -47,13 +46,21 @@ jobs:
               uses: ./.github/actions/setup-node
 
             - name: Cache Playwright browsers
-              uses: actions/cache@v6
+              id: playwright-cache
+              uses: actions/cache/restore@v6
               with:
                   path: ~/.cache/ms-playwright
                   key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
 
             - name: Install Playwright Browsers
               run: pnpm exec playwright install --with-deps chromium
+
+            - name: Save Playwright browsers
+              if: matrix.shard-index == 1 && steps.playwright-cache.outputs.cache-hit != 'true'
+              uses: actions/cache/save@v6
+              with:
+                  path: ~/.cache/ms-playwright
+                  key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
 
             - name: Build E2E Client
               run: pnpm build:e2e
@@ -74,7 +81,7 @@ jobs:
               with:
                   name: playwright-report-${{ matrix.shard-index }}-of-${{ matrix.shard-total }}
                   path: playwright-report/
-                  retention-days: 30
+                  retention-days: 7
 
             - name: Upload HeapSnapshots
               uses: actions/upload-artifact@v7
@@ -86,7 +93,8 @@ jobs:
 
     e2e-test:
         name: e2e-test
-        runs-on: ubuntu-latest
+        runs-on: minimum-runner
+        timeout-minutes: 5
         needs: e2e-shard
         if: ${{ always() && github.repository == 'dream-num/univer' && (github.event_name != 'pull_request' || !github.event.pull_request.draft) }}
 

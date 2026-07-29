@@ -141,6 +141,23 @@ describe('basic shape and position helpers', () => {
         expect(ctx.restore).toHaveBeenCalled();
     });
 
+    it('skips non-positive and non-finite stroke widths', () => {
+        for (const strokeWidth of [0, -1, Number.NaN, Number.POSITIVE_INFINITY]) {
+            const ctx = createShapeCtx();
+
+            Rect.drawWith(ctx, {
+                width: 80,
+                height: 32,
+                fill: '#ffffff',
+                stroke: '#ff0000',
+                strokeWidth,
+            });
+
+            expect(ctx.fill).toHaveBeenCalled();
+            expect(ctx.stroke).not.toHaveBeenCalled();
+        }
+    });
+
     it('draws a rounded visual rect centered in the interaction bounds', () => {
         const rect = new Rect('rect-visual', {
             width: 80,

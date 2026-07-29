@@ -32,10 +32,11 @@ const locale = {
             replace: 'Replace',
             'replace-all': 'Replace All',
             'case-sensitive': 'Case Sensitive',
-            'find-placeholder': 'Find in this Sheet',
+            'find-placeholder': 'Find',
             'advanced-finding': 'Advanced Searching & Replace',
             'replace-placeholder': 'Input Replace String',
             'match-the-whole-cell': 'Match the Whole Cell',
+            'match-the-whole-word': 'Match Whole Word',
             'find-direction': {
                 title: 'Find Direction',
                 row: 'Search by Row',

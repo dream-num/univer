@@ -30,6 +30,15 @@ import {
 
 function createProvider(): IFindReplaceProvider {
     return {
+        capabilities: {
+            caseSensitive: true,
+            matchesTheWholeWord: false,
+            matchesTheWholeCell: true,
+            findDirection: true,
+            findScope: true,
+            findBy: true,
+        },
+        isSupported: () => true,
         find: vi.fn(async () => []),
         terminate: vi.fn(),
     };

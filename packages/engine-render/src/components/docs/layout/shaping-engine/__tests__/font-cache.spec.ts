@@ -159,31 +159,5 @@ describe('font cache', () => {
             fontCache: '11px Other Font',
         } as any);
         expect(byMeasure.width).toBeGreaterThanOrEqual(0);
-
-        const fromGlyphInfo = FontCache.getBBoxFromGlyphInfo({
-            glyph: {
-                advanceWidth: 500,
-            },
-            font: {
-                unitsPerEm: 1000,
-                ascender: 800,
-                descender: -200,
-            },
-            boundingBox: {
-                x1: 0,
-                y1: -120,
-                x2: 510,
-                y2: 710,
-            },
-        } as any, {
-            fontString: '12px Arial',
-            fontSize: 12,
-            originFontSize: 12,
-            fontFamily: 'Arial',
-            fontCache: '12px Arial',
-        } as any);
-
-        expect(fromGlyphInfo.width).toBeGreaterThan(0);
-        expect(fromGlyphInfo.aba).toBeGreaterThan(0);
     });
 });

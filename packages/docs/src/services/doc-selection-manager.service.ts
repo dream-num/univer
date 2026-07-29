@@ -31,6 +31,12 @@ interface IDocSelectionManagerSearchParam {
     subUnitId: string;
 }
 
+/**
+ * Keeps a programmatically restored collapsed caret from being promoted back
+ * into a neighboring whole-entity selection by feature-specific UI.
+ */
+export const DOC_SELECTION_OPTION_PRESERVE_CARET = 'preserveCaret';
+
 export interface IRefreshSelectionParam extends IDocSelectionManagerSearchParam {
     docRanges: ISuccinctDocRangeParam[];
     isEditing: boolean;
@@ -150,20 +156,6 @@ export class DocSelectionManagerService extends RxDisposable {
         return textRanges.find((textRange) => textRange.isActive);
     }
 
-    /**
-     *
-     * @deprecated
-     */
-    getActiveRectRange(): Nullable<ITextRangeWithStyle> {
-        const selectionInfo = this._getTextRanges(this._currentSelection);
-        if (selectionInfo == null) {
-            return;
-        }
-
-        const { rectRanges } = selectionInfo;
-        return rectRanges.find((rectRange) => rectRange.isActive);
-    }
-
     // **Only used in test case** because this does not go through the render layer.
     __TEST_ONLY_add(textRanges: ITextRangeWithStyle[], isEditing = true) {
         if (this._currentSelection == null) {
@@ -179,23 +171,6 @@ export class DocSelectionManagerService extends RxDisposable {
             isEditing,
             style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE, // mock style.
         });
-    }
-
-    // Use to replace the current editor selection.
-    /**
-     * @deprecated pls use replaceDocRanges.
-     */
-    replaceTextRanges(
-        docRanges: ISuccinctDocRangeParam[],
-        isEditing = true,
-        options?: { [key: string]: boolean }
-    ) {
-        return this.replaceDocRanges(
-            docRanges,
-            this._currentSelection,
-            isEditing,
-            options
-        );
     }
 
     replaceDocRanges(
@@ -289,7 +264,7 @@ export class DocSelectionManagerService extends RxDisposable {
             return;
         }
 
-        const { textRanges, rectRanges } = allTextSelectionInfo;
+        const { textRanges, rectRanges, options } = allTextSelectionInfo;
 
         const docRanges = [...textRanges, ...rectRanges];
 
@@ -300,6 +275,7 @@ export class DocSelectionManagerService extends RxDisposable {
             subUnitId,
             docRanges,
             isEditing: false,
+            options,
         });
     }
 

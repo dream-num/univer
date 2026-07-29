@@ -17,11 +17,11 @@
 import type { ReactElement } from 'react';
 import { useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { CSSTransition } from 'react-transition-group';
+import { clsx } from '../../helper/clsx';
 import { ConfigContext } from '../config-provider/ConfigProvider';
-import './index.css';
 
 const POPUP_POINTER_OFFSET = 2;
+const DEFAULT_POPUP_OFFSET: [number, number] = [0, 0];
 const HIDDEN_POPUP_OFFSET: [number, number] = [-9999, -9999];
 
 export interface IPopupProps {
@@ -53,7 +53,7 @@ export interface IPopupProps {
 }
 
 export function Popup(props: IPopupProps) {
-    const { children, visible = false, offset = [0, 0], overflowVisible = false, placementY = 'below' } = props;
+    const { children, visible = false, offset = DEFAULT_POPUP_OFFSET, overflowVisible = false, placementY = 'below' } = props;
 
     const nodeRef = useRef(null);
 
@@ -116,35 +116,36 @@ export function Popup(props: IPopupProps) {
     }
 
     return createPortal(
-        <CSSTransition
-            in={visible}
-            nodeRef={nodeRef}
-            timeout={500}
-            classNames={{
-                enter: 'univer-popup-enter',
-                enterActive: 'univer-popup-enter-active',
-                enterDone: 'univer-popup-enter-done',
-                exitActive: 'univer-popup-exit',
-                exitDone: 'univer-popup-exit-active',
+        <section
+            ref={nodeRef}
+            dir={direction}
+            className={clsx(
+                `
+                  univer-popup univer-fixed univer-z-[1070] univer-origin-top-left univer-overflow-hidden
+                  univer-rounded-md univer-shadow univer-transition-[transform,opacity] univer-duration-150
+                `,
+                visible
+                    ? `
+                      univer-[transition-timing-function:cubic-bezier(0.08,0.82,0.17,1)] univer-scale-y-100
+                      univer-opacity-100
+                    `
+                    : `
+                      univer-[transition-timing-function:cubic-bezier(0.6,0.04,0.98,0.34)] univer-scale-y-0
+                      univer-opacity-0
+                    `
+            )}
+            style={{
+                // Fix #1089. If the popup does not have this 2px offset, the pointerup event's target would
+                // become the popup itself not the canvas element, hence the selection gesture is not terminated.
+                // It should be considered as debt of the rendering engine.
+                left: realOffset[0] + POPUP_POINTER_OFFSET,
+                top: realOffset[1] + POPUP_POINTER_OFFSET,
+                overflow: overflowVisible ? 'visible' : undefined,
             }}
+            onContextMenu={preventDefault}
         >
-            <section
-                ref={nodeRef}
-                dir={direction}
-                className="univer-popup"
-                style={{
-                    // Fix #1089. If the popup does not have this 2px offset, the pointerup event's target would
-                    // become the popup itself not the canvas element, hence the selection gesture is not terminated.
-                    // It should be considered as debt of the rendering engine.
-                    left: realOffset[0] + POPUP_POINTER_OFFSET,
-                    top: realOffset[1] + POPUP_POINTER_OFFSET,
-                    overflow: overflowVisible ? 'visible' : undefined,
-                }}
-                onContextMenu={preventDefault}
-            >
-                {children}
-            </section>
-        </CSSTransition>,
+            {children}
+        </section>,
         mountContainer!
     );
 }

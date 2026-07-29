@@ -291,7 +291,7 @@ export class MergeCellController extends Disposable {
 
     private _onRefRangeChange() {
         const registerRefRange = (unitId: string, subUnitId: string) => {
-            const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
+            const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
             if (!workbook) {
                 return;
             }
@@ -1125,7 +1125,7 @@ export class MergeCellController extends Disposable {
             // 1. MoveRowsOrColsMutation
             if (mutationIdArrByMove.includes(command.id)) {
                 if (!command.params) return;
-                const workbook = this._univerInstanceService.getUniverSheetInstance((command.params as IMoveRowsMutationParams).unitId);
+                const workbook = this._univerInstanceService.getUnit<Workbook>((command.params as IMoveRowsMutationParams).unitId, UniverInstanceType.UNIVER_SHEET);
                 if (!workbook) return;
                 const worksheet = workbook.getSheetBySheetId((command.params as IMoveRowsMutationParams).subUnitId);
                 if (!worksheet) return;
@@ -1180,7 +1180,7 @@ export class MergeCellController extends Disposable {
 
             // 2. InsertRowsOrCols / RemoveRowsOrCols Mutations
             if (mutationIdByRowCol.includes(command.id)) {
-                const workbook = this._univerInstanceService.getUniverSheetInstance((command.params as IInsertColMutationParams).unitId);
+                const workbook = this._univerInstanceService.getUnit<Workbook>((command.params as IInsertColMutationParams).unitId, UniverInstanceType.UNIVER_SHEET);
                 if (!workbook) return;
                 const worksheet = workbook.getSheetBySheetId((command.params as IInsertColMutationParams).subUnitId);
                 if (!worksheet) return;
@@ -1249,7 +1249,7 @@ export class MergeCellController extends Disposable {
 
 function getWorkbook(univerInstanceService: IUniverInstanceService, unitId?: string) {
     if (unitId) {
-        return univerInstanceService.getUniverSheetInstance(unitId);
+        return univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
     }
     return univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
 }

@@ -66,6 +66,7 @@ const filenameRules: Partial<Rules> = {
                 '^README-(\w+)?\\.md$',
                 '^[a-z]{2}-[A-Z]{2}\.ts$',
                 '^__tests__$',
+                '^__testing__$',
                 '^FUNDING.yml$',
                 '^bug_report.yml$',
                 '^bug_report.zh-CN.yml$',

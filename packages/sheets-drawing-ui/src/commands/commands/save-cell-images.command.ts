@@ -54,7 +54,6 @@ export const SaveCellImagesCommand: ICommand = {
             children: {
                 label: BATCH_SAVE_IMAGES_DIALOG_ID,
             },
-            destroyOnClose: true,
             preservePositionOnDestroy: true,
             onClose: () => dialogService.close(BATCH_SAVE_IMAGES_DIALOG_ID),
         });

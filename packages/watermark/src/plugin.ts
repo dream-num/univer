@@ -19,10 +19,12 @@ import {
     type IWatermarkConfigWithType,
     IWatermarkTypeEnum,
     UNIVER_WATERMARK_STORAGE_KEY,
+    UniverRenderEnginePlugin,
 } from '@univerjs/engine-render';
 
 import {
     type Dependency,
+    DependentOn,
     IConfigService,
     ILocalStorageService,
     Inject,
@@ -38,6 +40,7 @@ import { WatermarkImageBaseConfig, WatermarkTextBaseConfig, WatermarkUserInfoBas
 import { WatermarkRenderController } from './controllers/watermark.render.controller';
 import { WatermarkService } from './services/watermark.service';
 
+@DependentOn(UniverRenderEnginePlugin)
 export class UniverWatermarkPlugin extends Plugin {
     static override pluginName = 'UNIVER_WATERMARK_PLUGIN';
     static override packageName = pkg.name;

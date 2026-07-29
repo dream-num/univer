@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { ICellData, Injector, Nullable } from '@univerjs/core';
+import type { ICellData, Injector, Nullable, Workbook } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
-import { ICommandService, IUniverInstanceService } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { RemoveDefinedNameMutation, SetDefinedNameMutation } from '@univerjs/engine-formula';
 import { RemoveDefinedNameCommand, SetDefinedNameCommand } from '@univerjs/sheets';
 import { beforeEach, describe, expect, it } from 'vitest';
@@ -51,7 +51,7 @@ describe('Test FDefinedName', () => {
             endColumn: number
         ): Nullable<ICellData> =>
             get(IUniverInstanceService)
-                .getUniverSheetInstance('test')
+                .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                 ?.getSheetBySheetId('sheet1')
                 ?.getRange(startRow, startColumn, endRow, endColumn)
                 .getValue();

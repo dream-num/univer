@@ -130,5 +130,4 @@ export {
 export { clsx } from './helper/clsx';
 export { isBrowser } from './helper/is-browser';
 export { render, unmount } from './helper/react-dom';
-export { resizeObserverCtor } from './helper/resize-observer';
 export { cva } from 'class-variance-authority';

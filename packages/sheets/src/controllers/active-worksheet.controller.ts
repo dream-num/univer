@@ -19,7 +19,7 @@ import type { IInsertSheetMutationParams, IRemoveSheetMutationParams } from '../
 import type { ISetWorksheetHideMutationParams } from '../commands/mutations/set-worksheet-hide.mutation';
 import type { ISetSelectionsOperationParams } from '../commands/operations/selection.operation';
 import type { ISetWorksheetActiveOperationParams } from '../commands/operations/set-worksheet-active.operation';
-import { Disposable, ICommandService, IUniverInstanceService } from '@univerjs/core';
+import { Disposable, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { InsertSheetMutation } from '../commands/mutations/insert-sheet.mutation';
 import { RemoveSheetMutation } from '../commands/mutations/remove-sheet.mutation';
 import { SetWorksheetHideMutation } from '../commands/mutations/set-worksheet-hide.mutation';
@@ -80,7 +80,7 @@ export class ActiveWorksheetController extends Disposable {
     private _adjustActiveSheetOnHideSheet(mutation: IMutationInfo<ISetWorksheetHideMutationParams>) {
         // If the active sheet is hidden, we need to change the active sheet to the next sheet.
         const { unitId, subUnitId } = mutation.params;
-        const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
+        const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {
             return;
         }
@@ -98,7 +98,7 @@ export class ActiveWorksheetController extends Disposable {
 
     private _beforeAdjustActiveSheetOnRemoveSheet(mutation: IMutationInfo<IRemoveSheetMutationParams>) {
         const { unitId, subUnitId } = mutation.params;
-        const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
+        const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {
             return;
         }
@@ -122,7 +122,7 @@ export class ActiveWorksheetController extends Disposable {
 
         // If the current sheet is not the deleted one, we don't have to call _switchToNextSheet.
         const { unitId } = mutation.params;
-        const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
+        const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {
             return;
         }

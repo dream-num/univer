@@ -34,7 +34,6 @@ import { BehaviorSubject } from 'rxjs';
 import { afterEach, describe, expect, it } from 'vitest';
 import { SheetOptionalPasteCommand } from '../../../commands/commands/clipboard.command';
 import { ISheetClipboardService, PREDEFINED_HOOK_NAME_PASTE } from '../../../services/clipboard/clipboard.service';
-import { ISheetSelectionRenderService } from '../../../services/selection/base-selection-render.service';
 import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
 import { ClipboardPopupMenu } from '../ClipboardPopupMenu';
 
@@ -90,21 +89,15 @@ class TestSheetSkeletonManagerService {
     }
 }
 
-class TestSheetSelectionRenderService {
-    getViewPort(): object {
-        return {};
-    }
-}
-
 class TestRenderUnit {
     readonly components = new Map();
     readonly mainComponent = {};
     readonly engine = {};
     readonly sheetSkeletonManagerService = new TestSheetSkeletonManagerService();
-    readonly selectionRenderService = new TestSheetSelectionRenderService();
     readonly scene = {
         scaleX: 1,
         scaleY: 1,
+        getViewport: () => ({}),
         getViewportScrollXY: () => ({ x: 0, y: 0 }),
         getEngine: () => ({
             getCanvas: () => ({
@@ -117,10 +110,6 @@ class TestRenderUnit {
     with(token: unknown): unknown {
         if (token === SheetSkeletonManagerService) {
             return this.sheetSkeletonManagerService;
-        }
-
-        if (token === ISheetSelectionRenderService) {
-            return this.selectionRenderService;
         }
 
         return null;

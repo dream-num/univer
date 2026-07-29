@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { CellValue, ICellRenderContext, IRange, Nullable } from '@univerjs/core';
-import { DataValidationStatus, DataValidationType, ICommandService, Inject, InterceptorEffectEnum, IUniverInstanceService, Optional, RxDisposable, sequenceExecute } from '@univerjs/core';
+import type { CellValue, ICellRenderContext, IRange, Nullable, Workbook } from '@univerjs/core';
+import { DataValidationStatus, DataValidationType, ICommandService, Inject, InterceptorEffectEnum, IUniverInstanceService, Optional, RxDisposable, sequenceExecute, UniverInstanceType } from '@univerjs/core';
 import { DataValidatorRegistryService } from '@univerjs/data-validation';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { InterceptCellContentPriority, INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
@@ -75,7 +75,7 @@ export class SheetsDataValidationRenderController extends RxDisposable {
             const state = this._editorBridgeService!.getEditCellState();
             if (state) {
                 const { unitId, sheetId, row, column } = state;
-                const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
+                const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
                 if (!workbook) {
                     return;
                 }
@@ -201,7 +201,7 @@ export class SheetsDataValidationRenderController extends RxDisposable {
 
                             const info: ICellRenderContext = {
                                 data: cell,
-                                style: skeleton.getStyles().getStyleByCell(cell),
+                                style: workbook.getStyles().getStyleByCell(cell),
                                 primaryWithCoord: skeleton.getCellWithCoordByIndex(mergeCell?.startRow ?? row, mergeCell?.startColumn ?? col),
                                 unitId,
                                 subUnitId,
@@ -224,7 +224,7 @@ export class SheetsDataValidationRenderController extends RxDisposable {
 
                             const info: ICellRenderContext = {
                                 data: cell,
-                                style: skeleton.getStyles().getStyleByCell(cell),
+                                style: workbook.getStyles().getStyleByCell(cell),
                                 primaryWithCoord: skeleton.getCellWithCoordByIndex(mergeCell?.startRow ?? row, mergeCell?.startColumn ?? col),
                                 unitId,
                                 subUnitId,
@@ -355,7 +355,7 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
 
                             const info: ICellRenderContext = {
                                 data: cell,
-                                style: skeleton.getStyles().getStyleByCell(cell),
+                                style: workbook.getStyles().getStyleByCell(cell),
                                 primaryWithCoord: skeleton.getCellWithCoordByIndex(mergeCell?.startRow ?? row, mergeCell?.startColumn ?? col),
                                 unitId,
                                 subUnitId,
@@ -378,7 +378,7 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
 
                             const info: ICellRenderContext = {
                                 data: cell,
-                                style: skeleton.getStyles().getStyleByCell(cell),
+                                style: workbook.getStyles().getStyleByCell(cell),
                                 primaryWithCoord: skeleton.getCellWithCoordByIndex(mergeCell?.startRow ?? row, mergeCell?.startColumn ?? col),
                                 unitId,
                                 subUnitId,

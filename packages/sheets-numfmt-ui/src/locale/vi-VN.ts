@@ -49,8 +49,8 @@ const locale: typeof enUS = {
         thousandthPercentileDes: 'Định dạng phân vị phần nghìn được sử dụng để biểu thị các số thông thường. Các định dạng tiền tệ và kế toán cung cấp các định dạng chuyên dụng để tính toán giá trị tiền tệ.',
         addDecimal: 'Thêm chữ số thập phân',
         subtractDecimal: 'Giảm chữ số thập phân',
-        customFormat: 'Custom Format',
-        customFormatDes: 'Generate custom number formats based on existing formats.',
+        customFormat: 'Định dạng tùy chỉnh',
+        customFormatDes: 'Tạo định dạng số tùy chỉnh dựa trên các định dạng hiện có.',
         info: {
             error: 'Lỗi',
             forceStringInfo: 'Số được lưu trữ dưới dạng văn bản',

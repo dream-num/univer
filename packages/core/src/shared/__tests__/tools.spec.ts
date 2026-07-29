@@ -30,12 +30,7 @@ describe('Tools extra coverage', () => {
         expect(Tools.deleteNull({ a: 1, b: null, c: undefined })).toEqual({ a: 1 });
     });
 
-    it('should merge, compare and clone complex values', () => {
-        const merged = Tools.deepMerge(
-            { a: { b: 1 }, list: [1], keep: true },
-            { a: { c: 2 }, list: [2, 3], extra: 'x' }
-        );
-        expect(merged).toEqual({ a: { b: 1, c: 2 }, list: [2, 3], keep: true, extra: 'x' });
+    it('should compare and clone complex values', () => {
         expect(Tools.diffValue([1, { a: 2 }], [1, { a: 2 }])).toBe(true);
         expect(Tools.diffValue(new Date('2024-01-01'), new Date('2024-01-01'))).toBe(true);
         expect(Tools.diffValue(/a/i, /a/i)).toBe(true);
@@ -99,16 +94,6 @@ describe('Tools extra coverage', () => {
         expect(Tools.isValidParameter('bad name')).toBe(false);
         expect(Tools.clamp(20, 1, 10)).toBe(10);
         expect(Tools.clamp(-1, 1, 10)).toBe(1);
-    });
-
-    it('should reject prototype pollution keys in deepMerge', () => {
-        const payload = JSON.parse('{"startIndex":0,"__proto__":{"isAdmin":true,"polluted":true}}');
-        expect(({} as any).isAdmin).toBeUndefined();
-
-        Tools.deepMerge({}, payload);
-
-        expect(({} as any).isAdmin).toBeUndefined();
-        expect(({} as any).polluted).toBeUndefined();
     });
 
     it('should read timing helpers', () => {

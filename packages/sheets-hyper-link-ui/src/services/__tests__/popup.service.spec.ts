@@ -83,7 +83,6 @@ class TestEditorBridgeService {
 class TestDocSelectionManagerService {
     activeTextRange: any = { startOffset: 1, endOffset: 3, collapsed: false };
     readonly replacedDocRanges: any[] = [];
-    readonly replacedTextRanges: any[] = [];
 
     getActiveTextRange(): any {
         return this.activeTextRange;
@@ -91,10 +90,6 @@ class TestDocSelectionManagerService {
 
     replaceDocRanges(ranges: any, unitRange: any): void {
         this.replacedDocRanges.push({ ranges, unitRange });
-    }
-
-    replaceTextRanges(ranges: any): void {
-        this.replacedTextRanges.push(ranges);
     }
 }
 

@@ -255,8 +255,6 @@ const locale: typeof enUS = {
             notChangeMerge: '不能對合併儲存格做部分更改',
             detailUpdate: '新開啟',
             detailSave: '已恢復本機快取',
-            row: '列',
-            column: '欄',
             loading: '渲染中···',
             copy: '副本',
             return: '返回',

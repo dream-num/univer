@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+/* eslint-disable max-lines-per-function */
+/* eslint-disable complexity */
+
 import {
     createInterceptorKey,
     Disposable,
@@ -26,9 +29,6 @@ import {
     RANGE_TYPE,
     type Workbook,
 } from '@univerjs/core';
-
-/* eslint-disable max-lines-per-function */
-/* eslint-disable complexity */
 
 import {
     CURSOR_TYPE,

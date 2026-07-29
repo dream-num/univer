@@ -16,7 +16,8 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverActionRecorderConfig } from './config/config';
-import { IConfigService, Inject, Injector, merge, Plugin } from '@univerjs/core';
+import { DependentOn, IConfigService, Inject, Injector, merge, Plugin } from '@univerjs/core';
+import { UniverUIPlugin } from '@univerjs/ui';
 import pkg from '../package.json';
 import { ACTION_RECORDER_PLUGIN_CONFIG_KEY, defaultPluginConfig } from './config/config';
 import { ActionRecorderController } from './controllers/action-recorder.controller';
@@ -28,6 +29,7 @@ import { ActionReplayService } from './services/replay.service';
  * This plugin provides a recorder for user's interactions with Univer,
  * it only records commands (and some special operations) so that it can be replayed later.
  */
+@DependentOn(UniverUIPlugin)
 export class UniverActionRecorderPlugin extends Plugin {
     static override pluginName = 'UNIVER_ACTION_RECORDER_PLUGIN';
     static override packageName = pkg.name;

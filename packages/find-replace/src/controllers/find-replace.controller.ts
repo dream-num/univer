@@ -113,13 +113,13 @@ export class FindReplaceController extends RxDisposable {
     }
 
     private _openPanel(): void {
+        const sessionUnitId = this._univerInstanceService.getFocusedUnit()?.getUnitId();
         this._dialogService.open({
             id: FIND_REPLACE_DIALOG_ID,
             draggable: true,
             width: FIND_REPLACE_PANEL_WIDTH,
             title: { title: this._localeService.t<LocaleKey>('find-replace.dialog.title') },
             children: { label: 'FindReplaceDialog' },
-            destroyOnClose: true,
             mask: false,
             maskClosable: false,
             defaultPosition: getFindReplaceDialogDefaultPosition(),
@@ -129,7 +129,7 @@ export class FindReplaceController extends RxDisposable {
 
         this._closingListenerDisposable = toDisposable(
             this._univerInstanceService.focused$.pipe(takeUntil(this.dispose$)).subscribe((focused) => {
-                if (!focused || !this._univerInstanceService.getUniverSheetInstance(focused)) {
+                if (!focused || focused !== sessionUnitId) {
                     this.closePanel();
                 }
             })

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICellData, IMutationInfo, IObjectMatrixPrimitiveType, IRange, Nullable } from '@univerjs/core';
+import type { IAccessor, ICellData, IMutationInfo, IObjectMatrixPrimitiveType, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { IDeleteRangeMutationParams, IInsertRangeMutationParams } from '../../basics/interfaces/mutation-interface';
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
-import { Dimension, getArrayLength, IUniverInstanceService, ObjectMatrix, Tools } from '@univerjs/core';
+import { Dimension, getArrayLength, IUniverInstanceService, ObjectMatrix, Tools, UniverInstanceType } from '@univerjs/core';
 import { generateNullCell } from '../../basics/utils';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { getMoveRangeUndoRedoMutations } from '../commands/move-range.command';
@@ -48,7 +48,7 @@ export const InsertRangeUndoMutationFactory = (
 //     handler: (accessor, params) => {
 //         const { unitId, subUnitId, range, cellValue, shiftDimension } = params;
 //         const univerInstanceService = accessor.get(IUniverInstanceService);
-//         const workbook = univerInstanceService.getUniverSheetInstance(unitId);
+//         const workbook = univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
 //         if (!workbook) return false;
 //         const worksheet = workbook.getSheetBySheetId(subUnitId);
 //         if (!worksheet) return false;
@@ -77,7 +77,7 @@ export function getInsertRangeMutations(accessor: IAccessor, params: IInsertRang
     const instanceService = accessor.get(IUniverInstanceService);
     const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
-    const workbook = instanceService.getUniverSheetInstance(unitId);
+    const workbook = instanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
     const worksheet = workbook?.getSheetBySheetId(subUnitId);
     if (worksheet) {
         const cellMatrix = worksheet.getCellMatrix();
@@ -180,7 +180,7 @@ export function getRemoveRangeMutations(accessor: IAccessor, params: IDeleteRang
     const instanceService = accessor.get(IUniverInstanceService);
     const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
-    const workbook = instanceService.getUniverSheetInstance(unitId);
+    const workbook = instanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
     const worksheet = workbook?.getSheetBySheetId(subUnitId);
     if (worksheet) {
         const cellMatrix = worksheet.getCellMatrix();
@@ -384,7 +384,7 @@ export const DeleteRangeUndoMutationFactory = (
 
     return {
         ...Tools.deepClone(params),
-        cellValue: undoData.getData(),
+        cellValue: undoData.clone(),
     };
 };
 

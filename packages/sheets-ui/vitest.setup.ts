@@ -17,7 +17,9 @@
 import getCanvasWindow from 'jest-canvas-mock/lib/window';
 import { vi } from 'vitest';
 
-const apis = [
+type CanvasWindow = ReturnType<typeof getCanvasWindow>;
+
+const apis: Array<keyof CanvasWindow> = [
     'Path2D',
     'CanvasGradient',
     'CanvasPattern',
@@ -27,7 +29,7 @@ const apis = [
     'TextMetrics',
     'ImageBitmap',
     'createImageBitmap',
-] as const;
+];
 
 const canvasWindow = getCanvasWindow({ document: window.document });
 

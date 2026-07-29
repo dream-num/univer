@@ -38,6 +38,7 @@ const locale: typeof enUS = {
             'replace-placeholder': '输入替换内容',
             'case-sensitive': '匹配大小写',
             'match-the-whole-cell': '匹配整个单元格',
+            'match-the-whole-word': '全词匹配',
             'find-scope': {
                 title: '查找范围',
                 'current-sheet': '当前子表',

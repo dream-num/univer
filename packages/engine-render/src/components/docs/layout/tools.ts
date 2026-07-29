@@ -78,7 +78,7 @@ import { DEFAULT_DOCUMENT_FONTSIZE } from '../../../basics/const';
 import { GlyphType, LineType } from '../../../basics/i-document-skeleton-cached';
 import { getFontStyleString, isFunction, ptToPixel } from '../../../basics/tools';
 import { getDocumentCompatibilityPolicy } from '../document-compatibility';
-import { getDocsTableRenderViewport, hasDocsTableHorizontalViewport } from '../table-render-viewport';
+import { getDocsTableRenderViewport, getDocsTableViewportLeft, hasDocsTableHorizontalViewport } from '../table-render-viewport';
 import { updateInlineDrawingPosition } from './block/paragraph/layout-ruler';
 import { getCustomDecorationStyle } from './style/custom-decoration';
 import { getCustomRangeStyle } from './style/custom-range';
@@ -718,6 +718,7 @@ export interface IDocumentSkeletonTableContext {
 }
 
 export interface IDocumentSkeletonTableIteratorOptions {
+    includeCells?: boolean;
     docsLeft?: number;
     docsTop?: number;
     pageMarginTop?: number;
@@ -735,6 +736,7 @@ export function documentSkeletonTableIterator(
     const {
         docsLeft = 0,
         docsTop = 0,
+        includeCells = true,
         pageMarginTop = 0,
         resolveViewport = true,
         skeFooters,
@@ -752,6 +754,7 @@ export function documentSkeletonTableIterator(
         collectPageTables({
             contexts,
             docsLeft,
+            includeCells,
             page: rootPage,
             pageIndex,
             pageLeft: rootPageLeft,
@@ -770,6 +773,7 @@ export function documentSkeletonTableIterator(
             collectPageTables({
                 contexts,
                 docsLeft,
+                includeCells,
                 page: headerPage,
                 pageIndex,
                 pageLeft: rootPageDocumentLeft,
@@ -787,6 +791,7 @@ export function documentSkeletonTableIterator(
             collectPageTables({
                 contexts,
                 docsLeft,
+                includeCells,
                 page: footerPage,
                 pageIndex,
                 pageLeft: rootPageDocumentLeft,
@@ -808,6 +813,7 @@ export function documentSkeletonTableIterator(
                 collectPageTables({
                     contexts,
                     docsLeft,
+                    includeCells,
                     page: nestedPage,
                     pageIndex,
                     pageLeft: nestedPageLeft,
@@ -854,7 +860,7 @@ export function documentSkeletonLineIterator(
             const sourceTableId = getSourceTableId(table.tableId);
             const viewport = getDocsTableRenderViewport(unitId, sourceTableId);
             const hasHorizontalViewport = hasDocsTableHorizontalViewport(viewport);
-            const tableViewportLeft = getTableViewportLeft(pageLeft, table.left, viewport, docsLeft);
+            const tableViewportLeft = getDocsTableViewportLeft(viewport, pageLeft + table.left, docsLeft);
             const tableViewportRight = tableViewportLeft + (hasHorizontalViewport ? viewport.viewportWidth : table.width);
             const tableScrollLeft = hasHorizontalViewport ? viewport.scrollLeft : 0;
 
@@ -1053,6 +1059,7 @@ function getPageLineBounds(
 interface ICollectPageTablesOptions {
     contexts: IDocumentSkeletonTableContext[];
     docsLeft: number;
+    includeCells: boolean;
     page: IDocumentSkeletonPage;
     pageIndex: number;
     pageLeft: number;
@@ -1068,6 +1075,7 @@ function collectPageTables(options: ICollectPageTablesOptions): void {
     const {
         contexts,
         docsLeft,
+        includeCells,
         page,
         pageIndex,
         pageLeft,
@@ -1086,56 +1094,58 @@ function collectPageTables(options: ICollectPageTablesOptions): void {
         const sourceTableId = getSourceTableId(effectiveTableId);
         const viewport = resolveViewport ? getDocsTableRenderViewport(unitId, sourceTableId) : null;
         const hasHorizontalViewport = hasDocsTableHorizontalViewport(viewport);
-        const tableViewportLeft = getTableViewportLeft(pageLeft, table.left, viewport, docsLeft);
+        const tableViewportLeft = getDocsTableViewportLeft(viewport, pageLeft + table.left, docsLeft);
         const tableViewportRight = tableViewportLeft + (hasHorizontalViewport ? viewport.viewportWidth : table.width);
         const tableScrollLeft = hasHorizontalViewport ? viewport.scrollLeft : 0;
         const cells: IDocumentSkeletonTableCellGeometry[] = [];
 
-        table.rows.forEach((row, rowIndex) => {
-            row.cells.forEach((cell, columnIndex) => {
-                if ((cell as IDocumentSkeletonPage & { isMergedCellCovered?: boolean }).isMergedCellCovered) {
-                    return;
-                }
+        if (includeCells) {
+            table.rows.forEach((row, rowIndex) => {
+                row.cells.forEach((cell, columnIndex) => {
+                    if ((cell as IDocumentSkeletonPage & { isMergedCellCovered?: boolean }).isMergedCellCovered) {
+                        return;
+                    }
 
-                const cellMarginLeft = cell.marginLeft ?? 0;
-                const cellMarginRight = cell.marginRight ?? 0;
-                const cellMarginTop = cell.marginTop ?? 0;
-                const cellMarginBottom = cell.marginBottom ?? 0;
-                const cellPageWidth = cell.pageWidth ?? 0;
-                const cellPageHeight = cell.pageHeight ?? 0;
-                const cellTop = tableTop + (row.top ?? 0) + cellMarginTop;
-                const cellLeft = tableLeft + (cell.left ?? 0) - tableScrollLeft + cellMarginLeft;
-                const cellContentRight = cellLeft + cellPageWidth - cellMarginLeft - cellMarginRight;
-                const visualLeft = cellLeft + tableCellInsetX;
-                const visualRight = cellContentRight - tableCellInsetX;
-                const visualWidth = Math.max(0, visualRight - visualLeft);
-                const clipLeft = tableViewportLeft;
-                const clipRight = Math.min(cellContentRight, tableViewportRight);
+                    const cellMarginLeft = cell.marginLeft ?? 0;
+                    const cellMarginRight = cell.marginRight ?? 0;
+                    const cellMarginTop = cell.marginTop ?? 0;
+                    const cellMarginBottom = cell.marginBottom ?? 0;
+                    const cellPageWidth = cell.pageWidth ?? 0;
+                    const cellPageHeight = cell.pageHeight ?? 0;
+                    const cellTop = tableTop + (row.top ?? 0) + cellMarginTop;
+                    const cellLeft = tableLeft + (cell.left ?? 0) - tableScrollLeft + cellMarginLeft;
+                    const cellContentRight = cellLeft + cellPageWidth - cellMarginLeft - cellMarginRight;
+                    const visualLeft = cellLeft + tableCellInsetX;
+                    const visualRight = cellContentRight - tableCellInsetX;
+                    const visualWidth = Math.max(0, visualRight - visualLeft);
+                    const clipLeft = tableViewportLeft;
+                    const clipRight = Math.min(cellContentRight, tableViewportRight);
 
-                if (visualWidth <= 0 || Math.min(visualRight, clipRight) <= Math.max(visualLeft, clipLeft)) {
-                    return;
-                }
+                    if (visualWidth <= 0 || Math.min(visualRight, clipRight) <= Math.max(visualLeft, clipLeft)) {
+                        return;
+                    }
 
-                cells.push({
-                    cell,
-                    cellRect: {
-                        bottom: cellTop + cellPageHeight - cellMarginBottom - cellMarginTop,
-                        left: Math.max(cellLeft, tableViewportLeft),
-                        right: Math.min(cellContentRight, tableViewportRight),
-                        top: cellTop,
-                    },
-                    clipLeft,
-                    clipRight,
-                    columnIndex,
-                    pageLeft: cellLeft,
-                    pageTop: cellTop,
-                    row,
-                    rowIndex,
-                    visualLeft,
-                    visualWidth,
+                    cells.push({
+                        cell,
+                        cellRect: {
+                            bottom: cellTop + cellPageHeight - cellMarginBottom - cellMarginTop,
+                            left: Math.max(cellLeft, tableViewportLeft),
+                            right: Math.min(cellContentRight, tableViewportRight),
+                            top: cellTop,
+                        },
+                        clipLeft,
+                        clipRight,
+                        columnIndex,
+                        pageLeft: cellLeft,
+                        pageTop: cellTop,
+                        row,
+                        rowIndex,
+                        visualLeft,
+                        visualWidth,
+                    });
                 });
             });
-        });
+        }
 
         contexts.push({
             cells,
@@ -1155,13 +1165,6 @@ function collectPageTables(options: ICollectPageTablesOptions): void {
             },
         });
     });
-}
-
-function getTableViewportLeft(pageLeft: number, tableLeft: number, viewport: unknown, docsLeft: number): number {
-    const viewportLeft = (viewport as Nullable<{ viewportLeft?: number }>)?.viewportLeft;
-    return viewportLeft != null
-        ? viewportLeft - docsLeft
-        : pageLeft + tableLeft;
 }
 
 function getSourceTableId(tableId: string): string {

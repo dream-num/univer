@@ -19,6 +19,7 @@ export interface IDocsTableRenderViewport {
     leadingInsetLeft?: number;
     scrollLeft: number;
     trailingInsetRight?: number;
+    viewportLeft?: number;
     viewportWidth: number;
 }
 
@@ -36,6 +37,16 @@ export function getDocsTableRenderViewport(unitId: string, tableId: string): IDo
 
 export function getDocsTableVirtualContentWidth(viewport: IDocsTableRenderViewport): number {
     return (viewport.leadingInsetLeft ?? 0) + viewport.contentWidth + (viewport.trailingInsetRight ?? 0);
+}
+
+export function getDocsTableViewportLeft(
+    viewport: IDocsTableRenderViewport | null | undefined,
+    fallbackLeft: number,
+    docsLeft = 0
+): number {
+    return viewport?.viewportLeft != null
+        ? viewport.viewportLeft - docsLeft
+        : fallbackLeft;
 }
 
 export function hasDocsTableHorizontalViewport(viewport: IDocsTableRenderViewport | null | undefined): viewport is IDocsTableRenderViewport {

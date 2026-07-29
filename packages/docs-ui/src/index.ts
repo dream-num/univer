@@ -17,12 +17,22 @@
 import './global.css';
 
 export type { IDocObjectParam } from './basics/component-tools';
-export { getDocObject, getDocObjectById, neoGetDocObject } from './basics/component-tools';
+export { getDocObjectById, neoGetDocObject } from './basics/component-tools';
 export {
     addCustomDecorationBySelectionFactory,
     addCustomDecorationFactory,
     deleteCustomDecorationFactory,
 } from './basics/custom-decoration-factory';
+export {
+    DOC_CUSTOM_RANGE_CHROME_BACKGROUND_ALPHA,
+    DOC_CUSTOM_RANGE_CHROME_RADIUS,
+    drawDocCustomRangeChrome,
+    resolveDocCustomRangeChromeTheme,
+} from './basics/doc-custom-range-chrome';
+export type {
+    IDocCustomRangeChromeRect,
+    IDocCustomRangeChromeTheme,
+} from './basics/doc-custom-range-chrome';
 export * from './basics/docs-view-key';
 export { hasParagraphInTable } from './basics/paragraph';
 export { AfterSpaceCommand, EnterCommand, TabCommand } from './commands/commands/auto-format.command';
@@ -92,7 +102,6 @@ export {
 export { ReplaceTextRunsCommand } from './commands/commands/replace-content.command';
 export {
     CoverContentCommand,
-    ReplaceContentCommand,
     ReplaceSelectionCommand,
     ReplaceSnapshotCommand,
 } from './commands/commands/replace-content.command';
@@ -200,7 +209,11 @@ export { menuSchema as DocsUIMenuSchema } from './menu/schema';
 export { UniverDocsUIPlugin } from './plugin';
 export * from './services';
 export { IDocClipboardService } from './services/clipboard/clipboard.service';
-export type { IDocClipboardHook } from './services/clipboard/clipboard.service';
+export type {
+    IDocClipboardCopyContentContext,
+    IDocClipboardHook,
+    IDocClipboardPasteContext,
+} from './services/clipboard/clipboard.service';
 export {
     DocClipboardPasteAdapterService,
     IDocClipboardPasteAdapterService,
@@ -209,6 +222,7 @@ export type {
     IDocClipboardPasteAdapter,
     IDocClipboardPasteBlockRangeMapping,
     IDocClipboardPasteCustomBlockMapping,
+    IDocClipboardPasteCustomRangeMapping,
     IDocClipboardPasteMutationInfoParams,
     IDocClipboardPasteMutationInfos,
 } from './services/clipboard/doc-paste-mutation-adapter.service';
@@ -216,8 +230,11 @@ export { convertBodyToHtml } from './services/clipboard/udm-to-html/convertor';
 export { DocHtmlExportService } from './services/clipboard/udm-to-html/doc-html-export.service';
 export type { DocHtmlExportTransformer } from './services/clipboard/udm-to-html/doc-html-export.service';
 export { DocAutoFormatService } from './services/doc-auto-format.service';
-export { DOC_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, IDocEmbedInteractionBoundaryService, IDocEmbedRuntimeFocusCoordinator } from './services/doc-embed-integration.service';
-export type { IDocEmbedInteractionBoundaryService as IDocEmbedInteractionBoundaryServiceType, IDocEmbedRuntimeFocusCoordinator as IDocEmbedRuntimeFocusCoordinatorType } from './services/doc-embed-integration.service';
+export {
+    DOC_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE,
+    IDocEmbedInteractionBoundaryService,
+    IDocEmbedRuntimeFocusCoordinator,
+} from './services/doc-embed-integration.service';
 export {
     DocEventManagerService,
     getListMarkerFallbackBound,
@@ -245,7 +262,7 @@ export type { IEditorInputConfig } from './services/selection/doc-selection-rend
 export { DocSelectionRenderService } from './services/selection/doc-selection-render.service';
 export type { IDocRange } from './services/selection/range-interface';
 export { convertPositionsToRectRanges, RectRange } from './services/selection/rect-range';
-export { getCanvasOffsetByEngine } from './services/selection/selection-utils';
+export { getCanvasOffsetByEngine, getTextRangeFromCharIndex } from './services/selection/selection-utils';
 export { getAnchorBounding, getLineBounding, TEXT_RANGE_LAYER_INDEX, TextRange } from './services/selection/text-range';
 export { whenDocAndEditorFocused } from './shortcuts/utils';
 export { DOC_VERTICAL_PADDING } from './types/const/padding';

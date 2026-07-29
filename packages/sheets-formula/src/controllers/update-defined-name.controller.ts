@@ -81,7 +81,7 @@ export class UpdateDefinedNameController extends Disposable {
                     if (result.type === FormulaReferenceMoveType.SetUnitName) {
                         result.oldUnitName = this._univerInstanceService
                             .getUnit<Workbook>(result.unitId, UniverInstanceType.UNIVER_SHEET)
-                            ?.getName();
+                            ?.name;
                     }
 
                     return this._getUpdateDefinedNameMutations(workbook, result);

@@ -255,8 +255,6 @@ const locale: typeof enUS = {
             notChangeMerge: 'Вы не можете частично изменить объединенные ячейки',
             detailUpdate: 'Новый открытый',
             detailSave: 'Восстановлено из локального кэша',
-            row: '',
-            column: '',
             loading: 'Загрузка...',
             copy: 'Копировать',
             return: 'Выход',

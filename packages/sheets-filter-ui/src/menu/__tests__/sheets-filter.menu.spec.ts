@@ -16,15 +16,38 @@
 
 import type { IWorkbookData, Workbook } from '@univerjs/core';
 import type { ISetSheetsFilterCriteriaMutationParams, ISetSheetsFilterRangeMutationParams } from '@univerjs/sheets-filter';
-import { AuthzIoLocalService, DisposableCollection, IAuthzIoService, ICommandService, Inject, Injector, LocaleType, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
-import { ActiveDirtyManagerService, IActiveDirtyManagerService, ISheetRowFilteredService, SheetRowFilteredService } from '@univerjs/engine-formula';
-import { ExclusiveRangeService, IExclusiveRangeService, RangeProtectionRuleModel, RefRangeService, SetWorksheetActiveOperation, SheetInterceptorService, SheetRangeThemeModel, SheetsSelectionsService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel, ZebraCrossingCacheController } from '@univerjs/sheets';
-import { RemoveSheetsFilterMutation, SetSheetsFilterCriteriaMutation, SetSheetsFilterRangeMutation, UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
-import { SmartToggleSheetsFilterCommand } from '@univerjs/sheets-filter/commands/commands/sheets-filter.command.js';
-import { IMenuManagerService, IPlatformService, IShortcutService, MenuManagerService, PlatformService, ShortcutService } from '@univerjs/ui';
+import {
+    DisposableCollection,
+    ICommandService,
+    Inject,
+    Injector,
+    LocaleType,
+    Plugin,
+    Univer,
+    UniverInstanceType,
+} from '@univerjs/core';
+import { SetWorksheetActiveOperation } from '@univerjs/sheets';
+import {
+    RemoveSheetsFilterMutation,
+    SetSheetsFilterCriteriaMutation,
+    SetSheetsFilterRangeMutation,
+    UniverSheetsFilterPlugin,
+} from '@univerjs/sheets-filter';
+import {
+    IMenuManagerService,
+    IPlatformService,
+    IShortcutService,
+    MenuManagerService,
+    PlatformService,
+    ShortcutService,
+} from '@univerjs/ui';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { CloseFilterPanelOperation, OpenFilterPanelOperation } from '../../commands/operations/sheets-filter.operation';
-import { ClearFilterCriteriaMenuItemFactory, ReCalcFilterMenuItemFactory, SmartToggleFilterMenuItemFactory } from '../sheets-filter.menu';
+import {
+    ClearFilterCriteriaMenuItemFactory,
+    ReCalcFilterMenuItemFactory,
+    SmartToggleFilterMenuItemFactory,
+} from '../sheets-filter.menu';
 
 const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
     id: 'test',
@@ -66,33 +89,14 @@ function createSheetsFilterMenuTestBed() {
         override onStarting(): void {
             const injector = this._injector;
             injector.add([IPlatformService, { useClass: PlatformService }]);
-            injector.add([RefRangeService]);
-            injector.add([SheetsSelectionsService]);
             injector.add([IShortcutService, { useClass: ShortcutService }]);
             injector.add([IMenuManagerService, { useClass: MenuManagerService }]);
-            injector.add([WorksheetPermissionService]);
-            injector.add([WorksheetProtectionPointModel]);
-            injector.add([WorkbookPermissionService]);
-            injector.add([IAuthzIoService, { useClass: AuthzIoLocalService }]);
-            injector.add([WorksheetProtectionRuleModel]);
-            injector.add([SheetInterceptorService]);
-            injector.add([RangeProtectionRuleModel]);
-            injector.add([SheetRangeThemeModel]);
-            injector.add([ZebraCrossingCacheController]);
-            injector.add([IExclusiveRangeService, { useClass: ExclusiveRangeService, deps: [SheetsSelectionsService] }]);
-            injector.add([IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }]);
-            injector.add([ISheetRowFilteredService, { useClass: SheetRowFilteredService }]);
 
             const commandService = injector.get(ICommandService);
             [
-                SmartToggleSheetsFilterCommand,
                 OpenFilterPanelOperation,
                 CloseFilterPanelOperation,
             ].forEach((command) => commandService.registerCommand(command));
-
-            this._injector.get(SheetInterceptorService);
-            this._injector.get(WorkbookPermissionService);
-            this._injector.get(WorksheetPermissionService);
         }
     }
 
@@ -121,7 +125,6 @@ describe('test sheet filter menu items', () => {
         disposableCollection = new DisposableCollection();
 
         commandService = get(ICommandService);
-        commandService.registerCommand(SetWorksheetActiveOperation);
 
         // Active sheet, prevent activeSheet from being initialized to null, causing activeFilterModel$ to also transmit null.
         expect(commandService.syncExecuteCommand(SetWorksheetActiveOperation.id, { unitId: 'test', subUnitId: 'sheet1' })).toBeTruthy();

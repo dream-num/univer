@@ -47,8 +47,9 @@ import { DOCS_EXTENSION_TYPE } from './doc-extension';
 import { getDocumentCompatibilityPolicy, shouldAllowImportedTableMarginOverflow } from './document-compatibility';
 import { collectBackgroundGlyphRuns } from './extensions/background-runs';
 import { getTableIdAndSliceIndex } from './layout/block/table';
+import { documentSkeletonTableIterator } from './layout/tools';
 import { Liquid } from './liquid';
-import { getDocsTableRenderViewport, hasDocsTableHorizontalViewport } from './table-render-viewport';
+import { getDocsTableRenderViewport, getDocsTableViewportLeft, hasDocsTableHorizontalViewport } from './table-render-viewport';
 import './extensions';
 
 const DEFAULT_BORDER_COLOR: ITableCellBorder = {
@@ -57,6 +58,7 @@ const DEFAULT_BORDER_COLOR: ITableCellBorder = {
     },
 };
 const TABLE_VIEWPORT_BORDER_CLIP_PADDING = 2;
+const TABLE_OVERFLOW_INTERACTION_PADDING = 24;
 
 export interface IPageRenderConfig {
     page: IDocumentSkeletonPage;
@@ -150,6 +152,48 @@ export class Documents extends DocComponent {
 
     override getEngine() {
         return (this.getScene() as Scene).getEngine();
+    }
+
+    override isHit(coord: Vector2): boolean {
+        if (super.isHit(coord)) {
+            return true;
+        }
+
+        const skeletonData = this.getSkeleton()?.getSkeletonData();
+        if (!skeletonData) {
+            return false;
+        }
+
+        const localCoord = this.getInverseCoord(coord);
+        const { pages, skeHeaders, skeFooters } = skeletonData;
+        const unitId = this._getRenderUnitId();
+        const { docsLeft } = this.getOffsetConfig();
+        return documentSkeletonTableIterator(pages, {
+            includeCells: false,
+            pageMarginTop: this.pageMarginTop,
+            resolveViewport: false,
+            skeFooters,
+            skeHeaders,
+            unitId,
+        }).some(({ tableId, tableRect }) => {
+            const sourceTableId = getTableIdAndSliceIndex(tableId).tableId;
+            const viewport = getDocsTableRenderViewport(unitId, sourceTableId);
+            const projectedLeft = hasDocsTableHorizontalViewport(viewport)
+                ? getDocsTableViewportLeft(
+                    viewport,
+                    tableRect.left - (viewport.leadingInsetLeft ?? 0),
+                    docsLeft
+                )
+                : tableRect.left;
+            const projectedRight = hasDocsTableHorizontalViewport(viewport)
+                ? projectedLeft + viewport.viewportWidth
+                : tableRect.right;
+
+            return localCoord.x >= projectedLeft - TABLE_OVERFLOW_INTERACTION_PADDING &&
+                localCoord.x <= projectedRight + TABLE_OVERFLOW_INTERACTION_PADDING &&
+                localCoord.y >= tableRect.top - TABLE_OVERFLOW_INTERACTION_PADDING &&
+                localCoord.y <= tableRect.bottom + TABLE_OVERFLOW_INTERACTION_PADDING;
+        });
     }
 
     changeSkeleton(newSkeleton: DocumentSkeleton) {

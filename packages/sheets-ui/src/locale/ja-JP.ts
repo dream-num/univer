@@ -255,8 +255,6 @@ const locale: typeof enUS = {
             notChangeMerge: '結合セルに対して部分的な変更はできません',
             detailUpdate: '再読み込み',
             detailSave: 'ローカルキャッシュを復元',
-            row: '',
-            column: '',
             loading: '読み込み中...',
             copy: 'コピー',
             return: '終了',

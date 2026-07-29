@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IMutationInfo, Nullable } from '@univerjs/core';
+import type { ICellData, IMutationInfo, Nullable, Workbook } from '@univerjs/core';
 import type { IReorderRangeMutationParams } from '@univerjs/sheets';
 import {
     Disposable,
@@ -23,6 +23,7 @@ import {
     ObjectMatrix,
     Range,
     Tools,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { FormulaDataModel, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { ReorderRangeCommand, SetRangeValuesMutation, SheetInterceptorService } from '@univerjs/sheets';
@@ -58,7 +59,7 @@ export class FormulaReorderController extends Disposable {
         const redos: IMutationInfo[] = [];
         const undos: IMutationInfo[] = [];
         const { unitId, subUnitId, range, order } = params;
-        const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
+        const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
         const worksheet = workbook?.getSheetBySheetId(subUnitId);
 
         if (!worksheet) {

@@ -278,14 +278,8 @@ class TestUniverInstanceService {
         return { dispose: () => {} };
     }
 
-    changeDoc(): void {}
-
     getUnitType() {
         return UniverInstanceType.UNIVER_SHEET;
-    }
-
-    getUniverSheetInstance() {
-        return this._workbook;
     }
 }
 

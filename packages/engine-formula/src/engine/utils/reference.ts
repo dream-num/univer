@@ -15,7 +15,14 @@
  */
 
 import type { IRange, IUnitRangeName, IUnitRangeWithName } from '@univerjs/core';
-import { AbsoluteRefType, columnLabelToNumber, MAX_COLUMN_COUNT, MAX_ROW_COUNT, RANGE_TYPE, Tools } from '@univerjs/core';
+import {
+    AbsoluteRefType,
+    columnLabelToNumber,
+    MAX_COLUMN_COUNT,
+    MAX_ROW_COUNT,
+    RANGE_TYPE,
+    Tools,
+} from '@univerjs/core';
 import { includeFormulaLexerToken } from '../../basics/match-token';
 import { isReferenceString, UNIT_NAME_REGEX_PRECOMPILING } from '../../basics/regex';
 import { prefixToken, SPACE_TOKEN } from '../../basics/token';
@@ -225,8 +232,6 @@ export function handleRefStringInfo(refString: string) {
         refBody,
         sheetName,
         unitQualifier,
-        /** @deprecated Use unitQualifier. Kept for reference-grid compatibility. */
-        unitId: unitQualifier,
     };
 }
 

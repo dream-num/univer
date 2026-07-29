@@ -19,6 +19,7 @@ export * from './basics';
 export {
     combineDrawingEffectFilter,
     createDrawingEffectFilter,
+    expandDrawingEffectBounds,
     resolveDrawingEffectMasks,
     resolveGlowEffect,
     resolveOuterShadowEffect,
@@ -65,6 +66,7 @@ export type {
 } from './components/docs/table-render-viewport';
 export {
     getDocsTableRenderViewport,
+    getDocsTableViewportLeft,
     setDocsTableRenderViewportProvider,
 } from './components/docs/table-render-viewport';
 export { DataStreamTreeNode } from './components/docs/view-model/data-stream-tree-node';
@@ -79,7 +81,7 @@ export type { IDrawingGroupShadow } from './drawing-group';
 export * from './engine';
 export * from './group';
 export * from './layer';
-export { IRenderingEngine, UniverRenderEnginePlugin } from './plugin';
+export { UniverRenderEnginePlugin } from './plugin';
 export {
     getCurrentTypeOfRenderer,
     IRenderManagerService,

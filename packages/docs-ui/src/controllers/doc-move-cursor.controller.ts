@@ -42,7 +42,7 @@ import {
 } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import { DocumentSkeletonPageType, IRenderManagerService, LineType } from '@univerjs/engine-render';
-import { getDocObject } from '../basics/component-tools';
+import { neoGetDocObject } from '../basics/component-tools';
 import {
     findTableAfterLine,
     findTableBeforeLine,
@@ -123,10 +123,9 @@ export class DocMoveCursorController extends Disposable {
             return;
         }
 
-        const skeleton = this._renderManagerService.getRenderUnitById(docDataModel.getUnitId())
-            ?.with(DocSkeletonManagerService)
-            .getSkeleton();
-        const docObject = this._getDocObject();
+        const currentRender = this._renderManagerService.getRenderUnitById(docDataModel.getUnitId());
+        const skeleton = currentRender?.with(DocSkeletonManagerService).getSkeleton();
+        const docObject = currentRender ? neoGetDocObject(currentRender) : null;
 
         if (activeRange == null || skeleton == null || docObject == null) {
             return;
@@ -155,13 +154,13 @@ export class DocMoveCursorController extends Disposable {
                 max = Math.max(max, range.endOffset!);
             }
 
-            this._textSelectionManagerService.replaceTextRanges([
+            this._textSelectionManagerService.replaceDocRanges([
                 {
                     startOffset: direction === Direction.LEFT || direction === Direction.UP ? max : min,
                     endOffset: direction === Direction.LEFT || direction === Direction.UP ? min : max,
                     style,
                 },
-            ], false);
+            ], undefined, false);
 
             return;
         }
@@ -216,13 +215,13 @@ export class DocMoveCursorController extends Disposable {
                 return;
             }
 
-            this._textSelectionManagerService.replaceTextRanges([
+            this._textSelectionManagerService.replaceDocRanges([
                 {
                     startOffset: anchorOffset,
                     endOffset: normalizedNextOffset,
                     style,
                 },
-            ], false);
+            ], undefined, false);
 
             this._scrollToFocusNodePosition(docDataModel.getUnitId(), normalizedNextOffset);
 
@@ -238,13 +237,13 @@ export class DocMoveCursorController extends Disposable {
 
             focusOffset = Math.min(dataStreamLength - 2, Math.max(0, focusOffset));
 
-            this._textSelectionManagerService.replaceTextRanges([
+            this._textSelectionManagerService.replaceDocRanges([
                 {
                     startOffset: anchorOffset,
                     endOffset: focusOffset,
                     style,
                 },
-            ], false);
+            ], undefined, false);
 
             this._scrollToFocusNodePosition(docDataModel.getUnitId(), focusOffset);
         } else {
@@ -270,13 +269,13 @@ export class DocMoveCursorController extends Disposable {
                     return;
                 }
 
-                this._textSelectionManagerService.replaceTextRanges([
+                this._textSelectionManagerService.replaceDocRanges([
                     {
                         startOffset: anchorOffset,
                         endOffset: newFocusOffset,
                         style,
                     },
-                ], false);
+                ], undefined, false);
 
                 return;
             }
@@ -300,13 +299,13 @@ export class DocMoveCursorController extends Disposable {
             }
 
             // move selection
-            this._textSelectionManagerService.replaceTextRanges([
+            this._textSelectionManagerService.replaceDocRanges([
                 {
                     startOffset: anchorOffset,
                     endOffset: newFocusOffset,
                     style,
                 },
-            ], false);
+            ], undefined, false);
 
             this._scrollToFocusNodePosition(docDataModel.getUnitId(), newFocusOffset);
         }
@@ -321,10 +320,9 @@ export class DocMoveCursorController extends Disposable {
             return false;
         }
 
-        const skeleton = this._renderManagerService.getRenderUnitById(docDataModel.getUnitId())
-            ?.with(DocSkeletonManagerService)
-            .getSkeleton();
-        const docObject = this._getDocObject();
+        const currentRender = this._renderManagerService.getRenderUnitById(docDataModel.getUnitId());
+        const skeleton = currentRender?.with(DocSkeletonManagerService).getSkeleton();
+        const docObject = currentRender ? neoGetDocObject(currentRender) : null;
         if (activeRange == null || skeleton == null || docObject == null || allRanges == null) {
             return;
         }
@@ -387,13 +385,13 @@ export class DocMoveCursorController extends Disposable {
                 return;
             }
 
-            this._textSelectionManagerService.replaceTextRanges([
+            this._textSelectionManagerService.replaceDocRanges([
                 {
                     startOffset: cursor,
                     endOffset: cursor,
                     style,
                 },
-            ], false);
+            ], undefined, false);
 
             this._scrollToFocusNodePosition(docDataModel.getUnitId(), cursor);
 
@@ -453,13 +451,13 @@ export class DocMoveCursorController extends Disposable {
                 return;
             }
 
-            this._textSelectionManagerService.replaceTextRanges([
+            this._textSelectionManagerService.replaceDocRanges([
                 {
                     startOffset: normalizedCursor,
                     endOffset: normalizedCursor,
                     style,
                 },
-            ], false);
+            ], undefined, false);
 
             this._scrollToFocusNodePosition(docDataModel.getUnitId(), normalizedCursor);
         } else {
@@ -508,13 +506,13 @@ export class DocMoveCursorController extends Disposable {
                     return;
                 }
 
-                this._textSelectionManagerService.replaceTextRanges([
+                this._textSelectionManagerService.replaceDocRanges([
                     {
                         startOffset: cursor,
                         endOffset: cursor,
                         style,
                     },
-                ], false);
+                ], undefined, false);
 
                 return;
             }
@@ -538,13 +536,13 @@ export class DocMoveCursorController extends Disposable {
             }
 
             // move selection
-            this._textSelectionManagerService.replaceTextRanges([
+            this._textSelectionManagerService.replaceDocRanges([
                 {
                     startOffset: cursor,
                     endOffset: cursor,
                     style,
                 },
-            ], false);
+            ], undefined, false);
 
             this._scrollToFocusNodePosition(docDataModel.getUnitId(), cursor);
         }
@@ -1476,9 +1474,5 @@ export class DocMoveCursorController extends Disposable {
             endOffset: offset,
             collapsed: true,
         });
-    }
-
-    private _getDocObject() {
-        return getDocObject(this._univerInstanceService, this._renderManagerService);
     }
 }

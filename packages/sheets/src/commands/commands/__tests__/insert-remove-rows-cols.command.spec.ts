@@ -274,7 +274,7 @@ describe('Test insert and remove rows cols commands', () => {
             });
 
             expect(result).toBeTruthy();
-            const worksheet = get(IUniverInstanceService).getUniverSheetInstance('test')!.getSheetBySheetId('sheet1')!;
+            const worksheet = get(IUniverInstanceService).getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)!.getSheetBySheetId('sheet1')!;
             expect(worksheet.getRowHeight(1)).toBe(36);
             expect(getCellStyle(1, 0)).toBe('s1');
         });
@@ -373,7 +373,7 @@ describe('Test insert and remove rows cols commands', () => {
             });
 
             expect(result).toBeTruthy();
-            const worksheet = get(IUniverInstanceService).getUniverSheetInstance('test')!.getSheetBySheetId('sheet1')!;
+            const worksheet = get(IUniverInstanceService).getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)!.getSheetBySheetId('sheet1')!;
             expect(worksheet.getColumnWidth(1)).toBe(112);
             expect(getCellStyle(0, 1)).toBe('s1');
         });

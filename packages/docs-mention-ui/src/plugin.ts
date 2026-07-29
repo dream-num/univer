@@ -16,7 +16,10 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverDocsMentionUIConfig } from './config/config';
-import { IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
+import { UniverDocsPlugin } from '@univerjs/docs';
+import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
+import { UniverUIPlugin } from '@univerjs/ui';
 import pkg from '../package.json';
 import { defaultPluginConfig, DOCS_MENTION_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { ComponentsController } from './controllers/components.controller';
@@ -26,6 +29,7 @@ import { DocMentionPopupService } from './services/doc-mention-popup.service';
 import { DocMentionService } from './services/doc-mention.service';
 import { DOC_MENTION_UI_PLUGIN } from './types/const/const';
 
+@DependentOn(UniverDocsPlugin, UniverUIPlugin, UniverDocsUIPlugin)
 export class UniverDocsMentionUIPlugin extends Plugin {
     static override pluginName = DOC_MENTION_UI_PLUGIN;
     static override packageName = pkg.name;

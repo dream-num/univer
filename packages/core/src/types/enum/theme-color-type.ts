@@ -16,8 +16,6 @@
 
 /**
  * Theme color type enum
- *
- * @deprecated
  */
 export enum ThemeColorType {
     /**
@@ -45,8 +43,6 @@ export enum ThemeColorType {
 
 /**
  * Preset theme names.
- *
- * @deprecated
  */
 export enum ThemeColors {
     OFFICE = 'Office',

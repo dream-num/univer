@@ -106,7 +106,6 @@ import {
 } from './commands/commands/paragraph-align.command';
 import {
     CoverContentCommand,
-    ReplaceContentCommand,
     ReplaceSelectionCommand,
     ReplaceSnapshotCommand,
     ReplaceTextRunsCommand,
@@ -233,7 +232,7 @@ import {
     NormalTextHeadingShortcut,
 } from './shortcuts/heading.shortcut';
 
-@DependentOn(UniverRenderEnginePlugin, UniverDocsPlugin)
+@DependentOn(UniverDocsPlugin, UniverRenderEnginePlugin)
 export class UniverDocsUIPlugin extends Plugin {
     static override pluginName = 'DOC_UI_PLUGIN';
     static override packageName = pkg.name;
@@ -350,7 +349,6 @@ export class UniverDocsUIPlugin extends Plugin {
             DocParagraphSettingCommand,
             InnerPasteCommand,
             CutContentCommand,
-            ReplaceContentCommand,
             ReplaceSnapshotCommand,
             CoverContentCommand,
             SetDocZoomRatioCommand,

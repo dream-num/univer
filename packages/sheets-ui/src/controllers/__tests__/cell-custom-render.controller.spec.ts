@@ -57,11 +57,11 @@ function createController(options?: { editable?: boolean; selectionEditable?: bo
         getSheetId: vi.fn(() => 'sheet-1'),
         getMergedCell: vi.fn(() => null),
         getCell: vi.fn(() => cellData),
+        getComposedCellStyleByCellData: vi.fn(() => ({ fs: 12 })),
     };
     const skeleton = {
         worksheet,
         getCellIndexByOffset: vi.fn(() => ({ row: 1, column: 2 })),
-        getStyles: vi.fn(() => ({ getStyleByCell: vi.fn(() => ({ fs: 12 })) })),
         getCellWithCoordByIndex: vi.fn(() => ({ startX: 10, startY: 20 })),
     };
     const currentSkeleton$ = new Subject<any>();

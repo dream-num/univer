@@ -41,6 +41,7 @@ function createSkeleton(options: { cells: Map<string, any>; primary?: (row: numb
         getRowVisible: vi.fn(() => true),
         getColVisible: vi.fn(() => true),
         getCell: vi.fn((row: number, col: number) => options.cells.get(`${row},${col}`)),
+        getComposedCellStyleByCellData: vi.fn((_row: number, _col: number, cell) => ({ fs: cell?.fs ?? 10 })),
     };
 
     return {
@@ -49,9 +50,6 @@ function createSkeleton(options: { cells: Map<string, any>; primary?: (row: numb
         getCellWithCoordByIndex: vi.fn((row: number, col: number) => (
             options.primary?.(row, col) ?? createCellWithCoord(row, col)
         )),
-        getStyles: vi.fn(() => ({
-            getStyleByCell: vi.fn((cell) => ({ fs: cell?.fs ?? 10 })),
-        })),
     } as any;
 }
 

@@ -21,7 +21,7 @@ const locale: typeof enUS = {
         title: '表',
         selectRange: '表の範囲を選択',
         rename: '表の名前を変更',
-        renamePlaceholder: 'Enter table name',
+        renamePlaceholder: 'テーブル名を入力',
         updateRange: '表の範囲を更新',
         tableRangeWithMergeError: '表の範囲は結合セルと重複できません',
         tableRangeWithOtherTableError: '表の範囲は他の表と重複できません',
@@ -43,9 +43,9 @@ const locale: typeof enUS = {
         tablePrefix: '表',
         tableNameError: '表の名前は空白を含めることはできず、数字で始めることはできず、既存の表名と重複できません',
         columnMenu: {
-            'insert-left': 'Insert 1 table column left',
-            'insert-right': 'Insert 1 table column right',
-            delete: 'Delete table column',
+            'insert-left': '左に 1 列挿入',
+            'insert-right': '右に 1 列挿入',
+            delete: '列を削除',
         },
 
         sort: {

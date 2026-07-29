@@ -32,7 +32,6 @@ import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BehaviorSubject } from 'rxjs';
 import { afterEach, describe, expect, it } from 'vitest';
-import { ISheetSelectionRenderService } from '../../../services/selection/base-selection-render.service';
 import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
 import { AutoFillPopupMenu } from '../AutoFillPopupMenu';
 
@@ -85,21 +84,15 @@ class TestSheetSkeletonManagerService {
     }
 }
 
-class TestSheetSelectionRenderService {
-    getViewPort(): object {
-        return {};
-    }
-}
-
 class TestRenderUnit {
     readonly components = new Map();
     readonly mainComponent = {};
     readonly engine = {};
     readonly sheetSkeletonManagerService = new TestSheetSkeletonManagerService();
-    readonly selectionRenderService = new TestSheetSelectionRenderService();
     readonly scene = {
         scaleX: 1,
         scaleY: 1,
+        getViewport: () => ({}),
         getViewportScrollXY: () => ({ x: 0, y: 0 }),
         getEngine: () => ({
             getCanvas: () => ({
@@ -112,10 +105,6 @@ class TestRenderUnit {
     with(token: unknown): unknown {
         if (token === SheetSkeletonManagerService) {
             return this.sheetSkeletonManagerService;
-        }
-
-        if (token === ISheetSelectionRenderService) {
-            return this.selectionRenderService;
         }
 
         return null;

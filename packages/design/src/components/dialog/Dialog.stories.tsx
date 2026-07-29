@@ -62,7 +62,6 @@ export const DialogDraggable = {
                     open={visible}
                     title="hello world"
                     draggable
-                    destroyOnClose
                     preservePositionOnDestroy
                     defaultPosition={{ x: 100, y: 100 }}
                     onClose={() => setVisible(false)}

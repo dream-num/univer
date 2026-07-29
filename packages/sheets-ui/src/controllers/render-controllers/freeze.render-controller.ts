@@ -29,7 +29,6 @@ import {
     Injector,
     InterceptorManager,
     type IRange,
-    type IWorksheetData,
     type Nullable,
     RANGE_TYPE,
     ThemeService,
@@ -1640,17 +1639,11 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
     }
 
     private _getFreeze() {
-        const config: IWorksheetData | undefined = this._sheetSkeletonManagerService
+        return this._sheetSkeletonManagerService
             .getCurrentParam()
             ?.skeleton
             .worksheet
-            .getSnapshot();
-
-        if (config == null) {
-            return;
-        }
-
-        return config.freeze;
+            .getFreeze();
     }
 
     private _getSheetObject() {

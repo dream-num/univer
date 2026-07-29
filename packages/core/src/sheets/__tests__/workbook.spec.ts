@@ -66,7 +66,7 @@ describe('Test workbook', () => {
 
             expect(saved).toEqual(workbook.getSnapshot());
             expect(saved).not.toBe(workbook.getSnapshot());
-            expect(workbook.getName()).toBe('');
+            expect(workbook.name).toBe('');
 
             workbook.setName('Renamed');
             workbook.setRev(5);

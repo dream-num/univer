@@ -136,10 +136,19 @@ function createControllerTestBed(initialFormulaComputing = CalculationMode.WHEN_
         commandService,
         formulaDataModel: injector.get(FormulaDataModel),
         activeDirtyManagerService: injector.get(IActiveDirtyManagerService),
-        registerOtherFormulaService: injector.get(RegisterOtherFormulaService),
         executedCommands,
         executedDisposable,
     };
+}
+
+async function settleInitialCalculation(testBed: ReturnType<typeof createControllerTestBed>): Promise<void> {
+    await vi.advanceTimersByTimeAsync(10);
+    if (testBed.executedCommands.some(({ id }) => id === SetFormulaCalculationStartMutation.id)) {
+        await testBed.commandService.executeCommand(SetFormulaCalculationNotificationMutation.id, {
+            functionsExecutedState: FormulaExecutedStateType.SUCCESS,
+        });
+    }
+    testBed.executedCommands.length = 0;
 }
 
 describe('TriggerCalculationController', () => {
@@ -155,13 +164,7 @@ describe('TriggerCalculationController', () => {
     it('should trigger initial calculation and enrich calculation params through real command hooks', async () => {
         const testBed = createControllerTestBed();
 
-        await Promise.resolve();
-
-        expect(testBed.registerOtherFormulaService.calculateStarted$.getValue()).toBe(true);
-
-        testBed.executedCommands.length = 0;
-
-        await testBed.commandService.executeCommand(SetFormulaCalculationStartMutation.id, {});
+        await vi.advanceTimersByTimeAsync(10);
         await testBed.commandService.executeCommand(SetFormulaStringBatchCalculationMutation.id, {});
 
         expect(testBed.executedCommands.find((command) => command.id === SetFormulaCalculationStartMutation.id)).toMatchObject({
@@ -187,10 +190,10 @@ describe('TriggerCalculationController', () => {
     it('should not enqueue an empty initial calculation in no-calculation mode', async () => {
         const testBed = createControllerTestBed(CalculationMode.NO_CALCULATION);
 
-        await Promise.resolve();
+        await vi.advanceTimersByTimeAsync(10);
 
-        expect(testBed.registerOtherFormulaService.calculateStarted$.getValue()).toBe(true);
         expect(testBed.executedCommands.some(({ id }) => id === SetTriggerFormulaCalculationStartMutation.id)).toBe(false);
+        expect(testBed.executedCommands.some(({ id }) => id === SetFormulaCalculationStartMutation.id)).toBe(false);
 
         testBed.executedDisposable.dispose();
         testBed.testBed.univer.dispose();
@@ -198,6 +201,7 @@ describe('TriggerCalculationController', () => {
 
     it('should merge dirty data from real active-dirty registrations and skip style-triggered range updates', async () => {
         const testBed = createControllerTestBed();
+        await settleInitialCalculation(testBed);
 
         testBed.activeDirtyManagerService.register('formula.test-dirty-1', {
             commandId: 'formula.test-dirty-1',
@@ -228,8 +232,6 @@ describe('TriggerCalculationController', () => {
                 dirtyRanges: [{ unitId: 'test', sheetId: 'sheet1', range: { startRow: 9, startColumn: 9, endRow: 9, endColumn: 9 } }],
             }),
         });
-
-        testBed.executedCommands.length = 0;
 
         await testBed.commandService.executeCommand('formula.test-dirty-1');
         await testBed.commandService.executeCommand(SetRangeValuesMutation.id, {
@@ -266,6 +268,7 @@ describe('TriggerCalculationController', () => {
 
     it('should stop and restart calculation through real notification flow', async () => {
         const testBed = createControllerTestBed();
+        await settleInitialCalculation(testBed);
 
         testBed.activeDirtyManagerService.register('formula.test-dirty-restart', {
             commandId: 'formula.test-dirty-restart',
@@ -274,8 +277,6 @@ describe('TriggerCalculationController', () => {
                 dirtyRanges: [{ unitId: 'test', sheetId: 'sheet1', range: { startRow: 4, startColumn: 0, endRow: 4, endColumn: 1 } }],
             }),
         });
-
-        testBed.executedCommands.length = 0;
 
         await testBed.commandService.executeCommand(SetFormulaCalculationNotificationMutation.id, {
             stageInfo: {
@@ -312,6 +313,7 @@ describe('TriggerCalculationController', () => {
 
     it('should publish progress updates through real notification commands', async () => {
         const testBed = createControllerTestBed();
+        await settleInitialCalculation(testBed);
         const progressValues: Array<{ done: number; count: number; label?: string }> = [];
         const subscription = testBed.controller.progress$.subscribe((value) => progressValues.push(value));
 

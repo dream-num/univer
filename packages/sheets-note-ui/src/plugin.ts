@@ -26,7 +26,11 @@ import {
     touchDependencies,
     UniverInstanceType,
 } from '@univerjs/core';
+import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
+import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsNotePlugin } from '@univerjs/sheets-note';
+import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
+import { UniverUIPlugin } from '@univerjs/ui';
 import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_NOTE_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { ComponentsController } from './controllers/components.controller';
@@ -36,7 +40,13 @@ import { SheetsNotePopupController } from './controllers/sheets-note-popup.contr
 import { SheetsNoteUIController } from './controllers/ui.controller';
 import { SheetsNotePopupService } from './services/sheets-note-popup.service';
 
-@DependentOn(UniverSheetsNotePlugin)
+@DependentOn(
+    UniverRenderEnginePlugin,
+    UniverSheetsPlugin,
+    UniverUIPlugin,
+    UniverSheetsNotePlugin,
+    UniverSheetsUIPlugin
+)
 export class UniverSheetsNoteUIPlugin extends Plugin {
     static override pluginName = 'SHEET_NOTE_UI_PLUGIN';
     static override packageName = pkg.name;

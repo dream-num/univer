@@ -25,9 +25,9 @@ import { MoreDownIcon, PasteSpecialDoubleIcon } from '@univerjs/icons';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useState } from 'react';
 import { SheetOptionalPasteCommand } from '../../commands/commands/clipboard.command';
+import { getViewportByCell } from '../../common/utils';
 import { getSheetObject } from '../../controllers/utils/component-tools';
 import { ISheetClipboardService, PREDEFINED_HOOK_NAME_PASTE } from '../../services/clipboard/clipboard.service';
-import { ISheetSelectionRenderService } from '../../services/selection/base-selection-render.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { useActiveWorkbook } from '../hook';
 
@@ -62,14 +62,14 @@ const useMenuPosition = (range?: IDiscreteRange) => {
 
     const ru = renderManagerService.getRenderUnitById(workbook.getUnitId());
     const sheetSkeletonManagerService = ru?.with(SheetSkeletonManagerService);
-    const selectionRenderService = ru?.with(ISheetSelectionRenderService);
 
     const sheetObject = getSheetObject(univerInstanceService, renderManagerService);
-    if (!sheetObject || !selectionRenderService) return null;
+    if (!sheetObject) return null;
 
     const { scene } = sheetObject;
     const skeleton = sheetSkeletonManagerService?.getCurrentSkeleton();
-    const viewport = selectionRenderService.getViewPort();
+    const viewport = getViewportByCell(anchor.endRow, anchor.endCol, scene, workbook.getActiveSheet());
+    if (!viewport) return null;
     const scaleX = scene?.scaleX;
     const scaleY = scene?.scaleY;
     const scrollXY = scene?.getViewportScrollXY(viewport);

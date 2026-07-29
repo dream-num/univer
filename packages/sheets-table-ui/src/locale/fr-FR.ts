@@ -21,7 +21,7 @@ const locale: typeof enUS = {
         title: 'Tableau',
         selectRange: 'Sélectionner la plage du tableau',
         rename: 'Renommer le tableau',
-        renamePlaceholder: 'Enter table name',
+        renamePlaceholder: 'Saisir le nom du tableau',
         updateRange: 'Mettre à jour la plage du tableau',
         tableRangeWithMergeError: 'La plage du tableau ne peut pas chevaucher des cellules fusionnées',
         tableRangeWithOtherTableError: 'La plage du tableau ne peut pas chevaucher d\'autres tableaux',
@@ -43,9 +43,9 @@ const locale: typeof enUS = {
         tablePrefix: 'Tableau',
         tableNameError: 'Le nom du tableau ne peut pas contenir d\'espaces, ne peut pas commencer par un chiffre et ne peut pas être identique à un nom de tableau existant',
         columnMenu: {
-            'insert-left': 'Insert 1 table column left',
-            'insert-right': 'Insert 1 table column right',
-            delete: 'Delete table column',
+            'insert-left': 'Insérer 1 colonne à gauche',
+            'insert-right': 'Insérer 1 colonne à droite',
+            delete: 'Supprimer la colonne du tableau',
         },
 
         sort: {

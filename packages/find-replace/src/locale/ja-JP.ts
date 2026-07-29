@@ -34,10 +34,11 @@ const locale: typeof enUS = {
             replace: '置換',
             'replace-all': 'すべて置換',
             'case-sensitive': '大文字と小文字を区別',
-            'find-placeholder': 'このシート内を検索',
+            'find-placeholder': '検索',
             'advanced-finding': '詳細検索と置換',
             'replace-placeholder': '置換文字列を入力',
             'match-the-whole-cell': 'セル全体に一致',
+            'match-the-whole-word': '単語単位で検索',
             'find-direction': {
                 title: '検索方向',
                 row: '行ごとに検索',

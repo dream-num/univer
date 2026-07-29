@@ -17,13 +17,20 @@
 import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsFindReplaceConfig } from './config/config';
 import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
+import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { UniverFindReplacePlugin } from '@univerjs/find-replace';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
+import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_FIND_REPLACE_PLUGIN_CONFIG_KEY } from './config/config';
 import { SheetsFindReplaceController } from './controllers/sheet-find-replace.controller';
 
-@DependentOn(UniverSheetsPlugin, UniverSheetsPlugin, UniverFindReplacePlugin)
+@DependentOn(
+    UniverRenderEnginePlugin,
+    UniverSheetsPlugin,
+    UniverFindReplacePlugin,
+    UniverSheetsUIPlugin
+)
 export class UniverSheetsFindReplacePlugin extends Plugin {
     static override pluginName = 'SHEET_FIND_REPLACE_PLUGIN';
     static override packageName = pkg.name;

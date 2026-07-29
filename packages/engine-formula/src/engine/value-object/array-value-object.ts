@@ -58,10 +58,6 @@ enum ArrayCalculateType {
     SINGLE,
 }
 
-export function fromObjectToString(array: IArrayValueObject) {
-    return '';
-}
-
 export function transformToValueObject(array: Array<Array<number | string | boolean | null>> = [], isIgnoreNumberPattern: boolean = false) {
     const arrayValueList: BaseValueObject[][] = [];
 
@@ -173,7 +169,7 @@ export class ArrayValueObject extends BaseValueObject {
     }>;
 
     constructor(rawValue: string | IArrayValueObject) {
-        super(typeof rawValue === 'string' ? rawValue as string : fromObjectToString(rawValue as IArrayValueObject));
+        super();
 
         this._values = this._formatValue(rawValue);
     }

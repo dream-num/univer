@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { ICellData, Injector, Nullable } from '@univerjs/core';
+import type { ICellData, Injector, Nullable, Workbook } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
-import { ICommandService, ILogService, IUniverInstanceService, LocaleType } from '@univerjs/core';
+import { ICommandService, ILogService, IUniverInstanceService, LocaleType, UniverInstanceType } from '@univerjs/core';
 import {
     CopySheetCommand,
     getPrimaryForRange,
@@ -101,7 +101,7 @@ describe('Test FWorkbook', () => {
             endColumn: number
         ): Nullable<ICellData> =>
             get(IUniverInstanceService)
-                .getUniverSheetInstance('test')
+                .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                 ?.getSheetBySheetId('sheet1')
                 ?.getRange(startRow, startColumn, endRow, endColumn)
                 .getValue();

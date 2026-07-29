@@ -21,7 +21,6 @@ import {
     Disposable,
     DisposableCollection,
     EDITOR_ACTIVATED,
-    FOCUSING_EDITOR_BUT_HIDDEN,
     FOCUSING_EDITOR_STANDALONE,
     FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE,
     HorizontalAlign,
@@ -52,6 +51,7 @@ import {
     IEditorService,
     MoveCursorOperation,
     MoveSelectionOperation,
+    ReplaceSnapshotCommand,
     VIEWPORT_KEY,
 } from '@univerjs/docs-ui';
 import {
@@ -248,9 +248,18 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
                 documentModel!.updateDocumentDataPageSize((endX - startX) / scaleX);
             }
 
-            this._instanceSrv.changeDoc(editorUnitId, documentModel!);
-            this._contextService.setContextValue(FOCUSING_EDITOR_BUT_HIDDEN, true);
-            this._textSelectionManagerService.replaceTextRanges([{
+            const snapshot = documentModel!.getSnapshot();
+            const editorDocument = this._instanceSrv.getUnit(editorUnitId, UniverInstanceType.UNIVER_DOC);
+            if (editorDocument == null) {
+                this._instanceSrv.createUnit(UniverInstanceType.UNIVER_DOC, snapshot);
+            } else {
+                this._commandService.syncExecuteCommand(ReplaceSnapshotCommand.id, {
+                    unitId: editorUnitId,
+                    snapshot,
+                });
+            }
+            this._instanceSrv.setCurrentUnitForType(editorUnitId);
+            this._textSelectionManagerService.replaceDocRanges([{
                 startOffset: 0,
                 endOffset: 0,
             }]);
@@ -612,7 +621,7 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
             viewportScrollX: Number.POSITIVE_INFINITY,
         });
 
-        this._textSelectionManagerService.replaceTextRanges([
+        this._textSelectionManagerService.replaceDocRanges([
             {
                 startOffset: cursor,
                 endOffset: cursor,

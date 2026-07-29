@@ -43,67 +43,6 @@ import {
  */
 export interface IFWorkbookSheetsUIMixin {
     /**
-     * Open a sidebar.
-     * @deprecated use `univerAPI.openSidebar` instead
-     * @param {ISidebarMethodOptions} params the sidebar options
-     * @returns {IDisposable} the disposable object
-     * @example
-     * ```ts
-     * univerAPI.openSidebar({
-     *   id: 'mock-sidebar-id',
-     *   width: 300,
-     *   header: {
-     *     label: 'Sidebar Header',
-     *   },
-     *   children: {
-     *     label: 'Sidebar Content',
-     *   },
-     *   footer: {
-     *     label: 'Sidebar Footer',
-     *   },
-     *   onClose: () => {
-     *     console.log('Sidebar closed')
-     *   },
-     * });
-     * ```
-     */
-    openSiderbar(params: ISidebarMethodOptions): IDisposable;
-
-    /**
-     * Open a dialog.
-     * @deprecated use `univerAPI.openDialog` instead
-     * @param {IDialogPartMethodOptions} dialog the dialog options
-     * @returns {IDisposable} the disposable object
-     * @example
-     * ```ts
-     * import { Button } from '@univerjs/design';
-     *
-     * univerAPI.openDialog({
-     *   id: 'mock-dialog-id',
-     *   width: 500,
-     *   title: {
-     *     label: 'Dialog Title',
-     *   },
-     *   children: {
-     *     label: 'Dialog Content',
-     *   },
-     *   footer: {
-     *     title: (
-     *       <>
-     *         <Button onClick={() => { console.log('Cancel clicked') }}>Cancel</Button>
-     *         <Button variant="primary" onClick={() => { console.log('Confirm clicked') }} style={{marginLeft: '10px'}}>Confirm</Button>
-     *       </>
-     *     )
-     *   },
-     *   draggable: true,
-     *   mask: true,
-     *   maskClosable: true,
-     * });
-     * ```
-     */
-    openDialog(dialog: IDialogPartMethodOptions): IDisposable;
-
-    /**
      * Customize the column header of the all worksheets in the workbook.
      * @param {IColumnsHeaderCfgParam} cfg The configuration of the column header.
      * @example
@@ -268,27 +207,6 @@ export interface IFWorkbookSheetsUIMixin {
 }
 
 export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheetsUIMixin {
-    override openSiderbar(params: ISidebarMethodOptions): IDisposable {
-        this._logDeprecation('openSiderbar');
-
-        const sideBarService = this._injector.get(ISidebarService);
-        return sideBarService.open(params);
-    }
-
-    override openDialog(dialog: IDialogPartMethodOptions): IDisposable {
-        this._logDeprecation('openDialog');
-
-        const dialogService = this._injector.get(IDialogService);
-        const disposable = dialogService.open({
-            ...dialog,
-            onClose: () => {
-                disposable.dispose();
-            },
-        });
-
-        return disposable;
-    }
-
     override customizeColumnHeader(cfg: IColumnsHeaderCfgParam): void {
         const unitId = this._workbook.getUnitId();
         const sheetColumn = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.COLUMN) as SpreadsheetColumnHeader;

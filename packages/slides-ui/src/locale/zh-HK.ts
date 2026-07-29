@@ -18,60 +18,60 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'slides-ui': {
-        append: 'Append Slide',
+        append: '新增幻灯片',
 
         text: {
             insert: {
-                title: 'Insert Text',
+                title: '插入文字',
             },
         },
 
         shape: {
             insert: {
-                title: 'Insert Shape',
-                rectangle: 'Insert Rectangle',
-                ellipse: 'Insert Ellipse',
+                title: '插入圖形',
+                rectangle: '插入矩形',
+                ellipse: '插入橢圓',
             },
         },
 
         image: {
             insert: {
-                title: 'Insert Image',
-                float: 'Insert Float Image',
+                title: '插入圖片',
+                float: '插入浮動圖片',
             },
         },
 
         popup: {
-            edit: 'Edit',
-            delete: 'Delete',
+            edit: '編輯',
+            delete: '刪除',
         },
 
         sidebar: {
-            text: 'Edit Text',
-            shape: 'Edit Shape',
-            image: 'Edit Image',
+            text: '編輯文字',
+            shape: '編輯圖形',
+            image: '編輯圖片',
         },
 
         'image-panel': {
             arrange: {
-                title: 'Arrange',
-                forward: 'Bring Forward',
-                backward: 'Send Backward',
-                front: 'Bring to Front',
-                back: 'Send to Back',
+                title: '排列',
+                forward: '上移一層',
+                backward: '下移一層',
+                front: '至頂',
+                back: '至底',
             },
             transform: {
-                title: 'Transform',
-                width: 'Width (px)',
-                height: 'Height (px)',
+                title: '變換',
+                width: '寬度 (px)',
+                height: '高度 (px)',
                 x: 'X (px)',
                 y: 'Y (px)',
-                rotate: 'Rotate (°)',
+                rotate: '旋轉 (°)',
             },
         },
         panel: {
             fill: {
-                title: 'Fill Color',
+                title: '填色',
             },
         },
     },

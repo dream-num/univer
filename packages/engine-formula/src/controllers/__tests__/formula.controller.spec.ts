@@ -27,6 +27,7 @@ import {
     toDisposable,
 } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
+import { OtherFormulaMarkDirty } from '../../commands/mutations/formula.mutation';
 import { ActiveDirtyManagerService, IActiveDirtyManagerService } from '../../services/active-dirty-manager.service';
 import { FunctionService, IFunctionService } from '../../services/function.service';
 import { RegisterOtherFormulaService } from '../../services/register-other-formula.service';
@@ -39,6 +40,7 @@ type FormulaDataSyncController = Pick<
 
 function createController(dataSyncPrimaryController?: FormulaDataSyncController): {
     controller: FormulaController;
+    commandService: ICommandService;
     registerOtherFormulaService: RegisterOtherFormulaService;
 } {
     const injector = new Injector();
@@ -50,19 +52,28 @@ function createController(dataSyncPrimaryController?: FormulaDataSyncController)
     injector.add([LifecycleService]);
     injector.add([RegisterOtherFormulaService]);
     const registerOtherFormulaService = injector.get(RegisterOtherFormulaService);
+    const commandService = injector.get(ICommandService);
     return {
         controller: new FormulaController(
-            injector.get(ICommandService),
+            commandService,
             injector.get(IFunctionService),
             injector.get(IConfigService),
             dataSyncPrimaryController,
             registerOtherFormulaService
         ),
+        commandService,
         registerOtherFormulaService,
     };
 }
 
 describe('FormulaController', () => {
+    it('registers the generic other-formula dirty mutation', () => {
+        const { commandService, controller } = createController();
+
+        expect(commandService.hasCommand(OtherFormulaMarkDirty.id)).toBe(true);
+        controller.dispose();
+    });
+
     it('registers mutation-only synchronization once per other-formula host', () => {
         const dispose = vi.fn();
         const dataSyncPrimaryController = {

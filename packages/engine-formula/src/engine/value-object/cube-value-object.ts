@@ -30,7 +30,7 @@ export class CubeValueObject extends BaseValueObject {
     private _values: ArrayValueObject[] = [];
 
     constructor(values: ArrayValueObject[]) {
-        super('');
+        super();
         this._values = values;
     }
 

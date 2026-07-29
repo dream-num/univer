@@ -24,7 +24,6 @@ import {
     Inject,
     Injector,
     type IRange,
-    type IWorksheetData,
     type Nullable,
     RANGE_TYPE,
     toDisposable,
@@ -501,12 +500,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
     }
 
     private _getFreeze(): Nullable<IFreeze> {
-        const snapshot: IWorksheetData | undefined = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton.worksheet.getSnapshot();
-        if (snapshot == null) {
-            return;
-        }
-
-        return snapshot.freeze;
+        return this._sheetSkeletonManagerService.getCurrentParam()?.skeleton.worksheet.getFreeze();
     }
 
     private _getSheetObject() {

@@ -145,9 +145,8 @@ class TestSheetSkeletonManagerService {
 }
 
 function createSelectionSkeleton(freeze = { startRow: 0, startColumn: 0, xSplit: 0, ySplit: 0 }) {
-    const skeleton = createFakeSkeleton({
-        getWorksheetConfig: () => ({ freeze }),
-    });
+    const skeleton = createFakeSkeleton();
+    skeleton.worksheet.getFreeze = () => freeze;
     const withCellMeta = (row: number, column: number) => {
         const coord = skeleton.getNoMergeCellWithCoordByIndex(row, column);
         return {

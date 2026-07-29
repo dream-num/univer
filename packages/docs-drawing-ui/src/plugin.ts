@@ -17,10 +17,12 @@
 import type { Dependency } from '@univerjs/core';
 import type { IUniverDocsDrawingUIConfig } from './config/config';
 import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
+import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsDrawingPlugin } from '@univerjs/docs-drawing';
+import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverDrawingPlugin } from '@univerjs/drawing';
 import { UniverDrawingUIPlugin } from '@univerjs/drawing-ui';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { UniverUIPlugin } from '@univerjs/ui';
 import pkg from '../package.json';
 import { defaultPluginConfig, DOCS_DRAWING_UI_PLUGIN_CONFIG_KEY } from './config/config';
@@ -40,7 +42,15 @@ import { DocDrawingPopupMenuController } from './menu/drawing-popup-menu.control
 import { DocDrawingFloatingToolbarAdapterService } from './services/doc-drawing-floating-toolbar-adapter.service';
 import { DocRefreshDrawingsService } from './services/doc-refresh-drawings.service';
 
-@DependentOn(UniverDrawingUIPlugin, UniverDrawingPlugin, UniverDocsDrawingPlugin, UniverUIPlugin)
+@DependentOn(
+    UniverDocsPlugin,
+    UniverDrawingPlugin,
+    UniverRenderEnginePlugin,
+    UniverDocsDrawingPlugin,
+    UniverUIPlugin,
+    UniverDocsUIPlugin,
+    UniverDrawingUIPlugin
+)
 export class UniverDocsDrawingUIPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_DOC;
     static override pluginName = 'DOC_DRAWING_UI_PLUGIN';

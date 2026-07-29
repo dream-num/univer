@@ -126,7 +126,7 @@ export function getClearContentMutationParamsForRanges(
         const redoMutationParams: ISetRangeValuesMutationParams = {
             unitId,
             subUnitId,
-            cellValue: redoMatrix.getData(),
+            cellValue: redoMatrix.clone(),
         };
         const undoMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
             accessor,

@@ -471,7 +471,7 @@ describe('Test cut command with formulas', () => {
             sheetId: string = 'sheet1'
         ): Array<Array<Nullable<ICellData>>> | undefined =>
             get(IUniverInstanceService)
-                .getUniverSheetInstance('test')
+                .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                 ?.getSheetBySheetId(sheetId)
                 ?.getRange(startRow, startColumn, endRow, endColumn)
                 .getValues();
@@ -573,7 +573,7 @@ describe('Test cut command with formulas', () => {
     ) {
         const testSheetClipboardService = sheetClipboardService as ITestSheetClipboardService;
         const copyContentCache = sheetClipboardService.copyContentCache();
-        const workbook = get(IUniverInstanceService).getUniverSheetInstance('test');
+        const workbook = get(IUniverInstanceService).getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET);
         const targetWorksheet = workbook?.getSheetBySheetId(toSubUnitId);
 
         if (targetWorksheet) {
@@ -878,7 +878,7 @@ describe('Test paste with formula', () => {
             endColumn: number
         ): Array<Array<Nullable<ICellData>>> | undefined =>
             get(IUniverInstanceService)
-                .getUniverSheetInstance('test')
+                .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                 ?.getSheetBySheetId('sheet1')
                 ?.getRange(startRow, startColumn, endRow, endColumn)
                 .getValues();

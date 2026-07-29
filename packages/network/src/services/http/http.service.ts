@@ -160,30 +160,12 @@ export class HTTPService extends Disposable {
     /**
      * Send an HTTP request. It returns an observable that emits HTTP events. For example, it can be used to
      * send Server-Sent Events (SSE) requests.
-     * @deprecated Please use `stream` method instead.
      * @param method HTTP request method, e.g. GET, POST, PUT, DELETE, etc.
      * @param url The URL to send the request to.
      * @param _params Optional parameters for the request.
      * @returns An observable of the HTTP event.
      */
     stream<T>(
-        method: HTTPRequestMethod,
-        url: string,
-        _params?: IRequestParams
-    ): Observable<HTTPEvent<T>> {
-        return this.getSSE<T>(method, url, _params);
-    }
-
-    /**
-     * Send a Server-Sent Events (SSE) request. It returns an observable that emits HTTP events. It is the observable
-     * pair of the `request` method.
-     * @deprecated Please use `stream` method instead.
-     * @param method HTTP request method, e.g. GET, POST, PUT, DELETE, etc.
-     * @param url The URL to send the request to.
-     * @param _params Optional parameters for the request.
-     * @returns An observable of the HTTP event.
-     */
-    getSSE<T>(
         method: HTTPRequestMethod,
         url: string,
         _params?: IPostRequestParams
@@ -199,7 +181,7 @@ export class HTTPService extends Disposable {
             withCredentials: _params?.withCredentials ?? false,
             reportProgress: true,
             responseType: _params?.responseType ?? 'json',
-            body: (['GET', 'DELETE'].includes(method)) ? undefined : (_params as IPostRequestParams)?.body,
+            body: (['GET', 'DELETE'].includes(method)) ? undefined : _params?.body,
         });
 
         return of(request).pipe(concatMap((request) => this._runInterceptorsAndImplementation(request)));

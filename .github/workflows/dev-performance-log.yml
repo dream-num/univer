@@ -16,6 +16,7 @@ jobs:
     e2e-test:
         if: github.repository == 'dream-num/univer'
         runs-on: ubuntu-latest
+        timeout-minutes: 20
 
         env:
             GH_TOKEN: ${{ github.token }}

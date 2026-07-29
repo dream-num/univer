@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { Injector, Univer } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, RedoCommand, UndoCommand } from '@univerjs/core';
+import type { Injector, Univer, Workbook } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, RedoCommand, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SetTabColorMutation } from '../../mutations/set-tab-color.mutation';
 import { SetTabColorCommand } from '../set-tab-color.command';
@@ -42,7 +42,7 @@ describe('Test tab color commands', () => {
 
     describe('Set several specific colors', () => {
         function getTabColor() {
-            return get(IUniverInstanceService).getUniverSheetInstance('test')?.getActiveSheet()?.getTabColor();
+            return get(IUniverInstanceService).getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)?.getActiveSheet()?.getTabColor();
         }
 
         describe('correct situations', () => {

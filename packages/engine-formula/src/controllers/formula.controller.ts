@@ -20,6 +20,7 @@ import type { IUniverEngineFormulaConfig } from '../config/config';
 import type { BaseFunction } from '../functions/base-function';
 import { Disposable, ICommandService, IConfigService, Inject, Optional } from '@univerjs/core';
 import { DataSyncPrimaryController } from '@univerjs/rpc';
+import { OtherFormulaMarkDirty } from '../commands/mutations/formula.mutation';
 import { RegisterFunctionMutation } from '../commands/mutations/register-function.mutation';
 import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-formula-data.mutation';
 import { RemoveDefinedNameMutation, SetDefinedNameMutation } from '../commands/mutations/set-defined-name.mutation';
@@ -119,6 +120,7 @@ export class FormulaController extends Disposable {
             SetFeatureCalculationMutation,
             RemoveFeatureCalculationMutation,
 
+            OtherFormulaMarkDirty,
             SetOtherFormulaMutation,
             RemoveOtherFormulaMutation,
             SetSuperTableMutation,

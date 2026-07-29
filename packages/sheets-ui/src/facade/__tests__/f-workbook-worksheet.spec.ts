@@ -179,8 +179,8 @@ describe('Test FWorkbook/FWorksheet UI mixin', () => {
 
         expect(worksheet.getSkeleton()).toEqual(worksheetSkeleton.skeleton);
 
-        expect(worksheet.autoResizeColumn(2)).toBe(worksheet);
-        expect(worksheet.setColumnAutoWidth(4, 3)).toBe(worksheet);
+        expect(worksheet.autoResizeColumns(2)).toBe(worksheet);
+        expect(worksheet.autoResizeColumns(4, 3)).toBe(worksheet);
         expect(worksheet.autoResizeRows(1, 2)).toBe(worksheet);
         expect(syncExecuteSpy).toHaveBeenCalledWith(SetWorksheetColAutoWidthCommand.id, {
             unitId: workbook.getId(),

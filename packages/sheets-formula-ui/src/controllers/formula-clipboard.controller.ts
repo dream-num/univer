@@ -260,7 +260,7 @@ export function getSetCellFormulaMutations(
     const setValuesMutation: ISetRangeValuesMutationParams = {
         unitId,
         subUnitId,
-        cellValue: valueMatrix.getData(),
+        cellValue: valueMatrix.clone(),
     };
 
     redoMutationsInfo.push({

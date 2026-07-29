@@ -18,60 +18,60 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'slides-ui': {
-        append: 'Append Slide',
+        append: 'Thêm trang chiếu',
 
         text: {
             insert: {
-                title: 'Insert Text',
+                title: 'Chèn văn bản',
             },
         },
 
         shape: {
             insert: {
-                title: 'Insert Shape',
-                rectangle: 'Insert Rectangle',
-                ellipse: 'Insert Ellipse',
+                title: 'Chèn hình',
+                rectangle: 'Chèn hình chữ nhật',
+                ellipse: 'Chèn hình elip',
             },
         },
 
         image: {
             insert: {
-                title: 'Insert Image',
-                float: 'Insert Float Image',
+                title: 'Chèn hình ảnh',
+                float: 'Chèn hình ảnh nổi',
             },
         },
 
         popup: {
-            edit: 'Edit',
-            delete: 'Delete',
+            edit: 'Chỉnh sửa',
+            delete: 'Xóa',
         },
 
         sidebar: {
-            text: 'Edit Text',
-            shape: 'Edit Shape',
-            image: 'Edit Image',
+            text: 'Chỉnh sửa văn bản',
+            shape: 'Chỉnh sửa hình',
+            image: 'Chỉnh sửa hình ảnh',
         },
 
         'image-panel': {
             arrange: {
-                title: 'Arrange',
-                forward: 'Bring Forward',
-                backward: 'Send Backward',
-                front: 'Bring to Front',
-                back: 'Send to Back',
+                title: 'Sắp xếp',
+                forward: 'Chuyển lên trên',
+                backward: 'Chuyển xuống dưới',
+                front: 'Đưa lên trên cùng',
+                back: 'Đưa xuống dưới cùng',
             },
             transform: {
-                title: 'Transform',
-                width: 'Width (px)',
-                height: 'Height (px)',
+                title: 'Biến đổi',
+                width: 'Chiều rộng (px)',
+                height: 'Chiều cao (px)',
                 x: 'X (px)',
                 y: 'Y (px)',
-                rotate: 'Rotate (°)',
+                rotate: 'Xoay (°)',
             },
         },
         panel: {
             fill: {
-                title: 'Fill Color',
+                title: 'Màu tô',
             },
         },
     },

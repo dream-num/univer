@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IAccessor, IMutation, IRange } from '@univerjs/core';
-import { CommandType, IUniverInstanceService, moveMatrixArray, Rectangle } from '@univerjs/core';
+import type { IAccessor, IMutation, IRange, Workbook } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, moveMatrixArray, Rectangle, UniverInstanceType } from '@univerjs/core';
 
 export interface IMoveRowsMutationParams {
     unitId: string;
@@ -75,7 +75,7 @@ export const MoveRowsMutation: IMutation<IMoveRowsMutationParams> = {
         const { unitId, subUnitId, sourceRange, targetRange } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const univerSheet = univerInstanceService.getUniverSheetInstance(unitId);
+        const univerSheet = univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
         if (!univerSheet) {
             throw new Error('[MoveRowMutation] univerSheet is null!');
         }
@@ -156,7 +156,7 @@ export const MoveColsMutation: IMutation<IMoveColumnsMutationParams> = {
         const { unitId, subUnitId, sourceRange, targetRange } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const univerSheet = univerInstanceService.getUniverSheetInstance(unitId);
+        const univerSheet = univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
         if (!univerSheet) {
             throw new Error('[MoveColumnMutation] univerSheet is null!');
         }

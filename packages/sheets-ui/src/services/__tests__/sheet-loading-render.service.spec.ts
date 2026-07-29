@@ -107,7 +107,7 @@ vi.mock('@univerjs/engine-render', async (importOriginal) => {
     };
 });
 
-function createLayoutService(contentElement: HTMLElement): ILayoutService {
+function createLayoutService(getContentElement: () => HTMLElement): ILayoutService {
     return {
         isFocused: false,
         rootContainerElement: null,
@@ -116,13 +116,46 @@ function createLayoutService(contentElement: HTMLElement): ILayoutService {
         registerRootContainerElement: () => toDisposable(() => {}),
         registerContentElement: () => toDisposable(() => {}),
         registerContainerElement: () => toDisposable(() => {}),
-        getContentElement: () => contentElement,
+        getContentElement,
         checkElementInCurrentContainers: () => false,
         checkContentIsFocused: () => false,
     };
 }
 
 describe('SheetLoadingRenderService', () => {
+    it('skips the preview and completes handoff when workbench content is not registered', async () => {
+        const contentElements: HTMLElement[] = [];
+        const injector = new Injector();
+        injector.add([ILogService, { useClass: DesktopLogService }]);
+        injector.add([IContextService, { useClass: ContextService }]);
+        injector.add([IUniverInstanceService, { useClass: UniverInstanceService }]);
+        injector.add([ThemeService]);
+        injector.add([SheetInterceptorService]);
+        injector.add([ILayoutService, { useValue: createLayoutService(() => contentElements[0]) }]);
+        injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+        const service = injector.createInstance(SheetLoadingRenderService);
+        const workbookData = {
+            id: 'unit-1',
+            name: 'Workbook',
+            appVersion: '',
+            locale: LocaleType.EN_US,
+            styles: {},
+            sheetOrder: ['sheet-1'],
+            sheets: { 'sheet-1': { id: 'sheet-1', cellData: {} } },
+            resources: [],
+        } satisfies IWorkbookData;
+
+        service.showSkeleton(workbookData, 'sheet-1');
+        service.show(workbookData, 'sheet-1', {});
+
+        expect(service.loading$.value).toBe(true);
+        expect(service.previewReady$.value).toBe(false);
+        await expect(service.handoff('unit-1', 10_000)).resolves.toBe(true);
+        expect(service.loading$.value).toBe(false);
+        service.dispose();
+        injector.get(IRenderManagerService).dispose();
+    });
+
     it('renders intercepted display values without owning the global workbook or pointer events', async () => {
         const contentElement = document.createElement('div');
         contentElement.style.pointerEvents = 'auto';
@@ -133,7 +166,7 @@ describe('SheetLoadingRenderService', () => {
             return animationFrames.length;
         });
 
-        const layoutService = createLayoutService(contentElement);
+        const layoutService = createLayoutService(() => contentElement);
         const injector = new Injector();
         injector.add([ILogService, { useClass: DesktopLogService }]);
         injector.add([IContextService, { useClass: ContextService }]);
@@ -240,7 +273,7 @@ describe('SheetLoadingRenderService', () => {
         injector.add([IUniverInstanceService, { useClass: UniverInstanceService }]);
         injector.add([ThemeService]);
         injector.add([SheetInterceptorService]);
-        injector.add([ILayoutService, { useValue: createLayoutService(contentElement) }]);
+        injector.add([ILayoutService, { useValue: createLayoutService(() => contentElement) }]);
         injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
         const service = injector.createInstance(SheetLoadingRenderService);
         const workbookData = {
@@ -267,8 +300,9 @@ describe('SheetLoadingRenderService', () => {
         vi.useRealTimers();
     });
 
-    it('keeps the preview mounted until the final canvas is mounted', async () => {
+    it('keeps the preview mounted until workbench content and the final canvas are mounted', async () => {
         const contentElement = document.createElement('div');
+        const contentElements = [contentElement];
         vi.spyOn(contentElement, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 640, 480));
         const animationFrames: FrameRequestCallback[] = [];
         const requestAnimationFrame = vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
@@ -282,7 +316,7 @@ describe('SheetLoadingRenderService', () => {
         injector.add([IUniverInstanceService, { useClass: UniverInstanceService }]);
         injector.add([ThemeService]);
         injector.add([SheetInterceptorService]);
-        injector.add([ILayoutService, { useValue: createLayoutService(contentElement) }]);
+        injector.add([ILayoutService, { useValue: createLayoutService(() => contentElements[0]) }]);
         injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
         const service = injector.createInstance(SheetLoadingRenderService);
         const workbookData = {
@@ -309,6 +343,7 @@ describe('SheetLoadingRenderService', () => {
         service.showSkeleton(workbookData, 'sheet-1');
         service.show(workbookData, 'sheet-1', {});
 
+        contentElements.length = 0;
         const handoff = service.handoff('unit-1', 10_000);
         await vi.waitFor(() => expect(animationFrames).toHaveLength(2));
 
@@ -320,6 +355,7 @@ describe('SheetLoadingRenderService', () => {
         await vi.waitFor(() => expect(animationFrames).toHaveLength(3));
         expect(finalScene.requestRender).not.toHaveBeenCalled();
 
+        contentElements.push(contentElement);
         finalEngine.mount(contentElement);
         animationFrames[2](0);
         await vi.waitFor(() => expect(animationFrames).toHaveLength(4));

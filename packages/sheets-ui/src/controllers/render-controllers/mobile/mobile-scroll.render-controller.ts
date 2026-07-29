@@ -25,7 +25,6 @@ import {
     Inject,
     type IRange,
     IUniverInstanceService,
-    type IWorksheetData,
     type Nullable,
     RANGE_TYPE,
     toDisposable,
@@ -174,12 +173,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
     }
 
     private _getFreeze(): Nullable<IFreeze> {
-        const snapshot: IWorksheetData | undefined = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton.worksheet.getSnapshot();
-        if (snapshot == null) {
-            return;
-        }
-
-        return snapshot.freeze;
+        return this._sheetSkeletonManagerService.getCurrentParam()?.skeleton.worksheet.getFreeze();
     }
 
     // eslint-disable-next-line max-lines-per-function

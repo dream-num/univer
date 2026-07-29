@@ -15,10 +15,11 @@
  */
 
 import type { Injector, Univer } from '@univerjs/core';
-import { EDITOR_ACTIVATED, FOCUSING_SHEET, IContextService } from '@univerjs/core';
+import { EDITOR_ACTIVATED, IContextService } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createTestBed } from '../../__tests__/create-test-bed';
 import {
+    FIND_REPLACE_AVAILABLE,
     FIND_REPLACE_DIALOG_FOCUS,
     FIND_REPLACE_INPUT_FOCUS,
     FIND_REPLACE_REPLACE_REVEALED,
@@ -48,9 +49,9 @@ describe('find-replace.shortcut', () => {
         univer.dispose();
     });
 
-    it('should require sheet focus and editor inactivity for opening find dialog', () => {
+    it('should require provider availability and editor inactivity for opening find dialog', () => {
         contextService.setContextValue(FIND_REPLACE_DIALOG_FOCUS, false);
-        contextService.setContextValue(FOCUSING_SHEET, true);
+        contextService.setContextValue(FIND_REPLACE_AVAILABLE, true);
         contextService.setContextValue(EDITOR_ACTIVATED, false);
 
         expect(OpenFindDialogShortcutItem.preconditions!(contextService)).toBe(true);
@@ -63,12 +64,23 @@ describe('find-replace.shortcut', () => {
     it('should open replace dialog only when dialog is hidden or replace is not revealed', () => {
         contextService.setContextValue(FIND_REPLACE_DIALOG_FOCUS, false);
         contextService.setContextValue(FIND_REPLACE_REPLACE_REVEALED, false);
-        contextService.setContextValue(FOCUSING_SHEET, true);
+        contextService.setContextValue(FIND_REPLACE_AVAILABLE, true);
         contextService.setContextValue(EDITOR_ACTIVATED, false);
         expect(OpenReplaceDialogShortcutItem.preconditions!(contextService)).toBe(true);
 
         contextService.setContextValue(FIND_REPLACE_DIALOG_FOCUS, true);
         contextService.setContextValue(FIND_REPLACE_REPLACE_REVEALED, true);
+        expect(OpenReplaceDialogShortcutItem.preconditions!(contextService)).toBe(false);
+    });
+
+    it('should disable open shortcuts when no provider is available', () => {
+        contextService.setContextValue(FIND_REPLACE_DIALOG_FOCUS, false);
+        contextService.setContextValue(FIND_REPLACE_REPLACE_REVEALED, false);
+        contextService.setContextValue(FIND_REPLACE_AVAILABLE, false);
+        contextService.setContextValue(EDITOR_ACTIVATED, false);
+
+        expect(OpenFindDialogShortcutItem.preconditions!(contextService)).toBe(false);
+        expect(MacOpenFindDialogShortcutItem.preconditions!(contextService)).toBe(false);
         expect(OpenReplaceDialogShortcutItem.preconditions!(contextService)).toBe(false);
     });
 

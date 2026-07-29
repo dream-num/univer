@@ -225,32 +225,6 @@ export class SheetsSelectionsService extends RxDisposable {
         selectionData.splice(0);
     }
 
-    /**
-     * Determine whether multiple current selections overlap
-     *
-     * @deprecated this should be extracted to an pure function
-     */
-    isOverlapping(): boolean {
-        const selectionDataList = this.getCurrentSelections();
-        if (selectionDataList == null) {
-            return false;
-        }
-
-        return selectionDataList.some(({ range }, index) =>
-            selectionDataList.some(({ range: range2 }, index2) => {
-                if (index === index2) {
-                    return false;
-                }
-                return (
-                    range.startRow <= range2.endRow &&
-                    range.endRow >= range2.startRow &&
-                    range.startColumn <= range2.endColumn &&
-                    range.endColumn >= range2.startColumn
-                );
-            })
-        );
-    }
-
     protected _getCurrentSelections() {
         const current = this._currentSelectionPos;
         if (!current) {

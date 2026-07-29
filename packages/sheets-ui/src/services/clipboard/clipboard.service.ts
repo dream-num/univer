@@ -492,7 +492,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     }
 
     private _generateCopyContent(unitId: string, subUnitId: string, range: IRange, hooks: ISheetClipboardHook[], copyHookType: ICopyHookValueType = PREDEFINED_HOOK_NAME_COPY.DEFAULT_COPY): Nullable<ICopyContent> {
-        const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
+        const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
         const worksheet = workbook?.getSheetBySheetId(subUnitId);
 
         if (!workbook || !worksheet) {
@@ -807,7 +807,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         }
 
         const worksheet = this._univerInstanceService
-            .getUniverSheetInstance(pasteTarget.unitId)
+            .getUnit<Workbook>(pasteTarget.unitId, UniverInstanceType.UNIVER_SHEET)
             ?.getSheetBySheetId(pasteTarget.subUnitId);
         if (!worksheet) {
             return false;
@@ -859,7 +859,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         }
 
         const { mapFunc } = virtualizeDiscreteRanges([range]);
-        const worksheet = this._univerInstanceService.getUniverSheetInstance(copyUnitId)?.getSheetBySheetId(copySubUnitId);
+        const worksheet = this._univerInstanceService.getUnit<Workbook>(copyUnitId, UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetId(copySubUnitId);
 
         const cellMatrix = new ObjectMatrix<ICellDataWithSpanInfo>();
         cachedMatrix.forValue((row, col, value) => {
@@ -893,7 +893,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         if (!pasteTarget) return false;
 
         const pasteToWorksheet = this._univerInstanceService
-            .getUniverSheetInstance(pasteTarget.unitId)
+            .getUnit<Workbook>(pasteTarget.unitId, UniverInstanceType.UNIVER_SHEET)
             ?.getSheetBySheetId(pasteTarget.subUnitId);
         if (!pasteToWorksheet) {
             return false;
@@ -1178,7 +1178,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         cellMatrix: ObjectMatrix<ICellDataWithSpanAndDisplay>,
         pasteType?: string
     ) {
-        const worksheet = this._univerInstanceService.getUniverSheetInstance(unitId)?.getSheetBySheetId(subUnitId);
+        const worksheet = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetId(subUnitId);
         if (!worksheet) {
             return null;
         }
@@ -1454,7 +1454,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         const pasteSelectionRangeColLen = discreteRange.cols.length;
 
         const worksheet = this._univerInstanceService
-            .getUniverSheetInstance(unitId)
+            .getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)
             ?.getSheetBySheetId(subUnitId);
         if (!worksheet) {
             return null;
@@ -1492,7 +1492,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
     private _expandOrShrinkRowsCols(unitId: string, subUnitId: string, range: IDiscreteRange, colCount: number, rowCount: number) {
         const { rows, cols } = range;
-        const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
+        const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
         const worksheet = workbook?.getSheetBySheetId(subUnitId);
         let newRows: number[];
         let newCols: number[];

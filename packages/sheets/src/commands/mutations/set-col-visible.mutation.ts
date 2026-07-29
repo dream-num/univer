@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IAccessor, IMutation, IRange } from '@univerjs/core';
-import { BooleanNumber, CommandType, IUniverInstanceService } from '@univerjs/core';
+import type { IAccessor, IMutation, IRange, Workbook } from '@univerjs/core';
+import { BooleanNumber, CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 
 export interface ISetColHiddenMutationParams {
     unitId: string;
@@ -25,7 +25,7 @@ export interface ISetColHiddenMutationParams {
 
 export const SetColHiddenUndoMutationFactory = (accessor: IAccessor, params: ISetColHiddenMutationParams) => {
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const universheet = univerInstanceService.getUniverSheetInstance(params.unitId);
+    const universheet = univerInstanceService.getUnit<Workbook>(params.unitId, UniverInstanceType.UNIVER_SHEET);
 
     if (universheet == null) {
         throw new Error('universheet is null error!');
@@ -43,7 +43,7 @@ export const SetColHiddenMutation: IMutation<ISetColHiddenMutationParams> = {
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const universheet = univerInstanceService.getUniverSheetInstance(params.unitId);
+        const universheet = univerInstanceService.getUnit<Workbook>(params.unitId, UniverInstanceType.UNIVER_SHEET);
 
         if (!universheet) {
             return false;
@@ -72,7 +72,7 @@ export interface ISetColVisibleMutationParams {
 
 export const SetColVisibleUndoMutationFactory = (accessor: IAccessor, params: ISetColVisibleMutationParams) => {
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const universheet = univerInstanceService.getUniverSheetInstance(params.unitId);
+    const universheet = univerInstanceService.getUnit<Workbook>(params.unitId, UniverInstanceType.UNIVER_SHEET);
 
     if (universheet == null) {
         throw new Error('universheet is null error!');
@@ -90,7 +90,7 @@ export const SetColVisibleMutation: IMutation<ISetColVisibleMutationParams> = {
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const universheet = univerInstanceService.getUniverSheetInstance(params.unitId);
+        const universheet = univerInstanceService.getUnit<Workbook>(params.unitId, UniverInstanceType.UNIVER_SHEET);
 
         if (!universheet) {
             return false;

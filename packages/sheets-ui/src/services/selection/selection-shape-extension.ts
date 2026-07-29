@@ -165,8 +165,7 @@ export class SelectionShapeExtension {
             ?.getCurrentParam()
             ?.skeleton
             .worksheet
-            .getSnapshot()
-            .freeze;
+            .getFreeze();
         return freeze;
     }
 

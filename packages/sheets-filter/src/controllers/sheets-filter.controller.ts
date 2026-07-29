@@ -54,6 +54,7 @@ import {
     moveMatrixArray,
     Optional,
     Rectangle,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { DataSyncPrimaryController } from '@univerjs/rpc';
 import {
@@ -178,7 +179,7 @@ export class SheetsFilterController extends Disposable {
 
         this.disposeWithMe(this._sheetsFilterService.loadedUnitId$.subscribe((unitId) => {
             if (unitId) {
-                const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
+                const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
                 const sheet = workbook?.getActiveSheet();
                 if (sheet) {
                     this._registerRefRange(unitId, sheet.getSheetId());
@@ -189,7 +190,7 @@ export class SheetsFilterController extends Disposable {
 
     private _registerRefRange(unitId: string, subUnitId: string): void {
         this._disposableCollection.dispose();
-        const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
+        const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
         const workSheet = workbook?.getSheetBySheetId(subUnitId);
         if (!workbook || !workSheet) return;
         const range = this._sheetsFilterService.getFilterModel(unitId, subUnitId)?.getRange();
@@ -478,7 +479,7 @@ export class SheetsFilterController extends Disposable {
                 undos.push({ id: SetSheetsFilterCriteriaMutation.id, params: setCriteriaMutationParams });
             });
         } else {
-            const worksheet = this._univerInstanceService.getUniverSheetInstance(unitId)?.getSheetBySheetId(subUnitId);
+            const worksheet = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetId(subUnitId);
             if (!worksheet) {
                 return this._handleNull();
             }

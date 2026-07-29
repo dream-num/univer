@@ -455,7 +455,7 @@ export class RangeProtectionRefRangeService extends Disposable {
 
             // 2. InsertRowsOrCols / RemoveRowsOrCols Mutations
             if (mutationIdByRowCol.includes(command.id)) {
-                const workbook = this._univerInstanceService.getUniverSheetInstance((command.params as IInsertColMutationParams).unitId);
+                const workbook = this._univerInstanceService.getUnit<Workbook>((command.params as IInsertColMutationParams).unitId, UniverInstanceType.UNIVER_SHEET);
                 if (!workbook) return;
                 const worksheet = workbook.getSheetBySheetId((command.params as IInsertColMutationParams).subUnitId);
                 if (!worksheet) return;

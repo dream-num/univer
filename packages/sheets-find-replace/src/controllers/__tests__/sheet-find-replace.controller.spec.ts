@@ -49,6 +49,7 @@ const baseQuery: IFindQuery = {
     findString: 'alpha',
     caseSensitive: false,
     matchesTheWholeCell: false,
+    matchesTheWholeWord: false,
     findDirection: FindDirection.ROW,
     findScope: FindScope.SUBUNIT,
     findBy: FindBy.VALUE,

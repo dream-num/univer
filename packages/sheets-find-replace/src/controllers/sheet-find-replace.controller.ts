@@ -37,6 +37,7 @@ import {
     rotate,
     ThemeService,
     Tools,
+    type UnitModel,
     UniverInstanceType,
     type Workbook,
     type Worksheet,
@@ -1004,6 +1005,15 @@ export class SheetFindModel extends FindModel {
  * It also adds the search results to the search view by highlighting them.
  */
 class SheetsFindReplaceProvider extends Disposable implements IFindReplaceProvider {
+    readonly capabilities = {
+        caseSensitive: true,
+        matchesTheWholeWord: false,
+        matchesTheWholeCell: true,
+        findDirection: true,
+        findScope: true,
+        findBy: true,
+    };
+
     /**
      * Hold all find results in this kind of univer business instances (Workbooks).
      */
@@ -1015,6 +1025,10 @@ class SheetsFindReplaceProvider extends Disposable implements IFindReplaceProvid
         @Inject(Injector) private readonly _injector: Injector
     ) {
         super();
+    }
+
+    isSupported(unit: UnitModel): boolean {
+        return unit.type === UniverInstanceType.UNIVER_SHEET;
     }
 
     async find(query: IFindQuery): Promise<SheetFindModel[]> {

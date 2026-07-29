@@ -46,7 +46,6 @@ import {
     hasSpace,
     hasThai,
     hasTibetan,
-    hasUnMergedCellInRow,
     injectStyle,
     inViewRanges,
     isArray,
@@ -234,10 +233,6 @@ describe('tools extra', () => {
             startX: 5,
             endX: 10,
         });
-
-        const mergeData = [{ startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 }];
-        expect(hasUnMergedCellInRow(0, 0, 2, mergeData as any)).toBe(true);
-        expect(hasUnMergedCellInRow(0, 0, 1, mergeData as any)).toBe(false);
 
         expect(mergeInfoOffset({
             startY: 1,

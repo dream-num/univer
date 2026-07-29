@@ -32,8 +32,8 @@ import { useDependency, useObservable } from '@univerjs/ui';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { map } from 'rxjs';
 import { SetScrollOperation } from '../../commands/operations/scroll.operation';
+import { getViewportByCell } from '../../common/utils';
 import { getSheetObject } from '../../controllers/utils/component-tools';
-import { ISheetSelectionRenderService } from '../../services/selection/base-selection-render.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { useActiveWorkbook } from '../hook';
 
@@ -89,16 +89,13 @@ export function AutoFillPopupMenu() {
     const selected = useObservable(autoFillService.applyType$, AUTO_FILL_APPLY_TYPE.SERIES);
     const [isHovered, setHovered] = useState(false);
     const workbook = useActiveWorkbook();
-    const { sheetSkeletonManagerService, selectionRenderService } = useMemo(() => {
+    const sheetSkeletonManagerService = useMemo(() => {
         if (workbook) {
             const ru = renderManagerService.getRenderUnitById(workbook.getUnitId());
-            return {
-                sheetSkeletonManagerService: ru?.with(SheetSkeletonManagerService),
-                selectionRenderService: ru?.with(ISheetSelectionRenderService),
-            };
+            return ru?.with(SheetSkeletonManagerService);
         }
 
-        return { sheetSkeletonManagerService: null, selectionRenderService: null };
+        return null;
     }, [workbook, renderManagerService]);
 
     const handleMouseEnter = () => {
@@ -147,11 +144,12 @@ export function AutoFillPopupMenu() {
     }
 
     const sheetObject = getSheetObject(univerInstanceService, renderManagerService);
-    if (!sheetObject || !selectionRenderService) return null;
+    if (!sheetObject || !workbook) return null;
 
     const { scene } = sheetObject;
     const skeleton = sheetSkeletonManagerService?.getCurrentSkeleton();
-    const viewport = selectionRenderService.getViewPort();
+    const viewport = getViewportByCell(anchor.row, anchor.col, scene, workbook.getActiveSheet());
+    if (!viewport) return null;
     const scaleX = scene?.scaleX;
     const scaleY = scene?.scaleY;
     const scrollXY = scene?.getViewportScrollXY(viewport);

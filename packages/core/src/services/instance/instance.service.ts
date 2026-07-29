@@ -113,15 +113,9 @@ export interface IUniverInstanceService {
 
     registerCtorForType<T extends UnitModel>(type: UniverInstanceType, ctor: new (...args: any[]) => T): IDisposable;
 
-    /** @deprecated */
-    changeDoc(unitId: string, doc: DocumentDataModel): void;
-
     getUnit<T extends UnitModel>(id: string, type?: UniverInstanceType): Nullable<T>;
     getAllUnitsForType<T>(type: UniverInstanceType): T[];
     getUnitType(unitId: string): UniverInstanceType;
-
-    /** @deprecated */
-    getUniverSheetInstance(unitId: string): Nullable<Workbook>;
 }
 
 export const IUniverInstanceService = createIdentifier<IUniverInstanceService>('univer.current');
@@ -257,24 +251,8 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         return this._unitCreateOptions.get(unitId) ?? null;
     }
 
-    getUniverSheetInstance(unitId: string): Nullable<Workbook> {
-        return this.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
-    }
-
     getAllUnitsForType<T>(type: UniverInstanceType): T[] {
         return (this._unitsByType.get(type) ?? []) as T[];
-    }
-
-    changeDoc(unitId: string, doc: DocumentDataModel): void {
-        const allDocs = this.getAllUnitsForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
-        const oldDoc = allDocs.find((doc) => doc.getUnitId() === unitId);
-
-        if (oldDoc != null) {
-            const index = allDocs.indexOf(oldDoc);
-            allDocs.splice(index, 1);
-        }
-
-        this.__addUnit(doc);
     }
 
     private readonly _focused$ = new BehaviorSubject<Nullable<string>>(null);

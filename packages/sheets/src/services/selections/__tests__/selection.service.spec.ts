@@ -67,20 +67,6 @@ describe('SheetsSelectionsService', () => {
         expect(service.getCurrentSelections()).toEqual([]);
     });
 
-    it('detects overlapping selections on the active sheet', () => {
-        const service = createService();
-
-        service.setSelections([{
-            range: { startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 },
-            primary: null,
-        }, {
-            range: { startRow: 1, endRow: 2, startColumn: 1, endColumn: 2 },
-            primary: null,
-        }] as never);
-
-        expect(service.isOverlapping()).toBe(true);
-    });
-
     it('adds explicit worksheet selections and clears all workbook selections', () => {
         const service = createService();
         const selection = {

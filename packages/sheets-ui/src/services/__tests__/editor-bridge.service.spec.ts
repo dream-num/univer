@@ -159,6 +159,7 @@ function createPositionedEditCellParam() {
         ...createEditCellParam(),
         scene: {
             getAncestorScale: () => ({ scaleX: 2, scaleY: 1.5 }),
+            getViewport: () => ({}),
             getViewportScrollXY: () => ({ x: 5, y: 10 }),
         },
         engine: {
@@ -279,6 +280,7 @@ describe('EditorBridgeService', () => {
         };
         const worksheet = {
             getSheetId: () => 'sheet-1',
+            getFreeze: () => null,
             getCellRaw: vi.fn(() => ({ v: '=SUM(A1:A2)' })),
             getCell: vi.fn(() => ({ isInArrayFormulaRange: true })),
             getCellDocumentModelWithFormula: vi.fn(() => ({ documentModel })),
@@ -297,9 +299,7 @@ describe('EditorBridgeService', () => {
             }),
         } as never);
         mocks.renderManagerService.getRenderUnitById.mockReturnValue({
-            with: () => ({
-                getViewPort: () => ({ viewportKey: 'main' }),
-            }),
+            with: vi.fn(),
         } as never);
 
         service.setEditCell(createPositionedEditCellParam());
@@ -334,6 +334,7 @@ describe('EditorBridgeService', () => {
         };
         const worksheet = {
             getSheetId: () => 'sheet-1',
+            getFreeze: () => null,
             getCellRaw: vi.fn(() => ({ v: 'Embedded' })),
             getCell: vi.fn(() => ({ v: 'Embedded' })),
             getCellDocumentModelWithFormula: vi.fn(() => ({ documentModel })),
@@ -359,9 +360,7 @@ describe('EditorBridgeService', () => {
             }),
         } as never);
         mocks.renderManagerService.getRenderUnitById.mockReturnValue({
-            with: () => ({
-                getViewPort: () => ({ viewportKey: 'embedded-main' }),
-            }),
+            with: vi.fn(),
         } as never);
 
         service.setEditCell(createPositionedEditCellParam());

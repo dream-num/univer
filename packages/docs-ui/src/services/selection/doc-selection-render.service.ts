@@ -50,7 +50,7 @@ import {
     serializeRectRange,
     serializeTextRange,
 } from './selection-utils';
-import { TextRange } from './text-range';
+import { cursorConvertToTextRange, TextRange } from './text-range';
 import { getWordBoundaryByIndex } from './word-boundary';
 
 export interface IEditorInputConfig {
@@ -236,14 +236,18 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         const document = mainComponent as Documents;
         const docSkeleton = this._docSkeletonManagerService.getSkeleton();
 
-        const generalAddRange = (startOffset: number, endOffset: number) => {
+        const generalAddRange = (
+            startOffset: number,
+            endOffset: number,
+            rangeStyle: ITextSelectionStyle
+        ) => {
             const rangeList = getRangeListFromCharIndex(
                 startOffset,
                 endOffset,
                 scene,
                 document,
                 docSkeleton,
-                style,
+                rangeStyle,
                 segmentId,
                 segmentPage
             );
@@ -263,15 +267,32 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
         for (const range of ranges) {
             const { startOffset, endOffset, rangeType, startNodePosition, endNodePosition } = range as ITextRangeWithStyle;
+            const rangeStyle = range.style ?? style;
 
-            if (rangeType === DOC_RANGE_TYPE.RECT) {
+            if (rangeType !== DOC_RANGE_TYPE.RECT && startOffset === endOffset) {
+                const textRange = cursorConvertToTextRange(
+                    scene,
+                    {
+                        ...range,
+                        segmentId,
+                        segmentPage,
+                        style: rangeStyle,
+                    },
+                    docSkeleton,
+                    document
+                );
+
+                if (textRange) {
+                    this._addTextRange(textRange);
+                }
+            } else if (rangeType === DOC_RANGE_TYPE.RECT) {
                 const rectRange = getRectRangeFromCharIndex(
                     startOffset,
                     endOffset,
                     scene,
                     document,
                     docSkeleton,
-                    style,
+                    rangeStyle,
                     segmentId,
                     segmentPage
                 );
@@ -291,7 +312,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
                             scene,
                             document,
                             docSkeleton,
-                            style,
+                            rangeStyle,
                             segmentId,
                             segmentPage,
                             startNodePosition.isBack,
@@ -304,7 +325,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
                             scene,
                             document,
                             docSkeleton,
-                            style,
+                            rangeStyle,
                             segmentId,
                             segmentPage
                         );
@@ -315,10 +336,10 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
                     }
                     // eslint-disable-next-line unused-imports/no-unused-vars
                 } catch (_e) {
-                    generalAddRange(startOffset, endOffset);
+                    generalAddRange(startOffset, endOffset, rangeStyle);
                 }
             } else {
-                generalAddRange(startOffset, endOffset);
+                generalAddRange(startOffset, endOffset, rangeStyle);
             }
         }
 
@@ -419,9 +440,6 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     }
 
     // FIXME: for editor cell editor we don't need to blur the input element
-    /**
-     * @deprecated
-     */
     deactivate() {
         this._container.style.left = '0px';
         this._container.style.top = '0px';
@@ -1189,7 +1207,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
                 return;
             }
 
-            const bounds = viewport.getBounding();
+            const bounds = viewport.calcViewportInfo();
 
             const activeRangeInstance = this._getActiveRangeInstance();
 

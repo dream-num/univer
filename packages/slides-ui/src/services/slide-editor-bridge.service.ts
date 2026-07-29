@@ -25,7 +25,6 @@ import type { KeyCode } from '@univerjs/ui';
 import { BehaviorSubject, type Observable, Subject } from 'rxjs';
 import {
     createIdentifier,
-    createSectionId,
     Disposable,
     DocumentDataModel,
     EDITOR_ACTIVATED,
@@ -92,12 +91,6 @@ export interface ISlideEditorBridgeService {
     currentEditRectState$: Observable<Nullable<IEditorBridgeServiceParam>>;
     visible$: Observable<IEditorBridgeServiceVisibleParam>;
 
-    /**
-     * @deprecated This is a temp solution only for demo purposes. We should have mutations to directly write
-     * content to slides.
-     */
-    endEditing$: Subject<RichText>;
-
     // interceptor: InterceptorManager<{
     //     BEFORE_CELL_EDIT: typeof BEFORE_CELL_EDIT;
     //     AFTER_CELL_EDIT: typeof AFTER_CELL_EDIT;
@@ -143,8 +136,6 @@ export class SlideEditorBridgeService extends Disposable implements ISlideEditor
 
     private readonly _afterVisible$ = new BehaviorSubject<IEditorBridgeServiceVisibleParam>(this._visibleParam);
     readonly afterVisible$ = this._afterVisible$.asObservable();
-
-    readonly endEditing$ = new Subject<RichText>();
 
     private _currentEditRectInfo: ISetEditorInfo;
 
@@ -222,8 +213,6 @@ export class SlideEditorBridgeService extends Disposable implements ISlideEditor
         const editorRectInfo = this._currentEditRectInfo;
         const unitId = editorRectInfo.unitId;
 
-        // let docData: IDocumentData = this.genDocData(editorRectInfo.startEditingText);
-
         const docData = editorRectInfo.richTextObj.documentData;
         docData.id = editorUnitId;
         docData.documentStyle = {
@@ -299,51 +288,5 @@ export class SlideEditorBridgeService extends Disposable implements ISlideEditor
 
     getCurrentEditorId() {
         return this._editorUnitId;
-    }
-
-    /**
-     * @deprecated
-     */
-    genDocData(target: RichText) {
-        const editorUnitId = this.getCurrentEditorId();
-        const content = target.text;
-        const fontSize = target.fs;
-        const docData: IDocumentData = {
-            id: editorUnitId,
-            body: {
-                dataStream: `${content}\r\n`,
-                textRuns: [{ st: 0, ed: content.length }],
-                paragraphs: [{
-                    paragraphStyle: {
-                        // no use
-                        // textStyle: { fs: 30 },
-                        // horizontalAlign: HorizontalAlign.CENTER,
-                        // verticalAlign: VerticalAlign.MIDDLE,
-                    } as IParagraphStyle,
-                    startIndex: content.length + 1,
-                }] as IParagraph[],
-                sectionBreaks: [{ sectionId: createSectionId(new Set()), startIndex: content.length + 2 }],
-            } as IDocumentBody,
-            documentStyle: {
-                marginBottom: 0,
-                marginLeft: 0,
-                marginRight: 0,
-                marginTop: 0,
-                pageSize: { width: Infinity, height: Infinity },
-                textStyle: { fs: fontSize },
-                renderConfig: {
-                    // horizontalAlign: HorizontalAlign.CENTER,
-                    verticalAlign: VerticalAlign.MIDDLE,
-                    centerAngle: 0,
-                    vertexAngle: 0,
-                    wrapStrategy: 0,
-                },
-            } as IDocumentStyle,
-            drawings: {},
-            drawingsOrder: [],
-            settings: { zoomRatio: 1 } as IDocumentSettings,
-        };
-
-        return docData;
     }
 }

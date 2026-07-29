@@ -17,9 +17,14 @@
 import type { Dependency, Workbook } from '@univerjs/core';
 import type { IUniverSheetsHyperLinkUIConfig } from './config/config';
 import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
+import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
+import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
+import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsHyperLinkPlugin } from '@univerjs/sheets-hyper-link';
+import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
+import { UniverUIPlugin } from '@univerjs/ui';
 import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_HYPER_LINK_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { SheetsHyperLinkAutoFillController } from './controllers/auto-fill.controller';
@@ -35,7 +40,16 @@ import { SheetsHyperLinkResolverService } from './services/resolver.service';
 import { SheetsHyperLinkSidePanelService } from './services/side-panel.service';
 import { SHEET_HYPER_LINK_UI_PLUGIN } from './types/const';
 
-@DependentOn(UniverSheetsHyperLinkPlugin, UniverDocsUIPlugin)
+@DependentOn(
+    UniverDocsPlugin,
+    UniverFormulaEnginePlugin,
+    UniverRenderEnginePlugin,
+    UniverSheetsPlugin,
+    UniverUIPlugin,
+    UniverDocsUIPlugin,
+    UniverSheetsHyperLinkPlugin,
+    UniverSheetsUIPlugin
+)
 export class UniverSheetsHyperLinkUIPlugin extends Plugin {
     static override pluginName: string = SHEET_HYPER_LINK_UI_PLUGIN;
     static override packageName = pkg.name;

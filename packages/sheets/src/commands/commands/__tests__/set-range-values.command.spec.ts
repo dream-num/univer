@@ -169,7 +169,7 @@ describe('Test set range values commands', () => {
 
         getValue = (sheetId?: string): Nullable<ICellData> =>
             get(IUniverInstanceService)
-                .getUniverSheetInstance('test')
+                .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                 ?.getSheetBySheetId(sheetId || 'sheet1')
                 ?.getRange(0, 0, 0, 0)
                 .getValue();
@@ -181,14 +181,14 @@ describe('Test set range values commands', () => {
             endColumn: number
         ): Nullable<Array<Array<Nullable<ICellData>>>> =>
             get(IUniverInstanceService)
-                .getUniverSheetInstance('test')
+                .getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)
                 ?.getSheetBySheetId('sheet1')
                 ?.getRange(startRow, startColumn, endRow, endColumn)
                 .getValues();
 
         getStyle = (): Nullable<IStyleData> => {
             const value = getValue();
-            const styles = get(IUniverInstanceService).getUniverSheetInstance('test')?.getStyles();
+            const styles = get(IUniverInstanceService).getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)?.getStyles();
             if (value && styles) {
                 return styles.getStyleByCell(value);
             }
@@ -196,7 +196,7 @@ describe('Test set range values commands', () => {
 
         getStyles = (startRow: number, startColumn: number, endRow: number, endColumn: number): Nullable<Nullable<IStyleData>[][]> => {
             const values = getValues(startRow, startColumn, endRow, endColumn);
-            const styles = get(IUniverInstanceService).getUniverSheetInstance('test')?.getStyles();
+            const styles = get(IUniverInstanceService).getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)?.getStyles();
 
             return values?.map((row, rowIndex) => {
                 return row?.map((cell, columnIndex) => {

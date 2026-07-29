@@ -17,8 +17,11 @@
 import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsTableUIConfig } from './config/config';
 import { DependentOn, ICommandService, IConfigService, Inject, Injector, merge, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
+import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsTablePlugin } from '@univerjs/sheets-table';
+import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
+import { UniverUIPlugin } from '@univerjs/ui';
 import pkg from '../package.json';
 import { OpenTableFilterPanelOperation } from './commands/operations/open-table-filter-dialog.opration';
 import { OpenTableSelectorOperation } from './commands/operations/open-table-selector.operation';
@@ -34,7 +37,13 @@ import { SheetTableThemeUIController } from './controllers/sheet-table-theme-ui.
 import { SheetTableMenuController } from './menu/sheet-table-menu.controller';
 import { SheetsTableUiService } from './services/sheets-table-ui.service';
 
-@DependentOn(UniverSheetsTablePlugin)
+@DependentOn(
+    UniverRenderEnginePlugin,
+    UniverSheetsPlugin,
+    UniverUIPlugin,
+    UniverSheetsTablePlugin,
+    UniverSheetsUIPlugin
+)
 export class UniverSheetsTableUIPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
     static override packageName = pkg.name;

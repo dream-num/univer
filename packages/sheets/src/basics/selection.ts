@@ -15,7 +15,6 @@
  */
 
 import {
-    getCellInfoInMergeData,
     type ICellWithCoord,
     type IRange,
     type IRangeWithCoord,
@@ -210,33 +209,5 @@ export function convertPrimaryWithCoordToPrimary(primaryWithCoord: ICellWithCoor
         startColumn,
         endRow,
         endColumn,
-    };
-}
-
-/**
- * @deprecated Use worksheet.getCellInfoInMergeData or SpreadsheetSkeleton.getCellByIndex instead
- * Convert the coordinates of a single cell into a selection data.
- * @param row Specified Row Coordinate
- * @param column Specified Column Coordinate
- * @param mergeData  Obtain the data of merged cells through the worksheet object.
- * @returns ISelectionWithStyle
- */
-export function transformCellDataToSelectionData(
-    row: number,
-    column: number,
-    mergeData: IRange[]
-): Nullable<ISelectionWithStyle> {
-    const newCellRange = getCellInfoInMergeData(row, column, mergeData);
-
-    const newSelectionData = makeCellRangeToRangeData(newCellRange);
-
-    if (!newSelectionData) {
-        return;
-    }
-
-    return {
-        range: newSelectionData,
-        primary: newCellRange,
-        style: null,
     };
 }

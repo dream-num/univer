@@ -735,38 +735,6 @@ export class SelectionControl extends Disposable {
     }
 
     /**
-     * Update selection model with new range & primary cell(aka: highlight/current), also update row/col selection size & style.
-     *
-     * @deprecated  use `updateRangeBySelectionWithCoord` and `updateStyle` to do same thing.
-     *
-     * @param newSelectionRange
-     * @param rowHeaderWidth
-     * @param columnHeaderHeight
-     * @param style
-     * @param primaryCell primary cell
-     */
-    update(
-        newSelectionRange: IRangeWithCoord,
-        rowHeaderWidth: number = 0,
-        columnHeaderHeight: number = 0,
-        style?: Nullable<ISelectionStyle>,
-        primaryCell?: Nullable<ICellWithCoord>
-    ): void {
-        this._rowHeaderWidth = rowHeaderWidth;
-        this._columnHeaderHeight = columnHeaderHeight;
-        this._rowHeaderOffsetX = 0;
-        this._columnHeaderOffsetY = 0;
-        this.updateRangeBySelectionWithCoord({
-            rangeWithCoord: newSelectionRange,
-            primaryWithCoord: primaryCell,
-            style,
-        });
-        if (style) {
-            this.updateStyle(style);
-        }
-    }
-
-    /**
      * Update primary range.
      * highlight cell would update if primary cell has value.
      * highlight cell would be cleared if primary cell is null.

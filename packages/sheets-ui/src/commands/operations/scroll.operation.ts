@@ -34,11 +34,6 @@ export const SetScrollOperation: IOperation<IScrollStateWithSearchParam> = {
         const { unitId, sheetId, offsetX = 0, offsetY = 0, sheetViewStartColumn, sheetViewStartRow, duration, screenRatioX, screenRatioY } = params;
         const renderManagerService = accessor.get(IRenderManagerService);
         const scrollManagerService = renderManagerService.getRenderUnitById(unitId)!.with(SheetScrollManagerService);
-        // const currentService = accessor.get(IUniverInstanceService);
-        // const workbook = currentService.getUniverSheetInstance(unitId);
-        // const worksheet = workbook!.getSheetBySheetId(sheetId);
-        // const { xSplit, ySplit } = worksheet!.getConfig().freeze;
-
         const renderUnit = renderManagerService.getRenderUnitById(unitId);
 
         if (!renderUnit) {

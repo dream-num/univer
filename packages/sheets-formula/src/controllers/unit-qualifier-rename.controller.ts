@@ -38,7 +38,7 @@ export function collectUnitQualifierFormulaPatches(
             const formula = refactorFormulaUnitQualifier(cell.f, oldName, newName);
             if (formula !== cell.f) updates.setValue(row, column, { f: formula });
         });
-        const cellValue = updates.getData();
+        const cellValue = updates.clone();
         return Object.keys(cellValue).length > 0
             ? [{ unitId, subUnitId: sheet.getSheetId(), cellValue }]
             : [];
@@ -88,7 +88,7 @@ export class UnitQualifierRenameController extends Disposable {
                 redos.push({ id: SetRangeValuesMutation.id, params: patch });
                 undos.unshift({
                     id: SetRangeValuesMutation.id,
-                    params: { ...patch, cellValue: undoCellValue.getData() },
+                    params: { ...patch, cellValue: undoCellValue.clone() },
                 });
             }
             const definedNames = this._definedNamesService.getDefinedNameMap(workbook.getUnitId());

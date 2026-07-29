@@ -31,7 +31,7 @@ import {
 } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
-import { Engine, IRenderingEngine, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
+import { Engine, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import {
     SheetInterceptorService,
     SheetSkeletonService,
@@ -123,7 +123,6 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
             const injector = this._injector;
             injector.add([SheetInterceptorService]);
             injector.add([SheetSkeletonService]);
-            injector.add([IRenderingEngine, { useFactory: () => new Engine() }]);
             injector.add([IRenderManagerService, { useClass: RenderManagerServiceTestBed }]);
             injector.add([LexerTreeBuilder]);
 

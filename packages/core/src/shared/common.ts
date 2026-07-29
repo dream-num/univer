@@ -91,12 +91,6 @@ export function convertCellToRange(cellInfo: ICellWithCoord): IRangeWithCoord {
     };
 }
 
-/**
- * @deprecated use `convertCellToRange` instead
- */
-const makeCellToSelection = convertCellToRange;
-export { makeCellToSelection };
-
 export function makeCellRangeToRangeData(cellInfo: Nullable<ISelectionCell>): Nullable<IRange> {
     if (!cellInfo) {
         return;

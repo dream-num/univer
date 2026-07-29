@@ -106,9 +106,9 @@ const locale: typeof enUS = {
                 lastWeek: 'Tuần trước',
                 nextWeek: 'Tuần sau',
                 today: 'Hôm nay',
-                topN: 'Top {0}',
+                topN: 'Trên cùng {0}',
                 bottomN: 'Cuối {0}',
-                topNPercent: 'Top {0}%',
+                topNPercent: 'Trên cùng {0}%',
                 bottomNPercent: 'Cuối {0}%',
             },
         },
@@ -170,7 +170,7 @@ const locale: typeof enUS = {
         errorMessage: {
             notBlank: 'Điều kiện không được để trống',
             formulaError: 'Lỗi công thức',
-            rangeError: 'Bad selection',
+            rangeError: 'Lựa chọn không hợp lệ',
         },
         permission: {
             dialog: {

@@ -30,13 +30,13 @@ const locale: typeof enUS = {
         },
         Confirm: {
             cancel: 'zrušiť',
-            confirm: 'ok',
+            confirm: 'OK',
         },
         CascaderList: {
             empty: 'Žiadne',
         },
         Calendar: {
-            year: '',
+            year: 'Rok',
             weekDays: ['Ne', 'Po', 'Ut', 'St', 'Št', 'Pi', 'So'],
             months: [
                 'Jan',
@@ -65,7 +65,7 @@ const locale: typeof enUS = {
         ColorPicker: {
             more: 'Viac farieb',
             cancel: 'zrušiť',
-            confirm: 'ok',
+            confirm: 'OK',
         },
         GradientColorPicker: {
             linear: 'Lineárny',

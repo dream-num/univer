@@ -173,7 +173,6 @@ function setup(workbookData: IWorkbookData = BASE_WORKBOOK_DATA) {
 
 class TestRenderManagerService extends Disposable implements Partial<IRenderManagerService> {
     private _render: IRender | null = null;
-    readonly createRender$ = new Subject<string>();
     readonly created$ = new Subject<IRender>();
     readonly disposed$ = new Subject<string>();
 

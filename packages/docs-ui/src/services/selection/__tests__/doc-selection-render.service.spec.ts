@@ -28,12 +28,14 @@ import { DocSelectionRenderService } from '../doc-selection-render.service';
 import { TextRange } from '../text-range';
 
 const {
+    cursorConvertToTextRangeMock,
     getCanvasOffsetByEngineMock,
     getRangeListFromCharIndexMock,
     getRangeListFromSelectionMock,
     getRectRangeFromCharIndexMock,
     getTextRangeFromCharIndexMock,
 } = vi.hoisted(() => ({
+    cursorConvertToTextRangeMock: vi.fn(),
     getCanvasOffsetByEngineMock: vi.fn(),
     getRangeListFromCharIndexMock: vi.fn(),
     getRangeListFromSelectionMock: vi.fn(),
@@ -51,6 +53,15 @@ vi.mock('../selection-utils', async () => {
         getRangeListFromSelection: getRangeListFromSelectionMock,
         getRectRangeFromCharIndex: getRectRangeFromCharIndexMock,
         getTextRangeFromCharIndex: getTextRangeFromCharIndexMock,
+    };
+});
+
+vi.mock('../text-range', async () => {
+    const actual = await vi.importActual<typeof import('../text-range')>('../text-range');
+
+    return {
+        ...actual,
+        cursorConvertToTextRange: cursorConvertToTextRangeMock,
     };
 });
 
@@ -326,6 +337,7 @@ describe('doc selection render service internals', () => {
         getRangeListFromSelectionMock.mockReturnValue(null);
         getRectRangeFromCharIndexMock.mockReturnValue(null);
         getTextRangeFromCharIndexMock.mockReturnValue(null);
+        cursorConvertToTextRangeMock.mockReturnValue(null);
         vi.spyOn(TextRange.prototype as unknown as Record<'_anchorBlink', () => void>, '_anchorBlink').mockImplementation(() => {});
         vi.spyOn(TextRange.prototype, 'refresh').mockImplementation(() => {});
     });
@@ -563,6 +575,77 @@ describe('doc selection render service internals', () => {
         expect(updateInputPositionSpy).not.toHaveBeenCalled();
         expect(service._rangeList).toEqual([textRange, fallbackTextRange, generalTextRange]);
         expect(service._rectRangeList).toEqual([rectRange, fallbackRectRange, generalRectRange]);
+    });
+
+    it('uses a range-specific selection style when one is supplied', () => {
+        const { mainComponent, scene, service, skeleton } = createService();
+        const customStyle = {
+            fill: 'rgba(0, 0, 0, 0)',
+            stroke: 'rgba(0, 0, 0, 0)',
+            strokeActive: 'rgba(0, 0, 0, 0)',
+            strokeWidth: 0,
+        };
+        getRangeListFromCharIndexMock.mockReturnValueOnce({
+            textRanges: [createTextRange()],
+            rectRanges: [],
+        });
+
+        service.addDocRanges([{
+            startOffset: 10,
+            endOffset: 11,
+            style: customStyle,
+        }], false, {
+            shouldFocus: false,
+        });
+
+        expect(getRangeListFromCharIndexMock).toHaveBeenCalledWith(
+            10,
+            11,
+            scene,
+            mainComponent,
+            skeleton,
+            customStyle,
+            'segment-1',
+            2
+        );
+    });
+
+    it('reconstructs a collapsed document range as a cursor instead of an expanded whole-entity selection', () => {
+        const { mainComponent, scene, service, skeleton } = createService();
+        const cursorRange = createTextRange({ collapsed: true, focusNodePosition: null });
+        const customStyle = {
+            fill: 'rgba(0, 0, 0, 0)',
+            stroke: 'rgba(0, 0, 0, 0)',
+            strokeActive: 'rgba(0, 0, 0, 0)',
+            strokeWidth: 0,
+        };
+        cursorConvertToTextRangeMock.mockReturnValueOnce(cursorRange);
+
+        service.addDocRanges([{
+            startOffset: 35,
+            endOffset: 35,
+            collapsed: true,
+            style: customStyle,
+        }], true, {
+            shouldFocus: false,
+        });
+
+        expect(cursorConvertToTextRangeMock).toHaveBeenCalledWith(
+            scene,
+            {
+                startOffset: 35,
+                endOffset: 35,
+                collapsed: true,
+                segmentId: 'segment-1',
+                segmentPage: 2,
+                style: customStyle,
+            },
+            skeleton,
+            mainComponent
+        );
+        expect(getTextRangeFromCharIndexMock).not.toHaveBeenCalled();
+        expect(getRangeListFromCharIndexMock).not.toHaveBeenCalled();
+        expect(service._rangeList).toEqual([cursorRange]);
     });
 
     it('sets the cursor manually from the resolved paragraph node and emits selection state', () => {
@@ -1340,7 +1423,7 @@ describe('DocSelectionRenderService', () => {
             onScrollAfter$: scrollAfter$,
             onScrollEnd$: scrollEnd$,
             getAbsoluteVector: () => ({ x: 4, y: 8 }),
-            getBounding: () => ({
+            calcViewportInfo: () => ({
                 viewBound: {
                     left: 0,
                     top: 0,

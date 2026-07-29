@@ -16,7 +16,7 @@
 
 import type { IContextService } from '@univerjs/core';
 import type { IShortcutItem } from '@univerjs/ui';
-import { EDITOR_ACTIVATED, FOCUSING_SHEET } from '@univerjs/core';
+import { EDITOR_ACTIVATED } from '@univerjs/core';
 import { KeyCode, MetaKeys } from '@univerjs/ui';
 import {
     FocusSelectionOperation,
@@ -26,6 +26,7 @@ import {
     OpenReplaceDialogOperation,
 } from '../commands/operations/find-replace.operation';
 import {
+    FIND_REPLACE_AVAILABLE,
     FIND_REPLACE_DIALOG_FOCUS,
     FIND_REPLACE_INPUT_FOCUS,
     FIND_REPLACE_REPLACE_REVEALED,
@@ -45,9 +46,8 @@ function whenFindReplaceInputFocused(contextService: IContextService): boolean {
 
 const FIND_REPLACE_SHORTCUT_GROUP = '7_find-replace-shortcuts';
 
-// Current we only support find replace on sheet.
-function whenSheetFocused(contextService: IContextService) {
-    return contextService.getContextValue(FOCUSING_SHEET);
+function whenFindReplaceAvailable(contextService: IContextService): boolean {
+    return contextService.getContextValue(FIND_REPLACE_AVAILABLE);
 }
 
 function whenEditorNotActivated(contextService: IContextService): boolean {
@@ -61,7 +61,7 @@ export const OpenFindDialogShortcutItem: IShortcutItem = {
     group: FIND_REPLACE_SHORTCUT_GROUP,
     groupTitle: 'find-replace.shortcut.panel',
     preconditions(contextService) {
-        return !whenFindReplaceDialogFocused(contextService) && whenSheetFocused(contextService) && whenEditorNotActivated(contextService);
+        return !whenFindReplaceDialogFocused(contextService) && whenFindReplaceAvailable(contextService) && whenEditorNotActivated(contextService);
     },
 };
 
@@ -71,7 +71,7 @@ export const MacOpenFindDialogShortcutItem: IShortcutItem = {
     binding: KeyCode.F | MetaKeys.CTRL_COMMAND,
     mac: KeyCode.F | MetaKeys.MAC_CTRL,
     preconditions(contextService) {
-        return !whenFindReplaceDialogFocused(contextService) && whenSheetFocused(contextService) && whenEditorNotActivated(contextService);
+        return !whenFindReplaceDialogFocused(contextService) && whenFindReplaceAvailable(contextService) && whenEditorNotActivated(contextService);
     },
 };
 
@@ -83,7 +83,7 @@ export const OpenReplaceDialogShortcutItem: IShortcutItem = {
     group: FIND_REPLACE_SHORTCUT_GROUP,
     groupTitle: 'find-replace.shortcut.panel',
     preconditions(contextService) {
-        return whenSheetFocused(contextService) && whenEditorNotActivated(contextService) && (!whenFindReplaceDialogFocused(contextService) || !whenReplaceRevealed(contextService));
+        return whenFindReplaceAvailable(contextService) && whenEditorNotActivated(contextService) && (!whenFindReplaceDialogFocused(contextService) || !whenReplaceRevealed(contextService));
     },
 };
 

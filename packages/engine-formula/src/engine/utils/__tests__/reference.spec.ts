@@ -360,34 +360,29 @@ describe('Test Reference', () => {
             refBody: 'A1:A2',
             sheetName: '',
             unitQualifier: '',
-            unitId: '',
         });
 
         expect(handleRefStringInfo('sheet1!A1')).toStrictEqual({
             refBody: 'A1',
             sheetName: 'sheet1',
             unitQualifier: '',
-            unitId: '',
         });
 
         expect(handleRefStringInfo('[Book1]Sheet1!A1')).toStrictEqual({
             refBody: 'A1',
             sheetName: 'Sheet1',
             unitQualifier: 'Book1',
-            unitId: 'Book1',
         });
         expect(handleRefStringInfo("'[Book1]Sheet1'!R2C3")).toStrictEqual({
             refBody: 'R2C3',
             sheetName: 'Sheet1',
             unitQualifier: 'Book1',
-            unitId: 'Book1',
         });
 
         expect(handleRefStringInfo("'sheet-1'!A1")).toStrictEqual({
             refBody: 'A1',
             sheetName: 'sheet-1',
             unitQualifier: '',
-            unitId: '',
         });
 
         // with single quote
@@ -395,7 +390,6 @@ describe('Test Reference', () => {
             refBody: 'A1',
             sheetName: "sheet'1",
             unitQualifier: '',
-            unitId: '',
         });
 
         // with double quote
@@ -403,14 +397,12 @@ describe('Test Reference', () => {
             refBody: 'A1',
             sheetName: "sheet''1",
             unitQualifier: '',
-            unitId: '',
         });
 
         expect(handleRefStringInfo("'[Book-1.xlsx]Sheet1'!$A$4")).toStrictEqual({
             refBody: '$A$4',
             sheetName: 'Sheet1',
             unitQualifier: 'Book-1.xlsx',
-            unitId: 'Book-1.xlsx',
         });
 
         // with single quote
@@ -418,7 +410,6 @@ describe('Test Reference', () => {
             refBody: '$A$4',
             sheetName: 'Sheet1',
             unitQualifier: "Book'1.xlsx",
-            unitId: "Book'1.xlsx",
         });
 
         // with double quote
@@ -426,14 +417,12 @@ describe('Test Reference', () => {
             refBody: '$A$4',
             sheetName: 'Sheet1',
             unitQualifier: "Book''1.xlsx",
-            unitId: "Book''1.xlsx",
         });
 
         expect(handleRefStringInfo("'[Book-1.xlsx]sheet-1'!$A$4")).toStrictEqual({
             refBody: '$A$4',
             sheetName: 'sheet-1',
             unitQualifier: 'Book-1.xlsx',
-            unitId: 'Book-1.xlsx',
         });
     });
 

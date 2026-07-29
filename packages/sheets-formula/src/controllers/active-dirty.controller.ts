@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICommandInfo, IObjectMatrixPrimitiveType, IRange, IUnitRange, Nullable } from '@univerjs/core';
-import type { IDirtyUnitDefinedNameMap, IDirtyUnitSheetNameMap, IFormulaDirtyData, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
+import type { ICellData, ICommandInfo, IObjectMatrixPrimitiveType, IRange, IUnitRange, Nullable, Workbook } from '@univerjs/core';
+import type { IDirtyUnitDefinedNameMap, IDirtyUnitSheetNameMap, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import type {
     IInsertColMutationParams,
     IInsertRowMutationParams,
@@ -36,8 +36,9 @@ import {
     Inject,
     IUniverInstanceService,
     ObjectMatrix,
+    UniverInstanceType,
 } from '@univerjs/core';
-import { FormulaDataModel, IActiveDirtyManagerService, RemoveDefinedNameMutation, SetDefinedNameMutation, SetTriggerFormulaCalculationStartMutation } from '@univerjs/engine-formula';
+import { FormulaDataModel, IActiveDirtyManagerService, RemoveDefinedNameMutation, SetDefinedNameMutation } from '@univerjs/engine-formula';
 import {
     ClearSelectionFormatCommand,
     InsertColMutation,
@@ -256,16 +257,6 @@ export class ActiveDirtyController extends Disposable {
     }
 
     private _initialSheet() {
-        this._activeDirtyManagerService.register(SetTriggerFormulaCalculationStartMutation.id, {
-            commandId: SetTriggerFormulaCalculationStartMutation.id,
-            getDirtyData: (command: ICommandInfo) => {
-                const params = command.params as IFormulaDirtyData;
-                return {
-                    ...params,
-                };
-            },
-        });
-
         this._activeDirtyManagerService.register(RemoveSheetMutation.id, {
             commandId: RemoveSheetMutation.id,
             getDirtyData: (command: ICommandInfo) => {
@@ -359,9 +350,9 @@ export class ActiveDirtyController extends Disposable {
 
         const dirtyRanges: IUnitRange[] = [];
 
-        const sourceMatrix = this._rangeToMatrix(sourceRange).getData();
+        const sourceMatrix = this._rangeToMatrix(sourceRange).clone();
 
-        const targetMatrix = this._rangeToMatrix(targetRange).getData();
+        const targetMatrix = this._rangeToMatrix(targetRange).clone();
 
         dirtyRanges.push(...this._getDirtyRangesByCellValue(unitId, sheetId, sourceMatrix));
 
@@ -374,7 +365,7 @@ export class ActiveDirtyController extends Disposable {
 
     private _getReorderRangeMutationDirtyRange(params: IReorderRangeMutationParams) {
         const { unitId, subUnitId: sheetId, range } = params;
-        const matrix = this._rangeToMatrix(range).getData();
+        const matrix = this._rangeToMatrix(range).clone();
         const dirtyRanges: IUnitRange[] = [];
         dirtyRanges.push(...this._getDirtyRangesByCellValue(unitId, sheetId, matrix));
         dirtyRanges.push(...this._getDirtyRangesForArrayFormula(unitId, sheetId, matrix));
@@ -386,7 +377,7 @@ export class ActiveDirtyController extends Disposable {
 
         const dirtyRanges: IUnitRange[] = [];
 
-        const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
+        const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
 
         const worksheet = workbook?.getSheetBySheetId(sheetId);
 
@@ -413,7 +404,7 @@ export class ActiveDirtyController extends Disposable {
             });
         }
 
-        const matrixData = matrix.getData();
+        const matrixData = matrix.clone();
 
         dirtyRanges.push(...this._getDirtyRangesByCellValue(unitId, sheetId, matrixData));
 

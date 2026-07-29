@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Dependency, IOperation, IWorkbookData, Workbook } from '@univerjs/core';
+import type { IOperation, IWorkbookData, Workbook } from '@univerjs/core';
 import type { IInsertColMutationParams } from '@univerjs/sheets';
 import type { IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';
 import type { IOpenFilterPanelOperationParams } from '../../commands/operations/sheets-filter.operation';
@@ -32,21 +32,7 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-import {
-    ActiveDirtyManagerService,
-    IActiveDirtyManagerService,
-    ISheetRowFilteredService,
-    SheetRowFilteredService,
-} from '@univerjs/engine-formula';
-import {
-    InsertColMutation,
-    MarkDirtyFilterChangeMutation,
-    RefRangeService,
-    SheetInterceptorService,
-    SheetRangeThemeModel,
-    SheetsSelectionsService,
-    ZebraCrossingCacheController,
-} from '@univerjs/sheets';
+import { InsertColMutation } from '@univerjs/sheets';
 import { CustomFilterOperator, FilterBy, SheetsFilterService, UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import { afterEach, beforeEach, describe, expect, it, vitest } from 'vitest';
 import {
@@ -130,16 +116,7 @@ function createSheetsFilterPanelServiceTestBed(workbookData: IWorkbookData) {
         }
 
         override onStarting(): void {
-            ([
-                [RefRangeService],
-                [SheetsSelectionsService],
-                [SheetInterceptorService],
-                [ISheetsFilterPanelService, { useClass: SheetsFilterPanelService }],
-                [SheetRangeThemeModel],
-                [ZebraCrossingCacheController],
-                [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
-                [ISheetRowFilteredService, { useClass: SheetRowFilteredService }],
-            ] as Dependency[]).forEach((d) => this._injector.add(d));
+            this._injector.add([ISheetsFilterPanelService, { useClass: SheetsFilterPanelService }]);
         }
     }
 
@@ -156,8 +133,6 @@ function createSheetsFilterPanelServiceTestBed(workbookData: IWorkbookData) {
         OpenFilterPanelOperation,
         CloseFilterPanelOperation,
         SetCellEditVisibleOperation,
-        MarkDirtyFilterChangeMutation,
-        InsertColMutation,
     ].forEach((command) => commandService.registerCommand(command));
 
     return { univer, get };

@@ -86,7 +86,7 @@ import {
     UnionNodeFactory,
     ValueNodeFactory,
 } from '@univerjs/engine-formula';
-import { Engine, IRenderingEngine, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
+import { Engine, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { InsertColMutation, InsertRowMutation, MoveRangeCommand, MoveRangeMutation, RangeProtectionRuleModel, RefRangeService, RemoveColByRangeCommand, RemoveColCommand, RemoveColMutation, RemoveRowByRangeCommand, RemoveRowCommand, RemoveRowMutation, SetRangeValuesCommand, SetRangeValuesMutation, SheetInterceptorService, SheetSkeletonService, SheetsSelectionsService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { UpdateFormulaController } from '@univerjs/sheets-formula';
 import enUS from '@univerjs/sheets/locale/en-US';
@@ -136,7 +136,6 @@ function createFacadeTestBed(workbookData: IWorkbookData, dependencies: Dependen
             injector.add([SheetsSelectionsService]);
             injector.add([SheetInterceptorService]);
             injector.add([IFunctionService, { useClass: FunctionService }]);
-            injector.add([IRenderingEngine, { useFactory: () => new Engine() }]);
             injector.add([IRenderManagerService, { useClass: RenderManagerServiceTestBed }]);
             injector.add([SheetSkeletonService]);
             injector.add([FormulaDataModel]);

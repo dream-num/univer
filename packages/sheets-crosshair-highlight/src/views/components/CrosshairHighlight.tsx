@@ -48,7 +48,7 @@ export function CrosshairOverlay(props: ICrosshairOverlayProps) {
     }, [onChange]);
 
     return (
-        <div className="univer-grid univer-grid-cols-8 univer-gap-x-2 univer-gap-y-3">
+        <div className="univer-grid univer-grid-cols-8 univer-gap-x-2 univer-gap-y-3 univer-p-1.5">
             {colors.map((color: string, index: number) => {
                 return (
                     <div

@@ -189,6 +189,53 @@ describe('Test dependency', () => {
             expect(tree2.refOffsetY).toEqual(2);
         });
 
+        it('limits other formulas without sheet dimensions to one result slot', async () => {
+            const formulaId = 'formula.shape-unit_shape_shape_shape-1_test';
+            formulaCurrentConfigService.load({
+                formulaData: {},
+                arrayFormulaCellData: {},
+                arrayFormulaRange: {},
+                forceCalculate: false,
+                dirtyRanges: [],
+                dirtyNameMap: {},
+                dirtyDefinedNameMap: {},
+                dirtyUnitFeatureMap: {},
+                dirtyUnitOtherFormulaMap: {
+                    'shape-unit': {
+                        shape: {
+                            [formulaId]: true,
+                        },
+                    },
+                },
+                excludedCell: {},
+                allUnitData: {
+                    [testUnitId]: testSheetData,
+                },
+            });
+
+            otherFormulaManagerService.batchRegister({
+                'shape-unit': {
+                    shape: {
+                        [formulaId]: {
+                            f: '=1',
+                            ranges: [{
+                                startRow: 0,
+                                endRow: 2,
+                                startColumn: 0,
+                                endColumn: 2,
+                            }],
+                        },
+                    },
+                },
+            });
+
+            const treeList = await formulaDependencyGenerator.generate();
+            const shapeTrees = treeList.filter((tree) => tree.formulaId === formulaId);
+
+            expect(shapeTrees).toHaveLength(1);
+            expect(shapeTrees[0]).toBeInstanceOf(FormulaDependencyTree);
+        });
+
         it('should generate virtual dependency trees for shared formulas with offsets', async () => {
             formulaCurrentConfigService.load({
                 formulaData: {

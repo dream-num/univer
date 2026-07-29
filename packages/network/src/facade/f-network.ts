@@ -98,6 +98,6 @@ export class FNetwork extends FBase {
         url: string,
         params?: IPostRequestParams
     ): Observable<HTTPEvent<T>> {
-        return this._httpService.getSSE(method, url, params);
+        return this._httpService.stream(method, url, params);
     }
 }

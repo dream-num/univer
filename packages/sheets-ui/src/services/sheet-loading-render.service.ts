@@ -108,7 +108,16 @@ export class SheetLoadingRenderService extends Disposable implements ISheetLoadi
 
         let shouldRender = false;
         if (!loadingRender.render) {
-            loadingRender.render = this._createLoadingRender(loadingRender.workbook, loadingRender.sourceUnitId);
+            const contentElement = this._layoutService.getContentElement();
+            if (!contentElement) {
+                return;
+            }
+
+            loadingRender.render = this._createLoadingRender(
+                loadingRender.workbook,
+                loadingRender.sourceUnitId,
+                contentElement
+            );
             shouldRender = true;
         }
 
@@ -166,6 +175,11 @@ export class SheetLoadingRenderService extends Disposable implements ISheetLoadi
             return true;
         }
 
+        if (!this._loadingRender.render) {
+            this.hide(sourceUnitId);
+            return true;
+        }
+
         this._finalCanvasGuard?.unsubscribe();
         this._finalCanvasGuard = null;
 
@@ -217,9 +231,12 @@ export class SheetLoadingRenderService extends Disposable implements ISheetLoadi
         return workbook;
     }
 
-    private _createLoadingRender(workbook: Workbook, sourceUnitId: string): RenderUnit {
+    private _createLoadingRender(
+        workbook: Workbook,
+        sourceUnitId: string,
+        contentElement: HTMLElement
+    ): RenderUnit {
         const previewUnitId = workbook.getUnitId();
-        const contentElement = this._layoutService.getContentElement();
         const { width, height } = contentElement.getBoundingClientRect();
         const engine = this._injector.createInstance(Engine, previewUnitId, undefined);
         const scene = new Scene(`${PREVIEW_SCENE_PREFIX}${previewUnitId}`, engine, {
@@ -257,11 +274,12 @@ export class SheetLoadingRenderService extends Disposable implements ISheetLoadi
     private _waitForFinalCanvas(render: IRender): Observable<void> {
         return new Observable((subscriber) => {
             let frameId: number | undefined;
-            const contentElement = this._layoutService.getContentElement();
             const canvasElement = render.engine.getCanvasElement();
 
             const checkMounted = () => {
+                const contentElement = this._layoutService.getContentElement();
                 if (
+                    contentElement &&
                     canvasElement.parentElement === contentElement &&
                     canvasElement.width > 0 &&
                     canvasElement.height > 0

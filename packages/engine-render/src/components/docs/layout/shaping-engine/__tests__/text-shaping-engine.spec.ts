@@ -57,7 +57,9 @@ const h = vi.hoisted(() => {
 });
 
 vi.mock('opentype.js', () => ({
-    parse: h.parse,
+    default: {
+        parse: h.parse,
+    },
 }));
 
 vi.mock('../font-library', () => ({

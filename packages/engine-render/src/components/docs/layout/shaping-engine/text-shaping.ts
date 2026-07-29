@@ -15,9 +15,8 @@
  */
 
 import type { IDocumentBody, IStyleBase, Nullable } from '@univerjs/core';
-import type Opentype from 'opentype.js';
 import { BooleanNumber } from '@univerjs/core';
-import { parse } from 'opentype.js';
+import Opentype from 'opentype.js';
 import { DEFAULT_FONTFACE_PLANE } from '../../../../basics/const';
 import { getFirstGrapheme, isEmojiGrapheme } from '../../../../basics/tools';
 import { fontLibrary } from './font-library';
@@ -126,7 +125,7 @@ function shapeChunk(
 
     let font = fontCache.get(fontInfo.fullName);
     if (!font) {
-        font = parse(fontBuffer) as Opentype.Font;
+        font = Opentype.parse(fontBuffer) as Opentype.Font;
         fontCache.set(fontInfo.fullName, font);
     }
 

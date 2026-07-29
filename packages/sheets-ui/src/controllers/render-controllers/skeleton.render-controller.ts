@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-import type { Nullable, Workbook } from '@univerjs/core';
-import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import type { ISheetSkeletonManagerParam } from '@univerjs/sheets';
-import { Disposable, Inject } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import type { ISheetRenderSkeletonManagerParam } from '../../services/sheet-render-skeleton.service';
+import {
+    Disposable,
+    Inject,
+    type Nullable,
+    type Workbook,
+} from '@univerjs/core';
+import { type IRenderContext, IRenderManagerService, type IRenderModule } from '@univerjs/engine-render';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 
 export class SheetSkeletonRenderController extends Disposable implements IRenderModule {
@@ -30,13 +33,13 @@ export class SheetSkeletonRenderController extends Disposable implements IRender
         super();
 
         this.disposeWithMe(
-            this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param: Nullable<ISheetSkeletonManagerParam>) => {
+            this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param: Nullable<ISheetRenderSkeletonManagerParam>) => {
                 this._updateSceneSize(param);
             })
         );
     }
 
-    private _updateSceneSize(param: Nullable<ISheetSkeletonManagerParam>) {
+    private _updateSceneSize(param: Nullable<ISheetRenderSkeletonManagerParam>) {
         if (param == null) {
             return;
         }

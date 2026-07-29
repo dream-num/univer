@@ -14,14 +14,39 @@
  * limitations under the License.
  */
 
-import type { IFreeze, Injector, IRange, IRangeWithCoord, Nullable, ThemeService } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
-import type { ISelectionWithStyle } from '@univerjs/sheets';
+import { SHEET_VIEWPORT_KEY } from '../../components/sheets';
+import type { SpreadsheetRenderSkeleton } from '../../components/sheets/sheet.render-skeleton';
+
+import {
+    ColorKit,
+    type IFreeze,
+    type Injector,
+    type IRange,
+    type IRangeWithCoord,
+    IUniverInstanceService,
+    LookUp,
+    type Nullable,
+    Quantity,
+    type ThemeService,
+    UniverInstanceType,
+} from '@univerjs/core';
+import {
+    CURSOR_TYPE,
+    type IMouseEvent,
+    type IPointerEvent,
+    IRenderManagerService,
+    Rect,
+    type Scene,
+    ScrollTimer,
+    ScrollTimerType,
+    Vector2,
+    type Viewport,
+    withCurrentTypeOfRenderer,
+} from '@univerjs/engine-render';
+import { type ISelectionWithStyle, SELECTION_CONTROL_BORDER_BUFFER_WIDTH } from '@univerjs/sheets';
 import type { Subscription } from 'rxjs';
 import type { SelectionControl } from './selection-control';
-import { ColorKit, IUniverInstanceService, LookUp, Quantity, UniverInstanceType } from '@univerjs/core';
-import { CURSOR_TYPE, IRenderManagerService, Rect, ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2, withCurrentTypeOfRenderer } from '@univerjs/engine-render';
-import { attachSelectionWithCoord, SELECTION_CONTROL_BORDER_BUFFER_WIDTH } from '@univerjs/sheets';
+import { attachRenderSelectionWithCoord } from '../../common/skeleton-util';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { ISheetSelectionRenderService } from './base-selection-render.service';
 import { genNormalSelectionStyle, RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './const';
@@ -36,7 +61,7 @@ export interface ISelectionShapeTargetSelection {
 }
 
 export interface ISelectionShapeExtensionOption {
-    skeleton: SpreadsheetSkeleton;
+    skeleton: SpreadsheetRenderSkeleton;
     scene: Scene;
     themeService: ThemeService;
     injector: Injector;
@@ -90,7 +115,7 @@ export class SelectionShapeExtension {
 
     private _fillControlColors: string[] = [];
 
-    private _skeleton: SpreadsheetSkeleton;
+    private _skeleton: SpreadsheetRenderSkeleton;
     private _scene: Scene;
     private readonly _themeService: ThemeService;
     private readonly _injector: Injector;
@@ -139,7 +164,8 @@ export class SelectionShapeExtension {
         )
             ?.getCurrentParam()
             ?.skeleton
-            .getWorksheetConfig()
+            .worksheet
+            .getSnapshot()
             .freeze;
         return freeze;
     }
@@ -250,7 +276,7 @@ export class SelectionShapeExtension {
             primary: primaryCell,
             style: null,
         };
-        const selectionWithCoord = attachSelectionWithCoord(selection, this._skeleton);
+        const selectionWithCoord = attachRenderSelectionWithCoord(selection, this._skeleton);
         const startCell = this._skeleton.getNoMergeCellWithCoordByIndex(startRow, startColumn);
         const endCell = this._skeleton.getNoMergeCellWithCoordByIndex(endRow, endColumn);
         const startY = startCell?.startY || 0;
@@ -588,7 +614,7 @@ export class SelectionShapeExtension {
         const range = this._swapPositions(startRow, startColumn, endRow, endColumn);
         const primaryCell = this._skeleton.getCellWithMergeInfoByIndex(startRow, startColumn);
         const selectionWithStyle: ISelectionWithStyle = { range, primary: primaryCell, style: null };
-        const selectionRangeWithCoord = attachSelectionWithCoord(selectionWithStyle, this._skeleton);
+        const selectionRangeWithCoord = attachRenderSelectionWithCoord(selectionWithStyle, this._skeleton);
         this._targetSelection = { ...selectionRangeWithCoord.rangeWithCoord };
 
         this._control.updateRangeBySelectionWithCoord(selectionRangeWithCoord);

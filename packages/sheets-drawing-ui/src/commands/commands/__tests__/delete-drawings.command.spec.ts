@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-import type { ISheetDrawing } from '@univerjs/sheets-drawing';
 import { DrawingTypeEnum, ImageSourceType } from '@univerjs/core';
-import { InsertSheetDrawingCommand, ISheetDrawingService } from '@univerjs/sheets-drawing';
+import {
+    InsertSheetDrawingCommand,
+    type ISheetDrawing,
+    ISheetDrawingService,
+    SheetDrawingAnchorType,
+} from '@univerjs/sheets-drawing';
 import { afterEach, describe, expect, it } from 'vitest';
 import { createSheetsDrawingUiTestBed } from '../../../__tests__/create-sheets-drawing-ui-test-bed';
 import { DeleteDrawingsCommand } from '../delete-drawings.command';
@@ -29,6 +33,7 @@ function createSheetDrawing(drawingId: string): ISheetDrawing {
         drawingType: DrawingTypeEnum.DRAWING_IMAGE,
         imageSourceType: ImageSourceType.URL,
         source: `https://example.com/${drawingId}.png`,
+        anchorType: SheetDrawingAnchorType.Both,
         sheetTransform: {
             angle: 0,
             flipX: false,

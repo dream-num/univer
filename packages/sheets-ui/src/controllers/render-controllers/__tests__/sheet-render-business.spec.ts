@@ -15,12 +15,14 @@
  */
 
 import { CommandType } from '@univerjs/core';
+
 import { SetFormulaCalculationNotificationMutation } from '@univerjs/engine-formula';
-import { SHEET_EXTENSION_PREFIX, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { MoveRangeMutation, SetRangeValuesMutation } from '@univerjs/sheets';
+
 import { BehaviorSubject, Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { SHEET_VIEW_KEY } from '../../../common/keys';
+import { SHEET_EXTENSION_PREFIX, SHEET_VIEWPORT_KEY } from '../../../components/sheets';
 import { SheetRenderController } from '../sheet.render-controller';
 
 const renderClasses = vi.hoisted(() => {

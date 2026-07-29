@@ -14,43 +14,55 @@
  * limitations under the License.
  */
 
-import type {
-    DrawingTypeEnum,
-    ICommandInfo,
-    IDisposable,
-    INeedCheckDisposable,
-    Injector,
-    IRange,
-    Nullable,
-    Workbook,
-    Worksheet,
-} from '@univerjs/core';
-import type { BaseObject, IBoundRectNoAngle, IRender, IShapeProps, Shape, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
-import type { ISetWorksheetRowAutoHeightMutationParams, ISheetLocationBase } from '@univerjs/sheets';
-import type { IPopup } from '@univerjs/ui';
-import type { Observable } from 'rxjs';
+import type { SpreadsheetRenderSkeleton } from '../components/sheets/sheet.render-skeleton';
+
 import {
     Disposable,
     DisposableCollection,
+    type DrawingTypeEnum,
     fromEventSubject,
+    type ICommandInfo,
     ICommandService,
+    type IDisposable,
+    type INeedCheckDisposable,
     Inject,
+    type Injector,
+    type IRange,
     IUniverInstanceService,
+    type Nullable,
     toDisposable,
     UniverInstanceType,
+    type Workbook,
+    type Worksheet,
 } from '@univerjs/core';
-import { IRenderManagerService, RENDER_CLASS_TYPE } from '@univerjs/engine-render';
+import {
+    type BaseObject,
+    type IBoundRectNoAngle,
+    type IRender,
+    IRenderManagerService,
+    type IShapeProps,
+    RENDER_CLASS_TYPE,
+    type Shape,
+    type Viewport,
+} from '@univerjs/engine-render';
 import {
     COMMAND_LISTENER_SKELETON_CHANGE,
     IRefSelectionsService,
+    type ISetWorksheetRowAutoHeightMutationParams,
+    type ISheetLocationBase,
     RefRangeService,
     SetFrozenMutation,
     SetSelectionsOperation,
     SetWorksheetRowAutoHeightMutation,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { ICanvasPopupService } from '@univerjs/ui';
-import { BehaviorSubject, map, throttleTime } from 'rxjs';
+import { ICanvasPopupService, type IPopup } from '@univerjs/ui';
+import {
+    BehaviorSubject,
+    map,
+    type Observable,
+    throttleTime,
+} from 'rxjs';
 import { SetScrollOperation } from '../commands/operations/scroll.operation';
 import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
 import { getViewportByCell, transformBound2OffsetBound } from '../common/utils';
@@ -158,7 +170,7 @@ export class SheetCanvasPopManagerService extends Disposable {
         this._popupMenuOffsetMap.clear();
     }
 
-    private _createHiddenRectObserver(params: { row: number; column: number; worksheet: Worksheet; skeleton: SpreadsheetSkeleton; currentRender: IRender }) {
+    private _createHiddenRectObserver(params: { row: number; column: number; worksheet: Worksheet; skeleton: SpreadsheetRenderSkeleton; currentRender: IRender }) {
         const { row, column, worksheet, skeleton, currentRender } = params;
         const calc = () => {
             const freeze = worksheet.getFreeze();
@@ -244,7 +256,7 @@ export class SheetCanvasPopManagerService extends Disposable {
     private _createPositionObserver(
         bound: IBoundRectNoAngle,
         currentRender: IRender,
-        skeleton: SpreadsheetSkeleton,
+        skeleton: SpreadsheetRenderSkeleton,
         worksheet: Worksheet
     ) {
         const calc = () => {
@@ -722,7 +734,7 @@ export class SheetCanvasPopManagerService extends Disposable {
         initialRow: number,
         initialCol: number,
         currentRender: IRender,
-        skeleton: SpreadsheetSkeleton,
+        skeleton: SpreadsheetRenderSkeleton,
         activeViewport: Viewport
     ) {
         let row = initialRow;
@@ -772,7 +784,7 @@ export class SheetCanvasPopManagerService extends Disposable {
         row: number,
         col: number,
         currentRender: IRender,
-        skeleton: SpreadsheetSkeleton,
+        skeleton: SpreadsheetRenderSkeleton,
         activeViewport: Viewport
     ): IBoundRectNoAngle {
         const { scene, engine } = currentRender;
@@ -833,7 +845,7 @@ export class SheetCanvasPopManagerService extends Disposable {
     private _createRangePositionObserver(
         range: IRange,
         currentRender: IRender,
-        skeleton: SpreadsheetSkeleton,
+        skeleton: SpreadsheetRenderSkeleton,
         activeViewport: Viewport
     ) {
         let { startRow, startColumn, endRow, endColumn } = range;

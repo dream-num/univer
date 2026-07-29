@@ -14,36 +14,48 @@
  * limitations under the License.
  */
 
-/* eslint-disable max-lines-per-function */
-/* eslint-disable complexity */
-
-import type { EventState, IRange, Nullable, Workbook } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
-import type {
-    IDeltaColumnWidthCommandParams,
-    IDeltaRowHeightCommandParams,
-    ISetWorksheetRowIsAutoHeightCommandParams,
-} from '@univerjs/sheets';
-import type { ISetWorksheetColIsAutoWidthCommandParams } from '../../commands/commands/set-worksheet-auto-col-width.command';
 import {
     createInterceptorKey,
     Disposable,
+    type EventState,
     ICommandService,
     Inject,
     InterceptorManager,
+    type IRange,
+    type Nullable,
     RANGE_TYPE,
+    type Workbook,
 } from '@univerjs/core';
-import { CURSOR_TYPE, Rect, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 
+/* eslint-disable max-lines-per-function */
+/* eslint-disable complexity */
+
+import {
+    CURSOR_TYPE,
+    type IMouseEvent,
+    type IPointerEvent,
+    type IRenderContext,
+    type IRenderModule,
+    Rect,
+    Vector2,
+} from '@univerjs/engine-render';
 import {
     DeltaColumnWidthCommand,
     DeltaRowHeightCommand,
+    type IDeltaColumnWidthCommandParams,
+    type IDeltaRowHeightCommandParams,
+    type ISetWorksheetRowIsAutoHeightCommandParams,
     SetWorksheetRowIsAutoHeightCommand,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { Subscription } from 'rxjs';
-import { SetWorksheetColAutoWidthCommand } from '../../commands/commands/set-worksheet-auto-col-width.command';
+import {
+    type ISetWorksheetColIsAutoWidthCommandParams,
+    SetWorksheetColAutoWidthCommand,
+} from '../../commands/commands/set-worksheet-auto-col-width.command';
+
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX, SHEET_VIEW_KEY } from '../../common/keys';
+import { SHEET_VIEWPORT_KEY, type SpreadsheetColumnHeader, type SpreadsheetHeader } from '../../components/sheets';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import {
     HEADER_MENU_SHAPE_SIZE,

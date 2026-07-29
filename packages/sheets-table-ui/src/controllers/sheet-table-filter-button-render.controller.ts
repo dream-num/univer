@@ -14,16 +14,30 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IDisposable, IRange, Workbook } from '@univerjs/core';
-import type { IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import type { ITableRangeWithState } from '@univerjs/sheets-table';
-import type { ISheetsTableFilterButtonShapeProps } from '../views/widgets/table-filter-button.shape';
-import { ICommandService, Inject, Injector, InterceptorEffectEnum, RxDisposable, VerticalAlign } from '@univerjs/core';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+
+import {
+    type ICommandInfo,
+    ICommandService,
+    type IDisposable,
+    Inject,
+    Injector,
+    InterceptorEffectEnum,
+    type IRange,
+    RxDisposable,
+    VerticalAlign,
+    type Workbook,
+} from '@univerjs/core';
 import { INTERCEPTOR_POINT, SetVerticalTextAlignCommand, SheetInterceptorService, SheetRangeThemeModel } from '@univerjs/sheets';
-import { TableManager } from '@univerjs/sheets-table';
-import { getCoordByCell, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { type ITableRangeWithState, TableManager } from '@univerjs/sheets-table';
+import { getCoordByCell, SheetSkeletonManagerService, type SpreadsheetRenderSkeleton } from '@univerjs/sheets-ui';
 import { map, merge, of, startWith, switchMap, takeUntil } from 'rxjs';
-import { FILTER_ICON_PADDING, FILTER_ICON_SIZE, SheetsTableFilterButtonShape } from '../views/widgets/table-filter-button.shape';
+import {
+    FILTER_ICON_PADDING,
+    FILTER_ICON_SIZE,
+    type ISheetsTableFilterButtonShapeProps,
+    SheetsTableFilterButtonShape,
+} from '../views/widgets/table-filter-button.shape';
 
 const SHEETS_FILTER_BUTTON_Z_INDEX = 5000;
 
@@ -31,7 +45,7 @@ interface ISheetsTableFilterRenderParams {
     unitId: string;
     worksheetId: string;
     tableFilterRanges: ITableRangeWithState[];
-    skeleton: SpreadsheetSkeleton;
+    skeleton: SpreadsheetRenderSkeleton;
 }
 
 const computeIconTop = (

@@ -14,21 +14,13 @@
  * limitations under the License.
  */
 
-import { drawingPositionToTransform } from '@univerjs/sheets-drawing';
+import { type IDrawingParam } from '@univerjs/core';
+import { UnitDrawingService } from '@univerjs/drawing';
 import { describe, expect, it, vi } from 'vitest';
 import { SheetsDrawingRenderController } from '../sheet-drawing.render-controller';
 
-vi.mock('@univerjs/sheets-drawing', async (importOriginal) => {
-    const actual = await importOriginal<typeof import('@univerjs/sheets-drawing')>();
-
-    return {
-        ...actual,
-        drawingPositionToTransform: vi.fn(() => ({ left: 24, top: 36, width: 120, height: 80 })),
-    };
-});
-
 describe('SheetsDrawingRenderController', () => {
-    it('initializes sheet drawing data and materializes sheet transforms for render objects', () => {
+    it('registers already-materialized model drawings without rewriting geometry', () => {
         const drawingWithSheetTransform = {
             unitId: 'unit-1',
             subUnitId: 'sheet-1',
@@ -37,6 +29,7 @@ describe('SheetsDrawingRenderController', () => {
                 from: { row: 1, column: 2 },
                 to: { row: 3, column: 4 },
             },
+            transform: { left: 24, top: 36, width: 300, height: 200 },
         } as any;
         const drawingWithoutSkeleton = {
             unitId: 'unit-1',
@@ -64,34 +57,20 @@ describe('SheetsDrawingRenderController', () => {
             initializeNotification: vi.fn(),
             getDrawingDataForUnit: vi.fn(() => drawingData),
         };
-        const drawingManagerService = {
-            registerDrawingData: vi.fn(),
-            initializeNotification: vi.fn(),
-        };
-        const skeletonParam = { skeleton: { id: 'skeleton-1' } };
-        const sheetSkeletonService = {
-            getSkeletonParam: vi.fn((unitId: string, subUnitId: string) => {
-                if (unitId === 'unit-1' && subUnitId === 'sheet-1') {
-                    return skeletonParam;
-                }
-
-                return null;
-            }),
-        };
-
+        const drawingManagerService = new UnitDrawingService<IDrawingParam>();
+        const registerDrawingData = vi.spyOn(drawingManagerService, 'registerDrawingData');
+        const initializeNotification = vi.spyOn(drawingManagerService, 'initializeNotification');
         const controller = new SheetsDrawingRenderController(
             { unitId: 'unit-1' } as never,
             sheetDrawingService as never,
-            drawingManagerService as never,
-            sheetSkeletonService as never
+            drawingManagerService
         );
 
         expect(sheetDrawingService.initializeNotification).toHaveBeenCalledWith('unit-1');
-        expect(drawingPositionToTransform).toHaveBeenCalledWith(drawingWithSheetTransform.sheetTransform, skeletonParam);
-        expect(drawingWithSheetTransform.transform).toEqual({ left: 24, top: 36, width: 120, height: 80 });
+        expect(drawingWithSheetTransform.transform).toEqual({ left: 24, top: 36, width: 300, height: 200 });
         expect(drawingWithoutSkeleton).not.toHaveProperty('transform');
-        expect(drawingManagerService.registerDrawingData).toHaveBeenCalledWith('unit-1', drawingData);
-        expect(drawingManagerService.initializeNotification).toHaveBeenCalledWith('unit-1');
+        expect(registerDrawingData).toHaveBeenCalledWith('unit-1', drawingData);
+        expect(initializeNotification).toHaveBeenCalledWith('unit-1');
 
         controller.dispose();
     });

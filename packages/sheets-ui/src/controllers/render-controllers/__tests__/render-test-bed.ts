@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import type { Dependency, IDisposable, IWorkbookData, Workbook } from '@univerjs/core';
-import type { IRenderContext, Vector2 } from '@univerjs/engine-render';
-import type { Observable } from 'rxjs';
 import {
+    type Dependency,
     ICommandService,
     IContextService,
+    type IDisposable,
     ILogService,
     Inject,
     Injector,
     IUniverInstanceService,
+    type IWorkbookData,
     LocaleService,
     LocaleType,
     LogLevel,
@@ -31,11 +31,20 @@ import {
     Tools,
     Univer,
     UniverInstanceType,
+    type Workbook,
 } from '@univerjs/core';
-import { IRenderManagerService, RenderManagerService, SHEET_VIEWPORT_KEY, Viewport } from '@univerjs/engine-render';
+
+import {
+    type IRenderContext,
+    IRenderManagerService,
+    RenderManagerService,
+    type Vector2,
+    Viewport,
+} from '@univerjs/engine-render';
 import { SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, type Observable, Subject } from 'rxjs';
 import { SHEET_VIEW_KEY } from '../../../common/keys';
+import { SHEET_VIEWPORT_KEY } from '../../../components/sheets';
 import enUS from '../../../locale/en-US';
 import { HeaderUnhideRangeService } from '../../../services/header-unhide-range.service';
 import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';

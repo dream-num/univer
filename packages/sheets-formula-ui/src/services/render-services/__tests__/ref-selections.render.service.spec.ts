@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IWorkbookData, Workbook } from '@univerjs/core';
 import type { IRenderContext } from '@univerjs/engine-render';
-import type { ISelectionWithStyle } from '@univerjs/sheets';
+
 import {
     IContextService,
+    type IDisposable,
     ILogService,
     Inject,
     Injector,
     IUniverInstanceService,
+    type IWorkbookData,
     LocaleService,
     LocaleType,
     LogLevel,
@@ -32,17 +33,19 @@ import {
     Tools,
     Univer,
     UniverInstanceType,
+    type Workbook,
 } from '@univerjs/core';
-import { SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import {
     IRefSelectionsService,
+    type ISelectionWithStyle,
     REF_SELECTIONS_ENABLED,
     RefSelectionsService,
     SelectionMoveType,
     SELECTIONS_ENABLED,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { SHEET_VIEW_KEY, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { SHEET_VIEW_KEY, SHEET_VIEWPORT_KEY, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+
 import { IShortcutService } from '@univerjs/ui';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { afterEach, describe, expect, it } from 'vitest';

@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-import type { IRange, IScale } from '@univerjs/core';
-import type { SpreadsheetSkeleton, UniverRenderingContext } from '@univerjs/engine-render';
 import type { IDataBarCellData } from './type';
-import { Range } from '@univerjs/core';
-import { FIX_ONE_PIXEL_BLUR_OFFSET, SheetExtension, SpreadsheetExtensionRegistry } from '@univerjs/engine-render';
+
+import { type IRange, type IScale, Range } from '@univerjs/core';
+import {
+    FIX_ONE_PIXEL_BLUR_OFFSET,
+    SpreadsheetExtensionRegistry,
+    type UniverRenderingContext,
+} from '@univerjs/engine-render';
+import { SheetExtension, type SpreadsheetRenderSkeleton } from '@univerjs/sheets-ui';
 
 export const dataBarUKey = 'sheet-conditional-rule-data-bar';
 export const defaultDataBarPositiveColor = '#ffbe38';
@@ -45,7 +49,7 @@ export class DataBar extends SheetExtension {
     override draw(
         ctx: UniverRenderingContext,
         _parentScale: IScale,
-        spreadsheetSkeleton: SpreadsheetSkeleton,
+        spreadsheetSkeleton: SpreadsheetRenderSkeleton,
         diffRanges: IRange[]
     ) {
         const { worksheet } = spreadsheetSkeleton;

@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-import type { ISelectionWithStyle } from '@univerjs/sheets';
+import { SHEET_VIEWPORT_KEY } from '../../../components/sheets';
+
+import { type ISelectionWithStyle, REF_SELECTIONS_ENABLED, SELECTIONS_ENABLED } from '@univerjs/sheets';
 import {
     CommandService,
     ConfigService,
@@ -28,8 +30,7 @@ import {
     RANGE_TYPE,
     ThemeService,
 } from '@univerjs/core';
-import { ScrollTimerType, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
-import { REF_SELECTIONS_ENABLED, SELECTIONS_ENABLED } from '@univerjs/sheets';
+import { ScrollTimerType } from '@univerjs/engine-render';
 import {
     IPlatformService,
     IShortcutService,

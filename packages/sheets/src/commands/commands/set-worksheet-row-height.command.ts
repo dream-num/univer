@@ -14,30 +14,30 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand, IRange } from '@univerjs/core';
-import type {
-    ISetWorksheetRowHeightMutationParams,
-    ISetWorksheetRowIsAutoHeightMutationParams,
-} from '../mutations/set-worksheet-row-height.mutation';
 import {
     BooleanNumber,
     CommandType,
+    type IAccessor,
+    type ICommand,
     ICommandService,
+    type IRange,
     IUndoRedoService,
     IUniverInstanceService,
     RANGE_TYPE,
     Rectangle,
     sequenceExecute,
 } from '@univerjs/core';
-import { SheetsSelectionsService } from '../../services/selections/selection.service';
-import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
-import { SheetSkeletonService } from '../../skeleton/skeleton.service';
 import {
+    type ISetWorksheetRowHeightMutationParams,
+    type ISetWorksheetRowIsAutoHeightMutationParams,
     SetWorksheetRowHeightMutation,
     SetWorksheetRowHeightMutationFactory,
     SetWorksheetRowIsAutoHeightMutation,
     SetWorksheetRowIsAutoHeightMutationFactory,
 } from '../mutations/set-worksheet-row-height.mutation';
+import { SheetsSelectionsService } from '../../services/selections/selection.service';
+import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
+import { SheetSkeletonService } from '../../skeleton/skeleton.service';
 import { getSuitableRangesInView } from './util';
 import { getSheetCommandTarget } from './utils/target-util';
 
@@ -344,7 +344,10 @@ export const SetWorksheetRowIsAutoHeightCommand: ICommand = {
         );
 
         const skeleton = accessor.get(SheetSkeletonService).getSkeleton(unitId, subUnitId);
-        const { suitableRanges, remainingRanges } = getSuitableRangesInView(redoMutationParams.ranges, skeleton);
+        const { suitableRanges, remainingRanges } = getSuitableRangesInView(
+            redoMutationParams.ranges,
+            skeleton?.worksheet.getColumnCount() ?? null
+        );
 
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
         const { undos: autoHeightUndos, redos: autoHeightRedos } = sheetInterceptorService.generateMutationsOfAutoHeight({

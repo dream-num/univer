@@ -14,10 +14,16 @@
  * limitations under the License.
  */
 
-import type { Nullable, Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import type { ISheetSkeletonManagerParam } from '@univerjs/sheets';
-import { Disposable, DisposableCollection, fromEventSubject, Inject } from '@univerjs/core';
+import type { ISheetRenderSkeletonManagerParam } from '../services/sheet-render-skeleton.service';
+import {
+    Disposable,
+    DisposableCollection,
+    fromEventSubject,
+    Inject,
+    type Nullable,
+    type Workbook,
+} from '@univerjs/core';
 import { SHEET_VIEW_KEY } from '../common/keys';
 import { HoverManagerService } from '../services/hover-manager.service';
 import { SheetScrollManagerService } from '../services/scroll-manager.service';
@@ -46,7 +52,7 @@ export class HoverRenderController extends Disposable implements IRenderModule {
     private _initPointerEvent() {
         const disposeSet = new DisposableCollection();
         // eslint-disable-next-line max-lines-per-function
-        const handleSkeletonChange = (skeletonParam: Nullable<ISheetSkeletonManagerParam>) => {
+        const handleSkeletonChange = (skeletonParam: Nullable<ISheetRenderSkeletonManagerParam>) => {
             disposeSet.dispose();
 
             if (!skeletonParam) {

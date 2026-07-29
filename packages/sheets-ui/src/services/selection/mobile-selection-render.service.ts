@@ -14,37 +14,56 @@
  * limitations under the License.
  */
 
+import { SHEET_VIEWPORT_KEY } from '../../components/sheets';
+import type { SpreadsheetRenderSkeleton } from '../../components/sheets/sheet.render-skeleton';
+
 /* eslint-disable complexity */
 /* eslint-disable max-lines-per-function */
-import type {
-    EventState,
-    ICellWithCoord,
-    IDisposable,
-    IRange,
-    IRangeWithCoord,
-    Nullable,
-    Workbook,
-} from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
-import type { ISelectionWithCoord, ISelectionWithStyle, ISetSelectionsOperationParams, WorkbookSelectionModel } from '@univerjs/sheets';
-import type { ISheetObjectParam } from '../../controllers/utils/component-tools';
 import {
+    type EventState,
+    type ICellWithCoord,
     ICommandService,
     IContextService,
+    type IDisposable,
     ILogService,
     Inject,
     Injector,
+    type IRange,
+    type IRangeWithCoord,
+    type Nullable,
     RANGE_TYPE,
     Rectangle,
     ThemeService,
     toDisposable,
+    type Workbook,
 } from '@univerjs/core';
-import { ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
-import { attachSelectionWithCoord, convertSelectionDataToRange, REF_SELECTIONS_ENABLED, SelectionMoveType, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
+import {
+    type IMouseEvent,
+    type IPointerEvent,
+    type IRenderContext,
+    type IRenderModule,
+    type Scene,
+    ScrollTimer,
+    ScrollTimerType,
+    Vector2,
+    type Viewport,
+} from '@univerjs/engine-render';
+import {
+    convertSelectionDataToRange,
+    type ISelectionWithCoord,
+    type ISelectionWithStyle,
+    type ISetSelectionsOperationParams,
+    REF_SELECTIONS_ENABLED,
+    SelectionMoveType,
+    SetSelectionsOperation,
+    SheetsSelectionsService,
+    type WorkbookSelectionModel,
+} from '@univerjs/sheets';
+import { getCoordByOffset, getSheetObject, type ISheetObjectParam } from '../../controllers/utils/component-tools';
 import { IShortcutService } from '@univerjs/ui';
 import { distinctUntilChanged, merge, startWith } from 'rxjs';
+import { attachRenderSelectionWithCoord } from '../../common/skeleton-util';
 import { MOBILE_EXPANDING_SELECTION, MOBILE_PINCH_ZOOMING } from '../../consts/mobile-context';
-import { getCoordByOffset, getSheetObject } from '../../controllers/utils/component-tools';
 import { isThisColSelected, isThisRowSelected } from '../../controllers/utils/selections-tools';
 import { SheetScrollManagerService } from '../scroll-manager.service';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
@@ -350,7 +369,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         }
         const selectionWithStyle: ISelectionWithStyle = { range: selectCell, primary: selectCell, style: null };
         selectionWithStyle.range.rangeType = rangeType;
-        const selectionCellWithCoord = attachSelectionWithCoord(selectionWithStyle, this._skeleton);
+        const selectionCellWithCoord = attachRenderSelectionWithCoord(selectionWithStyle, this._skeleton);
         this._startRangeWhenPointerDown = { ...selectionCellWithCoord.rangeWithCoord };
 
         let activeSelectionControl = this.getActiveSelectionControl<MobileSelectionControl>();
@@ -384,7 +403,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
      * @param scene
      * @param rangeType
      */
-    override newSelectionControl(scene: Scene, skeleton: SpreadsheetSkeleton, selection: ISelectionWithStyle): MobileSelectionControl {
+    override newSelectionControl(scene: Scene, skeleton: SpreadsheetRenderSkeleton, selection: ISelectionWithStyle): MobileSelectionControl {
         const selectionControls = this.getSelectionControls();
         const {
             rowHeaderWidth,
@@ -401,7 +420,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
             columnHeaderOffsetY: Math.max(0, columnHeaderHeightAndMarginTop - columnHeaderHeight),
             rangeType,
         });
-        const selectionWithCoord = attachSelectionWithCoord(selection, skeleton);
+        const selectionWithCoord = attachRenderSelectionWithCoord(selection, skeleton);
         control.updateRangeBySelectionWithCoord(selectionWithCoord, skeleton);
         this._selectionControls.push(control);
 
@@ -724,7 +743,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
             return false;
         }
         const newSelection: ISelectionWithStyle = { range: newSelectionRange, style: null, primary: null };
-        const newSelectionRangeWithCoord = attachSelectionWithCoord(newSelection, skeleton);
+        const newSelectionRangeWithCoord = attachRenderSelectionWithCoord(newSelection, skeleton);
 
         const rangeChanged =
             currSelectionRange.startRow !== newSelectionRange.startRow ||

@@ -78,6 +78,7 @@
         "@univerjs/design": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/icons": "1.34.0",
+        "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*"
     },
     "devDependencies": {

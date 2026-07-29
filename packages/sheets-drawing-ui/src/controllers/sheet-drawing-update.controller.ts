@@ -14,17 +14,6 @@
  * limitations under the License.
  */
 
-import type { IAccessor, IDrawingParam, IImageIoServiceParam, IRange, Nullable, Workbook } from '@univerjs/core';
-import type { IImageData } from '@univerjs/drawing';
-import type { IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import type { ISheetLocationBase, WorkbookSelectionModel } from '@univerjs/sheets';
-import type {
-    IInsertSheetDrawingCommandParams,
-    ISetDrawingArrangeCommandParams,
-    ISetDrawingCommandParams,
-    ISheetDrawing,
-    ISheetDrawingPosition,
-} from '@univerjs/sheets-drawing';
 import type { LocaleKey } from '../locale/types';
 import {
     BooleanNumber,
@@ -34,16 +23,22 @@ import {
     DrawingTypeEnum,
     FOCUSING_COMMON_DRAWINGS,
     generateRandomId,
+    type IAccessor,
     ICommandService,
     IContextService,
+    type IDrawingParam,
     IImageIoService,
+    type IImageIoServiceParam,
     ImageSourceType,
     ImageUploadStatusType,
     Inject,
     Injector,
+    type IRange,
     IURLImageService,
     LocaleService,
+    type Nullable,
     PositionedObjectLayoutType,
+    type Workbook,
     WrapTextType,
 } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
@@ -56,19 +51,28 @@ import {
     getDrawingImageAllowSize,
     getImageSize,
     IDrawingManagerService,
+    type IImageData,
     SetDrawingSelectedOperation,
 } from '@univerjs/drawing';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { type IRenderContext, IRenderManagerService, type IRenderModule } from '@univerjs/engine-render';
 import {
     attachRangeWithCoord,
+    type ISheetLocationBase,
     SetRangeValuesCommand,
     SheetInterceptorService,
     SheetSkeletonService,
     SheetsSelectionsService,
+    type SpreadsheetSkeleton,
+    type WorkbookSelectionModel,
 } from '@univerjs/sheets';
 import {
     drawingPositionToTransform,
+    type IInsertSheetDrawingCommandParams,
     InsertSheetDrawingCommand,
+    type ISetDrawingArrangeCommandParams,
+    type ISetDrawingCommandParams,
+    type ISheetDrawing,
+    type ISheetDrawingPosition,
     ISheetDrawingService,
     SetDrawingArrangeCommand,
     SetSheetDrawingCommand,
@@ -121,7 +125,7 @@ export function getDrawingSizeByCell(
     if (skeleton == null) {
         return false;
     }
-    const cellInfo = skeleton.getCellByIndex(location.row, location.col);
+    const cellInfo = skeleton.getCellWithCoordByIndex(location.row, location.col);
 
     const cellWidth = cellInfo.mergeInfo.endX - cellInfo.mergeInfo.startX - 2;
     const cellHeight = cellInfo.mergeInfo.endY - cellInfo.mergeInfo.startY - 2;

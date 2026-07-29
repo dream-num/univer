@@ -42,7 +42,6 @@ function createController() {
                 }),
             },
         } as never,
-        { getSkeleton: vi.fn(() => skeleton) } as never,
         {
             getArrayFormulaRange: vi.fn(() => null),
             getArrayFormulaCellData: vi.fn(() => ({})),

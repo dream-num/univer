@@ -112,7 +112,81 @@ export { SheetPermissionOpenDialogOperation } from './commands/operations/sheet-
 export { SheetPermissionOpenPanelOperation } from './commands/operations/sheet-permission-open-panel.operation';
 export { SidebarDefinedNameOperation } from './commands/operations/sidebar-defined-name.operation';
 export { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, RANGE_SELECTOR_COMPONENT_KEY, SHEET_VIEW_KEY } from './common/keys';
+export {
+    attachRenderPrimaryWithCoord,
+    attachRenderRangeWithCoord,
+    attachRenderSelectionWithCoord,
+} from './common/skeleton-util';
 export { getCellRealRange, getViewportByCell } from './common/utils';
+export { SpreadsheetColumnHeader } from './components/sheets/column-header';
+export {
+    BG_Z_INDEX,
+    BORDER_Z_INDEX,
+    EXPAND_SIZE_FOR_RENDER_OVERFLOW,
+    FONT_EXTENSION_Z_INDEX,
+    MEASURE_EXTENT,
+    MEASURE_EXTENT_FOR_PARAGRAPH,
+    PRINTING_BG_Z_INDEX,
+    sheetContentViewportKeys,
+    sheetHeaderViewportKeys,
+} from './components/sheets/constants';
+export {
+    Background,
+    Border,
+    ColumnHeaderLayout,
+    Custom,
+    Font,
+    Marker,
+    RowHeaderLayout,
+    SHEET_EXTENSION_PREFIX,
+    SHEET_EXTENSION_TYPE,
+    SheetExtension,
+} from './components/sheets/extensions';
+export type {
+    IColumnsHeaderCfgParam,
+    IRowsHeaderCfgParam,
+} from './components/sheets/extensions';
+export {
+    SHEET_VIEWPORT_KEY,
+    ShowGridlinesState,
+} from './components/sheets/interfaces';
+export type {
+    IAColumnCfg,
+    IAColumnCfgObj,
+    IARowCfg,
+    IARowCfgObj,
+    IBorderCache,
+    IBorderCacheItem,
+    IFontCacheItem,
+    IHeaderStyleCfg,
+    IPaintForRefresh,
+    IPaintForScrolling,
+    IRowStyleCfg,
+    IStylesCache,
+} from './components/sheets/interfaces';
+export { SpreadsheetRowHeader } from './components/sheets/row-header';
+export { SheetComponent, SpreadsheetHeader } from './components/sheets/sheet-component';
+export {
+    convertTransformToOffsetX,
+    convertTransformToOffsetY,
+    DEFAULT_PADDING_DATA,
+    getDocsSkeletonPageSize,
+    getShrinkToFitScale,
+    RENDER_RAW_FORMULA_KEY,
+    scaleDocumentDataForShrinkToFit,
+    SpreadsheetRenderSkeleton,
+} from './components/sheets/sheet.render-skeleton';
+export type {
+    ICacheItem,
+    IGetPosByRowColOptions,
+} from './components/sheets/sheet.render-skeleton';
+export { Spreadsheet } from './components/sheets/spreadsheet';
+export {
+    createDocumentModelWithStyle,
+    extractOtherStyle,
+    getFontFormat,
+} from './components/sheets/util';
+export type { ICellStyle } from './components/sheets/util';
 export type { IUniverSheetsUIConfig } from './config/config';
 export { SHEETS_UI_PLUGIN_CONFIG_KEY } from './config/config';
 export { UNIVER_SHEET_PERMISSION_USER_PART } from './consts/permission';
@@ -271,6 +345,8 @@ export type { ISheetEmbedTabMountParams } from './services/sheet-embed-runtime.s
 export { ISheetHostChromeOverrideService } from './services/sheet-host-chrome-override.service';
 export type { ISheetHostChromeOverride } from './services/sheet-host-chrome-override.service';
 export { ISheetLoadingRenderService } from './services/sheet-loading-render.service';
+export { SheetRenderSkeletonService } from './services/sheet-render-skeleton.service';
+export type { ISheetRenderSkeletonManagerParam } from './services/sheet-render-skeleton.service';
 export { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
 export { SheetsRenderService } from './services/sheets-render.service';
 export { IStatusBarService, StatusBarService } from './services/status-bar.service';

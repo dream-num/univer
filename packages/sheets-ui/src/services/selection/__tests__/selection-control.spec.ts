@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
-import type { IRangeWithCoord, ThemeService } from '@univerjs/core';
-import type { Vector2 } from '@univerjs/engine-render';
-import { Injector, IUniverInstanceService } from '@univerjs/core';
-import { CURSOR_TYPE, IRenderManagerService, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
+import { SHEET_VIEWPORT_KEY } from '../../../components/sheets';
+
+import {
+    Injector,
+    type IRangeWithCoord,
+    IUniverInstanceService,
+    type ThemeService,
+} from '@univerjs/core';
+import { CURSOR_TYPE, IRenderManagerService, type Vector2 } from '@univerjs/engine-render';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { ISheetSelectionRenderService } from '../base-selection-render.service';
 import { SelectionControl } from '../selection-control';

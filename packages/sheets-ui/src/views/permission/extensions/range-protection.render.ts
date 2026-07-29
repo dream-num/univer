@@ -14,11 +14,18 @@
  * limitations under the License.
  */
 
-import type { ICellDataForSheetInterceptor, IRange, IScale } from '@univerjs/core';
-import type { SpreadsheetSkeleton, UniverRenderingContext } from '@univerjs/engine-render';
+import { SheetExtension } from '../../../components/sheets';
+import type { SpreadsheetRenderSkeleton } from '../../../components/sheets/sheet.render-skeleton';
+
+import {
+    type ICellDataForSheetInterceptor,
+    type IRange,
+    type IScale,
+    Range,
+} from '@univerjs/core';
+import type { UniverRenderingContext } from '@univerjs/engine-render';
 import type { ICellPermission } from '@univerjs/sheets';
-import { Range } from '@univerjs/core';
-import { SheetExtension } from '@univerjs/engine-render';
+
 import { UnitAction } from '@univerjs/protocol';
 import { base64 } from './protect-background-img';
 
@@ -71,7 +78,7 @@ export abstract class RangeProtectionRenderExtension extends SheetExtension {
     override draw(
         ctx: UniverRenderingContext,
         _parentScale: IScale,
-        spreadsheetSkeleton: SpreadsheetSkeleton,
+        spreadsheetSkeleton: SpreadsheetRenderSkeleton,
         diffRanges?: IRange[]
     ) {
         const { worksheet } = spreadsheetSkeleton;

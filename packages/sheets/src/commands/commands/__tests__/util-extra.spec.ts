@@ -47,11 +47,7 @@ describe('sheets command util', () => {
             { startRow: 2000, endRow: 2499, startColumn: 0, endColumn: 2 },
         ];
 
-        const result = getSuitableRangesInView(ranges, {
-            worksheet: { getColumnCount: () => 10 },
-            scrollY: 0,
-            getOffsetRelativeToRowCol: () => ({ row: 100 }),
-        } as any);
+        const result = getSuitableRangesInView(ranges, 10, 100);
 
         expect(result.suitableRanges).toEqual([
             { startRow: 50, endRow: 749, startColumn: 0, endColumn: 2 },

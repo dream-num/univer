@@ -14,18 +14,8 @@
  * limitations under the License.
  */
 
-import type { DependencyIdentifier, DocumentDataModel, ICellCustomRender, IDisposable, Injector, Nullable } from '@univerjs/core';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import type {
-    IRender,
-    RenderComponentType,
-    SheetComponent,
-    SheetExtension,
-} from '@univerjs/engine-render';
-import type { CommandListenerSkeletonChange } from '@univerjs/sheets';
-import type { IEditorBridgeServiceVisibleParam, ISetZoomRatioCommandParams, ISheetPasteByShortKeyParams, IViewportScrollState } from '@univerjs/sheets-ui';
+import type { IEditorBridgeServiceVisibleParam, ISetZoomRatioCommandParams, ISheetPasteByShortKeyParams, IViewportScrollState, SheetComponent, SheetExtension } from '@univerjs/sheets-ui';
 import type { FRange } from '@univerjs/sheets/facade';
-import type { Observable } from 'rxjs';
 import type {
     IBeforeClipboardChangeEventParams,
     IBeforeClipboardPasteEventParams,
@@ -45,25 +35,41 @@ import type {
     ISheetSkeletonChangedEventParams,
     ISheetZoomEventParams,
 } from './f-event';
-import { CanceledError, DisposableCollection, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, ILogService, InterceptorEffectEnum, IPermissionService, IUniverInstanceService, LifecycleService, LifecycleStages, RichTextValue, toDisposable, UniverInstanceType } from '@univerjs/core';
-import { FUniver } from '@univerjs/core/facade';
-import { RichTextEditingMutation } from '@univerjs/docs';
-import { IRenderManagerService } from '@univerjs/engine-render';
-import { COMMAND_LISTENER_SKELETON_CHANGE, getSkeletonChangedEffectedRange, INTERCEPTOR_POINT, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import {
-    DragManagerService,
-    HoverManagerService,
-    IEditorBridgeService,
-    ISheetClipboardService,
-    SetCellEditVisibleOperation,
-    SetZoomRatioCommand,
-    SHEET_VIEW_KEY,
-    SheetPasteShortKeyCommand,
-    SheetPermissionRenderManagerService,
-    SheetScrollManagerService,
-} from '@univerjs/sheets-ui';
+    CanceledError,
+    type DependencyIdentifier,
+    DisposableCollection,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    type DocumentDataModel,
+    type ICellCustomRender,
+    ICommandService,
+    type IDisposable,
+    ILogService,
+    type Injector,
+    InterceptorEffectEnum,
+    IPermissionService,
+    IUniverInstanceService,
+    LifecycleService,
+    LifecycleStages,
+    type Nullable,
+    RichTextValue,
+    toDisposable,
+    UniverInstanceType,
+} from '@univerjs/core';
+import { FUniver } from '@univerjs/core/facade';
+import { type IRichTextEditingMutationParams, RichTextEditingMutation } from '@univerjs/docs';
+import { type IRender, IRenderManagerService, type RenderComponentType } from '@univerjs/engine-render';
+import {
+    COMMAND_LISTENER_SKELETON_CHANGE,
+    type CommandListenerSkeletonChange,
+    getSkeletonChangedEffectedRange,
+    INTERCEPTOR_POINT,
+    SheetInterceptorService,
+    SheetsSelectionsService,
+} from '@univerjs/sheets';
+import { DragManagerService, HoverManagerService, IEditorBridgeService, ISheetClipboardService, SetCellEditVisibleOperation, SetZoomRatioCommand, SHEET_VIEW_KEY, SheetPasteShortKeyCommand, SheetPermissionRenderManagerService, SheetScrollManagerService } from '@univerjs/sheets-ui';
 import { CopyCommand, CutCommand, HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, KeyCode, PasteCommand, PLAIN_TEXT_CLIPBOARD_MIME_TYPE, supportClipboardAPI } from '@univerjs/ui';
-import { combineLatest, filter } from 'rxjs';
+import { combineLatest, filter, type Observable } from 'rxjs';
 
 /**
  * @ignore

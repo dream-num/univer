@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IDisposable, IMutationInfo } from '@univerjs/core';
-import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
+import type { SpreadsheetSkeleton } from '@univerjs/sheets';
 import type { ISheetDrawing } from './sheet-drawing.service';
-import { toDisposable } from '@univerjs/core';
+import { type ICommandInfo, type IDisposable, type IMutationInfo, toDisposable } from '@univerjs/core';
 
 export interface ISheetDrawingTransformPlan {
     command: ICommandInfo;

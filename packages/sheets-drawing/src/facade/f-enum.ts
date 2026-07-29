@@ -16,7 +16,7 @@
 
 import { DrawingTypeEnum } from '@univerjs/core';
 import { FEnum } from '@univerjs/core/facade';
-import { SheetDrawingAnchorKind, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
+import { SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
 
 /**
  * @ignore
@@ -27,15 +27,12 @@ export interface IFSheetsDrawingEnumMixin {
 
     /** Please refer to {@link SheetDrawingAnchorType}. */
     SheetDrawingAnchorType: typeof SheetDrawingAnchorType;
-    /** Please refer to {@link SheetDrawingAnchorKind}. */
-    SheetDrawingAnchorKind: typeof SheetDrawingAnchorKind;
 }
 
 export class FSheetsDrawingEnumMixin extends FEnum implements IFSheetsDrawingEnumMixin {
     override get DrawingType(): typeof DrawingTypeEnum { return DrawingTypeEnum; };
 
     override get SheetDrawingAnchorType(): typeof SheetDrawingAnchorType { return SheetDrawingAnchorType; };
-    override get SheetDrawingAnchorKind(): typeof SheetDrawingAnchorKind { return SheetDrawingAnchorKind; };
 }
 
 FEnum.extend(FSheetsDrawingEnumMixin);

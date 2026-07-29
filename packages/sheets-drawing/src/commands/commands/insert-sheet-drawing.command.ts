@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand } from '@univerjs/core';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
-import type { ISheetDrawing } from '../../services/sheet-drawing.service';
 import {
     CommandType,
+    type IAccessor,
+    type ICommand,
     ICommandService,
     IUndoRedoService,
     sequenceExecute,
 } from '@univerjs/core';
-import { SheetInterceptorService } from '@univerjs/sheets';
-import { ISheetDrawingService } from '../../services/sheet-drawing.service';
+import { SheetInterceptorService, SheetSkeletonService } from '@univerjs/sheets';
+import { isSheetDrawingPlacementTarget, materializeSheetDrawingPlacement } from '../../services/sheet-drawing-placement';
+import { type ISheetDrawing, ISheetDrawingService, SheetDrawingAnchorType } from '../../services/sheet-drawing.service';
 import { DrawingApplyType, SetDrawingApplyMutation } from '../mutations/set-drawing-apply.mutation';
 import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
 
@@ -43,8 +44,16 @@ export const InsertSheetDrawingCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const sheetDrawingService = accessor.get(ISheetDrawingService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
+        const sheetSkeletonService = accessor.get(SheetSkeletonService);
 
-        const drawings = params.drawings;
+        const drawings = params.drawings.map((drawing) => {
+            if (!isSheetDrawingPlacementTarget(drawing) || drawing.anchorType === SheetDrawingAnchorType.None) {
+                return drawing;
+            }
+
+            const skeleton = sheetSkeletonService.ensureSkeleton(drawing.unitId, drawing.subUnitId);
+            return skeleton ? materializeSheetDrawingPlacement(drawing, skeleton) : drawing;
+        });
         const jsonOp = sheetDrawingService.getBatchAddOp(drawings) as IDrawingJsonUndo1;
         const { unitId, subUnitId, undo, redo, objects } = jsonOp;
 

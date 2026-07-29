@@ -15,17 +15,15 @@
  */
 
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { Disposable, Inject } from '@univerjs/core';
+import { Disposable } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import { SheetSkeletonService } from '@univerjs/sheets';
-import { drawingPositionToTransform, ISheetDrawingService } from '@univerjs/sheets-drawing';
+import { ISheetDrawingService } from '@univerjs/sheets-drawing';
 
 export class SheetsDrawingRenderController extends Disposable implements IRenderModule {
     constructor(
         private _context: IRenderContext,
         @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService,
-        @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
-        @Inject(SheetSkeletonService) private readonly _sheetSkeletonService: SheetSkeletonService
+        @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService
     ) {
         super();
 
@@ -39,20 +37,6 @@ export class SheetsDrawingRenderController extends Disposable implements IRender
     private _drawingInitializeListener() {
         // initialize drawing data and add to sheet canvas
         this._sheetDrawingService.initializeNotification(this._context.unitId);
-        const data = this._sheetDrawingService.getDrawingDataForUnit(this._context.unitId);
-        for (const subUnit in data) {
-            const subUnitData = data[subUnit];
-            for (const drawingId in subUnitData.data) {
-                const drawingData = subUnitData.data[drawingId];
-                const { unitId, subUnitId } = drawingData;
-                const skeletonParam = this._sheetSkeletonService.getSkeletonParam(unitId, subUnitId);
-
-                if (skeletonParam && drawingData.sheetTransform) {
-                    drawingData.transform = drawingPositionToTransform(drawingData.sheetTransform, skeletonParam);
-                }
-            }
-        }
-
         this._drawingManagerService.registerDrawingData(this._context.unitId, this._sheetDrawingService.getDrawingDataForUnit(this._context.unitId));
         this._drawingManagerService.initializeNotification(this._context.unitId);
     }

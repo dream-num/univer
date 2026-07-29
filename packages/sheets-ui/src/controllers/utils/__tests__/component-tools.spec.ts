@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import { SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { describe, expect, it, vi } from 'vitest';
+
 import { SHEET_VIEW_KEY } from '../../../common/keys';
+import { SHEET_VIEWPORT_KEY } from '../../../components/sheets';
 import { getCoordByCell, getCoordByOffset, getSheetObject, getTransformCoord } from '../component-tools';
 
 function createSheetComponents() {

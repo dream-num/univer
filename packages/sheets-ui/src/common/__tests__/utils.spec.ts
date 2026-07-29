@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import { SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { describe, expect, it } from 'vitest';
+
+import { SHEET_VIEWPORT_KEY } from '../../components/sheets';
 import {
     checkCellContentInRange,
     checkCellContentInRanges,

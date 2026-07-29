@@ -14,23 +14,26 @@
  * limitations under the License.
  */
 
-import type { IUniverInstanceService, Nullable } from '@univerjs/core';
-import type {
-    Engine,
-    IRenderContext,
-    IRenderManagerService,
-    Rect,
-    Scene,
-    Spreadsheet,
-    SpreadsheetColumnHeader,
-    SpreadsheetHeader,
-    SpreadsheetSkeleton,
-    Viewport,
-} from '@univerjs/engine-render';
-import { UniverInstanceType, Workbook } from '@univerjs/core';
-import { SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
+import type { SpreadsheetRenderSkeleton } from '../../components/sheets/sheet.render-skeleton';
+import {
+    type IUniverInstanceService,
+    type Nullable,
+    UniverInstanceType,
+    Workbook,
+} from '@univerjs/core';
 
+import {
+    type Engine,
+    type IRenderContext,
+    type IRenderManagerService,
+    type Rect,
+    type Scene,
+    Vector2,
+    type Viewport,
+} from '@univerjs/engine-render';
 import { SHEET_VIEW_KEY } from '../../common/keys';
+
+import { SHEET_VIEWPORT_KEY, type Spreadsheet, type SpreadsheetColumnHeader, type SpreadsheetHeader } from '../../components/sheets';
 
 export interface ISheetObjectParam {
     spreadsheet: Spreadsheet;
@@ -97,7 +100,7 @@ export function getSheetObject(
     };
 }
 
-export function getCoordByCell(row: number, col: number, scene: Scene, skeleton: SpreadsheetSkeleton) {
+export function getCoordByCell(row: number, col: number, scene: Scene, skeleton: SpreadsheetRenderSkeleton) {
     const { startX, startY, endX, endY } = skeleton.getCellWithCoordByIndex(row, col);
     return { startX, startY, endX, endY };
 }
@@ -106,7 +109,7 @@ export function getCoordByOffset(
     evtOffsetX: number,
     evtOffsetY: number,
     scene: Scene,
-    skeleton: SpreadsheetSkeleton,
+    skeleton: SpreadsheetRenderSkeleton,
     viewport?: Viewport,
     closeFirst?: boolean
 ) {
@@ -143,7 +146,7 @@ export function getCoordByOffset(
     };
 }
 
-export function getTransformCoord(evtOffsetX: number, evtOffsetY: number, scene: Scene, skeleton: SpreadsheetSkeleton) {
+export function getTransformCoord(evtOffsetX: number, evtOffsetY: number, scene: Scene, skeleton: SpreadsheetRenderSkeleton) {
     const relativeCoords = scene.getCoordRelativeToViewport(Vector2.FromArray([evtOffsetX, evtOffsetY]));
 
     const viewMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);

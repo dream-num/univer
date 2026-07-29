@@ -14,15 +14,42 @@
  * limitations under the License.
  */
 
-import type { ICellRenderContext, IPaddingData } from '@univerjs/core';
 import type { IBaseDataValidationWidget } from '@univerjs/data-validation';
-import type { IMouseEvent, IPointerEvent, SpreadsheetSkeleton, UniverRenderingContext, UniverRenderingContext2D } from '@univerjs/engine-render';
-import type { ListValidator } from '@univerjs/sheets-data-validation';
-import type { IShowDataValidationDropdownParams } from '../../commands/operations/data-validation.operation';
-import { DataValidationRenderMode, DataValidationType, DEFAULT_STYLES, HorizontalAlign, ICommandService, Inject, IUniverInstanceService, LocaleService, UniverInstanceType, VerticalAlign, WrapStrategy } from '@univerjs/core';
-import { CURSOR_TYPE, DocSimpleSkeleton, getCurrentTypeOfRenderer, getFontStyleString, IRenderManagerService, Rect, Text } from '@univerjs/engine-render';
-import { getCellValueOrigin, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
-import { ShowDataValidationDropdown } from '../../commands/operations/data-validation.operation';
+
+import type { SpreadsheetRenderSkeleton } from '@univerjs/sheets-ui';
+import {
+    DataValidationRenderMode,
+    DataValidationType,
+    DEFAULT_STYLES,
+    HorizontalAlign,
+    type ICellRenderContext,
+    ICommandService,
+    Inject,
+    type IPaddingData,
+    IUniverInstanceService,
+    LocaleService,
+    UniverInstanceType,
+    VerticalAlign,
+    WrapStrategy,
+} from '@univerjs/core';
+import {
+    CURSOR_TYPE,
+    DocSimpleSkeleton,
+    getCurrentTypeOfRenderer,
+    getFontStyleString,
+    type IMouseEvent,
+    type IPointerEvent,
+    IRenderManagerService,
+    Rect,
+    Text,
+    type UniverRenderingContext,
+    type UniverRenderingContext2D,
+} from '@univerjs/engine-render';
+import { getCellValueOrigin, type ListValidator, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
+import {
+    type IShowDataValidationDropdownParams,
+    ShowDataValidationDropdown,
+} from '../../commands/operations/data-validation.operation';
 import { DROP_DOWN_DEFAULT_COLOR } from '../../const';
 
 /**
@@ -146,7 +173,7 @@ export class DropdownWidget implements IBaseDataValidationWidget {
     }
 
     // eslint-disable-next-line max-lines-per-function, complexity
-    drawWith(ctx: UniverRenderingContext2D, info: ICellRenderContext, skeleton: SpreadsheetSkeleton): void {
+    drawWith(ctx: UniverRenderingContext2D, info: ICellRenderContext, skeleton: SpreadsheetRenderSkeleton): void {
         const { primaryWithCoord, row, col, style, data, subUnitId } = info;
         const _cellBounding = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo : primaryWithCoord;
         const _row = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo.startRow : row;

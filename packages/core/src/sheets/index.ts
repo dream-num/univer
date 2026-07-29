@@ -17,7 +17,6 @@
 export * from './clone';
 export { getEmptySnapshot as getSheetsEmptySnapshot } from './empty-snapshot';
 export { Range } from './range';
-export * from './sheet-skeleton';
 export {
     DEFAULT_WORKSHEET_COLUMN_COUNT,
     DEFAULT_WORKSHEET_COLUMN_COUNT_KEY,
@@ -45,4 +44,10 @@ export {
 } from './util';
 export { SheetViewModel } from './view-model';
 export { getWorksheetUID, Workbook } from './workbook';
-export { extractPureTextFromCell, getDisplayValueFromCell, getOriginCellValue, Worksheet } from './worksheet';
+export {
+    extractPureTextFromCell,
+    getDisplayValueFromCell,
+    getOriginCellValue,
+    type IDocumentLayoutObject,
+    Worksheet,
+} from './worksheet';

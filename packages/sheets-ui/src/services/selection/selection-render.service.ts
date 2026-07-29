@@ -14,17 +14,50 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IRangeWithCoord, Nullable, Workbook } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, Viewport } from '@univerjs/engine-render';
-import type { ISelectionWithCoord, ISelectionWithStyle, ISetSelectionsOperationParams, WorkbookSelectionModel } from '@univerjs/sheets';
-import type { ISheetObjectParam } from '../../controllers/utils/component-tools';
+import { SHEET_VIEWPORT_KEY } from '../../components/sheets';
+
+import {
+    ICommandService,
+    IContextService,
+    type IDisposable,
+    ILogService,
+    Inject,
+    Injector,
+    type IRangeWithCoord,
+    type Nullable,
+    RANGE_TYPE,
+    Rectangle,
+    set,
+    ThemeService,
+    toDisposable,
+    type Workbook,
+} from '@univerjs/core';
+import {
+    type IMouseEvent,
+    type IPointerEvent,
+    type IRenderContext,
+    type IRenderModule,
+    ScrollTimerType,
+    Vector2,
+    type Viewport,
+} from '@univerjs/engine-render';
+import {
+    convertSelectionDataToRange,
+    type ISelectionWithCoord,
+    type ISelectionWithStyle,
+    type ISetSelectionsOperationParams,
+    REF_SELECTIONS_ENABLED,
+    SelectionMoveType,
+    SELECTIONS_ENABLED,
+    SetSelectionsOperation,
+    SheetsSelectionsService,
+    type WorkbookSelectionModel,
+} from '@univerjs/sheets';
+import { getCoordByOffset, getSheetObject, type ISheetObjectParam } from '../../controllers/utils/component-tools';
 import type { SelectionControl } from './selection-control';
-import { ICommandService, IContextService, ILogService, Inject, Injector, RANGE_TYPE, Rectangle, set, ThemeService, toDisposable } from '@univerjs/core';
-import { ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
-import { attachSelectionWithCoord, convertSelectionDataToRange, REF_SELECTIONS_ENABLED, SelectionMoveType, SELECTIONS_ENABLED, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
 import { distinctUntilChanged, merge, startWith } from 'rxjs';
-import { getCoordByOffset, getSheetObject } from '../../controllers/utils/component-tools';
+import { attachRenderSelectionWithCoord } from '../../common/skeleton-util';
 
 import { isThisColSelected, isThisRowSelected } from '../../controllers/utils/selections-tools';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
@@ -388,7 +421,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
         }
         const selectionWithStyle: ISelectionWithStyle = { range: selectCell, primary: selectCell, style: null };
         selectionWithStyle.range.rangeType = rangeType;
-        const selectionCellWithCoord = attachSelectionWithCoord(selectionWithStyle, this._skeleton);
+        const selectionCellWithCoord = attachRenderSelectionWithCoord(selectionWithStyle, this._skeleton);
         this._startRangeWhenPointerDown = { ...selectionCellWithCoord.rangeWithCoord };
 
         let activeSelectionControl: Nullable<SelectionControl> = this.getActiveSelectionControl();

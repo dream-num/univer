@@ -14,13 +14,20 @@
  * limitations under the License.
  */
 
-import type { IWorkbookData } from '@univerjs/core';
-import { Disposable, DisposableCollection, ICommandService, IUniverInstanceService, LocaleType, UniverInstanceType } from '@univerjs/core';
+import {
+    Disposable,
+    DisposableCollection,
+    ICommandService,
+    type IWorkbookData,
+    LocaleType,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
-import { CancelFrozenCommand, SetFrozenMutation, SetSelectionsOperation, SheetSkeletonService } from '@univerjs/sheets';
+import { CancelFrozenCommand, SetFrozenMutation, SetSelectionsOperation } from '@univerjs/sheets';
 import { BehaviorSubject } from 'rxjs';
 import { SheetScrollManagerService } from '../../../services/scroll-manager.service';
 import { SelectAllService } from '../../../services/select-all/select-all.service';
+import { SheetRenderSkeletonService } from '../../../services/sheet-render-skeleton.service';
 import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
 import { ShortcutExperienceService } from '../../../services/shortcut-experience.service';
 import {
@@ -195,9 +202,7 @@ export function createFrozenCommandTestBed(workbookData?: IWorkbookData) {
 
     const unitId = sheet.getUnitId();
     const injector = univer.__getInjector();
-    injector.add([SheetSkeletonService]);
-    // NOTE: this is a hack. Please refer to ./services/clipboard/__tests__/clipboard-test-bed.ts
-    const mockSheetSkService = new SheetSkeletonService(injector, get(IUniverInstanceService));
+    injector.add([SheetRenderSkeletonService]);
     const fakeSheetSkeletonManagerService = new SheetSkeletonManagerService({
         unit: sheet,
         unitId,
@@ -211,7 +216,7 @@ export function createFrozenCommandTestBed(workbookData?: IWorkbookData) {
         activated$: new BehaviorSubject(true),
         activate: () => {},
         deactivate: () => {},
-    }, injector.get(SheetSkeletonService));
+    }, injector.get(SheetRenderSkeletonService));
 
     injector.add([SheetSkeletonManagerService, { useValue: fakeSheetSkeletonManagerService }]);
     injector.get(IRenderManagerService).addRender(unitId, {

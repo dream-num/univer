@@ -14,42 +14,20 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IMutationInfo, IRange, ITransformState, Nullable } from '@univerjs/core';
-import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
-import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
-import type {
-    IDeleteRangeMoveLeftCommandParams,
-    IDeleteRangeMoveUpCommandParams,
-    IDeltaColumnWidthCommandParams,
-    IDeltaRowHeightCommandParams,
-    IInsertColCommandParams,
-    IInsertRangeMoveDownCommandParams,
-    IInsertRangeMoveRightCommandParams,
-    IInsertRowCommandParams,
-    IMoveColsCommandParams,
-    IMoveRangeCommandParams,
-    IMoveRowsCommandParams,
-    IRemoveRowColCommandParams,
-    ISetColHiddenCommandParams,
-    ISetColHiddenMutationParams,
-    ISetColVisibleMutationParams,
-    ISetColWidthCommandParams,
-    ISetRowHeightCommandParams,
-    ISetRowHiddenCommandParams,
-    ISetRowHiddenMutationParams,
-    ISetRowVisibleMutationParams,
-    ISetSpecificColsVisibleCommandParams,
-    ISetSpecificRowsVisibleCommandParams,
-    ISetWorksheetColWidthMutationParams,
-    ISetWorksheetRowAutoHeightMutationParams,
-    ISetWorksheetRowHeightMutationParams,
-    ISetWorksheetRowIsAutoHeightMutationParams,
-    ISheetSkeletonManagerParam,
-} from '@univerjs/sheets';
-import type { ISheetDrawingTransformExtensionResult, ISheetDrawingTransformPlan } from '../services/sheet-drawing-transform-plan.service';
-import type { ISheetDrawing, ISheetDrawingPosition } from '../services/sheet-drawing.service';
-import { Disposable, ICommandService, Inject, IUniverInstanceService, RANGE_TYPE, Rectangle } from '@univerjs/core';
-import { IDrawingManagerService } from '@univerjs/drawing';
+import {
+    Disposable,
+    type ICommandInfo,
+    ICommandService,
+    type IMutationInfo,
+    Inject,
+    type IRange,
+    type ITransformState,
+    IUniverInstanceService,
+    type Nullable,
+    RANGE_TYPE,
+    Rectangle,
+} from '@univerjs/core';
+import { type IDrawingJsonUndo1, IDrawingManagerService } from '@univerjs/drawing';
 import {
     attachRangeWithCoord,
     DeleteRangeMoveLeftCommand,
@@ -57,10 +35,37 @@ import {
     DeltaColumnWidthCommand,
     DeltaRowHeightCommand,
     getSheetCommandTarget,
+    type IDeleteRangeMoveLeftCommandParams,
+    type IDeleteRangeMoveUpCommandParams,
+    type IDeltaColumnWidthCommandParams,
+    type IDeltaRowHeightCommandParams,
+    type IInsertColCommandParams,
+    type IInsertRangeMoveDownCommandParams,
+    type IInsertRangeMoveRightCommandParams,
+    type IInsertRowCommandParams,
+    type IMoveColsCommandParams,
+    type IMoveRangeCommandParams,
+    type IMoveRowsCommandParams,
     InsertColCommand,
     InsertRangeMoveDownCommand,
     InsertRangeMoveRightCommand,
     InsertRowCommand,
+    type IRemoveRowColCommandParams,
+    type ISetColHiddenCommandParams,
+    type ISetColHiddenMutationParams,
+    type ISetColVisibleMutationParams,
+    type ISetColWidthCommandParams,
+    type ISetRowHeightCommandParams,
+    type ISetRowHiddenCommandParams,
+    type ISetRowHiddenMutationParams,
+    type ISetRowVisibleMutationParams,
+    type ISetSpecificColsVisibleCommandParams,
+    type ISetSpecificRowsVisibleCommandParams,
+    type ISetWorksheetColWidthMutationParams,
+    type ISetWorksheetRowAutoHeightMutationParams,
+    type ISetWorksheetRowHeightMutationParams,
+    type ISetWorksheetRowIsAutoHeightMutationParams,
+    type ISheetSkeletonManagerParam,
     MoveColsCommand,
     MoveRangeCommand,
     MoveRowsCommand,
@@ -83,12 +88,23 @@ import {
     SheetInterceptorService,
     SheetSkeletonService,
     SheetsSelectionsService,
+    type SpreadsheetSkeleton,
 } from '@univerjs/sheets';
 import { drawingPositionToTransform, transformToAxisAlignPosition, transformToDrawingPosition } from '../basics/transform-position';
 import { DrawingApplyType, SetDrawingApplyMutation } from '../commands/mutations/set-drawing-apply.mutation';
 import { ClearSheetDrawingTransformerOperation } from '../commands/operations/clear-drawing-transformer.operation';
-import { SheetDrawingTransformPlanService } from '../services/sheet-drawing-transform-plan.service';
-import { ISheetDrawingService, SheetDrawingAnchorType } from '../services/sheet-drawing.service';
+import { isSheetDrawingPlacementTarget, materializeSheetDrawingPlacement } from '../services/sheet-drawing-placement';
+import {
+    type ISheetDrawingTransformExtensionResult,
+    type ISheetDrawingTransformPlan,
+    SheetDrawingTransformPlanService,
+} from '../services/sheet-drawing-transform-plan.service';
+import {
+    type ISheetDrawing,
+    type ISheetDrawingPosition,
+    ISheetDrawingService,
+    SheetDrawingAnchorType,
+} from '../services/sheet-drawing.service';
 
 enum RangeMoveUndoType {
     deleteLeft,
@@ -318,13 +334,21 @@ export class SheetDrawingTransformAffectedController extends Disposable {
             if (!patch.drawingId) return;
             const original = originals.get(patch.drawingId);
             if (!original) return;
-            plan.updates.set(patch.drawingId, {
+            if (original.anchorType === SheetDrawingAnchorType.None || !isSheetDrawingPlacementTarget(original)) {
+                return;
+            }
+            const updated = {
                 ...original,
                 ...patch,
                 transform: { ...original.transform, ...patch.transform },
                 sheetTransform: patch.sheetTransform ?? original.sheetTransform,
                 axisAlignSheetTransform: patch.axisAlignSheetTransform ?? original.axisAlignSheetTransform,
-            });
+            };
+            if ((updated.anchorType ?? SheetDrawingAnchorType.Position) === SheetDrawingAnchorType.Position) {
+                updated.transform.width = original.transform?.width;
+                updated.transform.height = original.transform?.height;
+            }
+            plan.updates.set(patch.drawingId, materializeSheetDrawingPlacement(updated, skeleton));
         });
 
         const feature = this._transformPlanService.transform(plan);

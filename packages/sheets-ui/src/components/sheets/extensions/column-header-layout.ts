@@ -1,0 +1,258 @@
+/**
+ * Copyright 2023-present DreamNum Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import type { IAColumnCfg, IAColumnCfgObj, IHeaderStyleCfg } from '../interfaces';
+import type { SpreadsheetRenderSkeleton } from '../sheet.render-skeleton';
+import { type IScale, numberToABC } from '@univerjs/core';
+import {
+    DEFAULT_FONTFACE_PLANE,
+    FIX_ONE_PIXEL_BLUR_OFFSET,
+    getColor,
+    MIDDLE_CELL_POS_MAGIC_NUMBER,
+    SheetColumnHeaderExtensionRegistry,
+    type UniverRenderingContext,
+} from '@univerjs/engine-render';
+import { SheetExtension } from './sheet-extension';
+
+const UNIQUE_KEY = 'DefaultColumnHeaderLayoutExtension';
+
+export interface IColumnsHeaderCfgParam {
+    headerStyle?: Partial<IHeaderStyleCfg>;
+    columnsCfg?: Record<number, IAColumnCfg>;
+}
+
+const DEFAULT_COLUMN_STYLE = {
+    fontSize: 13,
+    fontFamily: DEFAULT_FONTFACE_PLANE,
+    fontColor: '#000000',
+    backgroundColor: getColor([248, 249, 250]),
+    borderColor: getColor([217, 217, 217]),
+    textAlign: 'center',
+    textBaseline: 'middle',
+} as const;
+
+/**
+ * Column Header Bar, include a lot of columns header
+ */
+export class ColumnHeaderLayout extends SheetExtension {
+    override uKey = UNIQUE_KEY;
+    override Z_INDEX = 10;
+    // The workbook columns configuration and header style
+    columnsCfg: Record<number, IAColumnCfg> = {};
+    headerStyle: Partial<IHeaderStyleCfg> = {};
+    // Map of column configurations and header styles for each worksheet, where the key is worksheet id
+    columnsCfgOfWorksheet: Map<string, Record<number, IAColumnCfg>> = new Map();
+    headerStyleOfWorksheet: Map<string, Partial<IHeaderStyleCfg>> = new Map();
+
+    constructor(cfg?: IColumnsHeaderCfgParam) {
+        super();
+        if (cfg) {
+            this.configHeaderColumn(cfg);
+        }
+    }
+
+    configHeaderColumn(cfg: IColumnsHeaderCfgParam, sheetId?: string): void {
+        if (sheetId) {
+            this.columnsCfgOfWorksheet.set(sheetId, cfg.columnsCfg ?? {});
+            this.headerStyleOfWorksheet.set(sheetId, cfg.headerStyle ?? {});
+        } else {
+            this.columnsCfg = cfg.columnsCfg ?? {};
+            this.headerStyle = cfg.headerStyle ?? {};
+        }
+    }
+
+    getColumnsCfg(sheetId: string): Record<number, IAColumnCfg> {
+        const columnsCfg = this.columnsCfgOfWorksheet.get(sheetId) ?? {};
+        return { ...this.columnsCfg, ...columnsCfg };
+    }
+
+    getHeaderStyle(sheetId: string): IHeaderStyleCfg {
+        const headerStyle = this.headerStyleOfWorksheet.get(sheetId) ?? {};
+        return { ...DEFAULT_COLUMN_STYLE, ...this.headerStyle, ...headerStyle };
+    }
+
+    getCfgOfCurrentColumn(columnsCfg: Record<number, IAColumnCfg>, headerStyle: IHeaderStyleCfg, colIndex: number): [IAColumnCfgObj, boolean] {
+        let mergeWithSpecCfg;
+        let curColSpecCfg;
+
+        if (columnsCfg[colIndex]) {
+            if (typeof columnsCfg[colIndex] == 'string') {
+                columnsCfg[colIndex] = { text: columnsCfg[colIndex] } as IAColumnCfgObj;
+            }
+            curColSpecCfg = columnsCfg[colIndex] as IHeaderStyleCfg & { text: string };
+            mergeWithSpecCfg = { ...headerStyle, ...curColSpecCfg };
+        } else {
+            mergeWithSpecCfg = { ...headerStyle, text: numberToABC(colIndex) };
+        }
+        const specStyle = Object.keys(curColSpecCfg || {}).length > 1; // if cfg have more keys than 'text', means there would be special style config for this column.
+        return [mergeWithSpecCfg, specStyle] as [IAColumnCfgObj, boolean];
+    }
+
+    setStyleToCtx(ctx: UniverRenderingContext, columnStyle: Partial<IHeaderStyleCfg>): void {
+        if (columnStyle.textAlign) ctx.textAlign = columnStyle.textAlign;
+        if (columnStyle.textBaseline) ctx.textBaseline = columnStyle.textBaseline;
+        if (columnStyle.fontColor) ctx.fillStyle = columnStyle.fontColor;
+        if (columnStyle.borderColor) ctx.strokeStyle = columnStyle.borderColor;
+        if (columnStyle.fontSize) ctx.font = `${columnStyle.fontSize}px ${DEFAULT_FONTFACE_PLANE}`;
+    }
+
+    // eslint-disable-next-line max-lines-per-function
+    override draw(ctx: UniverRenderingContext, parentScale: IScale, spreadsheetSkeleton: SpreadsheetRenderSkeleton): void {
+        const { rowColumnSegment, columnHeaderHeight = 0 } = spreadsheetSkeleton;
+        const { startColumn, endColumn } = rowColumnSegment;
+
+        if (!spreadsheetSkeleton || columnHeaderHeight === 0) {
+            return;
+        }
+
+        const { rowHeightAccumulation, columnTotalWidth, columnWidthAccumulation, rowTotalHeight, worksheet } = spreadsheetSkeleton;
+
+        if (
+            !rowHeightAccumulation ||
+            !columnWidthAccumulation ||
+            columnTotalWidth === undefined ||
+            rowTotalHeight === undefined
+        ) {
+            return;
+        }
+
+        const columnsCfg = this.getColumnsCfg(worksheet.getSheetId());
+        const headerStyle = this.getHeaderStyle(worksheet.getSheetId());
+
+        const scale = this._getScale(parentScale);
+        this.setStyleToCtx(ctx, headerStyle);
+
+        // background
+        ctx.save();
+        ctx.fillStyle = headerStyle.backgroundColor;
+        ctx.fillRectByPrecision(0, 0, columnTotalWidth, columnHeaderHeight);
+        ctx.restore();
+
+        ctx.setLineWidthByPrecision(1);
+        ctx.translateWithPrecisionRatio(FIX_ONE_PIXEL_BLUR_OFFSET, FIX_ONE_PIXEL_BLUR_OFFSET);
+        let preColumnPosition = 0;
+        const colGaps = spreadsheetSkeleton.gapConfig?.colGaps;
+
+        // draw each column header
+        for (let c = startColumn - 1; c <= endColumn; c++) {
+            if (c < 0 || c > columnWidthAccumulation.length - 1) {
+                continue;
+            }
+
+            const columnEndPosition = columnWidthAccumulation[c];
+            if (preColumnPosition === columnEndPosition) {
+                continue;// Skip hidden columns
+            }
+
+            // Draw gap area in column header if a gap is configured before this column
+            const gapSize = colGaps?.[c]?.size ?? 0;
+            if (gapSize > 0) {
+                const gapItem = colGaps![c];
+                const gapLeft = preColumnPosition;
+                const gapRight = preColumnPosition + gapSize;
+                // defaultBackgroundColor and defaultStripeColor are guaranteed by SheetSkeleton._fillDefaultGapThemeColors
+                const { defaultBackgroundColor = '', defaultStripeColor = '' } = spreadsheetSkeleton.gapConfig || {};
+                const defaultBg = defaultBackgroundColor;
+                const defaultStripe = defaultStripeColor;
+
+                // Fill gap background
+                ctx.save();
+                ctx.fillStyle = gapItem.color ?? defaultBg;
+                ctx.fillRectByPrecision(gapLeft, 0, gapSize, columnHeaderHeight);
+                ctx.restore();
+
+                // Draw diagonal stripes
+                ctx.save();
+                ctx.beginPath();
+                ctx.rectByPrecision(gapLeft, 0, gapSize, columnHeaderHeight);
+                ctx.clip();
+                ctx.strokeStyle = gapItem.stripeColor ?? defaultStripe;
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                const spacing = 6;
+                for (let d = -columnHeaderHeight; d < gapSize; d += spacing) {
+                    ctx.moveTo(gapLeft + d, columnHeaderHeight);
+                    ctx.lineTo(gapLeft + d + columnHeaderHeight, 0);
+                }
+                ctx.stroke();
+                ctx.restore();
+
+                preColumnPosition = gapRight;
+            }
+
+            // After gap, the column itself may still be hidden (width = 0)
+            if (preColumnPosition >= columnEndPosition) {
+                preColumnPosition = columnEndPosition;
+                continue;
+            }
+
+            const cellBound = { left: preColumnPosition, top: 0, right: columnEndPosition, bottom: columnHeaderHeight, width: columnEndPosition - preColumnPosition, height: columnHeaderHeight };
+            const [curColumnCfg, specStyle] = this.getCfgOfCurrentColumn(columnsCfg, headerStyle, c);
+
+            // background
+            if (specStyle && curColumnCfg.backgroundColor) {
+                ctx.save();
+                ctx.fillStyle = curColumnCfg.backgroundColor;
+                ctx.fillRectByPrecision(cellBound.left, cellBound.top, cellBound.width, cellBound.height);
+                ctx.restore();
+            }
+
+            // vertical line border
+            ctx.beginPath();
+            ctx.moveToByPrecision(cellBound.right, 0);
+            ctx.lineToByPrecision(cellBound.right, cellBound.height);
+            ctx.stroke();
+            // column header text
+            const textX = (() => {
+                switch (curColumnCfg.textAlign) {
+                    case 'center':
+                        return cellBound.left + (cellBound.right - cellBound.left) / 2;
+                    case 'right':
+                        return cellBound.right - MIDDLE_CELL_POS_MAGIC_NUMBER * 3;
+                    case 'left':
+                        return cellBound.left + MIDDLE_CELL_POS_MAGIC_NUMBER * 3;
+                    default: // center
+                        return cellBound.left + (cellBound.right - cellBound.left) / 2;
+                }
+            })();
+            const middleYCellRect = cellBound.height / 2 + MIDDLE_CELL_POS_MAGIC_NUMBER; // Magic number 1, because the vertical alignment appears to be off by 1 pixel
+
+            if (specStyle) {
+                ctx.save();
+                ctx.beginPath();
+                this.setStyleToCtx(ctx, curColumnCfg);
+                ctx.rectByPrecision(cellBound.left, cellBound.top, cellBound.width, cellBound.height);
+                ctx.clip();
+            }
+
+            ctx.fillText(curColumnCfg.text, textX, middleYCellRect);
+            if (specStyle) {
+                ctx.restore();
+            }
+
+            preColumnPosition = columnEndPosition;
+        }
+
+        // border bottom line
+        const columnHeaderHeightFix = columnHeaderHeight - 0.5 / scale;
+        ctx.beginPath();
+        ctx.moveToByPrecision(0, columnHeaderHeightFix);
+        ctx.lineToByPrecision(columnTotalWidth, columnHeaderHeightFix);
+        ctx.stroke();
+    }
+}
+
+SheetColumnHeaderExtensionRegistry.add(new ColumnHeaderLayout());

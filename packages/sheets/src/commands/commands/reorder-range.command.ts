@@ -14,13 +14,23 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand, IRange } from '@univerjs/core';
-import type { IReorderRangeMutationParams } from '../mutations/reorder-range.mutation';
+import {
+    CommandType,
+    type IAccessor,
+    type ICommand,
+    ICommandService,
+    type IRange,
+    IUndoRedoService,
+    sequenceExecute,
+} from '@univerjs/core';
+import {
+    type IReorderRangeMutationParams,
+    ReorderRangeMutation,
+    ReorderRangeUndoMutationFactory,
+} from '../mutations/reorder-range.mutation';
 import type { ISheetCommandSharedParams } from '../utils/interface';
-import { CommandType, ICommandService, IUndoRedoService, sequenceExecute } from '@univerjs/core';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { SheetSkeletonService } from '../../skeleton/skeleton.service';
-import { ReorderRangeMutation, ReorderRangeUndoMutationFactory } from '../mutations/reorder-range.mutation';
 import { getSuitableRangesInView } from './util';
 
 export interface IReorderRangeCommandParams extends ISheetCommandSharedParams {
@@ -67,7 +77,8 @@ export const ReorderRangeCommand: ICommand<IReorderRangeCommandParams> = {
         ];
 
         const result = sequenceExecute(redos, commandService);
-        const { suitableRanges, remainingRanges } = getSuitableRangesInView([range], accessor.get(SheetSkeletonService).getSkeleton(unitId, subUnitId));
+        const skeleton = accessor.get(SheetSkeletonService).getSkeleton(unitId, subUnitId);
+        const { suitableRanges, remainingRanges } = getSuitableRangesInView([range], skeleton?.worksheet.getColumnCount() ?? null);
         const { undos: autoHeightUndos, redos: autoHeightRedos } = sheetInterceptorService.generateMutationsOfAutoHeight({
             unitId,
             subUnitId,

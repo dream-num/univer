@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-import type {
-    ICellWithCoord,
-    IRange,
-    IRangeWithCoord,
-    ISelection,
-    ISelectionCell,
-    Nullable,
+import {
+    getCellInfoInMergeData,
+    type ICellWithCoord,
+    type IRange,
+    type IRangeWithCoord,
+    type ISelection,
+    type ISelectionCell,
+    makeCellRangeToRangeData,
+    type Nullable,
 } from '@univerjs/core';
-import { getCellInfoInMergeData, makeCellRangeToRangeData } from '@univerjs/core';
 
 export const SELECTION_CONTROL_BORDER_BUFFER_WIDTH = 1.5; // The draggable range of the selection is too thin, making it easy for users to miss. Therefore, a buffer gap is provided to make it easier for users to select.
 
@@ -142,7 +143,7 @@ export interface ISelectionStyle {
 export interface ISelectionWithCoord {
     rangeWithCoord: IRangeWithCoord;
     primaryWithCoord: Nullable<ICellWithCoord>;
-    style?: Nullable<ISelectionStyle>;
+    style?: Nullable<Partial<ISelectionStyle>>;
 }
 
 /**

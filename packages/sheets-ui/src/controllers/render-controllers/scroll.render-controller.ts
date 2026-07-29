@@ -14,29 +14,57 @@
  * limitations under the License.
  */
 
-import type { IFreeze, IRange, IWorksheetData, Nullable, Workbook } from '@univerjs/core';
-import type { IRenderContext, IRenderModule, IScrollObserverParam, IWheelEvent, Viewport } from '@univerjs/engine-render';
-import type { IScrollToCellOperationParams, ISetSelectionsOperationParams, SheetsSelectionsService } from '@univerjs/sheets';
-import type { IScrollCommandParams } from '../../commands/commands/set-scroll.command';
-import type { IExpandSelectionCommandParams } from '../../commands/commands/set-selection.command';
-import type { IScrollState, IScrollStateSearchParam, IViewportScrollState } from '../../services/scroll-manager.service';
 import {
     Direction,
     Disposable,
     FOCUSING_SHEET,
     ICommandService,
     IContextService,
+    type IFreeze,
     Inject,
     Injector,
+    type IRange,
+    type IWorksheetData,
+    type Nullable,
     RANGE_TYPE,
     toDisposable,
     Tools,
+    type Workbook,
 } from '@univerjs/core';
-import { IRenderManagerService, RENDER_CLASS_TYPE, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
-import { getSelectionsService, ScrollToCellOperation, SetSelectionsOperation } from '@univerjs/sheets';
-import { ScrollCommand, SetScrollRelativeCommand } from '../../commands/commands/set-scroll.command';
-import { ExpandSelectionCommand } from '../../commands/commands/set-selection.command';
-import { SheetScrollManagerService } from '../../services/scroll-manager.service';
+
+import {
+    type IRenderContext,
+    IRenderManagerService,
+    type IRenderModule,
+    type IScrollObserverParam,
+    type IWheelEvent,
+    RENDER_CLASS_TYPE,
+    type Viewport,
+} from '@univerjs/engine-render';
+import {
+    getSelectionsService,
+    type IScrollToCellOperationParams,
+    type ISetSelectionsOperationParams,
+    ScrollToCellOperation,
+    SetSelectionsOperation,
+    type SheetsSelectionsService,
+} from '@univerjs/sheets';
+import {
+    type IScrollCommandParams,
+    ScrollCommand,
+    SetScrollRelativeCommand,
+} from '../../commands/commands/set-scroll.command';
+import {
+    ExpandSelectionCommand,
+    type IExpandSelectionCommandParams,
+} from '../../commands/commands/set-selection.command';
+import { SHEET_VIEWPORT_KEY } from '../../components/sheets';
+import {
+    type IScrollState,
+    type IScrollStateSearchParam,
+    type IViewportScrollState,
+    SheetScrollManagerService,
+} from '../../services/scroll-manager.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { getSheetObject } from '../utils/component-tools';
 
@@ -473,7 +501,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
     }
 
     private _getFreeze(): Nullable<IFreeze> {
-        const snapshot: IWorksheetData | undefined = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton.getWorksheetConfig();
+        const snapshot: IWorksheetData | undefined = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton.worksheet.getSnapshot();
         if (snapshot == null) {
             return;
         }

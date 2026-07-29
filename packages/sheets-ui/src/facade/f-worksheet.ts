@@ -14,33 +14,36 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IRange, ISelectionCell, Nullable } from '@univerjs/core';
-import type {
-    IColumnsHeaderCfgParam,
-    IRowsHeaderCfgParam,
-    RenderComponentType,
-    SpreadsheetColumnHeader,
-    SpreadsheetRowHeader,
-    SpreadsheetSkeleton,
-} from '@univerjs/engine-render';
-import type { ISelectionStyle } from '@univerjs/sheets';
-import type { IScrollState } from '@univerjs/sheets-ui';
-import type { FRange } from '@univerjs/sheets/facade';
-import { ICommandService, toDisposable } from '@univerjs/core';
-import { IRenderManagerService, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
-import { SetWorksheetRowIsAutoHeightCommand } from '@univerjs/sheets';
 import {
+    ICommandService,
+    type IDisposable,
+    type IRange,
+    type ISelectionCell,
+    type Nullable,
+    toDisposable,
+} from '@univerjs/core';
+
+import { IRenderManagerService, type RenderComponentType } from '@univerjs/engine-render';
+import { type ISelectionStyle, SetWorksheetRowIsAutoHeightCommand } from '@univerjs/sheets';
+import {
+    type IColumnsHeaderCfgParam,
     IMarkSelectionService,
+    type IRowsHeaderCfgParam,
+    type IScrollState,
     SetColumnHeaderHeightCommand,
     SetRowHeaderWidthCommand,
     SetWorksheetColAutoWidthCommand,
     SetZoomRatioCommand,
     SHEET_VIEW_KEY,
+    SHEET_VIEWPORT_KEY,
     SheetScrollManagerService,
     SheetSkeletonManagerService,
     SheetsScrollRenderController,
+    type SpreadsheetColumnHeader,
+    type SpreadsheetRenderSkeleton,
+    type SpreadsheetRowHeader,
 } from '@univerjs/sheets-ui';
-import { FWorksheet } from '@univerjs/sheets/facade';
+import { type FRange, FWorksheet } from '@univerjs/sheets/facade';
 
 /**
  * @ignore
@@ -189,7 +192,7 @@ export interface IFWorksheetUIMixin {
 
     /**
      * Get the skeleton service of the worksheet.
-     * @returns {Nullable<SpreadsheetSkeleton>} The skeleton of the worksheet.
+     * @returns {Nullable<SpreadsheetRenderSkeleton>} The skeleton of the worksheet.
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -199,7 +202,7 @@ export interface IFWorksheetUIMixin {
      * console.log(skeleton);
      * ```
      */
-    getSkeleton(): Nullable<SpreadsheetSkeleton>;
+    getSkeleton(): Nullable<SpreadsheetRenderSkeleton>;
 
     /**
      * Sets the width of the given column to fit its contents.
@@ -455,7 +458,7 @@ export class FWorksheetUIMixin extends FWorksheet implements IFWorksheetUIMixin 
         return scrollState || emptyScrollState;
     }
 
-    override getSkeleton(): Nullable<SpreadsheetSkeleton> {
+    override getSkeleton(): Nullable<SpreadsheetRenderSkeleton> {
         const service = this._injector.get(IRenderManagerService).getRenderUnitById(this._workbook.getUnitId())?.with(SheetSkeletonManagerService);
         return service?.getSkeleton(this._worksheet.getSheetId());
     }

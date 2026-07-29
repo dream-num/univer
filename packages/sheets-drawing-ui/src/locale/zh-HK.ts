@@ -63,8 +63,8 @@ const locale: typeof enUS = {
         'drawing-anchor': {
             title: '錨點屬性',
             both: '與儲存格一起移動和調整大小',
-            position: '移動但不調整大小與儲存格',
-            none: '不要移動或調整大小與儲存格',
+            position: '與儲存格一起移動但不調整大小',
+            none: '不隨儲存格移動或調整大小',
         },
         'cell-image': {
             pasteTitle: '貼上為儲存格圖片',

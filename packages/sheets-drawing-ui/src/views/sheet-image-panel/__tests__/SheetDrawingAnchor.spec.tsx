@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable import/consistent-type-specifier-style -- Keep type and value imports from one package in one declaration. */
 import { DrawingTypeEnum, ImageSourceType } from '@univerjs/core';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -220,6 +219,7 @@ describe('SheetDrawingAnchor', () => {
         const renderManagerService = testBed.get(IRenderManagerService) as unknown as TestRenderManagerService;
         const drawings = [
             createSheetDrawing('drawing-a', SheetDrawingAnchorType.Position),
+            createSheetDrawing('drawing-b', SheetDrawingAnchorType.None),
         ];
 
         container = document.createElement('div');
@@ -243,6 +243,19 @@ describe('SheetDrawingAnchor', () => {
         });
 
         expect(container.firstElementChild?.classList.contains('univer-hidden')).toBe(true);
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: testBed.injector }}>
+                    <SheetDrawingAnchor drawings={[drawings[1]]} />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        expect(container.firstElementChild?.classList.contains('univer-hidden')).toBe(false);
+        expect(Array.from(container.querySelectorAll<HTMLInputElement>('input[type="radio"]')).map((option) => option.checked))
+            .toEqual([false, false, true]);
 
         testBed.univer.dispose();
     });

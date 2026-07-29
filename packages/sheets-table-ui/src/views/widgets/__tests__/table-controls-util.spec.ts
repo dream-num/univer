@@ -14,13 +14,19 @@
  * limitations under the License.
  */
 
-import type { SpreadsheetSkeleton, UniverRenderingContext } from '@univerjs/engine-render';
-import { describe, expect, it } from 'vitest';
+import type { UniverRenderingContext } from '@univerjs/engine-render';
+import { BooleanNumber, type IWorkbookData, LocaleType, Univer, UniverInstanceType, type Workbook } from '@univerjs/core';
+import { SpreadsheetSkeleton } from '@univerjs/sheets';
+
+import { SpreadsheetRenderSkeleton } from '@univerjs/sheets-ui';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
     buildCenteredPlusSegments,
     buildTableMenuRegions,
     hitTestTableControl,
+    TABLE_CONTROL_ANCHOR_HEIGHT,
     TABLE_CONTROL_INSERT_BUTTON_SIZE,
+    TABLE_CONTROL_MENU_ITEM_HEIGHT,
 } from '../table-controls-util';
 import { SheetTableControlsShape } from '../table-controls.shape';
 
@@ -45,20 +51,44 @@ function createCanvasContext(): UniverRenderingContext {
     }) as UniverRenderingContext;
 }
 
-function createSkeleton(): SpreadsheetSkeleton {
-    return {
-        rowHeaderWidth: 40,
-        columnTotalWidth: 400,
-        columnHeaderHeight: 32,
-        rowTotalHeight: 600,
-        getNoMergeCellWithCoordByIndex: () => ({
-            startX: 40,
-            startY: 60,
-        }),
-    } as unknown as SpreadsheetSkeleton;
-}
-
 describe('table controls geometry', () => {
+    let univer: Univer;
+    let skeleton: SpreadsheetRenderSkeleton;
+
+    beforeAll(() => {
+        univer = new Univer();
+        const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+            id: 'table-controls-workbook',
+            appVersion: '3.0.0-alpha',
+            locale: LocaleType.EN_US,
+            name: '',
+            sheetOrder: ['sheet1'],
+            styles: {},
+            sheets: {
+                sheet1: {
+                    id: 'sheet1',
+                    name: 'Sheet1',
+                    rowCount: 30,
+                    columnCount: 10,
+                    cellData: {},
+                    hidden: BooleanNumber.FALSE,
+                },
+            },
+        });
+        const worksheet = workbook.getActiveSheet();
+        if (!worksheet) {
+            throw new Error('Active sheet is required for table control tests');
+        }
+
+        skeleton = univer.__getInjector().createInstance(
+            SpreadsheetRenderSkeleton,
+            new SpreadsheetSkeleton(worksheet).calculate(),
+            workbook.getStyles()
+        ).calculate();
+    });
+
+    afterAll(() => univer.dispose());
+
     it('hit-tests the topmost region first', () => {
         const hit = hitTestTableControl([
             { type: 'anchor-main', tableId: 't1', left: 0, top: 0, width: 100, height: 24 },
@@ -91,7 +121,7 @@ describe('table controls geometry', () => {
     });
 
     it('opens a table menu whose action rows can be hit-tested', () => {
-        const shape = new DrawableSheetTableControlsShape('table-controls', createSkeleton);
+        const shape = new DrawableSheetTableControlsShape('table-controls', () => skeleton);
         shape.setItems([{
             tableId: 'table-orders',
             tableName: 'Orders',
@@ -102,8 +132,11 @@ describe('table controls geometry', () => {
         shape.setOpenedMenuTableId('table-orders');
 
         shape.drawForTest(createCanvasContext());
+        const position = skeleton.getNoMergeCellWithCoordByIndex(0, 0);
+        const menuTop = Math.max(0, position.startY - TABLE_CONTROL_ANCHOR_HEIGHT) + TABLE_CONTROL_ANCHOR_HEIGHT;
+        const deleteRowCenter = menuTop + TABLE_CONTROL_MENU_ITEM_HEIGHT * 3.5;
 
-        expect(shape.hitTest(56, 170)).toMatchObject({
+        expect(shape.hitTest(position.startX + 16, deleteRowCenter)).toMatchObject({
             type: 'menu-item',
             tableId: 'table-orders',
             action: 'delete',
@@ -111,7 +144,7 @@ describe('table controls geometry', () => {
     });
 
     it('activates the hovered insert region for row and column insertion', () => {
-        const shape = new DrawableSheetTableControlsShape('table-controls', createSkeleton);
+        const shape = new DrawableSheetTableControlsShape('table-controls', () => skeleton);
         shape.setItems([{
             tableId: 'table-orders',
             tableName: 'Orders',

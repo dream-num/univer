@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 
-import type { IRange, Nullable, SheetSkeleton, Worksheet } from '@univerjs/core';
-import { ObjectMatrix, Range } from '@univerjs/core';
+import {
+    type IRange,
+    ObjectMatrix,
+    Range,
+    type Worksheet,
+} from '@univerjs/core';
 
 export function getRangesHeight(ranges: IRange[], worksheet: Worksheet) {
     const cellHeights = new ObjectMatrix<number>();
@@ -34,29 +38,31 @@ export function getRangesHeight(ranges: IRange[], worksheet: Worksheet) {
 
 const MAX_RANGE_CELL_COUNT = 10_000;
 
-export function getSuitableRangesInView(ranges: IRange[], skeleton: Nullable<SheetSkeleton>): { suitableRanges: IRange[]; remainingRanges: IRange[] } {
-    if (!skeleton) {
+export function getSuitableRangesInView(
+    ranges: IRange[],
+    columnCount: number | null,
+    viewportRow = ranges[0]?.startRow ?? 0
+): { suitableRanges: IRange[]; remainingRanges: IRange[] } {
+    if (columnCount == null) {
         return { suitableRanges: ranges, remainingRanges: [] };
     }
 
-    const colCount = skeleton.worksheet.getColumnCount();
-    const maxRowCount = Math.ceil(MAX_RANGE_CELL_COUNT / colCount);
+    const maxRowCount = Math.ceil(MAX_RANGE_CELL_COUNT / Math.max(columnCount, 1));
     const suitableRanges: IRange[] = [];
     const remainingRanges: IRange[] = [];
-    const row = skeleton.getOffsetRelativeToRowCol(0, skeleton.scrollY).row;
     // Calculate the distance between each range and current row, then sort by distance
     const rangesWithDistance = ranges.map((range) => {
         // Calculate the minimum distance between range and current row
         let distance: number;
-        if (row >= range.startRow && row <= range.endRow) {
+        if (viewportRow >= range.startRow && viewportRow <= range.endRow) {
             // Current row is within the range, distance is 0
             distance = 0;
-        } else if (row < range.startRow) {
+        } else if (viewportRow < range.startRow) {
             // Current row is above the range, distance is range.startRow - row
-            distance = range.startRow - row;
+            distance = range.startRow - viewportRow;
         } else {
             // Current row is below the range, distance is row - range.endRow
-            distance = row - range.endRow;
+            distance = viewportRow - range.endRow;
         }
 
         return {

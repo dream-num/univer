@@ -14,10 +14,18 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IExecutionOptions } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, LocaleService, toDisposable } from '@univerjs/core';
+import { convertTransformToOffsetX, convertTransformToOffsetY } from '../../components/sheets';
+
+import {
+    type ICommandInfo,
+    ICommandService,
+    type IExecutionOptions,
+    IUniverInstanceService,
+    LocaleService,
+    toDisposable,
+} from '@univerjs/core';
 import { borderClassName, clsx, DropdownMenu } from '@univerjs/design';
-import { convertTransformToOffsetX, convertTransformToOffsetY, IRenderManagerService } from '@univerjs/engine-render';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { AutofillDoubleIcon, MoreDownIcon } from '@univerjs/icons';
 import { AUTO_FILL_APPLY_TYPE, IAutoFillService, RefillCommand } from '@univerjs/sheets';
 import { useDependency, useObservable } from '@univerjs/ui';

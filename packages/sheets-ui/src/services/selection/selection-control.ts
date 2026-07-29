@@ -14,22 +14,43 @@
  * limitations under the License.
  */
 
-import type { ICellWithCoord, IRangeWithCoord, Nullable, ThemeService } from '@univerjs/core';
-import type { IObjectFullState, IRectProps, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import type { ISelectionStyle, ISelectionWidgetConfig, ISelectionWithCoord } from '@univerjs/sheets';
-import type { ISelectionShapeExtensionOption } from './selection-shape-extension';
-import { ColorKit, Disposable, RANGE_TYPE, toDisposable } from '@univerjs/core';
-import { cancelRequestFrame, DashedRect, FIX_ONE_PIXEL_BLUR_OFFSET, Group, Rect, requestNewFrame, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
+import type { SpreadsheetRenderSkeleton } from '../../components/sheets/sheet.render-skeleton';
+
 import {
+    ColorKit,
+    Disposable,
+    type ICellWithCoord,
+    type IRangeWithCoord,
+    type Nullable,
+    RANGE_TYPE,
+    type ThemeService,
+    toDisposable,
+} from '@univerjs/core';
+import {
+    cancelRequestFrame,
+    DashedRect,
+    FIX_ONE_PIXEL_BLUR_OFFSET,
+    Group,
+    type IObjectFullState,
+    type IRectProps,
+    Rect,
+    requestNewFrame,
+    type Scene,
+    TRANSFORM_CHANGE_OBSERVABLE_TYPE,
+} from '@univerjs/engine-render';
+import {
+    type ISelectionStyle,
+    type ISelectionWidgetConfig,
+    type ISelectionWithCoord,
     SELECTION_CONTROL_BORDER_BUFFER_COLOR,
     SELECTION_CONTROL_BORDER_BUFFER_WIDTH,
 } from '@univerjs/sheets';
+import { type ISelectionShapeExtensionOption, SelectionShapeExtension } from './selection-shape-extension';
 
 import { BehaviorSubject, Subject } from 'rxjs';
 import { SHEET_COMPONENT_HEADER_SELECTION_LAYER_INDEX, SHEET_COMPONENT_SELECTION_LAYER_INDEX } from '../../common/keys';
 import { genNormalSelectionStyle } from './const';
 import { SelectionRenderModel } from './selection-render-model';
-import { SelectionShapeExtension } from './selection-shape-extension';
 
 export enum SELECTION_MANAGER_KEY {
     Selection = '__SpreadsheetSelectionShape__',
@@ -697,7 +718,7 @@ export class SelectionControl extends Disposable {
      * Update range and primary range and style.
      * @param selectionWthCoord
      */
-    updateRangeBySelectionWithCoord(selectionWthCoord: ISelectionWithCoord, sk?: SpreadsheetSkeleton) {
+    updateRangeBySelectionWithCoord(selectionWthCoord: ISelectionWithCoord, sk?: SpreadsheetRenderSkeleton) {
         if (sk) {
             // do not get header size from workbook, that is default value.
             // if row is over one million, row header width would be bigger than default value.

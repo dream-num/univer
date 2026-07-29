@@ -14,28 +14,49 @@
  * limitations under the License.
  */
 
-import type { IFreeze, IRange, IWorksheetData, Nullable, Workbook } from '@univerjs/core';
-import type { IMouseEvent, IPoint, IPointerEvent, IRenderContext, IRenderModule, IScrollObserverParam } from '@univerjs/engine-render';
-import type { IScrollToCellOperationParams, ISheetSkeletonManagerParam } from '@univerjs/sheets';
-import type { IExpandSelectionCommandParams } from '../../../commands/commands/set-selection.command';
-import type { IScrollState, IScrollStateSearchParam, IViewportScrollState } from '../../../services/scroll-manager.service';
+import type { ISheetRenderSkeletonManagerParam } from '../../../services/sheet-render-skeleton.service';
+
 import {
     Direction,
     Disposable,
     ICommandService,
     IContextService,
+    type IFreeze,
     Inject,
+    type IRange,
     IUniverInstanceService,
+    type IWorksheetData,
+    type Nullable,
     RANGE_TYPE,
     toDisposable,
+    type Workbook,
 } from '@univerjs/core';
-import { IRenderManagerService, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
-import { ScrollToCellOperation, SheetsSelectionsService } from '@univerjs/sheets';
+import {
+    type IMouseEvent,
+    type IPoint,
+    type IPointerEvent,
+    type IRenderContext,
+    IRenderManagerService,
+    type IRenderModule,
+    type IScrollObserverParam,
+} from '@univerjs/engine-render';
+import { type IScrollToCellOperationParams, ScrollToCellOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { ScrollCommand, SetScrollRelativeCommand } from '../../../commands/commands/set-scroll.command';
-import { ExpandSelectionCommand, MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../../commands/commands/set-selection.command';
+import {
+    ExpandSelectionCommand,
+    type IExpandSelectionCommandParams,
+    MoveSelectionCommand,
+    MoveSelectionEnterAndTabCommand,
+} from '../../../commands/commands/set-selection.command';
 import { SetZoomRatioCommand } from '../../../commands/commands/set-zoom-ratio.command';
+import { SHEET_VIEWPORT_KEY } from '../../../components/sheets';
 import { MOBILE_EXPANDING_SELECTION, MOBILE_PINCH_ZOOMING } from '../../../consts/mobile-context';
-import { SheetScrollManagerService } from '../../../services/scroll-manager.service';
+import {
+    type IScrollState,
+    type IScrollStateSearchParam,
+    type IViewportScrollState,
+    SheetScrollManagerService,
+} from '../../../services/scroll-manager.service';
 import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
 import { getSheetObject } from '../../utils/component-tools';
 
@@ -153,7 +174,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
     }
 
     private _getFreeze(): Nullable<IFreeze> {
-        const snapshot: IWorksheetData | undefined = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton.getWorksheetConfig();
+        const snapshot: IWorksheetData | undefined = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton.worksheet.getSnapshot();
         if (snapshot == null) {
             return;
         }
@@ -303,7 +324,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
                         viewportMain.viewportScrollX = 0;
                         viewportMain.viewportScrollY = 0;
                     }
-                    this._updateSceneSize(param as unknown as ISheetSkeletonManagerParam);
+                    this._updateSceneSize(param);
                 }
             })
         ));
@@ -1049,7 +1070,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
         }, 300);
     }
 
-    private _updateSceneSize(param: ISheetSkeletonManagerParam) {
+    private _updateSceneSize(param: ISheetRenderSkeletonManagerParam) {
         if (param == null) {
             return;
         }

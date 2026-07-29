@@ -15,7 +15,7 @@
  */
 
 import { FEnum } from '@univerjs/core/facade';
-import { SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
+import { SHEET_VIEWPORT_KEY } from '@univerjs/sheets-ui';
 
 /**
  * @ignore

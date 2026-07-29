@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ICellOverGridPosition, ISheetOverGridPosition } from '../basics';
-import { precisionTo } from '@univerjs/engine-render';
+import { numfmt } from '@univerjs/core';
 import { attachRangeWithCoord } from './util';
+import type { SpreadsheetSkeleton } from './spreadsheet-skeleton';
 
 export function convertPositionSheetOverGridToAbsolute(
     unitId: string,
@@ -47,11 +47,11 @@ export function convertPositionSheetOverGridToAbsolute(
 
     const { startX: endSelectionX, startY: endSelectionY } = endSelectionCell;
 
-    const left = precisionTo(startSelectionX + fromColumnOffset, 1);
-    const top = precisionTo(startSelectionY + fromRowOffset, 1);
+    const left = numfmt.round(startSelectionX + fromColumnOffset, 1);
+    const top = numfmt.round(startSelectionY + fromRowOffset, 1);
 
-    let width = precisionTo(endSelectionX + toColumnOffset - left, 1);
-    let height = precisionTo(endSelectionY + toRowOffset - top, 1);
+    let width = numfmt.round(endSelectionX + toColumnOffset - left, 1);
+    let height = numfmt.round(endSelectionY + toRowOffset - top, 1);
 
     if (startSelectionCell.startX === endSelectionCell.endX) {
         width = 0;
@@ -90,8 +90,8 @@ export function convertPositionCellToSheetOverGrid(
 
     const { startX: startSelectionX, startY: startSelectionY } = startSelectionCell;
 
-    const left = precisionTo(startSelectionX + fromColumnOffset, 1);
-    const top = precisionTo(startSelectionY + fromRowOffset, 1);
+    const left = numfmt.round(startSelectionX + fromColumnOffset, 1);
+    const top = numfmt.round(startSelectionY + fromRowOffset, 1);
 
     const endSelectionCell = skeleton.getCellIndexAndOffsetByPosition(left + width, top + height);
 

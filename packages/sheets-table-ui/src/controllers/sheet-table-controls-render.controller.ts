@@ -14,22 +14,29 @@
  * limitations under the License.
  */
 
-import type { EventState, IRange, Workbook } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { LocaleKey } from '../locale/types';
-import type { ITableControlHitRegion } from '../views/widgets/table-controls-util';
+
 import {
     CommandType,
     Disposable,
+    type EventState,
     fromCallback,
     ICommandService,
     Inject,
     Injector,
     IPermissionService,
+    type IRange,
     LocaleService,
     toDisposable,
+    type Workbook,
 } from '@univerjs/core';
-import { CURSOR_TYPE } from '@univerjs/engine-render';
+import {
+    CURSOR_TYPE,
+    type IMouseEvent,
+    type IPointerEvent,
+    type IRenderContext,
+    type IRenderModule,
+} from '@univerjs/engine-render';
 import {
     SelectRangeCommand,
     SheetRangeThemeModel,
@@ -55,6 +62,7 @@ import {
     SetZoomRatioOperation,
     SHEET_VIEW_KEY,
     SheetSkeletonManagerService,
+    type SpreadsheetRenderSkeleton,
 } from '@univerjs/sheets-ui';
 import { IDialogService, ISidebarService } from '@univerjs/ui';
 import { filter, merge } from 'rxjs';
@@ -65,7 +73,11 @@ import {
     SHEET_TABLE_THEME_PANEL,
     SHEET_TABLE_THEME_PANEL_ID,
 } from '../const';
-import { TABLE_CONTROL_INSERT_BUTTON_SIZE, TABLE_CONTROL_TOP_GAP_SIZE } from '../views/widgets/table-controls-util';
+import {
+    type ITableControlHitRegion,
+    TABLE_CONTROL_INSERT_BUTTON_SIZE,
+    TABLE_CONTROL_TOP_GAP_SIZE,
+} from '../views/widgets/table-controls-util';
 import { SheetTableControlsShape } from '../views/widgets/table-controls.shape';
 import { SheetTableThemeUIController } from './sheet-table-theme-ui.controller';
 
@@ -96,7 +108,7 @@ function isSameTopGap(left: TopGapSnapshot, right: TopGapSnapshot): boolean {
 
 export class SheetTableControlsRenderController extends Disposable implements IRenderModule {
     private readonly _shape: SheetTableControlsShape;
-    private readonly _topGapBaseBySkeleton = new WeakMap<SpreadsheetSkeleton, TopGapSnapshot>();
+    private readonly _topGapBaseBySkeleton = new WeakMap<SpreadsheetRenderSkeleton, TopGapSnapshot>();
 
     constructor(
         private readonly _context: IRenderContext<Workbook>,
@@ -450,7 +462,7 @@ export class SheetTableControlsRenderController extends Disposable implements IR
         return null;
     }
 
-    private _getRangeBounds(skeleton: SpreadsheetSkeleton, range: IRange): { left: number; top: number; right: number; bottom: number } {
+    private _getRangeBounds(skeleton: SpreadsheetRenderSkeleton, range: IRange): { left: number; top: number; right: number; bottom: number } {
         const startCell = skeleton.getNoMergeCellWithCoordByIndex(range.startRow, range.startColumn);
         const endCell = skeleton.getNoMergeCellWithCoordByIndex(range.endRow, range.endColumn);
         return {
@@ -461,7 +473,7 @@ export class SheetTableControlsRenderController extends Disposable implements IR
         };
     }
 
-    private _syncTopTableGap(skeleton: SpreadsheetSkeleton): void {
+    private _syncTopTableGap(skeleton: SpreadsheetRenderSkeleton): void {
         const worksheet = this._context.unit.getActiveSheet();
         if (!worksheet) {
             return;

@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import type { Worksheet } from '@univerjs/core';
-import type { Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
+import type { Scene } from '@univerjs/engine-render';
 import type { IFloatDomData } from '@univerjs/sheets-drawing';
-import { DrawingTypeEnum } from '@univerjs/core';
-import { SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
+
+import { DrawingTypeEnum, type Worksheet } from '@univerjs/core';
+import { SpreadsheetSkeleton } from '@univerjs/sheets';
+import { SHEET_VIEWPORT_KEY, SpreadsheetRenderSkeleton } from '@univerjs/sheets-ui';
+
 import { ComponentManager } from '@univerjs/ui';
 import { act } from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -47,19 +49,6 @@ class TestPrintingScene {
             viewportScrollX: 0,
             viewportScrollY: 0,
         };
-    }
-}
-
-class TestPrintingSkeleton {
-    readonly rowHeaderWidth = 46;
-    readonly columnHeaderHeight = 28;
-
-    rowStartY(row: number): number {
-        return row * 24;
-    }
-
-    colStartX(column: number): number {
-        return column * 72;
     }
 }
 
@@ -111,6 +100,19 @@ function createFloatDomInfo(drawingId = 'printed-float-dom', label = 'printing')
     };
 }
 
+function createPrintingSkeleton(testBed: ReturnType<typeof createSheetsDrawingUiTestBed>): SpreadsheetRenderSkeleton {
+    const worksheet = testBed.workbook.getActiveSheet();
+    if (!worksheet) {
+        throw new Error('Active sheet is required for printing tests');
+    }
+
+    return testBed.injector.createInstance(
+        SpreadsheetRenderSkeleton,
+        new SpreadsheetSkeleton(worksheet).calculate(),
+        testBed.workbook.getStyles()
+    ).calculate();
+}
+
 describe('PrintingFloatDom', () => {
     let container: HTMLDivElement | undefined;
     let currentTestBed: ReturnType<typeof createSheetsDrawingUiTestBed> | undefined;
@@ -128,10 +130,11 @@ describe('PrintingFloatDom', () => {
     });
 
     it('prints floating doms with the scene scale applied to size and rotation', async () => {
-        currentTestBed = createSheetsDrawingUiTestBed(undefined, [
+        const testBed = createSheetsDrawingUiTestBed(undefined, [
             [ComponentManager],
         ]);
-        currentTestBed.injector.get(ComponentManager).register(PRINTING_COMPONENT_KEY, PrintingContent);
+        currentTestBed = testBed;
+        testBed.injector.get(ComponentManager).register(PRINTING_COMPONENT_KEY, PrintingContent);
         const root = document.createElement('div');
         container = root;
         document.body.appendChild(root);
@@ -140,9 +143,9 @@ describe('PrintingFloatDom', () => {
             unmountPrintingFloatDom = mountPrintingFloatDom({
                 floatDomInfos: [createFloatDomInfo()],
                 scene: new TestPrintingScene() as unknown as Scene,
-                skeleton: new TestPrintingSkeleton() as unknown as SpreadsheetSkeleton,
+                skeleton: createPrintingSkeleton(testBed),
                 worksheet: new TestPrintingWorksheet() as unknown as Worksheet,
-            }, root, currentTestBed!.injector);
+            }, root, testBed.injector);
             await Promise.resolve();
         });
 
@@ -159,10 +162,11 @@ describe('PrintingFloatDom', () => {
     });
 
     it('prints each floating DOM with its own component data', async () => {
-        currentTestBed = createSheetsDrawingUiTestBed(undefined, [
+        const testBed = createSheetsDrawingUiTestBed(undefined, [
             [ComponentManager],
         ]);
-        currentTestBed.injector.get(ComponentManager).register(PRINTING_COMPONENT_KEY, PrintingContent);
+        currentTestBed = testBed;
+        testBed.injector.get(ComponentManager).register(PRINTING_COMPONENT_KEY, PrintingContent);
         const root = document.createElement('div');
         container = root;
         document.body.appendChild(root);
@@ -174,9 +178,9 @@ describe('PrintingFloatDom', () => {
                     createFloatDomInfo('second-printed-float-dom', 'Second printed label'),
                 ],
                 scene: new TestPrintingScene() as unknown as Scene,
-                skeleton: new TestPrintingSkeleton() as unknown as SpreadsheetSkeleton,
+                skeleton: createPrintingSkeleton(testBed),
                 worksheet: new TestPrintingWorksheet() as unknown as Worksheet,
-            }, root, currentTestBed!.injector);
+            }, root, testBed.injector);
             await Promise.resolve();
         });
 
@@ -185,6 +189,8 @@ describe('PrintingFloatDom', () => {
     });
 
     it('forwards printing-only component props', () => {
+        const testBed = createSheetsDrawingUiTestBed();
+        currentTestBed = testBed;
         const info = {
             ...createFloatDomInfo(),
             props: { printingLabel: 'Ready callback props' },
@@ -193,7 +199,7 @@ describe('PrintingFloatDom', () => {
         const [, floatDom] = createPrintingFloatDom(
             info,
             new TestPrintingScene() as unknown as Scene,
-            new TestPrintingSkeleton() as unknown as SpreadsheetSkeleton,
+            createPrintingSkeleton(testBed),
             new TestPrintingWorksheet() as unknown as Worksheet
         );
 

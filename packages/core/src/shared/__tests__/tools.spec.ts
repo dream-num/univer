@@ -93,6 +93,7 @@ describe('Tools extra coverage', () => {
         expect(Tools.hasIntersectionBetweenTwoRanges(1, 3, 3, 5)).toBe(true);
         expect(Tools.hasIntersectionBetweenTwoRanges(1, 2, 3, 4)).toBe(false);
         expect(Tools.isStartValidPosition('_name')).toBe(true);
+        expect(Tools.isStartValidPosition('名称')).toBe(true);
         expect(Tools.isStartValidPosition('1name')).toBe(false);
         expect(Tools.isValidParameter('valid_name')).toBe(true);
         expect(Tools.isValidParameter('bad name')).toBe(false);

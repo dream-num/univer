@@ -14,18 +14,23 @@
  * limitations under the License.
  */
 
-import type { ICellDataForSheetInterceptor, ICommandInfo, IObjectMatrixPrimitiveType, IRange, IRowAutoHeightInfo, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import type { IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import type { ISelectionWithStyle, ISetWorksheetRowAutoHeightMutationParams } from '@univerjs/sheets';
 import {
     ColorKit,
     Disposable,
+    type ICellDataForSheetInterceptor,
+    type ICommandInfo,
     ICommandService,
     ILogService,
     Inject,
+    type IObjectMatrixPrimitiveType,
+    type IRange,
+    type IRowAutoHeightInfo,
+    type Nullable,
     ObjectMatrix,
     ThemeService,
     toDisposable,
+    type Workbook,
+    type Worksheet,
 } from '@univerjs/core';
 import {
     ErrorType,
@@ -33,12 +38,20 @@ import {
     SetArrayFormulaDataMutation,
     SetFormulaCalculationResultMutation,
 } from '@univerjs/engine-formula';
-import { IRenderManagerService } from '@univerjs/engine-render';
-import { attachSelectionWithCoord, BEFORE_CELL_EDIT, SetWorksheetRowAutoHeightMutation, SheetInterceptorService, SheetSkeletonService } from '@univerjs/sheets';
+import { type IRenderContext, IRenderManagerService, type IRenderModule } from '@univerjs/engine-render';
 import {
+    BEFORE_CELL_EDIT,
+    type ISelectionWithStyle,
+    type ISetWorksheetRowAutoHeightMutationParams,
+    SetWorksheetRowAutoHeightMutation,
+    SheetInterceptorService,
+} from '@univerjs/sheets';
+import {
+    attachRenderSelectionWithCoord,
     SELECTION_SHAPE_DEPTH,
     SelectionControl,
     SheetSkeletonManagerService,
+    type SpreadsheetRenderSkeleton,
 } from '@univerjs/sheets-ui';
 
 /**
@@ -46,12 +59,11 @@ import {
  */
 export class FormulaEditorShowController extends Disposable implements IRenderModule {
     private _previousShape: Nullable<SelectionControl>;
-    private _skeleton: SpreadsheetSkeleton;
+    private _skeleton: SpreadsheetRenderSkeleton;
 
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
-        @Inject(SheetSkeletonService) private readonly _sheetSkeletonService: SheetSkeletonService,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
         @Inject(ThemeService) private readonly _themeService: ThemeService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
@@ -89,7 +101,7 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
         );
     }
 
-    protected _changeRuntime(skeleton: SpreadsheetSkeleton): void {
+    protected _changeRuntime(skeleton: SpreadsheetRenderSkeleton): void {
         this._skeleton = skeleton;
     }
 
@@ -208,7 +220,7 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
 
     private _createArrayFormulaRangeShape(arrayRange: IRange, unitId: string, subUnitId: string): void {
         const renderUnit = this._renderManagerService.getRenderUnitById(unitId);
-        const skeleton = this._sheetSkeletonService.getSkeleton(unitId, subUnitId);
+        const skeleton = this._sheetSkeletonManagerService.getSkeleton(subUnitId);
         if (!renderUnit || !skeleton) return;
 
         const { scene } = renderUnit;
@@ -224,7 +236,7 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
                 widgets: {},
             },
         };
-        const selectionWithCoord = attachSelectionWithCoord(selectionWithStyle, skeleton);
+        const selectionWithCoord = attachRenderSelectionWithCoord(selectionWithStyle, skeleton);
         const { rowHeaderWidth, columnHeaderHeight } = skeleton;
         const control = new SelectionControl(scene, SELECTION_SHAPE_DEPTH.FORMULA_EDITOR_SHOW, this._themeService, {
             highlightHeader: false,

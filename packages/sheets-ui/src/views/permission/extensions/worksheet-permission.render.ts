@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
+import { SheetExtension } from '../../../components/sheets';
+import type { SpreadsheetRenderSkeleton } from '../../../components/sheets/sheet.render-skeleton';
+
 import type { IScale } from '@univerjs/core';
-import type { SpreadsheetSkeleton, UniverRenderingContext } from '@univerjs/engine-render';
+import type { UniverRenderingContext } from '@univerjs/engine-render';
 import type { IWorksheetProtectionRenderCellData } from '@univerjs/sheets';
-import { SheetExtension } from '@univerjs/engine-render';
+
 import { UnitAction } from '@univerjs/protocol';
 import { base64 } from './protect-background-img';
 
@@ -45,7 +48,7 @@ export class WorksheetProtectionRenderExtension extends SheetExtension {
     override draw(
         ctx: UniverRenderingContext,
         _parentScale: IScale,
-        spreadsheetSkeleton: SpreadsheetSkeleton
+        spreadsheetSkeleton: SpreadsheetRenderSkeleton
     ) {
         const { worksheet } = spreadsheetSkeleton;
 

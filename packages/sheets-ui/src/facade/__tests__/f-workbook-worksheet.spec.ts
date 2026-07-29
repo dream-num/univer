@@ -15,15 +15,17 @@
  */
 
 import { ICommandService } from '@univerjs/core';
+
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { EditorService, IEditorService } from '@univerjs/docs-ui';
 import { DefinedNamesService, IDefinedNamesService } from '@univerjs/engine-formula';
-import { IRenderManagerService, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, RefSelectionsService, SetWorksheetRowIsAutoHeightCommand, SheetsSelectionsService } from '@univerjs/sheets';
 import { ISheetSelectionRenderService, SetColumnHeaderHeightCommand, SetRowHeaderWidthCommand, SHEET_VIEW_KEY, SheetScrollManagerService, SheetSkeletonManagerService, SheetsScrollRenderController } from '@univerjs/sheets-ui';
 import { describe, expect, it, vi } from 'vitest';
 import { SetWorksheetColAutoWidthCommand } from '../../commands/commands/set-worksheet-auto-col-width.command';
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
+import { SHEET_VIEWPORT_KEY } from '../../components/sheets';
 import { EditorBridgeService, IEditorBridgeService } from '../../services/editor-bridge.service';
 import { createFacadeTestBed } from './create-test-bed';
 import '../f-workbook';

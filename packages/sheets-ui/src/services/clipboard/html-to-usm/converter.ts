@@ -14,11 +14,30 @@
  * limitations under the License.
  */
 
+import type { SpreadsheetRenderSkeleton } from '../../../components/sheets/sheet.render-skeleton';
+
 /* eslint-disable complexity */
 
-import type { ICustomRange, IDocumentBody, IDocumentData, IStyleData, ITextRun, ITextStyle, Nullable } from '@univerjs/core';
-import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
-import type { ISheetSkeletonManagerParam } from '@univerjs/sheets';
+import {
+    createParagraphId,
+    CustomRangeType,
+    DEFAULT_WORKSHEET_ROW_HEIGHT,
+    generateRandomId,
+    getNumfmtParseValueFilter,
+    type ICustomRange,
+    type IDocumentBody,
+    type IDocumentData,
+    isDefaultFormat,
+    isSafeUrl,
+    type IStyleData,
+    type ITextRun,
+    type ITextStyle,
+    type Nullable,
+    numfmt,
+    ObjectMatrix,
+    skipParseTagNames,
+} from '@univerjs/core';
+
 import type {
     ICellDataWithSpanInfo,
     IClipboardPropertyItem,
@@ -26,7 +45,7 @@ import type {
     IUniverSheetCopyDataModel,
 } from '../type';
 import type { IAfterProcessRule, IPastePlugin } from './paste-plugins/type';
-import { createParagraphId, CustomRangeType, DEFAULT_WORKSHEET_ROW_HEIGHT, generateRandomId, getNumfmtParseValueFilter, isDefaultFormat, isSafeUrl, numfmt, ObjectMatrix, skipParseTagNames } from '@univerjs/core';
+import type { ISheetRenderSkeletonManagerParam } from '../../sheet-render-skeleton.service';
 import { handleStringToStyle, textTrim } from '@univerjs/ui';
 import { extractNodeStyle } from './parse-node-style';
 import parseToDom, { convertToCellStyle, generateParagraphs } from './utils';
@@ -78,7 +97,7 @@ function matchFilter(node: HTMLElement, filter: IStyleRule['filter']) {
 }
 
 interface IHtmlToUSMServiceProps {
-    getCurrentSkeleton: () => Nullable<ISheetSkeletonManagerParam>;
+    getCurrentSkeleton: () => Nullable<ISheetRenderSkeletonManagerParam>;
 }
 
 export class HtmlToUSMService {
@@ -113,7 +132,7 @@ export class HtmlToUSMService {
     // mso-number-format is a css property used in html copied from excel to indicate the cell format, we need to parse it and apply the corresponding format in univer sheet.
     private _msoNumfmtMap = new Map<string, string>();
 
-    private _getCurrentSkeleton: () => Nullable<ISheetSkeletonManagerParam>;
+    private _getCurrentSkeleton: () => Nullable<ISheetRenderSkeletonManagerParam>;
 
     constructor(props: IHtmlToUSMServiceProps) {
         this._getCurrentSkeleton = props.getCurrentSkeleton;
@@ -445,7 +464,7 @@ export class HtmlToUSMService {
     }
 
     // eslint-disable-next-line max-lines-per-function
-    private _parseTableByHtml(htmlElement: HTMLElement, tableElIndex: number, skeleton?: SpreadsheetSkeleton) {
+    private _parseTableByHtml(htmlElement: HTMLElement, tableElIndex: number, skeleton?: SpreadsheetRenderSkeleton) {
         const cellMatrix = new ObjectMatrix<IParsedCellValueByClipboard>();
         const tableEle = htmlElement.querySelectorAll('table')[tableElIndex];
         if (!tableEle) {
@@ -608,7 +627,7 @@ export class HtmlToUSMService {
         }
     }
 
-    private _getCellTextAndRichText(cell: Element, styleStr: string, skeleton?: SpreadsheetSkeleton) {
+    private _getCellTextAndRichText(cell: Element, styleStr: string, skeleton?: SpreadsheetRenderSkeleton) {
         if (cell.childElementCount === 0) {
             return {
                 cellText: normalizePlainCellText(cell.textContent ?? ''),
@@ -645,7 +664,7 @@ export class HtmlToUSMService {
             };
             // Rich text parsing method, refer to the doc
             this._parseCellHtml(null, cell.childNodes, newDocBody, undefined, styleStr);
-            const documentModel = skeleton.getBlankCellDocumentModel()?.documentModel;
+            const documentModel = skeleton.worksheet.getBlankCellDocumentModel(null, 0, 0).documentModel;
             const p = documentModel?.getSnapshot();
             const singleDataStream = `${newDocBody.dataStream}\r\n`;
             const documentData = {
@@ -676,7 +695,7 @@ export class HtmlToUSMService {
             return null;
         }
         const { skeleton } = currentSkeleton;
-        const documentModel = skeleton.getBlankCellDocumentModel()?.documentModel;
+        const documentModel = skeleton.worksheet.getBlankCellDocumentModel(null, 0, 0).documentModel;
         const p = documentModel?.getSnapshot();
         const documentData = { ...p, ...snapshot };
         documentModel?.reset(documentData);

@@ -43,6 +43,7 @@ export * from './components/docs/layout/doc-simple-skeleton';
 export { DocumentSkeleton } from './components/docs/layout/doc-skeleton';
 export type { IFindNodeRestrictions } from './components/docs/layout/doc-skeleton';
 export {
+    columnIterator,
     compareDocumentSkeletonNestedPagePathOrder,
     documentSkeletonLineIterator,
     documentSkeletonTableIterator,
@@ -70,7 +71,6 @@ export { DataStreamTreeNode } from './components/docs/view-model/data-stream-tre
 export { DocumentViewModel } from './components/docs/view-model/document-view-model';
 export { DocumentEditArea } from './components/docs/view-model/document-view-model';
 export { parseDataStreamToTree } from './components/docs/view-model/document-view-model';
-export { DEFAULT_PADDING_DATA } from './components/sheets/sheet.render-skeleton';
 export type { IUniverEngineRenderConfig } from './config/config';
 export * from './context';
 export * from './custom';

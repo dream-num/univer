@@ -14,32 +14,54 @@
  * limitations under the License.
  */
 
-import type { BooleanNumber, ICommandInfo, IExecutionOptions, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import type { ISetFormulaCalculationNotificationMutation } from '@univerjs/engine-formula';
-import type { IAfterRender$Info, IBasicFrameInfo, IExtendFrameInfo, IRenderContext, IRenderModule, IScrollBarProps, ISummaryFrameInfo, ISummaryMetric, ITimeMetric, IViewportInfos, Scene } from '@univerjs/engine-render';
-import type { IUniverSheetsUIConfig } from '../../config/config';
-import { CommandType, ICommandService, IConfigService, Inject, Optional, Rectangle, RxDisposable } from '@univerjs/core';
-import { SetFormulaCalculationNotificationMutation } from '@univerjs/engine-formula';
+import {
+    type BooleanNumber,
+    CommandType,
+    type ICommandInfo,
+    ICommandService,
+    IConfigService,
+    type IExecutionOptions,
+    Inject,
+    type IRange,
+    type Nullable,
+    Optional,
+    Rectangle,
+    RxDisposable,
+    type Workbook,
+    type Worksheet,
+} from '@univerjs/core';
 
 import {
+    type ISetFormulaCalculationNotificationMutation,
+    SetFormulaCalculationNotificationMutation,
+} from '@univerjs/engine-formula';
+import {
+    type IAfterRender$Info,
+    type IBasicFrameInfo,
+    type IExtendFrameInfo,
+    type IRenderContext,
+    type IRenderModule,
+    type IScrollBarProps,
+    type ISummaryFrameInfo,
+    type ISummaryMetric,
+    type ITimeMetric,
+    type IViewportInfos,
     Rect,
+    type Scene,
     ScrollBar,
-    SHEET_EXTENSION_PREFIX,
-    SHEET_VIEWPORT_KEY,
-    Spreadsheet,
-    SpreadsheetColumnHeader,
-    SpreadsheetRowHeader,
     Viewport,
 } from '@univerjs/engine-render';
 import { COMMAND_LISTENER_SKELETON_CHANGE, COMMAND_LISTENER_VALUE_CHANGE, MoveRangeMutation, SetRangeValuesMutation } from '@univerjs/sheets';
 import { ITelemetryService } from '@univerjs/telemetry';
+
 import { Subject, withLatestFrom } from 'rxjs';
 import {
     SHEET_COMPONENT_HEADER_LAYER_INDEX,
     SHEET_COMPONENT_MAIN_LAYER_INDEX,
     SHEET_VIEW_KEY,
 } from '../../common/keys';
-import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
+import { SHEET_EXTENSION_PREFIX, SHEET_VIEWPORT_KEY, Spreadsheet, SpreadsheetColumnHeader, SpreadsheetRowHeader } from '../../components/sheets';
+import { type IUniverSheetsUIConfig, SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { SheetsRenderService } from '../../services/sheets-render.service';
 

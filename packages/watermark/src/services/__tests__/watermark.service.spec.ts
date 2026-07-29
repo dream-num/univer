@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import { ILocalStorageService, Injector } from '@univerjs/core';
 import { UNIVER_WATERMARK_STORAGE_KEY } from '@univerjs/engine-render';
+
+import { ILocalStorageService, Injector } from '@univerjs/core';
+
 import { describe, expect, it, vi } from 'vitest';
 import { WatermarkService } from '../watermark.service';
 

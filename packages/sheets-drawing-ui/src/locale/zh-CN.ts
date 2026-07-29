@@ -63,8 +63,8 @@ const locale: typeof enUS = {
         'drawing-anchor': {
             title: '锚点属性',
             both: '与单元格一起移动和调整大小',
-            position: '移动但不调整大小与单元格',
-            none: '不要移动或调整大小与单元格',
+            position: '与单元格一起移动但不调整大小',
+            none: '不随单元格移动或调整大小',
         },
         'cell-image': {
             pasteTitle: '粘贴为单元格图片',

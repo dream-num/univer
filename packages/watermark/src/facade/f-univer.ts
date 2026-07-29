@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import type { IImageWatermarkConfig, ITextWatermarkConfig } from '@univerjs/engine-render';
+import { type IImageWatermarkConfig, type ITextWatermarkConfig, IWatermarkTypeEnum } from '@univerjs/engine-render';
+
 import { FEnum, FUniver } from '@univerjs/core/facade';
-import { IWatermarkTypeEnum } from '@univerjs/engine-render';
+
 import { WatermarkImageBaseConfig, WatermarkService, WatermarkTextBaseConfig } from '@univerjs/watermark';
 
 interface IFWatermarkEnumMixin {

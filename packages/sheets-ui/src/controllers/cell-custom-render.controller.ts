@@ -14,33 +14,33 @@
  * limitations under the License.
  */
 
-import type {
-    ICellCustomRender,
-    ICellDataForSheetInterceptor,
-    ICellRenderContext,
-    Nullable,
-    Workbook,
-} from '@univerjs/core';
-import type {
-    IMouseEvent,
-    IPointerEvent,
-    IRenderContext,
-    IRenderModule,
-    RenderManagerService,
-    Spreadsheet,
-} from '@univerjs/engine-render';
-import type { ICellPermission, ISheetSkeletonManagerParam } from '@univerjs/sheets';
+import type { Spreadsheet } from '../components/sheets';
+
+import type { ISheetRenderSkeletonManagerParam } from '../services/sheet-render-skeleton.service';
 import {
     Disposable,
     DisposableCollection,
     fromEventSubject,
+    type ICellCustomRender,
+    type ICellDataForSheetInterceptor,
+    type ICellRenderContext,
     Inject,
     IPermissionService,
+    type Nullable,
     sortRules,
+    type Workbook,
 } from '@univerjs/core';
-import { IRenderManagerService, Vector2 } from '@univerjs/engine-render';
+import {
+    type IMouseEvent,
+    type IPointerEvent,
+    type IRenderContext,
+    IRenderManagerService,
+    type IRenderModule,
+    type RenderManagerService,
+    Vector2,
+} from '@univerjs/engine-render';
 import { UnitAction } from '@univerjs/protocol';
-import { WorkbookEditablePermission, WorksheetEditPermission } from '@univerjs/sheets';
+import { type ICellPermission, WorkbookEditablePermission, WorksheetEditPermission } from '@univerjs/sheets';
 import { throttleTime } from 'rxjs';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
@@ -66,7 +66,7 @@ export class CellCustomRenderController extends Disposable implements IRenderMod
 
         const workbook = this._context.unit;
         // eslint-disable-next-line max-lines-per-function
-        const handleSkeletonChange = (skeletonParam: Nullable<ISheetSkeletonManagerParam>) => {
+        const handleSkeletonChange = (skeletonParam: Nullable<ISheetRenderSkeletonManagerParam>) => {
             disposableCollection.dispose();
             if (!skeletonParam) {
                 return;

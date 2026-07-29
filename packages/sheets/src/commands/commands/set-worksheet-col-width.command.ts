@@ -14,24 +14,26 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand, IRange } from '@univerjs/core';
-import type { ISetWorksheetColWidthMutationParams } from '../mutations/set-worksheet-col-width.mutation';
 import {
     CommandType,
+    type IAccessor,
+    type ICommand,
     ICommandService,
+    type IRange,
     IUndoRedoService,
     IUniverInstanceService,
     RANGE_TYPE,
     Rectangle,
     sequenceExecute,
 } from '@univerjs/core';
-import { SheetsSelectionsService } from '../../services/selections/selection.service';
-import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
-import { SheetSkeletonService } from '../../skeleton/skeleton.service';
 import {
+    type ISetWorksheetColWidthMutationParams,
     SetWorksheetColWidthMutation,
     SetWorksheetColWidthMutationFactory,
 } from '../mutations/set-worksheet-col-width.mutation';
+import { SheetsSelectionsService } from '../../services/selections/selection.service';
+import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
+import { SheetSkeletonService } from '../../skeleton/skeleton.service';
 import { getRangesHeight, getSuitableRangesInView } from './util';
 import { getSheetCommandTarget } from './utils/target-util';
 
@@ -115,7 +117,10 @@ export const DeltaColumnWidthCommand: ICommand<IDeltaColumnWidthCommandParams> =
         }
 
         const skeleton = accessor.get(SheetSkeletonService).getSkeleton(unitId, subUnitId);
-        const { suitableRanges, remainingRanges } = getSuitableRangesInView(redoMutationParams.ranges, skeleton);
+        const { suitableRanges, remainingRanges } = getSuitableRangesInView(
+            redoMutationParams.ranges,
+            skeleton?.worksheet.getColumnCount() ?? null
+        );
         const cellHeights = getRangesHeight(suitableRanges, worksheet);
 
         const interceptor = accessor.get(SheetInterceptorService);
@@ -195,7 +200,10 @@ export const SetColWidthCommand: ICommand = {
             colWidth: params.value,
         };
 
-        const { suitableRanges, remainingRanges } = getSuitableRangesInView(redoMutationParams.ranges, skeleton);
+        const { suitableRanges, remainingRanges } = getSuitableRangesInView(
+            redoMutationParams.ranges,
+            skeleton?.worksheet.getColumnCount() ?? null
+        );
         const cellHeights = getRangesHeight(suitableRanges, worksheet);
 
         const undoMutationParams = SetWorksheetColWidthMutationFactory(redoMutationParams, worksheet);

@@ -15,10 +15,18 @@
  */
 
 import type { IPosition, IRange, Workbook, Worksheet } from '@univerjs/core';
-import type { IBoundRectNoAngle, IRender, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ICollaborator } from '@univerjs/protocol';
-import type { ISheetLocation, ISheetSkeletonManagerParam } from '@univerjs/sheets';
-import { SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
+
+import type { ISheetLocation } from '@univerjs/sheets';
+import type { SpreadsheetRenderSkeleton } from '../components/sheets/sheet.render-skeleton';
+import type { ISheetRenderSkeletonManagerParam } from '../services/sheet-render-skeleton.service';
+import {
+    type IBoundRectNoAngle,
+    type IRender,
+    type Scene,
+    Vector2,
+} from '@univerjs/engine-render';
+import { SHEET_VIEWPORT_KEY } from '../components/sheets';
 
 export function getUserListEqual(userList1: ICollaborator[], userList2: ICollaborator[]) {
     if (userList1.length !== userList2.length) return false;
@@ -49,7 +57,7 @@ export function checkCellContentInRange(worksheet: Worksheet, range: IRange): bo
     return someCellGoingToBeRemoved;
 }
 
-export function getCellIndexByOffsetWithMerge(offsetX: number, offsetY: number, scene: Scene, skeleton: SpreadsheetSkeleton) {
+export function getCellIndexByOffsetWithMerge(offsetX: number, offsetY: number, scene: Scene, skeleton: SpreadsheetRenderSkeleton) {
     const activeViewport = scene.getActiveViewportByCoord(
         Vector2.FromArray([offsetX, offsetY])
     );
@@ -107,7 +115,7 @@ export function getViewportByCell(row: number, column: number, scene: Scene, wor
     }
 }
 
-export function transformBound2OffsetBound(originBound: IBoundRectNoAngle, scene: Scene, skeleton: SpreadsheetSkeleton, worksheet: Worksheet): IBoundRectNoAngle {
+export function transformBound2OffsetBound(originBound: IBoundRectNoAngle, scene: Scene, skeleton: SpreadsheetRenderSkeleton, worksheet: Worksheet): IBoundRectNoAngle {
     const topLeft = transformPosition2Offset(originBound.left, originBound.top, scene, skeleton, worksheet);
     const bottomRight = transformPosition2Offset(originBound.right, originBound.bottom, scene, skeleton, worksheet);
 
@@ -119,7 +127,7 @@ export function transformBound2OffsetBound(originBound: IBoundRectNoAngle, scene
     };
 }
 
-export function transformPosition2Offset(x: number, y: number, scene: Scene, skeleton: SpreadsheetSkeleton, worksheet: Worksheet) {
+export function transformPosition2Offset(x: number, y: number, scene: Scene, skeleton: SpreadsheetRenderSkeleton, worksheet: Worksheet) {
     const { scaleX, scaleY } = scene.getAncestorScale();
     const viewMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
     if (!viewMain) {
@@ -160,7 +168,7 @@ export function transformPosition2Offset(x: number, y: number, scene: Scene, ske
     };
 }
 
-export function getCellRealRange(workbook: Workbook, worksheet: Worksheet, skeleton: SpreadsheetSkeleton, row: number, col: number) {
+export function getCellRealRange(workbook: Workbook, worksheet: Worksheet, skeleton: SpreadsheetRenderSkeleton, row: number, col: number) {
     let actualRow = row;
     let actualCol = col;
 
@@ -185,7 +193,7 @@ export function getCellRealRange(workbook: Workbook, worksheet: Worksheet, skele
     return location;
 }
 
-export function getHoverCellPosition(currentRender: IRender, workbook: Workbook, worksheet: Worksheet, skeletonParam: ISheetSkeletonManagerParam, offsetX: number, offsetY: number) {
+export function getHoverCellPosition(currentRender: IRender, workbook: Workbook, worksheet: Worksheet, skeletonParam: ISheetRenderSkeletonManagerParam, offsetX: number, offsetY: number) {
     const { scene } = currentRender;
 
     const unitId = workbook.getUnitId();

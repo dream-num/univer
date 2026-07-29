@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import type { ThemeService } from '@univerjs/core';
-import type { Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
+import type { SpreadsheetRenderSkeleton } from '../../components/sheets/sheet.render-skeleton';
+
+import { ColorKit, createInterceptorKey, type ThemeService } from '@univerjs/core';
+import type { Scene } from '@univerjs/engine-render';
 import type { ISelectionStyle } from '@univerjs/sheets';
-import { ColorKit, createInterceptorKey } from '@univerjs/core';
 
 export const RANGE_MOVE_PERMISSION_CHECK = createInterceptorKey<boolean, null>('rangeMovePermissionCheck');
-export const RANGE_FILL_PERMISSION_CHECK = createInterceptorKey<boolean, { x: number; y: number; skeleton: SpreadsheetSkeleton; scene: Scene }>('rangeFillPermissionCheck');
+export const RANGE_FILL_PERMISSION_CHECK = createInterceptorKey<boolean, { x: number; y: number; skeleton: SpreadsheetRenderSkeleton; scene: Scene }>('rangeFillPermissionCheck');
 
 export enum SELECTION_SHAPE_DEPTH {
     FORMULA_EDITOR_SHOW = 100, // see packages/sheets-formula/src/controllers/formula-editor-show.controller.ts

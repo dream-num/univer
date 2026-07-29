@@ -14,23 +14,35 @@
  * limitations under the License.
  */
 
-import type { EventState } from '@univerjs/core';
-import type { IScrollObserverParam, IWheelEvent } from '@univerjs/engine-render';
-import type { IPageElement } from '../../../types/interfaces/i-slide-data';
-import { IConfigService, IContextService, Inject, Injector, LocaleService, Styles, Worksheet } from '@univerjs/core';
+import {
+    Spreadsheet,
+    SpreadsheetColumnHeader,
+    SpreadsheetRenderSkeleton,
+    SpreadsheetRowHeader,
+} from '@univerjs/sheets-ui';
+
+import {
+    type EventState,
+    IConfigService,
+    IContextService,
+    Inject,
+    Injector,
+    LocaleService,
+    Styles,
+    Worksheet,
+} from '@univerjs/core';
 import {
     getColor,
+    type IScrollObserverParam,
+    type IWheelEvent,
     Rect,
     Scene,
     SceneViewer,
     ScrollBar,
-    Spreadsheet,
-    SpreadsheetColumnHeader,
-    SpreadsheetRowHeader,
-    SpreadsheetSkeleton,
     Viewport,
 } from '@univerjs/engine-render';
-import { PageElementType } from '../../../types/interfaces/i-slide-data';
+import { type IPageElement, PageElementType } from '../../../types/interfaces/i-slide-data';
+import { SpreadsheetSkeleton } from '@univerjs/sheets';
 import { CanvasObjectProviderRegistry, ObjectAdaptor } from '../adaptor';
 
 enum SHEET_VIEW_KEY {
@@ -92,8 +104,9 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
         const { worksheet, styles } = spreadsheetModel;
 
         const styleModel = new Styles(styles);
-        const spreadsheetSkeleton = new SpreadsheetSkeleton(
-            new Worksheet(id, worksheet, styleModel), // FIXME: worksheet in slide doesn't has a Worksheet object
+        const worksheetModel = new Worksheet(id, worksheet, styleModel); // FIXME: worksheet in slide doesn't have a Worksheet object
+        const spreadsheetSkeleton = new SpreadsheetRenderSkeleton(
+            new SpreadsheetSkeleton(worksheetModel).calculate(),
             styleModel,
             this._localeService,
             this._contextService,

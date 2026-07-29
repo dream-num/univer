@@ -14,41 +14,6 @@
  * limitations under the License.
  */
 
-import type {
-    IDisposable,
-    IDrawingSearch,
-    IPosition,
-    IRange,
-    ITransformState,
-    Nullable,
-    Serializable,
-    Workbook,
-    Worksheet,
-} from '@univerjs/core';
-import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
-import type {
-    BaseObject,
-    IBoundRectNoAngle,
-    IRectProps,
-    IRender,
-    ITransformerConfig,
-    Scene,
-    SpreadsheetSkeleton,
-} from '@univerjs/engine-render';
-import type {
-    ISetFrozenMutationParams,
-    ISetSelectionsOperationParams,
-    ISetWorksheetRowAutoHeightMutationParams,
-} from '@univerjs/sheets';
-import type {
-    IFloatDomData,
-    IInsertSheetDrawingCommandParams,
-    ISetDrawingCommandParams,
-    ISheetDrawing,
-    ISheetDrawingPosition,
-    ISheetFloatDom,
-} from '@univerjs/sheets-drawing';
-import type { IFloatDom, IFloatDomLayout } from '@univerjs/ui';
 import {
     Disposable,
     DisposableCollection,
@@ -56,35 +21,59 @@ import {
     fromEventSubject,
     generateRandomId,
     ICommandService,
+    type IDisposable,
+    type IDrawingSearch,
     Inject,
+    type IPosition,
+    type IRange,
+    type ITransformState,
     IUniverInstanceService,
     LifecycleService,
     LifecycleStages,
+    type Nullable,
     Optional,
+    type Serializable,
     Tools,
     UniverInstanceType,
+    type Workbook,
+    type Worksheet,
 } from '@univerjs/core';
-import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
+
+import { getDrawingShapeKeyByDrawingSearch, type IDrawingJsonUndo1, IDrawingManagerService } from '@univerjs/drawing';
 import { disposeDrawingRenderObject, insertGroupObject } from '@univerjs/drawing-ui';
 import {
+    type BaseObject,
     DRAWING_OBJECT_LAYER_INDEX,
+    type IBoundRectNoAngle,
+    Image,
+    type IRectProps,
+    type IRender,
     IRenderManagerService,
+    type ITransformerConfig,
     ObjectType,
     Rect,
-    Image as RenderImage,
-    SHEET_VIEWPORT_KEY,
+    type Scene,
 } from '@univerjs/engine-render';
 import {
     COMMAND_LISTENER_SKELETON_CHANGE,
     getSheetCommandTarget,
+    type ISetFrozenMutationParams,
+    type ISetSelectionsOperationParams,
+    type ISetWorksheetRowAutoHeightMutationParams,
     SetFrozenMutation,
     SetSelectionsOperation,
     SetWorksheetRowAutoHeightMutation,
 } from '@univerjs/sheets';
 import {
     DrawingApplyType,
+    type IFloatDomData,
+    type IInsertSheetDrawingCommandParams,
     InsertSheetDrawingCommand,
+    type ISetDrawingCommandParams,
+    type ISheetDrawing,
+    type ISheetDrawingPosition,
     ISheetDrawingService,
+    type ISheetFloatDom,
     SetDrawingApplyMutation,
     SetSheetDrawingCommand,
     transformToAxisAlignPosition,
@@ -94,9 +83,16 @@ import {
     ISheetSelectionRenderService,
     SetScrollOperation,
     SetZoomRatioOperation,
+    SHEET_VIEWPORT_KEY,
     SheetSkeletonManagerService,
+    type SpreadsheetRenderSkeleton,
 } from '@univerjs/sheets-ui';
-import { CanvasFloatDomPreviewService, CanvasFloatDomService } from '@univerjs/ui';
+import {
+    CanvasFloatDomPreviewService,
+    CanvasFloatDomService,
+    type IFloatDom,
+    type IFloatDomLayout,
+} from '@univerjs/ui';
 import { BehaviorSubject, filter, map, of, Subject, switchMap, take } from 'rxjs';
 import { SHEET_CHART_RENDER_OBJECT_CONFIG } from './sheet-chart-render-object.config';
 
@@ -595,7 +591,7 @@ export interface ILimitBound extends IBoundRectNoAngle {
  * @returns ILimitBound
  */
 // eslint-disable-next-line max-lines-per-function
-export function transformBound2DOMBound(posOfFloatObject: IBoundRectNoAngle, scene: Scene, skeleton: SpreadsheetSkeleton, worksheet: Worksheet, floatDomInfo?: ICanvasFloatDomInfo, skipBoundsOfViewArea = false): ILimitBound {
+export function transformBound2DOMBound(posOfFloatObject: IBoundRectNoAngle, scene: Scene, skeleton: SpreadsheetRenderSkeleton, worksheet: Worksheet, floatDomInfo?: ICanvasFloatDomInfo, skipBoundsOfViewArea = false): ILimitBound {
     const { scaleX, scaleY } = scene.getAncestorScale();
     const viewMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
 
@@ -721,7 +717,7 @@ export function transformBound2DOMBound(posOfFloatObject: IBoundRectNoAngle, sce
 export const calcSheetFloatDomPosition = (
     floatObject: BaseObject,
     scene: Scene,
-    skeleton: SpreadsheetSkeleton,
+    skeleton: SpreadsheetRenderSkeleton,
     worksheet: Worksheet,
     floatDomInfo?: ICanvasFloatDomInfo
 ): IFloatDomLayout => {
@@ -946,8 +942,8 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             skewX: info.rect.skewX,
             skewY: info.rect.skewY,
         } as ITransformState;
-        const sheetTransform = transformToDrawingPosition(transform, skeletonParam.skeleton);
-        const axisAlignSheetTransform = transformToAxisAlignPosition(transform, skeletonParam.skeleton);
+        const sheetTransform = transformToDrawingPosition(transform, skeletonParam.skeleton.spreadsheetSkeleton);
+        const axisAlignSheetTransform = transformToAxisAlignPosition(transform, skeletonParam.skeleton.spreadsheetSkeleton);
         if (!sheetTransform || !axisAlignSheetTransform) {
             return;
         }
@@ -1013,13 +1009,13 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
 
         const previewObjectKey = this._getFloatDomPreviewObjectKey(rectShapeKey);
         const existingPreviewObject = scene.getObject(previewObjectKey);
-        if (existingPreviewObject instanceof RenderImage) {
+        if (existingPreviewObject instanceof Image) {
             existingPreviewObject.changeSource(preview.image);
             this._syncPreviewObjectTransform(existingPreviewObject, rect);
             return existingPreviewObject;
         }
 
-        const previewObject = new RenderImage(previewObjectKey, {
+        const previewObject = new Image(previewObjectKey, {
             left: rect.left,
             top: rect.top,
             width: rect.width,
@@ -2372,7 +2368,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
     private _createRangePositionObserver(
         range: IRange,
         currentRender: IRender,
-        skeleton: SpreadsheetSkeleton
+        skeleton: SpreadsheetRenderSkeleton
     ) {
         let { startRow, startColumn } = range;
         const topLeftCoord = calcCellPositionByCell(startRow, startColumn, skeleton);
@@ -2478,7 +2474,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
 function calcCellPositionByCell(
     row: number,
     col: number,
-    skeleton: SpreadsheetSkeleton
+    skeleton: SpreadsheetRenderSkeleton
 ): IBoundRectNoAngle {
     const primaryWithCoord = skeleton.getCellWithCoordByIndex(row, col);
     const cellInfo = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo : primaryWithCoord;

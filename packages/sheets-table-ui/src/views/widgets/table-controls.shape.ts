@@ -14,17 +14,26 @@
  * limitations under the License.
  */
 
-import type { IShapeProps, SpreadsheetSkeleton, UniverRenderingContext, Vector2 } from '@univerjs/engine-render';
-import type { ITableControlHitRegion, TableControlMenuAction } from './table-controls-util';
-import { DEFAULT_FONTFACE_PLANE, Rect, Shape } from '@univerjs/engine-render';
+import type { SpreadsheetRenderSkeleton } from '@univerjs/sheets-ui';
+
+import {
+    DEFAULT_FONTFACE_PLANE,
+    type IShapeProps,
+    Rect,
+    Shape,
+    type UniverRenderingContext,
+    type Vector2,
+} from '@univerjs/engine-render';
 import {
     buildCenteredPlusSegments,
     buildTableMenuRegions,
     hitTestTableControl,
+    type ITableControlHitRegion,
     TABLE_CONTROL_ANCHOR_HEIGHT,
     TABLE_CONTROL_ANCHOR_RADIUS,
     TABLE_CONTROL_MENU_ITEM_HEIGHT,
     TABLE_CONTROL_MENU_WIDTH,
+    type TableControlMenuAction,
 } from './table-controls-util';
 
 const ANCHOR_MIN_WIDTH = 122;
@@ -71,7 +80,7 @@ export class SheetTableControlsShape extends Shape<IShapeProps> {
 
     constructor(
         key: string,
-        private readonly _getSkeleton: () => SpreadsheetSkeleton | null | undefined
+        private readonly _getSkeleton: () => SpreadsheetRenderSkeleton | null | undefined
     ) {
         super(key, {
             evented: true,
@@ -168,7 +177,7 @@ export class SheetTableControlsShape extends Shape<IShapeProps> {
         ctx.restore();
     }
 
-    private _drawAnchor(ctx: UniverRenderingContext, skeleton: SpreadsheetSkeleton, item: ITableControlRenderItem): void {
+    private _drawAnchor(ctx: UniverRenderingContext, skeleton: SpreadsheetRenderSkeleton, item: ITableControlRenderItem): void {
         const position = skeleton.getNoMergeCellWithCoordByIndex(item.range.startRow, item.range.startColumn);
         const left = position.startX;
         const rawTop = position.startY - TABLE_CONTROL_ANCHOR_HEIGHT - ANCHOR_OFFSET_Y;

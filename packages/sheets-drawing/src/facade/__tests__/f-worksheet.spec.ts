@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-/* eslint-disable import/consistent-type-specifier-style -- Keep type and value imports from one package in one declaration. */
-import type { FWorkbook } from '@univerjs/sheets/facade';
+import type { ISheetDrawingPlacement } from '../../services/sheet-drawing-placement';
 import {
     DrawingTypeEnum,
     ICommandService,
@@ -29,13 +28,13 @@ import {
     type Workbook,
 } from '@univerjs/core';
 import { SheetSkeletonService } from '@univerjs/sheets';
+import { FWorkbook, FWorksheet } from '@univerjs/sheets/facade';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createSheetsDrawingTestBed } from '../../__tests__/create-sheets-drawing-test-bed';
 import { InsertSheetDrawingCommand } from '../../commands/commands/insert-sheet-drawing.command';
 import { resolveSheetDrawingRotateEnabled } from '../../common/rotate-enabled';
-import { type ISheetDrawingPlacement, SheetDrawingAnchorKind } from '../../services/sheet-drawing-placement';
-import { type ISheetDrawing, ISheetDrawingService } from '../../services/sheet-drawing.service';
-import { FWorksheetDrawingMixin } from '../f-worksheet';
+import { type ISheetDrawing, ISheetDrawingService, SheetDrawingAnchorType } from '../../services/sheet-drawing.service';
+import '../f-worksheet';
 
 describe('FWorksheetDrawingMixin group drawings', () => {
     let univer: Univer;
@@ -230,7 +229,7 @@ describe('FWorksheetDrawingMixin group drawings', () => {
                 throw new Error('SKELETON_MUST_NOT_BE_READ');
             });
         const placement: ISheetDrawingPlacement = {
-            kind: SheetDrawingAnchorKind.Absolute,
+            kind: SheetDrawingAnchorType.None,
             left: 640,
             top: 96,
             width: 320,
@@ -261,6 +260,51 @@ describe('FWorksheetDrawingMixin group drawings', () => {
         };
         expect(fWorksheet.setDrawingPlacement(image.drawingId, moved)).toBe(true);
         expect(fWorksheet.getDrawingPlacement(image.drawingId)).toEqual(moved);
+    });
+
+    it('sets a Position placement from absolute bounds through the command', () => {
+        const commandService = injector.get(ICommandService);
+        const fWorksheet = createFacade(injector);
+        const image = createDrawing('position-bounds-image', 10, DrawingTypeEnum.DRAWING_IMAGE);
+        expect(commandService.syncExecuteCommand(InsertSheetDrawingCommand.id, {
+            unitId: 'test',
+            drawings: [image],
+        })).toBe(true);
+
+        expect(fWorksheet.setDrawingPlacement(image.drawingId, {
+            kind: SheetDrawingAnchorType.Position,
+            left: 123,
+            top: 47,
+            width: 205,
+            height: 91,
+        })).toBe(true);
+
+        const placement = fWorksheet.getDrawingPlacement(image.drawingId);
+        expect(placement?.kind).toBe(SheetDrawingAnchorType.Position);
+        expect(placement && 'left' in placement).toBe(false);
+        if (placement?.kind === SheetDrawingAnchorType.Position) {
+            expect(placement.width).toBe(205);
+            expect(placement.height).toBe(91);
+        }
+    });
+
+    it('does not expose generic Float DOM drawings through the placement facade', () => {
+        const commandService = injector.get(ICommandService);
+        const fWorksheet = createFacade(injector);
+        const floatDom = createDrawing('float-dom-1', 10, DrawingTypeEnum.DRAWING_BLOCK);
+
+        expect(commandService.syncExecuteCommand(InsertSheetDrawingCommand.id, {
+            unitId: 'test',
+            drawings: [floatDom],
+        })).toBe(true);
+        expect(fWorksheet.getDrawingPlacement(floatDom.drawingId)).toBeNull();
+        expect(fWorksheet.setDrawingPlacement(floatDom.drawingId, {
+            kind: SheetDrawingAnchorType.None,
+            left: 10,
+            top: 20,
+            width: 40,
+            height: 30,
+        })).toBe(false);
     });
 
     it('returns only images from sheet drawing data and exposes active images from the drawing selection', () => {
@@ -295,10 +339,11 @@ describe('FWorksheetDrawingMixin group drawings', () => {
     });
 });
 
-function createFacade(injector: Injector): FWorksheetDrawingMixin {
+function createFacade(injector: Injector): FWorksheet {
     const workbook = injector.get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const worksheet = workbook.getSheetBySheetId('sheet1')!;
-    return injector.createInstance(FWorksheetDrawingMixin, { getId: () => 'test' } as FWorkbook, workbook, worksheet);
+    const fWorkbook = injector.createInstance(FWorkbook, workbook);
+    return injector.createInstance(FWorksheet, fWorkbook, workbook, worksheet);
 }
 
 function createDrawing(drawingId: string, left: number, drawingType = DrawingTypeEnum.DRAWING_SHAPE): ISheetDrawing {

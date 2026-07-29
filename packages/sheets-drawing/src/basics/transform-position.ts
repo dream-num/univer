@@ -15,10 +15,12 @@
  */
 
 import type { ITransformState, Nullable } from '@univerjs/core';
-import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
-import type { ISheetSkeletonManagerParam } from '@univerjs/sheets';
 import type { ISheetDrawingPosition } from '../services/sheet-drawing.service';
-import { convertPositionSheetOverGridToAbsolute } from '@univerjs/sheets';
+import {
+    convertPositionSheetOverGridToAbsolute,
+    type ISheetSkeletonManagerParam,
+    type SpreadsheetSkeleton,
+} from '@univerjs/sheets';
 
 export function drawingPositionToTransform(position: ISheetDrawingPosition, sheetSkeletonParam: Nullable<ISheetSkeletonManagerParam>): Nullable<ITransformState> {
     if (!sheetSkeletonParam) return;
@@ -29,8 +31,8 @@ export function drawingPositionToTransform(position: ISheetDrawingPosition, shee
 
     let { left, top, width, height } = absolutePosition;
 
-    const sheetWidth = skeleton.rowHeaderWidth + skeleton.columnTotalWidth;
-    const sheetHeight = skeleton.columnHeaderHeight + skeleton.rowTotalHeight;
+    const sheetWidth = skeleton.columnTotalWidth;
+    const sheetHeight = skeleton.rowTotalHeight;
 
     if ((left + width) > sheetWidth) {
         left = sheetWidth - width;
@@ -53,7 +55,10 @@ export function drawingPositionToTransform(position: ISheetDrawingPosition, shee
 }
 
 // use transform and originSize convert to  ISheetDrawingPosition
-export function transformToDrawingPosition(transform: ITransformState, skeleton: SpreadsheetSkeleton): ISheetDrawingPosition {
+export function transformToDrawingPosition(
+    transform: ITransformState,
+    skeleton: SpreadsheetSkeleton
+): ISheetDrawingPosition {
     const { left = 0, top = 0, width = 0, height = 0, flipY = false, flipX = false, angle = 0, skewX = 0, skewY = 0 } = transform;
     const startSelectionCell = skeleton.getCellIndexAndOffsetByPosition(left, top);
     const endSelectionCell = skeleton.getCellIndexAndOffsetByPosition(left + width, top + height);
@@ -78,7 +83,10 @@ export function transformToDrawingPosition(transform: ITransformState, skeleton:
  * [225°, 315°): rotate the bound 90° counterclockwise, and the left, top, bottom, right will use the rotated bound.
  * @return The axis-aligned position of the drawing element.
  */
-export function transformToAxisAlignPosition(transform: ITransformState, skeleton: SpreadsheetSkeleton): ISheetDrawingPosition {
+export function transformToAxisAlignPosition(
+    transform: ITransformState,
+    skeleton: SpreadsheetSkeleton
+): ISheetDrawingPosition {
     const { left = 0, top = 0, width = 0, height = 0, angle = 0 } = transform;
 
     const norm = ((angle % 360) + 360) % 360;

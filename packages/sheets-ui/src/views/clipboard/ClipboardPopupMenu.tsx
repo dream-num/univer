@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
+import { convertTransformToOffsetX, convertTransformToOffsetY } from '../../components/sheets';
+
 import type { IDiscreteRange } from '@univerjs/sheets';
 import type { IPasteHookKeyType } from '../../services/clipboard/type';
 import { ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { borderClassName, clsx, DropdownMenu } from '@univerjs/design';
-import { convertTransformToOffsetX, convertTransformToOffsetY, IRenderManagerService } from '@univerjs/engine-render';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { MoreDownIcon, PasteSpecialDoubleIcon } from '@univerjs/icons';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useState } from 'react';

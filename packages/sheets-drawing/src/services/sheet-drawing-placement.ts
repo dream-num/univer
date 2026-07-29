@@ -14,40 +14,42 @@
  * limitations under the License.
  */
 
-/* eslint-disable import/consistent-type-specifier-style -- Keep type and value imports from one package in one declaration. */
-import type { ITransformState } from '@univerjs/core';
-import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
-import { convertPositionCellToSheetOverGrid, convertPositionSheetOverGridToAbsolute, type ICellOverGridPosition } from '@univerjs/sheets';
-import { transformToAxisAlignPosition } from '../basics/transform-position';
+import { DrawingTypeEnum, type IDrawingParam, type IGroupBaseBound, type ITransformState, type Nullable } from '@univerjs/core';
 import {
-    type ISheetDrawing,
+    convertPositionCellToSheetOverGrid,
+    convertPositionSheetOverGridToAbsolute,
+    type ICellOverGridPosition,
+    type SpreadsheetSkeleton,
+} from '@univerjs/sheets';
+import { transformToAxisAlignPosition, transformToDrawingPosition } from '../basics/transform-position';
+import {
     type ISheetDrawingPosition,
     type ISheetFloatDom,
     type ISheetImage,
+    type ISheetShape,
     SheetDrawingAnchorType,
 } from './sheet-drawing.service';
 
-/**
- * Public Sheet drawing anchor semantics.
- *
- * The values intentionally match {@link SheetDrawingAnchorType} so snapshots
- * keep a single persisted source of truth.
- */
-export enum SheetDrawingAnchorKind {
-    // eslint-disable-next-line ts/prefer-literal-enum-member -- Keep the public enum aligned with the persisted model value.
-    OneCell = SheetDrawingAnchorType.Position,
-    // eslint-disable-next-line ts/prefer-literal-enum-member -- Keep the public enum aligned with the persisted model value.
-    TwoCell = SheetDrawingAnchorType.Both,
-    // eslint-disable-next-line ts/prefer-literal-enum-member -- Keep the public enum aligned with the persisted model value.
-    Absolute = SheetDrawingAnchorType.None,
+export type ISheetDrawingPlacementTarget = ISheetImage | ISheetShape;
+type SheetDrawingPlacementMaterializationTarget = ISheetDrawingPlacementTarget | ISheetFloatDom;
+
+export function isSheetDrawingPlacementTarget(
+    drawing: Nullable<IDrawingParam>
+): drawing is ISheetDrawingPlacementTarget {
+    return Boolean(
+        drawing &&
+        (drawing.drawingType === DrawingTypeEnum.DRAWING_IMAGE || drawing.drawingType === DrawingTypeEnum.DRAWING_SHAPE) &&
+        'sheetTransform' in drawing
+    );
 }
 
 /**
- * Anchor a drawing to one cell while keeping a fixed pixel extent.
+ * Position follows the anchor cell while the extent remains fixed.
+ * This maps to OOXML `xdr:oneCellAnchor`.
  */
-export interface ISheetDrawingOneCellPlacement {
+export interface ISheetDrawingPositionPlacement {
     /** Placement discriminator. */
-    kind: SheetDrawingAnchorKind.OneCell;
+    kind: SheetDrawingAnchorType.Position;
     /** Zero-based anchor cell and pixel offsets from its top-left corner. */
     from: ICellOverGridPosition;
     /** Drawing width in pixels. */
@@ -57,11 +59,12 @@ export interface ISheetDrawingOneCellPlacement {
 }
 
 /**
- * Anchor a drawing between two cell markers.
+ * Position and extent follow two cell markers.
+ * This maps to OOXML `xdr:twoCellAnchor`.
  */
-export interface ISheetDrawingTwoCellPlacement {
+export interface ISheetDrawingBothPlacement {
     /** Placement discriminator. */
-    kind: SheetDrawingAnchorKind.TwoCell;
+    kind: SheetDrawingAnchorType.Both;
     /** Zero-based start cell and pixel offsets. */
     from: ICellOverGridPosition;
     /** Zero-based end cell and pixel offsets. */
@@ -69,11 +72,12 @@ export interface ISheetDrawingTwoCellPlacement {
 }
 
 /**
- * Position a drawing in the Sheet canvas pixel coordinate system.
+ * Position and extent use the model Sheet grid coordinate system and do not
+ * follow cells. This maps to OOXML `xdr:absoluteAnchor`.
  */
-export interface ISheetDrawingAbsolutePlacement {
+export interface ISheetDrawingNonePlacement {
     /** Placement discriminator. */
-    kind: SheetDrawingAnchorKind.Absolute;
+    kind: SheetDrawingAnchorType.None;
     /** Horizontal pixel offset from the Sheet canvas origin. */
     left: number;
     /** Vertical pixel offset from the Sheet canvas origin. */
@@ -88,15 +92,31 @@ export interface ISheetDrawingAbsolutePlacement {
  * Explicit Sheet drawing placement.
  */
 export type ISheetDrawingPlacement =
-    | ISheetDrawingOneCellPlacement
-    | ISheetDrawingTwoCellPlacement
-    | ISheetDrawingAbsolutePlacement;
+    | ISheetDrawingPositionPlacement
+    | ISheetDrawingBothPlacement
+    | ISheetDrawingNonePlacement;
 
-export function getSheetDrawingPlacement(drawing: ISheetDrawing): ISheetDrawingPlacement {
+/**
+ * Absolute Sheet grid bounds paired with the requested anchor behavior.
+ * Commands normalize Position and Both bounds to cell markers.
+ */
+export type ISheetDrawingBoundsPlacement = IGroupBaseBound & {
+    kind: SheetDrawingAnchorType.Position | SheetDrawingAnchorType.Both;
+};
+
+/**
+ * Placement accepted by Sheet drawing write APIs.
+ *
+ * Marker placements are already normalized. Bounds placements are normalized
+ * by the command with the model SpreadsheetSkeleton.
+ */
+export type ISheetDrawingPlacementInput = ISheetDrawingPlacement | ISheetDrawingBoundsPlacement;
+
+export function getSheetDrawingPlacement(drawing: ISheetDrawingPlacementTarget): ISheetDrawingPlacement {
     const anchorType = drawing.anchorType ?? SheetDrawingAnchorType.Position;
     if (anchorType === SheetDrawingAnchorType.None) {
         return {
-            kind: SheetDrawingAnchorKind.Absolute,
+            kind: SheetDrawingAnchorType.None,
             left: drawing.transform?.left ?? 0,
             top: drawing.transform?.top ?? 0,
             width: drawing.transform?.width ?? 0,
@@ -106,18 +126,65 @@ export function getSheetDrawingPlacement(drawing: ISheetDrawing): ISheetDrawingP
 
     if (anchorType === SheetDrawingAnchorType.Both) {
         return {
-            kind: SheetDrawingAnchorKind.TwoCell,
+            kind: SheetDrawingAnchorType.Both,
             from: { ...drawing.sheetTransform.from },
             to: { ...drawing.sheetTransform.to },
         };
     }
 
     return {
-        kind: SheetDrawingAnchorKind.OneCell,
+        kind: SheetDrawingAnchorType.Position,
         from: { ...drawing.sheetTransform.from },
         width: drawing.transform?.width ?? 0,
         height: drawing.transform?.height ?? 0,
     };
+}
+
+/**
+ * Normalize an API placement input to the authoritative model representation.
+ */
+export function normalizeSheetDrawingPlacement(
+    placement: ISheetDrawingPlacementInput,
+    skeleton?: SpreadsheetSkeleton
+): ISheetDrawingPlacement {
+    if (placement.kind === SheetDrawingAnchorType.None) {
+        validateBounds(placement);
+        return placement;
+    }
+    if (!isSheetDrawingBoundsPlacement(placement)) {
+        validatePlacement(placement);
+        return placement;
+    }
+
+    validateBounds(placement);
+    if (!skeleton) {
+        throw new Error('SHEET_DRAWING_PLACEMENT_SKELETON_REQUIRED');
+    }
+
+    const { from, to } = transformToDrawingPosition(placement, skeleton);
+    return placement.kind === SheetDrawingAnchorType.Position
+        ? {
+            kind: SheetDrawingAnchorType.Position,
+            from,
+            width: placement.width,
+            height: placement.height,
+        }
+        : {
+            kind: SheetDrawingAnchorType.Both,
+            from,
+            to,
+        };
+}
+
+/**
+ * Rebuild derived geometry from the authoritative fields of the current
+ * placement contract.
+ */
+export function materializeSheetDrawingPlacement(
+    drawing: ISheetDrawingPlacementTarget,
+    skeleton: SpreadsheetSkeleton
+): ISheetDrawingPlacementTarget {
+    return applySheetDrawingPlacement(drawing, getSheetDrawingPlacement(drawing), skeleton);
 }
 
 export function applySheetDrawingPlacement(
@@ -131,26 +198,23 @@ export function applySheetDrawingPlacement(
     skeleton?: SpreadsheetSkeleton
 ): ISheetFloatDom;
 export function applySheetDrawingPlacement(
-    drawing: ISheetDrawing,
+    drawing: ISheetShape,
     placement: ISheetDrawingPlacement,
     skeleton?: SpreadsheetSkeleton
-): ISheetDrawing;
+): ISheetShape;
 export function applySheetDrawingPlacement(
-    drawing: ISheetDrawing,
+    drawing: SheetDrawingPlacementMaterializationTarget,
     placement: ISheetDrawingPlacement,
     skeleton?: SpreadsheetSkeleton
-): ISheetDrawing {
+): SheetDrawingPlacementMaterializationTarget {
     validatePlacement(placement);
 
-    if (placement.kind === SheetDrawingAnchorKind.Absolute) {
+    if (placement.kind === SheetDrawingAnchorType.None) {
         const transform = withExistingTransform(drawing.transform, placement);
-        const sheetTransform = absoluteSheetTransform(placement, drawing.sheetTransform);
         return {
             ...drawing,
             anchorType: SheetDrawingAnchorType.None,
             transform,
-            sheetTransform,
-            axisAlignSheetTransform: sheetTransform,
         };
     }
 
@@ -158,7 +222,7 @@ export function applySheetDrawingPlacement(
         throw new Error('SHEET_DRAWING_PLACEMENT_SKELETON_REQUIRED');
     }
 
-    if (placement.kind === SheetDrawingAnchorKind.OneCell) {
+    if (placement.kind === SheetDrawingAnchorType.Position) {
         const converted = convertPositionCellToSheetOverGrid(
             drawing.unitId,
             drawing.subUnitId,
@@ -222,41 +286,20 @@ function withExistingTransform(
     };
 }
 
-function absoluteSheetTransform(
-    placement: ISheetDrawingAbsolutePlacement,
-    current: ISheetDrawingPosition
-): ISheetDrawingPosition {
-    return {
-        ...current,
-        from: {
-            column: 0,
-            columnOffset: placement.left,
-            row: 0,
-            rowOffset: placement.top,
-        },
-        to: {
-            column: 0,
-            columnOffset: placement.left + placement.width,
-            row: 0,
-            rowOffset: placement.top + placement.height,
-        },
-    };
-}
-
 function validatePlacement(placement: ISheetDrawingPlacement): void {
-    if (placement.kind === SheetDrawingAnchorKind.OneCell) {
+    if (placement.kind === SheetDrawingAnchorType.Position) {
         validateCellPosition(placement.from);
         validateExtent(placement.width, placement.height);
         return;
     }
 
-    if (placement.kind === SheetDrawingAnchorKind.TwoCell) {
+    if (placement.kind === SheetDrawingAnchorType.Both) {
         validateCellPosition(placement.from);
         validateCellPosition(placement.to);
         return;
     }
 
-    if (placement.kind === SheetDrawingAnchorKind.Absolute) {
+    if (placement.kind === SheetDrawingAnchorType.None) {
         if (!Number.isFinite(placement.left) || !Number.isFinite(placement.top)) {
             throw new TypeError('SHEET_DRAWING_PLACEMENT_POSITION_INVALID');
         }
@@ -265,6 +308,19 @@ function validatePlacement(placement: ISheetDrawingPlacement): void {
     }
 
     throw new Error('SHEET_DRAWING_PLACEMENT_KIND_INVALID');
+}
+
+function isSheetDrawingBoundsPlacement(
+    placement: ISheetDrawingPlacementInput
+): placement is ISheetDrawingBoundsPlacement {
+    return 'left' in placement;
+}
+
+function validateBounds(bounds: IGroupBaseBound): void {
+    if (!Number.isFinite(bounds.left) || !Number.isFinite(bounds.top)) {
+        throw new TypeError('SHEET_DRAWING_PLACEMENT_POSITION_INVALID');
+    }
+    validateExtent(bounds.width, bounds.height);
 }
 
 function validateCellPosition(position: ICellOverGridPosition): void {

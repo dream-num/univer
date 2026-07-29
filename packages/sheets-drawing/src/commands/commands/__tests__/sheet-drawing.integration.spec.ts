@@ -14,23 +14,27 @@
  * limitations under the License.
  */
 
-import type { Injector, Univer } from '@univerjs/core';
-import type { ISheetDrawing } from '../../../services/sheet-drawing.service';
 import {
     ArrangeTypeEnum,
     DrawingTypeEnum,
     ICommandService,
     ImageSourceType,
+    type Injector,
     IUndoRedoService,
     IUniverInstanceService,
     UndoCommand,
+    type Univer,
 } from '@univerjs/core';
 import { DRAWING_COPY_CONTEXT_KEY, IDrawingManagerService } from '@univerjs/drawing';
 import { CopySheetCommand, RemoveSheetCommand, SetWorksheetActivateCommand, SheetInterceptorService } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createSheetsDrawingTestBed } from '../../../__tests__/create-sheets-drawing-test-bed';
 import { resolveSheetDrawingRotateEnabled } from '../../../common/rotate-enabled';
-import { ISheetDrawingService } from '../../../services/sheet-drawing.service';
+import {
+    type ISheetDrawing,
+    ISheetDrawingService,
+    SheetDrawingAnchorType,
+} from '../../../services/sheet-drawing.service';
 import { DrawingApplyType, SetDrawingApplyMutation } from '../../mutations/set-drawing-apply.mutation';
 import { InsertSheetDrawingCommand } from '../insert-sheet-drawing.command';
 import { RemoveSheetDrawingCommand } from '../remove-sheet-drawing.command';
@@ -45,6 +49,7 @@ function createSheetDrawing(drawingId: string, subUnitId = 'sheet1'): ISheetDraw
         drawingType: DrawingTypeEnum.DRAWING_IMAGE,
         imageSourceType: ImageSourceType.URL,
         source: `https://example.com/${drawingId}.png`,
+        anchorType: SheetDrawingAnchorType.Both,
         sheetTransform: {
             angle: 0,
             flipX: false,
@@ -117,7 +122,7 @@ function createGroupSheetDrawing(drawingId: string, angle = 0): ISheetDrawing {
             ...drawing.axisAlignSheetTransform,
             angle,
         },
-    } as ISheetDrawing;
+    };
 }
 
 describe('sheet drawing integration', () => {

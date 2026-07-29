@@ -14,9 +14,18 @@
  * limitations under the License.
  */
 
-import type { DisposableCollection, IRange, Worksheet } from '@univerjs/core';
-import type { Engine, Scene, Spreadsheet, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import { createInterceptorKey, Disposable, InterceptorManager } from '@univerjs/core';
+import { type Spreadsheet } from '../components/sheets';
+import type { SpreadsheetRenderSkeleton } from '../components/sheets/sheet.render-skeleton';
+
+import {
+    createInterceptorKey,
+    Disposable,
+    type DisposableCollection,
+    InterceptorManager,
+    type IRange,
+    type Worksheet,
+} from '@univerjs/core';
+import type { Engine, Scene } from '@univerjs/engine-render';
 
 /** Tracks asynchronous resources registered by all interceptors for one print page. */
 export class SheetPrintingResourceCollector {
@@ -60,7 +69,7 @@ interface ISheetPrintContext {
     engine: Engine;
     root: HTMLElement;
     worksheet: Worksheet;
-    skeleton: SpreadsheetSkeleton;
+    skeleton: SpreadsheetRenderSkeleton;
     range: IRange;
     resourceCollector: SheetPrintingResourceCollector;
     offset: {

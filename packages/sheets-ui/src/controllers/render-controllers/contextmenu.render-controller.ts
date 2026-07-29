@@ -14,20 +14,25 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
-import type { IRenderContext, IRenderModule, Spreadsheet, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
-import type { ISheetHostChromeOverride } from '../../services/sheet-host-chrome-override.service';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+
+import type { Spreadsheet, SpreadsheetColumnHeader, SpreadsheetHeader } from '../../components/sheets';
 import {
     Disposable,
     Inject,
     Injector,
     RANGE_TYPE,
+    type Workbook,
 } from '@univerjs/core';
-import { attachSelectionWithCoord, SheetsSelectionsService } from '@univerjs/sheets';
+import { SheetsSelectionsService } from '@univerjs/sheets';
 import { ContextMenuPosition, IContextMenuService } from '@univerjs/ui';
 import { SHEET_VIEW_KEY } from '../../common/keys';
+import { attachRenderSelectionWithCoord } from '../../common/skeleton-util';
 import { ISheetSelectionRenderService } from '../../services/selection/base-selection-render.service';
-import { ISheetHostChromeOverrideService } from '../../services/sheet-host-chrome-override.service';
+import {
+    type ISheetHostChromeOverride,
+    ISheetHostChromeOverrideService,
+} from '../../services/sheet-host-chrome-override.service';
 
 /**
  * This controller subscribe to context menu events in sheet rendering views and invoke context menu at a correct
@@ -59,7 +64,7 @@ export class SheetContextMenuRenderController extends Disposable implements IRen
                 }
                 const rangeType = currentSelection.range.rangeType;
                 const skeleton = this._selectionRenderService.getSkeleton();
-                const selectionRangeWithCoord = attachSelectionWithCoord(currentSelection, skeleton);
+                const selectionRangeWithCoord = attachRenderSelectionWithCoord(currentSelection, skeleton);
                 const range = selectionRangeWithCoord.rangeWithCoord;
                 const isPointerInRange = () => {
                     if (!range) {

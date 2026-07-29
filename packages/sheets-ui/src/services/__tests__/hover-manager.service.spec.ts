@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+import { SHEET_VIEWPORT_KEY } from '../../components/sheets';
+
 import { Injector, IUniverInstanceService } from '@univerjs/core';
-import { IRenderManagerService, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { describe, expect, it } from 'vitest';
 import { HoverManagerService } from '../hover-manager.service';

@@ -14,10 +14,22 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IPosition, ISelectionCell, Nullable, Workbook } from '@univerjs/core';
-import type { Engine, IDocumentLayoutObject, Scene } from '@univerjs/engine-render';
+import { convertTransformToOffsetX, convertTransformToOffsetY } from '../components/sheets';
+
+import {
+    convertTextRotation,
+    DeviceInputEventType,
+    type Engine,
+    IRenderManagerService,
+    type Scene,
+} from '@univerjs/engine-render';
 import type { KeyCode } from '@univerjs/ui';
-import type { Observable } from 'rxjs';
+import {
+    BehaviorSubject,
+    map,
+    type Observable,
+    switchMap,
+} from 'rxjs';
 import {
     CellValueType,
     convertCellToRange,
@@ -27,27 +39,25 @@ import {
     EDITOR_ACTIVATED,
     FOCUSING_EDITOR_STANDALONE,
     IContextService,
+    type IDisposable,
+    type IDocumentLayoutObject,
     Inject,
+    type IPosition,
+    type ISelectionCell,
     IUniverInstanceService,
+    type Nullable,
     ThemeService,
     toDisposable,
     UniverInstanceType,
+    type Workbook,
 } from '@univerjs/core';
 import { getCanvasOffsetByEngine, IEditorService } from '@univerjs/docs-ui';
 import {
-    convertTextRotation,
-    convertTransformToOffsetX,
-    convertTransformToOffsetY,
-    DeviceInputEventType,
-    IRenderManagerService,
-} from '@univerjs/engine-render';
-import {
-    attachPrimaryWithCoord,
     BEFORE_CELL_EDIT,
     SheetInterceptorService,
-    SheetSkeletonService,
 } from '@univerjs/sheets';
-import { BehaviorSubject, map, switchMap } from 'rxjs';
+import { attachRenderPrimaryWithCoord } from '../common/skeleton-util';
+import { SheetRenderSkeletonService } from './sheet-render-skeleton.service';
 import { ISheetSelectionRenderService } from './selection/base-selection-render.service';
 
 export interface IEditorBridgeServiceVisibleParam {
@@ -156,7 +166,7 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
 
     constructor(
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
-        @Inject(SheetSkeletonService) private readonly _sheetSkeletonService: SheetSkeletonService,
+        @Inject(SheetRenderSkeletonService) private readonly _sheetRenderSkeletonService: SheetRenderSkeletonService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(ThemeService) private readonly _themeService: ThemeService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
@@ -206,10 +216,10 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         const renderUnit = this._renderManagerService.getRenderUnitById(unitId);
         if (!renderUnit) return;
 
-        const skeleton = this._sheetSkeletonService.getSkeleton(unitId, sheetId);
+        const skeleton = this._sheetRenderSkeletonService.getSkeleton(unitId, sheetId);
         if (!skeleton) return;
 
-        const primaryWithCoord = attachPrimaryWithCoord(skeleton, primary);
+        const primaryWithCoord = attachRenderPrimaryWithCoord(skeleton, primary);
         const actualRangeWithCoord = convertCellToRange(primaryWithCoord);
         const canvasOffset = getCanvasOffsetByEngine(engine);
 
@@ -323,11 +333,11 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         const renderUnit = this._renderManagerService.getRenderUnitById(unitId);
         if (!renderUnit) return;
 
-        const skeleton = this._sheetSkeletonService.getSkeleton(unitId, sheetId);
+        const skeleton = this._sheetRenderSkeletonService.getSkeleton(unitId, sheetId);
         if (!skeleton) return;
 
         const { startRow, startColumn } = primary;
-        const primaryWithCoord = attachPrimaryWithCoord(skeleton, primary);
+        const primaryWithCoord = attachRenderPrimaryWithCoord(skeleton, primary);
         const actualRangeWithCoord = convertCellToRange(primaryWithCoord);
         const canvasOffset = getCanvasOffsetByEngine(engine);
 

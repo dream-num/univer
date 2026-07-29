@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { SHEET_VIEWPORT_KEY } from '../../../components/sheets';
+
 import {
     ContextService,
     DesktopLogService,
@@ -25,7 +27,7 @@ import {
     UniverInstanceService,
     Workbook,
 } from '@univerjs/core';
-import { IRenderManagerService, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetSkeletonService } from '@univerjs/sheets';
 import { describe, expect, it } from 'vitest';
 import {

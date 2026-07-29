@@ -15,7 +15,6 @@
  */
 
 import type { Canvas } from '../canvas';
-import type { SHEET_VIEWPORT_KEY } from '../components/sheets/interfaces';
 import type { DeepImmutable, FloatArray } from './i-events';
 import type { Transform } from './transform';
 
@@ -870,7 +869,7 @@ export interface IViewportInfo {
      * The physical position means the top and left values have already considered the scaling factor.
      */
     viewPortPosition: IBoundRectNoAngle;
-    viewportKey: string | SHEET_VIEWPORT_KEY;
+    viewportKey: string;
     /**
      * In the future, a number will be used to indicate the reason for the "dirty" status
      * Here, a binary value is used to facilitate computation.

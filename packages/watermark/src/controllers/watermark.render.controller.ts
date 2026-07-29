@@ -14,10 +14,24 @@
  * limitations under the License.
  */
 
-import type { UnitModel } from '@univerjs/core';
-import type { IRenderContext, IRenderModule, IWatermarkConfigWithType } from '@univerjs/engine-render';
-import { ILocalStorageService, Inject, RxDisposable, UserManagerService } from '@univerjs/core';
-import { IWatermarkTypeEnum, UNIVER_WATERMARK_LAYER_INDEX, UNIVER_WATERMARK_STORAGE_KEY, WatermarkLayer } from '@univerjs/engine-render';
+import {
+    type IRenderContext,
+    type IRenderModule,
+    type IWatermarkConfigWithType,
+    IWatermarkTypeEnum,
+    UNIVER_WATERMARK_LAYER_INDEX,
+    UNIVER_WATERMARK_STORAGE_KEY,
+    WatermarkLayer,
+} from '@univerjs/engine-render';
+
+import {
+    ILocalStorageService,
+    Inject,
+    RxDisposable,
+    type UnitModel,
+    UserManagerService,
+} from '@univerjs/core';
+
 import { WatermarkService } from '../services/watermark.service';
 
 export class WatermarkRenderController extends RxDisposable implements IRenderModule {

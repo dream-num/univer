@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-/* eslint-disable import/consistent-type-specifier-style -- Keep type and value imports from one package in one declaration. */
 import type { ISheetOverGridPosition } from '@univerjs/sheets';
-import { createIdentifier, type IDrawingParam, type IRotationSkewFlipTransform, type Serializable } from '@univerjs/core';
-import { type IDrawingJsonUndo1, type IImageData, type IUnitDrawingService, UnitDrawingService } from '@univerjs/drawing';
+import { createIdentifier, type IDrawingParam, type IDrawingSearch, type IRotationSkewFlipTransform, type Serializable } from '@univerjs/core';
+import { type IDrawingGroupUpdateParam, type IDrawingJsonUndo1, type IImageData, type IUnitDrawingService, UnitDrawingService } from '@univerjs/drawing';
 
 export enum SheetDrawingAnchorType {
     /**
@@ -82,6 +81,9 @@ export class SheetDrawingService extends UnitDrawingService<ISheetDrawing> { }
 
 export interface ISheetDrawingService extends IUnitDrawingService<ISheetDrawing> {
     getBatchUpdateOp(updateParams: ISheetDrawing[]): IDrawingJsonUndo1;
+    getDrawingsByGroup(groupParam: IDrawingSearch): ISheetDrawing[];
+    getGroupDrawingOp(groupParams: IDrawingGroupUpdateParam[]): IDrawingJsonUndo1;
+    getUngroupDrawingOp(groupParams: IDrawingGroupUpdateParam[]): IDrawingJsonUndo1;
 }
 
 export const ISheetDrawingService = createIdentifier<ISheetDrawingService>('sheets-drawing.sheet-drawing.service');

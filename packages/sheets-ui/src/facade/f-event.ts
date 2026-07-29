@@ -15,13 +15,13 @@
  */
 
 import type { IRange, RichTextValue } from '@univerjs/core';
-import type { IEventBase } from '@univerjs/core/facade';
-import type { DeviceInputEventType, SpreadsheetSkeleton } from '@univerjs/engine-render';
+
+import type { DeviceInputEventType } from '@univerjs/engine-render';
 import type { CommandListenerSkeletonChange } from '@univerjs/sheets';
-import type { IDragCellPosition } from '@univerjs/sheets-ui';
+import type { IDragCellPosition, SpreadsheetRenderSkeleton } from '@univerjs/sheets-ui';
 import type { FRange, FWorkbook, FWorksheet } from '@univerjs/sheets/facade';
 import type { KeyCode } from '@univerjs/ui';
-import { FEventName } from '@univerjs/core/facade';
+import { FEventName, type IEventBase } from '@univerjs/core/facade';
 
 /**
  * Event interface triggered before clipboard content changes
@@ -258,7 +258,7 @@ export interface ISheetZoomEventParams extends IEventBase {
  * Event interface for sheet skeleton change event
  */
 export interface ISheetSkeletonChangedEventParams extends ISheetUIEventBase {
-    skeleton: SpreadsheetSkeleton;
+    skeleton: SpreadsheetRenderSkeleton;
     payload: CommandListenerSkeletonChange;
     effectedRanges: FRange[];
 }

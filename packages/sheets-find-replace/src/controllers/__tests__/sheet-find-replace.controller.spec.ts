@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-import type { ICellData, IRange } from '@univerjs/core';
-import type { IFindQuery } from '@univerjs/find-replace';
-import { UniverInstanceType } from '@univerjs/core';
-import { RENDER_RAW_FORMULA_KEY } from '@univerjs/engine-render';
-import { FindBy, FindDirection, FindScope } from '@univerjs/find-replace';
+import { type ICellData, type IRange, UniverInstanceType } from '@univerjs/core';
+
+import {
+    FindBy,
+    FindDirection,
+    FindScope,
+    type IFindQuery,
+} from '@univerjs/find-replace';
 import { SelectRangeCommand, SetRangeValuesCommand, SetWorksheetActivateCommand } from '@univerjs/sheets';
-import { ScrollToCellCommand } from '@univerjs/sheets-ui';
+
+import { RENDER_RAW_FORMULA_KEY, ScrollToCellCommand } from '@univerjs/sheets-ui';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { SheetReplaceCommand } from '../../commands/commands/sheet-replace.command';

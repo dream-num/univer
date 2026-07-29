@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-/* eslint-disable import/consistent-type-specifier-style -- Keep type and value imports from one package in one declaration. */
 import type { LocaleKey } from '../../locale/types';
-import { ICommandService, type IDrawingParam, LocaleService, type Nullable } from '@univerjs/core';
+import { ICommandService, type IDrawingParam, LocaleService } from '@univerjs/core';
 import { clsx, Radio, RadioGroup } from '@univerjs/design';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import { type BaseObject, IRenderManagerService, type SpreadsheetSkeleton } from '@univerjs/engine-render';
-import { SheetSkeletonService } from '@univerjs/sheets';
+import { type BaseObject, IRenderManagerService } from '@univerjs/engine-render';
 import {
     getSheetDrawingPlacement,
-    type ISheetDrawing,
-    type ISheetDrawingPlacement,
+    type ISheetDrawingPlacementInput,
+    type ISheetDrawingPlacementTarget,
+    ISheetDrawingService,
+    isSheetDrawingPlacementTarget,
     SetSheetDrawingPlacementCommand,
-    SheetDrawingAnchorKind,
-    transformToDrawingPosition,
+    SheetDrawingAnchorType,
 } from '@univerjs/sheets-drawing';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
@@ -36,59 +35,26 @@ export interface ISheetDrawingAnchorProps {
     drawings: IDrawingParam[];
 }
 
-export const SheetDrawingAnchor = (props: ISheetDrawingAnchorProps) => {
+const SheetDrawingAnchorContent = (props: ISheetDrawingAnchorProps) => {
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const drawingManagerService = useDependency(IDrawingManagerService);
+    const sheetDrawingService = useDependency(ISheetDrawingService);
     const renderManagerService = useDependency(IRenderManagerService);
-    const sheetSkeletonService = useDependency(SheetSkeletonService);
 
     const { drawings } = props;
 
-    const drawingParam = isSheetDrawing(drawings[0]) ? drawings[0] : undefined;
+    const drawingParam = isSheetDrawingPlacementTarget(drawings[0]) ? drawings[0] : undefined;
     const renderObject = drawingParam ? renderManagerService.getRenderUnitById(drawingParam.unitId) : undefined;
     const scene = renderObject?.scene;
     const transformer = scene?.getTransformerByCreate();
 
-    const [anchorShow, setAnchorShow] = useState(true);
+    const [anchorShow, setAnchorShow] = useState(Boolean(drawingParam));
 
     const type = drawingParam
         ? getSheetDrawingPlacement(drawingParam).kind
-        : SheetDrawingAnchorKind.OneCell;
+        : SheetDrawingAnchorType.Position;
     const [value, setValue] = useState(type);
-
-    function getUpdateParams(objects: Map<string, BaseObject>, drawingManagerService: IDrawingManagerService): Nullable<ISheetDrawing>[] {
-        const params: Nullable<ISheetDrawing>[] = [];
-        objects.forEach((object) => {
-            const { oKey } = object;
-
-            const searchParam = drawingManagerService.getDrawingOKey(oKey);
-
-            if (searchParam == null) {
-                params.push(null);
-                return true;
-            }
-
-            if (!isSheetDrawing(searchParam)) {
-                params.push(null);
-                return true;
-            }
-
-            const { unitId, subUnitId, drawingId, drawingType, anchorType, sheetTransform, axisAlignSheetTransform } = searchParam;
-
-            params.push({
-                unitId,
-                subUnitId,
-                drawingId,
-                anchorType,
-                sheetTransform,
-                drawingType,
-                axisAlignSheetTransform,
-            });
-        });
-
-        return params;
-    }
 
     useEffect(() => {
         if (!transformer) {
@@ -103,16 +69,13 @@ export const SheetDrawingAnchor = (props: ISheetDrawingAnchorProps) => {
 
         const onChangeStartObserver = transformer.changeStart$.subscribe((state) => {
             const { objects } = state;
-            const params = getUpdateParams(objects, drawingManagerService);
+            const params = getUpdateParams(objects, drawingManagerService, sheetDrawingService);
 
             if (params.length === 0) {
                 setAnchorShow(false);
-            } else if (params.length >= 1) {
+            } else {
                 setAnchorShow(true);
-                const drawing = params[0];
-                setValue(drawing
-                    ? getSheetDrawingPlacement(drawing).kind
-                    : SheetDrawingAnchorKind.OneCell);
+                setValue(getSheetDrawingPlacement(params[0]).kind);
             }
         });
 
@@ -120,7 +83,7 @@ export const SheetDrawingAnchor = (props: ISheetDrawingAnchorProps) => {
             onChangeStartObserver.unsubscribe();
             onClearControlObserver.unsubscribe();
         };
-    }, [drawingManagerService, transformer]);
+    }, [drawingManagerService, sheetDrawingService, transformer]);
 
     if (!drawingParam || !transformer) {
         return null;
@@ -133,24 +96,21 @@ export const SheetDrawingAnchor = (props: ISheetDrawingAnchorProps) => {
         }
 
         const focusDrawings = drawingManagerService.getFocusDrawings();
-        if (!focusDrawings.length || !focusDrawings.every(isSheetDrawing)) {
+        if (!focusDrawings.length || !focusDrawings.every(isSheetDrawingPlacementTarget)) {
             return;
         }
 
         const { unitId, subUnitId } = focusDrawings[0];
-        const skeleton = kind === SheetDrawingAnchorKind.Absolute
-            ? undefined
-            : sheetSkeletonService.ensureSkeleton(unitId, subUnitId);
-        if (kind !== SheetDrawingAnchorKind.Absolute && !skeleton) {
-            return;
-        }
-
-        const placementUpdates: Array<{ drawingId: string; placement: ISheetDrawingPlacement }> = [];
+        const placementUpdates: Array<{ drawingId: string; placement: ISheetDrawingPlacementInput }> = [];
         for (const drawing of focusDrawings) {
-            const placement = createPlacement(drawing, kind, skeleton);
-            if (!placement) {
+            const transform = drawing.transform;
+            if (!transform) {
                 return;
             }
+            const { left = 0, top = 0, width = 0, height = 0 } = transform;
+            const placement: ISheetDrawingPlacementInput = kind === SheetDrawingAnchorType.None
+                ? { kind: SheetDrawingAnchorType.None, left, top, width, height }
+                : { kind, left, top, width, height };
             placementUpdates.push({ drawingId: drawing.drawingId, placement });
         }
 
@@ -181,50 +141,47 @@ export const SheetDrawingAnchor = (props: ISheetDrawingAnchorProps) => {
 
             <div>
                 <RadioGroup value={value} onChange={handleChange} direction="vertical">
-                    <Radio value={SheetDrawingAnchorKind.TwoCell}>{localeService.t<LocaleKey>('sheets-drawing-ui.drawing-anchor.both')}</Radio>
-                    <Radio value={SheetDrawingAnchorKind.OneCell}>{localeService.t<LocaleKey>('sheets-drawing-ui.drawing-anchor.position')}</Radio>
-                    <Radio value={SheetDrawingAnchorKind.Absolute}>{localeService.t<LocaleKey>('sheets-drawing-ui.drawing-anchor.none')}</Radio>
+                    <Radio value={SheetDrawingAnchorType.Both}>{localeService.t<LocaleKey>('sheets-drawing-ui.drawing-anchor.both')}</Radio>
+                    <Radio value={SheetDrawingAnchorType.Position}>{localeService.t<LocaleKey>('sheets-drawing-ui.drawing-anchor.position')}</Radio>
+                    <Radio value={SheetDrawingAnchorType.None}>{localeService.t<LocaleKey>('sheets-drawing-ui.drawing-anchor.none')}</Radio>
                 </RadioGroup>
             </div>
         </div>
     );
 };
 
-function isSheetDrawing(drawing: IDrawingParam | undefined): drawing is ISheetDrawing {
-    return Boolean(drawing && 'sheetTransform' in drawing && 'axisAlignSheetTransform' in drawing);
+export const SheetDrawingAnchor = (props: ISheetDrawingAnchorProps) => (
+    <SheetDrawingAnchorContent key={props.drawings[0]?.drawingId} {...props} />
+);
+
+function getUpdateParams(
+    objects: Map<string, BaseObject>,
+    drawingManagerService: IDrawingManagerService,
+    sheetDrawingService: ISheetDrawingService
+): ISheetDrawingPlacementTarget[] {
+    const params: ISheetDrawingPlacementTarget[] = [];
+    objects.forEach((object) => {
+        const searchParam = drawingManagerService.getDrawingOKey(object.oKey);
+        if (!searchParam) {
+            return;
+        }
+
+        const drawing = sheetDrawingService.getDrawingByParam(searchParam);
+        if (isSheetDrawingPlacementTarget(drawing)) {
+            params.push(drawing);
+        }
+    });
+
+    return params;
 }
 
-function getAnchorKind(value: string | number | boolean): SheetDrawingAnchorKind | null {
+function getAnchorKind(value: string | number | boolean): SheetDrawingAnchorType | null {
     if (
-        value === SheetDrawingAnchorKind.OneCell ||
-        value === SheetDrawingAnchorKind.TwoCell ||
-        value === SheetDrawingAnchorKind.Absolute
+        value === SheetDrawingAnchorType.Position ||
+        value === SheetDrawingAnchorType.Both ||
+        value === SheetDrawingAnchorType.None
     ) {
         return value;
     }
     return null;
-}
-
-function createPlacement(
-    drawing: ISheetDrawing,
-    kind: SheetDrawingAnchorKind,
-    skeleton?: SpreadsheetSkeleton
-): ISheetDrawingPlacement | null {
-    const transform = drawing.transform;
-    if (!transform) {
-        return null;
-    }
-
-    const { left = 0, top = 0, width = 0, height = 0 } = transform;
-    if (kind === SheetDrawingAnchorKind.Absolute) {
-        return { kind, left, top, width, height };
-    }
-    if (!skeleton) {
-        return null;
-    }
-
-    const { from, to } = transformToDrawingPosition(transform, skeleton);
-    return kind === SheetDrawingAnchorKind.OneCell
-        ? { kind, from, width, height }
-        : { kind, from, to };
 }

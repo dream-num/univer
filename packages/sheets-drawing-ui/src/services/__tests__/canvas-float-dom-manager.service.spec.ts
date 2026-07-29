@@ -14,27 +14,42 @@
  * limitations under the License.
  */
 
-import type { IWorkbookData } from '@univerjs/core';
-import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
-import type { IRender, IRenderManagerService as IRenderManagerServiceType, Scene } from '@univerjs/engine-render';
-import type { ISheetFloatDom } from '@univerjs/sheets-drawing';
-import type { IFloatDom, IFloatDomLayout } from '@univerjs/ui';
-import type { ICanvasFloatDomInfo, ISheetFloatDomRenderObjectFactoryContext } from '../canvas-float-dom-manager.service';
 import {
     BooleanNumber,
     Disposable,
     DrawingTypeEnum,
     EventSubject,
+    type IWorkbookData,
     LifecycleService,
     LifecycleStages,
     LocaleType,
     UniverInstanceType,
 } from '@univerjs/core';
-import { getDrawingShapeKeyByDrawingSearch } from '@univerjs/drawing';
-import { IRenderManagerService, Rect, SHEET_VIEWPORT_KEY, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import { DrawingApplyType, InsertSheetDrawingCommand, ISheetDrawingService, RemoveSheetDrawingCommand, SetDrawingApplyMutation, SetSheetDrawingCommand } from '@univerjs/sheets-drawing';
-import { ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
-import { CanvasFloatDomService } from '@univerjs/ui';
+
+import { getDrawingShapeKeyByDrawingSearch, type IDrawingJsonUndo1 } from '@univerjs/drawing';
+import {
+    type IRender,
+    IRenderManagerService,
+    Rect,
+    type Scene,
+} from '@univerjs/engine-render';
+import { SpreadsheetSkeleton } from '@univerjs/sheets';
+import {
+    DrawingApplyType,
+    InsertSheetDrawingCommand,
+    ISheetDrawingService,
+    type ISheetFloatDom,
+    RemoveSheetDrawingCommand,
+    SetDrawingApplyMutation,
+    SetSheetDrawingCommand,
+} from '@univerjs/sheets-drawing';
+import {
+    ISheetSelectionRenderService,
+    SHEET_VIEWPORT_KEY,
+    SheetSkeletonManagerService,
+    SpreadsheetRenderSkeleton,
+} from '@univerjs/sheets-ui';
+import { CanvasFloatDomService, type IFloatDom, type IFloatDomLayout } from '@univerjs/ui';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createSheetsDrawingUiTestBed } from '../../__tests__/create-sheets-drawing-ui-test-bed';
@@ -44,7 +59,9 @@ import {
     calcSheetFloatDomPosition,
     createFloatDomHostClickIntent,
     createFloatDomMoveDragState,
+    type ICanvasFloatDomInfo,
     isCanvasFloatDomDrawingType,
+    type ISheetFloatDomRenderObjectFactoryContext,
     resolveFloatDomMoveDragTransform,
     SheetCanvasFloatDomManagerService,
     shouldActivateStage2FromHostClickIntent,
@@ -130,10 +147,10 @@ function setup(workbookData: IWorkbookData = BASE_WORKBOOK_DATA) {
     const injector = testBed.injector;
     const worksheet = testBed.workbook.getActiveSheet();
     const skeleton = injector.createInstance(
-        SpreadsheetSkeleton,
-        worksheet,
+        SpreadsheetRenderSkeleton,
+        new SpreadsheetSkeleton(worksheet).calculate(),
         testBed.workbook.getStyles()
-    ).calculate() as SpreadsheetSkeleton;
+    ).calculate();
     const scene = createScene({
         left: 0,
         top: 0,
@@ -154,7 +171,7 @@ function setup(workbookData: IWorkbookData = BASE_WORKBOOK_DATA) {
     };
 }
 
-class TestRenderManagerService extends Disposable implements Partial<IRenderManagerServiceType> {
+class TestRenderManagerService extends Disposable implements Partial<IRenderManagerService> {
     private _render: IRender | null = null;
     readonly createRender$ = new Subject<string>();
     readonly created$ = new Subject<IRender>();
@@ -184,7 +201,7 @@ class TestRenderManagerService extends Disposable implements Partial<IRenderMana
 class TestSheetSkeletonManager {
     readonly currentSkeleton$: BehaviorSubject<{ sheetId: string } | null>;
 
-    constructor(private readonly _skeleton: SpreadsheetSkeleton) {
+    constructor(private readonly _skeleton: SpreadsheetRenderSkeleton) {
         this.currentSkeleton$ = new BehaviorSubject<{ sheetId: string } | null>({ sheetId: 'sheet1' });
     }
 
@@ -312,7 +329,7 @@ function findChildObject(object: unknown, key: string): Rect | undefined {
     }
 }
 
-function createRender(skeleton: SpreadsheetSkeleton, scene: Scene): IRender {
+function createRender(skeleton: SpreadsheetRenderSkeleton, scene: Scene): IRender {
     const sheetSkeletonManager = new TestSheetSkeletonManager(skeleton);
     const sheetSelectionRenderService = new TestSheetSelectionRenderService();
     const canvasElement = document.createElement('div');

@@ -14,14 +14,25 @@
  * limitations under the License.
  */
 
-import type { ICommand, IMutationInfo, IRange } from '@univerjs/core';
-import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
-import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecute } from '@univerjs/core';
+import {
+    CommandType,
+    type ICommand,
+    ICommandService,
+    type IMutationInfo,
+    type IRange,
+    IUndoRedoService,
+    IUniverInstanceService,
+    sequenceExecute,
+} from '@univerjs/core';
+import {
+    type ISetRangeValuesMutationParams,
+    SetRangeValuesMutation,
+    SetRangeValuesUndoMutationFactory,
+} from '../mutations/set-range-values.mutation';
 import { generateNullCellValue, getVisibleRanges } from '../../basics/utils';
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { SheetSkeletonService } from '../../skeleton/skeleton.service';
-import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
 import { getSuitableRangesInView } from './util';
 import { getSheetCommandTarget } from './utils/target-util';
 
@@ -89,7 +100,7 @@ export const ClearSelectionContentCommand: ICommand<IClearSelectionContentComman
         const result = sequenceExecute(redoMutations, commandService);
 
         // auto height
-        const { suitableRanges, remainingRanges } = getSuitableRangesInView(ranges, skeleton);
+        const { suitableRanges, remainingRanges } = getSuitableRangesInView(ranges, skeleton.worksheet.getColumnCount());
         const { undos: autoHeightUndos, redos: autoHeightRedos } = sheetInterceptorService.generateMutationsOfAutoHeight({
             unitId,
             subUnitId,

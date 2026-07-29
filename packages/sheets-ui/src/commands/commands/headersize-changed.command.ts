@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
-import type { SpreadsheetColumnHeader, SpreadsheetRowHeader } from '@univerjs/engine-render';
+import type { SpreadsheetColumnHeader, SpreadsheetRowHeader } from '../../components/sheets';
 
-import { CommandType } from '@univerjs/core';
+import { CommandType, type ICommand } from '@univerjs/core';
+
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SHEET_VIEW_KEY } from '../../common/keys';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';

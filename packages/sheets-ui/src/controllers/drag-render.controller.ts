@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-import type { Nullable, Workbook } from '@univerjs/core';
-import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import type { ISheetSkeletonManagerParam } from '@univerjs/sheets';
-import { Disposable, DisposableCollection, Inject } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import type { ISheetRenderSkeletonManagerParam } from '../services/sheet-render-skeleton.service';
+import {
+    Disposable,
+    DisposableCollection,
+    Inject,
+    type Nullable,
+    type Workbook,
+} from '@univerjs/core';
+import { type IRenderContext, IRenderManagerService, type IRenderModule } from '@univerjs/engine-render';
 import { DragManagerService } from '../services/drag-manager.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
@@ -36,7 +40,7 @@ export class DragRenderController extends Disposable implements IRenderModule, I
 
     private _initDragEvent() {
         const disposeSet = new DisposableCollection();
-        const handleSkeletonChange = (skeletonParam: Nullable<ISheetSkeletonManagerParam>) => {
+        const handleSkeletonChange = (skeletonParam: Nullable<ISheetRenderSkeletonManagerParam>) => {
             disposeSet.dispose();
             if (!skeletonParam) {
                 return;

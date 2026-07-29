@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-import type { Dependency, Workbook } from '@univerjs/core';
-import type { IUniverUIConfig } from '@univerjs/ui';
-import type { IUniverSheetsUIConfig } from './config/config';
 import {
+    type Dependency,
     DependentOn,
     IConfigService,
     Inject,
@@ -29,13 +27,14 @@ import {
     registerDependencies,
     touchDependencies,
     UniverInstanceType,
+    type Workbook,
 } from '@univerjs/core';
+import { type IUniverUIConfig, UI_PLUGIN_CONFIG_KEY, UniverMobileUIPlugin } from '@univerjs/ui';
+import { defaultPluginConfig, type IUniverSheetsUIConfig, SHEETS_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, RefSelectionsService, UniverSheetsPlugin } from '@univerjs/sheets';
-import { UI_PLUGIN_CONFIG_KEY, UniverMobileUIPlugin } from '@univerjs/ui';
 import { filter } from 'rxjs/operators';
 import pkg from '../package.json';
-import { defaultPluginConfig, SHEETS_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { AutoFillRenderController, AutoFillUIController } from './controllers/auto-fill-ui.controller';
 import { AutoHeightController } from './controllers/auto-height.controller';
 import { AutoWidthController } from './controllers/auto-width.controller';
@@ -121,6 +120,7 @@ import { SelectAllService } from './services/select-all/select-all.service';
 import { ISheetSelectionRenderService } from './services/selection/base-selection-render.service';
 import { MobileSheetsSelectionRenderService } from './services/selection/mobile-selection-render.service';
 import { ISheetBarService, SheetBarService } from './services/sheet-bar/sheet-bar.service';
+import { SheetRenderSkeletonService } from './services/sheet-render-skeleton.service';
 import { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
 import { SheetsRenderService } from './services/sheets-render.service';
 import { ShortcutExperienceService } from './services/shortcut-experience.service';
@@ -181,6 +181,7 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
             [SelectAllService],
             [ISheetCellDropdownManagerService, { useClass: SheetCellDropdownManagerService }],
             [SheetCellEditorResizeService],
+            [SheetRenderSkeletonService],
 
             // controllers
             [AutoHeightController],

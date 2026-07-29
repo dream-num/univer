@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand } from '@univerjs/core';
-import type { ISheetPasteByShortKeyParams } from '@univerjs/sheets-ui';
 import {
     CommandType,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    type IAccessor,
+    type ICommand,
     ICommandService,
     InterceptorEffectEnum,
     IPermissionService,
@@ -28,10 +28,11 @@ import {
     RANGE_TYPE,
     UniverInstanceType,
 } from '@univerjs/core';
+
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { EditorService, IEditorService } from '@univerjs/docs-ui';
 import { DefinedNamesService, FormulaDataModel, IDefinedNamesService } from '@univerjs/engine-formula';
-import { IRenderManagerService, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import {
     INTERCEPTOR_POINT,
     IRefSelectionsService,
@@ -46,6 +47,7 @@ import {
     HoverManagerService,
     IEditorBridgeService,
     ISheetClipboardService,
+    type ISheetPasteByShortKeyParams,
     SetZoomRatioCommand,
     SHEET_VIEW_KEY,
     SheetPasteShortKeyCommand,
@@ -62,6 +64,7 @@ import {
 import { Subject } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
+import { SHEET_VIEWPORT_KEY } from '../../components/sheets';
 import { createFacadeTestBed } from './create-test-bed';
 import '../f-enum';
 import '../f-event';

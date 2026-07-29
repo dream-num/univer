@@ -38,13 +38,18 @@ export { UniverSheetsDrawingPlugin } from './plugin';
 export {
     applySheetDrawingPlacement,
     getSheetDrawingPlacement,
-    SheetDrawingAnchorKind,
+    isSheetDrawingPlacementTarget,
+    materializeSheetDrawingPlacement,
+    normalizeSheetDrawingPlacement,
 } from './services/sheet-drawing-placement';
 export type {
-    ISheetDrawingAbsolutePlacement,
-    ISheetDrawingOneCellPlacement,
+    ISheetDrawingBothPlacement,
+    ISheetDrawingBoundsPlacement,
+    ISheetDrawingNonePlacement,
     ISheetDrawingPlacement,
-    ISheetDrawingTwoCellPlacement,
+    ISheetDrawingPlacementInput,
+    ISheetDrawingPlacementTarget,
+    ISheetDrawingPositionPlacement,
 } from './services/sheet-drawing-placement';
 export { SheetDrawingTransformPlanService } from './services/sheet-drawing-transform-plan.service';
 export type {

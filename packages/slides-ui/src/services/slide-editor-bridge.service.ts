@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IDocumentBody, IDocumentData, IDocumentSettings, IDocumentStyle, IParagraph, IParagraphStyle, IPosition, Nullable } from '@univerjs/core';
-import type { Engine, IDocumentLayoutObject, RichText, Scene } from '@univerjs/engine-render';
+import {
+    DeviceInputEventType,
+    type Engine,
+    IRenderManagerService,
+    type RichText,
+    type Scene,
+} from '@univerjs/engine-render';
 import type { KeyCode } from '@univerjs/ui';
-import type { Observable } from 'rxjs';
+import { BehaviorSubject, type Observable, Subject } from 'rxjs';
 import {
     createIdentifier,
     createSectionId,
@@ -28,12 +33,20 @@ import {
     FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE,
     HorizontalAlign,
     IContextService,
+    type IDisposable,
+    type IDocumentBody,
+    type IDocumentData,
+    type IDocumentLayoutObject,
+    type IDocumentSettings,
+    type IDocumentStyle,
+    type IParagraph,
+    type IParagraphStyle,
+    type IPosition,
+    type Nullable,
     VerticalAlign,
 } from '@univerjs/core';
 import { IEditorService } from '@univerjs/docs-ui';
-import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import { SLIDE_KEY } from '@univerjs/slides';
-import { BehaviorSubject, Subject } from 'rxjs';
 import { SLIDE_EDITOR_ID } from '../const';
 
 // TODO same as @univerjs/slides/views/render/adaptors/index.js

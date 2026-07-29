@@ -14,15 +14,30 @@
  * limitations under the License.
  */
 
+import {
+    BorderType,
+    ICommandService,
+    IConfigService,
+    IContextService,
+    Injector,
+    type ISelectionCell,
+    type IWorkbookData,
+    LocaleService,
+    RANGE_TYPE,
+    type Univer,
+    type Workbook,
+    type Worksheet,
+} from '@univerjs/core';
+
 /* eslint-disable dot-notation */
-import type { ISelectionCell, IWorkbookData, Univer, Workbook, Worksheet } from '@univerjs/core';
-import { BorderType, ICommandService, IConfigService, IContextService, Injector, LocaleService, RANGE_TYPE } from '@univerjs/core';
-import { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import {
     SetBorderPositionCommand,
     SheetsSelectionsService,
+    SpreadsheetSkeleton,
 } from '@univerjs/sheets';
+
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { SpreadsheetRenderSkeleton } from '../../../components/sheets/sheet.render-skeleton';
 import {
     createSelectionCommandTestBed,
     MERGED_CELLS_DATA,
@@ -35,7 +50,7 @@ describe('Test commands used for change selections', () => {
     let get: Injector['get'];
     let commandService: ICommandService;
     let selectionManagerService: SheetsSelectionsService;
-    let spreadsheetSkeleton: SpreadsheetSkeleton;
+    let spreadsheetSkeleton: SpreadsheetRenderSkeleton;
     let localeService: LocaleService;
     let contextService: IContextService;
     let configService: IConfigService;
@@ -92,8 +107,8 @@ describe('Test commands used for change selections', () => {
         const injector = get(Injector);
 
         worksheet = workbook.getActiveSheet()!;
-        spreadsheetSkeleton = new SpreadsheetSkeleton(
-            worksheet,
+        spreadsheetSkeleton = new SpreadsheetRenderSkeleton(
+            new SpreadsheetSkeleton(worksheet).calculate(),
             workbook.getStyles(),
             localeService,
             contextService,

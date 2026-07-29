@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
-import type { IWatermarkConfigWithType } from '@univerjs/engine-render';
-import { Disposable, ILocalStorageService, Inject } from '@univerjs/core';
-import { UNIVER_WATERMARK_STORAGE_KEY } from '@univerjs/engine-render';
+import { type IWatermarkConfigWithType, UNIVER_WATERMARK_STORAGE_KEY } from '@univerjs/engine-render';
+
+import {
+    Disposable,
+    ILocalStorageService,
+    Inject,
+    type Nullable,
+} from '@univerjs/core';
+
 import { Subject } from 'rxjs';
 
 export class WatermarkService extends Disposable {

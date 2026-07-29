@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
-import type { RenderUnit } from '@univerjs/engine-render';
-import type { ISelectionWithStyle } from '@univerjs/sheets';
 import {
     createIdentifier,
     Disposable,
@@ -25,9 +22,12 @@ import {
     IUniverInstanceService,
     ThemeService,
     UniverInstanceType,
+    type Workbook,
 } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
-import { attachSelectionWithCoord, SheetSkeletonService } from '@univerjs/sheets';
+import { IRenderManagerService, type RenderUnit } from '@univerjs/engine-render';
+import type { ISelectionWithStyle } from '@univerjs/sheets';
+import { attachRenderSelectionWithCoord } from '../../common/skeleton-util';
+import { SheetRenderSkeletonService } from '../sheet-render-skeleton.service';
 import { SELECTION_SHAPE_DEPTH } from '../selection/const';
 import { SelectionControl } from '../selection/selection-control';
 
@@ -62,7 +62,7 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
 
     constructor(
         @IUniverInstanceService private readonly _currentService: IUniverInstanceService,
-        @Inject(SheetSkeletonService) private readonly _sheetSkeletonService: SheetSkeletonService,
+        @Inject(SheetRenderSkeletonService) private readonly _sheetRenderSkeletonService: SheetRenderSkeletonService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(ThemeService) private readonly _themeService: ThemeService
     ) {
@@ -123,7 +123,7 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
             const renderUnit = this._renderManagerService.getRenderUnitById(unitId) as RenderUnit;
             if (!renderUnit) return;
 
-            const skeleton = this._sheetSkeletonService.getSkeleton(unitId, subUnitId);
+            const skeleton = this._sheetRenderSkeletonService.getSkeleton(unitId, subUnitId);
             if (!skeleton) return;
 
             const { scene } = renderUnit;
@@ -134,7 +134,7 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
                 rowHeaderWidth,
                 columnHeaderHeight,
             });
-            const selectionWithCoord = attachSelectionWithCoord(selection, skeleton);
+            const selectionWithCoord = attachRenderSelectionWithCoord(selection, skeleton);
             control.updateRangeBySelectionWithCoord(selectionWithCoord);
             shape.control = control;
         });

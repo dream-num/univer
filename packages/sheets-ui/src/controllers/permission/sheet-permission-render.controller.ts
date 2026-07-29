@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { IRenderContext, IRenderModule, Spreadsheet } from '@univerjs/engine-render';
 import type { MenuConfig } from '@univerjs/ui';
-import type { IUniverSheetsUIConfig } from '../../config/config';
+
+import type { Spreadsheet } from '../../components/sheets';
 import { Disposable, IConfigService, Inject, IPermissionService } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { type IRenderContext, IRenderManagerService, type IRenderModule } from '@univerjs/engine-render';
 import { RangeProtectionRuleModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { merge, throttleTime } from 'rxjs';
-import { convertToShadowStrategy, SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
+import { convertToShadowStrategy, type IUniverSheetsUIConfig, SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import {
     RANGE_PROTECTION_CAN_NOT_VIEW_RENDER_EXTENSION_KEY,

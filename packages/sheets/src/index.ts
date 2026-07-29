@@ -657,6 +657,9 @@ export {
     convertPositionCellToSheetOverGrid,
     convertPositionSheetOverGridToAbsolute,
 } from './skeleton/drawing-position-util';
+export { SheetSkeleton } from './skeleton/sheet-skeleton';
 export { SheetSkeletonService } from './skeleton/skeleton.service';
 export type { ISheetSkeletonManagerParam } from './skeleton/skeleton.service';
+export { SpreadsheetSkeleton } from './skeleton/spreadsheet-skeleton';
+export type { IGridCellOffset } from './skeleton/spreadsheet-skeleton';
 export { attachPrimaryWithCoord, attachRangeWithCoord, attachSelectionWithCoord } from './skeleton/util';

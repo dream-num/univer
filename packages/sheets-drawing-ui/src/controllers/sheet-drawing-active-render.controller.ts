@@ -14,20 +14,22 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IDrawingParam, Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import type { ISetWorksheetActiveOperationParams } from '@univerjs/sheets';
-import type { ISheetDrawing } from '@univerjs/sheets-drawing';
-import { Disposable, ICommandService, Inject } from '@univerjs/core';
+import {
+    Disposable,
+    type ICommandInfo,
+    ICommandService,
+    type IDrawingParam,
+    type Workbook,
+} from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import { SetWorksheetActiveOperation, SheetSkeletonService } from '@univerjs/sheets';
-import { drawingPositionToTransform, ISheetDrawingService } from '@univerjs/sheets-drawing';
+import { type ISetWorksheetActiveOperationParams, SetWorksheetActiveOperation } from '@univerjs/sheets';
+import { ISheetDrawingService } from '@univerjs/sheets-drawing';
 
 export class SheetDrawingActiveRenderController extends Disposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(SheetSkeletonService) private readonly _sheetSkeletonService: SheetSkeletonService,
         @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService
     ) {
@@ -81,7 +83,6 @@ export class SheetDrawingActiveRenderController extends Disposable implements IR
 
     private _updateDrawings(showUnitId: string, showSubunitId: string): void {
         setTimeout(() => {
-            const sheetSkeletonParam = this._sheetSkeletonService.getSkeletonParam(showUnitId, showSubunitId);
             const drawingMap = this._drawingManagerService.drawingManagerData;
             const insertDrawings: IDrawingParam[] = [];
             const removeDrawings: IDrawingParam[] = [];
@@ -96,10 +97,6 @@ export class SheetDrawingActiveRenderController extends Disposable implements IR
                     const drawingData = subUnitMap[subUnitId]?.data ?? {};
                     Object.keys(drawingData).forEach((drawingId) => {
                         if (unitId === showUnitId && subUnitId === showSubunitId) {
-                            const drawing = drawingData[drawingId] as ISheetDrawing;
-                            if (drawing.sheetTransform) {
-                                drawing.transform = drawingPositionToTransform(drawing.sheetTransform, sheetSkeletonParam);
-                            }
                             insertDrawings.push(drawingData[drawingId]);
                         } else {
                             removeDrawings.push(drawingData[drawingId]);

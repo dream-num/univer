@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import type { Spreadsheet } from '@univerjs/engine-render';
-import type { Observable } from 'rxjs';
-import type { IUniverSheetsUIConfig } from '../../config/config';
+import { type Spreadsheet } from '../../components/sheets';
+
+import { BehaviorSubject, type Observable } from 'rxjs';
+import { convertToShadowStrategy, type IUniverSheetsUIConfig, SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { Disposable, IConfigService } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { BehaviorSubject } from 'rxjs';
-import { convertToShadowStrategy, SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { RANGE_PROTECTION_CAN_NOT_VIEW_RENDER_EXTENSION_KEY, RANGE_PROTECTION_CAN_VIEW_RENDER_EXTENSION_KEY } from '../../views/permission/extensions/range-protection.render';
 import { worksheetProtectionKey } from '../../views/permission/extensions/worksheet-permission.render';
 

@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
+import { SHEET_VIEWPORT_KEY } from '../../components/sheets';
+
 import {
+    CommandService,
     ConfigService,
     ContextService,
     DesktopLogService,
+    ICommandService,
     IConfigService,
     IContextService,
     ILogService,
@@ -28,49 +32,24 @@ import {
     UniverInstanceType,
     Workbook,
 } from '@univerjs/core';
-import { SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
+
 import { SheetSkeletonService, SheetsSelectionsService } from '@univerjs/sheets';
-import { Subject } from 'rxjs';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { ISheetSelectionRenderService } from '../selection/base-selection-render.service';
+import { SheetRenderSkeletonService } from '../sheet-render-skeleton.service';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
-
-class TestSheetSkeletonService {
-    static skeleton: any;
-    static param: any;
-    static scene: unknown;
-    buildSkeleton$ = new Subject<any>();
-
-    setScene(_unitId: string, scene: unknown) {
-        TestSheetSkeletonService.scene = scene;
-    }
-
-    getSkeletonsByUnitId() {
-        return [TestSheetSkeletonService.skeleton];
-    }
-
-    getSkeleton() {
-        return TestSheetSkeletonService.skeleton;
-    }
-
-    getSkeletonParam() {
-        return TestSheetSkeletonService.param;
-    }
-
-    ensureSkeleton() {
-        return TestSheetSkeletonService.skeleton;
-    }
-}
 
 describe('SheetSkeletonManagerService', () => {
     it('sets the current worksheet skeleton and marks it dirty for recalculation', () => {
         const injector = new Injector();
         injector.add([IConfigService, { useClass: ConfigService }]);
+        injector.add([ICommandService, { useClass: CommandService }]);
         injector.add([IContextService, { useClass: ContextService }]);
         injector.add([ILogService, { useClass: DesktopLogService }]);
         injector.add([LocaleService]);
         injector.add([IUniverInstanceService, { useClass: UniverInstanceService }]);
         injector.add([SheetSkeletonService]);
+        injector.add([SheetRenderSkeletonService]);
         const univerInstanceService = injector.get(IUniverInstanceService) as UniverInstanceService;
         const workbook = injector.createInstance(Workbook, {
             id: 'unit-1',
@@ -99,27 +78,32 @@ describe('SheetSkeletonManagerService', () => {
     });
 
     it('updates sheet header sizes, viewport bounds and selection render state', () => {
-        const registeredSkeletons: string[] = [];
-        const skeleton = {
-            columnHeaderHeight: 20,
-            rowHeaderWidth: 46,
-            registerGetCellHeight: () => registeredSkeletons.push('registered'),
-        };
-        const param = { unitId: 'unit-1', sheetId: 'sheet-1', skeleton, dirty: false };
-        TestSheetSkeletonService.skeleton = skeleton;
-        TestSheetSkeletonService.param = param;
-
         const injector = new Injector();
-        injector.add([SheetSkeletonService, { useClass: TestSheetSkeletonService as never }]);
-        const workbook = {
-            getSheetBySheetId: () => ({ getSheetId: () => 'sheet-1' }),
-            getStyles: () => ({}),
-        };
+        injector.add([IConfigService, { useClass: ConfigService }]);
+        injector.add([ICommandService, { useClass: CommandService }]);
+        injector.add([IContextService, { useClass: ContextService }]);
+        injector.add([ILogService, { useClass: DesktopLogService }]);
+        injector.add([LocaleService]);
+        injector.add([IUniverInstanceService, { useClass: UniverInstanceService }]);
+        injector.add([SheetSkeletonService]);
+        injector.add([SheetRenderSkeletonService]);
+        const univerInstanceService = injector.get(IUniverInstanceService);
+        const workbook = injector.createInstance(Workbook, {
+            id: 'unit-1',
+            sheets: { 'sheet-1': { id: 'sheet-1' } },
+            sheetOrder: ['sheet-1'],
+        });
+        univerInstanceService.__addUnit(workbook);
+        const skeleton = injector.get(SheetRenderSkeletonService).getSkeleton('unit-1', 'sheet-1');
+        if (!skeleton) {
+            throw new Error('Sheet skeleton is required for header size tests');
+        }
+        const registerGetCellHeight = vi.spyOn(skeleton, 'registerGetCellHeight');
         const service = injector.createInstance(SheetSkeletonManagerService, {
             unit: workbook,
             unitId: 'unit-1',
             type: UniverInstanceType.UNIVER_SHEET,
-            scene: {},
+            scene: undefined,
         } as never);
 
         const viewportState = new Map<string, any>([
@@ -152,33 +136,42 @@ describe('SheetSkeletonManagerService', () => {
         service.setColumnHeaderSize(render as never, 'sheet-1', 32);
         service.setRowHeaderSize(render as never, 'sheet-1', 60);
 
-        expect(registeredSkeletons).toEqual(['registered']);
+        expect(registerGetCellHeight).toHaveBeenCalledTimes(1);
         expect(skeleton.columnHeaderHeight).toBe(32);
         expect(skeleton.rowHeaderWidth).toBe(60);
         expect(mainViewport).toEqual({ top: 32, left: 60 });
         expect(viewportState.get(SHEET_VIEWPORT_KEY.VIEW_COLUMN_RIGHT)).toMatchObject({ height: 32, left: 114 });
         expect(viewportState.get(SHEET_VIEWPORT_KEY.VIEW_LEFT_TOP)).toMatchObject({ height: 32, width: 60 });
         expect(resetSelections).toEqual([selections, selections]);
-        expect((param as { commandId?: string }).commandId).toBe('sheet.command.set-row-header-width');
+        expect(service.getSkeletonParam('sheet-1')?.commandId).toBe('sheet.command.set-row-header-width');
     });
 
     it('keeps header size updates safe when selection services are unavailable', () => {
-        const skeleton = {
-            columnHeaderHeight: 20,
-            rowHeaderWidth: 46,
-            registerGetCellHeight: () => {},
-        };
-        const param = { unitId: 'unit-1', sheetId: 'sheet-1', skeleton, dirty: false };
-        TestSheetSkeletonService.skeleton = skeleton;
-        TestSheetSkeletonService.param = param;
-
         const injector = new Injector();
-        injector.add([SheetSkeletonService, { useClass: TestSheetSkeletonService as never }]);
+        injector.add([IConfigService, { useClass: ConfigService }]);
+        injector.add([ICommandService, { useClass: CommandService }]);
+        injector.add([IContextService, { useClass: ContextService }]);
+        injector.add([ILogService, { useClass: DesktopLogService }]);
+        injector.add([LocaleService]);
+        injector.add([IUniverInstanceService, { useClass: UniverInstanceService }]);
+        injector.add([SheetSkeletonService]);
+        injector.add([SheetRenderSkeletonService]);
+        const univerInstanceService = injector.get(IUniverInstanceService);
+        const workbook = injector.createInstance(Workbook, {
+            id: 'unit-1',
+            sheets: { 'sheet-1': { id: 'sheet-1' } },
+            sheetOrder: ['sheet-1'],
+        });
+        univerInstanceService.__addUnit(workbook);
+        const skeleton = injector.get(SheetRenderSkeletonService).getSkeleton('unit-1', 'sheet-1');
+        if (!skeleton) {
+            throw new Error('Sheet skeleton is required for header size tests');
+        }
         const service = injector.createInstance(SheetSkeletonManagerService, {
-            unit: {},
+            unit: workbook,
             unitId: 'unit-1',
             type: UniverInstanceType.UNIVER_SHEET,
-            scene: {},
+            scene: undefined,
         } as never);
 
         const viewportState = new Map<string, any>([
@@ -206,6 +199,6 @@ describe('SheetSkeletonManagerService', () => {
         expect(skeleton.columnHeaderHeight).toBe(32);
         expect(skeleton.rowHeaderWidth).toBe(60);
         expect(mainViewport).toEqual({ top: 32, left: 60 });
-        expect((param as { commandId?: string }).commandId).toBe('sheet.command.set-row-header-width');
+        expect(service.getSkeletonParam('sheet-1')?.commandId).toBe('sheet.command.set-row-header-width');
     });
 });

@@ -14,15 +14,22 @@
  * limitations under the License.
  */
 
-import type { IRange, Workbook } from '@univerjs/core';
-import type { IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import type {
-    ICancelMarkDirtyRowAutoHeightOperationParams,
-    IMarkDirtyRowAutoHeightOperationParams,
-} from '@univerjs/sheets';
-import { createIdentifier, Disposable, ICommandService, Inject, Rectangle } from '@univerjs/core';
+import type { SpreadsheetRenderSkeleton } from '../components/sheets/sheet.render-skeleton';
+
+import {
+    createIdentifier,
+    Disposable,
+    ICommandService,
+    Inject,
+    type IRange,
+    Rectangle,
+    type Workbook,
+} from '@univerjs/core';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import {
     CancelMarkDirtyRowAutoHeightOperation,
+    type ICancelMarkDirtyRowAutoHeightOperationParams,
+    type IMarkDirtyRowAutoHeightOperationParams,
     MarkDirtyRowAutoHeightOperation,
     SetWorksheetRowAutoHeightMutation,
 } from '@univerjs/sheets';
@@ -37,7 +44,7 @@ export interface IAutoHeightTask {
 
 export interface IAutoHeightTaskInfo extends IAutoHeightTask {
     startTime: number;
-    skeleton: SpreadsheetSkeleton;
+    skeleton: SpreadsheetRenderSkeleton;
 }
 
 export const IAutoHeightService = createIdentifier('sheets-ui.services.auto-height');

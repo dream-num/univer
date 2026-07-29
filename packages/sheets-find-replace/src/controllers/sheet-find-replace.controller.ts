@@ -14,20 +14,6 @@
  * limitations under the License.
  */
 
-import type { ICellData, IDisposable, IObjectMatrixPrimitiveType, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import type { IFindComplete, IFindMatch, IFindMoveParams, IFindQuery, IFindReplaceProvider, IReplaceAllResult } from '@univerjs/find-replace';
-import type {
-    ISelectionWithStyle,
-    ISelectRangeCommandParams,
-    ISetRangeValuesCommandParams,
-    ISetSelectionsOperationParams,
-    ISetWorksheetActivateCommandParams,
-    ISheetCommandSharedParams,
-    WorkbookSelectionModel,
-} from '@univerjs/sheets';
-import type { IScrollToCellCommandParams } from '@univerjs/sheets-ui';
-import type { ISheetReplaceCommandParams, ISheetReplacement } from '../commands/commands/sheet-replace.command';
-import type { ISheetFindReplaceHighlightShapeProps } from '../views/shapes/find-replace-highlight.shape';
 import {
     ColorKit,
     CommandType,
@@ -35,11 +21,16 @@ import {
     EDITOR_ACTIVATED,
     fromCallback,
     groupBy,
+    type ICellData,
     ICommandService,
     IContextService,
+    type IDisposable,
     Inject,
     Injector,
+    type IObjectMatrixPrimitiveType,
+    type IRange,
     IUniverInstanceService,
+    type Nullable,
     ObjectMatrix,
     regexp,
     replaceInDocumentBody,
@@ -47,21 +38,58 @@ import {
     ThemeService,
     Tools,
     UniverInstanceType,
+    type Workbook,
+    type Worksheet,
 } from '@univerjs/core';
-import { IRenderManagerService, RENDER_RAW_FORMULA_KEY } from '@univerjs/engine-render';
-import { FindBy, FindDirection, FindModel, FindReplaceController, FindScope, IFindReplaceService } from '@univerjs/find-replace';
+
+import { IRenderManagerService } from '@univerjs/engine-render';
 import {
+    FindBy,
+    FindDirection,
+    FindModel,
+    FindReplaceController,
+    FindScope,
+    type IFindComplete,
+    type IFindMatch,
+    type IFindMoveParams,
+    type IFindQuery,
+    type IFindReplaceProvider,
+    IFindReplaceService,
+    type IReplaceAllResult,
+} from '@univerjs/find-replace';
+import {
+    type ISelectionWithStyle,
+    type ISelectRangeCommandParams,
+    type ISetRangeValuesCommandParams,
+    type ISetSelectionsOperationParams,
+    type ISetWorksheetActivateCommandParams,
+    type ISheetCommandSharedParams,
     SelectRangeCommand,
     SetRangeValuesCommand,
     SetSelectionsOperation,
     SetWorksheetActivateCommand,
     SetWorksheetActiveOperation,
     SheetsSelectionsService,
+    type WorkbookSelectionModel,
 } from '@univerjs/sheets';
-import { getCoordByCell, getSheetObject, ScrollToCellCommand, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import {
+    getCoordByCell,
+    getSheetObject,
+    type IScrollToCellCommandParams,
+    RENDER_RAW_FORMULA_KEY,
+    ScrollToCellCommand,
+    SheetSkeletonManagerService,
+} from '@univerjs/sheets-ui';
 import { debounceTime, filter, merge, skip, Subject, throttleTime } from 'rxjs';
-import { SheetReplaceCommand } from '../commands/commands/sheet-replace.command';
-import { SheetFindReplaceHighlightShape } from '../views/shapes/find-replace-highlight.shape';
+import {
+    type ISheetReplaceCommandParams,
+    type ISheetReplacement,
+    SheetReplaceCommand,
+} from '../commands/commands/sheet-replace.command';
+import {
+    type ISheetFindReplaceHighlightShapeProps,
+    SheetFindReplaceHighlightShape,
+} from '../views/shapes/find-replace-highlight.shape';
 import {
     isBeforePositionWithColumnPriority,
     isBeforePositionWithRowPriority,

@@ -14,25 +14,29 @@
  * limitations under the License.
  */
 
-import type { Dependency, ICellData, IDisposable, IRange, IWorkbookData, Nullable, Workbook } from '@univerjs/core';
-import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import type { ICellDataWithSpanInfo } from '@univerjs/sheets-ui';
 import {
+    type Dependency,
     DisposableCollection,
+    type ICellData,
     ICommandService,
+    type IDisposable,
     ILogService,
     Inject,
     Injector,
+    type IRange,
     IUniverInstanceService,
+    type IWorkbookData,
     LocaleService,
     LocaleType,
     LogLevel,
+    type Nullable,
     ObjectMatrix,
     Plugin,
     RANGE_TYPE,
     UndoCommand,
     Univer,
     UniverInstanceType,
+    type Workbook,
 } from '@univerjs/core';
 import {
     CalculateFormulaService,
@@ -53,6 +57,7 @@ import {
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import {
     discreteRangeToRange,
+    type ISetRangeValuesMutationParams,
     MoveRangeMutation,
     SetRangeValuesMutation,
     SetSelectionsOperation,
@@ -65,6 +70,7 @@ import {
 import { UpdateFormulaController } from '@univerjs/sheets-formula';
 import {
     COPY_TYPE,
+    type ICellDataWithSpanInfo,
     IMarkSelectionService,
     ISheetClipboardService,
     ISheetSelectionRenderService,
@@ -72,6 +78,7 @@ import {
     PREDEFINED_HOOK_NAME_PASTE,
     SheetClipboardController,
     SheetClipboardService,
+    SheetRenderSkeletonService,
     SheetSelectionRenderService,
     SheetSkeletonManagerService,
 } from '@univerjs/sheets-ui';
@@ -315,6 +322,7 @@ export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: De
 
     // NOTE: This is pretty hack for the test. But with these hacks we can avoid to create
     // real canvas-environment in univerjs/sheets-ui. If some we have to do that, this hack could be removed.
+    const sheetRenderSkeletonService = injector.createInstance(SheetRenderSkeletonService);
     const fakeSheetSkeletonManagerService = new SheetSkeletonManagerService({
         unit: sheet,
         unitId: 'test',
@@ -327,7 +335,7 @@ export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: De
         activated$: new BehaviorSubject(true),
         activate: () => {},
         deactivate: () => {},
-    }, injector.get(SheetSkeletonService));
+    }, sheetRenderSkeletonService);
 
     injector.add([SheetSkeletonManagerService, { useValue: fakeSheetSkeletonManagerService }]);
     injector.get(IRenderManagerService).addRender('test', {

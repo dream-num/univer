@@ -14,17 +14,21 @@
  * limitations under the License.
  */
 
-import type { ICreateUnitOptions, IDisposable, Workbook } from '@univerjs/core';
+import { RENDER_RAW_FORMULA_KEY, Spreadsheet } from '../components/sheets';
+
 import {
     IContextService,
+    type ICreateUnitOptions,
+    type IDisposable,
     Inject,
     IUniverInstanceService,
     RxDisposable,
     ThemeService,
     toDisposable,
     UniverInstanceType,
+    type Workbook,
 } from '@univerjs/core';
-import { IRenderManagerService, RENDER_RAW_FORMULA_KEY, Spreadsheet } from '@univerjs/engine-render';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { distinctUntilChanged, takeUntil } from 'rxjs';
 
 const SHEET_MAIN_CANVAS_ID = 'univer-sheet-main-canvas';

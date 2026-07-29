@@ -14,20 +14,35 @@
  * limitations under the License.
  */
 
-import type { ICustomRange, IParagraph, IPosition, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import type {
-    IBoundRectNoAngle,
-    IDocumentSkeletonDrawing,
-    IMouseEvent,
-    IPointerEvent,
-    IRender,
+import { SHEET_VIEWPORT_KEY } from '../components/sheets';
+
+import {
+    CellValueType,
+    Disposable,
+    type ICustomRange,
+    type IParagraph,
+    type IPosition,
+    isRealNum,
+    IUniverInstanceService,
+    type Nullable,
+    UniverInstanceType,
+    type Workbook,
+    type Worksheet,
+} from '@univerjs/core';
+import {
+    type IBoundRectNoAngle,
+    type IDocumentSkeletonDrawing,
+    type IMouseEvent,
+    type IPointerEvent,
+    type IRender,
+    IRenderManagerService,
+    Vector2,
 } from '@univerjs/engine-render';
-import type { ISheetLocation, ISheetLocationBase, ISheetSkeletonManagerParam } from '@univerjs/sheets';
-import { CellValueType, Disposable, isRealNum, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { IRenderManagerService, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
+import type { ISheetLocation, ISheetLocationBase } from '@univerjs/sheets';
 import { BehaviorSubject, distinctUntilChanged, map, of, Subject } from 'rxjs';
 import { getHoverCellPosition } from '../common/utils';
 import { SheetScrollManagerService } from './scroll-manager.service';
+import type { ISheetRenderSkeletonManagerParam } from './sheet-render-skeleton.service';
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 import { calcPadding, calculateDocSkeletonRects } from './utils/doc-skeleton-util';
 
@@ -282,7 +297,7 @@ export class HoverManagerService extends Disposable {
         return { currentRender, workbook, worksheet, skeletonParam };
     }
 
-    private _calcActiveCell(currentRender: IRender, workbook: Workbook, worksheet: Worksheet, skeletonParam: ISheetSkeletonManagerParam, offsetX: number, offsetY: number) {
+    private _calcActiveCell(currentRender: IRender, workbook: Workbook, worksheet: Worksheet, skeletonParam: ISheetRenderSkeletonManagerParam, offsetX: number, offsetY: number) {
         const hoverPosition = getHoverCellPosition(currentRender, workbook, worksheet, skeletonParam, offsetX, offsetY);
         const skeleton = skeletonParam.skeleton;
         if (!hoverPosition) {

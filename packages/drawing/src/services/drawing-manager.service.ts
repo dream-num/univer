@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { ArrangeTypeEnum, IDisposable, IDrawingGroupNestedParam, IDrawingParam, IDrawingSearch, Nullable } from '@univerjs/core';
 import type { Observable } from 'rxjs';
-import { createIdentifier } from '@univerjs/core';
+import { type ArrangeTypeEnum, createIdentifier, type IDisposable, type IDrawingGroupNestedParam, type IDrawingParam, type IDrawingSearch, type Nullable } from '@univerjs/core';
 
 export interface IDrawingMap<T extends IDrawingParam> {
     [unitId: string]: IDrawingSubunitMap<T>;
@@ -96,7 +95,7 @@ export interface IUnitFocusDrawingService {
 /**
  * Responsible for operations related to drawing grouping, including observers,broadcasting, and generating operations.
  */
-export interface IUnitGroupDrawingService {
+export interface IUnitGroupDrawingService<T extends IDrawingParam> {
     readonly group$: Observable<IDrawingGroupUpdateParam[]>;
     readonly ungroup$: Observable<IDrawingGroupUpdateParam[]>;
 
@@ -107,7 +106,7 @@ export interface IUnitGroupDrawingService {
     getUngroupDrawingOp(groupParams: IDrawingGroupUpdateParam[]): unknown;
     groupUpdateNotification(groupParams: IDrawingGroupUpdateParam[]): void;
     ungroupUpdateNotification(groupParams: IDrawingGroupUpdateParam[]): void;
-    getDrawingsByGroup(groupParam: IDrawingSearch): IDrawingParam[];
+    getDrawingsByGroup(groupParam: IDrawingSearch): T[];
     getDrawingsByGroupNested(groupParam: IDrawingSearch): IDrawingGroupNestedParam | null;
 
     featurePluginGroupUpdateNotification(groupParams: IDrawingGroupUpdateParam[]): void;
@@ -136,7 +135,7 @@ export interface IUnitOrderDrawingService {
     featurePluginOrderUpdateNotification(drawingOrderUpdateParam: IDrawingOrderUpdateParam): void;
 }
 
-export interface IUnitDrawingService<T extends IDrawingParam> extends IUnitNormalDrawingService<T>, IUnitFocusDrawingService, IUnitGroupDrawingService, IUnitOrderDrawingService, IDisposable {
+export interface IUnitDrawingService<T extends IDrawingParam> extends IUnitNormalDrawingService<T>, IUnitFocusDrawingService, IUnitGroupDrawingService<T>, IUnitOrderDrawingService, IDisposable {
     drawingManagerData: IDrawingMap<T>;
 
     dispose(): void;

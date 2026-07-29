@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { Dependency, ICellData, IDrawingParam, IWorkbookData, Workbook } from '@univerjs/core';
-import type { IRender, Rect, Scene } from '@univerjs/engine-render';
-import type { ISheetFloatDom, ISheetImage } from '@univerjs/sheets-drawing';
 import {
+    type Dependency,
     Disposable,
     DrawingTypeEnum,
     EventSubject,
+    type ICellData,
     ICommandService,
+    type IDrawingParam,
     ILogService,
     ImageSourceType,
     Inject,
@@ -29,6 +29,7 @@ import {
     IUndoRedoService,
     IUniverInstanceService,
     IURLImageService,
+    type IWorkbookData,
     LocaleService,
     LocaleType,
     LogLevel,
@@ -36,14 +37,24 @@ import {
     Tools,
     Univer,
     UniverInstanceType,
+    type Workbook,
 } from '@univerjs/core';
+
 import { FUniver } from '@univerjs/core/facade';
 import { IDrawingManagerService, UniverDrawingPlugin } from '@univerjs/drawing';
-import { IRenderManagerService, RenderManagerService, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import { UniverSheetsPlugin } from '@univerjs/sheets';
+import {
+    type IRender,
+    IRenderManagerService,
+    type Rect,
+    RenderManagerService,
+    type Scene,
+} from '@univerjs/engine-render';
+import { SpreadsheetSkeleton, UniverSheetsPlugin } from '@univerjs/sheets';
 import {
     InsertSheetDrawingCommand,
     ISheetDrawingService,
+    type ISheetFloatDom,
+    type ISheetImage,
     RemoveSheetDrawingCommand,
     SetSheetDrawingCommand,
     UniverSheetsDrawingPlugin,
@@ -53,7 +64,11 @@ import {
     IBatchSaveImagesService,
     SheetCanvasFloatDomManagerService,
 } from '@univerjs/sheets-drawing-ui';
-import { ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import {
+    ISheetSelectionRenderService,
+    SheetSkeletonManagerService,
+    SpreadsheetRenderSkeleton,
+} from '@univerjs/sheets-ui';
 import sheetsEnUS from '@univerjs/sheets/locale/en-US';
 import { CanvasFloatDomService, ComponentManager } from '@univerjs/ui';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -176,7 +191,7 @@ class TestRenderManagerService extends Disposable implements Partial<IRenderMana
 class TestSheetSkeletonManager {
     readonly currentSkeleton$: BehaviorSubject<{ sheetId: string } | null>;
 
-    constructor(private readonly _skeleton: SpreadsheetSkeleton) {
+    constructor(private readonly _skeleton: SpreadsheetRenderSkeleton) {
         this.currentSkeleton$ = new BehaviorSubject<{ sheetId: string } | null>({ sheetId: 'sheet1' });
     }
 
@@ -268,7 +283,7 @@ class TestRenderScene {
     detachTransformerFrom() { }
 }
 
-function createRender(skeleton: SpreadsheetSkeleton, scene: Scene): IRender {
+function createRender(skeleton: SpreadsheetRenderSkeleton, scene: Scene): IRender {
     const sheetSkeletonManager = new TestSheetSkeletonManager(skeleton);
     const sheetSelectionRenderService = new TestSheetSelectionRenderService();
     const canvasElement = document.createElement('div');
@@ -308,10 +323,10 @@ function createDrawingUITestBedWithRender() {
     ]);
     const modelWorksheet = testBed.workbook.getActiveSheet();
     const skeleton = testBed.injector.createInstance(
-        SpreadsheetSkeleton,
-        modelWorksheet,
+        SpreadsheetRenderSkeleton,
+        new SpreadsheetSkeleton(modelWorksheet).calculate(),
         testBed.workbook.getStyles()
-    ).calculate() as SpreadsheetSkeleton;
+    ).calculate();
     const renderManager = testBed.injector.get(IRenderManagerService) as unknown as TestRenderManagerService;
     renderManager.configure(createRender(skeleton, new TestRenderScene() as unknown as Scene));
 

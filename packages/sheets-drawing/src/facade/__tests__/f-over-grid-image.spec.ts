@@ -14,15 +14,20 @@
  * limitations under the License.
  */
 
-import type { Injector, Univer } from '@univerjs/core';
-import type { ISheetImage } from '@univerjs/sheets-drawing';
-import { DrawingTypeEnum, ICommandService, ImageSourceType } from '@univerjs/core';
+import { DrawingTypeEnum, ICommandService, ImageSourceType, type Injector, type Univer } from '@univerjs/core';
 import { SheetSkeletonService } from '@univerjs/sheets';
-import { ISheetDrawingService } from '@univerjs/sheets-drawing';
+import { getSheetDrawingPlacement, ISheetDrawingService, type ISheetImage, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createSheetsDrawingTestBed } from '../../__tests__/create-sheets-drawing-test-bed';
 import { InsertSheetDrawingCommand } from '../../commands/commands/insert-sheet-drawing.command';
-import { FOverGridImage } from '../f-over-grid-image';
+import { FOverGridImage, FOverGridImageBuilder } from '../f-over-grid-image';
+
+const BOUNDS_ANCHOR_KINDS: readonly (
+    SheetDrawingAnchorType.Position | SheetDrawingAnchorType.Both
+)[] = [
+    SheetDrawingAnchorType.Position,
+    SheetDrawingAnchorType.Both,
+];
 
 describe('FOverGridImage', () => {
     let univer: Univer;
@@ -126,6 +131,31 @@ describe('FOverGridImage', () => {
 
         expect(fImage.remove()).toBe(true);
         expect(sheetDrawingService.getDrawingByParam({ unitId: 'test', subUnitId: 'sheet1', drawingId: 'drawing-1' })).toBeUndefined();
+    });
+
+    it.each(BOUNDS_ANCHOR_KINDS)('builds %s placement directly from absolute Sheet bounds', async (kind) => {
+        const image = await injector
+            .createInstance(FOverGridImageBuilder, 'test', 'sheet1')
+            .setSource('https://example.com/direct-bounds.png', ImageSourceType.URL)
+            .setPlacement({
+                kind,
+                left: 123,
+                top: 47,
+                width: 205,
+                height: 91,
+            })
+            .buildAsync();
+
+        expect(image.anchorType).toBe(kind);
+        expect(image.transform).toEqual(expect.objectContaining({
+            left: 123,
+            top: 47,
+            width: 205,
+            height: 91,
+        }));
+        const placement = getSheetDrawingPlacement(image);
+        expect(placement.kind).toBe(kind);
+        expect('left' in placement).toBe(false);
     });
 
     function getStoredImage(drawingId: string): ISheetImage {

@@ -14,12 +14,26 @@
  * limitations under the License.
  */
 
-import type { IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import type { IRenderContext, IRenderModule, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import type { ISelectionWithStyle } from '@univerjs/sheets';
-import { ColorKit, Disposable, IContextService, Inject, RANGE_TYPE } from '@univerjs/core';
-import { IRefSelectionsService, REF_SELECTIONS_ENABLED, SheetsSelectionsService } from '@univerjs/sheets';
-import { getCoordByCell, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import type { IRenderContext, IRenderModule, Scene } from '@univerjs/engine-render';
+
+import {
+    ColorKit,
+    Disposable,
+    IContextService,
+    Inject,
+    type IRange,
+    type Nullable,
+    RANGE_TYPE,
+    type Workbook,
+    type Worksheet,
+} from '@univerjs/core';
+import {
+    IRefSelectionsService,
+    type ISelectionWithStyle,
+    REF_SELECTIONS_ENABLED,
+    SheetsSelectionsService,
+} from '@univerjs/sheets';
+import { getCoordByCell, SheetSkeletonManagerService, type SpreadsheetRenderSkeleton } from '@univerjs/sheets-ui';
 import { combineLatest, map, merge, startWith, tap } from 'rxjs';
 import { SHEETS_CROSSHAIR_HIGHLIGHT_Z_INDEX } from '../../const';
 import { SheetsCrosshairHighlightService } from '../../services/crosshair.service';
@@ -148,7 +162,7 @@ export class SheetCrosshairHighlightRenderController extends Disposable implemen
         this._shapes = [];
     }
 
-    private _addShapes(range: IRange, index: number, scene: Scene, skeleton: SpreadsheetSkeleton): void {
+    private _addShapes(range: IRange, index: number, scene: Scene, skeleton: SpreadsheetRenderSkeleton): void {
         const { startRow, endRow, startColumn, endColumn } = range;
         const startPosition = getCoordByCell(startRow, startColumn, scene, skeleton);
         const endPosition = getCoordByCell(endRow, endColumn, scene, skeleton);

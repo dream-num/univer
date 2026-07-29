@@ -86,7 +86,6 @@
     "dependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
-        "@univerjs/engine-render": "workspace:*",
         "@univerjs/protocol": "workspace:*",
         "@univerjs/rpc": "workspace:*"
     },

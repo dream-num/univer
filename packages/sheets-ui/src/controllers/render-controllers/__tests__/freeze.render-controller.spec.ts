@@ -15,10 +15,12 @@
  */
 
 import { ICommandService } from '@univerjs/core';
-import { SHEET_VIEWPORT_KEY, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
+
+import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
 import { SetFrozenCommand, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { BehaviorSubject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
+import { SHEET_VIEWPORT_KEY } from '../../../components/sheets';
 import { SheetScrollManagerService } from '../../../services/scroll-manager.service';
 import { HeaderFreezeRenderController } from '../freeze.render-controller';
 import { createRenderTestBed } from './render-test-bed';

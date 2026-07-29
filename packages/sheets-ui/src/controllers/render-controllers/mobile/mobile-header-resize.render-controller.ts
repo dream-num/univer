@@ -14,28 +14,36 @@
  * limitations under the License.
  */
 
+import type { Subscription } from 'rxjs';
+
 /* eslint-disable max-lines-per-function */
 
-import type { Nullable, Workbook } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import type { ISelectionWithStyle } from '@univerjs/sheets';
-import type { Subscription } from 'rxjs';
+import type { SpreadsheetRenderSkeleton } from '../../../components/sheets/sheet.render-skeleton';
 import {
     Disposable,
     ICommandService,
     IContextService,
     Inject,
+    type Nullable,
     RANGE_TYPE,
     toDisposable,
+    type Workbook,
 } from '@univerjs/core';
-import { Rect } from '@univerjs/engine-render';
 import {
-    attachSelectionWithCoord,
+    type IMouseEvent,
+    type IPointerEvent,
+    type IRenderContext,
+    type IRenderModule,
+    Rect,
+} from '@univerjs/engine-render';
+import {
     DeltaColumnWidthCommand,
     DeltaRowHeightCommand,
+    type ISelectionWithStyle,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX } from '../../../common/keys';
+import { attachRenderSelectionWithCoord } from '../../../common/skeleton-util';
 import { MOBILE_EXPANDING_SELECTION, MOBILE_PINCH_ZOOMING } from '../../../consts/mobile-context';
 import { SheetScrollManagerService } from '../../../services/scroll-manager.service';
 import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
@@ -178,7 +186,7 @@ export class MobileHeaderResizeRenderController extends Disposable implements IR
         if (!skeleton || !this._rowResizeButton) return;
 
         const { scene } = this._context;
-        const selectionWithCoord = attachSelectionWithCoord(selection, skeleton);
+        const selectionWithCoord = attachRenderSelectionWithCoord(selection, skeleton);
         const { endRow } = selectionWithCoord.rangeWithCoord;
 
         // Position button at the bottom of the selected row(s)
@@ -208,7 +216,7 @@ export class MobileHeaderResizeRenderController extends Disposable implements IR
         if (!skeleton || !this._columnResizeButton) return;
 
         const { scene } = this._context;
-        const selectionWithCoord = attachSelectionWithCoord(selection, skeleton);
+        const selectionWithCoord = attachRenderSelectionWithCoord(selection, skeleton);
         const { endColumn } = selectionWithCoord.rangeWithCoord;
 
         // Position button at the right edge of the selected column(s)
@@ -401,7 +409,7 @@ export class MobileHeaderResizeRenderController extends Disposable implements IR
         }));
     }
 
-    private _createResizeHelper(type: 'row' | 'column', offset: number, skeleton: SpreadsheetSkeleton): void {
+    private _createResizeHelper(type: 'row' | 'column', offset: number, skeleton: SpreadsheetRenderSkeleton): void {
         const scene = this._context.scene;
         const { scaleX, scaleY } = scene.getAncestorScale();
         const scale = Math.max(scaleX, scaleY);

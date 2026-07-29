@@ -14,26 +14,6 @@
  * limitations under the License.
  */
 
-import type {
-    ICommandInfo,
-    IDisposable,
-    IDocumentBody,
-    IPosition,
-    Nullable,
-    UnitModel,
-} from '@univerjs/core';
-import type { IDocObjectParam, IEditorInputConfig } from '@univerjs/docs-ui';
-import type {
-    DocBackground,
-    Documents,
-    DocumentSkeleton,
-    IDocumentLayoutObject,
-    IRenderContext,
-    IRenderModule,
-    Scene,
-} from '@univerjs/engine-render';
-import type { SlideDataModel } from '@univerjs/slides';
-import type { IEditorBridgeServiceVisibleParam } from '../services/slide-editor-bridge.service';
 import {
     createParagraphId,
     DEFAULT_EMPTY_DOCUMENT_VALUE,
@@ -45,26 +25,30 @@ import {
     FOCUSING_EDITOR_STANDALONE,
     FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE,
     HorizontalAlign,
+    type ICommandInfo,
     ICommandService,
     IContextService,
+    type IDisposable,
+    type IDocumentBody,
+    type IDocumentLayoutObject,
     Inject,
+    type IPosition,
     IUndoRedoService,
     IUniverInstanceService,
     LocaleService,
+    type Nullable,
     toDisposable,
+    type UnitModel,
     UniverInstanceType,
     VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
 import {
-    DocSelectionManagerService,
-    DocSkeletonManagerService,
-    RichTextEditingMutation,
-} from '@univerjs/docs';
-import {
     DOCS_COMPONENT_MAIN_LAYER_INDEX,
     DOCS_VIEW_KEY,
     DocSelectionRenderService,
+    type IDocObjectParam,
+    type IEditorInputConfig,
     IEditorService,
     MoveCursorOperation,
     MoveSelectionOperation,
@@ -73,18 +57,33 @@ import {
 import {
     convertTextRotation,
     DeviceInputEventType,
+    type DocBackground,
+    type Documents,
+    type DocumentSkeleton,
     FIX_ONE_PIXEL_BLUR_OFFSET,
     fixLineWidthByScale,
     getCurrentTypeOfRenderer,
+    type IRenderContext,
     IRenderManagerService,
+    type IRenderModule,
     Rect,
+    type Scene,
     ScrollBar,
 } from '@univerjs/engine-render';
+import type { SlideDataModel } from '@univerjs/slides';
+import {
+    type IEditorBridgeServiceVisibleParam,
+    ISlideEditorBridgeService,
+} from '../services/slide-editor-bridge.service';
+import {
+    DocSelectionManagerService,
+    DocSkeletonManagerService,
+    RichTextEditingMutation,
+} from '@univerjs/docs';
 import { ILayoutService, KeyCode } from '@univerjs/ui';
 import { filter } from 'rxjs';
 import { SetTextEditArrowOperation } from '../commands/operations/text-edit.operation';
 import { SLIDE_EDITOR_ID } from '../const';
-import { ISlideEditorBridgeService } from '../services/slide-editor-bridge.service';
 import { ISlideEditorManagerService } from '../services/slide-editor-manager.service';
 import { CursorChange } from '../type';
 

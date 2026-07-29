@@ -14,20 +14,23 @@
  * limitations under the License.
  */
 
-/* eslint-disable import/consistent-type-specifier-style -- Keep type and value imports from one package in one declaration. */
 import { CommandType, type ICommand, ICommandService, IUndoRedoService, sequenceExecute } from '@univerjs/core';
 import { SheetSkeletonService } from '@univerjs/sheets';
-import { applySheetDrawingPlacement, type ISheetDrawingPlacement, SheetDrawingAnchorKind } from '../../services/sheet-drawing-placement';
-import { ISheetDrawingService } from '../../services/sheet-drawing.service';
+import {
+    applySheetDrawingPlacement,
+    type ISheetDrawingPlacementInput,
+    isSheetDrawingPlacementTarget,
+    normalizeSheetDrawingPlacement,
+} from '../../services/sheet-drawing-placement';
+import { ISheetDrawingService, SheetDrawingAnchorType } from '../../services/sheet-drawing.service';
 import { DrawingApplyType, SetDrawingApplyMutation } from '../mutations/set-drawing-apply.mutation';
-import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
 
 export interface ISetSheetDrawingPlacementCommandParams {
     unitId: string;
     subUnitId: string;
     drawings: Array<{
         drawingId: string;
-        placement: ISheetDrawingPlacement;
+        placement: ISheetDrawingPlacementInput;
     }>;
 }
 
@@ -42,7 +45,7 @@ export const SetSheetDrawingPlacementCommand: ICommand<ISetSheetDrawingPlacement
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const drawingService = accessor.get(ISheetDrawingService);
-        const skeleton = params.drawings.every(({ placement }) => placement.kind === SheetDrawingAnchorKind.Absolute)
+        const skeleton = params.drawings.every(({ placement }) => placement.kind === SheetDrawingAnchorType.None)
             ? undefined
             : accessor.get(SheetSkeletonService).ensureSkeleton(params.unitId, params.subUnitId);
         const updatedDrawings = [];
@@ -52,27 +55,22 @@ export const SetSheetDrawingPlacementCommand: ICommand<ISetSheetDrawingPlacement
                 subUnitId: params.subUnitId,
                 drawingId,
             });
-            if (!drawing) {
+            if (!isSheetDrawingPlacementTarget(drawing)) {
                 return false;
             }
-            updatedDrawings.push(applySheetDrawingPlacement(drawing, placement, skeleton));
+            const normalizedPlacement = normalizeSheetDrawingPlacement(placement, skeleton);
+            updatedDrawings.push(applySheetDrawingPlacement(drawing, normalizedPlacement, skeleton));
         }
         const drawingOp = drawingService.getBatchUpdateOp(updatedDrawings);
         const { unitId, subUnitId, undo, redo, objects } = drawingOp;
-        const redoMutations = [
-            {
-                id: SetDrawingApplyMutation.id,
-                params: { unitId, subUnitId, op: redo, objects, type: DrawingApplyType.UPDATE },
-            },
-            { id: ClearSheetDrawingTransformerOperation.id, params: [unitId] },
-        ];
-        const undoMutations = [
-            {
-                id: SetDrawingApplyMutation.id,
-                params: { unitId, subUnitId, op: undo, objects, type: DrawingApplyType.UPDATE },
-            },
-            { id: ClearSheetDrawingTransformerOperation.id, params: [unitId] },
-        ];
+        const redoMutations = [{
+            id: SetDrawingApplyMutation.id,
+            params: { unitId, subUnitId, op: redo, objects, type: DrawingApplyType.UPDATE },
+        }];
+        const undoMutations = [{
+            id: SetDrawingApplyMutation.id,
+            params: { unitId, subUnitId, op: undo, objects, type: DrawingApplyType.UPDATE },
+        }];
         const result = sequenceExecute(redoMutations, commandService);
         if (!result.result) {
             return false;

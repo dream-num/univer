@@ -15,8 +15,8 @@
  */
 
 import type { ICellWithCoord, IRange, IRangeWithCoord, ISelectionCell } from '@univerjs/core';
-import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ISelectionWithCoord, ISelectionWithStyle } from '../basics';
+import type { SpreadsheetSkeleton } from './spreadsheet-skeleton';
 
 /**
  * Add startXY endXY to range, XY are no merge cell position.

@@ -14,14 +14,26 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IPosition, Nullable } from '@univerjs/core';
-import type { DocumentSkeleton, IDocumentLayoutObject, Scene } from '@univerjs/engine-render';
+import {
+    convertTextRotation,
+    type DocumentSkeleton,
+    fixLineWidthByScale,
+    getCurrentTypeOfRenderer,
+    IRenderManagerService,
+    Rect,
+    type Scene,
+    ScrollBar,
+} from '@univerjs/engine-render';
 import {
     Disposable,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    type DocumentDataModel,
     HorizontalAlign,
     IConfigService,
+    type IDocumentLayoutObject,
+    type IPosition,
     IUniverInstanceService,
+    type Nullable,
     Optional,
     UniverInstanceType,
     VerticalAlign,
@@ -29,14 +41,6 @@ import {
 } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { DOCS_COMPONENT_MAIN_LAYER_INDEX, VIEWPORT_KEY } from '@univerjs/docs-ui';
-import {
-    convertTextRotation,
-    fixLineWidthByScale,
-    getCurrentTypeOfRenderer,
-    IRenderManagerService,
-    Rect,
-    ScrollBar,
-} from '@univerjs/engine-render';
 import { ILayoutService } from '@univerjs/ui';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
 import { IEditorBridgeService } from '../editor-bridge.service';

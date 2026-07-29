@@ -15,27 +15,32 @@
  */
 
 import type { Injector, Worksheet } from '@univerjs/core';
-import type { Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
+
+import type { Scene } from '@univerjs/engine-render';
 import type { IFloatDomData } from '@univerjs/sheets-drawing';
-import type { IFloatDom, IFloatDomLayout } from '@univerjs/ui';
-import type { ComponentType } from 'react';
+import type { SpreadsheetRenderSkeleton } from '@univerjs/sheets-ui';
 import { render, unmount } from '@univerjs/design';
-import { connectInjector, PrintFloatDomSingle } from '@univerjs/ui';
-import { useMemo } from 'react';
+import {
+    connectInjector,
+    type IFloatDom,
+    type IFloatDomLayout,
+    PrintFloatDomSingle,
+} from '@univerjs/ui';
+import { type ComponentType, useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { transformBound2DOMBound } from '../services/canvas-float-dom-manager.service';
 
 export interface IPrintingFloatDomProps {
     floatDomInfos: IFloatDomData[];
     scene: Scene;
-    skeleton: SpreadsheetSkeleton;
+    skeleton: SpreadsheetRenderSkeleton;
     worksheet: Worksheet;
 };
 
 export function createPrintingFloatDom(
     info: IFloatDomData,
     scene: Scene,
-    skeleton: SpreadsheetSkeleton,
+    skeleton: SpreadsheetRenderSkeleton,
     worksheet: Worksheet
 ) {
     const { width, height, angle, left, top } = info.transform!;

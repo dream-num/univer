@@ -14,24 +14,30 @@
  * limitations under the License.
  */
 
-import type { ICellWithCoord, ICustomRange, Injector, IParagraph, ITextRangeParam, Workbook } from '@univerjs/core';
-import type {
-    DocumentSkeleton,
-    IBoundRectNoAngle,
-    IDocumentSkeletonGlyph,
-    IFontCacheItem,
-} from '@univerjs/engine-render';
+import { type IFontCacheItem } from '../../components/sheets';
+
 import {
     CustomRangeType,
     HorizontalAlign,
+    type ICellWithCoord,
+    type ICustomRange,
+    type Injector,
+    type IParagraph,
+    type ITextRangeParam,
     IUniverInstanceService,
     PresetListType,
     UniverInstanceType,
     VerticalAlign,
+    type Workbook,
 } from '@univerjs/core';
+import {
+    type DocumentSkeleton,
+    type IBoundRectNoAngle,
+    type IDocumentSkeletonGlyph,
+    IRenderManagerService,
+} from '@univerjs/engine-render';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { DOC_VERTICAL_PADDING, getLineBounding, NodePositionConvertToCursor } from '@univerjs/docs-ui';
-import { IRenderManagerService } from '@univerjs/engine-render';
 import { IEditorBridgeService } from '../editor-bridge.service';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 

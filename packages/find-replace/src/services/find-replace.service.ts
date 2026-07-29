@@ -14,21 +14,30 @@
  * limitations under the License.
  */
 
-import type { IDisposable, Nullable } from '@univerjs/core';
-import type { Observable } from 'rxjs';
 import {
     createIdentifier,
     Disposable,
     DisposableCollection,
     ICommandService,
     IContextService,
+    type IDisposable,
     Inject,
     Injector,
     IUniverInstanceService,
+    type Nullable,
     toDisposable,
 } from '@univerjs/core';
-import { RENDER_RAW_FORMULA_KEY } from '@univerjs/engine-render';
-import { BehaviorSubject, combineLatest, debounceTime, Subject, throttleTime } from 'rxjs';
+
+import { RENDER_RAW_FORMULA_KEY } from '@univerjs/sheets-ui';
+import {
+    BehaviorSubject,
+    combineLatest,
+    debounceTime,
+    type Observable,
+    Subject,
+    throttleTime,
+} from 'rxjs';
+
 import { FIND_REPLACE_REPLACE_REVEALED } from './context-keys';
 
 export type FindProgressFn = () => void;

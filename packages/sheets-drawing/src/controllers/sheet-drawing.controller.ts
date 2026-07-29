@@ -14,10 +14,17 @@
  * limitations under the License.
  */
 
-/* eslint-disable import/consistent-type-specifier-style -- Keep type and value imports from one package in one declaration. */
 import { Disposable, ICommandService, Inject, IResourceManagerService, IUniverInstanceService, UniverInstanceType, type Workbook } from '@univerjs/core';
 import { getOrCreateDrawingCopyPlan, type IDrawingJsonUndo1, IDrawingManagerService, type IDrawingSubunitMap } from '@univerjs/drawing';
-import { CopySheetCommand, type ICopySheetCommandInterceptorParams, type IRemoveSheetCommandParams, RemoveSheetCommand, SheetInterceptorService } from '@univerjs/sheets';
+import {
+    CopySheetCommand,
+    type ICopySheetCommandInterceptorParams,
+    type IRemoveSheetCommandParams,
+    RemoveSheetCommand,
+    SheetInterceptorService,
+    SheetSkeletonService,
+    type SpreadsheetSkeleton,
+} from '@univerjs/sheets';
 import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-drawing.command';
 import { RemoveSheetDrawingCommand } from '../commands/commands/remove-sheet-drawing.command';
 import { SetDrawingArrangeCommand } from '../commands/commands/set-drawing-arrange.command';
@@ -25,7 +32,8 @@ import { SetSheetDrawingPlacementCommand } from '../commands/commands/set-sheet-
 import { SetSheetDrawingCommand } from '../commands/commands/set-sheet-drawing.command';
 import { DrawingApplyType, SetDrawingApplyMutation } from '../commands/mutations/set-drawing-apply.mutation';
 import { ClearSheetDrawingTransformerOperation } from '../commands/operations/clear-drawing-transformer.operation';
-import { type ISheetDrawing, ISheetDrawingService } from '../services/sheet-drawing.service';
+import { isSheetDrawingPlacementTarget, materializeSheetDrawingPlacement } from '../services/sheet-drawing-placement';
+import { type ISheetDrawing, ISheetDrawingService, SheetDrawingAnchorType } from '../services/sheet-drawing.service';
 
 export const SHEET_DRAWING_PLUGIN = 'SHEET_DRAWING_PLUGIN';
 
@@ -53,6 +61,7 @@ function getDrawingsInOrder(drawingData: Record<string, ISheetDrawing>, drawingO
 export class SheetsDrawingLoadController extends Disposable {
     constructor(
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
+        @Inject(SheetSkeletonService) private readonly _sheetSkeletonService: SheetSkeletonService,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService,
@@ -112,8 +121,28 @@ export class SheetsDrawingLoadController extends Disposable {
                     this._drawingManagerService.removeDrawingDataForUnit(unitId);
                 },
                 onLoad: (unitId, value) => {
-                    this._sheetDrawingService.registerDrawingData(unitId, value);
-                    this._drawingManagerService.registerDrawingData(unitId, value);
+                    const materialized: IDrawingSubunitMap<ISheetDrawing> = {};
+                    Object.entries(value).forEach(([subUnitId, sheetDrawings]) => {
+                        let skeleton: SpreadsheetSkeleton | undefined;
+                        const data: Record<string, ISheetDrawing> = {};
+                        Object.entries(sheetDrawings.data).forEach(([drawingId, drawing]) => {
+                            if (!isSheetDrawingPlacementTarget(drawing) || drawing.anchorType === SheetDrawingAnchorType.None) {
+                                data[drawingId] = drawing;
+                                return;
+                            }
+
+                            skeleton ??= this._sheetSkeletonService.ensureSkeleton(unitId, subUnitId);
+                            data[drawingId] = skeleton
+                                ? materializeSheetDrawingPlacement(drawing, skeleton)
+                                : drawing;
+                        });
+                        materialized[subUnitId] = {
+                            ...sheetDrawings,
+                            data,
+                        };
+                    });
+                    this._sheetDrawingService.registerDrawingData(unitId, materialized);
+                    this._drawingManagerService.registerDrawingData(unitId, materialized);
                 },
             })
         );

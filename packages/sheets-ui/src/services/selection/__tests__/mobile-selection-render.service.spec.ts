@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+import { SHEET_VIEWPORT_KEY } from '../../../components/sheets';
+
 import { Injector, RANGE_TYPE, ThemeService } from '@univerjs/core';
-import { SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
+
 import { SetSelectionsOperation } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
 import { BehaviorSubject } from 'rxjs';

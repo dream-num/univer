@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { attachPrimaryWithCoord, attachRangeWithCoord, attachSelectionWithCoord } from '@univerjs/sheets';
 import { describe, expect, it } from 'vitest';
+import { attachRenderPrimaryWithCoord, attachRenderRangeWithCoord, attachRenderSelectionWithCoord } from '../../../common/skeleton-util';
 
 describe('selection util', () => {
     it('should attach coordinates and normalize reversed ranges', () => {
@@ -27,7 +27,7 @@ describe('selection util', () => {
             },
         } as any;
 
-        const range = attachRangeWithCoord(skeleton, {
+        const range = attachRenderRangeWithCoord(skeleton, {
             startRow: 3,
             endRow: 1,
             startColumn: 4,
@@ -52,7 +52,7 @@ describe('selection util', () => {
             },
         } as any;
 
-        const primary = attachPrimaryWithCoord(skeleton, {
+        const primary = attachRenderPrimaryWithCoord(skeleton, {
             actualRow: 2,
             actualColumn: 3,
             isMerged: true,
@@ -68,7 +68,7 @@ describe('selection util', () => {
         expect(primary.mergeInfo.startX).toBe(10);
         expect(primary.mergeInfo.endY).toBe(90);
 
-        const selection = attachSelectionWithCoord({
+        const selection = attachRenderSelectionWithCoord({
             range: { startRow: 1, endRow: 4, startColumn: 1, endColumn: 5 },
             primary: {
                 actualRow: 2,

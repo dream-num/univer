@@ -14,18 +14,26 @@
  * limitations under the License.
  */
 
-import type { DependencyIdentifier, Nullable, Workbook } from '@univerjs/core';
-import type { IRender, IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import type { ISheetSkeletonManagerParam } from '@univerjs/sheets';
-import { Disposable, Inject } from '@univerjs/core';
-import { SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
-import { SheetSkeletonService, SheetsSelectionsService } from '@univerjs/sheets';
+import { SHEET_VIEWPORT_KEY } from '../components/sheets';
+import type { SpreadsheetRenderSkeleton } from '../components/sheets/sheet.render-skeleton';
+
+import {
+    type DependencyIdentifier,
+    Disposable,
+    Inject,
+    type Nullable,
+    type Workbook,
+} from '@univerjs/core';
+import type { IRender, IRenderContext, IRenderModule } from '@univerjs/engine-render';
+
+import { SheetsSelectionsService } from '@univerjs/sheets';
 import { BehaviorSubject } from 'rxjs';
 import {
     SetColumnHeaderHeightCommand,
     SetRowHeaderWidthCommand,
 } from '../commands/commands/headersize-changed.command';
 import { ISheetSelectionRenderService } from './selection/base-selection-render.service';
+import { type ISheetRenderSkeletonManagerParam, SheetRenderSkeletonService } from './sheet-render-skeleton.service';
 
 export interface ISheetSkeletonManagerSearch {
     sheetId: string;
@@ -38,33 +46,35 @@ export interface ISheetSkeletonManagerSearch {
 export class SheetSkeletonManagerService extends Disposable implements IRenderModule {
     private _sheetId: string = '';
 
-    private readonly _currentSkeleton$ = new BehaviorSubject<Nullable<ISheetSkeletonManagerParam>>(null);
+    private readonly _currentSkeleton$ = new BehaviorSubject<Nullable<ISheetRenderSkeletonManagerParam>>(null);
     readonly currentSkeleton$ = this._currentSkeleton$.asObservable();
 
     /**
      * CurrentSkeletonBefore for pre-triggered logic during registration
      */
-    private readonly _currentSkeletonBefore$ = new BehaviorSubject<Nullable<ISheetSkeletonManagerParam>>(null);
+    private readonly _currentSkeletonBefore$ = new BehaviorSubject<Nullable<ISheetRenderSkeletonManagerParam>>(null);
     readonly currentSkeletonBefore$ = this._currentSkeletonBefore$.asObservable();
 
     constructor(
         private readonly _context: IRenderContext<Workbook>,
-        @Inject(SheetSkeletonService) private readonly _sheetSkeletonService: SheetSkeletonService
+        @Inject(SheetRenderSkeletonService) private readonly _sheetRenderSkeletonService: SheetRenderSkeletonService
     ) {
         super();
 
         const { unitId, scene } = this._context;
-        this._sheetSkeletonService.setScene(unitId, scene);
+        if (scene) {
+            this._sheetRenderSkeletonService.setScene(unitId, scene);
+        }
 
         this._initSkeletonsRegisterGetCellHeight(unitId);
     }
 
     private _initSkeletonsRegisterGetCellHeight(unitId: string) {
-        const skeletons = this._sheetSkeletonService.getSkeletonsByUnitId(unitId);
+        const skeletons = this._sheetRenderSkeletonService.getSkeletonsByUnitId(unitId);
         skeletons.forEach((skeleton) => skeleton.registerGetCellHeight());
 
         this.disposeWithMe(
-            this._sheetSkeletonService.buildSkeleton$.subscribe((skeleton) => skeleton.registerGetCellHeight())
+            this._sheetRenderSkeletonService.buildSkeleton$.subscribe((skeleton) => skeleton.registerGetCellHeight())
         );
     }
 
@@ -75,28 +85,28 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
         this._currentSkeleton$.complete();
     }
 
-    getCurrentSkeleton(): Nullable<SpreadsheetSkeleton> {
+    getCurrentSkeleton(): Nullable<SpreadsheetRenderSkeleton> {
         return this.getCurrentParam()?.skeleton;
     }
 
     /**
      * get ISheetSkeletonManagerParam from _currentSkeletonSearchParam
      */
-    getCurrentParam(): Nullable<ISheetSkeletonManagerParam> {
+    getCurrentParam(): Nullable<ISheetRenderSkeletonManagerParam> {
         return this._getSkeletonParam(this._sheetId);
     }
 
     /**
      * Get skeleton by sheetId
      */
-    getSkeleton(sheetId: string): Nullable<SpreadsheetSkeleton> {
+    getSkeleton(sheetId: string): Nullable<SpreadsheetRenderSkeleton> {
         return this._getSkeleton(sheetId);
     }
 
     /**
      * Get SkeletonParam by sheetId
      */
-    getSkeletonParam(sheetId: string): Nullable<ISheetSkeletonManagerParam> {
+    getSkeletonParam(sheetId: string): Nullable<ISheetRenderSkeletonManagerParam> {
         return this._getSkeletonParam(sheetId);
     }
 
@@ -120,7 +130,7 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
                 return;
             }
 
-            skeletonParam = this._sheetSkeletonService.newSkeletonParam(unitId, sheetId, worksheet, workbook.getStyles());
+            skeletonParam = this._sheetRenderSkeletonService.newSkeletonParam(unitId, sheetId, worksheet, workbook.getStyles());
         } else {
             this.reCalculate(skeletonParam);
         }
@@ -130,7 +140,7 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
     }
 
     // @TODO why need this function? How about caller get skeleton and call sk.calculate()?
-    reCalculate(param?: Nullable<ISheetSkeletonManagerParam>) {
+    reCalculate(param?: Nullable<ISheetRenderSkeletonManagerParam>) {
         const skeletonParam = param || this.getCurrentParam();
 
         if (!skeletonParam) {
@@ -158,16 +168,16 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
         param.dirty = state;
     }
 
-    ensureSkeleton(sheetId: string): SpreadsheetSkeleton | undefined {
-        return this._sheetSkeletonService.ensureSkeleton(this._context.unitId, sheetId);
+    ensureSkeleton(sheetId: string): SpreadsheetRenderSkeleton | undefined {
+        return this._sheetRenderSkeletonService.ensureSkeleton(this._context.unitId, sheetId);
     }
 
-    private _getSkeletonParam(sheetId: string): Nullable<ISheetSkeletonManagerParam> {
-        return this._sheetSkeletonService.getSkeletonParam(this._context.unitId, sheetId);
+    private _getSkeletonParam(sheetId: string): Nullable<ISheetRenderSkeletonManagerParam> {
+        return this._sheetRenderSkeletonService.getSkeletonParam(this._context.unitId, sheetId);
     }
 
-    private _getSkeleton(sheetId: string): Nullable<SpreadsheetSkeleton> {
-        return this._sheetSkeletonService.getSkeleton(this._context.unitId, sheetId);
+    private _getSkeleton(sheetId: string): Nullable<SpreadsheetRenderSkeleton> {
+        return this._sheetRenderSkeletonService.getSkeleton(this._context.unitId, sheetId);
     }
 
     setColumnHeaderSize(render: Nullable<IRender>, sheetId: string, size: number) {
@@ -194,7 +204,7 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
         });
         this._resetSelectionsIfAvailable(render);
 
-        const sheetSkeletonManagerParam = this._sheetSkeletonService.getSkeletonParam(render.unitId, sheetId);
+        const sheetSkeletonManagerParam = this._sheetRenderSkeletonService.getSkeletonParam(render.unitId, sheetId);
         if (sheetSkeletonManagerParam) {
             sheetSkeletonManagerParam.commandId = SetColumnHeaderHeightCommand.id;
             this._currentSkeleton$.next(sheetSkeletonManagerParam);
@@ -231,7 +241,7 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
         });
         this._resetSelectionsIfAvailable(render);
 
-        const sheetSkeletonManagerParam = this._sheetSkeletonService.getSkeletonParam(render.unitId, sheetId);
+        const sheetSkeletonManagerParam = this._sheetRenderSkeletonService.getSkeletonParam(render.unitId, sheetId);
         if (sheetSkeletonManagerParam) {
             sheetSkeletonManagerParam.commandId = SetRowHeaderWidthCommand.id;
             this._currentSkeleton$.next(sheetSkeletonManagerParam);

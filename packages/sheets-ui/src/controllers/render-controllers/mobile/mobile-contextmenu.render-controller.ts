@@ -14,13 +14,36 @@
  * limitations under the License.
  */
 
-import type { ICellWithCoord, IRange, Nullable, Workbook } from '@univerjs/core';
-import type { IPointerEvent, IRenderContext, IRenderModule, Viewport } from '@univerjs/engine-render';
-import type { ISelectionWithStyle } from '@univerjs/sheets';
-import { Disposable, IContextService, Inject, RANGE_TYPE, Rectangle, toDisposable } from '@univerjs/core';
-import { IRenderManagerService, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
-import { convertPrimaryWithCoordToPrimary, convertSelectionDataToRange, SelectionMoveType, SheetsSelectionsService } from '@univerjs/sheets';
+import {
+    Disposable,
+    type ICellWithCoord,
+    IContextService,
+    Inject,
+    type IRange,
+    type Nullable,
+    RANGE_TYPE,
+    Rectangle,
+    toDisposable,
+    type Workbook,
+} from '@univerjs/core';
+
+import {
+    type IPointerEvent,
+    type IRenderContext,
+    IRenderManagerService,
+    type IRenderModule,
+    Vector2,
+    type Viewport,
+} from '@univerjs/engine-render';
+import {
+    convertPrimaryWithCoordToPrimary,
+    convertSelectionDataToRange,
+    type ISelectionWithStyle,
+    SelectionMoveType,
+    SheetsSelectionsService,
+} from '@univerjs/sheets';
 import { ContextMenuPosition, IContextMenuService, ILayoutService } from '@univerjs/ui';
+import { SHEET_VIEWPORT_KEY } from '../../../components/sheets';
 import { MOBILE_EXPANDING_SELECTION, MOBILE_PINCH_ZOOMING } from '../../../consts/mobile-context';
 import { ISheetSelectionRenderService } from '../../../services/selection/base-selection-render.service';
 import { SELECTION_MANAGER_KEY } from '../../../services/selection/selection-control';

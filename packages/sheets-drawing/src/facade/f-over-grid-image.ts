@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable import/consistent-type-specifier-style -- Keep type and value imports from one package in one declaration. */
-import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import {
     ArrangeTypeEnum,
     DrawingTypeEnum,
@@ -29,19 +27,26 @@ import {
 } from '@univerjs/core';
 import { FBase } from '@univerjs/core/facade';
 import { getImageSize } from '@univerjs/drawing';
-import { convertPositionCellToSheetOverGrid, convertPositionSheetOverGridToAbsolute, type ICellOverGridPosition, SheetSkeletonService } from '@univerjs/sheets';
+import {
+    convertPositionCellToSheetOverGrid,
+    convertPositionSheetOverGridToAbsolute,
+    type ICellOverGridPosition,
+    SheetSkeletonService,
+    type SpreadsheetSkeleton,
+} from '@univerjs/sheets';
 import {
     applySheetDrawingPlacement,
     getSheetDrawingPlacement,
     type ISheetDrawingPlacement,
+    type ISheetDrawingPlacementInput,
     ISheetDrawingService,
     type ISheetImage,
+    normalizeSheetDrawingPlacement,
     RemoveSheetDrawingCommand,
     SetDrawingArrangeCommand,
     SetSheetDrawingCommand,
     SetSheetDrawingPlacementCommand,
-    SheetDrawingAnchorKind,
-    type SheetDrawingAnchorType,
+    SheetDrawingAnchorType,
     transformToAxisAlignPosition,
 } from '@univerjs/sheets-drawing';
 
@@ -137,11 +142,11 @@ function convertFOverGridImageToSheetImage(fOverGridImage: IFOverGridImage, shee
  */
 export class FOverGridImageBuilder {
     private _image: IFOverGridImage;
-    private _placement?: ISheetDrawingPlacement;
+    private _placement?: ISheetDrawingPlacementInput;
     constructor(
         unitId: string,
         subUnitId: string,
-        @Inject(Injector) protected readonly _injector: Injector
+        @Inject(SheetSkeletonService) private readonly _sheetSkeletonService: SheetSkeletonService
     ) {
         this._image = {
             drawingId: generateRandomId(6),
@@ -201,8 +206,7 @@ export class FOverGridImageBuilder {
      */
     setImage(image: ISheetImage): FOverGridImageBuilder {
         const { unitId, subUnitId } = image;
-        const sheetSkeletonService = this._injector.get(SheetSkeletonService);
-        const skeleton = sheetSkeletonService.getSkeleton(unitId, subUnitId);
+        const skeleton = this._sheetSkeletonService.getSkeleton(unitId, subUnitId);
         if (!skeleton) {
             throw new Error(`Skeleton for unitId ${unitId} and subUnitId ${subUnitId} not found`);
         }
@@ -520,7 +524,9 @@ export class FOverGridImageBuilder {
      *
      * This placement takes precedence over the individual row, column, size,
      * and anchor type builder fields.
-     * @param {ISheetDrawingPlacement} placement Image placement.
+     * Position and Both also accept absolute Sheet grid bounds, which are
+     * converted to cell markers with the model SpreadsheetSkeleton.
+     * @param {ISheetDrawingPlacementInput} placement Image placement.
      * @returns {FOverGridImageBuilder} This builder.
      * @example
      * ```ts
@@ -528,8 +534,23 @@ export class FOverGridImageBuilder {
      * const image = await sheet.newOverGridImage()
      *   .setSource('https://avatars.githubusercontent.com/u/61444807?s=96&v=4')
      *   .setPlacement({
-     *     kind: univerAPI.Enum.SheetDrawingAnchorKind.OneCell,
+     *     kind: univerAPI.Enum.SheetDrawingAnchorType.Position,
      *     from: { row: 2, column: 2, rowOffset: 8, columnOffset: 8 },
+     *     width: 240,
+     *     height: 120,
+     *   })
+     *   .buildAsync();
+     * sheet.insertImages([image]);
+     * ```
+     * @example OneCell from absolute bounds
+     * ```ts
+     * const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const image = await sheet.newOverGridImage()
+     *   .setSource('https://avatars.githubusercontent.com/u/61444807?s=96&v=4')
+     *   .setPlacement({
+     *     kind: univerAPI.Enum.SheetDrawingAnchorType.Position,
+     *     left: 160,
+     *     top: 72,
      *     width: 240,
      *     height: 120,
      *   })
@@ -542,7 +563,7 @@ export class FOverGridImageBuilder {
      * const image = await sheet.newOverGridImage()
      *   .setSource('https://avatars.githubusercontent.com/u/61444807?s=96&v=4')
      *   .setPlacement({
-     *     kind: univerAPI.Enum.SheetDrawingAnchorKind.TwoCell,
+     *     kind: univerAPI.Enum.SheetDrawingAnchorType.Both,
      *     from: { row: 2, column: 2, rowOffset: 8, columnOffset: 8 },
      *     to: { row: 8, column: 6, rowOffset: 0, columnOffset: 0 },
      *   })
@@ -555,7 +576,7 @@ export class FOverGridImageBuilder {
      * const image = await sheet.newOverGridImage()
      *   .setSource('https://avatars.githubusercontent.com/u/61444807?s=96&v=4')
      *   .setPlacement({
-     *     kind: univerAPI.Enum.SheetDrawingAnchorKind.Absolute,
+     *     kind: univerAPI.Enum.SheetDrawingAnchorType.None,
      *     left: 640,
      *     top: 96,
      *     width: 240,
@@ -565,7 +586,7 @@ export class FOverGridImageBuilder {
      * sheet.insertImages([image]);
      * ```
      */
-    setPlacement(placement: ISheetDrawingPlacement): FOverGridImageBuilder {
+    setPlacement(placement: ISheetDrawingPlacementInput): FOverGridImageBuilder {
         this._placement = placement;
         return this;
     }
@@ -721,8 +742,6 @@ export class FOverGridImageBuilder {
     }
 
     async buildAsync(): Promise<ISheetImage> {
-        const sheetSkeletonService = this._injector.get(SheetSkeletonService);
-
         if (!this._placement && (this._image.width === 0 || this._image.height === 0)) {
             const size = await getImageSize(this._image.source);
             const width = size.width;
@@ -737,7 +756,7 @@ export class FOverGridImageBuilder {
             }
         }
 
-        if (this._placement?.kind === SheetDrawingAnchorKind.Absolute) {
+        if (this._placement?.kind === SheetDrawingAnchorType.None) {
             const { left, top, width, height } = this._placement;
             const sheetTransform = {
                 from: {
@@ -772,13 +791,14 @@ export class FOverGridImageBuilder {
             return applySheetDrawingPlacement(image, this._placement);
         }
 
-        const image = convertFOverGridImageToSheetImage(this._image, sheetSkeletonService);
+        const image = convertFOverGridImageToSheetImage(this._image, this._sheetSkeletonService);
         if (!this._placement) {
             return image;
         }
 
-        const skeleton = sheetSkeletonService.ensureSkeleton(image.unitId, image.subUnitId);
-        return applySheetDrawingPlacement(image, this._placement, skeleton);
+        const skeleton = this._sheetSkeletonService.ensureSkeleton(image.unitId, image.subUnitId);
+        const placement = normalizeSheetDrawingPlacement(this._placement, skeleton);
+        return applySheetDrawingPlacement(image, placement, skeleton);
     }
 }
 
@@ -790,7 +810,8 @@ export class FOverGridImage extends FBase {
         private _image: ISheetImage,
         @ICommandService protected readonly _commandService: ICommandService,
         @Inject(Injector) protected readonly _injector: Injector,
-        @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService
+        @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService,
+        @Inject(SheetSkeletonService) private readonly _sheetSkeletonService: SheetSkeletonService
     ) {
         super();
     }
@@ -851,14 +872,17 @@ export class FOverGridImage extends FBase {
 
     /**
      * Set this image's explicit placement through the drawing command.
-     * @param {ISheetDrawingPlacement} placement OneCell, TwoCell, or Absolute placement.
+     * Position and Both also accept absolute Sheet grid bounds; the command
+     * converts those bounds to cell markers without render or UI state.
+     * @param {ISheetDrawingPlacementInput} placement Marker placement or absolute bounds with the requested anchor behavior.
      * @returns {boolean} `true` when the command succeeds.
      * @example OneCell
      * ```ts
      * const image = univerAPI.getActiveWorkbook().getActiveSheet().getImages()[0];
      * image.setPlacement({
-     *   kind: univerAPI.Enum.SheetDrawingAnchorKind.OneCell,
-     *   from: { row: 4, column: 3, rowOffset: 8, columnOffset: 8 },
+     *   kind: univerAPI.Enum.SheetDrawingAnchorType.Position,
+     *   left: 240,
+     *   top: 96,
      *   width: 320,
      *   height: 180,
      * });
@@ -867,7 +891,7 @@ export class FOverGridImage extends FBase {
      * ```ts
      * const image = univerAPI.getActiveWorkbook().getActiveSheet().getImages()[0];
      * image.setPlacement({
-     *   kind: univerAPI.Enum.SheetDrawingAnchorKind.TwoCell,
+     *   kind: univerAPI.Enum.SheetDrawingAnchorType.Both,
      *   from: { row: 4, column: 3, rowOffset: 8, columnOffset: 8 },
      *   to: { row: 10, column: 8, rowOffset: 0, columnOffset: 0 },
      * });
@@ -876,7 +900,7 @@ export class FOverGridImage extends FBase {
      * ```ts
      * const image = univerAPI.getActiveWorkbook().getActiveSheet().getImages()[0];
      * image.setPlacement({
-     *   kind: univerAPI.Enum.SheetDrawingAnchorKind.Absolute,
+     *   kind: univerAPI.Enum.SheetDrawingAnchorType.None,
      *   left: 640,
      *   top: 96,
      *   width: 320,
@@ -884,7 +908,7 @@ export class FOverGridImage extends FBase {
      * });
      * ```
      */
-    setPlacement(placement: ISheetDrawingPlacement): boolean {
+    setPlacement(placement: ISheetDrawingPlacementInput): boolean {
         return this._commandService.syncExecuteCommand(SetSheetDrawingPlacementCommand.id, {
             unitId: this._image.unitId,
             subUnitId: this._image.subUnitId,
@@ -1106,8 +1130,7 @@ export class FOverGridImage extends FBase {
         this._image.sheetTransform.angle = angle;
         this._image.transform && (this._image.transform.angle = angle);
         if (this._image.transform) {
-            const sheetSkeletonService = this._injector.get(SheetSkeletonService);
-            const skeleton = sheetSkeletonService.getSkeleton(this._image.unitId, this._image.subUnitId);
+            const skeleton = this._sheetSkeletonService.getSkeleton(this._image.unitId, this._image.subUnitId);
             if (!skeleton) {
                 throw new Error(`Skeleton for unitId ${this._image.unitId} and subUnitId ${this._image.subUnitId} not found`);
             }

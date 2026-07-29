@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import { awaitTime } from '@univerjs/core';
 import { IWatermarkTypeEnum, UNIVER_WATERMARK_STORAGE_KEY } from '@univerjs/engine-render';
+
+import { awaitTime } from '@univerjs/core';
+
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { WatermarkRenderController } from '../watermark.render.controller';

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { IRange, IScale } from '@univerjs/core';
-import type { SpreadsheetSkeleton, UniverRenderingContext } from '@univerjs/engine-render';
 import type { IIconSetCellData } from './type';
-import { Range } from '@univerjs/core';
-import { SheetExtension, SpreadsheetExtensionRegistry } from '@univerjs/engine-render';
+
+import { type IRange, type IScale, Range } from '@univerjs/core';
+import { SpreadsheetExtensionRegistry, type UniverRenderingContext } from '@univerjs/engine-render';
+import { SheetExtension, type SpreadsheetRenderSkeleton } from '@univerjs/sheets-ui';
 import { iconMap, IIconSetType } from '../models/icon-map';
 
 export const IconUKey = 'sheet-conditional-rule-icon';
@@ -49,7 +49,7 @@ export class ConditionalFormattingIcon extends SheetExtension {
     override draw(
         ctx: UniverRenderingContext,
         _parentScale: IScale,
-        spreadsheetSkeleton: SpreadsheetSkeleton,
+        spreadsheetSkeleton: SpreadsheetRenderSkeleton,
         diffRanges: IRange[]
     ) {
         const { worksheet } = spreadsheetSkeleton;

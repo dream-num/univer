@@ -16,19 +16,22 @@
 
 /* eslint-disable ts/no-explicit-any */
 
-import type { Dependency, IDisposable, IWorkbookData, Workbook } from '@univerjs/core';
 import {
+    type Dependency,
     DisposableCollection,
+    type IDisposable,
     ILogService,
     Inject,
     Injector,
     IUniverInstanceService,
+    type IWorkbookData,
     LocaleService,
     LocaleType,
     LogLevel,
     Plugin,
     Univer,
     UniverInstanceType,
+    type Workbook,
 } from '@univerjs/core';
 import {
     CalculateFormulaService,
@@ -69,6 +72,7 @@ import { IMarkSelectionService } from '../../mark-selection/mark-selection.servi
 import { ISheetSelectionRenderService } from '../../selection/base-selection-render.service';
 import { SheetSelectionRenderService } from '../../selection/selection-render.service';
 import { SheetSkeletonManagerService } from '../../sheet-skeleton-manager.service';
+import { SheetRenderSkeletonService } from '../../sheet-render-skeleton.service';
 import { ISheetClipboardService, SheetClipboardService } from '../clipboard.service';
 
 const cellData = {
@@ -610,6 +614,7 @@ export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: De
             injector.add([IFormulaRuntimeService, { useClass: FormulaRuntimeService }]);
             injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);
             injector.add([SheetSkeletonService]);
+            injector.add([SheetRenderSkeletonService]);
 
             dependencies?.forEach((d) => injector.add(d));
 
@@ -643,7 +648,7 @@ export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: De
         activated$: new BehaviorSubject(true),
         activate: () => {},
         deactivate: () => {},
-    }, injector.get(SheetSkeletonService));
+    }, injector.get(SheetRenderSkeletonService));
 
     injector.add([SheetSkeletonManagerService, { useValue: fakeSheetSkeletonManagerService }]);
     injector.get(IRenderManagerService).addRender('test', {

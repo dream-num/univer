@@ -14,24 +14,23 @@
  * limitations under the License.
  */
 
-import type { IDrawingGroupNestedIds, IDrawingGroupNestedParam, IDrawingParam, IDrawingSearch, Nullable } from '@univerjs/core';
-import type { JSONOp, JSONOpList } from 'ot-json1';
-import type { Observable } from 'rxjs';
 import type { IDrawingGroupUpdateParam, IDrawingMap, IDrawingMapItemData, IDrawingOrderMapParam, IDrawingOrderUpdateParam, IDrawingSubunitMap, IDrawingVisibleParam, IUnitDrawingService } from './drawing-manager.service';
-import { DrawingTypeEnum, sortRules, sortRulesByDesc } from '@univerjs/core';
+import { DrawingTypeEnum, type IDrawingGroupNestedIds, type IDrawingGroupNestedParam, type IDrawingParam, type IDrawingSearch, type Nullable, sortRules, sortRulesByDesc } from '@univerjs/core';
 import * as json1 from 'ot-json1';
-import { Subject } from 'rxjs';
+import { type Observable, Subject } from 'rxjs';
+
+type JSONOp = json1.JSONOp;
 
 export interface IDrawingJsonUndo1 {
-    undo: JSONOp;
-    redo: JSONOp;
+    undo: json1.JSONOp;
+    redo: json1.JSONOp;
     unitId: string;
     subUnitId: string;
     objects: IDrawingSearch[] | IDrawingOrderMapParam | IDrawingGroupUpdateParam | IDrawingGroupUpdateParam[];
 }
 
 export interface IDrawingJson1Type {
-    op: JSONOp | JSONOpList;
+    op: json1.JSONOp | json1.JSONOpList;
     unitId: string;
     subUnitId: string;
     objects: IDrawingSearch[] | IDrawingOrderMapParam | IDrawingGroupUpdateParam | IDrawingGroupUpdateParam[];
@@ -479,7 +478,7 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
         return { undo: invertOp, redo: op, unitId, subUnitId, objects: groupParams };
     }
 
-    getDrawingsByGroup(groupParam: IDrawingSearch): IDrawingParam[] {
+    getDrawingsByGroup(groupParam: IDrawingSearch): T[] {
         const { unitId, subUnitId, drawingId } = groupParam;
         const group = this.getDrawingByParam({ unitId, subUnitId, drawingId });
 
@@ -489,7 +488,7 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
 
         const drawings = this._getDrawingData(unitId, subUnitId);
 
-        const children: IDrawingParam[] = [];
+        const children: T[] = [];
         Object.keys(drawings).forEach((key) => {
             const drawing = drawings[key];
             if (drawing.groupId === drawingId) {

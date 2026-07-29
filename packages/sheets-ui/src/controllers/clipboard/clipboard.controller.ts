@@ -14,24 +14,6 @@
  * limitations under the License.
  */
 
-import type {
-    ICellData,
-    ICommandInfo,
-    IDocumentData,
-    IMutationInfo,
-    IObjectArrayPrimitiveType,
-    IObjectMatrixPrimitiveType,
-    IRange,
-    Workbook,
-    Worksheet,
-} from '@univerjs/core';
-import type {
-    IInsertColMutationParams,
-    IInsertRowMutationParams,
-    ISetRangeValuesMutationParams,
-    ISetWorksheetColWidthMutationParams,
-} from '@univerjs/sheets';
-import type { IUniverSheetsUIConfig } from '../../config/config';
 import type { LocaleKey } from '../../locale/types';
 import type {
     ICellDataWithSpanInfo,
@@ -48,11 +30,18 @@ import {
     extractPureTextFromCell,
     getNumfmtParseValueFilter,
     handleStyleToString,
+    type ICellData,
+    type ICommandInfo,
     ICommandService,
     IConfigService,
     IContextService,
+    type IDocumentData,
+    type IMutationInfo,
     Inject,
     Injector,
+    type IObjectArrayPrimitiveType,
+    type IObjectMatrixPrimitiveType,
+    type IRange,
     isFormulaString,
     IUniverInstanceService,
     LocaleService,
@@ -60,14 +49,20 @@ import {
     RxDisposable,
     Tools,
     UniverInstanceType,
+    type Workbook,
+    type Worksheet,
 } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import { convertBodyToHtml, DocSelectionRenderService } from '@univerjs/docs-ui';
 import { IRenderManagerService, withCurrentTypeOfRenderer } from '@univerjs/engine-render';
 import {
     AddWorksheetMergeCommand,
+    type IInsertColMutationParams,
+    type IInsertRowMutationParams,
     InsertColMutation,
     InsertRowMutation,
+    type ISetRangeValuesMutationParams,
+    type ISetWorksheetColWidthMutationParams,
     MAX_CELL_PER_SHEET_KEY,
     MoveColsMutation,
     MoveRangeMutation,
@@ -93,7 +88,7 @@ import {
     SheetPasteValueCommand,
 } from '../../commands/commands/clipboard.command';
 import { SetScrollOperation } from '../../commands/operations/scroll.operation';
-import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
+import { type IUniverSheetsUIConfig, SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import {
     escapeSpecialCode,
     FORMULA_CLIPBOARD_MIME_TYPE,
@@ -530,7 +525,7 @@ export class SheetClipboardController extends RxDisposable {
         }
 
         const { skeleton } = currentSkeleton;
-        const documentModel = skeleton.getBlankCellDocumentModel()?.documentModel;
+        const documentModel = skeleton.worksheet.getBlankCellDocumentModel(null, 0, 0).documentModel;
         const p = documentModel?.getSnapshot();
         const documentData = { ...p, ...snapshot };
         documentModel?.reset(documentData);

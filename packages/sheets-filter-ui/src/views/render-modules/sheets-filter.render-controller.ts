@@ -14,17 +14,43 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IRange, Workbook } from '@univerjs/core';
-import type { IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import type { ISheetCommandSharedParams } from '@univerjs/sheets';
-import type { FilterModel } from '@univerjs/sheets-filter';
-import type { ISheetsFilterButtonShapeProps } from '../widgets/filter-button.shape';
-import { CommandType, fromCallback, ICommandService, Inject, Injector, InterceptorEffectEnum, RxDisposable, ThemeService, VerticalAlign } from '@univerjs/core';
-import { attachSelectionWithCoord, INTERCEPTOR_POINT, SetRangeValuesMutation, SheetInterceptorService } from '@univerjs/sheets';
-import { FILTER_MUTATIONS, SheetsFilterService } from '@univerjs/sheets-filter';
-import { getCoordByCell, ISheetSelectionRenderService, SelectionControl, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import {
+    CommandType,
+    fromCallback,
+    ICommandService,
+    type IDisposable,
+    Inject,
+    Injector,
+    InterceptorEffectEnum,
+    type IRange,
+    RxDisposable,
+    ThemeService,
+    VerticalAlign,
+    type Workbook,
+} from '@univerjs/core';
+import {
+    INTERCEPTOR_POINT,
+    type ISheetCommandSharedParams,
+    SetRangeValuesMutation,
+    SheetInterceptorService,
+} from '@univerjs/sheets';
+import { FILTER_MUTATIONS, type FilterModel, SheetsFilterService } from '@univerjs/sheets-filter';
+import {
+    attachRenderSelectionWithCoord,
+    getCoordByCell,
+    ISheetSelectionRenderService,
+    SelectionControl,
+    SheetSkeletonManagerService,
+    type SpreadsheetRenderSkeleton,
+} from '@univerjs/sheets-ui';
 import { filter, map, of, startWith, switchMap, takeUntil, throttleTime } from 'rxjs';
-import { FILTER_ICON_PADDING, FILTER_ICON_SIZE, SheetsFilterButtonShape } from '../widgets/filter-button.shape';
+import {
+    FILTER_ICON_PADDING,
+    FILTER_ICON_SIZE,
+    type ISheetsFilterButtonShapeProps,
+    SheetsFilterButtonShape,
+} from '../widgets/filter-button.shape';
 
 const DEFAULT_Z_INDEX = 1000;
 
@@ -35,7 +61,7 @@ interface ISheetsFilterRenderParams {
     worksheetId: string;
     filterModel?: FilterModel;
     range?: IRange;
-    skeleton: SpreadsheetSkeleton;
+    skeleton: SpreadsheetRenderSkeleton;
 }
 
 function computeIconTop(
@@ -133,7 +159,7 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
         this._renderButtons(renderParams as Required<ISheetsFilterRenderParams>);
     }
 
-    private _renderRange(range: IRange, skeleton: SpreadsheetSkeleton): void {
+    private _renderRange(range: IRange, skeleton: SpreadsheetRenderSkeleton): void {
         const { scene } = this._context;
         const { rowHeaderWidth, columnHeaderHeight } = skeleton;
         const filterRangeShape = this._filterRangeShape = new SelectionControl(
@@ -152,7 +178,7 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
             primary: null,
             style: { fill: 'rgba(0, 0, 0, 0.0)' },
         };
-        const selectionWithCoord = attachSelectionWithCoord(selectionWithStyle, skeleton);
+        const selectionWithCoord = attachRenderSelectionWithCoord(selectionWithStyle, skeleton);
         filterRangeShape.updateRangeBySelectionWithCoord(selectionWithCoord);
         filterRangeShape.setEvent(false);
 

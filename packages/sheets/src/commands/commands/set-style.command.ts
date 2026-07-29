@@ -14,37 +14,38 @@
  * limitations under the License.
  */
 
-import type {
-    HorizontalAlign,
-    IAccessor,
-    ICellData,
-    IColorStyle,
-    ICommand,
-    IMutationInfo,
-    IRange,
-    IStyleData,
-    ITextRotation,
-    VerticalAlign,
-    WrapStrategy,
-} from '@univerjs/core';
-import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
-import type { ISheetCommandSharedParams } from '../utils/interface';
 import {
     BooleanNumber,
     CommandType,
     FontItalic,
     FontWeight,
+    type HorizontalAlign,
+    type IAccessor,
+    type ICellData,
+    type IColorStyle,
+    type ICommand,
     ICommandService,
+    type IMutationInfo,
+    type IRange,
+    type IStyleData,
+    type ITextRotation,
     IUndoRedoService,
     IUniverInstanceService,
     ObjectMatrix,
     sequenceExecute,
     Tools,
+    type VerticalAlign,
+    type WrapStrategy,
 } from '@univerjs/core';
+import {
+    type ISetRangeValuesMutationParams,
+    SetRangeValuesMutation,
+    SetRangeValuesUndoMutationFactory,
+} from '../mutations/set-range-values.mutation';
+import type { ISheetCommandSharedParams } from '../utils/interface';
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { SheetSkeletonService } from '../../skeleton/skeleton.service';
-import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
 import { getRangesHeight, getSuitableRangesInView } from './util';
 import { createRangeIteratorWithSkipFilteredRows } from './utils/selection-utils';
 import { getSheetCommandTarget } from './utils/target-util';
@@ -130,7 +131,7 @@ export const SetStyleCommand: ICommand<ISetStyleCommandParams<unknown>> = {
 
         let autoHeightContext = null;
         if (AFFECT_LAYOUT_STYLES.includes(params?.style.type)) {
-            const { suitableRanges, remainingRanges } = getSuitableRangesInView(ranges, skeleton);
+            const { suitableRanges, remainingRanges } = getSuitableRangesInView(ranges, skeleton?.worksheet.getColumnCount() ?? null);
             const cellHeights = getRangesHeight(suitableRanges, worksheet);
             autoHeightContext = {
                 suitableRanges,

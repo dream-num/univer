@@ -14,11 +14,20 @@
  * limitations under the License.
  */
 
-import type { Nullable, Styles, Workbook, Worksheet } from '@univerjs/core';
-import type { Scene } from '@univerjs/engine-render';
-import { Disposable, Inject, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { SpreadsheetSkeleton } from '@univerjs/engine-render';
+import {
+    Disposable,
+    ICommandService,
+    Inject,
+    IUniverInstanceService,
+    type Nullable,
+    type Styles,
+    UniverInstanceType,
+    type Workbook,
+    type Worksheet,
+} from '@univerjs/core';
 import { Subject } from 'rxjs';
+import { COMMAND_LISTENER_SKELETON_CHANGE } from '../basics/const/command-listener-const';
+import { SpreadsheetSkeleton } from './spreadsheet-skeleton';
 
 export interface ISheetSkeletonManagerParam {
     unitId: string;
@@ -29,16 +38,14 @@ export interface ISheetSkeletonManagerParam {
 }
 
 export class SheetSkeletonService extends Disposable {
-    private _sceneMap: Map<string, Scene> = new Map();
     private _sheetSkeletonParamStore: Map<string, Map<string, ISheetSkeletonManagerParam>> = new Map();
     private _buildSkeleton$ = new Subject<SpreadsheetSkeleton>();
     readonly buildSkeleton$ = this._buildSkeleton$.asObservable();
 
     constructor(
-        @Inject(Injector) readonly _injector: Injector,
-        @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService
+        @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService,
+        @Inject(ICommandService) private readonly _commandService: ICommandService
     ) {
-        // empty
         super();
 
         this._init();
@@ -62,12 +69,40 @@ export class SheetSkeletonService extends Disposable {
     }
 
     private _init() {
+        this._univerInstanceService
+            .getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET)
+            .forEach((workbook) => this._initWorkbookSkeleton(workbook));
+
         this.disposeWithMe(
             this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((event) => this._initWorkbookSkeleton(event.unit))
         );
 
         this.disposeWithMe(
             this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => this._disposeByUnitId(workbook.getUnitId()))
+        );
+
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((commandInfo) => {
+                if (!COMMAND_LISTENER_SKELETON_CHANGE.includes(commandInfo.id) || !commandInfo.params) {
+                    return;
+                }
+
+                const unitId = Reflect.get(commandInfo.params, 'unitId');
+                const subUnitId = Reflect.get(commandInfo.params, 'subUnitId');
+                if (typeof unitId !== 'string' || typeof subUnitId !== 'string') {
+                    return;
+                }
+
+                const skeletonParam = this.getSkeletonParam(unitId, subUnitId);
+                if (!skeletonParam) {
+                    return;
+                }
+
+                skeletonParam.skeleton.makeDirty(true);
+                skeletonParam.skeleton.calculate();
+                skeletonParam.dirty = false;
+                skeletonParam.commandId = commandInfo.id;
+            })
         );
     }
 
@@ -84,7 +119,7 @@ export class SheetSkeletonService extends Disposable {
                 }
 
                 const sheetId = worksheet.getSheetId();
-                const skeleton = this._buildSkeleton(worksheet, workbook.getStyles());
+                const skeleton = this._buildSkeleton(worksheet);
                 sheetSkeletonMap.set(sheetId, {
                     unitId,
                     sheetId,
@@ -117,7 +152,7 @@ export class SheetSkeletonService extends Disposable {
 
         workbook.getWorksheets().forEach((worksheet) => {
             const sheetId = worksheet.getSheetId();
-            const skeleton = this._buildSkeleton(worksheet, workbook.getStyles());
+            const skeleton = this._buildSkeleton(worksheet);
             sheetSkeletonMap.set(sheetId, {
                 unitId,
                 sheetId,
@@ -129,33 +164,11 @@ export class SheetSkeletonService extends Disposable {
         this._sheetSkeletonParamStore.set(unitId, sheetSkeletonMap);
     }
 
-    private _buildSkeleton(worksheet: Worksheet, styles: Styles) {
-        const spreadsheetSkeleton = this._injector.createInstance(
-            SpreadsheetSkeleton,
-            worksheet,
-            styles
-        );
-
-        const unitId = worksheet.getUnitId();
-        const scene = this._sceneMap.get(unitId);
-        if (scene) {
-            spreadsheetSkeleton.setScene(scene);
-        }
+    private _buildSkeleton(worksheet: Worksheet): SpreadsheetSkeleton {
+        const spreadsheetSkeleton = new SpreadsheetSkeleton(worksheet).calculate();
 
         this._buildSkeleton$.next(spreadsheetSkeleton);
         return spreadsheetSkeleton;
-    }
-
-    setScene(unitId: string, scene: Scene) {
-        this._sceneMap.set(unitId, scene);
-
-        // update scene for all skeleton
-        const sheetSkeletonMap = this._sheetSkeletonParamStore.get(unitId);
-        if (!sheetSkeletonMap) {
-            return;
-        }
-
-        sheetSkeletonMap.forEach((skeletonParam) => skeletonParam.skeleton.setScene(scene));
     }
 
     getSkeletonsByUnitId(unitId: string): SpreadsheetSkeleton[] {
@@ -180,12 +193,12 @@ export class SheetSkeletonService extends Disposable {
         return sheetSkeletonMap.get(subUnitId);
     }
 
-    newSkeleton(unitId: string, subUnitId: string, worksheet: Worksheet, styles: Styles): SpreadsheetSkeleton {
-        return this.newSkeletonParam(unitId, subUnitId, worksheet, styles).skeleton;
+    newSkeleton(unitId: string, subUnitId: string, worksheet: Worksheet, _styles: Styles): SpreadsheetSkeleton {
+        return this.newSkeletonParam(unitId, subUnitId, worksheet, _styles).skeleton;
     }
 
-    newSkeletonParam(unitId: string, subUnitId: string, worksheet: Worksheet, styles: Styles): ISheetSkeletonManagerParam {
-        const skeleton = this._buildSkeleton(worksheet, styles);
+    newSkeletonParam(unitId: string, subUnitId: string, worksheet: Worksheet, _styles: Styles): ISheetSkeletonManagerParam {
+        const skeleton = this._buildSkeleton(worksheet);
 
         let sheetSkeletonMap = this._sheetSkeletonParamStore.get(unitId);
         if (!sheetSkeletonMap) {

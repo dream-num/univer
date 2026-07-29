@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+import { IWatermarkTypeEnum } from '@univerjs/engine-render';
+
 import { Injector } from '@univerjs/core';
 import { FEnum, FUniver } from '@univerjs/core/facade';
-import { IWatermarkTypeEnum } from '@univerjs/engine-render';
+
 import { WatermarkService, WatermarkTextBaseConfig } from '@univerjs/watermark';
 import { describe, expect, it } from 'vitest';
 import { FUniverWatermarkMixin, FWatermarkEnumMixin } from '../f-univer';

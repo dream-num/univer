@@ -14,9 +14,24 @@
  * limitations under the License.
  */
 
-import type { ICellDataForSheetInterceptor, IRange, Nullable, Workbook } from '@univerjs/core';
-import type { IRenderContext, IRenderModule, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import { DisposableCollection, Inject, IPermissionService, IUniverInstanceService, Optional, RANGE_TYPE, Rectangle, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import type { IRenderContext, IRenderModule, Scene } from '@univerjs/engine-render';
+
+import type { SpreadsheetRenderSkeleton } from '../../components/sheets/sheet.render-skeleton';
+import {
+    DisposableCollection,
+    type ICellDataForSheetInterceptor,
+    Inject,
+    IPermissionService,
+    type IRange,
+    IUniverInstanceService,
+    type Nullable,
+    Optional,
+    RANGE_TYPE,
+    Rectangle,
+    RxDisposable,
+    UniverInstanceType,
+    type Workbook,
+} from '@univerjs/core';
 import { UnitAction } from '@univerjs/protocol';
 
 import { getSheetCommandTarget, RangeProtectionCache, RangeProtectionRuleModel, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission, WorksheetSetColumnStylePermission, WorksheetSetRowStylePermission } from '@univerjs/sheets';
@@ -131,7 +146,7 @@ export class SheetPermissionInterceptorCanvasRenderController extends RxDisposab
     private _initRangeFillPermissionInterceptor() {
         this.disposeWithMe(
             this._selectionRenderService.interceptor.intercept(this._selectionRenderService.interceptor.getInterceptPoints().RANGE_FILL_PERMISSION_CHECK, {
-                handler: (_: Nullable<boolean>, position: { x: number; y: number; skeleton: SpreadsheetSkeleton; scene: Scene }) => {
+                handler: (_: Nullable<boolean>, position: { x: number; y: number; skeleton: SpreadsheetRenderSkeleton; scene: Scene }) => {
                     const target = getSheetCommandTarget(this._univerInstanceService);
                     if (!target) {
                         return false;

@@ -14,14 +14,42 @@
  * limitations under the License.
  */
 
-import type { ICellData, IObjectMatrixPrimitiveType, IWorkbookData } from '@univerjs/core';
-import type { IRender } from '@univerjs/engine-render';
-import type { Subscription } from 'rxjs';
-import { createIdentifier, Disposable, Inject, Injector, InterceptorEffectEnum, ObjectMatrix, Workbook } from '@univerjs/core';
-import { Engine, IRenderManagerService, RenderUnit, Scene, Spreadsheet } from '@univerjs/engine-render';
+import { Spreadsheet } from '../components/sheets';
+
+import {
+    createIdentifier,
+    Disposable,
+    type ICellData,
+    Inject,
+    Injector,
+    InterceptorEffectEnum,
+    type IObjectMatrixPrimitiveType,
+    type IWorkbookData,
+    ObjectMatrix,
+    Workbook,
+} from '@univerjs/core';
+import {
+    Engine,
+    type IRender,
+    IRenderManagerService,
+    RenderUnit,
+    Scene,
+} from '@univerjs/engine-render';
+import {
+    BehaviorSubject,
+    filter,
+    firstValueFrom,
+    from,
+    map,
+    Observable,
+    of,
+    type Subscription,
+    switchMap,
+    take,
+    timeout,
+} from 'rxjs';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { ILayoutService } from '@univerjs/ui';
-import { BehaviorSubject, filter, firstValueFrom, from, map, Observable, of, switchMap, take, timeout } from 'rxjs';
 import { SheetRenderController } from '../controllers/render-controllers/sheet.render-controller';
 import { SheetSkeletonRenderController } from '../controllers/render-controllers/skeleton.render-controller';
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';

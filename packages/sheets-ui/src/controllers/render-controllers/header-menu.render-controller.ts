@@ -14,17 +14,25 @@
  * limitations under the License.
  */
 
-import type { Nullable, Workbook } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
-import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
+import type { SpreadsheetColumnHeader, SpreadsheetHeader } from '../../components/sheets';
+
 import {
     Disposable,
     ICommandService,
     Inject,
+    type Nullable,
     RANGE_TYPE,
+    type Workbook,
 } from '@univerjs/core';
-import { CURSOR_TYPE, Rect } from '@univerjs/engine-render';
-import { SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
+import {
+    CURSOR_TYPE,
+    type IMouseEvent,
+    type IPointerEvent,
+    type IRenderContext,
+    type IRenderModule,
+    Rect,
+} from '@univerjs/engine-render';
+import { type ISetSelectionsOperationParams, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { ContextMenuPosition, IContextMenuService } from '@univerjs/ui';
 import { Subscription } from 'rxjs';
 

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { Spreadsheet } from '../../components/sheets';
+
 import {
     ContextService,
     DesktopLogService,
@@ -25,7 +27,7 @@ import {
     UniverInstanceService,
     UniverInstanceType,
 } from '@univerjs/core';
-import { IRenderManagerService, RenderManagerService, Spreadsheet } from '@univerjs/engine-render';
+import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { SheetsRenderService } from '../sheets-render.service';

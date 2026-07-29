@@ -22,7 +22,6 @@ import type {
     IDocumentSkeletonGlyph,
 } from '../../../../basics/i-document-skeleton-cached';
 import type { IFontCreateConfig } from '../../../../basics/interfaces';
-import type { IOpenTypeGlyphInfo } from '../shaping-engine/text-shaping';
 import { BooleanNumber, BulletAlignment, DataStreamTreeTokenType, GridType } from '@univerjs/core';
 import { cjk } from '../../../../basics/cjk-regexp';
 import { GlyphType } from '../../../../basics/i-document-skeleton-cached';
@@ -30,7 +29,6 @@ import {
     isCjkCenterAlignedPunctuation,
     isCjkLeftAlignedPunctuation,
     isCjkRightAlignedPunctuation,
-    ptToPixel,
 } from '../../../../basics/tools';
 import { applyFontMetricCompatibility, getDocumentCompatibilityPolicy } from '../../document-compatibility';
 import { FontCache } from '../shaping-engine/font-cache';
@@ -94,11 +92,10 @@ export function createSkeletonWordGlyph(
 export function createSkeletonLetterGlyph(
     content: string,
     config: IFontCreateConfig,
-    glyphMetrics?: number | { ascent?: number; descent?: number; width?: number },
-    glyphInfo?: IOpenTypeGlyphInfo
+    glyphMetrics?: number | { ascent?: number; descent?: number; width?: number }
 ): IDocumentSkeletonGlyph {
     const glyphWidth = typeof glyphMetrics === 'number' ? glyphMetrics : glyphMetrics?.width;
-    const glyph = _createSkeletonWordOrLetter(GlyphType.LETTER, content, config, glyphWidth, glyphInfo);
+    const glyph = _createSkeletonWordOrLetter(GlyphType.LETTER, content, config, glyphWidth);
 
     if (typeof glyphMetrics === 'object') {
         if (glyphMetrics.ascent != null) {
@@ -190,8 +187,7 @@ export function _createSkeletonWordOrLetter(
     glyphType: GlyphType,
     content: string,
     config: IFontCreateConfig,
-    glyphWidth?: number,
-    glyphInfo?: IOpenTypeGlyphInfo
+    glyphWidth?: number
 ): IDocumentSkeletonGlyph {
     const { fontStyle, textStyle, charSpace = 1, gridType = GridType.LINES, snapToGrid = BooleanNumber.FALSE } = config;
     const skipWidthList: string[] = [
@@ -253,11 +249,7 @@ export function _createSkeletonWordOrLetter(
     let bBox = null;
     let xOffset = 0;
 
-    if (glyphInfo && glyphInfo.boundingBox && glyphInfo.font) {
-        bBox = FontCache.getBBoxFromGlyphInfo(glyphInfo, fontStyle);
-    } else {
-        bBox = FontCache.getTextSize(content, fontStyle);
-    }
+    bBox = FontCache.getTextSize(content, fontStyle);
     bBox = applyFontMetricCompatibility(
         content,
         fontStyle,
@@ -275,15 +267,6 @@ export function _createSkeletonWordOrLetter(
         if (gridType === GridType.SNAP_TO_CHARS) {
             xOffset = (width - contentWidth) / 2;
         }
-    }
-
-    // Handle kerning.
-    if (glyphInfo && glyphInfo.kerning !== 0 && glyphInfo.font) {
-        const radio = ptToPixel(fontStyle.fontSize) / glyphInfo.font.unitsPerEm;
-        const delta = glyphInfo.kerning * radio;
-
-        width += delta;
-        xOffset += delta;
     }
 
     return {

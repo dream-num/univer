@@ -19,8 +19,6 @@ import type {
     IDocumentSkeletonBoundingBox,
     IDocumentSkeletonFontStyle,
 } from '../../../../basics/i-document-skeleton-cached';
-import type { IOpenTypeGlyphInfo } from './text-shaping';
-import { ptToPixel } from '../../../../basics/tools';
 
 export const DEFAULT_MEASURE_TEXT = '0';
 
@@ -202,23 +200,6 @@ export class FontCache {
         }
 
         return bBox;
-    }
-
-    static getBBoxFromGlyphInfo(glyphInfo: IOpenTypeGlyphInfo, fontStyle: IDocumentSkeletonFontStyle) {
-        const glyph = glyphInfo.glyph!;
-        const font = glyphInfo.font!;
-        const { y1, y2 } = glyphInfo.boundingBox!;
-        const scale = ptToPixel(fontStyle.fontSize) / font.unitsPerEm;
-
-        const { ascender, descender } = font;
-
-        return this._calculateBoundingBoxByMeasureText({
-            width: (glyph.advanceWidth ?? 0) * scale,
-            fontBoundingBoxAscent: ascender * scale,
-            fontBoundingBoxDescent: Math.abs(descender * scale),
-            actualBoundingBoxAscent: y2 * scale,
-            actualBoundingBoxDescent: Math.abs(y1 * scale),
-        }, fontStyle);
     }
 
     /**

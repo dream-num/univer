@@ -24,7 +24,6 @@ import {
     ConfigService,
     ContextService,
     createIdentifier,
-    dateKit,
     DesktopLogService,
     ICommandService,
     IConfigService,
@@ -34,7 +33,6 @@ import {
     IUniverInstanceService,
     LifecycleService,
     LifecycleStages,
-    LOCALE_META,
     LocaleService,
     LocaleType,
     LogLevel,
@@ -63,16 +61,15 @@ import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { SetActiveCommentOperation } from '../../../commands/operations/comment.operations';
-import { ThreadCommentPanelService } from '../../../services/thread-comment-panel.service';
-import { transformTextNodes2Document } from '../../thread-comment-editor/util';
-import { ThreadCommentTree, ThreadCommentTreeLocation } from '../../ThreadCommentTree';
+import { SetActiveCommentOperation } from '../../commands/operations/comment.operations';
+import { ThreadCommentPanelService } from '../../services/thread-comment-panel.service';
+import { transformTextNodes2Document } from '../thread-comment-editor/util';
+import { ThreadCommentPanel } from '../ThreadCommentPanel';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 const UNIT_ID = 'unit-1';
 const SHEET_ID = 'sheet-1';
-const REPLY_LABEL = 'thread-comment-ui.editor.reply';
 const IRenderManagerService = createIdentifier<TestRenderManagerService>('engine-render.render-manager.service');
 
 interface IEditorRecord {
@@ -82,26 +79,12 @@ interface IEditorRecord {
     focused: boolean;
 }
 
-class TestState {
-    static addedComments: IThreadComment[] = [];
-    static resolveStates: boolean[] = [];
-
-    static reset() {
-        this.addedComments = [];
-        this.resolveStates = [];
-    }
-}
-
 class TestLocaleService {
     private readonly _currentLocale$ = new BehaviorSubject<LocaleType>(LocaleType.ZH_CN);
     readonly currentLocale$ = this._currentLocale$.asObservable();
 
     t(key: string) {
         return key;
-    }
-
-    setLocale(locale: LocaleType) {
-        this._currentLocale$.next(locale);
     }
 
     getCurrentLocale() {
@@ -337,7 +320,7 @@ class TestUniverInstanceService {
 }
 
 function createComment(overrides: Partial<IThreadComment>): IThreadComment {
-    const id = overrides.id ?? 'thread-1';
+    const id = overrides.id ?? 'comment-1';
 
     return {
         id,
@@ -358,7 +341,7 @@ function createComment(overrides: Partial<IThreadComment>): IThreadComment {
     };
 }
 
-function createTreeTestBed() {
+function createPanelTestBed() {
     const injector = new Injector();
     const dependencies: Dependency[] = [
         [ICommandService, { useClass: CommandService }],
@@ -400,13 +383,12 @@ function createTreeTestBed() {
 
     return {
         injector,
-        editorService: injector.get(IEditorService),
         panelService: injector.get(ThreadCommentPanelService),
         threadCommentModel: injector.get(ThreadCommentModel),
     };
 }
 
-function renderTree(injector: Injector, element: React.ReactElement) {
+function renderPanel(injector: Injector, element: React.ReactElement) {
     const container = document.createElement('div');
     document.body.appendChild(container);
     const root = createRoot(container);
@@ -422,108 +404,38 @@ function renderTree(injector: Injector, element: React.ReactElement) {
     return { container, root };
 }
 
-function renderDefaultTree(injector: Injector, commentId?: string) {
-    return renderTree(
+function renderDefaultPanel(injector: Injector) {
+    return renderPanel(
         injector,
-        <ThreadCommentTree
-            id={commentId}
+        <ThreadCommentPanel
             unitId={UNIT_ID}
-            subUnitId={SHEET_ID}
-            refStr="A1"
+            subUnitId$={new BehaviorSubject<string | undefined>(SHEET_ID)}
             type={UniverInstanceType.UNIVER_SHEET}
+            onAdd={() => undefined}
             getSubUnitName={(subUnitId) => subUnitId}
-            location={ThreadCommentTreeLocation.PANEL}
-            onAddComment={(comment) => {
-                TestState.addedComments.push(comment);
-                return true;
-            }}
-            onResolve={(resolved) => {
-                TestState.resolveStates.push(resolved);
-            }}
         />
     );
-}
-
-function getTree(container: HTMLElement, commentId: string) {
-    const item = container.querySelector(`#PANEL-${UNIT_ID}-${SHEET_ID}-${commentId}`);
-    if (!item) {
-        throw new Error(`Tree item "${commentId}" was not found.`);
-    }
-
-    return item as HTMLElement;
-}
-
-function getButton(container: HTMLElement, text: string): HTMLButtonElement {
-    const button = Array.from(container.querySelectorAll('button')).find((item) => item.textContent?.trim() === text);
-    if (!button) {
-        throw new Error(`Button "${text}" was not found.`);
-    }
-
-    return button as HTMLButtonElement;
-}
-
-function getResolveAction(container: HTMLElement, commentId: string) {
-    const tree = getTree(container, commentId);
-    const header = tree.firstElementChild as HTMLElement | null;
-    const controls = header?.lastElementChild as HTMLElement | null;
-    const action = controls?.firstElementChild;
-    if (!action) {
-        throw new Error('Resolve action was not found.');
-    }
-
-    return action as HTMLElement;
-}
-
-function getRootCommentItem(container: HTMLElement, commentId: string) {
-    const scroller = getTree(container, commentId).children[1];
-    const item = scroller?.firstElementChild;
-    if (!item) {
-        throw new Error('Root comment item was not found.');
-    }
-
-    return item as HTMLElement;
-}
-
-function getReplyAction(container: HTMLElement, commentId: string) {
-    const item = getRootCommentItem(container, commentId);
-    const nameRow = item.children[1] as HTMLElement | undefined;
-    const controls = nameRow?.lastElementChild as HTMLElement | undefined;
-    const action = controls?.firstElementChild;
-    if (!action) {
-        throw new Error('Reply action was not found.');
-    }
-
-    return action as HTMLElement;
-}
-
-function getOnlyEditor(testBed: ReturnType<typeof createTreeTestBed>) {
-    const editors = Array.from(testBed.editorService.getAllEditor().values());
-    if (editors.length !== 1) {
-        throw new Error(`Expected one editor, received ${editors.length}.`);
-    }
-
-    return editors[0];
 }
 
 function addRootComment(model: ThreadCommentModel, comment: IThreadComment) {
     model.addComment(comment.unitId, comment.subUnitId, comment);
 }
 
-function waitForTreeRefresh() {
-    return new Promise((resolve) => setTimeout(resolve, 40));
+function getPanelItem(container: HTMLElement, commentId: string) {
+    const item = container.querySelector(`#PANEL-${UNIT_ID}-${SHEET_ID}-${commentId}`);
+    if (!item) {
+        throw new Error(`Panel item "${commentId}" was not found.`);
+    }
+
+    return item as HTMLElement;
 }
 
-function waitForFrame() {
-    return new Promise((resolve) => setTimeout(resolve, 16));
-}
-
-describe('ThreadCommentTree', () => {
+describe('ThreadCommentPanel', () => {
     let root: Root | undefined;
     let container: HTMLElement | undefined;
 
     beforeEach(() => {
         document.body.innerHTML = '';
-        TestState.reset();
     });
 
     afterEach(() => {
@@ -535,138 +447,66 @@ describe('ThreadCommentTree', () => {
         container = undefined;
     });
 
-    it('provides mirrored layout hooks for RTL comment rows', () => {
-        const testBed = createTreeTestBed();
-        addRootComment(testBed.threadCommentModel, createComment({ id: 'root-thread', ref: 'A1', dT: '2026/07/07 20:35' }));
+    it('keeps unresolved comments before resolved comments after applying caller sorting', () => {
+        const testBed = createPanelTestBed();
+        addRootComment(testBed.threadCommentModel, createComment({
+            id: 'open-thread',
+            ref: 'A1',
+            text: transformTextNodes2Document([{ type: 'text', content: 'Open comment' }]),
+        }));
+        addRootComment(testBed.threadCommentModel, createComment({
+            id: 'resolved-thread',
+            ref: 'B2',
+            resolved: true,
+            text: transformTextNodes2Document([{ type: 'text', content: 'Resolved comment' }]),
+        }));
 
-        const rendered = renderDefaultTree(testBed.injector, 'root-thread');
+        const rendered = renderPanel(
+            testBed.injector,
+            <ThreadCommentPanel
+                unitId={UNIT_ID}
+                subUnitId$={new BehaviorSubject<string | undefined>(SHEET_ID)}
+                type={UniverInstanceType.UNIVER_SHEET}
+                onAdd={() => undefined}
+                getSubUnitName={(subUnitId) => subUnitId}
+                sortComments={(comments) => comments.slice().reverse()}
+            />
+        );
         root = rendered.root;
         container = rendered.container;
 
-        const tree = getTree(container, 'root-thread');
-        const header = tree.firstElementChild as HTMLElement;
-        const titleAccent = header.firstElementChild?.firstElementChild as HTMLElement;
-        const resolveAction = getResolveAction(container, 'root-thread');
-        const item = getRootCommentItem(container, 'root-thread');
-        const avatar = item.firstElementChild as HTMLElement;
-        const time = item.querySelector('time');
+        const panelText = container.textContent ?? '';
 
-        expect(titleAccent.className).toContain('rtl:univer-ml-2');
-        expect(titleAccent.className).toContain('rtl:univer-mr-0');
-        expect(resolveAction.className).toContain('rtl:univer-ml-0');
-        expect(resolveAction.className).toContain('rtl:univer-mr-1');
-        expect(item.className).toContain('rtl:univer-pl-0');
-        expect(item.className).toContain('rtl:univer-pr-[30px]');
-        expect(avatar.className).toContain('rtl:univer-left-auto');
-        expect(avatar.className).toContain('rtl:univer-right-0');
-        expect(time?.getAttribute('dir')).toBe('ltr');
+        expect(panelText.indexOf('Open comment')).toBeGreaterThan(-1);
+        expect(panelText.indexOf('Resolved comment')).toBeGreaterThan(-1);
+        expect(panelText.indexOf('Open comment')).toBeLessThan(panelText.indexOf('thread-comment-ui.panel.solved'));
+        expect(panelText.indexOf('thread-comment-ui.panel.solved')).toBeLessThan(panelText.indexOf('Resolved comment'));
     });
 
-    it('formats comment timestamps with dateKit intl using the current region', () => {
-        const testBed = createTreeTestBed();
-        const rawDate = '2026/07/07 20:35';
-        testBed.injector.get(LocaleService).setLocale(LocaleType.ZH_CN);
-        testBed.injector.get(RegionService).setRegion(LocaleType.EN_US);
-        addRootComment(testBed.threadCommentModel, createComment({ id: 'root-thread', ref: 'A1', dT: rawDate }));
+    it('sets active comment from unresolved panel items and clears it for resolved items', () => {
+        const testBed = createPanelTestBed();
+        addRootComment(testBed.threadCommentModel, createComment({ id: 'open-thread', ref: 'A1' }));
+        addRootComment(testBed.threadCommentModel, createComment({ id: 'resolved-thread', ref: 'B2', resolved: true }));
 
-        const rendered = renderDefaultTree(testBed.injector, 'root-thread');
+        const rendered = renderDefaultPanel(testBed.injector);
         root = rendered.root;
         container = rendered.container;
-
-        const time = getRootCommentItem(container, 'root-thread').querySelector('time');
-        const expected = dateKit(rawDate).formatIntl(LOCALE_META[LocaleType.EN_US].tag, {
-            year: 'numeric',
-            month: 'numeric',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false,
-        });
-
-        expect(time?.textContent).toBe(expected);
-        expect(time?.textContent).not.toBe(rawDate);
-    });
-
-    it('does not render a timestamp for a new comment', () => {
-        const testBed = createTreeTestBed();
-
-        const rendered = renderDefaultTree(testBed.injector);
-        root = rendered.root;
-        container = rendered.container;
-
-        expect(container.querySelector('time')).toBeNull();
-    });
-
-    it('adds a reply through the tree editor and stores it under the root thread', async () => {
-        const testBed = createTreeTestBed();
-        addRootComment(testBed.threadCommentModel, createComment({ id: 'root-thread', ref: 'A1' }));
-
-        const rendered = renderDefaultTree(testBed.injector, 'root-thread');
-        root = rendered.root;
-        container = rendered.container;
-
-        await act(async () => {
-            getRootCommentItem(container!, 'root-thread').dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
-            await waitForFrame();
-        });
-
-        await act(async () => {
-            getReplyAction(container!, 'root-thread').dispatchEvent(new MouseEvent('click', { bubbles: true }));
-            await waitForFrame();
-        });
 
         act(() => {
-            getOnlyEditor(testBed).replaceText('Reply from tree');
+            getPanelItem(container!, 'open-thread').dispatchEvent(new MouseEvent('click', { bubbles: true }));
         });
 
-        await act(async () => {
-            getButton(container!, REPLY_LABEL).dispatchEvent(new MouseEvent('click', { bubbles: true }));
-            await waitForTreeRefresh();
-        });
-
-        const thread = testBed.threadCommentModel.getCommentWithChildren(UNIT_ID, SHEET_ID, 'root-thread');
-        expect(thread?.children).toHaveLength(1);
-        expect(thread?.children[0].parentId).toBe('root-thread');
-        expect(thread?.children[0].threadId).toBe('root-thread');
-        expect(thread?.children[0].personId).toBe('owner');
-        expect(thread?.children[0].text.dataStream).toBe('Reply from tree\r\n');
-        expect(TestState.addedComments).toHaveLength(1);
-        expect(TestState.addedComments[0].parentId).toBe('root-thread');
-    });
-
-    it('toggles the resolved state and updates the active comment target', async () => {
-        const testBed = createTreeTestBed();
-        addRootComment(testBed.threadCommentModel, createComment({ id: 'root-thread', ref: 'A1' }));
-        testBed.panelService.setActiveComment({
-            unitId: UNIT_ID,
-            subUnitId: SHEET_ID,
-            commentId: 'root-thread',
-        });
-
-        const rendered = renderDefaultTree(testBed.injector, 'root-thread');
-        root = rendered.root;
-        container = rendered.container;
-
-        await act(async () => {
-            getResolveAction(container!, 'root-thread').dispatchEvent(new MouseEvent('click', { bubbles: true }));
-            await waitForTreeRefresh();
-        });
-
-        expect(testBed.threadCommentModel.getComment(UNIT_ID, SHEET_ID, 'root-thread')?.resolved).toBe(true);
-        expect(testBed.panelService.activeCommentId).toBeUndefined();
-        expect(TestState.resolveStates).toEqual([true]);
-
-        await act(async () => {
-            getResolveAction(container!, 'root-thread').dispatchEvent(new MouseEvent('click', { bubbles: true }));
-            await waitForTreeRefresh();
-        });
-
-        expect(testBed.threadCommentModel.getComment(UNIT_ID, SHEET_ID, 'root-thread')?.resolved).toBe(false);
         expect(testBed.panelService.activeCommentId).toEqual({
             unitId: UNIT_ID,
             subUnitId: SHEET_ID,
-            commentId: 'root-thread',
+            commentId: 'open-thread',
+            temp: false,
         });
-        expect(TestState.resolveStates).toEqual([true, false]);
+
+        act(() => {
+            getPanelItem(container!, 'resolved-thread').dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        });
+
+        expect(testBed.panelService.activeCommentId).toBeUndefined();
     });
 });

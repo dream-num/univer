@@ -20,10 +20,10 @@ import { cleanup, fireEvent, render } from '@testing-library/react';
 import { ILocalStorageService, Injector, LocaleService, LocaleType } from '@univerjs/core';
 import { scrollbarClassName } from '@univerjs/design';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import enUS from '../../locale/en-US';
-import { connectInjector } from '../../utils/di';
-import { EmojiPicker } from '../emoji-picker/EmojiPicker';
-import { SymbolPicker } from '../symbol-picker/SymbolPicker';
+import enUS from '../../../locale/en-US';
+import { connectInjector } from '../../../utils/di';
+import { SymbolPicker } from '../../symbol-picker/SymbolPicker';
+import { EmojiPicker } from '../EmojiPicker';
 
 class TestLocalStorageService implements ILocalStorageServiceType {
     async getItem<T>(): Promise<T | null> {

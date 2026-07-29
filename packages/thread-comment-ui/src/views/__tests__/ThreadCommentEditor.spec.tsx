@@ -51,9 +51,9 @@ import { act, createRef } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { SetActiveCommentOperation } from '../../../commands/operations/comment.operations';
-import { ThreadCommentPanelService } from '../../../services/thread-comment-panel.service';
-import { ThreadCommentEditor } from '../../ThreadCommentEditor';
+import { SetActiveCommentOperation } from '../../commands/operations/comment.operations';
+import { ThreadCommentPanelService } from '../../services/thread-comment-panel.service';
+import { ThreadCommentEditor } from '../ThreadCommentEditor';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 

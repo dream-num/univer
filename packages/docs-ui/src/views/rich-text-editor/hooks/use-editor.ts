@@ -17,7 +17,7 @@
 import type { IDocumentData, Nullable } from '@univerjs/core';
 import type { RefObject } from 'react';
 import type { Editor, IEditorCanvasStyle } from '../../../services/editor/editor';
-import { createParagraphId, Tools } from '@univerjs/core';
+import { createParagraphId, RichTextBuilder, Tools } from '@univerjs/core';
 import { useDependency } from '@univerjs/ui';
 import { useLayoutEffect, useMemo, useState } from 'react';
 import { IEditorService } from '../../../services/editor/editor-manager.service';
@@ -39,7 +39,9 @@ export function useEditor(opts: IUseEditorProps) {
 
     useLayoutEffect(() => {
         if (container.current) {
-            const initialDoc = typeof initialValue === 'string' ? undefined : Tools.deepClone(initialValue);
+            const initialDoc = typeof initialValue === 'string'
+                ? RichTextBuilder.create().insertText(initialValue).getData()
+                : Tools.deepClone(initialValue);
             const snapshot: IDocumentData = {
                 body: {
                     dataStream: typeof initialValue === 'string' ? `${initialValue}\r\n` : '\r\n',

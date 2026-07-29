@@ -375,10 +375,9 @@ export function RangeSelector(props: IRangeSelectorProps) {
                 maxRangeCount={maxRangeCount}
                 onConfirm={(ranges) => {
                     const resultStr = stringifyRanges(ranges);
-                    const empty = RichTextBuilder.newEmptyData();
-                    empty.body!.dataStream = resultStr;
+                    const documentData = RichTextBuilder.create().insertText(resultStr).getData();
                     editor?.replaceText(resultStr, false);
-                    onChange?.(empty, resultStr);
+                    onChange?.(documentData, resultStr);
                     setPopupVisible(false);
                     setRangeSelectorRanges([]);
                     requestAnimationFrame(() => {

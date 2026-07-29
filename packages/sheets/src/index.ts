@@ -386,6 +386,8 @@ export { SetFrozenMutation, SetFrozenMutationFactory } from './commands/mutation
 export type { ISetFrozenMutationParams } from './commands/mutations/set-frozen.mutation';
 export { SetGridlinesColorMutation } from './commands/mutations/set-gridlines-color.mutation';
 export type { ISetGridlinesColorMutationParams } from './commands/mutations/set-gridlines-color.mutation';
+export { SetNumfmtLocaleMutation } from './commands/mutations/set-numfmt-locale.mutation';
+export type { ISetNumfmtLocaleMutationParams } from './commands/mutations/set-numfmt-locale.mutation';
 export {
     FactorySetRangeProtectionMutation,
     SetRangeProtectionMutation,

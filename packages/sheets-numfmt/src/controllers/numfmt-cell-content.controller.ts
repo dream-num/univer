@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICellDataForSheetInterceptor, INumfmtLocaleTag, Workbook } from '@univerjs/core';
+import type { ICellData, ICellDataForSheetInterceptor, INumfmtLocaleTag, Nullable, Workbook } from '@univerjs/core';
 import type { ISetNumfmtMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import type { IUniverSheetsNumfmtConfig } from '../config/config';
 import {
@@ -39,13 +39,14 @@ import {
     InterceptCellContentPriority,
     INTERCEPTOR_POINT,
     INumfmtService,
+    SetNumfmtLocaleMutation,
     SetNumfmtMutation,
     SetRangeValuesMutation,
     SheetInterceptorService,
 } from '@univerjs/sheets';
 import { BehaviorSubject, merge, of, skip, switchMap } from 'rxjs';
 import { SHEETS_NUMFMT_PLUGIN_CONFIG_KEY } from '../config/config';
-import { getPatternPreviewIgnoreGeneral } from '../utils/pattern';
+import { DEFAULT_NUMFMT_LOCALE, getPatternPreviewIgnoreGeneral } from '../utils/pattern';
 
 const TEXT_FORMAT_MARK = {
     tl: {
@@ -54,7 +55,7 @@ const TEXT_FORMAT_MARK = {
     },
 };
 export class SheetsNumfmtCellContentController extends Disposable {
-    private _locale$ = new BehaviorSubject<INumfmtLocaleTag>('en');
+    private _locale$ = new BehaviorSubject<INumfmtLocaleTag>(DEFAULT_NUMFMT_LOCALE);
     public locale$ = this._locale$.asObservable();
     constructor(
         @IUniverInstanceService private readonly _instanceService: IUniverInstanceService,
@@ -70,9 +71,9 @@ export class SheetsNumfmtCellContentController extends Disposable {
     }
 
     public get locale(): INumfmtLocaleTag {
-        const _locale = this._locale$.getValue();
-        if (_locale) {
-            return _locale;
+        const locale = this._locale$.getValue();
+        if (locale) {
+            return locale;
         }
         const currentLocale = this._localeService.getCurrentLocale();
 
@@ -116,6 +117,13 @@ export class SheetsNumfmtCellContentController extends Disposable {
                 return 'en';
             }
         }
+    }
+
+    private _getWorkbookLocale(workbook?: Nullable<Workbook>): INumfmtLocaleTag {
+        const locale = workbook?.getNumfmtLocale();
+        if (locale) return locale;
+
+        return DEFAULT_NUMFMT_LOCALE;
     }
 
     // eslint-disable-next-line max-lines-per-function
@@ -186,12 +194,14 @@ export class SheetsNumfmtCellContentController extends Disposable {
                 }
 
                 let numfmtRes: string = '';
+                const numfmtLocale = this._getWorkbookLocale(location.workbook);
+                const cacheParameters = `${unitId}_${sheetId}_${numfmtLocale}_${originCellValue.v}_${numfmtValue?.pattern}`;
                 const cache = renderCache.getValue(location.row, location.col);
-                if (cache && cache.parameters === `${originCellValue.v}_${numfmtValue?.pattern}`) {
+                if (cache && cache.parameters === cacheParameters) {
                     return next({ ...cell, ...cache.result });
                 }
 
-                const info = getPatternPreviewIgnoreGeneral(numfmtValue?.pattern as string, Number(originCellValue.v), this.locale);
+                const info = getPatternPreviewIgnoreGeneral(numfmtValue?.pattern as string, Number(originCellValue.v), numfmtLocale);
                 numfmtRes = info.result;
                 if (!numfmtRes) {
                     return next(cell);
@@ -208,7 +218,7 @@ export class SheetsNumfmtCellContentController extends Disposable {
 
                 renderCache.setValue(location.row, location.col, {
                     result: res,
-                    parameters: `${originCellValue.v}_${numfmtValue?.pattern}`,
+                    parameters: cacheParameters,
                 });
                 Object.assign(cell, res);
                 return next(cell);
@@ -217,7 +227,11 @@ export class SheetsNumfmtCellContentController extends Disposable {
         }));
 
         this.disposeWithMe(this._commandService.onCommandExecuted((commandInfo) => {
-            if (commandInfo.id === SetNumfmtMutation.id) {
+            if (commandInfo.id === SetNumfmtLocaleMutation.id) {
+                const currentWorkbook = this._instanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+                this._locale$.next(this._getWorkbookLocale(currentWorkbook));
+                renderCache.reset();
+            } else if (commandInfo.id === SetNumfmtMutation.id) {
                 const params = commandInfo.params as ISetNumfmtMutationParams;
                 Object.keys(params.values).forEach((key) => {
                     const v = params.values[key];
@@ -243,9 +257,10 @@ export class SheetsNumfmtCellContentController extends Disposable {
                 )
                 .subscribe(() => renderCache.reset())
         );
-    }
 
-    setNumfmtLocal(locale: INumfmtLocaleTag) {
-        this._locale$.next(locale);
+        this.disposeWithMe(
+            this._instanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET)
+                .subscribe((workbook) => this._locale$.next(this._getWorkbookLocale(workbook)))
+        );
     }
 }

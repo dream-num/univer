@@ -25,7 +25,9 @@ interface IPatternPreview {
     color?: string;
 }
 
-export const getPatternPreview = (pattern: string, value: number, locale: INumfmtLocaleTag = 'en'): IPatternPreview => {
+export const DEFAULT_NUMFMT_LOCALE: INumfmtLocaleTag = 'en';
+
+export const getPatternPreview = (pattern: string, value: number, locale: INumfmtLocaleTag = DEFAULT_NUMFMT_LOCALE): IPatternPreview => {
     // in the source code of numfmt, the formatColor function will read the the partitions[3]
     try {
         const formatColor = numfmt.formatColor(pattern, value);

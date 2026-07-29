@@ -69,11 +69,17 @@ describe('Test workbook', () => {
             expect(workbook.name).toBe('');
 
             workbook.setName('Renamed');
+            workbook.setNumfmtLocale('de');
             workbook.setRev(5);
             workbook.incrementRev();
             workbook.setCustomMetadata({ owner: 'tester' } as never);
 
             expect(workbook.getSnapshot().name).toBe('Renamed');
+            expect(workbook.getNumfmtLocale()).toBe('de');
+            expect(workbook.save().numfmtLocale).toBe('de');
+            workbook.setNumfmtLocale(null);
+            expect(workbook.getNumfmtLocale()).toBeUndefined();
+            expect(workbook.save()).not.toHaveProperty('numfmtLocale');
             expect(workbook.getRev()).toBe(6);
             expect(workbook.getCustomMetadata()).toEqual({ owner: 'tester' });
             expect(workbook.getConfig()).toBe(workbook.getSnapshot());

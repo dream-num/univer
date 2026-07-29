@@ -15,7 +15,7 @@
  */
 
 import type { INumfmtLocaleTag } from '@univerjs/core';
-import { SheetsNumfmtCellContentController } from '@univerjs/sheets-numfmt';
+import { SetNumfmtLocaleCommand } from '@univerjs/sheets-numfmt';
 import { FWorkbook } from '@univerjs/sheets/facade';
 
 export interface IFWorkbookSheetsNumfmtMixin {
@@ -45,8 +45,10 @@ export interface IFWorkbookSheetsNumfmtMixin {
 }
 export class FWorkbookSheetsNumfmtMixin extends FWorkbook implements IFWorkbookSheetsNumfmtMixin {
     override setNumfmtLocal(locale: INumfmtLocaleTag): FWorkbook {
-        const sheetsNumfmtCellContentController = this._injector.get(SheetsNumfmtCellContentController);
-        sheetsNumfmtCellContentController.setNumfmtLocal(locale);
+        this._commandService.syncExecuteCommand(SetNumfmtLocaleCommand.id, {
+            unitId: this.id,
+            locale,
+        });
         return this;
     }
 }

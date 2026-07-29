@@ -23,6 +23,8 @@ export {
 export { CURRENCYFORMAT, DATEFMTLISG, NUMBERFORMAT } from './base/const/formatdetail';
 export { AddDecimalCommand } from './commands/commands/add-decimal.command';
 export { SetCurrencyCommand } from './commands/commands/set-currency.command';
+export { SetNumfmtLocaleCommand } from './commands/commands/set-numfmt-locale.command';
+export type { ISetNumfmtLocaleCommandParams } from './commands/commands/set-numfmt-locale.command';
 export { SetNumfmtCommand } from './commands/commands/set-numfmt.command';
 export type { ISetNumfmtCommandParams } from './commands/commands/set-numfmt.command';
 export { SetPercentCommand } from './commands/commands/set-percent.command';

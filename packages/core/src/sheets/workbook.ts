@@ -15,7 +15,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import type { Nullable } from '../shared';
+import type { INumfmtLocaleTag, Nullable } from '../shared';
 import type { IStyleData } from '../types/interfaces';
 import type { CustomData, IRangeType, IWorkbookData, IWorksheetData } from './typedef';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -147,6 +147,19 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
     setName(name: string): void {
         this._name$.next(name);
         this._snapshot.name = name;
+    }
+
+    getNumfmtLocale(): INumfmtLocaleTag | undefined {
+        return this._snapshot.numfmtLocale;
+    }
+
+    setNumfmtLocale(locale: INumfmtLocaleTag | null): void {
+        if (locale === null) {
+            delete this._snapshot.numfmtLocale;
+            return;
+        }
+
+        this._snapshot.numfmtLocale = locale;
     }
 
     getUnitId() {

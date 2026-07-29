@@ -15,7 +15,7 @@
  */
 
 import type { IResources } from '../services/resource-manager/type';
-import type { IObjectArrayPrimitiveType, IObjectMatrixPrimitiveType, Nullable } from '../shared';
+import type { INumfmtLocaleTag, IObjectArrayPrimitiveType, IObjectMatrixPrimitiveType, Nullable } from '../shared';
 import type { BooleanNumber } from '../types/enum';
 import type { LocaleType } from '../types/enum/locale-type';
 import type { IDocumentData } from '../types/interfaces';
@@ -52,6 +52,11 @@ export interface IWorkbookData {
      * Locale of the document.
      */
     locale: LocaleType;
+
+    /**
+     * Locale used to render locale-sensitive number formats.
+     */
+    numfmtLocale?: INumfmtLocaleTag;
 
     /**
      * Style references.

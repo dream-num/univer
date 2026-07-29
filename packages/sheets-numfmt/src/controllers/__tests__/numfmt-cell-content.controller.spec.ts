@@ -35,11 +35,13 @@ import {
     INTERCEPTOR_POINT,
     INumfmtService,
     NumfmtService,
+    SetNumfmtLocaleMutation,
     SetNumfmtMutation,
     SetRangeValuesMutation,
     SheetInterceptorService,
 } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { SetNumfmtLocaleCommand } from '../../commands/commands/set-numfmt-locale.command';
 import { SHEETS_NUMFMT_PLUGIN_CONFIG_KEY } from '../../config/config';
 import * as patternUtils from '../../utils/pattern';
 import { SheetsNumfmtCellContentController } from '../numfmt-cell-content.controller';
@@ -170,6 +172,8 @@ describe('SheetsNumfmtCellContentController', () => {
 
         commandService.registerCommand(SetNumfmtMutation);
         commandService.registerCommand(SetRangeValuesMutation);
+        commandService.registerCommand(SetNumfmtLocaleMutation);
+        commandService.registerCommand(SetNumfmtLocaleCommand);
     });
 
     afterEach(() => {
@@ -294,11 +298,31 @@ describe('SheetsNumfmtCellContentController', () => {
         previewCallCount += 1;
         expect(previewSpy).toHaveBeenCalledTimes(previewCallCount);
 
-        controller.setNumfmtLocal('fr');
+        commandService.syncExecuteCommand(SetNumfmtLocaleCommand.id, {
+            unitId: workbook.getUnitId(),
+            locale: 'fr',
+        });
         expect(controller.locale).toBe('fr');
+        expect(workbook.save().numfmtLocale).toBe('fr');
 
         getInterceptedCell(sheet1, workbook, 1, 1, get);
         previewCallCount += 1;
         expect(previewSpy).toHaveBeenCalledTimes(previewCallCount);
+    });
+
+    it('uses the locale stored on each workbook independently', () => {
+        const defaultWorksheet = workbook.getSheetBySheetId('sheet1')!;
+        numfmtService.setValues('test', 'sheet1', [{ pattern: '#,##0.00', ranges: [cellToRange(1, 1)] }]);
+
+        const germanData = createWorkbookData();
+        germanData.id = 'german';
+        germanData.numfmtLocale = 'de';
+        const germanWorkbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, germanData);
+        const germanWorksheet = germanWorkbook.getSheetBySheetId('sheet1')!;
+        numfmtService.setValues('german', 'sheet1', [{ pattern: '#,##0.00', ranges: [cellToRange(1, 1)] }]);
+
+        expect(getInterceptedCell(defaultWorksheet, workbook, 1, 1, get)).toMatchObject({ v: '1,234.50' });
+        expect(getInterceptedCell(germanWorksheet, germanWorkbook, 1, 1, get)).toMatchObject({ v: '1.234,50' });
+        expect(getInterceptedCell(defaultWorksheet, workbook, 1, 1, get)).toMatchObject({ v: '1,234.50' });
     });
 });

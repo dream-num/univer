@@ -15,10 +15,10 @@
  */
 
 import type { FUniver } from '@univerjs/core/facade';
-import { ICommandService } from '@univerjs/core';
-import { RemoveNumfmtMutation, SetNumfmtMutation, SetRangeValuesMutation } from '@univerjs/sheets';
+import { ICommandService, RedoCommand, UndoCommand } from '@univerjs/core';
+import { RemoveNumfmtMutation, SetNumfmtLocaleMutation, SetNumfmtMutation, SetRangeValuesMutation } from '@univerjs/sheets';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { SetNumfmtCommand, SheetsNumfmtCellContentController } from '../../index';
+import { SetNumfmtCommand, SetNumfmtLocaleCommand, SheetsNumfmtCellContentController } from '../../index';
 import { createFacadeTestBed } from './create-test-bed';
 import '../index';
 
@@ -34,6 +34,8 @@ describe('Test FRange', () => {
             SetNumfmtMutation,
             RemoveNumfmtMutation,
             SetNumfmtCommand,
+            SetNumfmtLocaleMutation,
+            SetNumfmtLocaleCommand,
         ].forEach((command) => commandService.registerCommand(command));
         univerAPI = testBed.univerAPI;
     });
@@ -57,8 +59,47 @@ describe('Test FRange', () => {
         ]);
     });
 
-    it('sets workbook number format locale through the facade API', () => {
+    it('sets workbook number format locale through the facade API and supports undo/redo', async () => {
         const workbook = univerAPI.getActiveWorkbook()!;
         expect(workbook.setNumfmtLocal('fr')).toBe(workbook);
+        expect(testBed.sheet.getSnapshot().numfmtLocale).toBe('fr');
+
+        await expect(testBed.injector.get(ICommandService).executeCommand(UndoCommand.id)).resolves.toBe(true);
+        expect(testBed.sheet.getSnapshot().numfmtLocale).toBeUndefined();
+
+        await expect(testBed.injector.get(ICommandService).executeCommand(RedoCommand.id)).resolves.toBe(true);
+        expect(testBed.sheet.getSnapshot().numfmtLocale).toBe('fr');
+    });
+
+    it('restores the number-format locale from a reopened workbook snapshot', () => {
+        const workbook = univerAPI.getActiveWorkbook()!;
+        workbook.setNumfmtLocal('de');
+
+        const snapshot = structuredClone(testBed.sheet.getSnapshot());
+        snapshot.sheetOrder = ['sheet1'];
+        snapshot.styles.german = { n: { pattern: '#,##0.00' } };
+        snapshot.sheets.sheet1.cellData = {
+            0: {
+                0: {
+                    v: 1234.5,
+                    t: 2,
+                    s: 'german',
+                },
+            },
+        };
+
+        const reopened = createFacadeTestBed(snapshot, [[SheetsNumfmtCellContentController]]);
+        try {
+            reopened.injector.get(SheetsNumfmtCellContentController);
+            expect(
+                reopened.univerAPI
+                    .getActiveWorkbook()!
+                    .getSheetBySheetId('sheet1')!
+                    .getRange('A1')
+                    .getDisplayValue()
+            ).toBe('1.234,50');
+        } finally {
+            reopened.univer.dispose();
+        }
     });
 });

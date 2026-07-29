@@ -21,6 +21,7 @@ import pkg from '../package.json';
 import { SHEET_NUMFMT_PLUGIN } from './base/const/plugin-name';
 import { AddDecimalCommand } from './commands/commands/add-decimal.command';
 import { SetCurrencyCommand } from './commands/commands/set-currency.command';
+import { SetNumfmtLocaleCommand } from './commands/commands/set-numfmt-locale.command';
 import { SetNumfmtCommand } from './commands/commands/set-numfmt.command';
 import { SetPercentCommand } from './commands/commands/set-percent.command';
 import { SubtractDecimalCommand } from './commands/commands/subtract-decimal.command';
@@ -67,6 +68,7 @@ export class UniverSheetsNumfmtPlugin extends Plugin {
             SetCurrencyCommand,
             SetPercentCommand,
             SetNumfmtCommand,
+            SetNumfmtLocaleCommand,
         ].forEach((config) => {
             this.disposeWithMe(this._commandService.registerCommand(config));
         });

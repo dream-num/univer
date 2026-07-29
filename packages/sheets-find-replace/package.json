@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-find-replace",
-    "version": "1.0.0-alpha.7",
+    "version": "1.0.0-alpha.8",
     "private": false,
     "description": "Find and replace integration for Univer Sheets.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

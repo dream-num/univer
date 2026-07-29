@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-ui",
-    "version": "1.0.0-alpha.7",
+    "version": "1.0.0-alpha.8",
     "private": false,
     "description": "Spreadsheet UI layer for Univer Sheets.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

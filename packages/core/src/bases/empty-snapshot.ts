@@ -34,7 +34,7 @@ export function createDefaultBaseTableSnapshot(options: ICreateDefaultBaseTableS
     const now = options.now ?? Date.now();
     const primaryFieldId = options.primaryFieldId ?? generateRandomId(6);
     const gridViewId = options.gridViewId ?? generateRandomId(6);
-    const recordCount = options.recordCount ?? 5;
+    const recordCount = options.recordCount ?? 0;
     const primaryField: IFieldSnapshot = {
         id: primaryFieldId,
         name: options.primaryFieldName ?? 'Name',
@@ -114,7 +114,7 @@ export function getEmptySnapshot(
                 id: tableId,
                 name: 'Table 1',
                 now,
-                recordCount: 5,
+                recordCount: 0,
             }),
         },
         createdAt: now,

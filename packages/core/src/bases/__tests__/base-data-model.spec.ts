@@ -20,6 +20,19 @@ import { BaseDataModel } from '../base-data-model';
 import { BaseFieldType } from '../typedef';
 
 describe('BaseDataModel', () => {
+    it('creates an empty default table without persistent records', () => {
+        const model = new BaseDataModel({ id: 'base-1', name: 'Base' });
+        const snapshot = model.getSnapshot();
+        const table = snapshot.tables['table-1'];
+
+        expect(snapshot.tableOrder).toEqual(['table-1']);
+        expect(table.recordOrder).toEqual([]);
+        expect(table.records).toEqual({});
+        expect(table.rowId).toEqual({});
+        expect(table.rowIndex).toEqual({});
+        expect(table.cellData).toEqual({});
+    });
+
     it('keeps complete recordOrder without sorting all records', () => {
         const throwingOrderKey = {
             localeCompare: () => {

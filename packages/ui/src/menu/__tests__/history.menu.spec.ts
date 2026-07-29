@@ -24,7 +24,7 @@ import {
 } from '@univerjs/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { describe, expect, it } from 'vitest';
-import { RedoMenuItemFactory, UndoMenuItemFactory } from '../../../menu/history.menu';
+import { RedoMenuItemFactory, UndoMenuItemFactory } from '../history.menu';
 
 function createAccessor() {
     const undoRedoStatus$ = new BehaviorSubject({ undos: 1, redos: 1 });

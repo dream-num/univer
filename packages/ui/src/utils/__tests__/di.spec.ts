@@ -15,9 +15,10 @@
  */
 
 import { act, renderHook } from '@testing-library/react';
-import { Observable, Subject } from 'rxjs';
+import { useState } from 'react';
+import { Observable, of, Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
-import { useObservableRef } from '../di';
+import { useObservable, useObservableRef } from '../di';
 
 describe('useObservableRef', () => {
     it('should keep default value when observable is undefined', () => {
@@ -54,5 +55,60 @@ describe('useObservableRef', () => {
 
         unmount();
         expect(unsubscribe).toHaveBeenCalledTimes(1);
+    });
+});
+
+describe('useObservable', () => {
+    it('should return undefined when no initial value is provided', () => {
+        const observable: Observable<boolean> | undefined = undefined;
+
+        const { result } = renderHook(() => useObservable<boolean>(observable));
+        expect(result.current).toBeUndefined();
+    });
+
+    it('should return the initial value when provided', () => {
+        const observable: Observable<boolean> | undefined = undefined;
+
+        const { result } = renderHook(() => useObservable<boolean>(observable, true));
+        expect(result.current).toBeTruthy();
+    });
+
+    it('should return the initial value when provided synchronously', () => {
+        const observable: Observable<boolean> = of(true);
+
+        const { result } = renderHook(() => useObservable<boolean>(observable));
+        expect(result.current).toBeTruthy();
+    });
+
+    it('should emit new values when the observable emits', () => {
+        const subject = new Subject<boolean>();
+        const { result } = renderHook(() => useObservable(subject));
+
+        expect(result.current).toBeUndefined();
+        act(() => subject.next(true));
+        expect(result.current).toBeTruthy();
+        act(() => subject.next(false));
+        expect(result.current).toBeFalsy();
+    });
+
+    it('should emit when passing a new observable', () => {
+        const { result } = renderHook(() => {
+            const [observable, setObservable] = useState<Observable<boolean> | undefined>(undefined);
+            const value = useObservable(observable);
+
+            return { value, setObservable };
+        });
+
+        expect(result.current.value).toBeUndefined();
+        act(() => result.current.setObservable(of(true)));
+        expect(result.current.value).toBeTruthy();
+        act(() => result.current.setObservable(of(false)));
+        expect(result.current.value).toBeFalsy();
+    });
+
+    it('should support a callback function returning an observable', () => {
+        const { result } = renderHook(() => useObservable(() => new Observable((subscriber) => subscriber.next(true)), undefined, true, []));
+
+        expect(result.current).toBeTruthy();
     });
 });

@@ -159,8 +159,11 @@ export const FloatDom = ({ unitId }: { unitId?: string }) => {
     const layers = useObservable(domLayerService.domLayers$);
     const focusUnit = useObservable(instanceService.focused$);
     const currentUnitId = resolveFloatDomCurrentUnitId(unitId, focusUnit);
+    const visibleLayers = typeof unitId === 'string'
+        ? layers?.filter((layer) => layer[1].unitId === unitId)
+        : layers?.filter((layer) => shouldRenderFloatDomLayer(layer[1], currentUnitId));
 
-    return layers?.filter((layer) => shouldRenderFloatDomLayer(layer[1], currentUnitId))?.map((layer) => (
+    return visibleLayers?.map((layer) => (
         <FloatDomSingle
             id={layer[1].domId ?? layer[0]}
             layer={layer[1]}

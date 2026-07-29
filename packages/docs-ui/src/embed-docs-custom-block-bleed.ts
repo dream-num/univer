@@ -25,6 +25,7 @@ export interface IDocsCustomBlockBleedViewport {
 }
 
 export interface IDocsCustomBlockBleedViewportHint {
+    authoritativeContentWidth?: boolean;
     bleedLeft?: number;
     bleedWidth?: number;
 }
@@ -50,7 +51,18 @@ export function resolveDocsTableLikeCustomBlockBleedViewport(root: HTMLElement, 
     const normalizedContentWidth = Math.max(1, contentWidth);
     const hintedBleedLeft = hint?.bleedLeft;
     const hintedBleedWidth = hint?.bleedWidth;
-    if (Number.isFinite(hintedBleedWidth) && (hintedBleedWidth ?? 0) > 0) {
+    const hasBleedHint = Number.isFinite(hintedBleedWidth) && (hintedBleedWidth ?? 0) > 0;
+    if (normalizedContentWidth <= rootWidth && (hint?.authoritativeContentWidth || !hasBleedHint)) {
+        return {
+            bleedLeft: 0,
+            bleedRight: 0,
+            bleedWidth: rootWidth,
+            contentWidth: normalizedContentWidth,
+            virtualWidth: rootWidth,
+        };
+    }
+
+    if (hasBleedHint) {
         const bleedLeft = Math.max(0, hintedBleedLeft ?? 0);
         const bleedWidth = Math.max(1, hintedBleedWidth!);
         return {
@@ -59,16 +71,6 @@ export function resolveDocsTableLikeCustomBlockBleedViewport(root: HTMLElement, 
             bleedWidth,
             contentWidth: normalizedContentWidth,
             virtualWidth: Math.max(bleedWidth, bleedLeft + normalizedContentWidth),
-        };
-    }
-
-    if (normalizedContentWidth <= rootWidth) {
-        return {
-            bleedLeft: 0,
-            bleedRight: 0,
-            bleedWidth: rootWidth,
-            contentWidth: normalizedContentWidth,
-            virtualWidth: rootWidth,
         };
     }
 

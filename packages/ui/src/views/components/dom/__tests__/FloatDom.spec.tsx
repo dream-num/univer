@@ -227,6 +227,18 @@ describe('FloatDom', () => {
         expect(document.getElementById('float-1')).not.toBeNull();
     });
 
+    it('does not render preserved layers from another unit in an explicitly scoped root', () => {
+        const rendered = renderWithDependencies(<FloatDom unitId="sheet-1" />);
+
+        act(() => rendered.injector.get(CanvasFloatDomService).addFloatDom({
+            ...createFloatDom(),
+            preserveOnFocusChange: true,
+        }));
+
+        expect(screen.queryByText('float content')).toBeNull();
+        expect(document.getElementById('float-1')).toBeNull();
+    });
+
     it('updates content box insets at runtime through CanvasFloatDomService', async () => {
         const rendered = renderWithDependencies(<FloatDom unitId="doc-1" />);
         const service = rendered.injector.get(CanvasFloatDomService);

@@ -25,6 +25,8 @@ export { RemoveSheetDrawingCommand } from './commands/commands/remove-sheet-draw
 export type { IRemoveSheetDrawingCommandParam, IRemoveSheetDrawingCommandParams } from './commands/commands/remove-sheet-drawing.command';
 export { SetDrawingArrangeCommand } from './commands/commands/set-drawing-arrange.command';
 export type { ISetDrawingArrangeCommandParams } from './commands/commands/set-drawing-arrange.command';
+export { SetSheetDrawingPlacementCommand } from './commands/commands/set-sheet-drawing-placement.command';
+export type { ISetSheetDrawingPlacementCommandParams } from './commands/commands/set-sheet-drawing-placement.command';
 export { SetSheetDrawingCommand } from './commands/commands/set-sheet-drawing.command';
 export type { ISetDrawingCommandParams } from './commands/commands/set-sheet-drawing.command';
 export { DrawingApplyType, SetDrawingApplyMutation } from './commands/mutations/set-drawing-apply.mutation';
@@ -34,6 +36,19 @@ export { isKnownSheetNonRotatableDrawingType, resolveSheetDrawingRotateEnabled }
 export type { IUniverSheetsDrawingConfig } from './config/config';
 export { SHEET_DRAWING_PLUGIN } from './controllers/sheet-drawing.controller';
 export { UniverSheetsDrawingPlugin } from './plugin';
+export {
+    applySheetDrawingPlacement,
+    getSheetDrawingPlacement,
+    normalizeSheetDrawingPlacement,
+} from './services/sheet-drawing-placement';
+export type {
+    ISheetDrawingAbsolutePlacement,
+    ISheetDrawingOneCellPlacement,
+    ISheetDrawingPlacement,
+    ISheetDrawingPlacementByBounds,
+    ISheetDrawingPlacementInput,
+    ISheetDrawingTwoCellPlacement,
+} from './services/sheet-drawing-placement';
 export { SheetDrawingTransformPlanService } from './services/sheet-drawing-transform-plan.service';
 export type {
     ISheetDrawingTransformExtension,

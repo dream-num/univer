@@ -14,16 +14,34 @@
  * limitations under the License.
  */
 
-import type { IDrawingParam } from '@univerjs/core';
+import type { IDrawingParam, IGroupBaseBound, Injector } from '@univerjs/core';
 import type { IFBlobSource } from '@univerjs/core/facade';
 import type { IDrawingGroupUpdateParam, IDrawingJsonUndo1 } from '@univerjs/drawing';
-import type { ISheetDrawing, ISheetImage } from '@univerjs/sheets-drawing';
+import type { ISheetDrawing, ISheetDrawingPlacement, ISheetDrawingPlacementInput, ISheetImage } from '@univerjs/sheets-drawing';
 import { DrawingTypeEnum, generateRandomId, ImageSourceType, IUndoRedoService } from '@univerjs/core';
 import { isGroupableDrawingType } from '@univerjs/drawing';
 import { getGroupState, transformObjectOutOfGroup } from '@univerjs/engine-render';
-import { DrawingApplyType, InsertSheetDrawingCommand, ISheetDrawingService, RemoveSheetDrawingCommand, SetDrawingApplyMutation, SetSheetDrawingCommand } from '@univerjs/sheets-drawing';
+import { SheetSkeletonService } from '@univerjs/sheets';
+import { DrawingApplyType, getSheetDrawingPlacement, InsertSheetDrawingCommand, ISheetDrawingService, normalizeSheetDrawingPlacement, RemoveSheetDrawingCommand, SetDrawingApplyMutation, SetSheetDrawingCommand, SetSheetDrawingPlacementCommand, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
 import { FWorksheet } from '@univerjs/sheets/facade';
 import { FOverGridImage, FOverGridImageBuilder } from './f-over-grid-image';
+
+export interface ISheetDrawingLayoutObject {
+    drawingId: string;
+    drawingType: DrawingTypeEnum;
+    bounds: IGroupBaseBound;
+    placement: ISheetDrawingPlacement;
+    groupId?: string;
+}
+
+export interface ISheetDrawingLayout {
+    /** Entire Sheet grid in model coordinates. */
+    gridBounds: IGroupBaseBound;
+    /** Cell content range in model coordinates. */
+    dataBounds: IGroupBaseBound;
+    /** Drawings ordered from back to front. */
+    drawings: ISheetDrawingLayoutObject[];
+}
 
 /**
  * @ignore
@@ -184,6 +202,113 @@ export interface IFWorksheetDrawingMixin {
      * ```
      */
     updateImages(sheetImages: ISheetImage[]): FWorksheet;
+
+    /**
+     * Get the placement of any drawing on this sheet.
+     *
+     * Image, Shape, Chart, and Group use the same placement contract.
+     * @param {string} drawingId Drawing id.
+     * @returns {ISheetDrawingPlacement | null} The placement, or `null` when the drawing does not exist.
+     * @example
+     * ```ts
+     * const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const placement = sheet.getDrawingPlacement('drawing-id');
+     * if (placement?.kind === univerAPI.Enum.SheetDrawingAnchorType.Both) {
+     *   console.log(placement.from, placement.to);
+     * }
+     * ```
+     */
+    getDrawingPlacement(drawingId: string): ISheetDrawingPlacement | null;
+
+    /**
+     * Set the placement of any drawing on this sheet through the drawing command.
+     *
+     * @param {string} drawingId Drawing id.
+     * @param {ISheetDrawingPlacementInput} placement Exact markers or model-space bounds with an explicit anchor type.
+     * @returns {boolean} `true` when the command succeeds.
+     * @example OneCell: move with cells, keep pixel size
+     * ```ts
+     * const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const drawingId = sheet.getImages()[0]?.getId();
+     * if (!drawingId) throw new Error('No drawing found.');
+     * const changed = sheet.setDrawingPlacement(drawingId, {
+     *   kind: univerAPI.Enum.SheetDrawingAnchorType.Position,
+     *   from: { row: 2, column: 2, rowOffset: 8, columnOffset: 8 },
+     *   width: 240,
+     *   height: 120,
+     * });
+     * console.log(changed);
+     * ```
+     * @example TwoCell: move and resize with both cell markers
+     * ```ts
+     * const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const drawingId = sheet.getImages()[0]?.getId();
+     * if (!drawingId) throw new Error('No drawing found.');
+     * sheet.setDrawingPlacement(drawingId, {
+     *   kind: univerAPI.Enum.SheetDrawingAnchorType.Both,
+     *   from: { row: 2, column: 2, rowOffset: 8, columnOffset: 8 },
+     *   to: { row: 8, column: 6, rowOffset: 0, columnOffset: 0 },
+     * });
+     * ```
+     * @example Absolute: do not move or resize after row or column changes
+     * ```ts
+     * const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const drawingId = sheet.getImages()[0]?.getId();
+     * if (!drawingId) throw new Error('No drawing found.');
+     * sheet.setDrawingPlacement(drawingId, {
+     *   kind: univerAPI.Enum.SheetDrawingAnchorType.None,
+     *   left: 640,
+     *   top: 96,
+     *   width: 240,
+     *   height: 120,
+     * });
+     * ```
+     */
+    setDrawingPlacement(drawingId: string, placement: ISheetDrawingPlacementInput): boolean;
+
+    /**
+     * Resolve exact markers or model-space bounds to a normalized Placement.
+     *
+     * Bounds inference is usually preferable when positioning from an existing
+     * transform. Exact markers are useful when the caller must preserve a
+     * user-selected cell and offset. `Position` maps to OOXML OneCell,
+     * `Both` maps to TwoCell, and `None` maps to Absolute.
+     * @param {ISheetDrawingPlacementInput} placement Exact markers or bounds with an explicit anchor type.
+     * @returns {ISheetDrawingPlacement} The normalized Placement.
+     * @example Infer Position and Both placements from bounds in Node/headless
+     * ```ts
+     * const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const positionPlacement = sheet.resolveDrawingPlacement({
+     *   kind: univerAPI.Enum.SheetDrawingAnchorType.Position,
+     *   bounds: { left: 120, top: 80, width: 320, height: 160 },
+     * });
+     * const bothPlacement = sheet.resolveDrawingPlacement({
+     *   kind: univerAPI.Enum.SheetDrawingAnchorType.Both,
+     *   bounds: { left: 120, top: 80, width: 320, height: 160 },
+     * });
+     * console.log(positionPlacement.from);
+     * console.log(bothPlacement.from, bothPlacement.to);
+     * ```
+     */
+    resolveDrawingPlacement(placement: ISheetDrawingPlacementInput): ISheetDrawingPlacement;
+
+    /**
+     * Get the Sheet host layout in model coordinates.
+     *
+     * This API is available in Node/headless and does not include viewport,
+     * scroll, zoom, frozen-pane clipping, or screen coordinates.
+     * @returns {ISheetDrawingLayout} Grid, data, and ordered Drawing bounds.
+     * @example
+     * ```ts
+     * const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const layout = sheet.getDrawingLayout();
+     * console.log(layout.gridBounds, layout.dataBounds);
+     * for (const drawing of layout.drawings) {
+     *   console.log(drawing.drawingId, drawing.bounds);
+     * }
+     * ```
+     */
+    getDrawingLayout(): ISheetDrawingLayout;
 
     /**
      * Get the current selected images.
@@ -384,6 +509,16 @@ export interface IFWorksheetDrawingMixin {
 }
 
 export class FWorksheetDrawingMixin extends FWorksheet implements IFWorksheetDrawingMixin {
+    declare private _sheetDrawingService: ISheetDrawingService;
+    declare private _sheetSkeletonService: SheetSkeletonService;
+    declare private _undoRedoService: IUndoRedoService;
+
+    override _initialize(injector: Injector): void {
+        this._sheetDrawingService = injector.get(ISheetDrawingService);
+        this._sheetSkeletonService = injector.get(SheetSkeletonService);
+        this._undoRedoService = injector.get(IUndoRedoService);
+    }
+
     override async insertImage(url: IFBlobSource | string, column?: number, row?: number, offsetX?: number, offsetY?: number): Promise<boolean> {
         const imageBuilder = this.newOverGridImage();
         if (typeof url === 'string') {
@@ -450,7 +585,7 @@ export class FWorksheetDrawingMixin extends FWorksheet implements IFWorksheetDra
     }
 
     override getImages(): FOverGridImage[] {
-        const sheetDrawingService = this._injector.get(ISheetDrawingService);
+        const sheetDrawingService = this._sheetDrawingService;
         const drawingData = sheetDrawingService.getDrawingData(this._fWorkbook.getId(), this.getSheetId());
         const images: FOverGridImage[] = [];
         for (const drawingId in drawingData) {
@@ -464,7 +599,7 @@ export class FWorksheetDrawingMixin extends FWorksheet implements IFWorksheetDra
     }
 
     override getImageById(id: string): FOverGridImage | null {
-        const sheetDrawingService = this._injector.get(ISheetDrawingService);
+        const sheetDrawingService = this._sheetDrawingService;
         const drawing = sheetDrawingService.getDrawingByParam({ unitId: this._fWorkbook.getId(), subUnitId: this.getSheetId(), drawingId: id });
         if (drawing && drawing.drawingType === DrawingTypeEnum.DRAWING_IMAGE) {
             return this._injector.createInstance(FOverGridImage, drawing as ISheetImage);
@@ -473,7 +608,7 @@ export class FWorksheetDrawingMixin extends FWorksheet implements IFWorksheetDra
     }
 
     override getActiveImages(): FOverGridImage[] {
-        const sheetDrawingService = this._injector.get(ISheetDrawingService);
+        const sheetDrawingService = this._sheetDrawingService;
         const drawingData = sheetDrawingService.getFocusDrawings();
         const images: FOverGridImage[] = [];
         for (const drawingId in drawingData) {
@@ -488,6 +623,81 @@ export class FWorksheetDrawingMixin extends FWorksheet implements IFWorksheetDra
         return this;
     }
 
+    override getDrawingPlacement(drawingId: string): ISheetDrawingPlacement | null {
+        const drawing = this._sheetDrawingService.getDrawingByParam({
+            unitId: this._fWorkbook.getId(),
+            subUnitId: this.getSheetId(),
+            drawingId,
+        });
+        return drawing ? getSheetDrawingPlacement(drawing) : null;
+    }
+
+    override setDrawingPlacement(drawingId: string, placement: ISheetDrawingPlacementInput): boolean {
+        return this._commandService.syncExecuteCommand(SetSheetDrawingPlacementCommand.id, {
+            unitId: this._fWorkbook.getId(),
+            subUnitId: this.getSheetId(),
+            drawings: [{ drawingId, placement }],
+        });
+    }
+
+    override resolveDrawingPlacement(placement: ISheetDrawingPlacementInput): ISheetDrawingPlacement {
+        const skeleton = placement.kind === SheetDrawingAnchorType.None
+            ? undefined
+            : this._sheetSkeletonService.ensureSkeleton(this._fWorkbook.getId(), this.getSheetId());
+        if (placement.kind !== SheetDrawingAnchorType.None && !skeleton) {
+            throw new Error('SHEET_DRAWING_PLACEMENT_SKELETON_REQUIRED');
+        }
+        return normalizeSheetDrawingPlacement(placement, skeleton);
+    }
+
+    override getDrawingLayout(): ISheetDrawingLayout {
+        const unitId = this._fWorkbook.getId();
+        const subUnitId = this.getSheetId();
+        const skeleton = this._sheetSkeletonService.ensureSkeleton(unitId, subUnitId);
+        if (!skeleton) {
+            throw new Error('SHEET_DRAWING_PLACEMENT_SKELETON_REQUIRED');
+        }
+        const { startRow, endRow, startColumn, endColumn } = this._worksheet.getDataRealRange();
+        const startCell = skeleton.getCellWithCoordByIndex(startRow, startColumn, false);
+        const endCell = skeleton.getCellWithCoordByIndex(endRow, endColumn, false);
+        const drawingService = this._sheetDrawingService;
+        const drawingData = drawingService.getDrawingData(unitId, subUnitId);
+        const orderedIds = drawingService.getDrawingOrder(unitId, subUnitId);
+        const drawingIds = [...orderedIds, ...Object.keys(drawingData).filter((drawingId) => !orderedIds.includes(drawingId))];
+        const drawings: ISheetDrawingLayoutObject[] = [];
+
+        for (const drawingId of drawingIds) {
+            const drawing = drawingData[drawingId];
+            const bounds = drawing && getDrawingBounds(drawing);
+            if (!drawing || !bounds) {
+                continue;
+            }
+            drawings.push({
+                drawingId,
+                drawingType: drawing.drawingType,
+                bounds,
+                placement: getSheetDrawingPlacement(drawing),
+                groupId: drawing.groupId,
+            });
+        }
+
+        return {
+            gridBounds: {
+                left: 0,
+                top: 0,
+                width: skeleton.columnTotalWidth,
+                height: skeleton.rowTotalHeight,
+            },
+            dataBounds: {
+                left: startCell.startX,
+                top: startCell.startY,
+                width: endCell.endX - startCell.startX,
+                height: endCell.endY - startCell.startY,
+            },
+            drawings,
+        };
+    }
+
     override newOverGridImage(): FOverGridImageBuilder {
         const unitId = this._fWorkbook.getId();
         const subUnitId = this.getSheetId();
@@ -500,7 +710,7 @@ export class FWorksheetDrawingMixin extends FWorksheet implements IFWorksheetDra
 
         const unitId = this._fWorkbook.getId();
         const subUnitId = this.getSheetId();
-        const sheetDrawingService = this._injector.get(ISheetDrawingService);
+        const sheetDrawingService = this._sheetDrawingService;
         if (sheetDrawingService.getDrawingByParam({ unitId, subUnitId, drawingId: groupId })) return null;
 
         const drawings = uniqueDrawingIds.map((drawingId) => sheetDrawingService.getDrawingByParam({ unitId, subUnitId, drawingId }));
@@ -539,7 +749,7 @@ export class FWorksheetDrawingMixin extends FWorksheet implements IFWorksheetDra
     override ungroupDrawings(groupIds: string[]): boolean {
         const unitId = this._fWorkbook.getId();
         const subUnitId = this.getSheetId();
-        const sheetDrawingService = this._injector.get(ISheetDrawingService);
+        const sheetDrawingService = this._sheetDrawingService;
         const groupParams: IDrawingGroupUpdateParam[] = [];
 
         for (const groupId of groupIds) {
@@ -581,7 +791,7 @@ export class FWorksheetDrawingMixin extends FWorksheet implements IFWorksheetDra
     override getDrawingGroupChildren(groupId: string, recursive = false): ISheetDrawing[] {
         const unitId = this._fWorkbook.getId();
         const subUnitId = this.getSheetId();
-        const sheetDrawingService = this._injector.get(ISheetDrawingService);
+        const sheetDrawingService = this._sheetDrawingService;
 
         if (!recursive) {
             return sheetDrawingService.getDrawingsByGroup({ unitId, subUnitId, drawingId: groupId }) as ISheetDrawing[];
@@ -599,7 +809,7 @@ export class FWorksheetDrawingMixin extends FWorksheet implements IFWorksheetDra
     override getDrawingParentGroup(drawingId: string): ISheetDrawing | null {
         const unitId = this._fWorkbook.getId();
         const subUnitId = this.getSheetId();
-        const sheetDrawingService = this._injector.get(ISheetDrawingService);
+        const sheetDrawingService = this._sheetDrawingService;
         const drawing = sheetDrawingService.getDrawingByParam({ unitId, subUnitId, drawingId });
 
         if (!drawing?.groupId) return null;
@@ -617,9 +827,9 @@ export class FWorksheetDrawingMixin extends FWorksheet implements IFWorksheetDra
     private _applyGroupDrawingOperation(groupParams: IDrawingGroupUpdateParam[], type: DrawingApplyType.GROUP | DrawingApplyType.UNGROUP): boolean {
         if (groupParams.length === 0) return false;
 
-        const sheetDrawingService = this._injector.get(ISheetDrawingService);
+        const sheetDrawingService = this._sheetDrawingService;
         const commandService = this._commandService;
-        const undoRedoService = this._injector.get(IUndoRedoService);
+        const undoRedoService = this._undoRedoService;
         const jsonOp = (type === DrawingApplyType.GROUP
             ? sheetDrawingService.getGroupDrawingOp(groupParams)
             : sheetDrawingService.getUngroupDrawingOp(groupParams)) as IDrawingJsonUndo1;
@@ -686,6 +896,23 @@ export class FWorksheetDrawingMixin extends FWorksheet implements IFWorksheetDra
                 };
             });
     }
+}
+
+function getDrawingBounds(drawing: ISheetDrawing): IGroupBaseBound | null {
+    const { left, top, width, height } = drawing.transform ?? {};
+    if (
+        typeof left !== 'number' ||
+        typeof top !== 'number' ||
+        typeof width !== 'number' ||
+        typeof height !== 'number' ||
+        !Number.isFinite(left) ||
+        !Number.isFinite(top) ||
+        !Number.isFinite(width) ||
+        !Number.isFinite(height)
+    ) {
+        return null;
+    }
+    return { left, top, width, height };
 }
 
 FWorksheet.extend(FWorksheetDrawingMixin);

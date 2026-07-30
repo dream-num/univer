@@ -15,7 +15,7 @@
  */
 
 import { ObjectType } from '@univerjs/engine-render';
-import { InsertSheetDrawingCommand, SetDrawingArrangeCommand } from '@univerjs/sheets-drawing';
+import { InsertSheetDrawingCommand, SetDrawingArrangeCommand, SetSheetDrawingPlacementCommand } from '@univerjs/sheets-drawing';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { SheetDrawingPermissionController } from '../sheet-drawing-permission.controller';
@@ -151,8 +151,16 @@ describe('SheetDrawingPermissionController', () => {
                 subUnitId: 'sheet-1',
             },
         });
+        beforeCommandHandler()?.({
+            id: SetSheetDrawingPlacementCommand.id,
+            params: {
+                unitId: 'unit-1',
+                subUnitId: 'sheet-1',
+                drawings: [],
+            },
+        });
 
-        expect(sheetPermissionCheckController.permissionCheckWithoutRange).toHaveBeenCalledTimes(2);
+        expect(sheetPermissionCheckController.permissionCheckWithoutRange).toHaveBeenCalledTimes(3);
         expect(sheetPermissionCheckController.blockExecuteWithoutPermission).toHaveBeenCalledWith('sheets-drawing-ui.permission.dialog.editErr');
 
         controller.dispose();

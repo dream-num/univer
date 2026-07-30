@@ -20,6 +20,7 @@ import type {
     IRemoveSheetDrawingCommandParams,
     ISetDrawingArrangeCommandParams,
     ISetDrawingCommandParams,
+    ISetSheetDrawingPlacementCommandParams,
 } from '@univerjs/sheets-drawing';
 import type { LocaleKey } from '../locale/types';
 import {
@@ -46,6 +47,7 @@ import {
     RemoveSheetDrawingCommand,
     SetDrawingArrangeCommand,
     SetSheetDrawingCommand,
+    SetSheetDrawingPlacementCommand,
 } from '@univerjs/sheets-drawing';
 import { combineLatest, distinctUntilChanged, EMPTY, map, switchMap, tap } from 'rxjs';
 
@@ -442,6 +444,10 @@ export class SheetDrawingPermissionController extends Disposable {
                     const { drawings } = params;
                     unitId = drawings?.[0]?.unitId;
                     subUnitId = drawings?.[0]?.subUnitId;
+                } else if (command.id === SetSheetDrawingPlacementCommand.id) {
+                    const params = command.params as ISetSheetDrawingPlacementCommandParams;
+                    unitId = params.unitId;
+                    subUnitId = params.subUnitId;
                 } else if (command.id === SetDrawingArrangeCommand.id) {
                     const params = command.params as ISetDrawingArrangeCommandParams;
                     unitId = params.unitId;

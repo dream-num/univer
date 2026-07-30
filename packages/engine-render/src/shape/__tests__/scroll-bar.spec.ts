@@ -129,6 +129,28 @@ describe('ScrollBar', () => {
         scrollBar.dispose();
     });
 
+    it('optionally hides unscrollable tracks and restores them when content overflows', () => {
+        const scrollBar = ScrollBar.attachTo(viewport, {
+            enableHorizontal: true,
+            enableVertical: true,
+            hideTrackWhenUnscrollable: true,
+        });
+
+        scrollBar.resize(160, 120, 100, 80);
+
+        expect(scrollBar.horizonScrollTrack?.visible).toBe(false);
+        expect(scrollBar.verticalScrollTrack?.visible).toBe(false);
+        expect(scrollBar.placeholderBarRect?.visible).toBe(false);
+
+        scrollBar.resize(160, 120, 640, 480);
+
+        expect(scrollBar.horizonScrollTrack?.visible).toBe(true);
+        expect(scrollBar.verticalScrollTrack?.visible).toBe(true);
+        expect(scrollBar.placeholderBarRect?.visible).toBe(true);
+
+        scrollBar.dispose();
+    });
+
     it('uses track clicks and thumb dragging to update viewport scroll', () => {
         const scrollBar = new ScrollBar(viewport, { mainScene: scene });
         const scrollToBarPos = vi.spyOn(viewport, 'scrollToBarPos');

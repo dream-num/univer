@@ -48,6 +48,8 @@ export interface IScrollBarProps {
     enableHorizontal?: boolean;
     /** Enable the vertical scroll bar. True by default. */
     enableVertical?: boolean;
+    /** Hide the track when the corresponding content axis does not overflow. False by default. */
+    hideTrackWhenUnscrollable?: boolean;
     /** The min width of horizon thumb. Default is 17 px. */
     minThumbSizeH?: number;
     /** The min height of vertical thumb. Default is 17 px. */
@@ -67,6 +69,7 @@ export class ScrollBar extends Disposable {
 
     _enableHorizontal: boolean = true;
     _enableVertical: boolean = true;
+    private _hideTrackWhenUnscrollable = false;
 
     horizontalThumbSize: number = 0;
     horizontalMinusMiniThumb: number = 0;
@@ -199,6 +202,22 @@ export class ScrollBar extends Disposable {
 
     set enableVertical(val: boolean) {
         this._enableVertical = val;
+    }
+
+    get hideTrackWhenUnscrollable() {
+        return this._hideTrackWhenUnscrollable;
+    }
+
+    set hideTrackWhenUnscrollable(val: boolean) {
+        if (this._hideTrackWhenUnscrollable === val) {
+            return;
+        }
+
+        this._hideTrackWhenUnscrollable = val;
+        this._resizeHorizontal();
+        this._resizeVertical();
+        this._resizeRightBottomCorner();
+        this.makeDirty(true);
     }
 
     get limitX() {
@@ -473,7 +492,11 @@ export class ScrollBar extends Disposable {
         });
 
         // content is smaller than viewport size
-        if (this.horizontalThumbSize >= viewportW - (this._trackThickness + 2)) {
+        const scrollable = this.horizontalThumbSize < viewportW - (this._trackThickness + 2);
+        this.horizonScrollTrack?.setProps({
+            visible: !this._hideTrackWhenUnscrollable || scrollable,
+        });
+        if (!scrollable) {
             this.horizonThumbRect?.setProps({
                 visible: false,
             });
@@ -520,7 +543,11 @@ export class ScrollBar extends Disposable {
         });
 
         // content is smaller than viewport size
-        if (this.verticalThumbSize >= viewportH - this._trackThickness) {
+        const scrollable = this.verticalThumbSize < viewportH - this._trackThickness;
+        this.verticalScrollTrack?.setProps({
+            visible: !this._hideTrackWhenUnscrollable || scrollable,
+        });
+        if (!scrollable) {
             this.verticalThumbRect?.setProps({
                 visible: false,
             });
@@ -543,6 +570,10 @@ export class ScrollBar extends Disposable {
         const viewportH = this._viewportH;
         const viewportW = this._viewportW;
         if (this._enableHorizontal && this._enableVertical) {
+            this.placeholderBarRect?.setProps({
+                visible: !this._hideTrackWhenUnscrollable
+                    || Boolean(this.horizonScrollTrack?.visible && this.verticalScrollTrack?.visible),
+            });
             this.placeholderBarRect?.transformByState({
                 left: viewportW - this._trackThickness,
                 top: viewportH - this._trackThickness,

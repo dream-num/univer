@@ -115,13 +115,22 @@ export enum BaseFieldType {
     Progress = 'progress',
     Currency = 'currency',
     Rating = 'rating',
-    TwoWayLink = 'twoWayLink',
+    RecordLink = 'recordLink',
     RecordId = 'recordId',
     CreatedBy = 'createdBy',
     UpdatedBy = 'updatedBy',
     CreatedAt = 'createdAt',
     UpdatedAt = 'updatedAt',
     Summary = 'summary',
+}
+
+export interface IRecordLinkFieldConfig extends Record<string, unknown> {
+    targetTableId: TableId;
+    multiple: boolean;
+    /** Field used as the single visible RecordLink label. Defaults to the target table primary field. */
+    displayFieldId?: FieldId;
+    /** Ordered target-table fields rendered as secondary context in the record picker. */
+    pickerFieldIds?: FieldId[];
 }
 
 export enum BaseViewType {
@@ -466,6 +475,7 @@ export interface IGridProjection extends IViewProjection {
 export interface IKanbanProjection extends IViewProjection {
     type: BaseViewType.Kanban;
     groupFieldId: FieldId;
+    titleFieldId?: FieldId;
     coverFieldId?: FieldId | null;
     cardLayout: KanbanCardLayoutMode;
     showFieldNames: boolean;
@@ -534,6 +544,7 @@ export interface IGanttProjection extends IViewProjection {
 
 export interface IGalleryProjection extends IViewProjection {
     type: BaseViewType.Gallery;
+    titleFieldId?: FieldId;
     coverFieldId?: FieldId | null;
     cardLayout: KanbanCardLayoutMode;
     showFieldNames: boolean;

@@ -17,7 +17,8 @@
 import type { IBaseSnapshot, IFieldSnapshot, IRecordSnapshot, ITableSnapshot, IViewSnapshot } from './typedef';
 import pkg from '../../package.json';
 import { generateRandomId } from '../shared';
-import { LocaleType } from '../types/enum';
+import { CellValueType, LocaleType } from '../types/enum';
+import { BASE_RECORD_ID_FIELD_ID, createBaseRecordIdField } from './record-identity';
 import { BaseFieldType, BaseViewType } from './typedef';
 
 export interface ICreateDefaultBaseTableSnapshotOptions {
@@ -35,6 +36,7 @@ export function createDefaultBaseTableSnapshot(options: ICreateDefaultBaseTableS
     const primaryFieldId = options.primaryFieldId ?? generateRandomId(6);
     const gridViewId = options.gridViewId ?? generateRandomId(6);
     const recordCount = options.recordCount ?? 0;
+    const recordIdField = createBaseRecordIdField();
     const primaryField: IFieldSnapshot = {
         id: primaryFieldId,
         name: options.primaryFieldName ?? 'Name',
@@ -51,7 +53,7 @@ export function createDefaultBaseTableSnapshot(options: ICreateDefaultBaseTableS
         const recordId = `${options.id}-record-${index + 1}`;
         records[recordId] = {
             id: recordId,
-            values: {},
+            values: { [BASE_RECORD_ID_FIELD_ID]: recordId },
             orderKey: String(index + 1).padStart(4, '0'),
             createdAt: now,
             updatedAt: now,
@@ -59,7 +61,9 @@ export function createDefaultBaseTableSnapshot(options: ICreateDefaultBaseTableS
         recordOrder.push(recordId);
         rowIndex[recordId] = index;
         rowId[index] = recordId;
-        cellData[index] = {};
+        cellData[index] = {
+            0: { v: recordId, t: CellValueType.STRING },
+        };
     }
 
     const gridView: IViewSnapshot = {
@@ -67,8 +71,10 @@ export function createDefaultBaseTableSnapshot(options: ICreateDefaultBaseTableS
         tableId: options.id,
         name: 'Grid',
         type: BaseViewType.Grid,
-        fieldOrder: [primaryFieldId],
-        fieldSettings: {},
+        fieldOrder: [BASE_RECORD_ID_FIELD_ID, primaryFieldId],
+        fieldSettings: {
+            [BASE_RECORD_ID_FIELD_ID]: { hidden: true },
+        },
         config: { frozenFieldCount: 1 },
     };
 
@@ -76,14 +82,23 @@ export function createDefaultBaseTableSnapshot(options: ICreateDefaultBaseTableS
         id: options.id,
         name: options.name,
         primaryFieldId,
-        fieldOrder: [primaryFieldId],
-        fields: { [primaryFieldId]: primaryField },
+        fieldOrder: [BASE_RECORD_ID_FIELD_ID, primaryFieldId],
+        fields: {
+            [BASE_RECORD_ID_FIELD_ID]: recordIdField,
+            [primaryFieldId]: primaryField,
+        },
         records,
         recordOrder,
         rowIndex,
         rowId,
-        colIndex: { [primaryFieldId]: 0 },
-        colId: { 0: primaryFieldId },
+        colIndex: {
+            [BASE_RECORD_ID_FIELD_ID]: 0,
+            [primaryFieldId]: 1,
+        },
+        colId: {
+            0: BASE_RECORD_ID_FIELD_ID,
+            1: primaryFieldId,
+        },
         cellData,
         resources: {
             attachmentSets: {},
@@ -107,7 +122,7 @@ export function getEmptySnapshot(
         name,
         locale,
         appVersion: pkg.version,
-        schemaVersion: 1,
+        schemaVersion: 2,
         tableOrder: [tableId],
         tables: {
             [tableId]: createDefaultBaseTableSnapshot({

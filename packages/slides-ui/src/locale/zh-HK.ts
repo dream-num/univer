@@ -18,7 +18,7 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'slides-ui': {
-        append: '新增幻灯片',
+        append: '新增投影片',
 
         text: {
             insert: {

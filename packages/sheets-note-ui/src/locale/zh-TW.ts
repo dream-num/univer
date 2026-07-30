@@ -22,7 +22,7 @@ const locale: typeof enUS = {
             placeholder: '在此輸入',
         },
         rightClick: {
-            addNote: '添加批註',
+            addNote: '新增批註',
             deleteNote: '刪除批註',
             toggleNote: '顯示/隱藏批註',
         },

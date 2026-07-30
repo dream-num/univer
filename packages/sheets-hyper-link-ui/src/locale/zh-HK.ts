@@ -21,7 +21,7 @@ const locale: typeof enUS = {
         form: {
             editTitle: '編輯連結',
             addTitle: '插入連結',
-            label: '文本',
+            label: '文字',
             labelPlaceholder: '輸入文字',
             type: '類型',
             link: '連結',

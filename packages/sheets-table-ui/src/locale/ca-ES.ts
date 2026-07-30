@@ -43,9 +43,9 @@ const locale: typeof enUS = {
         tablePrefix: 'Taula',
         tableNameError: 'El nom de la taula no pot contenir espais, no pot començar amb un número i no pot ser idèntic a un nom de taula existent',
         columnMenu: {
-            'insert-left': 'Insert 1 table column left',
-            'insert-right': 'Insert 1 table column right',
-            delete: 'Delete table column',
+            'insert-left': 'Insereix una columna de taula a l’esquerra',
+            'insert-right': 'Insereix una columna de taula a la dreta',
+            delete: 'Suprimeix la columna de la taula',
         },
 
         sort: {

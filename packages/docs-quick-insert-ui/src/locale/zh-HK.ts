@@ -22,7 +22,7 @@ const locale: typeof enUS = {
             numberedList: '有序列表',
             bulletedList: '無序列表',
             divider: '分隔線',
-            text: '文本',
+            text: '文字',
             table: '表格',
             image: '圖片',
         },

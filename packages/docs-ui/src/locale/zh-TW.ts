@@ -45,7 +45,7 @@ const locale: typeof enUS = {
             order: '有序列表',
             unorder: '無序列表',
             checklist: '任務列表',
-            documentFlavor: '现代模式',
+            documentFlavor: '現代模式',
             alignLeft: '左對齊',
             alignCenter: '居中對齊',
             alignRight: '右對齊',
@@ -177,7 +177,7 @@ const locale: typeof enUS = {
             noBackground: '無背景色',
         },
         'page-settings': {
-            'document-setting': '文檔設置',
+            'document-setting': '文件設定',
             mode: '模式',
             'modern-mode': '現代模式',
             'classic-mode': '經典模式',

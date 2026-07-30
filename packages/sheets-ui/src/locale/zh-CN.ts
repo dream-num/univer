@@ -347,7 +347,7 @@ const locale: typeof enUS = {
             inputRangePlaceholder: '请输入范围（必填）',
             inputFormulaPlaceholder: '请输入公式（必填）',
             formulaOrRefStringInvalid: '公式或引用字符串无效',
-            defaultName: 'DefinedName',
+            defaultName: '定义名称',
             updateButton: '修改',
             deleteButton: '删除',
             deleteConfirmText: '确定删除定义名称？',

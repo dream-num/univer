@@ -35,7 +35,7 @@ const locale: typeof enUS = {
             nameSheetConflict: '名稱與工作表名稱衝突',
             formulaOrRefStringEmpty: '公式或引用字串不能為空',
             nameConflict: '名稱與函數名稱衝突',
-            defaultName: 'DefinedName',
+            defaultName: '定義名稱',
         },
         permission: {
             dialog: {

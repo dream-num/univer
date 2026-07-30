@@ -23,13 +23,16 @@ export function dealWithBullet(
     bullet?: IBullet,
     lists?: ILists,
     listLevelAncestors?: Array<Nullable<IDocumentSkeletonBullet>>,
-    localeService?: LocaleService
+    localeService?: LocaleService,
+    compactSpacing = false,
+    paragraphTextStyle?: ITextStyle
 ): IDocumentSkeletonBullet | undefined {
     if (!bullet || !lists) {
         return;
     }
 
-    const { listId, listType, nestingLevel = 0, textStyle } = bullet;
+    const { listId, listType, nestingLevel = 0, startNumber, image, textStyle } = bullet;
+    const preserveTextLineHeight = compactSpacing;
 
     const list = lists[listType];
 
@@ -48,8 +51,12 @@ export function dealWithBullet(
         nestingLevel,
         list.nestingLevel,
         listLevelAncestors,
-        textStyle,
-        localeService
+        startNumber,
+        { ...paragraphTextStyle, ...textStyle },
+        localeService,
+        compactSpacing,
+        preserveTextLineHeight,
+        image?.source
     );
     return bulletSke;
 }
@@ -89,8 +96,12 @@ function _getBulletSke(
     nestingLevel: number,
     nestings: INestingLevel[],
     listLevelAncestors?: Array<Nullable<IDocumentSkeletonBullet>>,
+    paragraphStartNumber?: number,
     textStyleConfig?: ITextStyle,
-    _localeService?: LocaleService
+    _localeService?: LocaleService,
+    compactSpacing = false,
+    preserveTextLineHeight = false,
+    imageSource?: string
 ): IDocumentSkeletonBullet {
     const nesting = nestings[nestingLevel];
     const {
@@ -103,20 +114,31 @@ function _getBulletSke(
     } = nesting;
 
     const textStyle = { ...textStyleConfig, ...textStyleFirst };
-
     const fontStyle = getFontStyleString(textStyle); // Get font style in canvas.font format
+
+    const previousAtLevel = listLevelAncestors?.[nestingLevel];
+    const startIndex = paragraphStartNumber === undefined
+        ? previousAtLevel?.startIndexItem ?? 1
+        : 1;
+    const effectiveStartNumber = paragraphStartNumber ?? previousAtLevel?.startNumber ?? nesting.startNumber;
 
     let symbolContent: string;
     if (glyphSymbol) {
         // Unordered list uses directly
-        symbolContent = glyphSymbol;
+        symbolContent = normalizeLegacySymbolFontGlyph(glyphSymbol, textStyle.ff);
     } else {
         // Ordered list
-        symbolContent = __generateOrderedListSymbol(glyphFormat, nestingLevel, nestings, listLevelAncestors); // Ordered list processing
+        symbolContent = __generateOrderedListSymbol(
+            glyphFormat,
+            nestingLevel,
+            nestings,
+            listLevelAncestors,
+            startIndex,
+            effectiveStartNumber
+        ); // Ordered list processing
     }
 
     // const bBox = FontCache.getTextSize(symbolContent, fontStyle);
-    const startIndex = listLevelAncestors?.[nestingLevel]?.startIndexItem ?? 1;
 
     return {
         listId,
@@ -124,19 +146,50 @@ function _getBulletSke(
         ts: textStyle, // text style
         fontStyle, //
         startIndexItem: startIndex + 1,
+        startNumber: effectiveStartNumber,
         // bBox,
         nestingLevel: nesting,
         bulletAlign: bulletAlignment,
         bulletType: glyphSymbol ? false : !!glyphType, // Default is unordered list, only ordered if glyphSymbol is empty and glyphType is not empty
+        compactSpacing,
+        preserveTextLineHeight,
+        imageSource,
         paragraphProperties: nesting.paragraphProperties,
     };
+}
+
+const LEGACY_SYMBOL_GLYPH_EQUIVALENTS: Record<string, Record<number, string>> = {
+    wingdings: {
+        0xA7: '\u25AA',
+    },
+};
+
+function normalizeLegacySymbolFontGlyph(symbol: string, fontFamily?: Nullable<string>): string {
+    const primaryFontFamily = fontFamily
+        ?.split(',')[0]
+        ?.trim()
+        .replace(/^['"]|['"]$/g, '')
+        .toLowerCase();
+    const equivalents = primaryFontFamily
+        ? LEGACY_SYMBOL_GLYPH_EQUIVALENTS[primaryFontFamily]
+        : undefined;
+    if (!equivalents) {
+        return symbol;
+    }
+
+    return Array.from(symbol, (character) => {
+        const codePoint = character.codePointAt(0);
+        return codePoint === undefined ? character : equivalents[codePoint] ?? character;
+    }).join('');
 }
 
 function __generateOrderedListSymbol(
     glyphFormat: string,
     nestingLevel: number,
     nestings: INestingLevel[],
-    listLevelAncestors?: Array<Nullable<IDocumentSkeletonBullet>>
+    listLevelAncestors: Array<Nullable<IDocumentSkeletonBullet>> | undefined,
+    currentStartIndex: number,
+    currentStartNumber: number
 ) {
     // const indexNumber = startNumber + startIndex;
     // parse  <prefix>%[nestingLevelMinusOne]<suffix>, return symbolContent
@@ -155,13 +208,17 @@ function __generateOrderedListSymbol(
         const levelAndSuffixPre = glyphFormatSplit[i];
         const { level, suffix } = ___getLevelAndSuffix(levelAndSuffixPre);
 
-        let startIndexItem = listLevelAncestors?.[level]?.startIndexItem || 1;
+        const ancestor = listLevelAncestors?.[level];
+        let startIndexItem = level === nestingLevel ? currentStartIndex : ancestor?.startIndexItem || 1;
 
-        if (level !== nestingLevel && listLevelAncestors?.[level] !== null) {
+        if (level !== nestingLevel && ancestor !== null) {
             startIndexItem -= 1;
         }
 
-        const singleSymbol = ___getSymbolByBesting(startIndexItem, nestings[level]);
+        const startNumber = level === nestingLevel
+            ? currentStartNumber
+            : ancestor?.startNumber ?? nestings[level].startNumber;
+        const singleSymbol = ___getSymbolByBesting(startIndexItem, nestings[level], startNumber);
         // console.log(
         //     '___getSymbolByBesting',
         //     singleSymbol,
@@ -178,8 +235,8 @@ function __generateOrderedListSymbol(
     return resultSymbol.join('');
 }
 
-function ___getSymbolByBesting(startIndex: number = 1, nesting: INestingLevel) {
-    const { startNumber, glyphType, glyphSymbol } = nesting;
+function ___getSymbolByBesting(startIndex: number = 1, nesting: INestingLevel, startNumber = nesting.startNumber) {
+    const { glyphType, glyphSymbol } = nesting;
 
     if (glyphSymbol) {
         // Unordered list uses directly

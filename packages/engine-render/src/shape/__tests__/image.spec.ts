@@ -86,6 +86,29 @@ describe('image extra', () => {
         expect(ctx.drawImage).toHaveBeenCalled();
     });
 
+    it('scales srcRect offsets with a group-resized render bound', () => {
+        const native = createNativeImage(100, 60);
+        const image = new Image('group-cropped-image', {
+            image: native,
+            left: 20,
+            top: 10,
+            width: 100,
+            height: 60,
+            srcRect: { left: 10, top: 12, right: 14, bottom: 16 },
+        });
+        vi.spyOn(image, 'getRealBound').mockReturnValue({
+            left: 0,
+            top: 0,
+            width: 50,
+            height: 30,
+        });
+
+        const ctx = createCtxMock();
+        image.render(ctx);
+
+        expect(ctx.drawImage).toHaveBeenCalledWith(native, -30, -21, 62, 44);
+    });
+
     it('supports source switching, reset size and hit testing', () => {
         const image = new Image('img2', {
             image: createNativeImage(90, 50),

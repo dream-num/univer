@@ -44,7 +44,7 @@ export class DrawingGroupObject extends Group {
         height: 0,
     };
 
-    private _outerShadow?: IDrawingGroupShadow;
+    protected _outerShadow?: IDrawingGroupShadow;
 
     private _glow?: IGlowEffect;
 

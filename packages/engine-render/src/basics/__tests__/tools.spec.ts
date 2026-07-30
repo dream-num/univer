@@ -177,6 +177,28 @@ describe('tools extra', () => {
         expect(fontStack.fontFamily).toBe('"SF Mono", "Cascadia Code", Consolas, monospace');
         expect(fontStack.fontString).toContain('"SF Mono", "Cascadia Code", Consolas, monospace');
 
+        const themeFont = getFontStyleString({
+            bl: 1,
+            fs: 15,
+            ff: '+mj-lt',
+        } as any);
+        expect(themeFont.fontFamily).toBe('"+mj-lt"');
+        expect(themeFont.fontCache).toBe('normal bold 15pt "+mj-lt"');
+
+        const officeFallbackStack = getFontStyleString({
+            fs: 12,
+            ff: 'Google Sans Text',
+        } as any);
+        expect(officeFallbackStack.fontFamily).toBe('"Google Sans Text", Calibri');
+        expect(officeFallbackStack.fontString).toContain('"Google Sans Text", Calibri');
+
+        const sourceSansFallbackStack = getFontStyleString({
+            fs: 18,
+            ff: 'Source Sans Pro',
+        } as any);
+        expect(sourceSansFallbackStack.fontFamily).toBe('"Source Sans Pro", Calibri');
+        expect(sourceSansFallbackStack.fontString).toContain('"Source Sans Pro", Calibri');
+
         const fractionalSize = getFontStyleString({
             fs: 10.0125,
             ff: 'Microsoft YaHei',

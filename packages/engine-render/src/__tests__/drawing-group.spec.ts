@@ -198,6 +198,38 @@ describe('drawing group', () => {
         expect(child.getRealBound().width).toBe(100);
     });
 
+    it('maps a rotated child through an anisotropically resized drawing group', () => {
+        const drawingGroup = new DrawingGroupObject('rotated-child-group');
+        drawingGroup.transformByState({
+            left: 10,
+            top: 20,
+            width: 200,
+            height: 100,
+        });
+        drawingGroup.setBaseBound({
+            left: 0,
+            top: 0,
+            width: 100,
+            height: 200,
+        });
+
+        const child = new Rect('rotated-child', {
+            left: -50,
+            top: 50,
+            width: 200,
+            height: 100,
+            angle: 90,
+            fill: '#333333',
+        });
+        drawingGroup.addObject(child);
+
+        const bound = child.getRealBound();
+        expect(bound.left).toBeCloseTo(-50, 6);
+        expect(bound.top).toBeCloseTo(-100, 6);
+        expect(bound.width).toBeCloseTo(100, 6);
+        expect(bound.height).toBeCloseTo(200, 6);
+    });
+
     it('covers group object management, transform recalculation and dispose flow', () => {
         const sceneChild = new Rect('scene-child', {
             left: 5,

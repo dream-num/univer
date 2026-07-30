@@ -48,4 +48,18 @@ describe('document compatibility policy', () => {
         expect(applyFontMetricCompatibility('5', fontStyle, bBox, traditional).width).toBeCloseTo(14.72);
         expect(applyFontMetricCompatibility('5', fontStyle, bBox, modern).width).toBe(16);
     });
+
+    it('matches PowerPoint fallback metrics for bold Source Sans Pro slide text', () => {
+        const unspecified = getDocumentCompatibilityPolicy(DocumentFlavor.UNSPECIFIED);
+        const sourceSans = {
+            ...fontStyle,
+            fontString: 'normal bold 18pt "Source Sans Pro", Calibri',
+            fontFamily: '"Source Sans Pro", Calibri',
+            fontSize: 18,
+            originFontSize: 18,
+        };
+
+        expect(applyFontMetricCompatibility('Negative controls', sourceSans, bBox, unspecified).width)
+            .toBeCloseTo(14.72);
+    });
 });

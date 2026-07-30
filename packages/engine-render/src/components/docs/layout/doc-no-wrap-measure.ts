@@ -17,6 +17,7 @@
 import type { IDocumentData, ITextRun, ITextStyle } from '@univerjs/core';
 import { getFontStyleString } from '../../../basics/tools';
 import { LineBreaker } from './line-breaker';
+import { BreakPointType } from './line-breaker/break';
 import { FontCache } from './shaping-engine/font-cache';
 
 function splitDocumentNoWrapMeasureLines(text: string): string[] {
@@ -218,6 +219,65 @@ export function measureDocumentNoWrapTextWidth(documentData: IDocumentData | nul
         0,
         ...splitDocumentNoWrapMeasureLines(dataStream).map((line) => measureDocumentNoWrapLineByStyle(line, fallbackTextStyle))
     );
+}
+
+/**
+ * Measures the widest line after applying the docs Unicode break policy
+ * within a fixed-width host.
+ */
+export function measureDocumentWrappedTextWidth(
+    documentData: IDocumentData | null | undefined,
+    maxLineWidth: number
+): number {
+    const dataStream = documentData?.body?.dataStream ?? '';
+    if (!documentData || !dataStream || !Number.isFinite(maxLineWidth) || maxLineWidth <= 0) {
+        return 0;
+    }
+
+    const breaker = new LineBreaker(dataStream);
+    let lineStart = 0;
+    let lastFittingEnd = 0;
+    let widestLine = 0;
+    let breakPoint = breaker.nextBreakPoint();
+
+    while (breakPoint) {
+        const candidateEnd = breakPoint.position;
+        const candidateWidth = measureDocumentNoWrapTextRangeWidth(documentData, lineStart, candidateEnd);
+
+        if (candidateWidth <= maxLineWidth) {
+            lastFittingEnd = candidateEnd;
+            if (breakPoint.type === BreakPointType.Mandatory) {
+                widestLine = Math.max(widestLine, candidateWidth);
+                lineStart = candidateEnd;
+                lastFittingEnd = candidateEnd;
+            }
+            breakPoint = breaker.nextBreakPoint();
+            continue;
+        }
+
+        if (lastFittingEnd > lineStart) {
+            widestLine = Math.max(
+                widestLine,
+                measureDocumentNoWrapTextRangeWidth(documentData, lineStart, lastFittingEnd)
+            );
+            lineStart = lastFittingEnd;
+            continue;
+        }
+
+        widestLine = Math.max(widestLine, maxLineWidth);
+        lineStart = candidateEnd;
+        lastFittingEnd = candidateEnd;
+        breakPoint = breaker.nextBreakPoint();
+    }
+
+    if (lineStart < dataStream.length) {
+        widestLine = Math.max(
+            widestLine,
+            Math.min(maxLineWidth, measureDocumentNoWrapTextRangeWidth(documentData, lineStart, dataStream.length))
+        );
+    }
+
+    return widestLine;
 }
 
 /**

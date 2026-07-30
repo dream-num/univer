@@ -142,6 +142,11 @@ describe('ScrollBar', () => {
         expect(scrollBar.verticalScrollTrack?.visible).toBe(false);
         expect(scrollBar.placeholderBarRect?.visible).toBe(false);
 
+        scrollBar.resize(160, 120, 160.5, 120.5);
+
+        expect(scrollBar.horizonScrollTrack?.visible).toBe(false);
+        expect(scrollBar.verticalScrollTrack?.visible).toBe(false);
+
         scrollBar.resize(160, 120, 640, 480);
 
         expect(scrollBar.horizonScrollTrack?.visible).toBe(true);

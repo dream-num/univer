@@ -131,9 +131,9 @@ function createController(options: { drawing?: Record<string, unknown>; rects?: 
 describe('DocFloatDomController', () => {
     it('preserves existing props while adding custom block runtime viewport', () => {
         expect(mergeDocFloatDomRuntimeProps({ keep: true }, {
-            customBlockRenderViewport: { bleedLeft: 96, bleedWidth: 1440, contentHeight: 720, contentWidth: 1280, height: 480, viewportHeight: 320 },
+            customBlockRenderViewport: { bleedLeft: 96, bleedWidth: 1440, contentHeight: 720, contentWidth: 1280, height: 480, pageContentWidth: 1008, viewportHeight: 320 },
         } as never)).toEqual({
-            customBlockRenderViewport: { bleedLeft: 96, bleedWidth: 1440, contentHeight: 720, contentWidth: 1280, height: 480, viewportHeight: 320 },
+            customBlockRenderViewport: { bleedLeft: 96, bleedWidth: 1440, contentHeight: 720, contentWidth: 1280, height: 480, pageContentWidth: 1008, viewportHeight: 320 },
             keep: true,
         });
     });

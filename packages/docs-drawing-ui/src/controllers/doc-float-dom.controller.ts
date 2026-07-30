@@ -95,7 +95,7 @@ interface ICanvasFloatDomInfo {
 interface IDocFloatDomParams extends IDocFloatDomDataBase {
 }
 
-type IDocFloatDomRuntimeViewport = Partial<Pick<IDocsCustomBlockRenderViewport, 'bleedLeft' | 'bleedWidth' | 'contentHeight' | 'contentWidth' | 'height' | 'viewportHeight'>>;
+type IDocFloatDomRuntimeViewport = Partial<Pick<IDocsCustomBlockRenderViewport, 'bleedLeft' | 'bleedWidth' | 'contentHeight' | 'contentWidth' | 'height' | 'pageContentWidth' | 'viewportHeight'>>;
 
 interface IDocFloatDomRuntimeParam extends IDocFloatDom {
     customBlockRenderViewport?: IDocFloatDomRuntimeViewport;
@@ -132,6 +132,9 @@ function pickValidCustomBlockRenderViewport(viewport: IDocFloatDomRuntimeViewpor
     }
     if (isPositiveNumber(viewport?.height)) {
         result.height = viewport!.height;
+    }
+    if (isPositiveNumber(viewport?.pageContentWidth)) {
+        result.pageContentWidth = viewport!.pageContentWidth;
     }
     if (isPositiveNumber(viewport?.viewportHeight)) {
         result.viewportHeight = viewport!.viewportHeight;

@@ -115,6 +115,7 @@ describe('resolveDocsCustomBlockRenderViewport', () => {
             height: 480,
             layoutWidth: 960,
             offsetLeft: 0,
+            pageContentWidth: 1008,
             viewportHeight: 480,
             width: 960,
         });
@@ -221,6 +222,7 @@ describe('resolveDocsCustomBlockRenderViewport', () => {
             height: 480,
             layoutWidth: 600,
             offsetLeft: 0,
+            pageContentWidth: 600,
             viewportHeight: 480,
             width: 600,
         });
@@ -242,6 +244,7 @@ describe('resolveDocsCustomBlockRenderViewport', () => {
             height: 480,
             layoutWidth: 420,
             offsetLeft: 0,
+            pageContentWidth: 600,
             viewportHeight: 480,
             width: 420,
         });

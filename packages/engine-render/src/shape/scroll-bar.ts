@@ -22,6 +22,7 @@ import type { Scene } from '../scene';
 import type { Viewport } from '../viewport';
 import { Disposable, Tools } from '@univerjs/core';
 import { Subscription } from 'rxjs';
+import { hasScrollableOverflow } from '../basics/tools';
 import { Transform } from '../basics/transform';
 import { Rect } from './rect';
 
@@ -492,7 +493,7 @@ export class ScrollBar extends Disposable {
         });
 
         // content is smaller than viewport size
-        const scrollable = this.horizontalThumbSize < viewportW - (this._trackThickness + 2);
+        const scrollable = hasScrollableOverflow(contentWidth, viewportW);
         this.horizonScrollTrack?.setProps({
             visible: !this._hideTrackWhenUnscrollable || scrollable,
         });
@@ -543,7 +544,7 @@ export class ScrollBar extends Disposable {
         });
 
         // content is smaller than viewport size
-        const scrollable = this.verticalThumbSize < viewportH - this._trackThickness;
+        const scrollable = hasScrollableOverflow(contentHeight, viewportH);
         this.verticalScrollTrack?.setProps({
             visible: !this._hideTrackWhenUnscrollable || scrollable,
         });

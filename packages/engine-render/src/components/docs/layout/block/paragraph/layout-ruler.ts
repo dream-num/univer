@@ -1789,6 +1789,7 @@ export function updateInlineDrawingPosition(
                         contentHeight: viewport.contentHeight,
                         contentWidth: viewport.contentWidth,
                         height: viewport.height,
+                        pageContentWidth: viewport.pageContentWidth,
                         viewportHeight: viewport.viewportHeight,
                     }
                     : undefined;
@@ -1895,6 +1896,7 @@ function __getDrawingPosition(
                 contentHeight: viewport.contentHeight,
                 contentWidth: viewport.contentWidth,
                 height: viewport.height,
+                pageContentWidth: viewport.pageContentWidth,
                 viewportHeight: viewport.viewportHeight,
             }
             : undefined;

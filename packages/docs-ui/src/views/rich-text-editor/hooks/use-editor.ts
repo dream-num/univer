@@ -26,13 +26,14 @@ export interface IUseEditorProps {
     editorId: string;
     initialValue: Nullable<IDocumentData | string>;
     container: RefObject<HTMLDivElement>;
+    preserveHostFocus?: boolean;
     autoFocus?: boolean;
     isSingle?: boolean;
     canvasStyle?: IEditorCanvasStyle;
 }
 
 export function useEditor(opts: IUseEditorProps) {
-    const { editorId, initialValue, container, autoFocus: _autoFocus, isSingle, canvasStyle } = opts;
+    const { editorId, initialValue, container, preserveHostFocus, autoFocus: _autoFocus, isSingle, canvasStyle } = opts;
     const autoFocus = useMemo(() => _autoFocus ?? false, []);
     const [editor, setEditor] = useState<Editor>();
     const editorService = useDependency(IEditorService);
@@ -70,6 +71,7 @@ export function useEditor(opts: IUseEditorProps) {
                     canvasStyle,
                     editorUnitId: editorId,
                     initialSnapshot: snapshot,
+                    preserveHostFocus,
                 },
                 container.current
             );

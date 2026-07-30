@@ -135,10 +135,12 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
     return (
         <div onClick={(e) => e.preventDefault()}>
             <div onMouseDown={handleEditorMouseDown}>
+                {/* Comments are hosted by Sheets/Docs, so editing should not replace the host's global focus. */}
                 <RichTextEditor
                     className="univer-w-full"
                     editorRef={editor}
                     editorId={editorId}
+                    preserveHostFocus
                     autoFocus={autoFocus}
                     keyboardEventConfig={keyboardEventConfig}
                     placeholder={localeService.t<LocaleKey>('thread-comment-ui.editor.placeholder')}

@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-/* eslint-disable import/consistent-type-specifier-style -- Keep type and value imports from one package in one declaration. */
-import { type ICommand, ICommandService } from '@univerjs/core';
+import type { ICommand } from '@univerjs/core';
+import type { Documents, DocumentSkeleton, ITextRangeWithStyle } from '@univerjs/engine-render';
+import type { IFindQuery } from '@univerjs/find-replace';
+import { ICommandService } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService, DocTextResolverService, RichTextEditingMutation } from '@univerjs/docs';
 import { DocBackScrollRenderController, getTextRangeFromCharIndex } from '@univerjs/docs-ui';
 import { createCommandTestBed } from '@univerjs/docs-ui/commands/commands/__tests__/create-command-test-bed';
-import { type Documents, type DocumentSkeleton, IRenderManagerService, type ITextRangeWithStyle } from '@univerjs/engine-render';
-import { FindBy, FindDirection, FindScope, type IFindQuery } from '@univerjs/find-replace';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { FindBy, FindDirection, FindScope } from '@univerjs/find-replace';
 import { firstValueFrom } from 'rxjs';
-/* eslint-enable import/consistent-type-specifier-style */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DocsReplaceCommand } from '../../commands/commands/docs-replace.command';
 import { DocsFindRenderController } from '../../controllers/docs-find-render.controller';

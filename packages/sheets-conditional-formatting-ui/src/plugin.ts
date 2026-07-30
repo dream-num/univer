@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IUniverSheetsConditionalFormattingUIConfig } from './config/config';
 import {
     DependentOn,
     ICommandService,
@@ -44,13 +45,11 @@ import { AddTextCfCommand } from './commands/commands/add-text-cf.command';
 import { AddTimePeriodCfCommand } from './commands/commands/add-time-period-cf.command';
 import { AddUniqueValuesCfCommand } from './commands/commands/add-unique-values-cf.command';
 import { OpenConditionalFormattingOperator } from './commands/operations/open-conditional-formatting-panel';
-/* eslint-disable import/consistent-type-specifier-style -- Keep type and value imports from one module in one declaration. */
 import {
     defaultPluginConfig,
-    type IUniverSheetsConditionalFormattingUIConfig,
+
     SHEETS_CONDITIONAL_FORMATTING_UI_PLUGIN_CONFIG_KEY,
 } from './config/config';
-/* eslint-enable import/consistent-type-specifier-style */
 import { ConditionalFormattingFormulaRefRangeController } from './controllers/cf-formula-ref-range.controller';
 import { ConditionalFormattingAutoFillController } from './controllers/cf.auto-fill.controller';
 import { ConditionalFormattingClearController } from './controllers/cf.clear.controller';

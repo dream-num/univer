@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import type { IFindQuery, IFindReplaceProvider } from '@univerjs/find-replace';
+import type { DocumentDataModel, Nullable, UnitModel } from '@univerjs/core';
 
-/* eslint-disable import/consistent-type-specifier-style -- Keep type and value imports from one package in one declaration. */
-import { Disposable, type DocumentDataModel, Inject, Injector, IUniverInstanceService, type Nullable, type UnitModel, UniverInstanceType } from '@univerjs/core';
-/* eslint-enable import/consistent-type-specifier-style */
+import type { IFindQuery, IFindReplaceProvider } from '@univerjs/find-replace';
+import { Disposable, Inject, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { DocsFindRenderController } from '../controllers/docs-find-render.controller';

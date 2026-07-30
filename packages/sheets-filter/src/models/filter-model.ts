@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-/* eslint-disable import/consistent-type-specifier-style -- Keep type and value imports from one package in one declaration. */
-import { type CellValue, CellValueType, ColorKit, Disposable, extractPureTextFromCell, type ICellData, type IRange, type IStyleData, mergeSets, type Nullable, Rectangle, Tools, type Worksheet } from '@univerjs/core';
-import { BehaviorSubject, type Observable } from 'rxjs';
+import type { CellValue, ICellData, IRange, IStyleData, Nullable, Worksheet } from '@univerjs/core';
+import type { Observable } from 'rxjs';
+import type { IAutoFilter, IColorFilters, ICustomFilter, ICustomFilters, IFilterColumn, IFilters } from './types';
+import { CellValueType, ColorKit, Disposable, extractPureTextFromCell, mergeSets, Rectangle, Tools } from '@univerjs/core';
+import { BehaviorSubject } from 'rxjs';
 import { DEFAULT_FILTER_FONT_COLOR } from '../common/const';
 import { ensureNumeric, getCustomFilterFn, isNumericFilterFn, notEquals } from './custom-filters';
-import { CustomFilterOperator, FilterBy, type IAutoFilter, type IColorFilters, type ICustomFilter, type ICustomFilters, type IFilterColumn, type IFilters } from './types';
-/* eslint-enable import/consistent-type-specifier-style */
+import { CustomFilterOperator, FilterBy } from './types';
 
 const EMPTY = () => new Set<number>();
 

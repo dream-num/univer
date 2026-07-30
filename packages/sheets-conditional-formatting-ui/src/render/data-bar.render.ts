@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-/* eslint-disable import/consistent-type-specifier-style -- Keep type and value imports from one package in one declaration. */
+import type { IRange, IScale } from '@univerjs/core';
+import type { UniverRenderingContext } from '@univerjs/engine-render';
 import type { IDataBarCellData } from '@univerjs/sheets-conditional-formatting/models/conditional-formatting-cell-data';
-import { type IRange, type IScale, Range } from '@univerjs/core';
-import { FIX_ONE_PIXEL_BLUR_OFFSET, type UniverRenderingContext } from '@univerjs/engine-render';
-import { SheetExtension, type SpreadsheetRenderSkeleton } from '@univerjs/sheets-ui';
-/* eslint-enable import/consistent-type-specifier-style */
+import type { SpreadsheetRenderSkeleton } from '@univerjs/sheets-ui';
+import { Range } from '@univerjs/core';
+import { FIX_ONE_PIXEL_BLUR_OFFSET } from '@univerjs/engine-render';
+import { SheetExtension } from '@univerjs/sheets-ui';
 
 export const dataBarUKey = 'sheet-conditional-rule-data-bar';
 

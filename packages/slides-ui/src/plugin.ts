@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-/* eslint-disable import/consistent-type-specifier-style -- Keep type and value imports from one package in one declaration. */
+import type { Dependency } from '@univerjs/core';
+import type { SlideDataModel } from '@univerjs/slides';
+import type { IUniverSlidesUIConfig } from './config/config';
 import {
-    type Dependency,
+
     DependentOn,
     IConfigService,
     Inject,
@@ -31,11 +33,10 @@ import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverDrawingPlugin } from '@univerjs/drawing';
 import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
-import { CanvasObjectProviderRegistry, type SlideDataModel, UniverSlidesPlugin } from '@univerjs/slides';
+import { CanvasObjectProviderRegistry, UniverSlidesPlugin } from '@univerjs/slides';
 import { UniverUIPlugin } from '@univerjs/ui';
 import pkg from '../package.json';
-import { defaultPluginConfig, type IUniverSlidesUIConfig, SLIDES_UI_PLUGIN_CONFIG_KEY } from './config/config';
-/* eslint-enable import/consistent-type-specifier-style */
+import { defaultPluginConfig, SLIDES_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { CanvasView } from './controllers/canvas-view';
 import { ComponentsController } from './controllers/components.controller';
 import { SlideEditingRenderController } from './controllers/slide-editing.render-controller';

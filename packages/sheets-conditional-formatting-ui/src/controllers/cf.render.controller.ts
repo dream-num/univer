@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
+import type { ICellDataForSheetInterceptor, IRange, Workbook } from '@univerjs/core';
+import type { IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
 import type { IConditionalFormattingCellData } from '@univerjs/sheets-conditional-formatting/models/conditional-formatting-cell-data';
-/* eslint-disable import/consistent-type-specifier-style -- Keep type and value imports from one package in one declaration. */
 import {
     Disposable,
-    type ICellDataForSheetInterceptor,
+
     Inject,
     InterceptorEffectEnum,
-    type IRange,
+
     IUniverInstanceService,
     UniverInstanceType,
-    type Workbook,
+
 } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
@@ -32,9 +33,8 @@ import {
     ConditionalFormattingRuleModel,
     ConditionalFormattingService,
     ConditionalFormattingViewModel,
-    type IConditionFormattingRule,
+
 } from '@univerjs/sheets-conditional-formatting';
-/* eslint-enable import/consistent-type-specifier-style */
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { merge } from 'rxjs';
 import { bufferTime, filter } from 'rxjs/operators';

@@ -15,12 +15,11 @@
  */
 
 import type { IColorScale, IConditionFormattingRule } from '../type';
+import type { IContext } from './base-calculate-unit';
 import { CellValueType, ColorKit, ObjectMatrix, Range, Tools } from '@univerjs/core';
 import { FormulaResultStatus } from '@univerjs/engine-formula';
 import { CFValueType } from '../../base/const';
-/* eslint-disable import/consistent-type-specifier-style -- Keep type and value imports from one module in one declaration. */
-import { BaseCalculateUnit, CalculateEmitStatus, type IContext } from './base-calculate-unit';
-/* eslint-enable import/consistent-type-specifier-style */
+import { BaseCalculateUnit, CalculateEmitStatus } from './base-calculate-unit';
 import { filterRange, getColorScaleFromValue, getValueByType, isNullable } from './utils';
 
 interface IConfigItem {

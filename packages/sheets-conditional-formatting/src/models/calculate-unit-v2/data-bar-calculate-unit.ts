@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import type { ICellData } from '@univerjs/core';
 import type { IConditionFormattingRule, IDataBar } from '../type';
-/* eslint-disable import/consistent-type-specifier-style -- Keep type and value imports from one package in one declaration. */
-import { CellValueType, type ICellData, ObjectMatrix, Range } from '@univerjs/core';
+import type { IContext } from './base-calculate-unit';
+import { CellValueType, ObjectMatrix, Range } from '@univerjs/core';
 import { FormulaResultStatus } from '@univerjs/engine-formula';
 import {
     CFValueType,
@@ -24,8 +25,7 @@ import {
     defaultDataBarPositiveColor,
     defaultPlaceholderColor,
 } from '../../base/const';
-import { BaseCalculateUnit, CalculateEmitStatus, type IContext } from './base-calculate-unit';
-/* eslint-enable import/consistent-type-specifier-style */
+import { BaseCalculateUnit, CalculateEmitStatus } from './base-calculate-unit';
 import { filterRange, getValueByType, isNullable } from './utils';
 
 const getSafeValue = (v: number) => Math.max(Math.min(100, v), 0);

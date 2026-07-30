@@ -14,30 +14,30 @@
  * limitations under the License.
  */
 
-/* eslint-disable import/consistent-type-specifier-style -- Keep type and value imports from one package in one declaration. */
+import type { IDisposable, Nullable, UnitModel } from '@univerjs/core';
+import type { Observable } from 'rxjs';
 import {
     createIdentifier,
     Disposable,
     DisposableCollection,
     ICommandService,
     IContextService,
-    type IDisposable,
+
     Inject,
     Injector,
     IUniverInstanceService,
-    type Nullable,
+
     toDisposable,
-    type UnitModel,
+
 } from '@univerjs/core';
 import {
     BehaviorSubject,
     combineLatest,
     debounceTime,
-    type Observable,
+
     Subject,
     throttleTime,
 } from 'rxjs';
-/* eslint-enable import/consistent-type-specifier-style */
 
 import { FIND_REPLACE_AVAILABLE, FIND_REPLACE_REPLACE_REVEALED } from './context-keys';
 

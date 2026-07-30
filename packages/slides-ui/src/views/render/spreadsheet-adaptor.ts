@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-/* eslint-disable import/consistent-type-specifier-style -- Keep type and value imports from one package in one declaration. */
+import type { EventState } from '@univerjs/core';
+import type { IScrollObserverParam, IWheelEvent } from '@univerjs/engine-render';
+import type { IPageElement } from '@univerjs/slides';
 import {
-    type EventState,
+
     IConfigService,
     IContextService,
     Inject,
@@ -27,8 +29,7 @@ import {
 } from '@univerjs/core';
 import {
     getColor,
-    type IScrollObserverParam,
-    type IWheelEvent,
+
     Rect,
     Scene,
     SceneViewer,
@@ -43,11 +44,10 @@ import {
     SpreadsheetRowHeader,
 } from '@univerjs/sheets-ui';
 import {
-    type IPageElement,
+
     ObjectAdaptor,
     PageElementType,
 } from '@univerjs/slides';
-/* eslint-enable import/consistent-type-specifier-style */
 
 enum SHEET_VIEW_KEY {
     MAIN = 'spreadInSlide',

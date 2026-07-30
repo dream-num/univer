@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-/* eslint-disable import/consistent-type-specifier-style -- Keep type and value imports from one package in one declaration. */
+import type { DocumentDataModel, ITextRange, Nullable } from '@univerjs/core';
+import type { IFindMatch, IFindMoveParams, IFindQuery, IReplaceAllResult } from '@univerjs/find-replace';
+import type { IDocsReplaceCommandParams } from '../commands/commands/docs-replace.command';
 import {
-    type DocumentDataModel,
+
     fromCallback,
     ICommandService,
     Inject,
-    type ITextRange,
-    type Nullable,
+
     toDisposable,
 } from '@univerjs/core';
 import {
@@ -29,10 +30,9 @@ import {
     DocTextResolverService,
     RichTextEditingMutation,
 } from '@univerjs/docs';
-import { FindModel, type IFindMatch, type IFindMoveParams, type IFindQuery, type IReplaceAllResult } from '@univerjs/find-replace';
+import { FindModel } from '@univerjs/find-replace';
 import { debounceTime, filter, merge, Subject } from 'rxjs';
-import { DocsReplaceCommand, type IDocsReplaceCommandParams } from '../commands/commands/docs-replace.command';
-/* eslint-enable import/consistent-type-specifier-style */
+import { DocsReplaceCommand } from '../commands/commands/docs-replace.command';
 import { findDocRanges } from '../controllers/utils';
 
 export const DOCS_FIND_REPLACE_PROVIDER = 'docs-find-replace-provider';

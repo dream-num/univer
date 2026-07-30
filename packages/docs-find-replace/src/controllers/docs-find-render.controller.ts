@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
+import type { Nullable } from '@univerjs/core';
 import type { DocSkeletonManagerService } from '@univerjs/docs';
-import type { DocsFindModel } from '../models/docs-find.model';
 
-/* eslint-disable import/consistent-type-specifier-style -- Keep type and value imports from one package in one declaration. */
-import { ColorKit, Disposable, Inject, type Nullable, ThemeService, toDisposable } from '@univerjs/core';
+import type { Documents, ITextSelectionStyle } from '@univerjs/engine-render';
+import type { DocsFindModel } from '../models/docs-find.model';
+import { ColorKit, Disposable, Inject, ThemeService, toDisposable } from '@univerjs/core';
 import { DocBackScrollRenderController, getTextRangeFromCharIndex } from '@univerjs/docs-ui';
-import { type Documents, IRenderManagerService, type ITextSelectionStyle } from '@univerjs/engine-render';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { merge } from 'rxjs';
-/* eslint-enable import/consistent-type-specifier-style */
 
 export class DocsFindRenderController extends Disposable {
     private readonly _highlights: Array<{ dispose(): void }> = [];

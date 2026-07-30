@@ -58,7 +58,7 @@ function createEventSubject() {
     };
 }
 
-function createController(options: { readonly?: boolean; hasEditor?: boolean; embedRecentInteraction?: boolean; embedContains?: boolean; unitId?: string; currentSelectionUnitId?: string; embedRuntimeFocusCoordinator?: EmbedRuntimeFocusCoordinator } = {}) {
+function createController(options: { readonly?: boolean; hasEditor?: boolean; preserveHostFocus?: boolean; embedRecentInteraction?: boolean; embedContains?: boolean; unitId?: string; currentSelectionUnitId?: string; embedRuntimeFocusCoordinator?: EmbedRuntimeFocusCoordinator } = {}) {
     const refreshSelection$ = new Subject<any>();
     const textSelectionInner$ = new Subject<any>();
     const currentSkeleton$ = new Subject<any>();
@@ -121,6 +121,7 @@ function createController(options: { readonly?: boolean; hasEditor?: boolean; em
         : null;
     const editorService = {
         getEditor: vi.fn(() => editor),
+        getEditorRenderConfig: vi.fn(() => ({ preserveHostFocus: options.preserveHostFocus })),
         focus: vi.fn(),
         getFocusId: vi.fn(() => null),
     };
@@ -408,6 +409,20 @@ describe('DocSelectionRenderController', () => {
         expect(stopPropagation).toHaveBeenCalled();
         expect(docSelectionRenderService.__handleDblClick).toHaveBeenCalled();
         expect(docSelectionRenderService.__handleTripleClick).toHaveBeenCalled();
+
+        controller.dispose();
+    });
+
+    it('preserves the host unit focus for configured editors', () => {
+        const { controller, document, editorService, instanceService } = createController({
+            hasEditor: true,
+            preserveHostFocus: true,
+        });
+
+        document.onPointerDown$.emit({ offsetX: 11, offsetY: 22, button: 0 }, { stopPropagation: vi.fn() });
+
+        expect(editorService.focus).toHaveBeenCalledWith('doc-1');
+        expect(instanceService.focusUnit).not.toHaveBeenCalled();
 
         controller.dispose();
     });

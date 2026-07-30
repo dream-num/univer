@@ -25,12 +25,13 @@ import {
     IContextService,
     Injector,
     IUniverInstanceService,
+    numberToABC,
     ThemeService,
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionRenderService, IEditorService } from '@univerjs/docs-ui';
-import { DeviceInputEventType } from '@univerjs/engine-render';
+import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import {
     ComponentManager,
     DISABLE_AUTO_FOCUS_KEY,
@@ -41,7 +42,7 @@ import {
     useSidebarClick,
 } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
-import { map, startWith } from 'rxjs';
+import { map, skip, startWith } from 'rxjs';
 import {
     SetCellEditVisibleArrowOperation,
     SetCellEditVisibleOperation,
@@ -50,6 +51,8 @@ import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY } from '../../common/keys';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
 import { SheetCellEditorResizeService } from '../../services/editor/cell-editor-resize.service';
+import { SheetScrollManagerService } from '../../services/scroll-manager.service';
+import { genNormalSelectionStyle } from '../../services/selection/const';
 import {
     ISheetEmbedFloatingGeometryService,
     ISheetEmbedInteractionBoundaryService,
@@ -213,6 +216,7 @@ export function EditorContainer() {
     const componentManager = useDependency(ComponentManager);
     const editorBridgeService = useDependency(IEditorBridgeService);
     const cellEditorResizeService = useDependency(SheetCellEditorResizeService);
+    const renderManagerService = useDependency(IRenderManagerService);
     const rootRef = useRef<HTMLDivElement>(null);
     const pointerRefocusTimerRef = useRef<number | undefined>(undefined);
     const visible = useObservable(editorBridgeService.visible$);
@@ -226,6 +230,10 @@ export function EditorContainer() {
     const FormulaEditor = componentManager.get(EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY);
     const editState = useObservable(editorBridgeService.currentEditCellState$);
     const darkMode = useObservable(themeService.darkMode$, themeService.darkMode);
+    const [showEditCellAddress, setShowEditCellAddress] = useState(false);
+    const editCellAddress = editState ? `${numberToABC(editState.column)}${editState.row + 1}` : null;
+    // The editor border uses the normal selection stroke, so the address label stays visually in sync with it.
+    const editorBorderColor = genNormalSelectionStyle(themeService).stroke;
     const focusCoordinator = injector.has(ISheetEmbedRuntimeFocusCoordinator)
         ? injector.get(ISheetEmbedRuntimeFocusCoordinator)
         : undefined;
@@ -246,6 +254,36 @@ export function EditorContainer() {
         false,
         [editState?.unitId, focusCoordinator, instanceService, visible?.unitId]
     );
+
+    useEffect(() => {
+        setShowEditCellAddress(false);
+        if (!visible?.visible || !editState?.unitId) {
+            return undefined;
+        }
+
+        const scrollManagerService = renderManagerService
+            .getRenderUnitById(editState.unitId)
+            ?.with(SheetScrollManagerService);
+        if (!scrollManagerService) {
+            return undefined;
+        }
+
+        // The behavior subject replays the existing position; only later emissions belong to this edit session.
+        const subscription = scrollManagerService.validViewportScrollInfo$.pipe(skip(1)).subscribe((scrollInfo) => {
+            if (scrollInfo) {
+                setShowEditCellAddress(true);
+            }
+        });
+
+        return () => subscription.unsubscribe();
+    }, [
+        editState?.column,
+        editState?.row,
+        editState?.sheetId,
+        editState?.unitId,
+        renderManagerService,
+        visible?.visible,
+    ]);
 
     useEffect(() => {
         const subscription = cellEditorManagerService.state$.subscribe((param) => {
@@ -649,6 +687,22 @@ export function EditorContainer() {
                 }),
             }}
         >
+            {visible?.visible && showEditCellAddress && editCellAddress && (
+                <div
+                    data-u-comp="sheet-cell-editor-address"
+                    className="
+                      univer-pointer-events-none univer-absolute univer-left-0 univer-top-0 univer-z-10
+                      univer-whitespace-nowrap univer-rounded-t univer-px-1.5 univer-text-xs univer-leading-5
+                    "
+                    style={{
+                        backgroundColor: editorBorderColor,
+                        color: themeService.getColorFromTheme('white'),
+                        transform: 'translateY(-100%)',
+                    }}
+                >
+                    {editCellAddress}
+                </div>
+            )}
             {FormulaEditor && (
                 <FormulaEditor
                     editorId={DOCS_NORMAL_EDITOR_UNIT_ID_KEY}

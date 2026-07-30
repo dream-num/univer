@@ -36,7 +36,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { IEditorService } from '@univerjs/docs-ui';
-import { DeviceInputEventType } from '@univerjs/engine-render';
+import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import { ComponentManager, connectInjector, ILayoutService, ISidebarService } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -46,6 +46,7 @@ import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY } from '../../../common/keys';
 import { IEditorBridgeService } from '../../../services/editor-bridge.service';
 import { ICellEditorManagerService } from '../../../services/editor/cell-editor-manager.service';
 import { SheetCellEditorResizeService } from '../../../services/editor/cell-editor-resize.service';
+import { SheetScrollManagerService } from '../../../services/scroll-manager.service';
 import {
     EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE,
     EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE,
@@ -145,6 +146,7 @@ function createTestBed(options: { docSelectionIsFocusing?: boolean; focusedUnitI
         resizeCellEditor: vi.fn(),
         fitTextSize: vi.fn(),
     };
+    const validViewportScrollInfo$ = new BehaviorSubject<Nullable<Record<string, never>>>({});
     const docSelectionRenderService = {
         isFocusing: options.docSelectionIsFocusing ?? true,
         focus: vi.fn(),
@@ -195,16 +197,25 @@ function createTestBed(options: { docSelectionIsFocusing?: boolean; focusedUnitI
         useValue: {
             darkMode: false,
             darkMode$: of(false),
-            getColorFromTheme: () => '#fff',
+            getColorFromTheme: (color: string) => color === 'primary.600' ? '#00aa66' : '#fff',
         } as never,
     }]);
     injector.add([SheetCellEditorResizeService, { useValue: cellEditorResizeService as never }]);
+    injector.add([IRenderManagerService, {
+        useValue: {
+            getRenderUnitById: () => ({
+                with: (token: unknown) => token === SheetScrollManagerService
+                    ? { validViewportScrollInfo$ }
+                    : null,
+            }),
+        } as never,
+    }]);
     injector.add([ILayoutService, { useValue: { focus: vi.fn() } as never }]);
     injector.add([ISidebarService, { useValue: { getContainer: () => null } as never }]);
     injector.add([ISheetEmbedRuntimeFocusCoordinator, { useValue: focusCoordinator }]);
     injector.add([ISheetEmbedInteractionBoundaryService, { useValue: interactionBoundaryService }]);
 
-    return { injector, editorBridgeService, focusCoordinator, interactionBoundaryService, docSelectionRenderService, cellEditorResizeService };
+    return { injector, editorBridgeService, focusCoordinator, interactionBoundaryService, docSelectionRenderService, cellEditorResizeService, validViewportScrollInfo$ };
 }
 
 function renderEditorContainer(root: Root, injector: Injector): void {
@@ -558,6 +569,53 @@ describe('EditorContainer embed focus lease', () => {
         });
 
         expect(cellEditorResizeService.fitTextSize).toHaveBeenCalledTimes(1);
+    });
+
+    it('shows the edited cell address after scrolling and resets it for the next edit session', async () => {
+        const { injector, editorBridgeService, validViewportScrollInfo$ } = createTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        await act(async () => {
+            renderEditorContainer(root!, injector);
+            await Promise.resolve();
+        });
+
+        expect(container.querySelector('[data-u-comp="sheet-cell-editor-address"]')).toBeNull();
+
+        await act(async () => {
+            validViewportScrollInfo$.next({});
+            await Promise.resolve();
+        });
+
+        const address = container.querySelector('[data-u-comp="sheet-cell-editor-address"]') as HTMLElement;
+
+        expect(address.textContent).toBe('A1');
+        expect(address.style.backgroundColor).toBe('rgb(0, 170, 102)');
+        expect(address.style.color).toBe('rgb(255, 255, 255)');
+
+        await act(async () => {
+            editorBridgeService.changeVisible({
+                visible: false,
+                eventType: DeviceInputEventType.PointerUp,
+                unitId: 'sheet-1',
+            });
+            await Promise.resolve();
+        });
+
+        expect(container.querySelector('[data-u-comp="sheet-cell-editor-address"]')).toBeNull();
+
+        await act(async () => {
+            editorBridgeService.changeVisible({
+                visible: true,
+                eventType: DeviceInputEventType.Dblclick,
+                unitId: 'sheet-1',
+            });
+            await Promise.resolve();
+        });
+
+        expect(container.querySelector('[data-u-comp="sheet-cell-editor-address"]')).toBeNull();
     });
 
     it('keeps the cell editor visible while formula range selection moves focus to the sheet canvas', async () => {

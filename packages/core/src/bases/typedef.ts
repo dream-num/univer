@@ -54,23 +54,41 @@ export interface IBaseResources {
 }
 
 export interface IBaseAttachment {
-    /** Stable attachment identifier. Use the uploaded file id for remote attachments. */
+    /**
+     * Stable attachment identifier.
+     *
+     * Keep this value unique within one attachment cell. For an uploaded attachment, use the
+     * identifier returned by the attachment service.
+     */
     id: string;
-    /** Display name, including the file extension when available. */
+    /** User-visible file name. Include the extension so clients can classify the file when `mimeType` is absent. */
     name: string;
-    /** MIME type used to classify and preview the attachment. */
+    /** MIME type used to classify and preview the attachment, for example `image/webp` or `application/pdf`. */
     mimeType?: string;
-    /** File size in bytes. */
+    /** File size in bytes. This is descriptive metadata and does not affect source loading. */
     size?: number;
-    /** Image width in pixels when known. */
+    /** Image width in pixels when known. This is descriptive metadata used to reserve preview space. */
     width?: number;
-    /** Image height in pixels when known. */
+    /** Image height in pixels when known. This is descriptive metadata used to reserve preview space. */
     height?: number;
-    /** How to interpret `source`, for example UUID, URL, or Base64 data. */
+    /**
+     * How clients should resolve `source`.
+     *
+     * Facade write APIs infer `BASE64` for data URLs and otherwise default to `URL`. Set this
+     * explicitly to `UUID` for identifiers managed by an attachment service.
+     */
     sourceType?: ImageSourceType;
-    /** Canonical attachment source: an uploaded file id, URL, or Base64 data URL. */
+    /**
+     * Canonical attachment source: an uploaded file id, URL, or Base64 data.
+     *
+     * Facade write APIs require a non-empty source for every non-empty attachment entry.
+     */
     source?: string;
-    /** Optional preview source when it is distinct from the canonical attachment source. */
+    /**
+     * Optional preview source when it differs from `source`.
+     *
+     * A data URL is treated as Base64; every other value is treated as a URL.
+     */
     thumbnail?: string;
 }
 

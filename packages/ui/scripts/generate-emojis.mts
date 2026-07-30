@@ -52,6 +52,9 @@ const unicodeEmojiTestUrl = 'https://www.unicode.org/Public/17.0.0/emoji/emoji-t
 const cldrJsonVersion = '48.2.0';
 const cldrJsonBaseUrl = `https://cdn.jsdelivr.net/gh/unicode-org/cldr-json@${cldrJsonVersion}/cldr-json`;
 const cldrJsonDownloadConcurrency = 4;
+const downloadMaxAttempts = 3;
+const downloadRetryBaseDelayMs = 500;
+const downloadTimeoutMs = 30_000;
 const envProxyNodeArg = '--use-env-proxy';
 const envProxyRelaunchEnv = 'UNIVER_UI_EMOJI_ENV_PROXY_REEXEC';
 const emojiCategories: EmojiCategory[] = ['people', 'nature', 'foods', 'activity', 'places', 'objects', 'symbols'];
@@ -289,19 +292,46 @@ export function getEmojiSourceUrls(): string[] {
     ];
 }
 
-async function downloadText(url: string): Promise<string> {
-    let response: Response;
-    try {
-        response = await fetch(url);
-    } catch (error) {
-        throw new Error(`Failed to download ${url}`, { cause: error });
+function isRetryableDownloadStatus(status: number): boolean {
+    return status === 408 || status === 429 || status >= 500;
+}
+
+async function waitForDownloadRetry(url: string, attempt: number, reason: unknown): Promise<void> {
+    const delayMs = downloadRetryBaseDelayMs * 2 ** (attempt - 1);
+    const message = reason instanceof Error ? reason.message : String(reason);
+    console.warn(`Failed to download ${url}: ${message}. Retrying in ${delayMs}ms (${attempt}/${downloadMaxAttempts - 1}).`);
+    await new Promise<void>((resolve) => setTimeout(resolve, delayMs));
+}
+
+export async function downloadText(url: string): Promise<string> {
+    for (let attempt = 1; attempt <= downloadMaxAttempts; attempt += 1) {
+        let response: Response;
+        try {
+            response = await fetch(url, {
+                signal: AbortSignal.timeout(downloadTimeoutMs),
+            });
+        } catch (error) {
+            if (attempt === downloadMaxAttempts) {
+                throw new Error(`Failed to download ${url} after ${downloadMaxAttempts} attempts`, { cause: error });
+            }
+
+            await waitForDownloadRetry(url, attempt, error);
+            continue;
+        }
+
+        if (response.ok) {
+            return response.text();
+        }
+
+        const error = new Error(`${response.status} ${response.statusText}`);
+        if (!isRetryableDownloadStatus(response.status) || attempt === downloadMaxAttempts) {
+            throw new Error(`Failed to download ${url}: ${error.message}`);
+        }
+
+        await waitForDownloadRetry(url, attempt, error);
     }
 
-    if (!response.ok) {
-        throw new Error(`Failed to download ${url}: ${response.status} ${response.statusText}`);
-    }
-
-    return response.text();
+    throw new Error(`Failed to download ${url}`);
 }
 
 async function downloadUnicodeEmojiTest(): Promise<string> {

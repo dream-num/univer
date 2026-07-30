@@ -56,12 +56,15 @@ export interface IScrollBarProps {
 
 const MIN_THUMB_SIZE = 17;
 const DEFAULT_TRACK_SIZE = 10;
+const DEFAULT_TRACK_BORDER_SIZE = 1;
 const HOVER_TRACK_SIZE = 10;
 const DEFAULT_THUMB_MARGIN = 2;
 const HOVER_THUMB_MARGIN = 1;
 const BAR_DRAG_SCROLL_THROTTLE_MS = 32;
 
 export class ScrollBar extends Disposable {
+    static readonly DEFAULT_TOTAL_SIZE = DEFAULT_TRACK_SIZE + DEFAULT_TRACK_BORDER_SIZE;
+
     _enableHorizontal: boolean = true;
     _enableVertical: boolean = true;
 
@@ -121,7 +124,7 @@ export class ScrollBar extends Disposable {
     private _hThumbMargin = DEFAULT_THUMB_MARGIN;
 
     // origin: barBorder, used for strokeWidth of scroll track, is draw on the center of the track border, so the visible border thickness is barBorder / 2 at both side of the track, and the visible track thickness is `trackThickness - barBorder`.
-    private _trackBorderThickness = 1;
+    private _trackBorderThickness = DEFAULT_TRACK_BORDER_SIZE;
     private _thumbLengthRatio = 1;
 
     /**

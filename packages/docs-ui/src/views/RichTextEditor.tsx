@@ -38,6 +38,8 @@ export interface IRichTextEditorProps {
     onFocusChange?: (isFocus: boolean, newValue?: string) => void;
     initialValue?: IDocumentData | string;
     onClickOutside?: () => void;
+    /** Keep the globally focused unit on the editor's host while this editor receives input focus. */
+    preserveHostFocus?: boolean;
     keyboardEventConfig?: IKeyboardEventConfig;
     moveCursor?: boolean;
     style?: CSSProperties;
@@ -60,6 +62,7 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
         onFocusChange: _onFocusChange,
         initialValue,
         onClickOutside: _onClickOutside,
+        preserveHostFocus,
         keyboardEventConfig,
         moveCursor = true,
         style,
@@ -86,6 +89,7 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
         editorId,
         initialValue,
         container: formulaEditorContainerRef,
+        preserveHostFocus,
         autoFocus,
         isSingle,
     });

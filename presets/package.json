@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/presets",
-    "version": "1.0.0-alpha.7",
+    "version": "1.0.0-alpha.8",
     "private": false,
     "description": "Build Univer apps faster and easier with pre-configured plugin collections.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

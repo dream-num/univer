@@ -283,7 +283,7 @@ export abstract class Shape<T extends IShapeProps> extends BaseObject {
 
         // let { scaleX, scaleY } = props;
         // const { scaleX = 1, scaleY = 1 } = ctx.getScale();
-        if (!stroke || strokeWidth === 0) {
+        if (!stroke || strokeWidth === undefined || !Number.isFinite(strokeWidth) || strokeWidth <= 0) {
             return;
         }
 

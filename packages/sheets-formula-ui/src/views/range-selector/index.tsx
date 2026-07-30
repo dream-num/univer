@@ -343,6 +343,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
                     <RichTextEditor
                         isSingle
                         {...props}
+                        preserveHostFocus
                         onFocusChange={(focusing, newValue) => {
                             setFocusing(focusing);
                             onFocusChange?.(focusing, newValue);

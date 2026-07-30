@@ -103,6 +103,8 @@ export interface IEditorCanvasStyle {
 
 export interface IEditorConfigParams {
     initialSnapshot: IDocumentData;
+    /** Keep the globally focused unit on the editor's host while this editor receives input focus. */
+    preserveHostFocus?: boolean;
     cancelDefaultResizeListener?: boolean;
     canvasStyle?: IEditorCanvasStyle;
     // A Boolean attribute which, if present, indicates that the editor should automatically have focus.

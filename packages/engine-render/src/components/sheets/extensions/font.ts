@@ -39,7 +39,6 @@ import {
     getDisplayValueFromCell,
     HorizontalAlign,
     Tools,
-    VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
 import { FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics';
@@ -49,6 +48,7 @@ import { Text } from '../../../shape/text';
 import { SpreadsheetExtensionRegistry } from '../../extension';
 import { EXPAND_SIZE_FOR_RENDER_OVERFLOW, FONT_EXTENSION_Z_INDEX } from '../constants';
 import { DEFAULT_PADDING_DATA, getDocsSkeletonPageSize } from '../sheet.render-skeleton';
+import { calculateCellImageRect } from '../util';
 import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultFontExtension';
@@ -458,16 +458,6 @@ export class Font extends SheetExtension {
 
     private _renderImages(ctx: UniverRenderingContext, fontsConfig: IFontCacheItem, startX: number, startY: number, endX: number, endY: number) {
         const { documentSkeleton, verticalAlign, horizontalAlign } = fontsConfig;
-        const PADDING = 2;
-        const padding = fontsConfig.style?.pd;
-        const paddingLeft = padding?.l ?? PADDING;
-        const paddingRight = padding?.r ?? PADDING;
-        const paddingTop = padding?.t ?? PADDING;
-        const paddingBottom = padding?.b ?? PADDING;
-        const contentStartX = startX + paddingLeft;
-        const contentEndX = endX - paddingRight;
-        const contentStartY = startY + paddingTop;
-        const contentEndY = endY - paddingBottom;
 
         const documentDataModel = documentSkeleton!.getViewModel().getDataModel();
         const drawingDatas = documentDataModel.getDrawings();
@@ -489,32 +479,14 @@ export class Font extends SheetExtension {
                 const width = drawingData.docTransform?.size.width ?? drawing.width;
                 const height = drawingData.docTransform?.size.height ?? drawing.height;
                 const angle = drawingData.docTransform?.angle ?? drawing.angle;
-                let x = startX;
-                let y = startY;
-
-                switch (verticalAlign) {
-                    case VerticalAlign.TOP:
-                        y = contentStartY;
-                        break;
-                    case VerticalAlign.MIDDLE:
-                        y = (contentStartY + contentEndY) / 2 - height / 2;
-                        break;
-                    default:
-                        y = contentEndY - height;
-                        break;
-                }
-
-                switch (horizontalAlign) {
-                    case HorizontalAlign.RIGHT:
-                        x = contentEndX - width;
-                        break;
-                    case HorizontalAlign.CENTER:
-                        x = (contentStartX + contentEndX) / 2 - width / 2;
-                        break;
-                    default:
-                        x = contentStartX;
-                        break;
-                }
+                const { left: x, top: y } = calculateCellImageRect({
+                    cellRect: { left: startX, top: startY, right: endX, bottom: endY },
+                    imageWidth: width,
+                    imageHeight: height,
+                    horizontalAlign,
+                    verticalAlign,
+                    padding: fontsConfig.style?.pd,
+                });
 
                 const { rotatedHeight, rotatedWidth } = rotatedBoundingBox(width, height, angle);
 

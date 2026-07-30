@@ -14,23 +14,16 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICellData, IRange, Nullable, Workbook } from '@univerjs/core';
+import type { IAccessor, IRange, Workbook } from '@univerjs/core';
 import type { IMenuItem } from '@univerjs/ui';
 import type { LocaleKey } from '../locale/types';
 import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { SheetsSelectionsService } from '@univerjs/sheets';
+import { isCellImage, SheetsSelectionsService } from '@univerjs/sheets';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { combineLatest, map, of, switchMap } from 'rxjs';
 import { SaveCellImagesCommand } from '../commands/commands/save-cell-images.command';
 
 export const SAVE_CELL_IMAGES_MENU_ID = 'sheet.menu.save-cell-images';
-
-/**
- * Check if a cell has image
- */
-function cellHasImage(cell: Nullable<ICellData>): boolean {
-    return !!(cell?.p?.drawingsOrder?.length && cell?.p?.drawingsOrder?.length > 0);
-}
 
 /**
  * Check if selection range has any images
@@ -48,7 +41,7 @@ function selectionHasImages(
     for (let row = startRow; row <= endRow; row++) {
         for (let col = startColumn; col <= endColumn; col++) {
             const cell = cellMatrix.getValue(row, col);
-            if (cellHasImage(cell)) {
+            if (isCellImage(cell?.p)) {
                 return true;
             }
         }

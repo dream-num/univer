@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 
-import type { CellValue, ICellData, IStyleData, Nullable, Styles } from '@univerjs/core';
+import type { CellValue, ICellData, IDocumentData, IStyleData, Nullable, Styles } from '@univerjs/core';
 import { CellValueType, isBooleanString, isRealNum, isTextFormat, willLoseNumericPrecision } from '@univerjs/core';
+
+export function isCellImage(documentData: Nullable<IDocumentData>): boolean {
+    return !!documentData?.drawingsOrder?.length;
+}
 
 /**
  * Get cell value type by style, new value and old value.

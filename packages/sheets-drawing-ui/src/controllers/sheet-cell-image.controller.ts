@@ -20,13 +20,16 @@ import type { ISheetLocationBase } from '@univerjs/sheets';
 import { Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, Inject, Injector, InterceptorEffectEnum } from '@univerjs/core';
 import { DocDrawingController } from '@univerjs/docs-drawing';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import { InterceptCellContentPriority, INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
+import { InterceptCellContentPriority, INTERCEPTOR_POINT, isCellImage, SheetInterceptorService } from '@univerjs/sheets';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { getDrawingSizeByCell } from './sheet-drawing-update.controller';
 
 export function resizeImageByCell(injector: Injector, location: ISheetLocationBase, cell: Nullable<ICellData>) {
-    if (cell?.p?.body?.dataStream.length === 3 && cell.p?.drawingsOrder?.length === 1) {
-        const image = cell.p.drawings![cell.p.drawingsOrder[0]]! as IImageData & IDocDrawingBase;
+    const documentData = cell?.p;
+    const drawingId = isCellImage(documentData) && documentData?.drawingsOrder?.length === 1 ? documentData.drawingsOrder[0] : undefined;
+    const image = drawingId ? documentData?.drawings?.[drawingId] as IImageData & IDocDrawingBase : undefined;
+
+    if (image && documentData) {
         const imageSize = getDrawingSizeByCell(
             injector,
             {
@@ -50,8 +53,8 @@ export function resizeImageByCell(injector: Injector, location: ISheetLocationBa
             image.docTransform!.positionH.posOffset = 0;
             image.docTransform!.positionV.posOffset = 0;
 
-            cell.p.documentStyle.pageSize!.width = Infinity;
-            cell.p.documentStyle.pageSize!.height = Infinity;
+            documentData.documentStyle.pageSize!.width = Infinity;
+            documentData.documentStyle.pageSize!.height = Infinity;
             return true;
         }
     }
@@ -93,7 +96,7 @@ export class SheetCellImageController extends Disposable {
                     effect: InterceptorEffectEnum.Style,
                     priority: InterceptCellContentPriority.CELL_IMAGE,
                     handler: (cell, pos, next) => {
-                        if (cell?.p && cell.p.drawingsOrder?.length) {
+                        if (cell && isCellImage(cell.p)) {
                             if (cell === pos.rawData) {
                                 cell = { ...pos.rawData };
                             }

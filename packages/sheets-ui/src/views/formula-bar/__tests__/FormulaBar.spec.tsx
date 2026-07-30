@@ -214,6 +214,7 @@ function createCellEditState(): ICellEditorState {
             documentModel: {
                 getBody: () => ({ customBlocks: [] }),
                 getDrawingsOrder: () => [],
+                getSnapshot: () => ({ id: 'doc-1', documentStyle: {}, drawingsOrder: [] }),
             },
         } as never,
     };

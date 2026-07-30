@@ -22,4 +22,6 @@ export * from './row-header';
 export * from './sheet-component';
 export * from './sheet.render-skeleton';
 export * from './spreadsheet';
+export { calculateCellImageRect } from './util';
+export type { ICellImageRectConfig } from './util';
 export * from './watermark';

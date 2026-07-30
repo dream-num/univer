@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injector, IUniverInstanceService } from '@univerjs/core';
+import { HorizontalAlign, Injector, IUniverInstanceService, VerticalAlign } from '@univerjs/core';
 import { IRenderManagerService, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { describe, expect, it } from 'vitest';
@@ -156,7 +156,7 @@ describe('HoverManagerService', () => {
             getUnitId: () => 'u-1',
             getActiveSheet: () => ({
                 getSheetId: () => 'sheet1',
-                getCell: () => null,
+                getCell: () => ({ p: {} }),
             }),
         };
 
@@ -195,12 +195,41 @@ describe('HoverManagerService', () => {
                     startX: 100,
                     endX: 200,
                     startY: 20,
-                    endY: 40,
+                    endY: 140,
                 },
             }),
             getOffsetByColumn: (column: number) => (column + 1) * 100,
             getOffsetByRow: (row: number) => (row + 1) * 20,
-            getFont: () => null,
+            getFont: () => ({
+                verticalAlign: VerticalAlign.UNSPECIFIED,
+                horizontalAlign: HorizontalAlign.UNSPECIFIED,
+                style: {},
+                documentSkeleton: {
+                    getSkeletonData: () => ({
+                        pages: [{
+                            skeDrawings: new Map([['image-1', {
+                                drawingId: 'image-1',
+                                aLeft: 0,
+                                aTop: 16,
+                                width: 86,
+                                height: 86,
+                            }]]),
+                        }],
+                    }),
+                    getViewModel: () => ({
+                        getDataModel: () => ({
+                            getBody: () => ({ customRanges: [], paragraphs: [] }),
+                            getDrawings: () => ({
+                                'image-1': {
+                                    docTransform: {
+                                        size: { width: 86, height: 86 },
+                                    },
+                                },
+                            }),
+                        }),
+                    }),
+                },
+            }),
             getRowIndexByOffsetY: () => 5,
             getColumnIndexByOffsetX: () => 3,
         };
@@ -304,6 +333,12 @@ describe('HoverManagerService', () => {
         expect(pointerUps.at(-1)).toEqual(expect.objectContaining({ unitId: 'u-1', row: 1, col: 1 }));
         expect(clicks.at(-1)).toEqual(expect.objectContaining({ location: expect.objectContaining({ row: 1, col: 1 }) }));
         expect(dbClicks.at(-1)).toEqual(expect.objectContaining({ location: expect.objectContaining({ row: 1, col: 1 }) }));
+
+        service.triggerMouseMove('u-1', { offsetX: 150, offsetY: 40 } as never);
+        expect(richTextNoDistinct.at(-1)?.drawing).toBeUndefined();
+
+        service.triggerMouseMove('u-1', { offsetX: 150, offsetY: 130 } as never);
+        expect(richTextNoDistinct.at(-1)?.drawing?.drawingId).toBe('image-1');
 
         service.triggerRowHeaderDbClick('u-1', 10, 10);
         service.triggerColHeaderDbClick('u-1', 100, 10);

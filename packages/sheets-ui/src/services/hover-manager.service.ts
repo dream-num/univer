@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-import type { ICustomRange, IParagraph, IPosition, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { ICellWithCoord, ICustomRange, IDocDrawingBase, IParagraph, IPosition, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type {
     IBoundRectNoAngle,
     IDocumentSkeletonDrawing,
+    IFontCacheItem,
     IMouseEvent,
     IPointerEvent,
     IRender,
 } from '@univerjs/engine-render';
 import type { ISheetLocation, ISheetLocationBase, ISheetSkeletonManagerParam } from '@univerjs/sheets';
 import { CellValueType, Disposable, isRealNum, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { IRenderManagerService, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
+import { calculateCellImageRect, IRenderManagerService, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import { BehaviorSubject, distinctUntilChanged, map, of, Subject } from 'rxjs';
 import { getHoverCellPosition } from '../common/utils';
 import { SheetScrollManagerService } from './scroll-manager.service';
@@ -92,6 +93,37 @@ export interface IHoverHeaderPosition {
 export function getLocationBase(location: ISheetLocation) {
     const { workbook, worksheet, ...locBase } = location;
     return locBase;
+}
+
+function calculateCellDrawingRects(
+    font: IFontCacheItem,
+    cell: ICellWithCoord,
+    drawings: ReturnType<typeof calculateDocSkeletonRects>['drawings']
+) {
+    const drawingData = font.documentSkeleton?.getViewModel().getDataModel().getDrawings();
+    const cellRect = {
+        left: 0,
+        top: 0,
+        right: cell.mergeInfo.endX - cell.mergeInfo.startX,
+        bottom: cell.mergeInfo.endY - cell.mergeInfo.startY,
+    };
+
+    return drawings.map((drawing) => {
+        const drawingOrigin = drawingData?.[drawing.drawingId] as IDocDrawingBase | undefined;
+        const imageWidth = drawingOrigin?.docTransform?.size.width ?? drawing.drawing.width;
+        const imageHeight = drawingOrigin?.docTransform?.size.height ?? drawing.drawing.height;
+        return {
+            ...drawing,
+            rect: calculateCellImageRect({
+                cellRect,
+                imageWidth,
+                imageHeight,
+                horizontalAlign: font.horizontalAlign,
+                verticalAlign: font.verticalAlign,
+                padding: font.style?.pd,
+            }),
+        };
+    });
 }
 
 export class HoverManagerService extends Disposable {
@@ -315,12 +347,13 @@ export class HoverManagerService extends Disposable {
                 isRealNum(cellData?.v) && (!cellData?.t || cellData.t === CellValueType.NUMBER);
             const { paddingLeft, paddingTop } = calcPadding(cell, font, isNum);
             const rects = calculateDocSkeletonRects(font.documentSkeleton, paddingLeft, paddingTop);
+            const drawingRects = calculateCellDrawingRects(font, cell, rects.drawings);
 
             const innerX = offsetX - position.startX - leftOffset;
             const innerY = offsetY - position.startY - topOffset;
             customRange = rects.links.find((link) => link.rects.some((rect) => rect.left <= innerX && innerX <= rect.right && (rect.top) <= innerY && innerY <= (rect.bottom)));
             bullet = rects.checkLists.find((list) => list.rect.left <= innerX && innerX <= list.rect.right && (list.rect.top) <= innerY && innerY <= (list.rect.bottom));
-            drawing = rects.drawings.find((drawing) => drawing.rect.left <= innerX && innerX <= drawing.rect.right && (drawing.rect.top) <= innerY && innerY <= (drawing.rect.bottom));
+            drawing = drawingRects.find((drawing) => drawing.rect.left <= innerX && innerX <= drawing.rect.right && drawing.rect.top <= innerY && innerY <= drawing.rect.bottom);
         }
 
         const rect = customRange?.rects.pop() ?? bullet?.rect ?? drawing?.rect;

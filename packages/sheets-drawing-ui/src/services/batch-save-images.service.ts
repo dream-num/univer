@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { ICellData, IRange, Nullable, Workbook } from '@univerjs/core';
+import type { ICellData, IRange, Workbook } from '@univerjs/core';
 import type { IImageData } from '@univerjs/drawing';
 import { createIdentifier, Disposable, IImageIoService, ImageSourceType, Inject, IUniverInstanceService, IURLImageService, UniverInstanceType } from '@univerjs/core';
-import { SheetsSelectionsService } from '@univerjs/sheets';
+import { isCellImage, SheetsSelectionsService } from '@univerjs/sheets';
 
 declare global {
     // eslint-disable-next-line ts/naming-convention
@@ -179,22 +179,16 @@ function rangeToA1Notation(range: IRange): string {
 }
 
 /**
- * Check if a cell has image
- */
-function cellHasImage(cell: Nullable<ICellData>): boolean {
-    return !!(cell?.p?.drawingsOrder?.length && cell?.p?.drawingsOrder?.length > 0);
-}
-
-/**
  * Get image data from cell
  */
 function getCellImageData(cell: ICellData): IImageData | null {
-    if (!cell.p?.drawingsOrder?.length || !cell.p?.drawings) {
+    const documentData = cell.p;
+    const drawingId = documentData?.drawingsOrder?.[0];
+    if (!isCellImage(documentData) || !drawingId || !documentData?.drawings) {
         return null;
     }
 
-    const drawingId = cell.p.drawingsOrder[0];
-    const drawing = cell.p.drawings[drawingId];
+    const drawing = documentData.drawings[drawingId];
 
     if (!drawing || !('source' in drawing) || !('imageSourceType' in drawing)) {
         return null;
@@ -274,7 +268,7 @@ export class BatchSaveImagesService extends Disposable implements IBatchSaveImag
                 for (let col = startColumn; col <= endColumn; col++) {
                     const cell = cellMatrix.getValue(row, col);
 
-                    if (cellHasImage(cell)) {
+                    if (isCellImage(cell?.p)) {
                         const imageData = getCellImageData(cell!);
                         if (imageData) {
                             images.push({
@@ -311,7 +305,7 @@ export class BatchSaveImagesService extends Disposable implements IBatchSaveImag
                 for (let col = startColumn; col <= endColumn; col++) {
                     const cell = cellMatrix.getValue(row, col);
 
-                    if (cellHasImage(cell)) {
+                    if (isCellImage(cell?.p)) {
                         const imageData = getCellImageData(cell!);
                         if (imageData) {
                             images.push({

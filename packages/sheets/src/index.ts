@@ -15,7 +15,7 @@
  */
 
 export type { ICellOverGridPosition, ISheetOverGridPosition } from './basics/cell-position';
-export { checkCellValueType } from './basics/cell-type';
+export { checkCellValueType, isCellImage } from './basics/cell-type';
 export {
     COMMAND_LISTENER_SKELETON_CHANGE,
     COMMAND_LISTENER_VALUE_CHANGE,

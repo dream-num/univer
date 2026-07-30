@@ -29,6 +29,7 @@ import { DeviceInputEventType } from '@univerjs/engine-render';
 import { CheckMarkIcon, CloseIcon, DownIcon, FxIcon } from '@univerjs/icons';
 import { UnitAction } from '@univerjs/protocol';
 import {
+    isCellImage,
     RangeProtectionCache,
     RangeProtectionRuleModel,
     SheetsSelectionsService,
@@ -291,8 +292,8 @@ export function FormulaBar(props: IProps) {
         shouldSkipFocus.current = false;
     };
 
-    const isCellImage = (editState?.documentLayoutObject.documentModel?.getDrawingsOrder()?.length ?? 0) > 0;
-    const hideEditor = isCellImage || viewDisable;
+    const cellImage = isCellImage(editState?.documentLayoutObject.documentModel?.getSnapshot());
+    const hideEditor = cellImage || viewDisable;
 
     return (
         <div

@@ -14,13 +14,71 @@
  * limitations under the License.
  */
 
-import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY } from '@univerjs/core';
+import { DataStreamTreeTokenType, DOCS_NORMAL_EDITOR_UNIT_ID_KEY } from '@univerjs/core';
 import { INTERCEPTOR_POINT } from '@univerjs/sheets';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
-import { SheetCellImageController } from '../sheet-cell-image.controller';
+import { resizeImageByCell, SheetCellImageController } from '../sheet-cell-image.controller';
+
+const DRAWING_ID = 'drawing-1';
+
+function createCellImage(dataStream: string) {
+    return {
+        p: {
+            body: { dataStream },
+            drawingsOrder: [DRAWING_ID],
+            drawings: {
+                [DRAWING_ID]: {
+                    transform: { width: 20, height: 10, left: 1, top: 1 },
+                    docTransform: {
+                        size: { width: 20, height: 10 },
+                        angle: 0,
+                        positionH: { posOffset: 1 },
+                        positionV: { posOffset: 1 },
+                    },
+                },
+            },
+            documentStyle: { pageSize: { width: 20, height: 10 } },
+        },
+    };
+}
+
+function createInjector() {
+    const skeleton = {
+        getCellWithCoordByIndex: vi.fn(() => ({
+            mergeInfo: { startX: 0, endX: 100, startY: 0, endY: 50 },
+        })),
+    };
+    const skeletonManagerService = {
+        getSkeletonParam: vi.fn(() => ({ skeleton })),
+    };
+    const render = {
+        with: vi.fn(() => skeletonManagerService),
+    };
+    const renderManagerService = {
+        getRenderUnitById: vi.fn(() => render),
+    };
+
+    return { get: vi.fn(() => renderManagerService) } as never;
+}
 
 describe('SheetCellImageController', () => {
+    it.each([
+        DataStreamTreeTokenType.CUSTOM_BLOCK + DataStreamTreeTokenType.PARAGRAPH + DataStreamTreeTokenType.SECTION_BREAK,
+        DataStreamTreeTokenType.PARAGRAPH + DataStreamTreeTokenType.CUSTOM_BLOCK + DataStreamTreeTokenType.PARAGRAPH + DataStreamTreeTokenType.SECTION_BREAK,
+    ])('resizes cell images for supported document structures', (dataStream) => {
+        const cell = createCellImage(dataStream);
+
+        expect(resizeImageByCell(createInjector(), {
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
+            row: 1,
+            col: 2,
+        }, cell as never)).toBe(true);
+        expect(cell.p.drawings[DRAWING_ID].transform).toEqual({ width: 96, height: 48, left: 0, top: 0 });
+        expect(cell.p.drawings[DRAWING_ID].docTransform.size).toEqual({ width: 96, height: 48 });
+    });
+
     it('reloads editor drawing data when the embedded editor opens and clears it when closed', () => {
         let interceptor: any;
         const visible$ = new Subject<{ visible: boolean }>();

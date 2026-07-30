@@ -82,6 +82,7 @@ import {
     COMMAND_LISTENER_SKELETON_CHANGE,
     InsertColMutation,
     InsertRowMutation,
+    isCellImage,
     MoveColsMutation,
     MoveRowsMutation,
     REF_SELECTIONS_ENABLED,
@@ -495,10 +496,10 @@ export class EditingRenderController extends Disposable {
                 }
             );
         };
-        const isCellImage = this._isCellImageData(documentDataModel.getSnapshot());
-        this._submitEmptyCellImageEdit = isCellImage && eventType === DeviceInputEventType.Keyboard && keycode === KeyCode.BACKSPACE;
+        const cellImage = isCellImage(documentDataModel.getSnapshot());
+        this._submitEmptyCellImageEdit = cellImage && eventType === DeviceInputEventType.Keyboard && keycode === KeyCode.BACKSPACE;
 
-        if (isCellImage) {
+        if (cellImage) {
             clearAndEdit();
         } else if (eventType === DeviceInputEventType.Keyboard && keycode === KeyCode.F2) {
             // f2, continue to edit
@@ -599,11 +600,11 @@ export class EditingRenderController extends Disposable {
         }
 
         const isEmpty = snapshot?.body?.dataStream.length === 2;
-        const isCellImage = editCellState.documentLayoutObject.documentModel
-            ? this._isCellImageData(editCellState.documentLayoutObject.documentModel.getSnapshot())
+        const cellImage = editCellState.documentLayoutObject.documentModel
+            ? isCellImage(editCellState.documentLayoutObject.documentModel.getSnapshot())
             : false;
 
-        if (snapshot && shouldSubmitCellEdit({ isEmpty, isCellImage, shouldSubmitEmptyCellImageEdit })) {
+        if (snapshot && shouldSubmitCellEdit({ isEmpty, isCellImage: cellImage, shouldSubmitEmptyCellImageEdit })) {
             const res = await this._submitEdit(snapshot, keycode === (MetaKeys.CTRL_COMMAND | KeyCode.ENTER) || keycode === (MetaKeys.MAC_CTRL | KeyCode.ENTER));
             if (res === false) return; // if the submit was rejected, don't move selection
         }
@@ -616,11 +617,6 @@ export class EditingRenderController extends Disposable {
 
     private _getEditorObject() {
         return getEditorObject(this._editorBridgeService.getCurrentEditorId(), this._renderManagerService);
-    }
-
-    private _isCellImageData(snapshot: IDocumentData) {
-        const drawingCount = snapshot.drawingsOrder?.length ?? 0;
-        return drawingCount > 0;
     }
 
     submitCellData(documentDataModel: DocumentDataModel) {
@@ -900,7 +896,7 @@ export function getCellDataByInput(
     const currentLocale = localeService.getCurrentLocale();
     newDataStream = normalizeString(newDataStream, lexerTreeBuilder, currentLocale, functionService);
 
-    if (snapshot.drawingsOrder?.length) {
+    if (isCellImage(snapshot)) {
         cellData.v = '';
         cellData.f = null;
         cellData.si = null;

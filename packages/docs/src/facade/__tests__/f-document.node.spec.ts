@@ -17,7 +17,7 @@
 // @vitest-environment node
 
 import type { Univer } from '@univerjs/core';
-import { ColumnSeparatorType, DocumentFlavor, PageOrientType, SectionType } from '@univerjs/core';
+import { ColumnSeparatorType, DataStreamTreeTokenType, DocumentFlavor, PageOrientType, SectionType } from '@univerjs/core';
 import { afterEach, describe, expect, it } from 'vitest';
 import { createDocumentData, createTestBed } from './create-test-bed';
 
@@ -90,5 +90,19 @@ describe('FDocument in Node', () => {
             endIndex: 3,
             properties: { docxBreakType: 'column' },
         }));
+    });
+
+    it('reads custom block structure without rendering or pixel layout', () => {
+        const data = createDocumentData('node-custom-block-layout', {
+            dataStream: `A${DataStreamTreeTokenType.CUSTOM_BLOCK}B\r\n`,
+            customBlocks: [{ blockId: 'embed-block', startIndex: 1 }],
+        });
+        const testBed = createTestBed(data);
+        univer = testBed.univer;
+
+        expect(globalThis).not.toHaveProperty('window');
+        expect(testBed.univerAPI.getActiveDocument()?.getCustomBlockLayout()).toEqual({
+            blocks: [{ blockId: 'embed-block', startIndex: 1, index: 0 }],
+        });
     });
 });

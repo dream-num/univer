@@ -115,6 +115,27 @@ export enum BaseViewType {
 }
 
 export type FieldConfig = Record<string, unknown>;
+
+export type BaseDateHourCycle = 'h12' | 'h24';
+
+/**
+ * Display options for Date, CreatedAt, and UpdatedAt fields.
+ */
+export interface IBaseDateFieldConfig extends FieldConfig {
+    /**
+     * Date-only display pattern, such as `yyyy/mm/dd`.
+     */
+    pattern?: string;
+    /**
+     * Whether to append a time to the formatted date.
+     */
+    includeTime?: boolean;
+    /**
+     * Explicit 12-hour or 24-hour time format.
+     */
+    hourCycle?: BaseDateHourCycle;
+}
+
 export type ViewSpecificConfig =
     | IGridViewConfig
     | IKanbanViewConfig

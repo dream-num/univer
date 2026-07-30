@@ -148,7 +148,10 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
             if (docDataModel?.getUnitId() !== unitId) {
                 this._instanceSrv.setCurrentUnitForType(unitId);
             }
-            this._instanceSrv.focusUnit(unitId);
+            // Host-owned editors need the current Doc unit for editing commands without replacing the host's global focus.
+            if (!this._editorService.getEditorRenderConfig(unitId)?.preserveHostFocus) {
+                this._instanceSrv.focusUnit(unitId);
+            }
 
             const skeleton = this._docSkeletonManagerService.getSkeleton();
             const { offsetX, offsetY } = evt;

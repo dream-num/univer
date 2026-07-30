@@ -68,6 +68,7 @@ interface IEditorRecord {
     data: IDocumentData;
     selections: ISuccinctDocRangeParam[];
     focused: boolean;
+    preserveHostFocus?: boolean;
     order: string[];
 }
 
@@ -204,13 +205,14 @@ class TestEditorService {
         return id ? this._editors.get(id) : undefined;
     }
 
-    register(config: { initialSnapshot: IDocumentData }, _container: HTMLDivElement): IDisposable {
+    register(config: { initialSnapshot: IDocumentData; preserveHostFocus?: boolean }, _container: HTMLDivElement): IDisposable {
         const snapshot = config.initialSnapshot;
         const record: IEditorRecord = {
             id: snapshot.id,
             data: snapshot,
             selections: [],
             focused: false,
+            preserveHostFocus: config.preserveHostFocus,
             order: [],
         };
         const editor = new TestEditor(record);
@@ -450,6 +452,24 @@ describe('ThreadCommentEditor', () => {
         expect(getButton(container, REPLY_LABEL).type).toBe('button');
         expect(getButton(container, REPLY_LABEL).disabled).toBe(false);
         expect(TestState.submitCount).toBe(0);
+    });
+
+    it('preserves the sheet host focus while editing a comment', () => {
+        const testBed = createEditorTestBed();
+        const rendered = renderEditor(
+            testBed.injector,
+            <ThreadCommentEditor
+                autoFocus={false}
+                editorId={EDITOR_ID}
+                subUnitId="subUnit"
+                type={UniverInstanceType.UNIVER_SHEET}
+                unitId="unit"
+            />
+        );
+        root = rendered.root;
+        container = rendered.container;
+
+        expect(TestState.records.get(EDITOR_ID)?.preserveHostFocus).toBe(true);
     });
 
     it('saves reply content, clears the editor, and does not submit an outer form', () => {

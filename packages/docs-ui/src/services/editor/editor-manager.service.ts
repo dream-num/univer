@@ -28,6 +28,7 @@ import { Editor } from './editor';
 
 export interface IEditorRenderConfig {
     canvasStyle: IEditorCanvasStyle;
+    preserveHostFocus?: boolean;
     scrollBar?: boolean;
     backScrollOffset?: number;
 }
@@ -227,6 +228,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
             canvasStyle,
             scrollBar: config.scrollBar,
             ...(config.backScrollOffset === undefined ? {} : { backScrollOffset: config.backScrollOffset }),
+            ...(config.preserveHostFocus === undefined ? {} : { preserveHostFocus: config.preserveHostFocus }),
         });
 
         const documentDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(editorUnitId, UniverInstanceType.UNIVER_DOC);

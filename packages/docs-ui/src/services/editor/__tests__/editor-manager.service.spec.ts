@@ -510,6 +510,7 @@ describe('EditorService', () => {
             canvasStyle: { backgroundColor: '#ffffff' },
             scrollBar: false,
             backScrollOffset: 12,
+            preserveHostFocus: true,
         }, container);
         const render = TestRegisterRenderManagerService.renders.get(editorUnitId)!;
 
@@ -519,6 +520,7 @@ describe('EditorService', () => {
             canvasStyle: { backgroundColor: '#ffffff' },
             scrollBar: false,
             backScrollOffset: 12,
+            preserveHostFocus: true,
         });
         expect(render.container).toBe(container);
         expect(render.viewport.disposed).toBe(true);

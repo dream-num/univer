@@ -70,6 +70,22 @@ describe('resolveDocsTableLikeCustomBlockBleedViewport', () => {
         });
     });
 
+    it('converts measured screen geometry back to logical geometry at document scale', () => {
+        const root = createElementWithRect({ left: 440, right: 2360, width: 1920 });
+        document.body.appendChild(root);
+        vi.spyOn(window, 'innerWidth', 'get').mockReturnValue(2880);
+
+        expect(resolveDocsTableLikeCustomBlockBleedViewport(root, 1800, {
+            viewScale: 2,
+        })).toEqual({
+            bleedLeft: 215,
+            bleedRight: 255,
+            bleedWidth: 1430,
+            contentWidth: 1800,
+            virtualWidth: 2015,
+        });
+    });
+
     it('uses authoritative render viewport bleed hints without expanding the layout root', () => {
         const root = createElementWithRect({ left: 220, right: 1180, width: 960 });
         document.body.appendChild(root);

@@ -16,6 +16,7 @@
 
 import { DrawingTypeEnum } from '@univerjs/core';
 import { InsertDocDrawingCommand } from '@univerjs/docs-drawing';
+import { SetDocZoomRatioOperation } from '@univerjs/docs-ui';
 import { Rect } from '@univerjs/engine-render';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
@@ -131,9 +132,9 @@ function createController(options: { drawing?: Record<string, unknown>; rects?: 
 describe('DocFloatDomController', () => {
     it('preserves existing props while adding custom block runtime viewport', () => {
         expect(mergeDocFloatDomRuntimeProps({ keep: true }, {
-            customBlockRenderViewport: { bleedLeft: 96, bleedWidth: 1440, contentHeight: 720, contentWidth: 1280, height: 480, pageContentWidth: 1008, viewportHeight: 320 },
+            customBlockRenderViewport: { bleedLeft: 96, bleedWidth: 1440, contentHeight: 720, contentWidth: 1280, height: 480, pageContentWidth: 1008, viewScale: 1.5, viewportHeight: 320 },
         } as never)).toEqual({
-            customBlockRenderViewport: { bleedLeft: 96, bleedWidth: 1440, contentHeight: 720, contentWidth: 1280, height: 480, pageContentWidth: 1008, viewportHeight: 320 },
+            customBlockRenderViewport: { bleedLeft: 96, bleedWidth: 1440, contentHeight: 720, contentWidth: 1280, height: 480, pageContentWidth: 1008, viewScale: 1.5, viewportHeight: 320 },
             keep: true,
         });
     });
@@ -158,6 +159,73 @@ describe('DocFloatDomController', () => {
             absolute: { left: false, top: false },
             opacity: 0.4,
         });
+    });
+
+    it('updates opted-in runtime view scale when the host doc zoom changes', async () => {
+        const rect = new Rect('dom-rect', {
+            left: 30,
+            top: 50,
+            width: 50,
+            height: 40,
+        });
+        const { add$, canvasFloatDomService, commandHandlers, controller } = createController({
+            rects: [rect],
+            drawing: {
+                customBlockRenderViewport: {
+                    contentHeight: 240,
+                    height: 240,
+                    viewScale: 1,
+                    viewportHeight: 120,
+                },
+            },
+        });
+
+        add$.next([{ unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'dom-1' }]);
+        await Promise.resolve();
+        commandHandlers.forEach((handler) => handler({
+            id: SetDocZoomRatioOperation.id,
+            params: { unitId: 'doc-1', zoomRatio: 2 },
+        }));
+
+        expect(canvasFloatDomService.updateFloatDom).toHaveBeenCalledWith('dom-1', {
+            props: expect.objectContaining({
+                customBlockRenderViewport: expect.objectContaining({
+                    viewScale: 2,
+                }),
+            }),
+        });
+
+        controller.dispose();
+    });
+
+    it('does not add view scale to other float dom runtimes on host zoom', async () => {
+        const rect = new Rect('dom-rect', {
+            left: 30,
+            top: 50,
+            width: 50,
+            height: 40,
+        });
+        const { add$, canvasFloatDomService, commandHandlers, controller } = createController({
+            rects: [rect],
+            drawing: {
+                customBlockRenderViewport: {
+                    contentHeight: 240,
+                    height: 240,
+                    viewportHeight: 120,
+                },
+            },
+        });
+
+        add$.next([{ unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'dom-1' }]);
+        await Promise.resolve();
+        commandHandlers.forEach((handler) => handler({
+            id: SetDocZoomRatioOperation.id,
+            params: { unitId: 'doc-1', zoomRatio: 2 },
+        }));
+
+        expect(canvasFloatDomService.updateFloatDom).not.toHaveBeenCalled();
+
+        controller.dispose();
     });
 
     it('adds rendered float doms, updates their position, and removes them with their rect object', async () => {

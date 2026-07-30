@@ -95,7 +95,7 @@ interface ICanvasFloatDomInfo {
 interface IDocFloatDomParams extends IDocFloatDomDataBase {
 }
 
-type IDocFloatDomRuntimeViewport = Partial<Pick<IDocsCustomBlockRenderViewport, 'bleedLeft' | 'bleedWidth' | 'contentHeight' | 'contentWidth' | 'height' | 'pageContentWidth' | 'viewportHeight'>>;
+type IDocFloatDomRuntimeViewport = Partial<Pick<IDocsCustomBlockRenderViewport, 'bleedLeft' | 'bleedWidth' | 'contentHeight' | 'contentWidth' | 'height' | 'pageContentWidth' | 'viewScale' | 'viewportHeight'>>;
 
 interface IDocFloatDomRuntimeParam extends IDocFloatDom {
     customBlockRenderViewport?: IDocFloatDomRuntimeViewport;
@@ -135,6 +135,10 @@ function pickValidCustomBlockRenderViewport(viewport: IDocFloatDomRuntimeViewpor
     }
     if (isPositiveNumber(viewport?.pageContentWidth)) {
         result.pageContentWidth = viewport!.pageContentWidth;
+    }
+    const viewScale = viewport?.viewScale;
+    if (isPositiveNumber(viewScale)) {
+        result.viewScale = viewScale;
     }
     if (isPositiveNumber(viewport?.viewportHeight)) {
         result.viewportHeight = viewport!.viewportHeight;
@@ -377,13 +381,30 @@ export class DocFloatDomController extends Disposable {
     }
 
     private _initScrollAndZoomEvent() {
-        const updateDoc = (unitId: string) => {
+        const updateDoc = (unitId: string, updateRuntimeViewScale = false) => {
             const renderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
             if (!renderObject) {
                 return;
             }
-            this._domLayerInfoMap.forEach((floatDomInfo) => {
+            const viewScale = renderObject.scene.getAncestorScale().scaleX || 1;
+            this._domLayerInfoMap.forEach((floatDomInfo, drawingId) => {
                 if (floatDomInfo.unitId !== unitId) return;
+                if (updateRuntimeViewScale && floatDomInfo.runtimeViewport?.viewScale != null) {
+                    floatDomInfo.runtimeViewport = {
+                        ...floatDomInfo.runtimeViewport,
+                        viewScale,
+                    };
+                    const currentProps = this._canvasFloatDomService.domLayers
+                        .find(([id]) => id === drawingId)
+                        ?.[1]
+                        .props;
+                    this._canvasFloatDomService.updateFloatDom(drawingId, {
+                        props: {
+                            ...currentProps,
+                            customBlockRenderViewport: floatDomInfo.runtimeViewport,
+                        },
+                    });
+                }
                 const position = calcDocFloatDomPosition(floatDomInfo.rect, renderObject.renderUnit);
                 floatDomInfo.position$.next(position);
             });
@@ -414,7 +435,7 @@ export class DocFloatDomController extends Disposable {
             if (commandInfo.id === SetDocZoomRatioOperation.id) {
                 const params = (commandInfo.params) as ISetDocZoomRatioOperationParams;
                 const { unitId } = params;
-                updateDoc(unitId);
+                updateDoc(unitId, true);
             }
         }));
     }

@@ -303,7 +303,7 @@ async function waitForDownloadRetry(url: string, attempt: number, reason: unknow
     await new Promise<void>((resolve) => setTimeout(resolve, delayMs));
 }
 
-export async function downloadText(url: string): Promise<string> {
+async function downloadText(url: string): Promise<string> {
     for (let attempt = 1; attempt <= downloadMaxAttempts; attempt += 1) {
         let response: Response;
         try {

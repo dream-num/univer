@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { ISheetDrawingBoundsPlacement, ISheetDrawingPlacement } from '../../services/sheet-drawing-placement';
+import type { ISheetDrawing } from '../../services/sheet-drawing.service';
 import { Direction, DrawingTypeEnum, ImageSourceType, RANGE_TYPE, RedoCommandId, UndoCommandId } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import {
@@ -43,10 +45,9 @@ import { SetSheetDrawingPlacementCommand } from '../../commands/commands/set-she
 import {
     applySheetDrawingPlacement,
     getSheetDrawingPlacement,
-    type ISheetDrawingBoundsPlacement,
-    type ISheetDrawingPlacement,
+
 } from '../../services/sheet-drawing-placement';
-import { type ISheetDrawing, ISheetDrawingService, SheetDrawingAnchorType } from '../../services/sheet-drawing.service';
+import { ISheetDrawingService, SheetDrawingAnchorType } from '../../services/sheet-drawing.service';
 
 describe('sheet drawing transforms without UI plugins', () => {
     let testBed: ReturnType<typeof createSheetsDrawingTestBed>;
@@ -103,6 +104,24 @@ describe('sheet drawing transforms without UI plugins', () => {
         expect(getDrawing(service)).toEqual(before);
         expect(testBed.commandService.syncExecuteCommand(RedoCommandId)).toBe(true);
         expect(getDrawing(service)).toEqual(after);
+    });
+
+    it('preserves drawing rotation when rows resize a two-cell anchor', async () => {
+        const service = await insertDrawing();
+        const drawing = getDrawing(service);
+        drawing.transform = {
+            ...drawing.transform,
+            angle: 45,
+        };
+
+        expect(await testBed.commandService.executeCommand(InsertRowCommand.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            range: { startRow: 2, endRow: 2, startColumn: 0, endColumn: 19 },
+            direction: Direction.DOWN,
+        })).toBe(true);
+
+        expect(getDrawing(service).transform?.angle).toBe(45);
     });
 
     it.each([

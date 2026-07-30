@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-import { DrawingTypeEnum, type IDrawingParam, type IGroupBaseBound, type ITransformState, type Nullable } from '@univerjs/core';
+import type { IDrawingParam, IGroupBaseBound, ITransformState, Nullable } from '@univerjs/core';
+import type { ICellOverGridPosition, SpreadsheetSkeleton } from '@univerjs/sheets';
+import type { ISheetDrawingPosition, ISheetFloatDom, ISheetImage, ISheetShape } from './sheet-drawing.service';
+import { DrawingTypeEnum } from '@univerjs/core';
 import {
     convertPositionCellToSheetOverGrid,
     convertPositionSheetOverGridToAbsolute,
-    type ICellOverGridPosition,
-    type SpreadsheetSkeleton,
+
 } from '@univerjs/sheets';
 import { transformToAxisAlignPosition, transformToDrawingPosition } from '../basics/transform-position';
 import {
-    type ISheetDrawingPosition,
-    type ISheetFloatDom,
-    type ISheetImage,
-    type ISheetShape,
+
     SheetDrawingAnchorType,
 } from './sheet-drawing.service';
 
@@ -107,8 +106,17 @@ export type ISheetDrawingBoundsPlacement = IGroupBaseBound & {
 /**
  * Placement accepted by Sheet drawing write APIs.
  *
- * Marker placements are already normalized. Bounds placements are normalized
- * by the command with the model SpreadsheetSkeleton.
+ * Prefer bounds for normal authoring flows and anchor-mode changes: callers
+ * can reuse the drawing's `left`, `top`, `width`, and `height`, and the command
+ * derives cell markers with the model `SpreadsheetSkeleton`.
+ *
+ * Use explicit markers when cells are part of the user's input, or when exact
+ * marker identity matters, such as OOXML import/export, copy and paste, or
+ * deterministic server-side generation.
+ *
+ * `Position` accepts either `from + width + height` or bounds. `Both` accepts
+ * either `from + to` or bounds. `None` always uses bounds because an Absolute
+ * placement has no cell markers.
  */
 export type ISheetDrawingPlacementInput = ISheetDrawingPlacement | ISheetDrawingBoundsPlacement;
 

@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import type { IRotationSkewFlipTransform, ISize } from '@univerjs/core';
+import type { ICellOverGridPosition, SpreadsheetSkeleton } from '@univerjs/sheets';
+import type { ISheetDrawingPlacement, ISheetDrawingPlacementInput, ISheetImage } from '@univerjs/sheets-drawing';
 import {
     ArrangeTypeEnum,
     DrawingTypeEnum,
@@ -22,25 +25,23 @@ import {
     ImageSourceType,
     Inject,
     Injector,
-    type IRotationSkewFlipTransform,
-    type ISize,
+
 } from '@univerjs/core';
 import { FBase } from '@univerjs/core/facade';
 import { getImageSize } from '@univerjs/drawing';
 import {
     convertPositionCellToSheetOverGrid,
     convertPositionSheetOverGridToAbsolute,
-    type ICellOverGridPosition,
+
     SheetSkeletonService,
-    type SpreadsheetSkeleton,
+
 } from '@univerjs/sheets';
 import {
     applySheetDrawingPlacement,
     getSheetDrawingPlacement,
-    type ISheetDrawingPlacement,
-    type ISheetDrawingPlacementInput,
+
     ISheetDrawingService,
-    type ISheetImage,
+
     normalizeSheetDrawingPlacement,
     RemoveSheetDrawingCommand,
     SetDrawingArrangeCommand,
@@ -524,11 +525,12 @@ export class FOverGridImageBuilder {
      *
      * This placement takes precedence over the individual row, column, size,
      * and anchor type builder fields.
-     * Position and Both also accept absolute Sheet grid bounds, which are
-     * converted to cell markers with the model SpreadsheetSkeleton.
+     * Prefer bounds for ordinary image insertion; the Sheet model derives the
+     * markers. Use explicit markers when cells come from user input or an
+     * imported format and must be preserved exactly.
      * @param {ISheetDrawingPlacementInput} placement Image placement.
      * @returns {FOverGridImageBuilder} This builder.
-     * @example
+     * @example OneCell with an explicit user-selected anchor cell
      * ```ts
      * const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
      * const image = await sheet.newOverGridImage()
@@ -542,7 +544,7 @@ export class FOverGridImageBuilder {
      *   .buildAsync();
      * sheet.insertImages([image]);
      * ```
-     * @example OneCell from absolute bounds
+     * @example OneCell inferred from bounds (recommended for ordinary insertion)
      * ```ts
      * const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
      * const image = await sheet.newOverGridImage()
@@ -557,7 +559,22 @@ export class FOverGridImageBuilder {
      *   .buildAsync();
      * sheet.insertImages([image]);
      * ```
-     * @example TwoCell
+     * @example TwoCell inferred from bounds (recommended for ordinary insertion)
+     * ```ts
+     * const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const image = await sheet.newOverGridImage()
+     *   .setSource('https://avatars.githubusercontent.com/u/61444807?s=96&v=4')
+     *   .setPlacement({
+     *     kind: univerAPI.Enum.SheetDrawingAnchorType.Both,
+     *     left: 160,
+     *     top: 72,
+     *     width: 240,
+     *     height: 120,
+     *   })
+     *   .buildAsync();
+     * sheet.insertImages([image]);
+     * ```
+     * @example TwoCell with explicit user-selected start and end cells
      * ```ts
      * const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
      * const image = await sheet.newOverGridImage()
@@ -570,7 +587,7 @@ export class FOverGridImageBuilder {
      *   .buildAsync();
      * sheet.insertImages([image]);
      * ```
-     * @example Absolute
+     * @example Absolute/free bounds for an overlay that must ignore row and column changes
      * ```ts
      * const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
      * const image = await sheet.newOverGridImage()
@@ -854,10 +871,13 @@ export class FOverGridImage extends FBase {
 
     /**
      * Get this image's explicit placement.
+     * OneCell and TwoCell are returned in normalized marker form, even when
+     * bounds were supplied to the builder or setter.
      * @returns {ISheetDrawingPlacement} OneCell, TwoCell, or Absolute placement.
      * @example
      * ```ts
      * const image = univerAPI.getActiveWorkbook().getActiveSheet().getImages()[0];
+     * if (!image) throw new Error('No image found.');
      * console.log(image.getPlacement());
      * ```
      */
@@ -872,13 +892,16 @@ export class FOverGridImage extends FBase {
 
     /**
      * Set this image's explicit placement through the drawing command.
-     * Position and Both also accept absolute Sheet grid bounds; the command
-     * converts those bounds to cell markers without render or UI state.
+     *
+     * Bounds are recommended when changing an existing image because they can
+     * come directly from its transform. Use explicit markers when the user
+     * selected cells, or exact imported or server-generated markers matter.
      * @param {ISheetDrawingPlacementInput} placement Marker placement or absolute bounds with the requested anchor behavior.
      * @returns {boolean} `true` when the command succeeds.
-     * @example OneCell
+     * @example OneCell inferred from bounds (recommended for changing an existing image)
      * ```ts
      * const image = univerAPI.getActiveWorkbook().getActiveSheet().getImages()[0];
+     * if (!image) throw new Error('No image found.');
      * image.setPlacement({
      *   kind: univerAPI.Enum.SheetDrawingAnchorType.Position,
      *   left: 240,
@@ -887,18 +910,43 @@ export class FOverGridImage extends FBase {
      *   height: 180,
      * });
      * ```
-     * @example TwoCell
+     * @example OneCell with an explicit user-selected anchor cell
      * ```ts
      * const image = univerAPI.getActiveWorkbook().getActiveSheet().getImages()[0];
+     * if (!image) throw new Error('No image found.');
+     * image.setPlacement({
+     *   kind: univerAPI.Enum.SheetDrawingAnchorType.Position,
+     *   from: { row: 4, column: 3, rowOffset: 8, columnOffset: 8 },
+     *   width: 320,
+     *   height: 180,
+     * });
+     * ```
+     * @example TwoCell inferred from bounds (recommended for changing an existing image)
+     * ```ts
+     * const image = univerAPI.getActiveWorkbook().getActiveSheet().getImages()[0];
+     * if (!image) throw new Error('No image found.');
+     * image.setPlacement({
+     *   kind: univerAPI.Enum.SheetDrawingAnchorType.Both,
+     *   left: 240,
+     *   top: 96,
+     *   width: 320,
+     *   height: 180,
+     * });
+     * ```
+     * @example TwoCell with explicit user-selected start and end cells
+     * ```ts
+     * const image = univerAPI.getActiveWorkbook().getActiveSheet().getImages()[0];
+     * if (!image) throw new Error('No image found.');
      * image.setPlacement({
      *   kind: univerAPI.Enum.SheetDrawingAnchorType.Both,
      *   from: { row: 4, column: 3, rowOffset: 8, columnOffset: 8 },
      *   to: { row: 10, column: 8, rowOffset: 0, columnOffset: 0 },
      * });
      * ```
-     * @example Absolute
+     * @example Absolute/free bounds for an overlay that must ignore row and column changes
      * ```ts
      * const image = univerAPI.getActiveWorkbook().getActiveSheet().getImages()[0];
+     * if (!image) throw new Error('No image found.');
      * image.setPlacement({
      *   kind: univerAPI.Enum.SheetDrawingAnchorType.None,
      *   left: 640,

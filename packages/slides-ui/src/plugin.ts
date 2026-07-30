@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import type { Dependency } from '@univerjs/core';
-import type { SlideDataModel } from '@univerjs/slides';
-import type { IUniverSlidesUIConfig } from './config/config';
+/* eslint-disable import/consistent-type-specifier-style -- Keep type and value imports from one package in one declaration. */
 import {
+    type Dependency,
     DependentOn,
     IConfigService,
     Inject,
@@ -32,10 +31,11 @@ import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverDrawingPlugin } from '@univerjs/drawing';
 import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
-import { UniverSlidesPlugin } from '@univerjs/slides';
+import { CanvasObjectProviderRegistry, type SlideDataModel, UniverSlidesPlugin } from '@univerjs/slides';
 import { UniverUIPlugin } from '@univerjs/ui';
 import pkg from '../package.json';
-import { defaultPluginConfig, SLIDES_UI_PLUGIN_CONFIG_KEY } from './config/config';
+import { defaultPluginConfig, type IUniverSlidesUIConfig, SLIDES_UI_PLUGIN_CONFIG_KEY } from './config/config';
+/* eslint-enable import/consistent-type-specifier-style */
 import { CanvasView } from './controllers/canvas-view';
 import { ComponentsController } from './controllers/components.controller';
 import { SlideEditingRenderController } from './controllers/slide-editing.render-controller';
@@ -47,6 +47,7 @@ import { ISlideEditorBridgeService, SlideEditorBridgeService } from './services/
 import { ISlideEditorManagerService, SlideEditorManagerService } from './services/slide-editor-manager.service';
 import { SlideCanvasPopMangerService } from './services/slide-popup-manager.service';
 import { SlideRenderService } from './services/slide-render.service';
+import { SpreadsheetAdaptorFactory } from './views/render/spreadsheet-adaptor';
 
 @DependentOn(
     UniverDocsPlugin,
@@ -84,6 +85,8 @@ export class UniverSlidesUIPlugin extends Plugin {
     }
 
     override onStarting(): void {
+        CanvasObjectProviderRegistry.add(new SpreadsheetAdaptorFactory());
+
         this._injector.add([ComponentsController]);
         this._injector.get(ComponentsController);
         mergeOverrideWithDependencies([
@@ -150,7 +153,7 @@ export class UniverSlidesUIPlugin extends Plugin {
         try {
             const slideDataModel = currentService.getCurrentUnitOfType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE)!;
             currentService.focusUnit(slideDataModel.getUnitId());
-        } catch (e) {
+        } catch {
         }
     }
 }

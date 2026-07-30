@@ -26,6 +26,7 @@
     ],
     "exports": {
         ".": "./src/index.ts",
+        "./models/conditional-formatting-cell-data": "./src/models/conditional-formatting-cell-data.ts",
         "./*": "./src/*",
         "./facade": "./src/facade/index.ts",
         "./locale/*": "./src/locale/*.ts"
@@ -41,6 +42,11 @@
                 "import": "./lib/es/index.js",
                 "require": "./lib/cjs/index.js",
                 "types": "./lib/types/index.d.ts"
+            },
+            "./models/conditional-formatting-cell-data": {
+                "import": "./lib/es/models/conditional-formatting-cell-data.js",
+                "require": "./lib/cjs/models/conditional-formatting-cell-data.js",
+                "types": "./lib/types/models/conditional-formatting-cell-data.d.ts"
             },
             "./*": {
                 "import": "./lib/es/*",
@@ -87,12 +93,11 @@
     "dependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
-        "@univerjs/engine-render": "workspace:*",
-        "@univerjs/sheets": "workspace:*",
-        "@univerjs/sheets-ui": "workspace:*"
+        "@univerjs/sheets": "workspace:*"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
+        "@univerjs/engine-render": "workspace:*",
         "@univerjs/icons-svg": "^1.34.0",
         "@univerjs/sheets-formula": "workspace:*",
         "rxjs": "^7.8.2",

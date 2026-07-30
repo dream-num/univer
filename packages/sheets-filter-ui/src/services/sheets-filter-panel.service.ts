@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IRange, Nullable, Workbook } from '@univerjs/core';
-import type { FilterColumn, FilterModel, IFilterColumn, ISetSheetsFilterCriteriaCommandParams } from '@univerjs/sheets-filter';
-import type { Observable } from 'rxjs';
-import type { FilterOperator, IFilterConditionFormParams, IFilterConditionItem } from '../models/conditions';
-import { ColorKit, createIdentifier, Disposable, ICommandService, Inject, Injector, IUniverInstanceService, LocaleService, Quantity, Tools, UniverInstanceType } from '@univerjs/core';
-import { COLOR_BLACK_RGB } from '@univerjs/engine-render';
+/* eslint-disable import/consistent-type-specifier-style -- Keep type and value imports from one package in one declaration. */
+import { ColorKit, createIdentifier, DEFAULT_STYLES, Disposable, ICommandService, type IDisposable, Inject, Injector, type IRange, IUniverInstanceService, LocaleService, type Nullable, Quantity, Tools, UniverInstanceType, type Workbook } from '@univerjs/core';
 import { RefRangeService } from '@univerjs/sheets';
-import { FilterBy, SetSheetsFilterCriteriaCommand } from '@univerjs/sheets-filter';
-import { BehaviorSubject, combineLatest, map, merge, of, ReplaySubject, shareReplay, startWith, Subject, throttleTime } from 'rxjs';
-import { FilterConditionItems } from '../models/conditions';
+import { FilterBy, type FilterColumn, type FilterModel, type IFilterColumn, type ISetSheetsFilterCriteriaCommandParams, SetSheetsFilterCriteriaCommand } from '@univerjs/sheets-filter';
+import { BehaviorSubject, combineLatest, map, merge, type Observable, of, ReplaySubject, shareReplay, startWith, Subject, throttleTime } from 'rxjs';
+import { FilterConditionItems, type FilterOperator, type IFilterConditionFormParams, type IFilterConditionItem } from '../models/conditions';
+/* eslint-enable import/consistent-type-specifier-style */
 import { statisticFilterByValueItems } from '../models/utils';
 import { getFilterTreeByValueItems, ISheetsGenerateFilterValuesService } from '../worker/generate-filter-values.service';
 import { areAllLeafNodesChecked, findObjectByKey, searchTree, updateLeafNodesCheckedStatus } from './util';
+
+const DEFAULT_FILTER_FONT_COLOR = new ColorKit(DEFAULT_STYLES.cl.rgb).toRgbString();
 
 export interface IFilterByValueItem {
     value: string;
@@ -746,7 +745,7 @@ export class ByColorsModel extends Disposable implements IFilterByModel {
                     cellTextColors.set(cl, { color: cl, checked: cellTextColorsChecked.has(cl) });
                 }
             } else {
-                cellTextColors.set('default-font-color', { color: COLOR_BLACK_RGB, checked: cellTextColorsChecked.has(COLOR_BLACK_RGB) });
+                cellTextColors.set('default-font-color', { color: DEFAULT_FILTER_FONT_COLOR, checked: cellTextColorsChecked.has(DEFAULT_FILTER_FONT_COLOR) });
             }
         }
 

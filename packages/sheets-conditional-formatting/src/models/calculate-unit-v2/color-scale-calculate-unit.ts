@@ -15,15 +15,13 @@
  */
 
 import type { IColorScale, IConditionFormattingRule } from '../type';
-import type { IContext } from './base-calculate-unit';
-import { CellValueType, ColorKit, ObjectMatrix, Range } from '@univerjs/core';
+import { CellValueType, ColorKit, ObjectMatrix, Range, Tools } from '@univerjs/core';
 import { FormulaResultStatus } from '@univerjs/engine-formula';
-import { isObject } from '@univerjs/engine-render';
 import { CFValueType } from '../../base/const';
-import { BaseCalculateUnit, CalculateEmitStatus } from './base-calculate-unit';
+/* eslint-disable import/consistent-type-specifier-style -- Keep type and value imports from one module in one declaration. */
+import { BaseCalculateUnit, CalculateEmitStatus, type IContext } from './base-calculate-unit';
+/* eslint-enable import/consistent-type-specifier-style */
 import { filterRange, getColorScaleFromValue, getValueByType, isNullable } from './utils';
-
-;
 
 interface IConfigItem {
     value: number;
@@ -58,7 +56,7 @@ export class ColorScaleCalculateUnit extends BaseCalculateUnit<IConfigItem[], st
                 color: new ColorKit(config.color),
             };
         });
-        const isAllFinished = !_configList.some((item) => isObject(item.value) ? item.value.status !== FormulaResultStatus.SUCCESS : false);
+        const isAllFinished = !_configList.some((item) => Tools.isObject(item.value) ? item.value.status !== FormulaResultStatus.SUCCESS : false);
 
         if (isAllFinished) {
             const colorList = _configList

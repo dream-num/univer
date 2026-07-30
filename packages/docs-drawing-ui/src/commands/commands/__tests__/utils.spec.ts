@@ -18,7 +18,8 @@ import { DrawingTypeEnum } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { groupToUngroup, ungroupToGroup } from '../utils';
 
-vi.mock('@univerjs/engine-render', () => ({
+vi.mock('@univerjs/core', async (importOriginal) => ({
+    ...await importOriginal<typeof import('@univerjs/core')>(),
     getGroupState: vi.fn(() => ({ left: 10, top: 20, width: 100, height: 50 })),
     transformObjectOutOfGroup: vi.fn((transform, groupTransform) => ({
         left: (transform.left ?? 0) + (groupTransform.left ?? 0),

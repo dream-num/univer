@@ -83,6 +83,9 @@ export enum CFValueType {
 
 export const DEFAULT_BG_COLOR = '#fff';
 export const DEFAULT_FONT_COLOR = '#000000';
+export const defaultDataBarPositiveColor = '#ffbe38';
+export const defaultDataBarNativeColor = '#abd91a';
+export const defaultPlaceholderColor = '#000';
 
 export const createDefaultRule = () => ({
     cfId: undefined as unknown as string,

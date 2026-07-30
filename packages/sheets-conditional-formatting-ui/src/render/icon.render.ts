@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import type { IIconSetCellData } from './type';
-
+/* eslint-disable import/consistent-type-specifier-style -- Keep type and value imports from one package in one declaration. */
+import type { UniverRenderingContext } from '@univerjs/engine-render';
+import type { IIconSetCellData } from '@univerjs/sheets-conditional-formatting/models/conditional-formatting-cell-data';
 import { type IRange, type IScale, Range } from '@univerjs/core';
-import { SpreadsheetExtensionRegistry, type UniverRenderingContext } from '@univerjs/engine-render';
+import { iconMap, IIconSetType } from '@univerjs/sheets-conditional-formatting';
 import { SheetExtension, type SpreadsheetRenderSkeleton } from '@univerjs/sheets-ui';
-import { iconMap, IIconSetType } from '../models/icon-map';
+/* eslint-enable import/consistent-type-specifier-style */
 
 export const IconUKey = 'sheet-conditional-rule-icon';
 const EXTENSION_Z_INDEX = 35;
@@ -134,5 +135,3 @@ export class ConditionalFormattingIcon extends SheetExtension {
         return `${iconType}_${iconIndex}`;
     }
 }
-
-SpreadsheetExtensionRegistry.add(ConditionalFormattingIcon);

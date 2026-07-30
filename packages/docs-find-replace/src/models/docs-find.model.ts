@@ -14,17 +14,14 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ITextRange, Nullable } from '@univerjs/core';
-import type { DocSkeletonManagerService } from '@univerjs/docs';
-import type { Documents, ITextSelectionStyle } from '@univerjs/engine-render';
-import type { IFindMatch, IFindMoveParams, IFindQuery, IReplaceAllResult } from '@univerjs/find-replace';
-import type { IDocsReplaceCommandParams } from '../commands/commands/docs-replace.command';
+/* eslint-disable import/consistent-type-specifier-style -- Keep type and value imports from one package in one declaration. */
 import {
-    ColorKit,
+    type DocumentDataModel,
     fromCallback,
     ICommandService,
     Inject,
-    ThemeService,
+    type ITextRange,
+    type Nullable,
     toDisposable,
 } from '@univerjs/core';
 import {
@@ -32,11 +29,10 @@ import {
     DocTextResolverService,
     RichTextEditingMutation,
 } from '@univerjs/docs';
-import { DocBackScrollRenderController, getTextRangeFromCharIndex } from '@univerjs/docs-ui';
-import { IRenderManagerService } from '@univerjs/engine-render';
-import { FindModel } from '@univerjs/find-replace';
+import { FindModel, type IFindMatch, type IFindMoveParams, type IFindQuery, type IReplaceAllResult } from '@univerjs/find-replace';
 import { debounceTime, filter, merge, Subject } from 'rxjs';
-import { DocsReplaceCommand } from '../commands/commands/docs-replace.command';
+import { DocsReplaceCommand, type IDocsReplaceCommandParams } from '../commands/commands/docs-replace.command';
+/* eslint-enable import/consistent-type-specifier-style */
 import { findDocRanges } from '../controllers/utils';
 
 export const DOCS_FIND_REPLACE_PROVIDER = 'docs-find-replace-provider';
@@ -52,20 +48,21 @@ export class DocsFindModel extends FindModel {
     override readonly matchesUpdate$ = this._matchesUpdate$.asObservable();
     private readonly _activelyChangingMatch$ = new Subject<IDocFindMatch>();
     override readonly activelyChangingMatch$ = this._activelyChangingMatch$.asObservable();
+    private readonly _currentMatchChanged$ = new Subject<{
+        match: Nullable<IDocFindMatch>;
+        shouldScroll: boolean;
+    }>();
+
+    readonly currentMatchChanged$ = this._currentMatchChanged$.asObservable();
     private _matches: IDocFindMatch[] = [];
     private _position = -1;
     private _query: Nullable<IFindQuery> = null;
-    private _highlights: Array<{ dispose(): void }> = [];
-
     override readonly unitId: string;
 
     constructor(
         private readonly _doc: DocumentDataModel,
-        private readonly _skeletonManager: DocSkeletonManagerService,
         @Inject(DocSelectionManagerService) private readonly _selectionManager: DocSelectionManagerService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(ThemeService) private readonly _themeService: ThemeService,
         @Inject(DocTextResolverService)
         private readonly _textResolverService: DocTextResolverService
     ) {
@@ -83,7 +80,6 @@ export class DocsFindModel extends FindModel {
                 debounceTime(220)
             )
             .subscribe(() => this._scan(true))));
-        this.disposeWithMe(toDisposable(this._skeletonManager.currentSkeleton$.subscribe(() => this._refreshHighlights())));
     }
 
     get currentMatch(): Nullable<IDocFindMatch> {
@@ -92,9 +88,9 @@ export class DocsFindModel extends FindModel {
 
     override dispose(): void {
         super.dispose();
-        this._disposeHighlights();
         this._matchesUpdate$.complete();
         this._activelyChangingMatch$.complete();
+        this._currentMatchChanged$.complete();
     }
 
     override getMatches(): IDocFindMatch[] {
@@ -129,7 +125,7 @@ export class DocsFindModel extends FindModel {
         if (index < 0 || index >= this._matches.length) index = params?.loop ? 0 : -1;
         if (index < 0) {
             this._position = -1;
-            this._refreshHighlights();
+            this._currentMatchChanged$.next({ match: null, shouldScroll: false });
             return null;
         }
         return this._activate(index, params?.noFocus);
@@ -157,7 +153,7 @@ export class DocsFindModel extends FindModel {
         if (index < 0) index = params?.loop ? this._matches.length - 1 : -1;
         if (index < 0) {
             this._position = -1;
-            this._refreshHighlights();
+            this._currentMatchChanged$.next({ match: null, shouldScroll: false });
             return null;
         }
         return this._activate(index, params?.noFocus);
@@ -194,7 +190,6 @@ export class DocsFindModel extends FindModel {
         if (!body) {
             this._matches = [];
             this._position = -1;
-            this._disposeHighlights();
             if (emit) this._matchesUpdate$.next([]);
             return;
         }
@@ -215,7 +210,6 @@ export class DocsFindModel extends FindModel {
         this._position = previousStart == null
             ? -1
             : this._matches.findIndex((match) => match.range.startOffset >= previousStart);
-        this._refreshHighlights();
         if (emit) this._matchesUpdate$.next(this._matches);
     }
 
@@ -232,7 +226,7 @@ export class DocsFindModel extends FindModel {
         if (!match) return null;
         this._position = index;
         if (!noFocus) this._focusMatch(match);
-        else this._refreshHighlights();
+        else this._currentMatchChanged$.next({ match, shouldScroll: false });
         return match;
     }
 
@@ -241,50 +235,8 @@ export class DocsFindModel extends FindModel {
             unitId: this.unitId,
             subUnitId: this.unitId,
         }, true, { shouldFocus: false });
-        this._renderManagerService.getRenderUnitById(this.unitId)
-            ?.with(DocBackScrollRenderController)
-            .scrollToRange(match.range);
         this._activelyChangingMatch$.next(match);
-        this._refreshHighlights();
-    }
-
-    private _refreshHighlights(): void {
-        this._disposeHighlights();
-        const render = this._renderManagerService.getRenderUnitById(this.unitId);
-        const skeleton = this._skeletonManager.getSkeleton();
-        const document = render?.mainComponent as Nullable<Documents>;
-        if (!render || !skeleton || !document) return;
-
-        const color = this._themeService.getColorFromTheme('yellow.400');
-        const passiveStyle: ITextSelectionStyle = {
-            strokeWidth: 0,
-            stroke: 'rgba(0,0,0,0)',
-            strokeActive: 'rgba(0,0,0,0)',
-            fill: new ColorKit(color).setAlpha(0.3).toRgbString(),
-        };
-        const activeStyle: ITextSelectionStyle = {
-            ...passiveStyle,
-            fill: new ColorKit(color).setAlpha(0.65).toRgbString(),
-        };
-
-        this._matches.forEach((match, index) => {
-            const range = getTextRangeFromCharIndex(
-                match.range.startOffset,
-                match.range.endOffset,
-                render.scene,
-                document,
-                skeleton,
-                index === this._position ? activeStyle : passiveStyle,
-                '',
-                -1
-            );
-            if (range) this._highlights.push(range);
-        });
-    }
-
-    private _disposeHighlights(): void {
-        this._highlights.forEach((highlight) => highlight.dispose());
-        this._highlights = [];
+        this._currentMatchChanged$.next({ match, shouldScroll: true });
     }
 }
 

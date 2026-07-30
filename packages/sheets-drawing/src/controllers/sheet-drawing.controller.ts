@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, Inject, IResourceManagerService, IUniverInstanceService, UniverInstanceType, type Workbook } from '@univerjs/core';
-import { getOrCreateDrawingCopyPlan, type IDrawingJsonUndo1, IDrawingManagerService, type IDrawingSubunitMap } from '@univerjs/drawing';
+import type { Workbook } from '@univerjs/core';
+import type { IDrawingJsonUndo1, IDrawingSubunitMap } from '@univerjs/drawing';
+import type { ICopySheetCommandInterceptorParams, IRemoveSheetCommandParams, SpreadsheetSkeleton } from '@univerjs/sheets';
+import type { ISheetDrawing } from '../services/sheet-drawing.service';
+import { Disposable, ICommandService, Inject, IResourceManagerService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { getOrCreateDrawingCopyPlan, IDrawingManagerService } from '@univerjs/drawing';
 import {
     CopySheetCommand,
-    type ICopySheetCommandInterceptorParams,
-    type IRemoveSheetCommandParams,
+
     RemoveSheetCommand,
     SheetInterceptorService,
     SheetSkeletonService,
-    type SpreadsheetSkeleton,
+
 } from '@univerjs/sheets';
 import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-drawing.command';
 import { RemoveSheetDrawingCommand } from '../commands/commands/remove-sheet-drawing.command';
@@ -31,9 +34,8 @@ import { SetDrawingArrangeCommand } from '../commands/commands/set-drawing-arran
 import { SetSheetDrawingPlacementCommand } from '../commands/commands/set-sheet-drawing-placement.command';
 import { SetSheetDrawingCommand } from '../commands/commands/set-sheet-drawing.command';
 import { DrawingApplyType, SetDrawingApplyMutation } from '../commands/mutations/set-drawing-apply.mutation';
-import { ClearSheetDrawingTransformerOperation } from '../commands/operations/clear-drawing-transformer.operation';
 import { isSheetDrawingPlacementTarget, materializeSheetDrawingPlacement } from '../services/sheet-drawing-placement';
-import { type ISheetDrawing, ISheetDrawingService, SheetDrawingAnchorType } from '../services/sheet-drawing.service';
+import { ISheetDrawingService, SheetDrawingAnchorType } from '../services/sheet-drawing.service';
 
 export const SHEET_DRAWING_PLUGIN = 'SHEET_DRAWING_PLUGIN';
 
@@ -84,7 +86,6 @@ export class SheetsDrawingLoadController extends Disposable {
             RemoveSheetDrawingCommand,
             SetDrawingArrangeCommand,
             SetSheetDrawingPlacementCommand,
-            ClearSheetDrawingTransformerOperation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 

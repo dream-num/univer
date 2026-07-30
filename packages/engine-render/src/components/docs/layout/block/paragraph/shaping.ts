@@ -21,8 +21,7 @@ import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-no
 import type { DocumentViewModel } from '../../../view-model/document-view-model';
 import type { IBreakPoints } from '../../line-breaker/line-breaker';
 import type { ILayoutContext } from '../../tools';
-import { BooleanNumber, DataStreamTreeTokenType, GridType, PositionedObjectLayoutType } from '@univerjs/core';
-import { cjk } from '../../../../../basics/cjk-regexp';
+import { BooleanNumber, cjk, DataStreamTreeTokenType, GridType, PositionedObjectLayoutType } from '@univerjs/core';
 import { GlyphType } from '../../../../../basics/i-document-skeleton-cached';
 import {
     hasArabic,

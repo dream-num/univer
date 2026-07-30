@@ -19,7 +19,7 @@ import { regexp } from '@univerjs/core';
 type CharsetDataUnit = [number, number];
 
 /**
- * Golden regex sources generated from `cjk-regex@3.4.0`.
+ * Shared golden regex sources generated from `cjk-regex@3.4.0`.
  *
  * Keep these strings stable unless intentionally upgrading cjk-regex semantics. The tests
  * assert exact source equality so document CJK layout behavior does not drift through

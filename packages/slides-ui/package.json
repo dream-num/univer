@@ -81,6 +81,8 @@
         "@univerjs/drawing": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/icons": "1.34.0",
+        "@univerjs/sheets": "workspace:*",
+        "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/slides": "workspace:*",
         "@univerjs/ui": "workspace:*"
     },

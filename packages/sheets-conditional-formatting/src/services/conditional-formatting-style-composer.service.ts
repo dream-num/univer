@@ -14,8 +14,13 @@
  * limitations under the License.
  */
 
+import type {
+    IDataBarCellData,
+    IDataBarRenderParams,
+    IIconSetCellData,
+    IIconSetRenderParams,
+} from '../models/conditional-formatting-cell-data';
 import type { IConditionFormattingRule, IHighlightCell } from '../models/type';
-import type { IDataBarCellData, IDataBarRenderParams, IIconSetCellData, IIconSetRenderParams } from '../render/type';
 import { Inject, merge } from '@univerjs/core';
 import { CFRuleType } from '../base/const';
 import { ConditionalFormattingRuleModel } from '../models/conditional-formatting-rule-model';

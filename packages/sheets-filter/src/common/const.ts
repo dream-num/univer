@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { ColorKit, DEFAULT_STYLES } from '@univerjs/core';
+
 export const SetSheetsFilterRangeMutationId = 'sheet.mutation.set-filter-range';
 export const SetSheetsFilterCriteriaMutationId = 'sheet.mutation.set-filter-criteria';
 export const RemoveSheetsFilterMutationId = 'sheet.mutation.remove-filter';
@@ -25,3 +27,5 @@ export const FILTER_MUTATIONS = new Set([
     RemoveSheetsFilterMutationId,
     ReCalcSheetsFilterMutationId,
 ]);
+
+export const DEFAULT_FILTER_FONT_COLOR = new ColorKit(DEFAULT_STYLES.cl.rgb).toRgbString();

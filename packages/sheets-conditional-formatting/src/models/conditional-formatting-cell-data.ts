@@ -15,7 +15,7 @@
  */
 
 import type { ICellData } from '@univerjs/core';
-import type { IIconSetType } from '../models/icon-map';
+import type { IIconSetType } from './icon-map';
 
 export interface IDataBarRenderParams {
     color: string;

@@ -14,13 +14,7 @@
  * limitations under the License.
  */
 
-import {
-    Spreadsheet,
-    SpreadsheetColumnHeader,
-    SpreadsheetRenderSkeleton,
-    SpreadsheetRowHeader,
-} from '@univerjs/sheets-ui';
-
+/* eslint-disable import/consistent-type-specifier-style -- Keep type and value imports from one package in one declaration. */
 import {
     type EventState,
     IConfigService,
@@ -41,9 +35,19 @@ import {
     ScrollBar,
     Viewport,
 } from '@univerjs/engine-render';
-import { type IPageElement, PageElementType } from '../../../types/interfaces/i-slide-data';
 import { SpreadsheetSkeleton } from '@univerjs/sheets';
-import { CanvasObjectProviderRegistry, ObjectAdaptor } from '../adaptor';
+import {
+    Spreadsheet,
+    SpreadsheetColumnHeader,
+    SpreadsheetRenderSkeleton,
+    SpreadsheetRowHeader,
+} from '@univerjs/sheets-ui';
+import {
+    type IPageElement,
+    ObjectAdaptor,
+    PageElementType,
+} from '@univerjs/slides';
+/* eslint-enable import/consistent-type-specifier-style */
 
 enum SHEET_VIEW_KEY {
     MAIN = 'spreadInSlide',
@@ -101,18 +105,8 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
             return;
         }
 
-        const { worksheet, styles } = spreadsheetModel;
-
-        const styleModel = new Styles(styles);
-        const worksheetModel = new Worksheet(id, worksheet, styleModel); // FIXME: worksheet in slide doesn't have a Worksheet object
-        const spreadsheetSkeleton = new SpreadsheetRenderSkeleton(
-            new SpreadsheetSkeleton(worksheetModel).calculate(),
-            styleModel,
-            this._localeService,
-            this._contextService,
-            this._configService,
-            this._injector
-        );
+        const { worksheet } = spreadsheetModel;
+        const spreadsheetSkeleton = this._createSpreadsheetSkeleton(id, spreadsheetModel);
 
         const { rowTotalHeight, columnTotalWidth, rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
         const allWidth = columnTotalWidth + worksheet.rowHeader.width || 0;
@@ -161,6 +155,20 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
         return sv;
     }
 
+    private _createSpreadsheetSkeleton(id: string, spreadsheetModel: NonNullable<IPageElement['spreadsheet']>) {
+        const styleModel = new Styles(spreadsheetModel.styles);
+        // FIXME: worksheet in slide doesn't have a Worksheet object
+        const worksheetModel = new Worksheet(id, spreadsheetModel.worksheet, styleModel);
+        return new SpreadsheetRenderSkeleton(
+            new SpreadsheetSkeleton(worksheetModel).calculate(),
+            styleModel,
+            this._localeService,
+            this._contextService,
+            this._configService,
+            this._injector
+        );
+    }
+
     // eslint-disable-next-line max-lines-per-function
     private _updateViewport(
         id: string,
@@ -201,7 +209,7 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
             isWheelPreventDefaultX: true,
         });
 
-        const VIEW_LEFT_TOP = new Viewport(SHEET_VIEW_KEY.VIEW_LEFT_TOP + id, scene, {
+        const _viewLeftTop = new Viewport(SHEET_VIEW_KEY.VIEW_LEFT_TOP + id, scene, {
             left: 0,
             top: 0,
             width: rowHeaderWidthScale,
@@ -228,7 +236,7 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
 
         scene.attachControl();
 
-        const scrollbar = new ScrollBar(viewMain, {
+        const _scrollbar = new ScrollBar(viewMain, {
             mainScene,
         });
 
@@ -266,5 +274,3 @@ export class SpreadsheetAdaptorFactory {
         return spreadsheetAdaptor;
     }
 }
-
-CanvasObjectProviderRegistry.add(new SpreadsheetAdaptorFactory());

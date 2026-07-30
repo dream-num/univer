@@ -16,11 +16,9 @@
 
 export * from '../components/docs/layout/shaping-engine/font-cache';
 export * from './cell-data';
-export { cjk } from './cjk-regexp';
 export * from './const';
 export * from './document-node-tools';
 export * from './draw';
-export * from './group-transform';
 export * from './i-document-skeleton-cached';
 export * from './i-events';
 export * from './interfaces';

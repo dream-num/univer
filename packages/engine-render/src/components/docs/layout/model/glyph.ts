@@ -22,8 +22,7 @@ import type {
     IDocumentSkeletonGlyph,
 } from '../../../../basics/i-document-skeleton-cached';
 import type { IFontCreateConfig } from '../../../../basics/interfaces';
-import { BooleanNumber, BulletAlignment, DataStreamTreeTokenType, GridType } from '@univerjs/core';
-import { cjk } from '../../../../basics/cjk-regexp';
+import { BooleanNumber, BulletAlignment, cjk, DataStreamTreeTokenType, GridType } from '@univerjs/core';
 import { GlyphType } from '../../../../basics/i-document-skeleton-cached';
 import {
     isCjkCenterAlignedPunctuation,

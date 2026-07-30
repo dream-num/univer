@@ -14,18 +14,22 @@
  * limitations under the License.
  */
 
+import type { IDrawingParam, Injector } from '@univerjs/core';
 import type { IFBlobSource } from '@univerjs/core/facade';
+import type { IDrawingGroupUpdateParam } from '@univerjs/drawing';
+import type { ISheetDrawing, ISheetDrawingPlacement, ISheetDrawingPlacementInput, ISheetImage } from '@univerjs/sheets-drawing';
 import {
     DrawingTypeEnum,
     generateRandomId,
-    type IDrawingParam,
+    getGroupState,
+
     ImageSourceType,
-    type Injector,
+
     IUndoRedoService,
+    transformObjectOutOfGroup,
 } from '@univerjs/core';
-import { type IDrawingGroupUpdateParam, isGroupableDrawingType } from '@univerjs/drawing';
-import { getGroupState, transformObjectOutOfGroup } from '@univerjs/engine-render';
-import { DrawingApplyType, getSheetDrawingPlacement, InsertSheetDrawingCommand, type ISheetDrawing, type ISheetDrawingPlacement, type ISheetDrawingPlacementInput, ISheetDrawingService, type ISheetImage, isSheetDrawingPlacementTarget, RemoveSheetDrawingCommand, SetDrawingApplyMutation, SetSheetDrawingCommand, SetSheetDrawingPlacementCommand } from '@univerjs/sheets-drawing';
+import { isGroupableDrawingType } from '@univerjs/drawing';
+import { DrawingApplyType, getSheetDrawingPlacement, InsertSheetDrawingCommand, ISheetDrawingService, isSheetDrawingPlacementTarget, RemoveSheetDrawingCommand, SetDrawingApplyMutation, SetSheetDrawingCommand, SetSheetDrawingPlacementCommand } from '@univerjs/sheets-drawing';
 import { FWorksheet } from '@univerjs/sheets/facade';
 import { FOverGridImage, FOverGridImageBuilder } from './f-over-grid-image';
 
@@ -192,6 +196,9 @@ export interface IFWorksheetDrawingMixin {
     /**
      * Get the placement of an Image or Shape on this sheet.
      *
+     * OneCell and TwoCell are always returned in normalized marker form, even
+     * when bounds were supplied to the setter.
+     *
      * @param {string} drawingId Drawing id.
      * @returns {ISheetDrawingPlacement | null} The placement, or `null` when the drawing is not an Image or Shape.
      * @example
@@ -208,17 +215,21 @@ export interface IFWorksheetDrawingMixin {
     /**
      * Set the placement of an Image or Shape on this sheet through the drawing command.
      *
+     * Bounds are recommended for normal authoring flows and anchor-mode
+     * changes. The command derives cell markers from the Sheet model in both
+     * headless and UI runtimes. Use explicit markers when the user selected
+     * cells, or when exact OOXML, copy/paste, or server-generated markers must
+     * be preserved.
+     *
      * @param {string} drawingId Drawing id.
-     * Position and Both also accept absolute Sheet grid bounds. The command
-     * converts bounds to cell markers in headless and UI runtimes.
      * @param {ISheetDrawingPlacementInput} placement Marker placement or absolute bounds with the requested anchor behavior.
      * @returns {boolean} `true` when the command succeeds.
-     * @example OneCell: move with cells, keep pixel size
+     * @example OneCell inferred from bounds (recommended for changing an existing drawing)
      * ```ts
      * const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
-     * const drawingId = sheet.getImages()[0]?.getId();
-     * if (!drawingId) throw new Error('No drawing found.');
-     * const changed = sheet.setDrawingPlacement(drawingId, {
+     * const image = sheet.getImages()[0];
+     * if (!image) throw new Error('No image found.');
+     * const changed = sheet.setDrawingPlacement(image.getId(), {
      *   kind: univerAPI.Enum.SheetDrawingAnchorType.Position,
      *   left: 160,
      *   top: 48,
@@ -227,23 +238,48 @@ export interface IFWorksheetDrawingMixin {
      * });
      * console.log(changed);
      * ```
-     * @example TwoCell: move and resize with both cell markers
+     * @example OneCell with an explicit user-selected anchor cell
      * ```ts
      * const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
-     * const drawingId = sheet.getImages()[0]?.getId();
-     * if (!drawingId) throw new Error('No drawing found.');
-     * sheet.setDrawingPlacement(drawingId, {
+     * const image = sheet.getImages()[0];
+     * if (!image) throw new Error('No image found.');
+     * sheet.setDrawingPlacement(image.getId(), {
+     *   kind: univerAPI.Enum.SheetDrawingAnchorType.Position,
+     *   from: { row: 2, column: 2, rowOffset: 8, columnOffset: 8 },
+     *   width: 240,
+     *   height: 120,
+     * });
+     * ```
+     * @example TwoCell inferred from bounds (recommended for changing an existing drawing)
+     * ```ts
+     * const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const image = sheet.getImages()[0];
+     * if (!image) throw new Error('No image found.');
+     * sheet.setDrawingPlacement(image.getId(), {
+     *   kind: univerAPI.Enum.SheetDrawingAnchorType.Both,
+     *   left: 160,
+     *   top: 48,
+     *   width: 240,
+     *   height: 120,
+     * });
+     * ```
+     * @example TwoCell with explicit user-selected start and end cells
+     * ```ts
+     * const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * const image = sheet.getImages()[0];
+     * if (!image) throw new Error('No image found.');
+     * sheet.setDrawingPlacement(image.getId(), {
      *   kind: univerAPI.Enum.SheetDrawingAnchorType.Both,
      *   from: { row: 2, column: 2, rowOffset: 8, columnOffset: 8 },
      *   to: { row: 8, column: 6, rowOffset: 0, columnOffset: 0 },
      * });
      * ```
-     * @example Absolute: do not move or resize after row or column changes
+     * @example Absolute/free bounds for an overlay that must ignore row and column changes
      * ```ts
      * const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
-     * const drawingId = sheet.getImages()[0]?.getId();
-     * if (!drawingId) throw new Error('No drawing found.');
-     * sheet.setDrawingPlacement(drawingId, {
+     * const image = sheet.getImages()[0];
+     * if (!image) throw new Error('No image found.');
+     * sheet.setDrawingPlacement(image.getId(), {
      *   kind: univerAPI.Enum.SheetDrawingAnchorType.None,
      *   left: 640,
      *   top: 96,

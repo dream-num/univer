@@ -18,6 +18,7 @@ export { afterInitApply } from './after-init-apply';
 export * from './array-search';
 export * from './blob';
 export { checkIfMove, MOVE_BUFFER_VALUE, ROTATE_BUFFER_VALUE } from './check-if-move';
+export { cjk } from './cjk-regexp';
 export { ColorKit, COLORS, type IRgbColor, RGB_PAREN, RGBA_PAREN } from './color/color-kit';
 export * from './command-enum';
 export * from './common';
@@ -26,6 +27,7 @@ export type { DateKit, DateKitInput, DateKitUnitType, OpUnitType } from './date-
 export { dateKit } from './date-kit';
 export * from './doc-tool';
 export * from './generate';
+export * from './group-transform';
 export * from './hash-algorithm';
 export * from './intervals';
 export * from './lifecycle';

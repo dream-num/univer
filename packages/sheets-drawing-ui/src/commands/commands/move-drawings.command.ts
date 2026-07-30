@@ -18,7 +18,7 @@ import type { IAccessor, ICommand } from '@univerjs/core';
 import type { ISetDrawingCommandParams, ISheetDrawing } from '@univerjs/sheets-drawing';
 import { CommandType, Direction, ICommandService } from '@univerjs/core';
 import { SheetSkeletonService } from '@univerjs/sheets';
-import { ClearSheetDrawingTransformerOperation, ISheetDrawingService, SetSheetDrawingCommand, transformToAxisAlignPosition, transformToDrawingPosition } from '@univerjs/sheets-drawing';
+import { ISheetDrawingService, SetSheetDrawingCommand, transformToAxisAlignPosition, transformToDrawingPosition } from '@univerjs/sheets-drawing';
 
 export interface IMoveDrawingsCommandParams {
     direction: Direction;
@@ -75,11 +75,6 @@ export const MoveDrawingsCommand: ICommand = {
             drawings: newDrawings,
         });
 
-        if (result) {
-            commandService.syncExecuteCommand(ClearSheetDrawingTransformerOperation.id, [unitId]);
-            return true;
-        }
-
-        return false;
+        return result;
     },
 };

@@ -69,7 +69,7 @@ const cjkTestCases: TestCases = {
     ...casify('𛄀𛄁𛄡𛄢𚿵𚿶𚿷𚿸𛀂𛀀𛀁𛃾𛃿𛅕𛄲𛅤𛅥𛅦𛅧', 'cjk-letter'),
 };
 
-describe('cjk', () => {
+describe('shared cjk', () => {
     it('keeps cjk-regex 3.4.0 generated sources', () => {
         expect(cjk.CJK_LETTER_REG.source).toBe(CJK_LETTER_SOURCE);
         expect(cjk.CJK_PUNCTUATION_REG.source).toBe(CJK_PUNCTUATION_SOURCE);

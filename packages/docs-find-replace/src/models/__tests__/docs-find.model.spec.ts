@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
-import type { Documents, DocumentSkeleton, ITextRangeWithStyle } from '@univerjs/engine-render';
-import type { IFindQuery } from '@univerjs/find-replace';
-import { ICommandService } from '@univerjs/core';
+/* eslint-disable import/consistent-type-specifier-style -- Keep type and value imports from one package in one declaration. */
+import { type ICommand, ICommandService } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService, DocTextResolverService, RichTextEditingMutation } from '@univerjs/docs';
 import { DocBackScrollRenderController, getTextRangeFromCharIndex } from '@univerjs/docs-ui';
 import { createCommandTestBed } from '@univerjs/docs-ui/commands/commands/__tests__/create-command-test-bed';
-import { IRenderManagerService } from '@univerjs/engine-render';
-import { FindBy, FindDirection, FindScope } from '@univerjs/find-replace';
+import { type Documents, type DocumentSkeleton, IRenderManagerService, type ITextRangeWithStyle } from '@univerjs/engine-render';
+import { FindBy, FindDirection, FindScope, type IFindQuery } from '@univerjs/find-replace';
 import { firstValueFrom } from 'rxjs';
+/* eslint-enable import/consistent-type-specifier-style */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DocsReplaceCommand } from '../../commands/commands/docs-replace.command';
+import { DocsFindRenderController } from '../../controllers/docs-find-render.controller';
 import { DocsFindModel } from '../docs-find.model';
 
 const getTextRangeFromCharIndexMock = vi.hoisted(() => vi.fn());
@@ -67,7 +67,7 @@ function createModelTestBed(dataStream = 'cat xx cat\r\n') {
     selectionManager.__TEST_ONLY_setCurrentSelection({ unitId: 'test-doc', subUnitId: 'test-doc' });
     const skeletonManager = testBed.get(DocSkeletonManagerService);
     vi.spyOn(skeletonManager, 'getSkeleton').mockReturnValue(null as never);
-    const model = testBed.injector.createInstance(DocsFindModel, testBed.doc, skeletonManager);
+    const model = testBed.injector.createInstance(DocsFindModel, testBed.doc);
     return { ...testBed, commandService, selectionManager, skeletonManager, scrollToRange, model };
 }
 
@@ -112,9 +112,10 @@ describe('DocsFindModel', () => {
     });
 
     it('selects and scrolls to the active match without focusing the document editor', () => {
-        const { model, selectionManager, scrollToRange, univer } = createModelTestBed();
+        const { model, selectionManager, skeletonManager, scrollToRange, univer, injector } = createModelTestBed();
         const replaceDocRanges = vi.spyOn(selectionManager, 'replaceDocRanges');
         model.start(docsQuery('cat'));
+        const renderController = injector.createInstance(DocsFindRenderController, model, skeletonManager);
         model.moveToNextMatch({ ignoreSelection: true, noFocus: true });
         model.focusSelection();
 
@@ -122,6 +123,7 @@ describe('DocsFindModel', () => {
             expect.objectContaining({ startOffset: 0, endOffset: 3 }),
         ], { unitId: 'test-doc', subUnitId: 'test-doc' }, true, { shouldFocus: false });
         expect(scrollToRange).toHaveBeenCalledWith(expect.objectContaining({ startOffset: 0, endOffset: 3 }));
+        renderController.dispose();
         model.dispose();
         univer.dispose();
     });
@@ -172,7 +174,7 @@ describe('DocsFindModel', () => {
     });
 
     it('disposes every TextRange highlight', () => {
-        const { model, skeletonManager, get, univer } = createModelTestBed();
+        const { model, skeletonManager, get, univer, injector } = createModelTestBed();
         vi.mocked(skeletonManager.getSkeleton).mockReturnValue({} as DocumentSkeleton);
         const render = get(IRenderManagerService).getRenderUnitById('test-doc')!;
         (render as unknown as { mainComponent: Documents }).mainComponent = {} as Documents;
@@ -181,10 +183,12 @@ describe('DocsFindModel', () => {
         getTextRangeFromCharIndexMock.mockReturnValueOnce(first).mockReturnValueOnce(second);
 
         model.start(docsQuery('cat'));
+        const renderController = injector.createInstance(DocsFindRenderController, model, skeletonManager);
         expect(getTextRangeFromCharIndex).toHaveBeenCalledTimes(2);
-        model.dispose();
+        renderController.dispose();
         expect(first.dispose).toHaveBeenCalledOnce();
         expect(second.dispose).toHaveBeenCalledOnce();
+        model.dispose();
         univer.dispose();
     });
 });

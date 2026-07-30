@@ -27,7 +27,6 @@ import { SheetInterceptorService } from '@univerjs/sheets';
 import { resolveSheetDrawingRotateEnabled } from '../../common/rotate-enabled';
 import { ISheetDrawingService } from '../../services/sheet-drawing.service';
 import { DrawingApplyType, SetDrawingApplyMutation } from '../mutations/set-drawing-apply.mutation';
-import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
 
 export interface ISetDrawingCommandParams {
     unitId: string;
@@ -124,10 +123,6 @@ export const SetSheetDrawingCommand: ICommand<ISetDrawingCommandParams> = {
                     type: DrawingApplyType.UPDATE,
                 },
             },
-            {
-                id: ClearSheetDrawingTransformerOperation.id,
-                params: [unitId],
-            },
             ...intercepted.redos,
         ];
         const undoMutations = [
@@ -141,10 +136,6 @@ export const SetSheetDrawingCommand: ICommand<ISetDrawingCommandParams> = {
                     objects,
                     type: DrawingApplyType.UPDATE,
                 },
-            },
-            {
-                id: ClearSheetDrawingTransformerOperation.id,
-                params: [unitId],
             },
             ...intercepted.undos,
         ];

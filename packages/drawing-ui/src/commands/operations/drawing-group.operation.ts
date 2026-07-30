@@ -16,9 +16,8 @@
 
 import type { IDrawingParam, IOperation } from '@univerjs/core';
 import type { IDrawingGroupUpdateParam } from '@univerjs/drawing';
-import { CommandType, DrawingTypeEnum, generateRandomId } from '@univerjs/core';
+import { CommandType, DrawingTypeEnum, generateRandomId, getGroupState, transformObjectOutOfGroup } from '@univerjs/core';
 import { DRAWING_GROUPABLE_TYPES, IDrawingManagerService, isGroupableDrawingType } from '@univerjs/drawing';
-import { getGroupState, transformObjectOutOfGroup } from '@univerjs/engine-render';
 
 /**
  * Now only support grouping images, shapes, charts, and groups.

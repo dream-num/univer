@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, Nullable, UnitModel } from '@univerjs/core';
 import type { IFindQuery, IFindReplaceProvider } from '@univerjs/find-replace';
-import { Disposable, Inject, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+
+/* eslint-disable import/consistent-type-specifier-style -- Keep type and value imports from one package in one declaration. */
+import { Disposable, type DocumentDataModel, Inject, Injector, IUniverInstanceService, type Nullable, type UnitModel, UniverInstanceType } from '@univerjs/core';
+/* eslint-enable import/consistent-type-specifier-style */
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { DocsFindRenderController } from '../controllers/docs-find-render.controller';
 import { DocsFindModel } from '../models/docs-find.model';
 
 export class DocsFindReplaceProvider extends Disposable implements IFindReplaceProvider {
@@ -32,6 +35,7 @@ export class DocsFindReplaceProvider extends Disposable implements IFindReplaceP
     };
 
     private _model: Nullable<DocsFindModel> = null;
+    private _renderController: Nullable<DocsFindRenderController> = null;
 
     constructor(
         @IUniverInstanceService private readonly _instanceService: IUniverInstanceService,
@@ -52,12 +56,15 @@ export class DocsFindReplaceProvider extends Disposable implements IFindReplaceP
         const skeleton = this._renderManagerService.getRenderUnitById(doc.getUnitId())?.with(DocSkeletonManagerService);
         if (!skeleton) return [];
 
-        this._model = this._injector.createInstance(DocsFindModel, doc, skeleton);
+        this._model = this._injector.createInstance(DocsFindModel, doc);
         this._model.start(query);
+        this._renderController = this._injector.createInstance(DocsFindRenderController, this._model, skeleton);
         return [this._model];
     }
 
     terminate(): void {
+        this._renderController?.dispose();
+        this._renderController = null;
         this._model?.dispose();
         this._model = null;
     }

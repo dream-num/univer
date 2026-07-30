@@ -28,7 +28,7 @@ import {
 import { getDrawingShapeKeyByDrawingSearch } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetSkeletonService } from '@univerjs/sheets';
-import { ClearSheetDrawingTransformerOperation, DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation, transformToAxisAlignPosition, transformToDrawingPosition } from '@univerjs/sheets-drawing';
+import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation, transformToAxisAlignPosition, transformToDrawingPosition } from '@univerjs/sheets-drawing';
 
 interface IFlipDrawingCommandParam {
     unitId: string;
@@ -60,13 +60,10 @@ export const FlipSheetDrawingCommand: ICommand = {
         const flipH = params.flipH;
         const flipV = params.flipV;
 
-        const unitIds: string[] = [];
         const updateParams: any[] = [];
 
         for (const param of drawings) {
             const { unitId, subUnitId, drawingId } = param;
-            unitIds.push(unitId);
-
             const drawingData = sheetDrawingService.getDrawingData(unitId, subUnitId);
             const existing = drawingData?.[drawingId];
             if (!existing) {
@@ -158,8 +155,8 @@ export const FlipSheetDrawingCommand: ICommand = {
         if (result.result) {
             undoRedoService.pushUndoRedo({
                 unitID: opUnitId,
-                undoMutations: [undoUpdateMutation, { id: ClearSheetDrawingTransformerOperation.id, params: unitIds }],
-                redoMutations: [updateMutation, { id: ClearSheetDrawingTransformerOperation.id, params: unitIds }],
+                undoMutations: [undoUpdateMutation],
+                redoMutations: [updateMutation],
             });
 
             return true;

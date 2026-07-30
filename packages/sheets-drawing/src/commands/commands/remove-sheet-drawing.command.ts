@@ -25,7 +25,6 @@ import {
 import { SheetInterceptorService } from '@univerjs/sheets';
 import { ISheetDrawingService } from '../../services/sheet-drawing.service';
 import { DrawingApplyType, SetDrawingApplyMutation } from '../mutations/set-drawing-apply.mutation';
-import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
 
 export interface IRemoveSheetDrawingCommandParam {
     unitId: string;
@@ -71,10 +70,6 @@ export const RemoveSheetDrawingCommand: ICommand = {
                     type: DrawingApplyType.REMOVE,
                 },
             },
-            {
-                id: ClearSheetDrawingTransformerOperation.id,
-                params: [unitId],
-            },
             ...intercepted.redos,
         ];
         const undoMutations = [
@@ -88,10 +83,6 @@ export const RemoveSheetDrawingCommand: ICommand = {
                     objects,
                     type: DrawingApplyType.INSERT,
                 },
-            },
-            {
-                id: ClearSheetDrawingTransformerOperation.id,
-                params: [unitId],
             },
             ...intercepted.undos,
         ];

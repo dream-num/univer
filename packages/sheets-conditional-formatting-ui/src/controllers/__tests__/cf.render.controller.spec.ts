@@ -16,9 +16,9 @@
 
 import type { IRange } from '@univerjs/core';
 import { INTERCEPTOR_POINT } from '@univerjs/sheets';
-import { DEFAULT_PADDING, DEFAULT_WIDTH } from '@univerjs/sheets-conditional-formatting';
 import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { DEFAULT_PADDING, DEFAULT_WIDTH } from '../../render/icon.render';
 import { SheetsCfRenderController } from '../cf.render.controller';
 
 afterEach(() => {

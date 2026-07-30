@@ -23,8 +23,7 @@ import type {
 } from '../../../../../basics/i-document-skeleton-cached';
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../../view-model/document-view-model';
-import { HorizontalAlign, WrapStrategy } from '@univerjs/core';
-import { cjk } from '../../../../../basics/cjk-regexp';
+import { cjk, HorizontalAlign, WrapStrategy } from '@univerjs/core';
 import {
     isCjkLeftAlignedPunctuation,
     isCjkRightAlignedPunctuation,

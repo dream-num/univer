@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+// @vitest-environment jsdom
+
+import { IIconSetType } from '@univerjs/sheets-conditional-formatting';
 import { describe, expect, it, vi } from 'vitest';
-import { IIconSetType } from '../../models/icon-map';
 import { DataBar } from '../data-bar.render';
 import { ConditionalFormattingIcon } from '../icon.render';
 

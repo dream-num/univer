@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+/* eslint-disable import/consistent-type-specifier-style -- Keep type and value imports from one package in one declaration. */
 import {
     createIdentifier,
     Disposable,
@@ -28,8 +29,6 @@ import {
     toDisposable,
     type UnitModel,
 } from '@univerjs/core';
-
-import { RENDER_RAW_FORMULA_KEY } from '@univerjs/sheets-ui';
 import {
     BehaviorSubject,
     combineLatest,
@@ -38,6 +37,7 @@ import {
     Subject,
     throttleTime,
 } from 'rxjs';
+/* eslint-enable import/consistent-type-specifier-style */
 
 import { FIND_REPLACE_AVAILABLE, FIND_REPLACE_REPLACE_REVEALED } from './context-keys';
 
@@ -825,7 +825,6 @@ export class FindReplaceService extends Disposable implements IFindReplaceServic
 
     changeFindBy(findBy: FindBy): void {
         this._state.changeState({ findBy });
-        this._toggleDisplayRawFormula(findBy === FindBy.FORMULA);
     }
 
     changeFindScope(scope: FindScope): void {
@@ -922,7 +921,6 @@ export class FindReplaceService extends Disposable implements IFindReplaceServic
         this._modelDisposables?.dispose();
         this._modelDisposables = null;
 
-        this._toggleDisplayRawFormula(false);
         this._toggleRevealReplace(false);
     }
 
@@ -950,9 +948,5 @@ export class FindReplaceService extends Disposable implements IFindReplaceServic
 
     private _toggleRevealReplace(revealReplace: boolean): void {
         this._contextService.setContextValue(FIND_REPLACE_REPLACE_REVEALED, revealReplace);
-    }
-
-    private _toggleDisplayRawFormula(force: boolean): void {
-        this._contextService.setContextValue(RENDER_RAW_FORMULA_KEY, force);
     }
 }

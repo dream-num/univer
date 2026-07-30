@@ -14,21 +14,14 @@
  * limitations under the License.
  */
 
-import type { IDataBarCellData } from './type';
-
+/* eslint-disable import/consistent-type-specifier-style -- Keep type and value imports from one package in one declaration. */
+import type { IDataBarCellData } from '@univerjs/sheets-conditional-formatting/models/conditional-formatting-cell-data';
 import { type IRange, type IScale, Range } from '@univerjs/core';
-import {
-    FIX_ONE_PIXEL_BLUR_OFFSET,
-    SpreadsheetExtensionRegistry,
-    type UniverRenderingContext,
-} from '@univerjs/engine-render';
+import { FIX_ONE_PIXEL_BLUR_OFFSET, type UniverRenderingContext } from '@univerjs/engine-render';
 import { SheetExtension, type SpreadsheetRenderSkeleton } from '@univerjs/sheets-ui';
+/* eslint-enable import/consistent-type-specifier-style */
 
 export const dataBarUKey = 'sheet-conditional-rule-data-bar';
-export const defaultDataBarPositiveColor = '#ffbe38';
-export const defaultDataBarNativeColor = '#abd91a';
-
-export const defaultPlaceholderColor = '#000';
 
 const EXTENSION_Z_INDEX = 34;
 
@@ -180,5 +173,3 @@ export class DataBar extends SheetExtension {
         ctx.fill();
     }
 }
-
-SpreadsheetExtensionRegistry.add(DataBar);

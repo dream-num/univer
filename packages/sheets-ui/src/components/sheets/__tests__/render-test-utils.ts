@@ -51,12 +51,10 @@ function restoreProperty(target: object, key: PropertyKey, descriptor: PropertyD
 }
 
 export function setupRenderTestEnv(): { restore: () => void } {
-    const jestDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'jest');
     const resizeObserverDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'ResizeObserver');
     const requestIdleCallbackDescriptor = Object.getOwnPropertyDescriptor(window, 'requestIdleCallback');
     const cancelIdleCallbackDescriptor = Object.getOwnPropertyDescriptor(window, 'cancelIdleCallback');
 
-    Object.defineProperty(globalThis, 'jest', { configurable: true, writable: true, value: vi });
     patchCanvasContext();
 
     class ResizeObserverMock {
@@ -114,7 +112,6 @@ export function setupRenderTestEnv(): { restore: () => void } {
             setPointerCaptureSpy.mockRestore();
             releasePointerCaptureSpy.mockRestore();
             hasPointerCaptureSpy.mockRestore();
-            restoreProperty(globalThis, 'jest', jestDescriptor);
             restoreProperty(globalThis, 'ResizeObserver', resizeObserverDescriptor);
             restoreProperty(window, 'requestIdleCallback', requestIdleCallbackDescriptor);
             restoreProperty(window, 'cancelIdleCallback', cancelIdleCallbackDescriptor);

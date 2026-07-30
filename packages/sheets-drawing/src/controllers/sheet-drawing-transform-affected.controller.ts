@@ -14,20 +14,24 @@
  * limitations under the License.
  */
 
+import type { ICommandInfo, IMutationInfo, IRange, ITransformState, Nullable } from '@univerjs/core';
+import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
+import type { IDeleteRangeMoveLeftCommandParams, IDeleteRangeMoveUpCommandParams, IDeltaColumnWidthCommandParams, IDeltaRowHeightCommandParams, IInsertColCommandParams, IInsertRangeMoveDownCommandParams, IInsertRangeMoveRightCommandParams, IInsertRowCommandParams, IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, IRemoveRowColCommandParams, ISetColHiddenCommandParams, ISetColHiddenMutationParams, ISetColVisibleMutationParams, ISetColWidthCommandParams, ISetRowHeightCommandParams, ISetRowHiddenCommandParams, ISetRowHiddenMutationParams, ISetRowVisibleMutationParams, ISetSpecificColsVisibleCommandParams, ISetSpecificRowsVisibleCommandParams, ISetWorksheetColWidthMutationParams, ISetWorksheetRowAutoHeightMutationParams, ISetWorksheetRowHeightMutationParams, ISetWorksheetRowIsAutoHeightMutationParams, ISheetSkeletonManagerParam, SpreadsheetSkeleton } from '@univerjs/sheets';
+import type { ISheetDrawingTransformExtensionResult, ISheetDrawingTransformPlan } from '../services/sheet-drawing-transform-plan.service';
+import type { ISheetDrawing, ISheetDrawingPosition } from '../services/sheet-drawing.service';
 import {
     Disposable,
-    type ICommandInfo,
+
     ICommandService,
-    type IMutationInfo,
+
     Inject,
-    type IRange,
-    type ITransformState,
+
     IUniverInstanceService,
-    type Nullable,
+
     RANGE_TYPE,
     Rectangle,
 } from '@univerjs/core';
-import { type IDrawingJsonUndo1, IDrawingManagerService } from '@univerjs/drawing';
+import { IDrawingManagerService } from '@univerjs/drawing';
 import {
     attachRangeWithCoord,
     DeleteRangeMoveLeftCommand,
@@ -35,37 +39,12 @@ import {
     DeltaColumnWidthCommand,
     DeltaRowHeightCommand,
     getSheetCommandTarget,
-    type IDeleteRangeMoveLeftCommandParams,
-    type IDeleteRangeMoveUpCommandParams,
-    type IDeltaColumnWidthCommandParams,
-    type IDeltaRowHeightCommandParams,
-    type IInsertColCommandParams,
-    type IInsertRangeMoveDownCommandParams,
-    type IInsertRangeMoveRightCommandParams,
-    type IInsertRowCommandParams,
-    type IMoveColsCommandParams,
-    type IMoveRangeCommandParams,
-    type IMoveRowsCommandParams,
+
     InsertColCommand,
     InsertRangeMoveDownCommand,
     InsertRangeMoveRightCommand,
     InsertRowCommand,
-    type IRemoveRowColCommandParams,
-    type ISetColHiddenCommandParams,
-    type ISetColHiddenMutationParams,
-    type ISetColVisibleMutationParams,
-    type ISetColWidthCommandParams,
-    type ISetRowHeightCommandParams,
-    type ISetRowHiddenCommandParams,
-    type ISetRowHiddenMutationParams,
-    type ISetRowVisibleMutationParams,
-    type ISetSpecificColsVisibleCommandParams,
-    type ISetSpecificRowsVisibleCommandParams,
-    type ISetWorksheetColWidthMutationParams,
-    type ISetWorksheetRowAutoHeightMutationParams,
-    type ISetWorksheetRowHeightMutationParams,
-    type ISetWorksheetRowIsAutoHeightMutationParams,
-    type ISheetSkeletonManagerParam,
+
     MoveColsCommand,
     MoveRangeCommand,
     MoveRowsCommand,
@@ -88,20 +67,17 @@ import {
     SheetInterceptorService,
     SheetSkeletonService,
     SheetsSelectionsService,
-    type SpreadsheetSkeleton,
+
 } from '@univerjs/sheets';
 import { drawingPositionToTransform, transformToAxisAlignPosition, transformToDrawingPosition } from '../basics/transform-position';
 import { DrawingApplyType, SetDrawingApplyMutation } from '../commands/mutations/set-drawing-apply.mutation';
-import { ClearSheetDrawingTransformerOperation } from '../commands/operations/clear-drawing-transformer.operation';
 import { isSheetDrawingPlacementTarget, materializeSheetDrawingPlacement } from '../services/sheet-drawing-placement';
 import {
-    type ISheetDrawingTransformExtensionResult,
-    type ISheetDrawingTransformPlan,
+
     SheetDrawingTransformPlanService,
 } from '../services/sheet-drawing-transform-plan.service';
 import {
-    type ISheetDrawing,
-    type ISheetDrawingPosition,
+
     ISheetDrawingService,
     SheetDrawingAnchorType,
 } from '../services/sheet-drawing.service';
@@ -340,9 +316,9 @@ export class SheetDrawingTransformAffectedController extends Disposable {
             const updated = {
                 ...original,
                 ...patch,
-                transform: { ...original.transform, ...patch.transform },
-                sheetTransform: patch.sheetTransform ?? original.sheetTransform,
-                axisAlignSheetTransform: patch.axisAlignSheetTransform ?? original.axisAlignSheetTransform,
+                transform: mergeDrawingTransform(original.transform, patch.transform),
+                sheetTransform: mergeDrawingPosition(original.sheetTransform, patch.sheetTransform),
+                axisAlignSheetTransform: mergeDrawingPosition(original.axisAlignSheetTransform, patch.axisAlignSheetTransform),
             };
             if ((updated.anchorType ?? SheetDrawingAnchorType.Position) === SheetDrawingAnchorType.Position) {
                 updated.transform.width = original.transform?.width;
@@ -357,7 +333,6 @@ export class SheetDrawingTransformAffectedController extends Disposable {
             if (changed.length) {
                 this._sheetDrawingService.refreshTransform(changed);
                 this._drawingManagerService.refreshTransform(changed);
-                this._commandService.syncExecuteCommand(ClearSheetDrawingTransformerOperation.id, [unitId]);
             }
             return { redos: [], undos: [] };
         }
@@ -394,11 +369,6 @@ export class SheetDrawingTransformAffectedController extends Disposable {
 
         redos.push(...feature.redos);
         undos.push(...feature.undos);
-        if (redos.length || undos.length) {
-            redos.push({ id: ClearSheetDrawingTransformerOperation.id, params: [unitId] });
-            undos.push({ id: ClearSheetDrawingTransformerOperation.id, params: [unitId] });
-        }
-
         return { redos, undos };
     }
 
@@ -1508,4 +1478,33 @@ export class SheetDrawingTransformAffectedController extends Disposable {
 
         this._finalizePlan(unitId, subUnitId, updateDrawings, [], 'refresh', command);
     }
+}
+
+function mergeDrawingTransform(
+    original: Nullable<ITransformState>,
+    patch: Nullable<ITransformState>
+): ITransformState {
+    return {
+        ...original,
+        left: patch?.left ?? original?.left,
+        top: patch?.top ?? original?.top,
+        width: patch?.width ?? original?.width,
+        height: patch?.height ?? original?.height,
+    };
+}
+
+function mergeDrawingPosition(
+    original: ISheetDrawingPosition,
+    patch: Nullable<ISheetDrawingPosition>
+): ISheetDrawingPosition {
+    if (!patch) {
+        return original;
+    }
+
+    return {
+        ...patch,
+        ...original,
+        from: patch.from,
+        to: patch.to,
+    };
 }

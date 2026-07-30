@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
+import type { IAccessor, ICommand } from '@univerjs/core';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
+import type { ISheetDrawing } from '../../services/sheet-drawing.service';
 import {
     CommandType,
-    type IAccessor,
-    type ICommand,
+
     ICommandService,
     IUndoRedoService,
     sequenceExecute,
 } from '@univerjs/core';
 import { SheetInterceptorService, SheetSkeletonService } from '@univerjs/sheets';
 import { isSheetDrawingPlacementTarget, materializeSheetDrawingPlacement } from '../../services/sheet-drawing-placement';
-import { type ISheetDrawing, ISheetDrawingService, SheetDrawingAnchorType } from '../../services/sheet-drawing.service';
+import { ISheetDrawingService, SheetDrawingAnchorType } from '../../services/sheet-drawing.service';
 import { DrawingApplyType, SetDrawingApplyMutation } from '../mutations/set-drawing-apply.mutation';
-import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
 
 export interface IInsertSheetDrawingCommandParams {
     unitId: string;
@@ -70,10 +70,6 @@ export const InsertSheetDrawingCommand: ICommand = {
                     type: DrawingApplyType.INSERT,
                 },
             },
-            {
-                id: ClearSheetDrawingTransformerOperation.id,
-                params: [unitId],
-            },
             ...intercepted.redos,
         ];
         const undoMutations = [
@@ -87,10 +83,6 @@ export const InsertSheetDrawingCommand: ICommand = {
                     objects,
                     type: DrawingApplyType.REMOVE,
                 },
-            },
-            {
-                id: ClearSheetDrawingTransformerOperation.id,
-                params: [unitId],
             },
             ...intercepted.undos,
         ];

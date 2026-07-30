@@ -16,8 +16,7 @@
 
 import type { IDrawingGroupNestedIds, IDrawingGroupNestedParam, IDrawingParam } from '@univerjs/core';
 import type { IDrawingGroupUpdateParam } from '@univerjs/drawing';
-import { DrawingTypeEnum, generateRandomId } from '@univerjs/core';
-import { getGroupState, transformObjectOutOfGroup } from '@univerjs/engine-render';
+import { DrawingTypeEnum, generateRandomId, getGroupState, transformObjectOutOfGroup } from '@univerjs/core';
 
 export function ungroupToGroup(ungroupParams: IDrawingGroupUpdateParam[]) {
     const newGroupParams: IDrawingGroupUpdateParam[] = [];

@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
-import type { ISheetDrawingPlacement } from '../../services/sheet-drawing-placement';
+import type { Injector, Univer, Workbook } from '@univerjs/core';
+import type { ISheetDrawingPlacement, ISheetDrawingPlacementInput } from '../../services/sheet-drawing-placement';
+import type { ISheetDrawing } from '../../services/sheet-drawing.service';
 import {
     DrawingTypeEnum,
     ICommandService,
     ImageSourceType,
-    type Injector,
+
     IUniverInstanceService,
     RedoCommand,
     UndoCommand,
-    type Univer,
+
     UniverInstanceType,
-    type Workbook,
+
 } from '@univerjs/core';
 import { SheetSkeletonService } from '@univerjs/sheets';
 import { FWorkbook, FWorksheet } from '@univerjs/sheets/facade';
@@ -33,7 +35,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createSheetsDrawingTestBed } from '../../__tests__/create-sheets-drawing-test-bed';
 import { InsertSheetDrawingCommand } from '../../commands/commands/insert-sheet-drawing.command';
 import { resolveSheetDrawingRotateEnabled } from '../../common/rotate-enabled';
-import { type ISheetDrawing, ISheetDrawingService, SheetDrawingAnchorType } from '../../services/sheet-drawing.service';
+import { ISheetDrawingService, SheetDrawingAnchorType } from '../../services/sheet-drawing.service';
 import '../f-worksheet';
 
 describe('FWorksheetDrawingMixin group drawings', () => {
@@ -262,29 +264,76 @@ describe('FWorksheetDrawingMixin group drawings', () => {
         expect(fWorksheet.getDrawingPlacement(image.drawingId)).toEqual(moved);
     });
 
-    it('sets a Position placement from absolute bounds through the command', () => {
+    it.each([
+        {
+            name: 'infers OneCell markers from bounds',
+            placement: {
+                kind: SheetDrawingAnchorType.Position,
+                left: 123,
+                top: 47,
+                width: 205,
+                height: 91,
+            },
+            exact: false,
+        },
+        {
+            name: 'keeps explicit OneCell markers',
+            placement: {
+                kind: SheetDrawingAnchorType.Position,
+                from: { row: 2, column: 3, rowOffset: 4, columnOffset: 5 },
+                width: 205,
+                height: 91,
+            },
+            exact: true,
+        },
+        {
+            name: 'infers TwoCell markers from bounds',
+            placement: {
+                kind: SheetDrawingAnchorType.Both,
+                left: 123,
+                top: 47,
+                width: 205,
+                height: 91,
+            },
+            exact: false,
+        },
+        {
+            name: 'keeps explicit TwoCell markers',
+            placement: {
+                kind: SheetDrawingAnchorType.Both,
+                from: { row: 2, column: 3, rowOffset: 4, columnOffset: 5 },
+                to: { row: 8, column: 7, rowOffset: 6, columnOffset: 9 },
+            },
+            exact: true,
+        },
+        {
+            name: 'keeps Absolute bounds',
+            placement: {
+                kind: SheetDrawingAnchorType.None,
+                left: 123,
+                top: 47,
+                width: 205,
+                height: 91,
+            },
+            exact: true,
+        },
+    ] satisfies Array<{ name: string; placement: ISheetDrawingPlacementInput; exact: boolean }>)('$name through the public facade command', ({ placement, exact }) => {
         const commandService = injector.get(ICommandService);
         const fWorksheet = createFacade(injector);
-        const image = createDrawing('position-bounds-image', 10, DrawingTypeEnum.DRAWING_IMAGE);
+        const image = createDrawing(`placement-${placement.kind}-${exact}`, 10, DrawingTypeEnum.DRAWING_IMAGE);
         expect(commandService.syncExecuteCommand(InsertSheetDrawingCommand.id, {
             unitId: 'test',
             drawings: [image],
         })).toBe(true);
 
-        expect(fWorksheet.setDrawingPlacement(image.drawingId, {
-            kind: SheetDrawingAnchorType.Position,
-            left: 123,
-            top: 47,
-            width: 205,
-            height: 91,
-        })).toBe(true);
+        expect(fWorksheet.setDrawingPlacement(image.drawingId, placement)).toBe(true);
 
-        const placement = fWorksheet.getDrawingPlacement(image.drawingId);
-        expect(placement?.kind).toBe(SheetDrawingAnchorType.Position);
-        expect(placement && 'left' in placement).toBe(false);
-        if (placement?.kind === SheetDrawingAnchorType.Position) {
-            expect(placement.width).toBe(205);
-            expect(placement.height).toBe(91);
+        const normalized = fWorksheet.getDrawingPlacement(image.drawingId);
+        expect(normalized?.kind).toBe(placement.kind);
+        if (exact) {
+            expect(normalized).toEqual(placement);
+        } else {
+            expect(normalized && 'left' in normalized).toBe(false);
         }
     });
 

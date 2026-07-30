@@ -14,23 +14,28 @@
  * limitations under the License.
  */
 
+import type { IDrawingParam, IDrawingSearch, IRotationSkewFlipTransform, Serializable } from '@univerjs/core';
+import type { IDrawingGroupUpdateParam, IDrawingJsonUndo1, IImageData, IUnitDrawingService } from '@univerjs/drawing';
 import type { ISheetOverGridPosition } from '@univerjs/sheets';
-import { createIdentifier, type IDrawingParam, type IDrawingSearch, type IRotationSkewFlipTransform, type Serializable } from '@univerjs/core';
-import { type IDrawingGroupUpdateParam, type IDrawingJsonUndo1, type IImageData, type IUnitDrawingService, UnitDrawingService } from '@univerjs/drawing';
+import { createIdentifier } from '@univerjs/core';
+import { UnitDrawingService } from '@univerjs/drawing';
 
 export enum SheetDrawingAnchorType {
     /**
-     * Only the position of the drawing follows the cell changes. When rows or columns are inserted or deleted, the position of the drawing changes, but the size remains the same.
+     * OneCell placement (`xdr:oneCellAnchor`): the drawing follows its anchor
+     * cell while keeping a fixed pixel size.
      */
     Position = '0',
 
     /**
-     * The size and position of the drawing follow the cell changes. When rows or columns are inserted or deleted, the size and position of the drawing change accordingly.
+     * TwoCell placement (`xdr:twoCellAnchor`): the drawing follows two cell
+     * markers, so row and column changes can update both position and size.
      */
     Both = '1',
 
     /**
-     * The size and position of the drawing do not follow the cell changes. When rows or columns are inserted or deleted, the position and size of the drawing remain unchanged.
+     * Absolute or free placement (`xdr:absoluteAnchor`): the drawing keeps its
+     * Sheet-grid bounds when rows or columns change.
      */
     None = '2',
 }

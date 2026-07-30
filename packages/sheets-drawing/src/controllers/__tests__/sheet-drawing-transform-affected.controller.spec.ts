@@ -16,7 +16,6 @@
 
 import { DrawingTypeEnum } from '@univerjs/core';
 import {
-    ClearSheetDrawingTransformerOperation,
     DrawingApplyType,
     SetDrawingApplyMutation,
     SheetDrawingAnchorType,
@@ -177,13 +176,11 @@ describe('SheetDrawingTransformAffectedController', () => {
             'feature.pre-redo',
             SetDrawingApplyMutation.id,
             'feature.redo',
-            ClearSheetDrawingTransformerOperation.id,
         ]);
         expect(result.undos.map(({ id }: any) => id)).toEqual([
             'feature.pre-undo',
             SetDrawingApplyMutation.id,
             'feature.undo',
-            ClearSheetDrawingTransformerOperation.id,
         ]);
         expect(sheetDrawingService.getBatchUpdateOp.mock.calls[0][0][0].transform).toMatchObject({ left: 77, top: 88 });
     });
@@ -229,7 +226,6 @@ describe('SheetDrawingTransformAffectedController', () => {
         expect(result.redos).toEqual([
             { id: SetDrawingApplyMutation.id, params: { unitId: UNIT_ID, subUnitId: SUB_UNIT_ID, op: 'update-redo', objects: sheetDrawingService.getBatchUpdateOp.mock.calls[0][0], type: DrawingApplyType.UPDATE } },
             { id: SetDrawingApplyMutation.id, params: { unitId: UNIT_ID, subUnitId: SUB_UNIT_ID, op: 'remove-redo', objects: sheetDrawingService.getBatchRemoveOp.mock.calls[0][0], type: DrawingApplyType.REMOVE } },
-            { id: ClearSheetDrawingTransformerOperation.id, params: [UNIT_ID] },
         ]);
         expect(result.undos[1].params.type).toBe(DrawingApplyType.INSERT);
     });
@@ -261,7 +257,7 @@ describe('SheetDrawingTransformAffectedController', () => {
                 to: { row: 2, column: 6, rowOffset: 8, columnOffset: 5 },
             },
         });
-        expect(result.redos).toContainEqual({ id: ClearSheetDrawingTransformerOperation.id, params: [UNIT_ID] });
+        expect(result.redos).toHaveLength(1);
     });
 
     it('shrinks a both-anchored drawing when deleted rows cover its top anchor', () => {
@@ -349,7 +345,6 @@ describe('SheetDrawingTransformAffectedController', () => {
         });
         expect(result.redos).toEqual([
             { id: SetDrawingApplyMutation.id, params: { unitId: UNIT_ID, subUnitId: SUB_UNIT_ID, op: 'update-redo', objects: [updatedDrawing], type: DrawingApplyType.UPDATE } },
-            { id: ClearSheetDrawingTransformerOperation.id, params: [UNIT_ID] },
         ]);
     });
 
@@ -381,7 +376,6 @@ describe('SheetDrawingTransformAffectedController', () => {
         });
         expect(result.undos).toEqual([
             { id: SetDrawingApplyMutation.id, params: { unitId: UNIT_ID, subUnitId: SUB_UNIT_ID, op: 'update-undo', objects: [updatedDrawing], type: DrawingApplyType.UPDATE } },
-            { id: ClearSheetDrawingTransformerOperation.id, params: [UNIT_ID] },
         ]);
     });
 
@@ -440,7 +434,6 @@ describe('SheetDrawingTransformAffectedController', () => {
         });
         expect(result.redos).toEqual([
             { id: SetDrawingApplyMutation.id, params: { unitId: UNIT_ID, subUnitId: SUB_UNIT_ID, op: 'update-redo', objects: [updatedDrawing], type: DrawingApplyType.UPDATE } },
-            { id: ClearSheetDrawingTransformerOperation.id, params: [UNIT_ID] },
         ]);
     });
 });

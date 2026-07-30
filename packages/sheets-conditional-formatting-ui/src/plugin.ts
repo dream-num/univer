@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { IUniverSheetsConditionalFormattingUIConfig } from './config/config';
 import {
     DependentOn,
     ICommandService,
@@ -27,7 +26,7 @@ import {
     touchDependencies,
     UniverInstanceType,
 } from '@univerjs/core';
-import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
+import { SpreadsheetExtensionRegistry, UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { SHEET_CONDITIONAL_FORMATTING_PLUGIN, UniverSheetsConditionalFormattingPlugin } from '@univerjs/sheets-conditional-formatting';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
@@ -45,7 +44,13 @@ import { AddTextCfCommand } from './commands/commands/add-text-cf.command';
 import { AddTimePeriodCfCommand } from './commands/commands/add-time-period-cf.command';
 import { AddUniqueValuesCfCommand } from './commands/commands/add-unique-values-cf.command';
 import { OpenConditionalFormattingOperator } from './commands/operations/open-conditional-formatting-panel';
-import { defaultPluginConfig, SHEETS_CONDITIONAL_FORMATTING_UI_PLUGIN_CONFIG_KEY } from './config/config';
+/* eslint-disable import/consistent-type-specifier-style -- Keep type and value imports from one module in one declaration. */
+import {
+    defaultPluginConfig,
+    type IUniverSheetsConditionalFormattingUIConfig,
+    SHEETS_CONDITIONAL_FORMATTING_UI_PLUGIN_CONFIG_KEY,
+} from './config/config';
+/* eslint-enable import/consistent-type-specifier-style */
 import { ConditionalFormattingFormulaRefRangeController } from './controllers/cf-formula-ref-range.controller';
 import { ConditionalFormattingAutoFillController } from './controllers/cf.auto-fill.controller';
 import { ConditionalFormattingClearController } from './controllers/cf.clear.controller';
@@ -59,6 +64,8 @@ import { SheetsCfRenderController } from './controllers/cf.render.controller';
 import { ConditionalFormattingViewportController } from './controllers/cf.viewport.controller';
 import { ComponentsController } from './controllers/components.controller';
 import { ConditionalFormattingMenuController } from './menu/cf.menu.controller';
+import { DataBar } from './render/data-bar.render';
+import { ConditionalFormattingIcon } from './render/icon.render';
 
 @DependentOn(
     UniverRenderEnginePlugin,
@@ -97,6 +104,9 @@ export class UniverSheetsConditionalFormattingUIPlugin extends Plugin {
     }
 
     override onStarting(): void {
+        SpreadsheetExtensionRegistry.add(DataBar);
+        SpreadsheetExtensionRegistry.add(ConditionalFormattingIcon);
+
         this._injector.add([ComponentsController]);
         this._injector.get(ComponentsController);
         registerDependencies(this._injector, [

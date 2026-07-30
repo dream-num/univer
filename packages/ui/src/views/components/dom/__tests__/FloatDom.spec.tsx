@@ -239,6 +239,21 @@ describe('FloatDom', () => {
         expect(document.getElementById('float-1')).toBeNull();
     });
 
+    it('renders a unit only in its explicit root when the same unit is focused globally', async () => {
+        const rendered = renderWithDependencies(
+            <>
+                <div data-testid="global-root"><FloatDom /></div>
+                <div data-testid="scoped-root"><FloatDom unitId="doc-1" /></div>
+            </>,
+            { getUnitId: () => 'doc-1' }
+        );
+
+        act(() => rendered.injector.get(CanvasFloatDomService).addFloatDom(createFloatDom()));
+
+        await waitFor(() => expect(screen.getByTestId('scoped-root').textContent).toBe('float content'));
+        expect(screen.getByTestId('global-root').textContent).toBe('');
+    });
+
     it('updates content box insets at runtime through CanvasFloatDomService', async () => {
         const rendered = renderWithDependencies(<FloatDom unitId="doc-1" />);
         const service = rendered.injector.get(CanvasFloatDomService);

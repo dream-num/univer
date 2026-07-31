@@ -443,7 +443,6 @@ describe('docs layout tools extra', () => {
             { paragraphStyle: {}, bullet: { listType: 'missing' } } as any
         );
         expect(configWithMissingBulletList.textStyle.bl).toBeUndefined();
-
     });
 
     it('creates default skeleton, prepares section config, and resolves page paths', () => {

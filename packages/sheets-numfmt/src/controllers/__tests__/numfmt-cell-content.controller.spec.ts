@@ -269,6 +269,24 @@ describe('SheetsNumfmtCellContentController', () => {
         expect(previewSpy).toHaveBeenCalledTimes(previewCallsAfterFirstRender + 2);
     });
 
+    it('applies and caches a legitimate empty number-format result', () => {
+        const worksheet = workbook.getSheetBySheetId('sheet1')!;
+        const previewSpy = vi.spyOn(patternUtils, 'getPatternPreviewIgnoreGeneral');
+
+        numfmtService.setValues('test', 'sheet1', [{ pattern: ';;;', ranges: [cellToRange(1, 1)] }]);
+
+        expect(getInterceptedCell(worksheet, workbook, 1, 1, get)).toMatchObject({
+            v: '',
+            t: CellValueType.NUMBER,
+            coverable: false,
+        });
+        expect(worksheet.getCellRaw(1, 1)).toMatchObject({ v: '1234.5', t: CellValueType.STRING });
+
+        const previewCallsAfterFirstRender = previewSpy.mock.calls.length;
+        getInterceptedCell(worksheet, workbook, 1, 1, get);
+        expect(previewSpy).toHaveBeenCalledTimes(previewCallsAfterFirstRender);
+    });
+
     it('resets cached rendering when active sheet changes and supports locale override', () => {
         const sheet1 = workbook.getSheetBySheetId('sheet1')!;
         const sheet2 = workbook.getSheetBySheetId('sheet2')!;

@@ -91,6 +91,11 @@ const UNSPECIFIED_DOCUMENT_COMPATIBILITY_POLICY: IDocumentCompatibilityPolicy = 
                 fontString: /\bbold\b/i,
                 widthScale: 0.92,
             },
+            {
+                fontFamily: /^(?:微软雅黑|microsoft yahei(?: ui)?)$/i,
+                content: /^[“”]$/u,
+                widthScale: 0.85,
+            },
         ],
     },
     table: {

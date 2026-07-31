@@ -62,4 +62,20 @@ describe('document compatibility policy', () => {
         expect(applyFontMetricCompatibility('Negative controls', sourceSans, bBox, unspecified).width)
             .toBeCloseTo(14.72);
     });
+
+    it('matches PowerPoint punctuation metrics for Microsoft YaHei slide text', () => {
+        const unspecified = getDocumentCompatibilityPolicy(DocumentFlavor.UNSPECIFIED);
+        const microsoftYaHei = {
+            ...fontStyle,
+            fontString: 'normal normal 15pt 微软雅黑, "Microsoft YaHei"',
+            fontFamily: '微软雅黑, "Microsoft YaHei"',
+            fontSize: 15,
+            originFontSize: 15,
+        };
+
+        expect(applyFontMetricCompatibility('“', microsoftYaHei, bBox, unspecified).width)
+            .toBeCloseTo(13.6);
+        expect(applyFontMetricCompatibility('人', microsoftYaHei, bBox, unspecified).width)
+            .toBe(16);
+    });
 });

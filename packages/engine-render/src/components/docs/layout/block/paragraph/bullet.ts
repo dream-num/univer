@@ -161,6 +161,7 @@ function _getBulletSke(
 const LEGACY_SYMBOL_GLYPH_EQUIVALENTS: Record<string, Record<number, string>> = {
     wingdings: {
         0xA7: '\u25AA',
+        0xD8: '\u27A2',
     },
 };
 

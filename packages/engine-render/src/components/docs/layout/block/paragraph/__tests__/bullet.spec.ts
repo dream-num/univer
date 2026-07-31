@@ -95,6 +95,20 @@ describe('bullet', () => {
             expect(result!.bulletType).toBe(true);
         });
 
+        it.each([
+            [0, '一、'],
+            [9, '十、'],
+            [10, '十一、'],
+            [100, '一百零一、'],
+        ])('generates Chinese counting symbol %s', (startNumber, expected) => {
+            const bullet = createBullet();
+            const lists = createLists([
+                createNestingLevel({ glyphFormat: '%1、', glyphType: ListGlyphType.CHINESE_COUNTING, startNumber }),
+            ]);
+            const result = dealWithBullet(bullet, lists as unknown as ILists);
+            expect(result?.symbol).toBe(expected);
+        });
+
         it('uses glyphSymbol directly for unordered list', () => {
             const bullet = createBullet();
             const lists = createLists([
@@ -115,6 +129,15 @@ describe('bullet', () => {
             expect(result).toBeDefined();
             expect(result!.symbol).toBe('\u25AA');
             expect(result!.ts.ff).toBe('Wingdings');
+        });
+
+        it('maps the Wingdings arrow used by PowerPoint bullet lists', () => {
+            const bullet = createBullet({ textStyle: { ff: 'Wingdings' } });
+            const lists = createLists([
+                createNestingLevel({ glyphSymbol: '\u00D8' }),
+            ]);
+            const result = dealWithBullet(bullet, lists as unknown as ILists);
+            expect(result?.symbol).toBe('\u27A2');
         });
 
         it('preserves explicitly requested compact spacing', () => {

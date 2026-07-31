@@ -44,6 +44,9 @@ function generateOrderedSymbol(startIndex: number, startNumber: number, glyphTyp
     if (glyphType === ListGlyphType.LOWER_ROMAN) {
         return roman(startIndex, startNumber);
     }
+    if (glyphType === ListGlyphType.CHINESE_COUNTING) {
+        return chineseCounting(startIndex, startNumber);
+    }
 
     return decimal(startIndex, startNumber);
 }
@@ -82,6 +85,35 @@ function upperRoman(startIndex: number, startNumber: number) {
 // A lowercase Roman numeral, like i, ii, or iii.
 function roman(startIndex: number, startNumber: number) {
     return _convertRoman(startIndex + startNumber, false);
+}
+
+function chineseCounting(startIndex: number, startNumber: number) {
+    const value = startIndex + startNumber;
+    if (value <= 0 || value >= 10000) {
+        return value.toString();
+    }
+
+    const digits = '零一二三四五六七八九';
+    const units = ['', '十', '百', '千'];
+    let result = '';
+    let pendingZero = false;
+    for (let place = 3; place >= 0; place--) {
+        const divisor = 10 ** place;
+        const digit = Math.floor(value / divisor) % 10;
+        if (digit === 0) {
+            pendingZero ||= result.length > 0 && value % divisor > 0;
+            continue;
+        }
+        if (pendingZero) {
+            result += digits[0];
+            pendingZero = false;
+        }
+        if (!(digit === 1 && place === 1 && result.length === 0)) {
+            result += digits[digit];
+        }
+        result += units[place];
+    }
+    return result;
 }
 
 function _convertRoman(num: number, uppercase = false) {

@@ -24,6 +24,7 @@ import {
     ObjectRelativeFromV,
     PositionedObjectLayoutType,
 } from '@univerjs/core';
+import { FEnum } from '@univerjs/core/facade';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { IDocDrawingService, TextWrappingStyle, UpdateDocDrawingWrappingStyleCommand } from '@univerjs/docs-drawing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -59,6 +60,11 @@ describe('FDocument image facade', () => {
         testBed.univer.dispose();
         vi.unstubAllGlobals();
         vi.restoreAllMocks();
+    });
+
+    it('exposes TextWrappingStyle under its Facade signature name', () => {
+        expect(FEnum.get().TextWrappingStyle).toBe(TextWrappingStyle);
+        expect(FEnum.get()).not.toHaveProperty('DocsImageWrappingStyle');
     });
 
     it('inserts an image with optional transform and text range options', async () => {

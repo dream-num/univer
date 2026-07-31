@@ -267,7 +267,7 @@ export class RollingAverage {
 
         // Remove one maximum and one minimum to ensure the accuracy of the average value.
         const min = Math.min(...this._samples);
-        const max = Math.min(...this._samples);
+        const max = Math.max(...this._samples);
         const filteredData = this._samples.filter((v) => v !== max && v !== min);
         this.averageFrameTime = filteredData.reduce((sum, value) => sum + value, 0) / filteredData.length;
 

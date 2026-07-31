@@ -25,6 +25,7 @@ import type {
     Nullable,
     TextDirection,
 } from '@univerjs/core';
+import type { IBoundRectNoAngle } from '../../basics';
 import {
     createParagraphId,
     createSectionId,
@@ -37,6 +38,46 @@ import {
 } from '@univerjs/core';
 import { convertTextRotation } from '../../basics/text-rotation';
 import { DEFAULT_PADDING_DATA } from './sheet.render-skeleton';
+
+const DEFAULT_CELL_IMAGE_PADDING = 2;
+
+export interface ICellImageRectConfig {
+    cellRect: IBoundRectNoAngle;
+    imageWidth: number;
+    imageHeight: number;
+    horizontalAlign: HorizontalAlign;
+    verticalAlign: VerticalAlign;
+    padding?: Nullable<IPaddingData>;
+}
+
+export function calculateCellImageRect(config: ICellImageRectConfig): IBoundRectNoAngle {
+    const { cellRect, imageWidth, imageHeight, horizontalAlign, verticalAlign, padding } = config;
+    const contentLeft = cellRect.left + (padding?.l ?? DEFAULT_CELL_IMAGE_PADDING);
+    const contentRight = cellRect.right - (padding?.r ?? DEFAULT_CELL_IMAGE_PADDING);
+    const contentTop = cellRect.top + (padding?.t ?? DEFAULT_CELL_IMAGE_PADDING);
+    const contentBottom = cellRect.bottom - (padding?.b ?? DEFAULT_CELL_IMAGE_PADDING);
+
+    let left = contentLeft;
+    if (horizontalAlign === HorizontalAlign.RIGHT) {
+        left = contentRight - imageWidth;
+    } else if (horizontalAlign === HorizontalAlign.CENTER) {
+        left = (contentLeft + contentRight - imageWidth) / 2;
+    }
+
+    let top = contentBottom - imageHeight;
+    if (verticalAlign === VerticalAlign.TOP) {
+        top = contentTop;
+    } else if (verticalAlign === VerticalAlign.MIDDLE) {
+        top = (contentTop + contentBottom - imageHeight) / 2;
+    }
+
+    return {
+        left,
+        top,
+        right: left + imageWidth,
+        bottom: top + imageHeight,
+    };
+}
 
 export interface ICellStyle {
     textRotation?: ITextRotation;

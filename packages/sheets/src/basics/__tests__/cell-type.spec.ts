@@ -16,9 +16,15 @@
 
 import { CellValueType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
-import { checkCellValueType } from '../cell-type';
+import { checkCellValueType, isCellImage } from '../cell-type';
 
 describe('test util cell type ', () => {
+    it('identifies a cell image from its document drawings', () => {
+        expect(isCellImage(undefined)).toBe(false);
+        expect(isCellImage({ id: 'doc-1', documentStyle: {}, drawingsOrder: [] })).toBe(false);
+        expect(isCellImage({ id: 'doc-1', documentStyle: {}, drawingsOrder: ['drawing-1'] })).toBe(true);
+    });
+
     it('should be able to get the correct type of cell value from "checkCellValueType"', () => {
         expect(checkCellValueType('string', CellValueType.BOOLEAN)).toBe(CellValueType.STRING);
         expect(checkCellValueType('string', CellValueType.NUMBER)).toBe(CellValueType.STRING);

@@ -73,4 +73,16 @@ describe('MultipleSelect logic branches', () => {
         fireEvent.click(screen.getByTestId('close-menu'));
         expect((container.querySelector('[data-u-comp="multiple-select"]') as HTMLDivElement).className).toContain('univer-cursor-pointer');
     });
+
+    it('uses the latest controlled value when selecting consecutive items', () => {
+        const onChange = vi.fn();
+        const { rerender } = render(<MultipleSelect value={[]} options={options} onChange={onChange} />);
+
+        fireEvent.click(screen.getByTestId('item-1'));
+        expect(onChange).toHaveBeenLastCalledWith(['1']);
+
+        rerender(<MultipleSelect value={['1']} options={options} onChange={onChange} />);
+        fireEvent.click(screen.getByTestId('item-2'));
+        expect(onChange).toHaveBeenLastCalledWith(['1', '2']);
+    });
 });

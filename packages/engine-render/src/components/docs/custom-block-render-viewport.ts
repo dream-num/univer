@@ -31,6 +31,8 @@ export interface IDocsCustomBlockRenderViewport {
     height: number;
     layoutWidth?: number;
     offsetLeft?: number;
+    pageContentWidth?: number;
+    viewScale?: number;
     viewportHeight?: number;
     width: number;
 }

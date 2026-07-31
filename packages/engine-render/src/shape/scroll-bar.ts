@@ -22,6 +22,7 @@ import type { Scene } from '../scene';
 import type { Viewport } from '../viewport';
 import { Disposable, Tools } from '@univerjs/core';
 import { Subscription } from 'rxjs';
+import { hasScrollableOverflow } from '../basics/tools';
 import { Transform } from '../basics/transform';
 import { Rect } from './rect';
 
@@ -48,6 +49,8 @@ export interface IScrollBarProps {
     enableHorizontal?: boolean;
     /** Enable the vertical scroll bar. True by default. */
     enableVertical?: boolean;
+    /** Hide the track when the corresponding content axis does not overflow. False by default. */
+    hideTrackWhenUnscrollable?: boolean;
     /** The min width of horizon thumb. Default is 17 px. */
     minThumbSizeH?: number;
     /** The min height of vertical thumb. Default is 17 px. */
@@ -56,14 +59,18 @@ export interface IScrollBarProps {
 
 const MIN_THUMB_SIZE = 17;
 const DEFAULT_TRACK_SIZE = 10;
+const DEFAULT_TRACK_BORDER_SIZE = 1;
 const HOVER_TRACK_SIZE = 10;
 const DEFAULT_THUMB_MARGIN = 2;
 const HOVER_THUMB_MARGIN = 1;
 const BAR_DRAG_SCROLL_THROTTLE_MS = 32;
 
 export class ScrollBar extends Disposable {
+    static readonly DEFAULT_TOTAL_SIZE = DEFAULT_TRACK_SIZE + DEFAULT_TRACK_BORDER_SIZE;
+
     _enableHorizontal: boolean = true;
     _enableVertical: boolean = true;
+    private _hideTrackWhenUnscrollable = false;
 
     horizontalThumbSize: number = 0;
     horizontalMinusMiniThumb: number = 0;
@@ -121,7 +128,7 @@ export class ScrollBar extends Disposable {
     private _hThumbMargin = DEFAULT_THUMB_MARGIN;
 
     // origin: barBorder, used for strokeWidth of scroll track, is draw on the center of the track border, so the visible border thickness is barBorder / 2 at both side of the track, and the visible track thickness is `trackThickness - barBorder`.
-    private _trackBorderThickness = 1;
+    private _trackBorderThickness = DEFAULT_TRACK_BORDER_SIZE;
     private _thumbLengthRatio = 1;
 
     /**
@@ -196,6 +203,22 @@ export class ScrollBar extends Disposable {
 
     set enableVertical(val: boolean) {
         this._enableVertical = val;
+    }
+
+    get hideTrackWhenUnscrollable() {
+        return this._hideTrackWhenUnscrollable;
+    }
+
+    set hideTrackWhenUnscrollable(val: boolean) {
+        if (this._hideTrackWhenUnscrollable === val) {
+            return;
+        }
+
+        this._hideTrackWhenUnscrollable = val;
+        this._resizeHorizontal();
+        this._resizeVertical();
+        this._resizeRightBottomCorner();
+        this.makeDirty(true);
     }
 
     get limitX() {
@@ -470,7 +493,11 @@ export class ScrollBar extends Disposable {
         });
 
         // content is smaller than viewport size
-        if (this.horizontalThumbSize >= viewportW - (this._trackThickness + 2)) {
+        const scrollable = hasScrollableOverflow(contentWidth, viewportW);
+        this.horizonScrollTrack?.setProps({
+            visible: !this._hideTrackWhenUnscrollable || scrollable,
+        });
+        if (!scrollable) {
             this.horizonThumbRect?.setProps({
                 visible: false,
             });
@@ -517,7 +544,11 @@ export class ScrollBar extends Disposable {
         });
 
         // content is smaller than viewport size
-        if (this.verticalThumbSize >= viewportH - this._trackThickness) {
+        const scrollable = hasScrollableOverflow(contentHeight, viewportH);
+        this.verticalScrollTrack?.setProps({
+            visible: !this._hideTrackWhenUnscrollable || scrollable,
+        });
+        if (!scrollable) {
             this.verticalThumbRect?.setProps({
                 visible: false,
             });
@@ -540,6 +571,10 @@ export class ScrollBar extends Disposable {
         const viewportH = this._viewportH;
         const viewportW = this._viewportW;
         if (this._enableHorizontal && this._enableVertical) {
+            this.placeholderBarRect?.setProps({
+                visible: !this._hideTrackWhenUnscrollable
+                    || Boolean(this.horizonScrollTrack?.visible && this.verticalScrollTrack?.visible),
+            });
             this.placeholderBarRect?.transformByState({
                 left: viewportW - this._trackThickness,
                 top: viewportH - this._trackThickness,

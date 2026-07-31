@@ -47,6 +47,11 @@ function colorWithOpacity(color: string, opacity: number | undefined): string {
     return parsedColor.setAlpha(parsedColor.getAlpha() * clamp(opacity, 0, 1)).toRgbString();
 }
 
+function isTransparentColor(color: string): boolean {
+    const parsedColor = new ColorKit(color);
+    return parsedColor.isValid && parsedColor.getAlpha() <= 0;
+}
+
 function cssPixels(value: number): string {
     return `${Math.abs(value) < Number.EPSILON ? 0 : value}px`;
 }
@@ -56,7 +61,7 @@ function toDropShadowFilter(effect: IResolvedDrawingShadow): string {
 }
 
 export function resolveOuterShadowEffect(effect: IShadowEffect | undefined): IResolvedDrawingShadow | undefined {
-    if (!effect?.color) {
+    if (!effect?.color || (effect.opacity !== undefined && effect.opacity <= 0)) {
         return undefined;
     }
 
@@ -64,8 +69,13 @@ export function resolveOuterShadowEffect(effect: IShadowEffect | undefined): IRe
     const direction = ((effect.direction ?? 0) * Math.PI) / 180;
     const sizeScale = ((effect.sx ?? 1) + (effect.sy ?? 1)) / 2;
 
+    const color = colorWithOpacity(effect.color, effect.opacity);
+    if (isTransparentColor(color)) {
+        return undefined;
+    }
+
     return {
-        color: colorWithOpacity(effect.color, effect.opacity),
+        color,
         blurRadius: Math.max(0, effect.blurRadius ?? 0) * sizeScale,
         offsetX: Math.cos(direction) * distance * sizeScale,
         offsetY: Math.sin(direction) * distance * sizeScale,
@@ -73,7 +83,7 @@ export function resolveOuterShadowEffect(effect: IShadowEffect | undefined): IRe
 }
 
 export function resolveGlowEffect(effect: IGlowEffect | undefined): IResolvedDrawingShadow | undefined {
-    if (!effect?.color) {
+    if (!effect?.color || (effect.radius ?? 0) <= 0 || isTransparentColor(effect.color)) {
         return undefined;
     }
 

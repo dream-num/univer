@@ -21,6 +21,7 @@ import { UnitModel, UniverInstanceType } from '../common/unit';
 import { Tools } from '../shared/tools';
 import { CellValueType } from '../types/enum';
 import { getEmptySnapshot } from './empty-snapshot';
+import { assertBaseTableRecordIdentity, BASE_RECORD_ID_FIELD_ID } from './record-identity';
 import { BaseFieldType } from './typedef';
 
 const BASE_LIST_VALUE_SEPARATOR = ', ';
@@ -105,7 +106,9 @@ function normalizeBaseSnapshot(snapshot: IBaseSnapshot): IBaseSnapshot {
     delete (snapshot as IBaseSnapshot & { compress?: unknown }).compress;
     delete (snapshot as IBaseSnapshot & { kind?: unknown }).kind;
     Object.values(snapshot.tables ?? {}).forEach((table) => {
+        assertBaseTableRecordIdentity(table);
         normalizeBaseTable(table);
+        assertMaterializedRecordIdentity(table);
     });
     return snapshot;
 }
@@ -117,6 +120,7 @@ function isNormalizedBaseSnapshot(snapshot: IBaseSnapshot): boolean {
 function isNormalizedBaseTable(table: ITableSnapshot): boolean {
     const records = table.records ?? {};
     const fields = table.fields ?? {};
+    assertBaseTableRecordIdentity(table);
     if (
         !Array.isArray(table.recordOrder)
         || !table.rowIndex
@@ -137,7 +141,12 @@ function isNormalizedBaseTable(table: ITableSnapshot): boolean {
 
     for (let index = 0; index < table.recordOrder.length; index++) {
         const recordId = table.recordOrder[index];
-        if (!records[recordId] || table.rowIndex[recordId] !== index || table.rowId[index] !== recordId) {
+        if (
+            !records[recordId]
+            || table.rowIndex[recordId] !== index
+            || table.rowId[index] !== recordId
+            || table.cellData[index]?.[0]?.v !== recordId
+        ) {
             return false;
         }
     }
@@ -252,32 +261,54 @@ function rebuildColumnIndexes(table: ITableSnapshot, fields: Record<string, IFie
 }
 
 function hydrateRecordCellData(table: ITableSnapshot, records: Record<string, IRecordSnapshot>, fields: Record<string, IFieldSnapshot>): void {
+    const rowIndex = table.rowIndex ?? {};
+    const colIndex = table.colIndex ?? {};
+    const cellData = table.cellData ?? {};
+    table.rowIndex = rowIndex;
+    table.colIndex = colIndex;
+    table.cellData = cellData;
+
     Object.values(records).forEach((record) => {
-        const row = table.rowIndex![record.id];
+        const row = rowIndex[record.id];
         if (row == null) {
             return;
         }
-        table.cellData![row] = { ...table.cellData![row] };
+        cellData[row] = { ...cellData[row] };
+        cellData[row][0] = { v: record.id, t: CellValueType.STRING };
         Object.entries(record.values ?? {}).forEach(([fieldId, value]) => {
             const field = fields[fieldId];
             if (field?.type === BaseFieldType.Attachment) {
                 writeAttachmentResources(table, record.id, fieldId, value);
             }
-            const col = table.colIndex![fieldId];
+            const col = colIndex[fieldId];
             if (col == null) {
                 return;
             }
-            const existingCell = table.cellData![row][col];
+            const existingCell = cellData[row][col];
             if (existingCell != null) {
-                table.cellData![row][col] = normalizeBaseCellData(existingCell, field);
+                cellData[row][col] = normalizeBaseCellData(existingCell, field);
                 if (shouldRefreshCellDataFromRecord(existingCell, field, value)) {
-                    table.cellData![row][col] = toBaseCellData(value, field);
+                    cellData[row][col] = toBaseCellData(value, field);
                 }
                 return;
             }
-            table.cellData![row][col] = toBaseCellData(value, field);
+            cellData[row][col] = toBaseCellData(value, field);
         });
     });
+}
+
+function assertMaterializedRecordIdentity(table: ITableSnapshot): void {
+    for (const record of Object.values(table.records)) {
+        const row = table.rowIndex?.[record.id];
+        if (
+            row == null
+            || table.colIndex?.[BASE_RECORD_ID_FIELD_ID] !== 0
+            || table.colId?.[0] !== BASE_RECORD_ID_FIELD_ID
+            || table.cellData?.[row]?.[0]?.v !== record.id
+        ) {
+            throw new Error(`[BaseDataModel]: record "${record.id}" is missing its record-id cell projection.`);
+        }
+    }
 }
 
 function toBaseCellData(value: CellValue | IBaseCellData, field?: IFieldSnapshot): IBaseCellData {
@@ -361,6 +392,9 @@ function normalizeAttachmentValue(value: unknown): Record<string, unknown>[] {
 }
 
 function shouldRefreshCellDataFromRecord(cell: IBaseCellData, field: IFieldSnapshot | undefined, value: unknown): boolean {
+    if (field?.type === BaseFieldType.RecordId) {
+        return cell.v !== value;
+    }
     if (field?.type === BaseFieldType.Attachment) {
         return cell.v !== '';
     }

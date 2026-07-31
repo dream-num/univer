@@ -115,9 +115,33 @@ describe('resolveDocsCustomBlockRenderViewport', () => {
             height: 480,
             layoutWidth: 960,
             offsetLeft: 0,
+            pageContentWidth: 1008,
+            viewScale: 1,
             viewportHeight: 480,
             width: 960,
         });
+    });
+
+    it('keeps document scale separate from logical sheet-like viewport dimensions', () => {
+        expect(resolveDocsCustomBlockRenderViewport({
+            childType: UniverInstanceType.UNIVER_SHEET,
+            docsLeft: 120,
+            documentFlavor: DocumentFlavor.MODERN,
+            fallbackHeight: 480,
+            fallbackWidth: 960,
+            pageMarginLeft: 96,
+            pageMarginRight: 96,
+            pageWidth: 1200,
+            scale: 2,
+            visibleCanvasLeft: 0,
+            visibleCanvasWidth: 1440,
+        })).toEqual(expect.objectContaining({
+            bleedLeft: 211,
+            bleedWidth: 1430,
+            contentHeight: 480,
+            viewScale: 2,
+            width: 960,
+        }));
     });
 
     it('uses actual table height for sheet-like docs blocks so docs owns vertical scrolling', () => {
@@ -221,6 +245,8 @@ describe('resolveDocsCustomBlockRenderViewport', () => {
             height: 480,
             layoutWidth: 600,
             offsetLeft: 0,
+            pageContentWidth: 600,
+            viewScale: 1,
             viewportHeight: 480,
             width: 600,
         });
@@ -242,6 +268,8 @@ describe('resolveDocsCustomBlockRenderViewport', () => {
             height: 480,
             layoutWidth: 420,
             offsetLeft: 0,
+            pageContentWidth: 600,
+            viewScale: 1,
             viewportHeight: 480,
             width: 420,
         });

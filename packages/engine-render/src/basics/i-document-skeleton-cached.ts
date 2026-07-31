@@ -304,6 +304,8 @@ export interface IDocumentSkeletonDrawing {
         contentHeight?: number;
         contentWidth?: number;
         height?: number;
+        pageContentWidth?: number;
+        viewScale?: number;
         viewportHeight?: number;
     };
 }

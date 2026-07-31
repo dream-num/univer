@@ -16,7 +16,7 @@
 
 import type { FUniver } from '@univerjs/core/facade';
 import { ICommandService } from '@univerjs/core';
-import { RemoveNumfmtMutation, SetNumfmtMutation, SetRangeValuesMutation } from '@univerjs/sheets';
+import { RemoveNumfmtMutation, SetNumfmtMutation, SetRangeValuesCommand, SetRangeValuesMutation } from '@univerjs/sheets';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { SetNumfmtCommand, SheetsNumfmtCellContentController } from '../../index';
 import { createFacadeTestBed } from './create-test-bed';
@@ -31,10 +31,12 @@ describe('Test FRange', () => {
         const commandService = testBed.injector.get(ICommandService);
         [
             SetRangeValuesMutation,
+            SetRangeValuesCommand,
             SetNumfmtMutation,
             RemoveNumfmtMutation,
             SetNumfmtCommand,
         ].forEach((command) => commandService.registerCommand(command));
+        testBed.injector.get(SheetsNumfmtCellContentController);
         univerAPI = testBed.univerAPI;
     });
 
@@ -60,5 +62,17 @@ describe('Test FRange', () => {
     it('sets workbook number format locale through the facade API', () => {
         const workbook = univerAPI.getActiveWorkbook()!;
         expect(workbook.setNumfmtLocal('fr')).toBe(workbook);
+    });
+
+    it('hides a formatted value without changing its raw value', () => {
+        const activeSheet = univerAPI.getActiveWorkbook()!.getActiveSheet();
+        const cell = activeSheet.getRange('A1');
+
+        cell.setValue(233628);
+        cell.setNumberFormat(';;;');
+
+        expect(cell.getDisplayValue()).toBe('');
+        expect(cell.getRawValue()).toBe(233628);
+        expect(cell.getNumberFormat()).toBe(';;;');
     });
 });

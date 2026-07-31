@@ -25,6 +25,7 @@ import {
     Disposable,
     DrawingTypeEnum,
     EventSubject,
+    IUniverInstanceService,
     LifecycleService,
     LifecycleStages,
     LocaleType,
@@ -35,7 +36,7 @@ import { IRenderManagerService, Rect, SHEET_VIEWPORT_KEY, SpreadsheetSkeleton } 
 import { DrawingApplyType, InsertSheetDrawingCommand, ISheetDrawingService, RemoveSheetDrawingCommand, SetDrawingApplyMutation, SetSheetDrawingCommand } from '@univerjs/sheets-drawing';
 import { ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { CanvasFloatDomService } from '@univerjs/ui';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, of, Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createSheetsDrawingUiTestBed } from '../../__tests__/create-sheets-drawing-ui-test-bed';
 import {
@@ -1998,9 +1999,10 @@ describe('SheetCanvasFloatDomManagerService', () => {
         }));
     });
 
-    it('refreshes float dom position when the sheet viewport scrolls', () => {
+    it('refreshes float dom position when a non-current sheet renderer scrolls', () => {
         const fixture = setup();
         disposables.push(fixture);
+        vi.spyOn(fixture.get(IUniverInstanceService), 'getCurrentTypeOfUnit$').mockReturnValue(of(null));
         fixture.get(LifecycleService).stage = LifecycleStages.Rendered;
         const canvasFloatDomService = fixture.get(CanvasFloatDomService);
 

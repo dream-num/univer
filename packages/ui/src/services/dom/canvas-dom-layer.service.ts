@@ -16,7 +16,7 @@
 
 import type { IPosition, Serializable } from '@univerjs/core';
 import type { Observable } from 'rxjs';
-import { Disposable } from '@univerjs/core';
+import { Disposable, toDisposable } from '@univerjs/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 
 export interface IFloatDomLayout extends IPosition {
@@ -78,6 +78,7 @@ export function shouldRenderFloatDomLayer(layer: Pick<IFloatDom, 'unitId' | 'pre
 
 export class CanvasFloatDomService extends Disposable {
     private _domLayerMap = new Map<string, IFloatDom>();
+    private _scopedRenderRootCount = new Map<string, number>();
     private _domLayers$ = new BehaviorSubject<[string, IFloatDom][]>([]);
 
     domLayers$ = this._domLayers$.asObservable();
@@ -108,6 +109,29 @@ export class CanvasFloatDomService extends Disposable {
         this._notice();
     }
 
+    hasScopedRenderRoot(unitId: string): boolean {
+        return this._scopedRenderRootCount.has(unitId);
+    }
+
+    registerScopedRenderRoot(unitId: string) {
+        this._scopedRenderRootCount.set(unitId, (this._scopedRenderRootCount.get(unitId) ?? 0) + 1);
+        this._notice();
+
+        return toDisposable(() => {
+            const count = this._scopedRenderRootCount.get(unitId);
+            if (count == null) {
+                return;
+            }
+
+            if (count === 1) {
+                this._scopedRenderRootCount.delete(unitId);
+            } else {
+                this._scopedRenderRootCount.set(unitId, count - 1);
+            }
+            this._notice();
+        });
+    }
+
     removeFloatDom(id: string): void {
         if (this._domLayerMap.delete(id)) {
             this._notice();
@@ -121,6 +145,7 @@ export class CanvasFloatDomService extends Disposable {
 
     override dispose(): void {
         this._domLayerMap.clear();
+        this._scopedRenderRootCount.clear();
         this._domLayers$.next([]);
         this._domLayers$.complete();
         super.dispose();

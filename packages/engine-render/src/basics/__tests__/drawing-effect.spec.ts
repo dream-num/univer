@@ -56,6 +56,17 @@ describe('drawing effect', () => {
         });
     });
 
+    it('skips effects that cannot paint visible pixels', () => {
+        expect(resolveGlowEffect({ color: '#5b9bd5', radius: 0 })).toBeUndefined();
+        expect(resolveGlowEffect({ color: 'rgba(91, 155, 213, 0)', radius: 4 })).toBeUndefined();
+        expect(resolveOuterShadowEffect({
+            color: '#000000',
+            opacity: 0,
+            blurRadius: 4,
+            distance: 2,
+        })).toBeUndefined();
+    });
+
     it('creates one filter chain for glow and shadow without duplicating the source draw', () => {
         expect(createDrawingEffectFilter(
             { color: '#5b9bd5', radius: 4 },

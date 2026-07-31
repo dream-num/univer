@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DrawingTypeEnum } from '@univerjs/core';
+import { DrawingTypeEnum, UniverInstanceType } from '@univerjs/core';
 import { InsertDocDrawingCommand } from '@univerjs/docs-drawing';
 import { SetDocZoomRatioOperation } from '@univerjs/docs-ui';
 import { Rect } from '@univerjs/engine-render';
@@ -374,7 +374,7 @@ describe('DocFloatDomController', () => {
         controller.dispose();
     });
 
-    it('disables host event pass-through for embed float dom runtimes', async () => {
+    it('uses the full content box for sheet-like embed float dom runtimes', async () => {
         const rect = new Rect('dom-rect', {
             left: 30,
             top: 50,
@@ -384,7 +384,12 @@ describe('DocFloatDomController', () => {
         const { controller, add$, canvasFloatDomService } = createController({
             rects: [rect],
             drawing: {
-                data: { version: 1, embedId: 'embed-1', hostAnchorId: 'anchor-1' },
+                data: {
+                    version: 1,
+                    embedId: 'embed-1',
+                    hostAnchorId: 'anchor-1',
+                    childType: UniverInstanceType.UNIVER_SHEET,
+                },
             },
         });
 
@@ -392,6 +397,37 @@ describe('DocFloatDomController', () => {
         await Promise.resolve();
 
         expect(canvasFloatDomService.addFloatDom).toHaveBeenCalledWith(expect.objectContaining({
+            contentBox: { contentInset: 0, wrapperInset: 0 },
+            eventPassThrough: false,
+        }));
+
+        controller.dispose();
+    });
+
+    it('keeps the legacy content box for other embed float dom runtimes', async () => {
+        const rect = new Rect('dom-rect', {
+            left: 30,
+            top: 50,
+            width: 50,
+            height: 40,
+        } as never);
+        const { controller, add$, canvasFloatDomService } = createController({
+            rects: [rect],
+            drawing: {
+                data: {
+                    version: 1,
+                    embedId: 'embed-1',
+                    hostAnchorId: 'anchor-1',
+                    childType: UniverInstanceType.UNIVER_SLIDE,
+                },
+            },
+        });
+
+        add$.next([{ unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'dom-1' }]);
+        await Promise.resolve();
+
+        expect(canvasFloatDomService.addFloatDom).toHaveBeenCalledWith(expect.objectContaining({
+            contentBox: undefined,
             eventPassThrough: false,
         }));
 

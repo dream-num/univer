@@ -17,7 +17,11 @@
 import './f-univer';
 import './f-enum';
 
-export { FDocument } from './f-document';
+export {
+    FDocument,
+    type IDocumentCustomBlockLayout,
+    type IDocumentCustomBlockLayoutItem,
+} from './f-document';
 export { FDocumentParagraph, isParagraphFacade } from './f-document-paragraph';
 export type { IFDocumentFindTextOptions, IFDocumentParagraphInfo } from './f-document-paragraph';
 export { DocsSectionUnsupportedDocumentFlavorError, FDocumentSection } from './f-document-section';

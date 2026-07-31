@@ -15,7 +15,7 @@
  */
 
 import type { IDrawingParam, IRotationSkewFlipTransform, Serializable } from '@univerjs/core';
-import type { IImageData, IUnitDrawingService } from '@univerjs/drawing';
+import type { IDrawingJsonUndo1, IImageData, IUnitDrawingService } from '@univerjs/drawing';
 import type { ISheetOverGridPosition } from '@univerjs/sheets';
 import { createIdentifier } from '@univerjs/core';
 import { UnitDrawingService } from '@univerjs/drawing';
@@ -81,6 +81,8 @@ export type ISheetUpdateDrawing = OptionalField<ISheetImage | ISheetShape, 'shee
 
 export class SheetDrawingService extends UnitDrawingService<ISheetDrawing> { }
 
-export interface ISheetDrawingService extends IUnitDrawingService<ISheetDrawing> { }
+export interface ISheetDrawingService extends IUnitDrawingService<ISheetDrawing> {
+    getBatchUpdateOp(updateParams: ISheetDrawing[]): IDrawingJsonUndo1;
+}
 
 export const ISheetDrawingService = createIdentifier<ISheetDrawingService>('sheets-drawing.sheet-drawing.service');

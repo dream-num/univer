@@ -24,6 +24,7 @@ import { CopySheetCommand, RemoveSheetCommand, SheetInterceptorService } from '@
 import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-drawing.command';
 import { RemoveSheetDrawingCommand } from '../commands/commands/remove-sheet-drawing.command';
 import { SetDrawingArrangeCommand } from '../commands/commands/set-drawing-arrange.command';
+import { SetSheetDrawingPlacementCommand } from '../commands/commands/set-sheet-drawing-placement.command';
 import { SetSheetDrawingCommand } from '../commands/commands/set-sheet-drawing.command';
 import { DrawingApplyType, SetDrawingApplyMutation } from '../commands/mutations/set-drawing-apply.mutation';
 import { ClearSheetDrawingTransformerOperation } from '../commands/operations/clear-drawing-transformer.operation';
@@ -76,6 +77,7 @@ export class SheetsDrawingLoadController extends Disposable {
             InsertSheetDrawingCommand,
             RemoveSheetDrawingCommand,
             SetDrawingArrangeCommand,
+            SetSheetDrawingPlacementCommand,
             ClearSheetDrawingTransformerOperation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }

@@ -952,7 +952,7 @@ function normalizeBaseFormulaForEngine(formula: string, currentTable: ITableSnap
         .replace(BASE_LEGACY_FIELD_REF_PATTERN, (_match, fieldName: string) => hold(createEngineThisRowRef(currentTable, fieldName, snapshot)))
         .replace(BASE_TABLE_FIELD_REF_PATTERN, (_match, sourceTableName: string, fieldName: string) => {
             const targetTable = resolveBaseFormulaTable(sourceTableName, currentTable, snapshot);
-            return targetTable ? hold(createEngineThisRowRef(targetTable, fieldName, snapshot)) : `${sourceTableName}[${fieldName}]`;
+            return targetTable ? hold(createEngineColumnRef(targetTable, fieldName, snapshot)) : `${sourceTableName}[${fieldName}]`;
         })
         .replace(BASE_BRACKET_FIELD_REF_PATTERN, (_match, prefix: string, fieldName: string) => `${prefix}${hold(createEngineThisRowRef(currentTable, fieldName, snapshot))}`);
     return normalized.replace(/__BASE_FORMULA_REF_(\d+)__/g, (_match, index: string) => refs[Number(index)] ?? '');
@@ -1013,6 +1013,10 @@ function isInsideBaseFormulaString(formula: string, position: number): boolean {
 
 function createEngineThisRowRef(table: ITableSnapshot, fieldName: string, snapshot: IBaseSnapshot): string {
     return `${getEngineBaseTableName(table, snapshot)}[[#This Row],[${fieldName}]]`;
+}
+
+function createEngineColumnRef(table: ITableSnapshot, fieldName: string, snapshot: IBaseSnapshot): string {
+    return `${getEngineBaseTableName(table, snapshot)}[[#Data],[${fieldName}]]`;
 }
 
 function getEngineBaseTableName(table: ITableSnapshot, snapshot: IBaseSnapshot): string {

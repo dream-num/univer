@@ -92,7 +92,7 @@ export function MultipleSelect(props: IMultipleSelectProps) {
                 },
             };
         });
-    }, [options]);
+    }, [onChange, options, value]);
 
     function handleClose(item: string) {
         const newValue = value.filter((v) => v !== item);

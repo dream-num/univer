@@ -15,11 +15,17 @@
  */
 
 import type { IBaseSnapshot } from '../typedef';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { BaseDataModel } from '../base-data-model';
+import { BASE_RECORD_ID_FIELD_ID, createBaseRecordIdField } from '../record-identity';
 import { BaseFieldType } from '../typedef';
 
 describe('BaseDataModel', () => {
+    it('exposes RecordLink without the removed TwoWayLink field type', () => {
+        expect(Object.values(BaseFieldType)).toContain('recordLink');
+        expect(Object.values(BaseFieldType)).not.toContain('twoWayLink');
+    });
+
     it('creates an empty default table without persistent records', () => {
         const model = new BaseDataModel({ id: 'base-1', name: 'Base' });
         const snapshot = model.getSnapshot();
@@ -31,14 +37,15 @@ describe('BaseDataModel', () => {
         expect(table.rowId).toEqual({});
         expect(table.rowIndex).toEqual({});
         expect(table.cellData).toEqual({});
+        expect(table.fieldOrder[0]).toBe(BASE_RECORD_ID_FIELD_ID);
+        expect(table.fields[BASE_RECORD_ID_FIELD_ID]).toEqual(createBaseRecordIdField());
+        expect(table.views[table.viewOrder[0] ?? '']?.fieldSettings?.[BASE_RECORD_ID_FIELD_ID]?.hidden).toBe(true);
     });
 
     it('keeps complete recordOrder without sorting all records', () => {
-        const throwingOrderKey = {
-            localeCompare: () => {
-                throw new Error('complete recordOrder should avoid sorting all records');
-            },
-        } as unknown as string;
+        const localeCompare = vi.spyOn(String.prototype, 'localeCompare').mockImplementation(() => {
+            throw new Error('complete recordOrder should avoid sorting all records');
+        });
         const snapshot: Partial<IBaseSnapshot> = {
             id: 'base-1',
             name: 'Base',
@@ -48,24 +55,25 @@ describe('BaseDataModel', () => {
                     id: 'table-1',
                     name: 'Table',
                     fields: {
+                        [BASE_RECORD_ID_FIELD_ID]: createBaseRecordIdField(),
                         title: { id: 'title', name: 'Title', type: BaseFieldType.Text, config: {} },
                     },
-                    fieldOrder: ['title'],
+                    fieldOrder: [BASE_RECORD_ID_FIELD_ID, 'title'],
                     primaryFieldId: 'title',
                     records: {
                         'record-1': {
                             id: 'record-1',
-                            orderKey: throwingOrderKey,
+                            orderKey: '1',
                             createdAt: 0,
                             updatedAt: 0,
-                            values: { title: 'One' },
+                            values: { [BASE_RECORD_ID_FIELD_ID]: 'record-1', title: 'One' },
                         },
                         'record-2': {
                             id: 'record-2',
-                            orderKey: throwingOrderKey,
+                            orderKey: '2',
                             createdAt: 0,
                             updatedAt: 0,
-                            values: { title: 'Two' },
+                            values: { [BASE_RECORD_ID_FIELD_ID]: 'record-2', title: 'Two' },
                         },
                     },
                     recordOrder: ['record-2', 'record-1'],
@@ -78,5 +86,33 @@ describe('BaseDataModel', () => {
         const model = new BaseDataModel(snapshot);
 
         expect(model.getSnapshot().tables['table-1'].recordOrder).toEqual(['record-2', 'record-1']);
+        expect(model.getSnapshot().tables['table-1'].cellData?.[0]?.[0]?.v).toBe('record-2');
+        expect(model.getSnapshot().tables['table-1'].cellData?.[1]?.[0]?.v).toBe('record-1');
+        expect(localeCompare).not.toHaveBeenCalled();
+        localeCompare.mockRestore();
+    });
+
+    it('rejects a table whose record identity is missing instead of silently migrating it', () => {
+        const snapshot: Partial<IBaseSnapshot> = {
+            id: 'base-1',
+            name: 'Base',
+            tables: {
+                'table-1': {
+                    id: 'table-1',
+                    name: 'Table',
+                    fields: {
+                        title: { id: 'title', name: 'Title', type: BaseFieldType.Text, config: {} },
+                    },
+                    fieldOrder: ['title'],
+                    primaryFieldId: 'title',
+                    records: {},
+                    recordOrder: [],
+                    viewOrder: [],
+                    views: {},
+                },
+            },
+        };
+
+        expect(() => new BaseDataModel(snapshot)).toThrow('has an invalid record-id system field');
     });
 });

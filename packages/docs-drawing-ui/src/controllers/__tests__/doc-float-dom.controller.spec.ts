@@ -168,7 +168,7 @@ describe('DocFloatDomController', () => {
             width: 50,
             height: 40,
         });
-        const { add$, canvasFloatDomService, commandHandlers, controller } = createController({
+        const { add$, canvasFloatDomService, commandHandlers, controller, scene } = createController({
             rects: [rect],
             drawing: {
                 customBlockRenderViewport: {
@@ -182,10 +182,13 @@ describe('DocFloatDomController', () => {
 
         add$.next([{ unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'dom-1' }]);
         await Promise.resolve();
+        scene.getAncestorScale.mockReturnValue({ scaleX: 1, scaleY: 1 });
         commandHandlers.forEach((handler) => handler({
             id: SetDocZoomRatioOperation.id,
             params: { unitId: 'doc-1', zoomRatio: 2 },
         }));
+        scene.getAncestorScale.mockReturnValue({ scaleX: 2, scaleY: 2 });
+        await Promise.resolve();
 
         expect(canvasFloatDomService.updateFloatDom).toHaveBeenCalledWith('dom-1', {
             props: expect.objectContaining({

@@ -435,7 +435,9 @@ export class DocFloatDomController extends Disposable {
             if (commandInfo.id === SetDocZoomRatioOperation.id) {
                 const params = (commandInfo.params) as ISetDocZoomRatioOperationParams;
                 const { unitId } = params;
-                updateDoc(unitId, true);
+                globalThis.queueMicrotask(() => {
+                    if (!this._disposed) updateDoc(unitId, true);
+                });
             }
         }));
     }

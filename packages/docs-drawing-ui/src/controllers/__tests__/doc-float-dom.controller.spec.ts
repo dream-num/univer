@@ -299,7 +299,7 @@ describe('DocFloatDomController', () => {
         controller.dispose();
     });
 
-    it('updates rendered float dom bounds from doc drawing transform refreshes', async () => {
+    it('updates rendered float dom bounds only from the owning document unit', async () => {
         const rect = new Rect('dom-rect', {
             left: 30,
             top: 50,
@@ -320,7 +320,16 @@ describe('DocFloatDomController', () => {
         const positions: unknown[] = [];
         const sub = position$.subscribe((position: unknown) => positions.push(position));
 
+        const positionCount = positions.length;
         refreshTransform$.next([{
+            unitId: 'doc-2',
+            drawingId: 'dom-1',
+            transform: { left: 0, top: 0, width: 160, height: 240, angle: 0 },
+        }]);
+        expect(positions).toHaveLength(positionCount);
+
+        refreshTransform$.next([{
+            unitId: 'doc-1',
             drawingId: 'dom-1',
             transform: { left: 40, top: 60, width: 160, height: 240, angle: 0 },
             customBlockRenderViewport: { contentHeight: 240, height: 240, viewportHeight: 120 },
@@ -456,6 +465,7 @@ describe('DocFloatDomController', () => {
         const sub = position$.subscribe((position: unknown) => positions.push(position));
 
         refreshTransform$.next([{
+            unitId: 'doc-1',
             drawingId: 'dom-1',
             customBlockRenderViewport: { contentHeight: 240, height: 240, viewportHeight: 120 },
         }]);
@@ -493,12 +503,14 @@ describe('DocFloatDomController', () => {
         const sub = position$.subscribe((position: unknown) => positions.push(position));
 
         refreshTransform$.next([{
+            unitId: 'doc-1',
             drawingId: 'dom-1',
             transform: { left: 40, top: 60, width: 160, height: 240, angle: 0 },
             customBlockRenderViewport: { contentHeight: 240, height: 240, viewportHeight: 120 },
         }]);
         rect.transformByState({ left: 45, top: 65, width: 160, height: 40, angle: 0 } as never);
         refreshTransform$.next([{
+            unitId: 'doc-1',
             drawingId: 'dom-1',
             transform: { left: 45, top: 65, width: 160, height: 40, angle: 0 },
         }]);
@@ -537,6 +549,7 @@ describe('DocFloatDomController', () => {
 
         rect.transformByState({ left: 30, top: 60, width: 720, height: 405, angle: 0 } as never);
         refreshTransform$.next([{
+            unitId: 'doc-1',
             drawingId: 'dom-1',
             transform: { left: 30, top: 60, width: 720, height: 405, angle: 0 },
         }]);

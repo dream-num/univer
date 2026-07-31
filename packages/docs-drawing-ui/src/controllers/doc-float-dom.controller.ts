@@ -314,7 +314,7 @@ export class DocFloatDomController extends Disposable {
             this._drawingManagerService.refreshTransform$.subscribe((params) => {
                 params.forEach((param) => {
                     const floatDomInfo = this._domLayerInfoMap.get(param.drawingId);
-                    if (!floatDomInfo) {
+                    if (!floatDomInfo || floatDomInfo.unitId !== param.unitId) {
                         return;
                     }
 

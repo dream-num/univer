@@ -144,7 +144,33 @@ export const addDrawing = (param: IAddDrawingParam) => {
 };
 
 function normalizeDrawingInsertOffset(body: IDocumentBody, offset: number): number {
-    return offset === 0 && body.dataStream[0] === DataStreamTreeTokenType.PARAGRAPH ? 1 : offset;
+    const { dataStream } = body;
+    if (offset === 0 && dataStream[0] === DataStreamTreeTokenType.PARAGRAPH) {
+        return 1;
+    }
+
+    if (
+        dataStream[offset] === DataStreamTreeTokenType.SECTION_BREAK &&
+        dataStream[offset - 1] === DataStreamTreeTokenType.PARAGRAPH &&
+        isInsideTableCell(dataStream, offset)
+    ) {
+        return offset - 1;
+    }
+
+    return offset;
+}
+
+function isInsideTableCell(dataStream: string, offset: number): boolean {
+    let cellDepth = 0;
+    for (let index = 0; index < offset; index++) {
+        if (dataStream[index] === DataStreamTreeTokenType.TABLE_CELL_START) {
+            cellDepth++;
+        } else if (dataStream[index] === DataStreamTreeTokenType.TABLE_CELL_END) {
+            cellDepth = Math.max(0, cellDepth - 1);
+        }
+    }
+
+    return cellDepth > 0;
 }
 
 function buildDrawingInsertBody(body: IDocumentBody, drawings: IDrawingParam[], insertOffset: number): IDocumentBody {

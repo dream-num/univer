@@ -17,10 +17,12 @@
 import type { IBaseSnapshot, ICellData, Injector, IWorkbookData, Nullable, Univer, Workbook } from '@univerjs/core';
 import type { IFormulaData } from '../../basics/common';
 import {
+    BASE_RECORD_ID_FIELD_ID,
     BaseDataModel,
     BaseFieldType,
     BooleanNumber,
     CellValueType,
+    createBaseRecordIdField,
     IUniverInstanceService,
     LocaleType,
     ObjectMatrix,
@@ -110,7 +112,7 @@ const TEST_WORKBOOK_DATA_EXTRA: IWorkbookData = {
 const TEST_BASE_DATA: Partial<IBaseSnapshot> = {
     id: 'base-test',
     name: 'Base',
-    schemaVersion: 1,
+    schemaVersion: 2,
     tableOrder: ['table-main', 'tableOther'],
     createdAt: 0,
     updatedAt: 0,
@@ -119,8 +121,9 @@ const TEST_BASE_DATA: Partial<IBaseSnapshot> = {
             id: 'table-main',
             name: 'Sales',
             primaryFieldId: 'name',
-            fieldOrder: ['name', 'amount', 'qty', 'tags', 'link', 'attachment', 'total'],
+            fieldOrder: [BASE_RECORD_ID_FIELD_ID, 'name', 'amount', 'qty', 'tags', 'link', 'attachment', 'total'],
             fields: {
+                [BASE_RECORD_ID_FIELD_ID]: createBaseRecordIdField(),
                 name: { id: 'name', name: 'Name', type: BaseFieldType.Text, config: {} },
                 amount: { id: 'amount', name: 'Amount', type: BaseFieldType.Number, config: {} },
                 qty: { id: 'qty', name: 'Qty', type: BaseFieldType.Number, config: {} },
@@ -143,6 +146,7 @@ const TEST_BASE_DATA: Partial<IBaseSnapshot> = {
                     createdAt: 0,
                     updatedAt: 0,
                     values: {
+                        [BASE_RECORD_ID_FIELD_ID]: 'record-1',
                         name: 'Order 1',
                         amount: 10,
                         qty: 2,
@@ -160,8 +164,9 @@ const TEST_BASE_DATA: Partial<IBaseSnapshot> = {
             id: 'tableOther',
             name: 'Sales',
             primaryFieldId: 'external',
-            fieldOrder: ['external'],
+            fieldOrder: [BASE_RECORD_ID_FIELD_ID, 'external'],
             fields: {
+                [BASE_RECORD_ID_FIELD_ID]: createBaseRecordIdField(),
                 external: { id: 'external', name: 'External', type: BaseFieldType.Number, config: {} },
             },
             records: {
@@ -170,7 +175,7 @@ const TEST_BASE_DATA: Partial<IBaseSnapshot> = {
                     orderKey: 'a',
                     createdAt: 0,
                     updatedAt: 0,
-                    values: { external: 8 },
+                    values: { [BASE_RECORD_ID_FIELD_ID]: 'record-2', external: 8 },
                 },
             },
             recordOrder: ['record-2'],
@@ -1054,8 +1059,8 @@ describe('Test formula data model', () => {
                 const formulaData = formulaDataModel.getFormulaData();
                 expect(formulaData['base-test']?.['table-main']).toEqual({
                     0: {
-                        6: {
-                            f: '=SUM(table-main[[#This Row],[Amount]], table-main[[#This Row],[Qty]], tableOther[[#This Row],[External]])',
+                        7: {
+                            f: '=SUM(table-main[[#This Row],[Amount]], table-main[[#This Row],[Qty]], tableOther[[#Data],[External]])',
                             si: 'total',
                         },
                     },
@@ -1070,12 +1075,13 @@ describe('Test formula data model', () => {
                 });
                 expect(calculateData.unitSheetNameMap['base-test']?.Sales).toBe('tableOther');
                 expect(tableData?.rowCount).toBe(1);
-                expect(tableData?.columnCount).toBe(7);
-                expect(tableData?.cellData.getValue(0, 0)).toEqual({ v: 'Order 1', t: CellValueType.STRING });
-                expect(tableData?.cellData.getValue(0, 1)).toEqual({ v: 10, t: CellValueType.NUMBER });
-                expect(tableData?.cellData.getValue(0, 3)).toEqual({ v: 'paid, online', t: CellValueType.STRING });
-                expect(tableData?.cellData.getValue(0, 4)).toEqual({ v: 'Invoice', t: CellValueType.STRING });
-                expect(tableData?.cellData.getValue(0, 5)).toEqual({ v: '', t: CellValueType.STRING });
+                expect(tableData?.columnCount).toBe(8);
+                expect(tableData?.cellData.getValue(0, 0)).toEqual({ v: 'record-1', t: CellValueType.STRING });
+                expect(tableData?.cellData.getValue(0, 1)).toEqual({ v: 'Order 1', t: CellValueType.STRING });
+                expect(tableData?.cellData.getValue(0, 2)).toEqual({ v: 10, t: CellValueType.NUMBER });
+                expect(tableData?.cellData.getValue(0, 4)).toEqual({ v: 'paid, online', t: CellValueType.STRING });
+                expect(tableData?.cellData.getValue(0, 5)).toEqual({ v: 'Invoice', t: CellValueType.STRING });
+                expect(tableData?.cellData.getValue(0, 6)).toEqual({ v: '', t: CellValueType.STRING });
             });
 
             it('should preserve workbook-qualified A1 references in Base formulas', () => {
@@ -1088,7 +1094,7 @@ describe('Test formula data model', () => {
                 };
                 univer.createUnit(UniverInstanceType.UNIVER_BASE, snapshot);
 
-                expect(formulaDataModel.getFormulaData()['base-external-a1']?.['table-main']?.[0]?.[6]?.f).toBe(
+                expect(formulaDataModel.getFormulaData()['base-external-a1']?.['table-main']?.[0]?.[7]?.f).toBe(
                     '=SUM([Host.xlsx]Sheet1!$A$1:$B$10)'
                 );
             });
@@ -1103,7 +1109,7 @@ describe('Test formula data model', () => {
                 };
                 univer.createUnit(UniverInstanceType.UNIVER_BASE, snapshot);
 
-                expect(formulaDataModel.getFormulaData()['base-external-table']?.['table-main']?.[0]?.[6]?.f).toBe(
+                expect(formulaDataModel.getFormulaData()['base-external-table']?.['table-main']?.[0]?.[7]?.f).toBe(
                     '=SUM([Orders Base]!Orders[Amount])'
                 );
             });

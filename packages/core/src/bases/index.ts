@@ -20,6 +20,14 @@ export {
     getEmptySnapshot as getBasesEmptySnapshot,
     type ICreateDefaultBaseTableSnapshotOptions,
 } from './empty-snapshot';
+export {
+    assertBaseTableRecordIdentity,
+    BASE_RECORD_ID_FIELD_ID,
+    BASE_RECORD_ID_FIELD_NAME,
+    createBaseRecordIdField,
+    isBaseRecordIdFieldName,
+    isValidBaseRecordId,
+} from './record-identity';
 export { BaseFieldType, BaseFilterConjunction, BaseFilterOperator, BaseSortDirection, BaseViewType } from './typedef';
 export type {
     BaseCellMatrix,
@@ -78,6 +86,7 @@ export type {
     IProjectedField,
     IProjectedGroup,
     IProjectedRow,
+    IRecordLinkFieldConfig,
     IRecordSnapshot,
     ISortConfig,
     ITableSnapshot,

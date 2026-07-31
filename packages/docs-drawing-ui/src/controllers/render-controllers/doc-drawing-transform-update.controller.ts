@@ -36,7 +36,7 @@ import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/do
 import { IEditorService, SetDocZoomRatioOperation } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { getDocsTableRenderViewport, getTableIdAndSliceIndex, Liquid, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
-import { debounceTime, filter } from 'rxjs';
+import { debounceTime, filter, merge } from 'rxjs';
 import { DocRefreshDrawingsService } from '../../services/doc-refresh-drawings.service';
 
 interface IDrawingParamsWithBehindText {
@@ -245,7 +245,7 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
     private _initialize() {
         this._initialRenderRefresh();
         this._drawingInitializeListener();
-        this._initResize();
+        this._initTransformRefresh();
     }
 
     private _initialRenderRefresh() {
@@ -303,10 +303,16 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
         );
     }
 
-    private _initResize() {
+    private _initTransformRefresh() {
         this.disposeWithMe(
-            fromEventSubject(this._context.engine.onTransformChange$).pipe(
-                filter((evt) => evt.type === TRANSFORM_CHANGE_OBSERVABLE_TYPE.resize),
+            merge(
+                fromEventSubject(this._context.engine.onTransformChange$).pipe(
+                    filter((evt) => evt.type === TRANSFORM_CHANGE_OBSERVABLE_TYPE.resize)
+                ),
+                fromEventSubject(this._context.scene.onTransformChange$).pipe(
+                    filter((evt) => evt.type === TRANSFORM_CHANGE_OBSERVABLE_TYPE.scale)
+                )
+            ).pipe(
                 debounceTime(16)
             ).subscribe(() => {
                 const skeleton = this._docSkeletonManagerService.getSkeleton();

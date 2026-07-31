@@ -46,6 +46,7 @@ import {
     RemoveSheetDrawingCommand,
     SetDrawingArrangeCommand,
     SetSheetDrawingCommand,
+    SetSheetDrawingPlacementCommand,
 } from '@univerjs/sheets-drawing';
 import { combineLatest, distinctUntilChanged, EMPTY, map, switchMap, tap } from 'rxjs';
 
@@ -442,6 +443,10 @@ export class SheetDrawingPermissionController extends Disposable {
                     const { drawings } = params;
                     unitId = drawings?.[0]?.unitId;
                     subUnitId = drawings?.[0]?.subUnitId;
+                } else if (command.id === SetSheetDrawingPlacementCommand.id) {
+                    const target = getPlacementCommandTarget(command.params);
+                    unitId = target.unitId;
+                    subUnitId = target.subUnitId;
                 } else if (command.id === SetDrawingArrangeCommand.id) {
                     const params = command.params as ISetDrawingArrangeCommandParams;
                     unitId = params.unitId;
@@ -462,4 +467,21 @@ export class SheetDrawingPermissionController extends Disposable {
             })
         );
     }
+}
+
+function getPlacementCommandTarget(params: object | undefined): {
+    unitId?: string;
+    subUnitId?: string;
+} {
+    if (!params) {
+        return {};
+    }
+
+    const unitId = 'unitId' in params && typeof params.unitId === 'string'
+        ? params.unitId
+        : undefined;
+    const subUnitId = 'subUnitId' in params && typeof params.subUnitId === 'string'
+        ? params.subUnitId
+        : undefined;
+    return { unitId, subUnitId };
 }

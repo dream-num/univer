@@ -46,6 +46,21 @@ export interface IFDocumentParagraphQuery {
     segmentId?: string;
 }
 
+export interface IDocumentCustomBlockLayoutItem {
+    blockId: string;
+    startIndex: number;
+    index: number;
+}
+
+/**
+ * Structural custom-block layout from the document model.
+ *
+ * This intentionally excludes rendered pixel positions and pagination.
+ */
+export interface IDocumentCustomBlockLayout {
+    blocks: IDocumentCustomBlockLayoutItem[];
+}
+
 /**
  * Options for inserting a section break in a traditional document.
  *
@@ -100,6 +115,31 @@ export class FDocument extends FBaseInitialable {
             throw new Error(segmentId === '' ? 'Document data model is not found.' : `Document data model is not found in the segment: ${segmentId}`);
         }
         return documentDataModel;
+    }
+
+    /**
+     * Returns the document's custom blocks in stable model order.
+     *
+     * This method is available in Node/headless environments and does not
+     * perform font measurement, line wrapping, pagination, or rendering.
+     *
+     * @returns {IDocumentCustomBlockLayout} Custom block identifiers and model positions.
+     * @example
+     * ```ts
+     * const document = univerAPI.getActiveDocument();
+     * const layout = document?.getCustomBlockLayout();
+     * console.log(layout?.blocks);
+     * ```
+     */
+    getCustomBlockLayout(): IDocumentCustomBlockLayout {
+        const blocks = this._documentDataModel.getBody()?.customBlocks ?? [];
+        return {
+            blocks: blocks.map(({ blockId, startIndex }, index) => ({
+                blockId,
+                startIndex,
+                index,
+            })),
+        };
     }
 
     /**

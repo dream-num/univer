@@ -185,19 +185,17 @@ export class SheetsNumfmtCellContentController extends Disposable {
                     return next(cell);
                 }
 
-                let numfmtRes: string = '';
                 const cache = renderCache.getValue(location.row, location.col);
                 if (cache && cache.parameters === `${originCellValue.v}_${numfmtValue?.pattern}`) {
                     return next({ ...cell, ...cache.result });
                 }
 
                 const info = getPatternPreviewIgnoreGeneral(numfmtValue?.pattern as string, Number(originCellValue.v), this.locale);
-                numfmtRes = info.result;
-                if (!numfmtRes) {
-                    return next(cell);
-                }
-
+                const numfmtRes = info.result;
                 const res: ICellDataForSheetInterceptor = { v: numfmtRes, t: CellValueType.NUMBER };
+                if (numfmtRes === '') {
+                    res.coverable = false;
+                }
                 if (info.color) {
                     const color = this._themeService.getColorFromTheme(`${info.color}.500`) ?? info.color;
 

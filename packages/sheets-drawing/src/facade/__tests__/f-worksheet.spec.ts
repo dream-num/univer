@@ -14,8 +14,13 @@
  * limitations under the License.
  */
 
-import type { Injector, Univer, Workbook } from '@univerjs/core';
+import type {
+    Injector,
+    Univer,
+    Workbook,
+} from '@univerjs/core';
 import type { FWorkbook } from '@univerjs/sheets/facade';
+import type { ISheetDrawingPlacement } from '../../services/sheet-drawing-placement';
 import type { ISheetDrawing } from '../../services/sheet-drawing.service';
 import {
     DrawingTypeEnum,
@@ -26,11 +31,13 @@ import {
     UndoCommand,
     UniverInstanceType,
 } from '@univerjs/core';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { SheetSkeletonService } from '@univerjs/sheets';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createSheetsDrawingTestBed } from '../../__tests__/create-sheets-drawing-test-bed';
 import { InsertSheetDrawingCommand } from '../../commands/commands/insert-sheet-drawing.command';
 import { resolveSheetDrawingRotateEnabled } from '../../common/rotate-enabled';
-import { ISheetDrawingService } from '../../services/sheet-drawing.service';
+import { getSheetDrawingPlacement } from '../../services/sheet-drawing-placement';
+import { ISheetDrawingService, SheetDrawingAnchorType } from '../../services/sheet-drawing.service';
 import { FWorksheetDrawingMixin } from '../f-worksheet';
 
 describe('FWorksheetDrawingMixin group drawings', () => {
@@ -217,6 +224,118 @@ describe('FWorksheetDrawingMixin group drawings', () => {
         expect(fWorksheet.deleteImages(images)).toBe(fWorksheet);
         expect(fWorksheet.getImageById(image.drawingId)).toBeNull();
         expect(fWorksheet.getImages()).toEqual([]);
+    });
+
+    it('builds and round-trips an Absolute image placement without a Sheet skeleton', async () => {
+        const fWorksheet = createFacade(injector);
+        const ensureSkeleton = vi.spyOn(injector.get(SheetSkeletonService), 'ensureSkeleton')
+            .mockImplementation(() => {
+                throw new Error('SKELETON_MUST_NOT_BE_READ');
+            });
+        const placement: ISheetDrawingPlacement = {
+            kind: SheetDrawingAnchorType.None,
+            left: 640,
+            top: 96,
+            width: 320,
+            height: 180,
+        };
+
+        const image = await fWorksheet.newOverGridImage()
+            .setSource('https://example.com/absolute.png', ImageSourceType.URL)
+            .setPlacement(placement)
+            .buildAsync();
+
+        expect(ensureSkeleton).not.toHaveBeenCalled();
+        expect(image.transform).toEqual(expect.objectContaining({
+            left: placement.left,
+            top: placement.top,
+            width: placement.width,
+            height: placement.height,
+        }));
+
+        fWorksheet.insertImages([image]);
+        expect(fWorksheet.getDrawingPlacement(image.drawingId)).toEqual(placement);
+        expect(fWorksheet.getImageById(image.drawingId)?.getPlacement()).toEqual(placement);
+
+        const moved: ISheetDrawingPlacement = {
+            ...placement,
+            left: 720,
+            top: 128,
+        };
+        expect(fWorksheet.setDrawingPlacement(image.drawingId, moved)).toBe(true);
+        expect(fWorksheet.getDrawingPlacement(image.drawingId)).toEqual(moved);
+    });
+
+    it('infers Position and Both markers from model bounds and returns the headless host layout', () => {
+        const fWorksheet = createFacade(injector);
+        const commandService = injector.get(ICommandService);
+        const drawing = createDrawing('layout-drawing', 120);
+        expect(commandService.syncExecuteCommand(InsertSheetDrawingCommand.id, {
+            unitId: 'test',
+            drawings: [drawing],
+        })).toBe(true);
+
+        const bounds = { left: 120, top: 80, width: 320, height: 160 };
+        const position = fWorksheet.resolveDrawingPlacement({
+            kind: SheetDrawingAnchorType.Position,
+            bounds,
+        });
+        const both = fWorksheet.resolveDrawingPlacement({
+            kind: SheetDrawingAnchorType.Both,
+            bounds,
+        });
+
+        expect(position).toEqual(expect.objectContaining({
+            kind: SheetDrawingAnchorType.Position,
+            width: bounds.width,
+            height: bounds.height,
+        }));
+        expect(position).toHaveProperty('from');
+        expect(both).toEqual(expect.objectContaining({
+            kind: SheetDrawingAnchorType.Both,
+        }));
+        expect(both).toHaveProperty('from');
+        expect(both).toHaveProperty('to');
+
+        expect(fWorksheet.setDrawingPlacement(drawing.drawingId, {
+            kind: SheetDrawingAnchorType.Both,
+            bounds,
+        })).toBe(true);
+        expect(fWorksheet.getDrawingPlacement(drawing.drawingId)).toEqual(both);
+
+        const layout = fWorksheet.getDrawingLayout();
+        expect(layout.gridBounds.width).toBeGreaterThan(0);
+        expect(layout.gridBounds.height).toBeGreaterThan(0);
+        expect(layout.dataBounds.width).toBeGreaterThan(0);
+        expect(layout.dataBounds.height).toBeGreaterThan(0);
+        expect(layout.drawings).toEqual([
+            expect.objectContaining({
+                drawingId: drawing.drawingId,
+                bounds,
+                placement: both,
+            }),
+        ]);
+    });
+
+    it('rejects invalid bounds and reversed TwoCell markers without mutating the drawing', () => {
+        const fWorksheet = createFacade(injector);
+        const commandService = injector.get(ICommandService);
+        const drawing = createDrawing('validated-drawing', 120);
+        expect(commandService.syncExecuteCommand(InsertSheetDrawingCommand.id, {
+            unitId: 'test',
+            drawings: [drawing],
+        })).toBe(true);
+
+        expect(() => fWorksheet.setDrawingPlacement(drawing.drawingId, {
+            kind: SheetDrawingAnchorType.Position,
+            bounds: { left: 120, top: 80, width: 0, height: 160 },
+        })).toThrow('SHEET_DRAWING_PLACEMENT_EXTENT_INVALID');
+        expect(() => fWorksheet.setDrawingPlacement(drawing.drawingId, {
+            kind: SheetDrawingAnchorType.Both,
+            from: { row: 8, column: 6, rowOffset: 0, columnOffset: 0 },
+            to: { row: 2, column: 2, rowOffset: 0, columnOffset: 0 },
+        })).toThrow('SHEET_DRAWING_PLACEMENT_EXTENT_INVALID');
+        expect(fWorksheet.getDrawingPlacement(drawing.drawingId)).toEqual(getSheetDrawingPlacement(drawing));
     });
 
     it('returns only images from sheet drawing data and exposes active images from the drawing selection', () => {

@@ -16,10 +16,11 @@
 
 import type { ISheetDrawing } from '@univerjs/sheets-drawing';
 import type { Root } from 'react-dom/client';
-import { DrawingTypeEnum, ImageSourceType } from '@univerjs/core';
+import { DrawingTypeEnum, ImageSourceType, RedoCommand, UndoCommand } from '@univerjs/core';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { InsertSheetDrawingCommand, ISheetDrawingService, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
+import { SheetSkeletonService } from '@univerjs/sheets';
+import { InsertSheetDrawingCommand, ISheetDrawingService, SheetDrawingAnchorType, transformToDrawingPosition } from '@univerjs/sheets-drawing';
 import { RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -30,12 +31,16 @@ import { SheetDrawingAnchor } from '../SheetDrawingAnchor';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
-function createSheetDrawing(drawingId: string, anchorType: SheetDrawingAnchorType): ISheetDrawing {
+function createSheetDrawing(
+    drawingId: string,
+    anchorType: SheetDrawingAnchorType,
+    drawingType = DrawingTypeEnum.DRAWING_IMAGE
+): ISheetDrawing {
     return {
         unitId: 'test',
         subUnitId: 'sheet1',
         drawingId,
-        drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+        drawingType,
         imageSourceType: ImageSourceType.URL,
         source: `https://example.com/${drawingId}.png`,
         anchorType,
@@ -82,9 +87,18 @@ class TestRenderManagerService {
                     clearControl$: this.clearControl$,
                     changeStart$: this.changeStart$,
                 }),
+                getTransformer: () => ({
+                    debounceRefreshControls: () => undefined,
+                }),
             },
         };
     }
+}
+
+function createTestBed() {
+    return createSheetsDrawingUiTestBed(undefined, [
+        [IRenderManagerService, { useClass: TestRenderManagerService }],
+    ]);
 }
 
 describe('SheetDrawingAnchor', () => {
@@ -101,9 +115,7 @@ describe('SheetDrawingAnchor', () => {
     });
 
     it('updates every focused sheet image when the anchor mode changes', async () => {
-        const testBed = createSheetsDrawingUiTestBed(undefined, [
-            [IRenderManagerService, { useClass: TestRenderManagerService as never }],
-        ]);
+        const testBed = createTestBed();
         const sheetDrawingService = testBed.get(ISheetDrawingService);
         const drawingManagerService = testBed.get(IDrawingManagerService);
         const drawings = [
@@ -153,13 +165,101 @@ describe('SheetDrawingAnchor', () => {
             SheetDrawingAnchorType.None,
         ]);
 
+        expect(await testBed.commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(sheetDrawingService.getDrawingByParam({
+            unitId: testBed.unitId,
+            subUnitId: testBed.subUnitId,
+            drawingId: 'drawing-a',
+        })?.anchorType).toBe(SheetDrawingAnchorType.Position);
+        expect(sheetDrawingService.getDrawingByParam({
+            unitId: testBed.unitId,
+            subUnitId: testBed.subUnitId,
+            drawingId: 'drawing-b',
+        })?.anchorType).toBe(SheetDrawingAnchorType.Both);
+        expect(await testBed.commandService.executeCommand(RedoCommand.id)).toBe(true);
+        expect(sheetDrawingService.getDrawingByParam({
+            unitId: testBed.unitId,
+            subUnitId: testBed.subUnitId,
+            drawingId: 'drawing-a',
+        })?.anchorType).toBe(SheetDrawingAnchorType.None);
+
+        testBed.univer.dispose();
+    });
+
+    it('recomputes Shape cell markers when Absolute changes to OneCell and then TwoCell', async () => {
+        const testBed = createTestBed();
+        const sheetDrawingService = testBed.get(ISheetDrawingService);
+        const drawingManagerService = testBed.get(IDrawingManagerService);
+        const drawing = createSheetDrawing(
+            'absolute-drawing',
+            SheetDrawingAnchorType.None,
+            DrawingTypeEnum.DRAWING_SHAPE
+        );
+        drawing.transform = { ...drawing.transform, left: 320, top: 220 };
+
+        await testBed.commandService.executeCommand(InsertSheetDrawingCommand.id, {
+            unitId: testBed.unitId,
+            drawings: [drawing],
+        });
+        const skeleton = testBed.get(SheetSkeletonService).ensureSkeleton(testBed.unitId, testBed.subUnitId);
+        const transform = sheetDrawingService.getDrawingByParam({
+            unitId: drawing.unitId,
+            subUnitId: drawing.subUnitId,
+            drawingId: drawing.drawingId,
+        })?.transform;
+        if (!transform || !skeleton) {
+            throw new Error('Sheet drawing test fixture is incomplete.');
+        }
+        const expected = transformToDrawingPosition(transform, skeleton);
+        drawingManagerService.focusDrawing([{
+            unitId: drawing.unitId,
+            subUnitId: drawing.subUnitId,
+            drawingId: drawing.drawingId,
+        }]);
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        const mountedRoot = createRoot(container);
+        root = mountedRoot;
+        await act(async () => {
+            mountedRoot.render(
+                <RediContext.Provider value={{ injector: testBed.injector }}>
+                    <SheetDrawingAnchor drawings={[drawing]} />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        const oneCellOption = container.querySelectorAll<HTMLInputElement>('input[type="radio"]')[1];
+        await act(async () => {
+            oneCellOption.click();
+            await Promise.resolve();
+        });
+
+        const updated = sheetDrawingService.getDrawingByParam({
+            unitId: drawing.unitId,
+            subUnitId: drawing.subUnitId,
+            drawingId: drawing.drawingId,
+        });
+        expect(updated?.anchorType).toBe(SheetDrawingAnchorType.Position);
+        expect(updated?.sheetTransform.from).toEqual(expected.from);
+
+        const twoCellOption = container.querySelectorAll<HTMLInputElement>('input[type="radio"]')[0];
+        await act(async () => {
+            twoCellOption.click();
+            await Promise.resolve();
+        });
+        const resized = sheetDrawingService.getDrawingByParam({
+            unitId: drawing.unitId,
+            subUnitId: drawing.subUnitId,
+            drawingId: drawing.drawingId,
+        });
+        expect(resized?.anchorType).toBe(SheetDrawingAnchorType.Both);
+        expect(resized?.sheetTransform).toEqual(expected);
         testBed.univer.dispose();
     });
 
     it('hides anchor controls when the transformer clears the sheet image selection', async () => {
-        const testBed = createSheetsDrawingUiTestBed(undefined, [
-            [IRenderManagerService, { useClass: TestRenderManagerService as never }],
-        ]);
+        const testBed = createTestBed();
         const renderManagerService = testBed.get(IRenderManagerService) as unknown as TestRenderManagerService;
         const drawings = [
             createSheetDrawing('drawing-a', SheetDrawingAnchorType.Position),
@@ -191,9 +291,7 @@ describe('SheetDrawingAnchor', () => {
     });
 
     it('syncs the selected anchor mode when the transformer starts editing another sheet image', async () => {
-        const testBed = createSheetsDrawingUiTestBed(undefined, [
-            [IRenderManagerService, { useClass: TestRenderManagerService as never }],
-        ]);
+        const testBed = createTestBed();
         const renderManagerService = testBed.get(IRenderManagerService) as unknown as TestRenderManagerService;
         const drawings = [
             createSheetDrawing('drawing-a', SheetDrawingAnchorType.Both),

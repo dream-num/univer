@@ -161,7 +161,7 @@ describe('DocFloatDomController', () => {
         });
     });
 
-    it('updates opted-in runtime view scale when the host doc zoom changes', async () => {
+    it('updates float dom position after host doc zoom without rewriting runtime viewport', async () => {
         const rect = new Rect('dom-rect', {
             left: 30,
             top: 50,
@@ -182,6 +182,7 @@ describe('DocFloatDomController', () => {
 
         add$.next([{ unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'dom-1' }]);
         await Promise.resolve();
+        const position$ = canvasFloatDomService.addFloatDom.mock.calls[0][0].position$ as BehaviorSubject<unknown>;
         scene.getAncestorScale.mockReturnValue({ scaleX: 1, scaleY: 1 });
         commandHandlers.forEach((handler) => handler({
             id: SetDocZoomRatioOperation.id,
@@ -190,42 +191,12 @@ describe('DocFloatDomController', () => {
         scene.getAncestorScale.mockReturnValue({ scaleX: 2, scaleY: 2 });
         await Promise.resolve();
 
-        expect(canvasFloatDomService.updateFloatDom).toHaveBeenCalledWith('dom-1', {
-            props: expect.objectContaining({
-                customBlockRenderViewport: expect.objectContaining({
-                    viewScale: 2,
-                }),
-            }),
+        expect(position$.getValue()).toMatchObject({
+            startX: 40,
+            startY: 60,
+            width: 100,
+            height: 480,
         });
-
-        controller.dispose();
-    });
-
-    it('does not add view scale to other float dom runtimes on host zoom', async () => {
-        const rect = new Rect('dom-rect', {
-            left: 30,
-            top: 50,
-            width: 50,
-            height: 40,
-        });
-        const { add$, canvasFloatDomService, commandHandlers, controller } = createController({
-            rects: [rect],
-            drawing: {
-                customBlockRenderViewport: {
-                    contentHeight: 240,
-                    height: 240,
-                    viewportHeight: 120,
-                },
-            },
-        });
-
-        add$.next([{ unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'dom-1' }]);
-        await Promise.resolve();
-        commandHandlers.forEach((handler) => handler({
-            id: SetDocZoomRatioOperation.id,
-            params: { unitId: 'doc-1', zoomRatio: 2 },
-        }));
-
         expect(canvasFloatDomService.updateFloatDom).not.toHaveBeenCalled();
 
         controller.dispose();

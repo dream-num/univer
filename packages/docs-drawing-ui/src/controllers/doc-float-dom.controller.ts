@@ -381,30 +381,13 @@ export class DocFloatDomController extends Disposable {
     }
 
     private _initScrollAndZoomEvent() {
-        const updateDoc = (unitId: string, updateRuntimeViewScale = false) => {
+        const updateDoc = (unitId: string) => {
             const renderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
             if (!renderObject) {
                 return;
             }
-            const viewScale = renderObject.scene.getAncestorScale().scaleX || 1;
-            this._domLayerInfoMap.forEach((floatDomInfo, drawingId) => {
+            this._domLayerInfoMap.forEach((floatDomInfo) => {
                 if (floatDomInfo.unitId !== unitId) return;
-                if (updateRuntimeViewScale && floatDomInfo.runtimeViewport?.viewScale != null) {
-                    floatDomInfo.runtimeViewport = {
-                        ...floatDomInfo.runtimeViewport,
-                        viewScale,
-                    };
-                    const currentProps = this._canvasFloatDomService.domLayers
-                        .find(([id]) => id === drawingId)
-                        ?.[1]
-                        .props;
-                    this._canvasFloatDomService.updateFloatDom(drawingId, {
-                        props: {
-                            ...currentProps,
-                            customBlockRenderViewport: floatDomInfo.runtimeViewport,
-                        },
-                    });
-                }
                 const position = calcDocFloatDomPosition(floatDomInfo.rect, renderObject.renderUnit);
                 floatDomInfo.position$.next(position);
             });
@@ -436,7 +419,7 @@ export class DocFloatDomController extends Disposable {
                 const params = (commandInfo.params) as ISetDocZoomRatioOperationParams;
                 const { unitId } = params;
                 globalThis.queueMicrotask(() => {
-                    if (!this._disposed) updateDoc(unitId, true);
+                    if (!this._disposed) updateDoc(unitId);
                 });
             }
         }));

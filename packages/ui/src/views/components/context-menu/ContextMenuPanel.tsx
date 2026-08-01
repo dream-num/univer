@@ -50,6 +50,7 @@ interface IContextMenuPanelProps {
     activeItemIds?: string[];
     hiddenItemIds?: string[];
     sizeVariant?: ContextMenuSizeVariant;
+    flowConnectedQuickGroups?: boolean;
     autoFocus?: boolean;
     autoFocusTarget?: ContextMenuAutoFocusTarget;
     suppressHoverUntilPointerMove?: boolean;
@@ -70,6 +71,7 @@ interface IContextMenuMenuProps {
     hiddenItemIds?: string[];
     hoverSuppressed?: boolean;
     sizeVariant: ContextMenuSizeVariant;
+    flowConnectedQuickGroups?: boolean;
     onMenuPointerEnter?: () => void;
     onMenuPointerLeave?: () => void;
     onOptionSelect?: (option: IValueOption) => void;
@@ -91,6 +93,7 @@ interface IContextMenuMenuItemProps {
     compact?: boolean;
     headerAction?: boolean;
     sizeVariant: ContextMenuSizeVariant;
+    flowConnectedQuickGroups?: boolean;
     onMenuPointerEnter?: () => void;
     onMenuPointerLeave?: () => void;
     onOptionSelect?: (option: IValueOption) => void;
@@ -432,20 +435,21 @@ function getContextMenuGroupClassName(sizeVariant: ContextMenuSizeVariant) {
     return contextMenuGroupVariants({ sizeVariant });
 }
 
-function isParagraphTHeaderQuickGroup(menuSchema: IMenuSchema, sizeVariant: ContextMenuSizeVariant) {
-    return sizeVariant === 'paragraph-t'
-        && menuSchema.quickLayout === 'icon'
+function isHeaderQuickGroup(menuSchema: IMenuSchema) {
+    return menuSchema.quickLayout === 'icon'
         && CONTEXT_MENU_HEADER_QUICK_GROUP_KEYS.has(menuSchema.key);
 }
 
-function shouldClusterParagraphTHeaderQuickGroups(
+function shouldClusterHeaderQuickGroups(
     currentSchema: IMenuSchema,
     nextSchema: IMenuSchema | undefined,
-    sizeVariant: ContextMenuSizeVariant
+    sizeVariant: ContextMenuSizeVariant,
+    flowConnectedQuickGroups: boolean
 ) {
-    return isParagraphTHeaderQuickGroup(currentSchema, sizeVariant)
+    return (sizeVariant === 'paragraph-t' || flowConnectedQuickGroups)
+        && isHeaderQuickGroup(currentSchema)
         && !!nextSchema
-        && isParagraphTHeaderQuickGroup(nextSchema, sizeVariant);
+        && isHeaderQuickGroup(nextSchema);
 }
 
 function getContextMenuQuickGroupClassName(
@@ -604,7 +608,8 @@ export function getNextMenuButtonByDirection(
 
 export function getContextMenuSchemaRenderGroups(
     visibleSchemas: IMenuSchema[],
-    sizeVariant: ContextMenuSizeVariant
+    sizeVariant: ContextMenuSizeVariant,
+    flowConnectedQuickGroups = false
 ): IContextMenuSchemaRenderGroup[] {
     const renderGroups: IContextMenuSchemaRenderGroup[] = [];
 
@@ -612,7 +617,7 @@ export function getContextMenuSchemaRenderGroups(
         const menuSchema = visibleSchemas[index];
         const nextSchema = visibleSchemas[index + 1];
 
-        if (shouldClusterParagraphTHeaderQuickGroups(menuSchema, nextSchema, sizeVariant)) {
+        if (shouldClusterHeaderQuickGroups(menuSchema, nextSchema, sizeVariant, flowConnectedQuickGroups)) {
             renderGroups.push({
                 startIndex: index,
                 endIndex: index + 1,
@@ -630,6 +635,17 @@ export function getContextMenuSchemaRenderGroups(
     }
 
     return renderGroups;
+}
+
+function mergeContextMenuQuickGroupSchemas(menuSchemas: IMenuSchema[]): IMenuSchema {
+    const firstSchema = menuSchemas[0];
+
+    return {
+        ...firstSchema,
+        key: menuSchemas.map((schema) => schema.key).join('-'),
+        quickColumns: getContextMenuQuickGroupColumns(firstSchema),
+        children: menuSchemas.flatMap((schema) => schema.children ?? []),
+    };
 }
 
 function getContextMenuHeaderClassName(sizeVariant: ContextMenuSizeVariant) {
@@ -654,6 +670,7 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
         activeItemIds,
         hiddenItemIds,
         sizeVariant = 'default',
+        flowConnectedQuickGroups = false,
         autoFocus,
         autoFocusTarget = 'first-item',
         suppressHoverUntilPointerMove = false,
@@ -823,6 +840,7 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
                 hiddenItemIds={hiddenItemIds}
                 hoverSuppressed={hoverSuppressed}
                 sizeVariant={sizeVariant}
+                flowConnectedQuickGroups={flowConnectedQuickGroups}
                 onMenuPointerEnter={onMenuPointerEnter}
                 onMenuPointerLeave={onMenuPointerLeave}
                 onOptionSelect={onOptionSelect}
@@ -833,7 +851,7 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
 }
 
 function ContextMenuMenu(props: IContextMenuMenuProps) {
-    const { menuSchemas, menuManagerService, menuSessionVersion, submenuPortalContainer, rootMenuElement, activeItemIds, hiddenItemIds, hoverSuppressed, sizeVariant, onMenuPointerEnter, onMenuPointerLeave, onOptionSelect, maxMenuHeight } = props;
+    const { menuSchemas, menuManagerService, menuSessionVersion, submenuPortalContainer, rootMenuElement, activeItemIds, hiddenItemIds, hoverSuppressed, sizeVariant, flowConnectedQuickGroups = false, onMenuPointerEnter, onMenuPointerLeave, onOptionSelect, maxMenuHeight } = props;
     const localeService = useDependency(LocaleService);
     const hiddenGroupStates = useContextGroupHiddenStates(menuSchemas);
     const [activeSubmenuKey, setActiveSubmenuKey] = useState<string | null>(null);
@@ -852,8 +870,8 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
         });
     }, [hiddenGroupStates, menuSchemas]);
     const renderGroups = useMemo(
-        () => getContextMenuSchemaRenderGroups(visibleSchemas, sizeVariant),
-        [sizeVariant, visibleSchemas]
+        () => getContextMenuSchemaRenderGroups(visibleSchemas, sizeVariant, flowConnectedQuickGroups),
+        [flowConnectedQuickGroups, sizeVariant, visibleSchemas]
     );
 
     const renderQuickLayoutGroup = (
@@ -909,6 +927,10 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                 const titleNode = renderMenuSchemaHeader(menuSchema);
 
                 if (groupedSchemas.length > 1) {
+                    const quickSchemas = flowConnectedQuickGroups
+                        ? [mergeContextMenuQuickGroupSchemas(groupedSchemas)]
+                        : groupedSchemas;
+
                     return (
                         <div
                             key={groupedSchemas.map((schema) => schema.key).join('-')}
@@ -917,7 +939,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                                 hasSeparator && borderBottomClassName
                             )}
                         >
-                            {groupedSchemas.map((groupedMenuSchema, groupedIndex) => renderQuickLayoutGroup(
+                            {quickSchemas.map((groupedMenuSchema, groupedIndex) => renderQuickLayoutGroup(
                                 groupedMenuSchema,
                                 startIndex + groupedIndex,
                                 true
@@ -943,6 +965,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                             hiddenItemIds={hiddenItemIds}
                             hoverSuppressed={hoverSuppressed}
                             sizeVariant={sizeVariant}
+                            flowConnectedQuickGroups={flowConnectedQuickGroups}
                             onMenuPointerEnter={onMenuPointerEnter}
                             onMenuPointerLeave={onMenuPointerLeave}
                         />
@@ -989,6 +1012,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                                         maxMenuHeight={maxMenuHeight}
                                         compact
                                         sizeVariant={sizeVariant}
+                                        flowConnectedQuickGroups={flowConnectedQuickGroups}
                                     />
                                 )
                             ))}
@@ -1025,6 +1049,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                                     onOptionSelect={onOptionSelect}
                                     maxMenuHeight={maxMenuHeight}
                                     sizeVariant={sizeVariant}
+                                    flowConnectedQuickGroups={flowConnectedQuickGroups}
                                 />
                             )
                         ))}
@@ -1069,6 +1094,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                     compact
                     headerAction
                     sizeVariant={sizeVariant}
+                    flowConnectedQuickGroups={flowConnectedQuickGroups}
                     onMenuPointerEnter={onMenuPointerEnter}
                     onMenuPointerLeave={onMenuPointerLeave}
                     onOptionSelect={onOptionSelect}
@@ -1096,6 +1122,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
         compact = false,
         headerAction = false,
         sizeVariant,
+        flowConnectedQuickGroups = false,
         onMenuPointerEnter,
         onMenuPointerLeave,
         onOptionSelect,
@@ -1554,6 +1581,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                                         hiddenItemIds={hiddenItemIds}
                                         hoverSuppressed={hoverSuppressed}
                                         sizeVariant={sizeVariant}
+                                        flowConnectedQuickGroups={flowConnectedQuickGroups}
                                         onMenuPointerEnter={onMenuPointerEnter}
                                         onMenuPointerLeave={onMenuPointerLeave}
                                         onOptionSelect={onSubmenuOptionSelect}

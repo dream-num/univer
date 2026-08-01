@@ -714,16 +714,20 @@ export const menuSchema: MenuSchemaType = {
                     order: 5,
                     menuItemFactory: EmptyParagraphOrderListMenuItemFactory,
                 },
+            },
+            quickBottom: {
+                order: 1,
+                quickLayout: 'icon',
                 [BulletListCommand.id]: {
-                    order: 6,
+                    order: 0,
                     menuItemFactory: EmptyParagraphBulletListMenuItemFactory,
                 },
                 [CheckListCommand.id]: {
-                    order: 7,
+                    order: 1,
                     menuItemFactory: EmptyParagraphCheckListMenuItemFactory,
                 },
                 [HorizontalLineCommand.id]: {
-                    order: 8,
+                    order: 5,
                     menuItemFactory: EmptyParagraphHorizontalLineMenuItemFactory,
                 },
             },
@@ -770,16 +774,20 @@ export const menuSchema: MenuSchemaType = {
                     order: 5,
                     menuItemFactory: InsertOrderListBellowMenuItemFactory,
                 },
+            },
+            quickBottom: {
+                order: 1,
+                quickLayout: 'icon',
                 [InsertBulletListBellowCommand.id]: {
-                    order: 6,
+                    order: 0,
                     menuItemFactory: InsertBulletListBellowMenuItemFactory,
                 },
                 [InsertCheckListBellowCommand.id]: {
-                    order: 7,
+                    order: 1,
                     menuItemFactory: InsertCheckListBellowMenuItemFactory,
                 },
                 [InsertHorizontalLineBellowCommand.id]: {
-                    order: 8,
+                    order: 5,
                     menuItemFactory: InsertHorizontalLineBellowMenuItemFactory,
                 },
             },
@@ -827,16 +835,20 @@ export const menuSchema: MenuSchemaType = {
                     order: 7,
                     menuItemFactory: SubtitleHeadingMenuItemFactory,
                 },
+            },
+            quickBottom: {
+                order: 1,
+                quickLayout: 'icon',
                 [OrderListCommand.id]: {
-                    order: 8,
+                    order: 0,
                     menuItemFactory: OrderListMenuItemFactory,
                 },
                 [BulletListCommand.id]: {
-                    order: 9,
+                    order: 1,
                     menuItemFactory: BulletListMenuItemFactory,
                 },
                 [CheckListCommand.id]: {
-                    order: 10,
+                    order: 2,
                     menuItemFactory: CheckListMenuItemFactory,
                 },
             },

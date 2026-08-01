@@ -176,6 +176,7 @@ describe('ContextMenuPanel', () => {
 
         expect(shouldShowContextMenuGroupSeparator(schemas, 0)).toBe(false);
         expect(shouldShowContextMenuGroupSeparator(schemas, 1)).toBe(true);
+        expect(getContextMenuSchemaRenderGroups(schemas, 'default')).toHaveLength(3);
         expect(getContextMenuSchemaRenderGroups(schemas, 'paragraph-t')).toEqual([
             {
                 startIndex: 0,
@@ -189,6 +190,48 @@ describe('ContextMenuPanel', () => {
             },
         ]);
         expect(getContextMenuQuickGroupColumns(schemas[0])).toBe(6);
+    });
+
+    it('flows explicitly connected quick groups through one six-column grid', () => {
+        const { container } = renderWithDependencies(
+            <ContextMenuPanel menuType="paragraph-menu" flowConnectedQuickGroups />,
+            {
+                'paragraph-menu': [
+                    {
+                        key: 'quickTop',
+                        order: 0,
+                        quickLayout: 'icon',
+                        children: Array.from({ length: 5 }, (_, index) => createButtonItem(`top-${index}`, {
+                            icon: 'AlignLeftIcon',
+                            tooltip: `top-${index}`,
+                        })),
+                    },
+                    {
+                        key: 'quickBottom',
+                        order: 1,
+                        quickLayout: 'icon',
+                        children: Array.from({ length: 3 }, (_, index) => createButtonItem(`extension-${index}`, {
+                            icon: 'ResetIcon',
+                            tooltip: `extension-${index}`,
+                        })),
+                    },
+                ],
+            }
+        );
+
+        const quickGrids = container.querySelectorAll('.univer-menu-item-group');
+        expect(quickGrids).toHaveLength(1);
+        expect(hasClassToken(quickGrids[0] as HTMLElement, 'univer-grid-cols-6')).toBe(true);
+        expect(Array.from(quickGrids[0].querySelectorAll('button')).map((button) => button.getAttribute('aria-label'))).toEqual([
+            'translated:top-0',
+            'translated:top-1',
+            'translated:top-2',
+            'translated:top-3',
+            'translated:top-4',
+            'translated:extension-0',
+            'translated:extension-1',
+            'translated:extension-2',
+        ]);
     });
 
     it('renders paragraph quick menus with real tiny groups and submits the clicked command', () => {

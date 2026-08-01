@@ -105,16 +105,20 @@ function blockRangeBody(blockType: DocumentBlockRangeType, paragraphStyle: IPara
 }
 
 describe('ParagraphMenu command behavior', () => {
-    it('keeps each T menu quick-action section in one reflowing grid', () => {
-        const paragraphMenuSchema = menuSchema[ContextMenuPosition.PARAGRAPH];
-
+    it('keeps the extensible T menu quick-action groups configured as icon grids', () => {
         for (const menuId of [
             DOC_PARAGRAPH_T_INSERT_MENU_ID,
             DOC_PARAGRAPH_T_INSERT_BELOW_MENU_ID,
             DOC_PARAGRAPH_T_EDIT_MENU_ID,
         ]) {
-            expect(paragraphMenuSchema).toHaveProperty([menuId, 'quickTop', 'quickLayout'], 'icon');
-            expect(paragraphMenuSchema).not.toHaveProperty([menuId, 'quickBottom']);
+            expect(menuSchema).toHaveProperty(
+                [ContextMenuPosition.PARAGRAPH, menuId, 'quickTop', 'quickLayout'],
+                'icon'
+            );
+            expect(menuSchema).toHaveProperty(
+                [ContextMenuPosition.PARAGRAPH, menuId, 'quickBottom', 'quickLayout'],
+                'icon'
+            );
         }
     });
 

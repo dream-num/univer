@@ -176,7 +176,7 @@ describe('ContextMenuPanel', () => {
 
         expect(shouldShowContextMenuGroupSeparator(schemas, 0)).toBe(false);
         expect(shouldShowContextMenuGroupSeparator(schemas, 1)).toBe(true);
-        expect(getContextMenuSchemaRenderGroups(schemas)).toEqual([
+        expect(getContextMenuSchemaRenderGroups(schemas, 'paragraph-t')).toEqual([
             {
                 startIndex: 0,
                 endIndex: 1,
@@ -189,47 +189,6 @@ describe('ContextMenuPanel', () => {
             },
         ]);
         expect(getContextMenuQuickGroupColumns(schemas[0])).toBe(6);
-    });
-
-    it('flows connected quick-group actions through one six-column grid', () => {
-        const { container } = renderWithDependencies(
-            <ContextMenuPanel menuType="paragraph-menu" />,
-            {
-                'paragraph-menu': [
-                    {
-                        key: 'quickTop',
-                        order: 0,
-                        quickLayout: 'icon',
-                        children: Array.from({ length: 5 }, (_, index) => createButtonItem(`top-${index}`, {
-                            icon: 'AlignLeftIcon',
-                            tooltip: `top-${index}`,
-                        })),
-                    },
-                    {
-                        key: 'quickBottom',
-                        order: 1,
-                        quickLayout: 'icon',
-                        children: Array.from({ length: 3 }, (_, index) => createButtonItem(`bottom-${index}`, {
-                            icon: 'ResetIcon',
-                            tooltip: `bottom-${index}`,
-                        })),
-                    },
-                ],
-            }
-        );
-
-        const quickGrids = container.querySelectorAll('.univer-menu-item-group');
-        expect(quickGrids).toHaveLength(1);
-        expect(Array.from(quickGrids[0].querySelectorAll('button')).map((button) => button.getAttribute('aria-label'))).toEqual([
-            'translated:top-0',
-            'translated:top-1',
-            'translated:top-2',
-            'translated:top-3',
-            'translated:top-4',
-            'translated:bottom-0',
-            'translated:bottom-1',
-            'translated:bottom-2',
-        ]);
     });
 
     it('renders paragraph quick menus with real tiny groups and submits the clicked command', () => {

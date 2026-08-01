@@ -21,6 +21,7 @@ import type { IMutiPageParagraphBound } from '../../services/doc-event-manager.s
 import type { IDocBlockMenuTarget } from '../../services/doc-paragraph-menu.service';
 import { DataStreamTreeTokenType, DocumentBlockRangeType, DocumentBlockType, JSONX, NamedStyleType } from '@univerjs/core';
 import { DocBlockMoveValidatorService } from '@univerjs/docs';
+import { ContextMenuPosition } from '@univerjs/ui';
 import { describe, expect, it } from 'vitest';
 import {
     DocCopyCurrentParagraphCommand,
@@ -35,9 +36,12 @@ import { H2HeadingCommand, SetParagraphNamedStyleCommand } from '../../commands/
 import {
     BACKGROUND_COLOR_SWATCH_ICONS,
     DOC_PARAGRAPH_T_EDIT_MENU_ID,
+    DOC_PARAGRAPH_T_INSERT_BELOW_MENU_ID,
+    DOC_PARAGRAPH_T_INSERT_MENU_ID,
     INSERT_BELLOW_MENU_ID,
     ParagraphMenuBackgroundColorSwatchMenuItemFactories,
 } from '../../menu/paragraph-menu';
+import { menuSchema } from '../../menu/schema';
 import {
     buildUnwrapBlockRangeActions,
     getBlockRangeClipboardTargetRange,
@@ -101,6 +105,19 @@ function blockRangeBody(blockType: DocumentBlockRangeType, paragraphStyle: IPara
 }
 
 describe('ParagraphMenu command behavior', () => {
+    it('keeps each T menu quick-action section in one reflowing grid', () => {
+        const paragraphMenuSchema = menuSchema[ContextMenuPosition.PARAGRAPH];
+
+        for (const menuId of [
+            DOC_PARAGRAPH_T_INSERT_MENU_ID,
+            DOC_PARAGRAPH_T_INSERT_BELOW_MENU_ID,
+            DOC_PARAGRAPH_T_EDIT_MENU_ID,
+        ]) {
+            expect(paragraphMenuSchema).toHaveProperty([menuId, 'quickTop', 'quickLayout'], 'icon');
+            expect(paragraphMenuSchema).not.toHaveProperty([menuId, 'quickBottom']);
+        }
+    });
+
     it('keeps the background palette within two eight-column rows', () => {
         expect(BACKGROUND_COLOR_SWATCH_ICONS).toHaveLength(15);
         expect(Object.keys(ParagraphMenuBackgroundColorSwatchMenuItemFactories)).toHaveLength(15);

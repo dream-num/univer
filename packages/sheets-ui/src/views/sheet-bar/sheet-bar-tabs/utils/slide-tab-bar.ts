@@ -299,28 +299,24 @@ export class SlideTabItem {
 export class SlideScrollbar {
     protected _slideTabBar: SlideTabBar;
 
-    protected _scrollX: number;
-
     constructor(slideTabBar: SlideTabBar) {
-        const primeval = slideTabBar.primeval();
-        this._scrollX = primeval.scrollLeft;
         this._slideTabBar = slideTabBar;
     }
 
     scrollX(x: number) {
         const primeval = this._slideTabBar.primeval();
-        primeval.scrollLeft = x;
-        this._scrollX = primeval.scrollLeft;
+        const viewportWidth = primeval.parentElement?.clientWidth ?? primeval.clientWidth;
+        const maxScrollX = Math.max(0, primeval.scrollWidth - viewportWidth);
+        primeval.scrollLeft = Math.min(maxScrollX, Math.max(0, x));
     }
 
     scrollRight() {
         const primeval = this._slideTabBar.primeval();
-        primeval.scrollLeft = primeval.scrollWidth;
-        this._scrollX = primeval.scrollLeft;
+        this.scrollX(primeval.scrollWidth);
     }
 
     getScrollX(): number {
-        return this._scrollX;
+        return this._slideTabBar.primeval().scrollLeft;
     }
 }
 
@@ -558,7 +554,26 @@ export class SlideTabBar {
         };
 
         this._wheelAction = (wheelEvent: WheelEvent) => {
-            this.setScroll(wheelEvent.deltaY);
+            const viewportWidth = this._slideTabBar.parentElement?.clientWidth ?? this._slideTabBar.clientWidth;
+            if (this._slideTabBar.scrollWidth <= viewportWidth) {
+                return;
+            }
+
+            const dominantDelta = Math.abs(wheelEvent.deltaX) > Math.abs(wheelEvent.deltaY)
+                ? wheelEvent.deltaX
+                : wheelEvent.deltaY;
+            if (dominantDelta === 0) {
+                return;
+            }
+
+            const deltaModeMultiplier = wheelEvent.deltaMode === WheelEvent.DOM_DELTA_LINE
+                ? 16
+                : wheelEvent.deltaMode === WheelEvent.DOM_DELTA_PAGE
+                    ? viewportWidth
+                    : 1;
+
+            wheelEvent.preventDefault();
+            this.setScroll(dominantDelta * deltaModeMultiplier);
         };
 
         this.addListener();
@@ -628,17 +643,18 @@ export class SlideTabBar {
     }
 
     isLeftEnd(): boolean {
-        return this._slideTabBar.scrollLeft === 0;
+        return this._slideTabBar.scrollLeft <= 1;
     }
 
     isRightEnd(): boolean {
         const parent = this._slideTabBar.parentElement;
         if (!parent) return false;
-        return this._slideTabBar.scrollWidth - parent.clientWidth === this._slideTabBar.scrollLeft;
+        const maxScrollX = Math.max(0, this._slideTabBar.scrollWidth - parent.clientWidth);
+        return maxScrollX - this._slideTabBar.scrollLeft <= 1;
     }
 
     addListener() {
-        this._slideTabBar.addEventListener('wheel', this._wheelAction);
+        this._slideTabBar.addEventListener('wheel', this._wheelAction, { passive: false });
         this._slideTabItems.forEach((item) => {
             item.addEventListener('pointerdown', this._downAction);
         });
@@ -653,13 +669,6 @@ export class SlideTabBar {
 
     setScroll(x: number) {
         this._slideScrollbar.scrollX(this._slideScrollbar.getScrollX() + x);
-        if (x > 0) {
-            const left = this.calculateLeftScrollX();
-            this._slideScrollbar.scrollX(this._slideScrollbar.getScrollX() + left);
-        } else if (x < 0) {
-            const right = this.calculateRightScrollX();
-            this._slideScrollbar.scrollX(this._slideScrollbar.getScrollX() + right);
-        }
 
         this._config.onScroll({
             leftEnd: this.isLeftEnd(),

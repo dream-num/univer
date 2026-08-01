@@ -50,7 +50,6 @@ interface IContextMenuPanelProps {
     activeItemIds?: string[];
     hiddenItemIds?: string[];
     sizeVariant?: ContextMenuSizeVariant;
-    flowConnectedQuickGroups?: boolean;
     autoFocus?: boolean;
     autoFocusTarget?: ContextMenuAutoFocusTarget;
     suppressHoverUntilPointerMove?: boolean;
@@ -71,7 +70,6 @@ interface IContextMenuMenuProps {
     hiddenItemIds?: string[];
     hoverSuppressed?: boolean;
     sizeVariant: ContextMenuSizeVariant;
-    flowConnectedQuickGroups?: boolean;
     onMenuPointerEnter?: () => void;
     onMenuPointerLeave?: () => void;
     onOptionSelect?: (option: IValueOption) => void;
@@ -93,7 +91,6 @@ interface IContextMenuMenuItemProps {
     compact?: boolean;
     headerAction?: boolean;
     sizeVariant: ContextMenuSizeVariant;
-    flowConnectedQuickGroups?: boolean;
     onMenuPointerEnter?: () => void;
     onMenuPointerLeave?: () => void;
     onOptionSelect?: (option: IValueOption) => void;
@@ -442,12 +439,9 @@ function isHeaderQuickGroup(menuSchema: IMenuSchema) {
 
 function shouldClusterHeaderQuickGroups(
     currentSchema: IMenuSchema,
-    nextSchema: IMenuSchema | undefined,
-    sizeVariant: ContextMenuSizeVariant,
-    flowConnectedQuickGroups: boolean
+    nextSchema: IMenuSchema | undefined
 ) {
-    return (sizeVariant === 'paragraph-t' || flowConnectedQuickGroups)
-        && isHeaderQuickGroup(currentSchema)
+    return isHeaderQuickGroup(currentSchema)
         && !!nextSchema
         && isHeaderQuickGroup(nextSchema);
 }
@@ -607,9 +601,7 @@ export function getNextMenuButtonByDirection(
 }
 
 export function getContextMenuSchemaRenderGroups(
-    visibleSchemas: IMenuSchema[],
-    sizeVariant: ContextMenuSizeVariant,
-    flowConnectedQuickGroups = false
+    visibleSchemas: IMenuSchema[]
 ): IContextMenuSchemaRenderGroup[] {
     const renderGroups: IContextMenuSchemaRenderGroup[] = [];
 
@@ -617,7 +609,7 @@ export function getContextMenuSchemaRenderGroups(
         const menuSchema = visibleSchemas[index];
         const nextSchema = visibleSchemas[index + 1];
 
-        if (shouldClusterHeaderQuickGroups(menuSchema, nextSchema, sizeVariant, flowConnectedQuickGroups)) {
+        if (shouldClusterHeaderQuickGroups(menuSchema, nextSchema)) {
             renderGroups.push({
                 startIndex: index,
                 endIndex: index + 1,
@@ -670,7 +662,6 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
         activeItemIds,
         hiddenItemIds,
         sizeVariant = 'default',
-        flowConnectedQuickGroups = false,
         autoFocus,
         autoFocusTarget = 'first-item',
         suppressHoverUntilPointerMove = false,
@@ -840,7 +831,6 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
                 hiddenItemIds={hiddenItemIds}
                 hoverSuppressed={hoverSuppressed}
                 sizeVariant={sizeVariant}
-                flowConnectedQuickGroups={flowConnectedQuickGroups}
                 onMenuPointerEnter={onMenuPointerEnter}
                 onMenuPointerLeave={onMenuPointerLeave}
                 onOptionSelect={onOptionSelect}
@@ -851,7 +841,7 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
 }
 
 function ContextMenuMenu(props: IContextMenuMenuProps) {
-    const { menuSchemas, menuManagerService, menuSessionVersion, submenuPortalContainer, rootMenuElement, activeItemIds, hiddenItemIds, hoverSuppressed, sizeVariant, flowConnectedQuickGroups = false, onMenuPointerEnter, onMenuPointerLeave, onOptionSelect, maxMenuHeight } = props;
+    const { menuSchemas, menuManagerService, menuSessionVersion, submenuPortalContainer, rootMenuElement, activeItemIds, hiddenItemIds, hoverSuppressed, sizeVariant, onMenuPointerEnter, onMenuPointerLeave, onOptionSelect, maxMenuHeight } = props;
     const localeService = useDependency(LocaleService);
     const hiddenGroupStates = useContextGroupHiddenStates(menuSchemas);
     const [activeSubmenuKey, setActiveSubmenuKey] = useState<string | null>(null);
@@ -870,8 +860,8 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
         });
     }, [hiddenGroupStates, menuSchemas]);
     const renderGroups = useMemo(
-        () => getContextMenuSchemaRenderGroups(visibleSchemas, sizeVariant, flowConnectedQuickGroups),
-        [flowConnectedQuickGroups, sizeVariant, visibleSchemas]
+        () => getContextMenuSchemaRenderGroups(visibleSchemas),
+        [visibleSchemas]
     );
 
     const renderQuickLayoutGroup = (
@@ -927,9 +917,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                 const titleNode = renderMenuSchemaHeader(menuSchema);
 
                 if (groupedSchemas.length > 1) {
-                    const quickSchemas = flowConnectedQuickGroups
-                        ? [mergeContextMenuQuickGroupSchemas(groupedSchemas)]
-                        : groupedSchemas;
+                    const mergedMenuSchema = mergeContextMenuQuickGroupSchemas(groupedSchemas);
 
                     return (
                         <div
@@ -939,11 +927,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                                 hasSeparator && borderBottomClassName
                             )}
                         >
-                            {quickSchemas.map((groupedMenuSchema, groupedIndex) => renderQuickLayoutGroup(
-                                groupedMenuSchema,
-                                startIndex + groupedIndex,
-                                true
-                            ))}
+                            {renderQuickLayoutGroup(mergedMenuSchema, startIndex, true)}
                         </div>
                     );
                 }
@@ -965,7 +949,6 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                             hiddenItemIds={hiddenItemIds}
                             hoverSuppressed={hoverSuppressed}
                             sizeVariant={sizeVariant}
-                            flowConnectedQuickGroups={flowConnectedQuickGroups}
                             onMenuPointerEnter={onMenuPointerEnter}
                             onMenuPointerLeave={onMenuPointerLeave}
                         />
@@ -1012,7 +995,6 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                                         maxMenuHeight={maxMenuHeight}
                                         compact
                                         sizeVariant={sizeVariant}
-                                        flowConnectedQuickGroups={flowConnectedQuickGroups}
                                     />
                                 )
                             ))}
@@ -1049,7 +1031,6 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                                     onOptionSelect={onOptionSelect}
                                     maxMenuHeight={maxMenuHeight}
                                     sizeVariant={sizeVariant}
-                                    flowConnectedQuickGroups={flowConnectedQuickGroups}
                                 />
                             )
                         ))}
@@ -1094,7 +1075,6 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                     compact
                     headerAction
                     sizeVariant={sizeVariant}
-                    flowConnectedQuickGroups={flowConnectedQuickGroups}
                     onMenuPointerEnter={onMenuPointerEnter}
                     onMenuPointerLeave={onMenuPointerLeave}
                     onOptionSelect={onOptionSelect}
@@ -1122,7 +1102,6 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
         compact = false,
         headerAction = false,
         sizeVariant,
-        flowConnectedQuickGroups = false,
         onMenuPointerEnter,
         onMenuPointerLeave,
         onOptionSelect,
@@ -1581,7 +1560,6 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                                         hiddenItemIds={hiddenItemIds}
                                         hoverSuppressed={hoverSuppressed}
                                         sizeVariant={sizeVariant}
-                                        flowConnectedQuickGroups={flowConnectedQuickGroups}
                                         onMenuPointerEnter={onMenuPointerEnter}
                                         onMenuPointerLeave={onMenuPointerLeave}
                                         onOptionSelect={onSubmenuOptionSelect}

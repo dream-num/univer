@@ -1450,7 +1450,6 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
                         <ContextMenuPanel
                             className="univer-w-[212px]"
                             menuType={resolvedParagraphMenuType}
-                            flowConnectedQuickGroups
                             activeItemIds={currentActiveTarget?.kind === 'table' ? undefined : paragraphMenuActiveItemIds}
                             hiddenItemIds={openMode === 'slash' || currentActiveTarget?.kind === 'table' ? undefined : paragraphMenuHiddenItemIds}
                             autoFocus={openMode === 'slash'}

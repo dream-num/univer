@@ -15,7 +15,7 @@
  */
 
 import type { IListMentionParam, IListMentionResponse, IMentionIOService } from './type';
-import { Inject } from '@wendellhu/redi';
+import { Inject } from '../../common/di';
 import { MentionType } from '../../types/enum';
 import { UserManagerService } from '../user-manager/user-manager.service';
 

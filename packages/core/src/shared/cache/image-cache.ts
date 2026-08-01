@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Injector } from '@wendellhu/redi';
+import type { Injector } from '../../common/di';
 import { IImageIoService, ImageSourceType } from '../../services/image-io/image-io.service';
 import { IURLImageService } from '../../services/image-io/url-image.service';
 import { LRUMap } from '../lru/lru-map';

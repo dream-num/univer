@@ -19,9 +19,10 @@ import type {
     IDocumentSkeletonDivide,
     IDocumentSkeletonGlyph,
     IDocumentSkeletonLine,
+    IDocumentSkeletonPage,
     IDocumentSkeletonSection,
 } from '@univerjs/engine-render';
-import { ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType } from '@univerjs/core';
+import { BooleanNumber, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType } from '@univerjs/core';
 import { UpdateDrawingDocTransformCommand } from '@univerjs/docs-drawing';
 import { NodePositionConvertToCursor } from '@univerjs/docs-ui';
 import { DocumentSkeletonPageType } from '@univerjs/engine-render';
@@ -31,7 +32,11 @@ import {
     IMoveInlineDrawingCommand,
     ITransformNonInlineDrawingCommand,
 } from '../../commands/commands/update-doc-drawing.command';
-import { DocDrawingTransformerController, getDocsTableCellAnchorContext } from '../doc-drawing-transformer-update.controller';
+import {
+    DocDrawingTransformerController,
+    getDocsTableCellAnchorContext,
+    shouldUseDocsDrawingOuterPageOrigin,
+} from '../doc-drawing-transformer-update.controller';
 
 function createController() {
     const controller = Object.create(DocDrawingTransformerController.prototype) as any;
@@ -324,8 +329,62 @@ describe('DocDrawingTransformerController business methods', () => {
 
         const wrappedAnchor = controller._getDrawingAnchor(drawing(), object);
         expect(wrappedAnchor?.docTransform.positionH.posOffset).toBe(42);
-        expect(wrappedAnchor?.docTransform.positionV.posOffset).toBe(-8);
+        expect(wrappedAnchor?.docTransform.positionV.posOffset).toBe(120);
+
+        const topAndBottomAnchor = controller._getDrawingAnchor({
+            ...drawing(),
+            layoutType: PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM,
+        }, object);
+        expect(topAndBottomAnchor?.docTransform.positionH.posOffset).toBe(42);
+        expect(topAndBottomAnchor?.docTransform.positionV.posOffset).toBe(120);
         rangeSpy.mockRestore();
+    });
+
+    it('matches the render-side page origin for body and header/footer drawings', () => {
+        const bodyPage = {
+            type: DocumentSkeletonPageType.BODY,
+            pageWidth: 816,
+            pageHeight: 1056,
+        } as IDocumentSkeletonPage;
+        const headerPage = {
+            type: DocumentSkeletonPageType.HEADER,
+            pageWidth: 816,
+            pageHeight: 120,
+        } as IDocumentSkeletonPage;
+        const overlayDrawing = {
+            layoutType: PositionedObjectLayoutType.WRAP_NONE,
+            behindDoc: BooleanNumber.FALSE,
+        };
+
+        expect(shouldUseDocsDrawingOuterPageOrigin({
+            drawing: overlayDrawing,
+            height: 60,
+            page: bodyPage,
+            width: 80,
+        })).toBe(true);
+        expect(shouldUseDocsDrawingOuterPageOrigin({
+            drawing: overlayDrawing,
+            height: 60,
+            hostPage: bodyPage,
+            page: headerPage,
+            width: 80,
+        })).toBe(false);
+        expect(shouldUseDocsDrawingOuterPageOrigin({
+            drawing: overlayDrawing,
+            height: 1055,
+            hostPage: bodyPage,
+            page: headerPage,
+            width: 815,
+        })).toBe(true);
+        expect(shouldUseDocsDrawingOuterPageOrigin({
+            drawing: {
+                ...overlayDrawing,
+                layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
+            },
+            height: 60,
+            page: bodyPage,
+            width: 80,
+        })).toBe(false);
     });
 
     it('limits a drawing away from the gap between document pages while preserving drawings already on one page', () => {

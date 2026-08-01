@@ -23,7 +23,7 @@ import { BaselineOffset, getColorStyle } from '@univerjs/core';
 import { GlyphType } from '../../../basics';
 import { cjk } from '../../../basics/cjk-regexp';
 import { COLOR_BLACK_RGB } from '../../../basics/const';
-import { combineDrawingEffectFilter, createDrawingEffectFilter } from '../../../basics/drawing-effect';
+import { resolveGlowEffect, resolveOuterShadowEffect } from '../../../basics/drawing-effect';
 import { Vector2 } from '../../../basics/vector2';
 import { CheckboxShape } from '../../../shape';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../extension';
@@ -123,15 +123,20 @@ export class FontAndBaseLine extends docExtension {
             return;
         }
 
-        const effectFilter = createDrawingEffectFilter(glow, outerShadow);
-        if (!effectFilter) {
+        const effects = [resolveGlowEffect(glow), resolveOuterShadowEffect(outerShadow)].filter((effect) => effect != null);
+        if (effects.length === 0) {
             drawText();
             return;
         }
 
         ctx.save();
-        ctx.filter = combineDrawingEffectFilter(ctx.filter, effectFilter);
-        drawText();
+        for (const effect of effects) {
+            ctx.shadowColor = effect.color;
+            ctx.shadowBlur = effect.blurRadius;
+            ctx.shadowOffsetX = effect.offsetX;
+            ctx.shadowOffsetY = effect.offsetY;
+            drawText();
+        }
         ctx.restore();
     }
 

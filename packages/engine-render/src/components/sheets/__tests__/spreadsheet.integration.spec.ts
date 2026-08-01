@@ -413,20 +413,25 @@ describe('spreadsheet integration', () => {
             { startRow: 5, endRow: 5, startColumn: 2, endColumn: 4, rangeType: RANGE_TYPE.NORMAL },
         ];
         workbookData.sheets['sheet-1'].cellData = {
-            3: { 2: { s: 'leftBorder' } },
-            4: { 2: { s: 'leftBorder' } },
-            5: { 2: { s: 'leftBorder' } },
+            3: { 2: { s: 'leftBorder' }, 3: { s: 'leftBorder' }, 4: { s: 'leftBorder' } },
+            4: { 2: { s: 'leftBorder' }, 3: { s: 'leftBorder' }, 4: { s: 'leftBorder' } },
+            5: { 2: { s: 'leftBorder' }, 3: { s: 'leftBorder' }, 4: { s: 'leftBorder' } },
         };
 
         const workbook = fixture.univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, workbookData);
         const worksheet = workbook.getActiveSheet()!;
         const skeleton = fixture.univer.__getInjector().createInstance(SpreadsheetSkeleton, worksheet, workbook.getStyles()).calculate() as SpreadsheetSkeleton;
         skeleton.setScene(fixture.scene);
+        const mergeBorderSpy = vi.spyOn(
+            skeleton as unknown as { _setMergeBorderProps: (...args: unknown[]) => void },
+            '_setMergeBorderProps'
+        );
         skeleton.setStylesCache(createViewportInfo(fixture.scene, fixture.cacheCanvas));
 
         expect(skeleton.stylesCache.border?.getValue(3, 2)?.l).toEqual(expect.objectContaining({ color: '#000000' }));
         expect(skeleton.stylesCache.border?.getValue(4, 2)?.l).toEqual(expect.objectContaining({ color: '#000000' }));
         expect(skeleton.stylesCache.border?.getValue(5, 2)?.l).toEqual(expect.objectContaining({ color: '#000000' }));
+        expect(mergeBorderSpy).toHaveBeenCalledTimes(12);
     });
 
     it('renders spreadsheet with cache refresh and scrolling diff paths in scene viewport', () => {
@@ -807,6 +812,32 @@ describe('spreadsheet integration', () => {
 
         expect(styleCellSpy).not.toHaveBeenCalled();
         expect(skeleton.rowColumnSegment).toEqual(skeleton.getCacheRangeByViewport(viewportInfo));
+    });
+
+    it('reuses cached member styles while rebuilding merged borders during scrolling', () => {
+        const { skeleton, scene, cacheCanvas } = fixture;
+        skeleton.setStylesCache(createViewportInfo(scene, cacheCanvas));
+        const styleCellSpy = vi.spyOn(
+            skeleton as unknown as { _setStylesCacheForOneCell: (row: number, column: number, options: { reuseExisting?: boolean; mergeRange?: unknown }) => void },
+            '_setStylesCacheForOneCell'
+        );
+        const mergeBorderSpy = vi.spyOn(
+            skeleton as unknown as { _setMergeBorderProps: (...args: unknown[]) => void },
+            '_setMergeBorderProps'
+        );
+
+        skeleton.setStylesCache(createViewportInfo(scene, cacheCanvas, {
+            diffBounds: [createBound(100, 60, 220, 140)],
+            diffCacheBounds: [],
+            diffX: 0,
+            diffY: 12,
+            shouldCacheUpdate: 0,
+            isDirty: 0,
+            isForceDirty: false,
+        }));
+
+        expect(styleCellSpy.mock.calls.some(([, , options]) => options.reuseExisting && !options.mergeRange)).toBe(true);
+        expect(mergeBorderSpy).toHaveBeenCalledTimes(4);
     });
 
     it('skips merge lookups for one-cell style cache when merge data is absent', () => {

@@ -35,7 +35,7 @@ import {
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
-import { docDrawingPositionToTransform, DocSkeletonManagerService } from '@univerjs/docs';
+import { docDrawingPositionToTransform, DocSkeletonManagerService, isSheetLikeDocsCustomBlockChildType } from '@univerjs/docs';
 import { InsertDocDrawingCommand } from '@univerjs/docs-drawing';
 import { SetDocZoomRatioOperation, VIEWPORT_KEY } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
@@ -95,7 +95,7 @@ interface ICanvasFloatDomInfo {
 interface IDocFloatDomParams extends IDocFloatDomDataBase {
 }
 
-type IDocFloatDomRuntimeViewport = Partial<Pick<IDocsCustomBlockRenderViewport, 'bleedLeft' | 'bleedWidth' | 'contentHeight' | 'contentWidth' | 'height' | 'viewportHeight'>>;
+type IDocFloatDomRuntimeViewport = Partial<Pick<IDocsCustomBlockRenderViewport, 'bleedLeft' | 'bleedWidth' | 'contentHeight' | 'contentWidth' | 'height' | 'pageContentWidth' | 'viewScale' | 'viewportHeight'>>;
 
 interface IDocFloatDomRuntimeParam extends IDocFloatDom {
     customBlockRenderViewport?: IDocFloatDomRuntimeViewport;
@@ -132,6 +132,13 @@ function pickValidCustomBlockRenderViewport(viewport: IDocFloatDomRuntimeViewpor
     }
     if (isPositiveNumber(viewport?.height)) {
         result.height = viewport!.height;
+    }
+    if (isPositiveNumber(viewport?.pageContentWidth)) {
+        result.pageContentWidth = viewport!.pageContentWidth;
+    }
+    const viewScale = viewport?.viewScale;
+    if (isPositiveNumber(viewScale)) {
+        result.viewScale = viewScale;
     }
     if (isPositiveNumber(viewport?.viewportHeight)) {
         result.viewportHeight = viewport!.viewportHeight;
@@ -259,6 +266,9 @@ export class DocFloatDomController extends Disposable {
                     position$,
                     id: rectParam.drawingId,
                     componentKey: rectParam.componentKey,
+                    contentBox: isSheetLikeEmbedFloatDomRuntimeParam(runtimeParam)
+                        ? { contentInset: 0, wrapperInset: 0 }
+                        : undefined,
                     eventPassThrough: preserveRuntimeGeometry ? false : undefined,
                     preserveOnFocusChange: preserveRuntimeGeometry,
                     onPointerDown: (evt) => {
@@ -304,7 +314,7 @@ export class DocFloatDomController extends Disposable {
             this._drawingManagerService.refreshTransform$.subscribe((params) => {
                 params.forEach((param) => {
                     const floatDomInfo = this._domLayerInfoMap.get(param.drawingId);
-                    if (!floatDomInfo) {
+                    if (!floatDomInfo || floatDomInfo.unitId !== param.unitId) {
                         return;
                     }
 
@@ -411,7 +421,9 @@ export class DocFloatDomController extends Disposable {
             if (commandInfo.id === SetDocZoomRatioOperation.id) {
                 const params = (commandInfo.params) as ISetDocZoomRatioOperationParams;
                 const { unitId } = params;
-                updateDoc(unitId);
+                globalThis.queueMicrotask(() => {
+                    if (!this._disposed) updateDoc(unitId);
+                });
             }
         }));
     }
@@ -533,6 +545,19 @@ function isEmbedFloatDomRuntimeParam(param: IDocFloatDomRuntimeParam): boolean {
 
     const candidate = data as { embedId?: unknown; hostAnchorId?: unknown; version?: unknown };
     return candidate.version === 1 && typeof candidate.embedId === 'string' && typeof candidate.hostAnchorId === 'string';
+}
+
+function isSheetLikeEmbedFloatDomRuntimeParam(param: IDocFloatDomRuntimeParam): boolean {
+    if (!isEmbedFloatDomRuntimeParam(param)) {
+        return false;
+    }
+
+    const data = param.data;
+    return !!data &&
+        typeof data === 'object' &&
+        'childType' in data &&
+        typeof data.childType === 'number' &&
+        isSheetLikeDocsCustomBlockChildType(data.childType);
 }
 
 function createTransformFromRect(rect: Rect): Partial<ITransformState> {

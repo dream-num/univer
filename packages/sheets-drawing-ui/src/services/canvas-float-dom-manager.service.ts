@@ -1483,6 +1483,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         }
                     });
                     listener && disposableCollection.add(listener);
+                    this._bindFloatDomScroll(disposableCollection, info, renderObject.renderUnit.scene, skeleton.skeleton, target.worksheet);
                     this._domLayerInfoMap.set(drawingId, info);
                 });
             })
@@ -1546,32 +1547,6 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             })
         );
 
-        // #region scroll
-        this.disposeWithMe(
-            this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(
-                switchMap((workbook) => workbook ? workbook.activeSheet$ : of(null)),
-                map((worksheet) => {
-                    if (!worksheet) return null;
-                    const unitId = worksheet.getUnitId();
-                    const render = this._renderManagerService.getRenderUnitById(unitId);
-                    return render ? { render, unitId, subUnitId: worksheet.getSheetId() } : null;
-                }),
-                switchMap((render) =>
-                    render
-                        ? fromEventSubject(render.render.scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN)!.onScrollAfter$)
-                            .pipe(map(() => ({ unitId: render.unitId, subUnitId: render.subUnitId })))
-                        : of(null)
-                )
-            ).subscribe((value) => {
-                if (!value) return; // TODO@weird94: maybe we should throw an error here and do some cleaning work?
-
-                const { unitId, subUnitId } = value;
-                updateSheet(unitId, subUnitId);
-            })
-        );
-
-        //#endregion
-
         // #region zoom
         this.disposeWithMe(this._commandService.onCommandExecuted((commandInfo) => {
             if (commandInfo.id === SetZoomRatioOperation.id) {
@@ -1590,6 +1565,23 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             }
         }));
         //# endregion
+    }
+
+    private _bindFloatDomScroll(
+        disposableCollection: DisposableCollection,
+        info: ICanvasFloatDomInfo,
+        scene: Scene,
+        skeleton: SpreadsheetSkeleton,
+        worksheet: Worksheet
+    ): void {
+        const viewport = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
+        if (!viewport) {
+            return;
+        }
+
+        disposableCollection.add(fromEventSubject(viewport.onScrollAfter$).subscribe(() => {
+            info.position$.next(calcSheetFloatDomPosition(info.rect, scene, skeleton, worksheet, info));
+        }));
     }
 
     updateFloatDomProps(unitId: string, subUnitId: string, id: string, props: Record<string, any>) {
@@ -2112,6 +2104,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 this._canvasFloatDomService.removeFloatDom(drawingId);
             });
             listener && disposableCollection.add(listener);
+            this._bindFloatDomScroll(disposableCollection, floatDomInfo, renderObject.renderUnit.scene, skeletonParam.skeleton, target.worksheet);
             this._domLayerInfoMap.set(drawingId, floatDomInfo);
         }
 
@@ -2352,6 +2345,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 this._canvasFloatDomService.removeFloatDom(drawingId);
             });
             listener && disposableCollection.add(listener);
+            this._bindFloatDomScroll(disposableCollection, floatDomInfo, renderObject.renderUnit.scene, skeleton.skeleton, target.worksheet);
             this._domLayerInfoMap.set(drawingId, floatDomInfo);
         }
 

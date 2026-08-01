@@ -25,7 +25,7 @@ import type { ScrollBar } from './shape/scroll-bar';
 import { EventSubject, Tools } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { RENDER_CLASS_TYPE } from './basics/const';
-import { fixLineWidthByScale, toPx } from './basics/tools';
+import { fixLineWidthByScale, hasScrollableOverflow, toPx } from './basics/tools';
 import { Transform } from './basics/transform';
 import { Vector2 } from './basics/vector2';
 import { subtractViewportRange } from './basics/viewport-subtract';
@@ -1087,10 +1087,10 @@ export class Viewport {
         scrollX = scrollX ?? this.scrollX;
         scrollY = scrollY ?? this.scrollY;
         const { height, width } = this._calcViewPortSize();
-        if (this._sceneWCurrVpAfterScale <= width) {
+        if (!hasScrollableOverflow(this._sceneWCurrVpAfterScale, width)) {
             scrollX = 0;
         }
-        if (this._sceneHCurrVpAfterScale <= height) {
+        if (!hasScrollableOverflow(this._sceneHCurrVpAfterScale, height)) {
             scrollY = 0;
         }
 

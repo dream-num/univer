@@ -160,7 +160,23 @@ export const FloatDom = ({ unitId }: { unitId?: string }) => {
     const focusUnit = useObservable(instanceService.focused$);
     const currentUnitId = resolveFloatDomCurrentUnitId(unitId, focusUnit);
 
-    return layers?.filter((layer) => shouldRenderFloatDomLayer(layer[1], currentUnitId))?.map((layer) => (
+    useEffect(() => {
+        if (typeof unitId !== 'string') {
+            return;
+        }
+
+        const disposable = domLayerService.registerScopedRenderRoot(unitId);
+        return () => disposable.dispose();
+    }, [domLayerService, unitId]);
+
+    const visibleLayers = typeof unitId === 'string'
+        ? layers?.filter((layer) => layer[1].unitId === unitId)
+        : layers?.filter((layer) =>
+            !domLayerService.hasScopedRenderRoot(layer[1].unitId) &&
+            shouldRenderFloatDomLayer(layer[1], currentUnitId)
+        );
+
+    return visibleLayers?.map((layer) => (
         <FloatDomSingle
             id={layer[1].domId ?? layer[0]}
             layer={layer[1]}

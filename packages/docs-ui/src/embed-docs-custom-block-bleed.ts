@@ -25,8 +25,10 @@ export interface IDocsCustomBlockBleedViewport {
 }
 
 export interface IDocsCustomBlockBleedViewportHint {
+    authoritativeContentWidth?: boolean;
     bleedLeft?: number;
     bleedWidth?: number;
+    viewScale?: number;
 }
 
 export function createDefaultDocsTableLikeCustomBlockBleedViewport(): IDocsCustomBlockBleedViewport {
@@ -46,11 +48,26 @@ export function createDefaultDocsTableLikeCustomBlockBleedViewport(): IDocsCusto
 
 export function resolveDocsTableLikeCustomBlockBleedViewport(root: HTMLElement, contentWidth: number, hint?: IDocsCustomBlockBleedViewportHint): IDocsCustomBlockBleedViewport {
     const rootRect = root.getBoundingClientRect();
-    const rootWidth = Math.max(1, rootRect.width);
+    const hintedViewScale = hint?.viewScale;
+    const viewScale = typeof hintedViewScale === 'number' && Number.isFinite(hintedViewScale) && hintedViewScale > 0
+        ? hintedViewScale
+        : 1;
+    const rootWidth = Math.max(1, rootRect.width / viewScale);
     const normalizedContentWidth = Math.max(1, contentWidth);
     const hintedBleedLeft = hint?.bleedLeft;
     const hintedBleedWidth = hint?.bleedWidth;
-    if (Number.isFinite(hintedBleedWidth) && (hintedBleedWidth ?? 0) > 0) {
+    const hasBleedHint = Number.isFinite(hintedBleedWidth) && (hintedBleedWidth ?? 0) > 0;
+    if (normalizedContentWidth <= rootWidth && (hint?.authoritativeContentWidth || !hasBleedHint)) {
+        return {
+            bleedLeft: 0,
+            bleedRight: 0,
+            bleedWidth: rootWidth,
+            contentWidth: normalizedContentWidth,
+            virtualWidth: rootWidth,
+        };
+    }
+
+    if (hasBleedHint) {
         const bleedLeft = Math.max(0, hintedBleedLeft ?? 0);
         const bleedWidth = Math.max(1, hintedBleedWidth!);
         return {
@@ -62,28 +79,19 @@ export function resolveDocsTableLikeCustomBlockBleedViewport(root: HTMLElement, 
         };
     }
 
-    if (normalizedContentWidth <= rootWidth) {
-        return {
-            bleedLeft: 0,
-            bleedRight: 0,
-            bleedWidth: rootWidth,
-            contentWidth: normalizedContentWidth,
-            virtualWidth: rootWidth,
-        };
-    }
-
     const bounds = resolveDocsTableLikeCustomBlockBleedBounds(root);
     const viewportLeft = bounds.left + DOCS_CUSTOM_BLOCK_VIEWPORT_INSET;
     const viewportWidth = Math.max(1, bounds.width - DOCS_CUSTOM_BLOCK_VIEWPORT_INSET * 2);
-    const bleedLeft = Math.max(0, rootRect.left - viewportLeft);
-    const bleedRight = Math.max(0, viewportLeft + viewportWidth - rootRect.right);
+    const bleedLeft = Math.max(0, (rootRect.left - viewportLeft) / viewScale);
+    const bleedRight = Math.max(0, (viewportLeft + viewportWidth - rootRect.right) / viewScale);
+    const logicalViewportWidth = viewportWidth / viewScale;
 
     return {
         bleedLeft,
         bleedRight,
-        bleedWidth: viewportWidth,
+        bleedWidth: logicalViewportWidth,
         contentWidth: normalizedContentWidth,
-        virtualWidth: Math.max(viewportWidth, bleedLeft + normalizedContentWidth),
+        virtualWidth: Math.max(logicalViewportWidth, bleedLeft + normalizedContentWidth),
     };
 }
 

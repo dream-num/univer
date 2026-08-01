@@ -15,12 +15,62 @@
  */
 
 import { describe, expect, it } from 'vitest';
+import { DrawingTypeEnum } from '../../../../../types/interfaces/i-drawing';
 import { DocumentDataModel } from '../../../document-data-model';
 import { DataStreamTreeTokenType } from '../../../types';
 import { getRichTextEditPath } from '../../utils';
 import { addDrawing, getCustomBlockIdsInSelections } from '../drawings';
 
 describe('drawing build utils', () => {
+    it('anchors a drawing in the current table-cell paragraph at the cell structural tail', () => {
+        const T = DataStreamTreeTokenType;
+        const tableStream = `${T.TABLE_START}${T.TABLE_ROW_START}${T.TABLE_CELL_START}Cell${T.PARAGRAPH}${T.SECTION_BREAK}${T.TABLE_CELL_END}${T.TABLE_ROW_END}${T.TABLE_END}`;
+        const doc = new DocumentDataModel({
+            id: 'doc-table-cell-drawing',
+            body: {
+                dataStream: `${tableStream}${T.PARAGRAPH}${T.SECTION_BREAK}`,
+                paragraphs: [
+                    { startIndex: 7, paragraphId: 'cell-paragraph' },
+                    { startIndex: 12, paragraphId: 'body-paragraph' },
+                ],
+                sectionBreaks: [
+                    { startIndex: 8, sectionId: 'cell-section' },
+                    { startIndex: 13, sectionId: 'body-section' },
+                ],
+                customBlocks: [],
+                tables: [{ startIndex: 0, endIndex: 12, tableId: 'table-1' }],
+            },
+            drawings: {},
+            drawingsOrder: [],
+        });
+
+        const actions = addDrawing({
+            selection: { startOffset: 8, endOffset: 8, collapsed: true },
+            documentDataModel: doc,
+            drawings: [{
+                unitId: 'doc-table-cell-drawing',
+                subUnitId: '',
+                drawingId: 'drawing-new',
+                drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+            }],
+        });
+
+        expect(actions).toBeTruthy();
+        if (!actions) {
+            throw new Error('Expected addDrawing to return JSONX actions');
+        }
+        doc.apply(actions);
+
+        expect(doc.getBody()?.dataStream).toBe(
+            `${T.TABLE_START}${T.TABLE_ROW_START}${T.TABLE_CELL_START}Cell${T.CUSTOM_BLOCK}${T.PARAGRAPH}${T.SECTION_BREAK}${T.TABLE_CELL_END}${T.TABLE_ROW_END}${T.TABLE_END}${T.PARAGRAPH}${T.SECTION_BREAK}`
+        );
+        expect(doc.getBody()?.customBlocks).toEqual([{ startIndex: 7, blockId: 'drawing-new' }]);
+        expect(doc.getBody()?.paragraphs).toEqual([
+            { startIndex: 8, paragraphId: 'cell-paragraph' },
+            { startIndex: 13, paragraphId: 'body-paragraph' },
+        ]);
+    });
+
     it('keeps the initial empty paragraph above a drawing inserted at offset zero', () => {
         const doc = new DocumentDataModel({
             id: 'doc-empty-drawing',

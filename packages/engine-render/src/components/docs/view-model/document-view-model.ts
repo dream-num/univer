@@ -157,6 +157,21 @@ export function parseDataStreamToTree(dataStream: string, tables?: ICustomTable[
                     ? columnParagraphList
                     : paragraphList;
 
+            if (
+                tempParagraphList.length > 0 &&
+                currentBlocks.length > 0 &&
+                content === DataStreamTreeTokenType.CUSTOM_BLOCK.repeat(currentBlocks.length)
+            ) {
+                // Older drawing insertion could leave custom blocks between a paragraph terminator and section break.
+                // Project them as a synthetic paragraph without changing the persisted snapshot.
+                const blockParagraph = DataStreamTreeNode.create(DataStreamTreeNodeType.PARAGRAPH, content);
+                blockParagraph.setIndexRange(i - content.length, i - 1);
+                blockParagraph.addBlocks(currentBlocks);
+                tempParagraphList.push(blockParagraph);
+                currentBlocks.length = 0;
+                content = '';
+            }
+
             if (tempParagraphList.length === 0) {
                 const emptyParagraph = DataStreamTreeNode.create(DataStreamTreeNodeType.PARAGRAPH, '');
                 emptyParagraph.setIndexRange(i, i - 1);

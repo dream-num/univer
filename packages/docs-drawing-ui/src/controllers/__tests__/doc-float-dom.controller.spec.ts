@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import { DrawingTypeEnum } from '@univerjs/core';
+import { DrawingTypeEnum, UniverInstanceType } from '@univerjs/core';
 import { InsertDocDrawingCommand } from '@univerjs/docs-drawing';
+import { SetDocZoomRatioOperation } from '@univerjs/docs-ui';
 import { Rect } from '@univerjs/engine-render';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
@@ -131,9 +132,9 @@ function createController(options: { drawing?: Record<string, unknown>; rects?: 
 describe('DocFloatDomController', () => {
     it('preserves existing props while adding custom block runtime viewport', () => {
         expect(mergeDocFloatDomRuntimeProps({ keep: true }, {
-            customBlockRenderViewport: { bleedLeft: 96, bleedWidth: 1440, contentHeight: 720, contentWidth: 1280, height: 480, viewportHeight: 320 },
+            customBlockRenderViewport: { bleedLeft: 96, bleedWidth: 1440, contentHeight: 720, contentWidth: 1280, height: 480, pageContentWidth: 1008, viewScale: 1.5, viewportHeight: 320 },
         } as never)).toEqual({
-            customBlockRenderViewport: { bleedLeft: 96, bleedWidth: 1440, contentHeight: 720, contentWidth: 1280, height: 480, viewportHeight: 320 },
+            customBlockRenderViewport: { bleedLeft: 96, bleedWidth: 1440, contentHeight: 720, contentWidth: 1280, height: 480, pageContentWidth: 1008, viewScale: 1.5, viewportHeight: 320 },
             keep: true,
         });
     });
@@ -158,6 +159,47 @@ describe('DocFloatDomController', () => {
             absolute: { left: false, top: false },
             opacity: 0.4,
         });
+    });
+
+    it('updates float dom position after host doc zoom without rewriting runtime viewport', async () => {
+        const rect = new Rect('dom-rect', {
+            left: 30,
+            top: 50,
+            width: 50,
+            height: 40,
+        });
+        const { add$, canvasFloatDomService, commandHandlers, controller, scene } = createController({
+            rects: [rect],
+            drawing: {
+                customBlockRenderViewport: {
+                    contentHeight: 240,
+                    height: 240,
+                    viewScale: 1,
+                    viewportHeight: 120,
+                },
+            },
+        });
+
+        add$.next([{ unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'dom-1' }]);
+        await Promise.resolve();
+        const position$ = canvasFloatDomService.addFloatDom.mock.calls[0][0].position$ as BehaviorSubject<unknown>;
+        scene.getAncestorScale.mockReturnValue({ scaleX: 1, scaleY: 1 });
+        commandHandlers.forEach((handler) => handler({
+            id: SetDocZoomRatioOperation.id,
+            params: { unitId: 'doc-1', zoomRatio: 2 },
+        }));
+        scene.getAncestorScale.mockReturnValue({ scaleX: 2, scaleY: 2 });
+        await Promise.resolve();
+
+        expect(position$.getValue()).toMatchObject({
+            startX: 40,
+            startY: 60,
+            width: 100,
+            height: 480,
+        });
+        expect(canvasFloatDomService.updateFloatDom).not.toHaveBeenCalled();
+
+        controller.dispose();
     });
 
     it('adds rendered float doms, updates their position, and removes them with their rect object', async () => {
@@ -257,7 +299,7 @@ describe('DocFloatDomController', () => {
         controller.dispose();
     });
 
-    it('updates rendered float dom bounds from doc drawing transform refreshes', async () => {
+    it('updates rendered float dom bounds only from the owning document unit', async () => {
         const rect = new Rect('dom-rect', {
             left: 30,
             top: 50,
@@ -278,7 +320,16 @@ describe('DocFloatDomController', () => {
         const positions: unknown[] = [];
         const sub = position$.subscribe((position: unknown) => positions.push(position));
 
+        const positionCount = positions.length;
         refreshTransform$.next([{
+            unitId: 'doc-2',
+            drawingId: 'dom-1',
+            transform: { left: 0, top: 0, width: 160, height: 240, angle: 0 },
+        }]);
+        expect(positions).toHaveLength(positionCount);
+
+        refreshTransform$.next([{
+            unitId: 'doc-1',
             drawingId: 'dom-1',
             transform: { left: 40, top: 60, width: 160, height: 240, angle: 0 },
             customBlockRenderViewport: { contentHeight: 240, height: 240, viewportHeight: 120 },
@@ -332,7 +383,7 @@ describe('DocFloatDomController', () => {
         controller.dispose();
     });
 
-    it('disables host event pass-through for embed float dom runtimes', async () => {
+    it('uses the full content box for sheet-like embed float dom runtimes', async () => {
         const rect = new Rect('dom-rect', {
             left: 30,
             top: 50,
@@ -342,7 +393,12 @@ describe('DocFloatDomController', () => {
         const { controller, add$, canvasFloatDomService } = createController({
             rects: [rect],
             drawing: {
-                data: { version: 1, embedId: 'embed-1', hostAnchorId: 'anchor-1' },
+                data: {
+                    version: 1,
+                    embedId: 'embed-1',
+                    hostAnchorId: 'anchor-1',
+                    childType: UniverInstanceType.UNIVER_SHEET,
+                },
             },
         });
 
@@ -350,6 +406,37 @@ describe('DocFloatDomController', () => {
         await Promise.resolve();
 
         expect(canvasFloatDomService.addFloatDom).toHaveBeenCalledWith(expect.objectContaining({
+            contentBox: { contentInset: 0, wrapperInset: 0 },
+            eventPassThrough: false,
+        }));
+
+        controller.dispose();
+    });
+
+    it('keeps the legacy content box for other embed float dom runtimes', async () => {
+        const rect = new Rect('dom-rect', {
+            left: 30,
+            top: 50,
+            width: 50,
+            height: 40,
+        } as never);
+        const { controller, add$, canvasFloatDomService } = createController({
+            rects: [rect],
+            drawing: {
+                data: {
+                    version: 1,
+                    embedId: 'embed-1',
+                    hostAnchorId: 'anchor-1',
+                    childType: UniverInstanceType.UNIVER_SLIDE,
+                },
+            },
+        });
+
+        add$.next([{ unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'dom-1' }]);
+        await Promise.resolve();
+
+        expect(canvasFloatDomService.addFloatDom).toHaveBeenCalledWith(expect.objectContaining({
+            contentBox: undefined,
             eventPassThrough: false,
         }));
 
@@ -378,6 +465,7 @@ describe('DocFloatDomController', () => {
         const sub = position$.subscribe((position: unknown) => positions.push(position));
 
         refreshTransform$.next([{
+            unitId: 'doc-1',
             drawingId: 'dom-1',
             customBlockRenderViewport: { contentHeight: 240, height: 240, viewportHeight: 120 },
         }]);
@@ -415,12 +503,14 @@ describe('DocFloatDomController', () => {
         const sub = position$.subscribe((position: unknown) => positions.push(position));
 
         refreshTransform$.next([{
+            unitId: 'doc-1',
             drawingId: 'dom-1',
             transform: { left: 40, top: 60, width: 160, height: 240, angle: 0 },
             customBlockRenderViewport: { contentHeight: 240, height: 240, viewportHeight: 120 },
         }]);
         rect.transformByState({ left: 45, top: 65, width: 160, height: 40, angle: 0 } as never);
         refreshTransform$.next([{
+            unitId: 'doc-1',
             drawingId: 'dom-1',
             transform: { left: 45, top: 65, width: 160, height: 40, angle: 0 },
         }]);
@@ -459,6 +549,7 @@ describe('DocFloatDomController', () => {
 
         rect.transformByState({ left: 30, top: 60, width: 720, height: 405, angle: 0 } as never);
         refreshTransform$.next([{
+            unitId: 'doc-1',
             drawingId: 'dom-1',
             transform: { left: 30, top: 60, width: 720, height: 405, angle: 0 },
         }]);

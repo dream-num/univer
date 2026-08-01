@@ -14,8 +14,17 @@
  * limitations under the License.
  */
 
+import type {
+    IDocumentSkeletonColumn,
+    IDocumentSkeletonDivide,
+    IDocumentSkeletonGlyph,
+    IDocumentSkeletonLine,
+    IDocumentSkeletonSection,
+} from '@univerjs/engine-render';
 import { ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType } from '@univerjs/core';
 import { UpdateDrawingDocTransformCommand } from '@univerjs/docs-drawing';
+import { NodePositionConvertToCursor } from '@univerjs/docs-ui';
+import { DocumentSkeletonPageType } from '@univerjs/engine-render';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import {
@@ -198,6 +207,125 @@ describe('DocDrawingTransformerController business methods', () => {
             width: 90,
             height: 70,
         }]]));
+    });
+
+    it('uses the outer page origin only for WRAP_NONE page-relative positions', () => {
+        const controller = createController();
+        const previousPage = {
+            type: DocumentSkeletonPageType.BODY,
+            marginLeft: 30,
+            marginTop: 40,
+        };
+        const anchorPage = {
+            type: DocumentSkeletonPageType.BODY,
+            marginLeft: 48,
+            marginTop: 64,
+        };
+        const glyph = {} as IDocumentSkeletonGlyph;
+        const divide = { glyphGroup: [glyph] } as IDocumentSkeletonDivide;
+        const line = {
+            divides: [divide],
+            paragraphIndex: 0,
+            paragraphStart: true,
+            top: 0,
+        } as IDocumentSkeletonLine;
+        const section = { parent: anchorPage, top: 0 } as unknown as IDocumentSkeletonSection;
+        const column = { left: 0, lines: [line], parent: section } as IDocumentSkeletonColumn;
+        Object.assign(glyph, { parent: divide });
+        Object.assign(divide, { parent: line });
+        Object.assign(line, { parent: column });
+
+        const skeleton = {
+            findNodeByCoord: vi.fn(() => ({
+                node: glyph,
+                segmentId: '',
+                segmentPage: 1,
+            })),
+            findPositionByGlyph: vi.fn(() => ({})),
+            getSkeletonData: vi.fn(() => ({
+                pages: [previousPage, anchorPage],
+                skeFooters: new Map(),
+                skeHeaders: new Map(),
+            })),
+        };
+        const renderDependency = {
+            getSegment: vi.fn(() => ''),
+            getSegmentPage: vi.fn(() => 1),
+            getSkeleton: vi.fn(() => skeleton),
+        };
+        const mainComponent = {
+            getOffsetConfig: vi.fn(() => ({
+                docsLeft: 5,
+                docsTop: 7,
+                pageLayoutType: 0,
+                pageMarginLeft: 0,
+                pageMarginTop: 20,
+            })),
+        };
+        controller._renderManagerService.getRenderUnitById.mockReturnValue({
+            components: new Map(),
+            engine: {},
+            mainComponent,
+            scene: {
+                getViewports: vi.fn(() => [{}]),
+                getViewportScrollXY: vi.fn(() => ({ x: 0, y: 0 })),
+            },
+            with: vi.fn(() => renderDependency),
+        });
+        controller._getPageContentSize = vi.fn(() => ({ width: 1000, height: 1000 }));
+        controller._getTransformCoordForDocumentOffset = vi.fn(() => ({}));
+        controller._liquid = {
+            x: 0,
+            y: 0,
+            reset: vi.fn(() => {
+                controller._liquid.x = 0;
+                controller._liquid.y = 0;
+            }),
+            restorePagePadding: vi.fn((page: { marginLeft: number; marginTop: number }) => {
+                controller._liquid.x -= page.marginLeft;
+                controller._liquid.y -= page.marginTop;
+            }),
+            translatePage: vi.fn(() => {
+                controller._liquid.x += 300;
+                controller._liquid.y += 400;
+            }),
+            translatePagePadding: vi.fn((page: { marginLeft: number; marginTop: number }) => {
+                controller._liquid.x += page.marginLeft;
+                controller._liquid.y += page.marginTop;
+            }),
+        };
+        const rangeSpy = vi.spyOn(NodePositionConvertToCursor.prototype, 'getRangePointData').mockReturnValue({
+            borderBoxPointGroup: [],
+            contentBoxPointGroup: [],
+            cursorList: [{ collapsed: true, endOffset: 0, startOffset: 0 }],
+        } as ReturnType<NodePositionConvertToCursor['getRangePointData']>);
+        const overlayDrawing = {
+            ...drawing(),
+            layoutType: PositionedObjectLayoutType.WRAP_NONE,
+        };
+        const object = {
+            angle: 0,
+            height: 60,
+            left: 395,
+            top: 527,
+            width: 80,
+        };
+
+        const anchor = controller._getDrawingAnchor(overlayDrawing, object);
+
+        expect(anchor?.docTransform.positionH).toEqual({
+            relativeFrom: ObjectRelativeFromH.PAGE,
+            posOffset: 90,
+        });
+        expect(anchor?.docTransform.positionV).toEqual({
+            relativeFrom: ObjectRelativeFromV.PAGE,
+            posOffset: 120,
+        });
+
+        const wrappedAnchor = controller._getDrawingAnchor(drawing(), object);
+        expect(wrappedAnchor?.docTransform.positionH.posOffset).toBe(42);
+        expect(wrappedAnchor?.docTransform.positionV.posOffset).toBe(-8);
+        rangeSpy.mockRestore();
     });
 
     it('limits a drawing away from the gap between document pages while preserving drawings already on one page', () => {

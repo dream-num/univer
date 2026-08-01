@@ -559,12 +559,17 @@ export class DocDrawingTransformerController extends Disposable {
         const tableCellContext = page.type === DocumentSkeletonPageType.CELL ? getDocsTableCellAnchorContext(drawing.unitId, page) : null;
         const anchorPage = tableCellContext?.hostPage ?? page;
         const pageType = anchorPage.type;
+        let pageOffsetLeft = this._liquid.x;
+        let pageOffsetTop = this._liquid.y;
 
         for (const p of pages) {
             const { headerId, footerId, pageHeight, pageWidth, marginLeft, marginBottom } = p;
             const pIndex = pages.indexOf(p);
 
             if (segmentPage > -1 && pIndex === segmentPage) {
+                pageOffsetLeft = this._liquid.x;
+                pageOffsetTop = this._liquid.y;
+
                 switch (pageType) {
                     case DocumentSkeletonPageType.HEADER: {
                         const headerSke = skeHeaders.get(headerId)?.get(pageWidth);
@@ -605,6 +610,11 @@ export class DocDrawingTransformerController extends Disposable {
                 break;
             }
 
+            if (p === anchorPage) {
+                pageOffsetLeft = this._liquid.x;
+                pageOffsetTop = this._liquid.y;
+            }
+
             this._liquid.translatePagePadding(p);
             if (p === anchorPage) {
                 break;
@@ -630,6 +640,12 @@ export class DocDrawingTransformerController extends Disposable {
         };
 
         switch (positionH.relativeFrom) {
+            case ObjectRelativeFromH.PAGE: {
+                if (drawing.layoutType === PositionedObjectLayoutType.WRAP_NONE) {
+                    docTransform.positionH.posOffset = left - pageOffsetLeft - docsLeft;
+                }
+                break;
+            }
             case ObjectRelativeFromH.MARGIN: {
                 docTransform.positionH.posOffset = left - this._liquid.x - docsLeft - page.marginLeft;
                 break;
@@ -647,7 +663,9 @@ export class DocDrawingTransformerController extends Disposable {
 
         switch (positionV.relativeFrom) {
             case ObjectRelativeFromV.PAGE: {
-                docTransform.positionV.posOffset = top - this._liquid.y - docsTop - page.marginTop;
+                docTransform.positionV.posOffset = drawing.layoutType === PositionedObjectLayoutType.WRAP_NONE
+                    ? top - pageOffsetTop - docsTop
+                    : top - this._liquid.y - docsTop - page.marginTop;
                 break;
             }
             case ObjectRelativeFromV.LINE: {

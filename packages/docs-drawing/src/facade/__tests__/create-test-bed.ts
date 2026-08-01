@@ -15,7 +15,14 @@
  */
 
 import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
-import { DocumentFlavor, ILogService, IUniverInstanceService, LogLevel, Univer, UniverInstanceType } from '@univerjs/core';
+import {
+    DocumentFlavor,
+    ILogService,
+    IUniverInstanceService,
+    LogLevel,
+    Univer,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDrawingPlugin } from '@univerjs/drawing';
@@ -36,7 +43,7 @@ const DEFAULT_DOC_DATA: IDocumentData = {
     drawingsOrder: [],
 };
 
-export function createFacadeTestBed() {
+export function createFacadeTestBed(data: IDocumentData = DEFAULT_DOC_DATA) {
     const univer = new Univer();
     const injector = univer.__getInjector();
 
@@ -47,7 +54,7 @@ export function createFacadeTestBed() {
 
     const documentDataModel = univer.createUnit<IDocumentData, DocumentDataModel>(
         UniverInstanceType.UNIVER_DOC,
-        DEFAULT_DOC_DATA
+        structuredClone(data)
     );
     injector.get(IUniverInstanceService).focusUnit(documentDataModel.getUnitId());
     injector.get(ILogService).setLogLevel(LogLevel.SILENT);

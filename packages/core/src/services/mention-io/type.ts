@@ -16,7 +16,7 @@
 
 import type { MentionType } from '../../types/enum';
 import type { IMention } from '../../types/interfaces';
-import { createIdentifier } from '@wendellhu/redi';
+import { createIdentifier } from '../../common/di';
 
 export interface IListMentionParam {
     search?: string;

@@ -17,10 +17,10 @@
 import type { ComponentType } from 'react';
 import type { IFloatDom, IFloatDomLayout } from '../../../services/dom/canvas-dom-layer.service';
 import { IUniverInstanceService } from '@univerjs/core';
-import { useDependency } from '@wendellhu/redi/react-bindings';
 import { memo, useMemo, useRef } from 'react';
 import { ComponentManager } from '../../../common';
 import { shouldForwardFloatDomEvents } from '../../../services/dom/canvas-dom-layer.service';
+import { useDependency } from '../../../utils/di';
 
 export const PrintFloatDomSingle = memo((props: { layer: IFloatDom; id: string; position: IFloatDomLayout }) => {
     const { layer } = props;

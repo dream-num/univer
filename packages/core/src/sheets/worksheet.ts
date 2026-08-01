@@ -14,13 +14,22 @@
  * limitations under the License.
  */
 
-import type { IDisposable } from '@wendellhu/redi';
+import type { IDisposable } from '../common/di';
 import type { IInterceptor } from '../common/interceptor';
 import type { IObjectMatrixPrimitiveType, Nullable } from '../shared';
 import type { BooleanNumber, HorizontalAlign, TextDirection, VerticalAlign, WrapStrategy } from '../types/enum';
 import type { IDocumentData, IDocumentRenderConfig, IPaddingData, IStyleData, ITextRotation } from '../types/interfaces';
 import type { Styles } from './styles';
-import type { CustomData, ICellData, ICellDataForSheetInterceptor, ICellDataWithSpanAndDisplay, IFreeze, IRange, ISelectionCell, IWorksheetData } from './typedef';
+import type {
+    CustomData,
+    ICellData,
+    ICellDataForSheetInterceptor,
+    ICellDataWithSpanAndDisplay,
+    IFreeze,
+    IRange,
+    ISelectionCell,
+    IWorksheetData,
+} from './typedef';
 import { BuildTextUtils, DocumentDataModel } from '../docs';
 import { convertTextRotation, getFontStyleString } from '../docs/data-model/utils';
 import { composeStyles, ObjectMatrix, toDisposable, Tools } from '../shared';
@@ -35,7 +44,14 @@ import { RowManager } from './row-manager';
 import { mergeWorksheetSnapshotWithDefault } from './sheet-snapshot-utils';
 import { SpanModel } from './span-model';
 import { CellModeEnum } from './typedef';
-import { addLinkToDocumentModel, createDocumentModelWithStyle, DEFAULT_PADDING_DATA, extractOtherStyle, getFontFormat, isNotNullOrUndefined } from './util';
+import {
+    addLinkToDocumentModel,
+    createDocumentModelWithStyle,
+    DEFAULT_PADDING_DATA,
+    extractOtherStyle,
+    getFontFormat,
+    isNotNullOrUndefined,
+} from './util';
 import { SheetViewModel } from './view-model';
 
 export interface IDocumentLayoutObject {

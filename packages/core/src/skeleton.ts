@@ -15,7 +15,7 @@
  */
 
 import type { IFontLocale } from './sheets/util';
-import { Inject } from '@wendellhu/redi';
+import { Inject } from './common/di';
 import { LocaleService } from './services/locale/locale.service';
 import { Disposable } from './shared/lifecycle';
 

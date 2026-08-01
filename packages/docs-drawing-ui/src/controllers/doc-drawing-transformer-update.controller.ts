@@ -38,7 +38,12 @@ import { DocSelectionRenderService, getAnchorBounding, getOneTextSelectionRange,
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { DocumentSkeletonPageType, getColor, IRenderManagerService, Liquid, PageLayoutType, Rect, Vector2 } from '@univerjs/engine-render';
 import { IMoveInlineDrawingCommand, ITransformNonInlineDrawingCommand } from '../commands/commands/update-doc-drawing.command';
-import { getDocsTableCellDrawingOffset } from './render-controllers/doc-drawing-transform-update.controller';
+import {
+    getDocsDrawingBehindText,
+    getDocsDrawingClipPage,
+    getDocsPageRelativeDrawingAnchorPage,
+    getDocsTableCellDrawingOffset,
+} from './render-controllers/doc-drawing-transform-update.controller';
 
 const INLINE_DRAWING_ANCHOR_KEY_PREFIX = '__InlineDrawingAnchor__';
 
@@ -86,6 +91,31 @@ export function getDocsTableCellAnchorContext(unitId: string, cell: IDocumentSke
         row,
         table,
     };
+}
+
+export function shouldUseDocsDrawingOuterPageOrigin(config: {
+    drawing: Pick<IDocDrawingBase, 'behindDoc' | 'layoutType'>;
+    height: number;
+    hostPage?: IDocumentSkeletonPage;
+    page: IDocumentSkeletonPage;
+    width: number;
+}): boolean {
+    const { drawing, height, hostPage, page, width } = config;
+    if (drawing.layoutType !== PositionedObjectLayoutType.WRAP_NONE) {
+        return false;
+    }
+
+    const behindText = getDocsDrawingBehindText({ drawingOrigin: drawing, hostPage });
+    const clipPage = getDocsDrawingClipPage({
+        drawing: {
+            behindText,
+            transform: { width, height },
+        },
+        hostPage,
+        page,
+    });
+
+    return getDocsPageRelativeDrawingAnchorPage({ page, clipPage, hostPage }) != null;
 }
 
 // Listen doc drawing transformer change, and update drawing data.
@@ -559,12 +589,27 @@ export class DocDrawingTransformerController extends Disposable {
         const tableCellContext = page.type === DocumentSkeletonPageType.CELL ? getDocsTableCellAnchorContext(drawing.unitId, page) : null;
         const anchorPage = tableCellContext?.hostPage ?? page;
         const pageType = anchorPage.type;
+        const drawingHostPage = (page.type === DocumentSkeletonPageType.HEADER || page.type === DocumentSkeletonPageType.FOOTER) && segmentPage > -1
+            ? pages[segmentPage]
+            : undefined;
+        const useOuterPageOrigin = shouldUseDocsDrawingOuterPageOrigin({
+            drawing,
+            height: object.height,
+            hostPage: drawingHostPage,
+            page,
+            width: object.width,
+        });
+        let pageOffsetLeft = this._liquid.x;
+        let pageOffsetTop = this._liquid.y;
 
         for (const p of pages) {
             const { headerId, footerId, pageHeight, pageWidth, marginLeft, marginBottom } = p;
             const pIndex = pages.indexOf(p);
 
             if (segmentPage > -1 && pIndex === segmentPage) {
+                pageOffsetLeft = this._liquid.x;
+                pageOffsetTop = this._liquid.y;
+
                 switch (pageType) {
                     case DocumentSkeletonPageType.HEADER: {
                         const headerSke = skeHeaders.get(headerId)?.get(pageWidth);
@@ -605,6 +650,11 @@ export class DocDrawingTransformerController extends Disposable {
                 break;
             }
 
+            if (p === anchorPage) {
+                pageOffsetLeft = this._liquid.x;
+                pageOffsetTop = this._liquid.y;
+            }
+
             this._liquid.translatePagePadding(p);
             if (p === anchorPage) {
                 break;
@@ -630,6 +680,12 @@ export class DocDrawingTransformerController extends Disposable {
         };
 
         switch (positionH.relativeFrom) {
+            case ObjectRelativeFromH.PAGE: {
+                if (useOuterPageOrigin) {
+                    docTransform.positionH.posOffset = left - pageOffsetLeft - docsLeft;
+                }
+                break;
+            }
             case ObjectRelativeFromH.MARGIN: {
                 docTransform.positionH.posOffset = left - this._liquid.x - docsLeft - page.marginLeft;
                 break;
@@ -647,7 +703,9 @@ export class DocDrawingTransformerController extends Disposable {
 
         switch (positionV.relativeFrom) {
             case ObjectRelativeFromV.PAGE: {
-                docTransform.positionV.posOffset = top - this._liquid.y - docsTop - page.marginTop;
+                docTransform.positionV.posOffset = useOuterPageOrigin
+                    ? top - pageOffsetTop - docsTop
+                    : top - this._liquid.y - docsTop + page.marginTop;
                 break;
             }
             case ObjectRelativeFromV.LINE: {

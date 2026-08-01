@@ -180,6 +180,101 @@ describe('slide-tab-bar', () => {
         expect(bar.getSlideTabItems()).toEqual([]);
     });
 
+    it('uses the dominant wheel axis and the live DOM scroll position', () => {
+        const { root, bar: barElement, events } = setupDOM();
+        const bar = createBar(root, events);
+
+        const horizontalWheel = new WheelEvent('wheel', {
+            bubbles: true,
+            cancelable: true,
+            deltaX: 20,
+            deltaY: 2,
+        });
+        barElement.dispatchEvent(horizontalWheel);
+
+        expect(horizontalWheel.defaultPrevented).toBe(true);
+        expect(barElement.scrollLeft).toBe(20);
+
+        barElement.scrollLeft = 60;
+        barElement.dispatchEvent(new WheelEvent('wheel', {
+            bubbles: true,
+            cancelable: true,
+            deltaX: -15,
+        }));
+        expect(barElement.scrollLeft).toBe(45);
+
+        barElement.dispatchEvent(new WheelEvent('wheel', {
+            bubbles: true,
+            cancelable: true,
+            deltaY: 20,
+        }));
+        expect(barElement.scrollLeft).toBe(65);
+        expect(events.scrollStates.at(-1)).toEqual({ leftEnd: false, rightEnd: false });
+
+        bar.destroy();
+    });
+
+    it('normalizes wheel delta modes and clamps both scroll boundaries', () => {
+        const { root, bar: barElement, events } = setupDOM();
+        const bar = createBar(root, events);
+
+        barElement.dispatchEvent(new WheelEvent('wheel', {
+            bubbles: true,
+            cancelable: true,
+            deltaMode: WheelEvent.DOM_DELTA_LINE,
+            deltaY: 2,
+        }));
+        expect(barElement.scrollLeft).toBe(32);
+
+        barElement.dispatchEvent(new WheelEvent('wheel', {
+            bubbles: true,
+            cancelable: true,
+            deltaX: 200,
+        }));
+        expect(barElement.scrollLeft).toBe(120);
+        expect(bar.isRightEnd()).toBe(true);
+        expect(events.scrollStates.at(-1)).toEqual({ leftEnd: false, rightEnd: true });
+
+        Object.defineProperty(root, 'clientWidth', { configurable: true, value: 80 });
+        barElement.dispatchEvent(new WheelEvent('wheel', {
+            bubbles: true,
+            cancelable: true,
+            deltaX: 20,
+        }));
+        expect(barElement.scrollLeft).toBe(140);
+        expect(bar.isRightEnd()).toBe(true);
+
+        barElement.dispatchEvent(new WheelEvent('wheel', {
+            bubbles: true,
+            cancelable: true,
+            deltaX: -200,
+        }));
+        expect(barElement.scrollLeft).toBe(0);
+        expect(bar.isLeftEnd()).toBe(true);
+        expect(events.scrollStates.at(-1)).toEqual({ leftEnd: true, rightEnd: false });
+
+        bar.destroy();
+    });
+
+    it('leaves wheel events alone when the sheet tabs do not overflow', () => {
+        const { root, bar: barElement, events } = setupDOM();
+        Object.defineProperty(barElement, 'scrollWidth', { configurable: true, value: 80 });
+        const bar = createBar(root, events);
+        const wheel = new WheelEvent('wheel', {
+            bubbles: true,
+            cancelable: true,
+            deltaY: 20,
+        });
+
+        barElement.dispatchEvent(wheel);
+
+        expect(wheel.defaultPrevented).toBe(false);
+        expect(barElement.scrollLeft).toBe(0);
+        expect(events.scrollStates).toEqual([]);
+
+        bar.destroy();
+    });
+
     it('supports editing, fixed dragging style, and per-item animation', () => {
         const { root, events } = setupDOM();
         const frameState = new TestAnimationFrameState();

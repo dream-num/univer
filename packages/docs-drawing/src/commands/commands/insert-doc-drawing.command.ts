@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IAccessor, ICommand, IMutationInfo, ITextRangeParam, JSONXActions } from '@univerjs/core';
+import type { DocumentDataModel, IAccessor, ICommand, IMutationInfo, ITextRangeParam } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IDocDrawing } from '../../services/doc-drawing.service';
 import {
     BooleanNumber,
     BuildTextUtils,
     CommandType,
-    getCustomBlockIdsInSelections,
-    getRichTextEditPath,
     ICommandService,
     IUniverInstanceService,
-    JSONX,
-    TextX,
-    TextXActionType,
     UniverInstanceType,
 } from '@univerjs/core';
-import { DocSelectionManagerService, getContentInsertRange, normalizeTextRange, RichTextEditingMutation } from '@univerjs/docs';
+import {
+    DocSelectionManagerService,
+    getContentInsertRange,
+    normalizeTextRange,
+    RichTextEditingMutation,
+} from '@univerjs/docs';
 
 export interface IInsertDocDrawingCommandParams {
     unitId: string;
@@ -46,7 +46,6 @@ export const InsertDocDrawingCommand: ICommand = {
 
     type: CommandType.COMMAND,
 
-    // eslint-disable-next-line max-lines-per-function
     handler: (accessor: IAccessor, params?: IInsertDocDrawingCommandParams) => {
         if (!params) {
             return false;
@@ -61,22 +60,19 @@ export const InsertDocDrawingCommand: ICommand = {
             return false;
         }
 
-        const targetTextRange = resolveDocDrawingInsertTextRange(accessor, unitId, textRange);
+        const resolvedTextRange = resolveDocDrawingInsertTextRange(accessor, unitId, textRange);
 
-        if (!targetTextRange) {
+        if (!resolvedTextRange) {
             return false;
         }
 
-        const { collapsed, startOffset, segmentId = '' } = targetTextRange;
+        const { segmentId = '' } = resolvedTextRange;
         const body = documentDataModel.getSelfOrHeaderFooterModel(segmentId)?.getBody();
 
         if (!body) {
             return false;
         }
 
-        const textX = new TextX();
-        const jsonX = JSONX.getInstance();
-        const rawActions: JSONXActions = [];
         const snapshot = documentDataModel.getSnapshot();
         const isHeaderFooter = !!snapshot.headers?.[segmentId] || !!snapshot.footers?.[segmentId];
         const targetDrawings = isHeaderFooter
@@ -86,78 +82,14 @@ export const InsertDocDrawingCommand: ICommand = {
                 transforms: drawing.transforms ?? (drawing.transform ? [drawing.transform] : null),
             }))
             : drawings;
-        const drawingOrderLength = snapshot.drawingsOrder?.length ?? 0;
-        let removeDrawingLen = 0;
-
-        // Step 1: Insert placeholder `\b` in dataStream and add drawing to customBlocks.
-        if (collapsed) {
-            if (startOffset > 0) {
-                textX.push({
-                    t: TextXActionType.RETAIN,
-                    len: startOffset,
-                });
-            }
-        } else {
-            const dos = BuildTextUtils.selection.delete([targetTextRange], body, 0, null, false);
-            textX.push(...dos);
-
-            const removedCustomBlockIds = getCustomBlockIdsInSelections(body, [targetTextRange]);
-            const drawings = documentDataModel.getDrawings() ?? {};
-            const drawingOrder = documentDataModel.getDrawingsOrder() ?? [];
-            const sortedRemovedCustomBlockIds = removedCustomBlockIds.sort((a, b) => {
-                if (drawingOrder.indexOf(a) > drawingOrder.indexOf(b)) {
-                    return -1;
-                } else if (drawingOrder.indexOf(a) < drawingOrder.indexOf(b)) {
-                    return 1;
-                }
-
-                return 0;
-            });
-
-            if (sortedRemovedCustomBlockIds.length > 0) {
-                for (const blockId of sortedRemovedCustomBlockIds) {
-                    const drawing = drawings[blockId];
-                    const drawingIndex = drawingOrder.indexOf(blockId);
-                    if (drawing == null || drawingIndex < 0) {
-                        continue;
-                    }
-
-                    const removeDrawingAction = jsonX.removeOp(['drawings', blockId], drawing);
-                    const removeDrawingOrderAction = jsonX.removeOp(['drawingsOrder', drawingIndex], blockId);
-
-                    rawActions.push(removeDrawingAction!);
-                    rawActions.push(removeDrawingOrderAction!);
-
-                    removeDrawingLen++;
-                }
-            }
-        }
-
-        textX.push({
-            t: TextXActionType.INSERT,
-            body: {
-                dataStream: '\b'.repeat(targetDrawings.length),
-                customBlocks: targetDrawings.map((drawing, i) => ({
-                    startIndex: i,
-                    blockId: drawing.drawingId,
-                })),
-            },
-            len: targetDrawings.length,
+        const actions = BuildTextUtils.drawing.add({
+            selection: resolvedTextRange,
+            documentDataModel,
+            drawings: targetDrawings,
         });
 
-        const path = getRichTextEditPath(documentDataModel, segmentId);
-        const placeHolderAction = jsonX.editOp(textX.serialize(), path);
-
-        rawActions.push(placeHolderAction!);
-
-        // Step 2: add drawing to drawings and drawingsOrder fields.
-        for (const drawing of targetDrawings) {
-            const { drawingId } = drawing;
-            const addDrawingAction = jsonX.insertOp(['drawings', drawingId], drawing);
-            const addDrawingOrderAction = jsonX.insertOp(['drawingsOrder', drawingOrderLength - removeDrawingLen], drawingId);
-
-            rawActions.push(addDrawingAction!);
-            rawActions.push(addDrawingOrderAction!);
+        if (!actions) {
+            return false;
         }
 
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
@@ -169,9 +101,7 @@ export const InsertDocDrawingCommand: ICommand = {
             },
         };
 
-        doMutation.params.actions = rawActions.reduce((acc, cur) => {
-            return JSONX.compose(acc, cur as JSONXActions);
-        }, null as JSONXActions);
+        doMutation.params.actions = actions;
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,

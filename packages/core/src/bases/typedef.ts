@@ -129,12 +129,30 @@ export enum BaseRecordLinkRole {
     Parent = 'parent',
 }
 
+/**
+ * Configuration for a RecordLink field.
+ *
+ * A RecordLink points to records in another table in the same Base. The cell
+ * stores target record IDs, while the UI resolves those IDs to the configured
+ * display field. Prefer the dedicated RecordLink Facade methods instead of
+ * reading or writing the canonical cell string directly.
+ */
 export interface IRecordLinkFieldConfig extends Record<string, unknown> {
+    /** ID of the target table. The table must belong to the same Base. */
     targetTableId: TableId;
+    /** `false` allows one linked record; `true` allows an ordered list of linked records. */
     multiple: boolean;
-    /** Field used as the single visible RecordLink label. Defaults to the target table primary field. */
+    /**
+     * Target-table field used as the visible label in cells, cards, and record details.
+     * Defaults to the target table's primary field. The field must exist and must not
+     * be a system field such as `record-id`.
+     */
     displayFieldId?: FieldId;
-    /** Ordered target-table fields rendered as secondary context in the record picker. */
+    /**
+     * Ordered target-table fields shown as secondary context in the record picker.
+     * These fields help users distinguish records; they do not change the stored link
+     * or add more labels to the cell. IDs must be unique, existing, non-system fields.
+     */
     pickerFieldIds?: FieldId[];
     /** Optional table-level semantic role of this link. */
     relationRole?: BaseRecordLinkRole;

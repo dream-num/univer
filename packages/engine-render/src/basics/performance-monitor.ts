@@ -265,11 +265,17 @@ export class RollingAverage {
             this._sampleCount++;
         }
 
-        // Remove one maximum and one minimum to ensure the accuracy of the average value.
-        const min = Math.min(...this._samples);
-        const max = Math.min(...this._samples);
-        const filteredData = this._samples.filter((v) => v !== max && v !== min);
-        this.averageFrameTime = filteredData.reduce((sum, value) => sum + value, 0) / filteredData.length;
+        // Once the window is full, exclude one minimum and maximum to reduce outlier bias.
+        const shouldTrimExtremes = this.isSaturated() && this._sampleCount > 2;
+        const sampleSum = this._samples.reduce((sum, value) => sum + value, 0);
+
+        if (shouldTrimExtremes) {
+            const min = Math.min(...this._samples);
+            const max = Math.max(...this._samples);
+            this.averageFrameTime = (sampleSum - min - max) / (this._sampleCount - 2);
+        } else {
+            this.averageFrameTime = sampleSum / this._sampleCount;
+        }
 
         // add new value to mean
         delta = frameDuration - this.averageFrameTime;

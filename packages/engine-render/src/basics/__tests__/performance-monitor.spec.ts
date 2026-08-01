@@ -97,4 +97,15 @@ describe('performance monitor', () => {
         expect(average.averageFrameTime).toBeCloseTo(16.67, 2);
         expect(average.variance).toBe(0);
     });
+
+    it('removes only one minimum and maximum from duplicate samples', () => {
+        const average = new RollingAverage(3);
+
+        for (const frameTime of [10, 10, 20]) {
+            average.addFrameTime(frameTime);
+            average.calcAverageFrameTime();
+        }
+
+        expect(average.averageFrameTime).toBe(10);
+    });
 });

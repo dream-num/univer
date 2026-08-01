@@ -141,6 +141,10 @@ const PARAGRAPH_MENU_HOVER_BRIDGE_EDGE_OVERLAP = 12;
 const PARAGRAPH_MENU_HOVER_BRIDGE_VERTICAL_PADDING = 8;
 type ParagraphMenuOpenMode = 'pointer' | 'slash';
 
+function getParagraphMenuIconSizeClass(iconKey: string): string {
+    return iconKey === 'TextTypeIcon' ? 'univer-size-3' : 'univer-size-4';
+}
+
 export function shouldExecuteParagraphMenuMove(
     validatorService: Pick<DocBlockMoveValidatorService, 'canMoveBlock'>,
     context: IDocBlockMoveValidationContext
@@ -1298,7 +1302,15 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
                     hoverOpenSchedulerRef.current.openNow();
                 }}
             >
-                <TargetIcon />
+                <TargetIcon
+                    className={clsx(
+                        getParagraphMenuIconSizeClass(targetIconKey),
+                        `
+                          univer-shrink-0 univer-text-gray-700
+                          dark:!univer-text-white
+                        `
+                    )}
+                />
                 {currentActiveTarget?.draggable && (
                     <button
                         type="button"

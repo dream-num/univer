@@ -32,7 +32,12 @@ import { HorizontalLineCommand } from '../../commands/commands/doc-horizontal-li
 import { BulletListCommand } from '../../commands/commands/list.command';
 import { AlignCenterCommand } from '../../commands/commands/paragraph-align.command';
 import { H2HeadingCommand, SetParagraphNamedStyleCommand } from '../../commands/commands/set-heading.command';
-import { DOC_PARAGRAPH_T_EDIT_MENU_ID, INSERT_BELLOW_MENU_ID } from '../../menu/paragraph-menu';
+import {
+    BACKGROUND_COLOR_SWATCH_ICONS,
+    DOC_PARAGRAPH_T_EDIT_MENU_ID,
+    INSERT_BELLOW_MENU_ID,
+    ParagraphMenuBackgroundColorSwatchMenuItemFactories,
+} from '../../menu/paragraph-menu';
 import {
     buildUnwrapBlockRangeActions,
     getBlockRangeClipboardTargetRange,
@@ -96,6 +101,12 @@ function blockRangeBody(blockType: DocumentBlockRangeType, paragraphStyle: IPara
 }
 
 describe('ParagraphMenu command behavior', () => {
+    it('keeps the background palette within two eight-column rows', () => {
+        expect(BACKGROUND_COLOR_SWATCH_ICONS).toHaveLength(15);
+        expect(Object.keys(ParagraphMenuBackgroundColorSwatchMenuItemFactories)).toHaveLength(15);
+        expect(BACKGROUND_COLOR_SWATCH_ICONS).not.toContain('DocParagraphBackgroundColorSwatchIcon.15');
+    });
+
     it('places the root menu on the right in rtl so submenus can open to the left', () => {
         expect(getParagraphMenuPopupDirection(300, 212, 8, {
             anchorRight: 340,

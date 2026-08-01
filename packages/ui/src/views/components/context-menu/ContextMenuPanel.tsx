@@ -432,20 +432,18 @@ function getContextMenuGroupClassName(sizeVariant: ContextMenuSizeVariant) {
     return contextMenuGroupVariants({ sizeVariant });
 }
 
-function isParagraphTHeaderQuickGroup(menuSchema: IMenuSchema, sizeVariant: ContextMenuSizeVariant) {
-    return sizeVariant === 'paragraph-t'
-        && menuSchema.quickLayout === 'icon'
+function isConnectedHeaderQuickGroup(menuSchema: IMenuSchema) {
+    return menuSchema.quickLayout === 'icon'
         && CONTEXT_MENU_HEADER_QUICK_GROUP_KEYS.has(menuSchema.key);
 }
 
-function shouldClusterParagraphTHeaderQuickGroups(
+function shouldClusterConnectedHeaderQuickGroups(
     currentSchema: IMenuSchema,
-    nextSchema: IMenuSchema | undefined,
-    sizeVariant: ContextMenuSizeVariant
+    nextSchema: IMenuSchema | undefined
 ) {
-    return isParagraphTHeaderQuickGroup(currentSchema, sizeVariant)
+    return isConnectedHeaderQuickGroup(currentSchema)
         && !!nextSchema
-        && isParagraphTHeaderQuickGroup(nextSchema, sizeVariant);
+        && isConnectedHeaderQuickGroup(nextSchema);
 }
 
 function getContextMenuQuickGroupClassName(
@@ -603,8 +601,7 @@ export function getNextMenuButtonByDirection(
 }
 
 export function getContextMenuSchemaRenderGroups(
-    visibleSchemas: IMenuSchema[],
-    sizeVariant: ContextMenuSizeVariant
+    visibleSchemas: IMenuSchema[]
 ): IContextMenuSchemaRenderGroup[] {
     const renderGroups: IContextMenuSchemaRenderGroup[] = [];
 
@@ -612,7 +609,7 @@ export function getContextMenuSchemaRenderGroups(
         const menuSchema = visibleSchemas[index];
         const nextSchema = visibleSchemas[index + 1];
 
-        if (shouldClusterParagraphTHeaderQuickGroups(menuSchema, nextSchema, sizeVariant)) {
+        if (shouldClusterConnectedHeaderQuickGroups(menuSchema, nextSchema)) {
             renderGroups.push({
                 startIndex: index,
                 endIndex: index + 1,
@@ -630,6 +627,17 @@ export function getContextMenuSchemaRenderGroups(
     }
 
     return renderGroups;
+}
+
+export function mergeContextMenuQuickGroupSchemas(menuSchemas: IMenuSchema[]): IMenuSchema {
+    const firstSchema = menuSchemas[0];
+
+    return {
+        ...firstSchema,
+        key: menuSchemas.map((schema) => schema.key).join('-'),
+        quickColumns: getContextMenuQuickGroupColumns(firstSchema),
+        children: menuSchemas.flatMap((schema) => schema.children ?? []),
+    };
 }
 
 function getContextMenuHeaderClassName(sizeVariant: ContextMenuSizeVariant) {
@@ -852,8 +860,8 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
         });
     }, [hiddenGroupStates, menuSchemas]);
     const renderGroups = useMemo(
-        () => getContextMenuSchemaRenderGroups(visibleSchemas, sizeVariant),
-        [sizeVariant, visibleSchemas]
+        () => getContextMenuSchemaRenderGroups(visibleSchemas),
+        [visibleSchemas]
     );
 
     const renderQuickLayoutGroup = (
@@ -863,6 +871,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
         hasSeparator = false
     ) => {
         const titleNode = renderMenuSchemaHeader(menuSchema);
+        const isCompactQuickLayout = menuSchema.quickLayoutVariant === 'compact';
 
         return (
             <div
@@ -871,7 +880,13 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                     renderAsClusterChild
                         ? 'univer-grid'
                         : getContextMenuQuickGroupClassName(menuSchema, visibleSchemas, index, sizeVariant),
-                    hasSeparator && borderBottomClassName
+                    isCompactQuickLayout && clsx(
+                        'univer-px-0',
+                        titleNode
+                            ? 'univer-gap-2 univer-pb-1.5 univer-pt-2'
+                            : 'univer-gap-1 univer-pb-2 univer-pt-1.5'
+                    ),
+                    hasSeparator && !isCompactQuickLayout && borderBottomClassName
                 )}
             >
                 {titleNode}
@@ -909,6 +924,8 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                 const titleNode = renderMenuSchemaHeader(menuSchema);
 
                 if (groupedSchemas.length > 1) {
+                    const mergedMenuSchema = mergeContextMenuQuickGroupSchemas(groupedSchemas);
+
                     return (
                         <div
                             key={groupedSchemas.map((schema) => schema.key).join('-')}
@@ -917,11 +934,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                                 hasSeparator && borderBottomClassName
                             )}
                         >
-                            {groupedSchemas.map((groupedMenuSchema, groupedIndex) => renderQuickLayoutGroup(
-                                groupedMenuSchema,
-                                startIndex + groupedIndex,
-                                true
-                            ))}
+                            {renderQuickLayoutGroup(mergedMenuSchema, startIndex, true)}
                         </div>
                     );
                 }
@@ -1041,7 +1054,13 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
 
         const titleContent = (
             <strong
-                className={getContextMenuHeaderClassName(sizeVariant)}
+                className={clsx(
+                    getContextMenuHeaderClassName(sizeVariant),
+                    menuSchema.quickLayoutVariant === 'compact' && `
+                      !univer-px-0 !univer-text-sm !univer-font-medium !univer-text-gray-800
+                      dark:!univer-text-gray-100
+                    `
+                )}
             >
                 {localeService.t(menuSchema.title)}
             </strong>
@@ -1146,6 +1165,9 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
 
     const hasSelectionSubmenu = selections.length > 0;
     const hasSubItemSubmenu = subMenuItems.length > 0;
+    const hasCompactQuickSubmenu = hasSubItemSubmenu && subMenuItems.some(
+        (item) => item.quickLayoutVariant === 'compact'
+    );
     const hasSubmenu = hasSelectionSubmenu || hasSubItemSubmenu;
     const submenuVisible = hasSubmenu && activeSubmenuKey === menuKey;
     const selectionsCommandId = selectorItem.selectionsCommandId;
@@ -1428,7 +1450,11 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                             <div
                                 className={clsx(
                                     getContextMenuSubmenuPanelClassName(sizeVariant),
-                                    scrollbarClassName
+                                    scrollbarClassName,
+                                    hasCompactQuickSubmenu && `
+                                      !univer-rounded-lg !univer-p-3
+                                      dark:!univer-border-gray-600
+                                    `
                                 )}
                                 style={{
                                     maxHeight: maxMenuHeight,

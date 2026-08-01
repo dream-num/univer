@@ -43,7 +43,7 @@ const tinyMenuGroupVariants = cva('univer-menu-item-group univer-px-0', {
         variant: {
             default: 'univer-gap-1.5 univer-p-0.5',
             paragraphT: 'univer-gap-2 univer-p-1',
-            compactParagraph: 'univer-gap-0.5 univer-p-0',
+            compactParagraph: 'univer-gap-1 univer-p-0',
         },
         layout: {
             grid: 'univer-grid',
@@ -120,7 +120,7 @@ const tinyMenuIconVariants = cva(
             variant: {
                 default: 'univer-size-4',
                 paragraphT: 'univer-size-5',
-                compactParagraph: 'univer-size-5',
+                compactParagraph: 'univer-size-6',
             },
         },
         defaultVariants: {
@@ -130,7 +130,7 @@ const tinyMenuIconVariants = cva(
 );
 
 function getTinyMenuVariant(sizeVariant: TinyMenuSizeVariant, layoutVariant: TinyMenuLayoutVariant): TinyMenuVariant {
-    if (sizeVariant === 'paragraph-t' && layoutVariant === 'compact') {
+    if (layoutVariant === 'compact') {
         return 'compactParagraph';
     }
 

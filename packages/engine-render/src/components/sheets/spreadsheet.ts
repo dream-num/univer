@@ -181,6 +181,10 @@ interface IBlitRect {
     dh: number;
 }
 
+function boundsOverlap(a: IBoundRectNoAngle, b: IBoundRectNoAngle) {
+    return a.left <= b.right && a.right >= b.left && a.top <= b.bottom && a.bottom >= b.top;
+}
+
 /**
  * Clip a blit source rectangle to the source canvas bounds and shrink the destination
  * rectangle proportionally, as required by the HTML spec:
@@ -350,7 +354,9 @@ export class Spreadsheet extends SheetComponent {
             extension.draw(ctx, parentScale, spreadsheetSkeleton, extensionDiffRanges, {
                 viewRanges: extensionViewRanges,
                 checkOutOfViewBound: true,
-                fontRenderRanges: extension === this._fontExtension ? spreadsheetSkeleton.incrementalFontRenderRanges : undefined,
+                fontRenderRanges: extension === this._fontExtension && !hasMergeData
+                    ? spreadsheetSkeleton.incrementalFontRenderRanges
+                    : undefined,
                 hasMergeData,
                 viewportKey: viewportInfo.viewportKey,
                 viewBound: viewportInfo.cacheBound,
@@ -477,7 +483,8 @@ export class Spreadsheet extends SheetComponent {
             Math.abs(diffY) * scaleY >= cacheCanvas.getHeight() * cachePixelRatio;
         const hasMergeData = spreadsheetSkeleton.worksheet.getMergeData().length > 0;
         const isScrolling = diffX !== 0 || diffY !== 0;
-        const shouldRefreshCache = isDirty || isForceDirty || isScrollJumpOutsideCache || (hasMergeData && isScrolling) || (shouldCacheUpdate && diffX !== 0);
+        const mergeRepairBounds = this._getMergeRepairBounds(spreadsheetSkeleton, viewportInfo, hasMergeData, isScrolling);
+        const shouldRefreshCache = isDirty || isForceDirty || isScrollJumpOutsideCache || (shouldCacheUpdate && diffX !== 0);
         if (diffBounds.length === 0 || (diffX === 0 && diffY === 0) || shouldRefreshCache) {
             if (shouldRefreshCache) {
                 this.addRenderTagToScene('scrolling', false);
@@ -498,7 +505,7 @@ export class Spreadsheet extends SheetComponent {
                 scaleY,
                 columnHeaderHeightAndMarginTop,
                 rowHeaderWidthAndMarginLeft,
-            });
+            }, mergeRepairBounds);
         }
         // support for browser native zoom (only windows has this problem)
         const sourceLeft = bufferEdgeSizeX * Math.min(1, window.devicePixelRatio);
@@ -510,7 +517,39 @@ export class Spreadsheet extends SheetComponent {
         cacheCtx.restore();
     }
 
-    paintNewAreaForScrolling(viewportInfo: IViewportInfo, param: IPaintForScrolling) {
+    private _getMergeRepairBounds(spreadsheetSkeleton: SpreadsheetSkeleton, viewportInfo: IViewportInfo, hasMergeData: boolean, isScrolling: boolean) {
+        if (!hasMergeData || !isScrolling) {
+            return [];
+        }
+
+        const { columnWidthAccumulation, rowHeightAccumulation, rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop } = spreadsheetSkeleton;
+        const dirtyBounds = viewportInfo.shouldCacheUpdate ? viewportInfo.diffCacheBounds : viewportInfo.diffBounds;
+        const mergeBounds: IBoundRectNoAngle[] = [];
+        const visited = new Set<string>();
+
+        for (const dirtyBound of dirtyBounds) {
+            const range = spreadsheetSkeleton.getRangeByViewBound(dirtyBound);
+            const mergeRanges = spreadsheetSkeleton.worksheet.getMergedCellRange(range.startRow, range.startColumn, range.endRow, range.endColumn);
+            for (const mergeRange of mergeRanges) {
+                const key = `${mergeRange.startRow}:${mergeRange.startColumn}`;
+                if (visited.has(key)) {
+                    continue;
+                }
+                visited.add(key);
+
+                mergeBounds.push({
+                    left: (columnWidthAccumulation[mergeRange.startColumn - 1] ?? 0) + rowHeaderWidthAndMarginLeft,
+                    top: (rowHeightAccumulation[mergeRange.startRow - 1] ?? 0) + columnHeaderHeightAndMarginTop,
+                    right: columnWidthAccumulation[mergeRange.endColumn] + rowHeaderWidthAndMarginLeft,
+                    bottom: rowHeightAccumulation[mergeRange.endRow] + columnHeaderHeightAndMarginTop,
+                });
+            }
+        }
+
+        return mergeBounds;
+    }
+
+    paintNewAreaForScrolling(viewportInfo: IViewportInfo, param: IPaintForScrolling, mergeRepairBounds: IBoundRectNoAngle[] = []) {
         const { cacheCanvas, cacheCtx, mainCtx, topOrigin, leftOrigin, bufferEdgeX, bufferEdgeY, scaleX, scaleY, columnHeaderHeightAndMarginTop, rowHeaderWidthAndMarginLeft } = param;
         const { shouldCacheUpdate, diffCacheBounds, diffX, diffY } = viewportInfo;
         cacheCtx.save();
@@ -529,8 +568,20 @@ export class Spreadsheet extends SheetComponent {
         // - (leftOrigin - bufferEdgeX)  ----> simplified to - leftOrigin + bufferEdgeX
         cacheCtx.translateWithPrecision(m.e / m.a - leftOrigin + bufferEdgeX, m.f / m.d - topOrigin + bufferEdgeY);
 
-        if (shouldCacheUpdate) {
-            for (const diffBound of diffCacheBounds) {
+        const repaintBounds = shouldCacheUpdate ? diffCacheBounds.map((bound) => ({ ...bound })) : [];
+        for (const mergeRepairBound of mergeRepairBounds) {
+            const overlappingBound = repaintBounds.find((bound) => boundsOverlap(bound, mergeRepairBound));
+            if (overlappingBound) {
+                overlappingBound.left = Math.min(overlappingBound.left, mergeRepairBound.left);
+                overlappingBound.top = Math.min(overlappingBound.top, mergeRepairBound.top);
+                overlappingBound.right = Math.max(overlappingBound.right, mergeRepairBound.right);
+                overlappingBound.bottom = Math.max(overlappingBound.bottom, mergeRepairBound.bottom);
+            } else {
+                repaintBounds.push(mergeRepairBound);
+            }
+        }
+        if (repaintBounds.length) {
+            for (const diffBound of repaintBounds) {
                 const { left: diffLeft, right: diffRight, bottom: diffBottom, top: diffTop } = diffBound;
 
                 // When this.draw, ctx.translate cell offset is relative to spreadsheet content

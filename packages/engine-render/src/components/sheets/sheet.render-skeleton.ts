@@ -433,11 +433,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             !!vpInfo.diffY
         );
         const hasMergeData = this.worksheet.getMergeData().length > 0;
-        const isScrolling = !!vpInfo && (!!vpInfo.diffX || !!vpInfo.diffY);
-        const shouldRefreshCacheForScroll = isIncrementalScroll && (
-            (hasMergeData && isScrolling) ||
-            (!!vpInfo.shouldCacheUpdate && !!vpInfo.diffX)
-        );
+        const shouldRefreshCacheForScroll = isIncrementalScroll && !!vpInfo.shouldCacheUpdate && !!vpInfo.diffX;
         const shouldUseIncrementalStyleRange = isIncrementalScroll && !shouldRefreshCacheForScroll;
         const styleRanges = shouldUseIncrementalStyleRange
             ? (vpInfo.shouldCacheUpdate ? (vpInfo.diffCacheBounds?.map((bound) => this.getRangeByViewBound(bound)) ?? []) : [])

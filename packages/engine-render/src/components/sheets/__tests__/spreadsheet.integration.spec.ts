@@ -828,10 +828,10 @@ describe('spreadsheet integration', () => {
 
         skeleton.setStylesCache(createViewportInfo(scene, cacheCanvas, {
             diffBounds: [createBound(100, 60, 220, 140)],
-            diffCacheBounds: [],
+            diffCacheBounds: [createBound(100, 60, 220, 140)],
             diffX: 0,
             diffY: 12,
-            shouldCacheUpdate: 0,
+            shouldCacheUpdate: 1,
             isDirty: 0,
             isForceDirty: false,
         }));
@@ -1064,7 +1064,42 @@ describe('spreadsheet integration', () => {
         cacheCanvas.dispose();
     });
 
-    it('refreshes cache for merged sheets while scrolling to keep merged text visible', () => {
+    it('repairs the full merged range incrementally so merged text remains visible', () => {
+        const { spreadsheet, skeleton, mainCanvas, cacheCanvas, scene } = fixture;
+        const context = mainCanvas.getContext();
+        const mergeInfo = skeleton.getCellWithCoordByIndex(2, 2, false).mergeInfo;
+        const mergedBound = createBound(
+            mergeInfo.startX + skeleton.rowHeaderWidthAndMarginLeft,
+            mergeInfo.startY + skeleton.columnHeaderHeightAndMarginTop,
+            mergeInfo.endX + skeleton.rowHeaderWidthAndMarginLeft,
+            mergeInfo.endY + skeleton.columnHeaderHeightAndMarginTop
+        );
+        const viewportInfo = createViewportInfo(scene, cacheCanvas, {
+            diffBounds: [createBound(mergedBound.right - 8, mergedBound.top, mergedBound.right, mergedBound.bottom)],
+            diffCacheBounds: [],
+            diffX: 0,
+            diffY: -8,
+            isDirty: 0,
+            isForceDirty: false,
+            shouldCacheUpdate: 0,
+        });
+        spreadsheet.makeDirty(false);
+        spreadsheet.makeForceDirty(false);
+
+        const paintSpy = vi.spyOn(spreadsheet, 'paintNewAreaForScrolling');
+        const refreshSpy = vi.spyOn(spreadsheet, 'refreshCacheCanvas');
+        const drawSpy = vi.spyOn(spreadsheet, 'draw').mockImplementation(() => {});
+
+        spreadsheet.renderByViewports(context, viewportInfo, skeleton);
+
+        expect(refreshSpy).not.toHaveBeenCalled();
+        expect(paintSpy).toHaveBeenCalledOnce();
+        expect(drawSpy).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
+            diffBounds: [mergedBound],
+        }));
+    });
+
+    it('does not repaint merged cells outside the scroll diff', () => {
         const { spreadsheet, skeleton, mainCanvas, cacheCanvas, scene } = fixture;
         const context = mainCanvas.getContext();
         const viewportInfo = createViewportInfo(scene, cacheCanvas, {
@@ -1079,13 +1114,33 @@ describe('spreadsheet integration', () => {
         spreadsheet.makeDirty(false);
         spreadsheet.makeForceDirty(false);
 
-        const paintSpy = vi.spyOn(spreadsheet, 'paintNewAreaForScrolling');
-        const refreshSpy = vi.spyOn(spreadsheet, 'refreshCacheCanvas');
+        const drawSpy = vi.spyOn(spreadsheet, 'draw').mockImplementation(() => {});
 
         spreadsheet.renderByViewports(context, viewportInfo, skeleton);
 
-        expect(refreshSpy).toHaveBeenCalledOnce();
-        expect(paintSpy).not.toHaveBeenCalled();
+        expect(drawSpy).not.toHaveBeenCalled();
+    });
+
+    it('uses each repair bound when drawing merged fonts', () => {
+        const { spreadsheet, skeleton, mainCanvas, cacheCanvas, scene } = fixture;
+        const context = mainCanvas.getContext();
+        const fontExtension = { uKey: 'DefaultFontExtension', draw: vi.fn() };
+        (spreadsheet as any)._fontExtension = fontExtension;
+        vi.spyOn(spreadsheet as any, 'getExtensionsByOrder').mockReturnValue([fontExtension]);
+        (skeleton as any)._incrementalFontRenderRanges = [{
+            startRow: 10,
+            endRow: 10,
+            startColumn: 0,
+            endColumn: 4,
+        }];
+        (spreadsheet as any)._refreshIncrementalState = true;
+
+        spreadsheet.draw(context, createViewportInfo(scene, cacheCanvas, {
+            diffBounds: [createBound(100, 60, 220, 140)],
+        }));
+
+        expect(fontExtension.draw.mock.calls[0][4].fontRenderRanges).toBeUndefined();
+        (spreadsheet as any)._refreshIncrementalState = false;
     });
 
     it('refreshes cache for horizontal cache updates to avoid exposing stale cache edges', () => {

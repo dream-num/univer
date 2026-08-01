@@ -15,6 +15,7 @@
  */
 
 import type { Nullable } from '@univerjs/core';
+import type { DataStreamTreeNode } from '../data-stream-tree-node';
 import { DataStreamTreeNodeType, DataStreamTreeTokenType } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { DocumentEditArea, DocumentViewModel, parseDataStreamToTree } from '../document-view-model';
@@ -86,6 +87,26 @@ describe('DocumentViewModel', () => {
             // Second section (empty)
             expect(sectionList[1].children.length).toBe(1);
             expect(sectionList[1].children[0].content).toBe('');
+        });
+
+        it('projects legacy custom blocks after a paragraph terminator into a renderable paragraph', () => {
+            const T = DataStreamTreeTokenType;
+            const dataStream = `${T.TABLE_START}${T.TABLE_ROW_START}${T.TABLE_CELL_START}${T.PARAGRAPH}${T.CUSTOM_BLOCK}${T.SECTION_BREAK}${T.TABLE_CELL_END}${T.TABLE_ROW_END}${T.TABLE_END}${T.PARAGRAPH}${T.SECTION_BREAK}`;
+            const { sectionList } = parseDataStreamToTree(dataStream);
+            const tableCell = findFirstNodeByType(sectionList[0], DataStreamTreeNodeType.TABLE_CELL);
+            expect(tableCell).not.toBeNull();
+            if (!tableCell) {
+                throw new Error('Expected a table-cell node');
+            }
+            const paragraphs = tableCell.children[0].children;
+
+            expect(paragraphs.map((paragraph: DataStreamTreeNode) => paragraph.content)).toEqual([
+                T.PARAGRAPH,
+                `${T.CUSTOM_BLOCK}${T.SECTION_BREAK}`,
+            ]);
+            expect(paragraphs[1].startIndex).toBe(4);
+            expect(paragraphs[1].endIndex).toBe(4);
+            expect(paragraphs[1].blocks).toEqual([4]);
         });
 
         it('should parse table/custom-block and build table node cache', () => {

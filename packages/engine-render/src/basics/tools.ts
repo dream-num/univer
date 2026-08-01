@@ -41,6 +41,11 @@ const PI_OVER_DEG180 = Math.PI / DEG180;
 const DEG180_OVER_PI = DEG180 / Math.PI;
 const RGB_PAREN = 'rgb(';
 const RGBA_PAREN = 'rgba(';
+const SCROLLABLE_OVERFLOW_EPSILON = 0.5;
+
+export function hasScrollableOverflow(contentSize: number, viewportSize: number): boolean {
+    return contentSize - viewportSize > SCROLLABLE_OVERFLOW_EPSILON;
+}
 
 // TODO :move to core @jerry
 export const getColor = (RgbArray: number[], opacity?: number): string => {

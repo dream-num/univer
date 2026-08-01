@@ -23,10 +23,11 @@ import { TextWrappingStyle } from '@univerjs/docs-drawing';
  */
 export interface IFDocumentImageEnumMixin {
     /**
-     * Represents the wrapping styles used by docs image operations.
+     * Represents the text wrapping styles used by document drawings, including images and Shapes.
      *
      * Prefer `INLINE`, `WRAP_SQUARE`, or `WRAP_TOP_AND_BOTTOM` for ordinary document content.
      * `BEHIND_TEXT` and `IN_FRONT_OF_TEXT` are overlay styles that do not cause text to reflow.
+     * Use this property whenever a Facade signature references `TextWrappingStyle`.
      * @example
      * ```ts
      * const fDocument = univerAPI.getActiveDocument();
@@ -35,7 +36,7 @@ export interface IFDocumentImageEnumMixin {
      *   imageSourceType: univerAPI.Enum.ImageSourceType.URL,
      *   width: 320,
      *   // Float the image and wrap body text around its rectangular bounds.
-     *   wrappingStyle: univerAPI.Enum.DocsImageWrappingStyle.WRAP_SQUARE,
+     *   wrappingStyle: univerAPI.Enum.TextWrappingStyle.WRAP_SQUARE,
      *   textRange: {
      *     startOffset: 30,
      *   },
@@ -43,7 +44,7 @@ export interface IFDocumentImageEnumMixin {
      * console.log(image);
      * ```
      */
-    DocsImageWrappingStyle: typeof TextWrappingStyle;
+    TextWrappingStyle: typeof TextWrappingStyle;
 
     /**
      * Represents the horizontal position types used by docs image operations.
@@ -83,7 +84,7 @@ export interface IFDocumentImageEnumMixin {
 }
 
 export class FDocumentImageEnumMixin extends FEnum implements IFDocumentImageEnumMixin {
-    override get DocsImageWrappingStyle(): typeof TextWrappingStyle {
+    override get TextWrappingStyle(): typeof TextWrappingStyle {
         return TextWrappingStyle;
     }
 

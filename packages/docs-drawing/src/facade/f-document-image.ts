@@ -301,7 +301,7 @@ export class FDocumentImage {
      *
      * if (image) {
      *   // Float the image beside body text without covering it.
-     *   const success = image.setWrappingStyle(univerAPI.Enum.DocsImageWrappingStyle.WRAP_SQUARE);
+     *   const success = image.setWrappingStyle(univerAPI.Enum.TextWrappingStyle.WRAP_SQUARE);
      *   console.log(success);
      * }
      * ```

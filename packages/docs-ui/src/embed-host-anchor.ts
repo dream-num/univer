@@ -45,6 +45,8 @@ export interface IDocsCustomBlockLayoutViewport {
     height: number;
     layoutWidth?: number;
     offsetLeft?: number;
+    pageContentWidth?: number;
+    viewScale?: number;
     viewportHeight?: number;
     width: number;
 }
@@ -62,6 +64,7 @@ export function resolveDocsCustomBlockRenderViewport(params: IDocsCustomBlockRen
         : undefined;
     const height = sheetLike ? contentHeight : fallbackHeight;
     const viewportHeight = sheetLike && visibleCanvasHeight != null ? Math.min(contentHeight, visibleCanvasHeight) : height;
+    const viewScale = params.scale && params.scale > 0 ? params.scale : 1;
 
     if (!sheetLike) {
         return {
@@ -88,13 +91,14 @@ export function resolveDocsCustomBlockRenderViewport(params: IDocsCustomBlockRen
             height,
             layoutWidth,
             offsetLeft: 0,
+            pageContentWidth,
+            viewScale,
             viewportHeight,
             width: layoutWidth,
         };
     }
 
-    const scale = params.scale && params.scale > 0 ? params.scale : 1;
-    const inset = MODERN_DOCS_CUSTOM_BLOCK_VIEWPORT_INSET / scale;
+    const inset = MODERN_DOCS_CUSTOM_BLOCK_VIEWPORT_INSET / viewScale;
     const docsLeft = params.docsLeft ?? 0;
     const fallbackViewportLeft = docsLeft + inset;
     const fallbackViewportWidth = Math.max(0, pageWidth! - inset * 2);
@@ -116,6 +120,8 @@ export function resolveDocsCustomBlockRenderViewport(params: IDocsCustomBlockRen
         height,
         layoutWidth,
         offsetLeft: 0,
+        pageContentWidth,
+        viewScale,
         viewportHeight,
         width: layoutWidth,
     };

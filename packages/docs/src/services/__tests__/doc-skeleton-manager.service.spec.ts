@@ -88,5 +88,13 @@ describe('DocSkeletonManagerService', () => {
 
         expect(service.getViewModel().getDataModel().getUnitId()).toBe('doc-1');
         expect(service.getSkeleton()).toBeTruthy();
+
+        const publishedSkeletons: unknown[] = [];
+        const subscription = service.currentSkeleton$.subscribe((skeleton) => publishedSkeletons.push(skeleton));
+        const skeleton = service.recalculate();
+
+        expect(skeleton).toBe(service.getSkeleton());
+        expect(publishedSkeletons).toEqual([skeleton, skeleton]);
+        subscription.unsubscribe();
     });
 });

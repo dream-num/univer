@@ -90,7 +90,7 @@ export interface IFDocumentImageMixin {
      *   imageSourceType: univerAPI.Enum.ImageSourceType.URL,
      *   width: 320,
      *   // Keep the image in the text flow so it cannot cover surrounding text.
-     *   wrappingStyle: univerAPI.Enum.DocsImageWrappingStyle.INLINE,
+     *   wrappingStyle: univerAPI.Enum.TextWrappingStyle.INLINE,
      *   textRange: {
      *     startOffset: 30,
      *   },
@@ -106,7 +106,7 @@ export interface IFDocumentImageMixin {
      *   imageSourceType: univerAPI.Enum.ImageSourceType.URL,
      *   width: 320,
      *   // Float the image and let body text flow beside its rectangular bounds.
-     *   wrappingStyle: univerAPI.Enum.DocsImageWrappingStyle.WRAP_SQUARE,
+     *   wrappingStyle: univerAPI.Enum.TextWrappingStyle.WRAP_SQUARE,
      *   textRange: {
      *     startOffset: 30,
      *   },

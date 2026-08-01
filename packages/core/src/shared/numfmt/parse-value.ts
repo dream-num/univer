@@ -398,6 +398,18 @@ interface IDateLocaleData {
     locale?: string;
 }
 
+type DateLocaleLookups = Omit<IDateLocaleData, 'locale'>;
+
+interface ICachedDateLocaleLookups {
+    lookups: DateLocaleLookups;
+    mmmm: string[];
+    mmm: string[];
+    dddd: string[];
+    ddd: string[];
+}
+
+const dateLocaleLookupCache = new WeakMap<LocaleData, ICachedDateLocaleLookups>();
+
 interface IDateParseState {
     path: string;
     sep?: string;
@@ -585,15 +597,41 @@ const getLookups = (values: string[], symbol: LookupSymbol): LocaleLookup[] => {
     return lookups;
 };
 
+const tokensMatch = (values: string[], cachedValues: string[]): boolean =>
+    values.length === cachedValues.length && values.every((value, index) => value === cachedValues[index]);
+
+const getDateLocaleLookups = (locale: LocaleData): DateLocaleLookups => {
+    let cached = dateLocaleLookupCache.get(locale);
+    if (
+        !cached ||
+        !tokensMatch(locale.mmmm, cached.mmmm) ||
+        !tokensMatch(locale.mmm, cached.mmm) ||
+        !tokensMatch(locale.dddd, cached.dddd) ||
+        !tokensMatch(locale.ddd, cached.ddd)
+    ) {
+        cached = {
+            lookups: {
+                mon: getLookups(locale.mmmm, 'F').concat(getLookups(locale.mmm, 'M')),
+                mp: locale.mmm[0].at(-1) === '.',
+                day: getLookups(locale.dddd, 'l').concat(getLookups(locale.ddd, 'D')),
+                dp: locale.ddd[0].at(-1) === '.',
+            },
+            mmmm: [...locale.mmmm],
+            mmm: [...locale.mmm],
+            dddd: [...locale.dddd],
+            ddd: [...locale.ddd],
+        };
+        dateLocaleLookupCache.set(locale, cached);
+    }
+    return cached.lookups;
+};
+
 /** Parse a date or datetime string and return its serial value and format. */
 // eslint-disable-next-line complexity
 export function parseDate(value: string, options: ParseOptions = {}): ParseData<number> | null {
     const l10n = getLocale(options.locale || '') || defaultLocale;
     const localeData: IDateLocaleData = {
-        mon: getLookups(l10n.mmmm, 'F').concat(getLookups(l10n.mmm, 'M')),
-        mp: l10n.mmm[0].at(-1) === '.',
-        day: getLookups(l10n.dddd, 'l').concat(getLookups(l10n.ddd, 'D')),
-        dp: l10n.ddd[0].at(-1) === '.',
+        ...getDateLocaleLookups(l10n),
         locale: options.locale,
     };
     const date = nextToken(

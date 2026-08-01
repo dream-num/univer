@@ -58,6 +58,52 @@ test('cells rendering after scrolling', async () => {
     });
     await page.waitForTimeout(1000);
 
+    await page.locator(SHEET_MAIN_CANVAS_ID).evaluate((source: HTMLCanvasElement) => {
+        const reference = document.createElement('canvas');
+        reference.id = 'merge-scroll-incremental-reference';
+        reference.width = source.width;
+        reference.height = source.height;
+        const referenceContext = reference.getContext('2d');
+        if (!referenceContext) {
+            throw new Error('Failed to get incremental reference canvas context');
+        }
+        referenceContext.drawImage(source, 0, 0);
+        document.body.appendChild(reference);
+    });
+
+    await page.setViewportSize({ width: 1281, height: 1280 });
+    await page.waitForTimeout(100);
+    await page.setViewportSize({ width: 1280, height: 1280 });
+    await page.waitForTimeout(500);
+
+    const differentPixels = await page.locator(SHEET_MAIN_CANVAS_ID).evaluate((source: HTMLCanvasElement) => {
+        const reference = document.querySelector<HTMLCanvasElement>('#merge-scroll-incremental-reference');
+        const sourceContext = source.getContext('2d');
+        const referenceContext = reference?.getContext('2d');
+        if (!reference || !sourceContext || !referenceContext) {
+            throw new Error('Failed to read canvas pixels');
+        }
+        if (source.width !== reference.width || source.height !== reference.height) {
+            return Number.POSITIVE_INFINITY;
+        }
+        const actual = sourceContext.getImageData(0, 0, source.width, source.height).data;
+        const expected = referenceContext.getImageData(0, 0, reference.width, reference.height).data;
+        let count = 0;
+        for (let index = 0; index < actual.length; index += 4) {
+            if (
+                actual[index] !== expected[index] ||
+                actual[index + 1] !== expected[index + 1] ||
+                actual[index + 2] !== expected[index + 2] ||
+                actual[index + 3] !== expected[index + 3]
+            ) {
+                count++;
+            }
+        }
+        reference.remove();
+        return count;
+    });
+    expect(differentPixels).toBe(0);
+
     const filename = generateSnapshotName('mergedCellsRenderingScrolling');
     const screenshot = await page.locator(SHEET_MAIN_CANVAS_ID).screenshot();
     await expect(screenshot).toMatchSnapshot(filename, { maxDiffPixelRatio: 0.005 });

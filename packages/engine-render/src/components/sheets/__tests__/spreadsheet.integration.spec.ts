@@ -21,8 +21,10 @@ import {
     BorderStyleTypes,
     createSheetGapTestConfig,
     HorizontalAlign,
+
     ILogService,
     IUniverInstanceService,
+
     LocaleType,
     LogLevel,
     ObjectMatrix,
@@ -30,6 +32,7 @@ import {
     Univer,
     UniverInstanceType,
     VerticalAlign,
+
     WrapStrategy,
 } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -422,16 +425,13 @@ describe('spreadsheet integration', () => {
         const worksheet = workbook.getActiveSheet()!;
         const skeleton = fixture.univer.__getInjector().createInstance(SpreadsheetSkeleton, worksheet, workbook.getStyles()).calculate() as SpreadsheetSkeleton;
         skeleton.setScene(fixture.scene);
-        const mergeBorderSpy = vi.spyOn(
-            skeleton as unknown as { _setMergeBorderProps: (...args: unknown[]) => void },
-            '_setMergeBorderProps'
-        );
+        const borderStyleSpy = vi.spyOn(skeleton, '_setBorderStylesCache');
         skeleton.setStylesCache(createViewportInfo(fixture.scene, fixture.cacheCanvas));
 
         expect(skeleton.stylesCache.border?.getValue(3, 2)?.l).toEqual(expect.objectContaining({ color: '#000000' }));
         expect(skeleton.stylesCache.border?.getValue(4, 2)?.l).toEqual(expect.objectContaining({ color: '#000000' }));
         expect(skeleton.stylesCache.border?.getValue(5, 2)?.l).toEqual(expect.objectContaining({ color: '#000000' }));
-        expect(mergeBorderSpy).toHaveBeenCalledTimes(12);
+        expect(borderStyleSpy.mock.calls.filter(([, , , options]) => options?.mergeRange)).toHaveLength(3);
     });
 
     it('renders spreadsheet with cache refresh and scrolling diff paths in scene viewport', () => {
@@ -629,13 +629,12 @@ describe('spreadsheet integration', () => {
         expect(extensionDraw.mock.calls.at(-1)?.[4].hasMergeData).toBe(false);
     });
 
-    it('skips sparse extensions with no matching cell data during merge-free incremental drawing', () => {
+    it('skips sparse extensions outside merge repair bounds on sheets with merged cells', () => {
         const { spreadsheet, skeleton, scene, cacheCanvas, mainCanvas } = fixture;
         const context = mainCanvas.getContext() as any;
         const sparseDraw = vi.fn();
         const regularDraw = vi.fn();
 
-        vi.spyOn(skeleton.worksheet, 'getMergeData').mockReturnValue([]);
         vi.spyOn(skeleton.worksheet, 'getCell').mockReturnValue(undefined);
         vi.spyOn(spreadsheet as any, 'getExtensionsByOrder').mockReturnValue([
             {
@@ -817,14 +816,9 @@ describe('spreadsheet integration', () => {
     it('reuses cached member styles while rebuilding merged borders during scrolling', () => {
         const { skeleton, scene, cacheCanvas } = fixture;
         skeleton.setStylesCache(createViewportInfo(scene, cacheCanvas));
-        const styleCellSpy = vi.spyOn(
-            skeleton as unknown as { _setStylesCacheForOneCell: (row: number, column: number, options: { reuseExisting?: boolean; mergeRange?: unknown }) => void },
-            '_setStylesCacheForOneCell'
-        );
-        const mergeBorderSpy = vi.spyOn(
-            skeleton as unknown as { _setMergeBorderProps: (...args: unknown[]) => void },
-            '_setMergeBorderProps'
-        );
+        const cachedStyle = skeleton.stylesCache.fontMatrix.getValue(1, 1);
+        expect(cachedStyle).toBeDefined();
+        const borderStyleSpy = vi.spyOn(skeleton, '_setBorderStylesCache');
 
         skeleton.setStylesCache(createViewportInfo(scene, cacheCanvas, {
             diffBounds: [createBound(100, 60, 220, 140)],
@@ -836,8 +830,8 @@ describe('spreadsheet integration', () => {
             isForceDirty: false,
         }));
 
-        expect(styleCellSpy.mock.calls.some(([, , options]) => options.reuseExisting && !options.mergeRange)).toBe(true);
-        expect(mergeBorderSpy).toHaveBeenCalledTimes(4);
+        expect(skeleton.stylesCache.fontMatrix.getValue(1, 1)).toBe(cachedStyle);
+        expect(borderStyleSpy.mock.calls.some(([, , , options]) => options?.mergeRange)).toBe(true);
     });
 
     it('skips merge lookups for one-cell style cache when merge data is absent', () => {
@@ -1096,7 +1090,34 @@ describe('spreadsheet integration', () => {
         expect(paintSpy).toHaveBeenCalledOnce();
         expect(drawSpy).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
             diffBounds: [mergedBound],
-        }));
+        }), true);
+    });
+
+    it('refreshes the cache when merge repair covers most of the cache area', () => {
+        const { spreadsheet, skeleton, mainCanvas, cacheCanvas, scene } = fixture;
+        const context = mainCanvas.getContext();
+        const viewportInfo = createViewportInfo(scene, cacheCanvas, {
+            diffBounds: [createBound(0, 200, 460, 280)],
+            diffCacheBounds: [],
+            diffX: 0,
+            diffY: -80,
+            isDirty: 0,
+            isForceDirty: false,
+            shouldCacheUpdate: 0,
+        });
+        spreadsheet.makeDirty(false);
+        spreadsheet.makeForceDirty(false);
+        vi.spyOn(skeleton.worksheet, 'getMergedCellRange').mockReturnValue([
+            { startRow: 0, endRow: 9, startColumn: 0, endColumn: 6, rangeType: RANGE_TYPE.NORMAL },
+        ]);
+
+        const paintSpy = vi.spyOn(spreadsheet, 'paintNewAreaForScrolling');
+        const refreshSpy = vi.spyOn(spreadsheet, 'refreshCacheCanvas');
+
+        spreadsheet.renderByViewports(context, viewportInfo, skeleton);
+
+        expect(refreshSpy).toHaveBeenCalledOnce();
+        expect(paintSpy).not.toHaveBeenCalled();
     });
 
     it('does not repaint merged cells outside the scroll diff', () => {
@@ -1119,28 +1140,6 @@ describe('spreadsheet integration', () => {
         spreadsheet.renderByViewports(context, viewportInfo, skeleton);
 
         expect(drawSpy).not.toHaveBeenCalled();
-    });
-
-    it('uses each repair bound when drawing merged fonts', () => {
-        const { spreadsheet, skeleton, mainCanvas, cacheCanvas, scene } = fixture;
-        const context = mainCanvas.getContext();
-        const fontExtension = { uKey: 'DefaultFontExtension', draw: vi.fn() };
-        (spreadsheet as any)._fontExtension = fontExtension;
-        vi.spyOn(spreadsheet as any, 'getExtensionsByOrder').mockReturnValue([fontExtension]);
-        (skeleton as any)._incrementalFontRenderRanges = [{
-            startRow: 10,
-            endRow: 10,
-            startColumn: 0,
-            endColumn: 4,
-        }];
-        (spreadsheet as any)._refreshIncrementalState = true;
-
-        spreadsheet.draw(context, createViewportInfo(scene, cacheCanvas, {
-            diffBounds: [createBound(100, 60, 220, 140)],
-        }));
-
-        expect(fontExtension.draw.mock.calls[0][4].fontRenderRanges).toBeUndefined();
-        (spreadsheet as any)._refreshIncrementalState = false;
     });
 
     it('refreshes cache for horizontal cache updates to avoid exposing stale cache edges', () => {

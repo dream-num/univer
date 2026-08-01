@@ -737,6 +737,41 @@ numfmtTest('parseDate locale support', (t) => {
     }
 });
 
+numfmtTest('parseDate refreshes cached locale tokens when locale data changes', (t) => {
+    const firstMonths = [
+        'cachejanuary',
+        'cachefebruary',
+        'cachemarch',
+        'cacheapril',
+        'cachemay',
+        'cachejune',
+        'cachejuly',
+        'cacheaugust',
+        'cacheseptember',
+        'cacheoctober',
+        'cachenovember',
+        'cachedecember',
+    ];
+    const secondMonths = firstMonths.map((month) => `new${month}`);
+    const expected = parseDate('13 January 1989', { locale: 'en' });
+
+    addLocale({ mmmm: firstMonths, mmm: firstMonths }, 'zz_cache');
+    t.deepEqual(parseDate('13 cachejanuary 1989', { locale: 'zz_cache' }), expected);
+
+    addLocale({ mmmm: secondMonths, mmm: secondMonths }, 'zz_cache');
+    t.deepEqual(parseDate('13 cachejanuary 1989', { locale: 'zz_cache' }), null);
+    t.deepEqual(parseDate('13 newcachejanuary 1989', { locale: 'zz_cache' }), expected);
+
+    const locale = getLocale('zz_cache');
+    t.ok(locale);
+    if (!locale) {
+        return;
+    }
+    locale.mmmm[0] = 'livecachejanuary';
+    t.deepEqual(parseDate('13 newcachejanuary 1989', { locale: 'zz_cache' }), null);
+    t.deepEqual(parseDate('13 livecachejanuary 1989', { locale: 'zz_cache' }), expected);
+});
+
 numfmtTest('parseTime locale support', (t) => {
     t.deepEqual(parseTime('01:31 a', { locale: 'fi' }), { v: 0.06319444444444444, z: 'hh:mm AM/PM' }, 'fi: 01:31 a');
     t.deepEqual(parseTime('01:31 am', { locale: 'fi' }), { v: 0.06319444444444444, z: 'hh:mm AM/PM' }, 'fi: 01:31 am');

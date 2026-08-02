@@ -301,9 +301,10 @@ export class DocDrawingAddRemoveController extends Disposable {
 
                 const renderObject = this._renderManagerService.getRenderUnitById(unitId);
                 const scene = renderObject?.scene;
-                if (scene == null) {
+                if (renderObject == null || scene == null) {
                     return false;
                 }
+                this._docRefreshDrawingsService.refreshDrawings(renderObject.with(DocSkeletonManagerService).getSkeleton());
                 const transformer = scene.getTransformerByCreate();
 
                 transformer.refreshControls();

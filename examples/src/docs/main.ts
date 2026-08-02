@@ -16,6 +16,7 @@ import zhCN from '@univerjs/mockdata/locales/zh-CN';
 import { UniverUIPlugin } from '@univerjs/ui';
 import { UniverWatermarkPlugin } from '@univerjs/watermark';
 import '@univerjs/docs/facade';
+import '@univerjs/docs-drawing/facade';
 import '@univerjs/docs-ui/facade';
 import '@univerjs/watermark/facade';
 import '../global.css';

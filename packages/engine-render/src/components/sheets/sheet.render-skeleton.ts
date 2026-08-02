@@ -433,21 +433,13 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             !!vpInfo.diffY
         );
         const hasMergeData = this.worksheet.getMergeData().length > 0;
-        const isScrolling = !!vpInfo && (!!vpInfo.diffX || !!vpInfo.diffY);
-        const shouldRefreshCacheForScroll = isIncrementalScroll && (
-            (hasMergeData && isScrolling) ||
-            (!!vpInfo.shouldCacheUpdate && !!vpInfo.diffX)
-        );
+        const shouldRefreshCacheForScroll = isIncrementalScroll && !!vpInfo.shouldCacheUpdate && !!vpInfo.diffX;
         const shouldUseIncrementalStyleRange = isIncrementalScroll && !shouldRefreshCacheForScroll;
         const styleRanges = shouldUseIncrementalStyleRange
             ? (vpInfo.shouldCacheUpdate ? (vpInfo.diffCacheBounds?.map((bound) => this.getRangeByViewBound(bound)) ?? []) : [])
             : [rowColumnSegment];
-        const visibleCellOptions: ISetStylesCacheForOneCellOptions | null = hasMergeData
-            ? null
-            : { cacheItem: { bg: true, border: true }, reuseExisting: shouldUseIncrementalStyleRange, hasMergeData, rowVisible: true };
-        const overflowCellOptions: ISetStylesCacheForOneCellOptions | null = hasMergeData
-            ? null
-            : { cacheItem: { bg: false, border: false }, reuseExisting: shouldUseIncrementalStyleRange, hasMergeData, rowVisible: true };
+        const visibleCellOptions: ISetStylesCacheForOneCellOptions = { cacheItem: { bg: true, border: true }, reuseExisting: isIncrementalScroll, hasMergeData, rowVisible: true };
+        const overflowCellOptions: ISetStylesCacheForOneCellOptions = { cacheItem: { bg: false, border: false }, reuseExisting: isIncrementalScroll, hasMergeData, rowVisible: true };
         this._incrementalFontRenderRanges = [];
 
         // clear cache out of visible range
@@ -488,7 +480,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                 }
 
                 for (let c = visibleStartColumn; c <= visibleEndColumn; c++) {
-                    this._setStylesCacheForOneCell(r, c, visibleCellOptions ?? { cacheItem: { bg: true, border: true }, reuseExisting: shouldUseIncrementalStyleRange, hasMergeData, rowVisible: true });
+                    this._setStylesCacheForOneCell(r, c, visibleCellOptions);
                 }
                 if (shouldUseIncrementalStyleRange) {
                     pushRowRange(this._incrementalFontRenderRanges, r, visibleStartColumn, visibleEndColumn);
@@ -496,7 +488,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
 
                 // Calculate text length for overflow cells just outside the visible range.
                 for (let c = visibleStartColumn - 1; c >= expandStartCol; c--) {
-                    this._setStylesCacheForOneCell(r, c, overflowCellOptions ?? { cacheItem: { bg: false, border: false }, reuseExisting: shouldUseIncrementalStyleRange, hasMergeData, rowVisible: true });
+                    this._setStylesCacheForOneCell(r, c, overflowCellOptions);
                     if (shouldUseIncrementalStyleRange) {
                         pushRowRange(this._incrementalFontRenderRanges, r, c, c);
                     }
@@ -509,7 +501,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
 
                 // Calculate text length for overflow cells just outside the visible range.
                 for (let c = visibleEndColumn + 1; c <= expandEndCol; c++) {
-                    this._setStylesCacheForOneCell(r, c, overflowCellOptions ?? { cacheItem: { bg: false, border: false }, reuseExisting: shouldUseIncrementalStyleRange, hasMergeData, rowVisible: true });
+                    this._setStylesCacheForOneCell(r, c, overflowCellOptions);
                     if (shouldUseIncrementalStyleRange) {
                         pushRowRange(this._incrementalFontRenderRanges, r, c, c);
                     }
@@ -528,7 +520,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             for (const mergeRange of mergeRanges) {
                 this._setStylesCacheForOneCell(mergeRange.startRow, mergeRange.startColumn, {
                     mergeRange,
-                    reuseExisting: shouldUseIncrementalStyleRange,
+                    reuseExisting: isIncrementalScroll,
                     hasMergeData,
                 });
                 if (shouldUseIncrementalStyleRange) {
@@ -1483,10 +1475,6 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             const mergeInfo = this.worksheet.getCellInfoInMergeData(row, col);
             isMerged = mergeInfo.isMerged;
             isMergedMainCell = mergeInfo.isMergedMainCell;
-            if (isMerged) {
-                const { startRow, startColumn, endRow, endColumn } = mergeInfo;
-                options.mergeRange = { startRow, startColumn, endRow, endColumn };
-            }
         }
 
         const rowVisible = options.rowVisible ?? this.worksheet.getRowVisible(row);

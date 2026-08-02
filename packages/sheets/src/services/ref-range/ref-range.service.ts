@@ -62,6 +62,7 @@ const MERGE_UNDO = createInterceptorKey<IMutationInfo[], null>('MERGE_UNDO');
 
 class WatchRange extends Disposable {
     constructor(
+        readonly revision: number,
         private readonly _unitId: string,
         private readonly _subUnitId: string,
         private _range: Nullable<IRange>,
@@ -117,6 +118,8 @@ export class RefRangeService extends Disposable {
     interceptor = new InterceptorManager({ MERGE_REDO, MERGE_UNDO });
 
     private _watchRanges = new Set<WatchRange>();
+    private _watchRangesListener: Nullable<IDisposable> = null;
+    private _watchRangeRevision = 0;
 
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
@@ -137,25 +140,28 @@ export class RefRangeService extends Disposable {
     }
 
     watchRange(unitId: string, subUnitId: string, range: IRange, callback: WatchRangeCallback, skipIntersects?: boolean): IDisposable {
-        let watchRangesListener: Nullable<IDisposable>;
-        if (this._watchRanges.size === 0) {
-            watchRangesListener = this._commandService.onCommandExecuted((command) => {
+        if (!this._watchRangesListener) {
+            this._watchRangesListener = this.disposeWithMe(this._commandService.onCommandExecuted((command) => {
                 if (command.type !== CommandType.MUTATION) return false;
+
+                // A callback may synchronously replace its watcher. The replacement starts with the next mutation.
+                const revision = this._watchRangeRevision;
                 for (const watchRange of this._watchRanges) {
+                    if (watchRange.revision > revision) continue;
                     watchRange.onMutation(command as IMutationInfo<ISheetCommandSharedParams>);
                 }
-            });
+            }));
         }
 
-        const watchRange = new WatchRange(unitId, subUnitId, range, callback, skipIntersects);
+        const watchRange = new WatchRange(++this._watchRangeRevision, unitId, subUnitId, range, callback, skipIntersects);
         this._watchRanges.add(watchRange);
 
         const teardownWatching = toDisposable(() => {
             this._watchRanges.delete(watchRange);
 
             if (this._watchRanges.size === 0) {
-                watchRangesListener?.dispose();
-                watchRangesListener = null;
+                this._watchRangesListener?.dispose();
+                this._watchRangesListener = null;
             }
         });
 

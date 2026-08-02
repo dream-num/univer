@@ -268,7 +268,7 @@ export function Sidebar() {
                     </button>
                 </header>
 
-                <section className="univer-box-border univer-cursor-default univer-px-4">
+                <section className="univer-box-border univer-min-w-0 univer-cursor-default univer-px-4">
                     {options?.children}
                 </section>
 

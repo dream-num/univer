@@ -124,6 +124,11 @@ export enum BaseFieldType {
     Summary = 'summary',
 }
 
+/** Semantic roles supported by Base RecordLink fields. */
+export enum BaseRecordLinkRole {
+    Parent = 'parent',
+}
+
 /**
  * Configuration for a RecordLink field.
  *
@@ -149,6 +154,8 @@ export interface IRecordLinkFieldConfig extends Record<string, unknown> {
      * or add more labels to the cell. IDs must be unique, existing, non-system fields.
      */
     pickerFieldIds?: FieldId[];
+    /** Optional table-level semantic role of this link. */
+    relationRole?: BaseRecordLinkRole;
 }
 
 export enum BaseViewType {
@@ -485,9 +492,35 @@ export interface IProjectedGroup {
     children?: IProjectedGroup[];
 }
 
+/** Why a stored Parent link cannot participate in the effective hierarchy. */
+export enum BaseHierarchyInvalidReason {
+    MissingParent = 'missingParent',
+    SelfParent = 'selfParent',
+    Cycle = 'cycle',
+    MaxDepth = 'maxDepth',
+}
+
+export interface IBaseHierarchyNodeProjection {
+    recordId: RecordId;
+    parentRecordId: RecordId | null;
+    depth: number;
+    directChildCount: number;
+    subtreeHeight: number;
+    subtreeEndIndex: number;
+    invalidReason?: BaseHierarchyInvalidReason;
+}
+
+export interface IBaseHierarchyProjection {
+    fieldId: FieldId;
+    rootRecordIds: RecordId[];
+    orderedRecordIds: RecordId[];
+    nodes: Record<RecordId, IBaseHierarchyNodeProjection>;
+}
+
 export interface IGridProjection extends IViewProjection {
     type: BaseViewType.Grid;
     frozenFieldCount?: number;
+    hierarchy?: IBaseHierarchyProjection;
 }
 
 export interface IKanbanProjection extends IViewProjection {
@@ -738,6 +771,45 @@ export type BaseHitTestResult =
         tableId: TableId;
         viewId: ViewId;
         recordId: RecordId;
+    }
+    | {
+        type: 'grid-hierarchy-toggle' | 'grid-hierarchy-add-child';
+        tableId: TableId;
+        viewId: ViewId;
+        recordId: RecordId;
+    }
+    | {
+        type: 'grid-cell-checkbox';
+        tableId: TableId;
+        viewId: ViewId;
+        recordId: RecordId;
+        fieldId: FieldId;
+    }
+    | {
+        type: 'grid-rating-icon';
+        tableId: TableId;
+        viewId: ViewId;
+        recordId: RecordId;
+        fieldId: FieldId;
+        value: number;
+    }
+    | {
+        type: 'grid-row-header' | 'grid-row-checkbox';
+        tableId: TableId;
+        viewId: ViewId;
+        recordId: RecordId;
+    }
+    | {
+        type: 'grid-row-header-select-all';
+        tableId: TableId;
+        viewId: ViewId;
+    }
+    | {
+        type: 'grid-row-drag-handle';
+        tableId: TableId;
+        viewId: ViewId;
+        recordId: RecordId;
+        disabled: boolean;
     }
     | {
         type: 'kanban-add-record';

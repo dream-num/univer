@@ -22,6 +22,7 @@ import {
     createIdentifier,
     Disposable,
     DocumentDataModel,
+    DocumentFlavor,
     EDITOR_ACTIVATED,
     FOCUSING_EDITOR_STANDALONE,
     FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE,
@@ -204,9 +205,8 @@ export class SlideEditorBridgeService extends Disposable implements ISlideEditor
         docData.id = editorUnitId;
         docData.documentStyle = {
             ...docData.documentStyle,
-            ...{
-                pageSize: { width: editorRectInfo.richTextObj.width, height: Infinity },
-            },
+            documentFlavor: DocumentFlavor.UNSPECIFIED,
+            pageSize: { width: editorRectInfo.richTextObj.width, height: Infinity },
         };
 
         const docDataModel = new DocumentDataModel(docData);

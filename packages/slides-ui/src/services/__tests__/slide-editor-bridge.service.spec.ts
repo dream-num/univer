@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ContextService, IContextService, Injector } from '@univerjs/core';
+import { ContextService, DocumentFlavor, IContextService, Injector } from '@univerjs/core';
 import { IEditorService } from '@univerjs/docs-ui';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import { beforeEach, describe, expect, it } from 'vitest';
@@ -96,6 +96,7 @@ describe('SlideEditorBridgeService', () => {
                         dataStream: 'Text\r\n',
                     },
                     documentStyle: {
+                        documentFlavor: DocumentFlavor.TRADITIONAL,
                         pageSize: { width: 10, height: 10 },
                     },
                 },
@@ -128,5 +129,7 @@ describe('SlideEditorBridgeService', () => {
             unitId: 'slide-1',
             editorUnitId: SLIDE_EDITOR_ID,
         });
+        expect(service.getEditRectState()?.documentLayoutObject.documentModel?.getSnapshot().documentStyle.documentFlavor)
+            .toBe(DocumentFlavor.UNSPECIFIED);
     });
 });

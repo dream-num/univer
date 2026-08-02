@@ -28,7 +28,7 @@ export {
     isBaseRecordIdFieldName,
     isValidBaseRecordId,
 } from './record-identity';
-export { BaseFieldType, BaseFilterConjunction, BaseFilterOperator, BaseSortDirection, BaseViewType } from './typedef';
+export { BaseFieldType, BaseFilterConjunction, BaseFilterOperator, BaseHierarchyInvalidReason, BaseRecordLinkRole, BaseSortDirection, BaseViewType } from './typedef';
 export type {
     BaseCellMatrix,
     BaseCellPrimitiveValue,
@@ -47,6 +47,8 @@ export type {
     IBaseAttachment,
     IBaseCellData,
     IBaseDateFieldConfig,
+    IBaseHierarchyNodeProjection,
+    IBaseHierarchyProjection,
     IBaseInvalidation,
     IBaseRect,
     IBaseResources,

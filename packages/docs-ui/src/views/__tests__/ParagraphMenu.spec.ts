@@ -21,6 +21,7 @@ import type { IMutiPageParagraphBound } from '../../services/doc-event-manager.s
 import type { IDocBlockMenuTarget } from '../../services/doc-paragraph-menu.service';
 import { DataStreamTreeTokenType, DocumentBlockRangeType, DocumentBlockType, JSONX, NamedStyleType } from '@univerjs/core';
 import { DocBlockMoveValidatorService } from '@univerjs/docs';
+import { ContextMenuPosition } from '@univerjs/ui';
 import { describe, expect, it } from 'vitest';
 import {
     DocCopyCurrentParagraphCommand,
@@ -32,7 +33,15 @@ import { HorizontalLineCommand } from '../../commands/commands/doc-horizontal-li
 import { BulletListCommand } from '../../commands/commands/list.command';
 import { AlignCenterCommand } from '../../commands/commands/paragraph-align.command';
 import { H2HeadingCommand, SetParagraphNamedStyleCommand } from '../../commands/commands/set-heading.command';
-import { DOC_PARAGRAPH_T_EDIT_MENU_ID, INSERT_BELLOW_MENU_ID } from '../../menu/paragraph-menu';
+import {
+    BACKGROUND_COLOR_SWATCH_ICONS,
+    DOC_PARAGRAPH_T_EDIT_MENU_ID,
+    DOC_PARAGRAPH_T_INSERT_BELOW_MENU_ID,
+    DOC_PARAGRAPH_T_INSERT_MENU_ID,
+    INSERT_BELLOW_MENU_ID,
+    ParagraphMenuBackgroundColorSwatchMenuItemFactories,
+} from '../../menu/paragraph-menu';
+import { menuSchema } from '../../menu/schema';
 import {
     buildUnwrapBlockRangeActions,
     getBlockRangeClipboardTargetRange,
@@ -96,6 +105,29 @@ function blockRangeBody(blockType: DocumentBlockRangeType, paragraphStyle: IPara
 }
 
 describe('ParagraphMenu command behavior', () => {
+    it('keeps the extensible T menu quick-action groups configured as icon grids', () => {
+        for (const menuId of [
+            DOC_PARAGRAPH_T_INSERT_MENU_ID,
+            DOC_PARAGRAPH_T_INSERT_BELOW_MENU_ID,
+            DOC_PARAGRAPH_T_EDIT_MENU_ID,
+        ]) {
+            expect(menuSchema).toHaveProperty(
+                [ContextMenuPosition.PARAGRAPH, menuId, 'quickTop', 'quickLayout'],
+                'icon'
+            );
+            expect(menuSchema).toHaveProperty(
+                [ContextMenuPosition.PARAGRAPH, menuId, 'quickBottom', 'quickLayout'],
+                'icon'
+            );
+        }
+    });
+
+    it('keeps the background palette within two eight-column rows', () => {
+        expect(BACKGROUND_COLOR_SWATCH_ICONS).toHaveLength(15);
+        expect(Object.keys(ParagraphMenuBackgroundColorSwatchMenuItemFactories)).toHaveLength(15);
+        expect(BACKGROUND_COLOR_SWATCH_ICONS).not.toContain('DocParagraphBackgroundColorSwatchIcon.15');
+    });
+
     it('places the root menu on the right in rtl so submenus can open to the left', () => {
         expect(getParagraphMenuPopupDirection(300, 212, 8, {
             anchorRight: 340,

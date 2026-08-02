@@ -2363,18 +2363,7 @@ export class RichTextBuilder extends RichTextValue {
             return this;
         }
 
-        return this.insertRichText(RichTextValue.create({
-            id: 'd',
-            documentStyle: {},
-            body: {
-                dataStream: text,
-                textRuns: [{
-                    st: 0,
-                    ed: text.length,
-                    ts: normalizeRichTextSpanStyle(style),
-                }],
-            },
-        }));
+        return this.insertText(text, normalizeRichTextSpanStyle(style));
     }
 
     /**
@@ -2571,7 +2560,7 @@ export class RichTextBuilder extends RichTextValue {
             insertText = start;
         } else {
             startIndex = Math.min(start, startIndex);
-            insertText = text as string;
+            insertText = typeof text === 'string' ? text : '';
         }
 
         if (typeof text === 'object') {
@@ -2581,14 +2570,16 @@ export class RichTextBuilder extends RichTextValue {
         }
 
         if (!insertText) return this;
+        const plainTextBody = BuildTextUtils.transform.fromPlainText(insertText);
         const newBody: IDocumentBody = {
-            dataStream: insertText,
+            dataStream: plainTextBody.dataStream,
+            paragraphs: plainTextBody.paragraphs,
             textRuns: insertStyle
                 ? [
                     {
                         ts: insertStyle,
-                        st: startIndex,
-                        ed: startIndex + insertText.length,
+                        st: 0,
+                        ed: plainTextBody.dataStream.length,
                     },
                 ]
                 : [],

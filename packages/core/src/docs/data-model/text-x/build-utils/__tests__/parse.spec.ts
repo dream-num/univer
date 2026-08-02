@@ -52,4 +52,11 @@ describe('parse build utils', () => {
             customRanges: [],
         });
     });
+
+    it('should normalize platform line endings without creating duplicate paragraphs', () => {
+        const body = fromPlainText('First\r\nSecond\rThird\nFourth');
+
+        expect(body.dataStream).toBe('First\rSecond\rThird\rFourth');
+        expect(body.paragraphs?.map((paragraph) => paragraph.startIndex)).toEqual([5, 12, 18]);
+    });
 });

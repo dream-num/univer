@@ -92,22 +92,23 @@ export function TextColorSwatchIcon({ className, style, onClick, color }: ColorS
             onClick={onClick}
         >
             <rect
-                x={3}
-                y={3}
-                width={18}
-                height={18}
-                rx={4}
+                x={1}
+                y={1}
+                width={22}
+                height={22}
+                rx={2.5}
                 fill="none"
                 stroke="currentColor"
-                strokeOpacity={0.16}
+                strokeWidth={1}
+                strokeOpacity={0.12}
             />
             <text
                 x={12}
-                y={16.5}
+                y={17.25}
                 direction="ltr"
                 fontFamily="Arial, sans-serif"
-                fontSize={12}
-                fontWeight={700}
+                fontSize={15}
+                fontWeight={400}
                 fill={color}
                 textAnchor="middle"
             >
@@ -134,7 +135,7 @@ export function BackgroundColorSwatchIcon({ className, style, onClick, color }: 
                 y={3}
                 width={18}
                 height={18}
-                rx={5}
+                rx={3}
                 fill={color}
                 stroke="currentColor"
                 strokeOpacity={0.12}

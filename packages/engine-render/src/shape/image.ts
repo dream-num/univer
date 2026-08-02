@@ -403,9 +403,11 @@ export class Image extends Shape<IImageProps> {
                 const drawHeight = clipBounds.height;
                 if (!this._renderByCropper && this.srcRect) {
                     const { left = 0, top = 0, right = 0, bottom = 0 } = this.srcRect;
-                    // Scale srcRect offsets proportionally to the actual clip bounds
-                    const scaleW = drawWidth / w;
-                    const scaleH = drawHeight / h;
+                    // srcRect offsets live in the image's original frame. Scale
+                    // them with the rendered frame (not just the shape clip), so
+                    // images resized by a drawing group keep the same crop.
+                    const scaleW = this.width > 0 ? drawWidth / this.width : 1;
+                    const scaleH = this.height > 0 ? drawHeight / this.height : 1;
                     ctx.drawImage(
                         this._native,
                         drawLeft - left * scaleW,
@@ -424,10 +426,18 @@ export class Image extends Shape<IImageProps> {
 
         if (!this._renderByCropper && this.srcRect) {
             const { left = 0, top = 0, right = 0, bottom = 0 } = this.srcRect;
+            const scaleW = this.width > 0 ? w / this.width : 1;
+            const scaleH = this.height > 0 ? h / this.height : 1;
             ctx.beginPath();
             ctx.rect(-w / 2, -h / 2, w, h);
             ctx.clip();
-            ctx.drawImage(this._native, -left - w / 2, -top - h / 2, w + right + left, h + bottom + top);
+            ctx.drawImage(
+                this._native,
+                -left * scaleW - w / 2,
+                -top * scaleH - h / 2,
+                w + (right + left) * scaleW,
+                h + (bottom + top) * scaleH
+            );
         } else {
             ctx.drawImage(this._native, -w / 2, -h / 2, w, h);
         }

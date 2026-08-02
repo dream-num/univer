@@ -1,6 +1,6 @@
 import type { Univer } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
-import { awaitTime, Disposable, Inject, IUniverInstanceService, ThemeService, UniverInstanceType } from '@univerjs/core';
+import { awaitTime, Disposable, DocumentFlavor, Inject, IUniverInstanceService, ThemeService, UniverInstanceType } from '@univerjs/core';
 import { DEFAULT_WORKBOOK_DATA_DEMO, DEFAULT_WORKBOOK_DATA_DEMO_DEFAULT_STYLE } from '@univerjs/mockdata';
 import { getDefaultDocData } from './data/default-doc';
 import { getDefaultWorkbookData } from './data/default-sheet';
@@ -17,6 +17,7 @@ export interface IE2EControllerAPI {
     loadMergeCellSheet(loadTimeout?: number): Promise<void>;
     loadDefaultStyleSheet(loadTimeout?: number): Promise<void>;
     loadDefaultDoc(loadTimeout?: number,): Promise<void>;
+    loadDocLayoutFixture(documentFlavor: DocumentFlavor, loadTimeout?: number): Promise<void>;
     setDarkMode(darkMode: boolean): void;
     disposeUniver(): Promise<void>;
     disposeCurrSheetUnit(disposeTimeout?: number): Promise<void>;
@@ -59,6 +60,7 @@ export class E2EController extends Disposable {
             disposeCurrSheetUnit: (disposeTimeout?: number) => this._disposeDefaultSheetUnit(disposeTimeout),
             setDarkMode: (darkMode) => this._setDarkMode(darkMode),
             loadDefaultDoc: (loadTimeout) => this._loadDefaultDoc(loadTimeout),
+            loadDocLayoutFixture: (documentFlavor, loadTimeout) => this._loadDocLayoutFixture(documentFlavor, loadTimeout),
             disposeUniver: () => this._disposeUniver(),
         };
     }
@@ -107,6 +109,17 @@ export class E2EController extends Disposable {
 
     private async _loadDefaultDoc(loadingTimeout: number = AWAIT_LOADING_TIMEOUT): Promise<void> {
         this._univerInstanceService.createUnit(UniverInstanceType.UNIVER_DOC, getDefaultDocData());
+        await awaitTime(loadingTimeout);
+    }
+
+    private async _loadDocLayoutFixture(documentFlavor: DocumentFlavor, loadingTimeout: number = AWAIT_LOADING_TIMEOUT): Promise<void> {
+        if (documentFlavor !== DocumentFlavor.TRADITIONAL && documentFlavor !== DocumentFlavor.MODERN) {
+            throw new Error(`Unsupported Doc E2E flavor: ${documentFlavor}`);
+        }
+        const snapshot = getDefaultDocData();
+        snapshot.id = `e2e-doc-layout-${documentFlavor}`;
+        snapshot.documentStyle = { ...snapshot.documentStyle, documentFlavor };
+        this._univerInstanceService.createUnit(UniverInstanceType.UNIVER_DOC, snapshot);
         await awaitTime(loadingTimeout);
     }
 

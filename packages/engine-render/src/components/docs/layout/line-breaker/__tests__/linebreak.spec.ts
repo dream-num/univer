@@ -18,6 +18,7 @@
 import fs from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { eastAsianQuoteLineBreakExtension } from '../extensions/east-asian-quote-linebreak-extension';
 import { tabLineBreakExtension } from '../extensions/tab-linebreak-extension';
 import { LineBreaker } from '../line-breaker';
 
@@ -77,6 +78,22 @@ describe('unicode line break tests', () => {
 });
 
 describe('line break extensions tests', () => {
+    it('should allow an East Asian line to break before a smart opening quote', () => {
+        const data = '力” 、“年度';
+        const breaker = new LineBreaker(data);
+        eastAsianQuoteLineBreakExtension(breaker);
+        const breaks: string[] = [];
+        let last = 0;
+        let bk;
+
+        while ((bk = breaker.nextBreakPoint())) {
+            breaks.push(data.slice(last, bk.position));
+            last = bk.position;
+        }
+
+        expect(breaks).toStrictEqual(['力” 、', '“年', '度']);
+    });
+
     it('should break before tab in Chinese', () => {
         const data = '中\t国';
         const breaker = new LineBreaker(data);

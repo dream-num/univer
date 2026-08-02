@@ -266,6 +266,7 @@ export interface IDocumentSkeletonGlyph {
     url?: string; // image url
     featureId?: string; // support interaction for feature ,eg. hyperLine person
     drawingId?: string; // drawing.drawingId
+    fauxBoldStrokeWidth?: number;
 }
 
 export interface IDocumentSkeletonBullet {
@@ -274,10 +275,14 @@ export interface IDocumentSkeletonBullet {
     ts: ITextStyle; // text style
     fontStyle?: IDocumentSkeletonFontStyle; // fontStyle converted from ITextStyle to canvas font
     startIndexItem: number; // startIndexItem, list start index
+    startNumber?: number; // zero-based start number retained across a restarted sequence
     // bBox: IDocumentSkeletonBoundingBox; // bBox text position information
     nestingLevel?: INestingLevel;
     bulletAlign?: BulletAlignment;
     bulletType?: boolean; // bulletType false unordered, true ordered;
+    compactSpacing?: boolean;
+    preserveTextLineHeight?: boolean;
+    imageSource?: string;
     paragraphProperties?: IParagraphProperties;
     // bp: number; // bulletPosition distance from list to page edge
     // ti: number; // textIndent distance from content to list, take Max(textIndent, followWith+)

@@ -72,7 +72,7 @@ import { DocParagraphSettingPanelOperation } from '../../operations/doc-paragrap
 import { DocOpenPageSettingCommand } from '../../operations/open-page-setting.operation';
 import { SetDocZoomRatioOperation } from '../../operations/set-doc-zoom-ratio.operation';
 import { AfterSpaceCommand, EnterCommand, TabCommand } from '../auto-format.command';
-import { BreakLineCommand } from '../break-line.command';
+import { BreakLineCommand, BreakLineInsertionMode } from '../break-line.command';
 import { CutContentCommand } from '../clipboard.inner.command';
 import {
     DeleteCurrentParagraphCommand,
@@ -1041,7 +1041,7 @@ describe('misc document commands', () => {
 
         expect(InsertHorizontalLineBellowCommand.handler(accessor as never)).toBe(true);
         expect(syncExecuteCommand).toHaveBeenCalledWith(HorizontalLineCommand.id, {
-            insertionMode: 'insert-gap',
+            insertionMode: BreakLineInsertionMode.InsertGap,
             insertRange: { startOffset: 7, endOffset: 7 },
         });
     });

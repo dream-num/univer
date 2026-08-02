@@ -97,6 +97,22 @@ import { FSelection } from './f-selection';
 import { FWorksheetPermission } from './permission/f-worksheet-permission';
 import { covertToColRange, covertToRowRange } from './utils';
 
+function assertValidRowInsertion(methodName: string, rowIndex: number, rowCount: number, howMany: number): void {
+    if (!Number.isInteger(howMany) || howMany <= 0) {
+        throw new RangeError(`${methodName}(): row count ${howMany} must be a positive integer.`);
+    }
+
+    const lastRowIndex = rowCount - 1;
+    if (!Number.isInteger(rowIndex) || rowIndex < 0 || rowIndex > lastRowIndex) {
+        throw new RangeError(
+            `${methodName}(): row index ${rowIndex} is out of bounds. ` +
+            `The worksheet has ${rowCount} rows; expected an integer from 0 to ${lastRowIndex}. ` +
+            `To insert ${howMany} row(s) at the bottom, use insertRowsAfter(${lastRowIndex}, ${howMany}). ` +
+            `To resize the worksheet directly, use setRowCount(${rowCount + howMany}).`
+        );
+    }
+}
+
 export interface IFacadeClearOptions {
     contentsOnly?: boolean;
     formatOnly?: boolean;
@@ -536,7 +552,7 @@ export class FWorksheet extends FBaseInitialable {
 
     /**
      * Inserts a row after the given row position.
-     * @param {number} afterPosition - The row after which the new row should be added, starting at 0 for the first row.
+     * @param {number} afterPosition - The existing row after which the new row should be added. The index is zero-based and must be between 0 and `getMaxRows() - 1`.
      * @returns {FWorksheet} This sheet, for chaining.
      * @example
      * ```typescript
@@ -554,7 +570,7 @@ export class FWorksheet extends FBaseInitialable {
 
     /**
      * Inserts a row before the given row position.
-     * @param {number} beforePosition - The row before which the new row should be added, starting at 0 for the first row.
+     * @param {number} beforePosition - The existing row before which the new row should be added. The index is zero-based and must be between 0 and `getMaxRows() - 1`.
      * @returns {FWorksheet} This sheet, for chaining.
      * @example
      * ```typescript
@@ -572,8 +588,8 @@ export class FWorksheet extends FBaseInitialable {
 
     /**
      * Inserts one or more consecutive blank rows in a sheet starting at the specified location.
-     * @param {number} rowIndex - The index indicating where to insert a row, starting at 0 for the first row.
-     * @param {number} numRows - The number of rows to insert.
+     * @param {number} rowIndex - The existing row before which rows are inserted. The index is zero-based and must be between 0 and `getMaxRows() - 1`.
+     * @param {number} numRows - The positive number of rows to insert.
      * @returns {FWorksheet} This sheet, for chaining.
      * @example
      * ```typescript
@@ -586,13 +602,14 @@ export class FWorksheet extends FBaseInitialable {
      * ```
      */
     insertRows(rowIndex: number, numRows: number = 1): FWorksheet {
+        assertValidRowInsertion('insertRows', rowIndex, this.getMaxRows(), numRows);
         return this.insertRowsBefore(rowIndex, numRows);
     }
 
     /**
      * Inserts a number of rows after the given row position.
-     * @param {number} afterPosition - The row after which the new rows should be added, starting at 0 for the first row.
-     * @param {number} howMany - The number of rows to insert.
+     * @param {number} afterPosition - The existing row after which the new rows should be added. The index is zero-based and must be between 0 and `getMaxRows() - 1`.
+     * @param {number} howMany - The positive number of rows to insert.
      * @returns {FWorksheet} This sheet, for chaining.
      * @example
      * ```typescript
@@ -605,6 +622,8 @@ export class FWorksheet extends FBaseInitialable {
      * ```
      */
     insertRowsAfter(afterPosition: number, howMany: number): FWorksheet {
+        assertValidRowInsertion('insertRowsAfter', afterPosition, this.getMaxRows(), howMany);
+
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
         const direction = Direction.DOWN;
@@ -635,8 +654,8 @@ export class FWorksheet extends FBaseInitialable {
 
     /**
      * Inserts a number of rows before the given row position.
-     * @param {number} beforePosition - The row before which the new rows should be added, starting at 0 for the first row.
-     * @param {number} howMany - The number of rows to insert.
+     * @param {number} beforePosition - The existing row before which the new rows should be added. The index is zero-based and must be between 0 and `getMaxRows() - 1`.
+     * @param {number} howMany - The positive number of rows to insert.
      * @returns {FWorksheet} This sheet, for chaining.
      * @example
      * ```typescript
@@ -649,6 +668,8 @@ export class FWorksheet extends FBaseInitialable {
      * ```
      */
     insertRowsBefore(beforePosition: number, howMany: number): FWorksheet {
+        assertValidRowInsertion('insertRowsBefore', beforePosition, this.getMaxRows(), howMany);
+
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
         const direction = Direction.UP;
@@ -2650,7 +2671,8 @@ export class FWorksheet extends FBaseInitialable {
     }
 
     /**
-     * Appends a row to the bottom of the current data region in the sheet. If a cell's content begins with =, it's interpreted as a formula.
+     * Appends a row to the bottom of the current data region in the sheet. If the destination row is already within the worksheet capacity,
+     * this method writes into that row without increasing `getMaxRows()`. If a cell's content begins with =, it's interpreted as a formula.
      * @param {CellValue[]} rowContents - An array of values for the new row.
      * @returns {FWorksheet} Returns the current worksheet instance for method chaining.
      * @example

@@ -40,6 +40,7 @@ import '@univerjs/engine-formula/facade';
 import '@univerjs/sheets-filter/facade';
 import '@univerjs/sheets-formula/facade';
 import '@univerjs/sheets-numfmt/facade';
+import '@univerjs/sheets-hyper-link/facade';
 import '@univerjs/sheets-hyper-link-ui/facade';
 import '@univerjs/sheets-thread-comment/facade';
 import '@univerjs/sheets-conditional-formatting/facade';
@@ -163,16 +164,22 @@ function createNewInstance() {
     });
 
     window.univer = univer;
-    window.univerAPI = FUniver.newAPI(univer);
+    const univerAPI = FUniver.newAPI(univer);
+    window.univerAPI = univerAPI;
+    if (IS_E2E && new URLSearchParams(window.location.search).has('ref-range-e2e')) {
+        import('./ref-range-e2e').then(({ installRefRangeE2EFixture }) => {
+            installRefRangeE2EFixture(univer, univerAPI);
+        });
+    }
     // window.univerAPI.addFonts([
     //     { value: 'PingFang SC', label: '苹方（简）', category: 'sans-serif' },
     //     { value: 'Helvetica Neue', label: 'Helvetica Neue', category: 'sans-serif' },
     // ]);
 
-    customRegisterEvent(univer, window.univerAPI!);
+    customRegisterEvent(univer, univerAPI);
     // customRangePopups(univer, window.univerAPI!);
-    simpleRangePopupDemo(univer, window.univerAPI!);
-    insertFloatDom(univer, window.univerAPI!);
+    simpleRangePopupDemo(univer, univerAPI);
+    insertFloatDom(univer, univerAPI);
 }
 
 createNewInstance();

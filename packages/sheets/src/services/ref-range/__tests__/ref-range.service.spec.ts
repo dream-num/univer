@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { Dependency, ICommand, IRange, IWorkbookData, Nullable, Workbook } from '@univerjs/core';
+import type { Dependency, ICommand, IDisposable, IRange, IWorkbookData, Nullable, Workbook } from '@univerjs/core';
 import type { IInsertColMutationParams } from '../../../basics';
 import { ICommandService, ILogService, Inject, Injector, IUniverInstanceService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { InsertColMutation } from '../../../commands/mutations/insert-row-col.mutation';
 import { SheetsSelectionsService } from '../../selections/selection.service';
 import { SheetInterceptorService } from '../../sheet-interceptor/sheet-interceptor.service';
@@ -161,6 +161,136 @@ describe('test "RefRangeService"', () => {
             } as IInsertColMutationParams)).toBeTruthy();
             expect(beforeRange).toBeNull();
             expect(afterRange).toBeNull();
+        });
+
+        it('should keep one command listener after watchers are disposed out of registration order', () => {
+            const watchedRange: IRange = { startRow: 0, startColumn: 1, endColumn: 3, endRow: 0 };
+
+            for (let i = 0; i < 3; i++) {
+                const first = refRangeService.watchRange('test', 'sheet1', watchedRange, () => {});
+                const second = refRangeService.watchRange('test', 'sheet1', watchedRange, () => {});
+                first.dispose();
+                second.dispose();
+            }
+
+            const callback = vi.fn();
+            refRangeService.watchRange('test', 'sheet1', watchedRange, callback);
+
+            expect(commandService.syncExecuteCommand(InsertColMutation.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                range: { startRow: 0, endRow: 9, startColumn: 2, endColumn: 2 },
+            })).toBeTruthy();
+            expect(callback).toHaveBeenCalledOnce();
+            expect(callback).toHaveBeenCalledWith(watchedRange, {
+                startRow: 0,
+                startColumn: 1,
+                endColumn: 4,
+                endRow: 0,
+            });
+        });
+
+        it('should not notify a replacement watcher for the mutation that registered it', () => {
+            const watchedRange: IRange = { startRow: 0, startColumn: 1, endColumn: 3, endRow: 0 };
+            const replacementCallback = vi.fn();
+            let primaryDisposable: IDisposable;
+            let replacementDisposable: IDisposable | undefined;
+            const primaryCallback = vi.fn((_before: IRange, after: Nullable<IRange>) => {
+                if (!after) {
+                    throw new Error('Expected the watched range to survive column insertion');
+                }
+                replacementDisposable = refRangeService.watchRange('test', 'sheet1', after, replacementCallback);
+                primaryDisposable.dispose();
+            });
+            primaryDisposable = refRangeService.watchRange('test', 'sheet1', watchedRange, primaryCallback);
+            const insertParams = {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                range: { startRow: 0, endRow: 9, startColumn: 2, endColumn: 2 },
+            };
+
+            expect(commandService.syncExecuteCommand(InsertColMutation.id, insertParams)).toBeTruthy();
+            expect(primaryCallback).toHaveBeenCalledOnce();
+            expect(replacementCallback).not.toHaveBeenCalled();
+
+            expect(commandService.syncExecuteCommand(InsertColMutation.id, insertParams)).toBeTruthy();
+            expect(primaryCallback).toHaveBeenCalledOnce();
+            expect(replacementCallback).toHaveBeenCalledOnce();
+            replacementDisposable?.dispose();
+        });
+
+        it('should not notify a pending watcher after another callback disposes it', () => {
+            const watchedRange: IRange = { startRow: 0, startColumn: 1, endColumn: 3, endRow: 0 };
+            let pendingDisposable: IDisposable;
+            const firstCallback = vi.fn(() => pendingDisposable.dispose());
+            const pendingCallback = vi.fn();
+            refRangeService.watchRange('test', 'sheet1', watchedRange, firstCallback);
+            pendingDisposable = refRangeService.watchRange('test', 'sheet1', watchedRange, pendingCallback);
+
+            expect(commandService.syncExecuteCommand(InsertColMutation.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                range: { startRow: 0, endRow: 9, startColumn: 2, endColumn: 2 },
+            })).toBeTruthy();
+            expect(firstCallback).toHaveBeenCalledOnce();
+            expect(pendingCallback).not.toHaveBeenCalled();
+        });
+
+        it('should keep chart-like rebinders and stable float watchers bounded during structural churn', () => {
+            const rebindWatcherCount = 64;
+            const stableWatcherCount = 64;
+            const mutationCount = 200;
+            const watchedRange: IRange = { startRow: 0, startColumn: 1, endColumn: 3, endRow: 0 };
+            const activeRebinders: IDisposable[] = [];
+            const stableWatchers: IDisposable[] = [];
+            let rebindCallbackCount = 0;
+            let rebindCallbacksInCurrentMutation = 0;
+            let stableCallbackCount = 0;
+
+            const bindRebindingWatcher = (index: number, range: IRange): IDisposable => {
+                const currentDisposable = refRangeService.watchRange('test', 'sheet1', range, (_before, after) => {
+                    if (!after) {
+                        throw new Error('Expected the watched range to survive column insertion');
+                    }
+                    rebindCallbackCount++;
+                    rebindCallbacksInCurrentMutation++;
+                    if (rebindCallbacksInCurrentMutation > rebindWatcherCount) {
+                        throw new Error('A structural mutation notified replacement watchers registered during the same mutation');
+                    }
+                    const replacement = bindRebindingWatcher(index, after);
+                    currentDisposable.dispose();
+                    activeRebinders[index] = replacement;
+                });
+                return currentDisposable;
+            };
+
+            for (let i = 0; i < rebindWatcherCount; i++) {
+                activeRebinders.push(bindRebindingWatcher(i, watchedRange));
+            }
+            for (let i = 0; i < stableWatcherCount; i++) {
+                stableWatchers.push(refRangeService.watchRange('test', 'sheet1', watchedRange, () => {
+                    stableCallbackCount++;
+                }));
+            }
+
+            const insertParams = {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                range: { startRow: 0, endRow: 9, startColumn: 2, endColumn: 2 },
+            };
+            for (let i = 0; i < mutationCount; i++) {
+                rebindCallbacksInCurrentMutation = 0;
+                expect(commandService.syncExecuteCommand(InsertColMutation.id, insertParams)).toBeTruthy();
+            }
+
+            expect(rebindCallbackCount).toBe(rebindWatcherCount * mutationCount);
+            expect(stableCallbackCount).toBe(stableWatcherCount * mutationCount);
+
+            activeRebinders.forEach((disposable) => disposable.dispose());
+            stableWatchers.forEach((disposable) => disposable.dispose());
+            expect(commandService.syncExecuteCommand(InsertColMutation.id, insertParams)).toBeTruthy();
+            expect(rebindCallbackCount).toBe(rebindWatcherCount * mutationCount);
+            expect(stableCallbackCount).toBe(stableWatcherCount * mutationCount);
         });
     });
 });

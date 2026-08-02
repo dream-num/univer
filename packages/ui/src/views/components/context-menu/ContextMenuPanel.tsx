@@ -49,6 +49,7 @@ interface IContextMenuPanelProps {
     className?: string;
     activeItemIds?: string[];
     hiddenItemIds?: string[];
+    flowQuickGroups?: boolean;
     sizeVariant?: ContextMenuSizeVariant;
     autoFocus?: boolean;
     autoFocusTarget?: ContextMenuAutoFocusTarget;
@@ -68,6 +69,7 @@ interface IContextMenuMenuProps {
     maxMenuHeight: number;
     activeItemIds?: string[];
     hiddenItemIds?: string[];
+    flowQuickGroups?: boolean;
     hoverSuppressed?: boolean;
     sizeVariant: ContextMenuSizeVariant;
     onMenuPointerEnter?: () => void;
@@ -432,20 +434,18 @@ function getContextMenuGroupClassName(sizeVariant: ContextMenuSizeVariant) {
     return contextMenuGroupVariants({ sizeVariant });
 }
 
-function isParagraphTHeaderQuickGroup(menuSchema: IMenuSchema, sizeVariant: ContextMenuSizeVariant) {
-    return sizeVariant === 'paragraph-t'
-        && menuSchema.quickLayout === 'icon'
+function isHeaderQuickGroup(menuSchema: IMenuSchema) {
+    return menuSchema.quickLayout === 'icon'
         && CONTEXT_MENU_HEADER_QUICK_GROUP_KEYS.has(menuSchema.key);
 }
 
-function shouldClusterParagraphTHeaderQuickGroups(
+function shouldClusterHeaderQuickGroups(
     currentSchema: IMenuSchema,
-    nextSchema: IMenuSchema | undefined,
-    sizeVariant: ContextMenuSizeVariant
+    nextSchema: IMenuSchema | undefined
 ) {
-    return isParagraphTHeaderQuickGroup(currentSchema, sizeVariant)
+    return isHeaderQuickGroup(currentSchema)
         && !!nextSchema
-        && isParagraphTHeaderQuickGroup(nextSchema, sizeVariant);
+        && isHeaderQuickGroup(nextSchema);
 }
 
 function getContextMenuQuickGroupClassName(
@@ -604,7 +604,7 @@ export function getNextMenuButtonByDirection(
 
 export function getContextMenuSchemaRenderGroups(
     visibleSchemas: IMenuSchema[],
-    sizeVariant: ContextMenuSizeVariant
+    flowQuickGroups = false
 ): IContextMenuSchemaRenderGroup[] {
     const renderGroups: IContextMenuSchemaRenderGroup[] = [];
 
@@ -612,7 +612,7 @@ export function getContextMenuSchemaRenderGroups(
         const menuSchema = visibleSchemas[index];
         const nextSchema = visibleSchemas[index + 1];
 
-        if (shouldClusterParagraphTHeaderQuickGroups(menuSchema, nextSchema, sizeVariant)) {
+        if (flowQuickGroups && shouldClusterHeaderQuickGroups(menuSchema, nextSchema)) {
             renderGroups.push({
                 startIndex: index,
                 endIndex: index + 1,
@@ -630,6 +630,17 @@ export function getContextMenuSchemaRenderGroups(
     }
 
     return renderGroups;
+}
+
+function mergeContextMenuQuickGroupSchemas(menuSchemas: IMenuSchema[]): IMenuSchema {
+    const firstSchema = menuSchemas[0];
+
+    return {
+        ...firstSchema,
+        key: menuSchemas.map((schema) => schema.key).join('-'),
+        quickColumns: getContextMenuQuickGroupColumns(firstSchema),
+        children: menuSchemas.flatMap((schema) => schema.children ?? []),
+    };
 }
 
 function getContextMenuHeaderClassName(sizeVariant: ContextMenuSizeVariant) {
@@ -653,6 +664,7 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
         className,
         activeItemIds,
         hiddenItemIds,
+        flowQuickGroups,
         sizeVariant = 'default',
         autoFocus,
         autoFocusTarget = 'first-item',
@@ -821,6 +833,7 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
                 rootMenuElement={menuElement}
                 activeItemIds={activeItemIds}
                 hiddenItemIds={hiddenItemIds}
+                flowQuickGroups={flowQuickGroups}
                 hoverSuppressed={hoverSuppressed}
                 sizeVariant={sizeVariant}
                 onMenuPointerEnter={onMenuPointerEnter}
@@ -833,7 +846,7 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
 }
 
 function ContextMenuMenu(props: IContextMenuMenuProps) {
-    const { menuSchemas, menuManagerService, menuSessionVersion, submenuPortalContainer, rootMenuElement, activeItemIds, hiddenItemIds, hoverSuppressed, sizeVariant, onMenuPointerEnter, onMenuPointerLeave, onOptionSelect, maxMenuHeight } = props;
+    const { menuSchemas, menuManagerService, menuSessionVersion, submenuPortalContainer, rootMenuElement, activeItemIds, hiddenItemIds, flowQuickGroups, hoverSuppressed, sizeVariant, onMenuPointerEnter, onMenuPointerLeave, onOptionSelect, maxMenuHeight } = props;
     const localeService = useDependency(LocaleService);
     const hiddenGroupStates = useContextGroupHiddenStates(menuSchemas);
     const [activeSubmenuKey, setActiveSubmenuKey] = useState<string | null>(null);
@@ -852,8 +865,8 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
         });
     }, [hiddenGroupStates, menuSchemas]);
     const renderGroups = useMemo(
-        () => getContextMenuSchemaRenderGroups(visibleSchemas, sizeVariant),
-        [sizeVariant, visibleSchemas]
+        () => getContextMenuSchemaRenderGroups(visibleSchemas, flowQuickGroups),
+        [flowQuickGroups, visibleSchemas]
     );
 
     const renderQuickLayoutGroup = (
@@ -909,6 +922,8 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                 const titleNode = renderMenuSchemaHeader(menuSchema);
 
                 if (groupedSchemas.length > 1) {
+                    const mergedMenuSchema = mergeContextMenuQuickGroupSchemas(groupedSchemas);
+
                     return (
                         <div
                             key={groupedSchemas.map((schema) => schema.key).join('-')}
@@ -917,11 +932,7 @@ function ContextMenuMenu(props: IContextMenuMenuProps) {
                                 hasSeparator && borderBottomClassName
                             )}
                         >
-                            {groupedSchemas.map((groupedMenuSchema, groupedIndex) => renderQuickLayoutGroup(
-                                groupedMenuSchema,
-                                startIndex + groupedIndex,
-                                true
-                            ))}
+                            {renderQuickLayoutGroup(mergedMenuSchema, startIndex, true)}
                         </div>
                     );
                 }

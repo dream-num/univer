@@ -95,7 +95,6 @@ export const BACKGROUND_COLOR_SWATCH_ICONS = [
     'DocParagraphBackgroundColorSwatchIcon.12',
     'DocParagraphBackgroundColorSwatchIcon.13',
     'DocParagraphBackgroundColorSwatchIcon.14',
-    'DocParagraphBackgroundColorSwatchIcon.15',
 ] as const;
 
 function getHeadingActivatedObservable(accessor: IAccessor, headingType: NamedStyleType): Observable<boolean> {

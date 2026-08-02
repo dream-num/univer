@@ -176,7 +176,24 @@ describe('ContextMenuPanel', () => {
 
         expect(shouldShowContextMenuGroupSeparator(schemas, 0)).toBe(false);
         expect(shouldShowContextMenuGroupSeparator(schemas, 1)).toBe(true);
-        expect(getContextMenuSchemaRenderGroups(schemas, 'paragraph-t')).toEqual([
+        expect(getContextMenuSchemaRenderGroups(schemas)).toEqual([
+            {
+                startIndex: 0,
+                endIndex: 0,
+                menuSchemas: [schemas[0]],
+            },
+            {
+                startIndex: 1,
+                endIndex: 1,
+                menuSchemas: [schemas[1]],
+            },
+            {
+                startIndex: 2,
+                endIndex: 2,
+                menuSchemas: [schemas[2]],
+            },
+        ]);
+        expect(getContextMenuSchemaRenderGroups(schemas, true)).toEqual([
             {
                 startIndex: 0,
                 endIndex: 1,
@@ -192,10 +209,11 @@ describe('ContextMenuPanel', () => {
     });
 
     it('renders paragraph quick menus with real tiny groups and submits the clicked command', () => {
-        renderWithDependencies(
+        const { container } = renderWithDependencies(
             <ContextMenuPanel
                 menuType="paragraph-menu"
                 sizeVariant="paragraph-t"
+                flowQuickGroups
                 activeItemIds={['align-center']}
                 hiddenItemIds={['reset-format']}
                 onOptionSelect={(option) => TestState.selectedOptions.push(option)}
@@ -224,6 +242,10 @@ describe('ContextMenuPanel', () => {
                         order: 1,
                         quickLayout: 'icon',
                         children: [
+                            createButtonItem('extension-item', {
+                                icon: 'ResetIcon',
+                                tooltip: 'extension-item',
+                            }),
                             createButtonItem('reset-format', {
                                 icon: 'ResetIcon',
                                 tooltip: 'docs-ui.toolbar.resetFormat',
@@ -244,7 +266,11 @@ describe('ContextMenuPanel', () => {
             }
         );
 
+        const quickGrids = container.querySelectorAll('.univer-menu-item-group');
+        expect(quickGrids).toHaveLength(1);
+        expect(hasClassToken(quickGrids[0] as HTMLElement, 'univer-grid-cols-6')).toBe(true);
         expect(screen.getByText('translated:docs-ui.paragraphMenu.align')).not.toBeNull();
+        expect(screen.getByRole('button', { name: 'translated:extension-item' })).not.toBeNull();
         expect(screen.queryByRole('button', { name: 'translated:docs-ui.toolbar.resetFormat' })).toBeNull();
 
         const alignCenterButton = screen.getByRole('button', { name: 'translated:docs-ui.toolbar.alignCenter' });

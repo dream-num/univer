@@ -178,9 +178,7 @@ function createNewInstance() {
 
     customRegisterEvent(univer, univerAPI);
     // customRangePopups(univer, window.univerAPI!);
-    if (!IS_E2E) {
-        simpleRangePopupDemo(univer, univerAPI);
-    }
+    simpleRangePopupDemo(univer, univerAPI);
     insertFloatDom(univer, univerAPI);
 }
 

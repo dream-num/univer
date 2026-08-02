@@ -30,7 +30,7 @@ function createWorkbookData(): IWorkbookData {
             [FIXTURE_SHEET_ID]: {
                 id: FIXTURE_SHEET_ID,
                 name: 'Feature Matrix',
-                rowCount: 80,
+                rowCount: 120,
                 columnCount: 30,
                 cellData: {
                     1: { 1: { v: 1 } },

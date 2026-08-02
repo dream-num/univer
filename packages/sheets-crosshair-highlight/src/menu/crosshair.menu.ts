@@ -41,6 +41,7 @@ export function CrosshairHighlightMenuItemFactory(accessor: IAccessor): IMenuSel
                     name: CROSSHAIR_HIGHLIGHT_OVERLAY_COMPONENT,
                     hoverable: false,
                     selectable: false,
+                    props: { embedded: true },
                 },
             },
         ],

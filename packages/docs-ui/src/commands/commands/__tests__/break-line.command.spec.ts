@@ -19,7 +19,7 @@ import { awaitTime, DataStreamTreeTokenType, DocumentBlockRangeType, DocumentFla
 import { DocSelectionManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
 import { NORMAL_TEXT_SELECTION_PLUGIN_STYLE } from '@univerjs/engine-render';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { BreakLineCommand } from '../break-line.command';
+import { BreakLineCommand, BreakLineInsertionMode } from '../break-line.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
 function getDocumentData(): IDocumentData {
@@ -271,7 +271,7 @@ describe('break line command', () => {
         const selectionManager = get(DocSelectionManagerService);
         const replaceDocRanges = vi.spyOn(selectionManager, 'replaceDocRanges');
 
-        await commandService.executeCommand(BreakLineCommand.id, { insertionMode: 'insert-gap' });
+        await commandService.executeCommand(BreakLineCommand.id, { insertionMode: BreakLineInsertionMode.InsertGap });
         await awaitTime(0);
 
         expect(replaceDocRanges).toHaveBeenCalledWith([

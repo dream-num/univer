@@ -23,9 +23,14 @@ import { DocMenuStyleService } from '../../services/doc-menu-style.service';
 
 export { generateParagraphs };
 
+export enum BreakLineInsertionMode {
+    SplitParagraph = 'split-paragraph',
+    InsertGap = 'insert-gap',
+}
+
 interface IBreakLineCommandParams {
     horizontalLine?: IParagraphBorder;
-    insertionMode?: 'split-paragraph' | 'insert-gap';
+    insertionMode?: BreakLineInsertionMode;
     textRange?: ITextRangeParam;
 }
 
@@ -58,7 +63,7 @@ export const BreakLineCommand: ICommand<IBreakLineCommandParams> = {
             return true;
         }
 
-        const { horizontalLine, insertionMode = 'split-paragraph' } = params ?? {};
+        const { horizontalLine, insertionMode = BreakLineInsertionMode.SplitParagraph } = params ?? {};
         const { segmentId } = activeTextRange;
         const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         const originBody = docDataModel?.getSelfOrHeaderFooterModel(segmentId ?? '')?.getBody();
@@ -74,7 +79,7 @@ export const BreakLineCommand: ICommand<IBreakLineCommandParams> = {
         const paragraphs = originBody.paragraphs ?? [];
         const isBareStructuralGap = isTopLevelStructuralGap(originBody.dataStream, startOffset) &&
             originBody.dataStream[startOffset] !== DataStreamTreeTokenType.PARAGRAPH;
-        const insertsAtStructuralGap = insertionMode === 'insert-gap' || isBareStructuralGap;
+        const insertsAtStructuralGap = insertionMode === BreakLineInsertionMode.InsertGap || isBareStructuralGap;
         const prevParagraph = insertsAtStructuralGap
             ? undefined
             : paragraphs.find((p) => p.startIndex >= startOffset);

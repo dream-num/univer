@@ -17,11 +17,11 @@
 import type { ICommand, ITextRangeParam } from '@univerjs/core';
 import { CommandType, DashStyleType, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocContentInsertService } from '@univerjs/docs';
-import { BreakLineCommand } from './break-line.command';
+import { BreakLineCommand, BreakLineInsertionMode } from './break-line.command';
 import { getCurrentParagraph } from './util';
 
 interface IHorizontalCommandParams {
-    insertionMode?: 'split-paragraph' | 'insert-gap';
+    insertionMode?: BreakLineInsertionMode;
     insertRange?: ITextRangeParam;
 }
 
@@ -62,7 +62,7 @@ export const InsertHorizontalLineBellowCommand: ICommand<IHorizontalCommandParam
         }
         if (contentInsertRange) {
             return commandService.syncExecuteCommand(HorizontalLineCommand.id, {
-                insertionMode: 'insert-gap',
+                insertionMode: BreakLineInsertionMode.InsertGap,
                 insertRange: {
                     startOffset: contentInsertRange.startOffset,
                     endOffset: contentInsertRange.endOffset,

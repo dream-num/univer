@@ -72,7 +72,9 @@ export const BreakLineCommand: ICommand<IBreakLineCommandParams> = {
         const { startOffset, endOffset } = activeTextRange;
 
         const paragraphs = originBody.paragraphs ?? [];
-        const insertsAtStructuralGap = insertionMode === 'insert-gap' || isTopLevelStructuralGap(originBody.dataStream, startOffset);
+        const isBareStructuralGap = isTopLevelStructuralGap(originBody.dataStream, startOffset) &&
+            originBody.dataStream[startOffset] !== DataStreamTreeTokenType.PARAGRAPH;
+        const insertsAtStructuralGap = insertionMode === 'insert-gap' || isBareStructuralGap;
         const prevParagraph = insertsAtStructuralGap
             ? undefined
             : paragraphs.find((p) => p.startIndex >= startOffset);

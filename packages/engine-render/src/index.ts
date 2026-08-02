@@ -14,6 +14,21 @@
  * limitations under the License.
  */
 
+export {
+    AlignmentSnapSession,
+    getAlignmentRectXAnchors,
+    getAlignmentRectYAnchors,
+    getClosestAlignmentOffset,
+    normalizeAlignmentRect,
+} from './alignment-snap';
+export type {
+    AlignmentSnapAxis,
+    IAlignmentRect,
+    IAlignmentSnapAxisOptions,
+    IAlignmentSnapAxisResult,
+    IAlignmentSnapGuide,
+    IAlignmentSnapSessionConfig,
+} from './alignment-snap';
 export * from './base-object';
 export * from './basics';
 export {

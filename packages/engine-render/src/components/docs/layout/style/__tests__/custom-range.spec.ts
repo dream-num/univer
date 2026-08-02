@@ -36,6 +36,15 @@ describe('custom range style', () => {
         });
     });
 
+    it('preserves the text run color when requested by the custom range', () => {
+        expect(getCustomRangeStyle({
+            rangeType: CustomRangeType.HYPERLINK,
+            properties: { textColorMode: 'text' },
+        } as never)).toEqual({
+            ul: { s: BooleanNumber.TRUE },
+        });
+    });
+
     it('does not style unsupported custom range types', () => {
         expect(getCustomRangeStyle({ rangeType: CustomRangeType.COMMENT } as never)).toBeNull();
     });

@@ -39,6 +39,7 @@ export {
     measureDocumentNoWrapTextRangeWidth,
     measureDocumentNoWrapTextWidth,
     measureDocumentUnbreakableTextWidth,
+    measureDocumentWrappedTextWidth,
 } from './components/docs/layout/doc-no-wrap-measure';
 export * from './components/docs/layout/doc-simple-skeleton';
 export { DocumentSkeleton } from './components/docs/layout/doc-skeleton';

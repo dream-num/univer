@@ -38,6 +38,7 @@ import { LineBreakerHyphenEnhancer } from '../../line-breaker/enhancers/hyphen-e
 import { LineBreakerLinkEnhancer } from '../../line-breaker/enhancers/link-enhancer';
 import { LineBreakerWholeEntityEnhancer } from '../../line-breaker/enhancers/whole-entity-enhancer';
 import { customBlockLineBreakExtension } from '../../line-breaker/extensions/custom-block-linebreak-extension';
+import { eastAsianQuoteLineBreakExtension } from '../../line-breaker/extensions/east-asian-quote-linebreak-extension';
 import { tabLineBreakExtension } from '../../line-breaker/extensions/tab-linebreak-extension';
 import {
     createSkeletonCustomBlockGlyph,
@@ -228,6 +229,9 @@ export function shaping(
     // Add custom extension for linebreak.
     tabLineBreakExtension(lineBreaker);
     customBlockLineBreakExtension(lineBreaker);
+    if (cjk.hasCJKText(content)) {
+        eastAsianQuoteLineBreakExtension(lineBreaker);
+    }
 
     let breaker: IBreakPoints = new LineBreakerLinkEnhancer(lineBreaker);
 

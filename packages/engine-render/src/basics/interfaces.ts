@@ -131,6 +131,15 @@ export interface IParagraphConfig {
     paragraphIndex: number;
     documentCompatibilityPolicy?: IDocumentCompatibilityPolicy;
     useWordStyleLineHeight?: boolean;
+    usePptxFontSizeLineHeight?: boolean;
+    usePptxNominalFontLineHeight?: boolean;
+    usePptxCompatibleLineSpacing?: boolean;
+    usePptxPercentageLineSpacing?: boolean;
+    pptxPercentageFontSize?: number;
+    usePptxNormAutofitLineHeight?: boolean;
+    pptxEmptyParagraphFontSize?: number;
+    pptxHasExplicitEndParaFontSize?: boolean;
+    sumPptxParagraphSpacing?: boolean;
     docxFallbackAnchorLeft?: IParagraphStyle['indentStart'];
     paragraphNonInlineSkeDrawings?: Map<string, IDocumentSkeletonDrawing>;
     paragraphInlineSkeDrawings?: Map<string, IDocumentSkeletonDrawing>;

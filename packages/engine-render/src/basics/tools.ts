@@ -331,11 +331,11 @@ function normalizeFontFamily(fontFamily: Nullable<string>, defaultFont: string):
 
     return fontFamily
         .split(',')
-        .map((item) => {
-            const family = item.trim().replace(/^['"]|['"]$/g, '');
-            return family.includes(' ') ? `"${family}"` : family;
-        })
+        .map((item) => item.trim().replace(/^['"]|['"]$/g, ''))
         .filter(Boolean)
+        .map((family) => /^[\p{L}_-][\p{L}\p{N}_-]*$/u.test(family)
+            ? family
+            : `"${family.replaceAll('\\', '\\\\').replaceAll('"', '\\"')}"`)
         .join(', ');
 }
 

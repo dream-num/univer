@@ -54,6 +54,11 @@ function createContext(): MockRenderContext {
         fillStyle: '',
         filter: 'none',
         font: '10px Arial',
+        globalCompositeOperation: 'source-over',
+        shadowColor: 'transparent',
+        shadowBlur: 0,
+        shadowOffsetX: 0,
+        shadowOffsetY: 0,
         save: vi.fn(),
         restore: vi.fn(),
         fillText: vi.fn(),
@@ -114,12 +119,18 @@ function createGlyph(content: string, overrides?: GlyphOverrides): IDocumentSkel
 }
 
 describe('docs font and baseline extension', () => {
-    it('renders public glow and outer shadow fields in one text draw', () => {
+    it('renders public glow and outer shadow behind the source text without canvas filters', () => {
         const extension = new FontAndBaseLine();
         const TestContext = createContext();
-        let filterDuringDraw = '';
+        const effectsDuringDraw: Array<{ composite: string; color: string; blur: number; offsetX: number; offsetY: number }> = [];
         TestContext.fillText.mockImplementation(() => {
-            filterDuringDraw = TestContext.filter;
+            effectsDuringDraw.push({
+                composite: TestContext.globalCompositeOperation,
+                color: TestContext.shadowColor,
+                blur: TestContext.shadowBlur,
+                offsetX: TestContext.shadowOffsetX,
+                offsetY: TestContext.shadowOffsetY,
+            });
         });
         extension.extensionOffset = {
             spanPointWithFont: Vector2.create(12, 20),
@@ -149,9 +160,22 @@ describe('docs font and baseline extension', () => {
             },
         }));
 
-        expect(TestContext.fillText).toHaveBeenCalledTimes(1);
-        expect(filterDuringDraw).toContain('drop-shadow(0px 0px 2px #5b9bd5)');
-        expect(filterDuringDraw).toContain('drop-shadow(2px 0px 3px rgba(0,0,0,0.4))');
+        expect(TestContext.fillText).toHaveBeenCalledTimes(2);
+        expect(effectsDuringDraw[0]).toEqual({
+            composite: 'source-over',
+            color: '#5b9bd5',
+            blur: 2,
+            offsetX: 0,
+            offsetY: 0,
+        });
+        expect(effectsDuringDraw[1]).toEqual({
+            composite: 'source-over',
+            color: 'rgba(0,0,0,0.4)',
+            blur: 3,
+            offsetX: 2,
+            offsetY: 0,
+        });
+        expect(TestContext.filter).toBe('none');
         expect(TestContext.save).toHaveBeenCalledTimes(1);
         expect(TestContext.restore).toHaveBeenCalledTimes(1);
     });

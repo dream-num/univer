@@ -15,10 +15,11 @@
  */
 
 import type { DocumentDataModel, ICommand, IDocumentData, Injector, Univer } from '@univerjs/core';
-import { awaitTime, DataStreamTreeTokenType, DocumentBlockRangeType, ICommandService, IUniverInstanceService, NamedStyleType, UniverInstanceType } from '@univerjs/core';
+import { awaitTime, DataStreamTreeTokenType, DocumentBlockRangeType, DocumentFlavor, ICommandService, IUniverInstanceService, NamedStyleType, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { BreakLineCommand } from '../break-line.command';
+import { NORMAL_TEXT_SELECTION_PLUGIN_STYLE } from '@univerjs/engine-render';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { BreakLineCommand, BreakLineInsertionMode } from '../break-line.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
 function getDocumentData(): IDocumentData {
@@ -68,10 +69,40 @@ function getDocumentDataWithColumnGroup(): IDocumentData {
             columnGroups: [{ columnGroupId: 'cg-1', startIndex: 7, endIndex: 16 }],
         },
         documentStyle: {
+            documentFlavor: DocumentFlavor.MODERN,
             pageSize: {
                 width: 594.3,
                 height: 840.51,
             },
+            marginTop: 72,
+            marginBottom: 72,
+            marginRight: 90,
+            marginLeft: 90,
+        },
+    };
+}
+
+function getDocumentDataWithTable(documentFlavor: DocumentFlavor): IDocumentData {
+    const T = DataStreamTreeTokenType;
+    const tableStream = `${T.TABLE_START}${T.TABLE_ROW_START}${T.TABLE_CELL_START}A${T.PARAGRAPH}${T.SECTION_BREAK}${T.TABLE_CELL_END}${T.TABLE_ROW_END}${T.TABLE_END}`;
+
+    return {
+        id: 'test-doc',
+        body: {
+            dataStream: `${tableStream}${T.PARAGRAPH}${T.SECTION_BREAK}`,
+            paragraphs: [
+                { paragraphId: 'cell', startIndex: 4 },
+                { paragraphId: 'after', startIndex: tableStream.length },
+            ],
+            sectionBreaks: [
+                { sectionId: 'cell-section', startIndex: 5 },
+                { sectionId: 'section_fixture_203', startIndex: tableStream.length + 1 },
+            ],
+            tables: [{ tableId: 'table-1', startIndex: 0, endIndex: tableStream.length }],
+        },
+        documentStyle: {
+            documentFlavor,
+            pageSize: { width: 594.3, height: 840.51 },
             marginTop: 72,
             marginBottom: 72,
             marginRight: 90,
@@ -161,6 +192,50 @@ describe('break line command', () => {
         return selectionManager;
     }
 
+    function setupWithTable(documentFlavor: DocumentFlavor) {
+        univer.dispose();
+        const testBed = createCommandTestBed(getDocumentDataWithTable(documentFlavor));
+        univer = testBed.univer;
+        get = testBed.get;
+        commandService = get(ICommandService);
+        commandService.registerCommand(BreakLineCommand);
+        commandService.registerCommand(SetTextSelectionsOperation);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+
+        const selectionManager = get(DocSelectionManagerService);
+        selectionManager.__TEST_ONLY_setCurrentSelection({
+            unitId: 'test-doc',
+            subUnitId: 'test-doc',
+        });
+
+        return selectionManager;
+    }
+
+    async function executeBreakLineAndApplyRenderedSelection(selectionManager: DocSelectionManagerService) {
+        const replaceDocRanges = vi.spyOn(selectionManager, 'replaceDocRanges');
+
+        await commandService.executeCommand(BreakLineCommand.id);
+        await awaitTime(0);
+        const refreshedRanges = replaceDocRanges.mock.calls.at(-1)?.[0];
+        replaceDocRanges.mockRestore();
+        if (!refreshedRanges?.length) {
+            throw new Error('BreakLineCommand did not request a rendered selection refresh');
+        }
+
+        selectionManager.__replaceTextRangesWithNoRefresh({
+            textRanges: refreshedRanges.map((range, index) => ({
+                ...range,
+                collapsed: range.startOffset === range.endOffset,
+                isActive: index === refreshedRanges.length - 1,
+            })),
+            rectRanges: [],
+            segmentId: '',
+            segmentPage: -1,
+            style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+            isEditing: true,
+        }, { unitId: 'test-doc', subUnitId: 'test-doc' });
+    }
+
     beforeEach(() => {
         const testBed = createCommandTestBed(getDocumentData());
         univer = testBed.univer;
@@ -192,15 +267,31 @@ describe('break line command', () => {
         expect(getParagraphs()[1].paragraphStyle?.headingId).toBeUndefined();
     });
 
+    it('keeps the cursor fixed for explicit gap insertion mode', async () => {
+        const selectionManager = get(DocSelectionManagerService);
+        const replaceDocRanges = vi.spyOn(selectionManager, 'replaceDocRanges');
+
+        await commandService.executeCommand(BreakLineCommand.id, { insertionMode: BreakLineInsertionMode.InsertGap });
+        await awaitTime(0);
+
+        expect(replaceDocRanges).toHaveBeenCalledWith([
+            expect.objectContaining({ startOffset: 5, endOffset: 5 }),
+        ], { unitId: 'test-doc', subUnitId: 'test-doc' }, true, undefined);
+    });
+
     it('keeps column groups when breaking a blank paragraph below a column group', async () => {
         const selectionManager = setupWithColumnGroup();
         selectionManager.__TEST_ONLY_add([{ startOffset: 17, endOffset: 17, collapsed: true, isActive: true, segmentId: '', style: null as never }]);
 
-        await commandService.executeCommand(BreakLineCommand.id);
-        await awaitTime(0);
+        await executeBreakLineAndApplyRenderedSelection(selectionManager);
 
         expect(getBody()?.columnGroups).toEqual([{ columnGroupId: 'cg-1', startIndex: 7, endIndex: 16 }]);
         expect(getBody()?.dataStream).toContain(DataStreamTreeTokenType.COLUMN_GROUP_END);
+        expect(selectionManager.getActiveTextRange()?.startOffset).toBe(18);
+
+        await executeBreakLineAndApplyRenderedSelection(selectionManager);
+
+        expect(selectionManager.getActiveTextRange()?.startOffset).toBe(19);
     });
 
     it('keeps column groups wrapped when breaking at the closing column boundary', async () => {
@@ -218,10 +309,7 @@ describe('break line command', () => {
         const selectionManager = setupWithAdjacentBlocks();
         selectionManager.__TEST_ONLY_add([{ startOffset: 4, endOffset: 4, collapsed: true, isActive: true, segmentId: '', style: null as never }]);
 
-        await commandService.executeCommand(BreakLineCommand.id, {
-            textRange: { startOffset: 4, endOffset: 4, collapsed: true, segmentId: '' },
-        });
-        await awaitTime(0);
+        await executeBreakLineAndApplyRenderedSelection(selectionManager);
 
         const T = DataStreamTreeTokenType;
         expect(getBody()?.dataStream).toBe(`${T.BLOCK_START}A${T.PARAGRAPH}${T.BLOCK_END}${T.PARAGRAPH}${T.BLOCK_START}B${T.PARAGRAPH}${T.BLOCK_END}${T.PARAGRAPH}${T.SECTION_BREAK}`);
@@ -232,5 +320,24 @@ describe('break line command', () => {
         expect(getBody()?.paragraphs?.find((paragraph) => paragraph.startIndex === 4)?.paragraphStyle).toBeUndefined();
         expect(getBody()?.paragraphs?.find((paragraph) => paragraph.paragraphId === 'callout-paragraph')?.paragraphStyle).toEqual({ indentStart: { v: 60 } });
         expect(selectionManager.getActiveTextRange()?.startOffset).toBe(4);
+
+        await executeBreakLineAndApplyRenderedSelection(selectionManager);
+
+        expect(selectionManager.getActiveTextRange()?.startOffset).toBe(5);
+    });
+
+    it.each<{ name: string; documentFlavor: DocumentFlavor }>([
+        { name: 'modern', documentFlavor: DocumentFlavor.MODERN },
+        { name: 'traditional', documentFlavor: DocumentFlavor.TRADITIONAL },
+    ])('moves the cursor after repeated Enter below a table in $name docs', async ({ documentFlavor }) => {
+        const selectionManager = setupWithTable(documentFlavor);
+        const tableEnd = getBody()?.tables?.[0].endIndex ?? 0;
+        selectionManager.__TEST_ONLY_add([{ startOffset: tableEnd, endOffset: tableEnd, collapsed: true, isActive: true, segmentId: '' }]);
+
+        await executeBreakLineAndApplyRenderedSelection(selectionManager);
+        expect(selectionManager.getActiveTextRange()?.startOffset).toBe(tableEnd + 1);
+
+        await executeBreakLineAndApplyRenderedSelection(selectionManager);
+        expect(selectionManager.getActiveTextRange()?.startOffset).toBe(tableEnd + 2);
     });
 });

@@ -355,6 +355,44 @@ describe('RichTextBuilder', () => {
             expect(data.textRuns![0].ed).toBe(5);
         });
 
+        it('should offset inserted styles exactly once', () => {
+            const data = RichTextBuilder.create()
+                .text('Hello World')
+                .insertText(5, ' Bold', { bl: BooleanNumber.TRUE })
+                .getData();
+
+            expect(data.body?.dataStream).toBe('Hello Bold World\r\n');
+            expect(data.body?.textRuns).toEqual([{
+                st: 5,
+                ed: 10,
+                ts: { bl: BooleanNumber.TRUE },
+            }]);
+        });
+
+        it('should convert platform line endings into document paragraphs', () => {
+            const data = RichTextBuilder.create()
+                .text('First\r\nSecond\rThird\nFourth')
+                .getData();
+
+            expect(data.body?.dataStream).toBe('First\rSecond\rThird\rFourth\r\n');
+            expect(data.body?.paragraphs?.map((paragraph) => paragraph.startIndex)).toEqual([5, 12, 18, 25]);
+        });
+
+        it('should keep multiline span styles aligned with normalized paragraphs', () => {
+            const data = RichTextBuilder.create()
+                .text('A')
+                .span('B\r\nC', { bold: true })
+                .getData();
+
+            expect(data.body?.dataStream).toBe('AB\rC\r\n');
+            expect(data.body?.paragraphs?.map((paragraph) => paragraph.startIndex)).toEqual([2, 4]);
+            expect(data.body?.textRuns).toEqual([{
+                st: 1,
+                ed: 4,
+                ts: { bl: BooleanNumber.TRUE },
+            }]);
+        });
+
         it('should build agent-friendly styled spans', () => {
             const builder = RichTextBuilder.create()
                 .text('Status: ')

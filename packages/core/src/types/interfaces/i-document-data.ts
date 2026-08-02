@@ -685,6 +685,10 @@ export interface IBullet {
     listType: string; // listType orderList or bulletList etc.
     listId: string; // listId
     nestingLevel: number; // nestingLevel
+    startNumber?: number; // zero-based start number for a restarted ordered-list sequence
+    image?: {
+        source: string;
+    }; // Image used as the list marker.
     textStyle?: ITextStyle; // textStyle
 }
 
@@ -827,12 +831,18 @@ export interface IDocTextFill {
     };
 }
 
+export interface IDocTextOutline {
+    color?: string;
+    width?: number;
+}
+
 export interface ITextStyle extends IStyleBase {
     // bo?: BaselineOffset; // BaselineOffset, sup, sub
-    sc?: number; // spacing
+    sc?: number; // character spacing in points
     pos?: number; // position
     sa?: number; // scale
     textFill?: IDocTextFill;
+    textOutline?: IDocTextOutline;
     /**
      * DrawingML-style glow around the rendered glyphs.
      *
@@ -858,6 +868,12 @@ export interface IIndentStart {
 }
 
 /**
+ * Vertical alignment of text runs inside a paragraph line box.
+ * This is the normalized form of DrawingML `fontAlgn`.
+ */
+export type ParagraphFontAlign = 'auto' | 'top' | 'center' | 'baseline' | 'bottom';
+
+/**
  * Properties of paragraph style
  */
 export interface IParagraphStyle extends IParagraphProperties {
@@ -874,6 +890,12 @@ export type IDocumentDefaultParagraphStyle = Omit<IParagraphStyle, 'headingId' |
 export interface IParagraphProperties extends IIndentStart {
     headingId?: string; // headingId
     namedStyleType?: NamedStyleType; // namedStyleType
+    defaultTabStop?: number; // Distance between automatic tab stops for this paragraph.
+    /** Whether East Asian kinsoku line-breaking rules apply to this paragraph. */
+    eastAsianLineBreak?: BooleanNumber;
+    /** Whether punctuation may hang outside the paragraph text bounds. */
+    hangingPunctuation?: BooleanNumber;
+    fontAlign?: ParagraphFontAlign;
     horizontalAlign?: HorizontalAlign; // Horizontal alignment
     lineSpacing?: number; // lineSpacing 17.3.1.33 spacing (Spacing Between Lines and Above/Below Paragraph)
     direction?: TextDirection; // direction

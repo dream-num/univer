@@ -14,6 +14,21 @@
  * limitations under the License.
  */
 
+export {
+    AlignmentSnapSession,
+    getAlignmentRectXAnchors,
+    getAlignmentRectYAnchors,
+    getClosestAlignmentOffset,
+    normalizeAlignmentRect,
+} from './alignment-snap';
+export type {
+    AlignmentSnapAxis,
+    IAlignmentRect,
+    IAlignmentSnapAxisOptions,
+    IAlignmentSnapAxisResult,
+    IAlignmentSnapGuide,
+    IAlignmentSnapSessionConfig,
+} from './alignment-snap';
 export * from './base-object';
 export * from './basics';
 export {
@@ -39,6 +54,7 @@ export {
     measureDocumentNoWrapTextRangeWidth,
     measureDocumentNoWrapTextWidth,
     measureDocumentUnbreakableTextWidth,
+    measureDocumentWrappedTextWidth,
 } from './components/docs/layout/doc-no-wrap-measure';
 export * from './components/docs/layout/doc-simple-skeleton';
 export { DocumentSkeleton } from './components/docs/layout/doc-skeleton';

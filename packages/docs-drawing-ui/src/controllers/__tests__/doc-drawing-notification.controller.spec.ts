@@ -19,6 +19,7 @@ import {
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     PositionedObjectLayoutType,
+    RedoCommand,
     UndoCommand,
 } from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
@@ -181,8 +182,8 @@ describe('DocDrawingAddRemoveController', () => {
         controller.dispose();
     });
 
-    it('updates drawing order and refreshes controls after reorder and undo commands', () => {
-        const { controller, executedHandlers, drawingManagerService, docDrawingService, refreshControls } = createController();
+    it('updates drawing order after a reorder mutation', () => {
+        const { controller, executedHandlers, drawingManagerService, docDrawingService } = createController();
 
         executedHandlers[0]({
             id: RichTextEditingMutation.id,
@@ -191,8 +192,6 @@ describe('DocDrawingAddRemoveController', () => {
                 actions: ['drawingsOrder', [0, { d: 0 }], [1, { p: 0 }]],
             },
         });
-        executedHandlers.forEach((handler) => handler({ id: UndoCommand.id }));
-
         expect(drawingManagerService.setDrawingOrder).toHaveBeenCalledWith('doc-1', 'doc-1', ['drawing-1', 'drawing-2']);
         expect(docDrawingService.setDrawingOrder).toHaveBeenCalledWith('doc-1', 'doc-1', ['drawing-2', 'drawing-1']);
         expect(drawingManagerService.orderNotification).toHaveBeenCalledWith({
@@ -205,7 +204,17 @@ describe('DocDrawingAddRemoveController', () => {
             subUnitId: 'doc-1',
             drawingIds: ['drawing-2', 'drawing-1'],
         });
-        expect(refreshControls).toHaveBeenCalled();
+        controller.dispose();
+    });
+
+    it.each([UndoCommand.id, RedoCommand.id])('refreshes drawings before controls after %s', (commandId) => {
+        const { controller, executedHandlers, refreshControls, refreshDrawings, skeleton } = createController();
+
+        executedHandlers.forEach((handler) => handler({ id: commandId }));
+
+        expect(refreshDrawings).toHaveBeenCalledExactlyOnceWith(skeleton);
+        expect(refreshControls).toHaveBeenCalledOnce();
+        expect(refreshDrawings.mock.invocationCallOrder[0]).toBeLessThan(refreshControls.mock.invocationCallOrder[0]);
 
         controller.dispose();
     });

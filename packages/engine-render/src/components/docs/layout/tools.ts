@@ -341,12 +341,15 @@ export function getCharSpaceConfig(sectionBreakConfig: ISectionBreakConfig, para
 
     const { fs: documentFontSize = DEFAULT_DOCUMENT_FONTSIZE } = documentTextStyle;
 
-    const { snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
+    const {
+        snapToGrid = BooleanNumber.TRUE,
+        defaultTabStop: paragraphDefaultTabStop,
+    } = paragraphStyle;
 
     return {
         charSpace,
         documentFontSize,
-        defaultTabStop,
+        defaultTabStop: paragraphDefaultTabStop ?? defaultTabStop,
         gridType,
         snapToGrid,
     };

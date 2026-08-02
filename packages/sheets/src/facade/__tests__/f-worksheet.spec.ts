@@ -320,6 +320,42 @@ describe('Test FWorksheet', () => {
         expect(sheet?.getMaxRows()).toBe(102);
     });
 
+    it('Worksheet inserts rows after the last valid row index', () => {
+        const activeSheet = univerAPI.getActiveWorkbook()!.getSheetByName('sheet1')!;
+        const rowCount = activeSheet.getMaxRows();
+
+        activeSheet.insertRowsAfter(rowCount - 1, 30);
+
+        expect(activeSheet.getMaxRows()).toBe(rowCount + 30);
+    });
+
+    it('Worksheet rejects invalid row insertion indexes with actionable errors', () => {
+        const activeSheet = univerAPI.getActiveWorkbook()!.getSheetByName('sheet1')!;
+        const rowCount = activeSheet.getMaxRows();
+        const executeCommand = vi.spyOn(commandService, 'syncExecuteCommand');
+
+        expect(() => activeSheet.insertRows(rowCount, 30)).toThrowError(
+            `insertRows(): row index ${rowCount} is out of bounds. ` +
+            `The worksheet has ${rowCount} rows; expected an integer from 0 to ${rowCount - 1}. ` +
+            `To insert 30 row(s) at the bottom, use insertRowsAfter(${rowCount - 1}, 30). ` +
+            `To resize the worksheet directly, use setRowCount(${rowCount + 30}).`
+        );
+        expect(() => activeSheet.insertRowsAfter(-1, 1)).toThrowError(/expected an integer from 0 to 99/);
+        expect(() => activeSheet.insertRowAfter(rowCount)).toThrowError(/insertRowsAfter\(\): row index 100/);
+        expect(() => activeSheet.insertRowBefore(-1)).toThrowError(/insertRowsBefore\(\): row index -1/);
+        expect(executeCommand).not.toHaveBeenCalled();
+    });
+
+    it('Worksheet rejects invalid row insertion counts', () => {
+        const activeSheet = univerAPI.getActiveWorkbook()!.getSheetByName('sheet1')!;
+        const executeCommand = vi.spyOn(commandService, 'syncExecuteCommand');
+
+        expect(() => activeSheet.insertRows(0, 0)).toThrowError('insertRows(): row count 0 must be a positive integer.');
+        expect(() => activeSheet.insertRowsBefore(0, -1)).toThrowError('insertRowsBefore(): row count -1 must be a positive integer.');
+        expect(() => activeSheet.insertRowsAfter(0, 1.5)).toThrowError('insertRowsAfter(): row count 1.5 must be a positive integer.');
+        expect(executeCommand).not.toHaveBeenCalled();
+    });
+
     it('Worksheet deleteRow', async () => {
         const activeSheet = univerAPI.getActiveWorkbook()?.getSheetByName('sheet1');
 
@@ -629,10 +665,17 @@ describe('Test FWorksheet', () => {
     it('Worksheet appends rows and updates sheet dimensions through facade APIs', () => {
         const activeSheet = univerAPI.getActiveWorkbook()!.getActiveSheet();
 
+        const initialMaxRows = activeSheet.getMaxRows();
         const initialLastRow = activeSheet.getLastRow();
         activeSheet.appendRow(['North', 100, true]);
         expect(activeSheet.getRange(initialLastRow + 1, 0, 1, 3).getValues()).toEqual([['North', 100, 1]]);
         expect(activeSheet.getDataRange().getA1Notation()).toBe(`A1:C${initialLastRow + 2}`);
+        expect(activeSheet.getMaxRows()).toBe(initialMaxRows);
+
+        activeSheet.getRange(initialMaxRows - 1, 0).setValue('at capacity');
+        activeSheet.appendRow(['expanded']);
+        expect(activeSheet.getMaxRows()).toBe(initialMaxRows + 1);
+        expect(activeSheet.getRange(initialMaxRows, 0).getValue()).toBe('expanded');
 
         activeSheet.setRowCount(120);
         activeSheet.setColumnCount(80);

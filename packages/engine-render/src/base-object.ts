@@ -605,6 +605,26 @@ export abstract class BaseObject extends Disposable {
         };
     }
 
+    /**
+     * Returns the flip state after composing this object with every ancestor
+     * drawing group whose transform participates in rendering.
+     */
+    getEffectiveFlipState(): { flipX: boolean; flipY: boolean } {
+        let flipX = this.flipX;
+        let flipY = this.flipY;
+        let isInGroup = this.isInGroup;
+        let parent = this.getParent();
+
+        while (isInGroup && parent?.classType === RENDER_CLASS_TYPE.GROUP) {
+            flipX = flipX !== Boolean(parent.flipX);
+            flipY = flipY !== Boolean(parent.flipY);
+            isInGroup = Boolean(parent.isInGroup);
+            parent = parent.getParent();
+        }
+
+        return { flipX, flipY };
+    }
+
     getRealBound(): IGroupBaseBound {
         let { width: realWidth, height: realHeight, left: realLeft, top: realTop } = this;
         let baseBound;

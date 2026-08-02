@@ -324,29 +324,15 @@ export function getFontStyleString(
     };
 }
 
-const OFFICE_FONT_FALLBACKS = new Map<string, string>([
-    ['google sans', 'Calibri'],
-    ['google sans text', 'Calibri'],
-    ['source sans pro', 'Calibri'],
-]);
-
-export function normalizeFontFamily(fontFamily: Nullable<string>, defaultFont: string): string {
+function normalizeFontFamily(fontFamily: Nullable<string>, defaultFont: string): string {
     if (!fontFamily?.trim()) {
         return defaultFont;
     }
 
-    const families = fontFamily
+    return fontFamily
         .split(',')
         .map((item) => item.trim().replace(/^['"]|['"]$/g, ''))
-        .filter(Boolean);
-    const normalizedFamilies = families.flatMap((family) => {
-        const fallback = OFFICE_FONT_FALLBACKS.get(family.toLowerCase());
-        return fallback && !families.some((item) => item.toLowerCase() === fallback.toLowerCase())
-            ? [family, fallback]
-            : [family];
-    });
-
-    return normalizedFamilies
+        .filter(Boolean)
         .map((family) => /^[\p{L}_-][\p{L}\p{N}_-]*$/u.test(family)
             ? family
             : `"${family.replaceAll('\\', '\\\\').replaceAll('"', '\\"')}"`)

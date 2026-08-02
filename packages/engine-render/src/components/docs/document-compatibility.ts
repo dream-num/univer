@@ -84,19 +84,7 @@ const UNSPECIFIED_DOCUMENT_COMPATIBILITY_POLICY: IDocumentCompatibilityPolicy = 
     applyDocumentDefaultParagraphStyle: false,
     useWordStyleLineHeight: false,
     font: {
-        metricScaleRules: [
-            {
-                fontFamily: /^source sans pro$/i,
-                minFontSize: 16,
-                fontString: /\bbold\b/i,
-                widthScale: 0.92,
-            },
-            {
-                fontFamily: /^(?:微软雅黑|microsoft yahei(?: ui)?)$/i,
-                content: /^[“”]$/u,
-                widthScale: 0.85,
-            },
-        ],
+        metricScaleRules: [],
     },
     table: {
         currentPageOverflowTolerance: 0,

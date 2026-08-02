@@ -179,6 +179,23 @@ describe('ContextMenuPanel', () => {
         expect(getContextMenuSchemaRenderGroups(schemas)).toEqual([
             {
                 startIndex: 0,
+                endIndex: 0,
+                menuSchemas: [schemas[0]],
+            },
+            {
+                startIndex: 1,
+                endIndex: 1,
+                menuSchemas: [schemas[1]],
+            },
+            {
+                startIndex: 2,
+                endIndex: 2,
+                menuSchemas: [schemas[2]],
+            },
+        ]);
+        expect(getContextMenuSchemaRenderGroups(schemas, true)).toEqual([
+            {
+                startIndex: 0,
                 endIndex: 1,
                 menuSchemas: [schemas[0], schemas[1]],
             },
@@ -196,6 +213,7 @@ describe('ContextMenuPanel', () => {
             <ContextMenuPanel
                 menuType="paragraph-menu"
                 sizeVariant="paragraph-t"
+                flowQuickGroups
                 activeItemIds={['align-center']}
                 hiddenItemIds={['reset-format']}
                 onOptionSelect={(option) => TestState.selectedOptions.push(option)}

@@ -177,6 +177,14 @@ describe('tools extra', () => {
         expect(fontStack.fontFamily).toBe('"SF Mono", "Cascadia Code", Consolas, monospace');
         expect(fontStack.fontString).toContain('"SF Mono", "Cascadia Code", Consolas, monospace');
 
+        const themeFont = getFontStyleString({
+            bl: 1,
+            fs: 15,
+            ff: '+mj-lt',
+        } as any);
+        expect(themeFont.fontFamily).toBe('"+mj-lt"');
+        expect(themeFont.fontCache).toBe('normal bold 15pt "+mj-lt"');
+
         const fractionalSize = getFontStyleString({
             fs: 10.0125,
             ff: 'Microsoft YaHei',

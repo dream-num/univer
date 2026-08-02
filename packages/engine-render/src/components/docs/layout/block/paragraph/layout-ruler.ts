@@ -44,6 +44,7 @@ import {
     WrapStrategy,
 } from '@univerjs/core';
 import { GlyphType, LineType } from '../../../../../basics/i-document-skeleton-cached';
+import { isCjkLeftAlignedPunctuation } from '../../../../../basics/tools';
 import { getDocsCustomBlockRenderViewport } from '../../../custom-block-render-viewport';
 import { BreakPointType } from '../../line-breaker/break';
 import { addGlyphToDivide, createSkeletonBulletGlyph } from '../../model/glyph';
@@ -99,12 +100,17 @@ function isBeyondDivideWidth(width: number, divideWidth: number) {
 function isGlyphGroupBeyondDivideWidth(
     glyphGroup: IDocumentSkeletonGlyph[],
     offsetLeft: number,
-    divideWidth: number
+    divideWidth: number,
+    hangingPunctuation = false
 ) {
     const width = __getGlyphGroupWidth(glyphGroup);
-    const trailingShrinkability = glyphGroup[glyphGroup.length - 1]?.adjustability?.shrinkability?.[1] ?? 0;
+    const trailingGlyph = glyphGroup[glyphGroup.length - 1];
+    const trailingShrinkability = trailingGlyph?.adjustability?.shrinkability?.[1] ?? 0;
+    const trailingHangingWidth = hangingPunctuation && trailingGlyph && isCjkLeftAlignedPunctuation(trailingGlyph.content)
+        ? trailingGlyph.width
+        : 0;
 
-    return isBeyondDivideWidth(offsetLeft + width - trailingShrinkability, divideWidth);
+    return isBeyondDivideWidth(offsetLeft + width - Math.max(trailingShrinkability, trailingHangingWidth), divideWidth);
 }
 
 export function layoutParagraph(
@@ -137,6 +143,11 @@ export function layoutParagraph(
                 ...bulletParagraphStyle,
                 ...paragraphConfig.paragraphStyle,
             };
+
+            const hangingWidth = getNumberUnitValue(paragraphConfig.paragraphStyle.hanging, charSpaceApply);
+            if (hangingWidth > 0) {
+                bulletGlyph.width = hangingWidth;
+            }
 
             _lineOperator(ctx, [bulletGlyph, ...glyphGroup], pages, sectionBreakConfig, paragraphConfig, isParagraphFirstShapedText, breakPointType);
         } else {
@@ -267,7 +278,8 @@ function _divideOperator(
         const lastLeft = lastGlyph?.left || 0;
         const preOffsetLeft = lastWidth + lastLeft;
         const { hyphenationZone } = sectionBreakConfig;
-        if (isGlyphGroupBeyondDivideWidth(glyphGroup, preOffsetLeft, divide.width)) {
+        const hangingPunctuation = paragraphConfig.paragraphStyle?.hangingPunctuation === BooleanNumber.TRUE;
+        if (isGlyphGroupBeyondDivideWidth(glyphGroup, preOffsetLeft, divide.width, hangingPunctuation)) {
             if (
                 divide?.glyphGroup.length === 0 &&
                 glyphGroup.length > 0 &&
@@ -336,7 +348,7 @@ function _divideOperator(
                 while (glyphGroup.length) {
                     sliceGlyphGroup.push(glyphGroup.shift()!);
 
-                    if (isGlyphGroupBeyondDivideWidth(sliceGlyphGroup, 0, divide.width)) {
+                    if (isGlyphGroupBeyondDivideWidth(sliceGlyphGroup, 0, divide.width, hangingPunctuation)) {
                         // To avoid infinity loop when width is less than one char's width.
                         if (sliceGlyphGroup.length > 1) { // || (sliceGlyphGroup.length > 0 && sliceGlyphGroup[sliceGlyphGroup.length - 1].drawingId)) {
                             glyphGroup.unshift(sliceGlyphGroup.pop()!);

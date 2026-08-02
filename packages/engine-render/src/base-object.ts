@@ -24,7 +24,7 @@ import type { Engine } from './engine';
 import type { Layer } from './layer';
 import type { Scene } from './scene';
 import { Disposable, EventSubject } from '@univerjs/core';
-import { getRenderTransformBaseOnParentBound } from './basics';
+import { getRenderTransformBaseOnParentBound, getRotatedBoundInGroup } from './basics';
 import { CURSOR_TYPE, RENDER_CLASS_TYPE } from './basics/const';
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './basics/interfaces';
 import { generateRandomKey, toPx } from './basics/tools';
@@ -642,12 +642,22 @@ export abstract class BaseObject extends Disposable {
                 width: parentRealBound.width || 0,
                 height: parentRealBound.height || 0,
             };
-            const realBound = getRenderTransformBaseOnParentBound(baseBound, parentBound, { width: realWidth, height: realHeight, left: realLeft, top: realTop });
+            const rotatedBound = getRotatedBoundInGroup(
+                { width: realWidth, height: realHeight, left: realLeft, top: realTop },
+                this.angle
+            );
+            const mappedRotatedBound = getRenderTransformBaseOnParentBound(baseBound, parentBound, rotatedBound);
+            const normalizedAngle = ((this.angle % 360) + 360) % 360;
+            const swapsAxes =
+                (normalizedAngle >= 45 && normalizedAngle < 135) ||
+                (normalizedAngle >= 225 && normalizedAngle < 315);
+            const mappedCenterX = mappedRotatedBound.left + mappedRotatedBound.width / 2;
+            const mappedCenterY = mappedRotatedBound.top + mappedRotatedBound.height / 2;
 
-            realWidth = realBound.width;
-            realHeight = realBound.height;
-            realLeft = realBound.left - parentBound.left - parentBound.width / 2;
-            realTop = realBound.top - parentBound.top - parentBound.height / 2;
+            realWidth = swapsAxes ? mappedRotatedBound.height : mappedRotatedBound.width;
+            realHeight = swapsAxes ? mappedRotatedBound.width : mappedRotatedBound.height;
+            realLeft = mappedCenterX - realWidth / 2 - parentBound.left - parentBound.width / 2;
+            realTop = mappedCenterY - realHeight / 2 - parentBound.top - parentBound.height / 2;
 
             // const isParentFlipX = this.parent?.flipX;
             // const isParentFlipY = this.parent?.flipY;

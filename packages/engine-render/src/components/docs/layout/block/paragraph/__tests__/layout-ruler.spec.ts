@@ -135,6 +135,7 @@ describe('layout-ruler', () => {
 
         expect(result.length).toBe(1);
         expect(result[0].sections.length).toBeGreaterThan(0);
+        expect(result[0].sections[0].columns[0].lines[0].divides[0].glyphGroup[0].width).toBe(21);
     });
 
     it('uses trailing CJK punctuation shrinkability when deciding line overflow', () => {
@@ -145,6 +146,15 @@ describe('layout-ruler', () => {
         expect(__testing.isGlyphGroupBeyondDivideWidth([text, punctuation], 85, 100)).toBe(false);
         punctuation.adjustability.shrinkability = [0, 0];
         expect(__testing.isGlyphGroupBeyondDivideWidth([text, punctuation], 85, 100)).toBe(true);
+    });
+
+    it('allows explicit hanging punctuation to extend beyond the line end', () => {
+        const text = createGlyph('字', 10);
+        const punctuation = createGlyph('。', 10);
+        punctuation.adjustability.shrinkability = [0, 0];
+
+        expect(__testing.isGlyphGroupBeyondDivideWidth([text, punctuation], 85, 100)).toBe(true);
+        expect(__testing.isGlyphGroupBeyondDivideWidth([text, punctuation], 85, 100, true)).toBe(false);
     });
 
     it('keeps direct paragraph indents before bullet list defaults', () => {
@@ -182,6 +192,7 @@ describe('layout-ruler', () => {
 
         expect(paragraphConfig.paragraphStyle?.indentStart).toEqual({ v: 12 });
         expect(paragraphConfig.paragraphStyle?.hanging).toEqual({ v: 12 });
+        expect(curPage.sections[0].columns[0].lines[0].divides[0].glyphGroup[0].width).toBe(12);
     });
 
     it('lays out first shaped text without bullet', () => {

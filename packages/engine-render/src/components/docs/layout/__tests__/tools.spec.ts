@@ -205,6 +205,7 @@ describe('docs layout tools extra', () => {
                 lineSpacing: 0,
                 spacingRule: 0,
                 snapToGrid: BooleanNumber.TRUE,
+                defaultTabStop: 17,
             },
         };
 
@@ -215,7 +216,7 @@ describe('docs layout tools extra', () => {
         const charCfg = getCharSpaceConfig(sectionBreakConfig as any, paragraphConfig as any);
         expect(charCfg).toEqual(expect.objectContaining({
             charSpace: 2,
-            defaultTabStop: 5,
+            defaultTabStop: 17,
             documentFontSize: 11,
         }));
     });

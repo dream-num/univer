@@ -53,7 +53,7 @@ export const isEmptyDocument = (dataStream?: string) => {
 };
 
 export const fromPlainText = (text: string): IDocumentBody => {
-    const dataStream = text.replace(/\n/g, '\r');
+    const dataStream = text.replace(/\r\n?|\n/g, '\r');
     const paragraphs: IParagraph[] = [];
     const existingParagraphIds = new Set<string>();
     const customRanges: ICustomRange[] = [];

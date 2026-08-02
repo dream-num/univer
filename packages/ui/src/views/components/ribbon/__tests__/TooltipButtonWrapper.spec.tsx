@@ -23,8 +23,10 @@ import { cleanup, fireEvent, render } from '@testing-library/react';
 import { ILogService, Injector, LocaleService } from '@univerjs/core';
 import { of } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+
 import { ComponentManager } from '../../../../common/component-manager';
 import { IconManager } from '../../../../common/icon-manager';
+import { MenuItemType } from '../../../../services/menu/menu';
 import { IMenuManagerService } from '../../../../services/menu/menu-manager.service';
 import { connectInjector } from '../../../../utils/di';
 import {
@@ -45,7 +47,10 @@ class TestLogService {
     warn(): void {}
 }
 
-function renderWithDependencies(element: ReactElement) {
+function renderWithDependencies(
+    element: ReactElement,
+    menuItems: ReturnType<IMenuManagerService['getMenuByPositionKey']> = []
+) {
     const injector = new Injector();
     injector.add([LocaleService, { useClass: TestLocaleService as never }]);
     injector.add([ILogService, { useClass: TestLogService as never }]);
@@ -56,7 +61,7 @@ function renderWithDependencies(element: ReactElement) {
             menuChanged$: of(undefined),
             mergeMenu: () => {},
             appendRootMenu: () => {},
-            getMenuByPositionKey: () => [],
+            getMenuByPositionKey: () => menuItems,
             getFlatMenuByPositionKey: () => [],
         },
     }]);
@@ -120,7 +125,7 @@ describe('DropdownWrapper', () => {
 });
 
 describe('DropdownMenuWrapper', () => {
-    it('renders a single non-hoverable custom panel flush with the dropdown edge', async () => {
+    it('renders a single embedded custom panel flush with the dropdown edge', async () => {
         const { findByRole, getByRole } = renderWithDependencies(
             <ToolbarDropdownProvider>
                 <TooltipWrapper dropdownKey="test-custom-panel">
@@ -131,6 +136,7 @@ describe('DropdownMenuWrapper', () => {
                                 name: 'TestDynamicOption',
                                 hoverable: false,
                                 selectable: false,
+                                props: { embedded: true },
                             },
                         }]}
                         onOptionSelect={vi.fn()}
@@ -148,5 +154,75 @@ describe('DropdownMenuWrapper', () => {
 
         expect(menuItem?.className).toContain('!univer-p-0');
         expect(menuContent?.className).toContain('!univer-p-0');
+    });
+
+    it('keeps padding around a non-embedded custom panel', async () => {
+        const { findByRole, getByRole } = renderWithDependencies(
+            <ToolbarDropdownProvider>
+                <TooltipWrapper dropdownKey="test-non-embedded-custom-panel">
+                    <DropdownMenuWrapper
+                        menuId="test-menu"
+                        options={[{
+                            label: {
+                                name: 'TestDynamicOption',
+                                hoverable: false,
+                                selectable: false,
+                            },
+                        }]}
+                        onOptionSelect={vi.fn()}
+                    >
+                        <button type="button">Open non-embedded custom panel</button>
+                    </DropdownMenuWrapper>
+                </TooltipWrapper>
+            </ToolbarDropdownProvider>
+        );
+
+        fireEvent.pointerDown(getByRole('button', { name: 'Open non-embedded custom panel' }), { button: 0, ctrlKey: false });
+        const option = await findByRole('button', { name: 'Choose dynamic value' });
+        const menuItem = option.closest('[data-slot="dropdown-menu-item"]');
+        const menuContent = option.closest('[data-slot="dropdown-menu-content"]');
+
+        expect(menuItem?.className).not.toContain('!univer-p-0');
+        expect(menuContent?.className).not.toContain('!univer-p-0');
+    });
+
+    it('keeps padding around a custom panel when menu actions follow it', async () => {
+        const { findByRole, getByRole } = renderWithDependencies(
+            <ToolbarDropdownProvider>
+                <TooltipWrapper dropdownKey="test-custom-panel-with-action">
+                    <DropdownMenuWrapper
+                        menuId="test-menu"
+                        options={[{
+                            label: {
+                                name: 'TestDynamicOption',
+                                hoverable: false,
+                                selectable: false,
+                                props: { embedded: true },
+                            },
+                        }]}
+                        onOptionSelect={vi.fn()}
+                    >
+                        <button type="button">Open custom panel with action</button>
+                    </DropdownMenuWrapper>
+                </TooltipWrapper>
+            </ToolbarDropdownProvider>,
+            [{
+                key: 'reset',
+                order: 0,
+                item: {
+                    id: 'reset',
+                    type: MenuItemType.BUTTON,
+                    title: 'Reset',
+                },
+            }]
+        );
+
+        fireEvent.pointerDown(getByRole('button', { name: 'Open custom panel with action' }), { button: 0, ctrlKey: false });
+        const option = await findByRole('button', { name: 'Choose dynamic value' });
+        const menuItem = option.closest('[data-slot="dropdown-menu-item"]');
+        const menuContent = option.closest('[data-slot="dropdown-menu-content"]');
+
+        expect(menuItem?.className).not.toContain('!univer-p-0');
+        expect(menuContent?.className).not.toContain('!univer-p-0');
     });
 });

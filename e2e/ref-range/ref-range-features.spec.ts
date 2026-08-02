@@ -119,7 +119,7 @@ test('RefRange consumers stay aligned across row and column edits', async ({ pag
     page.on('pageerror', (error) => pageErrors.push(error.stack ?? error.message));
 
     await page.setViewportSize({ width: 1600, height: 1200 });
-    await page.goto('/sheets/');
+    await page.goto('/sheets/?ref-range-e2e');
     await page.locator(`html[${RefRangeE2EProtocol.REF_RANGE_E2E_READY_ATTRIBUTE}="true"]`).waitFor();
     const initial = await executeFixture<RefRangeE2EProtocol.IFixtureSnapshot>(page, { action: 'setup' });
 

@@ -166,7 +166,7 @@ function createNewInstance() {
     window.univer = univer;
     const univerAPI = FUniver.newAPI(univer);
     window.univerAPI = univerAPI;
-    if (IS_E2E) {
+    if (IS_E2E && new URLSearchParams(window.location.search).has('ref-range-e2e')) {
         import('./ref-range-e2e').then(({ installRefRangeE2EFixture }) => {
             installRefRangeE2EFixture(univer, univerAPI);
         });

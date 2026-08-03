@@ -68,10 +68,6 @@ export class JSONX {
         return json1.type.compose(thisActions, otherActions);
     }
 
-    static composeAll(operations: readonly JSONOp[]): JSONOp {
-        return operations.reduce((composed, operation) => json1.type.compose(composed, operation), null);
-    }
-
     static transform(thisActions: JSONOp, otherActions: JSONOp, priority: TPriority) {
         return json1.type.transform(thisActions, otherActions, priority);
     }

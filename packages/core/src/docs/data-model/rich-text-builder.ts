@@ -1899,14 +1899,20 @@ export class RichTextValue {
      * ```
      */
     getParagraphs(): RichTextValue[] {
-        const paragraphs = this._data.body?.paragraphs ?? [];
+        const body = this._data.body;
+        if (!body) {
+            return [];
+        }
 
-        let start = 0;
-        return paragraphs.map((paragraph) => {
-            const sub = this.slice(start, paragraph.startIndex);
-            start = paragraph.startIndex;
-            return sub;
-        });
+        const startOffsets = getParagraphContentStartOffsets(body);
+        return (body.paragraphs ?? []).map((paragraph) => RichTextBuilder.create(createParagraphSnapshot(
+            this._data,
+            paragraph.paragraphId,
+            {
+                startOffset: startOffsets.get(paragraph.startIndex) ?? 0,
+                endOffset: paragraph.startIndex,
+            }
+        )));
     }
 
     /**
@@ -2001,6 +2007,7 @@ export class RichTextBuilder extends RichTextValue {
 
     private _doc: DocumentDataModel;
     private readonly _trackedRanges = new Set<IMutableRichTextRange>();
+    private _childHandleRevision = 0;
 
     constructor(data: IDocumentData) {
         super(data);
@@ -2010,8 +2017,10 @@ export class RichTextBuilder extends RichTextValue {
     /**
      * Returns editable paragraph handles backed by this detached rich-text builder.
      *
-     * Paragraph boundaries come from the document model rather than splitting plain text. Each handle stays aligned
-     * when text in this builder grows or shrinks, so callers can safely iterate from the first paragraph to the last.
+     * Paragraph boundaries come from the document model rather than splitting plain text. Handles stay aligned across
+     * edits made through their child run handles, so callers can safely iterate from the first paragraph to the last.
+     * Direct builder edits that change text or run boundaries invalidate previously returned paragraph and run handles;
+     * query them again after calling methods such as `insertText()`, `setStyle()`, `setLink()`, or `delete()`.
      *
      * @returns Editable paragraphs in document order.
      * @example
@@ -2113,7 +2122,8 @@ export class RichTextBuilder extends RichTextValue {
                 this._trackRange(startOffset, endOffset),
                 sourceRun?.ts,
                 sourceRun?.sId,
-                Boolean(sourceRun)
+                Boolean(sourceRun),
+                this._childHandleRevision
             ));
         }
 
@@ -2188,7 +2198,19 @@ export class RichTextBuilder extends RichTextValue {
     }
 
     private _createParagraphBuilder(paragraphId: string, startOffset: number, endOffset: number): RichTextParagraphBuilder {
-        return new RichTextParagraphBuilder(this, paragraphId, this._trackRange(startOffset, endOffset));
+        return new RichTextParagraphBuilder(
+            this,
+            paragraphId,
+            this._trackRange(startOffset, endOffset),
+            this._childHandleRevision
+        );
+    }
+
+    /** @internal */
+    _assertChildHandleRevision(revision: number): void {
+        if (revision !== this._childHandleRevision) {
+            throw new Error('Rich text child handle is no longer valid.');
+        }
     }
 
     private _trackRange(startOffset: number, endOffset: number): IMutableRichTextRange {
@@ -2214,6 +2236,11 @@ export class RichTextBuilder extends RichTextValue {
             trackedRange.startOffset = mapStart(trackedRange.startOffset);
             trackedRange.endOffset = mapEnd(trackedRange.endOffset);
         }
+    }
+
+    private _invalidateChildHandles(): void {
+        this._childHandleRevision++;
+        this._trackedRanges.clear();
     }
 
     /**
@@ -2342,14 +2369,15 @@ export class RichTextBuilder extends RichTextValue {
     }
 
     /**
-     * Appends one text span with explicit style.
+     * Appends one text span with an optional style.
      *
      * Prefer this method when combining multiple styles, because the style object is local to the inserted text and does
      * not leak into following calls.
      *
      * @param text Text to append.
-     * @param style Text style for this span. Agent-friendly aliases such as `bold`, `italic`, `fontFamily`, `fontSize`,
-     * `color`, and `background` are supported alongside native document text style fields.
+     * @param style Optional text style for this span. When omitted, the span is appended as unstyled text. Agent-friendly
+     * aliases such as `bold`, `italic`, `fontFamily`, `fontSize`, `color`, and `background` are supported alongside native
+     * document text style fields.
      * @returns The current builder for chaining.
      * @example
      * ```ts
@@ -2358,12 +2386,12 @@ export class RichTextBuilder extends RichTextValue {
      *   .span('Important', { bold: true, italic: true, color: '#d92d20' });
      * ```
      */
-    span(text: string, style: IRichTextSpanStyle): RichTextBuilder {
+    span(text: string, style?: IRichTextSpanStyle): RichTextBuilder {
         if (!text) {
             return this;
         }
 
-        return this.insertText(text, normalizeRichTextSpanStyle(style));
+        return style ? this.insertText(text, normalizeRichTextSpanStyle(style)) : this.insertText(text);
     }
 
     /**
@@ -2596,6 +2624,7 @@ export class RichTextBuilder extends RichTextValue {
         }
 
         TextX.apply(this._doc.getBody()!, textX.serialize());
+        this._invalidateChildHandles();
         return this;
     }
 
@@ -2643,6 +2672,7 @@ export class RichTextBuilder extends RichTextValue {
         }
 
         TextX.apply(this._doc.getBody()!, textX.serialize());
+        this._invalidateChildHandles();
         return this;
     }
 
@@ -2670,11 +2700,37 @@ export class RichTextBuilder extends RichTextValue {
      */
     delete(start: number, count: number): RichTextBuilder;
     delete(start: number, count?: number): RichTextBuilder {
-        // Implementation logic here
-        if (count !== undefined) {
-            if (!count) return this;
-            const actions = BuildTextUtils.selection.delete([{ startOffset: start, endOffset: start + count, collapsed: true }], this._data.body!);
+        const terminalTokenLength =
+            DataStreamTreeTokenType.PARAGRAPH.length + DataStreamTreeTokenType.SECTION_BREAK.length;
+        const contentLength = Math.max(
+            0,
+            (this._data.body?.dataStream.length ?? terminalTokenLength) - terminalTokenLength
+        );
+        let startOffset: number;
+        let deleteCount: number;
+
+        if (count === undefined) {
+            if (start < 0) {
+                throw new RangeError('Delete count cannot be negative.');
+            }
+            deleteCount = Math.min(start, contentLength);
+            startOffset = contentLength - deleteCount;
+        } else {
+            if (start < 0 || count < 0) {
+                throw new RangeError('Delete range cannot be negative.');
+            }
+            startOffset = Math.min(start, contentLength);
+            deleteCount = Math.min(count, contentLength - startOffset);
+        }
+
+        if (deleteCount > 0) {
+            const actions = BuildTextUtils.selection.delete([{
+                startOffset,
+                endOffset: startOffset + deleteCount,
+                collapsed: true,
+            }], this._data.body!);
             TextX.apply(this._doc.getBody()!, actions);
+            this._invalidateChildHandles();
         }
         return this;
     }
@@ -2702,6 +2758,7 @@ export class RichTextBuilder extends RichTextValue {
         };
         const actions = BuildTextUtils.selection.retain([{ startOffset: start, endOffset: end, collapsed: true }], newBody);
         TextX.apply(this._doc.getBody()!, actions);
+        this._invalidateChildHandles();
         return this;
     }
 
@@ -2731,6 +2788,7 @@ export class RichTextBuilder extends RichTextValue {
             throw new Error('Insert text failed, please check.');
         }
         TextX.apply(this._doc.getBody()!, textX.serialize());
+        this._invalidateChildHandles();
         return this;
     }
 
@@ -2782,6 +2840,7 @@ export class RichTextBuilder extends RichTextValue {
      */
     cancelLink(start: number, end: number): RichTextBuilder;
     cancelLink(start: number | string, end?: number): RichTextBuilder {
+        let changed = false;
         if (typeof start === 'string') {
             const textX = BuildTextUtils.customRange.delete({
                 rangeId: start,
@@ -2791,6 +2850,7 @@ export class RichTextBuilder extends RichTextValue {
                 throw new Error('Insert text failed, please check.');
             }
             TextX.apply(this._doc.getBody()!, textX.serialize());
+            changed = true;
         } else {
             const slice = this.slice(start as number, end as number);
             slice.getLinks().forEach((l) => {
@@ -2802,7 +2862,12 @@ export class RichTextBuilder extends RichTextValue {
                     throw new Error('Insert text failed, please check.');
                 }
                 TextX.apply(this._doc.getBody()!, textX.serialize());
+                changed = true;
             });
+        }
+
+        if (changed) {
+            this._invalidateChildHandles();
         }
 
         return this;
@@ -2917,18 +2982,21 @@ export class RichTextParagraphBuilder extends RichTextValue {
     constructor(
         private readonly _owner: RichTextBuilder,
         private readonly _paragraphId: string,
-        private readonly _range: IMutableRichTextRange
+        private readonly _range: IMutableRichTextRange,
+        private readonly _revision: number
     ) {
         super(createParagraphSnapshot(_owner.getData(), _paragraphId, _range));
     }
 
     /** Returns the persisted paragraph id. */
     getId(): string {
+        this._assertActive();
         return this._paragraphId;
     }
 
     /** Returns the current paragraph range without its trailing paragraph marker. */
     getRange(): IRichTextRange {
+        this._assertActive();
         return { ...this._range };
     }
 
@@ -2942,6 +3010,7 @@ export class RichTextParagraphBuilder extends RichTextValue {
      * ```
      */
     getText(): string {
+        this._assertActive();
         const dataStream = this._owner.getData().body?.dataStream ?? '';
         return dataStream.slice(this._range.startOffset, this._range.endOffset);
     }
@@ -2955,18 +3024,22 @@ export class RichTextParagraphBuilder extends RichTextValue {
      * @returns Editable text runs in document order.
      */
     override getTextRuns(): RichTextRunBuilder[] {
+        this._assertActive();
         return this._owner._createTextRunBuilders(this._range);
     }
 
     override getParagraphStyle(): ParagraphStyleValue {
+        this._assertActive();
         return ParagraphStyleValue.create(this._getParagraph().paragraphStyle);
     }
 
     override getParagraphBullet() {
+        this._assertActive();
         return this._getParagraph().bullet;
     }
 
     override getLinks() {
+        this._assertActive();
         return this.getData().body?.customRanges?.filter((range) => range.rangeType === CustomRangeType.HYPERLINK) ?? [];
     }
 
@@ -2976,6 +3049,7 @@ export class RichTextParagraphBuilder extends RichTextValue {
     }
 
     override getData(): IDocumentData {
+        this._assertActive();
         return createParagraphSnapshot(this._owner.getData(), this._paragraphId, this._range);
     }
 
@@ -2989,6 +3063,10 @@ export class RichTextParagraphBuilder extends RichTextValue {
             throw new Error(`Rich text paragraph "${this._paragraphId}" was not found.`);
         }
         return paragraph;
+    }
+
+    private _assertActive(): void {
+        this._owner._assertChildHandleRevision(this._revision);
     }
 }
 
@@ -3007,36 +3085,43 @@ export class RichTextRunBuilder {
         private readonly _range: IMutableRichTextRange,
         private readonly _textStyle: ITextStyle | undefined,
         private readonly _styleId: string | undefined,
-        private readonly _hasExplicitTextStyle: boolean
+        private readonly _hasExplicitTextStyle: boolean,
+        private readonly _revision: number
     ) {}
 
     /** Inclusive start offset, kept for compatibility with existing `getTextRuns()` callers. */
     get st(): number {
+        this._assertActive();
         return this._range.startOffset;
     }
 
     /** Exclusive end offset, automatically updated after text replacement. */
     get ed(): number {
+        this._assertActive();
         return this._range.endOffset;
     }
 
     /** Optional persisted style id. This is not a stable run identity. */
     get sId(): string | undefined {
+        this._assertActive();
         return this._styleId;
     }
 
     /** Existing text-style value property exposed by `getTextRuns()`. */
     get ts(): TextStyleValue | null {
+        this._assertActive();
         return this._textStyle ? TextStyleValue.create(this._textStyle) : null;
     }
 
     /** Returns the current run range. */
     getRange(): IRichTextRange {
+        this._assertActive();
         return { ...this._range };
     }
 
     /** Returns the current run text. */
     getText(): string {
+        this._assertActive();
         const dataStream = this._owner.getData().body?.dataStream ?? '';
         return dataStream.slice(this._range.startOffset, this._range.endOffset);
     }
@@ -3048,6 +3133,7 @@ export class RichTextRunBuilder {
 
     /** Returns whether this segment is backed by an explicit document text run. */
     hasTextStyle(): boolean {
+        this._assertActive();
         return this._hasExplicitTextStyle;
     }
 
@@ -3076,9 +3162,7 @@ export class RichTextRunBuilder {
      * ```
      */
     setText(text: string): this {
-        if (!this._active) {
-            throw new Error('Rich text run handle is no longer valid.');
-        }
+        this._assertActive();
         this._owner._replaceTextRun(
             this._range,
             text,
@@ -3090,6 +3174,13 @@ export class RichTextRunBuilder {
             this._active = false;
         }
         return this;
+    }
+
+    private _assertActive(): void {
+        if (!this._active) {
+            throw new Error('Rich text run handle is no longer valid.');
+        }
+        this._owner._assertChildHandleRevision(this._revision);
     }
 }
 

@@ -225,6 +225,16 @@ describe('RichTextValue', () => {
         expect(richText.toPlainText()).toBe('Hello World\nNew Line');
     });
 
+    it('should preserve control characters supplied through the raw document-data boundary', () => {
+        const richText = RichTextValue.createByBody({
+            dataStream: 'A\nB\r\n',
+            paragraphs: [{ startIndex: 3, paragraphId: 'paragraph-1' }],
+        });
+
+        expect(richText.getData().body?.dataStream).toBe('A\nB\r\n');
+        expect(richText.getData().body?.paragraphs?.map((paragraph) => paragraph.startIndex)).toEqual([3]);
+    });
+
     it('should get paragraph style', () => {
         const paragraphStyle = {
             horizontalAlign: HorizontalAlign.CENTER,
@@ -274,6 +284,29 @@ describe('RichTextValue', () => {
         expect(runs[0].st).toBe(0);
         expect(runs[0].ed).toBe(5);
         expect(runs[0].ts?.getValue()).toEqual(textRun.ts);
+    });
+
+    it('should expose complete paragraph runs without requiring copy', () => {
+        const richText = RichTextValue.createByBody({
+            dataStream: 'Unstyled\rSecond\r\n',
+            textRuns: [],
+            paragraphs: [
+                { startIndex: 8, paragraphId: 'paragraph-1' },
+                { startIndex: 15, paragraphId: 'paragraph-2' },
+            ],
+        });
+
+        const paragraphs = richText.getParagraphs();
+        const copiedParagraphs = richText.copy().getParagraphs();
+
+        expect(paragraphs.map((paragraph) => paragraph.toPlainText())).toEqual(['Unstyled', 'Second']);
+        expect(paragraphs.map((paragraph) => paragraph.getTextRuns().map(({ st, ed }) => ({ st, ed })))).toEqual([
+            [{ st: 0, ed: 8 }],
+            [{ st: 0, ed: 6 }],
+        ]);
+        expect(paragraphs.map((paragraph) => paragraph.getTextRuns().length)).toEqual(
+            copiedParagraphs.map((paragraph) => paragraph.getTextRuns().length)
+        );
     });
 
     it('should get links', () => {
@@ -391,6 +424,17 @@ describe('RichTextBuilder', () => {
             expect(data.body?.paragraphs?.map((paragraph) => paragraph.startIndex)).toEqual([5, 12, 18, 25]);
         });
 
+        it('should treat an inserted carriage return as a strict document paragraph break', () => {
+            const builder = RichTextBuilder.create()
+                .span('AB', {})
+                .insertText(1, '\r');
+
+            expect(builder.getData().body?.dataStream).toBe('A\rB\r\n');
+            expect(builder.getData().body?.paragraphs?.map((paragraph) => paragraph.startIndex)).toEqual([1, 3]);
+            expect(builder.toPlainText()).toBe('A\nB');
+            expect(builder.getParagraphs().map((paragraph) => paragraph.getText())).toEqual(['A', 'B']);
+        });
+
         it('should keep multiline span styles aligned with normalized paragraphs', () => {
             const data = RichTextBuilder.create()
                 .text('A')
@@ -443,6 +487,15 @@ describe('RichTextBuilder', () => {
                     },
                 },
             ]);
+        });
+
+        it('should append an unstyled span when style is omitted', () => {
+            const data = RichTextBuilder.create()
+                .span('Text')
+                .getData();
+
+            expect(data.body?.dataStream).toBe('Text\r\n');
+            expect(data.body?.textRuns).toEqual([]);
         });
 
         it('should build inline code as a text style', () => {
@@ -671,6 +724,18 @@ describe('RichTextBuilder', () => {
             expect(() => run.setText('First\nSecond')).toThrow(RangeError);
             expect(run.getText()).toBe('Original');
         });
+
+        it('invalidates existing child handles after a direct builder edit', () => {
+            const builder = RichTextBuilder.create().span('AB', {});
+            const paragraph = builder.getParagraphs()[0];
+            const run = paragraph.getTextRuns()[0];
+
+            builder.insertText(0, 'X');
+
+            expect(builder.getTextRuns().map((item) => item.getText())).toEqual(['XAB']);
+            expect(() => run.getText()).toThrow('Rich text child handle is no longer valid.');
+            expect(() => paragraph.getText()).toThrow('Rich text child handle is no longer valid.');
+        });
     });
 
     describe('rich text insertion', () => {
@@ -723,6 +788,21 @@ describe('RichTextBuilder', () => {
                 .delete(5, 0);
 
             expect(builder.getData().body!.dataStream).toBe('Hello World\r\n');
+        });
+
+        it('should delete the requested number of characters from the end', () => {
+            const builder = RichTextBuilder.create()
+                .insertText('ABCDE')
+                .delete(2);
+
+            expect(builder.getData().body!.dataStream).toBe('ABC\r\n');
+        });
+
+        it('should clamp end deletion to content and reject negative counts', () => {
+            const builder = RichTextBuilder.create().insertText('ABC');
+
+            expect(() => builder.delete(-1)).toThrow(RangeError);
+            expect(builder.delete(10).getData().body!.dataStream).toBe('\r\n');
         });
     });
 

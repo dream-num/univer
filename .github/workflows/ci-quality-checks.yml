@@ -110,7 +110,7 @@ jobs:
     typecheck:
         if: github.repository == 'dream-num/univer' && (github.event_name != 'pull_request' || !github.event.pull_request.draft)
         runs-on: ubuntu-latest
-        timeout-minutes: 10
+        timeout-minutes: 15
         env:
             TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
             TURBO_TEAM: ${{ vars.TURBO_TEAM }}

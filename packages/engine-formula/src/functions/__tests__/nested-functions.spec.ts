@@ -32,6 +32,7 @@ import {
     RichTextValue,
 } from '@univerjs/core';
 import { beforeEach, describe, expect, it } from 'vitest';
+import { FormulaEvaluationMode } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { Lexer } from '../../engine/analysis/lexer';
 import { AstTreeBuilder } from '../../engine/analysis/parser';
@@ -42,6 +43,7 @@ import { IFunctionService } from '../../services/function.service';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
 import { ISuperTableService } from '../../services/super-table.service';
 import { DateFunction } from '../date/date';
+import { Datevalue } from '../date/datevalue';
 import { Day } from '../date/day';
 import { Edate } from '../date/edate';
 import { FUNCTION_NAMES_DATE } from '../date/function-names';
@@ -58,9 +60,11 @@ import { FUNCTION_NAMES_LOOKUP } from '../lookup/function-names';
 import { Hyperlink } from '../lookup/hyperlink';
 import { Index } from '../lookup/index/index';
 import { Match } from '../lookup/match';
+import { Offset } from '../lookup/offset';
 import { Row } from '../lookup/row';
 import { Sort } from '../lookup/sort';
 import { Unique } from '../lookup/unique';
+import { Vlookup } from '../lookup/vlookup';
 import { Xlookup } from '../lookup/xlookup';
 import { Xmatch } from '../lookup/xmatch';
 import { Fact } from '../math/fact';
@@ -69,6 +73,7 @@ import { Product } from '../math/product';
 import { Sum } from '../math/sum';
 import { Sumif } from '../math/sumif';
 import { Sumifs } from '../math/sumifs';
+import { Sumproduct } from '../math/sumproduct';
 import { Compare } from '../meta/compare';
 import { Divided } from '../meta/divided';
 import { FUNCTION_NAMES_META } from '../meta/function-names';
@@ -78,6 +83,7 @@ import { Plus } from '../meta/plus';
 import { Countif } from '../statistical/countif';
 import { FUNCTION_NAMES_STATISTICAL } from '../statistical/function-names';
 import { Max } from '../statistical/max';
+import { Median } from '../statistical/median';
 import { Min } from '../statistical/min';
 import { Concatenate } from '../text/concatenate';
 import { FUNCTION_NAMES_TEXT } from '../text/function-names';
@@ -85,6 +91,7 @@ import { Left } from '../text/left';
 import { Len } from '../text/len';
 import { T } from '../text/t';
 import { Text } from '../text/text';
+import { Textjoin } from '../text/textjoin';
 import { getObjectValue } from '../util';
 import { createFunctionTestBed } from './create-function-test-bed';
 
@@ -393,6 +400,10 @@ const getFunctionsTestWorkbookData = (): IWorkbookData => {
                         3: {
                             v: 'LIstMonths',
                         },
+                        23: {
+                            v: 1000,
+                            t: CellValueType.NUMBER,
+                        },
                     },
                     21: {
                         0: {
@@ -567,6 +578,12 @@ const getFunctionsTestWorkbookData = (): IWorkbookData => {
                             t: CellValueType.STRING,
                         },
                     },
+                    97: {
+                        25: {
+                            v: 1000,
+                            t: CellValueType.NUMBER,
+                        },
+                    },
                     98: {
                         25: {
                             s: 'style-only-blank',
@@ -578,7 +595,9 @@ const getFunctionsTestWorkbookData = (): IWorkbookData => {
         locale: LocaleType.ZH_CN,
         name: '',
         sheetOrder: [],
-        styles: {},
+        styles: {
+            'style-only': {},
+        },
     };
 };
 describe('Test nested functions', () => {
@@ -586,6 +605,7 @@ describe('Test nested functions', () => {
     let lexer: Lexer;
     let astTreeBuilder: AstTreeBuilder;
     let interpreter: Interpreter;
+    let formulaRuntimeService: IFormulaRuntimeService;
     let calculate: (formula: string) => (string | number | boolean | null)[][] | string | number | boolean;
     let calculateByRuntime: (formula: string) => Nullable<ICellData>;
 
@@ -602,7 +622,7 @@ describe('Test nested functions', () => {
 
         const formulaCurrentConfigService = get(IFormulaCurrentConfigService);
 
-        const formulaRuntimeService = get(IFormulaRuntimeService);
+        formulaRuntimeService = get(IFormulaRuntimeService);
         const superTableService = get(ISuperTableService);
 
         formulaCurrentConfigService.load({
@@ -637,10 +657,12 @@ describe('Test nested functions', () => {
             new Iferror(FUNCTION_NAMES_LOGICAL.IFERROR),
             new Xlookup(FUNCTION_NAMES_LOOKUP.XLOOKUP),
             new Max(FUNCTION_NAMES_STATISTICAL.MAX),
+            new Median(FUNCTION_NAMES_STATISTICAL.MEDIAN),
             new Sumif(FUNCTION_NAMES_MATH.SUMIF),
             new Sumifs(FUNCTION_NAMES_MATH.SUMIFS),
             new Edate(FUNCTION_NAMES_DATE.EDATE),
             new DateFunction(FUNCTION_NAMES_DATE.DATE),
+            new Datevalue(FUNCTION_NAMES_DATE.DATEVALUE),
             new Today(FUNCTION_NAMES_DATE.TODAY),
             new Day(FUNCTION_NAMES_DATE.DAY),
             new Month(FUNCTION_NAMES_DATE.MONTH),
@@ -653,7 +675,9 @@ describe('Test nested functions', () => {
             new Minus(FUNCTION_NAMES_META.MINUS),
             new Concatenate(FUNCTION_NAMES_TEXT.CONCATENATE),
             new Sum(FUNCTION_NAMES_MATH.SUM),
+            new Sumproduct(FUNCTION_NAMES_MATH.SUMPRODUCT),
             new Choose(FUNCTION_NAMES_LOOKUP.CHOOSE),
+            new Vlookup(FUNCTION_NAMES_LOOKUP.VLOOKUP),
             new Sort(FUNCTION_NAMES_LOOKUP.SORT),
             new Unique(FUNCTION_NAMES_LOOKUP.UNIQUE),
             new Len(FUNCTION_NAMES_TEXT.LEN),
@@ -664,9 +688,11 @@ describe('Test nested functions', () => {
             new Fact(FUNCTION_NAMES_MATH.FACT),
             new T(FUNCTION_NAMES_TEXT.T),
             new Text(FUNCTION_NAMES_TEXT.TEXT),
+            new Textjoin(FUNCTION_NAMES_TEXT.TEXTJOIN),
             new Hyperlink(FUNCTION_NAMES_LOOKUP.HYPERLINK),
             new Row(FUNCTION_NAMES_LOOKUP.ROW),
             new Match(FUNCTION_NAMES_LOOKUP.MATCH),
+            new Offset(FUNCTION_NAMES_LOOKUP.OFFSET),
             new Index(FUNCTION_NAMES_LOOKUP.INDEX),
             new Countif(FUNCTION_NAMES_STATISTICAL.COUNTIF),
             new Left(FUNCTION_NAMES_TEXT.LEFT)
@@ -803,6 +829,99 @@ describe('Test nested functions', () => {
             const result = calculate('=IF(TRUE,B2,0)');
 
             expect(result).toBe(101);
+        });
+
+        it('Nested INDEX selects from a vertical array constant using MATCH', () => {
+            expect(calculate('=INDEX({"2013-02-10";"2014-01-31"},MATCH(2014,{2013;2014},0))')).toStrictEqual([['2014-01-31']]);
+            expect(calculate('=DATEVALUE(INDEX({"2013-02-10";"2014-01-31"},MATCH(2014,{2013;2014},0)))')).toStrictEqual([[41670]]);
+        });
+
+        it('COUNTIF treats an incomplete comparison from an OFFSET blank as no match', () => {
+            formulaRuntimeService.setCurrent(
+                20,
+                25,
+                formulaRuntimeService.currentRowCount,
+                formulaRuntimeService.currentColumnCount,
+                formulaRuntimeService.currentSubUnitId,
+                formulaRuntimeService.currentUnitId,
+                FormulaEvaluationMode.LEGACY_SCALAR
+            );
+
+            expect(calculate('=">="&OFFSET(X21,1,0,1,1)')).toStrictEqual([['>=']]);
+            expect(calculate('=COUNTIF(D2:D4,">="&OFFSET(X21,1,0,1,1))')).toBe(0);
+            expect(calculate('=COUNTIF(D2:D4,">="&X21)-COUNTIF(D2:D4,">="&OFFSET(X21,1,0,1,1))')).toBe(0);
+        });
+
+        it('Nested CHOOSE intersects operator expressions but preserves direct ranges in legacy scalar formulas', () => {
+            formulaRuntimeService.setCurrent(
+                2,
+                0,
+                formulaRuntimeService.currentRowCount,
+                formulaRuntimeService.currentColumnCount,
+                formulaRuntimeService.currentSubUnitId,
+                formulaRuntimeService.currentUnitId,
+                FormulaEvaluationMode.LEGACY_SCALAR
+            );
+
+            expect(calculate('=CHOOSE({1,2},A2:A4&"|"&B2:B4,C2:C4)')).toStrictEqual([['44928|102', 5]]);
+        });
+
+        it('Nested VLOOKUP preserves the complete CHOOSE lookup table in legacy scalar formulas', () => {
+            formulaRuntimeService.setCurrent(
+                2,
+                0,
+                formulaRuntimeService.currentRowCount,
+                formulaRuntimeService.currentColumnCount,
+                formulaRuntimeService.currentSubUnitId,
+                formulaRuntimeService.currentUnitId,
+                FormulaEvaluationMode.LEGACY_SCALAR
+            );
+
+            expect(calculate('=VLOOKUP(A3&"|"&B3,CHOOSE({1,2},A2:A4&"|"&B2:B4,C2:C4),2,FALSE)')).toStrictEqual([[5]]);
+        });
+
+        it('Nested SUMPRODUCT preserves SUMIFS arrays and intersects binary IF branches in legacy scalar formulas', () => {
+            formulaRuntimeService.setCurrent(
+                1,
+                0,
+                formulaRuntimeService.currentRowCount,
+                formulaRuntimeService.currentColumnCount,
+                formulaRuntimeService.currentSubUnitId,
+                formulaRuntimeService.currentUnitId,
+                FormulaEvaluationMode.LEGACY_SCALAR
+            );
+
+            expect(calculate('=SUMPRODUCT(SUMIFS(D2:D4,A2:A4,A2:A4)*IF(3>=C2:C4,B2:B4,D2:D4))')).toBe(380000);
+            expect(calculate('=SUMPRODUCT(IF(A1="ALL",1,A2:A4=A3)*D2:D4)')).toBe(0);
+        });
+
+        it('Nested MEDIAN uses legacy intersection for IF conditions while preserving the selected range', () => {
+            formulaRuntimeService.setCurrent(
+                formulaRuntimeService.currentRow,
+                formulaRuntimeService.currentColumn,
+                formulaRuntimeService.currentRowCount,
+                formulaRuntimeService.currentColumnCount,
+                formulaRuntimeService.currentSubUnitId,
+                formulaRuntimeService.currentUnitId,
+                FormulaEvaluationMode.LEGACY_SCALAR
+            );
+
+            expect(calculate('=MEDIAN(IF(A1:A5=A1,B1:B5))')).toBe(102.5);
+            expect(calculate('=MEDIAN(IF(A1:A5="missing",B1:B5))')).toBe(0);
+        });
+
+        it('Nested TEXTJOIN preserves IF text arrays in legacy scalar formulas', () => {
+            formulaRuntimeService.setCurrent(
+                formulaRuntimeService.currentRow,
+                formulaRuntimeService.currentColumn,
+                formulaRuntimeService.currentRowCount,
+                formulaRuntimeService.currentColumnCount,
+                formulaRuntimeService.currentSubUnitId,
+                formulaRuntimeService.currentUnitId,
+                FormulaEvaluationMode.LEGACY_SCALAR
+            );
+
+            expect(calculate('=TEXTJOIN(", ",TRUE,IF(A1:A3<>"",B1:B3,""))')).toBe('B, 101, 102');
         });
 
         it('Nested functions XMATCH keeps Formula2 binary lookup ranges as arrays', () => {

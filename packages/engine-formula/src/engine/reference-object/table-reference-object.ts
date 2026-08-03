@@ -215,6 +215,10 @@ export class TableReferenceObject extends BaseReferenceObject {
         const columnsRaw = body.slice(commaAt + 1).trim(); // May be "[Col]" or "[[ColA]:[ColB]]" or "Col"
 
         const section = this._parseSectionMaybeBracketed(sectionRaw);
+        if (section === undefined) {
+            const { startColumn, endColumn } = this._parseColumnOrRange(body, titleMap, fullStartCol);
+            return { startColumn, endColumn, type: TableOptionType.DATA };
+        }
         const { startColumn, endColumn } = this._parseColumnOrRange(columnsRaw, titleMap, fullStartCol);
 
         return { startColumn, endColumn, type: section };
@@ -245,13 +249,12 @@ export class TableReferenceObject extends BaseReferenceObject {
 
     /**
      * Parse Section, compatible with both "[#Data]" and "#Data" inputs
-     * Returns TableOptionType if matched; returns DATA if not (could throw error instead)
+     * Returns TableOptionType if matched; returns undefined when the comma belongs to a column title.
      */
-    private _parseSectionMaybeBracketed(raw: string): TableOptionType {
+    private _parseSectionMaybeBracketed(raw: string): TableOptionType | undefined {
         const x = raw.trim();
         const inner = (x.startsWith('[') && x.endsWith(']')) ? this._stripOuterBracketOnce(x) : x;
-        const typeMaybe = this._mapSection(inner);
-        return typeMaybe ?? TableOptionType.DATA;
+        return this._mapSection(inner);
     }
 
     /**
@@ -290,6 +293,12 @@ export class TableReferenceObject extends BaseReferenceObject {
         fullStartCol: number
     ): { startColumn: number; endColumn: number } {
         const s = raw.trim();
+
+        const singleColumnIndex = this._titleToIndex(this._stripOuterBracketIfAny(s), titleMap);
+        if (singleColumnIndex !== -1) {
+            const column = fullStartCol + singleColumnIndex;
+            return { startColumn: column, endColumn: column };
+        }
 
         // Check if there's a range colon at top level
         const colonAt = this._findColonAtTopLevel(s);

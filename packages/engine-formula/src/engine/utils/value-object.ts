@@ -437,6 +437,18 @@ export function filterSameValueObjectResult(array: ArrayValueObject, range: Arra
         const rangeValueObject = range.get(r, c);
         const isBlankStringCriteria = criteriaObject.isString() && criteriaObject.getValue() === '';
 
+        if (
+            isBlankStringCriteria &&
+            (
+                operator === compareToken.GREATER_THAN ||
+                operator === compareToken.GREATER_THAN_OR_EQUAL ||
+                operator === compareToken.LESS_THAN ||
+                operator === compareToken.LESS_THAN_OR_EQUAL
+            )
+        ) {
+            return BooleanValueObject.create(false);
+        }
+
         if (operator === compareToken.NOT_EQUAL && isBlankStringCriteria && rangeValueObject?.isString() && rangeValueObject.getValue() === '') {
             return BooleanValueObject.create(true);
         }
@@ -445,7 +457,17 @@ export function filterSameValueObjectResult(array: ArrayValueObject, range: Arra
             criteriaObject.isString() &&
             criteriaObject.getValue() !== '' &&
             (operator === compareToken.LESS_THAN || operator === compareToken.LESS_THAN_OR_EQUAL) &&
-            (rangeValueObject == null || rangeValueObject.isNull() || (rangeValueObject.isString() && rangeValueObject.getValue() === ''))
+            rangeValueObject?.isString() &&
+            rangeValueObject.getValue() === ''
+        ) {
+            return BooleanValueObject.create(true);
+        }
+
+        if (
+            criteriaObject.isString() &&
+            criteriaObject.getValue() !== '' &&
+            (operator === compareToken.LESS_THAN || operator === compareToken.LESS_THAN_OR_EQUAL) &&
+            (rangeValueObject == null || rangeValueObject.isNull())
         ) {
             return BooleanValueObject.create(false);
         }

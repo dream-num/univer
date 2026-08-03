@@ -103,6 +103,16 @@ export class BaseFunction {
     needsAstChildren: boolean = false;
 
     /**
+     * Arguments that preserve a selected IF branch as an array in legacy scalar formulas.
+     */
+    legacyScalarArrayArgumentIndexes: readonly number[] = [];
+
+    /**
+     * Arguments whose operator expressions use implicit intersection in legacy scalar formulas.
+     */
+    legacyScalarOperatorIntersectionArgumentIndexes: readonly number[] = [];
+
+    /**
      * Legacy CSE-style array functions should write only the first result cell
      * when they are used as a top-level normal formula.
      */

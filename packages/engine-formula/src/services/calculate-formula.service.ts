@@ -305,10 +305,20 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
                 tree.rowCount,
                 tree.columnCount,
                 tree.subUnitId,
-                tree.unitId
+                tree.unitId,
+                tree.evaluationMode
             );
 
-            const node = generateAstNode(tree.unitId, tree.formula, this._lexer, this._astTreeBuilder, this._currentConfigService, tree.subUnitId);
+            const node = generateAstNode(
+                tree.unitId,
+                tree.formula,
+                this._lexer,
+                this._astTreeBuilder,
+                this._currentConfigService,
+                tree.subUnitId,
+                tree.column,
+                tree.row
+            );
             const nodeData = {
                 node,
                 refOffsetX: tree.refOffsetX,

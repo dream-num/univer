@@ -19,6 +19,7 @@ import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/r
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { Tools } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
+import { addQuotesBothSides } from '../../../engine/utils/reference';
 import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
@@ -77,6 +78,7 @@ export class Cell extends BaseFunction {
 
         const currentActiveSheetData = (_reference as BaseReferenceObject).getCurrentActiveSheetData();
         const { columnData, defaultColumnWidth } = currentActiveSheetData;
+        const forcedSheetName = (_reference as BaseReferenceObject).getForcedSheetName();
 
         _reference = (_reference as BaseReferenceObject).toArrayValueObject();
 
@@ -91,7 +93,9 @@ export class Cell extends BaseFunction {
 
         switch (infoTypeValue.toLocaleLowerCase()) {
             case 'address':
-                return StringValueObject.create(`$${Tools.chatAtABC(_currentColumn)}$${_currentRow + 1}`);
+                return StringValueObject.create(
+                    `${forcedSheetName ? `${addQuotesBothSides(forcedSheetName)}!` : ''}$${Tools.chatAtABC(_currentColumn)}$${_currentRow + 1}`
+                );
             case 'col':
                 return NumberValueObject.create(_currentColumn + 1);
             case 'color':

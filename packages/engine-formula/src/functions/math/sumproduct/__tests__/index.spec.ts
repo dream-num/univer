@@ -296,10 +296,11 @@ describe('Test sumproduct function', () => {
             expect(getObjectValue(result, true)).toBe(1209.32171126296);
         });
 
-        it('uses legacy implicit intersection for derived arrays passed to SUM', async () => {
-            const result = await calculate('=SUMPRODUCT(C1:C3,A1:A3+B1:B3)/SUM(A1:A3+B1:B3)');
+        it('uses the formula row for legacy implicit intersection of derived arrays passed to SUM', () => {
+            get(IFormulaRuntimeService).setCurrent(1, 0, 3, 3, 'sheet1', 'test');
+            const result = calculate('=SUMPRODUCT(C1:C3,A1:A3+B1:B3)/SUM(A1:A3+B1:B3)');
 
-            expect(result).toBeCloseTo((0.1 * 110 + 0.2 * 220 + 0.3 * 330) / 110, 12);
+            expect(result).toBeCloseTo((0.1 * 110 + 0.2 * 220 + 0.3 * 330) / 220, 12);
         });
     });
 });

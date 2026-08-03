@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import type { FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { BaseReferenceObject } from '../../../engine/reference-object/base-reference-object';
 import { BooleanValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
@@ -24,7 +25,19 @@ export class Isblank extends BaseFunction {
 
     override maxParams = 1;
 
-    override calculate(value: BaseValueObject) {
+    override needsReferenceObject = true;
+
+    override calculate(value: FunctionVariantType) {
+        if (value instanceof BaseReferenceObject) {
+            const array = value.toArrayValueObject(false).mapValue((valueObject) =>
+                BooleanValueObject.create(valueObject.isNull())
+            );
+
+            return array.getRowCount() === 1 && array.getColumnCount() === 1
+                ? array.getFirstCell()
+                : array;
+        }
+
         if (value.isNull()) {
             return BooleanValueObject.create(true);
         } else if (value.isArray()) {

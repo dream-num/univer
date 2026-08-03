@@ -132,6 +132,14 @@ export class BaseAstNode {
         return this._valueObject;
     }
 
+    acceptsLegacyScalarArrayArgument(_child: BaseAstNode): boolean {
+        return false;
+    }
+
+    intersectsLegacyScalarOperatorArgument(_child: BaseAstNode): boolean {
+        return false;
+    }
+
     isCalculated() {
         return this._calculateState;
     }

@@ -32,6 +32,7 @@ import type {
 } from '../basics/common';
 import type { IImageFormulaInfo } from '../engine/value-object/primitive-object';
 import { BooleanNumber, CellValueType, Disposable, Inject, isFormulaId, isFormulaString, IUniverInstanceService, ObjectMatrix, RANGE_TYPE, Styles, UniverInstanceType } from '@univerjs/core';
+import { FormulaEvaluationMode } from '../basics/common';
 import { LexerTreeBuilder } from '../engine/analysis/lexer-tree-builder';
 import { deserializeRangeWithSheet } from '../engine/utils/reference';
 import { clearArrayFormulaCellDataByCell, updateFormulaDataByCellValue } from './utils/formula-data-util';
@@ -879,12 +880,16 @@ export function initSheetFormulaData(
         formulaData[unitId][sheetId] = {};
     }
 
-    const formulaIdMap = new Map<string, { f: string; r: number; c: number }>(); // Connect the formula and ID
+    const formulaIdMap = new Map<string, { f: string; r: number; c: number; evaluationMode?: FormulaEvaluationMode }>(); // Connect the formula and ID
     const sheetFormulaDataMatrix = new ObjectMatrix<Nullable<IFormulaDataItem>>(formulaData[unitId][sheetId]);
 
     cellMatrix.forValue((r, c, cell) => {
         const formulaString = cell?.f || '';
         const formulaId = cell?.si || '';
+        const evaluationMode =
+            cell?.custom?._xlsx?.sourceScalarFormula === formulaString
+                ? FormulaEvaluationMode.LEGACY_SCALAR
+                : undefined;
 
         const checkFormulaString = isFormulaString(formulaString);
         const checkFormulaId = isFormulaId(formulaId);
@@ -893,11 +898,13 @@ export function initSheetFormulaData(
             sheetFormulaDataMatrix.setValue(r, c, {
                 f: formulaString,
                 si: formulaId,
+                ...(evaluationMode ? { evaluationMode } : {}),
             });
-            formulaIdMap.set(formulaId, { f: formulaString, r, c });
+            formulaIdMap.set(formulaId, { f: formulaString, r, c, evaluationMode });
         } else if (checkFormulaString && !checkFormulaId) {
             sheetFormulaDataMatrix.setValue(r, c, {
                 f: formulaString,
+                ...(evaluationMode ? { evaluationMode } : {}),
             });
         } else if (!checkFormulaString && checkFormulaId) {
             sheetFormulaDataMatrix.setValue(r, c, {
@@ -917,8 +924,15 @@ export function initSheetFormulaData(
                 const x = c - formulaInfo.c;
                 const y = r - formulaInfo.r;
                 const f = formulaInfo.f;
+                const evaluationMode = formulaInfo.evaluationMode;
 
-                sheetFormulaDataMatrix.setValue(r, c, { f, si: formulaId, x, y });
+                sheetFormulaDataMatrix.setValue(r, c, {
+                    f,
+                    si: formulaId,
+                    x,
+                    y,
+                    ...(evaluationMode ? { evaluationMode } : {}),
+                });
             } else {
                 // If the formula ID is not found in the formula ID map, delete the formula ID.
                 // Prevent IDs without corresponding formulas from appearing

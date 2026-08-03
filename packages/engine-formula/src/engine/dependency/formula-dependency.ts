@@ -34,7 +34,7 @@ import type {
 import type { IAllRuntimeData } from '../../services/runtime.service';
 import type { FunctionNode, PrefixNode, SuffixNode } from '../ast-node';
 import type { BaseAstNode } from '../ast-node/base-ast-node';
-import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
+import type { FunctionVariantType } from '../reference-object/base-reference-object';
 import type { IExecuteAstNodeData } from '../utils/ast-node-tool';
 import type { PreCalculateNodeType } from '../utils/node-type';
 import type {
@@ -65,6 +65,7 @@ import { LexerTreeBuilder } from '../analysis/lexer-tree-builder';
 import { AstTreeBuilder } from '../analysis/parser';
 import { NodeType } from '../ast-node/node-type';
 import { Interpreter } from '../interpreter/interpreter';
+import { BaseReferenceObject } from '../reference-object/base-reference-object';
 import { FORMULA_AST_CACHE, generateAstNode, includeDefinedName } from '../utils/generate-ast-node';
 import {
     FormulaDependencyTree,
@@ -452,7 +453,7 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
     }
 
     protected _createFDtree(unitId: string, sheetId: string, row: number, column: number, unitData: IUnitData, formulaDataItem: IFormulaDataItem) {
-        const { f: formulaString, x = 0, y = 0 } = formulaDataItem;
+        const { evaluationMode, f: formulaString, x = 0, y = 0 } = formulaDataItem;
 
         const FDtree = new FormulaDependencyTree(generateRandomDependencyTreeId(this._dependencyManagerService));
 
@@ -462,6 +463,7 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
 
         // FDtree.node = node;
         FDtree.formula = formulaString;
+        FDtree.evaluationMode = evaluationMode;
         FDtree.unitId = unitId;
         FDtree.subUnitId = sheetId;
         FDtree.row = row;
@@ -534,7 +536,16 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
     }
 
     protected _getTreeNode(tree: IFormulaDependencyTree) {
-        return generateAstNode(tree.unitId, tree.formula, this._lexer, this._astTreeBuilder, this._currentConfigService, tree.subUnitId);
+        return generateAstNode(
+            tree.unitId,
+            tree.formula,
+            this._lexer,
+            this._astTreeBuilder,
+            this._currentConfigService,
+            tree.subUnitId,
+            tree.column,
+            tree.row
+        );
     }
 
     // eslint-disable-next-line style/generator-star-spacing
@@ -738,7 +749,8 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
                 tree.rowCount,
                 tree.columnCount,
                 tree.subUnitId,
-                tree.unitId
+                tree.unitId,
+                tree.evaluationMode
             );
 
             const node = this._getTreeNode(tree);
@@ -934,19 +946,17 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
         }
     }
 
-    private async _executeNode(node: PreCalculateNodeType | FunctionNode, refOffsetX = 0, refOffsetY = 0) {
-        let value: BaseReferenceObject;
+    private async _executeNode(node: PreCalculateNodeType | FunctionNode, refOffsetX = 0, refOffsetY = 0): Promise<BaseReferenceObject | null> {
         const nodeData = {
             node,
             refOffsetX,
             refOffsetY,
         };
-        if (this._interpreter.checkAsyncNode(node)) {
-            value = (await this._interpreter.executeAsync(nodeData)) as BaseReferenceObject;
-        } else {
-            value = this._interpreter.execute(nodeData) as BaseReferenceObject;
-        }
-        return value;
+        const value = this._interpreter.checkAsyncNode(node)
+            ? await this._interpreter.executeAsync(nodeData)
+            : this._interpreter.execute(nodeData);
+
+        return value instanceof BaseReferenceObject ? value : null;
     }
 
     /**
@@ -972,9 +982,11 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
         for (let i = 0, len = preCalculateNodeList.length; i < len; i++) {
             const node = preCalculateNodeList[i];
 
-            const value: BaseReferenceObject = await this._executeNode(node, refOffsetX, refOffsetY);
+            const value = await this._executeNode(node, refOffsetX, refOffsetY);
 
-            rangeList.push(...value.toUnitRanges());
+            if (value != null) {
+                rangeList.push(...value.toUnitRanges());
+            }
 
             node.setValue(null);
         }
@@ -1065,7 +1077,8 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
             tree.rowCount,
             tree.columnCount,
             tree.subUnitId,
-            tree.unitId
+            tree.unitId,
+            tree.evaluationMode
         );
 
         const dirtyRanges: IUnitRange[] = [];
@@ -1110,7 +1123,8 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
                 tree.rowCount,
                 tree.columnCount,
                 tree.subUnitId,
-                tree.unitId
+                tree.unitId,
+                tree.evaluationMode
             );
 
             const node = this._getTreeNode(tree);
@@ -1205,9 +1219,11 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
 
         for (let i = 0, len = referenceFunctionList.length; i < len; i++) {
             const node = referenceFunctionList[i];
-            const value: BaseReferenceObject = await this._executeNode(node, refOffsetX, refOffsetY);
+            const value = await this._executeNode(node, refOffsetX, refOffsetY);
 
-            rangeList.push(...value.toUnitRanges());
+            if (value != null) {
+                rangeList.push(...value.toUnitRanges());
+            }
 
             node.setValue(null);
         }

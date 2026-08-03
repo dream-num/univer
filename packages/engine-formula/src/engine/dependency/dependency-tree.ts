@@ -16,6 +16,7 @@
 
 import type { IRange, IUnitRange, Nullable } from '@univerjs/core';
 import type {
+    FormulaEvaluationMode,
     IDirtyUnitSheetNameMap,
     IFeatureDirtyRangeType,
     IRuntimeUnitDataType,
@@ -153,6 +154,10 @@ export class FormulaDependencyTreeVirtual extends FormulaDependencyTreeCalculato
 
     get formula() {
         return this.refTree?.formula ?? '';
+    }
+
+    get evaluationMode() {
+        return this.refTree?.evaluationMode;
     }
 
     get nodeData() {
@@ -302,6 +307,8 @@ export class FormulaDependencyTree extends FormulaDependencyTreeCalculator {
     rangeList: IUnitRange[] = [];
 
     formula: string = '';
+
+    evaluationMode?: FormulaEvaluationMode;
 
     row: number = -1;
 

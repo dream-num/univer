@@ -26,6 +26,8 @@ export class Textjoin extends BaseFunction {
 
     override maxParams = 255;
 
+    override legacyScalarArrayArgumentIndexes = Array.from({ length: this.maxParams - 2 }, (_, index) => index + 2);
+
     override calculate(delimiter: BaseValueObject, ignoreEmpty: BaseValueObject, ...variants: BaseValueObject[]): BaseValueObject {
         const delimiterValues = this._getDelimiterValues(delimiter);
         const textValues = this._getTextValues(variants);

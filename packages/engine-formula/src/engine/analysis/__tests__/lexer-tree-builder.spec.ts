@@ -134,6 +134,13 @@ describe('lexer nodeMaker test', () => {
             );
         });
 
+        it('keeps punctuation inside table column names', () => {
+            const node = lexerTreeBuilder.treeBuilder('=SUM(Table3[Deposit,\r\nCredit (+)])') as LexerNode;
+            expect(JSON.stringify(node.serialize())).toStrictEqual(
+                '{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"SUM","st":0,"ed":2,"children":[{"token":"P_1","st":0,"ed":2,"children":["Table3[Deposit,\\r\\nCredit (+)]"]}]}]}'
+            );
+        });
+
         it('import range', () => {
             const node = lexerTreeBuilder.treeBuilder('=[asdfasdfasdf]\'sheet-1\'!A3:B10') as LexerNode;
             expect(JSON.stringify(node.serialize())).toStrictEqual(

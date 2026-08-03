@@ -71,6 +71,52 @@ describe('TableReferenceObject current row', () => {
 
         expect(reference.toArrayValueObject(false).getFirstCell().getValue()).toBe(ErrorType.NA);
     });
+
+    it('matches CRLF structured references against LF table column names', () => {
+        const reference = new TableReferenceObject('Table_FMEA[[#This Row],[F\r\n(1-5)]]', {
+            sheetId: 'sheet',
+            titleMap: new Map([['F\n(1-5)', 3]]),
+            range: { startRow: 7, endRow: 33, startColumn: 0, endColumn: 14 },
+        }, '[[#This Row],[F\r\n(1-5)]]', options);
+        reference.setCurrentRowAndColumn(8, 6);
+
+        expect(reference.getRangeData()).toEqual({
+            startRow: 8,
+            endRow: 8,
+            startColumn: 3,
+            endColumn: 3,
+        });
+    });
+
+    it('treats commas inside single-bracket column titles as title text', () => {
+        const reference = new TableReferenceObject('Table1[Deposit,\r\nCredit (+)]', {
+            sheetId: 'sheet',
+            titleMap: new Map([['Deposit,\nCredit (+)', 6]]),
+            range: { startRow: 0, endRow: 10, startColumn: 0, endColumn: 7 },
+        }, '[Deposit,\r\nCredit (+)]', options);
+
+        expect(reference.getRangeData()).toEqual({
+            startRow: 1,
+            endRow: 10,
+            startColumn: 6,
+            endColumn: 6,
+        });
+    });
+
+    it('treats a trailing colon inside a single-bracket column title as title text', () => {
+        const reference = new TableReferenceObject('Table1[Business Name:]', {
+            sheetId: 'sheet',
+            titleMap: new Map([['Business Name:', 3]]),
+            range: { startRow: 0, endRow: 10, startColumn: 0, endColumn: 6 },
+        }, '[Business Name:]', options);
+
+        expect(reference.getRangeData()).toEqual({
+            startRow: 1,
+            endRow: 10,
+            startColumn: 3,
+            endColumn: 3,
+        });
+    });
 });
 /**
  * Copyright 2023-present DreamNum Co., Ltd.

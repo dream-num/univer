@@ -20,6 +20,7 @@ import type { Compare } from '../../functions/meta/compare';
 import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
 import type { ArrayValueObject } from '../value-object/array-value-object';
 import type { BaseValueObject } from '../value-object/base-value-object';
+import { FormulaEvaluationMode } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { OPERATOR_TOKEN_COMPARE_SET, OPERATOR_TOKEN_SET, operatorToken } from '../../basics/token';
 import { FUNCTION_NAMES_MATH } from '../../functions/math/function-names';
@@ -98,7 +99,57 @@ export class OperatorNode extends BaseAstNode {
             return array.get(0, 0) as BaseValueObject;
         }
 
+        if (this._usesLegacyScalarArrayArgumentIntersection()) {
+            const { startRow, startColumn, endRow, endColumn } = reference.getRangePosition();
+            const currentRow = this._runtimeService.currentRow;
+            const currentColumn = this._runtimeService.currentColumn;
+
+            if (startRow === endRow && currentColumn >= startColumn && currentColumn <= endColumn) {
+                return reference.getCellByColumn(currentColumn);
+            }
+
+            if (startColumn === endColumn && currentRow >= startRow && currentRow <= endRow) {
+                return reference.getCellByRow(currentRow);
+            }
+
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+
         return array;
+    }
+
+    private _usesLegacyScalarArrayArgumentIntersection(): boolean {
+        if (this._runtimeService.formulaEvaluationMode !== FormulaEvaluationMode.LEGACY_SCALAR) {
+            return false;
+        }
+
+        return this._ancestorAcceptsLegacyScalarArrayArgument(this, this.getParent());
+    }
+
+    private _ancestorAcceptsLegacyScalarArrayArgument(
+        child: BaseAstNode,
+        initialParent: ReturnType<BaseAstNode['getParent']>
+    ): boolean {
+        let currentChild = child;
+        let parent = initialParent;
+        let insideIf = false;
+        while (parent != null) {
+            if (parent.nodeType === NodeType.FUNCTION) {
+                if (parent.intersectsLegacyScalarOperatorArgument(currentChild)) {
+                    return true;
+                }
+                if (parent.getToken().toUpperCase() === 'IF') {
+                    insideIf = true;
+                } else {
+                    return insideIf && parent.acceptsLegacyScalarArrayArgument(currentChild);
+                }
+            }
+
+            currentChild = parent;
+            parent = parent.getParent();
+        }
+
+        return false;
     }
 
     /**

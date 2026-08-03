@@ -571,16 +571,9 @@ export class BaseReferenceObject extends ObjectClassType {
     }
 
     getCellByPosition(rowRaw?: number, columnRaw?: number) {
-        let row = rowRaw;
-        let column = columnRaw;
-        const rangeData = this.getRangeData();
-        if (!row) {
-            row = rangeData.startRow;
-        }
-
-        if (!column) {
-            column = rangeData.startColumn;
-        }
+        const range = this.getRangePosition();
+        const row = rowRaw ?? range.startRow;
+        const column = columnRaw ?? range.startColumn;
 
         const cell = this.getCellData(row, column);
 

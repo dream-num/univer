@@ -27,6 +27,10 @@ export class Match extends BaseFunction {
 
     override maxParams = 3;
 
+    override legacyScalarArrayArgumentIndexes = [1];
+
+    override legacyScalarOperatorIntersectionArgumentIndexes = [1];
+
     override calculate(
         lookupValue: BaseValueObject,
         lookupArray: ArrayValueObject,

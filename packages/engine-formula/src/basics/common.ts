@@ -193,6 +193,11 @@ export interface IFormulaExecuteResultMap {
     [unitId: string]: Nullable<{ [sheetId: string]: IObjectMatrixPrimitiveType<IFormulaExecuteResultItem[]> }>;
 }
 
+export enum FormulaEvaluationMode {
+    DEFAULT = 'default',
+    LEGACY_SCALAR = 'legacy-scalar',
+}
+
 export interface IFormulaIdMapData {
     [unitId: string]: Nullable<{ [subUnitId: string]: Nullable<{ [formulaId: string]: IFormulaIdMap }> }>;
 }
@@ -209,6 +214,7 @@ export interface IFormulaDataItem {
     x?: number; // Offset from x direction
     y?: number; // Offset from y direction
     si?: string; // formulaId,
+    evaluationMode?: FormulaEvaluationMode;
     // row: number;
     // column: number;
     // sheetId: string;

@@ -30,6 +30,7 @@ import type { ArrayValueObject } from '../engine/value-object/array-value-object
 import type { BaseValueObject } from '../engine/value-object/base-value-object';
 import type { StringValueObject } from '../engine/value-object/primitive-object';
 import { createIdentifier, Disposable, isNullCell, ObjectMatrix } from '@univerjs/core';
+import { FormulaEvaluationMode } from '../basics/common';
 import { isInDirtyRange } from '../basics/dirty';
 import { ErrorType } from '../basics/error-type';
 import { CELL_INVERTED_INDEX_CACHE } from '../basics/inverted-index-cache';
@@ -107,6 +108,8 @@ export interface IFormulaRuntimeService {
 
     currentUnitId: string;
 
+    formulaEvaluationMode: FormulaEvaluationMode;
+
     dispose(): void;
 
     reset(): void;
@@ -117,7 +120,8 @@ export interface IFormulaRuntimeService {
         rowCount: number,
         columnCount: number,
         sheetId: string,
-        unitId: string
+        unitId: string,
+        evaluationMode?: FormulaEvaluationMode
     ): void;
 
     setFunctionRefInfoOverride(rowCount: number, columnCount: number): () => void;
@@ -221,6 +225,8 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
     private _currentSubUnitId: string = '';
     private _currentUnitId: string = '';
 
+    private _formulaEvaluationMode = FormulaEvaluationMode.DEFAULT;
+
     private _runtimeData: IRuntimeUnitDataType = {};
 
     private _runtimeOtherData: IRuntimeOtherUnitDataType = {}; // Data returned by other businesses through formula calculation, excluding the sheet.
@@ -289,6 +295,10 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
     get currentUnitId() {
         return this._currentUnitId;
+    }
+
+    get formulaEvaluationMode() {
+        return this._formulaEvaluationMode;
     }
 
     override dispose(): void {
@@ -407,6 +417,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         this._totalFormulasToCalculate = 0;
         this._completedFormulasCount = 0;
         this._functionRefInfoOverrideStack = [];
+        this._formulaEvaluationMode = FormulaEvaluationMode.DEFAULT;
 
         this.clearReferenceAndNumberformatCache();
     }
@@ -417,13 +428,22 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         clearReferenceToRangeCache();
     }
 
-    setCurrent(row: number, column: number, rowCount: number, columnCount: number, sheetId: string, unitId: string) {
+    setCurrent(
+        row: number,
+        column: number,
+        rowCount: number,
+        columnCount: number,
+        sheetId: string,
+        unitId: string,
+        evaluationMode = FormulaEvaluationMode.DEFAULT
+    ) {
         this._currentRow = row;
         this._currentColumn = column;
         this._currentRowCount = rowCount;
         this._currentColumnCount = columnCount;
         this._currentSubUnitId = sheetId;
         this._currentUnitId = unitId;
+        this._formulaEvaluationMode = evaluationMode;
     }
 
     setFunctionRefInfoOverride(rowCount: number, columnCount: number) {

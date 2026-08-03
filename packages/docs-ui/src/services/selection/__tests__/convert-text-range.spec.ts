@@ -14,9 +14,14 @@
  * limitations under the License.
  */
 
-import type { INodePosition } from '@univerjs/engine-render';
 import { DataStreamTreeTokenType, PositionedObjectLayoutType } from '@univerjs/core';
-import { DocumentSkeletonPageType, setDocsTableRenderViewportProvider } from '@univerjs/engine-render';
+import {
+    DocumentSkeleton,
+    DocumentSkeletonPageType,
+    PageLayoutType,
+    setDocsTableRenderViewportProvider,
+    Transform,
+} from '@univerjs/engine-render';
 import { afterEach, describe, expect, it } from 'vitest';
 import {
     compareNodePosition,
@@ -203,7 +208,7 @@ describe('selection convert text range helpers', () => {
                 }),
             }),
         };
-        const position: INodePosition = {
+        const position = {
             column: 0,
             divide: 0,
             glyph: 0,
@@ -307,7 +312,7 @@ describe('selection convert text range helpers', () => {
                 }),
             }),
         };
-        const position: INodePosition = {
+        const position = {
             column: 0,
             divide: 0,
             glyph: 0,
@@ -401,7 +406,7 @@ describe('selection convert text range helpers', () => {
                 }),
             }),
         };
-        const position: INodePosition = {
+        const position = {
             column: 0,
             divide: 0,
             glyph: 0,
@@ -516,7 +521,7 @@ describe('selection convert text range helpers', () => {
                 }),
             }),
         };
-        const position: INodePosition = {
+        const position = {
             column: 0,
             divide: 0,
             glyph: 0,
@@ -540,6 +545,92 @@ describe('selection convert text range helpers', () => {
         const result = convertor.getRangePointData(position, position);
 
         expect(getAnchorBounding(result.contentBoxPointGroup).left).toBe(145);
+    });
+
+    it('projects selections through sibling traditional section columns without accumulating offsets', () => {
+        const createLine = () => ({
+            asc: 10,
+            divides: [{
+                glyphGroup: [{
+                    bBox: { ba: 8, bd: 2 },
+                    count: 1,
+                    glyphType: 'LETTER',
+                    left: 0,
+                    width: 10,
+                }],
+                left: 0,
+                paddingLeft: 0,
+            }],
+            lineHeight: 20,
+            marginBottom: 0,
+            marginTop: 0,
+            paddingTop: 0,
+            top: 0,
+        });
+        const page = {
+            marginLeft: 0,
+            marginTop: 0,
+            pageHeight: 500,
+            pageWidth: 500,
+            sections: [{
+                columns: [{ left: 0, lines: [createLine()] }],
+                top: 10,
+            }, {
+                columns: [
+                    { left: 0, lines: [createLine()] },
+                    { left: 30, lines: [createLine()] },
+                    { left: 60, lines: [createLine()] },
+                ],
+                top: 100,
+            }],
+        };
+        const skeleton: DocumentSkeleton = Object.assign(Object.create(DocumentSkeleton.prototype), {
+            getSkeletonData: () => ({
+                pages: [page],
+                skeFooters: new Map(),
+                skeHeaders: new Map(),
+            }),
+        });
+        const start = {
+            column: 0,
+            divide: 0,
+            glyph: 0,
+            isBack: true,
+            line: 0,
+            page: 0,
+            pageType: DocumentSkeletonPageType.BODY,
+            path: ['pages', 0],
+            section: 0,
+            segmentPage: -1,
+        };
+        const end = {
+            ...start,
+            column: 2,
+            isBack: false,
+            section: 1,
+        };
+        const convertor = new NodePositionConvertToCursor({
+            docsLeft: 0,
+            docsTop: 0,
+            documentTransform: new Transform(),
+            pageLayoutType: PageLayoutType.VERTICAL,
+            pageMarginLeft: 0,
+            pageMarginTop: 0,
+        }, skeleton);
+
+        const getSelectionBounds = (selectionStart: typeof start, selectionEnd: typeof start) => {
+            const result = convertor.getRangePointData(selectionStart, selectionEnd);
+            return getLineBounding(result.contentBoxPointGroup).map(({ left, top }) => ({ left, top }));
+        };
+        const expectedBounds = [
+            { left: 0, top: 12 },
+            { left: 0, top: 102 },
+            { left: 30, top: 102 },
+            { left: 60, top: 102 },
+        ];
+
+        expect(getSelectionBounds(start, end)).toEqual(expectedBounds);
+        expect(getSelectionBounds(end, start)).toEqual(expectedBounds);
     });
 
     it('excludes layout-only paragraph spacing from text selection height', () => {
@@ -585,7 +676,7 @@ describe('selection convert text range helpers', () => {
                 skeHeaders: new Map(),
             }),
         };
-        const position: INodePosition = {
+        const position = {
             column: 0,
             divide: 0,
             glyph: 0,
@@ -758,7 +849,7 @@ function createEmbedCustomBlockCursorHarness(drawing?: Record<string, unknown>) 
             }),
         }),
     };
-    const position: INodePosition = {
+    const position = {
         column: 0,
         divide: 0,
         glyph: 0,

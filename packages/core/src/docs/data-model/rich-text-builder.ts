@@ -2700,7 +2700,12 @@ export class RichTextBuilder extends RichTextValue {
      */
     delete(start: number, count: number): RichTextBuilder;
     delete(start: number, count?: number): RichTextBuilder {
-        const contentLength = Math.max(0, (this._data.body?.dataStream.length ?? 2) - 2);
+        const terminalTokenLength =
+            DataStreamTreeTokenType.PARAGRAPH.length + DataStreamTreeTokenType.SECTION_BREAK.length;
+        const contentLength = Math.max(
+            0,
+            (this._data.body?.dataStream.length ?? terminalTokenLength) - terminalTokenLength
+        );
         let startOffset: number;
         let deleteCount: number;
 

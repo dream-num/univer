@@ -19,14 +19,13 @@ import type { IUniverThreadCommentUIConfig } from './config/config';
 import { DependentOn, ICommandService, IConfigService, Inject, Injector, merge, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverThreadCommentPlugin } from '@univerjs/thread-comment';
-import { UniverUIPlugin } from '@univerjs/ui';
 import pkg from '../package.json';
 import { SetActiveCommentOperation } from './commands/operations/comment.operations';
 import { defaultPluginConfig, THREAD_COMMENT_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { ThreadCommentPanelService } from './services/thread-comment-panel.service';
 import { PLUGIN_NAME } from './types/const';
 
-@DependentOn(UniverThreadCommentPlugin, UniverUIPlugin, UniverDocsUIPlugin)
+@DependentOn(UniverThreadCommentPlugin, UniverDocsUIPlugin)
 export class UniverThreadCommentUIPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
     static override packageName = pkg.name;

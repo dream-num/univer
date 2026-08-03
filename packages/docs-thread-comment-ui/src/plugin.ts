@@ -22,7 +22,6 @@ import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { UniverThreadCommentPlugin } from '@univerjs/thread-comment';
 import { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
-import { UniverUIPlugin } from '@univerjs/ui';
 import pkg from '../package.json';
 import { PLUGIN_NAME } from './common/const';
 import { defaultPluginConfig, DOCS_THREAD_COMMENT_UI_PLUGIN_CONFIG_KEY } from './config/config';
@@ -36,7 +35,6 @@ import { DocThreadCommentService } from './services/doc-thread-comment.service';
     UniverDocsPlugin,
     UniverThreadCommentPlugin,
     UniverRenderEnginePlugin,
-    UniverUIPlugin,
     UniverDocsUIPlugin,
     UniverThreadCommentUIPlugin
 )

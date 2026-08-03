@@ -21,7 +21,6 @@ import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsHyperLinkPlugin } from '@univerjs/docs-hyper-link';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
-import { UniverUIPlugin } from '@univerjs/ui';
 import pkg from '../package.json';
 import { defaultPluginConfig, DOCS_HYPER_LINK_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { ComponentsController } from './controllers/components.controller';
@@ -36,7 +35,6 @@ import { DOC_HYPER_LINK_UI_PLUGIN } from './types/const';
     UniverDocsPlugin,
     UniverRenderEnginePlugin,
     UniverDocsHyperLinkPlugin,
-    UniverUIPlugin,
     UniverDocsUIPlugin
 )
 export class UniverDocsHyperLinkUIPlugin extends Plugin {

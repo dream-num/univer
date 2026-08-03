@@ -35,7 +35,7 @@ import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { IRefSelectionsService, RefSelectionsService, UniverSheetsPlugin } from '@univerjs/sheets';
-import { UI_PLUGIN_CONFIG_KEY, UniverUIPlugin } from '@univerjs/ui';
+import { UI_PLUGIN_CONFIG_KEY } from '@univerjs/ui';
 import { filter } from 'rxjs/operators';
 import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_UI_PLUGIN_CONFIG_KEY } from './config/config';
@@ -131,7 +131,6 @@ import { IStatusBarService, StatusBarService } from './services/status-bar.servi
     UniverFormulaEnginePlugin,
     UniverRenderEnginePlugin,
     UniverSheetsPlugin,
-    UniverUIPlugin,
     UniverDocsUIPlugin
 )
 export class UniverSheetsUIPlugin extends Plugin {

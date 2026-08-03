@@ -34,7 +34,6 @@ import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engin
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsDrawingPlugin } from '@univerjs/sheets-drawing';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
-import { UniverUIPlugin } from '@univerjs/ui';
 import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_DRAWING_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { ComponentsController } from './controllers/components.controller';
@@ -63,7 +62,6 @@ import { SheetDrawingHitTestService } from './services/sheet-drawing-hit-test.se
     UniverRenderEnginePlugin,
     UniverDocsDrawingPlugin,
     UniverSheetsPlugin,
-    UniverUIPlugin,
     UniverSheetsDrawingPlugin,
     UniverDrawingUIPlugin,
     UniverSheetsUIPlugin

@@ -32,7 +32,6 @@ import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { SHEET_CONDITIONAL_FORMATTING_PLUGIN, UniverSheetsConditionalFormattingPlugin } from '@univerjs/sheets-conditional-formatting';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
-import { UniverUIPlugin } from '@univerjs/ui';
 import pkg from '../package.json';
 import { AddAverageCfCommand } from './commands/commands/add-average-cf.command';
 import { AddColorScaleConditionalRuleCommand } from './commands/commands/add-color-scale-cf.command';
@@ -63,7 +62,6 @@ import { ConditionalFormattingMenuController } from './menu/cf.menu.controller';
 @DependentOn(
     UniverRenderEnginePlugin,
     UniverSheetsPlugin,
-    UniverUIPlugin,
     UniverSheetsFormulaPlugin,
     UniverSheetsConditionalFormattingPlugin,
     UniverSheetsUIPlugin

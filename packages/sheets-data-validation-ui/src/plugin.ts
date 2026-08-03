@@ -22,7 +22,6 @@ import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engin
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validation';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
-import { UniverUIPlugin } from '@univerjs/ui';
 import pkg from '../package.json';
 import {
     AddSheetDataValidationAndOpenCommand,
@@ -53,7 +52,6 @@ import { DataValidationDropdownManagerService } from './services/dropdown-manage
     UniverDataValidationPlugin,
     UniverRenderEnginePlugin,
     UniverSheetsPlugin,
-    UniverUIPlugin,
     UniverSheetsUIPlugin,
     UniverSheetsDataValidationPlugin
 )

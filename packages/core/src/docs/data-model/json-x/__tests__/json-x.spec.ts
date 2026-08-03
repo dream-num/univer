@@ -42,6 +42,22 @@ describe('Basic use of json-x', () => {
             expect(JSONX.isNoop(null)).toBe(true);
         });
 
+        it('composes a sequence of operations in order', () => {
+            const doc = createDoc();
+            const jsonX = JSONX.getInstance();
+            const composed = JSONX.composeAll([
+                jsonX.replaceOp(['id'], 'doc-json-x', 'doc-json-x-2'),
+                jsonX.insertOp(['settings'], { zoomRatio: 2 }),
+            ]);
+
+            expect(JSONX.apply(doc, composed)).toEqual({
+                ...doc,
+                id: 'doc-json-x-2',
+                settings: { zoomRatio: 2 },
+            });
+            expect(JSONX.composeAll([])).toBeNull();
+        });
+
         it('should apply insert, replace and remove operations to document snapshots', () => {
             const jsonX = JSONX.getInstance();
             const doc = createDoc();

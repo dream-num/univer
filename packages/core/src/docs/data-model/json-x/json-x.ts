@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { Doc, JSONOp, Path } from 'ot-json1';
 import type { Nullable } from '../../../shared/types';
 import type { IDocumentBody, IDocumentData } from '../../../types/interfaces';
 import type { TextXAction } from '../text-x/action-types';
@@ -37,7 +36,9 @@ export interface ISubType {
     [k: string]: any;
 };
 
-export { json1 as JSON1, JSONOp as JSONXActions, Path as JSONXPath };
+export const JSON1 = json1;
+export type JSONXActions = json1.JSONOp;
+export type JSONXPath = json1.Path;
 
 export class JSONX {
     // static name = 'json-x';
@@ -56,24 +57,28 @@ export class JSONX {
         json1.type.registerSubtype(subType);
     }
 
-    static apply(doc: IDocumentData, actions: JSONOp) {
+    static apply(doc: IDocumentData, actions: json1.JSONOp) {
         if (json1.type.isNoop(actions)) {
             return;
         }
 
-        return json1.type.apply(doc as unknown as Doc, actions);
+        return json1.type.apply(doc as unknown as json1.Doc, actions);
     }
 
-    static compose(thisActions: JSONOp, otherActions: JSONOp) {
+    static compose(thisActions: json1.JSONOp, otherActions: json1.JSONOp) {
         return json1.type.compose(thisActions, otherActions);
     }
 
-    static transform(thisActions: JSONOp, otherActions: JSONOp, priority: TPriority) {
+    static composeAll(operations: readonly json1.JSONOp[]): json1.JSONOp {
+        return operations.reduce((composed, operation) => json1.type.compose(composed, operation), null);
+    }
+
+    static transform(thisActions: json1.JSONOp, otherActions: json1.JSONOp, priority: TPriority) {
         return json1.type.transform(thisActions, otherActions, priority);
     }
 
     // Use to transform cursor position, just call TextXPro.transformPosition.
-    static transformPosition(thisActions: JSONOp, index: number, priority: TPriority = 'right'): number {
+    static transformPosition(thisActions: json1.JSONOp, index: number, priority: TPriority = 'right'): number {
         if (thisActions && thisActions.length === 2 && thisActions[0] === 'body' && (thisActions[1] as any).et === TextX.name) {
             return TextX.transformPosition((thisActions[1] as any).e, index, priority === 'left');
         }
@@ -81,15 +86,15 @@ export class JSONX {
         return index;
     }
 
-    static invertWithDoc(actions: JSONOp, doc: IDocumentData) {
+    static invertWithDoc(actions: json1.JSONOp, doc: IDocumentData) {
         // Why not use invert?
         // Because invertWithDoc = invert(makeInvertible(op, doc));
         // First we need to make all op invertible, then we can invert it.
         // invertWithDoc is a helper function to make all op invertible and then invert it.
-        return json1.type.invertWithDoc(actions, doc as unknown as Doc);
+        return json1.type.invertWithDoc(actions, doc as unknown as json1.Doc);
     }
 
-    static isNoop(actions: JSONOp) {
+    static isNoop(actions: json1.JSONOp) {
         return json1.type.isNoop(actions);
     }
 
@@ -104,21 +109,21 @@ export class JSONX {
     }
 
     // eslint-disable-next-line ts/no-explicit-any
-    removeOp(path: Path, value?: any) {
+    removeOp(path: json1.Path, value?: any) {
         return json1.removeOp(path, value);
     }
 
-    moveOp(from: Path, to: Path) {
+    moveOp(from: json1.Path, to: json1.Path) {
         return json1.moveOp(from, to);
     }
 
     // eslint-disable-next-line ts/no-explicit-any
-    insertOp(path: Path, value: any) {
+    insertOp(path: json1.Path, value: any) {
         return json1.insertOp(path, value);
     }
 
     // eslint-disable-next-line ts/no-explicit-any
-    replaceOp(path: Path, oldVal: any, newVal: any) {
+    replaceOp(path: json1.Path, oldVal: any, newVal: any) {
         return json1.replaceOp(path, oldVal, newVal);
     }
 

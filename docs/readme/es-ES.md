@@ -234,7 +234,7 @@ Para expectativas de compatibilidad de API, APIs experimentales, APIs internas y
 
 ## 🧭 Compatibilidad
 
-- **Runtime de navegador**: Univer se compila con objetivo Chrome 88 y admite Chrome `>=88`. Otros navegadores necesitan capacidades equivalentes de la plataforma web.
+- **Runtime de navegador**: Univer se compila con objetivo Chrome 88 y busca funcionar en Edge `>=88`, Firefox `>=90`, Chrome `>=88`, Safari `>=14.1` y Electron `>=12`.
 - **Polyfills**: Univer depende de `Intl.Segmenter`. Añade un polyfill como `@formatjs/intl-segmenter` si tu navegador o runtime objetivo no lo incluye.
 - **Herramientas de build**: Recomendamos Vite, esbuild o Webpack 5. Si tu herramienta no soporta el campo `exports` de `package.json` (común en Webpack 4), puede que necesites configurar mapeos de ruta adicionales.
 - **React**: La capa de vista de Univer está construida sobre React 18, soporta React 18 y 19, y ofrece compatibilidad mínima para React 16.9+ y 17.

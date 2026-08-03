@@ -235,7 +235,7 @@ API 互換性、experimental API、internal API、deprecation rules について
 
 ## 🧭 互換性
 
-- **ブラウザ実行環境**：Univer は Chrome 88 をターゲットとしてコンパイルされており、Chrome `>=88` をサポートします。その他のブラウザには同等の Web プラットフォーム機能が必要です。
+- **ブラウザ実行環境**：Univer は Chrome 88 をターゲットとしてコンパイルされており、Edge `>=88`、Firefox `>=90`、Chrome `>=88`、Safari `>=14.1`、Electron `>=12` で動作することを目指しています。
 - **Polyfills**：Univer は `Intl.Segmenter` に依存しています。対象ブラウザや実行環境が対応していない場合は、`@formatjs/intl-segmenter` などの polyfill を追加してください。
 - **ビルドツール**：Vite、esbuild、Webpack 5 を推奨します。`package.json` の `exports` フィールドに対応していないビルドツール（Webpack 4 など）では、追加のパスマッピングが必要になる場合があります。
 - **React**：Univer の view layer は React 18 ベースで構築されており、React 18 と 19 をサポートします。React 16.9+ と 17 には最小限の互換サポートを提供します。

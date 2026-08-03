@@ -20,7 +20,11 @@ import { IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } f
 import { fromModule, IRPCChannelService } from '@univerjs/rpc';
 import pkg from '../../package.json';
 import { defaultPluginConfig, SHEETS_FILTER_UI_PLUGIN_CONFIG_KEY } from '../config/config';
-import { ISheetsGenerateFilterValuesService, SHEETS_GENERATE_FILTER_VALUES_SERVICE_NAME, SheetsGenerateFilterValuesService } from './generate-filter-values.service';
+import {
+    ISheetsGenerateFilterValuesService,
+    SHEETS_GENERATE_FILTER_VALUES_SERVICE_NAME,
+    SheetsGenerateFilterValuesService,
+} from './generate-filter-values.service';
 
 export class UniverSheetsFilterUIWorkerPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;

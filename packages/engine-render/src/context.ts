@@ -367,7 +367,12 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
         h: number,
         radii?: number | DOMPointInit | Array<number | DOMPointInit>
     ): void {
-        this._context.roundRect(x, y, w, h, radii);
+        if (typeof this._context.roundRect === 'function') {
+            this._context.roundRect(x, y, w, h, radii);
+            return;
+        }
+
+        this._context.rect(x, y, w, h);
     }
 
     roundRectByPrecision(

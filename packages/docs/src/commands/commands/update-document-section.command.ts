@@ -257,7 +257,7 @@ export const DeleteDocumentSectionBreakCommand: ICommand<IDeleteDocumentSectionB
             return false;
         }
         const section = sections.find((item) => item.sectionId === params.sectionId);
-        if (!section || section === sections.at(-1)) {
+        if (!section || section === sections[sections.length - 1]) {
             return false;
         }
 

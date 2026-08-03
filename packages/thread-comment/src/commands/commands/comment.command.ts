@@ -20,7 +20,12 @@ import type { IUpdateCommentPayload } from '../mutations/comment.mutation';
 import { CommandType, ICommandService } from '@univerjs/core';
 import { ThreadCommentModel } from '../../models/thread-comment.model';
 import { IThreadCommentDataSourceService } from '../../services/tc-datasource.service';
-import { AddCommentMutation, DeleteCommentMutation, ResolveCommentMutation, UpdateCommentMutation } from '../mutations/comment.mutation';
+import {
+    AddCommentMutation,
+    DeleteCommentMutation,
+    ResolveCommentMutation,
+    UpdateCommentMutation,
+} from '../mutations/comment.mutation';
 
 export interface IAddCommentCommandParams {
     unitId: string;

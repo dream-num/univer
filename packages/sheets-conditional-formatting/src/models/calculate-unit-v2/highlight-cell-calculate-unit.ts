@@ -96,7 +96,7 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                     const configRule = context.rule.rule as IRankHighlightCell;
                     if (configRule.isPercent) {
                         if (configRule.isBottom) {
-                            allValue = allValue.toReversed();
+                            allValue = allValue.slice().reverse();
                         }
 
                         // Calculate the index directly based on the threshold percentage.

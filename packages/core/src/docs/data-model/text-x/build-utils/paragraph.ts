@@ -15,7 +15,13 @@
  */
 
 import type { ITextRange } from '../../../../sheets/typedef';
-import type { ICustomTable, IDocumentBody, IParagraph, IParagraphStyle, ITextStyle } from '../../../../types/interfaces';
+import type {
+    ICustomTable,
+    IDocumentBody,
+    IParagraph,
+    IParagraphStyle,
+    ITextStyle,
+} from '../../../../types/interfaces';
 import type { DocumentDataModel } from '../../document-data-model';
 import { MemoryCursor } from '../../../../common/memory-cursor';
 import { UpdateDocsAttributeType } from '../../../../shared';

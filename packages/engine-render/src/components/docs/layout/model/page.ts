@@ -409,7 +409,7 @@ export function createSkeletonCellPages(
             break;
         }
 
-        const retryPage = pages.at(-1);
+        const retryPage = pages[pages.length - 1];
         if (retryPage == null) {
             break;
         }
@@ -461,7 +461,9 @@ export function applyTrailingBlockRangeSpaceBelow(pages: IDocumentSkeletonPage[]
     }
 
     for (const page of pages) {
-        const lastLine = page.sections.at(-1)?.columns.at(-1)?.lines.at(-1);
+        const lastSection = page.sections[page.sections.length - 1];
+        const lastColumn = lastSection?.columns[lastSection.columns.length - 1];
+        const lastLine = lastColumn?.lines[lastColumn.lines.length - 1];
         if (!lastLine) {
             continue;
         }

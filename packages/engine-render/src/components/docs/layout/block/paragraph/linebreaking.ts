@@ -916,7 +916,7 @@ export function lineBreaking(
             ) {
                 // Word treats a DOCX column break at the start of the final column as redundant.
             } else if (isTraditionalDocumentCompatibility(documentCompatibilityPolicy)) {
-                const lastColumn = getLastSection(lastPage)?.columns.at(-1);
+                const lastColumn = getLastSection(lastPage)?.columns.slice(-1)[0];
                 if (lastColumn && (isBlankColumn(lastColumn) || _isDocxColumnBreakVisuallyBlankColumn(lastColumn))) {
                     setColumnFullState(lastColumn, false);
                 } else {

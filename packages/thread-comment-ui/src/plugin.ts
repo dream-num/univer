@@ -16,7 +16,17 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverThreadCommentUIConfig } from './config/config';
-import { DependentOn, ICommandService, IConfigService, Inject, Injector, merge, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
+import {
+    DependentOn,
+    ICommandService,
+    IConfigService,
+    Inject,
+    Injector,
+    merge,
+    mergeOverrideWithDependencies,
+    Plugin,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverThreadCommentPlugin } from '@univerjs/thread-comment';
 import pkg from '../package.json';

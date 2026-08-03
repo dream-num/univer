@@ -7,7 +7,7 @@ export const BUILD_OUTPUT_DIRECTORIES = {
 } as const;
 
 export const CLEANUP_DIRECTORIES = ['dist', 'lib', 'coverage'] as const;
-export const DEFAULT_BROWSER_TARGET = 'chrome70';
+export const DEFAULT_BROWSER_TARGET = 'chrome88';
 export const DEFAULT_ENTRY_FILE = 'src/index.ts';
 export const FACADE_ENTRY_FILE = 'src/facade/index.ts';
 export const LOCALE_DIRECTORY = 'src/locale';

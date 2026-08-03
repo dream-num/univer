@@ -235,7 +235,7 @@ API 호환성 기대치, experimental APIs, internal APIs, deprecation rules는 
 
 ## 🧭 호환성
 
-- **브라우저 런타임**: Univer는 Chrome 70을 대상으로 컴파일되며 Edge `>=70`, Firefox `>=63`, Chrome `>=70`, Safari `>=12.0`, Electron `>=5`에서 잘 동작하도록 노력합니다.
+- **브라우저 런타임**: Univer는 Chrome 88을 대상으로 컴파일되며 Chrome `>=88`을 지원합니다. 다른 브라우저에는 동등한 웹 플랫폼 기능이 필요합니다.
 - **Polyfills**: Univer는 `Intl.Segmenter`에 의존합니다. 대상 브라우저나 런타임이 이를 제공하지 않는다면 `@formatjs/intl-segmenter` 같은 polyfill을 추가하세요.
 - **빌드 도구**: Vite, esbuild, Webpack 5를 권장합니다. 빌드 도구가 `package.json`의 `exports` 필드를 지원하지 않는 경우(Webpack 4에서 흔함) 추가 path mapping이 필요할 수 있습니다.
 - **React**: Univer의 view layer는 React 18 기반이며 React 18과 19를 지원합니다. React 16.9+ 및 17에는 최소한의 호환성 지원을 제공합니다.

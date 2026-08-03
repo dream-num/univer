@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-/* eslint-disable ts/explicit-function-return-type */
-
-import type { CommandType, IDocumentData, IExecutionOptions, LifecycleStages, UniverInstanceType } from '@univerjs/core';
+import type {
+    CommandType,
+    IDocumentData,
+    IExecutionOptions,
+    LifecycleStages,
+    UniverInstanceType,
+} from '@univerjs/core';
 import type { FDoc } from './f-doc';
 
 /**
@@ -94,7 +98,7 @@ export class FEventName {
      */
     static _instance: FEventName | null;
 
-    static get() {
+    static get(): FEventName {
         if (this._instance) {
             return this._instance;
         }
@@ -143,7 +147,7 @@ export class FEventName {
      * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
-    get DocCreated() {
+    get DocCreated(): 'DocCreated' {
         return 'DocCreated' as const;
     }
 
@@ -160,7 +164,7 @@ export class FEventName {
      * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
-    get DocDisposed() {
+    get DocDisposed(): 'DocDisposed' {
         return 'DocDisposed' as const;
     }
 
@@ -177,7 +181,7 @@ export class FEventName {
      * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
-    get LifeCycleChanged() {
+    get LifeCycleChanged(): 'LifeCycleChanged' {
         return 'LifeCycleChanged' as const;
     }
 
@@ -194,7 +198,7 @@ export class FEventName {
      * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
-    get Redo() {
+    get Redo(): 'Redo' {
         return 'Redo' as const;
     }
 
@@ -211,7 +215,7 @@ export class FEventName {
      * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
-    get Undo() {
+    get Undo(): 'Undo' {
         return 'Undo' as const;
     }
 
@@ -231,7 +235,7 @@ export class FEventName {
      * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
-    get BeforeRedo() {
+    get BeforeRedo(): 'BeforeRedo' {
         return 'BeforeRedo' as const;
     }
 
@@ -251,7 +255,7 @@ export class FEventName {
      * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
-    get BeforeUndo() {
+    get BeforeUndo(): 'BeforeUndo' {
         return 'BeforeUndo' as const;
     }
 
@@ -268,7 +272,7 @@ export class FEventName {
      * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
-    get CommandExecuted() {
+    get CommandExecuted(): 'CommandExecuted' {
         return 'CommandExecuted' as const;
     }
 
@@ -288,7 +292,7 @@ export class FEventName {
      * // Remove the event listener, use `disposable.dispose()`
      * ```
      */
-    get BeforeCommandExecute() {
+    get BeforeCommandExecute(): 'BeforeCommandExecute' {
         return 'BeforeCommandExecute' as const;
     }
 }

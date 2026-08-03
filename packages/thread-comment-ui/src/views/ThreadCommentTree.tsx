@@ -19,7 +19,15 @@ import type { IAddCommentCommandParams, IThreadComment, IUpdateCommentCommandPar
 import type { IUniverUIConfig } from '@univerjs/ui';
 import type { LocaleKey } from '../locale/types';
 import type { IThreadCommentEditorInstance } from './ThreadCommentEditor';
-import { dateKit, generateRandomId, ICommandService, LOCALE_META, LocaleService, RegionService, UserManagerService } from '@univerjs/core';
+import {
+    dateKit,
+    generateRandomId,
+    ICommandService,
+    LOCALE_META,
+    LocaleService,
+    RegionService,
+    UserManagerService,
+} from '@univerjs/core';
 import { borderClassName, clsx, Dropdown, scrollbarClassName, Tooltip } from '@univerjs/design';
 import { DeleteIcon, MoreHorizontalIcon, ReplyToCommentIcon, SuccessIcon, SuccessOutlineIcon } from '@univerjs/icons';
 import {

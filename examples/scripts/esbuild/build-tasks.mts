@@ -1,3 +1,4 @@
+import { DEFAULT_BROWSER_TARGET } from '@univerjs-infra/shared/tsdown';
 import esbuild from 'esbuild';
 
 export function nodeBuildTask() {
@@ -5,7 +6,7 @@ export function nodeBuildTask() {
         bundle: true,
         color: true,
         minify: false,
-        target: 'chrome70',
+        target: DEFAULT_BROWSER_TARGET,
         entryPoints: [
             './src/node/cases/basic.ts',
             './src/node/sdk/worker.ts',

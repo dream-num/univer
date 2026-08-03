@@ -14,9 +14,45 @@
  * limitations under the License.
  */
 
-/* eslint-disable ts/explicit-function-return-type */
-
-import { AbsoluteRefType, AutoFillSeries, BaselineOffset, BooleanNumber, BorderStyleTypes, BorderType, ColorType, CommandType, CommonHideTypes, CopyPasteType, DataValidationErrorStyle, DataValidationOperator, DataValidationRenderMode, DataValidationStatus, DataValidationType, DeleteDirection, DeveloperMetadataVisibility, Dimension, Direction, HorizontalAlign, ImageSourceType, InterpolationPointType, LifecycleStages, LocaleType, MentionType, NumberUnitType, PresetListType, ProtectionType, RelativeDate, SheetTypes, SpacingRule, TextDecoration, TextDirection, ThemeColorType, UniverInstanceType, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import {
+    AbsoluteRefType,
+    AutoFillSeries,
+    BaselineOffset,
+    BooleanNumber,
+    BorderStyleTypes,
+    BorderType,
+    ColorType,
+    CommandType,
+    CommonHideTypes,
+    CopyPasteType,
+    DataValidationErrorStyle,
+    DataValidationOperator,
+    DataValidationRenderMode,
+    DataValidationStatus,
+    DataValidationType,
+    DeleteDirection,
+    DeveloperMetadataVisibility,
+    Dimension,
+    Direction,
+    HorizontalAlign,
+    ImageSourceType,
+    InterpolationPointType,
+    LifecycleStages,
+    LocaleType,
+    MentionType,
+    NumberUnitType,
+    PresetListType,
+    ProtectionType,
+    RelativeDate,
+    SheetTypes,
+    SpacingRule,
+    TextDecoration,
+    TextDirection,
+    ThemeColorType,
+    UniverInstanceType,
+    VerticalAlign,
+    WrapStrategy,
+} from '@univerjs/core';
 
 /**
  * @hideconstructor
@@ -27,7 +63,7 @@ export class FEnum {
      */
     static _instance: FEnum | null;
 
-    static get() {
+    static get(): FEnum {
         if (this._instance) {
             return this._instance;
         }
@@ -71,7 +107,7 @@ export class FEnum {
      * console.log(univerAPI.Enum.AbsoluteRefType);
      * ```
      */
-    get AbsoluteRefType() {
+    get AbsoluteRefType(): typeof AbsoluteRefType {
         return AbsoluteRefType;
     }
 
@@ -83,7 +119,7 @@ export class FEnum {
      * console.log(univerAPI.Enum.UniverInstanceType.UNIVER_SHEET);
      * ```
      */
-    get UniverInstanceType() {
+    get UniverInstanceType(): typeof UniverInstanceType {
         return UniverInstanceType;
     }
 
@@ -95,7 +131,7 @@ export class FEnum {
      * console.log(univerAPI.Enum.LifecycleStages.Rendered);
      * ```
      */
-    get LifecycleStages() {
+    get LifecycleStages(): typeof LifecycleStages {
         return LifecycleStages;
     }
 
@@ -107,7 +143,7 @@ export class FEnum {
      * console.log(univerAPI.Enum.DataValidationType.LIST);
      * ```
      */
-    get DataValidationType() {
+    get DataValidationType(): typeof DataValidationType {
         return DataValidationType;
     }
 
@@ -119,7 +155,7 @@ export class FEnum {
      * console.log(univerAPI.Enum.DataValidationErrorStyle.WARNING);
      * ```
      */
-    get DataValidationErrorStyle() {
+    get DataValidationErrorStyle(): typeof DataValidationErrorStyle {
         return DataValidationErrorStyle;
     }
 
@@ -131,7 +167,7 @@ export class FEnum {
      * console.log(univerAPI.Enum.DataValidationRenderMode.TEXT);
      * ```
      */
-    get DataValidationRenderMode() {
+    get DataValidationRenderMode(): typeof DataValidationRenderMode {
         return DataValidationRenderMode;
     }
 
@@ -143,7 +179,7 @@ export class FEnum {
      * console.log(univerAPI.Enum.DataValidationOperator.BETWEEN);
      * ```
      */
-    get DataValidationOperator() {
+    get DataValidationOperator(): typeof DataValidationOperator {
         return DataValidationOperator;
     }
 
@@ -155,7 +191,7 @@ export class FEnum {
      * console.log(univerAPI.Enum.DataValidationStatus.VALID);
      * ```
      */
-    get DataValidationStatus() {
+    get DataValidationStatus(): typeof DataValidationStatus {
         return DataValidationStatus;
     }
 
@@ -167,7 +203,7 @@ export class FEnum {
      * console.log(univerAPI.Enum.CommandType.COMMAND);
      * ```
      */
-    get CommandType() {
+    get CommandType(): typeof CommandType {
         return CommandType;
     }
 
@@ -179,7 +215,7 @@ export class FEnum {
      * console.log(univerAPI.Enum.BaselineOffset.SUPERSCRIPT);
      * ```
      */
-    get BaselineOffset() {
+    get BaselineOffset(): typeof BaselineOffset {
         return BaselineOffset;
     }
 
@@ -191,7 +227,7 @@ export class FEnum {
      * console.log(univerAPI.Enum.BooleanNumber.TRUE);
      * ```
      */
-    get BooleanNumber() {
+    get BooleanNumber(): typeof BooleanNumber {
         return BooleanNumber;
     }
 
@@ -203,7 +239,7 @@ export class FEnum {
      * console.log(univerAPI.Enum.HorizontalAlign.CENTER);
      * ```
      */
-    get HorizontalAlign() {
+    get HorizontalAlign(): typeof HorizontalAlign {
         return HorizontalAlign;
     }
 
@@ -215,7 +251,7 @@ export class FEnum {
      * console.log(univerAPI.Enum.SpacingRule.EXACT);
      * ```
      */
-    get SpacingRule() {
+    get SpacingRule(): typeof SpacingRule {
         return SpacingRule;
     }
 
@@ -230,7 +266,7 @@ export class FEnum {
      * console.log(univerAPI.Enum.NumberUnitType.POINT);
      * ```
      */
-    get NumberUnitType() {
+    get NumberUnitType(): typeof NumberUnitType {
         return NumberUnitType;
     }
 
@@ -242,7 +278,7 @@ export class FEnum {
      * console.log(univerAPI.Enum.PresetListType.BULLET_LIST);
      * ```
      */
-    get PresetListType() {
+    get PresetListType(): typeof PresetListType {
         return PresetListType;
     }
 
@@ -254,7 +290,7 @@ export class FEnum {
      * console.log(univerAPI.Enum.TextDecoration.DOUBLE);
      * ```
      */
-    get TextDecoration() {
+    get TextDecoration(): typeof TextDecoration {
         return TextDecoration;
     }
 
@@ -266,7 +302,7 @@ export class FEnum {
      * console.log(univerAPI.Enum.TextDirection.LEFT_TO_RIGHT);
      * ```
      */
-    get TextDirection() {
+    get TextDirection(): typeof TextDirection {
         return TextDirection;
     }
 
@@ -278,7 +314,7 @@ export class FEnum {
      * console.log(univerAPI.Enum.VerticalAlign.MIDDLE);
      * ```
      */
-    get VerticalAlign() {
+    get VerticalAlign(): typeof VerticalAlign {
         return VerticalAlign;
     }
 
@@ -290,7 +326,7 @@ export class FEnum {
      * console.log(univerAPI.Enum.WrapStrategy.WRAP);
      * ```
      */
-    get WrapStrategy() {
+    get WrapStrategy(): typeof WrapStrategy {
         return WrapStrategy;
     }
 
@@ -302,7 +338,7 @@ export class FEnum {
      * console.log(univerAPI.Enum.BorderType.OUTSIDE);
      * ```
      */
-    get BorderType() {
+    get BorderType(): typeof BorderType {
         return BorderType;
     }
 
@@ -314,7 +350,7 @@ export class FEnum {
      * console.log(univerAPI.Enum.BorderStyleTypes.NONE);
      * ```
      */
-    get BorderStyleTypes() {
+    get BorderStyleTypes(): typeof BorderStyleTypes {
         return BorderStyleTypes;
     }
 
@@ -326,7 +362,7 @@ export class FEnum {
      * console.log(univerAPI.Enum.AutoFillSeries.ALTERNATE_SERIES);
      * ```
      */
-    get AutoFillSeries() {
+    get AutoFillSeries(): typeof AutoFillSeries {
         return AutoFillSeries;
     }
 
@@ -338,7 +374,7 @@ export class FEnum {
      * console.log(univerAPI.Enum.ColorType.RGB);
      * ```
      */
-    get ColorType() {
+    get ColorType(): typeof ColorType {
         return ColorType;
     }
 
@@ -350,7 +386,7 @@ export class FEnum {
      * console.log(univerAPI.Enum.CommonHideTypes.ON);
      * ```
      */
-    get CommonHideTypes() {
+    get CommonHideTypes(): typeof CommonHideTypes {
         return CommonHideTypes;
     }
 
@@ -362,7 +398,7 @@ export class FEnum {
      * console.log(univerAPI.Enum.CopyPasteType.PASTE_VALUES);
      * ```
      */
-    get CopyPasteType() {
+    get CopyPasteType(): typeof CopyPasteType {
         return CopyPasteType;
     }
 
@@ -374,7 +410,7 @@ export class FEnum {
      * console.log(univerAPI.Enum.DeleteDirection.LEFT);
      * ```
      */
-    get DeleteDirection() {
+    get DeleteDirection(): typeof DeleteDirection {
         return DeleteDirection;
     }
 
@@ -386,7 +422,7 @@ export class FEnum {
      * console.log(univerAPI.Enum.DeveloperMetadataVisibility.DOCUMENT);
      * ```
      */
-    get DeveloperMetadataVisibility() {
+    get DeveloperMetadataVisibility(): typeof DeveloperMetadataVisibility {
         return DeveloperMetadataVisibility;
     }
 
@@ -398,7 +434,7 @@ export class FEnum {
      * console.log(univerAPI.Enum.Dimension.ROWS);
      * ```
      */
-    get Dimension() {
+    get Dimension(): typeof Dimension {
         return Dimension;
     }
 
@@ -410,7 +446,7 @@ export class FEnum {
      * console.log(univerAPI.Enum.Direction.UP);
      * ```
      */
-    get Direction() {
+    get Direction(): typeof Direction {
         return Direction;
     }
 
@@ -422,7 +458,7 @@ export class FEnum {
      * console.log(univerAPI.Enum.InterpolationPointType.NUMBER);
      * ```
      */
-    get InterpolationPointType() {
+    get InterpolationPointType(): typeof InterpolationPointType {
         return InterpolationPointType;
     }
 
@@ -434,7 +470,7 @@ export class FEnum {
      * console.log(univerAPI.Enum.LocaleType.EN_US);
      * ```
      */
-    get LocaleType() {
+    get LocaleType(): typeof LocaleType {
         return LocaleType;
     }
 
@@ -446,7 +482,7 @@ export class FEnum {
      * console.log(univerAPI.Enum.MentionType.PERSON);
      * ```
      */
-    get MentionType() {
+    get MentionType(): typeof MentionType {
         return MentionType;
     }
 
@@ -458,7 +494,7 @@ export class FEnum {
      * console.log(univerAPI.Enum.ProtectionType.RANGE);
      * ```
      */
-    get ProtectionType() {
+    get ProtectionType(): typeof ProtectionType {
         return ProtectionType;
     }
 
@@ -470,7 +506,7 @@ export class FEnum {
      * console.log(univerAPI.Enum.RelativeDate.TODAY);
      * ```
      */
-    get RelativeDate() {
+    get RelativeDate(): typeof RelativeDate {
         return RelativeDate;
     }
 
@@ -482,7 +518,7 @@ export class FEnum {
      * console.log(univerAPI.Enum.SheetTypes.GRID);
      * ```
      */
-    get SheetTypes() {
+    get SheetTypes(): typeof SheetTypes {
         return SheetTypes;
     }
 
@@ -494,7 +530,7 @@ export class FEnum {
      * console.log(univerAPI.Enum.ThemeColorType.ACCENT1);
      * ```
      */
-    get ThemeColorType() {
+    get ThemeColorType(): typeof ThemeColorType {
         return ThemeColorType;
     }
 
@@ -506,7 +542,7 @@ export class FEnum {
      * console.log(univerAPI.Enum.ImageSourceType.URL);
      * ```
      */
-    get ImageSourceType() {
+    get ImageSourceType(): typeof ImageSourceType {
         return ImageSourceType;
     }
 }

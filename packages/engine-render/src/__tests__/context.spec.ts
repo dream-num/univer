@@ -224,6 +224,16 @@ describe('context extra', () => {
         browserSpy.mockRestore();
     });
 
+    it('falls back when the native context does not support roundRect', () => {
+        const nativeCtx = createNativeContext();
+        delete (nativeCtx as Partial<CanvasRenderingContext2D>).roundRect;
+        const renderCtx = new UniverRenderingContext2D(nativeCtx);
+
+        renderCtx.roundRect(1, 2, 3, 4, 2);
+
+        expect(nativeCtx.rect).toHaveBeenCalledWith(1, 2, 3, 4);
+    });
+
     it('covers fallback line dash branches and printing context', () => {
         const nativeCtx = createNativeContext() as any;
         delete nativeCtx.setLineDash;

@@ -32,7 +32,7 @@ import { SetSlidePageThumbOperation } from '../commands/operations/set-thumb.ope
 import { SetTextEditArrowOperation } from '../commands/operations/text-edit.operation';
 import { UpdateSlideElementOperation } from '../commands/operations/update-element.operation';
 import { menuSchema } from '../menu/schema';
-import { SlideEditorContainer } from '../views/editor-container';
+import { SlideEditorContainer } from '../views/editor-container/EditorContainer';
 import { SlideSideBar } from '../views/slide-bar/SlideBar';
 import { EditorDeleteLeftShortcut, generateArrowSelectionShortCutItem } from './shortcuts/editor.shortcuts';
 

@@ -27,6 +27,14 @@ function restoreProperty(target: object, key: PropertyKey, descriptor: Restorabl
     }
 }
 
+function setPropertyUndefined(target: object, key: PropertyKey) {
+    Object.defineProperty(target, key, {
+        configurable: true,
+        writable: true,
+        value: undefined,
+    });
+}
+
 describe('installShims', () => {
     let requestIdleDescriptor: RestorableDescriptor;
     let cancelIdleDescriptor: RestorableDescriptor;
@@ -59,24 +67,9 @@ describe('installShims', () => {
             writable: true,
             value: undefined,
         });
-        // eslint-disable-next-line no-extend-native
-        Object.defineProperty(Array.prototype, 'findLast', {
-            configurable: true,
-            writable: true,
-            value: undefined,
-        });
-        // eslint-disable-next-line no-extend-native
-        Object.defineProperty(Array.prototype, 'findLastIndex', {
-            configurable: true,
-            writable: true,
-            value: undefined,
-        });
-        // eslint-disable-next-line no-extend-native
-        Object.defineProperty(String.prototype, 'at', {
-            configurable: true,
-            writable: true,
-            value: undefined,
-        });
+        setPropertyUndefined(Array.prototype, 'findLast');
+        setPropertyUndefined(Array.prototype, 'findLastIndex');
+        setPropertyUndefined(String.prototype, 'at');
     });
 
     afterEach(() => {

@@ -38,7 +38,11 @@ export { DEFAULT_DOCUMENT_SUB_COMPONENT_ID } from './subdocument';
 export { ActionIterator } from './text-x/action-iterator';
 export { PRESERVE_INSERTED_PARAGRAPH_IDS, TextXActionType } from './text-x/action-types';
 export type { IDeleteAction, IInsertAction, IRetainAction, TextXAction } from './text-x/action-types';
-export { normalizeInsertedSectionIdsForDocument, normalizeTextRuns, RESTORE_INSERTED_PARAGRAPH_IDS } from './text-x/apply-utils/common';
+export {
+    normalizeInsertedSectionIdsForDocument,
+    normalizeTextRuns,
+    RESTORE_INSERTED_PARAGRAPH_IDS,
+} from './text-x/apply-utils/common';
 export { updateAttributeByDelete } from './text-x/apply-utils/delete-apply';
 export { updateAttributeByInsert } from './text-x/apply-utils/insert-apply';
 export * from './text-x/build-utils';

@@ -102,7 +102,7 @@ export class SuperTableService extends Disposable implements ISuperTableService 
     hasTable(unitId: string, tableName: string): boolean {
         const unitIdMap = this._tableMap.get(unitId);
         if (unitIdMap) {
-            return unitIdMap.keys().some((name) => name.toLowerCase() === tableName.toLowerCase());
+            return Array.from(unitIdMap.keys()).some((name) => name.toLowerCase() === tableName.toLowerCase());
         }
 
         return false;

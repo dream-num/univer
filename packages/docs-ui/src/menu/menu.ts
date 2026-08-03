@@ -86,10 +86,12 @@ import {
     AlignRightCommand,
 } from '../commands/commands/paragraph-align.command';
 import { SetParagraphNamedStyleCommand } from '../commands/commands/set-heading.command';
-// import { SwitchDocModeCommand } from '../commands/commands/switch-doc-mode.command';
 import { CreateDocTableCommand } from '../commands/commands/table/doc-table-create.command';
 import { DocCreateTableOperation } from '../commands/operations/doc-create-table.operation';
-import { InsertDocumentColumnBreakOperation, InsertDocumentSectionBreakOperation } from '../commands/operations/insert-break.operation';
+import {
+    InsertDocumentColumnBreakOperation,
+    InsertDocumentSectionBreakOperation,
+} from '../commands/operations/insert-break.operation';
 import { DocOpenPageSettingCommand } from '../commands/operations/open-page-setting.operation';
 import { getCommandSkeleton } from '../commands/util';
 import { IDocEmbedRuntimeFocusCoordinator } from '../services/doc-embed-integration.service';

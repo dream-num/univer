@@ -14,7 +14,17 @@
  * limitations under the License.
  */
 
-import type { ICustomBlock, ICustomColumnGroup, ICustomDecoration, ICustomRange, IDocumentBlockRange, IDocumentBody, IParagraph, ISectionBreak, ITextRun } from '../../../types/interfaces/i-document-data';
+import type {
+    ICustomBlock,
+    ICustomColumnGroup,
+    ICustomDecoration,
+    ICustomRange,
+    IDocumentBlockRange,
+    IDocumentBody,
+    IParagraph,
+    ISectionBreak,
+    ITextRun,
+} from '../../../types/interfaces/i-document-data';
 import type { DocumentDataModel } from '../../data-model';
 import type { IRetainAction } from './action-types';
 import { merge } from '../../../common/lodash';

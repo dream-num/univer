@@ -17,8 +17,22 @@
 import type { Dependency } from '@univerjs/core';
 import type { IWatermarkConfigWithType } from '@univerjs/engine-render';
 import type { IUniverWatermarkConfig } from './config/config';
-import { DependentOn, IConfigService, ILocalStorageService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
-import { IRenderManagerService, IWatermarkTypeEnum, UNIVER_WATERMARK_STORAGE_KEY, UniverRenderEnginePlugin } from '@univerjs/engine-render';
+import {
+    DependentOn,
+    IConfigService,
+    ILocalStorageService,
+    Inject,
+    Injector,
+    merge,
+    Plugin,
+    UniverInstanceType,
+} from '@univerjs/core';
+import {
+    IRenderManagerService,
+    IWatermarkTypeEnum,
+    UNIVER_WATERMARK_STORAGE_KEY,
+    UniverRenderEnginePlugin,
+} from '@univerjs/engine-render';
 import pkg from '../package.json';
 import { WatermarkImageBaseConfig, WatermarkTextBaseConfig, WatermarkUserInfoBaseConfig } from './common/const';
 import { defaultPluginConfig, WATERMARK_PLUGIN_CONFIG_KEY } from './config/config';

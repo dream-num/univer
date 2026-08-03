@@ -14,10 +14,25 @@
  * limitations under the License.
  */
 
-import type { IDrawingGroupNestedIds, IDrawingGroupNestedParam, IDrawingParam, IDrawingSearch, Nullable } from '@univerjs/core';
+import type {
+    IDrawingGroupNestedIds,
+    IDrawingGroupNestedParam,
+    IDrawingParam,
+    IDrawingSearch,
+    Nullable,
+} from '@univerjs/core';
 import type { JSONOp, JSONOpList } from 'ot-json1';
 import type { Observable } from 'rxjs';
-import type { IDrawingGroupUpdateParam, IDrawingMap, IDrawingMapItemData, IDrawingOrderMapParam, IDrawingOrderUpdateParam, IDrawingSubunitMap, IDrawingVisibleParam, IUnitDrawingService } from './drawing-manager.service';
+import type {
+    IDrawingGroupUpdateParam,
+    IDrawingMap,
+    IDrawingMapItemData,
+    IDrawingOrderMapParam,
+    IDrawingOrderUpdateParam,
+    IDrawingSubunitMap,
+    IDrawingVisibleParam,
+    IUnitDrawingService,
+} from './drawing-manager.service';
 import { DrawingTypeEnum, sortRules, sortRulesByDesc } from '@univerjs/core';
 import * as json1 from 'ot-json1';
 import { Subject } from 'rxjs';
@@ -166,10 +181,10 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
             }
 
             param.transform = updateParam.transform;
-            if (Object.hasOwn(updateParam, 'transforms')) {
+            if (Object.prototype.hasOwnProperty.call(updateParam, 'transforms')) {
                 param.transforms = updateParam.transforms;
             }
-            if (Object.hasOwn(updateParam, 'isMultiTransform')) {
+            if (Object.prototype.hasOwnProperty.call(updateParam, 'isMultiTransform')) {
                 param.isMultiTransform = updateParam.isMultiTransform;
             }
 

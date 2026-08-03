@@ -15,6 +15,8 @@ import { removeCssArtifacts } from './utils/files.ts';
 import { createExternalPackages, readPackageJson } from './utils/package.ts';
 import { emitPublishPackageJson } from './utils/publish-manifest.ts';
 
+export { DEFAULT_BROWSER_TARGET } from './constants.ts';
+
 /**
  * Builds the shared context consumed by all output format factories.
  */

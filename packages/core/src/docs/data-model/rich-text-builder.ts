@@ -2442,7 +2442,7 @@ export class RichTextBuilder extends RichTextValue {
      */
     listItem(text: string, options: IRichTextListItemOptions = {}): RichTextBuilder {
         const listType = options.type ?? PresetListType.BULLET_LIST;
-        const currentParagraph = this._data.body?.paragraphs?.at(-1);
+        const currentParagraph = this._data.body?.paragraphs?.slice(-1)[0];
         const currentBullet = currentParagraph?.bullet;
         const listId = options.listId?.trim() ||
             (currentBullet?.listType === listType ? currentBullet.listId : generateRandomId());
@@ -2453,7 +2453,7 @@ export class RichTextBuilder extends RichTextValue {
             this.paragraph(options.paragraphStyle);
         }
 
-        const targetParagraph = this._data.body?.paragraphs?.at(-1);
+        const targetParagraph = this._data.body?.paragraphs?.slice(-1)[0];
         if (targetParagraph) {
             targetParagraph.bullet = {
                 listId,
@@ -2494,7 +2494,7 @@ export class RichTextBuilder extends RichTextValue {
             return this;
         }
 
-        const currentParagraph = this._data.body?.paragraphs?.at(-1);
+        const currentParagraph = this._data.body?.paragraphs?.slice(-1)[0];
         const currentParagraphStyle = Tools.deepClone(currentParagraph?.paragraphStyle);
         const currentParagraphBullet = Tools.deepClone(currentParagraph?.bullet);
         const startIndex = Math.max(0, (this._data.body?.dataStream.length ?? 2) - 2);
@@ -2511,7 +2511,7 @@ export class RichTextBuilder extends RichTextValue {
                 }],
             },
         }));
-        const nextParagraph = this._data.body?.paragraphs?.at(-1);
+        const nextParagraph = this._data.body?.paragraphs?.slice(-1)[0];
         if (nextParagraphStyle) {
             if (nextParagraph) {
                 nextParagraph.paragraphStyle = nextParagraphStyle;

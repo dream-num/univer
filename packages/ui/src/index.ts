@@ -67,7 +67,12 @@ export type { IContextMenuHandler } from './services/contextmenu/contextmenu.ser
 export { DesktopDialogService } from './services/dialog/desktop-dialog.service';
 export { IDialogService } from './services/dialog/dialog.service';
 export { CanvasFloatDomPreviewService, CanvasFloatDomService } from './services/dom/canvas-dom-layer.service';
-export type { ICanvasFloatDomPreview, ICanvasFloatDomPreviewRequest, IFloatDom, IFloatDomLayout } from './services/dom/canvas-dom-layer.service';
+export type {
+    ICanvasFloatDomPreview,
+    ICanvasFloatDomPreviewRequest,
+    IFloatDom,
+    IFloatDomLayout,
+} from './services/dom/canvas-dom-layer.service';
 export { FontService, IFontService } from './services/font.service';
 export type { IFontConfig } from './services/font.service';
 export { DesktopGalleryService } from './services/gallery/desktop-gallery.service';
@@ -120,7 +125,11 @@ export { IUIRuntimeScopeService, UIRuntimeScopeService } from './services/runtim
 export type { IUIRuntimeScope } from './services/runtime-scope/ui-runtime-scope.service';
 export { KeyCode, MetaKeys } from './services/shortcut/keycode';
 export { ShortcutPanelService } from './services/shortcut/shortcut-panel.service';
-export { IShortcutService, NativeTextEditorShortcutBehavior, ShortcutService } from './services/shortcut/shortcut.service';
+export {
+    IShortcutService,
+    NativeTextEditorShortcutBehavior,
+    ShortcutService,
+} from './services/shortcut/shortcut.service';
 export type { IShortcutItem } from './services/shortcut/shortcut.service';
 export { DesktopSidebarService } from './services/sidebar/desktop-sidebar.service';
 export { useSidebarClick } from './services/sidebar/hooks/use-sidebar-click';

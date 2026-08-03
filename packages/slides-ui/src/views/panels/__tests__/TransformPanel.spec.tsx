@@ -16,7 +16,14 @@
 
 import type { ISlideData, SlideDataModel } from '@univerjs/slides';
 import type { Root } from 'react-dom/client';
-import { ICommandService, IUniverInstanceService, LocaleService, LocaleType, Univer, UniverInstanceType } from '@univerjs/core';
+import {
+    ICommandService,
+    IUniverInstanceService,
+    LocaleService,
+    LocaleType,
+    Univer,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { BasicShapes, PageElementType, PageType, UniverSlidesPlugin } from '@univerjs/slides';
 import { RediContext } from '@univerjs/ui';
 import { act } from 'react';

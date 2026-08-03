@@ -612,9 +612,9 @@ const getDateLocaleLookups = (locale: LocaleData): DateLocaleLookups => {
         cached = {
             lookups: {
                 mon: getLookups(locale.mmmm, 'F').concat(getLookups(locale.mmm, 'M')),
-                mp: locale.mmm[0].at(-1) === '.',
+                mp: locale.mmm[0].endsWith('.'),
                 day: getLookups(locale.dddd, 'l').concat(getLookups(locale.ddd, 'D')),
-                dp: locale.ddd[0].at(-1) === '.',
+                dp: locale.ddd[0].endsWith('.'),
             },
             mmmm: [...locale.mmmm],
             mmm: [...locale.mmm],

@@ -189,7 +189,7 @@ const calcParagraphPositionsFromLineContexts = (
 
 function getParagraphLineBottom(context: IDocumentSkeletonLineContext, lineTop: number): number {
     const lineBottom = lineTop + context.line.lineHeight;
-    if (context.source !== 'column' || context.line !== context.column.lines.at(-1) || !Number.isFinite(context.page.pageHeight)) {
+    if (context.source !== 'column' || context.line !== context.column.lines[context.column.lines.length - 1] || !Number.isFinite(context.page.pageHeight)) {
         return lineBottom;
     }
 

@@ -234,7 +234,7 @@ univerAPI.createWorkbook({})
 
 ## 🧭 兼容性
 
-- **浏览器运行时**：Univer 的编译目标是 Chrome 70，并尽力支持 Edge `>=70`、Firefox `>=63`、Chrome `>=70`、Safari `>=12.0` 和 Electron `>=5`。
+- **浏览器运行时**：Univer 的编译目标是 Chrome 88，并尽力支持 Edge `>=88`、Firefox `>=90`、Chrome `>=88`、Safari `>=14.1` 和 Electron `>=12`。
 - **Polyfills**：Univer 依赖 `Intl.Segmenter`。如果目标浏览器或运行时不支持，请添加 `@formatjs/intl-segmenter` 等 polyfill。
 - **构建工具**：推荐使用 Vite、esbuild 或 Webpack 5。如果构建工具不支持 `package.json` 中的 `exports` 字段（Webpack 4 中较常见），可能需要额外配置路径映射。
 - **React**：Univer 的视图层基于 React 18 构建，支持 React 18 和 19，并对 React 16.9+ 与 17 提供最低限度的兼容支持。

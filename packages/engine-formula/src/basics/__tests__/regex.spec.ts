@@ -64,6 +64,13 @@ describe('Test ref regex', () => {
         expect(new RegExp(REFERENCE_TABLE_SINGLE_COLUMN_REGEX).test('Table1[[#Title],[#Data],[Column1]]')).toBe(true);
     });
 
+    it('allows a hash only at the end of a table column name', () => {
+        const regex = new RegExp(REFERENCE_TABLE_SINGLE_COLUMN_REGEX);
+
+        expect(regex.test('Table1[Column#]')).toBe(true);
+        expect(regex.test('Table1[Column#Name]')).toBe(false);
+    });
+
     it('Table multiple range', () => {
         expect(new RegExp(REFERENCE_TABLE_MULTIPLE_COLUMN_REGEX).test('Table1[[#Title],[#Data],[Column1]:[Column10]]')).toBe(true);
     });

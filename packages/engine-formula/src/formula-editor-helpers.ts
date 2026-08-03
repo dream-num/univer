@@ -236,7 +236,7 @@ export function buildFormulaTextRuns(
     for (let index = 0; index < sequenceNodes.length; index++) {
         const node = sequenceNodes[index];
         if (typeof node === 'string') {
-            const start = textRuns.at(-1)?.ed ?? 0;
+            const start = textRuns[textRuns.length - 1]?.ed ?? 0;
             textRuns.push(createTextRun(start, start + node.length, colors.plainTextColor));
             continue;
         }

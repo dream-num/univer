@@ -18,9 +18,7 @@ import type { DocumentDataModel, IExecutionOptions, IMutation, IMutationCommonPa
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IDocStateChangeInfo } from '../../services/doc-state-emit.service';
 import { CommandType, IUniverInstanceService, JSONX, UniverInstanceType, validateDocBodyStructure } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
 import { DocSelectionManagerService } from '../../services/doc-selection-manager.service';
-import { DocSkeletonManagerService } from '../../services/doc-skeleton-manager.service';
 import { DocStateEmitService } from '../../services/doc-state-emit.service';
 
 export interface IRichTextEditingMutationParams extends IMutationCommonParams {
@@ -106,11 +104,9 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         } = params;
         const isSync = paramsIsSync || options?.fromCollab || options?.fromChangeset;
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const renderManagerService = accessor.get(IRenderManagerService);
         const docStateEmitService = accessor.get(DocStateEmitService);
 
         const documentDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
-        const documentViewModel = renderManagerService.getRenderUnitById(unitId)?.with(DocSkeletonManagerService).getViewModel();
         if (documentDataModel == null) {
             throw new Error(`DocumentDataModel not found for unitId: ${unitId}`);
         }
@@ -141,9 +137,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
             throw error;
         }
 
-        // Step 2: Update Doc View Model.
-        documentViewModel?.reset(documentDataModel);
-        // Step 3: Update cursor & selection.
+        // Step 2: Update cursor & selection.
         // Make sure update cursor & selection after doc skeleton is calculated.
         if (!noNeedSetTextRange && textRanges && trigger != null && !isSync) {
             queueMicrotask(() => {
@@ -151,7 +145,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
             });
         }
 
-        // Step 4: Emit state change event.
+        // Step 3: Emit state change event.
         const changeState: IDocStateChangeInfo = {
             commandId: RichTextEditingMutationId,
             unitId,

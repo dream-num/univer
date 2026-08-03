@@ -52,17 +52,22 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
 
     reRender(unitId: string) {
         const docSkeletonManagerService = this._renderManagerService.getRenderUnitById(unitId)?.with(DocSkeletonManagerService);
-        const skeleton = docSkeletonManagerService?.getSkeleton();
-        if (!skeleton) {
+        if (!docSkeletonManagerService) {
             return;
         }
+        const skeleton = docSkeletonManagerService.getSkeleton();
 
         // TODO: `disabled` is only used for read only demo, and will be removed in the future.
-        const disabled = !!skeleton.getViewModel().getDataModel().getSnapshot().disabled;
+        const documentDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
+        if (!documentDataModel) {
+            return;
+        }
+        const disabled = !!documentDataModel.getSnapshot().disabled;
         if (disabled) {
             return;
         }
 
+        docSkeletonManagerService.getViewModel().reset(documentDataModel);
         skeleton.calculate();
 
         // REFACTOR: @Jocs, should not use scroll bar to indicate a Zen Editor. refactor after support modern doc.
@@ -221,12 +226,13 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         const updateCommandList = [RichTextEditingMutation.id];
 
         this.disposeWithMe(this._commandService.onCommandExecuted((command: ICommandInfo) => {
-            // TODO@Jocs: performance, only update the skeleton when the command is related to the current unit.
             if (updateCommandList.includes(command.id)) {
                 const params = command.params as IRichTextEditingMutationParams;
                 const { unitId } = params;
 
-                this.reRender(unitId);
+                if (unitId === this._context.unitId) {
+                    this.reRender(unitId);
+                }
             }
         }));
     }

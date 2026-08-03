@@ -31,6 +31,7 @@ import {
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { BehaviorSubject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { InsertTextCommand } from '../commands/commands/core-editing.command';
 import { DocsRenameMutation } from '../commands/mutations/docs-rename.mutation';
 import { SetTextSelectionsOperation } from '../commands/operations/text-selection.operation';
 import { UniverDocsPlugin } from '../plugin';
@@ -135,6 +136,29 @@ describe('docs integration', () => {
 
         expect(ok).toBeTruthy();
         expect(doc.getTitle()).toBe('Renamed');
+    });
+
+    it('edits a document without a render manager', () => {
+        univer.registerPlugin(UniverDocsPlugin);
+        const doc = univer.createUnit<IDocumentData, DocumentDataModel>(
+            UniverInstanceType.UNIVER_DOC,
+            createTestDocData('doc-headless')
+        );
+
+        injector.get(IUniverInstanceService).focusUnit(doc.getUnitId());
+
+        const ok = injector.get(ICommandService).syncExecuteCommand(InsertTextCommand.id, {
+            unitId: doc.getUnitId(),
+            body: { dataStream: '!' },
+            range: {
+                startOffset: 5,
+                endOffset: 5,
+                collapsed: true,
+            },
+        });
+
+        expect(ok).toBeTruthy();
+        expect(doc.getSnapshot().body?.dataStream).toBe('Hello!\r\n');
     });
 
     it('manages selections and emits selection operations via real command flow', async () => {

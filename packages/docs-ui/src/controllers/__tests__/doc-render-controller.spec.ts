@@ -128,9 +128,13 @@ function createControllerFixture(options?: {
             })),
         })),
     };
+    const viewModel = {
+        reset: vi.fn(),
+    };
     const skeletonManager = {
         currentSkeletonBefore$: new Subject(),
         getSkeleton: vi.fn(() => skeleton),
+        getViewModel: vi.fn(() => viewModel),
     };
     const unitId = options?.unitId ?? 'doc-unit';
     const context = {
@@ -201,6 +205,7 @@ function createControllerFixture(options?: {
             })),
         },
         {
+            getUnit: vi.fn(() => context.unit),
             getCurrentUnitOfType: vi.fn(() => ({
                 getUnitId: vi.fn(() => unitId),
             })),
@@ -224,6 +229,7 @@ function createControllerFixture(options?: {
         canvasElement,
         canvasColorService,
         skeletonManager,
+        viewModel,
         pageLayoutService,
         selectionManager,
     };
@@ -253,7 +259,7 @@ describe('doc render controller', () => {
     });
 
     it('refreshes page layout and selection after rich text mutations resize the document', () => {
-        const { commandCallbacks, pageLayoutService, selectionManager } = createControllerFixture();
+        const { commandCallbacks, context, pageLayoutService, selectionManager, viewModel } = createControllerFixture();
 
         commandCallbacks[0]({
             id: RichTextEditingMutation.id,
@@ -263,6 +269,7 @@ describe('doc render controller', () => {
             },
         } as unknown as ICommandInfo);
 
+        expect(viewModel.reset).toHaveBeenCalledWith(context.unit);
         expect(pageLayoutService.calculatePagePosition).toHaveBeenCalledTimes(1);
         expect(selectionManager.refreshSelection).toHaveBeenCalledTimes(1);
     });

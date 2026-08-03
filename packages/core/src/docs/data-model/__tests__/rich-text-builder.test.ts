@@ -16,10 +16,23 @@
 
 import type { IBullet } from '../../../types/interfaces';
 import { describe, expect, it } from 'vitest';
-import { BaselineOffset, BooleanNumber, HorizontalAlign, TextDecoration, TextDirection, VerticalAlign } from '../../../types/enum';
+import {
+    BaselineOffset,
+    BooleanNumber,
+    HorizontalAlign,
+    TextDecoration,
+    TextDirection,
+    VerticalAlign,
+} from '../../../types/enum';
 import { CustomRangeType, SpacingRule } from '../../../types/interfaces';
 import { PresetListType } from '../preset-list-type';
-import { ParagraphStyleBuilder, RichTextBuilder, RichTextValue, TextDecorationBuilder, TextStyleBuilder } from '../rich-text-builder';
+import {
+    ParagraphStyleBuilder,
+    RichTextBuilder,
+    RichTextValue,
+    TextDecorationBuilder,
+    TextStyleBuilder,
+} from '../rich-text-builder';
 
 describe('TextStyleBuilder', () => {
     it('should create empty text style', () => {

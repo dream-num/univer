@@ -22,7 +22,11 @@ import { Tools } from '../../../shared/tools';
 import { ActionIterator } from './action-iterator';
 import { PRESERVE_INSERTED_PARAGRAPH_IDS, TextXActionType } from './action-types';
 import { textXApply } from './apply';
-import { normalizeInsertedParagraphIdsForDocument, normalizeInsertedSectionIdsForDocument, RESTORE_INSERTED_PARAGRAPH_IDS } from './apply-utils/common';
+import {
+    normalizeInsertedParagraphIdsForDocument,
+    normalizeInsertedSectionIdsForDocument,
+    RESTORE_INSERTED_PARAGRAPH_IDS,
+} from './apply-utils/common';
 import { transformBody } from './transform-utils';
 import { composeBody, getBodySlice, isUselessRetainAction } from './utils';
 

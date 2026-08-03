@@ -1572,7 +1572,7 @@ export class DocumentSkeleton extends Skeleton {
             marginLeft,
             marginRight,
         } = curSkeletonPage;
-        const sectionTop = curSkeletonPage.sections.at(-1)?.top ?? 0;
+        const sectionTop = curSkeletonPage.sections[curSkeletonPage.sections.length - 1]?.top ?? 0;
         const newSection = createSkeletonSection(
             columnProperties,
             columnSeparatorType,

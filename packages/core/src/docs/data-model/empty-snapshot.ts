@@ -16,7 +16,15 @@
 
 import type { IDocumentData } from '../../types/interfaces';
 import { generateRandomId } from '../../shared/random-id';
-import { DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING, DEFAULT_DOCUMENT_PARAGRAPH_SPACE_ABOVE, DEFAULT_DOCUMENT_PARAGRAPH_SPACE_BELOW, MODERN_DOCUMENT_WIDTH, ModernDocumentWidthMode, PAGE_SIZE, TRADITIONAL_DOCUMENT_DEFAULT_MARGIN } from '../../types/const';
+import {
+    DEFAULT_DOCUMENT_PARAGRAPH_LINE_SPACING,
+    DEFAULT_DOCUMENT_PARAGRAPH_SPACE_ABOVE,
+    DEFAULT_DOCUMENT_PARAGRAPH_SPACE_BELOW,
+    MODERN_DOCUMENT_WIDTH,
+    ModernDocumentWidthMode,
+    PAGE_SIZE,
+    TRADITIONAL_DOCUMENT_DEFAULT_MARGIN,
+} from '../../types/const';
 import { BooleanNumber } from '../../types/enum';
 import { LocaleType } from '../../types/enum/locale-type';
 import { DocumentFlavor, PaperType } from '../../types/interfaces';

@@ -120,8 +120,7 @@ abstract class FMenuBase extends FBase {
         const paths = typeof path === 'string' ? path.split('|') : path;
         const len = paths.length;
 
-        // eslint-disable-next-line ts/no-explicit-any
-        const menuConfig: Record<string, any> = {};
+        const menuConfig: Record<string, MenuSchemaType> = {};
         let obj = menuConfig;
 
         const schema = this.__getSchema();
@@ -131,7 +130,7 @@ abstract class FMenuBase extends FBase {
             } else {
                 obj[p] = {};
             }
-            obj = obj[p];
+            obj = obj[p] as Record<string, MenuSchemaType>;
         });
 
         this._menuManagerService.mergeMenu(menuConfig);
@@ -174,15 +173,14 @@ export class FMenu extends FMenuBase {
         }
 
         this._buildingSchema = {
-            // eslint-disable-next-line ts/explicit-function-return-type
-            menuItemFactory: () => ({
+            menuItemFactory: (): IMenuButtonItem => ({
                 id: _item.id,
                 type: MenuItemType.BUTTON, // we only support button for now
                 icon: _item.icon,
                 title: _item.title,
                 tooltip: _item.tooltip,
                 commandId,
-            } as IMenuButtonItem),
+            }),
         };
 
         if (typeof _item.order !== 'undefined') {
@@ -235,8 +233,7 @@ export class FSubmenu extends FMenuBase {
         super();
 
         this._buildingSchema = {
-            // eslint-disable-next-line ts/explicit-function-return-type
-            menuItemFactory: () => ({
+            menuItemFactory: (): IMenuItem => ({
                 id: _item.id,
                 type: MenuItemType.SUBITEMS,
                 icon: _item.icon,

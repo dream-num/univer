@@ -16,7 +16,6 @@
 
 import { LocaleService } from '@univerjs/core';
 import { useMemo } from 'react';
-
 import { useDependency } from '../utils/di';
 
 export interface ICommonLabelProps {

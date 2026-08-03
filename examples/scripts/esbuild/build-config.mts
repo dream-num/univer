@@ -4,6 +4,7 @@ import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { ignoreGlobalCssPlugin, removeClassnameNewlinesPlugin } from '@univerjs-infra/shared/esbuild';
+import { DEFAULT_BROWSER_TARGET } from '@univerjs-infra/shared/tsdown';
 import aliasPlugin from 'esbuild-plugin-alias';
 import copyPlugin from 'esbuild-plugin-copy';
 import vue3 from 'esbuild-plugin-vue3';
@@ -61,7 +62,7 @@ export async function createBuildConfig(args: IBuildArgs): Promise<SameShape<Bui
         loader: { '.svg': 'file', '.ttf': 'file' },
         sourcemap: args.watch,
         minify: false,
-        target: 'chrome70',
+        target: DEFAULT_BROWSER_TARGET,
         plugins: [
             ignoreGlobalCssPlugin(),
             removeClassnameNewlinesPlugin(),

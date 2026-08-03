@@ -14,10 +14,17 @@
  * limitations under the License.
  */
 
-/* eslint-disable no-param-reassign */
-
 import type { Nullable } from '../../../shared';
-import type { ICustomDecoration, ICustomRange, IDocumentBlockRange, IDocumentBody, IParagraph, IParagraphStyle, ITextRun, ITextStyle } from '../../../types/interfaces';
+import type {
+    ICustomDecoration,
+    ICustomRange,
+    IDocumentBlockRange,
+    IDocumentBody,
+    IParagraph,
+    IParagraphStyle,
+    ITextRun,
+    ITextStyle,
+} from '../../../types/interfaces';
 import type { IRetainAction } from './action-types';
 import { merge } from '../../../common/lodash';
 import { Tools, UpdateDocsAttributeType } from '../../../shared';

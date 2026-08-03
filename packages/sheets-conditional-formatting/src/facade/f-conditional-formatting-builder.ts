@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable ts/explicit-function-return-type */
-
 import type { IRange } from '@univerjs/core';
 import type {
     CFTimePeriodOperator,
@@ -44,7 +42,7 @@ import { CFNumberOperator, CFRuleType, CFSubRuleType, CFTextOperator, CFValueTyp
 class ConditionalFormatRuleBaseBuilder {
     protected _rule: Partial<IConditionFormattingRule> = {};
 
-    protected get _ruleConfig() {
+    protected get _ruleConfig(): IConditionalFormattingRuleConfig | null {
         return this._rule.rule || null;
     }
 
@@ -105,14 +103,13 @@ class ConditionalFormatRuleBaseBuilder {
         this._ensureAttr(this._rule, ['rule']);
     }
 
-    // eslint-disable-next-line ts/no-explicit-any
-    protected _ensureAttr(obj: Record<string, any>, keys: string[]) {
+    protected _ensureAttr<T extends object>(obj: T, keys: string[]): T {
         keys.reduce((pre, cur) => {
             if (!pre[cur]) {
                 pre[cur] = {};
             }
-            return pre[cur];
-        }, obj);
+            return pre[cur] as Record<string, unknown>;
+        }, obj as Record<string, unknown>);
         return obj;
     }
 
@@ -231,7 +228,7 @@ class ConditionalFormatRuleBaseBuilder {
      * fWorksheet.addConditionalFormattingRule(rule);
      * ```
      */
-    setRanges(ranges: IRange[]) {
+    setRanges(ranges: IRange[]): this {
         this._rule.ranges = ranges;
         return this;
     }

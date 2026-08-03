@@ -683,8 +683,8 @@ importers:
         specifier: 19.2.8
         version: 19.2.8(react@19.2.8)
       react-mosaic-component:
-        specifier: ^6.2.0
-        version: 6.2.0(@types/node@26.1.2)(@types/react@19.2.18)(dnd-core@16.0.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        specifier: ^7.0.0
+        version: 7.0.0(@types/node@26.1.2)(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       rxjs:
         specifier: ^7.8.2
         version: 7.8.2
@@ -7193,10 +7193,6 @@ packages:
     resolution: {integrity: sha512-quJQXlTSUGL2LH9SUXo8VwsY4soanhgo6LNSm84E1LBcE8s3O0wpdiRzyR9z/ZZJMlMWv37qOOb9pdJlMUEKFQ==}
     engines: {node: '>=8'}
 
-  ansi-regex@6.1.0:
-    resolution: {integrity: sha512-7HSX4QQb4CspciLpVFwyRe79O3xsIZDDLER21kERQ71oaPodF8jL725AgJMFAYbooIqolJoRLuM81SpeUkpkvA==}
-    engines: {node: '>=12'}
-
   ansi-regex@6.2.2:
     resolution: {integrity: sha512-Bq3SmSpyFHaWjPk8If9yc6svM8c56dB5BAtW4Qbw5jHTwwXXcTLoRMkpDJp6VL0XzlWaCHTXrkFURMYmD0sLqg==}
     engines: {node: '>=12'}
@@ -7923,8 +7919,8 @@ packages:
   dnd-core@16.0.1:
     resolution: {integrity: sha512-HK294sl7tbw6F6IeuK16YSBUoorvHpY8RHO+9yFfaJyCDVb6n7PRcezrOEOa2SBCqiYpemh5Jx20ZcjKdFAVng==}
 
-  dnd-multi-backend@8.1.2:
-    resolution: {integrity: sha512-KPDVEsiM+6gNEegqZYTWJQgJxYV4vB91tUrvoKJjaS0wwWqT/jNU0P7xJAwCue/cbasJNvk2dFZH7tC+bjX1Rg==}
+  dnd-multi-backend@9.0.0:
+    resolution: {integrity: sha512-BCUFes4x0LA2bZyEZFHeQzZ1CBZo6PB40zMOG/gNgICxjAZfN2jHgISowqkR1isdx/msUNzscxEb17SP7yc4KQ==}
     peerDependencies:
       dnd-core: ^16.0.1
 
@@ -8681,7 +8677,7 @@ packages:
 
   glob@7.2.3:
     resolution: {integrity: sha512-nFR0zLpU2YCaRxwoCJvL6UvCH2JFyFVIvwTLsIf21AuHlMskA1hhTdk+LlYJtOlYt9v6dvszD2BGRqBL+iQK9Q==}
-    deprecated: Glob versions prior to v9 are no longer supported
+    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
 
   global-directory@5.0.0:
     resolution: {integrity: sha512-1pgFdhK3J2LeM+dVf2Pd424yHx2ou338lC0ErNP2hPx4j8eW1Sp0XqSjNxtk6Tc4Kr5wlWtSvz8cn2yb7/SG/w==}
@@ -10370,22 +10366,22 @@ packages:
     resolution: {integrity: sha512-y3bGgqKj3QBdxLbLkomlohkvsA8gdAiUQlSBJnBhfn+BPxg4bc62d8TcBW15wavDfgexCgccckhcZvywyQYPOw==}
     hasBin: true
 
-  rdndmb-html5-to-touch@8.1.2:
-    resolution: {integrity: sha512-efi3MaXYxWaLMd5xzF1bVvmX8erTMhYHSlaMjQe+tynf4IdtgRYfKLwYg+4Z5eq4k7idrjKHQOIMDE6D8LjnOA==}
+  rdndmb-html5-to-touch@9.0.0:
+    resolution: {integrity: sha512-g8XfS6y+CEFGWdFF5pIqrGSF6bTVe2sB5AIVVoBRIl+FzNuDrc2jpfzUmpsiNvx28l3BRZ91UFP0Mm4zYVJfHA==}
 
   react-dnd-html5-backend@16.0.1:
     resolution: {integrity: sha512-Wu3dw5aDJmOGw8WjH1I1/yTH+vlXEL4vmjk5p+MHxP8HuHJS1lAGeIdG/hze1AvNeXWo/JgULV87LyQOr+r5jw==}
 
-  react-dnd-multi-backend@8.1.2:
-    resolution: {integrity: sha512-Ecj+gwr5B7zRiWqkDU5sUvUmufcu97WnsZFHnqHrWFJhTXAXQnhrperHLFktNP2CnQYtAgbucodr1if0MWpEaA==}
+  react-dnd-multi-backend@9.0.0:
+    resolution: {integrity: sha512-LAKDdyj4oMvVA/k2RiJ8KLIPO9sBiYIjIYtoFCuAgml9qQwIq+oTav2IXGfG4DrP49fBnVO7jjf5ofJMNOlWTA==}
     peerDependencies:
       dnd-core: ^16.0.1
       react: 19.2.8
       react-dnd: ^16.0.1
       react-dom: 19.2.8
 
-  react-dnd-preview@8.1.2:
-    resolution: {integrity: sha512-j5M1NcQBItOCYXONRbCNs6MzW7u4KygeOGZlztNNguTs1/f2d7q1fRnQjFLjCpgeg5Gy/JrTFrbRThZglJP5dg==}
+  react-dnd-preview@9.0.0:
+    resolution: {integrity: sha512-WZTbrrNDlCGYJGrITHN/obI2kpdaKV3AY6Il2LLZcA9ApzG5bbDXBlWSFwuw8eTCMjmCXs5Wcv+p2QCMxX1Afw==}
     peerDependencies:
       react: 19.2.8
       react-dnd: ^16.0.1
@@ -10432,8 +10428,8 @@ packages:
   react-is@17.0.2:
     resolution: {integrity: sha512-w2GsyukL62IJnlaff/nRegPQR94C/XXamvMWmSHRJ4y7Ts/4ocGRmTHvOs8PSE6pB3dWOrD/nueuU5sduBsQ4w==}
 
-  react-mosaic-component@6.2.0:
-    resolution: {integrity: sha512-v7By4y0tFJNFAI/BUhXfTct87WQY9WaCpQwLaqed15jpE4g2sAo34GIB3LIhDHuhwwTU5lvmlVJUXcUggqSBQA==}
+  react-mosaic-component@7.0.0:
+    resolution: {integrity: sha512-soy7p/ikWYcrnZ6hghtvHqEtShUSunTpD7JBOpHcFQqnUkmPPjXKH9lFOrPJBN8lx7tn2Ca3ZPuKIYG2VQyVWQ==}
     peerDependencies:
       react: 19.2.8
 
@@ -11320,9 +11316,8 @@ packages:
   utila@0.4.0:
     resolution: {integrity: sha512-Z0DbgELS9/L/75wZbro8xAnT50pBVFQZ+hUEueGDU5FN51YSCYM+jdxsfCiHjwNP/4LCDD0i/graKpeBnOXKRA==}
 
-  uuid@9.0.1:
-    resolution: {integrity: sha512-b+1eJOlsR9K8HJpow9Ok3fiWOWSIcIzXodvv0rQjVoOVNpWMpxf1wZNpt4y9h10odCNrqnYp1OBzRktckBe3sA==}
-    deprecated: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+  uuid@11.1.1:
+    resolution: {integrity: sha512-vIYxrBCC/N/K+Js3qSN88go7kIfNPssr/hHCesKCQNAjmgvYS2oqr69kIufEG+O4+PfezOH4EbIeHCfFov8ZgQ==}
     hasBin: true
 
   valibot@1.4.2:
@@ -14903,8 +14898,6 @@ snapshots:
 
   ansi-regex@5.0.1: {}
 
-  ansi-regex@6.1.0: {}
-
   ansi-regex@6.2.2: {}
 
   ansi-styles@4.3.0:
@@ -15595,7 +15588,7 @@ snapshots:
       '@react-dnd/invariant': 4.0.2
       redux: 4.2.1
 
-  dnd-multi-backend@8.1.2(dnd-core@16.0.1):
+  dnd-multi-backend@9.0.0(dnd-core@16.0.1):
     dependencies:
       dnd-core: 16.0.1
 
@@ -18534,9 +18527,9 @@ snapshots:
       minimist: 1.2.8
       strip-json-comments: 2.0.1
 
-  rdndmb-html5-to-touch@8.1.2(dnd-core@16.0.1):
+  rdndmb-html5-to-touch@9.0.0(dnd-core@16.0.1):
     dependencies:
-      dnd-multi-backend: 8.1.2(dnd-core@16.0.1)
+      dnd-multi-backend: 9.0.0(dnd-core@16.0.1)
       react-dnd-html5-backend: 16.0.1
       react-dnd-touch-backend: 16.0.1
     transitivePeerDependencies:
@@ -18546,16 +18539,16 @@ snapshots:
     dependencies:
       dnd-core: 16.0.1
 
-  react-dnd-multi-backend@8.1.2(dnd-core@16.0.1)(react-dnd@16.0.1(@types/node@26.1.2)(@types/react@19.2.18)(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
+  react-dnd-multi-backend@9.0.0(dnd-core@16.0.1)(react-dnd@16.0.1(@types/node@26.1.2)(@types/react@19.2.18)(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
     dependencies:
       dnd-core: 16.0.1
-      dnd-multi-backend: 8.1.2(dnd-core@16.0.1)
+      dnd-multi-backend: 9.0.0(dnd-core@16.0.1)
       react: 19.2.8
       react-dnd: 16.0.1(@types/node@26.1.2)(@types/react@19.2.18)(react@19.2.8)
-      react-dnd-preview: 8.1.2(react-dnd@16.0.1(@types/node@26.1.2)(@types/react@19.2.18)(react@19.2.8))(react@19.2.8)
+      react-dnd-preview: 9.0.0(react-dnd@16.0.1(@types/node@26.1.2)(@types/react@19.2.18)(react@19.2.8))(react@19.2.8)
       react-dom: 19.2.8(react@19.2.8)
 
-  react-dnd-preview@8.1.2(react-dnd@16.0.1(@types/node@26.1.2)(@types/react@19.2.18)(react@19.2.8))(react@19.2.8):
+  react-dnd-preview@9.0.0(react-dnd@16.0.1(@types/node@26.1.2)(@types/react@19.2.18)(react@19.2.8))(react@19.2.8):
     dependencies:
       react: 19.2.8
       react-dnd: 16.0.1(@types/node@26.1.2)(@types/react@19.2.18)(react@19.2.8)
@@ -18620,24 +18613,24 @@ snapshots:
 
   react-is@17.0.2: {}
 
-  react-mosaic-component@6.2.0(@types/node@26.1.2)(@types/react@19.2.18)(dnd-core@16.0.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
+  react-mosaic-component@7.0.0(@types/node@26.1.2)(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
     dependencies:
       classnames: 2.5.1
+      dnd-core: 16.0.1
       immutability-helper: 3.1.1
-      lodash: 4.18.1
+      lodash-es: 4.18.1
       prop-types: 15.8.1
-      rdndmb-html5-to-touch: 8.1.2(dnd-core@16.0.1)
+      rdndmb-html5-to-touch: 9.0.0(dnd-core@16.0.1)
       react: 19.2.8
       react-dnd: 16.0.1(@types/node@26.1.2)(@types/react@19.2.18)(react@19.2.8)
       react-dnd-html5-backend: 16.0.1
-      react-dnd-multi-backend: 8.1.2(dnd-core@16.0.1)(react-dnd@16.0.1(@types/node@26.1.2)(@types/react@19.2.18)(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      react-dnd-multi-backend: 9.0.0(dnd-core@16.0.1)(react-dnd@16.0.1(@types/node@26.1.2)(@types/react@19.2.18)(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       react-dnd-touch-backend: 16.0.1
-      uuid: 9.0.1
+      uuid: 11.1.1
     transitivePeerDependencies:
       - '@types/hoist-non-react-statics'
       - '@types/node'
       - '@types/react'
-      - dnd-core
       - react-dom
 
   react-remove-scroll-bar@2.3.8(@types/react@19.2.18)(react@19.2.8):
@@ -19216,7 +19209,7 @@ snapshots:
 
   strip-ansi@7.1.2:
     dependencies:
-      ansi-regex: 6.1.0
+      ansi-regex: 6.2.2
 
   strip-ansi@7.2.0:
     dependencies:
@@ -19700,7 +19693,7 @@ snapshots:
 
   utila@0.4.0: {}
 
-  uuid@9.0.1: {}
+  uuid@11.1.1: {}
 
   valibot@1.4.2(typescript@6.0.3):
     optionalDependencies:

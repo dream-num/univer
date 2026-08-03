@@ -96,7 +96,7 @@
         "lit": "^3.3.3",
         "react": "19.2.8",
         "react-dom": "19.2.8",
-        "react-mosaic-component": "^6.2.0",
+        "react-mosaic-component": "^7.0.0",
         "rxjs": "^7.8.2"
     },
     "devDependencies": {

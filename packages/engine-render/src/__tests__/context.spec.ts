@@ -229,9 +229,12 @@ describe('context extra', () => {
         delete (nativeCtx as Partial<CanvasRenderingContext2D>).roundRect;
         const renderCtx = new UniverRenderingContext2D(nativeCtx);
 
-        renderCtx.roundRect(1, 2, 3, 4, 2);
+        renderCtx.roundRect(10, 20, 40, 20, 4);
 
-        expect(nativeCtx.rect).toHaveBeenCalledWith(1, 2, 3, 4);
+        expect(nativeCtx.moveTo).toHaveBeenCalledWith(14, 20);
+        expect(nativeCtx.quadraticCurveTo).toHaveBeenNthCalledWith(1, 50, 20, 50, 24);
+        expect(nativeCtx.closePath).toHaveBeenCalledTimes(1);
+        expect(nativeCtx.rect).not.toHaveBeenCalled();
     });
 
     it('covers fallback line dash branches and printing context', () => {

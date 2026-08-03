@@ -28,14 +28,13 @@ import {
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsSortPlugin } from '@univerjs/sheets-sort';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
-import { UniverUIPlugin } from '@univerjs/ui';
 import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_SORT_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { ComponentsController } from './controllers/components.controller';
 import { SheetsSortUIController } from './controllers/ui.controller';
 import { SheetsSortUIService } from './services/sheets-sort-ui.service';
 
-@DependentOn(UniverSheetsPlugin, UniverUIPlugin, UniverSheetsSortPlugin, UniverSheetsUIPlugin)
+@DependentOn(UniverSheetsPlugin, UniverSheetsSortPlugin, UniverSheetsUIPlugin)
 export class UniverSheetsSortUIPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;
     static override pluginName = 'SHEET_SORT_UI_PLUGIN';

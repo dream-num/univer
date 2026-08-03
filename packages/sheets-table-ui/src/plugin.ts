@@ -21,7 +21,6 @@ import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engin
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsTablePlugin } from '@univerjs/sheets-table';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
-import { UniverUIPlugin } from '@univerjs/ui';
 import pkg from '../package.json';
 import { OpenTableFilterPanelOperation } from './commands/operations/open-table-filter-dialog.opration';
 import { OpenTableSelectorOperation } from './commands/operations/open-table-selector.operation';
@@ -40,7 +39,6 @@ import { SheetsTableUiService } from './services/sheets-table-ui.service';
 @DependentOn(
     UniverRenderEnginePlugin,
     UniverSheetsPlugin,
-    UniverUIPlugin,
     UniverSheetsTablePlugin,
     UniverSheetsUIPlugin
 )

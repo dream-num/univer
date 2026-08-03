@@ -24,7 +24,6 @@ import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engin
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsHyperLinkPlugin } from '@univerjs/sheets-hyper-link';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
-import { UniverUIPlugin } from '@univerjs/ui';
 import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_HYPER_LINK_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { SheetsHyperLinkAutoFillController } from './controllers/auto-fill.controller';
@@ -45,7 +44,6 @@ import { SHEET_HYPER_LINK_UI_PLUGIN } from './types/const';
     UniverFormulaEnginePlugin,
     UniverRenderEnginePlugin,
     UniverSheetsPlugin,
-    UniverUIPlugin,
     UniverDocsUIPlugin,
     UniverSheetsHyperLinkPlugin,
     UniverSheetsUIPlugin

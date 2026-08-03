@@ -19,7 +19,6 @@ import type { IUniverDrawingUIConfig } from './config/config';
 import { DependentOn, IConfigService, Inject, Injector, merge, Plugin } from '@univerjs/core';
 import { UniverDrawingPlugin } from '@univerjs/drawing';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
-import { UniverUIPlugin } from '@univerjs/ui';
 import pkg from '../package.json';
 import { defaultPluginConfig, DRAWING_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { ComponentsController } from './controllers/components.controller';
@@ -30,7 +29,7 @@ import { DrawingUIController } from './controllers/ui.controller';
 import { DrawingImageClipService } from './services/drawing-image-clip.service';
 import { DrawingRenderService } from './services/drawing-render.service';
 
-@DependentOn(UniverDrawingPlugin, UniverRenderEnginePlugin, UniverUIPlugin)
+@DependentOn(UniverDrawingPlugin, UniverRenderEnginePlugin)
 export class UniverDrawingUIPlugin extends Plugin {
     static override pluginName = 'UNIVER_DRAWING_UI_PLUGIN';
     static override packageName = pkg.name;

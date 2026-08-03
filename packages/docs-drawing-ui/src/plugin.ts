@@ -23,7 +23,6 @@ import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverDrawingPlugin } from '@univerjs/drawing';
 import { UniverDrawingUIPlugin } from '@univerjs/drawing-ui';
 import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
-import { UniverUIPlugin } from '@univerjs/ui';
 import pkg from '../package.json';
 import { defaultPluginConfig, DOCS_DRAWING_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { ComponentsController } from './controllers/components.controller';
@@ -47,7 +46,6 @@ import { DocRefreshDrawingsService } from './services/doc-refresh-drawings.servi
     UniverDrawingPlugin,
     UniverRenderEnginePlugin,
     UniverDocsDrawingPlugin,
-    UniverUIPlugin,
     UniverDocsUIPlugin,
     UniverDrawingUIPlugin
 )

@@ -30,7 +30,6 @@ import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsNotePlugin } from '@univerjs/sheets-note';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
-import { UniverUIPlugin } from '@univerjs/ui';
 import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_NOTE_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { ComponentsController } from './controllers/components.controller';
@@ -43,7 +42,6 @@ import { SheetsNotePopupService } from './services/sheets-note-popup.service';
 @DependentOn(
     UniverRenderEnginePlugin,
     UniverSheetsPlugin,
-    UniverUIPlugin,
     UniverSheetsNotePlugin,
     UniverSheetsUIPlugin
 )

@@ -3,6 +3,7 @@ import type { IBuildContext, IBuildOptions } from './types.ts';
 import { existsSync, rmSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
+import { pathToFileURL } from 'node:url';
 import { mergeConfig, build as tsdownBuild } from 'tsdown';
 import { createModuleConfig } from './configs/module.ts';
 import { createUmdConfig } from './configs/umd.ts';
@@ -112,7 +113,7 @@ export async function build(options: IBuildOptions = {}) {
         for (const ext of configExtensions) {
             const defaultConfigPath = path.resolve(packageDir, `tsdown.config${ext}`);
             if (existsSync(defaultConfigPath)) {
-                const { default: userConfigModule } = await import(defaultConfigPath);
+                const { default: userConfigModule } = await import(pathToFileURL(defaultConfigPath).href);
                 if (userConfigModule.obfuscatorIgnorePatterns) {
                     options.obfuscatorIgnorePatterns = userConfigModule.obfuscatorIgnorePatterns;
                 }
@@ -126,7 +127,7 @@ export async function build(options: IBuildOptions = {}) {
 
     if (options.tsdownConfigPath) {
         const configPath = path.resolve(packageDir, options.tsdownConfigPath);
-        let userConfig = (await import(configPath)).default;
+        let userConfig = (await import(pathToFileURL(configPath).href)).default;
         if (typeof userConfig === 'function') {
             userConfig = await userConfig();
         }

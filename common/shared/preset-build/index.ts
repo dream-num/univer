@@ -4,6 +4,7 @@ import type { IPresetBuildOptions, IPresetPackageJson } from './types.ts';
 import { existsSync, readFileSync, rmSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
+import { pathToFileURL } from 'node:url';
 import { mergeConfig, build as tsdownBuild } from 'tsdown';
 import { createModuleConfig } from '../tsdown/configs/module.ts';
 import { BUILD_OUTPUT_DIRECTORIES, CLEANUP_DIRECTORIES } from '../tsdown/constants.ts';
@@ -37,7 +38,7 @@ async function loadUserConfig(options: IPresetBuildOptions, packageDir: string) 
     }
 
     const configPath = path.resolve(packageDir, options.tsdownConfigPath);
-    let userConfig = (await import(configPath)).default;
+    let userConfig = (await import(pathToFileURL(configPath).href)).default;
 
     if (typeof userConfig === 'function') {
         userConfig = await userConfig();

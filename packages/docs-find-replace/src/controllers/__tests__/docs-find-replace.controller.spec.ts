@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-import type { IFindReplaceService } from '@univerjs/find-replace';
-import type { IMenuManagerService } from '@univerjs/ui';
 import { ICommandService, toDisposable } from '@univerjs/core';
 import { createCommandTestBed } from '@univerjs/docs-ui/commands/commands/__tests__/create-command-test-bed';
-import { IFindReplaceService as FindReplaceServiceToken } from '@univerjs/find-replace';
-import { IMenuManagerService as MenuManagerServiceToken } from '@univerjs/ui';
+import { IFindReplaceService } from '@univerjs/find-replace';
+import { IMenuManagerService } from '@univerjs/ui';
 import { describe, expect, it, vi } from 'vitest';
 import { DocsReplaceCommand } from '../../commands/commands/docs-replace.command';
 import { menuSchema } from '../../menu/schema';
@@ -32,8 +30,8 @@ describe('DocsFindReplaceController', () => {
         const registerProvider = vi.fn(() => toDisposable(providerDisposed));
         const mergeMenu = vi.fn();
         const testBed = createCommandTestBed(undefined, [
-            [FindReplaceServiceToken, { useValue: { registerFindReplaceProvider: registerProvider } as unknown as IFindReplaceService }],
-            [MenuManagerServiceToken, { useValue: { mergeMenu } as unknown as IMenuManagerService }],
+            [IFindReplaceService, { useValue: { registerFindReplaceProvider: registerProvider } as unknown as IFindReplaceService }],
+            [IMenuManagerService, { useValue: { mergeMenu } as unknown as IMenuManagerService }],
         ]);
         testBed.injector.add([DocsFindReplaceProvider]);
         const commandService = testBed.get(ICommandService);

@@ -28,7 +28,18 @@ export {
     isBaseRecordIdFieldName,
     isValidBaseRecordId,
 } from './record-identity';
-export { BaseFieldType, BaseFilterConjunction, BaseFilterOperator, BaseHierarchyInvalidReason, BaseRecordLinkRole, BaseSortDirection, BaseViewType } from './typedef';
+export {
+    BaseConditionalColorOperator,
+    BaseConditionalColorTarget,
+    BaseConditionalDateMode,
+    BaseFieldType,
+    BaseFilterConjunction,
+    BaseFilterOperator,
+    BaseHierarchyInvalidReason,
+    BaseRecordLinkRole,
+    BaseSortDirection,
+    BaseViewType,
+} from './typedef';
 export type {
     BaseCellMatrix,
     BaseCellPrimitiveValue,
@@ -46,6 +57,8 @@ export type {
     FieldSnapshot,
     IBaseAttachment,
     IBaseCellData,
+    IBaseConditionalColoringConfig,
+    IBaseConditionalColorRule,
     IBaseDateFieldConfig,
     IBaseHierarchyNodeProjection,
     IBaseHierarchyProjection,
@@ -54,6 +67,7 @@ export type {
     IBaseResources,
     IBaseSnapshot,
     IBaseViewColorCondition,
+    IBaseViewCommonConfig,
     IBaseViewport,
     ICalendarEventResizeSelection,
     ICalendarEventSelection,

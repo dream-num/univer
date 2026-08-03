@@ -170,6 +170,114 @@ export type FieldConfig = Record<string, unknown>;
 
 export type BaseDateHourCycle = 'h12' | 'h24';
 
+/** Where a Base conditional color is painted when its condition matches. */
+export const BaseConditionalColorTarget = {
+    /** Paint only the cell in the rule's field. */
+    CELL: 'cell',
+    /** Paint the complete record row. */
+    ROW: 'row',
+    /** Paint the rule's field column unconditionally; operator, operand, and date mode are ignored. */
+    COLUMN: 'column',
+} as const;
+
+export type BaseConditionalColorTarget = typeof BaseConditionalColorTarget[keyof typeof BaseConditionalColorTarget];
+
+/**
+ * Operators supported by Base conditional coloring rules.
+ *
+ * Text, select, person, and similar fields support equality, containment, and
+ * empty checks. Number, currency, progress, and rating fields support equality,
+ * numeric comparison, and empty checks. Date-like fields support equality,
+ * before/after, and empty checks. Checkbox fields support equality only.
+ */
+export const BaseConditionalColorOperator = {
+    IS: 'is',
+    IS_NOT: 'isNot',
+    CONTAINS: 'contains',
+    NOT_CONTAINS: 'notContains',
+    IS_EMPTY: 'isEmpty',
+    IS_NOT_EMPTY: 'isNotEmpty',
+    GREATER_THAN: 'greaterThan',
+    LESS_THAN: 'lessThan',
+    BEFORE: 'before',
+    AFTER: 'after',
+} as const;
+
+export type BaseConditionalColorOperator = typeof BaseConditionalColorOperator[keyof typeof BaseConditionalColorOperator];
+
+/**
+ * Relative or exact date windows supported by date conditional coloring rules.
+ *
+ * With `IS`, dates inside the selected window match. `IS_NOT` matches dates
+ * outside it, `BEFORE` matches dates before its start, and `AFTER` matches
+ * dates after its end. Relative windows do not use an operand; `EXACT` does.
+ */
+export const BaseConditionalDateMode = {
+    EXACT: 'exact',
+    TODAY: 'today',
+    TOMORROW: 'tomorrow',
+    YESTERDAY: 'yesterday',
+    THIS_WEEK: 'thisWeek',
+    LAST_WEEK: 'lastWeek',
+    THIS_MONTH: 'thisMonth',
+    LAST_MONTH: 'lastMonth',
+    PAST_7_DAYS: 'past7',
+    NEXT_7_DAYS: 'next7',
+    PAST_30_DAYS: 'past30',
+    NEXT_30_DAYS: 'next30',
+} as const;
+
+export type BaseConditionalDateMode = typeof BaseConditionalDateMode[keyof typeof BaseConditionalDateMode];
+
+/**
+ * A color condition stored by a Base view.
+ *
+ * Rules are evaluated in array order. Earlier matching rules are painted last
+ * and therefore have higher visual priority than later matching rules.
+ */
+export interface IBaseViewColorCondition {
+    /** Stable id unique within the view. */
+    id: string;
+    /** Valid CSS color rendered for a match, for example `#fde9e9` or `rgba(255, 0, 0, 0.2)`. */
+    color: string;
+    /** Paint target. Gantt color conditions may omit it for legacy snapshots. */
+    target?: BaseConditionalColorTarget;
+    /** Field whose value is evaluated for cell/row targets, or whose column is painted for a column target. */
+    fieldId: FieldId;
+    /** Comparison performed against the field value. Ignored for a column target. */
+    operator: BaseConditionalColorOperator;
+    /**
+     * Comparison value in the field's normal value shape: number for numeric
+     * fields, boolean for checkbox fields, text/option ids for text and select
+     * fields, or a date-compatible value for an exact date comparison. Ignored
+     * by empty checks, relative date modes, and column targets.
+     */
+    operand?: unknown;
+    /**
+     * Exact or relative date window for Date, CreatedAt, and UpdatedAt fields.
+     * Defaults to `EXACT` when omitted. Ignored for a column target.
+     */
+    dateMode?: BaseConditionalDateMode;
+}
+
+/** A complete Base conditional coloring rule used by Grid and other Base views. */
+export interface IBaseConditionalColorRule extends IBaseViewColorCondition {
+    /** Paint target for the matching rule. */
+    target: BaseConditionalColorTarget;
+}
+
+/** Persisted conditional coloring configuration for one Base view. */
+export interface IBaseConditionalColoringConfig {
+    /** Rules in descending visual-priority order. */
+    rules: IBaseConditionalColorRule[];
+}
+
+/** Configuration shared by every Base view type. */
+export interface IBaseViewCommonConfig {
+    /** Conditional coloring rules, or `null` when the feature is cleared. */
+    conditionalColoring?: IBaseConditionalColoringConfig | null;
+}
+
 /**
  * Display options for Date, CreatedAt, and UpdatedAt fields.
  */
@@ -194,7 +302,7 @@ export type ViewSpecificConfig =
     | ICalendarViewConfig
     | IGanttViewConfig
     | IGalleryViewConfig
-    | Record<string, unknown>;
+    | (IBaseViewCommonConfig & Record<string, unknown>);
 
 export interface IBaseSnapshot {
     id: BaseId;
@@ -344,7 +452,7 @@ export interface IGroupConfig {
     hideEmptyGroup?: boolean;
 }
 
-export interface IGridViewConfig {
+export interface IGridViewConfig extends IBaseViewCommonConfig {
     frozenFieldCount?: number;
     showRecordIndex?: boolean;
     rowHeight?: 'short' | 'medium' | 'tall' | 'extraTall';
@@ -369,7 +477,7 @@ export interface IKanbanColumnSetting {
     collapsed?: boolean;
 }
 
-export interface IKanbanViewConfig {
+export interface IKanbanViewConfig extends IBaseViewCommonConfig {
     groupFieldId: FieldId;
     coverFieldId?: FieldId | null;
     cardLayout?: KanbanCardLayoutMode;
@@ -379,7 +487,7 @@ export interface IKanbanViewConfig {
     card?: ICardLayoutConfig;
 }
 
-export interface ICalendarViewConfig {
+export interface ICalendarViewConfig extends IBaseViewCommonConfig {
     startDateFieldId: FieldId;
     endDateFieldId?: FieldId;
     titleFieldId?: FieldId;
@@ -391,39 +499,7 @@ export interface ICalendarViewConfig {
     fieldSettings?: Record<FieldId, { hidden?: boolean; order?: number }>;
 }
 
-export interface IBaseViewColorCondition {
-    id: string;
-    color: string;
-    target?: 'cell' | 'row' | 'column';
-    fieldId: FieldId;
-    operator:
-        | 'is'
-        | 'isNot'
-        | 'contains'
-        | 'notContains'
-        | 'isEmpty'
-        | 'isNotEmpty'
-        | 'greaterThan'
-        | 'lessThan'
-        | 'before'
-        | 'after';
-    operand?: unknown;
-    dateMode?:
-        | 'exact'
-        | 'today'
-        | 'tomorrow'
-        | 'yesterday'
-        | 'thisWeek'
-        | 'lastWeek'
-        | 'thisMonth'
-        | 'lastMonth'
-        | 'past7'
-        | 'next7'
-        | 'past30'
-        | 'next30';
-}
-
-export interface IGanttViewConfig {
+export interface IGanttViewConfig extends IBaseViewCommonConfig {
     startDateFieldId: FieldId;
     endDateFieldId: FieldId;
     titleFieldId?: FieldId;
@@ -451,7 +527,7 @@ export interface IGanttViewConfig {
     };
 }
 
-export interface IGalleryViewConfig {
+export interface IGalleryViewConfig extends IBaseViewCommonConfig {
     card: ICardLayoutConfig;
     coverFieldId?: FieldId | null;
     cardLayout?: KanbanCardLayoutMode;

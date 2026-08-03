@@ -5,6 +5,7 @@ export interface IE2EControllerAPI {
     loadDefaultSheet(loadTimeout?: number): Promise<void>;
     loadDefaultDoc(loadTimeout?: number): Promise<void>;
     loadDocLayoutFixture(documentFlavor: 1 | 2, loadTimeout?: number): Promise<void>;
+    loadSlideLayoutFixture(loadTimeout?: number): Promise<void>;
     loadDemoSheet(loadTimeout?: number): Promise<void>;
     loadMergeCellSheet(loadTimeout?: number): Promise<void>;
     loadDefaultStyleSheet(loadTimeout?: number): Promise<void>;

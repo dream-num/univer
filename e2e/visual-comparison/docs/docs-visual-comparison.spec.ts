@@ -36,24 +36,7 @@ test.describe('Doc layout flavors', () => {
                 () => page.evaluate(() => window.univerAPI?.getActiveDocument()?.getDocumentFlavor()),
                 { timeout: 10_000 }
             ).toBe(fixture.flavor);
-            await expect.poll(async () => {
-                const screenshot = await page.screenshot();
-                return page.evaluate(async (base64) => {
-                    const blob = await (await fetch(`data:image/png;base64,${base64}`)).blob();
-                    const bitmap = await createImageBitmap(blob);
-                    const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
-                    const context = canvas.getContext('2d', { willReadFrequently: true });
-                    if (!context) return 0;
-                    context.drawImage(bitmap, 0, 0);
-                    const pixels = context.getImageData(0, 0, bitmap.width, bitmap.height).data;
-                    let ink = 0;
-                    for (let index = 0; index < pixels.length; index += 16) {
-                        const luminance = pixels[index] * 0.2126 + pixels[index + 1] * 0.7152 + pixels[index + 2] * 0.0722;
-                        if (pixels[index + 3] > 180 && luminance < 180) ink++;
-                    }
-                    return ink;
-                }, screenshot.toString('base64'));
-            }, { timeout: 10_000 }).toBeGreaterThan(1_000);
+            await expect(page).toHaveScreenshot(generateSnapshotName(`doc-layout-${fixture.name}`), { maxDiffPixels: 150 });
             expect(errors.map((error) => error.stack ?? error.message)).toEqual([]);
         });
     }

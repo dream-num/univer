@@ -1,7 +1,7 @@
 import type { Univer } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
 import { awaitTime, Disposable, DocumentFlavor, Inject, IUniverInstanceService, ThemeService, UniverInstanceType } from '@univerjs/core';
-import { DEFAULT_WORKBOOK_DATA_DEMO, DEFAULT_WORKBOOK_DATA_DEMO_DEFAULT_STYLE } from '@univerjs/mockdata';
+import { DEFAULT_SLIDE_DATA, DEFAULT_WORKBOOK_DATA_DEMO, DEFAULT_WORKBOOK_DATA_DEMO_DEFAULT_STYLE } from '@univerjs/mockdata';
 import { getDefaultDocData } from './data/default-doc';
 import { getDefaultWorkbookData } from './data/default-sheet';
 
@@ -18,6 +18,7 @@ export interface IE2EControllerAPI {
     loadDefaultStyleSheet(loadTimeout?: number): Promise<void>;
     loadDefaultDoc(loadTimeout?: number,): Promise<void>;
     loadDocLayoutFixture(documentFlavor: DocumentFlavor, loadTimeout?: number): Promise<void>;
+    loadSlideLayoutFixture(loadTimeout?: number): Promise<void>;
     setDarkMode(darkMode: boolean): void;
     disposeUniver(): Promise<void>;
     disposeCurrSheetUnit(disposeTimeout?: number): Promise<void>;
@@ -61,6 +62,7 @@ export class E2EController extends Disposable {
             setDarkMode: (darkMode) => this._setDarkMode(darkMode),
             loadDefaultDoc: (loadTimeout) => this._loadDefaultDoc(loadTimeout),
             loadDocLayoutFixture: (documentFlavor, loadTimeout) => this._loadDocLayoutFixture(documentFlavor, loadTimeout),
+            loadSlideLayoutFixture: (loadTimeout) => this._loadSlideLayoutFixture(loadTimeout),
             disposeUniver: () => this._disposeUniver(),
         };
     }
@@ -120,6 +122,26 @@ export class E2EController extends Disposable {
         snapshot.id = `e2e-doc-layout-${documentFlavor}`;
         snapshot.documentStyle = { ...snapshot.documentStyle, documentFlavor };
         this._univerInstanceService.createUnit(UniverInstanceType.UNIVER_DOC, snapshot);
+        await awaitTime(loadingTimeout);
+    }
+
+    private async _loadSlideLayoutFixture(loadingTimeout: number = AWAIT_LOADING_TIMEOUT): Promise<void> {
+        const snapshot = structuredClone(DEFAULT_SLIDE_DATA);
+        const body = snapshot.body;
+        if (!body) {
+            throw new Error('Missing Slide E2E fixture body');
+        }
+        const page = body.pages.richText_1;
+        delete page.pageElements.titleIcon1;
+        const document = page.pageElements.document.document;
+        if (!document) {
+            throw new Error('Missing embedded Doc in Slide E2E fixture');
+        }
+        document.documentStyle.documentFlavor = DocumentFlavor.UNSPECIFIED;
+        snapshot.id = 'e2e-slide-layout';
+        body.pages = { richText_1: page };
+        body.pageOrder = ['richText_1'];
+        this._univerInstanceService.createUnit(UniverInstanceType.UNIVER_SLIDE, snapshot);
         await awaitTime(loadingTimeout);
     }
 

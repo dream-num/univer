@@ -26,7 +26,11 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { AddDataValidationMutation, RemoveDataValidationMutation, UpdateDataValidationMutation } from '../commands/mutations/data-validation.mutation';
+import {
+    AddDataValidationMutation,
+    RemoveDataValidationMutation,
+    UpdateDataValidationMutation,
+} from '../commands/mutations/data-validation.mutation';
 import { DataValidationResourceController } from '../controllers/dv-resource.controller';
 import { DataValidationModel } from '../models/data-validation-model';
 import { UpdateRuleType } from '../types/enum/update-rule-type';

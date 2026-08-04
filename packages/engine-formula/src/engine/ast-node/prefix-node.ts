@@ -73,7 +73,6 @@ export class PrefixNode extends BaseAstNode {
     }
 
     private _handlerAT(value: FunctionVariantType) {
-        // TODO(@ai-review): Keep Formula2 implicit intersection aligned for references, arrays, and scalar operands.
         if (value instanceof ArrayValueObject) {
             return value.get(0, 0) ?? ErrorValueObject.create(ErrorType.VALUE);
         }

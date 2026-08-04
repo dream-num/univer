@@ -16,10 +16,10 @@
 
 import type { ILocalStorageService as ILocalStorageServiceType } from '@univerjs/core';
 import type { ComponentType, ReactElement } from 'react';
-import { cleanup, fireEvent, render } from '@testing-library/react';
+import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import { ILocalStorageService, Injector, LocaleService, LocaleType } from '@univerjs/core';
 import { scrollbarClassName } from '@univerjs/design';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import enUS from '../../../locale/en-US';
 import { connectInjector } from '../../../utils/di';
 import { SymbolPicker } from '../../symbol-picker/SymbolPicker';
@@ -51,6 +51,14 @@ class TestLocalStorageService implements ILocalStorageServiceType {
     }
 }
 
+class TestResizeObserver {
+    disconnect(): void {}
+
+    observe(): void {}
+
+    unobserve(): void {}
+}
+
 function renderWithDependencies(element: ReactElement) {
     const injector = new Injector();
     injector.add([LocaleService]);
@@ -64,7 +72,18 @@ function renderWithDependencies(element: ReactElement) {
     return render(<ConnectedTestRoot />);
 }
 
-afterEach(cleanup);
+beforeEach(() => {
+    // TODO(@ai-review): Verify this mocked viewport still exercises bounded rendering instead of hiding an empty virtual list.
+    vi.stubGlobal('ResizeObserver', TestResizeObserver);
+    vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockReturnValue(240);
+    vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(396);
+});
+
+afterEach(() => {
+    cleanup();
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+});
 
 describe('picker callbacks', () => {
     it('omits the popup frame when the emoji picker is embedded', () => {
@@ -91,6 +110,18 @@ describe('picker callbacks', () => {
         for (const className of scrollbarClassName.split(' ')) {
             expect(scrollContainer?.classList.contains(className)).toBe(true);
         }
+    });
+
+    it('keeps the mounted emoji buttons bounded while scrolling', async () => {
+        const { container, getByRole, getByText } = renderWithDependencies(<EmojiPicker />);
+
+        await waitFor(() => expect(container.querySelectorAll('button').length).toBeGreaterThan(10));
+        expect(container.querySelectorAll('button').length).toBeLessThan(150);
+
+        fireEvent.click(getByRole('button', { name: 'Symbols' }));
+
+        expect(getByText('Symbols')).toBeTruthy();
+        expect(container.querySelectorAll('button').length).toBeLessThan(150);
     });
 
     it('reports a symbol through the direct change callback', () => {

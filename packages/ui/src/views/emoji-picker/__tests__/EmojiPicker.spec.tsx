@@ -73,7 +73,6 @@ function renderWithDependencies(element: ReactElement) {
 }
 
 beforeEach(() => {
-    // TODO(@ai-review): Verify this mocked viewport still exercises bounded rendering instead of hiding an empty virtual list.
     vi.stubGlobal('ResizeObserver', TestResizeObserver);
     vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockReturnValue(240);
     vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(396);

@@ -94,7 +94,6 @@ export function EmojiPicker(props: IEmojiPickerProps) {
     );
     const recentStorageKey = extraProps?.recentStorageKey ?? RECENTS_STORAGE_KEY;
     const isSearching = deferredQuery.trim().length > 0;
-    // TODO(@ai-review): Verify category jumps stay aligned if the emoji row or section header spacing changes.
     const { rows, sectionPositions } = useMemo(() => {
         const normalSections = [
             { key: 'recent' as const, title: localeService.t<LocaleKey>('ui.emojiPicker.recents'), emojis: recents },
@@ -241,8 +240,9 @@ export function EmojiPicker(props: IEmojiPickerProps) {
                                 ? (
                                     <div
                                         key={row.key}
+                                        style={{ height: EMOJI_SECTION_HEADER_HEIGHT }}
                                         className="
-                                          univer-flex univer-h-6 univer-items-center univer-text-xs univer-text-gray-500
+                                          univer-flex univer-items-center univer-text-xs univer-text-gray-500
                                           dark:!univer-text-gray-400
                                         "
                                     >
@@ -310,7 +310,10 @@ function EmojiGrid(props: {
     onSelect: (item: IEmojiItem, options?: { keepOpen?: boolean }) => void;
 }) {
     return (
-        <div className="univer-grid univer-h-8 univer-grid-cols-10 univer-justify-between univer-gap-1">
+        <div
+            className="univer-grid univer-grid-cols-10 univer-justify-between univer-gap-1"
+            style={{ height: EMOJI_ROW_HEIGHT }}
+        >
             {props.items.map((item) => {
                 const title = getLocalizedEmojiTitle(item, props.emojiTitles);
                 const active = props.activeEmoji === item.emoji;

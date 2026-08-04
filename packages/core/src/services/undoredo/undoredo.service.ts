@@ -23,6 +23,7 @@ import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY } f
 import { createIdentifier } from '../../common/di';
 import { Disposable, toDisposable } from '../../shared/lifecycle';
 import { CommandType, ICommandService, sequenceExecute } from '../command/command.service';
+import { IConfigService } from '../config/config.service';
 import { EDITOR_ACTIVATED, FOCUSING_FX_BAR_EDITOR, FOCUSING_SHEET } from '../context/context';
 import { IContextService } from '../context/context.service';
 import { IUniverInstanceService } from '../instance/instance.service';
@@ -97,7 +98,8 @@ export interface IUndoRedoStatus {
     redos: number;
 }
 
-const STACK_CAPACITY = 20;
+export const DEFAULT_UNDO_REDO_HISTORY_LIMIT = 50;
+export const UNDO_REDO_HISTORY_LIMIT_CONFIG_KEY = 'undoRedo.historyLimit';
 
 abstract class MultiImplementationCommand implements IDisposable {
     dispose(): void {
@@ -174,13 +176,17 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
 
     private _batchingStatus = new Map<string, BatchingStatus>();
 
+    private readonly _historyLimit: number;
+
     constructor(
         @IUniverInstanceService protected readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService protected readonly _commandService: ICommandService,
-        @IContextService private readonly _contextService: IContextService
+        @IContextService private readonly _contextService: IContextService,
+        @IConfigService configService: IConfigService
     ) {
         super();
 
+        this._historyLimit = configService.getConfig<number>(UNDO_REDO_HISTORY_LIMIT_CONFIG_KEY) ?? DEFAULT_UNDO_REDO_HISTORY_LIMIT;
         this.undoRedoStatus$ = this._undoRedoStatus$.asObservable();
 
         this.disposeWithMe(this._commandService.registerCommand(UndoCommand));
@@ -195,6 +201,7 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
 
         const redoStack = this._getRedoStack(unitID, true);
         const undoStack = this._getUndoStack(unitID, true);
+        const historyLimit = this._historyLimit;
 
         // redo stack should be cleared when pushing an undo
         redoStack.length = 0;
@@ -215,7 +222,7 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
 
         function appendNewItem(item: IUndoRedoItem) {
             undoStack.push(item);
-            if (undoStack.length > STACK_CAPACITY) {
+            if (undoStack.length > historyLimit) {
                 undoStack.splice(0, 1);
             }
         }

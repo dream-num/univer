@@ -18,11 +18,14 @@ import type { ILocales } from '../shared/locale';
 import { defaultTheme } from '@univerjs/themes';
 import { describe, expect, it, vi } from 'vitest';
 import { Injector } from '../common/di';
+import { UniverInstanceType } from '../common/unit';
 import { COMMAND_LOG_EXECUTION_CONFIG_KEY } from '../services/command/command.service';
 import { IConfigService } from '../services/config/config.service';
+import { IUniverInstanceService } from '../services/instance/instance.service';
 import { LocaleService } from '../services/locale/locale.service';
 import { LogLevel } from '../services/log/log.service';
 import { RegionService } from '../services/region/region.service';
+import { IUndoRedoService, UNDO_REDO_HISTORY_LIMIT_CONFIG_KEY } from '../services/undoredo/undoredo.service';
 import { Skeleton } from '../skeleton';
 import { LocaleType } from '../types/enum/locale-type';
 import { Univer } from '../univer';
@@ -61,6 +64,7 @@ describe('Univer', () => {
             direction: 'rtl',
             logLevel: LogLevel.VERBOSE,
             logCommandExecution: true,
+            undoRedoHistoryLimit: 12,
         });
 
         const injector = univer.__getInjector();
@@ -72,6 +76,7 @@ describe('Univer', () => {
         expect(localeService.getDirection()).toBe('rtl');
         expect(localeService.t('test.greeting', 'Univer')).toBe('Hello Univer');
         expect(injector.get(IConfigService).getConfig(COMMAND_LOG_EXECUTION_CONFIG_KEY)).toBe(true);
+        expect(injector.get(IConfigService).getConfig(UNDO_REDO_HISTORY_LIMIT_CONFIG_KEY)).toBe(12);
 
         univer.setLocale(LocaleType.ZH_CN);
         expect(localeService.getCurrentLocale()).toBe(LocaleType.ZH_CN);
@@ -80,6 +85,33 @@ describe('Univer', () => {
 
         univer.setRegion(LocaleType.JA_JP);
         expect(regionService.getCurrentRegion()).toBe(LocaleType.JA_JP);
+
+        univer.dispose();
+    });
+
+    it('should apply the configured undo redo history limit', () => {
+        const unitId = 'undo-redo-limit-doc';
+        const univer = new Univer({ undoRedoHistoryLimit: 2 });
+        univer.createUnit(UniverInstanceType.UNIVER_DOC, { id: unitId });
+
+        const injector = univer.__getInjector();
+        injector.get(IUniverInstanceService).focusUnit(unitId);
+        const undoRedoService = injector.get(IUndoRedoService);
+
+        for (let i = 0; i < 3; i++) {
+            undoRedoService.pushUndoRedo({
+                unitID: unitId,
+                undoMutations: [],
+                redoMutations: [],
+                id: `item-${i}`,
+            });
+        }
+
+        expect(undoRedoService.pitchTopUndoElement()?.id).toBe('item-2');
+        undoRedoService.popUndoToRedo();
+        expect(undoRedoService.pitchTopUndoElement()?.id).toBe('item-1');
+        undoRedoService.popUndoToRedo();
+        expect(undoRedoService.pitchTopUndoElement()).toBeNull();
 
         univer.dispose();
     });

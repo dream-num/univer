@@ -48,7 +48,12 @@ import { IResourceLoaderService } from './services/resource-loader/type';
 import { ResourceManagerService } from './services/resource-manager/resource-manager.service';
 import { IResourceManagerService } from './services/resource-manager/type';
 import { ThemeService } from './services/theme/theme.service';
-import { IUndoRedoService, LocalUndoRedoService } from './services/undoredo/undoredo.service';
+import {
+    DEFAULT_UNDO_REDO_HISTORY_LIMIT,
+    IUndoRedoService,
+    LocalUndoRedoService,
+    UNDO_REDO_HISTORY_LIMIT_CONFIG_KEY,
+} from './services/undoredo/undoredo.service';
 import { UserManagerService } from './services/user-manager/user-manager.service';
 import { DisposableCollection, toDisposable } from './shared';
 import { Workbook } from './sheets/workbook';
@@ -99,6 +104,13 @@ export interface IUniverConfig {
     logCommandExecution?: boolean;
 
     /**
+     * The maximum number of undoable command groups retained for each unit.
+     * Set to `0` to disable undo history.
+     * @default 50
+     */
+    undoRedoHistoryLimit?: number;
+
+    /**
      * The override dependencies of the Univer instance.
      */
     override?: DependencyOverride;
@@ -129,7 +141,8 @@ export class Univer implements IDisposable {
     constructor(config: Partial<IUniverConfig> = {}, parentInjector?: Injector) {
         const injector = this._injector = createUniverInjector(parentInjector, config?.override);
 
-        const { theme, darkMode, locale, region, locales, direction, logLevel, logCommandExecution } = config;
+        const { theme, darkMode, locale, region, locales, direction, logLevel, logCommandExecution, undoRedoHistoryLimit } = config;
+        const configService = this._injector.get(IConfigService);
         if (theme) this._injector.get(ThemeService).setTheme(theme);
         if (darkMode) this._injector.get(ThemeService).setDarkMode(darkMode);
         if (locales) this._injector.get(LocaleService).load(locales);
@@ -138,8 +151,12 @@ export class Univer implements IDisposable {
         if (direction) this._injector.get(LocaleService).setDirection(direction);
         if (logLevel) this._injector.get(ILogService).setLogLevel(logLevel);
         if (logCommandExecution !== undefined) {
-            this._injector.get(IConfigService).setConfig(COMMAND_LOG_EXECUTION_CONFIG_KEY, logCommandExecution);
+            configService.setConfig(COMMAND_LOG_EXECUTION_CONFIG_KEY, logCommandExecution);
         }
+        configService.setConfig(
+            UNDO_REDO_HISTORY_LIMIT_CONFIG_KEY,
+            undoRedoHistoryLimit ?? DEFAULT_UNDO_REDO_HISTORY_LIMIT
+        );
 
         this._init(injector);
     }

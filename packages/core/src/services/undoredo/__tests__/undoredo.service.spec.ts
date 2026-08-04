@@ -25,7 +25,13 @@ import { EDITOR_ACTIVATED, FOCUSING_FX_BAR_EDITOR, FOCUSING_SHEET } from '../../
 import { ContextService, IContextService } from '../../context/context.service';
 import { IUniverInstanceService } from '../../instance/instance.service';
 import { DesktopLogService, ILogService, LogLevel } from '../../log/log.service';
-import { IUndoRedoService, LocalUndoRedoService, RedoCommandId, UndoCommandId } from '../undoredo.service';
+import {
+    DEFAULT_UNDO_REDO_HISTORY_LIMIT,
+    IUndoRedoService,
+    LocalUndoRedoService,
+    RedoCommandId,
+    UndoCommandId,
+} from '../undoredo.service';
 
 const MUTATION_ID = 'test.mutation';
 
@@ -118,6 +124,32 @@ describe('LocalUndoRedoService', () => {
 
         expect(undoRedoService.pitchTopRedoElement()).toBeNull();
         expect(statuses.at(-1)).toEqual({ undos: 1, redos: 0 });
+    });
+
+    it('should retain 50 undo items by default', () => {
+        expect(DEFAULT_UNDO_REDO_HISTORY_LIMIT).toBe(50);
+
+        for (let i = 0; i <= DEFAULT_UNDO_REDO_HISTORY_LIMIT; i++) {
+            undoRedoService.pushUndoRedo({
+                unitID: 'unit-1',
+                undoMutations: [],
+                redoMutations: [],
+                id: `item-${i}`,
+            });
+        }
+
+        const itemIds: string[] = [];
+        for (let i = 0; i < DEFAULT_UNDO_REDO_HISTORY_LIMIT; i++) {
+            const item = undoRedoService.pitchTopUndoElement();
+            if (item?.id) {
+                itemIds.push(item.id);
+            }
+            undoRedoService.popUndoToRedo();
+        }
+
+        expect(itemIds).toHaveLength(DEFAULT_UNDO_REDO_HISTORY_LIMIT);
+        expect(itemIds.at(-1)).toBe('item-1');
+        expect(undoRedoService.pitchTopUndoElement()).toBeNull();
     });
 
     it('should execute undo and redo commands against registered mutations', () => {

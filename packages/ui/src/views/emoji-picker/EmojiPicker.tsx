@@ -239,7 +239,7 @@ export function EmojiPicker(props: IEmojiPickerProps) {
             >
                 <CategoryButton
                     selected={!isSearching && activeTab === 'recent'}
-                    titleKey="ui.emojiPicker.recents"
+                    title={localeService.t<LocaleKey>('ui.emojiPicker.recents')}
                     onClick={() => scrollToSection('recent')}
                 >
                     <RecentIcon />
@@ -248,7 +248,7 @@ export function EmojiPicker(props: IEmojiPickerProps) {
                     <CategoryButton
                         key={category.key}
                         selected={!isSearching && activeTab === category.key}
-                        titleKey={category.titleKey}
+                        title={localeService.t(category.titleKey)}
                         onClick={() => scrollToSection(category.key)}
                     >
                         <CategoryIcon category={category.key} />
@@ -332,15 +332,13 @@ function EmojiGrid(props: {
     );
 }
 
-function CategoryButton(props: { children: ReactElement; onClick: () => void; selected: boolean; titleKey: LocaleKey }) {
-    const localeService = useDependency(LocaleService);
-
+function CategoryButton(props: { children: ReactElement; onClick: () => void; selected: boolean; title: string }) {
     return (
         <button
             type="button"
-            aria-label={localeService.t(props.titleKey)}
+            aria-label={props.title}
             aria-selected={props.selected}
-            title={localeService.t(props.titleKey)}
+            title={props.title}
             className={clsx(
                 `
                   univer-flex univer-h-[30px] univer-flex-1 univer-cursor-pointer univer-items-center

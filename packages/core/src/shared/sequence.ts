@@ -36,7 +36,6 @@ export function ABCToNumber(a: string) {
 const orderA = 'A'.charCodeAt(0);
 const orderZ = 'Z'.charCodeAt(0);
 const order_a = 'a'.charCodeAt(0);
-const order_z = 'z'.charCodeAt(0);
 
 /**
  * column subscript number to letters

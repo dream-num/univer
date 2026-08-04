@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import type { IGlowEffect, IShadowEffect } from '@univerjs/core';
 import type { IBoundRectNoAngle } from './vector2';
-// eslint-disable-next-line import/consistent-type-specifier-style -- Keep type and value imports from one package together.
-import { ColorKit, type IGlowEffect, type IShadowEffect } from '@univerjs/core';
+import { ColorKit } from '@univerjs/core';
 
 // Canvas blur visually spans about twice the DrawingML glow radius. This factor is verified against PowerPoint output.
 const DRAWINGML_GLOW_BLUR_SCALE = 0.5;

@@ -60,7 +60,6 @@ export interface IScrollBarProps {
 const MIN_THUMB_SIZE = 17;
 const DEFAULT_TRACK_SIZE = 10;
 const DEFAULT_TRACK_BORDER_SIZE = 1;
-const HOVER_TRACK_SIZE = 10;
 const DEFAULT_THUMB_MARGIN = 2;
 const HOVER_THUMB_MARGIN = 1;
 const BAR_DRAG_SCROLL_THROTTLE_MS = 32;
@@ -770,7 +769,6 @@ export class ScrollBar extends Disposable {
     }
 
     private _horizonHoverFunc(color: string, evt: unknown, state: EventState) {
-        // this._trackThickness = HOVER_TRACK_SIZE;
         this._hThumbMargin = HOVER_THUMB_MARGIN;
         this._resizeHorizontal();
         this._resizeRightBottomCorner();
@@ -804,7 +802,6 @@ export class ScrollBar extends Disposable {
             thumb.setProps({
                 fill: color,
             });
-            // this._trackThickness = HOVER_TRACK_SIZE;
             this._resizeHorizontal();
             this.makeViewDirty(true);
         };

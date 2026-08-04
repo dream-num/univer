@@ -27,6 +27,7 @@ import { ArrayValueObject } from '../value-object/array-value-object';
 import { ErrorValueObject } from '../value-object/base-value-object';
 import { BooleanValueObject, NumberValueObject } from '../value-object/primitive-object';
 import { expandArrayValueObject } from './array-object';
+import { isWildcard } from './compare';
 import { booleanObjectIntersection, findCompareToken, valueObjectCompare } from './object-compare';
 
 export function convertTonNumber(valueObject: BaseValueObject) {
@@ -451,6 +452,15 @@ export function filterSameValueObjectResult(array: ArrayValueObject, range: Arra
 
         if (operator === compareToken.NOT_EQUAL && isBlankStringCriteria && rangeValueObject?.isString() && rangeValueObject.getValue() === '') {
             return BooleanValueObject.create(true);
+        }
+
+        if (
+            criteriaObject.isString() &&
+            isWildcard(`${criteriaObject.getValue()}`) &&
+            rangeValueObject?.isString() &&
+            rangeValueObject.getValue() === ''
+        ) {
+            return valueObject;
         }
 
         if (

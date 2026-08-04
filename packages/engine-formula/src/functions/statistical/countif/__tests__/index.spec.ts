@@ -65,6 +65,7 @@ const getTestWorkbookData = (): IWorkbookData => {
                         5: {
                             v: '',
                             t: CellValueType.STRING,
+                            f: '=""',
                         },
                         6: {
                             v: '<30d',
@@ -279,6 +280,11 @@ describe('Test countif function', () => {
         it('Counts empty strings as non-blank for not-empty criteria', async () => {
             const result = await calculate('=COUNTIF(F1:F3,"<>")');
             expect(result).toBe(2);
+        });
+
+        it('Matches typed empty strings with wildcard criteria', async () => {
+            expect(await calculate('=COUNTIF(F1:F2,"*")')).toBe(1);
+            expect(await calculate('=COUNTIF(F1:F2,"<>*")')).toBe(1);
         });
 
         it('Treats a blank cell reference criteria as zero', async () => {

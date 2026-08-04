@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { BaseCellValue, BaseDataModel, FormulaEvaluationMode, IBaseCellData, IBaseSnapshot, ICellData, IFieldSnapshot, IObjectArrayPrimitiveType, IObjectMatrixPrimitiveType, IRange, IRowData, ITableSnapshot, IUnitRange, Nullable, Workbook } from '@univerjs/core';
+import type { BaseCellValue, BaseDataModel, IBaseCellData, IBaseSnapshot, ICellData, IFieldSnapshot, IObjectArrayPrimitiveType, IObjectMatrixPrimitiveType, IRange, IRowData, ITableSnapshot, IUnitRange, Nullable, Workbook } from '@univerjs/core';
 
 import type {
     IArrayFormulaRangeType,
@@ -880,13 +880,12 @@ export function initSheetFormulaData(
         formulaData[unitId][sheetId] = {};
     }
 
-    const formulaIdMap = new Map<string, { f: string; r: number; c: number; evaluationMode?: FormulaEvaluationMode }>(); // Connect the formula and ID
+    const formulaIdMap = new Map<string, { f: string; r: number; c: number }>(); // Connect the formula and ID
     const sheetFormulaDataMatrix = new ObjectMatrix<Nullable<IFormulaDataItem>>(formulaData[unitId][sheetId]);
 
     cellMatrix.forValue((r, c, cell) => {
         const formulaString = cell?.f || '';
         const formulaId = cell?.si || '';
-        const evaluationMode = cell?.formulaEvaluationMode;
 
         const checkFormulaString = isFormulaString(formulaString);
         const checkFormulaId = isFormulaId(formulaId);
@@ -895,13 +894,11 @@ export function initSheetFormulaData(
             sheetFormulaDataMatrix.setValue(r, c, {
                 f: formulaString,
                 si: formulaId,
-                ...(evaluationMode ? { evaluationMode } : {}),
             });
-            formulaIdMap.set(formulaId, { f: formulaString, r, c, evaluationMode });
+            formulaIdMap.set(formulaId, { f: formulaString, r, c });
         } else if (checkFormulaString && !checkFormulaId) {
             sheetFormulaDataMatrix.setValue(r, c, {
                 f: formulaString,
-                ...(evaluationMode ? { evaluationMode } : {}),
             });
         } else if (!checkFormulaString && checkFormulaId) {
             sheetFormulaDataMatrix.setValue(r, c, {
@@ -921,14 +918,11 @@ export function initSheetFormulaData(
                 const x = c - formulaInfo.c;
                 const y = r - formulaInfo.r;
                 const f = formulaInfo.f;
-                const evaluationMode = formulaInfo.evaluationMode;
-
                 sheetFormulaDataMatrix.setValue(r, c, {
                     f,
                     si: formulaId,
                     x,
                     y,
-                    ...(evaluationMode ? { evaluationMode } : {}),
                 });
             } else {
                 // If the formula ID is not found in the formula ID map, delete the formula ID.

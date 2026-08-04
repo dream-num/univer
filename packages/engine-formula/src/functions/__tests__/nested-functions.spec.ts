@@ -21,8 +21,6 @@ import type { BaseAstNode } from '../../engine/ast-node/base-ast-node';
 import {
     CellValueType,
     CustomRangeType,
-    FormulaEvaluationMode,
-
     LocaleType,
 
     RichTextValue,
@@ -838,8 +836,7 @@ describe('Test nested functions', () => {
                 formulaRuntimeService.currentRowCount,
                 formulaRuntimeService.currentColumnCount,
                 formulaRuntimeService.currentSubUnitId,
-                formulaRuntimeService.currentUnitId,
-                FormulaEvaluationMode.LEGACY_SCALAR
+                formulaRuntimeService.currentUnitId
             );
 
             expect(calculate('=">="&OFFSET(X21,1,0,1,1)')).toStrictEqual([['>=']]);
@@ -847,76 +844,71 @@ describe('Test nested functions', () => {
             expect(calculate('=COUNTIF(D2:D4,">="&X21)-COUNTIF(D2:D4,">="&OFFSET(X21,1,0,1,1))')).toBe(0);
         });
 
-        it('Nested CHOOSE intersects operator expressions but preserves direct ranges in legacy scalar formulas', () => {
+        it('Nested CHOOSE evaluates explicit implicit intersections', () => {
             formulaRuntimeService.setCurrent(
                 2,
                 0,
                 formulaRuntimeService.currentRowCount,
                 formulaRuntimeService.currentColumnCount,
                 formulaRuntimeService.currentSubUnitId,
-                formulaRuntimeService.currentUnitId,
-                FormulaEvaluationMode.LEGACY_SCALAR
+                formulaRuntimeService.currentUnitId
             );
 
-            expect(calculate('=CHOOSE({1,2},A2:A4&"|"&B2:B4,C2:C4)')).toStrictEqual([['44928|102', 5]]);
+            expect(calculate('=@CHOOSE({1,2},@A2:A4&"|"&@B2:B4,C2:C4)')).toBe('44928|102');
         });
 
-        it('Nested VLOOKUP preserves the complete CHOOSE lookup table in legacy scalar formulas', () => {
+        it('Nested VLOOKUP consumes a CHOOSE table with explicit implicit intersections', () => {
             formulaRuntimeService.setCurrent(
                 2,
                 0,
                 formulaRuntimeService.currentRowCount,
                 formulaRuntimeService.currentColumnCount,
                 formulaRuntimeService.currentSubUnitId,
-                formulaRuntimeService.currentUnitId,
-                FormulaEvaluationMode.LEGACY_SCALAR
+                formulaRuntimeService.currentUnitId
             );
 
-            expect(calculate('=VLOOKUP(A3&"|"&B3,CHOOSE({1,2},A2:A4&"|"&B2:B4,C2:C4),2,FALSE)')).toStrictEqual([[5]]);
+            expect(calculate('=VLOOKUP(A3&"|"&B3,CHOOSE({1,2},@A2:A4&"|"&@B2:B4,C2:C4),2,FALSE)')).toStrictEqual([[5]]);
         });
 
-        it('Nested SUMPRODUCT preserves SUMIFS arrays and intersects binary IF branches in legacy scalar formulas', () => {
+        it('Nested SUMPRODUCT preserves SUMIFS arrays and evaluates explicit intersections', () => {
             formulaRuntimeService.setCurrent(
                 1,
                 0,
                 formulaRuntimeService.currentRowCount,
                 formulaRuntimeService.currentColumnCount,
                 formulaRuntimeService.currentSubUnitId,
-                formulaRuntimeService.currentUnitId,
-                FormulaEvaluationMode.LEGACY_SCALAR
+                formulaRuntimeService.currentUnitId
             );
 
-            expect(calculate('=SUMPRODUCT(SUMIFS(D2:D4,A2:A4,A2:A4)*IF(3>=C2:C4,B2:B4,D2:D4))')).toBe(380000);
-            expect(calculate('=SUMPRODUCT(IF(A1="ALL",1,A2:A4=A3)*D2:D4)')).toBe(0);
+            expect(calculate('=SUMPRODUCT(SUMIFS(D2:D4,A2:A4,A2:A4)*IF(3>=@C2:C4,B2:B4,D2:D4))')).toBe(380000);
+            expect(calculate('=SUMPRODUCT(IF(A1="ALL",1,@A2:A4=A3)*D2:D4)')).toBe(0);
         });
 
-        it('Nested MEDIAN uses legacy intersection for IF conditions while preserving the selected range', () => {
+        it('Nested MEDIAN uses explicit intersection for IF conditions while preserving the selected range', () => {
             formulaRuntimeService.setCurrent(
                 formulaRuntimeService.currentRow,
                 formulaRuntimeService.currentColumn,
                 formulaRuntimeService.currentRowCount,
                 formulaRuntimeService.currentColumnCount,
                 formulaRuntimeService.currentSubUnitId,
-                formulaRuntimeService.currentUnitId,
-                FormulaEvaluationMode.LEGACY_SCALAR
+                formulaRuntimeService.currentUnitId
             );
 
-            expect(calculate('=MEDIAN(IF(A1:A5=A1,B1:B5))')).toBe(102.5);
-            expect(calculate('=MEDIAN(IF(A1:A5="missing",B1:B5))')).toBe(0);
+            expect(calculate('=MEDIAN(IF(@A1:A5=A1,B1:B5))')).toBe(102.5);
+            expect(calculate('=MEDIAN(IF(@A1:A5="missing",B1:B5))')).toBe(0);
         });
 
-        it('Nested TEXTJOIN preserves IF text arrays in legacy scalar formulas', () => {
+        it('Nested TEXTJOIN preserves IF text arrays after explicit intersection', () => {
             formulaRuntimeService.setCurrent(
                 formulaRuntimeService.currentRow,
                 formulaRuntimeService.currentColumn,
                 formulaRuntimeService.currentRowCount,
                 formulaRuntimeService.currentColumnCount,
                 formulaRuntimeService.currentSubUnitId,
-                formulaRuntimeService.currentUnitId,
-                FormulaEvaluationMode.LEGACY_SCALAR
+                formulaRuntimeService.currentUnitId
             );
 
-            expect(calculate('=TEXTJOIN(", ",TRUE,IF(A1:A3<>"",B1:B3,""))')).toBe('B, 101, 102');
+            expect(calculate('=TEXTJOIN(", ",TRUE,IF(@A1:A3<>"",B1:B3,""))')).toBe('B, 101, 102');
         });
 
         it('Nested functions XMATCH keeps Formula2 binary lookup ranges as arrays', () => {

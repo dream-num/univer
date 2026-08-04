@@ -28,9 +28,7 @@ export class Choose extends BaseFunction {
 
     override maxParams = 255;
 
-    override legacyScalarArrayArgumentIndexes = Array.from({ length: this.maxParams - 1 }, (_, index) => index + 1);
-
-    override legacyScalarOperatorIntersectionArgumentIndexes = this.legacyScalarArrayArgumentIndexes;
+    override lazyIfReferenceArrayArgumentIndexes = Array.from({ length: this.maxParams - 1 }, (_, index) => index + 1);
 
     override needsReferenceObject = true;
 

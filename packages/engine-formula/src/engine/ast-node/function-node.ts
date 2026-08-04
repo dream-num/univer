@@ -86,12 +86,8 @@ export class FunctionNode extends BaseAstNode {
         return NodeType.FUNCTION;
     }
 
-    override acceptsLegacyScalarArrayArgument(child: BaseAstNode): boolean {
-        return this._functionExecutor.legacyScalarArrayArgumentIndexes.includes(this.getChildren().indexOf(child));
-    }
-
-    override intersectsLegacyScalarOperatorArgument(child: BaseAstNode): boolean {
-        return this._functionExecutor.legacyScalarOperatorIntersectionArgumentIndexes.includes(this.getChildren().indexOf(child));
+    override preservesLazyIfReferenceArray(child: BaseAstNode): boolean {
+        return this._functionExecutor.lazyIfReferenceArrayArgumentIndexes.includes(this.getChildren().indexOf(child));
     }
 
     override async executeAsync() {

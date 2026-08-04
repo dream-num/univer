@@ -305,8 +305,7 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
                 tree.rowCount,
                 tree.columnCount,
                 tree.subUnitId,
-                tree.unitId,
-                tree.evaluationMode
+                tree.unitId
             );
 
             const node = generateAstNode(

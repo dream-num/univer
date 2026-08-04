@@ -15,7 +15,6 @@
  */
 
 import type {
-    FormulaEvaluationMode,
     ICellData,
     IColumnData,
     IObjectArrayPrimitiveType,
@@ -210,7 +209,6 @@ export interface IFormulaDataItem {
     x?: number; // Offset from x direction
     y?: number; // Offset from y direction
     si?: string; // formulaId,
-    evaluationMode?: FormulaEvaluationMode;
     // row: number;
     // column: number;
     // sheetId: string;

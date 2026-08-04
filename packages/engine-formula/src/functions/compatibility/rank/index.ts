@@ -44,7 +44,7 @@ export class Rank extends BaseFunction {
 
     override needsReferenceObject = true;
 
-    override legacyScalarArrayArgumentIndexes = [1];
+    override lazyIfReferenceArrayArgumentIndexes = [1];
 
     override calculate(number: FunctionVariantType, ref: FunctionVariantType, order?: FunctionVariantType): BaseValueObject {
         let _number = number;

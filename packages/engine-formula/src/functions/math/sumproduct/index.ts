@@ -26,7 +26,7 @@ export class Sumproduct extends BaseFunction {
 
     override maxParams = 255;
 
-    override legacyScalarArrayArgumentIndexes = Array.from({ length: this.maxParams }, (_, index) => index);
+    override lazyIfReferenceArrayArgumentIndexes = Array.from({ length: this.maxParams }, (_, index) => index);
 
     override calculate(array1: BaseValueObject, ...variants: BaseValueObject[]) {
         // 1. Early error from array1

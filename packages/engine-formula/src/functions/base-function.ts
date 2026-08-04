@@ -103,14 +103,9 @@ export class BaseFunction {
     needsAstChildren: boolean = false;
 
     /**
-     * Arguments that preserve a selected IF branch as an array in legacy scalar formulas.
+     * Arguments that preserve a selected lazy IF branch as a reference array.
      */
-    legacyScalarArrayArgumentIndexes: readonly number[] = [];
-
-    /**
-     * Arguments whose operator expressions use implicit intersection in legacy scalar formulas.
-     */
-    legacyScalarOperatorIntersectionArgumentIndexes: readonly number[] = [];
+    lazyIfReferenceArrayArgumentIndexes: readonly number[] = [];
 
     /**
      * Legacy CSE-style array functions should write only the first result cell

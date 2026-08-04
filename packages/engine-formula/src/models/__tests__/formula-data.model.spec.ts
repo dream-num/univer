@@ -23,8 +23,6 @@ import {
     BooleanNumber,
     CellValueType,
     createBaseRecordIdField,
-    FormulaEvaluationMode,
-
     IUniverInstanceService,
 
     LocaleType,
@@ -41,29 +39,8 @@ import { FormulaDataModel, initSheetFormulaData } from '../formula-data.model';
 import { createCommandTestBed } from './create-command-test-bed';
 
 describe('initSheetFormulaData', () => {
-    it('maps imported scalar formula metadata to the engine evaluation mode', () => {
-        const formula = '=MATCH(20,(A1:A2="y")*B1:B2,0)';
-        const result = initSheetFormulaData(
-            {},
-            'unit',
-            'sheet',
-            new ObjectMatrix<ICellData>({
-                0: {
-                    0: {
-                        f: formula,
-                        formulaEvaluationMode: FormulaEvaluationMode.LEGACY_SCALAR,
-                    },
-                    1: { f: formula },
-                },
-            })
-        );
-
-        expect(result.unit?.sheet?.[0]?.[0]?.evaluationMode).toBe(FormulaEvaluationMode.LEGACY_SCALAR);
-        expect(result.unit?.sheet?.[0]?.[1]?.evaluationMode).toBeUndefined();
-    });
-
-    it('propagates imported scalar evaluation mode to shared formula followers', () => {
-        const formula = '=RANK(E2,IF(A$2:A$4=A2,E$2:E$4),0)';
+    it('propagates explicit implicit intersection to shared formula followers', () => {
+        const formula = '=RANK(E2,IF(@A$2:A$4=A2,E$2:E$4),0)';
         const result = initSheetFormulaData(
             {},
             'unit',
@@ -73,7 +50,6 @@ describe('initSheetFormulaData', () => {
                     7: {
                         f: formula,
                         si: '3',
-                        formulaEvaluationMode: FormulaEvaluationMode.LEGACY_SCALAR,
                     },
                 },
                 2: {
@@ -82,8 +58,8 @@ describe('initSheetFormulaData', () => {
             })
         );
 
-        expect(result.unit?.sheet?.[1]?.[7]?.evaluationMode).toBe(FormulaEvaluationMode.LEGACY_SCALAR);
-        expect(result.unit?.sheet?.[2]?.[7]?.evaluationMode).toBe(FormulaEvaluationMode.LEGACY_SCALAR);
+        expect(result.unit?.sheet?.[1]?.[7]?.f).toBe(formula);
+        expect(result.unit?.sheet?.[2]?.[7]?.f).toBe(formula);
     });
 });
 

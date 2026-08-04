@@ -25,7 +25,7 @@ export class PercentileInc extends BaseFunction {
 
     override maxParams = 2;
 
-    override legacyScalarArrayArgumentIndexes = [0];
+    override lazyIfReferenceArrayArgumentIndexes = [0];
 
     override calculate(array: BaseValueObject, k: BaseValueObject): BaseValueObject {
         const arrayValues = getArrayValuesByAggregateIgnoreOptions(array);

@@ -453,7 +453,7 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
     }
 
     protected _createFDtree(unitId: string, sheetId: string, row: number, column: number, unitData: IUnitData, formulaDataItem: IFormulaDataItem) {
-        const { evaluationMode, f: formulaString, x = 0, y = 0 } = formulaDataItem;
+        const { f: formulaString, x = 0, y = 0 } = formulaDataItem;
 
         const FDtree = new FormulaDependencyTree(generateRandomDependencyTreeId(this._dependencyManagerService));
 
@@ -463,7 +463,6 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
 
         // FDtree.node = node;
         FDtree.formula = formulaString;
-        FDtree.evaluationMode = evaluationMode;
         FDtree.unitId = unitId;
         FDtree.subUnitId = sheetId;
         FDtree.row = row;
@@ -749,8 +748,7 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
                 tree.rowCount,
                 tree.columnCount,
                 tree.subUnitId,
-                tree.unitId,
-                tree.evaluationMode
+                tree.unitId
             );
 
             const node = this._getTreeNode(tree);
@@ -1077,8 +1075,7 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
             tree.rowCount,
             tree.columnCount,
             tree.subUnitId,
-            tree.unitId,
-            tree.evaluationMode
+            tree.unitId
         );
 
         const dirtyRanges: IUnitRange[] = [];
@@ -1123,8 +1120,7 @@ export class FormulaDependencyGenerator extends Disposable implements IFormulaDe
                 tree.rowCount,
                 tree.columnCount,
                 tree.subUnitId,
-                tree.unitId,
-                tree.evaluationMode
+                tree.unitId
             );
 
             const node = this._getTreeNode(tree);

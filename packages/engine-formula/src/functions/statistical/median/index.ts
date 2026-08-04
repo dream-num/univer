@@ -27,7 +27,7 @@ export class Median extends BaseFunction {
 
     override maxParams = 255;
 
-    override legacyScalarArrayArgumentIndexes = Array.from({ length: this.maxParams }, (_, index) => index);
+    override lazyIfReferenceArrayArgumentIndexes = Array.from({ length: this.maxParams }, (_, index) => index);
 
     override calculate(...variants: BaseValueObject[]): BaseValueObject {
         const values: number[] = [];

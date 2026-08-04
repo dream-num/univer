@@ -398,7 +398,7 @@ export class Interpreter extends Disposable {
 
         while (parent != null) {
             if (parent.nodeType === NodeType.FUNCTION) {
-                return parent.acceptsLegacyScalarArrayArgument(child);
+                return parent.preservesLazyIfReferenceArray(child);
             }
 
             child = parent;

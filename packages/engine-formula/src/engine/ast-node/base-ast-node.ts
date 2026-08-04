@@ -132,11 +132,7 @@ export class BaseAstNode {
         return this._valueObject;
     }
 
-    acceptsLegacyScalarArrayArgument(_child: BaseAstNode): boolean {
-        return false;
-    }
-
-    intersectsLegacyScalarOperatorArgument(_child: BaseAstNode): boolean {
+    preservesLazyIfReferenceArray(_child: BaseAstNode): boolean {
         return false;
     }
 

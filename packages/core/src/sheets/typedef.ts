@@ -242,11 +242,6 @@ export interface IColAutoWidthInfo {
  */
 export type CellValue = string | number | boolean;
 
-export enum FormulaEvaluationMode {
-    DEFAULT = 'default',
-    LEGACY_SCALAR = 'legacy-scalar',
-}
-
 /**
  * Cell data
  */
@@ -272,11 +267,6 @@ export interface ICellData {
      * Raw formula string. For example `=SUM(A1:B4)`.
      */
     f?: Nullable<string>;
-
-    /**
-     * Controls how the formula result is reduced when the source format uses legacy scalar semantics.
-     */
-    formulaEvaluationMode?: FormulaEvaluationMode;
 
     /**
      * If the formula is a formula array, this field is used to store the referencing range.

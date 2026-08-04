@@ -60,6 +60,8 @@ export class Scene extends Disposable {
     private _scaleY: number = 1;
     private _transform = new Transform();
     private _evented = true;
+    private _objectsEventDisabled = false;
+    private readonly _objectsEventLocks = new Set<string>();
 
     private _layers: Layer[] = [];
     private _viewports: Viewport[] = [];
@@ -1204,13 +1206,29 @@ export class Scene extends Disposable {
      * see sceneInputManager@_onPointerMove
      */
     // Disable object events
-    disableObjectsEvent() {
-        // Set the _evented property to false
-        this._evented = false;
+    disableObjectsEvent(): void {
+        this._objectsEventDisabled = true;
+        this._syncObjectsEvented();
     }
 
-    enableObjectsEvent() {
-        this._evented = true;
+    enableObjectsEvent(): void {
+        this._objectsEventDisabled = false;
+        this._syncObjectsEvented();
+    }
+
+    // TODO(@ai-review): Verify named locks must continue to override legacy enable/disable calls from unrelated render interactions.
+    setObjectsEventLock(owner: string, locked: boolean): void {
+        if (locked) {
+            this._objectsEventLocks.add(owner);
+        } else {
+            this._objectsEventLocks.delete(owner);
+        }
+
+        this._syncObjectsEvented();
+    }
+
+    private _syncObjectsEvented(): void {
+        this._evented = !this._objectsEventDisabled && this._objectsEventLocks.size === 0;
     }
 
     _capturedObject: BaseObject | null = null;

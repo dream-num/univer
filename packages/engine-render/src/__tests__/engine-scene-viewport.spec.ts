@@ -212,6 +212,27 @@ describe('engine scene viewport extra', () => {
         container.remove();
     });
 
+    it('keeps object events disabled until every named owner releases its lock', () => {
+        const { engine, scene, container } = createFixture();
+
+        // TODO(@ai-review): Confirm legacy enable calls cannot release named locks owned by other render interactions.
+        scene.setObjectsEventLock('pending-insert', true);
+        scene.setObjectsEventLock('mind-map-insert', true);
+        scene.enableObjectsEvent();
+
+        expect(scene.objectsEvented).toBe(false);
+
+        scene.setObjectsEventLock('mind-map-insert', false);
+        expect(scene.objectsEvented).toBe(false);
+
+        scene.setObjectsEventLock('pending-insert', false);
+        expect(scene.objectsEvented).toBe(true);
+
+        scene.dispose();
+        engine.dispose();
+        container.remove();
+    });
+
     it('locks vertical wheel jitter by raw delta before doc scrollbar scaling', () => {
         const { engine, scene, viewport, container } = createFixture();
         scene.transformByState({

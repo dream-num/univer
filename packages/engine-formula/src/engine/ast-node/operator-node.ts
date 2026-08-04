@@ -15,12 +15,13 @@
  */
 
 import type { compareToken } from '../../basics/token';
+
 import type { BaseFunction } from '../../functions/base-function';
 import type { Compare } from '../../functions/meta/compare';
 import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
 import type { ArrayValueObject } from '../value-object/array-value-object';
 import type { BaseValueObject } from '../value-object/base-value-object';
-import { FormulaEvaluationMode } from '../../basics/common';
+import { FormulaEvaluationMode } from '@univerjs/core';
 import { ErrorType } from '../../basics/error-type';
 import { OPERATOR_TOKEN_COMPARE_SET, OPERATOR_TOKEN_SET, operatorToken } from '../../basics/token';
 import { FUNCTION_NAMES_MATH } from '../../functions/math/function-names';

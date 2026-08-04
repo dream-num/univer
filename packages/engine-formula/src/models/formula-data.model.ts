@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { BaseCellValue, BaseDataModel, IBaseCellData, IBaseSnapshot, ICellData, IFieldSnapshot, IObjectArrayPrimitiveType, IObjectMatrixPrimitiveType, IRange, IRowData, ITableSnapshot, IUnitRange, Nullable, Workbook } from '@univerjs/core';
+import type { BaseCellValue, BaseDataModel, FormulaEvaluationMode, IBaseCellData, IBaseSnapshot, ICellData, IFieldSnapshot, IObjectArrayPrimitiveType, IObjectMatrixPrimitiveType, IRange, IRowData, ITableSnapshot, IUnitRange, Nullable, Workbook } from '@univerjs/core';
+
 import type {
     IArrayFormulaRangeType,
     IArrayFormulaUnitCellType,
@@ -32,7 +33,6 @@ import type {
 } from '../basics/common';
 import type { IImageFormulaInfo } from '../engine/value-object/primitive-object';
 import { BooleanNumber, CellValueType, Disposable, Inject, isFormulaId, isFormulaString, IUniverInstanceService, ObjectMatrix, RANGE_TYPE, Styles, UniverInstanceType } from '@univerjs/core';
-import { FormulaEvaluationMode } from '../basics/common';
 import { LexerTreeBuilder } from '../engine/analysis/lexer-tree-builder';
 import { deserializeRangeWithSheet } from '../engine/utils/reference';
 import { clearArrayFormulaCellDataByCell, updateFormulaDataByCellValue } from './utils/formula-data-util';
@@ -886,10 +886,7 @@ export function initSheetFormulaData(
     cellMatrix.forValue((r, c, cell) => {
         const formulaString = cell?.f || '';
         const formulaId = cell?.si || '';
-        const evaluationMode =
-            cell?.custom?._xlsx?.sourceScalarFormula === formulaString
-                ? FormulaEvaluationMode.LEGACY_SCALAR
-                : undefined;
+        const evaluationMode = cell?.formulaEvaluationMode;
 
         const checkFormulaString = isFormulaString(formulaString);
         const checkFormulaId = isFormulaId(formulaId);

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { IRange, IUnitRange, Nullable } from '@univerjs/core';
+import type { FormulaEvaluationMode, IRange, IUnitRange, Nullable } from '@univerjs/core';
+
 import type {
-    FormulaEvaluationMode,
     IDirtyUnitSheetNameMap,
     IFeatureDirtyRangeType,
     IRuntimeUnitDataType,

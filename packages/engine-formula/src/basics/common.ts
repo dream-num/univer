@@ -15,6 +15,7 @@
  */
 
 import type {
+    FormulaEvaluationMode,
     ICellData,
     IColumnData,
     IObjectArrayPrimitiveType,
@@ -191,11 +192,6 @@ export interface IFormulaExecuteResultItem {
 
 export interface IFormulaExecuteResultMap {
     [unitId: string]: Nullable<{ [sheetId: string]: IObjectMatrixPrimitiveType<IFormulaExecuteResultItem[]> }>;
-}
-
-export enum FormulaEvaluationMode {
-    DEFAULT = 'default',
-    LEGACY_SCALAR = 'legacy-scalar',
 }
 
 export interface IFormulaIdMapData {

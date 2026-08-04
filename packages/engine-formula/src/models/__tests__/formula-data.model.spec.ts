@@ -23,14 +23,20 @@ import {
     BooleanNumber,
     CellValueType,
     createBaseRecordIdField,
+    FormulaEvaluationMode,
+
     IUniverInstanceService,
+
     LocaleType,
+
     ObjectMatrix,
     RANGE_TYPE,
+
     UniverInstanceType,
+
 } from '@univerjs/core';
+
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { FormulaEvaluationMode } from '../../basics/common';
 import { FormulaDataModel, initSheetFormulaData } from '../formula-data.model';
 import { createCommandTestBed } from './create-command-test-bed';
 
@@ -45,7 +51,7 @@ describe('initSheetFormulaData', () => {
                 0: {
                     0: {
                         f: formula,
-                        custom: { _xlsx: { sourceScalarFormula: formula } },
+                        formulaEvaluationMode: FormulaEvaluationMode.LEGACY_SCALAR,
                     },
                     1: { f: formula },
                 },
@@ -67,7 +73,7 @@ describe('initSheetFormulaData', () => {
                     7: {
                         f: formula,
                         si: '3',
-                        custom: { _xlsx: { sourceScalarFormula: formula } },
+                        formulaEvaluationMode: FormulaEvaluationMode.LEGACY_SCALAR,
                     },
                 },
                 2: {

@@ -14,26 +14,7 @@
  * limitations under the License.
  */
 
-import type {
-    BorderStyleTypes,
-    IBorderStyleData,
-    ICellDataForSheetInterceptor,
-    ICellInfo,
-    ICellWithCoord,
-    IColAutoWidthInfo,
-    IColumnRange,
-    IDocumentData,
-    IPaddingData,
-    IRange,
-    IRowAutoHeightInfo,
-    IRowRange,
-    ISize,
-    IStyleData,
-    ITextRotation,
-    Nullable,
-    Styles,
-    Worksheet,
-} from '@univerjs/core';
+import type { BorderStyleTypes, IBorderStyleData, ICellDataForSheetInterceptor, ICellInfo, ICellWithCoord, IColAutoWidthInfo, IColumnRange, IDocumentData, IPaddingData, IRange, IRowAutoHeightInfo, IRowRange, ISize, IStyleData, ITextRotation, Nullable, Styles, Worksheet } from '@univerjs/core';
 import type { IDocumentSkeletonColumn } from '../../basics/i-document-skeleton-cached';
 import type { ITransformChangeState } from '../../basics/interfaces';
 import type { IBoundRectNoAngle, IPoint, IViewportInfo } from '../../basics/vector2';
@@ -41,28 +22,38 @@ import type { Scene } from '../../scene';
 import type { IBorderCache, IFontCacheItem, IStylesCache } from './interfaces';
 import {
     BooleanNumber,
+
     CellValueType,
     DEFAULT_STYLES,
     DocumentDataModel,
     getColorStyle,
     getDisplayValueFromCell,
     HorizontalAlign,
+
     IConfigService,
     IContextService,
+
     Inject,
     Injector,
+
     isCellCoverable,
     isDefaultFormat,
+
     isNullCell,
+
     isWhiteColor,
+
     LocaleService,
+
     numfmt,
     ObjectMatrix,
     Range,
     searchArray,
     SheetSkeleton,
+
     Tools,
     VerticalAlign,
+
     WrapStrategy,
 } from '@univerjs/core';
 import { distinctUntilChanged, startWith } from 'rxjs';
@@ -100,6 +91,9 @@ export const DEFAULT_PADDING_DATA = {
 
 export const RENDER_RAW_FORMULA_KEY = 'RENDER_RAW_FORMULA';
 
+const GENERAL_NUMBER_MAX_SIGNIFICANT_DIGITS = 15;
+const GENERAL_NUMBER_RESERVE_GLYPH = '0';
+
 export function getShrinkToFitScale(contentWidth: number, availableWidth: number, fontSize: number): number {
     if (contentWidth <= availableWidth || contentWidth <= 0 || availableWidth <= 0 || fontSize <= 0) {
         return 1;
@@ -118,16 +112,16 @@ export function getGeneralNumberDisplayText(
         return displayText;
     }
 
-    const excelGeneralReserve = FontCache.getMeasureText('0', fontString).width;
-    if (FontCache.getMeasureText(displayText, fontString).width + excelGeneralReserve <= availableWidth) {
+    const roundingReserveWidth = FontCache.getMeasureText(GENERAL_NUMBER_RESERVE_GLYPH, fontString).width;
+    if (FontCache.getMeasureText(displayText, fontString).width + roundingReserveWidth <= availableWidth) {
         return displayText;
     }
 
     let bestFit = '';
-    for (let decimalPlaces = 0; decimalPlaces <= 9; decimalPlaces++) {
+    for (let decimalPlaces = 0; decimalPlaces < GENERAL_NUMBER_MAX_SIGNIFICANT_DIGITS; decimalPlaces++) {
         const pattern = decimalPlaces === 0 ? '0E+00' : `0.${'#'.repeat(decimalPlaces)}E+00`;
         const candidate = numfmt.format(pattern, value);
-        if (FontCache.getMeasureText(candidate, fontString).width + excelGeneralReserve > availableWidth) {
+        if (FontCache.getMeasureText(candidate, fontString).width + roundingReserveWidth > availableWidth) {
             break;
         }
         bestFit = candidate;

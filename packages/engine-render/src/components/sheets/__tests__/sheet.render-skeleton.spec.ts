@@ -23,7 +23,7 @@ describe('General number display', () => {
         vi.restoreAllMocks();
     });
 
-    it('uses the most precise scientific notation that fits a narrow Excel column', () => {
+    it('uses the most precise scientific notation that fits a narrow column', () => {
         vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text) => ({
             fontBoundingBoxAscent: 0,
             fontBoundingBoxDescent: 0,

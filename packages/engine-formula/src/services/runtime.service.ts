@@ -15,6 +15,7 @@
  */
 
 import type { ICellData, IRange, Nullable } from '@univerjs/core';
+
 import type {
     IArrayFormulaEmbeddedMap,
     IArrayFormulaRangeType,
@@ -29,8 +30,7 @@ import type { BaseReferenceObject, FunctionVariantType } from '../engine/referen
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../engine/value-object/base-value-object';
 import type { StringValueObject } from '../engine/value-object/primitive-object';
-import { createIdentifier, Disposable, isNullCell, ObjectMatrix } from '@univerjs/core';
-import { FormulaEvaluationMode } from '../basics/common';
+import { createIdentifier, Disposable, FormulaEvaluationMode, isNullCell, ObjectMatrix } from '@univerjs/core';
 import { isInDirtyRange } from '../basics/dirty';
 import { ErrorType } from '../basics/error-type';
 import { CELL_INVERTED_INDEX_CACHE } from '../basics/inverted-index-cache';

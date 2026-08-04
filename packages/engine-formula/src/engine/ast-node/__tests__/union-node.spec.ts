@@ -15,38 +15,39 @@
  */
 
 import type { IUnitRange, IWorkbookData } from '@univerjs/core';
-import type { ISheetData } from '../../basics/common';
-import type { IFormulaDependencyTree } from '../../engine/dependency/dependency-tree';
+import type { ISheetData } from '../../../basics/common';
+import type { IFormulaDependencyTree } from '../../dependency/dependency-tree';
+
 import { CellValueType, LocaleType } from '@univerjs/core';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { Lexer } from '../../engine/analysis/lexer';
-import { LexerNode } from '../../engine/analysis/lexer-node';
-import { AstTreeBuilder } from '../../engine/analysis/parser';
-import { BaseAstNode } from '../../engine/ast-node/base-ast-node';
-import { FormulaDependencyTree } from '../../engine/dependency/dependency-tree';
-import { IFormulaDependencyGenerator } from '../../engine/dependency/formula-dependency';
-import { Interpreter } from '../../engine/interpreter/interpreter';
-import { generateExecuteAstNodeData } from '../../engine/utils/ast-node-tool';
-import { IFormulaCurrentConfigService } from '../../services/current-data.service';
-import { DependencyManagerService, IDependencyManagerService } from '../../services/dependency-manager.service';
+import { createFunctionTestBed } from '../../../functions/__tests__/create-function-test-bed';
+import { FUNCTION_NAMES_LOGICAL } from '../../../functions/logical/function-names';
+import { Let } from '../../../functions/logical/let';
+import { Choosecols } from '../../../functions/lookup/choosecols';
+import { Filter } from '../../../functions/lookup/filter';
+import { FUNCTION_NAMES_LOOKUP } from '../../../functions/lookup/function-names';
+import { Vstack } from '../../../functions/lookup/vstack';
+import { FUNCTION_NAMES_MATH } from '../../../functions/math/function-names';
+import { Sum } from '../../../functions/math/sum';
+import { Compare } from '../../../functions/meta/compare';
+import { FUNCTION_NAMES_META } from '../../../functions/meta/function-names';
+import { getObjectValue } from '../../../functions/util';
+import { IFormulaCurrentConfigService } from '../../../services/current-data.service';
+import { DependencyManagerService, IDependencyManagerService } from '../../../services/dependency-manager.service';
 import {
     FeatureCalculationManagerService,
     IFeatureCalculationManagerService,
-} from '../../services/feature-calculation-manager.service';
-import { IFunctionService } from '../../services/function.service';
-import { IFormulaRuntimeService } from '../../services/runtime.service';
-import { FUNCTION_NAMES_LOGICAL } from '../logical/function-names';
-import { Let } from '../logical/let';
-import { Choosecols } from '../lookup/choosecols';
-import { Filter } from '../lookup/filter';
-import { FUNCTION_NAMES_LOOKUP } from '../lookup/function-names';
-import { Vstack } from '../lookup/vstack';
-import { FUNCTION_NAMES_MATH } from '../math/function-names';
-import { Sum } from '../math/sum';
-import { Compare } from '../meta/compare';
-import { FUNCTION_NAMES_META } from '../meta/function-names';
-import { getObjectValue } from '../util';
-import { createFunctionTestBed } from './create-function-test-bed';
+} from '../../../services/feature-calculation-manager.service';
+import { IFunctionService } from '../../../services/function.service';
+import { IFormulaRuntimeService } from '../../../services/runtime.service';
+import { Lexer } from '../../analysis/lexer';
+import { LexerNode } from '../../analysis/lexer-node';
+import { AstTreeBuilder } from '../../analysis/parser';
+import { FormulaDependencyTree } from '../../dependency/dependency-tree';
+import { IFormulaDependencyGenerator } from '../../dependency/formula-dependency';
+import { Interpreter } from '../../interpreter/interpreter';
+import { generateExecuteAstNodeData } from '../../utils/ast-node-tool';
+import { BaseAstNode } from '../base-ast-node';
 
 class CapturingDependencyManagerService extends DependencyManagerService {
     readonly capturedRanges = new Map<number, IUnitRange[]>();

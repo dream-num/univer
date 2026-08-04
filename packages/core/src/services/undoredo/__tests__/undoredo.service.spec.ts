@@ -152,6 +152,79 @@ describe('LocalUndoRedoService', () => {
         expect(undoRedoService.pitchTopUndoElement()).toBeNull();
     });
 
+    it('should group consecutive scopes without exposing the group on history items', () => {
+        const replaceGroup = undoRedoService.beginUndoRedoGroup('unit-1', 'property');
+        undoRedoService.pushUndoRedo({
+            unitID: 'unit-1',
+            undoMutations: [{ id: MUTATION_ID, params: { label: 'undo-first' } }],
+            redoMutations: [{ id: MUTATION_ID, params: { label: 'redo-first' } }],
+        });
+        replaceGroup.dispose();
+
+        const nextReplaceGroup = undoRedoService.beginUndoRedoGroup('unit-1', 'property');
+        undoRedoService.pushUndoRedo({
+            unitID: 'unit-1',
+            undoMutations: [{ id: MUTATION_ID, params: { label: 'undo-latest' } }],
+            redoMutations: [{ id: MUTATION_ID, params: { label: 'redo-latest' } }],
+        });
+        nextReplaceGroup.dispose();
+
+        expect(undoRedoService.pitchTopUndoElement()).toEqual(expect.objectContaining({
+            undoMutations: [{ id: MUTATION_ID, params: { label: 'undo-first' } }],
+            redoMutations: [{ id: MUTATION_ID, params: { label: 'redo-latest' } }],
+        }));
+
+        const appendGroup = undoRedoService.beginUndoRedoGroup('unit-1', 'compound', 'append');
+        undoRedoService.pushUndoRedo({
+            unitID: 'unit-1',
+            undoMutations: [{ id: MUTATION_ID, params: { label: 'undo-text' } }],
+            redoMutations: [{ id: MUTATION_ID, params: { label: 'redo-text' } }],
+        });
+        undoRedoService.pushUndoRedo({
+            unitID: 'unit-1',
+            undoMutations: [{ id: MUTATION_ID, params: { label: 'undo-size' } }],
+            redoMutations: [{ id: MUTATION_ID, params: { label: 'redo-size' } }],
+        });
+        appendGroup.dispose();
+
+        expect(undoRedoService.pitchTopUndoElement()).toEqual(expect.objectContaining({
+            undoMutations: [
+                { id: MUTATION_ID, params: { label: 'undo-size' } },
+                { id: MUTATION_ID, params: { label: 'undo-text' } },
+            ],
+            redoMutations: [
+                { id: MUTATION_ID, params: { label: 'redo-text' } },
+                { id: MUTATION_ID, params: { label: 'redo-size' } },
+            ],
+        }));
+    });
+
+    it('should start a new group after undo and redo', () => {
+        const group = undoRedoService.beginUndoRedoGroup('unit-1', 'property');
+        undoRedoService.pushUndoRedo({
+            unitID: 'unit-1',
+            undoMutations: [{ id: MUTATION_ID, params: { label: 'undo-first' } }],
+            redoMutations: [{ id: MUTATION_ID, params: { label: 'redo-first' } }],
+        });
+        group.dispose();
+
+        undoRedoService.popUndoToRedo();
+        undoRedoService.popRedoToUndo();
+
+        const nextGroup = undoRedoService.beginUndoRedoGroup('unit-1', 'property');
+        undoRedoService.pushUndoRedo({
+            unitID: 'unit-1',
+            undoMutations: [{ id: MUTATION_ID, params: { label: 'undo-second' } }],
+            redoMutations: [{ id: MUTATION_ID, params: { label: 'redo-second' } }],
+        });
+        nextGroup.dispose();
+
+        undoRedoService.popUndoToRedo();
+        expect(undoRedoService.pitchTopUndoElement()?.redoMutations).toEqual([
+            { id: MUTATION_ID, params: { label: 'redo-first' } },
+        ]);
+    });
+
     it('should execute undo and redo commands against registered mutations', () => {
         undoRedoService.pushUndoRedo({
             unitID: 'unit-1',

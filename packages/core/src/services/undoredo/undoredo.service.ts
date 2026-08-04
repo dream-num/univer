@@ -46,6 +46,13 @@ export interface IUndoRedoService {
 
     pushUndoRedo(item: IUndoRedoItem): void;
 
+    /**
+     * Group undo redo items pushed while the returned scope is active.
+     * Reusing the same group id joins consecutive scopes without exposing the
+     * group to commands or undo redo items.
+     */
+    beginUndoRedoGroup(unitId: string, groupId: string, mode?: 'replace' | 'append'): IDisposable;
+
     /** Pitch the top redo element of the currently focused Univer document instance. */
     pitchTopUndoElement(): Nullable<IUndoRedoItem>;
     /** Pitch the top undo element of the currently focused Univer document instance. */
@@ -175,6 +182,8 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
     protected readonly _redoStacks = new Map<string, IUndoRedoItem[]>();
 
     private _batchingStatus = new Map<string, BatchingStatus>();
+    private readonly _activeGroups = new Map<string, { id: string; mode: 'replace' | 'append' }>();
+    private readonly _itemGroups = new WeakMap<IUndoRedoItem, string>();
 
     private readonly _historyLimit: number;
 
@@ -206,10 +215,22 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
         // redo stack should be cleared when pushing an undo
         redoStack.length = 0;
 
-        // should try to append first and then
-        if (this._batchingStatus.has(item.unitID)) {
+        const activeGroup = this._activeGroups.get(unitID);
+        const lastItem = this._pitchUndoElement(unitID);
+        if (activeGroup) {
+            if (lastItem && this._itemGroups.get(lastItem) === activeGroup.id) {
+                if (activeGroup.mode === 'replace') {
+                    lastItem.redoMutations = item.redoMutations;
+                } else {
+                    lastItem.redoMutations.push(...item.redoMutations);
+                    lastItem.undoMutations.unshift(...item.undoMutations);
+                }
+            } else {
+                appendNewItem(item);
+                this._itemGroups.set(item, activeGroup.id);
+            }
+        } else if (this._batchingStatus.has(item.unitID)) {
             const batchingStatus = this._batchingStatus.get(item.unitID)!;
-            const lastItem = this._pitchUndoElement(item.unitID);
             if (batchingStatus === BatchingStatus.WAITING || !lastItem) {
                 appendNewItem(item);
                 this._batchingStatus.set(item.unitID, BatchingStatus.CREATED);
@@ -228,6 +249,20 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
         }
 
         this._updateStatus();
+    }
+
+    beginUndoRedoGroup(unitId: string, groupId: string, mode: 'replace' | 'append' = 'replace'): IDisposable {
+        if (this._activeGroups.has(unitId) || this._batchingStatus.has(unitId)) {
+            throw new Error('[LocalUndoRedoService]: cannot group undo redo twice at the same time!');
+        }
+
+        const group = { id: groupId, mode };
+        this._activeGroups.set(unitId, group);
+        return toDisposable(() => {
+            if (this._activeGroups.get(unitId) === group) {
+                this._activeGroups.delete(unitId);
+            }
+        });
     }
 
     clearUndoRedo(unitID: string): void {
@@ -268,6 +303,7 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
         const undoStack = this._getUndoStackForFocused();
         const element = undoStack.pop();
         if (element) {
+            this._itemGroups.delete(element);
             // Only push to redo stack if redoMutations is not empty
             if (element.redoMutations.length > 0) {
                 const redoStack = this._getRedoStackForFocused();
@@ -281,6 +317,7 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
         const redoStack = this._getRedoStackForFocused();
         const element = redoStack.pop();
         if (element) {
+            this._itemGroups.delete(element);
             const undoStack = this._getUndoStackForFocused();
             undoStack.push(element);
             this._updateStatus();
@@ -294,12 +331,13 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
         // if the last item is the one we want to rollback
         if (item && item.id === id) {
             stack.pop();
+            this._itemGroups.delete(item);
             sequenceExecute(item.undoMutations, this._commandService);
         }
     }
 
     __tempBatchingUndoRedo(unitId: string): IDisposable {
-        if (this._batchingStatus.has(unitId)) {
+        if (this._batchingStatus.has(unitId) || this._activeGroups.has(unitId)) {
             throw new Error('[LocalUndoRedoService]: cannot batching undo redo twice at the same time!');
         }
 

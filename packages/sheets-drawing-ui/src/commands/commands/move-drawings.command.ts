@@ -14,19 +14,12 @@
  * limitations under the License.
  */
 
-import { type IAccessor, type ICommand, CommandType, Direction, ICommandService } from '@univerjs/core';
+import type { IAccessor, ICommand } from '@univerjs/core';
+import type { ISetDrawingCommandParams, ISheetDrawing } from '@univerjs/sheets-drawing';
+import { CommandType, Direction, ICommandService } from '@univerjs/core';
 import { SheetSkeletonService } from '@univerjs/sheets';
-import {
-    type ISetDrawingCommandParams,
-    type ISheetDrawing,
-    ClearSheetDrawingTransformerOperation,
-    ISheetDrawingService,
-    SetSheetDrawingCommand,
-    transformToAxisAlignPosition,
-    transformToDrawingPosition,
-} from '@univerjs/sheets-drawing';
-
-import { getTimedDrawingHistoryMergeId } from '../utils/timed-history-merge';
+import { ClearSheetDrawingTransformerOperation, ISheetDrawingService, SetSheetDrawingCommand, transformToAxisAlignPosition, transformToDrawingPosition } from '@univerjs/sheets-drawing';
+import { UndoRedoGroupService } from '@univerjs/ui/services/undo-redo/undo-redo-group.service';
 
 export interface IMoveDrawingsCommandParams {
     direction: Direction;
@@ -39,6 +32,7 @@ export const MoveDrawingsCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const drawingManagerService = accessor.get(ISheetDrawingService);
         const sheetSkeletonService = accessor.get(SheetSkeletonService);
+        const undoRedoGroupService = accessor.get(UndoRedoGroupService);
 
         const { direction } = params;
 
@@ -49,10 +43,6 @@ export const MoveDrawingsCommand: ICommand = {
         }
 
         const unitId = drawings[0].unitId;
-        const subUnitId = drawings[0].subUnitId;
-        const historyMergeId = getTimedDrawingHistoryMergeId(
-            `sheet-drawing:nudge:${unitId}:${subUnitId}:${drawings.map((drawing) => drawing.drawingId).sort().join(',')}`
-        );
 
         const newDrawings = drawings.map((drawing) => {
             const { transform, unitId, subUnitId } = drawing as ISheetDrawing;
@@ -82,11 +72,14 @@ export const MoveDrawingsCommand: ICommand = {
             } as ISheetDrawing;
         }).filter((drawing) => drawing != null) as ISheetDrawing[];
 
-        const result = commandService.syncExecuteCommand<ISetDrawingCommandParams>(SetSheetDrawingCommand.id, {
+        const result = undoRedoGroupService.runTimed(
             unitId,
-            drawings: newDrawings,
-            historyMergeId,
-        });
+            `sheet-drawing:nudge:${drawings[0].subUnitId}:${drawings.map((drawing) => drawing.drawingId).sort().join(',')}`,
+            () => commandService.syncExecuteCommand<ISetDrawingCommandParams>(SetSheetDrawingCommand.id, {
+                unitId,
+                drawings: newDrawings,
+            })
+        );
 
         if (result) {
             commandService.syncExecuteCommand(ClearSheetDrawingTransformerOperation.id, [unitId]);

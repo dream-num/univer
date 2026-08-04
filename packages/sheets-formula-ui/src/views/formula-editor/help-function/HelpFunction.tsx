@@ -28,16 +28,11 @@ import { useEditorPosition } from '../hooks/use-editor-position';
 import { useFormulaDescribe } from '../hooks/use-formula-describe';
 import { HelpHiddenTip } from './HelpHiddenTip';
 
-interface IParamsProps {
+function Params({ className, title, value }: {
     className?: string;
-    title?: string;
-    titleKey?: LocaleKey;
+    title: string;
     value?: string;
-}
-
-const Params = ({ className, title, titleKey, value }: IParamsProps) => {
-    const localeService = useDependency(LocaleService);
-
+}) {
     return (
         <div className="univer-my-2">
             <div
@@ -46,7 +41,7 @@ const Params = ({ className, title, titleKey, value }: IParamsProps) => {
                   dark:!univer-text-white
                 `, className)}
             >
-                {titleKey ? localeService.t(titleKey) : title}
+                {title}
             </div>
             <div
                 className="univer-whitespace-pre-wrap univer-break-words univer-text-xs univer-text-gray-500"
@@ -55,17 +50,16 @@ const Params = ({ className, title, titleKey, value }: IParamsProps) => {
             </div>
         </div>
     );
-};
+}
 
-interface IHelpProps {
+function Help(props: {
     prefix?: string;
     value?: IFunctionParam[];
     active: number;
     onClick: (paramIndex: number) => void;
-}
-
-const Help = (props: IHelpProps) => {
+}) {
     const { prefix, value, active, onClick } = props;
+
     return (
         <div>
             <span>
@@ -87,17 +81,15 @@ const Help = (props: IHelpProps) => {
             )
         </div>
     );
-};
+}
 
-interface IHelpFunctionProps {
+export function HelpFunction(props: {
     onParamsSwitch?: (index: number) => void;
     onClose?: () => void;
     editor: Editor;
     isFocus: boolean;
     formulaText: string;
-};
-
-export function HelpFunction(props: IHelpFunctionProps) {
+}) {
     const { onParamsSwitch = noop, onClose: propColose = noop, isFocus, editor, formulaText } = props;
     const { functionInfo, paramIndex, reset } = useFormulaDescribe(isFocus, formulaText, editor);
     const editorBridgeService = useDependency(IEditorBridgeService);
@@ -194,13 +186,13 @@ export function HelpFunction(props: IHelpFunctionProps) {
                         >
                             <div className="univer-mt-3">
                                 <Params
-                                    titleKey="sheets-formula-ui.prompt.helpExample"
+                                    title={localeService.t<LocaleKey>('sheets-formula-ui.prompt.helpExample')}
                                     value={`${functionInfo.functionName}(${functionInfo.functionParameter
                                         .map((item) => item.example)
                                         .join(',')})`}
                                 />
                                 <Params
-                                    titleKey="sheets-formula-ui.prompt.helpAbstract"
+                                    title={localeService.t<LocaleKey>('sheets-formula-ui.prompt.helpAbstract')}
                                     value={functionInfo.description}
                                 />
                                 {functionInfo &&

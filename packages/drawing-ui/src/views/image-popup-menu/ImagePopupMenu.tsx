@@ -204,11 +204,15 @@ function ToolbarGroup(props: { children: ReactNode }) {
     );
 }
 
-function ToolbarButton(props: { titleKey: string; active?: boolean; disabled?: boolean; children: ReactNode; onClick: () => void }) {
-    const localeService = useDependency(LocaleService);
-
+function ToolbarButton(props: {
+    title: string;
+    active?: boolean;
+    disabled?: boolean;
+    children: ReactNode;
+    onClick: () => void;
+}) {
     return (
-        <Tooltip title={localeService.t(props.titleKey as LocaleKey)} placement="bottom">
+        <Tooltip title={props.title} placement="bottom">
             <button
                 type="button"
                 disabled={props.disabled}
@@ -395,7 +399,7 @@ function DocImageFloatingToolbar(props: IDocImageFloatingToolbarProps) {
                             return (
                                 <ToolbarButton
                                     key={`${item.commandId}-${item.index}`}
-                                    titleKey={item.label}
+                                    title={localeService.t(item.label as LocaleKey)}
                                     disabled={item.disable}
                                     onClick={() => executeMenuItem(item)}
                                 >
@@ -476,7 +480,7 @@ function DocChartFloatingToolbar(props: Pick<IDocImageFloatingToolbarProps, 'men
                         return (
                             <ToolbarButton
                                 key={`${item.commandId}-${item.index}`}
-                                titleKey={item.label}
+                                title={localeService.t(item.label as LocaleKey)}
                                 disabled={item.disable}
                                 onClick={() => executeMenuItem(item)}
                             >

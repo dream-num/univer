@@ -15,7 +15,14 @@
  */
 
 import type { Observable } from 'rxjs';
-import type { CellValue, IBaseCellData, IBaseSnapshot, IFieldSnapshot, IRecordSnapshot, ITableSnapshot } from './typedef';
+import type {
+    CellValue,
+    IBaseCellData,
+    IBaseSnapshot,
+    IFieldSnapshot,
+    IRecordSnapshot,
+    ITableSnapshot,
+} from './typedef';
 import { BehaviorSubject } from 'rxjs';
 import { UnitModel, UniverInstanceType } from '../common/unit';
 import { Tools } from '../shared/tools';

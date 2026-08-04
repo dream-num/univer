@@ -923,12 +923,6 @@ function getStyles(styleText: string): Record<string, any> {
     return output;
 }
 
-function extractColorFromString(str: string) {
-    const regex = /#([0-9a-f]{3,6})\b|rgb\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*\)/gi;
-    const matches = str.match(regex);
-    return matches ? matches[0] : null;
-}
-
 function getPtFontSizeByPx(size: number) {
     const ptSize = Math.round(size * PX_TO_PT_RATIO);
 

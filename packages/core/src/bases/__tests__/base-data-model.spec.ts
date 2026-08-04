@@ -21,9 +21,17 @@ import { BASE_RECORD_ID_FIELD_ID, createBaseRecordIdField } from '../record-iden
 import { BaseFieldType } from '../typedef';
 
 describe('BaseDataModel', () => {
-    it('exposes RecordLink without the removed TwoWayLink field type', () => {
+    it('excludes field types without a public authoring contract', () => {
         expect(Object.values(BaseFieldType)).toContain('recordLink');
-        expect(Object.values(BaseFieldType)).not.toContain('twoWayLink');
+        expect(Object.values(BaseFieldType)).not.toEqual(expect.arrayContaining([
+            'twoWayLink',
+            'lookup',
+            'summary',
+            'location',
+            'button',
+            'flow',
+            'barcode',
+        ]));
     });
 
     it('creates an empty default table without persistent records', () => {

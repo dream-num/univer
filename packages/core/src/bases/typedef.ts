@@ -92,6 +92,7 @@ export interface IBaseAttachment {
     thumbnail?: string;
 }
 
+// TODO(@ai-review): Confirm these runtime values remain limited to field types with a supported public authoring contract.
 export enum BaseFieldType {
     Text = 'text',
     SingleSelect = 'singleSelect',
@@ -104,13 +105,10 @@ export enum BaseFieldType {
     Checkbox = 'checkbox',
     Link = 'link',
     Formula = 'formula',
-    Lookup = 'lookup',
     Flow = 'flow',
-    Button = 'button',
     Numbering = 'numbering',
     Phone = 'phone',
     Email = 'email',
-    Location = 'location',
     Barcode = 'barcode',
     Progress = 'progress',
     Currency = 'currency',
@@ -121,7 +119,6 @@ export enum BaseFieldType {
     UpdatedBy = 'updatedBy',
     CreatedAt = 'createdAt',
     UpdatedAt = 'updatedAt',
-    Summary = 'summary',
 }
 
 /** Semantic roles supported by Base RecordLink fields. */

@@ -14,11 +14,19 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand } from '@univerjs/core';
-import type { ISetDrawingCommandParams, ISheetDrawing } from '@univerjs/sheets-drawing';
-import { CommandType, Direction, ICommandService } from '@univerjs/core';
+import { type IAccessor, type ICommand, CommandType, Direction, ICommandService } from '@univerjs/core';
 import { SheetSkeletonService } from '@univerjs/sheets';
-import { ClearSheetDrawingTransformerOperation, ISheetDrawingService, SetSheetDrawingCommand, transformToAxisAlignPosition, transformToDrawingPosition } from '@univerjs/sheets-drawing';
+import {
+    type ISetDrawingCommandParams,
+    type ISheetDrawing,
+    ClearSheetDrawingTransformerOperation,
+    ISheetDrawingService,
+    SetSheetDrawingCommand,
+    transformToAxisAlignPosition,
+    transformToDrawingPosition,
+} from '@univerjs/sheets-drawing';
+
+import { getTimedDrawingHistoryMergeId } from '../utils/timed-history-merge';
 
 export interface IMoveDrawingsCommandParams {
     direction: Direction;
@@ -41,6 +49,10 @@ export const MoveDrawingsCommand: ICommand = {
         }
 
         const unitId = drawings[0].unitId;
+        const subUnitId = drawings[0].subUnitId;
+        const historyMergeId = getTimedDrawingHistoryMergeId(
+            `sheet-drawing:nudge:${unitId}:${subUnitId}:${drawings.map((drawing) => drawing.drawingId).sort().join(',')}`
+        );
 
         const newDrawings = drawings.map((drawing) => {
             const { transform, unitId, subUnitId } = drawing as ISheetDrawing;
@@ -73,6 +85,7 @@ export const MoveDrawingsCommand: ICommand = {
         const result = commandService.syncExecuteCommand<ISetDrawingCommandParams>(SetSheetDrawingCommand.id, {
             unitId,
             drawings: newDrawings,
+            historyMergeId,
         });
 
         if (result) {

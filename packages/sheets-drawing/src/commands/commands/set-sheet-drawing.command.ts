@@ -14,24 +14,20 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
-import type { ISheetDrawing } from '../../services/sheet-drawing.service';
-import {
-    CommandType,
-    ICommandService,
-    IUndoRedoService,
-    sequenceExecute,
-} from '@univerjs/core';
+import { type ICommand, CommandType, ICommandService, IUndoRedoService, sequenceExecute } from '@univerjs/core';
 import { SheetInterceptorService } from '@univerjs/sheets';
 import { resolveSheetDrawingRotateEnabled } from '../../common/rotate-enabled';
-import { ISheetDrawingService } from '../../services/sheet-drawing.service';
+import { type ISheetDrawing, ISheetDrawingService } from '../../services/sheet-drawing.service';
 import { DrawingApplyType, SetDrawingApplyMutation } from '../mutations/set-drawing-apply.mutation';
 import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
+import { type DrawingHistoryMergeMode, pushOrMergeDrawingHistory } from '../utils/push-or-merge-history';
 
 export interface ISetDrawingCommandParams {
     unitId: string;
     drawings: Partial<ISheetDrawing>[];
+    historyMergeId?: string;
+    historyMergeMode?: DrawingHistoryMergeMode;
 }
 
 function hasIncomingAngle(drawing: Partial<ISheetDrawing>): boolean {
@@ -151,11 +147,11 @@ export const SetSheetDrawingCommand: ICommand<ISetDrawingCommandParams> = {
 
         const result = sequenceExecute(redoMutations, commandService);
         if (result.result) {
-            undoRedoService.pushUndoRedo({
+            pushOrMergeDrawingHistory(undoRedoService, {
                 unitID: unitId,
                 undoMutations,
                 redoMutations,
-            });
+            }, params.historyMergeId, params.historyMergeMode);
 
             return true;
         }

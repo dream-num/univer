@@ -24,20 +24,13 @@ describe('UndoRedoGroupService', () => {
         const service = new UndoRedoGroupService({ beginUndoRedoGroup });
 
         vi.spyOn(Date, 'now').mockReturnValueOnce(1_000).mockReturnValueOnce(1_900).mockReturnValueOnce(2_901);
-        service.runTimed('unit-1', 'shape:fill', () => true);
-        service.runTimed('unit-1', 'shape:fill', () => true);
-        service.runTimed('unit-1', 'shape:fill', () => true);
+        service.runTimed('unit-1', 'drawing:nudge', () => true);
+        service.runTimed('unit-1', 'drawing:nudge', () => true);
+        service.runTimed('unit-1', 'drawing:nudge', () => true);
 
         expect(beginUndoRedoGroup.mock.calls[1][1]).toBe(beginUndoRedoGroup.mock.calls[0][1]);
         expect(beginUndoRedoGroup.mock.calls[2][1]).not.toBe(beginUndoRedoGroup.mock.calls[0][1]);
         expect(dispose).toHaveBeenCalledTimes(3);
-    });
-
-    it('builds stable scopes from changed leaf fields', () => {
-        const service = new UndoRedoGroupService({ beginUndoRedoGroup: vi.fn() });
-
-        expect(service.getFieldScope({ unitId: 'unit-1', style: { fill: '#fff', line: undefined } }, ['unitId']))
-            .toBe('style.fill');
     });
 
     it('creates a runner that can group separated command executions', () => {

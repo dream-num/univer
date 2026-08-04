@@ -18,10 +18,6 @@ import { generateRandomId, IUndoRedoService } from '@univerjs/core';
 
 const HISTORY_GROUP_WINDOW = 1_000;
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-    return !!value && typeof value === 'object' && !Array.isArray(value);
-}
-
 export class UndoRedoGroupService {
     private readonly _sessions = new Map<string, { expiresAt: number; id: string }>();
 
@@ -54,29 +50,6 @@ export class UndoRedoGroupService {
         }
 
         return this._run(unitId, groupId, mode, action);
-    }
-
-    getFieldScope(value: object, excludedKeys: readonly string[] = []): string {
-        const excluded = new Set(excludedKeys);
-        const fields: string[] = [];
-        const visit = (current: unknown, path: string) => {
-            if (isRecord(current)) {
-                const keys = Object.keys(current)
-                    .filter((key) => !excluded.has(key) && current[key] !== undefined)
-                    .sort();
-                if (keys.length) {
-                    keys.forEach((key) => visit(current[key], path ? `${path}.${key}` : key));
-                    return;
-                }
-            }
-
-            if (path) {
-                fields.push(path);
-            }
-        };
-
-        visit(value, '');
-        return fields.join(',');
     }
 
     private _run<T>(unitId: string, groupId: string, mode: 'replace' | 'append', action: () => T): T {

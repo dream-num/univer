@@ -30,6 +30,8 @@ describe('BaseDataModel', () => {
             'summary',
             'location',
             'button',
+            'flow',
+            'barcode',
         ]));
     });
 

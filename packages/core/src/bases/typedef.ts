@@ -104,14 +104,9 @@ export enum BaseFieldType {
     Checkbox = 'checkbox',
     Link = 'link',
     Formula = 'formula',
-    Lookup = 'lookup',
-    Flow = 'flow',
-    Button = 'button',
     Numbering = 'numbering',
     Phone = 'phone',
     Email = 'email',
-    Location = 'location',
-    Barcode = 'barcode',
     Progress = 'progress',
     Currency = 'currency',
     Rating = 'rating',
@@ -121,7 +116,6 @@ export enum BaseFieldType {
     UpdatedBy = 'updatedBy',
     CreatedAt = 'createdAt',
     UpdatedAt = 'updatedAt',
-    Summary = 'summary',
 }
 
 /** Semantic roles supported by Base RecordLink fields. */

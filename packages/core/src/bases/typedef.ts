@@ -92,7 +92,6 @@ export interface IBaseAttachment {
     thumbnail?: string;
 }
 
-// TODO(@ai-review): Confirm these runtime values remain limited to field types with a supported public authoring contract.
 export enum BaseFieldType {
     Text = 'text',
     SingleSelect = 'singleSelect',

@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
-import type { ReactNode, RefObject } from 'react';
+import type { MouseEventHandler, ReactNode, RefObject } from 'react';
 import type { Observable } from 'rxjs';
-import type { IUniverUIConfig } from '../../../config/config';
 import { IConfigService, LocaleService } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
-import { createContext, useContext, useEffect, useRef } from 'react';
+import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { UI_PLUGIN_CONFIG_KEY } from '../../../config/config';
+import { defaultPluginConfig, UI_PLUGIN_CONFIG_KEY } from '../../../config/config';
 import { useDependency, useObservable } from '../../../utils/di';
 import { useEvent } from '../../hooks/event';
 
@@ -34,6 +32,7 @@ interface IAbsolutePosition {
 }
 
 const RectPopupContext = createContext<RefObject<IAbsolutePosition | undefined>>({ current: undefined });
+const RectPopupDirectionContext = createContext<RectPopupDirection>('vertical');
 
 export type RectPopupDirection =
     | 'left'
@@ -68,7 +67,7 @@ export interface IRectPopupProps {
      * the anchor element bounding rect
      */
     anchorRect$: Observable<IAbsolutePosition>;
-    excludeRects?: RefObject<Nullable<IAbsolutePosition[]>>;
+    excludeRects?: RefObject<IAbsolutePosition[] | null | undefined | void>;
     direction?: RectPopupDirection;
     hidden?: boolean;
     // #region closing behavior
@@ -76,9 +75,9 @@ export interface IRectPopupProps {
     excludeOutside?: HTMLElement[];
     onContextMenu?: () => void;
 
-    onPointerEnter?: (e: React.MouseEvent<HTMLElement>) => void;
-    onPointerLeave?: (e: React.MouseEvent<HTMLElement>) => void;
-    onClick?: (e: React.MouseEvent<HTMLElement>) => void;
+    onPointerEnter?: MouseEventHandler<HTMLElement>;
+    onPointerLeave?: MouseEventHandler<HTMLElement>;
+    onClick?: MouseEventHandler<HTMLElement>;
     // #endregion
     portal?: boolean;
 
@@ -103,8 +102,27 @@ export interface IPopupLayoutInfo extends Pick<IRectPopupProps, 'direction'> {
 /** The popup should have a minimum edge to the boundary. */
 const PUSHING_MINIMUM_GAP = 8;
 
+function resolvePopupDirection(layout: IPopupLayoutInfo): RectPopupDirection {
+    const direction = layout.direction ?? 'vertical';
+    const availableTop = layout.position.top;
+    const availableBottom = layout.containerHeight - layout.position.bottom;
+    const placeAbove = availableTop >= availableBottom;
+
+    switch (direction) {
+        case 'vertical-center':
+            return placeAbove ? 'top-center' : 'bottom-center';
+        case 'vertical-left':
+            return placeAbove ? 'top-left' : 'bottom-left';
+        case 'vertical-right':
+            return placeAbove ? 'top-right' : 'bottom-right';
+        default:
+            return direction;
+    }
+}
+
 function calcPopupPosition(layout: IPopupLayoutInfo): { top: number; left: number } {
-    const { position, width, height, containerHeight, containerWidth, direction = 'vertical', noPushMinimumGap = false } = layout;
+    const { position, width, height, containerHeight, containerWidth, noPushMinimumGap = false } = layout;
+    const direction = resolvePopupDirection(layout);
 
     const minTop = noPushMinimumGap ? -Infinity : PUSHING_MINIMUM_GAP;
     const maxTop = noPushMinimumGap ? Infinity : containerHeight - height - PUSHING_MINIMUM_GAP;
@@ -212,7 +230,8 @@ function RectPopup(props: IRectPopupProps) {
     const excludeRectsRef = excludeRects;
     const configService = useDependency(IConfigService);
     const anchorRectRef = useRef<IAbsolutePosition | undefined>(undefined);
-    const uiConfig = configService.getConfig(UI_PLUGIN_CONFIG_KEY) as IUniverUIConfig;
+    const [resolvedDirection, setResolvedDirection] = useState<RectPopupDirection>(direction);
+    const uiConfig = configService.getConfig<typeof defaultPluginConfig>(UI_PLUGIN_CONFIG_KEY) ?? defaultPluginConfig;
     const popupRootId = uiConfig?.popupRootId ?? 'univer-popup-portal';
 
     const updatePosition = useEvent((position: IAbsolutePosition) => {
@@ -223,17 +242,19 @@ function RectPopup(props: IRectPopupProps) {
             const innerWidth = window.innerWidth;
             const innerHeight = window.innerHeight;
 
-            positionRef.current = calcPopupPosition(
-                {
-                    position,
-                    width: clientWidth,
-                    height: clientHeight,
-                    containerWidth: innerWidth,
-                    containerHeight: innerHeight,
-                    direction,
-                    noPushMinimumGap,
-                }
-            );
+            const layout = {
+                position,
+                width: clientWidth,
+                height: clientHeight,
+                containerWidth: innerWidth,
+                containerHeight: innerHeight,
+                direction,
+                noPushMinimumGap,
+            };
+            const nextDirection = resolvePopupDirection(layout);
+
+            setResolvedDirection((currentDirection) => currentDirection === nextDirection ? currentDirection : nextDirection);
+            positionRef.current = calcPopupPosition({ ...layout, direction: nextDirection });
 
             nodeRef.current.style.top = `${positionRef.current.top}px`;
             nodeRef.current.style.left = `${positionRef.current.left}px`;
@@ -340,9 +361,11 @@ function RectPopup(props: IRectPopupProps) {
                 onPointerEnter={onPointerEnter}
                 onPointerLeave={onPointerLeave}
             >
-                <RectPopupContext.Provider value={anchorRectRef}>
-                    {children}
-                </RectPopupContext.Provider>
+                <RectPopupDirectionContext.Provider value={resolvedDirection}>
+                    <RectPopupContext.Provider value={anchorRectRef}>
+                        {children}
+                    </RectPopupContext.Provider>
+                </RectPopupDirectionContext.Provider>
             </section>
         </>
     );
@@ -353,5 +376,6 @@ function RectPopup(props: IRectPopupProps) {
 RectPopup.calcPopupPosition = calcPopupPosition;
 
 RectPopup.useContext = () => useContext(RectPopupContext);
+RectPopup.useDirection = () => useContext(RectPopupDirectionContext);
 
 export { RectPopup };

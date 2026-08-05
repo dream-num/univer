@@ -34,6 +34,7 @@ import {
     DropdownMenuWrapper,
     DropdownWrapper,
     ToolbarDropdownProvider,
+    ToolbarTooltip,
     TooltipWrapper,
 } from '../TooltipButtonWrapper';
 
@@ -74,6 +75,34 @@ function renderWithDependencies(
 }
 
 afterEach(cleanup);
+
+describe('ToolbarTooltip', () => {
+    it('stays hidden after its popup closes until a new trigger interaction', () => {
+        const renderTooltip = (popupOpen: boolean) => (
+            <ToolbarTooltip title="Fill" popupOpen={popupOpen}>
+                <button type="button">Fill trigger</button>
+            </ToolbarTooltip>
+        );
+        const { getByRole, queryByRole, rerender } = render(renderTooltip(false));
+        const trigger = getByRole('button', { name: 'Fill trigger' }).parentElement;
+        if (!trigger) {
+            throw new Error('Expected toolbar tooltip trigger wrapper');
+        }
+
+        fireEvent.mouseEnter(trigger);
+        expect(getByRole('tooltip').textContent).toBe('Fill');
+
+        rerender(renderTooltip(true));
+        expect(queryByRole('tooltip')).toBeNull();
+
+        rerender(renderTooltip(false));
+        expect(queryByRole('tooltip')).toBeNull();
+
+        fireEvent.mouseLeave(trigger);
+        fireEvent.mouseEnter(trigger);
+        expect(getByRole('tooltip').textContent).toBe('Fill');
+    });
+});
 
 describe('DropdownMenuLabel', () => {
     it('preserves option metadata when a custom label emits a dynamic value', () => {

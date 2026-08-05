@@ -17,7 +17,12 @@
 import type { IDropdownMenuProps, IDropdownProps, ITooltipProps } from '@univerjs/design';
 import type { ReactNode } from 'react';
 import type { IMenuItem, IValueOption } from '../../../services/menu/menu';
-import { clsx, Dropdown, DropdownMenu, Tooltip } from '@univerjs/design';
+import {
+    clsx,
+    Dropdown,
+    DropdownMenu,
+    Tooltip,
+} from '@univerjs/design';
 import { CheckMarkIcon } from '@univerjs/icons';
 import {
     createContext,
@@ -50,6 +55,37 @@ export interface ITooltipWrapperRef {
     el: HTMLSpanElement | null;
 }
 
+export interface IToolbarTooltipProps extends Omit<ITooltipProps, 'visible' | 'onVisibleChange'> {
+    popupOpen: boolean;
+}
+
+/**
+ * Keeps toolbar tooltips controlled while a related popup opens and closes.
+ * The tooltip stays hidden after the popup closes until a new hover or focus interaction occurs.
+ */
+export function ToolbarTooltip(props: IToolbarTooltipProps) {
+    const { popupOpen, ...tooltipProps } = props;
+    const [tooltipVisible, setTooltipVisible] = useState(false);
+
+    useEffect(() => {
+        if (popupOpen) {
+            setTooltipVisible(false);
+        }
+    }, [popupOpen]);
+
+    return (
+        <Tooltip
+            {...tooltipProps}
+            visible={!popupOpen && tooltipVisible}
+            onVisibleChange={(visible) => {
+                if (!popupOpen) {
+                    setTooltipVisible(visible);
+                }
+            }}
+        />
+    );
+}
+
 export function ToolbarDropdownProvider(props: { children: ReactNode }) {
     const [openDropdownKey, setOpenDropdownKey] = useState<string | null>(null);
     const contextValue = useMemo(() => ({
@@ -69,20 +105,11 @@ export const TooltipWrapper = forwardRef<ITooltipWrapperRef, ITooltipProps & { d
 
     const spanRef = useRef<HTMLSpanElement>(null);
 
-    const [tooltipVisible, setTooltipVisible] = useState(false);
     const [localDropdownVisible, setLocalDropdownVisible] = useState(false);
     const toolbarDropdownContext = useContext(ToolbarDropdownContext);
     const dropdownVisible = dropdownKey && toolbarDropdownContext
         ? toolbarDropdownContext.openDropdownKey === dropdownKey
         : localDropdownVisible;
-
-    function handleChangeTooltipVisible(visible: boolean) {
-        if (dropdownVisible) {
-            setTooltipVisible(false);
-        } else {
-            setTooltipVisible(visible);
-        }
-    }
 
     const handleChangeDropdownVisible = useCallback((visible: boolean) => {
         if (dropdownKey && toolbarDropdownContext) {
@@ -90,8 +117,6 @@ export const TooltipWrapper = forwardRef<ITooltipWrapperRef, ITooltipProps & { d
         } else {
             setLocalDropdownVisible(visible);
         }
-
-        setTooltipVisible(false);
     }, [dropdownKey, toolbarDropdownContext]);
 
     const contextValue = useMemo(() => ({
@@ -113,13 +138,12 @@ export const TooltipWrapper = forwardRef<ITooltipWrapperRef, ITooltipProps & { d
 
     return tooltipProps.title
         ? (
-            <Tooltip
-                visible={tooltipVisible}
-                onVisibleChange={handleChangeTooltipVisible}
+            <ToolbarTooltip
+                popupOpen={dropdownVisible}
                 {...tooltipProps}
             >
                 {content}
-            </Tooltip>
+            </ToolbarTooltip>
         )
         : content;
 });

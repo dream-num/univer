@@ -395,10 +395,20 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
         const buttonStyle = grid && large ? { textAlign: 'center', whiteSpace: 'normal' } as const : undefined;
 
         if (isCustomComponent) {
+            const hoverable = typeof label === 'string' || label?.hoverable !== false;
+
             return (
                 <span
                     data-u-command={id}
-                    className={toolbarButtonVariants({ noIcon: !icon, active: activated, className: buttonClassName })}
+                    className={toolbarButtonVariants({
+                        noIcon: !icon,
+                        active: activated,
+                        className: clsx(buttonClassName, !hoverable && `
+                          univer-cursor-default !univer-bg-transparent
+                          hover:!univer-bg-transparent
+                          dark:hover:!univer-bg-transparent
+                        `),
+                    })}
                     style={buttonStyle}
                     aria-disabled={disabled}
                 >

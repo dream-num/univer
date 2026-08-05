@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
+import type { MouseEventHandler, ReactNode, RefObject } from 'react';
 import type { Observable } from 'rxjs';
 import { IConfigService, LocaleService } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
-import * as React from 'react';
+import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { defaultPluginConfig, UI_PLUGIN_CONFIG_KEY } from '../../../config/config';
 import { useDependency, useObservable } from '../../../utils/di';
@@ -30,8 +31,8 @@ interface IAbsolutePosition {
     bottom: number;
 }
 
-const RectPopupContext = React.createContext<React.RefObject<IAbsolutePosition | undefined>>({ current: undefined });
-const RectPopupDirectionContext = React.createContext<RectPopupDirection>('vertical');
+const RectPopupContext = createContext<RefObject<IAbsolutePosition | undefined>>({ current: undefined });
+const RectPopupDirectionContext = createContext<RectPopupDirection>('vertical');
 
 export type RectPopupDirection =
     | 'left'
@@ -60,13 +61,13 @@ export type RectPopupDirection =
     | 'horizontal-center';
 
 export interface IRectPopupProps {
-    children?: React.ReactNode;
+    children?: ReactNode;
 
     /**
      * the anchor element bounding rect
      */
     anchorRect$: Observable<IAbsolutePosition>;
-    excludeRects?: React.RefObject<IAbsolutePosition[] | null | undefined | void>;
+    excludeRects?: RefObject<IAbsolutePosition[] | null | undefined | void>;
     direction?: RectPopupDirection;
     hidden?: boolean;
     // #region closing behavior
@@ -74,9 +75,9 @@ export interface IRectPopupProps {
     excludeOutside?: HTMLElement[];
     onContextMenu?: () => void;
 
-    onPointerEnter?: (e: React.MouseEvent<HTMLElement>) => void;
-    onPointerLeave?: (e: React.MouseEvent<HTMLElement>) => void;
-    onClick?: (e: React.MouseEvent<HTMLElement>) => void;
+    onPointerEnter?: MouseEventHandler<HTMLElement>;
+    onPointerLeave?: MouseEventHandler<HTMLElement>;
+    onClick?: MouseEventHandler<HTMLElement>;
     // #endregion
     portal?: boolean;
 
@@ -219,17 +220,17 @@ function RectPopup(props: IRectPopupProps) {
         noPushMinimumGap,
         autoRelayout = true,
     } = props;
-    const nodeRef = React.useRef<HTMLElement>(null);
+    const nodeRef = useRef<HTMLElement>(null);
     const clickOtherFn = useEvent(onClickOutside ?? (() => { /* empty */ }));
     const contextMenuFn = useEvent(onContextMenu ?? (() => { /* empty */ }));
-    const positionRef = React.useRef<Partial<IAbsolutePosition>>({
+    const positionRef = useRef<Partial<IAbsolutePosition>>({
         top: -9999,
         left: -9999,
     });
     const excludeRectsRef = excludeRects;
     const configService = useDependency(IConfigService);
-    const anchorRectRef = React.useRef<IAbsolutePosition | undefined>(undefined);
-    const [resolvedDirection, setResolvedDirection] = React.useState<RectPopupDirection>(direction);
+    const anchorRectRef = useRef<IAbsolutePosition | undefined>(undefined);
+    const [resolvedDirection, setResolvedDirection] = useState<RectPopupDirection>(direction);
     const uiConfig = configService.getConfig<typeof defaultPluginConfig>(UI_PLUGIN_CONFIG_KEY) ?? defaultPluginConfig;
     const popupRootId = uiConfig?.popupRootId ?? 'univer-popup-portal';
 
@@ -260,7 +261,7 @@ function RectPopup(props: IRectPopupProps) {
         });
     });
 
-    React.useEffect(() => {
+    useEffect(() => {
         let observer: ResizeObserver | null;
         if (nodeRef.current) {
             observer = new ResizeObserver(() => {
@@ -277,7 +278,7 @@ function RectPopup(props: IRectPopupProps) {
         };
     }, [nodeRef.current, autoRelayout]);
 
-    React.useEffect(() => {
+    useEffect(() => {
         const anchorRectSub = anchorRect$.subscribe((anchorRect) => {
             anchorRectRef.current = anchorRect;
             updatePosition(anchorRect);
@@ -286,7 +287,7 @@ function RectPopup(props: IRectPopupProps) {
         return () => anchorRectSub.unsubscribe();
     }, [anchorRect$, direction]);
 
-    React.useEffect(() => {
+    useEffect(() => {
         const handleClickOther = (e: MouseEvent) => {
             if (
                 excludeOutside &&
@@ -318,7 +319,7 @@ function RectPopup(props: IRectPopupProps) {
         };
     }, [clickOtherFn, excludeOutside, excludeRectsRef]);
 
-    React.useEffect(() => {
+    useEffect(() => {
         const handleContextMenu = (e: MouseEvent) => {
             if (e.ctrlKey && e.button === 0) {
                 return;
@@ -374,7 +375,7 @@ function RectPopup(props: IRectPopupProps) {
 
 RectPopup.calcPopupPosition = calcPopupPosition;
 
-RectPopup.useContext = () => React.useContext(RectPopupContext);
-RectPopup.useDirection = () => React.useContext(RectPopupDirectionContext);
+RectPopup.useContext = () => useContext(RectPopupContext);
+RectPopup.useDirection = () => useContext(RectPopupDirectionContext);
 
 export { RectPopup };

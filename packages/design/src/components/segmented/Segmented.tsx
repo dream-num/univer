@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import * as React from 'react';
+import type { CSSProperties, ReactNode } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { clsx } from '../../helper/clsx';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 
@@ -22,7 +23,7 @@ type ItemValue = string | number;
 const SEGMENTED_PADDING = 4;
 
 interface ISegmentedItem<T extends ItemValue = ItemValue> {
-    label: React.ReactNode;
+    label: ReactNode;
     value: T;
 }
 
@@ -43,16 +44,16 @@ export function Segmented<T extends ItemValue = ItemValue>({
     className = '',
     size = 'middle',
 }: ISegmentedProps<T>) {
-    const { direction } = React.useContext(ConfigContext);
-    const [selectedItem, setSelectedItem] = React.useState<T>(
+    const { direction } = useContext(ConfigContext);
+    const [selectedItem, setSelectedItem] = useState<T>(
         value !== undefined ? value : (defaultValue || items[0].value)
     );
-    const [slideStyle, setSlideStyle] = React.useState({});
-    const itemRefs = React.useRef<Map<T, HTMLButtonElement>>(new Map());
-    const containerRef = React.useRef<HTMLDivElement>(null);
+    const [slideStyle, setSlideStyle] = useState({});
+    const itemRefs = useRef<Map<T, HTMLButtonElement>>(new Map());
+    const containerRef = useRef<HTMLDivElement>(null);
 
     // Update internal state when controlled value changes
-    React.useEffect(() => {
+    useEffect(() => {
         if (value !== undefined && value !== selectedItem) {
             setSelectedItem(value);
         }
@@ -79,18 +80,18 @@ export function Segmented<T extends ItemValue = ItemValue>({
                     left: `${SEGMENTED_PADDING}px`,
                     width: `${newRect.width}px`,
                     transform: `translateX(${newLeft}px)`,
-                } as React.CSSProperties);
+                } as CSSProperties);
             } else {
                 setSlideStyle({
                     left: `${SEGMENTED_PADDING}px`,
                     width: `${newRect.width}px`,
                     transform: `translateX(${newLeft}px)`,
-                } as React.CSSProperties);
+                } as CSSProperties);
             }
         }
     };
 
-    React.useEffect(() => {
+    useEffect(() => {
         updateSliderPosition(selectedItem);
     }, [direction, selectedItem]);
 

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { IDropdownMenuProps, IDropdownProps, ITooltipProps } from '@univerjs/design';
+import type { ReactNode } from 'react';
 import type { IMenuItem, IValueOption } from '../../../services/menu/menu';
 import {
     clsx,
@@ -22,23 +24,29 @@ import {
     Tooltip,
 } from '@univerjs/design';
 import { CheckMarkIcon } from '@univerjs/icons';
-import * as React from 'react';
+import {
+    createContext,
+    forwardRef,
+    useCallback,
+    useContext,
+    useEffect,
+    useImperativeHandle,
+    useMemo,
+    useRef,
+    useState,
+} from 'react';
 import { combineLatest, map, merge, of, scan, startWith } from 'rxjs';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
 import { useDependency, useObservable } from '../../../utils/di';
 import { keepInteractionInsideSameEmbedBoundary } from '../../../utils/embed-boundary';
 import { CustomLabel } from '../../custom-label/CustomLabel';
 
-type DropdownMenuProps = React.ComponentProps<typeof DropdownMenu>;
-type DropdownProps = React.ComponentProps<typeof Dropdown>;
-type TooltipProps = React.ComponentProps<typeof Tooltip>;
-
-const TooltipWrapperContext = React.createContext({
+const TooltipWrapperContext = createContext({
     dropdownVisible: false,
     setDropdownVisible: (_visible: boolean) => {},
 });
 
-const ToolbarDropdownContext = React.createContext<{
+const ToolbarDropdownContext = createContext<{
     openDropdownKey: string | null;
     setOpenDropdownKey: (key: string | null) => void;
 } | null>(null);
@@ -47,7 +55,7 @@ export interface ITooltipWrapperRef {
     el: HTMLSpanElement | null;
 }
 
-export interface IToolbarTooltipProps extends Omit<TooltipProps, 'visible' | 'onVisibleChange'> {
+export interface IToolbarTooltipProps extends Omit<ITooltipProps, 'visible' | 'onVisibleChange'> {
     popupOpen: boolean;
 }
 
@@ -57,9 +65,9 @@ export interface IToolbarTooltipProps extends Omit<TooltipProps, 'visible' | 'on
  */
 export function ToolbarTooltip(props: IToolbarTooltipProps) {
     const { popupOpen, ...tooltipProps } = props;
-    const [tooltipVisible, setTooltipVisible] = React.useState(false);
+    const [tooltipVisible, setTooltipVisible] = useState(false);
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (popupOpen) {
             setTooltipVisible(false);
         }
@@ -78,9 +86,9 @@ export function ToolbarTooltip(props: IToolbarTooltipProps) {
     );
 }
 
-export function ToolbarDropdownProvider(props: { children: React.ReactNode }) {
-    const [openDropdownKey, setOpenDropdownKey] = React.useState<string | null>(null);
-    const contextValue = React.useMemo(() => ({
+export function ToolbarDropdownProvider(props: { children: ReactNode }) {
+    const [openDropdownKey, setOpenDropdownKey] = useState<string | null>(null);
+    const contextValue = useMemo(() => ({
         openDropdownKey,
         setOpenDropdownKey,
     }), [openDropdownKey]);
@@ -92,18 +100,18 @@ export function ToolbarDropdownProvider(props: { children: React.ReactNode }) {
     );
 }
 
-export const TooltipWrapper = React.forwardRef<ITooltipWrapperRef, TooltipProps & { dropdownKey?: string }>((props, ref) => {
+export const TooltipWrapper = forwardRef<ITooltipWrapperRef, ITooltipProps & { dropdownKey?: string }>((props, ref) => {
     const { children, dropdownKey, ...tooltipProps } = props;
 
-    const spanRef = React.useRef<HTMLSpanElement>(null);
+    const spanRef = useRef<HTMLSpanElement>(null);
 
-    const [localDropdownVisible, setLocalDropdownVisible] = React.useState(false);
-    const toolbarDropdownContext = React.useContext(ToolbarDropdownContext);
+    const [localDropdownVisible, setLocalDropdownVisible] = useState(false);
+    const toolbarDropdownContext = useContext(ToolbarDropdownContext);
     const dropdownVisible = dropdownKey && toolbarDropdownContext
         ? toolbarDropdownContext.openDropdownKey === dropdownKey
         : localDropdownVisible;
 
-    const handleChangeDropdownVisible = React.useCallback((visible: boolean) => {
+    const handleChangeDropdownVisible = useCallback((visible: boolean) => {
         if (dropdownKey && toolbarDropdownContext) {
             toolbarDropdownContext.setOpenDropdownKey(visible ? dropdownKey : null);
         } else {
@@ -111,12 +119,12 @@ export const TooltipWrapper = React.forwardRef<ITooltipWrapperRef, TooltipProps 
         }
     }, [dropdownKey, toolbarDropdownContext]);
 
-    const contextValue = React.useMemo(() => ({
+    const contextValue = useMemo(() => ({
         dropdownVisible,
         setDropdownVisible: handleChangeDropdownVisible,
     }), [dropdownVisible, handleChangeDropdownVisible]);
 
-    React.useImperativeHandle(ref, () => ({
+    useImperativeHandle(ref, () => ({
         el: spanRef.current,
     }));
 
@@ -140,19 +148,19 @@ export const TooltipWrapper = React.forwardRef<ITooltipWrapperRef, TooltipProps 
         : content;
 });
 
-export function DropdownWrapper(props: Omit<Partial<DropdownProps>, 'overlay'> & { overlay: React.ReactNode; align?: 'start' | 'end' | 'center' }) {
+export function DropdownWrapper(props: Omit<Partial<IDropdownProps>, 'overlay'> & { overlay: ReactNode; align?: 'start' | 'end' | 'center' }) {
     const { children, overlay, disabled, align = 'start' } = props;
-    const { dropdownVisible, setDropdownVisible } = React.useContext(TooltipWrapperContext);
-    const triggerRef = React.useRef<HTMLDivElement>(null);
-    const overlayRef = React.useRef<HTMLDivElement>(null);
+    const { dropdownVisible, setDropdownVisible } = useContext(TooltipWrapperContext);
+    const triggerRef = useRef<HTMLDivElement>(null);
+    const overlayRef = useRef<HTMLDivElement>(null);
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (disabled) {
             setDropdownVisible(false);
         }
     }, [disabled, setDropdownVisible]);
 
-    React.useEffect(() => {
+    useEffect(() => {
         const ownerDocument = triggerRef.current?.ownerDocument;
         if (!dropdownVisible || !ownerDocument) return;
 
@@ -243,13 +251,13 @@ export function DropdownMenuWrapper({
     slot?: boolean;
     value?: string | number;
     options: IValueOption[];
-    children: React.ReactNode;
+    children: ReactNode;
     disabled?: boolean;
     onOptionSelect: (option: IValueOption) => void;
 }) {
-    const { dropdownVisible, setDropdownVisible } = React.useContext(TooltipWrapperContext);
+    const { dropdownVisible, setDropdownVisible } = useContext(TooltipWrapperContext);
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (disabled) {
             setDropdownVisible(false);
         }
@@ -263,7 +271,7 @@ export function DropdownMenuWrapper({
         false,
         [menuId, menuManagerService]
     );
-    const hiddenStates$ = React.useMemo(() => {
+    const hiddenStates$ = useMemo(() => {
         const itemStates = menuItems.map((item) => {
             const hidden$ = item.children
                 ? combineLatest(item.children.map((subItem) => subItem.item?.hidden$ ?? of(false))).pipe(
@@ -281,7 +289,7 @@ export function DropdownMenuWrapper({
     }, [menuItems]);
     const hiddenStates = useObservable<Record<string, boolean>>(hiddenStates$, {});
 
-    const filteredMenuItems = React.useMemo(() => {
+    const filteredMenuItems = useMemo(() => {
         return menuItems.filter((item) => {
             if (!item.children) {
                 return !hiddenStates[item.key];
@@ -330,7 +338,7 @@ export function DropdownMenuWrapper({
             typeof options[0].label === 'object' &&
             options[0].label?.hoverable === false &&
             options[0].label.props?.embedded === true;
-        const items: DropdownMenuProps['items'] = options.map((option) => ({
+        const items: IDropdownMenuProps['items'] = options.map((option) => ({
             type: 'item',
             className: clsx({
                 'focus:univer-bg-white': typeof option.label !== 'string' && option.label?.hoverable === false,
@@ -407,7 +415,7 @@ export function DropdownMenuWrapper({
             </DropdownMenu>
         );
     } else {
-        const items: DropdownMenuProps['items'] = [];
+        const items: IDropdownMenuProps['items'] = [];
 
         for (const menuItem of filteredMenuItems) {
             if (menuItem.item) {

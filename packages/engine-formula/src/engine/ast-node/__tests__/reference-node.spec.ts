@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IFormulaCurrentConfigService } from '../../../services/current-data.service';
 import type { IFormulaUnitReferenceResolver } from '../../../services/unit-reference-resolver.service';
 import { describe, expect, it, vi } from 'vitest';
 import { ReferenceObjectType } from '../../utils/value-object';
@@ -66,7 +67,12 @@ describe('ReferenceNode external range loading', () => {
             true
         );
         const right = new BaseAstNode('B2');
-        const union = new UnionNode(':');
+        const union = new UnionNode(':', {
+            getSheetsInfo: () => ({
+                sheetNameMap: {},
+                sheetOrder: [],
+            }),
+        } satisfies Pick<IFormulaCurrentConfigService, 'getSheetsInfo'>);
         left.setParent(union);
         right.setParent(union);
 

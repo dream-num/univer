@@ -207,6 +207,31 @@ describe('Test if function', () => {
             expect(getObjectValue(result)).toStrictEqual([['first'], ['second'], ['blank']]);
         });
 
+        it('Aggregate-propagated context preserves single-cell legacy array operands', () => {
+            testFunction.setRefInfo('unit', 'summary', 4, 11, 2, 1);
+
+            const logicTest = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([[true], [false], [true]]),
+                rowCount: 3,
+                columnCount: 1,
+                unitId: 'unit',
+                sheetId: 'data',
+                row: 4,
+                column: 0,
+            });
+            const valueIfTrue = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([[5], [6], [7]]),
+                rowCount: 3,
+                columnCount: 1,
+                unitId: 'unit',
+                sheetId: 'data',
+                row: 4,
+                column: 2,
+            });
+
+            expect(getObjectValue(testFunction.calculate(logicTest, valueIfTrue))).toStrictEqual([[5], [false], [7]]);
+        });
+
         it('ValueIfFalse is array', () => {
             const logicTest = BooleanValueObject.create(false);
             const valueIfTrue = NumberValueObject.create(1);

@@ -86,6 +86,10 @@ export class FunctionNode extends BaseAstNode {
         return NodeType.FUNCTION;
     }
 
+    override preservesLazyIfReferenceArray(child: BaseAstNode): boolean {
+        return this._functionExecutor.lazyIfReferenceArrayArgumentIndexes.includes(this.getChildren().indexOf(child));
+    }
+
     override async executeAsync() {
         const children = this.getChildren();
 

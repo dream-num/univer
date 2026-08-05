@@ -22,13 +22,13 @@ export const WrapperError = (props: {
     children: ReactElement;
 }) => {
     return (
-        <div className="univer-relative">
-            <div
-                className="univer-absolute univer-bottom-[-13px] univer-z-[999] univer-text-[10px] univer-text-red-500"
-            >
-                {props.errorText}
-            </div>
+        <div>
             {props.children}
+            {props.errorText && (
+                <div className="univer-mt-1 univer-text-xs univer-text-red-500">
+                    {props.errorText}
+                </div>
+            )}
         </div>
     );
 };

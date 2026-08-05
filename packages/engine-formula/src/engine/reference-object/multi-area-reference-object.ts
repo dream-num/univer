@@ -14,14 +14,20 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
+import type { IUnitRange, Nullable } from '@univerjs/core';
 import type { ArrayValueObject } from '../value-object/array-value-object';
-import type { BaseValueObject, ErrorValueObject } from '../value-object/base-value-object';
+import type { BaseValueObject } from '../value-object/base-value-object';
 import { createNewArray } from '../utils/array-object';
+import { ErrorValueObject } from '../value-object/base-value-object';
 import { NullValueObject } from '../value-object/primitive-object';
 import { BaseReferenceObject } from './base-reference-object';
 
 export type MultiAreaValue = BaseReferenceObject | ErrorValueObject;
+
+export enum MultiAreaArrayMode {
+    FIRST_CELL_GRID = 'first-cell-grid',
+    STACK_AREAS = 'stack-areas',
+}
 
 export class MultiAreaReferenceObject extends BaseReferenceObject {
     /**
@@ -31,7 +37,11 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
      */
     private _areas: MultiAreaValue[][] = [];
 
-    constructor(token: string, areas: MultiAreaValue[][] = []) {
+    constructor(
+        token: string,
+        areas: MultiAreaValue[][] = [],
+        private readonly _arrayMode = MultiAreaArrayMode.FIRST_CELL_GRID
+    ) {
         // The parent class's rangeData becomes meaningless for multi-area.
         // We only reuse the generic infrastructure from BaseReferenceObject.
         super(token);
@@ -108,37 +118,33 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
     // ------------------------------------------------------------
 
     override getRowCount(): number {
-        // Total rows across all areas
+        if (this._arrayMode === MultiAreaArrayMode.FIRST_CELL_GRID) {
+            return this._areas.length;
+        }
+
         let total = 0;
         for (const a of this._flatAreas()) {
-            if (a.isError()) {
-                continue;
+            if (a instanceof BaseReferenceObject) {
+                total += a.getRowCount();
             }
-            total += (a as BaseReferenceObject).getRowCount();
         }
         return total;
     }
 
     override getColumnCount(): number {
-        // Column count is ambiguous across disjoint areas.
-        // Excel usually treats multi-area as NOT having a single column count.
-        // Returning the sum is the safest for aggregations.
-        let total = 0;
-        for (const a of this._flatAreas()) {
-            if (a.isError()) {
-                continue;
-            }
-            total += (a as BaseReferenceObject).getColumnCount();
+        if (this._arrayMode === MultiAreaArrayMode.FIRST_CELL_GRID) {
+            return this._areas.reduce((max, row) => Math.max(max, row.length), 0);
         }
-        return total;
+
+        return this._flatAreas().reduce(
+            (max, area) => area instanceof BaseReferenceObject ? Math.max(max, area.getColumnCount()) : max,
+            0
+        );
     }
 
     override isExceedRange(): boolean {
         return this._flatAreas().some((a) => {
-            if (a.isError()) {
-                return false;
-            }
-            return (a as BaseReferenceObject).isExceedRange();
+            return a instanceof BaseReferenceObject && a.isExceedRange();
         });
     }
 
@@ -146,17 +152,14 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
         super.setRefOffset(x, y);
         // Propagate offset to sub-areas
         this._flatAreas().forEach((a) => {
-            if (a.isError()) {
-                return;
+            if (a instanceof BaseReferenceObject) {
+                a.setRefOffset(x, y);
             }
-            (a as BaseReferenceObject).setRefOffset(x, y);
         });
     }
 
     private _getReferenceArea(): BaseReferenceObject | undefined {
-        const flat = this._flatAreas();
-        const first = flat.find((a) => !a.isError()) as BaseReferenceObject | undefined;
-        return first;
+        return this._flatAreas().find((area): area is BaseReferenceObject => area instanceof BaseReferenceObject);
     }
 
     // ------------------------------------------------------------
@@ -202,12 +205,12 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
             let stopRow = false;
 
             for (const area of row) {
-                if (area.isError()) {
+                if (!(area instanceof BaseReferenceObject)) {
                     continue;
                 }
 
                 let stopArea = false;
-                (area as BaseReferenceObject).iterator((v, r, c) => {
+                area.iterator((v, r, c) => {
                     const res = callback(v, r, c);
                     if (res === false) {
                         stopArea = true;
@@ -252,6 +255,10 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
      * - inner `_areas[row]` dimension => columns
      */
     override toArrayValueObject(): ArrayValueObject {
+        if (this._arrayMode === MultiAreaArrayMode.STACK_AREAS) {
+            return this._stackAreas();
+        }
+
         const rows = this._areas.length;
 
         if (rows === 0) {
@@ -259,49 +266,57 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
             return createNewArray([], 0, 0);
         }
 
-        // Use the first row's length as the column count (assuming rows are consistent; otherwise fill extras later)
-        const cols = this._areas[0]?.length ?? 0;
+        const cols = this.getColumnCount();
 
         const result: BaseValueObject[][] = [];
 
         for (let r = 0; r < rows; r++) {
-            const rowAreas = this._areas[r];
-            if (!rowAreas) continue;
-
-            result[r] = result[r] || [];
+            const rowAreas = this._areas[r] ?? [];
+            result[r] = [];
 
             for (let c = 0; c < cols; c++) {
                 const area = rowAreas[c];
                 if (!area) {
+                    result[r][c] = NullValueObject.create();
                     continue;
                 }
 
                 // If it's already an error value, put it directly
-                if (area.isError()) {
-                    result[r][c] = area as ErrorValueObject;
+                if (area instanceof ErrorValueObject) {
+                    result[r][c] = area;
                     continue;
                 }
 
-                // Otherwise take the first cell of that area
-                let firstValue: Nullable<BaseValueObject> = null;
-
-                (area as BaseReferenceObject).iterator((v) => {
-                    firstValue = v ?? null;
-                    // Only need the first one; stop iteration immediately
-                    return false;
-                });
-
-                if (firstValue != null) {
-                    result[r][c] = firstValue as BaseValueObject;
-                }
-                // If firstValue is also null, depending on needs:
-                // - keep it empty (ArrayValueObject's default empty value)
-                // - or fill a NullValueObject / EmptyValueObject
-                result[r][c] = NullValueObject.create();
+                result[r][c] = area.toArrayValueObject(false).getRealValue(0, 0) ?? NullValueObject.create();
             }
         }
 
         return createNewArray(result, rows, cols);
+    }
+
+    private _stackAreas(): ArrayValueObject {
+        const result: BaseValueObject[][] = [];
+        const cols = this.getColumnCount();
+
+        for (const area of this._flatAreas()) {
+            if (area instanceof ErrorValueObject) {
+                const row = new Array<BaseValueObject>(cols).fill(NullValueObject.create());
+                row[0] = area;
+                result.push(row);
+                continue;
+            }
+
+            const array = area.toArrayValueObject(false);
+            for (let r = 0; r < array.getRowCount(); r++) {
+                const row: BaseValueObject[] = [];
+                for (let c = 0; c < cols; c++) {
+                    row[c] = array.getRealValue(r, c) ?? NullValueObject.create();
+                }
+                result.push(row);
+            }
+        }
+
+        return createNewArray(result, result.length, cols);
     }
 
     override getRangePosition() {
@@ -318,11 +333,11 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
         let maxEndColumn = Number.NEGATIVE_INFINITY;
 
         for (const area of flat) {
-            if (area.isError()) {
+            if (!(area instanceof BaseReferenceObject)) {
                 continue;
             }
 
-            const { startRow, startColumn, endRow, endColumn } = (area as BaseReferenceObject).getRangePosition();
+            const { startRow, startColumn, endRow, endColumn } = area.getRangePosition();
 
             // Skip any invalid range silently.
             if (
@@ -373,6 +388,12 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
         };
     }
 
+    override toUnitRanges(): IUnitRange[] {
+        return this._flatAreas()
+            .filter((area): area is BaseReferenceObject => area instanceof BaseReferenceObject)
+            .flatMap((area) => area.toUnitRanges());
+    }
+
     override getRangeData() {
         const flat = this._flatAreas();
 
@@ -388,11 +409,11 @@ export class MultiAreaReferenceObject extends BaseReferenceObject {
         let maxEndColumn = Number.NEGATIVE_INFINITY;
 
         for (const area of flat) {
-            if (area.isError()) {
+            if (!(area instanceof BaseReferenceObject)) {
                 continue;
             }
             // Use the raw rangeData (without offset) of each area
-            const { startRow, startColumn, endRow, endColumn } = (area as BaseReferenceObject).getRangeData();
+            const { startRow, startColumn, endRow, endColumn } = area.getRangeData();
 
             // Skip invalid/NaN ranges silently
             if (

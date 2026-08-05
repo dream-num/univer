@@ -1992,6 +1992,10 @@ export class ValueObjectFactory {
                 return createBooleanValueObjectByRawValue(rawValue);
             }
 
+            if (isStringWrappedByDoubleQuotes(rawValue)) {
+                return createStringValueObjectByRawValue(rawValue);
+            }
+
             // "000123456" should be treated as string, not number, but "123456" should be treated as number
             if (isRealNum(rawValue) && Number(rawValue).toString() === rawValue.trim()) {
                 return NumberValueObject.create(Number(rawValue));

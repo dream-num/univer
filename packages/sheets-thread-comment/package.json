@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-thread-comment",
-    "version": "1.0.0-alpha.8",
+    "version": "1.0.0-beta.0",
     "private": false,
     "description": "Thread comment integration for Univer Sheets.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

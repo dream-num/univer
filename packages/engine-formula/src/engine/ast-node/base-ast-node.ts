@@ -132,6 +132,10 @@ export class BaseAstNode {
         return this._valueObject;
     }
 
+    preservesLazyIfReferenceArray(_child: BaseAstNode): boolean {
+        return false;
+    }
+
     isCalculated() {
         return this._calculateState;
     }

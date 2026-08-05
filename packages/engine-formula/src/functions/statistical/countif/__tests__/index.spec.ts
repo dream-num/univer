@@ -65,6 +65,7 @@ const getTestWorkbookData = (): IWorkbookData => {
                         5: {
                             v: '',
                             t: CellValueType.STRING,
+                            f: '=""',
                         },
                         6: {
                             v: '<30d',
@@ -281,9 +282,21 @@ describe('Test countif function', () => {
             expect(result).toBe(2);
         });
 
+        it('Matches typed empty strings with wildcard criteria', async () => {
+            expect(await calculate('=COUNTIF(F1:F2,"*")')).toBe(1);
+            expect(await calculate('=COUNTIF(F1:F2,"<>*")')).toBe(1);
+        });
+
         it('Treats a blank cell reference criteria as zero', async () => {
             const result = await calculate('=COUNTIF(F1:F3,F2)');
             expect(result).toBe(0);
+        });
+
+        it('Does not match incomplete inequality criteria', async () => {
+            expect(await calculate('=COUNTIF(F1:F3,">")')).toBe(0);
+            expect(await calculate('=COUNTIF(F1:F3,">=")')).toBe(0);
+            expect(await calculate('=COUNTIF(F1:F3,"<")')).toBe(0);
+            expect(await calculate('=COUNTIF(F1:F3,"<=")')).toBe(0);
         });
 
         it('Compares text bucket criteria with locale ordering', async () => {
@@ -291,8 +304,8 @@ describe('Test countif function', () => {
             expect(await calculate('=COUNTIF(G1:G3,">180d")')).toBe(1);
         });
 
-        it('Excludes blank cells in less-than text criteria', async () => {
-            expect(await calculate('=COUNTIF(F1:F2,"<1 hour")')).toBe(0);
+        it('Includes empty strings but excludes blank cells in less-than text criteria', async () => {
+            expect(await calculate('=COUNTIF(F1:F2,"<1 hour")')).toBe(1);
         });
 
         it('Does not include same-lower-bound numeric buckets in pipe-delimited less-than criteria', async () => {

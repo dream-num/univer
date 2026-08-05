@@ -53,7 +53,9 @@ export class Xlookup extends BaseFunction {
             _searchMode = NumberValueObject.create(1);
         }
 
-        const _lookupValue = this._legacyImplicitLookupValue(lookupValue);
+        const _lookupValue = this.currentFormulaRowCount > 1 || this.currentFormulaColumnCount > 1
+            ? lookupValue
+            : this._legacyImplicitLookupValue(lookupValue);
 
         if (_lookupValue.isError()) {
             return _lookupValue;

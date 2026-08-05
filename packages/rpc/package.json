@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/rpc",
-    "version": "1.0.0-alpha.8",
+    "version": "1.0.0-beta.0",
     "private": false,
     "description": "Browser RPC layer for Univer main-thread and worker communication.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

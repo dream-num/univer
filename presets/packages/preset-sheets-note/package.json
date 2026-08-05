@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/preset-sheets-note",
-    "version": "1.0.0-alpha.8",
+    "version": "1.0.0-beta.0",
     "private": false,
     "description": "Preset for notes in Univer Sheets.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

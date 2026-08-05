@@ -90,6 +90,30 @@ describe('CellReferenceObject', () => {
         expect(reference.getCellByPosition().getValue()).toBe(0);
     });
 
+    it('should apply shared-formula offsets when reading the referenced cell', () => {
+        const reference = new CellReferenceObject('A1');
+        reference.setDefaultUnitId('unit-1');
+        reference.setDefaultSheetId('sheet-1');
+        reference.setUnitData({
+            'unit-1': {
+                'sheet-1': {
+                    rowCount: 2,
+                    columnCount: 1,
+                    rowData: {},
+                    columnData: {},
+                    cellData: new ObjectMatrix({
+                        0: { 0: { v: 1, t: CellValueType.NUMBER } },
+                        1: { 0: { v: 2, t: CellValueType.NUMBER } },
+                    }),
+                },
+            },
+        });
+        reference.setRefOffset(0, 1);
+
+        expect(reference.getCellByPosition().getValue()).toBe(2);
+        expect(reference.getCellByPosition(0, 0).getValue()).toBe(1);
+    });
+
     it('should treat string enum number cell types as numeric cells', () => {
         const reference = new CellReferenceObject('A1');
 

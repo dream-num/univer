@@ -46,6 +46,8 @@ export enum TextDecoration {
     WAVY_DOUBLE,
     WAVY_HEAVY,
     WORDS,
+    SINGLE_ACCOUNTING,
+    DOUBLE_ACCOUNTING,
 }
 
 /**

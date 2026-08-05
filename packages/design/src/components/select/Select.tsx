@@ -59,6 +59,12 @@ export interface ISelectProps {
      */
     borderless?: boolean;
 
+    /** Preferred side for the options popup. */
+    side?: IDropdownMenuProps['side'];
+
+    /** Whether the options popup may flip to avoid viewport collisions. */
+    avoidCollisions?: IDropdownMenuProps['avoidCollisions'];
+
     /**
      * The callback function that is triggered when the value is changed
      */
@@ -78,6 +84,8 @@ export function Select(props: ISelectProps) {
         disabled = false,
         options = [],
         borderless = false,
+        side,
+        avoidCollisions,
         onChange,
     } = props;
 
@@ -151,6 +159,8 @@ export function Select(props: ISelectProps) {
             open={open}
             items={items}
             disabled={disabled}
+            side={side}
+            avoidCollisions={avoidCollisions}
             onOpenChange={handleOpenChange}
         >
             <div

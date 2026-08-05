@@ -39,4 +39,42 @@ describe('RectPopup adaptive vertical placement', () => {
             direction: 'vertical-center',
         })).toEqual({ left: 150, top: 660 });
     });
+
+    it('preserves left alignment when choosing the vertical side', () => {
+        expect(RectPopup.calcPopupPosition({
+            position: { left: 100, right: 300, top: 100, bottom: 200 },
+            width: 100,
+            height: 40,
+            containerWidth: 1000,
+            containerHeight: 1000,
+            direction: 'vertical-left',
+        })).toEqual({ left: 100, top: 200 });
+        expect(RectPopup.calcPopupPosition({
+            position: { left: 100, right: 300, top: 700, bottom: 800 },
+            width: 100,
+            height: 40,
+            containerWidth: 1000,
+            containerHeight: 1000,
+            direction: 'vertical-left',
+        })).toEqual({ left: 100, top: 660 });
+    });
+
+    it('preserves right alignment when choosing the vertical side', () => {
+        expect(RectPopup.calcPopupPosition({
+            position: { left: 100, right: 300, top: 100, bottom: 200 },
+            width: 100,
+            height: 40,
+            containerWidth: 1000,
+            containerHeight: 1000,
+            direction: 'vertical-right',
+        })).toEqual({ left: 200, top: 200 });
+        expect(RectPopup.calcPopupPosition({
+            position: { left: 100, right: 300, top: 700, bottom: 800 },
+            width: 100,
+            height: 40,
+            containerWidth: 1000,
+            containerHeight: 1000,
+            direction: 'vertical-right',
+        })).toEqual({ left: 200, top: 660 });
+    });
 });

@@ -158,6 +158,8 @@ export { useToolbarItemStatus } from './views/components/ribbon/hook';
 export { Ribbon } from './views/components/ribbon/Ribbon';
 export { ToolbarButton } from './views/components/ribbon/ToolbarButton';
 export { ToolbarItem } from './views/components/ribbon/ToolbarItem';
+export { ToolbarTooltip } from './views/components/ribbon/TooltipButtonWrapper';
+export type { IToolbarTooltipProps } from './views/components/ribbon/TooltipButtonWrapper';
 export { Sidebar } from './views/components/sidebar/Sidebar';
 export type { ISidebarMethodOptions } from './views/components/sidebar/Sidebar';
 export { FONT_FAMILY_COMPONENT, FontFamily } from './views/font-family/FontFamily';

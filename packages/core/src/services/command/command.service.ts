@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import type { IAccessor, IDisposable } from '../../common/di';
 import { findLast, remove } from '../../common/array';
-import { createIdentifier, type IAccessor, type IDisposable, Inject, Injector } from '../../common/di';
+import { createIdentifier, Inject, Injector } from '../../common/di';
 import { CustomCommandExecutionError } from '../../common/error';
 import { sequence, sequenceAsync } from '../../common/sequence';
 import { Disposable, DisposableCollection, toDisposable } from '../../shared/lifecycle';

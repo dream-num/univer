@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { IAccessor, IDisposable } from '../../common/di';
 import { findLast, remove } from '../../common/array';
-import { createIdentifier, Inject, Injector } from '../../common/di';
+import { createIdentifier, type IAccessor, type IDisposable, Inject, Injector } from '../../common/di';
 import { CustomCommandExecutionError } from '../../common/error';
 import { sequence, sequenceAsync } from '../../common/sequence';
 import { Disposable, DisposableCollection, toDisposable } from '../../shared/lifecycle';
@@ -231,6 +230,14 @@ export interface ICommandService {
      */
     registerMultipleCommand(command: ICommand<object, unknown>): IDisposable;
     /**
+     * Create a command service that shares this service's command registry and
+     * execution listeners while resolving command dependencies from `accessor`.
+     *
+     * This is useful for UI runtimes hosted in a child dependency scope. Commands
+     * remain registered once, but their handlers receive the child scope.
+     */
+    createScoped(accessor: IAccessor): ICommandService;
+    /**
      * Execute a command with the given id and parameters.
      * @param id Identifier of the command.
      * @param params Parameters of this execution.
@@ -271,10 +278,10 @@ export interface ICommandService {
 }
 
 class CommandRegistry {
-    private readonly _commands = new Map<string, ICommand>();
+    private readonly _commands = new Map<string, ICommand<object, unknown>>();
     private readonly _commandTypes = new Map<string, CommandType>();
 
-    registerCommand(command: ICommand): IDisposable {
+    registerCommand(command: ICommand<object, unknown>): IDisposable {
         if (this._commands.has(command.id)) {
             throw new Error(`[CommandRegistry]: command "${command.id}" has been registered before.`);
         }
@@ -296,7 +303,7 @@ class CommandRegistry {
         return this._commands.has(id);
     }
 
-    getCommand(id: string): [ICommand] | null {
+    getCommand(id: string): [ICommand<object, unknown>] | null {
         if (!this._commands.has(id)) {
             return null;
         }
@@ -361,7 +368,7 @@ export class CommandService extends Disposable implements ICommandService {
         return this._commandRegistry.hasCommand(commandId);
     }
 
-    registerCommand(command: ICommand): IDisposable {
+    registerCommand(command: ICommand<object, unknown>): IDisposable {
         return this._commandRegistry.registerCommand(command);
     }
 
@@ -370,8 +377,24 @@ export class CommandService extends Disposable implements ICommandService {
         this._multiCommandDisposables.get(commandId)?.dispose();
     }
 
-    registerMultipleCommand(command: ICommand): IDisposable {
+    registerMultipleCommand(command: ICommand<object, unknown>): IDisposable {
         return this._registerMultiCommand(command);
+    }
+
+    createScoped(accessor: IAccessor): ICommandService {
+        return {
+            disposed: () => this.disposed(),
+            hasCommand: (commandId) => this.hasCommand(commandId),
+            registerCommand: (command) => this.registerCommand(command),
+            unregisterCommand: (commandId) => this.unregisterCommand(commandId),
+            registerMultipleCommand: (command) => this.registerMultipleCommand(command),
+            createScoped: (childAccessor) => this.createScoped(childAccessor),
+            executeCommand: (id, params, options) => this._executeCommand(accessor, id, params, options),
+            syncExecuteCommand: (id, params, options) => this._syncExecuteCommand(accessor, id, params, options),
+            onCommandExecuted: (listener) => this.onCommandExecuted(listener),
+            beforeCommandExecuted: (listener) => this.beforeCommandExecuted(listener),
+            onMutationExecutedForCollab: (listener) => this.onMutationExecutedForCollab(listener),
+        };
     }
 
     beforeCommandExecuted(listener: CommandListener): IDisposable {
@@ -418,6 +441,15 @@ export class CommandService extends Disposable implements ICommandService {
         params?: P,
         options?: IExecutionOptions
     ): Promise<R> {
+        return this._executeCommand(this._injector, id, params, options);
+    }
+
+    private async _executeCommand<P extends object = object, R = boolean>(
+        accessor: IAccessor,
+        id: string,
+        params?: P,
+        options?: IExecutionOptions
+    ): Promise<R> {
         if (this._disposed) {
             this._warnCommandSkippedAfterDisposed(id);
             return false as R;
@@ -443,7 +475,7 @@ export class CommandService extends Disposable implements ICommandService {
                     return false as R;
                 }
 
-                const result = await this._execute<P, R>(command as ICommand<P, R>, params, _options);
+                const result = await this._execute<P, R>(accessor, command as ICommand<P, R>, params, _options);
                 // For syncOnly mutations, only call collab listeners, not regular listeners
                 if (_options.syncOnly) {
                     if (command.type === CommandType.MUTATION) {
@@ -475,6 +507,15 @@ export class CommandService extends Disposable implements ICommandService {
     syncExecuteCommand<P extends object = object, R = boolean>(
         id: string,
         params?: P | undefined,
+        options?: IExecutionOptions
+    ): R {
+        return this._syncExecuteCommand(this._injector, id, params, options);
+    }
+
+    private _syncExecuteCommand<P extends object = object, R = boolean>(
+        accessor: IAccessor,
+        id: string,
+        params?: P,
         options?: IExecutionOptions
     ): R {
         if (this._disposed) {
@@ -515,7 +556,7 @@ export class CommandService extends Disposable implements ICommandService {
                     return false as R;
                 }
 
-                const result = this._syncExecute<P, R>(command as ICommand<P, R>, params, _options);
+                const result = this._syncExecute<P, R>(accessor, command as ICommand<P, R>, params, _options);
                 // For syncOnly mutations, only call collab listeners, not regular listeners
                 if (_options.syncOnly) {
                     if (command.type === CommandType.MUTATION) {
@@ -548,7 +589,7 @@ export class CommandService extends Disposable implements ICommandService {
         return toDisposable(() => remove(this._commandExecutionStack, stackItem));
     }
 
-    private _registerMultiCommand(command: ICommand): IDisposable {
+    private _registerMultiCommand(command: ICommand<object, unknown>): IDisposable {
         // compose a multi command and register it
         const registry = this._commandRegistry.getCommand(command.id);
         let multiCommand: MultiCommand;
@@ -582,7 +623,12 @@ export class CommandService extends Disposable implements ICommandService {
         });
     }
 
-    private async _execute<P extends object, R = boolean>(command: ICommand<P, R>, params?: P, options?: IExecutionOptions): Promise<R> {
+    private async _execute<P extends object, R = boolean>(
+        accessor: IAccessor,
+        command: ICommand<P, R>,
+        params?: P,
+        options?: IExecutionOptions
+    ): Promise<R> {
         // If syncOnly is true, skip execution but return true to indicate success for sync purposes
         if (options?.syncOnly) {
             return true as R;
@@ -598,7 +644,7 @@ export class CommandService extends Disposable implements ICommandService {
         this._commandExecutingLevel++;
         let result: R | boolean;
         try {
-            result = await this._injector.invoke(command.handler, params, options);
+            result = await command.handler(accessor, params, options);
             this._commandExecutingLevel--;
         } catch (e) {
             result = false;
@@ -609,7 +655,12 @@ export class CommandService extends Disposable implements ICommandService {
         return result;
     }
 
-    private _syncExecute<P extends object, R = boolean>(command: ICommand<P, R>, params?: P, options?: IExecutionOptions): R {
+    private _syncExecute<P extends object, R = boolean>(
+        accessor: IAccessor,
+        command: ICommand<P, R>,
+        params?: P,
+        options?: IExecutionOptions
+    ): R {
          // If syncOnly is true, skip execution but return true to indicate success for sync purposes
         if (options?.syncOnly) {
             return true as R;
@@ -625,7 +676,7 @@ export class CommandService extends Disposable implements ICommandService {
         this._commandExecutingLevel++;
         let result: R | boolean;
         try {
-            result = this._injector.invoke(command.handler, params, options) as R;
+            result = command.handler(accessor, params, options) as R;
             if (result instanceof Promise) {
                 throw new TypeError('[CommandService]: Command handler should not return a promise.');
             }

@@ -42,28 +42,26 @@ const ALIGNMENT_OPTIONS = [
 ] satisfies Array<{ label: LocaleKey; value: string; icon: ReactNode }>;
 
 const ParagraphSettingSection = (props: {
-    titleKey: LocaleKey;
+    title: string;
     children: ReactNode;
     first?: boolean;
 }) => {
-    const { titleKey, children, first = false } = props;
-    const localeService = useDependency(LocaleService);
+    const { title, children, first = false } = props;
 
     return (
         <section className={clsx(!first && 'univer-mt-5')}>
-            <div className="univer-text-sm univer-font-medium univer-leading-5">{localeService.t(titleKey)}</div>
+            <div className="univer-text-sm univer-font-medium univer-leading-5">{title}</div>
             <div className="univer-mt-3">{children}</div>
         </section>
     );
 };
 
 const ParagraphSettingRow = (props: {
-    labelKey: LocaleKey;
+    label: string;
     unit?: string;
     children: ReactNode;
 }) => {
-    const { labelKey, unit, children } = props;
-    const localeService = useDependency(LocaleService);
+    const { label, unit, children } = props;
 
     return (
         <div
@@ -76,7 +74,7 @@ const ParagraphSettingRow = (props: {
                   dark:!univer-text-gray-100
                 "
             >
-                {localeService.t(labelKey)}
+                {label}
                 {unit}
             </div>
             <div className="univer-w-full univer-min-w-0">
@@ -140,7 +138,7 @@ export function ParagraphSetting() {
 
     return (
         <div className="univer-box-border univer-w-full">
-            <ParagraphSettingSection titleKey="docs-ui.doc.paragraphSetting.alignment" first>
+            <ParagraphSettingSection title={localeService.t<LocaleKey>('docs-ui.doc.paragraphSetting.alignment')} first>
                 <div
                     className={clsx(`
                       univer-flex univer-grid-cols-4 univer-items-center univer-justify-around univer-gap-2
@@ -176,32 +174,32 @@ export function ParagraphSetting() {
                 </div>
             </ParagraphSettingSection>
 
-            <ParagraphSettingSection titleKey="docs-ui.doc.paragraphSetting.indentation">
+            <ParagraphSettingSection title={localeService.t<LocaleKey>('docs-ui.doc.paragraphSetting.indentation')}>
                 <div className="univer-grid univer-gap-3">
-                    <ParagraphSettingRow labelKey="docs-ui.doc.paragraphSetting.left" unit="(px)">
+                    <ParagraphSettingRow label={localeService.t<LocaleKey>('docs-ui.doc.paragraphSetting.left')} unit="(px)">
                         <AutoFocusInputNumber value={indentStart} onChange={(v) => setIndentStart(v ?? 0)} />
                     </ParagraphSettingRow>
-                    <ParagraphSettingRow labelKey="docs-ui.doc.paragraphSetting.right" unit="(px)">
+                    <ParagraphSettingRow label={localeService.t<LocaleKey>('docs-ui.doc.paragraphSetting.right')} unit="(px)">
                         <AutoFocusInputNumber value={indentEnd} onChange={(v) => setIndentEnd(v ?? 0)} />
                     </ParagraphSettingRow>
-                    <ParagraphSettingRow labelKey="docs-ui.doc.paragraphSetting.firstLine" unit="(px)">
+                    <ParagraphSettingRow label={localeService.t<LocaleKey>('docs-ui.doc.paragraphSetting.firstLine')} unit="(px)">
                         <AutoFocusInputNumber value={indentFirstLine} onChange={(v) => setIndentFirstLine(v ?? 0)} />
                     </ParagraphSettingRow>
-                    <ParagraphSettingRow labelKey="docs-ui.doc.paragraphSetting.hanging" unit="(px)">
+                    <ParagraphSettingRow label={localeService.t<LocaleKey>('docs-ui.doc.paragraphSetting.hanging')} unit="(px)">
                         <AutoFocusInputNumber value={hanging} onChange={(v) => setHanging(v ?? 0)} />
                     </ParagraphSettingRow>
                 </div>
             </ParagraphSettingSection>
 
-            <ParagraphSettingSection titleKey="docs-ui.doc.paragraphSetting.spacing">
+            <ParagraphSettingSection title={localeService.t<LocaleKey>('docs-ui.doc.paragraphSetting.spacing')}>
                 <div className="univer-grid univer-gap-3">
-                    <ParagraphSettingRow labelKey="docs-ui.doc.paragraphSetting.before" unit="(px)">
+                    <ParagraphSettingRow label={localeService.t<LocaleKey>('docs-ui.doc.paragraphSetting.before')} unit="(px)">
                         <AutoFocusInputNumber value={spaceAbove} onChange={(v) => setSpaceAbove(v ?? 0)} />
                     </ParagraphSettingRow>
-                    <ParagraphSettingRow labelKey="docs-ui.doc.paragraphSetting.after" unit="(px)">
+                    <ParagraphSettingRow label={localeService.t<LocaleKey>('docs-ui.doc.paragraphSetting.after')} unit="(px)">
                         <AutoFocusInputNumber value={spaceBelow} onChange={(v) => setSpaceBelow(v ?? 0)} />
                     </ParagraphSettingRow>
-                    <ParagraphSettingRow labelKey="docs-ui.doc.paragraphSetting.lineSpace">
+                    <ParagraphSettingRow label={localeService.t<LocaleKey>('docs-ui.doc.paragraphSetting.lineSpace')}>
                         <div className="univer-flex univer-w-full univer-flex-col univer-gap-2">
                             <Select
                                 className="univer-w-full"

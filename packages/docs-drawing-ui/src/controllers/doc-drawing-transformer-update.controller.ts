@@ -209,7 +209,6 @@ export class DocDrawingTransformerController extends Disposable {
         );
 
         const throttleMultipleDrawingUpdate = throttle(this._updateMultipleDrawingDocTransform.bind(this), 50);
-        const throttleNonInlineMoveUpdate = throttle(this._nonInlineDrawingTransform.bind(this), 50);
 
         this.disposeWithMe(
             toDisposable(
@@ -232,10 +231,6 @@ export class DocDrawingTransformerController extends Disposable {
                             angle === drawingCache.angle
                         ) {
                             return;
-                        }
-
-                        if (drawingCache && drawingCache.drawing.layoutType !== PositionedObjectLayoutType.INLINE) {
-                            // throttleNonInlineMoveUpdate(drawingCache.drawing, object, true);
                         }
 
                         if (drawingCache && drawingCache.drawing.layoutType === PositionedObjectLayoutType.INLINE && offsetX != null && offsetY != null) {

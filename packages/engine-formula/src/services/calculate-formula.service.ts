@@ -308,7 +308,16 @@ export class CalculateFormulaService extends Disposable implements ICalculateFor
                 tree.unitId
             );
 
-            const node = generateAstNode(tree.unitId, tree.formula, this._lexer, this._astTreeBuilder, this._currentConfigService, tree.subUnitId);
+            const node = generateAstNode(
+                tree.unitId,
+                tree.formula,
+                this._lexer,
+                this._astTreeBuilder,
+                this._currentConfigService,
+                tree.subUnitId,
+                tree.column,
+                tree.row
+            );
             const nodeData = {
                 node,
                 refOffsetX: tree.refOffsetX,

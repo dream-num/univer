@@ -43,7 +43,9 @@ export function generateAstNode(
     lexer: Lexer,
     astTreeBuilder: AstTreeBuilder,
     currentConfigService: IFormulaCurrentConfigService,
-    subUnitId?: string
+    subUnitId?: string,
+    definedNameRefOffsetX = 0,
+    definedNameRefOffsetY = 0
 ): AstRootNode {
     if (subUnitId) {
         currentConfigService.setExecuteUnitId(unitId);
@@ -51,7 +53,7 @@ export function generateAstNode(
     }
 
     const executeSubUnitId = subUnitId ?? currentConfigService.getExecuteSubUnitId() ?? '';
-    const cacheKey = `${unitId}:${executeSubUnitId}:${formulaString}`;
+    const cacheKey = `${unitId}:${executeSubUnitId}:${definedNameRefOffsetX}:${definedNameRefOffsetY}:${formulaString}`;
     // refOffsetX and refOffsetY are separated by -, otherwise x:1 y:10 will be repeated with x:11 y:0
     let astNode: Nullable<AstRootNode> = FORMULA_AST_CACHE.get(cacheKey);
 
@@ -66,7 +68,7 @@ export function generateAstNode(
         return astNode;
     }
 
-    const lexerNode = lexer.treeBuilder(formulaString, true, unitId);
+    const lexerNode = lexer.treeBuilder(formulaString, true, unitId, definedNameRefOffsetX, definedNameRefOffsetY);
 
     if (ERROR_TYPE_SET.has(lexerNode as ErrorType)) {
         return ErrorNode.create(lexerNode as ErrorType);

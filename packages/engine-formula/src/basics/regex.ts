@@ -62,7 +62,7 @@ export const REFERENCE_REGEX_SINGLE_COLUMN = `^${UNIT_NAME_SHEET_NAME_REGEX}\\s*
 
 export const REFERENCE_REGEX_SINGLE_COLUMN_PRECOMPILING = new RegExp(REFERENCE_REGEX_SINGLE_COLUMN);
 
-const TABLE_NAME_REGEX = '((?![~!@#$%^&*()_+<>?:,./;’，。、‘：“《》？~！@#￥%……（）【】\\[\\]\\/\\\\]).)+';
+const TABLE_NAME_REGEX = '((?![~!@#$%^&*()+<>?:,./;’，。、‘：“《》？~！@#￥%……（）【】\\[\\]\\/\\\\]).)+';
 
 const TABLE_TITLE_REGEX = '\\[#.+\\]\\s*?,\\s*?';
 

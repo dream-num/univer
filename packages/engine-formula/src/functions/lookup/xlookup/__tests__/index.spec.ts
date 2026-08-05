@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import type { BaseValueObject } from '../../../../engine/value-object/base-value-object';
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
-import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
+import { BaseValueObject, ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { Concatenate } from '../../../text/concatenate';
 import { FUNCTION_NAMES_TEXT } from '../../../text/function-names';
@@ -159,9 +158,49 @@ describe('Test xlookup', () => {
                     [20],
                     [30],
                 ])
-            ) as BaseValueObject;
+            );
+            if (!(resultObject instanceof BaseValueObject)) {
+                throw new TypeError('Expected XLOOKUP to return a value object');
+            }
 
             expect(getObjectValue(resultObject)).toBe(20);
+        });
+
+        it('Reference-derived lookup array should stay an array in a dynamic array formula', async () => {
+            const positionedFunction = new Xlookup(FUNCTION_NAMES_LOOKUP.XLOOKUP);
+            positionedFunction.setRefInfo('unit', 'summary', 2, 5, 3, 1);
+
+            const lookupValue = ArrayValueObject.createByArray([
+                ['A'],
+                ['B'],
+                ['C'],
+            ]);
+            lookupValue.setUnitId('unit');
+            lookupValue.setSheetId('source');
+            lookupValue.setCurrent(1, 1);
+
+            const resultObject = positionedFunction.calculate(
+                lookupValue,
+                ArrayValueObject.createByArray([
+                    ['A'],
+                    ['B'],
+                    ['C'],
+                ]),
+                ArrayValueObject.createByArray([
+                    [10],
+                    [20],
+                    [30],
+                ])
+            );
+            if (!(resultObject instanceof BaseValueObject)) {
+                throw new TypeError('Expected XLOOKUP to return a value object');
+            }
+
+            expect(getObjectValue(resultObject)).toStrictEqual([
+                [10],
+                [20],
+                [30],
+            ]);
         });
 
         it('Reference-derived single-cell lookup value should use the cell value directly', async () => {

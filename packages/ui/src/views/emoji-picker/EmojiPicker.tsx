@@ -34,6 +34,7 @@ import {
 } from '@univerjs/icons';
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { useDependency, useObservable } from '../../utils/di';
+import { useVirtualList } from '../hooks/virtual-list';
 import {
     EMOJI_CATEGORIES,
     getDefaultRecentEmojis,
@@ -50,6 +51,10 @@ export const EMOJI_PICKER_COMPONENT = 'ui.emoji-picker';
 
 const RECENTS_STORAGE_KEY = 'univer.ui.recent-emojis';
 const ACTIVE_SECTION_SCROLL_OFFSET = 28;
+const EMOJI_COLUMN_COUNT = 10;
+const EMOJI_ROW_HEIGHT = 32;
+const EMOJI_SECTION_HEADER_HEIGHT = 24;
+const EMOJI_VIRTUAL_OVERSCAN = 3;
 
 interface IEmojiPickerPopupProps {
     activeEmoji?: string;
@@ -65,38 +70,50 @@ interface IEmojiPickerProps {
 
 type EmojiSectionKey = 'recent' | EmojiCategory;
 interface IEmojiSection { emojis: IEmojiItem[]; key: EmojiSectionKey; title: string }
+interface IEmojiSectionPosition { key: EmojiSectionKey; rowIndex: number; top: number }
+type EmojiVirtualRow =
+    | { key: string; title: string; type: 'header' }
+    | { items: IEmojiItem[]; key: string; type: 'emojis' };
 
 export function EmojiPicker(props: IEmojiPickerProps) {
     const extraProps = props.popup?.extraProps;
     const localeService = useDependency(LocaleService);
     const localStorageService = useDependency(ILocalStorageService);
     const currentLocale = useObservable(localeService.currentLocale$, localeService.getCurrentLocale());
-    const scrollRef = useRef<HTMLDivElement>(null);
-    const sectionRefs = useRef<Partial<Record<EmojiSectionKey, HTMLDivElement | null>>>({});
+    const scrollRef = useRef<HTMLDivElement>(undefined!);
+    const pendingSectionRef = useRef<EmojiSectionKey | null>(null);
     const [query, setQuery] = useState('');
     const [activeEmoji, setActiveEmoji] = useState(extraProps?.activeEmoji);
     const [activeTab, setActiveTab] = useState<EmojiSectionKey>('recent');
     const [recents, setRecents] = useState<IEmojiItem[]>(() => getDefaultRecentEmojis());
     const deferredQuery = useDeferredValue(query);
-    const emojiLocaleData = useMemo(() => getEmojiLocaleData(localeService), [currentLocale, localeService]);
+    const emojiLocaleData = getEmojiLocaleData(localeService);
     const searchResults = useMemo(
         () => searchEmojis(deferredQuery, emojiLocaleData.emojiSearchIndex),
         [deferredQuery, emojiLocaleData]
     );
     const recentStorageKey = extraProps?.recentStorageKey ?? RECENTS_STORAGE_KEY;
     const isSearching = deferredQuery.trim().length > 0;
-    const normalSections = [
-        { key: 'recent' as const, title: localeService.t<LocaleKey>('ui.emojiPicker.recents'), emojis: recents },
-        ...EMOJI_CATEGORIES.map((category) => ({
-            key: category.key,
-            title: localeService.t(category.titleKey),
-            emojis: emojis[category.key],
-        })),
-    ];
-    const sections = isSearching
-        ? [{ key: 'people' as const, title: localeService.t<LocaleKey>('ui.emojiPicker.searchResults'), emojis: searchResults }]
-        : normalSections;
-    const renderedSections = sections.filter((section) => section.emojis.length);
+    const { rows, sectionPositions } = useMemo(() => {
+        const normalSections = [
+            { key: 'recent' as const, title: localeService.t<LocaleKey>('ui.emojiPicker.recents'), emojis: recents },
+            ...EMOJI_CATEGORIES.map((category) => ({
+                key: category.key,
+                title: localeService.t(category.titleKey),
+                emojis: emojis[category.key],
+            })),
+        ];
+        const sections = isSearching
+            ? [{ key: 'people' as const, title: localeService.t<LocaleKey>('ui.emojiPicker.searchResults'), emojis: searchResults }]
+            : normalSections;
+
+        return createEmojiVirtualRows(sections, currentLocale);
+    }, [currentLocale, isSearching, localeService, recents, searchResults]);
+    const [virtualRows, { containerProps, scrollTo, wrapperStyle }] = useVirtualList(rows, {
+        containerTarget: scrollRef,
+        itemHeight: getEmojiVirtualRowHeight,
+        overscan: EMOJI_VIRTUAL_OVERSCAN,
+    });
 
     useEffect(() => {
         let disposed = false;
@@ -115,6 +132,19 @@ export function EmojiPicker(props: IEmojiPickerProps) {
         };
     }, [localStorageService, recentStorageKey]);
 
+    useEffect(() => {
+        const pendingSection = pendingSectionRef.current;
+        if (isSearching || !pendingSection) {
+            return;
+        }
+
+        const position = sectionPositions.find((item) => item.key === pendingSection);
+        if (position) {
+            scrollTo(position.rowIndex);
+        }
+        pendingSectionRef.current = null;
+    }, [isSearching, scrollTo, sectionPositions]);
+
     const handleSelect = (item: IEmojiItem, options?: { keepOpen?: boolean }) => {
         const nextRecents = promoteRecentEmoji(recents, item);
         setActiveEmoji(item.emoji);
@@ -129,22 +159,24 @@ export function EmojiPicker(props: IEmojiPickerProps) {
     };
 
     const handleScroll = (event: UIEvent<HTMLDivElement>) => {
+        containerProps.onScroll(event);
         if (isSearching) {
             return;
         }
 
-        setActiveTab(getActiveSectionByScrollTop(normalSections, sectionRefs.current, event.currentTarget.scrollTop));
+        setActiveTab(getActiveSectionByScrollTop(sectionPositions, event.currentTarget.scrollTop));
     };
 
     const scrollToSection = (section: EmojiSectionKey) => {
         setQuery('');
         setActiveTab(section);
-        requestAnimationFrame(() => {
-            const sectionElement = sectionRefs.current[section];
-            if (scrollRef.current && sectionElement) {
-                scrollRef.current.scrollTop = sectionElement.offsetTop;
-            }
-        });
+        const position = sectionPositions.find((item) => item.key === section);
+        if (!isSearching && position) {
+            scrollTo(position.rowIndex);
+            return;
+        }
+
+        pendingSectionRef.current = section;
     };
 
     return (
@@ -201,21 +233,32 @@ export function EmojiPicker(props: IEmojiPickerProps) {
                 )}
                 onScroll={handleScroll}
             >
-                {renderedSections.length
+                {rows.length
                     ? (
-                        <div className="univer-flex univer-flex-col univer-gap-1.5 univer-pb-2">
-                            {renderedSections.map((section) => (
-                                <EmojiSectionView
-                                    key={section.key}
-                                    activeEmoji={activeEmoji}
-                                    emojiTitles={emojiLocaleData.emojiTitles}
-                                    section={section}
-                                    onSelect={handleSelect}
-                                    refElement={(element) => {
-                                        sectionRefs.current[section.key] = element;
-                                    }}
-                                />
-                            ))}
+                        <div style={wrapperStyle}>
+                            {virtualRows.map(({ data: row }) => row.type === 'header'
+                                ? (
+                                    <div
+                                        key={row.key}
+                                        style={{ height: EMOJI_SECTION_HEADER_HEIGHT }}
+                                        className="
+                                          univer-flex univer-items-center univer-text-xs univer-text-gray-500
+                                          dark:!univer-text-gray-400
+                                        "
+                                    >
+                                        {row.title}
+                                    </div>
+                                )
+                                : (
+                                    <EmojiGrid
+                                        key={row.key}
+                                        activeEmoji={activeEmoji}
+                                        emojiTitles={emojiLocaleData.emojiTitles}
+                                        items={row.items}
+                                        keyPrefix={row.key}
+                                        onSelect={handleSelect}
+                                    />
+                                ))}
                         </div>
                     )
                     : (
@@ -239,7 +282,7 @@ export function EmojiPicker(props: IEmojiPickerProps) {
             >
                 <CategoryButton
                     selected={!isSearching && activeTab === 'recent'}
-                    titleKey="ui.emojiPicker.recents"
+                    title={localeService.t<LocaleKey>('ui.emojiPicker.recents')}
                     onClick={() => scrollToSection('recent')}
                 >
                     <RecentIcon />
@@ -248,41 +291,13 @@ export function EmojiPicker(props: IEmojiPickerProps) {
                     <CategoryButton
                         key={category.key}
                         selected={!isSearching && activeTab === category.key}
-                        titleKey={category.titleKey}
+                        title={localeService.t(category.titleKey)}
                         onClick={() => scrollToSection(category.key)}
                     >
                         <CategoryIcon category={category.key} />
                     </CategoryButton>
                 ))}
             </div>
-        </section>
-    );
-}
-
-function EmojiSectionView(props: {
-    activeEmoji?: string;
-    emojiTitles?: Record<string, string>;
-    onSelect: (item: IEmojiItem, options?: { keepOpen?: boolean }) => void;
-    refElement: (element: HTMLDivElement | null) => void;
-    section: IEmojiSection;
-}) {
-    return (
-        <section ref={props.refElement} className="univer-flex univer-flex-col univer-gap-1">
-            <div
-                className="
-                  univer-text-xs univer-text-gray-500
-                  dark:!univer-text-gray-400
-                "
-            >
-                {props.section.title}
-            </div>
-            <EmojiGrid
-                activeEmoji={props.activeEmoji}
-                emojiTitles={props.emojiTitles}
-                items={props.section.emojis}
-                keyPrefix={props.section.key}
-                onSelect={props.onSelect}
-            />
         </section>
     );
 }
@@ -295,7 +310,10 @@ function EmojiGrid(props: {
     onSelect: (item: IEmojiItem, options?: { keepOpen?: boolean }) => void;
 }) {
     return (
-        <div className="univer-grid univer-grid-cols-10 univer-justify-between univer-gap-1">
+        <div
+            className="univer-grid univer-grid-cols-10 univer-justify-between univer-gap-1"
+            style={{ height: EMOJI_ROW_HEIGHT }}
+        >
             {props.items.map((item) => {
                 const title = getLocalizedEmojiTitle(item, props.emojiTitles);
                 const active = props.activeEmoji === item.emoji;
@@ -332,15 +350,13 @@ function EmojiGrid(props: {
     );
 }
 
-function CategoryButton(props: { children: ReactElement; onClick: () => void; selected: boolean; titleKey: LocaleKey }) {
-    const localeService = useDependency(LocaleService);
-
+function CategoryButton(props: { children: ReactElement; onClick: () => void; selected: boolean; title: string }) {
     return (
         <button
             type="button"
-            aria-label={localeService.t(props.titleKey)}
+            aria-label={props.title}
             aria-selected={props.selected}
-            title={localeService.t(props.titleKey)}
+            title={props.title}
             className={clsx(
                 `
                   univer-flex univer-h-[30px] univer-flex-1 univer-cursor-pointer univer-items-center
@@ -371,17 +387,46 @@ function writeRecents(localStorageService: ILocalStorageService, storageKey: str
         .catch(() => undefined);
 }
 
-function getActiveSectionByScrollTop(
-    sections: IEmojiSection[],
-    sectionElements: Partial<Record<EmojiSectionKey, HTMLDivElement | null>>,
-    scrollTop: number
-): EmojiSectionKey {
-    let active: EmojiSectionKey = 'recent';
+function createEmojiVirtualRows(sections: IEmojiSection[], locale: string): {
+    rows: EmojiVirtualRow[];
+    sectionPositions: IEmojiSectionPosition[];
+} {
+    const rows: EmojiVirtualRow[] = [];
+    const sectionPositions: IEmojiSectionPosition[] = [];
+    let top = 0;
 
     sections.forEach((section) => {
-        const element = sectionElements[section.key];
-        if (element && element.offsetTop <= scrollTop + ACTIVE_SECTION_SCROLL_OFFSET) {
-            active = section.key;
+        if (!section.emojis.length) {
+            return;
+        }
+
+        sectionPositions.push({ key: section.key, rowIndex: rows.length, top });
+        rows.push({ key: `${locale}-${section.key}-header`, title: section.title, type: 'header' });
+        top += EMOJI_SECTION_HEADER_HEIGHT;
+
+        for (let start = 0; start < section.emojis.length; start += EMOJI_COLUMN_COUNT) {
+            rows.push({
+                items: section.emojis.slice(start, start + EMOJI_COLUMN_COUNT),
+                key: `${locale}-${section.key}-${start / EMOJI_COLUMN_COUNT}`,
+                type: 'emojis',
+            });
+            top += EMOJI_ROW_HEIGHT;
+        }
+    });
+
+    return { rows, sectionPositions };
+}
+
+function getEmojiVirtualRowHeight(_index: number, row: EmojiVirtualRow): number {
+    return row.type === 'header' ? EMOJI_SECTION_HEADER_HEIGHT : EMOJI_ROW_HEIGHT;
+}
+
+function getActiveSectionByScrollTop(sectionPositions: IEmojiSectionPosition[], scrollTop: number): EmojiSectionKey {
+    let active: EmojiSectionKey = 'recent';
+
+    sectionPositions.forEach((position) => {
+        if (position.top <= scrollTop + ACTIVE_SECTION_SCROLL_OFFSET) {
+            active = position.key;
         }
     });
 

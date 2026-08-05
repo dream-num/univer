@@ -158,6 +158,7 @@ export function Gallery(props: IGalleryProps) {
                   univer-absolute univer-bottom-6 univer-left-1/2 univer-flex -univer-translate-x-1/2
                   univer-items-center univer-gap-3 univer-rounded-full univer-bg-gray-800 univer-px-6 univer-py-3
                   univer-text-gray-400
+                  rtl:univer-flex-row-reverse
                 `}
             >
                 {hasPagination && (

@@ -172,7 +172,7 @@ export class DrawingPopupMenuController extends RxDisposable {
             const menus = this._canvasPopManagerService.getFeatureMenu(unitId, subUnitId, drawingId, drawingType);
             singletonPopupDisposer = this.disposeWithMe(this._canvasPopManagerService.attachPopupToObject(object, {
                 componentKey: COMPONENT_IMAGE_POPUP_MENU,
-                direction: 'horizontal',
+                direction: this._localeService.getDirection() === 'rtl' ? 'left' : 'horizontal',
                 offset: [2, 0],
                 extraProps: {
                     menuItems: menus || this._getImageMenuItems(unitId, subUnitId, drawingId, drawingType),

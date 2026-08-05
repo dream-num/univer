@@ -103,6 +103,11 @@ export class BaseFunction {
     needsAstChildren: boolean = false;
 
     /**
+     * Arguments that preserve a selected lazy IF branch as a reference array.
+     */
+    lazyIfReferenceArrayArgumentIndexes: readonly number[] = [];
+
+    /**
      * Legacy CSE-style array functions should write only the first result cell
      * when they are used as a top-level normal formula.
      */

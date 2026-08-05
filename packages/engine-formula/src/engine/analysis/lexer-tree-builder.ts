@@ -19,7 +19,7 @@ import type { IDirtyUnitDefinedNameMap, IExprTreeNode, ISuperTable } from '../..
 import type { IFunctionNames } from '../../basics/function';
 import type { IDefinedNamesServiceParam } from '../../services/defined-names.service';
 import type { ISequenceArray, ISequenceNode } from '../utils/sequence';
-import { AbsoluteRefType, Disposable, isValidRange, moveRangeByOffset, Tools } from '@univerjs/core';
+import { AbsoluteRefType, Disposable, isValidRange, MAX_COLUMN_COUNT, MAX_ROW_COUNT, moveRangeByOffset, Tools } from '@univerjs/core';
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { ERROR_TYPE_COUNT_ARRAY, ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { isFormulaLexerToken, isTokenCannotBeAtEnd, isTokenCannotPrecedeSuffixToken } from '../../basics/match-token';
@@ -81,6 +81,9 @@ export const FormulaSequenceNodeCache = new FormulaAstLRU<Array<string | ISequen
 interface IInjectDefinedNameParam {
     unitId: Nullable<string>;
     sheetId?: Nullable<string>;
+    refOffsetX: number;
+    refOffsetY: number;
+    hasFunction(functionToken: IFunctionNames): boolean;
     getValueByName(unitId: string, name: string, sheetId?: Nullable<string>): Nullable<IDefinedNamesServiceParam>;
     getDirtyDefinedNameMap(): IDirtyUnitDefinedNameMap;
     getSheetName: (unitId: string, sheetId: string) => string;
@@ -699,8 +702,14 @@ export class LexerTreeBuilder extends Disposable {
         transformSuffix = true,
         injectDefinedNameParam?: IInjectDefinedNameParam
     ) {
-        if (transformSuffix === true) {
-            const lexerNode = FormulaLexerNodeCache.get(formulaString);
+        // Parsing LET/LAMBDA rewrites the lexer tree with runtime parameter bindings.
+        // Reusing that mutated tree would bind the next AST to the previous AST's nodes.
+        const isCacheable = !/\b(?:LET|LAMBDA)\s*\(/iu.test(formulaString);
+        const cacheKey = injectDefinedNameParam == null
+            ? formulaString
+            : `${injectDefinedNameParam.unitId ?? ''}\0${injectDefinedNameParam.sheetId ?? ''}\0${injectDefinedNameParam.refOffsetX}\0${injectDefinedNameParam.refOffsetY}\0${formulaString}`;
+        if (transformSuffix === true && isCacheable) {
+            const lexerNode = FormulaLexerNodeCache.get(cacheKey);
             const simpleCheckDefinedNameResult = injectDefinedNameParam && this._simpleCheckDefinedName?.(formulaString, injectDefinedNameParam);
             if (lexerNode && !simpleCheckDefinedNameResult) {
                 return lexerNode;
@@ -753,7 +762,9 @@ export class LexerTreeBuilder extends Disposable {
             if (!isValid) {
                 return ErrorType.VALUE;
             }
-            FormulaLexerNodeCache.set(formulaString, this._currentLexerNode);
+            if (isCacheable) {
+                FormulaLexerNodeCache.set(cacheKey, this._currentLexerNode);
+            }
         }
 
         if (currentHasDefinedName) {
@@ -768,7 +779,7 @@ export class LexerTreeBuilder extends Disposable {
         hasDefinedName: boolean;
         definedNames: string[];
     } {
-        const { unitId, sheetId, getValueByName, getSheetName } = param;
+        const { unitId, sheetId, hasFunction, getValueByName } = param;
 
         if (unitId == null) {
             return {
@@ -794,13 +805,24 @@ export class LexerTreeBuilder extends Disposable {
             let token = tokenRaw;
             if (nodeType === sequenceNodeType.REFERENCE || nodeType === sequenceNodeType.FUNCTION) {
                 if (nodeType === sequenceNodeType.FUNCTION) {
+                    const nextNode = sequenceNodes[i + 1];
+                    const isFunctionCall = typeof nextNode === 'string' && nextNode.trim() === matchToken.OPEN_BRACKET;
+                    if (isFunctionCall && hasFunction(tokenRaw.trim().toUpperCase())) {
+                        sequenceString += tokenRaw;
+                        continue;
+                    }
                     token = this._getHasSheetNameDefinedName(tokenRaw, unitId, param);
                 }
 
                 const definedNameToken = token.trim();
                 const definedContent = getValueByName(unitId, definedNameToken, sheetId);
                 if (definedContent) {
-                    const refString = definedContent.formulaOrRefString;
+                    const refOffsetX = definedContent.localSheetId === 'AllDefaultWorkbook'
+                        ? param.refOffsetX - 1
+                        : param.refOffsetX;
+                    const refString = definedContent.formulaOrRefString.startsWith('=')
+                        ? definedContent.formulaOrRefString
+                        : this._moveDefinedNameRefOffset(definedContent.formulaOrRefString, refOffsetX, param.refOffsetY);
                     // if (refString.substring(0, 1) === operatorToken.EQUALS) {
                     //     refString = refString.substring(1);
                     // }
@@ -835,6 +857,38 @@ export class LexerTreeBuilder extends Disposable {
             hasDefinedName,
             definedNames,
         };
+    }
+
+    private _moveDefinedNameRefOffset(formulaString: string, refOffsetX: number, refOffsetY: number) {
+        const sequenceNodes = this.sequenceNodesBuilder(formulaString);
+
+        if (sequenceNodes == null) {
+            return formulaString;
+        }
+
+        return generateStringWithSequence(sequenceNodes.map((node) => {
+            if (typeof node === 'string' || node.nodeType !== sequenceNodeType.REFERENCE) {
+                return node;
+            }
+
+            const sequenceGrid = deserializeRangeWithSheetWithCache(node.token);
+            const range = moveRangeByOffset(sequenceGrid.range, refOffsetX, refOffsetY);
+            const wrap = (value: number, limit: number) => ((value % limit) + limit) % limit;
+
+            range.startRow = wrap(range.startRow, MAX_ROW_COUNT);
+            range.endRow = wrap(range.endRow, MAX_ROW_COUNT);
+            range.startColumn = wrap(range.startColumn, MAX_COLUMN_COUNT);
+            range.endColumn = wrap(range.endColumn, MAX_COLUMN_COUNT);
+
+            return {
+                ...node,
+                token: serializeRangeToRefString({
+                    range,
+                    unitId: sequenceGrid.unitId,
+                    sheetName: sequenceGrid.sheetName,
+                }),
+            };
+        }));
     }
 
     private _getHasSheetNameDefinedName(tokenRaw: string, unitId: string, param: IInjectDefinedNameParam) {
@@ -1550,7 +1604,8 @@ export class LexerTreeBuilder extends Disposable {
             } else if (
                 currentString === matchToken.OPEN_BRACKET &&
                 this.isSingleQuotationClose() &&
-                this.isDoubleQuotationClose()
+                this.isDoubleQuotationClose() &&
+                this.isSquareBracketClose()
             ) {
                 if (this._segmentCount() > 0 || this.isLambdaOpen()) {
                     if (this.isLambdaClose()) {
@@ -1591,7 +1646,8 @@ export class LexerTreeBuilder extends Disposable {
             } else if (
                 currentString === matchToken.CLOSE_BRACKET &&
                 this.isSingleQuotationClose() &&
-                this.isDoubleQuotationClose()
+                this.isDoubleQuotationClose() &&
+                this.isSquareBracketClose()
             ) {
                 if (this._formulaErrorLastTokenCheck(formulaChars, cur - 1)) {
                     this._formalErrorOccurred();

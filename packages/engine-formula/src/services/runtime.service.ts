@@ -15,6 +15,7 @@
  */
 
 import type { ICellData, IRange, Nullable } from '@univerjs/core';
+
 import type {
     IArrayFormulaEmbeddedMap,
     IArrayFormulaRangeType,
@@ -407,7 +408,6 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         this._totalFormulasToCalculate = 0;
         this._completedFormulasCount = 0;
         this._functionRefInfoOverrideStack = [];
-
         this.clearReferenceAndNumberformatCache();
     }
 
@@ -417,7 +417,14 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         clearReferenceToRangeCache();
     }
 
-    setCurrent(row: number, column: number, rowCount: number, columnCount: number, sheetId: string, unitId: string) {
+    setCurrent(
+        row: number,
+        column: number,
+        rowCount: number,
+        columnCount: number,
+        sheetId: string,
+        unitId: string
+    ) {
         this._currentRow = row;
         this._currentColumn = column;
         this._currentRowCount = rowCount;

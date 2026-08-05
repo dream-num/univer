@@ -104,10 +104,21 @@ export class CalculateController extends Disposable {
         );
     }
 
-    private async _calculate(
-        formulaDirtyData: Partial<IFormulaDirtyData>
-    ) {
-        const { forceCalculation: forceCalculate = false, dirtyRanges = [], dirtyNameMap = {}, dirtyDefinedNameMap = {}, dirtySuperTableMap = {}, dirtyUnitFeatureMap = {}, dirtyUnitOtherFormulaMap = {}, clearDependencyTreeCache = {}, maxIteration = DEFAULT_CYCLE_REFERENCE_COUNT, rowData, externalReferences, isCalculateTreeModel = false } = formulaDirtyData;
+    private async _calculate(formulaDirtyData: Partial<IFormulaDirtyData>) {
+        const {
+            forceCalculation: forceCalculate = false,
+            dirtyRanges = [],
+            dirtyNameMap = {},
+            dirtyDefinedNameMap = {},
+            dirtySuperTableMap = {},
+            dirtyUnitFeatureMap = {},
+            dirtyUnitOtherFormulaMap = {},
+            clearDependencyTreeCache = {},
+            maxIteration = DEFAULT_CYCLE_REFERENCE_COUNT,
+            rowData,
+            externalReferences,
+            isCalculateTreeModel = false,
+        } = formulaDirtyData;
 
         const formulaData = this._formulaDataModel.getFormulaData();
         const arrayFormulaCellData = this._formulaDataModel.getArrayFormulaCellData();
@@ -276,7 +287,15 @@ export class CalculateController extends Disposable {
     }
 
     private async _applyResult(data: IAllRuntimeData) {
-        const { unitData, unitOtherData, arrayFormulaRange, arrayFormulaCellData, clearArrayFormulaCellData, arrayFormulaEmbedded, imageFormulaData, dependencyTreeModelData } = data;
+        const {
+            unitData,
+            unitOtherData,
+            arrayFormulaRange,
+            arrayFormulaCellData,
+            clearArrayFormulaCellData,
+            arrayFormulaEmbedded,
+            imageFormulaData,
+        } = data;
 
         if (!unitData) {
             this._applyTreeResult(data);

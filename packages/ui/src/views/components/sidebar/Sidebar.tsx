@@ -41,7 +41,6 @@ export interface ISidebarMethodOptions {
 
 const MIN_SIDEBAR_WIDTH = 280;
 const MAX_SIDEBAR_WIDTH = 800;
-const DEFAULT_SIDEBAR_WIDTH = 384;
 
 export function Sidebar() {
     const localeService = useDependency(LocaleService);

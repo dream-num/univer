@@ -27,6 +27,7 @@ import { ArrayValueObject } from '../value-object/array-value-object';
 import { ErrorValueObject } from '../value-object/base-value-object';
 import { BooleanValueObject, NumberValueObject } from '../value-object/primitive-object';
 import { expandArrayValueObject } from './array-object';
+import { isWildcard } from './compare';
 import { booleanObjectIntersection, findCompareToken, valueObjectCompare } from './object-compare';
 
 export function convertTonNumber(valueObject: BaseValueObject) {
@@ -437,7 +438,38 @@ export function filterSameValueObjectResult(array: ArrayValueObject, range: Arra
         const rangeValueObject = range.get(r, c);
         const isBlankStringCriteria = criteriaObject.isString() && criteriaObject.getValue() === '';
 
+        if (
+            isBlankStringCriteria &&
+            (
+                operator === compareToken.GREATER_THAN ||
+                operator === compareToken.GREATER_THAN_OR_EQUAL ||
+                operator === compareToken.LESS_THAN ||
+                operator === compareToken.LESS_THAN_OR_EQUAL
+            )
+        ) {
+            return BooleanValueObject.create(false);
+        }
+
         if (operator === compareToken.NOT_EQUAL && isBlankStringCriteria && rangeValueObject?.isString() && rangeValueObject.getValue() === '') {
+            return BooleanValueObject.create(true);
+        }
+
+        if (
+            criteriaObject.isString() &&
+            isWildcard(`${criteriaObject.getValue()}`) &&
+            rangeValueObject?.isString() &&
+            rangeValueObject.getValue() === ''
+        ) {
+            return valueObject;
+        }
+
+        if (
+            criteriaObject.isString() &&
+            criteriaObject.getValue() !== '' &&
+            (operator === compareToken.LESS_THAN || operator === compareToken.LESS_THAN_OR_EQUAL) &&
+            rangeValueObject?.isString() &&
+            rangeValueObject.getValue() === ''
+        ) {
             return BooleanValueObject.create(true);
         }
 
@@ -445,7 +477,7 @@ export function filterSameValueObjectResult(array: ArrayValueObject, range: Arra
             criteriaObject.isString() &&
             criteriaObject.getValue() !== '' &&
             (operator === compareToken.LESS_THAN || operator === compareToken.LESS_THAN_OR_EQUAL) &&
-            (rangeValueObject == null || rangeValueObject.isNull() || (rangeValueObject.isString() && rangeValueObject.getValue() === ''))
+            (rangeValueObject == null || rangeValueObject.isNull())
         ) {
             return BooleanValueObject.create(false);
         }

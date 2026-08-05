@@ -16,12 +16,15 @@
 
 import type { Injector } from '@univerjs/core';
 import type { FormulaDependencyTreeVirtual } from '../../dependency/dependency-tree';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { ErrorType } from '../../../basics/error-type';
 import { IFormulaCurrentConfigService } from '../../../services/current-data.service';
 import { IOtherFormulaManagerService } from '../../../services/other-formula-manager.service';
 import { IFormulaRuntimeService } from '../../../services/runtime.service';
 import { FormulaDependencyTree } from '../../dependency/dependency-tree';
 import { IFormulaDependencyGenerator } from '../../dependency/formula-dependency';
+import { Interpreter } from '../../interpreter/interpreter';
+import { ErrorValueObject } from '../../value-object/base-value-object';
 import { createCommandTestBed } from './create-command-test-bed';
 
 describe('Test dependency', () => {
@@ -292,6 +295,35 @@ describe('Test dependency', () => {
                 [realTree, 0, 1],
                 [realTree, 0, 2],
             ]);
+        });
+
+        it('ignores a non-reference result while collecting dependency ranges', async () => {
+            formulaCurrentConfigService.load({
+                formulaData: {
+                    [testUnitId]: {
+                        [testSheetId]: {
+                            0: {
+                                0: { f: '=A1' },
+                            },
+                        },
+                    },
+                },
+                arrayFormulaCellData: {},
+                arrayFormulaRange: {},
+                forceCalculate: true,
+                dirtyRanges: [],
+                dirtyNameMap: {},
+                dirtyDefinedNameMap: {},
+                dirtyUnitFeatureMap: {},
+                dirtyUnitOtherFormulaMap: {},
+                excludedCell: {},
+                allUnitData: {
+                    [testUnitId]: testSheetData,
+                },
+            });
+            vi.spyOn(get(Interpreter), 'execute').mockReturnValue(ErrorValueObject.create(ErrorType.REF));
+
+            await expect(formulaDependencyGenerator.generate()).resolves.toHaveLength(1);
         });
     });
 });

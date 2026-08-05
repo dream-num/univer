@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/find-replace",
-    "version": "1.0.0-alpha.8",
+    "version": "1.0.0-beta.0",
     "private": false,
     "description": "Shared find and replace services and UI infrastructure for Univer.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

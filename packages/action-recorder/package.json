@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/action-recorder",
-    "version": "1.0.0-alpha.8",
+    "version": "1.0.0-beta.0",
     "private": false,
     "description": "Record and replay user actions in Univer.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

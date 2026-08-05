@@ -248,6 +248,21 @@ describe('ToolbarItem', () => {
         expect(container.querySelector('button button')).toBeNull();
     });
 
+    it('does not apply a full-item hover background to a non-hoverable custom label', () => {
+        const { container } = renderWithDependencies(
+            <ToolbarItem
+                id="test-custom-button"
+                type={MenuItemType.BUTTON}
+                label={{ name: 'TestDynamicOption', hoverable: false }}
+                grid
+            />
+        );
+
+        const rootClassName = container.querySelector('[data-u-command="test-custom-button"]')?.className;
+        expect(rootClassName).toContain('hover:!univer-bg-transparent');
+        expect(rootClassName).toContain('univer-cursor-default');
+    });
+
     it('fills a custom component in a fixed-width Grid item', () => {
         const { container, getByRole } = renderWithDependencies(
             <ToolbarItem

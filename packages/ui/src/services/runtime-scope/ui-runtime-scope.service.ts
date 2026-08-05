@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-import { createIdentifier, Disposable, type IAccessor, type IDisposable, toDisposable } from '@univerjs/core';
+import type { IDisposable } from '@univerjs/core';
+import { createIdentifier, Disposable, toDisposable } from '@univerjs/core';
 
-export interface IUIRuntimeScope extends IAccessor {
+export interface IUIRuntimeScope {
     unitId: string;
+    has(identifier: unknown): boolean;
+    get<T = unknown>(identifier: unknown): T;
 }
 
 export interface IUIRuntimeScopeService {

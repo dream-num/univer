@@ -84,6 +84,16 @@ describe('Gallery', () => {
         expect(screen.getByRole('button', { name: /reset zoom/i })).toBeInTheDocument();
     });
 
+    it('keeps the toolbar controls in logical order in RTL', () => {
+        render(
+            <ConfigProvider locale={enUS.design} direction="rtl" mountContainer={document.body}>
+                <Gallery images={images} open />
+            </ConfigProvider>
+        );
+
+        expect(screen.getByRole('dialog').querySelector('footer')).toHaveClass('rtl:univer-flex-row-reverse');
+    });
+
     it('zoom in/out/reset buttons adjust the image scale', () => {
         renderGallery({ images, open: true });
         const img = screen.getByRole('img');

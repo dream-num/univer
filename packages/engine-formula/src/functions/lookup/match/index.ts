@@ -27,6 +27,8 @@ export class Match extends BaseFunction {
 
     override maxParams = 3;
 
+    override lazyIfReferenceArrayArgumentIndexes = [1];
+
     override calculate(
         lookupValue: BaseValueObject,
         lookupArray: ArrayValueObject,

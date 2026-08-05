@@ -22,9 +22,12 @@ import type { LexerNode } from '../lexer-node';
 import { ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../basics/error-type';
+import { FUNCTION_NAMES_INFORMATION } from '../../../functions/information/function-names';
+import { Isblank } from '../../../functions/information/isblank';
 import { FUNCTION_NAMES_LOGICAL } from '../../../functions/logical/function-names';
 import { Groupby } from '../../../functions/logical/groupby';
 import { If } from '../../../functions/logical/if';
+import { Or } from '../../../functions/logical/or';
 import { Percentof } from '../../../functions/logical/percentof';
 import { FUNCTION_NAMES_LOOKUP } from '../../../functions/lookup/function-names';
 import { Hstack } from '../../../functions/lookup/hstack';
@@ -38,6 +41,7 @@ import { Compare } from '../../../functions/meta/compare';
 import { Divided } from '../../../functions/meta/divided';
 import { FUNCTION_NAMES_META } from '../../../functions/meta/function-names';
 import { Minus } from '../../../functions/meta/minus';
+import { Multiply } from '../../../functions/meta/multiply';
 import { Plus } from '../../../functions/meta/plus';
 import { Counta } from '../../../functions/statistical/counta';
 import { Countif } from '../../../functions/statistical/countif';
@@ -154,6 +158,7 @@ describe('Test indirect', () => {
             new Compare(FUNCTION_NAMES_META.COMPARE),
             new Plus(FUNCTION_NAMES_META.PLUS),
             new Minus(FUNCTION_NAMES_META.MINUS),
+            new Multiply(FUNCTION_NAMES_META.MULTIPLY),
             new Divided(FUNCTION_NAMES_META.DIVIDED),
             new Pi(FUNCTION_NAMES_MATH.PI),
             new Countif(FUNCTION_NAMES_STATISTICAL.COUNTIF),
@@ -165,7 +170,9 @@ describe('Test indirect', () => {
             new Offset(FUNCTION_NAMES_LOOKUP.OFFSET),
             new Groupby(FUNCTION_NAMES_LOGICAL.GROUPBY),
             new If(FUNCTION_NAMES_LOGICAL.IF),
-            new Percentof(FUNCTION_NAMES_LOGICAL.PERCENTOF)
+            new Or(FUNCTION_NAMES_LOGICAL.OR),
+            new Percentof(FUNCTION_NAMES_LOGICAL.PERCENTOF),
+            new Isblank(FUNCTION_NAMES_INFORMATION.ISBLANK)
         );
 
         superTableService.registerTable(testBed.unitId, 'Table1', {
@@ -177,6 +184,26 @@ describe('Test indirect', () => {
                 ['col4', 3],
                 ['CASH\nOUT', 0],
                 ['CASH\nIN', 1],
+                ['Blank\nColumn', 4],
+                ['Deposit,\nCredit (+)', 0],
+                ['Business Name:', 3],
+                ['F\n(1-5)', 4],
+                ['S\n(1-5)', 4],
+                ['D\n(1-10)', 4],
+            ]),
+            range: {
+                startRow: 0,
+                endRow: 3,
+                startColumn: 0,
+                endColumn: 4,
+            },
+        });
+        superTableService.registerTable(testBed.unitId, 'Table_FMEA', {
+            sheetId: testBed.sheetId,
+            titleMap: new Map([
+                ['F\n(1-5)', 4],
+                ['S\n(1-5)', 4],
+                ['D\n(1-10)', 4],
             ]),
             range: {
                 startRow: 0,
@@ -818,6 +845,39 @@ describe('Test indirect', () => {
             const astNode = astTreeBuilder.parse(lexerNode) as BaseAstNode;
             const result = interpreter.execute(generateExecuteAstNodeData(astNode));
             expect((result as BaseValueObject).getValue()).toStrictEqual(4);
+        });
+
+        it('supports commas and line breaks in structured-reference column names', () => {
+            const lexerNode = lexer.treeBuilder('=SUM(Table1[Deposit,\r\nCredit (+)])') as LexerNode;
+            const astNode = astTreeBuilder.parse(lexerNode) as BaseAstNode;
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode));
+
+            expect((result as BaseValueObject).getValue()).toStrictEqual(4);
+        });
+
+        it('supports trailing colons in structured-reference column names', () => {
+            const lexerNode = lexer.treeBuilder('=SUBTOTAL(103,Table1[Business Name:])') as LexerNode;
+            const astNode = astTreeBuilder.parse(lexerNode) as BaseAstNode;
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode));
+
+            expect((result as BaseValueObject).getValue()).toStrictEqual(3);
+        });
+
+        it('resolves blank current-row cells with normalized line-break column names', async () => {
+            const lexerNode = lexer.treeBuilder('=ISBLANK(Table1[[#This Row],[Blank\r\nColumn]])') as LexerNode;
+            const astNode = astTreeBuilder.parse(lexerNode) as BaseAstNode;
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode));
+            expect((result as BaseValueObject).getValue()).toBe(true);
+        });
+
+        it('calculates FMEA current-row formulas with parenthesized column names', () => {
+            const lexerNode = lexer.treeBuilder(
+                '=IF(OR(ISBLANK(Table_FMEA[[#This Row],[F\r\n(1-5)]]),ISBLANK(Table_FMEA[[#This Row],[S\r\n(1-5)]]))," - ",Table_FMEA[[#This Row],[F\r\n(1-5)]]*Table_FMEA[[#This Row],[S\r\n(1-5)]])'
+            ) as LexerNode;
+            const astNode = astTreeBuilder.parse(lexerNode) as BaseAstNode;
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode));
+
+            expect((result as BaseValueObject).getValue()).toBe(' - ');
         });
 
         it('supports line-break column names in SUBTOTAL structured references', async () => {

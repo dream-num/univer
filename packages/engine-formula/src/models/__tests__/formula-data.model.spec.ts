@@ -24,14 +24,44 @@ import {
     CellValueType,
     createBaseRecordIdField,
     IUniverInstanceService,
+
     LocaleType,
+
     ObjectMatrix,
     RANGE_TYPE,
+
     UniverInstanceType,
+
 } from '@univerjs/core';
+
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { FormulaDataModel, initSheetFormulaData } from '../formula-data.model';
 import { createCommandTestBed } from './create-command-test-bed';
+
+describe('initSheetFormulaData', () => {
+    it('propagates explicit implicit intersection to shared formula followers', () => {
+        const formula = '=RANK(E2,IF(@A$2:A$4=A2,E$2:E$4),0)';
+        const result = initSheetFormulaData(
+            {},
+            'unit',
+            'sheet',
+            new ObjectMatrix<ICellData>({
+                1: {
+                    7: {
+                        f: formula,
+                        si: '3',
+                    },
+                },
+                2: {
+                    7: { si: '3' },
+                },
+            })
+        );
+
+        expect(result.unit?.sheet?.[1]?.[7]?.f).toBe(formula);
+        expect(result.unit?.sheet?.[2]?.[7]?.f).toBe(formula);
+    });
+});
 
 const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
     id: 'test',

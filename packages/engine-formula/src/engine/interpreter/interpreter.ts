@@ -27,7 +27,6 @@ import { Disposable } from '@univerjs/core';
 import { AstNodePromiseType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME } from '../../basics/token-type';
-import { FUNCTION_NAMES_LOOKUP } from '../../functions/lookup/function-names';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
 import { NodeType } from '../ast-node/node-type';
 import { ErrorValueObject } from '../value-object/base-value-object';
@@ -351,15 +350,16 @@ export class Interpreter extends Disposable {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
+        const preserveArray = this._preserveLazyIfSelectedReferenceArray(node);
         if (value.isReferenceObject()) {
             const reference = value as BaseReferenceObject;
-            if (this._preserveLazyIfSelectedReferenceArray(node)) {
+            if (preserveArray) {
                 return reference.toArrayValueObject();
             }
             value = this._implicitLazyIfReferenceValue(reference);
         }
 
-        if (value.isArray()) {
+        if (value.isArray() && !preserveArray) {
             value = this._implicitLazyIfArrayValue(value as ArrayValueObject);
         }
 
@@ -398,7 +398,7 @@ export class Interpreter extends Disposable {
 
         while (parent != null) {
             if (parent.nodeType === NodeType.FUNCTION) {
-                return parent.getToken().toUpperCase() === FUNCTION_NAMES_LOOKUP.MATCH && parent.getChildren().indexOf(child) === 1;
+                return parent.preservesLazyIfReferenceArray(child);
             }
 
             child = parent;

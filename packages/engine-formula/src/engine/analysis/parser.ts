@@ -390,7 +390,7 @@ export class AstTreeBuilder extends Disposable {
                 return aggregatorNode;
             }
 
-            return new ErrorFunctionNode();
+            return new ErrorFunctionNode(typeof item === 'string' ? item : item.getToken());
         }
 
         // console.log('astNode111', astNode, item);

@@ -15,6 +15,7 @@
  */
 
 import type { compareToken } from '../../basics/token';
+
 import type { BaseFunction } from '../../functions/base-function';
 import type { Compare } from '../../functions/meta/compare';
 import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';

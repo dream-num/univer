@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IRange, Nullable } from '@univerjs/core';
+import type { ICellData, IRange, IUnitRange, Nullable } from '@univerjs/core';
 import type { IArrayFormulaRangeType, IRuntimeUnitDataType, IUnitData, IUnitSheetNameMap, IUnitStylesData } from '../../basics/common';
 import type { BaseValueObject, IArrayValueObject } from '../value-object/base-value-object';
 import { CellValueType, isNullCell, isTextFormat, moveRangeByOffset, ObjectMatrix } from '@univerjs/core';
@@ -571,16 +571,9 @@ export class BaseReferenceObject extends ObjectClassType {
     }
 
     getCellByPosition(rowRaw?: number, columnRaw?: number) {
-        let row = rowRaw;
-        let column = columnRaw;
-        const rangeData = this.getRangeData();
-        if (!row) {
-            row = rangeData.startRow;
-        }
-
-        if (!column) {
-            column = rangeData.startColumn;
-        }
+        const range = this.getRangePosition();
+        const row = rowRaw ?? range.startRow;
+        const column = columnRaw ?? range.startColumn;
 
         const cell = this.getCellData(row, column);
 
@@ -687,6 +680,10 @@ export class BaseReferenceObject extends ObjectClassType {
             sheetId: this.getSheetId(),
             unitId: this.getUnitId(),
         };
+    }
+
+    toUnitRanges(): IUnitRange[] {
+        return [this.toUnitRange()];
     }
 
     private _checkIfWorksheetMiss() {

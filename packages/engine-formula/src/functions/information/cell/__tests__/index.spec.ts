@@ -40,6 +40,7 @@ const getTestWorkbookData = (): IWorkbookData => {
         sheets: {
             sheet1: {
                 id: 'sheet1',
+                name: 'Sheet1',
                 cellData: {
                     0: {
                         0: {
@@ -133,10 +134,22 @@ const getTestWorkbookData = (): IWorkbookData => {
                     },
                 },
             },
+            sheet2: {
+                id: 'sheet2',
+                name: 'Startup Costs',
+                cellData: {
+                    1: {
+                        1: {
+                            v: 4,
+                            t: CellValueType.NUMBER,
+                        },
+                    },
+                },
+            },
         },
         locale: LocaleType.ZH_CN,
         name: '',
-        sheetOrder: [],
+        sheetOrder: ['sheet1', 'sheet2'],
         styles: {},
     };
 };
@@ -226,6 +239,9 @@ describe('Test cell function', () => {
 
             result = await calculate('=Cell("width", D3)');
             expect(result).toStrictEqual([[88, true]]);
+
+            result = await calculate('=Cell("address", \'Startup Costs\'!B2)');
+            expect(result).toBe("'Startup Costs'!$B$2");
         });
 
         it('infoType value is normal, reference value is not reference', async () => {

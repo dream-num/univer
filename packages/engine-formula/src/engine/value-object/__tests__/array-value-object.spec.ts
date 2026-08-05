@@ -452,6 +452,12 @@ describe('arrayValueObject test', () => {
             expect(stringValueObject.isString()).toBeTruthy();
         });
 
+        it('Array constants preserve quoted numeric and date text', () => {
+            const arrayValueObject = ValueObjectFactory.create('{"123";"2014-01-31"}') as ArrayValueObject;
+
+            expect(arrayValueObject.toValue()).toStrictEqual([['123'], ['2014-01-31']]);
+        });
+
         it('StringValueObject empty string converts to VALUE error for arithmetic coercion', () => {
             const number = StringValueObject.create('').convertToNumberObjectValue();
 

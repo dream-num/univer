@@ -35,5 +35,15 @@ describe('Test today function', () => {
             const result = testFunction.calculate();
             expect(result.getValue()).toBe(43831);
         });
+
+        it('uses the local calendar day instead of the UTC calendar day', () => {
+            vi.spyOn(Date.prototype, 'getFullYear').mockReturnValue(2020);
+            vi.spyOn(Date.prototype, 'getMonth').mockReturnValue(0);
+            vi.spyOn(Date.prototype, 'getDate').mockReturnValue(2);
+
+            const result = testFunction.calculate();
+
+            expect(result.getValue()).toBe(43832);
+        });
     });
 });

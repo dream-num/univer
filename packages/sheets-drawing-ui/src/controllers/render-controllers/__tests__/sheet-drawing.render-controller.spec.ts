@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { ISheetDrawing } from '@univerjs/sheets-drawing';
+import { DrawingTypeEnum } from '@univerjs/core';
 import { drawingPositionToTransform } from '@univerjs/sheets-drawing';
 import { describe, expect, it, vi } from 'vitest';
 import { SheetsDrawingRenderController } from '../sheet-drawing.render-controller';
@@ -29,22 +31,43 @@ vi.mock('@univerjs/sheets-drawing', async (importOriginal) => {
 
 describe('SheetsDrawingRenderController', () => {
     it('initializes sheet drawing data and materializes sheet transforms for render objects', () => {
-        const drawingWithSheetTransform = {
+        const drawingWithSheetTransform: Partial<ISheetDrawing> = {
             unitId: 'unit-1',
             subUnitId: 'sheet-1',
             drawingId: 'drawing-1',
             sheetTransform: {
-                from: { row: 1, column: 2 },
-                to: { row: 3, column: 4 },
+                from: { row: 1, column: 2, rowOffset: 0, columnOffset: 0 },
+                to: { row: 3, column: 4, rowOffset: 0, columnOffset: 0 },
             },
-        } as any;
-        const drawingWithoutSkeleton = {
+        };
+        const drawingWithoutSkeleton: Partial<ISheetDrawing> = {
             unitId: 'unit-1',
             subUnitId: 'missing-sheet',
             drawingId: 'drawing-2',
             sheetTransform: {
-                from: { row: 5, column: 6 },
-                to: { row: 7, column: 8 },
+                from: { row: 5, column: 6, rowOffset: 0, columnOffset: 0 },
+                to: { row: 7, column: 8, rowOffset: 0, columnOffset: 0 },
+            },
+        };
+        const groupedDrawing: Partial<ISheetDrawing> = {
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
+            drawingId: 'drawing-4',
+            groupId: 'group-1',
+            transform: { left: 2, top: 3, width: 40, height: 50 },
+            sheetTransform: {
+                from: { row: 1, column: 2, rowOffset: 0, columnOffset: 0 },
+                to: { row: 3, column: 4, rowOffset: 0, columnOffset: 0 },
+            },
+        };
+        const drawingGroup: Partial<ISheetDrawing> = {
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
+            drawingId: 'drawing-5',
+            drawingType: DrawingTypeEnum.DRAWING_GROUP,
+            sheetTransform: {
+                from: { row: 1, column: 2, rowOffset: 0, columnOffset: 0 },
+                to: { row: 3, column: 4, rowOffset: 0, columnOffset: 0 },
             },
         };
         const drawingData = {
@@ -52,6 +75,8 @@ describe('SheetsDrawingRenderController', () => {
                 data: {
                     'drawing-1': drawingWithSheetTransform,
                     'drawing-3': { unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'drawing-3' },
+                    'drawing-4': groupedDrawing,
+                    'drawing-5': drawingGroup,
                 },
             },
             'missing-sheet': {
@@ -68,7 +93,13 @@ describe('SheetsDrawingRenderController', () => {
             registerDrawingData: vi.fn(),
             initializeNotification: vi.fn(),
         };
-        const skeletonParam = { skeleton: { id: 'skeleton-1' } };
+        const skeletonParam = {
+            skeleton: {
+                id: 'skeleton-1',
+                rowHeaderWidthAndMarginLeft: 10,
+                columnHeaderHeightAndMarginTop: 20,
+            },
+        };
         const sheetSkeletonService = {
             getSkeletonParam: vi.fn((unitId: string, subUnitId: string) => {
                 if (unitId === 'unit-1' && subUnitId === 'sheet-1') {
@@ -89,6 +120,8 @@ describe('SheetsDrawingRenderController', () => {
         expect(sheetDrawingService.initializeNotification).toHaveBeenCalledWith('unit-1');
         expect(drawingPositionToTransform).toHaveBeenCalledWith(drawingWithSheetTransform.sheetTransform, skeletonParam);
         expect(drawingWithSheetTransform.transform).toEqual({ left: 24, top: 36, width: 120, height: 80 });
+        expect(drawingGroup.transform).toEqual({ left: 14, top: 16, width: 120, height: 80 });
+        expect(groupedDrawing.transform).toEqual({ left: 2, top: 3, width: 40, height: 50 });
         expect(drawingWithoutSkeleton).not.toHaveProperty('transform');
         expect(drawingManagerService.registerDrawingData).toHaveBeenCalledWith('unit-1', drawingData);
         expect(drawingManagerService.initializeNotification).toHaveBeenCalledWith('unit-1');

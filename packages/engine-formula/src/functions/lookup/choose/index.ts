@@ -28,6 +28,8 @@ export class Choose extends BaseFunction {
 
     override maxParams = 255;
 
+    override lazyIfReferenceArrayArgumentIndexes = Array.from({ length: this.maxParams - 1 }, (_, index) => index + 1);
+
     override needsReferenceObject = true;
 
     override calculate(indexNum: FunctionVariantType, ...variants: FunctionVariantType[]) {

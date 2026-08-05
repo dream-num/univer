@@ -26,6 +26,7 @@ import { FUNCTION_NAMES_META } from '../../functions/meta/function-names';
 import { IFunctionService } from '../../services/function.service';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
 import { LexerNode } from '../analysis/lexer-node';
+import { ArrayValueObject } from '../value-object/array-value-object';
 import { ErrorValueObject } from '../value-object/base-value-object';
 import { NumberValueObject } from '../value-object/primitive-object';
 import { BaseAstNode, ErrorNode } from './base-ast-node';
@@ -72,8 +73,11 @@ export class PrefixNode extends BaseAstNode {
     }
 
     private _handlerAT(value: FunctionVariantType) {
+        if (value instanceof ArrayValueObject) {
+            return value.get(0, 0) ?? ErrorValueObject.create(ErrorType.VALUE);
+        }
         if (!value.isReferenceObject()) {
-            return ErrorValueObject.create(ErrorType.VALUE);
+            return value;
         }
 
         const currentValue = value as BaseReferenceObject;

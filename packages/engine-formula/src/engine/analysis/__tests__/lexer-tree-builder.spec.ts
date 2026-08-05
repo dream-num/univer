@@ -82,6 +82,16 @@ describe('lexer nodeMaker test', () => {
             );
         });
 
+        it.each([
+            '=LET(value,A1,value+1)',
+            '=_xlfn.LAMBDA(value,value+1)(A1)',
+        ])('returns a fresh mutable lexer tree for %s', (formula) => {
+            const first = lexerTreeBuilder.treeBuilder(formula);
+            const second = lexerTreeBuilder.treeBuilder(formula);
+
+            expect(second).not.toBe(first);
+        });
+
         it('REDUCE', () => {
             const node = lexerTreeBuilder.treeBuilder('=REDUCE(1, A1:C2, LAMBDA(a,b,a+b^2))') as LexerNode;
             expect(JSON.stringify(node.serialize())).toStrictEqual(
@@ -121,6 +131,13 @@ describe('lexer nodeMaker test', () => {
             const node = lexerTreeBuilder.treeBuilder('=SUM(Table3[[#All],[Column1]:[Column2]])') as LexerNode;
             expect(JSON.stringify(node.serialize())).toStrictEqual(
                 '{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"SUM","st":0,"ed":2,"children":[{"token":"P_1","st":0,"ed":2,"children":["Table3[[#All],[Column1]:[Column2]]"]}]}]}'
+            );
+        });
+
+        it('keeps punctuation inside table column names', () => {
+            const node = lexerTreeBuilder.treeBuilder('=SUM(Table3[Deposit,\r\nCredit (+)])') as LexerNode;
+            expect(JSON.stringify(node.serialize())).toStrictEqual(
+                '{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"SUM","st":0,"ed":2,"children":[{"token":"P_1","st":0,"ed":2,"children":["Table3[Deposit,\\r\\nCredit (+)]"]}]}]}'
             );
         });
 

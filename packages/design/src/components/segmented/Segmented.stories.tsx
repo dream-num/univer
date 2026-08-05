@@ -42,3 +42,21 @@ export const SegmentedBasic = {
         );
     },
 };
+
+export const SegmentedSmall = {
+    render() {
+        return (
+            <div style={{ width: 260 }}>
+                <Segmented
+                    size="small"
+                    items={[
+                        { label: 'None', value: 'none' },
+                        { label: 'Solid', value: 'solid' },
+                        { label: 'Gradient', value: 'gradient' },
+                        { label: 'Image', value: 'image' },
+                    ]}
+                />
+            </div>
+        );
+    },
+};

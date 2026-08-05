@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import type { CSSProperties, ReactNode } from 'react';
-import { useContext, useEffect, useRef, useState } from 'react';
+import { type CSSProperties, type ReactNode, useContext, useEffect, useRef, useState } from 'react';
 import { clsx } from '../../helper/clsx';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 
@@ -33,6 +32,7 @@ interface ISegmentedProps<T extends ItemValue = ItemValue> {
     defaultValue?: T;
     onChange?: (value: T) => void;
     className?: string;
+    size?: 'small' | 'middle';
 }
 
 export function Segmented<T extends ItemValue = ItemValue>({
@@ -41,6 +41,7 @@ export function Segmented<T extends ItemValue = ItemValue>({
     defaultValue,
     onChange,
     className = '',
+    size = 'middle',
 }: ISegmentedProps<T>) {
     const { direction } = useContext(ConfigContext);
     const [selectedItem, setSelectedItem] = useState<T>(
@@ -128,9 +129,11 @@ export function Segmented<T extends ItemValue = ItemValue>({
                     }}
                     className={clsx(`
                       univer-relative univer-box-border univer-min-w-0 univer-flex-1 univer-cursor-pointer
-                      univer-truncate univer-border-none univer-bg-transparent univer-px-3 univer-py-1 univer-text-xs
+                      univer-truncate univer-border-none univer-bg-transparent univer-py-1 univer-text-xs
                       univer-font-medium univer-transition-colors
                     `, {
+                        'univer-px-1': size === 'small',
+                        'univer-px-3': size === 'middle',
                         'univer-text-gray-900 dark:!univer-text-white': selectedItem === item.value,
                         'univer-text-gray-500 hover:univer-text-gray-900 dark:hover:!univer-text-white': selectedItem !== item.value,
                     })}

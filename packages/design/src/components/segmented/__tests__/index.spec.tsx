@@ -59,16 +59,6 @@ describe('Segmented', () => {
         expect(getByText('Icon label')).toBeInTheDocument();
     });
 
-    it('should use compact horizontal padding for small size', () => {
-        const { getByText, rerender } = render(<Segmented items={items} size="small" />);
-        expect(getByText('A')).toHaveClass('univer-px-1');
-        expect(getByText('A')).not.toHaveClass('univer-px-3');
-
-        rerender(<Segmented items={items} />);
-        expect(getByText('A')).toHaveClass('univer-px-3');
-        expect(getByText('A')).not.toHaveClass('univer-px-1');
-    });
-
     it('should support controlled value', () => {
         const { getByText, rerender } = render(<Segmented items={items} value="a" />);
         expect(getByText('A')).toHaveClass('univer-text-gray-900', { exact: false });

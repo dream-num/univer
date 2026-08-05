@@ -38,7 +38,7 @@ import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsDrawingPlugin } from '@univerjs/sheets-drawing';
 import enUS from '@univerjs/sheets/locale/en-US';
 import { ISidebarService } from '@univerjs/ui';
-import { UndoRedoGroupService } from '@univerjs/ui/services/undo-redo/undo-redo-group.service';
+import { UndoRedoGroupService } from '@univerjs/ui/undo-redo-group';
 import { BehaviorSubject, Subject } from 'rxjs';
 
 const TEST_WORKBOOK_DATA: IWorkbookData = {

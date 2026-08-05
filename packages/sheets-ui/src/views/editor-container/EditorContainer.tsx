@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
+import type { Nullable, Workbook } from '@univerjs/core';
 import type { KeyCode } from '@univerjs/ui';
 import type { ICellEditorState } from '../../services/editor-bridge.service';
 import {
@@ -31,6 +31,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionRenderService, IEditorService } from '@univerjs/docs-ui';
+import { quoteSheetName } from '@univerjs/engine-formula';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import {
     ComponentManager,
@@ -62,6 +63,7 @@ import {
     SHEET_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE,
     SHEET_EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE,
 } from '../../services/sheet-embed-integration.service';
+import { useActiveWorksheet } from '../hook';
 import { focusSheetCellEditorElement, registerSheetCellEditorRuntimePortal } from './focus-editor';
 import { useKeyEventConfig } from './hooks';
 
@@ -229,9 +231,18 @@ export function EditorContainer() {
     );
     const FormulaEditor = componentManager.get(EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY);
     const editState = useObservable(editorBridgeService.currentEditCellState$);
+    const workbook = editState
+        ? instanceService.getUnit<Workbook>(editState.unitId, UniverInstanceType.UNIVER_SHEET) ?? null
+        : null;
+    const activeSheet = useActiveWorksheet(workbook);
     const darkMode = useObservable(themeService.darkMode$, themeService.darkMode);
     const [showEditCellAddress, setShowEditCellAddress] = useState(false);
-    const editCellAddress = editState ? `${numberToABC(editState.column)}${editState.row + 1}` : null;
+    const editSheetName = editState ? workbook?.getSheetBySheetId(editState.sheetId)?.getName() : null;
+    const editCellAddress = editState
+        ? `${activeSheet && editSheetName && activeSheet.getSheetId() !== editState.sheetId
+            ? `'${quoteSheetName(editSheetName)}'!`
+            : ''}${numberToABC(editState.column)}${editState.row + 1}`
+        : null;
     // The editor border uses the normal selection stroke, so the address label stays visually in sync with it.
     const editorBorderColor = genNormalSelectionStyle(themeService).stroke;
     const focusCoordinator = injector.has(ISheetEmbedRuntimeFocusCoordinator)

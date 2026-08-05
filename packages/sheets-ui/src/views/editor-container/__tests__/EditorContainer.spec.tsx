@@ -99,7 +99,7 @@ class TestEditorBridgeService {
     readonly visible$ = this._visible$.asObservable();
     readonly currentEditCellState$ = new BehaviorSubject<Nullable<ICellEditorState>>({
         unitId: 'sheet-1',
-        sheetId: 'sheet-1',
+        sheetId: 'worksheet-1',
         row: 0,
         column: 0,
         editorUnitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
@@ -142,6 +142,19 @@ function createTestBed(options: { docSelectionIsFocusing?: boolean; focusedUnitI
     const focusCoordinator = new EmbedRuntimeFocusCoordinator();
     const interactionBoundaryService = new EmbedInteractionBoundaryService();
     const editorBridgeService = new TestEditorBridgeService();
+    const editSheet = { getSheetId: () => 'worksheet-1', getName: () => 'Sheet1' };
+    const otherSheet = { getSheetId: () => 'worksheet-2', getName: () => 'Sheet2' };
+    const activeSheet$ = new BehaviorSubject(editSheet);
+    const workbook = {
+        activeSheet$,
+        getUnitId: () => 'sheet-1',
+        getActiveSheet: () => activeSheet$.getValue(),
+        getSheetBySheetId: (sheetId: string) => {
+            if (sheetId === editSheet.getSheetId()) return editSheet;
+            if (sheetId === otherSheet.getSheetId()) return otherSheet;
+            return null;
+        },
+    };
     const cellEditorResizeService = {
         resizeCellEditor: vi.fn(),
         fitTextSize: vi.fn(),
@@ -178,12 +191,16 @@ function createTestBed(options: { docSelectionIsFocusing?: boolean; focusedUnitI
             getFocusedUnit: () => options.focusedUnitId == null
                 ? null
                 : { getUnitId: () => options.focusedUnitId },
-            getUnit: (unitId: string, type?: UniverInstanceType) => (
-                (type == null || type === UniverInstanceType.UNIVER_SHEET) &&
-                    (options.sheetUnitIds ?? ['child-sheet', 'scoped-child-sheet', 'sheet-1']).includes(unitId)
-                    ? { getUnitId: () => unitId }
-                    : null
-            ),
+            getUnit: (unitId: string, type?: UniverInstanceType) => {
+                if (
+                    (type != null && type !== UniverInstanceType.UNIVER_SHEET) ||
+                    !(options.sheetUnitIds ?? ['child-sheet', 'scoped-child-sheet', 'sheet-1']).includes(unitId)
+                ) {
+                    return null;
+                }
+
+                return unitId === workbook.getUnitId() ? workbook : { getUnitId: () => unitId };
+            },
         } as never,
     }]);
     injector.add([IContextService, {
@@ -215,7 +232,7 @@ function createTestBed(options: { docSelectionIsFocusing?: boolean; focusedUnitI
     injector.add([ISheetEmbedRuntimeFocusCoordinator, { useValue: focusCoordinator }]);
     injector.add([ISheetEmbedInteractionBoundaryService, { useValue: interactionBoundaryService }]);
 
-    return { injector, editorBridgeService, focusCoordinator, interactionBoundaryService, docSelectionRenderService, cellEditorResizeService, validViewportScrollInfo$ };
+    return { injector, editorBridgeService, focusCoordinator, interactionBoundaryService, docSelectionRenderService, cellEditorResizeService, validViewportScrollInfo$, activeSheet$, otherSheet };
 }
 
 function renderEditorContainer(root: Root, injector: Injector): void {
@@ -616,6 +633,34 @@ describe('EditorContainer embed focus lease', () => {
         });
 
         expect(container.querySelector('[data-u-comp="sheet-cell-editor-address"]')).toBeNull();
+    });
+
+    it('qualifies the edited cell address after switching worksheets', async () => {
+        const { injector, validViewportScrollInfo$, activeSheet$, otherSheet } = createTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        await act(async () => {
+            renderEditorContainer(root!, injector);
+            await Promise.resolve();
+        });
+
+        await act(async () => {
+            validViewportScrollInfo$.next({});
+            await Promise.resolve();
+        });
+
+        const getAddress = () => container?.querySelector('[data-u-comp="sheet-cell-editor-address"]')?.textContent;
+
+        expect(getAddress()).toBe('A1');
+
+        await act(async () => {
+            activeSheet$.next(otherSheet);
+            await Promise.resolve();
+        });
+
+        expect(getAddress()).toBe("'Sheet1'!A1");
     });
 
     it('keeps the cell editor visible while formula range selection moves focus to the sheet canvas', async () => {

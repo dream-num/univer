@@ -66,6 +66,10 @@ import { INotificationService } from './services/notification/notification.servi
 import { IUIPartsService, UIPartsService } from './services/parts/parts.service';
 import { IPlatformService, PlatformService } from './services/platform/platform.service';
 import { CanvasPopupService, ICanvasPopupService } from './services/popup/canvas-popup.service';
+import {
+    IUnitPresenceUIAdapterRegistry,
+    UnitPresenceUIAdapterRegistry,
+} from './services/presence/unit-presence-ui-adapter.service';
 import { IRibbonOverrideService, RibbonOverrideService } from './services/ribbon/ribbon-override.service';
 import { DesktopRibbonService, IRibbonService } from './services/ribbon/ribbon.service';
 import { IUIRuntimeScopeService, UIRuntimeScopeService } from './services/runtime-scope/ui-runtime-scope.service';
@@ -128,6 +132,7 @@ export class UniverUIPlugin extends Plugin {
             [IRibbonOverrideService, { useClass: RibbonOverrideService }],
             [IShortcutService, { useClass: ShortcutService }],
             [IPlatformService, { useClass: PlatformService }],
+            [IUnitPresenceUIAdapterRegistry, { useClass: UnitPresenceUIAdapterRegistry }],
             [IMenuManagerService, { useClass: MenuManagerService }],
             [IContextMenuHostService, { useClass: ContextMenuHostService }],
             [IContextMenuService, { useClass: ContextMenuService }],

@@ -118,6 +118,16 @@ export { BuiltInUIPart, IUIPartsService, UIPartsService } from './services/parts
 export { IPlatformService, PlatformService } from './services/platform/platform.service';
 export { CanvasPopupService, ICanvasPopupService } from './services/popup/canvas-popup.service';
 export type { IPopup, IPopupWithExtraProps } from './services/popup/canvas-popup.service';
+export type {
+    ILocalUnitPresenceState,
+    IRemoteUnitPresenceState,
+    IUnitPresencePoint,
+    IUnitPresenceUIAdapter,
+} from './services/presence/unit-presence-ui-adapter.service';
+export {
+    IUnitPresenceUIAdapterRegistry,
+    UnitPresenceUIAdapterRegistry,
+} from './services/presence/unit-presence-ui-adapter.service';
 export { IRibbonOverrideService, RibbonOverrideService } from './services/ribbon/ribbon-override.service';
 export type { IRibbonOverride } from './services/ribbon/ribbon-override.service';
 export { DesktopRibbonService, IRibbonService } from './services/ribbon/ribbon.service';
@@ -154,6 +164,8 @@ export { PrintFloatDomSingle } from './views/components/dom/Print';
 export { CanvasPopup, SingleCanvasPopup } from './views/components/popup/CanvasPopup';
 export { RectPopup } from './views/components/popup/RectPopup';
 export type { RectPopupDirection } from './views/components/popup/RectPopup';
+export type { IUnitPresenceLabelDrawingOptions } from './views/components/presence/UnitPresenceLabel';
+export { drawUnitPresenceLabel, UNIT_PRESENCE_LABEL_HEIGHT } from './views/components/presence/UnitPresenceLabel';
 export { useToolbarItemStatus } from './views/components/ribbon/hook';
 export { Ribbon } from './views/components/ribbon/Ribbon';
 export { ToolbarButton } from './views/components/ribbon/ToolbarButton';

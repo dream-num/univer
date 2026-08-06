@@ -101,7 +101,6 @@ export class NumfmtAlertRenderController extends Disposable implements IRenderMo
         }
 
         const cellValue = cellData?.v;
-        // TODO(@ai-review): Confirm every parser-supported numeric text, including percentages, should surface the text-format alert.
         const isConvertibleNumber = isRealNum(cellValue as CellValue) ||
             (typeof cellValue === 'string' && typeof getNumfmtParseValueFilter(cellValue)?.v === 'number');
         if (!isTextFormat(numfmtValue?.pattern) || !Tools.isDefine(cellValue) || !isConvertibleNumber) {

@@ -279,10 +279,10 @@ export interface ICommandService {
 }
 
 class CommandRegistry {
-    private readonly _commands = new Map<string, ICommand<object, unknown>>();
+    private readonly _commands = new Map<string, ICommand>();
     private readonly _commandTypes = new Map<string, CommandType>();
 
-    registerCommand(command: ICommand<object, unknown>): IDisposable {
+    registerCommand(command: ICommand): IDisposable {
         if (this._commands.has(command.id)) {
             throw new Error(`[CommandRegistry]: command "${command.id}" has been registered before.`);
         }
@@ -304,7 +304,7 @@ class CommandRegistry {
         return this._commands.has(id);
     }
 
-    getCommand(id: string): [ICommand<object, unknown>] | null {
+    getCommand(id: string): [ICommand] | null {
         if (!this._commands.has(id)) {
             return null;
         }
@@ -369,7 +369,7 @@ export class CommandService extends Disposable implements ICommandService {
         return this._commandRegistry.hasCommand(commandId);
     }
 
-    registerCommand(command: ICommand<object, unknown>): IDisposable {
+    registerCommand(command: ICommand): IDisposable {
         return this._commandRegistry.registerCommand(command);
     }
 
@@ -378,23 +378,25 @@ export class CommandService extends Disposable implements ICommandService {
         this._multiCommandDisposables.get(commandId)?.dispose();
     }
 
-    registerMultipleCommand(command: ICommand<object, unknown>): IDisposable {
+    registerMultipleCommand(command: ICommand): IDisposable {
         return this._registerMultiCommand(command);
     }
 
     createScoped(accessor: IAccessor): ICommandService {
+        const commandService: ICommandService = this;
+
         return {
-            disposed: () => this.disposed(),
-            hasCommand: (commandId) => this.hasCommand(commandId),
-            registerCommand: (command) => this.registerCommand(command),
-            unregisterCommand: (commandId) => this.unregisterCommand(commandId),
-            registerMultipleCommand: (command) => this.registerMultipleCommand(command),
-            createScoped: (childAccessor) => this.createScoped(childAccessor),
+            disposed: () => commandService.disposed(),
+            hasCommand: (commandId) => commandService.hasCommand(commandId),
+            registerCommand: (command) => commandService.registerCommand(command),
+            unregisterCommand: (commandId) => commandService.unregisterCommand(commandId),
+            registerMultipleCommand: (command) => commandService.registerMultipleCommand(command),
+            createScoped: (childAccessor) => commandService.createScoped(childAccessor),
             executeCommand: (id, params, options) => this._executeCommand(accessor, id, params, options),
             syncExecuteCommand: (id, params, options) => this._syncExecuteCommand(accessor, id, params, options),
-            onCommandExecuted: (listener) => this.onCommandExecuted(listener),
-            beforeCommandExecuted: (listener) => this.beforeCommandExecuted(listener),
-            onMutationExecutedForCollab: (listener) => this.onMutationExecutedForCollab(listener),
+            onCommandExecuted: (listener) => commandService.onCommandExecuted(listener),
+            beforeCommandExecuted: (listener) => commandService.beforeCommandExecuted(listener),
+            onMutationExecutedForCollab: (listener) => commandService.onMutationExecutedForCollab(listener),
         };
     }
 
@@ -590,7 +592,7 @@ export class CommandService extends Disposable implements ICommandService {
         return toDisposable(() => remove(this._commandExecutionStack, stackItem));
     }
 
-    private _registerMultiCommand(command: ICommand<object, unknown>): IDisposable {
+    private _registerMultiCommand(command: ICommand): IDisposable {
         // compose a multi command and register it
         const registry = this._commandRegistry.getCommand(command.id);
         let multiCommand: MultiCommand;

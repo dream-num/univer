@@ -54,6 +54,7 @@ const locale: typeof enUS = {
         info: {
             error: 'خطا',
             forceStringInfo: 'عدد به عنوان متن ذخیره شده',
+            convertToNumber: 'تبدیل به عدد',
         },
     },
 };

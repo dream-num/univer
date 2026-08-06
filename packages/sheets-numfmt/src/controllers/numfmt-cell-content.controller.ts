@@ -20,6 +20,7 @@ import type { IUniverSheetsNumfmtConfig } from '../config/config';
 import {
     CellValueType,
     Disposable,
+    getNumfmtParseValueFilter,
     ICommandService,
     IConfigService,
     Inject,
@@ -161,8 +162,15 @@ export class SheetsNumfmtCellContentController extends Disposable {
                 // If the cell not specified number type, then check the cell value type
                 if (cell.t !== CellValueType.NUMBER) {
                     const type = checkCellValueType(cell.v, cell.t);
-                    // just handle number or number string
-                    if (type !== CellValueType.NUMBER) {
+                    // just handle number/number string/number string with text format, other type will not be processed
+                    if (
+                        type !== CellValueType.NUMBER &&
+                        !(
+                            isTextFormat(numfmtValue?.pattern) &&
+                            typeof cell.v === 'string' &&
+                            typeof getNumfmtParseValueFilter(cell.v)?.v === 'number'
+                        )
+                    ) {
                         return next(cell);
                     }
                 }

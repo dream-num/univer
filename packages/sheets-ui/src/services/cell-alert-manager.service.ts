@@ -29,6 +29,12 @@ export enum CellAlertType {
     ERROR,
 }
 
+export interface ICellAlertMenuItem {
+    label: ReactNode;
+    disabled?: boolean;
+    onSelect: () => void;
+}
+
 export interface ICellAlert {
     type: CellAlertType;
     title: ReactNode;
@@ -37,6 +43,7 @@ export interface ICellAlert {
     width: number;
     height: number;
     key: string;
+    menu?: ICellAlertMenuItem[];
 }
 
 export class CellAlertManagerService extends Disposable {
@@ -96,7 +103,9 @@ export class CellAlertManagerService extends Disposable {
             },
             {
                 componentKey: CELL_ALERT_KEY,
-                direction: 'horizontal',
+                direction: alert.menu?.length ? 'left-center' : 'horizontal',
+                autoRelayout: Boolean(alert.menu?.length),
+                showOnSelectionMoving: Boolean(alert.menu?.length),
                 extraProps: {
                     alert,
                 },

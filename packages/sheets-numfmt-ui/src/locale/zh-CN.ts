@@ -54,6 +54,7 @@ const locale: typeof enUS = {
         info: {
             error: '错误',
             forceStringInfo: '以文本形式存储的数字',
+            convertToNumber: '转换为数字',
         },
     },
 };

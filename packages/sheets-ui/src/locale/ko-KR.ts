@@ -273,6 +273,7 @@ const locale: typeof enUS = {
             problem: '문제가 발생했습니다',
             error: '오류',
             forceStringInfo: '숫자가 텍스트로 저장되었습니다',
+            convertToNumber: '숫자로 변환',
         },
         clipboard: {
             paste: {

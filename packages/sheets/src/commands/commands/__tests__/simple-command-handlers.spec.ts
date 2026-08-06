@@ -434,6 +434,7 @@ describe('TextToNumberCommand', () => {
                 0: { v: '42', t: CellValueType.STRING },
                 1: { v: '003', t: CellValueType.NUMBER, s: 'text-style' },
                 2: { v: 'abc', t: CellValueType.STRING },
+                3: { v: '20%', t: CellValueType.FORCE_STRING },
             },
         });
         const worksheet = {
@@ -455,9 +456,9 @@ describe('TextToNumberCommand', () => {
         expect(TextToNumberCommand.handler(accessor, {
             unitId: 'unit-1',
             subUnitId: 'sheet-1',
-            ranges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 2 }],
+            ranges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 3 }],
         })).toBe(true);
-        expect(executed.map((call) => call.id)).toEqual([SetRangeValuesMutation.id, RemoveNumfmtMutation.id]);
+        expect(executed.map((call) => call.id)).toEqual([SetRangeValuesMutation.id, SetNumfmtMutation.id, RemoveNumfmtMutation.id]);
         expect(executed[0].params).toMatchObject({
             unitId: 'unit-1',
             subUnitId: 'sheet-1',
@@ -465,17 +466,32 @@ describe('TextToNumberCommand', () => {
                 0: {
                     0: { v: 42, t: CellValueType.NUMBER },
                     1: { v: 3, t: CellValueType.NUMBER },
+                    3: { v: 0.2, t: CellValueType.NUMBER },
                 },
             },
         });
-        expect(executed[1].params).toEqual({
+        expect(executed[1].params).toMatchObject({
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
+            refMap: {
+                0: { pattern: '0%' },
+            },
+            values: {
+                0: { ranges: [{ startRow: 0, endRow: 0, startColumn: 3, endColumn: 3 }] },
+            },
+        });
+        expect(executed[2].params).toEqual({
             unitId: 'unit-1',
             subUnitId: 'sheet-1',
             ranges: [{ startRow: 0, endRow: 0, startColumn: 1, endColumn: 1 }],
         });
         expect(undoRecords[0]).toMatchObject({
             unitID: 'unit-1',
-            undoMutations: [{ id: SetRangeValuesMutation.id }, { id: SetNumfmtMutation.id }],
+            undoMutations: [
+                { id: SetRangeValuesMutation.id },
+                { id: RemoveNumfmtMutation.id },
+                { id: SetNumfmtMutation.id },
+            ],
         });
     });
 

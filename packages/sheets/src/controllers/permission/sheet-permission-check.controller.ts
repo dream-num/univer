@@ -54,6 +54,7 @@ import type {
     ISetWorksheetRowIsAutoHeightCommandParams,
 } from '../../commands/commands/set-worksheet-row-height.command';
 import type { ISetWorksheetShowCommandParams } from '../../commands/commands/set-worksheet-show.command';
+import type { ITextToNumberCommandParams } from '../../commands/commands/text-to-number.command';
 import type { LocaleKey } from '../../locale/types';
 import {
     CustomCommandExecutionError,
@@ -116,6 +117,7 @@ import {
     SetWorksheetRowIsAutoHeightCommand,
 } from '../../commands/commands/set-worksheet-row-height.command';
 import { SetWorksheetShowCommand } from '../../commands/commands/set-worksheet-show.command';
+import { TextToNumberCommand } from '../../commands/commands/text-to-number.command';
 import { getSheetCommandTarget } from '../../commands/commands/utils/target-util';
 import { SetWorksheetNameMutation } from '../../commands/mutations/set-worksheet-name.mutation';
 import { RangeProtectionRuleModel } from '../../models/range-protection-rule.model';
@@ -549,6 +551,22 @@ export class SheetPermissionCheckController extends Disposable {
                         params.localSheetId
                     );
                 }
+                errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.editErr');
+                break;
+
+            // text to number
+            case TextToNumberCommand.id:
+                params = commandInfo.params as ITextToNumberCommandParams | undefined;
+                permission = this.permissionCheckWithRanges(
+                    {
+                        workbookTypes: [WorkbookEditablePermission],
+                        worksheetTypes: [WorksheetSetCellValuePermission, WorksheetSetCellStylePermission, WorksheetEditPermission],
+                        rangeTypes: [RangeProtectionPermissionEditPoint],
+                    },
+                    params?.ranges,
+                    params?.unitId,
+                    params?.subUnitId
+                );
                 errorMsg = this._localeService.t<LocaleKey>('sheets.permission.dialog.editErr');
                 break;
 

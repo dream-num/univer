@@ -273,6 +273,7 @@ const locale: typeof enUS = {
             problem: 'Vyskytol sa problém',
             error: 'Chyba',
             forceStringInfo: 'Číslo uložené ako text',
+            convertToNumber: 'Konvertovať na číslo',
         },
         clipboard: {
             paste: {

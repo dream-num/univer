@@ -273,6 +273,7 @@ const locale: typeof enUS = {
             problem: 'حدثت مشكلة',
             error: 'خطأ',
             forceStringInfo: 'رقم مخزن كنص',
+            convertToNumber: 'تحويل إلى رقم',
         },
         clipboard: {
             paste: {

@@ -54,6 +54,7 @@ const locale: typeof enUS = {
         info: {
             error: 'エラー',
             forceStringInfo: '数値がテキストとして保存されました',
+            convertToNumber: '数値に変換',
         },
     },
 };

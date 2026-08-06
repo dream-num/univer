@@ -271,6 +271,7 @@ const locale = {
             problem: 'There was a problem',
             error: 'Error',
             forceStringInfo: 'Number stored as text',
+            convertToNumber: 'Convert to Number',
         },
         clipboard: {
             paste: {

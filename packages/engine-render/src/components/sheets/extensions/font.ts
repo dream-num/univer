@@ -696,7 +696,11 @@ export class Font extends SheetExtension {
         // so that the divide will be aligned when the skeleton is calculated.
         const overflowRectangle = overflowCache.getValue(row, col);
         const isOverflow = !(wrapStrategy === WrapStrategy.WRAP && vertexAngle === 0);
-        if (isOverflow && overflowRectangle) {
+        const hasMultipleParagraphs = (documentDataModel.getBody()?.paragraphs?.length ?? 0) > 1;
+        if (
+            (isOverflow && overflowRectangle) ||
+            (wrapStrategy !== WrapStrategy.WRAP && hasMultipleParagraphs)
+        ) {
             const contentSize = getDocsSkeletonPageSize(documentSkeleton);
 
             const documentStyle = documentDataModel.getSnapshot().documentStyle;
@@ -710,6 +714,9 @@ export class Font extends SheetExtension {
                     .updateDocumentDataPageSize(width + marginLeft + marginRight);
                 documentSkeleton.calculate();
             }
+        }
+
+        if (isOverflow && overflowRectangle) {
             const endColumn = overflowRectangle.endColumn;
             const startColumn = overflowRectangle.startColumn;
             const startRow = overflowRectangle.startRow;

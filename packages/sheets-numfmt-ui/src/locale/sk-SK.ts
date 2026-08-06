@@ -54,6 +54,7 @@ const locale: typeof enUS = {
         info: {
             error: 'Chyba',
             forceStringInfo: 'Číslo uložené ako text',
+            convertToNumber: 'Konvertovať na číslo',
         },
     },
 };

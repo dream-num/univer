@@ -15,12 +15,13 @@
  */
 
 import type { IAccessor, ICellData, ICommand, IRange } from '@univerjs/core';
-import type { IRemoveNumfmtMutationParams } from '../mutations/numfmt.mutation';
+import type { IRemoveNumfmtMutationParams, ISetCellsNumfmt } from '../mutations/numfmt.mutation';
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 import type { ISheetCommandSharedParams } from '../utils/interface';
 import {
     CellValueType,
     CommandType,
+    getNumfmtParseValueFilter,
     ICommandService,
     isRealNum,
     isTextFormat,
@@ -30,7 +31,13 @@ import {
     sequenceExecute,
 } from '@univerjs/core';
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
-import { factoryRemoveNumfmtUndoMutation, RemoveNumfmtMutation } from '../mutations/numfmt.mutation';
+import {
+    factoryRemoveNumfmtUndoMutation,
+    factorySetNumfmtUndoMutation,
+    RemoveNumfmtMutation,
+    SetNumfmtMutation,
+    transformCellsToRange,
+} from '../mutations/numfmt.mutation';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
 import { getSheetCommandTarget } from './utils/target-util';
 
@@ -61,6 +68,7 @@ export const TextToNumberCommand: ICommand = {
         const { worksheet, unitId, subUnitId } = target;
 
         const newCellValue = new ObjectMatrix<ICellData>();
+        const setNumfmtCells: ISetCellsNumfmt = [];
         const removeNumfmtRanges: IRange[] = [];
 
         for (let i = 0; i < ranges.length; i++) {
@@ -72,14 +80,24 @@ export const TextToNumberCommand: ICommand = {
 
                     const cell = worksheet.getCellRaw(r, c);
                     const pattern = typeof cell?.s === 'string' ? worksheet.getStyleDataByHash(cell.s)?.n?.pattern : cell?.s?.n?.pattern;
+                    const parsedValue = typeof cell?.v === 'string' ? getNumfmtParseValueFilter(cell.v) : null;
+                    const numberValue = isRealNum(cell?.v)
+                        ? Number(cell?.v)
+                        : typeof parsedValue?.v === 'number' ? parsedValue.v : null;
 
-                    if (cell && cell.v && (cell.t !== CellValueType.NUMBER || isTextFormat(pattern)) && isRealNum(cell.v)) {
+                    if (cell && cell.v && (cell.t !== CellValueType.NUMBER || isTextFormat(pattern)) && numberValue !== null) {
                         newCellValue.setValue(r, c, {
-                            v: Number(cell.v),
+                            v: numberValue,
                             t: CellValueType.NUMBER,
                         });
 
-                        if (isTextFormat(pattern)) {
+                        if (parsedValue?.z && (!pattern || isTextFormat(pattern))) {
+                            setNumfmtCells.push({
+                                pattern: parsedValue.z,
+                                row: r,
+                                col: c,
+                            });
+                        } else if (isTextFormat(pattern)) {
                             removeNumfmtRanges.push({
                                 startRow: r,
                                 endRow: r,
@@ -109,6 +127,15 @@ export const TextToNumberCommand: ICommand = {
                 params: SetRangeValuesUndoMutationFactory(accessor, setRangeValuesMutationParams),
             },
         ];
+
+        if (setNumfmtCells.length) {
+            const setNumfmtMutationParams = transformCellsToRange(unitId, subUnitId, setNumfmtCells);
+            redos.push({
+                id: SetNumfmtMutation.id,
+                params: setNumfmtMutationParams,
+            });
+            undos.push(...factorySetNumfmtUndoMutation(accessor, setNumfmtMutationParams));
+        }
 
         if (removeNumfmtRanges.length) {
             const removeNumfmtMutationParams: IRemoveNumfmtMutationParams = {

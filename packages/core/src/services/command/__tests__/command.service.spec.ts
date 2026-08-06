@@ -16,7 +16,7 @@
 
 import type { IMultiCommand } from '../command.service';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { createIdentifier, Injector } from '../../../common/di';
+import { Injector } from '../../../common/di';
 import { CustomCommandExecutionError } from '../../../common/error';
 import { ConfigService, IConfigService } from '../../config/config.service';
 import { ContextService, IContextService } from '../../context/context.service';
@@ -179,40 +179,6 @@ describe('Test CommandService', () => {
     });
 
     describe('Test command execution hooks', () => {
-        it('Should execute registered commands with dependencies from a scoped accessor', async () => {
-            const dependency = createIdentifier<string>('scoped-command-dependency');
-            const scopedInjector = injector.createChild([[dependency, { useValue: 'scoped' }]]);
-            const scopedCommandService = commandService.createScoped(scopedInjector);
-            scopedInjector.add([ICommandService, { useValue: scopedCommandService }]);
-            commandService.registerCommand({
-                id: anotherCommandID,
-                type: CommandType.COMMAND,
-                handler: (accessor) => accessor.get(dependency),
-            });
-
-            await expect(scopedCommandService.executeCommand<object, string>(anotherCommandID)).resolves.toBe('scoped');
-        });
-
-        it('Should keep nested commands in the same scoped accessor', async () => {
-            const dependency = createIdentifier<string>('nested-scoped-command-dependency');
-            const nestedCommandID = 'nested-scoped-command';
-            const scopedInjector = injector.createChild([[dependency, { useValue: 'scoped' }]]);
-            const scopedCommandService = commandService.createScoped(scopedInjector);
-            scopedInjector.add([ICommandService, { useValue: scopedCommandService }]);
-            commandService.registerCommand({
-                id: nestedCommandID,
-                type: CommandType.COMMAND,
-                handler: (accessor) => accessor.get(dependency),
-            });
-            commandService.registerCommand({
-                id: anotherCommandID,
-                type: CommandType.COMMAND,
-                handler: (accessor) => accessor.get(ICommandService).executeCommand<object, string>(nestedCommandID),
-            });
-
-            await expect(scopedCommandService.executeCommand<object, string>(anotherCommandID)).resolves.toBe('scoped');
-        });
-
         it('Should "beforeCommandExecuted" hook be called before command execution', async () => {
             const numbers: number[] = [];
             const pushValCommandID = 'push-val';

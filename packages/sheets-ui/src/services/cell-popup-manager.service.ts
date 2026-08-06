@@ -16,14 +16,19 @@
 
 import type { IDisposable } from '@univerjs/core';
 import type { ISheetLocationBase } from '@univerjs/sheets';
+import type { RectPopupDirection } from '@univerjs/ui';
 import type { ICanvasPopup } from './canvas-pop-manager.service';
 import { Disposable, generateRandomId, Inject, ObjectMatrix, toDisposable } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { CELL_POPUP_COMPONENT_KEY } from '../views/cell-popup/config';
 import { SheetCanvasPopManagerService } from './canvas-pop-manager.service';
 
+export type CellPopupDirection = Extract<RectPopupDirection, 'horizontal' | 'vertical' | 'left-center'>;
+
+const CELL_POPUP_DIRECTIONS: CellPopupDirection[] = ['horizontal', 'vertical', 'left-center'];
+
 export interface ICellPopup extends Omit<ICanvasPopup, 'direction' | 'offset' | 'mask'> {
-    direction?: 'horizontal' | 'vertical';
+    direction?: CellPopupDirection;
     id?: string;
     priority: number;
 }
@@ -33,13 +38,10 @@ export interface ICellPopupDirectionCache {
     disposable?: IDisposable;
 }
 
-export interface ICellPopupCache {
-    horizontal?: ICellPopupDirectionCache;
-    vertical?: ICellPopupDirectionCache;
-}
+export type ICellPopupCache = Partial<Record<CellPopupDirection, ICellPopupDirectionCache>>;
 
 export interface ICellPopupChange extends ISheetLocationBase {
-    direction: 'horizontal' | 'vertical';
+    direction: CellPopupDirection;
 }
 
 export class CellPopupManagerService extends Disposable {
@@ -112,7 +114,7 @@ export class CellPopupManagerService extends Disposable {
                         direction,
                     },
                     noPushMinimumGap: true,
-                    autoRelayout: false,
+                    autoRelayout: popup.autoRelayout ?? false,
                     zIndex: 90,
                 },
                 unitId,
@@ -139,7 +141,7 @@ export class CellPopupManagerService extends Disposable {
         return toDisposable(hidePopup);
     }
 
-    getPopups(unitId: string, subUnitId: string, row: number, col: number, direction: 'horizontal' | 'vertical') {
+    getPopups(unitId: string, subUnitId: string, row: number, col: number, direction: CellPopupDirection) {
         const subUnitMap = this._ensureCellPopupMap(unitId, subUnitId);
         return subUnitMap.getValue(row, col)?.[direction]?.popups || [];
     }
@@ -151,34 +153,18 @@ export class CellPopupManagerService extends Disposable {
             return;
         }
 
-        // Hide horizontal popups
-        if (cache.horizontal) {
-            cache.horizontal.disposable?.dispose();
-            cache.horizontal = undefined;
-            this._change$.next({
-                unitId,
-                subUnitId,
-                row,
-                col,
-                direction: 'horizontal',
-            });
-        }
+        CELL_POPUP_DIRECTIONS.forEach((direction) => {
+            const directionCache = cache[direction];
+            if (!directionCache) {
+                return;
+            }
 
-        // Hide vertical popups
-        if (cache.vertical) {
-            cache.vertical.disposable?.dispose();
-            cache.vertical = undefined;
-            this._change$.next({
-                unitId,
-                subUnitId,
-                row,
-                col,
-                direction: 'vertical',
-            });
-        }
+            directionCache.disposable?.dispose();
+            cache[direction] = undefined;
+            this._change$.next({ unitId, subUnitId, row, col, direction });
+        });
 
-        // Clear the cache if both directions are empty
-        if (!cache.horizontal && !cache.vertical) {
+        if (CELL_POPUP_DIRECTIONS.every((direction) => !cache[direction])) {
             subUnitMap.realDeleteValue(row, col);
         }
     }

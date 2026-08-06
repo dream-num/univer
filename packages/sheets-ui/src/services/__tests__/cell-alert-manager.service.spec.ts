@@ -43,28 +43,29 @@ describe('CellAlertManagerService', () => {
             .mockReturnValueOnce(oldPopupDispose)
             .mockReturnValueOnce(newPopupDispose);
         const service = new CellAlertManagerService(
-            { getRenderUnitById: vi.fn(() => ({ id: 'render' })) } as any,
-            { showPopup } as any
+            { getRenderUnitById: vi.fn(() => ({ id: 'render' })) } as never,
+            { showPopup } as never
         );
 
-        const emitted: Array<[string, any][]> = [];
+        const emitted: Array<Array<[string, unknown]>> = [];
         service.currentAlert$.subscribe((value) => emitted.push(value));
 
         const first = createAlert('alert-1');
-        service.showAlert(first as any);
+        service.showAlert(first as never);
         expect(showPopup).toHaveBeenCalledWith(
             first.location,
             expect.objectContaining({
                 componentKey: 'univer.sheet.cell-alert',
                 direction: 'horizontal',
                 priority: 1,
+                showOnSelectionMoving: false,
                 extraProps: { alert: first },
             })
         );
         expect(service.currentAlert.size).toBe(1);
         expect(emitted.at(-1)?.map(([key]) => key)).toEqual(['alert-1']);
 
-        service.showAlert({ ...first, message: 'updated' } as any);
+        service.showAlert({ ...first, message: 'updated' } as never);
         expect(oldPopupDispose.dispose).toHaveBeenCalled();
         expect(service.currentAlert.get('alert-1')?.alert.message).toBe('message');
         expect(emitted.at(-1)?.map(([key]) => key)).toEqual(['alert-1']);
@@ -79,13 +80,14 @@ describe('CellAlertManagerService', () => {
         const popupA = { dispose: vi.fn() };
         const popupB = { dispose: vi.fn() };
         const showPopup = vi.fn().mockReturnValueOnce(popupA).mockReturnValueOnce(popupB);
-        const renderManager: any = {
-            getRenderUnitById: vi.fn(() => ({ id: 'render' })),
+        let currentRender: { id: string } | null = { id: 'render' };
+        const renderManager = {
+            getRenderUnitById: vi.fn(() => currentRender),
         };
-        const service = new CellAlertManagerService(renderManager as any, { showPopup } as any);
+        const service = new CellAlertManagerService(renderManager as never, { showPopup } as never);
 
-        service.showAlert(createAlert('a') as any);
-        service.showAlert(createAlert('b') as any);
+        service.showAlert(createAlert('a') as never);
+        service.showAlert(createAlert('b') as never);
         expect(service.currentAlert.size).toBe(2);
 
         service.clearAlert();
@@ -93,11 +95,36 @@ describe('CellAlertManagerService', () => {
         expect(popupA.dispose).toHaveBeenCalled();
         expect(popupB.dispose).toHaveBeenCalled();
 
-        renderManager.getRenderUnitById = vi.fn(() => null);
-        service.showAlert(createAlert('no-render') as any);
+        currentRender = null;
+        service.showAlert(createAlert('no-render') as never);
         expect(showPopup).toHaveBeenCalledTimes(2);
         expect(service.currentAlert.has('no-render')).toBe(true);
 
         service.removeAlert('not-found');
+    });
+
+    it('anchors actionable alerts to the left of the cell', () => {
+        const showPopup = vi.fn(() => ({ dispose: vi.fn() }));
+        const service = new CellAlertManagerService(
+            { getRenderUnitById: vi.fn(() => ({ id: 'render' })) } as never,
+            { showPopup } as never
+        );
+        const alert = {
+            ...createAlert('action-alert'),
+            menu: [{ label: 'Text to Number', onSelect: vi.fn() }],
+        };
+
+        service.showAlert(alert as never);
+
+        expect(showPopup).toHaveBeenCalledWith(
+            alert.location,
+            expect.objectContaining({
+                componentKey: 'univer.sheet.cell-alert',
+                direction: 'left-center',
+                autoRelayout: true,
+                showOnSelectionMoving: true,
+                extraProps: { alert },
+            })
+        );
     });
 });

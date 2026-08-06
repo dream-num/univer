@@ -273,6 +273,7 @@ const locale: typeof enUS = {
             problem: '出現了一個問題',
             error: '錯誤',
             forceStringInfo: '以文字形式儲存的數字',
+            convertToNumber: '轉換為數字',
         },
         clipboard: {
             paste: {

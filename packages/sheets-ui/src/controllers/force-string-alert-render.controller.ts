@@ -128,7 +128,7 @@ export class ForceStringAlertRenderController extends Disposable implements IRen
             height: 74,
             key: this._alertKey,
             menu: [{
-                label: this._localeService.t<LocaleKey>('sheets-ui.rightClick.textToNumber'),
+                label: this._localeService.t<LocaleKey>('sheets-ui.info.convertToNumber'),
                 onSelect: () => {
                     const result = this._commandService.syncExecuteCommand(TextToNumberCommand.id, {
                         unitId,

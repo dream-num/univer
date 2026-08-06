@@ -117,7 +117,7 @@ export class NumfmtAlertRenderController extends Disposable implements IRenderMo
             height: 74,
             key: this._alertKey,
             menu: [{
-                label: this._localeService.t('sheets-ui.rightClick.textToNumber'),
+                label: this._localeService.t<LocaleKey>('sheets-numfmt-ui.info.convertToNumber'),
                 onSelect: () => {
                     const result = this._commandService.syncExecuteCommand(TextToNumberCommand.id, {
                         unitId,

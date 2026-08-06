@@ -42,8 +42,11 @@ vi.mock('@univerjs/engine-render', async (importOriginal) => {
 
 describe('SheetCheckboxController', () => {
     it('uses pointer cursor for checkbox bullets and toggles the clicked checkbox paragraph', () => {
-        const currentRichText$ = new Subject<any>();
-        const currentClickedCell$ = new Subject<any>();
+        const currentRichText$ = new Subject<{ bullet?: { startIndex: number } } | null>();
+        const currentClickedCell$ = new Subject<{
+            location: { unitId: string; subUnitId: string; row: number; col: number };
+            bullet?: { startIndex: number };
+        }>();
         const commandService = { executeCommand: vi.fn() };
         const controller = new SheetCheckboxController(
             { currentRichText$, currentClickedCell$ } as never,
@@ -81,7 +84,7 @@ describe('SheetCheckboxController', () => {
 
 describe('ForceStringRenderController', () => {
     it('marks numeric-looking string cells unless disabled or formatted as text', () => {
-        let interceptor: any;
+        let interceptor: typeof INTERCEPTOR_POINT.CELL_CONTENT | undefined;
         const controller = new ForceStringRenderController(
             { unitId: 'unit-1' } as never,
             { getCurrentParam: vi.fn(() => ({ skeleton: {} })) } as never,
@@ -101,18 +104,22 @@ describe('ForceStringRenderController', () => {
         };
         const rawCell = { v: '123', t: CellValueType.STRING };
 
+        if (!interceptor) {
+            throw new Error('CELL_CONTENT interceptor was not registered');
+        }
+
         const result = interceptor.handler(rawCell, {
             rawData: rawCell,
             workbook,
-        }, (cell: unknown) => cell);
+        } as never, (cell) => cell);
 
         expect(result).not.toBe(rawCell);
-        expect(result.markers.tl).toEqual({ size: 6, color: '#409f11' });
+        expect(result?.markers?.tl).toEqual({ size: 6, color: '#409f11' });
 
         expect(interceptor.handler({ ...rawCell, s: 'text' }, {
             rawData: { ...rawCell, s: 'text' },
             workbook,
-        }, (cell: unknown) => cell)).not.toHaveProperty('markers');
+        } as never, (cell) => cell)).not.toHaveProperty('markers');
 
         controller.dispose();
     });
@@ -175,7 +182,7 @@ describe('ForceStringAlertRenderController', () => {
             message: 'sheets-ui.info.forceStringInfo',
             key: 'SHEET_FORCE_STRING_ALERT:unit-1',
             location: { unitId: 'unit-1', subUnitId: 'sheet-1', row: 1, col: 2 },
-            menu: [expect.objectContaining({ label: 'sheets-ui.rightClick.textToNumber' })],
+            menu: [expect.objectContaining({ label: 'sheets-ui.info.convertToNumber' })],
         }));
 
         const alert = cellAlertManagerService.showAlert.mock.calls[0][0];

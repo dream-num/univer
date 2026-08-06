@@ -52,6 +52,7 @@ const locale = {
         info: {
             error: 'Error',
             forceStringInfo: 'Number stored as text',
+            convertToNumber: 'Convert to Number',
         },
     },
 };

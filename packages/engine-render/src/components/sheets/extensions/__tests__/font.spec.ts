@@ -296,6 +296,7 @@ describe('font extension', () => {
 
         const documentDataModel = {
             updateDocumentDataPageSize: vi.fn(),
+            getBody: vi.fn(() => ({ paragraphs: [{}] })),
             getSnapshot: vi.fn(() => ({
                 documentStyle: {
                     marginLeft: 1,
@@ -355,6 +356,109 @@ describe('font extension', () => {
 
         font.parent = { getDocuments: vi.fn(() => null) };
         expect(() => font._renderDocuments(ctx, 0, 0, renderFontCtx, overflow)).toThrow('documents is null');
+    });
+
+    it('uses the natural content width for a non-wrapped document without cell overflow', () => {
+        const font = new Font() as any;
+        const ctx = createCtx();
+        const overflow = new ObjectMatrix<any>();
+        const spreadsheetSkeleton = createSpreadsheetSkeleton();
+        const documentDataModel = {
+            updateDocumentDataPageSize: vi.fn(),
+            getBody: vi.fn(() => ({ paragraphs: [{}, {}] })),
+            getSnapshot: vi.fn(() => ({
+                documentStyle: {
+                    marginLeft: 1,
+                    marginRight: 2,
+                },
+            })),
+        };
+        const documentSkeleton = {
+            getViewModel: vi.fn(() => ({
+                getDataModel: vi.fn(() => documentDataModel),
+            })),
+            calculate: vi.fn(),
+            makeDirty: vi.fn(),
+            getSkeletonData: vi.fn(() => ({
+                pages: [{
+                    width: 30,
+                    height: 12,
+                    sections: [{
+                        columns: [{
+                            width: 30,
+                            spaceWidth: 0,
+                            lines: [{ lineHeight: 10 }],
+                        }],
+                    }],
+                }],
+            })),
+        };
+        const documents = {
+            resize: vi.fn(),
+            changeSkeleton: vi.fn(() => documents),
+            render: vi.fn(),
+        };
+        font.parent = {
+            getDocuments: vi.fn(() => documents),
+        };
+
+        font._renderDocuments(ctx, 0, 0, {
+            fontCache: createFontCache({
+                documentSkeleton,
+                wrapStrategy: WrapStrategy.OVERFLOW,
+                vertexAngle: 0,
+            }),
+            startX: 0,
+            startY: 0,
+            endX: 40,
+            endY: 20,
+            spreadsheetSkeleton,
+        }, overflow);
+
+        expect(documentDataModel.updateDocumentDataPageSize).toHaveBeenNthCalledWith(1, Number.POSITIVE_INFINITY);
+        expect(documentDataModel.updateDocumentDataPageSize).toHaveBeenNthCalledWith(2, 33);
+        expect(documentSkeleton.calculate).toHaveBeenCalledOnce();
+
+        documentDataModel.updateDocumentDataPageSize.mockClear();
+        documentDataModel.getBody.mockReturnValue({ paragraphs: [{}] });
+        documentSkeleton.calculate.mockClear();
+
+        font._renderDocuments(ctx, 0, 0, {
+            fontCache: createFontCache({
+                documentSkeleton,
+                wrapStrategy: WrapStrategy.OVERFLOW,
+                vertexAngle: 0,
+            }),
+            startX: 0,
+            startY: 0,
+            endX: 40,
+            endY: 20,
+            spreadsheetSkeleton,
+        }, overflow);
+
+        expect(documentDataModel.updateDocumentDataPageSize).toHaveBeenCalledOnce();
+        expect(documentDataModel.updateDocumentDataPageSize).toHaveBeenCalledWith(Number.POSITIVE_INFINITY);
+        expect(documentSkeleton.calculate).not.toHaveBeenCalled();
+
+        documentDataModel.updateDocumentDataPageSize.mockClear();
+        documentDataModel.getBody.mockReturnValue({ paragraphs: [{}, {}] });
+
+        font._renderDocuments(ctx, 0, 0, {
+            fontCache: createFontCache({
+                documentSkeleton,
+                wrapStrategy: WrapStrategy.WRAP,
+                vertexAngle: 45,
+            }),
+            startX: 0,
+            startY: 0,
+            endX: 40,
+            endY: 20,
+            spreadsheetSkeleton,
+        }, overflow);
+
+        expect(documentDataModel.updateDocumentDataPageSize).toHaveBeenCalledOnce();
+        expect(documentDataModel.updateDocumentDataPageSize).toHaveBeenCalledWith(Number.POSITIVE_INFINITY);
+        expect(documentSkeleton.calculate).not.toHaveBeenCalled();
     });
 
     it('covers image rendering fallback branches', () => {

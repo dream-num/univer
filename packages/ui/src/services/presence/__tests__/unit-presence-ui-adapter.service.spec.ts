@@ -15,10 +15,22 @@
  */
 
 import type { IUnitPresenceUIAdapter } from '../unit-presence-ui-adapter.service';
-import { UniverInstanceType } from '@univerjs/core';
+import { Injector, UniverInstanceType } from '@univerjs/core';
 import { NEVER, of } from 'rxjs';
 import { describe, expect, it } from 'vitest';
-import { UnitPresenceUIAdapterRegistry } from '../unit-presence-ui-adapter.service';
+import {
+    IUnitPresenceUIAdapterRegistry,
+    UnitPresenceUIAdapterRegistry,
+} from '../unit-presence-ui-adapter.service';
+
+function createRegistry() {
+    const injector = new Injector();
+    injector.add([IUnitPresenceUIAdapterRegistry, { useClass: UnitPresenceUIAdapterRegistry }]);
+    return {
+        injector,
+        registry: injector.get(IUnitPresenceUIAdapterRegistry),
+    };
+}
 
 function createAdapter(unitType: UniverInstanceType): IUnitPresenceUIAdapter {
     return {
@@ -38,7 +50,7 @@ function createAdapter(unitType: UniverInstanceType): IUnitPresenceUIAdapter {
 
 describe('UnitPresenceUIAdapterRegistry', () => {
     it('registers and disposes adapters while publishing immutable snapshots', () => {
-        const registry = new UnitPresenceUIAdapterRegistry();
+        const { injector, registry } = createRegistry();
         const snapshots: Array<readonly IUnitPresenceUIAdapter[]> = [];
         const subscription = registry.adapters$.subscribe((adapters) => snapshots.push(adapters));
         const adapter = createAdapter(UniverInstanceType.UNIVER_BOARD);
@@ -55,13 +67,15 @@ describe('UnitPresenceUIAdapterRegistry', () => {
         expect(registry.getAll()).toEqual([]);
         expect(snapshots).toHaveLength(3);
         subscription.unsubscribe();
+        injector.dispose();
     });
 
     it('rejects duplicate host registrations', () => {
-        const registry = new UnitPresenceUIAdapterRegistry();
+        const { injector, registry } = createRegistry();
         registry.register(createAdapter(UniverInstanceType.UNIVER_SLIDE));
 
         expect(() => registry.register(createAdapter(UniverInstanceType.UNIVER_SLIDE)))
             .toThrow('A unit presence adapter is already registered');
+        injector.dispose();
     });
 });

@@ -54,6 +54,7 @@ const locale: typeof enUS = {
         info: {
             error: 'Kesalahan',
             forceStringInfo: 'Angka disimpan sebagai teks',
+            convertToNumber: 'Konversi ke angka',
         },
     },
 };

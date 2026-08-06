@@ -54,6 +54,7 @@ const locale: typeof enUS = {
         info: {
             error: 'Errore',
             forceStringInfo: 'Numero memorizzato come testo',
+            convertToNumber: 'Converti in numero',
         },
     },
 };

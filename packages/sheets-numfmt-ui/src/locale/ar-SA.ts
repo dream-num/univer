@@ -54,6 +54,7 @@ const locale: typeof enUS = {
         info: {
             error: 'خطأ',
             forceStringInfo: 'رقم مخزن كنص',
+            convertToNumber: 'تحويل إلى رقم',
         },
     },
 };

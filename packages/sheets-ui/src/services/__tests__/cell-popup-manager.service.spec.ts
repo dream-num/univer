@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { ICellPopupChange } from '../cell-popup-manager.service';
 import { describe, expect, it, vi } from 'vitest';
 import { CellPopupManagerService } from '../cell-popup-manager.service';
 
@@ -23,8 +24,8 @@ describe('CellPopupManagerService', () => {
         const sheetPopupService = {
             attachPopupToCell: vi.fn(() => popupDisposable),
         };
-        const service = new CellPopupManagerService(sheetPopupService as any);
-        const changes: any[] = [];
+        const service = new CellPopupManagerService(sheetPopupService as never);
+        const changes: ICellPopupChange[] = [];
         service.change$.subscribe((change) => changes.push(change));
 
         const location = { unitId: 'unit-1', subUnitId: 'sheet-1', row: 4, col: 5 };
@@ -32,12 +33,12 @@ describe('CellPopupManagerService', () => {
             id: 'p-low',
             componentKey: 'component-a',
             priority: 10,
-        } as any);
+        } as never);
         const disposeHigh = service.showPopup(location, {
             id: 'p-high',
             componentKey: 'component-b',
             priority: 1,
-        } as any);
+        } as never);
 
         expect(sheetPopupService.attachPopupToCell).toHaveBeenCalledTimes(1);
         expect(service.getPopups('unit-1', 'sheet-1', 4, 5, 'horizontal').map((p) => p.id)).toEqual(['p-high', 'p-low']);
@@ -52,17 +53,41 @@ describe('CellPopupManagerService', () => {
         expect(popupDisposable.dispose).toHaveBeenCalledTimes(1);
     });
 
-    it('supports vertical cache and hidePopup clear logic', () => {
+    it('preserves explicit automatic relayout for dynamic cell popups', () => {
+        const sheetPopupService = {
+            attachPopupToCell: vi.fn(() => ({ dispose: vi.fn() })),
+        };
+        const service = new CellPopupManagerService(sheetPopupService as never);
+        const location = { unitId: 'unit-1', subUnitId: 'sheet-1', row: 4, col: 5 };
+
+        service.showPopup(location, {
+            componentKey: 'dynamic-popup',
+            priority: 1,
+            autoRelayout: true,
+        } as never);
+
+        expect(sheetPopupService.attachPopupToCell).toHaveBeenCalledWith(
+            location.row,
+            location.col,
+            expect.objectContaining({ autoRelayout: true }),
+            location.unitId,
+            location.subUnitId
+        );
+    });
+
+    it('supports vertical and left caches in hidePopup clear logic', () => {
         const horizontalDisposable = { dispose: vi.fn() };
         const verticalDisposable = { dispose: vi.fn() };
+        const leftDisposable = { dispose: vi.fn() };
         const sheetPopupService = {
             attachPopupToCell: vi
                 .fn()
                 .mockReturnValueOnce(horizontalDisposable)
-                .mockReturnValueOnce(verticalDisposable),
+                .mockReturnValueOnce(verticalDisposable)
+                .mockReturnValueOnce(leftDisposable),
         };
-        const service = new CellPopupManagerService(sheetPopupService as any);
-        const changes: any[] = [];
+        const service = new CellPopupManagerService(sheetPopupService as never);
+        const changes: ICellPopupChange[] = [];
         service.change$.subscribe((change) => changes.push(change));
 
         const location = { unitId: 'unit-2', subUnitId: 'sheet-2', row: 1, col: 2 };
@@ -71,22 +96,31 @@ describe('CellPopupManagerService', () => {
             componentKey: 'h',
             direction: 'horizontal',
             priority: 1,
-        } as any);
+        } as never);
         service.showPopup(location, {
             id: 'v1',
             componentKey: 'v',
             direction: 'vertical',
             priority: 2,
-        } as any);
+        } as never);
+        service.showPopup(location, {
+            id: 'l1',
+            componentKey: 'l',
+            direction: 'left-center',
+            priority: 3,
+        } as never);
 
         expect(service.getPopups('unit-2', 'sheet-2', 1, 2, 'horizontal').length).toBe(1);
         expect(service.getPopups('unit-2', 'sheet-2', 1, 2, 'vertical').length).toBe(1);
+        expect(service.getPopups('unit-2', 'sheet-2', 1, 2, 'left-center').length).toBe(1);
 
         service.hidePopup('unit-2', 'sheet-2', 1, 2);
         expect(horizontalDisposable.dispose).toHaveBeenCalled();
         expect(verticalDisposable.dispose).toHaveBeenCalled();
+        expect(leftDisposable.dispose).toHaveBeenCalled();
         expect(service.getPopups('unit-2', 'sheet-2', 1, 2, 'horizontal')).toEqual([]);
         expect(service.getPopups('unit-2', 'sheet-2', 1, 2, 'vertical')).toEqual([]);
+        expect(service.getPopups('unit-2', 'sheet-2', 1, 2, 'left-center')).toEqual([]);
 
         // No-op branch.
         service.hidePopup('unit-2', 'sheet-2', 9, 9);
@@ -96,6 +130,7 @@ describe('CellPopupManagerService', () => {
             .map((change) => change.direction);
         expect(directions.includes('horizontal')).toBe(true);
         expect(directions.includes('vertical')).toBe(true);
+        expect(directions.includes('left-center')).toBe(true);
     });
 
     it('clears all popups for a workbook unit', () => {
@@ -106,18 +141,18 @@ describe('CellPopupManagerService', () => {
                 .mockReturnValueOnce(disposables[0])
                 .mockReturnValueOnce(disposables[1]),
         };
-        const service = new CellPopupManagerService(sheetPopupService as any);
+        const service = new CellPopupManagerService(sheetPopupService as never);
 
         service.showPopup({ unitId: 'unit-3', subUnitId: 'sheet-a', row: 1, col: 1 }, {
             id: 'a',
             componentKey: 'a',
             priority: 1,
-        } as any);
+        } as never);
         service.showPopup({ unitId: 'unit-3', subUnitId: 'sheet-b', row: 2, col: 2 }, {
             id: 'b',
             componentKey: 'b',
             priority: 1,
-        } as any);
+        } as never);
 
         service.hidePopupsForUnit('unit-3');
 

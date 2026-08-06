@@ -273,6 +273,7 @@ const locale: typeof enUS = {
             problem: 'Đã xảy ra một vấn đề',
             error: 'Lỗi',
             forceStringInfo: 'Số được lưu trữ dưới dạng văn bản',
+            convertToNumber: 'Chuyển đổi thành số',
         },
         clipboard: {
             paste: {

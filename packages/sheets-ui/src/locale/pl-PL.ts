@@ -273,6 +273,7 @@ const locale: typeof enUS = {
             problem: 'Wystąpił problem',
             error: 'Błąd',
             forceStringInfo: 'Liczba przechowywana jako tekst',
+            convertToNumber: 'Konwertuj na liczbę',
         },
         clipboard: {
             paste: {

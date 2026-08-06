@@ -16,12 +16,13 @@
 
 import type { ISheetLocationBase } from '@univerjs/sheets';
 import type { IPopupWithExtraProps } from '@univerjs/ui';
+import type { CellPopupDirection } from '../services/cell-popup-manager.service';
 import { ComponentManager, useDependency, useObservable } from '@univerjs/ui';
 import { useMemo } from 'react';
 import { filter, map } from 'rxjs';
 import { CellPopupManagerService } from '../services/cell-popup-manager.service';
 
-export const CellPopup = (props: { popup: IPopupWithExtraProps<ISheetLocationBase & { direction: 'horizontal' | 'vertical' }> }) => {
+export const CellPopup = (props: { popup: IPopupWithExtraProps<ISheetLocationBase & { direction: CellPopupDirection }> }) => {
     const { popup } = props;
     const location = popup.extraProps;
     const { row, col, direction, unitId, subUnitId } = location;
@@ -36,7 +37,13 @@ export const CellPopup = (props: { popup: IPopupWithExtraProps<ISheetLocationBas
     const componentManager = useDependency(ComponentManager);
 
     return (
-        <div data-u-comp="sheets-ui-cell-popup" className="univer-ml-px univer-flex univer-flex-col">
+        <div
+            data-u-comp="sheets-ui-cell-popup"
+            className={`
+              ${direction === 'left-center' ? 'univer-mr-px' : 'univer-ml-px'}
+              univer-flex univer-flex-col
+            `}
+        >
             {popups.map((popup) => {
                 const Component = componentManager.get(popup.componentKey);
                 return Component ? <Component key={popup.id ?? popup.componentKey} popup={popup} /> : null;

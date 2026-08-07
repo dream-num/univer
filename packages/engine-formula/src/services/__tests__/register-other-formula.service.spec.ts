@@ -23,6 +23,7 @@ import {
     ILogService,
     Injector,
     LifecycleService,
+    LifecycleStages,
 } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { OtherFormulaMarkDirty } from '../../commands/mutations/formula.mutation';
@@ -34,10 +35,11 @@ import { OtherFormulaBizType, RegisterOtherFormulaService } from '../register-ot
 
 type FormulaResultMatrix = Record<number, Record<number, Array<{ v?: unknown }>>>;
 
-function createService(): {
+function createService(registerCommands = true): {
     service: RegisterOtherFormulaService;
     commandService: ICommandService;
     activeDirtyManagerService: IActiveDirtyManagerService;
+    lifecycleService: LifecycleService;
 } {
     const injector = new Injector();
     injector.add([ILogService, { useClass: DesktopLogService }]);
@@ -47,15 +49,19 @@ function createService(): {
     injector.add([LifecycleService]);
     injector.add([RegisterOtherFormulaService]);
     const commandService = injector.get(ICommandService);
-    commandService.registerCommand(SetOtherFormulaMutation);
-    commandService.registerCommand(RemoveOtherFormulaMutation);
-    commandService.registerCommand(OtherFormulaMarkDirty);
-    commandService.registerCommand(SetFormulaCalculationResultMutation);
+    const service = injector.get(RegisterOtherFormulaService);
+    if (registerCommands) {
+        commandService.registerCommand(SetOtherFormulaMutation);
+        commandService.registerCommand(RemoveOtherFormulaMutation);
+        commandService.registerCommand(OtherFormulaMarkDirty);
+        commandService.registerCommand(SetFormulaCalculationResultMutation);
+    }
 
     return {
-        service: injector.get(RegisterOtherFormulaService),
+        service,
         commandService,
         activeDirtyManagerService: injector.get(IActiveDirtyManagerService),
+        lifecycleService: injector.get(LifecycleService),
     };
 }
 
@@ -73,32 +79,45 @@ describe('RegisterOtherFormulaService', () => {
         expect(activeDirtyManagerService.get(OtherFormulaMarkDirty.id)?.commandId).toBe(OtherFormulaMarkDirty.id);
     });
 
-    it('should buffer register requests until calculation starts', async () => {
+    it('should register immediately and leave pre-start scheduling to the calculation trigger', async () => {
         const { service, commandService } = createService();
         const executedIds: string[] = [];
         commandService.onCommandExecuted((command) => executedIds.push(command.id));
 
         const formulaId = service.registerFormulaWithRange('unit-1', 'sheet-1', '=A1');
         expect(formulaId.startsWith('formula.unit-1_sheet-1_default_')).toBe(true);
-        expect(executedIds).not.toContain(SetOtherFormulaMutation.id);
-
-        service.calculateStarted$.next(true);
         await flushCommandChain();
 
         expect(executedIds).toEqual([SetOtherFormulaMutation.id, OtherFormulaMarkDirty.id]);
     });
 
-    it('should register immediately after calculation started', async () => {
+    it('should register every formula once without a second lifecycle gate', async () => {
         const { service, commandService } = createService();
         const executedIds: string[] = [];
         commandService.onCommandExecuted((command) => executedIds.push(command.id));
 
-        service.calculateStarted$.next(true);
         service.registerFormulaWithRange('unit-2', 'sheet-2', '=SUM(A1:A5)', [], { source: 'test' }, OtherFormulaBizType.DOC, 'doc-1');
 
         await flushCommandChain();
 
-        expect(executedIds).toContain(SetOtherFormulaMutation.id);
+        expect(executedIds).toEqual([SetOtherFormulaMutation.id, OtherFormulaMarkDirty.id]);
+    });
+
+    it('should defer registration until formula commands are available', async () => {
+        const { service, commandService, lifecycleService } = createService(false);
+        const executedIds: string[] = [];
+        commandService.onCommandExecuted((command) => executedIds.push(command.id));
+
+        service.registerFormulaWithRange('unit-3', 'sheet-3', '=A1');
+        await flushCommandChain();
+        expect(executedIds).toEqual([]);
+
+        commandService.registerCommand(SetOtherFormulaMutation);
+        commandService.registerCommand(OtherFormulaMarkDirty);
+        lifecycleService.stage = LifecycleStages.Ready;
+        await flushCommandChain();
+
+        expect(executedIds).toEqual([SetOtherFormulaMutation.id, OtherFormulaMarkDirty.id]);
     });
 
     it('should expose all registered formulas for host-level dirty propagation', () => {

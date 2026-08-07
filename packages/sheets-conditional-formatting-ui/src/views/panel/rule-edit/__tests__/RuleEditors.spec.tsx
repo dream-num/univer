@@ -186,6 +186,31 @@ describe('conditional formatting rule editors', () => {
         currentTestBed = undefined;
     });
 
+    it('keeps the icon-set gallery grid RTL when the locale direction is RTL', async () => {
+        currentTestBed = createEditorTestBed();
+        currentTestBed.get(LocaleService).setDirection('rtl');
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        const interceptorManager = createRuleInterceptorManager();
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <IconSet interceptorManager={interceptorManager} onChange={() => undefined} />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        await openDropdown(0);
+
+        expect(document.querySelector('[data-u-comp="cf-icon-set-group-grid"]')?.getAttribute('dir')).toBe('rtl');
+        expect(document.querySelector('[data-u-comp="cf-icon-set-group-grid"] button')?.className).toContain('univer-justify-start');
+        expect(document.querySelector('[data-u-comp="cf-icon-set-group-grid"] button > span')?.getAttribute('dir')).toBe('rtl');
+        expect(document.querySelector('[data-u-comp="cf-icon-set-group-grid"] button > span')?.className).not.toContain('univer-flex-row-reverse');
+    });
+
     it('blocks submitting an empty text condition and submits the entered text condition rule', async () => {
         currentTestBed = createEditorTestBed();
         container = document.createElement('div');

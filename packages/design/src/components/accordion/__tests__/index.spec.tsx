@@ -28,14 +28,18 @@ describe('Accordion', () => {
             { label: 'Item 3', children: <div>Content 3</div> },
         ];
         const { getByText, queryByText } = render(<Accordion items={items} />);
+        const firstTrigger = getByText('Item 1').closest('button');
+        const firstArrow = firstTrigger?.querySelector('[aria-hidden="true"]');
 
         // Should be hidden by default
+        expect(firstArrow?.getAttribute('class')).toContain('rtl:univer-rotate-90');
         expect(queryByText('Content 1')?.parentElement?.parentElement?.className).toContain('univer-max-h-0');
         expect(queryByText('Content 2')?.parentElement?.parentElement?.className).toContain('univer-max-h-0');
         expect(queryByText('Content 3')?.parentElement?.parentElement?.className).toContain('univer-max-h-0');
 
         // Should expand the first item
         fireEvent.click(getByText('Item 1'));
+        expect(firstArrow?.getAttribute('class')).not.toContain('rtl:univer-rotate-90');
         expect(getByText('Content 1').parentElement?.parentElement?.className).toContain('univer-max-h-screen');
         expect(queryByText('Content 2')?.parentElement?.parentElement?.className).toContain('univer-max-h-0');
         expect(queryByText('Content 3')?.parentElement?.parentElement?.className).toContain('univer-max-h-0');

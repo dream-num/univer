@@ -148,6 +148,7 @@ const locale: typeof enUS = {
             cancel: 'Batal',
             confirm: 'Konfirmasi',
             'search-placeholder': 'Gunakan spasi untuk memisahkan kata kunci',
+            'input-values-placeholder': 'Masukkan Nilai',
             'select-all': 'Pilih Semua',
         },
     },

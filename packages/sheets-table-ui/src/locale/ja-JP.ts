@@ -148,6 +148,7 @@ const locale: typeof enUS = {
             cancel: 'キャンセル',
             confirm: '確認',
             'search-placeholder': '検索語はスペースで区切る',
+            'input-values-placeholder': '値を入力',
             'select-all': 'すべて選択',
         },
     },

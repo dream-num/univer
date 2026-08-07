@@ -150,6 +150,7 @@ const locale: typeof enUS = {
             cancel: 'انصراف',
             confirm: 'تایید',
             'search-placeholder': 'برای جداسازی کلیدواژه‌ها از فاصله استفاده کنید',
+            'input-values-placeholder': 'ورود مقادیر',
             'select-all': 'انتخاب همه',
         },
     },

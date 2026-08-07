@@ -578,9 +578,10 @@ describe('DataValidationItem', () => {
         expect(currentTestBed.markSelectionService.removed).toEqual(['shape-0', 'shape-1']);
     });
 
-    it('removes the hovered rule through the sheet data-validation command without selecting the item', async () => {
+    it('positions and runs the hovered rule delete action in RTL without selecting the item', async () => {
         currentTestBed = createItemTestBed();
         container = document.createElement('div');
+        container.dir = 'rtl';
         document.body.appendChild(container);
         root = createRoot(container);
         let selectedCount = 0;
@@ -594,6 +595,11 @@ describe('DataValidationItem', () => {
         await enterItem(item);
 
         const deleteButton = container.querySelector('.univer-absolute') as HTMLElement;
+
+        expect(item.className).toContain('rtl:univer-pl-9');
+        expect(item.className).toContain('rtl:univer-pr-2');
+        expect(deleteButton.className).toContain('rtl:univer-left-2');
+        expect(deleteButton.className).toContain('rtl:univer-right-auto');
 
         await act(async () => {
             deleteButton.dispatchEvent(new MouseEvent('click', { bubbles: true }));

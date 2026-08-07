@@ -98,9 +98,9 @@ export function CellAlert({ popup }: { popup: ICanvasPopup }) {
     }
 
     const iconMap = {
-        [CellAlertType.ERROR]: <ErrorIcon className="univer-mr-1.5 univer-text-red-500" />,
-        [CellAlertType.INFO]: <InfoIcon className="univer-mr-1.5 univer-text-blue-500" />,
-        [CellAlertType.WARNING]: <WarningIcon className="univer-mr-1.5 univer-text-yellow-500" />,
+        [CellAlertType.ERROR]: <ErrorIcon className="univer-text-red-500" />,
+        [CellAlertType.INFO]: <InfoIcon className="univer-text-blue-500" />,
+        [CellAlertType.WARNING]: <WarningIcon className="univer-text-yellow-500" />,
     };
 
     return (
@@ -113,8 +113,8 @@ export function CellAlert({ popup }: { popup: ICanvasPopup }) {
         >
             <div
                 className={`
-                  univer-mb-1.5 univer-flex univer-h-5 univer-flex-row univer-items-center univer-text-sm
-                  univer-font-medium
+                  univer-mb-1.5 univer-flex univer-h-5 univer-flex-row univer-items-center univer-gap-x-1.5
+                  univer-text-sm univer-font-medium
                 `}
             >
                 {type ? iconMap[type] : null}

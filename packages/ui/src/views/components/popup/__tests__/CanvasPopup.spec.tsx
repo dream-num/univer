@@ -145,7 +145,6 @@ describe('CanvasPopup', () => {
         rendered.dispose();
     });
 
-    // TODO(@ai-review): Confirm this integration test would fail if CanvasPopup stopped forwarding its canvas as the RectPopup boundary.
     it('keeps a partially visible drawing popup inside the canvas', async () => {
         const rendered = renderWithDependencies(<CanvasPopup />);
         const popupService = rendered.injector.get(ICanvasPopupService);
@@ -175,7 +174,6 @@ describe('CanvasPopup', () => {
         rendered.dispose();
     });
 
-    // TODO(@ai-review): Confirm an offscreen canvas cannot make its popup reappear at the viewport edge.
     it('hides a drawing popup when the canvas boundary is outside the viewport', async () => {
         const rendered = renderWithDependencies(<CanvasPopup />);
         const popupService = rendered.injector.get(ICanvasPopupService);

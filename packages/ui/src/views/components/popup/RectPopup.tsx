@@ -128,7 +128,6 @@ function calcPopupPosition(layout: IPopupLayoutInfo): { top: number; left: numbe
     const { position, width, height, containerHeight, containerWidth, noPushMinimumGap = false } = layout;
     const direction = resolvePopupDirection(layout);
 
-    // TODO(@ai-review): Verify every RectPopup caller that supplies an offset container expects the existing 8px edge gap inside that container.
     const containerLeft = layout.containerLeft ?? 0;
     const containerTop = layout.containerTop ?? 0;
     const containerRight = containerLeft + containerWidth;
@@ -250,7 +249,6 @@ function RectPopup(props: IRectPopupProps) {
 
             const { clientWidth, clientHeight } = nodeRef.current;
             const boundaryRect = boundaryElement?.getBoundingClientRect();
-            // TODO(@ai-review): Verify intersecting the optional boundary with the viewport preserves popup visibility in embedded editors.
             const containerLeft = Math.max(boundaryRect?.left ?? 0, 0);
             const containerTop = Math.max(boundaryRect?.top ?? 0, 0);
             const containerRight = Math.min(boundaryRect?.right ?? window.innerWidth, window.innerWidth);

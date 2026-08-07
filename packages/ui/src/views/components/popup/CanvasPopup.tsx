@@ -77,7 +77,6 @@ export const SingleCanvasPopup = ({ popup, children }: ISingleCanvasPopupProps) 
         return null;
     }
 
-    // TODO(@ai-review): Confirm canvas popups should remain inside the render canvas for every product, including embedded and frozen Sheet viewports.
     return (
         <RectPopup
             {...popup}

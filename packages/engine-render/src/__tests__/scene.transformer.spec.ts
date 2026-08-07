@@ -52,4 +52,29 @@ describe('Transformer', () => {
         scene.dispose();
         engine.dispose();
     });
+
+    it('renders controls on the configured layer without moving the selected object', () => {
+        const engine = new Engine('transformer-layer-engine', { elementWidth: 100, elementHeight: 100, dpr: 1 });
+        const scene = new Scene('transformer-layer-scene', engine);
+        const rect = new Rect('transformer-layer-rect', { width: 10, height: 10 });
+        scene.addObject(rect, 2);
+        const transformer = new Transformer(scene, {
+            borderEnabled: true,
+            controlLayerIndex: 4,
+        });
+        let controlLayerIndex: number | undefined;
+        const controlSubscription = transformer.createControl$.subscribe((control) => {
+            controlLayerIndex = control.getLayerIndex();
+        });
+
+        transformer.setSelectedControl(rect);
+
+        expect(rect.getLayerIndex()).toBe(2);
+        expect(controlLayerIndex).toBe(4);
+
+        controlSubscription.unsubscribe();
+        transformer.dispose();
+        scene.dispose();
+        engine.dispose();
+    });
 });

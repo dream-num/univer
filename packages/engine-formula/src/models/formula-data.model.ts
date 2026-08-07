@@ -960,8 +960,7 @@ function normalizeBaseFormulaForEngine(formula: string, currentTable: ITableSnap
     const normalized = protectBaseFormulaParts(formula, hold)
         .replace(BASE_LEGACY_FIELD_REF_PATTERN, (_match, fieldName: string) => hold(createEngineThisRowRef(currentTable, fieldName, snapshot)))
         .replace(BASE_TABLE_SCOPED_FIELD_REF_PATTERN, (_match, sourceTableName: string, scope: string, fieldName: string) => {
-            const targetTable = resolveBaseFormulaTable(sourceTableName, currentTable, snapshot)
-                ?? (sourceTableName.toLowerCase() === 'table' ? currentTable : undefined);
+            const targetTable = resolveBaseFormulaTable(sourceTableName, currentTable, snapshot);
             if (!targetTable) return `${sourceTableName}[[#${scope}],[${fieldName}]]`;
             return hold(scope.toLowerCase() === 'data'
                 ? createEngineColumnRef(targetTable, fieldName, snapshot)
@@ -983,9 +982,7 @@ function normalizeBaseFormulaForEngine(formula: string, currentTable: ITableSnap
         .replace(BASE_TABLE_FIELD_REF_PATTERN, (_match, sourceTableName: string, fieldName: string) => {
             const targetTable = resolveBaseFormulaTable(sourceTableName, currentTable, snapshot);
             if (targetTable) return hold(createEngineColumnRef(targetTable, fieldName, snapshot));
-            return sourceTableName.toLowerCase() === 'table'
-                ? hold(createEngineThisRowRef(currentTable, fieldName, snapshot))
-                : `${sourceTableName}[${fieldName}]`;
+            return `${sourceTableName}[${fieldName}]`;
         })
         .replace(BASE_BRACKET_FIELD_REF_PATTERN, (_match, prefix: string, fieldName: string) => `${prefix}${hold(createEngineThisRowRef(currentTable, fieldName, snapshot))}`);
     return normalized.replace(/__BASE_FORMULA_REF_(\d+)__/g, (_match, index: string) => refs[Number(index)] ?? '');
@@ -1208,7 +1205,7 @@ function isBaseCellData(value: unknown): value is IBaseCellData {
 }
 
 function resolveBaseFormulaTable(tableName: string | undefined, currentTable: ITableSnapshot, snapshot: IBaseSnapshot): ITableSnapshot | undefined {
-    if (!tableName || tableName === 'table' || tableName === currentTable.id || tableName === currentTable.name) {
+    if (!tableName || tableName === currentTable.id || tableName === currentTable.name) {
         return currentTable;
     }
 

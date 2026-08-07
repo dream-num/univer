@@ -1133,6 +1133,38 @@ describe('Test formula data model', () => {
                 );
             });
 
+            it('does not reinterpret an unresolved table identifier as the current Base table', () => {
+                const univerInstanceService = get(IUniverInstanceService);
+                univerInstanceService.registerCtorForType(UniverInstanceType.UNIVER_BASE, BaseDataModel);
+                const snapshot = structuredClone(TEST_BASE_DATA);
+                snapshot.id = 'base-unresolved-table';
+                snapshot.tables!['table-main'].name = 'Orders';
+                snapshot.tables!['table-main'].fields.total.config = {
+                    formula: '=SUM(table[Amount])+table[[#This Row],[Qty]]',
+                };
+                univer.createUnit(UniverInstanceType.UNIVER_BASE, snapshot);
+
+                expect(formulaDataModel.getFormulaData()['base-unresolved-table']?.['table-main']?.[0]?.[7]?.f).toBe(
+                    '=SUM(table[Amount])+table[[#This Row],[Qty]]'
+                );
+            });
+
+            it('resolves table when it is the real Base table name', () => {
+                const univerInstanceService = get(IUniverInstanceService);
+                univerInstanceService.registerCtorForType(UniverInstanceType.UNIVER_BASE, BaseDataModel);
+                const snapshot = structuredClone(TEST_BASE_DATA);
+                snapshot.id = 'base-real-table-name';
+                snapshot.tables!['table-main'].name = 'table';
+                snapshot.tables!['table-main'].fields.total.config = {
+                    formula: '=SUM(table[Amount])+table[[#This Row],[Qty]]',
+                };
+                univer.createUnit(UniverInstanceType.UNIVER_BASE, snapshot);
+
+                expect(formulaDataModel.getFormulaData()['base-real-table-name']?.['table-main']?.[0]?.[7]?.f).toBe(
+                    '=SUM(table[[#Data],[Amount]])+table[[#This Row],[Qty]]'
+                );
+            });
+
             it('should preserve workbook-qualified A1 references in Base formulas', () => {
                 const univerInstanceService = get(IUniverInstanceService);
                 univerInstanceService.registerCtorForType(UniverInstanceType.UNIVER_BASE, BaseDataModel);

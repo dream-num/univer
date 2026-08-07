@@ -83,7 +83,7 @@ export class PrefixNode extends BaseAstNode {
         const currentValue = value as BaseReferenceObject;
 
         if (currentValue.isCell()) {
-            return ErrorValueObject.create(ErrorType.VALUE);
+            return currentValue.getCellByPosition();
         }
 
         if (this._preserveAtRangeForFormula2LookupArray()) {

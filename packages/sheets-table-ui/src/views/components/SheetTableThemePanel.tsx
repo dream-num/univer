@@ -387,7 +387,10 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                                 <Dropdown
                                     overlay={(
                                         <div dir={direction} className="univer-p-2">
-                                            <ColorPicker value={row.background} onChange={row.onChange} />
+                                            <ColorPicker
+                                                value={new ColorKit(row.background).toHexString()}
+                                                onChange={row.onChange}
+                                            />
                                         </div>
                                     )}
                                 >

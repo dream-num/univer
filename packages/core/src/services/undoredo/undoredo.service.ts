@@ -40,6 +40,16 @@ export interface IUndoRedoItem {
     id?: string;
 }
 
+export interface IUndoRedoTransaction {
+    /** Keep the batched undo redo element and end the transaction. */
+    commit(): void;
+    /**
+     * Undo the elements pushed during the transaction and restore both the undo and the redo
+     * stack to the state they had when the transaction started, then end the transaction.
+     */
+    rollback(): void;
+}
+
 export interface IUndoRedoService {
     undoRedoStatus$: Observable<IUndoRedoStatus>;
 
@@ -64,6 +74,16 @@ export interface IUndoRedoService {
      * @returns a disposable to cancel batching undo redo elements
      */
     __tempBatchingUndoRedo(unitId: string): IDisposable;
+
+    /**
+     * Batch undo redo elements into a single `IUndoRedoItem` like `__tempBatchingUndoRedo`,
+     * and additionally allow rolling the batch back: the pushed elements are undone and the
+     * undo and redo stacks are restored to the state they had when the transaction started.
+     *
+     * @deprecated This is a temporary solution. We are going to refactor the undo redo service shortly.
+     * @returns a transaction that must be either committed or rolled back
+     */
+    __tempUndoRedoTransaction(unitId: string): IUndoRedoTransaction;
 }
 
 enum BatchingStatus {
@@ -288,6 +308,7 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
         if (item && item.id === id) {
             stack.pop();
             sequenceExecute(item.undoMutations, this._commandService);
+            this._updateStatus();
         }
     }
 
@@ -298,6 +319,47 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
 
         this._batchingStatus.set(unitId, BatchingStatus.WAITING);
         return toDisposable(() => this._batchingStatus.delete(unitId));
+    }
+
+    __tempUndoRedoTransaction(unitId: string): IUndoRedoTransaction {
+        const undoStack = this._getUndoStack(unitId, true);
+        const redoStack = this._getRedoStack(unitId, true);
+        const undoSnapshot = undoStack.slice();
+        const redoSnapshot = redoStack.slice();
+        const batching = this.__tempBatchingUndoRedo(unitId);
+        let finished = false;
+
+        return {
+            commit: () => {
+                if (finished) return;
+                finished = true;
+
+                batching.dispose();
+            },
+            rollback: () => {
+                if (finished) return;
+                finished = true;
+
+                batching.dispose();
+
+                // Undo the elements pushed since the transaction started, then restore both
+                // stacks, so a rolled back transaction does not clear the redo history and
+                // leaves no undo element behind. The pushed elements are identified by
+                // reference: when the stack is at capacity, pushing evicts the oldest element
+                // and the stack length no longer reflects what was pushed.
+                const snapshotItems = new Set(undoSnapshot);
+                const pushedDuringTransaction = undoStack.filter((item) => !snapshotItems.has(item));
+                for (let i = pushedDuringTransaction.length - 1; i >= 0; i--) {
+                    sequenceExecute(pushedDuringTransaction[i].undoMutations, this._commandService);
+                }
+
+                undoStack.length = 0;
+                undoStack.push(...undoSnapshot);
+                redoStack.length = 0;
+                redoStack.push(...redoSnapshot);
+                this._updateStatus();
+            },
+        };
     }
 
     protected _updateStatus(): void {
@@ -356,9 +418,11 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
     }
 
     private _tryBatchingElements(item: IUndoRedoItem, newItem: IUndoRedoItem): void {
-        // this could be not that easy in other sitatuations than Find & Replace
+        // Redo mutations replay in chronological order, while undo mutations must replay in
+        // reverse chronological order. This matters for order-sensitive mutations, e.g. batched
+        // row removals: rows removed bottom-up must be inserted back top-down on undo.
         item.redoMutations.push(...newItem.redoMutations);
-        item.undoMutations.push(...newItem.undoMutations);
+        item.undoMutations.unshift(...newItem.undoMutations);
     }
 
     private _getFocusedUnitId() {

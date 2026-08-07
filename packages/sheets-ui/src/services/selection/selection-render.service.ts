@@ -428,8 +428,18 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
 
             activeSelectionControl.updateRangeBySelectionWithCoord(selectionCellWithCoord);// (cursorRangeWidthCoord, primaryCursorCellRange);
         } else {
-            // In normal situation, pointerdown ---> Create new SelectionControl,
-            activeSelectionControl = this.newSelectionControl(scene, skeleton, selectionWithStyle);
+            // When holding ctrl, reuse the selection control whose range is identical to the
+            // clicked cell instead of stacking a duplicate selection on top of it. The reused
+            // control is moved to the end of the control list so it becomes the active selection.
+            const duplicateControl = evt.ctrlKey ? this._activateDuplicateControl(cursorRangeWidthCoord) : null;
+
+            if (duplicateControl) {
+                activeSelectionControl = duplicateControl;
+                duplicateControl.updateRangeBySelectionWithCoord(selectionCellWithCoord);
+            } else {
+                // In normal situation, pointerdown ---> Create new SelectionControl,
+                activeSelectionControl = this.newSelectionControl(scene, skeleton, selectionWithStyle);
+            }
         }
         // clear highlight except last one.
         for (let i = 0; i < this.getSelectionControls().length - 1; i++) {

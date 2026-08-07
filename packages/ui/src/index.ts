@@ -165,7 +165,13 @@ export { CanvasPopup, SingleCanvasPopup } from './views/components/popup/CanvasP
 export { RectPopup } from './views/components/popup/RectPopup';
 export type { RectPopupDirection } from './views/components/popup/RectPopup';
 export type { IUnitPresenceLabelDrawingOptions } from './views/components/presence/UnitPresenceLabel';
-export { drawUnitPresenceLabel, UNIT_PRESENCE_LABEL_HEIGHT } from './views/components/presence/UnitPresenceLabel';
+export {
+    drawUnitPresenceLabel,
+    drawUnitPresencePointer,
+    UNIT_PRESENCE_LABEL_HEIGHT,
+    UNIT_PRESENCE_POINTER_HEIGHT,
+    UNIT_PRESENCE_POINTER_WIDTH,
+} from './views/components/presence/UnitPresenceLabel';
 export { useToolbarItemStatus } from './views/components/ribbon/hook';
 export { Ribbon } from './views/components/ribbon/Ribbon';
 export { ToolbarButton } from './views/components/ribbon/ToolbarButton';

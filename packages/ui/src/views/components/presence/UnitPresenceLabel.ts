@@ -21,11 +21,29 @@ export interface IUnitPresenceLabelDrawingOptions {
 }
 
 export const UNIT_PRESENCE_LABEL_HEIGHT = 20;
+export const UNIT_PRESENCE_POINTER_WIDTH = 212;
+export const UNIT_PRESENCE_POINTER_HEIGHT = 42;
 const UNIT_PRESENCE_LABEL_MAX_WIDTH = 200;
 const UNIT_PRESENCE_LABEL_HORIZONTAL_PADDING = 4;
 const UNIT_PRESENCE_LABEL_VERTICAL_PADDING = 5;
 const UNIT_PRESENCE_LABEL_RADIUS = 4;
 const UNIT_PRESENCE_LABEL_FONT = 'bold 13px Source Han Sans CN, Arial, sans-serif';
+const UNIT_PRESENCE_POINTER_PATH = 'M4.037 4.688a.495.495 0 0 1 .651-.651l16 6.5a.5.5 0 0 1-.063.947l-6.124 1.58a2 2 0 0 0-1.438 1.435l-1.579 6.126a.5.5 0 0 1-.947.063z';
+let unitPresencePointerPath: Path2D | null = null;
+
+export function drawUnitPresencePointer(
+    ctx: CanvasRenderingContext2D,
+    options: IUnitPresenceLabelDrawingOptions
+): void {
+    ctx.save();
+    ctx.fillStyle = options.color;
+    // TODO(@ai-review): Verify that lazily constructing the shared Path2D remains safe in every supported canvas runtime.
+    unitPresencePointerPath ??= new Path2D(UNIT_PRESENCE_POINTER_PATH);
+    ctx.fill(unitPresencePointerPath);
+    ctx.transform(1, 0, 0, 1, 12, 22);
+    drawUnitPresenceLabel(ctx, options);
+    ctx.restore();
+}
 
 export function drawUnitPresenceLabel(
     ctx: CanvasRenderingContext2D,

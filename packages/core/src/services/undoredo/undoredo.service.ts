@@ -43,7 +43,7 @@ export interface IUndoRedoItem {
 export interface IUndoRedoService {
     undoRedoStatus$: Observable<IUndoRedoStatus>;
 
-    pushUndoRedo(item: IUndoRedoItem): void;
+    pushUndoRedo(item: IUndoRedoItem, options?: { mergeWithPrevious?: boolean }): void;
 
     /** Pitch the top redo element of the currently focused Univer document instance. */
     pitchTopUndoElement(): Nullable<IUndoRedoItem>;
@@ -190,7 +190,7 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
         this.disposeWithMe(toDisposable(this._univerInstanceService.focused$.subscribe(() => this._updateStatus())));
     }
 
-    pushUndoRedo(item: IUndoRedoItem): void {
+    pushUndoRedo(item: IUndoRedoItem, options?: { mergeWithPrevious?: boolean }): void {
         const { unitID } = item;
 
         const redoStack = this._getRedoStack(unitID, true);
@@ -198,6 +198,14 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
 
         // redo stack should be cleared when pushing an undo
         redoStack.length = 0;
+
+        const previousItem = this._pitchUndoElement(unitID);
+        if (options?.mergeWithPrevious && item.id && previousItem?.id === item.id) {
+            previousItem.redoMutations.push(...item.redoMutations);
+            previousItem.undoMutations = [...item.undoMutations, ...previousItem.undoMutations];
+            this._updateStatus();
+            return;
+        }
 
         // should try to append first and then
         if (this._batchingStatus.has(item.unitID)) {

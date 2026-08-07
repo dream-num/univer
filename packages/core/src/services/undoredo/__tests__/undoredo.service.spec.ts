@@ -137,6 +137,27 @@ describe('LocalUndoRedoService', () => {
         expect(undoRedoService.pitchTopUndoElement()?.id).toBe('run');
     });
 
+    it('should merge consecutive history items with the same id when requested', () => {
+        undoRedoService.pushUndoRedo({
+            unitID: 'unit-1',
+            undoMutations: [{ id: MUTATION_ID, params: { label: 'undo-insert' } }],
+            redoMutations: [{ id: MUTATION_ID, params: { label: 'redo-insert' } }],
+            id: 'edit-session',
+        });
+        undoRedoService.pushUndoRedo({
+            unitID: 'unit-1',
+            undoMutations: [{ id: MUTATION_ID, params: { label: 'undo-edit' } }],
+            redoMutations: [{ id: MUTATION_ID, params: { label: 'redo-edit' } }],
+            id: 'edit-session',
+        }, { mergeWithPrevious: true });
+
+        expect(commandService.syncExecuteCommand(UndoCommandId)).toBe(true);
+        expect(mutationLog).toEqual(['undo-edit', 'undo-insert']);
+
+        expect(commandService.syncExecuteCommand(RedoCommandId)).toBe(true);
+        expect(mutationLog).toEqual(['undo-edit', 'undo-insert', 'redo-insert', 'redo-edit']);
+    });
+
     it('should rollback the latest undo item and support batching', () => {
         const batching = undoRedoService.__tempBatchingUndoRedo('unit-1');
 

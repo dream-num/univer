@@ -164,14 +164,6 @@ export { PrintFloatDomSingle } from './views/components/dom/Print';
 export { CanvasPopup, SingleCanvasPopup } from './views/components/popup/CanvasPopup';
 export { RectPopup } from './views/components/popup/RectPopup';
 export type { RectPopupDirection } from './views/components/popup/RectPopup';
-export type { IUnitPresenceLabelDrawingOptions } from './views/components/presence/UnitPresenceLabel';
-export {
-    drawUnitPresenceLabel,
-    drawUnitPresencePointer,
-    UNIT_PRESENCE_LABEL_HEIGHT,
-    UNIT_PRESENCE_POINTER_HEIGHT,
-    UNIT_PRESENCE_POINTER_WIDTH,
-} from './views/components/presence/UnitPresenceLabel';
 export { useToolbarItemStatus } from './views/components/ribbon/hook';
 export { Ribbon } from './views/components/ribbon/Ribbon';
 export { ToolbarButton } from './views/components/ribbon/ToolbarButton';

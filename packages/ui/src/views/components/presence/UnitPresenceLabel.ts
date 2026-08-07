@@ -37,7 +37,6 @@ export function drawUnitPresencePointer(
 ): void {
     ctx.save();
     ctx.fillStyle = options.color;
-    // TODO(@ai-review): Verify that lazily constructing the shared Path2D remains safe in every supported canvas runtime.
     unitPresencePointerPath ??= new Path2D(UNIT_PRESENCE_POINTER_PATH);
     ctx.fill(unitPresencePointerPath);
     ctx.transform(1, 0, 0, 1, 12, 22);

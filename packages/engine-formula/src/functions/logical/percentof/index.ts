@@ -15,20 +15,28 @@
  */
 
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { ErrorType } from '../../../basics/error-type';
-import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { BaseFunction } from '../../base-function';
+import { Sum } from '../../math/sum';
 
 /**
- * PERCENTOF is an Excel GROUPBY aggregator token. It is evaluated by GROUPBY's
- * AST path, not as a standalone scalar function.
+ * PERCENTOF is logically equivalent to SUM(dataSubset) / SUM(dataAll).
+ * GROUPBY also consumes the function name as an aggregator token through its AST path.
  */
-export class Percentof extends BaseFunction {
-    override minParams = 0;
+export class Percentof extends Sum {
+    override minParams = 2;
 
-    override maxParams = 0;
+    override maxParams = 2;
 
-    override calculate(..._variants: BaseValueObject[]) {
-        return ErrorValueObject.create(ErrorType.VALUE);
+    override calculate(dataSubset: BaseValueObject, dataAll: BaseValueObject) {
+        const subsetTotal = super.calculate(dataSubset);
+        if (subsetTotal.isError()) {
+            return subsetTotal;
+        }
+
+        const allTotal = super.calculate(dataAll);
+        if (allTotal.isError()) {
+            return allTotal;
+        }
+
+        return subsetTotal.divided(allTotal);
     }
 }

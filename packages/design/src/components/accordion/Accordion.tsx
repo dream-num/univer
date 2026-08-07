@@ -70,8 +70,9 @@ export function Accordion(props: IAccordionProps) {
                         onClick={() => toggleItem(index)}
                     >
                         <DownIcon
+                            aria-hidden="true"
                             className={clsx('univer-size-2.5 univer-flex-shrink-0 univer-transition-transform', {
-                                '-univer-rotate-90': openIndex !== index,
+                                '-univer-rotate-90 rtl:univer-rotate-90': openIndex !== index,
                                 'univer-rotate-0': openIndex === index,
                             })}
                         />

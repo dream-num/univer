@@ -324,8 +324,8 @@ export function SheetTableFilterPanel() {
                 >
                     {localeService.t<LocaleKey>('sheets-table-ui.filter.clear-filter')}
                 </Button>
-                <div>
-                    <Button className="univer-mr-2" onClick={onCancel}>{localeService.t<LocaleKey>('sheets-table-ui.filter.cancel')}</Button>
+                <div className="univer-flex univer-gap-x-2">
+                    <Button onClick={onCancel}>{localeService.t<LocaleKey>('sheets-table-ui.filter.cancel')}</Button>
                     <Button variant="primary" onClick={onApply}>{localeService.t<LocaleKey>('sheets-table-ui.filter.confirm')}</Button>
                 </div>
             </div>

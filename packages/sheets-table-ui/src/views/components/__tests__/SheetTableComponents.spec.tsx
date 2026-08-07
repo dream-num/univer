@@ -686,9 +686,7 @@ function clickCheckboxByText(container: HTMLElement, text: string): void {
 }
 
 function clickCustomThemeAddControl(container: HTMLElement): void {
-    const addControl = Array.from(container.querySelectorAll('div')).find((item) => {
-        return item.textContent?.trim() === '+' && item.className.includes('univer-leading-10');
-    });
+    const addControl = container.querySelector('[data-u-comp="sheet-table-theme-add"]');
     if (!addControl) {
         throw new Error('Custom theme add control was not found.');
     }
@@ -697,9 +695,7 @@ function clickCustomThemeAddControl(container: HTMLElement): void {
 }
 
 function clickCustomThemeRemoveControl(container: HTMLElement): void {
-    const removeControl = Array.from(container.querySelectorAll('div')).find((item) => {
-        return item.textContent?.trim() === 'x' && item.className.includes('univer-absolute');
-    });
+    const removeControl = container.querySelector('[data-u-comp="sheet-table-theme-remove"]');
     if (!removeControl) {
         throw new Error('Custom theme remove control was not found.');
     }
@@ -1387,6 +1383,45 @@ describe('sheet table view components', () => {
 
         expect(rangeThemeModel.getCustomRangeThemeStyle(unitId, 'table-custom-1')).toBeDefined();
         expect(table.getTableStyleId()).toBe('table-custom-1');
+    });
+
+    it('opens a custom table theme color without NaN channel values', async () => {
+        testBed = createTestBed();
+        const unitId = testBed.workbook.getUnitId();
+        const rendered = renderWithRediContext(
+            testBed,
+            <SheetTableThemePanel
+                unitId={unitId}
+                subUnitId="sheet1"
+                tableId="table-orders"
+                oldConfig={{}}
+            />
+        );
+        root = rendered.root;
+        container = rendered.container;
+
+        clickCustomThemeAddControl(container);
+        await flushCommands();
+
+        const headerColorButton = Array.from(container.querySelectorAll('button'))
+            .find((button) => button.getAttribute('aria-label')?.startsWith('Header '));
+        if (!headerColorButton) {
+            throw new Error('Header color control was not found.');
+        }
+        clickElement(headerColorButton);
+
+        const colorPicker = document.querySelector('[data-u-comp="color-picker"]');
+        const moreColorControl = colorPicker?.querySelector('a');
+        if (!moreColorControl) {
+            throw new Error('More color control was not found.');
+        }
+        clickElement(moreColorControl);
+
+        const channelValues = Array.from(document.querySelectorAll('input[maxlength="6"], input[maxlength="3"]'))
+            .map((input) => (input as HTMLInputElement).value);
+
+        expect(channelValues).toHaveLength(4);
+        expect(channelValues.every((value) => !value.toLowerCase().includes('nan'))).toBe(true);
     });
 
     it('removes an unused custom theme without changing the table style', async () => {

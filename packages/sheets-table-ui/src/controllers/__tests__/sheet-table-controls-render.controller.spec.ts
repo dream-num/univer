@@ -16,17 +16,29 @@
 
 import { CommandType } from '@univerjs/core';
 import { SelectRangeCommand } from '@univerjs/sheets';
+import { DeleteSheetTableCommand } from '@univerjs/sheets-table';
 import { MoveSelectionCommand, SelectAllCommand } from '@univerjs/sheets-ui';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
+import { SHEET_TABLE_MENU } from '../../const';
 import { SheetTableControlsRenderController } from '../sheet-table-controls-render.controller';
 
-function createController(hasSkeleton = true) {
+interface ITestTable {
+    getId: () => string;
+    getDisplayName: () => string;
+    getRange: () => { startRow: number; endRow: number; startColumn: number; endColumn: number };
+    getTableStyleId: () => string;
+}
+
+function createController(hasSkeleton = true, tables: ITestTable[] = []) {
     const activeSheet$ = new Subject();
     const currentSkeleton$ = new Subject();
     const tableAdd$ = new Subject();
     const selectionChanged$ = new Subject();
     const sceneMakeDirty = vi.fn();
+    const executeTableCommand = vi.fn();
+    const popupDisposable = { dispose: vi.fn() };
+    const attachPopupByPosition = vi.fn((_bound: unknown, _popup: unknown, _location: unknown) => popupDisposable);
     const skeleton = hasSkeleton ? { gapConfig: { rowGaps: {} } } : null;
     let commandListener: ((command: { id: string; type: CommandType }) => void) | undefined;
 
@@ -56,6 +68,7 @@ function createController(hasSkeleton = true) {
                 commandListener = listener;
                 return { dispose: vi.fn() };
             },
+            executeCommand: executeTableCommand,
         } as never,
         {
             tableAdd$,
@@ -63,7 +76,8 @@ function createController(hasSkeleton = true) {
             tableNameChanged$: new Subject(),
             tableRangeChanged$: new Subject(),
             tableThemeChanged$: new Subject(),
-            getTablesBySubunitId: () => [],
+            getTablesBySubunitId: () => tables,
+            getTableById: (_unitId: string, tableId: string) => tables.find((table) => table.getId() === tableId),
         } as never,
         { getRangeThemeStyle: vi.fn() } as never,
         { unitPermissionInitStateChange$: new Subject() } as never,
@@ -79,7 +93,8 @@ function createController(hasSkeleton = true) {
         { refreshTable$: new Subject() } as never,
         { t: (key: string) => key } as never,
         {} as never,
-        {} as never
+        {} as never,
+        { attachPopupByPosition } as never
     );
 
     sceneMakeDirty.mockClear();
@@ -88,6 +103,9 @@ function createController(hasSkeleton = true) {
         sceneMakeDirty,
         selectionChanged$,
         tableAdd$,
+        attachPopupByPosition,
+        executeTableCommand,
+        popupDisposable,
         executeCommand: (command: { id: string; type: CommandType }) => commandListener?.(command),
     };
 }
@@ -124,6 +142,58 @@ describe('SheetTableControlsRenderController', () => {
         expect(refreshBounds).toHaveBeenCalledOnce();
         expect(sceneMakeDirty).not.toHaveBeenCalled();
 
+        controller.dispose();
+    });
+
+    it('opens the registered design menu and routes its actions through the existing table commands', async () => {
+        const table: ITestTable = {
+            getId: () => 'table-1',
+            getDisplayName: () => 'Orders',
+            getRange: () => ({ startRow: 1, endRow: 3, startColumn: 2, endColumn: 4 }),
+            getTableStyleId: () => 'theme-1',
+        };
+        const { attachPopupByPosition, controller, executeTableCommand, popupDisposable } = createController(true, [table]);
+        const shape = Reflect.get(controller, '_shape') as {
+            getAnchorRegion: (tableId: string) => unknown;
+        };
+        vi.spyOn(shape, 'getAnchorRegion').mockReturnValue({
+            type: 'anchor-main',
+            tableId: 'table-1',
+            left: 40,
+            top: 20,
+            width: 122,
+            height: 28,
+        });
+        const handleHit = Reflect.get(controller, '_handleHit') as (hit: object) => void;
+
+        handleHit.call(controller, { type: 'anchor-menu-toggle', tableId: 'table-1' });
+
+        expect(attachPopupByPosition).toHaveBeenCalledWith(
+            { left: 40, right: 162, top: 20, bottom: 48 },
+            expect.objectContaining({ componentKey: SHEET_TABLE_MENU }),
+            { unitId: 'unit-1', subUnitId: 'sheet-1', row: 1, col: 2 }
+        );
+        const popup = attachPopupByPosition.mock.calls[0][1] as {
+            extraProps: {
+                labels: Record<string, string>;
+                onSelect: (action: 'delete') => void | Promise<void>;
+            };
+        };
+        expect(popup.extraProps.labels).toEqual({
+            rename: 'sheets-table-ui.rename',
+            'update-range': 'sheets-table-ui.updateRange',
+            'set-theme': 'sheets-table-ui.setTheme',
+            delete: 'sheets-table-ui.removeTable',
+        });
+
+        await popup.extraProps.onSelect('delete');
+
+        expect(popupDisposable.dispose).toHaveBeenCalledOnce();
+        expect(executeTableCommand).toHaveBeenCalledWith(DeleteSheetTableCommand.id, {
+            tableId: 'table-1',
+            subUnitId: 'sheet-1',
+            unitId: 'unit-1',
+        });
         controller.dispose();
     });
 });

@@ -52,6 +52,7 @@ describe('PanelSection', () => {
         expect(button).toHaveAttribute('aria-expanded', 'true');
 
         fireEvent.click(button);
+        expect(button.querySelector('[aria-hidden="true"]')?.getAttribute('class')).toContain('rtl:univer-rotate-90');
         expect(button).toHaveAttribute('aria-expanded', 'false');
 
         fireEvent.click(button);

@@ -15,16 +15,13 @@
  */
 
 import type { IShapeProps, SpreadsheetSkeleton, UniverRenderingContext, Vector2 } from '@univerjs/engine-render';
-import type { ITableControlHitRegion, TableControlMenuAction } from './table-controls-util';
-import { DEFAULT_FONTFACE_PLANE, Rect, Shape } from '@univerjs/engine-render';
+import type { ITableControlHitRegion } from './table-controls-util';
+import { DEFAULT_FONTFACE_PLANE, Shape } from '@univerjs/engine-render';
 import {
     buildCenteredPlusSegments,
-    buildTableMenuRegions,
     hitTestTableControl,
     TABLE_CONTROL_ANCHOR_HEIGHT,
     TABLE_CONTROL_ANCHOR_RADIUS,
-    TABLE_CONTROL_MENU_ITEM_HEIGHT,
-    TABLE_CONTROL_MENU_WIDTH,
 } from './table-controls-util';
 
 const ANCHOR_MIN_WIDTH = 122;
@@ -35,9 +32,6 @@ const ANCHOR_OFFSET_Y = 0;
 const ANCHOR_BORDER = 'rgba(0, 0, 0, 0.22)';
 const ANCHOR_DIVIDER = 'rgba(0, 0, 0, 0.20)';
 const ANCHOR_TOGGLE_BG_ACTIVE = 'rgba(0, 0, 0, 0.12)';
-const MENU_RADIUS = 8;
-const MENU_BORDER = '#d9dee7';
-const MENU_HOVER_BG = '#f1f3f4';
 const INSERT_BUTTON_VISUAL_SIZE = 18;
 const INSERT_BUTTON_PLUS_SIZE = 8;
 
@@ -49,25 +43,12 @@ export interface ITableControlRenderItem {
     text: string;
 }
 
-export interface ITableControlMenuLabels {
-    rename: string;
-    'update-range': string;
-    'set-theme': string;
-    delete: string;
-}
-
 export class SheetTableControlsShape extends Shape<IShapeProps> {
     private _items: ITableControlRenderItem[] = [];
     private _regions: ITableControlHitRegion[] = [];
     private _openedMenuTableId: string | null = null;
     private _hoveredRegion: ITableControlHitRegion | null = null;
     private _hoveredInsertRegion: ITableControlHitRegion | null = null;
-    private _menuLabels: ITableControlMenuLabels = {
-        rename: 'Rename table',
-        'update-range': 'Update range',
-        'set-theme': 'Set theme',
-        delete: 'Remove table',
-    };
 
     constructor(
         key: string,
@@ -85,11 +66,6 @@ export class SheetTableControlsShape extends Shape<IShapeProps> {
         this.makeDirty(true);
     }
 
-    setMenuLabels(labels: ITableControlMenuLabels): void {
-        this._menuLabels = labels;
-        this.makeDirty(true);
-    }
-
     setOpenedMenuTableId(tableId: string | null): void {
         if (this._openedMenuTableId === tableId) {
             return;
@@ -101,6 +77,10 @@ export class SheetTableControlsShape extends Shape<IShapeProps> {
 
     getOpenedMenuTableId(): string | null {
         return this._openedMenuTableId;
+    }
+
+    getAnchorRegion(tableId: string): ITableControlHitRegion | null {
+        return this._regions.find((region) => region.type === 'anchor-main' && region.tableId === tableId) ?? null;
     }
 
     setHoveredRegion(region: ITableControlHitRegion | null): void {
@@ -202,10 +182,6 @@ export class SheetTableControlsShape extends Shape<IShapeProps> {
             height: TABLE_CONTROL_ANCHOR_HEIGHT,
         });
         this._regions.push(toggleRegion);
-
-        if (this._openedMenuTableId === item.tableId) {
-            this._drawMenu(ctx, item.tableId, left, top + TABLE_CONTROL_ANCHOR_HEIGHT);
-        }
     }
 
     private _drawAnchorToggle(ctx: UniverRenderingContext, anchorWidth: number, color: string, active: boolean): void {
@@ -277,40 +253,6 @@ export class SheetTableControlsShape extends Shape<IShapeProps> {
         ctx.restore();
     }
 
-    private _drawMenu(ctx: UniverRenderingContext, tableId: string, left: number, top: number): void {
-        const regions = buildTableMenuRegions(tableId, left, top);
-
-        ctx.save();
-        ctx.translateWithPrecision(left, top);
-        Rect.drawWith(ctx, {
-            width: TABLE_CONTROL_MENU_WIDTH,
-            height: regions.length * TABLE_CONTROL_MENU_ITEM_HEIGHT,
-            radius: MENU_RADIUS,
-            fill: '#fff',
-            stroke: MENU_BORDER,
-        });
-        ctx.restore();
-
-        for (const region of regions) {
-            const hovered = this._isSameRegion(this._hoveredRegion, region);
-            if (hovered) {
-                ctx.save();
-                ctx.fillStyle = MENU_HOVER_BG;
-                ctx.fillRectByPrecision(region.left, region.top, region.width, region.height);
-                ctx.restore();
-            }
-
-            ctx.save();
-            ctx.font = `12px ${DEFAULT_FONTFACE_PLANE}`;
-            ctx.fillStyle = region.action === 'delete' ? '#d92d20' : '#344054';
-            ctx.textAlign = 'left';
-            ctx.fillText(this._menuLabels[region.action as TableControlMenuAction], region.left + 12, region.top + region.height / 2);
-            ctx.restore();
-        }
-
-        this._regions.push(...regions);
-    }
-
     private _drawInsertButton(ctx: UniverRenderingContext, region: ITableControlHitRegion, fill: string): void {
         const centerX = region.left + region.width / 2;
         const centerY = region.top + region.height / 2;
@@ -336,6 +278,6 @@ export class SheetTableControlsShape extends Shape<IShapeProps> {
     }
 
     private _isSameRegion(a: ITableControlHitRegion | null, b: ITableControlHitRegion): boolean {
-        return Boolean(a && a.type === b.type && a.tableId === b.tableId && a.action === b.action && a.index === b.index);
+        return Boolean(a && a.type === b.type && a.tableId === b.tableId && a.index === b.index);
     }
 }

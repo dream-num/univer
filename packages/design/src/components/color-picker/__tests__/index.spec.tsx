@@ -96,7 +96,10 @@ describe('ColorPicker', () => {
         fireEvent.click(moreLink);
 
         const dialog = document.querySelector('[role="dialog"]');
+        const overlay = document.querySelector('[data-state="open"].univer-fixed.univer-inset-0');
+
         expect(dialog?.className).toContain('!univer-z-[1090]');
+        expect(overlay?.className).toContain('!univer-z-[1090]');
     });
 
     it('should call onChange when rgb input changes in dialog', () => {

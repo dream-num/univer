@@ -150,6 +150,7 @@ const locale: typeof enUS = {
             cancel: 'Отмена',
             confirm: 'Подтвердить',
             'search-placeholder': 'Используйте пробел для разделения ключевых слов',
+            'input-values-placeholder': 'Введите значения',
             'select-all': 'Выбрать все',
         },
     },

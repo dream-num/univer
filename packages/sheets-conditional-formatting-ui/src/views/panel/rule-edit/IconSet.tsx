@@ -138,7 +138,11 @@ const IconGroupList = (props: IIconGroupListProps) => {
                         >
                             {localeService.t(group.title)}
                         </div>
-                        <div className="univer-grid univer-grid-cols-2 univer-gap-1">
+                        <div
+                            dir={direction}
+                            data-u-comp="cf-icon-set-group-grid"
+                            className="univer-grid univer-grid-cols-2 univer-gap-1"
+                        >
                             {group.group.map((groupItem, groupItemIndex) => {
                                 const selected = groupItem.name === iconType;
                                 return (
@@ -150,11 +154,10 @@ const IconGroupList = (props: IIconGroupListProps) => {
                                         className={clsx(
                                             `
                                               univer-flex univer-h-8 univer-w-full univer-cursor-pointer
-                                              univer-items-center univer-rounded-md univer-border-0
+                                              univer-items-center univer-justify-start univer-rounded-md univer-border-0
                                               univer-bg-transparent univer-px-2 univer-outline-none
                                               univer-transition-colors
                                               focus-visible:univer-ring-2 focus-visible:univer-ring-primary-600
-                                              rtl:univer-flex-row-reverse
                                             `,
                                             selected
                                                 ? `
@@ -168,7 +171,7 @@ const IconGroupList = (props: IIconGroupListProps) => {
                                         )}
                                         onClick={() => { onClick(groupItem.name); }}
                                     >
-                                        <span className="univer-flex univer-items-center univer-gap-0.5">
+                                        <span dir={direction} className="univer-flex univer-items-center univer-gap-0.5">
                                             {groupItem.list.map((base64, index) => (
                                                 <img
                                                     key={index}

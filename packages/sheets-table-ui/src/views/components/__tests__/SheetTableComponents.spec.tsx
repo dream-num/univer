@@ -686,9 +686,7 @@ function clickCheckboxByText(container: HTMLElement, text: string): void {
 }
 
 function clickCustomThemeAddControl(container: HTMLElement): void {
-    const addControl = Array.from(container.querySelectorAll('div')).find((item) => {
-        return item.textContent?.trim() === '+' && item.className.includes('univer-leading-10');
-    });
+    const addControl = container.querySelector('[data-u-comp="sheet-table-theme-add"]');
     if (!addControl) {
         throw new Error('Custom theme add control was not found.');
     }
@@ -697,9 +695,7 @@ function clickCustomThemeAddControl(container: HTMLElement): void {
 }
 
 function clickCustomThemeRemoveControl(container: HTMLElement): void {
-    const removeControl = Array.from(container.querySelectorAll('div')).find((item) => {
-        return item.textContent?.trim() === 'x' && item.className.includes('univer-absolute');
-    });
+    const removeControl = container.querySelector('[data-u-comp="sheet-table-theme-remove"]');
     if (!removeControl) {
         throw new Error('Custom theme remove control was not found.');
     }

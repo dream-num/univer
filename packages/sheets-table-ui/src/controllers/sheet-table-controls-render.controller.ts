@@ -14,9 +14,16 @@
  * limitations under the License.
  */
 
-import type { EventState, IRange, Workbook } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
+import type { EventState, IDisposable, IRange, Workbook } from '@univerjs/core';
+import type {
+    IMouseEvent,
+    IPointerEvent,
+    IRenderContext,
+    IRenderModule,
+    SpreadsheetSkeleton,
+} from '@univerjs/engine-render';
 import type { LocaleKey } from '../locale/types';
+import type { SheetTableMenuAction } from '../views/components/SheetTableMenu';
 import type { ITableControlHitRegion } from '../views/widgets/table-controls-util';
 import {
     CommandType,
@@ -54,12 +61,14 @@ import {
     SetScrollOperation,
     SetZoomRatioOperation,
     SHEET_VIEW_KEY,
+    SheetCanvasPopManagerService,
     SheetSkeletonManagerService,
 } from '@univerjs/sheets-ui';
 import { IDialogService, ISidebarService } from '@univerjs/ui';
 import { filter, merge } from 'rxjs';
 import { openRangeSelector } from '../commands/operations/open-table-selector.operation';
 import {
+    SHEET_TABLE_MENU,
     SHEET_TABLE_RENAME_DIALOG,
     SHEET_TABLE_RENAME_DIALOG_ID,
     SHEET_TABLE_THEME_PANEL,
@@ -97,6 +106,7 @@ function isSameTopGap(left: TopGapSnapshot, right: TopGapSnapshot): boolean {
 export class SheetTableControlsRenderController extends Disposable implements IRenderModule {
     private readonly _shape: SheetTableControlsShape;
     private readonly _topGapBaseBySkeleton = new WeakMap<SpreadsheetSkeleton, TopGapSnapshot>();
+    private _menuPopup: IDisposable | null = null;
 
     constructor(
         private readonly _context: IRenderContext<Workbook>,
@@ -112,7 +122,8 @@ export class SheetTableControlsRenderController extends Disposable implements IR
         @Inject(SheetTableThemeUIController) private readonly _sheetTableThemeUIController: SheetTableThemeUIController,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @IDialogService private readonly _dialogService: IDialogService,
-        @ISidebarService private readonly _sidebarService: ISidebarService
+        @ISidebarService private readonly _sidebarService: ISidebarService,
+        @Inject(SheetCanvasPopManagerService) private readonly _sheetCanvasPopupService: SheetCanvasPopManagerService
     ) {
         super();
         this._shape = new SheetTableControlsShape(
@@ -127,6 +138,7 @@ export class SheetTableControlsRenderController extends Disposable implements IR
     private _initShape(): void {
         this._context.scene.addObjects([this._shape], TABLE_CONTROLS_LAYER_INDEX);
         this.disposeWithMe(toDisposable(() => {
+            this._closeFloatingControls();
             this._context.scene.removeObjects([this._shape]);
         }));
 
@@ -200,13 +212,6 @@ export class SheetTableControlsRenderController extends Disposable implements IR
         }
 
         this._syncTopTableGap(skeleton);
-        this._shape.setMenuLabels({
-            rename: this._localeService.t<LocaleKey>('sheets-table-ui.rename'),
-            'update-range': this._localeService.t<LocaleKey>('sheets-table-ui.updateRange'),
-            'set-theme': this._localeService.t<LocaleKey>('sheets-table-ui.setTheme'),
-            delete: this._localeService.t<LocaleKey>('sheets-table-ui.removeTable'),
-        });
-
         const unitId = this._context.unit.getUnitId();
         const subUnitId = worksheet.getSheetId();
         const items = this._tableManager.getTablesBySubunitId(unitId, subUnitId).map((table) => {
@@ -290,7 +295,7 @@ export class SheetTableControlsRenderController extends Disposable implements IR
         const subUnitId = worksheet.getSheetId();
 
         if (hit.type === 'anchor-menu-toggle' || hit.type === 'anchor-main') {
-            this._shape.setOpenedMenuTableId(this._shape.getOpenedMenuTableId() === hit.tableId ? null : hit.tableId);
+            this._toggleTableMenu(unitId, subUnitId, hit.tableId);
             return;
         }
 
@@ -315,33 +320,81 @@ export class SheetTableControlsRenderController extends Disposable implements IR
                 count: 1,
             });
             this._closeFloatingControls();
+        }
+    }
+
+    private _toggleTableMenu(unitId: string, subUnitId: string, tableId: string): void {
+        if (this._shape.getOpenedMenuTableId() === tableId) {
+            this._closeFloatingControls();
             return;
         }
 
-        if (hit.type !== 'menu-item') {
+        const table = this._tableManager.getTableById(unitId, tableId);
+        const anchor = this._shape.getAnchorRegion(tableId);
+        if (!table || !anchor) {
             return;
         }
 
-        switch (hit.action) {
+        this._closeFloatingControls();
+        this._shape.setOpenedMenuTableId(tableId);
+        const range = table.getRange();
+
+        this._menuPopup = this._sheetCanvasPopupService.attachPopupByPosition(
+            {
+                left: anchor.left,
+                right: anchor.left + anchor.width,
+                top: anchor.top,
+                bottom: anchor.top + anchor.height,
+            },
+            {
+                componentKey: SHEET_TABLE_MENU,
+                direction: 'bottom-left',
+                extraProps: {
+                    anchorWidth: anchor.width,
+                    tableName: table.getDisplayName(),
+                    labels: {
+                        rename: this._localeService.t<LocaleKey>('sheets-table-ui.rename'),
+                        'update-range': this._localeService.t<LocaleKey>('sheets-table-ui.updateRange'),
+                        'set-theme': this._localeService.t<LocaleKey>('sheets-table-ui.setTheme'),
+                        delete: this._localeService.t<LocaleKey>('sheets-table-ui.removeTable'),
+                    },
+                    onSelect: (action: SheetTableMenuAction) => this._handleTableMenuAction(action, unitId, subUnitId, tableId),
+                    onClose: () => this._closeFloatingControls(),
+                },
+            },
+            {
+                unitId,
+                subUnitId,
+                row: range.startRow,
+                col: range.startColumn,
+            }
+        ) ?? null;
+
+        if (!this._menuPopup) {
+            this._shape.setOpenedMenuTableId(null);
+        }
+    }
+
+    private _handleTableMenuAction(action: SheetTableMenuAction, unitId: string, subUnitId: string, tableId: string): void | Promise<void> {
+        this._closeFloatingControls();
+
+        switch (action) {
             case 'rename':
-                this._openRenameDialog(unitId, hit.tableId);
+                this._openRenameDialog(unitId, tableId);
                 break;
             case 'update-range':
-                this._openRangeSelector(unitId, subUnitId, hit.tableId);
-                break;
+                return this._openRangeSelector(unitId, subUnitId, tableId);
             case 'set-theme':
-                this._openThemePanel(unitId, subUnitId, hit.tableId);
+                this._openThemePanel(unitId, subUnitId, tableId);
                 break;
             case 'delete':
                 this._commandService.executeCommand(DeleteSheetTableCommand.id, {
-                    tableId: hit.tableId,
+                    tableId,
                     subUnitId,
                     unitId,
                 });
                 break;
         }
-
-        this._closeFloatingControls();
     }
 
     private _openRenameDialog(unitId: string, tableId: string): void {
@@ -395,12 +448,16 @@ export class SheetTableControlsRenderController extends Disposable implements IR
             id: SHEET_TABLE_THEME_PANEL_ID,
             header: { title: this._localeService.t<LocaleKey>('sheets-table-ui.tableStyle') },
             children: {
-                label: SHEET_TABLE_THEME_PANEL,
-                oldConfig: table.getTableConfig(),
-                unitId,
-                subUnitId,
-                tableId,
-            } as any,
+                label: {
+                    name: SHEET_TABLE_THEME_PANEL,
+                    props: {
+                        oldConfig: table.getTableConfig(),
+                        unitId,
+                        subUnitId,
+                        tableId,
+                    },
+                },
+            },
             width: 330,
         });
     }
@@ -519,6 +576,9 @@ export class SheetTableControlsRenderController extends Disposable implements IR
     }
 
     private _closeFloatingControls(): void {
+        const menuPopup = this._menuPopup;
+        this._menuPopup = null;
+        menuPopup?.dispose();
         this._shape.setOpenedMenuTableId(null);
         this._shape.setHoveredInsertRegion(null);
         this._shape.setHoveredRegion(null);

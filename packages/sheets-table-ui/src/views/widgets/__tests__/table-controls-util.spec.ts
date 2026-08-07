@@ -18,7 +18,6 @@ import type { SpreadsheetSkeleton, UniverRenderingContext } from '@univerjs/engi
 import { describe, expect, it } from 'vitest';
 import {
     buildCenteredPlusSegments,
-    buildTableMenuRegions,
     hitTestTableControl,
     TABLE_CONTROL_INSERT_BUTTON_SIZE,
 } from '../table-controls-util';
@@ -74,13 +73,6 @@ describe('table controls geometry', () => {
         ], 0, 0)).toBeNull();
     });
 
-    it('builds menu item regions under the anchor', () => {
-        const regions = buildTableMenuRegions('t1', 20, 30);
-
-        expect(regions.map((item) => item.action)).toEqual(['rename', 'update-range', 'set-theme', 'delete']);
-        expect(regions[0]).toMatchObject({ left: 20, top: 30 });
-    });
-
     it('builds centered plus segments around the insert button center', () => {
         const segments = buildCenteredPlusSegments(20, 30, 8);
 
@@ -90,7 +82,7 @@ describe('table controls geometry', () => {
         ]);
     });
 
-    it('opens a table menu whose action rows can be hit-tested', () => {
+    it('keeps menu action rows out of canvas hit testing', () => {
         const shape = new DrawableSheetTableControlsShape('table-controls', createSkeleton);
         shape.setItems([{
             tableId: 'table-orders',
@@ -103,11 +95,7 @@ describe('table controls geometry', () => {
 
         shape.drawForTest(createCanvasContext());
 
-        expect(shape.hitTest(56, 170)).toMatchObject({
-            type: 'menu-item',
-            tableId: 'table-orders',
-            action: 'delete',
-        });
+        expect(shape.hitTest(56, 170)).toBeNull();
     });
 
     it('activates the hovered insert region for row and column insertion', () => {

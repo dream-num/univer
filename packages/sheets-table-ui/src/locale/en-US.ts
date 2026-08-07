@@ -146,6 +146,7 @@ const locale = {
             cancel: 'Cancel',
             confirm: 'Confirm',
             'search-placeholder': 'Use space to separate keywords',
+            'input-values-placeholder': 'Input Values',
             'select-all': 'Select All',
         },
     },

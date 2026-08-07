@@ -150,6 +150,7 @@ const locale: typeof enUS = {
             cancel: '取消',
             confirm: '確認',
             'search-placeholder': '使用空格分隔關鍵字',
+            'input-values-placeholder': '請輸入',
             'select-all': '全選',
         },
     },

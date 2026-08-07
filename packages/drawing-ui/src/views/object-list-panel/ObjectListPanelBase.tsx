@@ -24,7 +24,6 @@ import {
     LocateFixedIcon,
     LockIcon,
     MoreDownIcon,
-    MoreRightIcon,
     UnlockIcon,
 } from '@univerjs/icons';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -476,7 +475,11 @@ export function ObjectListPanelBase(props: IObjectListPanelBaseProps) {
                                                               univer-items-center univer-justify-center
                                                             "
                                                         >
-                                                            {sectionCollapsed ? <MoreRightIcon /> : <MoreDownIcon />}
+                                                            <MoreDownIcon
+                                                                className={clsx({
+                                                                    '-univer-rotate-90 rtl:univer-rotate-90': sectionCollapsed,
+                                                                })}
+                                                            />
                                                         </span>
                                                     )
                                                     : <span className="univer-size-4 univer-shrink-0" />}
@@ -658,7 +661,11 @@ function ObjectListRow(props: {
                             onToggleExpanded();
                         }}
                     >
-                        {item.expanded ? <MoreDownIcon /> : <MoreRightIcon />}
+                        <MoreDownIcon
+                            className={clsx({
+                                '-univer-rotate-90 rtl:univer-rotate-90': !item.expanded,
+                            })}
+                        />
                     </button>
                 )
                 : <span className="univer-size-5 univer-shrink-0" />}

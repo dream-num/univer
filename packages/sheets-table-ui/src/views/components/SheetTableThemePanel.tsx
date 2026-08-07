@@ -19,7 +19,7 @@ import type { IAddTableThemeCommandParams, ISetSheetTableCommandParams, ITableSe
 import type { LocaleKey } from '../../locale/types';
 import { ColorKit, ErrorService, ICommandService, LocaleService } from '@univerjs/core';
 import { borderClassName, clsx, ColorPicker, Dropdown } from '@univerjs/design';
-import { DownIcon } from '@univerjs/icons';
+import { CloseIcon, DownIcon, IncreaseIcon } from '@univerjs/icons';
 import { RangeThemeStyle, SetRangeThemeMutation, SheetRangeThemeModel } from '@univerjs/sheets';
 import {
     AddTableThemeCommand,
@@ -88,7 +88,7 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
     const firstRowBg = customStyle?.getFirstRowStyle()?.bg?.rgb ?? TABLE_DEFAULT_BG_COLOR;
     const secondRowBg = customStyle?.getSecondRowStyle()?.bg?.rgb ?? TABLE_DEFAULT_BG_COLOR;
     const lastRowBg = customStyle?.getLastRowStyle()?.bg?.rgb ?? TABLE_DEFAULT_BG_COLOR;
-    const [hoverCustomId, setHoverCustomId] = useState<string | null>(null);
+    const direction = useObservable(localeService.direction$, localeService.getDirection());
 
     const handleThemeChange = (theme: string) => {
         commandService.executeCommand<ISetSheetTableCommandParams>(SetSheetTableCommand.id, {
@@ -145,302 +145,276 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
     const secondRowBgIsDark = new ColorKit(secondRowBg).isDark();
     const lastRowBgIsDark = new ColorKit(lastRowBg).isDark();
 
+    const customThemeRows = [
+        {
+            key: 'header',
+            label: localeService.t<LocaleKey>('sheets-table-ui.header'),
+            background: headerBg,
+            isDark: headerBgIsDark,
+            onChange: (value: string) => {
+                const headerRowStyle = processStyleWithBorderStyle('headerRowStyle', {
+                    bg: { rgb: value },
+                    cl: { rgb: new ColorKit(value).isDark() ? '#fff' : '#000' },
+                });
+                setCustomTheme(table.getTableStyleId(), { headerRowStyle });
+            },
+        },
+        {
+            key: 'first-row',
+            label: localeService.t<LocaleKey>('sheets-table-ui.firstLine'),
+            background: firstRowBg,
+            isDark: firstRowBgIsDark,
+            onChange: (value: string) => {
+                setCustomTheme(table.getTableStyleId(), {
+                    firstRowStyle: {
+                        bg: { rgb: value },
+                        cl: { rgb: new ColorKit(value).isDark() ? '#fff' : '#000' },
+                    },
+                });
+            },
+        },
+        {
+            key: 'second-row',
+            label: localeService.t<LocaleKey>('sheets-table-ui.secondLine'),
+            background: secondRowBg,
+            isDark: secondRowBgIsDark,
+            onChange: (value: string) => {
+                setCustomTheme(table.getTableStyleId(), {
+                    secondRowStyle: {
+                        bg: { rgb: value },
+                        cl: { rgb: new ColorKit(value).isDark() ? '#fff' : '#000' },
+                    },
+                });
+            },
+        },
+        {
+            key: 'last-row',
+            label: localeService.t<LocaleKey>('sheets-table-ui.footer'),
+            background: lastRowBg,
+            isDark: lastRowBgIsDark,
+            onChange: (value: string) => {
+                const lastRowStyle = processStyleWithBorderStyle('lastRowStyle', {
+                    bg: { rgb: value },
+                    cl: { rgb: new ColorKit(value).isDark() ? '#fff' : '#000' },
+                });
+                setCustomTheme(table.getTableStyleId(), { lastRowStyle });
+            },
+        },
+    ];
+
     return (
-        <div>
-            <h5>{localeService.t<LocaleKey>('sheets-table-ui.defaultStyle')}</h5>
-            <div className="univer-flex univer-gap-2">
-                {defaultRangeThemes.map((item) => {
-                    const rangeThemeItem = rangeThemeModel.getDefaultRangeThemeStyle(item);
-                    const headerRowBg = rangeThemeItem?.getHeaderRowStyle()?.bg?.rgb || TABLE_DEFAULT_BG_COLOR;
-                    const firstRowBg = rangeThemeItem?.getFirstRowStyle()?.bg?.rgb || TABLE_DEFAULT_BG_COLOR;
-                    const secondRowBg = rangeThemeItem?.getSecondRowStyle()?.bg?.rgb || TABLE_DEFAULT_BG_COLOR;
-                    const lastRowBg = rangeThemeItem?.getLastRowStyle()?.bg?.rgb || TABLE_DEFAULT_BG_COLOR;
-
-                    return (
-                        <div
-                            key={item}
-                            className={clsx(`
-                              univer-h-10 univer-w-8 univer-cursor-pointer univer-border univer-border-solid
-                              univer-border-gray-200 univer-p-px
-                              [&>div]:univer-box-border [&>div]:univer-h-2.5
-                            `, {
-                                'univer-border-blue-500': item === themeConfig.theme,
-                            })}
-                            onClick={() => handleThemeChange(item)}
-                        >
-                            <div style={{ background: headerRowBg, border: `${headerRowBg ? TABLE_BORDER_NONE : TABLE_BORDER_DEFAULT}` }} />
-                            <div style={{ background: firstRowBg, border: `${firstRowBg ? TABLE_BORDER_NONE : TABLE_BORDER_DEFAULT}` }} />
-                            <div style={{ background: secondRowBg, border: `${secondRowBg ? TABLE_BORDER_NONE : TABLE_BORDER_DEFAULT}` }} />
-                            <div style={{ background: lastRowBg, border: `${lastRowBg ? TABLE_BORDER_NONE : TABLE_BORDER_DEFAULT}` }} />
-                        </div>
-                    );
-                })}
-            </div>
-
-            <h5>{localeService.t<LocaleKey>('sheets-table-ui.customStyle')}</h5>
-            <div className={clsx('univer-w-full univer-rounded-sm', borderClassName)}>
-                <div className="univer-flex univer-flex-wrap univer-gap-2 univer-p-2">
-                    <div
-                        className={clsx(`
-                          univer-h-10 univer-w-8 univer-cursor-pointer univer-p-px univer-text-center univer-leading-10
-                        `, borderClassName)}
-                        onClick={handleAddCustomTheme}
-                    >
-                        +
-                    </div>
-                    {customRangeThemes.map((item) => {
-                        const rangeThemeItem = rangeThemeModel.getCustomRangeThemeStyle(unitId, item);
-                        const headerRowBg = rangeThemeItem?.getHeaderRowStyle()?.bg?.rgb;
-                        const firstRowBg = rangeThemeItem?.getFirstRowStyle()?.bg?.rgb;
-                        const secondRowBg = rangeThemeItem?.getSecondRowStyle()?.bg?.rgb;
-                        const lastRowBg = rangeThemeItem?.getLastRowStyle()?.bg?.rgb;
+        <div dir={direction} className="univer-flex univer-flex-col univer-gap-5 univer-pb-4">
+            <section className="univer-flex univer-flex-col univer-gap-2">
+                <h5
+                    className="
+                      univer-m-0 univer-text-xs univer-font-medium univer-text-gray-500
+                      dark:!univer-text-gray-300
+                    "
+                >
+                    {localeService.t<LocaleKey>('sheets-table-ui.defaultStyle')}
+                </h5>
+                <div className="univer-grid univer-grid-cols-6 univer-gap-2">
+                    {defaultRangeThemes.map((item) => {
+                        const rangeThemeItem = rangeThemeModel.getDefaultRangeThemeStyle(item);
+                        const rowBackgrounds = [
+                            rangeThemeItem?.getHeaderRowStyle()?.bg?.rgb || TABLE_DEFAULT_BG_COLOR,
+                            rangeThemeItem?.getFirstRowStyle()?.bg?.rgb || TABLE_DEFAULT_BG_COLOR,
+                            rangeThemeItem?.getSecondRowStyle()?.bg?.rgb || TABLE_DEFAULT_BG_COLOR,
+                            rangeThemeItem?.getLastRowStyle()?.bg?.rgb || TABLE_DEFAULT_BG_COLOR,
+                        ];
+                        const selected = item === themeConfig.theme;
 
                         return (
-                            <div
+                            <button
                                 key={item}
+                                type="button"
+                                title={item}
+                                aria-label={item}
+                                aria-pressed={selected}
                                 className={clsx(`
-                                  univer-relative univer-h-10 univer-w-8 univer-cursor-pointer univer-border
-                                  univer-border-solid univer-border-gray-200 univer-p-px
-                                `, {
-                                    'univer-border-blue-500': item === themeConfig.theme,
+                                  univer-flex univer-h-12 univer-w-full univer-cursor-pointer univer-flex-col
+                                  univer-overflow-hidden univer-rounded-lg univer-bg-white univer-p-1 univer-shadow-sm
+                                  univer-transition-all
+                                  hover:univer-border-gray-400 hover:univer-shadow-md
+                                  focus:univer-outline-none focus:univer-ring-2 focus:univer-ring-primary-200
+                                  dark:!univer-bg-gray-800
+                                `, borderClassName, {
+                                    '!univer-border-primary-500 univer-ring-2 univer-ring-primary-100': selected,
                                 })}
                                 onClick={() => handleThemeChange(item)}
-                                onMouseEnter={() => setHoverCustomId(item)}
-                                onMouseLeave={() => setHoverCustomId(null)}
                             >
-                                <div className="univer-box-border univer-h-2.5" style={{ background: headerRowBg ?? TABLE_BORDER_NONE, border: `${headerRowBg ? TABLE_BORDER_NONE : TABLE_BORDER_DEFAULT}` }} />
-                                <div className="univer-box-border univer-h-2.5" style={{ background: firstRowBg ?? TABLE_BORDER_NONE, border: `${firstRowBg ? TABLE_BORDER_NONE : TABLE_BORDER_DEFAULT}` }} />
-                                <div className="univer-box-border univer-h-2.5" style={{ background: secondRowBg ?? TABLE_BORDER_NONE, border: `${secondRowBg ? TABLE_BORDER_NONE : TABLE_BORDER_DEFAULT}` }} />
-                                <div className="univer-box-border univer-h-2.5" style={{ background: lastRowBg ?? TABLE_BORDER_NONE, border: `${lastRowBg ? TABLE_BORDER_NONE : TABLE_BORDER_DEFAULT}` }} />
+                                {rowBackgrounds.map((background, index) => (
+                                    <span
+                                        key={index}
+                                        className="univer-min-h-0 univer-w-full univer-flex-1"
+                                        style={{
+                                            background,
+                                            border: background ? TABLE_BORDER_NONE : TABLE_BORDER_DEFAULT,
+                                        }}
+                                    />
+                                ))}
+                            </button>
+                        );
+                    })}
+                </div>
+            </section>
 
-                                <div
-                                    className={`
-                                      univer-absolute univer-right-[-3px] univer-top-[-3px] univer-size-3
-                                      univer-rounded-md univer-bg-gray-200 univer-text-center univer-text-xs
-                                      univer-leading-[10px]
-                                    `}
-                                    style={{ display: hoverCustomId === item ? 'block' : 'none' }}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
+            <section className="univer-flex univer-flex-col univer-gap-2">
+                <h5
+                    className="
+                      univer-m-0 univer-text-xs univer-font-medium univer-text-gray-500
+                      dark:!univer-text-gray-300
+                    "
+                >
+                    {localeService.t<LocaleKey>('sheets-table-ui.customStyle')}
+                </h5>
+                <div
+                    className="
+                      univer-grid univer-grid-cols-5 univer-gap-2 univer-rounded-lg univer-bg-gray-50 univer-p-2
+                      dark:!univer-bg-gray-800
+                    "
+                >
+                    <button
+                        type="button"
+                        data-u-comp="sheet-table-theme-add"
+                        aria-label={localeService.t<LocaleKey>('sheets-table-ui.setTheme')}
+                        className="
+                          univer-flex univer-h-12 univer-w-full univer-cursor-pointer univer-items-center
+                          univer-justify-center univer-rounded-lg univer-border univer-border-dashed
+                          univer-border-gray-300 univer-bg-white univer-p-0 univer-text-gray-500
+                          univer-transition-colors
+                          hover:univer-border-primary-500 hover:univer-text-primary-600
+                          focus:univer-outline-none focus:univer-ring-2 focus:univer-ring-primary-200
+                          dark:!univer-border-gray-600 dark:!univer-bg-gray-900 dark:!univer-text-gray-300
+                        "
+                        onClick={handleAddCustomTheme}
+                    >
+                        <IncreaseIcon className="univer-size-4" />
+                    </button>
+                    {customRangeThemes.map((item) => {
+                        const rangeThemeItem = rangeThemeModel.getCustomRangeThemeStyle(unitId, item);
+                        const rowBackgrounds = [
+                            rangeThemeItem?.getHeaderRowStyle()?.bg?.rgb,
+                            rangeThemeItem?.getFirstRowStyle()?.bg?.rgb,
+                            rangeThemeItem?.getSecondRowStyle()?.bg?.rgb,
+                            rangeThemeItem?.getLastRowStyle()?.bg?.rgb,
+                        ];
+                        const selected = item === themeConfig.theme;
+
+                        return (
+                            <div key={item} className="univer-group univer-relative univer-h-12 univer-min-w-0">
+                                <button
+                                    type="button"
+                                    title={item}
+                                    aria-label={item}
+                                    aria-pressed={selected}
+                                    className={clsx(`
+                                      univer-flex univer-size-full univer-cursor-pointer univer-flex-col
+                                      univer-overflow-hidden univer-rounded-lg univer-bg-white univer-p-1
+                                      univer-shadow-sm univer-transition-all
+                                      hover:univer-border-gray-400 hover:univer-shadow-md
+                                      focus:univer-outline-none focus:univer-ring-2 focus:univer-ring-primary-200
+                                      dark:!univer-bg-gray-900
+                                    `, borderClassName, {
+                                        '!univer-border-primary-500 univer-ring-2 univer-ring-primary-100': selected,
+                                    })}
+                                    onClick={() => handleThemeChange(item)}
+                                >
+                                    {rowBackgrounds.map((background, index) => (
+                                        <span
+                                            key={index}
+                                            className="univer-min-h-0 univer-w-full univer-flex-1"
+                                            style={{
+                                                background: background ?? TABLE_BORDER_NONE,
+                                                border: background ? TABLE_BORDER_NONE : TABLE_BORDER_DEFAULT,
+                                            }}
+                                        />
+                                    ))}
+                                </button>
+                                <button
+                                    type="button"
+                                    data-u-comp="sheet-table-theme-remove"
+                                    aria-label={`${localeService.t<LocaleKey>('sheets-table-ui.customStyle')} ${item}`}
+                                    className={clsx(`
+                                      univer-absolute univer-right-[-6px] univer-top-[-6px] univer-z-10 univer-flex
+                                      univer-size-5 univer-cursor-pointer univer-items-center univer-justify-center
+                                      univer-rounded-full univer-border univer-border-solid univer-border-gray-200
+                                      univer-bg-white univer-p-0 univer-text-gray-500 univer-shadow-sm
+                                      univer-transition-all
+                                      hover:univer-border-red-200 hover:univer-bg-red-50 hover:univer-text-red-600
+                                      focus:univer-opacity-100 focus:univer-outline-none focus:univer-ring-2
+                                      focus:univer-ring-primary-200
+                                      rtl:univer-left-[-6px] rtl:univer-right-auto
+                                      dark:!univer-border-gray-600 dark:!univer-bg-gray-900
+                                    `, {
+                                        'univer-opacity-100': selected,
+                                        'univer-opacity-0 group-focus-within:univer-opacity-100 group-hover:univer-opacity-100': !selected,
+                                    })}
+                                    onClick={(event) => {
+                                        event.stopPropagation();
                                         removeCustomTheme(item);
                                     }}
                                 >
-                                    x
-                                </div>
+                                    <CloseIcon className="univer-size-3" />
+                                </button>
                             </div>
                         );
                     })}
                 </div>
 
                 {customSelected && (
-                    <>
-                        <div className="univer-h-px univer-w-full univer-bg-gray-200" />
-                        <div className="univer-flex univer-flex-col univer-gap-2 univer-p-2">
-                            <div className="univer-flex univer-h-9 univer-gap-2">
+                    <div
+                        className="
+                          univer-flex univer-flex-col univer-gap-2 univer-rounded-lg univer-bg-gray-50 univer-p-3
+                          dark:!univer-bg-gray-800
+                        "
+                    >
+                        {customThemeRows.map((row) => (
+                            <div key={row.key} className="univer-flex univer-h-10 univer-min-w-0 univer-gap-2">
                                 <div
                                     className={clsx(`
-                                      univer-box-border univer-h-full univer-w-52 univer-rounded-sm univer-text-center
-                                      univer-leading-9
+                                      univer-flex univer-min-w-0 univer-flex-1 univer-items-center univer-rounded-md
+                                      univer-px-3 univer-text-sm univer-font-medium
+                                      rtl:univer-text-right
                                     `, borderClassName, {
-                                        'univer-text-white': headerBgIsDark,
-                                        'univer-text-gray-900': !headerBgIsDark,
+                                        'univer-text-white': row.isDark,
+                                        'univer-text-gray-900': !row.isDark,
                                     })}
-                                    style={{
-                                        background: headerBg,
-                                    }}
+                                    style={{ background: row.background }}
                                 >
-                                    {localeService.t<LocaleKey>('sheets-table-ui.header')}
+                                    <span className="univer-truncate">{row.label}</span>
                                 </div>
                                 <Dropdown
                                     overlay={(
-                                        <div className="univer-p-2">
-                                            <ColorPicker
-                                                value={headerBg}
-                                                onChange={(val) => {
-                                                    const headerRowStyle = processStyleWithBorderStyle('headerRowStyle', {
-                                                        bg: {
-                                                            rgb: val,
-                                                        },
-                                                        cl: {
-                                                            rgb: new ColorKit(val).isDark() ? '#fff' : '#000',
-                                                        },
-                                                    });
-                                                    setCustomTheme(table.getTableStyleId(), { headerRowStyle });
-                                                }}
-                                            />
+                                        <div dir={direction} className="univer-p-2">
+                                            <ColorPicker value={row.background} onChange={row.onChange} />
                                         </div>
                                     )}
                                 >
-                                    <div
+                                    <button
+                                        type="button"
+                                        aria-label={`${row.label} ${localeService.t<LocaleKey>('sheets-table-ui.setTheme')}`}
                                         className={clsx(`
-                                          univer-flex univer-cursor-pointer univer-items-center univer-gap-2
-                                          univer-rounded-sm univer-bg-white univer-p-1
+                                          univer-flex univer-h-10 univer-cursor-pointer univer-items-center univer-gap-2
+                                          univer-rounded-md univer-bg-white univer-px-2 univer-text-gray-600
+                                          univer-transition-colors
+                                          hover:univer-bg-gray-100
+                                          focus:univer-outline-none focus:univer-ring-2 focus:univer-ring-primary-200
+                                          dark:!univer-bg-gray-900 dark:!univer-text-gray-300
                                         `, borderClassName)}
                                     >
-                                        <div
-                                            className={clsx('univer-size-4 univer-rounded-lg univer-bg-gray-400', borderClassName, {
-                                                'univer-text-white': headerBgIsDark,
-                                                'univer-text-gray-900': !headerBgIsDark,
-                                            })}
-                                            style={{
-                                                background: headerBg,
-                                            }}
+                                        <span
+                                            className={clsx('univer-size-4 univer-rounded-full', borderClassName)}
+                                            style={{ background: row.background }}
                                         />
-                                        <DownIcon className="univer-size-2" />
-                                    </div>
+                                        <DownIcon className="univer-size-3" />
+                                    </button>
                                 </Dropdown>
                             </div>
-                            <div className="univer-flex univer-h-9 univer-gap-2">
-                                <div
-                                    className={clsx(`
-                                      univer-box-border univer-h-full univer-w-52 univer-rounded-sm univer-text-center
-                                      univer-leading-9
-                                    `, borderClassName, {
-                                        'univer-text-white': firstRowBgIsDark,
-                                        'univer-text-gray-900': !firstRowBgIsDark,
-                                    })}
-                                    style={{
-                                        background: firstRowBg,
-                                    }}
-                                >
-                                    {localeService.t<LocaleKey>('sheets-table-ui.firstLine')}
-                                </div>
-                                <Dropdown
-                                    overlay={(
-                                        <div className="univer-p-2">
-                                            <ColorPicker
-                                                value={firstRowBg}
-                                                onChange={(val) => {
-                                                    setCustomTheme(table.getTableStyleId(), {
-                                                        firstRowStyle: {
-                                                            bg: {
-                                                                rgb: val,
-                                                            },
-                                                            cl: {
-                                                                rgb: new ColorKit(val).isDark() ? '#fff' : '#000',
-                                                            },
-                                                        },
-                                                    });
-                                                }}
-                                            />
-                                        </div>
-                                    )}
-                                >
-                                    <div
-                                        className={clsx(`
-                                          univer-flex univer-cursor-pointer univer-items-center univer-gap-2
-                                          univer-rounded-sm univer-bg-white univer-p-1
-                                        `, borderClassName)}
-                                    >
-                                        <div
-                                            className={clsx('univer-size-4 univer-rounded-lg univer-bg-gray-400', borderClassName)}
-                                            style={{ background: firstRowBg }}
-                                        />
-                                        <DownIcon className="univer-size-2" />
-                                    </div>
-                                </Dropdown>
-                            </div>
-                            <div className="univer-flex univer-h-9 univer-gap-2">
-                                <div
-                                    className={clsx(`
-                                      univer-box-border univer-h-full univer-w-52 univer-rounded-sm univer-text-center
-                                      univer-leading-9
-                                    `, borderClassName, {
-                                        'univer-text-white': secondRowBgIsDark,
-                                        'univer-text-gray-900': !secondRowBgIsDark,
-                                    })}
-                                    style={{
-                                        background: secondRowBg,
-                                    }}
-                                >
-                                    {localeService.t<LocaleKey>('sheets-table-ui.secondLine')}
-                                </div>
-                                <Dropdown
-                                    overlay={(
-                                        <div className="univer-p-2">
-                                            <ColorPicker
-                                                value={secondRowBg}
-                                                onChange={(val) => setCustomTheme(table.getTableStyleId(), {
-                                                    secondRowStyle: {
-                                                        bg: {
-                                                            rgb: val,
-                                                        },
-                                                        cl: {
-                                                            rgb: new ColorKit(val).isDark() ? '#fff' : '#000',
-                                                        },
-                                                    },
-                                                })}
-                                            />
-                                        </div>
-                                    )}
-                                >
-                                    <div
-                                        className={clsx(`
-                                          univer-flex univer-cursor-pointer univer-items-center univer-gap-2
-                                          univer-rounded-sm univer-bg-white univer-p-1
-                                        `, borderClassName)}
-                                    >
-                                        <div
-                                            className={clsx('univer-size-4 univer-rounded-lg univer-bg-gray-400', borderClassName)}
-                                            style={{ background: secondRowBg }}
-                                        />
-                                        <DownIcon className="univer-size-2" />
-                                    </div>
-                                </Dropdown>
-                            </div>
-                            <div className="univer-flex univer-h-9 univer-gap-2">
-                                <div
-                                    className={clsx(`
-                                      univer-box-border univer-h-full univer-w-52 univer-rounded-sm univer-text-center
-                                      univer-leading-9
-                                    `, borderClassName, {
-                                        'univer-text-white': lastRowBgIsDark,
-                                        'univer-text-gray-900': !lastRowBgIsDark,
-                                    })}
-                                    style={{
-                                        background: lastRowBg,
-                                    }}
-                                >
-                                    {localeService.t<LocaleKey>('sheets-table-ui.footer')}
-                                </div>
-                                <Dropdown
-                                    overlay={(
-                                        <div className="univer-p-2">
-                                            <ColorPicker
-                                                value={lastRowBg}
-                                                onChange={(val) => {
-                                                    const lastRowStyle = processStyleWithBorderStyle('lastRowStyle', {
-                                                        bg: {
-                                                            rgb: val,
-                                                        },
-                                                        cl: {
-                                                            rgb: new ColorKit(val).isDark() ? '#fff' : '#000',
-                                                        },
-                                                    });
-                                                    setCustomTheme(table.getTableStyleId(), { lastRowStyle });
-                                                }}
-                                            />
-                                        </div>
-                                    )}
-                                >
-                                    <div
-                                        className={clsx(`
-                                          univer-flex univer-cursor-pointer univer-items-center univer-gap-2
-                                          univer-rounded-sm univer-bg-white univer-p-1
-                                        `, borderClassName)}
-                                    >
-                                        <div
-                                            className={clsx('univer-size-4 univer-rounded-lg univer-bg-gray-400', borderClassName)}
-                                            style={{ background: lastRowBg }}
-                                        />
-                                        <DownIcon className="univer-size-2" />
-                                    </div>
-                                </Dropdown>
-                            </div>
-                        </div>
-                    </>
+                        ))}
+                    </div>
                 )}
-            </div>
+            </section>
         </div>
     );
 };

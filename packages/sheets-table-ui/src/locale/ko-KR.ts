@@ -148,6 +148,7 @@ const locale: typeof enUS = {
             cancel: '취소',
             confirm: '확인',
             'search-placeholder': '검색어는 공백으로 구분',
+            'input-values-placeholder': '값 입력',
             'select-all': '전체 선택',
         },
     },

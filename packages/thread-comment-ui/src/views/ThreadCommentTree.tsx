@@ -104,6 +104,7 @@ function formatCommentDateTime(value: string, region: LocaleType): string {
         hour: '2-digit',
         minute: '2-digit',
         hour12: false,
+        numberingSystem: 'latn',
     });
 }
 
@@ -134,6 +135,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
     const uiConfig = useConfigValue<IUniverUIConfig>(UI_PLUGIN_CONFIG_KEY);
     const avatarFallback = uiConfig?.avatarFallback;
     const currentRegion = useObservable(regionService.currentRegion$, regionService.getCurrentRegion());
+    const direction = useObservable(localeService.direction$, localeService.getDirection());
     const dateText = isMock ? null : formatCommentDateTime(item.dT, currentRegion);
 
     const handleDeleteItem = () => {
@@ -205,11 +207,12 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                                 ? (
                                     <Dropdown
                                         overlay={(
-                                            <div className="univer-rounded-lg">
+                                            <div dir={direction} className="univer-rounded-lg">
                                                 <ul
                                                     className={`
                                                       univer-m-0 univer-box-border univer-grid univer-list-none
                                                       univer-p-1.5 univer-text-sm
+                                                      rtl:univer-text-right
                                                       [&_a]:univer-block [&_a]:univer-cursor-pointer
                                                       [&_a]:univer-rounded [&_a]:univer-px-2 [&_a]:univer-py-1.5
                                                       [&_a]:univer-transition-colors
@@ -259,6 +262,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                     dir="ltr"
                     className={`
                       univer-mb-1 univer-block univer-text-xs/normal univer-text-gray-600
+                      rtl:univer-text-right
                       dark:!univer-text-gray-200
                     `}
                 >
@@ -529,7 +533,11 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
             </div>
             <div
                 ref={scroller}
-                className={clsx('univer-max-h-80 univer-overflow-y-auto univer-overflow-x-hidden', scrollbarClassName)}
+                className={clsx(
+                    'univer-max-h-80 univer-overflow-y-auto univer-overflow-x-hidden',
+                    scrollbarClassName,
+                    location === ThreadCommentTreeLocation.PANEL && '-univer-mx-4 univer-px-4'
+                )}
             >
                 {renderComments.map(
                     (item) => (

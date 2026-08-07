@@ -95,6 +95,8 @@ class TestState {
 class TestLocaleService {
     private readonly _currentLocale$ = new BehaviorSubject<LocaleType>(LocaleType.ZH_CN);
     readonly currentLocale$ = this._currentLocale$.asObservable();
+    private readonly _direction$ = new BehaviorSubject<'ltr' | 'rtl'>('ltr');
+    readonly direction$ = this._direction$.asObservable();
 
     t(key: string) {
         return key;
@@ -106,6 +108,14 @@ class TestLocaleService {
 
     getCurrentLocale() {
         return this._currentLocale$.getValue();
+    }
+
+    setDirection(direction: 'ltr' | 'rtl') {
+        this._direction$.next(direction);
+    }
+
+    getDirection() {
+        return this._direction$.getValue();
     }
 }
 
@@ -496,6 +506,18 @@ function getReplyAction(container: HTMLElement, commentId: string) {
     return action as HTMLElement;
 }
 
+function getMoreAction(container: HTMLElement, commentId: string) {
+    const item = getRootCommentItem(container, commentId);
+    const nameRow = item.children[1] as HTMLElement | undefined;
+    const controls = nameRow?.lastElementChild as HTMLElement | undefined;
+    const action = controls?.lastElementChild;
+    if (!action) {
+        throw new Error('More action was not found.');
+    }
+
+    return action as HTMLElement;
+}
+
 function getOnlyEditor(testBed: ReturnType<typeof createTreeTestBed>) {
     const editors = Array.from(testBed.editorService.getAllEditor().values());
     if (editors.length !== 1) {
@@ -535,6 +557,20 @@ describe('ThreadCommentTree', () => {
         container = undefined;
     });
 
+    it('extends the panel scroller to the card edges while preserving content padding', () => {
+        const testBed = createTreeTestBed();
+        addRootComment(testBed.threadCommentModel, createComment({ id: 'root-thread', ref: 'A1' }));
+
+        const rendered = renderDefaultTree(testBed.injector, 'root-thread');
+        root = rendered.root;
+        container = rendered.container;
+
+        const scroller = getTree(container, 'root-thread').children[1] as HTMLElement;
+
+        expect(scroller.className).toContain('-univer-mx-4');
+        expect(scroller.className).toContain('univer-px-4');
+    });
+
     it('provides mirrored layout hooks for RTL comment rows', () => {
         const testBed = createTreeTestBed();
         addRootComment(testBed.threadCommentModel, createComment({ id: 'root-thread', ref: 'A1', dT: '2026/07/07 20:35' }));
@@ -560,6 +596,26 @@ describe('ThreadCommentTree', () => {
         expect(avatar.className).toContain('rtl:univer-left-auto');
         expect(avatar.className).toContain('rtl:univer-right-0');
         expect(time?.getAttribute('dir')).toBe('ltr');
+        expect(time?.className).toContain('rtl:univer-text-right');
+    });
+
+    it('right-aligns the comment action menu in RTL', () => {
+        const testBed = createTreeTestBed();
+        const localeService = testBed.injector.get(LocaleService);
+        addRootComment(testBed.threadCommentModel, createComment({ id: 'root-thread', ref: 'A1' }));
+
+        const rendered = renderDefaultTree(testBed.injector, 'root-thread');
+        root = rendered.root;
+        container = rendered.container;
+
+        act(() => localeService.setDirection('rtl'));
+        act(() => getMoreAction(container!, 'root-thread').click());
+
+        const menu = document.body.querySelector('[data-slot="popover-content"] ul');
+
+        expect(menu).not.toBeNull();
+        expect(menu?.parentElement?.getAttribute('dir')).toBe('rtl');
+        expect(menu?.className).toContain('rtl:univer-text-right');
     });
 
     it('formats comment timestamps with dateKit intl using the current region', () => {
@@ -585,6 +641,22 @@ describe('ThreadCommentTree', () => {
 
         expect(time?.textContent).toBe(expected);
         expect(time?.textContent).not.toBe(rawDate);
+    });
+
+    it.each([LocaleType.AR_SA, LocaleType.FA_IR])('uses Latin digits for %s comment timestamps', (region) => {
+        const testBed = createTreeTestBed();
+        const rawDate = '2026/07/07 20:35';
+        testBed.injector.get(RegionService).setRegion(region);
+        addRootComment(testBed.threadCommentModel, createComment({ id: 'root-thread', ref: 'A1', dT: rawDate }));
+
+        const rendered = renderDefaultTree(testBed.injector, 'root-thread');
+        root = rendered.root;
+        container = rendered.container;
+
+        const dateText = getRootCommentItem(container, 'root-thread').querySelector('time')?.textContent ?? '';
+
+        expect(dateText).toMatch(/[0-9]/);
+        expect(dateText).not.toMatch(/[\u0660-\u0669\u06F0-\u06F9]/u);
     });
 
     it('does not render a timestamp for a new comment', () => {

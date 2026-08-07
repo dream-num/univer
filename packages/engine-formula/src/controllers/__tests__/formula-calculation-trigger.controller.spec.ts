@@ -18,7 +18,6 @@ import * as core from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { FormulaCalculationTriggerService } from '../../services/formula-calculation-trigger.service';
-import { RegisterOtherFormulaService } from '../../services/register-other-formula.service';
 import { FormulaCalculationTriggerController } from '../formula-calculation-trigger.controller';
 
 describe('FormulaCalculationTriggerController', () => {
@@ -27,39 +26,32 @@ describe('FormulaCalculationTriggerController', () => {
     it('starts immediately in Node.js', () => {
         vi.spyOn(core, 'isNodeEnv').mockReturnValue(true);
         const start = vi.fn();
-        const calculateStarted$ = new BehaviorSubject(false);
         const lifecycle$ = new BehaviorSubject(core.LifecycleStages.Ready);
 
         const injector = new core.Injector([
             [FormulaCalculationTriggerService, { useValue: { start } }],
-            [RegisterOtherFormulaService, { useValue: { calculateStarted$ } }],
             [core.LifecycleService, { useValue: { lifecycle$ } }],
         ]);
         const controller = injector.createInstance(FormulaCalculationTriggerController);
 
         expect(start).toHaveBeenCalledOnce();
-        expect(calculateStarted$.getValue()).toBe(true);
         controller.dispose();
     });
 
     it('starts after rendering in the browser', () => {
         vi.spyOn(core, 'isNodeEnv').mockReturnValue(false);
         const start = vi.fn();
-        const calculateStarted$ = new BehaviorSubject(false);
         const lifecycle$ = new BehaviorSubject(core.LifecycleStages.Ready);
 
         const injector = new core.Injector([
             [FormulaCalculationTriggerService, { useValue: { start } }],
-            [RegisterOtherFormulaService, { useValue: { calculateStarted$ } }],
             [core.LifecycleService, { useValue: { lifecycle$ } }],
         ]);
         const controller = injector.createInstance(FormulaCalculationTriggerController);
 
         expect(start).not.toHaveBeenCalled();
-        expect(calculateStarted$.getValue()).toBe(false);
         lifecycle$.next(core.LifecycleStages.Rendered);
         expect(start).toHaveBeenCalledOnce();
-        expect(calculateStarted$.getValue()).toBe(true);
 
         lifecycle$.next(core.LifecycleStages.Steady);
         expect(start).toHaveBeenCalledOnce();

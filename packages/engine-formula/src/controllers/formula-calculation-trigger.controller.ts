@@ -17,20 +17,15 @@
 import { Disposable, Inject, isNodeEnv, LifecycleService, LifecycleStages } from '@univerjs/core';
 import { filter, take } from 'rxjs';
 import { FormulaCalculationTriggerService } from '../services/formula-calculation-trigger.service';
-import { RegisterOtherFormulaService } from '../services/register-other-formula.service';
 
 export class FormulaCalculationTriggerController extends Disposable {
     constructor(
         @Inject(FormulaCalculationTriggerService) formulaCalculationTriggerService: FormulaCalculationTriggerService,
-        @Inject(RegisterOtherFormulaService) registerOtherFormulaService: RegisterOtherFormulaService,
         @Inject(LifecycleService) lifecycleService: LifecycleService
     ) {
         super();
 
-        const start = () => {
-            formulaCalculationTriggerService.start();
-            registerOtherFormulaService.calculateStarted$.next(true);
-        };
+        const start = () => formulaCalculationTriggerService.start();
 
         if (isNodeEnv()) {
             start();

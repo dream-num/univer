@@ -14,7 +14,15 @@
  * limitations under the License.
  */
 
-import * as core from '@univerjs/core';
+import {
+    ICommandService,
+    isNodeEnv,
+    LifecycleService,
+    LifecycleStages,
+    LocaleService,
+    LocaleType,
+    Univer,
+} from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import { SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -23,12 +31,12 @@ import '@univerjs/engine-formula/facade';
 import '@univerjs/sheets/facade';
 import '../../facade';
 
-function createWorkbookData(): core.IWorkbookData {
+function createWorkbookData() {
     return {
         id: 'standalone-sheet-formula',
         name: 'Standalone Sheet Formula',
         appVersion: 'test',
-        locale: core.LocaleType.EN_US,
+        locale: LocaleType.EN_US,
         styles: {},
         sheetOrder: ['sheet-1'],
         sheets: {
@@ -49,7 +57,7 @@ function createWorkbookData(): core.IWorkbookData {
 }
 
 describe('standalone Sheet formula calculation trigger', () => {
-    let univer: core.Univer | undefined;
+    let univer: Univer | undefined;
 
     afterEach(() => {
         univer?.dispose();
@@ -58,16 +66,16 @@ describe('standalone Sheet formula calculation trigger', () => {
     });
 
     it('calculates on cold start and recalculates after value and formula edits', async () => {
-        vi.spyOn(core, 'isNodeEnv').mockReturnValue(false);
+        vi.mocked(isNodeEnv).mockReturnValue(false);
 
-        univer = new core.Univer();
+        univer = new Univer();
         const injector = univer.__getInjector();
-        injector.get(core.LocaleService).load({ [core.LocaleType.EN_US]: {} });
-        injector.get(core.LocaleService).setLocale(core.LocaleType.EN_US);
+        injector.get(LocaleService).load({ [LocaleType.EN_US]: {} });
+        injector.get(LocaleService).setLocale(LocaleType.EN_US);
         univer.registerPlugin(UniverSheetsFormulaPlugin);
 
         let calculationStarts = 0;
-        injector.get(core.ICommandService).onCommandExecuted((command) => {
+        injector.get(ICommandService).onCommandExecuted((command) => {
             if (command.id === SetFormulaCalculationStartMutation.id) {
                 calculationStarts++;
             }
@@ -80,7 +88,7 @@ describe('standalone Sheet formula calculation trigger', () => {
         const output = sheet.getRange('B1');
 
         const startupResultApplied = api.getFormula().onCalculationResultApplied(10_000);
-        injector.get(core.LifecycleService).stage = core.LifecycleStages.Rendered;
+        injector.get(LifecycleService).stage = LifecycleStages.Rendered;
         await startupResultApplied;
         expect(output.getValue()).toBe(4);
         expect(calculationStarts).toBe(1);
@@ -97,4 +105,13 @@ describe('standalone Sheet formula calculation trigger', () => {
         expect(output.getValue()).toBe(9);
         expect(calculationStarts).toBe(3);
     });
+});
+
+vi.mock('@univerjs/core', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('@univerjs/core')>();
+
+    return {
+        ...actual,
+        isNodeEnv: vi.fn(actual.isNodeEnv),
+    };
 });

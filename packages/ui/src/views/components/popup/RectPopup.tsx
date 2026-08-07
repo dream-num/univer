@@ -88,12 +88,15 @@ export interface IRectPopupProps {
     noPushMinimumGap?: boolean;
 
     autoRelayout?: boolean;
+    boundaryElement?: Element;
 }
 
 export interface IPopupLayoutInfo extends Pick<IRectPopupProps, 'direction'> {
     position: IAbsolutePosition;
     width: number;
     height: number;
+    containerLeft?: number;
+    containerTop?: number;
     containerWidth: number;
     containerHeight: number;
     noPushMinimumGap?: boolean;
@@ -104,8 +107,9 @@ const PUSHING_MINIMUM_GAP = 8;
 
 function resolvePopupDirection(layout: IPopupLayoutInfo): RectPopupDirection {
     const direction = layout.direction ?? 'vertical';
-    const availableTop = layout.position.top;
-    const availableBottom = layout.containerHeight - layout.position.bottom;
+    const containerTop = layout.containerTop ?? 0;
+    const availableTop = layout.position.top - containerTop;
+    const availableBottom = containerTop + layout.containerHeight - layout.position.bottom;
     const placeAbove = availableTop >= availableBottom;
 
     switch (direction) {
@@ -124,10 +128,15 @@ function calcPopupPosition(layout: IPopupLayoutInfo): { top: number; left: numbe
     const { position, width, height, containerHeight, containerWidth, noPushMinimumGap = false } = layout;
     const direction = resolvePopupDirection(layout);
 
-    const minTop = noPushMinimumGap ? -Infinity : PUSHING_MINIMUM_GAP;
-    const maxTop = noPushMinimumGap ? Infinity : containerHeight - height - PUSHING_MINIMUM_GAP;
-    const minLeft = noPushMinimumGap ? -Infinity : PUSHING_MINIMUM_GAP;
-    const maxLeft = noPushMinimumGap ? Infinity : containerWidth - width - PUSHING_MINIMUM_GAP;
+    // TODO(@ai-review): Verify every RectPopup caller that supplies an offset container expects the existing 8px edge gap inside that container.
+    const containerLeft = layout.containerLeft ?? 0;
+    const containerTop = layout.containerTop ?? 0;
+    const containerRight = containerLeft + containerWidth;
+    const containerBottom = containerTop + containerHeight;
+    const minTop = noPushMinimumGap ? -Infinity : containerTop + PUSHING_MINIMUM_GAP;
+    const maxTop = noPushMinimumGap ? Infinity : containerBottom - height - PUSHING_MINIMUM_GAP;
+    const minLeft = noPushMinimumGap ? -Infinity : containerLeft + PUSHING_MINIMUM_GAP;
+    const maxLeft = noPushMinimumGap ? Infinity : containerRight - width - PUSHING_MINIMUM_GAP;
 
     // In y-axis
     if (direction === 'vertical' || direction.indexOf('top') === 0 || direction.indexOf('bottom') === 0) {
@@ -144,7 +153,7 @@ function calcPopupPosition(layout: IPopupLayoutInfo): { top: number; left: numbe
             const rectWidth = endX - startX;
             const offsetX = (rectWidth - width) / 2;
 
-            horizontalStyle = (Math.max(startX + offsetX, minLeft) + width) > containerWidth
+            horizontalStyle = (Math.max(startX + offsetX, minLeft) + width) > containerRight
                 ? { left: Math.max(Math.min(maxLeft, endX - width - offsetX), minLeft) }
                 : { left: Math.max(minLeft, Math.min(startX + offsetX, maxLeft)) };
         } else if (direction.includes('right')) {
@@ -153,7 +162,7 @@ function calcPopupPosition(layout: IPopupLayoutInfo): { top: number; left: numbe
             horizontalStyle = { left: Math.max(Math.min(startX, maxLeft), minLeft) };
         } else {
             // If the popup element exceed the visible area. We should "push" it back.
-            horizontalStyle = (startX + width) > containerWidth
+            horizontalStyle = (startX + width) > containerRight
                 ? Math.max(endX - width, minLeft) < PUSHING_MINIMUM_GAP
                     ? { left: Math.max(Math.min(startX, maxLeft), minLeft) }
                     : { left: Math.max(Math.min(endX - width, maxLeft), minLeft) } // on left
@@ -176,7 +185,7 @@ function calcPopupPosition(layout: IPopupLayoutInfo): { top: number; left: numbe
         const rectHeight = endY - startY;
         const offsetY = (rectHeight - height) / 2;
 
-        verticalStyle = (Math.max(startY + offsetY, minTop) + height) > containerHeight
+        verticalStyle = (Math.max(startY + offsetY, minTop) + height) > containerBottom
             ? { top: Math.max(Math.min(maxTop, endY - height - offsetY), minTop) }
             : { top: Math.max(minTop, Math.min(startY + offsetY, maxTop)) };
     } else if (direction.includes('top')) {
@@ -189,7 +198,7 @@ function calcPopupPosition(layout: IPopupLayoutInfo): { top: number; left: numbe
         };
     } else {
         // If the popup element exceed the visible area. We should "push" it back.
-        verticalStyle = ((startY + height) > containerHeight)
+        verticalStyle = ((startY + height) > containerBottom)
             ? Math.max(endY - height, minTop) < PUSHING_MINIMUM_GAP
                 ? { top: Math.max(Math.min(startY, maxTop), minTop) }
                 : { top: Math.max(Math.min(endY - height, maxTop), minTop) } // on top
@@ -219,6 +228,7 @@ function RectPopup(props: IRectPopupProps) {
         onMaskClick,
         noPushMinimumGap,
         autoRelayout = true,
+        boundaryElement,
     } = props;
     const nodeRef = useRef<HTMLElement>(null);
     const clickOtherFn = useEvent(onClickOutside ?? (() => { /* empty */ }));
@@ -239,15 +249,33 @@ function RectPopup(props: IRectPopupProps) {
             if (!nodeRef.current) return;
 
             const { clientWidth, clientHeight } = nodeRef.current;
-            const innerWidth = window.innerWidth;
-            const innerHeight = window.innerHeight;
+            const boundaryRect = boundaryElement?.getBoundingClientRect();
+            // TODO(@ai-review): Verify intersecting the optional boundary with the viewport preserves popup visibility in embedded editors.
+            const containerLeft = Math.max(boundaryRect?.left ?? 0, 0);
+            const containerTop = Math.max(boundaryRect?.top ?? 0, 0);
+            const containerRight = Math.min(boundaryRect?.right ?? window.innerWidth, window.innerWidth);
+            const containerBottom = Math.min(boundaryRect?.bottom ?? window.innerHeight, window.innerHeight);
+            const containerWidth = Math.max(containerRight - containerLeft, 0);
+            const containerHeight = Math.max(containerBottom - containerTop, 0);
+            const minimumGap = noPushMinimumGap ? 0 : PUSHING_MINIMUM_GAP * 2;
+            const cannotFitBoundary = boundaryElement != null && (
+                containerWidth <= 0 ||
+                containerHeight <= 0 ||
+                containerWidth < clientWidth + minimumGap ||
+                containerHeight < clientHeight + minimumGap
+            );
+
+            nodeRef.current.style.visibility = cannotFitBoundary ? 'hidden' : '';
+            if (cannotFitBoundary) return;
 
             const layout = {
                 position,
                 width: clientWidth,
                 height: clientHeight,
-                containerWidth: innerWidth,
-                containerHeight: innerHeight,
+                containerLeft,
+                containerTop,
+                containerWidth,
+                containerHeight,
                 direction,
                 noPushMinimumGap,
             };

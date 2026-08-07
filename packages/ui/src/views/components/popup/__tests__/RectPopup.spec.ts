@@ -18,6 +18,48 @@ import { describe, expect, it } from 'vitest';
 import { RectPopup } from '../RectPopup';
 
 describe('RectPopup adaptive vertical placement', () => {
+    // TODO(@ai-review): Verify this regression matches the Sheet canvas top boundary used by drawing popups after vertical scrolling.
+    it('keeps a horizontal popup inside an offset container', () => {
+        expect(RectPopup.calcPopupPosition({
+            position: { left: 200, right: 668, top: 29, bottom: 398 },
+            width: 26,
+            height: 26,
+            containerLeft: 0,
+            containerTop: 152,
+            containerWidth: 1580,
+            containerHeight: 891,
+            direction: 'horizontal',
+        })).toEqual({ left: 668, top: 160 });
+    });
+
+    // TODO(@ai-review): Verify a partially visible anchor at the canvas bottom-right should keep its popup inset by the standard edge gap.
+    it('keeps a horizontal popup inside the bottom and right container edges', () => {
+        expect(RectPopup.calcPopupPosition({
+            position: { left: 450, right: 550, top: 480, bottom: 600 },
+            width: 60,
+            height: 40,
+            containerLeft: 100,
+            containerTop: 200,
+            containerWidth: 400,
+            containerHeight: 300,
+            direction: 'horizontal',
+        })).toEqual({ left: 432, top: 452 });
+    });
+
+    // TODO(@ai-review): Verify adaptive vertical placement compares space relative to an offset container instead of the browser origin.
+    it('uses offset container space when choosing the vertical side', () => {
+        expect(RectPopup.calcPopupPosition({
+            position: { left: 200, right: 300, top: 550, bottom: 600 },
+            width: 50,
+            height: 40,
+            containerLeft: 100,
+            containerTop: 500,
+            containerWidth: 400,
+            containerHeight: 400,
+            direction: 'vertical-center',
+        })).toEqual({ left: 225, top: 600 });
+    });
+
     it('uses the bottom side when the anchor has more space below', () => {
         expect(RectPopup.calcPopupPosition({
             position: { left: 100, right: 300, top: 100, bottom: 200 },

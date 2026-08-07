@@ -144,4 +144,64 @@ describe('CanvasPopup', () => {
 
         rendered.dispose();
     });
+
+    // TODO(@ai-review): Confirm this integration test would fail if CanvasPopup stopped forwarding its canvas as the RectPopup boundary.
+    it('keeps a partially visible drawing popup inside the canvas', async () => {
+        const rendered = renderWithDependencies(<CanvasPopup />);
+        const popupService = rendered.injector.get(ICanvasPopupService);
+
+        act(() => {
+            popupService.addPopup({
+                unitId: 'book-1',
+                subUnitId: 'sheet-1',
+                componentKey: 'test-popup',
+                anchorRect$: new BehaviorSubject({ left: 200, top: 29, right: 668, bottom: 398 }),
+                canvasElement: createCanvasElement(new DOMRect(0, 152, 1580, 891)),
+                direction: 'horizontal',
+                extraProps: { label: 'Drawing menu' },
+            });
+        });
+
+        expect(await screen.findByRole('button', { name: 'Drawing menu' })).toBeTruthy();
+
+        const popupElement = document.querySelector<HTMLElement>('[data-u-comp="rect-popup"]');
+        if (!popupElement) {
+            throw new Error('RectPopup was not rendered');
+        }
+        await waitFor(() => {
+            expect(popupElement.style.top).toBe('160px');
+        });
+
+        rendered.dispose();
+    });
+
+    // TODO(@ai-review): Confirm an offscreen canvas cannot make its popup reappear at the viewport edge.
+    it('hides a drawing popup when the canvas boundary is outside the viewport', async () => {
+        const rendered = renderWithDependencies(<CanvasPopup />);
+        const popupService = rendered.injector.get(ICanvasPopupService);
+
+        act(() => {
+            popupService.addPopup({
+                unitId: 'book-1',
+                subUnitId: 'sheet-1',
+                componentKey: 'test-popup',
+                anchorRect$: new BehaviorSubject({ left: 40, top: -180, right: 90, bottom: -160 }),
+                canvasElement: createCanvasElement(new DOMRect(0, -200, 400, 100)),
+                direction: 'horizontal',
+                extraProps: { label: 'Offscreen drawing menu' },
+            });
+        });
+
+        expect(await screen.findByText('Offscreen drawing menu')).toBeTruthy();
+
+        const popupElement = document.querySelector<HTMLElement>('[data-u-comp="rect-popup"]');
+        if (!popupElement) {
+            throw new Error('RectPopup was not rendered');
+        }
+        await waitFor(() => {
+            expect(popupElement.style.visibility).toBe('hidden');
+        });
+
+        rendered.dispose();
+    });
 });

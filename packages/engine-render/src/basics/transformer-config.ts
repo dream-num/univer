@@ -72,6 +72,9 @@ export interface ITransformerConfig {
     useSingleNodeRotation?: boolean;
     shouldOverdrawWholeArea?: boolean;
 
+    /** Render transformer controls on a layer independent from the selected object. */
+    controlLayerIndex?: number;
+
     zeroLeft?: number;
     zeroTop?: number;
     moveBoundaryEnabled?: boolean;

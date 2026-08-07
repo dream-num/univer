@@ -148,6 +148,7 @@ const locale: typeof enUS = {
             cancel: 'Zrušiť',
             confirm: 'Potvrdiť',
             'search-placeholder': 'Použite medzeru na oddelenie kľúčových slov',
+            'input-values-placeholder': 'Zadajte hodnoty',
             'select-all': 'Vybrať všetko',
         },
     },

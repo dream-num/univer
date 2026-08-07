@@ -489,6 +489,39 @@ describe('RuleList', () => {
         ).toEqual(ruleIdsBeforeCreate);
     });
 
+    it('mirrors rule list controls in RTL layouts', async () => {
+        currentTestBed = await createRuleListTestBed();
+        container = document.createElement('div');
+        container.dir = 'rtl';
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        await act(async () => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <RuleList onClick={() => undefined} onCreate={() => undefined} />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        const createRuleButton = container.querySelectorAll('a')[0];
+        const actionGroup = createRuleButton?.parentElement?.parentElement;
+        const draggableItem = container.querySelector<HTMLElement>('[data-draggable-list-item-id]');
+        const ruleRow = draggableItem?.firstElementChild as HTMLElement | undefined;
+        const dragHandle = ruleRow?.querySelector<HTMLElement>('.draggableHandle');
+        const deleteControl = ruleRow?.lastElementChild as HTMLElement | undefined;
+
+        expect(actionGroup?.className).toContain('univer-gap-2');
+        expect(actionGroup?.className).not.toContain('univer-space-x-2');
+        expect(ruleRow?.className).toContain('rtl:univer-pl-8');
+        expect(ruleRow?.className).toContain('rtl:univer-pr-5');
+        expect(dragHandle?.className).toContain('rtl:univer-left-auto');
+        expect(dragHandle?.className).toContain('rtl:univer-right-0');
+        expect(deleteControl?.className).toContain('rtl:univer-left-1');
+        expect(deleteControl?.className).toContain('rtl:univer-right-auto');
+    });
+
     it('moves a dragged worksheet rule after the drop target rule', async () => {
         currentTestBed = await createRuleListTestBed();
         container = document.createElement('div');

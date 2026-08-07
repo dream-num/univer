@@ -150,6 +150,7 @@ const locale: typeof enUS = {
             cancel: 'Hủy bỏ',
             confirm: 'Xác nhận',
             'search-placeholder': 'Sử dụng khoảng trắng để tách các từ khóa',
+            'input-values-placeholder': 'Vui lòng nhập',
             'select-all': 'Chọn tất cả',
         },
     },

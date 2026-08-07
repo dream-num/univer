@@ -81,6 +81,7 @@ export const DataValidationItem = (props: IDataValidationDetailProps) => {
                   univer-bg-secondary univer-relative univer--mx-2 univer-box-border univer-flex univer-w-[287px]
                   univer-cursor-pointer univer-flex-col univer-justify-between univer-overflow-hidden univer-rounded-md
                   univer-p-2 univer-pr-9
+                  rtl:univer-pl-9 rtl:univer-pr-2
                 `,
                 {
                     'hover:univer-bg-gray-50 dark:hover:!univer-bg-gray-700': !disable,
@@ -127,6 +128,7 @@ export const DataValidationItem = (props: IDataValidationDetailProps) => {
                       univer-absolute univer-right-2 univer-top-[19px] univer-flex univer-size-5 univer-items-center
                       univer-justify-center univer-rounded
                       hover:univer-bg-gray-200
+                      rtl:univer-left-2 rtl:univer-right-auto
                       dark:!univer-text-gray-300
                       dark:hover:!univer-bg-gray-700
                     `}

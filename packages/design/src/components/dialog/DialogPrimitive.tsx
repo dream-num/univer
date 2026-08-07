@@ -52,13 +52,14 @@ interface IDialogContentProps {
     closable?: boolean;
     onClickClose?: () => void;
     mountContainer?: HTMLElement | null;
+    overlayClassName?: string;
 }
 const DialogContent = forwardRef<
     ElementRef<typeof Content>,
     ComponentPropsWithoutRef<typeof Content> & IDialogContentProps
->(({ className, children, closable = true, onClickClose, mountContainer, ...props }, ref) => (
+>(({ className, children, closable = true, onClickClose, mountContainer, overlayClassName, ...props }, ref) => (
     <DialogPortal container={mountContainer ?? undefined}>
-        <DialogOverlay />
+        <DialogOverlay className={overlayClassName} />
         <Content
             ref={ref}
             className={clsx(

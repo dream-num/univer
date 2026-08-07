@@ -15,6 +15,7 @@
  */
 
 import type { ITableFilterItem } from '@univerjs/sheets-table';
+import type { LocaleKey } from '../../locale/types';
 import type { IConditionCompareTypeEnum, IConditionExpect, IConditionInfo, ITableConditionTypeEnumWithoutLogic } from './type';
 import { Injector, LocaleService } from '@univerjs/core';
 import { borderClassName, CascaderList, clsx, DatePicker, DateRangePicker, Dropdown, Input, InputNumber, Select } from '@univerjs/design';
@@ -130,7 +131,7 @@ export const SheetTableConditionPanel = (props: IConditionFilterProps) => {
                             ? (
                                 <Input
                                     className="univer-w-full"
-                                    placeholder="请输入"
+                                    placeholder={localeService.t<LocaleKey>('sheets-table-ui.filter.input-values-placeholder')}
                                     value={conditionInfo.info.string}
                                     onChange={(v) => handleConditionInfo({ string: v })}
                                 />

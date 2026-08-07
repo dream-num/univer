@@ -148,6 +148,7 @@ const locale: typeof enUS = {
             cancel: 'Abbrechen',
             confirm: 'Bestätigen',
             'search-placeholder': 'Leerzeichen zum Trennen von Schlüsselwörtern verwenden',
+            'input-values-placeholder': 'Werte eingeben',
             'select-all': 'Alle auswählen',
         },
     },

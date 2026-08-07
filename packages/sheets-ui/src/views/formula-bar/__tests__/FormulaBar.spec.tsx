@@ -326,6 +326,15 @@ describe('FormulaBar', () => {
         currentBed = undefined;
     });
 
+    it('keeps its toolbar layout LTR when the sheet host is RTL', () => {
+        currentBed = createFormulaBarTestBed();
+        const rendered = renderWithDependencies(<FormulaBar disableDefinedName />, currentBed.injector);
+        root = rendered.root;
+        container = rendered.container;
+
+        expect(rendered.container.querySelector('[data-u-comp="formula-bar"]')?.getAttribute('dir')).toBe('ltr');
+    });
+
     it('closes editing through the command service when cancel is clicked', async () => {
         currentBed = createFormulaBarTestBed();
         const rendered = renderWithDependencies(<FormulaBar disableDefinedName />, currentBed.injector);

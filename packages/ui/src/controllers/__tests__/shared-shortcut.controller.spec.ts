@@ -17,7 +17,6 @@
 import type { IContextService } from '@univerjs/core';
 import { EDITOR_ACTIVATED, FOCUSING_FX_BAR_EDITOR, FOCUSING_UNIVER_EDITOR } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
-import { KeyCode, MetaKeys } from '../../services/shortcut/keycode';
 import {
     CopyShortcutItem,
     CutShortcutItem,
@@ -89,11 +88,7 @@ describe('SharedController', () => {
         expect(registerCommand).toHaveBeenCalledWith(expect.objectContaining({
             id: 'base-ui.operation.toggle-fullscreen',
         }));
-        expect(registerShortcut).toHaveBeenCalledWith(expect.objectContaining({
-            id: RedoShortcutItem.id,
-            binding: KeyCode.Z | MetaKeys.CTRL_COMMAND | MetaKeys.SHIFT,
-        }));
-        expect(registerShortcut).toHaveBeenCalledTimes(6);
+        expect(registerShortcut).toHaveBeenCalledTimes(5);
 
         controller.dispose();
     });

@@ -103,12 +103,6 @@ export const RedoShortcutItem: IShortcutItem = {
     preconditions: whenEditorFocusedButNotCellEditor,
 };
 
-const RedoWithShiftShortcutItem: IShortcutItem = {
-    id: RedoCommand.id,
-    binding: KeyCode.Z | MetaKeys.CTRL_COMMAND | MetaKeys.SHIFT,
-    preconditions: whenEditorFocusedButNotCellEditor,
-};
-
 /**
  * Define shared UI behavior across Univer business. Including undo / redo and clipboard operations.
  */
@@ -135,7 +129,7 @@ export class SharedController extends Disposable {
     }
 
     private _registerShortcuts(): void {
-        const shortcutItems = [UndoShortcutItem, RedoShortcutItem, RedoWithShiftShortcutItem];
+        const shortcutItems = [UndoShortcutItem, RedoShortcutItem];
         shortcutItems.push(CutShortcutItem, CopyShortcutItem, OnlyDisplayPasteShortcutItem);
 
         shortcutItems.forEach((shortcut) => this.disposeWithMe(this._shortcutService.registerShortcut(shortcut)));

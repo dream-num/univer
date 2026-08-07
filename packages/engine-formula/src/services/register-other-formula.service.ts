@@ -26,11 +26,9 @@ import {
     Disposable,
     generateRandomId,
     ICommandService,
-    Inject,
-    LifecycleService,
     ObjectMatrix,
 } from '@univerjs/core';
-import { BehaviorSubject, bufferWhen, filter, skip, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import { OtherFormulaMarkDirty } from '../commands/mutations/formula.mutation';
 import { SetFormulaCalculationResultMutation } from '../commands/mutations/set-formula-calculation.mutation';
 import { RemoveOtherFormulaMutation, SetOtherFormulaMutation } from '../commands/mutations/set-other-formula.mutation';
@@ -60,12 +58,9 @@ export class RegisterOtherFormulaService extends Disposable {
     private _otherFormulaResultApplied$ = new Subject<ISetFormulaCalculationResultMutation>();
     public otherFormulaResultApplied$ = this._otherFormulaResultApplied$.asObservable();
 
-    public calculateStarted$ = new BehaviorSubject(false);
-
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
-        @IActiveDirtyManagerService private _activeDirtyManagerService: IActiveDirtyManagerService,
-        @Inject(LifecycleService) private readonly _lifecycleService: LifecycleService
+        @IActiveDirtyManagerService private _activeDirtyManagerService: IActiveDirtyManagerService
     ) {
         super();
         this._initFormulaRegister();
@@ -78,7 +73,6 @@ export class RegisterOtherFormulaService extends Disposable {
         this._formulaChangeWithRange$.complete();
         this._formulaResult$.complete();
         this._otherFormulaResultApplied$.complete();
-        this.calculateStarted$.complete();
     }
 
     private _ensureCacheMap(unitId: string, subUnitId: string) {
@@ -149,17 +143,7 @@ export class RegisterOtherFormulaService extends Disposable {
             });
         };
 
-        this.disposeWithMe(
-            this._formulaChangeWithRange$
-                .pipe(bufferWhen(() => this.calculateStarted$.pipe(skip(1), filter((calculateStarted) => calculateStarted))))
-                .subscribe((options) => options.forEach(handleRegister))
-        );
-
-        this.disposeWithMe(
-            this._formulaChangeWithRange$
-                .pipe(filter(() => this.calculateStarted$.getValue()))
-                .subscribe(handleRegister)
-        );
+        this.disposeWithMe(this._formulaChangeWithRange$.subscribe(handleRegister));
     }
 
     private _initFormulaCalculationResultChange() {

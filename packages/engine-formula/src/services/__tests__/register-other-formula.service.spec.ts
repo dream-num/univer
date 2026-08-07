@@ -73,32 +73,28 @@ describe('RegisterOtherFormulaService', () => {
         expect(activeDirtyManagerService.get(OtherFormulaMarkDirty.id)?.commandId).toBe(OtherFormulaMarkDirty.id);
     });
 
-    it('should buffer register requests until calculation starts', async () => {
+    it('should register immediately and leave pre-start scheduling to the calculation trigger', async () => {
         const { service, commandService } = createService();
         const executedIds: string[] = [];
         commandService.onCommandExecuted((command) => executedIds.push(command.id));
 
         const formulaId = service.registerFormulaWithRange('unit-1', 'sheet-1', '=A1');
         expect(formulaId.startsWith('formula.unit-1_sheet-1_default_')).toBe(true);
-        expect(executedIds).not.toContain(SetOtherFormulaMutation.id);
-
-        service.calculateStarted$.next(true);
         await flushCommandChain();
 
         expect(executedIds).toEqual([SetOtherFormulaMutation.id, OtherFormulaMarkDirty.id]);
     });
 
-    it('should register immediately after calculation started', async () => {
+    it('should register every formula once without a second lifecycle gate', async () => {
         const { service, commandService } = createService();
         const executedIds: string[] = [];
         commandService.onCommandExecuted((command) => executedIds.push(command.id));
 
-        service.calculateStarted$.next(true);
         service.registerFormulaWithRange('unit-2', 'sheet-2', '=SUM(A1:A5)', [], { source: 'test' }, OtherFormulaBizType.DOC, 'doc-1');
 
         await flushCommandChain();
 
-        expect(executedIds).toContain(SetOtherFormulaMutation.id);
+        expect(executedIds).toEqual([SetOtherFormulaMutation.id, OtherFormulaMarkDirty.id]);
     });
 
     it('should expose all registered formulas for host-level dirty propagation', () => {

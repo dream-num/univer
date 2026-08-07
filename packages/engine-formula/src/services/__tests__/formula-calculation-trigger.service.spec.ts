@@ -94,6 +94,36 @@ describe('FormulaCalculationTriggerService', () => {
         testBed.service.dispose();
     });
 
+    it('queues Other Formula dirty data before start and flushes it after start', async () => {
+        const testBed = createTestBed(false);
+        testBed.conversions.set('other-formula-dirty', {
+            commandId: 'other-formula-dirty',
+            getDirtyData: () => ({
+                dirtyUnitOtherFormulaMap: {
+                    'doc-unit': { 'shape-unit': { 'formula-1': true } },
+                },
+            }),
+        });
+
+        testBed.emit({ id: 'other-formula-dirty' } as ICommandInfo);
+        await vi.advanceTimersByTimeAsync(10);
+        expect(testBed.executed).toEqual([]);
+
+        testBed.service.start();
+        await vi.advanceTimersByTimeAsync(10);
+
+        expect(testBed.executed).toHaveLength(1);
+        expect(testBed.executed[0]).toMatchObject({
+            id: SetFormulaCalculationStartMutation.id,
+            params: {
+                dirtyUnitOtherFormulaMap: {
+                    'doc-unit': { 'shape-unit': { 'formula-1': true } },
+                },
+            },
+        });
+        testBed.service.dispose();
+    });
+
     it('merges dirty data from different unit types into one calculation', async () => {
         const testBed = createTestBed();
         testBed.conversions.set('sheet-dirty', {

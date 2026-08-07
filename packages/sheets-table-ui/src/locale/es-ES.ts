@@ -148,6 +148,7 @@ const locale: typeof enUS = {
             cancel: 'Cancelar',
             confirm: 'Confirmar',
             'search-placeholder': 'Usa espacio para separar palabras clave',
+            'input-values-placeholder': 'Introducir valores',
             'select-all': 'Seleccionar todo',
         },
     },

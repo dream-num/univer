@@ -1090,7 +1090,7 @@ describe('Test formula data model', () => {
                 expect(formulaData['base-test']?.['table-main']).toEqual({
                     0: {
                         7: {
-                            f: '=SUM(table-main[[#This Row],[Amount]], table-main[[#This Row],[Qty]], tableOther[[#Data],[External]])',
+                            f: '=SUM(_T_table_x2d_main[[#This Row],[Amount]], _T_table_x2d_main[[#This Row],[Qty]], _T_tableOther[[#Data],[External]])',
                             si: 'total',
                         },
                     },
@@ -1104,6 +1104,8 @@ describe('Test formula data model', () => {
                     unitType: UniverInstanceType.UNIVER_BASE,
                 });
                 expect(calculateData.unitSheetNameMap['base-test']?.Sales).toBe('tableOther');
+                expect(calculateData.unitSheetNameMap['base-test']?._T_table_x2d_main).toBe('table-main');
+                expect(calculateData.unitSheetNameMap['base-test']?._T_tableOther).toBe('tableOther');
                 expect(tableData?.rowCount).toBe(1);
                 expect(tableData?.columnCount).toBe(8);
                 expect(tableData?.cellData.getValue(0, 0)).toEqual({ v: 'record-1', t: CellValueType.STRING });
@@ -1112,6 +1114,55 @@ describe('Test formula data model', () => {
                 expect(tableData?.cellData.getValue(0, 4)).toEqual({ v: 'paid, online', t: CellValueType.STRING });
                 expect(tableData?.cellData.getValue(0, 5)).toEqual({ v: 'Invoice', t: CellValueType.STRING });
                 expect(tableData?.cellData.getValue(0, 6)).toEqual({ v: '', t: CellValueType.STRING });
+            });
+
+            it('preserves explicit current-row scope and expands qualified columns to #Data', () => {
+                const univerInstanceService = get(IUniverInstanceService);
+                univerInstanceService.registerCtorForType(UniverInstanceType.UNIVER_BASE, BaseDataModel);
+                const snapshot = structuredClone(TEST_BASE_DATA);
+                snapshot.id = 'base-structured-scope';
+                snapshot.tables!['table-main'].name = 'Orders';
+                snapshot.tables!.tableOther.name = 'Pricing';
+                snapshot.tables!['table-main'].fields.total.config = {
+                    formula: '=Orders[@[Amount]]+[@[Qty]]+SUM(Pricing[External])',
+                };
+                univer.createUnit(UniverInstanceType.UNIVER_BASE, snapshot);
+
+                expect(formulaDataModel.getFormulaData()['base-structured-scope']?.['table-main']?.[0]?.[7]?.f).toBe(
+                    '=Orders[[#This Row],[Amount]]+Orders[[#This Row],[Qty]]+SUM(Pricing[[#Data],[External]])'
+                );
+            });
+
+            it('does not reinterpret an unresolved table identifier as the current Base table', () => {
+                const univerInstanceService = get(IUniverInstanceService);
+                univerInstanceService.registerCtorForType(UniverInstanceType.UNIVER_BASE, BaseDataModel);
+                const snapshot = structuredClone(TEST_BASE_DATA);
+                snapshot.id = 'base-unresolved-table';
+                snapshot.tables!['table-main'].name = 'Orders';
+                snapshot.tables!['table-main'].fields.total.config = {
+                    formula: '=SUM(table[Amount])+table[[#This Row],[Qty]]',
+                };
+                univer.createUnit(UniverInstanceType.UNIVER_BASE, snapshot);
+
+                expect(formulaDataModel.getFormulaData()['base-unresolved-table']?.['table-main']?.[0]?.[7]?.f).toBe(
+                    '=SUM(table[Amount])+table[[#This Row],[Qty]]'
+                );
+            });
+
+            it('resolves table when it is the real Base table name', () => {
+                const univerInstanceService = get(IUniverInstanceService);
+                univerInstanceService.registerCtorForType(UniverInstanceType.UNIVER_BASE, BaseDataModel);
+                const snapshot = structuredClone(TEST_BASE_DATA);
+                snapshot.id = 'base-real-table-name';
+                snapshot.tables!['table-main'].name = 'table';
+                snapshot.tables!['table-main'].fields.total.config = {
+                    formula: '=SUM(table[Amount])+table[[#This Row],[Qty]]',
+                };
+                univer.createUnit(UniverInstanceType.UNIVER_BASE, snapshot);
+
+                expect(formulaDataModel.getFormulaData()['base-real-table-name']?.['table-main']?.[0]?.[7]?.f).toBe(
+                    '=SUM(table[[#Data],[Amount]])+table[[#This Row],[Qty]]'
+                );
             });
 
             it('should preserve workbook-qualified A1 references in Base formulas', () => {

@@ -87,6 +87,11 @@ export interface IDialogProps {
     className?: string;
 
     /**
+     * Additional className for the dialog overlay.
+     */
+    overlayClassName?: string;
+
+    /**
      * whether show close button
      */
     closable?: boolean;
@@ -244,6 +249,7 @@ function useDraggable(
 export function Dialog(props: IDialogProps) {
     const {
         className,
+        overlayClassName,
         children,
         style,
         open = false,
@@ -337,6 +343,7 @@ export function Dialog(props: IDialogProps) {
                 }}
                 closable={closable}
                 mountContainer={mountContainer}
+                overlayClassName={overlayClassName}
                 dir={direction}
                 onClickClose={handleClickClose}
                 onEscapeKeyDown={(e) => {

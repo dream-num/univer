@@ -222,6 +222,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
     useSingleNodeRotation: boolean = false;
     shouldOverdrawWholeArea: boolean = false;
+    controlLayerIndex: number | undefined;
 
     private readonly _changeStart$ = new Subject<IChangeObserverConfig>();
 
@@ -1847,7 +1848,9 @@ export class Transformer extends Disposable implements ITransformerConfig {
         }
         const oKey = applyObject.oKey;
         const zIndex = this._selectedObjectMap.size + applyObject.maxZIndex + DEFAULT_CONTROL_PLUS_INDEX;
-        const layerIndex = applyObject.getLayerIndex() || DEFAULT_TRANSFORMER_LAYER_INDEX;
+        const layerIndex = applyObject.transformerConfig?.controlLayerIndex ??
+            this.controlLayerIndex ??
+            (applyObject.getLayerIndex() || DEFAULT_TRANSFORMER_LAYER_INDEX);
         const groupElements: BaseObject[] = [];
 
         if (borderEnabled && !isCropper) {

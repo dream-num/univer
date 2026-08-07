@@ -78,8 +78,9 @@ export function PanelSection(props: IPanelSectionProps) {
             >
                 {collapsible && (
                     <DownIcon
+                        aria-hidden="true"
                         className={clsx('univer-size-2.5 univer-flex-shrink-0 univer-transition-transform', {
-                            '-univer-rotate-90': !expanded,
+                            '-univer-rotate-90 rtl:univer-rotate-90': !expanded,
                             'univer-rotate-0': expanded,
                         })}
                     />

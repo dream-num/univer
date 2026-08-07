@@ -304,7 +304,7 @@ export function RuleList(props: IRuleListProps) {
                         />
                     ).map((ele, index) => <span key={index}>{ele}</span>)}
                 </div>
-                <div className="univer-flex univer-justify-end univer-space-x-2">
+                <div className="univer-flex univer-justify-end univer-gap-2">
                     <Tooltip title={localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.createRule')} placement="bottom">
                         <a
                             className="univer-size-5 univer-cursor-pointer"
@@ -351,6 +351,7 @@ export function RuleList(props: IRuleListProps) {
                               univer-group univer-relative univer-flex univer-items-center univer-justify-between
                               univer-rounded univer-py-2 univer-pl-5 univer-pr-8
                               hover:univer-bg-gray-100
+                              rtl:univer-pl-8 rtl:univer-pr-5
                               dark:hover:!univer-bg-gray-700
                             `, {
                                 'univer-bg-gray-100 dark:!univer-bg-gray-700': draggingId === rule.cfId,
@@ -368,6 +369,7 @@ export function RuleList(props: IRuleListProps) {
                                   univer-absolute univer-left-0 univer-hidden univer-size-5 univer-cursor-grab
                                   univer-items-center univer-justify-center univer-rounded
                                   group-hover:univer-flex
+                                  rtl:univer-left-auto rtl:univer-right-0
                                 `, 'draggableHandle')}
                                 onClick={(e) => e.stopPropagation()}
                             >
@@ -402,6 +404,7 @@ export function RuleList(props: IRuleListProps) {
                                   univer-items-center univer-justify-center univer-rounded univer-text-red-500
                                   group-hover:univer-flex
                                   hover:univer-bg-gray-200
+                                  rtl:univer-left-1 rtl:univer-right-auto
                                 `, {
                                     'univer-flex univer-items-center univer-justify-center': draggingId === rule.cfId,
                                 })}

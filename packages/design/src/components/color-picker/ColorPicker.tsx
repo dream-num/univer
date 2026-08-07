@@ -131,6 +131,7 @@ export function ColorPicker({ format = 'hex', value, onChange }: IColorPickerPro
 
             <Dialog
                 className="!univer-z-[1090] !univer-w-fit !univer-p-2.5"
+                overlayClassName="!univer-z-[1090]"
                 closable={false}
                 maskClosable={false}
                 open={visible}

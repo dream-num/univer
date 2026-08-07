@@ -82,6 +82,8 @@ interface IEditorRecord {
 class TestLocaleService {
     private readonly _currentLocale$ = new BehaviorSubject<LocaleType>(LocaleType.ZH_CN);
     readonly currentLocale$ = this._currentLocale$.asObservable();
+    private readonly _direction$ = new BehaviorSubject<'ltr' | 'rtl'>('ltr');
+    readonly direction$ = this._direction$.asObservable();
 
     t(key: string) {
         return key;
@@ -89,6 +91,10 @@ class TestLocaleService {
 
     getCurrentLocale() {
         return this._currentLocale$.getValue();
+    }
+
+    getDirection() {
+        return this._direction$.getValue();
     }
 }
 

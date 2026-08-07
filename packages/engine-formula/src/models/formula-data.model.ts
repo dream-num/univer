@@ -416,7 +416,7 @@ export class FormulaDataModel extends Disposable {
                     rowData: {},
                     columnData: {},
                 };
-                tableNameMap[table.name] = table.id;
+                addEngineBaseTableNameMappings(tableNameMap, table, snapshot);
             }
 
             allUnitData[unitId] = baseData;
@@ -942,8 +942,12 @@ export function initSheetFormulaData(
 }
 
 const BASE_LEGACY_FIELD_REF_PATTERN = /\{([^}]+)\}/g;
-const BASE_TABLE_FIELD_REF_PATTERN = /\b([A-Z_]\w*)\[([^\]]+)\]/gi;
-const BASE_BRACKET_FIELD_REF_PATTERN = /(^|[^A-Za-z0-9_\]\[])\[([^\]]+)\]/g;
+const BASE_TABLE_SCOPED_FIELD_REF_PATTERN = /\b([A-Z_][\w.]*)\[\[\s*#(This Row|Data)\s*\],\s*\[([^\]]+)\]\]/gi;
+const BASE_TABLE_CURRENT_ROW_FIELD_REF_PATTERN = /\b([A-Z_][\w.]*)\[@\[([^\]]+)\]\]/gi;
+const BASE_TABLE_FIELD_REF_PATTERN = /\b([A-Z_][\w.]*)\[([^\[\]#]+)\]/gi;
+const BASE_SCOPED_FIELD_REF_PATTERN = /(^|[^\w\[])\[\[\s*#(This Row|Data)\s*\],\s*\[([^\]]+)\]\]/gi;
+const BASE_CURRENT_ROW_FIELD_REF_PATTERN = /(^|[^\w\[])\[@\[([^\]]+)\]\](?!\])/g;
+const BASE_BRACKET_FIELD_REF_PATTERN = /(^|[^\w\[])\[@?([^\[\]#]+)\](?!\])/g;
 const BASE_EXTERNAL_A1_REF_PATTERN = /(?:'\[[^\]]+\](?:[^']|'')+'|\[[^\]]+\][^\s'!]+)!\$?[A-Z]{1,3}\$?\d+(?::\$?[A-Z]{1,3}\$?\d+)?/gi;
 const BASE_EXTERNAL_STRUCTURED_REFERENCE_PREFIX = /(?:'((?:[^']|'')+)'|\[[^\]]+\]|[A-Za-z0-9_.-]+)![^\s!\[\]]+\[/g;
 
@@ -953,11 +957,35 @@ function normalizeBaseFormulaForEngine(formula: string, currentTable: ITableSnap
         const index = refs.push(ref) - 1;
         return `__BASE_FORMULA_REF_${index}__`;
     };
-    const normalized = protectBaseExternalReferences(formula, hold)
+    const normalized = protectBaseFormulaParts(formula, hold)
         .replace(BASE_LEGACY_FIELD_REF_PATTERN, (_match, fieldName: string) => hold(createEngineThisRowRef(currentTable, fieldName, snapshot)))
+        .replace(BASE_TABLE_SCOPED_FIELD_REF_PATTERN, (_match, sourceTableName: string, scope: string, fieldName: string) => {
+            const targetTable = resolveBaseFormulaTable(sourceTableName, currentTable, snapshot)
+                ?? (sourceTableName.toLowerCase() === 'table' ? currentTable : undefined);
+            if (!targetTable) return `${sourceTableName}[[#${scope}],[${fieldName}]]`;
+            return hold(scope.toLowerCase() === 'data'
+                ? createEngineColumnRef(targetTable, fieldName, snapshot)
+                : createEngineThisRowRef(targetTable, fieldName, snapshot));
+        })
+        .replace(BASE_TABLE_CURRENT_ROW_FIELD_REF_PATTERN, (_match, sourceTableName: string, fieldName: string) => {
+            const targetTable = resolveBaseFormulaTable(sourceTableName, currentTable, snapshot);
+            return targetTable
+                ? hold(createEngineThisRowRef(targetTable, fieldName, snapshot))
+                : `${sourceTableName}[@[${fieldName}]]`;
+        })
+        .replace(BASE_SCOPED_FIELD_REF_PATTERN, (_match, prefix: string, scope: string, fieldName: string) => `${prefix}${hold(
+            scope.toLowerCase() === 'data'
+                ? createEngineColumnRef(currentTable, fieldName, snapshot)
+                : createEngineThisRowRef(currentTable, fieldName, snapshot)
+        )}`)
+        .replace(BASE_CURRENT_ROW_FIELD_REF_PATTERN, (_match, prefix: string, fieldName: string) =>
+            `${prefix}${hold(createEngineThisRowRef(currentTable, fieldName, snapshot))}`)
         .replace(BASE_TABLE_FIELD_REF_PATTERN, (_match, sourceTableName: string, fieldName: string) => {
             const targetTable = resolveBaseFormulaTable(sourceTableName, currentTable, snapshot);
-            return targetTable ? hold(createEngineColumnRef(targetTable, fieldName, snapshot)) : `${sourceTableName}[${fieldName}]`;
+            if (targetTable) return hold(createEngineColumnRef(targetTable, fieldName, snapshot));
+            return sourceTableName.toLowerCase() === 'table'
+                ? hold(createEngineThisRowRef(currentTable, fieldName, snapshot))
+                : `${sourceTableName}[${fieldName}]`;
         })
         .replace(BASE_BRACKET_FIELD_REF_PATTERN, (_match, prefix: string, fieldName: string) => `${prefix}${hold(createEngineThisRowRef(currentTable, fieldName, snapshot))}`);
     return normalized.replace(/__BASE_FORMULA_REF_(\d+)__/g, (_match, index: string) => refs[Number(index)] ?? '');
@@ -969,14 +997,23 @@ function protectBaseExternalReferences(formula: string, replace: (reference: str
     return protectBaseExternalStructuredReferences(withProtectedA1, replace);
 }
 
+function protectBaseFormulaParts(formula: string, replace: (reference: string) => string): string {
+    return protectBaseFormulaStrings(protectBaseExternalReferences(formula, replace), replace);
+}
+
+function protectBaseFormulaStrings(formula: string, replace: (reference: string) => string): string {
+    return formula.replace(/"(?:""|[^"])*"/g, replace);
+}
+
 function protectBaseExternalStructuredReferences(
     formula: string,
     replace: (reference: string) => string
 ): string {
     const spans: Array<{ start: number; end: number }> = [];
     BASE_EXTERNAL_STRUCTURED_REFERENCE_PREFIX.lastIndex = 0;
-    let match: RegExpExecArray | null;
-    while ((match = BASE_EXTERNAL_STRUCTURED_REFERENCE_PREFIX.exec(formula)) != null) {
+    while (true) {
+        const match = BASE_EXTERNAL_STRUCTURED_REFERENCE_PREFIX.exec(formula);
+        if (match == null) break;
         if (isInsideBaseFormulaString(formula, match.index)) continue;
         const openBracket = BASE_EXTERNAL_STRUCTURED_REFERENCE_PREFIX.lastIndex - 1;
         let depth = 0;
@@ -1029,14 +1066,41 @@ function getEngineBaseTableName(table: ITableSnapshot, snapshot: IBaseSnapshot):
     let sameNameCount = 0;
     for (let i = 0; i < tables.length; i++) {
         const item = tables[i];
-        if (item.name === table.name) {
+        if (item.name.trim().toLowerCase() === table.name.trim().toLowerCase()) {
             sameNameCount++;
             if (sameNameCount > 1) {
                 break;
             }
         }
     }
-    return sameNameCount === 1 ? table.name : table.id;
+    return sameNameCount === 1 && isExcelTableName(table.name)
+        ? table.name
+        : createStableExcelTableName(table.id);
+}
+
+function addEngineBaseTableNameMappings(
+    tableNameMap: Record<string, string>,
+    table: ITableSnapshot,
+    snapshot: IBaseSnapshot
+): void {
+    tableNameMap[table.name] = table.id;
+    tableNameMap[getEngineBaseTableName(table, snapshot)] = table.id;
+}
+
+function isExcelTableName(name: string): boolean {
+    if (name.length === 0 || name.length > 255 || !/^[A-Za-z_][A-Za-z0-9_.]*$/.test(name)) {
+        return false;
+    }
+    return !/^[RC]$/i.test(name)
+        && !/^[A-Za-z]{1,3}[1-9]\d*$/.test(name)
+        && !/^R(?:\d+)?C(?:\d+)?$/i.test(name);
+}
+
+function createStableExcelTableName(tableId: string): string {
+    const encoded = Array.from(tableId, (character) => /[A-Za-z0-9]/.test(character)
+        ? character
+        : `_x${character.codePointAt(0)?.toString(16) ?? '0'}_`).join('');
+    return `_T_${encoded}`;
 }
 
 function buildBaseRuntimeCellData(table: ITableSnapshot): Record<number, Record<number, IBaseCellData>> {

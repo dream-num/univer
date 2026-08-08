@@ -1,0 +1,380 @@
+{
+    "source": {
+        "issue": 1207,
+        "format": "pptx",
+        "generatedBy": "@univerjs-pro/uexcli 0.3.0",
+        "description": "Real slide shape snapshots imported from issue-1207-bullet-style-cases.pptx"
+    },
+    "cases": [
+        {
+            "id": "shape-12",
+            "name": "case-A",
+            "doc": {
+                "body": {
+                    "dataStream": "Wingdings bullet; Arial body\r\n",
+                    "paragraphs": [
+                        {
+                            "bullet": {
+                                "listId": "shape-12-shape-text-list",
+                                "listType": "BULLET_LIST",
+                                "nestingLevel": 0,
+                                "textStyle": {
+                                    "ff": "Wingdings"
+                                }
+                            },
+                            "paragraphStyle": {
+                                "hanging": {
+                                    "v": 26
+                                },
+                                "horizontalAlign": 1,
+                                "indentStart": {
+                                    "v": 16
+                                }
+                            },
+                            "startIndex": 28
+                        }
+                    ],
+                    "textRuns": [
+                        {
+                            "ed": 28,
+                            "st": 0,
+                            "ts": {
+                                "cl": {
+                                    "rgb": "#111111",
+                                    "th": 0
+                                },
+                                "ff": "Arial",
+                                "fs": 18
+                            }
+                        }
+                    ]
+                },
+                "documentStyle": {
+                    "renderConfig": {
+                        "horizontalAlign": 1,
+                        "shapeTextOpticalVerticalAlign": 1,
+                        "verticalAlign": 2
+                    },
+                    "textStyle": {
+                        "cl": {
+                            "rgb": "#111111",
+                            "th": 0
+                        },
+                        "ff": "Arial",
+                        "fs": 18
+                    }
+                },
+                "id": "shape-12-shape-text",
+                "lists": {
+                    "BULLET_LIST": {
+                        "listType": "BULLET_LIST",
+                        "nestingLevel": [
+                            {
+                                "bulletAlignment": 0,
+                                "glyphFormat": " %1",
+                                "glyphSymbol": "p",
+                                "startNumber": 0
+                            },
+                            {
+                                "bulletAlignment": 0,
+                                "glyphFormat": " %2",
+                                "glyphSymbol": "○",
+                                "startNumber": 0
+                            },
+                            {
+                                "bulletAlignment": 0,
+                                "glyphFormat": " %3",
+                                "glyphSymbol": "■",
+                                "startNumber": 0
+                            },
+                            {
+                                "bulletAlignment": 0,
+                                "glyphFormat": " %4",
+                                "glyphSymbol": "●",
+                                "startNumber": 0
+                            },
+                            {
+                                "bulletAlignment": 0,
+                                "glyphFormat": " %5",
+                                "glyphSymbol": "○",
+                                "startNumber": 0
+                            },
+                            {
+                                "bulletAlignment": 0,
+                                "glyphFormat": " %6",
+                                "glyphSymbol": "■",
+                                "startNumber": 0
+                            },
+                            {
+                                "bulletAlignment": 0,
+                                "glyphFormat": " %7",
+                                "glyphSymbol": "●",
+                                "startNumber": 0
+                            },
+                            {
+                                "bulletAlignment": 0,
+                                "glyphFormat": " %8",
+                                "glyphSymbol": "○",
+                                "startNumber": 0
+                            },
+                            {
+                                "bulletAlignment": 0,
+                                "glyphFormat": " %9",
+                                "glyphSymbol": "■",
+                                "startNumber": 0
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        {
+            "id": "shape-14",
+            "name": "case-B",
+            "doc": {
+                "body": {
+                    "dataStream": "Red, larger bullet; black Arial body\r\n",
+                    "paragraphs": [
+                        {
+                            "bullet": {
+                                "listId": "shape-14-shape-text-list",
+                                "listType": "BULLET_LIST",
+                                "nestingLevel": 0,
+                                "textStyle": {
+                                    "cl": {
+                                        "rgb": "#E11D48"
+                                    },
+                                    "ff": "Wingdings",
+                                    "fs": 27
+                                }
+                            },
+                            "paragraphStyle": {
+                                "hanging": {
+                                    "v": 26
+                                },
+                                "horizontalAlign": 1,
+                                "indentStart": {
+                                    "v": 16
+                                }
+                            },
+                            "startIndex": 36
+                        }
+                    ],
+                    "textRuns": [
+                        {
+                            "ed": 36,
+                            "st": 0,
+                            "ts": {
+                                "cl": {
+                                    "rgb": "#111111",
+                                    "th": 0
+                                },
+                                "ff": "Arial",
+                                "fs": 18
+                            }
+                        }
+                    ]
+                },
+                "documentStyle": {
+                    "renderConfig": {
+                        "horizontalAlign": 1,
+                        "shapeTextOpticalVerticalAlign": 1,
+                        "verticalAlign": 2
+                    },
+                    "textStyle": {
+                        "cl": {
+                            "rgb": "#111111",
+                            "th": 0
+                        },
+                        "ff": "Arial",
+                        "fs": 18
+                    }
+                },
+                "id": "shape-14-shape-text",
+                "lists": {
+                    "BULLET_LIST": {
+                        "listType": "BULLET_LIST",
+                        "nestingLevel": [
+                            {
+                                "bulletAlignment": 0,
+                                "glyphFormat": " %1",
+                                "glyphSymbol": "p",
+                                "startNumber": 0
+                            },
+                            {
+                                "bulletAlignment": 0,
+                                "glyphFormat": " %2",
+                                "glyphSymbol": "○",
+                                "startNumber": 0
+                            },
+                            {
+                                "bulletAlignment": 0,
+                                "glyphFormat": " %3",
+                                "glyphSymbol": "■",
+                                "startNumber": 0
+                            },
+                            {
+                                "bulletAlignment": 0,
+                                "glyphFormat": " %4",
+                                "glyphSymbol": "●",
+                                "startNumber": 0
+                            },
+                            {
+                                "bulletAlignment": 0,
+                                "glyphFormat": " %5",
+                                "glyphSymbol": "○",
+                                "startNumber": 0
+                            },
+                            {
+                                "bulletAlignment": 0,
+                                "glyphFormat": " %6",
+                                "glyphSymbol": "■",
+                                "startNumber": 0
+                            },
+                            {
+                                "bulletAlignment": 0,
+                                "glyphFormat": " %7",
+                                "glyphSymbol": "●",
+                                "startNumber": 0
+                            },
+                            {
+                                "bulletAlignment": 0,
+                                "glyphFormat": " %8",
+                                "glyphSymbol": "○",
+                                "startNumber": 0
+                            },
+                            {
+                                "bulletAlignment": 0,
+                                "glyphFormat": " %9",
+                                "glyphSymbol": "■",
+                                "startNumber": 0
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        {
+            "id": "shape-16",
+            "name": "case-C",
+            "doc": {
+                "body": {
+                    "dataStream": "Unicode square bullet\r\n",
+                    "paragraphs": [
+                        {
+                            "bullet": {
+                                "listId": "shape-16-shape-text-list",
+                                "listType": "BULLET_LIST",
+                                "nestingLevel": 0,
+                                "textStyle": {
+                                    "ff": "Arial"
+                                }
+                            },
+                            "paragraphStyle": {
+                                "hanging": {
+                                    "v": 26
+                                },
+                                "horizontalAlign": 1,
+                                "indentStart": {
+                                    "v": 16
+                                }
+                            },
+                            "startIndex": 21
+                        }
+                    ],
+                    "textRuns": [
+                        {
+                            "ed": 21,
+                            "st": 0,
+                            "ts": {
+                                "cl": {
+                                    "rgb": "#111111",
+                                    "th": 0
+                                },
+                                "ff": "Arial",
+                                "fs": 18
+                            }
+                        }
+                    ]
+                },
+                "documentStyle": {
+                    "renderConfig": {
+                        "horizontalAlign": 1,
+                        "shapeTextOpticalVerticalAlign": 1,
+                        "verticalAlign": 2
+                    },
+                    "textStyle": {
+                        "cl": {
+                            "rgb": "#111111",
+                            "th": 0
+                        },
+                        "ff": "Arial",
+                        "fs": 18
+                    }
+                },
+                "id": "shape-16-shape-text",
+                "lists": {
+                    "BULLET_LIST": {
+                        "listType": "BULLET_LIST",
+                        "nestingLevel": [
+                            {
+                                "bulletAlignment": 0,
+                                "glyphFormat": " %1",
+                                "glyphSymbol": "□",
+                                "startNumber": 0
+                            },
+                            {
+                                "bulletAlignment": 0,
+                                "glyphFormat": " %2",
+                                "glyphSymbol": "○",
+                                "startNumber": 0
+                            },
+                            {
+                                "bulletAlignment": 0,
+                                "glyphFormat": " %3",
+                                "glyphSymbol": "■",
+                                "startNumber": 0
+                            },
+                            {
+                                "bulletAlignment": 0,
+                                "glyphFormat": " %4",
+                                "glyphSymbol": "●",
+                                "startNumber": 0
+                            },
+                            {
+                                "bulletAlignment": 0,
+                                "glyphFormat": " %5",
+                                "glyphSymbol": "○",
+                                "startNumber": 0
+                            },
+                            {
+                                "bulletAlignment": 0,
+                                "glyphFormat": " %6",
+                                "glyphSymbol": "■",
+                                "startNumber": 0
+                            },
+                            {
+                                "bulletAlignment": 0,
+                                "glyphFormat": " %7",
+                                "glyphSymbol": "●",
+                                "startNumber": 0
+                            },
+                            {
+                                "bulletAlignment": 0,
+                                "glyphFormat": " %8",
+                                "glyphSymbol": "○",
+                                "startNumber": 0
+                            },
+                            {
+                                "bulletAlignment": 0,
+                                "glyphFormat": " %9",
+                                "glyphSymbol": "■",
+                                "startNumber": 0
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    ]
+}

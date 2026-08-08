@@ -651,13 +651,22 @@ export class ArrayValueObject extends BaseValueObject {
         valueObject: BaseValueObject,
         searchType: ArrayOrderSearchType = ArrayOrderSearchType.MIN,
         isDesc = false,
-        isFuzzyMatching = false
+        isFuzzyMatching = false,
+        keepFirstNearest = false
     ) {
         let result: Nullable<BaseValueObject>;
         let maxOrMin: Nullable<BaseValueObject>;
         let resultPosition: Nullable<{ row: number; column: number }>;
 
         let maxOrMinPosition: Nullable<{ row: number; column: number }>;
+
+        const _isNearer = (itemValue: BaseValueObject, currentValue: BaseValueObject) => {
+            const distance = itemValue.minus(valueObject).abs();
+            const currentDistance = currentValue.minus(valueObject).abs();
+            return keepFirstNearest
+                ? distance.isLessThan(currentDistance).getValue() === true
+                : distance.isLessThanOrEqual(currentDistance).getValue() === true;
+        };
 
         const _handleMatch = (itemValue: Nullable<BaseValueObject>, row: number, column: number) => {
             // Skip the blank cells
@@ -684,11 +693,7 @@ export class ArrayValueObject extends BaseValueObject {
                 if (itemValue.isGreaterThan(valueObject).getValue() === true) {
                     if (
                         maxOrMin == null ||
-                        itemValue
-                            .minus(valueObject)
-                            .abs()
-                            .isLessThanOrEqual(maxOrMin.minus(valueObject).abs())
-                            .getValue() === true
+                        _isNearer(itemValue, maxOrMin)
                     ) {
                         maxOrMin = itemValue;
                         maxOrMinPosition = { row, column };
@@ -698,11 +703,7 @@ export class ArrayValueObject extends BaseValueObject {
                 if (itemValue.isLessThan(valueObject).getValue() === true) {
                     if (
                         maxOrMin == null ||
-                        itemValue
-                            .minus(valueObject)
-                            .abs()
-                            .isLessThanOrEqual(maxOrMin.minus(valueObject).abs())
-                            .getValue() === true
+                        _isNearer(itemValue, maxOrMin)
                     ) {
                         maxOrMin = itemValue;
                         maxOrMinPosition = { row, column };
@@ -1532,11 +1533,14 @@ export class ArrayValueObject extends BaseValueObject {
         const sheetId = this.getSheetId();
         const startRow = this.getCurrentRow();
         const startColumn = this.getCurrentColumn();
+        const isWildcardComparison = batchOperatorType === BatchOperatorType.COMPARE &&
+            valueObject.isString() &&
+            isWildcard(String(valueObject.getValue()));
         /**
          * If comparison operations are conducted for a single numerical value,
          * then retrieve the judgment from the inverted index. This enhances performance.
          */
-        if (batchOperatorType === BatchOperatorType.COMPARE && this._useInvertedIndexCache) {
+        if (batchOperatorType === BatchOperatorType.COMPARE && this._useInvertedIndexCache && !isWildcardComparison) {
             const { rowsInCache, rowsNotInCache } = CELL_INVERTED_INDEX_CACHE.canUseCache(
                 unitId,
                 sheetId,

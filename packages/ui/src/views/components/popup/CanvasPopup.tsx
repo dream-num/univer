@@ -45,7 +45,7 @@ export const SingleCanvasPopup = ({ popup, children }: ISingleCanvasPopupProps) 
     const hiddenRects$ = useMemo(() => popup.hiddenRects$?.pipe(throttleTime(0, animationFrameScheduler)) ?? of([]), [popup.hiddenRects$]);
     const excludeRects$ = useMemo(() => popup.excludeRects$?.pipe(throttleTime(0, animationFrameScheduler)), [popup.excludeRects$]);
     const excludeRectsRef = useObservableRef(excludeRects$, popup.excludeRects);
-    const { canvasElement, hideOnInvisible = true, hiddenType = 'destroy' } = popup;
+    const { canvasElement, constrainToCanvas = false, hideOnInvisible = true, hiddenType = 'destroy' } = popup;
 
     const hidden = useObservable(
         hideOnInvisible
@@ -82,7 +82,8 @@ export const SingleCanvasPopup = ({ popup, children }: ISingleCanvasPopupProps) 
             {...popup}
             hidden={hidden}
             anchorRect$={anchorRect$}
-            boundaryElement={canvasElement}
+            // TODO(@ai-review): Verify that canvas clamping remains opt-in so existing cell and range popups retain viewport placement.
+            boundaryElement={constrainToCanvas ? canvasElement : popup.boundaryElement}
             direction={popup.direction}
             onClickOutside={popup.onClickOutside}
             excludeOutside={popup.excludeOutside}

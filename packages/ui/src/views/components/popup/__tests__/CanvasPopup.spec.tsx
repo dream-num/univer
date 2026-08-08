@@ -101,7 +101,7 @@ describe('CanvasPopup', () => {
         }
     });
 
-    it('positions service popups from canvas anchors and tracks hover ownership', async () => {
+    it('uses viewport placement by default and tracks hover ownership', async () => {
         const rendered = renderWithDependencies(<CanvasPopup />);
         const popupService = rendered.injector.get(ICanvasPopupService);
         const anchorRect$ = new BehaviorSubject({ left: 40, top: 50, right: 90, bottom: 70 });
@@ -113,9 +113,10 @@ describe('CanvasPopup', () => {
                 subUnitId: 'sheet-1',
                 componentKey: 'test-popup',
                 anchorRect$,
-                canvasElement: createCanvasElement(new DOMRect(0, 0, 400, 300)),
+                canvasElement: createCanvasElement(new DOMRect(0, 100, 400, 300)),
                 direction: 'bottom-left',
                 offset: [4, 6],
+                hideOnInvisible: false,
                 extraProps: { label: 'Cell comment' },
             });
         });
@@ -156,6 +157,7 @@ describe('CanvasPopup', () => {
                 componentKey: 'test-popup',
                 anchorRect$: new BehaviorSubject({ left: 200, top: 29, right: 668, bottom: 398 }),
                 canvasElement: createCanvasElement(new DOMRect(0, 152, 1580, 891)),
+                constrainToCanvas: true,
                 direction: 'horizontal',
                 extraProps: { label: 'Drawing menu' },
             });
@@ -185,6 +187,7 @@ describe('CanvasPopup', () => {
                 componentKey: 'test-popup',
                 anchorRect$: new BehaviorSubject({ left: 40, top: -180, right: 90, bottom: -160 }),
                 canvasElement: createCanvasElement(new DOMRect(0, -200, 400, 100)),
+                constrainToCanvas: true,
                 direction: 'horizontal',
                 extraProps: { label: 'Offscreen drawing menu' },
             });

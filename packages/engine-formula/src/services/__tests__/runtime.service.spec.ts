@@ -149,6 +149,16 @@ describe('FormulaRuntimeService', () => {
         expect(runtime.currentSubUnitId).toBe('sheet');
         expect(runtime.currentUnitId).toBe('unit');
 
+        expect(runtime.hasFunctionRefInfoOverride()).toBe(false);
+        const restoreRefInfo = runtime.setFunctionRefInfoOverride(1, 2);
+        expect(runtime.hasFunctionRefInfoOverride()).toBe(true);
+        expect(runtime.currentRowCount).toBe(1);
+        expect(runtime.currentColumnCount).toBe(2);
+        restoreRefInfo();
+        expect(runtime.hasFunctionRefInfoOverride()).toBe(false);
+        expect(runtime.currentRowCount).toBe(99);
+        expect(runtime.currentColumnCount).toBe(88);
+
         const lambdaVar = new Map<string, Nullable<BaseAstNode>>([['x', null]]);
         runtime.registerFunctionDefinitionPrivacyVar('lambda-1', lambdaVar);
         expect(runtime.getFunctionDefinitionPrivacyVar('lambda-1')).toBe(lambdaVar);

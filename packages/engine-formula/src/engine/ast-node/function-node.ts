@@ -206,6 +206,13 @@ export class FunctionNode extends BaseAstNode {
             return result;
         }
 
+        if (
+            this._runtimeService.hasFunctionRefInfoOverride() &&
+            (this._runtimeService.currentRowCount > 1 || this._runtimeService.currentColumnCount > 1)
+        ) {
+            return result;
+        }
+
         return array.getFirstCell();
     }
 

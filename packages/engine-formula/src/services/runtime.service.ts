@@ -123,6 +123,8 @@ export interface IFormulaRuntimeService {
 
     setFunctionRefInfoOverride(rowCount: number, columnCount: number): () => void;
 
+    hasFunctionRefInfoOverride(): boolean;
+
     registerFunctionDefinitionPrivacyVar(lambdaId: string, lambdaVar: Map<string, Nullable<BaseAstNode>>): void;
 
     getFunctionDefinitionPrivacyVar(lambdaId: string): Nullable<Map<string, Nullable<BaseAstNode>>>;
@@ -439,6 +441,10 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         return () => {
             this._functionRefInfoOverrideStack.pop();
         };
+    }
+
+    hasFunctionRefInfoOverride(): boolean {
+        return this._functionRefInfoOverrideStack.length > 0;
     }
 
     clearFunctionDefinitionPrivacyVar() {

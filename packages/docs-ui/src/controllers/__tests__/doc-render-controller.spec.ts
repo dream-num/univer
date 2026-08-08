@@ -252,6 +252,21 @@ describe('doc render controller', () => {
         });
     });
 
+    // TODO(@ai-review): Confirm non-fit start alignment keeps horizontal navigation for content wider than the embed host.
+    it('keeps the horizontal scrollbar for start-aligned docs that do not fit to width', () => {
+        createControllerFixture({
+            fitToWidth: {
+                mode: 'none',
+                target: 'container',
+                align: 'start',
+            },
+        });
+
+        expect(mockScrollBarProps[0]).toMatchObject({
+            enableHorizontal: true,
+        });
+    });
+
     it('refreshes page layout and selection after rich text mutations resize the document', () => {
         const { commandCallbacks, pageLayoutService, selectionManager } = createControllerFixture();
 

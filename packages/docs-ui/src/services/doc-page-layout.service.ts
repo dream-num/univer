@@ -35,7 +35,9 @@ export class DocPageLayoutService extends Disposable implements IRenderModule {
         const docObject = neoGetDocObject(this._context);
         const viewScale = this._docViewScaleService.getViewScale();
         const fitOptions = this._docViewScaleService.getOptions();
-        const isStartAlignedFit = fitOptions.mode === 'fit-width' && fitOptions.align === 'start';
+        // TODO(@ai-review): Verify explicit start alignment should preserve zoom while anchoring oversized pages at their left margin.
+        const isFitToWidth = fitOptions.mode === 'fit-width';
+        const isStartAligned = fitOptions.align === 'start';
         const { document: docsComponent, scene, docBackground } = docObject;
         if (scene.scaleX !== viewScale || scene.scaleY !== viewScale) {
             scene.scale(viewScale, viewScale);
@@ -44,7 +46,7 @@ export class DocPageLayoutService extends Disposable implements IRenderModule {
         const parent = scene?.getParent();
 
         const { width: docsWidth, height: docsHeight, pageMarginLeft, pageMarginTop } = docsComponent;
-        const horizontalMargin = isStartAlignedFit
+        const horizontalMargin = isFitToWidth && isStartAligned
             ? resolveDocFitPaddingX(this._docViewScaleService.getAvailableWidth(), fitOptions.paddingX) / viewScale
             : pageMarginLeft;
 
@@ -62,7 +64,7 @@ export class DocPageLayoutService extends Disposable implements IRenderModule {
         let scrollToX = Number.POSITIVE_INFINITY;
 
         if (engineWidth > (docsWidth + horizontalMargin * 2) * viewScale) {
-            docsLeft = isStartAlignedFit ? horizontalMargin : (engineWidth / 2 - (docsWidth * viewScale) / 2) / viewScale;
+            docsLeft = isStartAligned ? horizontalMargin : (engineWidth / 2 - (docsWidth * viewScale) / 2) / viewScale;
             sceneWidth = (engineWidth - horizontalMargin * 2) / viewScale;
 
             scrollToX = 0;
@@ -70,7 +72,7 @@ export class DocPageLayoutService extends Disposable implements IRenderModule {
             docsLeft = horizontalMargin;
             sceneWidth = docsWidth + horizontalMargin * 2;
 
-            scrollToX = isStartAlignedFit ? 0 : (sceneWidth - engineWidth / viewScale) / 2;
+            scrollToX = isStartAligned ? 0 : (sceneWidth - engineWidth / viewScale) / 2;
         }
 
         if (engineHeight > docsHeight) {

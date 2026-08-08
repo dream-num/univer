@@ -28,6 +28,7 @@ import pkg from '../package.json';
 import { DeleteTextCommand, InsertTextCommand, UpdateTextCommand } from './commands/commands/core-editing.command';
 import { CreateHeaderFooterCommand } from './commands/commands/create-header-footer.command';
 import { SetDocumentDefaultParagraphStyleCommand } from './commands/commands/set-document-default-paragraph-style.command';
+import { SetDocumentNameCommand } from './commands/commands/set-document-name.command';
 import { SetSectionHeaderFooterLinkCommand } from './commands/commands/set-section-header-footer-link.command';
 import { UpdateDocumentParagraphStyleCommand } from './commands/commands/update-document-paragraph-style.command';
 import { DeleteDocumentSectionBreakCommand, InsertDocumentColumnBreakCommand, InsertDocumentSectionBreakCommand, UpdateDocumentSectionCommand } from './commands/commands/update-document-section.command';
@@ -78,6 +79,7 @@ export class UniverDocsPlugin extends Plugin {
                 UpdateTextCommand,
                 CreateHeaderFooterCommand,
                 SetDocumentDefaultParagraphStyleCommand,
+                SetDocumentNameCommand,
                 SetSectionHeaderFooterLinkCommand,
                 UpdateDocumentParagraphStyleCommand,
                 UpdateDocumentSectionCommand,

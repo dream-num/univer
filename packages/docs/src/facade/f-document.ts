@@ -34,7 +34,7 @@ import {
     UndoCommand,
 } from '@univerjs/core';
 import { FBaseInitialable } from '@univerjs/core/facade';
-import { CreateHeaderFooterCommand, generateParagraphs, getTopLevelSectionBreaks, HeaderFooterType, InsertDocumentColumnBreakCommand, InsertDocumentSectionBreakCommand } from '@univerjs/docs';
+import { CreateHeaderFooterCommand, generateParagraphs, getTopLevelSectionBreaks, HeaderFooterType, InsertDocumentColumnBreakCommand, InsertDocumentSectionBreakCommand, SetDocumentNameCommand } from '@univerjs/docs';
 import { FDocumentParagraph } from './f-document-paragraph';
 import { DocsSectionUnsupportedDocumentFlavorError, FDocumentSection } from './f-document-section';
 import { FDocumentTextRange } from './f-document-text-range';
@@ -193,6 +193,25 @@ export class FDocument extends FBaseInitialable {
      */
     getName(): string {
         return this._documentDataModel.getTitle() || '';
+    }
+
+    /**
+     * Set the document name.
+     * @param {string} name The new document name.
+     * @returns {FDocument} The current document for chaining.
+     *
+     * @example
+     * ```ts
+     * const document = univerAPI.getActiveDocument();
+     * document?.setName('Quarterly Report');
+     * ```
+     */
+    setName(name: string): this {
+        this._commandService.syncExecuteCommand(SetDocumentNameCommand.id, {
+            unitId: this.id,
+            name,
+        });
+        return this;
     }
 
     /**

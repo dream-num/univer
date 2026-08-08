@@ -62,7 +62,6 @@ export function dealWithBullet(
 }
 
 export function getDefaultBulletSke(listId: string, startIndex: number = 1): IDocumentSkeletonBullet {
-    // TODO(@ai-review): Confirm fallback markers inherit the paragraph font without weakening explicit imported marker styles.
     return {
         listId,
         symbol: '\u25CF', // symbol list content

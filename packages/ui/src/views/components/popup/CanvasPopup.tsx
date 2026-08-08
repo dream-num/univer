@@ -82,7 +82,6 @@ export const SingleCanvasPopup = ({ popup, children }: ISingleCanvasPopupProps) 
             {...popup}
             hidden={hidden}
             anchorRect$={anchorRect$}
-            // TODO(@ai-review): Verify that canvas clamping remains opt-in so existing cell and range popups retain viewport placement.
             boundaryElement={constrainToCanvas ? canvasElement : popup.boundaryElement}
             direction={popup.direction}
             onClickOutside={popup.onClickOutside}

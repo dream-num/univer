@@ -96,6 +96,7 @@ const orderListSymbolMap = {
 };
 
 type BulletSymbols = [string, string, string];
+// TODO(@ai-review): Verify built-in markers inherit effective paragraph fonts while imported marker styles remain explicit overrides.
 const bulletListFactory = (symbols: BulletSymbols): INestingLevel[] => {
     return [
         ...symbols,
@@ -105,9 +106,6 @@ const bulletListFactory = (symbols: BulletSymbols): INestingLevel[] => {
         glyphFormat: ` %${i + 1}`,
         glyphSymbol: templateSymbol,
         bulletAlignment: BulletAlignment.START,
-        textStyle: {
-            fs: 12,
-        },
         startNumber: 0,
         paragraphProperties: {
             hanging: { v: 21 },
@@ -120,9 +118,6 @@ const orderListFactory = (options: { glyphFormat: string; glyphType: ListGlyphTy
     return options.map((format, i) => ({
         ...format,
         bulletAlignment: BulletAlignment.START,
-        textStyle: {
-            fs: 12,
-        },
         startNumber: 0,
         paragraphProperties: {
             hanging: { v: 21 },
@@ -136,9 +131,6 @@ const checkListFactory = (symbol: string, textStyle?: ITextStyle): INestingLevel
         glyphFormat: ` %${i + 1}`,
         glyphSymbol: symbol,
         bulletAlignment: BulletAlignment.START,
-        textStyle: {
-            fs: 16,
-        },
         startNumber: 0,
         paragraphProperties: {
             hanging: { v: 21 },

@@ -31,6 +31,8 @@ export type {
     IDocumentDefaultParagraphStylePatch,
     ISetDocumentDefaultParagraphStyleCommandParams,
 } from './commands/commands/set-document-default-paragraph-style.command';
+export { SetDocumentNameCommand } from './commands/commands/set-document-name.command';
+export type { ISetDocumentNameCommandParams } from './commands/commands/set-document-name.command';
 export { SetSectionHeaderFooterLinkCommand } from './commands/commands/set-section-header-footer-link.command';
 export type { ISetSectionHeaderFooterLinkCommandParams } from './commands/commands/set-section-header-footer-link.command';
 export { UpdateDocumentParagraphStyleCommand } from './commands/commands/update-document-paragraph-style.command';

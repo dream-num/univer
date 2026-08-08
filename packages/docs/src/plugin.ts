@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { Dependency, ICommand } from '@univerjs/core';
-import type { IUniverDocsConfig } from './config/config';
 import {
+    type Dependency,
+    type ICommand,
     ICommandService,
     IConfigService,
     Inject,
@@ -28,13 +28,14 @@ import pkg from '../package.json';
 import { DeleteTextCommand, InsertTextCommand, UpdateTextCommand } from './commands/commands/core-editing.command';
 import { CreateHeaderFooterCommand } from './commands/commands/create-header-footer.command';
 import { SetDocumentDefaultParagraphStyleCommand } from './commands/commands/set-document-default-paragraph-style.command';
+import { SetDocumentNameCommand } from './commands/commands/set-document-name.command';
 import { SetSectionHeaderFooterLinkCommand } from './commands/commands/set-section-header-footer-link.command';
 import { UpdateDocumentParagraphStyleCommand } from './commands/commands/update-document-paragraph-style.command';
 import { DeleteDocumentSectionBreakCommand, InsertDocumentColumnBreakCommand, InsertDocumentSectionBreakCommand, UpdateDocumentSectionCommand } from './commands/commands/update-document-section.command';
 import { RichTextEditingMutation } from './commands/mutations/core-editing.mutation';
 import { DocsRenameMutation } from './commands/mutations/docs-rename.mutation';
 import { SetTextSelectionsOperation } from './commands/operations/text-selection.operation';
-import { defaultPluginConfig, DOCS_PLUGIN_CONFIG_KEY } from './config/config';
+import { defaultPluginConfig, DOCS_PLUGIN_CONFIG_KEY, type IUniverDocsConfig } from './config/config';
 import { DocCustomRangeController } from './controllers/custom-range.controller';
 import { DocBlockMoveValidatorService } from './services/doc-block-move-validator.service';
 import { DocContentInsertService } from './services/doc-content-insert.service';
@@ -78,6 +79,7 @@ export class UniverDocsPlugin extends Plugin {
                 UpdateTextCommand,
                 CreateHeaderFooterCommand,
                 SetDocumentDefaultParagraphStyleCommand,
+                SetDocumentNameCommand,
                 SetSectionHeaderFooterLinkCommand,
                 UpdateDocumentParagraphStyleCommand,
                 UpdateDocumentSectionCommand,

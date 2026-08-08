@@ -15,10 +15,12 @@
  */
 
 import type { IDocumentSkeletonGlyph } from '../../../../../basics/i-document-skeleton-cached';
-import { DocumentFlavor } from '@univerjs/core';
+import { BooleanNumber, DataStreamTreeTokenType, DocumentFlavor } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
+import { GlyphType } from '../../../../../basics/i-document-skeleton-cached';
 import { getDocumentCompatibilityPolicy } from '../../../document-compatibility';
-import { baseAdjustability, createSkeletonLetterGlyph, glyphShrinkLeft, glyphShrinkRight, isJustifiable, isSpace } from '../glyph';
+import { FontCache } from '../../shaping-engine/font-cache';
+import { baseAdjustability, createSkeletonBulletGlyph, createSkeletonLetterGlyph, glyphShrinkLeft, glyphShrinkRight, isJustifiable, isSpace } from '../glyph';
 
 describe('Glyph utils test cases', () => {
     describe('test baseAdjustability', () => {
@@ -133,6 +135,94 @@ describe('Glyph utils test cases', () => {
             expect(glyph.adjustability.shrinkability).toEqual([5, 10]);
             expect(glyph.width).toBe(15);
             expect(glyph.xOffset).toBe(-5);
+        });
+    });
+
+    describe('test bullet glyph style', () => {
+        it('uses explicit bullet style while inheriting omitted properties from the paragraph glyph', () => {
+            let measuredFont = '';
+            const measureSpy = vi.spyOn(FontCache, 'getTextSize').mockImplementation((_content, fontStyle) => {
+                measuredFont = fontStyle.fontString;
+                return {
+                    width: 12,
+                    ba: 18,
+                    bd: 4,
+                    aba: 18,
+                    abd: 4,
+                    sp: 0,
+                    sbr: 0,
+                    sbo: 0,
+                    spr: 0,
+                    spo: 0,
+                };
+            });
+            const paragraphGlyph = {
+                content: 'I',
+                raw: 'I',
+                ts: {
+                    ff: 'Arial',
+                    fs: 24,
+                    bl: BooleanNumber.TRUE,
+                    cl: { rgb: '#111111' },
+                },
+                fontStyle: {
+                    fontString: 'bold 24pt Arial',
+                    fontSize: 24,
+                    originFontSize: 24,
+                    fontFamily: 'Arial',
+                    fontCache: 'Arial-24-bold',
+                },
+                width: 12,
+                bBox: {
+                    width: 12,
+                    ba: 18,
+                    bd: 4,
+                    aba: 18,
+                    abd: 4,
+                    sp: 0,
+                    sbr: 0,
+                    sbo: 0,
+                    spr: 0,
+                    spo: 0,
+                },
+                xOffset: 0,
+                left: 0,
+                glyphType: GlyphType.LETTER,
+                streamType: DataStreamTreeTokenType.LETTER,
+                isJustifiable: false,
+                adjustability: {
+                    stretchability: [0, 0],
+                    shrinkability: [0, 0],
+                },
+                count: 1,
+            } as IDocumentSkeletonGlyph;
+
+            const bulletGlyph = createSkeletonBulletGlyph(
+                paragraphGlyph,
+                {
+                    listId: 'issue-1207-list',
+                    symbol: 'p',
+                    ts: {
+                        ff: 'Wingdings',
+                        cl: { rgb: '#FF0000' },
+                    },
+                    startIndexItem: 1,
+                },
+                10
+            );
+
+            expect(bulletGlyph.content).toBe('p');
+            expect(bulletGlyph.ts).toMatchObject({
+                ff: 'Wingdings',
+                fs: 24,
+                bl: BooleanNumber.TRUE,
+                cl: { rgb: '#FF0000' },
+            });
+            expect(bulletGlyph.fontStyle?.fontFamily).toBe('Wingdings');
+            expect(bulletGlyph.fontStyle?.originFontSize).toBe(24);
+            expect(measuredFont).toContain('Wingdings');
+            expect(measuredFont).toContain('24pt');
+            measureSpy.mockRestore();
         });
     });
 

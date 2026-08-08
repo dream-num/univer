@@ -37,6 +37,7 @@ import { __testing, getLineHeightMetrics, layoutParagraph, updateInlineDrawingPo
 import { lineBreaking } from '../linebreaking';
 import { shaping } from '../shaping';
 import { createParagraphLayoutTestBed } from './create-paragraph-layout-test-bed';
+import issue1207Snapshot from './fixtures/issue-1207-bullet-style.snapshot.json';
 
 describe('layout-ruler', () => {
     beforeEach(() => {
@@ -136,6 +137,66 @@ describe('layout-ruler', () => {
         expect(result.length).toBe(1);
         expect(result[0].sections.length).toBeGreaterThan(0);
         expect(result[0].sections[0].columns[0].lines[0].divides[0].glyphGroup[0].width).toBe(21);
+    });
+
+    it('preserves bullet styles from a real PowerPoint import snapshot', () => {
+        const expectedCases = {
+            'case-A': {
+                content: 'p',
+                fontFamily: 'Wingdings',
+                fontSize: 18,
+                color: '#111111',
+            },
+            'case-B': {
+                content: 'p',
+                fontFamily: 'Wingdings',
+                fontSize: 27,
+                color: '#E11D48',
+            },
+            'case-C': {
+                content: '□',
+                fontFamily: 'Arial',
+                fontSize: 18,
+                color: '#111111',
+            },
+        } as const;
+
+        for (const snapshotCase of issue1207Snapshot.cases) {
+            const { body, documentStyle, ...document } = snapshotCase.doc;
+            const content = body.dataStream.replace(/\r\n$/, '');
+            const testBed = createParagraphLayoutTestBed(content, {
+                ...document,
+                body,
+                documentStyle,
+            });
+            const shapedTextList = shaping(
+                testBed.ctx,
+                testBed.paragraphNode.content!,
+                testBed.viewModel,
+                testBed.paragraphNode,
+                testBed.sectionBreakConfig
+            );
+            const pages = lineBreaking(
+                testBed.ctx,
+                testBed.viewModel,
+                shapedTextList,
+                testBed.curPage,
+                testBed.paragraphNode,
+                testBed.sectionBreakConfig,
+                null
+            );
+            const bulletGlyph = pages[0].sections[0].columns[0].lines[0].divides[0].glyphGroup
+                .find((glyph) => glyph.glyphType === GlyphType.LIST);
+            const expected = expectedCases[snapshotCase.name as keyof typeof expectedCases];
+
+            expect(bulletGlyph, snapshotCase.name).toBeDefined();
+            expect(bulletGlyph?.content, snapshotCase.name).toBe(expected.content);
+            expect(bulletGlyph?.ts?.ff, snapshotCase.name).toBe(expected.fontFamily);
+            expect(bulletGlyph?.ts?.fs, snapshotCase.name).toBe(expected.fontSize);
+            expect(bulletGlyph?.ts?.cl?.rgb, snapshotCase.name).toBe(expected.color);
+            expect(bulletGlyph?.fontStyle?.fontFamily, snapshotCase.name).toBe(expected.fontFamily);
+            expect(bulletGlyph?.fontStyle?.originFontSize, snapshotCase.name).toBe(expected.fontSize);
+        }
     });
 
     it('uses trailing CJK punctuation shrinkability when deciding line overflow', () => {

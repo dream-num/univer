@@ -17,6 +17,7 @@
 import { CellValueType, ObjectMatrix } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { CellReferenceObject } from '../cell-reference-object';
+import { RangeReferenceObject } from '../range-reference-object';
 
 describe('CellReferenceObject', () => {
     it('should allow blank cells inside the Excel grid even when they are outside snapshot row data', () => {
@@ -112,6 +113,45 @@ describe('CellReferenceObject', () => {
 
         expect(reference.getCellByPosition().getValue()).toBe(2);
         expect(reference.getCellByPosition(0, 0).getValue()).toBe(1);
+    });
+
+    it('should not apply a shared-formula offset twice when unioning a materialized reference', () => {
+        const sharedReference = new CellReferenceObject('$B$2');
+        const materializedReference = new CellReferenceObject('B3');
+        sharedReference.setRefOffset(0, 1);
+
+        const union = sharedReference.unionBy(materializedReference);
+
+        if (!(union instanceof RangeReferenceObject)) {
+            throw new TypeError('Expected a range reference');
+        }
+
+        expect(union.getRangePosition()).toEqual(expect.objectContaining({
+            startRow: 1,
+            endRow: 2,
+            startColumn: 1,
+            endColumn: 1,
+        }));
+    });
+
+    it('should apply matching shared-formula offsets once when unioning references', () => {
+        const startReference = new CellReferenceObject('A1');
+        const endReference = new CellReferenceObject('B1');
+        startReference.setRefOffset(0, 1);
+        endReference.setRefOffset(0, 1);
+
+        const union = startReference.unionBy(endReference);
+
+        if (!(union instanceof RangeReferenceObject)) {
+            throw new TypeError('Expected a range reference');
+        }
+
+        expect(union.getRangePosition()).toEqual(expect.objectContaining({
+            startRow: 1,
+            endRow: 1,
+            startColumn: 0,
+            endColumn: 1,
+        }));
     });
 
     it('should treat string enum number cell types as numeric cells', () => {

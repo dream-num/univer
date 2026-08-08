@@ -59,7 +59,7 @@ export class CellReferenceObject extends BaseReferenceObject {
         //     return ErrorValueObject.create(ErrorType.REF);
         // }
 
-        const newRangeData = this.unionRange(this.getRangeData(), cellReferenceObject.getRangeData());
+        const newRangeData = this.unionRange(this.getRangePosition(), cellReferenceObject.getRangePosition());
 
         return this._createRange(newRangeData);
     }
@@ -125,10 +125,6 @@ export class CellReferenceObject extends BaseReferenceObject {
         rangeReferenceObject.setRuntimeArrayFormulaCellData(this.getRuntimeArrayFormulaCellData());
 
         rangeReferenceObject.setRuntimeFeatureCellData(this.getRuntimeFeatureCellData());
-
-        const { x, y } = this.getRefOffset();
-
-        rangeReferenceObject.setRefOffset(x, y);
 
         const forceSheetId = this.getForcedSheetId();
 

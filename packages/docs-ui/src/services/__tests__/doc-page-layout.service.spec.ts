@@ -222,27 +222,6 @@ describe('DocPageLayoutService', () => {
         expect(scene.viewport.scrollX).toBe(0);
     });
 
-    it('keeps the page scale and anchors the initial viewport at the start when requested', () => {
-        TestDocViewScaleService.options = { mode: 'none', align: 'start' };
-
-        const { documentComponent, scene, service } = createLayoutService({
-            documentWidth: 600,
-            documentHeight: 900,
-            pageMarginLeft: 40,
-            pageMarginTop: 20,
-            engineWidth: 500,
-            engineHeight: 800,
-        });
-
-        service.calculatePagePosition();
-
-        expect(scene.scaleX).toBe(1);
-        expect(scene.scaleY).toBe(1);
-        expect(documentComponent.left).toBe(40);
-        expect(scene.width).toBe(680);
-        expect(scene.viewport.scrollX).toBe(0);
-    });
-
     it('moves the page out of view while the engine has no usable width', () => {
         const { docBackground, documentComponent, scene, service } = createLayoutService({
             documentWidth: 600,

@@ -27,7 +27,6 @@
     "exports": {
         ".": "./src/index.ts",
         "./*": "./src/*",
-        "./undo-redo-group": "./src/services/undo-redo/undo-redo-group.service.ts",
         "./locale/*": "./src/locale/*.ts",
         "./facade": "./src/facade/index.ts"
     },

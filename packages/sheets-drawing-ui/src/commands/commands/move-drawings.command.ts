@@ -19,7 +19,7 @@ import type { ISetDrawingCommandParams, ISheetDrawing } from '@univerjs/sheets-d
 import { CommandType, Direction, ICommandService } from '@univerjs/core';
 import { SheetSkeletonService } from '@univerjs/sheets';
 import { ClearSheetDrawingTransformerOperation, ISheetDrawingService, SetSheetDrawingCommand, transformToAxisAlignPosition, transformToDrawingPosition } from '@univerjs/sheets-drawing';
-import { UndoRedoGroupService } from '@univerjs/ui/undo-redo-group';
+import { UndoRedoGroupService } from '@univerjs/ui';
 
 export interface IMoveDrawingsCommandParams {
     direction: Direction;

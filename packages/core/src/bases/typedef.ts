@@ -815,7 +815,6 @@ export interface IGalleryCardSelection {
 
 export type BaseHitTestResult =
     | { type: 'empty'; x: number; y: number }
-    // TODO(@ai-review): Verify this Text preview hit-test contract contains only renderer interaction data shared with Base UI consumers.
     | {
         type: 'grid-text-preview';
         tableId: TableId;

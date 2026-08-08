@@ -63,6 +63,7 @@ export class TableReferenceObject extends BaseReferenceObject {
         const tableStartRow = range.startRow;
         const tableEndRow = range.endRow;
         const dataStartRow = tableStartRow + (this._tableData.showHeader === false ? 0 : 1);
+        const dataEndRow = tableEndRow - (this._tableData.showFooter === true ? 1 : 0);
 
         let startRow = -1;
         let endRow = -1;
@@ -74,7 +75,7 @@ export class TableReferenceObject extends BaseReferenceObject {
                 break;
             case TableOptionType.DATA:
                 startRow = dataStartRow;
-                endRow = tableEndRow;
+                endRow = dataEndRow;
                 break;
             case TableOptionType.HEADERS:
                 if (this._tableData.showHeader === false) {
@@ -90,14 +91,14 @@ export class TableReferenceObject extends BaseReferenceObject {
                 endRow = tableEndRow;
                 break;
             case TableOptionType.THIS_ROW: {
-                const r = this._resolveThisRow(tableStartRow, tableEndRow);
+                const r = this._resolveThisRow(dataStartRow, dataEndRow);
                 startRow = r;
                 endRow = r;
                 break;
             }
             default:
                 startRow = dataStartRow;
-                endRow = tableEndRow;
+                endRow = dataEndRow;
                 break;
         }
 
@@ -127,7 +128,8 @@ export class TableReferenceObject extends BaseReferenceObject {
     override getCellData(row: number, column: number): Nullable<ICellData> {
         if (this._isCurrentRowForRange) {
             const { startRow, endRow } = this._tableData.range;
-            if (row < startRow || row > endRow) {
+            const lastCurrentRow = endRow - (this._tableData.showFooter === true ? 1 : 0);
+            if (row < startRow || row > lastCurrentRow) {
                 return { v: ErrorType.NA };
             }
         }
@@ -366,8 +368,8 @@ export class TableReferenceObject extends BaseReferenceObject {
     }
 
     /** Resolve #This Row's row number; takes first data row (tableStartRow+1) when no context available */
-    private _resolveThisRow(tableStartRow: number, tableEndRow: number): number {
+    private _resolveThisRow(dataStartRow: number, dataEndRow: number): number {
         this._isCurrentRowForRange = true;
-        return Math.min(tableStartRow + 1, tableEndRow);
+        return Math.min(dataStartRow, dataEndRow);
     }
 }

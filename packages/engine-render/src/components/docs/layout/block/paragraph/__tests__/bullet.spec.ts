@@ -251,12 +251,12 @@ describe('bullet', () => {
     });
 
     describe('getDefaultBulletSke', () => {
-        it('returns default bullet skeleton', () => {
+        it('returns a default bullet skeleton without an absolute font style', () => {
             const result = getDefaultBulletSke('list-default');
             expect(result.listId).toBe('list-default');
             expect(result.symbol).toBe('\u25CF');
-            expect(result.ts.ff).toBe('Arial');
-            expect(result.ts.fs).toBe(9);
+            expect(result.ts.ff).toBeUndefined();
+            expect(result.ts.fs).toBeUndefined();
             expect(result.startIndexItem).toBe(1);
             expect(result.paragraphProperties).toBeDefined();
         });

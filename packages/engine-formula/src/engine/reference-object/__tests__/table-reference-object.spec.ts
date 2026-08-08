@@ -21,7 +21,9 @@ import { ErrorType } from '../../../basics/error-type';
 import { TableReferenceObject } from '../table-reference-object';
 
 const options = new Map([
+    ['#All', TableOptionType.ALL],
     ['#Data', TableOptionType.DATA],
+    ['#Totals', TableOptionType.TOTALS],
     ['#This Row', TableOptionType.THIS_ROW],
 ]);
 
@@ -70,6 +72,33 @@ describe('TableReferenceObject current row', () => {
         });
 
         expect(reference.toArrayValueObject(false).getFirstCell().getValue()).toBe(ErrorType.NA);
+    });
+
+    it('excludes a declared totals row from data references', () => {
+        const table = {
+            sheetId: 'sheet',
+            titleMap: new Map([['Amount', 0]]),
+            range: { startRow: 0, endRow: 3, startColumn: 0, endColumn: 0 },
+            showFooter: true,
+        };
+
+        expect(new TableReferenceObject('Table[Amount]', table, '[Amount]', options).getRangeData()).toEqual({
+            startRow: 1,
+            endRow: 2,
+            startColumn: 0,
+            endColumn: 0,
+        });
+        expect(new TableReferenceObject(
+            'Table[[#Totals],[Amount]]',
+            table,
+            '[[#Totals],[Amount]]',
+            options
+        ).getRangeData()).toEqual({
+            startRow: 3,
+            endRow: 3,
+            startColumn: 0,
+            endColumn: 0,
+        });
     });
 
     it('matches CRLF structured references against LF table column names', () => {

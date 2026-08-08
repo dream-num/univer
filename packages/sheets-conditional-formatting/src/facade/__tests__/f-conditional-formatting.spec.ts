@@ -19,10 +19,12 @@ import type { FUniver } from '@univerjs/core/facade';
 import { ICommandService } from '@univerjs/core/services/command/command.service.js';
 import {
     FormulaExecuteStageType,
+    OtherFormulaMarkDirty,
     RemoveOtherFormulaMutation,
     SetFormulaCalculationNotificationMutation,
     SetFormulaCalculationResultMutation,
     SetFormulaCalculationStartMutation,
+    SetOtherFormulaMutation,
 } from '@univerjs/engine-formula';
 import { SetSelectionsOperation } from '@univerjs/sheets';
 import {
@@ -75,7 +77,9 @@ describe('Test conditional formatting facade', () => {
             SetConditionalRuleMutation,
             SetCfCommand,
             SetSelectionsOperation,
+            OtherFormulaMarkDirty,
             RemoveOtherFormulaMutation,
+            SetOtherFormulaMutation,
             SetFormulaCalculationStartMutation,
             SetFormulaCalculationNotificationMutation,
             SetFormulaCalculationResultMutation,

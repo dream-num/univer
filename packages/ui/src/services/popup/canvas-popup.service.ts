@@ -34,6 +34,8 @@ export interface IPopup<T = Record<string, unknown>> extends Omit<IRectPopupProp
 
     offset?: [number, number];
     canvasElement: HTMLCanvasElement;
+    /** Clamp popup placement to the visible canvas boundary instead of the viewport. */
+    constrainToCanvas?: boolean;
     hideOnInvisible?: boolean;
     hiddenType?: 'hide' | 'destroy';
     hiddenRects$?: Observable<IBoundRectNoAngle[]>;

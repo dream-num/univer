@@ -211,7 +211,6 @@ export class FDocument extends FBaseInitialable {
      * ```
      */
     setName(name: string): this {
-        // TODO(@ai-review): Verify that ignoring a false command result remains consistent with other chainable root Facade setters.
         this._commandService.syncExecuteCommand(SetDocumentNameCommand.id, {
             unitId: this.id,
             name,

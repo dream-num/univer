@@ -31,7 +31,6 @@ describe('SetDocumentNameCommand', () => {
     afterEach(() => testBed.univer.dispose());
 
     it('renames a document and supports undo and redo', () => {
-        // TODO(@ai-review): Verify that document name history should stay on the global Unit undo stack.
         expect(
             commandService.syncExecuteCommand(SetDocumentNameCommand.id, {
                 unitId: 'test',

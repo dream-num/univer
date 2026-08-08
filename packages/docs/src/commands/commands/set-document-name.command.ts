@@ -33,7 +33,6 @@ export interface ISetDocumentNameCommandParams {
 export const SetDocumentNameCommand: ICommand<ISetDocumentNameCommandParams> = {
     id: 'doc.command.set-name',
     type: CommandType.COMMAND,
-    // TODO(@ai-review): Verify that document rename belongs to the same unit-scoped undo history as other document mutations.
     handler: (accessor, params) => {
         if (!params) {
             return false;

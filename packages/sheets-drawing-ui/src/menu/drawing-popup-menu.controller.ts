@@ -172,7 +172,6 @@ export class DrawingPopupMenuController extends RxDisposable {
             const menus = this._canvasPopManagerService.getFeatureMenu(unitId, subUnitId, drawingId, drawingType);
             singletonPopupDisposer = this.disposeWithMe(this._canvasPopManagerService.attachPopupToObject(object, {
                 componentKey: COMPONENT_IMAGE_POPUP_MENU,
-                // TODO(@ai-review): Confirm that every non-shape Sheet drawing menu should stay within the visible Sheet canvas.
                 constrainToCanvas: true,
                 direction: this._localeService.getDirection() === 'rtl' ? 'left' : 'horizontal',
                 offset: [2, 0],

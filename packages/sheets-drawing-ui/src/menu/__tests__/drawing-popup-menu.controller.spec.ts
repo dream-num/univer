@@ -33,7 +33,6 @@ import { describe, expect, it, vi } from 'vitest';
 import { DrawingPopupMenuController } from '../drawing-popup-menu.controller';
 
 describe('DrawingPopupMenuController', () => {
-    // TODO(@ai-review): Verify that both image and Float DOM drawing menus need the same Sheet canvas boundary behavior.
     it.each([
         { drawingType: DrawingTypeEnum.DRAWING_IMAGE, label: 'image' },
         { drawingType: DrawingTypeEnum.DRAWING_DOM, label: 'Float DOM' },

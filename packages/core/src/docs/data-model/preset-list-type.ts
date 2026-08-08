@@ -96,7 +96,6 @@ const orderListSymbolMap = {
 };
 
 type BulletSymbols = [string, string, string];
-// TODO(@ai-review): Verify built-in markers inherit effective paragraph fonts while imported marker styles remain explicit overrides.
 const bulletListFactory = (symbols: BulletSymbols): INestingLevel[] => {
     return [
         ...symbols,

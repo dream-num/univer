@@ -251,7 +251,6 @@ describe('bullet', () => {
     });
 
     describe('getDefaultBulletSke', () => {
-        // TODO(@ai-review): Confirm fallback markers inherit effective paragraph fonts instead of imposing a hidden default.
         it('returns a default bullet skeleton without an absolute font style', () => {
             const result = getDefaultBulletSke('list-default');
             expect(result.listId).toBe('list-default');

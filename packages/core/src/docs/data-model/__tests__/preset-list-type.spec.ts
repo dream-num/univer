@@ -18,7 +18,6 @@ import { describe, expect, it } from 'vitest';
 import { PRESET_LIST_TYPE } from '../preset-list-type';
 
 describe('preset list types', () => {
-    // TODO(@ai-review): Confirm every built-in marker inherits paragraph font size unless its document data explicitly provides one.
     it('does not assign absolute font sizes to built-in list markers', () => {
         for (const [listType, listData] of Object.entries(PRESET_LIST_TYPE)) {
             for (const [level, nesting] of listData.nestingLevel.entries()) {

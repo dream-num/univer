@@ -49,11 +49,14 @@ class TestSingleUnitUIController extends SingleUnitUIController {
 }
 
 function createRenderer(unitId: string) {
+    const canvas = document.createElement('canvas');
+
     return {
         unitId,
         activate: vi.fn(),
         deactivate: vi.fn(),
         engine: {
+            getCanvasElement: () => canvas,
             mount: vi.fn(),
             unmount: vi.fn(),
         },
@@ -159,6 +162,50 @@ describe('SingleUnitUIController', () => {
         const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout');
         controller.dispose();
         expect(clearTimeoutSpy).toHaveBeenCalled();
+    });
+
+    it('preserves a renderer mounted in a product-owned workbench host', async () => {
+        vi.useFakeTimers();
+
+        const contentElement = document.createElement('div');
+        const productCanvasHost = document.createElement('div');
+        const renderer = createRenderer('render-1');
+        productCanvasHost.appendChild(renderer.engine.getCanvasElement());
+        contentElement.appendChild(productCanvasHost);
+
+        const renderManagerService = {
+            getRenderAll: vi.fn(() => new Map([['render-1', renderer]])),
+            getRenderUnitById: vi.fn(() => renderer),
+            created$: new Subject<unknown>(),
+            disposed$: new Subject<string>(),
+        };
+        const controller = new TestSingleUnitUIController(
+            new Injector(),
+            {
+                focused$: new Subject<string>(),
+                getFocusedUnit: vi.fn(() => ({ getUnitId: () => 'render-1' })),
+                getUnitCreateOptions: vi.fn(() => null),
+            },
+            {
+                registerRootContainerElement: vi.fn(() => ({ dispose: vi.fn() })),
+                registerContentElement: vi.fn(() => ({ dispose: vi.fn() })),
+            },
+            {
+                onStage: vi.fn().mockResolvedValue(undefined),
+                stage: LifecycleStages.Starting,
+            },
+            renderManagerService,
+            contentElement,
+            document.createElement('div')
+        );
+
+        controller.runBootstrap();
+        await controller.callbackPromise;
+        vi.advanceTimersByTime(300);
+
+        expect(renderer.engine.mount).not.toHaveBeenCalled();
+        expect(renderer.engine.getCanvasElement().parentElement).toBe(productCanvasHost);
+        expect(renderer.activate).toHaveBeenCalledTimes(1);
     });
 
     it('should not mount embedded renderers into the global workbench content', async () => {

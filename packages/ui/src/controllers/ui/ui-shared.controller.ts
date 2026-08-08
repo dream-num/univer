@@ -120,7 +120,10 @@ export abstract class SingleUnitUIController extends Disposable {
             : null;
         currentRenderer?.deactivate();
         currentRenderer?.engine.unmount();
-        renderer.engine.mount(contentElement);
+        const canvas = renderer.engine.getCanvasElement();
+        if (!contentElement.contains(canvas)) {
+            renderer.engine.mount(contentElement);
+        }
         renderer.activate();
         this._currentRenderId = rendererId;
         return true;

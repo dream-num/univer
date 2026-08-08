@@ -228,6 +228,8 @@ export interface ISuperTable {
      * Sheet tables default to true; Base virtual tables store records from row 0.
      */
     showHeader?: boolean;
+    /** Whether the projected range contains a physical totals row. */
+    showFooter?: boolean;
 }
 
 export enum TableOptionType {

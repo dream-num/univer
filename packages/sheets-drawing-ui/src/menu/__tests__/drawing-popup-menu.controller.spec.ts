@@ -33,7 +33,11 @@ import { describe, expect, it, vi } from 'vitest';
 import { DrawingPopupMenuController } from '../drawing-popup-menu.controller';
 
 describe('DrawingPopupMenuController', () => {
-    it('places the image popup on the left in RTL', () => {
+    // TODO(@ai-review): Verify that both image and Float DOM drawing menus need the same Sheet canvas boundary behavior.
+    it.each([
+        { drawingType: DrawingTypeEnum.DRAWING_IMAGE, label: 'image' },
+        { drawingType: DrawingTypeEnum.DRAWING_DOM, label: 'Float DOM' },
+    ])('constrains the $label popup to the canvas and places it on the left in RTL', ({ drawingType }) => {
         const injector = new Injector();
         const createControl$ = new Subject<void>();
         const clearControl$ = new Subject<void>();
@@ -55,7 +59,7 @@ describe('DrawingPopupMenuController', () => {
                     unitId: 'unit-1',
                     subUnitId: 'sheet-1',
                     drawingId: 'image-1',
-                    drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+                    drawingType,
                 }),
             } as never,
         }]);
@@ -105,7 +109,10 @@ describe('DrawingPopupMenuController', () => {
 
         expect(attachPopupToObject).toHaveBeenCalledWith(
             imageObject,
-            expect.objectContaining({ direction: 'left' })
+            expect.objectContaining({
+                constrainToCanvas: true,
+                direction: 'left',
+            })
         );
 
         controller.dispose();

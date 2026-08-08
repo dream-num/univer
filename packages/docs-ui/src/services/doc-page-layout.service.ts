@@ -35,7 +35,6 @@ export class DocPageLayoutService extends Disposable implements IRenderModule {
         const docObject = neoGetDocObject(this._context);
         const viewScale = this._docViewScaleService.getViewScale();
         const fitOptions = this._docViewScaleService.getOptions();
-        // TODO(@ai-review): Verify explicit start alignment should preserve zoom while anchoring oversized pages at their left margin.
         const isFitToWidth = fitOptions.mode === 'fit-width';
         const isStartAligned = fitOptions.align === 'start';
         const { document: docsComponent, scene, docBackground } = docObject;

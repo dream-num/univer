@@ -222,7 +222,6 @@ describe('DocPageLayoutService', () => {
         expect(scene.viewport.scrollX).toBe(0);
     });
 
-    // TODO(@ai-review): Confirm this regression covers the narrow tab viewport that previously centered and clipped the Doc prefix.
     it('keeps the page scale and anchors the initial viewport at the start when requested', () => {
         TestDocViewScaleService.options = { mode: 'none', align: 'start' };
 

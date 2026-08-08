@@ -62,14 +62,11 @@ export function dealWithBullet(
 }
 
 export function getDefaultBulletSke(listId: string, startIndex: number = 1): IDocumentSkeletonBullet {
+    // TODO(@ai-review): Confirm fallback markers inherit the paragraph font without weakening explicit imported marker styles.
     return {
         listId,
         symbol: '\u25CF', // symbol list content
-        ts: {
-            // TODO: @jikkai @DR-Univer should read default font from configuration, not from locale service
-            ff: 'Arial',
-            fs: 9,
-        }, // text style
+        ts: {},
         startIndexItem: startIndex,
         // bBox: {
         //     width: 8.4560546875,

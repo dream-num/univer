@@ -264,11 +264,12 @@ export class Xlookup extends BaseFunction {
                 resultArray,
                 matchModeValue === 1 ? ArrayOrderSearchType.MAX : ArrayOrderSearchType.MIN,
                 searchModeValue === -1,
-                axis
+                axis,
+                true
             );
         }
 
-        return this.equalSearchExpand(value, searchArray, resultArray, searchModeValue !== -1, axis);
+        return this._exactSearchExpand(value, searchArray, resultArray, searchModeValue !== -1, axis);
     }
 
     private _handleSingleObject(
@@ -294,11 +295,81 @@ export class Xlookup extends BaseFunction {
                 searchArray,
                 resultArray,
                 matchModeValue === 1 ? ArrayOrderSearchType.MAX : ArrayOrderSearchType.MIN,
-                searchModeValue === -1
+                searchModeValue === -1,
+                true
             );
         }
 
-        return this.equalSearch(value, searchArray, resultArray, searchModeValue !== -1);
+        return this._exactSearch(value, searchArray, resultArray, searchModeValue !== -1);
+    }
+
+    private _exactSearch(
+        value: BaseValueObject,
+        searchArray: ArrayValueObject,
+        resultArray: ArrayValueObject,
+        isFirst: boolean
+    ): BaseValueObject {
+        const position = this._findExactPosition(value, searchArray, isFirst);
+        if (position == null) {
+            return ErrorValueObject.create(ErrorType.NA);
+        }
+
+        return resultArray.get(position.row, position.column) ?? ErrorValueObject.create(ErrorType.NA);
+    }
+
+    private _exactSearchExpand(
+        value: BaseValueObject,
+        searchArray: ArrayValueObject,
+        resultArray: ArrayValueObject,
+        isFirst: boolean,
+        axis: number
+    ): BaseValueObject {
+        const position = this._findExactPosition(value, searchArray, isFirst);
+        if (position == null) {
+            return ErrorValueObject.create(ErrorType.NA);
+        }
+
+        return axis === 0
+            ? resultArray.slice([position.row, position.row + 1]) ?? ErrorValueObject.create(ErrorType.NA)
+            : resultArray.slice(undefined, [position.column, position.column + 1]) ?? ErrorValueObject.create(ErrorType.NA);
+    }
+
+    private _findExactPosition(
+        value: BaseValueObject,
+        searchArray: ArrayValueObject,
+        isFirst: boolean
+    ): Nullable<{ row: number; column: number }> {
+        let position: Nullable<{ row: number; column: number }>;
+        const find = (candidate: Nullable<BaseValueObject>, row: number, column: number) => {
+            if (candidate != null && this._isExactMatch(candidate, value)) {
+                position = { row, column };
+                return false;
+            }
+        };
+
+        if (isFirst) {
+            searchArray.iterator(find);
+        } else {
+            searchArray.iteratorReverse(find);
+        }
+
+        return position;
+    }
+
+    private _isExactMatch(candidate: BaseValueObject, value: BaseValueObject): boolean {
+        if (candidate.isError() || value.isError()) {
+            return candidate.isError() && value.isError() && candidate.getValue() === value.getValue();
+        }
+        if (
+            candidate.isNull() !== value.isNull() ||
+            candidate.isNumber() !== value.isNumber() ||
+            candidate.isString() !== value.isString() ||
+            candidate.isBoolean() !== value.isBoolean()
+        ) {
+            return false;
+        }
+
+        return candidate.isEqual(value).getValue() === true;
     }
 
     private _blankResultAsZero(value: BaseValueObject) {

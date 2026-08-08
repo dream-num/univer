@@ -120,6 +120,45 @@ describe('Test xlookup', () => {
             expect(getObjectValue(resultObject)).toBe(0);
         });
 
+        it('keeps blank, numeric zero, text zero, and empty text distinct', () => {
+            const lookupArray = ArrayValueObject.create({
+                calculateValueList: [
+                    [NullValueObject.create()],
+                    [NumberValueObject.create(0)],
+                    [StringValueObject.create('0')],
+                    [StringValueObject.create('')],
+                ],
+                rowCount: 4,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const returnArray = ArrayValueObject.createByArray([
+                ['blank'],
+                ['zero'],
+                ['zero-text'],
+                ['empty-text'],
+            ]);
+
+            expect(getObjectValue(testFunction.calculate(
+                NumberValueObject.create(0),
+                lookupArray,
+                returnArray
+            ))).toBe('zero');
+            expect(getObjectValue(testFunction.calculate(
+                StringValueObject.create('0'),
+                lookupArray,
+                returnArray
+            ))).toBe('zero-text');
+            expect(getObjectValue(testFunction.calculate(
+                StringValueObject.create(''),
+                lookupArray,
+                returnArray
+            ))).toBe('empty-text');
+        });
+
         it('Search array', async () => {
             const resultObject = testFunction.calculate(
                 arrayValueObject2.slice(undefined, [1, 2])!,
@@ -330,6 +369,18 @@ describe('Test xlookup', () => {
                 NumberValueObject.create(-1)
             ) as BaseValueObject;
             expect(getObjectValue(resultObject).toString()).toBe('800');
+        });
+
+        it('keeps the first duplicate approximate candidate in forward search', () => {
+            const resultObject = testFunction.calculate(
+                NumberValueObject.create(3),
+                ArrayValueObject.createByArray([[1], [2], [2], [4], [7]]),
+                ArrayValueObject.createByArray([['one'], ['two-first'], ['two-last'], ['four'], ['seven']]),
+                NullValueObject.create(),
+                NumberValueObject.create(-1)
+            );
+
+            expect(getObjectValue(resultObject)).toBe('two-first');
         });
 
         it('match_mode 1', async () => {

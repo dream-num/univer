@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { InvertedIndexCache } from '../inverted-index-cache';
 
 describe('InvertedIndexCache', () => {
+    afterEach(() => {
+        vi.restoreAllMocks();
+    });
+
     it('keeps empty string lookups distinct from numeric zero lookups', () => {
         const cache = new InvertedIndexCache();
         const unitId = 'unit';
@@ -32,5 +36,21 @@ describe('InvertedIndexCache', () => {
 
         expect(cache.getCellPositions(unitId, sheetId, column, 0, rows)?.matchingRows).toEqual([0, 1, 2]);
         expect(cache.getCellPositions(unitId, sheetId, column, '', rows)?.matchingRows).toEqual([1, 2]);
+    });
+
+    it('force-updates a row without scanning every distinct column value', () => {
+        const cache = new InvertedIndexCache();
+        const rows = 500;
+
+        for (let row = 0; row < rows; row++) {
+            cache.set('unit', 'sheet', 0, row, row);
+        }
+
+        const setHas = vi.spyOn(Set.prototype, 'has');
+        cache.set('unit', 'sheet', 0, 'updated', rows - 1, true);
+
+        expect(setHas.mock.calls.length).toBeLessThan(5);
+        expect(cache.getCellPositions('unit', 'sheet', 0, rows - 1, [[0, rows - 1]])?.matchingRows).toEqual([]);
+        expect(cache.getCellPositions('unit', 'sheet', 0, 'UPDATED', [[0, rows - 1]])?.matchingRows).toEqual([rows - 1]);
     });
 });

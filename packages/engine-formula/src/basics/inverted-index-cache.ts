@@ -67,6 +67,8 @@ export class InvertedIndexCache {
      */
     private _cache: Map<string, Map<string, Map<number, Map<ValueTypeWithSymbol, Set<number>>>>> = new Map();
 
+    private _rowValues: Map<string, Map<string, Map<number, Map<number, ValueTypeWithSymbol>>>> = new Map();
+
     private _continueBuildingCache: Map<string, Map<string, Map<number, IntervalTree<NumericTuple>>>> = new Map();
 
     set(unitId: string, sheetId: string, column: number, value: ValueTypeWithNullUndefined, row: number, isForceUpdate: boolean = false) {
@@ -92,12 +94,31 @@ export class InvertedIndexCache {
             sheetMap.set(column, columnMap);
         }
 
-        // If is force update, we need to remove the old value from the map
-        if (isForceUpdate) {
-            for (const [_, _cellList] of columnMap) {
-                if (_cellList.has(row)) {
-                    _cellList.delete(row);
-                    break;
+        let rowUnitMap = this._rowValues.get(unitId);
+        if (rowUnitMap == null) {
+            rowUnitMap = new Map();
+            this._rowValues.set(unitId, rowUnitMap);
+        }
+
+        let rowSheetMap = rowUnitMap.get(sheetId);
+        if (rowSheetMap == null) {
+            rowSheetMap = new Map();
+            rowUnitMap.set(sheetId, rowSheetMap);
+        }
+
+        let rowMap = rowSheetMap.get(column);
+        if (rowMap == null) {
+            rowMap = new Map();
+            rowSheetMap.set(column, rowMap);
+        }
+
+        if (isForceUpdate && rowMap.has(row)) {
+            const previousValue = rowMap.get(row) as ValueTypeWithSymbol;
+            const previousCellList = columnMap.get(previousValue);
+            if (previousCellList != null) {
+                previousCellList.delete(row);
+                if (previousCellList.size === 0) {
+                    columnMap.delete(previousValue);
                 }
             }
         }
@@ -111,6 +132,7 @@ export class InvertedIndexCache {
         }
 
         cellList.add(row);
+        rowMap.set(row, _value);
     }
 
     getCellValuePositions(unitId: string, sheetId: string, column: number) {
@@ -269,6 +291,7 @@ export class InvertedIndexCache {
 
     clear() {
         this._cache.clear();
+        this._rowValues.clear();
         this._continueBuildingCache.clear();
         normalizedValueMap.clear();
     }

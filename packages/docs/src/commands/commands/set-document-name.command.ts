@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel, ICommand } from '@univerjs/core';
 import {
     CommandType,
-    type DocumentDataModel,
-    type ICommand,
     ICommandService,
     IUndoRedoService,
     IUniverInstanceService,

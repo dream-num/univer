@@ -14,35 +14,31 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel, IDocumentBody, IDocumentData, IParagraphBorder, ISectionBreak, SectionHeaderFooterKind, SectionType } from '@univerjs/core';
+import type { IHeaderFooterProps } from '@univerjs/docs';
+import type { IFDocumentTextRange } from './utils';
 import {
     BooleanNumber,
     createSectionId,
     DashStyleType,
     DataStreamTreeTokenType,
-    type DocumentDataModel,
     DocumentFlavor,
     generateRandomId,
     getParagraphContentStartOffset,
     ICommandService,
-    type IDocumentBody,
-    type IDocumentData,
     Inject,
     Injector,
-    type IParagraphBorder,
     IResourceLoaderService,
-    type ISectionBreak,
     IUniverInstanceService,
     RedoCommand,
-    type SectionHeaderFooterKind,
-    type SectionType,
     UndoCommand,
 } from '@univerjs/core';
 import { FBaseInitialable } from '@univerjs/core/facade';
-import { CreateHeaderFooterCommand, generateParagraphs, getTopLevelSectionBreaks, HeaderFooterType, type IHeaderFooterProps, InsertDocumentColumnBreakCommand, InsertDocumentSectionBreakCommand, SetDocumentNameCommand } from '@univerjs/docs';
+import { CreateHeaderFooterCommand, generateParagraphs, getTopLevelSectionBreaks, HeaderFooterType, InsertDocumentColumnBreakCommand, InsertDocumentSectionBreakCommand, SetDocumentNameCommand } from '@univerjs/docs';
 import { FDocumentParagraph } from './f-document-paragraph';
 import { DocsSectionUnsupportedDocumentFlavorError, FDocumentSection } from './f-document-section';
 import { FDocumentTextRange } from './f-document-text-range';
-import { buildPlainTextInsertBody, type IFDocumentTextRange, replaceBodyRange } from './utils';
+import { buildPlainTextInsertBody, replaceBodyRange } from './utils';
 
 export interface IFDocumentParagraphQuery {
     text?: string;

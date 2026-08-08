@@ -917,6 +917,10 @@ describe('Test nested functions', () => {
             expect(result).toStrictEqual([[3]]);
         });
 
+        it('Nested INDEX returns its selected cell through explicit implicit intersection', () => {
+            expect(calculate('=@INDEX(C2:C4,2)')).toBe(3);
+        });
+
         it('Nested functions MATCH keeps bare Formula2 at ranges scalar in lookup products', () => {
             const result = calculate('=IFERROR(INDEX(C2:C4,MATCH(44928,(@B2:B4=B3)*(@A2:A4),0)),"")');
 

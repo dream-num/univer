@@ -105,9 +105,6 @@ const bulletListFactory = (symbols: BulletSymbols): INestingLevel[] => {
         glyphFormat: ` %${i + 1}`,
         glyphSymbol: templateSymbol,
         bulletAlignment: BulletAlignment.START,
-        textStyle: {
-            fs: 12,
-        },
         startNumber: 0,
         paragraphProperties: {
             hanging: { v: 21 },
@@ -120,9 +117,6 @@ const orderListFactory = (options: { glyphFormat: string; glyphType: ListGlyphTy
     return options.map((format, i) => ({
         ...format,
         bulletAlignment: BulletAlignment.START,
-        textStyle: {
-            fs: 12,
-        },
         startNumber: 0,
         paragraphProperties: {
             hanging: { v: 21 },
@@ -136,9 +130,6 @@ const checkListFactory = (symbol: string, textStyle?: ITextStyle): INestingLevel
         glyphFormat: ` %${i + 1}`,
         glyphSymbol: symbol,
         bulletAlignment: BulletAlignment.START,
-        textStyle: {
-            fs: 16,
-        },
         startNumber: 0,
         paragraphProperties: {
             hanging: { v: 21 },

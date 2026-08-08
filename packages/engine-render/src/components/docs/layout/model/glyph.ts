@@ -26,6 +26,7 @@ import { BooleanNumber, BulletAlignment, DataStreamTreeTokenType, GridType } fro
 import { cjk } from '../../../../basics/cjk-regexp';
 import { GlyphType } from '../../../../basics/i-document-skeleton-cached';
 import {
+    getFontStyleString,
     isCjkCenterAlignedPunctuation,
     isCjkLeftAlignedPunctuation,
     isCjkRightAlignedPunctuation,
@@ -292,17 +293,20 @@ export function createSkeletonBulletGlyph(
     charSpaceApply: number
 ): IDocumentSkeletonGlyph {
     const {
-        // bBox: boundingBox,
         symbol: content,
-        // ts: textStyle,
-        // fontStyle,
+        ts: bulletTextStyle,
         bulletAlign = BulletAlignment.START,
         bulletType = false,
     } = bulletSkeleton;
-    const { fontStyle } = glyph;
-    // glyph.fontStyle
-    // getFontStyleString(fontStyle, localeService);
-    const boundingBox = FontCache.getTextSize(content, fontStyle!);
+    const textStyle = {
+        ...glyph.ts,
+        ...bulletTextStyle,
+        st: {
+            s: BooleanNumber.FALSE,
+        },
+    };
+    const fontStyle = getFontStyleString(textStyle);
+    const boundingBox = FontCache.getTextSize(content, fontStyle);
     const contentWidth = boundingBox.width;
     // When text also needs to align to the grid, process it. LINES default reference is the global font size of the doc
 
@@ -326,13 +330,7 @@ export function createSkeletonBulletGlyph(
 
     return {
         content,
-        ts: {
-            ...glyph.ts,
-            // ...textStyle,
-            st: {
-                s: BooleanNumber.FALSE,
-            },
-        },
+        ts: textStyle,
         fontStyle,
         width,
         xOffset: 0,

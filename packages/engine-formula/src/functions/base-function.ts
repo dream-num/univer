@@ -443,9 +443,10 @@ export class BaseFunction {
         searchArray: ArrayValueObject,
         resultArray: ArrayValueObject,
         searchType: ArrayOrderSearchType = ArrayOrderSearchType.MIN,
-        isDesc = false
+        isDesc = false,
+        keepFirstNearest = false
     ) {
-        const position = searchArray.orderSearch(value, searchType, isDesc);
+        const position = searchArray.orderSearch(value, searchType, isDesc, false, keepFirstNearest);
 
         if (position == null) {
             return ErrorValueObject.create(ErrorType.NA);
@@ -540,9 +541,10 @@ export class BaseFunction {
         resultArray: ArrayValueObject,
         searchType: ArrayOrderSearchType = ArrayOrderSearchType.MIN,
         isDesc = false,
-        axis = 0
+        axis = 0,
+        keepFirstNearest = false
     ) {
-        const position = searchArray.orderSearch(value, searchType, isDesc);
+        const position = searchArray.orderSearch(value, searchType, isDesc, false, keepFirstNearest);
 
         if (position == null) {
             return ErrorValueObject.create(ErrorType.NA);

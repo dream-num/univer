@@ -83,7 +83,6 @@ export class DocIMEInputController extends Disposable implements IRenderModule {
             }
 
             this._docImeInputManagerService.setActiveRange(Tools.deepClone(activeRange));
-            // TODO(@ai-review): Verify that the initial IME selection snapshot contains every rect range needed to restore a mixed table/text selection on undo.
             this._docImeInputManagerService.setPreviousDocRanges(Tools.deepClone([
                 ...rangeList,
                 ...this._docSelectionRenderService.getAllRectRanges(),

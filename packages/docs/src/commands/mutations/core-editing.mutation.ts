@@ -117,7 +117,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
 
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const docRanges = docSelectionManagerService.getDocRanges() ?? [];
-        // TODO(@ai-review): Verify that selection intent captured before apply is sufficient to restore structural select-all through undo.
+        // Capture selection intent before applying actions so undo can restore structural selections.
         const selectionInfo = docSelectionManagerService.getSelectionInfo();
 
         // TODO: `disabled` is only used for read only demo, and will be removed in the future.

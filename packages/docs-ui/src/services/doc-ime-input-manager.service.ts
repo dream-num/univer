@@ -118,7 +118,6 @@ export class DocIMEInputManagerService extends RxDisposable implements IRenderMo
             segmentId: firstUndoParams.segmentId,
         };
 
-        // TODO(@ai-review): Verify that composed IME redo restores the final caret and segment instead of the pre-composition range.
         const redoMutationParams: IRichTextEditingMutationParams = {
             unitId,
             actions: this._redoMutationParamsCache.reduce((acc, cur) => {

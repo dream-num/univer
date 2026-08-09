@@ -138,7 +138,7 @@ export class DocStateChangeManagerService extends RxDisposable {
             : this._emitChangeState.bind(this);
 
         const pendingStates = stateCache.get(unitId);
-        // TODO(@ai-review): Verify that flushing a pending debounce group on segment changes preserves the intended typing history boundaries in headers and footers.
+        // Switching segments ends the current debounce group so body, header, and footer edits keep separate history entries.
         if (pendingStates?.length && pendingStates[pendingStates.length - 1].segmentId !== changeState.segmentId) {
             cb(unitId);
         }

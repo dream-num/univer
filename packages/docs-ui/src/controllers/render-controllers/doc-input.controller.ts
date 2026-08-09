@@ -126,7 +126,6 @@ export class DocInputController extends Disposable implements IRenderModule {
             );
             const hasComplexSelection = hasSelectedStructure || rangeList.length > 1 || this._docSelectionRenderService.getAllRectRanges().length > 0;
 
-            // TODO(@ai-review): Verify that all select-all entry points expose either multiple text ranges or a rect range before normal input is dispatched.
             if (hasComplexSelection) {
                 await this._commandService.executeCommand(ReplaceSelectionCommand.id, {
                     unitId,

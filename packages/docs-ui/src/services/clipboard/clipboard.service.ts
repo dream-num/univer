@@ -353,7 +353,6 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
 
         const activeRange = this._docSelectionManagerService.getActiveTextRange();
         const docRanges = this._docSelectionManagerService.getDocRanges();
-        // TODO(@ai-review): Verify that rect-only table selections choose the same insertion anchor as keyboard-driven table paste.
         const insertionAnchor = activeRange ?? docRanges.find((range) => range.isActive) ?? docRanges[0];
         const { segmentId, endOffset: activeEndOffset, style } = insertionAnchor || {};
         const ranges = this._docSelectionManagerService.getTextRanges() ?? [];

@@ -147,7 +147,6 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
                 return false;
             }
 
-            // TODO(@ai-review): Confirm that mixed table/text paste keeps one insertion anchor while preserving plugin resource undo mutations.
             selectionCutActions = getCutActionsFromDocRanges(
                 selections,
                 rectRanges,
@@ -732,7 +731,6 @@ export function getCutActionsFromDocRanges(
     return rawActions;
 }
 
-// TODO(@ai-review): Verify that inserting once at the earliest selected range matches the expected behavior for every supported multi-range editing surface.
 export function getReplaceDocRangesActions(
     textRanges: Readonly<Nullable<ITextRangeWithStyle[]>>,
     rectRanges: Readonly<Nullable<IRectRangeWithStyle[]>>,

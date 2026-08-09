@@ -346,7 +346,6 @@ export const ReplaceSelectionCommand: ICommand<IReplaceSelectionCommandParams> =
             },
         };
 
-        // TODO(@ai-review): Confirm that explicit facade selections keep their existing single-range replacement semantics while UI selections use the structural action builder.
         if (replacement) {
             doMutation.params.actions = replacement.actions;
         } else {

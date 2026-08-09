@@ -148,7 +148,6 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
             if (!docSkeletonManagerService) {
                 return false;
             }
-            // TODO(@ai-review): Verify that the first IME composition mutation atomically removes every structural range before inserting composition text once.
             const replacement = getReplaceDocRangesActions(
                 previousTextRanges,
                 previousRectRanges,

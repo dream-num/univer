@@ -1268,7 +1268,6 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
                 if ((e as InputEvent).inputType === 'historyUndo' || (e as InputEvent).inputType === 'historyRedo') {
                     return;
                 }
-                // TODO(@ai-review): Verify that table-only rect selections remain blocked until they expose a valid text insertion anchor.
                 if (this._rectRangeList.length > 0 && this._getActiveRange() == null) {
                     e.stopPropagation();
                     return e.preventDefault();

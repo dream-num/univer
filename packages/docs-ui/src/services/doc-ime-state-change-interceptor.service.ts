@@ -47,7 +47,6 @@ export class DocIMEStateChangeInterceptorService implements IDocStateChangeInter
 
         return {
             ...changeStateInfo,
-            // TODO(@ai-review): Verify that IME redo reuses the final composed selection while undo restores the original fragmented selection.
             redoState: {
                 ...changeStateInfo.redoState,
                 actions: redoMutationParams.actions,

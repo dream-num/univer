@@ -114,6 +114,17 @@ describe('FDocument', () => {
         expect(document.save().body?.dataStream).toBe('Hello,\r\n');
     });
 
+    it('sets the document name and supports undo and redo', () => {
+        expect(document.setName('Renamed document')).toBe(document);
+        expect(document.getName()).toBe('Renamed document');
+
+        expect(document.undo()).toBe(true);
+        expect(document.getName()).toBe('');
+
+        expect(document.redo()).toBe(true);
+        expect(document.getName()).toBe('Renamed document');
+    });
+
     it('runs undo and redo against the active document', () => {
         get(IUndoRedoService);
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommand } from '@univerjs/core';
+import type { DocumentDataModel, IMutation } from '@univerjs/core';
 import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 
 export interface IDocsRenameMutationParams {
@@ -22,10 +22,10 @@ export interface IDocsRenameMutationParams {
     unitId: string;
 }
 
-export const DocsRenameMutation: ICommand = {
+export const DocsRenameMutation: IMutation<IDocsRenameMutationParams> = {
     id: 'doc.mutation.rename-doc',
     type: CommandType.MUTATION,
-    handler: (accessor, params: IDocsRenameMutationParams) => {
+    handler: (accessor, params) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const doc = univerInstanceService.getUnit<DocumentDataModel>(params.unitId, UniverInstanceType.UNIVER_DOC);
         if (!doc) {

@@ -38,7 +38,7 @@ import {
     UpdateSheetDataValidationRangeCommand,
     UpdateSheetDataValidationSettingCommand,
 } from '@univerjs/sheets-data-validation';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createFacadeTestBed } from './create-test-bed';
 import '@univerjs/sheets-formula/facade';
 
@@ -46,9 +46,10 @@ describe('Test FRange', () => {
     let get: Injector['get'];
     let commandService: ICommandService;
     let univerAPI: FUniver;
+    let testBed: ReturnType<typeof createFacadeTestBed>;
 
     beforeEach(() => {
-        const testBed = createFacadeTestBed();
+        testBed = createFacadeTestBed();
         get = testBed.get;
 
         univerAPI = testBed.univerAPI;
@@ -70,6 +71,11 @@ describe('Test FRange', () => {
             callback({ didTimeout: false, timeRemaining: () => 16 } as IdleDeadline);
             return 1;
         }) as typeof requestIdleCallback);
+    });
+
+    afterEach(() => {
+        testBed.univer.dispose();
+        vi.unstubAllGlobals();
     });
 
     it('Range set data validation', async () => {

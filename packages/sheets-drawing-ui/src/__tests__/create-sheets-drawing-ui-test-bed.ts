@@ -37,7 +37,7 @@ import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-re
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsDrawingPlugin } from '@univerjs/sheets-drawing';
 import enUS from '@univerjs/sheets/locale/en-US';
-import { ISidebarService } from '@univerjs/ui';
+import { ISidebarService, UndoRedoGroupService } from '@univerjs/ui';
 import { BehaviorSubject, Subject } from 'rxjs';
 
 const TEST_WORKBOOK_DATA: IWorkbookData = {
@@ -153,6 +153,7 @@ export function createSheetsDrawingUiTestBed(workbookData?: IWorkbookData, depen
                 this._injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
             }
             this._injector.add([ISidebarService, { useClass: TestSidebarService as never }]);
+            this._injector.add([UndoRedoGroupService]);
             dependencies?.forEach((dependency) => this._injector.add(dependency));
         }
     }

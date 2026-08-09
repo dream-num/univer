@@ -19,6 +19,7 @@ import type { ISetDrawingCommandParams, ISheetDrawing } from '@univerjs/sheets-d
 import { CommandType, Direction, ICommandService } from '@univerjs/core';
 import { SheetSkeletonService } from '@univerjs/sheets';
 import { ClearSheetDrawingTransformerOperation, ISheetDrawingService, SetSheetDrawingCommand, transformToAxisAlignPosition, transformToDrawingPosition } from '@univerjs/sheets-drawing';
+import { UndoRedoGroupService } from '@univerjs/ui';
 
 export interface IMoveDrawingsCommandParams {
     direction: Direction;
@@ -31,6 +32,7 @@ export const MoveDrawingsCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const drawingManagerService = accessor.get(ISheetDrawingService);
         const sheetSkeletonService = accessor.get(SheetSkeletonService);
+        const undoRedoGroupService = accessor.get(UndoRedoGroupService);
 
         const { direction } = params;
 
@@ -70,10 +72,14 @@ export const MoveDrawingsCommand: ICommand = {
             } as ISheetDrawing;
         }).filter((drawing) => drawing != null) as ISheetDrawing[];
 
-        const result = commandService.syncExecuteCommand<ISetDrawingCommandParams>(SetSheetDrawingCommand.id, {
+        const result = undoRedoGroupService.runTimed(
             unitId,
-            drawings: newDrawings,
-        });
+            `sheet-drawing:nudge:${drawings[0].subUnitId}:${drawings.map((drawing) => drawing.drawingId).sort().join(',')}`,
+            () => commandService.syncExecuteCommand<ISetDrawingCommandParams>(SetSheetDrawingCommand.id, {
+                unitId,
+                drawings: newDrawings,
+            })
+        );
 
         if (result) {
             commandService.syncExecuteCommand(ClearSheetDrawingTransformerOperation.id, [unitId]);

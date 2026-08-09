@@ -756,7 +756,7 @@ describe('page model', () => {
         expect(pages[0].height).toBe(48);
     });
 
-    it('expands table cell height to include inline drawings', () => {
+    it('DOCX golden e2e expands table cell height to include inline drawings', () => {
         const page = {
             height: 20,
             skeDrawings: new Map([

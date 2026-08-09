@@ -1042,7 +1042,7 @@ describe('doc skeleton', () => {
         univer.dispose();
     });
 
-    it('keeps a nested table in the outer cell skeleton', () => {
+    it('DOCX golden e2e keeps a nested table in the outer cell skeleton', () => {
         const measureSpy = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text: string) => ({
             width: text.length * 8,
             fontBoundingBoxAscent: 8,
@@ -1109,7 +1109,7 @@ describe('doc skeleton', () => {
         measureSpy.mockRestore();
     });
 
-    it('honors a rendered page break inside a traditional table cell', () => {
+    it('DOCX golden e2e honors a rendered page break inside a traditional table cell', () => {
         const measureSpy = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text: string) => ({
             width: text.length * 8,
             fontBoundingBoxAscent: 8,
@@ -1457,7 +1457,7 @@ describe('doc skeleton', () => {
         univer.dispose();
     });
 
-    it('starts a NEXT_COLUMN section in the next available column', () => {
+    it('DOCX golden e2e starts a NEXT_COLUMN section in the next available column', () => {
         const first = `First${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
         const second = `Second${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
         const columns = [
@@ -1565,7 +1565,7 @@ describe('doc skeleton', () => {
         univer.dispose();
     });
 
-    it('moves NEXT_COLUMN to the next page when no column remains', () => {
+    it('DOCX golden e2e moves NEXT_COLUMN to the next page when no column remains', () => {
         const first = `First${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
         const second = `Second${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
         const univer = new Univer();
@@ -1606,7 +1606,7 @@ describe('doc skeleton', () => {
         univer.dispose();
     });
 
-    it('does not create a blank page for a rendered page break immediately after a section break', () => {
+    it('DOCX golden e2e does not create a blank page for a rendered page break immediately after a section break', () => {
         const first = `Landscape content${DataStreamTreeTokenType.PARAGRAPH.repeat(3)}${DataStreamTreeTokenType.SECTION_BREAK}`;
         const second = `${DataStreamTreeTokenType.PAGE_BREAK}Portrait content${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
         const univer = new Univer();
@@ -1739,7 +1739,7 @@ describe('doc skeleton', () => {
         measureSpy.mockRestore();
     });
 
-    it('adds one skeleton-only filler page for an ODD_PAGE section', () => {
+    it('DOCX golden e2e adds one skeleton-only filler page for an ODD_PAGE section', () => {
         const first = `First${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
         const second = `Second${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
         const univer = new Univer();
@@ -1783,7 +1783,7 @@ describe('doc skeleton', () => {
         univer.dispose();
     });
 
-    it('adds one skeleton-only filler page for an EVEN_PAGE section', () => {
+    it('DOCX golden e2e adds one skeleton-only filler page for an EVEN_PAGE section', () => {
         const first = `First${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
         const second = `Second${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
         const univer = new Univer();
@@ -2219,7 +2219,7 @@ describe('doc skeleton', () => {
         measureSpy.mockRestore();
     });
 
-    it('preserves physical page parity when an even-and-odd section restarts numbering', () => {
+    it('DOCX golden e2e preserves physical page parity when an even-and-odd section restarts numbering', () => {
         const first = `First${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
         const second = `Second${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
         const univer = new Univer();
@@ -2313,7 +2313,7 @@ describe('doc skeleton', () => {
         univer.dispose();
     });
 
-    it('lays out a traditional form document with header footer and long fields', () => {
+    it('DOCX golden e2e lays out a traditional form document with header footer and long fields', () => {
         const univer = new Univer();
         const localeService = univer.__getInjector().get(LocaleService);
         const lines = [

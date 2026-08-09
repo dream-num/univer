@@ -818,7 +818,7 @@ describe('linebreaking', () => {
         expect(result[0].sections[0].columns).toHaveLength(2);
     });
 
-    it('moves a split keepLines paragraph when it fits on an empty page', () => {
+    it('DOCX golden e2e moves a split keepLines paragraph when it fits on an empty page', () => {
         const contents = ['Filler filler filler filler', 'One two three four five'];
         const firstEnd = contents[0].length;
         const secondEnd = firstEnd + 1 + contents[1].length;
@@ -921,7 +921,7 @@ describe('linebreaking', () => {
         expect(paragraphLines(lastResult[1], followingIndex).length).toBeGreaterThan(0);
     });
 
-    it('moves a bounded keepNext chain and stops at a manual break', () => {
+    it('DOCX golden e2e moves a bounded keepNext chain and stops at a manual break', () => {
         const contents = [
             'Prefix prefix prefix prefix prefix prefix',
             'Heading one',
@@ -1089,7 +1089,7 @@ describe('linebreaking', () => {
         expect(testBed.ctx.paginationMetrics?.retryCount).toBeLessThanOrEqual(contents.length);
     });
 
-    it('avoids a single natural widow line and lets oversized keepLines paragraphs terminate', () => {
+    it('DOCX golden e2e avoids a single natural widow line and lets oversized keepLines paragraphs terminate', () => {
         const content = 'One two three four five six seven eight nine ten eleven twelve';
         const widowBed = createParagraphLayoutTestBed(content, {
             documentStyle: {
@@ -1165,7 +1165,7 @@ describe('linebreaking', () => {
             paragraphLines(page, oversizedBed.paragraphNode.endIndex).length > 0)).toBe(true);
     });
 
-    it('does not soften a manual page break with keep or widow constraints', () => {
+    it('DOCX golden e2e does not soften a manual page break with keep or widow constraints', () => {
         const content = `Before${DataStreamTreeTokenType.PAGE_BREAK}After`;
         const { viewModel, ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed(content, {
             documentStyle: {

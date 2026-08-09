@@ -19,22 +19,29 @@ import type { ISuccinctDocRangeParam } from '@univerjs/engine-render';
 import { CommandType, DataStreamTreeTokenType, DOC_RANGE_TYPE, getParagraphContentStartOffsets, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 
-interface ISelectAllCommandParams { }
+interface ISelectAllCommandParams {
+    segmentId?: string;
+    wholeDocument?: boolean;
+}
 
 export const DocSelectAllCommand: ICommand<ISelectAllCommandParams> = {
     id: 'doc.command.select-all',
     type: CommandType.COMMAND,
-    handler: async (accessor) => {
+    handler: async (accessor, params) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         const docRanges = docSelectionManagerService.getDocRanges();
         const activeRange = docRanges.find((range) => range.isActive) ?? docRanges[0];
-        if (docDataModel == null || activeRange == null) {
+        if (docDataModel == null) {
             return false;
         }
 
-        const { segmentId } = activeRange;
+        const segmentId = params?.segmentId ?? activeRange?.segmentId;
+        if (segmentId == null) {
+            return false;
+        }
+
         const unitId = docDataModel.getUnitId();
         const body = docDataModel.getSelfOrHeaderFooterModel(segmentId)?.getBody();
         if (body == null) {
@@ -46,10 +53,21 @@ export const DocSelectAllCommand: ICommand<ISelectAllCommandParams> = {
             return true;
         }
 
-        const scopes = getSelectAllScopes(body, activeRange);
-        const currentScopeIndex = scopes.findIndex((scope) => isSameRanges(docRanges, scope));
-        const textRanges = scopes[Math.min(currentScopeIndex + 1, scopes.length - 1)];
-        const wholeDocument = textRanges === scopes[scopes.length - 1];
+        let textRanges: ISuccinctDocRangeParam[];
+        let wholeDocument: boolean;
+        if (params?.wholeDocument) {
+            textRanges = getWholeDocumentRanges(body);
+            wholeDocument = true;
+        } else {
+            if (activeRange == null) {
+                return false;
+            }
+
+            const scopes = getSelectAllScopes(body, activeRange);
+            const currentScopeIndex = scopes.findIndex((scope) => isSameRanges(docRanges, scope));
+            textRanges = scopes[Math.min(currentScopeIndex + 1, scopes.length - 1)];
+            wholeDocument = textRanges === scopes[scopes.length - 1];
+        }
 
         docSelectionManagerService.replaceDocRanges(textRanges, {
             unitId,

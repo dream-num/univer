@@ -349,7 +349,7 @@ describe('test cases in clipboard', () => {
         return ranges;
     }
 
-    function createStructuralDocumentData(): IDocumentData {
+    function createStructuralDocumentData(includeListParagraph = false): IDocumentData {
         const T = DataStreamTreeTokenType;
         const dataStream = `P${T.PARAGRAPH}${T.BLOCK_START}A${T.PARAGRAPH}B${T.PARAGRAPH}${T.BLOCK_END}M${T.PARAGRAPH}${T.COLUMN_GROUP_START}${T.COLUMN_START}C${T.PARAGRAPH}${T.COLUMN_END}${T.COLUMN_START}${T.CUSTOM_BLOCK}D${T.PARAGRAPH}${T.COLUMN_END}${T.COLUMN_GROUP_END}Z${T.PARAGRAPH}${T.SECTION_BREAK}`;
 
@@ -358,7 +358,13 @@ describe('test cases in clipboard', () => {
             body: {
                 dataStream,
                 paragraphs: [
-                    { paragraphId: 'root-before', startIndex: 1 },
+                    {
+                        paragraphId: 'root-before',
+                        startIndex: 1,
+                        bullet: includeListParagraph
+                            ? { listId: 'list-1', listType: 'BULLET_LIST', nestingLevel: 0 }
+                            : undefined,
+                    },
                     { paragraphId: 'block-first', startIndex: 4 },
                     { paragraphId: 'block-second', startIndex: 6 },
                     { paragraphId: 'root-middle', startIndex: 9 },
@@ -949,7 +955,7 @@ describe('test cases in clipboard', () => {
         });
 
         it('normalizes fragmented whole-body selection to an empty document and replays the same actions for collaboration', async () => {
-            replaceDocument(createStructuralDocumentData());
+            replaceDocument(createStructuralDocumentData(true));
             const original = Tools.deepClone(getRequiredDocumentSnapshot());
             let collabActions: JSONXActions = [];
             const collabListener = commandService.onMutationExecutedForCollab((command) => {
@@ -983,6 +989,7 @@ describe('test cases in clipboard', () => {
                 customRanges: [],
                 customBlocks: [],
             }));
+            expect(deleted.body?.paragraphs?.[0].bullet).toBeUndefined();
             expect(deleted.drawings ?? {}).toEqual({});
             expect(deleted.drawingsOrder ?? []).toEqual([]);
 

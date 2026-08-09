@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IMultiCommand } from '../command.service';
+import type { CommandExecutionCompletion, IMultiCommand } from '../command.service';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Injector } from '../../../common/di';
 import { CustomCommandExecutionError } from '../../../common/error';
@@ -212,6 +212,144 @@ describe('Test CommandService', () => {
             disposable.dispose();
             commandService.syncExecuteCommand(pushValCommandID);
             expect(numbers).toEqual([-1, 0, 1, -1, 0, 1, 0]);
+        });
+
+        it('Should report fulfilled results for async, sync, false, and sync-only executions', async () => {
+            const completions: CommandExecutionCompletion[] = [];
+            const completionListener = vi.fn((_commandInfo, _options, completion: CommandExecutionCompletion) => {
+                completions.push(completion);
+            });
+            const regularListener = vi.fn();
+            const completionDisposable = commandService.onCommandExecutionCompleted(completionListener);
+            commandService.onCommandExecuted(regularListener);
+
+            expect(() => commandService.onCommandExecutionCompleted(completionListener)).toThrow(
+                '[CommandService]: could not add a completion listener twice.'
+            );
+            expect(commandService.syncExecuteCommand(commandID, { value: 1 })).toBe(true);
+            await expect(commandService.executeCommand(commandID, { value: 2 })).resolves.toBe(false);
+            await expect(commandService.executeCommand(commandID, { value: 1 }, { syncOnly: true })).resolves.toBe(
+                true
+            );
+
+            expect(completions).toEqual([
+                { status: 'fulfilled', result: true },
+                { status: 'fulfilled', result: false },
+                { status: 'fulfilled', result: true },
+            ]);
+            expect(regularListener).toHaveBeenCalledTimes(2);
+
+            completionDisposable.dispose();
+            commandService.syncExecuteCommand(commandID, { value: 1 });
+            expect(completionListener).toHaveBeenCalledTimes(3);
+        });
+
+        it('Should report rejections and isolate completion listener errors', async () => {
+            const completions: CommandExecutionCompletion[] = [];
+            const completionError = new Error('completion-listener-error');
+            const logError = vi.spyOn(logService, 'error').mockImplementation(() => undefined);
+            commandService.onCommandExecutionCompleted((_commandInfo, _options, completion) => {
+                completions.push(completion);
+            });
+            commandService.onCommandExecutionCompleted(() => {
+                throw completionError;
+            });
+
+            await expect(commandService.executeCommand(commandID, { value: 100 })).rejects.toThrow('100');
+            expect(() => commandService.syncExecuteCommand(commandID, { value: 100 })).toThrow('100');
+            expect(commandService.syncExecuteCommand(commandID, { value: 1 })).toBe(true);
+
+            expect(completions).toEqual([
+                { status: 'rejected', error: new Error('100') },
+                { status: 'rejected', error: new Error('100') },
+                { status: 'fulfilled', result: true },
+            ]);
+            expect(logError).toHaveBeenCalledTimes(3);
+            expect(logError).toHaveBeenCalledWith(
+                '[CommandService]',
+                'command completion listener failed',
+                completionError
+            );
+        });
+
+        it('Should complete a command disposed after before and clear failed command stack state', async () => {
+            const disposedCompletion = vi.fn();
+            const pushValCommandID = 'push-val-completion-dispose-before-hook';
+            commandService.registerCommand({
+                id: pushValCommandID,
+                type: CommandType.COMMAND,
+                handler: () => true,
+            });
+            commandService.onCommandExecutionCompleted(disposedCompletion);
+            commandService.beforeCommandExecuted(() => (commandService as CommandService).dispose());
+
+            await expect(commandService.executeCommand(pushValCommandID)).resolves.toBe(false);
+            expect(disposedCompletion).toHaveBeenCalledWith(
+                { id: pushValCommandID, type: CommandType.COMMAND, params: undefined },
+                {},
+                { status: 'fulfilled', result: false }
+            );
+        });
+
+        it('Should report a before-listener rejection and remove its command from the trigger stack', async () => {
+            const completions: CommandExecutionCompletion[] = [];
+            const beforeError = new Error('before-listener-error');
+            const beforeDisposable = commandService.beforeCommandExecuted(() => {
+                throw beforeError;
+            });
+            commandService.onCommandExecutionCompleted((_commandInfo, _options, completion) => {
+                completions.push(completion);
+            });
+
+            await expect(commandService.executeCommand(commandID, { value: 1 })).rejects.toThrow(beforeError);
+            beforeDisposable.dispose();
+
+            const mutationID = 'mutation-after-before-listener-error';
+            const mutationParams: { trigger?: string } = {};
+            commandService.registerCommand({
+                id: mutationID,
+                type: CommandType.MUTATION,
+                handler: (_accessor, params: { trigger?: string }) => {
+                    expect(params.trigger).toBeUndefined();
+                    return true;
+                },
+            });
+            expect(commandService.syncExecuteCommand(mutationID, mutationParams)).toBe(true);
+            expect(completions).toEqual([
+                { status: 'rejected', error: beforeError },
+                { status: 'fulfilled', result: true },
+            ]);
+        });
+
+        it('Should complete nested commands from inner to outer with each exact result', async () => {
+            const mutationID = 'nested-completion-mutation';
+            const commandID = 'nested-completion-command';
+            const completions: Array<{ id: string; completion: CommandExecutionCompletion }> = [];
+            let succeeds = false;
+            commandService.registerCommand({
+                id: mutationID,
+                type: CommandType.MUTATION,
+                handler: () => succeeds,
+            });
+            commandService.registerCommand({
+                id: commandID,
+                type: CommandType.COMMAND,
+                handler: (accessor) => accessor.get(ICommandService).syncExecuteCommand(mutationID),
+            });
+            commandService.onCommandExecutionCompleted((commandInfo, _options, completion) => {
+                completions.push({ id: commandInfo.id, completion });
+            });
+
+            await expect(commandService.executeCommand(commandID)).resolves.toBe(false);
+            succeeds = true;
+            expect(commandService.syncExecuteCommand(commandID)).toBe(true);
+
+            expect(completions).toEqual([
+                { id: mutationID, completion: { status: 'fulfilled', result: false } },
+                { id: commandID, completion: { status: 'fulfilled', result: false } },
+                { id: mutationID, completion: { status: 'fulfilled', result: true } },
+                { id: commandID, completion: { status: 'fulfilled', result: true } },
+            ]);
         });
 
         it('Should skip command execution after the command service is disposed', async () => {

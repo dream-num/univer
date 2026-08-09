@@ -98,6 +98,7 @@ function createService(options?: {
     class TestRuntimeScopeService {
         register = vi.fn();
         get = getRuntimeScope;
+        getForElement = vi.fn();
     }
 
     const injector = new Injector();

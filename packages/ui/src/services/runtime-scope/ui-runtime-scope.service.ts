@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { IDisposable } from '@univerjs/core';
-import { createIdentifier, Disposable, toDisposable } from '@univerjs/core';
+import { createIdentifier, Disposable, type IDisposable, toDisposable } from '@univerjs/core';
 
 export interface IUIRuntimeScope {
     unitId: string;
+    root?: HTMLElement;
     has(identifier: unknown): boolean;
     get<T = unknown>(identifier: unknown): T;
 }
@@ -26,24 +26,48 @@ export interface IUIRuntimeScope {
 export interface IUIRuntimeScopeService {
     register(scope: IUIRuntimeScope): IDisposable;
     get(unitId: string | null | undefined): IUIRuntimeScope | undefined;
+    getForElement(target: EventTarget | null): IUIRuntimeScope | undefined;
 }
 
 export const IUIRuntimeScopeService = createIdentifier<IUIRuntimeScopeService>('ui.runtime-scope.service');
 
 export class UIRuntimeScopeService extends Disposable implements IUIRuntimeScopeService {
-    private readonly _scopes = new Map<string, IUIRuntimeScope>();
+    private readonly _scopes = new Map<string, IUIRuntimeScope[]>();
 
     register(scope: IUIRuntimeScope): IDisposable {
-        this._scopes.set(scope.unitId, scope);
+        const scopes = this._scopes.get(scope.unitId) ?? [];
+        scopes.push(scope);
+        this._scopes.set(scope.unitId, scopes);
 
         return toDisposable(() => {
-            if (this._scopes.get(scope.unitId) === scope) {
+            const registeredScopes = this._scopes.get(scope.unitId);
+            const index = registeredScopes?.lastIndexOf(scope) ?? -1;
+            if (index >= 0) {
+                registeredScopes?.splice(index, 1);
+            }
+            if (!registeredScopes?.length) {
                 this._scopes.delete(scope.unitId);
             }
         });
     }
 
     get(unitId: string | null | undefined): IUIRuntimeScope | undefined {
-        return unitId ? this._scopes.get(unitId) : undefined;
+        return unitId ? this._scopes.get(unitId)?.at(-1) : undefined;
+    }
+
+    getForElement(target: EventTarget | null): IUIRuntimeScope | undefined {
+        if (typeof Node === 'undefined' || !(target instanceof Node)) {
+            return undefined;
+        }
+
+        const scopes = Array.from(this._scopes.values()).flat();
+        for (let index = scopes.length - 1; index >= 0; index--) {
+            const scope = scopes[index];
+            if (scope.root?.contains(target)) {
+                return scope;
+            }
+        }
+
+        return undefined;
     }
 }

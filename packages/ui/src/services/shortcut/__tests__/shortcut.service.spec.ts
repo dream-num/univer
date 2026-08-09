@@ -18,7 +18,7 @@
  * @vitest-environment jsdom
  */
 
-import { ICommandService, IContextService, Injector } from '@univerjs/core';
+import { FOCUSING_BASE, ICommandService, IContextService, Injector } from '@univerjs/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { EMBED_CHILD_UNIT_ID_ATTRIBUTE } from '../../../utils/embed-boundary';
 import { ILayoutService } from '../../layout/layout.service';
@@ -78,6 +78,7 @@ function createService(options?: {
         checkElementInCurrentContainers: vi.fn(() => options?.layoutAllowed),
     };
     const getRuntimeScope = vi.fn();
+    const getRuntimeScopeForElement = vi.fn();
 
     class TestCommandService {
         executeCommand = executeCommand;
@@ -98,7 +99,7 @@ function createService(options?: {
     class TestRuntimeScopeService {
         register = vi.fn();
         get = getRuntimeScope;
-        getForElement = vi.fn();
+        getForElement = getRuntimeScopeForElement;
     }
 
     const injector = new Injector();
@@ -112,7 +113,7 @@ function createService(options?: {
     injector.add([ShortcutService]);
     const service = injector.get(ShortcutService);
 
-    return { service, executeCommand, getRuntimeScope, layoutService };
+    return { service, executeCommand, getRuntimeScope, getRuntimeScopeForElement, layoutService };
 }
 
 describe('ShortcutService', () => {
@@ -308,6 +309,50 @@ describe('ShortcutService', () => {
         expect(getRuntimeScope).toHaveBeenCalledWith('child-board');
         expect(scopedContextService.getContextValue).toHaveBeenCalledWith('FOCUSING_BOARD');
         expect(scopedExecuteCommand).toHaveBeenCalledWith('board.operation.grouping-shortcut', undefined);
+        expect(executeCommand).not.toHaveBeenCalled();
+        expect(event.defaultPrevented).toBe(true);
+        service.dispose();
+    });
+
+    it('uses the runtime that owns the event target when the same child unit has multiple runtimes', () => {
+        const runtime = document.createElement('div');
+        const canvas = document.createElement('canvas');
+        runtime.setAttribute(EMBED_CHILD_UNIT_ID_ATTRIBUTE, 'child-base');
+        runtime.appendChild(canvas);
+
+        const scopedExecuteCommand = vi.fn(() => Promise.resolve(true));
+        const scopedContextService = {
+            getContextValue: vi.fn((key: string) => key === FOCUSING_BASE),
+        };
+        const targetRuntimeScope = {
+            has: vi.fn(() => true),
+            get: vi.fn((identifier: unknown) => identifier === IContextService
+                ? scopedContextService
+                : { executeCommand: scopedExecuteCommand }),
+        };
+        const otherRuntimeScope = {
+            has: vi.fn(() => true),
+            get: vi.fn(() => ({ getContextValue: vi.fn(() => false) })),
+        };
+        const { service, executeCommand, getRuntimeScope, getRuntimeScopeForElement } = createService();
+        getRuntimeScope.mockReturnValue(otherRuntimeScope);
+        getRuntimeScopeForElement.mockReturnValue(targetRuntimeScope);
+        service.registerShortcut({
+            id: 'base.operation.edit-cell',
+            binding: KeyCode.ENTER,
+            preconditions: (contextService) => contextService.getContextValue(FOCUSING_BASE),
+        });
+
+        const event = createKeyboardEvent(KeyCode.ENTER);
+        Object.defineProperty(event, 'target', {
+            configurable: true,
+            get: () => canvas,
+        });
+        window.dispatchEvent(event);
+
+        expect(getRuntimeScopeForElement).toHaveBeenCalledWith(canvas);
+        expect(getRuntimeScope).not.toHaveBeenCalled();
+        expect(scopedExecuteCommand).toHaveBeenCalledWith('base.operation.edit-cell', undefined);
         expect(executeCommand).not.toHaveBeenCalled();
         expect(event.defaultPrevented).toBe(true);
         service.dispose();

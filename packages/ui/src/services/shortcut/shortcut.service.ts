@@ -398,8 +398,8 @@ export class ShortcutService extends Disposable implements IShortcutService {
     }
 
     private _getRuntimeService<T>(event: KeyboardEvent, identifier: unknown): T | undefined {
-        const childUnitId = getEmbedChildUnitId(event.target);
-        const runtimeScope = this._runtimeScopeService.get(childUnitId);
+        const runtimeScope = this._runtimeScopeService.getForElement(event.target)
+            ?? this._runtimeScopeService.get(getEmbedChildUnitId(event.target));
         return runtimeScope?.has(identifier) ? runtimeScope.get<T>(identifier) : undefined;
     }
 }

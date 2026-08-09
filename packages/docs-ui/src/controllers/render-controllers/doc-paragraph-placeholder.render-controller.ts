@@ -107,6 +107,11 @@ export class DocParagraphPlaceholderRenderController extends Disposable implemen
         }
 
         this.disposeWithMe(documents.pageRender$.subscribe((pageRenderConfig) => this._drawPagePlaceholders(pageRenderConfig)));
+        this.disposeWithMe(this._docSelectionManagerService.textSelection$.subscribe(({ unitId }) => {
+            if (unitId === this._context.unitId) {
+                documents.makeDirty(true);
+            }
+        }));
     }
 
     private _drawPagePlaceholders({ page, pageLeft, pageTop, ctx }: IPageRenderConfig): void {
@@ -117,6 +122,13 @@ export class DocParagraphPlaceholderRenderController extends Disposable implemen
 
         const activeRange = this._docSelectionManagerService.getActiveTextRange();
         if (!activeRange || (activeRange.segmentId ?? '') !== (page.segmentId ?? '')) {
+            return;
+        }
+        if (
+            activeRange.startOffset == null ||
+            activeRange.endOffset == null ||
+            activeRange.startOffset !== activeRange.endOffset
+        ) {
             return;
         }
 
@@ -174,7 +186,7 @@ export function getParagraphPlaceholderLayouts(
     locale: IParagraphPlaceholderLocale,
     pageLeft = 0,
     pageTop = 0,
-    activeOffset?: number,
+    activeOffset: number,
     options?: IParagraphPlaceholderLayoutOptions
 ): IParagraphPlaceholderLayout[] {
     const paragraphs = new Map((body.paragraphs ?? []).map((paragraph) => [paragraph.startIndex, paragraph]));
@@ -258,7 +270,7 @@ function visitColumn(
     layouts: IParagraphPlaceholderLayout[],
     originLeft: number,
     originTop: number,
-    activeOffset?: number,
+    activeOffset: number,
     clip?: IParagraphPlaceholderClip
 ): void {
     for (const line of column.lines) {
@@ -268,7 +280,7 @@ function visitColumn(
 
         const paragraphStart = line.st;
         const paragraphEnd = line.paragraphIndex;
-        if (activeOffset != null && !isOffsetInParagraph(activeOffset, paragraphStart, paragraphEnd)) {
+        if (!isOffsetInParagraph(activeOffset, paragraphStart, paragraphEnd)) {
             continue;
         }
 

@@ -125,7 +125,7 @@ describe('DocStateChangeManagerService', () => {
 
     it('debounces history and collaboration flushing for composed edits', () => {
         vi.useFakeTimers();
-        const { service, emitter, undoRedoService } = createService();
+        const { service, emitter } = createService();
         const changes: unknown[] = [];
         const sub = service.docStateChange$.subscribe((value) => changes.push(value));
 
@@ -138,6 +138,66 @@ describe('DocStateChangeManagerService', () => {
         expect(service.getStateCache('doc-1')).toEqual({ history: [], collaboration: [] });
         expect(changes.at(-1)).toMatchObject({ unitId: 'doc-1', debounce: true });
         sub.unsubscribe();
+    });
+
+    it('preserves segment and whole-document selection state in undo and redo mutations', () => {
+        const { emitter, undoRedoService, univerInstanceService } = createService();
+        univerInstanceService.__addUnit(new DocumentDataModel({ id: 'doc-1' }));
+        univerInstanceService.focusUnit('doc-1');
+
+        emitter.emitStateChangeInfo(createChange({
+            segmentId: 'header-1',
+            redoState: {
+                actions: null as never,
+                textRanges: [{ startOffset: 2, endOffset: 2, collapsed: true }],
+                options: { wholeDocument: false },
+                isEditing: true,
+            },
+            undoState: {
+                actions: null as never,
+                textRanges: [{ startOffset: 0, endOffset: 4, collapsed: false }],
+                options: { wholeDocument: true },
+                isEditing: false,
+            },
+        }));
+
+        expect(undoRedoService.pitchTopUndoElement()).toMatchObject({
+            undoMutations: [{
+                params: {
+                    segmentId: 'header-1',
+                    options: { wholeDocument: true },
+                    isEditing: false,
+                },
+            }],
+            redoMutations: [{
+                params: {
+                    segmentId: 'header-1',
+                    options: { wholeDocument: false },
+                    isEditing: true,
+                },
+            }],
+        });
+    });
+
+    it('flushes debounced history before switching document segments', () => {
+        vi.useFakeTimers();
+        const { service, emitter, undoRedoService, univerInstanceService } = createService();
+        univerInstanceService.__addUnit(new DocumentDataModel({ id: 'doc-1' }));
+        univerInstanceService.focusUnit('doc-1');
+
+        emitter.emitStateChangeInfo(createChange({ segmentId: 'header-1', debounce: true }));
+        emitter.emitStateChangeInfo(createChange({ segmentId: '', debounce: true }));
+
+        expect(undoRedoService.pitchTopUndoElement()).toMatchObject({
+            undoMutations: [{ params: { segmentId: 'header-1' } }],
+            redoMutations: [{ params: { segmentId: 'header-1' } }],
+        });
+        expect(service.getStateCache('doc-1').history).toEqual([
+            expect.objectContaining({ segmentId: '' }),
+        ]);
+
+        vi.advanceTimersByTime(300);
+        expect(service.getStateCache('doc-1')).toEqual({ history: [], collaboration: [] });
     });
 
     it('can restore pre-existing state caches for a document', () => {

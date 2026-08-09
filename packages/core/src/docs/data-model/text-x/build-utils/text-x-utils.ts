@@ -21,6 +21,7 @@ import type { CustomRangeType, IDocumentBody, ITextRun } from '../../../../types
 import type { DocumentDataModel } from '../../document-data-model';
 import type { TextXAction } from '../action-types';
 import type { TextXSelection } from '../text-x';
+import type { IDocOperationalInterval } from './range-interval';
 import fastDiff from 'fast-diff';
 import { Tools, UpdateDocsAttributeType } from '../../../../shared';
 import { DataStreamTreeTokenType } from '../../types';
@@ -28,7 +29,7 @@ import { TextXActionType } from '../action-types';
 import { TextX } from '../text-x';
 import { getBodySlice, getBodySliceForTextXAction, getTextRunSlice } from '../utils';
 import { excludePointsFromRange, getIntersectingCustomRanges, getSelectionForAddCustomRange } from './custom-range';
-import { getBlockRangeInterval } from './range-interval';
+import { getBlockRangeInterval, getColumnGroupRangeInterval, getCustomRangeInterval } from './range-interval';
 
 export interface IDeleteCustomRangeParam {
     rangeId: string;
@@ -179,6 +180,130 @@ function isAtomicContainerDeleted(container: IStructuralTextContainer, selection
     ));
 }
 
+const IMPLICIT_TEXT_SELECTION_TOKENS = new Set<string>([
+    DataStreamTreeTokenType.PARAGRAPH,
+    DataStreamTreeTokenType.SECTION_BREAK,
+]);
+
+const IMPLICIT_COLUMN_SELECTION_TOKENS = new Set<string>([
+    ...IMPLICIT_TEXT_SELECTION_TOKENS,
+    DataStreamTreeTokenType.COLUMN_GROUP_START,
+    DataStreamTreeTokenType.COLUMN_START,
+    DataStreamTreeTokenType.COLUMN_END,
+    DataStreamTreeTokenType.COLUMN_GROUP_END,
+]);
+
+function mergeSelections(selections: ITextRange[]): ITextRange[] {
+    const sortedSelections = selections
+        .filter((selection) => selection.endOffset > selection.startOffset)
+        .map((selection) => ({ ...selection, collapsed: false }))
+        .sort((left, right) => left.startOffset - right.startOffset || left.endOffset - right.endOffset);
+    const mergedSelections: ITextRange[] = [];
+
+    for (const selection of sortedSelections) {
+        const previous = mergedSelections[mergedSelections.length - 1];
+        if (previous && selection.startOffset <= previous.endOffset) {
+            previous.endOffset = Math.max(previous.endOffset, selection.endOffset);
+            continue;
+        }
+
+        mergedSelections.push(selection);
+    }
+
+    return mergedSelections;
+}
+
+function isIntervalCoveredBySelections(
+    interval: IDocOperationalInterval,
+    selections: ITextRange[],
+    body: IDocumentBody,
+    implicitTokens: Set<string>
+): boolean {
+    let cursor = interval.startOffset;
+
+    for (const selection of selections) {
+        if (selection.endOffset <= cursor || selection.startOffset >= interval.endOffset) {
+            continue;
+        }
+
+        const selectionStart = Math.max(selection.startOffset, interval.startOffset);
+        const selectionEnd = Math.min(selection.endOffset, interval.endOffset);
+        for (let offset = cursor; offset < selectionStart; offset++) {
+            if (!implicitTokens.has(body.dataStream[offset])) {
+                return false;
+            }
+        }
+        cursor = Math.max(cursor, selectionEnd);
+        if (cursor >= interval.endOffset) {
+            return true;
+        }
+    }
+
+    for (let offset = cursor; offset < interval.endOffset; offset++) {
+        if (!implicitTokens.has(body.dataStream[offset])) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+function addCoveredIntervals(
+    selections: ITextRange[],
+    intervals: IDocOperationalInterval[],
+    body: IDocumentBody,
+    implicitTokens: Set<string>
+): ITextRange[] {
+    const expanded = [...selections];
+    const selectionTemplate = selections[0];
+
+    for (const interval of intervals) {
+        if (isIntervalCoveredBySelections(interval, expanded, body, implicitTokens)) {
+            expanded.push({
+                ...selectionTemplate,
+                ...interval,
+                collapsed: false,
+            });
+        }
+    }
+
+    return mergeSelections(expanded);
+}
+
+function expandFullyCoveredStructuralSelections(selections: ITextRange[], body: IDocumentBody): ITextRange[] {
+    let expanded = mergeSelections(selections);
+    expanded = addCoveredIntervals(
+        expanded,
+        (body.blockRanges ?? []).map(getBlockRangeInterval),
+        body,
+        IMPLICIT_TEXT_SELECTION_TOKENS
+    );
+    expanded = addCoveredIntervals(
+        expanded,
+        (body.customRanges ?? []).map(getCustomRangeInterval),
+        body,
+        IMPLICIT_TEXT_SELECTION_TOKENS
+    );
+    expanded = addCoveredIntervals(
+        expanded,
+        (body.columnGroups ?? []).map(getColumnGroupRangeInterval),
+        body,
+        IMPLICIT_COLUMN_SELECTION_TOKENS
+    );
+
+    const editableRootEnd = Math.max(0, body.dataStream.length - 2);
+    if (editableRootEnd > 0) {
+        expanded = addCoveredIntervals(
+            expanded,
+            [{ startOffset: 0, endOffset: editableRootEnd }],
+            body,
+            IMPLICIT_TEXT_SELECTION_TOKENS
+        );
+    }
+
+    return expanded;
+}
+
 function isOffsetDeleted(offset: number, selections: ITextRange[]) {
     return selections.some((selection) => offset >= selection.startOffset && offset < selection.endOffset);
 }
@@ -195,6 +320,12 @@ function protectLastDeletedOffset(offsets: number[], selections: ITextRange[], p
 
 function protectDeletedColumnBoundaryTokens(body: IDocumentBody, selections: ITextRange[], protectedOffsets: Set<number>) {
     // Plain text selection edits may cross column edges, but structural column tokens must stay atomic.
+    const fullyDeletedColumnGroups = (body.columnGroups ?? [])
+        .map(getColumnGroupRangeInterval)
+        .filter((interval) => selections.some((selection) =>
+            selection.startOffset <= interval.startOffset && selection.endOffset >= interval.endOffset
+        ));
+
     for (let i = 0; i < body.dataStream.length; i++) {
         const char = body.dataStream[i];
         if (
@@ -204,7 +335,8 @@ function protectDeletedColumnBoundaryTokens(body: IDocumentBody, selections: ITe
                 char === DataStreamTreeTokenType.COLUMN_END ||
                 char === DataStreamTreeTokenType.COLUMN_GROUP_END
             ) &&
-            isOffsetDeleted(i, selections)
+            isOffsetDeleted(i, selections) &&
+            !fullyDeletedColumnGroups.some((interval) => i >= interval.startOffset && i < interval.endOffset)
         ) {
             protectedOffsets.add(i);
         }
@@ -299,6 +431,7 @@ function collectStructuralTextContainers(body: IDocumentBody): IStructuralTextCo
 
         if (char === DataStreamTreeTokenType.COLUMN_START) {
             columnStack.push({
+                atomicRange: { startOffset: i, endOffset: i + 1 },
                 startOffset: i + 1,
                 endOffset: i + 1,
                 paragraphs: [],
@@ -309,6 +442,9 @@ function collectStructuralTextContainers(body: IDocumentBody): IStructuralTextCo
             const column = columnStack.pop();
             if (column) {
                 column.endOffset = i;
+                if (column.atomicRange) {
+                    column.atomicRange.endOffset = i + 1;
+                }
                 containers.push(column);
             }
         } else if (char === DataStreamTreeTokenType.TABLE_CELL_START) {
@@ -377,22 +513,26 @@ function normalizeSelectionsForStructuralSentinels(
         return selections;
     }
 
-    const insertOffset = selections[0].startOffset;
+    const structuralSelections = insertBody == null
+        ? expandFullyCoveredStructuralSelections(selections, body)
+        : selections;
+
+    const insertOffset = structuralSelections[0].startOffset;
     const protectedOffsets = new Set<number>();
 
     // Plain text edits must not leave the document root, columns, or table cells without parser children.
     collectStructuralTextContainers(body).forEach((container) => {
-        protectRequiredContainerChildren(container, selections, insertBody, insertOffset, protectedOffsets);
+        protectRequiredContainerChildren(container, structuralSelections, insertBody, insertOffset, protectedOffsets);
     });
-    protectDeletedColumnBoundaryTokens(body, selections, protectedOffsets);
-    protectPartiallyDeletedBlockBoundaryTokens(body, selections, protectedOffsets);
+    protectDeletedColumnBoundaryTokens(body, structuralSelections, protectedOffsets);
+    protectPartiallyDeletedBlockBoundaryTokens(body, structuralSelections, protectedOffsets);
 
     if (!protectedOffsets.size) {
-        return selections;
+        return structuralSelections;
     }
 
     const normalizedSelections: ITextRange[] = [];
-    selections.forEach((selection) => {
+    structuralSelections.forEach((selection) => {
         let startOffset = selection.startOffset;
 
         for (let offset = selection.startOffset; offset < selection.endOffset; offset++) {
@@ -425,8 +565,8 @@ function normalizeSelectionsForStructuralSentinels(
     return normalizedSelections.length
         ? normalizedSelections
         : [{
-            ...selections[0],
-            endOffset: selections[0].startOffset,
+            ...structuralSelections[0],
+            endOffset: structuralSelections[0].startOffset,
             collapsed: true,
         }];
 }
@@ -438,16 +578,19 @@ export function deleteSelectionTextX(
     insertBody: Nullable<IDocumentBody> = null,
     keepBullet: boolean = true
 ): Array<TextXAction> {
-    selections.sort((a, b) => a.startOffset - b.startOffset);
-    selections = normalizeSelectionsForStructuralSentinels(selections, body, insertBody);
+    const normalizedSelections = normalizeSelectionsForStructuralSentinels(
+        [...selections].sort((a, b) => a.startOffset - b.startOffset),
+        body,
+        insertBody
+    );
     const dos: Array<TextXAction> = [];
     const { paragraphs = [] } = body;
 
     const paragraphInRange = paragraphs?.find(
-        (p) => p.startIndex >= selections[0].startOffset && p.startIndex < selections[0].endOffset
+        (p) => p.startIndex >= normalizedSelections[0].startOffset && p.startIndex < normalizedSelections[0].endOffset
     );
     let cursor = memoryCursor;
-    selections.forEach((selection) => {
+    normalizedSelections.forEach((selection) => {
         const { startOffset, endOffset } = selection;
         if (startOffset > cursor) {
             dos.push({
@@ -475,7 +618,7 @@ export function deleteSelectionTextX(
     }
 
     if (paragraphInRange?.bullet && keepBullet) {
-        const nextParagraph = paragraphs.find((p) => p.startIndex - memoryCursor >= (selections[selections.length - 1].endOffset - 1));
+        const nextParagraph = paragraphs.find((p) => p.startIndex - memoryCursor >= (normalizedSelections[normalizedSelections.length - 1].endOffset - 1));
         if (nextParagraph) {
             if (nextParagraph.startIndex > cursor) {
                 dos.push({

@@ -111,6 +111,8 @@ export interface IDocumentSkeletonPage {
     isNaturalPageOverflow?: boolean;
     st: number; // startIndex
     ed: number; // endIndex
+    /** Whether this cell page is only a layout placeholder covered by a merged cell. */
+    isMergedCellCovered?: boolean;
     skeDrawings: Map<string, IDocumentSkeletonDrawing>;
     skeTables: Map<string, IDocumentSkeletonTable>; // table skeletons in the page
     skeColumnGroups: Map<string, IDocumentSkeletonColumnGroup>; // column group skeletons in the page

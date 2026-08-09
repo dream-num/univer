@@ -43,12 +43,17 @@ describe('doc ime input controller', () => {
             onCompositionstart$,
             onCompositionupdate$,
             onCompositionend$,
+            getAllRectRanges: vi.fn(() => []),
         };
         const docImeInputManagerService = {
             setActiveRange: vi.fn((range) => {
                 storedActiveRange = range;
             }),
             getActiveRange: vi.fn(() => storedActiveRange),
+            getPreviousDocRanges: vi.fn(() => []),
+            getPreviousSelectionOptions: vi.fn(() => null),
+            setPreviousDocRanges: vi.fn(),
+            setPreviousSelectionOptions: vi.fn(),
             clearUndoRedoMutationParamsCache: vi.fn(),
         };
         const commandService = {
@@ -56,6 +61,9 @@ describe('doc ime input controller', () => {
         };
         const docStateEmitService = {
             emitStateChangeInfo: vi.fn(),
+        };
+        const docSelectionManagerService = {
+            getSelectionInfo: vi.fn(() => ({ options: null })),
         };
 
         new DocIMEInputController(
@@ -68,6 +76,7 @@ describe('doc ime input controller', () => {
                 getSkeleton: vi.fn(() => ({})),
             } as never,
             docStateEmitService as never,
+            docSelectionManagerService as never,
             commandService as never
         );
 
@@ -123,12 +132,17 @@ describe('doc ime input controller', () => {
             onCompositionstart$,
             onCompositionupdate$,
             onCompositionend$,
+            getAllRectRanges: vi.fn(() => []),
         };
         const docImeInputManagerService = {
             setActiveRange: vi.fn((range) => {
                 storedActiveRange = range;
             }),
             getActiveRange: vi.fn(() => storedActiveRange),
+            getPreviousDocRanges: vi.fn(() => []),
+            getPreviousSelectionOptions: vi.fn(() => null),
+            setPreviousDocRanges: vi.fn(),
+            setPreviousSelectionOptions: vi.fn(),
             clearUndoRedoMutationParamsCache: vi.fn(),
         };
         const commandService = {
@@ -136,6 +150,9 @@ describe('doc ime input controller', () => {
         };
         const docStateEmitService = {
             emitStateChangeInfo: vi.fn(),
+        };
+        const docSelectionManagerService = {
+            getSelectionInfo: vi.fn(() => ({ options: null })),
         };
 
         new DocIMEInputController(
@@ -148,6 +165,7 @@ describe('doc ime input controller', () => {
                 getSkeleton: vi.fn(() => ({})),
             } as never,
             docStateEmitService as never,
+            docSelectionManagerService as never,
             commandService as never
         );
 

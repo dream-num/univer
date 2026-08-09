@@ -22,6 +22,8 @@ import { BehaviorSubject } from 'rxjs';
 interface IDocChangeState {
     actions: JSONXActions;
     textRanges: Nullable<ITextRangeWithStyle[]>;
+    options?: { [key: string]: boolean };
+    isEditing?: boolean;
 }
 
 export interface IDocStateChangeParams {

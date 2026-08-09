@@ -533,6 +533,12 @@ describe('docs layout tools extra', () => {
                             marginLeft: 30,
                             marginRight: 40,
                             renderConfig: { isRenderStyle: BooleanNumber.TRUE },
+                            defaultHeaderId: 'section-header',
+                            defaultFooterId: 'section-footer',
+                            evenPageHeaderId: 'section-even-header',
+                            evenPageFooterId: 'section-even-footer',
+                            firstPageHeaderId: 'section-first-header',
+                            firstPageFooterId: 'section-first-footer',
                         };
                     }
                     return { sectionType: SectionType.CONTINUOUS };
@@ -547,15 +553,26 @@ describe('docs layout tools extra', () => {
                     marginTop: 20,
                     marginBottom: 20,
                     renderConfig: {},
+                    defaultHeaderId: 'document-header',
+                    defaultFooterId: 'document-footer',
                 },
             },
         };
 
         const sectionConfig = prepareSectionBreakConfig(ctx as any, 0);
         expect(sectionConfig.pageSize?.width).toBeGreaterThan(0);
-        expect(sectionConfig.headerIds).toEqual(expect.objectContaining({
-            defaultHeaderId: expect.any(String),
-        }));
+        expect(sectionConfig.headerIds).toEqual({
+            defaultHeaderId: '',
+            evenPageHeaderId: '',
+            firstPageHeaderId: '',
+        });
+        expect(sectionConfig.footerIds).toEqual({
+            defaultFooterId: '',
+            evenPageFooterId: '',
+            firstPageFooterId: '',
+        });
+        expect(sectionConfig.evenAndOddHeaders).toBe(BooleanNumber.FALSE);
+        expect(sectionConfig.useFirstPageHeaderFooter).toBe(BooleanNumber.FALSE);
 
         const dirtyCtx = {
             isDirty: true,

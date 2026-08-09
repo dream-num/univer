@@ -169,10 +169,14 @@ describe('doc skeleton', () => {
         const header = createPage(DocumentSkeletonPageType.HEADER, 200);
         const footer = createPage(DocumentSkeletonPageType.FOOTER, 300);
         const cell = createPage(DocumentSkeletonPageType.CELL, 100, 'table-1');
+        const coveredCell = createPage(DocumentSkeletonPageType.CELL, 0, 'table-1');
+        coveredCell.page.ed = 0;
+        coveredCell.page.isMergedCellCovered = true;
 
-        const row = { cells: [cell.page] } as any;
+        const row = { cells: [coveredCell.page, cell.page] } as any;
         const table = { rows: [row], tableId: 'table-1' } as any;
         row.parent = table;
+        coveredCell.page.parent = row;
         cell.page.parent = row;
         table.parent = body.page;
         body.page.skeTables = new Map([['table-1', table]]);
@@ -212,7 +216,7 @@ describe('doc skeleton', () => {
 
         const cellPos = skeleton.findPositionByGlyph(cell.glyphs.glyphA as any, 0);
         expect(cellPos?.pageType).toBe(DocumentSkeletonPageType.CELL);
-        expect(cellPos?.path).toEqual(['pages', 0, 'skeTables', 'table-1', 'rows', 0, 'cells', 0]);
+        expect(cellPos?.path).toEqual(['pages', 0, 'skeTables', 'table-1', 'rows', 0, 'cells', 1]);
 
         const byBodyCoord = skeleton.findGlyphByPosition({
             pageType: DocumentSkeletonPageType.BODY,
@@ -308,6 +312,7 @@ describe('doc skeleton', () => {
 
         const nodePosBody = skeleton.findNodePositionByCharIndex(2, true);
         expect(nodePosBody?.pageType).toBe(DocumentSkeletonPageType.BODY);
+        expect(skeleton.findNodePositionByCharIndex(0)?.pageType).toBe(DocumentSkeletonPageType.BODY);
         const nodePosHeader = skeleton.findNodePositionByCharIndex(201, false, 'header-seg', 0);
         expect(nodePosHeader?.pageType).toBe(DocumentSkeletonPageType.HEADER);
         const nodePosFooter = skeleton.findNodePositionByCharIndex(301, false, 'footer-seg', 0);
@@ -316,6 +321,7 @@ describe('doc skeleton', () => {
         expect(nodePosCell?.pageType).toBe(DocumentSkeletonPageType.CELL);
 
         expect(skeleton.findNodeByCharIndex(2)).toBe(body.glyphs.glyphB);
+        expect(skeleton.findNodeByCharIndex(0)).toBe(body.glyphs.listGlyph);
         expect(skeleton.findNodeByCharIndex(201, 'header-seg', 0)).toBe(header.glyphs.glyphA);
         expect(skeleton.findNodeByCharIndex(999)).toBeUndefined();
 

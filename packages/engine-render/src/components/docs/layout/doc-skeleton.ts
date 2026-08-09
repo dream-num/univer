@@ -235,6 +235,10 @@ function resolveMostSpecificPageByCharIndex(page: IDocumentSkeletonPage, charInd
     for (const table of page.skeTables?.values() ?? []) {
         for (const row of table.rows) {
             for (const cell of row.cells) {
+                if (cell.isMergedCellCovered) {
+                    continue;
+                }
+
                 const { st, ed } = cell;
 
                 if (charIndex >= st && charIndex <= ed) {

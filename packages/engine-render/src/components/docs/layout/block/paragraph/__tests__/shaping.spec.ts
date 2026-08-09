@@ -23,6 +23,30 @@ import { shaping } from '../shaping';
 import { createParagraphLayoutTestBed } from './create-paragraph-layout-test-bed';
 
 describe('shaping', () => {
+    it('uses paragraph text style for an empty traditional paragraph mark', () => {
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('', {
+            documentStyle: {
+                documentFlavor: 1,
+                textStyle: { ff: 'Arial', fs: 11 },
+            },
+            body: {
+                textRuns: [],
+                paragraphs: [{
+                    startIndex: 0,
+                    paragraphId: 'compact-empty-paragraph',
+                    paragraphStyle: { textStyle: { ff: 'Arial', fs: 3 } },
+                }],
+            },
+        });
+
+        const glyphs = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig)
+            .flatMap((item) => item.glyphs);
+        const paragraphMark = glyphs.find((glyph) => glyph.streamType === DataStreamTreeTokenType.PARAGRAPH);
+
+        expect(paragraphMark?.fontStyle?.originFontSize).toBe(3);
+        expect(paragraphMark?.ts).toMatchObject({ ff: 'Arial', fs: 3 });
+    });
+
     it('shapes plain English text', () => {
         const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('Hello world');
 

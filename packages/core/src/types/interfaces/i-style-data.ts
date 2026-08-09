@@ -259,6 +259,8 @@ export interface IStyleBase {
      * fontFamily
      */
     ff?: Nullable<string>;
+    /** Font family used for East Asian characters in rich text. */
+    eastAsiaFontFamily?: Nullable<string>;
     /** Font size in points (pt), where 1 pt is 1/72 inch. */
     fs?: number;
     /**
@@ -356,6 +358,7 @@ export interface IStyleData extends IStyleBase {
  */
 export const STYLE_KEYS = defineExactKeys<IStyleData>()([
     'ff',
+    'eastAsiaFontFamily',
     'fs',
     'it',
     'bl',

@@ -61,6 +61,8 @@ interface IGlyphHorizonData {
 export class FontCache {
     private static _getTextHeightCache: { [key: string]: { width: number; height: number } } = {};
 
+    private static _normalLineHeightCache: Map<string, number> = new Map();
+
     private static _context: CanvasRenderingContext2D;
 
     private static _fontDataMap: Map<string, IFontData> = new Map();
@@ -199,7 +201,38 @@ export class FontCache {
             bBox = this._calculateBoundingBoxByMeasureText(measureText, fontStyle);
         }
 
-        return bBox;
+        const normalLineHeight = this.getNormalLineHeight(fontStyle);
+        return normalLineHeight == null ? bBox : { ...bBox, normalLineHeight };
+    }
+
+    static getNormalLineHeight(fontStyle: IDocumentSkeletonFontStyle): number | undefined {
+        const { fontString, fontSize, originFontSize } = fontStyle;
+        const cached = this._normalLineHeightCache.get(fontString);
+        if (cached != null) {
+            return cached * originFontSize / fontSize;
+        }
+
+        if (typeof document === 'undefined' || document.body == null) {
+            return undefined;
+        }
+
+        const span = document.createElement('span');
+        span.style.position = 'absolute';
+        span.style.visibility = 'hidden';
+        span.style.whiteSpace = 'nowrap';
+        span.style.font = fontString;
+        span.style.lineHeight = 'normal';
+        span.textContent = DEFAULT_MEASURE_TEXT;
+        document.body.appendChild(span);
+        const height = span.getBoundingClientRect().height;
+        span.remove();
+
+        if (!Number.isFinite(height) || height <= 0) {
+            return undefined;
+        }
+
+        this._normalLineHeightCache.set(fontString, height);
+        return height * originFontSize / fontSize;
     }
 
     /**

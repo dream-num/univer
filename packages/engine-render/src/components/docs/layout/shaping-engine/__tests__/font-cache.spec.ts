@@ -22,6 +22,7 @@ describe('font cache', () => {
         (FontCache as any)._globalFontMeasureCache = new Map();
         (FontCache as any)._fontDataMap = new Map();
         (FontCache as any)._getTextHeightCache = {};
+        (FontCache as any)._normalLineHeightCache = new Map();
         (FontCache as any)._context = null;
     });
 
@@ -105,6 +106,7 @@ describe('font cache', () => {
     });
 
     it('calculates text bounding box by font data and glyph info', () => {
+        vi.spyOn(FontCache, 'getNormalLineHeight').mockReturnValue(18);
         (FontCache as any)._fontDataMap = new Map([
             ['Local Font', {
                 notDefWidth: 0.6,
@@ -138,6 +140,7 @@ describe('font cache', () => {
         expect(byFont.width).toBeGreaterThan(0);
         expect(byFont.ba).toBeCloseTo(9.6);
         expect(byFont.abd).toBeCloseTo(1.8);
+        expect(byFont.normalLineHeight).toBe(18);
 
         (FontCache as any)._context = {
             font: '',

@@ -48,4 +48,43 @@ describe('document compatibility policy', () => {
         expect(applyFontMetricCompatibility('5', fontStyle, bBox, traditional).width).toBeCloseTo(14.72);
         expect(applyFontMetricCompatibility('5', fontStyle, bBox, modern).width).toBe(16);
     });
+
+    it('scales only non-bold primary Arial Latin glyphs in traditional documents', () => {
+        const normalArial = {
+            ...fontStyle,
+            fontString: 'normal normal 11.5pt Arial',
+            fontSize: 11.5,
+            originFontSize: 11.5,
+            fontFamily: 'Arial',
+            fontCache: 'normal normal 11.5pt Arial',
+        } as IDocumentSkeletonFontStyle;
+        const boldArial = {
+            ...normalArial,
+            fontString: 'normal bold 11.5pt Arial',
+            fontCache: 'normal bold 11.5pt Arial',
+        } as IDocumentSkeletonFontStyle;
+        const browserMeasuredGlyph = { ...bBox, width: 10 };
+        const traditional = getDocumentCompatibilityPolicy(DocumentFlavor.TRADITIONAL);
+        const modern = getDocumentCompatibilityPolicy(DocumentFlavor.MODERN);
+
+        expect(applyFontMetricCompatibility('A', normalArial, browserMeasuredGlyph, traditional).width).toBeCloseTo(9.8);
+        expect(applyFontMetricCompatibility('A', boldArial, browserMeasuredGlyph, traditional).width).toBe(10);
+        expect(applyFontMetricCompatibility('A', normalArial, browserMeasuredGlyph, modern).width).toBe(10);
+        expect(applyFontMetricCompatibility('中', normalArial, browserMeasuredGlyph, traditional).width).toBe(10);
+    });
+
+    it('applies the traditional SimSun width policy when it is the East Asia fallback family', () => {
+        const simSunFallback = {
+            ...fontStyle,
+            fontString: 'normal normal 12pt "Times New Roman", 宋体',
+            fontSize: 12,
+            originFontSize: 12,
+            fontFamily: '"Times New Roman", 宋体',
+            fontCache: 'normal normal 12pt "Times New Roman", 宋体',
+        } as IDocumentSkeletonFontStyle;
+        const traditional = getDocumentCompatibilityPolicy(DocumentFlavor.TRADITIONAL);
+
+        expect(applyFontMetricCompatibility('中', simSunFallback, { ...bBox, width: 10 }, traditional).width)
+            .toBeCloseTo(9.7);
+    });
 });

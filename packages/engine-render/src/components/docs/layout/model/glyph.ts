@@ -31,7 +31,11 @@ import {
     isCjkLeftAlignedPunctuation,
     isCjkRightAlignedPunctuation,
 } from '../../../../basics/tools';
-import { applyFontMetricCompatibility, getDocumentCompatibilityPolicy } from '../../document-compatibility';
+import {
+    applyFontMetricCompatibility,
+    getDocumentCompatibilityPolicy,
+    isTraditionalDocumentCompatibility,
+} from '../../document-compatibility';
 import { FontCache } from '../shaping-engine/font-cache';
 import { validationGrid } from '../tools';
 
@@ -250,13 +254,17 @@ export function _createSkeletonWordOrLetter(
     let bBox = null;
     let xOffset = 0;
 
+    const documentCompatibilityPolicy = config.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy();
     bBox = FontCache.getTextSize(content, fontStyle);
     bBox = applyFontMetricCompatibility(
         content,
         fontStyle,
         bBox,
-        config.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy()
+        documentCompatibilityPolicy
     );
+    if (content === DataStreamTreeTokenType.PARAGRAPH && isTraditionalDocumentCompatibility(documentCompatibilityPolicy)) {
+        bBox = { ...bBox, width: 0 };
+    }
 
     const { width: contentWidth = 0 } = bBox;
     let width = glyphWidth ?? contentWidth;

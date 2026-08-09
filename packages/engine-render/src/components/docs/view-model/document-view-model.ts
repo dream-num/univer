@@ -80,8 +80,9 @@ export function parseDataStreamToTree(dataStream: string, tables?: ICustomTable[
     const tableNodeCache: Map<string, ITableNodeCache> = new Map();
     // Only use to cache the outer paragraphs.
     const paragraphList: DataStreamTreeNode[] = [];
-    // Use to cache paragraphs in cell.
-    const cellParagraphList: DataStreamTreeNode[] = [];
+    // Each open table cell owns its paragraphs. A single shared list makes an
+    // inner table consume the paragraphs that precede it in the outer cell.
+    const cellParagraphLists: DataStreamTreeNode[][] = [];
     const tableList: ITableCache[] = [];
     const tableRowList: DataStreamTreeNode[] = [];
     const tableCellList: DataStreamTreeNode[] = [];
@@ -93,7 +94,7 @@ export function parseDataStreamToTree(dataStream: string, tables?: ICustomTable[
 
     const getParagraphList = () => {
         if (tableCellList.length > 0) {
-            return cellParagraphList;
+            return cellParagraphLists[cellParagraphLists.length - 1];
         }
 
         if (columnGroupList.length > 0) {
@@ -120,11 +121,13 @@ export function parseDataStreamToTree(dataStream: string, tables?: ICustomTable[
             content += DataStreamTreeTokenType.PARAGRAPH;
 
             const paragraphNode = DataStreamTreeNode.create(DataStreamTreeNodeType.PARAGRAPH, content);
+            let wrappedTableStartIndex: number | undefined;
 
             const lastTableCache = tableList[tableList.length - 1];
             if (lastTableCache && lastTableCache.isFinished) {
                 // Paragraph Node will only has one table node.
                 batchParent(paragraphNode, [lastTableCache.table], DataStreamTreeNodeType.PARAGRAPH);
+                wrappedTableStartIndex = lastTableCache.table.startIndex;
 
                 if (tables) {
                     const table = tables.find((table) => table.startIndex === lastTableCache.table.startIndex && table.endIndex === lastTableCache.table.endIndex + 1);
@@ -137,13 +140,13 @@ export function parseDataStreamToTree(dataStream: string, tables?: ICustomTable[
             }
 
             // Paragraph start and end index is from the first char of the paragraph to the last char of the paragraph. not include the Table content.
-            paragraphNode.setIndexRange(i - content.length + 1, i);
+            paragraphNode.setIndexRange(wrappedTableStartIndex ?? i - content.length + 1, i);
             paragraphNode.addBlocks(currentBlocks);
             currentBlocks.length = 0;
             content = '';
 
             if (tableCellList.length > 0) {
-                cellParagraphList.push(paragraphNode);
+                cellParagraphLists[cellParagraphLists.length - 1].push(paragraphNode);
             } else if (columnGroupList.length > 0) {
                 columnParagraphList.push(paragraphNode);
             } else {
@@ -152,7 +155,7 @@ export function parseDataStreamToTree(dataStream: string, tables?: ICustomTable[
         } else if (char === DataStreamTreeTokenType.SECTION_BREAK) {
             const sectionNode = DataStreamTreeNode.create(DataStreamTreeNodeType.SECTION_BREAK);
             const tempParagraphList = tableCellList.length > 0
-                ? cellParagraphList
+                ? cellParagraphLists[cellParagraphLists.length - 1]
                 : columnGroupList.length > 0
                     ? columnParagraphList
                     : paragraphList;
@@ -212,6 +215,7 @@ export function parseDataStreamToTree(dataStream: string, tables?: ICustomTable[
             const cellNode = DataStreamTreeNode.create(DataStreamTreeNodeType.TABLE_CELL);
 
             tableCellList.push(cellNode);
+            cellParagraphLists.push([]);
         } else if (char === DataStreamTreeTokenType.TABLE_END) {
             const lastTable = tableList[tableList.length - 1];
             lastTable.isFinished = true;
@@ -223,6 +227,7 @@ export function parseDataStreamToTree(dataStream: string, tables?: ICustomTable[
             batchParent(lastTableCache.table, [rowNode!], DataStreamTreeNodeType.TABLE);
         } else if (char === DataStreamTreeTokenType.TABLE_CELL_END) {
             const cellNode = tableCellList.pop();
+            cellParagraphLists.pop();
 
             const lastRow = tableRowList[tableRowList.length - 1];
 

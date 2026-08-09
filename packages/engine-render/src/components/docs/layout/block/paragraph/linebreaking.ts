@@ -67,10 +67,44 @@ function _endsWithToken(text: string, glyphs: IDocumentSkeletonGlyph[], token: D
     return text.endsWith(token) || glyphs[glyphs.length - 1]?.raw === token || glyphs[glyphs.length - 1]?.streamType === token;
 }
 
-function _isMarkedDocxColumnBreak(viewModel: DocumentViewModel, absoluteIndex: number): boolean {
+function _isRenderedPageBreak(viewModel: DocumentViewModel, absoluteIndex: number): boolean {
+    return viewModel.getBody?.()?.renderedPageBreaks?.includes(absoluteIndex) === true;
+}
+
+function _hasReachedRenderedPageBreak(
+    viewModel: DocumentViewModel,
+    absoluteIndex: number,
+    currentPage: IDocumentSkeletonPage
+): boolean {
+    const body = viewModel.getBody?.();
+    const renderedBreakIndex = body?.renderedPageBreaks?.indexOf(absoluteIndex) ?? -1;
+    if (renderedBreakIndex < 0) {
+        return false;
+    }
+
+    // Page-number restarts make the visible page number different from the physical page ordinal.
+    // Keep the conservative boundary behavior until the skeleton exposes a physical page index.
+    const hasPageNumberRestart = body?.sectionBreaks?.some(
+        (sectionBreak) => sectionBreak.startIndex <= absoluteIndex && sectionBreak.pageNumberStart != null
+    ) === true;
+    if (hasPageNumberRestart) {
+        return false;
+    }
+
+    const targetPageNumber = currentPage.pageNumberStart + renderedBreakIndex + 1;
+    return currentPage.pageNumber >= targetPageNumber;
+}
+
+function _isInsideFlowTable(viewModel: DocumentViewModel, absoluteIndex: number): boolean {
+    return viewModel.getBody?.()?.tables?.some(
+        (table) => table.startIndex <= absoluteIndex && absoluteIndex < table.endIndex
+    ) === true;
+}
+
+function _isMarkedColumnBreak(viewModel: DocumentViewModel, absoluteIndex: number): boolean {
     const customRange = viewModel.getCustomRange(absoluteIndex);
 
-    return customRange?.properties?.docxBreakType === DocxBreakType.COLUMN;
+    return customRange?.properties?.breakType === DocxBreakType.COLUMN;
 }
 
 function _glyphCount(glyphs: IDocumentSkeletonGlyph[]): number {
@@ -700,7 +734,8 @@ export function lineBreaking(
     curPage: IDocumentSkeletonPage,
     paragraphNode: DataStreamTreeNode,
     sectionBreakConfig: ISectionBreakConfig,
-    tableSkeleton: Nullable<IDocumentSkeletonTable>
+    tableSkeleton: Nullable<IDocumentSkeletonTable>,
+    tablePageBreakBefore = false
 ): IDocumentSkeletonPage[] {
     const { skeletonResourceReference } = ctx;
     const {
@@ -758,6 +793,7 @@ export function lineBreaking(
 
     const paragraphConfig: IParagraphConfig = {
         paragraphIndex: endIndex,
+        isInsideTable: _isInsideFlowTable(viewModel, endIndex),
         documentCompatibilityPolicy,
         paragraphStyle: resolvedParagraphStyle,
         docxFallbackAnchorLeft: _getFollowingIndentedParagraphAnchorLeft(
@@ -831,28 +867,31 @@ export function lineBreaking(
     segmentParagraphCache.set(endIndex, paragraphConfig);
 
     let allPages = [curPage];
-    const explicitStructuralBreak = _hasExplicitStructuralBreak(shapedTextList);
     const traditionalPagination = isTraditionalDocumentCompatibility(documentCompatibilityPolicy);
+    const explicitStructuralBreak = _hasExplicitStructuralBreak(shapedTextList);
     const forcePageBreakBefore =
         traditionalPagination &&
-        resolvedParagraphStyle.pageBreakBefore === BooleanNumber.TRUE &&
+        (resolvedParagraphStyle.pageBreakBefore === BooleanNumber.TRUE || tablePageBreakBefore) &&
         _hasPageContent(curPage) &&
         !_hasOnlyExplicitPageBoundaryMarkers(curPage);
     if (forcePageBreakBefore) {
-        allPages.push(
-            createSkeletonPage(
-                ctx,
-                sectionBreakConfig,
-                skeletonResourceReference,
-                _getNextPageNumber(curPage),
-                BreakType.PAGE
-            )
+        const nextPage = createSkeletonPage(
+            ctx,
+            sectionBreakConfig,
+            skeletonResourceReference,
+            _getNextPageNumber(curPage),
+            BreakType.PAGE
         );
+        nextPage.isExplicitPageBreak = true;
+        allPages.push(nextPage);
         ctx.paragraphsOpenNewPage.add(endIndex);
     }
     let isParagraphFirstShapedText = true; // First shaped text
+    let renderParagraphBullet = true;
     let shapedTextOffset = 0;
-    for (const [_index, { text, glyphs, breakPointType }] of _mergeAdjacentCustomBlockShapedTexts(shapedTextList, paragraphNonInlineSkeDrawingsByBlockId).entries()) {
+    let renderedPageBreakAnchorPage = curPage;
+    const mergedShapedTextList = _mergeAdjacentCustomBlockShapedTexts(shapedTextList, paragraphNonInlineSkeDrawingsByBlockId);
+    for (const [index, { text, glyphs, breakPointType }] of mergedShapedTextList.entries()) {
         const textStartIndex = paragraphNode.startIndex + shapedTextOffset;
         const textGlyphCount = _glyphCount(glyphs);
         const textEndIndex = textStartIndex + textGlyphCount;
@@ -876,30 +915,53 @@ export function lineBreaking(
                 sectionBreakConfig,
                 paragraphConfig,
                 isParagraphFirstShapedText || hasOnlyFloatingCustomBlockGlyphs(glyphs, paragraphNonInlineSkeDrawingsByBlockId),
-                breakPointType
+                breakPointType,
+                renderParagraphBullet
             );
 
             isParagraphFirstShapedText = false;
+            renderParagraphBullet = false;
         };
 
         if (_endsWithToken(text, glyphs, DataStreamTreeTokenType.PAGE_BREAK)) {
             pushPending();
-            allPages.push(
-                createSkeletonPage(
+            const currentPage = allPages[allPages.length - 1];
+            const isRenderedPageBreak =
+                traditionalPagination && _isRenderedPageBreak(viewModel, textEndIndex - 1);
+            const naturallyAdvancedInsideTable =
+                isRenderedPageBreak &&
+                _isInsideFlowTable(viewModel, textEndIndex - 1) &&
+                currentPage.isNaturalPageOverflow === true;
+            const alreadyAdvancedNaturally =
+                isRenderedPageBreak &&
+                (
+                    currentPage !== renderedPageBreakAnchorPage ||
+                    naturallyAdvancedInsideTable ||
+                    _hasReachedRenderedPageBreak(viewModel, textEndIndex - 1, currentPage)
+                );
+            if (
+                !alreadyAdvancedNaturally &&
+                _hasPageContent(currentPage) &&
+                !_hasOnlyExplicitPageBoundaryMarkers(currentPage)
+            ) {
+                const nextPage = createSkeletonPage(
                     ctx,
                     sectionBreakConfig,
                     skeletonResourceReference,
-                    _getNextPageNumber(allPages[allPages.length - 1]),
+                    _getNextPageNumber(currentPage),
                     BreakType.PAGE
-                )
-            );
+                );
+                nextPage.isExplicitPageBreak = true;
+                allPages.push(nextPage);
+            }
+            renderedPageBreakAnchorPage = allPages[allPages.length - 1];
             paragraphNonInlineSkeDrawings.clear();
             isParagraphFirstShapedText = true;
             shapedTextOffset += textGlyphCount;
             continue;
         } else if (
             _endsWithToken(text, glyphs, DataStreamTreeTokenType.COLUMN_BREAK) &&
-            (!isTraditionalDocumentCompatibility(documentCompatibilityPolicy) || _isMarkedDocxColumnBreak(viewModel, textEndIndex - 1))
+            (!isTraditionalDocumentCompatibility(documentCompatibilityPolicy) || _isMarkedColumnBreak(viewModel, textEndIndex - 1))
         ) {
             pushPending();
             // Column break mark, still within the same section

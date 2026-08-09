@@ -88,7 +88,7 @@ describe('FDocument in Node', () => {
         expect(document?.save().body?.customRanges).toContainEqual(expect.objectContaining({
             startIndex: 3,
             endIndex: 3,
-            properties: { docxBreakType: 'column' },
+            properties: { breakType: 'column' },
         }));
     });
 

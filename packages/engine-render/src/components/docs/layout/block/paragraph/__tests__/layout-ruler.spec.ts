@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDocumentSkeletonGlyph } from '../../../../../../basics/i-document-skeleton-cached';
+import type { IDocumentSkeletonDivide, IDocumentSkeletonGlyph } from '../../../../../../basics/i-document-skeleton-cached';
 import type { IParagraphConfig } from '../../../../../../basics/interfaces';
 import {
     BooleanNumber,
@@ -199,6 +199,26 @@ describe('layout-ruler', () => {
         }
     });
 
+    it('aligns following text to an explicit end tab stop', () => {
+        const tab = createGlyph(DataStreamTreeTokenType.TAB, 36);
+        tab.glyphType = GlyphType.TAB;
+        tab.left = 100;
+        const pageNumber = createGlyph('1', 8);
+        const paragraphMark = createGlyph(DataStreamTreeTokenType.PARAGRAPH, 8);
+        const divide = { glyphGroup: [tab], width: 580 } as IDocumentSkeletonDivide;
+        const paragraphConfig = {
+            paragraphStyle: {
+                tabStops: [{ offset: 600, alignment: 3, leader: 2 }],
+            },
+        } as IParagraphConfig;
+
+        __testing.adjustExplicitTabStop(divide, [pageNumber, paragraphMark], paragraphConfig);
+
+        expect(tab.width).toBe(464);
+        expect(tab.bBox.width).toBe(464);
+        expect(tab.tabLeader).toBe(2);
+    });
+
     it('uses trailing CJK punctuation shrinkability when deciding line overflow', () => {
         const text = createGlyph('字', 10);
         const punctuation = createGlyph('，', 10);
@@ -253,6 +273,7 @@ describe('layout-ruler', () => {
 
         expect(paragraphConfig.paragraphStyle?.indentStart).toEqual({ v: 12 });
         expect(paragraphConfig.paragraphStyle?.hanging).toEqual({ v: 12 });
+        expect(curPage.sections[0].columns[0].lines[0].divides[0].paddingLeft).toBe(0);
         expect(curPage.sections[0].columns[0].lines[0].divides[0].glyphGroup[0].width).toBe(12);
     });
 
@@ -548,8 +569,20 @@ describe('layout-ruler', () => {
         expect(getLineBoxHeight(metrics)).toBeCloseTo(24, 4);
     });
 
+    it('uses the font normal line height as the base for Word auto spacing', () => {
+        const metrics = getLineHeightMetrics(17, 0, 24, GridType.DEFAULT, 1.5, SpacingRule.AUTO, BooleanNumber.FALSE, true, true, 18.6666666667);
+
+        expect(getLineBoxHeight(metrics)).toBeCloseTo(28, 4);
+    });
+
     it('does not multiply inline custom block height by auto line spacing', () => {
         const metrics = getLineHeightMetrics(624, 0, 15.6, GridType.LINES, 1.5, SpacingRule.AUTO, BooleanNumber.FALSE, true, false);
+
+        expect(getLineBoxHeight(metrics)).toBeCloseTo(624, 4);
+    });
+
+    it('does not collapse an inline custom block to exact text line spacing', () => {
+        const metrics = getLineHeightMetrics(624, 0, 15.6, GridType.LINES, 20.8, SpacingRule.EXACT, BooleanNumber.FALSE, true, false);
 
         expect(getLineBoxHeight(metrics)).toBeCloseTo(624, 4);
     });
@@ -558,6 +591,24 @@ describe('layout-ruler', () => {
         const metrics = getLineHeightMetrics(16, 0, 15.6, GridType.LINES, 1.5, SpacingRule.AUTO, BooleanNumber.TRUE, true);
 
         expect(getLineBoxHeight(metrics)).toBeCloseTo(23.4, 4);
+    });
+
+    it('snaps multiline auto spacing to whole document-grid lines', () => {
+        const metrics = getLineHeightMetrics(16, 0, 15.6, GridType.LINES, 1.5, SpacingRule.AUTO, BooleanNumber.TRUE, true, true, undefined, true);
+
+        expect(getLineBoxHeight(metrics)).toBeCloseTo(31.2, 4);
+    });
+
+    it('occupies enough whole document-grid lines for tall glyphs', () => {
+        const metrics = getLineHeightMetrics(28, 0, 20.8, GridType.LINES, 1, SpacingRule.AUTO, BooleanNumber.TRUE, true);
+
+        expect(getLineBoxHeight(metrics)).toBeCloseTo(41.6, 4);
+    });
+
+    it('does not apply line pitch for a character-only grid', () => {
+        const metrics = getLineHeightMetrics(16, 0, 30, GridType.SNAP_TO_CHARS, 1.5, SpacingRule.AUTO, BooleanNumber.TRUE, true);
+
+        expect(getLineBoxHeight(metrics)).toBeCloseTo(24, 4);
     });
 
     it('treats at-least spacing as a minimum line box height', () => {

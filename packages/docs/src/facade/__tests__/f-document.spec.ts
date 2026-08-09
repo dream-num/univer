@@ -264,7 +264,7 @@ describe('FDocument', () => {
             startIndex: 2,
             endIndex: 2,
             wholeEntity: true,
-            properties: { docxBreakType: 'column' },
+            properties: { breakType: 'column' },
         }));
     });
 

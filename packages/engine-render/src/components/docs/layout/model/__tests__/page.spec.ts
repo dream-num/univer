@@ -18,15 +18,19 @@ import {
     BooleanNumber,
     ColumnSeparatorType,
     DocumentBlockRangeType,
+    DocumentFlavor,
+    GridType,
     PageOrientType,
     PositionedObjectLayoutType,
 } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { DocumentSkeletonPageType } from '../../../../../basics/i-document-skeleton-cached';
+import { getDocumentCompatibilityPolicy } from '../../../document-compatibility';
 import {
     createNullCellPage,
     createSkeletonCellPages,
     createSkeletonPage,
+    expandCellPageHeightForFlowTables,
     expandCellPageHeightForInlineDrawings,
 } from '../page';
 
@@ -190,6 +194,50 @@ describe('page model', () => {
         expect(page.marginBottom).toBe(40);
     });
 
+    it('keeps traditional document margins when header and footer content overlap the body', () => {
+        dealWithSectionMock.mockImplementation((_ctx: any, _vm: any, _node: any, areaPage: any) => ({
+            pages: [{
+                ...areaPage,
+                height: 80,
+                sections: [{ columns: [{ lines: [{ paragraphIndex: 0 }] }] }],
+                skeDrawings: new Map(),
+                skeTables: new Map(),
+            }],
+        }));
+
+        const skeletonResourceReference = createSkeletonResourceReference();
+        const ctx = {
+            layoutStartPointer: {},
+            skeletonResourceReference,
+            isDirty: false,
+        } as any;
+
+        const page = createSkeletonPage(
+            ctx,
+            {
+                pageNumberStart: 1,
+                pageSize: { width: 816, height: 1056 },
+                headerIds: { defaultHeaderId: 'h-default' },
+                footerIds: { defaultFooterId: 'f-default' },
+                headerTreeMap: new Map([['h-default', { getChildren: () => [{}] }]]),
+                footerTreeMap: new Map([['f-default', { getChildren: () => [{}] }]]),
+                columnProperties: [],
+                marginTop: 24,
+                marginBottom: 42,
+                marginHeader: 24,
+                marginFooter: 24,
+                documentCompatibilityPolicy: getDocumentCompatibilityPolicy(DocumentFlavor.TRADITIONAL),
+            } as any,
+            skeletonResourceReference,
+            1
+        );
+
+        expect(page.originMarginTop).toBe(24);
+        expect(page.marginTop).toBe(24);
+        expect(page.originMarginBottom).toBe(42);
+        expect(page.marginBottom).toBe(42);
+    });
+
     it('does not create negative-width columns for oversized single-column section properties', () => {
         const skeletonResourceReference = createSkeletonResourceReference();
         const ctx = {
@@ -335,6 +383,111 @@ describe('page model', () => {
         expect(updateInlineDrawingCoordsAndBorderMock).toHaveBeenCalled();
     });
 
+    it('preserves document text-layout settings in a table cell section', () => {
+        const ctx = {
+            layoutStartPointer: {},
+            skeletonResourceReference: createSkeletonResourceReference(),
+            isDirty: false,
+        } as any;
+        const compatibilityPolicy = getDocumentCompatibilityPolicy(DocumentFlavor.TRADITIONAL);
+        const sectionBreakConfig = {
+            sectionId: 'traditional-section',
+            lists: [],
+            localeService: {} as any,
+            drawings: {},
+            pageSize: { width: 300, height: 200 },
+            headerTreeMap: new Map(),
+            footerTreeMap: new Map(),
+            documentCompatibilityPolicy: compatibilityPolicy,
+            documentTextStyle: { ff: '宋体', fs: 12 },
+            paragraphLineGapDefault: 2,
+            defaultTabStop: 28,
+            adjustLineHeightInTable: BooleanNumber.TRUE,
+            characterSpacingControl: 2,
+            useFELayout: BooleanNumber.TRUE,
+            spaceWidthEastAsian: BooleanNumber.TRUE,
+            autoHyphenation: BooleanNumber.TRUE,
+            consecutiveHyphenLimit: 3,
+            doNotHyphenateCaps: BooleanNumber.TRUE,
+            hyphenationZone: 12,
+            charSpace: 1,
+            linePitch: 20.8,
+            gridType: GridType.LINES,
+            renderConfig: { horizontalAlign: 1 },
+        } as any;
+        const tableConfig = {
+            tableId: 'traditional-table',
+            tableRows: [{ tableCells: [{}] }],
+            tableColumns: [{ size: { width: { v: 120 } } }],
+        } as any;
+
+        const { sectionBreakConfig: cellConfig } = createNullCellPage(
+            ctx,
+            sectionBreakConfig,
+            tableConfig,
+            0,
+            0
+        );
+
+        expect({
+            documentTextStyle: cellConfig.documentTextStyle,
+            paragraphLineGapDefault: cellConfig.paragraphLineGapDefault,
+            defaultTabStop: cellConfig.defaultTabStop,
+            adjustLineHeightInTable: cellConfig.adjustLineHeightInTable,
+            characterSpacingControl: cellConfig.characterSpacingControl,
+            useFELayout: cellConfig.useFELayout,
+            spaceWidthEastAsian: cellConfig.spaceWidthEastAsian,
+            autoHyphenation: cellConfig.autoHyphenation,
+            consecutiveHyphenLimit: cellConfig.consecutiveHyphenLimit,
+            doNotHyphenateCaps: cellConfig.doNotHyphenateCaps,
+            hyphenationZone: cellConfig.hyphenationZone,
+            charSpace: cellConfig.charSpace,
+            linePitch: cellConfig.linePitch,
+            gridType: cellConfig.gridType,
+            renderConfig: cellConfig.renderConfig,
+        }).toEqual({
+            documentTextStyle: { ff: '宋体', fs: 12 },
+            paragraphLineGapDefault: 2,
+            defaultTabStop: 28,
+            adjustLineHeightInTable: BooleanNumber.TRUE,
+            characterSpacingControl: 2,
+            useFELayout: BooleanNumber.TRUE,
+            spaceWidthEastAsian: BooleanNumber.TRUE,
+            autoHyphenation: BooleanNumber.TRUE,
+            consecutiveHyphenLimit: 3,
+            doNotHyphenateCaps: BooleanNumber.TRUE,
+            hyphenationZone: 12,
+            charSpace: 1,
+            linePitch: 20.8,
+            gridType: GridType.LINES,
+            renderConfig: { horizontalAlign: 1 },
+        });
+        expect(cellConfig.documentCompatibilityPolicy).toBe(compatibilityPolicy);
+
+        const { sectionBreakConfig: compactCellConfig } = createNullCellPage(
+            ctx,
+            sectionBreakConfig,
+            tableConfig,
+            0,
+            0,
+            Number.POSITIVE_INFINITY,
+            Number.POSITIVE_INFINITY,
+            false
+        );
+
+        expect({
+            documentTextStyle: compactCellConfig.documentTextStyle,
+            documentCompatibilityPolicy: compactCellConfig.documentCompatibilityPolicy,
+            adjustLineHeightInTable: compactCellConfig.adjustLineHeightInTable,
+            linePitch: compactCellConfig.linePitch,
+        }).toEqual({
+            documentTextStyle: sectionBreakConfig.documentTextStyle,
+            documentCompatibilityPolicy: compatibilityPolicy,
+            adjustLineHeightInTable: BooleanNumber.TRUE,
+            linePitch: undefined,
+        });
+    });
+
     it('finishes dirty floating-object relayout inside the table cell segment', () => {
         dealWithSectionMock.mockClear();
         resetContextMock.mockClear();
@@ -424,6 +577,133 @@ describe('page model', () => {
         expect(page.sections[0].columns[0].width).toBeGreaterThan(0);
     });
 
+    it('keeps the outer table height constraint when a cell contains a rendered page break', () => {
+        let initialPageHeight = 0;
+        dealWithSectionMock.mockImplementation((_ctx: any, _vm: any, _node: any, areaPage: any) => {
+            initialPageHeight = areaPage.pageHeight;
+            return { pages: [createDealPage(areaPage)] };
+        });
+
+        const ctx = {
+            dataModel: {
+                getBody: () => ({
+                    dataStream: '0123456789\f123456789',
+                    renderedPageBreaks: [10],
+                }),
+            },
+            layoutStartPointer: {},
+            skeletonResourceReference: createSkeletonResourceReference(),
+            isDirty: false,
+        } as any;
+        const sectionBreakConfig = {
+            lists: [],
+            localeService: {} as any,
+            drawings: {},
+            pageSize: { width: 300, height: 200 },
+            headerTreeMap: new Map(),
+            footerTreeMap: new Map(),
+            documentCompatibilityPolicy: getDocumentCompatibilityPolicy(DocumentFlavor.TRADITIONAL),
+        } as any;
+
+        createSkeletonCellPages(
+            ctx,
+            {} as any,
+            { startIndex: 8, endIndex: 12, children: [{}] } as any,
+            sectionBreakConfig,
+            {
+                tableId: 'table-1',
+                tableRows: [{ tableCells: [{}] }],
+                tableColumns: [{ size: { width: { v: 80 } } }],
+            } as any,
+            0,
+            0,
+            80,
+            120
+        );
+
+        expect(initialPageHeight).toBe(80);
+    });
+
+    it('uses grid columns after preceding compact column spans', () => {
+        const ctx = {
+            layoutStartPointer: {},
+            skeletonResourceReference: createSkeletonResourceReference(),
+            isDirty: false,
+        } as any;
+        const sectionBreakConfig = {
+            lists: [],
+            localeService: {} as any,
+            drawings: {},
+            pageSize: { width: 300, height: 200 },
+            headerTreeMap: new Map(),
+            footerTreeMap: new Map(),
+        } as any;
+        const tableConfig = {
+            tableId: 'compact-spans',
+            tableRows: [{ tableCells: [{ columnSpan: 2 }, { columnSpan: 2 }] }],
+            tableColumns: [20, 30, 40, 50].map((width) => ({ size: { width: { v: width } } })),
+        } as any;
+
+        const first = createNullCellPage(ctx, sectionBreakConfig, tableConfig, 0, 0);
+        const second = createNullCellPage(ctx, sectionBreakConfig, tableConfig, 0, 1);
+
+        expect(first.page.pageWidth).toBe(50);
+        expect(second.page.pageWidth).toBe(90);
+    });
+
+    it('keeps vertically covered grid columns when sizing following cells', () => {
+        const ctx = {
+            layoutStartPointer: {},
+            skeletonResourceReference: createSkeletonResourceReference(),
+            isDirty: false,
+        } as any;
+        const sectionBreakConfig = {
+            lists: [],
+            localeService: {} as any,
+            drawings: {},
+            pageSize: { width: 300, height: 200 },
+            headerTreeMap: new Map(),
+            footerTreeMap: new Map(),
+        } as any;
+        const tableConfig = {
+            tableId: 'vertical-merge',
+            tableRows: [
+                { tableCells: [{ rowSpan: 2 }, {}, {}] },
+                { tableCells: [{ rowSpan: 0, columnSpan: 0 }, {}, {}] },
+            ],
+            tableColumns: [20, 80, 40].map((width) => ({ size: { width: { v: width } } })),
+        } as any;
+
+        const secondColumn = createNullCellPage(ctx, sectionBreakConfig, tableConfig, 1, 1);
+
+        expect(secondColumn.page.pageWidth).toBe(80);
+    });
+
+    it('sizes cells from their logical grid column after gridBefore', () => {
+        const ctx = {
+            layoutStartPointer: {},
+            skeletonResourceReference: createSkeletonResourceReference(),
+            isDirty: false,
+        } as any;
+        const sectionBreakConfig = {
+            lists: [],
+            localeService: {} as any,
+            drawings: {},
+            pageSize: { width: 300, height: 200 },
+            headerTreeMap: new Map(),
+            footerTreeMap: new Map(),
+        } as any;
+        const tableConfig = {
+            tableId: 'grid-before',
+            tableRows: [{ gridBefore: 1, tableCells: [{}] }],
+            tableColumns: [20, 80, 40].map((width) => ({ size: { width: { v: width } } })),
+        } as any;
+
+        const middleColumn = createNullCellPage(ctx, sectionBreakConfig, tableConfig, 0, 0);
+
+        expect(middleColumn.page.pageWidth).toBe(80);
+    });
+
     it('adds trailing block range spacing to table cell height when the block range is the last cell element', () => {
         dealWithSectionMock.mockImplementation((_ctx: any, _vm: any, _node: any, areaPage: any) => ({
             pages: [{
@@ -500,6 +780,28 @@ describe('page model', () => {
         expandCellPageHeightForInlineDrawings([page as never]);
 
         expect(page.height).toBe(54);
+    });
+
+    it('expands table cell height to include nested flow tables', () => {
+        const page = {
+            height: 20,
+            skeTables: new Map([
+                ['flow-table', {
+                    top: 12,
+                    height: 80,
+                    tableSource: {},
+                }],
+                ['floating-table', {
+                    top: 10,
+                    height: 100,
+                    tableSource: { textWrap: 1 },
+                }],
+            ]),
+        };
+
+        expandCellPageHeightForFlowTables([page as never]);
+
+        expect(page.height).toBe(92);
     });
 
     it('does not add trailing block range spacing when content follows in the cell', () => {

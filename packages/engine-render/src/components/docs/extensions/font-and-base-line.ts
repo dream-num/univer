@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDocTextFill, IDocTextFillGradientStop, IScale } from '@univerjs/core';
+import type { IDocTextFill, IDocTextFillGradientStop, IScale, TabStopLeader } from '@univerjs/core';
 import type { IBoundRectNoAngle } from '../../../basics';
 import type { IDocumentSkeletonGlyph } from '../../../basics/i-document-skeleton-cached';
 import type { UniverRenderingContext } from '../../../context';
@@ -402,6 +402,18 @@ export class FontAndBaseLine extends docExtension {
             return;
         }
 
+        if (glyph.glyphType === GlyphType.TAB && glyph.tabLeader != null) {
+            const leader = this._getTabLeaderCharacter(glyph.tabLeader);
+            if (leader) {
+                const leaderWidth = ctx.measureText(leader).width;
+                const count = leaderWidth > 0 ? Math.floor(width / leaderWidth) : 0;
+                if (count > 0) {
+                    ctx.fillText(leader.repeat(count), spanPointWithFont.x, spanPointWithFont.y);
+                }
+            }
+            return;
+        }
+
         const { vertexAngle, centerAngle } = renderConfig ?? {};
 
         const VERTICAL_DEG = 90;
@@ -445,6 +457,23 @@ export class FontAndBaseLine extends docExtension {
                 }
                 ctx.fillText(content, spanPointWithFont.x + x_offset, spanPointWithFont.y + y_offset);
             }
+        }
+    }
+
+    private _getTabLeaderCharacter(leader: TabStopLeader): string {
+        switch (leader) {
+            case 2:
+                return '.';
+            case 3:
+                return '-';
+            case 4:
+                return '_';
+            case 5:
+                return '\u2022';
+            case 6:
+                return '\u00B7';
+            default:
+                return '';
         }
     }
 

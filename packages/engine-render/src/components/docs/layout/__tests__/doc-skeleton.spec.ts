@@ -745,7 +745,7 @@ describe('doc skeleton', () => {
         expect(body.section.columns).toHaveLength(2);
     });
 
-    it('does not restore a later continuous section into the anchored title section', () => {
+    it('DOCX golden e2e keeps anchored drawings and continuous columns on stable physical pages', () => {
         const firstTitleParagraph = `First title${DataStreamTreeTokenType.PARAGRAPH}`;
         const secondTitleParagraph = `Second title${DataStreamTreeTokenType.PARAGRAPH}`;
         const anchoredTitleParagraph = `Anchor${DataStreamTreeTokenType.CUSTOM_BLOCK}${DataStreamTreeTokenType.PARAGRAPH}`;
@@ -818,6 +818,33 @@ describe('doc skeleton', () => {
         expect(firstPageSections[1].colCount).toBe(2);
         expect(firstPageSections[1].columns).toHaveLength(2);
         expect(firstPageSections[0].columns[0].width).toBeGreaterThan(firstPageSections[1].columns[0].width);
+        const pages = skeleton.getSkeletonData()?.pages ?? [];
+        expect({
+            pageCount: pages.length,
+            topology: pages.map((page) => ({
+                drawings: [...page.skeDrawings.keys()],
+                pageNumber: page.pageNumber,
+                sectionColumns: page.sections.map((section) => section.columns.length),
+                tables: [...page.skeTables.keys()],
+            })),
+        }).toMatchInlineSnapshot(`
+          {
+            "pageCount": 1,
+            "topology": [
+              {
+                "drawings": [
+                  "title-shape",
+                ],
+                "pageNumber": 1,
+                "sectionColumns": [
+                  1,
+                  2,
+                ],
+                "tables": [],
+              },
+            ],
+          }
+        `);
 
         skeleton.dispose();
         univer.dispose();

@@ -41,6 +41,7 @@
         "typecheck": "turbo typecheck",
         "serve:umd": "serve .",
         "test": "turbo test -- --passWithNoTests",
+        "test:docx-e2e": "pnpm --dir packages/engine-render exec vitest run src/components/docs/layout/__tests__/doc-skeleton.spec.ts src/components/docs/layout/model/__tests__/page.spec.ts -t \"DOCX golden e2e\"",
         "coverage": "turbo --concurrency 50% coverage -- --passWithNoTests ",
         "analyze:build": "node --experimental-strip-types ./scripts/build-analysis.mts",
         "build": "pnpm run build:plugins && pnpm run build:presets",

@@ -859,7 +859,7 @@ describe('page model', () => {
         expect(pages[0].height).toBe(20);
     });
 
-    it('locks public layout projections from the DOCX golden sample failure clusters', () => {
+    it('DOCX golden e2e locks public layout projections from the sample failure clusters', () => {
         const resource = createSkeletonResourceReference();
         const ctx = {
             layoutStartPointer: {},

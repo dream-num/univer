@@ -30,11 +30,7 @@ export function ignoreGlobalCssPlugin(): IEsbuildPlugin {
         name: 'ignore-global-css',
         setup(build: IPluginBuild) {
             build.onResolve({ filter: /\/global\.css$/ }, (args: IResolveArgs) => {
-                const importerSegments = args.importer.split(/[\\/]/);
-                const packageSegmentIndex = importerSegments.lastIndexOf('packages');
-                const exampleSegmentIndex = importerSegments.lastIndexOf('examples');
-
-                if (packageSegmentIndex > exampleSegmentIndex) {
+                if (args.importer.includes('packages')) {
                     return {
                         path: args.path,
                         namespace: 'ignore-global-css',

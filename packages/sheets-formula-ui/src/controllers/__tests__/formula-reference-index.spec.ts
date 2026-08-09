@@ -149,6 +149,26 @@ describe('formula reference index', () => {
 
         expect(testBedSheetFormulaData(formulaDataModel)[2]?.[0]?.f).toBe('=Target!A11');
     });
+
+    it('refreshes the index after a by-range command moves the formula host', async () => {
+        await commandService.executeCommand(InsertRowByRangeCommand.id, {
+            unitId: 'test',
+            subUnitId: 'formula',
+            range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 1 },
+            direction: Direction.UP,
+        });
+
+        await commandService.executeCommand(InsertRowByRangeCommand.id, {
+            unitId: 'test',
+            subUnitId: 'target',
+            range: { startRow: 4, endRow: 4, startColumn: 0, endColumn: 7 },
+            direction: Direction.UP,
+        });
+
+        const formulaSheet = testBedSheetFormulaData(formulaDataModel);
+        expect(formulaSheet[0]?.[0]).toBeUndefined();
+        expect(formulaSheet[1]?.[0]?.f).toBe('=Target!A11');
+    });
 });
 
 function testBedSheetFormulaData(formulaDataModel: FormulaDataModel) {

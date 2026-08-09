@@ -47,10 +47,14 @@ import {
 import { deserializeRangeWithSheetWithCache, ErrorType, FormulaDataModel, generateStringWithSequence, IDefinedNamesService, initSheetFormulaData, LexerTreeBuilder, refactorFormulaUnitQualifier, sequenceNodeType, serializeRangeToRefString, SetArrayFormulaDataMutation, SetFormulaDataMutation, SetTriggerFormulaCalculationStartMutation, splitTableStructuredRef } from '@univerjs/engine-formula';
 import {
     ClearSelectionFormatCommand,
+    InsertColByRangeCommand,
     InsertColCommand,
+    InsertRowByRangeCommand,
     InsertRowCommand,
     InsertSheetMutation,
+    RemoveColByRangeCommand,
     RemoveColCommand,
+    RemoveRowByRangeCommand,
     RemoveRowCommand,
     RemoveSheetMutation,
     SetBorderCommand,
@@ -272,7 +276,16 @@ export class UpdateFormulaController extends Disposable {
                     this._handleInsertSheetMutation(command.params as IInsertSheetMutationParams);
                 }
 
-                if ([InsertRowCommand.id, InsertColCommand.id, RemoveRowCommand.id, RemoveColCommand.id].includes(command.id)) {
+                if ([
+                    InsertRowCommand.id,
+                    InsertRowByRangeCommand.id,
+                    InsertColCommand.id,
+                    InsertColByRangeCommand.id,
+                    RemoveRowCommand.id,
+                    RemoveRowByRangeCommand.id,
+                    RemoveColCommand.id,
+                    RemoveColByRangeCommand.id,
+                ].includes(command.id)) {
                     this._rebuildFormulaReferenceIndex();
                 }
             })

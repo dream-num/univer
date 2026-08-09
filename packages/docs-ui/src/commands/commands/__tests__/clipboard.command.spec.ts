@@ -409,6 +409,42 @@ describe('test cases in clipboard', () => {
         };
     }
 
+    function createTerminalColumnGroupDocumentData(includeCollapsedDuplicate = false): IDocumentData {
+        const T = DataStreamTreeTokenType;
+        const dataStream = `${T.COLUMN_GROUP_START}${T.COLUMN_START}A${T.PARAGRAPH}${T.COLUMN_END}${T.COLUMN_START}B${T.PARAGRAPH}${T.COLUMN_END}${T.COLUMN_GROUP_END}${T.SECTION_BREAK}`;
+        const columnGroup = {
+            columnGroupId: 'terminal-columns',
+            startIndex: 0,
+            endIndex: 9,
+            columns: [
+                { columnId: 'terminal-column-1', widthRatio: 1 },
+                { columnId: 'terminal-column-2', widthRatio: 1 },
+            ],
+        };
+
+        return {
+            id: 'test-doc',
+            body: {
+                dataStream,
+                paragraphs: [
+                    { paragraphId: 'terminal-column-first', startIndex: 3 },
+                    { paragraphId: 'terminal-column-second', startIndex: 7 },
+                ],
+                sectionBreaks: [{ sectionId: 'terminal-column-section', startIndex: 10 }],
+                columnGroups: includeCollapsedDuplicate
+                    ? [columnGroup, { ...columnGroup, startIndex: 9, endIndex: 9 }]
+                    : [columnGroup],
+            },
+            documentStyle: {
+                pageSize: { width: 540, height: 720 },
+                marginTop: 72,
+                marginBottom: 72,
+                marginRight: 90,
+                marginLeft: 90,
+            },
+        };
+    }
+
     function expectStructuralSnapshotRestored(actual: IDocumentData | null | undefined, expected: IDocumentData): void {
         expect(actual?.body?.dataStream).toBe(expected.body?.dataStream);
         expect(actual?.body?.paragraphs).toEqual(expected.body?.paragraphs);
@@ -958,6 +994,89 @@ describe('test cases in clipboard', () => {
             expectStructuralSnapshotRestored(getDocumentSnapshot(), original);
             expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
             expect(getDocumentSnapshot()).toEqual(deleted);
+            collabListener.dispose();
+        });
+
+        it('normalizes a whole document ending in a column group to an empty document', async () => {
+            replaceDocument(createTerminalColumnGroupDocumentData());
+            const original = Tools.deepClone(getRequiredDocumentSnapshot());
+            let collabActions: JSONXActions = [];
+            const collabListener = commandService.onMutationExecutedForCollab((command) => {
+                const actions = getCollabActions(command);
+                if (actions) {
+                    collabActions = actions;
+                }
+            });
+
+            await commandService.executeCommand(CutContentCommand.id, {
+                segmentId: '',
+                textRanges: [],
+                selections: [
+                    { startOffset: 2, endOffset: 3, collapsed: false },
+                    { startOffset: 6, endOffset: 7, collapsed: false },
+                ],
+                rectRanges: [],
+            } satisfies IInnerCutCommandParams);
+
+            const deleted = Tools.deepClone(getRequiredDocumentSnapshot());
+            expect(deleted.body).toEqual(expect.objectContaining({
+                dataStream: '\r\n',
+                paragraphs: [expect.objectContaining({ startIndex: 0 })],
+                sectionBreaks: [expect.objectContaining({ startIndex: 1 })],
+                columnGroups: [],
+            }));
+
+            const remote = new DocumentDataModel(Tools.deepClone(original));
+            remote.apply(collabActions);
+            expect(remote.getSnapshot()).toEqual(deleted);
+
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+            expectStructuralSnapshotRestored(getDocumentSnapshot(), original);
+            expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+            expectStructuralSnapshotRestored(getDocumentSnapshot(), deleted);
+            collabListener.dispose();
+        });
+
+        it('deletes a whole collaborative document with a collapsed duplicate column-group range', async () => {
+            replaceDocument(createTerminalColumnGroupDocumentData(true));
+            const original = Tools.deepClone(getRequiredDocumentSnapshot());
+            const normalizedOriginal = Tools.deepClone(original);
+            if (normalizedOriginal.body) {
+                normalizedOriginal.body.columnGroups = normalizedOriginal.body.columnGroups?.slice(0, 1);
+            }
+            let collabActions: JSONXActions = [];
+            const collabListener = commandService.onMutationExecutedForCollab((command) => {
+                const actions = getCollabActions(command);
+                if (actions) {
+                    collabActions = actions;
+                }
+            });
+
+            await commandService.executeCommand(CutContentCommand.id, {
+                segmentId: '',
+                textRanges: [],
+                selections: [
+                    { startOffset: 2, endOffset: 3, collapsed: false },
+                    { startOffset: 6, endOffset: 7, collapsed: false },
+                ],
+                rectRanges: [],
+                wholeBodySelected: true,
+            } satisfies IInnerCutCommandParams);
+
+            const deleted = Tools.deepClone(getRequiredDocumentSnapshot());
+            expect(deleted.body).toEqual(expect.objectContaining({
+                dataStream: '\r\n',
+                columnGroups: [],
+            }));
+
+            const remote = new DocumentDataModel(Tools.deepClone(original));
+            remote.apply(collabActions);
+            expect(remote.getSnapshot()).toEqual(deleted);
+
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+            expectStructuralSnapshotRestored(getDocumentSnapshot(), normalizedOriginal);
+            expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+            expectStructuralSnapshotRestored(getDocumentSnapshot(), deleted);
             collabListener.dispose();
         });
 

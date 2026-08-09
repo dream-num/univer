@@ -38,6 +38,7 @@ import type {
 import {
     BuildTextUtils,
     CommandType,
+    createParagraphId,
     DataStreamTreeTokenType,
     generateRandomId,
     getCustomBlockIdsInSelections,
@@ -499,9 +500,17 @@ function getWholeBodyCutActions(
         return [];
     }
 
+    const emptyBody: IDocumentBody = {
+        dataStream: DataStreamTreeTokenType.PARAGRAPH,
+        paragraphs: [{
+            paragraphId: createParagraphId(new Set((body.paragraphs ?? []).map((paragraph) => paragraph.paragraphId))),
+            startIndex: 0,
+        }],
+    };
+    const deleteLength = Math.max(0, body.dataStream.length - 1);
     const textX = new TextX();
-    const editableEnd = Math.max(0, body.dataStream.length - 2);
-    textX.push({ t: TextXActionType.DELETE, len: editableEnd });
+    textX.push({ t: TextXActionType.INSERT, len: emptyBody.dataStream.length, body: emptyBody });
+    textX.push({ t: TextXActionType.DELETE, len: deleteLength });
     const jsonX = JSONX.getInstance();
     const path = getRichTextEditPath(docDataModel, segmentId);
     const rawActions: JSONXActions[] = [];
@@ -515,7 +524,7 @@ function getWholeBodyCutActions(
     const removedCustomBlockIds = getCustomBlockIdsInSelections(body, [{
         ...(selections[0] ?? { collapsed: false }),
         startOffset: 0,
-        endOffset: editableEnd,
+        endOffset: deleteLength,
         collapsed: false,
     }]).sort((left, right) => drawingOrder.indexOf(right) - drawingOrder.indexOf(left));
 

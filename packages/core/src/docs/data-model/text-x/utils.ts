@@ -30,6 +30,7 @@ import type { IRetainAction } from './action-types';
 import { merge } from '../../../common/lodash';
 import { UpdateDocsAttributeType } from '../../../shared/command-enum';
 import { Tools } from '../../../shared/tools';
+import { DataStreamTreeTokenType } from '../types';
 import { PRESERVE_INSERTED_PARAGRAPH_IDS } from './action-types';
 import { normalizeTextRuns } from './apply-utils/common';
 import { coverTextRuns } from './apply-utils/update-apply';
@@ -188,6 +189,9 @@ export function getColumnGroupSlice(
     for (const columnGroup of columnGroups) {
         const clonedColumnGroup = Tools.deepClone(columnGroup);
         const { startIndex, endIndex } = clonedColumnGroup;
+        if (body.dataStream[startIndex] !== DataStreamTreeTokenType.COLUMN_GROUP_START) {
+            continue;
+        }
 
         if (hasStructuralRangeInSlice(startIndex, endIndex, startOffset, endOffset, mode)) {
             newColumnGroups.push({

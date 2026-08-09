@@ -334,7 +334,7 @@ export interface IDocumentSkeletonBoundingBox {
     width: number; // width
     ba: number; // boundingBoxAscent
     bd: number; // boundingBoxDescent
-    normalLineHeight?: number; // CSS normal line height, used as the base for Word AUTO spacing
+    normalLineHeight?: number; // Canvas font bounding-box height, used as the base for Word AUTO spacing
     aba: number; // actualBoundingBoxAscent
     abd: number; // actualBoundingBoxDescent
     sp: number; // strikeoutPosition

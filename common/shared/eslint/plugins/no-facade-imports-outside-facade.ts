@@ -1,5 +1,6 @@
 import type { Rule } from 'eslint';
 import path from 'node:path';
+import process from 'node:process';
 
 interface IRuleOptions { ignore?: unknown[] }
 
@@ -49,6 +50,17 @@ function getRuleFilename(context: Rule.RuleContext): string {
     return typeof getFilename === 'function' ? getFilename.call(context) : '';
 }
 
+function getRuleCwd(context: Rule.RuleContext): string {
+    const cwdFromProperty = (context as { cwd?: unknown }).cwd;
+
+    if (typeof cwdFromProperty === 'string' && cwdFromProperty) {
+        return cwdFromProperty;
+    }
+
+    const getCwd = (context as { getCwd?: () => string }).getCwd;
+    return typeof getCwd === 'function' ? getCwd.call(context) : process.cwd();
+}
+
 const rule: Rule.RuleModule = {
     meta: {
         type: 'problem',
@@ -76,7 +88,8 @@ const rule: Rule.RuleModule = {
 
     create(context) {
         const filename = getRuleFilename(context);
-        const normalizedPath = normalizePath(filename);
+        const cwd = getRuleCwd(context);
+        const normalizedPath = normalizePath(path.relative(cwd, filename));
         const [ruleOptions = {} as IRuleOptions] = context.options as [IRuleOptions?];
         const ignorePaths = Array.isArray(ruleOptions.ignore) ? ruleOptions.ignore : [];
 
@@ -84,16 +97,10 @@ const rule: Rule.RuleModule = {
             return {};
         }
 
-        const isInPackages = normalizedPath.includes('/packages/');
+        const isInPackages = normalizedPath.startsWith('packages/') || normalizedPath.includes('/packages/');
         const isInFacade = normalizedPath.includes('/facade/');
 
         if (!isInPackages || isInFacade) {
-            return {};
-        }
-
-        // get parent dir
-        const parentDirMatch = normalizedPath.match(/\/([^/]+)\/packages\//);
-        if (!parentDirMatch) {
             return {};
         }
 

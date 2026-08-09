@@ -343,6 +343,8 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
             }
         }
 
+        this._hideCollapsedCaretsForVisibleSelection();
+
         this._textSelectionInner$.next({
             textRanges: this._getAllTextRanges(),
             rectRanges: this._getAllRectRanges(),
@@ -919,6 +921,16 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         }
 
         this._rangeList = newRanges;
+    }
+
+    private _hideCollapsedCaretsForVisibleSelection() {
+        const expandedTextRanges = this._rangeList.filter((range) => !range.collapsed);
+        if (expandedTextRanges.length === 0 && this._rectRangeList.length === 0) {
+            return;
+        }
+
+        this._deactivateAllTextRanges();
+        expandedTextRanges[expandedTextRanges.length - 1]?.activate();
     }
 
     private _deactivateAllTextRanges() {

@@ -30,7 +30,10 @@ export function ignoreGlobalCssPlugin(): IEsbuildPlugin {
         name: 'ignore-global-css',
         setup(build: IPluginBuild) {
             build.onResolve({ filter: /\/global\.css$/ }, (args: IResolveArgs) => {
-                if (args.importer.includes('packages')) {
+                const importerSegments = args.importer.split(/[\\/]/);
+
+                // TODO(@ai-review): Verify package-owned global styles stay ignored while example styles compile from worktrees nested below a parent `packages` directory.
+                if (importerSegments.includes('packages') && !importerSegments.includes('examples')) {
                     return {
                         path: args.path,
                         namespace: 'ignore-global-css',

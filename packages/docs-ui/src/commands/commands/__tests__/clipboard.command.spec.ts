@@ -14,7 +14,16 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommand, IDisposable, IDocumentData, Injector, IStyleBase, Univer } from '@univerjs/core';
+import type {
+    ICommand,
+    ICommandInfo,
+    IDisposable,
+    IDocumentData,
+    Injector,
+    IStyleBase,
+    JSONXActions,
+    Univer,
+} from '@univerjs/core';
 import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IDocClipboardHook } from '../../../services/clipboard/clipboard.service';
 import type { IInnerCutCommandParams, IInnerPasteCommandParams } from '../clipboard.inner.command';
@@ -24,12 +33,20 @@ import {
     CustomRangeType,
     DataStreamTreeTokenType,
     DOC_RANGE_TYPE,
+    DocumentBlockRangeType,
+    DocumentDataModel,
+    DrawingTypeEnum,
     EDITOR_ACTIVATED,
     FOCUSING_DOC,
     ICommandService,
     IContextService,
     IUniverInstanceService,
+    ObjectRelativeFromH,
+    ObjectRelativeFromV,
+    PositionedObjectLayoutType,
+    RedoCommand,
     SliceBodyType,
+    Tools,
     UndoCommand,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -176,6 +193,14 @@ describe('test cases in clipboard', () => {
         return getDocumentModel()?.getSnapshot();
     }
 
+    function getRequiredDocumentSnapshot(): IDocumentData {
+        const snapshot = getDocumentSnapshot();
+        if (!snapshot) {
+            throw new Error('Document snapshot not found');
+        }
+        return snapshot;
+    }
+
     function registerInnerClipboardCommands() {
         commandService.registerCommand(InnerPasteCommand);
         commandService.registerCommand(CutContentCommand);
@@ -227,7 +252,9 @@ describe('test cases in clipboard', () => {
     function createTableDocumentData(): IDocumentData {
         const tableData = genEmptyTable(2, 2);
         const tableSource = genTableSource(2, 2, 360);
-        const dataStream = `${tableData.dataStream}Tail\r\n`;
+        const prefix = 'Head\r';
+        const tableOffset = prefix.length;
+        const dataStream = `${prefix}${tableData.dataStream}Tail\r\n`;
 
         return {
             id: 'test-doc',
@@ -235,16 +262,23 @@ describe('test cases in clipboard', () => {
                 dataStream,
                 textRuns: [{ st: 0, ed: dataStream.length - 2, ts: {} }],
                 paragraphs: [
-                    ...tableData.paragraphs,
+                    { paragraphId: 'para_docs_ui_clipboard_table_head', startIndex: prefix.length - 1 },
+                    ...tableData.paragraphs.map((paragraph) => ({
+                        ...paragraph,
+                        startIndex: paragraph.startIndex + tableOffset,
+                    })),
                     { paragraphId: 'para_docs_ui_clipboard_table_tail', startIndex: dataStream.length - 2 },
                 ],
                 sectionBreaks: [
-                    ...tableData.sectionBreaks,
+                    ...tableData.sectionBreaks.map((sectionBreak) => ({
+                        ...sectionBreak,
+                        startIndex: sectionBreak.startIndex + tableOffset,
+                    })),
                     { sectionId: 'section_fixture_203', startIndex: dataStream.length - 1 },
                 ],
                 tables: [{
-                    startIndex: 0,
-                    endIndex: tableData.dataStream.length,
+                    startIndex: tableOffset,
+                    endIndex: tableOffset + tableData.dataStream.length,
                     tableId: 'table-1',
                 }],
                 customBlocks: [],
@@ -292,6 +326,109 @@ describe('test cases in clipboard', () => {
                 marginLeft: 90,
             },
         };
+    }
+
+    function getTableRowRanges(documentData: IDocumentData): Array<{ startOffset: number; endOffset: number }> {
+        const body = documentData.body;
+        const table = body?.tables?.[0];
+        if (!body || !table) {
+            throw new Error('Table body not found');
+        }
+
+        const ranges: Array<{ startOffset: number; endOffset: number }> = [];
+        let rowStart = -1;
+        for (let offset = table.startIndex; offset < table.endIndex; offset++) {
+            if (body.dataStream[offset] === DataStreamTreeTokenType.TABLE_ROW_START) {
+                rowStart = offset;
+            } else if (body.dataStream[offset] === DataStreamTreeTokenType.TABLE_ROW_END && rowStart >= 0) {
+                ranges.push({ startOffset: rowStart, endOffset: offset });
+                rowStart = -1;
+            }
+        }
+
+        return ranges;
+    }
+
+    function createStructuralDocumentData(): IDocumentData {
+        const T = DataStreamTreeTokenType;
+        const dataStream = `P${T.PARAGRAPH}${T.BLOCK_START}A${T.PARAGRAPH}B${T.PARAGRAPH}${T.BLOCK_END}M${T.PARAGRAPH}${T.COLUMN_GROUP_START}${T.COLUMN_START}C${T.PARAGRAPH}${T.COLUMN_END}${T.COLUMN_START}${T.CUSTOM_BLOCK}D${T.PARAGRAPH}${T.COLUMN_END}${T.COLUMN_GROUP_END}Z${T.PARAGRAPH}${T.SECTION_BREAK}`;
+
+        return {
+            id: 'test-doc',
+            body: {
+                dataStream,
+                paragraphs: [
+                    { paragraphId: 'root-before', startIndex: 1 },
+                    { paragraphId: 'block-first', startIndex: 4 },
+                    { paragraphId: 'block-second', startIndex: 6 },
+                    { paragraphId: 'root-middle', startIndex: 9 },
+                    { paragraphId: 'column-first', startIndex: 13 },
+                    { paragraphId: 'column-second', startIndex: 18 },
+                    { paragraphId: 'root-after', startIndex: 22 },
+                ],
+                sectionBreaks: [{ sectionId: 'structural-section', startIndex: 23 }],
+                blockRanges: [{
+                    blockId: 'structural-block',
+                    blockType: DocumentBlockRangeType.CALLOUT,
+                    startIndex: 2,
+                    endIndex: 7,
+                }],
+                columnGroups: [{ columnGroupId: 'structural-columns', startIndex: 10, endIndex: 20 }],
+                customRanges: [{
+                    rangeId: 'structural-custom-range',
+                    rangeType: CustomRangeType.CUSTOM,
+                    startIndex: 3,
+                    endIndex: 5,
+                }],
+                customBlocks: [{ blockId: 'structural-drawing', startIndex: 16 }],
+                customDecorations: [],
+            },
+            drawings: {
+                'structural-drawing': {
+                    drawingId: 'structural-drawing',
+                    drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+                    unitId: 'test-doc',
+                    subUnitId: '',
+                    layoutType: PositionedObjectLayoutType.INLINE,
+                    docTransform: {
+                        size: { width: 10, height: 10 },
+                        positionH: { relativeFrom: ObjectRelativeFromH.CHARACTER, posOffset: 0 },
+                        positionV: { relativeFrom: ObjectRelativeFromV.LINE, posOffset: 0 },
+                        angle: 0,
+                    },
+                },
+            },
+            drawingsOrder: ['structural-drawing'],
+            documentStyle: {
+                pageSize: { width: 540, height: 720 },
+                marginTop: 72,
+                marginBottom: 72,
+                marginRight: 90,
+                marginLeft: 90,
+            },
+        };
+    }
+
+    function expectStructuralSnapshotRestored(actual: IDocumentData | null | undefined, expected: IDocumentData): void {
+        expect(actual?.body?.dataStream).toBe(expected.body?.dataStream);
+        expect(actual?.body?.paragraphs).toEqual(expected.body?.paragraphs);
+        expect(actual?.body?.sectionBreaks).toEqual(expected.body?.sectionBreaks);
+        expect(actual?.body?.blockRanges ?? []).toEqual(expected.body?.blockRanges ?? []);
+        expect(actual?.body?.columnGroups ?? []).toEqual(expected.body?.columnGroups ?? []);
+        expect(actual?.body?.customRanges ?? []).toEqual(expected.body?.customRanges ?? []);
+        expect(actual?.body?.customBlocks ?? []).toEqual(expected.body?.customBlocks ?? []);
+        expect(actual?.body?.tables ?? []).toEqual(expected.body?.tables ?? []);
+        expect(actual?.drawings ?? {}).toEqual(expected.drawings ?? {});
+        expect(actual?.drawingsOrder ?? []).toEqual(expected.drawingsOrder ?? []);
+        expect(actual?.tableSource ?? {}).toEqual(expected.tableSource ?? {});
+    }
+
+    function getCollabActions(command: Readonly<ICommandInfo>): JSONXActions | null {
+        if (command.id !== RichTextEditingMutation.id || command.params == null || !('actions' in command.params)) {
+            return null;
+        }
+
+        return Array.isArray(command.params.actions) ? command.params.actions : null;
     }
 
     function createAnnotatedDocumentData(): IDocumentData {
@@ -623,10 +760,19 @@ describe('test cases in clipboard', () => {
 
         it('Should cut an entire selected table and remove the table source', async () => {
             replaceDocument(createTableDocumentData());
-            const table = getDocumentSnapshot()?.body?.tables?.[0];
-            if (!table) {
+            const original = Tools.deepClone(getRequiredDocumentSnapshot());
+            const body = original.body;
+            const table = body?.tables?.[0];
+            if (!body || !table) {
                 throw new Error('Table not found');
             }
+            let collabActions: JSONXActions = [];
+            const collabListener = commandService.onMutationExecutedForCollab((command) => {
+                const actions = getCollabActions(command);
+                if (actions) {
+                    collabActions = actions;
+                }
+            });
             const rectRange: IRectRangeWithStyle = {
                 startOffset: table.startIndex,
                 endOffset: table.endIndex - 1,
@@ -649,12 +795,328 @@ describe('test cases in clipboard', () => {
                 rectRanges: [rectRange],
             } satisfies IInnerCutCommandParams);
 
-            const snapshot = getDocumentSnapshot();
+            const deleted = Tools.deepClone(getRequiredDocumentSnapshot());
 
-            expect(snapshot?.body?.dataStream.includes(DataStreamTreeTokenType.TABLE_START)).toBe(false);
-            expect(snapshot?.tableSource?.['table-1']).toBeUndefined();
+            expect(deleted.body?.dataStream.includes(DataStreamTreeTokenType.TABLE_START)).toBe(false);
+            expect(deleted.tableSource?.['table-1']).toBeUndefined();
+
+            const remote = new DocumentDataModel(Tools.deepClone(original));
+            remote.apply(collabActions);
+            expect(remote.getSnapshot()).toEqual(deleted);
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+            expectStructuralSnapshotRestored(getDocumentSnapshot(), original);
+            expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+            expectStructuralSnapshotRestored(getDocumentSnapshot(), deleted);
+            collabListener.dispose();
+        });
+
+        it.each([
+            ['upper half across its start boundary', 0, 'above'],
+            ['lower half across its end boundary', 1, 'below'],
+        ])('keeps the table balanced when deleting its %s and replays the mutation for collaboration', async (_name, rowIndex, position) => {
+            replaceDocument(createTableDocumentData());
+            const original = Tools.deepClone(getRequiredDocumentSnapshot());
+            const body = original.body;
+            const table = original.body?.tables?.[0];
+            const rowRange = getTableRowRanges(original)[rowIndex];
+            if (!body || !table || !rowRange) {
+                throw new Error('Table row not found');
+            }
+            let collabActions: JSONXActions = [];
+            const collabListener = commandService.onMutationExecutedForCollab((command) => {
+                const actions = getCollabActions(command);
+                if (actions) {
+                    collabActions = actions;
+                }
+            });
+            const rectRange: IRectRangeWithStyle = {
+                ...rowRange,
+                collapsed: false,
+                rangeType: DOC_RANGE_TYPE.RECT,
+                tableId: table.tableId,
+                startRow: rowIndex,
+                endRow: rowIndex,
+                startColumn: 0,
+                endColumn: 1,
+                spanEntireRow: true,
+                spanEntireColumn: false,
+                spanEntireTable: false,
+            };
+
+            await commandService.executeCommand(CutContentCommand.id, {
+                segmentId: '',
+                textRanges: [],
+                selections: position === 'above'
+                    ? [{ startOffset: 0, endOffset: table.startIndex, collapsed: false }]
+                    : [{ startOffset: table.endIndex, endOffset: body.dataStream.length - 2, collapsed: false }],
+                rectRanges: [rectRange],
+            } satisfies IInnerCutCommandParams);
+
+            const deleted = Tools.deepClone(getRequiredDocumentSnapshot());
+            expect(deleted.body?.tables).toHaveLength(1);
+            expect(deleted.body?.dataStream).toContain(DataStreamTreeTokenType.TABLE_START);
+            expect(deleted.body?.dataStream).toContain(DataStreamTreeTokenType.TABLE_END);
+            expect(deleted.tableSource?.[table.tableId]?.tableRows).toHaveLength(1);
+
+            const remote = new DocumentDataModel(Tools.deepClone(original));
+            remote.apply(collabActions);
+            expect(remote.getSnapshot()).toEqual(deleted);
 
             expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+            expectStructuralSnapshotRestored(getDocumentSnapshot(), original);
+            expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+            expectStructuralSnapshotRestored(getDocumentSnapshot(), deleted);
+            collabListener.dispose();
+        });
+
+        it.each(['above', 'below'])('keeps the table intact when deleting content immediately %s it', async (position) => {
+            replaceDocument(createTableDocumentData());
+            const original = Tools.deepClone(getRequiredDocumentSnapshot());
+            const body = original.body;
+            const table = body?.tables?.[0];
+            if (!body || !table) {
+                throw new Error('Table not found');
+            }
+            const selection = position === 'above'
+                ? { startOffset: 0, endOffset: table.startIndex, collapsed: false }
+                : { startOffset: table.endIndex, endOffset: body.dataStream.length - 2, collapsed: false };
+            let collabActions: JSONXActions = [];
+            const collabListener = commandService.onMutationExecutedForCollab((command) => {
+                const actions = getCollabActions(command);
+                if (actions) {
+                    collabActions = actions;
+                }
+            });
+
+            await commandService.executeCommand(CutContentCommand.id, {
+                segmentId: '',
+                textRanges: [],
+                selections: [selection],
+                rectRanges: [],
+            } satisfies IInnerCutCommandParams);
+
+            const deleted = Tools.deepClone(getRequiredDocumentSnapshot());
+            expect(deleted.body?.tables).toHaveLength(1);
+            expect(deleted.body?.dataStream).toContain(DataStreamTreeTokenType.TABLE_START);
+            expect(deleted.body?.dataStream).toContain(DataStreamTreeTokenType.TABLE_END);
+            expect(deleted.tableSource?.[table.tableId]).toBeDefined();
+
+            const remote = new DocumentDataModel(Tools.deepClone(original));
+            remote.apply(collabActions);
+            expect(remote.getSnapshot()).toEqual(deleted);
+
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+            expectStructuralSnapshotRestored(getDocumentSnapshot(), original);
+            expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+            expectStructuralSnapshotRestored(getDocumentSnapshot(), deleted);
+            collabListener.dispose();
+        });
+
+        it('normalizes fragmented whole-body selection to an empty document and replays the same actions for collaboration', async () => {
+            replaceDocument(createStructuralDocumentData());
+            const original = Tools.deepClone(getRequiredDocumentSnapshot());
+            let collabActions: JSONXActions = [];
+            const collabListener = commandService.onMutationExecutedForCollab((command) => {
+                const actions = getCollabActions(command);
+                if (actions) {
+                    collabActions = actions;
+                }
+            });
+
+            await commandService.executeCommand(CutContentCommand.id, {
+                segmentId: '',
+                textRanges: [],
+                selections: [
+                    { startOffset: 0, endOffset: 1, collapsed: false },
+                    { startOffset: 2, endOffset: 4, collapsed: false },
+                    { startOffset: 5, endOffset: 9, collapsed: false },
+                    { startOffset: 12, endOffset: 13, collapsed: false },
+                    { startOffset: 16, endOffset: 18, collapsed: false },
+                    { startOffset: 21, endOffset: 22, collapsed: false },
+                ],
+                rectRanges: [],
+            } satisfies IInnerCutCommandParams);
+
+            const deleted = Tools.deepClone(getRequiredDocumentSnapshot());
+            expect(deleted.body).toEqual(expect.objectContaining({
+                dataStream: '\r\n',
+                paragraphs: [expect.objectContaining({ startIndex: 0 })],
+                sectionBreaks: [expect.objectContaining({ startIndex: 1 })],
+                blockRanges: [],
+                columnGroups: [],
+                customRanges: [],
+                customBlocks: [],
+            }));
+            expect(deleted.drawings ?? {}).toEqual({});
+            expect(deleted.drawingsOrder ?? []).toEqual([]);
+
+            const remote = new DocumentDataModel(Tools.deepClone(original));
+            remote.apply(collabActions);
+            expect(remote.getSnapshot()).toEqual(deleted);
+
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+            expectStructuralSnapshotRestored(getDocumentSnapshot(), original);
+            expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+            expect(getDocumentSnapshot()).toEqual(deleted);
+            collabListener.dispose();
+        });
+
+        it('deletes fragmented full block and column-group selections atomically with undo and redo', async () => {
+            replaceDocument(createStructuralDocumentData());
+            const original = Tools.deepClone(getRequiredDocumentSnapshot());
+            let collabActions: JSONXActions = [];
+            const collabListener = commandService.onMutationExecutedForCollab((command) => {
+                const actions = getCollabActions(command);
+                if (actions) {
+                    collabActions = actions;
+                }
+            });
+
+            await commandService.executeCommand(CutContentCommand.id, {
+                segmentId: '',
+                textRanges: [],
+                selections: [
+                    { startOffset: 2, endOffset: 4, collapsed: false },
+                    { startOffset: 5, endOffset: 8, collapsed: false },
+                    { startOffset: 12, endOffset: 13, collapsed: false },
+                    { startOffset: 16, endOffset: 18, collapsed: false },
+                ],
+                rectRanges: [],
+            } satisfies IInnerCutCommandParams);
+
+            const deleted = Tools.deepClone(getRequiredDocumentSnapshot());
+            expect(deleted.body?.blockRanges).toEqual([]);
+            expect(deleted.body?.columnGroups).toEqual([]);
+            expect(deleted.body?.customRanges).toEqual([]);
+            expect(deleted.body?.customBlocks).toEqual([]);
+            expect(deleted.drawings ?? {}).toEqual({});
+            expect(deleted.body?.dataStream).not.toContain(DataStreamTreeTokenType.BLOCK_START);
+            expect(deleted.body?.dataStream).not.toContain(DataStreamTreeTokenType.COLUMN_GROUP_START);
+
+            const remote = new DocumentDataModel(Tools.deepClone(original));
+            remote.apply(collabActions);
+            expect(remote.getSnapshot()).toEqual(deleted);
+
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+            expectStructuralSnapshotRestored(getDocumentSnapshot(), original);
+            expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+            expectStructuralSnapshotRestored(getDocumentSnapshot(), deleted);
+            collabListener.dispose();
+        });
+
+        it.each([
+            ['above block boundary', [{ startOffset: 0, endOffset: 5, collapsed: false }]],
+            ['below block boundary', [{ startOffset: 5, endOffset: 10, collapsed: false }]],
+            ['above column-group boundary', [{ startOffset: 8, endOffset: 13, collapsed: false }]],
+            ['below column-group boundary', [{ startOffset: 17, endOffset: 23, collapsed: false }]],
+        ])('keeps partially selected structures balanced when deleting %s', async (_name, selections) => {
+            replaceDocument(createStructuralDocumentData());
+            const original = Tools.deepClone(getRequiredDocumentSnapshot());
+
+            await commandService.executeCommand(CutContentCommand.id, {
+                segmentId: '',
+                textRanges: [],
+                selections,
+                rectRanges: [],
+            } satisfies IInnerCutCommandParams);
+
+            const deleted = Tools.deepClone(getRequiredDocumentSnapshot());
+            expect(deleted.body?.blockRanges).toHaveLength(1);
+            expect(deleted.body?.columnGroups).toHaveLength(1);
+            expect(deleted.body?.dataStream).toContain(DataStreamTreeTokenType.BLOCK_START);
+            expect(deleted.body?.dataStream).toContain(DataStreamTreeTokenType.BLOCK_END);
+            expect(deleted.body?.dataStream).toContain(DataStreamTreeTokenType.COLUMN_GROUP_START);
+            expect(deleted.body?.dataStream).toContain(DataStreamTreeTokenType.COLUMN_GROUP_END);
+
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+            expectStructuralSnapshotRestored(getDocumentSnapshot(), original);
+            expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+            expect(getDocumentSnapshot()).toEqual(deleted);
+        });
+
+        it.each([
+            ['the custom block itself', { startOffset: 16, endOffset: 17, removed: true }],
+            ['the content immediately above it', { startOffset: 12, endOffset: 13, removed: false }],
+            ['the content immediately below it', { startOffset: 17, endOffset: 18, removed: false }],
+        ])('handles deleting %s without crossing the custom-block point boundary', async (_name, range) => {
+            replaceDocument(createStructuralDocumentData());
+            const original = Tools.deepClone(getRequiredDocumentSnapshot());
+
+            await commandService.executeCommand(CutContentCommand.id, {
+                segmentId: '',
+                textRanges: [],
+                selections: [{ ...range, collapsed: false }],
+                rectRanges: [],
+            } satisfies IInnerCutCommandParams);
+
+            const snapshot = getDocumentSnapshot();
+            if (!snapshot) {
+                throw new Error('Document snapshot not found');
+            }
+            expect(snapshot?.body?.customBlocks ?? []).toHaveLength(range.removed ? 0 : 1);
+            expect(snapshot?.drawings?.['structural-drawing'] == null).toBe(range.removed);
+
+            const deleted = Tools.deepClone(snapshot);
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+            expectStructuralSnapshotRestored(getDocumentSnapshot(), original);
+            expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+            expect(getDocumentSnapshot()).toEqual(deleted);
+        });
+
+        it('normalizes whole-body selection containing an entire table and restores it through undo', async () => {
+            replaceDocument(createTableDocumentData());
+            const original = Tools.deepClone(getRequiredDocumentSnapshot());
+            const body = original.body;
+            const table = body?.tables?.[0];
+            if (!body || !table) {
+                throw new Error('Table not found');
+            }
+            let collabActions: JSONXActions = [];
+            const collabListener = commandService.onMutationExecutedForCollab((command) => {
+                const actions = getCollabActions(command);
+                if (actions) {
+                    collabActions = actions;
+                }
+            });
+            const rectRange: IRectRangeWithStyle = {
+                startOffset: table.startIndex,
+                endOffset: table.endIndex - 1,
+                collapsed: false,
+                rangeType: DOC_RANGE_TYPE.RECT,
+                tableId: table.tableId,
+                startRow: 0,
+                endRow: 1,
+                startColumn: 0,
+                endColumn: 1,
+                spanEntireRow: true,
+                spanEntireColumn: true,
+                spanEntireTable: true,
+            };
+
+            await commandService.executeCommand(CutContentCommand.id, {
+                segmentId: '',
+                textRanges: [],
+                selections: [
+                    { startOffset: 0, endOffset: table.startIndex, collapsed: false },
+                    { startOffset: table.endIndex, endOffset: body.dataStream.length - 2, collapsed: false },
+                ],
+                rectRanges: [rectRange],
+            } satisfies IInnerCutCommandParams);
+
+            const deleted = Tools.deepClone(getRequiredDocumentSnapshot());
+            expect(deleted.body?.dataStream).toBe('\r\n');
+            expect(deleted.body?.tables).toEqual([]);
+            expect(deleted.tableSource ?? {}).toEqual({});
+
+            const remote = new DocumentDataModel(Tools.deepClone(original));
+            remote.apply(collabActions);
+            expect(remote.getSnapshot()).toEqual(deleted);
+
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+            expectStructuralSnapshotRestored(getDocumentSnapshot(), original);
+            expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+            expectStructuralSnapshotRestored(getDocumentSnapshot(), deleted);
+            collabListener.dispose();
         });
     });
 

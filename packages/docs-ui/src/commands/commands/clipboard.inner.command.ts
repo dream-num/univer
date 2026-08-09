@@ -14,16 +14,35 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IAccessor, ICommand, ICustomTable, IDisposable, IDocumentData, IDrawingParam, IMutationInfo, ITextRange, JSONXActions, Nullable } from '@univerjs/core';
+import type {
+    DocumentDataModel,
+    IAccessor,
+    ICommand,
+    ICustomTable,
+    IDisposable,
+    IDocumentBody,
+    IDocumentData,
+    IDrawingParam,
+    IMutationInfo,
+    ITextRange,
+    JSONXActions,
+    Nullable,
+} from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { DocumentViewModel, IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
-import type { IDocClipboardPasteBlockRangeMapping, IDocClipboardPasteCustomBlockMapping, IDocClipboardPasteCustomRangeMapping } from '../../services/clipboard/doc-paste-mutation-adapter.service';
+import type {
+    IDocClipboardPasteBlockRangeMapping,
+    IDocClipboardPasteCustomBlockMapping,
+    IDocClipboardPasteCustomRangeMapping,
+} from '../../services/clipboard/doc-paste-mutation-adapter.service';
 import {
     BuildTextUtils,
     CommandType,
+    DataStreamTreeTokenType,
     generateRandomId,
     getCustomBlockIdsInSelections,
     getRichTextEditPath,
+    getTableRangeInterval,
     ICommandService,
     IUndoRedoService,
     IUniverInstanceService,
@@ -37,7 +56,9 @@ import {
 } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { getCustomDecorationAtPosition, getCustomRangeAtPosition } from '../../basics/paragraph';
-import { IDocClipboardPasteAdapterService } from '../../services/clipboard/doc-paste-mutation-adapter.service';
+import {
+    IDocClipboardPasteAdapterService,
+} from '../../services/clipboard/doc-paste-mutation-adapter.service';
 import { getCommandSkeleton } from '../util';
 import { getDeleteRowContentActionParams, getDeleteRowsActionsParams, getDeleteTableActionParams } from './table/table';
 
@@ -377,27 +398,8 @@ function getCutActionsFromTextRanges(
     }
 
     const { tables = [] } = originBody;
-
-    const memoryCursor = new MemoryCursor();
-    memoryCursor.reset();
-
-    for (let i = 0; i < selections.length; i++) {
-        const selection = adjustSelectionByTable(selections[i], tables);
-        const { startOffset, endOffset, collapsed } = selection;
-        const len = startOffset - memoryCursor.cursor;
-
-        if (collapsed) {
-            textX.push({
-                t: TextXActionType.RETAIN,
-                len,
-            });
-        } else {
-            textX.push(...BuildTextUtils.selection.delete([selection], originBody, memoryCursor.cursor, null, false));
-        }
-
-        memoryCursor.reset();
-        memoryCursor.moveCursor(endOffset);
-    }
+    const adjustedSelections = selections.map((selection) => adjustSelectionByTable(selection, tables));
+    textX.push(...BuildTextUtils.selection.delete(adjustedSelections, originBody, 0, null, false));
 
     const path = getRichTextEditPath(docDataModel, segmentId);
     rawActions.push(jsonX.editOp(textX.serialize(), path)!);
@@ -434,6 +436,117 @@ function getCutActionsFromTextRanges(
     return rawActions.reduce((acc, cur) => {
         return JSONX.compose(acc, cur as JSONXActions);
     }, null as JSONXActions);
+}
+
+const IMPLICIT_WHOLE_BODY_SELECTION_TOKENS = new Set<string>([
+    DataStreamTreeTokenType.PARAGRAPH,
+    DataStreamTreeTokenType.SECTION_BREAK,
+    DataStreamTreeTokenType.BLOCK_START,
+    DataStreamTreeTokenType.BLOCK_END,
+    DataStreamTreeTokenType.COLUMN_GROUP_START,
+    DataStreamTreeTokenType.COLUMN_START,
+    DataStreamTreeTokenType.COLUMN_END,
+    DataStreamTreeTokenType.COLUMN_GROUP_END,
+]);
+
+function isWholeBodySelected(
+    textRanges: ITextRangeWithStyle[],
+    rectRanges: IRectRangeWithStyle[],
+    body: IDocumentBody
+): boolean {
+    const intervals = textRanges
+        .filter((range) => !range.collapsed)
+        .map(({ startOffset, endOffset }) => ({ startOffset, endOffset }));
+
+    for (const rectRange of rectRanges) {
+        if (!rectRange.spanEntireTable) {
+            continue;
+        }
+        const table = (body.tables ?? []).find((item) =>
+            (rectRange.tableId && item.tableId === rectRange.tableId) || item.startIndex === rectRange.startOffset
+        );
+        if (table) {
+            intervals.push(getTableRangeInterval(table));
+        }
+    }
+
+    intervals.sort((left, right) => left.startOffset - right.startOffset || left.endOffset - right.endOffset);
+    const editableEnd = Math.max(0, body.dataStream.length - 2);
+    let intervalIndex = 0;
+    for (let offset = 0; offset < editableEnd; offset++) {
+        while (intervals[intervalIndex]?.endOffset <= offset) {
+            intervalIndex++;
+        }
+        const interval = intervals[intervalIndex];
+        if (interval && interval.startOffset <= offset && offset < interval.endOffset) {
+            continue;
+        }
+        if (!IMPLICIT_WHOLE_BODY_SELECTION_TOKENS.has(body.dataStream[offset])) {
+            return false;
+        }
+    }
+
+    return editableEnd > 0;
+}
+
+function getWholeBodyCutActions(
+    selections: ITextRangeWithStyle[],
+    docDataModel: DocumentDataModel,
+    segmentId: string
+): JSONXActions {
+    const body = docDataModel.getSelfOrHeaderFooterModel(segmentId)?.getBody();
+    if (!body) {
+        return [];
+    }
+
+    const textX = new TextX();
+    const editableEnd = Math.max(0, body.dataStream.length - 2);
+    textX.push({ t: TextXActionType.DELETE, len: editableEnd });
+    const jsonX = JSONX.getInstance();
+    const path = getRichTextEditPath(docDataModel, segmentId);
+    const rawActions: JSONXActions[] = [];
+    const editAction = jsonX.editOp(textX.serialize(), path);
+    if (editAction) {
+        rawActions.push(editAction);
+    }
+
+    const drawings = docDataModel.getDrawings() ?? {};
+    const drawingOrder = docDataModel.getDrawingsOrder() ?? [];
+    const removedCustomBlockIds = getCustomBlockIdsInSelections(body, [{
+        ...(selections[0] ?? { collapsed: false }),
+        startOffset: 0,
+        endOffset: editableEnd,
+        collapsed: false,
+    }]).sort((left, right) => drawingOrder.indexOf(right) - drawingOrder.indexOf(left));
+
+    for (const blockId of removedCustomBlockIds) {
+        const drawing = drawings[blockId];
+        const drawingIndex = drawingOrder.indexOf(blockId);
+        if (drawing == null || drawingIndex < 0) {
+            continue;
+        }
+        const removeDrawingAction = jsonX.removeOp(['drawings', blockId], drawing);
+        const removeDrawingOrderAction = jsonX.removeOp(['drawingsOrder', drawingIndex], blockId);
+        if (removeDrawingAction) {
+            rawActions.push(removeDrawingAction);
+        }
+        if (removeDrawingOrderAction) {
+            rawActions.push(removeDrawingOrderAction);
+        }
+    }
+
+    for (const table of body.tables ?? []) {
+        const removeTableSourceAction = jsonX.removeOp(['tableSource', table.tableId]);
+        if (removeTableSourceAction) {
+            rawActions.push(removeTableSourceAction);
+        }
+    }
+
+    let actions: JSONXActions | null = null;
+    for (const action of rawActions) {
+        actions = actions == null ? action : JSONX.compose(actions, action);
+    }
+    return actions ?? [];
 }
 
 // eslint-disable-next-line max-lines-per-function
@@ -555,9 +668,20 @@ export function getCutActionsFromDocRanges(
     rectRanges: Readonly<Nullable<IRectRangeWithStyle[]>>,
     docDataModel: DocumentDataModel,
     viewModel: DocumentViewModel,
-    segmentId: string
+    segmentId: string,
+    wholeBodySelected = false
 ): JSONXActions {
     let rawActions: JSONXActions = [];
+    const body = docDataModel.getSelfOrHeaderFooterModel(segmentId)?.getBody();
+
+    if (
+        body &&
+        Array.isArray(textRanges) &&
+        Array.isArray(rectRanges) &&
+        (wholeBodySelected || isWholeBodySelected(textRanges, rectRanges, body))
+    ) {
+        return getWholeBodyCutActions(textRanges, docDataModel, segmentId);
+    }
 
     if (Array.isArray(textRanges) && textRanges?.length !== 0) {
         rawActions = getCutActionsFromTextRanges(textRanges, docDataModel, segmentId);
@@ -582,6 +706,7 @@ export interface IInnerCutCommandParams {
     textRanges: ITextRangeWithStyle[];
     selections?: ITextRange[];
     rectRanges?: IRectRangeWithStyle[];
+    wholeBodySelected?: boolean;
 }
 
 export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
@@ -594,7 +719,14 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const { segmentId, textRanges, selections = docSelectionManagerService.getTextRanges(), rectRanges = docSelectionManagerService.getRectRanges() } = params;
+        const selectionInfo = docSelectionManagerService.getSelectionInfo();
+        const {
+            segmentId,
+            textRanges,
+            selections = docSelectionManagerService.getTextRanges(),
+            rectRanges = docSelectionManagerService.getRectRanges(),
+            wholeBodySelected = selectionInfo?.options?.wholeDocument === true,
+        } = params;
 
         if (
             (!Array.isArray(selections) || selections.length === 0)
@@ -623,10 +755,18 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
                 unitId,
                 actions: [],
                 textRanges,
+                trigger: CutContentCommand.id,
             },
         };
 
-        doMutation.params.actions = getCutActionsFromDocRanges(selections, rectRanges, docDataModel, viewModel, segmentId);
+        doMutation.params.actions = getCutActionsFromDocRanges(
+            selections,
+            rectRanges,
+            docDataModel,
+            viewModel,
+            segmentId,
+            wholeBodySelected
+        );
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,

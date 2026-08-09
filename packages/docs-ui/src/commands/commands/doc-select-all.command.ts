@@ -49,11 +49,12 @@ export const DocSelectAllCommand: ICommand<ISelectAllCommandParams> = {
         const scopes = getSelectAllScopes(body, activeRange);
         const currentScopeIndex = scopes.findIndex((scope) => isSameRanges(docRanges, scope));
         const textRanges = scopes[Math.min(currentScopeIndex + 1, scopes.length - 1)];
+        const wholeDocument = textRanges === scopes[scopes.length - 1];
 
         docSelectionManagerService.replaceDocRanges(textRanges, {
             unitId,
             subUnitId: unitId,
-        }, false);
+        }, false, { wholeDocument });
 
         return true;
     },

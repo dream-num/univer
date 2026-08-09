@@ -47,7 +47,7 @@ describe('DocIMEStateChangeInterceptorService', () => {
                 {
                     unitId,
                     actions: jsonX.replaceOp(['id'], unitId, `${unitId}-editing`),
-                    textRanges: [],
+                    textRanges: [{ startOffset: 3, endOffset: 3, collapsed: true }],
                 } as never
             );
         }
@@ -92,7 +92,10 @@ describe('DocIMEStateChangeInterceptorService', () => {
             redoState: { actions: [] },
             undoState: { actions: [], textRanges: [] },
         } as never)).toMatchObject({
-            redoState: { actions: jsonX.replaceOp(['id'], 'doc-1', 'doc-1-editing') },
+            redoState: {
+                actions: jsonX.replaceOp(['id'], 'doc-1', 'doc-1-editing'),
+                textRanges: [{ startOffset: 3, endOffset: 3, collapsed: true }],
+            },
             undoState: {
                 actions: jsonX.insertOp(['settings'], { zoomRatio: 1 }),
                 textRanges: [{ startOffset: 1, endOffset: 2 }],
@@ -112,10 +115,39 @@ describe('DocIMEStateChangeInterceptorService', () => {
             redoState: { actions: [] },
             undoState: { actions: [], textRanges: [] },
         } as never)).toMatchObject({
-            redoState: { actions: jsonX.replaceOp(['id'], 'doc-sync', 'doc-sync-editing') },
+            redoState: {
+                actions: jsonX.replaceOp(['id'], 'doc-sync', 'doc-sync-editing'),
+                textRanges: [{ startOffset: 3, endOffset: 3, collapsed: true }],
+            },
             undoState: {
                 actions: jsonX.insertOp(['settings'], { zoomRatio: 1 }),
                 textRanges: [{ startOffset: 1, endOffset: 2 }],
+            },
+        });
+    });
+
+    it('restores every fragmented range and whole-document intent on IME undo', () => {
+        const imeInputManager = createImeInputManager('doc-1');
+        imeInputManager.setPreviousDocRanges([
+            { startOffset: 0, endOffset: 2, collapsed: false } as never,
+            { startOffset: 5, endOffset: 8, collapsed: false } as never,
+        ]);
+        imeInputManager.setPreviousSelectionOptions({ wholeDocument: true });
+        registerImeRenderUnit('doc-1', imeInputManager);
+
+        expect(service.transformChangeStateInfo({
+            unitId: 'doc-1',
+            isCompositionEnd: true,
+            isSync: false,
+            redoState: { actions: [] },
+            undoState: { actions: [], textRanges: [] },
+        } as never)).toMatchObject({
+            undoState: {
+                textRanges: [
+                    { startOffset: 0, endOffset: 2, collapsed: false },
+                    { startOffset: 5, endOffset: 8, collapsed: false },
+                ],
+                options: { wholeDocument: true },
             },
         });
     });

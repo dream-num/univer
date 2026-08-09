@@ -14,16 +14,7 @@
  * limitations under the License.
  */
 
-import type {
-    ICommand,
-    ICommandInfo,
-    IDisposable,
-    IDocumentData,
-    Injector,
-    IStyleBase,
-    JSONXActions,
-    Univer,
-} from '@univerjs/core';
+import type { ICommand, ICommandInfo, IDisposable, IDocumentData, Injector, IStyleBase, JSONXActions, Univer } from '@univerjs/core';
 import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IDocClipboardHook } from '../../../services/clipboard/clipboard.service';
 import type { IInnerCutCommandParams, IInnerPasteCommandParams } from '../clipboard.inner.command';
@@ -742,6 +733,67 @@ describe('test cases in clipboard', () => {
             expect(drawingIds.sort()).toEqual([...(snapshot?.drawingsOrder ?? [])].sort());
 
             expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+        });
+
+        it('replaces a mixed whole-document table selection once and restores it through history', async () => {
+            const originalData = createTableDocumentData();
+            replaceDocument(originalData);
+            const original = Tools.deepClone(getRequiredDocumentSnapshot());
+            const body = original.body;
+            const table = body?.tables?.[0];
+            if (!body || !table) {
+                throw new Error('Table not found');
+            }
+
+            const selectionManager = get(DocSelectionManagerService);
+            const selectionInfo = selectionManager.getSelectionInfo();
+            if (!selectionInfo) {
+                throw new Error('Selection info not found');
+            }
+            const textRanges = [
+                { startOffset: 0, endOffset: table.startIndex, collapsed: false, isActive: true, segmentId: '' },
+                { startOffset: table.endIndex, endOffset: body.dataStream.length - 2, collapsed: false, segmentId: '' },
+            ];
+            const rectRange: IRectRangeWithStyle = {
+                startOffset: table.startIndex,
+                endOffset: table.endIndex - 1,
+                collapsed: false,
+                rangeType: DOC_RANGE_TYPE.RECT,
+                tableId: table.tableId,
+                startRow: 0,
+                endRow: 1,
+                startColumn: 0,
+                endColumn: 1,
+                spanEntireRow: true,
+                spanEntireColumn: true,
+                spanEntireTable: true,
+            };
+            selectionManager.__replaceTextRangesWithNoRefresh({
+                ...selectionInfo,
+                textRanges,
+                rectRanges: [rectRange],
+                options: { wholeDocument: true },
+            }, { unitId: 'test-doc', subUnitId: '' });
+
+            expect(await commandService.executeCommand(InnerPasteCommand.id, {
+                segmentId: '',
+                doc: { body: { dataStream: 'paste' } },
+                textRanges: [],
+            } satisfies IInnerPasteCommandParams)).toBe(true);
+
+            const replaced = Tools.deepClone(getRequiredDocumentSnapshot());
+            expect(replaced.body?.dataStream).toBe('paste\r\n');
+            expect(replaced.body?.tables).toEqual([]);
+            expect(replaced.tableSource ?? {}).toEqual({});
+
+            expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+            expectStructuralSnapshotRestored(getDocumentSnapshot(), original);
+            expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+            expect(getDocumentSnapshot()?.body).toEqual(expect.objectContaining({
+                dataStream: 'paste\r\n',
+                tables: [],
+            }));
+            expect(getDocumentSnapshot()?.tableSource ?? {}).toEqual({});
         });
     });
 

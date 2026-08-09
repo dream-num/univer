@@ -22,8 +22,9 @@ import { Disposable, ICommandService, Inject, Optional, SHEET_EDITOR_UNITS } fro
 import { DocSkeletonManagerService, InsertTextCommand } from '@univerjs/docs';
 import { getCustomDecorationAtPosition, getCustomRangeAtPosition, getTextRunAtPosition } from '../../basics/paragraph';
 import { AfterSpaceCommand } from '../../commands/commands/auto-format.command';
-import { DocMenuStyleService } from '../../services/doc-menu-style.service';
+import { ReplaceSelectionCommand } from '../../commands/commands/replace-content.command';
 import { IDocEmbedInteractionBoundaryService, IDocEmbedRuntimeFocusCoordinator } from '../../services/doc-embed-integration.service';
+import { DocMenuStyleService } from '../../services/doc-menu-style.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 
 export class DocInputController extends Disposable implements IRenderModule {
@@ -61,7 +62,7 @@ export class DocInputController extends Disposable implements IRenderModule {
 
             const { unitId } = this._context;
 
-            const { event, content = '', activeRange } = config;
+            const { event, content = '', activeRange, rangeList = [] } = config;
 
             const e = event as InputEvent;
             if (e.defaultPrevented) {
@@ -93,35 +94,53 @@ export class DocInputController extends Disposable implements IRenderModule {
             const curTextRun = getTextRunAtPosition(originBody, activeRange.endOffset, defaultTextStyle, cacheStyle, SHEET_EDITOR_UNITS.includes(unitId));
             const curCustomDecorations = getCustomDecorationAtPosition(originBody?.customDecorations ?? [], activeRange.endOffset);
 
-            await this._commandService.executeCommand<IInsertTextCommandParams>(InsertTextCommand.id, {
-                unitId,
-                body: {
-                    dataStream: content,
-                    textRuns: curTextRun
-                        ? [
-                            {
-                                ...curTextRun,
-                                st: 0,
-                                ed: content.length,
-                            },
-                        ]
-                        : [],
-                    customRanges: curCustomRange
-                        ? [{
-                            ...curCustomRange,
-                            startIndex: 0,
-                            endIndex: content.length - 1,
-                        }]
-                        : [],
-                    customDecorations: curCustomDecorations.map((customDecoration) => ({
-                        ...customDecoration,
+            const insertBody = {
+                dataStream: content,
+                textRuns: curTextRun
+                    ? [
+                        {
+                            ...curTextRun,
+                            st: 0,
+                            ed: content.length,
+                        },
+                    ]
+                    : [],
+                customRanges: curCustomRange
+                    ? [{
+                        ...curCustomRange,
                         startIndex: 0,
                         endIndex: content.length - 1,
-                    })),
-                },
-                range: activeRange,
-                segmentId,
-            });
+                    }]
+                    : [],
+                customDecorations: curCustomDecorations.map((customDecoration) => ({
+                    ...customDecoration,
+                    startIndex: 0,
+                    endIndex: content.length - 1,
+                })),
+            };
+            const hasSelectedStructure = !activeRange.collapsed && (
+                Boolean(originBody.blockRanges?.length) ||
+                Boolean(originBody.columnGroups?.length) ||
+                Boolean(originBody.customBlocks?.length) ||
+                Boolean(originBody.tables?.length)
+            );
+            const hasComplexSelection = hasSelectedStructure || rangeList.length > 1 || this._docSelectionRenderService.getAllRectRanges().length > 0;
+
+            // TODO(@ai-review): Verify that all select-all entry points expose either multiple text ranges or a rect range before normal input is dispatched.
+            if (hasComplexSelection) {
+                await this._commandService.executeCommand(ReplaceSelectionCommand.id, {
+                    unitId,
+                    body: insertBody,
+                    segmentId,
+                });
+            } else {
+                await this._commandService.executeCommand<IInsertTextCommandParams>(InsertTextCommand.id, {
+                    unitId,
+                    body: insertBody,
+                    range: activeRange,
+                    segmentId,
+                });
+            }
 
             // Space
             if (content === ' ') {

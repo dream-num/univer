@@ -137,6 +137,12 @@ export class DocStateChangeManagerService extends RxDisposable {
             ? this._pushHistory.bind(this)
             : this._emitChangeState.bind(this);
 
+        const pendingStates = stateCache.get(unitId);
+        // TODO(@ai-review): Verify that flushing a pending debounce group on segment changes preserves the intended typing history boundaries in headers and footers.
+        if (pendingStates?.length && pendingStates[pendingStates.length - 1].segmentId !== changeState.segmentId) {
+            cb(unitId);
+        }
+
         if (stateCache.has(unitId)) {
             const cacheStates = stateCache.get(unitId);
 
@@ -187,6 +193,9 @@ export class DocStateChangeManagerService extends RxDisposable {
             unitId,
             actions: cacheStates.reduce((acc, cur) => JSONX.compose(acc, cur.redoState.actions), null as JSONXActions),
             textRanges: lastState.redoState.textRanges,
+            segmentId: lastState.segmentId,
+            options: lastState.redoState.options,
+            isEditing: lastState.redoState.isEditing,
         };
 
         const undoParams: IRichTextEditingMutationParams = {
@@ -194,6 +203,9 @@ export class DocStateChangeManagerService extends RxDisposable {
             // Always need to put undoParams after redoParams, because `reverse` will change the `cacheStates` order.
             actions: cacheStates.reverse().reduce((acc, cur) => JSONX.compose(acc, cur.undoState.actions), null as JSONXActions),
             textRanges: firstState.undoState.textRanges,
+            segmentId: firstState.segmentId,
+            options: firstState.undoState.options,
+            isEditing: firstState.undoState.isEditing,
         };
 
         undoRedoService.pushUndoRedo({
@@ -224,6 +236,9 @@ export class DocStateChangeManagerService extends RxDisposable {
             unitId,
             actions: cacheStates.reduce((acc, cur) => JSONX.compose(acc, cur.redoState.actions), null as JSONXActions),
             textRanges: lastState.redoState.textRanges,
+            segmentId: lastState.segmentId,
+            options: lastState.redoState.options,
+            isEditing: lastState.redoState.isEditing,
         };
 
         const undoState: IRichTextEditingMutationParams = {
@@ -231,6 +246,9 @@ export class DocStateChangeManagerService extends RxDisposable {
             // Always need to put undoParams after redoParams, because `reverse` will change the `cacheStates` order.
             actions: cacheStates.reverse().reduce((acc, cur) => JSONX.compose(acc, cur.undoState.actions), null as JSONXActions),
             textRanges: firstState.undoState.textRanges,
+            segmentId: firstState.segmentId,
+            options: firstState.undoState.options,
+            isEditing: firstState.undoState.isEditing,
         };
 
         const changeState: IDocStateChangeParams = {

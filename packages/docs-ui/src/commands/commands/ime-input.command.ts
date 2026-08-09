@@ -16,13 +16,14 @@
 
 import type { DocumentDataModel, ICommand, ICommandInfo } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import type { ITextRangeWithStyle } from '@univerjs/engine-render';
+import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
 import { BuildTextUtils, CommandType, getRichTextEditPath, ICommandService, IUniverInstanceService, JSONX, SHEET_EDITOR_UNITS, TextX, TextXActionType, UniverInstanceType } from '@univerjs/core';
-import { RichTextEditingMutation } from '@univerjs/docs';
+import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { getCustomDecorationAtPosition, getCustomRangeAtPosition, getTextRunAtPosition } from '../../basics/paragraph';
 import { DocIMEInputManagerService } from '../../services/doc-ime-input-manager.service';
 import { DocMenuStyleService } from '../../services/doc-menu-style.service';
+import { getDocRangeInsertOffset, getReplaceDocRangesActions } from './clipboard.inner.command';
 
 export interface IIMEInputCommandParams {
     unitId: string;
@@ -52,7 +53,7 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
             return false;
         }
 
-        const previousActiveRange = imeInputManagerService.getActiveRange();
+        const previousActiveRange = imeInputManagerService.getCompositionRange();
         if (previousActiveRange == null) {
             return false;
         }
@@ -67,15 +68,29 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
         const insertRange = previousActiveRange;
         Object.assign(previousActiveRange, insertRange);
         const { startOffset, endOffset } = previousActiveRange;
+        const previousDocRanges = imeInputManagerService.getPreviousDocRanges();
+        const previousRectRanges = previousDocRanges.filter(isRectRange);
+        const previousTextRanges = previousDocRanges.filter((range) => !isRectRange(range));
+        const wholeBodySelected = imeInputManagerService.getPreviousSelectionOptions()?.wholeDocument === true;
+        const replacesComplexSelection = isCompositionStart && (wholeBodySelected || previousRectRanges.length > 0 || previousTextRanges.length > 1);
+        let replacementOffset = replacesComplexSelection
+            ? wholeBodySelected
+                ? 0
+                : getDocRangeInsertOffset(previousTextRanges, previousRectRanges)
+            : startOffset;
+        if (replacementOffset == null) {
+            return false;
+        }
 
         const len = newText.length;
 
         const textRanges: ITextRangeWithStyle[] = [
             {
-                startOffset: startOffset + len,
-                endOffset: startOffset + len,
+                startOffset: replacementOffset + len,
+                endOffset: replacementOffset + len,
                 collapsed: true,
                 style,
+                segmentId,
             },
         ];
 
@@ -85,31 +100,84 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
                 unitId,
                 actions: [],
                 textRanges,
+                segmentId,
+                trigger: IMEInputCommand.id,
             },
         };
 
         const defaultTextStyle = docMenuStyleService.getDefaultStyle();
         const styleCache = docMenuStyleService.getStyleCache();
-        const curCustomRange = getCustomRangeAtPosition(body.customRanges ?? [], startOffset + oldTextLen, SHEET_EDITOR_UNITS.includes(unitId));
+        const styleOffset = replacesComplexSelection ? replacementOffset : startOffset + oldTextLen;
+        const curCustomRange = getCustomRangeAtPosition(body.customRanges ?? [], styleOffset, SHEET_EDITOR_UNITS.includes(unitId));
         const curTextRun = getTextRunAtPosition(
             body,
-            isCompositionStart ? endOffset : startOffset + oldTextLen,
+            replacesComplexSelection ? replacementOffset : isCompositionStart ? endOffset : startOffset + oldTextLen,
             defaultTextStyle,
             styleCache,
             SHEET_EDITOR_UNITS.includes(unitId)
         );
 
-        const customDecorations = getCustomDecorationAtPosition(body.customDecorations ?? [], startOffset + oldTextLen);
+        const customDecorations = getCustomDecorationAtPosition(body.customDecorations ?? [], styleOffset);
+        const insertBody = {
+            dataStream: newText,
+            textRuns: curTextRun
+                ? [{
+                    ...curTextRun,
+                    st: 0,
+                    ed: newText.length,
+                }]
+                : [],
+            customRanges: curCustomRange
+                ? [{
+                    ...curCustomRange,
+                    startIndex: 0,
+                    endIndex: newText.length - 1,
+                }]
+                : [],
+            customDecorations: customDecorations.map((customDecoration) => ({
+                ...customDecoration,
+                startIndex: 0,
+                endIndex: newText.length - 1,
+            })),
+        };
         const textX = new TextX();
         const jsonX = JSONX.getInstance();
 
-        if (!previousActiveRange.collapsed && isCompositionStart) {
+        if (replacesComplexSelection) {
+            const docSkeletonManagerService = renderManagerService.getRenderUnitById(unitId)?.with(DocSkeletonManagerService);
+            if (!docSkeletonManagerService) {
+                return false;
+            }
+            // TODO(@ai-review): Verify that the first IME composition mutation atomically removes every structural range before inserting composition text once.
+            const replacement = getReplaceDocRangesActions(
+                previousTextRanges,
+                previousRectRanges,
+                docDataModel,
+                docSkeletonManagerService.getViewModel(),
+                segmentId ?? '',
+                insertBody,
+                wholeBodySelected
+            );
+            if (!replacement) {
+                return false;
+            }
+            replacementOffset = replacement.insertOffset;
+            doMutation.params!.actions = replacement.actions;
+            doMutation.params!.textRanges = [{
+                startOffset: replacementOffset + len,
+                endOffset: replacementOffset + len,
+                collapsed: true,
+                style,
+                segmentId,
+            }];
+        } else if (!previousActiveRange.collapsed && isCompositionStart) {
             const dos = BuildTextUtils.selection.delete([previousActiveRange], body, 0, null, false);
             textX.push(...dos);
             doMutation.params!.textRanges = [{
-                startOffset: startOffset + len,
-                endOffset: startOffset + len,
+                startOffset: replacementOffset + len,
+                endOffset: replacementOffset + len,
                 collapsed: true,
+                segmentId,
             }];
         } else {
             textX.push({
@@ -118,42 +186,25 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
             });
         }
 
-        if (oldTextLen > 0) {
+        if (!replacesComplexSelection && oldTextLen > 0) {
             textX.push({
                 t: TextXActionType.DELETE,
                 len: oldTextLen,
             });
         }
 
-        textX.push({
-            t: TextXActionType.INSERT,
-            body: {
-                dataStream: newText,
-                textRuns: curTextRun
-                    ? [{
-                        ...curTextRun,
-                        st: 0,
-                        ed: newText.length,
-                    }]
-                    : [],
-                customRanges: curCustomRange
-                    ? [{
-                        ...curCustomRange,
-                        startIndex: 0,
-                        endIndex: newText.length - 1,
-                    }]
-                    : [],
-                customDecorations: customDecorations.map((customDecoration) => ({
-                    ...customDecoration,
-                    startIndex: 0,
-                    endIndex: newText.length - 1,
-                })),
-            },
-            len: newText.length,
-        });
+        if (!replacesComplexSelection) {
+            textX.push({
+                t: TextXActionType.INSERT,
+                body: insertBody,
+                len: newText.length,
+            });
+        }
 
-        const path = getRichTextEditPath(docDataModel, segmentId);
-        doMutation.params!.actions = jsonX.editOp(textX.serialize(), path);
+        if (!replacesComplexSelection) {
+            const path = getRichTextEditPath(docDataModel, segmentId);
+            doMutation.params!.actions = jsonX.editOp(textX.serialize(), path);
+        }
 
         doMutation.params!.noHistory = !isCompositionEnd;
 
@@ -165,7 +216,19 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
         >(doMutation.id, doMutation.params);
 
         imeInputManagerService.pushUndoRedoMutationParams(result, doMutation.params!);
+        if (replacesComplexSelection) {
+            imeInputManagerService.setCompositionRange({
+                ...previousActiveRange,
+                startOffset: replacementOffset,
+                endOffset: replacementOffset,
+                collapsed: true,
+            });
+        }
 
         return Boolean(result);
     },
 };
+
+function isRectRange(range: ITextRangeWithStyle): range is IRectRangeWithStyle {
+    return 'tableId' in range;
+}

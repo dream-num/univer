@@ -14,27 +14,10 @@
  * limitations under the License.
  */
 
-import type {
-    DocumentDataModel,
-    IAccessor,
-    ICommand,
-    ICustomTable,
-    IDisposable,
-    IDocumentBody,
-    IDocumentData,
-    IDrawingParam,
-    IMutationInfo,
-    ITextRange,
-    JSONXActions,
-    Nullable,
-} from '@univerjs/core';
+import type { DocumentDataModel, IAccessor, ICommand, ICustomTable, IDisposable, IDocumentBody, IDocumentData, IDrawingParam, IMutationInfo, ITextRange, JSONXActions, Nullable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { DocumentViewModel, IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
-import type {
-    IDocClipboardPasteBlockRangeMapping,
-    IDocClipboardPasteCustomBlockMapping,
-    IDocClipboardPasteCustomRangeMapping,
-} from '../../services/clipboard/doc-paste-mutation-adapter.service';
+import type { IDocClipboardPasteBlockRangeMapping, IDocClipboardPasteCustomBlockMapping, IDocClipboardPasteCustomRangeMapping } from '../../services/clipboard/doc-paste-mutation-adapter.service';
 import {
     BuildTextUtils,
     CommandType,
@@ -63,7 +46,7 @@ import {
 import { getCommandSkeleton } from '../util';
 import { getDeleteRowContentActionParams, getDeleteRowsActionsParams, getDeleteTableActionParams } from './table/table';
 
-function hasRangeInTable(ranges: ITextRangeWithStyle[]): boolean {
+function hasRangeInTable(ranges: readonly ITextRangeWithStyle[]): boolean {
     return ranges.some((range) => {
         const { startNodePosition } = range;
 
@@ -97,10 +80,11 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const pasteAdapterService = getPasteAdapterService(accessor);
-        const selections = docSelectionManagerService.getTextRanges();
-        const rectRanges = docSelectionManagerService.getRectRanges();
+        const selections = docSelectionManagerService.getTextRanges() ?? [];
+        const rectRanges = docSelectionManagerService.getRectRanges() ?? [];
+        const selectionInfo = docSelectionManagerService.getSelectionInfo();
         const { body, tableSource, drawings } = doc;
-        if (!Array.isArray(selections) || selections.length === 0 || body == null) {
+        if ((selections.length === 0 && rectRanges.length === 0) || body == null) {
             return false;
         }
 
@@ -118,6 +102,7 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
                 actions: [],
                 textRanges,
                 segmentId,
+                trigger: InnerPasteCommand.id,
             },
         };
 
@@ -143,17 +128,51 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
 
         // TODO: @JOCS A feature that has not yet been implemented.
         // Can not paste tables into table cell now.
-        if (hasTable && hasRangeInTable(selections)) {
+        if (hasTable && (hasRangeInTable(selections) || rectRanges.some((range) => !range.spanEntireTable))) {
             return false;
         }
 
-        // Can not paste content when doc selection has both text ranges and rect ranges.
-        if (selections.length && rectRanges?.length) {
-            return false;
+        const replacesComplexSelection = rectRanges.length > 0 || selectionInfo?.options?.wholeDocument === true;
+        let selectionCutActions: JSONXActions = [];
+        let pasteSelections = selections;
+        if (replacesComplexSelection) {
+            const docSkeletonManagerService = getCommandSkeleton(accessor, unitId);
+            if (!docSkeletonManagerService) {
+                return false;
+            }
+
+            const wholeBodySelected = selectionInfo?.options?.wholeDocument === true || isWholeBodySelected(selections, rectRanges, originBody);
+            const insertOffset = wholeBodySelected ? 0 : getDocRangeInsertOffset(selections, rectRanges);
+            if (insertOffset == null) {
+                return false;
+            }
+
+            // TODO(@ai-review): Confirm that mixed table/text paste keeps one insertion anchor while preserving plugin resource undo mutations.
+            selectionCutActions = getCutActionsFromDocRanges(
+                selections,
+                rectRanges,
+                docDataModel,
+                docSkeletonManagerService.getViewModel(),
+                segmentId,
+                wholeBodySelected
+            );
+            pasteSelections = [{
+                startOffset: insertOffset,
+                endOffset: insertOffset,
+                collapsed: true,
+                segmentId,
+            }];
+            doMutation.params.textRanges = [{
+                startOffset: insertOffset + body.dataStream.length,
+                endOffset: insertOffset + body.dataStream.length,
+                collapsed: true,
+                segmentId,
+                style: selections.find((range) => range.isActive)?.style,
+            }];
         }
 
-        for (let i = 0; i < selections.length; i++) {
-            const selection = selections[i];
+        for (let i = 0; i < pasteSelections.length; i++) {
+            const selection = pasteSelections[i];
             const { startOffset, endOffset, collapsed } = selection;
 
             const len = startOffset - memoryCursor.cursor;
@@ -279,7 +298,7 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
                     len: body.dataStream.length,
                 });
             } else {
-                const dos = BuildTextUtils.selection.delete([selection], body, memoryCursor.cursor, cloneBody, selections.length === 1);
+                const dos = BuildTextUtils.selection.delete([selection], body, memoryCursor.cursor, cloneBody, pasteSelections.length === 1);
                 textX.push(...dos);
             }
 
@@ -291,9 +310,12 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
 
         rawActions.push(jsonX.editOp(textX.serialize(), path)!);
 
-        doMutation.params.actions = rawActions.reduce((acc, cur) => {
+        const pasteActions = rawActions.reduce((acc, cur) => {
             return JSONX.compose(acc, cur as JSONXActions);
         }, null as JSONXActions);
+        doMutation.params.actions = selectionCutActions && selectionCutActions.length > 0
+            ? JSONX.compose(selectionCutActions, pasteActions)
+            : pasteActions;
 
         if (!executeResourceMutationGroups(resourceMutationGroups, commandService)) {
             return false;
@@ -451,15 +473,15 @@ const IMPLICIT_WHOLE_BODY_SELECTION_TOKENS = new Set<string>([
 ]);
 
 function isWholeBodySelected(
-    textRanges: ITextRangeWithStyle[],
-    rectRanges: IRectRangeWithStyle[],
+    textRanges: Readonly<Nullable<ITextRangeWithStyle[]>>,
+    rectRanges: Readonly<Nullable<IRectRangeWithStyle[]>>,
     body: IDocumentBody
 ): boolean {
-    const intervals = textRanges
+    const intervals = (Array.isArray(textRanges) ? textRanges : [])
         .filter((range) => !range.collapsed)
         .map(({ startOffset, endOffset }) => ({ startOffset, endOffset }));
 
-    for (const rectRange of rectRanges) {
+    for (const rectRange of Array.isArray(rectRanges) ? rectRanges : []) {
         if (!rectRange.spanEntireTable) {
             continue;
         }
@@ -491,7 +513,7 @@ function isWholeBodySelected(
 }
 
 function getWholeBodyCutActions(
-    selections: ITextRangeWithStyle[],
+    selections: readonly ITextRangeWithStyle[],
     docDataModel: DocumentDataModel,
     segmentId: string
 ): JSONXActions {
@@ -708,6 +730,79 @@ export function getCutActionsFromDocRanges(
     }
 
     return rawActions;
+}
+
+// TODO(@ai-review): Verify that inserting once at the earliest selected range matches the expected behavior for every supported multi-range editing surface.
+export function getReplaceDocRangesActions(
+    textRanges: Readonly<Nullable<ITextRangeWithStyle[]>>,
+    rectRanges: Readonly<Nullable<IRectRangeWithStyle[]>>,
+    docDataModel: DocumentDataModel,
+    viewModel: DocumentViewModel,
+    segmentId: string,
+    insertBody: IDocumentBody,
+    wholeBodySelected = false
+) {
+    const body = docDataModel.getSelfOrHeaderFooterModel(segmentId)?.getBody();
+    const insertOffset = wholeBodySelected || (body && isWholeBodySelected(textRanges, rectRanges, body))
+        ? 0
+        : getDocRangeInsertOffset(textRanges, rectRanges);
+    if (insertOffset == null) {
+        return null;
+    }
+
+    const cutActions = getCutActionsFromDocRanges(
+        textRanges,
+        rectRanges,
+        docDataModel,
+        viewModel,
+        segmentId,
+        wholeBodySelected
+    );
+    const textX = new TextX();
+    if (insertOffset > 0) {
+        textX.push({
+            t: TextXActionType.RETAIN,
+            len: insertOffset,
+        });
+    }
+    if (insertBody.dataStream.length > 0) {
+        textX.push({
+            t: TextXActionType.INSERT,
+            body: insertBody,
+            len: insertBody.dataStream.length,
+        });
+    }
+
+    const insertAction = JSONX.getInstance().editOp(
+        textX.serialize(),
+        getRichTextEditPath(docDataModel, segmentId)
+    );
+    const actions = insertAction == null
+        ? cutActions
+        : cutActions == null || cutActions.length === 0
+            ? insertAction
+            : JSONX.compose(cutActions, insertAction);
+
+    return {
+        actions,
+        insertOffset,
+    };
+}
+
+export function getDocRangeInsertOffset(
+    textRanges: Readonly<Nullable<ITextRangeWithStyle[]>>,
+    rectRanges: Readonly<Nullable<IRectRangeWithStyle[]>>
+): Nullable<number> {
+    const ranges = [
+        ...(Array.isArray(textRanges) ? textRanges : []),
+        ...(Array.isArray(rectRanges) ? rectRanges : []),
+    ].filter((range) => range.startOffset != null && range.endOffset != null);
+    const insertOffset = ranges.reduce(
+        (offset, range) => Math.min(offset, range.startOffset),
+        Number.POSITIVE_INFINITY
+    );
+
+    return Number.isFinite(insertOffset) ? insertOffset : null;
 }
 
 export interface IInnerCutCommandParams {

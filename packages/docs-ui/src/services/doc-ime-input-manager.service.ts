@@ -29,6 +29,12 @@ interface ICacheParams {
 export class DocIMEInputManagerService extends RxDisposable implements IRenderModule {
     private _previousActiveRange: Nullable<ITextRangeWithStyle> = null;
 
+    private _previousDocRanges: ITextRangeWithStyle[] = [];
+
+    private _compositionRange: Nullable<ITextRangeWithStyle> = null;
+
+    private _previousSelectionOptions: Nullable<{ [key: string]: boolean }> = null;
+
     private _undoMutationParamsCache: IRichTextEditingMutationParams[] = [];
 
     private _redoMutationParamsCache: IRichTextEditingMutationParams[] = [];
@@ -62,6 +68,31 @@ export class DocIMEInputManagerService extends RxDisposable implements IRenderMo
 
     setActiveRange(range: Nullable<ITextRangeWithStyle>) {
         this._previousActiveRange = range;
+        this._compositionRange = range;
+    }
+
+    getCompositionRange(): Nullable<ITextRangeWithStyle> {
+        return this._compositionRange;
+    }
+
+    setCompositionRange(range: Nullable<ITextRangeWithStyle>): void {
+        this._compositionRange = range;
+    }
+
+    getPreviousDocRanges(): ITextRangeWithStyle[] {
+        return this._previousDocRanges;
+    }
+
+    setPreviousDocRanges(ranges: ITextRangeWithStyle[]): void {
+        this._previousDocRanges = ranges;
+    }
+
+    getPreviousSelectionOptions(): Nullable<{ [key: string]: boolean }> {
+        return this._previousSelectionOptions;
+    }
+
+    setPreviousSelectionOptions(options: Nullable<{ [key: string]: boolean }>): void {
+        this._previousSelectionOptions = options;
     }
 
     pushUndoRedoMutationParams(undoParams: IRichTextEditingMutationParams, redoParams: IRichTextEditingMutationParams) {
@@ -75,6 +106,8 @@ export class DocIMEInputManagerService extends RxDisposable implements IRenderMo
         }
 
         const { unitId } = this._undoMutationParamsCache[0];
+        const firstUndoParams = this._undoMutationParamsCache[0];
+        const lastRedoParams = this._redoMutationParamsCache.at(-1);
 
         const undoMutationParams: IRichTextEditingMutationParams = {
             unitId,
@@ -82,17 +115,28 @@ export class DocIMEInputManagerService extends RxDisposable implements IRenderMo
                 return JSONX.compose(acc, cur.actions);
             }, null as JSONXActions),
             textRanges: [], // Add empty array, will never use, just fix type error
+            segmentId: firstUndoParams.segmentId,
         };
 
+        // TODO(@ai-review): Verify that composed IME redo restores the final caret and segment instead of the pre-composition range.
         const redoMutationParams: IRichTextEditingMutationParams = {
             unitId,
             actions: this._redoMutationParamsCache.reduce((acc, cur) => {
                 return JSONX.compose(acc, cur.actions);
             }, null as JSONXActions),
-            textRanges: [], // Add empty array, will never use, just fix type error
+            textRanges: lastRedoParams?.textRanges ?? [],
+            segmentId: lastRedoParams?.segmentId,
+            options: lastRedoParams?.options,
+            isEditing: lastRedoParams?.isEditing,
         };
 
-        return { redoMutationParams, undoMutationParams, previousActiveRange: this._previousActiveRange };
+        return {
+            redoMutationParams,
+            undoMutationParams,
+            previousActiveRange: this._previousActiveRange,
+            previousDocRanges: this._previousDocRanges,
+            previousSelectionOptions: this._previousSelectionOptions,
+        };
     }
 
     override dispose(): void {
@@ -100,5 +144,8 @@ export class DocIMEInputManagerService extends RxDisposable implements IRenderMo
         this._redoMutationParamsCache = [];
 
         this._previousActiveRange = null;
+        this._previousDocRanges = [];
+        this._compositionRange = null;
+        this._previousSelectionOptions = null;
     }
 }

@@ -25,6 +25,9 @@ function getGetter<T extends object>(target: T, key: keyof T) {
 
 interface IFakeShape {
     dispose: ReturnType<typeof vi.fn>;
+    hide?: ReturnType<typeof vi.fn>;
+    setProps?: ReturnType<typeof vi.fn>;
+    show?: ReturnType<typeof vi.fn>;
 }
 
 interface IFakeTextRange {
@@ -36,7 +39,7 @@ interface IFakeTextRange {
     _anchorShape: IFakeShape;
     _docSkeleton: Record<string, unknown>;
     anchorNodePosition: Record<string, unknown>;
-    focusNodePosition: Record<string, unknown>;
+    focusNodePosition: Record<string, unknown> | null;
 }
 
 interface IFakeRectRange {
@@ -223,7 +226,7 @@ describe('selection range state', () => {
             _segmentPage: -1,
             _current: false,
             _rangeShape: { dispose: vi.fn() },
-            _anchorShape: { dispose: vi.fn() },
+            _anchorShape: { dispose: vi.fn(), hide: vi.fn(), show: vi.fn(), setProps: vi.fn() },
             _docSkeleton: {
                 getViewModel: () => ({
                     getDataModel: () => ({
@@ -245,10 +248,13 @@ describe('selection range state', () => {
         expect(getGetter(TextRange.prototype, 'direction').call(fakeRange)).toBe('none');
 
         expect(TextRange.prototype.isActive.call(fakeRange)).toBe(false);
+        fakeRange.focusNodePosition = null;
         TextRange.prototype.activate.call(fakeRange);
         expect(TextRange.prototype.isActive.call(fakeRange)).toBe(true);
+        expect(fakeRange._anchorShape.show).toHaveBeenCalledTimes(1);
         TextRange.prototype.deactivate.call(fakeRange);
         expect(TextRange.prototype.isActive.call(fakeRange)).toBe(false);
+        expect(fakeRange._anchorShape.hide).toHaveBeenCalledTimes(1);
         const textRangeShape = fakeRange._rangeShape;
         const textAnchorShape = fakeRange._anchorShape;
         TextRange.prototype.dispose.call(fakeRange);

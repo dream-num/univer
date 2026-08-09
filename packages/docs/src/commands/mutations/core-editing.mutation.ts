@@ -117,6 +117,8 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
 
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const docRanges = docSelectionManagerService.getDocRanges() ?? [];
+        // Capture selection intent before applying actions so undo can restore structural selections.
+        const selectionInfo = docSelectionManagerService.getSelectionInfo();
 
         // TODO: `disabled` is only used for read only demo, and will be removed in the future.
         const disabled = !!documentDataModel.getSnapshot().disabled;
@@ -162,10 +164,14 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
             redoState: {
                 actions,
                 textRanges,
+                options: params.options,
+                isEditing,
             },
             undoState: {
                 actions: undoActions,
                 textRanges: prevTextRanges ?? docRanges,
+                options: selectionInfo?.options,
+                isEditing: selectionInfo?.isEditing,
             },
             isCompositionEnd,
             isSync,

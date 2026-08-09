@@ -28,7 +28,7 @@ import {
     RESTORE_INSERTED_PARAGRAPH_IDS,
 } from './apply-utils/common';
 import { transformBody } from './transform-utils';
-import { composeBody, getBodySlice, isUselessRetainAction } from './utils';
+import { composeBody, getBodySlice, getBodySliceForTextXAction, isUselessRetainAction } from './utils';
 
 function onlyHasDataStream(body: IDocumentBody) {
     return Object.keys(body).length === 1;
@@ -251,6 +251,7 @@ export class TextX {
 
                 if (action.body.paragraphs?.length) {
                     (action.body as IDocumentBody & Record<string, unknown>)[RESTORE_INSERTED_PARAGRAPH_IDS] = true;
+                    Reflect.set(action.body, PRESERVE_INSERTED_PARAGRAPH_IDS, true);
                 }
 
                 invertedActions.push({
@@ -294,7 +295,7 @@ export class TextX {
             }
 
             if (action.t === TextXActionType.DELETE && (action.body == null || (action.body && action.body.dataStream.length !== action.len))) {
-                const body = getBodySlice(doc, index, index + action.len, false);
+                const body = getBodySliceForTextXAction(doc, index, index + action.len, false);
                 action.len = body.dataStream.length;
                 action.body = body;
             }

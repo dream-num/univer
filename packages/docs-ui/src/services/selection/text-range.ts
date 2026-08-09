@@ -317,10 +317,19 @@ export class TextRange implements IDocRange {
 
     activate() {
         this._current = true;
+
+        if (this._isCollapsed()) {
+            this._anchorShape?.show();
+            this.activeStatic();
+        }
     }
 
     deactivate() {
         this._current = false;
+
+        if (this._isCollapsed()) {
+            this._anchorShape?.hide();
+        }
     }
 
     dispose() {

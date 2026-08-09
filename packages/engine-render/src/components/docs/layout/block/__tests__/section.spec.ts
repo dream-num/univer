@@ -202,6 +202,13 @@ describe('section', () => {
                 ],
             });
             expect(columnGroup.height).toBeGreaterThan(0);
+            expect(columnGroup.columns.map(({ page: columnPage }) => ({
+                marginLeft: columnPage.marginLeft,
+                marginRight: columnPage.marginRight,
+            }))).toEqual([
+                { marginLeft: 8, marginRight: 8 },
+                { marginLeft: 8, marginRight: 8 },
+            ]);
             expect(columnGroup.columns[0].page.sections[0].columns[0].lines.length).toBeGreaterThan(0);
             expect(columnGroup.columns[0].page.sections[0].columns[0].lines[0].borderBottom).toMatchObject({
                 color: { rgb: '#336699' },

@@ -1721,6 +1721,14 @@ const DEFAULT_MODERN_SECTION_BREAK: Partial<ISectionBreak> = {
     columnProperties: [],
     columnSeparatorType: ColumnSeparatorType.NONE,
     sectionType: SectionType.SECTION_TYPE_UNSPECIFIED,
+    defaultHeaderId: '',
+    defaultFooterId: '',
+    evenPageHeaderId: '',
+    evenPageFooterId: '',
+    firstPageHeaderId: '',
+    firstPageFooterId: '',
+    evenAndOddHeaders: BooleanNumber.FALSE,
+    useFirstPageHeaderFooter: BooleanNumber.FALSE,
 };
 
 export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number) {

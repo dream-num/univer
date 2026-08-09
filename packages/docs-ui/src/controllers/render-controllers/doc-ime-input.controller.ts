@@ -24,7 +24,7 @@ import {
     Inject,
     Tools,
 } from '@univerjs/core';
-import { DocSkeletonManagerService, DocStateEmitService, RichTextEditingMutation } from '@univerjs/docs';
+import { DocSelectionManagerService, DocSkeletonManagerService, DocStateEmitService, RichTextEditingMutation } from '@univerjs/docs';
 import { IMEInputCommand } from '../../commands/commands/ime-input.command';
 import { DocIMEInputManagerService } from '../../services/doc-ime-input-manager.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
@@ -46,6 +46,7 @@ export class DocIMEInputController extends Disposable implements IRenderModule {
         @Inject(DocIMEInputManagerService) private readonly _docImeInputManagerService: DocIMEInputManagerService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @Inject(DocStateEmitService) private readonly _docStateEmitService: DocStateEmitService,
+        @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService,
         @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
@@ -75,13 +76,20 @@ export class DocIMEInputController extends Disposable implements IRenderModule {
 
             this._resetIME();
 
-            const { activeRange } = config;
+            const { activeRange, rangeList = [] } = config;
 
             if (activeRange == null) {
                 return;
             }
 
             this._docImeInputManagerService.setActiveRange(Tools.deepClone(activeRange));
+            this._docImeInputManagerService.setPreviousDocRanges(Tools.deepClone([
+                ...rangeList,
+                ...this._docSelectionRenderService.getAllRectRanges(),
+            ]));
+            this._docImeInputManagerService.setPreviousSelectionOptions(
+                Tools.deepClone(this._docSelectionManagerService.getSelectionInfo()?.options ?? null)
+            );
         });
     }
 
@@ -164,11 +172,16 @@ export class DocIMEInputController extends Disposable implements IRenderModule {
             trigger: IMEInputCommand.id,
             redoState: {
                 actions: [] as JSONXActions,
-                textRanges: [previousActiveRange],
+                textRanges: this._docImeInputManagerService.getPreviousDocRanges().length
+                    ? this._docImeInputManagerService.getPreviousDocRanges()
+                    : [previousActiveRange],
             },
             undoState: {
                 actions: [] as JSONXActions,
-                textRanges: [previousActiveRange],
+                textRanges: this._docImeInputManagerService.getPreviousDocRanges().length
+                    ? this._docImeInputManagerService.getPreviousDocRanges()
+                    : [previousActiveRange],
+                options: this._docImeInputManagerService.getPreviousSelectionOptions() ?? undefined,
             },
             isCompositionEnd: true,
         });
@@ -182,5 +195,7 @@ export class DocIMEInputController extends Disposable implements IRenderModule {
         this._docImeInputManagerService.clearUndoRedoMutationParamsCache();
 
         this._docImeInputManagerService.setActiveRange(null);
+        this._docImeInputManagerService.setPreviousDocRanges([]);
+        this._docImeInputManagerService.setPreviousSelectionOptions(null);
     }
 }

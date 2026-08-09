@@ -42,6 +42,7 @@ interface IColumnGroupLayout {
 }
 
 const EMPTY_COLUMN_GROUP_MIN_HEIGHT = 72;
+const COLUMN_GROUP_HORIZONTAL_PADDING = 8;
 
 export function createColumnGroupSkeleton(
     ctx: ILayoutContext,
@@ -137,8 +138,8 @@ function createColumnContentPage(
         },
         marginTop: 0,
         marginBottom: 0,
-        marginLeft: 0,
-        marginRight: 0,
+        marginLeft: COLUMN_GROUP_HORIZONTAL_PADDING,
+        marginRight: COLUMN_GROUP_HORIZONTAL_PADDING,
         columnProperties: [],
     };
     const page = createSkeletonPage(ctx, columnSectionBreakConfig, ctx.skeletonResourceReference);

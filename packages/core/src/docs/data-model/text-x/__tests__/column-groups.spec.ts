@@ -176,6 +176,23 @@ describe('TextX column groups', () => {
         expect(slice.columnGroups).toBeUndefined();
     });
 
+    it('does not carry column-group metadata without a start token into undo bodies', () => {
+        const T = DataStreamTreeTokenType;
+        const body: IDocumentBody = {
+            dataStream: `${T.COLUMN_GROUP_START}${T.COLUMN_START}A${T.PARAGRAPH}${T.COLUMN_END}${T.COLUMN_GROUP_END}${T.SECTION_BREAK}`,
+            paragraphs: [{ startIndex: 3, paragraphId: 'left' }],
+            sectionBreaks: [{ sectionId: 'section_fixture_31b', startIndex: 6 }],
+            columnGroups: [
+                { startIndex: 0, endIndex: 5, columnGroupId: 'cg-1' },
+                { startIndex: 5, endIndex: 5, columnGroupId: 'cg-1' },
+            ],
+        };
+
+        const slice = getBodySliceForTextXAction(body, 0, 6, false);
+
+        expect(slice.columnGroups).toEqual([{ startIndex: 0, endIndex: 5, columnGroupId: 'cg-1' }]);
+    });
+
     it('keeps a minimum paragraph when replacing all text in a column', () => {
         const T = DataStreamTreeTokenType;
         const body: IDocumentBody = {

@@ -74,6 +74,8 @@ export {
     sequenceExecuteAsync,
 } from './services/command/command.service';
 export type {
+    CommandExecutionCompletedListener,
+    CommandExecutionCompletion,
     CommandListener,
     ICommand,
     ICommandInfo,

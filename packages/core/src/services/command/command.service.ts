@@ -200,6 +200,16 @@ export interface IExecutionOptions {
 
 export type CommandListener = (commandInfo: Readonly<ICommandInfo>, options?: IExecutionOptions) => void;
 
+export type CommandExecutionCompletion<R = unknown> =
+    | Readonly<{ status: 'fulfilled'; result: R }>
+    | Readonly<{ status: 'rejected'; error: unknown }>;
+
+export type CommandExecutionCompletedListener = (
+    commandInfo: Readonly<ICommandInfo>,
+    options: IExecutionOptions,
+    completion: CommandExecutionCompletion
+) => void;
+
 /**
  * The identifier of the command service.
  */
@@ -256,6 +266,13 @@ export interface ICommandService {
      * @param listener
      */
     onCommandExecuted(listener: CommandListener): IDisposable;
+    /**
+     * Register a result-aware callback for every command that reached
+     * {@link beforeCommandExecuted}, including sync-only, false, and rejected executions.
+     * Listener errors are logged and do not change command execution semantics.
+     * @param listener
+     */
+    onCommandExecutionCompleted(listener: CommandExecutionCompletedListener): IDisposable;
     /**
      * Register a callback function that will be executed before a command is executed.
      * @param listener
@@ -322,6 +339,7 @@ export class CommandService extends Disposable implements ICommandService {
 
     private readonly _beforeCommandExecutionListeners: CommandListener[] = [];
     private readonly _commandExecutedListeners: CommandListener[] = [];
+    private readonly _commandExecutionCompletedListeners: CommandExecutionCompletedListener[] = [];
     private readonly _collabMutationListeners: CommandListener[] = [];
 
     private _multiCommandDisposables = new Map<string, IDisposable>();
@@ -346,6 +364,7 @@ export class CommandService extends Disposable implements ICommandService {
 
         this._commandExecutedListeners.length = 0;
         this._beforeCommandExecutionListeners.length = 0;
+        this._commandExecutionCompletedListeners.length = 0;
         this._collabMutationListeners.length = 0;
     }
 
@@ -400,6 +419,21 @@ export class CommandService extends Disposable implements ICommandService {
         throw new Error('[CommandService]: could not add a listener twice.');
     }
 
+    onCommandExecutionCompleted(listener: CommandExecutionCompletedListener): IDisposable {
+        if (this._commandExecutionCompletedListeners.indexOf(listener) === -1) {
+            this._commandExecutionCompletedListeners.push(listener);
+
+            return toDisposable(() => {
+                const index = this._commandExecutionCompletedListeners.indexOf(listener);
+                if (index >= 0) {
+                    this._commandExecutionCompletedListeners.splice(index, 1);
+                }
+            });
+        }
+
+        throw new Error('[CommandService]: could not add a completion listener twice.');
+    }
+
     onMutationExecutedForCollab(listener: CommandListener): IDisposable {
         if (this._collabMutationListeners.indexOf(listener) === -1) {
             this._collabMutationListeners.push(listener);
@@ -423,53 +457,54 @@ export class CommandService extends Disposable implements ICommandService {
             return false as R;
         }
 
-        try {
-            const item = this._commandRegistry.getCommand(id);
-            if (item) {
-                const [command] = item;
-                const commandInfo: ICommandInfo = {
-                    id: command.id,
-                    type: command.type,
-                    params,
-                };
+        const item = this._commandRegistry.getCommand(id);
+        if (item) {
+            const [command] = item;
+            const commandInfo: ICommandInfo = {
+                id: command.id,
+                type: command.type,
+                params,
+            };
 
-                const stackItemDisposable = this._pushCommandExecutionStack(commandInfo);
-                const _options = options ?? {};
+            const stackItemDisposable = this._pushCommandExecutionStack(commandInfo);
+            const _options = options ?? {};
+            const completionListeners = [...this._commandExecutionCompletedListeners];
 
+            try {
                 this._beforeCommandExecutionListeners.forEach((listener) => listener(commandInfo, _options));
                 if (this._disposed) {
-                    stackItemDisposable.dispose();
                     this._warnCommandSkippedAfterDisposed(id);
+                    this._notifyCommandExecutionCompleted(completionListeners, commandInfo, _options, {
+                        status: 'fulfilled',
+                        result: false,
+                    });
                     return false as R;
                 }
 
                 const result = await this._execute<P, R>(command as ICommand<P, R>, params, _options);
-                // For syncOnly mutations, only call collab listeners, not regular listeners
-                if (_options.syncOnly) {
-                    if (command.type === CommandType.MUTATION) {
-                        this._collabMutationListeners.forEach((listener) => listener(commandInfo, _options));
-                    }
-                } else {
-                    this._commandExecutedListeners.forEach((listener) => listener(commandInfo, _options));
-                    if (command.type === CommandType.MUTATION) {
-                        this._collabMutationListeners.forEach((listener) => listener(commandInfo, _options));
-                    }
-                }
+                this._notifyCommandExecuted(command, commandInfo, _options);
 
-                stackItemDisposable.dispose();
-
+                this._notifyCommandExecutionCompleted(completionListeners, commandInfo, _options, {
+                    status: 'fulfilled',
+                    result,
+                });
                 return result;
-            }
-
-            throw new Error(`[CommandService]: command "${id}" is not registered.`);
-        } catch (error) {
-            if (error instanceof CustomCommandExecutionError) {
-                // If need custom logic, can add it here
-                return false as R;
-            } else {
+            } catch (error) {
+                this._notifyCommandExecutionCompleted(completionListeners, commandInfo, _options, {
+                    status: 'rejected',
+                    error,
+                });
+                if (error instanceof CustomCommandExecutionError) {
+                    // If need custom logic, can add it here
+                    return false as R;
+                }
                 throw error;
+            } finally {
+                stackItemDisposable.dispose();
             }
         }
+
+        throw new Error(`[CommandService]: command "${id}" is not registered.`);
     }
 
     syncExecuteCommand<P extends object = object, R = boolean>(
@@ -482,65 +517,95 @@ export class CommandService extends Disposable implements ICommandService {
             return false as R;
         }
 
-        try {
-            const item = this._commandRegistry.getCommand(id);
-            if (item) {
-                const [command] = item;
-                const commandInfo: ICommandInfo = {
-                    id: command.id,
-                    type: command.type,
-                    params,
-                };
+        const item = this._commandRegistry.getCommand(id);
+        if (item) {
+            const [command] = item;
+            const commandInfo: ICommandInfo = {
+                id: command.id,
+                type: command.type,
+                params,
+            };
 
-                // If the executed command is of type `Mutation`, we should add a trigger params,
-                // whose value is the command's ID that triggers the mutation.
-                if (command.type === CommandType.MUTATION) {
-                    const triggerCommand = findLast(
-                        this._commandExecutionStack,
-                        (item) => item.type === CommandType.COMMAND
-                    );
-                    if (triggerCommand) {
-                        commandInfo.params = commandInfo.params ?? {};
-                        (commandInfo.params as IMutationCommonParams).trigger = triggerCommand.id;
-                    }
+            // If the executed command is of type `Mutation`, we should add a trigger params,
+            // whose value is the command's ID that triggers the mutation.
+            if (command.type === CommandType.MUTATION) {
+                const triggerCommand = findLast(
+                    this._commandExecutionStack,
+                    (item) => item.type === CommandType.COMMAND
+                );
+                if (triggerCommand) {
+                    commandInfo.params = commandInfo.params ?? {};
+                    (commandInfo.params as IMutationCommonParams).trigger = triggerCommand.id;
                 }
+            }
 
-                const stackItemDisposable = this._pushCommandExecutionStack(commandInfo);
-                const _options = options ?? {};
+            const stackItemDisposable = this._pushCommandExecutionStack(commandInfo);
+            const _options = options ?? {};
+            const completionListeners = [...this._commandExecutionCompletedListeners];
 
+            try {
                 this._beforeCommandExecutionListeners.forEach((listener) => listener(commandInfo, _options));
                 if (this._disposed) {
-                    stackItemDisposable.dispose();
                     this._warnCommandSkippedAfterDisposed(id);
+                    this._notifyCommandExecutionCompleted(completionListeners, commandInfo, _options, {
+                        status: 'fulfilled',
+                        result: false,
+                    });
                     return false as R;
                 }
 
                 const result = this._syncExecute<P, R>(command as ICommand<P, R>, params, _options);
-                // For syncOnly mutations, only call collab listeners, not regular listeners
-                if (_options.syncOnly) {
-                    if (command.type === CommandType.MUTATION) {
-                        this._collabMutationListeners.forEach((listener) => listener(commandInfo, _options));
-                    }
-                } else {
-                    this._commandExecutedListeners.forEach((listener) => listener(commandInfo, _options));
-                    if (command.type === CommandType.MUTATION) {
-                        this._collabMutationListeners.forEach((listener) => listener(commandInfo, _options));
-                    }
-                }
+                this._notifyCommandExecuted(command, commandInfo, _options);
 
-                stackItemDisposable.dispose();
-
+                this._notifyCommandExecutionCompleted(completionListeners, commandInfo, _options, {
+                    status: 'fulfilled',
+                    result,
+                });
                 return result;
-            }
-
-            throw new Error(`[CommandService]: command "${id}" is not registered.`);
-        } catch (error) {
-            if (error instanceof CustomCommandExecutionError) {
-                return false as R;
-            } else {
+            } catch (error) {
+                this._notifyCommandExecutionCompleted(completionListeners, commandInfo, _options, {
+                    status: 'rejected',
+                    error,
+                });
+                if (error instanceof CustomCommandExecutionError) {
+                    return false as R;
+                }
                 throw error;
+            } finally {
+                stackItemDisposable.dispose();
             }
         }
+
+        throw new Error(`[CommandService]: command "${id}" is not registered.`);
+    }
+
+    private _notifyCommandExecuted(
+        command: ICommand,
+        commandInfo: Readonly<ICommandInfo>,
+        options: IExecutionOptions
+    ): void {
+        // For syncOnly mutations, only call collab listeners, not regular listeners.
+        if (!options.syncOnly) {
+            this._commandExecutedListeners.forEach((listener) => listener(commandInfo, options));
+        }
+        if (command.type === CommandType.MUTATION) {
+            this._collabMutationListeners.forEach((listener) => listener(commandInfo, options));
+        }
+    }
+
+    private _notifyCommandExecutionCompleted(
+        listeners: readonly CommandExecutionCompletedListener[],
+        commandInfo: Readonly<ICommandInfo>,
+        options: IExecutionOptions,
+        completion: CommandExecutionCompletion
+    ): void {
+        listeners.forEach((listener) => {
+            try {
+                listener(commandInfo, options, completion);
+            } catch (error) {
+                this._logService.error('[CommandService]', 'command completion listener failed', error);
+            }
+        });
     }
 
     private _pushCommandExecutionStack(stackItem: ICommandExecutionStackItem): IDisposable {

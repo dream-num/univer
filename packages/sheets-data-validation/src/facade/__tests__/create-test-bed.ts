@@ -16,6 +16,7 @@
 
 import type { Dependency, IWorkbookData, UnitModel } from '@univerjs/core';
 import {
+    ICommandService,
     ILogService,
     Inject,
     Injector,
@@ -47,8 +48,11 @@ import {
     ISheetRowFilteredService,
     ISuperTableService,
     LexerTreeBuilder,
+    OtherFormulaMarkDirty,
     RegisterFunctionService,
     RegisterOtherFormulaService,
+    RemoveOtherFormulaMutation,
+    SetOtherFormulaMutation,
     SheetRowFilteredService,
     SuperTableService,
 } from '@univerjs/engine-formula';
@@ -183,7 +187,12 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
         }
 
         override onReady(): void {
-
+            const commandService = this._injector.get(ICommandService);
+            [
+                OtherFormulaMarkDirty,
+                SetOtherFormulaMutation,
+                RemoveOtherFormulaMutation,
+            ].forEach((command) => commandService.registerCommand(command));
         }
     }
 

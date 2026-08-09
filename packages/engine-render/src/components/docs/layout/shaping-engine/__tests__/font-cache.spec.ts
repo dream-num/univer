@@ -64,6 +64,36 @@ describe('font cache', () => {
         expect(FontCache.clearFontMeasureCache('12px Arial')).toBe(true);
     });
 
+    it('calculates the line-height metric without a DOM', () => {
+        const browserDocument = globalThis.document;
+        (FontCache as unknown as { _context: CanvasRenderingContext2D })._context = {
+            font: '',
+            textBaseline: 'alphabetic',
+            measureText: vi.fn(() => ({
+                width: 12,
+                fontBoundingBoxAscent: 8,
+                fontBoundingBoxDescent: 3,
+                actualBoundingBoxAscent: 8,
+                actualBoundingBoxDescent: 3,
+            })),
+        } as unknown as CanvasRenderingContext2D;
+
+        try {
+            vi.stubGlobal('document', undefined);
+            const result = FontCache.getTextSize('A', {
+                fontString: '12px Arial',
+                fontSize: 12,
+                originFontSize: 12,
+                fontFamily: 'Arial',
+                fontCache: '12px Arial',
+            });
+
+            expect(result.normalLineHeight).toBe(11);
+        } finally {
+            vi.stubGlobal('document', browserDocument);
+        }
+    });
+
     it('auto-cleans overflow cache and computes baseline offsets', () => {
         const cache = new Map<string, any>();
         for (let i = 0; i < 10; i++) {
@@ -138,6 +168,7 @@ describe('font cache', () => {
         expect(byFont.width).toBeGreaterThan(0);
         expect(byFont.ba).toBeCloseTo(9.6);
         expect(byFont.abd).toBeCloseTo(1.8);
+        expect(byFont.normalLineHeight).toBeCloseTo(12);
 
         (FontCache as any)._context = {
             font: '',

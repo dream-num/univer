@@ -129,6 +129,7 @@ export interface IParagraphTableCache {
 
 export interface IParagraphConfig {
     paragraphIndex: number;
+    isInsideTable?: boolean;
     documentCompatibilityPolicy?: IDocumentCompatibilityPolicy;
     useWordStyleLineHeight?: boolean;
     usePptxFontSizeLineHeight?: boolean;

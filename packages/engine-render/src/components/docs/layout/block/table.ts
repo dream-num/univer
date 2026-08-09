@@ -26,6 +26,7 @@ import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node'
 import type { DocumentViewModel } from '../../view-model/document-view-model';
 import type { ILayoutContext } from '../tools';
 import { BooleanNumber, TableAlignmentType, TableRowHeightRule, VerticalAlignmentType } from '@univerjs/core';
+import { DocumentSkeletonPageType } from '../../../../basics';
 import { getDocumentCompatibilityPolicy } from '../../document-compatibility';
 import { createNullCellPage, createSkeletonCellPages } from '../model/page';
 
@@ -39,7 +40,7 @@ export function createTableSkeleton(
     const { startIndex, endIndex, children: rowNodes } = tableNode;
     const table = viewModel.getTableByStartIndex(startIndex)?.tableSource;
     if (table == null) {
-        console.warn('Table not found when creating table skeleton');
+        console.warn(`Table not found when creating table skeleton at index ${startIndex}`);
         return null;
     }
 
@@ -73,7 +74,7 @@ export function createTableSkeleton(
                 continue;
             }
 
-            const cellPageSkeleton = createSkeletonCellPages(
+            const cellPageSkeletons = createSkeletonCellPages(
                 ctx,
                 viewModel,
                 cellNode,
@@ -81,10 +82,16 @@ export function createTableSkeleton(
                 table,
                 row,
                 col
-            )[0];
+            );
+            if (cellPageSkeletons.slice(1).some((page) => page.isExplicitPageBreak === true)) {
+                tableSkeleton.hasPageBreak = true;
+            }
+            const cellPageSkeleton = cellPageSkeletons[0];
 
-            const { marginTop = 0, marginBottom = 0 } = cellPageSkeleton;
-            const pageHeight = cellPageSkeleton.height + marginTop + marginBottom;
+            const pageHeight = getCellPagesLayoutHeight(
+                cellPageSkeletons,
+                curPage.type === DocumentSkeletonPageType.CELL
+            );
             cellPageSkeleton.left = left;
             left += cellPageSkeleton.pageWidth;
             cellPageSkeleton.parent = rowSkeleton;
@@ -95,7 +102,7 @@ export function createTableSkeleton(
         if (hRule === TableRowHeightRule.AT_LEAST) {
             rowHeight = Math.max(rowHeight, val.v);
         } else if (hRule === TableRowHeightRule.EXACT) {
-            rowHeight = Math.max(rowHeight, val.v);
+            rowHeight = val.v;
         }
 
         // Set row height to cell page height.
@@ -153,6 +160,14 @@ export function createTableSkeleton(
     return tableSkeleton;
 }
 
+function getCellPagesLayoutHeight(pages: IDocumentSkeletonPage[], includeContinuations: boolean): number {
+    const measuredPages = includeContinuations ? pages : pages.slice(0, 1);
+    return measuredPages.reduce((total, page) => {
+        const { marginTop = 0, marginBottom = 0 } = page;
+        return total + page.height + marginTop + marginBottom;
+    }, 0);
+}
+
 export function rollbackListCache(listLevel: Map<string, IParagraphList[][]>, table: DataStreamTreeNode) {
     const { startIndex, endIndex } = table;
 
@@ -198,7 +213,7 @@ export function createTableSkeletons(
 
     const table = viewModel.getTableByStartIndex(startIndex)?.tableSource;
     if (table == null) {
-        console.warn('Table not found when creating table skeletons');
+        console.warn(`Table not found when creating sliced table skeletons at index ${startIndex}`);
         return {
             skeTables,
             fromCurrentPage: false,
@@ -311,13 +326,12 @@ function dealWithTableRow(
     const { trHeight, cantSplit } = rowSource;
     const rowSkeletons: IDocumentSkeletonRow[] = [];
     const { hRule, val } = trHeight;
-    const canRowSplit = cantSplit !== BooleanNumber.TRUE && trHeight.hRule === TableRowHeightRule.AUTO;
-    // If the remain height is less than 50 pixels, you can't fit the next line, so you can start typography directly from the second page.
-    const MAX_FONT_SIZE = 72;
-    const needOpenNewTable = cache.remainHeight <= MAX_FONT_SIZE;
+    const canRowSplit = cantSplit !== BooleanNumber.TRUE && trHeight.hRule !== TableRowHeightRule.EXACT;
+    const needOpenNewTable = cache.remainHeight <= 0;
     let curTableSkeleton = getCurTableSkeleton(skeTables);
 
     const rowHeights = [0];
+    const forcedPageBreakRows = new WeakSet<IDocumentSkeletonRow>();
 
     for (const cellNode of cellNodes) {
         const col = cellNodes.indexOf(cellNode);
@@ -372,6 +386,14 @@ function dealWithTableRow(
             const pageIndex = cellPageSkeletons.indexOf(cellPageSkeleton);
             const rowSke = rowSkeletons[pageIndex];
 
+            // A rendered page boundary inside a cell is a structural split, even when an
+            // ancestor cell is measured with infinite height. Propagating that boundary
+            // through each enclosing table keeps deeply nested DOCX tables on the same
+            // physical pages without persisting any format-specific layout side channel.
+            if (pageIndex > 0 && cellPageSkeleton.isExplicitPageBreak === true) {
+                forcedPageBreakRows.add(rowSke);
+            }
+
             cellPageSkeleton.parent = rowSke;
             rowSke.cells[col] = cellPageSkeleton;
             rowHeights[pageIndex] = Math.max(rowHeights[pageIndex], cellPageHeight);
@@ -385,7 +407,7 @@ function dealWithTableRow(
         if (hRule === TableRowHeightRule.AT_LEAST) {
             rowHeights[rowIndex] = Math.max(rowHeights[rowIndex], val.v);
         } else if (hRule === TableRowHeightRule.EXACT) {
-            rowHeights[rowIndex] = Math.max(rowHeights[rowIndex], val.v);
+            rowHeights[rowIndex] = val.v;
         }
 
         rowHeights[rowIndex] = Math.min(rowHeights[rowIndex], pageContentHeight);
@@ -417,8 +439,9 @@ function dealWithTableRow(
     }
 
     // Handle vertical alignment in cell.
+    const isSplitRow = rowSkeletons.length > 1;
     for (const rowSkeleton of rowSkeletons) {
-        _verticalAlignInCell(rowSkeleton, rowSource);
+        _verticalAlignInCell(rowSkeleton, rowSource, isSplitRow);
     }
 
     while (rowSkeletons.length > 0) {
@@ -426,7 +449,8 @@ function dealWithTableRow(
         const lastRow = curTableSkeleton.rows[curTableSkeleton.rows.length - 1];
         const rowOverflowHeight = rowSkeleton.height - cache.remainHeight;
         const shouldOpenNewTable =
-            cache.remainHeight < MAX_FONT_SIZE ||
+            cache.remainHeight <= 0 ||
+            forcedPageBreakRows.has(rowSkeleton) ||
             rowOverflowHeight > documentCompatibilityPolicy.table.rowOverflowTolerance;
 
         if (shouldOpenNewTable) {
@@ -483,12 +507,13 @@ function getLeadingRepeatHeaderRows(table: ITable, rowNodes: DataStreamTreeNode[
         repeatRows.push(rowNodes[index]);
     }
 
-    return repeatRows;
+    return repeatRows.length === rowNodes.length ? [] : repeatRows;
 }
 
 function _verticalAlignInCell(
     rowSkeleton: IDocumentSkeletonRow,
-    rowSource: ITableRow
+    rowSource: ITableRow,
+    isSplitRow = false
 ) {
     for (let i = 0; i < rowSource.tableCells.length; i++) {
         const cellConfig = rowSource.tableCells[i];
@@ -503,6 +528,13 @@ function _verticalAlignInCell(
         const { pageHeight, height, originMarginTop, originMarginBottom } = cellPageSkeleton;
 
         let marginTop = originMarginTop;
+
+        // Word applies cell vertical alignment to an unsplit row as a whole. Centering or bottom-aligning
+        // every continuation fragment independently creates large blank areas and clipped text.
+        if (isSplitRow) {
+            cellPageSkeleton.marginTop = originMarginTop;
+            continue;
+        }
 
         switch (vAlign) {
             case VerticalAlignmentType.TOP: {

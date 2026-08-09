@@ -41,11 +41,13 @@ import {
     PositionedObjectLayoutType,
     SpacingRule,
     TableTextWrapType,
+    TabStopAlignment,
     WrapStrategy,
 } from '@univerjs/core';
 import { GlyphType, LineType } from '../../../../../basics/i-document-skeleton-cached';
 import { isCjkLeftAlignedPunctuation } from '../../../../../basics/tools';
 import { getDocsCustomBlockRenderViewport } from '../../../custom-block-render-viewport';
+import { isTraditionalDocumentCompatibility } from '../../../document-compatibility';
 import { BreakPointType } from '../../line-breaker/break';
 import { addGlyphToDivide, createSkeletonBulletGlyph } from '../../model/glyph';
 import {
@@ -74,6 +76,7 @@ import {
     isBlankColumn,
     isColumnFull,
     lineIterator,
+    reachesNextDocumentGridLine,
 } from '../../tools';
 import { createTableSkeletons, getTableLeft, rollbackListCache } from '../table';
 
@@ -120,11 +123,12 @@ export function layoutParagraph(
     sectionBreakConfig: ISectionBreakConfig,
     paragraphConfig: IParagraphConfig,
     isParagraphFirstShapedText: boolean,
-    breakPointType = BreakPointType.Normal
+    breakPointType = BreakPointType.Normal,
+    renderBullet = isParagraphFirstShapedText
 ) {
     if (isParagraphFirstShapedText) {
         // elementIndex === 0 means the first character at the beginning of a paragraph, needs a new line to distinguish from the previous paragraph
-        if (paragraphConfig.bulletSkeleton) {
+        if (renderBullet && paragraphConfig.bulletSkeleton) {
             const { bulletSkeleton, paragraphStyle = {} } = paragraphConfig;
             // If it is the beginning of a paragraph, bullet needs to be added
             const { gridType = GridType.LINES, charSpace = 0, defaultTabStop = 10.5 } = sectionBreakConfig;
@@ -155,6 +159,13 @@ export function layoutParagraph(
         }
     } else {
         _divideOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, isParagraphFirstShapedText, breakPointType);
+    }
+
+    if (breakPointType === BreakPointType.Mandatory) {
+        const divideInfo = getLastNotFullDivideInfo(getLastPage(pages));
+        if (divideInfo) {
+            updateDivideInfo(divideInfo.divide, { isFull: true, breakType: breakPointType });
+        }
     }
 
     return [...pages];
@@ -273,6 +284,7 @@ function _divideOperator(
     const divideInfo = getLastNotFullDivideInfo(lastPage); // Get the first divide in the latest line that is not full.
     if (divideInfo) {
         const { divide, isLast } = divideInfo;
+        _adjustExplicitTabStop(divide, glyphGroup, paragraphConfig);
         const lastGlyph = divide?.glyphGroup?.[divide.glyphGroup.length - 1];
         const lastWidth = lastGlyph?.width || 0;
         const lastLeft = lastGlyph?.left || 0;
@@ -559,6 +571,49 @@ function _divideOperator(
     }
 }
 
+function _adjustExplicitTabStop(
+    divide: IDocumentSkeletonDivide,
+    followingGlyphs: IDocumentSkeletonGlyph[],
+    paragraphConfig: IParagraphConfig
+): void {
+    const tabGlyph = divide.glyphGroup[divide.glyphGroup.length - 1];
+    if (tabGlyph?.glyphType !== GlyphType.TAB) {
+        return;
+    }
+
+    const tabStops = paragraphConfig.paragraphStyle?.tabStops;
+    if (!tabStops?.length) {
+        return;
+    }
+
+    const tabStop = [...tabStops]
+        .sort((left, right) => left.offset - right.offset)
+        .find(({ offset }) => offset > tabGlyph.left);
+    if (!tabStop) {
+        return;
+    }
+
+    let followingWidth = 0;
+    for (const glyph of followingGlyphs) {
+        followingWidth += glyph.width;
+    }
+
+    const alignmentOffset = tabStop.alignment === TabStopAlignment.END
+        ? followingWidth
+        : tabStop.alignment === TabStopAlignment.CENTER
+            ? followingWidth / 2
+            : 0;
+    const targetOffset = Math.min(tabStop.offset, divide.width);
+    const width = targetOffset - tabGlyph.left - alignmentOffset;
+    if (width <= 0) {
+        return;
+    }
+
+    tabGlyph.width = width;
+    tabGlyph.bBox.width = width;
+    tabGlyph.tabLeader = tabStop.leader;
+}
+
 function _lineOperator(
     ctx: ILayoutContext,
     glyphGroup: IDocumentSkeletonGlyph[],
@@ -607,6 +662,7 @@ function _lineOperator(
     const ascent = Math.max(...glyphGroup.map((glyph) => glyph.bBox.ba));
     const descent = Math.max(...glyphGroup.map((glyph) => glyph.bBox.bd));
     const glyphLineHeight = defaultSpanMetrics?.lineHeight || (ascent + descent);
+    const normalLineHeight = Math.max(...glyphGroup.map((glyph) => glyph.bBox.normalLineHeight ?? 0)) || undefined;
 
     const {
         paragraphStyle: originParagraphStyle = {},
@@ -647,9 +703,13 @@ function _lineOperator(
         sectionBreakConfig,
         paragraphConfig
     );
-
     const hasInlineCustomBlock = defaultSpanMetrics?.hasInlineCustomBlock ||
         glyphGroup.some((glyph) => glyph.streamType === DataStreamTreeTokenType.CUSTOM_BLOCK && glyph.width !== 0);
+    const snapMultilineParagraphToWholeGrid = snapToGrid === BooleanNumber.TRUE &&
+        !isParagraphFirstShapedText &&
+        !hasInlineCustomBlock &&
+        reachesNextDocumentGridLine(lineSpacing, getNumberUnitValue(spaceBelow, lineSpacing), linePitch) &&
+        isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy!);
     const positionedCustomBlockOnly = glyphGroup.length > 0 &&
         paragraphNonInlineSkeDrawings != null &&
         paragraphNonInlineSkeDrawings.size > 0 &&
@@ -676,8 +736,39 @@ function _lineOperator(
         spacingRule,
         snapToGrid,
         paragraphConfig.useWordStyleLineHeight,
-        !hasInlineCustomBlock
+        !hasInlineCustomBlock,
+        normalLineHeight,
+        snapMultilineParagraphToWholeGrid
     );
+
+    if (snapMultilineParagraphToWholeGrid && preLine?.paragraphIndex === paragraphIndex) {
+        const preLineGlyphs = __getGlyphGroupByLine(preLine);
+        const preLineHasInlineCustomBlock = preLineGlyphs.some(
+            (glyph) => glyph.streamType === DataStreamTreeTokenType.CUSTOM_BLOCK && glyph.width !== 0
+        );
+        if (__hasFlowGlyph(preLineGlyphs) && !preLineHasInlineCustomBlock) {
+            const preLineMetrics = getLineHeightMetrics(
+                preLine.contentHeight,
+                paragraphLineGapDefault,
+                linePitch,
+                gridType,
+                lineSpacing,
+                spacingRule,
+                snapToGrid,
+                paragraphConfig.useWordStyleLineHeight,
+                true,
+                undefined,
+                true
+            );
+            const heightDelta = preLineMetrics.lineSpacingApply -
+                (preLine.paddingTop + preLine.contentHeight + preLine.paddingBottom);
+            if (heightDelta > LINE_LAYOUT_OVERFLOW_TOLERANCE) {
+                preLine.paddingTop += heightDelta / 2;
+                preLine.paddingBottom += heightDelta / 2;
+                preLine.lineHeight += heightDelta;
+            }
+        }
+    }
 
     if (positionedCustomBlockOnly) {
         paddingTop = 0;
@@ -692,7 +783,10 @@ function _lineOperator(
         spaceAbove,
         spaceBelow,
         isParagraphFirstShapedText,
-        preLine
+        preLine,
+        isTraditionalDocumentCompatibility(paragraphConfig.documentCompatibilityPolicy!) &&
+            preLine == null &&
+            (column.parent?.top ?? 0) === 0
     );
 
     if (positionedCustomBlockOnly) {
@@ -773,6 +867,11 @@ function _lineOperator(
         needOpenNewPageByTableLayout = _updateAndPositionTable(ctx, lineTop, lineHeight, lastPage, column, section, skeTablesInParagraph, paragraphConfig.paragraphIndex, sectionBreakConfig, pDrawingAnchor?.get(paragraphIndex)?.top);
     }
 
+    const hasSameParagraphTopBottomDrawingWithInline = hasInlineCustomBlock &&
+        paragraphNonInlineSkeDrawings != null &&
+        [...paragraphNonInlineSkeDrawings.values()].some(
+            (drawing) => drawing.drawingOrigin.layoutType === PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM
+        );
     const calculatedLineTop = positionedCustomBlockOnly
         ? lineTop
         : calculateLineTopByDrawings(
@@ -792,9 +891,18 @@ function _lineOperator(
         ? calculatedLineTop
         : Math.max(calculatedLineTop, previousTopBottomCustomBlockFlowBottom);
 
-    const lineOverflowsSection = lineHeight + newLineTop - section.height > LINE_LAYOUT_OVERFLOW_TOLERANCE;
+    // Word keeps an inline drawing below a top-bottom floating drawing from the
+    // same paragraph and clips the inline drawing at the physical page bottom.
+    const clipsSameParagraphInlineDrawing = hasSameParagraphTopBottomDrawingWithInline && newLineTop < section.height;
+    const lineOverflowsSection = !clipsSameParagraphInlineDrawing &&
+        lineHeight + newLineTop - section.height > LINE_LAYOUT_OVERFLOW_TOLERANCE;
 
-    if ((lineOverflowsSection && column.lines.length > 0 && lastPage.sections.length > 0) || needOpenNewPageByTableLayout) {
+    if (
+        (lineOverflowsSection &&
+            (column.lines.length > 0 || section.top > 0) &&
+            lastPage.sections.length > 0) ||
+        needOpenNewPageByTableLayout
+    ) {
         // Line height exceeds column height, and there is more than one line in the column, and there is more than one section;
         // console.log('_lineOperator', { glyphGroup, pages, lineHeight, newLineTop, sectionHeight: section.height, lastPage });
         setColumnFullState(column, true);
@@ -907,7 +1015,7 @@ function __updateAndPositionDrawings(
     drawingAnchorLeft = 0,
     skipRelayoutCheck = false,
     overwriteTopBottomPosition = false
-) {
+): void {
     if (targetDrawings.length === 0) {
         return;
     }
@@ -1121,7 +1229,10 @@ function _updateAndPositionTable(
     const { top, left, height } = table;
 
     const localTop = top - section.top;
-    if (!ctx.isDirty && localTop + height > section.height && firstUnPositionedTable.isSlideTable === false) {
+    if (
+        (localTop + height > section.height || table.hasPageBreak === true) &&
+        firstUnPositionedTable.isSlideTable === false
+    ) {
         // Need split table.
         skeTablesInParagraph.pop();
         const availableHeight = section.height - localTop;
@@ -1460,6 +1571,7 @@ export const __testing = {
     isGlyphGroupBeyondDivideWidth,
     checkPageBreak: __checkPageBreak,
     updateAndPositionTable: _updateAndPositionTable,
+    adjustExplicitTabStop: _adjustExplicitTabStop,
 };
 
 function _columnOperator(
@@ -1495,7 +1607,14 @@ function _pageOperator(
     const curSkeletonPage: IDocumentSkeletonPage = getLastPage(pages);
     const { skeHeaders, skeFooters } = paragraphConfig;
 
-    pages.push(createSkeletonPage(ctx, sectionBreakConfig, { skeHeaders, skeFooters }, curSkeletonPage?.pageNumber + 1));
+    const nextPage = createSkeletonPage(
+        ctx,
+        sectionBreakConfig,
+        { skeHeaders, skeFooters },
+        curSkeletonPage?.pageNumber + 1
+    );
+    nextPage.isNaturalPageOverflow = true;
+    pages.push(nextPage);
     _columnOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, isParagraphFirstShapedText, breakPointType, defaultSpanMetrics);
 }
 
@@ -1518,12 +1637,12 @@ function __getIndentPadding(
     let paddingLeft = indentStartNumber;
     const paddingRight = indentEndNumber;
 
-    if (indentFirstLineNumber > 0 && isParagraphFirstShapedText) {
-        paddingLeft += indentFirstLineNumber;
-    }
-
-    if (hangingNumber > 0 && !isParagraphFirstShapedText) {
-        paddingLeft += hangingNumber;
+    if (isParagraphFirstShapedText) {
+        if (indentFirstLineNumber > 0) {
+            paddingLeft += indentFirstLineNumber;
+        } else if (hangingNumber > 0) {
+            paddingLeft -= hangingNumber;
+        }
     }
 
     return {
@@ -1538,7 +1657,8 @@ function __getParagraphSpace(
     spaceAbove: Nullable<INumberUnit>,
     spaceBelow: Nullable<INumberUnit>,
     isParagraphFirstShapedText: boolean,
-    preLine?: IDocumentSkeletonLine
+    preLine?: IDocumentSkeletonLine,
+    suppressSpaceAbove = false
 ) {
     // Unable to read the paragraph information from the previous line,
     // So add the spaceBelowApply information to each line when creating a new line.
@@ -1546,7 +1666,7 @@ function __getParagraphSpace(
     const spaceBelowApply = getNumberUnitValue(spaceBelow, lineSpacing);
 
     if (isParagraphFirstShapedText) {
-        let marginTop = getNumberUnitValue(spaceAbove, lineSpacing);
+        let marginTop = suppressSpaceAbove ? 0 : getNumberUnitValue(spaceAbove, lineSpacing);
 
         if (preLine) {
             const { spaceBelowApply: preSpaceBelowApply } = preLine;
@@ -1600,13 +1720,16 @@ export function getLineHeightMetrics(
     spacingRule: SpacingRule,
     snapToGrid: BooleanNumber,
     useWordStyleLineHeight = true,
-    scaleAutoLineSpacingByGlyphHeight = true
+    scaleAutoLineSpacingByGlyphHeight = true,
+    normalLineHeight?: number,
+    snapAutoLineSpacingToWholeGridLines = false
 ) {
+    const usesLineGridType = gridType === GridType.LINES || gridType === GridType.LINES_AND_CHARS;
     if (!useWordStyleLineHeight) {
         let paddingTop = paragraphLineGapDefault;
         let paddingBottom = paragraphLineGapDefault;
 
-        if (gridType === GridType.DEFAULT || snapToGrid === BooleanNumber.FALSE) {
+        if (!usesLineGridType || snapToGrid === BooleanNumber.FALSE) {
             if (spacingRule === SpacingRule.AUTO) {
                 return {
                     paddingTop,
@@ -1648,17 +1771,25 @@ export function getLineHeightMetrics(
     const usesDocumentGrid =
         spacingRule === SpacingRule.AUTO
         && snapToGrid === BooleanNumber.TRUE
-        && gridType !== GridType.DEFAULT;
+        && usesLineGridType;
 
     if (spacingRule === SpacingRule.AUTO) {
+        const gridLineSpacing = snapAutoLineSpacingToWholeGridLines
+            ? Math.ceil(lineSpacing - 1e-6) * linePitch
+            : lineSpacing * linePitch;
         let lineSpacingApply = usesDocumentGrid
-            ? lineSpacing * linePitch
+            ? scaleAutoLineSpacingByGlyphHeight
+                ? glyphLineHeight > gridLineSpacing + 1e-6
+                    ? Math.ceil((glyphLineHeight - 1e-6) / linePitch) * linePitch
+                    : gridLineSpacing
+                : Math.max(glyphLineHeight, gridLineSpacing)
             : scaleAutoLineSpacingByGlyphHeight
-                ? lineSpacing * glyphLineHeight
+                ? lineSpacing * Math.max(glyphLineHeight, normalLineHeight ?? 0)
                 : glyphLineHeight;
         if (
             !usesDocumentGrid
             && scaleAutoLineSpacingByGlyphHeight
+            && normalLineHeight == null
             && lineSpacing <= 1.05
             && glyphLineHeight >= 30
         ) {
@@ -1686,9 +1817,12 @@ export function getLineHeightMetrics(
         };
     }
 
-    const exactLineSpacingApply = snapToGrid === BooleanNumber.TRUE && gridType !== GridType.DEFAULT
+    let exactLineSpacingApply = snapToGrid === BooleanNumber.TRUE && usesLineGridType
         ? Math.max(lineSpacing, linePitch)
         : lineSpacing;
+    if (!scaleAutoLineSpacingByGlyphHeight) {
+        exactLineSpacingApply = Math.max(exactLineSpacingApply, glyphLineHeight);
+    }
 
     // EXACT follows the requested line box height even when it is smaller than the glyph box.
     // Negative padding lets subsequent lines advance by the exact value, which is closer to Word.
@@ -1758,7 +1892,6 @@ export function updateInlineDrawingPosition(
                 });
                 const drawingWidth = viewport?.width ?? width;
                 const drawingHeight = viewport?.height ?? height;
-
                 drawing.aLeft = viewport
                     ? blockLeft + (viewport.offsetLeft ?? 0)
                     : blockLeft + 0.5 * glyph.width - 0.5 * drawingWidth || 0;

@@ -64,11 +64,22 @@ const TRADITIONAL_DOCUMENT_COMPATIBILITY_POLICY: IDocumentCompatibilityPolicy = 
     font: {
         metricScaleRules: [
             {
+                fontFamily: /^arial$/i,
+                fontString: /^\S+\s+normal\s+\d+(?:\.\d+)?pt\s+["']?Arial["']?(?:,|$)/i,
+                content: /^[\u0000-\u024F\u2000-\u206F]$/u,
+                widthScale: 0.98,
+            },
+            {
                 fontFamily: /^calibri$/i,
                 minFontSize: 20,
                 fontString: /\bbold\b/i,
                 content: /^[\d/]+$/u,
                 widthScale: 0.92,
+            },
+            {
+                fontFamily: /^(?:宋体|SimSun)$/i,
+                content: /^[\u2E80-\u2FFF\u31C0-\u31EF\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF]$/u,
+                widthScale: 0.97,
             },
         ],
     },
@@ -132,16 +143,18 @@ export function applyFontMetricCompatibility(
     };
 }
 
-export function isTraditionalDocumentCompatibility(policy: IDocumentCompatibilityPolicy): boolean {
-    return policy.mode === 'traditional';
+export function isTraditionalDocumentCompatibility(policy?: IDocumentCompatibilityPolicy): boolean {
+    return policy?.mode === 'traditional';
 }
 
 export function shouldAllowImportedTableMarginOverflow(
     policy: IDocumentCompatibilityPolicy,
     tableSource: ITable | unknown
 ): boolean {
-    return policy.table.allowImportedTableMarginOverflow &&
-        tableSource != null &&
-        typeof tableSource === 'object' &&
-        'docxWidth' in tableSource;
+    if (!policy.table.allowImportedTableMarginOverflow || tableSource == null || typeof tableSource !== 'object') {
+        return false;
+    }
+
+    const table = tableSource as Partial<ITable>;
+    return table.size?.width != null;
 }

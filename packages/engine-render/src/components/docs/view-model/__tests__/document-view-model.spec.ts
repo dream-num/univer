@@ -145,6 +145,39 @@ describe('DocumentViewModel', () => {
             expect(paragraphWithCustomBlock?.blocks.length).toBe(1);
         });
 
+        it('keeps outer-cell paragraphs outside a nested table cell', () => {
+            const T = DataStreamTreeTokenType;
+            const nestedTable = `${T.TABLE_START}${T.TABLE_ROW_START}${T.TABLE_CELL_START}Inner${T.PARAGRAPH}${T.SECTION_BREAK}${T.TABLE_CELL_END}${T.TABLE_ROW_END}${T.TABLE_END}`;
+            const dataStream = `${T.TABLE_START}${T.TABLE_ROW_START}${T.TABLE_CELL_START}Before${T.PARAGRAPH}${nestedTable}${T.PARAGRAPH}After${T.PARAGRAPH}${T.SECTION_BREAK}${T.TABLE_CELL_END}${T.TABLE_ROW_END}${T.TABLE_END}${T.PARAGRAPH}${T.SECTION_BREAK}`;
+
+            const outerStart = 0;
+            const innerStart = dataStream.indexOf(T.TABLE_START, 1);
+            const innerEnd = dataStream.indexOf(T.TABLE_END, innerStart) + 1;
+            const outerEnd = dataStream.lastIndexOf(T.TABLE_END) + 1;
+            const { sectionList, tableNodeCache } = parseDataStreamToTree(dataStream, [
+                { tableId: 'outer', startIndex: outerStart, endIndex: outerEnd } as any,
+                { tableId: 'inner', startIndex: innerStart, endIndex: innerEnd } as any,
+            ]);
+            const outerTable = findFirstNodeByType(sectionList[0], DataStreamTreeNodeType.TABLE)!;
+            const outerCell = outerTable.children[0].children[0];
+            const outerParagraphs = outerCell.children[0].children;
+            const nestedTableNode = findFirstNodeByType(outerCell, DataStreamTreeNodeType.TABLE)!;
+            const nestedParagraphs = nestedTableNode.children[0].children[0].children[0].children;
+
+            expect(outerParagraphs.map((paragraph: DataStreamTreeNode) => paragraph.content)).toEqual([
+                `Before${T.PARAGRAPH}`,
+                T.PARAGRAPH,
+                `After${T.PARAGRAPH}${T.SECTION_BREAK}`,
+            ]);
+            expect(nestedParagraphs.map((paragraph: DataStreamTreeNode) => paragraph.content)).toEqual([
+                `Inner${T.PARAGRAPH}${T.SECTION_BREAK}`,
+            ]);
+            expect(outerTable.startIndex).toBe(outerStart);
+            expect(nestedTableNode.startIndex).toBe(innerStart);
+            expect(tableNodeCache.get('outer')?.table).toBe(outerTable);
+            expect(tableNodeCache.get('inner')?.table).toBe(nestedTableNode);
+        });
+
         it('should ignore block range tokens while preserving inner paragraphs', () => {
             const ds = [
                 DataStreamTreeTokenType.BLOCK_START,

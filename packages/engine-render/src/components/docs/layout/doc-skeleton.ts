@@ -17,7 +17,9 @@
 import type { ColumnSeparatorType, ISectionColumnProperties, LocaleService, Nullable } from '@univerjs/core';
 import type {
     IDocumentSkeletonCached,
+    IDocumentSkeletonColumn,
     IDocumentSkeletonGlyph,
+    IDocumentSkeletonLine,
     IDocumentSkeletonPage,
     ISkeletonResourceReference,
 } from '../../../basics/i-document-skeleton-cached';
@@ -25,9 +27,10 @@ import type { IDocsConfig, INodeInfo, INodePosition, INodeSearch } from '../../.
 import type { IViewportInfo, Vector2 } from '../../../basics/vector2';
 import type { DocumentViewModel } from '../view-model/document-view-model';
 import type { IDocumentPaginationMetrics, ILayoutContext } from './tools';
-import { DataStreamTreeTokenType, PRESET_LIST_TYPE, SectionType, Skeleton } from '@univerjs/core';
+import { BooleanNumber, DataStreamTreeTokenType, PRESET_LIST_TYPE, SectionType, Skeleton } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import {
+    BreakType,
     DocumentSkeletonPageType,
     GlyphType,
     LineType,
@@ -72,6 +75,166 @@ function hasCompatiblePageGeometry(page: IDocumentSkeletonPage, config: ReturnTy
         page.marginRight === marginRight;
 }
 
+function hasCompatiblePhysicalPage(page: IDocumentSkeletonPage, config: ReturnType<typeof prepareSectionBreakConfig>): boolean {
+    const { pageSize, pageOrient } = config;
+    return page.pageWidth === pageSize?.width &&
+        page.pageHeight === pageSize?.height &&
+        page.pageOrient === pageOrient;
+}
+
+function hasAvailableContinuousSectionSpace(page: IDocumentSkeletonPage): boolean {
+    const lastSection = page.sections.at(-1);
+    const contentHeight = page.pageHeight - page.marginTop - page.marginBottom;
+    const flowHeight = Math.max(
+        0,
+        ...(lastSection?.columns ?? []).flatMap((column) =>
+            column.lines.map((line) => line.top + line.lineHeight)
+        )
+    );
+    return (lastSection?.top ?? 0) + flowHeight < contentHeight - 1e-6;
+}
+
+function hasOnlyExplicitPageBoundaryMarkers(page: IDocumentSkeletonPage): boolean {
+    if ((page.skeTables?.size ?? 0) > 0) {
+        return false;
+    }
+    return (page.sections ?? []).every((section) =>
+        section.columns.every((column) =>
+            column.lines.every((line) =>
+                line.divides.every((divide) =>
+                    divide.glyphGroup.every(({ raw, streamType }) =>
+                        raw === DataStreamTreeTokenType.PARAGRAPH ||
+                        streamType === DataStreamTreeTokenType.PARAGRAPH ||
+                        raw === DataStreamTreeTokenType.PAGE_BREAK ||
+                        streamType === DataStreamTreeTokenType.PAGE_BREAK ||
+                        raw === DataStreamTreeTokenType.SECTION_BREAK ||
+                        streamType === DataStreamTreeTokenType.SECTION_BREAK
+                    )
+                )
+            )
+        )
+    );
+}
+
+interface IColumnFlowLine {
+    line: IDocumentSkeletonLine;
+    gapBefore: number;
+}
+
+function collectColumnFlowLines(columns: IDocumentSkeletonColumn[]): IColumnFlowLine[] {
+    return columns.flatMap((column) => {
+        let previousBottom = 0;
+        return column.lines.map((line) => {
+            const gapBefore = Math.max(0, line.top - previousBottom);
+            previousBottom = line.top + line.lineHeight;
+            return { line, gapBefore };
+        });
+    });
+}
+
+function takeBalancedColumnLineCount(
+    flowLines: IColumnFlowLine[],
+    startIndex: number,
+    remainingColumnCount: number,
+    targetHeight: number
+): number {
+    const maximumCount = flowLines.length - startIndex - (remainingColumnCount - 1);
+    let count = 0;
+    let height = 0;
+
+    while (count < maximumCount) {
+        const { line, gapBefore } = flowLines[startIndex + count];
+        const nextHeight = height + gapBefore + line.lineHeight;
+        if (count > 0 && Math.abs(targetHeight - height) <= Math.abs(targetHeight - nextHeight)) {
+            break;
+        }
+        height = nextHeight;
+        count++;
+    }
+
+    return Math.max(1, count);
+}
+
+function hasSameColumnGeometry(
+    currentColumns: ISectionColumnProperties[],
+    nextColumns: ISectionColumnProperties[]
+): boolean {
+    return currentColumns.length === nextColumns.length && currentColumns.every((column, index) => {
+        const nextColumn = nextColumns[index];
+        return nextColumn != null &&
+            Math.abs(column.width - nextColumn.width) <= 0.01 &&
+            Math.abs(column.paddingEnd - nextColumn.paddingEnd) <= 0.01;
+    });
+}
+
+/**
+ * Word balances the final page of a multi-column section before a continuous
+ * section break. The normal page layout intentionally fills columns in flow
+ * order, so rebalance the final line-only fragment once its complete height is
+ * known. Tables, column groups, drawings, and unequal-width columns stay on
+ * the regular layout path because moving those blocks requires a full relayout.
+ */
+function balanceFinalContinuousColumnSection(page: IDocumentSkeletonPage): void {
+    const section = page.sections.at(-1);
+    if (section == null || section.columns.length < 2 || section.columns.at(-1)?.isFull) {
+        return;
+    }
+    const firstWidth = section.columns[0].width;
+    if (
+        section.columns.some((column) =>
+            Math.abs(column.width - firstWidth) > 0.01 ||
+            column.drawingLRIds.length > 0 ||
+            column.lines.some((line) => line.type !== LineType.PARAGRAPH || line.tableId !== '')
+        ) ||
+        page.skeColumnGroups.size > 0 ||
+        page.skeDrawings.size > 0
+    ) {
+        return;
+    }
+
+    const flowLines = collectColumnFlowLines(section.columns);
+    if (flowLines.length < section.columns.length) {
+        return;
+    }
+
+    let lineIndex = 0;
+    let remainingHeight = flowLines.reduce(
+        (height, { line, gapBefore }) => height + gapBefore + line.lineHeight,
+        0
+    );
+    for (let columnIndex = 0; columnIndex < section.columns.length; columnIndex++) {
+        const column = section.columns[columnIndex];
+        const remainingColumnCount = section.columns.length - columnIndex;
+        const lineCount = remainingColumnCount === 1
+            ? flowLines.length - lineIndex
+            : takeBalancedColumnLineCount(
+                flowLines,
+                lineIndex,
+                remainingColumnCount,
+                remainingHeight / remainingColumnCount
+            );
+        const assignedLines = flowLines.slice(lineIndex, lineIndex + lineCount);
+        let columnHeight = 0;
+
+        column.lines = assignedLines.map(({ line, gapBefore }) => {
+            columnHeight += gapBefore;
+            line.top = columnHeight;
+            line.parent = column;
+            columnHeight += line.lineHeight;
+            return line;
+        });
+        column.height = columnHeight;
+        column.isFull = false;
+        remainingHeight -= assignedLines.reduce(
+            (height, { line, gapBefore }) => height + gapBefore + line.lineHeight,
+            0
+        );
+        lineIndex += lineCount;
+    }
+
+    section.height = Math.max(...section.columns.map((column) => column.height ?? 0));
+}
+
 function isTargetPageParity(pageNumber: number, sectionType: SectionType): boolean {
     return sectionType === SectionType.EVEN_PAGE ? pageNumber % 2 === 0 : pageNumber % 2 === 1;
 }
@@ -99,7 +262,7 @@ function mergeContinuousDuplicatePages(pages: IDocumentSkeletonPage[]) {
         const previousPage = pages[index - 1];
         const page = pages[index];
 
-        if (previousPage.pageNumber !== page.pageNumber) {
+        if (previousPage.pageNumber !== page.pageNumber || previousPage.sectionId !== page.sectionId) {
             index++;
             continue;
         }
@@ -1292,6 +1455,7 @@ export class DocumentSkeleton extends Skeleton {
             paragraphLineGapDefault = 0,
             defaultTabStop = 10.5,
             textStyle = {},
+            adjustLineHeightInTable = BooleanNumber.FALSE,
         } = documentStyle;
 
         const docsConfig: IDocsConfig = {
@@ -1305,6 +1469,7 @@ export class DocumentSkeleton extends Skeleton {
             paragraphLineGapDefault,
             defaultTabStop,
             documentTextStyle: textStyle,
+            adjustLineHeightInTable,
         };
 
         const skeleton = getNullSkeleton();
@@ -1401,8 +1566,9 @@ export class DocumentSkeleton extends Skeleton {
         // Loop the sections with the start section index.
         for (let i = startSectionIndex, len = viewModel.getChildren().length; i < len; i++) {
             const sectionNode = viewModel.getChildren()[i];
+            const sectionLayoutAnchor = i === startSectionIndex ? layoutAnchor : null;
             const sectionBreakConfig = prepareSectionBreakConfig(ctx, i);
-            const { sectionType, columnProperties, columnSeparatorType, sectionTypeNext, pageNumberStart = 1 } = sectionBreakConfig;
+            const { sectionType, columnProperties, columnSeparatorType, sectionTypeNext, pageNumberStart = 1, evenAndOddHeaders } = sectionBreakConfig;
             const explicitPageNumberStart = viewModel.getSectionBreak(sectionNode.endIndex)?.pageNumberStart;
             const effectiveSectionType = getEffectiveSectionType(sectionType);
 
@@ -1414,7 +1580,7 @@ export class DocumentSkeleton extends Skeleton {
 
             if (
                 effectiveSectionType === SectionType.NEXT_COLUMN &&
-                layoutAnchor == null &&
+                sectionLayoutAnchor == null &&
                 curSkeletonPage != null &&
                 hasCompatiblePageGeometry(curSkeletonPage, sectionBreakConfig)
             ) {
@@ -1426,13 +1592,20 @@ export class DocumentSkeleton extends Skeleton {
                 );
             }
 
-            if (
+            const hasCompatibleContinuousPage =
                 effectiveSectionType === SectionType.CONTINUOUS &&
                 curSkeletonPage != null &&
-                hasCompatiblePageGeometry(curSkeletonPage, sectionBreakConfig)
-            ) {
+                hasCompatiblePhysicalPage(curSkeletonPage, sectionBreakConfig);
+            if (hasCompatibleContinuousPage) {
                 updateBlockIndex(allSkeletonPages, -1, ctx.docsConfig.documentCompatibilityPolicy);
-                if (layoutAnchor != null && layoutAnchor >= sectionNode.startIndex && layoutAnchor <= sectionNode.endIndex) {
+            }
+
+            if (
+                hasCompatibleContinuousPage &&
+                curSkeletonPage != null &&
+                (sectionLayoutAnchor != null || hasAvailableContinuousSectionSpace(curSkeletonPage))
+            ) {
+                if (sectionLayoutAnchor != null) {
                     this._restoreContinuousSection(curSkeletonPage, columnProperties!, columnSeparatorType!);
                 } else {
                     this._addNewSectionByContinuous(curSkeletonPage, columnProperties!, columnSeparatorType!);
@@ -1440,10 +1613,40 @@ export class DocumentSkeleton extends Skeleton {
                 reuseCurrentPage = true;
             } else if (reuseNextColumn) {
                 reuseCurrentPage = true;
-            } else if (layoutAnchor == null || curSkeletonPage == null) {
-                let nextPageNumber = curSkeletonPage == null
-                    ? pageNumberStart
-                    : explicitPageNumberStart ?? curSkeletonPage.pageNumber + 1;
+            } else if (sectionLayoutAnchor == null || curSkeletonPage == null) {
+                const reuseExplicitPageBreak =
+                    effectiveSectionType === SectionType.NEXT_PAGE &&
+                    curSkeletonPage?.breakType === BreakType.PAGE &&
+                    hasOnlyExplicitPageBoundaryMarkers(curSkeletonPage);
+                const previousSkeletonPage = allSkeletonPages.at(-2);
+                const reuseOverflowedSectionBoundary =
+                    effectiveSectionType === SectionType.NEXT_PAGE &&
+                    curSkeletonPage?.breakType === BreakType.SECTION &&
+                    previousSkeletonPage?.sectionId === curSkeletonPage.sectionId &&
+                    hasOnlyExplicitPageBoundaryMarkers(curSkeletonPage);
+                const reuseBoundaryPage = reuseExplicitPageBreak || reuseOverflowedSectionBoundary;
+                let nextPageNumber = reuseBoundaryPage
+                    ? explicitPageNumberStart ?? curSkeletonPage.pageNumber
+                    : curSkeletonPage == null
+                        ? pageNumberStart
+                        : explicitPageNumberStart ?? curSkeletonPage.pageNumber + 1;
+                if (reuseBoundaryPage) {
+                    allSkeletonPages.pop();
+                }
+                if (
+                    curSkeletonPage != null &&
+                    effectiveSectionType === SectionType.NEXT_PAGE &&
+                    explicitPageNumberStart != null &&
+                    evenAndOddHeaders === 1 &&
+                    (allSkeletonPages.length + 1) % 2 !== explicitPageNumberStart % 2
+                ) {
+                    allSkeletonPages.push(createSkeletonPage(
+                        ctx,
+                        sectionBreakConfig,
+                        skeletonResourceReference,
+                        curSkeletonPage.pageNumber + 1
+                    ));
+                }
                 if (
                     curSkeletonPage != null &&
                     (effectiveSectionType === SectionType.EVEN_PAGE || effectiveSectionType === SectionType.ODD_PAGE) &&
@@ -1473,12 +1676,18 @@ export class DocumentSkeleton extends Skeleton {
                 sectionNode,
                 curSkeletonPage,
                 sectionBreakConfig,
-                layoutAnchor
+                sectionLayoutAnchor
             );
 
-            // todo: When this section has multiple columns and the next section is of continuous type, it needs to be split by column count and recalculate lines
-            if (sectionTypeNext === SectionType.CONTINUOUS && columnProperties!.length > 0) {
-                // TODO
+            const nextColumnProperties = i + 1 < len
+                ? prepareSectionBreakConfig(ctx, i + 1).columnProperties ?? []
+                : [];
+            if (
+                sectionTypeNext === SectionType.CONTINUOUS &&
+                columnProperties!.length > 0 &&
+                !hasSameColumnGeometry(columnProperties!, nextColumnProperties)
+            ) {
+                balanceFinalContinuousColumnSection(pages.at(-1) ?? curSkeletonPage);
             }
 
             if (reuseCurrentPage) {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody, ITable, Nullable } from '@univerjs/core';
+import type { IDocumentBody, IParagraph, ITable, Nullable } from '@univerjs/core';
 import type {
     IDocumentSkeletonHeaderFooter,
     IDocumentSkeletonPage,
@@ -24,11 +24,11 @@ import type { ISectionBreakConfig } from '../../../../basics/interfaces';
 import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../view-model/document-view-model';
 import type { ILayoutContext } from '../tools';
-import { BooleanNumber, PageOrientType, PositionedObjectLayoutType } from '@univerjs/core';
+import { BooleanNumber, GridType, PageOrientType, PositionedObjectLayoutType, SpacingRule, TableTextWrapType } from '@univerjs/core';
 import { BreakType, DocumentSkeletonPageType } from '../../../../basics/i-document-skeleton-cached';
-import { getDocumentCompatibilityPolicy } from '../../document-compatibility';
+import { getDocumentCompatibilityPolicy, isTraditionalDocumentCompatibility } from '../../document-compatibility';
 import { dealWithSection } from '../block/section';
-import { resetContext, updateBlockIndex, updateInlineDrawingCoordsAndBorder } from '../tools';
+import { reachesNextDocumentGridLine, resetContext, updateBlockIndex, updateInlineDrawingCoordsAndBorder } from '../tools';
 import { createSkeletonSection } from './section';
 
 function getHeaderFooterMaxHeight(pageHeight: number) {
@@ -138,8 +138,18 @@ export function createSkeletonPage(
 
     page.originMarginTop = marginTop;
     page.originMarginBottom = marginBottom;
-    page.marginTop = _getVerticalMargin(marginTop, header);
-    page.marginBottom = _getVerticalMargin(marginBottom, footer);
+    const documentCompatibilityPolicy =
+        sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy();
+    if (isTraditionalDocumentCompatibility(documentCompatibilityPolicy)) {
+        // Word places body content at the configured page margins even when a tall
+        // header or footer overlaps that area. Expanding the margins here changes
+        // pagination and pushes page-anchored cover content into the body flow.
+        page.marginTop = marginTop;
+        page.marginBottom = marginBottom;
+    } else {
+        page.marginTop = _getVerticalMargin(marginTop, header);
+        page.marginBottom = _getVerticalMargin(marginBottom, footer);
+    }
 
     const sections = page.sections;
     const lastSection = sections[sections.length - 1];
@@ -298,9 +308,36 @@ export function createNullCellPage(
     row: number,
     col: number,
     availableHeight: number = Number.POSITIVE_INFINITY,
-    maxCellPageHeight: number = Number.POSITIVE_INFINITY
+    maxCellPageHeight: number = Number.POSITIVE_INFINITY,
+    inheritDocumentLinePitch = true,
+    enableDocumentTableLineGrid = true
 ) {
-    const { sectionId, lists, footerTreeMap, headerTreeMap, localeService, drawings } = sectionBreakConfig;
+    const {
+        sectionId,
+        lists,
+        footerTreeMap,
+        headerTreeMap,
+        localeService,
+        drawings,
+        documentCompatibilityPolicy,
+        documentTextStyle,
+        paragraphLineGapDefault,
+        defaultTabStop,
+        adjustLineHeightInTable,
+        characterSpacingControl,
+        useFELayout,
+        spaceWidthEastAsian,
+        autoHyphenation,
+        consecutiveHyphenLimit,
+        doNotHyphenateCaps,
+        hyphenationZone,
+        charSpace,
+        linePitch,
+        gridType,
+        contentDirection,
+        textDirection,
+        renderConfig,
+    } = sectionBreakConfig;
     const { skeletonResourceReference } = ctx;
     const { cellMargin, tableRows, tableColumns, tableId } = tableConfig;
     const cellConfig = tableRows[row].tableCells[col];
@@ -312,8 +349,9 @@ export function createNullCellPage(
         bottom = { v: 5 },
     } = cellConfig.margin ?? cellMargin ?? {};
     const columnSpan = Math.max(1, cellConfig.columnSpan ?? 1);
+    const gridColumn = getTableCellGridColumn(tableConfig, row, col);
     const pageWidth = tableColumns
-        .slice(col, col + columnSpan)
+        .slice(gridColumn, gridColumn + columnSpan)
         .reduce((sum, column) => sum + column.size.width.v, 0);
     if (start.v + end.v >= pageWidth) {
         const marginWidth = start.v + end.v;
@@ -340,6 +378,24 @@ export function createNullCellPage(
         marginRight: end.v,
         localeService,
         drawings,
+        documentCompatibilityPolicy,
+        documentTextStyle,
+        paragraphLineGapDefault,
+        defaultTabStop,
+        adjustLineHeightInTable: enableDocumentTableLineGrid ? adjustLineHeightInTable : undefined,
+        characterSpacingControl,
+        useFELayout,
+        spaceWidthEastAsian,
+        autoHyphenation,
+        consecutiveHyphenLimit,
+        doNotHyphenateCaps,
+        hyphenationZone,
+        charSpace,
+        linePitch: inheritDocumentLinePitch ? linePitch : undefined,
+        gridType,
+        contentDirection,
+        textDirection,
+        renderConfig,
     };
 
     const areaPage = createSkeletonPage(
@@ -362,6 +418,45 @@ export function createNullCellPage(
     };
 }
 
+function getTableCellGridColumn(table: ITable, row: number, col: number): number {
+    const tableRow = table.tableRows[row];
+    let gridColumn = tableRow?.gridBefore ?? 0;
+    const cells = tableRow?.tableCells ?? [];
+
+    for (let cellIndex = 0; cellIndex < col; cellIndex++) {
+        const cell = cells[cellIndex];
+        const columnSpan = cell.columnSpan ?? 1;
+        if (columnSpan > 0) {
+            gridColumn += columnSpan;
+        } else if (isVerticallyCoveredGridColumn(table, row, gridColumn)) {
+            gridColumn += 1;
+        }
+    }
+
+    return gridColumn;
+}
+
+function isVerticallyCoveredGridColumn(table: ITable, row: number, gridColumn: number): boolean {
+    for (let masterRow = 0; masterRow < row; masterRow++) {
+        const cells = table.tableRows[masterRow]?.tableCells ?? [];
+        for (let masterCol = 0; masterCol < cells.length; masterCol++) {
+            const cell = cells[masterCol];
+            const rowSpan = cell.rowSpan ?? 1;
+            const columnSpan = cell.columnSpan ?? 1;
+            if (rowSpan <= 1 || columnSpan <= 0 || masterRow + rowSpan <= row) {
+                continue;
+            }
+
+            const masterGridColumn = getTableCellGridColumn(table, masterRow, masterCol);
+            if (gridColumn >= masterGridColumn && gridColumn < masterGridColumn + columnSpan) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
 export function createSkeletonCellPages(
     ctx: ILayoutContext,
     viewModel: DocumentViewModel,
@@ -375,6 +470,34 @@ export function createSkeletonCellPages(
 ) {
     // Table cell only has one section.
     const sectionNode = cellNode.children[0];
+    const body = ctx.dataModel?.getBody?.();
+    const linePitch = sectionBreakConfig.linePitch ?? 0;
+    const usesLineGrid = sectionBreakConfig.gridType === GridType.LINES || sectionBreakConfig.gridType === GridType.LINES_AND_CHARS;
+    const documentCompatibilityPolicy = sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy();
+    const isTraditionalLineGrid = isTraditionalDocumentCompatibility(documentCompatibilityPolicy) &&
+        usesLineGrid;
+    const usesNextDocumentGridLine = (paragraph: IParagraph) => {
+        const paragraphStyle = paragraph.paragraphStyle;
+        const lineSpacing = paragraphStyle?.lineSpacing;
+        return lineSpacing != null &&
+            paragraphStyle?.spacingRule === SpacingRule.AUTO &&
+            paragraphStyle.snapToGrid !== BooleanNumber.FALSE &&
+            reachesNextDocumentGridLine(lineSpacing, paragraphStyle.spaceBelow?.v ?? 0, linePitch);
+    };
+    const inheritDocumentLinePitch = isTraditionalLineGrid &&
+        body?.paragraphs?.some((paragraph) => {
+            if (paragraph.startIndex <= cellNode.startIndex || paragraph.startIndex >= cellNode.endIndex) {
+                return false;
+            }
+
+            return usesNextDocumentGridLine(paragraph);
+        }) === true;
+    const enableDocumentTableLineGrid = isTraditionalLineGrid &&
+        body?.tables?.some((table) => body.paragraphs?.some(
+            (paragraph) => paragraph.startIndex > table.startIndex &&
+                paragraph.startIndex < table.endIndex &&
+                usesNextDocumentGridLine(paragraph)
+        )) === true;
 
     const { page: areaPage, sectionBreakConfig: cellSectionBreakConfig } = createNullCellPage(
         ctx,
@@ -383,7 +506,9 @@ export function createSkeletonCellPages(
         row,
         col,
         availableHeight,
-        maxCellPageHeight
+        maxCellPageHeight,
+        inheritDocumentLinePitch,
+        enableDocumentTableLineGrid
     );
 
     const segmentId = tableConfig.tableId;
@@ -430,12 +555,59 @@ export function createSkeletonCellPages(
         sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy()
     );
 
-    applyTrailingBlockRangeSpaceBelow(pages, ctx.dataModel?.getBody?.(), cellNode.endIndex);
+    applyTrailingBlockRangeSpaceBelow(pages, body, cellNode.endIndex);
+    applyTrailingCellParagraphSpaceBelow(pages, body, cellNode.endIndex, cellSectionBreakConfig);
 
     updateInlineDrawingCoordsAndBorder(ctx, pages);
     expandCellPageHeightForInlineDrawings(pages);
+    expandCellPageHeightForFlowTables(pages);
 
     return pages;
+}
+
+function applyTrailingCellParagraphSpaceBelow(
+    pages: IDocumentSkeletonPage[],
+    body: Nullable<IDocumentBody>,
+    containerEndIndex: number,
+    sectionBreakConfig: ISectionBreakConfig
+) {
+    const page = pages[pages.length - 1];
+    const lastSection = page?.sections[page.sections.length - 1];
+    const lastColumn = lastSection?.columns[lastSection.columns.length - 1];
+    const lastLine = lastColumn?.lines[lastColumn.lines.length - 1];
+    if (!page || !lastLine) {
+        return;
+    }
+
+    const paragraphIndex = lastLine.paragraphIndex;
+    const hasLaterParagraph = body?.paragraphs?.some(
+        (paragraph) => paragraph.startIndex > paragraphIndex && paragraph.startIndex < containerEndIndex
+    );
+    const isBlockRangeParagraph = body?.blockRanges?.some(
+        (range) => range.startIndex < paragraphIndex && paragraphIndex < range.endIndex
+    );
+    if (hasLaterParagraph || isBlockRangeParagraph) {
+        return;
+    }
+
+    const paragraphStyle = body?.paragraphs?.find((paragraph) => paragraph.startIndex === paragraphIndex)?.paragraphStyle;
+    const lineSpacing = paragraphStyle?.lineSpacing;
+    const spaceBelow = Math.max(0, lastLine.spaceBelowApply ?? 0);
+    const linePitch = sectionBreakConfig.linePitch ?? 0;
+    const usesLineGrid = sectionBreakConfig.gridType === GridType.LINES || sectionBreakConfig.gridType === GridType.LINES_AND_CHARS;
+    if (
+        lineSpacing == null ||
+        paragraphStyle?.spacingRule !== SpacingRule.AUTO ||
+        paragraphStyle.snapToGrid === BooleanNumber.FALSE ||
+        !usesLineGrid ||
+        linePitch <= 0 ||
+        !reachesNextDocumentGridLine(lineSpacing, spaceBelow, linePitch) ||
+        !isTraditionalDocumentCompatibility(sectionBreakConfig.documentCompatibilityPolicy!)
+    ) {
+        return;
+    }
+
+    page.height += spaceBelow;
 }
 
 export function expandCellPageHeightForInlineDrawings(pages: IDocumentSkeletonPage[]) {
@@ -449,6 +621,19 @@ export function expandCellPageHeightForInlineDrawings(pages: IDocumentSkeletonPa
             if (drawingBottom > page.height) {
                 page.height = drawingBottom;
             }
+        });
+    }
+}
+
+export function expandCellPageHeightForFlowTables(pages: IDocumentSkeletonPage[]) {
+    for (const page of pages) {
+        page.skeTables?.forEach((table) => {
+            const textWrap = table.tableSource.textWrap ?? TableTextWrapType.NONE;
+            if (textWrap !== TableTextWrapType.NONE) {
+                return;
+            }
+
+            page.height = Math.max(page.height, table.top + table.height);
         });
     }
 }

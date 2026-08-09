@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentFlavor, IDocumentRenderConfig, IScale, ITableCell, ITableCellBorder, Nullable } from '@univerjs/core';
+import type { DocumentFlavor, ICustomRange, IDocumentRenderConfig, IScale, ITableCell, ITableCellBorder, Nullable } from '@univerjs/core';
 import type {
     IDocumentSkeletonColumnGroup,
     IDocumentSkeletonColumnGroupColumn,
@@ -59,6 +59,29 @@ const DEFAULT_BORDER_COLOR: ITableCellBorder = {
 };
 const TABLE_VIEWPORT_BORDER_CLIP_PADDING = 2;
 const TABLE_OVERFLOW_INTERACTION_PADDING = 24;
+
+export function resolveHeaderFooterFieldGlyph(
+    glyph: IDocumentSkeletonGlyph,
+    startIndex: number,
+    endIndex: number,
+    customRanges: ICustomRange[],
+    pageNumber: number,
+    pageCount: number
+): IDocumentSkeletonGlyph {
+    const fieldRange = customRanges.find((customRange) =>
+        customRange.startIndex <= startIndex &&
+        customRange.endIndex >= endIndex &&
+        typeof customRange.properties?.fieldType === 'string'
+    );
+    const fieldType = fieldRange?.properties?.fieldType?.toUpperCase();
+    const content = fieldType === 'PAGE'
+        ? String(pageNumber)
+        : fieldType === 'NUMPAGES'
+            ? String(pageCount)
+            : undefined;
+
+    return content == null || content === glyph.content ? glyph : { ...glyph, content };
+}
 
 export interface IPageRenderConfig {
     page: IDocumentSkeletonPage;
@@ -329,7 +352,8 @@ export class Documents extends DocComponent {
                     renderConfig,
                     parentScale,
                     page,
-                    true
+                    true,
+                    pages.length
                 );
             }
 
@@ -589,7 +613,8 @@ export class Documents extends DocComponent {
                     renderConfig,
                     parentScale,
                     page,
-                    false
+                    false,
+                    pages.length
                 );
             }
 
@@ -1313,13 +1338,22 @@ export class Documents extends DocComponent {
         renderConfig: IDocumentRenderConfig,
         parentScale: IScale,
         parentPage: IDocumentSkeletonPage,
-        isHeader = true
+        isHeader = true,
+        pageCount = 1
     ) {
         if (this._drawLiquid == null) {
             return;
         }
         const { sections, skeTables } = page;
         const { y: originY } = this._drawLiquid;
+        const skeleton = this.getSkeleton();
+        const customRanges = typeof skeleton?.getViewModel === 'function'
+            ? skeleton
+                .getViewModel()
+                .getSelfOrHeaderFooterViewModel(page.segmentId)
+                .getBody()
+                ?.customRanges ?? []
+            : [];
 
         if (skeTables.size > 0) {
             const tablePage = {
@@ -1397,6 +1431,7 @@ export class Documents extends DocComponent {
                         for (let i = 0; i < divideLength; i++) {
                             const divide = divides[i];
                             const { glyphGroup } = divide;
+                            let glyphStartIndex = divide.st;
 
                             this._drawLiquid.translateSave();
                             this._drawLiquid.translateDivide(divide);
@@ -1414,11 +1449,20 @@ export class Documents extends DocComponent {
 
                             // Draw text\border\lines etc.
                             for (const glyph of glyphGroup) {
-                                if (!glyph.content || glyph.content.length === 0) {
+                                const renderGlyph = resolveHeaderFooterFieldGlyph(
+                                    glyph,
+                                    glyphStartIndex,
+                                    glyphStartIndex + glyph.count - 1,
+                                    customRanges,
+                                    parentPage.pageNumber,
+                                    pageCount
+                                );
+                                glyphStartIndex += glyph.count;
+                                if (!renderGlyph.content || renderGlyph.content.length === 0) {
                                     continue;
                                 }
 
-                                const { width: spanWidth, left: spanLeft, xOffset } = glyph;
+                                const { width: spanWidth, left: spanLeft, xOffset } = renderGlyph;
 
                                 const { x: translateX, y: translateY } = this._drawLiquid;
 
@@ -1456,7 +1500,7 @@ export class Documents extends DocComponent {
 
                                 for (const extension of glyphExtensionsExcludeBackground) {
                                     extension.extensionOffset = extensionOffset;
-                                    extension.draw(ctx, parentScale, glyph);
+                                    extension.draw(ctx, parentScale, renderGlyph);
                                 }
                             }
 

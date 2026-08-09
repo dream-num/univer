@@ -55,6 +55,7 @@ import {
     BooleanNumber,
     ColumnSeparatorType,
     DataStreamTreeTokenType,
+    DEFAULT_STYLES,
     DocumentFlavor,
     GridType,
     HorizontalAlign,
@@ -305,11 +306,26 @@ export function validationGrid(gridType = GridType.LINES, snapToGrid = BooleanNu
     );
 }
 
+export function reachesNextDocumentGridLine(lineSpacing: number, spaceBelow: number, linePitch: number) {
+    return linePitch > 0 &&
+        lineSpacing * linePitch + Math.max(0, spaceBelow) >=
+        (Math.floor(lineSpacing + 1e-6) + 1) * linePitch - 1e-6;
+}
+
 export function getLineHeightConfig(sectionBreakConfig: ISectionBreakConfig, paragraphConfig: IParagraphConfig) {
-    const { paragraphStyle = {}, useWordStyleLineHeight = false } = paragraphConfig;
-    const { linePitch = 15.6, gridType = GridType.LINES, paragraphLineGapDefault = 0 } = sectionBreakConfig;
-    const hasDocumentGrid = gridType === GridType.LINES_AND_CHARS || gridType === GridType.SNAP_TO_CHARS;
-    const defaultSnapToGrid = useWordStyleLineHeight && !hasDocumentGrid ? BooleanNumber.FALSE : BooleanNumber.TRUE;
+    const { paragraphStyle = {}, useWordStyleLineHeight = false, isInsideTable = false } = paragraphConfig;
+    const {
+        linePitch = 15.6,
+        paragraphLineGapDefault = 0,
+        adjustLineHeightInTable = BooleanNumber.FALSE,
+    } = sectionBreakConfig;
+    const gridType = sectionBreakConfig.gridType ?? (useWordStyleLineHeight ? GridType.DEFAULT : GridType.LINES);
+    const hasLineGrid = gridType === GridType.LINES || gridType === GridType.LINES_AND_CHARS;
+    const defaultSnapToGrid = useWordStyleLineHeight && (
+        !hasLineGrid || (isInsideTable && adjustLineHeightInTable !== BooleanNumber.TRUE)
+    )
+        ? BooleanNumber.FALSE
+        : BooleanNumber.TRUE;
     const { lineSpacing = 0, spacingRule = SpacingRule.AUTO, snapToGrid = defaultSnapToGrid } = paragraphStyle;
 
     // Flavored docs use Word-style single spacing by default.
@@ -1474,15 +1490,15 @@ export function getFontCreateConfig(
     const customRange = viewModel.getCustomRange(index + startIndex);
     const showCustomRange = customRange && (customRange.show !== false);
     const customRangeStyle = showCustomRange ? getCustomRangeStyle(customRange) : null;
-    const hasAddonStyle = showCustomRange || showCustomDecoration || !!bullet || paragraphStyle?.namedStyleType;
+    const hasAddonStyle = showCustomRange || showCustomDecoration || !!bullet || paragraphStyle?.namedStyleType || paragraphStyle?.textStyle != null;
     const { st, ed } = textRun;
-    let { ts: textStyle = {} } = textRun;
+    let textStyle: ITextStyle = textRun.ts ?? {};
     const cache = fontCreateConfigCache.getValue(st, ed);
     if (cache && !hasAddonStyle && originTextRun) {
         return cache;
     }
 
-    const { snapToGrid = BooleanNumber.TRUE, namedStyleType } = paragraphStyle;
+    const { snapToGrid = BooleanNumber.TRUE, namedStyleType, textStyle: paragraphTextStyle } = paragraphStyle;
     const bulletTextStyle = bullet ? getBulletParagraphTextStyle(bullet, viewModel) : null;
     // Apply named style if it exists
     const namedStyle = namedStyleType ? NAMED_STYLE_MAP[namedStyleType] : null;
@@ -1490,13 +1506,20 @@ export function getFontCreateConfig(
     textStyle = {
         ...documentTextStyle,
         ...namedStyle,
+        ...paragraphTextStyle,
         ...textStyle,
         ...customDecorationStyle,
         ...customRangeStyle,
         ...bulletTextStyle,
     };
 
-    const fontStyle = getFontStyleString(textStyle);
+    const eastAsiaFontFamily = textStyle.eastAsiaFontFamily?.trim();
+    const fontStyle = getFontStyleString(eastAsiaFontFamily
+        ? {
+            ...textStyle,
+            ff: `${textStyle.ff || DEFAULT_STYLES.ff}, ${eastAsiaFontFamily}`,
+        }
+        : textStyle);
 
     const mixTextStyle: ITextStyle = {
         ...documentTextStyle,
@@ -1736,7 +1759,8 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
     const sectionNode = viewModel.getChildren()[nodeIndex];
     let { documentStyle } = dataModel;
     const { documentFlavor } = documentStyle;
-    let sectionBreak = viewModel.getSectionBreak(sectionNode.endIndex) || DEFAULT_SECTION_BREAK;
+    const explicitSectionBreak = viewModel.getSectionBreak(sectionNode.endIndex);
+    let sectionBreak = explicitSectionBreak || DEFAULT_SECTION_BREAK;
     const sectionBreaks = viewModel.getChildren().map((node) => viewModel.getSectionBreak(node.endIndex) || DEFAULT_SECTION_BREAK);
     sectionBreak = {
         ...sectionBreak,
@@ -1789,11 +1813,14 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
             wrapStrategy: WrapStrategy.UNSPECIFIED,
         },
     } = documentStyle;
+    const globalCharSpace = 0;
+    const globalLinePitch = 15.6;
+    const globalGridType = documentFlavor === DocumentFlavor.TRADITIONAL ? GridType.DEFAULT : GridType.LINES;
     const {
         sectionId,
-        charSpace = 0, // charSpace
-        linePitch = 15.6, // linePitch pt
-        gridType = GridType.LINES, // gridType
+        charSpace = globalCharSpace, // charSpace
+        linePitch = globalLinePitch, // linePitch pt
+        gridType = globalGridType, // gridType
 
         pageNumberStart = global_pageNumberStart,
         pageSize = global_pageSize,
@@ -1811,7 +1838,9 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
         evenPageFooterId = global_evenPageFooterId,
         firstPageHeaderId = global_firstPageHeaderId,
         firstPageFooterId = global_firstPageFooterId,
-        useFirstPageHeaderFooter = global_useFirstPageHeaderFooter,
+        useFirstPageHeaderFooter = documentFlavor === DocumentFlavor.TRADITIONAL && explicitSectionBreak
+            ? BooleanNumber.FALSE
+            : global_useFirstPageHeaderFooter,
         evenAndOddHeaders = global_evenAndOddHeaders,
 
         columnProperties = [],

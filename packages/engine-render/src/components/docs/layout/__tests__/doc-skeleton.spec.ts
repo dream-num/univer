@@ -14,18 +14,22 @@
  * limitations under the License.
  */
 
+import type { IParagraph } from '@univerjs/core';
 import {
+    BooleanNumber,
     ColumnSeparatorType,
     createDocumentModelWithStyle,
     DataStreamTreeTokenType,
     DocumentDataModel,
     DocumentFlavor,
+    GridType,
     LocaleService,
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     PageOrientType,
     PositionedObjectLayoutType,
     SectionType,
+    SpacingRule,
     TableSizeType,
     Univer,
     WrapTextType,
@@ -35,6 +39,7 @@ import { DocumentSkeletonPageType, GlyphType, PageLayoutType } from '../../../..
 import { Vector2 } from '../../../../basics/vector2';
 import { DocumentViewModel } from '../../view-model/document-view-model';
 import { DocumentSkeleton } from '../doc-skeleton';
+import { FontCache } from '../shaping-engine/font-cache';
 
 function createPage(type: DocumentSkeletonPageType, st: number, tableId = '') {
     const listGlyph = { st, ed: st, count: 1, width: 3, left: 0, xOffset: 0, content: '•', glyphType: GlyphType.LIST } as any;
@@ -746,7 +751,7 @@ describe('doc skeleton', () => {
         expect(body.section.columns).toHaveLength(2);
     });
 
-    it('does not restore a later continuous section into the anchored title section', () => {
+    it('DOCX golden e2e keeps anchored drawings and continuous columns on stable physical pages', () => {
         const firstTitleParagraph = `First title${DataStreamTreeTokenType.PARAGRAPH}`;
         const secondTitleParagraph = `Second title${DataStreamTreeTokenType.PARAGRAPH}`;
         const anchoredTitleParagraph = `Anchor${DataStreamTreeTokenType.CUSTOM_BLOCK}${DataStreamTreeTokenType.PARAGRAPH}`;
@@ -819,6 +824,94 @@ describe('doc skeleton', () => {
         expect(firstPageSections[1].colCount).toBe(2);
         expect(firstPageSections[1].columns).toHaveLength(2);
         expect(firstPageSections[0].columns[0].width).toBeGreaterThan(firstPageSections[1].columns[0].width);
+        const pages = skeleton.getSkeletonData()?.pages ?? [];
+        expect({
+            pageCount: pages.length,
+            topology: pages.map((page) => ({
+                drawings: [...page.skeDrawings.keys()],
+                pageNumber: page.pageNumber,
+                sectionColumns: page.sections.map((section) => section.columns.length),
+                tables: [...page.skeTables.keys()],
+            })),
+        }).toMatchInlineSnapshot(`
+          {
+            "pageCount": 1,
+            "topology": [
+              {
+                "drawings": [
+                  "title-shape",
+                ],
+                "pageNumber": 1,
+                "sectionColumns": [
+                  1,
+                  2,
+                ],
+                "tables": [],
+              },
+            ],
+          }
+        `);
+
+        skeleton.dispose();
+        univer.dispose();
+    });
+
+    it('keeps a later NEXT_PAGE section on a new page during anchored relayout', () => {
+        const anchoredParagraph = `Anchor${DataStreamTreeTokenType.CUSTOM_BLOCK}${DataStreamTreeTokenType.PARAGRAPH}`;
+        const title = `${anchoredParagraph}${DataStreamTreeTokenType.SECTION_BREAK}`;
+        const bodyText = `Body${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
+        const documentModel = new DocumentDataModel({
+            id: 'next-page-section-after-anchored-title',
+            body: {
+                dataStream: `${title}${bodyText}`,
+                paragraphs: [
+                    { startIndex: title.length - 2, paragraphId: 'title-anchor' },
+                    { startIndex: title.length + bodyText.length - 2, paragraphId: 'body' },
+                ],
+                sectionBreaks: [
+                    { sectionId: 'title-section', startIndex: title.length - 1 },
+                    {
+                        sectionId: 'body-section',
+                        startIndex: title.length + bodyText.length - 1,
+                        sectionType: SectionType.NEXT_PAGE,
+                    },
+                ],
+                customBlocks: [{ startIndex: 6, blockId: 'title-shape' }],
+            },
+            drawings: {
+                'title-shape': {
+                    unitId: 'next-page-section-after-anchored-title',
+                    subUnitId: 'next-page-section-after-anchored-title',
+                    drawingId: 'title-shape',
+                    drawingType: 1,
+                    layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
+                    wrapText: WrapTextType.BOTH_SIDES,
+                    docTransform: {
+                        angle: 0,
+                        positionH: { relativeFrom: ObjectRelativeFromH.PAGE, posOffset: 40 },
+                        positionV: { relativeFrom: ObjectRelativeFromV.PARAGRAPH, posOffset: -30 },
+                        size: { width: 150, height: 100 },
+                    },
+                },
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageSize: { width: 320, height: 400 },
+                marginTop: 20,
+                marginBottom: 20,
+                marginLeft: 20,
+                marginRight: 20,
+            },
+        });
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(documentModel), localeService);
+        const createSkeletonSpy = vi.spyOn(skeleton as any, '_createSkeleton');
+
+        skeleton.calculate();
+
+        expect(createSkeletonSpy.mock.calls.length).toBeGreaterThan(1);
+        expect(skeleton.getSkeletonData()?.pages.map(({ pageNumber }) => pageNumber)).toEqual([1, 2]);
 
         skeleton.dispose();
         univer.dispose();
@@ -955,7 +1048,422 @@ describe('doc skeleton', () => {
         univer.dispose();
     });
 
-    it('starts a NEXT_COLUMN section in the next available column', () => {
+    it('DOCX golden e2e keeps a nested table in the outer cell skeleton', () => {
+        const measureSpy = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text: string) => ({
+            width: text.length * 8,
+            fontBoundingBoxAscent: 8,
+            fontBoundingBoxDescent: 2,
+        }) as any);
+        const T = DataStreamTreeTokenType;
+        const inner = `${T.TABLE_START}${T.TABLE_ROW_START}${T.TABLE_CELL_START}Inner${T.PARAGRAPH}${T.SECTION_BREAK}${T.TABLE_CELL_END}${T.TABLE_ROW_END}${T.TABLE_END}`;
+        const outer = `${T.TABLE_START}${T.TABLE_ROW_START}${T.TABLE_CELL_START}Before${T.PARAGRAPH}${inner}${T.PARAGRAPH}After${T.PARAGRAPH}${T.SECTION_BREAK}${T.TABLE_CELL_END}${T.TABLE_ROW_END}${T.TABLE_END}`;
+        const dataStream = `${outer}${T.PARAGRAPH}${T.SECTION_BREAK}`;
+        const innerStart = outer.indexOf(inner);
+        const table = (tableId: string, width: number) => ({
+            tableId,
+            align: 0,
+            indent: { v: 0 },
+            textWrap: 0,
+            position: {
+                positionH: { relativeFrom: ObjectRelativeFromH.PAGE },
+                positionV: { relativeFrom: ObjectRelativeFromV.PAGE },
+            },
+            dist: { distT: 0, distB: 0, distL: 0, distR: 0 },
+            size: { type: TableSizeType.SPECIFIED, width: { v: width } },
+            tableRows: [{
+                tableCells: [{ size: { type: TableSizeType.SPECIFIED, width: { v: width } } }],
+                trHeight: { val: { v: 0 }, hRule: 0 },
+            }],
+            tableColumns: [{ size: { type: TableSizeType.SPECIFIED, width: { v: width } } }],
+        });
+        const documentModel = new DocumentDataModel({
+            id: 'nested-table-skeleton',
+            body: {
+                dataStream,
+                tables: [
+                    { tableId: 'outer', startIndex: 0, endIndex: outer.length },
+                    { tableId: 'inner', startIndex: innerStart, endIndex: innerStart + inner.length },
+                ],
+                sectionBreaks: [{ sectionId: 'body', startIndex: dataStream.length - 1 }],
+            },
+            tableSource: {
+                outer: table('outer', 280),
+                inner: table('inner', 240),
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageSize: { width: 320, height: 400 },
+                marginTop: 20,
+                marginBottom: 20,
+                marginLeft: 20,
+                marginRight: 20,
+            },
+        });
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(documentModel), localeService);
+
+        skeleton.calculate();
+
+        const outerSkeleton = skeleton.getSkeletonData()?.pages[0]?.skeTables.get('outer');
+        const outerCell = outerSkeleton?.rows[0]?.cells[0];
+        expect(outerCell?.skeTables.has('inner')).toBe(true);
+        expect(outerCell?.skeTables.get('inner')?.rows[0]?.cells[0]?.sections[0]?.columns[0]?.lines.length).toBeGreaterThan(0);
+
+        skeleton.dispose();
+        univer.dispose();
+        measureSpy.mockRestore();
+    });
+
+    it('DOCX golden e2e honors a rendered page break inside a traditional table cell', () => {
+        const measureSpy = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text: string) => ({
+            width: text.length * 8,
+            fontBoundingBoxAscent: 8,
+            fontBoundingBoxDescent: 2,
+        }) as any);
+        const T = DataStreamTreeTokenType;
+        const cell = `Before${T.PARAGRAPH}${T.PAGE_BREAK}After${T.PARAGRAPH}${T.SECTION_BREAK}`;
+        const table = `${T.TABLE_START}${T.TABLE_ROW_START}${T.TABLE_CELL_START}${cell}${T.TABLE_CELL_END}${T.TABLE_ROW_END}${T.TABLE_END}`;
+        const dataStream = `${table}${T.PARAGRAPH}${T.SECTION_BREAK}`;
+        const documentModel = new DocumentDataModel({
+            id: 'rendered-page-break-in-table-cell',
+            body: {
+                dataStream,
+                renderedPageBreaks: [dataStream.indexOf(T.PAGE_BREAK)],
+                paragraphs: [
+                    { startIndex: dataStream.indexOf(T.PARAGRAPH), paragraphId: 'before' },
+                    { startIndex: dataStream.indexOf(T.PARAGRAPH, dataStream.indexOf(T.PAGE_BREAK)), paragraphId: 'after' },
+                ],
+                tables: [{ tableId: 'table', startIndex: 0, endIndex: table.length }],
+                sectionBreaks: [
+                    { sectionId: 'cell', startIndex: dataStream.indexOf(T.SECTION_BREAK) },
+                    { sectionId: 'body', startIndex: dataStream.length - 1 },
+                ],
+            },
+            tableSource: {
+                table: {
+                    tableId: 'table',
+                    align: 0,
+                    indent: { v: 0 },
+                    textWrap: 0,
+                    position: {
+                        positionH: { relativeFrom: ObjectRelativeFromH.PAGE },
+                        positionV: { relativeFrom: ObjectRelativeFromV.PAGE },
+                    },
+                    dist: { distT: 0, distB: 0, distL: 0, distR: 0 },
+                    size: { type: TableSizeType.SPECIFIED, width: { v: 280 } },
+                    tableRows: [{
+                        tableCells: [{ size: { type: TableSizeType.SPECIFIED, width: { v: 280 } } }],
+                        trHeight: { val: { v: 0 }, hRule: 0 },
+                    }],
+                    tableColumns: [{ size: { type: TableSizeType.SPECIFIED, width: { v: 280 } } }],
+                },
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageSize: { width: 320, height: 200 },
+                marginTop: 20,
+                marginBottom: 20,
+                marginLeft: 20,
+                marginRight: 20,
+            },
+        });
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(documentModel), localeService);
+
+        skeleton.calculate();
+
+        const pages = skeleton.getSkeletonData()?.pages ?? [];
+        expect(pages).toHaveLength(2);
+        expect(pages.every((page) => [...page.skeTables.keys()].some((tableId) => tableId.startsWith('table')))).toBe(true);
+
+        skeleton.dispose();
+        univer.dispose();
+        measureSpy.mockRestore();
+    });
+
+    it('DOCX golden e2e does not duplicate a table-cell rendered break after natural overflow', () => {
+        const measureSpy = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text: string) => ({
+            width: text.length * 8,
+            fontBoundingBoxAscent: 8,
+            fontBoundingBoxDescent: 2,
+        }) as any);
+        const T = DataStreamTreeTokenType;
+        const before = 'Before '.repeat(70);
+        const cell = `${before}${T.PARAGRAPH}${T.PAGE_BREAK}After${T.PARAGRAPH}${T.SECTION_BREAK}`;
+        const table = `${T.TABLE_START}${T.TABLE_ROW_START}${T.TABLE_CELL_START}${cell}${T.TABLE_CELL_END}${T.TABLE_ROW_END}${T.TABLE_END}`;
+        const dataStream = `${table}${T.PARAGRAPH}${T.SECTION_BREAK}`;
+        const documentModel = new DocumentDataModel({
+            id: 'natural-overflow-before-rendered-table-break',
+            body: {
+                dataStream,
+                renderedPageBreaks: [dataStream.indexOf(T.PAGE_BREAK)],
+                paragraphs: [
+                    { startIndex: dataStream.indexOf(T.PARAGRAPH), paragraphId: 'before' },
+                    { startIndex: dataStream.indexOf(T.PARAGRAPH, dataStream.indexOf(T.PAGE_BREAK)), paragraphId: 'after' },
+                ],
+                tables: [{ tableId: 'table', startIndex: 0, endIndex: table.length }],
+                sectionBreaks: [
+                    { sectionId: 'cell', startIndex: dataStream.indexOf(T.SECTION_BREAK) },
+                    { sectionId: 'body', startIndex: dataStream.length - 1 },
+                ],
+            },
+            tableSource: {
+                table: {
+                    tableId: 'table',
+                    align: 0,
+                    indent: { v: 0 },
+                    textWrap: 0,
+                    position: {
+                        positionH: { relativeFrom: ObjectRelativeFromH.PAGE },
+                        positionV: { relativeFrom: ObjectRelativeFromV.PAGE },
+                    },
+                    dist: { distT: 0, distB: 0, distL: 0, distR: 0 },
+                    size: { type: TableSizeType.SPECIFIED, width: { v: 280 } },
+                    tableRows: [{
+                        tableCells: [{ size: { type: TableSizeType.SPECIFIED, width: { v: 280 } } }],
+                        trHeight: { val: { v: 0 }, hRule: 0 },
+                    }],
+                    tableColumns: [{ size: { type: TableSizeType.SPECIFIED, width: { v: 280 } } }],
+                },
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageSize: { width: 320, height: 200 },
+                marginTop: 20,
+                marginBottom: 20,
+                marginLeft: 20,
+                marginRight: 20,
+            },
+        });
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(documentModel), localeService);
+
+        skeleton.calculate();
+
+        const pages = skeleton.getSkeletonData()?.pages ?? [];
+        expect(pages).toHaveLength(2);
+        expect(pages.every((page) => [...page.skeTables.keys()].some((tableId) => tableId.startsWith('table')))).toBe(true);
+
+        skeleton.dispose();
+        univer.dispose();
+        measureSpy.mockRestore();
+    });
+
+    it('keeps the document-grid line height inside a traditional table cell', () => {
+        const measureSpy = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text: string) => ({
+            width: text.length * 8,
+            fontBoundingBoxAscent: 8,
+            fontBoundingBoxDescent: 2,
+        }) as any);
+        const T = DataStreamTreeTokenType;
+        const qualifyingCell = `${'一'.repeat(30)}${T.PARAGRAPH}${T.SECTION_BREAK}`;
+        const compactCell = `${'二'.repeat(30)}${T.PARAGRAPH}${T.SECTION_BREAK}`;
+        const firstRow = `${T.TABLE_ROW_START}${T.TABLE_CELL_START}${qualifyingCell}${T.TABLE_CELL_END}${T.TABLE_ROW_END}`;
+        const secondRow = `${T.TABLE_ROW_START}${T.TABLE_CELL_START}${compactCell}${T.TABLE_CELL_END}${T.TABLE_ROW_END}`;
+        const table = `${T.TABLE_START}${firstRow}${secondRow}${T.TABLE_END}`;
+        const bodyText = '一'.repeat(100);
+        const dataStream = `${table}${bodyText}${T.PARAGRAPH}${T.SECTION_BREAK}`;
+        const firstParagraph = dataStream.indexOf(T.PARAGRAPH);
+        const secondParagraph = dataStream.indexOf(T.PARAGRAPH, firstParagraph + 1);
+        const bodyParagraph = table.length + bodyText.length;
+        const documentModel = new DocumentDataModel({
+            id: 'table-cell-document-grid',
+            body: {
+                dataStream,
+                paragraphs: [firstParagraph, secondParagraph, bodyParagraph].map((startIndex, index) => ({
+                    startIndex,
+                    paragraphId: `cell-paragraph-${index}`,
+                    paragraphStyle: {
+                        lineSpacing: 1.5,
+                        spacingRule: SpacingRule.AUTO,
+                        ...(index === 1 ? {} : { spaceBelow: { v: 10.666666666666666 } }),
+                        ...(index === 2 ? { snapToGrid: BooleanNumber.FALSE } : {}),
+                    },
+                })),
+                tables: [{ tableId: 'table', startIndex: 0, endIndex: table.length }],
+                sectionBreaks: [
+                    {
+                        sectionId: 'qualifying-cell-section',
+                        startIndex: table.indexOf(T.SECTION_BREAK),
+                        linePitch: 20.8,
+                        gridType: GridType.LINES,
+                    },
+                    {
+                        sectionId: 'compact-cell-section',
+                        startIndex: table.indexOf(T.SECTION_BREAK, table.indexOf(T.SECTION_BREAK) + 1),
+                        linePitch: 20.8,
+                        gridType: GridType.LINES,
+                    },
+                    {
+                        sectionId: 'body-section',
+                        startIndex: dataStream.length - 1,
+                        linePitch: 20.8,
+                        gridType: GridType.LINES,
+                    },
+                ],
+            },
+            tableSource: {
+                table: {
+                    tableId: 'table',
+                    align: 0,
+                    indent: { v: 0 },
+                    textWrap: 0,
+                    position: {
+                        positionH: { relativeFrom: ObjectRelativeFromH.PAGE },
+                        positionV: { relativeFrom: ObjectRelativeFromV.PAGE },
+                    },
+                    dist: { distT: 0, distB: 0, distL: 0, distR: 0 },
+                    size: { type: TableSizeType.SPECIFIED, width: { v: 200 } },
+                    tableRows: [
+                        {
+                            tableCells: [{ size: { type: TableSizeType.SPECIFIED, width: { v: 200 } } }],
+                            trHeight: { val: { v: 0 }, hRule: 0 },
+                        },
+                        {
+                            tableCells: [{ size: { type: TableSizeType.SPECIFIED, width: { v: 200 } } }],
+                            trHeight: { val: { v: 0 }, hRule: 0 },
+                        },
+                    ],
+                    tableColumns: [{ size: { type: TableSizeType.SPECIFIED, width: { v: 200 } } }],
+                },
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageSize: { width: 320, height: 400 },
+                marginTop: 20,
+                marginBottom: 20,
+                marginLeft: 20,
+                marginRight: 20,
+                adjustLineHeightInTable: BooleanNumber.TRUE,
+                textStyle: { fs: 12 },
+            },
+        });
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(documentModel), localeService);
+
+        skeleton.calculate();
+
+        const rows = skeleton.getSkeletonData()?.pages[0]?.skeTables.get('table')?.rows ?? [];
+        const qualifyingLines = rows[0]?.cells[0]?.sections[0]?.columns[0]?.lines ?? [];
+        expect(qualifyingLines.map(({ paragraphIndex, top, lineHeight, spaceBelowApply }) => ({ paragraphIndex, top, lineHeight, spaceBelowApply }))).toEqual([
+            { paragraphIndex: firstParagraph, top: 0, lineHeight: 41.6, spaceBelowApply: 10.666666666666666 },
+            { paragraphIndex: firstParagraph, top: 41.6, lineHeight: 41.6, spaceBelowApply: 10.666666666666666 },
+        ]);
+        expect(rows[0]?.height).toBeCloseTo(103.86666666666666);
+        const compactLines = rows[1]?.cells[0]?.sections[0]?.columns[0]?.lines ?? [];
+        expect(compactLines.map(({ paragraphIndex, top, lineHeight, spaceBelowApply }) => ({ paragraphIndex, top, lineHeight, spaceBelowApply }))).toEqual([
+            { paragraphIndex: secondParagraph, top: 0, lineHeight: 23.4, spaceBelowApply: 0 },
+            { paragraphIndex: secondParagraph, top: 23.4, lineHeight: 23.4, spaceBelowApply: 0 },
+        ]);
+        expect(rows[1]?.height).toBeCloseTo(56.8);
+        const bodyLines = skeleton
+            .getSkeletonData()
+            ?.pages[0]
+            ?.sections[0]
+            ?.columns[0]
+            ?.lines
+            .filter(({ paragraphIndex }) => paragraphIndex === bodyParagraph) ?? [];
+        expect(bodyLines.map(({ lineHeight }) => lineHeight)).toEqual([
+            15,
+            15,
+            15,
+        ]);
+
+        skeleton.dispose();
+        univer.dispose();
+        measureSpy.mockRestore();
+    });
+
+    it('reuses an empty page created by a manual break for the following NEXT_PAGE section', () => {
+        const first = `First${DataStreamTreeTokenType.PAGE_BREAK}${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
+        const second = `Second${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        const documentModel = new DocumentDataModel({
+            id: 'page-break-before-next-page-section',
+            body: {
+                dataStream: `${first}${second}`,
+                paragraphs: [
+                    { startIndex: first.length - 2, paragraphId: 'first-paragraph' },
+                    { startIndex: first.length + second.length - 2, paragraphId: 'second-paragraph' },
+                ],
+                sectionBreaks: [
+                    { sectionId: 'first-section', startIndex: first.length - 1 },
+                    {
+                        sectionId: 'second-section',
+                        startIndex: first.length + second.length - 1,
+                        sectionType: SectionType.NEXT_PAGE,
+                    },
+                ],
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageSize: { width: 320, height: 400 },
+                marginTop: 20,
+                marginBottom: 20,
+                marginLeft: 20,
+                marginRight: 20,
+            },
+        });
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(documentModel), localeService);
+
+        skeleton.calculate();
+
+        expect(skeleton.getSkeletonData()?.pages.map(({ pageNumber }) => pageNumber)).toEqual([1, 2]);
+
+        skeleton.dispose();
+        univer.dispose();
+    });
+
+    it('reuses a marker-only overflow page for the following NEXT_PAGE section', () => {
+        const paragraph = DataStreamTreeTokenType.PARAGRAPH;
+        const section = DataStreamTreeTokenType.SECTION_BREAK;
+        const first = `First${paragraph}Second${paragraph}${section}`;
+        const second = `Next${paragraph}${section}`;
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        const documentModel = new DocumentDataModel({
+            id: 'next-page-after-marker-overflow',
+            body: {
+                dataStream: `${first}${second}`,
+                paragraphs: [
+                    { startIndex: 'First'.length, paragraphId: 'first-paragraph' },
+                    { startIndex: `First${paragraph}Second`.length, paragraphId: 'second-paragraph' },
+                    { startIndex: first.length + 'Next'.length, paragraphId: 'next-paragraph' },
+                ],
+                sectionBreaks: [
+                    { sectionId: 'first-section', startIndex: first.length - 1 },
+                    {
+                        sectionId: 'second-section',
+                        startIndex: first.length + second.length - 1,
+                        sectionType: SectionType.NEXT_PAGE,
+                    },
+                ],
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageSize: { width: 320, height: 76 },
+                marginTop: 20,
+                marginBottom: 20,
+                marginLeft: 20,
+                marginRight: 20,
+            },
+        });
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(documentModel), localeService);
+
+        skeleton.calculate();
+
+        expect(skeleton.getSkeletonData()?.pages.map(({ pageNumber }) => pageNumber)).toEqual([1, 2]);
+
+        skeleton.dispose();
+        univer.dispose();
+    });
+
+    it('DOCX golden e2e starts a NEXT_COLUMN section in the next available column', () => {
         const first = `First${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
         const second = `Second${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
         const columns = [
@@ -1063,7 +1571,7 @@ describe('doc skeleton', () => {
         univer.dispose();
     });
 
-    it('moves NEXT_COLUMN to the next page when no column remains', () => {
+    it('DOCX golden e2e moves NEXT_COLUMN to the next page when no column remains', () => {
         const first = `First${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
         const second = `Second${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
         const univer = new Univer();
@@ -1104,7 +1612,140 @@ describe('doc skeleton', () => {
         univer.dispose();
     });
 
-    it('adds one skeleton-only filler page for an ODD_PAGE section', () => {
+    it('DOCX golden e2e does not create a blank page for a rendered page break immediately after a section break', () => {
+        const first = `Landscape content${DataStreamTreeTokenType.PARAGRAPH.repeat(3)}${DataStreamTreeTokenType.SECTION_BREAK}`;
+        const second = `${DataStreamTreeTokenType.PAGE_BREAK}Portrait content${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        const documentModel = new DocumentDataModel({
+            id: 'rendered-page-break-after-section-break',
+            body: {
+                dataStream: `${first}${second}`,
+                renderedPageBreaks: [first.length],
+                paragraphs: [
+                    { startIndex: 'Landscape content'.length, paragraphId: 'landscape-content' },
+                    { startIndex: 'Landscape content'.length + 1, paragraphId: 'landscape-empty-1' },
+                    { startIndex: 'Landscape content'.length + 2, paragraphId: 'landscape-empty-2' },
+                    {
+                        startIndex: first.length + 'Portrait content'.length + 1,
+                        paragraphId: 'portrait-content',
+                    },
+                ],
+                sectionBreaks: [
+                    {
+                        sectionId: 'landscape-section',
+                        startIndex: first.length - 1,
+                        pageSize: { width: 400, height: 240 },
+                    },
+                    {
+                        sectionId: 'portrait-section',
+                        startIndex: first.length + second.length - 1,
+                        pageSize: { width: 240, height: 400 },
+                    },
+                ],
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageSize: { width: 240, height: 400 },
+                marginTop: 20,
+                marginBottom: 20,
+                marginLeft: 20,
+                marginRight: 20,
+            },
+        });
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(documentModel), localeService);
+
+        skeleton.calculate();
+
+        expect(skeleton.getSkeletonData()?.pages.map((page) => ({
+            pageNumber: page.pageNumber,
+            pageSize: [page.pageWidth, page.pageHeight],
+            lineText: page.sections.flatMap((section) =>
+                section.columns.flatMap((column) =>
+                    column.lines.flatMap((line) =>
+                        line.divides.flatMap((divide) => divide.glyphGroup.map((glyph) => glyph.content))
+                    )
+                )
+            ).join('').replace(/[\r\n\f]/g, ''),
+        }))).toMatchInlineSnapshot(`
+          [
+            {
+              "lineText": "Landscape content",
+              "pageNumber": 1,
+              "pageSize": [
+                400,
+                240,
+              ],
+            },
+            {
+              "lineText": "Portrait content",
+              "pageNumber": 2,
+              "pageSize": [
+                240,
+                400,
+              ],
+            },
+          ]
+        `);
+
+        skeleton.dispose();
+        univer.dispose();
+    });
+
+    it('does not wrap traditional text only because of the invisible paragraph mark', () => {
+        const measureSpy = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text: string) => ({
+            width: text === DataStreamTreeTokenType.PARAGRAPH ? 4 : text.length * 8.833333333333334,
+            fontBoundingBoxAscent: 8,
+            fontBoundingBoxDescent: 2,
+        }) as any);
+        const text = 'Click/tap';
+        const dataStream = `${text}${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        const documentModel = new DocumentDataModel({
+            id: 'traditional-invisible-paragraph-mark-width',
+            body: {
+                dataStream,
+                paragraphs: [{ startIndex: text.length, paragraphId: 'click-tap' }],
+                sectionBreaks: [{ sectionId: 'body', startIndex: dataStream.length - 1 }],
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageSize: { width: 100, height: 120 },
+                marginTop: 10,
+                marginBottom: 10,
+                marginLeft: 10,
+                marginRight: 10,
+                paragraphLineGapDefault: 0,
+                textStyle: { ff: 'Arial', fs: 11 },
+            },
+        });
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(documentModel), localeService);
+
+        skeleton.calculate();
+
+        const lines = skeleton.getSkeletonData()?.pages[0]?.sections[0]?.columns[0]?.lines ?? [];
+        expect(lines.map((line) => ({
+            text: line.divides.flatMap((divide) => divide.glyphGroup.map((glyph) => glyph.content)).join('').replace(/\r/g, ''),
+            paragraphMarks: line.divides
+                .flatMap((divide) => divide.glyphGroup)
+                .filter((glyph) => glyph.streamType === DataStreamTreeTokenType.PARAGRAPH)
+                .length,
+        }))).toMatchInlineSnapshot(`
+          [
+            {
+              "paragraphMarks": 1,
+              "text": "Click/tap",
+            },
+          ]
+        `);
+
+        skeleton.dispose();
+        univer.dispose();
+        measureSpy.mockRestore();
+    });
+
+    it('DOCX golden e2e adds one skeleton-only filler page for an ODD_PAGE section', () => {
         const first = `First${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
         const second = `Second${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
         const univer = new Univer();
@@ -1148,7 +1789,7 @@ describe('doc skeleton', () => {
         univer.dispose();
     });
 
-    it('adds one skeleton-only filler page for an EVEN_PAGE section', () => {
+    it('DOCX golden e2e adds one skeleton-only filler page for an EVEN_PAGE section', () => {
         const first = `First${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
         const second = `Second${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
         const univer = new Univer();
@@ -1235,7 +1876,7 @@ describe('doc skeleton', () => {
         univer.dispose();
     });
 
-    it('restarts page numbering from an explicit section pageNumberStart', () => {
+    it.each([1, 7])('restarts page numbering from an explicit section pageNumberStart of %i', (pageNumberStart) => {
         const first = `First${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
         const second = `Second${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
         const univer = new Univer();
@@ -1254,7 +1895,7 @@ describe('doc skeleton', () => {
                         sectionId: 'second-section',
                         startIndex: first.length + second.length - 1,
                         sectionType: SectionType.NEXT_PAGE,
-                        pageNumberStart: 7,
+                        pageNumberStart,
                     },
                 ],
             },
@@ -1271,13 +1912,363 @@ describe('doc skeleton', () => {
 
         skeleton.calculate();
 
-        expect(skeleton.getSkeletonData()?.pages.map(({ pageNumber }) => pageNumber)).toEqual([1, 7]);
+        expect(skeleton.getSkeletonData()?.pages.map(({ pageNumber }) => pageNumber)).toEqual([1, pageNumberStart]);
 
         skeleton.dispose();
         univer.dispose();
     });
 
-    it('starts a continuous section on a new page when its page geometry changes', () => {
+    it('keeps a continuous section on the current page when only its margins change', () => {
+        const first = `First${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
+        const second = `Second${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        const documentModel = new DocumentDataModel({
+            id: 'continuous-margin-change',
+            body: {
+                dataStream: `${first}${second}`,
+                paragraphs: [
+                    { startIndex: first.length - 2, paragraphId: 'first-paragraph' },
+                    { startIndex: first.length + second.length - 2, paragraphId: 'second-paragraph' },
+                ],
+                sectionBreaks: [
+                    { sectionId: 'first-section', startIndex: first.length - 1 },
+                    {
+                        sectionId: 'second-section',
+                        startIndex: first.length + second.length - 1,
+                        sectionType: SectionType.CONTINUOUS,
+                        marginTop: 30,
+                        marginBottom: 30,
+                        marginLeft: 30,
+                        marginRight: 30,
+                    },
+                ],
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageSize: { width: 320, height: 400 },
+                marginTop: 20,
+                marginBottom: 20,
+                marginLeft: 20,
+                marginRight: 20,
+            },
+        });
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(documentModel), localeService);
+
+        skeleton.calculate();
+
+        const pages = skeleton.getSkeletonData()?.pages ?? [];
+        expect(pages).toHaveLength(1);
+        expect(pages[0].sections).toHaveLength(2);
+
+        skeleton.dispose();
+        univer.dispose();
+    });
+
+    it('moves a continuous section when its first line does not fit the current page', () => {
+        const measureSpy = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text: string) => ({
+            width: text.length * 8,
+            fontBoundingBoxAscent: 8,
+            fontBoundingBoxDescent: 2,
+        }) as any);
+        const first = `First${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
+        const second = `Second${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        const documentModel = new DocumentDataModel({
+            id: 'continuous-section-first-line-overflow',
+            body: {
+                dataStream: `${first}${second}`,
+                paragraphs: [
+                    {
+                        startIndex: first.length - 2,
+                        paragraphId: 'first-paragraph',
+                        paragraphStyle: { lineSpacing: 50, spacingRule: SpacingRule.EXACT },
+                    },
+                    {
+                        startIndex: first.length + second.length - 2,
+                        paragraphId: 'second-paragraph',
+                        paragraphStyle: { lineSpacing: 50, spacingRule: SpacingRule.EXACT },
+                    },
+                ],
+                sectionBreaks: [
+                    { sectionId: 'first-section', startIndex: first.length - 1 },
+                    {
+                        sectionId: 'second-section',
+                        startIndex: first.length + second.length - 1,
+                        sectionType: SectionType.CONTINUOUS,
+                    },
+                ],
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageSize: { width: 320, height: 100 },
+                marginTop: 20,
+                marginBottom: 20,
+                marginLeft: 20,
+                marginRight: 20,
+            },
+        });
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(documentModel), localeService);
+
+        skeleton.calculate();
+
+        expect(skeleton.getSkeletonData()?.pages.map((page) => ({
+            pageNumber: page.pageNumber,
+            sectionTops: page.sections.map((section) => section.top),
+            paragraphIndexes: page.sections.flatMap((section) =>
+                section.columns.flatMap((column) => column.lines.map((line) => line.paragraphIndex))
+            ),
+        }))).toEqual([
+            { pageNumber: 1, sectionTops: [0, 50], paragraphIndexes: [first.length - 2] },
+            { pageNumber: 2, sectionTops: [0], paragraphIndexes: [first.length + second.length - 2] },
+        ]);
+
+        skeleton.dispose();
+        univer.dispose();
+        measureSpy.mockRestore();
+    });
+
+    it('balances the final page of a multi-column section before a continuous section', () => {
+        const measureSpy = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text: string) => ({
+            width: text.length * 8,
+            fontBoundingBoxAscent: 8,
+            fontBoundingBoxDescent: 2,
+        }) as any);
+        const paragraphToken = DataStreamTreeTokenType.PARAGRAPH;
+        const sectionToken = DataStreamTreeTokenType.SECTION_BREAK;
+        const firstParagraphs = [
+            'Alpha paragraph wraps across the column.',
+            'Beta paragraph wraps across the column.',
+            'Gamma paragraph wraps across the column.',
+            'Delta paragraph wraps across the column.',
+        ];
+        let first = '';
+        const paragraphs = firstParagraphs.map((text, index) => {
+            first += `${text}${paragraphToken}`;
+            return { startIndex: first.length - 1, paragraphId: `column-paragraph-${index}` };
+        });
+        first += sectionToken;
+        const second = `Following section${paragraphToken}${sectionToken}`;
+        paragraphs.push({
+            startIndex: first.length + 'Following section'.length,
+            paragraphId: 'following-section-paragraph',
+        });
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        const documentModel = new DocumentDataModel({
+            id: 'balanced-continuous-columns',
+            body: {
+                dataStream: `${first}${second}`,
+                paragraphs,
+                sectionBreaks: [
+                    {
+                        sectionId: 'column-section',
+                        startIndex: first.length - 1,
+                        columnProperties: [
+                            { width: 130, paddingEnd: 20 },
+                            { width: 130, paddingEnd: 0 },
+                        ],
+                    },
+                    {
+                        sectionId: 'following-section',
+                        startIndex: first.length + second.length - 1,
+                        sectionType: SectionType.CONTINUOUS,
+                        columnProperties: [{ width: 280, paddingEnd: 0 }],
+                    },
+                ],
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageSize: { width: 320, height: 500 },
+                marginTop: 20,
+                marginBottom: 20,
+                marginLeft: 20,
+                marginRight: 20,
+            },
+        });
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(documentModel), localeService);
+
+        skeleton.calculate();
+
+        const pages = skeleton.getSkeletonData()?.pages ?? [];
+        const [columnSection, followingSection] = pages[0].sections;
+        expect(pages).toHaveLength(1);
+        expect(columnSection.columns.every((column) => column.lines.length > 0)).toBe(true);
+        expect(Math.abs((columnSection.columns[0].height ?? 0) - (columnSection.columns[1].height ?? 0)))
+            .toBeLessThanOrEqual(Math.max(...columnSection.columns.flatMap((column) => column.lines.map((line) => line.lineHeight))));
+        expect(followingSection.top).toBe(columnSection.top + columnSection.height);
+
+        skeleton.dispose();
+        univer.dispose();
+        measureSpy.mockRestore();
+    });
+
+    it('keeps column flow when a continuous section has unchanged column geometry', () => {
+        const measureSpy = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text: string) => ({
+            width: text.length * 8,
+            fontBoundingBoxAscent: 8,
+            fontBoundingBoxDescent: 2,
+        }) as any);
+        const paragraphToken = DataStreamTreeTokenType.PARAGRAPH;
+        const sectionToken = DataStreamTreeTokenType.SECTION_BREAK;
+        const columns = [
+            { width: 130, paddingEnd: 20 },
+            { width: 130, paddingEnd: 0 },
+        ];
+        const first = `Alpha paragraph wraps across the column.${paragraphToken}${sectionToken}`;
+        const second = `Following section${paragraphToken}${sectionToken}`;
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        const documentModel = new DocumentDataModel({
+            id: 'continuous-unchanged-columns',
+            body: {
+                dataStream: `${first}${second}`,
+                paragraphs: [
+                    { startIndex: first.length - 2, paragraphId: 'column-paragraph' },
+                    { startIndex: first.length + second.length - 2, paragraphId: 'following-section-paragraph' },
+                ],
+                sectionBreaks: [
+                    { sectionId: 'column-section', startIndex: first.length - 1, columnProperties: columns },
+                    {
+                        sectionId: 'following-section',
+                        startIndex: first.length + second.length - 1,
+                        sectionType: SectionType.CONTINUOUS,
+                        columnProperties: columns,
+                    },
+                ],
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageSize: { width: 320, height: 500 },
+                marginTop: 20,
+                marginBottom: 20,
+                marginLeft: 20,
+                marginRight: 20,
+            },
+        });
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(documentModel), localeService);
+
+        skeleton.calculate();
+
+        const pages = skeleton.getSkeletonData()?.pages ?? [];
+        const [columnSection] = pages[0].sections;
+        expect(pages).toHaveLength(1);
+        expect(columnSection.columns[0].lines.length).toBeGreaterThan(0);
+        expect(columnSection.columns[1].lines).toHaveLength(0);
+
+        skeleton.dispose();
+        univer.dispose();
+        measureSpy.mockRestore();
+    });
+
+    it('starts a continuous section on the next page when the current page is full', () => {
+        const measureSpy = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text: string) => ({
+            width: text.length * 8,
+            fontBoundingBoxAscent: 8,
+            fontBoundingBoxDescent: 2,
+        }) as any);
+        const paragraphToken = DataStreamTreeTokenType.PARAGRAPH;
+        const sectionToken = DataStreamTreeTokenType.SECTION_BREAK;
+        const texts = ['First', 'Second', 'Third'];
+        let first = '';
+        const paragraphs: IParagraph[] = texts.map((text, index) => {
+            first += `${text}${paragraphToken}`;
+            return {
+                startIndex: first.length - 1,
+                paragraphId: `full-page-paragraph-${index}`,
+                paragraphStyle: { lineSpacing: 20, spacingRule: SpacingRule.EXACT },
+            };
+        });
+        first += sectionToken;
+        const second = `Following section${paragraphToken}${sectionToken}`;
+        paragraphs.push({
+            startIndex: first.length + second.length - 2,
+            paragraphId: 'following-section-paragraph',
+        });
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        const documentModel = new DocumentDataModel({
+            id: 'continuous-after-full-page',
+            body: {
+                dataStream: `${first}${second}`,
+                paragraphs,
+                sectionBreaks: [
+                    { sectionId: 'full-page-section', startIndex: first.length - 1 },
+                    {
+                        sectionId: 'following-section',
+                        startIndex: first.length + second.length - 1,
+                        sectionType: SectionType.CONTINUOUS,
+                    },
+                ],
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageSize: { width: 320, height: 100 },
+                marginTop: 20,
+                marginBottom: 20,
+                marginLeft: 20,
+                marginRight: 20,
+            },
+        });
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(documentModel), localeService);
+
+        skeleton.calculate();
+
+        const pages = skeleton.getSkeletonData()?.pages ?? [];
+        expect(pages).toHaveLength(2);
+        expect(pages[0].height).toBe(60);
+        expect(pages[1].sections[0].top).toBe(0);
+
+        skeleton.dispose();
+        univer.dispose();
+        measureSpy.mockRestore();
+    });
+
+    it('DOCX golden e2e preserves physical page parity when an even-and-odd section restarts numbering', () => {
+        const first = `First${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
+        const second = `Second${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        const documentModel = new DocumentDataModel({
+            id: 'section-page-number-parity',
+            body: {
+                dataStream: `${first}${second}`,
+                paragraphs: [
+                    { startIndex: first.length - 2, paragraphId: 'first-paragraph' },
+                    { startIndex: first.length + second.length - 2, paragraphId: 'second-paragraph' },
+                ],
+                sectionBreaks: [
+                    { sectionId: 'first-section', startIndex: first.length - 1 },
+                    {
+                        sectionId: 'second-section',
+                        startIndex: first.length + second.length - 1,
+                        sectionType: SectionType.NEXT_PAGE,
+                        pageNumberStart: 1,
+                        evenAndOddHeaders: 1,
+                    },
+                ],
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageSize: { width: 320, height: 400 },
+                marginTop: 20,
+                marginBottom: 20,
+                marginLeft: 20,
+                marginRight: 20,
+            },
+        });
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(documentModel), localeService);
+
+        skeleton.calculate();
+
+        expect(skeleton.getSkeletonData()?.pages.map(({ pageNumber }) => pageNumber)).toEqual([1, 2, 1]);
+
+        skeleton.dispose();
+        univer.dispose();
+    });
+
+    it('starts a continuous section on a new page when its physical page changes', () => {
         const first = `First${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
         const second = `Second${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
         const univer = new Univer();
@@ -1328,7 +2319,7 @@ describe('doc skeleton', () => {
         univer.dispose();
     });
 
-    it('lays out a traditional form document with header footer and long fields', () => {
+    it('DOCX golden e2e lays out a traditional form document with header footer and long fields', () => {
         const univer = new Univer();
         const localeService = univer.__getInjector().get(LocaleService);
         const lines = [

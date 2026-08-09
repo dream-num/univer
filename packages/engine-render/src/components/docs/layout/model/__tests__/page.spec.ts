@@ -858,4 +858,120 @@ describe('page model', () => {
 
         expect(pages[0].height).toBe(20);
     });
+
+    it('locks public layout projections from the DOCX golden sample failure clusters', () => {
+        const resource = createSkeletonResourceReference();
+        const ctx = {
+            layoutStartPointer: {},
+            skeletonResourceReference: resource,
+            isDirty: false,
+        } as any;
+        const section = {
+            pageNumberStart: 1,
+            pageSize: { width: 816, height: 1056 },
+            marginLeft: 96,
+            marginRight: 96,
+            marginTop: 96,
+            marginBottom: 96,
+            headerTreeMap: new Map(),
+            footerTreeMap: new Map(),
+            columnProperties: [
+                { width: 180, paddingEnd: 24 },
+                { width: 210, paddingEnd: 36 },
+                { width: 174, paddingEnd: 0 },
+            ],
+            columnSeparatorType: ColumnSeparatorType.BETWEEN_EACH_COLUMN,
+            documentCompatibilityPolicy: getDocumentCompatibilityPolicy(DocumentFlavor.TRADITIONAL),
+            documentTextStyle: { ff: 'SimSun', fs: 12 },
+            adjustLineHeightInTable: BooleanNumber.TRUE,
+            linePitch: 20.8,
+            gridType: GridType.LINES,
+        } as any;
+        const page = createSkeletonPage(ctx, section, resource, 1);
+        const table = {
+            tableId: 'golden-table',
+            tableRows: [{ gridBefore: 1, tableCells: [{ columnSpan: 2 }, {}] }],
+            tableColumns: [20, 80, 40, 50].map((width) => ({ size: { width: { v: width } } })),
+        } as any;
+        const firstCell = createNullCellPage(ctx, section, table, 0, 0);
+        const secondCell = createNullCellPage(ctx, section, table, 0, 1);
+        const inlinePage = {
+            height: 20,
+            skeDrawings: new Map([
+                ['inline-image', {
+                    aTop: 6,
+                    height: 48,
+                    drawingOrigin: { layoutType: PositionedObjectLayoutType.INLINE },
+                }],
+            ]),
+        };
+        const nestedTablePage = {
+            height: 20,
+            skeTables: new Map([
+                ['nested-table', { top: 12, height: 80, tableSource: {} }],
+            ]),
+        };
+
+        expandCellPageHeightForInlineDrawings([inlinePage as never]);
+        expandCellPageHeightForFlowTables([nestedTablePage as never]);
+
+        expect({
+            '0004-table-image-mix': {
+                inlineCellHeight: inlinePage.height,
+                nestedTableCellHeight: nestedTablePage.height,
+            },
+            '0006-long-table-grid': {
+                cellWidths: [firstCell.page.pageWidth, secondCell.page.pageWidth],
+            },
+            '0009-document-grid': {
+                adjustLineHeightInTable: firstCell.sectionBreakConfig.adjustLineHeightInTable,
+                fontFamily: firstCell.sectionBreakConfig.documentTextStyle?.ff,
+                gridType: firstCell.sectionBreakConfig.gridType,
+                linePitch: firstCell.sectionBreakConfig.linePitch,
+            },
+            '0026-multi-section-columns': {
+                columns: page.sections[0].columns.map((column) => ({ left: column.left, width: column.width })),
+                pageSize: [page.pageWidth, page.pageHeight],
+            },
+        }).toMatchInlineSnapshot(`
+          {
+            "0004-table-image-mix": {
+              "inlineCellHeight": 54,
+              "nestedTableCellHeight": 92,
+            },
+            "0006-long-table-grid": {
+              "cellWidths": [
+                120,
+                50,
+              ],
+            },
+            "0009-document-grid": {
+              "adjustLineHeightInTable": 1,
+              "fontFamily": "SimSun",
+              "gridType": 1,
+              "linePitch": 20.8,
+            },
+            "0026-multi-section-columns": {
+              "columns": [
+                {
+                  "left": 0,
+                  "width": 180,
+                },
+                {
+                  "left": 204,
+                  "width": 210,
+                },
+                {
+                  "left": 450,
+                  "width": 174,
+                },
+              ],
+              "pageSize": [
+                816,
+                1056,
+              ],
+            },
+          }
+        `);
+    });
 });

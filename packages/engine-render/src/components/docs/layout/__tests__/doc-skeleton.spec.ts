@@ -1177,7 +1177,7 @@ describe('doc skeleton', () => {
         measureSpy.mockRestore();
     });
 
-    it('does not duplicate a table-cell rendered break after natural overflow', () => {
+    it('DOCX golden e2e does not duplicate a table-cell rendered break after natural overflow', () => {
         const measureSpy = vi.spyOn(FontCache, 'getMeasureText').mockImplementation((text: string) => ({
             width: text.length * 8,
             fontBoundingBoxAscent: 8,

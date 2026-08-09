@@ -1576,7 +1576,7 @@ describe('linebreaking', () => {
         expect(result.length).toBeGreaterThanOrEqual(1);
     });
 
-    it('honors page breaks in paragraphs that only contain floating custom blocks', () => {
+    it('DOCX golden e2e honors page breaks in paragraphs that only contain floating custom blocks', () => {
         const content = `${DataStreamTreeTokenType.CUSTOM_BLOCK}${DataStreamTreeTokenType.CUSTOM_BLOCK}${DataStreamTreeTokenType.PAGE_BREAK}`;
         const { viewModel, ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed(content, {
             body: {
@@ -1669,7 +1669,7 @@ describe('linebreaking', () => {
         expect(result[1].skeDrawings.has('checklist-panel')).toBe(true);
     });
 
-    it('keeps every floating custom block on its side of a page break', () => {
+    it('DOCX golden e2e keeps every floating custom block on its side of a page break', () => {
         const firstPageIds = Array.from({ length: 15 }, (_, index) => `cover-${index + 1}`);
         const secondPageIds = Array.from({ length: 14 }, (_, index) => `content-${index + 1}`);
         const drawingIds = [...firstPageIds, ...secondPageIds];
@@ -1830,7 +1830,7 @@ describe('linebreaking', () => {
         expect(inlinePhoto?.aLeft).toBeGreaterThanOrEqual((leftWrap?.aLeft ?? 0) + (leftWrap?.width ?? 0));
     });
 
-    it('keeps an inline drawing on the same page as an adjacent top-bottom floating drawing in the same paragraph', () => {
+    it('DOCX golden e2e keeps an inline drawing on the same page as an adjacent top-bottom floating drawing in the same paragraph', () => {
         const content = `${DataStreamTreeTokenType.CUSTOM_BLOCK}${DataStreamTreeTokenType.CUSTOM_BLOCK}`;
         const { viewModel, ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed(content, {
             documentStyle: {
@@ -2149,7 +2149,7 @@ describe('linebreaking', () => {
         expect(secondColumnText).toContain('SECOND');
     });
 
-    it('wraps second-column text around a drawing anchored below a preceding section', () => {
+    it('DOCX golden e2e wraps second-column text around a drawing anchored below a preceding section', () => {
         const content = `${DataStreamTreeTokenType.CUSTOM_BLOCK}FIRST${DataStreamTreeTokenType.COLUMN_BREAK}ments without duplicating content in the body`;
         const { viewModel, ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed(content, {
             documentStyle: {
@@ -2362,7 +2362,7 @@ describe('linebreaking', () => {
         });
     });
 
-    it('positions DOCX floating anchors in empty paragraphs from the following text paragraph indent origin', () => {
+    it('DOCX golden e2e positions DOCX floating anchors in empty paragraphs from the following text paragraph indent origin', () => {
         const floatingParagraph = DataStreamTreeTokenType.CUSTOM_BLOCK;
         const bodyParagraph = 'Body';
         const { viewModel, ctx, sectionNode, sectionBreakConfig, curPage } = createSectionLayoutTestBed([floatingParagraph, bodyParagraph], {

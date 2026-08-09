@@ -591,7 +591,7 @@ describe('docs layout tools extra', () => {
         expect(getPageFromPath(root as any, ['skeTables', 't1', 'rows', 0, 'cells', 0])).toBeNull();
     });
 
-    it('inherits header and footer references from the previous traditional section', () => {
+    it('DOCX golden e2e inherits header and footer references from the previous traditional section', () => {
         const sections = [
             { sectionId: 'section_1', defaultHeaderId: 'header-section-1' },
             { sectionId: 'section_2' },
@@ -613,7 +613,7 @@ describe('docs layout tools extra', () => {
         expect(prepareSectionBreakConfig(ctx as any, 1).headerIds?.defaultHeaderId).toBe('header-section-1');
     });
 
-    it('does not inherit the title-page flag into a traditional section', () => {
+    it('DOCX golden e2e does not inherit the title-page flag into a traditional section', () => {
         const sections = [
             { sectionId: 'cover', useFirstPageHeaderFooter: BooleanNumber.TRUE },
             { sectionId: 'body' },

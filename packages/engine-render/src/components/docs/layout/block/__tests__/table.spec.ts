@@ -514,7 +514,7 @@ describe('docs table layout', () => {
         expect(result.fromCurrentPage).toBe(false);
     });
 
-    it('lays out splittable auto rows against the remaining page height', () => {
+    it('DOCX golden e2e lays out splittable auto rows against the remaining page height', () => {
         const { ctx, curPage, viewModel, tableNode, sectionBreakConfig, tableSource } = createContextAndTable();
         tableSource.tableRows[0].repeatHeaderRow = BooleanNumber.FALSE;
         tableSource.tableRows[0].trHeight = {
@@ -606,7 +606,7 @@ describe('docs table layout', () => {
         expect(result.skeTables[0].rows).toHaveLength(2);
     });
 
-    it('lays out splittable at-least rows against the remaining page height', () => {
+    it('DOCX golden e2e lays out splittable at-least rows against the remaining page height', () => {
         const { ctx, curPage, viewModel, tableNode, sectionBreakConfig, tableSource } = createContextAndTable();
         tableSource.tableRows[0].repeatHeaderRow = BooleanNumber.FALSE;
         tableSource.tableRows[0].trHeight = {
@@ -658,7 +658,7 @@ describe('docs table layout', () => {
         expect(result.skeTables[1]?.rows.map((row) => row.index) ?? []).not.toContain(1);
     });
 
-    it('repeats multiple leading header rows on sliced table pages', () => {
+    it('DOCX golden e2e repeats multiple leading header rows on sliced table pages', () => {
         const { ctx, curPage, viewModel, tableNode, sectionBreakConfig, tableSource } = createContextAndTable();
         tableSource.tableRows[1].repeatHeaderRow = BooleanNumber.TRUE;
         tableSource.tableRows.push(
@@ -697,7 +697,7 @@ describe('docs table layout', () => {
         expect(result.skeTables[1].rows[2]).toMatchObject({ index: 2, isRepeatRow: false });
     });
 
-    it('paginates an all-header table like the same table without repeat headers', () => {
+    it('DOCX golden e2e paginates an all-header table like the same table without repeat headers', () => {
         const paginate = (repeatHeaderRow: BooleanNumber) => {
             const { ctx, curPage, viewModel, tableNode, sectionBreakConfig, tableSource } = createContextAndTable();
             const row = {

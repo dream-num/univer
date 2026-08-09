@@ -63,7 +63,7 @@ import {
     SheetScrollManagerService,
 } from '@univerjs/sheets-ui';
 import { CopyCommand, CutCommand, HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, KeyCode, PasteCommand, PLAIN_TEXT_CLIPBOARD_MIME_TYPE, supportClipboardAPI } from '@univerjs/ui';
-import { combineLatest, filter } from 'rxjs';
+import { combineLatest, filter, of, take } from 'rxjs';
 
 /**
  * @ignore
@@ -408,17 +408,13 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
     private _initObserverListener(injector: Injector): void {
         const renderManagerService = injector.get(IRenderManagerService);
         const lifeCycleService = injector.get(LifecycleService);
+        const univerInstanceService = injector.get(IUniverInstanceService);
 
         const lifecycle$Disposable = new DisposableCollection();
         // eslint-disable-next-line max-lines-per-function
-        this.disposeWithMe(lifeCycleService.lifecycle$.subscribe((lifecycle) => {
-            if (lifecycle !== LifecycleStages.Rendered) return;
+        const registerPointerEventListeners = (): void => {
             const hoverManagerService = injector.get(HoverManagerService);
             const dragManagerService = injector.get(DragManagerService);
-            if (!hoverManagerService) return;
-
-            // Prevent multiple registrations
-            lifecycle$Disposable.dispose();
 
             // Cell events
             lifecycle$Disposable.add(
@@ -764,7 +760,17 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
             );
 
             this.disposeWithMe(lifecycle$Disposable);
-        }));
+        };
+
+        const sheetAvailable$ = univerInstanceService.getAllUnitsForType(UniverInstanceType.UNIVER_SHEET).length > 0
+            ? of(true)
+            : univerInstanceService.getTypeOfUnitAdded$(UniverInstanceType.UNIVER_SHEET).pipe(take(1));
+        this.disposeWithMe(
+            combineLatest([sheetAvailable$, lifeCycleService.lifecycle$]).pipe(
+                filter(([, lifecycle]) => lifecycle >= LifecycleStages.Rendered),
+                take(1)
+            ).subscribe(() => registerPointerEventListeners())
+        );
 
         // UI Events in renderUnit
         let sheetRenderUnit: Nullable<IRender>;

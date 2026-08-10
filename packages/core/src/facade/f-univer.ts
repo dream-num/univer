@@ -26,6 +26,7 @@ import type {
     LifecycleStages,
     LocaleType,
 } from '@univerjs/core';
+import type { Theme } from '@univerjs/themes';
 import type { Subscription } from 'rxjs';
 import type { ICommandEvent, IEventParamConfig } from './f-event';
 import {
@@ -368,6 +369,54 @@ export class FUniver extends Disposable {
      */
     redo(): Promise<boolean> {
         return this._commandService.executeCommand(RedoCommand.id);
+    }
+
+    /**
+     * Set the theme used by Univer.
+     * @param {Theme} theme - The complete theme to use.
+     * @example
+     * ```ts
+     * import { defaultTheme } from '@univerjs/themes';
+     *
+     * univerAPI.setTheme({
+     *   ...defaultTheme,
+     *   primary: {
+     *     ...defaultTheme.primary,
+     *     600: '#274fee',
+     *   },
+     * });
+     * ```
+     */
+    setTheme(theme: Theme): void {
+        const themeService = this._injector.get(ThemeService);
+        themeService.setTheme(theme);
+    }
+
+    /**
+     * Get the theme currently used by Univer.
+     * @returns {Theme} The current theme.
+     * @example
+     * ```ts
+     * const theme = univerAPI.getCurrentTheme();
+     * console.log(theme.primary[600]);
+     * ```
+     */
+    getCurrentTheme(): Theme {
+        const themeService = this._injector.get(ThemeService);
+        return themeService.getCurrentTheme();
+    }
+
+    /**
+     * Whether Univer is currently using dark mode.
+     * @returns {boolean} Whether dark mode is enabled.
+     * @example
+     * ```ts
+     * const darkMode = univerAPI.isDarkMode();
+     * ```
+     */
+    isDarkMode(): boolean {
+        const themeService = this._injector.get(ThemeService);
+        return themeService.darkMode;
     }
 
     /**

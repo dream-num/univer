@@ -21,6 +21,9 @@ import { ComponentExtension } from '../extension';
 export enum DOCS_EXTENSION_TYPE {
     SPAN,
     LINE,
+    /** Draws range or block backgrounds before inline backgrounds and text. */
+    // TODO(@ai-review): Confirm this extension phase remains ordered before both inline highlights and glyph rendering.
+    BACKGROUND,
 }
 
 export class docExtension extends ComponentExtension<

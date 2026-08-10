@@ -248,6 +248,7 @@ export class Documents extends DocComponent {
         }
 
         const backgroundExtension = extensions.find((e) => e.uKey === 'DefaultDocsBackgroundExtension');
+        const preTextBackgroundExtensions = extensions.filter((e) => e.type === DOCS_EXTENSION_TYPE.BACKGROUND);
         const glyphExtensionsExcludeBackground = extensions
             .filter((e) => e.type === DOCS_EXTENSION_TYPE.SPAN && e.uKey !== 'DefaultDocsBackgroundExtension');
 
@@ -323,6 +324,7 @@ export class Documents extends DocComponent {
                     skeTables,
                     extensions,
                     backgroundExtension,
+                    preTextBackgroundExtensions,
                     glyphExtensionsExcludeBackground,
                     alignOffsetNoAngle,
                     centerAngle,
@@ -345,6 +347,7 @@ export class Documents extends DocComponent {
                     ctx,
                     extensions,
                     backgroundExtension,
+                    preTextBackgroundExtensions,
                     glyphExtensionsExcludeBackground,
                     headerAlignOffsetNoAngle,
                     centerAngle,
@@ -506,7 +509,8 @@ export class Documents extends DocComponent {
                                     alignOffset,
                                     centerAngle,
                                     vertexAngle,
-                                    backgroundExtension
+                                    backgroundExtension,
+                                    preTextBackgroundExtensions
                                 );
 
                                 // Draw text\border\lines etc.
@@ -582,6 +586,7 @@ export class Documents extends DocComponent {
                     skeColumnGroups,
                     extensions,
                     backgroundExtension,
+                    preTextBackgroundExtensions,
                     glyphExtensionsExcludeBackground,
                     alignOffsetNoAngle,
                     centerAngle,
@@ -606,6 +611,7 @@ export class Documents extends DocComponent {
                     ctx,
                     extensions,
                     backgroundExtension,
+                    preTextBackgroundExtensions,
                     glyphExtensionsExcludeBackground,
                     footerAlignOffsetNoAngle,
                     centerAngle,
@@ -642,6 +648,7 @@ export class Documents extends DocComponent {
         skeTables: Map<string, IDocumentSkeletonTable>,
         extensions: ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>[],
         backgroundExtension: Nullable<ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>>,
+        preTextBackgroundExtensions: ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>[],
         glyphExtensionsExcludeBackground: ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>[],
         alignOffsetNoAngle: Vector2,
         centerAngle: number,
@@ -701,6 +708,7 @@ export class Documents extends DocComponent {
                         cell,
                         extensions,
                         backgroundExtension,
+                        preTextBackgroundExtensions,
                         glyphExtensionsExcludeBackground,
                         alignOffsetNoAngle,
                         centerAngle,
@@ -729,6 +737,7 @@ export class Documents extends DocComponent {
         skeColumnGroups: Map<string, IDocumentSkeletonColumnGroup>,
         extensions: ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>[],
         backgroundExtension: Nullable<ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>>,
+        preTextBackgroundExtensions: ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>[],
         glyphExtensionsExcludeBackground: ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>[],
         alignOffsetNoAngle: Vector2,
         centerAngle: number,
@@ -754,6 +763,7 @@ export class Documents extends DocComponent {
                     column.page,
                     extensions,
                     backgroundExtension,
+                    preTextBackgroundExtensions,
                     glyphExtensionsExcludeBackground,
                     alignOffsetNoAngle,
                     centerAngle,
@@ -956,9 +966,43 @@ export class Documents extends DocComponent {
         alignOffset: Vector2,
         centerAngle: number,
         vertexAngle: number,
-        backgroundExtension: Nullable<ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>>
+        backgroundExtension: Nullable<ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>>,
+        preTextBackgroundExtensions: ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>[]
     ) {
-        if (!backgroundExtension || this._drawLiquid == null) {
+        if (this._drawLiquid == null) {
+            return;
+        }
+
+        // TODO(@ai-review): Verify block backgrounds are painted before inline highlights and glyph text in body, table, column, header, and footer layouts.
+        for (const glyph of glyphGroup) {
+            if (!glyph.content) {
+                continue;
+            }
+
+            const { width: spanWidth, left: spanLeft, xOffset } = glyph;
+            const { x: translateX, y: translateY } = this._drawLiquid;
+            const originTranslate = Vector2.create(translateX, translateY);
+            const centerPoint = Vector2.create(spanWidth / 2, lineHeight / 2);
+            const spanStartPoint = calculateRectRotate(
+                originTranslate.addByPoint(spanLeft + xOffset, 0),
+                centerPoint,
+                centerAngle,
+                vertexAngle,
+                alignOffset
+            );
+
+            for (const extension of preTextBackgroundExtensions) {
+                extension.extensionOffset = {
+                    originTranslate,
+                    spanStartPoint,
+                    centerPoint,
+                    alignOffset,
+                };
+                extension.draw(ctx, parentScale, glyph);
+            }
+        }
+
+        if (!backgroundExtension) {
             return;
         }
 
@@ -991,6 +1035,7 @@ export class Documents extends DocComponent {
         cell: IDocumentSkeletonPage,
         extensions: ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>[],
         backgroundExtension: Nullable<ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>>,
+        preTextBackgroundExtensions: ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>[],
         glyphExtensionsExcludeBackground: ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>[],
         alignOffsetNoAngle: Vector2,
         centerAngle: number,
@@ -1009,6 +1054,7 @@ export class Documents extends DocComponent {
             cell,
             extensions,
             backgroundExtension,
+            preTextBackgroundExtensions,
             glyphExtensionsExcludeBackground,
             alignOffsetNoAngle,
             centerAngle,
@@ -1024,6 +1070,7 @@ export class Documents extends DocComponent {
         nestedPage: IDocumentSkeletonPage,
         extensions: ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>[],
         backgroundExtension: Nullable<ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>>,
+        preTextBackgroundExtensions: ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>[],
         glyphExtensionsExcludeBackground: ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>[],
         alignOffsetNoAngle: Vector2,
         centerAngle: number,
@@ -1060,6 +1107,7 @@ export class Documents extends DocComponent {
                     skeTables,
                     extensions,
                     backgroundExtension,
+                    preTextBackgroundExtensions,
                     glyphExtensionsExcludeBackground,
                     Vector2.create(0, 0),
                     centerAngle,
@@ -1075,6 +1123,7 @@ export class Documents extends DocComponent {
                     skeTables,
                     extensions,
                     backgroundExtension,
+                    preTextBackgroundExtensions,
                     glyphExtensionsExcludeBackground,
                     alignOffset,
                     centerAngle,
@@ -1140,7 +1189,8 @@ export class Documents extends DocComponent {
                                 alignOffset,
                                 centerAngle,
                                 vertexAngle,
-                                backgroundExtension
+                                backgroundExtension,
+                                preTextBackgroundExtensions
                             );
 
                             // Draw text\border\lines etc.
@@ -1331,6 +1381,7 @@ export class Documents extends DocComponent {
         ctx: UniverRenderingContext,
         extensions: ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>[],
         backgroundExtension: Nullable<ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>>,
+        preTextBackgroundExtensions: ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>[],
         glyphExtensionsExcludeBackground: ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>[],
         alignOffsetNoAngle: Vector2,
         centerAngle: number,
@@ -1369,6 +1420,7 @@ export class Documents extends DocComponent {
                 skeTables,
                 extensions,
                 backgroundExtension,
+                preTextBackgroundExtensions,
                 glyphExtensionsExcludeBackground,
                 alignOffsetNoAngle,
                 centerAngle,
@@ -1444,7 +1496,8 @@ export class Documents extends DocComponent {
                                 alignOffset,
                                 centerAngle,
                                 vertexAngle,
-                                backgroundExtension
+                                backgroundExtension,
+                                preTextBackgroundExtensions
                             );
 
                             // Draw text\border\lines etc.

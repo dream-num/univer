@@ -1741,9 +1741,9 @@ describe('documents render', () => {
 
         const lineDraw = vi.fn();
         const bgDraw = vi.fn();
-        const drawOrder: string[] = [];
-        const preTextBackgroundDraw = vi.fn(() => drawOrder.push('background'));
-        const spanDraw = vi.fn(() => drawOrder.push('span'));
+        const drawOrder: Array<{ glyph: unknown; phase: 'background' | 'span' }> = [];
+        const preTextBackgroundDraw = vi.fn((_ctx, _parentScale, glyph) => drawOrder.push({ glyph, phase: 'background' }));
+        const spanDraw = vi.fn((_ctx, _parentScale, glyph) => drawOrder.push({ glyph, phase: 'span' }));
         const clearCache = vi.fn();
 
         vi.spyOn(documents as any, 'getExtensionsByOrder').mockReturnValue([
@@ -1797,8 +1797,11 @@ describe('documents render', () => {
         expect(lineDraw).toHaveBeenCalled();
         expect(preTextBackgroundDraw).toHaveBeenCalled();
         expect(spanDraw).toHaveBeenCalled();
-        // TODO(@ai-review): Verify pre-text background extensions remain ordered before span extensions for every Docs layout path.
-        expect(drawOrder.indexOf('background')).toBeLessThan(drawOrder.indexOf('span'));
+        drawOrder.forEach((entry, index) => {
+            if (entry.phase === 'span') {
+                expect(drawOrder.slice(0, index)).toContainEqual({ glyph: entry.glyph, phase: 'background' });
+            }
+        });
         expect(tableDraw).toHaveBeenCalledTimes(2);
         expect(tableDraw.mock.calls[1][1]).toMatchObject({
             marginLeft: 48,

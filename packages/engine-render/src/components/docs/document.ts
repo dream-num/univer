@@ -973,7 +973,6 @@ export class Documents extends DocComponent {
             return;
         }
 
-        // TODO(@ai-review): Verify block backgrounds are painted before inline highlights and glyph text in body, table, column, header, and footer layouts.
         for (const glyph of glyphGroup) {
             if (!glyph.content) {
                 continue;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDisposable } from '@univerjs/core';
+import type { DependencyIdentifier, IDisposable } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import { createIdentifier, Disposable, ICommandService, IContextService, Optional, toDisposable } from '@univerjs/core';
 import { Subject } from 'rxjs';
@@ -397,7 +397,7 @@ export class ShortcutService extends Disposable implements IShortcutService {
         return isNativeTextEditor && isEmbedBoundaryTarget(target);
     }
 
-    private _getRuntimeService<T>(event: KeyboardEvent, identifier: unknown): T | undefined {
+    private _getRuntimeService<T>(event: KeyboardEvent, identifier: DependencyIdentifier<T>): T | undefined {
         const runtimeScope = this._runtimeScopeService.get(getEmbedChildUnitId(event.target), event.target);
         return runtimeScope?.has(identifier) ? runtimeScope.get<T>(identifier) : undefined;
     }

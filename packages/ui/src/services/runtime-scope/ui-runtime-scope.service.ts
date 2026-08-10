@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { IDisposable } from '@univerjs/core';
+import type { DependencyIdentifier, IDisposable } from '@univerjs/core';
 import { createIdentifier, Disposable, toDisposable } from '@univerjs/core';
 
 export interface IUIRuntimeScope {
     unitId: string;
     root?: HTMLElement;
-    has(identifier: unknown): boolean;
-    get<T = unknown>(identifier: unknown): T;
+    has<T>(identifier: DependencyIdentifier<T>): boolean;
+    get<T>(identifier: DependencyIdentifier<T>): T;
 }
 
 export interface IUIRuntimeScopeService {

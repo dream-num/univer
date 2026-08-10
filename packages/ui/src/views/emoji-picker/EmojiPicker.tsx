@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-import type { ReactElement, UIEvent } from 'react';
+import type { KeyboardEvent, ReactElement, UIEvent } from 'react';
 import type { LocaleKey } from '../../locale/types';
 import type { IPopup } from '../../services/popup/canvas-popup.service';
-import type { EmojiCategory, IEmojiItem } from './emoji-picker-utils';
+import type { EmojiCategory, EmojiSkinTone, IEmojiItem, IEmojiVariant } from './emoji-picker-utils';
 import { ILocalStorageService, LocaleService } from '@univerjs/core';
-import { borderTopClassName, clsx, Input, scrollbarClassName } from '@univerjs/design';
+import { borderTopClassName, Button, clsx, Dropdown, Input, scrollbarClassName } from '@univerjs/design';
 import {
     ActivityIcon,
     FoodsIcon,
+    MoreDownIcon,
     NatureIcon,
     ObjectsIcon,
     PeopleIcon,
@@ -36,11 +37,20 @@ import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { useDependency, useObservable } from '../../utils/di';
 import { useVirtualList } from '../hooks/virtual-list';
 import {
+    applyEmojiSkinTone,
     EMOJI_CATEGORIES,
+    EMOJI_SKIN_TONE_OPTIONS,
+
     getDefaultRecentEmojis,
+    getEmojiFamilyKey,
+
+    getEmojiFamilyVariants,
     getEmojiLocaleData,
     getLocalizedEmojiTitle,
     getRandomEmoji,
+    hasMixedSkinToneVariants,
+
+    parseStoredEmojiSkinTone,
     parseStoredRecentEmojis,
     promoteRecentEmoji,
     searchEmojis,
@@ -50,6 +60,7 @@ import { emojis } from './emojis.generated';
 export const EMOJI_PICKER_COMPONENT = 'ui.emoji-picker';
 
 const RECENTS_STORAGE_KEY = 'univer.ui.recent-emojis';
+const SKIN_TONE_STORAGE_KEY = 'univer.ui.emoji-skin-tone';
 const ACTIVE_SECTION_SCROLL_OFFSET = 28;
 const EMOJI_COLUMN_COUNT = 10;
 const EMOJI_ROW_HEIGHT = 32;
@@ -82,10 +93,13 @@ export function EmojiPicker(props: IEmojiPickerProps) {
     const currentLocale = useObservable(localeService.currentLocale$, localeService.getCurrentLocale());
     const scrollRef = useRef<HTMLDivElement>(undefined!);
     const pendingSectionRef = useRef<EmojiSectionKey | null>(null);
+    const skinToneChangedRef = useRef(false);
     const [query, setQuery] = useState('');
     const [activeEmoji, setActiveEmoji] = useState(extraProps?.activeEmoji);
     const [activeTab, setActiveTab] = useState<EmojiSectionKey>('recent');
     const [recents, setRecents] = useState<IEmojiItem[]>(() => getDefaultRecentEmojis());
+    const [skinTone, setSkinTone] = useState<EmojiSkinTone>('');
+    const [skinToneMenuOpen, setSkinToneMenuOpen] = useState(false);
     const deferredQuery = useDeferredValue(query);
     const emojiLocaleData = getEmojiLocaleData(localeService);
     const searchResults = useMemo(
@@ -95,20 +109,24 @@ export function EmojiPicker(props: IEmojiPickerProps) {
     const recentStorageKey = extraProps?.recentStorageKey ?? RECENTS_STORAGE_KEY;
     const isSearching = deferredQuery.trim().length > 0;
     const { rows, sectionPositions } = useMemo(() => {
-        const normalSections = [
-            { key: 'recent' as const, title: localeService.t<LocaleKey>('ui.emojiPicker.recents'), emojis: recents },
+        const normalSections: IEmojiSection[] = [
+            { key: 'recent', title: localeService.t<LocaleKey>('ui.emojiPicker.recents'), emojis: recents },
             ...EMOJI_CATEGORIES.map((category) => ({
                 key: category.key,
                 title: localeService.t(category.titleKey),
-                emojis: emojis[category.key],
+                emojis: emojis[category.key].map((item) => applyEmojiSkinTone(item, skinTone)),
             })),
         ];
-        const sections = isSearching
-            ? [{ key: 'people' as const, title: localeService.t<LocaleKey>('ui.emojiPicker.searchResults'), emojis: searchResults }]
+        const sections: IEmojiSection[] = isSearching
+            ? [{
+                key: 'people',
+                title: localeService.t<LocaleKey>('ui.emojiPicker.searchResults'),
+                emojis: searchResults.map((item) => applyEmojiSkinTone(item, skinTone)),
+            }]
             : normalSections;
 
         return createEmojiVirtualRows(sections, currentLocale);
-    }, [currentLocale, isSearching, localeService, recents, searchResults]);
+    }, [currentLocale, isSearching, localeService, recents, searchResults, skinTone]);
     const [virtualRows, { containerProps, scrollTo, wrapperStyle }] = useVirtualList(rows, {
         containerTarget: scrollRef,
         itemHeight: getEmojiVirtualRowHeight,
@@ -133,6 +151,23 @@ export function EmojiPicker(props: IEmojiPickerProps) {
     }, [localStorageService, recentStorageKey]);
 
     useEffect(() => {
+        let disposed = false;
+
+        localStorageService
+            .getItem<unknown>(SKIN_TONE_STORAGE_KEY)
+            .then((storedSkinTone) => {
+                if (!disposed && !skinToneChangedRef.current) {
+                    setSkinTone(parseStoredEmojiSkinTone(storedSkinTone));
+                }
+            })
+            .catch(() => undefined);
+
+        return () => {
+            disposed = true;
+        };
+    }, [localStorageService]);
+
+    useEffect(() => {
         const pendingSection = pendingSectionRef.current;
         if (isSearching || !pendingSection) {
             return;
@@ -149,13 +184,19 @@ export function EmojiPicker(props: IEmojiPickerProps) {
         const nextRecents = promoteRecentEmoji(recents, item);
         setActiveEmoji(item.emoji);
         setRecents(nextRecents);
-        writeRecents(localStorageService, recentStorageKey, nextRecents);
+        writeStorageItem(localStorageService, recentStorageKey, nextRecents);
         props.onChange?.(item.emoji);
         extraProps?.onSelect?.(item.emoji, options);
     };
 
     const handleRandom = () => {
-        handleSelect(getRandomEmoji(), { keepOpen: true });
+        handleSelect(getRandomEmoji(Math.random, skinTone), { keepOpen: true });
+    };
+
+    const handleSkinToneChange = (nextSkinTone: EmojiSkinTone) => {
+        skinToneChangedRef.current = true;
+        setSkinTone(nextSkinTone);
+        writeStorageItem(localStorageService, SKIN_TONE_STORAGE_KEY, nextSkinTone);
     };
 
     const handleScroll = (event: UIEvent<HTMLDivElement>) => {
@@ -182,6 +223,10 @@ export function EmojiPicker(props: IEmojiPickerProps) {
     return (
         <section
             data-u-comp={EMOJI_PICKER_COMPONENT}
+            onClick={(event) => {
+                event.stopPropagation();
+                setSkinToneMenuOpen(false);
+            }}
             className={clsx(
                 'univer-flex univer-h-[340px] univer-w-[420px] univer-flex-col univer-overflow-hidden',
                 !props.embedded && `
@@ -207,22 +252,25 @@ export function EmojiPicker(props: IEmojiPickerProps) {
                         />
                     )}
                 />
-                <button
-                    type="button"
+                <Button
                     aria-label={localeService.t<LocaleKey>('ui.emojiPicker.random')}
                     title={localeService.t<LocaleKey>('ui.emojiPicker.random')}
                     className="
-                      univer-box-border univer-flex univer-size-8 univer-cursor-pointer univer-items-center
-                      univer-justify-center univer-rounded-lg univer-border univer-border-solid univer-border-gray-300
-                      univer-bg-white univer-p-0 univer-text-gray-500
-                      hover:univer-border-gray-400 hover:univer-bg-gray-50
-                      dark:!univer-border-gray-600 dark:!univer-bg-gray-800 dark:!univer-text-gray-400
-                      dark:hover:!univer-bg-gray-700
+                      univer-flex-shrink-0 univer-text-gray-500
+                      dark:!univer-text-gray-400
                     "
+                    size="icon"
                     onClick={handleRandom}
                 >
                     <RandomIcon />
-                </button>
+                </Button>
+                <SkinToneDropdown
+                    emojiTitles={emojiLocaleData.emojiTitles}
+                    open={skinToneMenuOpen}
+                    skinTone={skinTone}
+                    onChange={handleSkinToneChange}
+                    onOpenChange={setSkinToneMenuOpen}
+                />
             </div>
 
             <div
@@ -256,6 +304,7 @@ export function EmojiPicker(props: IEmojiPickerProps) {
                                         emojiTitles={emojiLocaleData.emojiTitles}
                                         items={row.items}
                                         keyPrefix={row.key}
+                                        moreTitle={localeService.t<LocaleKey>('ui.ribbon.more')}
                                         onSelect={handleSelect}
                                     />
                                 ))}
@@ -307,6 +356,7 @@ function EmojiGrid(props: {
     emojiTitles?: Record<string, string>;
     items: IEmojiItem[];
     keyPrefix: string;
+    moreTitle: string;
     onSelect: (item: IEmojiItem, options?: { keepOpen?: boolean }) => void;
 }) {
     return (
@@ -315,37 +365,242 @@ function EmojiGrid(props: {
             style={{ height: EMOJI_ROW_HEIGHT }}
         >
             {props.items.map((item) => {
-                const title = getLocalizedEmojiTitle(item, props.emojiTitles);
-                const active = props.activeEmoji === item.emoji;
-
                 return (
-                    <button
+                    <EmojiButton
                         key={`${props.keyPrefix}-${item.emoji}-${item.title}`}
-                        type="button"
-                        aria-label={title}
-                        title={title}
-                        className={clsx(
-                            `
-                              univer-flex univer-size-7 univer-cursor-pointer univer-items-center univer-justify-center
-                              univer-rounded-lg univer-border-0 univer-bg-transparent univer-p-0 univer-text-lg
-                              dark:!univer-text-gray-200
-                            `,
-                            active
-                                ? `
-                                  univer-bg-primary-50 univer-shadow-sm
-                                  dark:!univer-bg-gray-800 dark:!univer-shadow-sm
-                                `
-                                : `
-                                  hover:univer-bg-gray-100
-                                  dark:hover:!univer-bg-gray-800
-                                `
-                        )}
-                        onClick={() => props.onSelect(item, { keepOpen: true })}
-                    >
-                        {item.emoji}
-                    </button>
+                        activeEmoji={props.activeEmoji}
+                        emojiTitles={props.emojiTitles}
+                        item={item}
+                        moreTitle={props.moreTitle}
+                        onSelect={props.onSelect}
+                    />
                 );
             })}
+        </div>
+    );
+}
+
+function EmojiButton(props: {
+    activeEmoji?: string;
+    emojiTitles?: Record<string, string>;
+    item: IEmojiItem;
+    moreTitle: string;
+    onSelect: (item: IEmojiItem, options?: { keepOpen?: boolean }) => void;
+}) {
+    const [variantsOpen, setVariantsOpen] = useState(false);
+    const title = getLocalizedEmojiTitle(props.item, props.emojiTitles);
+    const active = props.activeEmoji != null
+        && getEmojiFamilyKey(props.activeEmoji) === getEmojiFamilyKey(props.item.emoji);
+    const mixedToneVariants = hasMixedSkinToneVariants(props.item);
+    const button = (
+        <button
+            type="button"
+            aria-label={title}
+            title={title}
+            className={clsx(
+                `
+                  univer-flex univer-size-7 univer-cursor-pointer univer-items-center univer-justify-center
+                  univer-rounded-lg univer-border-0 univer-bg-transparent univer-p-0 univer-text-lg
+                  focus-visible:univer-outline-none focus-visible:univer-ring-1 focus-visible:univer-ring-primary-600
+                  dark:!univer-text-gray-200
+                `,
+                active
+                    ? `
+                      univer-bg-primary-50 univer-shadow-sm
+                      dark:!univer-bg-gray-800 dark:!univer-shadow-sm
+                    `
+                    : `
+                      hover:univer-bg-gray-100
+                      dark:hover:!univer-bg-gray-800
+                    `
+            )}
+            onClick={() => props.onSelect(props.item, { keepOpen: true })}
+        >
+            {props.item.emoji}
+        </button>
+    );
+
+    if (!mixedToneVariants) {
+        return button;
+    }
+
+    const variants = getEmojiFamilyVariants(props.item.emoji);
+    return (
+        <div className="univer-relative univer-size-7">
+            {button}
+            <Dropdown
+                align="end"
+                open={variantsOpen}
+                onOpenChange={setVariantsOpen}
+                overlay={(
+                    <div
+                        data-u-comp="ui.emoji-picker.skin-tone-variants"
+                        className="univer-grid univer-grid-cols-6 univer-gap-1 univer-p-1"
+                    >
+                        {variants.map((variant) => (
+                            <EmojiVariantButton
+                                key={variant.emoji}
+                                active={props.activeEmoji === variant.emoji}
+                                emojiTitles={props.emojiTitles}
+                                item={variant}
+                                onSelect={(item) => {
+                                    setVariantsOpen(false);
+                                    props.onSelect(item, { keepOpen: true });
+                                }}
+                            />
+                        ))}
+                    </div>
+                )}
+            >
+                <button
+                    type="button"
+                    aria-label={`${title}, ${props.moreTitle}`}
+                    title={`${title}, ${props.moreTitle}`}
+                    className="
+                      univer-bg-white/90
+                      dark:!univer-bg-gray-800/90
+                      univer-absolute univer-bottom-0 univer-right-0 univer-flex univer-size-3 univer-cursor-pointer
+                      univer-items-center univer-justify-center univer-rounded-sm univer-border-0 univer-p-0
+                      univer-text-gray-500
+                      hover:univer-bg-gray-100 hover:univer-text-gray-700
+                      focus-visible:univer-outline-none focus-visible:univer-ring-1
+                      focus-visible:univer-ring-primary-600
+                      dark:!univer-text-gray-300
+                      dark:hover:!univer-bg-gray-700
+                    "
+                >
+                    <MoreDownIcon className="!univer-size-2.5" />
+                </button>
+            </Dropdown>
+        </div>
+    );
+}
+
+function EmojiVariantButton(props: {
+    active: boolean;
+    emojiTitles?: Record<string, string>;
+    item: IEmojiVariant;
+    onSelect: (item: IEmojiVariant) => void;
+}) {
+    const title = getLocalizedEmojiTitle(props.item, props.emojiTitles);
+
+    return (
+        <button
+            type="button"
+            aria-label={title}
+            aria-pressed={props.active}
+            title={title}
+            className={clsx(`
+              univer-flex univer-size-8 univer-cursor-pointer univer-items-center univer-justify-center
+              univer-rounded-md univer-border-0 univer-bg-transparent univer-p-0 univer-text-lg
+              hover:univer-bg-gray-100
+              focus-visible:univer-outline-none focus-visible:univer-ring-1 focus-visible:univer-ring-primary-600
+              dark:hover:!univer-bg-gray-700
+            `, {
+                'univer-bg-primary-50 univer-ring-1 univer-ring-primary-600 dark:!univer-bg-gray-700': props.active,
+            })}
+            onClick={() => props.onSelect(props.item)}
+        >
+            {props.item.emoji}
+        </button>
+    );
+}
+
+function SkinToneDropdown(props: {
+    emojiTitles?: Record<string, string>;
+    open: boolean;
+    skinTone: EmojiSkinTone;
+    onChange: (skinTone: EmojiSkinTone) => void;
+    onOpenChange: (open: boolean) => void;
+}) {
+    const currentOption = EMOJI_SKIN_TONE_OPTIONS.find((option) => option.value === props.skinTone)
+        ?? EMOJI_SKIN_TONE_OPTIONS[0];
+    const currentTitle = getLocalizedEmojiTitle(currentOption, props.emojiTitles);
+
+    const handleKeyDown = (event: KeyboardEvent<HTMLButtonElement>, index: number) => {
+        const direction = event.key === 'ArrowRight' || event.key === 'ArrowDown'
+            ? 1
+            : event.key === 'ArrowLeft' || event.key === 'ArrowUp'
+                ? -1
+                : 0;
+        if (!direction) {
+            return;
+        }
+
+        event.preventDefault();
+        const nextIndex = (index + direction + EMOJI_SKIN_TONE_OPTIONS.length) % EMOJI_SKIN_TONE_OPTIONS.length;
+        const nextOption = EMOJI_SKIN_TONE_OPTIONS[nextIndex];
+        props.onChange(nextOption.value);
+        const radioButtons = event.currentTarget.parentElement
+            ?.querySelectorAll<HTMLButtonElement>('[role="radio"]');
+        radioButtons?.[nextIndex]?.focus();
+    };
+
+    return (
+        <div className="univer-flex-shrink-0" onClick={(event) => event.stopPropagation()}>
+            <Dropdown
+                align="end"
+                open={props.open}
+                onOpenChange={props.onOpenChange}
+                overlay={(
+                    <div
+                        data-u-comp="ui.emoji-picker.skin-tone-menu"
+                        role="radiogroup"
+                        aria-label={currentTitle}
+                        className="univer-flex univer-gap-1 univer-p-1"
+                    >
+                        {EMOJI_SKIN_TONE_OPTIONS.map((option, index) => {
+                            const title = getLocalizedEmojiTitle(option, props.emojiTitles);
+                            const selected = option.value === props.skinTone;
+
+                            return (
+                                <button
+                                    key={option.value || 'default'}
+                                    type="button"
+                                    role="radio"
+                                    aria-checked={selected}
+                                    aria-label={title}
+                                    title={title}
+                                    tabIndex={selected ? 0 : -1}
+                                    className={clsx(`
+                                      univer-flex univer-size-8 univer-cursor-pointer univer-items-center
+                                      univer-justify-center univer-rounded-md univer-border-0 univer-bg-transparent
+                                      univer-p-0 univer-text-lg
+                                      hover:univer-bg-gray-100
+                                      focus-visible:univer-outline-none focus-visible:univer-ring-1
+                                      focus-visible:univer-ring-primary-600
+                                      dark:hover:!univer-bg-gray-700
+                                    `, {
+                                        'univer-bg-primary-50 univer-ring-1 univer-ring-primary-600 dark:!univer-bg-gray-700': selected,
+                                    })}
+                                    onClick={() => {
+                                        props.onChange(option.value);
+                                        props.onOpenChange(false);
+                                    }}
+                                    onKeyDown={(event) => handleKeyDown(event, index)}
+                                >
+                                    {option.emoji}
+                                </button>
+                            );
+                        })}
+                    </div>
+                )}
+            >
+                <Button
+                    aria-label={currentTitle}
+                    title={currentTitle}
+                    className="univer-relative univer-flex-shrink-0"
+                    size="icon"
+                >
+                    <span className="univer-text-lg">{currentOption.emoji}</span>
+                    <MoreDownIcon
+                        className="
+                          !univer-absolute !univer-bottom-0.5 !univer-right-0.5 !univer-size-2.5 univer-text-gray-500
+                          dark:!univer-text-gray-300
+                        "
+                    />
+                </Button>
+            </Dropdown>
         </div>
     );
 }
@@ -381,9 +636,9 @@ function CategoryButton(props: { children: ReactElement; onClick: () => void; se
     );
 }
 
-function writeRecents(localStorageService: ILocalStorageService, storageKey: string, recents: IEmojiItem[]): void {
+function writeStorageItem<T>(localStorageService: ILocalStorageService, storageKey: string, value: T): void {
     localStorageService
-        .setItem(storageKey, recents)
+        .setItem(storageKey, value)
         .catch(() => undefined);
 }
 

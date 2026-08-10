@@ -6,9 +6,13 @@ import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { discoverUniverUiLocales } from '@univerjs-infra/shared/locale';
 
-interface IEmojiItem {
+interface IEmojiVariant {
     emoji: string;
     title: string;
+}
+
+interface IEmojiItem extends IEmojiVariant {
+    skinToneVariants?: IEmojiVariant[];
 }
 
 interface ICldrAnnotationsData {
@@ -58,6 +62,14 @@ const downloadTimeoutMs = 30_000;
 const envProxyNodeArg = '--use-env-proxy';
 const envProxyRelaunchEnv = 'UNIVER_UI_EMOJI_ENV_PROXY_REEXEC';
 const emojiCategories: EmojiCategory[] = ['people', 'nature', 'foods', 'activity', 'places', 'objects', 'symbols'];
+const emojiSkinToneModifierRegex = /[\u{1F3FB}-\u{1F3FF}]/u;
+const emojiSkinToneNames = new Set([
+    'Light Skin Tone',
+    'Medium-light Skin Tone',
+    'Medium Skin Tone',
+    'Medium-dark Skin Tone',
+    'Dark Skin Tone',
+]);
 const cldrLocaleMap: Record<string, string> = {
     'ar-SA': 'ar',
     'ca-ES': 'ca',
@@ -145,7 +157,45 @@ export function buildEmojisFromEmojiTest(emojiTest: string, options: { supported
         })
         .filter(isEmojiItem);
 
+    emojiCategories.forEach((category) => {
+        groups[category] = groupSkinToneVariants(groups[category]);
+    });
+
     return groups;
+}
+
+export function groupSkinToneVariants(items: IEmojiItem[]): IEmojiItem[] {
+    const baseItemsByTitle = new Map(
+        items
+            .filter((item) => !hasSkinToneModifier(item.emoji))
+            .map((item) => [item.title, item])
+    );
+    const variantsByBaseEmoji = new Map<string, IEmojiVariant[]>();
+    const groupedVariants = new Set<string>();
+
+    items.forEach((item) => {
+        if (!hasSkinToneModifier(item.emoji)) {
+            return;
+        }
+
+        const familyTitle = getSkinToneFamilyTitle(item.title, baseItemsByTitle);
+        const baseItem = baseItemsByTitle.get(familyTitle);
+        if (!baseItem) {
+            return;
+        }
+
+        const variants = variantsByBaseEmoji.get(baseItem.emoji) ?? [];
+        variants.push({ emoji: item.emoji, title: item.title });
+        variantsByBaseEmoji.set(baseItem.emoji, variants);
+        groupedVariants.add(item.emoji);
+    });
+
+    return items
+        .filter((item) => !groupedVariants.has(item.emoji))
+        .map((item) => {
+            const skinToneVariants = variantsByBaseEmoji.get(item.emoji);
+            return skinToneVariants?.length ? { ...item, skinToneVariants } : item;
+        });
 }
 
 export function buildEmojiSearchIndexFromCldrAnnotations(emojis: Array<string | IEmojiItem>, ...sources: ICldrAnnotationsData[]): IGeneratedEmojiLocale {
@@ -213,6 +263,32 @@ function getCldrAnnotation(source: ICldrAnnotationsData, emoji: string) {
 
 function stripEmojiVariationSelectors(emoji: string): string {
     return emoji.replace(/\uFE0F/g, '');
+}
+
+function hasSkinToneModifier(emoji: string): boolean {
+    return emojiSkinToneModifierRegex.test(emoji);
+}
+
+function getSkinToneFamilyTitle(title: string, baseItemsByTitle: Map<string, IEmojiItem>): string {
+    const separatorIndex = title.indexOf(': ');
+    if (separatorIndex < 0) {
+        return title;
+    }
+
+    const baseTitle = title.slice(0, separatorIndex);
+    const descriptors = title
+        .slice(separatorIndex + 2)
+        .split(', ')
+        .filter((descriptor) => !emojiSkinToneNames.has(descriptor));
+    const familyTitle = descriptors.length ? `${baseTitle}: ${descriptors.join(', ')}` : baseTitle;
+
+    // Unicode uses neutral person ZWJ sequences for mixed-tone variants while the unmodified
+    // kiss/couple emoji is a single code point with the shorter base title.
+    if (familyTitle.endsWith(': Person, Person') && baseItemsByTitle.has(baseTitle)) {
+        return baseTitle;
+    }
+
+    return familyTitle;
 }
 
 function toTitleCase(value: string): string {
@@ -398,7 +474,12 @@ async function generate(): Promise<void> {
     const emojiTest = await downloadUnicodeEmojiTest();
     const emojis = buildEmojisFromEmojiTest(emojiTest);
     const allEmojis = [
-        ...new Map(Object.values(emojis).flat().map((item) => [item.emoji, item])).values(),
+        ...new Map(
+            Object.values(emojis)
+                .flat()
+                .flatMap((item) => [item, ...(item.skinToneVariants ?? [])])
+                .map((item) => [item.emoji, item])
+        ).values(),
     ];
 
     writeGeneratedEmojis(outputPath, emojis);

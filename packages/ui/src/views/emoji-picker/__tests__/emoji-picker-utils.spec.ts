@@ -16,7 +16,11 @@
 
 import { describe, expect, it } from 'vitest';
 import {
+    applyEmojiSkinTone,
     getDefaultRecentEmojis,
+    getRandomEmoji,
+    hasMixedSkinToneVariants,
+    parseStoredEmojiSkinTone,
     parseStoredRecentEmojis,
     promoteRecentEmoji,
     searchEmojis,
@@ -40,6 +44,60 @@ describe('emoji picker utils', () => {
         ], { emoji: '💡', title: 'Light Bulb' });
 
         expect(result.map((item) => item.emoji)).toEqual(['💡', '😀']);
+    });
+
+    it('groups skin tones into one generated emoji family', () => {
+        const wavingHand = emojis.people.find((item) => item.emoji === '👋');
+
+        expect(wavingHand?.skinToneVariants?.map((item) => item.emoji)).toEqual([
+            '👋🏻',
+            '👋🏼',
+            '👋🏽',
+            '👋🏾',
+            '👋🏿',
+        ]);
+        expect(emojis.people.some((item) => item.emoji === '👋🏽')).toBe(false);
+    });
+
+    it('applies one preferred skin tone and falls back for unsupported emoji', () => {
+        const wavingHand = emojis.people.find((item) => item.emoji === '👋')!;
+        const lightBulb = emojis.objects.find((item) => item.emoji === '💡')!;
+
+        expect(applyEmojiSkinTone(wavingHand, '🏽').emoji).toBe('👋🏽');
+        expect(applyEmojiSkinTone(lightBulb, '🏽').emoji).toBe('💡');
+        expect(applyEmojiSkinTone(wavingHand, '').emoji).toBe('👋');
+    });
+
+    it('deduplicates recent skin tone variants by family', () => {
+        const result = promoteRecentEmoji([
+            { emoji: '👋🏻', title: 'Waving Hand: Light Skin Tone' },
+            { emoji: '💡', title: 'Light Bulb' },
+        ], { emoji: '👋🏿', title: 'Waving Hand: Dark Skin Tone' });
+
+        expect(result.map((item) => item.emoji)).toEqual(['👋🏿', '💡']);
+    });
+
+    it('keeps mixed skin tone combinations inside their family', () => {
+        const handshake = emojis.people.find((item) => item.emoji === '🤝')!;
+
+        expect(hasMixedSkinToneVariants(handshake)).toBe(true);
+        expect(handshake.skinToneVariants).toHaveLength(25);
+    });
+
+    it('randomizes families before applying the preferred skin tone', () => {
+        const families = Object.entries(emojis)
+            .filter(([category]) => category !== 'frequent')
+            .flatMap(([, items]) => items);
+        const wavingHandIndex = families.findIndex((item) => item.emoji === '👋');
+        const random = () => (wavingHandIndex + 0.1) / families.length;
+
+        expect(getRandomEmoji(random, '🏽').emoji).toBe('👋🏽');
+    });
+
+    it('validates stored skin tone preferences', () => {
+        expect(parseStoredEmojiSkinTone('🏾')).toBe('🏾');
+        expect(parseStoredEmojiSkinTone('invalid')).toBe('');
+        expect(parseStoredEmojiSkinTone(null)).toBe('');
     });
 
     it('searches emoji title case-insensitively', () => {

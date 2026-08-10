@@ -16,6 +16,13 @@
 
 export { BaseDataModel } from './base-data-model';
 export {
+    createBaseFormulaTableNameMap,
+    getBaseFormulaTableName,
+    migrateBaseFormulaTableNames,
+    normalizeBaseFormulaTableName,
+    normalizeBaseFormulaTableReferences,
+} from './formula-table-name';
+export {
     createDefaultBaseTableSnapshot,
     getEmptySnapshot as getBasesEmptySnapshot,
     type ICreateDefaultBaseTableSnapshotOptions,

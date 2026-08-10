@@ -16,19 +16,19 @@
 
 export { BaseDataModel } from './base-data-model';
 export {
+    createDefaultBaseTableSnapshot,
+    getEmptySnapshot as getBasesEmptySnapshot,
+    type ICreateDefaultBaseTableSnapshotOptions,
+} from './empty-snapshot';
+export {
     allocateBaseFormulaTableName,
-    createBaseFormulaTableReferenceNormalizer,
     createBaseFormulaTableNameMap,
+    createBaseFormulaTableReferenceNormalizer,
     getBaseFormulaTableName,
     migrateBaseFormulaTableNames,
     normalizeBaseFormulaTableName,
     normalizeBaseFormulaTableReferences,
 } from './formula-table-name';
-export {
-    createDefaultBaseTableSnapshot,
-    getEmptySnapshot as getBasesEmptySnapshot,
-    type ICreateDefaultBaseTableSnapshotOptions,
-} from './empty-snapshot';
 export {
     assertBaseTableRecordIdentity,
     BASE_RECORD_ID_FIELD_ID,

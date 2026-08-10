@@ -17,7 +17,10 @@
 import type { IBaseSnapshot, ITableSnapshot } from './typedef';
 
 type BaseFormulaTable = Pick<ITableSnapshot, 'id' | 'name' | 'formulaName'>;
-type BaseFormulaSnapshot = { tables: Record<string, BaseFormulaTable> };
+
+interface IBaseFormulaSnapshot {
+    tables: Record<string, BaseFormulaTable>;
+}
 
 interface ICompiledBaseFormulaTableAliases {
     formulaNameByAlias: ReadonlyMap<string, string>;
@@ -36,7 +39,7 @@ export function normalizeBaseFormulaTableName(displayName: string): string {
     return nonReference.slice(0, 255);
 }
 
-export function createBaseFormulaTableNameMap(snapshot: BaseFormulaSnapshot): ReadonlyMap<string, string> {
+export function createBaseFormulaTableNameMap(snapshot: IBaseFormulaSnapshot): ReadonlyMap<string, string> {
     const result = new Map<string, string>();
     const usedNames = new Set<string>();
     const nextSuffixByBaseName = new Map<string, number>();
@@ -106,17 +109,17 @@ function allocateBaseFormulaTableNameFromSet(
 
 export function getBaseFormulaTableName(
     table: BaseFormulaTable,
-    snapshot: BaseFormulaSnapshot
+    snapshot: IBaseFormulaSnapshot
 ): string {
     return createBaseFormulaTableNameMap(snapshot).get(table.id) ?? normalizeBaseFormulaTableName(table.name);
 }
 
-export function normalizeBaseFormulaTableReferences(formula: string, snapshot: BaseFormulaSnapshot): string {
+export function normalizeBaseFormulaTableReferences(formula: string, snapshot: IBaseFormulaSnapshot): string {
     return createBaseFormulaTableReferenceNormalizer(snapshot)(formula);
 }
 
 export function createBaseFormulaTableReferenceNormalizer(
-    snapshot: BaseFormulaSnapshot,
+    snapshot: IBaseFormulaSnapshot,
     formulaNames = createBaseFormulaTableNameMap(snapshot)
 ): (formula: string) => string {
     const compiledAliases = compileBaseFormulaTableAliases(createBaseFormulaTableAliases(snapshot, formulaNames));
@@ -145,7 +148,7 @@ export function migrateBaseFormulaTableNames(snapshot: IBaseSnapshot): void {
 }
 
 function createBaseFormulaTableAliases(
-    snapshot: BaseFormulaSnapshot,
+    snapshot: IBaseFormulaSnapshot,
     formulaNames = createBaseFormulaTableNameMap(snapshot)
 ): Array<{ alias: string; formulaName: string }> {
     const legacyFormulaNames = createLegacyBaseFormulaTableNameMap(snapshot);
@@ -183,7 +186,7 @@ function createBaseFormulaTableAliases(
         .sort((left, right) => right.alias.length - left.alias.length);
 }
 
-function createLegacyBaseFormulaTableNameMap(snapshot: BaseFormulaSnapshot): ReadonlyMap<string, string> {
+function createLegacyBaseFormulaTableNameMap(snapshot: IBaseFormulaSnapshot): ReadonlyMap<string, string> {
     const result = new Map<string, string>();
     const usedNames = new Set<string>();
     const nextSuffixByBaseName = new Map<string, number>();
@@ -229,9 +232,7 @@ function compileBaseFormulaTableAliases(
     const orderedAliases = Array.from(formulaNameByAlias.keys()).sort((left, right) => right.length - left.length);
     return {
         formulaNameByAlias,
-        pattern: orderedAliases.length
-            ? new RegExp(`(${orderedAliases.map(escapeRegExp).join('|')})(\\s*)\\[`, 'gi')
-            : undefined,
+        pattern: orderedAliases.length ? new RegExp(`(${orderedAliases.map(escapeRegExp).join('|')})(\\s*)\\[`, 'gi') : undefined,
     };
 }
 

@@ -19,8 +19,8 @@ import { BaseDataModel } from '../base-data-model';
 import { getEmptySnapshot } from '../empty-snapshot';
 import {
     allocateBaseFormulaTableName,
-    createBaseFormulaTableReferenceNormalizer,
     createBaseFormulaTableNameMap,
+    createBaseFormulaTableReferenceNormalizer,
     getBaseFormulaTableName,
     migrateBaseFormulaTableNames,
     normalizeBaseFormulaTableName,

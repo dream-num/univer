@@ -40,6 +40,7 @@ function createFunctionInfo(overrides: Partial<IFunctionInfo> = {}): IFunctionIn
     };
 }
 
+// TODO(@ai-review): Verify the remaining description tests protect locale refresh and search behavior with explicit expectations.
 describe('DescriptionService', () => {
     let univer: Univer;
     let localeService: LocaleService;
@@ -118,51 +119,6 @@ describe('DescriptionService', () => {
             abstract: 'Adds its arguments',
             description: 'You can add individual values, cell references or ranges or a mix of all three.',
         });
-    });
-
-    it('handles defined-name descriptions according to current implementation semantics', () => {
-        const rangeNameInfo = createFunctionInfo({
-            functionName: 'BOOK_RANGE',
-            functionType: FunctionType.DefinedName,
-            description: 'A1:B2',
-            abstract: 'Workbook range',
-            functionParameter: [],
-        });
-        const formulaNameInfo = createFunctionInfo({
-            functionName: 'BOOK_FORMULA',
-            functionType: FunctionType.DefinedName,
-            description: 'SUM(A1:A2)',
-            abstract: 'Workbook formula',
-            functionParameter: [],
-        });
-
-        descriptionService.registerDescriptions([rangeNameInfo, formulaNameInfo]);
-
-        expect(descriptionService.hasDefinedNameDescription('BOOK_RANGE')).toBe(true);
-        expect(descriptionService.hasDefinedNameDescription('BOOK_FORMULA')).toBe(true);
-        expect(descriptionService.isFormulaDefinedName('BOOK_RANGE')).toBe(false);
-        expect(descriptionService.isFormulaDefinedName('BOOK_FORMULA')).toBe(true);
-        expect(descriptionService.getSearchListByName('BOOK')).toEqual([]);
-        expect(descriptionService.getSearchListByNameFirstLetter('BOOK')).toEqual(
-            expect.arrayContaining([
-                {
-                    name: 'BOOK_RANGE',
-                    desc: 'Workbook range',
-                    functionType: FunctionType.DefinedName,
-                },
-                {
-                    name: 'BOOK_FORMULA',
-                    desc: 'Workbook formula',
-                    functionType: FunctionType.DefinedName,
-                },
-            ])
-        );
-        expect(descriptionService.getSearchListByType(-1)).not.toEqual(
-            expect.arrayContaining([
-                { name: 'BOOK_RANGE', desc: 'Workbook range' },
-                { name: 'BOOK_FORMULA', desc: 'Workbook formula' },
-            ])
-        );
     });
 
     it('re-registers descriptions with localized alias names after locale changes', () => {

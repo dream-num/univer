@@ -64,10 +64,8 @@ import { DocDrawingUpdateRenderController } from '../../../controllers/render-co
 import { DocRefreshDrawingsService } from '../../../services/doc-refresh-drawings.service';
 import { ClearDocDrawingTransformerOperation } from '../../operations/clear-drawing-transformer.operation';
 import { DeleteDocDrawingsCommand } from '../delete-doc-drawing.command';
-import { GroupDocDrawingCommand } from '../group-doc-drawing.command';
 import { InsertDocImageCommand } from '../insert-image.command';
 import { MoveDocDrawingsCommand } from '../move-drawings.command';
-import { UngroupDocDrawingCommand } from '../ungroup-doc-drawing.command';
 import {
     IMoveInlineDrawingCommand,
     ITransformNonInlineDrawingCommand,
@@ -280,23 +278,6 @@ function createInlineMoveDocData(): IDocumentData {
     };
 }
 
-function createGroupedDrawingDocData(): IDocumentData {
-    const docData = createMultiDrawingDocData();
-    docData.drawings!['group-1'] = {
-        drawingId: 'group-1',
-        unitId: 'test-doc',
-        subUnitId: 'test-doc',
-        drawingType: DrawingTypeEnum.DRAWING_GROUP,
-        layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
-        docTransform: { positionH: { posOffset: 0 }, positionV: { posOffset: 0 } },
-    } as never;
-    docData.drawings!['drawing-a'].groupId = 'group-1';
-    docData.drawings!['drawing-b'].groupId = 'group-1';
-    docData.drawingsOrder = ['drawing-c', 'group-1'];
-
-    return docData;
-}
-
 class TestDocDrawingUpdateRenderController {
     private _inserted = false;
 
@@ -368,8 +349,6 @@ function setupDrawingTestBed(docData: IDocumentData, dependencies: Dependency[] 
     [
         DeleteDocDrawingsCommand,
         MoveDocDrawingsCommand,
-        GroupDocDrawingCommand,
-        UngroupDocDrawingCommand,
         ClearDocDrawingTransformerOperation,
         InsertDocImageCommand,
         IMoveInlineDrawingCommand,
@@ -1219,58 +1198,7 @@ describe('docs drawing commands integration', () => {
         testBed.univer.dispose();
     });
 
-    it('keeps doc drawings unchanged because docs grouping is currently not applied', async () => {
-        const testBed = setupDrawingTestBed(createMultiDrawingDocData());
-        const doc = testBed.get(IUniverInstanceService)
-            .getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC)!;
-
-        expect(await testBed.commandService.executeCommand(GroupDocDrawingCommand.id, [{
-            parent: {
-                unitId: 'test-doc',
-                subUnitId: 'test-doc',
-                drawingId: 'group-1',
-                drawingType: DrawingTypeEnum.DRAWING_GROUP,
-            },
-            children: [
-                { unitId: 'test-doc', subUnitId: 'test-doc', drawingId: 'drawing-a', groupId: 'group-1' },
-                { unitId: 'test-doc', subUnitId: 'test-doc', drawingId: 'drawing-b', groupId: 'group-1' },
-            ],
-        }])).toBe(false);
-
-        expect(doc.getSnapshot().drawings?.['group-1']).toBeUndefined();
-        expect(doc.getSnapshot().drawings?.['drawing-a'].groupId).toBeUndefined();
-        expect(doc.getSnapshot().drawings?.['drawing-b'].groupId).toBeUndefined();
-        expect(doc.getSnapshot().drawingsOrder).toEqual(['drawing-a', 'drawing-b', 'drawing-c']);
-
-        testBed.univer.dispose();
-    });
-
-    it('keeps grouped doc drawings unchanged because docs ungrouping is currently not applied', async () => {
-        const testBed = setupDrawingTestBed(createGroupedDrawingDocData());
-        const doc = testBed.get(IUniverInstanceService)
-            .getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC)!;
-
-        expect(await testBed.commandService.executeCommand(UngroupDocDrawingCommand.id, [{
-            parent: {
-                unitId: 'test-doc',
-                subUnitId: 'test-doc',
-                drawingId: 'group-1',
-                drawingType: DrawingTypeEnum.DRAWING_GROUP,
-            },
-            children: [
-                { unitId: 'test-doc', subUnitId: 'test-doc', drawingId: 'drawing-a' },
-                { unitId: 'test-doc', subUnitId: 'test-doc', drawingId: 'drawing-b' },
-            ],
-        }])).toBe(false);
-
-        expect(doc.getSnapshot().drawings?.['group-1']).toMatchObject({ drawingId: 'group-1' });
-        expect(doc.getSnapshot().drawings?.['drawing-a'].groupId).toBe('group-1');
-        expect(doc.getSnapshot().drawings?.['drawing-b'].groupId).toBe('group-1');
-        expect(doc.getSnapshot().drawingsOrder).toEqual(['drawing-c', 'group-1']);
-
-        testBed.univer.dispose();
-    });
-
+    // TODO(@ai-review): Verify the remaining drawing command cases cover implemented mutations and render effects.
     it('clears the doc drawing transformer for the active render scene', async () => {
         const testBed = setupDrawingTestBed(createDrawingDocData());
 

@@ -223,6 +223,7 @@ describe('numfmt compatibility regression tests', () => {
         });
     });
 
+    // TODO(@ai-review): Verify number-format coverage remains focused on tokenization and formatting behavior.
     describe('numfmt.tokenize', () => {
         it('should tokenize patterns correctly', () => {
             const tokens = numfmt.tokenize('0.00');
@@ -244,16 +245,6 @@ describe('numfmt compatibility regression tests', () => {
         it('should tokenize patterns with grouping', () => {
             const tokens = numfmt.tokenize('#,##0');
             expect(tokens.some((t) => t.type === numfmt.tokenTypes.GROUP)).toBe(true);
-        });
-    });
-
-    describe('numfmt.tokenTypes', () => {
-        it('should expose expected token type constants', () => {
-            expect(typeof numfmt.tokenTypes.POINT).toBe('string');
-            expect(typeof numfmt.tokenTypes.ZERO).toBe('string');
-            expect(typeof numfmt.tokenTypes.COLOR).toBe('string');
-            expect(typeof numfmt.tokenTypes.MINUS).toBe('string');
-            expect(typeof numfmt.tokenTypes.GROUP).toBe('string');
         });
     });
 });

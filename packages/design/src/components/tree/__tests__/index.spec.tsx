@@ -21,6 +21,7 @@ import { findNodeFromPath, findNodePathFromTree, findSubTreeFromPath, isIntermed
 
 afterEach(cleanup);
 
+// TODO(@ai-review): Confirm tree coverage protects expansion and selection behavior without retaining a no-op defaultExpandAll render assertion.
 describe('Tree', () => {
     const data = [
         {
@@ -78,26 +79,6 @@ describe('Tree', () => {
                 { key: '0-1', title: 'node 0-1' },
             ],
         })).toBeFalsy();
-    });
-
-    it('defaultExpandAll', async () => {
-        const { container } = render(
-            <Tree
-                data={[
-                    {
-                        key: '0',
-                        title: 'node 0',
-                        children: [
-                            { key: '0-0', title: 'node 0-0' },
-                            { key: '0-1', title: 'node 0-1' },
-                        ],
-                    },
-                ]}
-                defaultExpandAll
-            />
-        );
-
-        expect(container);
     });
 
     it('should call onChange for checkbox and onExpend for node title click', () => {

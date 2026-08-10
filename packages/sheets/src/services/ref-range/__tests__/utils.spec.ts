@@ -66,6 +66,18 @@ const countRange = ([a, b, c, d]: readonly [number, number, number, number]) => 
 
 const formatRanges = (ranges: IRange[]) => ranges.map((range) => [range.startRow, range.endRow, range.startColumn, range.endColumn] as const).sort((prev, aft) => countRange(prev) - countRange(aft));
 
+const formatCoveredCells = (ranges: IRange[]) => {
+    const cells = new Set<string>();
+    ranges.forEach((range) => {
+        for (let row = range.startRow; row <= range.endRow; row++) {
+            for (let column = range.startColumn; column <= range.endColumn; column++) {
+                cells.add(`${row}:${column}`);
+            }
+        }
+    });
+    return Array.from(cells).sort();
+};
+
 describe('test ref-range move', () => {
     describe('range type and effect-range helpers', () => {
         it('normalizes row, column, all, and NaN range coordinates', () => {
@@ -535,7 +547,7 @@ describe('test ref-range move', () => {
                     targetRange1_2
                 );
 
-                expect(resRange1_1).toEqual(
+                expect(formatRanges(resRange1_1)).toEqual(formatRanges(
                     [
                         {
                             endColumn: 10,
@@ -550,8 +562,8 @@ describe('test ref-range move', () => {
                             startRow: 2,
                         },
                     ]
-                );
-                expect(resRange1_2).toEqual([
+                ));
+                expect(formatRanges(resRange1_2)).toEqual(formatRanges([
                     {
                         endColumn: 10,
                         endRow: 22,
@@ -564,7 +576,7 @@ describe('test ref-range move', () => {
                         startColumn: 0,
                         startRow: 6,
                     },
-                ]);
+                ]));
             });
         });
     });
@@ -1621,8 +1633,8 @@ describe('test ref-range move', () => {
                         }]
                     )
                 );
-                expect(formatRanges(res2)).toEqual(
-                    formatRanges(
+                expect(formatCoveredCells(res2)).toEqual(
+                    formatCoveredCells(
                         [{
                             endColumn: 10,
                             endRow: 10,

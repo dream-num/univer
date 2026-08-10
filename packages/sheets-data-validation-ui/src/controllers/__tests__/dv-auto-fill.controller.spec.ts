@@ -14,120 +14,122 @@
  * limitations under the License.
  */
 
-import { DataValidationType } from '@univerjs/core';
-import { AUTO_FILL_APPLY_TYPE, AutoFillTools } from '@univerjs/sheets';
-import { DATA_VALIDATION_PLUGIN_NAME, getDataValidationDiffMutations } from '@univerjs/sheets-data-validation';
-import { virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
-import { describe, expect, it, vi } from 'vitest';
+import type { ISheetAutoFillHook } from '@univerjs/sheets';
+import { DataValidationType, Direction, Range } from '@univerjs/core';
+import { AddDataValidationMutation } from '@univerjs/data-validation';
+import { AUTO_FILL_APPLY_TYPE } from '@univerjs/sheets';
+import { DATA_VALIDATION_PLUGIN_NAME } from '@univerjs/sheets-data-validation';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { createDvUiTestBed } from '../../__tests__/create-dv-ui-test-bed';
 import { DataValidationAutoFillController } from '../dv-auto-fill.controller';
 
-vi.mock('@univerjs/sheets-ui', async (importActual) => {
-    const actual = await importActual<typeof import('@univerjs/sheets-ui')>();
-    return {
-        ...actual,
-        virtualizeDiscreteRanges: vi.fn(() => ({
-            ranges: [
-                { startRow: 0, startColumn: 0, endRow: 0, endColumn: 0 },
-                { startRow: 1, startColumn: 1, endRow: 1, endColumn: 1 },
-            ],
-            mapFunc: (row: number, col: number) => ({ row, col }),
-        })),
-    };
-});
-
-vi.mock('@univerjs/sheets-data-validation', async (importActual) => {
-    const actual = await importActual<typeof import('@univerjs/sheets-data-validation')>();
-    return {
-        ...actual,
-        getDataValidationDiffMutations: vi.fn(() => ({ redoMutations: ['redo-dv'], undoMutations: ['undo-dv'] })),
-    };
-});
-
-vi.mock('@univerjs/sheets', async (importActual) => {
-    const actual = await importActual<typeof import('@univerjs/sheets')>();
-    return {
-        ...actual,
-        AutoFillTools: {
-            ...actual.AutoFillTools,
-            getAutoFillRepeatRange: vi.fn(() => [{
-                repeatStartCell: { row: 1, col: 1 },
-                relativeRange: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
-            }]),
-        },
-    };
-});
-
 describe('DataValidationAutoFillController', () => {
-    it('registers a hook and disables series fill when checkbox validation exists in source cells', () => {
-        let hook: { id: string; onBeforeFillData: (location: { unitId: string; subUnitId: string; source: { rows: number[]; cols: number[] } }) => void } | undefined;
-        const autoFillService = {
-            addHook: vi.fn((registeredHook) => {
-                hook = registeredHook;
-                return { dispose: vi.fn() };
-            }),
-            setDisableApplyType: vi.fn(),
-        };
+    let testBed: ReturnType<typeof createDvUiTestBed>;
+    let hook: ISheetAutoFillHook;
 
-        const controller = new DataValidationAutoFillController(
-            autoFillService as never,
-            {
-                getRuleByLocation: vi.fn(() => ({ type: DataValidationType.CHECKBOX })),
-            } as never,
-            {} as never
-        );
-
-        expect(controller).toBeTruthy();
-        expect(hook?.id).toBe(DATA_VALIDATION_PLUGIN_NAME);
-
-        hook!.onBeforeFillData({
-            unitId: 'book-1',
-            subUnitId: 'sheet-1',
-            source: { rows: [0], cols: [0] },
-        });
-
-        expect(autoFillService.setDisableApplyType).toHaveBeenCalledWith(AUTO_FILL_APPLY_TYPE.SERIES, true);
+    beforeEach(() => {
+        testBed = createDvUiTestBed();
+        testBed.injector.add([DataValidationAutoFillController]);
+        testBed.injector.get(DataValidationAutoFillController);
+        const registeredHook = testBed.autoFillService.getAllHooks().find((item) => item.id === DATA_VALIDATION_PLUGIN_NAME);
+        if (!registeredHook) {
+            throw new Error('Data validation autofill hook was not registered');
+        }
+        hook = registeredHook;
     });
 
-    it('builds diff mutations for copy and format autofill, and skips unsupported apply types', () => {
-        let hook: { onFillData: (location: { unitId: string; subUnitId: string; source: { rows: number[]; cols: number[]; startRow: number; endRow: number; startColumn: number; endColumn: number }; target: { rows: number[]; cols: number[]; startRow: number; endRow: number; startColumn: number; endColumn: number } }, direction: unknown, applyType: AUTO_FILL_APPLY_TYPE) => { redos: unknown[]; undos: unknown[] } } | undefined;
-        const ruleMatrixCopy = {
-            addRangeRules: vi.fn(),
-            diff: vi.fn(() => 'diffs'),
-        };
+    afterEach(() => {
+        vi.restoreAllMocks();
+        testBed.univer.dispose();
+    });
 
-        const controller = new DataValidationAutoFillController(
-            {
-                addHook: vi.fn((registeredHook) => {
-                    hook = registeredHook;
-                    return { dispose: vi.fn() };
-                }),
-                setDisableApplyType: vi.fn(),
-            } as never,
-            {
-                getRuleByLocation: vi.fn(() => null),
-                getRuleObjectMatrix: vi.fn(() => ({ clone: vi.fn(() => ruleMatrixCopy) })),
-                getRuleIdByLocation: vi.fn(() => 'rule-1'),
-                getRules: vi.fn(() => ['existing-rule']),
-            } as never,
-            {} as never
-        );
+    it('disables series fill for checkbox rules without querying each source cell', async () => {
+        await testBed.commandService.executeCommand(AddDataValidationMutation.id, {
+            unitId: testBed.unitId,
+            subUnitId: testBed.subUnitId,
+            rule: {
+                uid: 'checkbox-rule',
+                type: DataValidationType.CHECKBOX,
+                ranges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }],
+            },
+        });
+        vi.spyOn(testBed.dataValidationModel, 'getRuleByLocation').mockImplementation(() => {
+            throw new Error('must not query validation by cell');
+        });
 
-        expect(controller).toBeTruthy();
+        hook.onBeforeFillData?.({
+            unitId: testBed.unitId,
+            subUnitId: testBed.subUnitId,
+            source: {
+                rows: Array.from({ length: 100_000 }, (_, index) => index),
+                cols: Array.from({ length: 1_000 }, (_, index) => index),
+            },
+            target: { rows: [100_000], cols: [0] },
+        }, Direction.DOWN);
 
+        expect(testBed.autoFillService.menu.find((item) => item.value === AUTO_FILL_APPLY_TYPE.SERIES)?.disable).toBe(true);
+    });
+
+    it('ignores checkbox rules that only cover filtered-out source rows', async () => {
+        await testBed.commandService.executeCommand(AddDataValidationMutation.id, {
+            unitId: testBed.unitId,
+            subUnitId: testBed.subUnitId,
+            rule: {
+                uid: 'filtered-checkbox-rule',
+                type: DataValidationType.CHECKBOX,
+                ranges: [{ startRow: 1, endRow: 1, startColumn: 0, endColumn: 0 }],
+            },
+        });
+        vi.spyOn(testBed.dataValidationModel, 'getRuleByLocation').mockImplementation(() => {
+            throw new Error('must not query validation by cell');
+        });
+
+        hook.onBeforeFillData?.({
+            unitId: testBed.unitId,
+            subUnitId: testBed.subUnitId,
+            source: { rows: [0, 2], cols: [0] },
+            target: { rows: [3], cols: [0] },
+        }, Direction.DOWN);
+
+        expect(testBed.autoFillService.menu.find((item) => item.value === AUTO_FILL_APPLY_TYPE.SERIES)?.disable).toBe(false);
+    });
+
+    it('executes and undoes real validation mutations without enumerating autofill cells', async () => {
+        await testBed.commandService.executeCommand(AddDataValidationMutation.id, {
+            unitId: testBed.unitId,
+            subUnitId: testBed.subUnitId,
+            rule: {
+                uid: 'decimal-rule',
+                type: DataValidationType.DECIMAL,
+                formula1: '1',
+                ranges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }],
+            },
+        });
+        const foreach = vi.spyOn(Range, 'foreach').mockImplementation(() => {
+            throw new Error('must not enumerate cells');
+        });
         const location = {
-            unitId: 'book-1',
-            subUnitId: 'sheet-1',
-            source: { rows: [0], cols: [0], startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
-            target: { rows: [1], cols: [1], startRow: 1, endRow: 1, startColumn: 1, endColumn: 1 },
+            unitId: testBed.unitId,
+            subUnitId: testBed.subUnitId,
+            source: { rows: [0], cols: [0] },
+            target: { rows: [1], cols: [0] },
         };
-        const result = hook!.onFillData(location, 'down', AUTO_FILL_APPLY_TYPE.ONLY_FORMAT);
 
-        expect(vi.mocked(virtualizeDiscreteRanges)).toHaveBeenCalledWith([location.source, location.target]);
-        expect(vi.mocked(AutoFillTools.getAutoFillRepeatRange)).toHaveBeenCalled();
-        expect(ruleMatrixCopy.addRangeRules).toHaveBeenCalledWith([{ id: 'rule-1', ranges: [{ startRow: 1, endRow: 1, startColumn: 1, endColumn: 1 }] }]);
-        expect(vi.mocked(getDataValidationDiffMutations)).toHaveBeenCalledWith('book-1', 'sheet-1', 'diffs', {}, 'patched', true);
-        expect(result).toEqual({ redos: ['redo-dv'], undos: ['undo-dv'] });
+        const result = hook.onFillData?.(location, Direction.DOWN, AUTO_FILL_APPLY_TYPE.COPY);
+        if (!result) {
+            throw new Error('Data validation autofill did not return mutations');
+        }
+        foreach.mockRestore();
+        for (const mutation of result.redos) {
+            await testBed.commandService.executeCommand(mutation.id, mutation.params);
+        }
+        expect(testBed.dataValidationModel.getRuleByLocation(testBed.unitId, testBed.subUnitId, 0, 0)?.uid).toBe('decimal-rule');
+        expect(testBed.dataValidationModel.getRuleByLocation(testBed.unitId, testBed.subUnitId, 1, 0)?.uid).toBe('decimal-rule');
 
-        expect(hook!.onFillData(location, 'down', AUTO_FILL_APPLY_TYPE.NO_FORMAT)).toEqual({ redos: [], undos: [] });
+        for (const mutation of result.undos) {
+            await testBed.commandService.executeCommand(mutation.id, mutation.params);
+        }
+        expect(testBed.dataValidationModel.getRuleByLocation(testBed.unitId, testBed.subUnitId, 0, 0)?.uid).toBe('decimal-rule');
+        expect(testBed.dataValidationModel.getRuleByLocation(testBed.unitId, testBed.subUnitId, 1, 0)).toBeUndefined();
     });
 });

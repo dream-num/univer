@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import type { IRange } from '@univerjs/core';
 import type { IAutoFillLocation, ISheetAutoFillHook } from '@univerjs/sheets';
-import { DataValidationType, Disposable, Inject, Injector, ObjectMatrix, queryObjectMatrix, Range, Rectangle } from '@univerjs/core';
+import { DataValidationType, Disposable, getIntersectRange, Inject, Injector, Rectangle } from '@univerjs/core';
 import { AUTO_FILL_APPLY_TYPE, AutoFillTools, IAutoFillService } from '@univerjs/sheets';
 import { DATA_VALIDATION_PLUGIN_NAME, getDataValidationDiffMutations, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
 import { virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
@@ -42,58 +43,44 @@ export class DataValidationAutoFillController extends Disposable {
 
             const virtualRange = virtualizeDiscreteRanges([sourceRange, targetRange]);
             const [vSourceRange, vTargetRange] = virtualRange.ranges;
-            const { mapFunc } = virtualRange;
-            const sourceStartCell = {
-                row: vSourceRange.startRow,
-                col: vSourceRange.startColumn,
-            };
+            const { mapRange, projectRange } = virtualRange;
             const repeats = AutoFillTools.getAutoFillRepeatRange(vSourceRange, vTargetRange);
-            const additionMatrix = new ObjectMatrix();
-            const additionRules = new Set<string>();
-            repeats.forEach((repeat) => {
-                const targetStartCell = repeat.repeatStartCell;
-                const relativeRange = repeat.relativeRange;
-                const sourceRange = {
-                    startRow: sourceStartCell.row,
-                    startColumn: sourceStartCell.col,
-                    endColumn: sourceStartCell.col,
-                    endRow: sourceStartCell.row,
-                };
-                const targetRange = {
-                    startRow: targetStartCell.row,
-                    startColumn: targetStartCell.col,
-                    endColumn: targetStartCell.col,
-                    endRow: targetStartCell.row,
-                };
-                Range.foreach(relativeRange, (row, col) => {
-                    const sourcePositionRange = Rectangle.getPositionRange(
-                        {
-                            startRow: row,
-                            startColumn: col,
-                            endColumn: col,
-                            endRow: row,
-                        },
-                        sourceRange
-                    );
-                    const { row: sourceRow, col: sourceCol } = mapFunc(sourcePositionRange.startRow, sourcePositionRange.startColumn);
-                    // if ruleId exists, set more dv rules, if not, clear dv rules.
-                    const ruleId = this._sheetDataValidationModel.getRuleIdByLocation(unitId, subUnitId, sourceRow, sourceCol) || '';
-                    const targetPositionRange = Rectangle.getPositionRange(
-                        {
-                            startRow: row,
-                            startColumn: col,
-                            endColumn: col,
-                            endRow: row,
-                        },
-                        targetRange
-                    );
-                    const { row: targetRow, col: targetCol } = mapFunc(targetPositionRange.startRow, targetPositionRange.startColumn);
+            const additionsByRuleId = new Map<string, IRange[]>();
+            additionsByRuleId.set('', repeats.flatMap((repeat) => mapRange(Rectangle.getPositionRange(repeat.relativeRange, {
+                startRow: repeat.repeatStartCell.row,
+                endRow: repeat.repeatStartCell.row,
+                startColumn: repeat.repeatStartCell.col,
+                endColumn: repeat.repeatStartCell.col,
+            }))));
 
-                    additionMatrix.setValue(targetRow, targetCol, ruleId);
-                    additionRules.add(ruleId);
+            this._sheetDataValidationModel.getRules(unitId, subUnitId).forEach((rule) => {
+                const relativeSourceRanges = rule.ranges.flatMap((range) => {
+                    const projected = projectRange(range);
+                    const intersected = projected && getIntersectRange(projected, vSourceRange);
+                    return intersected
+                        ? [Rectangle.getRelativeRange(intersected, vSourceRange)]
+                        : [];
                 });
+                const targetRanges = repeats.flatMap((repeat) => relativeSourceRanges.flatMap((sourceRange) => {
+                    const copiedRange = getIntersectRange(sourceRange, repeat.relativeRange);
+                    if (!copiedRange) {
+                        return [];
+                    }
+                    return mapRange(Rectangle.getPositionRange(copiedRange, {
+                        startRow: repeat.repeatStartCell.row,
+                        endRow: repeat.repeatStartCell.row,
+                        startColumn: repeat.repeatStartCell.col,
+                        endColumn: repeat.repeatStartCell.col,
+                    }));
+                }));
+                if (targetRanges.length) {
+                    additionsByRuleId.set(rule.uid, targetRanges);
+                }
             });
-            const additions = Array.from(additionRules).map((id) => ({ id, ranges: queryObjectMatrix(additionMatrix, (value) => value === id) }));
+            const additions = Array.from(additionsByRuleId, ([id, ranges]) => ({
+                id,
+                ranges: ranges.length > 1 ? Rectangle.mergeRanges(ranges) : ranges,
+            }));
             ruleMatrixCopy.addRangeRules(additions);
             const diffs = ruleMatrixCopy.diff(this._sheetDataValidationModel.getRules(unitId, subUnitId));
             const { redoMutations, undoMutations } = getDataValidationDiffMutations(unitId, subUnitId, diffs, this._injector, 'patched', applyType === AUTO_FILL_APPLY_TYPE.ONLY_FORMAT);
@@ -106,14 +93,12 @@ export class DataValidationAutoFillController extends Disposable {
             id: DATA_VALIDATION_PLUGIN_NAME,
             onBeforeFillData: (location) => {
                 const { source: sourceRange, unitId, subUnitId } = location;
-                for (const row of sourceRange.rows) {
-                    for (const col of sourceRange.cols) {
-                        const dv = this._sheetDataValidationModel.getRuleByLocation(unitId, subUnitId, row, col);
-                        if (dv && dv.type === DataValidationType.CHECKBOX) {
-                            this._autoFillService.setDisableApplyType(AUTO_FILL_APPLY_TYPE.SERIES, true);
-                            return;
-                        }
-                    }
+                const { projectRange } = virtualizeDiscreteRanges([sourceRange]);
+                const hasCheckbox = this._sheetDataValidationModel.getRules(unitId, subUnitId).some((rule) => (
+                    rule.type === DataValidationType.CHECKBOX && rule.ranges.some((range) => projectRange(range) !== null)
+                ));
+                if (hasCheckbox) {
+                    this._autoFillService.setDisableApplyType(AUTO_FILL_APPLY_TYPE.SERIES, true);
                 }
             },
             onFillData: (location, direction, applyType) => {

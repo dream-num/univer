@@ -21,7 +21,6 @@ test('cells rendering after scrolling', async () => {
     await page.waitForTimeout(1000);
 
     const canvas = page.locator(SHEET_MAIN_CANVAS_ID);
-    // TODO(@ai-review): Verify fixed-count wheel input and stable scroll frames eliminate CI flakiness without hiding merged-cell repaint regressions.
     await canvas.evaluate(async (element: HTMLCanvasElement) => {
         const scroll = async (deltaY: number) => {
             for (let elapsed = 0; elapsed < 1000; elapsed += 30) {

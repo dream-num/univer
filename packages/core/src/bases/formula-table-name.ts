@@ -237,9 +237,7 @@ function compileBaseFormulaTableAliases(
 }
 
 function createLegacyBaseFormulaTableName(tableId: string): string {
-    const encoded = Array.from(tableId, (character) =>
-        /[A-Za-z0-9]/.test(character) ? character : `_x${character.codePointAt(0)?.toString(16) ?? '0'}_`
-    ).join('');
+    const encoded = Array.from(tableId, (character) => /[A-Za-z0-9]/.test(character) ? character : `_x${character.codePointAt(0)?.toString(16) ?? '0'}_`).join('');
     return `_T_${encoded}`;
 }
 

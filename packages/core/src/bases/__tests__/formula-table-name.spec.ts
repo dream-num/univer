@@ -19,6 +19,7 @@ import { BaseDataModel } from '../base-data-model';
 import { getEmptySnapshot } from '../empty-snapshot';
 import {
     allocateBaseFormulaTableName,
+    createBaseFormulaTableReferenceNormalizer,
     createBaseFormulaTableNameMap,
     getBaseFormulaTableName,
     migrateBaseFormulaTableNames,
@@ -108,6 +109,20 @@ describe('Base formula table names', () => {
             '=SUM(_T_table_x2d_1[Amount],table-1[Amount],"_T_table_x2d_1[Amount]",Book!_T_table_x2d_1[Amount])',
             snapshot
         )).toBe('=SUM(Work_Items[Amount],Work_Items[Amount],"_T_table_x2d_1[Amount]",Book!_T_table_x2d_1[Amount])');
+    });
+
+    it('reuses one compiled alias normalizer across formulas', () => {
+        const snapshot = {
+            tables: {
+                'table.+(1)': { id: 'table.+(1)', name: 'Work Items' },
+            },
+        };
+        const normalizeReferences = createBaseFormulaTableReferenceNormalizer(snapshot);
+
+        expect(normalizeReferences('=SUM(table.+(1)[Amount])')).toBe('=SUM(Work_Items[Amount])');
+        expect(normalizeReferences('="table.+(1)[Amount]"&Book!table.+(1)[Amount]')).toBe(
+            '="table.+(1)[Amount]"&Book!table.+(1)[Amount]'
+        );
     });
 
     it('persists a canonical formula name while migrating a historical snapshot', () => {

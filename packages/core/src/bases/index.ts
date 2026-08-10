@@ -17,6 +17,7 @@
 export { BaseDataModel } from './base-data-model';
 export {
     allocateBaseFormulaTableName,
+    createBaseFormulaTableReferenceNormalizer,
     createBaseFormulaTableNameMap,
     getBaseFormulaTableName,
     migrateBaseFormulaTableNames,

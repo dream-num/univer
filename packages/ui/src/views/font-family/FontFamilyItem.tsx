@@ -49,7 +49,7 @@ export const FontFamilyItem = ({ value, onChange }: IFontFamilyItemProps) => {
                         className={`
                           univer-flex univer-h-7 univer-w-full univer-appearance-none univer-items-center
                           univer-justify-between univer-gap-6 univer-rounded univer-border-none univer-bg-transparent
-                          univer-px-2
+                          univer-px-2 univer-text-gray-900
                           hover:univer-bg-gray-100
                           dark:!univer-text-white
                           dark:hover:!univer-bg-gray-700

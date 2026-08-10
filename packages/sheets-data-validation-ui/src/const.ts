@@ -14,4 +14,5 @@
  * limitations under the License.
  */
 
-export const DROP_DOWN_DEFAULT_COLOR = '#ECECEC';
+export const DROP_DOWN_DEFAULT_COLOR = 'gray.100';
+export const DROP_DOWN_ICON_COLOR = 'gray.600';

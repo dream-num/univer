@@ -274,7 +274,6 @@ export function convertBodyToHtml(doc: IDocumentData): string {
     return result.html;
 }
 
-// eslint-disable-next-line max-lines-per-function
 function processNode(node: DataStreamTreeNode, doc: IDocumentData, result: IHtmlResult) {
     switch (node.nodeType) {
         case DataStreamTreeNodeType.SECTION_BREAK: {
@@ -330,12 +329,7 @@ function processNode(node: DataStreamTreeNode, doc: IDocumentData, result: IHtml
             }).join('');
 
             if (childHtml) {
-                if (hasVisibleHtml(inlineHtml)) {
-                    renderParagraphNodeHtml(doc, paragraph, startIndex, endIndex, inlineHtml, style, result);
-                } else {
-                    closeListStack(result);
-                }
-
+                closeListStack(result);
                 result.html += childHtml;
                 break;
             }

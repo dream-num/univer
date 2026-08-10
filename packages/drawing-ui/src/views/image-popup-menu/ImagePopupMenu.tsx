@@ -131,7 +131,7 @@ export function ImagePopupMenu(props: IImagePopupMenuProps) {
             >
                 <div
                     className={clsx(`
-                      univer-flex univer-items-center univer-gap-2 univer-rounded univer-p-1
+                      univer-flex univer-items-center univer-gap-2 univer-rounded univer-p-1 univer-text-gray-900
                       hover:univer-bg-gray-100
                       dark:hover:!univer-bg-gray-800
                     `, borderClassName, {

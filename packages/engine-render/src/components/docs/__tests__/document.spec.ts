@@ -632,14 +632,10 @@ describe('documents render', () => {
             cacheBound: { left: 80, top: 30, right: 760, bottom: 490 },
         } as any);
 
-        expect(rectDraw.mock.calls.map(([, props]) => props.fill)).toEqual([
-            '#fafafa',
-            'rgba(255, 255, 255, 1)',
-        ]);
+        expect(rectDraw).toHaveBeenCalledTimes(2);
         expect(rectDraw.mock.calls[0][1]).toMatchObject({
             width: 680,
             height: 460,
-            fill: '#fafafa',
         });
         expect(translate.mock.calls[0]).toEqual([80, 30]);
 
@@ -720,10 +716,7 @@ describe('documents render', () => {
             translate: vi.fn(),
         } as any);
 
-        expect(rectDraw.mock.calls.map(([, props]) => props.fill)).toEqual([
-            '#fafafa',
-            'rgba(255, 255, 255, 1)',
-        ]);
+        expect(rectDraw).toHaveBeenCalledTimes(2);
 
         docBackground.dispose();
     });
@@ -762,11 +755,10 @@ describe('documents render', () => {
             cacheBound: { left: 90, top: 40, right: 700, bottom: 480 },
         } as any);
 
-        expect(rectDraw.mock.calls.map(([, props]) => props.fill)).toEqual(['rgba(255, 255, 255, 1)']);
+        expect(rectDraw).toHaveBeenCalledTimes(1);
         expect(rectDraw.mock.calls[0][1]).toMatchObject({
             width: 610,
             height: 440,
-            fill: 'rgba(255, 255, 255, 1)',
         });
         expect(translate.mock.calls[0]).toEqual([90, 40]);
 

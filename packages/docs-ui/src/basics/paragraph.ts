@@ -45,7 +45,7 @@ export function getTextRunAtPosition(
     const retTextRun: ITextRun = {
         st: 0,
         ed: 0,
-        ts: {},
+        ts: !defaultStyle.cl ? {} : { cl: { ...defaultStyle.cl } },
     };
 
     if (isFormula) {

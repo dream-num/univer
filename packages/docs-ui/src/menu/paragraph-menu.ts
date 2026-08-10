@@ -20,6 +20,7 @@ import type { LocaleKey } from '../locale/types';
 import { ICommandService, NamedStyleType, ThemeService, UniverInstanceType } from '@univerjs/core';
 import { SetTextSelectionsOperation } from '@univerjs/docs';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
+
 import { Observable } from 'rxjs';
 import {
     DocCopyCommand,
@@ -612,13 +613,15 @@ export function ParagraphMenuIndentDecreaseMenuItemFactory(accessor: IAccessor):
 }
 
 export function ParagraphMenuDefaultTextColorMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
+    const defaultTextColor = accessor.get(ThemeService).getColorFromTheme('gray.900');
+
     return {
         id: `${SetInlineFormatTextColorCommand.id}.default`,
         commandId: SetInlineFormatTextColorCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'DefaultTextColorIcon',
         title: 'docs-ui.paragraphMenu.defaultTextColor',
-        params: { value: '#000000' },
+        params: { value: defaultTextColor },
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
@@ -634,12 +637,16 @@ export function ParagraphMenuNoBackgroundMenuItemFactory(accessor: IAccessor): I
 }
 
 export function ParagraphMenuResetTextColorMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
+    const themeService = accessor.get(ThemeService);
+
     return {
         id: ResetInlineFormatTextColorCommand.id,
+        commandId: SetInlineFormatTextColorCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'NoColorDoubleIcon',
         title: 'docs-ui.toolbar.resetColor',
         tooltip: 'docs-ui.toolbar.resetColor',
+        params: () => ({ value: themeService.getColorFromTheme('gray.900') }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }

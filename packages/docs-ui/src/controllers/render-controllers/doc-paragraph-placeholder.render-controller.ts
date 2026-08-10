@@ -43,7 +43,7 @@ import { DocSelectionManagerService } from '@univerjs/docs';
 import { getDocsTableRenderViewport, getDocsTableViewportLeft, getTableIdAndSliceIndex } from '@univerjs/engine-render';
 import { DOCS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 
-const PLACEHOLDER_COLOR = 'rgba(0, 0, 0, 0.35)';
+const PLACEHOLDER_COLOR = 'gray.400';
 const DEFAULT_PLACEHOLDER_FONT_SIZE = 12;
 const MIN_BODY_TEXT_PLACEHOLDER_FONT_SIZE = 16;
 const DEFAULT_PLACEHOLDER_FONT_FAMILY = 'Arial';

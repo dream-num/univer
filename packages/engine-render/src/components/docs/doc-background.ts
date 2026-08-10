@@ -24,10 +24,10 @@ import { Path, Rect } from '../../shape';
 import { DocComponent } from './doc-component';
 import { Liquid } from './liquid';
 
-const PAGE_STROKE_COLOR = 'rgba(198, 198, 198, 1)';
-const PAGE_FILL_COLOR = 'rgba(255, 255, 255, 1)';
-const DOCS_WORKSPACE_FILL_COLOR = '#fafafa';
-const MARGIN_STROKE_COLOR = 'rgba(158, 158, 158, 1)';
+const PAGE_STROKE_COLOR = 'gray.200';
+const PAGE_FILL_COLOR = 'gray.50';
+const DOCS_WORKSPACE_FILL_COLOR = 'gray.100';
+const MARGIN_STROKE_COLOR = 'gray.300';
 
 export class DocBackground extends DocComponent {
     private _drawLiquid: Liquid;

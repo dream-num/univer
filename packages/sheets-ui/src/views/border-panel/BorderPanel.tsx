@@ -110,7 +110,7 @@ export function BorderPanel(props: IBorderPanelProps) {
                         <button
                             className={`
                               univer-flex univer-cursor-pointer univer-items-center univer-gap-2 univer-rounded
-                              univer-border-none univer-bg-transparent univer-p-1
+                              univer-border-none univer-bg-transparent univer-p-1 univer-text-gray-900
                               hover:univer-bg-gray-100
                               dark:hover:!univer-bg-gray-700
                             `}
@@ -165,7 +165,7 @@ export function BorderPanel(props: IBorderPanelProps) {
                         <button
                             className={`
                               univer-flex univer-cursor-pointer univer-items-center univer-gap-2 univer-rounded
-                              univer-border-none univer-bg-transparent univer-p-1
+                              univer-border-none univer-bg-transparent univer-p-1 univer-text-gray-900
                               hover:univer-bg-gray-100
                               dark:hover:!univer-bg-gray-700
                             `}

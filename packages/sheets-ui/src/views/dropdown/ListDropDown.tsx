@@ -19,7 +19,7 @@ import type { IPopupWithExtraProps } from '@univerjs/ui';
 import type { CSSProperties } from 'react';
 import type { LocaleKey } from '../../locale/types';
 import type { IBaseDropdownProps } from './type';
-import { ColorKit, LocaleService } from '@univerjs/core';
+import { ColorKit, LocaleService, ThemeService } from '@univerjs/core';
 import { borderClassName, borderTopClassName, clsx, scrollbarClassName } from '@univerjs/design';
 import { CheckMarkIcon } from '@univerjs/icons';
 import {
@@ -29,7 +29,7 @@ import {
     WorkbookEditablePermission,
     WorksheetEditPermission,
 } from '@univerjs/sheets';
-import { useDependency } from '@univerjs/ui';
+import { useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { getListDropdownValue } from './list-dropdown/utils';
 
@@ -58,6 +58,8 @@ function SelectList(props: ISelectListProps) {
         showSearch: showSearchOnDropdown,
     } = props;
     const localeService = useDependency(LocaleService);
+    const themeService = useDependency(ThemeService);
+    useObservable(themeService.currentTheme$);
     const { row, col, unitId, subUnitId } = location;
 
     const searchRef = useRef<HTMLInputElement>(null);
@@ -112,7 +114,8 @@ function SelectList(props: ISelectListProps) {
                     <input
                         ref={searchRef}
                         className={clsx(`
-                          univer-w-full univer-rounded-md univer-px-2 univer-py-1 univer-text-sm
+                          univer-w-full univer-rounded-md univer-bg-white univer-px-2 univer-py-1 univer-text-sm
+                          univer-text-gray-900
                           focus:univer-border-primary-500 focus:univer-outline-none
                           dark:!univer-bg-black dark:!univer-text-white
                         `, borderClassName)}
@@ -156,7 +159,11 @@ function SelectList(props: ISelectListProps) {
 
                     const index = item.label.toLocaleLowerCase().indexOf(lowerFilter!);
 
-                    const isDark = new ColorKit(item.color).isDark();
+                    const isThemeColor = Boolean(item.color?.includes('.') && themeService.isValidThemeColor(item.color));
+                    const backgroundColor = isThemeColor
+                        ? themeService.getColorFromTheme(item.color!)
+                        : item.color;
+                    const isDark = new ColorKit(backgroundColor).isDark();
 
                     return (
                         <div
@@ -174,10 +181,10 @@ function SelectList(props: ISelectListProps) {
                                   univer-inline-flex univer-h-4 univer-w-fit univer-items-center univer-truncate
                                   univer-rounded-full univer-px-1.5 univer-text-xs
                                 `, {
-                                    'univer-text-gray-900': !isDark,
-                                    'univer-text-white': isDark,
+                                    'univer-text-gray-900': isThemeColor || !isDark,
+                                    'univer-text-white': !isThemeColor && isDark,
                                 })}
-                                style={{ background: item.color }}
+                                style={{ background: backgroundColor }}
                             >
                                 {lowerFilter && item.label.toLowerCase().includes(lowerFilter)
                                     ? (

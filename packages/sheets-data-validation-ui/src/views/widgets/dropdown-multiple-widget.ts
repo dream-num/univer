@@ -24,6 +24,7 @@ import { HorizontalAlign, ICommandService, Inject, IUniverInstanceService, Unive
 import { CURSOR_TYPE, getCurrentTypeOfRenderer, getFontStyleString, IRenderManagerService } from '@univerjs/engine-render';
 import { getCellValueOrigin, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
 import { ShowDataValidationDropdown } from '../../commands/operations/data-validation.operation';
+import { DROP_DOWN_ICON_COLOR } from '../../const';
 import { CELL_PADDING_H, CELL_PADDING_V, Dropdown, ICON_PLACE, layoutDropdowns, MARGIN_V } from './shape';
 
 const downPath = new Path2D('M3.32201 4.84556C3.14417 5.05148 2.85583 5.05148 2.67799 4.84556L0.134292 1.90016C-0.152586 1.56798 0.0505937 1 0.456301 1L5.5437 1C5.94941 1 6.15259 1.56798 5.86571 1.90016L3.32201 4.84556Z');
@@ -72,7 +73,7 @@ export class DropdownMultipleWidget implements IBaseDataValidationWidget {
 
         ctx.save();
         ctx.translateWithPrecision(cellBounding.startX + left, cellBounding.startY + top);
-        ctx.fillStyle = '#565656';
+        ctx.fillStyle = DROP_DOWN_ICON_COLOR;
         ctx.fill(downPath);
         ctx.restore();
     }

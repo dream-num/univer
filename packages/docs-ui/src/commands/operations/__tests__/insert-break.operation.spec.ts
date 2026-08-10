@@ -111,7 +111,7 @@ describe('document break operations', () => {
         expect(body.customRanges).toContainEqual(expect.objectContaining({
             startIndex: 5,
             endIndex: 5,
-            properties: { docxBreakType: 'column' },
+            properties: { breakType: 'column' },
         }));
     });
 

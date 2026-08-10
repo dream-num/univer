@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Injector } from '@univerjs/core';
+import type { Injector, Univer } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
 import {
     DataValidationErrorStyle,
@@ -25,9 +25,12 @@ import {
 } from '@univerjs/core';
 import {
     FormulaExecuteStageType,
+    OtherFormulaMarkDirty,
+    RemoveOtherFormulaMutation,
     SetFormulaCalculationNotificationMutation,
     SetFormulaCalculationResultMutation,
     SetFormulaCalculationStartMutation,
+    SetOtherFormulaMutation,
 } from '@univerjs/engine-formula';
 import {
     AddSheetDataValidationCommand,
@@ -38,18 +41,20 @@ import {
     UpdateSheetDataValidationRangeCommand,
     UpdateSheetDataValidationSettingCommand,
 } from '@univerjs/sheets-data-validation';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createFacadeTestBed } from './create-test-bed';
 import '@univerjs/sheets-formula/facade';
 
 describe('Test FRange', () => {
     let get: Injector['get'];
     let commandService: ICommandService;
+    let univer: Univer;
     let univerAPI: FUniver;
 
     beforeEach(() => {
         const testBed = createFacadeTestBed();
         get = testBed.get;
+        univer = testBed.univer;
 
         univerAPI = testBed.univerAPI;
 
@@ -58,6 +63,9 @@ describe('Test FRange', () => {
             AddSheetDataValidationCommand,
             ClearRangeDataValidationCommand,
             RemoveSheetDataValidationCommand,
+            OtherFormulaMarkDirty,
+            RemoveOtherFormulaMutation,
+            SetOtherFormulaMutation,
             UpdateSheetDataValidationOptionsCommand,
             UpdateSheetDataValidationRangeCommand,
             UpdateSheetDataValidationSettingCommand,
@@ -70,6 +78,11 @@ describe('Test FRange', () => {
             callback({ didTimeout: false, timeRemaining: () => 16 } as IdleDeadline);
             return 1;
         }) as typeof requestIdleCallback);
+    });
+
+    afterEach(() => {
+        univer.dispose();
+        vi.unstubAllGlobals();
     });
 
     it('Range set data validation', async () => {

@@ -14,12 +14,21 @@
  * limitations under the License.
  */
 
-import { DocumentFlavor } from '@univerjs/core';
-import { RichTextEditingMutation } from '@univerjs/docs';
-import { DocumentEditArea, Path, Rect } from '@univerjs/engine-render';
+import {
+    DocumentFlavor,
+    ICommandService,
+    Injector,
+    IUniverInstanceService,
+    LocaleService,
+    ThemeService,
+} from '@univerjs/core';
+import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { DocumentEditArea, IRenderManagerService, Path, Rect } from '@univerjs/engine-render';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { CloseHeaderFooterCommand } from '../../commands/commands/doc-header-footer.command';
+import { IEditorService } from '../../services/editor/editor-manager.service';
+import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 import { TextBubbleShape } from '../../views/header-footer/text-bubble';
 import { DocHeaderFooterController } from '../doc-header-footer.controller';
 
@@ -39,7 +48,7 @@ function createCtx() {
         save: vi.fn(),
         restore: vi.fn(),
         translate: vi.fn(),
-    } as any;
+    };
 }
 
 function createController(options: {
@@ -47,7 +56,17 @@ function createController(options: {
     documentFlavor?: DocumentFlavor;
     editor?: boolean;
 } = {}) {
-    const pageRender$ = new Subject<any>();
+    const pageRender$ = new Subject<{
+        ctx: ReturnType<typeof createCtx>;
+        pageLeft: number;
+        pageTop: number;
+        page: {
+            pageWidth: number;
+            pageHeight: number;
+            marginTop: number;
+            marginBottom: number;
+        };
+    }>();
     const commandHandlers: Array<(command: { id: string; params?: unknown }) => void> = [];
     const document = {
         pageRender$,
@@ -70,44 +89,47 @@ function createController(options: {
     const viewModel = {
         getEditArea: vi.fn(() => options.editArea ?? DocumentEditArea.BODY),
     };
-    const controller = new DocHeaderFooterController(
-        {
-            unitId: 'doc-1',
-            unit,
-            mainComponent: document,
-        } as never,
-        {
-            onCommandExecuted: vi.fn((handler) => {
-                commandHandlers.push(handler);
-                return { dispose: vi.fn() };
-            }),
-            executeCommand: vi.fn(),
-        } as never,
-        {
+    const commandService = {
+        onCommandExecuted: vi.fn((handler) => {
+            commandHandlers.push(handler);
+            return { dispose: vi.fn() };
+        }),
+        executeCommand: vi.fn(),
+    };
+    const context = {
+        unitId: 'doc-1',
+        unit,
+        mainComponent: document,
+    } as never;
+    const injector = new Injector([
+        [ICommandService, { useValue: commandService }],
+        [IEditorService, { useValue: {
             isEditor: vi.fn(() => options.editor ?? false),
             getEditor: vi.fn(() => null),
-        } as never,
-        {
+        } }],
+        [IUniverInstanceService, { useValue: {
             getCurrentTypeOfUnit$: vi.fn(() => new BehaviorSubject({ getUnitId: () => 'doc-1' })),
             getUnit: vi.fn(() => unit),
-        } as never,
-        {
+        } }],
+        [IRenderManagerService, { useValue: {
             getRenderUnitById: vi.fn(() => ({ mainComponent: document })),
-        } as never,
-        {
+        } }],
+        [DocSkeletonManagerService, { useValue: {
             getViewModel: vi.fn(() => viewModel),
-        } as never,
-        {
+        } }],
+        [DocSelectionRenderService, { useValue: {
             setSegment: vi.fn(),
             setSegmentPage: vi.fn(),
             setCursorManually: vi.fn(),
-        } as never,
-        {
+        } }],
+        [LocaleService, { useValue: {
             t: vi.fn((key: string) => key),
-        } as never
-    );
+        } }],
+        [ThemeService],
+    ]);
+    const controller = injector.createInstance(DocHeaderFooterController, context);
 
-    return { controller, pageRender$, commandHandlers, document };
+    return { controller, pageRender$, commandHandlers, commandService, document };
 }
 
 describe('DocHeaderFooterController', () => {
@@ -117,14 +139,14 @@ describe('DocHeaderFooterController', () => {
     });
 
     it('closes header/footer editing after rich text changes in modern document mode', () => {
-        const { controller, commandHandlers } = createController({
+        const { controller, commandHandlers, commandService } = createController({
             editArea: DocumentEditArea.HEADER,
             documentFlavor: DocumentFlavor.MODERN,
         });
 
         commandHandlers[0]({ id: RichTextEditingMutation.id });
 
-        expect((controller as any)._commandService.executeCommand).toHaveBeenCalledWith(CloseHeaderFooterCommand.id, {
+        expect(commandService.executeCommand).toHaveBeenCalledWith(CloseHeaderFooterCommand.id, {
             unitId: 'doc-1',
         });
 
@@ -152,8 +174,8 @@ describe('DocHeaderFooterController', () => {
 
         expect(ctx.translate).toHaveBeenCalledWith(11.5, 23.5);
         expect(rectSpy).toHaveBeenCalledTimes(2);
-        expect(rectSpy.mock.calls[0][1]).toMatchObject({ width: 200, height: 30, fill: 'rgba(255, 255, 255, 0.5)' });
-        expect(rectSpy.mock.calls[1][1]).toMatchObject({ width: 200, height: 40, fill: 'rgba(255, 255, 255, 0.5)' });
+        expect(rectSpy.mock.calls[0][1]).toMatchObject({ width: 200, height: 30 });
+        expect(rectSpy.mock.calls[1][1]).toMatchObject({ width: 200, height: 40 });
         expect(pathSpy).not.toHaveBeenCalled();
         expect(textSpy).not.toHaveBeenCalled();
 

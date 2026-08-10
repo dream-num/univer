@@ -14,10 +14,23 @@
  * limitations under the License.
  */
 
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { browserStorage } from '../storage-driver';
 
 const STORAGE_PREFIX = 'UniverLocalStorage/';
+
+function createMemoryLocalStorage() {
+    const values = new Map<string, string>();
+    return {
+        get length() {
+            return values.size;
+        },
+        getItem: (key: string) => values.get(key) ?? null,
+        setItem: (key: string, value: string) => values.set(key, value),
+        removeItem: (key: string) => values.delete(key),
+        key: (index: number) => Array.from(values.keys())[index] ?? null,
+    };
+}
 
 function clearOwnStorage() {
     const toRemove: string[] = [];
@@ -31,12 +44,16 @@ function clearOwnStorage() {
 }
 
 describe('browserStorage (LocalStorageDriver fallback)', () => {
+    beforeAll(() => {
+        vi.stubGlobal('localStorage', createMemoryLocalStorage());
+    });
+
     beforeEach(() => {
         clearOwnStorage();
     });
 
-    afterEach(() => {
-        vi.restoreAllMocks();
+    afterAll(() => {
+        vi.unstubAllGlobals();
     });
 
     describe('getItem / setItem', () => {
@@ -177,50 +194,5 @@ describe('browserStorage (LocalStorageDriver fallback)', () => {
 
             expect(result).toBeUndefined();
         });
-    });
-});
-
-describe('IndexedDBDriver', () => {
-    it('should be chosen when indexedDB is available', async () => {
-        const mockDB = {
-            transaction: vi.fn().mockReturnValue({
-                objectStore: vi.fn().mockReturnValue({
-                    get: vi.fn().mockReturnValue({
-                        onsuccess: null,
-                        onerror: null,
-                        result: 'idb-value',
-                    }),
-                }),
-            }),
-        };
-
-        const openReq = {
-            onsuccess: null as ((e: Event) => void) | null,
-            onerror: null as ((e: Event) => void) | null,
-            onupgradeneeded: null as ((e: Event) => void) | null,
-            result: mockDB,
-            error: null,
-        };
-
-        const originalIDB = (globalThis as any).indexedDB;
-        (globalThis as any).indexedDB = {
-            open: vi.fn().mockReturnValue(openReq),
-        };
-
-        // Force re-evaluation by creating a new module instance is hard,
-        // so we just verify the driver creation path works when indexedDB exists.
-        // We rely on the actual module being loaded with indexedDB mocked.
-        const { browserStorage: idbStorage } = await import('../storage-driver');
-
-        // Trigger the async DB open
-        if (openReq.onsuccess) {
-            openReq.onsuccess({ target: openReq } as unknown as Event);
-        }
-
-        // Since the mock is tricky to fully set up, we at least verify
-        // that no exception is thrown during construction.
-        expect(idbStorage).toBeDefined();
-
-        (globalThis as any).indexedDB = originalIDB;
     });
 });

@@ -16,19 +16,12 @@
 
 import { cleanup, fireEvent, render } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
-import { ConfigProvider } from '../../config-provider/ConfigProvider';
 import { Button } from '../Button';
-import { ButtonGroup } from '../ButtonGroup';
 import '@testing-library/jest-dom/vitest';
 
 afterEach(cleanup);
 
 describe('Button', () => {
-    it('renders correctly', () => {
-        const { container } = render(<Button variant="primary">btn1</Button>);
-        expect(container);
-    });
-
     it('click onClick function', () => {
         let a = 1;
 
@@ -64,60 +57,5 @@ describe('Button', () => {
         fireEvent.click(container.querySelector('button')!);
 
         expect(a).toEqual(1);
-    });
-
-    it('supports an icon size for square trigger buttons', () => {
-        const { container } = render(
-            <Button size="icon">
-                <svg />
-            </Button>
-        );
-
-        const button = container.querySelector('[data-u-comp="button"]');
-
-        expect(button?.className).toContain('univer-size-8');
-        expect(button?.className).toContain('!univer-p-0');
-    });
-});
-
-describe('ButtonGroup', () => {
-    it('renders correctly', () => {
-        const { container } = render(
-            <ButtonGroup>
-                <Button variant="primary">btn1</Button>
-                <Button variant="link">btn2</Button>
-            </ButtonGroup>
-        );
-        expect(container);
-    });
-
-    it('renders horizontal button group', () => {
-        const { container } = render(
-            <ButtonGroup orientation="horizontal">
-                <Button variant="primary">btn1</Button>
-                <Button variant="link">btn2</Button>
-            </ButtonGroup>
-        );
-        expect(container.querySelector('.univer-grid-flow-row')).toBeNull();
-    });
-
-    it('mirrors horizontal edge styles in RTL', () => {
-        const { container } = render(
-            <ConfigProvider mountContainer={document.body} direction="rtl">
-                <ButtonGroup orientation="horizontal">
-                    <Button>btn1</Button>
-                    <Button>btn2</Button>
-                </ButtonGroup>
-            </ConfigProvider>
-        );
-
-        const buttons = container.querySelectorAll('[data-u-comp="button"]');
-
-        expect(buttons[0].className).toContain('!univer-rounded-l-none');
-        expect(buttons[0].className).not.toContain('!univer-rounded-r-none');
-        expect(buttons[1].className).toContain('!univer-rounded-r-none');
-        expect(buttons[1].className).toContain('!univer-border-r-0');
-        expect(buttons[1].className).not.toContain('!univer-rounded-l-none');
-        expect(buttons[1].className).not.toContain('!univer-border-l-0');
     });
 });

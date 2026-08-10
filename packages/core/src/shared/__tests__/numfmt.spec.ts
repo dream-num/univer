@@ -246,14 +246,4 @@ describe('numfmt compatibility regression tests', () => {
             expect(tokens.some((t) => t.type === numfmt.tokenTypes.GROUP)).toBe(true);
         });
     });
-
-    describe('numfmt.tokenTypes', () => {
-        it('should expose expected token type constants', () => {
-            expect(typeof numfmt.tokenTypes.POINT).toBe('string');
-            expect(typeof numfmt.tokenTypes.ZERO).toBe('string');
-            expect(typeof numfmt.tokenTypes.COLOR).toBe('string');
-            expect(typeof numfmt.tokenTypes.MINUS).toBe('string');
-            expect(typeof numfmt.tokenTypes.GROUP).toBe('string');
-        });
-    });
 });

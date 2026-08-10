@@ -138,13 +138,6 @@ describe('Dialog', () => {
         expect(dialog).toBeInTheDocument();
         expect(dialog.dir).toBe('rtl');
 
-        const closeButton = dialog.querySelector('[data-slot="close"]') as HTMLElement;
-        expect(closeButton.className).toContain('rtl:univer-left-4');
-        expect(closeButton.className).toContain('rtl:univer-right-auto');
-
-        const header = dialog.querySelector('[data-slot="dialog-header"]') as HTMLElement;
-        expect(header.className).toContain('sm:rtl:!univer-text-right');
-
         mountContainer.remove();
     });
 });

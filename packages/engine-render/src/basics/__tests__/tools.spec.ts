@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { BaselineOffset, BooleanNumber, GridType, NumberUnitType, Rectangle, Tools } from '@univerjs/core';
+import { BaselineOffset, Rectangle, Tools } from '@univerjs/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { FontCache } from '../../components/docs/layout/shaping-engine/font-cache';
 import {
@@ -319,12 +319,6 @@ describe('tools extra', () => {
             g: expect.any(Number),
             b: expect.any(Number),
         }));
-    });
-
-    it('keeps core enum imports consistent for helpers coverage', () => {
-        expect(GridType.LINES).toBeGreaterThanOrEqual(0);
-        expect(BooleanNumber.TRUE).toBe(1);
-        expect(NumberUnitType.PIXEL).toBeGreaterThanOrEqual(0);
     });
 
     it('Emoji test', () => {

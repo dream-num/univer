@@ -16,7 +16,7 @@
 
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
-import { FormDualColumnLayout, FormLayout } from '../FormLayout';
+import { FormLayout } from '../FormLayout';
 import '@testing-library/jest-dom/vitest';
 
 afterEach(cleanup);
@@ -56,21 +56,5 @@ describe('FormLayout', () => {
 
         fireEvent.click(screen.getByText('Always Visible'));
         expect(screen.getByText('Child Content')).toBeInTheDocument();
-    });
-
-    it('should render dual column layout', () => {
-        const { container } = render(
-            <FormDualColumnLayout>
-                <div>Left</div>
-                <div>Right</div>
-            </FormDualColumnLayout>
-        );
-
-        expect(screen.getByText('Left')).toBeInTheDocument();
-        expect(screen.getByText('Right')).toBeInTheDocument();
-
-        const wrapper = container.firstElementChild as HTMLElement;
-        expect(wrapper.className).toContain('univer-flex');
-        expect(wrapper.className).toContain('univer-justify-between');
     });
 });

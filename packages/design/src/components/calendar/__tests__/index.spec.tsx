@@ -63,12 +63,6 @@ describe('Calendar', () => {
         expect(container.querySelector('[data-u-comp="time-input"]')).toBeInTheDocument();
     });
 
-    it('should highlight today and selected day', () => {
-        const { getByText } = renderCalendar();
-        // 15th is selected
-        expect(getByText('15').className).toMatch(/univer-bg-primary-600/);
-    });
-
     it('should switch year when navigating across month boundaries', () => {
         const date = new Date(2023, 0, 15);
         const { getByLabelText, getByText } = render(

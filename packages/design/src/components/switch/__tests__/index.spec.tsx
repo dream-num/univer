@@ -21,13 +21,6 @@ import { Switch } from '../Switch';
 afterEach(cleanup);
 
 describe('Switch', () => {
-    afterEach(cleanup);
-
-    it('renders correctly', () => {
-        const { container } = render(<Switch />);
-        expect(container);
-    });
-
     it('renders the checked', () => {
         const { container } = render(<Switch defaultChecked />);
 

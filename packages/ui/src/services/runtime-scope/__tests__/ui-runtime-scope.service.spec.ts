@@ -51,12 +51,43 @@ describe('UIRuntimeScopeService', () => {
         const fullscreenDisposable = service.register(fullscreenScope);
 
         expect(service.get('base-1')).toBe(fullscreenScope);
-        expect(service.getForElement(floatingTarget)).toBe(floatingScope);
-        expect(service.getForElement(fullscreenTarget)).toBe(fullscreenScope);
+        expect(service.get('base-1', floatingTarget)).toBe(floatingScope);
+        expect(service.get('base-1', fullscreenTarget)).toBe(fullscreenScope);
 
         fullscreenDisposable.dispose();
         expect(service.get('base-1')).toBe(floatingScope);
         floatingDisposable.dispose();
         expect(service.get('base-1')).toBeUndefined();
+    });
+
+    it('keeps the unit id as the runtime boundary when resolving an event target', () => {
+        const service = new UIRuntimeScopeService();
+        const baseRoot = document.createElement('div');
+        const sheetRoot = document.createElement('div');
+        const sheetTarget = document.createElement('textarea');
+        sheetRoot.appendChild(sheetTarget);
+
+        const baseScope = {
+            unitId: 'base-1',
+            root: baseRoot,
+            has: () => false,
+            get<T>(): T {
+                throw new Error('not implemented');
+            },
+        };
+        const sheetScope = {
+            unitId: 'sheet-1',
+            root: sheetRoot,
+            has: () => false,
+            get<T>(): T {
+                throw new Error('not implemented');
+            },
+        };
+        service.register(baseScope);
+        service.register(sheetScope);
+
+        expect(service.get('base-1', sheetTarget)).toBe(baseScope);
+        expect(service.get('sheet-1', sheetTarget)).toBe(sheetScope);
+        expect(service.get(undefined, sheetTarget)).toBeUndefined();
     });
 });

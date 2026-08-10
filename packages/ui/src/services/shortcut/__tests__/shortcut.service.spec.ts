@@ -78,7 +78,6 @@ function createService(options?: {
         checkElementInCurrentContainers: vi.fn(() => options?.layoutAllowed),
     };
     const getRuntimeScope = vi.fn();
-    const getRuntimeScopeForElement = vi.fn();
 
     class TestCommandService {
         executeCommand = executeCommand;
@@ -99,7 +98,6 @@ function createService(options?: {
     class TestRuntimeScopeService {
         register = vi.fn();
         get = getRuntimeScope;
-        getForElement = getRuntimeScopeForElement;
     }
 
     const injector = new Injector();
@@ -113,7 +111,7 @@ function createService(options?: {
     injector.add([ShortcutService]);
     const service = injector.get(ShortcutService);
 
-    return { service, executeCommand, getRuntimeScope, getRuntimeScopeForElement, layoutService };
+    return { service, executeCommand, getRuntimeScope, layoutService };
 }
 
 describe('ShortcutService', () => {
@@ -306,7 +304,7 @@ describe('ShortcutService', () => {
         });
         window.dispatchEvent(event);
 
-        expect(getRuntimeScope).toHaveBeenCalledWith('child-board');
+        expect(getRuntimeScope).toHaveBeenCalledWith('child-board', canvas);
         expect(scopedContextService.getContextValue).toHaveBeenCalledWith('FOCUSING_BOARD');
         expect(scopedExecuteCommand).toHaveBeenCalledWith('board.operation.grouping-shortcut', undefined);
         expect(executeCommand).not.toHaveBeenCalled();
@@ -330,13 +328,8 @@ describe('ShortcutService', () => {
                 ? scopedContextService
                 : { executeCommand: scopedExecuteCommand }),
         };
-        const otherRuntimeScope = {
-            has: vi.fn(() => true),
-            get: vi.fn(() => ({ getContextValue: vi.fn(() => false) })),
-        };
-        const { service, executeCommand, getRuntimeScope, getRuntimeScopeForElement } = createService();
-        getRuntimeScope.mockReturnValue(otherRuntimeScope);
-        getRuntimeScopeForElement.mockReturnValue(targetRuntimeScope);
+        const { service, executeCommand, getRuntimeScope } = createService();
+        getRuntimeScope.mockReturnValue(targetRuntimeScope);
         service.registerShortcut({
             id: 'base.operation.edit-cell',
             binding: KeyCode.ENTER,
@@ -350,8 +343,7 @@ describe('ShortcutService', () => {
         });
         window.dispatchEvent(event);
 
-        expect(getRuntimeScopeForElement).toHaveBeenCalledWith(canvas);
-        expect(getRuntimeScope).not.toHaveBeenCalled();
+        expect(getRuntimeScope).toHaveBeenCalledWith('child-base', canvas);
         expect(scopedExecuteCommand).toHaveBeenCalledWith('base.operation.edit-cell', undefined);
         expect(executeCommand).not.toHaveBeenCalled();
         expect(event.defaultPrevented).toBe(true);
@@ -430,7 +422,7 @@ describe('ShortcutService', () => {
         });
         window.dispatchEvent(event);
 
-        expect(getRuntimeScope).toHaveBeenCalledWith('child-doc');
+        expect(getRuntimeScope).toHaveBeenCalledWith('child-doc', textEditor);
         expect(scopedExecuteCommand).toHaveBeenCalledWith('doc.command.select-all', undefined);
         expect(executeCommand).not.toHaveBeenCalled();
         expect(event.defaultPrevented).toBe(true);

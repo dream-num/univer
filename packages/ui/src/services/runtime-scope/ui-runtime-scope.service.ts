@@ -26,8 +26,7 @@ export interface IUIRuntimeScope {
 
 export interface IUIRuntimeScopeService {
     register(scope: IUIRuntimeScope): IDisposable;
-    get(unitId: string | null | undefined): IUIRuntimeScope | undefined;
-    getForElement(target: EventTarget | null): IUIRuntimeScope | undefined;
+    get(unitId: string | null | undefined, target?: EventTarget | null): IUIRuntimeScope | undefined;
 }
 
 export const IUIRuntimeScopeService = createIdentifier<IUIRuntimeScopeService>('ui.runtime-scope.service');
@@ -52,24 +51,17 @@ export class UIRuntimeScopeService extends Disposable implements IUIRuntimeScope
         });
     }
 
-    get(unitId: string | null | undefined): IUIRuntimeScope | undefined {
+    get(unitId: string | null | undefined, target?: EventTarget | null): IUIRuntimeScope | undefined {
         const scopes = unitId ? this._scopes.get(unitId) : undefined;
-        return scopes?.[scopes.length - 1];
-    }
-
-    getForElement(target: EventTarget | null): IUIRuntimeScope | undefined {
-        if (typeof Node === 'undefined' || !(target instanceof Node)) {
-            return undefined;
-        }
-
-        const scopes = Array.from(this._scopes.values()).flat();
-        for (let index = scopes.length - 1; index >= 0; index--) {
-            const scope = scopes[index];
-            if (scope.root?.contains(target)) {
-                return scope;
+        if (scopes && typeof Node !== 'undefined' && target instanceof Node) {
+            for (let index = scopes.length - 1; index >= 0; index--) {
+                const scope = scopes[index];
+                if (scope.root?.contains(target)) {
+                    return scope;
+                }
             }
         }
 
-        return undefined;
+        return scopes?.[scopes.length - 1];
     }
 }

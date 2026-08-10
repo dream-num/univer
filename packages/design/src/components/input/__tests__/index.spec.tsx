@@ -25,14 +25,6 @@ afterEach(() => {
 });
 
 describe('Input', () => {
-    afterEach(cleanup);
-
-    it('renders correctly', () => {
-        const { container } = render(<Input />);
-
-        expect(container);
-    });
-
     it('renders the placeholder', () => {
         const { getByPlaceholderText } = render(<Input placeholder="Test" />);
         const inputElement = getByPlaceholderText('Test');

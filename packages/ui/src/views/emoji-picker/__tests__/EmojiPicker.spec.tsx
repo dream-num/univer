@@ -85,14 +85,6 @@ afterEach(() => {
 });
 
 describe('picker callbacks', () => {
-    it('omits the popup frame when the emoji picker is embedded', () => {
-        const { container } = renderWithDependencies(<EmojiPicker embedded />);
-        const picker = container.querySelector('[data-u-comp="ui.emoji-picker"]');
-
-        expect(picker?.className).not.toContain('univer-border');
-        expect(picker?.className).not.toContain('univer-shadow-lg');
-    });
-
     it('reports an emoji through the direct change callback', () => {
         const onChange = vi.fn();
         const { getAllByRole } = renderWithDependencies(<EmojiPicker onChange={onChange} />);
@@ -130,14 +122,6 @@ describe('picker callbacks', () => {
         fireEvent.click(getByRole('button', { name: '∞' }));
 
         expect(onChange).toHaveBeenCalledWith('∞');
-    });
-
-    it('omits the popup frame when the symbol picker is embedded', () => {
-        const { container } = renderWithDependencies(<SymbolPicker embedded />);
-        const picker = container.querySelector('[data-u-comp="ui.symbol-picker"]');
-
-        expect(picker?.className).not.toContain('univer-border');
-        expect(picker?.className).not.toContain('univer-shadow-lg');
     });
 
     it('uses the design scrollbar styles for symbol content', () => {

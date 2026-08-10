@@ -21,13 +21,6 @@ import { Avatar } from '../Avatar';
 afterEach(cleanup);
 
 describe('Avatar', () => {
-    afterEach(cleanup);
-
-    it('renders correctly', () => {
-        const { container } = render(<Avatar size="small">Jane Doe</Avatar>);
-        expect(container);
-    });
-
     it('renders the children', () => {
         const { getByText } = render(<Avatar>Test</Avatar>);
         const childrenElement = getByText('Test');

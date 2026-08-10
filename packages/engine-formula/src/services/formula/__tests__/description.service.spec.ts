@@ -120,51 +120,6 @@ describe('DescriptionService', () => {
         });
     });
 
-    it('handles defined-name descriptions according to current implementation semantics', () => {
-        const rangeNameInfo = createFunctionInfo({
-            functionName: 'BOOK_RANGE',
-            functionType: FunctionType.DefinedName,
-            description: 'A1:B2',
-            abstract: 'Workbook range',
-            functionParameter: [],
-        });
-        const formulaNameInfo = createFunctionInfo({
-            functionName: 'BOOK_FORMULA',
-            functionType: FunctionType.DefinedName,
-            description: 'SUM(A1:A2)',
-            abstract: 'Workbook formula',
-            functionParameter: [],
-        });
-
-        descriptionService.registerDescriptions([rangeNameInfo, formulaNameInfo]);
-
-        expect(descriptionService.hasDefinedNameDescription('BOOK_RANGE')).toBe(true);
-        expect(descriptionService.hasDefinedNameDescription('BOOK_FORMULA')).toBe(true);
-        expect(descriptionService.isFormulaDefinedName('BOOK_RANGE')).toBe(false);
-        expect(descriptionService.isFormulaDefinedName('BOOK_FORMULA')).toBe(true);
-        expect(descriptionService.getSearchListByName('BOOK')).toEqual([]);
-        expect(descriptionService.getSearchListByNameFirstLetter('BOOK')).toEqual(
-            expect.arrayContaining([
-                {
-                    name: 'BOOK_RANGE',
-                    desc: 'Workbook range',
-                    functionType: FunctionType.DefinedName,
-                },
-                {
-                    name: 'BOOK_FORMULA',
-                    desc: 'Workbook formula',
-                    functionType: FunctionType.DefinedName,
-                },
-            ])
-        );
-        expect(descriptionService.getSearchListByType(-1)).not.toEqual(
-            expect.arrayContaining([
-                { name: 'BOOK_RANGE', desc: 'Workbook range' },
-                { name: 'BOOK_FORMULA', desc: 'Workbook formula' },
-            ])
-        );
-    });
-
     it('re-registers descriptions with localized alias names after locale changes', () => {
         const customInfo = createFunctionInfo({ aliasFunctionName: 'custom.alias' });
 

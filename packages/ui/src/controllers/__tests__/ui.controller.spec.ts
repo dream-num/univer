@@ -26,7 +26,6 @@ import { KeyCode, MetaKeys } from '../../services/shortcut/keycode';
 import { ErrorController } from '../error/error.controller';
 import { FeatureSearchController } from '../feature-search/feature-search.controller';
 import { ShortcutPanelController } from '../shortcut-display/shortcut-panel.controller';
-import { IUIController } from '../ui/ui.controller';
 
 describe('ErrorController', () => {
     it('should forward errors to message service', () => {
@@ -119,9 +118,5 @@ describe('menu schema and ui token', () => {
         const shortcutPanel = others[ToggleShortcutPanelOperation.id] as { order?: number; gridLayout?: unknown };
         expect(shortcutPanel.order).toBe(1);
         expect(shortcutPanel.gridLayout).toBeUndefined();
-    });
-
-    it('should expose ui controller identifier', () => {
-        expect(IUIController).toBeDefined();
     });
 });

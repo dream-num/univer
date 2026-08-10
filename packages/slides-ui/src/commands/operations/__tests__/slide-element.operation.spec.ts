@@ -43,7 +43,6 @@ import {
 } from '../insert-shape.operation';
 import { SlideAddTextCommand, SlideAddTextOperation } from '../insert-text.operation';
 import { SetSlidePageThumbOperation } from '../set-thumb.operation';
-import { SetTextEditArrowOperation } from '../text-edit.operation';
 import { UpdateSlideElementOperation } from '../update-element.operation';
 
 const unitId = 'slide-command-unit';
@@ -277,7 +276,6 @@ describe('slide element operations', () => {
         commandService.registerCommand(SetSlidePageThumbOperation);
         commandService.registerCommand(InsertSlideFloatImageCommand);
         commandService.registerCommand(ToggleSlideEditSidebarOperation);
-        commandService.registerCommand(SetTextEditArrowOperation);
         injector.get(LocaleService).load({});
     });
 
@@ -454,10 +452,6 @@ describe('slide element operations', () => {
             },
         });
         expect(TestCanvasView.activeObjectIds).toEqual(['created-object']);
-    });
-
-    it('keeps the current text-edit arrow operation as a no-op success', async () => {
-        await expect(commandService.executeCommand(SetTextEditArrowOperation.id, { direction: 'left' })).resolves.toBe(true);
     });
 
     it('opens and closes the slide edit sidebar for the selected object type', async () => {

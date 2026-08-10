@@ -20,47 +20,42 @@ test('cells rendering after scrolling', async () => {
     await page.evaluate(() => window.E2EControllerAPI.loadMergeCellSheet());
     await page.waitForTimeout(1000);
 
-    await page.evaluate(async () => {
-        const dispatchWheelEvent = (deltaX: number, deltaY: number, element: HTMLElement, interval: number = 30, lastFor: number = 1000) => {
-            const dispatchSimulateWheelEvent = (element) => {
-                const event = new WheelEvent('wheel', {
+    const canvas = page.locator(SHEET_MAIN_CANVAS_ID);
+    // TODO(@ai-review): Verify fixed-count wheel input and stable scroll frames eliminate CI flakiness without hiding merged-cell repaint regressions.
+    await canvas.evaluate(async (element: HTMLCanvasElement) => {
+        const scroll = async (deltaY: number) => {
+            for (let elapsed = 0; elapsed < 1000; elapsed += 30) {
+                element.dispatchEvent(new WheelEvent('wheel', {
                     bubbles: true,
                     cancelable: true,
                     deltaY,
-                    deltaX,
                     clientX: 580,
                     clientY: 580,
-                });
-                element.dispatchEvent(event);
-            };
-
-            // mock wheel event.
-            let intervalID;
-            const continuousWheelSimulation = (element, interval) => {
-                intervalID = setInterval(function () {
-                    dispatchSimulateWheelEvent(element);
-                }, interval);
-            };
-
-            // start mock wheel event.
-            continuousWheelSimulation(element, interval);
-            return new Promise((resolve) => {
-                setTimeout(() => {
-                    clearInterval(intervalID);
-                    resolve(1);
-                }, lastFor);
-            });
+                }));
+                await new Promise((resolve) => setTimeout(resolve, 30));
+            }
         };
-        const canvasElements = document.querySelectorAll('canvas[data-u-comp=render-canvas]') as unknown as HTMLElement[];
-        const filteredCanvasElements = Array.from(canvasElements).filter((canvas) => canvas.offsetHeight > 500);
-        const element = filteredCanvasElements[0];
-        await dispatchWheelEvent(0, 100, element);
-        await dispatchWheelEvent(0, -100, element);
+        await scroll(100);
+        await scroll(-100);
     });
-    await page.waitForTimeout(1000);
+    await page.evaluate(() => new Promise<void>((resolve) => {
+        let previous = '';
+        let stableFrames = 0;
+        const check = () => {
+            const current = JSON.stringify(window.univerAPI.getActiveWorkbook().getActiveSheet().getScrollState());
+            stableFrames = current === previous ? stableFrames + 1 : 0;
+            previous = current;
+            if (stableFrames >= 5) {
+                resolve();
+                return;
+            }
+            requestAnimationFrame(check);
+        };
+        requestAnimationFrame(check);
+    }));
 
     const filename = generateSnapshotName('mergedCellsRenderingScrolling');
-    const screenshot = await page.locator(SHEET_MAIN_CANVAS_ID).screenshot();
+    const screenshot = await canvas.screenshot();
     await expect(screenshot).toMatchSnapshot(filename, { maxDiffPixelRatio: 0.005 });
 });
 

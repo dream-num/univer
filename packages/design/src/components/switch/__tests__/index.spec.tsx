@@ -20,7 +20,6 @@ import { Switch } from '../Switch';
 
 afterEach(cleanup);
 
-// TODO(@ai-review): Confirm switch coverage protects checked and interaction behavior without retaining a no-op render assertion.
 describe('Switch', () => {
     it('renders the checked', () => {
         const { container } = render(<Switch defaultChecked />);

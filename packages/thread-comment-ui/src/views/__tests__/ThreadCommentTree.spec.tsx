@@ -539,7 +539,6 @@ function waitForFrame() {
     return new Promise((resolve) => setTimeout(resolve, 16));
 }
 
-// TODO(@ai-review): Confirm comment-tree coverage retains semantic direction and interaction checks without freezing spacing utility classes.
 describe('ThreadCommentTree', () => {
     let root: Root | undefined;
     let container: HTMLElement | undefined;

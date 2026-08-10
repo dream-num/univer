@@ -21,7 +21,6 @@ import { findNodeFromPath, findNodePathFromTree, findSubTreeFromPath, isIntermed
 
 afterEach(cleanup);
 
-// TODO(@ai-review): Confirm tree coverage protects expansion and selection behavior without retaining a no-op defaultExpandAll render assertion.
 describe('Tree', () => {
     const data = [
         {

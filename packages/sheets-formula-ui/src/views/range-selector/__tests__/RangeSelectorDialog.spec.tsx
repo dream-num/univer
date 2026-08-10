@@ -149,7 +149,6 @@ async function clickButton(text: string): Promise<void> {
     });
 }
 
-// TODO(@ai-review): Confirm the retained range-selector cases cover editing and confirmation behavior without freezing RTL utility classes.
 describe('RangeSelectorDialog', () => {
     let container: HTMLDivElement;
     let root: Root;

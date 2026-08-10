@@ -84,7 +84,6 @@ afterEach(() => {
     vi.unstubAllGlobals();
 });
 
-// TODO(@ai-review): Confirm picker coverage protects selection and virtualization without freezing embedded-frame utility classes.
 describe('picker callbacks', () => {
     it('reports an emoji through the direct change callback', () => {
         const onChange = vi.fn();

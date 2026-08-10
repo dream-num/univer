@@ -21,7 +21,6 @@ import '@testing-library/jest-dom/vitest';
 
 afterEach(cleanup);
 
-// TODO(@ai-review): Confirm button coverage remains focused on rendering and interaction instead of utility-class recipes.
 describe('Button', () => {
     it('click onClick function', () => {
         let a = 1;

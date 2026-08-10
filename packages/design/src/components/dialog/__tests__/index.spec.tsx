@@ -23,7 +23,6 @@ import '@testing-library/jest-dom/vitest';
 
 afterEach(cleanup);
 
-// TODO(@ai-review): Confirm dialog coverage retains portal and semantic direction behavior without freezing RTL positioning classes.
 describe('Dialog', () => {
     it('should not render when open is false', () => {
         const { queryByText } = render(<Dialog open={false} title="Title">content</Dialog>);

@@ -96,7 +96,6 @@ function renderWithDependencies(element: ReactElement) {
 
 afterEach(cleanup);
 
-// TODO(@ai-review): Confirm toolbar-item coverage protects labels, commands, and state transitions without freezing Grid utility classes.
 describe('ToolbarItem', () => {
     it('closes open selector options when the parent becomes disabled', async () => {
         const disabled$ = new BehaviorSubject(false);

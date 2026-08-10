@@ -29,7 +29,6 @@ import { IRibbonService } from '../../../../services/ribbon/ribbon.service';
 import { connectInjector } from '../../../../utils/di';
 import { Ribbon } from '../Ribbon';
 
-// TODO(@ai-review): Confirm ribbon override coverage protects placeholder and observer behavior without freezing centering utility classes.
 describe('Ribbon override chrome', () => {
     let observeCount = 0;
 

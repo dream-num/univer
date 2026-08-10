@@ -24,7 +24,6 @@ afterEach(() => {
     vi.unstubAllGlobals();
 });
 
-// TODO(@ai-review): Confirm input coverage protects user-visible and measured-slot behavior without retaining a no-op render assertion.
 describe('Input', () => {
     it('renders the placeholder', () => {
         const { getByPlaceholderText } = render(<Input placeholder="Test" />);

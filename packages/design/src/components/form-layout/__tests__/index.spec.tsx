@@ -21,7 +21,6 @@ import '@testing-library/jest-dom/vitest';
 
 afterEach(cleanup);
 
-// TODO(@ai-review): Confirm form-layout coverage protects validation and collapse behavior without freezing its flexbox utility classes.
 describe('FormLayout', () => {
     it('should toggle content when collapsable', () => {
         const { container } = render(

@@ -61,7 +61,6 @@ function renderWithDependencies(element: ReactElement) {
     };
 }
 
-// TODO(@ai-review): Confirm sidebar coverage protects open, close, and resize behavior without freezing internal min-width classes.
 describe('Sidebar', () => {
     afterEach(() => {
         cleanup();

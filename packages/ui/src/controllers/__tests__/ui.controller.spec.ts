@@ -119,6 +119,4 @@ describe('menu schema and ui token', () => {
         expect(shortcutPanel.order).toBe(1);
         expect(shortcutPanel.gridLayout).toBeUndefined();
     });
-
-    // TODO(@ai-review): Verify the remaining schema assertions represent intentional ribbon layout contracts.
 });

@@ -40,7 +40,6 @@ function createFunctionInfo(overrides: Partial<IFunctionInfo> = {}): IFunctionIn
     };
 }
 
-// TODO(@ai-review): Verify the remaining description tests protect locale refresh and search behavior with explicit expectations.
 describe('DescriptionService', () => {
     let univer: Univer;
     let localeService: LocaleService;

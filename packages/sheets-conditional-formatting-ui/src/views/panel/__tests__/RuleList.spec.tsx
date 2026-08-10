@@ -146,7 +146,6 @@ async function createRuleListTestBed() {
     return testBed;
 }
 
-// TODO(@ai-review): Confirm the retained conditional-formatting cases protect rule behavior rather than RTL utility-class placement.
 describe('RuleList', () => {
     let root: Root | undefined;
     let container: HTMLDivElement | undefined;

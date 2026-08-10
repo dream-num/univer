@@ -23,7 +23,6 @@ import '@testing-library/jest-dom/vitest';
 
 afterEach(cleanup);
 
-// TODO(@ai-review): Confirm calendar coverage protects date selection and navigation without binding selected state to a Tailwind color class.
 describe('Calendar', () => {
     const onChange = vi.fn();
 

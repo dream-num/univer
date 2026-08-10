@@ -1198,7 +1198,6 @@ describe('docs drawing commands integration', () => {
         testBed.univer.dispose();
     });
 
-    // TODO(@ai-review): Verify the remaining drawing command cases cover implemented mutations and render effects.
     it('clears the doc drawing transformer for the active render scene', async () => {
         const testBed = setupDrawingTestBed(createDrawingDocData());
 

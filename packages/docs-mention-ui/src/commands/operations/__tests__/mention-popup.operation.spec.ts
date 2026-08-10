@@ -22,7 +22,6 @@ import {
     ShowMentionEditPopupOperation,
 } from '../mention-popup.operation';
 
-// TODO(@ai-review): Verify mention popup tests retain coverage of real editing state transitions.
 describe('mention edit popup operations', () => {
     let univer: Univer;
     let commandService: ICommandService;

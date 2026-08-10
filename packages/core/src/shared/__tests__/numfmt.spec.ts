@@ -223,7 +223,6 @@ describe('numfmt compatibility regression tests', () => {
         });
     });
 
-    // TODO(@ai-review): Verify number-format coverage remains focused on tokenization and formatting behavior.
     describe('numfmt.tokenize', () => {
         it('should tokenize patterns correctly', () => {
             const tokens = numfmt.tokenize('0.00');

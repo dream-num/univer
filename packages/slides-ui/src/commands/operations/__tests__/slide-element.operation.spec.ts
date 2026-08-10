@@ -454,7 +454,6 @@ describe('slide element operations', () => {
         expect(TestCanvasView.activeObjectIds).toEqual(['created-object']);
     });
 
-    // TODO(@ai-review): Verify the remaining slide operations assert visible editing and sidebar behavior.
     it('opens and closes the slide edit sidebar for the selected object type', async () => {
         const sidebarService = univer.__getInjector().get(ISidebarService);
         const objectTypes = [

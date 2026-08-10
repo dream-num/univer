@@ -29,7 +29,6 @@ import '@testing-library/jest-dom/vitest';
 
 afterEach(cleanup);
 
-// TODO(@ai-review): Confirm color-picker coverage protects value changes without freezing RTL padding and positioning classes.
 describe('ColorPicker', () => {
     it('should not contain duplicate preset colors', () => {
         const flattenedPresets = colorPresets.flat().map((color) => color.toUpperCase());

@@ -75,7 +75,6 @@ import {
     toPx,
 } from '../tools';
 
-// TODO(@ai-review): Verify the remaining rendering helper tests exercise transformations, parsing, and platform fallbacks.
 describe('tools extra', () => {
     afterEach(() => {
         vi.restoreAllMocks();

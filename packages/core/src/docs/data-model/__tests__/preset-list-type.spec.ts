@@ -25,4 +25,13 @@ describe('preset list types', () => {
             }
         }
     });
+
+    it('keeps wrapped text aligned after the hanging marker at every level', () => {
+        for (const [listType, listData] of Object.entries(PRESET_LIST_TYPE)) {
+            for (const [level, nesting] of listData.nestingLevel.entries()) {
+                expect(nesting.paragraphProperties?.hanging, `${listType} level ${level}`).toEqual({ v: 21 });
+                expect(nesting.paragraphProperties?.indentStart, `${listType} level ${level}`).toEqual({ v: 21 * (level + 1) });
+            }
+        }
+    });
 });

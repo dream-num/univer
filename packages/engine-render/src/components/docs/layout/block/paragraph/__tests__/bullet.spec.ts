@@ -258,7 +258,10 @@ describe('bullet', () => {
             expect(result.ts.ff).toBeUndefined();
             expect(result.ts.fs).toBeUndefined();
             expect(result.startIndexItem).toBe(1);
-            expect(result.paragraphProperties).toBeDefined();
+            expect(result.paragraphProperties).toMatchObject({
+                hanging: { v: 21 },
+                indentStart: { v: 21 },
+            });
         });
 
         it('uses custom startIndex', () => {

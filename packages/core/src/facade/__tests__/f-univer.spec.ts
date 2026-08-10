@@ -81,7 +81,6 @@ describe('FUniver integration', () => {
         const injector = univer.__getInjector();
         const commandService = injector.get(ICommandService);
         const localeService = injector.get(LocaleService);
-        const themeService = injector.get(ThemeService);
         const logs: string[] = [];
         const disposables: IDisposable[] = [];
 
@@ -103,11 +102,9 @@ describe('FUniver integration', () => {
             facade: { hello: 'Hola {0}' },
         } as never);
         univerAPI.setLocale('esES');
-        univerAPI.toggleDarkMode(true);
 
         expect(localeService.getCurrentLocale()).toBe('esES');
         expect(localeService.t('facade.hello', 'Univer')).toBe('Hola Univer');
-        expect(themeService.darkMode).toBe(true);
 
         expect(await univerAPI.executeCommand(TEST_COMMAND_ID, { value: 'ok' })).toBe(true);
         expect(univerAPI.syncExecuteCommand(TEST_COMMAND_ID, { value: 'ok' })).toBe(true);
@@ -158,6 +155,26 @@ describe('FUniver integration', () => {
         ]));
 
         disposables.forEach((disposable) => disposable.dispose());
+    });
+
+    it('should configure and read the theme through the facade api', () => {
+        const themeService = univer.__getInjector().get(ThemeService);
+        const currentTheme = univerAPI.getCurrentTheme();
+        const theme = {
+            ...currentTheme,
+            primary: {
+                ...currentTheme.primary,
+                600: '#123456',
+            },
+        };
+
+        univerAPI.setTheme(theme);
+        univerAPI.toggleDarkMode(true);
+
+        expect(univerAPI.getCurrentTheme().primary[600]).toBe('#123456');
+        expect(univerAPI.isDarkMode()).toBe(true);
+        expect(themeService.getCurrentTheme().primary[600]).toBe('#123456');
+        expect(themeService.darkMode).toBe(true);
     });
 
     it('should support cancelable commands and undo-redo facade events', async () => {

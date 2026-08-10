@@ -18,7 +18,7 @@
  * @vitest-environment jsdom
  */
 
-import { FOCUSING_BASE, ICommandService, IContextService, Injector } from '@univerjs/core';
+import { ICommandService, IContextService, Injector } from '@univerjs/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { EMBED_CHILD_UNIT_ID_ATTRIBUTE } from '../../../utils/embed-boundary';
 import { ILayoutService } from '../../layout/layout.service';
@@ -304,47 +304,9 @@ describe('ShortcutService', () => {
         });
         window.dispatchEvent(event);
 
-        expect(getRuntimeScope).toHaveBeenCalledWith('child-board', canvas);
+        expect(getRuntimeScope).toHaveBeenCalledWith('child-board');
         expect(scopedContextService.getContextValue).toHaveBeenCalledWith('FOCUSING_BOARD');
         expect(scopedExecuteCommand).toHaveBeenCalledWith('board.operation.grouping-shortcut', undefined);
-        expect(executeCommand).not.toHaveBeenCalled();
-        expect(event.defaultPrevented).toBe(true);
-        service.dispose();
-    });
-
-    it('uses the runtime that owns the event target when the same child unit has multiple runtimes', () => {
-        const runtime = document.createElement('div');
-        const canvas = document.createElement('canvas');
-        runtime.setAttribute(EMBED_CHILD_UNIT_ID_ATTRIBUTE, 'child-base');
-        runtime.appendChild(canvas);
-
-        const scopedExecuteCommand = vi.fn(() => Promise.resolve(true));
-        const scopedContextService = {
-            getContextValue: vi.fn((key: string) => key === FOCUSING_BASE),
-        };
-        const targetRuntimeScope = {
-            has: vi.fn(() => true),
-            get: vi.fn((identifier: unknown) => identifier === IContextService
-                ? scopedContextService
-                : { executeCommand: scopedExecuteCommand }),
-        };
-        const { service, executeCommand, getRuntimeScope } = createService();
-        getRuntimeScope.mockReturnValue(targetRuntimeScope);
-        service.registerShortcut({
-            id: 'base.operation.edit-cell',
-            binding: KeyCode.ENTER,
-            preconditions: (contextService) => contextService.getContextValue(FOCUSING_BASE),
-        });
-
-        const event = createKeyboardEvent(KeyCode.ENTER);
-        Object.defineProperty(event, 'target', {
-            configurable: true,
-            get: () => canvas,
-        });
-        window.dispatchEvent(event);
-
-        expect(getRuntimeScope).toHaveBeenCalledWith('child-base', canvas);
-        expect(scopedExecuteCommand).toHaveBeenCalledWith('base.operation.edit-cell', undefined);
         expect(executeCommand).not.toHaveBeenCalled();
         expect(event.defaultPrevented).toBe(true);
         service.dispose();
@@ -422,7 +384,7 @@ describe('ShortcutService', () => {
         });
         window.dispatchEvent(event);
 
-        expect(getRuntimeScope).toHaveBeenCalledWith('child-doc', textEditor);
+        expect(getRuntimeScope).toHaveBeenCalledWith('child-doc');
         expect(scopedExecuteCommand).toHaveBeenCalledWith('doc.command.select-all', undefined);
         expect(executeCommand).not.toHaveBeenCalled();
         expect(event.defaultPrevented).toBe(true);

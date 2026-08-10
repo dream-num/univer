@@ -57,6 +57,7 @@ import {
     MenuItemType,
     SYMBOL_PICKER_COMPONENT,
 } from '@univerjs/ui';
+
 import { combineLatest, distinctUntilChanged, map, Observable, shareReplay } from 'rxjs';
 import { OpenHeaderFooterPanelCommand } from '../commands/commands/doc-header-footer.command';
 import { HorizontalLineCommand } from '../commands/commands/doc-horizontal-line.command';
@@ -985,7 +986,7 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
                     selectable: false,
                 },
                 value$: new Observable<string>((subscriber) => {
-                    const defaultValue = DEFAULT_STYLES.cl.rgb;
+                    const defaultValue = themeService.getColorFromTheme('gray.900');
                     const calc = () => {
                         if (shouldSuppressDocMenuStateRefresh(accessor)) {
                             return;
@@ -1518,20 +1519,28 @@ export function CheckListMenuItemFactory(accessor: IAccessor): IMenuButtonItem<L
 // }
 
 export function ResetTextColorMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
+    const themeService = accessor.get(ThemeService);
+
     return {
         id: ResetInlineFormatTextColorCommand.id,
+        commandId: SetInlineFormatTextColorCommand.id,
         type: MenuItemType.BUTTON,
         title: 'docs-ui.toolbar.resetColor',
         icon: 'NoColorDoubleIcon',
+        params: () => ({ value: themeService.getColorFromTheme('gray.900') }),
     };
 }
 
 export function ResetBackgroundColorMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
+    const themeService = accessor.get(ThemeService);
+
     return {
         id: ResetInlineFormatTextBackgroundColorCommand.id,
+        commandId: SetInlineFormatTextBackgroundColorCommand.id,
         type: MenuItemType.BUTTON,
         title: 'docs-ui.toolbar.resetColor',
         icon: 'NoColorDoubleIcon',
+        params: () => ({ value: themeService.getColorFromTheme('primary.600') }),
     };
 }
 
@@ -1553,6 +1562,7 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
                 },
                 value$: new Observable<string>((subscriber) => {
                     const defaultValue = themeService.getColorFromTheme('primary.600');
+
                     const calc = () => {
                         if (shouldSuppressDocMenuStateRefresh(accessor)) {
                             return;

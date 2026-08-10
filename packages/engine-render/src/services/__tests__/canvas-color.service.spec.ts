@@ -34,6 +34,50 @@ describe('CanvasColorService', () => {
         expect(injector.get(ICanvasColorService).getRenderColor('#17212b')).toBe('#17212b');
     });
 
+    it('resolves design tokens from the current theme in light mode', () => {
+        const injector = new Injector();
+        injector.add([ThemeService]);
+        injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
+        const themeService = injector.get(ThemeService);
+        const service = injector.get(ICanvasColorService);
+        const theme = themeService.getCurrentTheme();
+
+        themeService.setTheme({
+            ...theme,
+            white: '#07111f',
+            gray: {
+                ...theme.gray,
+                50: '#0d1422',
+            },
+        });
+
+        expect(service.getRenderColor('gray.50')).toBe('#0d1422');
+        expect(service.getRenderColor('white')).toBe('white');
+
+        themeService.setTheme({
+            ...theme,
+            gray: {
+                ...theme.gray,
+                50: '#101827',
+            },
+        });
+
+        expect(service.getRenderColor('gray.50')).toBe('#101827');
+    });
+
+    it('applies dark rendering to resolved design tokens', () => {
+        const injector = new Injector();
+        injector.add([ThemeService]);
+        injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
+        const themeService = injector.get(ThemeService);
+        const service = injector.get(ICanvasColorService);
+        const gray900 = themeService.getColorFromTheme('gray.900');
+
+        themeService.setDarkMode(true);
+
+        expect(service.getRenderColor('gray.900')).toBe(service.getRenderColor(gray900));
+    });
+
     it('maps render colors for dark mode rendering', () => {
         const injector = new Injector();
         injector.add([ThemeService]);

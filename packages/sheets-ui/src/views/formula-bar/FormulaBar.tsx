@@ -247,7 +247,7 @@ export function FormulaBar(props: IProps) {
     const workbookEditDisable = !(workbookEditablePermission?.value ?? true);
     const editorActivationDisable = editDisable || workbookEditDisable;
     const disabled = editDisable || imageDisable;
-    const shouldSkipFocus = useRef(false);
+    const shouldSkipFocusRef = useRef(false);
 
     const handlePointerDown = () => {
         try {
@@ -272,24 +272,24 @@ export function FormulaBar(props: IProps) {
                 // cancel by event
                 if (!result) {
                     contextService.setContextValue(FOCUSING_FX_BAR_EDITOR, false);
-                    shouldSkipFocus.current = true;
+                    shouldSkipFocusRef.current = true;
                 }
                 // undoRedoService.clearUndoRedo(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
             }
         } catch (e) {
             contextService.setContextValue(FOCUSING_FX_BAR_EDITOR, false);
-            shouldSkipFocus.current = true;
+            shouldSkipFocusRef.current = true;
             throw e;
         }
     };
 
     const handlePointerUp = () => {
-        if (shouldSkipFocus.current) {
+        if (shouldSkipFocusRef.current) {
             setTimeout(() => {
                 editorService.blur(true);
             }, 30);
         }
-        shouldSkipFocus.current = false;
+        shouldSkipFocusRef.current = false;
     };
 
     const cellImage = isCellImage(editState?.documentLayoutObject.documentModel?.getSnapshot());
@@ -300,7 +300,8 @@ export function FormulaBar(props: IProps) {
             dir="ltr"
             data-u-comp="formula-bar"
             className={clsx(`
-              univer-box-border univer-flex univer-bg-white univer-transition-[height] univer-ease-linear
+              univer-box-border univer-flex univer-bg-white univer-text-gray-900 univer-transition-[height]
+              univer-ease-linear
               dark:!univer-bg-gray-800
             `, borderBottomClassName, className, {
                 'univer-h-7': arrowDirection === ArrowDirection.Down,

@@ -239,8 +239,8 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
             zIndex: 2,
             left: -1,
             top: -1,
-            fill: 'rgb(248, 249, 250)',
-            stroke: 'rgb(217, 217, 217)',
+            fill: 'gray.50',
+            stroke: 'gray.200',
             strokeWidth: 1,
         });
 

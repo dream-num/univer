@@ -18,7 +18,7 @@ import type { ListValidator } from '@univerjs/sheets-data-validation';
 import type { IFormulaEditorRef } from '@univerjs/sheets-formula-ui';
 import type { LocaleKey } from '../../../locale/types';
 import type { IFormulaInputProps } from './interface';
-import { DataValidationType, generateRandomId, isFormulaString, LocaleService } from '@univerjs/core';
+import { DataValidationType, generateRandomId, isFormulaString, LocaleService, ThemeService } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { borderClassName, clsx, DraggableList, Dropdown, FormLayout, Input, Radio, RadioGroup } from '@univerjs/design';
 import { DeleteIcon, GripVerticalIcon, IncreaseIcon, MoreDownIcon } from '@univerjs/icons';
@@ -75,6 +75,11 @@ interface IColorSelectProps {
 const ColorSelect = (props: IColorSelectProps) => {
     const { value, onChange, disabled } = props;
     const [open, setOpen] = useState(false);
+    const themeService = useDependency(ThemeService);
+    useObservable(themeService.currentTheme$);
+    const backgroundColor = value.includes('.') && themeService.isValidThemeColor(value)
+        ? themeService.getColorFromTheme(value)
+        : value;
 
     return (
         <Dropdown
@@ -116,7 +121,7 @@ const ColorSelect = (props: IColorSelectProps) => {
             >
                 <div
                     className="univer-box-border univer-size-4 univer-rounded univer-text-base"
-                    style={{ background: value }}
+                    style={{ background: backgroundColor }}
                 />
 
                 <MoreDownIcon />

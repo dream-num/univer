@@ -111,7 +111,7 @@ export const FontFamily = ({ className, disabled: disabledProp, value, disabled$
         >
             <input
                 className={`
-                  univer-block univer-h-6 univer-border-none univer-bg-transparent univer-leading-6
+                  univer-block univer-h-6 univer-border-none univer-bg-transparent univer-leading-6 univer-text-gray-900
                   focus:univer-outline-none
                   dark:!univer-text-white
                   [&_input:focus]:!univer-ring-0

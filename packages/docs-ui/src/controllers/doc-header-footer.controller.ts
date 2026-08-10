@@ -30,6 +30,7 @@ import type {
 import type { LocaleKey } from '../locale/types';
 import {
     BooleanNumber,
+    ColorKit,
     Disposable,
     DocumentFlavor,
     generateRandomId,
@@ -37,6 +38,7 @@ import {
     Inject,
     IUniverInstanceService,
     LocaleService,
+    ThemeService,
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -49,8 +51,8 @@ import { DocSelectionRenderService } from '../services/selection/doc-selection-r
 import { getDocPageSectionContext } from '../utils/section-header-footer';
 import { TextBubbleShape } from '../views/header-footer/text-bubble';
 
-const HEADER_FOOTER_STROKE_COLOR = 'rgba(58, 96, 247, 1)';
-const HEADER_FOOTER_FILL_COLOR = 'rgba(58, 96, 247, 0.08)';
+const HEADER_FOOTER_COVER_ALPHA = 0.5;
+const HEADER_FOOTER_LABEL_ALPHA = 0.08;
 
 interface IHeaderFooterCreate {
     createType: Nullable<HeaderFooterType>;
@@ -122,7 +124,8 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @Inject(DocSelectionRenderService) private readonly _docSelectionRenderService: DocSelectionRenderService,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @Inject(ThemeService) private readonly _themeService: ThemeService
     ) {
         super();
 
@@ -321,6 +324,13 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
                         const isEditBody = editArea === DocumentEditArea.BODY;
                         const { page, pageLeft, pageTop, ctx } = config;
                         const { pageWidth, pageHeight, marginTop, marginBottom } = page;
+                        const primaryColor = this._themeService.getColorFromTheme('primary.600');
+                        const coverColor = new ColorKit(this._themeService.getColorFromTheme('gray.50'))
+                            .setAlpha(HEADER_FOOTER_COVER_ALPHA)
+                            .toRgbString();
+                        const labelColor = new ColorKit(primaryColor)
+                            .setAlpha(HEADER_FOOTER_LABEL_ALPHA)
+                            .toRgbString();
 
                         // Draw header footer label.
                         ctx.save();
@@ -333,7 +343,7 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
                                 top: 0,
                                 width: pageWidth,
                                 height: marginTop,
-                                fill: 'rgba(255, 255, 255, 0.5)',
+                                fill: coverColor,
                             });
                             ctx.save();
                             ctx.translate(0, pageHeight - marginBottom);
@@ -342,7 +352,7 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
                                 top: 0,
                                 width: pageWidth,
                                 height: marginBottom,
-                                fill: 'rgba(255, 255, 255, 0.5)',
+                                fill: coverColor,
                             });
                             ctx.restore();
                         } else { // Cover body.
@@ -353,7 +363,7 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
                                 top: marginTop,
                                 width: pageWidth,
                                 height: pageHeight - marginTop - marginBottom,
-                                fill: 'rgba(255, 255, 255, 0.5)',
+                                fill: coverColor,
                             });
                             ctx.restore();
                         }
@@ -368,7 +378,7 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
                                     points: [pageWidth, marginTop],
                                 }] as unknown as IPathProps['dataArray'],
                                 strokeWidth: 1,
-                                stroke: HEADER_FOOTER_STROKE_COLOR,
+                                stroke: primaryColor,
                             };
 
                             const footerPathConfigIPathProps = {
@@ -380,7 +390,7 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
                                     points: [pageWidth, pageHeight - marginBottom],
                                 }] as unknown as IPathProps['dataArray'],
                                 strokeWidth: 1,
-                                stroke: HEADER_FOOTER_STROKE_COLOR,
+                                stroke: primaryColor,
                             };
 
                             Path.drawWith(ctx, headerPathConfigIPathProps);
@@ -389,12 +399,12 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
                             ctx.translate(0, marginTop + 1);
                             TextBubbleShape.drawWith(ctx, {
                                 text: localeService.t<LocaleKey>('docs-ui.headerFooter.header'),
-                                color: HEADER_FOOTER_FILL_COLOR,
+                                color: labelColor,
                             });
                             ctx.translate(0, pageHeight - marginTop - marginBottom);
                             TextBubbleShape.drawWith(ctx, {
                                 text: localeService.t<LocaleKey>('docs-ui.headerFooter.footer'),
-                                color: HEADER_FOOTER_FILL_COLOR,
+                                color: labelColor,
                             });
                         }
                         ctx.restore();

@@ -358,7 +358,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
                             <Tooltip title={localeService.t<LocaleKey>('sheets-formula-ui.rangeSelector.buttonTooltip')} placement="bottom">
                                 <SelectRangeIcon
                                     className={`
-                                      univer-cursor-pointer
+                                      -univer-translate-y-0.5 univer-cursor-pointer
                                       dark:!univer-text-gray-300
                                     `}
                                     onClick={handleOpenModal}

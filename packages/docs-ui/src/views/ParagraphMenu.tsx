@@ -39,6 +39,7 @@ import {
     NamedStyleType,
     SliceBodyType,
     TextX,
+    ThemeService,
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -50,6 +51,7 @@ import {
     RichTextEditingMutation,
 } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
+
 import {
     ContextMenuPanel,
     IconManager,
@@ -882,6 +884,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
     const hoverOpenSchedulerRef = useRef(createParagraphMenuHoverOpenScheduler(() => openMenuRef.current()));
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
+    const themeService = useDependency(ThemeService);
     const docSelectionManagerService = useDependency(DocSelectionManagerService);
     const direction = useObservable(localeService.direction$, 'ltr');
     const docClipboardService = useDependency(IDocClipboardService);
@@ -1097,8 +1100,8 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
             if (formattingRange) {
                 replaceSelection(formattingRange);
             }
-            await commandService.executeCommand(SetInlineFormatTextColorCommand.id, { value: '#000000' });
-            await commandService.executeCommand(ResetInlineFormatTextBackgroundColorCommand.id);
+            await commandService.executeCommand(SetInlineFormatTextColorCommand.id, { value: themeService.getColorFromTheme('gray.900') });
+            await commandService.executeCommand(SetInlineFormatTextBackgroundColorCommand.id, { value: themeService.getColorFromTheme('primary.600') });
             finishParagraphMenuCommand(docParagraphMenuService, layoutService, handleHideMenu);
             return;
         }

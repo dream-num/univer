@@ -19,7 +19,7 @@ import type { IPopupWithExtraProps } from '@univerjs/ui';
 import type { ReactElement } from 'react';
 import type { IListDropdownProps } from '../ListDropDown';
 import type { IBaseDropdownProps } from '../type';
-import { Injector, LocaleService } from '@univerjs/core';
+import { Injector, LocaleService, ThemeService } from '@univerjs/core';
 import { serializeListOptions, SheetPermissionCheckController } from '@univerjs/sheets';
 import { RediContext } from '@univerjs/ui';
 import { act } from 'react';
@@ -86,6 +86,7 @@ class InteractionLog {
 function createInjector() {
     const injector = new Injector();
     injector.add([LocaleService, { useClass: TestLocaleService as never }]);
+    injector.add([ThemeService]);
     injector.add([SheetPermissionCheckController, { useClass: TestSheetPermissionCheckController as never }]);
 
     return injector;
@@ -123,13 +124,13 @@ function createPopup(extraProps: Partial<IListPopupProps> = {}): IPopupWithExtra
     } as IPopupWithExtraProps<IListPopupProps>;
 }
 
-function renderWithDependencies(element: ReactElement) {
+async function renderWithDependencies(element: ReactElement) {
     const injector = createInjector();
     const container = document.createElement('div');
     document.body.appendChild(container);
     const root = createRoot(container);
 
-    act(() => {
+    await act(async () => {
         root.render(
             <RediContext.Provider value={{ injector }}>
                 {element}
@@ -139,7 +140,6 @@ function renderWithDependencies(element: ReactElement) {
 
     return {
         container,
-        injector,
         unmount: () => {
             act(() => root.unmount());
             container.remove();
@@ -183,7 +183,7 @@ describe('ListDropDown', () => {
 
     it('reports multiple selections in option order and keeps the popup open when change is rejected', async () => {
         InteractionLog.allowClose = false;
-        const { container, unmount } = renderWithDependencies(
+        const { container, unmount } = await renderWithDependencies(
             <ListDropDown
                 popup={createPopup({
                     multiple: true,
@@ -200,7 +200,7 @@ describe('ListDropDown', () => {
     });
 
     it('hides the popup after a successful single selection', async () => {
-        const { container, unmount } = renderWithDependencies(
+        const { container, unmount } = await renderWithDependencies(
             <ListDropDown
                 popup={createPopup({
                     defaultValue: 'alpha',
@@ -216,7 +216,7 @@ describe('ListDropDown', () => {
     });
 
     it('opens the list editor only when cell edit permission allows it', async () => {
-        const { container, unmount } = renderWithDependencies(
+        const { container, unmount } = await renderWithDependencies(
             <ListDropDown
                 popup={createPopup({
                     showEdit: true,

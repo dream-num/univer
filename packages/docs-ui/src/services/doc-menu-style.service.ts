@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, ITextStyle, Nullable } from '@univerjs/core';
-import { Disposable, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { Disposable, Inject, IUniverInstanceService, ThemeService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 
@@ -40,7 +40,8 @@ export class DocMenuStyleService extends Disposable {
     constructor(
         @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @Inject(ThemeService) private readonly _themeService: ThemeService
     ) {
         super();
 
@@ -64,12 +65,16 @@ export class DocMenuStyleService extends Disposable {
     }
 
     getDefaultStyle(): ITextStyle {
+        const defaultTextStyle: ITextStyle = {
+            ...DEFAULT_TEXT_STYLE,
+            cl: { rgb: this._themeService.getColorFromTheme('gray.900') },
+        };
         const docDataModel = this._univerInstanceService
             .getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
 
         if (docDataModel == null) {
             return {
-                ...DEFAULT_TEXT_STYLE,
+                ...defaultTextStyle,
             };
         }
 
@@ -79,7 +84,7 @@ export class DocMenuStyleService extends Disposable {
 
         if (docViewModel == null) {
             return {
-                ...DEFAULT_TEXT_STYLE,
+                ...defaultTextStyle,
             };
         }
 
@@ -87,11 +92,11 @@ export class DocMenuStyleService extends Disposable {
 
         if (editArea === DocumentEditArea.BODY) {
             return {
-                ...DEFAULT_TEXT_STYLE,
+                ...defaultTextStyle,
             };
         } else {
             return {
-                ...DEFAULT_TEXT_STYLE,
+                ...defaultTextStyle,
                 fs: HEADER_FOOTER_DEFAULT_FONTSIZE,
             };
         }

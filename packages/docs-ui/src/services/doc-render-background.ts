@@ -17,8 +17,8 @@
 import type { ICanvasColorService } from '@univerjs/engine-render';
 import { DocumentFlavor } from '@univerjs/core';
 
-const DOC_TRADITIONAL_WORKSPACE_BACKGROUND_COLOR = '#fafafa';
-const DOC_MODERN_WORKSPACE_BACKGROUND_COLOR = '#fff';
+const DOC_TRADITIONAL_WORKSPACE_BACKGROUND_COLOR = 'var(--univer-gray-100)';
+const DOC_MODERN_WORKSPACE_BACKGROUND_COLOR = 'var(--univer-gray-50)';
 const DOC_EDITOR_INTERNAL_BACKGROUND_COLOR = 'transparent';
 
 export interface IResolveDocRenderBackgroundOptions {
@@ -45,7 +45,9 @@ export function resolveDocRenderBackground(options: IResolveDocRenderBackgroundO
     }
 
     return {
-        canvasElementBackgroundColor: canvasColorService?.getRenderColor(backgroundColor) ?? backgroundColor,
+        canvasElementBackgroundColor: editorBackgroundColor == null
+            ? backgroundColor
+            : canvasColorService?.getRenderColor(backgroundColor) ?? backgroundColor,
         docBackgroundFillColor: undefined,
     };
 }

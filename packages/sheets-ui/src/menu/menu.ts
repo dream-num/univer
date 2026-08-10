@@ -513,7 +513,7 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
                     selectable: false,
                 },
                 value$: new Observable<string>((subscriber) => {
-                    const defaultValue = DEFAULT_STYLES.cl.rgb;
+                    const defaultValue = themeService.getColorFromTheme('gray.900');
                     const { isAllValuesSame, value: currentValue } = selectionManagerService.getCellStylesProperty('cl');
 
                     if (isAllValuesSame) {

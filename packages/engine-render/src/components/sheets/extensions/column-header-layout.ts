@@ -34,11 +34,18 @@ export interface IColumnsHeaderCfgParam {
 const DEFAULT_COLUMN_STYLE = {
     fontSize: 13,
     fontFamily: DEFAULT_FONTFACE_PLANE,
+    fontColor: 'gray.900',
+    backgroundColor: 'gray.50',
+    borderColor: 'gray.200',
+    textAlign: 'center',
+    textBaseline: 'middle',
+} as const;
+
+const DEFAULT_PRINTING_COLUMN_STYLE = {
+    ...DEFAULT_COLUMN_STYLE,
     fontColor: '#000000',
     backgroundColor: getColor([248, 249, 250]),
     borderColor: getColor([217, 217, 217]),
-    textAlign: 'center',
-    textBaseline: 'middle',
 } as const;
 
 /**
@@ -76,9 +83,10 @@ export class ColumnHeaderLayout extends SheetExtension {
         return { ...this.columnsCfg, ...columnsCfg };
     }
 
-    getHeaderStyle(sheetId: string): IHeaderStyleCfg {
+    getHeaderStyle(sheetId: string, isPrinting = false): IHeaderStyleCfg {
         const headerStyle = this.headerStyleOfWorksheet.get(sheetId) ?? {};
-        return { ...DEFAULT_COLUMN_STYLE, ...this.headerStyle, ...headerStyle };
+        const defaultStyle = isPrinting ? DEFAULT_PRINTING_COLUMN_STYLE : DEFAULT_COLUMN_STYLE;
+        return { ...defaultStyle, ...this.headerStyle, ...headerStyle };
     }
 
     getCfgOfCurrentColumn(columnsCfg: Record<number, IAColumnCfg>, headerStyle: IHeaderStyleCfg, colIndex: number): [IAColumnCfgObj, boolean] {
@@ -127,7 +135,7 @@ export class ColumnHeaderLayout extends SheetExtension {
         }
 
         const columnsCfg = this.getColumnsCfg(worksheet.getSheetId());
-        const headerStyle = this.getHeaderStyle(worksheet.getSheetId());
+        const headerStyle = this.getHeaderStyle(worksheet.getSheetId(), ctx.__mode === 'printing');
 
         const scale = this._getScale(parentScale);
         this.setStyleToCtx(ctx, headerStyle);

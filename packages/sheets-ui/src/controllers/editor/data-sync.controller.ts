@@ -32,6 +32,7 @@ import {
     IContextService,
     Inject,
     IUniverInstanceService,
+    ThemeService,
     Tools,
     UniverInstanceType,
     VerticalAlign,
@@ -41,6 +42,7 @@ import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/do
 import { ReplaceSnapshotCommand } from '@univerjs/docs-ui';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import { MoveRangeMutation, RangeProtectionRuleModel, SetRangeValuesMutation, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import { skip } from 'rxjs';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
 import { FormulaEditorController } from './formula-editor.controller';
@@ -79,7 +81,8 @@ export class EditorDataSyncController extends Disposable {
         @Inject(WorksheetProtectionRuleModel) private readonly _worksheetProtectionRuleModel: WorksheetProtectionRuleModel,
         @Inject(FormulaEditorController) private readonly _formulaEditorController: FormulaEditorController,
         @IFormulaEditorManagerService private readonly _formulaEditorManagerService: IFormulaEditorManagerService,
-        @IContextService private readonly _contextService: IContextService
+        @IContextService private readonly _contextService: IContextService,
+        @Inject(ThemeService) private readonly _themeService: ThemeService
     ) {
         super();
 
@@ -90,6 +93,7 @@ export class EditorDataSyncController extends Disposable {
         this._syncFormulaEditorContent();
         this._commandExecutedListener();
         this._syncFormulaRefRenderStyleOnFocusChange();
+        this._syncFormulaBarTextColorOnThemeChange();
     }
 
     private _getEditorViewModel(unitId: string): Nullable<DocumentViewModel> {
@@ -303,6 +307,12 @@ export class EditorDataSyncController extends Disposable {
         }));
     }
 
+    private _syncFormulaBarTextColorOnThemeChange() {
+        this.disposeWithMe(this._themeService.currentTheme$.pipe(skip(1)).subscribe(() => {
+            this._refreshRenderStyleConfig(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
+        }));
+    }
+
     private _refreshRenderStyleConfig(unitId: string) {
         const currentRender = this._renderManagerService.getRenderUnitById(unitId);
         const skeleton = currentRender?.with(DocSkeletonManagerService).getSkeleton();
@@ -332,7 +342,14 @@ export class EditorDataSyncController extends Disposable {
 
         const isFormulaBar = snapshot.id === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY;
         if (isFormulaBar) {
-            snapshot.documentStyle = formulaEditorStyle;
+            snapshot.documentStyle = {
+                ...formulaEditorStyle,
+                textStyle: {
+                    cl: {
+                        rgb: this._themeService.getColorFromTheme('gray.900'),
+                    },
+                },
+            };
         } else {
             snapshot.documentStyle ??= {};
         }

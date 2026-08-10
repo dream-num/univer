@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { createIdentifier, Disposable, type IDisposable, toDisposable } from '@univerjs/core';
+import type { IDisposable } from '@univerjs/core';
+import { createIdentifier, Disposable, toDisposable } from '@univerjs/core';
 
 export interface IUIRuntimeScope {
     unitId: string;
@@ -52,7 +53,8 @@ export class UIRuntimeScopeService extends Disposable implements IUIRuntimeScope
     }
 
     get(unitId: string | null | undefined): IUIRuntimeScope | undefined {
-        return unitId ? this._scopes.get(unitId)?.at(-1) : undefined;
+        const scopes = unitId ? this._scopes.get(unitId) : undefined;
+        return scopes?.[scopes.length - 1];
     }
 
     getForElement(target: EventTarget | null): IUIRuntimeScope | undefined {

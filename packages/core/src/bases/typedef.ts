@@ -316,6 +316,8 @@ export interface IBaseSnapshot {
 export interface ITableSnapshot {
     id: TableId;
     name: string;
+    /** Stable canonical name used by formulas and exported structured references. */
+    formulaName?: string;
     fields: Record<FieldId, IFieldSnapshot>;
     fieldOrder: FieldId[];
     records: Record<RecordId, IRecordSnapshot>;

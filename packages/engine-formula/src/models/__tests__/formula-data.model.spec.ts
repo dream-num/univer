@@ -1122,7 +1122,9 @@ describe('Test formula data model', () => {
                 const snapshot = structuredClone(TEST_BASE_DATA);
                 snapshot.id = 'base-structured-scope';
                 snapshot.tables!['table-main'].name = 'Orders';
+                snapshot.tables!['table-main'].formulaName = 'Orders';
                 snapshot.tables!.tableOther.name = 'Pricing';
+                snapshot.tables!.tableOther.formulaName = 'Pricing';
                 snapshot.tables!['table-main'].fields.total.config = {
                     formula: '=Orders[@[Amount]]+[@[Qty]]+SUM(Pricing[External])',
                 };
@@ -1155,6 +1157,7 @@ describe('Test formula data model', () => {
                 const snapshot = structuredClone(TEST_BASE_DATA);
                 snapshot.id = 'base-real-table-name';
                 snapshot.tables!['table-main'].name = 'table';
+                snapshot.tables!['table-main'].formulaName = 'table';
                 snapshot.tables!['table-main'].fields.total.config = {
                     formula: '=SUM(table[Amount])+table[[#This Row],[Qty]]',
                 };

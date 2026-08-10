@@ -28,7 +28,6 @@ import { UnitModel, UniverInstanceType } from '../common/unit';
 import { Tools } from '../shared/tools';
 import { CellValueType } from '../types/enum';
 import { getEmptySnapshot } from './empty-snapshot';
-import { migrateBaseFormulaTableNames } from './formula-table-name';
 import { assertBaseTableRecordIdentity, BASE_RECORD_ID_FIELD_ID } from './record-identity';
 import { BaseFieldType } from './typedef';
 
@@ -89,7 +88,6 @@ export class BaseDataModel extends UnitModel<IBaseSnapshot, UniverInstanceType.U
 
     setSnapshot(snapshot: IBaseSnapshot): void {
         if (isNormalizedBaseSnapshot(snapshot)) {
-            migrateBaseFormulaTableNames(snapshot);
             this._snapshot = snapshot;
         } else {
             this._snapshot = normalizeBaseSnapshot(snapshot);
@@ -123,7 +121,6 @@ function normalizeBaseSnapshot(snapshot: IBaseSnapshot): IBaseSnapshot {
         normalizeBaseTable(table);
         assertMaterializedRecordIdentity(table);
     });
-    migrateBaseFormulaTableNames(snapshot);
     return snapshot;
 }
 

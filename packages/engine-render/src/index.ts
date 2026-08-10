@@ -46,6 +46,8 @@ export * from './components';
 export type { DocsCustomBlockRenderViewportProvider, IDocsCustomBlockRenderViewport, IDocsCustomBlockRenderViewportInput } from './components/docs/custom-block-render-viewport';
 export { getDocsCustomBlockRenderViewport, setDocsCustomBlockRenderViewportProvider } from './components/docs/custom-block-render-viewport';
 export { DocBackground } from './components/docs/doc-background';
+// TODO(@ai-review): Confirm DOCS_EXTENSION_TYPE remains the supported public contract for Pro document render extensions.
+export { DOCS_EXTENSION_TYPE } from './components/docs/doc-extension';
 export { Documents } from './components/docs/document';
 export type { IPageRenderConfig } from './components/docs/document';
 export type { IDocumentOffsetConfig } from './components/docs/document';

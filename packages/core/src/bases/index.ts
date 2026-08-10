@@ -21,6 +21,15 @@ export {
     type ICreateDefaultBaseTableSnapshotOptions,
 } from './empty-snapshot';
 export {
+    allocateBaseFormulaTableName,
+    createBaseFormulaTableNameMap,
+    createBaseFormulaTableReferenceNormalizer,
+    getBaseFormulaTableName,
+    migrateBaseFormulaTableNames,
+    normalizeBaseFormulaTableName,
+    normalizeBaseFormulaTableReferences,
+} from './formula-table-name';
+export {
     assertBaseTableRecordIdentity,
     BASE_RECORD_ID_FIELD_ID,
     BASE_RECORD_ID_FIELD_NAME,

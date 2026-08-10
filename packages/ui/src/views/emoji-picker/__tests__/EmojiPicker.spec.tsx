@@ -85,14 +85,6 @@ afterEach(() => {
 });
 
 describe('picker callbacks', () => {
-    it('omits the popup frame when the emoji picker is embedded', () => {
-        const { container } = renderWithDependencies(<EmojiPicker embedded />);
-        const picker = container.querySelector('[data-u-comp="ui.emoji-picker"]');
-
-        expect(picker?.className).not.toContain('univer-border');
-        expect(picker?.className).not.toContain('univer-shadow-lg');
-    });
-
     it('reports an emoji through the direct change callback', () => {
         const onChange = vi.fn();
         const { getAllByRole } = renderWithDependencies(<EmojiPicker onChange={onChange} />);
@@ -100,6 +92,42 @@ describe('picker callbacks', () => {
         fireEvent.click(getAllByRole('button', { name: 'grinning face' })[0]);
 
         expect(onChange).toHaveBeenCalledWith('😀');
+    });
+
+    it('keeps random selection and applies an icon-only skin tone preference', async () => {
+        const onChange = vi.fn();
+        const { container, getAllByRole, getByRole, queryAllByRole } = renderWithDependencies(<EmojiPicker onChange={onChange} />);
+
+        expect(getByRole('button', { name: 'Random emoji' })).toBeTruthy();
+        fireEvent.click(getByRole('button', { name: 'raised hand' }));
+
+        const skinToneOptions = getAllByRole('radio');
+        expect(skinToneOptions).toHaveLength(6);
+        expect(skinToneOptions.map((option) => option.textContent)).toEqual(['✋', '✋🏻', '✋🏼', '✋🏽', '✋🏾', '✋🏿']);
+
+        fireEvent.click(container.querySelector('[data-u-comp="ui.emoji-picker"]')!);
+        await waitFor(() => expect(queryAllByRole('radio')).toHaveLength(0));
+
+        fireEvent.click(getByRole('button', { name: 'raised hand' }));
+        fireEvent.click(getByRole('radio', { name: 'raised hand: medium skin tone' }));
+        await waitFor(() => expect(queryAllByRole('radio')).toHaveLength(0));
+        expect(onChange).not.toHaveBeenCalled();
+
+        fireEvent.change(getByRole('textbox', { name: 'Search' }), { target: { value: 'waving hand' } });
+        await waitFor(() => expect(getByRole('button', { name: 'waving hand: medium skin tone' })).toBeTruthy());
+    });
+
+    it('keeps mixed skin tone variants behind the family secondary entry', async () => {
+        const { getByRole } = renderWithDependencies(<EmojiPicker />);
+
+        fireEvent.change(getByRole('textbox', { name: 'Search' }), { target: { value: 'handshake' } });
+        await waitFor(() => expect(getByRole('button', { name: 'handshake, More' })).toBeTruthy());
+        fireEvent.click(getByRole('button', { name: 'handshake, More' }));
+
+        await waitFor(() => {
+            const variants = document.querySelector('[data-u-comp="ui.emoji-picker.skin-tone-variants"]');
+            expect(variants?.querySelectorAll('button')).toHaveLength(26);
+        });
     });
 
     it('uses the design scrollbar styles for emoji content', () => {
@@ -130,14 +158,6 @@ describe('picker callbacks', () => {
         fireEvent.click(getByRole('button', { name: '∞' }));
 
         expect(onChange).toHaveBeenCalledWith('∞');
-    });
-
-    it('omits the popup frame when the symbol picker is embedded', () => {
-        const { container } = renderWithDependencies(<SymbolPicker embedded />);
-        const picker = container.querySelector('[data-u-comp="ui.symbol-picker"]');
-
-        expect(picker?.className).not.toContain('univer-border');
-        expect(picker?.className).not.toContain('univer-shadow-lg');
     });
 
     it('uses the design scrollbar styles for symbol content', () => {

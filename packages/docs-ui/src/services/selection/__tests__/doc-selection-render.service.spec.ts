@@ -648,6 +648,29 @@ describe('doc selection render service internals', () => {
         expect(service._rangeList).toEqual([cursorRange]);
     });
 
+    it('deactivates structural carets when document ranges contain a visible selection', () => {
+        const { service } = createService();
+        const leadingCaret = createTextRange({ collapsed: true });
+        const expandedRange = createTextRange({ collapsed: false });
+        const trailingCaret = createTextRange({ collapsed: true });
+
+        cursorConvertToTextRangeMock
+            .mockReturnValueOnce(leadingCaret)
+            .mockReturnValueOnce(trailingCaret);
+        getTextRangeFromCharIndexMock.mockReturnValueOnce(expandedRange);
+
+        service.addDocRanges([
+            { startOffset: 2, endOffset: 2, rangeType: DOC_RANGE_TYPE.TEXT },
+            { startOffset: 4, endOffset: 8, rangeType: DOC_RANGE_TYPE.TEXT },
+            { startOffset: 10, endOffset: 10, rangeType: DOC_RANGE_TYPE.TEXT },
+        ], false, { shouldFocus: false });
+
+        expect(leadingCaret.deactivate).toHaveBeenCalled();
+        expect(trailingCaret.deactivate).toHaveBeenCalled();
+        expect(expandedRange.activate).toHaveBeenCalledTimes(2);
+        expect(service._rangeList).toEqual([leadingCaret, expandedRange, trailingCaret]);
+    });
+
     it('sets the cursor manually from the resolved paragraph node and emits selection state', () => {
         const { service } = createService();
         const position = { glyph: 3 };

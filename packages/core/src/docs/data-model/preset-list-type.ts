@@ -108,7 +108,7 @@ const bulletListFactory = (symbols: BulletSymbols): INestingLevel[] => {
         startNumber: 0,
         paragraphProperties: {
             hanging: { v: 21 },
-            indentStart: { v: 21 * (i) },
+            indentStart: { v: 21 * (i + 1) },
         },
     }));
 };
@@ -120,7 +120,7 @@ const orderListFactory = (options: { glyphFormat: string; glyphType: ListGlyphTy
         startNumber: 0,
         paragraphProperties: {
             hanging: { v: 21 },
-            indentStart: { v: 21 * (i) },
+            indentStart: { v: 21 * (i + 1) },
         },
     }));
 };
@@ -133,7 +133,7 @@ const checkListFactory = (symbol: string, textStyle?: ITextStyle): INestingLevel
         startNumber: 0,
         paragraphProperties: {
             hanging: { v: 21 },
-            indentStart: { v: 21 * (i) },
+            indentStart: { v: 21 * (i + 1) },
             textStyle,
         },
     } as INestingLevel));

@@ -256,7 +256,7 @@ const contextMenuSubmenuPanelVariants = cva(
 
 const contextMenuItemVariants = cva(
     `
-      univer-relative univer-flex univer-border-none univer-bg-transparent univer-text-left
+      univer-relative univer-flex univer-border-none univer-bg-transparent univer-text-left univer-text-gray-900
       dark:!univer-text-white
     `,
     {
@@ -1457,6 +1457,10 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                                             const optionSelectable = !isNonSelectableLabel(option.label);
                                             const optionHoverable = !isNonHoverableLabel(option.label);
                                             const optionClassName = clsx(
+                                                `
+                                                  univer-text-gray-900
+                                                  dark:!univer-text-white
+                                                `,
                                                 optionSelectable
                                                     ? sizeVariant === 'paragraph-t'
                                                         ? `
@@ -1464,14 +1468,12 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                                                           univer-w-full univer-items-center univer-rounded-lg
                                                           univer-border-none univer-bg-transparent univer-px-3
                                                           univer-text-left univer-text-base
-                                                          dark:!univer-text-white
                                                         `
                                                         : `
                                                           univer-relative univer-box-border univer-flex univer-min-h-8
                                                           univer-w-full univer-items-center univer-rounded-md
                                                           univer-border-none univer-bg-transparent univer-px-2
                                                           univer-text-left univer-text-sm
-                                                          dark:!univer-text-white
                                                         `
                                                     : `
                                                       univer-relative univer-box-border univer-block univer-w-full

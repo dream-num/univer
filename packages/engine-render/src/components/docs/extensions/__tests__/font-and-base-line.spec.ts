@@ -20,6 +20,7 @@ import type { UniverRenderingContext } from '../../../../context';
 import type { IExtensionConfig } from '../../../extension';
 import { BaselineOffset } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
+import { COLOR_BLACK_RGB } from '../../../../basics/const';
 import { GlyphType } from '../../../../basics/i-document-skeleton-cached';
 import { Vector2 } from '../../../../basics/vector2';
 import { CheckboxShape } from '../../../../shape';
@@ -43,6 +44,17 @@ type GlyphOverrides = Omit<Partial<IDocumentSkeletonGlyph>, 'bBox' | 'parent'> &
     bBox?: Partial<IDocumentSkeletonGlyph['bBox']>;
     parent?: IDocumentSkeletonGlyph['parent'] | null;
 };
+
+interface ITestableFontAndBaseLine {
+    _clamp: (value: number, min: number, max: number) => number;
+    _colorWithOpacity: (color: string, opacity?: number) => string;
+    _getTextFillImage: (source: string) => HTMLImageElement | null;
+    _normalizeGradientStops: (stops: undefined, fallbackColor: string) => unknown;
+    _textFillImageCache: Map<string, unknown>;
+    draw: FontAndBaseLine['draw'];
+    extensionOffset: IExtensionConfig;
+    parent: { onTextFillImageLoaded?: () => void };
+}
 
 const DEFAULT_SCALE: IScale = { scaleX: 1, scaleY: 1 };
 
@@ -119,6 +131,33 @@ function createGlyph(content: string, overrides?: GlyphOverrides): IDocumentSkel
 }
 
 describe('docs font and baseline extension', () => {
+    it('keeps existing document text colors unchanged', () => {
+        const screenExtension = new FontAndBaseLine();
+        const ScreenContext = createContext();
+        ScreenContext.__mode = 'rendering';
+        screenExtension.extensionOffset = {
+            spanPointWithFont: Vector2.create(12, 20),
+            spanStartPoint: Vector2.create(10, 10),
+            centerPoint: Vector2.create(8, 8),
+            renderConfig: {
+                vertexAngle: 0,
+                centerAngle: 0,
+            },
+        };
+
+        screenExtension.draw(ScreenContext, DEFAULT_SCALE, createGlyph('Header', {
+            ts: { fs: 12 },
+        }));
+
+        expect(ScreenContext.fillStyle).toBe(COLOR_BLACK_RGB);
+
+        screenExtension.draw(ScreenContext, DEFAULT_SCALE, createGlyph('Explicit black', {
+            ts: { fs: 12, cl: { rgb: '#000000' } },
+        }));
+
+        expect(ScreenContext.fillStyle).toBe('#000000');
+    });
+
     it('renders public glow and outer shadow behind the source text without canvas filters', () => {
         const extension = new FontAndBaseLine();
         const TestContext = createContext();
@@ -290,7 +329,7 @@ describe('docs font and baseline extension', () => {
     });
 
     it('renders solid and gradient text fills with normalized colors', () => {
-        const extension = new FontAndBaseLine() as any;
+        const extension = new FontAndBaseLine() as unknown as ITestableFontAndBaseLine;
         const TestContext = createContext();
         extension.extensionOffset = {
             spanPointWithFont: Vector2.create(10, 24),
@@ -311,7 +350,7 @@ describe('docs font and baseline extension', () => {
                     color: '#abc',
                     opacity: 0.5,
                 },
-            } as any,
+            } as IDocumentSkeletonGlyph['ts'],
         }));
         expect(TestContext.fillStyle).toBe('rgba(170, 187, 204, 0.5)');
 
@@ -332,7 +371,7 @@ describe('docs font and baseline extension', () => {
                         ],
                     },
                 },
-            } as any,
+            } as IDocumentSkeletonGlyph['ts'],
         }));
         expect(TestContext.createLinearGradient).toHaveBeenCalled();
 
@@ -345,7 +384,7 @@ describe('docs font and baseline extension', () => {
                     color: '#123456',
                     gradient: { type: 'radial' },
                 },
-            } as any,
+            } as IDocumentSkeletonGlyph['ts'],
         }));
         extension.draw(TestContext, DEFAULT_SCALE, createGlyph('D', {
             ts: {
@@ -356,7 +395,7 @@ describe('docs font and baseline extension', () => {
                     color: '#123456',
                     gradient: { type: 'diamond' },
                 },
-            } as any,
+            } as IDocumentSkeletonGlyph['ts'],
         }));
         expect(TestContext.createRadialGradient).toHaveBeenCalledTimes(2);
 
@@ -369,7 +408,7 @@ describe('docs font and baseline extension', () => {
                     color: '#123456',
                     gradient: { type: 'angular', angle: 180 },
                 },
-            } as any,
+            } as IDocumentSkeletonGlyph['ts'],
         }));
         expect(TestContext._context.createConicGradient).toHaveBeenCalled();
 
@@ -383,7 +422,7 @@ describe('docs font and baseline extension', () => {
     });
 
     it('renders picture text fills from cached images and ignores unsupported fill cases', () => {
-        const extension = new FontAndBaseLine() as any;
+        const extension = new FontAndBaseLine() as unknown as ITestableFontAndBaseLine;
         const TestContext = createContext();
         const image = document.createElement('canvas') as HTMLCanvasElement & {
             complete: boolean;
@@ -422,7 +461,7 @@ describe('docs font and baseline extension', () => {
                         opacity: 0.75,
                     },
                 },
-            } as any,
+            } as IDocumentSkeletonGlyph['ts'],
         }));
         expect(TestContext.createPattern).toHaveBeenCalled();
 
@@ -432,7 +471,7 @@ describe('docs font and baseline extension', () => {
                 fs: 12,
                 cl: { rgb: '#111111' },
                 textFill: { type: 'none' },
-            } as any,
+            } as IDocumentSkeletonGlyph['ts'],
         }));
         expect(TestContext.fillText).not.toHaveBeenCalled();
 
@@ -453,13 +492,13 @@ describe('docs font and baseline extension', () => {
                     type: 'solid',
                     color: '#ff0000',
                 },
-            } as any,
+            } as IDocumentSkeletonGlyph['ts'],
         }));
         expect(TestContext.fillText).toHaveBeenCalled();
     });
 
     it('loads picture text fills without forcing anonymous CORS mode', () => {
-        const extension = new FontAndBaseLine() as any;
+        const extension = new FontAndBaseLine() as unknown as ITestableFontAndBaseLine;
         const NativeImage = window.Image;
         class TestImage {
             complete = false;
@@ -480,7 +519,7 @@ describe('docs font and baseline extension', () => {
     });
 
     it('notifies the document when a picture text fill finishes loading', () => {
-        const extension = new FontAndBaseLine() as any;
+        const extension = new FontAndBaseLine() as unknown as ITestableFontAndBaseLine;
         const onTextFillImageLoaded = vi.fn();
         extension.parent = { onTextFillImageLoaded };
         const NativeImage = window.Image;
@@ -504,7 +543,7 @@ describe('docs font and baseline extension', () => {
     });
 
     it('notifies every document waiting for the same picture text fill', () => {
-        const extension = new FontAndBaseLine() as any;
+        const extension = new FontAndBaseLine() as unknown as ITestableFontAndBaseLine;
         const firstDocumentLoaded = vi.fn();
         const secondDocumentLoaded = vi.fn();
         const NativeImage = window.Image;

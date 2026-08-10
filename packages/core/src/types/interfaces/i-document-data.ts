@@ -125,6 +125,13 @@ export interface IDocStyles {
 export interface IDocumentBody {
     dataStream: string;
 
+    /**
+     * UTF-16 offsets of soft page-break tokens (`\f`) produced by the layout engine that last
+     * saved the source document. Renderers may honor them for traditional/paginated fidelity;
+     * exporters must keep them soft rather than converting them to authored page breaks.
+     */
+    renderedPageBreaks?: number[];
+
     textRuns?: ITextRun[]; // textRun style，interaction
 
     paragraphs?: IParagraph[]; // paragraph
@@ -215,7 +222,7 @@ export interface INestingLevel {
     //  <prefix>%[nestingLevel]<suffix>
     glyphFormat: string; // https://developers.google.com/docs/api/reference/rest/v1/documents#nestinglevel，ms word lvlText
     textStyle?: ITextStyle;
-    startNumber: number;
+    startNumber: number; // zero-based offset; 0 renders the first ordered item as 1
 
     // Union field glyph_kind can be only one of the following:
     glyphType?: ListGlyphType; // ordered list string is to support custom rules https://developers.google.com/docs/api/reference/rest/v1/documents#glyphtype， ms numFmt: GlyphType
@@ -499,6 +506,10 @@ export interface IDocumentLayout {
 
     defaultTabStop?: number; // 17.15.1.25 defaultTabStop (Distance Between Automatic Tab Stops)   0.5 in  = 36pt，this value should be converted to the default font size when exporting
     characterSpacingControl?: characterSpacingControlType; // characterSpacingControl 17.18.7 ST_CharacterSpacing (Character-Level Whitespace Compression Settings)，default compressPunctuation
+    /** Use the legacy East Asian Word layout rules stored as OOXML `useFELayout`. */
+    useFELayout?: BooleanNumber;
+    /** Align automatic line height inside tables to the active document line grid. */
+    adjustLineHeightInTable?: BooleanNumber;
     paragraphLineGapDefault?: number; // paragraphLineGapDefault default line spacing
     spaceWidthEastAsian?: BooleanNumber; // add space between east asian and English
 
@@ -716,6 +727,12 @@ export interface IDocDrawingBase extends IDrawingParam {
     layoutType: PositionedObjectLayoutType;
 
     behindDoc?: BooleanNumber; // wrapNone
+    /** Keeps the anchor constrained to its containing table cell when enabled. */
+    layoutInCell?: BooleanNumber;
+    /** Allows this floating object to overlap other floating objects. */
+    allowOverlap?: BooleanNumber;
+    /** WordprocessingML stacking order for anchored objects. */
+    relativeHeight?: number;
     start?: number[]; // wrapPolygon
     lineTo?: number[][]; // wrapPolygon
     wrapText?: WrapTextType; // wrapSquare | wrapThrough | wrapTight
@@ -903,6 +920,12 @@ export interface IParagraphProperties extends IIndentStart {
     snapToGrid?: BooleanNumber; // snapToGrid 17.3.2.34 snapToGrid (Use Document Grid Settings For Inter-Character Spacing)
     spaceAbove?: INumberUnit; // spaceAbove before beforeLines (Spacing Above Paragraph)
     spaceBelow?: INumberUnit; // spaceBelow after afterLines (Spacing Below Paragraph)
+    /** Whether the layout engine should derive paragraph-before spacing from the active compatibility policy. */
+    beforeAutoSpacing?: BooleanNumber;
+    /** Whether the layout engine should derive paragraph-after spacing from the active compatibility policy. */
+    afterAutoSpacing?: BooleanNumber;
+    /** Suppresses spacing between consecutive paragraphs that share the same named style. */
+    contextualSpacing?: BooleanNumber;
     borderBetween?: IParagraphBorder; // borderBetween
     borderTop?: IParagraphBorder; // borderTop
     borderBottom?: IParagraphBorder; // borderBottom
@@ -1030,6 +1053,7 @@ export enum DashStyleType {
 export interface ITabStop {
     offset: number; // offset
     alignment: TabStopAlignment; // alignment
+    leader?: TabStopLeader; // leader drawn between the preceding text and this tab stop
 }
 
 /**
@@ -1040,6 +1064,16 @@ export enum TabStopAlignment {
     START, // The tab stop is aligned to the start of the line. This is the default.
     CENTER, // The tab stop is aligned to the center of the line.
     END, // The tab stop is aligned to the end of the line.
+}
+
+export enum TabStopLeader {
+    TAB_STOP_LEADER_UNSPECIFIED,
+    NONE,
+    DOT,
+    HYPHEN,
+    UNDERSCORE,
+    HEAVY,
+    MIDDLE_DOT,
 }
 
 /**
@@ -1188,6 +1222,10 @@ export interface ITableRow {
      * corresponding `TABLE_ROW_START`/`TABLE_ROW_END` pair in `dataStream`.
      */
     tableCells: ITableCell[]; // tableCells
+    /** Number of table-grid columns omitted before the first cell in this row. */
+    gridBefore?: number;
+    /** Number of table-grid columns omitted after the last cell in this row. */
+    gridAfter?: number;
     // If omitted, then the table row shall automatically resize its height to the height required by its contents
     // (the equivalent of an hRule value of auto)
     trHeight: ITableRowSize; // 17.4.80 trHeight (Table Row Height)

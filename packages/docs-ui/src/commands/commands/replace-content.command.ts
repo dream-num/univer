@@ -14,15 +14,7 @@
  * limitations under the License.
  */
 
-import type {
-    DocumentDataModel,
-    ICommand,
-    IDocumentBody,
-    IDocumentData,
-    IMutationInfo,
-    ITextRange,
-    JSONXActions,
-} from '@univerjs/core';
+import type { DocumentDataModel, ICommand, IDocumentBody, IDocumentData, IMutationInfo, ITextRange, JSONXActions } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import {
@@ -40,6 +32,8 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { getCommandSkeleton } from '../util';
+import { getReplaceDocRangesActions } from './clipboard.inner.command';
 
 export interface IReplaceSnapshotCommandParams {
     unitId: string;
@@ -280,6 +274,7 @@ export interface IReplaceSelectionCommandParams {
     selection?: ITextRange;
     body: IDocumentBody; // Do not contain `\r\n` at the end.
     textRanges?: ITextRangeWithStyle[];
+    segmentId?: string;
 }
 
 export const ReplaceSelectionCommand: ICommand<IReplaceSelectionCommandParams> = {
@@ -290,7 +285,7 @@ export const ReplaceSelectionCommand: ICommand<IReplaceSelectionCommandParams> =
             return false;
         }
         const commandService = accessor.get(ICommandService);
-        const { unitId, body: insertBody, textRanges } = params;
+        const { unitId, body: insertBody, textRanges, segmentId } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId);
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
@@ -298,27 +293,69 @@ export const ReplaceSelectionCommand: ICommand<IReplaceSelectionCommandParams> =
             return false;
         }
 
-        const body = docDataModel.getBody();
         const selection = params.selection ?? docSelectionManagerService.getActiveTextRange();
+        const targetSegmentId = segmentId ?? docSelectionManagerService.getActiveTextRange()?.segmentId ?? '';
+        const body = docDataModel.getSelfOrHeaderFooterModel(targetSegmentId)?.getBody();
         if (!selection || !body) {
             return false;
         }
+
+        const selectionInfo = docSelectionManagerService.getSelectionInfo();
+        const selectedTextRanges = params.selection
+            ? [params.selection]
+            : docSelectionManagerService.getTextRanges() ?? [];
+        const selectedRectRanges = params.selection
+            ? []
+            : docSelectionManagerService.getRectRanges() ?? [];
+        const hasSelectedStructure = !selection.collapsed && (
+            Boolean(body.blockRanges?.length) ||
+            Boolean(body.columnGroups?.length) ||
+            Boolean(body.customBlocks?.length) ||
+            Boolean(body.tables?.length)
+        );
+        const hasComplexSelection = hasSelectedStructure || selectedRectRanges.length > 0 || selectedTextRanges.length > 1 || selectionInfo?.options?.wholeDocument === true;
+        const docSkeletonManagerService = hasComplexSelection ? getCommandSkeleton(accessor, unitId) : null;
+        const replacement = docSkeletonManagerService
+            ? getReplaceDocRangesActions(
+                selectedTextRanges,
+                selectedRectRanges,
+                docDataModel,
+                docSkeletonManagerService.getViewModel(),
+                targetSegmentId,
+                insertBody,
+                selectionInfo?.options?.wholeDocument === true
+            )
+            : null;
+        const insertOffset = replacement?.insertOffset ?? selection.startOffset;
 
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
             params: {
                 unitId,
                 actions: [],
-                textRanges,
+                textRanges: textRanges ?? [{
+                    startOffset: insertOffset + insertBody.dataStream.length,
+                    endOffset: insertOffset + insertBody.dataStream.length,
+                    collapsed: true,
+                    style: docSelectionManagerService.getActiveTextRange()?.style,
+                    segmentId: targetSegmentId,
+                }],
+                segmentId: targetSegmentId,
                 debounce: true,
+                trigger: ReplaceSelectionCommand.id,
             },
         };
 
-        const textX = new TextX();
-        const jsonX = JSONX.getInstance();
-        // delete
-        textX.push(...BuildTextUtils.selection.delete([selection], body, 0, insertBody));
-        doMutation.params.actions = jsonX.editOp(textX.serialize());
+        if (replacement) {
+            doMutation.params.actions = replacement.actions;
+        } else {
+            const textX = new TextX();
+            textX.push(...BuildTextUtils.selection.delete([selection], body, 0, insertBody));
+            doMutation.params.actions = JSONX.getInstance().editOp(
+                textX.serialize(),
+                getRichTextEditPath(docDataModel, targetSegmentId)
+            );
+        }
         return commandService.syncExecuteCommand(doMutation.id, doMutation.params);
     },
 };

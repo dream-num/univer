@@ -4,7 +4,7 @@
 [![license](https://img.shields.io/npm/l/@univerjs/themes?style=flat-square)](https://npmjs.com/package/@univerjs/themes)
 [![downloads](https://img.shields.io/npm/dm/@univerjs/themes?style=flat-square)](https://npmjs.com/package/@univerjs/themes)
 
-`@univerjs/themes` contains built-in Univer theme definitions such as the default, green, orange, purple, red, and yellow themes.
+`@univerjs/themes` contains built-in Univer theme definitions such as the default, dark blue, green, orange, purple, red, and yellow themes.
 
 ## Package Overview
 
@@ -25,7 +25,7 @@ Keep all `@univerjs/*` packages on the same version.
 ## Usage
 
 ```ts
-import { defaultTheme, greenTheme, orangeTheme, purpleTheme, redTheme, yellowTheme } from '@univerjs/themes';
+import { darkBlueTheme, defaultTheme, blueTheme, greenTheme, orangeTheme, purpleTheme, redTheme, yellowTheme } from '@univerjs/themes';
 ```
 
 ## Resources

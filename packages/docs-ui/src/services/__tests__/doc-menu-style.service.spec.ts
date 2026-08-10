@@ -57,7 +57,7 @@ class TestRenderManagerService {
     }
 }
 
-function createService(): DocMenuStyleService {
+function createService(defaultTextColor?: string): DocMenuStyleService {
     const injector = new Injector();
     injector.add([ILogService, { useClass: DesktopLogService }]);
     injector.add([IConfigService, { useClass: ConfigService }]);
@@ -68,6 +68,19 @@ function createService(): DocMenuStyleService {
     injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
     injector.add([DocSelectionManagerService]);
     injector.add([DocMenuStyleService]);
+
+    if (defaultTextColor) {
+        const themeService = injector.get(ThemeService);
+        const currentTheme = themeService.getCurrentTheme();
+        themeService.setTheme({
+            ...currentTheme,
+            gray: {
+                ...currentTheme.gray,
+                900: defaultTextColor,
+            },
+        });
+    }
+
     return injector.get(DocMenuStyleService);
 }
 
@@ -117,19 +130,19 @@ describe('DocMenuStyleService', () => {
     });
 
     it('uses body text defaults when there is no focused document render', () => {
-        const service = createService();
+        const service = createService('#F7F9FC');
 
-        expect(service.getDefaultStyle()).toEqual({ ff: 'Arial', fs: 11 });
+        expect(service.getDefaultStyle()).toEqual({ ff: 'Arial', fs: 11, cl: { rgb: '#F7F9FC' } });
     });
 
     it('uses body and header footer defaults from the active document render area', () => {
         const { service, renderManagerService } = createStyleTestBed();
 
         renderManagerService.editArea = DocumentEditArea.BODY;
-        expect(service.getDefaultStyle()).toEqual({ ff: 'Arial', fs: 11 });
+        expect(service.getDefaultStyle()).toEqual({ ff: 'Arial', fs: 11, cl: { rgb: '#1B1C1F' } });
 
         renderManagerService.editArea = DocumentEditArea.FOOTER;
-        expect(service.getDefaultStyle()).toEqual({ ff: 'Arial', fs: 9 });
+        expect(service.getDefaultStyle()).toEqual({ ff: 'Arial', fs: 9, cl: { rgb: '#1B1C1F' } });
     });
 
     it('clears cached input style when document selection changes', () => {

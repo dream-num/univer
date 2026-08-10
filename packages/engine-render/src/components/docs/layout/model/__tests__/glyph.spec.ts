@@ -268,5 +268,47 @@ describe('Glyph utils test cases', () => {
             expect(traditionalGlyph.width).toBeCloseTo(14.72);
             expect(modernGlyph.width).toBe(16);
         });
+
+        it('should calibrate SimSun CJK width only for traditional documents', () => {
+            vi.stubGlobal('document', {
+                createElement: () => ({
+                    getContext: () => ({
+                        font: '',
+                        textBaseline: 'alphabetic',
+                        measureText: () => ({
+                            width: 16,
+                            fontBoundingBoxAscent: 15,
+                            fontBoundingBoxDescent: 4,
+                            actualBoundingBoxAscent: 15,
+                            actualBoundingBoxDescent: 4,
+                        }),
+                    }),
+                }),
+            });
+            const config = {
+                fontStyle: {
+                    fontString: 'normal normal 12pt "Times New Roman", 宋体',
+                    fontSize: 12,
+                    originFontSize: 12,
+                    fontFamily: '"Times New Roman", 宋体',
+                    fontCache: 'normal normal 12pt "Times New Roman", 宋体',
+                },
+                textStyle: {},
+                charSpace: 0,
+                snapToGrid: 0,
+            } as any;
+
+            const traditionalGlyph = createSkeletonLetterGlyph('文', {
+                ...config,
+                documentCompatibilityPolicy: getDocumentCompatibilityPolicy(DocumentFlavor.TRADITIONAL),
+            });
+            const modernGlyph = createSkeletonLetterGlyph('文', {
+                ...config,
+                documentCompatibilityPolicy: getDocumentCompatibilityPolicy(DocumentFlavor.MODERN),
+            });
+
+            expect(traditionalGlyph.width).toBeCloseTo(15.52);
+            expect(modernGlyph.width).toBe(16);
+        });
     });
 });

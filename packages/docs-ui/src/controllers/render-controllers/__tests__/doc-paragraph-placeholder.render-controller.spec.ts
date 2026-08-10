@@ -244,7 +244,7 @@ describe('doc paragraph placeholder render controller', () => {
         const page = createPage([createLine(0, { fontSize: 13, fontFamily: 'Inter' })]);
         const body = createBody('\r\n', [{ startIndex: 0, paragraphId: 'para_placeholder_normal' }]);
 
-        const placeholders = getParagraphPlaceholderLayouts(page, body, locale);
+        const placeholders = getParagraphPlaceholderLayouts(page, body, locale, 0, 0, 0);
 
         expect(placeholders).toMatchObject([{
             text: '请输入文字或按"/"启用命令',
@@ -260,7 +260,7 @@ describe('doc paragraph placeholder render controller', () => {
         const page = createPage([createLine(0, { fontSize: 18 })]);
         const body = createBody('\r\n', [{ startIndex: 0, paragraphId: 'para_placeholder_large' }]);
 
-        const placeholders = getParagraphPlaceholderLayouts(page, body, locale);
+        const placeholders = getParagraphPlaceholderLayouts(page, body, locale, 0, 0, 0);
 
         expect(placeholders[0]).toMatchObject({
             fontSize: 18,
@@ -277,7 +277,7 @@ describe('doc paragraph placeholder render controller', () => {
             },
         }]);
 
-        const placeholders = getParagraphPlaceholderLayouts(page, body, locale);
+        const placeholders = getParagraphPlaceholderLayouts(page, body, locale, 0, 0, 0);
 
         expect(placeholders[0]).toMatchObject({
             text: '标题1',
@@ -298,7 +298,7 @@ describe('doc paragraph placeholder render controller', () => {
             },
         }]);
 
-        const placeholders = getParagraphPlaceholderLayouts(page, body, locale);
+        const placeholders = getParagraphPlaceholderLayouts(page, body, locale, 0, 0, 0);
 
         expect(placeholders[0]).toMatchObject({
             text: '项目',
@@ -311,7 +311,7 @@ describe('doc paragraph placeholder render controller', () => {
         const page = createPage([createLine(5, { st: 0 })]);
         const body = createBody('Hello\r\n', [{ startIndex: 5, paragraphId: 'para_placeholder_text' }]);
 
-        const placeholders = getParagraphPlaceholderLayouts(page, body, locale);
+        const placeholders = getParagraphPlaceholderLayouts(page, body, locale, 0, 0, 0);
 
         expect(placeholders).toEqual([]);
     });

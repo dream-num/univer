@@ -43,18 +43,22 @@ export class DocIMEStateChangeInterceptorService implements IDocStateChangeInter
             throw new Error('historyParams is null in RichTextEditingMutation');
         }
 
-        const { undoMutationParams, redoMutationParams, previousActiveRange } = historyParams;
+        const { undoMutationParams, redoMutationParams, previousActiveRange, previousDocRanges, previousSelectionOptions } = historyParams;
 
         return {
             ...changeStateInfo,
             redoState: {
                 ...changeStateInfo.redoState,
                 actions: redoMutationParams.actions,
+                textRanges: redoMutationParams.textRanges,
+                options: redoMutationParams.options,
+                isEditing: redoMutationParams.isEditing,
             },
             undoState: {
                 ...changeStateInfo.undoState,
                 actions: undoMutationParams.actions,
-                textRanges: [previousActiveRange],
+                textRanges: previousDocRanges.length ? previousDocRanges : [previousActiveRange],
+                options: previousSelectionOptions ?? undefined,
             },
         };
     }

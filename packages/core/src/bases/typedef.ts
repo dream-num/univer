@@ -818,6 +818,19 @@ export interface IGalleryCardSelection {
 export type BaseHitTestResult =
     | { type: 'empty'; x: number; y: number }
     | {
+        type: 'grid-text-preview';
+        tableId: TableId;
+        viewId: ViewId;
+        recordId: RecordId;
+        fieldId: FieldId;
+        virtual?: boolean;
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+        maxScroll: number;
+    }
+    | {
         type: 'grid-fill-handle';
         tableId: TableId;
         viewId: ViewId;

@@ -199,7 +199,10 @@ export class FontCache {
             bBox = this._calculateBoundingBoxByMeasureText(measureText, fontStyle);
         }
 
-        return bBox;
+        return {
+            ...bBox,
+            normalLineHeight: bBox.ba + bBox.bd,
+        };
     }
 
     /**

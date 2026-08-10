@@ -765,6 +765,39 @@ describe('misc document commands', () => {
         subscription.unsubscribe();
     });
 
+    it('selects the whole document directly for a structural selection without an active text range', async () => {
+        ({ univer, get } = createCommandTestBed(createColumnGroupDoc()));
+        commandService = get(ICommandService);
+        commandService.registerCommand(DocSelectAllCommand);
+
+        const selectionManager = get(DocSelectionManagerService);
+        const refreshEvents: Array<{
+            docRanges: Array<{ endOffset?: number; startOffset?: number }>;
+            options?: { [key: string]: boolean };
+        }> = [];
+        const subscription = selectionManager.refreshSelection$.subscribe((event) => event && refreshEvents.push(event));
+
+        const result = await commandService.executeCommand(DocSelectAllCommand.id, {
+            segmentId: '',
+            wholeDocument: true,
+        });
+        await awaitTime(0);
+
+        expect(result).toBe(true);
+        expect(refreshEvents.at(-1)).toEqual(expect.objectContaining({
+            docRanges: [
+                expect.objectContaining({ startOffset: 0, endOffset: 1 }),
+                expect.objectContaining({ startOffset: 4, endOffset: 5 }),
+                expect.objectContaining({ startOffset: 6, endOffset: 7 }),
+                expect.objectContaining({ startOffset: 10, endOffset: 11 }),
+                expect.objectContaining({ startOffset: 14, endOffset: 15 }),
+            ],
+            options: { wholeDocument: true },
+        }));
+
+        subscription.unsubscribe();
+    });
+
     it('selects the current paragraph first when tables are present', async () => {
         ({ univer, get } = createCommandTestBed(createTableDoc()));
         commandService = get(ICommandService);

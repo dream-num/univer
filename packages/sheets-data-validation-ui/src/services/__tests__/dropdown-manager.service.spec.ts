@@ -247,7 +247,7 @@ describe('DataValidationDropdownManagerService', () => {
             showSearch: true,
             options: [
                 { label: 'Open', value: 'Open', color: '#00aa00' },
-                { label: 'Closed', value: 'Closed', color: '#ECECEC' },
+                { label: 'Closed', value: 'Closed' },
             ],
         });
 

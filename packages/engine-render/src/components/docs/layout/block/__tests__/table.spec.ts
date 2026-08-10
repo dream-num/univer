@@ -26,6 +26,7 @@ import {
     VerticalAlignmentType,
 } from '@univerjs/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { BreakType, DocumentSkeletonPageType } from '../../../../../basics/i-document-skeleton-cached';
 import { getDocumentCompatibilityPolicy } from '../../../document-compatibility';
 import {
     createTableSkeleton,
@@ -328,6 +329,45 @@ describe('docs table layout', () => {
         expect(skeleton?.rows[0].cells[1].marginTop).toBeGreaterThanOrEqual(1);
     });
 
+    it('uses every nested cell page when estimating a table inside a cell', () => {
+        const { ctx, curPage, viewModel, tableNode, sectionBreakConfig, tableSource } = createContextAndTable();
+        curPage.type = DocumentSkeletonPageType.CELL;
+        tableSource.tableRows = [{
+            trHeight: { hRule: TableRowHeightRule.AUTO, val: { v: 0 } },
+            cantSplit: BooleanNumber.FALSE,
+            tableCells: [{ vAlign: VerticalAlignmentType.TOP }],
+        }];
+        tableNode.children = [createRowNode(1, 20, 1) as any];
+        createSkeletonCellPagesMock.mockReturnValue([
+            makeCellPage(60, 20),
+            makeCellPage(60, 30),
+        ]);
+
+        const skeleton = createTableSkeleton(ctx, curPage, viewModel, tableNode, sectionBreakConfig);
+
+        expect(skeleton?.height).toBe(54);
+        expect(skeleton?.rows[0].height).toBe(54);
+    });
+
+    it('does not count top-level cell continuation pages before the table paginator runs', () => {
+        const { ctx, curPage, viewModel, tableNode, sectionBreakConfig, tableSource } = createContextAndTable();
+        tableSource.tableRows = [{
+            trHeight: { hRule: TableRowHeightRule.AUTO, val: { v: 0 } },
+            cantSplit: BooleanNumber.FALSE,
+            tableCells: [{ vAlign: VerticalAlignmentType.TOP }],
+        }];
+        tableNode.children = [createRowNode(1, 20, 1) as any];
+        createSkeletonCellPagesMock.mockReturnValue([
+            makeCellPage(60, 20),
+            makeCellPage(60, 30),
+        ]);
+
+        const skeleton = createTableSkeleton(ctx, curPage, viewModel, tableNode, sectionBreakConfig);
+
+        expect(skeleton?.height).toBe(22);
+        expect(skeleton?.rows[0].height).toBe(22);
+    });
+
     it('keeps covered merged cells as non-rendering layout placeholders', () => {
         const { ctx, curPage, viewModel, tableNode, sectionBreakConfig, tableSource } = createContextAndTable();
         createSkeletonCellPagesMock.mockImplementation(
@@ -392,10 +432,10 @@ describe('docs table layout', () => {
         );
     });
 
-    it('treats explicit row height as a minimum so wrapped cell content remains visible', () => {
+    it('treats at-least row height as a minimum so wrapped cell content remains visible', () => {
         const { ctx, curPage, viewModel, tableNode, sectionBreakConfig, tableSource } = createContextAndTable();
         tableSource.tableRows[0].trHeight = {
-            hRule: TableRowHeightRule.EXACT,
+            hRule: TableRowHeightRule.AT_LEAST,
             val: { v: 18 },
         };
         createSkeletonCellPagesMock.mockImplementation(
@@ -474,7 +514,7 @@ describe('docs table layout', () => {
         expect(result.fromCurrentPage).toBe(false);
     });
 
-    it('lays out splittable auto rows against the remaining page height', () => {
+    it('DOCX golden e2e lays out splittable auto rows against the remaining page height', () => {
         const { ctx, curPage, viewModel, tableNode, sectionBreakConfig, tableSource } = createContextAndTable();
         tableSource.tableRows[0].repeatHeaderRow = BooleanNumber.FALSE;
         tableSource.tableRows[0].trHeight = {
@@ -495,6 +535,103 @@ describe('docs table layout', () => {
 
         const secondRowCall = createSkeletonCellPagesMock.mock.calls.find((call) => call[5] === 1 && call[6] === 0);
         expect(secondRowCall?.[7]).toBe(100);
+    });
+
+    it('top-aligns every continuation fragment of a vertically centered split row', () => {
+        const { ctx, curPage, viewModel, tableNode, sectionBreakConfig, tableSource } = createContextAndTable();
+        tableSource.tableRows[0].tableCells = [
+            { vAlign: VerticalAlignmentType.CENTER },
+            { vAlign: VerticalAlignmentType.CENTER },
+        ];
+        tableSource.tableRows[0].cantSplit = BooleanNumber.FALSE;
+        tableNode.children = [createRowNode(1, 20, 2) as any];
+        createSkeletonCellPagesMock.mockImplementation(() => [makeCellPage(60, 20), makeCellPage(60, 20)]);
+
+        const result = createTableSkeletons(ctx, curPage, viewModel, tableNode, sectionBreakConfig, 90);
+        const fragments = result.skeTables.flatMap((table) => table.rows).filter((row) => row.index === 0);
+
+        expect(fragments).toHaveLength(2);
+        expect(fragments.flatMap((row) => row.cells).every((cell) => cell.marginTop === cell.originMarginTop)).toBe(true);
+    });
+
+    it('propagates an explicit cell page boundary through an ancestor table measured with infinite height', () => {
+        const { ctx, curPage, viewModel, tableNode, sectionBreakConfig, tableSource } = createContextAndTable();
+        tableSource.tableRows = [{
+            trHeight: { hRule: TableRowHeightRule.AUTO, val: { v: 0 } },
+            cantSplit: BooleanNumber.FALSE,
+            tableCells: [{ vAlign: VerticalAlignmentType.TOP }],
+        }];
+        tableNode.children = [createRowNode(1, 20, 1) as any];
+        createSkeletonCellPagesMock.mockReturnValue([
+            makeCellPage(60, 20),
+            { ...makeCellPage(60, 20), breakType: BreakType.PAGE, isExplicitPageBreak: true },
+        ]);
+
+        const result = createTableSkeletons(
+            ctx,
+            curPage,
+            viewModel,
+            tableNode,
+            sectionBreakConfig,
+            Number.POSITIVE_INFINITY
+        );
+
+        expect(result.skeTables).toHaveLength(2);
+        expect(result.skeTables.map((table) => table.rows.length)).toEqual([1, 1]);
+    });
+
+    it('does not propagate a natural cell continuation through an ancestor table measured with infinite height', () => {
+        const { ctx, curPage, viewModel, tableNode, sectionBreakConfig, tableSource } = createContextAndTable();
+        tableSource.tableRows = [{
+            trHeight: { hRule: TableRowHeightRule.AUTO, val: { v: 0 } },
+            cantSplit: BooleanNumber.FALSE,
+            tableCells: [{ vAlign: VerticalAlignmentType.TOP }],
+        }];
+        tableNode.children = [createRowNode(1, 20, 1) as any];
+        createSkeletonCellPagesMock.mockReturnValue([
+            makeCellPage(60, 20),
+            { ...makeCellPage(60, 20), breakType: BreakType.PAGE, isNaturalPageOverflow: true },
+        ]);
+
+        const result = createTableSkeletons(
+            ctx,
+            curPage,
+            viewModel,
+            tableNode,
+            sectionBreakConfig,
+            Number.POSITIVE_INFINITY
+        );
+
+        expect(result.skeTables).toHaveLength(1);
+        expect(result.skeTables[0].rows).toHaveLength(2);
+    });
+
+    it('DOCX golden e2e lays out splittable at-least rows against the remaining page height', () => {
+        const { ctx, curPage, viewModel, tableNode, sectionBreakConfig, tableSource } = createContextAndTable();
+        tableSource.tableRows[0].repeatHeaderRow = BooleanNumber.FALSE;
+        tableSource.tableRows[0].trHeight = {
+            hRule: TableRowHeightRule.AT_LEAST,
+            val: { v: 20 },
+        };
+        tableSource.tableRows[0].cantSplit = BooleanNumber.FALSE;
+
+        createTableSkeletons(ctx, curPage, viewModel, tableNode, sectionBreakConfig, 90);
+
+        const firstRowCall = createSkeletonCellPagesMock.mock.calls.find((call) => call[5] === 0 && call[6] === 0);
+        expect(firstRowCall?.[7]).toBe(90);
+    });
+
+    it('uses the declared height for exact rows even when content is taller', () => {
+        const { ctx, curPage, viewModel, tableNode, sectionBreakConfig, tableSource } = createContextAndTable();
+        tableSource.tableRows[0].trHeight = {
+            hRule: TableRowHeightRule.EXACT,
+            val: { v: 40 },
+        };
+        createSkeletonCellPagesMock.mockReturnValue([makeCellPage(60, 90)]);
+
+        const result = createTableSkeleton(ctx, curPage, viewModel, tableNode, sectionBreakConfig);
+
+        expect(result?.rows[0].height).toBe(40);
     });
 
     it('keeps a splittable auto row on the current page when its first slice slightly overflows', () => {
@@ -521,7 +658,7 @@ describe('docs table layout', () => {
         expect(result.skeTables[1]?.rows.map((row) => row.index) ?? []).not.toContain(1);
     });
 
-    it('repeats multiple leading header rows on sliced table pages', () => {
+    it('DOCX golden e2e repeats multiple leading header rows on sliced table pages', () => {
         const { ctx, curPage, viewModel, tableNode, sectionBreakConfig, tableSource } = createContextAndTable();
         tableSource.tableRows[1].repeatHeaderRow = BooleanNumber.TRUE;
         tableSource.tableRows.push(
@@ -558,6 +695,32 @@ describe('docs table layout', () => {
         expect(result.skeTables[1].rows[0]).toMatchObject({ index: 0, isRepeatRow: true });
         expect(result.skeTables[1].rows[1]).toMatchObject({ index: 1, isRepeatRow: true });
         expect(result.skeTables[1].rows[2]).toMatchObject({ index: 2, isRepeatRow: false });
+    });
+
+    it('DOCX golden e2e paginates an all-header table like the same table without repeat headers', () => {
+        const paginate = (repeatHeaderRow: BooleanNumber) => {
+            const { ctx, curPage, viewModel, tableNode, sectionBreakConfig, tableSource } = createContextAndTable();
+            const row = {
+                repeatHeaderRow,
+                trHeight: {
+                    hRule: TableRowHeightRule.AT_LEAST,
+                    val: { v: 60 },
+                },
+                cantSplit: BooleanNumber.TRUE,
+                tableCells: [
+                    { vAlign: VerticalAlignmentType.TOP },
+                    { vAlign: VerticalAlignmentType.TOP },
+                ],
+            };
+            tableSource.tableRows = new Array(9).fill(null).map(() => ({ ...row }));
+            tableNode.children = new Array(9).fill(null).map((_, index) => createRowNode(index * 20 + 1, index * 20 + 20, 2));
+
+            return createTableSkeletons(ctx, curPage, viewModel, tableNode, sectionBreakConfig, 100).skeTables.map(
+                (table) => table.rows.filter((tableRow) => !tableRow.isRepeatRow).map((tableRow) => tableRow.index)
+            );
+        };
+
+        expect(paginate(BooleanNumber.TRUE)).toEqual(paginate(BooleanNumber.FALSE));
     });
 
     it('returns an empty slice result when the table is missing', () => {

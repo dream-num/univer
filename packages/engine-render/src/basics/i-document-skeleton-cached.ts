@@ -30,6 +30,7 @@ import type {
     ITableRow,
     ITextStyle,
     PageOrientType,
+    TabStopLeader,
 } from '@univerjs/core';
 import type { BreakPointType } from '../components/docs/layout/line-breaker/break';
 
@@ -104,8 +105,14 @@ export interface IDocumentSkeletonPage {
     height: number; // actual or content height, default 0
 
     breakType: BreakType; // type of page break
+    /** Internal layout provenance used to distinguish a forced boundary from natural overflow. */
+    isExplicitPageBreak?: boolean;
+    /** Internal layout provenance for a page opened because content exhausted the previous page. */
+    isNaturalPageOverflow?: boolean;
     st: number; // startIndex
     ed: number; // endIndex
+    /** Whether this cell page is only a layout placeholder covered by a merged cell. */
+    isMergedCellCovered?: boolean;
     skeDrawings: Map<string, IDocumentSkeletonDrawing>;
     skeTables: Map<string, IDocumentSkeletonTable>; // table skeletons in the page
     skeColumnGroups: Map<string, IDocumentSkeletonColumnGroup>; // column group skeletons in the page
@@ -138,6 +145,7 @@ export interface IDocumentSkeletonTable {
     ed: number; // endIndex
     tableId: string; // table id
     tableSource: ITable;
+    hasPageBreak?: boolean;
     parent?: IDocumentSkeletonPage;
 }
 
@@ -267,6 +275,7 @@ export interface IDocumentSkeletonGlyph {
     featureId?: string; // support interaction for feature ,eg. hyperLine person
     drawingId?: string; // drawing.drawingId
     fauxBoldStrokeWidth?: number;
+    tabLeader?: TabStopLeader;
 }
 
 export interface IDocumentSkeletonBullet {
@@ -327,6 +336,7 @@ export interface IDocumentSkeletonBoundingBox {
     width: number; // width
     ba: number; // boundingBoxAscent
     bd: number; // boundingBoxDescent
+    normalLineHeight?: number; // Canvas font bounding-box height, used as the base for Word AUTO spacing
     aba: number; // actualBoundingBoxAscent
     abd: number; // actualBoundingBoxDescent
     sp: number; // strikeoutPosition

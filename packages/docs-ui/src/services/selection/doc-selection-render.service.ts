@@ -15,27 +15,20 @@
  */
 
 import type { DocumentDataModel, Nullable } from '@univerjs/core';
-import type {
-    Documents,
-    Engine,
-    IDocSelectionInnerParam,
-    IFindNodeRestrictions,
-    IMouseEvent,
-    INodeInfo,
-    INodePosition,
-    IPointerEvent,
-    IRenderContext,
-    IRenderModule,
-    IScrollObserverParam,
-    ISuccinctDocRangeParam,
-    ITextRangeWithStyle,
-    ITextSelectionStyle,
-} from '@univerjs/engine-render';
+import type { Documents, Engine, IDocSelectionInnerParam, IFindNodeRestrictions, IMouseEvent, INodeInfo, INodePosition, IPointerEvent, IRenderContext, IRenderModule, IScrollObserverParam, ISuccinctDocRangeParam, ITextRangeWithStyle, ITextSelectionStyle } from '@univerjs/engine-render';
 import type { Subscription } from 'rxjs';
 import type { RectRange } from './rect-range';
 import { DataStreamTreeTokenType, DOC_RANGE_TYPE, ILogService, Inject, isInternalEditorID, IUniverInstanceService, Optional, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
-import { CURSOR_TYPE, getSystemHighlightColor, GlyphType, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, PageLayoutType, ScrollTimer, Vector2 } from '@univerjs/engine-render';
+import {
+    CURSOR_TYPE,
+    getSystemHighlightColor,
+    GlyphType,
+    NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+    PageLayoutType,
+    ScrollTimer,
+    Vector2,
+} from '@univerjs/engine-render';
 import { ILayoutService, KeyCode } from '@univerjs/ui';
 import { BehaviorSubject, filter, fromEvent, merge, Subject, takeUntil } from 'rxjs';
 import { DOC_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, IDocEmbedInteractionBoundaryService, IDocEmbedRuntimeFocusCoordinator } from '../doc-embed-integration.service';
@@ -342,6 +335,8 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
                 generalAddRange(startOffset, endOffset, rangeStyle);
             }
         }
+
+        this._hideCollapsedCaretsForVisibleSelection();
 
         this._textSelectionInner$.next({
             textRanges: this._getAllTextRanges(),
@@ -921,6 +916,16 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._rangeList = newRanges;
     }
 
+    private _hideCollapsedCaretsForVisibleSelection() {
+        const expandedTextRanges = this._rangeList.filter((range) => !range.collapsed);
+        if (expandedTextRanges.length === 0 && this._rectRangeList.length === 0) {
+            return;
+        }
+
+        this._deactivateAllTextRanges();
+        expandedTextRanges[expandedTextRanges.length - 1]?.activate();
+    }
+
     private _deactivateAllTextRanges() {
         this._rangeList.forEach((range) => {
             range.deactivate();
@@ -1259,11 +1264,11 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
                 if (this._shouldSuppressHostHiddenEditorEvent(e)) {
                     return;
                 }
-                // Prevent input when there is any rect ranges.
+                // A mixed text and rect selection can replace the selected document ranges.
                 if ((e as InputEvent).inputType === 'historyUndo' || (e as InputEvent).inputType === 'historyRedo') {
                     return;
                 }
-                if (this._rectRangeList.length > 0) {
+                if (this._rectRangeList.length > 0 && this._getActiveRange() == null) {
                     e.stopPropagation();
                     return e.preventDefault();
                 }
@@ -1284,8 +1289,8 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
                 if (this._shouldSuppressHostHiddenEditorEvent(e)) {
                     return;
                 }
-                // Prevent input when there is any rect ranges.
-                if (this._rectRangeList.length > 0) {
+                // Mixed select-all ranges have a text insertion anchor; table-only rect selections do not.
+                if (this._rectRangeList.length > 0 && this._getActiveRange() == null) {
                     e.stopPropagation();
                     return e.preventDefault();
                 }

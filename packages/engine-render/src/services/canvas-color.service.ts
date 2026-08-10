@@ -82,7 +82,16 @@ export class CanvasColorService extends Disposable implements ICanvasColorServic
         super();
     }
 
-    getRenderColor(color: string): string {
+    getRenderColor(inputColor: string): string {
+        let color = inputColor;
+
+        if (color.includes('.')) {
+            const themeColor = this._themeService.getColorFromTheme<unknown>(color);
+            if (typeof themeColor === 'string' && this._themeService.isValidThemeColor(color)) {
+                color = themeColor;
+            }
+        }
+
         if (!this._themeService.darkMode) {
             return color;
         }
@@ -121,9 +130,6 @@ export class CanvasColorService extends Disposable implements ICanvasColorServic
             const stripped = color.slice(4, -1).split(',');
             const invertedColor = this._invertAlgo(stripped.map(Number) as RGBColorType);
             cachedColor = `rgb(${invertedColor[0]},${invertedColor[1]},${invertedColor[2]})`;
-        } else if (this._themeService.isValidThemeColor(color)) {
-            // If the color is a theme token, we can get the color from the theme service
-            return this._themeService.getColorFromTheme(color);
         } else if (new ColorKit(color).isValid) {
             // Support X11 color names
             const { r, g, b, a } = new ColorKit(color).toRgb();

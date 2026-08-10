@@ -18,6 +18,8 @@ import type { DocumentDataModel, ICommand, IDocumentData, Injector, Univer } fro
 import { DataStreamTreeTokenType, ICommandService, IUniverInstanceService, RedoCommand, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { DocIMEInputManagerService } from '../../../services/doc-ime-input-manager.service';
+import { IMEInputCommand } from '../ime-input.command';
 import {
     buildReplaceSnapshotActions,
     CoverContentCommand,
@@ -47,6 +49,39 @@ function getDocumentData() {
     };
 
     return TEST_DOCUMENT_DATA_EN;
+}
+
+function getTerminalColumnGroupDocumentData(): IDocumentData {
+    const T = DataStreamTreeTokenType;
+    const dataStream = `${T.COLUMN_GROUP_START}${T.COLUMN_START}A${T.PARAGRAPH}${T.COLUMN_END}${T.COLUMN_START}B${T.PARAGRAPH}${T.COLUMN_END}${T.COLUMN_GROUP_END}${T.SECTION_BREAK}`;
+
+    return {
+        id: 'test-doc',
+        body: {
+            dataStream,
+            paragraphs: [
+                { paragraphId: 'terminal-column-first', startIndex: 3 },
+                { paragraphId: 'terminal-column-second', startIndex: 7 },
+            ],
+            sectionBreaks: [{ sectionId: 'terminal-column-section', startIndex: 10 }],
+            columnGroups: [{
+                columnGroupId: 'terminal-columns',
+                startIndex: 0,
+                endIndex: 9,
+                columns: [
+                    { columnId: 'terminal-column-1', widthRatio: 1 },
+                    { columnId: 'terminal-column-2', widthRatio: 1 },
+                ],
+            }],
+        },
+        documentStyle: {
+            pageSize: { width: 540, height: 720 },
+            marginTop: 72,
+            marginBottom: 72,
+            marginRight: 90,
+            marginLeft: 90,
+        },
+    };
 }
 
 describe('replace or cover content of document', () => {
@@ -279,6 +314,101 @@ describe('replace or cover content of document', () => {
 
             expect(result).toBeTruthy();
             expect(getDataStream()).toBe('=AVG(A2:B4)\r\n');
+        });
+
+        it('replaces a fragmented whole-column-group selection once at the document start', async () => {
+            univer.dispose();
+            const original = getTerminalColumnGroupDocumentData();
+            const testBed = createCommandTestBed(original);
+            univer = testBed.univer;
+            get = testBed.get;
+            commandService = get(ICommandService);
+            commandService.registerCommand(ReplaceSelectionCommand);
+            commandService.registerCommand(SetTextSelectionsOperation);
+            commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+
+            const selectionManager = get(DocSelectionManagerService);
+            selectionManager.__TEST_ONLY_setCurrentSelection({ unitId: 'test-doc', subUnitId: '' });
+            selectionManager.__TEST_ONLY_add([{
+                startOffset: 2,
+                endOffset: 3,
+                collapsed: false,
+                isActive: true,
+                segmentId: '',
+            }]);
+            const selectionInfo = selectionManager.getSelectionInfo();
+            if (!selectionInfo) {
+                throw new Error('Selection info not found');
+            }
+            selectionManager.__replaceTextRangesWithNoRefresh({
+                ...selectionInfo,
+                textRanges: [
+                    { startOffset: 2, endOffset: 3, collapsed: false, isActive: true, segmentId: '' },
+                    { startOffset: 6, endOffset: 7, collapsed: false, segmentId: '' },
+                ],
+                rectRanges: [],
+                options: { wholeDocument: true },
+            }, { unitId: 'test-doc', subUnitId: '' });
+
+            expect(await commandService.executeCommand(ReplaceSelectionCommand.id, {
+                unitId: 'test-doc',
+                body: { dataStream: 'x' },
+            })).toBeTruthy();
+
+            const replacedSnapshot = get(IUniverInstanceService)
+                .getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC)
+                ?.getSnapshot();
+            expect(replacedSnapshot?.body?.dataStream).toBe('x\r\n');
+            expect(replacedSnapshot?.body?.columnGroups).toEqual([]);
+
+            expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+            expect(getDataStream()).toBe(original.body?.dataStream);
+            expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+            expect(getDataStream()).toBe('x\r\n');
+        });
+
+        it('replaces a fragmented whole-column-group selection once during IME composition', async () => {
+            univer.dispose();
+            const testBed = createCommandTestBed(getTerminalColumnGroupDocumentData());
+            univer = testBed.univer;
+            get = testBed.get;
+            commandService = get(ICommandService);
+            commandService.registerCommand(IMEInputCommand);
+            commandService.registerCommand(SetTextSelectionsOperation);
+            commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+
+            const imeManager = get(DocIMEInputManagerService);
+            imeManager.setActiveRange({
+                startOffset: 2,
+                endOffset: 3,
+                collapsed: false,
+                isActive: true,
+                segmentId: '',
+            });
+            imeManager.setPreviousDocRanges([
+                { startOffset: 2, endOffset: 3, collapsed: false, isActive: true, segmentId: '' },
+                { startOffset: 6, endOffset: 7, collapsed: false, segmentId: '' },
+            ]);
+            imeManager.setPreviousSelectionOptions({ wholeDocument: true });
+
+            expect(await commandService.executeCommand(IMEInputCommand.id, {
+                unitId: 'test-doc',
+                newText: '中',
+                oldTextLen: 0,
+                isCompositionStart: true,
+                isCompositionEnd: true,
+            })).toBe(true);
+
+            expect(getDataStream()).toBe('中\r\n');
+            expect(imeManager.getCompositionRange()).toMatchObject({
+                startOffset: 0,
+                endOffset: 0,
+                collapsed: true,
+            });
+            expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+            expect(getDataStream()).toBe(getTerminalColumnGroupDocumentData().body?.dataStream);
+            expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+            expect(getDataStream()).toBe('中\r\n');
         });
 
         it('replaces text runs without adding undo history', async () => {

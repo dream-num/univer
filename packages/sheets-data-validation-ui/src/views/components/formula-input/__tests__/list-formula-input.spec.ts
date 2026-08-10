@@ -40,4 +40,12 @@ describe('ListFormulaInput', () => {
         expect(deserializeListOptions(payload.formula1)).toEqual(['Pending', 'Done']);
         expect(payload.formula2).toBe(',#00ff00');
     });
+
+    it('does not persist the themed default color', () => {
+        const payload = buildCustomListFormulaPayload([
+            { label: 'Pending', color: 'gray.100' },
+        ], 'gray.100');
+
+        expect(payload.formula2).toBe('');
+    });
 });

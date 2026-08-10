@@ -28,11 +28,11 @@ export enum HEADER_MENU_SHAPE_TYPE {
     HIGHLIGHT,
 }
 
-export const HEADER_MENU_SHAPE_CIRCLE_FILL = 'rgba(0, 0, 0, 0.15)';
+export const HEADER_MENU_SHAPE_CIRCLE_FILL = 'gray.200';
 
-export const HEADER_MENU_SHAPE_TRIANGLE_FILL = 'rgb(0, 0, 0)';
+export const HEADER_MENU_SHAPE_TRIANGLE_FILL = 'gray.900';
 
-export const HEADER_MENU_BACKGROUND_COLOR = 'rgb(255, 255, 255, 1)';
+export const HEADER_MENU_BACKGROUND_COLOR = 'gray.50';
 
 export class HeaderMenuShape<T extends IHeaderMenuShapeProps = IHeaderMenuShapeProps> extends Shape<T> {
     private _size: number = 12;

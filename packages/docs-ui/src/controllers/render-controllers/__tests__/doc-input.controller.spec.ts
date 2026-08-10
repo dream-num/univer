@@ -19,9 +19,9 @@
  */
 
 import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY } from '@univerjs/core';
-import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, EmbedInteractionBoundaryService, EmbedRuntimeFocusCoordinator } from '../../../services/doc-embed-integration.service';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
+import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, EmbedInteractionBoundaryService, EmbedRuntimeFocusCoordinator } from '../../../services/doc-embed-integration.service';
 import { DocInputController } from '../doc-input.controller';
 
 describe('DocInputController', () => {
@@ -44,7 +44,7 @@ describe('DocInputController', () => {
                     })),
                 },
             } as never,
-            { onInput$ } as never,
+            { onInput$, getAllRectRanges: vi.fn(() => []) } as never,
             { getSkeleton: vi.fn(() => ({})) } as never,
             { executeCommand } as never,
             {
@@ -89,7 +89,7 @@ describe('DocInputController', () => {
                     })),
                 },
             } as never,
-            { onInput$ } as never,
+            { onInput$, getAllRectRanges: vi.fn(() => []) } as never,
             { getSkeleton: vi.fn(() => ({})) } as never,
             { executeCommand } as never,
             {
@@ -138,7 +138,7 @@ describe('DocInputController', () => {
                     })),
                 },
             } as never,
-            { onInput$ } as never,
+            { onInput$, getAllRectRanges: vi.fn(() => []) } as never,
             { getSkeleton: vi.fn(() => ({})) } as never,
             { executeCommand } as never,
             {
@@ -193,7 +193,7 @@ describe('DocInputController', () => {
                     })),
                 },
             } as never,
-            { onInput$ } as never,
+            { onInput$, getAllRectRanges: vi.fn(() => []) } as never,
             { getSkeleton: vi.fn(() => ({})) } as never,
             { executeCommand } as never,
             {
@@ -247,7 +247,7 @@ describe('DocInputController', () => {
                     })),
                 },
             } as never,
-            { onInput$ } as never,
+            { onInput$, getAllRectRanges: vi.fn(() => []) } as never,
             { getSkeleton: vi.fn(() => ({})) } as never,
             { executeCommand } as never,
             {
@@ -274,5 +274,56 @@ describe('DocInputController', () => {
         }));
         runtimeScope.dispose();
         childEditor.remove();
+    });
+
+    it('routes input over mixed text and table ranges through structural replacement', async () => {
+        const onInput$ = new Subject<unknown>();
+        const executeCommand = vi.fn(() => Promise.resolve(true));
+        const activeRange = {
+            segmentId: '',
+            startOffset: 0,
+            endOffset: 4,
+            collapsed: false,
+            isActive: true,
+        };
+
+        new DocInputController(
+            {
+                unitId: 'test-doc',
+                unit: {
+                    getSelfOrHeaderFooterModel: vi.fn(() => ({
+                        getBody: vi.fn(() => ({ dataStream: 'text\r\n' })),
+                    })),
+                },
+            } as never,
+            {
+                onInput$,
+                getAllRectRanges: vi.fn(() => [{
+                    tableId: 'table-1',
+                    startOffset: 5,
+                    endOffset: 10,
+                }]),
+            } as never,
+            { getSkeleton: vi.fn(() => ({})) } as never,
+            { executeCommand } as never,
+            {
+                getDefaultStyle: vi.fn(() => ({})),
+                getStyleCache: vi.fn(() => ({})),
+            } as never
+        );
+
+        onInput$.next({
+            event: { defaultPrevented: false, data: 'x' },
+            content: 'x',
+            activeRange,
+            rangeList: [activeRange],
+        });
+        await Promise.resolve();
+
+        expect(executeCommand).toHaveBeenCalledWith('doc.command.replace-selection', expect.objectContaining({
+            unitId: 'test-doc',
+            segmentId: '',
+            body: expect.objectContaining({ dataStream: 'x' }),
+        }));
     });
 });

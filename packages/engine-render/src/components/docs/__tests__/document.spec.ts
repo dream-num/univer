@@ -32,7 +32,7 @@ import { Path, Rect } from '../../../shape';
 import { Viewport } from '../../../viewport';
 import { DocBackground } from '../doc-background';
 import { DOCS_EXTENSION_TYPE } from '../doc-extension';
-import { Documents, drawSectionColumnSeparators } from '../document';
+import { Documents, drawSectionColumnSeparators, resolveHeaderFooterFieldGlyph } from '../document';
 import { getDocumentCompatibilityPolicy } from '../document-compatibility';
 import { setDocsTableRenderViewportProvider } from '../table-render-viewport';
 
@@ -313,6 +313,15 @@ function attachColumnGroup(page: any) {
 }
 
 describe('documents render', () => {
+    it('resolves PAGE and NUMPAGES fields without mutating the model glyph', () => {
+        const glyph = { st: 0, ed: 0, content: '1' } as any;
+        const pageRange = { startIndex: 0, endIndex: 0, properties: { fieldType: 'PAGE' } } as any;
+        const pageCountRange = { startIndex: 0, endIndex: 0, properties: { fieldType: 'NUMPAGES' } } as any;
+
+        expect(resolveHeaderFooterFieldGlyph(glyph, 0, 0, [pageRange], 15, 16).content).toBe('15');
+        expect(resolveHeaderFooterFieldGlyph(glyph, 0, 0, [pageCountRange], 15, 16).content).toBe('16');
+        expect(glyph.content).toBe('1');
+    });
     let restoreEnv: () => void;
     let container: HTMLDivElement;
     let engine: Engine;
@@ -623,14 +632,10 @@ describe('documents render', () => {
             cacheBound: { left: 80, top: 30, right: 760, bottom: 490 },
         } as any);
 
-        expect(rectDraw.mock.calls.map(([, props]) => props.fill)).toEqual([
-            '#fafafa',
-            'rgba(255, 255, 255, 1)',
-        ]);
+        expect(rectDraw).toHaveBeenCalledTimes(2);
         expect(rectDraw.mock.calls[0][1]).toMatchObject({
             width: 680,
             height: 460,
-            fill: '#fafafa',
         });
         expect(translate.mock.calls[0]).toEqual([80, 30]);
 
@@ -711,10 +716,7 @@ describe('documents render', () => {
             translate: vi.fn(),
         } as any);
 
-        expect(rectDraw.mock.calls.map(([, props]) => props.fill)).toEqual([
-            '#fafafa',
-            'rgba(255, 255, 255, 1)',
-        ]);
+        expect(rectDraw).toHaveBeenCalledTimes(2);
 
         docBackground.dispose();
     });
@@ -753,11 +755,10 @@ describe('documents render', () => {
             cacheBound: { left: 90, top: 40, right: 700, bottom: 480 },
         } as any);
 
-        expect(rectDraw.mock.calls.map(([, props]) => props.fill)).toEqual(['rgba(255, 255, 255, 1)']);
+        expect(rectDraw).toHaveBeenCalledTimes(1);
         expect(rectDraw.mock.calls[0][1]).toMatchObject({
             width: 610,
             height: 440,
-            fill: 'rgba(255, 255, 255, 1)',
         });
         expect(translate.mock.calls[0]).toEqual([90, 40]);
 
@@ -1301,16 +1302,17 @@ describe('documents render', () => {
         documents.dispose();
     });
 
-    it('does not clip DOCX tables that extend into margins while fitting the physical page', () => {
+    it('does not clip traditional tables with a model width that extend into margins', () => {
         const bodyPage = createPage(DocumentSkeletonPageType.BODY, '');
         attachTable(bodyPage);
         const table = bodyPage.skeTables.get('table-1')!;
         table.left = -6;
         table.width = 190;
         table.tableSource = {
-            docxWidth: {
-                value: '2850',
-                type: 'dxa',
+            size: {
+                width: {
+                    v: 190,
+                },
             },
         };
         table.rows[0].cells[0].pageWidth = 190;

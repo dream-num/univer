@@ -234,7 +234,7 @@ export const InsertDocumentColumnBreakCommand: ICommand<IInsertDocumentColumnBre
                 rangeId: `docx-break-${generateRandomId()}`,
                 rangeType: CustomRangeType.CUSTOM,
                 wholeEntity: true,
-                properties: { docxBreakType: DocxBreakType.COLUMN },
+                properties: { breakType: DocxBreakType.COLUMN },
             }],
         });
         return executeSectionTextX(context.commandService, context.documentDataModel, textX, InsertDocumentColumnBreakCommand.id);

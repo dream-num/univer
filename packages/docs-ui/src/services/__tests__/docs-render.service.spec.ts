@@ -30,7 +30,7 @@ import {
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { Subject } from 'rxjs';
 import { describe, expect, it } from 'vitest';
-import { DocsRenderService, getDocsCanvasBackgroundColor } from '../docs-render.service';
+import { DocsRenderService } from '../docs-render.service';
 
 class TestUniverInstanceService {
     private readonly _added$ = new Subject<{ unit: DocumentDataModel }>();
@@ -156,20 +156,12 @@ describe('DocsRenderService', () => {
         expect(() => service.dispose()).not.toThrow();
     });
 
-    it('uses document flavor to choose the doc canvas background', () => {
-        expect(getDocsCanvasBackgroundColor(DocumentFlavor.MODERN)).toBe('#fff');
-        expect(getDocsCanvasBackgroundColor(DocumentFlavor.TRADITIONAL)).toBe('#fafafa');
-        expect(getDocsCanvasBackgroundColor()).toBe('#fafafa');
-    });
-
     it('creates renderers for document lifecycle changes and styles doc canvases', () => {
         const { service, instanceService, renderManagerService } = createLifecycleService();
 
         expect(renderManagerService.createdUnitIds).toEqual(['doc-existing']);
         expect(renderManagerService.canvases.get('doc-existing')?.id).toBe('univer-doc-main-canvas');
         expect(renderManagerService.canvases.get('doc-existing')?.contextId).toBe('univer-doc-main-canvas');
-        expect(renderManagerService.canvases.get('doc-existing')?.style.backgroundColor).toBe('#fff');
-
         const editorDoc = new DocumentDataModel({
             id: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
             documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },

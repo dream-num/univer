@@ -149,7 +149,7 @@ export function DefinedName({ disable }: { disable: boolean }) {
         return () => {
             subscription.unsubscribe();
         };
-    }, []); // Empty dependency array means this effect runs once on mount and clean up on unmount
+    }, [definedNamesService, lexerTreeBuilder, selectionManagerService, unitId, workbook]);
 
     const handleDefinedNamesList = debounce((value: string) => {
         const hasMatch = definedNames.find((i) => i.name.toLowerCase().includes(value.toLowerCase()));
@@ -292,11 +292,11 @@ export function DefinedName({ disable }: { disable: boolean }) {
             <input
                 ref={inputRef}
                 className={clsx(`
-                  univer-box-border univer-size-full univer-appearance-none univer-pl-1.5 univer-pr-5
-                  univer-text-gray-900
+                  univer-box-border univer-size-full univer-appearance-none univer-bg-transparent univer-pl-1.5
+                  univer-pr-5 univer-text-gray-900
                   focus:univer-outline-none
                   rtl:univer-pl-5 rtl:univer-pr-1.5
-                  dark:!univer-border-r-gray-700 dark:!univer-bg-gray-900 dark:!univer-text-white
+                  dark:!univer-border-r-gray-700 dark:!univer-text-white
                 `, borderRightClassName, {
                     'univer-cursor-not-allowed': disable,
                 })}

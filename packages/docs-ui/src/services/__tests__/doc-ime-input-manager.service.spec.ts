@@ -32,13 +32,24 @@ describe('DocIMEInputManagerService', () => {
 
         service.pushUndoRedoMutationParams(
             { unitId: 'doc-1', actions: jsonX.insertOp(['settings'], { zoomRatio: 1 }), textRanges: [] } as never,
-            { unitId: 'doc-1', actions: jsonX.replaceOp(['id'], 'doc-1', 'doc-2'), textRanges: [] } as never
+            {
+                unitId: 'doc-1',
+                actions: jsonX.replaceOp(['id'], 'doc-1', 'doc-2'),
+                textRanges: [{ startOffset: 3, endOffset: 3, collapsed: true }],
+                segmentId: 'header-1',
+                options: { wholeDocument: false },
+            } as never
         );
 
         expect(service.fetchComposedUndoRedoMutationParams()).toMatchObject({
             previousActiveRange: activeRange,
             undoMutationParams: { unitId: 'doc-1' },
-            redoMutationParams: { unitId: 'doc-1' },
+            redoMutationParams: {
+                unitId: 'doc-1',
+                segmentId: 'header-1',
+                textRanges: [{ startOffset: 3, endOffset: 3, collapsed: true }],
+                options: { wholeDocument: false },
+            },
         });
     });
 

@@ -222,7 +222,7 @@ describe('docs layout tools extra', () => {
     });
 
     it('defaults word-style docx paragraphs to snap when the section uses a document grid', () => {
-        const lineCfg = getLineHeightConfig({
+        const linesAndCharsCfg = getLineHeightConfig({
             linePitch: 30.46666666666667,
             gridType: GridType.LINES_AND_CHARS,
         } as any, {
@@ -233,7 +233,76 @@ describe('docs layout tools extra', () => {
             },
         } as any);
 
-        expect(lineCfg.snapToGrid).toBe(BooleanNumber.TRUE);
+        const linesCfg = getLineHeightConfig({
+            linePitch: 30.46666666666667,
+            gridType: GridType.LINES,
+        } as any, {
+            useWordStyleLineHeight: true,
+            paragraphStyle: {},
+        } as any);
+
+        const charsOnlyCfg = getLineHeightConfig({
+            linePitch: 30.46666666666667,
+            gridType: GridType.SNAP_TO_CHARS,
+        } as any, {
+            useWordStyleLineHeight: true,
+            paragraphStyle: {},
+        } as any);
+
+        expect(linesAndCharsCfg.snapToGrid).toBe(BooleanNumber.TRUE);
+        expect(linesCfg.snapToGrid).toBe(BooleanNumber.TRUE);
+        expect(charsOnlyCfg.snapToGrid).toBe(BooleanNumber.FALSE);
+    });
+
+    it('applies the classic table-grid line-height policy only when enabled', () => {
+        const paragraphConfig = {
+            useWordStyleLineHeight: true,
+            isInsideTable: true,
+            paragraphStyle: {
+                lineSpacing: 1.5,
+                spacingRule: SpacingRule.AUTO,
+            },
+        };
+        const enabled = getLineHeightConfig({
+            linePitch: 20.8,
+            gridType: GridType.LINES,
+            adjustLineHeightInTable: BooleanNumber.TRUE,
+        } as any, paragraphConfig as any);
+        const disabled = getLineHeightConfig({
+            linePitch: 20.8,
+            gridType: GridType.LINES,
+            adjustLineHeightInTable: BooleanNumber.FALSE,
+        } as any, paragraphConfig as any);
+        const body = getLineHeightConfig({
+            linePitch: 20.8,
+            gridType: GridType.LINES,
+            adjustLineHeightInTable: BooleanNumber.FALSE,
+        } as any, { ...paragraphConfig, isInsideTable: false } as any);
+
+        expect({
+            tableWithCompatibility: enabled.snapToGrid,
+            tableWithoutCompatibility: disabled.snapToGrid,
+            bodyWithoutCompatibility: body.snapToGrid,
+        }).toMatchInlineSnapshot(`
+          {
+            "bodyWithoutCompatibility": 1,
+            "tableWithCompatibility": 1,
+            "tableWithoutCompatibility": 0,
+          }
+        `);
+    });
+
+    it('does not activate a line grid when a word-style section only carries line pitch', () => {
+        const lineCfg = getLineHeightConfig({
+            linePitch: 24,
+        } as any, {
+            useWordStyleLineHeight: true,
+            paragraphStyle: {},
+        } as any);
+
+        expect(lineCfg.gridType).toBe(GridType.DEFAULT);
+        expect(lineCfg.snapToGrid).toBe(BooleanNumber.FALSE);
+        expect(lineCfg.lineSpacing).toBe(1);
     });
 
     it('updates block index values and iterates skeleton blocks', () => {
@@ -400,7 +469,7 @@ describe('docs layout tools extra', () => {
         expect(fromLastGlyph.charSpace).toBe(1);
 
         const viewModel = {
-            getTextRun: vi.fn(() => ({ st: 0, ed: 10, ts: { fs: 12, ff: 'Arial' } })),
+            getTextRun: vi.fn(() => ({ st: 0, ed: 10, ts: { fs: 12, ff: 'Arial', eastAsiaFontFamily: '宋体' } })),
             getCustomDecoration: vi.fn(() => null),
             getCustomRange: vi.fn(() => null),
             getDataModel: vi.fn(() => ({
@@ -425,6 +494,7 @@ describe('docs layout tools extra', () => {
         const config1 = getFontCreateConfig(0, viewModel as any, paragraphNode as any, sectionBreakConfig as any, paragraph as any);
         const config2 = getFontCreateConfig(0, viewModel as any, paragraphNode as any, sectionBreakConfig as any, paragraph as any);
         expect(config1).toBe(config2);
+        expect(config1.fontStyle.fontFamily).toBe('Arial, 宋体');
 
         const configWithBullet = getFontCreateConfig(
             0,
@@ -463,6 +533,12 @@ describe('docs layout tools extra', () => {
                             marginLeft: 30,
                             marginRight: 40,
                             renderConfig: { isRenderStyle: BooleanNumber.TRUE },
+                            defaultHeaderId: 'section-header',
+                            defaultFooterId: 'section-footer',
+                            evenPageHeaderId: 'section-even-header',
+                            evenPageFooterId: 'section-even-footer',
+                            firstPageHeaderId: 'section-first-header',
+                            firstPageFooterId: 'section-first-footer',
                         };
                     }
                     return { sectionType: SectionType.CONTINUOUS };
@@ -477,15 +553,26 @@ describe('docs layout tools extra', () => {
                     marginTop: 20,
                     marginBottom: 20,
                     renderConfig: {},
+                    defaultHeaderId: 'document-header',
+                    defaultFooterId: 'document-footer',
                 },
             },
         };
 
         const sectionConfig = prepareSectionBreakConfig(ctx as any, 0);
         expect(sectionConfig.pageSize?.width).toBeGreaterThan(0);
-        expect(sectionConfig.headerIds).toEqual(expect.objectContaining({
-            defaultHeaderId: expect.any(String),
-        }));
+        expect(sectionConfig.headerIds).toEqual({
+            defaultHeaderId: '',
+            evenPageHeaderId: '',
+            firstPageHeaderId: '',
+        });
+        expect(sectionConfig.footerIds).toEqual({
+            defaultFooterId: '',
+            evenPageFooterId: '',
+            firstPageFooterId: '',
+        });
+        expect(sectionConfig.evenAndOddHeaders).toBe(BooleanNumber.FALSE);
+        expect(sectionConfig.useFirstPageHeaderFooter).toBe(BooleanNumber.FALSE);
 
         const dirtyCtx = {
             isDirty: true,
@@ -521,7 +608,7 @@ describe('docs layout tools extra', () => {
         expect(getPageFromPath(root as any, ['skeTables', 't1', 'rows', 0, 'cells', 0])).toBeNull();
     });
 
-    it('inherits header and footer references from the previous traditional section', () => {
+    it('DOCX golden e2e inherits header and footer references from the previous traditional section', () => {
         const sections = [
             { sectionId: 'section_1', defaultHeaderId: 'header-section-1' },
             { sectionId: 'section_2' },
@@ -541,6 +628,49 @@ describe('docs layout tools extra', () => {
         };
 
         expect(prepareSectionBreakConfig(ctx as any, 1).headerIds?.defaultHeaderId).toBe('header-section-1');
+    });
+
+    it('DOCX golden e2e does not inherit the title-page flag into a traditional section', () => {
+        const sections = [
+            { sectionId: 'cover', useFirstPageHeaderFooter: BooleanNumber.TRUE },
+            { sectionId: 'body' },
+        ];
+        const ctx = {
+            docsConfig: {},
+            viewModel: {
+                getChildren: () => [{ endIndex: 4 }, { endIndex: 9 }],
+                getSectionBreak: (endIndex: number) => endIndex === 4 ? sections[0] : sections[1],
+            },
+            dataModel: {
+                documentStyle: {
+                    documentFlavor: DocumentFlavor.TRADITIONAL,
+                    useFirstPageHeaderFooter: BooleanNumber.TRUE,
+                },
+            },
+        };
+
+        expect(prepareSectionBreakConfig(ctx as any, 0).useFirstPageHeaderFooter).toBe(BooleanNumber.TRUE);
+        expect(prepareSectionBreakConfig(ctx as any, 1).useFirstPageHeaderFooter).toBe(BooleanNumber.FALSE);
+    });
+
+    it('keeps a traditional section without an explicit grid off the line grid', () => {
+        const ctx = {
+            docsConfig: {},
+            viewModel: {
+                getChildren: () => [{ endIndex: 4 }],
+                getSectionBreak: () => ({ sectionId: 'section_1', linePitch: 24 }),
+            },
+            dataModel: {
+                documentStyle: {
+                    documentFlavor: DocumentFlavor.TRADITIONAL,
+                    linePitch: 24,
+                },
+            },
+        };
+
+        const sectionConfig = prepareSectionBreakConfig(ctx as any, 0);
+        expect(sectionConfig.linePitch).toBe(24);
+        expect(sectionConfig.gridType).toBe(GridType.DEFAULT);
     });
 
     it('iterates document skeleton lines with nested table and column layout context', () => {

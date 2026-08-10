@@ -82,7 +82,7 @@ export function getDefaultBulletSke(listId: string, startIndex: number = 1): IDo
         paragraphProperties: {
             indentFirstLine: { v: 0 },
             hanging: { v: 21 },
-            indentStart: { v: 0 },
+            indentStart: { v: 21 },
         },
     };
 }

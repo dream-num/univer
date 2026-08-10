@@ -1364,6 +1364,52 @@ describe('linebreaking', () => {
         expect(result.length).toBeGreaterThanOrEqual(1);
     });
 
+    it('aligns wrapped list lines with the body text after the hanging marker', () => {
+        const content = 'A wrapped list item with enough text to continue';
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed(content, {
+            documentStyle: {
+                pageSize: { width: 160, height: 600 },
+                marginLeft: 20,
+                marginRight: 20,
+            },
+            body: {
+                paragraphs: [{
+                    startIndex: content.length,
+                    bullet: {
+                        listId: 'list-1',
+                        listType: 'test-list',
+                        nestingLevel: 0,
+                    },
+                }],
+            },
+            lists: {
+                'test-list': {
+                    listType: 'test-list',
+                    nestingLevel: [{
+                        bulletAlignment: 1,
+                        glyphFormat: '•',
+                        startNumber: 1,
+                        glyphType: 0,
+                        paragraphProperties: {
+                            hanging: { v: 21 },
+                            indentStart: { v: 21 },
+                        },
+                    }],
+                },
+            },
+        });
+        const shapedTextList = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+
+        const result = lineBreaking(ctx, viewModel, shapedTextList, curPage, paragraphNode, sectionBreakConfig, null);
+        const lines = paragraphLines(result[0], paragraphNode.endIndex);
+
+        expect(lines.length).toBeGreaterThan(1);
+        expect(lines[0].divides[0].left).toBe(0);
+        expect(lines.slice(1).map((line) => line.divides[0].left)).toEqual(
+            Array.from({ length: lines.length - 1 }, () => 21)
+        );
+    });
+
     it('handles empty shaped text list', () => {
         const { viewModel, ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed('');
 

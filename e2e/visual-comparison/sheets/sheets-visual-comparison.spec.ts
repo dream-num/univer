@@ -4,7 +4,8 @@ import { chromium, expect, test } from '@playwright/test';
 import { generateSnapshotName } from '../const';
 
 const SHEET_MAIN_CANVAS_ID = '#univer-sheet-main-canvas_workbook-01';
-const MERGED_CELLS_VISUAL_WIDTH = 1240;
+const MERGED_CELLS_VISUAL_START_COLUMN = 4;
+const MERGED_CELLS_VISUAL_END_COLUMN = 7;
 const isCI = !!process.env.CI;
 
 test('diff default sheet toolbar', async () => {
@@ -110,14 +111,37 @@ test('diff merged cells rendering', async () => {
     await page.waitForTimeout(2000);
 
     await page.evaluate(() => window.E2EControllerAPI.loadMergeCellSheet());
-    await page.waitForTimeout(1000);
+    await page.evaluate(async () => {
+        await document.fonts.ready;
+        const activeSheet = window.univerAPI.getActiveWorkbook().getActiveSheet();
+        activeSheet.scrollToCell(0, 0);
+        activeSheet.refreshCanvas();
+        await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+    });
 
     const filename = generateSnapshotName('mergedCellsRendering');
     const canvas = page.locator(SHEET_MAIN_CANVAS_ID);
-    // TODO(@ai-review): Confirm the A:G crop still covers the intended merged-cell layouts if the fixture's column widths change.
-    const screenshotDataUrl = await canvas.evaluate((element: HTMLCanvasElement, width) => {
+    // TODO(@ai-review): Verify the font-ready refresh keeps H-column bullet wrapping deterministic on Linux runners.
+    const screenshotDataUrl = await canvas.evaluate((element: HTMLCanvasElement, { startColumn, endColumn }) => {
+        const activeWorkbook = window.univerAPI.getActiveWorkbook();
+        const activeSheet = activeWorkbook.getActiveSheet();
+        const sheetSnapshot = activeWorkbook.save().sheets[activeSheet.getSheetId()];
+        const pixelRatio = element.width / element.getBoundingClientRect().width;
+        const defaultColumnWidth = sheetSnapshot.defaultColumnWidth;
+        const getColumnWidth = (column: number) => sheetSnapshot.columnData[column]?.w ?? defaultColumnWidth;
+        let sourceX = sheetSnapshot.rowHeader?.hidden ? 0 : sheetSnapshot.rowHeader?.width ?? 0;
+        for (let column = 0; column < startColumn; column++) {
+            sourceX += getColumnWidth(column);
+        }
+        let sourceWidth = 0;
+        for (let column = startColumn; column <= endColumn; column++) {
+            sourceWidth += getColumnWidth(column);
+        }
+        sourceX = Math.round(sourceX * pixelRatio);
+        sourceWidth = Math.round(sourceWidth * pixelRatio);
+
         const croppedCanvas = document.createElement('canvas');
-        croppedCanvas.width = width;
+        croppedCanvas.width = sourceWidth;
         croppedCanvas.height = element.height;
         const context = croppedCanvas.getContext('2d');
         if (!context) {
@@ -135,9 +159,12 @@ test('diff merged cells rendering', async () => {
         }
         context.fillStyle = backgroundColor;
         context.fillRect(0, 0, croppedCanvas.width, croppedCanvas.height);
-        context.drawImage(element, 0, 0);
+        context.drawImage(element, sourceX, 0, sourceWidth, element.height, 0, 0, sourceWidth, element.height);
         return croppedCanvas.toDataURL('image/png');
-    }, MERGED_CELLS_VISUAL_WIDTH);
+    }, {
+        startColumn: MERGED_CELLS_VISUAL_START_COLUMN,
+        endColumn: MERGED_CELLS_VISUAL_END_COLUMN,
+    });
     const screenshot = Buffer.from(screenshotDataUrl.slice(screenshotDataUrl.indexOf(',') + 1), 'base64');
     await expect(screenshot).toMatchSnapshot(filename, { maxDiffPixelRatio: 0.005 });
 });

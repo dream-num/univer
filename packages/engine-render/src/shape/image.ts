@@ -400,7 +400,6 @@ export class Image extends Shape<IImageProps> {
         const w = renderWidth ?? this.width;
         const h = renderHeight ?? this.height;
 
-        // TODO(@ai-review): Verify raster caching remains opt-in because decoded bitmap images already have an efficient native draw path.
         if (this.rasterCache) {
             this._renderWithCache(
                 ctx,

@@ -37,7 +37,6 @@ function resolveRenderCacheMetrics(bounds: IBoundRectNoAngle, requestedPixelRati
         return null;
     }
 
-    // TODO(@ai-review): Confirm the shared cache budget balances large SVG clarity and memory on the minimum supported browsers.
     const pixelRatio = Math.min(
         requestedPixelRatio,
         RENDER_CACHE_MAX_DIMENSION / boundsWidth,

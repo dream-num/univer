@@ -232,7 +232,6 @@ describe('image extra', () => {
         expect(ctx.drawImage).toHaveBeenCalled();
     });
 
-    // TODO(@ai-review): Confirm this regression fails if Image stops reusing its fixed-resolution raster cache across zoom changes.
     it('reuses an opted-in raster cache across context scale changes', () => {
         const native = createNativeImage(2_000, 1_000);
         const image = new Image('cached-image', {

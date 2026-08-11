@@ -6,7 +6,7 @@ export interface IE2EControllerAPI {
     loadDefaultDoc(loadTimeout?: number): Promise<void>;
     loadDocLayoutFixture(documentFlavor: 1 | 2, loadTimeout?: number): Promise<void>;
     loadDemoSheet(loadTimeout?: number): Promise<void>;
-    loadMergeCellSheet(loadTimeout?: number, disableAutoHyphenation?: boolean): Promise<void>;
+    loadMergeCellSheet(loadTimeout?: number): Promise<void>;
     loadDefaultStyleSheet(loadTimeout?: number): Promise<void>;
     setDarkMode(darkMode: boolean): void;
     disposeUniver(): Promise<void>;

@@ -49,13 +49,7 @@ export enum DataStreamTreeTokenType {
     BLOCK_START = '\x10', // block start
     BLOCK_END = '\x11', // block end
     // custom range.
-    /**
-     * @deprecated
-     */
     CUSTOM_RANGE_START = '\x1F', // custom range start
-    /**
-     * @deprecated
-     */
     CUSTOM_RANGE_END = '\x1E', // custom range end
 
     COLUMN_BREAK = '\v', // column break

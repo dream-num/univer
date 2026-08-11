@@ -94,7 +94,6 @@ test('diff demo sheet content', async ({ page }) => {
 /**
  * Aim for default sheet style.
  */
-// TODO(@ai-review): Verify merged-cell visual coverage is restored after H-column rich-text wrapping becomes deterministic.
 test('diff sheet default style rendering', async () => {
     const browser = await chromium.launch({
         headless: !!isCI, // Set to false to see the browser window

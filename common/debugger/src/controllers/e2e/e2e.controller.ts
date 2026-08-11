@@ -1,6 +1,6 @@
 import type { Univer } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
-import { awaitTime, Disposable, DocumentFlavor, Inject, IUniverInstanceService, ThemeService, UniverInstanceType } from '@univerjs/core';
+import { awaitTime, BooleanNumber, Disposable, DocumentFlavor, Inject, IUniverInstanceService, ThemeService, Tools, UniverInstanceType } from '@univerjs/core';
 import { DEFAULT_WORKBOOK_DATA_DEMO, DEFAULT_WORKBOOK_DATA_DEMO_DEFAULT_STYLE } from '@univerjs/mockdata';
 import { getDefaultDocData } from './data/default-doc';
 import { getDefaultWorkbookData } from './data/default-sheet';
@@ -14,7 +14,7 @@ export interface IE2EControllerAPI {
     loadAndRelease(id: number, loadTimeout?: number, disposeTimeout?: number): Promise<void>;
     loadDefaultSheet(loadTimeout?: number): Promise<void>;
     loadDemoSheet(loadTimeout?: number): Promise<void>;
-    loadMergeCellSheet(loadTimeout?: number): Promise<void>;
+    loadMergeCellSheet(loadTimeout?: number, disableAutoHyphenation?: boolean): Promise<void>;
     loadDefaultStyleSheet(loadTimeout?: number): Promise<void>;
     loadDefaultDoc(loadTimeout?: number,): Promise<void>;
     loadDocLayoutFixture(documentFlavor: DocumentFlavor, loadTimeout?: number): Promise<void>;
@@ -55,7 +55,10 @@ export class E2EController extends Disposable {
             loadAndRelease: (id, loadTimeout, disposeTimeout) => this._loadAndRelease(id, loadTimeout, disposeTimeout),
             loadDefaultSheet: (loadTimeout) => this._loadDefaultSheet(loadTimeout),
             loadDemoSheet: () => this._loadDemoSheet(),
-            loadMergeCellSheet: () => this._loadMergeCellSheet(2000),
+            loadMergeCellSheet: (loadTimeout, disableAutoHyphenation) => this._loadMergeCellSheet(
+                loadTimeout ?? 2000,
+                disableAutoHyphenation
+            ),
             loadDefaultStyleSheet: (loadTimeout) => this._loadDefaultStyleSheet(loadTimeout),
             disposeCurrSheetUnit: (disposeTimeout?: number) => this._disposeDefaultSheetUnit(disposeTimeout),
             setDarkMode: (darkMode) => this._setDarkMode(darkMode),
@@ -94,9 +97,18 @@ export class E2EController extends Disposable {
     /**
      * sheet-003 in default data
      */
-    private async _loadMergeCellSheet(loadingTimeout: number = AWAIT_LOADING_TIMEOUT): Promise<void> {
-        const data = { ...DEFAULT_WORKBOOK_DATA_DEMO };
+    private async _loadMergeCellSheet(loadingTimeout: number = AWAIT_LOADING_TIMEOUT, disableAutoHyphenation = false): Promise<void> {
+        const data = disableAutoHyphenation
+            ? Tools.deepClone(DEFAULT_WORKBOOK_DATA_DEMO)
+            : { ...DEFAULT_WORKBOOK_DATA_DEMO };
         data.sheetOrder = ['sheet-0003'];
+        if (disableAutoHyphenation) {
+            // TODO(@ai-review): Confirm that disabling auto-hyphenation only for the E:H snapshot preserves the intended H-column rich-text coverage.
+            const richTextDocument = data.sheets['sheet-0003']?.cellData?.[0]?.[7]?.p;
+            if (richTextDocument) {
+                richTextDocument.documentStyle.autoHyphenation = BooleanNumber.FALSE;
+            }
+        }
         this._univerInstanceService.createUnit(UniverInstanceType.UNIVER_SHEET, data);
         await awaitTime(loadingTimeout);
     }

@@ -110,18 +110,11 @@ test('diff merged cells rendering', async () => {
     await page.goto('http://localhost:3000/sheets/');
     await page.waitForTimeout(2000);
 
-    await page.evaluate(() => window.E2EControllerAPI.loadMergeCellSheet());
-    await page.evaluate(async () => {
-        await document.fonts.ready;
-        const activeSheet = window.univerAPI.getActiveWorkbook().getActiveSheet();
-        activeSheet.scrollToCell(0, 0);
-        activeSheet.refreshCanvas();
-        await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
-    });
+    await page.evaluate(() => window.E2EControllerAPI.loadMergeCellSheet(2000, true));
 
     const filename = generateSnapshotName('mergedCellsRendering');
     const canvas = page.locator(SHEET_MAIN_CANVAS_ID);
-    // TODO(@ai-review): Verify the font-ready refresh keeps H-column bullet wrapping deterministic on Linux runners.
+    // TODO(@ai-review): Verify the E:H canvas-pixel crop keeps H rich text covered without reintroducing viewport-coordinate drift.
     const screenshotDataUrl = await canvas.evaluate((element: HTMLCanvasElement, { startColumn, endColumn }) => {
         const activeWorkbook = window.univerAPI.getActiveWorkbook();
         const activeSheet = activeWorkbook.getActiveSheet();

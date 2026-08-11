@@ -54,19 +54,22 @@ function resolveRasterCachePixelRatio(width: number, height: number, requestedPi
         return requestedPixelRatio;
     }
 
-    const dimensionLimitedPixelRatio = Math.min(
-        requestedPixelRatio,
+    const dimensionPixelRatioLimit = Math.min(
         RASTER_CACHE_MAX_DIMENSION / width,
         RASTER_CACHE_MAX_DIMENSION / height
     );
     const pixelLimitedPixelRatio = Math.sqrt(RASTER_CACHE_MAX_PIXEL_COUNT / (width * height));
-    if (dimensionLimitedPixelRatio <= pixelLimitedPixelRatio) {
-        return dimensionLimitedPixelRatio;
+    const pixelRatioLimit = Math.min(dimensionPixelRatioLimit, pixelLimitedPixelRatio);
+    const pixelRatio = requestedPixelRatio + RASTER_CACHE_PIXEL_RATIO_STEP > pixelRatioLimit
+        ? pixelRatioLimit
+        : requestedPixelRatio;
+    if (pixelRatio < pixelLimitedPixelRatio) {
+        return pixelRatio;
     }
 
     const physicalWidth = Math.floor(width * pixelLimitedPixelRatio);
     const physicalHeight = Math.floor(RASTER_CACHE_MAX_PIXEL_COUNT / physicalWidth);
-    return Math.min((physicalWidth - 1) / width, (physicalHeight - 1) / height);
+    return Math.min(pixelRatio, (physicalWidth - 1) / width, (physicalHeight - 1) / height);
 }
 
 export interface IShapeClipBounds {

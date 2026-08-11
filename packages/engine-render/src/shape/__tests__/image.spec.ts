@@ -347,6 +347,7 @@ describe('image extra', () => {
         const context = canvas.getContext();
         const drawImage = vi.spyOn(UniverRenderingContext.prototype, 'drawImage');
 
+        context.setTransform(0.5, 0, 0, 0.5, 0, 0);
         image.render(context);
         context.setTransform(2, 0, 0, 2, 0, 0);
         image.render(context);

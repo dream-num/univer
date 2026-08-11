@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import type { IAccessor, Workbook } from '@univerjs/core';
-import type { IMenuButtonItem } from '@univerjs/ui';
 import type { LocaleKey } from '../locale/types';
 import {
     BooleanNumber,
     DisposableCollection,
+    type IAccessor,
     ICommandService,
     IUniverInstanceService,
     UniverInstanceType,
+    type Workbook,
 } from '@univerjs/core';
 import {
     SetWorksheetActiveOperation,
@@ -31,7 +31,7 @@ import {
     WorkbookEditablePermission,
     WorksheetEditPermission,
 } from '@univerjs/sheets';
-import { MenuItemType } from '@univerjs/ui';
+import { getMenuHiddenObservable, type IMenuButtonItem, MenuItemType } from '@univerjs/ui';
 import { Observable } from 'rxjs';
 import { getCurrentRangeDisable$ } from './menu-util';
 
@@ -44,6 +44,7 @@ export function ToggleGridlinesMenuFactory(accessor: IAccessor): IMenuButtonItem
         type: MenuItemType.BUTTON,
         tooltip: 'sheets-ui.toolbar.toggleGridlines',
         icon: 'HideGridlinesIcon',
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         activated$: new Observable<boolean>((observer) => {
             const getValue = () => {
                 const workbook = instanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);

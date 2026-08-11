@@ -21,6 +21,8 @@ import { ComponentExtension } from '../extension';
 export enum DOCS_EXTENSION_TYPE {
     SPAN,
     LINE,
+    /** Draws range or block backgrounds before inline backgrounds and text. */
+    BACKGROUND,
 }
 
 export class docExtension extends ComponentExtension<

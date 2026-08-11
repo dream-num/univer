@@ -1152,6 +1152,7 @@ describe('documents render', () => {
             [],
             null,
             [],
+            [],
             {} as any,
             0,
             0,
@@ -1230,6 +1231,7 @@ describe('documents render', () => {
             [],
             null,
             [],
+            [],
             {} as any,
             0,
             0,
@@ -1288,6 +1290,7 @@ describe('documents render', () => {
             bodyPage.skeTables,
             [],
             null,
+            [],
             [],
             {} as any,
             0,
@@ -1349,6 +1352,7 @@ describe('documents render', () => {
             bodyPage.skeTables,
             [],
             null,
+            [],
             [],
             {} as any,
             0,
@@ -1512,6 +1516,7 @@ describe('documents render', () => {
             [],
             null,
             [],
+            [],
             { x: 0, y: 0 },
             0,
             0,
@@ -1559,6 +1564,7 @@ describe('documents render', () => {
             nestedPage,
             [],
             null,
+            [],
             [],
             { x: 100, y: 200 },
             0,
@@ -1609,6 +1615,7 @@ describe('documents render', () => {
             [],
             null,
             [],
+            [],
             { x: 0, y: 0 },
             0,
             0,
@@ -1625,6 +1632,7 @@ describe('documents render', () => {
             nestedPage.skeTables,
             [],
             null,
+            [],
             [],
             { x: 0, y: 0 },
             0,
@@ -1680,6 +1688,7 @@ describe('documents render', () => {
             [],
             null,
             [],
+            [],
             { x: 0, y: 0 },
             0,
             0,
@@ -1732,7 +1741,9 @@ describe('documents render', () => {
 
         const lineDraw = vi.fn();
         const bgDraw = vi.fn();
-        const spanDraw = vi.fn();
+        const drawOrder: Array<{ glyph: unknown; phase: 'background' | 'span' }> = [];
+        const preTextBackgroundDraw = vi.fn((_ctx, _parentScale, glyph) => drawOrder.push({ glyph, phase: 'background' }));
+        const spanDraw = vi.fn((_ctx, _parentScale, glyph) => drawOrder.push({ glyph, phase: 'span' }));
         const clearCache = vi.fn();
 
         vi.spyOn(documents as any, 'getExtensionsByOrder').mockReturnValue([
@@ -1742,6 +1753,13 @@ describe('documents render', () => {
                 extensionOffset: {},
                 clearCache,
                 draw: bgDraw,
+            },
+            {
+                uKey: 'DocsPreTextBackgroundExtension',
+                type: DOCS_EXTENSION_TYPE.BACKGROUND,
+                extensionOffset: {},
+                clearCache,
+                draw: preTextBackgroundDraw,
             },
             {
                 uKey: 'DocsLineExtension',
@@ -1777,7 +1795,13 @@ describe('documents render', () => {
         expect(pageEvents.length).toBe(1);
         expect(clearCache).toHaveBeenCalled();
         expect(lineDraw).toHaveBeenCalled();
+        expect(preTextBackgroundDraw).toHaveBeenCalled();
         expect(spanDraw).toHaveBeenCalled();
+        drawOrder.forEach((entry, index) => {
+            if (entry.phase === 'span') {
+                expect(drawOrder.slice(0, index)).toContainEqual({ glyph: entry.glyph, phase: 'background' });
+            }
+        });
         expect(tableDraw).toHaveBeenCalledTimes(2);
         expect(tableDraw.mock.calls[1][1]).toMatchObject({
             marginLeft: 48,
@@ -1836,6 +1860,7 @@ describe('documents render', () => {
             ctx,
             [],
             null,
+            [],
             [],
             Vector2.create(0, 300),
             0,

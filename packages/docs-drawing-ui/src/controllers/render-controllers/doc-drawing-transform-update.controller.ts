@@ -286,7 +286,6 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
                         return;
                     }
 
-                    // TODO(@ai-review): Confirm the second microtask always follows the coalesced Doc layout refresh.
                     if (command.id === RichTextEditingMutation.id && options?.fromChangeset) {
                         this._scheduleChangesetDrawingRefresh();
                         return;

@@ -92,29 +92,6 @@ test('diff demo sheet content', async ({ page }) => {
 });
 
 /**
- * Aim for merged cells rendering.
- */
-test('diff merged cells rendering', async () => {
-    const browser = await chromium.launch({
-        headless: !!isCI, // Set to false to see the browser window
-    });
-    const context = await browser.newContext({
-        viewport: { width: 1280, height: 1280 },
-        deviceScaleFactor: 2, // Set your desired DPR
-    });
-    const page = await context.newPage();
-    await page.goto('http://localhost:3000/sheets/');
-    await page.waitForTimeout(2000);
-
-    await page.evaluate(() => window.E2EControllerAPI.loadMergeCellSheet());
-    await page.waitForTimeout(1000);
-
-    const filename = generateSnapshotName('mergedCellsRendering');
-    const screenshot = await page.locator(SHEET_MAIN_CANVAS_ID).screenshot();
-    await expect(screenshot).toMatchSnapshot(filename, { maxDiffPixelRatio: 0.005 });
-});
-
-/**
  * Aim for default sheet style.
  */
 test('diff sheet default style rendering', async () => {

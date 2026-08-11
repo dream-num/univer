@@ -150,6 +150,24 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         );
     }
 
+    cancelPointerSelection(): void {
+        if (!this._onPointerEvent) {
+            return;
+        }
+
+        this._scenePointerMoveSubs.forEach((subscription) => subscription.unsubscribe());
+        this._scenePointerUpSubs.forEach((subscription) => subscription.unsubscribe());
+        this._scenePointerMoveSubs = [];
+        this._scenePointerUpSubs = [];
+        this._onPointerEvent = false;
+        this._anchorNodePosition = null;
+        this._focusNodePosition = null;
+        this._removeAllRanges();
+        this._removeAllCacheRanges();
+        this._disposeScrollTimers();
+        this._context.scene.enableObjectsEvent();
+    }
+
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
         @ILayoutService private readonly _layoutService: ILayoutService,

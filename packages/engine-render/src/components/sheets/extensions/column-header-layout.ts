@@ -25,6 +25,7 @@ import { SheetColumnHeaderExtensionRegistry } from '../../extension';
 import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultColumnHeaderLayoutExtension';
+const MIN_TEXT_RENDER_WIDTH_IN_SCREEN_PX = 4;
 
 export interface IColumnsHeaderCfgParam {
     headerStyle?: Partial<IHeaderStyleCfg>;
@@ -220,6 +221,12 @@ export class ColumnHeaderLayout extends SheetExtension {
             ctx.moveToByPrecision(cellBound.right, 0);
             ctx.lineToByPrecision(cellBound.right, cellBound.height);
             ctx.stroke();
+
+            if (cellBound.width * Math.abs(parentScale.scaleX ?? 1) < MIN_TEXT_RENDER_WIDTH_IN_SCREEN_PX) {
+                preColumnPosition = columnEndPosition;
+                continue;
+            }
+
             // column header text
             const textX = (() => {
                 switch (curColumnCfg.textAlign) {

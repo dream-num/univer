@@ -849,6 +849,44 @@ describe('font extension', () => {
         expect(renderCellSpy).toHaveBeenCalledOnce();
     });
 
+    it('skips font work for rows that are too short to display text on screen', () => {
+        const font = new Font() as any;
+        const ctx = createCtx();
+        const spreadsheetSkeleton = createSpreadsheetSkeleton();
+        const fontMatrix = new ObjectMatrix<any>();
+        const compressedRowCount = 228;
+        for (let row = 0; row <= compressedRowCount; row++) {
+            fontMatrix.setValue(row, 0, createFontCache());
+        }
+        spreadsheetSkeleton.stylesCache = { fontMatrix };
+        spreadsheetSkeleton.rowHeightAccumulation = Array.from(
+            { length: compressedRowCount + 1 },
+            (_, row) => row < compressedRowCount ? (row + 1) * 2 : compressedRowCount * 2 + 20
+        );
+        spreadsheetSkeleton.getRowCount = vi.fn(() => compressedRowCount + 1);
+        spreadsheetSkeleton.columnTotalWidth = 120;
+        spreadsheetSkeleton.rowTotalHeight = compressedRowCount * 2 + 20;
+        const renderCellSpy = vi.spyOn(font, '_renderFontEachCell').mockReturnValue(true);
+
+        font.draw(ctx, { scaleX: 1, scaleY: 1 } as any, spreadsheetSkeleton, [], {
+            viewRanges: [{ startRow: 0, endRow: compressedRowCount, startColumn: 0, endColumn: 0 }],
+            checkOutOfViewBound: true,
+            viewportKey: 'viewMain',
+        } as any);
+
+        expect(renderCellSpy).toHaveBeenCalledOnce();
+        expect(renderCellSpy).toHaveBeenCalledWith(expect.anything(), compressedRowCount, 0, fontMatrix, expect.anything());
+
+        renderCellSpy.mockClear();
+        font.draw(ctx, { scaleX: 1, scaleY: 2 } as any, spreadsheetSkeleton, [], {
+            viewRanges: [{ startRow: 0, endRow: compressedRowCount, startColumn: 0, endColumn: 0 }],
+            checkOutOfViewBound: true,
+            viewportKey: 'viewMain',
+        } as any);
+
+        expect(renderCellSpy).toHaveBeenCalledTimes(compressedRowCount + 1);
+    });
+
     it('skips merge lookup work when the sheet has no merged cells', () => {
         const font = new Font() as any;
         const ctx = createCtx();

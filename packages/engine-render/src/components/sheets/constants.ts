@@ -22,6 +22,11 @@ export const BG_Z_INDEX = 21;
 export const PRINTING_BG_Z_INDEX = 21;
 
 export const EXPAND_SIZE_FOR_RENDER_OVERFLOW = 20;
+export const MIN_TEXT_RENDER_HEIGHT_IN_SCREEN_PX = 4;
+
+export function shouldRenderRowText(rowHeight: number, scaleY = 1): boolean {
+    return rowHeight * Math.abs(scaleY) >= MIN_TEXT_RENDER_HEIGHT_IN_SCREEN_PX;
+}
 
 export const sheetContentViewportKeys = [
     SHEET_VIEWPORT_KEY.VIEW_MAIN,

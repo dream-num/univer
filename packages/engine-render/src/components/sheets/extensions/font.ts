@@ -46,7 +46,7 @@ import { VERTICAL_ROTATE_ANGLE } from '../../../basics/text-rotation';
 import { clampRange, inViewRanges } from '../../../basics/tools';
 import { Text } from '../../../shape/text';
 import { SpreadsheetExtensionRegistry } from '../../extension';
-import { EXPAND_SIZE_FOR_RENDER_OVERFLOW, FONT_EXTENSION_Z_INDEX } from '../constants';
+import { EXPAND_SIZE_FOR_RENDER_OVERFLOW, FONT_EXTENSION_Z_INDEX, shouldRenderRowText } from '../constants';
 import { DEFAULT_PADDING_DATA, getDocsSkeletonPageSize } from '../sheet.render-skeleton';
 import { calculateCellImageRect } from '../util';
 import { SheetExtension } from './sheet-extension';
@@ -229,6 +229,14 @@ export class Font extends SheetExtension {
 
             const { startRow, endRow, startColumn, endColumn } = range;
             for (let row = startRow; row <= endRow; row++) {
+                const rowStartPosition = rowHeightAccumulation[row - 1] ?? 0;
+                const rowEndPosition = rowHeightAccumulation[row] ?? rowStartPosition;
+                const rowGap = spreadsheetSkeleton.gapConfig?.rowGaps?.[row]?.size ?? 0;
+                const rowHeight = Math.max(0, rowEndPosition - rowStartPosition - rowGap);
+                if (!shouldRenderRowText(rowHeight, parentScale.scaleY)) {
+                    continue;
+                }
+
                 for (let col = startColumn; col <= endColumn; col++) {
                     const fontCache = fontMatrix.getValue(row, col);
                     if (!fontCache) {

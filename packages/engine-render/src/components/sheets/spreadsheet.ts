@@ -690,7 +690,9 @@ export class Spreadsheet extends SheetComponent {
             return this;
         }
 
-        spreadsheetSkeleton.setStylesCache(viewportInfo);
+        spreadsheetSkeleton.setStylesCache(viewportInfo, {
+            scaleY: this.getParentScale().scaleY,
+        });
 
         const segment = spreadsheetSkeleton.rowColumnSegment;
 

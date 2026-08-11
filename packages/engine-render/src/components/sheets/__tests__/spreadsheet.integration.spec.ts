@@ -361,6 +361,43 @@ describe('spreadsheet integration', () => {
         expect(skeleton.stylesCache.fontMatrix.getSizeOf()).toBe(0);
     });
 
+    it('skips font cache for sub-four-pixel rows without dropping visible styles or merged text', () => {
+        const workbookData = workbookDataFactory();
+        workbookData.id = 'sheet-render-short-row-workbook';
+        workbookData.name = 'sheet-render-short-row-workbook';
+        workbookData.sheets['sheet-1'].rowData = {
+            ...workbookData.sheets['sheet-1'].rowData,
+            2: { h: 2 },
+            3: { h: 2 },
+            4: { h: 2 },
+        };
+        workbookData.sheets['sheet-1'].cellData = {
+            ...workbookData.sheets['sheet-1'].cellData,
+            4: { 0: { v: 'compressed', s: 'style-bg-border' } },
+        };
+
+        const workbook = fixture.univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, workbookData);
+        const worksheet = workbook.getActiveSheet()!;
+        const skeleton = fixture.univer.__getInjector().createInstance(SpreadsheetSkeleton, worksheet, workbook.getStyles()).calculate() as SpreadsheetSkeleton;
+        skeleton.setScene(fixture.scene);
+        const viewportInfo = createViewportInfo(fixture.scene, fixture.cacheCanvas);
+
+        skeleton.setStylesCache(viewportInfo, { scaleY: 1 });
+
+        expect(skeleton.stylesCache.fontMatrix.getValue(4, 0)).toBeUndefined();
+        expect(skeleton.stylesCache.backgroundPositions?.getValue(4, 0)).toBeDefined();
+        expect(skeleton.stylesCache.border?.getValue(4, 0)).toBeDefined();
+        expect(skeleton.stylesCache.fontMatrix.getValue(2, 2)).toBeDefined();
+
+        skeleton.resetCache();
+        skeleton.setStylesCache(viewportInfo, { scaleY: 2 });
+        expect(skeleton.stylesCache.fontMatrix.getValue(4, 0)).toBeDefined();
+
+        skeleton.resetCache();
+        skeleton.setStylesCache(viewportInfo);
+        expect(skeleton.stylesCache.fontMatrix.getValue(4, 0)).toBeDefined();
+    });
+
     it('keeps the last printing row and column when the viewport ends on their exact boundaries', () => {
         const { skeleton, scene, cacheCanvas } = fixture;
         const endRow = 3;
@@ -442,8 +479,10 @@ describe('spreadsheet integration', () => {
             isDirty: 1,
             isForceDirty: false,
         });
+        const stylesCacheSpy = vi.spyOn(skeleton, 'setStylesCache');
 
         spreadsheet.render(mainCtx as any, baseVpInfo);
+        expect(stylesCacheSpy).toHaveBeenCalledWith(baseVpInfo, { scaleY: 1 });
         expect(spreadsheet.allowCache).toBe(true);
         expect(spreadsheet.getSelectionBounding(2, 2, 2, 2)).toEqual(expect.objectContaining({
             startRow: 2,

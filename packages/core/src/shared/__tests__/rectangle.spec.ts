@@ -19,7 +19,6 @@ import { describe, expect, it } from 'vitest';
 import { Range } from '../../sheets/range';
 import { AbsoluteRefType } from '../../sheets/typedef';
 import { ObjectMatrix } from '../object-matrix';
-import { multiSubtractMultiRanges } from '../object-matrix-query';
 import { Rectangle } from '../rectangle';
 
 function rangesToMatrix(ranges: IRange[]) {
@@ -31,6 +30,13 @@ function rangesToMatrix(ranges: IRange[]) {
         });
     });
 
+    return matrix.getMatrix();
+}
+
+function subtractedRangesToMatrix(ranges: IRange[], rangesToSubtract: IRange[]) {
+    const matrix = new ObjectMatrix<number>();
+    ranges.forEach((range) => Range.foreach(range, (row, col) => matrix.setValue(row, col, 1)));
+    rangesToSubtract.forEach((range) => Range.foreach(range, (row, col) => matrix.realDeleteValue(row, col)));
     return matrix.getMatrix();
 }
 
@@ -134,8 +140,7 @@ describe('multiSubtractMulti', () => {
         const ranges2: IRange[] = [
             { startColumn: 2, endColumn: 4, startRow: 2, endRow: 4 },
         ];
-        const expected: IRange[] = multiSubtractMultiRanges(ranges1, ranges2);
-        expect(rangesToMatrix(Rectangle.subtractMulti(ranges1, ranges2))).toEqual(rangesToMatrix(expected));
+        expect(rangesToMatrix(Rectangle.subtractMulti(ranges1, ranges2))).toEqual(subtractedRangesToMatrix(ranges1, ranges2));
     });
 
     it('should handle subtracting multiple ranges from a single range', () => {
@@ -146,8 +151,7 @@ describe('multiSubtractMulti', () => {
             { startColumn: 2, endColumn: 5, startRow: 2, endRow: 5 },
             { startColumn: 6, endColumn: 8, startRow: 6, endRow: 8 },
         ];
-        const expected: IRange[] = multiSubtractMultiRanges(ranges1, ranges2);
-        expect(rangesToMatrix(Rectangle.subtractMulti(ranges1, ranges2))).toEqual(rangesToMatrix(expected));
+        expect(rangesToMatrix(Rectangle.subtractMulti(ranges1, ranges2))).toEqual(subtractedRangesToMatrix(ranges1, ranges2));
     });
 
     it('should handle non-overlapping subtraction ranges', () => {
@@ -157,8 +161,7 @@ describe('multiSubtractMulti', () => {
         const ranges2: IRange[] = [
             { startColumn: 6, endColumn: 8, startRow: 6, endRow: 8 },
         ];
-        const expected: IRange[] = multiSubtractMultiRanges(ranges1, ranges2);
-        expect(rangesToMatrix(Rectangle.subtractMulti(ranges1, ranges2))).toEqual(rangesToMatrix(expected));
+        expect(rangesToMatrix(Rectangle.subtractMulti(ranges1, ranges2))).toEqual(subtractedRangesToMatrix(ranges1, ranges2));
     });
 
     it('should handle subtraction ranges that completely overlap', () => {
@@ -168,8 +171,7 @@ describe('multiSubtractMulti', () => {
         const ranges2: IRange[] = [
             { startColumn: 1, endColumn: 5, startRow: 1, endRow: 5 },
         ];
-        const expected: IRange[] = multiSubtractMultiRanges(ranges1, ranges2);
-        expect(rangesToMatrix(Rectangle.subtractMulti(ranges1, ranges2))).toEqual(rangesToMatrix(expected));
+        expect(rangesToMatrix(Rectangle.subtractMulti(ranges1, ranges2))).toEqual(subtractedRangesToMatrix(ranges1, ranges2));
     });
 
     it('should handle empty ranges', () => {
@@ -177,8 +179,7 @@ describe('multiSubtractMulti', () => {
         const ranges2: IRange[] = [
             { startColumn: 2, endColumn: 4, startRow: 2, endRow: 4 },
         ];
-        const expected: IRange[] = multiSubtractMultiRanges(ranges1, ranges2);
-        expect(rangesToMatrix(Rectangle.subtractMulti(ranges1, ranges2))).toEqual(rangesToMatrix(expected));
+        expect(rangesToMatrix(Rectangle.subtractMulti(ranges1, ranges2))).toEqual(subtractedRangesToMatrix(ranges1, ranges2));
     });
 
     it('should handle empty subtraction ranges', () => {
@@ -186,7 +187,6 @@ describe('multiSubtractMulti', () => {
             { startColumn: 1, endColumn: 5, startRow: 1, endRow: 5 },
         ];
         const ranges2: IRange[] = [];
-        const expected: IRange[] = multiSubtractMultiRanges(ranges1, ranges2);
-        expect(rangesToMatrix(Rectangle.subtractMulti(ranges1, ranges2))).toEqual(rangesToMatrix(expected));
+        expect(rangesToMatrix(Rectangle.subtractMulti(ranges1, ranges2))).toEqual(subtractedRangesToMatrix(ranges1, ranges2));
     });
 });

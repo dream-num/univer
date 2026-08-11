@@ -23,8 +23,8 @@ import type {
 } from '../../../basics';
 import type { IMoveRangeMutationParams } from '../../../commands/mutations/move-range.mutation';
 import type { IMoveColumnsMutationParams } from '../../../commands/mutations/move-rows-cols.mutation';
-import { Direction, IUniverInstanceService, MAX_COLUMN_COUNT, MAX_ROW_COUNT, RANGE_TYPE } from '@univerjs/core';
-import { describe, expect, it } from 'vitest';
+import { Direction, IUniverInstanceService, MAX_COLUMN_COUNT, MAX_ROW_COUNT, Range, RANGE_TYPE } from '@univerjs/core';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { InsertColMutation, InsertRowMutation } from '../../../commands/mutations/insert-row-col.mutation';
 import { MoveRangeMutation } from '../../../commands/mutations/move-range.mutation';
 import { MoveColsMutation } from '../../../commands/mutations/move-rows-cols.mutation';
@@ -71,6 +71,18 @@ const formatRanges = (ranges: IRange[]) =>
         .map((range) => [range.startRow, range.endRow, range.startColumn, range.endColumn] as const)
         .sort((prev, aft) => prev[0] - aft[0] || prev[2] - aft[2] || prev[1] - aft[1] || prev[3] - aft[3]);
 
+const formatCoveredCells = (ranges: IRange[]) => {
+    const cells = new Set<string>();
+    ranges.forEach((range) => {
+        for (let row = range.startRow; row <= range.endRow; row++) {
+            for (let column = range.startColumn; column <= range.endColumn; column++) {
+                cells.add(`${row}:${column}`);
+            }
+        }
+    });
+    return Array.from(cells).sort();
+};
+
 const selectionDeps = (range?: IRange) => ({
     selectionManagerService: {
         getCurrentSelections: () => range ? [{ range }] : [],
@@ -78,6 +90,50 @@ const selectionDeps = (range?: IRange) => ({
 } as any);
 
 describe('ref range util behavior coverage', () => {
+    afterEach(() => vi.restoreAllMocks());
+
+    it('transforms large ranges without enumerating individual cells', () => {
+        const foreach = vi.spyOn(Range, 'foreach').mockImplementation(() => {
+            throw new Error('must not enumerate cells');
+        });
+        const targetRange = r(0, MAX_ROW_COUNT - 1, 0, MAX_COLUMN_COUNT - 1);
+
+        expect(() => handleMoveRowsCommon({
+            id: EffectRefRangId.MoveRowsCommandId,
+            params: { fromRange: r(2, 3, 0, MAX_COLUMN_COUNT - 1), toRange: r(8, 9, 0, MAX_COLUMN_COUNT - 1) },
+        }, targetRange)).not.toThrow();
+        expect(() => handleMoveColsCommon({
+            id: EffectRefRangId.MoveColsCommandId,
+            params: { fromRange: r(0, MAX_ROW_COUNT - 1, 2, 3), toRange: r(0, MAX_ROW_COUNT - 1, 8, 9) },
+        }, targetRange)).not.toThrow();
+        expect(() => handleReorderRangeCommon({
+            id: EffectRefRangId.ReorderRangeCommandId,
+            params: { unitId: 'unit', subUnitId: 'sheet', range: r(2, 3, 0, MAX_COLUMN_COUNT - 1), order: { 2: 3, 3: 2 } },
+        }, targetRange)).not.toThrow();
+        expect(() => handleMoveRangeCommon({
+            id: EffectRefRangId.MoveRangeCommandId,
+            params: { fromRange: r(2, 3, 2, 3), toRange: r(8, 9, 8, 9) },
+        }, targetRange)).not.toThrow();
+        expect(() => handleInsertRangeMoveDownCommon({
+            id: EffectRefRangId.InsertRangeMoveDownCommandId,
+            params: { range: r(2, 3, 2, 3) },
+        }, targetRange)).not.toThrow();
+        expect(() => handleInsertRangeMoveRightCommon({
+            id: EffectRefRangId.InsertRangeMoveRightCommandId,
+            params: { range: r(2, 3, 2, 3) },
+        }, targetRange)).not.toThrow();
+        expect(() => handleDeleteRangeMoveLeftCommon({
+            id: EffectRefRangId.DeleteRangeMoveLeftCommandId,
+            params: { range: r(2, 3, 2, 3) },
+        }, targetRange)).not.toThrow();
+        expect(() => handleDeleteRangeMoveUpCommon({
+            id: EffectRefRangId.DeleteRangeMoveUpCommandId,
+            params: { range: r(2, 3, 2, 3) },
+        }, targetRange)).not.toThrow();
+
+        foreach.mockRestore();
+    });
+
     describe('range type normalization', () => {
         it('expands typed and inferred column/row/all ranges for internal calculation', () => {
             expect(handleRangeTypeInput(r(Number.NaN, Number.NaN, 2, 4))).toEqual(r(0, MAX_ROW_COUNT - 1, 2, 4));
@@ -182,19 +238,19 @@ describe('ref range util behavior coverage', () => {
         });
 
         it('removes deleted cells and moves the trailing cells into the gap', () => {
-            expect(formatRanges(handleDeleteRangeMoveLeftCommon({
+            expect(formatCoveredCells(handleDeleteRangeMoveLeftCommon({
                 id: EffectRefRangId.DeleteRangeMoveLeftCommandId,
                 params: { range: r(1, 2, 2, 3) },
-            }, r(0, 3, 1, 5)))).toEqual(formatRanges([
+            }, r(0, 3, 1, 5)))).toEqual(formatCoveredCells([
                 r(0, 3, 1, 3),
                 r(0, 0, 4, 5),
                 r(3, 3, 4, 5),
             ]));
 
-            expect(formatRanges(handleDeleteRangeMoveUpCommon({
+            expect(formatCoveredCells(handleDeleteRangeMoveUpCommon({
                 id: EffectRefRangId.DeleteRangeMoveUpCommandId,
                 params: { range: r(2, 3, 1, 2) },
-            }, r(1, 5, 0, 3)))).toEqual(formatRanges([
+            }, r(1, 5, 0, 3)))).toEqual(formatCoveredCells([
                 r(1, 3, 0, 3),
                 r(4, 5, 0, 0),
                 r(4, 5, 3, 3),
@@ -293,10 +349,10 @@ describe('ref range util behavior coverage', () => {
         });
 
         it('uses common range transformations for split range operations', () => {
-            expect(formatRanges(handleCommonDefaultRangeChangeWithEffectRefCommands(r(0, 3, 1, 5), {
+            expect(formatCoveredCells(handleCommonDefaultRangeChangeWithEffectRefCommands(r(0, 3, 1, 5), {
                 id: EffectRefRangId.DeleteRangeMoveLeftCommandId,
                 params: { range: r(1, 2, 2, 3) },
-            }))).toEqual(formatRanges([
+            }))).toEqual(formatCoveredCells([
                 r(0, 3, 1, 3),
                 r(0, 0, 4, 5),
                 r(3, 3, 4, 5),

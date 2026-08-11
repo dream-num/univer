@@ -17,7 +17,6 @@
 import type { IRange, Nullable } from '@univerjs/core';
 import type {
     IAddConditionalRuleMutationParams,
-    IConditionalFormattingRuleConfig,
     IConditionFormattingRule,
     IDeleteConditionalRuleMutationParams,
     ISetConditionalRuleMutationParams,
@@ -28,10 +27,7 @@ import {
     Inject,
     Injector,
     IUniverInstanceService,
-    ObjectMatrix,
-    Range,
     Rectangle,
-    Tools,
 } from '@univerjs/core';
 import {
     getSheetCommandTarget,
@@ -42,7 +38,6 @@ import {
     AddConditionalRuleMutationUndoFactory,
     ConditionalFormattingRangeTransformService,
     ConditionalFormattingRuleModel,
-    ConditionalFormattingViewModel,
     DeleteConditionalRuleMutation,
     DeleteConditionalRuleMutationUndoFactory,
     SetConditionalRuleMutation,
@@ -52,11 +47,11 @@ import {
 import { COPY_TYPE, getRepeatRange, ISheetClipboardService, PREDEFINED_HOOK_NAME_PASTE, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
 
 interface ICopyInfoType {
-    matrix: ObjectMatrix<string[]>;
+    rules: Map<string, IRange[]>;
     info: {
         unitId: string;
         subUnitId: string;
-        cfMap: Record<string, IConditionalFormattingRuleConfig>;
+        cfMap: Record<string, Pick<IConditionFormattingRule, 'rule' | 'stopIfTrue'>>;
     };
 }
 
@@ -73,7 +68,6 @@ export class ConditionalFormattingCopyPasteController extends Disposable {
         @Inject(ISheetClipboardService) private _sheetClipboardService: ISheetClipboardService,
         @Inject(ConditionalFormattingRuleModel) private _conditionalFormattingRuleModel: ConditionalFormattingRuleModel,
         @Inject(Injector) private _injector: Injector,
-        @Inject(ConditionalFormattingViewModel) private _conditionalFormattingViewModel: ConditionalFormattingViewModel,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
         @Inject(ConditionalFormattingRangeTransformService) private _conditionalFormattingRangeTransformService: ConditionalFormattingRangeTransformService
     ) {
@@ -98,10 +92,10 @@ export class ConditionalFormattingCopyPasteController extends Disposable {
     }
 
     private _collectConditionalRule(unitId: string, subUnitId: string, range: IRange) {
-        const matrix = new ObjectMatrix<string[]>();
-        const cfMap: Record<string, IConditionalFormattingRuleConfig> = {};
+        const rules = new Map<string, IRange[]>();
+        const cfMap: Record<string, Pick<IConditionFormattingRule, 'rule' | 'stopIfTrue'>> = {};
         this._copyInfo = {
-            matrix,
+            rules,
             info: {
                 unitId,
                 subUnitId,
@@ -115,28 +109,25 @@ export class ConditionalFormattingCopyPasteController extends Disposable {
         if (!discreteRange) {
             return;
         }
-        const { rows, cols } = discreteRange;
-        const cfIdSet: Set<string> = new Set();
-        rows.forEach((row, rowIndex) => {
-            cols.forEach((col, colIndex) => {
-                const cellCfList = this._conditionalFormattingViewModel.getCellCfs(unitId, subUnitId, row, col);
-                if (!cellCfList) {
-                    return;
-                }
-                cellCfList.forEach((item) => cfIdSet.add(item.cfId));
-                matrix.setValue(rowIndex, colIndex, cellCfList.map((item) => item.cfId));
+        const { projectRange } = virtualizeDiscreteRanges([discreteRange]);
+        this._conditionalFormattingRuleModel.getSubunitRules(unitId, subUnitId)?.forEach((rule) => {
+            const projectedRanges = rule.ranges.flatMap((ruleRange) => {
+                const projected = projectRange(ruleRange);
+                return projected ? [projected] : [];
             });
-        });
-        cfIdSet.forEach((cfId) => {
-            const rule = this._conditionalFormattingRuleModel.getRule(unitId, subUnitId, cfId);
-            if (rule) {
-                cfMap[cfId] = rule.rule;
+            if (projectedRanges.length) {
+                rules.set(rule.cfId, projectedRanges.length > 1 ? Rectangle.mergeRanges(projectedRanges) : projectedRanges);
+                cfMap[rule.cfId] = { rule: rule.rule, stopIfTrue: rule.stopIfTrue };
             }
         });
     }
 
     // eslint-disable-next-line max-lines-per-function
     private _generateConditionalFormattingMutations(pasteFrom: ISheetDiscreteRangeLocation, pasteTo: ISheetDiscreteRangeLocation, payload: ICopyPastePayload) {
+        const copyInfo = this._copyInfo;
+        if (!copyInfo) {
+            return { redos: [], undos: [] };
+        }
         const { unitId: copyUnitId, subUnitId: copySubUnitId, range: copyRange } = pasteFrom;
         const { unitId: pastedUnitId, subUnitId: pastedSubUnitId, range: pastedRange } = pasteTo;
         const { copyType = COPY_TYPE.COPY } = payload;
@@ -152,147 +143,112 @@ export class ConditionalFormattingCopyPasteController extends Disposable {
             return { redos: [], undos: [] };
         }
 
-        const { ranges: [vCopyRange, vPastedRange], mapFunc } = virtualizeDiscreteRanges([copyRange, pastedRange]);
-        const repeatRange = getRepeatRange(vCopyRange, vPastedRange, true);
-        const effectedConditionalFormattingRuleRanges: Record<string, {
+        const sourceVirtualization = virtualizeDiscreteRanges([copyRange]);
+        const sourceVirtualRange = sourceVirtualization.ranges[0];
+        const targetVirtualization = virtualizeDiscreteRanges([pastedRange]);
+        const targetVirtualRange = targetVirtualization.ranges[0];
+        const repeatRange = getRepeatRange(sourceVirtualRange, targetVirtualRange, true);
+        const targetRanges = targetVirtualization.mapRange(targetVirtualRange);
+        const isSameSheet = pastedUnitId === copyUnitId && pastedSubUnitId === copySubUnitId;
+        const effectedConditionalFormattingRuleRanges = new Map<string, {
+            cfId: string;
             unitId: string;
             subUnitId: string;
             ranges: IRange[];
             add: IRange[];
             remove: IRange[];
-        }> = {};
+        }>();
+        const getEffectKey = (unitId: string, subUnitId: string, cfId: string) => JSON.stringify([unitId, subUnitId, cfId]);
 
         // 1. delete the conditional formatting rules in the pasted range.
-        Range.foreach(vPastedRange, (row, col) => {
-            const { row: realRow, col: realCol } = mapFunc(row, col);
-            const cellCfList = this._conditionalFormattingViewModel.getCellCfs(pastedUnitId, pastedSubUnitId, realRow, realCol);
-            if (cellCfList) {
-                cellCfList.forEach((item) => {
-                    if (!effectedConditionalFormattingRuleRanges[item.cfId]) {
-                        const rule = this._conditionalFormattingRuleModel.getRule(pastedUnitId, pastedSubUnitId, item.cfId);
-                        if (!rule) {
-                            return;
-                        }
-                        effectedConditionalFormattingRuleRanges[item.cfId] = {
-                            unitId: pastedUnitId,
-                            subUnitId: pastedSubUnitId,
-                            ranges: rule.ranges,
-                            add: [],
-                            remove: [],
-                        };
-                    }
-                    const current = effectedConditionalFormattingRuleRanges[item.cfId];
-                    current.remove.push({
-                        startRow: realRow,
-                        endRow: realRow,
-                        startColumn: realCol,
-                        endColumn: realCol,
-                    });
-                });
+        this._conditionalFormattingRuleModel.getSubunitRules(pastedUnitId, pastedSubUnitId)?.forEach((rule) => {
+            if (!Rectangle.doAnyRangesIntersect(rule.ranges, targetRanges)) {
+                return;
             }
+            effectedConditionalFormattingRuleRanges.set(getEffectKey(pastedUnitId, pastedSubUnitId, rule.cfId), {
+                cfId: rule.cfId,
+                unitId: pastedUnitId,
+                subUnitId: pastedSubUnitId,
+                ranges: rule.ranges,
+                add: [],
+                remove: targetRanges,
+            });
         });
 
         // 2. if it is cut from another worksheet, need to delete the conditional formatting rules in the copy range.
         if (copyType === COPY_TYPE.CUT && (pastedUnitId !== copyUnitId || pastedSubUnitId !== copySubUnitId)) {
-            Range.foreach(vCopyRange, (row, col) => {
-                const { row: realRow, col: realCol } = mapFunc(row, col);
-                const cellCfList = this._conditionalFormattingViewModel.getCellCfs(copyUnitId, copySubUnitId, realRow, realCol);
-                if (cellCfList) {
-                    cellCfList.forEach((item) => {
-                        if (!effectedConditionalFormattingRuleRanges[item.cfId]) {
-                            const rule = this._conditionalFormattingRuleModel.getRule(copyUnitId, copySubUnitId, item.cfId);
-                            if (!rule) {
-                                return;
-                            }
-                            effectedConditionalFormattingRuleRanges[item.cfId] = {
-                                unitId: copyUnitId,
-                                subUnitId: copySubUnitId,
-                                ranges: rule.ranges,
-                                add: [],
-                                remove: [],
-                            };
-                        }
-                        const current = effectedConditionalFormattingRuleRanges[item.cfId];
-                        current.remove.push({
-                            startRow: realRow,
-                            endRow: realRow,
-                            startColumn: realCol,
-                            endColumn: realCol,
-                        });
-                    });
+            const sourceRanges = sourceVirtualization.mapRange(sourceVirtualRange);
+            copyInfo.rules.forEach((_ranges, cfId) => {
+                const rule = this._conditionalFormattingRuleModel.getRule(copyUnitId, copySubUnitId, cfId);
+                if (!rule) {
+                    return;
                 }
+                effectedConditionalFormattingRuleRanges.set(getEffectKey(copyUnitId, copySubUnitId, cfId), {
+                    cfId,
+                    unitId: copyUnitId,
+                    subUnitId: copySubUnitId,
+                    ranges: rule.ranges,
+                    add: [],
+                    remove: sourceRanges,
+                });
             });
         }
 
-        const { matrix, info } = this._copyInfo as ICopyInfoType;
-        const waitAddRule: IConditionFormattingRule[] = [];
+        const { rules, info } = copyInfo;
+        const waitAddRule = new Map<string, IConditionFormattingRule>();
         const cacheCfIdMap: Record<string, IConditionFormattingRule> = {};
 
         // 3. generate the new conditional formatting rules based on the copy range's conditional formatting rules and the paste position.
         const getCurrentSheetCfRule = (copyRangeCfId: string) => {
             const oldRule = info?.cfMap[copyRangeCfId];
-            const targetRule = [...(this._conditionalFormattingRuleModel.getSubunitRules(pastedUnitId, pastedSubUnitId) || []), ...waitAddRule].find((rule) => {
-                return Tools.diffValue(rule.rule, oldRule);
-            });
-
-            if (targetRule) {
-                cacheCfIdMap[copyRangeCfId] = targetRule;
-                return targetRule;
-            } else {
-                const rule: IConditionFormattingRule = {
-                    rule: oldRule,
-                    cfId: this._conditionalFormattingRuleModel.createCfId(pastedUnitId, pastedSubUnitId),
-                    ranges: [],
-                    stopIfTrue: false,
-                };
-                cacheCfIdMap[copyRangeCfId] = rule;
-                waitAddRule.push(rule);
-                return rule;
+            if (isSameSheet) {
+                const rule = this._conditionalFormattingRuleModel.getRule(pastedUnitId, pastedSubUnitId, copyRangeCfId);
+                if (rule) {
+                    cacheCfIdMap[copyRangeCfId] = rule;
+                    return rule;
+                }
             }
+
+            const rule: IConditionFormattingRule = {
+                rule: oldRule.rule,
+                cfId: this._conditionalFormattingRuleModel.createCfId(pastedUnitId, pastedSubUnitId),
+                ranges: [],
+                stopIfTrue: oldRule.stopIfTrue,
+            };
+            cacheCfIdMap[copyRangeCfId] = rule;
+            waitAddRule.set(rule.cfId, rule);
+            return rule;
         };
 
-        repeatRange.forEach((item) => {
-            matrix &&
-                matrix.forValue((row, col, copyRangeCfIdList) => {
-                    const range = Rectangle.getPositionRange(
-                        {
-                            startRow: row,
-                            endRow: row,
-                            startColumn: col,
-                            endColumn: col,
-                        },
-                        item.startRange
-                    );
-
-                    const { row: _row, col: _col } = mapFunc(range.startRow, range.startColumn);
-
-                    copyRangeCfIdList.forEach((cfId) => {
-                        const rule = cacheCfIdMap[cfId] || getCurrentSheetCfRule(cfId);
-                        if (!effectedConditionalFormattingRuleRanges[rule.cfId]) {
-                            effectedConditionalFormattingRuleRanges[rule.cfId] = {
-                                unitId: pastedUnitId,
-                                subUnitId: pastedSubUnitId,
-                                ranges: rule.ranges,
-                                add: [],
-                                remove: [],
-                            };
-                        }
-                        const current = effectedConditionalFormattingRuleRanges[rule.cfId];
-                        current.add.push({
-                            startRow: _row,
-                            endRow: _row,
-                            startColumn: _col,
-                            endColumn: _col,
-                        });
-                    });
+        const sourceRuleEntries = Array.from(rules.entries());
+        if (!isSameSheet) {
+            // AddRule prepends, so emit lower-priority cross-sheet clones first.
+            sourceRuleEntries.reverse();
+        }
+        sourceRuleEntries.forEach(([cfId, sourceRanges]) => {
+            const rule = cacheCfIdMap[cfId] || getCurrentSheetCfRule(cfId);
+            const effectKey = getEffectKey(pastedUnitId, pastedSubUnitId, rule.cfId);
+            if (!effectedConditionalFormattingRuleRanges.has(effectKey)) {
+                effectedConditionalFormattingRuleRanges.set(effectKey, {
+                    cfId: rule.cfId,
+                    unitId: pastedUnitId,
+                    subUnitId: pastedSubUnitId,
+                    ranges: rule.ranges,
+                    add: [],
+                    remove: [],
                 });
+            }
+            const current = effectedConditionalFormattingRuleRanges.get(effectKey)!;
+            current.add.push(...repeatRange.flatMap((item) => sourceRanges.flatMap((sourceRange) => (
+                targetVirtualization.mapRange(Rectangle.getPositionRange(sourceRange, item.startRange))
+            ))));
         });
 
         const redos = [];
         const undos = [];
 
-        for (const cfId in effectedConditionalFormattingRuleRanges) {
-            const { unitId, subUnitId, ranges: sourceRanges, add, remove } = effectedConditionalFormattingRuleRanges[cfId];
+        for (const effect of effectedConditionalFormattingRuleRanges.values()) {
+            const { cfId, unitId, subUnitId, ranges: sourceRanges, add, remove } = effect;
             const ranges = this._conditionalFormattingRangeTransformService.applyRangeDelta(sourceRanges, remove, add);
 
             if (!ranges.length) {
@@ -303,14 +259,15 @@ export class ConditionalFormattingCopyPasteController extends Disposable {
                 };
                 redos.push({ id: DeleteConditionalRuleMutation.id, params: deleteParams });
                 undos.push(...DeleteConditionalRuleMutationUndoFactory(this._injector, deleteParams));
+                continue;
             }
 
-            if (waitAddRule.some((rule) => rule.cfId === cfId)) {
-                const rule = waitAddRule.find((rule) => rule.cfId === cfId) as IConditionFormattingRule;
+            const waitAdd = waitAddRule.get(cfId);
+            if (waitAdd) {
                 const addParams: IAddConditionalRuleMutationParams = {
                     unitId: pastedUnitId,
                     subUnitId: pastedSubUnitId,
-                    rule: { ...rule, ranges },
+                    rule: { ...waitAdd, ranges },
                 };
                 redos.push({ id: AddConditionalRuleMutation.id, params: addParams });
                 undos.push(AddConditionalRuleMutationUndoFactory(this._injector, addParams));

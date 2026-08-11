@@ -45,7 +45,6 @@ export {
     numfmt,
 } from './numfmt';
 export * from './object-matrix';
-export { queryObjectMatrix } from './object-matrix-query';
 export * from './random-id';
 export { moveRangeByOffset, splitIntoGrid } from './range';
 export * from './rectangle';

@@ -44,7 +44,7 @@ import type {
     IRemoveRowColCommand,
     IReorderRangeCommand,
 } from './type';
-import { Direction, getIntersectRange, IUniverInstanceService, MAX_COLUMN_COUNT, MAX_ROW_COUNT, mergeIntervals, ObjectMatrix, queryObjectMatrix, Range, RANGE_TYPE, Rectangle } from '@univerjs/core';
+import { Direction, getIntersectRange, IUniverInstanceService, MAX_COLUMN_COUNT, MAX_ROW_COUNT, mergeIntervals, ObjectMatrix, RANGE_TYPE, Rectangle } from '@univerjs/core';
 import { DeleteRangeMoveLeftCommand } from '../../commands/commands/delete-range-move-left.command';
 import { DeleteRangeMoveUpCommand } from '../../commands/commands/delete-range-move-up.command';
 import { InsertRangeMoveDownCommand } from '../../commands/commands/insert-range-move-down.command';
@@ -119,6 +119,67 @@ export const rotateRange = (range: IRange): IRange => {
 interface ILine {
     start: number;
     end: number;
+}
+
+interface ILineTransform extends ILine {
+    offset: number;
+}
+
+function mergeAndSortRanges(ranges: IRange[]): IRange[] {
+    const merged = ranges.length > 1 ? Rectangle.mergeRanges(ranges) : ranges;
+    return sortRanges(merged);
+}
+
+function sortRanges(ranges: IRange[]): IRange[] {
+    return ranges.sort((a, b) => a.startRow - b.startRow || a.startColumn - b.startColumn || a.endRow - b.endRow || a.endColumn - b.endColumn);
+}
+
+function translateRange(range: IRange, rowOffset: number, columnOffset: number): IRange {
+    return {
+        startRow: range.startRow + rowOffset,
+        endRow: range.endRow + rowOffset,
+        startColumn: range.startColumn + columnOffset,
+        endColumn: range.endColumn + columnOffset,
+    };
+}
+
+function moveRangeAlongAxis(targetRange: IRange, from: number, count: number, to: number, isRow: boolean): IRange[] {
+    let transforms: ILineTransform[];
+    if (from > to) {
+        transforms = [
+            { start: Number.NEGATIVE_INFINITY, end: to - 1, offset: 0 },
+            { start: to, end: from - 1, offset: count },
+            { start: from, end: from + count - 1, offset: to - from },
+            { start: from + count, end: Number.POSITIVE_INFINITY, offset: 0 },
+        ];
+    } else {
+        if (from + count > to) {
+            throw new Error('Invalid move operation');
+        }
+        transforms = [
+            { start: Number.NEGATIVE_INFINITY, end: from - 1, offset: 0 },
+            { start: from, end: from + count - 1, offset: to - from - count },
+            { start: from + count, end: to - 1, offset: -count },
+            { start: to, end: Number.POSITIVE_INFINITY, offset: 0 },
+        ];
+    }
+
+    const rangeStart = isRow ? targetRange.startRow : targetRange.startColumn;
+    const rangeEnd = isRow ? targetRange.endRow : targetRange.endColumn;
+    const ranges = transforms.flatMap(({ start, end, offset }) => {
+        const intersectStart = Math.max(rangeStart, start);
+        const intersectEnd = Math.min(rangeEnd, end);
+        if (intersectStart > intersectEnd) {
+            return [];
+        }
+
+        const range = isRow
+            ? { startRow: intersectStart, endRow: intersectEnd, startColumn: targetRange.startColumn, endColumn: targetRange.endColumn }
+            : { startRow: targetRange.startRow, endRow: targetRange.endRow, startColumn: intersectStart, endColumn: intersectEnd };
+        return [translateRange(range, isRow ? offset : 0, isRow ? 0 : offset)];
+    });
+
+    return mergeAndSortRanges(ranges);
 }
 /**
  * see docs/tldr/ref-range/move-rows-cols.tldr
@@ -276,17 +337,7 @@ export const handleMoveRowsCommon = (params: IMoveRowsCommand, targetRange: IRan
     const count = fromRange.endRow - fromRange.startRow + 1;
     const toRow = toRange.startRow;
 
-    const matrix = new ObjectMatrix();
-
-    Range.foreach(targetRange, (row, col) => {
-        matrix.setValue(row, col, 1);
-    });
-
-    matrix.moveRows(fromRow, count, toRow);
-
-    // TODO@zhangw try to remove queryObjectMatrix, this could case memory out of use in large range.
-    const res = queryObjectMatrix(matrix, (value) => value === 1);
-    return res;
+    return moveRangeAlongAxis(targetRange, fromRow, count, toRow, true);
 };
 
 export const handleReorderRangeCommon = (param: IReorderRangeCommand, targetRange: IRange) => {
@@ -294,26 +345,25 @@ export const handleReorderRangeCommon = (param: IReorderRangeCommand, targetRang
     if (!range || !order) {
         return [targetRange];
     }
-    const matrix = new ObjectMatrix();
-    Range.foreach(targetRange, (row, col) => {
-        matrix.setValue(row, col, 1);
-    });
+    const overwrittenRows: IRange[] = [];
+    const additions: IRange[] = [];
+    const startColumn = Math.max(range.startColumn, targetRange.startColumn);
+    const endColumn = Math.min(range.endColumn, targetRange.endColumn);
 
-    const cacheMatrix = new ObjectMatrix();
-    Range.foreach(range, (row, col) => {
-        if (Object.prototype.hasOwnProperty.call(order, row)) {
-            const targetRow = order[row];
-            const cloneCell = matrix.getValue(targetRow, col) ?? 0;
-            cacheMatrix.setValue(row, col, cloneCell);
+    Object.keys(order).forEach((key) => {
+        const row = Number(key);
+        if (row < range.startRow || row > range.endRow) {
+            return;
+        }
+
+        overwrittenRows.push({ startRow: row, endRow: row, startColumn: range.startColumn, endColumn: range.endColumn });
+        const sourceRow = order[row];
+        if (sourceRow >= targetRange.startRow && sourceRow <= targetRange.endRow && startColumn <= endColumn) {
+            additions.push({ startRow: row, endRow: row, startColumn, endColumn });
         }
     });
 
-    cacheMatrix.forValue((row, col, cellData) => {
-        matrix.setValue(row, col, cellData);
-    });
-    // TODO@zhangw try to remove queryObjectMatrix, this could case memory out of use in large range.
-    const res = queryObjectMatrix(matrix, (value) => value === 1);
-    return res;
+    return mergeAndSortRanges([...Rectangle.subtractMulti([targetRange], overwrittenRows), ...additions]);
 };
 
 export const handleMoveCols = (params: IMoveColsCommand, targetRange: IRange): IOperator[] => {
@@ -355,15 +405,7 @@ export const handleMoveColsCommon = (params: IMoveColsCommand, targetRange: IRan
     const count = fromRange.endColumn - fromRange.startColumn + 1;
     const toCol = toRange.startColumn;
 
-    const matrix = new ObjectMatrix();
-
-    Range.foreach(targetRange, (row, col) => {
-        matrix.setValue(row, col, 1);
-    });
-
-    matrix.moveColumns(fromCol, count, toCol);
-    // TODO@zhangw try to remove queryObjectMatrix, this could case memory out of use in large range.
-    return queryObjectMatrix(matrix, (value) => value === 1);
+    return moveRangeAlongAxis(targetRange, fromCol, count, toCol, false);
 };
 
 export const handleMoveRange = (param: IMoveRangeCommand, targetRange: IRange) => {
@@ -414,41 +456,13 @@ export const handleMoveRangeCommon = (param: IMoveRangeCommand, targetRange: IRa
         return [positionRange];
     }
 
-    const matrix = new ObjectMatrix();
-
-    Range.foreach(targetRange, (row, col) => {
-        matrix.setValue(row, col, 1);
-    });
-
-    const fromMatrix = new ObjectMatrix();
-    const loopFromRange = getIntersectRange(fromRange, targetRange);
-
-    loopFromRange && Range.foreach(loopFromRange, (row, col) => {
-        if (matrix.getValue(row, col)) {
-            matrix.setValue(row, col, undefined);
-            fromMatrix.setValue(row, col, 1);
-        }
-    });
-
     const columnOffset = toRange.startColumn - fromRange.startColumn;
     const rowOffset = toRange.startRow - fromRange.startRow;
+    const movedRange = getIntersectRange(fromRange, targetRange);
+    const remainingRanges = Rectangle.subtractMulti([targetRange], [fromRange, toRange]);
+    const translatedRanges = movedRange ? [translateRange(movedRange, rowOffset, columnOffset)] : [];
 
-    const loopToRange = {
-        startColumn: toRange.startColumn - columnOffset,
-        endColumn: toRange.endColumn - columnOffset,
-        startRow: toRange.startRow - rowOffset,
-        endRow: toRange.endRow - rowOffset,
-    };
-
-    loopToRange && Range.foreach(loopToRange, (row, col) => {
-        const targetRow = row + rowOffset;
-        const targetCol = col + columnOffset;
-        matrix.setValue(targetRow, targetCol, fromMatrix.getValue(row, col) ?? 0);
-    });
-
-    // TODO@zhangw try to remove queryObjectMatrix, this could case memory out of use in large range.
-    const res = queryObjectMatrix(matrix, (value) => value === 1);
-    return res;
+    return mergeAndSortRanges([...remainingRanges, ...translatedRanges]);
 };
 
 // see docs/tldr/ref-range/remove-rows-cols.tldr
@@ -769,19 +783,7 @@ export const handleInsertRangeMoveDownCommon = (param: IInsertRangeMoveDownComma
         return [targetRange];
     }
 
-    const matrix = new ObjectMatrix<number>();
-    noMoveRanges.forEach((noMoveRange) => {
-        Range.foreach(noMoveRange, (row, col) => {
-            matrix.setValue(row, col, 1);
-        });
-    });
-
-    targetMoveRange && Range.foreach(targetMoveRange, (row, col) => {
-        matrix.setValue(row + moveCount, col, 1);
-    });
-
-    // TODO@zhangw try to remove queryObjectMatrix, this could case memory out of use in large range.
-    return queryObjectMatrix(matrix, (v) => v === 1);
+    return sortRanges([...noMoveRanges, translateRange(targetMoveRange, moveCount, 0)]);
 };
 
 export const handleInsertRangeMoveRight = (param: IInsertRangeMoveRightCommand, targetRange: IRange) => {
@@ -820,19 +822,7 @@ export const handleInsertRangeMoveRightCommon = (param: IInsertRangeMoveRightCom
         return [targetRange];
     }
 
-    const matrix = new ObjectMatrix<number>();
-    noMoveRanges.forEach((noMoveRange) => {
-        Range.foreach(noMoveRange, (row, col) => {
-            matrix.setValue(row, col, 1);
-        });
-    });
-
-    targetMoveRange && Range.foreach(targetMoveRange, (row, col) => {
-        matrix.setValue(row, col + moveCount, 1);
-    });
-
-    // TODO@zhangw try to remove queryObjectMatrix, this could case memory out of use in large range.
-    return queryObjectMatrix(matrix, (v) => v === 1);
+    return sortRanges([...noMoveRanges, translateRange(targetMoveRange, 0, moveCount)]);
 };
 
 export const handleDeleteRangeMoveLeft = (param: IDeleteRangeMoveLeftCommand, targetRange: IRange) => {
@@ -872,34 +862,18 @@ export const handleDeleteRangeMoveLeftCommon = (param: IDeleteRangeMoveLeftComma
     };
 
     const moveCount = range.endColumn - range.startColumn + 1;
-    // this range need delete
-    const targetDeleteRange = getIntersectRange(range, targetRange);
-
     const noMoveRanges = Rectangle.subtract(targetRange, rightRange);
     const targetMoveRange = getIntersectRange(rightRange, targetRange);
 
-    if (!targetDeleteRange && !targetMoveRange) {
+    if (!targetMoveRange) {
         return [targetRange];
     }
 
-    const matrix = new ObjectMatrix<number>();
+    const movedRanges = targetMoveRange
+        ? Rectangle.subtract(targetMoveRange, range).map((target) => translateRange(target, 0, -moveCount))
+        : [];
 
-    targetMoveRange && Range.foreach(targetMoveRange, (row, col) => {
-        matrix.setValue(row, col - moveCount, 1);
-    });
-
-    targetDeleteRange && Range.foreach(targetDeleteRange, (row, col) => {
-        matrix.setValue(row, col - moveCount, 0);
-    });
-
-    noMoveRanges.forEach((noMoveRange) => {
-        Range.foreach(noMoveRange, (row, col) => {
-            matrix.setValue(row, col, 1);
-        });
-    });
-
-    // TODO@zhangw try to remove queryObjectMatrix, this could case memory out of use in large range.
-    return queryObjectMatrix(matrix, (v) => v === 1);
+    return mergeAndSortRanges([...noMoveRanges, ...movedRanges]);
 };
 
 export const handleDeleteRangeMoveUp = (param: IDeleteRangeMoveUpCommand, targetRange: IRange) => {
@@ -935,34 +909,18 @@ export const handleDeleteRangeMoveUpCommon = (param: IDeleteRangeMoveUpCommand, 
     };
 
     const moveCount = range.endRow - range.startRow + 1;
-    // this range need delete
-    const targetDeleteRange = getIntersectRange(range, targetRange);
-
     const noMoveRanges = Rectangle.subtract(targetRange, bottomRange);
     const targetMoveRange = getIntersectRange(bottomRange, targetRange);
 
-    if (!targetDeleteRange && !targetMoveRange) {
+    if (!targetMoveRange) {
         return [targetRange];
     }
 
-    const matrix = new ObjectMatrix<number>();
+    const movedRanges = targetMoveRange
+        ? Rectangle.subtract(targetMoveRange, range).map((target) => translateRange(target, -moveCount, 0))
+        : [];
 
-    targetMoveRange && Range.foreach(targetMoveRange, (row, col) => {
-        matrix.setValue(row - moveCount, col, 1);
-    });
-
-    targetDeleteRange && Range.foreach(targetDeleteRange, (row, col) => {
-        matrix.setValue(row - moveCount, col, 0);
-    });
-
-    noMoveRanges.forEach((noMoveRange) => {
-        Range.foreach(noMoveRange, (row, col) => {
-            matrix.setValue(row, col, 1);
-        });
-    });
-
-    // TODO@zhangw try to remove queryObjectMatrix, this could case memory out of use in large range.
-    return queryObjectMatrix(matrix, (v) => v === 1);
+    return mergeAndSortRanges([...noMoveRanges, ...movedRanges]);
 };
 
 export const handleRemoveRowCommon = (param: IRemoveRowColCommandInterceptParams, targetRange: IRange) => {

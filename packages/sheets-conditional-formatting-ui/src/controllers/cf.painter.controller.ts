@@ -17,18 +17,18 @@
 import type { IMutationInfo, IRange, Nullable, Workbook } from '@univerjs/core';
 import type {
     IAddConditionalRuleMutationParams,
+    IConditionFormattingRule,
     IDeleteConditionalRuleMutationParams,
     ISetConditionalRuleMutationParams,
 } from '@univerjs/sheets-conditional-formatting';
 import type { IFormatPainterHook } from '@univerjs/sheets-ui';
-import { Disposable, Inject, Injector, IUniverInstanceService, Range, Rectangle, Tools, UniverInstanceType } from '@univerjs/core';
+import { Disposable, getIntersectRange, Inject, Injector, IUniverInstanceService, Rectangle, Tools, UniverInstanceType } from '@univerjs/core';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import {
     AddConditionalRuleMutation,
     AddConditionalRuleMutationUndoFactory,
     ConditionalFormattingRangeTransformService,
     ConditionalFormattingRuleModel,
-    ConditionalFormattingViewModel,
     DeleteConditionalRuleMutation,
     DeleteConditionalRuleMutationUndoFactory,
     SetConditionalRuleMutation,
@@ -101,7 +101,6 @@ export class ConditionalFormattingPainterController extends Disposable {
         @Inject(IFormatPainterService) private _formatPainterService: IFormatPainterService,
         @Inject(SheetsSelectionsService) private _sheetsSelectionsService: SheetsSelectionsService,
         @Inject(ConditionalFormattingRuleModel) private _conditionalFormattingRuleModel: ConditionalFormattingRuleModel,
-        @Inject(ConditionalFormattingViewModel) private _conditionalFormattingViewModel: ConditionalFormattingViewModel,
         @Inject(ConditionalFormattingRangeTransformService) private _conditionalFormattingRangeTransformService: ConditionalFormattingRangeTransformService
 
     ) {
@@ -114,108 +113,6 @@ export class ConditionalFormattingPainterController extends Disposable {
     private _initFormattingPainter() {
         const noopReturnFunc = () => ({ redos: [], undos: [] });
 
-        const loopFunc = (
-            sourceStartCell: { row: number; col: number },
-            targetStartCell: { row: number; col: number },
-            relativeRange: IRange,
-            rangeMap: Map<string, IRange[]>,
-            rangeDeltaMap: Map<string, IRangeDelta>,
-            config: {
-                targetUnitId: string;
-                targetSubUnitId: string;
-            }
-        ) => {
-            const { unitId: sourceUnitId, subUnitId: sourceSubUnitId } = this._painterConfig!;
-            const { targetUnitId, targetSubUnitId } = config;
-
-            const getRangeDelta = (cfId: string) => {
-                let rangeDelta = rangeDeltaMap.get(cfId);
-                if (!rangeDelta) {
-                    rangeDelta = { add: [], remove: [] };
-                    rangeDeltaMap.set(cfId, rangeDelta);
-                }
-                return rangeDelta;
-            };
-            const sourceRange = {
-                startRow: sourceStartCell.row,
-                startColumn: sourceStartCell.col,
-                endColumn: sourceStartCell.col,
-                endRow: sourceStartCell.row,
-            };
-            const targetRange = {
-                startRow: targetStartCell.row,
-                startColumn: targetStartCell.col,
-                endColumn: targetStartCell.col,
-                endRow: targetStartCell.row,
-            };
-
-            Range.foreach(relativeRange, (row, col) => {
-                const sourcePositionRange = Rectangle.getPositionRange(
-                    {
-                        startRow: row,
-                        startColumn: col,
-                        endColumn: col,
-                        endRow: row,
-                    },
-                    sourceRange
-                );
-                const targetPositionRange = Rectangle.getPositionRange(
-                    {
-                        startRow: row,
-                        startColumn: col,
-                        endColumn: col,
-                        endRow: row,
-                    },
-                    targetRange
-                );
-
-                const sourceCellCf = this._conditionalFormattingViewModel.getCellCfs(
-                    sourceUnitId,
-                    sourceSubUnitId,
-                    sourcePositionRange.startRow,
-                    sourcePositionRange.startColumn
-                );
-
-                const targetCellCf = this._conditionalFormattingViewModel.getCellCfs(
-                    targetUnitId,
-                    targetSubUnitId,
-                    targetPositionRange.startRow,
-                    targetPositionRange.startColumn
-                );
-
-                if (targetCellCf) {
-                    targetCellCf.forEach((cf) => {
-                        if (!rangeMap.has(cf.cfId)) {
-                            const rule = this._conditionalFormattingRuleModel.getRule(targetUnitId, targetSubUnitId, cf.cfId);
-                            if (!rule) {
-                                return;
-                            }
-                            rangeMap.set(cf.cfId, rule.ranges);
-                        }
-                        getRangeDelta(cf.cfId).remove.push({
-                            startRow: targetPositionRange.startRow,
-                            endRow: targetPositionRange.startRow,
-                            startColumn: targetPositionRange.startColumn,
-                            endColumn: targetPositionRange.startColumn,
-                        });
-                    });
-                }
-
-                if (sourceCellCf) {
-                    sourceCellCf.forEach((cf) => {
-                        if (!rangeMap.has(cf.cfId)) {
-                            return;
-                        }
-                        getRangeDelta(cf.cfId).add.push({
-                            startRow: targetPositionRange.startRow,
-                            endRow: targetPositionRange.startRow,
-                            startColumn: targetPositionRange.startColumn,
-                            endColumn: targetPositionRange.startColumn,
-                        });
-                    });
-                }
-            });
-        };
         // eslint-disable-next-line max-lines-per-function
         const generalApplyFunc = (targetUnitId: string, targetSubUnitId: string, targetRange: IRange) => {
             const { range: sourceRange, unitId: sourceUnitId, subUnitId: sourceSubUnitId } = this._painterConfig!;
@@ -228,23 +125,53 @@ export class ConditionalFormattingPainterController extends Disposable {
             if (!targetUnitId || !targetSubUnitId || !sourceUnitId || !sourceSubUnitId) {
                 return noopReturnFunc();
             }
-            const ruleList = this._conditionalFormattingRuleModel.getSubunitRules(sourceUnitId, sourceSubUnitId) ?? [];
-            ruleList?.forEach((rule) => {
-                const { ranges, cfId } = rule;
-                if (ranges.some((range) => Rectangle.intersects(sourceRange, range))) {
-                    rangeMap.set(cfId, isSkipSheet ? [] : ranges);
+            const repeats = repeatByRange(sourceRange, targetRange);
+            const targetRanges = repeats.map((repeat) => Rectangle.getPositionRange(repeat.repeatRelativeRange, repeat.startRange));
+            const getRangeDelta = (cfId: string) => {
+                let rangeDelta = rangeDeltaMap.get(cfId);
+                if (!rangeDelta) {
+                    rangeDelta = { add: [], remove: [] };
+                    rangeDeltaMap.set(cfId, rangeDelta);
+                }
+                return rangeDelta;
+            };
+
+            const targetRuleList = this._conditionalFormattingRuleModel.getSubunitRules(targetUnitId, targetSubUnitId) ?? [];
+            const waitAddRule = new Map<string, IConditionFormattingRule>();
+            targetRuleList.forEach((rule) => {
+                if (Rectangle.doAnyRangesIntersect(rule.ranges, targetRanges)) {
+                    rangeMap.set(rule.cfId, rule.ranges);
+                    getRangeDelta(rule.cfId).remove.push(...targetRanges);
                 }
             });
 
-            const sourceStartCell = {
-                row: sourceRange.startRow,
-                col: sourceRange.startColumn,
-            };
-
-            const repeats = repeatByRange(sourceRange, targetRange);
-
-            repeats.forEach((repeat) => {
-                loopFunc(sourceStartCell, { row: repeat.startRange.startRow, col: repeat.startRange.startColumn }, repeat.repeatRelativeRange, rangeMap, rangeDeltaMap, { targetUnitId, targetSubUnitId });
+            const sourceRuleList = this._conditionalFormattingRuleModel.getSubunitRules(sourceUnitId, sourceSubUnitId) ?? [];
+            const sourceRules = isSkipSheet ? [...sourceRuleList].reverse() : sourceRuleList;
+            sourceRules.forEach((rule) => {
+                const sourceRanges = rule.ranges.flatMap((range) => {
+                    const intersected = getIntersectRange(range, sourceRange);
+                    return intersected ? [Rectangle.getRelativeRange(intersected, sourceRange)] : [];
+                });
+                const additions = repeats.flatMap((repeat) => sourceRanges.flatMap((range) => {
+                    const copiedRange = getIntersectRange(range, repeat.repeatRelativeRange);
+                    return copiedRange ? [Rectangle.getPositionRange(copiedRange, repeat.startRange)] : [];
+                }));
+                if (additions.length) {
+                    let targetCfId = rule.cfId;
+                    if (isSkipSheet) {
+                        targetCfId = this._conditionalFormattingRuleModel.createCfId(targetUnitId, targetSubUnitId);
+                        waitAddRule.set(targetCfId, {
+                            ...Tools.deepClone(rule),
+                            cfId: targetCfId,
+                            ranges: [],
+                        });
+                        rangeMap.set(targetCfId, []);
+                    }
+                    if (!rangeMap.has(targetCfId)) {
+                        rangeMap.set(targetCfId, rule.ranges);
+                    }
+                    getRangeDelta(targetCfId).add.push(...additions);
+                }
             });
             rangeDeltaMap.forEach((rangeDelta, cfId) => {
                 const ranges = rangeMap.get(cfId);
@@ -283,25 +210,21 @@ export class ConditionalFormattingPainterController extends Disposable {
                         undos.push(...DeleteConditionalRuleMutationUndoFactory(this._injector, params));
                     }
                 } else {
-                    const rule = this._conditionalFormattingRuleModel.getRule(targetUnitId, targetSubUnitId, cfId);
-                    if (!rule) {
+                    const waitAdd = waitAddRule.get(cfId);
+                    if (waitAdd) {
                         if (ranges.length) {
-                            const sourceRule = this._conditionalFormattingRuleModel.getRule(sourceUnitId, sourceSubUnitId, cfId);
-                            if (sourceRule) {
-                                const params: IAddConditionalRuleMutationParams = {
-                                    unitId: targetUnitId,
-                                    subUnitId: targetSubUnitId,
-                                    rule: {
-                                        ...Tools.deepClone(sourceRule),
-                                        cfId: this._conditionalFormattingRuleModel.createCfId(targetUnitId, targetSubUnitId),
-                                        ranges,
-                                    },
-                                };
-                                redos.push({ id: AddConditionalRuleMutation.id, params });
-                                undos.push(AddConditionalRuleMutationUndoFactory(this._injector, params));
-                            }
+                            const params: IAddConditionalRuleMutationParams = {
+                                unitId: targetUnitId,
+                                subUnitId: targetSubUnitId,
+                                rule: { ...waitAdd, ranges },
+                            };
+                            redos.push({ id: AddConditionalRuleMutation.id, params });
+                            undos.push(AddConditionalRuleMutationUndoFactory(this._injector, params));
                         }
-                    } else {
+                        return;
+                    }
+                    const rule = this._conditionalFormattingRuleModel.getRule(targetUnitId, targetSubUnitId, cfId);
+                    if (rule) {
                         if (ranges.length) {
                             const params: ISetConditionalRuleMutationParams = {
                                 unitId: targetUnitId,

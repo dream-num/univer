@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo } from '@univerjs/core';
+import type { ICommandInfo, IExecutionOptions } from '@univerjs/core';
 import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DocumentFlavor } from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { Subject } from 'rxjs';
@@ -106,7 +106,7 @@ function createControllerFixture(options?: {
     unitId?: string;
 }) {
     mockScrollBarProps.length = 0;
-    const commandCallbacks: Array<(command: ICommandInfo) => void> = [];
+    const commandCallbacks: Array<(command: ICommandInfo, options?: IExecutionOptions) => void> = [];
     const darkMode$ = new Subject<boolean>();
     const canvasElement = { style: {} as Record<string, string> };
     const canvasColorService = {
@@ -263,6 +263,30 @@ describe('doc render controller', () => {
             },
         } as unknown as ICommandInfo);
 
+        expect(pageLayoutService.calculatePagePosition).toHaveBeenCalledTimes(1);
+        expect(selectionManager.refreshSelection).toHaveBeenCalledTimes(1);
+    });
+
+    // TODO(@ai-review): Confirm this test continues to model SnapshotService's synchronous changeset replay boundary.
+    it('coalesces synchronous changeset mutations into one document render', async () => {
+        const { commandCallbacks, pageLayoutService, selectionManager, skeletonManager } = createControllerFixture();
+        const mutation = {
+            id: RichTextEditingMutation.id,
+            params: {
+                unitId: 'doc-unit',
+                actions: [],
+            },
+        } as unknown as ICommandInfo;
+
+        commandCallbacks[0](mutation, { fromChangeset: true });
+        commandCallbacks[0](mutation, { fromChangeset: true });
+        commandCallbacks[0](mutation, { fromChangeset: true });
+
+        expect(skeletonManager.getSkeleton().calculate).not.toHaveBeenCalled();
+
+        await Promise.resolve();
+
+        expect(skeletonManager.getSkeleton().calculate).toHaveBeenCalledTimes(1);
         expect(pageLayoutService.calculatePagePosition).toHaveBeenCalledTimes(1);
         expect(selectionManager.refreshSelection).toHaveBeenCalledTimes(1);
     });

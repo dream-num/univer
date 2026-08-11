@@ -95,10 +95,14 @@ interface IFakeRectRange {
 interface IServiceHarness {
     _anchorNodePosition?: unknown;
     _focusNodePosition?: unknown;
+    _onPointerEvent: boolean;
     _rangeList: IFakeTextRange[];
     _rangeListCache: IFakeTextRange[];
     _rectRangeList: IFakeRectRange[];
     _rectRangeListCache: IFakeRectRange[];
+    _scenePointerMoveSubs: Array<{ unsubscribe: VoidMock }>;
+    _scenePointerUpSubs: Array<{ unsubscribe: VoidMock }>;
+    _scrollTimers: Array<{ dispose: VoidMock }>;
     _selectionStyle: { strokeWidth: number };
     _textSelectionInner$: { next: Mock<(...args: unknown[]) => void> };
     focus: Mock<() => void>;
@@ -121,6 +125,7 @@ interface IServiceHarness {
     _moving(moveOffsetX: number, moveOffsetY: number): void;
     _updateInputPosition(): void;
     addDocRanges(ranges: Array<Record<string, unknown>>, isEditing?: boolean, options?: Record<string, boolean>): void;
+    cancelPointerSelection(): void;
     setCursorManually(evtOffsetX: number, evtOffsetY: number): void;
 }
 
@@ -153,6 +158,7 @@ function createService() {
     const skeleton = { name: 'skeleton' };
     const mainComponent = { name: 'doc-component' };
     const scene = {
+        enableObjectsEvent: vi.fn(),
         getEngine: vi.fn(() => engine),
         getViewports: vi.fn(() => []),
     };
@@ -162,6 +168,10 @@ function createService() {
         _rangeListCache: [],
         _rectRangeList: [],
         _rectRangeListCache: [],
+        _scenePointerMoveSubs: [],
+        _scenePointerUpSubs: [],
+        _scrollTimers: [],
+        _onPointerEvent: false,
         _selectionStyle: { strokeWidth: 1 },
         _currentSegmentId: 'segment-1',
         _currentSegmentPage: 2,
@@ -840,6 +850,49 @@ describe('doc selection render service internals', () => {
 });
 
 describe('DocSelectionRenderService', () => {
+    // TODO(@ai-review): Verify this regression test represents the native RectRange cache that previously returned after docs-table drag promotion.
+    it('cancels an active pointer selection and disposes its cached ranges', () => {
+        const { scene, service } = createService();
+        const liveTextRange = createTextRange();
+        const liveRectRange = createRectRange();
+        const cachedTextRange = createTextRange();
+        const cachedRectRange = createRectRange();
+        const moveSubscription = { unsubscribe: vi.fn() };
+        const upSubscription = { unsubscribe: vi.fn() };
+        const scrollTimer = { dispose: vi.fn() };
+        service._anchorNodePosition = { row: 0 };
+        service._focusNodePosition = { row: 1 };
+        service._onPointerEvent = true;
+        service._rangeList = [liveTextRange];
+        service._rectRangeList = [liveRectRange];
+        service._rangeListCache = [cachedTextRange];
+        service._rectRangeListCache = [cachedRectRange];
+        service._scenePointerMoveSubs = [moveSubscription];
+        service._scenePointerUpSubs = [upSubscription];
+        service._scrollTimers = [scrollTimer];
+
+        service.cancelPointerSelection();
+
+        expect(moveSubscription.unsubscribe).toHaveBeenCalledOnce();
+        expect(upSubscription.unsubscribe).toHaveBeenCalledOnce();
+        expect(liveTextRange.dispose).toHaveBeenCalledOnce();
+        expect(liveRectRange.dispose).toHaveBeenCalledOnce();
+        expect(cachedTextRange.dispose).toHaveBeenCalledOnce();
+        expect(cachedRectRange.dispose).toHaveBeenCalledOnce();
+        expect(scrollTimer.dispose).toHaveBeenCalledOnce();
+        expect(scene.enableObjectsEvent).toHaveBeenCalledOnce();
+        expect(service._anchorNodePosition).toBeNull();
+        expect(service._focusNodePosition).toBeNull();
+        expect(service._onPointerEvent).toBe(false);
+        expect(service._rangeList).toEqual([]);
+        expect(service._rectRangeList).toEqual([]);
+        expect(service._rangeListCache).toEqual([]);
+        expect(service._rectRangeListCache).toEqual([]);
+        expect(service._scenePointerMoveSubs).toEqual([]);
+        expect(service._scenePointerUpSubs).toEqual([]);
+        expect(service._scrollTimers).toEqual([]);
+    });
+
     let cleanup: Array<() => void> = [];
 
     beforeEach(() => {

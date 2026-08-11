@@ -1,8 +1,10 @@
+import { Buffer } from 'node:buffer';
+
 import { chromium, expect, test } from '@playwright/test';
 import { generateSnapshotName } from '../const';
 
 const SHEET_MAIN_CANVAS_ID = '#univer-sheet-main-canvas_workbook-01';
-const MERGED_CELLS_VISUAL_WIDTH = 620;
+const MERGED_CELLS_VISUAL_WIDTH = 1240;
 const isCI = !!process.env.CI;
 
 test('diff default sheet toolbar', async () => {
@@ -112,17 +114,31 @@ test('diff merged cells rendering', async () => {
 
     const filename = generateSnapshotName('mergedCellsRendering');
     const canvas = page.locator(SHEET_MAIN_CANVAS_ID);
-    const boundingBox = await canvas.boundingBox();
-    expect(boundingBox).not.toBeNull();
     // TODO(@ai-review): Confirm the A:G crop still covers the intended merged-cell layouts if the fixture's column widths change.
-    const screenshot = await page.screenshot({
-        clip: {
-            x: boundingBox!.x,
-            y: boundingBox!.y,
-            width: MERGED_CELLS_VISUAL_WIDTH,
-            height: boundingBox!.height,
-        },
-    });
+    const screenshotDataUrl = await canvas.evaluate((element: HTMLCanvasElement, width) => {
+        const croppedCanvas = document.createElement('canvas');
+        croppedCanvas.width = width;
+        croppedCanvas.height = element.height;
+        const context = croppedCanvas.getContext('2d');
+        if (!context) {
+            throw new Error('Failed to create a canvas context for the merged-cell snapshot');
+        }
+        let backgroundElement: Element | null = element;
+        let backgroundColor = '#fff';
+        while (backgroundElement) {
+            const candidate = getComputedStyle(backgroundElement).backgroundColor;
+            if (candidate !== 'rgba(0, 0, 0, 0)' && candidate !== 'transparent') {
+                backgroundColor = candidate;
+                break;
+            }
+            backgroundElement = backgroundElement.parentElement;
+        }
+        context.fillStyle = backgroundColor;
+        context.fillRect(0, 0, croppedCanvas.width, croppedCanvas.height);
+        context.drawImage(element, 0, 0);
+        return croppedCanvas.toDataURL('image/png');
+    }, MERGED_CELLS_VISUAL_WIDTH);
+    const screenshot = Buffer.from(screenshotDataUrl.slice(screenshotDataUrl.indexOf(',') + 1), 'base64');
     await expect(screenshot).toMatchSnapshot(filename, { maxDiffPixelRatio: 0.005 });
 });
 

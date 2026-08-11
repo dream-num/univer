@@ -239,7 +239,7 @@ describe('image extra', () => {
         expect(ctx.drawImage).toHaveBeenCalled();
     });
 
-    it('automatically raster caches only expensive inline SVG images', () => {
+    it('automatically raster caches only expensive static inline SVG images', () => {
         const filteredSvg = createSvgDataUrl(`
             <svg xmlns="http://www.w3.org/2000/svg">
                 <defs><filter id="noise"><feTurbulence /></filter></defs>
@@ -247,35 +247,89 @@ describe('image extra', () => {
             </svg>
         `);
         const ordinarySvg = createSvgDataUrl('<svg xmlns="http://www.w3.org/2000/svg"><rect width="10" height="10" /></svg>');
+        const animatedSvg = createSvgDataUrl(`
+            <svg xmlns="http://www.w3.org/2000/svg">
+                <defs><filter id="noise"><feTurbulence /></filter></defs>
+                <rect width="10" height="10" filter="url(#noise)"><animate attributeName="x" values="0;10" /></rect>
+            </svg>
+        `);
+        const filteredNative = createNativeImage(10, 10, filteredSvg);
+        const ordinaryNative = createNativeImage(10, 10, ordinarySvg);
+        const animatedNative = createNativeImage(10, 10, animatedSvg);
         const filteredImage = new Image('filtered-svg', {
-            image: createNativeImage(10, 10, filteredSvg),
+            image: filteredNative,
             left: 0,
             top: 0,
             width: 10,
             height: 10,
         });
         const ordinaryImage = new Image('ordinary-svg', {
-            image: createNativeImage(10, 10, ordinarySvg),
+            image: ordinaryNative,
             left: 0,
             top: 0,
             width: 10,
             height: 10,
         });
-        const optedOutImage = new Image('opted-out-svg', {
-            image: createNativeImage(10, 10, filteredSvg),
+        const animatedImage = new Image('animated-svg', {
+            image: animatedNative,
             left: 0,
             top: 0,
             width: 10,
             height: 10,
-            rasterCache: false,
         });
+        const canvas = new Canvas({ width: 20, height: 20, pixelRatio: 1 });
+        const context = canvas.getContext();
+        const drawImage = vi.spyOn(UniverRenderingContext.prototype, 'drawImage');
 
-        expect(filteredImage.rasterCache).toBe(true);
-        expect(ordinaryImage.rasterCache).toBe(false);
-        expect(optedOutImage.rasterCache).toBe(false);
+        for (const image of [filteredImage, ordinaryImage, animatedImage]) {
+            image.render(context);
+            image.render(context);
+        }
+
+        expect(drawImage.mock.calls.filter(([source]) => source === filteredNative)).toHaveLength(1);
+        expect(drawImage.mock.calls.filter(([source]) => source === ordinaryNative)).toHaveLength(2);
+        expect(drawImage.mock.calls.filter(([source]) => source === animatedNative)).toHaveLength(2);
+
+        drawImage.mockRestore();
+        filteredImage.dispose();
+        ordinaryImage.dispose();
+        animatedImage.dispose();
+        canvas.dispose();
     });
 
-    it('reuses an automatic SVG raster cache across context scale changes', () => {
+    it('reuses an automatic SVG raster cache within a scale bucket', () => {
+        const native = createNativeImage(100, 100, createSvgDataUrl(`
+            <svg xmlns="http://www.w3.org/2000/svg">
+                <defs><filter id="blur"><feGaussianBlur stdDeviation="10" /></filter></defs>
+                <rect width="100" height="100" filter="url(#blur)" />
+            </svg>
+        `));
+        const image = new Image('cached-image', {
+            image: native,
+            left: 0,
+            top: 0,
+            width: 100,
+            height: 100,
+        });
+        const canvas = new Canvas({ width: 200, height: 100, pixelRatio: 1 });
+        const context = canvas.getContext();
+        const drawImage = vi.spyOn(UniverRenderingContext.prototype, 'drawImage');
+
+        context.setTransform(1.1, 0, 0, 1.1, 0, 0);
+        image.render(context);
+        context.setTransform(1.4, 0, 0, 1.4, 0, 0);
+        image.render(context);
+        context.setTransform(1.6, 0, 0, 1.6, 0, 0);
+        image.render(context);
+
+        expect(drawImage.mock.calls.filter(([source]) => source === native)).toHaveLength(2);
+
+        drawImage.mockRestore();
+        image.dispose();
+        canvas.dispose();
+    });
+
+    it('draws the source SVG when the capped cache would be excessively upscaled', () => {
         const native = createNativeImage(4_000, 2_000, createSvgDataUrl(`
             <svg xmlns="http://www.w3.org/2000/svg">
                 <defs><filter id="blur"><feGaussianBlur stdDeviation="10" /></filter></defs>
@@ -297,7 +351,7 @@ describe('image extra', () => {
         context.setTransform(2, 0, 0, 2, 0, 0);
         image.render(context);
 
-        expect(drawImage.mock.calls.filter(([source]) => source === native)).toHaveLength(1);
+        expect(drawImage.mock.calls.filter(([source]) => source === native)).toHaveLength(2);
         const cacheCanvas = drawImage.mock.calls.find(([source]) => source instanceof HTMLCanvasElement)?.[0];
         if (!(cacheCanvas instanceof HTMLCanvasElement)) {
             throw new TypeError('Expected the SVG raster cache canvas to be rendered');

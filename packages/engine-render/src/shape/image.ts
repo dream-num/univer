@@ -27,8 +27,11 @@ import { Shape } from './shape';
 const INLINE_SVG_DATA_URL_PATTERN = /^data:image\/svg\+xml(?:;[^,]*)?,/i;
 const SVG_FILTER_REFERENCE_PATTERN = /\bfilter\s*=/i;
 const SVG_EXPENSIVE_FILTER_PATTERN = /<fe(?:Turbulence|DisplacementMap|GaussianBlur)\b/i;
+const SVG_ANIMATION_PATTERN = /<(?:animate(?:Color|Motion|Transform)?|set)\b|@keyframes\b/i;
 const RASTER_CACHE_MAX_PIXEL_COUNT = 2_000_000;
 const RASTER_CACHE_MAX_DIMENSION = 4_096;
+const RASTER_CACHE_PIXEL_RATIO_STEP = 0.5;
+const RASTER_CACHE_MAX_UPSCALE = 2;
 
 function shouldRasterCacheSvg(source?: string): boolean {
     const prefix = source && INLINE_SVG_DATA_URL_PATTERN.exec(source)?.[0];
@@ -39,7 +42,9 @@ function shouldRasterCacheSvg(source?: string): boolean {
     try {
         const payload = source.slice(prefix.length);
         const svg = prefix.toLowerCase().includes(';base64,') ? atob(payload) : decodeURIComponent(payload);
-        return SVG_FILTER_REFERENCE_PATTERN.test(svg) && SVG_EXPENSIVE_FILTER_PATTERN.test(svg);
+        return !SVG_ANIMATION_PATTERN.test(svg) &&
+            SVG_FILTER_REFERENCE_PATTERN.test(svg) &&
+            SVG_EXPENSIVE_FILTER_PATTERN.test(svg);
     } catch {
         return false;
     }
@@ -100,8 +105,6 @@ export interface IImageProps extends IShapeProps {
     opacity?: number;
 
     clipBounds?: Nullable<IShapeClipBounds>;
-
-    rasterCache?: boolean;
 }
 
 export class Image extends Shape<IImageProps> {
@@ -171,11 +174,7 @@ export class Image extends Shape<IImageProps> {
         return this._props.clipBounds;
     }
 
-    get rasterCache() {
-        if (this._props.rasterCache !== undefined) {
-            return this._props.rasterCache;
-        }
-
+    private _shouldRasterCache(): boolean {
         const source = this._native?.src || this._props.url || '';
         if (source !== this._rasterCacheSource) {
             const previous = this._autoRasterCache;
@@ -442,19 +441,26 @@ export class Image extends Shape<IImageProps> {
         const w = renderWidth ?? this.width;
         const h = renderHeight ?? this.height;
 
-        if (this.rasterCache) {
+        if (this._shouldRasterCache()) {
+            const transform = ctx.getTransform();
+            const requestedPixelRatio = Math.max(
+                Math.hypot(transform.a, transform.b),
+                Math.hypot(transform.c, transform.d)
+            );
             const pixelRatio = resolveRasterCachePixelRatio(
                 w,
                 h,
-                this.getEngine()?.getCanvas().getPixelRatio() ?? 1
+                Math.ceil(requestedPixelRatio / RASTER_CACHE_PIXEL_RATIO_STEP) * RASTER_CACHE_PIXEL_RATIO_STEP
             );
-            this._renderWithCache(
-                ctx,
-                { left: -w / 2, top: -h / 2, right: w / 2, bottom: h / 2 },
-                (cacheContext) => this._drawNative(cacheContext, native, w, h),
-                pixelRatio
-            );
-            return;
+            if (requestedPixelRatio <= pixelRatio * RASTER_CACHE_MAX_UPSCALE) {
+                this._renderWithCache(
+                    ctx,
+                    { left: -w / 2, top: -h / 2, right: w / 2, bottom: h / 2 },
+                    (cacheContext) => this._drawNative(cacheContext, native, w, h),
+                    pixelRatio
+                );
+                return;
+            }
         }
 
         this._drawNative(ctx, native, w, h);

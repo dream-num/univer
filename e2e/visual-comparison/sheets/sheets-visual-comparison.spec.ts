@@ -2,6 +2,7 @@ import { chromium, expect, test } from '@playwright/test';
 import { generateSnapshotName } from '../const';
 
 const SHEET_MAIN_CANVAS_ID = '#univer-sheet-main-canvas_workbook-01';
+const MERGED_CELLS_VISUAL_WIDTH = 620;
 const isCI = !!process.env.CI;
 
 test('diff default sheet toolbar', async () => {
@@ -110,7 +111,18 @@ test('diff merged cells rendering', async () => {
     await page.waitForTimeout(1000);
 
     const filename = generateSnapshotName('mergedCellsRendering');
-    const screenshot = await page.locator(SHEET_MAIN_CANVAS_ID).screenshot();
+    const canvas = page.locator(SHEET_MAIN_CANVAS_ID);
+    const boundingBox = await canvas.boundingBox();
+    expect(boundingBox).not.toBeNull();
+    // TODO(@ai-review): Confirm the A:G crop still covers the intended merged-cell layouts if the fixture's column widths change.
+    const screenshot = await page.screenshot({
+        clip: {
+            x: boundingBox!.x,
+            y: boundingBox!.y,
+            width: MERGED_CELLS_VISUAL_WIDTH,
+            height: boundingBox!.height,
+        },
+    });
     await expect(screenshot).toMatchSnapshot(filename, { maxDiffPixelRatio: 0.005 });
 });
 

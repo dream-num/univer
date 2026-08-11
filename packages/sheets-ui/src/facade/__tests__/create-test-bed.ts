@@ -36,6 +36,8 @@ import {
     SheetInterceptorService,
     SheetSkeletonService,
 } from '@univerjs/sheets';
+import { DragManagerService } from '../../services/drag-manager.service';
+import { HoverManagerService } from '../../services/hover-manager.service';
 
 function getTestWorkbookDataDemo(): IWorkbookData {
     return {
@@ -126,7 +128,10 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
             injector.add([IRenderManagerService, { useClass: RenderManagerServiceTestBed }]);
             injector.add([LexerTreeBuilder]);
 
-            dependencies?.forEach((d) => injector.add(d));
+            const dependencyIds = new Set(dependencies?.map((dependency) => Array.isArray(dependency) ? dependency[0] : dependency));
+            if (!dependencyIds.has(HoverManagerService)) injector.add([HoverManagerService]);
+            if (!dependencyIds.has(DragManagerService)) injector.add([DragManagerService]);
+            dependencies?.forEach((dependency) => injector.add(dependency));
 
             this._injector.get(SheetInterceptorService);
         }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDisposable } from '@univerjs/core';
+import type { IDisposable, UniverInstanceType } from '@univerjs/core';
 import { createIdentifier } from '@univerjs/core';
 
 export interface ISheetEmbedTabMountParams {
@@ -25,6 +25,7 @@ export interface ISheetEmbedTabMountParams {
 
 export interface ISheetEmbedRuntimeService {
     mountSheetTab(params: ISheetEmbedTabMountParams): IDisposable | undefined;
+    getSheetTabChildType?(params: ISheetEmbedTabMountParams): UniverInstanceType | undefined;
     clearTab(embedId?: string): void;
 }
 

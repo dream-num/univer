@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IWorksheetData } from '@univerjs/core';
+import type { IWorksheetData, UniverInstanceType } from '@univerjs/core';
 
 const EMBED_SHEETS_TAB_CUSTOM_KEY = 'UNIVER_EMBED_SHEETS_TAB';
 
@@ -22,6 +22,7 @@ interface IEmbedSheetsTabCustomData {
     version: 1;
     embedId: string;
     hostAnchorId: string;
+    childType?: UniverInstanceType;
 }
 
 export function getEmbedSheetsTabCustomData(snapshot: Pick<IWorksheetData, 'custom'>): IEmbedSheetsTabCustomData | undefined {
@@ -41,5 +42,6 @@ function isEmbedSheetsTabCustomData(value: unknown): value is IEmbedSheetsTabCus
     const candidate = value as Partial<IEmbedSheetsTabCustomData>;
     return candidate.version === 1 &&
         typeof candidate.embedId === 'string' &&
-        typeof candidate.hostAnchorId === 'string';
+        typeof candidate.hostAnchorId === 'string' &&
+        (candidate.childType === undefined || typeof candidate.childType === 'number');
 }

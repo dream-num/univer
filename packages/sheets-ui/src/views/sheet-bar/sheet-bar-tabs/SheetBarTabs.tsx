@@ -23,13 +23,22 @@ import type { IBaseSheetBarProps } from './SheetBarItem';
 import {
     ICommandService,
     IConfirmService,
+    Injector,
     IPermissionService,
     LocaleService,
     nameCharacterCheck,
     Quantity,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { LockIcon } from '@univerjs/icons';
+import {
+    BasesMultiIcon,
+    BoardsMultiIcon,
+    DocsMultiIcon,
+    LockIcon,
+    SheetsMultiIcon,
+    SlidesMultiIcon,
+} from '@univerjs/icons';
 import {
     InsertSheetMutation,
     RangeProtectionRuleModel,
@@ -48,8 +57,10 @@ import {
 import { UI_PLUGIN_CONFIG_KEY, useConfigValue, useDependency, useObservable } from '@univerjs/ui';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { merge } from 'rxjs';
+import { getEmbedSheetsTabCustomData } from '../../../embed-tab-anchor';
 import { IEditorBridgeService } from '../../../services/editor-bridge.service';
 import { ISheetBarService } from '../../../services/sheet-bar/sheet-bar.service';
+import { ISheetEmbedRuntimeService } from '../../../services/sheet-embed-runtime.service';
 import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
 import { useActiveWorkbook } from '../../hook';
 import { SheetBarItem } from './SheetBarItem';
@@ -66,6 +77,29 @@ interface IContextMenuAnchorRect {
     left: number;
     top: number;
     bottom: number;
+}
+
+interface IEmbedSheetTabProductIconProps {
+    childType: UniverInstanceType;
+}
+
+function EmbedSheetTabProductIcon({ childType }: IEmbedSheetTabProductIconProps) {
+    const className = 'univer-size-4 univer-shrink-0';
+
+    switch (childType) {
+        case UniverInstanceType.UNIVER_SHEET:
+            return <SheetsMultiIcon aria-hidden className={className} />;
+        case UniverInstanceType.UNIVER_DOC:
+            return <DocsMultiIcon aria-hidden className={className} />;
+        case UniverInstanceType.UNIVER_SLIDE:
+            return <SlidesMultiIcon aria-hidden className={className} />;
+        case UniverInstanceType.UNIVER_BASE:
+            return <BasesMultiIcon aria-hidden className={className} />;
+        case UniverInstanceType.UNIVER_BOARD:
+            return <BoardsMultiIcon aria-hidden className={className} />;
+        default:
+            return null;
+    }
 }
 
 function getScrollShadow(state: IScrollState) {
@@ -102,6 +136,7 @@ function shouldRefreshSheetTabs(commandInfo: ICommandInfo) {
 }
 
 export function SheetBarTabs() {
+    const injector = useDependency(Injector);
     const [sheetList, setSheetList] = useState<IBaseSheetBarProps[]>([]);
     const [activeSheetId, setActiveSheetId] = useState('');
     const [scrollShadow, setScrollShadow] = useState('');
@@ -245,6 +280,9 @@ export function SheetBarTabs() {
     const updateSheetItems = useCallback(() => {
         const activeSheet = workbook.getActiveSheet();
         const currentSubUnitId = activeSheet?.getSheetId() ?? '';
+        const embedRuntimeService = injector.has(ISheetEmbedRuntimeService)
+            ? injector.get(ISheetEmbedRuntimeService)
+            : undefined;
 
         const sheetListItems = workbook
             .getSheets()
@@ -253,17 +291,24 @@ export function SheetBarTabs() {
                 const worksheetRule = worksheetProtectionRuleModel.getRule(workbook.getUnitId(), sheet.getSheetId());
                 const hasSelectionRule = rangeProtectionRuleModel.getSubunitRuleList(workbook.getUnitId(), sheet.getSheetId()).length > 0;
                 const hasProtection = Boolean(worksheetRule?.permissionId || hasSelectionRule);
+                const embedData = getEmbedSheetsTabCustomData(sheet.getConfig());
+                const embedChildType = embedData?.childType ?? (embedData
+                    ? embedRuntimeService?.getSheetTabChildType?.({
+                        hostUnitId: workbook.getUnitId(),
+                        hostAnchorId: embedData.hostAnchorId,
+                        embedId: embedData.embedId,
+                    })
+                    : undefined);
 
                 return {
                     sheetId: sheet.getSheetId(),
-                    label: hasProtection
-                        ? (
-                            <>
-                                <LockIcon className="univer-shrink-0" />
-                                <span className="univer-truncate univer-outline-none">{sheet.getName()}</span>
-                            </>
-                        )
-                        : <span className="univer-truncate univer-outline-none">{sheet.getName()}</span>,
+                    label: (
+                        <>
+                            {embedChildType != null && <EmbedSheetTabProductIcon childType={embedChildType} />}
+                            {hasProtection && <LockIcon className="univer-shrink-0" />}
+                            <span className="univer-truncate univer-outline-none">{sheet.getName()}</span>
+                        </>
+                    ),
                     index,
                     selected: activeSheet === sheet,
                     color: sheet.getTabColor() ?? undefined,
@@ -274,7 +319,7 @@ export function SheetBarTabs() {
         setSheetList(sheetListItems);
         // eslint-disable-next-line react/set-state-in-effect
         setActiveSheetId(currentSubUnitId);
-    }, [rangeProtectionRuleModel, workbook, worksheetProtectionRuleModel]);
+    }, [injector, rangeProtectionRuleModel, workbook, worksheetProtectionRuleModel]);
 
     const setTabEditor = useCallback(() => {
         slideTabBarRef.current?.getActiveItem()?.setEditor();

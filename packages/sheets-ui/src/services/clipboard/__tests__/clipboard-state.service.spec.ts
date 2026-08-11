@@ -317,7 +317,6 @@ describe('SheetClipboardService', () => {
         expect(writtenHtml).toContain('</table><!--EndFragment-->');
     });
 
-    // TODO(@ai-review): Verify that Univer-owned Excel-compatible HTML never triggers the external-Excel warning on Windows.
     it('recognizes its Excel-compatible clipboard html as internal content on Windows', async () => {
         const { injector, service } = createTestContext('Windows');
         selectCell(injector);

@@ -378,7 +378,6 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             // Firstly see if the html content is from Excel
             const copyId = extractId(html);
             const isInternalCopy = Boolean(copyId && this._copyContentCache.get(copyId));
-            // TODO(@ai-review): Check that external Excel HTML cannot suppress the Windows shortcut warning with a stale or forged copy ID.
             if (this._platformService.isWindows && htmlIsFromExcel(html) && !isInternalCopy) {
                 this._notificationService.show({
                     type: 'warning',

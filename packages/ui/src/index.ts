@@ -162,6 +162,7 @@ export { type IDialogPartMethodOptions } from './views/components/dialog-part/in
 export { FloatDomSingle } from './views/components/dom/FloatDom';
 export { FloatDom } from './views/components/dom/FloatDom';
 export { PrintFloatDomSingle } from './views/components/dom/Print';
+export { HOVER_TRACK_HOST_CLASS_NAME, HoverTrack } from './views/components/hover-track/HoverTrack';
 export { CanvasPopup, SingleCanvasPopup } from './views/components/popup/CanvasPopup';
 export { RectPopup } from './views/components/popup/RectPopup';
 export type { RectPopupDirection } from './views/components/popup/RectPopup';

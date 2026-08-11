@@ -150,7 +150,6 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         );
     }
 
-    // TODO(@ai-review): Confirm canceling a promoted table drag cannot leave the Docs scene with object events disabled or restore cached native RectRanges on pointerup.
     cancelPointerSelection(): void {
         if (!this._onPointerEvent) {
             return;

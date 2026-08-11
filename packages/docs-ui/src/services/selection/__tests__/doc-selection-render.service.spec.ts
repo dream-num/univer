@@ -850,7 +850,6 @@ describe('doc selection render service internals', () => {
 });
 
 describe('DocSelectionRenderService', () => {
-    // TODO(@ai-review): Verify this regression test represents the native RectRange cache that previously returned after docs-table drag promotion.
     it('cancels an active pointer selection and disposes its cached ranges', () => {
         const { scene, service } = createService();
         const liveTextRange = createTextRange();

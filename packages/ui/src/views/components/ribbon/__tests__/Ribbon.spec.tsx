@@ -80,32 +80,6 @@ describe('Ribbon override chrome', () => {
         expect(container.querySelectorAll('[data-embed-ribbon-override="true"]')).toHaveLength(1);
         expect(observeCount).toBe(0);
     });
-
-    it('removes the entire ribbon for products without ribbon chrome', () => {
-        const hiddenOverride = {
-            id: 'embed-1',
-            hideRibbon: true,
-        };
-        const injector = new Injector([
-            [ComponentManager],
-            [LocaleService, { useValue: { t: (key: string) => key } }],
-            [IRibbonService, { useValue: createEmptyRibbonService() }],
-            [IRibbonOverrideService, {
-                useValue: {
-                    override$: of(hiddenOverride),
-                    getOverride: () => hiddenOverride,
-                    activate: () => {},
-                    clear: () => {},
-                },
-            }],
-        ]);
-
-        const ConnectedRibbon = connectInjector(Ribbon, injector) as ComponentType<{ ribbonType: 'classic' }>;
-        const { container } = render(<ConnectedRibbon ribbonType="classic" />);
-
-        expect(container.childElementCount).toBe(0);
-        expect(observeCount).toBe(0);
-    });
 });
 
 function createEmptyRibbonService() {

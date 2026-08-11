@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo } from '@univerjs/core';
+import type { ICommandInfo, IExecutionOptions } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DocumentFlavor } from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { Subject } from 'rxjs';
@@ -23,6 +24,17 @@ import { DOCS_VIEW_KEY } from '../../basics/docs-view-key';
 import { DocRenderController } from '../render-controllers/doc.render-controller';
 
 const mockScrollBarProps = vi.hoisted(() => [] as unknown[]);
+
+function createRichTextMutation(): ICommandInfo<IRichTextEditingMutationParams> {
+    return {
+        id: RichTextEditingMutation.id,
+        params: {
+            unitId: 'doc-unit',
+            actions: [],
+            textRanges: null,
+        },
+    };
+}
 
 vi.mock('@univerjs/engine-render', async (importOriginal) => {
     const actual = await importOriginal<typeof import('@univerjs/engine-render')>();
@@ -106,7 +118,7 @@ function createControllerFixture(options?: {
     unitId?: string;
 }) {
     mockScrollBarProps.length = 0;
-    const commandCallbacks: Array<(command: ICommandInfo) => void> = [];
+    const commandCallbacks: Array<(command: ICommandInfo, options?: IExecutionOptions) => void> = [];
     const darkMode$ = new Subject<boolean>();
     const canvasElement = { style: {} as Record<string, string> };
     const canvasColorService = {
@@ -255,14 +267,26 @@ describe('doc render controller', () => {
     it('refreshes page layout and selection after rich text mutations resize the document', () => {
         const { commandCallbacks, pageLayoutService, selectionManager } = createControllerFixture();
 
-        commandCallbacks[0]({
-            id: RichTextEditingMutation.id,
-            params: {
-                unitId: 'doc-unit',
-                actions: [],
-            },
-        } as unknown as ICommandInfo);
+        commandCallbacks[0](createRichTextMutation());
 
+        expect(pageLayoutService.calculatePagePosition).toHaveBeenCalledTimes(1);
+        expect(selectionManager.refreshSelection).toHaveBeenCalledTimes(1);
+    });
+
+    // TODO(@ai-review): Confirm this test continues to model SnapshotService's synchronous changeset replay boundary.
+    it('coalesces synchronous changeset mutations into one document render', async () => {
+        const { commandCallbacks, pageLayoutService, selectionManager, skeletonManager } = createControllerFixture();
+        const mutation = createRichTextMutation();
+
+        commandCallbacks[0](mutation, { fromChangeset: true });
+        commandCallbacks[0](mutation, { fromChangeset: true });
+        commandCallbacks[0](mutation, { fromChangeset: true });
+
+        expect(skeletonManager.getSkeleton().calculate).not.toHaveBeenCalled();
+
+        await Promise.resolve();
+
+        expect(skeletonManager.getSkeleton().calculate).toHaveBeenCalledTimes(1);
         expect(pageLayoutService.calculatePagePosition).toHaveBeenCalledTimes(1);
         expect(selectionManager.refreshSelection).toHaveBeenCalledTimes(1);
     });

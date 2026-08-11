@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, EventState, ICommandInfo, Nullable } from '@univerjs/core';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import type { DocumentDataModel, EventState, ICommandInfo, IExecutionOptions, Nullable } from '@univerjs/core';
 import type { DocumentSkeleton, IDocumentSkeletonPage, IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
 import { DocumentFlavor, ICommandService, Inject, isInternalEditorID, IUniverInstanceService, RxDisposable, ThemeService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
@@ -28,7 +27,18 @@ import { DocViewScaleService } from '../../services/doc-view-scale';
 import { IEditorService } from '../../services/editor/editor-manager.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 
+function getCommandUnitId(command: ICommandInfo): string | undefined {
+    const { params } = command;
+    if (params == null || !('unitId' in params) || typeof params.unitId !== 'string') {
+        return;
+    }
+
+    return params.unitId;
+}
+
 export class DocRenderController extends RxDisposable implements IRenderModule {
+    private _changesetRenderScheduled = false;
+
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
         @ICommandService private readonly _commandService: ICommandService,
@@ -220,15 +230,40 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
     private _initCommandListener() {
         const updateCommandList = [RichTextEditingMutation.id];
 
-        this.disposeWithMe(this._commandService.onCommandExecuted((command: ICommandInfo) => {
-            // TODO@Jocs: performance, only update the skeleton when the command is related to the current unit.
-            if (updateCommandList.includes(command.id)) {
-                const params = command.params as IRichTextEditingMutationParams;
-                const { unitId } = params;
-
-                this.reRender(unitId);
+        this.disposeWithMe(this._commandService.onCommandExecuted((command: ICommandInfo, options?: IExecutionOptions) => {
+            if (!updateCommandList.includes(command.id)) {
+                return;
             }
+
+            const unitId = getCommandUnitId(command);
+            if (unitId !== this._context.unitId) {
+                return;
+            }
+
+            // TODO(@ai-review): Verify this coalescing remains correct if changeset replay later yields between mutations.
+            if (options?.fromChangeset) {
+                this._scheduleChangesetRender();
+                return;
+            }
+
+            this.reRender(unitId);
         }));
+    }
+
+    private _scheduleChangesetRender(): void {
+        if (this._changesetRenderScheduled) {
+            return;
+        }
+
+        this._changesetRenderScheduled = true;
+        queueMicrotask(() => {
+            this._changesetRenderScheduled = false;
+            if (this._disposed) {
+                return;
+            }
+
+            this.reRender(this._context.unitId);
+        });
     }
 
     private _initThemeListener() {

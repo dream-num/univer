@@ -14,24 +14,9 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommandInfo, IDrawingParam, ITransformState } from '@univerjs/core';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import type { DocumentDataModel, ICommandInfo, IDrawingParam, IExecutionOptions, ITransformState } from '@univerjs/core';
 import type { Documents, DocumentSkeleton, IDocsCustomBlockRenderViewport, IDocsTableRenderViewport, IDocumentSkeletonHeaderFooter, IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonTable, Image, IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import {
-    AlignTypeH,
-    AlignTypeV,
-    BooleanNumber,
-    Disposable,
-    fromEventSubject,
-    ICommandService,
-    Inject,
-    IUniverInstanceService,
-    LifecycleService,
-    LifecycleStages,
-    ObjectRelativeFromH,
-    ObjectRelativeFromV,
-    PositionedObjectLayoutType,
-} from '@univerjs/core';
+import { AlignTypeH, AlignTypeV, BooleanNumber, Disposable, fromEventSubject, ICommandService, Inject, IUniverInstanceService, LifecycleService, LifecycleStages, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType } from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { IEditorService, SetDocZoomRatioOperation } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
@@ -222,8 +207,18 @@ function hasHorizontalTableViewport(viewport: IDocsTableRenderViewport | null | 
         (viewport.leadingInsetLeft ?? 0) + viewport.contentWidth + (viewport.trailingInsetRight ?? 0) > viewport.viewportWidth;
 }
 
+function getCommandUnitId(command: ICommandInfo): string | undefined {
+    const { params } = command;
+    if (params == null || !('unitId' in params) || typeof params.unitId !== 'string') {
+        return;
+    }
+
+    return params.unitId;
+}
+
 export class DocDrawingTransformUpdateController extends Disposable implements IRenderModule {
     private _liquid = new Liquid();
+    private _changesetDrawingRefreshScheduled = false;
 
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
@@ -274,33 +269,60 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
         const updateCommandList = [RichTextEditingMutation.id, SetDocZoomRatioOperation.id];
 
         this.disposeWithMe(
-            this._commandService.onCommandExecuted((command: ICommandInfo) => {
+            this._commandService.onCommandExecuted((command: ICommandInfo, options?: IExecutionOptions) => {
                 if (updateCommandList.includes(command.id)) {
-                    const params = command.params as IRichTextEditingMutationParams;
-                    const { unitId: commandUnitId } = params;
+                    const commandUnitId = getCommandUnitId(command);
 
-                    const { unitId, mainComponent } = this._context;
+                    const { unitId } = this._context;
 
                     if (commandUnitId !== unitId) {
                         return;
                     }
 
-                    const skeleton = this._docSkeletonManagerService.getSkeleton();
-
-                    if (skeleton == null) {
+                    // TODO(@ai-review): Confirm the second microtask always follows the coalesced Doc layout refresh.
+                    if (command.id === RichTextEditingMutation.id && options?.fromChangeset) {
+                        this._scheduleChangesetDrawingRefresh();
                         return;
                     }
 
-                    // TODO: @JOCS, Do not use unitId to check if it's need to render images or isEditor. maybe need a config?
-                    if (this._editorService.isEditor(unitId)) {
-                        mainComponent?.makeDirty();
-                        return;
-                    }
-
-                    this._refreshDrawing(skeleton);
+                    this._refreshCurrentDrawing();
                 }
             })
         );
+    }
+
+    private _scheduleChangesetDrawingRefresh(): void {
+        if (this._changesetDrawingRefreshScheduled) {
+            return;
+        }
+
+        this._changesetDrawingRefreshScheduled = true;
+        queueMicrotask(() => {
+            queueMicrotask(() => {
+                this._changesetDrawingRefreshScheduled = false;
+                if (this._disposed) {
+                    return;
+                }
+
+                this._refreshCurrentDrawing();
+            });
+        });
+    }
+
+    private _refreshCurrentDrawing(): void {
+        const skeleton = this._docSkeletonManagerService.getSkeleton();
+        if (skeleton == null) {
+            return;
+        }
+
+        const { unitId, mainComponent } = this._context;
+        // TODO: @JOCS, Do not use unitId to check if it's need to render images or isEditor. maybe need a config?
+        if (this._editorService.isEditor(unitId)) {
+            mainComponent?.makeDirty();
+            return;
+        }
+
+        this._refreshDrawing(skeleton);
     }
 
     private _initTransformRefresh() {

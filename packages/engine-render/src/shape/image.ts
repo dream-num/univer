@@ -28,7 +28,7 @@ const INLINE_SVG_DATA_URL_PATTERN = /^data:image\/svg\+xml(?:;[^,]*)?,/i;
 const SVG_FILTER_REFERENCE_PATTERN = /\bfilter\s*=/i;
 const SVG_EXPENSIVE_FILTER_PATTERN = /<fe(?:Turbulence|DisplacementMap|GaussianBlur)\b/i;
 const SVG_ANIMATION_PATTERN = /<(?:animate(?:Color|Motion|Transform)?|set)\b|@keyframes\b/i;
-const RASTER_CACHE_MAX_PIXEL_COUNT = 2_000_000;
+const RASTER_CACHE_MAX_PIXEL_COUNT = 4_000_000;
 const RASTER_CACHE_MAX_DIMENSION = 4_096;
 const RASTER_CACHE_PIXEL_RATIO_STEP = 0.5;
 const RASTER_CACHE_MAX_UPSCALE = 2;
@@ -55,12 +55,19 @@ function resolveRasterCachePixelRatio(width: number, height: number, requestedPi
         return requestedPixelRatio;
     }
 
-    return Math.min(
+    const dimensionLimitedPixelRatio = Math.min(
         requestedPixelRatio,
         RASTER_CACHE_MAX_DIMENSION / width,
-        RASTER_CACHE_MAX_DIMENSION / height,
-        Math.sqrt(RASTER_CACHE_MAX_PIXEL_COUNT / (width * height))
+        RASTER_CACHE_MAX_DIMENSION / height
     );
+    const pixelLimitedPixelRatio = Math.sqrt(RASTER_CACHE_MAX_PIXEL_COUNT / (width * height));
+    if (dimensionLimitedPixelRatio <= pixelLimitedPixelRatio) {
+        return dimensionLimitedPixelRatio;
+    }
+
+    const physicalWidth = Math.floor(width * pixelLimitedPixelRatio);
+    const physicalHeight = Math.floor(RASTER_CACHE_MAX_PIXEL_COUNT / physicalWidth);
+    return Math.min((physicalWidth - 1) / width, (physicalHeight - 1) / height);
 }
 
 export interface IShapeClipBounds {

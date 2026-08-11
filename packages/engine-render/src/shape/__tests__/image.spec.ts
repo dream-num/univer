@@ -356,7 +356,7 @@ describe('image extra', () => {
         if (!(cacheCanvas instanceof HTMLCanvasElement)) {
             throw new TypeError('Expected the SVG raster cache canvas to be rendered');
         }
-        expect(cacheCanvas.width * cacheCanvas.height).toBeLessThanOrEqual(2_000_000);
+        expect(cacheCanvas.width * cacheCanvas.height).toBeLessThanOrEqual(4_000_000);
 
         drawImage.mockRestore();
         image.dispose();

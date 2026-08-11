@@ -17,7 +17,8 @@ test('cells rendering after scrolling', async () => {
     await page.goto('http://localhost:3000/sheets/');
     await page.waitForTimeout(2000);
 
-    await page.evaluate(() => window.E2EControllerAPI.loadMergeCellSheet());
+    // TODO(@ai-review): Verify that fixing auto-hyphenation for merged-cell scroll snapshots still exercises H-column repaint behavior.
+    await page.evaluate(() => window.E2EControllerAPI.loadMergeCellSheet(2000, true));
     await page.waitForTimeout(1000);
 
     const canvas = page.locator(SHEET_MAIN_CANVAS_ID);
@@ -68,7 +69,7 @@ test('incremental merged-cell repaint matches a full refresh', async () => {
     await page.goto('http://localhost:3000/sheets/');
     await page.waitForTimeout(2000);
 
-    await page.evaluate(() => window.E2EControllerAPI.loadMergeCellSheet());
+    await page.evaluate(() => window.E2EControllerAPI.loadMergeCellSheet(2000, true));
     await page.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
     await expect(page.getByText('Custom Loading...', { exact: true })).toHaveCount(0, { timeout: 15_000 });
     await page.evaluate(async () => {
@@ -180,7 +181,7 @@ test('rendering after scrolling by API', async () => {
     await page.goto('http://localhost:3000/sheets/');
     await page.waitForTimeout(2000);
 
-    await page.evaluate(() => window.E2EControllerAPI.loadMergeCellSheet());
+    await page.evaluate(() => window.E2EControllerAPI.loadMergeCellSheet(2000, true));
     await page.evaluate(async () => {
         const activeSheet = window.univerAPI.getActiveWorkbook().getActiveSheet();
         activeSheet.scrollToCell(2, 4);

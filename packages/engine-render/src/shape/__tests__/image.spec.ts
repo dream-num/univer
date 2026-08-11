@@ -329,7 +329,7 @@ describe('image extra', () => {
         canvas.dispose();
     });
 
-    it('draws the source SVG when the capped cache would be excessively upscaled', () => {
+    it('keeps using the capped cache at high zoom', () => {
         const native = createNativeImage(4_000, 2_000, createSvgDataUrl(`
             <svg xmlns="http://www.w3.org/2000/svg">
                 <defs><filter id="blur"><feGaussianBlur stdDeviation="10" /></filter></defs>
@@ -351,12 +351,13 @@ describe('image extra', () => {
         context.setTransform(2, 0, 0, 2, 0, 0);
         image.render(context);
 
-        expect(drawImage.mock.calls.filter(([source]) => source === native)).toHaveLength(2);
+        expect(drawImage.mock.calls.filter(([source]) => source === native)).toHaveLength(1);
         const cacheCanvas = drawImage.mock.calls.find(([source]) => source instanceof HTMLCanvasElement)?.[0];
         if (!(cacheCanvas instanceof HTMLCanvasElement)) {
             throw new TypeError('Expected the SVG raster cache canvas to be rendered');
         }
         expect(cacheCanvas.width * cacheCanvas.height).toBeLessThanOrEqual(4_000_000);
+        expect(drawImage.mock.calls.filter(([source]) => source === cacheCanvas)).toHaveLength(2);
 
         drawImage.mockRestore();
         image.dispose();

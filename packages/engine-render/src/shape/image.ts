@@ -31,7 +31,6 @@ const SVG_ANIMATION_PATTERN = /<(?:animate(?:Color|Motion|Transform)?|set)\b|@ke
 const RASTER_CACHE_MAX_PIXEL_COUNT = 4_000_000;
 const RASTER_CACHE_MAX_DIMENSION = 4_096;
 const RASTER_CACHE_PIXEL_RATIO_STEP = 0.5;
-const RASTER_CACHE_MAX_UPSCALE = 2;
 
 function shouldRasterCacheSvg(source?: string): boolean {
     const prefix = source && INLINE_SVG_DATA_URL_PATTERN.exec(source)?.[0];
@@ -459,15 +458,13 @@ export class Image extends Shape<IImageProps> {
                 h,
                 Math.ceil(requestedPixelRatio / RASTER_CACHE_PIXEL_RATIO_STEP) * RASTER_CACHE_PIXEL_RATIO_STEP
             );
-            if (requestedPixelRatio <= pixelRatio * RASTER_CACHE_MAX_UPSCALE) {
-                this._renderWithCache(
-                    ctx,
-                    { left: -w / 2, top: -h / 2, right: w / 2, bottom: h / 2 },
-                    (cacheContext) => this._drawNative(cacheContext, native, w, h),
-                    pixelRatio
-                );
-                return;
-            }
+            this._renderWithCache(
+                ctx,
+                { left: -w / 2, top: -h / 2, right: w / 2, bottom: h / 2 },
+                (cacheContext) => this._drawNative(cacheContext, native, w, h),
+                pixelRatio
+            );
+            return;
         }
 
         this._drawNative(ctx, native, w, h);

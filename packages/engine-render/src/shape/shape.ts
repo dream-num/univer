@@ -27,6 +27,30 @@ export type LineCap = 'butt' | 'round' | 'square';
 export type PaintFirst = 'fill' | 'stroke';
 
 const BASE_OBJECT_ARRAY_Set = new Set(BASE_OBJECT_ARRAY);
+const RENDER_CACHE_MAX_PIXEL_COUNT = 2_000_000;
+const RENDER_CACHE_MAX_DIMENSION = 4_096;
+
+function resolveRenderCacheMetrics(bounds: IBoundRectNoAngle, requestedPixelRatio: number) {
+    const boundsWidth = bounds.right - bounds.left;
+    const boundsHeight = bounds.bottom - bounds.top;
+    if (requestedPixelRatio <= Number.EPSILON || boundsWidth <= 0 || boundsHeight <= 0) {
+        return null;
+    }
+
+    // TODO(@ai-review): Confirm the shared cache budget balances large SVG clarity and memory on the minimum supported browsers.
+    const pixelRatio = Math.min(
+        requestedPixelRatio,
+        RENDER_CACHE_MAX_DIMENSION / boundsWidth,
+        RENDER_CACHE_MAX_DIMENSION / boundsHeight,
+        Math.sqrt(RENDER_CACHE_MAX_PIXEL_COUNT / (boundsWidth * boundsHeight))
+    );
+    return {
+        pixelRatio,
+        width: Math.ceil(boundsWidth * pixelRatio) / pixelRatio,
+        height: Math.ceil(boundsHeight * pixelRatio) / pixelRatio,
+    };
+}
+
 export interface IShapeProps extends IObjectFullState, ISize, IOffset, IScale {
     rotateEnabled?: boolean;
     resizeEnabled?: boolean;
@@ -395,21 +419,19 @@ export abstract class Shape<T extends IShapeProps> extends BaseObject {
     protected _renderWithCache(
         ctx: UniverRenderingContext,
         bounds: IBoundRectNoAngle,
-        draw: (cacheContext: UniverRenderingContext) => void
+        draw: (cacheContext: UniverRenderingContext) => void,
+        fixedPixelRatio?: number
     ): void {
         const transform = ctx.getTransform();
         const scaleX = Math.hypot(transform.a, transform.b);
         const scaleY = Math.hypot(transform.c, transform.d);
-        const pixelRatio = Math.max(scaleX, scaleY);
-        if (pixelRatio <= Number.EPSILON) {
+        const requestedPixelRatio = fixedPixelRatio ?? Math.max(scaleX, scaleY);
+        const metrics = resolveRenderCacheMetrics(bounds, requestedPixelRatio);
+        if (!metrics) {
             return;
         }
 
-        const width = Math.ceil((bounds.right - bounds.left) * pixelRatio) / pixelRatio;
-        const height = Math.ceil((bounds.bottom - bounds.top) * pixelRatio) / pixelRatio;
-        if (width <= 0 || height <= 0) {
-            return;
-        }
+        const { width, height, pixelRatio } = metrics;
 
         const cacheBoundsChanged =
             this._renderCacheBounds?.left !== bounds.left ||

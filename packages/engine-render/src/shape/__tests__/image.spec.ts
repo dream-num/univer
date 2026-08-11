@@ -16,6 +16,8 @@
 
 import { describe, expect, it, vi } from 'vitest';
 import { Vector2 } from '../../basics/vector2';
+import { Canvas } from '../../canvas';
+import { UniverRenderingContext } from '../../context';
 import { Image } from '../image';
 
 function createNativeImage(width = 120, height = 80) {
@@ -228,5 +230,31 @@ describe('image extra', () => {
         expect(ctx.rect).toHaveBeenCalledWith(0, 0, 80, 120);
         expect(ctx.clip).toHaveBeenCalledBefore(ctx.transform);
         expect(ctx.drawImage).toHaveBeenCalled();
+    });
+
+    // TODO(@ai-review): Confirm this regression fails if Image stops reusing its fixed-resolution raster cache across zoom changes.
+    it('reuses an opted-in raster cache across context scale changes', () => {
+        const native = createNativeImage(2_000, 1_000);
+        const image = new Image('cached-image', {
+            image: native,
+            left: 0,
+            top: 0,
+            width: 2_000,
+            height: 1_000,
+            rasterCache: true,
+        });
+        const canvas = new Canvas({ width: 200, height: 100, pixelRatio: 1 });
+        const context = canvas.getContext();
+        const drawImage = vi.spyOn(UniverRenderingContext.prototype, 'drawImage');
+
+        image.render(context);
+        context.setTransform(2, 0, 0, 2, 0, 0);
+        image.render(context);
+
+        expect(drawImage.mock.calls.filter(([source]) => source === native)).toHaveLength(1);
+
+        drawImage.mockRestore();
+        image.dispose();
+        canvas.dispose();
     });
 });

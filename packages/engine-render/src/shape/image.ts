@@ -66,6 +66,8 @@ export interface IImageProps extends IShapeProps {
     opacity?: number;
 
     clipBounds?: Nullable<IShapeClipBounds>;
+
+    rasterCache?: boolean;
 }
 
 export class Image extends Shape<IImageProps> {
@@ -131,6 +133,10 @@ export class Image extends Shape<IImageProps> {
         return this._props.clipBounds;
     }
 
+    get rasterCache() {
+        return this._props.rasterCache ?? false;
+    }
+
     setOpacity(opacity: number) {
         this._props.opacity = opacity;
         this.makeDirty(true);
@@ -143,6 +149,16 @@ export class Image extends Shape<IImageProps> {
 
     setClipService(clipService: Nullable<IImageShapeClipService>) {
         this._clipService = clipService;
+    }
+
+    setRasterCacheEnabled(enabled: boolean): void {
+        if (this.rasterCache === enabled) {
+            return;
+        }
+
+        this._props.rasterCache = enabled;
+        this._releaseRenderCache();
+        this.makeDirty(true);
     }
 
     getClipService(): Nullable<IImageShapeClipService> {
@@ -377,12 +393,28 @@ export class Image extends Shape<IImageProps> {
     }
 
     protected override _draw(ctx: UniverRenderingContext, _bounds?: IViewportInfo, renderWidth?: number, renderHeight?: number) {
-        if (this._native == null) {
+        const native = this._native;
+        if (native == null) {
             return;
         }
         const w = renderWidth ?? this.width;
         const h = renderHeight ?? this.height;
 
+        // TODO(@ai-review): Verify raster caching remains opt-in because decoded bitmap images already have an efficient native draw path.
+        if (this.rasterCache) {
+            this._renderWithCache(
+                ctx,
+                { left: -w / 2, top: -h / 2, right: w / 2, bottom: h / 2 },
+                (cacheContext) => this._drawNative(cacheContext, native, w, h),
+                this.getEngine()?.getCanvas().getPixelRatio() ?? 1
+            );
+            return;
+        }
+
+        this._drawNative(ctx, native, w, h);
+    }
+
+    private _drawNative(ctx: UniverRenderingContext, native: HTMLImageElement, w: number, h: number): void {
         // Shape clip: when prstGeom is set and a clip service is available,
         // clip the image to the shape outline (e.g. ellipse, roundRect, etc.)
         if (this.prstGeom && this._clipService) {
@@ -409,14 +441,14 @@ export class Image extends Shape<IImageProps> {
                     const scaleW = this.width > 0 ? drawWidth / this.width : 1;
                     const scaleH = this.height > 0 ? drawHeight / this.height : 1;
                     ctx.drawImage(
-                        this._native,
+                        native,
                         drawLeft - left * scaleW,
                         drawTop - top * scaleH,
                         drawWidth + (right + left) * scaleW,
                         drawHeight + (bottom + top) * scaleH
                     );
                 } else {
-                    ctx.drawImage(this._native, drawLeft, drawTop, drawWidth, drawHeight);
+                    ctx.drawImage(native, drawLeft, drawTop, drawWidth, drawHeight);
                 }
                 ctx.restore();
                 return;
@@ -432,14 +464,14 @@ export class Image extends Shape<IImageProps> {
             ctx.rect(-w / 2, -h / 2, w, h);
             ctx.clip();
             ctx.drawImage(
-                this._native,
+                native,
                 -left * scaleW - w / 2,
                 -top * scaleH - h / 2,
                 w + (right + left) * scaleW,
                 h + (bottom + top) * scaleH
             );
         } else {
-            ctx.drawImage(this._native, -w / 2, -h / 2, w, h);
+            ctx.drawImage(native, -w / 2, -h / 2, w, h);
         }
     }
 

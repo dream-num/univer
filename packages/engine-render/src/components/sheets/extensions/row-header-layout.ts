@@ -24,6 +24,7 @@ import { SheetRowHeaderExtensionRegistry } from '../../extension';
 import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultRowHeaderLayoutExtension';
+const MIN_TEXT_RENDER_HEIGHT_IN_SCREEN_PX = 4;
 
 export interface IRowsHeaderCfgParam {
     headerStyle?: Partial<IRowStyleCfg>;
@@ -223,6 +224,11 @@ export class RowHeaderLayout extends SheetExtension {
             ctx.moveToByPrecision(cellBound.left, cellBound.bottom);
             ctx.lineToByPrecision(cellBound.right, cellBound.bottom);
             ctx.stroke();
+
+            if (cellBound.height * Math.abs(parentScale.scaleY ?? 1) < MIN_TEXT_RENDER_HEIGHT_IN_SCREEN_PX) {
+                preRowPosition = rowEndPosition;
+                continue;
+            }
 
             // row header text
             const textX = (() => {

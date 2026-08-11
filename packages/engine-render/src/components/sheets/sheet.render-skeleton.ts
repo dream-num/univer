@@ -66,7 +66,7 @@ import { DocSimpleSkeleton } from '../docs/layout/doc-simple-skeleton';
 import { DocumentSkeleton } from '../docs/layout/doc-skeleton';
 import { columnIterator } from '../docs/layout/tools';
 import { DocumentViewModel } from '../docs/view-model/document-view-model';
-import { EXPAND_SIZE_FOR_RENDER_OVERFLOW, MEASURE_EXTENT, MEASURE_EXTENT_FOR_PARAGRAPH } from './constants';
+import { EXPAND_SIZE_FOR_RENDER_OVERFLOW, MEASURE_EXTENT, MEASURE_EXTENT_FOR_PARAGRAPH, shouldRenderRowText } from './constants';
 import { SHEET_VIEWPORT_KEY } from './interfaces';
 
 interface IRowColumnRange extends IRowRange, IColumnRange { }
@@ -225,6 +225,11 @@ interface ISetStylesCacheForOneCellOptions {
     reuseExisting?: boolean;
     hasMergeData?: boolean;
     rowVisible?: boolean;
+    skipFontCache?: boolean;
+}
+
+export interface ISetStylesCacheOptions {
+    scaleY?: number;
 }
 
 export interface IGetPosByRowColOptions {
@@ -452,9 +457,10 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
     /**
      * Set border background and font to this._stylesCache by visible range, which derives from bounds)
      * @param vpInfo viewBounds
+     * @param options screen scale
      */
     // eslint-disable-next-line max-lines-per-function, complexity
-    setStylesCache(vpInfo?: IViewportInfo): Nullable<SpreadsheetSkeleton> {
+    setStylesCache(vpInfo?: IViewportInfo, options?: ISetStylesCacheOptions): Nullable<SpreadsheetSkeleton> {
         if (!this._worksheetData) return;
         if (!this.rowHeightAccumulation || !this.columnWidthAccumulation) return;
 
@@ -475,7 +481,10 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             ? (vpInfo.shouldCacheUpdate ? (vpInfo.diffCacheBounds?.map((bound) => this.getRangeByViewBound(bound)) ?? []) : [])
             : [rowColumnSegment];
         const visibleCellOptions: ISetStylesCacheForOneCellOptions = { cacheItem: { bg: true, border: true }, reuseExisting: isIncrementalScroll, hasMergeData, rowVisible: true };
+        const shortRowVisibleCellOptions: ISetStylesCacheForOneCellOptions = { ...visibleCellOptions, skipFontCache: true };
         const overflowCellOptions: ISetStylesCacheForOneCellOptions = { cacheItem: { bg: false, border: false }, reuseExisting: isIncrementalScroll, hasMergeData, rowVisible: true };
+        const scaleY = options?.scaleY ?? 1;
+        const hasRenderContext = options !== undefined;
         this._incrementalFontRenderRanges = [];
 
         // clear cache out of visible range
@@ -515,11 +524,22 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                     });
                 }
 
+                const rowStartPosition = this.rowHeightAccumulation[r - 1] ?? 0;
+                const rowEndPosition = this.rowHeightAccumulation[r] ?? rowStartPosition;
+                const rowGap = this.gapConfig?.rowGaps?.[r]?.size ?? 0;
+                const rowHeight = Math.max(0, rowEndPosition - rowStartPosition - rowGap);
+                // Merged-cell fonts are cached by the dedicated merge pass below.
+                const skipFontCacheForRow = hasRenderContext && !shouldRenderRowText(rowHeight, scaleY);
+                const cellOptions = skipFontCacheForRow ? shortRowVisibleCellOptions : visibleCellOptions;
                 for (let c = visibleStartColumn; c <= visibleEndColumn; c++) {
-                    this._setStylesCacheForOneCell(r, c, visibleCellOptions);
+                    this._setStylesCacheForOneCell(r, c, cellOptions);
                 }
-                if (shouldUseIncrementalStyleRange) {
+                if (shouldUseIncrementalStyleRange && !skipFontCacheForRow) {
                     pushRowRange(this._incrementalFontRenderRanges, r, visibleStartColumn, visibleEndColumn);
+                }
+
+                if (skipFontCacheForRow) {
+                    continue;
                 }
 
                 // Calculate text length for overflow cells just outside the visible range.
@@ -1536,7 +1556,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         if (options.reuseExisting && cacheItem && !options.mergeRange) {
             const bgHandled = !cacheItem.bg || Tools.isDefine(this._handleBgMatrix.getValue(row, col));
             const borderHandled = !cacheItem.border || Tools.isDefine(this._handleBorderMatrix.getValue(row, col));
-            if (bgHandled && borderHandled && this._stylesCache.fontMatrix.getValue(row, col)) {
+            if (bgHandled && borderHandled && (options.skipFontCache || this._stylesCache.fontMatrix.getValue(row, col))) {
                 return;
             }
         }
@@ -1570,7 +1590,9 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
 
         this._setBgStylesCache(row, col, style, options);
         this._setBorderStylesCache(row, col, style, options);
-        this._setFontStylesCache(row, col, { ...cell, ...{ s: style } }, style, options.hasMergeData ?? true);
+        if (!options.skipFontCache) {
+            this._setFontStylesCache(row, col, { ...cell, s: style }, style, options.hasMergeData ?? true);
+        }
     }
 
     /**

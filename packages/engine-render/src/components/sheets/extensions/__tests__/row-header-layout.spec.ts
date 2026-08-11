@@ -119,6 +119,37 @@ describe('row header layout extension', () => {
         expect(ctx.fillText).toHaveBeenCalled();
     });
 
+    it('omits row labels that cannot occupy four screen pixels', () => {
+        const layout = new RowHeaderLayout();
+        const ctx = createCtx();
+        const compressedRowCount = 228;
+        const skeleton = {
+            rowColumnSegment: { startRow: 0, endRow: compressedRowCount, startColumn: 0, endColumn: 0 },
+            rowHeaderWidth: 30,
+            rowHeightAccumulation: Array.from(
+                { length: compressedRowCount + 1 },
+                (_, row) => row < compressedRowCount ? (row + 1) * 2 : compressedRowCount * 2 + 20
+            ),
+            columnWidthAccumulation: [30],
+            columnTotalWidth: 30,
+            rowTotalHeight: compressedRowCount * 2 + 20,
+            worksheet: {
+                getSheetId: vi.fn(() => 'sheet-main'),
+            },
+        } as any;
+
+        layout.draw(ctx, { scaleX: 1, scaleY: 1 } as any, skeleton);
+
+        expect(ctx.fillText).toHaveBeenCalledOnce();
+        expect(ctx.fillText).toHaveBeenCalledWith(`${compressedRowCount + 1}`, expect.any(Number), expect.any(Number));
+        expect(ctx.stroke).toHaveBeenCalledTimes(compressedRowCount + 2);
+
+        ctx.fillText.mockClear();
+        layout.draw(ctx, { scaleX: 1, scaleY: 2 } as any, skeleton);
+
+        expect(ctx.fillText).toHaveBeenCalledTimes(compressedRowCount + 1);
+    });
+
     it('uses gapConfig default colors when drawing row gaps', () => {
         const layout = new RowHeaderLayout();
         const ctx = createCtx();

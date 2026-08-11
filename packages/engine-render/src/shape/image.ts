@@ -24,6 +24,54 @@ import { RENDER_CLASS_TYPE, Transform, Vector2 } from '../basics';
 import { offsetRotationAxis } from '../basics/offset-rotation-axis';
 import { Shape } from './shape';
 
+const INLINE_SVG_DATA_URL_PATTERN = /^data:image\/svg\+xml(?:;[^,]*)?,/i;
+const SVG_FILTER_REFERENCE_PATTERN = /\bfilter\s*=/i;
+const SVG_EXPENSIVE_FILTER_PATTERN = /<fe(?:Turbulence|DisplacementMap|GaussianBlur)\b/i;
+const SVG_ANIMATION_PATTERN = /<(?:animate(?:Color|Motion|Transform)?|set)\b|@keyframes\b/i;
+const RASTER_CACHE_MAX_PIXEL_COUNT = 4_000_000;
+const RASTER_CACHE_MAX_DIMENSION = 4_096;
+const RASTER_CACHE_PIXEL_RATIO_STEP = 0.5;
+
+function shouldRasterCacheSvg(source?: string): boolean {
+    const prefix = source && INLINE_SVG_DATA_URL_PATTERN.exec(source)?.[0];
+    if (!prefix) {
+        return false;
+    }
+
+    try {
+        const payload = source.slice(prefix.length);
+        const svg = prefix.toLowerCase().includes(';base64,') ? atob(payload) : decodeURIComponent(payload);
+        return !SVG_ANIMATION_PATTERN.test(svg) &&
+            SVG_FILTER_REFERENCE_PATTERN.test(svg) &&
+            SVG_EXPENSIVE_FILTER_PATTERN.test(svg);
+    } catch {
+        return false;
+    }
+}
+
+function resolveRasterCachePixelRatio(width: number, height: number, requestedPixelRatio: number): number {
+    if (width <= 0 || height <= 0) {
+        return requestedPixelRatio;
+    }
+
+    const dimensionPixelRatioLimit = Math.min(
+        RASTER_CACHE_MAX_DIMENSION / width,
+        RASTER_CACHE_MAX_DIMENSION / height
+    );
+    const pixelLimitedPixelRatio = Math.sqrt(RASTER_CACHE_MAX_PIXEL_COUNT / (width * height));
+    const pixelRatioLimit = Math.min(dimensionPixelRatioLimit, pixelLimitedPixelRatio);
+    const pixelRatio = requestedPixelRatio + RASTER_CACHE_PIXEL_RATIO_STEP > pixelRatioLimit
+        ? pixelRatioLimit
+        : requestedPixelRatio;
+    if (pixelRatio < pixelLimitedPixelRatio) {
+        return pixelRatio;
+    }
+
+    const physicalWidth = Math.floor(width * pixelLimitedPixelRatio);
+    const physicalHeight = Math.floor(RASTER_CACHE_MAX_PIXEL_COUNT / physicalWidth);
+    return Math.min(pixelRatio, (physicalWidth - 1) / width, (physicalHeight - 1) / height);
+}
+
 export interface IShapeClipBounds {
     left: number;
     top: number;
@@ -79,6 +127,10 @@ export class Image extends Shape<IImageProps> {
 
     private _clipService: Nullable<IImageShapeClipService> = null;
 
+    private _rasterCacheSource = '';
+
+    private _autoRasterCache = false;
+
     override objectType = ObjectType.IMAGE;
 
     override isDrawingObject: boolean = true;
@@ -129,6 +181,20 @@ export class Image extends Shape<IImageProps> {
 
     get clipBounds() {
         return this._props.clipBounds;
+    }
+
+    private _shouldRasterCache(): boolean {
+        const source = this._native?.src || this._props.url || '';
+        if (source !== this._rasterCacheSource) {
+            const previous = this._autoRasterCache;
+            this._rasterCacheSource = source;
+            this._autoRasterCache = shouldRasterCacheSvg(source);
+            if (previous && !this._autoRasterCache) {
+                this._releaseRenderCache();
+            }
+        }
+
+        return this._autoRasterCache;
     }
 
     setOpacity(opacity: number) {
@@ -377,12 +443,37 @@ export class Image extends Shape<IImageProps> {
     }
 
     protected override _draw(ctx: UniverRenderingContext, _bounds?: IViewportInfo, renderWidth?: number, renderHeight?: number) {
-        if (this._native == null) {
+        const native = this._native;
+        if (native == null) {
             return;
         }
         const w = renderWidth ?? this.width;
         const h = renderHeight ?? this.height;
 
+        if (this._shouldRasterCache()) {
+            const transform = ctx.getTransform();
+            const requestedPixelRatio = Math.max(
+                Math.hypot(transform.a, transform.b),
+                Math.hypot(transform.c, transform.d)
+            );
+            const pixelRatio = resolveRasterCachePixelRatio(
+                w,
+                h,
+                Math.ceil(requestedPixelRatio / RASTER_CACHE_PIXEL_RATIO_STEP) * RASTER_CACHE_PIXEL_RATIO_STEP
+            );
+            this._renderWithCache(
+                ctx,
+                { left: -w / 2, top: -h / 2, right: w / 2, bottom: h / 2 },
+                (cacheContext) => this._drawNative(cacheContext, native, w, h),
+                pixelRatio
+            );
+            return;
+        }
+
+        this._drawNative(ctx, native, w, h);
+    }
+
+    private _drawNative(ctx: UniverRenderingContext, native: HTMLImageElement, w: number, h: number): void {
         // Shape clip: when prstGeom is set and a clip service is available,
         // clip the image to the shape outline (e.g. ellipse, roundRect, etc.)
         if (this.prstGeom && this._clipService) {
@@ -409,14 +500,14 @@ export class Image extends Shape<IImageProps> {
                     const scaleW = this.width > 0 ? drawWidth / this.width : 1;
                     const scaleH = this.height > 0 ? drawHeight / this.height : 1;
                     ctx.drawImage(
-                        this._native,
+                        native,
                         drawLeft - left * scaleW,
                         drawTop - top * scaleH,
                         drawWidth + (right + left) * scaleW,
                         drawHeight + (bottom + top) * scaleH
                     );
                 } else {
-                    ctx.drawImage(this._native, drawLeft, drawTop, drawWidth, drawHeight);
+                    ctx.drawImage(native, drawLeft, drawTop, drawWidth, drawHeight);
                 }
                 ctx.restore();
                 return;
@@ -432,14 +523,14 @@ export class Image extends Shape<IImageProps> {
             ctx.rect(-w / 2, -h / 2, w, h);
             ctx.clip();
             ctx.drawImage(
-                this._native,
+                native,
                 -left * scaleW - w / 2,
                 -top * scaleH - h / 2,
                 w + (right + left) * scaleW,
                 h + (bottom + top) * scaleH
             );
         } else {
-            ctx.drawImage(this._native, -w / 2, -h / 2, w, h);
+            ctx.drawImage(native, -w / 2, -h / 2, w, h);
         }
     }
 

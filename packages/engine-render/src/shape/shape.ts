@@ -27,6 +27,16 @@ export type LineCap = 'butt' | 'round' | 'square';
 export type PaintFirst = 'fill' | 'stroke';
 
 const BASE_OBJECT_ARRAY_Set = new Set(BASE_OBJECT_ARRAY);
+
+function resolveRenderCachePixelRatio(ctx: UniverRenderingContext, fixedPixelRatio?: number): number {
+    if (fixedPixelRatio !== undefined) {
+        return fixedPixelRatio;
+    }
+
+    const transform = ctx.getTransform();
+    return Math.max(Math.hypot(transform.a, transform.b), Math.hypot(transform.c, transform.d));
+}
+
 export interface IShapeProps extends IObjectFullState, ISize, IOffset, IScale {
     rotateEnabled?: boolean;
     resizeEnabled?: boolean;
@@ -395,12 +405,10 @@ export abstract class Shape<T extends IShapeProps> extends BaseObject {
     protected _renderWithCache(
         ctx: UniverRenderingContext,
         bounds: IBoundRectNoAngle,
-        draw: (cacheContext: UniverRenderingContext) => void
+        draw: (cacheContext: UniverRenderingContext) => void,
+        fixedPixelRatio?: number
     ): void {
-        const transform = ctx.getTransform();
-        const scaleX = Math.hypot(transform.a, transform.b);
-        const scaleY = Math.hypot(transform.c, transform.d);
-        const pixelRatio = Math.max(scaleX, scaleY);
+        const pixelRatio = resolveRenderCachePixelRatio(ctx, fixedPixelRatio);
         if (pixelRatio <= Number.EPSILON) {
             return;
         }

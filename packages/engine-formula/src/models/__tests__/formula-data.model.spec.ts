@@ -165,7 +165,7 @@ const TEST_BASE_DATA: Partial<IBaseSnapshot> = {
                     name: 'Total',
                     type: BaseFieldType.Formula,
                     config: {
-                        formula: '=SUM({Amount}, [Qty], tableOther[External])',
+                        formula: '=SUM({Amount}, [Qty], _T_tableOther[External])',
                     },
                 },
             },
@@ -1090,7 +1090,7 @@ describe('Test formula data model', () => {
                 expect(formulaData['base-test']?.['table-main']).toEqual({
                     0: {
                         7: {
-                            f: '=SUM(_T_table_x2d_main[[#This Row],[Amount]], _T_table_x2d_main[[#This Row],[Qty]], _T_tableOther[[#Data],[External]])',
+                            f: '=SUM(Sales[[#This Row],[Amount]], Sales[[#This Row],[Qty]], Sales_2[[#Data],[External]])',
                             si: 'total',
                         },
                     },
@@ -1103,9 +1103,9 @@ describe('Test formula data model', () => {
                     name: 'Base',
                     unitType: UniverInstanceType.UNIVER_BASE,
                 });
-                expect(calculateData.unitSheetNameMap['base-test']?.Sales).toBe('tableOther');
-                expect(calculateData.unitSheetNameMap['base-test']?._T_table_x2d_main).toBe('table-main');
-                expect(calculateData.unitSheetNameMap['base-test']?._T_tableOther).toBe('tableOther');
+                expect(calculateData.unitSheetNameMap['base-test']?.Sales).toBe('table-main');
+                expect(calculateData.unitSheetNameMap['base-test']?.Sales_2).toBe('tableOther');
+                expect(calculateData.unitSheetNameMap['base-test']?._T_tableOther).toBeUndefined();
                 expect(tableData?.rowCount).toBe(1);
                 expect(tableData?.columnCount).toBe(8);
                 expect(tableData?.cellData.getValue(0, 0)).toEqual({ v: 'record-1', t: CellValueType.STRING });
@@ -1122,7 +1122,9 @@ describe('Test formula data model', () => {
                 const snapshot = structuredClone(TEST_BASE_DATA);
                 snapshot.id = 'base-structured-scope';
                 snapshot.tables!['table-main'].name = 'Orders';
+                snapshot.tables!['table-main'].formulaName = 'Orders';
                 snapshot.tables!.tableOther.name = 'Pricing';
+                snapshot.tables!.tableOther.formulaName = 'Pricing';
                 snapshot.tables!['table-main'].fields.total.config = {
                     formula: '=Orders[@[Amount]]+[@[Qty]]+SUM(Pricing[External])',
                 };
@@ -1155,6 +1157,7 @@ describe('Test formula data model', () => {
                 const snapshot = structuredClone(TEST_BASE_DATA);
                 snapshot.id = 'base-real-table-name';
                 snapshot.tables!['table-main'].name = 'table';
+                snapshot.tables!['table-main'].formulaName = 'table';
                 snapshot.tables!['table-main'].fields.total.config = {
                     formula: '=SUM(table[Amount])+table[[#This Row],[Qty]]',
                 };

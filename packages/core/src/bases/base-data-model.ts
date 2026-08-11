@@ -87,7 +87,11 @@ export class BaseDataModel extends UnitModel<IBaseSnapshot, UniverInstanceType.U
     }
 
     setSnapshot(snapshot: IBaseSnapshot): void {
-        this._snapshot = isNormalizedBaseSnapshot(snapshot) ? snapshot : normalizeBaseSnapshot(snapshot);
+        if (isNormalizedBaseSnapshot(snapshot)) {
+            this._snapshot = snapshot;
+        } else {
+            this._snapshot = normalizeBaseSnapshot(snapshot);
+        }
         this._name$.next(snapshot.name);
     }
 

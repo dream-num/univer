@@ -38,4 +38,25 @@ describe('range-tools', () => {
         expect(mapFunc(0, 0)).toEqual({ row: 5, col: 10 });
         expect(mapFunc(2, 2)).toEqual({ row: 9, col: 30 });
     });
+
+    it('maps rectangles between virtual and discrete coordinates', () => {
+        const result = virtualizeDiscreteRanges([{
+            rows: [5, 6, 9],
+            cols: [10, 11, 20],
+        }]);
+
+        expect(result).toHaveProperty('mapRange');
+        expect(result.mapRange({ startRow: 0, endRow: 2, startColumn: 0, endColumn: 2 })).toEqual([
+            { startRow: 5, endRow: 6, startColumn: 10, endColumn: 11 },
+            { startRow: 5, endRow: 6, startColumn: 20, endColumn: 20 },
+            { startRow: 9, endRow: 9, startColumn: 10, endColumn: 11 },
+            { startRow: 9, endRow: 9, startColumn: 20, endColumn: 20 },
+        ]);
+        expect(result.projectRange({ startRow: 6, endRow: 9, startColumn: 11, endColumn: 20 })).toEqual({
+            startRow: 1,
+            endRow: 2,
+            startColumn: 1,
+            endColumn: 2,
+        });
+    });
 });

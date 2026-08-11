@@ -32,7 +32,7 @@ import type {
     IUnitStylesData,
 } from '../basics/common';
 import type { IImageFormulaInfo } from '../engine/value-object/primitive-object';
-import { BooleanNumber, CellValueType, Disposable, Inject, isFormulaId, isFormulaString, IUniverInstanceService, ObjectMatrix, RANGE_TYPE, Styles, UniverInstanceType } from '@univerjs/core';
+import { BooleanNumber, CellValueType, createBaseFormulaTableNameMap, Disposable, getBaseFormulaTableName, Inject, isFormulaId, isFormulaString, IUniverInstanceService, ObjectMatrix, RANGE_TYPE, Styles, UniverInstanceType } from '@univerjs/core';
 import { LexerTreeBuilder } from '../engine/analysis/lexer-tree-builder';
 import { deserializeRangeWithSheet } from '../engine/utils/reference';
 import { clearArrayFormulaCellDataByCell, updateFormulaDataByCellValue } from './utils/formula-data-util';
@@ -191,9 +191,11 @@ export class FormulaDataModel extends Disposable {
             formulaData[unitId] = {};
 
             const tables = Object.values(snapshot.tables);
+            const formulaTableNames = createBaseFormulaTableNameMap(snapshot);
             for (let j = 0; j < tables.length; j++) {
                 const table = tables[j];
                 const tableFormulaData: Record<number, Record<number, IFormulaDataItem>> = {};
+                const normalizedFormulaByFieldId = new Map<string, string>();
                 const recordOrder = table.recordOrder;
                 if (!recordOrder) {
                     formulaData[unitId]![table.id] = tableFormulaData;
@@ -215,9 +217,14 @@ export class FormulaDataModel extends Disposable {
                         if (!formula) {
                             continue;
                         }
+                        let normalizedFormula = normalizedFormulaByFieldId.get(field.id);
+                        if (normalizedFormula == null) {
+                            normalizedFormula = normalizeBaseFormulaForEngine(formula, table, snapshot, formulaTableNames);
+                            normalizedFormulaByFieldId.set(field.id, normalizedFormula);
+                        }
                         tableFormulaData[row] ??= {};
                         tableFormulaData[row][col] = {
-                            f: normalizeBaseFormulaForEngine(formula, table, snapshot),
+                            f: normalizedFormula,
                             si: field.id,
                         };
                     }
@@ -407,6 +414,7 @@ export class FormulaDataModel extends Disposable {
             };
             const baseData: ISheetData = {};
             const tableNameMap: { [tableName: string]: string } = {};
+            const formulaTableNames = createBaseFormulaTableNameMap(snapshot);
 
             for (const table of Object.values(snapshot.tables)) {
                 baseData[table.id] = {
@@ -416,7 +424,7 @@ export class FormulaDataModel extends Disposable {
                     rowData: {},
                     columnData: {},
                 };
-                addEngineBaseTableNameMappings(tableNameMap, table, snapshot);
+                addEngineBaseTableNameMappings(tableNameMap, table, formulaTableNames);
             }
 
             allUnitData[unitId] = baseData;
@@ -951,40 +959,45 @@ const BASE_BRACKET_FIELD_REF_PATTERN = /(^|[^\w\[])\[@?([^\[\]#]+)\](?!\])/g;
 const BASE_EXTERNAL_A1_REF_PATTERN = /(?:'\[[^\]]+\](?:[^']|'')+'|\[[^\]]+\][^\s'!]+)!\$?[A-Z]{1,3}\$?\d+(?::\$?[A-Z]{1,3}\$?\d+)?/gi;
 const BASE_EXTERNAL_STRUCTURED_REFERENCE_PREFIX = /(?:'((?:[^']|'')+)'|\[[^\]]+\]|[A-Za-z0-9_.-]+)![^\s!\[\]]+\[/g;
 
-function normalizeBaseFormulaForEngine(formula: string, currentTable: ITableSnapshot, snapshot: IBaseSnapshot): string {
+function normalizeBaseFormulaForEngine(
+    formula: string,
+    currentTable: ITableSnapshot,
+    snapshot: IBaseSnapshot,
+    formulaTableNames: ReadonlyMap<string, string>
+): string {
     const refs: string[] = [];
     const hold = (ref: string) => {
         const index = refs.push(ref) - 1;
         return `__BASE_FORMULA_REF_${index}__`;
     };
     const normalized = protectBaseFormulaParts(formula, hold)
-        .replace(BASE_LEGACY_FIELD_REF_PATTERN, (_match, fieldName: string) => hold(createEngineThisRowRef(currentTable, fieldName, snapshot)))
+        .replace(BASE_LEGACY_FIELD_REF_PATTERN, (_match, fieldName: string) => hold(createEngineThisRowRef(currentTable, fieldName, formulaTableNames)))
         .replace(BASE_TABLE_SCOPED_FIELD_REF_PATTERN, (_match, sourceTableName: string, scope: string, fieldName: string) => {
-            const targetTable = resolveBaseFormulaTable(sourceTableName, currentTable, snapshot);
+            const targetTable = resolveBaseFormulaTable(sourceTableName, currentTable, snapshot, formulaTableNames);
             if (!targetTable) return `${sourceTableName}[[#${scope}],[${fieldName}]]`;
             return hold(scope.toLowerCase() === 'data'
-                ? createEngineColumnRef(targetTable, fieldName, snapshot)
-                : createEngineThisRowRef(targetTable, fieldName, snapshot));
+                ? createEngineColumnRef(targetTable, fieldName, formulaTableNames)
+                : createEngineThisRowRef(targetTable, fieldName, formulaTableNames));
         })
         .replace(BASE_TABLE_CURRENT_ROW_FIELD_REF_PATTERN, (_match, sourceTableName: string, fieldName: string) => {
-            const targetTable = resolveBaseFormulaTable(sourceTableName, currentTable, snapshot);
+            const targetTable = resolveBaseFormulaTable(sourceTableName, currentTable, snapshot, formulaTableNames);
             return targetTable
-                ? hold(createEngineThisRowRef(targetTable, fieldName, snapshot))
+                ? hold(createEngineThisRowRef(targetTable, fieldName, formulaTableNames))
                 : `${sourceTableName}[@[${fieldName}]]`;
         })
         .replace(BASE_SCOPED_FIELD_REF_PATTERN, (_match, prefix: string, scope: string, fieldName: string) => `${prefix}${hold(
             scope.toLowerCase() === 'data'
-                ? createEngineColumnRef(currentTable, fieldName, snapshot)
-                : createEngineThisRowRef(currentTable, fieldName, snapshot)
+                ? createEngineColumnRef(currentTable, fieldName, formulaTableNames)
+                : createEngineThisRowRef(currentTable, fieldName, formulaTableNames)
         )}`)
         .replace(BASE_CURRENT_ROW_FIELD_REF_PATTERN, (_match, prefix: string, fieldName: string) =>
-            `${prefix}${hold(createEngineThisRowRef(currentTable, fieldName, snapshot))}`)
+            `${prefix}${hold(createEngineThisRowRef(currentTable, fieldName, formulaTableNames))}`)
         .replace(BASE_TABLE_FIELD_REF_PATTERN, (_match, sourceTableName: string, fieldName: string) => {
-            const targetTable = resolveBaseFormulaTable(sourceTableName, currentTable, snapshot);
-            if (targetTable) return hold(createEngineColumnRef(targetTable, fieldName, snapshot));
+            const targetTable = resolveBaseFormulaTable(sourceTableName, currentTable, snapshot, formulaTableNames);
+            if (targetTable) return hold(createEngineColumnRef(targetTable, fieldName, formulaTableNames));
             return `${sourceTableName}[${fieldName}]`;
         })
-        .replace(BASE_BRACKET_FIELD_REF_PATTERN, (_match, prefix: string, fieldName: string) => `${prefix}${hold(createEngineThisRowRef(currentTable, fieldName, snapshot))}`);
+        .replace(BASE_BRACKET_FIELD_REF_PATTERN, (_match, prefix: string, fieldName: string) => `${prefix}${hold(createEngineThisRowRef(currentTable, fieldName, formulaTableNames))}`);
     return normalized.replace(/__BASE_FORMULA_REF_(\d+)__/g, (_match, index: string) => refs[Number(index)] ?? '');
 }
 
@@ -1050,47 +1063,20 @@ function isInsideBaseFormulaString(formula: string, position: number): boolean {
     return inString;
 }
 
-function createEngineThisRowRef(table: ITableSnapshot, fieldName: string, snapshot: IBaseSnapshot): string {
-    return `${getEngineBaseTableName(table, snapshot)}[[#This Row],[${fieldName}]]`;
+function createEngineThisRowRef(table: ITableSnapshot, fieldName: string, formulaTableNames: ReadonlyMap<string, string>): string {
+    return `${formulaTableNames.get(table.id) ?? getBaseFormulaTableName(table, { tables: { [table.id]: table } })}[[#This Row],[${fieldName}]]`;
 }
 
-function createEngineColumnRef(table: ITableSnapshot, fieldName: string, snapshot: IBaseSnapshot): string {
-    return `${getEngineBaseTableName(table, snapshot)}[[#Data],[${fieldName}]]`;
-}
-
-function getEngineBaseTableName(table: ITableSnapshot, snapshot: IBaseSnapshot): string {
-    const tables = Object.values(snapshot.tables);
-    let sameNameCount = 0;
-    for (let i = 0; i < tables.length; i++) {
-        const item = tables[i];
-        if (item.name.trim().toLowerCase() === table.name.trim().toLowerCase()) {
-            sameNameCount++;
-            if (sameNameCount > 1) {
-                break;
-            }
-        }
-    }
-    return sameNameCount === 1 && isExcelTableName(table.name)
-        ? table.name
-        : createStableExcelTableName(table.id);
+function createEngineColumnRef(table: ITableSnapshot, fieldName: string, formulaTableNames: ReadonlyMap<string, string>): string {
+    return `${formulaTableNames.get(table.id) ?? getBaseFormulaTableName(table, { tables: { [table.id]: table } })}[[#Data],[${fieldName}]]`;
 }
 
 function addEngineBaseTableNameMappings(
     tableNameMap: Record<string, string>,
     table: ITableSnapshot,
-    snapshot: IBaseSnapshot
+    formulaTableNames: ReadonlyMap<string, string>
 ): void {
-    tableNameMap[table.name] = table.id;
-    tableNameMap[getEngineBaseTableName(table, snapshot)] = table.id;
-}
-
-function isExcelTableName(name: string): boolean {
-    if (name.length === 0 || name.length > 255 || !/^[A-Za-z_][A-Za-z0-9_.]*$/.test(name)) {
-        return false;
-    }
-    return !/^[RC]$/i.test(name)
-        && !/^[A-Za-z]{1,3}[1-9]\d*$/.test(name)
-        && !/^R(?:\d+)?C(?:\d+)?$/i.test(name);
+    tableNameMap[formulaTableNames.get(table.id) ?? table.name] = table.id;
 }
 
 function createStableExcelTableName(tableId: string): string {
@@ -1204,16 +1190,21 @@ function isBaseCellData(value: unknown): value is IBaseCellData {
     );
 }
 
-function resolveBaseFormulaTable(tableName: string | undefined, currentTable: ITableSnapshot, snapshot: IBaseSnapshot): ITableSnapshot | undefined {
-    if (!tableName || tableName === currentTable.id || tableName === currentTable.name) {
+function resolveBaseFormulaTable(
+    tableName: string | undefined,
+    currentTable: ITableSnapshot,
+    snapshot: IBaseSnapshot,
+    formulaTableNames: ReadonlyMap<string, string>
+): ITableSnapshot | undefined {
+    if (!tableName) {
         return currentTable;
     }
-
-    const byId = snapshot.tables[tableName];
-    if (byId) {
-        return byId;
-    }
-
-    const matches = Object.values(snapshot.tables).filter((table) => table.name === tableName);
+    const normalizedName = tableName.toLowerCase();
+    const matches = Object.values(snapshot.tables).filter((table) =>
+        table.id.toLowerCase() === normalizedName
+        || table.name.toLowerCase() === normalizedName
+        || formulaTableNames.get(table.id)?.toLowerCase() === normalizedName
+        || createStableExcelTableName(table.id).toLowerCase() === normalizedName
+    );
     return matches.length === 1 ? matches[0] : undefined;
 }

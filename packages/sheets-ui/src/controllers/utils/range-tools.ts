@@ -17,9 +17,58 @@
 import type { IRange } from '@univerjs/core';
 import type { IDiscreteRange } from '@univerjs/sheets';
 
+interface ILine {
+    start: number;
+    end: number;
+}
+
+function groupConsecutive(values: number[], start: number, end: number): ILine[] {
+    const groups: ILine[] = [];
+    for (let index = start; index <= end; index++) {
+        const value = values[index];
+        const previous = groups[groups.length - 1];
+        if (previous && value === previous.end + 1) {
+            previous.end = value;
+        } else {
+            groups.push({ start: value, end: value });
+        }
+    }
+    return groups;
+}
+
+function projectLine(values: number[], start: number, end: number): ILine | null {
+    let low = 0;
+    let high = values.length;
+    while (low < high) {
+        const middle = Math.floor((low + high) / 2);
+        if (values[middle] < start) {
+            low = middle + 1;
+        } else {
+            high = middle;
+        }
+    }
+    const first = low;
+    if (first === values.length || values[first] > end) {
+        return null;
+    }
+
+    high = values.length;
+    while (low < high) {
+        const middle = Math.floor((low + high) / 2);
+        if (values[middle] <= end) {
+            low = middle + 1;
+        } else {
+            high = middle;
+        }
+    }
+    return { start: first, end: low - 1 };
+}
+
 export function virtualizeDiscreteRanges(ranges: IDiscreteRange[]): {
     ranges: IRange[];
     mapFunc: (row: number, col: number) => { row: number; col: number };
+    mapRange: (range: IRange) => IRange[];
+    projectRange: (range: IRange) => IRange | null;
 } {
     let totalRows: number[] = [];
     let totalCols: number[] = [];
@@ -51,5 +100,22 @@ export function virtualizeDiscreteRanges(ranges: IDiscreteRange[]): {
                 col: totalCols[col],
             }
         ),
+        mapRange: (range) => {
+            const rowGroups = groupConsecutive(totalRows, range.startRow, range.endRow);
+            const columnGroups = groupConsecutive(totalCols, range.startColumn, range.endColumn);
+            return rowGroups.flatMap((row) => columnGroups.map((column) => ({
+                startRow: row.start,
+                endRow: row.end,
+                startColumn: column.start,
+                endColumn: column.end,
+            })));
+        },
+        projectRange: (range) => {
+            const row = projectLine(totalRows, range.startRow, range.endRow);
+            const column = projectLine(totalCols, range.startColumn, range.endColumn);
+            return row && column
+                ? { startRow: row.start, endRow: row.end, startColumn: column.start, endColumn: column.end }
+                : null;
+        },
     };
 }

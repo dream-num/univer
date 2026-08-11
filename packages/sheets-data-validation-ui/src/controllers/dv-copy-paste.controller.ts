@@ -16,13 +16,13 @@
 
 import type { IRange, ISheetDataValidationRule, Nullable } from '@univerjs/core';
 import type { ICopyPastePayload, IPasteHookValueType, ISheetDiscreteRangeLocation } from '@univerjs/sheets-ui';
-import { Disposable, Inject, Injector, IUniverInstanceService, ObjectMatrix, queryObjectMatrix, Rectangle } from '@univerjs/core';
+import { Disposable, Inject, Injector, IUniverInstanceService, Rectangle } from '@univerjs/core';
 import { getSheetCommandTarget, rangeToDiscreteRange } from '@univerjs/sheets';
 import { DATA_VALIDATION_PLUGIN_NAME, getDataValidationDiffMutations, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
 import { COPY_TYPE, getRepeatRange, ISheetClipboardService, PREDEFINED_HOOK_NAME_PASTE, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
 
 interface ICopyInfoType {
-    matrix: ObjectMatrix<string>;
+    rules: Map<string, IRange[]>;
     unitId: string;
     subUnitId: string;
 }
@@ -61,11 +61,11 @@ export class DataValidationCopyPasteController extends Disposable {
     }
 
     private _collect(unitId: string, subUnitId: string, range: IRange) {
-        const matrix = new ObjectMatrix<string>();
+        const rules = new Map<string, IRange[]>();
         this._copyInfo = {
             unitId,
             subUnitId,
-            matrix,
+            rules,
         };
 
         const discreteRange = this._injector.invoke((accessor) => {
@@ -74,17 +74,24 @@ export class DataValidationCopyPasteController extends Disposable {
         if (!discreteRange) {
             return;
         }
-        const { rows, cols } = discreteRange;
-        rows.forEach((row, rowIndex) => {
-            cols.forEach((col, colIndex) => {
-                const ruleId = this._sheetDataValidationModel.getRuleIdByLocation(unitId, subUnitId, row, col);
-                matrix.setValue(rowIndex, colIndex, ruleId ?? '');
+        const { projectRange } = virtualizeDiscreteRanges([discreteRange]);
+        this._sheetDataValidationModel.getRules(unitId, subUnitId).forEach((rule) => {
+            const projectedRanges = rule.ranges.flatMap((ruleRange) => {
+                const projected = projectRange(ruleRange);
+                return projected ? [projected] : [];
             });
+            if (projectedRanges.length) {
+                rules.set(rule.uid, projectedRanges.length > 1 ? Rectangle.mergeRanges(projectedRanges) : projectedRanges);
+            }
         });
     }
 
     // eslint-disable-next-line max-lines-per-function
     private _generateMutations(pasteFrom: ISheetDiscreteRangeLocation, pasteTo: ISheetDiscreteRangeLocation, payload: ICopyPastePayload) {
+        const copyInfo = this._copyInfo;
+        if (!copyInfo) {
+            return { redos: [], undos: [] };
+        }
         const { unitId: copyUnitId, subUnitId: copySubUnitId, range: copyRange } = pasteFrom;
         const { unitId: pastedUnitId, subUnitId: pastedSubUnitId, range: pastedRange } = pasteTo;
         const { copyType = COPY_TYPE.COPY } = payload;
@@ -100,41 +107,29 @@ export class DataValidationCopyPasteController extends Disposable {
             return { redos: [], undos: [] };
         }
 
+        const sourceVirtualRange = virtualizeDiscreteRanges([copyRange]).ranges[0];
+        const targetVirtualization = virtualizeDiscreteRanges([pastedRange]);
+        const targetVirtualRange = targetVirtualization.ranges[0];
+        const repeatRange = getRepeatRange(sourceVirtualRange, targetVirtualRange, true);
+        const clearTargetRanges = targetVirtualization.mapRange(targetVirtualRange);
+        const getTargetRanges = (sourceRanges: IRange[]) => repeatRange.flatMap(({ startRange }) => sourceRanges.flatMap((sourceRange) => (
+            targetVirtualization.mapRange(Rectangle.getPositionRange(sourceRange, startRange))
+        )));
+
         if (pastedUnitId !== copyUnitId || pastedSubUnitId !== copySubUnitId) {
             const ruleMatrix = this._sheetDataValidationModel.getRuleObjectMatrix(pastedUnitId, pastedSubUnitId).clone();
-            const additionMatrix = new ObjectMatrix();
-            const addRules = new Set<string>();
-
-            const { ranges: [vCopyRange, vPastedRange], mapFunc } = virtualizeDiscreteRanges([copyRange, pastedRange]);
-
-            const repeatRange = getRepeatRange(vCopyRange, vPastedRange, true);
             const additionRules: Map<string, ISheetDataValidationRule> = new Map();
+            const additions = [{ id: '', ranges: clearTargetRanges }];
 
-            repeatRange.forEach(({ startRange }) => {
-                this._copyInfo?.matrix.forValue((row, col, ruleId) => {
-                    const range = Rectangle.getPositionRange(
-                        {
-                            startRow: row,
-                            endRow: row,
-                            startColumn: col,
-                            endColumn: col,
-                        },
-                        startRange
-                    );
-                    const transformedRuleId = `${copySubUnitId}-${ruleId}`;
-                    const oldRule = this._sheetDataValidationModel.getRuleById(copyUnitId, copySubUnitId, ruleId);
-
-                    if (!this._sheetDataValidationModel.getRuleById(pastedUnitId, pastedSubUnitId, transformedRuleId) && oldRule) {
-                        additionRules.set(transformedRuleId, { ...oldRule, uid: transformedRuleId });
-                    }
-
-                    const { row: startRow, col: startColumn } = mapFunc(range.startRow, range.startColumn);
-                    addRules.add(transformedRuleId);
-                    additionMatrix.setValue(startRow, startColumn, transformedRuleId);
-                });
+            copyInfo.rules.forEach((ranges, ruleId) => {
+                const transformedRuleId = `${copySubUnitId}-${ruleId}`;
+                const oldRule = this._sheetDataValidationModel.getRuleById(copyUnitId, copySubUnitId, ruleId);
+                if (!this._sheetDataValidationModel.getRuleById(pastedUnitId, pastedSubUnitId, transformedRuleId) && oldRule) {
+                    additionRules.set(transformedRuleId, { ...oldRule, uid: transformedRuleId });
+                }
+                additions.push({ id: transformedRuleId, ranges: getTargetRanges(ranges) });
             });
 
-            const additions = Array.from(addRules).map((id) => ({ id, ranges: queryObjectMatrix(additionMatrix, (value) => value === id) }));
             ruleMatrix.addRangeRules(additions);
 
             const { redoMutations, undoMutations } = getDataValidationDiffMutations(
@@ -149,17 +144,10 @@ export class DataValidationCopyPasteController extends Disposable {
             if (copyType === COPY_TYPE.CUT) {
                 // Delete rules in copy range
                 const copySheetRuleMatrix = this._sheetDataValidationModel.getRuleObjectMatrix(copyUnitId, copySubUnitId).clone();
-                const deleteRangeStartCell = mapFunc(vCopyRange.startRow, vCopyRange.startColumn);
-                const deleteRangeEndCell = mapFunc(vCopyRange.endRow, vCopyRange.endColumn);
                 copySheetRuleMatrix.addRangeRules([
                     {
                         id: '',
-                        ranges: [{
-                            startRow: deleteRangeStartCell.row,
-                            endRow: deleteRangeEndCell.row,
-                            startColumn: deleteRangeStartCell.col,
-                            endColumn: deleteRangeEndCell.col,
-                        }],
+                        ranges: virtualizeDiscreteRanges([copyRange]).mapRange(sourceVirtualRange),
                     },
                 ]);
                 const { redoMutations: cutRedos, undoMutations: cutUndos } = getDataValidationDiffMutations(
@@ -180,31 +168,10 @@ export class DataValidationCopyPasteController extends Disposable {
             };
         } else {
             const ruleMatrix = this._sheetDataValidationModel.getRuleObjectMatrix(copyUnitId, copySubUnitId).clone();
-            const additionMatrix = new ObjectMatrix();
-            const additionRules = new Set<string>();
-
-            const { ranges: [vCopyRange, vPastedRange], mapFunc } = virtualizeDiscreteRanges([copyRange, pastedRange]);
-
-            const repeatRange = getRepeatRange(vCopyRange, vPastedRange, true);
-
-            repeatRange.forEach(({ startRange }) => {
-                this._copyInfo?.matrix.forValue((row, col, ruleId) => {
-                    const range = Rectangle.getPositionRange(
-                        {
-                            startRow: row,
-                            endRow: row,
-                            startColumn: col,
-                            endColumn: col,
-                        },
-                        startRange
-                    );
-                    const { row: startRow, col: startColumn } = mapFunc(range.startRow, range.startColumn);
-                    additionMatrix.setValue(startRow, startColumn, ruleId);
-                    additionRules.add(ruleId);
-                });
-            });
-
-            const additions = Array.from(additionRules).map((id) => ({ id, ranges: queryObjectMatrix(additionMatrix, (value) => value === id) }));
+            const additions = [
+                { id: '', ranges: clearTargetRanges },
+                ...Array.from(copyInfo.rules, ([id, ranges]) => ({ id, ranges: getTargetRanges(ranges) })),
+            ];
             ruleMatrix.addRangeRules(additions);
             const { redoMutations, undoMutations } = getDataValidationDiffMutations(
                 pastedUnitId,

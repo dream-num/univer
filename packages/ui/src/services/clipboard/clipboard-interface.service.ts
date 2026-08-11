@@ -373,7 +373,16 @@ function sanitizeHtmlForClipboard(html: string): DocumentFragment {
 function serializeSanitizedHtmlForClipboard(html: string): string {
     const container = document.createElement('div');
     container.appendChild(sanitizeHtmlForClipboard(html));
-    return container.innerHTML;
+    const sanitizedHtml = container.innerHTML;
+    const isUniverExcelHtml = html.includes('xmlns:x="urn:schemas-microsoft-com:office:excel"')
+        && html.includes('<meta name="ProgId" content="Excel.Sheet">')
+        && html.includes('<meta name="Generator" content="Univer">');
+
+    if (!isUniverExcelHtml) {
+        return sanitizedHtml;
+    }
+
+    return `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta name="ProgId" content="Excel.Sheet"><meta name="Generator" content="Univer"></head><body><!--StartFragment-->${sanitizedHtml}<!--EndFragment--></body></html>`;
 }
 
 function sanitizeHtmlNode(node: Node): Node | null {

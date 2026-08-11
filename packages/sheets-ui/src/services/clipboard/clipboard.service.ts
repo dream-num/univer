@@ -142,6 +142,12 @@ const IMAGE_MIME_TO_EXTENSION = {
 
 export const FORMULA_CLIPBOARD_MIME_TYPE = 'web application/x-univer-sheets-formula';
 
+function wrapHtmlForExcel(html: string): string {
+    const table = html.match(/<table[\s\S]*<\/table>/)?.[0] ?? html;
+
+    return `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta name="ProgId" content="Excel.Sheet"><meta name="Generator" content="Univer"></head><body><!--StartFragment-->${table}<!--EndFragment--></body></html>`;
+}
+
 interface IFormulaClipboardPayload {
     rowCount: number;
     columnCount: number;
@@ -331,7 +337,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         // 4. write html and get plain text info the clipboard interface
         await this._clipboardInterfaceService.write(
             plain,
-            html,
+            wrapHtmlForExcel(html),
             formulaClipboardPayload ? { [FORMULA_CLIPBOARD_MIME_TYPE]: formulaClipboardPayload } : undefined
         );
 
@@ -370,7 +376,10 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         const shouldUseHTMLPaste = imageIndex === -1 || !htmlContainsImage(html);
         if (html && shouldUseHTMLPaste) {
             // Firstly see if the html content is from Excel
-            if (this._platformService.isWindows && htmlIsFromExcel(html)) {
+            const copyId = extractId(html);
+            const isInternalCopy = Boolean(copyId && this._copyContentCache.get(copyId));
+            // TODO(@ai-review): Check that external Excel HTML cannot suppress the Windows shortcut warning with a stale or forged copy ID.
+            if (this._platformService.isWindows && htmlIsFromExcel(html) && !isInternalCopy) {
                 this._notificationService.show({
                     type: 'warning',
                     title: this._localeService.t<LocaleKey>('sheets-ui.clipboard.shortCutNotify.title'),

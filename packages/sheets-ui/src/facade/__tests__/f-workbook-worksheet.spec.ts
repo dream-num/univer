@@ -79,9 +79,9 @@ describe('Test FWorkbook/FWorksheet UI mixin', () => {
 
     it('workbook and worksheet render facade methods should use render services and command ids consistently', async () => {
         const sheetSize = 100;
-        const rowHeader = { setCustomHeader: vi.fn(), makeDirty: vi.fn() };
-        const columnHeader = { setCustomHeader: vi.fn(), makeDirty: vi.fn() };
-        const mainComponent = { makeDirty: vi.fn() };
+        const rowHeader = { setCustomHeader: vi.fn(), makeDirtyNoDebounce: vi.fn() };
+        const columnHeader = { setCustomHeader: vi.fn(), makeDirtyNoDebounce: vi.fn() };
+        const mainComponent = { makeDirtyNoDebounce: vi.fn() };
         const visibleRange = { startRow: 1, endRow: 4, startColumn: 2, endColumn: 6 };
         const visibleRanges = new Map([[SHEET_VIEWPORT_KEY.VIEW_MAIN, visibleRange]]);
         const skeleton = {
@@ -120,6 +120,7 @@ describe('Test FWorkbook/FWorksheet UI mixin', () => {
             showSelection: vi.fn(),
         };
         const render = {
+            scene: { render: vi.fn() },
             components: new Map<SHEET_VIEW_KEY, unknown>([
                 [SHEET_VIEW_KEY.ROW, rowHeader],
                 [SHEET_VIEW_KEY.COLUMN, columnHeader],
@@ -165,7 +166,8 @@ describe('Test FWorkbook/FWorksheet UI mixin', () => {
 
         expect(worksheet.refreshCanvas()).toBe(worksheet);
         expect(skeletonManager.reCalculate).toHaveBeenCalledTimes(1);
-        expect(mainComponent.makeDirty).toHaveBeenCalledTimes(1);
+        expect(mainComponent.makeDirtyNoDebounce).toHaveBeenCalledTimes(1);
+        expect(render.scene.render).toHaveBeenCalledTimes(1);
 
         expect(worksheet.getVisibleRange()).toEqual(visibleRange);
         expect(worksheet.getVisibleRangesOfAllViewports()).toEqual(visibleRanges);

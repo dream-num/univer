@@ -24,6 +24,40 @@ import { RENDER_CLASS_TYPE, Transform, Vector2 } from '../basics';
 import { offsetRotationAxis } from '../basics/offset-rotation-axis';
 import { Shape } from './shape';
 
+const INLINE_SVG_DATA_URL_PATTERN = /^data:image\/svg\+xml(?:;[^,]*)?,/i;
+const SVG_FILTER_REFERENCE_PATTERN = /\bfilter\s*=/i;
+const SVG_EXPENSIVE_FILTER_PATTERN = /<fe(?:Turbulence|DisplacementMap|GaussianBlur)\b/i;
+const RASTER_CACHE_MAX_PIXEL_COUNT = 2_000_000;
+const RASTER_CACHE_MAX_DIMENSION = 4_096;
+
+function shouldRasterCacheSvg(source?: string): boolean {
+    const prefix = source && INLINE_SVG_DATA_URL_PATTERN.exec(source)?.[0];
+    if (!prefix) {
+        return false;
+    }
+
+    try {
+        const payload = source.slice(prefix.length);
+        const svg = prefix.toLowerCase().includes(';base64,') ? atob(payload) : decodeURIComponent(payload);
+        return SVG_FILTER_REFERENCE_PATTERN.test(svg) && SVG_EXPENSIVE_FILTER_PATTERN.test(svg);
+    } catch {
+        return false;
+    }
+}
+
+function resolveRasterCachePixelRatio(width: number, height: number, requestedPixelRatio: number): number {
+    if (width <= 0 || height <= 0) {
+        return requestedPixelRatio;
+    }
+
+    return Math.min(
+        requestedPixelRatio,
+        RASTER_CACHE_MAX_DIMENSION / width,
+        RASTER_CACHE_MAX_DIMENSION / height,
+        Math.sqrt(RASTER_CACHE_MAX_PIXEL_COUNT / (width * height))
+    );
+}
+
 export interface IShapeClipBounds {
     left: number;
     top: number;
@@ -81,6 +115,10 @@ export class Image extends Shape<IImageProps> {
 
     private _clipService: Nullable<IImageShapeClipService> = null;
 
+    private _rasterCacheSource = '';
+
+    private _autoRasterCache = false;
+
     override objectType = ObjectType.IMAGE;
 
     override isDrawingObject: boolean = true;
@@ -134,7 +172,21 @@ export class Image extends Shape<IImageProps> {
     }
 
     get rasterCache() {
-        return this._props.rasterCache ?? false;
+        if (this._props.rasterCache !== undefined) {
+            return this._props.rasterCache;
+        }
+
+        const source = this._native?.src || this._props.url || '';
+        if (source !== this._rasterCacheSource) {
+            const previous = this._autoRasterCache;
+            this._rasterCacheSource = source;
+            this._autoRasterCache = shouldRasterCacheSvg(source);
+            if (previous && !this._autoRasterCache) {
+                this._releaseRenderCache();
+            }
+        }
+
+        return this._autoRasterCache;
     }
 
     setOpacity(opacity: number) {
@@ -149,16 +201,6 @@ export class Image extends Shape<IImageProps> {
 
     setClipService(clipService: Nullable<IImageShapeClipService>) {
         this._clipService = clipService;
-    }
-
-    setRasterCacheEnabled(enabled: boolean): void {
-        if (this.rasterCache === enabled) {
-            return;
-        }
-
-        this._props.rasterCache = enabled;
-        this._releaseRenderCache();
-        this.makeDirty(true);
     }
 
     getClipService(): Nullable<IImageShapeClipService> {
@@ -401,11 +443,16 @@ export class Image extends Shape<IImageProps> {
         const h = renderHeight ?? this.height;
 
         if (this.rasterCache) {
+            const pixelRatio = resolveRasterCachePixelRatio(
+                w,
+                h,
+                this.getEngine()?.getCanvas().getPixelRatio() ?? 1
+            );
             this._renderWithCache(
                 ctx,
                 { left: -w / 2, top: -h / 2, right: w / 2, bottom: h / 2 },
                 (cacheContext) => this._drawNative(cacheContext, native, w, h),
-                this.getEngine()?.getCanvas().getPixelRatio() ?? 1
+                pixelRatio
             );
             return;
         }

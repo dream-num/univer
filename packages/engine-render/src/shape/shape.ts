@@ -27,27 +27,14 @@ export type LineCap = 'butt' | 'round' | 'square';
 export type PaintFirst = 'fill' | 'stroke';
 
 const BASE_OBJECT_ARRAY_Set = new Set(BASE_OBJECT_ARRAY);
-const RENDER_CACHE_MAX_PIXEL_COUNT = 2_000_000;
-const RENDER_CACHE_MAX_DIMENSION = 4_096;
 
-function resolveRenderCacheMetrics(bounds: IBoundRectNoAngle, requestedPixelRatio: number) {
-    const boundsWidth = bounds.right - bounds.left;
-    const boundsHeight = bounds.bottom - bounds.top;
-    if (requestedPixelRatio <= Number.EPSILON || boundsWidth <= 0 || boundsHeight <= 0) {
-        return null;
+function resolveRenderCachePixelRatio(ctx: UniverRenderingContext, fixedPixelRatio?: number): number {
+    if (fixedPixelRatio !== undefined) {
+        return fixedPixelRatio;
     }
 
-    const pixelRatio = Math.min(
-        requestedPixelRatio,
-        RENDER_CACHE_MAX_DIMENSION / boundsWidth,
-        RENDER_CACHE_MAX_DIMENSION / boundsHeight,
-        Math.sqrt(RENDER_CACHE_MAX_PIXEL_COUNT / (boundsWidth * boundsHeight))
-    );
-    return {
-        pixelRatio,
-        width: Math.ceil(boundsWidth * pixelRatio) / pixelRatio,
-        height: Math.ceil(boundsHeight * pixelRatio) / pixelRatio,
-    };
+    const transform = ctx.getTransform();
+    return Math.max(Math.hypot(transform.a, transform.b), Math.hypot(transform.c, transform.d));
 }
 
 export interface IShapeProps extends IObjectFullState, ISize, IOffset, IScale {
@@ -421,16 +408,16 @@ export abstract class Shape<T extends IShapeProps> extends BaseObject {
         draw: (cacheContext: UniverRenderingContext) => void,
         fixedPixelRatio?: number
     ): void {
-        const transform = ctx.getTransform();
-        const scaleX = Math.hypot(transform.a, transform.b);
-        const scaleY = Math.hypot(transform.c, transform.d);
-        const requestedPixelRatio = fixedPixelRatio ?? Math.max(scaleX, scaleY);
-        const metrics = resolveRenderCacheMetrics(bounds, requestedPixelRatio);
-        if (!metrics) {
+        const pixelRatio = resolveRenderCachePixelRatio(ctx, fixedPixelRatio);
+        if (pixelRatio <= Number.EPSILON) {
             return;
         }
 
-        const { width, height, pixelRatio } = metrics;
+        const width = Math.ceil((bounds.right - bounds.left) * pixelRatio) / pixelRatio;
+        const height = Math.ceil((bounds.bottom - bounds.top) * pixelRatio) / pixelRatio;
+        if (width <= 0 || height <= 0) {
+            return;
+        }
 
         const cacheBoundsChanged =
             this._renderCacheBounds?.left !== bounds.left ||

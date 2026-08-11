@@ -27,6 +27,7 @@ import {
 import { MoreLeftIcon, MoreRightIcon } from '@univerjs/icons';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { RibbonPosition } from '../../../services/menu/types';
+import { IRibbonOverrideService } from '../../../services/ribbon/ribbon-override.service';
 import { IRibbonService } from '../../../services/ribbon/ribbon.service';
 import { useDependency, useObservable } from '../../../utils/di';
 import { ComponentContainer } from '../ComponentContainer';
@@ -43,8 +44,10 @@ export function MobileRibbon(props: IMobileRibbonProps) {
     const { headerMenuComponents, headerMenu = true } = props;
 
     const localeService = useDependency(LocaleService);
+    const ribbonOverrideService = useDependency(IRibbonOverrideService);
     const ribbonService = useDependency(IRibbonService);
 
+    const ribbonOverride = useObservable(ribbonOverrideService.override$, ribbonOverrideService.getOverride());
     const ribbon = useObservable(ribbonService.ribbon$, []);
     const activatedTab = useObservable(ribbonService.activatedTab$, RibbonPosition.START);
 
@@ -92,7 +95,7 @@ export function MobileRibbon(props: IMobileRibbonProps) {
         };
     }, [activeGroup]);
 
-    if (ribbon.length === 0 && !hasHeaderMenu) {
+    if (ribbonOverride?.hideRibbon === true || (ribbon.length === 0 && !hasHeaderMenu)) {
         return null;
     }
 

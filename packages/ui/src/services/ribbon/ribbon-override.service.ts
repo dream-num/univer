@@ -22,11 +22,12 @@ import { BehaviorSubject } from 'rxjs';
 
 export interface IRibbonOverride {
     id: string;
-    ribbonService: IRibbonService;
+    ribbonService?: IRibbonService;
     injector?: Pick<Injector, 'get' | 'has' | 'invoke'>;
     portalContainer?: HTMLElement | null;
     placeholderTitle?: string;
     hideToolbar?: boolean;
+    hideRibbon?: boolean;
 }
 
 export interface IRibbonOverrideService {

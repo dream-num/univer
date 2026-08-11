@@ -64,7 +64,8 @@ export function Ribbon(props: IRibbonProps) {
     const activatedTab = useObservable(ribbonService.activatedTab$, RibbonPosition.START);
     const collapsedIds = useObservable(ribbonService.collapsedIds$, []);
     const fakeToolbarVisible = useObservable(ribbonService.fakeToolbarVisible$, false);
-    const hideToolbar = ribbonOverride?.hideToolbar === true;
+    const hideRibbon = ribbonOverride?.hideRibbon === true;
+    const hideToolbar = hideRibbon || ribbonOverride?.hideToolbar === true;
 
     const ribbon = useMemo(() => {
         if (ribbonType === 'simple') {
@@ -227,6 +228,10 @@ export function Ribbon(props: IRibbonProps) {
             'data-embed-id': ribbonOverride.id,
         }
         : {};
+
+    if (hideRibbon) {
+        return null;
+    }
 
     const content = (
         <>

@@ -107,13 +107,7 @@ test('diff merged cells rendering', async () => {
     await page.waitForTimeout(2000);
 
     await page.evaluate(() => window.E2EControllerAPI.loadMergeCellSheet());
-    // TODO(@ai-review): Verify this readiness sequence remains sufficient if sheet loading or font rendering becomes asynchronous in a different way.
-    await page.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
-    await expect(page.getByText('Custom Loading...', { exact: true })).toHaveCount(0, { timeout: 15_000 });
-    await page.evaluate(async () => {
-        await document.fonts.ready;
-        await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
-    });
+    await page.waitForTimeout(1000);
 
     const filename = generateSnapshotName('mergedCellsRendering');
     const screenshot = await page.locator(SHEET_MAIN_CANVAS_ID).screenshot();

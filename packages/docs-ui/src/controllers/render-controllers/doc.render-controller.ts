@@ -233,7 +233,6 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
                 return;
             }
 
-            // TODO(@ai-review): Verify this coalescing remains correct if changeset replay later yields between mutations.
             if (options?.fromChangeset) {
                 this._scheduleChangesetRender();
                 return;

@@ -267,7 +267,6 @@ describe('doc render controller', () => {
         expect(selectionManager.refreshSelection).toHaveBeenCalledTimes(1);
     });
 
-    // TODO(@ai-review): Confirm this test continues to model SnapshotService's synchronous changeset replay boundary.
     it('coalesces synchronous changeset mutations into one document render', async () => {
         const { commandCallbacks, pageLayoutService, selectionManager, skeletonManager } = createControllerFixture();
         const mutation = {

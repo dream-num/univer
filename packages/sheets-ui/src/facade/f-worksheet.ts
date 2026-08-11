@@ -333,8 +333,9 @@ export class FWorksheetUIMixin extends FWorksheet implements IFWorksheetUIMixin 
         render.with(SheetSkeletonManagerService).reCalculate();
 
         render.components.forEach((component) => {
-            component.makeDirty?.();
+            component.makeDirtyNoDebounce();
         });
+        render.scene.render();
 
         return this;
     }
@@ -553,6 +554,5 @@ export class FWorksheetUIMixin extends FWorksheet implements IFWorksheetUIMixin 
 
 FWorksheet.extend(FWorksheetUIMixin);
 declare module '@univerjs/sheets/facade' {
-    // eslint-disable-next-line ts/naming-convention
     interface FWorksheet extends IFWorksheetUIMixin { }
 }

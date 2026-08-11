@@ -125,7 +125,6 @@ test('incremental merged-cell repaint matches a full refresh', async () => {
     });
 
     await page.evaluate(() => window.univerAPI.getActiveWorkbook().getActiveSheet().refreshCanvas());
-    await page.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
 
     const differentPixels = await canvas.evaluate((source: HTMLCanvasElement, scrollBarSize) => {
         const reference = document.querySelector<HTMLCanvasElement>('#merge-scroll-incremental-reference');

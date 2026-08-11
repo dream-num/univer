@@ -132,6 +132,38 @@ describe('BrowserClipboardService', () => {
         expect(document.body.lastElementChild?.textContent).not.toBe('rich');
     });
 
+    it('should preserve Univer Excel metadata while sanitizing legacy html', async () => {
+        vi.mocked(supportClipboardAPI).mockReturnValue(false);
+        const { service } = createService();
+        const clipboardData = {
+            setData: vi.fn(),
+        };
+
+        vi.mocked(document.execCommand).mockImplementation(() => {
+            const event = new Event('copy', { cancelable: true }) as ClipboardEvent;
+            Object.defineProperty(event, 'clipboardData', {
+                value: clipboardData,
+            });
+            document.dispatchEvent(event);
+            return true;
+        });
+
+        await service.write(
+            'merged',
+            '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta name="ProgId" content="Excel.Sheet"><meta name="Generator" content="Univer"><script>alert(1)</script></head><body><!--StartFragment--><table data-copy-id="copy-id"><tbody><tr><td rowspan="3" onclick="alert(1)">merged</td></tr></tbody></table><!--EndFragment--></body></html>'
+        );
+
+        const copiedHtml = clipboardData.setData.mock.calls.find(([type]) => type === 'text/html')?.[1];
+
+        expect(copiedHtml).toContain('xmlns:x="urn:schemas-microsoft-com:office:excel"');
+        expect(copiedHtml).toContain('<meta name="ProgId" content="Excel.Sheet">');
+        expect(copiedHtml).toContain('<!--StartFragment--><table data-copy-id="copy-id">');
+        expect(copiedHtml).toContain('<td rowspan="3">merged</td>');
+        expect(copiedHtml).toContain('</table><!--EndFragment-->');
+        expect(copiedHtml).not.toContain('<script');
+        expect(copiedHtml).not.toContain('onclick');
+    });
+
     it('should sanitize html before legacy copy', async () => {
         vi.mocked(supportClipboardAPI).mockReturnValue(false);
         const { service } = createService();

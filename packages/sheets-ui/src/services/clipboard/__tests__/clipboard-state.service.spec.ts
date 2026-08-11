@@ -28,6 +28,7 @@ import {
     IUndoRedoService,
     IUniverInstanceService,
     LocaleService,
+    LocaleType,
     LocalUndoRedoService,
     ObjectMatrix,
     RANGE_TYPE,
@@ -143,8 +144,8 @@ interface IPrivateClipboardServiceAccess {
     _topLeftCellsMatch(rowCount: number, colCount: number, range: { topRow: number; leftCol: number }): boolean;
 }
 
-function createTestContext() {
-    vi.stubGlobal('navigator', { appVersion: 'Linux' });
+function createTestContext(appVersion = 'Linux') {
+    vi.stubGlobal('navigator', { appVersion });
     const injector = new Injector();
     injector.add([ILogService, { useClass: DesktopLogService }]);
     injector.add([IConfigService, { useClass: ConfigService }]);
@@ -163,6 +164,10 @@ function createTestContext() {
     injector.add([LocaleService]);
     injector.add([ErrorService]);
     injector.add([ISheetClipboardService, { useClass: SheetClipboardService }]);
+    const localeService = injector.get(LocaleService);
+    localeService.load({ [LocaleType.ZH_CN]: {} });
+    localeService.setLocale(LocaleType.ZH_CN);
+    localeService.setDirection('ltr');
     const commandService = injector.get(ICommandService);
     commandService.registerCommand(SetSelectionsOperation);
     commandService.registerCommand(SetWorksheetActiveOperation);
@@ -276,6 +281,58 @@ describe('SheetClipboardService', () => {
         expect(copyId && service.copyContentCache().get(copyId)?.copyType).toBe(COPY_TYPE.COPY);
     });
 
+    it('wraps merged sheet html with Excel metadata only when writing to the system clipboard', async () => {
+        const { injector, service } = createTestContext();
+        selectRange(injector, 1, 1, 2, 2);
+        service.addClipboardHook({
+            id: 'merged-cell-html',
+            onCopyCellStyle(_row: number, _column: number, rowSpan?: number, colSpan?: number) {
+                return rowSpan || colSpan
+                    ? { rowspan: `${rowSpan || 1}`, colspan: `${colSpan || 1}` }
+                    : undefined;
+            },
+        } as never);
+
+        const generatedHtml = service.generateCopyContent('unit-1', 'sheet-1', {
+            startRow: 1,
+            startColumn: 1,
+            endRow: 2,
+            endColumn: 2,
+        })?.html;
+
+        expect(generatedHtml).toMatch(/^<google-sheets-html-origin><table/);
+        expect(await service.copy()).toBe(true);
+
+        const clipboard = injector.get(IClipboardInterfaceService) as unknown as TestClipboardInterfaceService;
+        const writtenHtml = clipboard.writes[0].html;
+
+        expect(writtenHtml).toContain('xmlns:o="urn:schemas-microsoft-com:office:office"');
+        expect(writtenHtml).toContain('xmlns:x="urn:schemas-microsoft-com:office:excel"');
+        expect(writtenHtml).toContain('xmlns="http://www.w3.org/TR/REC-html40"');
+        expect(writtenHtml).toContain('<meta name="ProgId" content="Excel.Sheet">');
+        expect(writtenHtml).toContain('<meta name="Generator" content="Univer">');
+        expect(writtenHtml).toContain('<!--StartFragment--><table');
+        expect(writtenHtml).toContain('rowspan="2" colspan="2"');
+        expect(writtenHtml).toContain('data-copy-id=');
+        expect(writtenHtml).toContain('</table><!--EndFragment-->');
+    });
+
+    it('recognizes its Excel-compatible clipboard html as internal content on Windows', async () => {
+        const { injector, service } = createTestContext('Windows');
+        selectCell(injector);
+        const notificationService = injector.get(INotificationService);
+        const notificationSpy = vi.spyOn(notificationService, 'show');
+
+        expect(await service.copy()).toBe(true);
+
+        const clipboard = injector.get(IClipboardInterfaceService) as unknown as TestClipboardInterfaceService;
+        const item = new MockClipboardItem({ 'text/html': clipboard.writes[0].html });
+
+        await service.paste(item as unknown as ClipboardItem);
+
+        expect(notificationSpy).not.toHaveBeenCalled();
+    });
+
     it('writes formula clipboard payload for copyable formula cells', async () => {
         const { injector, service } = createTestContext();
         selectRange(injector, 1, 2, 2, 3);
@@ -338,6 +395,7 @@ describe('SheetClipboardService', () => {
         const copyId = clipboard.writes[0].html.match(/data-copy-id="([^"]+)"/)?.[1];
 
         expect(cut).toBe(true);
+        expect(clipboard.writes[0].html).toContain('xmlns:x="urn:schemas-microsoft-com:office:excel"');
         expect(service.copyContentCache().get(copyId!)?.copyType).toBe(COPY_TYPE.CUT);
     });
 

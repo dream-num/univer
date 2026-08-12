@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
+import type { IAccessor, Workbook } from '@univerjs/core';
+import type { IMenuButtonItem } from '@univerjs/ui';
 import type { LocaleKey } from '../locale/types';
 import {
     BooleanNumber,
     DisposableCollection,
-    type IAccessor,
     ICommandService,
     IUniverInstanceService,
     UniverInstanceType,
-    type Workbook,
 } from '@univerjs/core';
 import {
     SetWorksheetActiveOperation,
@@ -31,7 +31,7 @@ import {
     WorkbookEditablePermission,
     WorksheetEditPermission,
 } from '@univerjs/sheets';
-import { getMenuHiddenObservable, type IMenuButtonItem, MenuItemType } from '@univerjs/ui';
+import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { Observable } from 'rxjs';
 import { getCurrentRangeDisable$ } from './menu-util';
 

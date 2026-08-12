@@ -15,11 +15,12 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
+import type { IRenderManagerService } from '@univerjs/engine-render';
 import { Injector, LifecycleStages, LifecycleUnreachableError } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { IWorkbenchService, WorkbenchService } from '../../../services/workbench/workbench.service';
-import { SingleUnitUIController } from '../ui-shared.controller';
+import { isUnitEmbeddedRender, SingleUnitUIController } from '../ui-shared.controller';
 
 class TestSingleUnitUIController extends SingleUnitUIController {
     callbackPromise: Promise<void> | null = null;
@@ -48,20 +49,41 @@ class TestSingleUnitUIController extends SingleUnitUIController {
     }
 }
 
-function createRenderer(unitId: string) {
+function createRenderer(unitId: string, isMainScene = true) {
     const canvas = document.createElement('canvas');
 
     return {
         unitId,
+        isMainScene,
         activate: vi.fn(),
         deactivate: vi.fn(),
         engine: {
             getCanvasElement: () => canvas,
-            mount: vi.fn(),
-            unmount: vi.fn(),
+            mount: vi.fn((element: HTMLElement) => element.appendChild(canvas)),
+            unmount: vi.fn(() => canvas.remove()),
         },
     };
 }
+
+describe('isUnitEmbeddedRender', () => {
+    it('uses non-main renderer ownership for a normally preloaded Unit', () => {
+        const renderer = createRenderer('preloaded-child', false);
+
+        expect(isUnitEmbeddedRender(
+            'preloaded-child',
+            { getUnitCreateOptions: vi.fn(() => null) },
+            { getRenderUnitById: vi.fn(() => renderer as unknown as ReturnType<IRenderManagerService['getRenderUnitById']>) }
+        )).toBe(true);
+    });
+
+    it('keeps the create option fallback before the embed renderer exists', () => {
+        expect(isUnitEmbeddedRender(
+            'pending-child',
+            { getUnitCreateOptions: vi.fn(() => ({ embeddedRender: true })) },
+            { getRenderUnitById: vi.fn(() => null) }
+        )).toBe(true);
+    });
+});
 
 describe('SingleUnitUIController', () => {
     afterEach(() => {
@@ -144,6 +166,11 @@ describe('SingleUnitUIController', () => {
         focused$.next('render-2');
         expect(render2.engine.mount).toHaveBeenCalledTimes(1);
 
+        render2.engine.getCanvasElement().remove();
+        focused$.next('render-2');
+        // TODO(@ai-review): This models a fullscreen teardown detaching the cached host renderer before host refocus completes.
+        expect(render2.engine.mount).toHaveBeenCalledTimes(2);
+
         focused$.next('render-3');
         expect(render2.deactivate).toHaveBeenCalledTimes(1);
         expect(render2.engine.unmount).toHaveBeenCalledTimes(1);
@@ -154,7 +181,8 @@ describe('SingleUnitUIController', () => {
 
         disposed$.next('render-3');
         focused$.next('render-3');
-        expect(render3.engine.mount).toHaveBeenCalledTimes(2);
+        expect(render3.engine.mount).toHaveBeenCalledTimes(1);
+        expect(render3.activate).toHaveBeenCalledTimes(2);
 
         vi.advanceTimersByTime(3000);
         expect(lifecycleService.stage).toBe(LifecycleStages.Steady);
@@ -208,7 +236,7 @@ describe('SingleUnitUIController', () => {
         expect(renderer.activate).toHaveBeenCalledTimes(1);
     });
 
-    it('should not mount embedded renderers into the global workbench content', async () => {
+    it('should not switch the global workbench to a product-owned renderer for a normally preloaded Unit', async () => {
         vi.useFakeTimers();
 
         const layoutService = {
@@ -219,7 +247,9 @@ describe('SingleUnitUIController', () => {
         const focused$ = new Subject<string>();
         const created$ = new Subject<any>();
         const normalRender = createRenderer('normal-render');
-        const embeddedRender = createRenderer('embedded-render');
+        const embeddedRender = createRenderer('embedded-render', false);
+        const productCanvasHost = document.createElement('div');
+        productCanvasHost.appendChild(embeddedRender.engine.getCanvasElement());
         const rendererMap = new Map<string, any>([
             ['normal-render', normalRender],
             ['embedded-render', embeddedRender],
@@ -235,7 +265,8 @@ describe('SingleUnitUIController', () => {
         const instanceService = {
             focused$,
             getFocusedUnit: vi.fn(() => ({ getUnitId: () => 'embedded-render' })),
-            getUnitCreateOptions: vi.fn((unitId: string) => unitId === 'embedded-render' ? { embeddedRender: true } : null),
+            // TODO(@ai-review): Keep this null to model imported/preloaded Units whose embedded ownership exists only on the renderer.
+            getUnitCreateOptions: vi.fn(() => null),
         };
 
         const lifecycleService = {
@@ -262,8 +293,11 @@ describe('SingleUnitUIController', () => {
         expect(embeddedRender.engine.mount).not.toHaveBeenCalled();
 
         focused$.next('embedded-render');
+        expect(normalRender.deactivate).not.toHaveBeenCalled();
         expect(normalRender.engine.unmount).not.toHaveBeenCalled();
         expect(embeddedRender.engine.mount).not.toHaveBeenCalled();
+        expect(embeddedRender.engine.getCanvasElement().parentElement).toBe(productCanvasHost);
+        expect(embeddedRender.activate).not.toHaveBeenCalled();
 
         created$.next({ unitId: 'embedded-render' });
         expect(embeddedRender.engine.mount).not.toHaveBeenCalled();

@@ -22,6 +22,16 @@ import { IWorkbenchService } from '../../services/workbench/workbench.service';
 
 const STEADY_TIMEOUT = 3000;
 
+export function isUnitEmbeddedRender(
+    unitId: string,
+    instanceService: Pick<IUniverInstanceService, 'getUnitCreateOptions'>,
+    renderManagerService: Pick<IRenderManagerService, 'getRenderUnitById'>
+): boolean {
+    // TODO(@ai-review): Confirm renderer ownership is the canonical signal once a preloaded Unit is mounted by an embed host.
+    return renderManagerService.getRenderUnitById(unitId)?.isMainScene === false ||
+        instanceService.getUnitCreateOptions(unitId)?.embeddedRender === true;
+}
+
 /**
  * @ignore
  */
@@ -109,18 +119,32 @@ export abstract class SingleUnitUIController extends Disposable {
 
     private _currentRenderId: string | null = null;
     private _changeRenderUnit(rendererId: string, contentElement: HTMLElement): boolean {
-        if (this._currentRenderId === rendererId) return false;
-        if (this._instanceService.getUnitCreateOptions(rendererId)?.embeddedRender) return false;
+        const renderer = this._renderManagerService.getRenderUnitById(rendererId);
+        if (
+            !renderer ||
+            !renderer.unitId ||
+            isUnitEmbeddedRender(rendererId, this._instanceService, this._renderManagerService) ||
+            isInternalEditorID(renderer.unitId)
+        ) {
+            return false;
+        }
 
-        const renderer = this._renderManagerService.getRenderUnitById(rendererId)!;
-        if (!renderer || !renderer.unitId || isInternalEditorID(renderer.unitId)) return false;
+        const canvas = renderer.engine.getCanvasElement();
+        if (this._currentRenderId === rendererId) {
+            if (!contentElement.contains(canvas)) {
+                // TODO(@ai-review): Confirm fullscreen/product teardown is the only path that can detach the cached main renderer before it is focused again.
+                renderer.engine.mount(contentElement);
+                renderer.activate();
+                return true;
+            }
+            return false;
+        }
 
         const currentRenderer = this._currentRenderId
             ? this._renderManagerService.getRenderUnitById(this._currentRenderId)
             : null;
         currentRenderer?.deactivate();
         currentRenderer?.engine.unmount();
-        const canvas = renderer.engine.getCanvasElement();
         if (!contentElement.contains(canvas)) {
             renderer.engine.mount(contentElement);
         }

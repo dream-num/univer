@@ -34,7 +34,7 @@ export {
 } from './controllers/shared-shortcut.controller';
 export { ShortcutPanelController } from './controllers/shortcut-display/shortcut-panel.controller';
 export { DesktopUIController } from './controllers/ui/ui-desktop.controller';
-export { SingleUnitUIController } from './controllers/ui/ui-shared.controller';
+export { isUnitEmbeddedRender, SingleUnitUIController } from './controllers/ui/ui-shared.controller';
 export { IUIController } from './controllers/ui/ui.controller';
 export type { IWorkbenchOptions, RibbonType } from './controllers/ui/ui.controller';
 export { menuSchema as UIMenuSchema } from './menu/schema';

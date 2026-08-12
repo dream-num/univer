@@ -16,8 +16,8 @@
 
 import type { IMenuManagerService as IMenuManagerServiceType, IMenuSchema } from '@univerjs/ui';
 import { borderClassName, clsx } from '@univerjs/design';
-import { IMenuManagerService, MenuManagerPosition, ToolbarItem, useDependency } from '@univerjs/ui';
-import { useEffect, useState } from 'react';
+import { IMenuManagerService, MenuManagerPosition, preventBrowserZoomInContainers, ToolbarItem, useDependency } from '@univerjs/ui';
+import { useEffect, useRef, useState } from 'react';
 import {
     SetInlineFormatBoldCommand,
     SetInlineFormatFontSizeCommand,
@@ -92,6 +92,7 @@ export function FloatToolbar(props: IFloatToolbarProps) {
     const { avaliableMenus = DEFAULT_AVALIABLE_MENUS } = props;
 
     const menuManagerService = useDependency(IMenuManagerService);
+    const toolbarRef = useRef<HTMLDivElement>(null);
 
     const [menus, setMenus] = useState<IFloatToolbarMenuSchema[]>([]);
     const [extraMenus, setExtraMenus] = useState<IMenuSchema[]>([]);
@@ -112,8 +113,18 @@ export function FloatToolbar(props: IFloatToolbarProps) {
         };
     }, [avaliableMenus, menuManagerService]);
 
+    useEffect(() => {
+        const toolbar = toolbarRef.current;
+        if (!toolbar) {
+            return;
+        }
+
+        return preventBrowserZoomInContainers([toolbar]);
+    }, []);
+
     return (
         <div
+            ref={toolbarRef}
             className={clsx(`
               univer-box-border univer-flex univer-rounded univer-bg-white univer-py-1.5 univer-shadow-sm
               dark:!univer-border-gray-700 dark:!univer-bg-gray-900

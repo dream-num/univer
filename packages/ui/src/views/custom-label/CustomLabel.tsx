@@ -23,10 +23,14 @@ import { isObservable } from 'rxjs';
 import { ComponentManager, IconManager } from '../../common';
 import { useDependency, useObservable } from '../../utils/di';
 
+export type RibbonCustomLayout = 'toolbar' | 'grid';
+
 export type ICustomLabelProps<T = undefined> = {
     className?: string;
 
     iconSize?: number;
+
+    ribbonLayout?: RibbonCustomLayout;
 
     value?: string | number | undefined;
 

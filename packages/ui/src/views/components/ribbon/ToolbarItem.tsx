@@ -203,6 +203,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
 
     const { tooltip, shortcut, icon, title, label, id, commandId, type, slot, params, grid, large, showLabel, iconSize, iconColor, fullWidth } = props;
     const gridLabel = title ?? tooltip;
+    const ribbonLayout = grid ? 'grid' : 'toolbar';
 
     const shortcutDisplay = useToolbarShortcutDisplay({ id, commandId, shortcut });
     let tooltipTitle = tooltip ? localeService.t(tooltip) : '';
@@ -288,6 +289,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                         <CustomLabel
                             icon={iconToDisplay}
                             iconSize={iconSize}
+                            ribbonLayout={ribbonLayout}
                             title={titleToDisplay}
                             value={iconColor ?? value}
                             label={label}
@@ -337,7 +339,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                         {grid && large
                             ? (
                                 <>
-                                    <CustomLabel icon={iconToDisplay} iconSize={iconSize} />
+                                    <CustomLabel icon={iconToDisplay} iconSize={iconSize} ribbonLayout={ribbonLayout} />
                                     <div
                                         className={clsx(
                                             toolbarSelectorTriggerVariants({ disabled }),
@@ -345,6 +347,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                                         )}
                                     >
                                         <CustomLabel
+                                            ribbonLayout={ribbonLayout}
                                             title={titleToDisplay}
                                             value={value}
                                             label={label}
@@ -359,6 +362,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                                     <CustomLabel
                                         icon={iconToDisplay}
                                         iconSize={iconSize}
+                                        ribbonLayout={ribbonLayout}
                                         title={titleToDisplay}
                                         value={value}
                                         label={label}
@@ -414,6 +418,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                 >
                     <CustomLabel
                         className={grid && fullWidth ? '!univer-w-full' : undefined}
+                        ribbonLayout={ribbonLayout}
                         title={grid && showLabel ? gridLabel! : title!}
                         value={value}
                         label={label}
@@ -437,8 +442,8 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                 onDoubleClick={() => props.subId && executeCommand(props.subId)}
             >
                 {icon
-                    ? <CustomLabel icon={icon} iconSize={iconSize} title={grid && (large || showLabel) ? gridLabel : undefined} />
-                    : <CustomLabel title={title!} />}
+                    ? <CustomLabel icon={icon} iconSize={iconSize} ribbonLayout={ribbonLayout} title={grid && (large || showLabel) ? gridLabel : undefined} />
+                    : <CustomLabel ribbonLayout={ribbonLayout} title={title!} />}
             </ToolbarButton>
         );
     }

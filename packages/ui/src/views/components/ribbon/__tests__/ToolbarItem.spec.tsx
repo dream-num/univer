@@ -77,8 +77,8 @@ function renderWithDependencies(element: ReactElement) {
     injector.add([ILogService, { useClass: TestLogService as never }]);
     injector.add([ComponentManager]);
     injector.add([IconManager]);
-    injector.get(ComponentManager).register('TestDynamicOption', ({ onChange, className }: { onChange: (value: string) => void; className?: string }) => (
-        <button type="button" className={className} onClick={() => onChange('dynamic-value')}>Choose dynamic value</button>
+    injector.get(ComponentManager).register('TestDynamicOption', ({ onChange, className, ribbonLayout }: { onChange: (value: string) => void; className?: string; ribbonLayout?: string }) => (
+        <button type="button" className={className} data-ribbon-layout={ribbonLayout} onClick={() => onChange('dynamic-value')}>Choose dynamic value</button>
     ));
 
     injector.get(IconManager).register({
@@ -195,7 +195,20 @@ describe('ToolbarItem', () => {
         );
 
         expect(container.querySelector('[data-u-command="test-custom-button"]')).toBeTruthy();
+        expect(container.querySelector('[data-ribbon-layout="grid"]')).toBeTruthy();
         expect(container.querySelector('button button')).toBeNull();
+    });
+
+    it('reports the toolbar layout to a regular custom button label', () => {
+        const { container } = renderWithDependencies(
+            <ToolbarItem
+                id="test-custom-button"
+                type={MenuItemType.BUTTON}
+                label={{ name: 'TestDynamicOption' }}
+            />
+        );
+
+        expect(container.querySelector('[data-ribbon-layout="toolbar"]')).toBeTruthy();
     });
 
     it('applies a configured Grid icon size', () => {

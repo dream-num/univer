@@ -66,6 +66,11 @@ describe('Test Reference', () => {
             tableName: 'Inventory',
             columnStruct: '[Safety stock]',
         });
+        expect(splitTableStructuredRef("'Base name with ]] bracket'!Inventory[Safety stock]")).toEqual({
+            unitQualifier: 'Base name with ]] bracket',
+            tableName: 'Inventory',
+            columnStruct: '[Safety stock]',
+        });
     });
 
     it('getAbsoluteRefTypeWithSingleString', () => {

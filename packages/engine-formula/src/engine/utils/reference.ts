@@ -515,13 +515,13 @@ export function splitTableStructuredRef(ref: string) {
     if (qualifierEnd >= 0) {
         unitQualifier = tableRef.slice(0, qualifierEnd).trim();
         tableRef = tableRef.slice(qualifierEnd + 1);
-        if (unitQualifier.startsWith("'") && unitQualifier.endsWith("'")) {
+        const isQuotedQualifier = unitQualifier.startsWith("'") && unitQualifier.endsWith("'");
+        const isBracketedQualifier = !isQuotedQualifier && unitQualifier.startsWith('[') && unitQualifier.endsWith(']');
+        if (isQuotedQualifier) {
             unitQualifier = unitQualifier.slice(1, -1);
+        } else if (isBracketedQualifier) {
+            unitQualifier = unitQualifier.slice(1, -1).replaceAll(']]', ']');
         }
-        if (unitQualifier.startsWith('[') && unitQualifier.endsWith(']')) {
-            unitQualifier = unitQualifier.slice(1, -1);
-        }
-        unitQualifier = unitQualifier.replaceAll(']]', ']');
         unitQualifier = unquoteSheetName(unitQualifier);
     } else if (tableRef.startsWith('[')) {
         const legacyQualifierEnd = tableRef.indexOf(']');

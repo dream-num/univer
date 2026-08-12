@@ -315,7 +315,11 @@ export interface IBaseSnapshot {
 
 export interface ITableSnapshot {
     id: TableId;
-    /** Human-readable display name. Do not use it as a structured-reference identifier. */
+    /**
+     * Human-readable display name, subject to Excel worksheet name rules because
+     * each Base table is exported as a worksheet. Names must be unique within the
+     * Base, ignoring case. Do not use this value as a structured-reference identifier.
+     */
     name: string;
     /**
      * Persisted stable identifier used by formulas and exported structured references.

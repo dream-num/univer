@@ -27,11 +27,14 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { LoadingMultiIcon } from '@univerjs/icons';
 import { ComponentManager, ContextMenuPosition, IMenuManagerService, ToolbarItem, useConfigValue, useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo } from 'react';
+import { EMPTY, merge } from 'rxjs';
 import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { getEmbedSheetsTabCustomData } from '../../embed-tab-anchor';
+import { ISheetEmbedRuntimeFocusCoordinator } from '../../services/sheet-embed-integration.service';
 import { ISheetEmbedRuntimeService } from '../../services/sheet-embed-runtime.service';
 import { AutoFillPopupMenu } from '../auto-fill-popup-menu/AutoFillPopupMenu';
 import { EditorContainer } from '../editor-container/EditorContainer';
@@ -54,7 +57,7 @@ export function RenderSheetFooter() {
     const config = useConfigValue<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
     const menuManagerService = useDependency(IMenuManagerService);
     const showFooter = config?.footer ?? true;
-    const activeWorkbook = useActiveWorkbook();
+    const activeWorkbook = useRootWorkbenchWorkbook();
     const loadingWorkbook = useSheetLoadingWorkbook();
     const workbook = loadingWorkbook ?? activeWorkbook;
     const isLoading = useSheetLoading();
@@ -113,7 +116,7 @@ export function RenderSheetFooter() {
 
 export function RenderSheetHeader() {
     const config = useConfigValue<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
-    const activeWorkbook = useActiveWorkbook();
+    const activeWorkbook = useRootWorkbenchWorkbook();
     const loadingWorkbook = useSheetLoadingWorkbook();
     const workbook = loadingWorkbook ?? activeWorkbook;
     const isLoading = useSheetLoading();
@@ -157,18 +160,21 @@ export function RenderSheetContent() {
     const isLoading = useSheetLoading();
     const isPreviewReady = useSheetLoadingPreviewReady();
     const componentManager = useDependency(ComponentManager);
-    const activeWorkbook = useActiveWorkbook();
+    const activeWorkbook = useRootWorkbenchWorkbook();
     const loadingWorkbook = useSheetLoadingWorkbook();
     const workbook = loadingWorkbook ?? activeWorkbook;
     const activeEmbedTab = useActiveSheetEmbedTabData(workbook);
     const injector = useDependency(Injector);
     const activeWorkbookEmbeddedRender = useActiveWorkbookIsEmbeddedRender(workbook);
+    const focusedUnitType = useFocusedUnitType();
+    // An active embed tab remains the root Sheet surface; other product focus hides the Sheet workbench.
+    const rootWorkbenchOwnsSheet = activeEmbedTab != null || focusedUnitType == null || focusedUnitType === UniverInstanceType.UNIVER_SHEET;
 
     // We use string keys to avoid a hard dependency on sheets-shape-ui.
     const ShapeTextEditorContainer = componentManager.get('SheetShapeTextEditorContainer') ?? componentManager.get('ShapeTextEditorContainer');
 
     useEffect(() => {
-        if (!workbook || isLoading || activeEmbedTab || activeWorkbookEmbeddedRender) {
+        if (!workbook || isLoading || activeEmbedTab || activeWorkbookEmbeddedRender || !rootWorkbenchOwnsSheet) {
             return;
         }
 
@@ -176,9 +182,10 @@ export function RenderSheetContent() {
         instanceService.setCurrentUnitForType(workbook.getUnitId());
         instanceService.focusUnit(workbook.getUnitId());
         tryGetSheetEmbedRuntimeService(injector)?.clearTab();
-    }, [activeEmbedTab, activeWorkbookEmbeddedRender, injector, isLoading, workbook]);
+    }, [activeEmbedTab, activeWorkbookEmbeddedRender, injector, isLoading, rootWorkbenchOwnsSheet, workbook]);
 
     if (!workbook) return null;
+    if (!rootWorkbenchOwnsSheet) return null;
     if (isLoading) return isPreviewReady ? null : <SheetLoadingSkeleton />;
     if (activeWorkbookEmbeddedRender) return null;
     if (activeEmbedTab && workbook) {
@@ -289,13 +296,62 @@ function RenderSheetEmbedTabHost(props: { workbook: Workbook; worksheet: Workshe
 
 function useActiveWorkbookIsEmbeddedRender(workbook: Workbook | null): boolean {
     const univerInstanceService = useDependency(IUniverInstanceService);
+    const renderManagerService = useDependency(IRenderManagerService);
+    const injector = useDependency(Injector);
+    const runtimeFocusCoordinator = injector.has(ISheetEmbedRuntimeFocusCoordinator)
+        ? injector.get(ISheetEmbedRuntimeFocusCoordinator)
+        : undefined;
+    const renderLifecycle = useObservable(
+        () => merge(
+            renderManagerService.created$,
+            renderManagerService.disposed$,
+            runtimeFocusCoordinator?.runtimeSessionChanged$ ?? EMPTY
+        ),
+        null,
+        false,
+        [renderManagerService, runtimeFocusCoordinator]
+    );
     return useMemo(() => {
+        void renderLifecycle;
         if (!workbook) {
             return false;
         }
 
-        return univerInstanceService.getUnitCreateOptions(workbook.getUnitId())?.embeddedRender === true;
-    }, [univerInstanceService, workbook]);
+        // Imported Units may gain embedded ownership only after their non-main renderer is created.
+        return runtimeFocusCoordinator?.resolveRuntimeScopeByChildUnitId(workbook.getUnitId()) != null ||
+            renderManagerService.getRenderUnitById(workbook.getUnitId())?.isMainScene === false ||
+            univerInstanceService.getUnitCreateOptions(workbook.getUnitId())?.embeddedRender === true;
+    }, [renderLifecycle, renderManagerService, runtimeFocusCoordinator, univerInstanceService, workbook]);
+}
+
+function useRootWorkbenchWorkbook(): Workbook | null {
+    const activeWorkbook = useActiveWorkbook();
+    const injector = useDependency(Injector);
+    const instanceService = useDependency(IUniverInstanceService);
+    const runtimeFocusCoordinator = injector.has(ISheetEmbedRuntimeFocusCoordinator)
+        ? injector.get(ISheetEmbedRuntimeFocusCoordinator)
+        : undefined;
+    const runtimeSessionLifecycle = useObservable(
+        () => runtimeFocusCoordinator?.runtimeSessionChanged$ ?? EMPTY,
+        null,
+        false,
+        [runtimeFocusCoordinator]
+    );
+
+    return useMemo(() => {
+        void runtimeSessionLifecycle;
+        if (!activeWorkbook || !runtimeFocusCoordinator) {
+            return activeWorkbook;
+        }
+
+        const runtimeScope = runtimeFocusCoordinator.resolveRuntimeScopeByChildUnitId(activeWorkbook.getUnitId());
+        if (!runtimeScope?.hostUnitId) {
+            return activeWorkbook;
+        }
+
+        // Same-type embeds keep the host workbook in the root workbench while the child uses scoped services.
+        return instanceService.getUnit<Workbook>(runtimeScope.hostUnitId, UniverInstanceType.UNIVER_SHEET) ?? activeWorkbook;
+    }, [activeWorkbook, instanceService, runtimeFocusCoordinator, runtimeSessionLifecycle]);
 }
 
 function useFocusedUnitType(): UniverInstanceType | null {

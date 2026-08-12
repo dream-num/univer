@@ -109,18 +109,27 @@ export abstract class SingleUnitUIController extends Disposable {
 
     private _currentRenderId: string | null = null;
     private _changeRenderUnit(rendererId: string, contentElement: HTMLElement): boolean {
-        if (this._currentRenderId === rendererId) return false;
-        if (this._instanceService.getUnitCreateOptions(rendererId)?.embeddedRender) return false;
+        const renderer = this._renderManagerService.getRenderUnitById(rendererId);
+        if (
+            !renderer ||
+            !renderer.unitId ||
+            renderer.isMainScene === false ||
+            isInternalEditorID(renderer.unitId)
+        ) {
+            return false;
+        }
 
-        const renderer = this._renderManagerService.getRenderUnitById(rendererId)!;
-        if (!renderer || !renderer.unitId || isInternalEditorID(renderer.unitId)) return false;
-
-        const currentRenderer = this._currentRenderId
-            ? this._renderManagerService.getRenderUnitById(this._currentRenderId)
-            : null;
-        currentRenderer?.deactivate();
-        currentRenderer?.engine.unmount();
         const canvas = renderer.engine.getCanvasElement();
+        const isCurrentRenderer = this._currentRenderId === rendererId;
+        if (isCurrentRenderer && contentElement.contains(canvas)) return false;
+
+        if (!isCurrentRenderer) {
+            const currentRenderer = this._currentRenderId
+                ? this._renderManagerService.getRenderUnitById(this._currentRenderId)
+                : null;
+            currentRenderer?.deactivate();
+            currentRenderer?.engine.unmount();
+        }
         if (!contentElement.contains(canvas)) {
             renderer.engine.mount(contentElement);
         }

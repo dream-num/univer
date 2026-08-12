@@ -224,6 +224,50 @@ describe('Glyph utils test cases', () => {
             expect(measuredFont).toContain('24pt');
             measureSpy.mockRestore();
         });
+
+        it('centers the custom checkbox shape on the measured marker metrics', () => {
+            const measureSpy = vi.spyOn(FontCache, 'getTextSize').mockReturnValue({
+                width: 16,
+                ba: 18,
+                bd: 2,
+                aba: 18,
+                abd: 2,
+                sp: 0,
+                sbr: 0,
+                sbo: 0,
+                spr: 0,
+                spo: 0,
+            });
+
+            const bulletGlyph = createSkeletonBulletGlyph(
+                {
+                    ts: { fs: 20 },
+                    bBox: { ba: 18, bd: 2 },
+                } as IDocumentSkeletonGlyph,
+                {
+                    listId: 'check-list',
+                    symbol: '\u2610',
+                    ts: { fs: 20 },
+                    startIndexItem: 1,
+                },
+                10
+            );
+
+            expect(bulletGlyph.width).toBe(30);
+            expect(bulletGlyph.bBox).toMatchObject({
+                width: 24,
+                ba: 20,
+                bd: 4,
+                aba: 20,
+                abd: 4,
+            });
+            expect(bulletGlyph.bBox.ba + bulletGlyph.bBox.bd).toBe(24);
+            expect(bulletGlyph.bBox.aba + bulletGlyph.bBox.abd).toBe(24);
+            expect((bulletGlyph.bBox.bd - bulletGlyph.bBox.ba) / 2).toBe(-8);
+            expect((bulletGlyph.bBox.abd - bulletGlyph.bBox.aba) / 2).toBe(-8);
+            expect(bulletGlyph.width).toBeGreaterThanOrEqual(bulletGlyph.bBox.width);
+            measureSpy.mockRestore();
+        });
     });
 
     describe('test font compatibility policy', () => {

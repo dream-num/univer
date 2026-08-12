@@ -311,13 +311,23 @@ describe('docs font and baseline extension', () => {
 
         const checkedGlyph = createGlyph('\u2611', {
             glyphType: GlyphType.LIST,
+            bBox: {
+                width: 18,
+                aba: 14,
+                abd: 4,
+            },
             ts: {
                 fs: 10,
                 cl: { rgb: '#111111' },
             },
         });
         extension.draw(TestContext, DEFAULT_SCALE, checkedGlyph);
-        expect(checkSpy).toHaveBeenCalled();
+        expect(TestContext.translate).toHaveBeenCalledWith(29.5, 35.5);
+        expect(checkSpy).toHaveBeenCalledWith(TestContext, {
+            width: 18,
+            height: 18,
+            checked: true,
+        });
 
         extension.clearCache();
         extension.extensionOffset = {

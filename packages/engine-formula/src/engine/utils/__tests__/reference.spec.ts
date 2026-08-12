@@ -56,6 +56,16 @@ describe('Test Reference', () => {
             tableName: 'SalesTable',
             columnStruct: '[Amount]',
         });
+        expect(splitTableStructuredRef('[Urban Nomad | Official showcase]!Inventory[Safety stock]')).toEqual({
+            unitQualifier: 'Urban Nomad | Official showcase',
+            tableName: 'Inventory',
+            columnStruct: '[Safety stock]',
+        });
+        expect(splitTableStructuredRef('[Base name with ]] bracket]!Inventory[Safety stock]')).toEqual({
+            unitQualifier: 'Base name with ] bracket',
+            tableName: 'Inventory',
+            columnStruct: '[Safety stock]',
+        });
     });
 
     it('getAbsoluteRefTypeWithSingleString', () => {

@@ -501,6 +501,10 @@ export function splitTableStructuredRef(ref: string) {
         } else if (!quoteOpen && char === '[') {
             bracketDepth++;
         } else if (!quoteOpen && char === ']') {
+            if (bracketDepth > 0 && tableRef[i + 1] === ']') {
+                i++;
+                continue;
+            }
             bracketDepth--;
         } else if (!quoteOpen && bracketDepth === 0 && char === '!') {
             qualifierEnd = i;
@@ -517,6 +521,7 @@ export function splitTableStructuredRef(ref: string) {
         if (unitQualifier.startsWith('[') && unitQualifier.endsWith(']')) {
             unitQualifier = unitQualifier.slice(1, -1);
         }
+        unitQualifier = unitQualifier.replaceAll(']]', ']');
         unitQualifier = unquoteSheetName(unitQualifier);
     } else if (tableRef.startsWith('[')) {
         const legacyQualifierEnd = tableRef.indexOf(']');

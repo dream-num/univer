@@ -27,7 +27,7 @@ export function isUnitEmbeddedRender(
     instanceService: Pick<IUniverInstanceService, 'getUnitCreateOptions'>,
     renderManagerService: Pick<IRenderManagerService, 'getRenderUnitById'>
 ): boolean {
-    // TODO(@ai-review): Confirm renderer ownership is the canonical signal once a preloaded Unit is mounted by an embed host.
+    // Renderer ownership covers imported or preloaded Units that lack embedded creation metadata.
     return renderManagerService.getRenderUnitById(unitId)?.isMainScene === false ||
         instanceService.getUnitCreateOptions(unitId)?.embeddedRender === true;
 }
@@ -132,7 +132,7 @@ export abstract class SingleUnitUIController extends Disposable {
         const canvas = renderer.engine.getCanvasElement();
         if (this._currentRenderId === rendererId) {
             if (!contentElement.contains(canvas)) {
-                // TODO(@ai-review): Confirm fullscreen/product teardown is the only path that can detach the cached main renderer before it is focused again.
+                // Fullscreen or product teardown can detach a cached main renderer without changing its id.
                 renderer.engine.mount(contentElement);
                 renderer.activate();
                 return true;

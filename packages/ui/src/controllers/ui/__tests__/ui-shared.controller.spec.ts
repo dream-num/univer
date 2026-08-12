@@ -168,7 +168,6 @@ describe('SingleUnitUIController', () => {
 
         render2.engine.getCanvasElement().remove();
         focused$.next('render-2');
-        // TODO(@ai-review): This models a fullscreen teardown detaching the cached host renderer before host refocus completes.
         expect(render2.engine.mount).toHaveBeenCalledTimes(2);
 
         focused$.next('render-3');
@@ -265,7 +264,6 @@ describe('SingleUnitUIController', () => {
         const instanceService = {
             focused$,
             getFocusedUnit: vi.fn(() => ({ getUnitId: () => 'embedded-render' })),
-            // TODO(@ai-review): Keep this null to model imported/preloaded Units whose embedded ownership exists only on the renderer.
             getUnitCreateOptions: vi.fn(() => null),
         };
 

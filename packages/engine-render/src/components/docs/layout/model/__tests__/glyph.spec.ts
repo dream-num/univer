@@ -239,7 +239,6 @@ describe('Glyph utils test cases', () => {
                 spo: 0,
             });
 
-            // TODO(@ai-review): Verify that this regression case covers the largest supported checklist marker size used by imported documents.
             const bulletGlyph = createSkeletonBulletGlyph(
                 {
                     ts: { fs: 20 },

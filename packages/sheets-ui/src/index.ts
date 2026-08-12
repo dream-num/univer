@@ -251,7 +251,6 @@ export { SELECTION_SHAPE_DEPTH } from './services/selection/const';
 export { SelectionControl, SelectionControl as SelectionShape } from './services/selection/selection-control';
 export { SheetSelectionRenderService } from './services/selection/selection-render.service';
 export { SelectionShapeExtension } from './services/selection/selection-shape-extension';
-// TODO(@ai-review): Is SheetBarService the minimal public service required for isolated embedded Sheet chrome runtimes?
 export { ISheetBarService, SheetBarService } from './services/sheet-bar/sheet-bar.service';
 export {
     ISheetEmbedFloatingGeometryService,

@@ -366,7 +366,7 @@ function _getCheckboxBoundingBox(
     const fontExtra = size - Math.abs(boundingBox.ba) - Math.abs(boundingBox.bd);
     const actualExtra = size - Math.abs(boundingBox.aba) - Math.abs(boundingBox.abd);
 
-    // TODO(@ai-review): Verify that resizing around the measured glyph center matches Word across supported fonts.
+    // Expand equally above and below the measured glyph so its font-relative center stays stable.
     return {
         ...boundingBox,
         width: size,

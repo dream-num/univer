@@ -434,7 +434,7 @@ export class FontAndBaseLine extends docExtension {
                 const left = spanPointWithFont.x;
                 const top = spanPointWithFont.y - glyph.bBox.aba;
                 const BORDER_WIDTH = 1;
-                // TODO(@ai-review): Compare the custom checkbox baseline against Word for fonts whose checkbox glyph has a non-zero descent.
+                // The layout bbox already centers the custom shape on the marker's measured font metrics.
                 ctx.translate(left - BORDER_WIDTH / 2, top - BORDER_WIDTH / 2);
                 CheckboxShape.drawWith(ctx, {
                     width: size,

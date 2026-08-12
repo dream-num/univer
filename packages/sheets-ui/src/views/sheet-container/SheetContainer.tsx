@@ -167,7 +167,7 @@ export function RenderSheetContent() {
     const injector = useDependency(Injector);
     const activeWorkbookEmbeddedRender = useActiveWorkbookIsEmbeddedRender(workbook);
     const focusedUnitType = useFocusedUnitType();
-    // TODO(@ai-review): Does retaining an active embed-tab host while hiding ordinary cross-product preloads preserve both tab and root-workbench ownership?
+    // An active embed tab remains the root Sheet surface; other product focus hides the Sheet workbench.
     const rootWorkbenchOwnsSheet = activeEmbedTab != null || focusedUnitType == null || focusedUnitType === UniverInstanceType.UNIVER_SHEET;
 
     // We use string keys to avoid a hard dependency on sheets-shape-ui.
@@ -317,7 +317,7 @@ function useActiveWorkbookIsEmbeddedRender(workbook: Workbook | null): boolean {
             return false;
         }
 
-        // TODO(@ai-review): Verify imported workbooks remain hidden from the root workbench after their non-main embed renderer is created.
+        // Imported Units may gain embedded ownership only after their non-main renderer is created.
         return runtimeFocusCoordinator?.resolveRuntimeScopeByChildUnitId(workbook.getUnitId()) != null ||
             isUnitEmbeddedRender(workbook.getUnitId(), univerInstanceService, renderManagerService);
     }, [renderLifecycle, renderManagerService, runtimeFocusCoordinator, univerInstanceService, workbook]);
@@ -348,7 +348,7 @@ function useRootWorkbenchWorkbook(): Workbook | null {
             return activeWorkbook;
         }
 
-        // TODO(@ai-review): Confirm same-type Sheet embeds keep rendering their host workbook while scoped child services own editing.
+        // Same-type embeds keep the host workbook in the root workbench while the child uses scoped services.
         return instanceService.getUnit<Workbook>(runtimeScope.hostUnitId, UniverInstanceType.UNIVER_SHEET) ?? activeWorkbook;
     }, [activeWorkbook, instanceService, runtimeFocusCoordinator, runtimeSessionLifecycle]);
 }

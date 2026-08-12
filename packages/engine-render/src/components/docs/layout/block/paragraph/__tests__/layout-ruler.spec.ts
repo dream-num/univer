@@ -157,7 +157,6 @@ describe('layout-ruler', () => {
             },
         } as unknown as IParagraphConfig;
 
-        // TODO(@ai-review): Confirm that advancing a wide marker to 42 while retaining hanging 21 matches the intended Word tab-stop behavior.
         const result = layoutParagraph(
             ctx,
             shapedTextList[0].glyphs,

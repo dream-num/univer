@@ -151,7 +151,7 @@ export function layoutParagraph(
 
             const hangingWidth = getNumberUnitValue(paragraphConfig.paragraphStyle.hanging, charSpaceApply);
             if (hangingWidth > 0) {
-                // TODO(@ai-review): Confirm that list-default hanging may expand for oversized markers while a direct paragraph hanging remains authoritative.
+                // Direct paragraph hanging is authored layout; the list default is only a minimum marker width.
                 bulletGlyph.width = directParagraphHanging == null
                     ? Math.max(bulletGlyph.width, hangingWidth)
                     : hangingWidth;

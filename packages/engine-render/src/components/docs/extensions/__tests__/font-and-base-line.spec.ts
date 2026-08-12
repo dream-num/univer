@@ -322,7 +322,6 @@ describe('docs font and baseline extension', () => {
             },
         });
         extension.draw(TestContext, DEFAULT_SCALE, checkedGlyph);
-        // TODO(@ai-review): Verify that the draw assertion locks the custom checkbox to its layout bbox rather than its former font-size-only dimensions.
         expect(TestContext.translate).toHaveBeenCalledWith(29.5, 35.5);
         expect(checkSpy).toHaveBeenCalledWith(TestContext, {
             width: 18,

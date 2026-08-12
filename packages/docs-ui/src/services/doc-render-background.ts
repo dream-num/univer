@@ -18,8 +18,11 @@ import type { ICanvasColorService } from '@univerjs/engine-render';
 import { DocumentFlavor } from '@univerjs/core';
 
 const DOC_TRADITIONAL_WORKSPACE_BACKGROUND_COLOR = 'var(--univer-gray-100)';
-const DOC_MODERN_WORKSPACE_BACKGROUND_COLOR = 'var(--univer-gray-50)';
+const DOC_MODERN_WORKSPACE_BACKGROUND_COLOR = 'var(--univer-white)';
+const DOC_UNSPECIFIED_WORKSPACE_BACKGROUND_COLOR = 'var(--univer-gray-100)';
 const DOC_EDITOR_INTERNAL_BACKGROUND_COLOR = 'transparent';
+const DOC_TRADITIONAL_WORKSPACE_BACKGROUND_TOKEN = 'gray.100';
+const DOC_MODERN_WORKSPACE_BACKGROUND_TOKEN = 'white';
 
 export interface IResolveDocRenderBackgroundOptions {
     documentFlavor?: DocumentFlavor;
@@ -44,10 +47,24 @@ export function resolveDocRenderBackground(options: IResolveDocRenderBackgroundO
         };
     }
 
+    if (editorBackgroundColor != null) {
+        return {
+            canvasElementBackgroundColor: canvasColorService?.getRenderColor(editorBackgroundColor) ?? editorBackgroundColor,
+            docBackgroundFillColor: undefined,
+        };
+    }
+
+    if (documentFlavor !== DocumentFlavor.TRADITIONAL && documentFlavor !== DocumentFlavor.MODERN) {
+        return {
+            canvasElementBackgroundColor: backgroundColor,
+            docBackgroundFillColor: undefined,
+        };
+    }
+
+    const renderBackgroundColor = getDefaultDocCanvasBackgroundToken(documentFlavor);
+
     return {
-        canvasElementBackgroundColor: editorBackgroundColor == null
-            ? backgroundColor
-            : canvasColorService?.getRenderColor(backgroundColor) ?? backgroundColor,
+        canvasElementBackgroundColor: canvasColorService?.getRenderColor(renderBackgroundColor) ?? backgroundColor,
         docBackgroundFillColor: undefined,
     };
 }
@@ -57,7 +74,18 @@ export function getDefaultDocCanvasBackgroundColor(documentFlavor?: DocumentFlav
         return DOC_EDITOR_INTERNAL_BACKGROUND_COLOR;
     }
 
+    switch (documentFlavor) {
+        case DocumentFlavor.MODERN:
+            return DOC_MODERN_WORKSPACE_BACKGROUND_COLOR;
+        case DocumentFlavor.TRADITIONAL:
+            return DOC_TRADITIONAL_WORKSPACE_BACKGROUND_COLOR;
+        default:
+            return DOC_UNSPECIFIED_WORKSPACE_BACKGROUND_COLOR;
+    }
+}
+
+function getDefaultDocCanvasBackgroundToken(documentFlavor: DocumentFlavor.TRADITIONAL | DocumentFlavor.MODERN) {
     return documentFlavor === DocumentFlavor.MODERN
-        ? DOC_MODERN_WORKSPACE_BACKGROUND_COLOR
-        : DOC_TRADITIONAL_WORKSPACE_BACKGROUND_COLOR;
+        ? DOC_MODERN_WORKSPACE_BACKGROUND_TOKEN
+        : DOC_TRADITIONAL_WORKSPACE_BACKGROUND_TOKEN;
 }

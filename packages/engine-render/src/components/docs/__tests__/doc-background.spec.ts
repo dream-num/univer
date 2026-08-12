@@ -66,6 +66,53 @@ describe('DocBackground', () => {
         vi.restoreAllMocks();
     });
 
+    it('draws traditional workspaces with gray 100 and pages with white', () => {
+        const background = DocBackground.create('traditional-background', createSkeleton([createPage()]));
+        background.resize(320, 180);
+        const rectDraw = vi.spyOn(Rect, 'drawWith').mockImplementation(() => {});
+        vi.spyOn(Path, 'drawWith').mockImplementation(() => {});
+
+        background.draw(createCtx());
+
+        expect(rectDraw.mock.calls[0][1]).toMatchObject({ fill: 'gray.100' });
+        expect(rectDraw.mock.calls[1][1]).toMatchObject({ fill: 'white' });
+
+        background.dispose();
+    });
+
+    it('draws modern workspaces with white', () => {
+        const background = DocBackground.create(
+            'modern-background',
+            createSkeleton([createPage()], DocumentFlavor.MODERN)
+        );
+        background.resize(320, 180);
+        const rectDraw = vi.spyOn(Rect, 'drawWith').mockImplementation(() => {});
+
+        background.draw(createCtx());
+
+        expect(rectDraw).toHaveBeenCalledTimes(1);
+        expect(rectDraw.mock.calls[0][1]).toMatchObject({ fill: 'white' });
+
+        background.dispose();
+    });
+
+    it('keeps unspecified documents on the legacy gray workspace and page fills', () => {
+        const background = DocBackground.create(
+            'unspecified-background',
+            createSkeleton([createPage()], DocumentFlavor.UNSPECIFIED)
+        );
+        background.resize(320, 180);
+        const rectDraw = vi.spyOn(Rect, 'drawWith').mockImplementation(() => {});
+        vi.spyOn(Path, 'drawWith').mockImplementation(() => {});
+
+        background.draw(createCtx());
+
+        expect(rectDraw.mock.calls[0][1]).toMatchObject({ fill: 'gray.100' });
+        expect(rectDraw.mock.calls[1][1]).toMatchObject({ fill: 'gray.50' });
+
+        background.dispose();
+    });
+
     it('positions multiple traditional pages horizontally and draws their margin identifiers', () => {
         const background = DocBackground.create(
             'horizontal-background',

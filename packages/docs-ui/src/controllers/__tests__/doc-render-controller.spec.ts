@@ -17,7 +17,7 @@
 import type { ICommandInfo, IExecutionOptions } from '@univerjs/core';
 import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DocumentFlavor } from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { DOCS_VIEW_KEY } from '../../basics/docs-view-key';
 import { DocRenderController } from '../render-controllers/doc.render-controller';
@@ -107,7 +107,8 @@ function createControllerFixture(options?: {
 }) {
     mockScrollBarProps.length = 0;
     const commandCallbacks: Array<(command: ICommandInfo, options?: IExecutionOptions) => void> = [];
-    const darkMode$ = new Subject<boolean>();
+    const darkMode$ = new BehaviorSubject<boolean>(false);
+    const currentTheme$ = new BehaviorSubject<unknown>({});
     const canvasElement = { style: {} as Record<string, string> };
     const canvasColorService = {
         getRenderColor: vi.fn((color: string) => color),
@@ -214,7 +215,7 @@ function createControllerFixture(options?: {
                 align: options?.fitToWidth?.align ?? 'center',
             })),
         },
-        { darkMode$ }
+        { currentTheme$, darkMode$ }
     );
 
     return {
@@ -223,6 +224,8 @@ function createControllerFixture(options?: {
         context,
         canvasElement,
         canvasColorService,
+        currentTheme$,
+        darkMode$,
         skeletonManager,
         pageLayoutService,
         selectionManager,
@@ -230,6 +233,43 @@ function createControllerFixture(options?: {
 }
 
 describe('doc render controller', () => {
+    it.each([
+        [DocumentFlavor.TRADITIONAL, 'gray.100'],
+        [DocumentFlavor.MODERN, 'white'],
+    ])('resolves the %s workspace background again when dark mode changes', (documentFlavor, backgroundToken) => {
+        const { canvasColorService, canvasElement, darkMode$ } = createControllerFixture({ documentFlavor });
+        canvasColorService.getRenderColor.mockImplementation((color: string) => `dark:${color}`);
+
+        darkMode$.next(true);
+
+        expect(canvasColorService.getRenderColor).toHaveBeenLastCalledWith(backgroundToken);
+        expect(canvasElement.style.backgroundColor).toBe(`dark:${backgroundToken}`);
+    });
+
+    it('keeps the unspecified workspace background unchanged when dark mode changes', () => {
+        const { canvasColorService, canvasElement, darkMode$ } = createControllerFixture({
+            documentFlavor: DocumentFlavor.UNSPECIFIED,
+        });
+        canvasColorService.getRenderColor.mockImplementation((color: string) => `dark:${color}`);
+
+        darkMode$.next(true);
+
+        expect(canvasColorService.getRenderColor).not.toHaveBeenCalled();
+        expect(canvasElement.style.backgroundColor).toBe('var(--univer-gray-100)');
+    });
+
+    it('resolves the workspace background again when the theme changes', () => {
+        const { canvasColorService, canvasElement, currentTheme$ } = createControllerFixture({
+            documentFlavor: DocumentFlavor.TRADITIONAL,
+        });
+        canvasColorService.getRenderColor.mockImplementation((color: string) => `theme:${color}`);
+
+        currentTheme$.next({});
+
+        expect(canvasColorService.getRenderColor).toHaveBeenLastCalledWith('gray.100');
+        expect(canvasElement.style.backgroundColor).toBe('theme:gray.100');
+    });
+
     it('disables only the horizontal scrollbar for container-fitted embedded docs', () => {
         createControllerFixture({
             fitToWidth: {

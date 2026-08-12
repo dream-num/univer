@@ -31,6 +31,7 @@ import {
     isCjkLeftAlignedPunctuation,
     isCjkRightAlignedPunctuation,
 } from '../../../../basics/tools';
+import { getCheckboxShapeSize, isCheckboxGlyph } from '../../../../shape/checkbox';
 import {
     applyFontMetricCompatibility,
     getDocumentCompatibilityPolicy,
@@ -314,7 +315,11 @@ export function createSkeletonBulletGlyph(
         },
     };
     const fontStyle = getFontStyleString(textStyle);
-    const boundingBox = FontCache.getTextSize(content, fontStyle);
+    const measuredBoundingBox = FontCache.getTextSize(content, fontStyle);
+    const checkboxSize = isCheckboxGlyph(content) ? getCheckboxShapeSize(textStyle.fs) : null;
+    const boundingBox = checkboxSize == null
+        ? measuredBoundingBox
+        : _getCheckboxBoundingBox(measuredBoundingBox, checkboxSize);
     const contentWidth = boundingBox.width;
     // When text also needs to align to the grid, process it. LINES default reference is the global font size of the doc
 
@@ -334,7 +339,7 @@ export function createSkeletonBulletGlyph(
         }
     }
 
-    const bBox = _getMaxBoundingBox(glyph, boundingBox);
+    const bBox = checkboxSize == null ? _getMaxBoundingBox(glyph, boundingBox) : boundingBox;
 
     return {
         content,
@@ -351,6 +356,24 @@ export function createSkeletonBulletGlyph(
         // Deliberately set to 0 so that there is no need to count when calculating the cursor.
         count: 0,
         raw: content,
+    };
+}
+
+function _getCheckboxBoundingBox(
+    boundingBox: IDocumentSkeletonBoundingBox,
+    size: number
+): IDocumentSkeletonBoundingBox {
+    const fontExtra = size - Math.abs(boundingBox.ba) - Math.abs(boundingBox.bd);
+    const actualExtra = size - Math.abs(boundingBox.aba) - Math.abs(boundingBox.abd);
+
+    // TODO(@ai-review): Verify that resizing around the measured glyph center matches Word across supported fonts.
+    return {
+        ...boundingBox,
+        width: size,
+        ba: Math.abs(boundingBox.ba) + fontExtra / 2,
+        bd: Math.abs(boundingBox.bd) + fontExtra / 2,
+        aba: Math.abs(boundingBox.aba) + actualExtra / 2,
+        abd: Math.abs(boundingBox.abd) + actualExtra / 2,
     };
 }
 

@@ -25,7 +25,7 @@ import { cjk } from '../../../basics/cjk-regexp';
 import { COLOR_BLACK_RGB } from '../../../basics/const';
 import { resolveGlowEffect, resolveOuterShadowEffect } from '../../../basics/drawing-effect';
 import { Vector2 } from '../../../basics/vector2';
-import { CheckboxShape } from '../../../shape';
+import { CheckboxShape, isCheckboxGlyph } from '../../../shape/checkbox';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../extension';
 import { docExtension } from '../doc-extension';
 
@@ -428,23 +428,18 @@ export class FontAndBaseLine extends docExtension {
             ctx.fillText(content, 0, 0);
             ctx.restore();
         } else {
-            const CHECKED_GLYPH = '\u2611';
-            const UNCHECKED_GLYPH = '\u2610';
-            if ((content === UNCHECKED_GLYPH || content === CHECKED_GLYPH) && glyph.glyphType === GlyphType.LIST) {
-                const size = Math.ceil((glyph.ts?.fs ?? 12) * 1.2);
+            if (isCheckboxGlyph(content) && glyph.glyphType === GlyphType.LIST) {
+                const size = glyph.bBox.width;
                 ctx.save();
-                const fontHeight = glyph.bBox.aba - glyph.bBox.abd;
-                const bottom = spanPointWithFont.y;
-                const top = bottom - fontHeight;
                 const left = spanPointWithFont.x;
-                const topOffset = top + (bottom - top - size) / 2;
-                const leftOffset = left;
+                const top = spanPointWithFont.y - glyph.bBox.aba;
                 const BORDER_WIDTH = 1;
-                ctx.translate(leftOffset - BORDER_WIDTH / 2, topOffset - BORDER_WIDTH / 2);
+                // TODO(@ai-review): Compare the custom checkbox baseline against Word for fonts whose checkbox glyph has a non-zero descent.
+                ctx.translate(left - BORDER_WIDTH / 2, top - BORDER_WIDTH / 2);
                 CheckboxShape.drawWith(ctx, {
                     width: size,
                     height: size,
-                    checked: content === CHECKED_GLYPH,
+                    checked: content === '\u2611',
                 });
                 ctx.restore();
             } else {

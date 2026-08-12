@@ -139,6 +139,37 @@ describe('layout-ruler', () => {
         expect(result[0].sections[0].columns[0].lines[0].divides[0].glyphGroup[0].width).toBe(21);
     });
 
+    it('does not compress a wide list marker into the hanging indent', () => {
+        const { ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed('Item');
+        const shapedTextList = shaping(ctx, paragraphNode.content!, ctx.viewModel, paragraphNode, sectionBreakConfig);
+        const paragraphConfig = {
+            paragraphIndex: paragraphNode.endIndex,
+            paragraphStyle: {},
+            bulletSkeleton: {
+                listId: 'wide-list',
+                symbol: '12345',
+                ts: { ff: 'Arial', fs: 9 },
+                startIndexItem: 1,
+                paragraphProperties: {
+                    hanging: { v: 21 },
+                    indentStart: { v: 0 },
+                },
+            },
+        } as unknown as IParagraphConfig;
+
+        // TODO(@ai-review): Confirm that advancing a wide marker to 42 while retaining hanging 21 matches the intended Word tab-stop behavior.
+        const result = layoutParagraph(
+            ctx,
+            shapedTextList[0].glyphs,
+            [curPage],
+            sectionBreakConfig,
+            paragraphConfig,
+            true
+        );
+
+        expect(result[0].sections[0].columns[0].lines[0].divides[0].glyphGroup[0].width).toBe(42);
+    });
+
     it('preserves bullet styles from a real PowerPoint import snapshot', () => {
         const expectedCases = {
             'case-A': {

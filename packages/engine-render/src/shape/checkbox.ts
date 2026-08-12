@@ -25,6 +25,15 @@ export interface ICheckboxShapeProps extends IShapeProps {
 
 export const CHECK_OBJECT_ARRAY = ['checked'];
 
+// TODO(@ai-review): Confirm that Docs checklist markers remain the only consumers that interpret these Unicode glyphs as CheckboxShape instances.
+export function isCheckboxGlyph(content: string): boolean {
+    return content === '\u2610' || content === '\u2611';
+}
+
+export function getCheckboxShapeSize(fontSize = 12): number {
+    return Math.ceil(fontSize * 1.2);
+}
+
 export class CheckboxShape extends Shape<ICheckboxShapeProps> {
     _checked = false;
 

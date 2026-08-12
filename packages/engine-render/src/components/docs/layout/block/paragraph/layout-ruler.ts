@@ -130,6 +130,7 @@ export function layoutParagraph(
         // elementIndex === 0 means the first character at the beginning of a paragraph, needs a new line to distinguish from the previous paragraph
         if (renderBullet && paragraphConfig.bulletSkeleton) {
             const { bulletSkeleton, paragraphStyle = {} } = paragraphConfig;
+            const directParagraphHanging = paragraphStyle.hanging;
             // If it is the beginning of a paragraph, bullet needs to be added
             const { gridType = GridType.LINES, charSpace = 0, defaultTabStop = 10.5 } = sectionBreakConfig;
 
@@ -150,7 +151,10 @@ export function layoutParagraph(
 
             const hangingWidth = getNumberUnitValue(paragraphConfig.paragraphStyle.hanging, charSpaceApply);
             if (hangingWidth > 0) {
-                bulletGlyph.width = hangingWidth;
+                // TODO(@ai-review): Confirm that list-default hanging may expand for oversized markers while a direct paragraph hanging remains authoritative.
+                bulletGlyph.width = directParagraphHanging == null
+                    ? Math.max(bulletGlyph.width, hangingWidth)
+                    : hangingWidth;
             }
 
             _lineOperator(ctx, [bulletGlyph, ...glyphGroup], pages, sectionBreakConfig, paragraphConfig, isParagraphFirstShapedText, breakPointType);

@@ -315,8 +315,14 @@ export interface IBaseSnapshot {
 
 export interface ITableSnapshot {
     id: TableId;
+    /** Human-readable display name. Do not use it as a structured-reference identifier. */
     name: string;
-    /** Stable canonical name used by formulas and exported structured references. */
+    /**
+     * Persisted stable identifier used by formulas and exported structured references.
+     *
+     * Historical snapshots may omit this field. Use `getBaseFormulaTableName()` when a
+     * resolved formula identifier is required.
+     */
     formulaName?: string;
     fields: Record<FieldId, IFieldSnapshot>;
     fieldOrder: FieldId[];

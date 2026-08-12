@@ -20,6 +20,15 @@ import { CellReferenceObject } from '../cell-reference-object';
 import { RangeReferenceObject } from '../range-reference-object';
 
 describe('CellReferenceObject', () => {
+    it('preserves a directly assigned sheet ID when no sheet name needs resolution', () => {
+        const reference = new CellReferenceObject('A1');
+        reference.setForcedSheetIdDirect('base-table-id');
+
+        reference.setForcedSheetId({});
+
+        expect(reference.getForcedSheetId()).toBe('base-table-id');
+    });
+
     it('should allow blank cells inside the Excel grid even when they are outside snapshot row data', () => {
         const reference = new CellReferenceObject('Sheet2!A151');
 

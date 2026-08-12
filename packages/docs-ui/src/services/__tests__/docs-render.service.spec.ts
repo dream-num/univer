@@ -162,6 +162,7 @@ describe('DocsRenderService', () => {
         expect(renderManagerService.createdUnitIds).toEqual(['doc-existing']);
         expect(renderManagerService.canvases.get('doc-existing')?.id).toBe('univer-doc-main-canvas');
         expect(renderManagerService.canvases.get('doc-existing')?.contextId).toBe('univer-doc-main-canvas');
+        expect(renderManagerService.canvases.get('doc-existing')?.style.backgroundColor).toBe('var(--univer-white)');
         const editorDoc = new DocumentDataModel({
             id: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
             documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },

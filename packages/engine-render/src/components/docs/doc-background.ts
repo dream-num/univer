@@ -25,7 +25,8 @@ import { DocComponent } from './doc-component';
 import { Liquid } from './liquid';
 
 const PAGE_STROKE_COLOR = 'gray.200';
-const PAGE_FILL_COLOR = 'gray.50';
+const PAGE_FILL_COLOR = 'white';
+const UNSPECIFIED_PAGE_FILL_COLOR = 'gray.50';
 const DOCS_WORKSPACE_FILL_COLOR = 'gray.100';
 const MARGIN_STROKE_COLOR = 'gray.300';
 
@@ -122,7 +123,7 @@ export class DocBackground extends DocComponent {
                 height: pageHeight ?? height,
                 strokeWidth: 1,
                 stroke: this._pageStrokeColor ?? PAGE_STROKE_COLOR,
-                fill: this._pageFillColor ?? PAGE_FILL_COLOR,
+                fill: this._pageFillColor ?? (documentFlavor === DocumentFlavor.TRADITIONAL ? PAGE_FILL_COLOR : UNSPECIFIED_PAGE_FILL_COLOR),
                 zIndex: 3,
             };
 

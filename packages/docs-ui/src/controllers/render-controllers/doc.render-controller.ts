@@ -20,7 +20,7 @@ import type { DocumentSkeleton, IDocumentSkeletonPage, IRenderContext, IRenderMo
 import { DocumentFlavor, ICommandService, Inject, isInternalEditorID, IUniverInstanceService, RxDisposable, ThemeService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { DocBackground, Documents, IRenderManagerService, Layer, PageLayoutType, ScrollBar, Viewport } from '@univerjs/engine-render';
-import { takeUntil } from 'rxjs';
+import { combineLatest, takeUntil } from 'rxjs';
 import { DOCS_COMPONENT_BACKGROUND_LAYER_INDEX, DOCS_COMPONENT_DEFAULT_Z_INDEX, DOCS_COMPONENT_HEADER_LAYER_INDEX, DOCS_COMPONENT_MAIN_LAYER_INDEX, DOCS_VIEW_KEY, VIEWPORT_KEY } from '../../basics/docs-view-key';
 import { DocPageLayoutService } from '../../services/doc-page-layout.service';
 import { resolveDocRenderBackground } from '../../services/doc-render-background';
@@ -259,7 +259,7 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
     }
 
     private _initThemeListener() {
-        this.disposeWithMe(this._themeService.darkMode$.pipe(takeUntil(this.dispose$)).subscribe(() => {
+        this.disposeWithMe(combineLatest([this._themeService.currentTheme$, this._themeService.darkMode$]).pipe(takeUntil(this.dispose$)).subscribe(() => {
             this._syncCanvasBackground();
             this._context.mainComponent?.makeDirty(true);
             this._context.components.get(DOCS_VIEW_KEY.BACKGROUND)?.makeDirty(true);

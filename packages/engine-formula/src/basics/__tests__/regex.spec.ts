@@ -80,6 +80,7 @@ describe('Test ref regex', () => {
         expect(regexTestSingeRange('[1]Sheet1!A1')).toBe(true);
         expect(new RegExp(REFERENCE_TABLE_SINGLE_COLUMN_REGEX).test('[Book]Sheet1!A1')).toBe(false);
         expect(new RegExp(REFERENCE_TABLE_SINGLE_COLUMN_REGEX).test('[1]!SalesTable[Amount]')).toBe(true);
+        expect(new RegExp(REFERENCE_TABLE_SINGLE_COLUMN_REGEX).test('[Urban Nomad | Showcase]!Inventory[Safety stock]')).toBe(true);
         expect(new RegExp(REFERENCE_TABLE_SINGLE_COLUMN_REGEX).test('Sales.xlsx!SalesTable[Amount]')).toBe(true);
     });
 

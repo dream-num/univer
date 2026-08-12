@@ -72,7 +72,10 @@ const TABLE_MULTIPLE_COLUMN_REGEX = `${TABLE_CONTENT_REGEX}${RANGE_SYMBOL}${TABL
 
 // Display formulas use Book!Table[Column], OOXML formulas use [n]!Table[Column],
 // and the legacy runtime-id form [unitId]Table[Column] remains accepted.
-const TABLE_UNIT_QUALIFIER_REGEX = `(?:(?:${UNIT_NAME_REGEX}|'(?:[^']|'')+'|[^\\s!\\[\\]]+)!)?(?:${UNIT_NAME_REGEX})?`;
+// Product Unit display names have their own character semantics. Base names may contain
+// characters such as `|` while still being wrapped by `[...]!`.
+const TABLE_DISPLAY_UNIT_QUALIFIER_REGEX = '\\[([^\\[\\]]+)\\]';
+const TABLE_UNIT_QUALIFIER_REGEX = `(?:(?:${TABLE_DISPLAY_UNIT_QUALIFIER_REGEX}|'(?:[^']|'')+'|[^\\s!\\[\\]]+)!)?(?:${UNIT_NAME_REGEX})?`;
 
 export const REFERENCE_TABLE_ALL_COLUMN_REGEX = `^${TABLE_UNIT_QUALIFIER_REGEX}${TABLE_NAME_REGEX}$`;
 

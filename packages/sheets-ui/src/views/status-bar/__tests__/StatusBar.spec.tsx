@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-import type { IDisposable } from '@univerjs/core';
-import type { IMessageProps } from '@univerjs/design';
 import type { ReactElement } from 'react';
 import { Injector, LocaleService } from '@univerjs/core';
 import { FUNCTION_NAMES_MATH, FUNCTION_NAMES_STATISTICAL } from '@univerjs/engine-formula';
-import { IClipboardInterfaceService, IMessageService, RediContext } from '@univerjs/ui';
+import { RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { afterEach, describe, expect, it } from 'vitest';
 import { IStatusBarService, StatusBarService } from '../../../services/status-bar.service';
-import { CopyableStatisticItem } from '../CopyableStatisticItem';
+import { formatNumber } from '../CopyableStatisticItem';
 import { StatusBar } from '../StatusBar';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -32,47 +30,6 @@ import { StatusBar } from '../StatusBar';
 class TestLocaleService {
     t(key: string): string {
         return key;
-    }
-}
-
-class TestClipboardService {
-    readonly supportClipboard = true;
-
-    async writeText(text: string): Promise<void> {
-        TestState.copiedText = text;
-    }
-
-    async write(text: string): Promise<void> {
-        TestState.copiedText = text;
-    }
-
-    async readText(): Promise<string> {
-        return TestState.copiedText;
-    }
-
-    async read(): Promise<ClipboardItem[]> {
-        return [];
-    }
-}
-
-class TestMessageService {
-    show(options: IMessageProps): IDisposable {
-        TestState.messages.push(String(options.content));
-        return { dispose(): void {} };
-    }
-
-    remove(): void {}
-
-    removeAll(): void {}
-}
-
-class TestState {
-    static copiedText = '';
-    static messages: string[] = [];
-
-    static reset(): void {
-        this.copiedText = '';
-        this.messages = [];
     }
 }
 
@@ -88,8 +45,6 @@ function createStatusBarInjector() {
     const injector = new Injector();
     injector.add([LocaleService, { useClass: TestLocaleService as never }]);
     injector.add([IStatusBarService, { useClass: StatusBarService }]);
-    injector.add([IClipboardInterfaceService, { useClass: TestClipboardService as never }]);
-    injector.add([IMessageService, { useClass: TestMessageService as never }]);
 
     return injector;
 }
@@ -161,64 +116,73 @@ describe('StatusBar', () => {
 
     afterEach(() => {
         disposals.splice(0).forEach((dispose) => dispose());
-        TestState.reset();
         setViewportWidth(1024);
     });
 
-    it('renders filtered statistics from service state with number formatting', () => {
+    it('shows only sum by default with number formatting', () => {
         setViewportWidth(1024);
         const { container, injector, unmount } = renderWithDependencies(<StatusBar />);
         disposals.push(unmount);
 
         publishStatistics(injector);
 
-        expect(getByText(container, 'sheets-ui.statusbar.max: 12.50')).toBeTruthy();
-        expect(getByText(container, 'sheets-ui.statusbar.min: 3.00')).toBeTruthy();
         expect(getByText(container, 'sheets-ui.statusbar.sum: 15.50')).toBeTruthy();
-        expect(getByText(container, 'sheets-ui.statusbar.countA: 3')).toBeTruthy();
-        expect(getByText(container, 'sheets-ui.statusbar.count: 2')).toBeTruthy();
-        expect(getByText(container, 'sheets-ui.statusbar.average: 7.75')).toBeTruthy();
+        expect(queryByText(container, 'sheets-ui.statusbar.max: 12.50')).toBeNull();
+        expect(queryByText(container, 'sheets-ui.statusbar.average: 7.75')).toBeNull();
     });
 
-    it('keeps only the first available statistic in narrow viewports', () => {
-        setViewportWidth(640);
+    it('opens all available statistics and changes the displayed statistic', () => {
         const { container, injector, unmount } = renderWithDependencies(<StatusBar />);
         disposals.push(unmount);
 
         publishStatistics(injector);
 
-        expect(getByText(container, 'sheets-ui.statusbar.max: 12.50')).toBeTruthy();
-        expect(queryByText(container, 'sheets-ui.statusbar.min: 3.00')).toBeNull();
+        const statisticText = getByText(container, 'sheets-ui.statusbar.sum: 15.50');
+        act(() => statisticText.click());
+
+        expect(getByText(document.body, 'sheets-ui.statusbar.max: 12.50')).toBeTruthy();
+        expect(getByText(document.body, 'sheets-ui.statusbar.average: 7.75')).toBeTruthy();
+        expect(document.body.querySelector('[data-u-comp="status-bar-statistic-menu"]')?.className)
+            .toContain('univer-w-max');
+
+        act(() => {
+            getByText(document.body, 'sheets-ui.statusbar.average: 7.75').click();
+        });
+
+        expect(getByText(container, 'sheets-ui.statusbar.average: 7.75')).toBeTruthy();
         expect(queryByText(container, 'sheets-ui.statusbar.sum: 15.50')).toBeNull();
+    });
+
+    it('falls back to count when the selection has no numeric values', () => {
+        const { container, injector, unmount } = renderWithDependencies(<StatusBar />);
+        disposals.push(unmount);
+
+        act(() => {
+            injector.get(IStatusBarService).setState({
+                pattern: null,
+                values: [
+                    { func: FUNCTION_NAMES_STATISTICAL.COUNTA, value: 3 },
+                    { func: FUNCTION_NAMES_STATISTICAL.COUNT, value: 0 },
+                ],
+            });
+        });
+
+        expect(getByText(container, 'sheets-ui.statusbar.countA: 3')).toBeTruthy();
     });
 });
 
-describe('CopyableStatisticItem', () => {
-    const disposals: Array<() => void> = [];
+describe('formatNumber', () => {
+    it('does not force positive or negative large values into scientific notation', () => {
+        const value = 1_273_000_000;
 
-    afterEach(() => {
-        disposals.splice(0).forEach((dispose) => dispose());
-        TestState.reset();
-    });
-
-    it('copies the raw statistic value and reports a success message', async () => {
-        const { container, unmount } = renderWithDependencies(
-            <CopyableStatisticItem
-                name={FUNCTION_NAMES_MATH.SUM}
-                value={1234.5}
-                show
-                disable={false}
-                pattern="0.00"
-            />
-        );
-        disposals.push(unmount);
-
-        await act(async () => {
-            getByText(container, 'sheets-ui.statusbar.sum: 1234.50').dispatchEvent(new MouseEvent('click', { bubbles: true }));
-            await Promise.resolve();
-        });
-
-        expect(TestState.copiedText).toBe('1234.5');
-        expect(TestState.messages).toEqual(['sheets-ui.statusbar.copied']);
+        for (const largeValue of [value, -value]) {
+            expect(formatNumber({
+                name: FUNCTION_NAMES_MATH.SUM,
+                value: largeValue,
+                show: true,
+                disable: false,
+                pattern: null,
+            })).toBe(largeValue.toLocaleString());
+        }
     });
 });

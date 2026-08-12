@@ -181,6 +181,7 @@ export type { IFontFamilyItemProps } from './views/font-family/FontFamilyItem';
 export { FontSize } from './views/font-size/FontSize';
 export { FONT_SIZE_COMPONENT, FONT_SIZE_LIST, HEADING_LIST } from './views/font-size/interface';
 export * from './views/hooks/index';
+export { preventBrowserZoomInContainers } from './views/hooks/prevent-browser-zoom';
 export * from './views/index';
 export { type INotificationOptions } from './views/notification/Notification';
 export { ProgressBar } from './views/progress-bar/ProgressBar';

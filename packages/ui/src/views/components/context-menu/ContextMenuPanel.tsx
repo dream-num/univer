@@ -36,6 +36,7 @@ import { IMenuManagerService } from '../../../services/menu/menu-manager.service
 import { useDependency, useObservable } from '../../../utils/di';
 import { CustomLabel } from '../../custom-label/CustomLabel';
 import { useScrollYOverContainer } from '../../hooks/layout';
+import { preventBrowserZoomInContainers } from '../../hooks/prevent-browser-zoom';
 import { resolveMenuItemActiveState, UIQuickTileMenuGroup, UITinyMenuGroup } from '../../menu/desktop/TinyMenuGroup';
 
 type ContextMenuSizeVariant = 'default' | 'paragraph-t';
@@ -702,6 +703,14 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
 
     useScrollYOverContainer(menuElement, layoutService.rootContainerElement);
 
+    useEffect(() => {
+        if (!menuElement) {
+            return;
+        }
+
+        return preventBrowserZoomInContainers([menuElement]);
+    }, [menuElement]);
+
     const getFocusableMenuButtons = useCallback(() => {
         if (!menuElement) {
             return [];
@@ -1194,6 +1203,15 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
             closeSubmenu();
         }
     }, [closeSubmenu, disabled]);
+
+    useEffect(() => {
+        const submenuElement = submenuElementRef.current;
+        if (!submenuVisible || !submenuElement) {
+            return;
+        }
+
+        return preventBrowserZoomInContainers([submenuElement]);
+    }, [submenuVisible]);
 
     useEffect(() => {
         if (!submenuVisible) {

@@ -29,7 +29,7 @@ import {
 import { clsx } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { LoadingMultiIcon } from '@univerjs/icons';
-import { ComponentManager, ContextMenuPosition, IMenuManagerService, isUnitEmbeddedRender, ToolbarItem, useConfigValue, useDependency, useObservable } from '@univerjs/ui';
+import { ComponentManager, ContextMenuPosition, IMenuManagerService, ToolbarItem, useConfigValue, useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo } from 'react';
 import { EMPTY, merge } from 'rxjs';
 import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
@@ -319,7 +319,8 @@ function useActiveWorkbookIsEmbeddedRender(workbook: Workbook | null): boolean {
 
         // Imported Units may gain embedded ownership only after their non-main renderer is created.
         return runtimeFocusCoordinator?.resolveRuntimeScopeByChildUnitId(workbook.getUnitId()) != null ||
-            isUnitEmbeddedRender(workbook.getUnitId(), univerInstanceService, renderManagerService);
+            renderManagerService.getRenderUnitById(workbook.getUnitId())?.isMainScene === false ||
+            univerInstanceService.getUnitCreateOptions(workbook.getUnitId())?.embeddedRender === true;
     }, [renderLifecycle, renderManagerService, runtimeFocusCoordinator, univerInstanceService, workbook]);
 }
 

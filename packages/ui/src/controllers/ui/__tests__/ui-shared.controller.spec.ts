@@ -15,12 +15,11 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
-import type { IRenderManagerService } from '@univerjs/engine-render';
 import { Injector, LifecycleStages, LifecycleUnreachableError } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { IWorkbenchService, WorkbenchService } from '../../../services/workbench/workbench.service';
-import { isUnitEmbeddedRender, SingleUnitUIController } from '../ui-shared.controller';
+import { SingleUnitUIController } from '../ui-shared.controller';
 
 class TestSingleUnitUIController extends SingleUnitUIController {
     callbackPromise: Promise<void> | null = null;
@@ -64,26 +63,6 @@ function createRenderer(unitId: string, isMainScene = true) {
         },
     };
 }
-
-describe('isUnitEmbeddedRender', () => {
-    it('uses non-main renderer ownership for a normally preloaded Unit', () => {
-        const renderer = createRenderer('preloaded-child', false);
-
-        expect(isUnitEmbeddedRender(
-            'preloaded-child',
-            { getUnitCreateOptions: vi.fn(() => null) },
-            { getRenderUnitById: vi.fn(() => renderer as unknown as ReturnType<IRenderManagerService['getRenderUnitById']>) }
-        )).toBe(true);
-    });
-
-    it('keeps the create option fallback before the embed renderer exists', () => {
-        expect(isUnitEmbeddedRender(
-            'pending-child',
-            { getUnitCreateOptions: vi.fn(() => ({ embeddedRender: true })) },
-            { getRenderUnitById: vi.fn(() => null) }
-        )).toBe(true);
-    });
-});
 
 describe('SingleUnitUIController', () => {
     afterEach(() => {
@@ -235,7 +214,7 @@ describe('SingleUnitUIController', () => {
         expect(renderer.activate).toHaveBeenCalledTimes(1);
     });
 
-    it('should not switch the global workbench to a product-owned renderer for a normally preloaded Unit', async () => {
+    it('should not switch the global workbench to a non-main renderer', async () => {
         vi.useFakeTimers();
 
         const layoutService = {

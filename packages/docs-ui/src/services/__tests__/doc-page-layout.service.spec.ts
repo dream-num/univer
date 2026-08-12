@@ -180,7 +180,7 @@ describe('DocPageLayoutService', () => {
         expect(scene.viewport.scrollX).toBe(0);
     });
 
-    it('keeps the page margin and scrolls to the page center when the viewport is narrower than the page', () => {
+    it('keeps the page margin and resets horizontal scroll when the viewport is narrower than the page', () => {
         const { documentComponent, scene, service } = createLayoutService({
             documentWidth: 600,
             documentHeight: 900,
@@ -189,6 +189,7 @@ describe('DocPageLayoutService', () => {
             engineWidth: 500,
             engineHeight: 800,
         });
+        scene.viewport.scrollX = 90;
 
         service.calculatePagePosition();
 
@@ -196,7 +197,7 @@ describe('DocPageLayoutService', () => {
         expect(documentComponent.top).toBe(20);
         expect(scene.width).toBe(680);
         expect(scene.height).toBe(940);
-        expect(scene.viewport.scrollX).toBe(90);
+        expect(scene.viewport.scrollX).toBe(0);
     });
 
     it('uses fit-width start alignment padding instead of centering the page', () => {

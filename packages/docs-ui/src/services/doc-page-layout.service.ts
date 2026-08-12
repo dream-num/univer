@@ -70,7 +70,7 @@ export class DocPageLayoutService extends Disposable implements IRenderModule {
             docsLeft = horizontalMargin;
             sceneWidth = docsWidth + horizontalMargin * 2;
 
-            scrollToX = isStartAlignedFit ? 0 : (sceneWidth - engineWidth / viewScale) / 2;
+            scrollToX = 0;
         }
 
         if (engineHeight > docsHeight) {

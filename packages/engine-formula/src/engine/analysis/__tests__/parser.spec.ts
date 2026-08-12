@@ -16,6 +16,7 @@
 
 import type { Injector } from '@univerjs/core';
 import type { BaseAstNode } from '../../ast-node/base-ast-node';
+import type { BaseReferenceObject } from '../../reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../value-object/array-value-object';
 import type { BaseValueObject } from '../../value-object/base-value-object';
 import type { LexerNode } from '../lexer-node';
@@ -31,6 +32,7 @@ import { Or } from '../../../functions/logical/or';
 import { Percentof } from '../../../functions/logical/percentof';
 import { FUNCTION_NAMES_LOOKUP } from '../../../functions/lookup/function-names';
 import { Hstack } from '../../../functions/lookup/hstack';
+import { Index } from '../../../functions/lookup/index';
 import { Indirect } from '../../../functions/lookup/indirect';
 import { Offset } from '../../../functions/lookup/offset';
 import { FUNCTION_NAMES_MATH } from '../../../functions/math/function-names';
@@ -166,6 +168,7 @@ describe('Test indirect', () => {
             new StdevP(FUNCTION_NAMES_STATISTICAL.STDEV_P),
             new Regexmatch(FUNCTION_NAMES_TEXT.REGEXMATCH),
             new Hstack(FUNCTION_NAMES_LOOKUP.HSTACK),
+            new Index(FUNCTION_NAMES_LOOKUP.INDEX),
             new Indirect(FUNCTION_NAMES_LOOKUP.INDIRECT),
             new Offset(FUNCTION_NAMES_LOOKUP.OFFSET),
             new Groupby(FUNCTION_NAMES_LOGICAL.GROUPBY),
@@ -311,6 +314,28 @@ describe('Test indirect', () => {
             const sectionAstNode = astTreeBuilder.parse(sectionLexerNode as LexerNode);
             const sectionResult = interpreter.execute(generateExecuteAstNodeData(sectionAstNode as BaseAstNode));
             expect((sectionResult as BaseValueObject).getValue()).toBe(30);
+        });
+
+        it('keeps external Table source data when INDEX returns a selected cell reference', () => {
+            const lexerNode = lexer.treeBuilder('=INDEX(Sales.xlsx!SalesTable[Amount],1)');
+            const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
+
+            const reference = result as BaseReferenceObject;
+            expect({
+                unitId: reference.getUnitId(),
+                sheetId: reference.getSheetId(),
+                forcedUnitId: reference.getForcedUnitId(),
+                forcedSheetId: reference.getForcedSheetId(),
+                forcedSheetName: reference.getForcedSheetName(),
+            }).toEqual({
+                unitId: 'sales-source',
+                sheetId: 'source-sheet',
+                forcedUnitId: 'sales-source',
+                forcedSheetId: 'source-sheet',
+                forcedSheetName: '',
+            });
+            expect(reference.getCellByPosition().getValue()).toBe(10);
         });
 
         it('stores the resolved source Unit in external Table dependency ranges', async () => {

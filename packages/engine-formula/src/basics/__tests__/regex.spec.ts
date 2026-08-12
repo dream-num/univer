@@ -83,6 +83,13 @@ describe('Test ref regex', () => {
         expect(new RegExp(REFERENCE_TABLE_SINGLE_COLUMN_REGEX).test('Sales.xlsx!SalesTable[Amount]')).toBe(true);
     });
 
+    it('accepts escaped Univer display names as Table qualifiers', () => {
+        const regex = new RegExp(REFERENCE_TABLE_SINGLE_COLUMN_REGEX);
+
+        expect(regex.test('[Urban Nomad retail operations hub | Official showcase]!Inventory[Safety stock]')).toBe(true);
+        expect(regex.test('[Base name with ]] bracket]!Inventory[Safety stock]')).toBe(true);
+    });
+
     it('isReferenceString', () => {
         expect(isReferenceString('A1')).toBeTruthy();
         expect(isReferenceString('Sheet1!A1')).toBeTruthy();

@@ -72,7 +72,10 @@ const TABLE_MULTIPLE_COLUMN_REGEX = `${TABLE_CONTENT_REGEX}${RANGE_SYMBOL}${TABL
 
 // Display formulas use Book!Table[Column], OOXML formulas use [n]!Table[Column],
 // and the legacy runtime-id form [unitId]Table[Column] remains accepted.
-const TABLE_UNIT_QUALIFIER_REGEX = `(?:(?:${UNIT_NAME_REGEX}|'(?:[^']|'')+'|[^\\s!\\[\\]]+)!)?(?:${UNIT_NAME_REGEX})?`;
+// Univer display names are not Excel file names: characters such as `|` are valid,
+// and `]` is escaped as `]]` by the Formula reference builder.
+const TABLE_BRACKETED_UNIT_QUALIFIER_REGEX = '\\[(?:[^\\]]|\\]\\])+\\]';
+const TABLE_UNIT_QUALIFIER_REGEX = `(?:(?:${TABLE_BRACKETED_UNIT_QUALIFIER_REGEX}|'(?:[^']|'')+'|[^\\s!\\[\\]]+)!)?(?:${TABLE_BRACKETED_UNIT_QUALIFIER_REGEX})?`;
 
 export const REFERENCE_TABLE_ALL_COLUMN_REGEX = `^${TABLE_UNIT_QUALIFIER_REGEX}${TABLE_NAME_REGEX}$`;
 

@@ -501,6 +501,10 @@ export function splitTableStructuredRef(ref: string) {
         } else if (!quoteOpen && char === '[') {
             bracketDepth++;
         } else if (!quoteOpen && char === ']') {
+            if (bracketDepth > 0 && tableRef[i + 1] === ']') {
+                i++;
+                continue;
+            }
             bracketDepth--;
         } else if (!quoteOpen && bracketDepth === 0 && char === '!') {
             qualifierEnd = i;
@@ -511,11 +515,12 @@ export function splitTableStructuredRef(ref: string) {
     if (qualifierEnd >= 0) {
         unitQualifier = tableRef.slice(0, qualifierEnd).trim();
         tableRef = tableRef.slice(qualifierEnd + 1);
-        if (unitQualifier.startsWith("'") && unitQualifier.endsWith("'")) {
+        const isQuotedQualifier = unitQualifier.startsWith("'") && unitQualifier.endsWith("'");
+        const isBracketedQualifier = !isQuotedQualifier && unitQualifier.startsWith('[') && unitQualifier.endsWith(']');
+        if (isQuotedQualifier) {
             unitQualifier = unitQualifier.slice(1, -1);
-        }
-        if (unitQualifier.startsWith('[') && unitQualifier.endsWith(']')) {
-            unitQualifier = unitQualifier.slice(1, -1);
+        } else if (isBracketedQualifier) {
+            unitQualifier = unitQualifier.slice(1, -1).replaceAll(']]', ']');
         }
         unitQualifier = unquoteSheetName(unitQualifier);
     } else if (tableRef.startsWith('[')) {

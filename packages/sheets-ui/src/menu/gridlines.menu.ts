@@ -31,7 +31,7 @@ import {
     WorkbookEditablePermission,
     WorksheetEditPermission,
 } from '@univerjs/sheets';
-import { MenuItemType } from '@univerjs/ui';
+import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { Observable } from 'rxjs';
 import { getCurrentRangeDisable$ } from './menu-util';
 
@@ -44,6 +44,7 @@ export function ToggleGridlinesMenuFactory(accessor: IAccessor): IMenuButtonItem
         type: MenuItemType.BUTTON,
         tooltip: 'sheets-ui.toolbar.toggleGridlines',
         icon: 'HideGridlinesIcon',
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         activated$: new Observable<boolean>((observer) => {
             const getValue = () => {
                 const workbook = instanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);

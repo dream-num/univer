@@ -14,21 +14,24 @@
  * limitations under the License.
  */
 
+import type { Workbook } from '@univerjs/core';
 import type { IDocImage } from '@univerjs/docs-drawing';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import { Disposable, Inject } from '@univerjs/core';
 import { DrawingRenderService } from '@univerjs/drawing-ui';
 import { CURSOR_TYPE } from '@univerjs/engine-render';
-import { SheetsSelectionsService } from '@univerjs/sheets';
+import { isCellImage, SheetsSelectionsService } from '@univerjs/sheets';
 import { HoverManagerService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { throttleTime } from 'rxjs';
+
+const CELL_IMAGE_PREVIEW_KEY = 'preview-cell-image';
 
 export class SheetCellImageHoverRenderController extends Disposable implements IRenderModule {
     private _isSetCursor = false;
 
     constructor(
-        private _context: IRenderContext,
+        private _context: IRenderContext<Workbook>,
         @Inject(HoverManagerService) private _hoverManagerService: HoverManagerService,
         @Inject(SheetsSelectionsService) private _selectionsService: SheetsSelectionsService,
         @Inject(DrawingRenderService) private _drawingRenderService: DrawingRenderService,
@@ -85,12 +88,47 @@ export class SheetCellImageHoverRenderController extends Disposable implements I
         this.disposeWithMe(this._hoverManagerService.currentClickedCell$.subscribe((click) => {
             if (click?.drawing && this._isSetCursor) {
                 const imageDrawing = click.drawing.drawing.drawingOrigin as IDocImage;
-                const imageEle = this._sheetSkeletonManagerService.getCurrentSkeleton()?.imageCacheMap.getImage(imageDrawing.imageSourceType, imageDrawing.source);
-                if (!imageEle) return;
-                this._drawingRenderService.previewImage('preview-cell-image', imageEle.src, imageEle.width, imageEle.height);
-                this._context.scene.resetCursor();
-                this._isSetCursor = false;
+                this._previewImage(imageDrawing);
             }
         }));
+
+        const currentDbClickedCell$ = this._hoverManagerService.currentDbClickedCell$;
+        if (!currentDbClickedCell$) {
+            return;
+        }
+
+        this.disposeWithMe(currentDbClickedCell$.subscribe(({ location }) => {
+            if (location.unitId !== this._context.unitId) {
+                return;
+            }
+
+            const worksheet = this._context.unit.getSheetBySheetId(location.subUnitId);
+            const documentData = worksheet?.getCellRaw(location.row, location.col)?.p;
+            const drawingId = documentData?.drawingsOrder?.[0];
+            const imageDrawing = isCellImage(documentData) && drawingId
+                ? documentData.drawings?.[drawingId] as IDocImage | undefined
+                : undefined;
+
+            if (imageDrawing) {
+                this._previewImage(imageDrawing);
+            }
+        }));
+    }
+
+    private _previewImage(imageDrawing: IDocImage) {
+        if (this._disposed) {
+            return;
+        }
+
+        const imageCacheMap = this._sheetSkeletonManagerService.getCurrentSkeleton()?.imageCacheMap;
+        const imageEle = imageCacheMap?.getImage(
+            imageDrawing.imageSourceType,
+            imageDrawing.source,
+            () => this._previewImage(imageDrawing)
+        );
+        if (!imageEle) return;
+        this._drawingRenderService.previewImage(CELL_IMAGE_PREVIEW_KEY, imageEle.src, imageEle.width, imageEle.height);
+        this._context.scene.resetCursor();
+        this._isSetCursor = false;
     }
 }

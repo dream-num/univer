@@ -25,6 +25,7 @@ import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import {
     ClearSelectionFormatCommand,
+    isCellImage,
     SetWorksheetActiveOperation,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
@@ -173,6 +174,11 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
 
         d.add(spreadsheet.onDblclick$.subscribeEvent((evt) => {
             if (evt.button === 2) {
+                return;
+            }
+
+            const snapshot = this._editorBridgeService.getEditCellState()?.documentLayoutObject.documentModel?.getSnapshot();
+            if (isCellImage(snapshot)) {
                 return;
             }
 

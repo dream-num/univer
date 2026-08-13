@@ -72,7 +72,7 @@ export class Marker extends SheetExtension {
                         continue;
                     }
 
-                    let cellData = worksheet.getCell(row, col);
+                    let cellData = skeleton.stylesCache.fontMatrix.getValue(row, col)?.cellData ?? worksheet.getCell(row, col);
                     if (!hasMerge && !cellData?.markers) {
                         continue;
                     }
@@ -94,7 +94,7 @@ export class Marker extends SheetExtension {
                             col: mergeInfo.startColumn,
                         };
 
-                        cellData = worksheet.getCell(mainCell.row, mainCell.col);
+                        cellData = skeleton.stylesCache.fontMatrix.getValue(mainCell.row, mainCell.col)?.cellData ?? worksheet.getCell(mainCell.row, mainCell.col);
                     }
 
                     if (!this.isRenderDiffRangesByRow(mergeInfo.startRow, mergeInfo.endRow, diffRanges)) {

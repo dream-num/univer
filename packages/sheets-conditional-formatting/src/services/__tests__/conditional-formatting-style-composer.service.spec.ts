@@ -15,7 +15,8 @@
  */
 
 import { Injector } from '@univerjs/core';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { Subject } from 'rxjs';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CFRuleType } from '../../base/const';
 import { ConditionalFormattingRuleModel } from '../../models/conditional-formatting-rule-model';
 import { ConditionalFormattingViewModel } from '../../models/conditional-formatting-view-model';
@@ -25,22 +26,33 @@ describe('ConditionalFormattingStyleComposer', () => {
     let service: ConditionalFormattingStyleComposer;
     const rules = new Map<string, unknown>();
     let cellCfs: Array<{ cfId: string; result: unknown; priority: number }>;
+    let ruleChange$: Subject<void>;
+    let markDirty$: Subject<void>;
+    let cacheClear$: Subject<void>;
+    const getCellCfs = vi.fn(() => cellCfs);
 
     class TestConditionalFormattingRuleModel {
+        $ruleChange = ruleChange$;
+
         getRule(_unitId: string, _subUnitId: string, cfId: string) {
             return rules.get(cfId);
         }
     }
 
     class TestConditionalFormattingViewModel {
-        getCellCfs() {
-            return cellCfs;
-        }
+        markDirty$ = markDirty$;
+        cacheClear$ = cacheClear$;
+
+        getCellCfs = getCellCfs;
     }
 
     beforeEach(() => {
         rules.clear();
         cellCfs = [];
+        ruleChange$ = new Subject();
+        markDirty$ = new Subject();
+        cacheClear$ = new Subject();
+        getCellCfs.mockClear();
         const injector = new Injector();
         injector.add([ConditionalFormattingRuleModel, { useClass: TestConditionalFormattingRuleModel as never }]);
         injector.add([ConditionalFormattingViewModel, { useClass: TestConditionalFormattingViewModel as never }]);
@@ -72,5 +84,27 @@ describe('ConditionalFormattingStyleComposer', () => {
         expect(service.composeStyle('book-1', 'sheet-1', 1, 1)).toEqual({
             style: { bg: { rgb: '#ff0000' } },
         });
+    });
+
+    it('reuses the composed result until conditional formatting changes', () => {
+        rules.set('highlight', { stopIfTrue: false, rule: { type: CFRuleType.highlightCell } });
+        cellCfs = [{ cfId: 'highlight', result: { cl: { rgb: '#333333' } }, priority: 1 }];
+        const first = service.composeStyle('book-1', 'sheet-1', 1, 1);
+        const second = service.composeStyle('book-1', 'sheet-1', 1, 1);
+
+        expect(second).toBe(first);
+        expect(getCellCfs).toHaveBeenCalledOnce();
+
+        markDirty$.next();
+        service.composeStyle('book-1', 'sheet-1', 1, 1);
+        expect(getCellCfs).toHaveBeenCalledTimes(2);
+
+        ruleChange$.next();
+        service.composeStyle('book-1', 'sheet-1', 1, 1);
+        expect(getCellCfs).toHaveBeenCalledTimes(3);
+
+        cacheClear$.next();
+        service.composeStyle('book-1', 'sheet-1', 1, 1);
+        expect(getCellCfs).toHaveBeenCalledTimes(4);
     });
 });

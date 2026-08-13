@@ -14,8 +14,14 @@
  * limitations under the License.
  */
 
-import type { ICellData } from '@univerjs/core';
+import type { ICellData, IRange } from '@univerjs/core';
 import type { IIconSetType } from '../models/icon-map';
+
+export type IConditionalFormattingRenderRangeResolver = (
+    unitId: string,
+    subUnitId: string,
+    ranges: IRange[]
+) => IRange[] | null;
 
 export interface IDataBarRenderParams {
     color: string;

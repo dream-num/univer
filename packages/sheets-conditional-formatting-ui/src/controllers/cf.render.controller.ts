@@ -15,11 +15,23 @@
  */
 
 import type { ICellDataForSheetInterceptor, IRange, Workbook } from '@univerjs/core';
-import type { IConditionalFormattingCellData, IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
-import { Disposable, Inject, InterceptorEffectEnum, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import type { IConditionalFormattingCellData, IConditionalFormattingRenderRangeResolver, IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
+import { Disposable, getIntersectRange, Inject, InterceptorEffectEnum, IUniverInstanceService, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
-import { ConditionalFormattingRuleModel, ConditionalFormattingService, ConditionalFormattingViewModel, DEFAULT_PADDING, DEFAULT_WIDTH } from '@univerjs/sheets-conditional-formatting';
+import {
+    CFRuleType,
+    ConditionalFormattingIcon,
+    ConditionalFormattingRangeIndexModel,
+    ConditionalFormattingRuleModel,
+    ConditionalFormattingService,
+    ConditionalFormattingViewModel,
+    DataBar,
+    dataBarUKey,
+    DEFAULT_PADDING,
+    DEFAULT_WIDTH,
+    IconUKey,
+} from '@univerjs/sheets-conditional-formatting';
 import {
     SheetSkeletonManagerService,
 } from '@univerjs/sheets-ui';
@@ -37,22 +49,100 @@ export class SheetsCfRenderController extends Disposable {
         dispose: () => boolean;
     }>> = new Map();
 
+    private _boundRenderExtensions = new Map<string, Set<DataBar | ConditionalFormattingIcon>>();
+
     constructor(
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
         @Inject(ConditionalFormattingService) private _conditionalFormattingService: ConditionalFormattingService,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
         @Inject(IRenderManagerService) private _renderManagerService: IRenderManagerService,
         @Inject(ConditionalFormattingViewModel) private _conditionalFormattingViewModel: ConditionalFormattingViewModel,
-        @Inject(ConditionalFormattingRuleModel) private _conditionalFormattingRuleModel: ConditionalFormattingRuleModel
+        @Inject(ConditionalFormattingRuleModel) private _conditionalFormattingRuleModel: ConditionalFormattingRuleModel,
+        @Inject(ConditionalFormattingRangeIndexModel) private _conditionalFormattingRangeIndexModel: ConditionalFormattingRangeIndexModel
     ) {
         super();
 
         this._initViewModelInterceptor();
+        this._initRenderRangeResolvers();
         this._initSkeleton();
         queueMicrotask(() => this._markActiveSheetRulesDirty());
         this.disposeWithMe(() => {
             this._ruleChangeCacheMap.clear();
+            this._boundRenderExtensions.forEach((extensions) => {
+                extensions.forEach((extension) => extension.setRenderRangeResolver(null));
+            });
+            this._boundRenderExtensions.clear();
         });
+    }
+
+    private _initRenderRangeResolvers() {
+        const dataBarResolver = this._createRenderRangeResolver(CFRuleType.dataBar);
+        const iconResolver = this._createRenderRangeResolver(CFRuleType.iconSet);
+        const bind = (unitId: string) => {
+            this._unbindRenderRangeResolvers(unitId);
+            const mainComponent = this._renderManagerService.getRenderUnitById(unitId)?.mainComponent;
+            if (!mainComponent || !('getExtensionByKey' in mainComponent)) {
+                return;
+            }
+
+            const extensions = new Set<DataBar | ConditionalFormattingIcon>();
+            const dataBar = mainComponent.getExtensionByKey(dataBarUKey);
+            if (dataBar instanceof DataBar) {
+                dataBar.setRenderRangeResolver(dataBarResolver);
+                extensions.add(dataBar);
+            }
+
+            const icon = mainComponent.getExtensionByKey(IconUKey);
+            if (icon instanceof ConditionalFormattingIcon) {
+                icon.setRenderRangeResolver(iconResolver);
+                extensions.add(icon);
+            }
+
+            if (extensions.size) {
+                this._boundRenderExtensions.set(unitId, extensions);
+            }
+        };
+
+        this._renderManagerService.getAllRenderersOfType(UniverInstanceType.UNIVER_SHEET)
+            .forEach((render) => bind(render.unitId));
+        this.disposeWithMe(
+            this._renderManagerService.created$.subscribe((render) => {
+                if (render.type === UniverInstanceType.UNIVER_SHEET) {
+                    bind(render.unitId);
+                }
+            })
+        );
+        this.disposeWithMe(
+            this._renderManagerService.disposed$.subscribe((unitId) => this._unbindRenderRangeResolvers(unitId))
+        );
+    }
+
+    private _createRenderRangeResolver(ruleType: CFRuleType): IConditionalFormattingRenderRangeResolver {
+        return (unitId, subUnitId, ranges) => {
+            const intersections: IRange[] = [];
+            const matchingRules = this._conditionalFormattingRangeIndexModel
+                .getRulesByRanges(unitId, subUnitId, ranges)
+                .filter((rule) => rule.rule.type === ruleType);
+
+            ranges.forEach((range) => {
+                matchingRules.forEach((rule) => {
+                    rule.ranges.forEach((ruleRange) => {
+                        const intersection = getIntersectRange(range, ruleRange);
+                        if (intersection) {
+                            intersections.push(intersection);
+                        }
+                    });
+                });
+            });
+
+            return intersections.length > 1 ? Rectangle.mergeRanges(intersections) : intersections;
+        };
+    }
+
+    private _unbindRenderRangeResolvers(unitId: string) {
+        const extensions = this._boundRenderExtensions.get(unitId);
+        extensions?.forEach((extension) => extension.setRenderRangeResolver(null));
+        this._boundRenderExtensions.delete(unitId);
     }
 
     private _collectDirtyRanges(items: Array<{ cfId?: string; rule?: IConditionFormattingRule; subUnitId: string; unitId: string }>, unitId: string, subUnitId: string): IRange[] {

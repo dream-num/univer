@@ -15,6 +15,8 @@
  */
 
 import type { Nullable } from '../../shared';
+import type { ITextRangeParam } from '../../sheets/typedef';
+import type { LocaleType } from '../../types/enum';
 import type {
     IDocumentBody,
     IDocumentData,
@@ -31,6 +33,7 @@ import { mergeWith } from '../../common/lodash';
 import { UnitModel, UniverInstanceType } from '../../common/unit';
 import { generateRandomId } from '../../shared/random-id';
 import { Tools } from '../../shared/tools';
+import { calculateDocumentStatistics } from './document-statistics';
 import { getEmptySnapshot } from './empty-snapshot';
 import { JSONX } from './json-x/json-x';
 import { PRESET_LIST_TYPE } from './preset-list-type';
@@ -41,6 +44,21 @@ export const DEFAULT_DOC = {
     id: 'default_doc',
     documentStyle: {},
 };
+
+export interface IDocumentStatistics {
+    words: number;
+    charactersWithoutSpaces: number;
+    charactersWithSpaces: number;
+    paragraphs: number;
+    nonAsianWords: number;
+    asianCharactersAndKoreanWords: number;
+}
+
+export interface IDocumentStatisticsOptions {
+    locale?: LocaleType;
+    ranges?: Readonly<ITextRangeParam[]>;
+    signal?: AbortSignal;
+}
 
 function createDocumentSnapshot(snapshot: Partial<IDocumentData>): IDocumentData {
     if (snapshot.id != null && isInternalEditorID(snapshot.id)) {
@@ -408,5 +426,9 @@ export class DocumentDataModel extends DocumentDataModelSimple {
 
     getPlainText() {
         return getPlainText(this.getBody()?.dataStream ?? '');
+    }
+
+    getStatistics(options: IDocumentStatisticsOptions = {}): Promise<IDocumentStatistics> {
+        return calculateDocumentStatistics(this.getBody()?.dataStream ?? '', options);
     }
 }

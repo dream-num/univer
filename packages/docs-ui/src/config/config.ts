@@ -40,6 +40,7 @@ export interface IUniverDocsUIConfig {
     container?: HTMLElement | string;
     toc?: boolean;
     footer?: boolean;
+    wordCount?: boolean;
     placeholder?: boolean;
     fitToWidth?: IDocFitToWidthOptions;
     override?: DependencyOverride;
@@ -57,6 +58,7 @@ export const DEFAULT_DOC_FIT_TO_WIDTH_OPTIONS: Required<Omit<IDocFitToWidthOptio
 export const defaultPluginConfig: IUniverDocsUIConfig = {
     toc: false,
     footer: true,
+    wordCount: true,
     placeholder: true,
     fitToWidth: DEFAULT_DOC_FIT_TO_WIDTH_OPTIONS,
 };

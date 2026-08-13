@@ -279,6 +279,7 @@ export class UpdateFormulaController extends Disposable {
 
         const config = this._configService.getConfig<IUniverSheetsFormulaBaseConfig>(PLUGIN_CONFIG_KEY_BASE);
         const calculationMode = config?.initialFormulaComputing ?? CalculationMode.WHEN_EMPTY;
+        if (calculationMode === CalculationMode.NO_CALCULATION) return;
         const params = this._getDirtyDataByCalculationMode(calculationMode);
 
         this._commandService.executeCommand(SetTriggerFormulaCalculationStartMutation.id, params, { onlyLocal: true });

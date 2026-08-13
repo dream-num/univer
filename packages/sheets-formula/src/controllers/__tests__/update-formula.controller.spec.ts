@@ -84,12 +84,16 @@ function createWorkbookData(): IWorkbookData {
     };
 }
 
-function createControllerTestBed() {
+function createControllerTestBed(initialFormulaComputing?: CalculationMode) {
     const dependencies: Dependency[] = [
         [UpdateFormulaController],
     ];
 
-    return createFacadeTestBed(createWorkbookData(), dependencies);
+    const testBed = createFacadeTestBed(createWorkbookData(), dependencies);
+    if (initialFormulaComputing != null) {
+        testBed.injector.get(IConfigService).setConfig(PLUGIN_CONFIG_KEY_BASE, { initialFormulaComputing });
+    }
+    return testBed;
 }
 
 describe('UpdateFormulaController', () => {
@@ -132,6 +136,26 @@ describe('UpdateFormulaController', () => {
     afterEach(() => {
         vi.restoreAllMocks();
         testBed?.univer.dispose();
+    });
+
+    it('does not schedule workbook-added calculation in no-calculation mode', () => {
+        testBed.univer.dispose();
+        testBed = createControllerTestBed(CalculationMode.NO_CALCULATION);
+        commandService = testBed.injector.get(ICommandService);
+        commandService.registerCommand(SetFormulaDataMutation);
+        const executeCommand = vi.spyOn(commandService, 'executeCommand');
+
+        testBed.injector.get(UpdateFormulaController);
+        testBed.injector.get(IUniverInstanceService).createUnit(UniverInstanceType.UNIVER_SHEET, {
+            ...createWorkbookData(),
+            id: 'second',
+        });
+
+        expect(executeCommand).not.toHaveBeenCalledWith(
+            SetTriggerFormulaCalculationStartMutation.id,
+            expect.anything(),
+            expect.anything()
+        );
     });
 
     it('should update formula references when a referenced range moves', async () => {

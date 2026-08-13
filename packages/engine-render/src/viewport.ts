@@ -1499,13 +1499,15 @@ export class Viewport {
 
         const additionalAreas: IBoundRectNoAngle[] = [];
 
+        // Extend each exposed strip only toward the retained cache content. Expanding the
+        // strip on its other edges repaints pixels that are already valid in the cache.
         // curr has an extra part on the left compared to prev.
         if (currBound.left < prevBound.left) {
             additionalAreas.push({
                 top: currBound.top,
                 bottom: currBound.bottom,
                 left: currBound.left,
-                right: prevBound.left,
+                right: Math.min(currBound.right, prevBound.left + this.bufferEdgeX),
             });
         }
 
@@ -1514,7 +1516,7 @@ export class Viewport {
             additionalAreas.push({
                 top: currBound.top,
                 bottom: currBound.bottom,
-                left: prevBound.right,
+                left: Math.max(currBound.left, prevBound.right - this.bufferEdgeX),
                 right: currBound.right,
             });
         }
@@ -1522,7 +1524,7 @@ export class Viewport {
         if (currBound.top < prevBound.top) {
             additionalAreas.push({
                 top: currBound.top,
-                bottom: prevBound.top,
+                bottom: Math.min(currBound.bottom, prevBound.top + this.bufferEdgeY),
                 left: Math.max(prevBound.left, currBound.left),
                 right: Math.min(prevBound.right, currBound.right),
             });
@@ -1530,19 +1532,12 @@ export class Viewport {
 
         if (currBound.bottom > prevBound.bottom) {
             additionalAreas.push({
-                top: prevBound.bottom,
+                top: Math.max(currBound.top, prevBound.bottom - this.bufferEdgeY),
                 bottom: currBound.bottom,
                 left: Math.max(prevBound.left, currBound.left),
                 right: Math.min(prevBound.right, currBound.right),
             });
         }
-        for (const bound of additionalAreas) {
-            bound.left = bound.left - this.bufferEdgeX;
-            bound.right = bound.right + this.bufferEdgeX;
-            bound.top = bound.top - this.bufferEdgeY;
-            bound.bottom = bound.bottom + this.bufferEdgeY;
-        }
-
         return additionalAreas;
     }
 

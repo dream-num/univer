@@ -1047,25 +1047,50 @@ describe('engine scene viewport extra', () => {
         engine.dispose();
     });
 
-    it('expands cache diff strips across both axes to avoid exposing blank cache gaps', () => {
+    it('expands cache diff strips only toward retained cache content', () => {
         const { engine, scene, viewport } = createFixture();
         viewport.bufferEdgeX = 10;
         viewport.bufferEdgeY = 20;
 
-        const verticalDiff = (viewport as any)._calcDiffCacheBound(
+        const downwardDiff = (viewport as any)._calcDiffCacheBound(
             { left: 0, top: 0, right: 100, bottom: 100 },
             { left: 0, top: 50, right: 100, bottom: 150 }
         );
-        expect(verticalDiff).toEqual([
-            { left: -10, top: 80, right: 110, bottom: 170 },
+        expect(downwardDiff).toEqual([
+            { left: 0, top: 80, right: 100, bottom: 150 },
         ]);
 
-        const horizontalDiff = (viewport as any)._calcDiffCacheBound(
+        const upwardDiff = (viewport as any)._calcDiffCacheBound(
+            { left: 0, top: 50, right: 100, bottom: 150 },
+            { left: 0, top: 0, right: 100, bottom: 100 }
+        );
+        expect(upwardDiff).toEqual([
+            { left: 0, top: 0, right: 100, bottom: 70 },
+        ]);
+
+        const rightwardDiff = (viewport as any)._calcDiffCacheBound(
             { left: 0, top: 0, right: 100, bottom: 100 },
             { left: 50, top: 0, right: 150, bottom: 100 }
         );
-        expect(horizontalDiff).toEqual([
-            { left: 90, top: -20, right: 160, bottom: 120 },
+        expect(rightwardDiff).toEqual([
+            { left: 90, top: 0, right: 150, bottom: 100 },
+        ]);
+
+        const leftwardDiff = (viewport as any)._calcDiffCacheBound(
+            { left: 50, top: 0, right: 150, bottom: 100 },
+            { left: 0, top: 0, right: 100, bottom: 100 }
+        );
+        expect(leftwardDiff).toEqual([
+            { left: 0, top: 0, right: 60, bottom: 100 },
+        ]);
+
+        const diagonalDiff = (viewport as any)._calcDiffCacheBound(
+            { left: 0, top: 0, right: 100, bottom: 100 },
+            { left: 50, top: 50, right: 150, bottom: 150 }
+        );
+        expect(diagonalDiff).toEqual([
+            { left: 90, top: 50, right: 150, bottom: 150 },
+            { left: 50, top: 80, right: 100, bottom: 150 },
         ]);
 
         scene.dispose();

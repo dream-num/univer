@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { Injector, ThemeService } from '@univerjs/core';
-import { describe, expect, it } from 'vitest';
+import { ColorKit, Injector, ThemeService } from '@univerjs/core';
+import { describe, expect, it, vi } from 'vitest';
 import {
     CanvasColorService,
     DumbCanvasColorService,
@@ -76,6 +76,91 @@ describe('CanvasColorService', () => {
         themeService.setDarkMode(true);
 
         expect(service.getRenderColor('gray.900')).toBe(service.getRenderColor(gray900));
+    });
+
+    it('resolves and caches mixed theme colors without becoming stale after theme changes', () => {
+        const injector = new Injector();
+        injector.add([ThemeService]);
+        injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
+        const themeService = injector.get(ThemeService);
+        const service = injector.get(ICanvasColorService);
+        const mixSpy = vi.spyOn(ColorKit, 'mix');
+        const expression = 'mix(gray.200, gray.900, 0.07)';
+
+        expect(service.getRenderColor(expression)).toBe('#d5d7dc');
+        expect(service.getRenderColor(expression)).toBe('#d5d7dc');
+        expect(mixSpy).toHaveBeenCalledTimes(1);
+
+        themeService.setDarkMode(true);
+        expect(service.getRenderColor(expression)).toBe(service.getRenderColor('#d5d7dc'));
+        expect(mixSpy).toHaveBeenCalledTimes(1);
+
+        themeService.setDarkMode(false);
+        const theme = themeService.getCurrentTheme();
+        themeService.setTheme({
+            ...theme,
+            gray: {
+                ...theme.gray,
+                200: '#ccddee',
+                900: '#112233',
+            },
+        });
+
+        expect(service.getRenderColor(expression)).toBe('#bfd0e1');
+        expect(mixSpy).toHaveBeenCalledTimes(2);
+        mixSpy.mockRestore();
+    });
+
+    it('resolves and caches alpha theme colors without becoming stale after theme changes', () => {
+        const injector = new Injector();
+        injector.add([ThemeService]);
+        injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
+        const themeService = injector.get(ThemeService);
+        const service = injector.get(ICanvasColorService);
+        const alphaSpy = vi.spyOn(ColorKit.prototype, 'setAlpha');
+        const expression = 'alpha(gray.50, 0.5)';
+
+        expect(service.getRenderColor(expression)).toBe('rgba(249,250,251,0.5)');
+        expect(service.getRenderColor(expression)).toBe('rgba(249,250,251,0.5)');
+        expect(alphaSpy).toHaveBeenCalledTimes(1);
+
+        themeService.setDarkMode(true);
+        expect(service.getRenderColor(expression)).toBe(service.getRenderColor('rgba(249,250,251,0.5)'));
+        expect(alphaSpy).toHaveBeenCalledTimes(1);
+
+        themeService.setDarkMode(false);
+        const theme = themeService.getCurrentTheme();
+        themeService.setTheme({
+            ...theme,
+            gray: {
+                ...theme.gray,
+                50: '#101827',
+            },
+        });
+
+        expect(service.getRenderColor(expression)).toBe('rgba(16,24,39,0.5)');
+        expect(alphaSpy).toHaveBeenCalledTimes(2);
+        alphaSpy.mockRestore();
+    });
+
+    it('resolves alpha CSS color names', () => {
+        const injector = new Injector();
+        injector.add([ThemeService]);
+        injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
+        const service = injector.get(ICanvasColorService);
+
+        expect(service.getRenderColor('alpha(white, 0.5)')).toBe('rgba(255,255,255,0.5)');
+        expect(service.getRenderColor('alpha(white, 0.7)')).toBe('rgba(255,255,255,0.7)');
+    });
+
+    it('rejects invalid alpha color expressions', () => {
+        const injector = new Injector();
+        injector.add([ThemeService]);
+        injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
+        const service = injector.get(ICanvasColorService);
+
+        expect(() => service.getRenderColor('alpha(gray.50, 1.1)')).toThrow('[CanvasColorService]: illegal color');
+        expect(() => service.getRenderColor('alpha(not-a-color, 0.5)')).toThrow('[CanvasColorService]: illegal color');
     });
 
     it('maps render colors for dark mode rendering', () => {

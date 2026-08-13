@@ -885,7 +885,7 @@ export class Spreadsheet extends SheetComponent {
 
         ctx.setLineWidthByPrecision(1);
 
-        const defaultGridlinesColor = ctx.__mode === 'printing' ? getColor([214, 216, 219]) : 'gray.200';
+        const defaultGridlinesColor = ctx.__mode === 'printing' ? getColor([214, 216, 219]) : 'mix(gray.200, gray.900, 0.07)';
         ctx.strokeStyle = gridlinesColor ?? ctx.renderConfig.gridlinesColor ?? defaultGridlinesColor;
 
         const columnWidthAccumulationLength = columnWidthAccumulation.length;

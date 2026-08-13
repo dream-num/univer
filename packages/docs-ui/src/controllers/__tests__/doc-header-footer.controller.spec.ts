@@ -20,7 +20,6 @@ import {
     Injector,
     IUniverInstanceService,
     LocaleService,
-    ThemeService,
 } from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService, Path, Rect } from '@univerjs/engine-render';
@@ -125,7 +124,6 @@ function createController(options: {
         [LocaleService, { useValue: {
             t: vi.fn((key: string) => key),
         } }],
-        [ThemeService],
     ]);
     const controller = injector.createInstance(DocHeaderFooterController, context);
 
@@ -174,8 +172,16 @@ describe('DocHeaderFooterController', () => {
 
         expect(ctx.translate).toHaveBeenCalledWith(11.5, 23.5);
         expect(rectSpy).toHaveBeenCalledTimes(2);
-        expect(rectSpy.mock.calls[0][1]).toMatchObject({ width: 200, height: 30 });
-        expect(rectSpy.mock.calls[1][1]).toMatchObject({ width: 200, height: 40 });
+        expect(rectSpy.mock.calls[0][1]).toMatchObject({
+            width: 200,
+            height: 30,
+            fill: 'alpha(white, 0.5)',
+        });
+        expect(rectSpy.mock.calls[1][1]).toMatchObject({
+            width: 200,
+            height: 40,
+            fill: 'alpha(white, 0.5)',
+        });
         expect(pathSpy).not.toHaveBeenCalled();
         expect(textSpy).not.toHaveBeenCalled();
 
@@ -207,8 +213,15 @@ describe('DocHeaderFooterController', () => {
             height: 230,
         }));
         expect(pathSpy).toHaveBeenCalledTimes(2);
-        expect(textSpy).toHaveBeenCalledWith(ctx, expect.objectContaining({ text: 'docs-ui.headerFooter.header' }));
-        expect(textSpy).toHaveBeenCalledWith(ctx, expect.objectContaining({ text: 'docs-ui.headerFooter.footer' }));
+        expect(pathSpy).toHaveBeenCalledWith(ctx, expect.objectContaining({ stroke: 'primary.600' }));
+        expect(textSpy).toHaveBeenCalledWith(ctx, expect.objectContaining({
+            text: 'docs-ui.headerFooter.header',
+            color: 'alpha(primary.600, 0.08)',
+        }));
+        expect(textSpy).toHaveBeenCalledWith(ctx, expect.objectContaining({
+            text: 'docs-ui.headerFooter.footer',
+            color: 'alpha(primary.600, 0.08)',
+        }));
 
         controller.dispose();
     });

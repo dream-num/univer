@@ -111,6 +111,58 @@ describe('CanvasColorService', () => {
         mixSpy.mockRestore();
     });
 
+    it('resolves and caches alpha theme colors without becoming stale after theme changes', () => {
+        const injector = new Injector();
+        injector.add([ThemeService]);
+        injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
+        const themeService = injector.get(ThemeService);
+        const service = injector.get(ICanvasColorService);
+        const alphaSpy = vi.spyOn(ColorKit.prototype, 'setAlpha');
+        const expression = 'alpha(gray.50, 0.5)';
+
+        expect(service.getRenderColor(expression)).toBe('rgba(249,250,251,0.5)');
+        expect(service.getRenderColor(expression)).toBe('rgba(249,250,251,0.5)');
+        expect(alphaSpy).toHaveBeenCalledTimes(1);
+
+        themeService.setDarkMode(true);
+        expect(service.getRenderColor(expression)).toBe(service.getRenderColor('rgba(249,250,251,0.5)'));
+        expect(alphaSpy).toHaveBeenCalledTimes(1);
+
+        themeService.setDarkMode(false);
+        const theme = themeService.getCurrentTheme();
+        themeService.setTheme({
+            ...theme,
+            gray: {
+                ...theme.gray,
+                50: '#101827',
+            },
+        });
+
+        expect(service.getRenderColor(expression)).toBe('rgba(16,24,39,0.5)');
+        expect(alphaSpy).toHaveBeenCalledTimes(2);
+        alphaSpy.mockRestore();
+    });
+
+    it('resolves alpha CSS color names', () => {
+        const injector = new Injector();
+        injector.add([ThemeService]);
+        injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
+        const service = injector.get(ICanvasColorService);
+
+        expect(service.getRenderColor('alpha(white, 0.5)')).toBe('rgba(255,255,255,0.5)');
+        expect(service.getRenderColor('alpha(white, 0.7)')).toBe('rgba(255,255,255,0.7)');
+    });
+
+    it('rejects invalid alpha color expressions', () => {
+        const injector = new Injector();
+        injector.add([ThemeService]);
+        injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
+        const service = injector.get(ICanvasColorService);
+
+        expect(() => service.getRenderColor('alpha(gray.50, 1.1)')).toThrow('[CanvasColorService]: illegal color');
+        expect(() => service.getRenderColor('alpha(not-a-color, 0.5)')).toThrow('[CanvasColorService]: illegal color');
+    });
+
     it('maps render colors for dark mode rendering', () => {
         const injector = new Injector();
         injector.add([ThemeService]);

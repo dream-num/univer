@@ -70,19 +70,25 @@ const DARK_RENDER_COLOR_OVERRIDES: Record<string, string> = {
 };
 
 const COLOR_MIX_REGEXP = /^mix\(\s*([^,()]+)\s*,\s*([^,()]+)\s*,\s*(0(?:\.\d+)?|1(?:\.0+)?)\s*\)$/;
+const COLOR_ALPHA_REGEXP = /^alpha\(\s*([^,()]+)\s*,\s*(0(?:\.\d+)?|1(?:\.0+)?)\s*\)$/;
 
 /**
  * This service inverts a color for dark mode. This service is exposed
  */
 export class CanvasColorService extends Disposable implements ICanvasColorService {
     private readonly _darkModeCache = new Map<string, string>();
-    private readonly _mixCache = new Map<string, string>();
+    private readonly _resolvedColorCache = new Map<string, string>();
     private _invertAlgo = invertColorByMatrix;
 
     constructor(
         @Inject(ThemeService) private readonly _themeService: ThemeService
     ) {
         super();
+
+        this.disposeWithMe(this._themeService.currentTheme$.subscribe(() => {
+            this._resolvedColorCache.clear();
+            this._darkModeCache.clear();
+        }));
     }
 
     getRenderColor(inputColor: string): string {
@@ -140,24 +146,45 @@ export class CanvasColorService extends Disposable implements ICanvasColorServic
     }
 
     private _resolveColor(inputColor: string): string {
-        const mixMatch = inputColor.match(COLOR_MIX_REGEXP);
-        if (!mixMatch) {
-            return this._resolveThemeColor(inputColor);
-        }
-
-        const color1 = this._resolveThemeColor(mixMatch[1].trim());
-        const color2 = this._resolveThemeColor(mixMatch[2].trim());
-        const amount = Number(mixMatch[3]);
-        const cacheKey = `${color1}|${color2}|${amount}`;
-        const cachedColor = this._mixCache.get(cacheKey);
-
-        if (cachedColor) {
+        const cachedColor = this._resolvedColorCache.get(inputColor);
+        if (cachedColor !== undefined) {
             return cachedColor;
         }
 
-        const mixedColor = ColorKit.mix(color1, color2, amount).toHexString();
-        this._mixCache.set(cacheKey, mixedColor);
-        return mixedColor;
+        const mixMatch = inputColor.match(COLOR_MIX_REGEXP);
+        if (mixMatch) {
+            const color1 = this._resolveThemeColor(mixMatch[1].trim());
+            const color2 = this._resolveThemeColor(mixMatch[2].trim());
+            const amount = Number(mixMatch[3]);
+            const color = ColorKit.mix(color1, color2, amount).toHexString();
+            this._resolvedColorCache.set(inputColor, color);
+            return color;
+        }
+
+        const alphaMatch = inputColor.match(COLOR_ALPHA_REGEXP);
+        if (alphaMatch) {
+            const baseColor = this._resolveThemeColor(alphaMatch[1].trim());
+            const colorKit = new ColorKit(baseColor);
+
+            if (!colorKit.isValid) {
+                throw new Error(`[CanvasColorService]: illegal color "${inputColor}"`);
+            }
+
+            const color = colorKit.setAlpha(Number(alphaMatch[2])).toRgbString();
+            this._resolvedColorCache.set(inputColor, color);
+            return color;
+        }
+
+        if (inputColor.trim().startsWith('alpha(')) {
+            throw new Error(`[CanvasColorService]: illegal color "${inputColor}"`);
+        }
+
+        const color = this._resolveThemeColor(inputColor);
+        if (color !== inputColor) {
+            this._resolvedColorCache.set(inputColor, color);
+        }
+
+        return color;
     }
 
     private _resolveThemeColor(inputColor: string): string {

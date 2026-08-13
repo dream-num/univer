@@ -129,6 +129,19 @@ describe('ScrollBar', () => {
         scrollBar.dispose();
     });
 
+    it('uses translucent white for default track colors', () => {
+        const scrollBar = new ScrollBar(viewport);
+
+        expect(scrollBar.horizonScrollTrack?.fill).toBe('alpha(white, 0.5)');
+        expect(scrollBar.horizonScrollTrack?.stroke).toBe('alpha(white, 0.7)');
+        expect(scrollBar.verticalScrollTrack?.fill).toBe('alpha(white, 0.5)');
+        expect(scrollBar.verticalScrollTrack?.stroke).toBe('alpha(white, 0.7)');
+        expect(scrollBar.placeholderBarRect?.fill).toBe('alpha(white, 0.5)');
+        expect(scrollBar.placeholderBarRect?.stroke).toBe('alpha(white, 0.7)');
+
+        scrollBar.dispose();
+    });
+
     it('optionally hides unscrollable tracks and restores them when content overflows', () => {
         const scrollBar = ScrollBar.attachTo(viewport, {
             enableHorizontal: true,

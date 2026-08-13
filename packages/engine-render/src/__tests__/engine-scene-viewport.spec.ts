@@ -308,6 +308,67 @@ describe('engine scene viewport extra', () => {
         engine.dispose();
     });
 
+    it('preserves engine and layer caches only for a pending scroll render', () => {
+        const { engine, scene } = createFixture();
+        const layer = scene.getLayer(1);
+        const renderSpy = vi.spyOn(layer, 'render');
+        scene.render();
+        renderSpy.mockClear();
+
+        scene.makeDirtyForScrolling();
+        expect(scene.isScrollRenderPending()).toBe(true);
+        scene.render();
+        expect(scene.isScrollRenderPending()).toBe(false);
+        expect(renderSpy).toHaveBeenLastCalledWith(undefined, false, expect.objectContaining({
+            preserveCache: true,
+        }));
+
+        scene.makeDirtyForScrolling();
+        scene.makeDirty(true);
+        scene.render();
+        expect(renderSpy).toHaveBeenLastCalledWith(undefined, false, undefined);
+
+        scene.dispose();
+        engine.dispose();
+    });
+
+    it('scrolls independent viewport regions for a frozen sheet render', () => {
+        const { engine, scene, viewport, container } = createFixture();
+        viewport.setViewportSize({ left: 100, width: 200 });
+        const frozenViewport = new Viewport('viewMainLeft', scene, {
+            left: 0,
+            top: 0,
+            width: 100,
+            height: 180,
+            active: true,
+            allowCache: true,
+        });
+
+        scene.render();
+        const engineCtx = engine.getCanvas().getContext();
+        const drawImageSpy = vi.spyOn(engineCtx, 'drawImage');
+        const clearCanvasSpy = vi.spyOn(engine, 'clearCanvas');
+        drawImageSpy.mockClear();
+
+        viewport.scrollToViewportPos({ viewportScrollX: 20, viewportScrollY: 16 });
+        frozenViewport.updateScrollVal({
+            scrollX: 0,
+            scrollY: 16,
+            viewportScrollX: 0,
+            viewportScrollY: 16,
+        });
+        scene.makeDirtyForScrolling();
+        scene.render();
+
+        const engineScrollCopies = drawImageSpy.mock.calls.filter(([source]) => source === engineCtx.canvas);
+        expect(engineScrollCopies).toHaveLength(2);
+        expect(clearCanvasSpy).not.toHaveBeenCalled();
+
+        scene.dispose();
+        engine.dispose();
+        container.remove();
+    });
+
     it('covers engine pointer handlers and input manager dispatch', () => {
         const { engine, scene } = createFixture();
         scene.attachControl();

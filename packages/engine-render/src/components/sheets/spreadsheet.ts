@@ -16,7 +16,6 @@
 
 import type { IPosition, IRange, Nullable } from '@univerjs/core';
 import type { IBoundRectNoAngle, IViewportInfo, Vector2 } from '../../basics/vector2';
-import type { Canvas } from '../../canvas';
 import type { UniverRenderingContext2D } from '../../context';
 import type { Engine } from '../../engine';
 import type { Scene } from '../../scene';
@@ -30,6 +29,7 @@ import type { SpreadsheetSkeleton } from './sheet.render-skeleton';
 import { BooleanNumber, sortRules, Tools } from '@univerjs/core';
 import { FIX_ONE_PIXEL_BLUR_OFFSET, RENDER_CLASS_TYPE } from '../../basics/const';
 import { getColor } from '../../basics/tools';
+import { Canvas } from '../../canvas';
 import { Documents } from '../docs/document';
 import { SpreadsheetExtensionRegistry } from '../extension';
 import { sheetContentViewportKeys, sheetHeaderViewportKeys } from './constants';
@@ -265,6 +265,7 @@ function clipBlitRectToBounds(rect: IBlitRect, sourceWidth: number, sourceHeight
 }
 
 export class Spreadsheet extends SheetComponent {
+    private _scrollBufferCanvases = new Map<string, Canvas>();
     private _backgroundExtension!: Background;
 
     private _borderExtension!: Border;
@@ -321,6 +322,8 @@ export class Spreadsheet extends SheetComponent {
     override dispose() {
         super.dispose();
         this._documents?.dispose();
+        this._scrollBufferCanvases.forEach((canvas) => canvas.dispose());
+        this._scrollBufferCanvases.clear();
 
         // TODO: fix memory leak without reassigning these properties
         this._documents = null as unknown as Documents;
@@ -497,7 +500,8 @@ export class Spreadsheet extends SheetComponent {
         const bufferEdgeSizeX = bufferEdgeX * scaleX / window.devicePixelRatio;
         const bufferEdgeSizeY = bufferEdgeY * scaleY / window.devicePixelRatio;
 
-        const cacheCtx = cacheCanvas.getContext();
+        let renderCacheCanvas = cacheCanvas;
+        let cacheCtx = renderCacheCanvas.getContext();
         cacheCtx.save();
 
         const isForceDirty = isViewportForceDirty || this.isForceDirty();
@@ -520,8 +524,8 @@ export class Spreadsheet extends SheetComponent {
         } else if (diffBounds.length !== 0 || diffX !== 0 || diffY !== 0) {
             // scrolling && no dirty
             this.addRenderTagToScene('scrolling', true);
-            this.paintNewAreaForScrolling(viewportInfo, {
-                cacheCanvas,
+            renderCacheCanvas = this.paintNewAreaForScrolling(viewportInfo, {
+                cacheCanvas: renderCacheCanvas,
                 cacheCtx,
                 mainCtx,
                 topOrigin,
@@ -533,6 +537,9 @@ export class Spreadsheet extends SheetComponent {
                 columnHeaderHeightAndMarginTop,
                 rowHeaderWidthAndMarginLeft,
             }, mergeRepairBounds);
+            cacheCtx.restore();
+            cacheCtx = renderCacheCanvas.getContext();
+            cacheCtx.save();
         }
         // support for browser native zoom (only windows has this problem)
         const sourceLeft = bufferEdgeSizeX * Math.min(1, window.devicePixelRatio);
@@ -540,7 +547,7 @@ export class Spreadsheet extends SheetComponent {
         const { left, top, right, bottom } = viewPortPosition;
         const dw = right - left + rowHeaderWidthAndMarginLeft;
         const dh = bottom - top + columnHeaderHeightAndMarginTop;
-        this._applyCache(cacheCanvas, mainCtx, sourceLeft, sourceTop, dw, dh, left, top, dw, dh);
+        this._applyCache(renderCacheCanvas, mainCtx, sourceLeft, sourceTop, dw, dh, left, top, dw, dh);
         cacheCtx.restore();
     }
 
@@ -598,21 +605,33 @@ export class Spreadsheet extends SheetComponent {
     paintNewAreaForScrolling(viewportInfo: IViewportInfo, param: IPaintForScrolling, mergeRepairBounds: IBoundRectNoAngle[] = []) {
         const { cacheCanvas, cacheCtx, mainCtx, topOrigin, leftOrigin, bufferEdgeX, bufferEdgeY, scaleX, scaleY, columnHeaderHeightAndMarginTop, rowHeaderWidthAndMarginLeft } = param;
         const { diffX, diffY } = viewportInfo;
-        cacheCtx.save();
-        cacheCtx.setTransform(1, 0, 0, 1, 0, 0);
-        cacheCtx.globalCompositeOperation = 'copy';
-        cacheCtx.drawImage(cacheCanvas.getCanvasEle(), diffX * scaleX, diffY * scaleY);
-        cacheCtx.restore();
+        let renderCacheCanvas = cacheCanvas;
+        let renderCacheCtx = cacheCtx;
+        const viewport = (this.getParent() as Scene).getViewport(viewportInfo.viewportKey);
+        const canSwapCache = this._getAncestorParent()?.classType === RENDER_CLASS_TYPE.ENGINE && viewport?.canvas === cacheCanvas;
+
+        if (canSwapCache) {
+            renderCacheCanvas = this._getScrollBufferCanvas(viewportInfo.viewportKey, cacheCanvas);
+            renderCacheCtx = renderCacheCanvas.getContext();
+            this._copyCacheForScrolling(renderCacheCtx, cacheCanvas, diffX * scaleX, diffY * scaleY);
+
+            const previousBufferCanvas = viewport.swapCacheCanvas(renderCacheCanvas);
+            if (previousBufferCanvas) {
+                this._scrollBufferCanvases.set(viewportInfo.viewportKey, previousBufferCanvas);
+            }
+        } else {
+            this._copyCacheForScrolling(cacheCtx, cacheCanvas, diffX * scaleX, diffY * scaleY);
+        }
 
         this._refreshIncrementalState = true;
         // Reset the ctx position to the spreadsheet content origin before drawing.
         // trasnlation should be (rowHeaderWidth, colHeaderHeight) at start.
         const m = mainCtx.getTransform();
-        cacheCtx.setTransform(m.a, m.b, m.c, m.d, 0, 0);
+        renderCacheCtx.setTransform(m.a, m.b, m.c, m.d, 0, 0);
 
         // leftOrigin is the offset of viewport relative to sheetcorner (without considering zoom)
         // - (leftOrigin - bufferEdgeX)  ----> simplified to - leftOrigin + bufferEdgeX
-        cacheCtx.translateWithPrecision(m.e / m.a - leftOrigin + bufferEdgeX, m.f / m.d - topOrigin + bufferEdgeY);
+        renderCacheCtx.translateWithPrecision(m.e / m.a - leftOrigin + bufferEdgeX, m.f / m.d - topOrigin + bufferEdgeY);
 
         const repaintBounds = this._getRepaintBounds(viewportInfo, mergeRepairBounds);
         if (repaintBounds.length) {
@@ -626,26 +645,54 @@ export class Spreadsheet extends SheetComponent {
                 const w = diffRight - diffLeft;
                 const h = diffBottom - diffTop; // w and h must exactly match the diffarea size, otherwise when scrolling back, the clear area will be too large, causing valid content from the previous frame to be erased
 
-                cacheCtx.clearRectByPrecision(x, y, w, h);
+                renderCacheCtx.clearRectByPrecision(x, y, w, h);
                 // cacheCtx.fillStyle = this.testGetRandomLightColor();
                 // cacheCtx.fillRectByPrecision(x, y, w, h); // x, y is diffBounds, means it's relative to scrolling distance.
 
-                cacheCtx.save();
-                cacheCtx.beginPath();
-                cacheCtx.rectByPrecision(x, y, w, h);
-                cacheCtx.closePath();
+                renderCacheCtx.save();
+                renderCacheCtx.beginPath();
+                renderCacheCtx.rectByPrecision(x, y, w, h);
+                renderCacheCtx.closePath();
                 // The reason for clipping here is to avoid duplicate drawing (otherwise the text would be jagged, especially on Windows)
-                cacheCtx.clip();
-                this.draw(cacheCtx, {
+                renderCacheCtx.clip();
+                this.draw(renderCacheCtx, {
                     ...viewportInfo,
                     diffBounds: [diffBound],
                 }, repairsMerge);
-                cacheCtx.restore();
+                renderCacheCtx.restore();
             }
         }
 
         // this.testShowRuler(cacheCtx, viewportInfo);
         this._refreshIncrementalState = false;
+        return renderCacheCanvas;
+    }
+
+    private _copyCacheForScrolling(
+        targetCtx: UniverRenderingContext2D,
+        sourceCanvas: Canvas,
+        offsetX: number,
+        offsetY: number
+    ) {
+        targetCtx.save();
+        targetCtx.setTransform(1, 0, 0, 1, 0, 0);
+        targetCtx.globalCompositeOperation = 'copy';
+        targetCtx.drawImage(sourceCanvas.getCanvasEle(), offsetX, offsetY);
+        targetCtx.restore();
+    }
+
+    private _getScrollBufferCanvas(viewportKey: string, sourceCanvas: Canvas) {
+        let scrollBufferCanvas = this._scrollBufferCanvases.get(viewportKey);
+        if (!scrollBufferCanvas) {
+            scrollBufferCanvas = new Canvas({ colorService: this.getScene()?.getEngine()?.canvasColorService });
+            this._scrollBufferCanvases.set(viewportKey, scrollBufferCanvas);
+        }
+        if (scrollBufferCanvas.getWidth() !== sourceCanvas.getWidth() ||
+            scrollBufferCanvas.getHeight() !== sourceCanvas.getHeight() ||
+            scrollBufferCanvas.getPixelRatio() !== sourceCanvas.getPixelRatio()) {
+            scrollBufferCanvas.setSize(sourceCanvas.getWidth(), sourceCanvas.getHeight(), sourceCanvas.getPixelRatio());
+        }
+        return scrollBufferCanvas;
     }
 
     /**

@@ -1321,4 +1321,57 @@ describe('spreadsheet integration', () => {
             'rgba(24, 119, 242, 0.25)'
         );
     });
+
+    it('alternates scroll buffers independently for each viewport', () => {
+        const { spreadsheet, skeleton, scene, viewport, mainCanvas } = fixture;
+        const mainCtx = mainCanvas.getContext() as any;
+        const mainCache = viewport.canvas!;
+        mainCache.setSize(460, 280, 1);
+        const frozenViewport = new Viewport(SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT, scene, {
+            left: 0,
+            top: 0,
+            width: 80,
+            height: 240,
+            active: true,
+            allowCache: true,
+        });
+        const frozenCache = frozenViewport.canvas!;
+        frozenCache.setSize(120, 280, 1);
+
+        const paint = (viewportKey: string, cacheCanvas: Canvas) => spreadsheet.paintNewAreaForScrolling(
+            createViewportInfo(scene, cacheCanvas, {
+                viewportKey,
+                cacheCanvas,
+                diffX: 4,
+                diffY: 3,
+                diffBounds: [createBound(100, 60, 220, 140)],
+                diffCacheBounds: [createBound(100, 60, 220, 140)],
+            }),
+            {
+                cacheCanvas,
+                cacheCtx: cacheCanvas.getContext() as any,
+                mainCtx,
+                topOrigin: 0,
+                leftOrigin: 0,
+                bufferEdgeX: 8,
+                bufferEdgeY: 6,
+                rowHeaderWidthAndMarginLeft: skeleton.rowHeaderWidthAndMarginLeft,
+                columnHeaderHeightAndMarginTop: skeleton.columnHeaderHeightAndMarginTop,
+                scaleX: 1,
+                scaleY: 1,
+            }
+        );
+
+        const nextMainCache = paint(SHEET_VIEWPORT_KEY.VIEW_MAIN, mainCache);
+        const nextFrozenCache = paint(SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT, frozenCache);
+        expect(viewport.canvas).toBe(nextMainCache);
+        expect(frozenViewport.canvas).toBe(nextFrozenCache);
+        expect(nextMainCache).not.toBe(mainCache);
+        expect(nextFrozenCache).not.toBe(frozenCache);
+        expect(nextMainCache.getWidth()).toBe(460);
+        expect(nextFrozenCache.getWidth()).toBe(120);
+
+        expect(paint(SHEET_VIEWPORT_KEY.VIEW_MAIN, nextMainCache)).toBe(mainCache);
+        expect(paint(SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT, nextFrozenCache)).toBe(frozenCache);
+    });
 });

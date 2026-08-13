@@ -41,7 +41,7 @@ const STATISTIC_ROWS: IStatisticRow[] = [
     { key: 'asianCharactersAndKoreanWords', label: 'docs-ui.statistics.asianCharactersAndKoreanWords' },
 ];
 
-function StatisticsPanel({ statistics, selection }: { statistics: DisplayStatistics; selection: boolean }) {
+function StatisticsPanel({ statistics, selection, showPages }: { statistics: DisplayStatistics; selection: boolean; showPages: boolean }) {
     const localeService = useDependency(LocaleService);
     const localeTag = LOCALE_META[localeService.getCurrentLocale()].tag;
 
@@ -69,7 +69,7 @@ function StatisticsPanel({ statistics, selection }: { statistics: DisplayStatist
                 </div>
             </div>
             <dl className="univer-grid univer-grid-cols-[1fr_auto] univer-gap-x-5 univer-gap-y-2 univer-text-sm">
-                {STATISTIC_ROWS.map(({ key, label }) => (
+                {STATISTIC_ROWS.filter(({ key }) => showPages || key !== 'pages').map(({ key, label }) => (
                     <div className="univer-contents" key={String(key)}>
                         <dt>{localeService.t<LocaleKey>(label)}</dt>
                         <dd className="univer-m-0 univer-text-right univer-font-medium univer-tabular-nums">
@@ -85,7 +85,7 @@ function StatisticsPanel({ statistics, selection }: { statistics: DisplayStatist
 export function DocStatistics() {
     const localeService = useDependency(LocaleService);
     const [open, setOpen] = useState(false);
-    const { document, selection, loading } = useDocStatistics(open);
+    const { document, selection, loading, showPages } = useDocStatistics(open);
     const triggerRef = useRef<HTMLSpanElement>(null);
     const anchorRect$ = useMemo(() => new BehaviorSubject({ left: 0, right: 0, top: 0, bottom: 0 }), []);
     const localeTag = LOCALE_META[localeService.getCurrentLocale()].tag;
@@ -153,7 +153,7 @@ export function DocStatistics() {
                     onClickOutside={() => setOpen(false)}
                     onContextMenu={() => setOpen(false)}
                 >
-                    <StatisticsPanel statistics={displayedStatistics} selection={selection != null} />
+                    <StatisticsPanel statistics={displayedStatistics} selection={selection != null} showPages={showPages} />
                 </RectPopup>
             )}
         </>

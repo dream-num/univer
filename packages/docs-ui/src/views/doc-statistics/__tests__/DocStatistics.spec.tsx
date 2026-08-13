@@ -98,6 +98,7 @@ describe('DocStatistics', () => {
             },
             selection: null,
             loading: false,
+            showPages: true,
         });
 
         const rendered = renderStatistics();
@@ -114,7 +115,37 @@ describe('DocStatistics', () => {
 
         expect(useDocStatistics).toHaveBeenLastCalledWith(true);
         expect(document.body.textContent).toContain('Document statistics');
+        expect(document.body.textContent).toContain('Pages');
         expect(document.body.textContent).toContain('Characters (no spaces)');
         expect(document.body.textContent).toContain('Asian characters and Korean words');
+    });
+
+    it('hides pages in modern documents', () => {
+        vi.mocked(useDocStatistics).mockReturnValue({
+            document: {
+                pages: 0,
+                words: 12,
+                charactersWithoutSpaces: 31,
+                charactersWithSpaces: 36,
+                paragraphs: 3,
+                lines: 3,
+                nonAsianWords: 6,
+                asianCharactersAndKoreanWords: 6,
+            },
+            selection: null,
+            loading: false,
+            showPages: false,
+        });
+
+        const rendered = renderStatistics();
+        root = rendered.root;
+        container = rendered.container;
+
+        act(() => {
+            rendered.container.querySelector('button')?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        });
+
+        expect(document.body.textContent).not.toContain('Pages');
+        expect(document.body.textContent).toContain('Lines');
     });
 });

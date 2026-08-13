@@ -16,7 +16,7 @@
 
 import type { DocumentDataModel, IDocumentStatistics, IDocumentStatisticsOptions, ITextRangeParam, Nullable } from '@univerjs/core';
 import type { DocumentSkeleton } from '@univerjs/engine-render';
-import { IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
+import { DocumentFlavor, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import { documentSkeletonLineIterator, IRenderManagerService } from '@univerjs/engine-render';
 import { useDependency, useObservable } from '@univerjs/ui';
@@ -44,10 +44,12 @@ export interface IDocStatisticsViewState {
     document: IDocumentStatistics & IDocLayoutStatistics;
     selection: (IDocumentStatistics & IDocLayoutStatistics) | null;
     loading: boolean;
+    showPages: boolean;
 }
 
 interface ICalculateStatisticsParams {
     calculateLayout: boolean;
+    calculatePages: boolean;
     documentDataModel: DocumentDataModel;
     cachedStatistics?: IDocumentStatistics;
     locale: IDocumentStatisticsOptions['locale'];
@@ -86,39 +88,41 @@ function rangeIntersectsLine(range: ITextRangeParam, startOffset: number, endOff
 
 export function getDocLayoutStatistics(
     skeleton: DocumentSkeleton | null,
-    ranges: Readonly<ITextRangeParam>[] = []
+    ranges: Readonly<ITextRangeParam>[] = [],
+    calculatePages = true
 ): IDocLayoutStatistics {
     const pages = skeleton?.getSkeletonData()?.pages ?? [];
     if (ranges.length === 0) {
         let lines = 0;
         documentSkeletonLineIterator(pages, {}, () => lines++);
-        return { lines, pages: pages.length };
+        return { lines, pages: calculatePages ? pages.length : 0 };
     }
 
     let lines = 0;
-    const selectedPages = new Set<number>();
+    const selectedPages = calculatePages ? new Set<number>() : null;
     documentSkeletonLineIterator(pages, {}, ({ line, pageIndex }) => {
         if (ranges.some((range) => rangeIntersectsLine(range, line.st, line.ed))) {
             lines += 1;
-            selectedPages.add(pageIndex);
+            selectedPages?.add(pageIndex);
         }
     });
 
-    return { lines, pages: selectedPages.size };
+    return { lines, pages: selectedPages?.size ?? 0 };
 }
 
 async function calculateStatistics({
     calculateLayout,
+    calculatePages,
     documentDataModel,
     cachedStatistics,
     locale,
     selectionRanges,
     signal,
     skeleton,
-}: ICalculateStatisticsParams): Promise<Omit<IDocStatisticsViewState, 'loading'>> {
-    const documentLayout = calculateLayout ? getDocLayoutStatistics(skeleton) : EMPTY_LAYOUT_STATISTICS;
+}: ICalculateStatisticsParams): Promise<Omit<IDocStatisticsViewState, 'loading' | 'showPages'>> {
+    const documentLayout = calculateLayout ? getDocLayoutStatistics(skeleton, [], calculatePages) : EMPTY_LAYOUT_STATISTICS;
     const selectionLayout = calculateLayout && selectionRanges.length > 0
-        ? getDocLayoutStatistics(skeleton, selectionRanges)
+        ? getDocLayoutStatistics(skeleton, selectionRanges, calculatePages)
         : EMPTY_LAYOUT_STATISTICS;
     const [documentStatistics, selectionStatistics] = await Promise.all([
         cachedStatistics ?? documentDataModel.getStatistics({ locale, signal }),
@@ -202,8 +206,9 @@ export function useDocStatistics(calculateLayout = false): IDocStatisticsViewSta
     ));
     const selectionSnapshot = useStatisticsSelection(documentDataModel, selectionManager);
     const locale = useObservable(localeService.currentLocale$, localeService.getCurrentLocale());
+    const showPages = documentDataModel?.getDocumentStyle().documentFlavor !== DocumentFlavor.MODERN;
     const skeleton = useDocumentSkeleton(calculateLayout ? documentDataModel : null, renderManagerService);
-    const [state, setState] = useState<IDocStatisticsViewState>({
+    const [state, setState] = useState<Omit<IDocStatisticsViewState, 'showPages'>>({
         document: { ...EMPTY_STATISTICS, lines: 0, pages: 0 },
         selection: null,
         loading: true,
@@ -228,6 +233,7 @@ export function useDocStatistics(calculateLayout = false): IDocStatisticsViewSta
             try {
                 const result = await calculateStatistics({
                     calculateLayout,
+                    calculatePages: showPages,
                     documentDataModel: currentDocumentDataModel,
                     cachedStatistics: hasCachedDocumentStatistics ? cachedDocumentStatistics.statistics : undefined,
                     locale,
@@ -256,7 +262,7 @@ export function useDocStatistics(calculateLayout = false): IDocStatisticsViewSta
             clearTimeout(timeout);
             abortController.abort();
         };
-    }, [calculateLayout, documentDataModel, locale, selectionRanges, selectionSnapshot, skeleton]);
+    }, [calculateLayout, documentDataModel, locale, selectionRanges, selectionSnapshot, showPages, skeleton]);
 
-    return state;
+    return { ...state, showPages };
 }

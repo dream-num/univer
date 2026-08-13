@@ -20,6 +20,7 @@ import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { useConfigValue, useDependency, useObservable } from '@univerjs/ui';
 import { DOCS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { CountBar } from '../count-bar';
+import { DocStatistics } from '../doc-statistics/DocStatistics';
 
 function DocFooterContent() {
     const config = useConfigValue<IUniverDocsUIConfig>(DOCS_UI_PLUGIN_CONFIG_KEY);
@@ -31,7 +32,7 @@ function DocFooterContent() {
               univer-box-border univer-flex univer-items-center univer-justify-between univer-px-5 univer-py-1.5
             `}
         >
-            <div />
+            {config?.wordCount !== false && <DocStatistics />}
             <CountBar />
         </div>
     );

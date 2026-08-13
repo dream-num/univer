@@ -315,8 +315,18 @@ export interface IBaseSnapshot {
 
 export interface ITableSnapshot {
     id: TableId;
+    /**
+     * Human-readable display name, subject to Excel worksheet name rules because
+     * each Base table is exported as a worksheet. Names must be unique within the
+     * Base, ignoring case. Do not use this value as a structured-reference identifier.
+     */
     name: string;
-    /** Stable canonical name used by formulas and exported structured references. */
+    /**
+     * Persisted stable identifier used by formulas and exported structured references.
+     *
+     * Historical snapshots may omit this field. Use `getBaseFormulaTableName()` when a
+     * resolved formula identifier is required.
+     */
     formulaName?: string;
     fields: Record<FieldId, IFieldSnapshot>;
     fieldOrder: FieldId[];

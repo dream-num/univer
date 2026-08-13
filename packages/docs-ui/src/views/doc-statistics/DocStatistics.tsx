@@ -129,7 +129,7 @@ export function DocStatistics() {
                     noIcon
                     active={open}
                     className={`
-                      !univer-h-7 univer-px-2 univer-text-xs !univer-text-gray-600
+                      !univer-h-6 univer-px-2 univer-text-xs !univer-text-gray-600
                       focus-visible:univer-ring-2 focus-visible:univer-ring-primary-500
                       dark:!univer-text-gray-300
                     `}

@@ -29,6 +29,7 @@ import {
     LogLevel,
     ObjectMatrix,
     RANGE_TYPE,
+    ThemeService,
     Univer,
     UniverInstanceType,
     VerticalAlign,
@@ -212,7 +213,7 @@ function createFixture(): IFixture {
     viewport.scrollToViewportPos({ viewportScrollX: 30, viewportScrollY: 18 });
 
     skeleton.setScene(scene);
-    const spreadsheet = new Spreadsheet('sheet-component', skeleton, true);
+    const spreadsheet = new Spreadsheet('sheet-component', skeleton, true, get(ThemeService));
     scene.addObject(spreadsheet, 1);
 
     const mainCanvas = new Canvas({ width: 640, height: 360, pixelRatio: 1 });
@@ -262,6 +263,30 @@ describe('spreadsheet integration', () => {
         expect(getShrinkToFitScale(80, 100, 12)).toBe(1);
         expect(getShrinkToFitScale(200, 100, 12)).toBe(0.5);
         expect(getShrinkToFitScale(2400, 100, 12)).toBeCloseTo(1 / 12);
+    });
+
+    it('caches the themed screen gridline color while keeping the printing color stable', () => {
+        const spreadsheet = fixture.spreadsheet as unknown as {
+            _getDefaultGridlinesColor: (context: { __mode: string }) => string;
+        };
+        const themeService = fixture.univer.__getInjector().get(ThemeService);
+        const getScreenColor = () => spreadsheet._getDefaultGridlinesColor({ __mode: 'rendering' });
+
+        expect(getScreenColor()).toBe('#d5d7dc');
+        expect(spreadsheet._getDefaultGridlinesColor({ __mode: 'printing' })).toBe('rgb(214,216,219)');
+
+        const theme = themeService.getCurrentTheme();
+        themeService.setTheme({
+            ...theme,
+            gray: {
+                ...theme.gray,
+                200: '#ccddee',
+                900: '#112233',
+            },
+        });
+
+        expect(getScreenColor()).toBe('#bfd0e1');
+        expect(spreadsheet._getDefaultGridlinesColor({ __mode: 'printing' })).toBe('rgb(214,216,219)');
     });
 
     it('scales cloned rich-text font sizes without mutating the stored document', () => {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IPosition, IRange, Nullable } from '@univerjs/core';
+import type { IPosition, IRange, Nullable, ThemeService } from '@univerjs/core';
 import type { IBoundRectNoAngle, IViewportInfo, Vector2 } from '../../basics/vector2';
 import type { Canvas } from '../../canvas';
 import type { UniverRenderingContext2D } from '../../context';
@@ -27,7 +27,7 @@ import type { Border } from './extensions/border';
 import type { Font } from './extensions/font';
 import type { IPaintForRefresh, IPaintForScrolling, SHEET_VIEWPORT_KEY } from './interfaces';
 import type { SpreadsheetSkeleton } from './sheet.render-skeleton';
-import { BooleanNumber, sortRules, Tools } from '@univerjs/core';
+import { BooleanNumber, ColorKit, sortRules, Tools } from '@univerjs/core';
 import { FIX_ONE_PIXEL_BLUR_OFFSET, RENDER_CLASS_TYPE } from '../../basics/const';
 import { getColor } from '../../basics/tools';
 import { Documents } from '../docs/document';
@@ -42,6 +42,9 @@ const CUSTOM_EXTENSION_KEY = 'DefaultCustomExtension';
 const MARKER_EXTENSION_KEY = 'DefaultMarkerExtension';
 const RANGE_PROTECTION_VIEW_EXTENSION_KEY = 'RANGE_PROTECTION_CAN_VIEW_RENDER_EXTENSION_KEY';
 const RANGE_PROTECTION_HIDDEN_EXTENSION_KEY = 'RANGE_PROTECTION_CAN_NOT_VIEW_RENDER_EXTENSION_KEY';
+const PRINTING_GRIDLINES_COLOR = getColor([214, 216, 219]);
+const DEFAULT_GRIDLINES_COLOR_TOKEN = 'gray.200';
+const DEFAULT_GRIDLINES_COLOR_MIX_AMOUNT = 0.07;
 
 interface IRepaintBound {
     bound: IBoundRectNoAngle;
@@ -277,6 +280,8 @@ export class Spreadsheet extends SheetComponent {
 
     private _forceDisableGridlines = false;
 
+    private _defaultGridlinesColor = DEFAULT_GRIDLINES_COLOR_TOKEN;
+
     private _documents: Documents = new Documents(OBJECT_KEY, undefined, {
         pageMarginLeft: 0,
         pageMarginTop: 0,
@@ -287,11 +292,35 @@ export class Spreadsheet extends SheetComponent {
     constructor(
         oKey: string,
         spreadsheetSkeleton?: SpreadsheetSkeleton,
-        private _allowCache: boolean = true
+        private _allowCache: boolean = true,
+        themeService?: ThemeService
     ) {
         super(oKey, spreadsheetSkeleton);
+        this._initializeDefaultGridlinesColor(themeService);
         this._initialDefaultExtension();
         this.makeDirty(true);
+    }
+
+    private _initializeDefaultGridlinesColor(themeService?: ThemeService): void {
+        if (!themeService) {
+            return;
+        }
+
+        this.disposeWithMe(themeService.currentTheme$.subscribe(() => {
+            const gray200 = themeService.getColorFromTheme('gray.200');
+            const gray900 = themeService.getColorFromTheme('gray.900');
+            this._defaultGridlinesColor = ColorKit.mix(
+                gray200,
+                gray900,
+                DEFAULT_GRIDLINES_COLOR_MIX_AMOUNT
+            ).toHexString();
+            this.makeForceDirty(true);
+            this.makeDirty(true);
+        }));
+    }
+
+    private _getDefaultGridlinesColor(ctx: UniverRenderingContext2D): string {
+        return ctx.__mode === 'printing' ? PRINTING_GRIDLINES_COLOR : this._defaultGridlinesColor;
     }
 
     get backgroundExtension() {
@@ -885,8 +914,7 @@ export class Spreadsheet extends SheetComponent {
 
         ctx.setLineWidthByPrecision(1);
 
-        const defaultGridlinesColor = ctx.__mode === 'printing' ? getColor([214, 216, 219]) : 'gray.200';
-        ctx.strokeStyle = gridlinesColor ?? ctx.renderConfig.gridlinesColor ?? defaultGridlinesColor;
+        ctx.strokeStyle = gridlinesColor ?? ctx.renderConfig.gridlinesColor ?? this._getDefaultGridlinesColor(ctx);
 
         const columnWidthAccumulationLength = columnWidthAccumulation.length;
         const rowHeightAccumulationLength = rowHeightAccumulation.length;

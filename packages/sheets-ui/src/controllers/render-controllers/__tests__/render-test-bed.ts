@@ -66,6 +66,8 @@ export interface IFakeViewport {
     scrollX: number;
     scrollY: number;
     isActive: boolean;
+    isDirty: boolean;
+    isForceDirty: boolean;
     left: number;
     top: number;
     width: number;
@@ -75,6 +77,7 @@ export interface IFakeViewport {
     scrollAnimationFrameId: number | null;
     isWheelPreventDefaultX: boolean;
     isWheelPreventDefaultY: boolean;
+    shouldIntoRender(): boolean;
     scene?: IFakeScene;
     _paddingStartX: number;
     _paddingStartY: number;
@@ -109,6 +112,8 @@ export function createFakeViewport(viewportKey: string, options?: Partial<IFakeV
         scrollX: 0,
         scrollY: 0,
         isActive: true,
+        isDirty: false,
+        isForceDirty: false,
         left: 0,
         top: 0,
         width: 800,
@@ -118,6 +123,7 @@ export function createFakeViewport(viewportKey: string, options?: Partial<IFakeV
         scrollAnimationFrameId: null,
         isWheelPreventDefaultX: false,
         isWheelPreventDefaultY: false,
+        shouldIntoRender: () => viewport.isActive && viewport.width > 1 && viewport.height > 1,
         _paddingStartX: 0,
         _paddingStartY: 0,
         _scrollBar: { ratioScrollX: 1, ratioScrollY: 1 },
@@ -197,6 +203,10 @@ export interface IFakeScene {
     addObjects(objs: unknown[], layer?: number): void;
     enableLayerCache(...layers: number[]): void;
     makeDirty(dirty: boolean): void;
+    makeDirtyForScrolling(): void;
+    isDirty(): boolean;
+    isScrollRenderPending(): boolean;
+    getLayers(): Array<{ getObjectsByOrder(): Array<{ isDirty(): boolean }> }>;
     getViewport(key: unknown): IFakeViewport | null;
     getMainViewport(): IFakeViewport;
     getViewports(): IFakeViewport[];
@@ -253,6 +263,10 @@ export function createFakeScene(
         enableObjectsEvent: () => { },
         enableLayerCache: () => { },
         makeDirty: () => { },
+        makeDirtyForScrolling: () => { },
+        isDirty: () => false,
+        isScrollRenderPending: () => false,
+        getLayers: () => Array.from(layers.values()) as Array<{ getObjectsByOrder(): Array<{ isDirty(): boolean }> }>,
         getViewport: (key) => viewportMap.get(key) ?? null,
         getMainViewport: () => viewportMap.get(SHEET_VIEWPORT_KEY.VIEW_MAIN)!,
         getViewports: () => Array.from(viewportMap.values()),
@@ -524,6 +538,9 @@ export function createRenderTestBed(options?: { workbookData?: IWorkbookData; de
 
     const mainComponent = {
         zIndex: 1,
+        isDirty: () => false,
+        isForceDirty: () => false,
+        getSkeleton: () => ({ worksheet: { getMergeData: () => [] } }),
         makeForceDirty: () => { },
         onPointerDown$: createTestEvent<any>(),
     };

@@ -457,6 +457,12 @@ export class Viewport {
 
     get canvas() { return this._cacheCanvas; }
 
+    swapCacheCanvas(cacheCanvas: UniverCanvas) {
+        const previousCacheCanvas = this._cacheCanvas;
+        this._cacheCanvas = cacheCanvas;
+        return previousCacheCanvas;
+    }
+
     enable() {
         this._active = true;
     }
@@ -747,7 +753,12 @@ export class Viewport {
      * @param objects
      * @param isMaxLayer
      */
-    render(parentCtx?: UniverRenderingContext, objects: BaseObject[] = [], isMaxLayer = false): void {
+    render(
+        parentCtx?: UniverRenderingContext,
+        objects: BaseObject[] = [],
+        isMaxLayer = false,
+        viewportInfo?: IViewportInfo
+    ): void {
         if (!this.shouldIntoRender()) {
             return;
         }
@@ -773,7 +784,7 @@ export class Viewport {
 
         // set scrolling state for mainCtx,
         mainCtx.transform(tm[0], tm[1], tm[2], tm[3], tm[4], tm[5]);
-        const viewPortInfo = this.calcViewportInfo();
+        const viewPortInfo = viewportInfo ?? this.calcViewportInfo();
 
         for (let i = 0, length = objects.length; i < length; i++) {
             objects[i].render(mainCtx, viewPortInfo);

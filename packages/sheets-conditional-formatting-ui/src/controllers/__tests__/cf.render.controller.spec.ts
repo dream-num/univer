@@ -15,8 +15,9 @@
  */
 
 import type { IRange } from '@univerjs/core';
+import type { IConditionalFormattingRenderRangeResolver } from '@univerjs/sheets-conditional-formatting';
 import { INTERCEPTOR_POINT } from '@univerjs/sheets';
-import { DEFAULT_PADDING, DEFAULT_WIDTH } from '@univerjs/sheets-conditional-formatting';
+import { CFRuleType, ConditionalFormattingIcon, DataBar, dataBarUKey, DEFAULT_PADDING, DEFAULT_WIDTH, IconUKey } from '@univerjs/sheets-conditional-formatting';
 import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { SheetsCfRenderController } from '../cf.render.controller';
@@ -29,21 +30,46 @@ interface ITestConditionFormattingRule {
     ranges: IRange[];
 }
 
+interface ITestInterceptor {
+    handler: (cell: unknown, context: unknown, next: (cell: unknown) => unknown) => unknown;
+}
+
+interface ITestDirtyEvent {
+    cfId?: string;
+    rule?: ITestConditionFormattingRule;
+    subUnitId: string;
+    unitId: string;
+}
+
 function createController() {
-    let interceptor: any;
-    const ruleChange$ = new Subject<any>();
-    const markDirty$ = new Subject<any>();
+    let interceptor: ITestInterceptor;
+    const ruleChange$ = new Subject<ITestDirtyEvent>();
+    const markDirty$ = new Subject<ITestDirtyEvent>();
     const reCalculate = vi.fn();
     const makeDirty = vi.fn();
     const resetRangeCache = vi.fn();
+    const dataBar = new DataBar();
+    const icon = new ConditionalFormattingIcon();
+    const getRulesByRanges = vi.fn(() => [] as Array<{ ranges: IRange[]; rule: { type: CFRuleType } }>);
+    const renderCreated$ = new Subject<unknown>();
+    const renderDisposed$ = new Subject<string>();
     const rowColumnSegment = { startRow: 0, endRow: 10, startColumn: 0, endColumn: 10 };
     const getRule = vi.fn<() => ITestConditionFormattingRule>(() => ({
         ranges: [{ startRow: 2, endRow: 4, startColumn: 1, endColumn: 3 }],
     }));
     const getSubunitRules = vi.fn<() => ITestConditionFormattingRule[]>(() => []);
+    const render = {
+        unitId: 'unit-1',
+        type: 'UNIVER_SHEET',
+        with: vi.fn(() => ({ getCurrentSkeleton: vi.fn(() => ({ resetRangeCache, rowColumnSegment })), reCalculate })),
+        mainComponent: {
+            makeDirty,
+            getExtensionByKey: (key: string) => key === dataBarUKey ? dataBar : key === IconUKey ? icon : undefined,
+        },
+    };
     const controller = new SheetsCfRenderController(
         {
-            intercept: vi.fn((point, config) => {
+            intercept: vi.fn((point, config: ITestInterceptor) => {
                 expect(point).toBe(INTERCEPTOR_POINT.CELL_CONTENT);
                 interceptor = config;
                 return { dispose: vi.fn() };
@@ -64,19 +90,39 @@ function createController() {
             })),
         } as never,
         {
-            getRenderUnitById: vi.fn(() => ({
-                with: vi.fn(() => ({ getCurrentSkeleton: vi.fn(() => ({ resetRangeCache, rowColumnSegment })), reCalculate })),
-                mainComponent: { makeDirty },
-            })),
+            created$: renderCreated$,
+            disposed$: renderDisposed$,
+            getAllRenderersOfType: vi.fn(() => [render]),
+            getRenderUnitById: vi.fn(() => render),
         } as never,
         { markDirty$ } as never,
-        { $ruleChange: ruleChange$, getRule, getSubunitRules } as never
+        { $ruleChange: ruleChange$, getRule, getSubunitRules } as never,
+        { getRulesByRanges } as never
     );
 
-    return { controller, getRule, getSubunitRules, interceptor: () => interceptor, markDirty$, makeDirty, reCalculate, resetRangeCache, rowColumnSegment, ruleChange$ };
+    return { controller, dataBar, getRule, getRulesByRanges, getSubunitRules, icon, interceptor: () => interceptor, markDirty$, makeDirty, reCalculate, resetRangeCache, rowColumnSegment, ruleChange$ };
 }
 
 describe('SheetsCfRenderController', () => {
+    it('binds type-aware rule-range resolvers to conditional-formatting render extensions', () => {
+        const { controller, dataBar, getRulesByRanges, icon } = createController();
+        const ranges = [{ startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 }];
+        const dataBarResolver = (dataBar as unknown as { _renderRangeResolver: IConditionalFormattingRenderRangeResolver })._renderRangeResolver;
+        const iconResolver = (icon as unknown as { _renderRangeResolver: IConditionalFormattingRenderRangeResolver })._renderRangeResolver;
+
+        getRulesByRanges.mockReturnValue([{ ranges, rule: { type: CFRuleType.dataBar } }]);
+        expect(dataBarResolver('unit-1', 'sheet-1', ranges)).toEqual([expect.objectContaining(ranges[0])]);
+        expect(iconResolver('unit-1', 'sheet-1', ranges)).toEqual([]);
+
+        getRulesByRanges.mockReturnValue([{ ranges, rule: { type: CFRuleType.iconSet } }]);
+        expect(dataBarResolver('unit-1', 'sheet-1', ranges)).toEqual([]);
+        expect(iconResolver('unit-1', 'sheet-1', ranges)).toEqual([expect.objectContaining(ranges[0])]);
+
+        controller.dispose();
+        expect((dataBar as unknown as { _renderRangeResolver: unknown })._renderRangeResolver).toBeNull();
+        expect((icon as unknown as { _renderRangeResolver: unknown })._renderRangeResolver).toBeNull();
+    });
+
     it('composes conditional-formatting style, data bar and icon set into rendered cell data', () => {
         const { controller, interceptor } = createController();
         const rawCell = { v: 10, s: 'style-1' };
@@ -92,7 +138,12 @@ describe('SheetsCfRenderController', () => {
                     get: vi.fn(() => ({ fs: 12 })),
                 })),
             },
-        }, (cell: unknown) => cell);
+        }, (cell: unknown) => cell) as {
+            dataBar: unknown;
+            fontRenderExtension: unknown;
+            iconSet: unknown;
+            s: unknown;
+        };
 
         expect(result).not.toBe(rawCell);
         expect(result.s).toEqual({ fs: 12, bg: { rgb: '#00ff00' } });
@@ -124,7 +175,7 @@ describe('SheetsCfRenderController', () => {
 
     it('resets changed ranges found from conditional-formatting dirty cfIds', async () => {
         vi.useFakeTimers();
-        const { controller, getRule, markDirty$, resetRangeCache, rowColumnSegment } = createController();
+        const { controller, getRule, markDirty$, resetRangeCache } = createController();
 
         markDirty$.next({ unitId: 'unit-1', subUnitId: 'sheet-1', cfId: 'cf-1' });
         await vi.advanceTimersByTimeAsync(20);

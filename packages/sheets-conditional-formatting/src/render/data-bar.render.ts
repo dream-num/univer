@@ -16,7 +16,7 @@
 
 import type { IRange, IScale } from '@univerjs/core';
 import type { SpreadsheetSkeleton, UniverRenderingContext } from '@univerjs/engine-render';
-import type { IDataBarCellData } from './type';
+import type { IConditionalFormattingRenderRangeResolver, IDataBarCellData } from './type';
 import { Range } from '@univerjs/core';
 import { FIX_ONE_PIXEL_BLUR_OFFSET, SheetExtension, SpreadsheetExtensionRegistry } from '@univerjs/engine-render';
 
@@ -36,10 +36,15 @@ const stringifyRange = (range: IRange) => {
 export class DataBar extends SheetExtension {
     private _paddingRightAndLeft = 2;
     private _paddingTopAndBottom = 2;
+    private _renderRangeResolver: IConditionalFormattingRenderRangeResolver | null = null;
     override uKey = dataBarUKey;
 
     override Z_INDEX = EXTENSION_Z_INDEX;
     _radius = 1;
+
+    setRenderRangeResolver(resolver: IConditionalFormattingRenderRangeResolver | null) {
+        this._renderRangeResolver = resolver;
+    }
 
     // eslint-disable-next-line max-lines-per-function
     override draw(
@@ -53,7 +58,13 @@ export class DataBar extends SheetExtension {
             return false;
         }
         const mergeCellRendered = new Set<string>();
-        const renderRanges = diffRanges?.length ? diffRanges : [spreadsheetSkeleton.rowColumnSegment];
+        const sourceRanges = diffRanges?.length ? diffRanges : [spreadsheetSkeleton.rowColumnSegment];
+        const renderRanges = this._renderRangeResolver && worksheet.getMergeData().length === 0
+            ? this._renderRangeResolver(worksheet.getUnitId(), worksheet.getSheetId(), sourceRanges) ?? sourceRanges
+            : sourceRanges;
+        if (!renderRanges.length) {
+            return;
+        }
         ctx.save();
         // ctx.globalCompositeOperation = 'destination-over';
         // eslint-disable-next-line max-lines-per-function
@@ -139,6 +150,11 @@ export class DataBar extends SheetExtension {
             });
         });
         ctx.restore();
+    }
+
+    override dispose(): void {
+        this._renderRangeResolver = null;
+        super.dispose();
     }
 
     private _drawRectWithRoundedCorner(ctx: UniverRenderingContext, x: number, y: number, width: number, height: number, topLeftRadius: boolean, topRightRadius: boolean, bottomRightRadius: boolean, bottomLeftRadius: boolean) {

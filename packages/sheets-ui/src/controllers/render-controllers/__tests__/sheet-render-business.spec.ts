@@ -155,10 +155,6 @@ function createController() {
         getCurrentParam: vi.fn(() => ({ skeleton })),
     };
     const telemetryService = { capture: vi.fn() };
-    const themeService = {
-        currentTheme$: new BehaviorSubject({}),
-        getColorFromTheme: vi.fn(),
-    };
     const context = {
         unitId: 'unit-1',
         unit: workbook,
@@ -174,7 +170,6 @@ function createController() {
         sheetSkeletonManagerService as any,
         { checkMutationShouldTriggerRerender: vi.fn((id: string) => id === 'sheet.custom-rerender') } as any,
         commandService as any,
-        themeService as any,
         telemetryService as any
     );
 

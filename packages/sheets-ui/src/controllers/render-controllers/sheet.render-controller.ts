@@ -18,7 +18,7 @@ import type { BooleanNumber, ICommandInfo, IExecutionOptions, IRange, Nullable, 
 import type { ISetFormulaCalculationNotificationMutation } from '@univerjs/engine-formula';
 import type { IAfterRender$Info, IBasicFrameInfo, IExtendFrameInfo, IRenderContext, IRenderModule, IScrollBarProps, ISummaryFrameInfo, ISummaryMetric, ITimeMetric, IViewportInfos, Scene } from '@univerjs/engine-render';
 import type { IUniverSheetsUIConfig } from '../../config/config';
-import { CommandType, ICommandService, IConfigService, Inject, Optional, Rectangle, RxDisposable, ThemeService } from '@univerjs/core';
+import { CommandType, ICommandService, IConfigService, Inject, Optional, Rectangle, RxDisposable } from '@univerjs/core';
 import { SetFormulaCalculationNotificationMutation } from '@univerjs/engine-formula';
 
 import {
@@ -67,7 +67,6 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @Inject(SheetsRenderService) private readonly _sheetRenderService: SheetsRenderService,
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(ThemeService) private readonly _themeService: ThemeService,
         @Optional(ITelemetryService) private readonly _telemetryService?: ITelemetryService
     ) {
         super();
@@ -231,7 +230,7 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         const { scene, components } = this._context;
 
         const worksheet = workbook.getActiveSheet();
-        const spreadsheet = new Spreadsheet(SHEET_VIEW_KEY.MAIN, undefined, true, this._themeService);
+        const spreadsheet = new Spreadsheet(SHEET_VIEW_KEY.MAIN);
         this._addViewport(worksheet);
 
         const spreadsheetRowHeader = new SpreadsheetRowHeader(SHEET_VIEW_KEY.ROW);

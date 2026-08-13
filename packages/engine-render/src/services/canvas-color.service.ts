@@ -69,11 +69,14 @@ const DARK_RENDER_COLOR_OVERRIDES: Record<string, string> = {
     'rgba(148,163,184,0.45)': 'rgba(148,163,184,0.52)',
 };
 
+const COLOR_MIX_REGEXP = /^mix\(\s*([^,()]+)\s*,\s*([^,()]+)\s*,\s*(0(?:\.\d+)?|1(?:\.0+)?)\s*\)$/;
+
 /**
  * This service inverts a color for dark mode. This service is exposed
  */
 export class CanvasColorService extends Disposable implements ICanvasColorService {
-    private readonly _cache = new Map<string, string>();
+    private readonly _darkModeCache = new Map<string, string>();
+    private readonly _mixCache = new Map<string, string>();
     private _invertAlgo = invertColorByMatrix;
 
     constructor(
@@ -83,25 +86,18 @@ export class CanvasColorService extends Disposable implements ICanvasColorServic
     }
 
     getRenderColor(inputColor: string): string {
-        let color = inputColor;
-
-        if (color.includes('.')) {
-            const themeColor = this._themeService.getColorFromTheme<unknown>(color);
-            if (typeof themeColor === 'string' && this._themeService.isValidThemeColor(color)) {
-                color = themeColor;
-            }
-        }
+        const color = this._resolveColor(inputColor);
 
         if (!this._themeService.darkMode) {
             return color;
         }
 
-        if (this._cache.has(color)) {
-            return this._cache.get(color)!;
+        if (this._darkModeCache.has(color)) {
+            return this._darkModeCache.get(color)!;
         }
 
         if (normalizeRenderColor(color) === 'transparent') {
-            this._cache.set(color, 'transparent');
+            this._darkModeCache.set(color, 'transparent');
             return 'transparent';
         }
 
@@ -139,8 +135,42 @@ export class CanvasColorService extends Disposable implements ICanvasColorServic
             throw new Error(`[CanvasColorService]: illegal color "${color}"`);
         }
 
-        this._cache.set(color, cachedColor);
+        this._darkModeCache.set(color, cachedColor);
         return cachedColor;
+    }
+
+    private _resolveColor(inputColor: string): string {
+        const mixMatch = inputColor.match(COLOR_MIX_REGEXP);
+        if (!mixMatch) {
+            return this._resolveThemeColor(inputColor);
+        }
+
+        const color1 = this._resolveThemeColor(mixMatch[1].trim());
+        const color2 = this._resolveThemeColor(mixMatch[2].trim());
+        const amount = Number(mixMatch[3]);
+        const cacheKey = `${color1}|${color2}|${amount}`;
+        const cachedColor = this._mixCache.get(cacheKey);
+
+        if (cachedColor) {
+            return cachedColor;
+        }
+
+        const mixedColor = ColorKit.mix(color1, color2, amount).toHexString();
+        this._mixCache.set(cacheKey, mixedColor);
+        return mixedColor;
+    }
+
+    private _resolveThemeColor(inputColor: string): string {
+        let color = inputColor;
+
+        if (color.includes('.')) {
+            const themeColor = this._themeService.getColorFromTheme<unknown>(color);
+            if (typeof themeColor === 'string' && this._themeService.isValidThemeColor(color)) {
+                color = themeColor;
+            }
+        }
+
+        return color;
     }
 }
 

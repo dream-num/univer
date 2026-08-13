@@ -25,6 +25,7 @@ import { IMEInputCommand } from '@univerjs/docs-ui';
 import { EMPTY } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { SheetCopyCommand, SheetCutCommand, SheetPasteCommand } from '../../../commands/commands/clipboard.command';
+import { SetCellEditVisibleOperation } from '../../../commands/operations/cell-edit.operation';
 import { SheetPermissionCheckUIController } from '../sheet-permission-check-ui.controller';
 
 type ControllerConstructorArgs = ConstructorParameters<typeof SheetPermissionCheckUIController>;
@@ -80,6 +81,18 @@ describe('SheetPermissionCheckUIController', () => {
 
         expect(permissionCheckWithoutRange).not.toHaveBeenCalled();
         expect(blockExecuteWithoutPermission).not.toHaveBeenCalled();
+        controller.dispose();
+    });
+
+    it('checks the workbook identified by a cell editor visibility operation', () => {
+        const { controller, executeBefore, permissionCheckWithoutRange } = createController();
+
+        executeBefore({
+            id: SetCellEditVisibleOperation.id,
+            params: { visible: true, unitId: 'embedded-sheet' },
+        });
+
+        expect(permissionCheckWithoutRange).toHaveBeenCalledWith(expect.any(Object), 'embedded-sheet');
         controller.dispose();
     });
 

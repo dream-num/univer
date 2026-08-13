@@ -138,7 +138,7 @@ export class SheetPermissionCheckUIController extends Disposable {
                     workbookTypes: [WorkbookEditablePermission],
                     worksheetTypes: [WorksheetSetCellValuePermission, WorksheetEditPermission],
                     rangeTypes: [RangeProtectionPermissionEditPoint],
-                });
+                }, params.unitId);
                 errorMsg = this._localeService.t<LocaleKey>('sheets-ui.permission.dialog.editErr');
                 break;
             case ApplyFormatPainterCommand.id:

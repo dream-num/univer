@@ -41,10 +41,6 @@ export const menuSchema: MenuSchemaType = {
         [DOCS_IMAGE_MENU_ID]: {
             order: 0,
             menuItemFactory: ImageMenuFactory,
-            [IMAGE_MENU_UPLOAD_FLOAT_ID]: {
-                order: 0,
-                menuItemFactory: UploadFloatImageMenuFactory,
-            },
         },
     },
     [ContextMenuPosition.PARAGRAPH]: {

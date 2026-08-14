@@ -22,7 +22,7 @@ const DOC_MODERN_WORKSPACE_BACKGROUND_COLOR = 'var(--univer-white)';
 const DOC_UNSPECIFIED_WORKSPACE_BACKGROUND_COLOR = 'var(--univer-gray-100)';
 const DOC_EDITOR_INTERNAL_BACKGROUND_COLOR = 'transparent';
 const DOC_TRADITIONAL_WORKSPACE_BACKGROUND_TOKEN = 'gray.100';
-const DOC_MODERN_WORKSPACE_BACKGROUND_TOKEN = 'white';
+const DOC_MODERN_WORKSPACE_BACKGROUND_TOKEN = 'token(white)';
 
 export interface IResolveDocRenderBackgroundOptions {
     documentFlavor?: DocumentFlavor;

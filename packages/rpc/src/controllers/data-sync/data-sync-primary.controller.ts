@@ -51,6 +51,8 @@ export class DataSyncPrimaryController extends RxDisposable {
 
     private _syncMutationQueue: Promise<unknown> = Promise.resolve();
 
+    private _remoteReady: Promise<true> = Promise.resolve(true);
+
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
         @ICommandService private readonly _commandService: ICommandService,
@@ -108,6 +110,19 @@ export class DataSyncPrimaryController extends RxDisposable {
         });
     }
 
+    async syncMutation(commandInfo: IMutationInfo, options?: IRemoteSyncMutationOptions): Promise<boolean> {
+        const sync = () => this._remoteReady.then(() =>
+            this._remoteInstanceService.syncMutation({ mutationInfo: commandInfo }, options)
+        );
+        const result = this._syncMutationQueue.then(sync, sync);
+        this._syncMutationQueue = result.catch(() => false);
+        return result;
+    }
+
+    async waitForPendingMutations(): Promise<void> {
+        await this._syncMutationQueue.catch(() => false);
+    }
+
     private _initRPCChannels(): void {
         // for the worker to call
         this._rpcChannelService.registerChannel(RemoteSyncServiceName, fromModule(this._remoteSyncService));
@@ -119,6 +134,7 @@ export class DataSyncPrimaryController extends RxDisposable {
             { useFactory: () => toModule<IRemoteInstanceService>(this._rpcChannelService.requestChannel(RemoteInstanceServiceName)) },
         ]);
         this._remoteInstanceService = this._injector.get(IRemoteInstanceService);
+        this._remoteReady = this._remoteInstanceService.whenReady();
     }
 
     private _init(): void {
@@ -154,8 +170,7 @@ export class DataSyncPrimaryController extends RxDisposable {
                 !(options as IRemoteSyncMutationOptions)?.fromSync &&
                 // do not sync mutations those are not meant to be synced
                 this._syncingMutations.has(id)) {
-                const sync = () => this._remoteInstanceService.syncMutation({ mutationInfo: commandInfo as IMutationInfo }, options);
-                this._syncMutationQueue = this._syncMutationQueue.then(sync, sync).catch(() => false);
+                void this.syncMutation(commandInfo as IMutationInfo, options);
             }
         }));
     }

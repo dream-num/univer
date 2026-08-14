@@ -53,7 +53,7 @@ import { RegisterOtherFormulaService } from '../services/register-other-formula.
 
 type FormulaDataSyncController = Pick<
     DataSyncPrimaryController,
-    'registerSyncingMutations' | 'syncUnitMutations'
+    'registerSyncingMutations' | 'syncUnitMutations' | 'waitForPendingMutations'
 >;
 
 export class FormulaController extends Disposable {
@@ -83,13 +83,12 @@ export class FormulaController extends Disposable {
             return;
         }
 
-        this.disposeWithMe(this._registerOtherFormulaService.formulaChangeWithRange$.subscribe(({ unitId }) => {
-            if (this._syncedOtherFormulaUnits.has(unitId)) {
-                return;
+        this.disposeWithMe(this._registerOtherFormulaService.setMutationSyncHandler((unitId) => {
+            if (!this._syncedOtherFormulaUnits.has(unitId)) {
+                this._syncedOtherFormulaUnits.add(unitId);
+                this.disposeWithMe(dataSyncPrimaryController.syncUnitMutations(unitId));
             }
-
-            this._syncedOtherFormulaUnits.add(unitId);
-            this.disposeWithMe(dataSyncPrimaryController.syncUnitMutations(unitId));
+            return () => dataSyncPrimaryController.waitForPendingMutations();
         }));
     }
 

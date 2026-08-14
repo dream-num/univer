@@ -35,7 +35,7 @@ import { FormulaController } from '../formula.controller';
 
 type FormulaDataSyncController = Pick<
     DataSyncPrimaryController,
-    'registerSyncingMutations' | 'syncUnitMutations'
+    'registerSyncingMutations' | 'syncUnitMutations' | 'waitForPendingMutations'
 >;
 
 function createController(dataSyncPrimaryController?: FormulaDataSyncController): {
@@ -79,6 +79,7 @@ describe('FormulaController', () => {
         const dataSyncPrimaryController = {
             registerSyncingMutations: vi.fn<DataSyncPrimaryController['registerSyncingMutations']>(),
             syncUnitMutations: vi.fn<DataSyncPrimaryController['syncUnitMutations']>(() => toDisposable(dispose)),
+            waitForPendingMutations: vi.fn<DataSyncPrimaryController['waitForPendingMutations']>(() => Promise.resolve()),
         };
         const { controller, registerOtherFormulaService } = createController(dataSyncPrimaryController);
 

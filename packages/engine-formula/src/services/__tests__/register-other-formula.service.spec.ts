@@ -25,7 +25,7 @@ import {
     LifecycleService,
     LifecycleStages,
 } from '@univerjs/core';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { OtherFormulaMarkDirty } from '../../commands/mutations/formula.mutation';
 import { SetFormulaCalculationResultMutation } from '../../commands/mutations/set-formula-calculation.mutation';
 import { RemoveOtherFormulaMutation, SetOtherFormulaMutation } from '../../commands/mutations/set-other-formula.mutation';
@@ -35,7 +35,7 @@ import { OtherFormulaBizType, RegisterOtherFormulaService } from '../register-ot
 
 type FormulaResultMatrix = Record<number, Record<number, Array<{ v?: unknown }>>>;
 
-function createService(registerCommands = true): {
+function createService(registerCommands = true, remoteSync?: () => Promise<void>): {
     service: RegisterOtherFormulaService;
     commandService: ICommandService;
     activeDirtyManagerService: IActiveDirtyManagerService;
@@ -50,6 +50,7 @@ function createService(registerCommands = true): {
     injector.add([RegisterOtherFormulaService]);
     const commandService = injector.get(ICommandService);
     const service = injector.get(RegisterOtherFormulaService);
+    if (remoteSync) service.setMutationSyncHandler(() => remoteSync);
     if (registerCommands) {
         commandService.registerCommand(SetOtherFormulaMutation);
         commandService.registerCommand(RemoveOtherFormulaMutation);
@@ -88,6 +89,25 @@ describe('RegisterOtherFormulaService', () => {
         expect(formulaId.startsWith('formula.unit-1_sheet-1_default_')).toBe(true);
         await flushCommandChain();
 
+        expect(executedIds).toEqual([SetOtherFormulaMutation.id, OtherFormulaMarkDirty.id]);
+    });
+
+    it('marks a formula dirty only after its Worker definition is synchronized', async () => {
+        let releaseSync!: () => void;
+        const remoteSync = vi.fn<() => Promise<void>>(() => new Promise<void>((resolve) => {
+                releaseSync = resolve;
+            }));
+        const { service, commandService } = createService(true, remoteSync);
+        const executedIds: string[] = [];
+        commandService.onCommandExecuted((command) => executedIds.push(command.id));
+
+        service.registerFormulaWithRange('doc-1', 'body-1', '=1');
+        await flushCommandChain();
+        expect(executedIds).toEqual([SetOtherFormulaMutation.id]);
+        expect(remoteSync).toHaveBeenCalledOnce();
+
+        releaseSync();
+        await flushCommandChain();
         expect(executedIds).toEqual([SetOtherFormulaMutation.id, OtherFormulaMarkDirty.id]);
     });
 

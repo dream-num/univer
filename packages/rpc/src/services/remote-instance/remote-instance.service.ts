@@ -15,7 +15,7 @@
  */
 
 import type { IBaseSnapshot, IExecutionOptions, IMutationInfo, IWorkbookData } from '@univerjs/core';
-import { createIdentifier, ICommandService, ILogService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { createIdentifier, ICommandService, ILogService, Inject, IUniverInstanceService, LifecycleService, LifecycleStages, UniverInstanceType } from '@univerjs/core';
 
 export interface IRemoteSyncMutationOptions extends IExecutionOptions {
     /** If this mutation is executed after it was sent from the peer univer instance (e.g. in a web worker). */
@@ -69,13 +69,15 @@ export class WebWorkerRemoteInstanceService implements IRemoteInstanceService {
     constructor(
         @IUniverInstanceService protected readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService protected readonly _commandService: ICommandService,
-        @ILogService protected readonly _logService: ILogService
+        @ILogService protected readonly _logService: ILogService,
+        @Inject(LifecycleService) protected readonly _lifecycleService: LifecycleService
     ) {
         // empty
     }
 
     whenReady(): Promise<true> {
-        return Promise.resolve(true);
+        if (this._lifecycleService.stage >= LifecycleStages.Ready) return Promise.resolve(true);
+        return this._lifecycleService.onStage(LifecycleStages.Ready).then(() => true);
     }
 
     async syncMutation(params: { mutationInfo: IMutationInfo }, options?: IExecutionOptions): Promise<boolean> {

@@ -95,8 +95,8 @@ describe('RegisterOtherFormulaService', () => {
     it('marks a formula dirty only after its Worker definition is synchronized', async () => {
         let releaseSync!: () => void;
         const remoteSync = vi.fn<() => Promise<void>>(() => new Promise<void>((resolve) => {
-                releaseSync = resolve;
-            }));
+            releaseSync = resolve;
+        }));
         const { service, commandService } = createService(true, remoteSync);
         const executedIds: string[] = [];
         commandService.onCommandExecuted((command) => executedIds.push(command.id));

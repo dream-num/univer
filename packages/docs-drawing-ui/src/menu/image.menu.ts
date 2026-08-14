@@ -64,7 +64,8 @@ const getDisableWhenSelectionInTableObservable = (accessor: IAccessor) => {
 export function ImageMenuFactory(accessor: IAccessor): IMenuItem<LocaleKey> {
     return {
         id: DOCS_IMAGE_MENU_ID,
-        type: MenuItemType.SUBITEMS,
+        commandId: IMAGE_MENU_UPLOAD_FLOAT_ID,
+        type: MenuItemType.BUTTON,
         icon: 'AddImageIcon',
         tooltip: 'docs-drawing-ui.title',
         disabled$: getDisableWhenSelectionInTableObservable(accessor),

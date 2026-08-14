@@ -26,7 +26,7 @@ import type { Engine } from './engine';
 import type { ILayerRenderOptions, IScrollRenderInfo } from './layer';
 import type { SceneViewer } from './scene-viewer';
 import type { Viewport } from './viewport';
-import { Disposable, EventSubject, sortRules, sortRulesByDesc, toDisposable } from '@univerjs/core';
+import { Disposable, EventSubject, sortRules, sortRulesByDesc, toDisposable, Tools } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
 import { CURSOR_TYPE, RENDER_CLASS_TYPE } from './basics/const';
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './basics/interfaces';
@@ -37,6 +37,14 @@ import { InputManager } from './scene.input-manager';
 import { Transformer } from './scene.transformer';
 
 export const MAIN_VIEW_PORT_KEY = 'viewMain';
+
+const SCROLLBAR_SEEK_SETTLE_MS = 64;
+const SCROLLBAR_SEEK_MIN_PREVIEW_INTERVAL_MS = 100;
+const SCROLLBAR_SEEK_MAX_PREVIEW_INTERVAL_MS = 240;
+const SCROLLBAR_SEEK_FRAME_INTERVALS = 8;
+const SCROLLBAR_SEEK_RENDER_COST_MULTIPLIER = 4;
+const SCROLLBAR_SEEK_EXPENSIVE_RENDER_MIN_MS = 32;
+const SCROLLBAR_SEEK_EXPENSIVE_RENDER_FRAME_INTERVALS = 2;
 
 export interface ISceneInputControlOptions {
     enableDown: boolean;
@@ -59,6 +67,11 @@ interface IViewportScrollRenderState {
     dirtyBounds: IBoundRectNoAngle[];
     scrollRenderInfo?: IScrollRenderInfo;
     viewportInfo: IViewportInfo;
+}
+
+interface IViewportScrollPosition {
+    viewportScrollX: number;
+    viewportScrollY: number;
 }
 
 function createExposedScrollBounds(bounds: IBoundRectNoAngle, offsetX: number, offsetY: number) {
@@ -159,6 +172,13 @@ export class Scene extends Disposable {
     private _layers: Layer[] = [];
     private _viewports: Viewport[] = [];
     private _preserveEngineOnRender = false;
+    private _scrollbarDragViewport: Nullable<Viewport> = null;
+    private _isScrollbarSeeking = false;
+    private _isScrollbarPreviewDirty = false;
+    private _lastScrollbarSeekInputAt = Number.NEGATIVE_INFINITY;
+    private _lastScrollbarSeekRenderAt = Number.NEGATIVE_INFINITY;
+    private _lastFullRenderDuration = 0;
+    private _renderedViewportScrollPositions = new Map<string, IViewportScrollPosition>();
 
     private _cursor: CURSOR_TYPE = CURSOR_TYPE.DEFAULT;
     private _defaultCursor: CURSOR_TYPE = CURSOR_TYPE.DEFAULT;
@@ -377,6 +397,54 @@ export class Scene extends Disposable {
             layer.makeDirty(true);
         });
         return this;
+    }
+
+    beginScrollbarDrag(viewport: Viewport) {
+        if (this._parent.classType !== RENDER_CLASS_TYPE.ENGINE) {
+            return;
+        }
+
+        this._scrollbarDragViewport = viewport;
+        this._isScrollbarSeeking = false;
+        this._isScrollbarPreviewDirty = false;
+    }
+
+    updateScrollbarDrag(viewport: Viewport) {
+        if (viewport !== this._scrollbarDragViewport) {
+            return;
+        }
+
+        const now = Tools.now();
+        this._lastScrollbarSeekInputAt = now;
+        this._isScrollbarPreviewDirty = true;
+        if (this._isScrollbarSeeking) {
+            return;
+        }
+
+        const renderedPosition = this._renderedViewportScrollPositions.get(viewport.viewportKey);
+        if (!renderedPosition) {
+            return;
+        }
+
+        const { scaleX, scaleY } = this.getAncestorScale();
+        const viewportWidth = (viewport.width ?? 0) / Math.max(Math.abs(scaleX), Number.EPSILON);
+        const viewportHeight = (viewport.height ?? 0) / Math.max(Math.abs(scaleY), Number.EPSILON);
+        const isOutsideRenderedViewport = Math.abs(viewport.viewportScrollX - renderedPosition.viewportScrollX) >= viewportWidth ||
+            Math.abs(viewport.viewportScrollY - renderedPosition.viewportScrollY) >= viewportHeight;
+        if (isOutsideRenderedViewport) {
+            this._isScrollbarSeeking = true;
+            this._lastScrollbarSeekRenderAt = now;
+        }
+    }
+
+    endScrollbarDrag(viewport: Viewport) {
+        if (viewport !== this._scrollbarDragViewport) {
+            return;
+        }
+
+        this._scrollbarDragViewport = null;
+        this._isScrollbarSeeking = false;
+        this._isScrollbarPreviewDirty = false;
     }
 
     isScrollRenderPending() {
@@ -782,6 +850,12 @@ export class Scene extends Disposable {
             const viewport = this._viewports[i];
             if (viewport.viewportKey === key) {
                 this._viewports.splice(i, 1);
+                this._renderedViewportScrollPositions.delete(key);
+                if (viewport === this._scrollbarDragViewport) {
+                    this._scrollbarDragViewport = null;
+                    this._isScrollbarSeeking = false;
+                    this._isScrollbarPreviewDirty = false;
+                }
                 return viewport;
             }
         }
@@ -831,6 +905,66 @@ export class Scene extends Disposable {
         return { canPreserveEngine, dirtyBounds, scrollRenderInfos, viewportInfos };
     }
 
+    private _renderScrollbarSeekPreview(canvas: Canvas) {
+        if (!this._isScrollbarPreviewDirty) {
+            return;
+        }
+
+        const ctx = canvas.getContext();
+        const pixelRatio = canvas.getPixelRatio();
+        for (const viewport of this._viewports) {
+            if (viewport.shouldIntoRender()) {
+                viewport.renderScrollbarOnly(ctx, pixelRatio);
+            }
+        }
+        this._isScrollbarPreviewDirty = false;
+    }
+
+    private _getScrollbarSeekPreviewInterval() {
+        const frameInterval = this.getEngine()?.getEstimatedFrameInterval() ?? 1000 / 60;
+        return Tools.clamp(
+            Math.max(
+                frameInterval * SCROLLBAR_SEEK_FRAME_INTERVALS,
+                this._lastFullRenderDuration * SCROLLBAR_SEEK_RENDER_COST_MULTIPLIER
+            ),
+            SCROLLBAR_SEEK_MIN_PREVIEW_INTERVAL_MS,
+            SCROLLBAR_SEEK_MAX_PREVIEW_INTERVAL_MS
+        );
+    }
+
+    private _shouldDeferScrollbarSeekRender(now: number) {
+        if (!this._isScrollbarSeeking) {
+            return false;
+        }
+
+        const hasSettled = now - this._lastScrollbarSeekInputAt >= SCROLLBAR_SEEK_SETTLE_MS;
+        if (hasSettled) {
+            return false;
+        }
+
+        const frameInterval = this.getEngine()?.getEstimatedFrameInterval() ?? 1000 / 60;
+        const expensiveRenderThreshold = Math.max(
+            SCROLLBAR_SEEK_EXPENSIVE_RENDER_MIN_MS,
+            frameInterval * SCROLLBAR_SEEK_EXPENSIVE_RENDER_FRAME_INTERVALS
+        );
+        if (this._lastFullRenderDuration >= expensiveRenderThreshold) {
+            return true;
+        }
+
+        return now - this._lastScrollbarSeekRenderAt < this._getScrollbarSeekPreviewInterval();
+    }
+
+    private _recordRenderedViewportScrollPositions() {
+        for (const viewport of this._viewports) {
+            if (viewport.shouldIntoRender()) {
+                this._renderedViewportScrollPositions.set(viewport.viewportKey, {
+                    viewportScrollX: viewport.viewportScrollX,
+                    viewportScrollY: viewport.viewportScrollY,
+                });
+            }
+        }
+    }
+
     render(parentCtx?: UniverRenderingContext) {
         if (!this.isDirty()) {
             return;
@@ -839,6 +973,17 @@ export class Scene extends Disposable {
         const layers = this._layers.sort(sortRules);
         const canvasInstance = this.getEngine()?.getCanvas();
         const shouldTryPreservingEngine = this._preserveEngineOnRender && parentCtx == null && canvasInstance != null;
+        const isScrollbarSeekRender = this._isScrollbarSeeking && parentCtx == null && canvasInstance != null;
+        const shouldMeasureFullRender = parentCtx == null && canvasInstance != null;
+        const fullRenderStartedAt = Tools.now();
+        if (isScrollbarSeekRender) {
+            this._renderScrollbarSeekPreview(canvasInstance);
+        }
+        if (isScrollbarSeekRender && this._shouldDeferScrollbarSeekRender(fullRenderStartedAt)) {
+            this.getEngine()?.renderFrameTags$.next(['scrollDetailDeferred', true]);
+            return;
+        }
+
         this._preserveEngineOnRender = false;
         let layerRenderOptions: ILayerRenderOptions | undefined;
 
@@ -870,6 +1015,13 @@ export class Scene extends Disposable {
             layers[i].render(parentCtx, i === len - 1, layerRenderOptions);
         }
         this._afterRender$.next(canvasInstance);
+        this._recordRenderedViewportScrollPositions();
+        if (shouldMeasureFullRender) {
+            this._lastFullRenderDuration = Tools.now() - fullRenderStartedAt;
+            if (isScrollbarSeekRender) {
+                this._lastScrollbarSeekRenderAt = fullRenderStartedAt;
+            }
+        }
     }
 
     async requestRender(parentCtx?: UniverRenderingContext) {
@@ -1043,6 +1195,8 @@ export class Scene extends Disposable {
 
         this.clearLayer();
         this.clearViewports();
+        this._renderedViewportScrollPositions.clear();
+        this._scrollbarDragViewport = null;
         this.detachControl();
         this.onTransformChange$?.complete();
         this._inputManager?.dispose();

@@ -173,6 +173,8 @@ describe('ScrollBar', () => {
         const scrollBar = new ScrollBar(viewport, { mainScene: scene });
         const scrollToBarPos = vi.spyOn(viewport, 'scrollToBarPos');
         const scrollByBarDeltaValue = vi.spyOn(viewport, 'scrollByBarDeltaValue');
+        const beginScrollbarDrag = vi.spyOn(scene, 'beginScrollbarDrag');
+        const endScrollbarDrag = vi.spyOn(scene, 'endScrollbarDrag');
         const setCapture = vi.spyOn(engine, 'setCapture').mockImplementation(() => {});
 
         scrollBar.resize(160, 120, 640, 480);
@@ -195,6 +197,8 @@ describe('ScrollBar', () => {
         expect(scrollToBarPos).toHaveBeenCalledWith({ y: expect.any(Number) });
         expect(scrollByBarDeltaValue).toHaveBeenCalledWith({ x: 16 }, true, { isBarDragEnd: true });
         expect(scrollByBarDeltaValue).toHaveBeenCalledWith({ y: 24 }, true, { isBarDragEnd: true });
+        expect(beginScrollbarDrag).toHaveBeenCalledTimes(2);
+        expect(endScrollbarDrag).toHaveBeenCalledTimes(2);
         expect(setCapture).toHaveBeenCalled();
 
         scrollBar.dispose();
@@ -203,6 +207,7 @@ describe('ScrollBar', () => {
     it('coalesces rapid thumb drag deltas before scrolling the viewport', () => {
         const scrollBar = new ScrollBar(viewport, { mainScene: scene });
         const scrollByBarDeltaValue = vi.spyOn(viewport, 'scrollByBarDeltaValue');
+        const updateScrollbarDrag = vi.spyOn(scene, 'updateScrollbarDrag');
         const rafCallbacks: FrameRequestCallback[] = [];
         vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback: FrameRequestCallback) => {
             rafCallbacks.push(callback);
@@ -222,52 +227,45 @@ describe('ScrollBar', () => {
 
         expect(scrollByBarDeltaValue).toHaveBeenCalledOnce();
         expect(scrollByBarDeltaValue).toHaveBeenCalledWith({ y: 24 }, true, { isBarDragging: true });
+        expect(updateScrollbarDrag).toHaveBeenCalledWith(viewport);
 
         scrollBar.dispose();
     });
 
-    it('throttles continued thumb drag scrolling while preserving the latest delta', () => {
-        vi.useFakeTimers();
-        try {
-            const scrollBar = new ScrollBar(viewport, { mainScene: scene });
-            const scrollByBarDeltaValue = vi.spyOn(viewport, 'scrollByBarDeltaValue');
-            const rafCallbacks: FrameRequestCallback[] = [];
-            vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback: FrameRequestCallback) => {
-                rafCallbacks.push(callback);
-                return rafCallbacks.length;
-            });
-            vi.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => {});
+    it('schedules continued thumb drag scrolling on the next display frame', () => {
+        const scrollBar = new ScrollBar(viewport, { mainScene: scene });
+        const scrollByBarDeltaValue = vi.spyOn(viewport, 'scrollByBarDeltaValue');
+        const rafCallbacks: FrameRequestCallback[] = [];
+        vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback: FrameRequestCallback) => {
+            rafCallbacks.push(callback);
+            return rafCallbacks.length;
+        });
+        vi.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => {});
 
-            scrollBar.resize(160, 120, 640, 480);
-            scrollBar.verticalThumbRect!.onPointerDown$.emitEvent({ offsetX: 154, offsetY: 24 } as any);
-            scene.onPointerMove$.emitEvent({ offsetX: 154, offsetY: 36 } as any);
-            scene.onPointerMove$.emitEvent({ offsetX: 154, offsetY: 48 } as any);
+        scrollBar.resize(160, 120, 640, 480);
+        scrollBar.verticalThumbRect!.onPointerDown$.emitEvent({ offsetX: 154, offsetY: 24 } as any);
+        scene.onPointerMove$.emitEvent({ offsetX: 154, offsetY: 36 } as any);
+        scene.onPointerMove$.emitEvent({ offsetX: 154, offsetY: 48 } as any);
 
-            rafCallbacks[0](16);
-            expect(scrollByBarDeltaValue).toHaveBeenCalledOnce();
-            expect(scrollByBarDeltaValue).toHaveBeenLastCalledWith({ y: 24 }, true, { isBarDragging: true });
+        rafCallbacks[0](16);
+        expect(scrollByBarDeltaValue).toHaveBeenCalledOnce();
+        expect(scrollByBarDeltaValue).toHaveBeenLastCalledWith({ y: 24 }, true, { isBarDragging: true });
 
-            scene.onPointerMove$.emitEvent({ offsetX: 154, offsetY: 60 } as any);
-            scene.onPointerMove$.emitEvent({ offsetX: 154, offsetY: 72 } as any);
+        scene.onPointerMove$.emitEvent({ offsetX: 154, offsetY: 60 } as any);
+        scene.onPointerMove$.emitEvent({ offsetX: 154, offsetY: 72 } as any);
 
-            expect(rafCallbacks).toHaveLength(1);
-            expect(scrollByBarDeltaValue).toHaveBeenCalledOnce();
+        expect(rafCallbacks).toHaveLength(2);
+        expect(scrollByBarDeltaValue).toHaveBeenCalledOnce();
 
-            vi.advanceTimersByTime(32);
-            expect(rafCallbacks).toHaveLength(2);
+        rafCallbacks[1](32);
+        expect(scrollByBarDeltaValue).toHaveBeenCalledTimes(2);
+        expect(scrollByBarDeltaValue).toHaveBeenLastCalledWith({ y: 24 }, true, { isBarDragging: true });
 
-            rafCallbacks[1](48);
-            expect(scrollByBarDeltaValue).toHaveBeenCalledTimes(2);
-            expect(scrollByBarDeltaValue).toHaveBeenLastCalledWith({ y: 24 }, true, { isBarDragging: true });
+        scene.onPointerUp$.emitEvent({ offsetX: 154, offsetY: 72 } as any);
+        expect(scrollByBarDeltaValue).toHaveBeenCalledTimes(3);
+        expect(scrollByBarDeltaValue).toHaveBeenLastCalledWith({ y: 0 }, true, { isBarDragEnd: true });
 
-            scene.onPointerUp$.emitEvent({ offsetX: 154, offsetY: 72 } as any);
-            expect(scrollByBarDeltaValue).toHaveBeenCalledTimes(3);
-            expect(scrollByBarDeltaValue).toHaveBeenLastCalledWith({ y: 0 }, true, { isBarDragEnd: true });
-
-            scrollBar.dispose();
-        } finally {
-            vi.useRealTimers();
-        }
+        scrollBar.dispose();
     });
 
     it('supports single-axis scrollbars and no-op resize guards', () => {

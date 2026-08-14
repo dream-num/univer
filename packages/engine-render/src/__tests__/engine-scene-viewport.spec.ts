@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { Tools } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { CURSOR_TYPE } from '../basics/const';
 import { DeviceType, PointerInput } from '../basics/i-events';
@@ -332,6 +333,92 @@ describe('engine scene viewport extra', () => {
         engine.dispose();
     });
 
+    it('defers obsolete detail renders during a large scrollbar seek and paints the settled target', () => {
+        const { engine, scene, viewport } = createFixture();
+        const layer = scene.getLayer(1);
+        const renderSpy = vi.spyOn(layer, 'render');
+        const nowSpy = vi.spyOn(Tools, 'now');
+        const scrollbarRenderSpy = vi.spyOn(viewport, 'renderScrollbarOnly');
+        vi.spyOn(engine, 'getEstimatedFrameInterval').mockReturnValue(1000 / 120);
+
+        let now = 0;
+        nowSpy.mockImplementation(() => now);
+        scene.render();
+        renderSpy.mockClear();
+
+        scene.beginScrollbarDrag(viewport);
+        viewport.scrollToViewportPos({ viewportScrollY: 40 });
+        scene.updateScrollbarDrag(viewport);
+        scene.render();
+        expect(renderSpy).toHaveBeenCalledTimes(1);
+
+        renderSpy.mockClear();
+        now = 10;
+        viewport.scrollToViewportPos({ viewportScrollY: 240 });
+        scene.updateScrollbarDrag(viewport);
+        scene.render();
+        expect(renderSpy).not.toHaveBeenCalled();
+        expect(scrollbarRenderSpy).toHaveBeenCalled();
+
+        now = 90;
+        scene.render();
+        expect(renderSpy).toHaveBeenCalledTimes(1);
+
+        renderSpy.mockClear();
+        now = 100;
+        viewport.scrollToViewportPos({ viewportScrollY: 300 });
+        scene.updateScrollbarDrag(viewport);
+        scene.render();
+        expect(renderSpy).not.toHaveBeenCalled();
+
+        now = 164;
+        scene.render();
+        expect(renderSpy).toHaveBeenCalledTimes(1);
+
+        renderSpy.mockClear();
+        viewport.scrollToViewportPos({ viewportScrollY: 320 });
+        scene.updateScrollbarDrag(viewport);
+        scene.endScrollbarDrag(viewport);
+        scene.render();
+        expect(renderSpy).toHaveBeenCalledTimes(1);
+
+        scene.dispose();
+        engine.dispose();
+    });
+
+    it('keeps expensive content stable until a large scrollbar seek settles', () => {
+        const { engine, scene, viewport } = createFixture();
+        const layer = scene.getLayer(1);
+        const renderSpy = vi.spyOn(layer, 'render');
+        const nowSpy = vi.spyOn(Tools, 'now');
+        vi.spyOn(engine, 'getEstimatedFrameInterval').mockReturnValue(1000 / 120);
+
+        nowSpy.mockReturnValueOnce(0).mockReturnValueOnce(40);
+        scene.render();
+        renderSpy.mockClear();
+
+        let now = 50;
+        nowSpy.mockImplementation(() => now);
+        scene.beginScrollbarDrag(viewport);
+        viewport.scrollToViewportPos({ viewportScrollY: 240 });
+        scene.updateScrollbarDrag(viewport);
+        scene.render();
+        expect(renderSpy).not.toHaveBeenCalled();
+
+        now = 220;
+        viewport.scrollToViewportPos({ viewportScrollY: 300 });
+        scene.updateScrollbarDrag(viewport);
+        scene.render();
+        expect(renderSpy).not.toHaveBeenCalled();
+
+        now = 284;
+        scene.render();
+        expect(renderSpy).toHaveBeenCalledTimes(1);
+
+        scene.dispose();
+        engine.dispose();
+    });
+
     it('scrolls independent viewport regions for a frozen sheet render', () => {
         const { engine, scene, viewport, container } = createFixture();
         viewport.setViewportSize({ left: 100, width: 200 });
@@ -468,6 +555,19 @@ describe('engine scene viewport extra', () => {
                 message: '[Engine]: cannot subscribe to rect changes when container is not set!',
             })
         );
+        engine.dispose();
+    });
+
+    it('estimates the display frame interval without following isolated long frames', () => {
+        const engine = new Engine('unit-frame-interval', { elementWidth: 1, elementHeight: 1, dpr: 1 });
+        let timestamp = 0;
+        engine._endFrame(timestamp);
+        for (const interval of [8, 8, 8, 16]) {
+            timestamp += interval;
+            engine._endFrame(timestamp);
+        }
+
+        expect(engine.getEstimatedFrameInterval()).toBe(8);
         engine.dispose();
     });
 

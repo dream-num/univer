@@ -1553,6 +1553,31 @@ export class Viewport {
         }
     }
 
+    renderScrollbarOnly(ctx: UniverRenderingContext, pixelRatio: number) {
+        const scrollBar = this._scrollBar;
+        if (!scrollBar) {
+            return;
+        }
+
+        const width = this.width ?? 0;
+        const height = this.height ?? 0;
+        ctx.save();
+        ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+        if (scrollBar.enableVertical) {
+            ctx.clearRect(this.left + width - scrollBar.totalSize, this.top, scrollBar.totalSize, height);
+        }
+        if (scrollBar.enableHorizontal) {
+            ctx.clearRect(this.left, this.top + height - scrollBar.totalSize, width, scrollBar.totalSize);
+        }
+        ctx.restore();
+
+        ctx.save();
+        const scrollbarTM = this.getScrollBarTransForm().getMatrix();
+        ctx.transform(scrollbarTM[0], scrollbarTM[1], scrollbarTM[2], scrollbarTM[3], scrollbarTM[4], scrollbarTM[5]);
+        this._drawScrollbar(ctx);
+        ctx.restore();
+    }
+
     setViewportSize(props?: IViewProps) {
         if (Tools.isDefine(props?.top)) {
             this.top = props.top;

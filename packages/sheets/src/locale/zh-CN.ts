@@ -64,7 +64,6 @@ const locale: typeof enUS = {
                 cancel: '取消合并',
                 confirm: '继续合并',
                 warning: '警告',
-                dismantleMergeCellWarning: '这将导致一些合并单元格被拆分。您要继续吗？',
             },
         },
     },

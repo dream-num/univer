@@ -32,7 +32,6 @@ const locale: typeof enUS = {
         date: '日付',
         time: '時刻',
         thousandthPercentile: '桁区切り',
-        preview: 'プレビュー',
         dateTime: '日付と時刻',
         decimalLength: '小数点以下の桁数',
         currencyType: '通貨記号',

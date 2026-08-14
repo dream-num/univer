@@ -22,7 +22,6 @@ const locale: typeof enUS = {
         shortcut: {
             'open-find-dialog': 'Obrir el diàleg de cerca',
             'open-replace-dialog': 'Obrir el diàleg de reemplaçament',
-            'close-dialog': 'Tancar el diàleg de cerca i reemplaçament',
             'go-to-next-match': 'Anar a la següent coincidència',
             'go-to-previous-match': 'Anar a la coincidència anterior',
             'focus-selection': 'Enfocar la selecció',

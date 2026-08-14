@@ -19,8 +19,6 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'docs-ui': {
         toolbar: {
-            undo: 'Batalkan',
-            redo: 'Ulangi',
             font: 'Font',
             fontSize: 'Ukuran font',
             bold: 'Tebal',
@@ -45,7 +43,6 @@ const locale: typeof enUS = {
             order: 'Daftar berurut',
             unorder: 'Daftar tak berurut',
             checklist: 'Daftar tugas',
-            documentFlavor: 'Mode Modern',
             alignLeft: 'Rata Kiri',
             alignCenter: 'Rata Tengah',
             alignRight: 'Rata Kanan',
@@ -147,7 +144,6 @@ const locale: typeof enUS = {
                 multiSpace: 'Spasi Ganda',
                 atLeast: 'Setidaknya (px)',
                 exactly: 'Tepat (px)',
-                fixedValue: 'Nilai Tetap(px)',
             },
             sectionSetting: {
                 selectedSections: '{0} bagian dipilih',
@@ -194,9 +190,6 @@ const locale: typeof enUS = {
         },
         'page-settings': {
             'document-setting': 'Pengaturan Dokumen',
-            mode: 'Mode',
-            'modern-mode': 'Modern',
-            'classic-mode': 'Klasik',
             'modern-width': 'Lebar konten',
             'modern-width-narrow': 'Sempit',
             'modern-width-medium': 'Sedang',

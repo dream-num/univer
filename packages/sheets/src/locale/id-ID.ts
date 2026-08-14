@@ -64,7 +64,6 @@ const locale: typeof enUS = {
                 cancel: 'Batalkan penggabungan',
                 confirm: 'Lanjutkan penggabungan',
                 warning: 'Peringatan',
-                dismantleMergeCellWarning: 'Ini akan menyebabkan beberapa sel gabungan terpisah. Apakah Anda ingin melanjutkan?',
             },
         },
     },

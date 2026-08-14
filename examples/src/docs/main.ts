@@ -5,7 +5,6 @@ import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsDrawingUIPlugin } from '@univerjs/docs-drawing-ui';
 import { UniverDocsFindReplacePlugin } from '@univerjs/docs-find-replace';
 import { UniverDocsHyperLinkUIPlugin } from '@univerjs/docs-hyper-link-ui';
-import { UniverDocsMentionUIPlugin } from '@univerjs/docs-mention-ui';
 import { UniverDocsQuickInsertUIPlugin } from '@univerjs/docs-quick-insert-ui';
 import { UniverDocsThreadCommentUIPlugin } from '@univerjs/docs-thread-comment-ui';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
@@ -50,7 +49,6 @@ univer.registerPlugin(UniverDocsFindReplacePlugin);
 univer.registerPlugin(UniverDocsDrawingUIPlugin);
 univer.registerPlugin(UniverDocsThreadCommentUIPlugin);
 univer.registerPlugin(UniverDocsHyperLinkUIPlugin);
-univer.registerPlugin(UniverDocsMentionUIPlugin);
 univer.registerPlugin(UniverDocsQuickInsertUIPlugin);
 univer.registerPlugin(UniverWatermarkPlugin);
 

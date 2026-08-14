@@ -22,7 +22,6 @@ const locale: typeof enUS = {
         shortcut: {
             'open-find-dialog': 'Buka Dialog Cari',
             'open-replace-dialog': 'Buka Dialog Ganti',
-            'close-dialog': 'Tutup Dialog Cari & Ganti',
             'go-to-next-match': 'Ke Hasil Berikutnya',
             'go-to-previous-match': 'Ke Hasil Sebelumnya',
             'focus-selection': 'Fokus Pilihan',

@@ -22,7 +22,7 @@ import { eastAsianQuoteLineBreakExtension } from '../extensions/east-asian-quote
 import { tabLineBreakExtension } from '../extensions/tab-linebreak-extension';
 import { LineBreaker } from '../line-breaker';
 
-describe('unicode line break tests', () => {
+it('passes supported Unicode line break tests', () => {
     // these tests are weird, possibly incorrect or just tailored differently. we skip them.
     const skip = [
         125, 127, 815, 1161, 1163, 1165, 1167, 1331, 2189, 2191, 2873, 2875, 3567, 3739, 4081, 4083, 4425, 4427, 4473,
@@ -37,7 +37,7 @@ describe('unicode line break tests', () => {
     return lines.forEach((line, i) => {
         const rowNumber = i + 1;
         let bk;
-        if (!line || line.startsWith('#')) {
+        if (!line || line.startsWith('#') || skip.includes(rowNumber)) {
             return;
         }
 
@@ -67,11 +67,6 @@ describe('unicode line break tests', () => {
                 codes = codes.map((c) => Number.parseInt(c, 16));
                 return String.fromCodePoint(...codes);
             });
-
-        if (skip.includes(rowNumber)) {
-            it.skip(cols, () => { /* empty */ });
-            return;
-        }
 
         expect(breaks).toStrictEqual(expected);
     });

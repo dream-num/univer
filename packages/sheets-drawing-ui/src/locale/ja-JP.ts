@@ -46,7 +46,6 @@ const locale: typeof enUS = {
             error: 'セル画像の保存に失敗しました',
         },
         'image-popup': {
-            replace: '画像の変更',
             delete: '削除',
             edit: '編集',
             crop: 'トリミング',
@@ -69,7 +68,6 @@ const locale: typeof enUS = {
         'cell-image': {
             pasteTitle: 'セル内画像として貼り付け',
             pasteContent: 'セル内画像を貼り付けると、既存のセル内容が上書きされます。続行しますか？',
-            pasteError: 'この箇所では、シートのセル内画像のコピー＆ペーストはサポートされていません',
         },
         permission: {
             dialog: {

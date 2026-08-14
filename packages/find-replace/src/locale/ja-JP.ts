@@ -22,7 +22,6 @@ const locale: typeof enUS = {
         shortcut: {
             'open-find-dialog': '検索ダイアログを開く',
             'open-replace-dialog': '置換ダイアログを開く',
-            'close-dialog': '検索と置換ダイアログを閉じる',
             'go-to-next-match': '次の一致項目へ移動',
             'go-to-previous-match': '前の一致項目へ移動',
             'focus-selection': '選択範囲にフォーカス',

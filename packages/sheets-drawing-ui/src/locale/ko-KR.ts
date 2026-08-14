@@ -46,7 +46,6 @@ const locale: typeof enUS = {
             error: '셀 이미지 저장 실패',
         },
         'image-popup': {
-            replace: '바꾸기',
             delete: '삭제',
             edit: '편집',
             crop: '자르기',
@@ -69,7 +68,6 @@ const locale: typeof enUS = {
         'cell-image': {
             pasteTitle: '셀 이미지로 붙여넣기',
             pasteContent: '셀 이미지 붙여넣기는 기존 셀 내용을 덮어씁니다. 계속 진행하시겠습니까?',
-            pasteError: '이 단위에서는 시트 셀 이미지 복사 붙여넣기를 지원하지 않습니다',
         },
         permission: {
             dialog: {

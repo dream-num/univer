@@ -32,7 +32,6 @@ const locale: typeof enUS = {
         date: 'Dátum',
         time: 'Čas',
         thousandthPercentile: 'Oddeľovač tisícov',
-        preview: 'Náhľad',
         dateTime: 'Dátum a čas',
         decimalLength: 'Počet desatinných miest',
         currencyType: 'Symbol meny',

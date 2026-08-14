@@ -46,7 +46,6 @@ const locale: typeof enUS = {
             error: '儲存儲存格圖片失敗',
         },
         'image-popup': {
-            replace: '替換',
             delete: '刪除',
             edit: '編輯',
             crop: '裁切',
@@ -69,7 +68,6 @@ const locale: typeof enUS = {
         'cell-image': {
             pasteTitle: '貼上為儲存格圖片',
             pasteContent: '貼上儲存格圖片將覆蓋儲存格中的現有內容，繼續貼上',
-            pasteError: '此儲存格不支援儲存格圖片複製貼上',
         },
         permission: {
             dialog: {

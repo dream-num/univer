@@ -46,7 +46,6 @@ const locale: typeof enUS = {
             error: 'Falha ao salvar imagens de célula',
         },
         'image-popup': {
-            replace: 'Substituir',
             delete: 'Excluir',
             edit: 'Editar',
             crop: 'Cortar',
@@ -69,7 +68,6 @@ const locale: typeof enUS = {
         'cell-image': {
             pasteTitle: 'Colar como imagem de célula',
             pasteContent: 'Colar uma imagem de célula substituirá o conteúdo existente da célula, continuar colando',
-            pasteError: 'Copiar e colar imagem de célula da planilha não é suportado nesta unidade',
         },
         permission: {
             dialog: {

@@ -19,9 +19,7 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'thread-comment-ui': {
         panel: {
-            title: '評論管理',
             empty: '暫無評論',
-            filterEmpty: '沒有符合的結果',
             reset: '重置',
             addComment: '新增評論',
             solved: '已解決',

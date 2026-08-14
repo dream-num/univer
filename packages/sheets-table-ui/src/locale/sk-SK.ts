@@ -39,8 +39,6 @@ const locale: typeof enUS = {
         footer: 'Päta',
         firstLine: 'Prvý riadok',
         secondLine: 'Druhý riadok',
-        columnPrefix: 'Stĺpec',
-        tablePrefix: 'Tabuľka',
         tableNameError: 'Názov tabuľky nesmie obsahovať medzery, nesmie začínať číslom a nesmie byť zhodný s existujúcim názvom tabuľky',
         columnMenu: {
             'insert-left': 'Vložiť 1 stĺpec tabuľky vľavo',

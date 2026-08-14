@@ -21,9 +21,7 @@ const locale: typeof enUS = {
         edit: {
             confirm: 'OK',
             cancel: 'キャンセル',
-            title: 'リンク',
             address: 'アドレス',
-            placeholder: 'リンクのURLを入力してください',
             addressError: 'URLが正しくありません！',
             label: '表示文字列',
             labelError: 'リンクの表示文字列を入力してください',

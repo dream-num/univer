@@ -21,9 +21,7 @@ const locale: typeof enUS = {
         edit: {
             confirm: 'تأكيد',
             cancel: 'إلغاء',
-            title: 'ارتباط',
             address: 'ارتباط',
-            placeholder: 'يُرجى إدخال عنوان URL للارتباط',
             addressError: 'عنوان URL غير قانوني!',
             label: 'تسمية',
             labelError: 'يُرجى إدخال تسمية الارتباط',

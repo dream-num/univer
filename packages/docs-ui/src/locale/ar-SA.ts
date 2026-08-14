@@ -19,8 +19,6 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'docs-ui': {
         toolbar: {
-            undo: 'تراجع',
-            redo: 'إعادة',
             font: 'خط',
             fontSize: 'حجم الخط',
             bold: 'غامق',
@@ -45,7 +43,6 @@ const locale: typeof enUS = {
             order: 'قائمة مرقمة',
             unorder: 'قائمة نقطية',
             checklist: 'قائمة مهام',
-            documentFlavor: 'الوضع الحديث',
             alignLeft: 'محاذاة لليسار',
             alignCenter: 'محاذاة للوسط',
             alignRight: 'محاذاة لليمين',
@@ -147,7 +144,6 @@ const locale: typeof enUS = {
                 multiSpace: 'تباعد متعدد',
                 atLeast: 'على الأقل (بكسل)',
                 exactly: 'بالضبط (بكسل)',
-                fixedValue: 'قيمة ثابتة (بكسل)',
             },
             sectionSetting: {
                 selectedSections: 'تم تحديد {0} من المقاطع',
@@ -194,9 +190,6 @@ const locale: typeof enUS = {
         },
         'page-settings': {
             'document-setting': 'إعداد المستند',
-            mode: 'الوضع',
-            'modern-mode': 'حديث',
-            'classic-mode': 'كلاسيكي',
             'modern-width': 'عرض المحتوى',
             'modern-width-narrow': 'ضيق',
             'modern-width-medium': 'متوسط',

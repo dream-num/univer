@@ -22,7 +22,6 @@ const locale: typeof enUS = {
         shortcut: {
             'open-find-dialog': '打开查找对话框',
             'open-replace-dialog': '打开替换对话框',
-            'close-dialog': '关闭查找替换对话框',
             'go-to-next-match': '下一个匹配项',
             'go-to-previous-match': '下一个匹配项',
             'focus-selection': '聚焦选区',

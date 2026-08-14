@@ -35,9 +35,6 @@ const locale: typeof enUS = {
         CascaderList: {
             empty: 'Нет',
         },
-        Select: {
-            empty: 'Нет',
-        },
         Calendar: {
             year: 'Год',
             weekDays: ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
@@ -74,7 +71,6 @@ const locale: typeof enUS = {
             diamond: 'ромбовидный',
             offset: 'смещение',
             angle: 'угол',
-            flip: 'перевернуть',
             delete: 'удалить',
             transparency: 'прозрачность',
         },

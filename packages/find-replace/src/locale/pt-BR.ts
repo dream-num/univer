@@ -22,7 +22,6 @@ const locale: typeof enUS = {
         shortcut: {
             'open-find-dialog': 'Abrir Caixa de Localização',
             'open-replace-dialog': 'Abrir Caixa de Substituição',
-            'close-dialog': 'Fechar Caixa de Localizar e Substituir',
             'go-to-next-match': 'Ir para Próxima Correspondência',
             'go-to-previous-match': 'Ir para Correspondência Anterior',
             'focus-selection': 'Focar Seleção',

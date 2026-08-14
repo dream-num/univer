@@ -22,7 +22,6 @@ const locale: typeof enUS = {
         shortcut: {
             'open-find-dialog': 'فتح مربع حوار البحث',
             'open-replace-dialog': 'فتح مربع حوار الاستبدال',
-            'close-dialog': 'إغلاق مربع حوار البحث والاستبدال',
             'go-to-next-match': 'الانتقال إلى التطابق التالي',
             'go-to-previous-match': 'الانتقال إلى التطابق السابق',
             'focus-selection': 'تركيز التحديد',

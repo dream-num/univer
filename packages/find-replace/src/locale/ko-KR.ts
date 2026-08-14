@@ -22,7 +22,6 @@ const locale: typeof enUS = {
         shortcut: {
             'open-find-dialog': '찾기 대화 상자 열기',
             'open-replace-dialog': '바꾸기 대화 상자 열기',
-            'close-dialog': '찾기 및 바꾸기 대화 상자 닫기',
             'go-to-next-match': '다음 일치 항목으로 이동',
             'go-to-previous-match': '이전 일치 항목으로 이동',
             'focus-selection': '선택 영역에 포커스',

@@ -21,11 +21,9 @@ const locale: typeof enUS = {
         edit: {
             confirm: '確認',
             cancel: '取消',
-            title: '連結',
             address: '連結',
             label: '文字',
             labelError: '請輸入連結文字',
-            placeholder: '請輸入合法的連結',
             addressError: '請輸入合法的連結',
         },
         info: {

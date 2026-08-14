@@ -39,8 +39,6 @@ const locale: typeof enUS = {
         footer: '바닥글',
         firstLine: '첫 번째 줄',
         secondLine: '두 번째 줄',
-        columnPrefix: '열',
-        tablePrefix: '표',
         tableNameError: '표 이름은 공백을 포함할 수 없으며 숫자로 시작할 수 없고 기존 표 이름과 중복될 수 없습니다',
         columnMenu: {
             'insert-left': '왼쪽에 열 1개 삽입',

@@ -33,7 +33,6 @@ const locale: typeof enUS = {
             title: '編圖',
         },
         'image-popup': {
-            replace: '替換',
             delete: '刪除',
             edit: '編輯',
             crop: '裁切',
@@ -62,9 +61,7 @@ const locale: typeof enUS = {
             horizontal: '水平',
             vertical: '垂直',
             absolutePosition: '絕對位置（px）',
-            relativePosition: '相對位置',
             toTheRightOf: '右側',
-            relativeTo: '相對於',
             bellow: '下方',
             options: '選項',
             moveObjectWithText: '物件隨文字移動',

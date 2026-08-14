@@ -62,7 +62,6 @@ const locale = {
                 cancel: 'Cancel merging',
                 confirm: 'Continue merging',
                 warning: 'Warning',
-                dismantleMergeCellWarning: 'This will cause some merged cells to be split. Do you want to continue?',
             },
         },
     },

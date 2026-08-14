@@ -19,9 +19,7 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'thread-comment-ui': {
         panel: {
-            title: 'مدیریت نظرات',
             empty: 'هنوز نظری وجود ندارد',
-            filterEmpty: 'نتیجه ای یافت نشد',
             reset: 'بازنشانی فیلتر',
             addComment: 'افزودن نظر',
             solved: 'حل شده',

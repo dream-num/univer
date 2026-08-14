@@ -64,7 +64,6 @@ const locale: typeof enUS = {
                 cancel: 'Cancelar mesclagem',
                 confirm: 'Continuar mesclagem',
                 warning: 'Aviso',
-                dismantleMergeCellWarning: 'Isso fará com que algumas células mescladas sejam divididas. Deseja continuar?',
             },
         },
     },

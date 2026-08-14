@@ -59,9 +59,6 @@ const locale: typeof enUS = {
                 selectMonth: 'Pilih bulan',
             },
         },
-        Select: {
-            empty: 'Tidak ada',
-        },
         ColorPicker: {
             more: 'Warna Lainnya',
             cancel: 'Batal',
@@ -74,7 +71,6 @@ const locale: typeof enUS = {
             diamond: 'Berlian',
             offset: 'Offset',
             angle: 'Sudut',
-            flip: 'Balik',
             delete: 'Hapus',
             transparency: 'Transparansi',
         },

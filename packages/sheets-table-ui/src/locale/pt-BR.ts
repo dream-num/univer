@@ -39,8 +39,6 @@ const locale: typeof enUS = {
         footer: 'Rodapé',
         firstLine: 'Primeira Linha',
         secondLine: 'Segunda Linha',
-        columnPrefix: 'Coluna',
-        tablePrefix: 'Tabela',
         tableNameError: 'O nome da tabela não pode conter espaços, não pode começar com um número e não pode ser idêntico ao nome de uma tabela existente',
         columnMenu: {
             'insert-left': 'Inserir 1 coluna à esquerda',

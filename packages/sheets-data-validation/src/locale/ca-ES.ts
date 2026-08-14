@@ -27,7 +27,6 @@ const locale: typeof enUS = {
             equal: 'igual',
             notEqual: 'no igual',
             notBetween: 'no entre',
-            legal: 'és tipus legal',
         },
         ruleName: {
             between: 'Està entre {FORMULA1} i {FORMULA2}',
@@ -61,7 +60,6 @@ const locale: typeof enUS = {
                 equal: 'igual',
                 notEqual: 'no igual',
                 notBetween: 'no entre',
-                legal: 'és una data legal',
             },
             ruleName: {
                 between: 'està entre {FORMULA1} i {FORMULA2}',
@@ -103,20 +101,16 @@ const locale: typeof enUS = {
         custom: {
             ruleName: 'La fórmula personalitzada és {FORMULA1}',
             title: 'Fórmula personalitzada',
-            validFail: 'Si us plau, introdueix una fórmula vàlida',
             error: 'El contingut d’aquesta cel·la incompleix la seva regla de validació',
         },
         validFail: {
             value: 'Si us plau, introdueix un valor',
-            common: 'Si us plau, introdueix un valor o una fórmula',
             number: 'Si us plau, introdueix un número o una fórmula',
             formula: 'Si us plau, introdueix una fórmula',
-            integer: 'Si us plau, introdueix un enter o una fórmula',
             date: 'Si us plau, introdueix una data o una fórmula',
             list: 'Si us plau, introdueix opcions',
             listInvalid: 'La font de la llista ha de ser una llista delimitada o una referència a una sola fila o columna',
             checkboxEqual: 'Introdueix valors diferents per als continguts de cel·la marcats i desmarcats.',
-            formulaError: 'L’interval de referència conté dades invisibles, ajusta l’interval',
             listIntersects: 'L’interval seleccionat no pot creuar-se amb l’àmbit de les regles',
             primitive: 'No es permeten fórmules per a valors personalitzats marcats i desmarcats.',
         },
@@ -128,18 +122,9 @@ const locale: typeof enUS = {
             title: 'Desplegable',
             name: 'El valor conté un del rang',
             error: 'L’entrada ha d’estar dins del rang especificat',
-            emptyError: 'Si us plau, introdueix un valor',
-            add: 'Afegeix',
-            dropdown: 'Selecciona',
-            options: 'Opcions',
-            customOptions: 'Personalitzat',
-            refOptions: 'D’un interval',
-            formulaError: 'La font de la llista ha de ser una llista delimitada de dades o una referència a una sola fila o columna.',
-            edit: 'Edita',
         },
         listMultiple: {
             title: 'Desplegable-múltiple',
-            dropdown: 'Selecció múltiple',
         },
         decimal: {
             title: 'Número',
@@ -150,9 +135,6 @@ const locale: typeof enUS = {
         checkbox: {
             title: 'Casella de selecció',
             error: 'El contingut d’aquesta cel·la incompleix la seva regla de validació',
-            tips: 'Utilitza valors personalitzats dins de les cel·les',
-            checked: 'Valor seleccionat',
-            unchecked: 'Valor no seleccionat',
         },
     },
 };

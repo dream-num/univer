@@ -30,7 +30,6 @@ const locale = {
         date: 'Date',
         time: 'Time',
         thousandthPercentile: 'Thousands separator',
-        preview: 'Preview',
         dateTime: 'Date and time',
         decimalLength: 'Decimal places',
         currencyType: 'Currency Symbol',

@@ -641,16 +641,6 @@ describe('test "SheetsFilterPanelService"', () => {
             });
         });
     });
-
-    describe('test behavior when filter range or filter column changes', () => {
-        it('should close the panel when the filter removed or the column in not in the filter range', () => {
-            // TODO@wzhudev
-        });
-
-        it('should close the panel when the active sheet changes', () => {
-            // TODO@wzhudev
-        });
-    });
 });
 
 function tick(milliseconds: number = 0): Promise<void> {

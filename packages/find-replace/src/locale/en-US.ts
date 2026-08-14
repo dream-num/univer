@@ -20,7 +20,6 @@ const locale = {
         shortcut: {
             'open-find-dialog': 'Open Find Dialog',
             'open-replace-dialog': 'Open Replace Dialog',
-            'close-dialog': 'Close Find & Replace Dialog',
             'go-to-next-match': 'Go to Next Match',
             'go-to-previous-match': 'Go to Previous Match',
             'focus-selection': 'Focus Selection',

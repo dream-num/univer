@@ -27,7 +27,6 @@ const locale: typeof enUS = {
             equal: 'يساوي',
             notEqual: 'لا يساوي',
             notBetween: 'ليس بين',
-            legal: 'نوع قانوني',
         },
         ruleName: {
             between: 'بين {FORMULA1} و{FORMULA2}',
@@ -61,7 +60,6 @@ const locale: typeof enUS = {
                 equal: 'يساوي',
                 notEqual: 'لا يساوي',
                 notBetween: 'ليس بين',
-                legal: 'تاريخ قانوني',
             },
             ruleName: {
                 between: 'بين {FORMULA1} و{FORMULA2}',
@@ -103,20 +101,16 @@ const locale: typeof enUS = {
         custom: {
             ruleName: 'الصيغة المخصصة هي {FORMULA1}',
             title: 'صيغة مخصصة',
-            validFail: 'يرجى إدخال صيغة صالحة',
             error: 'محتويات هذه الخلية تنتهك قاعدة التحقق',
         },
         validFail: {
             value: 'يرجى إدخال قيمة',
-            common: 'يرجى إدخال قيمة أو صيغة',
             number: 'يرجى إدخال رقم أو صيغة',
             formula: 'يرجى إدخال صيغة',
-            integer: 'يرجى إدخال عدد صحيح أو صيغة',
             date: 'يرجى إدخال تاريخ أو صيغة',
             list: 'يرجى إدخال خيارات',
             listInvalid: 'يجب أن يكون مصدر القائمة قائمة محددة بفواصل أو مرجعًا لصف أو عمود واحد',
             checkboxEqual: 'أدخل قيمًا مختلفة لمحتويات الخلية المحددة وغير المحددة.',
-            formulaError: 'يحتوي نطاق المرجع على بيانات غير مرئية، يرجى إعادة ضبط النطاق',
             listIntersects: 'لا يمكن أن يتقاطع النطاق المحدد مع نطاق القواعد',
             primitive: 'غير مسموح بالصيغ لقيم المحدد وغير المحدد المخصصة.',
         },
@@ -128,18 +122,9 @@ const locale: typeof enUS = {
             title: 'قائمة منسدلة',
             name: 'القيمة تحتوي على واحدة من النطاق',
             error: 'يجب أن يكون الإدخال ضمن النطاق المحدد',
-            emptyError: 'يرجى إدخال قيمة',
-            add: 'إضافة',
-            dropdown: 'تحديد',
-            options: 'خيارات',
-            customOptions: 'مخصص',
-            refOptions: 'من نطاق',
-            formulaError: 'يجب أن يكون مصدر القائمة قائمة بيانات محددة بفواصل، أو مرجعًا لصف أو عمود واحد.',
-            edit: 'تحرير',
         },
         listMultiple: {
             title: 'قائمة منسدلة - متعددة',
-            dropdown: 'تحديد متعدد',
         },
         decimal: {
             title: 'رقم',
@@ -150,9 +135,6 @@ const locale: typeof enUS = {
         checkbox: {
             title: 'خانة اختيار',
             error: 'محتويات هذه الخلية تنتهك قاعدة التحقق',
-            tips: 'استخدم قيمًا مخصصة داخل الخلايا',
-            checked: 'القيمة المحددة',
-            unchecked: 'القيمة غير المحددة',
         },
     },
 };

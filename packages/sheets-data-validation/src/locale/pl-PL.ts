@@ -27,7 +27,6 @@ const locale: typeof enUS = {
             equal: 'równe',
             notEqual: 'różne od',
             notBetween: 'nie między',
-            legal: 'jest prawidłowym typem',
         },
         ruleName: {
             between: 'Jest między {FORMULA1} a {FORMULA2}',
@@ -61,7 +60,6 @@ const locale: typeof enUS = {
                 equal: 'równe',
                 notEqual: 'różne od',
                 notBetween: 'nie między',
-                legal: 'jest prawidłową datą',
             },
             ruleName: {
                 between: 'jest między {FORMULA1} a {FORMULA2}',
@@ -103,20 +101,16 @@ const locale: typeof enUS = {
         custom: {
             ruleName: 'Formuła niestandardowa to {FORMULA1}',
             title: 'Formuła niestandardowa',
-            validFail: 'Wprowadź prawidłową formułę',
             error: 'Zawartość tej komórki narusza regułę sprawdzania poprawności',
         },
         validFail: {
             value: 'Wprowadź wartość',
-            common: 'Wprowadź wartość lub formułę',
             number: 'Wprowadź liczbę lub formułę',
             formula: 'Wprowadź formułę',
-            integer: 'Wprowadź liczbę całkowitą lub formułę',
             date: 'Wprowadź datę lub formułę',
             list: 'Wprowadź opcje',
             listInvalid: 'Źródło listy musi być rozdzieloną listą lub odwołaniem do pojedynczego wiersza lub kolumny',
             checkboxEqual: 'Wprowadź różne wartości dla zaznaczonej i niezaznaczonej zawartości komórki.',
-            formulaError: 'Zakres odwołania zawiera niewidoczne dane, dostosuj zakres',
             listIntersects: 'Wybrany zakres nie może przecinać się z zakresem reguł',
             primitive: 'Formuły nie są dozwolone dla niestandardowych wartości zaznaczonych i niezaznaczonych.',
         },
@@ -128,18 +122,9 @@ const locale: typeof enUS = {
             title: 'Lista rozwijana',
             name: 'Wartość zawiera element z zakresu',
             error: 'Wartość musi należeć do określonego zakresu',
-            emptyError: 'Wprowadź wartość',
-            add: 'Dodaj',
-            dropdown: 'Wybierz',
-            options: 'Opcje',
-            customOptions: 'Niestandardowe',
-            refOptions: 'Z zakresu',
-            formulaError: 'Źródło listy musi być rozdzieloną listą danych lub odwołaniem do pojedynczego wiersza lub kolumny.',
-            edit: 'Edytuj',
         },
         listMultiple: {
             title: 'Lista rozwijana — wielokrotny wybór',
-            dropdown: 'Wielokrotny wybór',
         },
         decimal: {
             title: 'Liczba',
@@ -150,9 +135,6 @@ const locale: typeof enUS = {
         checkbox: {
             title: 'Pole wyboru',
             error: 'Zawartość tej komórki narusza regułę sprawdzania poprawności',
-            tips: 'Użyj niestandardowych wartości w komórkach',
-            checked: 'Wartość zaznaczona',
-            unchecked: 'Wartość niezaznaczona',
         },
     },
 };

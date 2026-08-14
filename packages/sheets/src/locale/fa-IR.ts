@@ -64,7 +64,6 @@ const locale: typeof enUS = {
                 cancel: 'لغو ادغام',
                 confirm: 'ادغام ادامه‌دار',
                 warning: 'هشدار',
-                dismantleMergeCellWarning: 'این باعث تقسیم برخی سلول‌های ادغام‌شده می‌شود. آیا می‌خواهید ادامه دهید؟',
             },
         },
     },

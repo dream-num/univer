@@ -64,7 +64,6 @@ const locale: typeof enUS = {
                 cancel: 'Cancelar fusión',
                 confirm: 'Continuar fusión',
                 warning: 'Advertencia',
-                dismantleMergeCellWarning: 'Esto dividirá algunas celdas fusionadas. ¿Quieres continuar?',
             },
         },
     },

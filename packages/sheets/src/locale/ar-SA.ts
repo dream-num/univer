@@ -64,7 +64,6 @@ const locale: typeof enUS = {
                 cancel: 'إلغاء الدمج',
                 confirm: 'الاستمرار في الدمج',
                 warning: 'تحذير',
-                dismantleMergeCellWarning: 'سيؤدي هذا إلى تقسيم بعض الخلايا المدمجة. هل تريد الاستمرار؟',
             },
         },
     },

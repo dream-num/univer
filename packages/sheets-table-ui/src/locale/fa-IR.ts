@@ -39,8 +39,6 @@ const locale: typeof enUS = {
         footer: 'پاورقی',
         firstLine: 'خط اول',
         secondLine: 'خط دوم',
-        columnPrefix: 'ستون',
-        tablePrefix: 'جدول',
         tableNameError: 'لا يمكن أن يحتوي اسم الجدول على مسافات، ولا يمكن أن يبدأ برقم، ولا يمكن أن يتكرر مع أسماء الجداول الموجودة',
         columnMenu: {
             'insert-left': 'درج ۱ ستون جدول در سمت چپ',

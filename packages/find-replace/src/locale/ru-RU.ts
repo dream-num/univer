@@ -22,7 +22,6 @@ const locale: typeof enUS = {
         shortcut: {
             'open-find-dialog': 'Открыть диалоговое окно поиска',
             'open-replace-dialog': 'Открыть диалоговое окно замены',
-            'close-dialog': 'Закрыть диалоговое окно поиска и замены',
             'go-to-next-match': 'Перейти к следующему совпадению',
             'go-to-previous-match': 'Перейти к предыдущему совпадению',
             'focus-selection': 'Фокус на выделении',

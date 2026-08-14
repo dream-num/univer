@@ -19,9 +19,7 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'thread-comment-ui': {
         panel: {
-            title: 'Správa komentárov',
             empty: 'Zatiaľ žiadne komentáre',
-            filterEmpty: 'Žiadne zodpovedajúce výsledky',
             reset: 'Obnoviť filter',
             addComment: 'Pridať komentár',
             solved: 'Vyriešené',

@@ -19,9 +19,7 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'thread-comment-ui': {
         panel: {
-            title: 'إدارة التعليقات',
             empty: 'لا توجد تعليقات بعد',
-            filterEmpty: 'لا توجد نتائج مطابقة',
             reset: 'إعادة ضبط التصفية',
             addComment: 'إضافة تعليق',
             solved: 'تم الحل',

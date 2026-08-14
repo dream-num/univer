@@ -32,7 +32,6 @@ const locale: typeof enUS = {
         date: 'Data',
         time: 'Hora',
         thousandthPercentile: 'Separador de milhares',
-        preview: 'Visualização',
         dateTime: 'Data e hora',
         decimalLength: 'Casas decimais',
         currencyType: 'Símbolo da moeda',

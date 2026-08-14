@@ -19,8 +19,6 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'docs-ui': {
         toolbar: {
-            undo: 'بازگرداندن',
-            redo: 'تکرار',
             font: 'فونت',
             fontSize: 'اندازه فونت',
             bold: 'پررنگ',
@@ -45,7 +43,6 @@ const locale: typeof enUS = {
             order: 'لیست شماره‌دار',
             unorder: 'لیست بدون شماره',
             checklist: 'لیست وظیفه',
-            documentFlavor: 'حالت مدرن',
             alignLeft: 'تراز چپ',
             alignCenter: 'تراز وسط',
             alignRight: 'تراز راست',
@@ -147,7 +144,6 @@ const locale: typeof enUS = {
                 multiSpace: 'فاصله چندگانه',
                 atLeast: 'حداقل (پیکسل)',
                 exactly: 'دقیقاً (پیکسل)',
-                fixedValue: 'مقدار ثابت(px)',
             },
             sectionSetting: {
                 selectedSections: '{0} بخش انتخاب شده',
@@ -194,9 +190,6 @@ const locale: typeof enUS = {
         },
         'page-settings': {
             'document-setting': 'تنظیمات سند',
-            mode: 'حالت',
-            'modern-mode': 'مدرن',
-            'classic-mode': 'کلاسیک',
             'modern-width': 'عرض محتوا',
             'modern-width-narrow': 'باریک',
             'modern-width-medium': 'متوسط',

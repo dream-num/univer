@@ -39,8 +39,6 @@ const locale: typeof enUS = {
         footer: 'フッター',
         firstLine: '先頭行',
         secondLine: '2行目',
-        columnPrefix: '列',
-        tablePrefix: '表',
         tableNameError: '表の名前は空白を含めることはできず、数字で始めることはできず、既存の表名と重複できません',
         columnMenu: {
             'insert-left': '左に 1 列挿入',

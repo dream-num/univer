@@ -46,7 +46,6 @@ const locale: typeof enUS = {
             error: 'Nie udało się zapisać obrazów w komórkach',
         },
         'image-popup': {
-            replace: 'Zamień',
             delete: 'Usuń',
             edit: 'Edytuj',
             crop: 'Przytnij',
@@ -69,7 +68,6 @@ const locale: typeof enUS = {
         'cell-image': {
             pasteTitle: 'Wklej jako obraz w komórce',
             pasteContent: 'Wklejenie obrazu w komórce spowoduje zastąpienie istniejącej zawartości komórki, kontynuować wklejanie',
-            pasteError: 'Kopiowanie i wklejanie obrazu w komórce arkusza nie jest obsługiwane w tej jednostce',
         },
         permission: {
             dialog: {

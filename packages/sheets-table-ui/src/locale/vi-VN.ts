@@ -39,8 +39,6 @@ const locale: typeof enUS = {
         footer: 'Chân trang',
         firstLine: 'Dòng đầu tiên',
         secondLine: 'Dòng thứ hai',
-        columnPrefix: 'Cột',
-        tablePrefix: 'Bảng',
         tableNameError: 'Tên bảng không thể chứa khoảng trắng, không được bắt đầu bằng số và không được trùng với tên bảng đã có',
         columnMenu: {
             'insert-left': 'Chèn 1 cột bảng bên trái',

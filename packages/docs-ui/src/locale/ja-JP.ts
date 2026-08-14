@@ -19,8 +19,6 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'docs-ui': {
         toolbar: {
-            undo: '元に戻す',
-            redo: 'やり直し',
             font: 'フォント',
             fontSize: 'フォントサイズ',
             bold: '太字',
@@ -45,7 +43,6 @@ const locale: typeof enUS = {
             order: '番号付きリスト',
             unorder: '箇条書き',
             checklist: 'チェックリスト',
-            documentFlavor: 'モダンモード',
             alignLeft: '左揃え',
             alignCenter: '中央揃え',
             alignRight: '右揃え',
@@ -147,7 +144,6 @@ const locale: typeof enUS = {
                 multiSpace: '複数行間',
                 atLeast: '最小値 (px)',
                 exactly: '固定値 (px)',
-                fixedValue: '固定値(px)',
             },
             sectionSetting: {
                 selectedSections: '{0} 個のセクションを選択中',
@@ -194,9 +190,6 @@ const locale: typeof enUS = {
         },
         'page-settings': {
             'document-setting': '文書設定',
-            mode: 'モード',
-            'modern-mode': 'モダン',
-            'classic-mode': 'クラシック',
             'modern-width': 'コンテンツ幅',
             'modern-width-narrow': '狭い',
             'modern-width-medium': '標準',

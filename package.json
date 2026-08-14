@@ -41,7 +41,6 @@
         "typecheck": "turbo typecheck",
         "serve:umd": "serve .",
         "test": "turbo test -- --passWithNoTests",
-        "test:docx-e2e": "pnpm --dir packages/engine-render exec vitest run src/components/docs/layout/__tests__/doc-skeleton.spec.ts src/components/docs/layout/__tests__/tools.spec.ts src/components/docs/layout/model/__tests__/page.spec.ts src/components/docs/layout/block/__tests__/table.spec.ts src/components/docs/layout/block/paragraph/__tests__/linebreaking.spec.ts -t \"DOCX golden e2e\"",
         "coverage": "turbo --concurrency 50% coverage -- --passWithNoTests ",
         "analyze:build": "node --experimental-strip-types ./scripts/build-analysis.mts",
         "build": "pnpm run build:plugins && pnpm run build:presets",
@@ -58,9 +57,10 @@
         "release": "verso"
     },
     "devDependencies": {
+        "@amamo/verso": "1.1.0",
         "@antfu/eslint-config": "^9.2.0",
-        "@commitlint/cli": "^21.2.1",
-        "@commitlint/config-conventional": "^21.2.0",
+        "@commitlint/cli": "^21.2.2",
+        "@commitlint/config-conventional": "^21.2.2",
         "@eslint-react/eslint-plugin": "^5.18.1",
         "@eslint/compat": "^2.1.0",
         "@playwright/test": "^1.57.0",
@@ -69,7 +69,6 @@
         "@types/react-dom": "19.2.4",
         "@univerjs-infra/shared": "workspace:*",
         "@univerjs/design": "workspace:*",
-        "@univerkit/verso": "1.0.0-rc.2",
         "eslint": "^10.8.0",
         "eslint-plugin-format": "^2.0.1",
         "eslint-plugin-react": "^7.37.5",
@@ -90,7 +89,6 @@
         "overrides": {
             "@types/react": "19.2.18",
             "@types/react-dom": "19.2.4",
-            "basic-ftp": "5.2.0",
             "react": "19.2.8",
             "react-dom": "19.2.8"
         }

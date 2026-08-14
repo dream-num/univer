@@ -39,8 +39,6 @@ const locale: typeof enUS = {
         footer: 'Pied de page',
         firstLine: 'Première ligne',
         secondLine: 'Deuxième ligne',
-        columnPrefix: 'Colonne',
-        tablePrefix: 'Tableau',
         tableNameError: 'Le nom du tableau ne peut pas contenir d\'espaces, ne peut pas commencer par un chiffre et ne peut pas être identique à un nom de tableau existant',
         columnMenu: {
             'insert-left': 'Insérer 1 colonne à gauche',

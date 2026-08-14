@@ -19,8 +19,6 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'docs-ui': {
         toolbar: {
-            undo: 'Hoàn tác',
-            redo: 'Làm lại',
             font: 'Phông chữ',
             fontSize: 'Cỡ chữ',
             bold: 'In đậm',
@@ -45,7 +43,6 @@ const locale: typeof enUS = {
             order: 'Danh sách có thứ tự',
             unorder: 'Danh sách không thứ tự',
             checklist: 'Danh sách công việc',
-            documentFlavor: 'Chế độ hiện đại',
             alignLeft: 'Căn trái',
             alignCenter: 'Căn giữa',
             alignRight: 'Căn phải',
@@ -147,7 +144,6 @@ const locale: typeof enUS = {
                 multiSpace: 'Nhiều dòng',
                 atLeast: 'Tối thiểu (px)',
                 exactly: 'Chính xác (px)',
-                fixedValue: 'Giá trị cố định (px)',
             },
             sectionSetting: {
                 selectedSections: 'Đã chọn {0} phần',
@@ -194,9 +190,6 @@ const locale: typeof enUS = {
         },
         'page-settings': {
             'document-setting': 'Cài đặt tài liệu',
-            mode: 'Chế độ',
-            'modern-mode': 'Hiện đại',
-            'classic-mode': 'Cổ điển',
             'modern-width': 'Độ rộng nội dung',
             'modern-width-narrow': 'Hẹp',
             'modern-width-medium': 'Vừa',

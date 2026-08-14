@@ -19,8 +19,6 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'docs-ui': {
         toolbar: {
-            undo: '撤銷',
-            redo: '重做',
             font: '字體',
             fontSize: '字號',
             bold: '粗體',
@@ -45,7 +43,6 @@ const locale: typeof enUS = {
             order: '有序列表',
             unorder: '無序列表',
             checklist: '任務列表',
-            documentFlavor: '現代模式',
             alignLeft: '左對齊',
             alignCenter: '居中對齊',
             alignRight: '右對齊',
@@ -147,7 +144,6 @@ const locale: typeof enUS = {
                 multiSpace: '多倍行距',
                 atLeast: '至少 (px)',
                 exactly: '固定值 (px)',
-                fixedValue: '固定值 (px)',
             },
             sectionSetting: {
                 selectedSections: '已選取 {0} 個節',
@@ -194,9 +190,6 @@ const locale: typeof enUS = {
         },
         'page-settings': {
             'document-setting': '文件設定',
-            mode: '模式',
-            'modern-mode': '現代模式',
-            'classic-mode': '經典模式',
             'modern-width': '內容寬度',
             'modern-width-narrow': '窄',
             'modern-width-medium': '適中',

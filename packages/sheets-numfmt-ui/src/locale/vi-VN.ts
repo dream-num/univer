@@ -32,7 +32,6 @@ const locale: typeof enUS = {
         date: 'Ngày',
         time: 'Thời gian',
         thousandthPercentile: 'Phân vị phần nghìn',
-        preview: 'Xem trước',
         dateTime: 'Ngày giờ',
         decimalLength: 'Số chữ số thập phân',
         currencyType: 'Loại tiền tệ',

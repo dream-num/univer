@@ -59,9 +59,6 @@ const locale: typeof enUS = {
                 selectMonth: '選擇月份',
             },
         },
-        Select: {
-            empty: '無',
-        },
         ColorPicker: {
             more: '更多顏色',
             cancel: '取消',
@@ -74,7 +71,6 @@ const locale: typeof enUS = {
             diamond: '菱形',
             offset: '偏移',
             angle: '角度',
-            flip: '翻轉',
             delete: '刪除',
             transparency: '透明度',
         },

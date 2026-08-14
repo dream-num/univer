@@ -33,7 +33,6 @@ const locale: typeof enUS = {
             title: '画像の編集',
         },
         'image-popup': {
-            replace: '置換',
             delete: '削除',
             edit: '編集',
             crop: 'トリミング',
@@ -62,9 +61,7 @@ const locale: typeof enUS = {
             horizontal: '水平方向',
             vertical: '垂直方向',
             absolutePosition: '絶対位置(px)',
-            relativePosition: '相対位置',
             toTheRightOf: '右側に',
-            relativeTo: '基準に対して',
             bellow: '下に',
             options: 'オプション',
             moveObjectWithText: '文字列と一緒にオブジェクトを移動',

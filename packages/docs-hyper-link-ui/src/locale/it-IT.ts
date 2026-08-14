@@ -21,9 +21,7 @@ const locale: typeof enUS = {
         edit: {
             confirm: 'Conferma',
             cancel: 'Annulla',
-            title: 'Collegamento',
             address: 'Collegamento',
-            placeholder: 'Inserisci un URL di collegamento',
             addressError: 'URL non valido!',
             label: 'Etichetta',
             labelError: 'Inserisci l\'etichetta del collegamento',

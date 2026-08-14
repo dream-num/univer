@@ -64,7 +64,6 @@ const locale: typeof enUS = {
                 cancel: 'Hủy hợp nhất',
                 confirm: 'Tiếp tục hợp nhất',
                 warning: 'Cảnh báo',
-                dismantleMergeCellWarning: 'Điều này sẽ khiến một số ô đã hợp nhất bị tách ra. Bạn có muốn tiếp tục không?',
             },
         },
     },

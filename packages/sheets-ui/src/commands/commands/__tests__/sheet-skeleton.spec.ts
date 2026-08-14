@@ -158,7 +158,6 @@ describe('Test commands used for change selections', () => {
             expectBorderList = Object.keys(borderOfRange);
             expect(borderLenEqual(actualBorderList, expectBorderList)).toBe(true);
             expect(actualBorderList.length).toBe(1);
-            expect(true).toBe(true);
         });
     });
 });

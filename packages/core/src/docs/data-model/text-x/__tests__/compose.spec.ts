@@ -238,36 +238,6 @@ describe('compose test cases', () => {
         expect(TextX.compose(actions_a, actions_b)).toEqual(expect_actions);
     });
 
-    it('test compose insert + insert', () => {
-        const actions_a: TextXAction[] = [{
-            t: TextXActionType.INSERT,
-            body: {
-                dataStream: 'h',
-            },
-            len: 1,
-        }];
-
-        const actions_b: TextXAction[] = [{
-            t: TextXActionType.INSERT,
-            body: {
-                dataStream: 'b',
-            },
-            len: 1,
-        }];
-
-        const expect_actions: TextXAction[] = [{
-            t: TextXActionType.INSERT,
-            body: {
-                dataStream: 'bh',
-            },
-            len: 2,
-        }];
-
-        const composed = TextX.compose(actions_a, actions_b);
-
-        // expect(composed).toEqual(expect_actions);
-    });
-
     it('test compose insert + delete', () => {
         const actions_a: TextXAction[] = [{
             t: TextXActionType.INSERT,

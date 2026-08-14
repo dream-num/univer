@@ -59,9 +59,6 @@ const locale: typeof enUS = {
                 selectMonth: '월 선택',
             },
         },
-        Select: {
-            empty: '없음',
-        },
         ColorPicker: {
             more: '추가 색상',
             cancel: '취소',
@@ -74,7 +71,6 @@ const locale: typeof enUS = {
             diamond: '다이아몬드형',
             offset: '오프셋',
             angle: '각도',
-            flip: '뒤집기',
             delete: '삭제',
             transparency: '투명도',
         },

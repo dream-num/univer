@@ -21,11 +21,9 @@ const locale: typeof enUS = {
         edit: {
             confirm: 'Xác nhận',
             cancel: 'Hủy',
-            title: 'Liên kết',
             address: 'Liên kết',
             label: 'Nhãn',
             labelError: 'Vui lòng nhập nhãn liên kết',
-            placeholder: 'Vui lòng nhập liên kết hợp lệ',
             addressError: 'Vui lòng nhập liên kết hợp lệ',
         },
         info: {

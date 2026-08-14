@@ -33,7 +33,6 @@ const locale: typeof enUS = {
             title: '이미지 편집',
         },
         'image-popup': {
-            replace: '교체',
             delete: '삭제',
             edit: '편집',
             crop: '자르기',
@@ -62,9 +61,7 @@ const locale: typeof enUS = {
             horizontal: '수평',
             vertical: '수직',
             absolutePosition: '절대 위치(px)',
-            relativePosition: '상대 위치',
             toTheRightOf: '우측에',
-            relativeTo: '상대적으로',
             bellow: '아래에',
             options: '옵션',
             moveObjectWithText: '텍스트와 함께 객체 이동',

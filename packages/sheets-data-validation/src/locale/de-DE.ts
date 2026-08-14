@@ -27,7 +27,6 @@ const locale: typeof enUS = {
             equal: 'gleich',
             notEqual: 'ungleich',
             notBetween: 'nicht zwischen',
-            legal: 'ist gültiger Typ',
         },
         ruleName: {
             between: 'Ist zwischen {FORMULA1} und {FORMULA2}',
@@ -61,7 +60,6 @@ const locale: typeof enUS = {
                 equal: 'gleich',
                 notEqual: 'ungleich',
                 notBetween: 'nicht zwischen',
-                legal: 'ist ein gültiges Datum',
             },
             ruleName: {
                 between: 'ist zwischen {FORMULA1} und {FORMULA2}',
@@ -103,20 +101,16 @@ const locale: typeof enUS = {
         custom: {
             ruleName: 'Benutzerdefinierte Formel ist {FORMULA1}',
             title: 'Benutzerdefinierte Formel',
-            validFail: 'Bitte geben Sie eine gültige Formel ein',
             error: 'Der Inhalt dieser Zelle verstößt gegen die Überprüfungsregel',
         },
         validFail: {
             value: 'Bitte geben Sie einen Wert ein',
-            common: 'Bitte geben Sie einen Wert oder eine Formel ein',
             number: 'Bitte geben Sie eine Zahl oder eine Formel ein',
             formula: 'Bitte geben Sie eine Formel ein',
-            integer: 'Bitte geben Sie eine ganze Zahl oder eine Formel ein',
             date: 'Bitte geben Sie ein Datum oder eine Formel ein',
             list: 'Bitte geben Sie Optionen ein',
             listInvalid: 'Die Listenquelle muss eine durch Trennzeichen getrennte Liste oder ein Bezug auf eine einzelne Zeile oder Spalte sein',
             checkboxEqual: 'Geben Sie unterschiedliche Werte für angekreuzte und nicht angekreuzte Zelleninhalte ein.',
-            formulaError: 'Der Bezugsbereich enthält unsichtbare Daten, bitte passen Sie den Bereich an',
             listIntersects: 'Der ausgewählte Bereich darf sich nicht mit dem Geltungsbereich der Regeln überschneiden',
             primitive: 'Formeln sind für benutzerdefinierte angekreuzte und nicht angekreuzte Werte nicht zulässig.',
         },
@@ -128,18 +122,9 @@ const locale: typeof enUS = {
             title: 'Dropdown',
             name: 'Wert enthält einen aus dem Bereich',
             error: 'Eingabe muss im angegebenen Bereich liegen',
-            emptyError: 'Bitte geben Sie einen Wert ein',
-            add: 'Hinzufügen',
-            dropdown: 'Auswählen',
-            options: 'Optionen',
-            customOptions: 'Benutzerdefiniert',
-            refOptions: 'Aus einem Bereich',
-            formulaError: 'Die Listenquelle muss eine durch Trennzeichen getrennte Datenliste oder ein Bezug auf eine einzelne Zeile oder Spalte sein.',
-            edit: 'Bearbeiten',
         },
         listMultiple: {
             title: 'Dropdown-Mehrfachauswahl',
-            dropdown: 'Mehrfachauswahl',
         },
         decimal: {
             title: 'Zahl',
@@ -150,9 +135,6 @@ const locale: typeof enUS = {
         checkbox: {
             title: 'Kontrollkästchen',
             error: 'Der Inhalt dieser Zelle verstößt gegen die Überprüfungsregel',
-            tips: 'Benutzerdefinierte Werte in Zellen verwenden',
-            checked: 'Ausgewählter Wert',
-            unchecked: 'Nicht ausgewählter Wert',
         },
     },
 };

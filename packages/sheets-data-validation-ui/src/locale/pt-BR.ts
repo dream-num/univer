@@ -40,18 +40,7 @@ const locale: typeof enUS = {
             legal: 'é tipo válido',
         },
         validFail: {
-            value: 'Insira um valor',
-            common: 'Insira um valor ou fórmula',
-            number: 'Insira um número ou fórmula',
-            formula: 'Insira uma fórmula',
-            integer: 'Insira um número inteiro ou fórmula',
-            date: 'Insira uma data ou fórmula',
-            list: 'Insira as opções',
-            listInvalid: 'A fonte da lista deve ser uma lista delimitada ou uma referência a uma única linha ou coluna',
-            checkboxEqual: 'Insira valores diferentes para o conteúdo da célula marcada e desmarcada.',
             formulaError: 'O intervalo de referência contém dados invisíveis, ajuste o intervalo',
-            listIntersects: 'O intervalo selecionado não pode intersectar o escopo das regras',
-            primitive: 'Fórmulas não são permitidas para valores personalizados de marcado e desmarcado.',
         },
         panel: {
             title: 'Gerenciamento de validação de dados',
@@ -75,50 +64,22 @@ const locale: typeof enUS = {
             rangeError: 'Os intervalos não são válidos',
             allowBlank: 'Permitir valores em branco',
         },
-        any: {
-            title: 'Qualquer valor',
-            error: 'O conteúdo desta célula viola a regra de validação',
-        },
         date: {
             title: 'Data',
         },
         list: {
             title: 'Lista suspensa',
-            name: 'O valor contém um do intervalo',
-            error: 'A entrada deve estar dentro do intervalo especificado',
-            emptyError: 'Insira um valor',
             add: 'Adicionar',
-            dropdown: 'Selecionar',
             options: 'Opções',
             customOptions: 'Personalizado',
             refOptions: 'De um intervalo',
-            formulaError: 'A fonte da lista deve ser uma lista delimitada de dados ou uma referência a uma única linha ou coluna.',
             edit: 'Editar',
-        },
-        listMultiple: {
-            title: 'Lista suspensa - Múltipla',
-            dropdown: 'Seleção múltipla',
-        },
-        textLength: {
-            title: 'Comprimento do texto',
-        },
-        decimal: {
-            title: 'Número',
-        },
-        whole: {
-            title: 'Número inteiro',
         },
         checkbox: {
             title: 'Caixa de seleção',
-            error: 'O conteúdo desta célula viola a regra de validação',
             tips: 'Use valores personalizados dentro das células',
             checked: 'Valor selecionado',
             unchecked: 'Valor não selecionado',
-        },
-        custom: {
-            title: 'Fórmula personalizada',
-            error: 'O conteúdo desta célula viola a regra de validação',
-            validFail: 'Insira uma fórmula válida',
         },
         alert: {
             title: 'Erro',

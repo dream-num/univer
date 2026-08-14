@@ -33,7 +33,6 @@ const locale: typeof enUS = {
             title: 'ویرایش تصویر',
         },
         'image-popup': {
-            replace: 'تعویض',
             delete: 'حذف',
             edit: 'ویرایش',
             crop: 'کراپ',
@@ -62,9 +61,7 @@ const locale: typeof enUS = {
             horizontal: 'افقی',
             vertical: 'عمودی',
             absolutePosition: 'موقعیت مطلق(px)',
-            relativePosition: 'موقعیت نسبی',
             toTheRightOf: 'سمت راست',
-            relativeTo: 'نسبت به',
             bellow: 'زیر',
             options: 'گزینه‌ها',
             moveObjectWithText: 'جابه‌جایی شیء با متن',

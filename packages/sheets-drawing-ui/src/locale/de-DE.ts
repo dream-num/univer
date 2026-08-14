@@ -46,7 +46,6 @@ const locale: typeof enUS = {
             error: 'Zellenbilder konnten nicht gespeichert werden',
         },
         'image-popup': {
-            replace: 'Ersetzen',
             delete: 'Löschen',
             edit: 'Bearbeiten',
             crop: 'Zuschneiden',
@@ -69,7 +68,6 @@ const locale: typeof enUS = {
         'cell-image': {
             pasteTitle: 'Als Zellenbild einfügen',
             pasteContent: 'Das Einfügen eines Zellenbilds überschreibt den bestehenden Inhalt der Zelle, mit dem Einfügen fortfahren?',
-            pasteError: 'Kopieren und Einfügen von Zellenbildern wird in dieser Einheit nicht unterstützt',
         },
         permission: {
             dialog: {

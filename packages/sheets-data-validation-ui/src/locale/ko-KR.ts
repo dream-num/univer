@@ -40,18 +40,7 @@ const locale: typeof enUS = {
             legal: '유효한 형식',
         },
         validFail: {
-            value: '값을 입력하세요',
-            common: '값 또는 수식을 입력하세요',
-            number: '숫자 또는 수식을 입력하세요',
-            formula: '수식을 입력하세요',
-            integer: '정수 또는 수식을 입력하세요',
-            date: '날짜 또는 수식을 입력하세요',
-            list: '목록 옵션을 입력하세요',
-            listInvalid: '목록 소스는 구분된 목록이거나 단일 행 또는 열 참조여야 합니다',
-            checkboxEqual: '선택된 값과 선택되지 않은 값에 서로 다른 값을 입력하세요',
             formulaError: '참조 범위에 보이지 않는 데이터가 포함되어 있습니다. 범위를 다시 설정하세요',
-            listIntersects: '선택한 범위가 규칙 범위와 겹칠 수 없습니다',
-            primitive: '사용자 지정 선택/미선택 값에는 수식을 사용할 수 없습니다',
         },
         panel: {
             title: '데이터 유효성 검사 관리',
@@ -75,50 +64,22 @@ const locale: typeof enUS = {
             rangeError: '범위가 올바르지 않습니다',
             allowBlank: '빈 셀 허용',
         },
-        any: {
-            title: '모든 값',
-            error: '이 셀의 내용이 유효성 검사 규칙을 위반했습니다',
-        },
         date: {
             title: '날짜',
         },
         list: {
             title: '목록',
-            name: '목록 범위 내 값',
-            error: '입력 값이 지정된 범위 내에 있어야 합니다',
-            emptyError: '값을 입력하세요',
             add: '추가',
-            dropdown: '목록 표시',
             options: '옵션',
             customOptions: '사용자 지정',
             refOptions: '범위 참조',
-            formulaError: '목록 소스는 구분된 목록이거나 단일 행 또는 열 참조여야 합니다',
             edit: '수정',
-        },
-        listMultiple: {
-            title: '복수 선택 목록',
-            dropdown: '여러 항목 선택',
-        },
-        textLength: {
-            title: '텍스트 길이',
-        },
-        decimal: {
-            title: '숫자',
-        },
-        whole: {
-            title: '정수',
         },
         checkbox: {
             title: '체크박스',
-            error: '이 셀의 내용이 유효성 검사 규칙을 위반했습니다',
             tips: '셀 내 사용자 지정 값을 사용하세요',
             checked: '선택된 값',
             unchecked: '선택되지 않은 값',
-        },
-        custom: {
-            title: '사용자 지정 수식',
-            error: '이 셀의 내용이 유효성 검사 규칙을 위반했습니다',
-            validFail: '유효한 수식을 입력하세요',
         },
         alert: {
             title: '오류',

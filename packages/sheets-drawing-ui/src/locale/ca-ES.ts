@@ -46,7 +46,6 @@ const locale: typeof enUS = {
             error: 'No s\'han pogut desar les imatges de cel·la',
         },
         'image-popup': {
-            replace: 'Reemplaça',
             delete: 'Elimina',
             edit: 'Edita',
             crop: 'Retalla',
@@ -69,7 +68,6 @@ const locale: typeof enUS = {
         'cell-image': {
             pasteTitle: 'Enganxa com a imatge de cel·la',
             pasteContent: 'Enganxar una imatge de cel·la sobreescriurà el contingut existent de la cel·la, continuar enganxant',
-            pasteError: 'La còpia i enganxat d’imatges de cel·la de full no està suportada en aquesta unitat',
         },
         permission: {
             dialog: {

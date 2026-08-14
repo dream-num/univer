@@ -19,9 +19,7 @@ const locale = {
         edit: {
             confirm: 'Confirm',
             cancel: 'Cancel',
-            title: 'Link',
             address: 'Link',
-            placeholder: 'Please input a link url',
             addressError: 'Url is illegal!',
             label: 'Label',
             labelError: 'Please input label of link',

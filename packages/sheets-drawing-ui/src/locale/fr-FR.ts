@@ -46,7 +46,6 @@ const locale: typeof enUS = {
             error: 'Échec de l\'enregistrement des images de cellule',
         },
         'image-popup': {
-            replace: 'Remplacer',
             delete: 'Supprimer',
             edit: 'Éditer',
             crop: 'Rogner',
@@ -69,7 +68,6 @@ const locale: typeof enUS = {
         'cell-image': {
             pasteTitle: 'Coller comme image de cellule',
             pasteContent: 'Coller une image de cellule écrasera le contenu existant de la cellule, continuer le collage',
-            pasteError: 'Le copier-coller d\'image de cellule n\'est pas pris en charge dans cette unité',
         },
         permission: {
             dialog: {

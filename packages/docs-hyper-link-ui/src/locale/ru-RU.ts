@@ -21,11 +21,9 @@ const locale: typeof enUS = {
         edit: {
             confirm: 'Подтвердить',
             cancel: 'Отменить',
-            title: 'Ссылка',
             address: 'Ссылка',
             label: 'Текст',
             labelError: 'Введите текст ссылки',
-            placeholder: 'Пожалуйста, введите ссылку',
             addressError: 'Пожалуйста, введите корректную ссылку',
         },
         info: {

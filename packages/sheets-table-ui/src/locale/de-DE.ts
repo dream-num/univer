@@ -39,8 +39,6 @@ const locale: typeof enUS = {
         footer: 'Fußzeile',
         firstLine: 'Erste Zeile',
         secondLine: 'Zweite Zeile',
-        columnPrefix: 'Spalte',
-        tablePrefix: 'Tabelle',
         tableNameError: 'Tabellenname darf keine Leerzeichen enthalten, darf nicht mit einer Zahl beginnen und darf nicht mit einem bestehenden Tabellennamen identisch sein',
         columnMenu: {
             'insert-left': '1 Tabellenspalte links einfügen',

@@ -19,8 +19,6 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'docs-ui': {
         toolbar: {
-            undo: '실행 취소',
-            redo: '다시 실행',
             font: '글꼴',
             fontSize: '글꼴 크기',
             bold: '굵게',
@@ -45,7 +43,6 @@ const locale: typeof enUS = {
             order: '번호 매기기',
             unorder: '글머리 기호',
             checklist: '할 일 목록',
-            documentFlavor: '모던 모드',
             alignLeft: '왼쪽 정렬',
             alignCenter: '가운데 정렬',
             alignRight: '오른쪽 정렬',
@@ -147,7 +144,6 @@ const locale: typeof enUS = {
                 multiSpace: '복수 줄 간격',
                 atLeast: '최소 (px)',
                 exactly: '고정값 (px)',
-                fixedValue: '고정 값(px)',
             },
             sectionSetting: {
                 selectedSections: '{0}개 구역 선택됨',
@@ -194,9 +190,6 @@ const locale: typeof enUS = {
         },
         'page-settings': {
             'document-setting': '문서 설정',
-            mode: '모드',
-            'modern-mode': '모던',
-            'classic-mode': '클래식',
             'modern-width': '콘텐츠 너비',
             'modern-width-narrow': '좁게',
             'modern-width-medium': '보통',

@@ -25,7 +25,6 @@ const locale = {
             equal: 'equal',
             notEqual: 'not equal',
             notBetween: 'not between',
-            legal: 'is legal type',
         },
         ruleName: {
             between: 'Is between {FORMULA1} and {FORMULA2}',
@@ -59,7 +58,6 @@ const locale = {
                 equal: 'equal',
                 notEqual: 'not equal',
                 notBetween: 'not between',
-                legal: 'is a legal date',
             },
             ruleName: {
                 between: 'is between {FORMULA1} and {FORMULA2}',
@@ -101,20 +99,16 @@ const locale = {
         custom: {
             ruleName: 'Custom formula is {FORMULA1}',
             title: 'Custom formula',
-            validFail: 'Please input a valid formula',
             error: 'This cell\'s contents violate its validation rule',
         },
         validFail: {
             value: 'Please input a value',
-            common: 'Please input value or formula',
             number: 'Please input number or formula',
             formula: 'Please input formula',
-            integer: 'Please input integer or formula',
             date: 'Please input date or formula',
             list: 'Please input options',
             listInvalid: 'The list source must be a delimited list or a reference to a single row or column',
             checkboxEqual: 'Enter different values for ticked and unticked cell contents.',
-            formulaError: 'The reference range contains invisible data, please readjust the range',
             listIntersects: 'The selected range cannot intersect with the scope of the rules',
             primitive: 'Formulas are not permitted for custom ticked and unticked values.',
         },
@@ -126,18 +120,9 @@ const locale = {
             title: 'Dropdown',
             name: 'Value contains one from range',
             error: 'Input must fall within specified range',
-            emptyError: 'Please enter a value',
-            add: 'Add',
-            dropdown: 'Select',
-            options: 'Options',
-            customOptions: 'Custom',
-            refOptions: 'From a range',
-            formulaError: 'The list source must be a delimited list of data, or a reference to a single row or column.',
-            edit: 'Edit',
         },
         listMultiple: {
             title: 'Dropdown-Multiple',
-            dropdown: 'Multiple select',
         },
         decimal: {
             title: 'Number',
@@ -148,9 +133,6 @@ const locale = {
         checkbox: {
             title: 'Checkbox',
             error: 'This cell\'s contents violate its validation rule',
-            tips: 'Use custom values within cells',
-            checked: 'Selected value',
-            unchecked: 'Unselected value',
         },
     },
 };

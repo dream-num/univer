@@ -64,7 +64,6 @@ const locale: typeof enUS = {
                 cancel: '結合をキャンセル',
                 confirm: '結合を続行',
                 warning: '警告',
-                dismantleMergeCellWarning: 'これにより、一部の結合セルが分割されます。続行しますか？',
             },
         },
     },

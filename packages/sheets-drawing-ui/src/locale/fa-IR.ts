@@ -46,7 +46,6 @@ const locale: typeof enUS = {
             error: 'ذخیره تصاویر سلول ناموفق بود',
         },
         'image-popup': {
-            replace: 'تعویض',
             delete: 'حذف',
             edit: 'ویرایش',
             crop: 'کراپ',
@@ -69,7 +68,6 @@ const locale: typeof enUS = {
         'cell-image': {
             pasteTitle: 'چسباندن به عنوان تصویر سلول',
             pasteContent: 'چسباندن تصویر سلول محتوای موجود سلول را پاک خواهد کرد، ادامه چسباندن',
-            pasteError: 'کپی و چسباندن تصویر سلول در این واحد پشتیبانی نمی‌شود',
         },
         permission: {
             dialog: {

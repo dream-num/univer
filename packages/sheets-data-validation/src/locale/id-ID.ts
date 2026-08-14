@@ -27,7 +27,6 @@ const locale: typeof enUS = {
             equal: 'sama dengan',
             notEqual: 'tidak sama dengan',
             notBetween: 'tidak antara',
-            legal: 'tipe yang sah',
         },
         ruleName: {
             between: 'Di antara {FORMULA1} dan {FORMULA2}',
@@ -61,7 +60,6 @@ const locale: typeof enUS = {
                 equal: 'sama dengan',
                 notEqual: 'tidak sama dengan',
                 notBetween: 'tidak antara',
-                legal: 'tanggal yang sah',
             },
             ruleName: {
                 between: 'antara {FORMULA1} dan {FORMULA2}',
@@ -103,20 +101,16 @@ const locale: typeof enUS = {
         custom: {
             ruleName: 'Rumus kustom adalah {FORMULA1}',
             title: 'Rumus kustom',
-            validFail: 'Harap masukkan rumus yang valid',
             error: 'Konten sel ini melanggar aturan validasinya',
         },
         validFail: {
             value: 'Harap masukkan nilai',
-            common: 'Harap masukkan nilai atau rumus',
             number: 'Harap masukkan angka atau rumus',
             formula: 'Harap masukkan rumus',
-            integer: 'Harap masukkan bilangan bulat atau rumus',
             date: 'Harap masukkan tanggal atau rumus',
             list: 'Harap masukkan opsi',
             listInvalid: 'Sumber daftar harus berupa daftar yang dipisahkan atau referensi ke satu baris atau kolom',
             checkboxEqual: 'Masukkan nilai yang berbeda untuk konten sel yang dicentang dan tidak dicentang',
-            formulaError: 'Rentang referensi berisi data yang tidak terlihat, harap sesuaikan rentangnya',
             listIntersects: 'Rentang yang dipilih tidak boleh berpotongan dengan cakupan aturan',
             primitive: 'Rumus tidak diizinkan untuk nilai kustom yang dicentang dan tidak dicentang',
         },
@@ -128,18 +122,9 @@ const locale: typeof enUS = {
             title: 'Dropdown',
             name: 'Nilai mengandung satu dari rentang',
             error: 'Input harus berada dalam rentang yang ditentukan',
-            emptyError: 'Harap masukkan nilai',
-            add: 'Tambah',
-            dropdown: 'Pilih',
-            options: 'Opsi',
-            customOptions: 'Kustom',
-            refOptions: 'Dari rentang',
-            formulaError: 'Sumber daftar harus berupa daftar data yang dipisahkan, atau referensi ke satu baris atau kolom',
-            edit: 'Edit',
         },
         listMultiple: {
             title: 'Dropdown-Multiple',
-            dropdown: 'Pilih banyak',
         },
         decimal: {
             title: 'Angka',
@@ -150,9 +135,6 @@ const locale: typeof enUS = {
         checkbox: {
             title: 'Kotak centang',
             error: 'Konten sel ini melanggar aturan validasinya',
-            tips: 'Gunakan nilai kustom dalam sel',
-            checked: 'Nilai terpilih',
-            unchecked: 'Nilai tidak terpilih',
         },
     },
 };

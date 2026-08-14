@@ -21,9 +21,7 @@ const locale: typeof enUS = {
         edit: {
             confirm: 'Confirmer',
             cancel: 'Annuler',
-            title: 'Lien',
             address: 'Lien',
-            placeholder: 'Veuillez entrer un lien',
             addressError: 'L\'url est illégal!',
             label: 'Libellé',
             labelError: 'Veuillez entrer le label du lien',

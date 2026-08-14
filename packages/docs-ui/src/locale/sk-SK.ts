@@ -19,8 +19,6 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'docs-ui': {
         toolbar: {
-            undo: 'Späť',
-            redo: 'Znova',
             font: 'Písmo',
             fontSize: 'Veľkosť písma',
             bold: 'Tučné',
@@ -45,7 +43,6 @@ const locale: typeof enUS = {
             order: 'Číslovaný zoznam',
             unorder: 'Odrážkový zoznam',
             checklist: 'Zoznam úloh',
-            documentFlavor: 'Moderný režim',
             alignLeft: 'Zarovnať doľava',
             alignCenter: 'Zarovnať na stred',
             alignRight: 'Zarovnať doprava',
@@ -147,7 +144,6 @@ const locale: typeof enUS = {
                 multiSpace: 'Viacnásobné',
                 atLeast: 'Najmenej (px)',
                 exactly: 'Presne (px)',
-                fixedValue: 'Pevná hodnota (px)',
             },
             sectionSetting: {
                 selectedSections: 'Vybraté sekcie: {0}',
@@ -194,9 +190,6 @@ const locale: typeof enUS = {
         },
         'page-settings': {
             'document-setting': 'Nastavenia dokumentu',
-            mode: 'Režim',
-            'modern-mode': 'Moderný',
-            'classic-mode': 'Klasický',
             'modern-width': 'Šírka obsahu',
             'modern-width-narrow': 'Úzka',
             'modern-width-medium': 'Stredná',

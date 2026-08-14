@@ -39,8 +39,6 @@ const locale: typeof enUS = {
         footer: 'Stopka',
         firstLine: 'Pierwszy wiersz',
         secondLine: 'Drugi wiersz',
-        columnPrefix: 'Kolumna',
-        tablePrefix: 'Tabela',
         tableNameError: 'Nazwa tabeli nie może zawierać spacji, nie może zaczynać się od cyfry i nie może być identyczna z istniejącą nazwą tabeli',
         columnMenu: {
             'insert-left': 'Wstaw 1 kolumnę tabeli z lewej',

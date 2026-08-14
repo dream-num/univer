@@ -64,7 +64,6 @@ const locale: typeof enUS = {
                 cancel: 'Zusammenführen abbrechen',
                 confirm: 'Zusammenführen fortsetzen',
                 warning: 'Warnung',
-                dismantleMergeCellWarning: 'Dadurch werden einige verbundene Zellen aufgeteilt. Möchten Sie fortfahren?',
             },
         },
     },

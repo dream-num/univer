@@ -97,8 +97,6 @@ export class Engine extends Disposable {
     // FPS
     private _fps = 60;
     private _deltaTime = 0;
-    private _estimatedFrameInterval = 1000 / 60;
-    private _frameIntervalSamples: number[] = [];
     private _performanceMonitor: PerformanceMonitor;
 
     private _pointerClickEvent!: (evt: Event) => void;
@@ -499,14 +497,6 @@ export class Engine extends Disposable {
         this._performanceMonitor.endFrame(timestamp);
         this._fps = this._performanceMonitor.averageFPS;
         this._deltaTime = this._performanceMonitor.instantaneousFrameTime || 0;
-        if (this._deltaTime > 0) {
-            this._frameIntervalSamples.push(Math.max(this._deltaTime, 1000 / 240));
-            if (this._frameIntervalSamples.length > 60) {
-                this._frameIntervalSamples.shift();
-            }
-            const sortedIntervals = [...this._frameIntervalSamples].sort((a, b) => a - b);
-            this._estimatedFrameInterval = sortedIntervals[Math.floor(sortedIntervals.length / 4)];
-        }
         this._endFrame$.next({
             FPS: this.getFps(),
             frameTime: this.getDeltaTime(),
@@ -531,7 +521,7 @@ export class Engine extends Disposable {
     }
 
     getEstimatedFrameInterval(): number {
-        return this._estimatedFrameInterval;
+        return this._performanceMonitor.estimatedFrameInterval;
     }
 
     /**

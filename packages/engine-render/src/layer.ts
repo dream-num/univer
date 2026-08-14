@@ -101,6 +101,7 @@ export class Layer extends Disposable {
     private _objects: BaseObject[] = [];
 
     private _cacheCanvas: Nullable<Canvas>;
+    private _cacheValid = false;
 
     protected _dirty: boolean = true;
 
@@ -138,6 +139,7 @@ export class Layer extends Disposable {
         this._allowCache = false;
         this._cacheCanvas?.dispose();
         this._cacheCanvas = null;
+        this._cacheValid = false;
     }
 
     isAllowCache(): boolean {
@@ -262,6 +264,9 @@ export class Layer extends Disposable {
 
     makeDirty(state: boolean = true) {
         this._dirty = state;
+        if (state) {
+            this._cacheValid = false;
+        }
         /**
          * parent is SceneViewer, make it dirty
          */
@@ -299,10 +304,12 @@ export class Layer extends Disposable {
                     clipContextToBounds(mainCtx, dirtyBounds);
                     this._draw(mainCtx, isMaxLayer, viewportInfos);
                     mainCtx.restore();
+                    // The visible frame is current, but the offscreen layer cache still represents the pre-scroll frame.
+                    this._cacheValid = false;
                     this.makeDirty(false);
                     return this;
                 }
-                if (this.isDirty()) {
+                if (this.isDirty() || !this._cacheValid) {
                     const ctx = this._cacheCanvas.getContext();
 
                     this._cacheCanvas.clear();
@@ -313,6 +320,7 @@ export class Layer extends Disposable {
                     this._draw(ctx, isMaxLayer, viewportInfos);
 
                     ctx.restore();
+                    this._cacheValid = true;
                 }
                 this._applyCache(mainCtx);
             } else {
@@ -350,6 +358,7 @@ export class Layer extends Disposable {
         }
 
         this._cacheCanvas = new Canvas({ colorService: engine?.canvasColorService });
+        this._cacheValid = false;
     }
 
     private _draw(mainCtx: UniverRenderingContext, isMaxLayer: boolean, viewportInfos?: Map<string, IViewportInfo>) {
@@ -401,5 +410,6 @@ export class Layer extends Disposable {
 
         this._cacheCanvas?.dispose();
         this._cacheCanvas = null;
+        this._cacheValid = false;
     }
 }

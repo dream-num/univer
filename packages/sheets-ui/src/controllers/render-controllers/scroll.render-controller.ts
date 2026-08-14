@@ -164,6 +164,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         const { scene } = this._context;
         const spreadsheet = this._getSheetObject()?.spreadsheet;
         return scene.getParent().classType === RENDER_CLASS_TYPE.ENGINE &&
+            !scene.isDirty() &&
             spreadsheet != null &&
             !spreadsheet.isDirty() &&
             !spreadsheet.isForceDirty() &&

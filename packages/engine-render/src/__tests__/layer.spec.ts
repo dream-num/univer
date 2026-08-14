@@ -157,7 +157,7 @@ describe('layer', () => {
         layer.dispose();
     });
 
-    it('scrolls a cached layer and clips its repaint to dirty bounds', () => {
+    it('clips scroll repaint and refreshes the stale layer cache before reuse', () => {
         const scene = createScene();
         const object = new TestObject('cached', 1);
         const layer = new Layer(scene, [object], 1, true);
@@ -175,9 +175,10 @@ describe('layer', () => {
         expect(ctx.rect).toHaveBeenCalledWith(140, 0, 20, 90);
         expect(ctx.drawImage).not.toHaveBeenCalled();
 
-        layer.makeDirty(true);
+        scene.__viewport.render.mockClear();
         layer.render(ctx);
-        expect(scene.__viewport.render).toHaveBeenLastCalledWith(expect.anything(), [object], false, undefined);
+        expect(scene.__viewport.render).toHaveBeenCalledWith(expect.anything(), [object], false, undefined);
+        expect(ctx.drawImage).toHaveBeenCalledWith(expect.any(HTMLCanvasElement), 0, 0, 160, 90);
 
         layer.dispose();
     });

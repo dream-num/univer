@@ -607,7 +607,7 @@ export class Spreadsheet extends SheetComponent {
         const { diffX, diffY } = viewportInfo;
         let renderCacheCanvas = cacheCanvas;
         let renderCacheCtx = cacheCtx;
-        const viewport = (this.getParent() as Scene).getViewport(viewportInfo.viewportKey);
+        const viewport = this.getScene().getViewport(viewportInfo.viewportKey);
         const canSwapCache = this._getAncestorParent()?.classType === RENDER_CLASS_TYPE.ENGINE && viewport?.canvas === cacheCanvas;
 
         if (canSwapCache) {

@@ -34,6 +34,7 @@ describe('performance monitor', () => {
         expect(monitor.averageFPS).toBeGreaterThan(0);
         expect(monitor.isSaturated).toBe(true);
         expect(monitor.isEnabled).toBe(true);
+        expect(monitor.estimatedFrameInterval).toBeGreaterThan(0);
 
         monitor.disable();
         monitor.sampleFrame(1100);
@@ -46,6 +47,18 @@ describe('performance monitor', () => {
         expect(monitor.isSaturated).toBe(false);
 
         monitor.dispose();
+    });
+
+    it('estimates animation-frame cadence without following isolated long frames', () => {
+        const monitor = new PerformanceMonitor();
+
+        for (const timestamp of [0, 8, 16, 24, 40]) {
+            monitor.endFrame(timestamp);
+        }
+
+        expect(monitor.estimatedFrameInterval).toBe(8);
+        monitor.reset();
+        expect(monitor.estimatedFrameInterval).toBeCloseTo(16.67, 2);
     });
 
     it('uses performance.now when available and Date.now as fallback', () => {

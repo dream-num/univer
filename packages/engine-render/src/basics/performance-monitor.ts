@@ -24,6 +24,8 @@ export const DEFAULT_FRAME_LIST_SIZE = 60 * 60; // 1min
 const DEFAULT_ONE_SEC_MS = 1000;
 
 const DEFAULT_FRAME_TIME = 16.67; // 60FPS
+const MIN_ANIMATION_FRAME_INTERVAL = 1000 / 240;
+const ANIMATION_FRAME_INTERVAL_PERCENTILE = 0.25;
 export interface IBasicFrameInfo {
     FPS: number;
     frameTime: number; // frame time in milliseconds
@@ -101,6 +103,14 @@ export class PerformanceMonitor extends Disposable {
      */
     get instantaneousFrameTime(): number {
         return this._rollingFrameTime.history(0);
+    }
+
+    /**
+     * Estimates the browser animation-frame cadence while ignoring isolated long frames.
+     */
+    get estimatedFrameInterval(): number {
+        const frameInterval = this._rollingFrameTime.percentile(ANIMATION_FRAME_INTERVAL_PERCENTILE);
+        return frameInterval > 0 ? Math.max(frameInterval, MIN_ANIMATION_FRAME_INTERVAL) : DEFAULT_FRAME_TIME;
     }
 
     /**
@@ -307,6 +317,23 @@ export class RollingAverage {
 
         const i0 = this._wrapPosition(this._pos - 1.0);
         return this._samples[this._wrapPosition(i0 - i)];
+    }
+
+    percentile(percentile: number): number {
+        if (this._sampleCount === 0) {
+            return 0;
+        }
+
+        const sampleCount = Math.min(this._sampleCount, this._samples.length);
+        const samples = new Array<number>(sampleCount);
+        for (let i = 0; i < sampleCount; i++) {
+            samples[i] = this.history(i);
+        }
+        samples.sort((a, b) => a - b);
+
+        const normalizedPercentile = Math.min(1, Math.max(0, percentile));
+        const index = Math.min(sampleCount - 1, Math.floor(sampleCount * normalizedPercentile));
+        return samples[index];
     }
 
     /**

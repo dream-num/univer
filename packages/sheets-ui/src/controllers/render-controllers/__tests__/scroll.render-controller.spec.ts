@@ -119,13 +119,23 @@ describe('SheetsScrollRenderController', () => {
 
         expect(preserveCacheSpy).toHaveBeenCalledWith();
 
-        (context.mainComponent as any).isDirty = () => true;
+        scene.isDirty = () => true;
         scene.onMouseWheel$.emit(
             { ctrlKey: false, shiftKey: false, deltaX: 0, deltaY: 10, preventDefault: vi.fn() },
             { stopPropagation: vi.fn() }
         );
         flushWheelFrame();
         expect(makeDirtySpy).toHaveBeenCalledWith(true);
+        expect(preserveCacheSpy).toHaveBeenCalledTimes(1);
+
+        scene.isDirty = () => false;
+        (context.mainComponent as any).isDirty = () => true;
+        scene.onMouseWheel$.emit(
+            { ctrlKey: false, shiftKey: false, deltaX: 0, deltaY: 10, preventDefault: vi.fn() },
+            { stopPropagation: vi.fn() }
+        );
+        flushWheelFrame();
+        expect(makeDirtySpy).toHaveBeenCalledTimes(2);
         void controller;
     });
 

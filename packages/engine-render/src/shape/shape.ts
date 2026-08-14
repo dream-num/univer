@@ -102,6 +102,7 @@ export abstract class Shape<T extends IShapeProps> extends BaseObject {
     private _renderCacheCanvas: Nullable<Canvas>;
     private _renderCacheBounds: Nullable<IBoundRectNoAngle>;
     private _renderCachePixelRatio = 0;
+    private _renderCacheTransformSize: Nullable<ISize>;
 
     private _hoverCursor: Nullable<string>;
 
@@ -402,6 +403,45 @@ export abstract class Shape<T extends IShapeProps> extends BaseObject {
         };
     }
 
+    override transformByState(option: IObjectFullState): this | undefined {
+        const previousWidth = this.width;
+        const previousHeight = this.height;
+        const cachedSize = this._renderCacheTransformSize;
+        const hasReusableCache = Boolean(
+            this._renderCacheCanvas &&
+            this._renderCacheBounds &&
+            cachedSize?.width === this.width &&
+            cachedSize.height === this.height
+        );
+
+        const result = super.transformByState(option);
+        const geometryChanged = previousWidth !== this.width || previousHeight !== this.height;
+        if (hasReusableCache && !geometryChanged) {
+            // Translation and rotation only change the outer transform; the cached local pixels
+            // remain valid. Keep filters and 3D effects out of the per-frame drag path.
+            this.makeDirty(false);
+        } else if (geometryChanged) {
+            this._releaseRenderCache();
+        }
+        return result;
+    }
+
+    override translate(x?: number | string, y?: number | string): this {
+        const cachedSize = this._renderCacheTransformSize;
+        const hasReusableCache = Boolean(
+            this._renderCacheCanvas &&
+            this._renderCacheBounds &&
+            cachedSize?.width === this.width &&
+            cachedSize.height === this.height
+        );
+
+        super.translate(x, y);
+        if (hasReusableCache) {
+            this.makeDirty(false);
+        }
+        return this;
+    }
+
     protected _renderWithCache(
         ctx: UniverRenderingContext,
         bounds: IBoundRectNoAngle,
@@ -449,6 +489,7 @@ export abstract class Shape<T extends IShapeProps> extends BaseObject {
             cacheContext.restore();
             this._renderCacheBounds = { ...bounds };
             this._renderCachePixelRatio = pixelRatio;
+            this._renderCacheTransformSize = { width: this.width, height: this.height };
         }
 
         ctx.drawImage(
@@ -465,6 +506,7 @@ export abstract class Shape<T extends IShapeProps> extends BaseObject {
         this._renderCacheCanvas = null;
         this._renderCacheBounds = null;
         this._renderCachePixelRatio = 0;
+        this._renderCacheTransformSize = null;
     }
 
     protected _draw(ctx: UniverRenderingContext, bounds?: IViewportInfo) {

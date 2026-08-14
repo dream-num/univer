@@ -75,7 +75,7 @@ describe('DocBackground', () => {
         background.draw(createCtx());
 
         expect(rectDraw.mock.calls[0][1]).toMatchObject({ fill: 'gray.100' });
-        expect(rectDraw.mock.calls[1][1]).toMatchObject({ fill: 'token(white)' });
+        expect(rectDraw.mock.calls[1][1]).toMatchObject({ fill: 'white' });
 
         background.dispose();
     });
@@ -91,7 +91,7 @@ describe('DocBackground', () => {
         background.draw(createCtx());
 
         expect(rectDraw).toHaveBeenCalledTimes(1);
-        expect(rectDraw.mock.calls[0][1]).toMatchObject({ fill: 'token(white)' });
+        expect(rectDraw.mock.calls[0][1]).toMatchObject({ fill: 'white' });
 
         background.dispose();
     });

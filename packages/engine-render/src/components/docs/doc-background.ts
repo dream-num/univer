@@ -25,7 +25,7 @@ import { DocComponent } from './doc-component';
 import { Liquid } from './liquid';
 
 const PAGE_STROKE_COLOR = 'gray.200';
-const PAGE_FILL_COLOR = 'token(white)';
+const PAGE_FILL_COLOR = 'white';
 const UNSPECIFIED_PAGE_FILL_COLOR = 'gray.50';
 const DOCS_WORKSPACE_FILL_COLOR = 'gray.100';
 const MARGIN_STROKE_COLOR = 'gray.300';

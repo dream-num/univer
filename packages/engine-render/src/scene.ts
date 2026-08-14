@@ -39,12 +39,9 @@ import { Transformer } from './scene.transformer';
 export const MAIN_VIEW_PORT_KEY = 'viewMain';
 
 const SCROLLBAR_SEEK_SETTLE_MS = 64;
-const SCROLLBAR_SEEK_MIN_PREVIEW_INTERVAL_MS = 100;
-const SCROLLBAR_SEEK_MAX_PREVIEW_INTERVAL_MS = 240;
-const SCROLLBAR_SEEK_FRAME_INTERVALS = 8;
-const SCROLLBAR_SEEK_RENDER_COST_MULTIPLIER = 4;
 const SCROLLBAR_SEEK_EXPENSIVE_RENDER_MIN_MS = 32;
 const SCROLLBAR_SEEK_EXPENSIVE_RENDER_FRAME_INTERVALS = 2;
+const SCROLLBAR_SEEK_RENDER_COST_SAMPLE_WEIGHT = 0.25;
 
 export interface ISceneInputControlOptions {
     enableDown: boolean;
@@ -176,8 +173,7 @@ export class Scene extends Disposable {
     private _isScrollbarSeeking = false;
     private _isScrollbarPreviewDirty = false;
     private _lastScrollbarSeekInputAt = Number.NEGATIVE_INFINITY;
-    private _lastScrollbarSeekRenderAt = Number.NEGATIVE_INFINITY;
-    private _lastFullRenderDuration = 0;
+    private _estimatedFullRenderDuration = 0;
     private _renderedViewportScrollPositions = new Map<string, IViewportScrollPosition>();
 
     private _cursor: CURSOR_TYPE = CURSOR_TYPE.DEFAULT;
@@ -433,7 +429,6 @@ export class Scene extends Disposable {
             Math.abs(viewport.viewportScrollY - renderedPosition.viewportScrollY) >= viewportHeight;
         if (isOutsideRenderedViewport) {
             this._isScrollbarSeeking = true;
-            this._lastScrollbarSeekRenderAt = now;
         }
     }
 
@@ -920,18 +915,6 @@ export class Scene extends Disposable {
         this._isScrollbarPreviewDirty = false;
     }
 
-    private _getScrollbarSeekPreviewInterval() {
-        const frameInterval = this.getEngine()?.getEstimatedFrameInterval() ?? 1000 / 60;
-        return Tools.clamp(
-            Math.max(
-                frameInterval * SCROLLBAR_SEEK_FRAME_INTERVALS,
-                this._lastFullRenderDuration * SCROLLBAR_SEEK_RENDER_COST_MULTIPLIER
-            ),
-            SCROLLBAR_SEEK_MIN_PREVIEW_INTERVAL_MS,
-            SCROLLBAR_SEEK_MAX_PREVIEW_INTERVAL_MS
-        );
-    }
-
     private _shouldDeferScrollbarSeekRender(now: number) {
         if (!this._isScrollbarSeeking) {
             return false;
@@ -947,11 +930,7 @@ export class Scene extends Disposable {
             SCROLLBAR_SEEK_EXPENSIVE_RENDER_MIN_MS,
             frameInterval * SCROLLBAR_SEEK_EXPENSIVE_RENDER_FRAME_INTERVALS
         );
-        if (this._lastFullRenderDuration >= expensiveRenderThreshold) {
-            return true;
-        }
-
-        return now - this._lastScrollbarSeekRenderAt < this._getScrollbarSeekPreviewInterval();
+        return this._estimatedFullRenderDuration >= expensiveRenderThreshold;
     }
 
     private _recordRenderedViewportScrollPositions() {
@@ -963,6 +942,16 @@ export class Scene extends Disposable {
                 });
             }
         }
+    }
+
+    private _recordFullRenderDuration(duration: number, isScrollbarSeekRender: boolean) {
+        if (!isScrollbarSeekRender || this._estimatedFullRenderDuration === 0) {
+            this._estimatedFullRenderDuration = duration;
+            return;
+        }
+
+        this._estimatedFullRenderDuration +=
+            (duration - this._estimatedFullRenderDuration) * SCROLLBAR_SEEK_RENDER_COST_SAMPLE_WEIGHT;
     }
 
     render(parentCtx?: UniverRenderingContext) {
@@ -1017,10 +1006,7 @@ export class Scene extends Disposable {
         this._afterRender$.next(canvasInstance);
         this._recordRenderedViewportScrollPositions();
         if (shouldMeasureFullRender) {
-            this._lastFullRenderDuration = Tools.now() - fullRenderStartedAt;
-            if (isScrollbarSeekRender) {
-                this._lastScrollbarSeekRenderAt = fullRenderStartedAt;
-            }
+            this._recordFullRenderDuration(Tools.now() - fullRenderStartedAt, isScrollbarSeekRender);
         }
     }
 

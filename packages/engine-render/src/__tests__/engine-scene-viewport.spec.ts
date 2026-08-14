@@ -333,7 +333,7 @@ describe('engine scene viewport extra', () => {
         engine.dispose();
     });
 
-    it('defers obsolete detail renders during a large scrollbar seek and paints the settled target', () => {
+    it('keeps cheap content live during a large scrollbar seek', () => {
         const { engine, scene, viewport } = createFixture();
         const layer = scene.getLayer(1);
         const renderSpy = vi.spyOn(layer, 'render');
@@ -341,46 +341,68 @@ describe('engine scene viewport extra', () => {
         const scrollbarRenderSpy = vi.spyOn(viewport, 'renderScrollbarOnly');
         vi.spyOn(engine, 'getEstimatedFrameInterval').mockReturnValue(1000 / 120);
 
-        let now = 0;
-        nowSpy.mockImplementation(() => now);
+        nowSpy
+            .mockReturnValueOnce(0)
+            .mockReturnValueOnce(4)
+            .mockReturnValueOnce(10)
+            .mockReturnValueOnce(10)
+            .mockReturnValueOnce(46)
+            .mockReturnValueOnce(50)
+            .mockReturnValueOnce(50)
+            .mockReturnValueOnce(54)
+            .mockReturnValueOnce(60)
+            .mockReturnValueOnce(60)
+            .mockReturnValueOnce(64);
         scene.render();
         renderSpy.mockClear();
 
         scene.beginScrollbarDrag(viewport);
-        viewport.scrollToViewportPos({ viewportScrollY: 40 });
-        scene.updateScrollbarDrag(viewport);
-        scene.render();
-        expect(renderSpy).toHaveBeenCalledTimes(1);
-
-        renderSpy.mockClear();
-        now = 10;
         viewport.scrollToViewportPos({ viewportScrollY: 240 });
         scene.updateScrollbarDrag(viewport);
         scene.render();
-        expect(renderSpy).not.toHaveBeenCalled();
+        expect(renderSpy).toHaveBeenCalledTimes(1);
         expect(scrollbarRenderSpy).toHaveBeenCalled();
 
-        now = 90;
-        scene.render();
-        expect(renderSpy).toHaveBeenCalledTimes(1);
-
         renderSpy.mockClear();
-        now = 100;
         viewport.scrollToViewportPos({ viewportScrollY: 300 });
         scene.updateScrollbarDrag(viewport);
         scene.render();
-        expect(renderSpy).not.toHaveBeenCalled();
-
-        now = 164;
-        scene.render();
         expect(renderSpy).toHaveBeenCalledTimes(1);
 
-        renderSpy.mockClear();
         viewport.scrollToViewportPos({ viewportScrollY: 320 });
         scene.updateScrollbarDrag(viewport);
         scene.endScrollbarDrag(viewport);
         scene.render();
+        expect(renderSpy).toHaveBeenCalledTimes(2);
+
+        scene.dispose();
+        engine.dispose();
+    });
+
+    it('keeps content live while its render cost stays within the seek budget', () => {
+        const { engine, scene, viewport } = createFixture();
+        const layer = scene.getLayer(1);
+        const renderSpy = vi.spyOn(layer, 'render');
+        const nowSpy = vi.spyOn(Tools, 'now');
+        vi.spyOn(engine, 'getEstimatedFrameInterval').mockReturnValue(1000 / 120);
+
+        nowSpy.mockReturnValueOnce(0).mockReturnValueOnce(12);
+        scene.render();
+        renderSpy.mockClear();
+
+        let now = 20;
+        nowSpy.mockImplementation(() => now);
+        scene.beginScrollbarDrag(viewport);
+        viewport.scrollToViewportPos({ viewportScrollY: 240 });
+        scene.updateScrollbarDrag(viewport);
+        scene.render();
         expect(renderSpy).toHaveBeenCalledTimes(1);
+
+        now = 28;
+        viewport.scrollToViewportPos({ viewportScrollY: 300 });
+        scene.updateScrollbarDrag(viewport);
+        scene.render();
+        expect(renderSpy).toHaveBeenCalledTimes(2);
 
         scene.dispose();
         engine.dispose();

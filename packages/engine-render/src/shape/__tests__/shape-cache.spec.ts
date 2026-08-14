@@ -52,4 +52,27 @@ describe('Shape render cache', () => {
         shape.dispose();
         mainCanvas.dispose();
     });
+
+    it('keeps the cached bitmap across drag translation but invalidates it for resize', () => {
+        const mainCanvas = new Canvas({ width: 200, height: 100, pixelRatio: 1 });
+        const shape = new CachedShape('translated-cached-shape', { width: 100, height: 50 });
+        const context = mainCanvas.getContext();
+        const bounds = { left: -10, top: -10, right: 110, bottom: 60 };
+
+        shape.drawCached(context, bounds);
+        shape.translate(24, 18);
+        shape.drawCached(context, bounds);
+        expect(shape.drawCount).toBe(1);
+
+        shape.transformByState({ left: 30, top: 20, width: 100, height: 50 });
+        shape.drawCached(context, bounds);
+        expect(shape.drawCount).toBe(1);
+
+        shape.transformByState({ width: 120 });
+        shape.drawCached(context, bounds);
+        expect(shape.drawCount).toBe(2);
+
+        shape.dispose();
+        mainCanvas.dispose();
+    });
 });

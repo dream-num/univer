@@ -73,6 +73,36 @@ describe('ConditionalFormattingStyleComposer', () => {
         });
     });
 
+    it('composes highlight, data bar, and icon set rules on the same cell', () => {
+        const dataBar = {
+            color: '#38bdf8',
+            isGradient: false,
+            isShowValue: true,
+            startPoint: 0,
+            value: 50,
+        };
+        const iconSet = {
+            iconId: '0',
+            iconType: '3Arrows',
+            isShowValue: true,
+        };
+        rules.set('highlight', { stopIfTrue: false, rule: { type: CFRuleType.highlightCell } });
+        rules.set('data-bar', { stopIfTrue: false, rule: { type: CFRuleType.dataBar } });
+        rules.set('icon-set', { stopIfTrue: false, rule: { type: CFRuleType.iconSet } });
+        cellCfs = [
+            { cfId: 'icon-set', result: iconSet, priority: 1 },
+            { cfId: 'data-bar', result: dataBar, priority: 2 },
+            { cfId: 'highlight', result: { bg: { rgb: '#fff7cc' } }, priority: 3 },
+        ];
+
+        expect(service.composeStyle('book-1', 'sheet-1', 1, 1)).toEqual({
+            style: { bg: { rgb: '#fff7cc' } },
+            dataBar,
+            iconSet,
+            isShowValue: true,
+        });
+    });
+
     it('stops evaluating lower-priority rules after a matched stop-if-true rule', () => {
         rules.set('stop', { stopIfTrue: true, rule: { type: CFRuleType.highlightCell } });
         rules.set('ignored', { stopIfTrue: false, rule: { type: CFRuleType.colorScale } });

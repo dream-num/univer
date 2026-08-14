@@ -59,9 +59,6 @@ const locale: typeof enUS = {
                 selectMonth: 'Chọn tháng',
             },
         },
-        Select: {
-            empty: 'Không có',
-        },
         ColorPicker: {
             more: 'Màu sắc khác',
             cancel: 'Hủy bỏ',
@@ -74,7 +71,6 @@ const locale: typeof enUS = {
             diamond: 'Hình thoi',
             offset: 'Độ lệch',
             angle: 'Góc',
-            flip: 'Lật',
             delete: 'Xóa',
             transparency: 'Độ trong suốt',
         },

@@ -64,7 +64,6 @@ const locale: typeof enUS = {
                 cancel: 'Anuluj scalanie',
                 confirm: 'Kontynuuj scalanie',
                 warning: 'Ostrzeżenie',
-                dismantleMergeCellWarning: 'Spowoduje to rozdzielenie niektórych scalonych komórek. Czy chcesz kontynuować?',
             },
         },
     },

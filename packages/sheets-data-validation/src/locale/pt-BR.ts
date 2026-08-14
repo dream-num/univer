@@ -27,7 +27,6 @@ const locale: typeof enUS = {
             equal: 'igual',
             notEqual: 'diferente',
             notBetween: 'não está entre',
-            legal: 'é tipo válido',
         },
         ruleName: {
             between: 'Está entre {FORMULA1} e {FORMULA2}',
@@ -61,7 +60,6 @@ const locale: typeof enUS = {
                 equal: 'igual',
                 notEqual: 'diferente',
                 notBetween: 'não está entre',
-                legal: 'é uma data válida',
             },
             ruleName: {
                 between: 'está entre {FORMULA1} e {FORMULA2}',
@@ -103,20 +101,16 @@ const locale: typeof enUS = {
         custom: {
             ruleName: 'A fórmula personalizada é {FORMULA1}',
             title: 'Fórmula personalizada',
-            validFail: 'Por favor, insira uma fórmula válida',
             error: 'O conteúdo desta célula viola sua regra de validação',
         },
         validFail: {
             value: 'Por favor, insira um valor',
-            common: 'Por favor, insira um valor ou fórmula',
             number: 'Por favor, insira um número ou fórmula',
             formula: 'Por favor, insira uma fórmula',
-            integer: 'Por favor, insira um inteiro ou fórmula',
             date: 'Por favor, insira uma data ou fórmula',
             list: 'Por favor, insira opções',
             listInvalid: 'A fonte da lista deve ser uma lista delimitada ou uma referência a uma única linha ou coluna',
             checkboxEqual: 'Insira valores diferentes para o conteúdo das células marcadas e desmarcadas.',
-            formulaError: 'O intervalo de referência contém dados invisíveis, por favor, reajuste o intervalo',
             listIntersects: 'O intervalo selecionado não pode intersectar com o escopo das regras',
             primitive: 'Fórmulas não são permitidas para valores personalizados de marcado e desmarcado.',
         },
@@ -128,18 +122,9 @@ const locale: typeof enUS = {
             title: 'Lista suspensa',
             name: 'O valor contém um do intervalo',
             error: 'A entrada deve estar dentro do intervalo especificado',
-            emptyError: 'Por favor, insira um valor',
-            add: 'Adicionar',
-            dropdown: 'Selecionar',
-            options: 'Opções',
-            customOptions: 'Personalizado',
-            refOptions: 'De um intervalo',
-            formulaError: 'A fonte da lista deve ser uma lista delimitada de dados, ou uma referência a uma única linha ou coluna.',
-            edit: 'Editar',
         },
         listMultiple: {
             title: 'Lista suspensa - Múltipla',
-            dropdown: 'Seleção múltipla',
         },
         decimal: {
             title: 'Número',
@@ -150,9 +135,6 @@ const locale: typeof enUS = {
         checkbox: {
             title: 'Caixa de seleção',
             error: 'O conteúdo desta célula viola sua regra de validação',
-            tips: 'Use valores personalizados dentro das células',
-            checked: 'Valor selecionado',
-            unchecked: 'Valor não selecionado',
         },
     },
 };

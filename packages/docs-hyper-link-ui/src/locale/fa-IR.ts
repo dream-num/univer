@@ -21,9 +21,7 @@ const locale: typeof enUS = {
         edit: {
             confirm: 'تایید',
             cancel: 'انصراف',
-            title: 'لینک',
             address: 'لینک',
-            placeholder: 'لطفا یک آدرس لینک وارد کنید',
             addressError: 'آدرس غیرمجاز است!',
             label: 'برچسب',
             labelError: 'لطفا برچسب لینک را وارد کنید',

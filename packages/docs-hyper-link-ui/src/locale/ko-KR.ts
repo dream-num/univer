@@ -21,9 +21,7 @@ const locale: typeof enUS = {
         edit: {
             confirm: '확인',
             cancel: '취소',
-            title: '링크',
             address: '링크',
-            placeholder: '링크 URL을 입력해주세요',
             addressError: 'URL이 올바르지 않습니다!',
             label: '라벨',
             labelError: '링크 라벨을 입력해주세요',

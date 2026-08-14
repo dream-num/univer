@@ -31,7 +31,6 @@ const locale = {
             title: 'Edit Image',
         },
         'image-popup': {
-            replace: 'Replace',
             delete: 'Delete',
             edit: 'Edit',
             crop: 'Crop',
@@ -60,9 +59,7 @@ const locale = {
             horizontal: 'Horizontal',
             vertical: 'Vertical',
             absolutePosition: 'Absolute Position(px)',
-            relativePosition: 'Relative Position',
             toTheRightOf: 'to the right of',
-            relativeTo: 'relative to',
             bellow: 'bellow',
             options: 'Options',
             moveObjectWithText: 'Move object with text',

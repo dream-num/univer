@@ -37,8 +37,6 @@ const locale = {
         footer: 'Footer',
         firstLine: 'First Line',
         secondLine: 'Second Line',
-        columnPrefix: 'Column',
-        tablePrefix: 'Table',
         tableNameError: 'Table name cannot contain spaces, cannot start with a number, and cannot be identical to an existing table name',
         columnMenu: {
             'insert-left': 'Insert 1 table column left',

@@ -64,7 +64,6 @@ const locale: typeof enUS = {
                 cancel: '병합 취소',
                 confirm: '병합 계속',
                 warning: '경고',
-                dismantleMergeCellWarning: '일부 병합된 셀이 분할됩니다. 계속하시겠습니까?',
             },
         },
     },

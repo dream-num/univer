@@ -33,7 +33,6 @@ const locale: typeof enUS = {
             title: 'Редактировать изображение',
         },
         'image-popup': {
-            replace: 'Заменить',
             delete: 'Удалить',
             edit: 'Редактировать',
             crop: 'Обрезать',
@@ -62,9 +61,7 @@ const locale: typeof enUS = {
             horizontal: 'По горизонтали',
             vertical: 'По вертикали',
             absolutePosition: 'Абсолютное положение (px)',
-            relativePosition: 'Относительное положение',
             toTheRightOf: 'справа от',
-            relativeTo: 'относительно',
             bellow: 'снизу',
             options: 'Параметры',
             moveObjectWithText: 'Перемещать объект с текстом',

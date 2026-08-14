@@ -64,7 +64,6 @@ const locale: typeof enUS = {
                 cancel: 'Annulla unione',
                 confirm: 'Continua unione',
                 warning: 'Avviso',
-                dismantleMergeCellWarning: 'Questo comporterà la divisione di alcune celle unite. Continuare?',
             },
         },
     },

@@ -32,7 +32,6 @@ const locale: typeof enUS = {
         date: 'Tanggal',
         time: 'Waktu',
         thousandthPercentile: 'Pemisah ribuan',
-        preview: 'Pratinjau',
         dateTime: 'Tanggal dan waktu',
         decimalLength: 'Tempat desimal',
         currencyType: 'Simbol Mata Uang',

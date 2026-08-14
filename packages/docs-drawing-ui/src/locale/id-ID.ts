@@ -33,7 +33,6 @@ const locale: typeof enUS = {
             title: 'Edit Gambar',
         },
         'image-popup': {
-            replace: 'Ganti',
             delete: 'Hapus',
             edit: 'Edit',
             crop: 'Pangkas',
@@ -62,9 +61,7 @@ const locale: typeof enUS = {
             horizontal: 'Horizontal',
             vertical: 'Vertikal',
             absolutePosition: 'Posisi Absolut(px)',
-            relativePosition: 'Posisi Relatif',
             toTheRightOf: 'di sebelah kanan',
-            relativeTo: 'relatif terhadap',
             bellow: 'di bawah',
             options: 'Opsi',
             moveObjectWithText: 'Pindahkan objek dengan teks',

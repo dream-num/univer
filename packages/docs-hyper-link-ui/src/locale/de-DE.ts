@@ -21,9 +21,7 @@ const locale: typeof enUS = {
         edit: {
             confirm: 'Bestätigen',
             cancel: 'Abbrechen',
-            title: 'Link',
             address: 'Link',
-            placeholder: 'Bitte eine Link-URL eingeben',
             addressError: 'URL ist ungültig!',
             label: 'Bezeichnung',
             labelError: 'Bitte die Bezeichnung des Links eingeben',

@@ -19,7 +19,6 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'sheets-hyper-link-ui': {
         form: {
-            editTitle: 'Editar Link',
             addTitle: 'Inserir Link',
             label: 'Rótulo',
             type: 'Tipo',

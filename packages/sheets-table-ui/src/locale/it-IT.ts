@@ -39,8 +39,6 @@ const locale: typeof enUS = {
         footer: 'Piè di Pagina',
         firstLine: 'Prima Riga',
         secondLine: 'Seconda Riga',
-        columnPrefix: 'Colonna',
-        tablePrefix: 'Tabella',
         tableNameError: 'Il nome tabella non può contenere spazi, non può iniziare con un numero e non può essere identico a un nome tabella esistente',
         columnMenu: {
             'insert-left': 'Inserisci 1 colonna tabella a sinistra',

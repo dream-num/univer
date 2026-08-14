@@ -31,12 +31,10 @@ const locale: typeof enUS = {
             lessThanOrEqual: '该值必须小于等于 {0}',
             greaterThan: '该值必大于 {0}',
             greaterThanOrEqual: '该值必大于等于 {0}',
-            rangeSelector: '选择范围或者输入值',
         },
         iconSet: {
             direction: '方向',
             shape: '形状',
-            mark: '标记',
             rank: '等级',
             rule: '规则',
             icon: '图标',
@@ -147,14 +145,11 @@ const locale: typeof enUS = {
             colorScale: '色阶',
             formula: '自定义公式',
             iconSet: '图标集',
-            duplicateValues: '重复值',
-            uniqueValues: '唯一值',
 
         },
         subRuleType: {
             uniqueValues: '唯一值',
             duplicateValues: '重复值',
-            rank: '最前最后',
             text: '文本',
             timePeriod: '时间日期',
             number: '数值',

@@ -32,7 +32,6 @@ const locale: typeof enUS = {
         date: 'تاريخ',
         time: 'وقت',
         thousandthPercentile: 'فاصل الألوف',
-        preview: 'معاينة',
         dateTime: 'التاريخ والوقت',
         decimalLength: 'المنازل العشرية',
         currencyType: 'رمز العملة',

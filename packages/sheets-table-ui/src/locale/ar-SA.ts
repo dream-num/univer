@@ -39,8 +39,6 @@ const locale: typeof enUS = {
         footer: 'تذييل',
         firstLine: 'السطر الأول',
         secondLine: 'السطر الثاني',
-        columnPrefix: 'عمود',
-        tablePrefix: 'جدول',
         tableNameError: 'لا يمكن أن يحتوي اسم الجدول على مسافات، ولا يمكن أن يبدأ برقم، ولا يمكن أن يكون مطابقًا لاسم جدول موجود',
         columnMenu: {
             'insert-left': 'إدراج عمود جدول إلى اليسار',

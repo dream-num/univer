@@ -40,18 +40,7 @@ const locale: typeof enUS = {
             legal: 'tipe yang sah',
         },
         validFail: {
-            value: 'Harap masukkan nilai',
-            common: 'Harap masukkan nilai atau rumus',
-            number: 'Harap masukkan angka atau rumus',
-            formula: 'Harap masukkan rumus',
-            integer: 'Harap masukkan bilangan bulat atau rumus',
-            date: 'Harap masukkan tanggal atau rumus',
-            list: 'Harap masukkan opsi',
-            listInvalid: 'Sumber daftar harus berupa daftar yang dipisahkan atau referensi ke satu baris atau kolom',
-            checkboxEqual: 'Masukkan nilai yang berbeda untuk konten sel yang dicentang dan tidak dicentang',
             formulaError: 'Rentang referensi berisi data yang tidak terlihat, harap sesuaikan rentangnya',
-            listIntersects: 'Rentang yang dipilih tidak boleh berpotongan dengan cakupan aturan',
-            primitive: 'Rumus tidak diizinkan untuk nilai kustom yang dicentang dan tidak dicentang',
         },
         panel: {
             title: 'Manajemen validasi data',
@@ -75,50 +64,22 @@ const locale: typeof enUS = {
             rangeError: 'Rentang tidak sah',
             allowBlank: 'Izinkan nilai kosong',
         },
-        any: {
-            title: 'Nilai apa saja',
-            error: 'Konten sel ini melanggar aturan validasi',
-        },
         date: {
             title: 'Tanggal',
         },
         list: {
             title: 'Dropdown',
-            name: 'Nilai mengandung satu dari rentang',
-            error: 'Input harus berada dalam rentang yang ditentukan',
-            emptyError: 'Harap masukkan nilai',
             add: 'Tambah',
-            dropdown: 'Pilih',
             options: 'Opsi',
             customOptions: 'Kustom',
             refOptions: 'Dari rentang',
-            formulaError: 'Sumber daftar harus berupa daftar data yang dipisahkan, atau referensi ke satu baris atau kolom',
             edit: 'Edit',
-        },
-        listMultiple: {
-            title: 'Dropdown-Multiple',
-            dropdown: 'Pilih banyak',
-        },
-        textLength: {
-            title: 'Panjang teks',
-        },
-        decimal: {
-            title: 'Angka',
-        },
-        whole: {
-            title: 'Bilangan bulat',
         },
         checkbox: {
             title: 'Kotak centang',
-            error: 'Konten sel ini melanggar aturan validasinya',
             tips: 'Gunakan nilai kustom dalam sel',
             checked: 'Nilai terpilih',
             unchecked: 'Nilai tidak terpilih',
-        },
-        custom: {
-            title: 'Rumus kustom',
-            error: 'Konten sel ini melanggar aturan validasinya',
-            validFail: 'Harap masukkan rumus yang valid',
         },
         alert: {
             title: 'Kesalahan',

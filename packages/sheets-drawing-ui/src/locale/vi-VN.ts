@@ -46,7 +46,6 @@ const locale: typeof enUS = {
             error: 'Lưu hình ảnh ô thất bại',
         },
         'image-popup': {
-            replace: 'Thay thế',
             delete: 'Xóa',
             edit: 'Chỉnh sửa',
             crop: 'Cắt',
@@ -69,7 +68,6 @@ const locale: typeof enUS = {
         'cell-image': {
             pasteTitle: 'Dán như hình ảnh ô',
             pasteContent: 'Dán hình ảnh ô sẽ ghi đè lên nội dung hiện có của ô, tiếp tục dán',
-            pasteError: 'Sao chép và dán hình ảnh ô không được hỗ trợ trong đơn vị này',
         },
         permission: {
             dialog: {

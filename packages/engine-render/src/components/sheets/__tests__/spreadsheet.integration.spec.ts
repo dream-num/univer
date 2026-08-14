@@ -633,11 +633,7 @@ describe('spreadsheet integration', () => {
         const random = spreadsheet.testGetRandomLightColor();
         expect(random).toMatch(/^#[A-F]{6}$/);
 
-        expect(spreadsheet.backgroundExtension).toBe(spreadsheet.backgroundExtension);
-        expect(spreadsheet.borderExtension).toBe(spreadsheet.borderExtension);
-        expect(spreadsheet.fontExtension).toBe(spreadsheet.fontExtension);
         expect(spreadsheet.getDocuments()).toBeDefined();
-        expect(spreadsheet.forceDisableGridlines).toBe(spreadsheet.forceDisableGridlines);
 
         const noSkeletonSpreadsheet = new Spreadsheet('no-skeleton');
         expect(noSkeletonSpreadsheet.draw(context, viewportInfo)).toBeUndefined();

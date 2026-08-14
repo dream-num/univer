@@ -22,7 +22,6 @@ const locale: typeof enUS = {
         shortcut: {
             'open-find-dialog': 'Otwórz okno Znajdź',
             'open-replace-dialog': 'Otwórz okno Zamień',
-            'close-dialog': 'Zamknij okno Znajdź i zamień',
             'go-to-next-match': 'Przejdź do następnego dopasowania',
             'go-to-previous-match': 'Przejdź do poprzedniego dopasowania',
             'focus-selection': 'Skup na zaznaczeniu',

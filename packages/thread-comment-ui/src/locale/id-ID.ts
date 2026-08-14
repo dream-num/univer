@@ -19,9 +19,7 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'thread-comment-ui': {
         panel: {
-            title: 'Manajemen Komentar',
             empty: 'Belum ada komentar',
-            filterEmpty: 'Tidak ada hasil yang cocok',
             reset: 'Atur Ulang Filter',
             addComment: 'Tambah Komentar',
             solved: 'Terselesaikan',

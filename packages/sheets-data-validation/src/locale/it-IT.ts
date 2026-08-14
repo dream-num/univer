@@ -27,7 +27,6 @@ const locale: typeof enUS = {
             equal: 'uguale a',
             notEqual: 'diverso da',
             notBetween: 'non tra',
-            legal: 'è un tipo valido',
         },
         ruleName: {
             between: 'È tra {FORMULA1} e {FORMULA2}',
@@ -61,7 +60,6 @@ const locale: typeof enUS = {
                 equal: 'uguale',
                 notEqual: 'diverso',
                 notBetween: 'non tra',
-                legal: 'è una data valida',
             },
             ruleName: {
                 between: 'è tra {FORMULA1} e {FORMULA2}',
@@ -103,20 +101,16 @@ const locale: typeof enUS = {
         custom: {
             ruleName: 'La formula personalizzata è {FORMULA1}',
             title: 'Formula personalizzata',
-            validFail: 'Inserire una formula valida',
             error: 'Il contenuto di questa cella viola la regola di convalida',
         },
         validFail: {
             value: 'Inserire un valore',
-            common: 'Inserire valore o formula',
             number: 'Inserire numero o formula',
             formula: 'Inserire formula',
-            integer: 'Inserire numero intero o formula',
             date: 'Inserire data o formula',
             list: 'Inserire opzioni',
             listInvalid: 'L\'origine dell\'elenco deve essere un elenco delimitato o un riferimento a una singola riga o colonna',
             checkboxEqual: 'Inserire valori diversi per i contenuti delle celle selezionate e non selezionate.',
-            formulaError: 'L\'intervallo di riferimento contiene dati invisibili, riaggiustare l\'intervallo',
             listIntersects: 'L\'intervallo selezionato non può intersecarsi con l\'ambito delle regole',
             primitive: 'Le formule non sono consentite per i valori personalizzati di selezionato e non selezionato.',
         },
@@ -128,18 +122,9 @@ const locale: typeof enUS = {
             title: 'Menu a discesa',
             name: 'Il valore contiene uno dall\'intervallo',
             error: 'L\'input deve rientrare nell\'intervallo specificato',
-            emptyError: 'Inserire un valore',
-            add: 'Aggiungi',
-            dropdown: 'Seleziona',
-            options: 'Opzioni',
-            customOptions: 'Personalizzato',
-            refOptions: 'Da un intervallo',
-            formulaError: 'L\'origine dell\'elenco deve essere un elenco delimitato di dati o un riferimento a una singola riga o colonna.',
-            edit: 'Modifica',
         },
         listMultiple: {
             title: 'Menu a discesa - Multiplo',
-            dropdown: 'Selezione multipla',
         },
         decimal: {
             title: 'Numero',
@@ -150,9 +135,6 @@ const locale: typeof enUS = {
         checkbox: {
             title: 'Casella di controllo',
             error: 'Il contenuto di questa cella viola la regola di convalida',
-            tips: 'Usa valori personalizzati nelle celle',
-            checked: 'Valore selezionato',
-            unchecked: 'Valore non selezionato',
         },
     },
 };

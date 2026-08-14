@@ -59,9 +59,6 @@ const locale: typeof enUS = {
                 selectMonth: 'انتخاب ماه',
             },
         },
-        Select: {
-            empty: 'هیچ‌کدام',
-        },
         ColorPicker: {
             more: 'رنگ‌های بیشتر',
             cancel: 'لغو',
@@ -74,7 +71,6 @@ const locale: typeof enUS = {
             diamond: 'الماسی',
             offset: 'افست',
             angle: 'زاویه',
-            flip: 'برگردان',
             delete: 'حذف',
             transparency: 'شفافیت',
         },

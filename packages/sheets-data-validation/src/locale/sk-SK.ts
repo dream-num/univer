@@ -27,7 +27,6 @@ const locale: typeof enUS = {
             equal: 'rovné',
             notEqual: 'nerovné',
             notBetween: 'nie medzi',
-            legal: 'je platný typ',
         },
         ruleName: {
             between: 'Je medzi {FORMULA1} a {FORMULA2}',
@@ -61,7 +60,6 @@ const locale: typeof enUS = {
                 equal: 'rovné',
                 notEqual: 'nerovné',
                 notBetween: 'nie medzi',
-                legal: 'je platný dátum',
             },
             ruleName: {
                 between: 'je medzi {FORMULA1} a {FORMULA2}',
@@ -103,20 +101,16 @@ const locale: typeof enUS = {
         custom: {
             ruleName: 'Vlastný vzorec je {FORMULA1}',
             title: 'Vlastný vzorec',
-            validFail: 'Zadajte platný vzorec',
             error: 'Obsah tejto bunky porušuje pravidlo overenia',
         },
         validFail: {
             value: 'Zadajte hodnotu',
-            common: 'Zadajte hodnotu alebo vzorec',
             number: 'Zadajte číslo alebo vzorec',
             formula: 'Zadajte vzorec',
-            integer: 'Zadajte celé číslo alebo vzorec',
             date: 'Zadajte dátum alebo vzorec',
             list: 'Zadajte možnosti',
             listInvalid: 'Zdroj zoznamu musí byť zoznam oddelený oddeľovačmi alebo odkaz na jeden riadok alebo stĺpec',
             checkboxEqual: 'Zadajte odlišné hodnoty pre označený a neoznačený obsah bunky.',
-            formulaError: 'Referenčný rozsah obsahuje neviditeľné údaje, upravte rozsah',
             listIntersects: 'Vybraný rozsah sa nemôže prekrývať s rozsahom pravidiel',
             primitive: 'Vzorce nie sú povolené pre vlastné hodnoty označené/neoznačené.',
         },
@@ -128,18 +122,9 @@ const locale: typeof enUS = {
             title: 'Rozbaľovací zoznam',
             name: 'Hodnota obsahuje jednu z rozsahu',
             error: 'Vstup musí spadať do zadaného rozsahu',
-            emptyError: 'Zadajte hodnotu',
-            add: 'Pridať',
-            dropdown: 'Vybrať',
-            options: 'Možnosti',
-            customOptions: 'Vlastné',
-            refOptions: 'Z rozsahu',
-            formulaError: 'Zdroj zoznamu musí byť zoznam oddelený oddeľovačmi alebo odkaz na jeden riadok alebo stĺpec.',
-            edit: 'Upraviť',
         },
         listMultiple: {
             title: 'Rozbaľovací zoznam – viacnásobný',
-            dropdown: 'Viacnásobný výber',
         },
         decimal: {
             title: 'Číslo',
@@ -150,9 +135,6 @@ const locale: typeof enUS = {
         checkbox: {
             title: 'Začiarkavacie políčko',
             error: 'Obsah tejto bunky porušuje pravidlo overenia',
-            tips: 'Použite vlastné hodnoty v bunkách',
-            checked: 'Vybraná hodnota',
-            unchecked: 'Nevybraná hodnota',
         },
     },
 };

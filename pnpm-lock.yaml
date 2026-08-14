@@ -7,7 +7,6 @@ settings:
 overrides:
   '@types/react': 19.2.18
   '@types/react-dom': 19.2.4
-  basic-ftp: 5.2.0
   react: 19.2.8
   react-dom: 19.2.8
 
@@ -15,6 +14,9 @@ importers:
 
   .:
     devDependencies:
+      '@amamo/verso':
+        specifier: 1.1.0
+        version: 1.1.0
       '@antfu/eslint-config':
         specifier: ^9.2.0
         version: 9.2.0(@eslint-react/eslint-plugin@5.18.1(eslint@10.8.0(jiti@2.7.0))(typescript@6.0.3))(@typescript-eslint/typescript-estree@8.65.0(typescript@6.0.3))(@typescript-eslint/utils@8.65.0(eslint@10.8.0(jiti@2.7.0))(typescript@6.0.3))(@vue/compiler-sfc@3.5.40)(eslint-plugin-format@2.0.1(eslint@10.8.0(jiti@2.7.0)))(eslint-plugin-react-refresh@0.5.3(eslint@10.8.0(jiti@2.7.0)))(eslint@10.8.0(jiti@2.7.0))(ts-declaration-location@1.0.7(typescript@6.0.3))(typescript@6.0.3)(vitest@4.1.10)
@@ -48,9 +50,6 @@ importers:
       '@univerjs/design':
         specifier: workspace:*
         version: link:packages/design
-      '@univerkit/verso':
-        specifier: 1.0.0-rc.2
-        version: 1.0.0-rc.2
       eslint:
         specifier: ^10.8.0
         version: 10.8.0(jiti@2.7.0)
@@ -478,9 +477,6 @@ importers:
       '@univerjs/docs-hyper-link-ui':
         specifier: workspace:*
         version: link:../packages/docs-hyper-link-ui
-      '@univerjs/docs-mention-ui':
-        specifier: workspace:*
-        version: link:../packages/docs-mention-ui
       '@univerjs/docs-quick-insert-ui':
         specifier: workspace:*
         version: link:../packages/docs-quick-insert-ui
@@ -3713,6 +3709,36 @@ packages:
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
     engines: {node: '>=10'}
 
+  '@amamo/verso-darwin-arm64@1.1.0':
+    resolution: {integrity: sha512-Oq7zwO9JlVBoKzIhpQr7u8si2kFTFerR163mQU9ZFAc4dajV99OSiU7eHlDVcYUIBGbitH9qv6eSgtrIyxkycQ==}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@amamo/verso-darwin-x64@1.1.0':
+    resolution: {integrity: sha512-WicorAn2J6OzuKRS+pj6VIfBOmPlark7bhWYZcLAISd+GItDM86l4O/7MVPuFtsaetLuvhVImTt8Is9siwEKuQ==}
+    cpu: [x64]
+    os: [darwin]
+
+  '@amamo/verso-linux-arm64@1.1.0':
+    resolution: {integrity: sha512-R2laXNQyIYbPTnDhnAhMYXdjJr2nf6V69ANbSmsCCx50iOJL86/yJ3d/UvQz1cSYmLIOWOiLGVLsg1GgYd59MQ==}
+    cpu: [arm64]
+    os: [linux]
+
+  '@amamo/verso-linux-x64@1.1.0':
+    resolution: {integrity: sha512-80iu8aLozg9ajEIHTCxrbdPsYiJ2CByA7LbVikmsjDtRM0C3PE/7m5aRwQNqv4vFPLlq+Yvf8yrI1C4atHwhEw==}
+    cpu: [x64]
+    os: [linux]
+
+  '@amamo/verso-win32-x64@1.1.0':
+    resolution: {integrity: sha512-99OXueAGm8+DSQB4/ZuWWZucNFTGa6x77VEZpPAEdvj0FHwAzlGYlfA0v65wggcN+qRIxHOe5hTW1AD+hrK4lQ==}
+    cpu: [x64]
+    os: [win32]
+
+  '@amamo/verso@1.1.0':
+    resolution: {integrity: sha512-WdyE/+xcGRxCl3TfbDILFIOY4/dgfHt0BBz3lOwVBv01NW/yQ2TGrjd3D2JCeRQz+HUbXpfCaXbOgmwqPDN+Zw==}
+    engines: {node: '>=22.18.0'}
+    hasBin: true
+
   '@antfu/eslint-config@9.2.0':
     resolution: {integrity: sha512-v/j0Pjn6Sj9CxHT8n4nIKI8lg4O/+P4G+Zdbg7u/3J6JaLayxRXsX2Twx0fjpUtoyxW5mdYd67QycVfr1ahirA==}
     hasBin: true
@@ -6764,36 +6790,6 @@ packages:
     peerDependencies:
       react: 19.2.8
       react-dom: 19.2.8
-
-  '@univerkit/verso-darwin-arm64@1.0.0-rc.2':
-    resolution: {integrity: sha512-ZvIk2pVzlhwPO8mkYIGLhJAqzcFAN3rvln9JEz/nwsOZ03pXiCwH1q1PgwZI1IpFJDlu2D7/7HVdXCFMzMJ0ug==}
-    cpu: [arm64]
-    os: [darwin]
-
-  '@univerkit/verso-darwin-x64@1.0.0-rc.2':
-    resolution: {integrity: sha512-fWxtqFUj/LEyt6FXkMoJ3adkFrwdZb6+Fe1a5T+qErYQ337/GOH3sPn6PQ4Fa9CMcdI+RzFe21inn5qyTJeR/w==}
-    cpu: [x64]
-    os: [darwin]
-
-  '@univerkit/verso-linux-arm64@1.0.0-rc.2':
-    resolution: {integrity: sha512-v8ZNp72gPjEIeDGDXZDxqa1aGAWEWZce3tedNBjubMCrwv6zGzZawf6oXzSxfcoR0vCDIEjb25IA/92S9Hzm1A==}
-    cpu: [arm64]
-    os: [linux]
-
-  '@univerkit/verso-linux-x64@1.0.0-rc.2':
-    resolution: {integrity: sha512-ApFSzSVMWvC6d3yMf3YF7BQW9QC6r6w/y2Pg116veOrn1mcP2noKj3n2joRFsDSa2YgGb2oF+AGKskcOZOfefA==}
-    cpu: [x64]
-    os: [linux]
-
-  '@univerkit/verso-win32-x64@1.0.0-rc.2':
-    resolution: {integrity: sha512-JbKsXxg0wlmeb553asStxEQ8C8tS5NTdz8Mv44GIUa6pZKlojQ8LpTVRTzAJR7ISUZyS4vOSdx/X6iFulvr5lQ==}
-    cpu: [x64]
-    os: [win32]
-
-  '@univerkit/verso@1.0.0-rc.2':
-    resolution: {integrity: sha512-5J7IiXParqT7AChqBxV8jGjE1J1RK0Lvrio6rVVrWNXPDmj6A6EZ4FCKcqt6ORA/jQzBt+n6PWlQvFe7U4aYlQ==}
-    engines: {node: '>=22.18.0'}
-    hasBin: true
 
   '@valibot/to-json-schema@1.7.1':
     resolution: {integrity: sha512-3qkmU6KXWh8GIThEAW3kuRHPQBMjWkKy+Ppz3WkUucx53DTpOa6siMn4xDGSOhlVyMrDaJTCTMLYPZVAIk1P0A==}
@@ -11675,6 +11671,29 @@ snapshots:
 
   '@alloc/quick-lru@5.2.0': {}
 
+  '@amamo/verso-darwin-arm64@1.1.0':
+    optional: true
+
+  '@amamo/verso-darwin-x64@1.1.0':
+    optional: true
+
+  '@amamo/verso-linux-arm64@1.1.0':
+    optional: true
+
+  '@amamo/verso-linux-x64@1.1.0':
+    optional: true
+
+  '@amamo/verso-win32-x64@1.1.0':
+    optional: true
+
+  '@amamo/verso@1.1.0':
+    optionalDependencies:
+      '@amamo/verso-darwin-arm64': 1.1.0
+      '@amamo/verso-darwin-x64': 1.1.0
+      '@amamo/verso-linux-arm64': 1.1.0
+      '@amamo/verso-linux-x64': 1.1.0
+      '@amamo/verso-win32-x64': 1.1.0
+
   '@antfu/eslint-config@9.2.0(@eslint-react/eslint-plugin@5.18.1(eslint@10.8.0(jiti@2.7.0))(typescript@6.0.3))(@typescript-eslint/typescript-estree@8.65.0(typescript@6.0.3))(@typescript-eslint/utils@8.65.0(eslint@10.8.0(jiti@2.7.0))(typescript@6.0.3))(@vue/compiler-sfc@3.5.40)(eslint-plugin-format@2.0.1(eslint@10.8.0(jiti@2.7.0)))(eslint-plugin-react-refresh@0.5.3(eslint@10.8.0(jiti@2.7.0)))(eslint@10.8.0(jiti@2.7.0))(ts-declaration-location@1.0.7(typescript@6.0.3))(typescript@6.0.3)(vitest@4.1.10)':
     dependencies:
       '@antfu/install-pkg': 1.1.0
@@ -14453,29 +14472,6 @@ snapshots:
     dependencies:
       react: 19.2.8
       react-dom: 19.2.8(react@19.2.8)
-
-  '@univerkit/verso-darwin-arm64@1.0.0-rc.2':
-    optional: true
-
-  '@univerkit/verso-darwin-x64@1.0.0-rc.2':
-    optional: true
-
-  '@univerkit/verso-linux-arm64@1.0.0-rc.2':
-    optional: true
-
-  '@univerkit/verso-linux-x64@1.0.0-rc.2':
-    optional: true
-
-  '@univerkit/verso-win32-x64@1.0.0-rc.2':
-    optional: true
-
-  '@univerkit/verso@1.0.0-rc.2':
-    optionalDependencies:
-      '@univerkit/verso-darwin-arm64': 1.0.0-rc.2
-      '@univerkit/verso-darwin-x64': 1.0.0-rc.2
-      '@univerkit/verso-linux-arm64': 1.0.0-rc.2
-      '@univerkit/verso-linux-x64': 1.0.0-rc.2
-      '@univerkit/verso-win32-x64': 1.0.0-rc.2
 
   '@valibot/to-json-schema@1.7.1(valibot@1.4.2(typescript@6.0.3))':
     dependencies:

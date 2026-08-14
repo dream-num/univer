@@ -22,7 +22,6 @@ const locale: typeof enUS = {
         shortcut: {
             'open-find-dialog': 'Ouvrir la boîte de dialogue de recherche',
             'open-replace-dialog': 'Ouvrir la boîte de dialogue de remplacement',
-            'close-dialog': 'Fermer la boîte de dialogue de recherche et de remplacement',
             'go-to-next-match': 'Aller à la correspondance suivante',
             'go-to-previous-match': 'Aller à la correspondance précédente',
             'focus-selection': 'Concentrer la sélection',

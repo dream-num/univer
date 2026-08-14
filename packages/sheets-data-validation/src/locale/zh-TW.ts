@@ -27,7 +27,6 @@ const locale: typeof enUS = {
             equal: '等於',
             notEqual: '不等於',
             notBetween: '未介於',
-            legal: '是合法類型',
         },
         ruleName: {
             between: '介於 {FORMULA1} 和 {FORMULA2} 之間',
@@ -61,7 +60,6 @@ const locale: typeof enUS = {
                 equal: '等於',
                 notEqual: '不等於',
                 notBetween: '未介於',
-                legal: '是合法日期',
             },
             ruleName: {
                 between: '介於 {FORMULA1} 和 {FORMULA2} 之間',
@@ -103,20 +101,16 @@ const locale: typeof enUS = {
         custom: {
             ruleName: '自訂公式 {FORMULA1}',
             title: '自訂公式',
-            validFail: '請輸入合法的公式',
             error: '此儲存格的內容違反了驗證規則',
         },
         validFail: {
             value: '請輸入一個合法值',
-            common: '請輸入數值或公式',
             number: '請輸入合法的數字或公式',
             formula: '請輸入合法的公式',
-            integer: '請輸入合法的整數或公式',
             date: '請輸入合法的日期或公式',
             list: '請輸入至少一個合法選項',
             listInvalid: '清單來源必須是分隔清單或單列或欄的參考。 ',
             checkboxEqual: '為勾選和未勾選的儲存格內容輸入不同的值。 ',
-            formulaError: '引用範圍內包含不可見的數據，請重新調整範圍',
             listIntersects: '所選範圍不能和規則範圍相交',
             primitive: '自訂勾選和未勾選值不允許使用公式。 ',
         },
@@ -128,18 +122,9 @@ const locale: typeof enUS = {
             title: '下拉選單',
             name: '值必須是列表中的值',
             error: '輸入必須在指定的範圍內',
-            emptyError: '請輸入一個值',
-            add: '新增選項',
-            dropdown: '單選',
-            options: '選項來源',
-            customOptions: '自訂',
-            refOptions: '引用資料',
-            formulaError: '列表來源必須是劃定分界後的資料列表,或是對單一列或欄的引用。',
-            edit: '編輯',
         },
         listMultiple: {
             title: '下拉式選單-多選',
-            dropdown: '多選',
         },
         decimal: {
             title: '數字',
@@ -150,9 +135,6 @@ const locale: typeof enUS = {
         checkbox: {
             title: '複選框',
             error: '此儲存格的內容違反了驗證規則',
-            tips: '在儲存格內使用自訂值',
-            checked: '選取值',
-            unchecked: '未選取值',
         },
     },
 };

@@ -33,7 +33,6 @@ const locale: typeof enUS = {
             title: 'Upraviť obrázok',
         },
         'image-popup': {
-            replace: 'Nahradiť',
             delete: 'Odstrániť',
             edit: 'Upraviť',
             crop: 'Orezať',
@@ -62,9 +61,7 @@ const locale: typeof enUS = {
             horizontal: 'Vodorovne',
             vertical: 'Zvisle',
             absolutePosition: 'Absolútna pozícia (px)',
-            relativePosition: 'Relatívna pozícia',
             toTheRightOf: 'vpravo od',
-            relativeTo: 'vzhľadom na',
             bellow: 'pod',
             options: 'Možnosti',
             moveObjectWithText: 'Presunúť objekt s textom',

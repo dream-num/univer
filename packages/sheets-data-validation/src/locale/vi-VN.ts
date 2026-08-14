@@ -27,7 +27,6 @@ const locale: typeof enUS = {
             equal: 'Bằng',
             notEqual: 'Không bằng',
             notBetween: 'Không nằm giữa',
-            legal: 'là kiểu hợp lệ',
         },
         ruleName: {
             between: 'Giữa {FORMULA1} và {FORMULA2}',
@@ -61,7 +60,6 @@ const locale: typeof enUS = {
                 equal: 'Bằng',
                 notEqual: 'Không bằng',
                 notBetween: 'Không nằm giữa',
-                legal: 'là ngày hợp lệ',
             },
             ruleName: {
                 between: 'Giữa {FORMULA1} và {FORMULA2}',
@@ -103,20 +101,16 @@ const locale: typeof enUS = {
         custom: {
             ruleName: 'Công thức tùy chỉnh {FORMULA1}',
             title: 'Công thức tùy chỉnh',
-            validFail: 'Vui lòng nhập một công thức hợp lệ',
             error: 'Nội dung của ô này vi phạm quy tắc xác thực',
         },
         validFail: {
             value: 'Vui lòng nhập một giá trị hợp lệ',
-            common: 'Vui lòng nhập giá trị hoặc công thức',
             number: 'Vui lòng nhập một số hợp lệ hoặc công thức',
             formula: 'Vui lòng nhập một công thức hợp lệ',
-            integer: 'Vui lòng nhập một số nguyên hợp lệ hoặc công thức',
             date: 'Vui lòng nhập một ngày hợp lệ hoặc công thức',
             list: 'Vui lòng nhập ít nhất một tùy chọn hợp lệ',
             listInvalid: 'Nguồn danh sách phải là một danh sách phân tách hoặc một tham chiếu đến một hàng hoặc cột đơn.',
             checkboxEqual: 'Nhập các giá trị khác nhau cho các ô được chọn và không được chọn.',
-            formulaError: 'Phạm vi tham chiếu chứa dữ liệu không hiển thị, vui lòng điều chỉnh lại phạm vi',
             listIntersects: 'Phạm vi đã chọn không thể giao với phạm vi quy tắc',
             primitive: 'Các giá trị tùy chỉnh cho ô được chọn và không được chọn không được phép sử dụng công thức.',
         },
@@ -128,18 +122,9 @@ const locale: typeof enUS = {
             title: 'Danh sách thả xuống',
             name: 'Giá trị phải nằm trong danh sách',
             error: 'Đầu vào phải nằm trong phạm vi chỉ định',
-            emptyError: 'Vui lòng nhập một giá trị',
-            add: 'Thêm tùy chọn',
-            dropdown: 'Chọn một',
-            options: 'Nguồn tùy chọn',
-            customOptions: 'Tùy chỉnh',
-            refOptions: 'Tham chiếu dữ liệu',
-            formulaError: 'Nguồn danh sách phải là danh sách dữ liệu đã được phân chia rõ ràng, hoặc là tham chiếu đến một hàng hoặc cột đơn.',
-            edit: 'Biên tập',
         },
         listMultiple: {
             title: 'Danh sách thả xuống - Chọn nhiều',
-            dropdown: 'Chọn nhiều',
         },
         decimal: {
             title: 'Số thập phân',
@@ -150,9 +135,6 @@ const locale: typeof enUS = {
         checkbox: {
             title: 'Hộp kiểm',
             error: 'Nội dung của ô này vi phạm quy tắc xác thực',
-            tips: 'Sử dụng giá trị tùy chỉnh trong ô',
-            checked: 'Giá trị khi chọn',
-            unchecked: 'Giá trị khi không chọn',
         },
     },
 };

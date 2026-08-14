@@ -33,7 +33,6 @@ const locale: typeof enUS = {
             title: 'Chỉnh sửa hình ảnh',
         },
         'image-popup': {
-            replace: 'Thay thế',
             delete: 'Xóa',
             edit: 'Chỉnh sửa',
             crop: 'Cắt',
@@ -62,9 +61,7 @@ const locale: typeof enUS = {
             horizontal: 'Ngang',
             vertical: 'Dọc',
             absolutePosition: 'Vị trí tuyệt đối (px)',
-            relativePosition: 'Vị trí tương đối',
             toTheRightOf: 'ở bên phải',
-            relativeTo: 'tương đối với',
             bellow: 'bên dưới',
             options: 'Tùy chọn',
             moveObjectWithText: 'Di chuyển đối tượng cùng văn bản',

@@ -22,7 +22,6 @@ const locale: typeof enUS = {
         shortcut: {
             'open-find-dialog': 'Mở hộp thoại Tìm kiếm',
             'open-replace-dialog': 'Mở hộp thoại Thay thế',
-            'close-dialog': 'Đóng hộp thoại Tìm kiếm & Thay thế',
             'go-to-next-match': 'Chuyển đến kết quả tiếp theo',
             'go-to-previous-match': 'Chuyển đến kết quả trước đó',
             'focus-selection': 'Tập trung vào vùng chọn',

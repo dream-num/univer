@@ -64,7 +64,6 @@ const locale: typeof enUS = {
                 cancel: 'Zrušiť zlúčenie',
                 confirm: 'Pokračovať v zlúčení',
                 warning: 'Varovanie',
-                dismantleMergeCellWarning: 'To spôsobí rozdelenie niektorých zlúčených buniek. Chcete pokračovať?',
             },
         },
     },

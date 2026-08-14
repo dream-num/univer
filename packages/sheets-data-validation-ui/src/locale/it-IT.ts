@@ -40,18 +40,7 @@ const locale: typeof enUS = {
             legal: 'è un tipo valido',
         },
         validFail: {
-            value: 'Inserisci un valore',
-            common: 'Inserisci valore o formula',
-            number: 'Inserisci numero o formula',
-            formula: 'Inserisci formula',
-            integer: 'Inserisci intero o formula',
-            date: 'Inserisci data o formula',
-            list: 'Inserisci opzioni',
-            listInvalid: 'L\'origine elenco deve essere un elenco delimitato o un riferimento a una singola riga o colonna',
-            checkboxEqual: 'Inserisci valori diversi per i contenuti delle celle selezionate e deselezionate.',
             formulaError: 'L\'intervallo di riferimento contiene dati invisibili, riadatta l\'intervallo',
-            listIntersects: 'L\'intervallo selezionato non può intersecarsi con l\'ambito delle regole',
-            primitive: 'Le formule non sono consentite per valori personalizzati selezionati e deselezionati.',
         },
         panel: {
             title: 'Gestione convalida dati',
@@ -75,50 +64,22 @@ const locale: typeof enUS = {
             rangeError: 'Gli intervalli non sono validi',
             allowBlank: 'Consenti valori vuoti',
         },
-        any: {
-            title: 'Qualsiasi valore',
-            error: 'Il contenuto di questa cella viola la regola di convalida',
-        },
         date: {
             title: 'Data',
         },
         list: {
             title: 'Menu a discesa',
-            name: 'Il valore contiene uno dall\'intervallo',
-            error: 'L\'input deve rientrare nell\'intervallo specificato',
-            emptyError: 'Inserisci un valore',
             add: 'Aggiungi',
-            dropdown: 'Seleziona',
             options: 'Opzioni',
             customOptions: 'Personalizzato',
             refOptions: 'Da un intervallo',
-            formulaError: 'L\'origine elenco deve essere un elenco delimitato di dati, o un riferimento a una singola riga o colonna.',
             edit: 'Modifica',
-        },
-        listMultiple: {
-            title: 'Menu a discesa-Multiplo',
-            dropdown: 'Selezione multipla',
-        },
-        textLength: {
-            title: 'Lunghezza testo',
-        },
-        decimal: {
-            title: 'Numero',
-        },
-        whole: {
-            title: 'Intero',
         },
         checkbox: {
             title: 'Casella di controllo',
-            error: 'Il contenuto di questa cella viola la sua regola di convalida',
             tips: 'Usa valori personalizzati all\'interno delle celle',
             checked: 'Valore selezionato',
             unchecked: 'Valore deselezionato',
-        },
-        custom: {
-            title: 'Formula personalizzata',
-            error: 'Il contenuto di questa cella viola la sua regola di convalida',
-            validFail: 'Inserisci una formula valida',
         },
         alert: {
             title: 'Errore',

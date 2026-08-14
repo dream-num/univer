@@ -65,7 +65,6 @@ const locale: typeof enUS = {
                 cancel: 'Annuler la fusion',
                 confirm: 'Continuer la fusion',
                 warning: 'Avertissement',
-                dismantleMergeCellWarning: 'Cela divisera certaines cellules fusionnées. Voulez-vous continuer ?',
             },
         },
     },

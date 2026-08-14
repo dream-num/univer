@@ -46,7 +46,6 @@ const locale: typeof enUS = {
             error: 'Gagal menyimpan gambar sel',
         },
         'image-popup': {
-            replace: 'Ganti',
             delete: 'Hapus',
             edit: 'Edit',
             crop: 'Pangkas',
@@ -69,7 +68,6 @@ const locale: typeof enUS = {
         'cell-image': {
             pasteTitle: 'Tempel sebagai gambar sel',
             pasteContent: 'Menempel gambar sel akan menimpa konten yang ada di sel, lanjutkan menempel',
-            pasteError: 'Salin tempel gambar sel lembar kerja tidak didukung dalam unit ini',
         },
         permission: {
             dialog: {

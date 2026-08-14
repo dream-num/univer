@@ -19,8 +19,6 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'docs-ui': {
         toolbar: {
-            undo: 'Отменить',
-            redo: 'Повторить',
             font: 'Шрифт',
             fontSize: 'Размер шрифта',
             bold: 'Полужирный',
@@ -45,7 +43,6 @@ const locale: typeof enUS = {
             order: 'Упорядоченный список',
             unorder: 'Неупорядоченный список',
             checklist: 'Список задач',
-            documentFlavor: 'Современный режим',
             alignLeft: 'Выровнять по левому краю',
             alignCenter: 'Выровнять по центру',
             alignRight: 'Выровнять по правому краю',
@@ -147,7 +144,6 @@ const locale: typeof enUS = {
                 multiSpace: 'Двойной отступ',
                 atLeast: 'Не менее (px)',
                 exactly: 'Точно (px)',
-                fixedValue: 'Фиксированное значение (px)',
             },
             sectionSetting: {
                 selectedSections: 'Выбрано разделов: {0}',
@@ -194,9 +190,6 @@ const locale: typeof enUS = {
         },
         'page-settings': {
             'document-setting': 'Настройки документа',
-            mode: 'Режим',
-            'modern-mode': 'Современный',
-            'classic-mode': 'Классический',
             'modern-width': 'Ширина содержимого',
             'modern-width-narrow': 'Узкая',
             'modern-width-medium': 'Средняя',

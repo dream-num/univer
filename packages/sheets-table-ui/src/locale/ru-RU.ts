@@ -39,8 +39,6 @@ const locale: typeof enUS = {
         footer: 'Нижний колонтитул',
         firstLine: 'Первая строка',
         secondLine: 'Вторая строка',
-        columnPrefix: 'Столбец',
-        tablePrefix: 'Таблица',
         tableNameError: 'Имя таблицы не может содержать пробелы, не может начинаться с цифры и не может совпадать с именем существующей таблицы',
         columnMenu: {
             'insert-left': 'Вставить 1 столбец слева',

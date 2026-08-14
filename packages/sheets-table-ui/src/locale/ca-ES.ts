@@ -39,8 +39,6 @@ const locale: typeof enUS = {
         footer: 'Peu de pàgina',
         firstLine: 'Primera línia',
         secondLine: 'Segona línia',
-        columnPrefix: 'Columna',
-        tablePrefix: 'Taula',
         tableNameError: 'El nom de la taula no pot contenir espais, no pot començar amb un número i no pot ser idèntic a un nom de taula existent',
         columnMenu: {
             'insert-left': 'Insereix una columna de taula a l’esquerra',

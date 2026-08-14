@@ -46,7 +46,6 @@ const locale: typeof enUS = {
             error: '保存单元格图片失败',
         },
         'image-popup': {
-            replace: '替换',
             delete: '删除',
             edit: '编辑',
             crop: '裁剪',
@@ -69,7 +68,6 @@ const locale: typeof enUS = {
         'cell-image': {
             pasteTitle: '粘贴为单元格图片',
             pasteContent: '粘贴单元格图片将覆盖单元格中的现有内容，继续粘贴',
-            pasteError: '此单元中不支持单元格图片复制粘贴',
         },
         permission: {
             dialog: {

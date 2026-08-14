@@ -46,7 +46,6 @@ const locale: typeof enUS = {
             error: 'فشل في حفظ صور الخلايا',
         },
         'image-popup': {
-            replace: 'استبدال',
             delete: 'حذف',
             edit: 'تحرير',
             crop: 'قص',
@@ -69,7 +68,6 @@ const locale: typeof enUS = {
         'cell-image': {
             pasteTitle: 'لصق كصورة خلية',
             pasteContent: 'سيؤدي لصق صورة خلية إلى استبدال المحتوى الموجود في الخلية، هل تريد المتابعة؟',
-            pasteError: 'نسخ ولصق صورة خلية الورقة غير مدعوم في هذه الوحدة',
         },
         permission: {
             dialog: {

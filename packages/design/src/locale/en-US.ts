@@ -57,9 +57,6 @@ const locale = {
                 selectMonth: 'Select month',
             },
         },
-        Select: {
-            empty: 'None',
-        },
         ColorPicker: {
             more: 'More Colors',
             cancel: 'cancel',
@@ -72,7 +69,6 @@ const locale = {
             diamond: 'Diamond',
             offset: 'Offset',
             angle: 'Angle',
-            flip: 'Flip',
             delete: 'Delete',
             transparency: 'Transparency',
         },

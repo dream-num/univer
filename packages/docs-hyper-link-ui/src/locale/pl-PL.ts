@@ -21,9 +21,7 @@ const locale: typeof enUS = {
         edit: {
             confirm: 'Potwierdź',
             cancel: 'Anuluj',
-            title: 'Łącze',
             address: 'Łącze',
-            placeholder: 'Wprowadź adres URL',
             addressError: 'Adres URL jest nieprawidłowy!',
             label: 'Etykieta',
             labelError: 'Wprowadź etykietę łącza',

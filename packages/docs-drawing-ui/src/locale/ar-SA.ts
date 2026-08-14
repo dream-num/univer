@@ -33,7 +33,6 @@ const locale: typeof enUS = {
             title: 'تحرير الصورة',
         },
         'image-popup': {
-            replace: 'استبدال',
             delete: 'حذف',
             edit: 'تحرير',
             crop: 'قص',
@@ -62,9 +61,7 @@ const locale: typeof enUS = {
             horizontal: 'أفقي',
             vertical: 'عمودي',
             absolutePosition: 'موضع مطلق(بكسل)',
-            relativePosition: 'موضع نسبي',
             toTheRightOf: 'إلى يمين',
-            relativeTo: 'بالنسبة إلى',
             bellow: 'أسفل',
             options: 'خيارات',
             moveObjectWithText: 'نقل الكائن مع النص',

@@ -17,8 +17,6 @@
 const locale = {
     'docs-ui': {
         toolbar: {
-            undo: 'Undo',
-            redo: 'Redo',
             font: 'Font',
             fontSize: 'Font size',
             bold: 'Bold',
@@ -43,7 +41,6 @@ const locale = {
             order: 'Ordered list',
             unorder: 'Unordered list',
             checklist: 'Task list',
-            documentFlavor: 'Modern Mode',
             alignLeft: 'Align Left',
             alignCenter: 'Align Center',
             alignRight: 'Align Right',
@@ -145,7 +142,6 @@ const locale = {
                 multiSpace: 'Multi Space',
                 atLeast: 'At Least (px)',
                 exactly: 'Exactly (px)',
-                fixedValue: 'Fixed Value(px)',
             },
             sectionSetting: {
                 selectedSections: '{0} sections selected',
@@ -192,9 +188,6 @@ const locale = {
         },
         'page-settings': {
             'document-setting': 'Document Setting',
-            mode: 'Mode',
-            'modern-mode': 'Modern',
-            'classic-mode': 'Classic',
             'modern-width': 'Content width',
             'modern-width-narrow': 'Narrow',
             'modern-width-medium': 'Medium',

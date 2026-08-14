@@ -33,7 +33,6 @@ const locale: typeof enUS = {
             title: '编辑图片',
         },
         'image-popup': {
-            replace: '替换',
             delete: '删除',
             edit: '编辑',
             crop: '裁剪',
@@ -62,9 +61,7 @@ const locale: typeof enUS = {
             horizontal: '水平',
             vertical: '垂直',
             absolutePosition: '绝对位置（px）',
-            relativePosition: '相对位置',
             toTheRightOf: '右侧',
-            relativeTo: '相对于',
             bellow: '下方',
             options: '选项',
             moveObjectWithText: '对象随文字移动',

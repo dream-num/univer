@@ -46,7 +46,6 @@ const locale: typeof enUS = {
             error: 'Error al guardar las imágenes de celda',
         },
         'image-popup': {
-            replace: 'Reemplazar',
             delete: 'Eliminar',
             edit: 'Editar',
             crop: 'Recortar',
@@ -69,7 +68,6 @@ const locale: typeof enUS = {
         'cell-image': {
             pasteTitle: 'Pegar como imagen de celda',
             pasteContent: 'Pegar una imagen de celda sobrescribirá el contenido existente de la celda, continuar pegando',
-            pasteError: 'La copia y pegado de imágenes de celda de hoja no está soportada en esta unidad',
         },
         permission: {
             dialog: {

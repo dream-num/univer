@@ -59,9 +59,6 @@ const locale: typeof enUS = {
                 selectMonth: '月を選択',
             },
         },
-        Select: {
-            empty: '該当なし',
-        },
         ColorPicker: {
             more: 'その他の色',
             cancel: 'キャンセル',
@@ -74,7 +71,6 @@ const locale: typeof enUS = {
             diamond: '菱形',
             offset: 'オフセット',
             angle: '角度',
-            flip: '反転',
             delete: '削除',
             transparency: '透明度',
         },

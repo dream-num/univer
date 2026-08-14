@@ -27,7 +27,6 @@ const locale: typeof enUS = {
             equal: '次の値に等しい',
             notEqual: '次の値に等しくない',
             notBetween: '次の値の間以外',
-            legal: '有効な形式',
         },
         ruleName: {
             between: '{FORMULA1} と {FORMULA2} の間',
@@ -61,7 +60,6 @@ const locale: typeof enUS = {
                 equal: '次の値に等しい',
                 notEqual: '次の値に等しくない',
                 notBetween: '次の値の間以外',
-                legal: '有効な日付',
             },
             ruleName: {
                 between: '{FORMULA1} と {FORMULA2} の間',
@@ -103,20 +101,16 @@ const locale: typeof enUS = {
         custom: {
             ruleName: 'ユーザー設定数式: {FORMULA1}',
             title: 'ユーザー設定',
-            validFail: '有効な数式を入力してください',
             error: 'このセルの内容は入力規則に違反しています',
         },
         validFail: {
             value: '値を入力してください',
-            common: '値または数式を入力してください',
             number: '数値または数式を入力してください',
             formula: '数式を入力してください',
-            integer: '整数または数式を入力してください',
             date: '日付または数式を入力してください',
             list: 'リストのオプションを入力してください',
             listInvalid: 'リスト元の値は、区切りリスト、または単一の行または列の参照である必要があります',
             checkboxEqual: 'チェックされた値とチェックされていない値には異なる値を入力してください',
-            formulaError: '参照範囲に見えないデータが含まれています。範囲を再設定してください',
             listIntersects: '選択した範囲はルール範囲と重なることはできません',
             primitive: 'カスタムの選択/未選択値には数式を使用できません',
         },
@@ -128,18 +122,9 @@ const locale: typeof enUS = {
             title: 'リスト',
             name: 'リスト範囲内の値',
             error: '入力値は指定された範囲内にある必要があります',
-            emptyError: '値を入力してください',
-            add: '追加',
-            dropdown: 'ドロップダウンリストから選択する',
-            options: 'オプション',
-            customOptions: 'カスタム',
-            refOptions: '範囲を参照',
-            formulaError: 'リスト元の値は、区切りリスト、または単一の行または列の参照である必要があります',
-            edit: '編集',
         },
         listMultiple: {
             title: '複数選択リスト',
-            dropdown: '複数項目を選択',
         },
         decimal: {
             title: '小数点数',
@@ -150,9 +135,6 @@ const locale: typeof enUS = {
         checkbox: {
             title: 'チェックボックス',
             error: 'このセルの内容は入力規則に違反しています',
-            tips: 'セル内のカスタム値を使用してください',
-            checked: 'チェックされた値',
-            unchecked: 'チェックされていない値',
         },
     },
 };

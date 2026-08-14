@@ -22,7 +22,6 @@ const locale: typeof enUS = {
         shortcut: {
             'open-find-dialog': 'Otvoriť dialógové okno hľadania',
             'open-replace-dialog': 'Otvoriť dialógové okno nahradenia',
-            'close-dialog': 'Zavrieť dialógové okno hľadania a nahradenia',
             'go-to-next-match': 'Prejsť na ďalšiu zhodu',
             'go-to-previous-match': 'Prejsť na predchádzajúcu zhodu',
             'focus-selection': 'Zamerať výber',

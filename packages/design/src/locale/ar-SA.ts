@@ -59,9 +59,6 @@ const locale: typeof enUS = {
                 selectMonth: 'اختر الشهر',
             },
         },
-        Select: {
-            empty: 'لا شيء',
-        },
         ColorPicker: {
             more: 'المزيد من الألوان',
             cancel: 'إلغاء',
@@ -74,7 +71,6 @@ const locale: typeof enUS = {
             diamond: 'ماسي',
             offset: 'إزاحة',
             angle: 'زاوية',
-            flip: 'قلب',
             delete: 'حذف',
             transparency: 'الشفافية',
         },

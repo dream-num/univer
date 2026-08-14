@@ -19,7 +19,6 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'sheets-hyper-link-ui': {
         form: {
-            editTitle: '編輯連結',
             addTitle: '插入連結',
             label: '文字',
             labelPlaceholder: '輸入文字',

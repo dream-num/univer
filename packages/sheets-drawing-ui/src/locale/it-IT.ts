@@ -46,7 +46,6 @@ const locale: typeof enUS = {
             error: 'Salvataggio immagini celle non riuscito',
         },
         'image-popup': {
-            replace: 'Sostituisci',
             delete: 'Elimina',
             edit: 'Modifica',
             crop: 'Ritaglia',
@@ -69,7 +68,6 @@ const locale: typeof enUS = {
         'cell-image': {
             pasteTitle: 'Incolla come immagine cella',
             pasteContent: "L'incollaggio di un'immagine cella sovrascriverà il contenuto esistente della cella, continuare con l'incollaggio",
-            pasteError: 'Copia e incolla di immagine cella non supportato in questa unità',
         },
         permission: {
             dialog: {

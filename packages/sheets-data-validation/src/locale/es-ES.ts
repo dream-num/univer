@@ -27,7 +27,6 @@ const locale: typeof enUS = {
             equal: 'igual',
             notEqual: 'no igual',
             notBetween: 'no entre',
-            legal: 'es tipo legal',
         },
         ruleName: {
             between: 'Está entre {FORMULA1} y {FORMULA2}',
@@ -61,7 +60,6 @@ const locale: typeof enUS = {
                 equal: 'igual',
                 notEqual: 'no igual',
                 notBetween: 'no entre',
-                legal: 'es una fecha legal',
             },
             ruleName: {
                 between: 'está entre {FORMULA1} y {FORMULA2}',
@@ -103,20 +101,16 @@ const locale: typeof enUS = {
         custom: {
             ruleName: 'La fórmula personalizada es {FORMULA1}',
             title: 'Fórmula personalizada',
-            validFail: 'Por favor, introduce una fórmula válida',
             error: 'El contenido de esta celda viola su regla de validación',
         },
         validFail: {
             value: 'Por favor, introduce un valor',
-            common: 'Por favor, introduce un valor o fórmula',
             number: 'Por favor, introduce un número o fórmula',
             formula: 'Por favor, introduce una fórmula',
-            integer: 'Por favor, introduce un entero o fórmula',
             date: 'Por favor, introduce una fecha o fórmula',
             list: 'Por favor, introduce opciones',
             listInvalid: 'La fuente de la lista debe ser una lista delimitada o una referencia a una sola fila o columna',
             checkboxEqual: 'Introduce valores diferentes para los contenidos de celda marcados y desmarcados.',
-            formulaError: 'El rango de referencia contiene datos invisibles, ajusta el rango',
             listIntersects: 'El rango seleccionado no puede cruzarse con el ámbito de las reglas',
             primitive: 'No se permiten fórmulas para valores personalizados marcados y desmarcados.',
         },
@@ -128,18 +122,9 @@ const locale: typeof enUS = {
             title: 'Desplegable',
             name: 'El valor contiene uno del rango',
             error: 'La entrada debe estar dentro del rango especificado',
-            emptyError: 'Por favor, introduce un valor',
-            add: 'Añadir',
-            dropdown: 'Seleccionar',
-            options: 'Opciones',
-            customOptions: 'Personalizado',
-            refOptions: 'De un rango',
-            formulaError: 'La fuente de la lista debe ser una lista delimitada de datos o una referencia a una sola fila o columna.',
-            edit: 'Editar',
         },
         listMultiple: {
             title: 'Desplegable-múltiple',
-            dropdown: 'Selección múltiple',
         },
         decimal: {
             title: 'Número',
@@ -150,9 +135,6 @@ const locale: typeof enUS = {
         checkbox: {
             title: 'Casilla de verificación',
             error: 'El contenido de esta celda viola su regla de validación',
-            tips: 'Usa valores personalizados dentro de las celdas',
-            checked: 'Valor seleccionado',
-            unchecked: 'Valor no seleccionado',
         },
     },
 };

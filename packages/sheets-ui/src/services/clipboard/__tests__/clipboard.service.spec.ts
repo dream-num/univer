@@ -506,15 +506,8 @@ describe('Test clipboard', () => {
                 },
             ]);
 
-            // TODO@Dushusir remove after Dialog replacement
-            // let alert = false;
-            // vi.spyOn(window, 'alert').mockImplementation(() => {
-            //     alert = true;
-            // });
-
             const res = await sheetClipboardService.paste(clipboardItem);
             expect(res).toBeFalsy();
-            // expect(alert).toBe(true);
         });
     });
 
@@ -602,13 +595,7 @@ describe('Test clipboard', () => {
                 },
             ]);
 
-            // let alert = false;
-            // vi.spyOn(window, 'alert').mockImplementation(() => {
-            //     alert = true;
-            // });
-
             await sheetClipboardService.paste(clipboardItem);
-            // expect(alert).toBe(true);
 
             const values = getValues(startRow, startColumn, endRow, endColumn);
             const styles = getStyles(startRow, startColumn, endRow, endColumn);
@@ -654,13 +641,7 @@ describe('Test clipboard', () => {
                 },
             ]);
 
-            // let alert = false;
-            // vi.spyOn(window, 'alert').mockImplementation(() => {
-            //     alert = true;
-            // });
-
             await sheetClipboardService.paste(clipboardItem);
-            // expect(alert).toBe(true);
 
             const values = getValues(startRow, startColumn, endRow, endColumn);
             const styles = getStyles(startRow, startColumn, endRow, endColumn);

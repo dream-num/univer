@@ -19,9 +19,7 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'thread-comment-ui': {
         panel: {
-            title: 'Quản lý Bình luận',
             empty: 'Chưa có bình luận',
-            filterEmpty: 'Không có kết quả phù hợp',
             reset: 'Đặt lại',
             addComment: 'Thêm bình luận',
             solved: 'Đã giải quyết',

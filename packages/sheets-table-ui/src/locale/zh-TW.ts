@@ -39,8 +39,6 @@ const locale: typeof enUS = {
         footer: '頁尾',
         firstLine: '第一列',
         secondLine: '第二列',
-        columnPrefix: '欄',
-        tablePrefix: '表格',
         tableNameError: '表格名稱不能包含空格、以數字開頭或與現有表格名稱重複',
         columnMenu: {
             'insert-left': '向左插入 1 個表格欄',

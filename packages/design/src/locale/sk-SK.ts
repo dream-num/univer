@@ -59,9 +59,6 @@ const locale: typeof enUS = {
                 selectMonth: 'Vybrať mesiac',
             },
         },
-        Select: {
-            empty: 'Žiadne',
-        },
         ColorPicker: {
             more: 'Viac farieb',
             cancel: 'zrušiť',
@@ -74,7 +71,6 @@ const locale: typeof enUS = {
             diamond: 'Diamantový',
             offset: 'Posun',
             angle: 'Uhol',
-            flip: 'Prevrátiť',
             delete: 'Odstrániť',
             transparency: 'Priehľadnosť',
         },

@@ -19,8 +19,6 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'docs-ui': {
         toolbar: {
-            undo: 'Deshacer',
-            redo: 'Rehacer',
             font: 'Fuente',
             fontSize: 'Tamaño de fuente',
             bold: 'Negrita',
@@ -45,7 +43,6 @@ const locale: typeof enUS = {
             order: 'Lista ordenada',
             unorder: 'Lista desordenada',
             checklist: 'Lista de tareas',
-            documentFlavor: 'Modo moderno',
             alignLeft: 'Alinear a la izquierda',
             alignCenter: 'Centrar',
             alignRight: 'Alinear a la derecha',
@@ -147,7 +144,6 @@ const locale: typeof enUS = {
                 multiSpace: 'Espacio múltiple',
                 atLeast: 'Como mínimo (px)',
                 exactly: 'Exactamente (px)',
-                fixedValue: 'Valor fijo (px)',
             },
             sectionSetting: {
                 selectedSections: '{0} secciones seleccionadas',
@@ -194,9 +190,6 @@ const locale: typeof enUS = {
         },
         'page-settings': {
             'document-setting': 'Configuración de documento',
-            mode: 'Modo',
-            'modern-mode': 'Moderno',
-            'classic-mode': 'Clásico',
             'modern-width': 'Ancho del contenido',
             'modern-width-narrow': 'Estrecho',
             'modern-width-medium': 'Medio',

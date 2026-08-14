@@ -40,18 +40,7 @@ const locale: typeof enUS = {
             legal: 'est de type légal',
         },
         validFail: {
-            value: 'Veuillez entrer une valeur',
-            common: 'Veuillez entrer une valeur ou une formule',
-            number: 'Veuillez entrer un nombre ou une formule',
-            formula: 'Veuillez entrer une formule',
-            integer: 'Veuillez entrer un entier ou une formule',
-            date: 'Veuillez entrer une date ou une formule',
-            list: 'Veuillez entrer des options',
-            listInvalid: 'La source de la liste doit être une liste délimitée ou une référence à une seule ligne ou colonne',
-            checkboxEqual: 'Entrez des valeurs différentes pour les contenus des cellules cochées et décochées.',
             formulaError: 'La plage de référence contient des données invisibles, veuillez réajuster la plage',
-            listIntersects: 'La plage sélectionnée ne peut pas croiser le champ des règles',
-            primitive: 'Les formules ne sont pas autorisées pour les valeurs personnalisées cochées et décochées.',
         },
         panel: {
             title: 'Gestion de la validation des données',
@@ -75,50 +64,22 @@ const locale: typeof enUS = {
             rangeError: 'Les plages ne sont pas légales',
             allowBlank: 'Autoriser les valeurs vides',
         },
-        any: {
-            title: 'N\'importe quelle valeur',
-            error: 'Le contenu de cette cellule viole la règle de validation',
-        },
         date: {
             title: 'Date',
         },
         list: {
             title: 'Liste déroulante',
-            name: 'La valeur contient une de la plage',
-            error: 'L\'entrée doit être dans la plage spécifiée',
-            emptyError: 'Veuillez entrer une valeur',
             add: 'Ajouter',
-            dropdown: 'Sélectionner',
             options: 'Options',
             customOptions: 'Personnalisé',
             refOptions: 'D\'une plage',
-            formulaError: 'La source de la liste doit être une liste délimitée de données, ou une référence à une seule ligne ou colonne.',
             edit: 'Éditer',
-        },
-        listMultiple: {
-            title: 'Liste déroulante-Multiple',
-            dropdown: 'Sélection multiple',
-        },
-        textLength: {
-            title: 'Longueur du texte',
-        },
-        decimal: {
-            title: 'Nombre',
-        },
-        whole: {
-            title: 'Entier',
         },
         checkbox: {
             title: 'Case à cocher',
-            error: 'Le contenu de cette cellule viole sa règle de validation',
             tips: 'Utiliser des valeurs personnalisées dans les cellules',
             checked: 'Valeur sélectionnée',
             unchecked: 'Valeur non sélectionnée',
-        },
-        custom: {
-            title: 'Formule personnalisée',
-            error: 'Le contenu de cette cellule viole sa règle de validation',
-            validFail: 'Veuillez entrer une formule valide',
         },
         alert: {
             title: 'Erreur',

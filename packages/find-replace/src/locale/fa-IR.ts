@@ -22,7 +22,6 @@ const locale: typeof enUS = {
         shortcut: {
             'open-find-dialog': 'باز کردن پنجره جستجو',
             'open-replace-dialog': 'باز کردن پنجره جایگزینی',
-            'close-dialog': 'بستن پنجره جستجو و جایگزینی',
             'go-to-next-match': 'رفتن به مورد تطابق بعدی',
             'go-to-previous-match': 'رفتن به مورد تطابق قبلی',
             'focus-selection': 'تمرکز بر انتخاب',

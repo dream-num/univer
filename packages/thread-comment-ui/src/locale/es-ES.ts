@@ -19,9 +19,7 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'thread-comment-ui': {
         panel: {
-            title: 'Gestión de comentarios',
             empty: 'Aún no hay comentarios',
-            filterEmpty: 'Sin resultados coincidentes',
             reset: 'Restablecer filtro',
             addComment: 'Añadir comentario',
             solved: 'Resuelto',

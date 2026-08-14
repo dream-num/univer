@@ -21,9 +21,7 @@ const locale: typeof enUS = {
         edit: {
             confirm: 'Confirma',
             cancel: 'Cancel·la',
-            title: 'Enllaç',
             address: 'Enllaç',
-            placeholder: 'Si us plau, introdueix una URL',
             addressError: 'La URL no és vàlida!',
             label: 'Etiqueta',
             labelError: 'Si us plau, introdueix l\'etiqueta de l\'enllaç',

@@ -32,7 +32,6 @@ const locale: typeof enUS = {
         date: 'تاریخ',
         time: 'زمان',
         thousandthPercentile: 'جداساز هزارتایی',
-        preview: 'پیش‌نمایش',
         dateTime: 'تاریخ و زمان',
         decimalLength: 'اعشار',
         currencyType: 'نماد ارز',

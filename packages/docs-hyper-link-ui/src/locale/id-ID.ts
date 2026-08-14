@@ -21,9 +21,7 @@ const locale: typeof enUS = {
         edit: {
             confirm: 'Konfirmasi',
             cancel: 'Batal',
-            title: 'Tautan',
             address: 'Tautan',
-            placeholder: 'Silakan masukkan URL tautan',
             addressError: 'URL tidak valid!',
             label: 'Label',
             labelError: 'Silakan masukkan label tautan',

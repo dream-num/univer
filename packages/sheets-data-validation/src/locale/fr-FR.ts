@@ -27,7 +27,6 @@ const locale: typeof enUS = {
             equal: 'égal à',
             notEqual: 'différent de',
             notBetween: 'pas entre',
-            legal: 'est de type légal',
         },
         ruleName: {
             between: 'est entre {FORMULA1} et {FORMULA2}',
@@ -61,7 +60,6 @@ const locale: typeof enUS = {
                 equal: 'égal à',
                 notEqual: 'différent de',
                 notBetween: 'pas entre',
-                legal: 'est une date légale',
             },
             ruleName: {
                 between: 'est entre {FORMULA1} et {FORMULA2}',
@@ -103,20 +101,16 @@ const locale: typeof enUS = {
         custom: {
             ruleName: 'La formule personnalisée est {FORMULA1}',
             title: 'Formule personnalisée',
-            validFail: 'Veuillez entrer une formule valide',
             error: 'Le contenu de cette cellule viole sa règle de validation',
         },
         validFail: {
             value: 'Veuillez entrer une valeur',
-            common: 'Veuillez entrer une valeur ou une formule',
             number: 'Veuillez entrer un nombre ou une formule',
             formula: 'Veuillez entrer une formule',
-            integer: 'Veuillez entrer un entier ou une formule',
             date: 'Veuillez entrer une date ou une formule',
             list: 'Veuillez entrer des options',
             listInvalid: 'La source de la liste doit être une liste délimitée ou une référence à une seule ligne ou colonne',
             checkboxEqual: 'Entrez des valeurs différentes pour les contenus des cellules cochées et décochées.',
-            formulaError: 'La plage de référence contient des données invisibles, veuillez réajuster la plage',
             listIntersects: 'La plage sélectionnée ne peut pas croiser le champ des règles',
             primitive: 'Les formules ne sont pas autorisées pour les valeurs personnalisées cochées et décochées.',
         },
@@ -128,18 +122,9 @@ const locale: typeof enUS = {
             title: 'Liste déroulante',
             name: 'La valeur contient une de la plage',
             error: 'L\'entrée doit être dans la plage spécifiée',
-            emptyError: 'Veuillez entrer une valeur',
-            add: 'Ajouter',
-            dropdown: 'Sélectionner',
-            options: 'Options',
-            customOptions: 'Personnalisé',
-            refOptions: 'D\'une plage',
-            formulaError: 'La source de la liste doit être une liste délimitée de données, ou une référence à une seule ligne ou colonne.',
-            edit: 'Éditer',
         },
         listMultiple: {
             title: 'Liste déroulante-Multiple',
-            dropdown: 'Sélection multiple',
         },
         decimal: {
             title: 'Nombre',
@@ -150,9 +135,6 @@ const locale: typeof enUS = {
         checkbox: {
             title: 'Case à cocher',
             error: 'Le contenu de cette cellule viole sa règle de validation',
-            tips: 'Utiliser des valeurs personnalisées dans les cellules',
-            checked: 'Valeur sélectionnée',
-            unchecked: 'Valeur non sélectionnée',
         },
     },
 };

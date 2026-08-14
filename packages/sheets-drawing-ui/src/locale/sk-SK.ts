@@ -46,7 +46,6 @@ const locale: typeof enUS = {
             error: 'Nepodarilo sa uložiť obrázky buniek',
         },
         'image-popup': {
-            replace: 'Nahradiť',
             delete: 'Odstrániť',
             edit: 'Upraviť',
             crop: 'Orezať',
@@ -69,7 +68,6 @@ const locale: typeof enUS = {
         'cell-image': {
             pasteTitle: 'Prilepiť ako obrázok bunky',
             pasteContent: 'Prilepením obrázka bunky sa prepíše existujúci obsah bunky, pokračovať',
-            pasteError: 'Kopírovanie a prilepovanie obrázkov buniek v tomto module nie je podporované',
         },
         permission: {
             dialog: {

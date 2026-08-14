@@ -39,8 +39,6 @@ const locale: typeof enUS = {
         footer: 'Pie de página',
         firstLine: 'Primera línea',
         secondLine: 'Segunda línea',
-        columnPrefix: 'Columna',
-        tablePrefix: 'Tabla',
         tableNameError: 'El nombre de la tabla no puede contener espacios, no puede comenzar con un número y no puede ser idéntico a un nombre de tabla existente',
         columnMenu: {
             'insert-left': 'Insertar 1 columna a la izquierda',

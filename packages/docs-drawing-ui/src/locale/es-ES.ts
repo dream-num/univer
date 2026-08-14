@@ -33,7 +33,6 @@ const locale: typeof enUS = {
             title: 'Editar imagen',
         },
         'image-popup': {
-            replace: 'Reemplazar',
             delete: 'Eliminar',
             edit: 'Editar',
             crop: 'Recortar',
@@ -62,9 +61,7 @@ const locale: typeof enUS = {
             horizontal: 'Horizontal',
             vertical: 'Vertical',
             absolutePosition: 'Posición absoluta(px)',
-            relativePosition: 'Posición relativa',
             toTheRightOf: 'a la derecha de',
-            relativeTo: 'relativo a',
             bellow: 'debajo',
             options: 'Opciones',
             moveObjectWithText: 'Mover objeto con el texto',

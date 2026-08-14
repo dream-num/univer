@@ -19,7 +19,6 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'sheets-hyper-link-ui': {
         form: {
-            editTitle: 'Edit Tautan',
             addTitle: 'Sisipkan Tautan',
             label: 'Label',
             type: 'Tipe',

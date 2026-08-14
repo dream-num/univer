@@ -196,8 +196,8 @@ describe('paragraph build utils', () => {
         expect(body.paragraphs?.[2].bullet).toMatchObject({
             listType: PresetListType.ORDER_LIST,
             nestingLevel: 0,
-            textStyle: { fs: 20 },
         });
+        expect(body.paragraphs?.[2].bullet?.textStyle).toBeUndefined();
 
         const toggled = toggleChecklistParagraph({ paragraphIndex: secondParagraph.startIndex, document: doc });
         expect(toggleChecklistParagraph({ paragraphIndex: 999, document: doc })).toBe(false);

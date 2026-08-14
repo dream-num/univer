@@ -102,9 +102,6 @@ export const switchParagraphBullet = (params: ISwitchParagraphBulletParams) => {
                             },
                             bullet: {
                                 nestingLevel: bullet?.nestingLevel ?? 0,
-                                textStyle: {
-                                    fs: 20,
-                                },
                                 listType,
                                 listId,
                             },
@@ -224,11 +221,9 @@ export const setParagraphBullet = (params: ISetParagraphBulletParams) => {
                         paragraphStyle,
                         bullet: {
                             nestingLevel: bullet?.nestingLevel ?? 0,
-                            textStyle: bullet?.listType === listType
-                                ? bullet.textStyle
-                                : {
-                                    fs: 20,
-                                },
+                            ...(bullet?.listType === listType && bullet.textStyle
+                                ? { textStyle: bullet.textStyle }
+                                : {}),
                             listType,
                             listId,
                         },

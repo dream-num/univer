@@ -134,6 +134,21 @@ describe('list commands', () => {
         expect(paragraphs[0].bullet?.listId).toBe(paragraphs[1].bullet?.listId);
     });
 
+    it.each([
+        ['ordered', OrderListCommand.id, PresetListType.ORDER_LIST],
+        ['unordered', BulletListCommand.id, PresetListType.BULLET_LIST],
+        ['task', CheckListCommand.id, PresetListType.CHECK_LIST],
+    ])('does not assign an absolute marker font size to %s lists', async (_label, commandId, listType) => {
+        setSelections([{ startOffset: 0, endOffset: 4, collapsed: false }]);
+
+        await commandService.executeCommand(commandId);
+        await awaitTime(0);
+
+        const bullet = getBody()?.paragraphs?.[0].bullet;
+        expect(bullet?.listType).toBe(listType);
+        expect(bullet?.textStyle?.fs).toBeUndefined();
+    });
+
     it('changes checklist type and nesting level on an existing list', async () => {
         setSelections([
             { startOffset: 0, endOffset: 4, collapsed: false },
@@ -177,6 +192,7 @@ describe('list commands', () => {
 
         expect(getBody()?.paragraphs?.[0].bullet?.listType).toBe(PresetListType.ORDER_LIST);
         expect(getBody()?.paragraphs?.[0].bullet?.nestingLevel).toBe(0);
+        expect(getBody()?.paragraphs?.[0].bullet?.textStyle?.fs).toBeUndefined();
         expect(getBody()?.paragraphs?.[0].paragraphStyle?.textStyle).toMatchObject(
             PRESET_LIST_TYPE[PresetListType.ORDER_LIST].nestingLevel[0].paragraphProperties?.textStyle ?? {}
         );

@@ -466,9 +466,6 @@ export const QuickListCommand: ICommand<IQuickListCommandParams> = {
                         bullet: {
                             ...(paragraph.bullet ?? {
                                 nestingLevel: 0,
-                                textStyle: {
-                                    fs: 20,
-                                },
                             }),
                             listType,
                             listId,

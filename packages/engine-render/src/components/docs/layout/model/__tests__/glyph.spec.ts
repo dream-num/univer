@@ -225,7 +225,7 @@ describe('Glyph utils test cases', () => {
             measureSpy.mockRestore();
         });
 
-        it('centers the custom checkbox shape on the measured marker metrics', () => {
+        it('inherits the paragraph font size when centering the custom checkbox shape', () => {
             const measureSpy = vi.spyOn(FontCache, 'getTextSize').mockReturnValue({
                 width: 16,
                 ba: 18,
@@ -247,12 +247,13 @@ describe('Glyph utils test cases', () => {
                 {
                     listId: 'check-list',
                     symbol: '\u2610',
-                    ts: { fs: 20 },
+                    ts: {},
                     startIndexItem: 1,
                 },
                 10
             );
 
+            expect(bulletGlyph.ts?.fs).toBe(20);
             expect(bulletGlyph.width).toBe(30);
             expect(bulletGlyph.bBox).toMatchObject({
                 width: 24,

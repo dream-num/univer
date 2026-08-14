@@ -41,7 +41,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocSkeletonManagerService, HeaderFooterType, RichTextEditingMutation } from '@univerjs/docs';
-import { DocumentEditArea, IRenderManagerService, PageLayoutType, Path, Rect, Vector2 } from '@univerjs/engine-render';
+import { DocumentEditArea, IRenderManagerService, PageLayoutType, Path, Vector2 } from '@univerjs/engine-render';
 import { neoGetDocObject } from '../basics/component-tools';
 import { CloseHeaderFooterCommand, CoreHeaderFooterCommand } from '../commands/commands/doc-header-footer.command';
 import { IEditorService } from '../services/editor/editor-manager.service';
@@ -49,7 +49,6 @@ import { DocSelectionRenderService } from '../services/selection/doc-selection-r
 import { getDocPageSectionContext } from '../utils/section-header-footer';
 import { TextBubbleShape } from '../views/header-footer/text-bubble';
 
-const HEADER_FOOTER_COVER_COLOR = 'alpha(white, 0.5)';
 const HEADER_FOOTER_STROKE_COLOR = 'primary.600';
 const HEADER_FOOTER_LABEL_COLOR = 'alpha(primary.600, 0.08)';
 
@@ -307,7 +306,6 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
 
             this.disposeWithMe(
                 toDisposable(
-                    // eslint-disable-next-line max-lines-per-function
                     docsComponent.pageRender$.subscribe((config: IPageRenderConfig) => {
                         if (this._editorService.isEditor(unitId)) {
                             return;
@@ -326,38 +324,6 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
                         // Draw header footer label.
                         ctx.save();
                         ctx.translate(pageLeft - 0.5, pageTop - 0.5);
-
-                        // Cover header and footer.
-                        if (isEditBody) {
-                            Rect.drawWith(ctx, {
-                                left: 0,
-                                top: 0,
-                                width: pageWidth,
-                                height: marginTop,
-                                fill: HEADER_FOOTER_COVER_COLOR,
-                            });
-                            ctx.save();
-                            ctx.translate(0, pageHeight - marginBottom);
-                            Rect.drawWith(ctx, {
-                                left: 0,
-                                top: 0,
-                                width: pageWidth,
-                                height: marginBottom,
-                                fill: HEADER_FOOTER_COVER_COLOR,
-                            });
-                            ctx.restore();
-                        } else { // Cover body.
-                            ctx.save();
-                            ctx.translate(0, marginTop);
-                            Rect.drawWith(ctx, {
-                                left: 0,
-                                top: marginTop,
-                                width: pageWidth,
-                                height: pageHeight - marginTop - marginBottom,
-                                fill: HEADER_FOOTER_COVER_COLOR,
-                            });
-                            ctx.restore();
-                        }
 
                         if (!isEditBody) {
                             const headerPathConfigIPathProps = {

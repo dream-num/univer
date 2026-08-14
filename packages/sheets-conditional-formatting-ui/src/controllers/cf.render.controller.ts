@@ -120,9 +120,13 @@ export class SheetsCfRenderController extends Disposable {
     private _createRenderRangeResolver(ruleType: CFRuleType): IConditionalFormattingRenderRangeResolver {
         return (unitId, subUnitId, ranges) => {
             const intersections: IRange[] = [];
-            const matchingRules = this._conditionalFormattingRangeIndexModel
+            const indexedRules = this._conditionalFormattingRangeIndexModel
                 .getRulesByRanges(unitId, subUnitId, ranges)
                 .filter((rule) => rule.rule.type === ruleType);
+            const matchingRules = indexedRules.length
+                ? indexedRules
+                : (this._conditionalFormattingRuleModel.getSubunitRules(unitId, subUnitId) ?? [])
+                    .filter((rule) => rule.rule.type === ruleType);
 
             ranges.forEach((range) => {
                 matchingRules.forEach((rule) => {

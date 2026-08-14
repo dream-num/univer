@@ -52,6 +52,7 @@ function createScene() {
         makeDirty: vi.fn(),
     };
     const viewport = {
+        viewportKey: 'viewport',
         shouldIntoRender: vi.fn(() => true),
         render: vi.fn(),
     };
@@ -81,10 +82,16 @@ function createScene() {
 }
 
 function createCtx() {
+    const canvas = document.createElement('canvas');
     const transform = document.createElement('canvas').getContext('2d')!.getTransform();
     return {
+        canvas,
         save: vi.fn(),
         restore: vi.fn(),
+        beginPath: vi.fn(),
+        rect: vi.fn(),
+        clip: vi.fn(),
+        clearRect: vi.fn(),
         setTransform: vi.fn(),
         getTransform: vi.fn(() => transform),
         drawImage: vi.fn(),
@@ -139,7 +146,7 @@ describe('layer', () => {
         const ctx = createCtx();
         layer.render(ctx, true);
         expect(ctx.save).toHaveBeenCalled();
-        expect(scene.__viewport.render).toHaveBeenCalledWith(ctx, [child, group], true);
+        expect(scene.__viewport.render).toHaveBeenCalledWith(ctx, [child, group], true, undefined);
         expect(layer.isDirty()).toBe(false);
 
         child.onTransformChange$.emitEvent({} as any);
@@ -147,6 +154,32 @@ describe('layer', () => {
 
         layer.clear();
         expect(layer.getObjects()).toEqual([]);
+        layer.dispose();
+    });
+
+    it('clips scroll repaint and refreshes the stale layer cache before reuse', () => {
+        const scene = createScene();
+        const object = new TestObject('cached', 1);
+        const layer = new Layer(scene, [object], 1, true);
+        const ctx = createCtx();
+        const viewportInfo = { viewportKey: 'viewport' } as IViewportInfo;
+        const dirtyBounds = [{ left: 140, top: 0, right: 160, bottom: 90 }];
+
+        scene.__resizeCache();
+        layer.render(ctx, false, {
+            dirtyBounds,
+            preserveCache: true,
+            viewportInfos: new Map([['viewport', viewportInfo]]),
+        });
+        expect(scene.__viewport.render).toHaveBeenLastCalledWith(expect.anything(), [object], false, viewportInfo);
+        expect(ctx.rect).toHaveBeenCalledWith(140, 0, 20, 90);
+        expect(ctx.drawImage).not.toHaveBeenCalled();
+
+        scene.__viewport.render.mockClear();
+        layer.render(ctx);
+        expect(scene.__viewport.render).toHaveBeenCalledWith(expect.anything(), [object], false, undefined);
+        expect(ctx.drawImage).toHaveBeenCalledWith(expect.any(HTMLCanvasElement), 0, 0, 160, 90);
+
         layer.dispose();
     });
 

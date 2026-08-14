@@ -16,25 +16,43 @@
 
 import type { IConditionFormattingRule, IHighlightCell } from '../models/type';
 import type { IDataBarCellData, IDataBarRenderParams, IIconSetCellData, IIconSetRenderParams } from '../render/type';
-import { Inject, merge } from '@univerjs/core';
+import { Disposable, Inject, LRUMap, merge } from '@univerjs/core';
 import { CFRuleType } from '../base/const';
 import { ConditionalFormattingRuleModel } from '../models/conditional-formatting-rule-model';
-import { ConditionalFormattingViewModel } from '../models/conditional-formatting-view-model';
+import { CONDITIONAL_FORMATTING_VIEWPORT_CACHE_LENGTH, ConditionalFormattingViewModel } from '../models/conditional-formatting-view-model';
 
-export class ConditionalFormattingStyleComposer {
+type IComposedStyle = { style?: IHighlightCell['style'] } & IDataBarCellData & IIconSetCellData & { isShowValue: boolean };
+
+export class ConditionalFormattingStyleComposer extends Disposable {
+    private _cache = new LRUMap<string, IComposedStyle | null>(CONDITIONAL_FORMATTING_VIEWPORT_CACHE_LENGTH);
+
     constructor(
         @Inject(ConditionalFormattingRuleModel) private _conditionalFormattingRuleModel: ConditionalFormattingRuleModel,
         @Inject(ConditionalFormattingViewModel) private _conditionalFormattingViewModel: ConditionalFormattingViewModel
     ) {
-        // empty
+        super();
+        this.disposeWithMe(this._conditionalFormattingRuleModel.$ruleChange.subscribe(() => this._cache.clear()));
+        this.disposeWithMe(this._conditionalFormattingViewModel.markDirty$.subscribe(() => this._cache.clear()));
+        this.disposeWithMe(this._conditionalFormattingViewModel.cacheClear$.subscribe(() => this._cache.clear()));
+    }
+
+    override dispose(): void {
+        this._cache.clear();
+        super.dispose();
     }
 
     // Conditional formats need to be evaluated in priority order.
     // Evaluation of subsequent rules stops only if the current rule is matched and stopIfTrue=true.
     composeStyle(unitId: string, subUnitId: string, row: number, col: number) {
+        const cacheKey = `${unitId}_${subUnitId}_${row}_${col}`;
+        if (this._cache.has(cacheKey)) {
+            return this._cache.get(cacheKey) ?? null;
+        }
+
         const cellCfs = this._conditionalFormattingViewModel.getCellCfs(unitId, subUnitId, row, col);
 
         if (!cellCfs?.length) {
+            this._cache.set(cacheKey, null);
             return null;
         }
 
@@ -58,6 +76,7 @@ export class ConditionalFormattingStyleComposer {
         }
 
         if (!matchedRules.length) {
+            this._cache.set(cacheKey, null);
             return null;
         }
 
@@ -65,13 +84,14 @@ export class ConditionalFormattingStyleComposer {
             ? matchedRules.slice(0, stopIfTrueIndex + 1)
             : matchedRules;
 
-        const result = {} as { style?: IHighlightCell['style'] } & IDataBarCellData & IIconSetCellData & { isShowValue: boolean };
+        const result = {} as IComposedStyle;
 
         for (let i = effectiveRules.length - 1; i >= 0; i--) {
             const { rule, cacheItem } = effectiveRules[i];
             this._mergeComposeResult(result, rule, cacheItem.result);
         }
 
+        this._cache.set(cacheKey, result);
         return result;
     }
 

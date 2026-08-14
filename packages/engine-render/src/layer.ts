@@ -15,6 +15,7 @@
  */
 
 import type { Nullable } from '@univerjs/core';
+import type { IBoundRectNoAngle, IViewportInfo } from './basics/vector2';
 import type { UniverRenderingContext } from './context';
 import type { Scene } from './scene';
 import type { SceneViewer } from './scene-viewer';
@@ -23,10 +24,84 @@ import { BaseObject } from './base-object';
 import { RENDER_CLASS_TYPE } from './basics/const';
 import { Canvas } from './canvas';
 
+export interface IScrollRenderInfo {
+    bounds: IBoundRectNoAngle;
+    offsetX: number;
+    offsetY: number;
+}
+
+export interface ILayerRenderOptions {
+    dirtyBounds?: IBoundRectNoAngle[];
+    preserveCache?: boolean;
+    viewportInfos?: Map<string, IViewportInfo>;
+}
+
+function clipContextToBounds(ctx: UniverRenderingContext, bounds: IBoundRectNoAngle[]) {
+    ctx.beginPath();
+    for (const bound of bounds) {
+        ctx.rect(bound.left, bound.top, bound.right - bound.left, bound.bottom - bound.top);
+    }
+    ctx.clip();
+}
+
+export function scrollAndClearCanvas(
+    ctx: UniverRenderingContext,
+    pixelRatio: number,
+    scrollRenderInfos: IScrollRenderInfo[],
+    dirtyBounds: IBoundRectNoAngle[]
+) {
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.globalCompositeOperation = 'copy';
+
+    for (const { bounds, offsetX, offsetY } of scrollRenderInfos) {
+        const width = bounds.right - bounds.left;
+        const height = bounds.bottom - bounds.top;
+        const copyWidth = width - Math.abs(offsetX);
+        const copyHeight = height - Math.abs(offsetY);
+        if (copyWidth <= 0 || copyHeight <= 0) {
+            continue;
+        }
+
+        const sourceX = (bounds.left + Math.max(0, -offsetX)) * pixelRatio;
+        const sourceY = (bounds.top + Math.max(0, -offsetY)) * pixelRatio;
+        const targetX = (bounds.left + Math.max(0, offsetX)) * pixelRatio;
+        const targetY = (bounds.top + Math.max(0, offsetY)) * pixelRatio;
+        const pixelCopyWidth = copyWidth * pixelRatio;
+        const pixelCopyHeight = copyHeight * pixelRatio;
+        ctx.drawImage(
+            ctx.canvas,
+            sourceX,
+            sourceY,
+            pixelCopyWidth,
+            pixelCopyHeight,
+            targetX,
+            targetY,
+            pixelCopyWidth,
+            pixelCopyHeight
+        );
+    }
+
+    clearCanvasBounds(ctx, pixelRatio, dirtyBounds);
+    ctx.restore();
+}
+
+function clearCanvasBounds(ctx: UniverRenderingContext, pixelRatio: number, dirtyBounds: IBoundRectNoAngle[]) {
+    for (const bound of dirtyBounds) {
+        ctx.clearRect(
+            bound.left * pixelRatio,
+            bound.top * pixelRatio,
+            (bound.right - bound.left) * pixelRatio,
+            (bound.bottom - bound.top) * pixelRatio
+        );
+    }
+}
+
 export class Layer extends Disposable {
     private _objects: BaseObject[] = [];
 
     private _cacheCanvas: Nullable<Canvas>;
+    private _cacheValid = false;
 
     protected _dirty: boolean = true;
 
@@ -64,6 +139,7 @@ export class Layer extends Disposable {
         this._allowCache = false;
         this._cacheCanvas?.dispose();
         this._cacheCanvas = null;
+        this._cacheValid = false;
     }
 
     isAllowCache(): boolean {
@@ -188,6 +264,9 @@ export class Layer extends Disposable {
 
     makeDirty(state: boolean = true) {
         this._dirty = state;
+        if (state) {
+            this._cacheValid = false;
+        }
         /**
          * parent is SceneViewer, make it dirty
          */
@@ -215,11 +294,22 @@ export class Layer extends Disposable {
         return this._dirty;
     }
 
-    render(parentCtx?: UniverRenderingContext, isMaxLayer = false) {
+    render(parentCtx?: UniverRenderingContext, isMaxLayer = false, options: ILayerRenderOptions = {}) {
         const mainCtx = parentCtx || this._scene.getEngine()?.getCanvas().getContext();
         if (mainCtx) {
+            const { dirtyBounds, preserveCache = false, viewportInfos } = options;
             if (this._allowCache && this._cacheCanvas) {
-                if (this.isDirty()) {
+                if (preserveCache && dirtyBounds) {
+                    mainCtx.save();
+                    clipContextToBounds(mainCtx, dirtyBounds);
+                    this._draw(mainCtx, isMaxLayer, viewportInfos);
+                    mainCtx.restore();
+                    // The visible frame is current, but the offscreen layer cache still represents the pre-scroll frame.
+                    this._cacheValid = false;
+                    this.makeDirty(false);
+                    return this;
+                }
+                if (this.isDirty() || !this._cacheValid) {
                     const ctx = this._cacheCanvas.getContext();
 
                     this._cacheCanvas.clear();
@@ -227,14 +317,18 @@ export class Layer extends Disposable {
                     ctx.save();
 
                     ctx.setTransform(mainCtx.getTransform());
-                    this._draw(ctx, isMaxLayer);
+                    this._draw(ctx, isMaxLayer, viewportInfos);
 
                     ctx.restore();
+                    this._cacheValid = true;
                 }
                 this._applyCache(mainCtx);
             } else {
                 mainCtx.save();
-                this._draw(mainCtx, isMaxLayer);
+                if (dirtyBounds) {
+                    clipContextToBounds(mainCtx, dirtyBounds);
+                }
+                this._draw(mainCtx, isMaxLayer, viewportInfos);
                 mainCtx.restore();
             }
         }
@@ -264,13 +358,14 @@ export class Layer extends Disposable {
         }
 
         this._cacheCanvas = new Canvas({ colorService: engine?.canvasColorService });
+        this._cacheValid = false;
     }
 
-    private _draw(mainCtx: UniverRenderingContext, isMaxLayer: boolean) {
+    private _draw(mainCtx: UniverRenderingContext, isMaxLayer: boolean, viewportInfos?: Map<string, IViewportInfo>) {
         const viewports = this._scene.getViewports().filter((vp) => vp.shouldIntoRender());
         const objects = this.getObjectsByOrder();
         for (const [_index, vp] of viewports.entries()) {
-            vp.render(mainCtx, objects, isMaxLayer);
+            vp.render(mainCtx, objects, isMaxLayer, viewportInfos?.get(vp.viewportKey));
         }
         objects.forEach((o) => {
             o.makeDirty(false);
@@ -315,5 +410,6 @@ export class Layer extends Disposable {
 
         this._cacheCanvas?.dispose();
         this._cacheCanvas = null;
+        this._cacheValid = false;
     }
 }

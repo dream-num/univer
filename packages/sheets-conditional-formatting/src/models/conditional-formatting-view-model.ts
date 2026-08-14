@@ -41,11 +41,13 @@ export class ConditionalFormattingViewModel extends Disposable {
     private _cellCache = new LRUMap<string, { cfId: string; result: any; priority: number }[]>(CONDITIONAL_FORMATTING_VIEWPORT_CACHE_LENGTH);
 
     private _markDirty$ = new Subject<{ cfId: string; unitId: string; subUnitId: string; isImmediately?: boolean }>();
+    private _cacheClear$ = new Subject<void>();
     /**
      * The rendering layer listens to this variable to determine whether a reRender is necessary.
      * @memberof ConditionalFormattingViewModel
      */
     public markDirty$ = this._markDirty$.asObservable();
+    public cacheClear$ = this._cacheClear$.asObservable();
     constructor(
         @Inject(Injector) private _injector: Injector,
         @Inject(ConditionalFormattingRuleModel) private _conditionalFormattingRuleModel: ConditionalFormattingRuleModel,
@@ -171,6 +173,7 @@ export class ConditionalFormattingViewModel extends Disposable {
     clearCache() {
         this._calculateUnitManagers.clear();
         this._cellCache.clear();
+        this._cacheClear$.next();
     }
 
     private _handleCustomFormulasSeparately() {

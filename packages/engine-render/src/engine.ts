@@ -520,6 +520,10 @@ export class Engine extends Disposable {
         return this._deltaTime;
     }
 
+    getEstimatedFrameInterval(): number {
+        return this._performanceMonitor.estimatedFrameInterval;
+    }
+
     /**
      * Exec all function in _renderFrameTasks
      */

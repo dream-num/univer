@@ -16,7 +16,7 @@
 
 import type { IRange, IScale } from '@univerjs/core';
 import type { SpreadsheetSkeleton, UniverRenderingContext } from '@univerjs/engine-render';
-import type { IIconSetCellData } from './type';
+import type { IConditionalFormattingRenderRangeResolver, IIconSetCellData } from './type';
 import { Range } from '@univerjs/core';
 import { SheetExtension, SpreadsheetExtensionRegistry } from '@univerjs/engine-render';
 import { iconMap, IIconSetType } from '../models/icon-map';
@@ -37,6 +37,7 @@ export class ConditionalFormattingIcon extends SheetExtension {
     private _width = DEFAULT_WIDTH;
 
     private _imageMap: Map<string, HTMLImageElement> = new Map();
+    private _renderRangeResolver: IConditionalFormattingRenderRangeResolver | null = null;
     override uKey = IconUKey;
 
     override Z_INDEX = EXTENSION_Z_INDEX;
@@ -44,6 +45,10 @@ export class ConditionalFormattingIcon extends SheetExtension {
     constructor() {
         super();
         this._init();
+    }
+
+    setRenderRangeResolver(resolver: IConditionalFormattingRenderRangeResolver | null) {
+        this._renderRangeResolver = resolver;
     }
 
     override draw(
@@ -57,7 +62,13 @@ export class ConditionalFormattingIcon extends SheetExtension {
             return false;
         }
         const mergeCellRendered = new Set<string>();
-        const renderRanges = diffRanges?.length ? diffRanges : [spreadsheetSkeleton.rowColumnSegment];
+        const sourceRanges = diffRanges?.length ? diffRanges : [spreadsheetSkeleton.rowColumnSegment];
+        const renderRanges = this._renderRangeResolver && worksheet.getMergeData().length === 0
+            ? this._renderRangeResolver(worksheet.getUnitId(), worksheet.getSheetId(), sourceRanges) ?? sourceRanges
+            : sourceRanges;
+        if (!renderRanges.length) {
+            return;
+        }
         ctx.save();
         // ctx.globalCompositeOperation = 'destination-over';
         renderRanges.forEach((range) => {
@@ -114,6 +125,11 @@ export class ConditionalFormattingIcon extends SheetExtension {
             });
         });
         ctx.restore();
+    }
+
+    override dispose(): void {
+        this._renderRangeResolver = null;
+        super.dispose();
     }
 
     private _init() {

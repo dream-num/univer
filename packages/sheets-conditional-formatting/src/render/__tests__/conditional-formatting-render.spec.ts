@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IRange } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { IIconSetType } from '../../models/icon-map';
 import { DataBar } from '../data-bar.render';
@@ -72,9 +73,12 @@ function createSkeleton(cells: Record<string, unknown>, hiddenRows = new Set<num
     return {
         rowColumnSegment: { startRow: 0, endRow: 2, startColumn: 0, endColumn: 2 },
         worksheet: {
+            getUnitId: () => 'unit-1',
+            getSheetId: () => 'sheet-1',
+            getMergeData: () => [],
             getRowVisible: (row: number) => !hiddenRows.has(row),
             getColVisible: (col: number) => !hiddenCols.has(col),
-            getCell: (row: number, col: number) => cells[`${row},${col}`],
+            getCell: vi.fn((row: number, col: number) => cells[`${row},${col}`]),
         },
         getCellWithCoordByIndex: (row: number, col: number) => createCellBounds(row, col),
     } as any;
@@ -134,6 +138,60 @@ describe('conditional formatting render extensions', () => {
         (dataBar as any)._drawRectWithRoundedCorner(ctx, 0, 0, 0, 10, true, true, true, true);
         (dataBar as any)._drawRectWithRoundedCorner(ctx, 0, 0, 10, 0, true, true, true, true);
         expect(ctx.beginPath).not.toHaveBeenCalled();
+    });
+
+    it('skips data bar cell visits only when a configured rule-range resolver confirms no matching rule', () => {
+        const ctx = createCtx();
+        const skeleton = createSkeleton({
+            '0,0': {
+                dataBar: {
+                    color: '#2f56ef',
+                    value: 75,
+                    startPoint: 25,
+                    isGradient: false,
+                    isShowValue: true,
+                },
+            },
+        });
+        const dataBar = new DataBar();
+        const resolver = vi.fn(() => []);
+        dataBar.setRenderRangeResolver(resolver);
+
+        const ranges = [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }];
+        dataBar.draw(ctx, { scaleX: 1, scaleY: 1 }, skeleton, ranges);
+
+        expect(resolver).toHaveBeenCalledWith('unit-1', 'sheet-1', ranges);
+        expect(skeleton.worksheet.getCell).not.toHaveBeenCalled();
+        expect(ctx.save).not.toHaveBeenCalled();
+    });
+
+    it('falls back to the original data bar path when indexed ranges are unavailable or merges exist', () => {
+        const ctx = createCtx();
+        const skeleton = createSkeleton({
+            '0,0': {
+                dataBar: {
+                    color: '#2f56ef',
+                    value: 75,
+                    startPoint: 25,
+                    isGradient: false,
+                    isShowValue: true,
+                },
+            },
+        });
+        const dataBar = new DataBar();
+        const resolver = vi.fn<() => IRange[] | null>(() => null);
+        dataBar.setRenderRangeResolver(resolver);
+
+        const ranges = [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }];
+        dataBar.draw(ctx, { scaleX: 1, scaleY: 1 }, skeleton, ranges);
+        expect(ctx.fill).toHaveBeenCalledTimes(1);
+
+        resolver.mockReturnValue([]);
+        skeleton.worksheet.getMergeData = () => [ranges[0]] as never;
+        dataBar.draw(ctx, { scaleX: 1, scaleY: 1 }, skeleton, ranges);
+
+        expect(resolver).toHaveBeenCalledTimes(1);
+        expect(ctx.fill).toHaveBeenCalledTimes(2);
     });
 
     it('draws configured conditional-formatting icons and skips unavailable icons', () => {
@@ -210,5 +268,20 @@ describe('conditional formatting render extensions', () => {
             { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
         ]);
         expect(ctx.drawImage).not.toHaveBeenCalled();
+    });
+
+    it('skips icon cell visits when a configured rule-range resolver confirms no matching rule', () => {
+        const ctx = createCtx();
+        const skeleton = createSkeleton({});
+        const icon = new ConditionalFormattingIcon();
+        const resolver = vi.fn(() => []);
+        icon.setRenderRangeResolver(resolver);
+
+        const ranges = [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 2 }];
+        icon.draw(ctx, { scaleX: 1, scaleY: 1 }, skeleton, ranges);
+
+        expect(resolver).toHaveBeenCalledWith('unit-1', 'sheet-1', ranges);
+        expect(skeleton.worksheet.getCell).not.toHaveBeenCalled();
+        expect(ctx.save).not.toHaveBeenCalled();
     });
 });

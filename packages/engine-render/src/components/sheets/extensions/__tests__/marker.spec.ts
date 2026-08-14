@@ -53,6 +53,14 @@ function createCellInfo(overrides?: Partial<any>) {
     };
 }
 
+function createStylesCache(cellData?: unknown) {
+    return {
+        fontMatrix: {
+            getValue: vi.fn(() => cellData === undefined ? undefined : { cellData }),
+        },
+    };
+}
+
 describe('marker extension', () => {
     it('returns early in printing mode or missing worksheet', () => {
         const marker = new Marker();
@@ -86,6 +94,7 @@ describe('marker extension', () => {
         };
         const skeleton = {
             worksheet,
+            stylesCache: createStylesCache(),
             rowColumnSegment: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
             getCellWithCoordByIndex: vi.fn(() => createCellInfo()),
         } as any;
@@ -137,6 +146,7 @@ describe('marker extension', () => {
         };
         const skeleton = {
             worksheet,
+            stylesCache: createStylesCache(),
             rowColumnSegment: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 1 },
             getCellWithCoordByIndex: vi.fn((row: number, col: number) => {
                 if (col === 0) {
@@ -171,6 +181,7 @@ describe('marker extension', () => {
         };
         const skeleton = {
             worksheet,
+            stylesCache: createStylesCache(),
             rowColumnSegment: { startRow: 0, endRow: 9, startColumn: 0, endColumn: 0 },
             getCellWithCoordByIndex: vi.fn((row: number) => createCellInfo({
                 mergeInfo: {
@@ -204,6 +215,7 @@ describe('marker extension', () => {
         };
         const skeleton = {
             worksheet,
+            stylesCache: createStylesCache(),
             rowColumnSegment: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
             getCellWithCoordByIndex: vi.fn(() => createCellInfo()),
         } as any;
@@ -212,5 +224,28 @@ describe('marker extension', () => {
 
         expect(skeleton.getCellWithCoordByIndex).not.toHaveBeenCalled();
         expect(ctx.fill).not.toHaveBeenCalled();
+    });
+
+    it('reuses intercepted marker data from the style cache', () => {
+        const marker = new Marker();
+        const ctx = createCtx();
+        const cachedCell = { markers: { tr: { size: 2, color: '#f00' } } };
+        const worksheet = {
+            getMergeData: vi.fn(() => []),
+            getRowVisible: vi.fn(() => true),
+            getColVisible: vi.fn(() => true),
+            getCell: vi.fn(() => ({ v: 'raw' })),
+        };
+        const skeleton = {
+            worksheet,
+            stylesCache: createStylesCache(cachedCell),
+            rowColumnSegment: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
+            getCellWithCoordByIndex: vi.fn(() => createCellInfo()),
+        } as any;
+
+        marker.draw(ctx, { scaleX: 1, scaleY: 1 } as any, skeleton, [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }]);
+
+        expect(worksheet.getCell).not.toHaveBeenCalled();
+        expect(ctx.fill).toHaveBeenCalledOnce();
     });
 });

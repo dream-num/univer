@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { Tools } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { CURSOR_TYPE } from '../basics/const';
 import { DeviceType, PointerInput } from '../basics/i-events';
@@ -308,6 +309,153 @@ describe('engine scene viewport extra', () => {
         engine.dispose();
     });
 
+    it('preserves engine and layer caches only for a pending scroll render', () => {
+        const { engine, scene } = createFixture();
+        const layer = scene.getLayer(1);
+        const renderSpy = vi.spyOn(layer, 'render');
+        scene.render();
+        renderSpy.mockClear();
+
+        scene.makeDirtyForScrolling();
+        expect(scene.isScrollRenderPending()).toBe(true);
+        scene.render();
+        expect(scene.isScrollRenderPending()).toBe(false);
+        expect(renderSpy).toHaveBeenLastCalledWith(undefined, false, expect.objectContaining({
+            preserveCache: true,
+        }));
+
+        scene.makeDirtyForScrolling();
+        scene.makeDirty(true);
+        scene.render();
+        expect(renderSpy).toHaveBeenLastCalledWith(undefined, false, undefined);
+
+        scene.dispose();
+        engine.dispose();
+    });
+
+    it('defers obsolete detail renders during a large scrollbar seek and paints the settled target', () => {
+        const { engine, scene, viewport } = createFixture();
+        const layer = scene.getLayer(1);
+        const renderSpy = vi.spyOn(layer, 'render');
+        const nowSpy = vi.spyOn(Tools, 'now');
+        const scrollbarRenderSpy = vi.spyOn(viewport, 'renderScrollbarOnly');
+        vi.spyOn(engine, 'getEstimatedFrameInterval').mockReturnValue(1000 / 120);
+
+        let now = 0;
+        nowSpy.mockImplementation(() => now);
+        scene.render();
+        renderSpy.mockClear();
+
+        scene.beginScrollbarDrag(viewport);
+        viewport.scrollToViewportPos({ viewportScrollY: 40 });
+        scene.updateScrollbarDrag(viewport);
+        scene.render();
+        expect(renderSpy).toHaveBeenCalledTimes(1);
+
+        renderSpy.mockClear();
+        now = 10;
+        viewport.scrollToViewportPos({ viewportScrollY: 240 });
+        scene.updateScrollbarDrag(viewport);
+        scene.render();
+        expect(renderSpy).not.toHaveBeenCalled();
+        expect(scrollbarRenderSpy).toHaveBeenCalled();
+
+        now = 90;
+        scene.render();
+        expect(renderSpy).toHaveBeenCalledTimes(1);
+
+        renderSpy.mockClear();
+        now = 100;
+        viewport.scrollToViewportPos({ viewportScrollY: 300 });
+        scene.updateScrollbarDrag(viewport);
+        scene.render();
+        expect(renderSpy).not.toHaveBeenCalled();
+
+        now = 164;
+        scene.render();
+        expect(renderSpy).toHaveBeenCalledTimes(1);
+
+        renderSpy.mockClear();
+        viewport.scrollToViewportPos({ viewportScrollY: 320 });
+        scene.updateScrollbarDrag(viewport);
+        scene.endScrollbarDrag(viewport);
+        scene.render();
+        expect(renderSpy).toHaveBeenCalledTimes(1);
+
+        scene.dispose();
+        engine.dispose();
+    });
+
+    it('keeps expensive content stable until a large scrollbar seek settles', () => {
+        const { engine, scene, viewport } = createFixture();
+        const layer = scene.getLayer(1);
+        const renderSpy = vi.spyOn(layer, 'render');
+        const nowSpy = vi.spyOn(Tools, 'now');
+        vi.spyOn(engine, 'getEstimatedFrameInterval').mockReturnValue(1000 / 120);
+
+        nowSpy.mockReturnValueOnce(0).mockReturnValueOnce(40);
+        scene.render();
+        renderSpy.mockClear();
+
+        let now = 50;
+        nowSpy.mockImplementation(() => now);
+        scene.beginScrollbarDrag(viewport);
+        viewport.scrollToViewportPos({ viewportScrollY: 240 });
+        scene.updateScrollbarDrag(viewport);
+        scene.render();
+        expect(renderSpy).not.toHaveBeenCalled();
+
+        now = 220;
+        viewport.scrollToViewportPos({ viewportScrollY: 300 });
+        scene.updateScrollbarDrag(viewport);
+        scene.render();
+        expect(renderSpy).not.toHaveBeenCalled();
+
+        now = 284;
+        scene.render();
+        expect(renderSpy).toHaveBeenCalledTimes(1);
+
+        scene.dispose();
+        engine.dispose();
+    });
+
+    it('scrolls independent viewport regions for a frozen sheet render', () => {
+        const { engine, scene, viewport, container } = createFixture();
+        viewport.setViewportSize({ left: 100, width: 200 });
+        const frozenViewport = new Viewport('viewMainLeft', scene, {
+            left: 0,
+            top: 0,
+            width: 100,
+            height: 180,
+            active: true,
+            allowCache: true,
+        });
+
+        scene.render();
+        const engineCtx = engine.getCanvas().getContext();
+        const drawImageSpy = vi.spyOn(engineCtx, 'drawImage');
+        const clearCanvasSpy = vi.spyOn(engine, 'clearCanvas');
+        drawImageSpy.mockClear();
+
+        viewport.scrollToViewportPos({ viewportScrollX: 20, viewportScrollY: 16 });
+        frozenViewport.updateScrollVal({
+            scrollX: 0,
+            scrollY: 16,
+            viewportScrollX: 0,
+            viewportScrollY: 16,
+        });
+        scene.makeDirtyForScrolling();
+        scene.render();
+
+        const engineScrollCopies = drawImageSpy.mock.calls.filter(([source]) => source === engineCtx.canvas);
+        expect(engineScrollCopies).toHaveLength(2);
+        expect(clearCanvasSpy).not.toHaveBeenCalled();
+
+        scene.dispose();
+        engine.dispose();
+        container.remove();
+    });
+
     it('covers engine pointer handlers and input manager dispatch', () => {
         const { engine, scene } = createFixture();
         scene.attachControl();
@@ -407,6 +555,19 @@ describe('engine scene viewport extra', () => {
                 message: '[Engine]: cannot subscribe to rect changes when container is not set!',
             })
         );
+        engine.dispose();
+    });
+
+    it('estimates the display frame interval without following isolated long frames', () => {
+        const engine = new Engine('unit-frame-interval', { elementWidth: 1, elementHeight: 1, dpr: 1 });
+        let timestamp = 0;
+        engine._endFrame(timestamp);
+        for (const interval of [8, 8, 8, 16]) {
+            timestamp += interval;
+            engine._endFrame(timestamp);
+        }
+
+        expect(engine.getEstimatedFrameInterval()).toBe(8);
         engine.dispose();
     });
 
@@ -986,25 +1147,50 @@ describe('engine scene viewport extra', () => {
         engine.dispose();
     });
 
-    it('expands cache diff strips across both axes to avoid exposing blank cache gaps', () => {
+    it('expands cache diff strips only toward retained cache content', () => {
         const { engine, scene, viewport } = createFixture();
         viewport.bufferEdgeX = 10;
         viewport.bufferEdgeY = 20;
 
-        const verticalDiff = (viewport as any)._calcDiffCacheBound(
+        const downwardDiff = (viewport as any)._calcDiffCacheBound(
             { left: 0, top: 0, right: 100, bottom: 100 },
             { left: 0, top: 50, right: 100, bottom: 150 }
         );
-        expect(verticalDiff).toEqual([
-            { left: -10, top: 80, right: 110, bottom: 170 },
+        expect(downwardDiff).toEqual([
+            { left: 0, top: 80, right: 100, bottom: 150 },
         ]);
 
-        const horizontalDiff = (viewport as any)._calcDiffCacheBound(
+        const upwardDiff = (viewport as any)._calcDiffCacheBound(
+            { left: 0, top: 50, right: 100, bottom: 150 },
+            { left: 0, top: 0, right: 100, bottom: 100 }
+        );
+        expect(upwardDiff).toEqual([
+            { left: 0, top: 0, right: 100, bottom: 70 },
+        ]);
+
+        const rightwardDiff = (viewport as any)._calcDiffCacheBound(
             { left: 0, top: 0, right: 100, bottom: 100 },
             { left: 50, top: 0, right: 150, bottom: 100 }
         );
-        expect(horizontalDiff).toEqual([
-            { left: 90, top: -20, right: 160, bottom: 120 },
+        expect(rightwardDiff).toEqual([
+            { left: 90, top: 0, right: 150, bottom: 100 },
+        ]);
+
+        const leftwardDiff = (viewport as any)._calcDiffCacheBound(
+            { left: 50, top: 0, right: 150, bottom: 100 },
+            { left: 0, top: 0, right: 100, bottom: 100 }
+        );
+        expect(leftwardDiff).toEqual([
+            { left: 0, top: 0, right: 60, bottom: 100 },
+        ]);
+
+        const diagonalDiff = (viewport as any)._calcDiffCacheBound(
+            { left: 0, top: 0, right: 100, bottom: 100 },
+            { left: 50, top: 50, right: 150, bottom: 150 }
+        );
+        expect(diagonalDiff).toEqual([
+            { left: 90, top: 50, right: 150, bottom: 150 },
+            { left: 50, top: 80, right: 100, bottom: 150 },
         ]);
 
         scene.dispose();

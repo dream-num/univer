@@ -46,6 +46,10 @@ const WHEEL_CROSS_AXIS_LOCK_RATIO = 2;
  * This controller handles scroll logic in sheet interaction.
  */
 export class SheetsScrollRenderController extends Disposable implements IRenderModule {
+    private _pendingWheelOffsetX = 0;
+    private _pendingWheelOffsetY = 0;
+    private _pendingWheelFrameId: number | null = null;
+
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @Inject(Injector) private readonly _injector: Injector,
@@ -70,6 +74,12 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         const viewMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
         if (!viewMain) return;
 
+        this.disposeWithMe(toDisposable(() => {
+            if (this._pendingWheelFrameId != null) {
+                cancelAnimationFrame(this._pendingWheelFrameId);
+                this._pendingWheelFrameId = null;
+            }
+        }));
         this.disposeWithMe(
             scene.onMouseWheel$.subscribeEvent((evt: IWheelEvent, state) => {
                 if (evt.ctrlKey || !this._contextService.getContextValue(FOCUSING_SHEET)) {
@@ -103,15 +113,20 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                     }
                 }
                 // add offset on scroll position to check whether scrolling is reaching limit
-                const targetViewportScrollX = viewMain.viewportScrollX + offsetX;
-                const targetViewportScrollY = viewMain.viewportScrollY + offsetY;
+                this._pendingWheelOffsetX += offsetX;
+                this._pendingWheelOffsetY += offsetY;
+                if (this._pendingWheelFrameId == null) {
+                    this._pendingWheelFrameId = requestAnimationFrame(() => {
+                        this._pendingWheelFrameId = null;
+                        this._flushPendingWheelScroll();
+                    });
+                }
+                const targetViewportScrollX = viewMain.viewportScrollX + this._pendingWheelOffsetX;
+                const targetViewportScrollY = viewMain.viewportScrollY + this._pendingWheelOffsetY;
                 const { x: targetScrollX, y: targetScrollY } = viewMain.transViewportScroll2ScrollValue(
                     targetViewportScrollX,
                     targetViewportScrollY
                 );
-
-                this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetX, offsetY });
-                this._context.scene.makeDirty(true);
 
                 const isLimitedStore = viewMain.limitedScroll(targetScrollX, targetScrollY);
 
@@ -129,6 +144,44 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                 }
             })
         );
+    }
+
+    private _flushPendingWheelScroll() {
+        const offsetX = this._pendingWheelOffsetX;
+        const offsetY = this._pendingWheelOffsetY;
+        if (offsetX === 0 && offsetY === 0) {
+            return;
+        }
+
+        this._pendingWheelOffsetX = 0;
+        this._pendingWheelOffsetY = 0;
+        const canUseScrollFastPath = this._canUseScrollFastPath();
+        this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetX, offsetY });
+        this._markSceneDirtyForScrolling(canUseScrollFastPath);
+    }
+
+    private _canUseScrollFastPath() {
+        const { scene } = this._context;
+        const spreadsheet = this._getSheetObject()?.spreadsheet;
+        return scene.getParent().classType === RENDER_CLASS_TYPE.ENGINE &&
+            !scene.isDirty() &&
+            spreadsheet != null &&
+            !spreadsheet.isDirty() &&
+            !spreadsheet.isForceDirty() &&
+            spreadsheet.getSkeleton()?.worksheet.getMergeData().length === 0 &&
+            scene.getViewports().every((viewport) =>
+                !viewport.shouldIntoRender() || (!viewport.isDirty && !viewport.isForceDirty)
+            ) &&
+            scene.getLayers().every((layer) => layer.getObjectsByOrder().every((object) => !object.isDirty()));
+    }
+
+    private _markSceneDirtyForScrolling(canUseScrollFastPath: boolean) {
+        const { scene } = this._context;
+        if (canUseScrollFastPath) {
+            scene.makeDirtyForScrolling();
+        } else {
+            scene.makeDirty(true);
+        }
     }
 
     // eslint-disable-next-line max-lines-per-function

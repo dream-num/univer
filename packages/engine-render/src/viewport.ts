@@ -457,6 +457,12 @@ export class Viewport {
 
     get canvas() { return this._cacheCanvas; }
 
+    swapCacheCanvas(cacheCanvas: UniverCanvas) {
+        const previousCacheCanvas = this._cacheCanvas;
+        this._cacheCanvas = cacheCanvas;
+        return previousCacheCanvas;
+    }
+
     enable() {
         this._active = true;
     }
@@ -747,7 +753,12 @@ export class Viewport {
      * @param objects
      * @param isMaxLayer
      */
-    render(parentCtx?: UniverRenderingContext, objects: BaseObject[] = [], isMaxLayer = false): void {
+    render(
+        parentCtx?: UniverRenderingContext,
+        objects: BaseObject[] = [],
+        isMaxLayer = false,
+        viewportInfo?: IViewportInfo
+    ): void {
         if (!this.shouldIntoRender()) {
             return;
         }
@@ -773,7 +784,7 @@ export class Viewport {
 
         // set scrolling state for mainCtx,
         mainCtx.transform(tm[0], tm[1], tm[2], tm[3], tm[4], tm[5]);
-        const viewPortInfo = this.calcViewportInfo();
+        const viewPortInfo = viewportInfo ?? this.calcViewportInfo();
 
         for (let i = 0, length = objects.length; i < length; i++) {
             objects[i].render(mainCtx, viewPortInfo);
@@ -1488,13 +1499,15 @@ export class Viewport {
 
         const additionalAreas: IBoundRectNoAngle[] = [];
 
+        // Extend each exposed strip only toward the retained cache content. Expanding the
+        // strip on its other edges repaints pixels that are already valid in the cache.
         // curr has an extra part on the left compared to prev.
         if (currBound.left < prevBound.left) {
             additionalAreas.push({
                 top: currBound.top,
                 bottom: currBound.bottom,
                 left: currBound.left,
-                right: prevBound.left,
+                right: Math.min(currBound.right, prevBound.left + this.bufferEdgeX),
             });
         }
 
@@ -1503,7 +1516,7 @@ export class Viewport {
             additionalAreas.push({
                 top: currBound.top,
                 bottom: currBound.bottom,
-                left: prevBound.right,
+                left: Math.max(currBound.left, prevBound.right - this.bufferEdgeX),
                 right: currBound.right,
             });
         }
@@ -1511,7 +1524,7 @@ export class Viewport {
         if (currBound.top < prevBound.top) {
             additionalAreas.push({
                 top: currBound.top,
-                bottom: prevBound.top,
+                bottom: Math.min(currBound.bottom, prevBound.top + this.bufferEdgeY),
                 left: Math.max(prevBound.left, currBound.left),
                 right: Math.min(prevBound.right, currBound.right),
             });
@@ -1519,19 +1532,12 @@ export class Viewport {
 
         if (currBound.bottom > prevBound.bottom) {
             additionalAreas.push({
-                top: prevBound.bottom,
+                top: Math.max(currBound.top, prevBound.bottom - this.bufferEdgeY),
                 bottom: currBound.bottom,
                 left: Math.max(prevBound.left, currBound.left),
                 right: Math.min(prevBound.right, currBound.right),
             });
         }
-        for (const bound of additionalAreas) {
-            bound.left = bound.left - this.bufferEdgeX;
-            bound.right = bound.right + this.bufferEdgeX;
-            bound.top = bound.top - this.bufferEdgeY;
-            bound.bottom = bound.bottom + this.bufferEdgeY;
-        }
-
         return additionalAreas;
     }
 
@@ -1545,6 +1551,31 @@ export class Viewport {
         } else if (parent.classType === RENDER_CLASS_TYPE.ENGINE) {
             this._scrollBar.render(ctx);
         }
+    }
+
+    renderScrollbarOnly(ctx: UniverRenderingContext, pixelRatio: number) {
+        const scrollBar = this._scrollBar;
+        if (!scrollBar) {
+            return;
+        }
+
+        const width = this.width ?? 0;
+        const height = this.height ?? 0;
+        ctx.save();
+        ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+        if (scrollBar.enableVertical) {
+            ctx.clearRect(this.left + width - scrollBar.totalSize, this.top, scrollBar.totalSize, height);
+        }
+        if (scrollBar.enableHorizontal) {
+            ctx.clearRect(this.left, this.top + height - scrollBar.totalSize, width, scrollBar.totalSize);
+        }
+        ctx.restore();
+
+        ctx.save();
+        const scrollbarTM = this.getScrollBarTransForm().getMatrix();
+        ctx.transform(scrollbarTM[0], scrollbarTM[1], scrollbarTM[2], scrollbarTM[3], scrollbarTM[4], scrollbarTM[5]);
+        this._drawScrollbar(ctx);
+        ctx.restore();
     }
 
     setViewportSize(props?: IViewProps) {

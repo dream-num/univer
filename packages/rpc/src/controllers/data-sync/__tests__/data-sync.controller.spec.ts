@@ -59,6 +59,7 @@ describe('data-sync controllers', () => {
             createInstance: vi.fn(async () => true),
             disposeInstance: vi.fn(async () => true),
             syncMutation: vi.fn(async () => true),
+            whenReady: vi.fn(async () => true as const),
         };
 
         const remoteChannel = buildRemoteChannel(remoteInstanceImpl);
@@ -219,6 +220,7 @@ describe('data-sync controllers', () => {
             createInstance: vi.fn(async () => true),
             disposeInstance: vi.fn(async () => true),
             syncMutation: vi.fn(() => new Promise<boolean>((resolve) => resolvers.push(resolve))),
+            whenReady: vi.fn(async () => true as const),
         };
 
         const remoteChannel = buildRemoteChannel(remoteInstanceImpl);

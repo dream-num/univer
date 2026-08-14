@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ICommandService, ILogService, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, ILogService, Injector, IUniverInstanceService, LifecycleService, LifecycleStages, UniverInstanceType } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { IRemoteInstanceService, IRemoteSyncService, RemoteSyncPrimaryService, WebWorkerRemoteInstanceService } from '../remote-instance.service';
 
@@ -83,10 +83,17 @@ describe('remote-instance.service', () => {
         injector.add([IUniverInstanceService, { useClass: TestUniverInstanceService as never }]);
         injector.add([ICommandService, { useClass: TestCommandService as never }]);
         injector.add([ILogService, { useClass: TestLogService as never }]);
+        injector.add([LifecycleService]);
         injector.add([IRemoteInstanceService, { useClass: WebWorkerRemoteInstanceService }]);
         const service = injector.get(IRemoteInstanceService);
 
-        await expect(service.whenReady()).resolves.toBe(true);
+        const ready = service.whenReady();
+        let readyResolved = false;
+        ready.then(() => readyResolved = true);
+        await Promise.resolve();
+        expect(readyResolved).toBe(false);
+        injector.get(LifecycleService).stage = LifecycleStages.Ready;
+        await expect(ready).resolves.toBe(true);
 
         await expect(service.syncMutation(
             {

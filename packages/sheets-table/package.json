@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-table",
-    "version": "1.0.0-beta.0",
+    "version": "1.0.0-beta.1",
     "private": false,
     "description": "Structured table model and commands for Univer Sheets.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

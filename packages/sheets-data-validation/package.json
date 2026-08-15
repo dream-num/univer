@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-data-validation",
-    "version": "1.0.0-beta.0",
+    "version": "1.0.0-beta.1",
     "private": false,
     "description": "Sheet-specific data validation commands, services, and Facade APIs for Univer Sheets.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

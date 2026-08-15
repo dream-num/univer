@@ -19,6 +19,7 @@ import type { ReactNode } from 'react';
 import type { IMenuItem, IValueOption } from '../../../services/menu/menu';
 import {
     clsx,
+    ConfigContext,
     Dropdown,
     DropdownMenu,
     Tooltip,
@@ -149,7 +150,8 @@ export const TooltipWrapper = forwardRef<ITooltipWrapperRef, ITooltipProps & { d
 });
 
 export function DropdownWrapper(props: Omit<Partial<IDropdownProps>, 'overlay'> & { overlay: ReactNode; align?: 'start' | 'end' | 'center' }) {
-    const { children, overlay, disabled, align = 'start' } = props;
+    const { children, overlay, disabled, align } = props;
+    const { direction } = useContext(ConfigContext);
     const { dropdownVisible, setDropdownVisible } = useContext(TooltipWrapperContext);
     const triggerRef = useRef<HTMLDivElement>(null);
     const overlayRef = useRef<HTMLDivElement>(null);
@@ -181,7 +183,7 @@ export function DropdownWrapper(props: Omit<Partial<IDropdownProps>, 'overlay'> 
 
     return (
         <Dropdown
-            align={align}
+            align={align ?? (direction === 'rtl' ? 'end' : 'start')}
             overlay={(
                 <div ref={overlayRef} className="univer-grid univer-gap-2">
                     {overlay}

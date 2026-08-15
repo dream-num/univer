@@ -21,6 +21,7 @@
 import type { ComponentType, ReactElement } from 'react';
 import { cleanup, fireEvent, render } from '@testing-library/react';
 import { ILogService, Injector, LocaleService } from '@univerjs/core';
+import { ConfigProvider } from '@univerjs/design';
 import { of } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -134,6 +135,25 @@ describe('DropdownMenuLabel', () => {
 });
 
 describe('DropdownWrapper', () => {
+    it('opens toward the left in RTL layouts', async () => {
+        const { findByText, getByRole } = render(
+            <ConfigProvider direction="rtl" mountContainer={document.body}>
+                <ToolbarDropdownProvider>
+                    <TooltipWrapper dropdownKey="test-dropdown">
+                        <DropdownWrapper overlay={<div>Dropdown content</div>}>
+                            <button type="button">Open dropdown</button>
+                        </DropdownWrapper>
+                    </TooltipWrapper>
+                </ToolbarDropdownProvider>
+            </ConfigProvider>
+        );
+
+        fireEvent.click(getByRole('button', { name: 'Open dropdown' }));
+        const content = (await findByText('Dropdown content')).closest('[data-slot="popover-content"]');
+
+        expect(content?.getAttribute('data-align')).toBe('end');
+    });
+
     it('closes on an outside pointerdown even when no click follows', async () => {
         const { findByText, getByRole, queryByText } = render(
             <ToolbarDropdownProvider>

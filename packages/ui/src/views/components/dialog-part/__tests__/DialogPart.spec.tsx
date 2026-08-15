@@ -18,7 +18,7 @@ import type { ReactElement } from 'react';
 import type { IDialogPartMethodOptions } from '../interface';
 import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
 import { DesktopLogService, ILogService, Injector, LocaleService } from '@univerjs/core';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ComponentManager, IconManager } from '../../../../common';
 import { DesktopDialogService } from '../../../../services/dialog/desktop-dialog.service';
 import { IDialogService } from '../../../../services/dialog/dialog.service';
@@ -55,6 +55,7 @@ function renderWithDependencies(element: ReactElement) {
 
 describe('DialogPart', () => {
     afterEach(() => {
+        vi.restoreAllMocks();
         cleanup();
     });
 
@@ -86,6 +87,30 @@ describe('DialogPart', () => {
         expect(snapshots.at(-1)).toMatchObject([{ id: 'permission-dialog', open: false }]);
 
         subscription.unsubscribe();
+        rendered.dispose();
+    });
+
+    it('passes custom label keys without spreading them into JSX', async () => {
+        const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+        const rendered = renderWithDependencies(<DialogPart />);
+        const dialogService = rendered.injector.get(IDialogService);
+        const children = {
+            key: 'pivot-filter',
+            title: <span>Keyed dialog content</span>,
+        };
+
+        act(() => {
+            dialogService.open({
+                id: 'keyed-dialog',
+                children,
+            });
+        });
+
+        expect(await screen.findByText('Keyed dialog content')).toBeTruthy();
+        expect(consoleErrorSpy.mock.calls.some(([message]) =>
+            typeof message === 'string' && message.includes('A props object containing a "key" prop is being spread into JSX')
+        )).toBe(false);
+
         rendered.dispose();
     });
 

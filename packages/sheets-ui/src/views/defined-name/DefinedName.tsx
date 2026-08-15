@@ -295,7 +295,6 @@ export function DefinedName({ disable }: { disable: boolean }) {
                   univer-box-border univer-size-full univer-appearance-none univer-bg-transparent univer-pl-1.5
                   univer-pr-5 univer-text-gray-900
                   focus:univer-outline-none
-                  rtl:univer-pl-5 rtl:univer-pr-1.5
                   dark:!univer-border-r-gray-700 dark:!univer-text-gray-0
                 `, borderRightClassName, {
                     'univer-cursor-not-allowed': disable,
@@ -323,7 +322,6 @@ export function DefinedName({ disable }: { disable: boolean }) {
                       univer-absolute univer-right-0 univer-top-0 univer-flex univer-h-full univer-cursor-pointer
                       univer-items-center univer-justify-center univer-px-1 univer-transition-colors univer-duration-200
                       hover:univer-bg-gray-100
-                      rtl:univer-left-0 rtl:univer-right-auto
                       dark:!univer-text-gray-0
                       dark:hover:!univer-bg-gray-800
                     `, {

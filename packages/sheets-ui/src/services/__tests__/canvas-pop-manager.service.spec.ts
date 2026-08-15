@@ -335,6 +335,25 @@ describe('SheetCanvasPopManagerService', () => {
         expect(popupService.popups.size).toBe(0);
     });
 
+    it('adds scaled sheet header insets to a canvas-constrained drawing popup', () => {
+        const { service, popupService } = createSheetHarness();
+        const targetObject = {
+            left: 20,
+            top: 10,
+            width: 40,
+            height: 30,
+            classType: RENDER_CLASS_TYPE.SHAPE,
+            getPropByKey: () => 'image',
+        };
+
+        service.attachPopupToObject(targetObject as never, {
+            componentKey: 'drawing-toolbar',
+            constrainToCanvas: true,
+        });
+
+        expect(popupService.lastPopup()?.boundaryInsets).toEqual({ left: 40, top: 40 });
+    });
+
     it('keeps absolute-position popups hidden while a selection is being dragged unless the popup opts in', () => {
         const { service, popupService, refSelectionService, sheetSelectionService } = createSheetHarness();
         const bound = { top: 10, left: 20, right: 30, bottom: 40 };

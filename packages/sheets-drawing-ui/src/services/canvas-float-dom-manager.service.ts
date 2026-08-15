@@ -1174,6 +1174,13 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         return { scene, transformer, renderUnit, canvas };
     }
 
+    private _getDrawingZIndex(unitId: string, subUnitId: string, drawingId: string): number {
+        const drawingOrder = this._drawingManagerService.getDrawingOrder(unitId, subUnitId);
+        const drawingIndex = drawingOrder.indexOf(drawingId);
+
+        return drawingIndex < 0 ? drawingOrder.length - 1 : drawingIndex;
+    }
+
     // eslint-disable-next-line max-lines-per-function
     private _drawingAddListener() {
         this.disposeWithMe(
@@ -1256,7 +1263,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         top,
                         width,
                         height,
-                        zIndex: this._drawingManagerService.getDrawingOrder(unitId, subUnitId).length - 1,
+                        zIndex: this._getDrawingZIndex(unitId, subUnitId, drawingId),
                     };
 
                     const isChart = drawingType === DrawingTypeEnum.DRAWING_CHART;
@@ -1961,7 +1968,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 top,
                 width,
                 height,
-                zIndex: this._drawingManagerService.getDrawingOrder(unitId, subUnitId).length - 1,
+                zIndex: this._getDrawingZIndex(unitId, subUnitId, drawingId),
             };
 
             const isChart = drawingType === DrawingTypeEnum.DRAWING_CHART;
@@ -2078,7 +2085,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                     top: calcOffsetPos.startY,
                     width: domAnchor.width ?? newRangePos.width,
                     height: domAnchor.height ?? newRangePos.height,
-                    zIndex: this._drawingManagerService.getDrawingOrder(unitId, subUnitId).length - 1,
+                    zIndex: this._getDrawingZIndex(unitId, subUnitId, drawingId),
                 });
                 const newPos = calcSheetFloatDomPosition(newRect, renderObject.renderUnit.scene, skeletonParam.skeleton, target.worksheet, floatDomInfo);
                 position$.next(newPos);
@@ -2238,7 +2245,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 top: calcOffsetPos.startY,
                 width: calcOffsetPos.width,
                 height: calcOffsetPos.height,
-                zIndex: this._drawingManagerService.getDrawingOrder(unitId, subUnitId).length - 1,
+                zIndex: this._getDrawingZIndex(unitId, subUnitId, drawingId),
             };
 
             const domRect = new Rect(rectShapeKey, headerRectConfig);
@@ -2327,7 +2334,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                     top: 0,
                     width: domLayoutParam.width,
                     height: domLayoutParam.height,
-                    zIndex: this._drawingManagerService.getDrawingOrder(unitId, subUnitId).length - 1,
+                    zIndex: this._getDrawingZIndex(unitId, subUnitId, drawingId),
                 });
                 const newPos = calcSheetFloatDomPosition(newRect, renderObject.renderUnit.scene, skeleton.skeleton, target.worksheet, floatDomInfo);
                 position$.next(newPos);

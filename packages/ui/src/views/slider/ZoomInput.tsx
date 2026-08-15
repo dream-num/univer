@@ -118,7 +118,7 @@ export function ZoomInput(props: IZoomInputProps) {
         <div
             className={clsx(`
               univer-flex univer-h-6 univer-w-[68px] univer-flex-shrink-0 univer-items-center univer-overflow-hidden
-              univer-rounded-md univer-border univer-border-gray-200 univer-bg-white
+              univer-rounded-md univer-border univer-border-gray-200 univer-bg-gray-0
               dark:!univer-border-gray-600 dark:!univer-bg-gray-800
             `, className, {
                 'univer-opacity-60': disabled,

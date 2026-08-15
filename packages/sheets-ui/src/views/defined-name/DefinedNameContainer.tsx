@@ -298,7 +298,7 @@ export const DefinedNameContainer = () => {
                                             className={`
                                               univer-my-1 univer-max-h-[100px] univer-max-w-[190px] univer-truncate
                                               univer-text-sm univer-font-medium univer-text-gray-900
-                                              dark:!univer-text-white
+                                              dark:!univer-text-gray-0
                                             `}
                                         >
                                             {definedName.name}

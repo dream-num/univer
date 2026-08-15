@@ -38,7 +38,7 @@ function Params({ className, title, value }: {
             <div
                 className={clsx(`
                   univer-mb-2 univer-text-sm univer-font-medium univer-text-gray-900
-                  dark:!univer-text-white
+                  dark:!univer-text-gray-0
                 `, className)}
             >
                 {title}
@@ -125,7 +125,7 @@ export function HelpFunction(props: {
                     <div
                         className={clsx(`
                           univer-m-0 univer-box-border univer-w-[250px] univer-select-none univer-list-none
-                          univer-rounded-lg univer-bg-white univer-leading-5 univer-shadow-md univer-outline-none
+                          univer-rounded-lg univer-bg-gray-0 univer-leading-5 univer-shadow-md univer-outline-none
                           dark:!univer-bg-gray-900
                         `, borderClassName)}
                     >
@@ -133,7 +133,7 @@ export function HelpFunction(props: {
                             className={clsx(`
                               univer-box-border univer-flex univer-items-center univer-justify-between univer-px-4
                               univer-py-3 univer-text-xs univer-font-medium univer-text-gray-900
-                              dark:!univer-text-white
+                              dark:!univer-text-gray-0
                             `, borderTopClassName)}
                             style={{
                                 overflowWrap: 'anywhere',

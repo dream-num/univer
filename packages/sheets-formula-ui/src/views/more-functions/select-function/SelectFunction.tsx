@@ -186,7 +186,7 @@ export function SelectFunction(props: ISelectFunctionProps) {
                             className={clsx(`
                               univer-relative univer-box-border univer-cursor-pointer univer-rounded univer-px-7
                               univer-py-1 univer-text-sm univer-text-gray-900 univer-transition-colors
-                              dark:!univer-text-white
+                              dark:!univer-text-gray-0
                             `, {
                                 'univer-bg-gray-200 dark:!univer-bg-gray-600': active === index,
                             })}
@@ -222,7 +222,7 @@ export function SelectFunction(props: ISelectFunctionProps) {
                         <div
                             className="
                               univer-text-sm univer-font-semibold univer-text-gray-900
-                              dark:!univer-text-white
+                              dark:!univer-text-gray-0
                             "
                         >
                             {functionInfo.functionName}
@@ -252,7 +252,7 @@ export function SelectFunction(props: ISelectFunctionProps) {
                                 className={clsx(`
                                   univer-mt-1.5 univer-break-words univer-rounded-md univer-bg-gray-50 univer-px-3
                                   univer-py-2 univer-font-mono univer-text-xs univer-leading-5 univer-text-gray-900
-                                  dark:!univer-bg-gray-800 dark:!univer-text-white
+                                  dark:!univer-bg-gray-800 dark:!univer-text-gray-0
                                 `, borderClassName)}
                             >
                                 <FunctionHelp
@@ -276,7 +276,7 @@ export function SelectFunction(props: ISelectFunctionProps) {
                                 className={clsx(`
                                   univer-mt-1.5 univer-break-words univer-rounded-md univer-bg-gray-50 univer-px-3
                                   univer-py-2 univer-font-mono univer-text-xs univer-leading-5 univer-text-gray-900
-                                  dark:!univer-bg-gray-800 dark:!univer-text-white
+                                  dark:!univer-bg-gray-800 dark:!univer-text-gray-0
                                 `, borderClassName)}
                             >
                                 {`${functionInfo.functionName}(${functionInfo.functionParameter
@@ -300,7 +300,7 @@ export function SelectFunction(props: ISelectFunctionProps) {
                                         <span
                                             className={`
                                               univer-text-xs univer-font-medium univer-text-gray-900
-                                              dark:!univer-text-white
+                                              dark:!univer-text-gray-0
                                             `}
                                         >
                                             {item.name}

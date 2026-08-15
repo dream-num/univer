@@ -712,7 +712,7 @@ describe('formula highlight helpers', () => {
             sheetSkeletonManagerService: {
                 getSkeleton: vi.fn(() => ({})),
             } as any,
-            themeService: { getColorFromTheme: vi.fn((key: string) => key === 'white' ? '#fff' : key) } as any,
+            themeService: { getColorFromTheme: vi.fn((key: string) => key === 'gray.0' ? '#fff' : key) } as any,
             univerInstanceService: univerInstanceService as any,
         });
 
@@ -756,7 +756,7 @@ describe('formula highlight helpers', () => {
             sheetSkeletonManagerService: {
                 getSkeleton: vi.fn(() => ({})),
             } as any,
-            themeService: { getColorFromTheme: vi.fn((key: string) => key === 'white' ? '#fff' : key) } as any,
+            themeService: { getColorFromTheme: vi.fn((key: string) => key === 'gray.0' ? '#fff' : key) } as any,
             univerInstanceService: { getUnit: vi.fn(() => workbook) } as any,
         });
 
@@ -794,7 +794,7 @@ describe('formula highlight helpers', () => {
             sheetSkeletonManagerService: {
                 getSkeleton: vi.fn(() => ({})),
             } as any,
-            themeService: { getColorFromTheme: vi.fn((key: string) => key === 'white' ? '#fff' : key) } as any,
+            themeService: { getColorFromTheme: vi.fn((key: string) => key === 'gray.0' ? '#fff' : key) } as any,
             univerInstanceService: { getUnit: vi.fn(() => workbook) } as any,
         });
 

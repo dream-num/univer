@@ -54,7 +54,6 @@ function isSameSelectionRange(left: IRange | undefined, right: IRange): boolean 
         (!left.unitId || !right.unitId || left.unitId === right.unitId);
 }
 
-// eslint-disable-next-line complexity, max-lines-per-function
 export function calcHighlightRanges(opts: {
     unitId: string;
     subUnitId: string;
@@ -330,7 +329,7 @@ export function useColor(): IColorMap {
         ].map((color) => themeService.isValidThemeColor(color) ? themeService.getColorFromTheme(color) : color);
         const numberColor = themeService.getColorFromTheme('blue.700');
         const stringColor = themeService.getColorFromTheme('jiqing.800');
-        const plainTextColor = themeService.getColorFromTheme('black');
+        const plainTextColor = themeService.getColorFromTheme('gray.1000');
         return { formulaRefColors, numberColor, stringColor, plainTextColor };
     }, [theme]);
     return result;

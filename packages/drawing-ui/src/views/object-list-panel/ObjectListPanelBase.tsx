@@ -420,7 +420,7 @@ export function ObjectListPanelBase(props: IObjectListPanelBaseProps) {
                                       dark:!univer-text-primary-200
                                     `
                                     : `
-                                      univer-border-gray-200 univer-bg-white univer-text-gray-600
+                                      univer-border-gray-200 univer-bg-gray-0 univer-text-gray-600
                                       hover:univer-bg-gray-50
                                       dark:!univer-bg-gray-900 dark:!univer-text-gray-300
                                       dark:hover:!univer-bg-gray-800
@@ -681,7 +681,7 @@ function ObjectListRow(props: {
                               !univer-h-7 univer-min-w-0 univer-overflow-hidden univer-text-ellipsis
                               univer-whitespace-nowrap !univer-rounded !univer-border-transparent !univer-bg-transparent
                               !univer-px-1 univer-text-sm univer-text-gray-900 !univer-shadow-none
-                              focus:!univer-border-primary-500 focus:!univer-bg-white focus:!univer-ring-1
+                              focus:!univer-border-primary-500 focus:!univer-bg-gray-0 focus:!univer-ring-1
                               focus:!univer-ring-primary-100
                               disabled:!univer-bg-transparent disabled:univer-opacity-100
                               dark:!univer-text-gray-100
@@ -831,7 +831,7 @@ function ObjectDetailsEditor(props: {
                     <textarea
                         className="
                           univer-box-border univer-min-h-16 univer-w-full univer-resize-none univer-rounded-md
-                          univer-border univer-border-solid univer-border-gray-200 univer-bg-white univer-p-2
+                          univer-border univer-border-solid univer-border-gray-200 univer-bg-gray-0 univer-p-2
                           univer-text-sm univer-text-gray-900 univer-outline-none
                           focus:univer-border-primary-500 focus:univer-ring-1 focus:univer-ring-primary-100
                           disabled:univer-cursor-not-allowed disabled:univer-opacity-70

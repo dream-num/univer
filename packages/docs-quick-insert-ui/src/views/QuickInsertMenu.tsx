@@ -136,7 +136,7 @@ export function QuickInsertMenu(props: IQuickInsertMenuProps) {
                       univer-bg-transparent univer-px-2 univer-text-left univer-text-sm univer-text-gray-900
                       univer-outline-none
                       hover:univer-bg-gray-50
-                      dark:!univer-text-white
+                      dark:!univer-text-gray-0
                       dark:hover:!univer-bg-gray-600
                     `, {
                         'hover:univer-bg-transparent': !isFocused,
@@ -161,9 +161,9 @@ export function QuickInsertMenu(props: IQuickInsertMenuProps) {
         <div
             className={clsx(`
               univer-box-border univer-grid univer-max-h-[360px] univer-gap-1 univer-overflow-y-auto
-              univer-overflow-x-hidden univer-overscroll-contain univer-rounded-md univer-bg-white univer-px-2
+              univer-overflow-x-hidden univer-overscroll-contain univer-rounded-md univer-bg-gray-0 univer-px-2
               univer-py-1 univer-text-sm univer-text-gray-900 univer-shadow-md
-              dark:!univer-bg-gray-700 dark:!univer-text-white
+              dark:!univer-bg-gray-700 dark:!univer-text-gray-0
             `, borderClassName, scrollbarClassName)}
             onWheel={(event) => event.stopPropagation()}
         >

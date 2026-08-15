@@ -136,16 +136,16 @@ export function ImagePopupMenu(props: IImagePopupMenuProps) {
                       dark:hover:!univer-bg-gray-800
                     `, borderClassName, {
                         'univer-bg-gray-100 dark:!univer-bg-gray-800': visible,
-                        'univer-bg-white dark:!univer-bg-gray-900': !visible,
+                        'univer-bg-gray-0 dark:!univer-bg-gray-900': !visible,
                     })}
                 >
                     <AutofillDoubleIcon
                         className={`
                           univer-fill-primary-600 univer-text-gray-900
-                          dark:!univer-text-white
+                          dark:!univer-text-gray-0
                         `}
                     />
-                    {showMore && <MoreDownIcon className="dark:!univer-text-white" />}
+                    {showMore && <MoreDownIcon className="dark:!univer-text-gray-0" />}
                 </div>
             </DropdownMenu>
         </div>
@@ -252,7 +252,7 @@ function ToolbarDropdownButton<T extends string | number>(props: {
                 <div
                     className={`
                       univer-min-w-32 univer-rounded-lg univer-border univer-border-solid univer-border-gray-200
-                      univer-bg-white univer-p-1 univer-shadow-lg
+                      univer-bg-gray-0 univer-p-1 univer-shadow-lg
                       dark:!univer-border-gray-700 dark:!univer-bg-gray-900
                     `}
                 >
@@ -377,7 +377,7 @@ function DocImageFloatingToolbar(props: IDocImageFloatingToolbarProps) {
                 event.preventDefault();
             }}
             className={clsx(`
-              univer-box-border univer-flex univer-items-center univer-rounded univer-bg-white univer-px-1 univer-py-1
+              univer-box-border univer-flex univer-items-center univer-rounded univer-bg-gray-0 univer-px-1 univer-py-1
               univer-shadow-sm
               dark:!univer-border-gray-700 dark:!univer-bg-gray-900
             `, borderClassName)}
@@ -451,7 +451,7 @@ function DocChartFloatingToolbar(props: Pick<IDocImageFloatingToolbarProps, 'men
                 event.preventDefault();
             }}
             className={clsx(`
-              univer-box-border univer-flex univer-items-center univer-rounded univer-bg-white univer-px-1 univer-py-1
+              univer-box-border univer-flex univer-items-center univer-rounded univer-bg-gray-0 univer-px-1 univer-py-1
               univer-shadow-sm
               dark:!univer-border-gray-700 dark:!univer-bg-gray-900
             `, borderClassName)}

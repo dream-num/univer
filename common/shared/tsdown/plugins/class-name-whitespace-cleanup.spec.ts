@@ -97,7 +97,7 @@ describe('cleanupClassNameTemplateWhitespace', () => {
                     variants: {
                         variant: {
                             primary: \`
-                              univer-border-primary-600 univer-bg-primary-600 univer-text-white
+                              univer-border-primary-600 univer-bg-primary-600 univer-text-gray-0
                               hover:univer-bg-primary-500
                             \`,
                         },
@@ -118,7 +118,7 @@ describe('cleanupClassNameTemplateWhitespace', () => {
             'cva(\n                "univer-box-border univer-inline-flex univer-cursor-pointer disabled:univer-pointer-events-none",'
         );
         expect(cleanedCode).toContain(
-            'primary: "univer-border-primary-600 univer-bg-primary-600 univer-text-white hover:univer-bg-primary-500"'
+            'primary: "univer-border-primary-600 univer-bg-primary-600 univer-text-gray-0 hover:univer-bg-primary-500"'
         );
         expect(cleanedCode).toContain(
             'className: "univer-gap-1 univer-rounded dark:!univer-bg-gray-700"'

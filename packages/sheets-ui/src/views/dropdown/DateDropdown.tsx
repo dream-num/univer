@@ -52,8 +52,8 @@ export function DateDropdown(props: {
     return (
         <div
             className={`
-              univer-rounded univer-bg-white univer-p-2 univer-shadow-lg
-              dark:!univer-bg-black
+              univer-rounded univer-bg-gray-0 univer-p-2 univer-shadow-lg
+              dark:!univer-bg-gray-1000
             `}
         >
             {patternType === 'time'

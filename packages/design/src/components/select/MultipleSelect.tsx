@@ -141,7 +141,7 @@ export function MultipleSelect(props: IMultipleSelectProps) {
                 <MoreDownIcon
                     className={`
                       univer-flex-shrink-0
-                      dark:!univer-text-white
+                      dark:!univer-text-gray-0
                     `}
                 />
             </div>

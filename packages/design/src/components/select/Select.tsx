@@ -73,8 +73,8 @@ export interface ISelectProps {
 
 export const selectClassName = clsx(`
   univer-box-border univer-inline-flex univer-h-8 univer-min-w-36 univer-items-center univer-justify-between
-  univer-gap-2 univer-rounded-lg univer-bg-white univer-px-2.5 univer-transition-colors univer-duration-200
-  dark:!univer-bg-gray-700 dark:!univer-text-white
+  univer-gap-2 univer-rounded-lg univer-bg-gray-0 univer-px-2.5 univer-transition-colors univer-duration-200
+  dark:!univer-bg-gray-700 dark:!univer-text-gray-0
 `, borderClassName);
 
 export function Select(props: ISelectProps) {
@@ -176,7 +176,7 @@ export function Select(props: ISelectProps) {
                 <div
                     className={`
                       univer-flex-1 univer-truncate univer-text-sm univer-text-gray-500
-                      dark:!univer-text-white
+                      dark:!univer-text-gray-0
                     `}
                 >
                     {displayValue}
@@ -184,7 +184,7 @@ export function Select(props: ISelectProps) {
                 <MoreDownIcon
                     className={`
                       univer-flex-shrink-0
-                      dark:!univer-text-white
+                      dark:!univer-text-gray-0
                     `}
                 />
             </div>

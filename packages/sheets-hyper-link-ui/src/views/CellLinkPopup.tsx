@@ -71,7 +71,7 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
         <div
             className={clsx(`
               univer-mb-1 univer-flex univer-max-w-80 univer-flex-row univer-items-center univer-justify-between
-              univer-gap-2 univer-overflow-hidden univer-rounded-lg univer-bg-white univer-p-2 univer-shadow-md
+              univer-gap-2 univer-overflow-hidden univer-rounded-lg univer-bg-gray-0 univer-p-2 univer-shadow-md
               dark:!univer-bg-gray-900
             `, borderClassName)}
             onClick={() => popupService.hideCurrentPopup()}
@@ -93,7 +93,7 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
                     className={`
                       univer-flex univer-size-5 univer-flex-none univer-items-center univer-justify-center
                       univer-text-base univer-text-gray-900
-                      dark:!univer-text-white
+                      dark:!univer-text-gray-0
                     `}
                 >
                     {iconsMap[linkObj.type]}
@@ -134,7 +134,7 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
                         }}
                     >
                         <Tooltip placement="bottom" title={localeService.t<LocaleKey>('sheets-hyper-link-ui.popup.copy')}>
-                            <CopyIcon className="dark:!univer-text-white" />
+                            <CopyIcon className="dark:!univer-text-gray-0" />
                         </Tooltip>
                     </div>
                 )}
@@ -160,7 +160,7 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
                             }}
                         >
                             <Tooltip placement="bottom" title={localeService.t<LocaleKey>('sheets-hyper-link-ui.popup.edit')}>
-                                <WriteIcon className="dark:!univer-text-white" />
+                                <WriteIcon className="dark:!univer-text-gray-0" />
                             </Tooltip>
                         </div>
                         <div
@@ -186,7 +186,7 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
                             }}
                         >
                             <Tooltip placement="bottom" title={localeService.t<LocaleKey>('sheets-hyper-link-ui.popup.cancel')}>
-                                <UnlinkIcon className="dark:!univer-text-white" />
+                                <UnlinkIcon className="dark:!univer-text-gray-0" />
                             </Tooltip>
                         </div>
                     </>

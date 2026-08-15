@@ -1278,7 +1278,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
                 ref={anchorRef}
                 className={clsx(`
                   univer-mr-1 univer-inline-flex univer-h-7 univer-cursor-pointer univer-items-center univer-gap-1
-                  univer-rounded-md univer-border univer-border-gray-200 univer-bg-white univer-px-2 univer-py-0
+                  univer-rounded-md univer-border univer-border-gray-200 univer-bg-gray-0 univer-px-2 univer-py-0
                   univer-shadow-sm univer-transition-colors
                   hover:univer-bg-gray-50 hover:univer-shadow-md
                   dark:!univer-border-gray-700 dark:!univer-bg-gray-900
@@ -1310,7 +1310,7 @@ function ParagraphMenuBase({ popup, tableBlockOnly = false }: { popup: IPopup; t
                         getParagraphMenuIconSizeClass(targetIconKey),
                         `
                           univer-shrink-0 univer-text-gray-700
-                          dark:!univer-text-white
+                          dark:!univer-text-gray-0
                         `
                     )}
                 />
@@ -1578,6 +1578,8 @@ export function shouldUseInsertBelowRange(commandId: string, params: IValueOptio
         || normalized === DOC_PARAGRAPH_T_INSERT_BELOW_COMMAND_ID;
 }
 
+const DRAG_HANDLE_DOTS = ['top-left', 'top-right', 'middle-left', 'middle-right', 'bottom-left', 'bottom-right'] as const;
+
 function DragHandleDotsIcon() {
     return (
         <span
@@ -1587,10 +1589,9 @@ function DragHandleDotsIcon() {
             `}
             aria-hidden="true"
         >
-            {Array.from({ length: 6 }).map((_, index) => (
+            {DRAG_HANDLE_DOTS.map((key) => (
                 <span
-                    // eslint-disable-next-line react/no-array-index-key
-                    key={index}
+                    key={key}
                     className={`
                       univer-size-0.5 univer-rounded-full univer-bg-gray-400 univer-transition-colors
                       group-hover:univer-bg-gray-500

@@ -444,7 +444,7 @@ function createItemTestBed(rule: ISheetDataValidationRule = createCheckboxRule()
     });
 
     const themeService = injector.get(ThemeService);
-    themeService.setTheme(set(themeService.getCurrentTheme(), 'black', '#35322b'));
+    themeService.setTheme(set(themeService.getCurrentTheme(), 'gray.1000', '#35322b'));
 
     univer.registerPlugin(UniverDataValidationPlugin);
     univer.registerPlugin(TestPlugin);

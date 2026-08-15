@@ -17,8 +17,6 @@
 import type { Theme } from './default';
 
 const darkBlueTheme: Theme = {
-    white: '#07111F',
-    black: '#F8FAFC',
     primary: {
         50: '#1E3A8A',
         100: '#1E40AF',
@@ -32,6 +30,7 @@ const darkBlueTheme: Theme = {
         900: '#EFF6FF',
     },
     gray: {
+        0: '#07111F',
         50: '#111318',
         100: '#202329',
         200: '#343840',
@@ -42,6 +41,7 @@ const darkBlueTheme: Theme = {
         700: '#CFD3D9',
         800: '#E4E7EB',
         900: '#F5F6F7',
+        1000: '#F8FAFC',
     },
     blue: {
         50: '#0C4A6E',

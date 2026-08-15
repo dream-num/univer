@@ -235,7 +235,7 @@ function createControllerFixture(options?: {
 describe('doc render controller', () => {
     it.each([
         [DocumentFlavor.TRADITIONAL, 'gray.100'],
-        [DocumentFlavor.MODERN, 'white'],
+        [DocumentFlavor.MODERN, 'gray.0'],
     ])('resolves the %s workspace background again when dark mode changes', (documentFlavor, backgroundToken) => {
         const { canvasColorService, canvasElement, darkMode$ } = createControllerFixture({ documentFlavor });
         canvasColorService.getRenderColor.mockImplementation((color: string) => `dark:${color}`);

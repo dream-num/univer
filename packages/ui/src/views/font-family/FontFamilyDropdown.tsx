@@ -76,7 +76,7 @@ export function FontFamilyDropdown(props: IFontFamilyDropdownProps) {
                     dir={direction}
                     className={clsx(`
                       univer-max-h-72 univer-min-w-44 univer-overflow-y-auto univer-rounded-lg univer-border
-                      univer-border-solid univer-border-gray-200 univer-bg-white univer-p-1 univer-shadow-lg
+                      univer-border-solid univer-border-gray-200 univer-bg-gray-0 univer-p-1 univer-shadow-lg
                       dark:!univer-border-gray-700 dark:!univer-bg-gray-900
                     `, popupClassName)}
                     {...popupDataAttributes}

@@ -297,7 +297,7 @@ export function Slider(props: ISliderProps) {
                             className={`
                               univer-absolute univer-left-1/2 univer-top-1/2 univer-box-border univer-block
                               univer-size-1.5 -univer-translate-x-1/2 -univer-translate-y-1/2 univer-cursor-pointer
-                              univer-rounded-full univer-border univer-border-white univer-bg-gray-400
+                              univer-rounded-full univer-border univer-border-gray-0 univer-bg-gray-400
                               dark:!univer-border-gray-700 dark:!univer-bg-gray-300
                             `}
                             role="button"
@@ -307,7 +307,7 @@ export function Slider(props: ISliderProps) {
                         <button
                             className={clsx(`
                               univer-absolute univer-top-1/2 univer-size-3.5 -univer-translate-x-1/2
-                              -univer-translate-y-1/2 univer-rounded-full univer-bg-white univer-shadow-sm
+                              -univer-translate-y-1/2 univer-rounded-full univer-bg-gray-0 univer-shadow-sm
                               univer-transition-all
                               focus-visible:univer-outline-none focus-visible:univer-ring-2
                               focus-visible:univer-ring-primary-100

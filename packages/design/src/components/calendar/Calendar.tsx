@@ -195,8 +195,8 @@ export function Calendar(props: ICalendarProps) {
             data-u-comp="calendar"
             dir={direction}
             className={clsx(`
-              univer-mx-auto univer-max-w-xs univer-select-none univer-rounded univer-bg-white univer-text-gray-900
-              dark:!univer-bg-gray-900 dark:!univer-text-white
+              univer-mx-auto univer-max-w-xs univer-select-none univer-rounded univer-bg-gray-0 univer-text-gray-900
+              dark:!univer-bg-gray-900 dark:!univer-text-gray-0
             `, className)}
         >
             <nav
@@ -238,7 +238,7 @@ export function Calendar(props: ICalendarProps) {
                                           univer-rounded univer-border-none univer-bg-transparent univer-px-2
                                           univer-text-sm univer-text-gray-900 univer-transition-colors
                                           hover:univer-bg-gray-100
-                                          dark:!univer-text-white
+                                          dark:!univer-text-gray-0
                                           dark:hover:!univer-bg-gray-600
                                         `, {
                                             'univer-bg-gray-200 dark:!univer-bg-gray-500': item.year === currentYear,
@@ -307,9 +307,9 @@ export function Calendar(props: ICalendarProps) {
                             <DayButton
                                 key={idx}
                                 className={clsx({
-                                    '!univer-bg-primary-600 univer-font-bold univer-text-white': !isToday(day) && isSelected(day),
-                                    'dark:!univer-text-white': !isToday(day) && !isSelected(day),
-                                    '!univer-bg-primary-600 univer-text-white': isToday(day) && isSelected(day),
+                                    '!univer-bg-primary-600 univer-font-bold univer-text-gray-0': !isToday(day) && isSelected(day),
+                                    'dark:!univer-text-gray-0': !isToday(day) && !isSelected(day),
+                                    '!univer-bg-primary-600 univer-text-gray-0': isToday(day) && isSelected(day),
                                     'univer-font-semibold univer-text-primary-600 dark:!univer-text-primary-500': isToday(day) && !isSelected(day),
                                     'univer-cursor-not-allowed univer-opacity-40': isDisabled(day),
                                     'univer-hover:bg-primary-100 univer-cursor-pointer univer-text-gray-800': !isSelected(day) && !isDisabled(day),

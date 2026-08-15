@@ -1,6 +1,6 @@
 import type { Theme } from '@univerjs/themes';
-import type { LoopColorKey, ThemeScaleKey, ThemeShadeKey } from './types';
-import { COLOR_SCALE_KEYS, COLOR_SHADE_KEYS, LOOP_COLOR_KEYS } from './constants';
+import type { LoopColorKey, ThemeGrayEndpointKey, ThemeScaleKey, ThemeShadeKey } from './types';
+import { COLOR_SCALE_KEYS, COLOR_SHADE_KEYS, GRAY_ENDPOINT_KEYS, LOOP_COLOR_KEYS } from './constants';
 
 export function cloneTheme(theme: Theme): Theme {
     return JSON.parse(JSON.stringify(theme)) as Theme;
@@ -39,14 +39,6 @@ export function mergeThemePatch(baseTheme: Theme, patch: unknown): Theme | null 
     const nextTheme = cloneTheme(baseTheme);
     const record = patch as Record<string, unknown>;
 
-    if (typeof record.white === 'string') {
-        nextTheme.white = record.white;
-    }
-
-    if (typeof record.black === 'string') {
-        nextTheme.black = record.black;
-    }
-
     for (const scale of COLOR_SCALE_KEYS) {
         const scalePatch = record[scale];
 
@@ -57,13 +49,14 @@ export function mergeThemePatch(baseTheme: Theme, patch: unknown): Theme | null 
         const scaleRecord = scalePatch as Record<string, unknown>;
         const mergedScale = { ...nextTheme[scale] } as Record<string, string>;
 
-        for (const shade of COLOR_SHADE_KEYS) {
+        const shadeKeys = scale === 'gray' ? [...GRAY_ENDPOINT_KEYS, ...COLOR_SHADE_KEYS] : COLOR_SHADE_KEYS;
+        for (const shade of shadeKeys) {
             if (typeof scaleRecord[shade] === 'string') {
                 mergedScale[shade] = scaleRecord[shade] as string;
             }
         }
 
-        nextTheme[scale] = mergedScale as Theme[ThemeScaleKey];
+        Object.assign(nextTheme[scale], mergedScale);
     }
 
     const loopColorPatch = record['loop-color'];
@@ -94,11 +87,14 @@ export function updateScaleColor(theme: Theme, scale: ThemeScaleKey, shade: Them
     } as Theme;
 }
 
-export function updateThemeRootColor(theme: Theme, key: 'white' | 'black', value: string): Theme {
+export function updateThemeGrayEndpoint(theme: Theme, key: ThemeGrayEndpointKey, value: string): Theme {
     return {
         ...theme,
-        [key]: value,
-    };
+        gray: {
+            ...theme.gray,
+            [key]: value,
+        },
+    } as Theme;
 }
 
 export function updateLoopColor(theme: Theme, key: LoopColorKey, value: string): Theme {

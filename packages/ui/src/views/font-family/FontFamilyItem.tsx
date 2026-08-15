@@ -51,7 +51,7 @@ export const FontFamilyItem = ({ value, onChange }: IFontFamilyItemProps) => {
                           univer-justify-between univer-gap-6 univer-rounded univer-border-none univer-bg-transparent
                           univer-px-2 univer-text-gray-900
                           hover:univer-bg-gray-100
-                          dark:!univer-text-white
+                          dark:!univer-text-gray-0
                           dark:hover:!univer-bg-gray-700
                         `}
                         style={{

@@ -56,7 +56,7 @@ export const DocLinkPopup = () => {
         <div
             className={clsx(`
               univer-box-border univer-flex univer-max-w-80 univer-items-center univer-justify-between
-              univer-overflow-hidden univer-rounded-lg univer-bg-white univer-p-3 univer-shadow
+              univer-overflow-hidden univer-rounded-lg univer-bg-gray-0 univer-p-3 univer-shadow
               dark:!univer-bg-gray-900
             `, borderClassName)}
             onClick={() => {
@@ -74,7 +74,7 @@ export const DocLinkPopup = () => {
                     className={`
                       univer-mr-2 univer-flex univer-size-5 univer-flex-[0_0_auto] univer-items-center
                       univer-justify-center univer-text-base univer-text-gray-900
-                      dark:!univer-text-white
+                      dark:!univer-text-gray-0
                     `}
                 >
                     <LinkIcon />

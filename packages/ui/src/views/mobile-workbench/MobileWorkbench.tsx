@@ -137,7 +137,7 @@ export function MobileWorkbench(props: IUniverAppProps) {
                 <div
                     data-u-comp="app-layout"
                     className={clsx(`
-                      univer-relative univer-flex univer-h-full univer-min-h-0 univer-flex-col univer-bg-white
+                      univer-relative univer-flex univer-h-full univer-min-h-0 univer-flex-col univer-bg-gray-0
                       dark:!univer-bg-gray-800
                     `, {
                         'univer-dark': darkMode,
@@ -180,7 +180,7 @@ export function MobileWorkbench(props: IUniverAppProps) {
                             <section
                                 className={clsx(`
                                   univer-relative univer-grid univer-flex-1 univer-grid-rows-[auto_1fr]
-                                  univer-overflow-hidden univer-bg-white
+                                  univer-overflow-hidden univer-bg-gray-0
                                   dark:!univer-bg-gray-800
                                 `, borderBottomClassName)}
                             >

@@ -164,16 +164,16 @@ export const ClipboardPopupMenu = () => {
                           dark:hover:!univer-bg-gray-800
                         `, borderClassName, {
                             'univer-bg-gray-100 dark:!univer-bg-gray-800': visible,
-                            'univer-bg-white dark:!univer-bg-gray-900': !visible,
+                            'univer-bg-gray-0 dark:!univer-bg-gray-900': !visible,
                         })}
                     >
                         <PasteSpecialDoubleIcon
                             className={`
                               univer-fill-primary-600 univer-text-gray-900
-                              dark:!univer-text-white
+                              dark:!univer-text-gray-0
                             `}
                         />
-                        {showMore && <MoreDownIcon className="dark:!univer-text-white" />}
+                        {showMore && <MoreDownIcon className="dark:!univer-text-gray-0" />}
                     </div>
                 </DropdownMenu>
             </div>

@@ -76,7 +76,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, ITextareaProps>((props, 
                   univer-transition-[color,box-shadow]
                   placeholder:univer-text-gray-200
                   disabled:univer-cursor-not-allowed disabled:univer-opacity-50
-                  dark:!univer-text-white
+                  dark:!univer-text-gray-0
                 `,
                 borderClassName,
                 scrollbarClassName,

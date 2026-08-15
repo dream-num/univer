@@ -56,7 +56,7 @@ export function CellAlert({ popup }: { popup: ICanvasPopup }) {
                             type: 'custom',
                             className: `
                               univer-px-2 univer-py-1.5 univer-font-medium univer-text-gray-900
-                              dark:!univer-text-white
+                              dark:!univer-text-gray-0
                             `,
                             children: message,
                         },
@@ -76,7 +76,7 @@ export function CellAlert({ popup }: { popup: ICanvasPopup }) {
                         aria-label={accessibleLabel || undefined}
                         className={`
                           univer-flex univer-items-center univer-gap-1 univer-rounded univer-border univer-border-solid
-                          univer-border-gray-200 univer-bg-white univer-p-1 univer-shadow
+                          univer-border-gray-200 univer-bg-gray-0 univer-p-1 univer-shadow
                           hover:univer-bg-gray-100
                           dark:!univer-border-gray-600 dark:!univer-bg-gray-900
                           dark:hover:!univer-bg-gray-800
@@ -106,9 +106,9 @@ export function CellAlert({ popup }: { popup: ICanvasPopup }) {
     return (
         <div
             className={`
-              univer-z-[100] univer-box-border univer-w-[156px] univer-rounded-lg univer-bg-white univer-px-2
+              univer-z-[100] univer-box-border univer-w-[156px] univer-rounded-lg univer-bg-gray-0 univer-px-2
               univer-py-1 univer-text-gray-900 univer-shadow
-              dark:!univer-bg-black dark:!univer-text-white
+              dark:!univer-bg-gray-1000 dark:!univer-text-gray-0
             `}
         >
             <div

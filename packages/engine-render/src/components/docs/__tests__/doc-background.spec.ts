@@ -66,7 +66,7 @@ describe('DocBackground', () => {
         vi.restoreAllMocks();
     });
 
-    it('draws traditional workspaces with gray 100 and pages with white', () => {
+    it('draws traditional workspaces with gray 100 and pages with the gray 0 theme token', () => {
         const background = DocBackground.create('traditional-background', createSkeleton([createPage()]));
         background.resize(320, 180);
         const rectDraw = vi.spyOn(Rect, 'drawWith').mockImplementation(() => {});
@@ -75,12 +75,12 @@ describe('DocBackground', () => {
         background.draw(createCtx());
 
         expect(rectDraw.mock.calls[0][1]).toMatchObject({ fill: 'gray.100' });
-        expect(rectDraw.mock.calls[1][1]).toMatchObject({ fill: 'white' });
+        expect(rectDraw.mock.calls[1][1]).toMatchObject({ fill: 'gray.0' });
 
         background.dispose();
     });
 
-    it('draws modern workspaces with white', () => {
+    it('draws modern workspaces with the gray 0 theme token', () => {
         const background = DocBackground.create(
             'modern-background',
             createSkeleton([createPage()], DocumentFlavor.MODERN)
@@ -91,7 +91,7 @@ describe('DocBackground', () => {
         background.draw(createCtx());
 
         expect(rectDraw).toHaveBeenCalledTimes(1);
-        expect(rectDraw.mock.calls[0][1]).toMatchObject({ fill: 'white' });
+        expect(rectDraw.mock.calls[0][1]).toMatchObject({ fill: 'gray.0' });
 
         background.dispose();
     });

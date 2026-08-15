@@ -18,11 +18,11 @@ import type { ICanvasColorService } from '@univerjs/engine-render';
 import { DocumentFlavor } from '@univerjs/core';
 
 const DOC_TRADITIONAL_WORKSPACE_BACKGROUND_COLOR = 'var(--univer-gray-100)';
-const DOC_MODERN_WORKSPACE_BACKGROUND_COLOR = 'var(--univer-white)';
+const DOC_MODERN_WORKSPACE_BACKGROUND_COLOR = 'var(--univer-gray-0)';
 const DOC_UNSPECIFIED_WORKSPACE_BACKGROUND_COLOR = 'var(--univer-gray-100)';
 const DOC_EDITOR_INTERNAL_BACKGROUND_COLOR = 'transparent';
 const DOC_TRADITIONAL_WORKSPACE_BACKGROUND_TOKEN = 'gray.100';
-const DOC_MODERN_WORKSPACE_BACKGROUND_TOKEN = 'white';
+const DOC_MODERN_WORKSPACE_BACKGROUND_TOKEN = 'gray.0';
 
 export interface IResolveDocRenderBackgroundOptions {
     documentFlavor?: DocumentFlavor;

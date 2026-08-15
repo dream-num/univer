@@ -111,7 +111,7 @@ function MessageStoryShell({ title, description, children }: { title: string; de
         >
             <div
                 className={`
-                  univer-border-white/70 univer-bg-white/80 univer-mx-auto univer-max-w-5xl univer-rounded-3xl
+                  univer-border-gray-0/70 univer-bg-gray-0/80 univer-mx-auto univer-max-w-5xl univer-rounded-3xl
                   univer-border univer-border-solid univer-p-8 univer-shadow-[0_30px_60px_-35px_rgba(15,23,42,0.55)]
                   univer-backdrop-blur-xl
                 `}

@@ -29,7 +29,7 @@ export enum SELECTION_SHAPE_DEPTH {
 
 export function genNormalSelectionStyle(themeService: ThemeService): ISelectionStyle {
     const primaryColor = themeService.getColorFromTheme('primary.600');
-    const whiteColor = themeService.getColorFromTheme('white');
+    const gray0Color = themeService.getColorFromTheme('gray.0');
     const fill = new ColorKit(primaryColor).setAlpha(0.07).toRgbString();
     return {
         strokeWidth: 1,
@@ -39,11 +39,11 @@ export function genNormalSelectionStyle(themeService: ThemeService): ISelectionS
         widgets: {},
         widgetSize: 6,
         widgetStrokeWidth: 1,
-        widgetStroke: whiteColor,
+        widgetStroke: gray0Color,
 
         autofillSize: 6,
         autofillStrokeWidth: 1,
-        autofillStroke: whiteColor,
+        autofillStroke: gray0Color,
 
         rowHeaderFill: fill,
         rowHeaderStroke: primaryColor,

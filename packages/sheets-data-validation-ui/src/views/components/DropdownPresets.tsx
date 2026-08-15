@@ -57,7 +57,7 @@ export function DropdownPresets({ onChange }: ICustomComponentProps<string | und
                           hover:univer-bg-gray-100
                           focus-visible:univer-outline-none focus-visible:univer-ring-2
                           focus-visible:univer-ring-primary-600 focus-visible:univer-ring-offset-0
-                          dark:!univer-bg-gray-800 dark:!univer-text-white
+                          dark:!univer-bg-gray-800 dark:!univer-text-gray-0
                           dark:hover:!univer-bg-gray-700
                         `}
                         onClick={() => onChange(serializeListOptions(values))}

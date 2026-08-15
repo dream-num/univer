@@ -253,7 +253,7 @@ export function SortOptionItem(props: ISortOptionItemProps) {
                               univer-my-0 univer-box-border univer-grid univer-max-h-[310px]
                               univer-w-[--radix-popper-anchor-width] univer-items-center univer-gap-1
                               univer-overflow-y-auto univer-overflow-x-hidden univer-rounded-lg univer-border
-                              univer-bg-white univer-p-1 univer-text-base univer-shadow-lg
+                              univer-bg-gray-0 univer-p-1 univer-text-base univer-shadow-lg
                             `, scrollbarClassName)}
                         >
                             {availableMenu.map((menuItem) => (
@@ -287,7 +287,7 @@ export function SortOptionItem(props: ISortOptionItemProps) {
                         className={clsx(`
                           univer-ml-2 univer-flex univer-w-full univer-items-center univer-justify-between
                           univer-overflow-hidden univer-rounded-md univer-py-1.5 univer-text-sm univer-text-gray-900
-                          dark:!univer-text-white
+                          dark:!univer-text-gray-0
                         `)}
                     >
                         <span

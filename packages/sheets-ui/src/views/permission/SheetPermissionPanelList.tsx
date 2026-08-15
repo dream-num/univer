@@ -344,7 +344,7 @@ function SheetPermissionPanelListContent() {
                                             <span
                                                 className={`
                                                   univer-h-4 univer-flex-grow univer-text-xs univer-text-gray-900
-                                                  dark:!univer-text-white
+                                                  dark:!univer-text-gray-0
                                                 `}
                                             >
                                                 {localeService.t<LocaleKey>('sheets-ui.permission.panel.created')}
@@ -352,7 +352,7 @@ function SheetPermissionPanelListContent() {
                                             <span
                                                 className={`
                                                   univer-h-4 univer-text-xs univer-text-gray-900
-                                                  dark:!univer-text-white
+                                                  dark:!univer-text-gray-0
                                                 `}
                                             >
                                                 {editPermission ? `${localeService.t<LocaleKey>('sheets-ui.permission.panel.iCanEdit')}` : `${localeService.t<LocaleKey>('sheets-ui.permission.panel.iCanNotEdit')}`}
@@ -363,7 +363,7 @@ function SheetPermissionPanelListContent() {
                                             <span
                                                 className={`
                                                   univer-h-4 univer-flex-grow univer-text-xs univer-text-gray-900
-                                                  dark:!univer-text-white
+                                                  dark:!univer-text-gray-0
                                                 `}
                                             >
                                                 {localeService.t<LocaleKey>('sheets-ui.permission.panel.viewPermission')}
@@ -371,7 +371,7 @@ function SheetPermissionPanelListContent() {
                                             <span
                                                 className={`
                                                   univer-h-4 univer-text-xs univer-text-gray-900
-                                                  dark:!univer-text-white
+                                                  dark:!univer-text-gray-0
                                                 `}
                                             >
                                                 {viewPermission ? `${localeService.t<LocaleKey>('sheets-ui.permission.panel.iCanView')}` : `${localeService.t<LocaleKey>('sheets-ui.permission.panel.iCanNotView')}`}

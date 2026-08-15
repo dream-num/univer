@@ -109,11 +109,11 @@ export const SheetTableConditionPanel = (props: IConditionFilterProps) => {
                 <div
                     className={clsx(`
                       univer-box-border univer-flex univer-h-8 univer-w-full univer-items-center univer-justify-between
-                      univer-rounded-md univer-bg-white univer-px-2 univer-text-sm univer-transition-colors
+                      univer-rounded-md univer-bg-gray-0 univer-px-2 univer-text-sm univer-transition-colors
                       univer-duration-200
                       hover:univer-border-primary-600
                       focus:univer-border-primary-600 focus:univer-outline-none focus:univer-ring-2
-                      dark:!univer-bg-gray-700 dark:!univer-text-white
+                      dark:!univer-bg-gray-700 dark:!univer-text-gray-0
                     `, borderClassName)}
                 >
                     <span>

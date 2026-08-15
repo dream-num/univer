@@ -57,7 +57,11 @@ describe('ThemeService', () => {
 
     it('should validate theme color', () => {
         const themeService = univer.__getInjector().get(ThemeService);
+        expect(themeService.isValidThemeColor('gray.0')).toBe(true);
+        expect(themeService.isValidThemeColor('gray.1000')).toBe(true);
         expect(themeService.isValidThemeColor('primary.600')).toBe(true);
+        expect(themeService.isValidThemeColor('white')).toBe(false);
+        expect(themeService.isValidThemeColor('black')).toBe(false);
         expect(themeService.isValidThemeColor('notexist')).toBe(false);
     });
 

@@ -112,7 +112,7 @@ export const DrawingAlign = (props: IDrawingAlignProps) => {
                 <div
                     className={`
                       univer-w-full univer-text-gray-900
-                      dark:!univer-text-white
+                      dark:!univer-text-gray-0
                     `}
                 >
                     <Select value={alignValue} options={alignOptions} onChange={handleAlignChange} />

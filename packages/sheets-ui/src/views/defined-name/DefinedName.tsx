@@ -296,7 +296,7 @@ export function DefinedName({ disable }: { disable: boolean }) {
                   univer-pr-5 univer-text-gray-900
                   focus:univer-outline-none
                   rtl:univer-pl-5 rtl:univer-pr-1.5
-                  dark:!univer-border-r-gray-700 dark:!univer-text-white
+                  dark:!univer-border-r-gray-700 dark:!univer-text-gray-0
                 `, borderRightClassName, {
                     'univer-cursor-not-allowed': disable,
                 })}
@@ -324,7 +324,7 @@ export function DefinedName({ disable }: { disable: boolean }) {
                       univer-items-center univer-justify-center univer-px-1 univer-transition-colors univer-duration-200
                       hover:univer-bg-gray-100
                       rtl:univer-left-0 rtl:univer-right-auto
-                      dark:!univer-text-white
+                      dark:!univer-text-gray-0
                       dark:hover:!univer-bg-gray-800
                     `, {
                         'univer-cursor-not-allowed univer-text-gray-300 hover:univer-bg-transparent dark:!univer-text-gray-700': disable,

@@ -100,7 +100,7 @@ export const Messager = ({ className, ...props }: IMessagerProps) => (
         offset={{ top: 16 }}
         className={clsx(
             `
-              [&_[data-sonner-toast]]:univer-bg-white/95
+              [&_[data-sonner-toast]]:univer-bg-gray-0/95
               dark:[&_[data-sonner-toast]]:!univer-bg-gray-800/95
               [&_[data-sonner-toast]]:univer-rounded-2xl [&_[data-sonner-toast]]:univer-border
               [&_[data-sonner-toast]]:univer-border-solid [&_[data-sonner-toast]]:univer-border-gray-200

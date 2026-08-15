@@ -33,20 +33,20 @@ export const buttonVariants = cva(
         variants: {
             variant: {
                 default: `
-                  univer-border-gray-200 univer-bg-white univer-text-gray-700
+                  univer-border-gray-200 univer-bg-gray-0 univer-text-gray-700
                   hover:univer-bg-gray-100
                   active:univer-bg-gray-200
-                  dark:!univer-border-gray-600 dark:!univer-bg-gray-700 dark:!univer-text-white
+                  dark:!univer-border-gray-600 dark:!univer-bg-gray-700 dark:!univer-text-gray-0
                   dark:hover:!univer-bg-gray-600
                   dark:active:!univer-bg-gray-700
                 `,
                 primary: `
-                  univer-border-primary-600 univer-bg-primary-600 univer-text-white
+                  univer-border-primary-600 univer-bg-primary-600 univer-text-gray-0
                   hover:univer-bg-primary-500
                   active:univer-bg-primary-700
                 `,
                 danger: `
-                  univer-border-red-500 univer-bg-red-500 univer-text-white
+                  univer-border-red-500 univer-bg-red-500 univer-text-gray-0
                   hover:univer-border-red-400 hover:univer-bg-red-400
                   active:univer-border-red-600 active:univer-bg-red-600
                 `,
@@ -54,7 +54,7 @@ export const buttonVariants = cva(
                   univer-border-transparent univer-bg-transparent univer-text-gray-900
                   hover:univer-bg-gray-100
                   active:univer-bg-gray-200
-                  dark:!univer-text-white
+                  dark:!univer-text-gray-0
                   dark:hover:!univer-bg-gray-700
                   dark:active:!univer-bg-gray-600
                 `,
@@ -68,7 +68,7 @@ export const buttonVariants = cva(
                   univer-border-transparent univer-bg-transparent univer-text-gray-900
                   hover:univer-bg-gray-100
                   active:univer-bg-gray-200
-                  dark:!univer-text-white
+                  dark:!univer-text-gray-0
                   dark:hover:!univer-bg-gray-700
                   dark:active:!univer-bg-gray-600
                 `,

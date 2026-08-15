@@ -64,7 +64,7 @@ export function Accordion(props: IAccordionProps) {
                           hover:univer-text-gray-900
                           focus:univer-outline-none
                           dark:!univer-text-gray-200
-                          dark:hover:!univer-text-white
+                          dark:hover:!univer-text-gray-0
                         `}
                         type="button"
                         onClick={() => toggleItem(index)}

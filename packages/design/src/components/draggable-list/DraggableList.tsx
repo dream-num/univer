@@ -275,7 +275,7 @@ export function DraggableList<T = any>(props: IDraggableListProps<T>) {
                     dir={direction}
                     className={clsx(`
                       univer-pointer-events-none univer-fixed univer-rounded-md univer-border univer-border-gray-200
-                      univer-bg-white univer-shadow-lg
+                      univer-bg-gray-0 univer-shadow-lg
                       dark:!univer-border-gray-700 dark:!univer-bg-gray-800
                     `)}
                     style={{

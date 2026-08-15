@@ -27,7 +27,7 @@ export function SidebarHeader(props: {
                 <h2
                     className="
                       univer-m-0 univer-text-lg univer-font-semibold univer-text-slate-950
-                      dark:!univer-text-white
+                      dark:!univer-text-gray-0
                     "
                 >
                     Theme Customizer

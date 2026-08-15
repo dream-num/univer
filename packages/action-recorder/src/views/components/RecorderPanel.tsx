@@ -65,7 +65,8 @@ function RecordPanelImpl() {
         <div
             className={`
               univer-fixed univer-bottom-20 univer-left-1/2 univer-z-[1000] univer-flex univer-h-16 univer-w-[512px]
-              -univer-translate-x-1/2 univer-items-center univer-rounded-lg univer-bg-white univer-px-5 univer-shadow-lg
+              -univer-translate-x-1/2 univer-items-center univer-rounded-lg univer-bg-gray-0 univer-px-5
+              univer-shadow-lg
             `}
         >
             <div className="univer-mr-2 univer-size-5 univer-shrink-0 univer-grow-0 univer-text-xl">

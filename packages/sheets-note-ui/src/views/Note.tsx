@@ -157,7 +157,7 @@ function SheetsNoteContent({ activePopup }: { activePopup: INotePopupLocation })
             ref={textareaRef}
             data-u-comp="note-textarea"
             className={clsx(`
-              univer-ml-px univer-min-h-1 univer-min-w-1 univer-bg-white !univer-text-sm univer-shadow
+              univer-ml-px univer-min-h-1 univer-min-w-1 univer-bg-gray-0 !univer-text-sm univer-shadow
               dark:!univer-bg-gray-800
             `)}
             value={note?.note}

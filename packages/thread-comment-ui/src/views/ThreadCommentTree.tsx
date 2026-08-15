@@ -301,7 +301,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                     <div
                         className={`
                           univer-text-sm univer-text-gray-900
-                          dark:!univer-text-white
+                          dark:!univer-text-gray-0
                         `}
                     >
                         {transformDocument2TextNodes(item.text).map((paragraph, i) => (
@@ -448,8 +448,8 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
         <div
             id={`${location}-${unitId}-${subUnitId}-${id}`}
             className={clsx(`
-              univer-relative univer-box-border univer-rounded-md univer-bg-white univer-p-4 univer-text-gray-900
-              dark:!univer-bg-gray-900 dark:!univer-text-white
+              univer-relative univer-box-border univer-rounded-md univer-bg-gray-0 univer-p-4 univer-text-gray-900
+              dark:!univer-bg-gray-900 dark:!univer-text-gray-0
             `, borderClassName, {
                 'univer-w-[278px]': !full,
                 'univer-w-full': full,

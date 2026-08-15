@@ -101,7 +101,7 @@ export function FilterByValue(props: { model: ByValuesModel }) {
                             data-u-comp="sheets-filter-panel-values-item-text"
                             className={`
                               univer-mx-1 univer-inline-block univer-flex-shrink univer-truncate univer-text-gray-900
-                              dark:!univer-text-white
+                              dark:!univer-text-gray-0
                             `}
                         >
                             {`${localeService.t<LocaleKey>('sheets-filter-ui.panel.select-all')}`}
@@ -133,7 +133,7 @@ export function FilterByValue(props: { model: ByValuesModel }) {
                           [&:hover_a]:univer-inline-block
                           hover:univer-bg-gray-50 univer-h-full
                           univer-text-gray-900 dark:hover:!univer-bg-gray-900
-                          dark:!univer-text-white
+                          dark:!univer-text-gray-0
                         `}
                         attachRender={(item) => (
                             <div

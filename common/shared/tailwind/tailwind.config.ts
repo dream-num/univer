@@ -82,8 +82,6 @@ const config: Omit<Config, 'content'> = {
     theme: {
         extend: {
             colors: {
-                white: 'var(--univer-white)',
-                black: 'var(--univer-black)',
                 primary: {
                     50: 'var(--univer-primary-50)',
                     100: 'var(--univer-primary-100)',
@@ -97,6 +95,7 @@ const config: Omit<Config, 'content'> = {
                     900: 'var(--univer-primary-900)',
                 },
                 gray: {
+                    0: 'var(--univer-gray-0)',
                     50: 'var(--univer-gray-50)',
                     100: 'var(--univer-gray-100)',
                     200: 'var(--univer-gray-200)',
@@ -107,6 +106,7 @@ const config: Omit<Config, 'content'> = {
                     700: 'var(--univer-gray-700)',
                     800: 'var(--univer-gray-800)',
                     900: 'var(--univer-gray-900)',
+                    1000: 'var(--univer-gray-1000)',
                 },
                 blue: {
                     50: 'var(--univer-blue-50)',

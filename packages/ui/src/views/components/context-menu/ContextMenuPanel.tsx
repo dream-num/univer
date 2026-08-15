@@ -133,8 +133,8 @@ const contextMenuContentVariants = cva('univer-inline-flex univer-items-center',
 const contextMenuPanelVariants = cva(
     `
       univer-box-border univer-grid univer-max-w-full univer-overflow-y-auto univer-overscroll-contain univer-rounded-md
-      univer-bg-white univer-text-gray-900 univer-shadow-md
-      dark:!univer-bg-gray-700 dark:!univer-text-white
+      univer-bg-gray-0 univer-text-gray-900 univer-shadow-md
+      dark:!univer-bg-gray-700 dark:!univer-text-gray-0
     `,
     {
         variants: {
@@ -239,7 +239,7 @@ const contextMenuHeaderRowVariants = cva('univer-flex univer-items-center univer
 const contextMenuSubmenuPanelVariants = cva(
     `
       univer-overflow-y-auto univer-overscroll-contain univer-rounded-md univer-border univer-border-solid
-      univer-border-gray-200 univer-bg-white univer-shadow-md
+      univer-border-gray-200 univer-bg-gray-0 univer-shadow-md
       dark:!univer-border-gray-600 dark:!univer-bg-gray-700
     `,
     {
@@ -258,7 +258,7 @@ const contextMenuSubmenuPanelVariants = cva(
 const contextMenuItemVariants = cva(
     `
       univer-relative univer-flex univer-border-none univer-bg-transparent univer-text-left univer-text-gray-900
-      dark:!univer-text-white
+      dark:!univer-text-gray-0
     `,
     {
         variants: {
@@ -1477,7 +1477,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                                             const optionClassName = clsx(
                                                 `
                                                   univer-text-gray-900
-                                                  dark:!univer-text-white
+                                                  dark:!univer-text-gray-0
                                                 `,
                                                 optionSelectable
                                                     ? sizeVariant === 'paragraph-t'

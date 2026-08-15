@@ -44,24 +44,28 @@ describe('CanvasColorService', () => {
 
         themeService.setTheme({
             ...theme,
-            white: '#07111f',
             gray: {
                 ...theme.gray,
+                0: '#07111f',
                 50: '#0d1422',
             },
         });
 
+        expect(service.getRenderColor('gray.0')).toBe('#07111f');
         expect(service.getRenderColor('gray.50')).toBe('#0d1422');
         expect(service.getRenderColor('white')).toBe('white');
+        expect(service.getRenderColor('black')).toBe('black');
 
         themeService.setTheme({
             ...theme,
             gray: {
                 ...theme.gray,
+                0: '#050914',
                 50: '#101827',
             },
         });
 
+        expect(service.getRenderColor('gray.0')).toBe('#050914');
         expect(service.getRenderColor('gray.50')).toBe('#101827');
     });
 

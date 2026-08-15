@@ -86,7 +86,6 @@ export function ShortcutPanel() {
             })
             .sort((a, b) => a.sequence - b.sequence);
 
-        // eslint-disable-next-line react/set-state-in-effect
         setShortcutItems(toRender);
     }, [shortcutService, localeService, currentLocale]);
 
@@ -101,7 +100,7 @@ export function ShortcutPanel() {
         <ul
             className={`
               univer-m-0 univer-list-none univer-p-0 univer-text-gray-900
-              dark:!univer-text-white
+              dark:!univer-text-gray-0
             `}
         >
             {shortcutItems.map((group) => (

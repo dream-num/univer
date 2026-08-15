@@ -45,7 +45,7 @@ export function ToolbarToggleGroup(props: {
                               univer-text-slate-600
                               hover:univer-bg-slate-100 hover:univer-text-slate-900
                               dark:!univer-text-gray-300
-                              dark:hover:!univer-bg-gray-800 dark:hover:!univer-text-white
+                              dark:hover:!univer-bg-gray-800 dark:hover:!univer-text-gray-0
                             `)}
                         style={active
                             ? {

@@ -20,7 +20,8 @@ export const HelpHiddenTip = ({ onClick }: { onClick: () => void }) => {
             className={`
               univer-z-[15] univer-box-border univer-h-[18px] univer-cursor-pointer univer-overflow-visible
               univer-whitespace-nowrap univer-rounded-l univer-border univer-border-r-0 univer-border-gray-600
-              univer-bg-primary-600 univer-p-0.5 univer-text-xs univer-font-bold univer-leading-[13px] univer-text-white
+              univer-bg-primary-600 univer-p-0.5 univer-text-xs univer-font-bold univer-leading-[13px]
+              univer-text-gray-0
             `}
             onClick={onClick}
         >

@@ -50,7 +50,7 @@ function StatisticsPanel({ statistics, selection, showPages }: { statistics: Dis
             role="dialog"
             aria-label={localeService.t<LocaleKey>('docs-ui.statistics.title')}
             className={`
-              univer-w-80 univer-rounded-lg univer-border univer-border-gray-200 univer-bg-white univer-p-4
+              univer-w-80 univer-rounded-lg univer-border univer-border-gray-200 univer-bg-gray-0 univer-p-4
               univer-shadow-lg
               dark:!univer-border-gray-600 dark:!univer-bg-gray-800
             `}

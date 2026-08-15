@@ -136,8 +136,8 @@ export function ColorSpectrum({ hsv, onChange, onChanged }: IColorSpectrumProps)
             <div
                 className={`
                   univer-pointer-events-none univer-absolute univer-left-0 univer-top-0 univer-size-4
-                  univer-rounded-full univer-border-2 univer-border-white univer-shadow-md univer-ring-2
-                  univer-ring-white univer-will-change-transform
+                  univer-rounded-full univer-border-2 univer-border-gray-0 univer-shadow-md univer-ring-2
+                  univer-ring-gray-0 univer-will-change-transform
                 `}
                 style={getIndicatorStyles()}
             />

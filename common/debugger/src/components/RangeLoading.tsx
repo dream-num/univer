@@ -5,7 +5,7 @@ export const RangeLoading = () => {
         <div
             className={clsx(`
               univer-flex univer-size-full univer-origin-top-left univer-items-center univer-justify-center
-              univer-bg-white
+              univer-bg-gray-0
               dark:!univer-bg-gray-900
             `, borderClassName)}
         >

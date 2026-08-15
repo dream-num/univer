@@ -105,7 +105,7 @@ export function UniverPreview(props: { theme: Theme; darkMode: boolean }) {
             id={PREVIEW_CONTAINER_ID}
             className={clsx(`
               univer-h-full univer-min-h-[520px] univer-w-full univer-overflow-hidden univer-rounded-[20px]
-              univer-bg-white
+              univer-bg-gray-0
             `)}
         />
     );

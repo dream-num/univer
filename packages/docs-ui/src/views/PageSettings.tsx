@@ -96,7 +96,7 @@ function SettingsLabel(props: { children: ReactNode; muted?: boolean }) {
                 ? 'univer-text-gray-500'
                 : `
                   univer-text-gray-900
-                  dark:!univer-text-white
+                  dark:!univer-text-gray-0
                 `)}
         >
             {children}
@@ -128,7 +128,6 @@ export function PageSettings(props: IConfirmChildrenProps) {
     }));
 
     useEffect(() => {
-        // eslint-disable-next-line react-hooks/immutability
         hooks.beforeClose = () => {
             return settings;
         };
@@ -175,11 +174,11 @@ export function PageSettings(props: IConfirmChildrenProps) {
                         className={clsx(`
                           univer-h-8 univer-cursor-pointer univer-rounded-md univer-border-none univer-bg-transparent
                           univer-text-sm univer-font-medium univer-text-gray-600 univer-transition-colors
-                          hover:univer-bg-white hover:univer-text-gray-900
+                          hover:univer-bg-gray-0 hover:univer-text-gray-900
                           dark:!univer-text-gray-200
                           dark:hover:!univer-bg-gray-700
                         `, {
-                            'univer-bg-white univer-text-gray-900 univer-shadow-sm dark:!univer-bg-gray-700 dark:!univer-text-white': settings.mode === mode,
+                            'univer-bg-gray-0 univer-text-gray-900 univer-shadow-sm dark:!univer-bg-gray-700 dark:!univer-text-gray-0': settings.mode === mode,
                         })}
                         onClick={() => handleModeChange(mode)}
                     >
@@ -198,7 +197,7 @@ export function PageSettings(props: IConfirmChildrenProps) {
                                     key={option}
                                     type="button"
                                     className={clsx(resetButtonClassName, borderClassName, `
-                                      univer-h-16 univer-flex-col univer-gap-1 univer-rounded-lg univer-bg-white
+                                      univer-h-16 univer-flex-col univer-gap-1 univer-rounded-lg univer-bg-gray-0
                                       univer-text-sm univer-font-medium univer-text-gray-700 univer-transition-colors
                                       hover:univer-border-primary-500 hover:univer-text-primary-600
                                       dark:!univer-bg-gray-900 dark:!univer-text-gray-100

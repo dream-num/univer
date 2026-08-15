@@ -109,7 +109,7 @@ function createFakeScene() {
 
 function createFakeThemeService() {
     return {
-        getColorFromTheme: (key: string) => (key === 'white' ? '#ffffff' : '#3b82f6'),
+        getColorFromTheme: (key: string) => (key === 'gray.0' ? '#ffffff' : '#3b82f6'),
     } as unknown as ThemeService;
 }
 

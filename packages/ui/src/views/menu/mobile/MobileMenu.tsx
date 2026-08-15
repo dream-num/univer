@@ -105,7 +105,7 @@ export function MobileMenu(props: IMobileMenuProps) {
                 <header
                     className="
                       univer-grid univer-grid-cols-[32px_minmax(0,1fr)_32px] univer-items-center univer-gap-3
-                      univer-border-0 univer-border-b univer-border-solid univer-border-gray-200 univer-bg-white
+                      univer-border-0 univer-border-b univer-border-solid univer-border-gray-200 univer-bg-gray-0
                       univer-px-4 univer-py-3
                     "
                 >
@@ -136,7 +136,7 @@ export function MobileMenu(props: IMobileMenuProps) {
 
             <div className="univer-flex-1 univer-overflow-y-auto univer-px-4 univer-pb-2 univer-pt-1">
                 {currentView?.kind !== 'options' && (
-                    <div className="univer-overflow-hidden univer-rounded-2xl univer-bg-white">
+                    <div className="univer-overflow-hidden univer-rounded-2xl univer-bg-gray-0">
                         <MobileSchemaList
                             schemas={currentView?.kind === 'schema' ? currentView.schemas : menuSchemas}
                             menuManagerService={menuManagerService}
@@ -149,7 +149,7 @@ export function MobileMenu(props: IMobileMenuProps) {
                 )}
 
                 {currentView?.kind === 'options' && (
-                    <div className="univer-overflow-hidden univer-rounded-2xl univer-bg-white">
+                    <div className="univer-overflow-hidden univer-rounded-2xl univer-bg-gray-0">
                         <MobileSelectionOptionsView
                             menuKey={currentView.menuKey}
                             menuItem={currentView.menuItem}
@@ -270,7 +270,7 @@ function MobileSchemaRow(props: {
             className={clsx(
                 `
                   univer-flex univer-min-h-[56px] univer-w-full univer-appearance-none univer-items-center univer-gap-3
-                  univer-border-0 univer-bg-white univer-px-4 univer-py-3 univer-text-left univer-transition-colors
+                  univer-border-0 univer-bg-gray-0 univer-px-4 univer-py-3 univer-text-left univer-transition-colors
                   enabled:hover:univer-bg-gray-50
                   enabled:active:univer-bg-gray-100
                   disabled:univer-cursor-not-allowed disabled:univer-opacity-40
@@ -353,7 +353,7 @@ function MobileSelectionOptionRow(props: {
             className={clsx(
                 `
                   univer-relative univer-flex univer-min-h-[56px] univer-w-full univer-appearance-none
-                  univer-items-center univer-gap-3 univer-border-0 univer-bg-white univer-px-4 univer-py-3
+                  univer-items-center univer-gap-3 univer-border-0 univer-bg-gray-0 univer-px-4 univer-py-3
                   univer-text-left univer-transition-colors
                   enabled:hover:univer-bg-gray-50
                   enabled:active:univer-bg-gray-100

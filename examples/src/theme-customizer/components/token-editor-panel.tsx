@@ -1,6 +1,6 @@
 import type { Theme } from '@univerjs/themes';
-import type { LoopColorKey, ThemeScaleKey, ThemeShadeKey } from '../types';
-import { IntegrationExampleSection, ThemeLoopColorSection, ThemeRootColorsSection, ThemeScaleSection } from './theme-sections';
+import type { LoopColorKey, ThemeGrayEndpointKey, ThemeScaleKey, ThemeShadeKey } from '../types';
+import { IntegrationExampleSection, ThemeGrayEndpointsSection, ThemeLoopColorSection, ThemeScaleSection } from './theme-sections';
 
 export function TokenEditorPanel(props: {
     copyLabel: string;
@@ -8,14 +8,14 @@ export function TokenEditorPanel(props: {
     visibleScaleKeys: ThemeScaleKey[];
     onCopy: () => void;
     onLoopColorChange: (key: LoopColorKey, value: string) => void;
-    onRootColorChange: (key: 'white' | 'black', value: string) => void;
+    onGrayEndpointChange: (key: ThemeGrayEndpointKey, value: string) => void;
     onScaleColorChange: (scale: ThemeScaleKey, shade: ThemeShadeKey, value: string) => void;
 }) {
-    const { copyLabel, theme, visibleScaleKeys, onCopy, onLoopColorChange, onRootColorChange, onScaleColorChange } = props;
+    const { copyLabel, theme, visibleScaleKeys, onCopy, onGrayEndpointChange, onLoopColorChange, onScaleColorChange } = props;
 
     return (
         <div className="univer-flex univer-flex-col univer-gap-4">
-            <ThemeRootColorsSection theme={theme} onChange={onRootColorChange} />
+            <ThemeGrayEndpointsSection theme={theme} onChange={onGrayEndpointChange} />
 
             {visibleScaleKeys.map((scale, index) => (
                 <ThemeScaleSection

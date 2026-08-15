@@ -76,7 +76,7 @@ function HexInput({ hsv, onChange }: IInputProps) {
                   univer-w-full univer-px-2 !univer-pl-4 univer-uppercase
                   focus:univer-border-primary-500 focus:univer-outline-none
                   rtl:!univer-pl-2 rtl:!univer-pr-4
-                  dark:!univer-text-white
+                  dark:!univer-text-gray-0
                 `, borderClassName)}
                 value={inputValue}
                 onChange={handleChange}
@@ -154,7 +154,7 @@ function RgbInput({ hsv, alpha, format, onChange }: IInputProps) {
               univer-flex univer-items-center univer-gap-2
               [&>input]:univer-w-11 [&>input]:univer-border-gray-200
               [&>input]:focus:univer-border-primary-500
-              dark:[&>input]:!univer-border-gray-600 dark:[&>input]:!univer-text-white
+              dark:[&>input]:!univer-border-gray-600 dark:[&>input]:!univer-text-gray-0
             `}
         >
             <input
@@ -191,7 +191,7 @@ export function ColorInput({ hsv, alpha, format, onChange }: IColorInputProps) {
     return (
         <div
             className={`
-              dark:![&_input]:univer-border-gray-600 dark:![&_input]:univer-text-white
+              dark:![&_input]:univer-border-gray-600 dark:![&_input]:univer-text-gray-0
               univer-flex univer-gap-2
               [&_input]:univer-box-border [&_input]:univer-flex [&_input]:univer-h-7 [&_input]:univer-items-center
               [&_input]:univer-rounded [&_input]:univer-border [&_input]:univer-border-solid

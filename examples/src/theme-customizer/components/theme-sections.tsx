@@ -1,6 +1,6 @@
 import type { Theme } from '@univerjs/themes';
 import type { ReactNode } from 'react';
-import type { LoopColorKey, ThemeScaleKey, ThemeShadeKey } from '../types';
+import type { LoopColorKey, ThemeGrayEndpointKey, ThemeScaleKey, ThemeShadeKey } from '../types';
 import { Button, clsx, ColorPicker, Dropdown, FormLayout, Input, Select, Textarea } from '@univerjs/design';
 import { useEffect, useState } from 'react';
 import { COLOR_SHADE_KEYS, LOOP_COLOR_KEYS, LOOP_COLOR_OPTIONS } from '../constants';
@@ -105,7 +105,7 @@ export function ThemeScaleSection(props: {
     return (
         <section
             className={clsx(`
-              univer-rounded-2xl univer-bg-white
+              univer-rounded-2xl univer-bg-gray-0
               dark:!univer-bg-gray-800
             `)}
         >
@@ -121,7 +121,7 @@ export function ThemeScaleSection(props: {
                     <div
                         className="
                           univer-text-sm univer-font-semibold univer-text-slate-900
-                          dark:!univer-text-white
+                          dark:!univer-text-gray-0
                         "
                     >
                         {title}
@@ -178,26 +178,26 @@ export function ThemeScaleSection(props: {
     );
 }
 
-export function ThemeRootColorsSection(props: {
+export function ThemeGrayEndpointsSection(props: {
     theme: Theme;
-    onChange: (key: 'white' | 'black', value: string) => void;
+    onChange: (key: ThemeGrayEndpointKey, value: string) => void;
 }) {
     const { theme, onChange } = props;
 
     return (
         <section
             className={clsx(`
-              univer-rounded-2xl univer-bg-white univer-p-4
+              univer-rounded-2xl univer-bg-gray-0 univer-p-4
               dark:!univer-bg-gray-800
             `)}
         >
             <div
                 className="
                   univer-mb-3 univer-text-sm univer-font-semibold univer-text-slate-900
-                  dark:!univer-text-white
+                  dark:!univer-text-gray-0
                 "
             >
-                Base Tokens
+                Gray Endpoints
             </div>
             <div
                 className="
@@ -205,8 +205,8 @@ export function ThemeRootColorsSection(props: {
                   sm:univer-grid-cols-2
                 "
             >
-                <ThemeColorField label="white" value={theme.white} onChange={(value) => onChange('white', value)} />
-                <ThemeColorField label="black" value={theme.black} onChange={(value) => onChange('black', value)} />
+                <ThemeColorField label="gray.0" value={theme.gray[0]} onChange={(value) => onChange('0', value)} />
+                <ThemeColorField label="gray.1000" value={theme.gray[1000]} onChange={(value) => onChange('1000', value)} />
             </div>
         </section>
     );
@@ -221,14 +221,14 @@ export function ThemeLoopColorSection(props: {
     return (
         <section
             className={clsx(`
-              univer-rounded-2xl univer-bg-white univer-p-4
+              univer-rounded-2xl univer-bg-gray-0 univer-p-4
               dark:!univer-bg-gray-800
             `)}
         >
             <div
                 className="
                   univer-mb-3 univer-text-sm univer-font-semibold univer-text-slate-900
-                  dark:!univer-text-white
+                  dark:!univer-text-gray-0
                 "
             >
                 loop-color
@@ -270,7 +270,7 @@ export function IntegrationExampleSection(props: {
                 <div
                     className="
                       univer-text-sm univer-font-semibold univer-text-slate-900
-                      dark:!univer-text-white
+                      dark:!univer-text-gray-0
                     "
                 >
                     Integration Example
@@ -317,7 +317,7 @@ export function JsonEditorPanel(props: {
                     <div
                         className="
                           univer-text-sm univer-font-semibold univer-text-slate-900
-                          dark:!univer-text-white
+                          dark:!univer-text-gray-0
                         "
                     >
                         Theme JSON

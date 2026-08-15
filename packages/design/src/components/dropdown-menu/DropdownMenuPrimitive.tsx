@@ -136,9 +136,9 @@ function DropdownMenuSubContent({
                   data-[side=right]:univer-slide-in-from-left-2
                   data-[side=top]:univer-slide-in-from-bottom-2
                   univer-z-[1080] univer-box-border univer-max-h-[--radix-popper-available-height]
-                  univer-overflow-y-auto univer-rounded-md univer-bg-white univer-p-1.5 univer-text-gray-900
+                  univer-overflow-y-auto univer-rounded-md univer-bg-gray-0 univer-p-1.5 univer-text-gray-900
                   univer-shadow-md
-                  dark:!univer-bg-gray-700 dark:!univer-text-white
+                  dark:!univer-bg-gray-700 dark:!univer-text-gray-0
                 `,
                 borderClassName,
                 scrollbarClassName,
@@ -170,9 +170,9 @@ function DropdownMenuContent({
                       data-[side=right]:univer-slide-in-from-left-2
                       data-[side=top]:univer-slide-in-from-bottom-2
                       univer-z-[1080] univer-box-border univer-max-h-[--radix-popper-available-height]
-                      univer-overflow-y-auto univer-rounded-md univer-bg-white univer-p-1.5 univer-text-gray-900
+                      univer-overflow-y-auto univer-rounded-md univer-bg-gray-0 univer-p-1.5 univer-text-gray-900
                       univer-shadow-md
-                      dark:!univer-bg-gray-700 dark:!univer-text-white
+                      dark:!univer-bg-gray-700 dark:!univer-text-gray-0
                     `,
                     borderClassName,
                     scrollbarClassName,

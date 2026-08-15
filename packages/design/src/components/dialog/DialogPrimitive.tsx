@@ -72,7 +72,7 @@ const DialogContent = forwardRef<
                   data-[state=closed]:univer-slide-out-to-top-[48%]
                   univer-fixed univer-left-1/2 univer-top-1/2 univer-z-[1080] univer-box-border univer-grid
                   univer-w-full univer-max-w-lg -univer-translate-x-1/2 -univer-translate-y-1/2 univer-gap-4
-                  univer-bg-white univer-p-4 univer-text-gray-500 univer-shadow-md univer-duration-200
+                  univer-bg-gray-0 univer-p-4 univer-text-gray-500 univer-shadow-md univer-duration-200
                   sm:!univer-rounded-lg
                   dark:!univer-bg-gray-700 dark:!univer-text-gray-400
                 `,
@@ -149,7 +149,7 @@ const DialogTitle = forwardRef<
             `
               univer-my-0 univer-text-lg univer-font-semibold univer-leading-none univer-tracking-tight
               univer-text-gray-900
-              dark:!univer-text-white
+              dark:!univer-text-gray-0
             `,
             className
         )}

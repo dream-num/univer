@@ -34,7 +34,7 @@ import { MobileSelectionControl } from '../mobile-selection-shape';
 
 class TestThemeService {
     getColorFromTheme(key: string) {
-        return key === 'white' ? '#ffffff' : '#3b82f6';
+        return key === 'gray.0' ? '#ffffff' : '#3b82f6';
     }
 }
 

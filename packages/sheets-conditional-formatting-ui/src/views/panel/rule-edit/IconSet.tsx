@@ -82,9 +82,9 @@ const TextInput = (props: { id: number; type: CFValueType; value: number | strin
                             ref={formulaEditorRef}
                             className={clsx(`
                               univer-box-border univer-h-8 univer-w-full univer-cursor-pointer univer-items-center
-                              univer-rounded-lg univer-bg-white univer-pt-2 univer-transition-colors
+                              univer-rounded-lg univer-bg-gray-0 univer-pt-2 univer-transition-colors
                               hover:univer-border-primary-600
-                              dark:!univer-bg-gray-700 dark:!univer-text-white
+                              dark:!univer-bg-gray-700 dark:!univer-text-gray-0
                               [&>div:first-child]:univer-px-2.5
                               [&>div]:univer-h-5 [&>div]:univer-ring-transparent
                             `, borderClassName)}
@@ -374,7 +374,7 @@ const IconSetRuleEdit = (props: {
                                 <div
                                     className={clsx(`
                                       univer-box-border univer-flex univer-h-8 univer-w-full univer-items-center
-                                      univer-justify-between univer-rounded-md univer-bg-white univer-px-4 univer-py-2
+                                      univer-justify-between univer-rounded-md univer-bg-gray-0 univer-px-4 univer-py-2
                                       univer-text-xs univer-text-gray-600 univer-transition-all
                                       hover:univer-border-primary-600
                                       dark:!univer-text-gray-200
@@ -635,7 +635,7 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
                     <div
                         className={clsx(`
                           univer-box-border univer-flex univer-h-8 univer-w-full univer-items-center
-                          univer-justify-between univer-rounded-md univer-bg-white univer-px-4 univer-py-2
+                          univer-justify-between univer-rounded-md univer-bg-gray-0 univer-px-4 univer-py-2
                           univer-text-xs univer-text-gray-600 univer-transition-all
                           hover:univer-border-primary-600
                         `, borderClassName)}

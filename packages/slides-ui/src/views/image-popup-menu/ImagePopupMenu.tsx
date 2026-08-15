@@ -82,7 +82,7 @@ export function SlideImagePopupMenu(props: IImagePopupMenuProps) {
                     <ul
                         className={clsx(`
                           univer-m-0 univer-box-border univer-grid univer-list-none univer-items-center univer-gap-1
-                          univer-rounded-lg univer-bg-white univer-p-1.5 univer-text-sm univer-shadow-lg
+                          univer-rounded-lg univer-bg-gray-0 univer-p-1.5 univer-text-sm univer-shadow-lg
                         `, borderClassName)}
                     >
                         {availableMenu.map((item) => (
@@ -112,16 +112,16 @@ export function SlideImagePopupMenu(props: IImagePopupMenuProps) {
                       dark:hover:!univer-bg-gray-800
                     `, borderClassName, {
                         'univer-bg-gray-100 dark:!univer-bg-gray-800': visible,
-                        'univer-bg-white dark:!univer-bg-gray-900': !visible,
+                        'univer-bg-gray-0 dark:!univer-bg-gray-900': !visible,
                     })}
                 >
                     <AutofillDoubleIcon
                         className={`
                           univer-fill-primary-600 univer-text-gray-900
-                          dark:!univer-text-white
+                          dark:!univer-text-gray-0
                         `}
                     />
-                    {showMore && <MoreDownIcon className="dark:!univer-text-white" />}
+                    {showMore && <MoreDownIcon className="dark:!univer-text-gray-0" />}
                 </div>
             </Dropdown>
         </div>

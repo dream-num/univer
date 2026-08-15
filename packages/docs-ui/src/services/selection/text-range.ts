@@ -521,13 +521,11 @@ export class TextRange implements IDocRange {
 
         try {
             const backgroundColorKit = new ColorKit(colorService.getRenderColor(this._getAnchorBackgroundColor(glyph)));
-            const gray0 = new ColorKit(colorService.getRenderColor('gray.0'));
-            const gray1000 = new ColorKit(colorService.getRenderColor(DEFAULT_CARET_COLOR));
-            if (!backgroundColorKit.isValid || !gray0.isValid || !gray1000.isValid) {
+            if (!backgroundColorKit.isValid) {
                 return DEFAULT_CARET_COLOR;
             }
 
-            return ColorKit.getContrastRatio(gray0, backgroundColorKit) > ColorKit.getContrastRatio(gray1000, backgroundColorKit)
+            return ColorKit.getContrastRatio(colorService.getRenderColor('gray.0'), backgroundColorKit) > ColorKit.getContrastRatio(colorService.getRenderColor(DEFAULT_CARET_COLOR), backgroundColorKit)
                 ? 'gray.0'
                 : DEFAULT_CARET_COLOR;
         } catch {

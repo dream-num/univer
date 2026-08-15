@@ -49,7 +49,7 @@ import { DocSelectionRenderService } from '../services/selection/doc-selection-r
 import { getDocPageSectionContext } from '../utils/section-header-footer';
 import { TextBubbleShape } from '../views/header-footer/text-bubble';
 
-const HEADER_FOOTER_COVER_COLOR = 'alpha(white, 0.5)';
+const HEADER_FOOTER_COVER_COLOR = 'alpha(gray.0, 0.5)';
 const HEADER_FOOTER_STROKE_COLOR = 'primary.600';
 const HEADER_FOOTER_LABEL_COLOR = 'alpha(primary.600, 0.08)';
 

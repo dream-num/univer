@@ -69,12 +69,17 @@ function createNodePosition(glyph = 0) {
     };
 }
 
-function createTextRangeHarness() {
+function createTextRangeHarness(backgroundColor?: string, themeColors: Record<string, string> = {}) {
     const addedObjects: unknown[] = [];
     const scene = {
         addObject: (object: unknown) => {
             addedObjects.push(object);
         },
+        getEngine: () => ({
+            canvasColorService: {
+                getRenderColor: (color: string) => themeColors[color] ?? color,
+            },
+        }),
     };
     const document = {
         getOffsetConfig: () => ({
@@ -85,7 +90,7 @@ function createTextRangeHarness() {
     const skeleton = {
         findNodePositionByCharIndex: (index: number) => createNodePosition(index),
         findGlyphByPosition: () => ({
-            ts: {},
+            ts: backgroundColor ? { bg: { rgb: backgroundColor } } : {},
         }),
         getViewModel: () => ({
             getDataModel: () => ({
@@ -136,8 +141,44 @@ describe('selection range state', () => {
         });
         expect(addedObjects).toHaveLength(1);
         expect(range.getAnchor()).not.toBeNull();
+        expect(range.getAnchor()?.stroke).toBe('gray.1000');
 
         range.dispose();
+        rangePointSpy.mockRestore();
+    });
+
+    it('contrasts the caret endpoint with the effective text background across theme directions', () => {
+        const rangePointSpy = vi.spyOn(NodePositionConvertToCursor.prototype, 'getRangePointData').mockImplementation(() => ({
+            contentBoxPointGroup: [[
+                { x: 10, y: 20 },
+                { x: 12, y: 20 },
+                { x: 12, y: 36 },
+                { x: 10, y: 36 },
+            ]],
+            borderBoxPointGroup: [],
+            cursorList: [{ startOffset: 1, endOffset: 1, collapsed: true }],
+        }) as never);
+
+        const createRange = (backgroundColor: string | undefined, themeColors: Record<string, string>) => {
+            const { document, scene, skeleton } = createTextRangeHarness(backgroundColor, themeColors);
+            return cursorConvertToTextRange(
+                scene as never,
+                { startOffset: 1, endOffset: 1, segmentId: '', segmentPage: -1 },
+                skeleton as never,
+                document as never
+            )!;
+        };
+        const lightBackgroundRange = createRange('#ffffff', { 'gray.0': '#ffffff', 'gray.1000': '#000000' });
+        const darkBackgroundRange = createRange('#070b19', { 'gray.0': '#ffffff', 'gray.1000': '#000000' });
+        const deepOceanRange = createRange(undefined, { 'gray.0': '#070b19', 'gray.1000': '#f5f7ff' });
+
+        expect(lightBackgroundRange.getAnchor()?.stroke).toBe('gray.1000');
+        expect(darkBackgroundRange.getAnchor()?.stroke).toBe('gray.0');
+        expect(deepOceanRange.getAnchor()?.stroke).toBe('gray.1000');
+
+        lightBackgroundRange.dispose();
+        darkBackgroundRange.dispose();
+        deepOceanRange.dispose();
         rangePointSpy.mockRestore();
     });
 

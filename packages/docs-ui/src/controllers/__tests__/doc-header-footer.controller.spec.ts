@@ -175,12 +175,12 @@ describe('DocHeaderFooterController', () => {
         expect(rectSpy.mock.calls[0][1]).toMatchObject({
             width: 200,
             height: 30,
-            fill: 'alpha(white, 0.5)',
+            fill: 'alpha(gray.0, 0.5)',
         });
         expect(rectSpy.mock.calls[1][1]).toMatchObject({
             width: 200,
             height: 40,
-            fill: 'alpha(white, 0.5)',
+            fill: 'alpha(gray.0, 0.5)',
         });
         expect(pathSpy).not.toHaveBeenCalled();
         expect(textSpy).not.toHaveBeenCalled();

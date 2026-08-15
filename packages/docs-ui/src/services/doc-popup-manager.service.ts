@@ -393,7 +393,9 @@ export class DocCanvasPopManagerService extends Disposable {
     // #endregion
 
     private _resolveEmbeddedPopupInjector(unitId: string, currentRender: IRender): Injector | undefined {
-        return this._univerInstanceService.getUnitCreateOptions(unitId)?.embeddedRender === true
+        const isEmbeddedRender = currentRender.isMainScene === false ||
+            this._univerInstanceService.getUnitCreateOptions(unitId)?.embeddedRender === true;
+        return isEmbeddedRender
             ? currentRender.getInjector?.()
             : undefined;
     }

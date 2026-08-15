@@ -57,6 +57,7 @@ class TestRenderManagerService {
     hasViewport = true;
     viewportScrollX = 0;
     viewportScrollY = 0;
+    isMainScene: boolean | undefined = true;
     canvasElement: { getBoundingClientRect: () => { left: number; top: number; width: number }; style: { width: string } } | null = {
         getBoundingClientRect: () => ({ left: 10, top: 20, width: 1000 }),
         style: { width: '1000px' },
@@ -82,6 +83,7 @@ class TestRenderManagerService {
 
         return {
             unitId,
+            isMainScene: this.isMainScene,
             engine: {
                 getCanvasElement: () => this.canvasElement,
             },
@@ -213,19 +215,30 @@ describe('DocCanvasPopManagerService', () => {
         expect(anchorRect$?.value).toEqual({ left: 25, right: 175, top: 50, bottom: 80 });
     });
 
-    it('keeps regular popups global and routes embedded popups to the render scope', () => {
-        const { service, popupService, renderManagerService, univerInstanceService } = createService();
+    it('keeps main-scene popups global and routes embedded render popups to the render scope', () => {
+        const { service, popupService, renderManagerService } = createService();
 
         service.attachPopupToRect({ left: 10, right: 110, top: 20, bottom: 40 }, { componentKey: 'normal-popup' }, 'doc-1');
         expect(popupService.popups.get('popup-1')?.connectorInjector).toBeUndefined();
         expect(renderManagerService.getInjector).not.toHaveBeenCalled();
 
-        univerInstanceService.embeddedUnitIds.add('doc-1');
+        renderManagerService.isMainScene = false;
         service.attachPopupToRect({ left: 10, right: 110, top: 20, bottom: 40 }, { componentKey: 'embed-popup' }, 'doc-1');
         expect(popupService.popups.size).toBe(1);
         expect(renderManagerService.scopedPopupService.popups.get('popup-1')?.componentKey).toBe('embed-popup');
         expect(renderManagerService.scopedPopupService.popups.get('popup-1')?.connectorInjector).toBe(renderManagerService.popupInjector);
         expect(renderManagerService.getInjector).toHaveBeenCalledTimes(1);
+    });
+
+    it('uses embedded unit creation metadata when the render has no scene ownership flag', () => {
+        const { service, popupService, renderManagerService, univerInstanceService } = createService();
+        renderManagerService.isMainScene = undefined;
+        univerInstanceService.embeddedUnitIds.add('doc-1');
+
+        service.attachPopupToRect({ left: 10, right: 110, top: 20, bottom: 40 }, { componentKey: 'embed-popup' }, 'doc-1');
+
+        expect(popupService.popups.size).toBe(0);
+        expect(renderManagerService.scopedPopupService.popups.get('popup-1')?.componentKey).toBe('embed-popup');
     });
 
     it('refreshes function-based rect popup anchors after scroll and rich text changes', () => {

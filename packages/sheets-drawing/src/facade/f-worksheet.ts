@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDrawingParam, IGroupBaseBound, Injector } from '@univerjs/core';
+import type { IDrawingParam, IGroupBaseBound } from '@univerjs/core';
 import type { IFBlobSource } from '@univerjs/core/facade';
 import type { IDrawingGroupUpdateParam, IDrawingJsonUndo1 } from '@univerjs/drawing';
 import type { ISheetDrawing, ISheetDrawingPlacement, ISheetDrawingPlacementInput, ISheetImage } from '@univerjs/sheets-drawing';
@@ -509,14 +509,16 @@ export interface IFWorksheetDrawingMixin {
 }
 
 export class FWorksheetDrawingMixin extends FWorksheet implements IFWorksheetDrawingMixin {
-    declare private _sheetDrawingService: ISheetDrawingService;
-    declare private _sheetSkeletonService: SheetSkeletonService;
-    declare private _undoRedoService: IUndoRedoService;
+    private get _sheetDrawingService(): ISheetDrawingService {
+        return this._injector.get(ISheetDrawingService);
+    }
 
-    override _initialize(injector: Injector): void {
-        this._sheetDrawingService = injector.get(ISheetDrawingService);
-        this._sheetSkeletonService = injector.get(SheetSkeletonService);
-        this._undoRedoService = injector.get(IUndoRedoService);
+    private get _sheetSkeletonService(): SheetSkeletonService {
+        return this._injector.get(SheetSkeletonService);
+    }
+
+    private get _undoRedoService(): IUndoRedoService {
+        return this._injector.get(IUndoRedoService);
     }
 
     override async insertImage(url: IFBlobSource | string, column?: number, row?: number, offsetX?: number, offsetY?: number): Promise<boolean> {

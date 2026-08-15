@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IExecutionOptions } from '@univerjs/core';
+import type { ICommandInfo } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LocaleService, toDisposable } from '@univerjs/core';
 import { borderClassName, clsx, DropdownMenu } from '@univerjs/design';
 import { convertTransformToOffsetX, convertTransformToOffsetY, IRenderManagerService } from '@univerjs/engine-render';
 import { AutofillDoubleIcon, MoreDownIcon } from '@univerjs/icons';
 import { AUTO_FILL_APPLY_TYPE, IAutoFillService, RefillCommand } from '@univerjs/sheets';
 import { useDependency, useObservable } from '@univerjs/ui';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useReducer, useState } from 'react';
 import { map } from 'rxjs';
 import { SetScrollOperation } from '../../commands/operations/scroll.operation';
 import { getViewportByCell } from '../../common/utils';
@@ -40,11 +40,6 @@ export interface IAutoFillPopupMenuItem {
     index: number;
     disable: boolean;
 }
-
-const useUpdate = () => {
-    const [, setState] = useState({});
-    return useCallback(() => setState((prevState) => !prevState), []);
-};
 
 export function AutoFillPopupMenu() {
     const commandService = useDependency(ICommandService);
@@ -79,7 +74,8 @@ export function AutoFillPopupMenu() {
         [autoFillService]
     );
     const selected = useObservable(autoFillService.applyType$, AUTO_FILL_APPLY_TYPE.SERIES);
-    const [isHovered, setHovered] = useState(false);
+    const [isHovered, setIsHovered] = useState(false);
+    const [, forceUpdate] = useReducer((version: number) => version + 1, 0);
     const workbook = useActiveWorkbook();
     const sheetSkeletonManagerService = useMemo(() => {
         if (workbook) {
@@ -91,16 +87,15 @@ export function AutoFillPopupMenu() {
     }, [workbook, renderManagerService]);
 
     const handleMouseEnter = () => {
-        setHovered(true);
+        setIsHovered(true);
     };
 
     const handleMouseLeave = () => {
-        setHovered(false);
+        setIsHovered(false);
     };
-    const forceUpdate = useUpdate();
 
     useEffect(() => {
-        const disposable = commandService.onCommandExecuted((command: ICommandInfo, options?: IExecutionOptions) => {
+        const disposable = commandService.onCommandExecuted((command: ICommandInfo) => {
             if (command.id === SetScrollOperation.id) {
                 forceUpdate();
             }
@@ -166,7 +161,7 @@ export function AutoFillPopupMenu() {
     const availableMenu = menu.filter((item) => !item.disable);
 
     return (
-        <div className="univer-absolute univer-inset-0 univer-z-10 univer-size-0">
+        <div className="univer-absolute univer-z-10 univer-size-0" style={{ left: 0, top: 0 }}>
             <div
                 className="univer-absolute"
                 style={{ left: `${relativeX + 2}px`, top: `${relativeY + 2}px` }}

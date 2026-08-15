@@ -820,6 +820,18 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         return factory?.(context) ?? new Rect(context.key, context.config);
     }
 
+    /**
+     * Drawing add notifications are emitted after the drawing model has updated its canonical order.
+     * For a batch add, using the final order length would assign every new render object the same z-index.
+     * Prefer the drawing's canonical index, while preserving the append fallback if the ID is not registered yet.
+     */
+    private _getDrawingZIndex(unitId: string, subUnitId: string, drawingId: string): number {
+        const drawingOrder = this._drawingManagerService.getDrawingOrder(unitId, subUnitId);
+        const drawingIndex = drawingOrder.indexOf(drawingId);
+
+        return drawingIndex < 0 ? drawingOrder.length - 1 : drawingIndex;
+    }
+
     private _bindScrollEvent() {
         this._lifecycleService.lifecycle$.pipe(filter((s) => s === LifecycleStages.Rendered), take(1)).subscribe(() => {
             this._scrollUpdateListener();
@@ -1256,7 +1268,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         top,
                         width,
                         height,
-                        zIndex: this._drawingManagerService.getDrawingOrder(unitId, subUnitId).length - 1,
+                        zIndex: this._getDrawingZIndex(unitId, subUnitId, drawingId),
                     };
 
                     const isChart = drawingType === DrawingTypeEnum.DRAWING_CHART;

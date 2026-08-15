@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IWorkbookData } from '@univerjs/core';
+import type { IDrawingParam, IWorkbookData } from '@univerjs/core';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
 import type { IRender, IRenderManagerService as IRenderManagerServiceType, Scene } from '@univerjs/engine-render';
 import type { ISheetFloatDom } from '@univerjs/sheets-drawing';
@@ -31,7 +31,7 @@ import {
     LocaleType,
     UniverInstanceType,
 } from '@univerjs/core';
-import { getDrawingShapeKeyByDrawingSearch } from '@univerjs/drawing';
+import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService, Rect, SHEET_VIEWPORT_KEY, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { DrawingApplyType, InsertSheetDrawingCommand, ISheetDrawingService, RemoveSheetDrawingCommand, SetDrawingApplyMutation, SetSheetDrawingCommand } from '@univerjs/sheets-drawing';
 import { ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
@@ -1273,6 +1273,100 @@ describe('SheetCanvasFloatDomManagerService', () => {
         headerDom.dispose();
         expect(fixture.manager.getFloatDomsBySubUnitId('test', 'sheet1')).toEqual([]);
         expect(findFloatDom(canvasFloatDomService, 'header-card')).toBeUndefined();
+    });
+
+    it('initializes overlapping chart render object z-indexes from drawing order', () => {
+        const fixture = setup();
+        disposables.push(fixture);
+        const sheetDrawingService = fixture.get(ISheetDrawingService);
+        const firstChart: ISheetFloatDom = {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            drawingId: 'chart-1',
+            drawingType: DrawingTypeEnum.DRAWING_CHART,
+            componentKey: 'FirstChart',
+            transform: { left: 88, top: 34, width: 160, height: 96 },
+            sheetTransform: {
+                from: { row: 1, column: 1, rowOffset: 0, columnOffset: 0 },
+                to: { row: 4, column: 4, rowOffset: 0, columnOffset: 0 },
+            },
+            axisAlignSheetTransform: {
+                from: { row: 1, column: 1, rowOffset: 0, columnOffset: 0 },
+                to: { row: 4, column: 4, rowOffset: 0, columnOffset: 0 },
+            },
+        };
+        const secondChart: ISheetFloatDom = {
+            ...firstChart,
+            drawingId: 'chart-2',
+            componentKey: 'SecondChart',
+        };
+        const addOp = sheetDrawingService.getBatchAddOp([firstChart, secondChart]) as IDrawingJsonUndo1;
+
+        expect(fixture.commandService.syncExecuteCommand(SetDrawingApplyMutation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            op: addOp.redo,
+            objects: addOp.objects,
+            type: DrawingApplyType.INSERT,
+        })).toBe(true);
+
+        expect(fixture.get(IDrawingManagerService).getDrawingOrder('test', 'sheet1')).toEqual(['chart-2', 'chart-1']);
+        expect(fixture.manager.getFloatDomInfo('chart-2')?.rect.zIndex).toBe(0);
+        expect(fixture.manager.getFloatDomInfo('chart-1')?.rect.zIndex).toBe(1);
+    });
+
+    it('places unregistered range and column header float doms at the end of the current drawing order', () => {
+        const fixture = setup();
+        disposables.push(fixture);
+        const drawingManagerService = fixture.get(IDrawingManagerService);
+        const firstPersistedDrawing: IDrawingParam = {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            drawingId: 'persisted-drawing-1',
+            drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+        };
+        const secondPersistedDrawing: IDrawingParam = {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            drawingId: 'persisted-drawing-2',
+            drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+        };
+        drawingManagerService.registerDrawingData('test', {
+            sheet1: {
+                data: {
+                    [firstPersistedDrawing.drawingId]: firstPersistedDrawing,
+                    [secondPersistedDrawing.drawingId]: secondPersistedDrawing,
+                },
+                order: [firstPersistedDrawing.drawingId, secondPersistedDrawing.drawingId],
+            },
+        });
+
+        const rangeDom = fixture.manager.addFloatDomToRange({
+            startRow: 1,
+            endRow: 1,
+            startColumn: 1,
+            endColumn: 1,
+        }, {
+            componentKey: 'RangeCard',
+            initPosition: { startX: 0, startY: 0, endX: 0, endY: 0 },
+        }, {
+            width: 80,
+            height: 24,
+        }, 'transient-range-card')!;
+        const headerDom = fixture.manager.addFloatDomToColumnHeader(2, {
+            componentKey: 'ColumnHeaderCard',
+            initPosition: { startX: 0, startY: 0, endX: 0, endY: 0 },
+        }, {
+            width: 96,
+            height: 28,
+        }, 'transient-header-card')!;
+
+        expect(drawingManagerService.getDrawingOrder('test', 'sheet1')).toEqual(['persisted-drawing-1', 'persisted-drawing-2']);
+        expect(fixture.manager.getFloatDomInfo('transient-range-card')?.rect.zIndex).toBe(1);
+        expect(fixture.manager.getFloatDomInfo('transient-header-card')?.rect.zIndex).toBe(1);
+
+        rangeDom.dispose();
+        headerDom.dispose();
     });
 
     it('removes and restores float dom layers when the drawing hidden state changes', async () => {

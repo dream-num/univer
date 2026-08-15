@@ -45,6 +45,7 @@ import { DocDrawingFloatingToolbarAdapterService } from '../services/doc-drawing
 
 export class DocDrawingPopupMenuController extends RxDisposable {
     private _initImagePopupMenu = new Set<string>();
+    private _embeddedRenderUnits = new Set<string>();
     private _disposePopups: IDisposable[] = [];
     private _isDrawingPanelOpen = false;
 
@@ -94,6 +95,27 @@ export class DocDrawingPopupMenuController extends RxDisposable {
 
         this.disposeWithMe(
             this._univerInstanceService.getTypeOfUnitDisposed$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC).pipe(takeUntil(this.dispose$)).subscribe((documentDataModel) => this._dispose(documentDataModel))
+        );
+
+        this.disposeWithMe(
+            this._renderManagerService.created$.pipe(takeUntil(this.dispose$)).subscribe((render) => {
+                if (render.type !== UniverInstanceType.UNIVER_DOC || render.isMainScene) {
+                    return;
+                }
+
+                this._embeddedRenderUnits.add(render.unitId);
+                this._create(this._univerInstanceService.getUnit<DocumentDataModel>(render.unitId, UniverInstanceType.UNIVER_DOC));
+            })
+        );
+
+        this.disposeWithMe(
+            this._renderManagerService.disposed$.pipe(takeUntil(this.dispose$)).subscribe((unitId) => {
+                if (!this._embeddedRenderUnits.delete(unitId)) {
+                    return;
+                }
+
+                this._initImagePopupMenu.delete(unitId);
+            })
         );
 
         this._univerInstanceService.getAllUnitsForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC).forEach((documentDataModel) => this._create(documentDataModel));

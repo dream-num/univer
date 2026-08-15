@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommandInfo, IDocDrawingPosition, IDrawingParam, IImageIoServiceParam, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, ICommandInfo, IDocDrawingPosition, IDrawingParam, IImageIoServiceParam, ITextRangeParam, Nullable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IDocDrawing, IDrawingDocTransform, IInsertDocDrawingCommandParams, ISetDocDrawingArrangeCommandParams, IUpdateDrawingDocTransformCommandParams } from '@univerjs/docs-drawing';
 import type { IImageData } from '@univerjs/drawing';
@@ -94,6 +94,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
 
     async insertDocImage(): Promise<boolean> {
         const insertPosition = this._getCurrentImageInsertPosition();
+        const textRange = this._getCurrentImageInsertTextRange();
         const files = await this._fileOpenerService.openFile({
             multiple: true,
             accept: DRAWING_IMAGE_ALLOW_IMAGE_LIST.map((image) => `.${image.replace('image/', '')}`).join(','),
@@ -110,12 +111,15 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
             return false;
         }
 
-        await this._insertFloatImages(files, insertPosition);
-        return true;
+        return await this._insertFloatImages(files, insertPosition, textRange);
     }
 
     // eslint-disable-next-line max-lines-per-function
-    private async _insertFloatImages(files: File[], insertPosition: Nullable<IImageInsertPosition>) {
+    private async _insertFloatImages(
+        files: File[],
+        insertPosition: Nullable<IImageInsertPosition>,
+        textRange: Nullable<ITextRangeParam>
+    ) {
         let imageParams: Nullable<IImageIoServiceParam>[] = [];
 
         try {
@@ -145,7 +149,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
         }
 
         if (imageParams.length === 0) {
-            return;
+            return false;
         }
 
         const { unitId } = this._context;
@@ -171,7 +175,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
             const docTransform = this._getImagePosition(width * scale, height * scale, imagePosition);
 
             if (docTransform == null) {
-                return;
+                return false;
             }
 
             const transform = docDrawingPositionToTransform(docTransform);
@@ -209,9 +213,10 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
             docDrawingParams.push(docDrawingParam);
         }
 
-        this._commandService.executeCommand<IInsertDocDrawingCommandParams>(InsertDocDrawingCommand.id, {
+        return await this._commandService.executeCommand<IInsertDocDrawingCommandParams>(InsertDocDrawingCommand.id, {
             unitId,
             drawings: docDrawingParams,
+            textRange: textRange ?? undefined,
         });
     }
 
@@ -253,6 +258,11 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
             left: position.left,
             top: position.top,
         };
+    }
+
+    private _getCurrentImageInsertTextRange(): Nullable<ITextRangeParam> {
+        return this._docSelectionRenderService.getAllTextRanges().find((range) => range.isActive)
+            ?? this._docSelectionManagerService.getActiveTextRange();
     }
 
     private _updateOrderListener() {
@@ -373,7 +383,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
     private _transformDrawingListener() {
         const res = this._getCurrentSceneAndTransformer();
         if (res && res.transformer) {
-            this.disposeWithMe(res.transformer.changeEnd$.pipe(debounceTime(30)).subscribe((params) => {
+            this.disposeWithMe(res.transformer.changeEnd$.pipe(debounceTime(30)).subscribe(() => {
                 this._docSelectionManagerService.refreshSelection();
             }));
         } else {
@@ -474,7 +484,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
                     scene.detachTransformerFrom(shape);
                     try {
                         (shape as Image).setOpacity(isDocInputFocusing ? 0.5 : 1);
-                    } catch (e) {
+                    } catch {
                     }
                     if (!isDocInputFocusing) {
                         continue;
@@ -489,7 +499,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
 
                         try {
                             (shape as Image).setOpacity(1);
-                        } catch (e) {
+                        } catch {
                         }
                     }
                 }

@@ -328,11 +328,26 @@ describe('FormulaBar', () => {
 
     it('keeps its toolbar layout LTR when the sheet host is RTL', () => {
         currentBed = createFormulaBarTestBed();
-        const rendered = renderWithDependencies(<FormulaBar disableDefinedName />, currentBed.injector);
+        const rendered = renderWithDependencies(
+            <div dir="rtl">
+                <FormulaBar disableDefinedName />
+            </div>,
+            currentBed.injector
+        );
         root = rendered.root;
         container = rendered.container;
 
-        expect(rendered.container.querySelector('[data-u-comp="formula-bar"]')?.getAttribute('dir')).toBe('ltr');
+        const formulaBar = rendered.container.querySelector('[data-u-comp="formula-bar"]');
+        const definedName = formulaBar?.querySelector('[data-u-comp="defined-name"]');
+        const input = definedName?.querySelector('input');
+        const dropdownTrigger = definedName?.querySelector('a');
+
+        expect(formulaBar?.getAttribute('dir')).toBe('ltr');
+        expect(input?.classList).toContain('univer-pl-1.5');
+        expect(input?.classList).toContain('univer-pr-5');
+        expect(input?.className).not.toContain('rtl:');
+        expect(dropdownTrigger?.classList).toContain('univer-right-0');
+        expect(dropdownTrigger?.className).not.toContain('rtl:');
     });
 
     it('closes editing through the command service when cancel is clicked', async () => {

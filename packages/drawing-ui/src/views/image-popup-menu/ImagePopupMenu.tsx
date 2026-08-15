@@ -43,7 +43,7 @@ export interface IImagePopupMenuItem {
     disable: boolean;
     type?: 'button' | 'select';
     value?: string;
-    options?: Array<{ label: unknown; value: string }>;
+    options?: Array<{ icon?: string; label: unknown; value: string }>;
     commandParamsFactory?: (value: string) => object;
     hideOnClick?: boolean;
     icon?: string;
@@ -423,11 +423,15 @@ function DocChartFloatingToolbar(props: Pick<IDocImageFloatingToolbarProps, 'men
     const actionItems = props.menuItems
         .filter((item) => item.type !== 'select' && item.icon)
         .sort((a, b) => a.index - b.index);
-    const chartTypeOptions = (chartTypeItem?.options ?? []).map((option) => ({
-        label: String(option.label),
-        value: option.value,
-        icon: <ChartIcon />,
-    }));
+    const chartTypeOptions = (chartTypeItem?.options ?? []).map((option) => {
+        const Icon = option.icon ? iconManager.get(option.icon) : ChartIcon;
+
+        return {
+            label: String(option.label),
+            value: option.value,
+            icon: <Icon />,
+        };
+    });
 
     const executeMenuItem = (item: IImagePopupMenuItem | undefined) => {
         if (!item || item.disable) {

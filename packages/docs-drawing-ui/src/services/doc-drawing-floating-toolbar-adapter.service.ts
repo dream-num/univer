@@ -25,6 +25,7 @@ export interface IDocDrawingFloatingToolbarParams {
 }
 
 export interface IDocDrawingFloatingToolbarOption {
+    icon?: string;
     label: unknown;
     value: string;
 }

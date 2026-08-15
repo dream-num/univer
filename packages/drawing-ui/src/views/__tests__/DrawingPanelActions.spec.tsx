@@ -343,4 +343,48 @@ describe('drawing panel actions', () => {
         expect(executedCommands.map((command) => command.id)).toEqual([chartEditCommandId]);
         expect(container.querySelector('[data-u-comp="doc-chart-floating-toolbar"]')).toBeNull();
     });
+
+    it('renders the icon provided by each chart toolbar option', () => {
+        const iconManager = univer.__getInjector().get(IconManager);
+        iconManager.register({
+            LineChartIcon: () => <span data-testid="line-chart-icon" />,
+            ColumnChartIcon: () => <span data-testid="column-chart-icon" />,
+        });
+
+        const rendered = renderWithRediContext(
+            univer.__getInjector(),
+            <ImagePopupMenu
+                popup={{
+                    extraProps: {
+                        variant: 'doc-chart-floating-toolbar',
+                        menuItems: [{
+                            type: 'select',
+                            label: 'chart.type',
+                            index: 0,
+                            commandId: chartEditCommandId,
+                            disable: false,
+                            value: 'line',
+                            options: [
+                                { label: 'Line', value: 'line', icon: 'LineChartIcon' },
+                                { label: 'Column', value: 'column', icon: 'ColumnChartIcon' },
+                            ],
+                            commandParamsFactory: (value) => ({ value }),
+                        }],
+                    },
+                }}
+            />
+        );
+        root = rendered.root;
+        container = rendered.container;
+
+        const chartTypeButton = container.querySelector<HTMLButtonElement>(
+            '[data-u-comp="doc-chart-floating-toolbar"] button'
+        );
+        expect(chartTypeButton?.querySelector('[data-testid="line-chart-icon"]')).not.toBeNull();
+
+        clickElement(chartTypeButton!);
+
+        expect(document.querySelector('[data-testid="line-chart-icon"]')).not.toBeNull();
+        expect(document.querySelector('[data-testid="column-chart-icon"]')).not.toBeNull();
+    });
 });

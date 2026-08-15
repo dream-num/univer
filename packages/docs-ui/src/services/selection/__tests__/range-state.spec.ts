@@ -69,12 +69,17 @@ function createNodePosition(glyph = 0) {
     };
 }
 
-function createTextRangeHarness() {
+function createTextRangeHarness(textColor?: string, themeColors: Record<string, string> = {}) {
     const addedObjects: unknown[] = [];
     const scene = {
         addObject: (object: unknown) => {
             addedObjects.push(object);
         },
+        getEngine: () => ({
+            canvasColorService: {
+                getRenderColor: (color: string) => themeColors[color] ?? color,
+            },
+        }),
     };
     const document = {
         getOffsetConfig: () => ({
@@ -85,7 +90,7 @@ function createTextRangeHarness() {
     const skeleton = {
         findNodePositionByCharIndex: (index: number) => createNodePosition(index),
         findGlyphByPosition: () => ({
-            ts: {},
+            ts: textColor ? { cl: { rgb: textColor } } : {},
         }),
         getViewModel: () => ({
             getDataModel: () => ({
@@ -136,8 +141,41 @@ describe('selection range state', () => {
         });
         expect(addedObjects).toHaveLength(1);
         expect(range.getAnchor()).not.toBeNull();
+        expect(range.getAnchor()?.stroke).toBe('gray.1000');
 
         range.dispose();
+        rangePointSpy.mockRestore();
+    });
+
+    it('matches the caret endpoint to the current text color across theme directions', () => {
+        const rangePointSpy = vi.spyOn(NodePositionConvertToCursor.prototype, 'getRangePointData').mockImplementation(() => ({
+            contentBoxPointGroup: [[
+                { x: 10, y: 20 },
+                { x: 12, y: 20 },
+                { x: 12, y: 36 },
+                { x: 10, y: 36 },
+            ]],
+            borderBoxPointGroup: [],
+            cursorList: [{ startOffset: 1, endOffset: 1, collapsed: true }],
+        }) as never);
+
+        const createRange = (textColor: string, themeColors: Record<string, string>) => {
+            const { document, scene, skeleton } = createTextRangeHarness(textColor, themeColors);
+            return cursorConvertToTextRange(
+                scene as never,
+                { startOffset: 1, endOffset: 1, segmentId: '', segmentPage: -1 },
+                skeleton as never,
+                document as never
+            )!;
+        };
+        const lightThemeRange = createRange('#f5f7ff', { 'gray.0': '#ffffff', 'gray.1000': '#000000' });
+        const invertedThemeRange = createRange('#f5f7ff', { 'gray.0': '#070b19', 'gray.1000': '#f5f7ff' });
+
+        expect(lightThemeRange.getAnchor()?.stroke).toBe('gray.0');
+        expect(invertedThemeRange.getAnchor()?.stroke).toBe('gray.1000');
+
+        lightThemeRange.dispose();
+        invertedThemeRange.dispose();
         rangePointSpy.mockRestore();
     });
 

@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService } from '@univerjs/core';
-import { IMenuManagerService, IShortcutService } from '@univerjs/ui';
+import { Disposable, DrawingTypeEnum, ICommandService, Inject } from '@univerjs/core';
+import { IDrawingManagerService } from '@univerjs/drawing';
+import { IMenuManagerService, IShortcutService, ISidebarService } from '@univerjs/ui';
 import { DeleteDrawingsCommand } from '../commands/commands/delete-drawings.command';
 import { FlipSheetDrawingCommand } from '../commands/commands/flip-drawings.command';
 import { GroupSheetDrawingCommand } from '../commands/commands/group-sheet-drawing.command';
@@ -26,6 +27,7 @@ import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-d
 import { EditSheetDrawingOperation } from '../commands/operations/edit-sheet-drawing.operation';
 import { SidebarSheetDrawingOperation } from '../commands/operations/open-drawing-panel.operation';
 import { menuSchema } from '../menu/schema';
+import { COMPONENT_SHEET_DRAWING_PANEL } from '../views/sheet-image-panel/component-name';
 import {
     DeleteDrawingsShortcutItem,
     MoveDrawingDownShortcutItem,
@@ -38,7 +40,9 @@ export class SheetDrawingUIController extends Disposable {
     constructor(
         @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
         @ICommandService private readonly _commandService: ICommandService,
-        @IShortcutService private readonly _shortcutService: IShortcutService
+        @IShortcutService private readonly _shortcutService: IShortcutService,
+        @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
+        @Inject(ISidebarService) private readonly _sidebarService: ISidebarService
     ) {
         super();
 
@@ -80,10 +84,25 @@ export class SheetDrawingUIController extends Disposable {
         });
     }
 
+    private _initImagePanel(): void {
+        this.disposeWithMe(this._drawingManagerService.focus$.subscribe((drawings) => {
+            if (!this._sidebarService.visible || this._sidebarService.options.id !== COMPONENT_SHEET_DRAWING_PANEL) {
+                return;
+            }
+
+            if (drawings.length === 1 && drawings[0].drawingType === DrawingTypeEnum.DRAWING_IMAGE) {
+                return;
+            }
+
+            this._sidebarService.close(COMPONENT_SHEET_DRAWING_PANEL);
+        }));
+    }
+
     private _init(): void {
         this._initCommands();
         this._initCustomComponents();
         this._initMenus();
         this._initShortcuts();
+        this._initImagePanel();
     }
 }

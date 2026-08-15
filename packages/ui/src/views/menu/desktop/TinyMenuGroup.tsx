@@ -52,7 +52,7 @@ type TinyMenuDisplayItem = IDisplayMenuItem<IMenuItem> & {
 const quickTileMenuButtonVariants = cva(
     `
       univer-relative univer-box-border univer-flex univer-size-12 univer-w-full univer-appearance-none univer-flex-col
-      univer-items-center univer-justify-center univer-gap-0.5 univer-rounded-lg univer-border-none univer-bg-white
+      univer-items-center univer-justify-center univer-gap-0.5 univer-rounded-lg univer-border-none univer-bg-gray-0
       univer-p-0 univer-font-medium univer-text-gray-700 univer-outline-none univer-transition-all
       focus-visible:univer-ring-2 focus-visible:univer-ring-primary-600 focus-visible:univer-ring-offset-0
       dark:!univer-bg-gray-700 dark:!univer-text-gray-100

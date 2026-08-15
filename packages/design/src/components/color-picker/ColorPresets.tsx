@@ -50,7 +50,7 @@ export function ColorPresets({ hsv, onChange }: IColorPresetsProps) {
                               univer-box-border univer-size-5 univer-cursor-pointer univer-rounded-full univer-border
                               univer-border-solid univer-border-transparent univer-bg-gray-300 univer-transition-shadow
                             `, {
-                                'univer-ring-2 univer-ring-offset-2 univer-ring-offset-white dark:!univer-ring-primary-600 dark:!univer-ring-offset-gray-600': color.toUpperCase() === currentColor.toUpperCase(),
+                                'univer-ring-2 univer-ring-offset-2 univer-ring-offset-gray-0 dark:!univer-ring-primary-600 dark:!univer-ring-offset-gray-600': color.toUpperCase() === currentColor.toUpperCase(),
                                 '!univer-border-gray-200': i === 0 && j === 0,
                             })}
                             style={{ backgroundColor: color }}

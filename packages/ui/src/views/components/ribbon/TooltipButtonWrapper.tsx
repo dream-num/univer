@@ -341,7 +341,7 @@ export function DropdownMenuWrapper({
         const items: IDropdownMenuProps['items'] = options.map((option) => ({
             type: 'item',
             className: clsx({
-                'focus:univer-bg-white': typeof option.label !== 'string' && option.label?.hoverable === false,
+                'focus:univer-bg-gray-0': typeof option.label !== 'string' && option.label?.hoverable === false,
                 '!univer-p-0': isSingleEmbeddedCustomPanel,
             }),
             children: (

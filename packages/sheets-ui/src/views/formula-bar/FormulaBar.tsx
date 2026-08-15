@@ -300,7 +300,7 @@ export function FormulaBar(props: IProps) {
             dir="ltr"
             data-u-comp="formula-bar"
             className={clsx(`
-              univer-box-border univer-flex univer-bg-white univer-text-gray-900 univer-transition-[height]
+              univer-box-border univer-flex univer-bg-gray-0 univer-text-gray-900 univer-transition-[height]
               univer-ease-linear
               dark:!univer-bg-gray-800
             `, borderBottomClassName, className, {
@@ -326,7 +326,7 @@ export function FormulaBar(props: IProps) {
                             className={clsx(`
                               univer-flex univer-items-center univer-justify-center univer-rounded univer-p-1
                               univer-text-base
-                              dark:!univer-text-white
+                              dark:!univer-text-gray-0
                             `, {
                                 'univer-cursor-pointer univer-text-red-600 hover:univer-bg-gray-100 dark:!univer-text-green-400 dark:hover:!univer-bg-gray-700': iconActivated,
                             })}
@@ -338,7 +338,7 @@ export function FormulaBar(props: IProps) {
                             className={clsx(`
                               univer-flex univer-items-center univer-justify-center univer-rounded univer-p-1
                               univer-text-base
-                              dark:!univer-text-white
+                              dark:!univer-text-gray-0
                             `, {
                                 'univer-cursor-pointer univer-text-green-600 hover:univer-bg-gray-100 dark:!univer-text-red-400 dark:hover:!univer-bg-gray-700': iconActivated,
                             })}
@@ -351,7 +351,7 @@ export function FormulaBar(props: IProps) {
                               univer-flex univer-cursor-pointer univer-items-center univer-justify-center univer-rounded
                               univer-p-1 univer-text-base
                               hover:univer-bg-gray-100
-                              dark:!univer-text-white
+                              dark:!univer-text-gray-0
                               dark:hover:!univer-bg-gray-700
                             `}
                             onClick={handlerFxBtnClick}
@@ -365,7 +365,7 @@ export function FormulaBar(props: IProps) {
                     <div
                         ref={ref}
                         className="
-                          univer-relative univer-flex-1 univer-bg-white
+                          univer-relative univer-flex-1 univer-bg-gray-0
                           dark:!univer-bg-gray-800
                         "
                         onPointerDown={handlePointerDown}
@@ -404,7 +404,7 @@ export function FormulaBar(props: IProps) {
                             <div
                                 className={`
                                   univer-pointer-events-none univer-relative univer-left-0 univer-top-0 univer-z-[100]
-                                  univer-size-full univer-cursor-not-allowed univer-bg-white
+                                  univer-size-full univer-cursor-not-allowed univer-bg-gray-0
                                   dark:!univer-bg-gray-800
                                 `}
                             />

@@ -61,7 +61,7 @@ export function RibbonGridMenu({
                           focus-visible:univer-outline-none focus-visible:univer-ring-2 focus-visible:univer-ring-inset
                           focus-visible:univer-ring-primary-500
                           dark:!univer-text-gray-200
-                          dark:hover:!univer-text-white
+                          dark:hover:!univer-text-gray-0
                         `, isActive
                             ? `
                               univer-border-primary-600 univer-text-primary-700

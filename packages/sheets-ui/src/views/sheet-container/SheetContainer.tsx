@@ -85,7 +85,7 @@ export function RenderSheetFooter() {
             <section
                 className={clsx(`
                   univer-box-border univer-grid univer-w-full univer-grid-flow-col univer-grid-cols-[1fr,auto,auto,auto]
-                  univer-items-center univer-justify-between univer-bg-white univer-px-5 univer-text-gray-900
+                  univer-items-center univer-justify-between univer-bg-gray-0 univer-px-5 univer-text-gray-900
                   dark:!univer-bg-gray-900 dark:!univer-text-gray-200
                 `, { 'univer-pointer-events-none': isLoading })}
                 data-range-selector
@@ -132,7 +132,7 @@ export function RenderSheetHeader() {
             <div
                 aria-hidden
                 className="
-                  univer-h-7 univer-border-b univer-border-gray-200 univer-bg-white
+                  univer-h-7 univer-border-b univer-border-gray-200 univer-bg-gray-0
                   dark:!univer-border-gray-700 dark:!univer-bg-gray-900
                 "
                 data-u-comp="formula-bar-placeholder"
@@ -207,7 +207,7 @@ function SheetLoadingSkeleton() {
             data-u-comp="sheet-loading-skeleton"
             aria-busy
             className="
-              univer-absolute univer-inset-0 univer-z-10 univer-overflow-hidden univer-bg-white
+              univer-absolute univer-inset-0 univer-z-10 univer-overflow-hidden univer-bg-gray-0
               dark:!univer-bg-gray-900
             "
         >
@@ -287,7 +287,7 @@ function RenderSheetEmbedTabHost(props: { workbook: Workbook; worksheet: Workshe
         <div
             data-embed-sheets-sheet-tab-host={hostAnchorId}
             className="
-              univer-absolute univer-inset-0 univer-z-40 univer-bg-white
+              univer-absolute univer-inset-0 univer-z-40 univer-bg-gray-0
               dark:!univer-bg-gray-900
             "
         />

@@ -201,7 +201,7 @@ export function SheetTableFilterPanel() {
     return (
         <div
             className={`
-              univer-box-border univer-flex univer-w-[400px] univer-flex-col univer-rounded-[10px] univer-bg-white
+              univer-box-border univer-flex univer-w-[400px] univer-flex-col univer-rounded-[10px] univer-bg-gray-0
               univer-p-4 univer-shadow-lg
               dark:!univer-border-gray-600 dark:!univer-bg-gray-700
             `}
@@ -222,7 +222,7 @@ export function SheetTableFilterPanel() {
                               univer-text-left univer-text-sm univer-text-gray-900
                               hover:univer-bg-gray-100
                               disabled:univer-cursor-not-allowed disabled:univer-text-gray-400
-                              dark:!univer-text-white
+                              dark:!univer-text-gray-0
                               dark:hover:!univer-bg-gray-600
                             `}
                             onClick={() => insertColumn('left')}
@@ -238,7 +238,7 @@ export function SheetTableFilterPanel() {
                               univer-text-left univer-text-sm univer-text-gray-900
                               hover:univer-bg-gray-100
                               disabled:univer-cursor-not-allowed disabled:univer-text-gray-400
-                              dark:!univer-text-white
+                              dark:!univer-text-gray-0
                               dark:hover:!univer-bg-gray-600
                             `}
                             onClick={() => insertColumn('right')}
@@ -254,7 +254,7 @@ export function SheetTableFilterPanel() {
                               univer-text-left univer-text-sm univer-text-gray-900
                               hover:univer-bg-gray-100
                               disabled:univer-cursor-not-allowed disabled:univer-text-gray-400
-                              dark:!univer-text-white
+                              dark:!univer-text-gray-0
                               dark:hover:!univer-bg-gray-600
                             `}
                             disabled={!canDeleteColumn}

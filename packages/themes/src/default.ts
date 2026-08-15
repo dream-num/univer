@@ -15,8 +15,6 @@
  */
 
 const defaultTheme = {
-    white: '#FFFFFF',
-    black: '#000000',
     primary: {
         50: '#F3F5FF',
         100: '#E9EDFF',
@@ -30,6 +28,7 @@ const defaultTheme = {
         900: '#1033BF',
     },
     gray: {
+        0: '#FFFFFF',
         50: '#F9FAFB',
         100: '#EEEFF1',
         200: '#E3E5EA',
@@ -40,6 +39,7 @@ const defaultTheme = {
         700: '#272A2F',
         800: '#1F2124',
         900: '#1B1C1F',
+        1000: '#000000',
     },
     blue: {
         50: '#EBF5FF',

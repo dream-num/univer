@@ -1,11 +1,10 @@
 import type { Theme } from '@univerjs/themes';
-import type { EditorMode, LoopColorKey, ThemeScaleKey, ThemeShadeKey, TokenDensity } from '../types';
+import type { EditorMode, LoopColorKey, ThemeGrayEndpointKey, ThemeScaleKey, ThemeShadeKey, TokenDensity } from '../types';
 import { defaultTheme } from '@univerjs/themes';
 import { useEffect, useMemo, useState } from 'react';
 import { COLOR_SCALE_KEYS, CORE_SCALE_KEYS, THEME_PRESETS } from '../constants';
-import { cloneTheme, formatTheme, mergeThemePatch, updateLoopColor, updateScaleColor, updateThemeRootColor } from '../theme-utils';
+import { cloneTheme, formatTheme, mergeThemePatch, updateLoopColor, updateScaleColor, updateThemeGrayEndpoint } from '../theme-utils';
 
-// eslint-disable-next-line max-lines-per-function
 export function useThemeCustomizerState() {
     const [theme, setTheme] = useState<Theme>(() => cloneTheme(defaultTheme));
     const [editorMode, setEditorMode] = useState<EditorMode>('tokens');
@@ -39,8 +38,8 @@ export function useThemeCustomizerState() {
         applyTheme(updateScaleColor(theme, scale, shade, value));
     }
 
-    function handleRootColorChange(key: 'white' | 'black', value: string) {
-        applyTheme(updateThemeRootColor(theme, key, value));
+    function handleGrayEndpointChange(key: ThemeGrayEndpointKey, value: string) {
+        applyTheme(updateThemeGrayEndpoint(theme, key, value));
     }
 
     function handleLoopColorChange(key: LoopColorKey, value: string) {
@@ -106,7 +105,7 @@ export function useThemeCustomizerState() {
         handleJsonChange,
         handleLoopColorChange,
         handlePresetApply,
-        handleRootColorChange,
+        handleGrayEndpointChange,
         handleScaleColorChange,
     };
 }

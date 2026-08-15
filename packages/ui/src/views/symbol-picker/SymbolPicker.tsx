@@ -55,7 +55,7 @@ export function SymbolPicker(props: ISymbolPickerProps) {
             className={clsx(
                 'univer-flex univer-h-[340px] univer-w-[420px] univer-flex-col univer-overflow-hidden',
                 !props.embedded && `
-                  univer-rounded-[10px] univer-border univer-border-solid univer-border-gray-200 univer-bg-white
+                  univer-rounded-[10px] univer-border univer-border-solid univer-border-gray-200 univer-bg-gray-0
                   univer-shadow-lg
                   dark:!univer-border-gray-600 dark:!univer-bg-gray-900
                 `,

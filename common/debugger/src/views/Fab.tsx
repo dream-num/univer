@@ -97,7 +97,7 @@ export function Fab() {
                 <button
                     className={clsx(`
                       univer-flex univer-size-9 univer-cursor-pointer univer-items-center univer-justify-center
-                      univer-rounded-full univer-bg-white univer-text-base univer-text-gray-900 univer-shadow
+                      univer-rounded-full univer-bg-gray-0 univer-text-base univer-text-gray-900 univer-shadow
                       univer-outline-none univer-transition-shadow
                       hover:univer-ring-1 hover:univer-ring-primary-400
                       dark:!univer-bg-gray-900 dark:!univer-text-gray-200

@@ -104,8 +104,8 @@ function SelectList(props: ISelectListProps) {
         <div
             data-u-comp="sheets-dropdown-list"
             className={clsx(`
-              univer-box-border univer-rounded-lg univer-bg-white univer-py-1 univer-text-gray-900 univer-shadow
-              dark:!univer-bg-black dark:!univer-text-white
+              univer-box-border univer-rounded-lg univer-bg-gray-0 univer-py-1 univer-text-gray-900 univer-shadow
+              dark:!univer-bg-gray-1000 dark:!univer-text-gray-0
             `, borderClassName)}
             style={style}
         >
@@ -114,10 +114,10 @@ function SelectList(props: ISelectListProps) {
                     <input
                         ref={searchRef}
                         className={clsx(`
-                          univer-w-full univer-rounded-md univer-bg-white univer-px-2 univer-py-1 univer-text-sm
+                          univer-w-full univer-rounded-md univer-bg-gray-0 univer-px-2 univer-py-1 univer-text-sm
                           univer-text-gray-900
                           focus:univer-border-primary-500 focus:univer-outline-none
-                          dark:!univer-bg-black dark:!univer-text-white
+                          dark:!univer-bg-gray-1000 dark:!univer-text-gray-0
                         `, borderClassName)}
                         type="text"
                         value={lowerFilter}
@@ -182,7 +182,7 @@ function SelectList(props: ISelectListProps) {
                                   univer-rounded-full univer-px-1.5 univer-text-xs
                                 `, {
                                     'univer-text-gray-900': isThemeColor || !isDark,
-                                    'univer-text-white': !isThemeColor && isDark,
+                                    'univer-text-gray-0': !isThemeColor && isDark,
                                 })}
                                 style={{ background: backgroundColor }}
                             >

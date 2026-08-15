@@ -31,6 +31,6 @@ export function genFormulaRefSelectionStyle(themeService: ThemeService, refColor
         widgets: { tl: true, tc: true, tr: true, ml: true, mr: true, bl: true, bc: true, br: true },
         widgetSize: 6,
         widgetStrokeWidth: 1,
-        widgetStroke: themeService.getColorFromTheme('white'),
+        widgetStroke: themeService.getColorFromTheme('gray.0'),
     };
 }

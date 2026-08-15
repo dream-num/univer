@@ -1,10 +1,11 @@
-import type { IThemePreset, ThemeScaleKey, ThemeShadeKey, TokenDensity } from './types';
+import type { IThemePreset, ThemeGrayEndpointKey, ThemeScaleKey, ThemeShadeKey, TokenDensity } from './types';
 
 import { defaultTheme, greenTheme, orangeTheme, purpleTheme, redTheme, yellowTheme } from '@univerjs/themes';
 
 export const PREVIEW_CONTAINER_ID = 'theme-customizer-preview';
 
 export const COLOR_SHADE_KEYS: ThemeShadeKey[] = ['50', '100', '200', '300', '400', '500', '600', '700', '800', '900'];
+export const GRAY_ENDPOINT_KEYS: ThemeGrayEndpointKey[] = ['0', '1000'];
 export const COLOR_SCALE_KEYS: ThemeScaleKey[] = ['primary', 'gray', 'blue', 'red', 'orange', 'yellow', 'green', 'jiqing', 'indigo', 'purple', 'pink'];
 export const CORE_SCALE_KEYS: ThemeScaleKey[] = ['primary', 'gray', 'blue', 'green', 'red'];
 export const LOOP_COLOR_KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'] as const;

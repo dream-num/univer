@@ -119,11 +119,11 @@ export function BorderPanel(props: IBorderPanelProps) {
                             <PaintBucketDoubleIcon
                                 className={`
                                   univer-fill-primary-600
-                                  dark:!univer-text-white
+                                  dark:!univer-text-gray-0
                                 `}
                                 extend={{ colorChannel1: value?.color ?? '' }}
                             />
-                            <MoreDownIcon className="dark:!univer-text-white" />
+                            <MoreDownIcon className="dark:!univer-text-gray-0" />
                         </button>
                     </Dropdown>
                 </div>
@@ -152,7 +152,7 @@ export function BorderPanel(props: IBorderPanelProps) {
                                             <BorderLine
                                                 className={`
                                                   univer-ml-6 univer-fill-gray-900
-                                                  dark:!univer-fill-white
+                                                  dark:!univer-fill-gray-0
                                                 `}
                                                 type={item.value}
                                             />
@@ -174,11 +174,11 @@ export function BorderPanel(props: IBorderPanelProps) {
                             <BorderLine
                                 className={`
                                   univer-fill-gray-900
-                                  dark:!univer-fill-white
+                                  dark:!univer-fill-gray-0
                                 `}
                                 type={type ?? BorderStyleTypes.THIN}
                             />
-                            <MoreDownIcon className="dark:!univer-text-white" />
+                            <MoreDownIcon className="dark:!univer-text-gray-0" />
                         </button>
                     </Dropdown>
                 </div>

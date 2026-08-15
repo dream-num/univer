@@ -198,7 +198,7 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
                 data-u-comp="sheets-formula-editor"
                 className={clsx(`
                   univer-m-0 univer-box-border univer-max-h-[400px] univer-w-[250px] univer-list-none
-                  univer-overflow-y-auto univer-rounded-lg univer-bg-white univer-p-2 univer-leading-5 univer-shadow-md
+                  univer-overflow-y-auto univer-rounded-lg univer-bg-gray-0 univer-p-2 univer-leading-5 univer-shadow-md
                   univer-outline-none
                   dark:!univer-bg-gray-900
                 `, borderClassName, scrollbarClassName)}
@@ -209,7 +209,7 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
                         className={clsx(`
                           univer-box-border univer-cursor-pointer univer-rounded univer-px-2 univer-py-1
                           univer-text-gray-900 univer-transition-colors
-                          dark:!univer-text-white
+                          dark:!univer-text-gray-0
                         `, {
                             'univer-bg-gray-200 dark:!univer-bg-gray-600': active === index,
                         })}

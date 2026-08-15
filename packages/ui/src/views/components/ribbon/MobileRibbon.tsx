@@ -234,7 +234,7 @@ export function MobileRibbon(props: IMobileRibbonProps) {
             <div
                 className={clsx(`
                   univer-grid univer-grid-cols-[22px_minmax(0,1fr)_22px] univer-items-center univer-gap-1.5
-                  univer-rounded-xl univer-bg-white univer-px-2 univer-py-1
+                  univer-rounded-xl univer-bg-gray-0 univer-px-2 univer-py-1
                   dark:!univer-bg-gray-800
                 `, borderClassName)}
             >

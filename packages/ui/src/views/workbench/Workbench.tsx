@@ -156,7 +156,7 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
                 <div
                     data-u-comp="workbench-layout"
                     className={clsx(`
-                      univer-flex univer-h-full univer-min-h-0 univer-flex-col univer-bg-white
+                      univer-flex univer-h-full univer-min-h-0 univer-flex-col univer-bg-gray-0
                       dark:!univer-bg-gray-800
                     `, {
                         'univer-dark': darkMode,
@@ -169,7 +169,7 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
                     {/* user header */}
                     <div
                         className={`
-                          univer-relative univer-flex univer-min-h-0 univer-flex-col univer-bg-white
+                          univer-relative univer-flex univer-min-h-0 univer-flex-col univer-bg-gray-0
                           dark:!univer-bg-gray-800
                         `}
                     >
@@ -209,7 +209,7 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
                             <section
                                 className={clsx(`
                                   univer-relative univer-grid univer-flex-1 univer-grid-rows-[auto_1fr]
-                                  univer-overflow-hidden univer-bg-white
+                                  univer-overflow-hidden univer-bg-gray-0
                                   dark:!univer-bg-gray-800
                                 `, borderBottomClassName)}
                             >

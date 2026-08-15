@@ -25,8 +25,8 @@ export function Command({ className, ...props }: ComponentProps<typeof CommandPr
             data-slot="command"
             className={clsx(`
               univer-flex univer-h-full univer-w-full univer-flex-col univer-overflow-hidden univer-rounded-md
-              univer-bg-white univer-text-gray-900
-              dark:!univer-bg-gray-700 dark:!univer-text-white
+              univer-bg-gray-0 univer-text-gray-900
+              dark:!univer-bg-gray-700 dark:!univer-text-gray-0
             `, className)}
             {...props}
         />

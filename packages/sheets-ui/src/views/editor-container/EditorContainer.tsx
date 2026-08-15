@@ -77,7 +77,7 @@ const EDITOR_DEFAULT_POSITION = {
 };
 
 const CELL_EDITOR_DARK_SURFACE_THEME_COLOR = 'gray.800';
-const CELL_EDITOR_LIGHT_SURFACE_THEME_COLOR = 'white';
+const CELL_EDITOR_LIGHT_SURFACE_THEME_COLOR = 'gray.0';
 
 interface ICellEditorHostBackgroundOptions {
     darkMode?: boolean;
@@ -707,7 +707,7 @@ export function EditorContainer() {
                     "
                     style={{
                         backgroundColor: editorBorderColor,
-                        color: themeService.getColorFromTheme('white'),
+                        color: themeService.getColorFromTheme('gray.0'),
                         transform: 'translateY(-100%)',
                     }}
                 >

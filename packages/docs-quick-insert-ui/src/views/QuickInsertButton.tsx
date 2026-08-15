@@ -85,7 +85,7 @@ export const QuickInsertButton = ({ className = '' }: {
               dark:hover:!univer-bg-gray-700
             `, borderClassName, {
                 'univer-bg-gray-100 dark:!univer-bg-gray-700': editPopup,
-                'univer-bg-white dark:!univer-bg-gray-900': !editPopup,
+                'univer-bg-gray-0 dark:!univer-bg-gray-900': !editPopup,
             }, className)}
             role="button"
             tabIndex={0}

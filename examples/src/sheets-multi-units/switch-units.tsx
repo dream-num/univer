@@ -19,7 +19,7 @@ export const SwitchUnits = () => {
     const activeSheetId = activeSheet?.getUnitId();
 
     return (
-        <div className="univer-w-full univer-border-b univer-border-gray-200 univer-bg-white univer-shadow-sm">
+        <div className="univer-w-full univer-border-b univer-border-gray-200 univer-bg-gray-0 univer-shadow-sm">
             <div className="univer-px-4 univer-py-2">
                 <div
                     className={`

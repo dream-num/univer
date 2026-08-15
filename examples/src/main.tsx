@@ -47,22 +47,6 @@ const primaryGroups = PRIMARY_CATEGORY_ORDER.map((category) => groupedDemos.find
 
 const defaultCategory = primaryGroups[0]?.category ?? groupedDemos[0]?.category ?? 'sheets';
 
-// package info
-// eslint-disable-next-line node/prefer-global/process
-if (process.env.NODE_ENV === 'production') {
-    // eslint-disable-next-line no-console
-    console.table({
-        // eslint-disable-next-line node/prefer-global/process
-        NODE_ENV: process.env.NODE_ENV,
-        // eslint-disable-next-line node/prefer-global/process
-        GIT_COMMIT_HASH: process.env.GIT_COMMIT_HASH,
-        // eslint-disable-next-line node/prefer-global/process
-        GIT_REF_NAME: process.env.GIT_REF_NAME,
-        // eslint-disable-next-line node/prefer-global/process
-        BUILD_TIME: process.env.BUILD_TIME,
-    });
-}
-
 function DemoList({ items }: { items: (typeof demos)[number][] }) {
     return (
         <ul>
@@ -109,7 +93,7 @@ function Examples() {
     return (
         <main
             className="
-              univer-h-screen univer-overflow-y-auto univer-bg-white univer-px-6 univer-py-10 univer-text-slate-800
+              univer-h-screen univer-overflow-y-auto univer-bg-gray-0 univer-px-6 univer-py-10 univer-text-slate-800
             "
         >
             <section className="univer-mx-auto univer-max-w-3xl">
@@ -138,9 +122,9 @@ function Examples() {
                                       univer-cursor-pointer univer-rounded-full univer-border-none univer-px-4
                                       univer-py-2 univer-text-sm univer-font-medium
                                     `, isActive
-                                        ? 'univer-bg-slate-900 univer-text-white'
+                                        ? 'univer-bg-slate-900 univer-text-gray-0'
                                         : `
-                                          univer-bg-white univer-font-medium univer-text-slate-700
+                                          univer-bg-gray-0 univer-font-medium univer-text-slate-700
                                           hover:univer-bg-slate-50
                                         `)}
                                     type="button"

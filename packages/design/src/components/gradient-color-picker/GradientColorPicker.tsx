@@ -238,7 +238,7 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
                     `
                     : `
                       univer-flex univer-w-full univer-min-w-0 univer-max-w-80 univer-flex-col univer-gap-4
-                      univer-rounded-lg univer-bg-white univer-p-4 univer-shadow-lg
+                      univer-rounded-lg univer-bg-gray-0 univer-p-4 univer-shadow-lg
                       dark:!univer-bg-gray-800
                     `,
                 className
@@ -281,7 +281,7 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
                                             : `
                                               univer-text-gray-500
                                               hover:univer-text-gray-900
-                                              dark:hover:!univer-text-white
+                                              dark:hover:!univer-text-gray-0
                                             `
                                     )}
                                     onClick={() => handleTypeChange(item.value as GradientType)}
@@ -363,7 +363,7 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
                             `
                               univer-absolute univer-top-1/2 univer-size-4 -univer-translate-x-1/2
                               -univer-translate-y-1/2 univer-cursor-pointer univer-rounded-full univer-border-2
-                              univer-border-white univer-shadow-md
+                              univer-border-gray-0 univer-shadow-md
                             `,
                             selectedIndex === index ? 'univer-z-10 univer-ring-2 univer-ring-primary-500' : 'univer-z-0'
                         )}

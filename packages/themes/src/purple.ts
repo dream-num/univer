@@ -17,8 +17,6 @@
 import type { Theme } from './default';
 
 const purpleTheme: Theme = {
-    white: '#FFFFFF',
-    black: '#000000',
     primary: {
         50: '#F5F3FF',
         100: '#EDE9FE',
@@ -32,6 +30,7 @@ const purpleTheme: Theme = {
         900: '#4C1D95',
     },
     gray: {
+        0: '#FFFFFF',
         50: '#FAFAFC',
         100: '#F1F0F5',
         200: '#E5E2EC',
@@ -42,6 +41,7 @@ const purpleTheme: Theme = {
         700: '#403748',
         800: '#302838',
         900: '#241D2A',
+        1000: '#000000',
     },
     blue: {
         50: '#EFF6FF',

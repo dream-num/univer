@@ -89,7 +89,7 @@ export function Checkbox(props: ICheckboxProps) {
         <label
             data-u-comp="checkbox"
             className={clsx('univer-box-border univer-inline-flex univer-items-center univer-gap-2 univer-text-sm', {
-                'univer-cursor-pointer univer-text-gray-900 dark:!univer-text-white': !disabled,
+                'univer-cursor-pointer univer-text-gray-900 dark:!univer-text-gray-0': !disabled,
                 'univer-text-gray-400': disabled,
             }, className)}
             style={style}
@@ -118,7 +118,7 @@ export function Checkbox(props: ICheckboxProps) {
                         <CheckMarkIcon
                             className={`
                               univer-absolute univer-left-1/2 univer-top-1/2 univer-block univer-size-3
-                              -univer-translate-x-1/2 -univer-translate-y-1/2 univer-text-white
+                              -univer-translate-x-1/2 -univer-translate-y-1/2 univer-text-gray-0
                             `}
                         />
                     )}
@@ -126,7 +126,7 @@ export function Checkbox(props: ICheckboxProps) {
                         <span
                             className={`
                               univer-absolute univer-left-1/2 univer-top-1/2 univer-block univer-h-0.5 univer-w-2.5
-                              -univer-translate-x-1/2 -univer-translate-y-1/2 univer-rounded univer-bg-white
+                              -univer-translate-x-1/2 -univer-translate-y-1/2 univer-rounded univer-bg-gray-0
                             `}
                         />
                     )}

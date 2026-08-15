@@ -233,7 +233,7 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                                 aria-pressed={selected}
                                 className={clsx(`
                                   univer-flex univer-h-12 univer-w-full univer-cursor-pointer univer-flex-col
-                                  univer-overflow-hidden univer-rounded-lg univer-bg-white univer-p-1 univer-shadow-sm
+                                  univer-overflow-hidden univer-rounded-lg univer-bg-gray-0 univer-p-1 univer-shadow-sm
                                   univer-transition-all
                                   hover:univer-border-gray-400 hover:univer-shadow-md
                                   focus:univer-outline-none focus:univer-ring-2 focus:univer-ring-primary-200
@@ -281,7 +281,7 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                         className="
                           univer-flex univer-h-12 univer-w-full univer-cursor-pointer univer-items-center
                           univer-justify-center univer-rounded-lg univer-border univer-border-dashed
-                          univer-border-gray-300 univer-bg-white univer-p-0 univer-text-gray-500
+                          univer-border-gray-300 univer-bg-gray-0 univer-p-0 univer-text-gray-500
                           univer-transition-colors
                           hover:univer-border-primary-500 hover:univer-text-primary-600
                           focus:univer-outline-none focus:univer-ring-2 focus:univer-ring-primary-200
@@ -310,7 +310,7 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                                     aria-pressed={selected}
                                     className={clsx(`
                                       univer-flex univer-size-full univer-cursor-pointer univer-flex-col
-                                      univer-overflow-hidden univer-rounded-lg univer-bg-white univer-p-1
+                                      univer-overflow-hidden univer-rounded-lg univer-bg-gray-0 univer-p-1
                                       univer-shadow-sm univer-transition-all
                                       hover:univer-border-gray-400 hover:univer-shadow-md
                                       focus:univer-outline-none focus:univer-ring-2 focus:univer-ring-primary-200
@@ -339,7 +339,7 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                                       univer-absolute univer-right-[-6px] univer-top-[-6px] univer-z-10 univer-flex
                                       univer-size-5 univer-cursor-pointer univer-items-center univer-justify-center
                                       univer-rounded-full univer-border univer-border-solid univer-border-gray-200
-                                      univer-bg-white univer-p-0 univer-text-gray-500 univer-shadow-sm
+                                      univer-bg-gray-0 univer-p-0 univer-text-gray-500 univer-shadow-sm
                                       univer-transition-all
                                       hover:univer-border-red-200 hover:univer-bg-red-50 hover:univer-text-red-600
                                       focus:univer-opacity-100 focus:univer-outline-none focus:univer-ring-2
@@ -377,7 +377,7 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                                       univer-px-3 univer-text-sm univer-font-medium
                                       rtl:univer-text-right
                                     `, borderClassName, {
-                                        'univer-text-white': row.isDark,
+                                        'univer-text-gray-0': row.isDark,
                                         'univer-text-gray-900': !row.isDark,
                                     })}
                                     style={{ background: row.background }}
@@ -399,7 +399,7 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                                         aria-label={`${row.label} ${localeService.t<LocaleKey>('sheets-table-ui.setTheme')}`}
                                         className={clsx(`
                                           univer-flex univer-h-10 univer-cursor-pointer univer-items-center univer-gap-2
-                                          univer-rounded-md univer-bg-white univer-px-2 univer-text-gray-600
+                                          univer-rounded-md univer-bg-gray-0 univer-px-2 univer-text-gray-600
                                           univer-transition-colors
                                           hover:univer-bg-gray-100
                                           focus:univer-outline-none focus:univer-ring-2 focus:univer-ring-primary-200

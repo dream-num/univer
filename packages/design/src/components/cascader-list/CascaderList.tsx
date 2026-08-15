@@ -111,7 +111,7 @@ export function CascaderList(props: ICascaderListProps) {
             className={clsx(`
               univer-overflow-auto-y univer-grid univer-h-full univer-max-h-80 univer-grid-flow-col univer-rounded
               univer-py-2 univer-text-gray-900
-              dark:!univer-text-white
+              dark:!univer-text-gray-0
               [&>ul:not(:last-child)]:univer-border-0 [&>ul:not(:last-child)]:univer-border-r
               [&>ul:not(:last-child)]:univer-border-solid [&>ul:not(:last-child)]:univer-border-r-gray-200
             `, borderClassName, scrollbarClassName, wrapperClassName)}

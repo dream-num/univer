@@ -191,8 +191,8 @@ export function Sidebar() {
             aria-expanded={!!options?.visible}
             aria-label={localeService.t<LocaleKey>('ui.sidebar.panel')}
             className={clsx(`
-              univer-relative univer-h-full univer-flex-shrink-0 univer-bg-white univer-text-gray-900
-              dark:!univer-bg-gray-900 dark:!univer-text-white
+              univer-relative univer-h-full univer-flex-shrink-0 univer-bg-gray-0 univer-text-gray-900
+              dark:!univer-bg-gray-900 dark:!univer-text-gray-0
             `, {
                 'univer-w-96 univer-translate-x-0': options?.visible,
                 'univer-w-0 univer-translate-x-full': !options?.visible,
@@ -242,9 +242,9 @@ export function Sidebar() {
                 <header
                     className={`
                       univer-sticky univer-top-0 univer-z-10 univer-box-border univer-flex univer-cursor-default
-                      univer-items-center univer-justify-between univer-bg-white univer-p-4 univer-pb-2 univer-text-base
-                      univer-font-medium univer-text-gray-800
-                      dark:!univer-bg-gray-900 dark:!univer-text-white
+                      univer-items-center univer-justify-between univer-bg-gray-0 univer-p-4 univer-pb-2
+                      univer-text-base univer-font-medium univer-text-gray-800
+                      dark:!univer-bg-gray-900 dark:!univer-text-gray-0
                     `}
                 >
                     {options?.header}
@@ -274,7 +274,7 @@ export function Sidebar() {
                 {options?.footer && (
                     <footer
                         className={`
-                          univer-sticky univer-bottom-0 univer-box-border univer-bg-white univer-p-4
+                          univer-sticky univer-bottom-0 univer-box-border univer-bg-gray-0 univer-p-4
                           dark:!univer-bg-gray-900
                         `}
                     >

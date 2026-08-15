@@ -121,7 +121,7 @@ export function ColorPicker({ format = 'hex', value, onChange }: IColorPickerPro
                     className={`
                       univer-cursor-pointer univer-gap-2 univer-text-sm univer-text-gray-900 univer-transition-opacity
                       hover:univer-opacity-80
-                      dark:!univer-text-white
+                      dark:!univer-text-gray-0
                     `}
                     onClick={() => setVisible(true)}
                 >

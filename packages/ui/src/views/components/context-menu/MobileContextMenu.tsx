@@ -167,7 +167,7 @@ export function MobileContextMenu() {
                             aria-label={localeService.t<LocaleKey>('ui.rangeSelector.cancel')}
                             className="
                               univer-flex univer-size-8 univer-shrink-0 univer-appearance-none univer-items-center
-                              univer-justify-center univer-rounded-full univer-border-0 univer-bg-white univer-p-0
+                              univer-justify-center univer-rounded-full univer-border-0 univer-bg-gray-0 univer-p-0
                               univer-leading-none univer-text-gray-600 univer-shadow-sm univer-outline-none
                               univer-ring-0 univer-transition-colors
                               hover:univer-bg-gray-100

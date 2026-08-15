@@ -69,7 +69,7 @@ export function Radio(props: IRadioProps) {
         <label
             data-u-comp="radio"
             className={clsx('univer-box-border univer-inline-flex univer-items-center univer-gap-2 univer-text-sm', {
-                'univer-cursor-pointer univer-text-gray-900 dark:!univer-text-white': !disabled,
+                'univer-cursor-pointer univer-text-gray-900 dark:!univer-text-gray-0': !disabled,
                 'univer-text-gray-400': disabled,
             })}
         >
@@ -97,7 +97,7 @@ export function Radio(props: IRadioProps) {
                         <span
                             className={`
                               univer-absolute univer-left-1/2 univer-top-1/2 univer-block univer-size-2
-                              -univer-translate-x-1/2 -univer-translate-y-1/2 univer-rounded-full univer-bg-white
+                              -univer-translate-x-1/2 -univer-translate-y-1/2 univer-rounded-full univer-bg-gray-0
                             `}
                         />
                     )}

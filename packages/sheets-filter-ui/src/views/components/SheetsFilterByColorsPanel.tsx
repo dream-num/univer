@@ -56,7 +56,7 @@ export function FilterByColor(props: { model: ByColorsModel }) {
                         <div
                             className={`
                               univer-mb-2 univer-text-sm univer-text-gray-900
-                              dark:!univer-text-white
+                              dark:!univer-text-gray-0
                             `}
                         >
                             {localeService.t<LocaleKey>('sheets-filter-ui.panel.filter-by-cell-fill-color')}
@@ -78,7 +78,7 @@ export function FilterByColor(props: { model: ByColorsModel }) {
                                                 className={`
                                                   univer-size-6 univer-cursor-pointer univer-rounded-full
                                                   hover:univer-ring-2 hover:univer-ring-offset-2
-                                                  hover:univer-ring-offset-white
+                                                  hover:univer-ring-offset-gray-0
                                                 `}
                                             />
                                         )
@@ -90,7 +90,7 @@ export function FilterByColor(props: { model: ByColorsModel }) {
                                                   univer-rounded-full univer-border univer-border-solid
                                                   univer-border-transparent univer-bg-gray-300 univer-transition-shadow
                                                   hover:univer-ring-2 hover:univer-ring-offset-2
-                                                  hover:univer-ring-offset-white
+                                                  hover:univer-ring-offset-gray-0
                                                 `)}
                                                 style={{ backgroundColor: color.color }}
                                             />
@@ -108,7 +108,7 @@ export function FilterByColor(props: { model: ByColorsModel }) {
                         <div
                             className={`
                               univer-mb-2 univer-text-sm univer-text-gray-900
-                              dark:!univer-text-white
+                              dark:!univer-text-gray-0
                             `}
                         >
                             {localeService.t<LocaleKey>('sheets-filter-ui.panel.filter-by-cell-text-color')}
@@ -129,7 +129,7 @@ export function FilterByColor(props: { model: ByColorsModel }) {
                                           univer-box-border univer-flex univer-size-full univer-cursor-pointer
                                           univer-items-center univer-justify-center univer-rounded-full univer-border
                                           univer-border-solid univer-border-[rgba(13,13,13,0.06)] univer-p-0.5
-                                          hover:univer-ring-2 hover:univer-ring-offset-2 hover:univer-ring-offset-white
+                                          hover:univer-ring-2 hover:univer-ring-offset-2 hover:univer-ring-offset-gray-0
                                           dark:!univer-border-[rgba(255,255,255,0.06)]
                                         `}
                                     >
@@ -164,7 +164,7 @@ function CheckedIcon() {
         <div
             className={`
               univer-absolute -univer-bottom-0.5 -univer-right-0.5 univer-flex univer-size-3 univer-cursor-pointer
-              univer-items-center univer-justify-center univer-rounded-full univer-bg-white
+              univer-items-center univer-justify-center univer-rounded-full univer-bg-gray-0
             `}
         >
             <SuccessIcon

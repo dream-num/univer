@@ -166,7 +166,7 @@ export const PermissionDetailUserPart = (props: IPermissionDetailUserPartProps) 
                                         <span
                                             className={`
                                               univer-ml-1.5 univer-w-[130px] univer-truncate univer-text-gray-900
-                                              dark:!univer-text-white
+                                              dark:!univer-text-gray-0
                                             `}
                                         >
                                             {item.subject?.name}

@@ -112,7 +112,7 @@ export function ProgressBar(props: IProgressBarProps) {
                 <CloseIcon
                     className={`
                       univer-size-3.5
-                      dark:!univer-text-white
+                      dark:!univer-text-gray-0
                     `}
                 />
             </button>

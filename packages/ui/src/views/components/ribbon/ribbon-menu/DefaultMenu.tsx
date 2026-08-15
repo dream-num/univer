@@ -118,7 +118,7 @@ export function DefaultMenu({
                 className={`
                   univer-mr-2 univer-flex univer-h-7 univer-cursor-pointer univer-items-center univer-gap-1.5
                   univer-whitespace-nowrap !univer-rounded-full univer-bg-gray-700 univer-pl-3 univer-pr-2
-                  univer-text-sm univer-text-white
+                  univer-text-sm univer-text-gray-0
                   dark:!univer-bg-gray-200 dark:!univer-text-gray-800
                 `}
                 onClick={() => setGroupSelectorVisible(true)}

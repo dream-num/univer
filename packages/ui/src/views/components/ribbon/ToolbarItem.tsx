@@ -56,7 +56,7 @@ const toolbarButtonSelectorRootVariants = cva(
                 true: toolbarDisabledClassName,
                 false: `
                   univer-text-gray-900
-                  dark:!univer-text-white
+                  dark:!univer-text-gray-0
                 `,
             },
         },
@@ -152,7 +152,7 @@ const toolbarSelectorRootVariants = cva(
                 true: toolbarDisabledClassName,
                 false: `
                   univer-text-gray-900
-                  dark:!univer-text-white
+                  dark:!univer-text-gray-0
                 `,
             },
             active: {
@@ -330,7 +330,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                         className={clsx(toolbarSelectorRootVariants({ disabled, active: activated }), {
                             'univer-box-border univer-h-full univer-min-w-14 univer-flex-col univer-justify-center univer-gap-1 univer-px-1.5 univer-py-1 univer-text-xs [&>svg]:univer-size-8': grid && large,
                             'univer-box-border univer-h-full': grid && !large,
-                            'univer-bg-white dark:!univer-bg-gray-800': grid && !large && !icon,
+                            'univer-bg-gray-0 dark:!univer-bg-gray-800': grid && !large && !icon,
                             '[&>svg]:univer-size-4': grid && !large,
                         }, grid && !large && !icon && borderClassName)}
                     >

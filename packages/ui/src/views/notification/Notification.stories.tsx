@@ -41,14 +41,14 @@ function NotificationStoryShell({ title, description, children }: { title: strin
         >
             <div
                 className={`
-                  univer-border-white/20 univer-bg-white/10 univer-mx-auto univer-max-w-5xl univer-rounded-3xl
+                  univer-border-gray-0/20 univer-bg-gray-0/10 univer-mx-auto univer-max-w-5xl univer-rounded-3xl
                   univer-border univer-border-solid univer-p-8 univer-backdrop-blur-xl
                 `}
             >
                 <h2
                     className="
                       univer-m-0 univer-font-sans univer-text-2xl univer-font-semibold univer-tracking-tight
-                      univer-text-white
+                      univer-text-gray-0
                     "
                 >
                     {title}

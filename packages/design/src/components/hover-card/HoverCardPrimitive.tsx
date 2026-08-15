@@ -44,8 +44,8 @@ const HoverCardContent = forwardRef<
               data-[side=right]:univer-slide-in-from-left-2
               data-[side=top]:univer-slide-in-from-bottom-2
               univer-z-[1080] univer-w-64 univer-origin-[--radix-hover-card-content-transform-origin] univer-rounded-md
-              univer-bg-white univer-text-gray-900 univer-shadow-md univer-outline-none
-              dark:!univer-bg-gray-900 dark:!univer-text-white
+              univer-bg-gray-0 univer-text-gray-900 univer-shadow-md univer-outline-none
+              dark:!univer-bg-gray-900 dark:!univer-text-gray-0
             `,
             borderClassName,
             className

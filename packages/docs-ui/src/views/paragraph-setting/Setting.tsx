@@ -142,7 +142,7 @@ export function ParagraphSetting() {
                 <div
                     className={clsx(`
                       univer-flex univer-grid-cols-4 univer-items-center univer-justify-around univer-gap-2
-                      univer-rounded-lg univer-bg-white univer-p-1
+                      univer-rounded-lg univer-bg-gray-0 univer-p-1
                       dark:!univer-bg-gray-900
                     `, borderClassName)}
                 >

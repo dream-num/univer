@@ -46,7 +46,7 @@ export function WorkbenchSkeleton({ darkMode, direction, overlay = false }: IWor
                 data-u-comp="workbench-skeleton-toolbar"
                 className="
                   univer-flex univer-h-11 univer-shrink-0 univer-items-center univer-gap-2 univer-border-0
-                  univer-border-b univer-border-solid univer-border-gray-200 univer-bg-white univer-px-4
+                  univer-border-b univer-border-solid univer-border-gray-200 univer-bg-gray-0 univer-px-4
                   dark:!univer-border-gray-700 dark:!univer-bg-gray-800
                 "
             >
@@ -89,7 +89,7 @@ export function WorkbenchSkeleton({ darkMode, direction, overlay = false }: IWor
                 data-u-comp="workbench-skeleton-footer"
                 className="
                   univer-flex univer-h-10 univer-shrink-0 univer-items-center univer-justify-between univer-border-0
-                  univer-border-t univer-border-solid univer-border-gray-200 univer-bg-white univer-px-4
+                  univer-border-t univer-border-solid univer-border-gray-200 univer-bg-gray-0 univer-px-4
                   dark:!univer-border-gray-700 dark:!univer-bg-gray-800
                 "
             >

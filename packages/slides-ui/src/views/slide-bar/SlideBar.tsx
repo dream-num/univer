@@ -98,7 +98,7 @@ export function SlideSideBar() {
                     <a
                         className={clsx(`
                           univer-box-border univer-block univer-h-8 univer-w-full univer-cursor-pointer
-                          univer-rounded-md univer-bg-white univer-text-center univer-text-sm univer-transition-colors
+                          univer-rounded-md univer-bg-gray-0 univer-text-center univer-text-sm univer-transition-colors
                         `, borderClassName)}
                         onClick={handleAppendSlide}
                     >
@@ -118,7 +118,7 @@ export function SlideSideBar() {
                         <div
                             ref={divRefs[index]}
                             className={clsx(`
-                              univer-relative univer-box-border univer-h-32 univer-w-52 univer-bg-white
+                              univer-relative univer-box-border univer-h-32 univer-w-52 univer-bg-gray-0
                               hover:univer-border-primary-600
                             `, borderClassName)}
                         />

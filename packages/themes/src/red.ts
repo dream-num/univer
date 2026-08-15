@@ -17,8 +17,6 @@
 import type { Theme } from './default';
 
 const redTheme: Theme = {
-    white: '#FFFFFF',
-    black: '#000000',
     primary: {
         50: '#FFF1F2',
         100: '#FFE4E6',
@@ -32,6 +30,7 @@ const redTheme: Theme = {
         900: '#881337',
     },
     gray: {
+        0: '#FFFFFF',
         50: '#FAF8F8',
         100: '#F4EEEE',
         200: '#E8DEDE',
@@ -42,6 +41,7 @@ const redTheme: Theme = {
         700: '#493737',
         800: '#352727',
         900: '#271D1D',
+        1000: '#000000',
     },
     blue: {
         50: '#EFF6FF',

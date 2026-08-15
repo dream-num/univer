@@ -94,7 +94,7 @@ export const SideMenu = forwardRef<ISideMenuInstance, ISideMenuProps>((props, re
                 onClick={() => onOpenChange?.(!open)}
                 className={clsx(`
                   univer-absolute univer-left-5 univer-top-4 univer-z-[100] univer-flex univer-size-8
-                  univer-cursor-pointer univer-items-center univer-justify-center univer-rounded-full univer-bg-white
+                  univer-cursor-pointer univer-items-center univer-justify-center univer-rounded-full univer-bg-gray-0
                   univer-text-gray-800 univer-shadow-sm
                   dark:!univer-bg-gray-600 dark:!univer-text-gray-200
                 `, iconClass)}
@@ -110,7 +110,7 @@ export const SideMenu = forwardRef<ISideMenuInstance, ISideMenuProps>((props, re
                       univer-flex-col univer-px-4 univer-pb-4 univer-pt-14 univer-transition-all univer-duration-300
                     `,
                     {
-                        'univer-rounded-r-2xl univer-bg-white univer-shadow univer-backdrop-blur-[10px] dark:!univer-bg-gray-900': isSideBar,
+                        'univer-rounded-r-2xl univer-bg-gray-0 univer-shadow univer-backdrop-blur-[10px] dark:!univer-bg-gray-900': isSideBar,
                     }
                 )}
                 style={{

@@ -162,7 +162,7 @@ export function createWorksheetTestBed(workbookData?: IWorkbookData, dependencie
     // load theme service
     const themeService = injector.get(ThemeService);
     const theme = themeService.getCurrentTheme();
-    const newTheme = set(theme, 'black', '#35322b');
+    const newTheme = set(theme, 'gray.1000', '#35322b');
     themeService.setTheme(newTheme);
 
     // register builtin plugins

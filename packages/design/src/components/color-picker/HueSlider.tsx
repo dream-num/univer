@@ -116,8 +116,8 @@ export function HueSlider({ hsv, onChange, onChanged }: IHueSliderProps) {
                     data-u-comp="color-picker-hue-slider-thumb"
                     className={`
                       univer-absolute univer-top-1/2 univer-box-border univer-size-2 univer-rounded-full
-                      univer-bg-transparent univer-shadow-md univer-ring-2 univer-ring-white univer-transition-transform
-                      univer-duration-75 univer-will-change-transform
+                      univer-bg-transparent univer-shadow-md univer-ring-2 univer-ring-gray-0
+                      univer-transition-transform univer-duration-75 univer-will-change-transform
                     `}
                     style={{
                         left: getThumbPosition(),

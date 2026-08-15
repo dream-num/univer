@@ -230,7 +230,7 @@ export function EmojiPicker(props: IEmojiPickerProps) {
             className={clsx(
                 'univer-flex univer-h-[340px] univer-w-[420px] univer-flex-col univer-overflow-hidden',
                 !props.embedded && `
-                  univer-rounded-[10px] univer-border univer-border-solid univer-border-gray-200 univer-bg-white
+                  univer-rounded-[10px] univer-border univer-border-solid univer-border-gray-200 univer-bg-gray-0
                   univer-shadow-lg
                   dark:!univer-border-gray-600 dark:!univer-bg-gray-900
                 `
@@ -457,7 +457,7 @@ function EmojiButton(props: {
                     aria-label={`${title}, ${props.moreTitle}`}
                     title={`${title}, ${props.moreTitle}`}
                     className="
-                      univer-bg-white/90
+                      univer-bg-gray-0/90
                       dark:!univer-bg-gray-800/90
                       univer-absolute univer-bottom-0 univer-right-0 univer-flex univer-size-3 univer-cursor-pointer
                       univer-items-center univer-justify-center univer-rounded-sm univer-border-0 univer-p-0

@@ -139,7 +139,7 @@ function MobileSheetBarImpl(props: { workbook: Workbook }) {
                           univer-truncate univer-px-1 univer-py-0.5 univer-text-sm univer-font-medium univer-leading-6
                           univer-transition-all
                         `, borderRightClassName, {
-                            'univer-bg-white univer-text-blue-600 dark:!univer-bg-gray-700 dark:!univer-text-blue-400': sheet.sheetId === activeKey,
+                            'univer-bg-gray-0 univer-text-blue-600 dark:!univer-bg-gray-700 dark:!univer-text-blue-400': sheet.sheetId === activeKey,
                             'univer-text-gray-600 hover:univer-bg-gray-50 active:univer-bg-gray-100 dark:!univer-text-gray-300 dark:hover:!univer-bg-gray-700': sheet.sheetId !== activeKey,
                         })}
                         key={sheet.sheetId}

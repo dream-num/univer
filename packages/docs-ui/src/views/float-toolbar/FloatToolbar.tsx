@@ -126,7 +126,7 @@ export function FloatToolbar(props: IFloatToolbarProps) {
         <div
             ref={toolbarRef}
             className={clsx(`
-              univer-box-border univer-flex univer-rounded univer-bg-white univer-py-1.5 univer-shadow-sm
+              univer-box-border univer-flex univer-rounded univer-bg-gray-0 univer-py-1.5 univer-shadow-sm
               dark:!univer-border-gray-700 dark:!univer-bg-gray-900
             `, borderClassName)}
         >

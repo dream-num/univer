@@ -160,7 +160,7 @@ function createFacadeTestBed(workbookData: IWorkbookData, dependencies: Dependen
 
     const themeService = injector.get(ThemeService);
     const theme = themeService.getCurrentTheme();
-    const newTheme = set(theme, 'black', '#35322b');
+    const newTheme = set(theme, 'gray.1000', '#35322b');
     themeService.setTheme(newTheme);
 
     univer.registerPlugin(TestPlugin);

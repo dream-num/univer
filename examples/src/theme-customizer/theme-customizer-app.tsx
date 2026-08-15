@@ -25,7 +25,7 @@ export function ThemeCustomizerApp() {
         handleJsonChange,
         handleLoopColorChange,
         handlePresetApply,
-        handleRootColorChange,
+        handleGrayEndpointChange,
         handleScaleColorChange,
     } = useThemeCustomizerState();
 
@@ -48,7 +48,7 @@ export function ThemeCustomizerApp() {
                     <aside
                         className={clsx(`
                           univer-flex univer-h-full univer-min-h-0 univer-flex-col univer-overflow-hidden
-                          univer-rounded-[28px] univer-bg-white univer-shadow-[0_16px_48px_rgba(15,23,42,0.08)]
+                          univer-rounded-[28px] univer-bg-gray-0 univer-shadow-[0_16px_48px_rgba(15,23,42,0.08)]
                           dark:!univer-bg-gray-900
                         `)}
                     >
@@ -71,7 +71,7 @@ export function ThemeCustomizerApp() {
                                         visibleScaleKeys={visibleScaleKeys}
                                         onCopy={handleCopyTheme}
                                         onLoopColorChange={handleLoopColorChange}
-                                        onRootColorChange={handleRootColorChange}
+                                        onGrayEndpointChange={handleGrayEndpointChange}
                                         onScaleColorChange={handleScaleColorChange}
                                     />
                                 )
@@ -95,20 +95,20 @@ export function ThemeCustomizerApp() {
                     <section
                         className={clsx(`
                           univer-flex univer-h-full univer-min-h-0 univer-flex-col univer-overflow-hidden
-                          univer-rounded-[28px] univer-bg-white univer-shadow-[0_18px_56px_rgba(15,23,42,0.16)]
+                          univer-rounded-[28px] univer-bg-gray-0 univer-shadow-[0_18px_56px_rgba(15,23,42,0.16)]
                           dark:!univer-bg-gray-900
                         `)}
                     >
                         <div
                             className="
-                              univer-bg-white univer-p-4
+                              univer-bg-gray-0 univer-p-4
                               dark:!univer-bg-gray-900
                             "
                         >
                             <h2
                                 className="
                                   univer-m-0 univer-text-base univer-font-semibold univer-text-slate-950
-                                  dark:!univer-text-white
+                                  dark:!univer-text-gray-0
                                 "
                             >
                                 Live Preview

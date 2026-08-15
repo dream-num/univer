@@ -31,7 +31,7 @@ export interface IGalleryProps {
 const buttonClassName = `
     univer-flex univer-cursor-pointer univer-items-center univer-justify-center univer-border-none
     univer-bg-transparent univer-p-0 univer-text-current
-    hover:univer-text-white
+    hover:univer-text-gray-0
 `;
 
 export function Gallery(props: IGalleryProps) {

@@ -113,10 +113,10 @@ const ColorSelect = (props: IColorSelectProps) => {
             <div
                 className={clsx(`
                   univer-box-border univer-inline-flex univer-h-8 univer-w-16 univer-cursor-pointer univer-items-center
-                  univer-justify-between univer-gap-2 univer-rounded-lg univer-bg-white univer-px-2.5
+                  univer-justify-between univer-gap-2 univer-rounded-lg univer-bg-gray-0 univer-px-2.5
                   univer-transition-colors univer-duration-200
                   hover:univer-border-primary-600
-                  dark:!univer-bg-gray-700 dark:!univer-text-white
+                  dark:!univer-bg-gray-700 dark:!univer-text-gray-0
                 `, borderClassName)}
             >
                 <div
@@ -355,9 +355,9 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                             ref={formulaEditorRef}
                             className={clsx(`
                               univer-box-border univer-h-8 univer-w-full univer-cursor-pointer univer-items-center
-                              univer-rounded-lg univer-bg-white univer-pt-2 univer-transition-colors
+                              univer-rounded-lg univer-bg-gray-0 univer-pt-2 univer-transition-colors
                               hover:univer-border-primary-600
-                              dark:!univer-bg-gray-700 dark:!univer-text-white
+                              dark:!univer-bg-gray-700 dark:!univer-text-gray-0
                               [&>div:first-child]:univer-px-2.5
                               [&>div]:univer-h-5 [&>div]:univer-ring-transparent
                             `, borderClassName)}

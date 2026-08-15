@@ -220,7 +220,7 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
             style: {
                 strokeWidth: 1,
                 stroke: this._themeService.getColorFromTheme('primary.600'),
-                fill: new ColorKit(this._themeService.getColorFromTheme('white')).setAlpha(0).toString(),
+                fill: new ColorKit(this._themeService.getColorFromTheme('gray.0')).setAlpha(0).toString(),
                 widgets: {},
             },
         };

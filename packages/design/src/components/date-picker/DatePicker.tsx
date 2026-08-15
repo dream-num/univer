@@ -65,7 +65,7 @@ export function DatePicker(props: IDatePickerProps) {
                   univer-flex univer-h-8 univer-items-center univer-justify-between univer-gap-2 univer-rounded-md
                   univer-bg-transparent univer-px-2 univer-text-sm univer-text-gray-800 univer-transition-all
                   hover:univer-border-primary-600
-                  dark:!univer-text-white
+                  dark:!univer-text-gray-0
                 `, borderClassName, className)}
                 type="button"
             >

@@ -36,7 +36,9 @@ export function DialogPart() {
             const props = options[k] as any;
 
             if (props) {
-                (dialogProps as any)[k] = <CustomLabel {...props} />;
+                const { key: itemKey, ...customLabelProps } = props;
+
+                (dialogProps as any)[k] = <CustomLabel key={itemKey} {...customLabelProps} />;
             }
         }
 

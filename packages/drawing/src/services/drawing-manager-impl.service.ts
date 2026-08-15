@@ -33,7 +33,7 @@ import type {
     IDrawingVisibleParam,
     IUnitDrawingService,
 } from './drawing-manager.service';
-import { DrawingTypeEnum, sortRules, sortRulesByDesc } from '@univerjs/core';
+import { DrawingTypeEnum, normalizeDrawingOrderIndex, sortRules, sortRulesByDesc } from '@univerjs/core';
 import * as json1 from 'ot-json1';
 import { Subject } from 'rxjs';
 
@@ -839,7 +839,7 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
         const orders = this.getDrawingOrder(unitId, subUnitId);
         const drawingId = drawingIds[0];
         const currentIndex = orders.indexOf(drawingId);
-        const targetIndex = Math.max(0, Math.min(Math.floor(zOrder), orders.length - 1)) || 0;
+        const targetIndex = normalizeDrawingOrderIndex(zOrder, orders.length);
         if (currentIndex < 0 || currentIndex === targetIndex) {
             return null;
         }

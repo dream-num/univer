@@ -23,6 +23,7 @@ import {
     ICommandService,
     IUniverInstanceService,
     JSONX,
+    normalizeDrawingOrderIndex,
     UniverInstanceType,
 } from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
@@ -88,7 +89,7 @@ function getDrawingOrderAtIndex(drawingOrder: string[], drawingIds: string[], zO
     }
 
     const [drawingId] = arrangedDrawingOrder.splice(currentIndex, 1);
-    const targetIndex = Math.max(0, Math.min(zOrder, arrangedDrawingOrder.length));
+    const targetIndex = normalizeDrawingOrderIndex(zOrder, drawingOrder.length);
     arrangedDrawingOrder.splice(targetIndex, 0, drawingId);
     return arrangedDrawingOrder;
 }

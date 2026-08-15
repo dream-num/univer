@@ -20,15 +20,20 @@ import { CommandType } from '@univerjs/core';
 export const OpenImageCropOperation: IOperation<IDrawingSearch> = {
     id: 'sheet.operation.open-image-crop',
     type: CommandType.OPERATION,
-    handler: (accessor, params) => {
+    handler: (_accessor, _params) => {
         return true;
     },
 };
 
-export const CloseImageCropOperation: IOperation<{ isAuto?: boolean }> = {
+export interface ICloseImageCropOperationParams {
+    isAuto?: boolean;
+    isCancel?: boolean;
+}
+
+export const CloseImageCropOperation: IOperation<ICloseImageCropOperationParams> = {
     id: 'sheet.operation.close-image-crop',
     type: CommandType.OPERATION,
-    handler: (accessor, params) => {
+    handler: (_accessor, _params) => {
         return true;
     },
 };
@@ -53,7 +58,7 @@ export interface IOpenImageCropOperationBySrcRectParams {
 export const AutoImageCropOperation: IOperation<IOpenImageCropOperationBySrcRectParams> = {
     id: 'sheet.operation.Auto-image-crop',
     type: CommandType.OPERATION,
-    handler: (accessor, params) => {
+    handler: (_accessor, _params) => {
         return true;
     },
 };

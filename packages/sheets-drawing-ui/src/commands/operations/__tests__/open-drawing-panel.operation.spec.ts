@@ -34,6 +34,7 @@ describe('SidebarSheetDrawingOperation', () => {
 
         expect(testBed.sidebarService.visible).toBe(true);
         expect(testBed.sidebarService.options).toMatchObject({
+            id: COMPONENT_SHEET_DRAWING_PANEL,
             header: { title: 'sheets-drawing-ui.panel.title' },
             children: { label: COMPONENT_SHEET_DRAWING_PANEL },
             width: 360,
@@ -49,14 +50,17 @@ describe('SidebarSheetDrawingOperation', () => {
 
         drawingManagerService.registerDrawingData(testBed.unitId, {
             [testBed.subUnitId]: {
-                'drawing-1': {
-                    unitId: testBed.unitId,
-                    subUnitId: testBed.subUnitId,
-                    drawingId: 'drawing-1',
-                    drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+                data: {
+                    'drawing-1': {
+                        unitId: testBed.unitId,
+                        subUnitId: testBed.subUnitId,
+                        drawingId: 'drawing-1',
+                        drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+                    },
                 },
+                order: ['drawing-1'],
             },
-        } as never);
+        });
         drawingManagerService.focusDrawing([{
             unitId: testBed.unitId,
             subUnitId: testBed.subUnitId,

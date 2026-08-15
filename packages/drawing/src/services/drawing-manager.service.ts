@@ -129,6 +129,7 @@ export interface IUnitOrderDrawingService {
     getBackwardDrawingOp(orderParams: IDrawingOrderMapParam): unknown;
     getFrontDrawingsOp(orderParams: IDrawingOrderMapParam): unknown;
     getBackDrawingsOp(orderParams: IDrawingOrderMapParam): unknown;
+    getDrawingOrderOp(orderParams: IDrawingOrderMapParam, zOrder: number): unknown;
     // replaceDrawingOrder(unitId: string, subUnitId: string, drawingIds: string[]): void;
     getDrawingOrder(unitId: string, subUnitId: string): string[];
     setDrawingOrder(unitId: string, subUnitId: string, order: string[]): void;

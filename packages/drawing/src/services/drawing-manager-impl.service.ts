@@ -830,6 +830,39 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
         return { undo: invertOp, redo: op, unitId, subUnitId, objects: { ...orderParams, drawingIds: newIds } };
     }
 
+    getDrawingOrderOp(orderParams: IDrawingOrderMapParam, zOrder: number): Nullable<IDrawingJsonUndo1> {
+        const { unitId, subUnitId, drawingIds } = orderParams;
+        if (drawingIds.length !== 1) {
+            return null;
+        }
+
+        const orders = this.getDrawingOrder(unitId, subUnitId);
+        const drawingId = drawingIds[0];
+        const currentIndex = orders.indexOf(drawingId);
+        const targetIndex = Math.max(0, Math.min(Math.floor(zOrder), orders.length - 1)) || 0;
+        if (currentIndex < 0 || currentIndex === targetIndex) {
+            return null;
+        }
+
+        const op = json1.moveOp(
+            [unitId, subUnitId, DrawingMapItemType.order, currentIndex],
+            [unitId, subUnitId, DrawingMapItemType.order, targetIndex]
+        );
+        const invertOp = json1.type.invertWithDoc(op, this.drawingManagerData as unknown as json1.Doc);
+        const affectedDrawingIds = orders.slice(
+            Math.min(currentIndex, targetIndex),
+            Math.max(currentIndex, targetIndex) + 1
+        );
+
+        return {
+            undo: invertOp,
+            redo: op,
+            unitId,
+            subUnitId,
+            objects: { ...orderParams, drawingIds: affectedDrawingIds },
+        };
+    }
+
     private _getDrawingCount(unitId: string, subUnitId: string) {
         return this.getDrawingOrder(unitId, subUnitId).length || 0;
     }

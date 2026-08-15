@@ -25,9 +25,10 @@ import {
 import { ISheetDrawingService } from '../../services/sheet-drawing.service';
 import { DrawingApplyType, SetDrawingApplyMutation } from '../mutations/set-drawing-apply.mutation';
 
-export interface ISetDrawingArrangeCommandParams extends IDrawingOrderMapParam {
-    arrangeType: ArrangeTypeEnum;
-}
+export type ISetDrawingArrangeCommandParams = IDrawingOrderMapParam & (
+    { arrangeType: ArrangeTypeEnum; zOrder?: never }
+    | { arrangeType?: never; zOrder: number }
+);
 
 export const SetDrawingArrangeCommand: ICommand = {
     id: 'sheet.command.set-drawing-arrange',
@@ -40,18 +41,20 @@ export const SetDrawingArrangeCommand: ICommand = {
 
         const sheetDrawingService = accessor.get(ISheetDrawingService);
 
-        const { unitId, subUnitId, drawingIds, arrangeType } = params;
+        const { unitId, subUnitId, drawingIds } = params;
 
         const drawingOrderMapParam = { unitId, subUnitId, drawingIds } as IDrawingOrderMapParam;
 
         let jsonOp: Nullable<IDrawingJsonUndo1>;
-        if (arrangeType === ArrangeTypeEnum.forward) {
+        if (params.zOrder !== undefined) {
+            jsonOp = sheetDrawingService.getDrawingOrderOp(drawingOrderMapParam, params.zOrder) as Nullable<IDrawingJsonUndo1>;
+        } else if (params.arrangeType === ArrangeTypeEnum.forward) {
             jsonOp = sheetDrawingService.getForwardDrawingsOp(drawingOrderMapParam) as IDrawingJsonUndo1;
-        } else if (arrangeType === ArrangeTypeEnum.backward) {
+        } else if (params.arrangeType === ArrangeTypeEnum.backward) {
             jsonOp = sheetDrawingService.getBackwardDrawingOp(drawingOrderMapParam) as IDrawingJsonUndo1;
-        } else if (arrangeType === ArrangeTypeEnum.front) {
+        } else if (params.arrangeType === ArrangeTypeEnum.front) {
             jsonOp = sheetDrawingService.getFrontDrawingsOp(drawingOrderMapParam) as IDrawingJsonUndo1;
-        } else if (arrangeType === ArrangeTypeEnum.back) {
+        } else if (params.arrangeType === ArrangeTypeEnum.back) {
             jsonOp = sheetDrawingService.getBackDrawingsOp(drawingOrderMapParam) as IDrawingJsonUndo1;
         }
 

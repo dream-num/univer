@@ -231,4 +231,30 @@ describe('AutoFillPopupMenu', () => {
 
         expect(autoFillService.refillTypes).toEqual([AUTO_FILL_APPLY_TYPE.COPY]);
     });
+
+    it('keeps the overlay origin on the physical left edge in rtl', () => {
+        currentBed = createAutoFillPopupTestBed();
+        currentBed.injector.get(LocaleService).setDirection('rtl');
+        const autoFillService = currentBed.injector.get(IAutoFillService) as unknown as TestAutoFillService;
+        const rendered = renderWithDependencies(<AutoFillPopupMenu />, currentBed.injector);
+        root = rendered.root;
+        container = rendered.container;
+
+        act(() => {
+            autoFillService.setShowMenu(true);
+        });
+
+        const trigger = rendered.container.querySelector('[data-slot="dropdown-menu-trigger"]');
+        if (!(trigger instanceof HTMLElement)) {
+            throw new TypeError('Auto fill menu trigger not found');
+        }
+
+        const overlay = trigger.parentElement?.parentElement;
+        if (!(overlay instanceof HTMLElement)) {
+            throw new TypeError('Auto fill menu overlay not found');
+        }
+
+        expect(overlay.style.left).toBe('0px');
+        expect(overlay.style.right).toBe('');
+    });
 });

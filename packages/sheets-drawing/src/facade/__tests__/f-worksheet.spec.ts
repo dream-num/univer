@@ -16,7 +16,6 @@
 
 import type {
     Injector,
-    Univer,
     Workbook,
 } from '@univerjs/core';
 import type { FWorkbook } from '@univerjs/sheets/facade';
@@ -29,9 +28,10 @@ import {
     IUniverInstanceService,
     RedoCommand,
     UndoCommand,
+    Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-import { SheetSkeletonService } from '@univerjs/sheets';
+import { SheetSkeletonService, UniverSheetsPlugin } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createSheetsDrawingTestBed } from '../../__tests__/create-sheets-drawing-test-bed';
 import { InsertSheetDrawingCommand } from '../../commands/commands/insert-sheet-drawing.command';
@@ -52,6 +52,27 @@ describe('FWorksheetDrawingMixin group drawings', () => {
 
     afterEach(() => {
         univer.dispose();
+    });
+
+    it('uses non-drawing worksheet APIs before drawing services are registered', () => {
+        univer.dispose();
+        univer = new Univer();
+        univer.registerPlugin(UniverSheetsPlugin);
+        univer.createUnit(UniverInstanceType.UNIVER_SHEET, {
+            id: 'test',
+            sheetOrder: ['sheet1'],
+            sheets: {
+                sheet1: {
+                    id: 'sheet1',
+                    name: 'Sheet1',
+                    rowCount: 20,
+                    columnCount: 20,
+                    cellData: {},
+                },
+            },
+        });
+
+        expect(createFacade(univer.__getInjector()).getSheetName()).toBe('Sheet1');
     });
 
     it('groups drawings and exposes parent and child relationships', () => {

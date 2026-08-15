@@ -33,7 +33,7 @@ import type {
     IDrawingVisibleParam,
     IUnitDrawingService,
 } from './drawing-manager.service';
-import { DrawingTypeEnum, sortRules, sortRulesByDesc } from '@univerjs/core';
+import { DrawingTypeEnum, normalizeDrawingOrderIndex, sortRules, sortRulesByDesc } from '@univerjs/core';
 import * as json1 from 'ot-json1';
 import { Subject } from 'rxjs';
 
@@ -828,6 +828,39 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
         const invertOp = json1.type.invertWithDoc(op, this.drawingManagerData as unknown as json1.Doc);
 
         return { undo: invertOp, redo: op, unitId, subUnitId, objects: { ...orderParams, drawingIds: newIds } };
+    }
+
+    getDrawingOrderOp(orderParams: IDrawingOrderMapParam, zOrder: number): Nullable<IDrawingJsonUndo1> {
+        const { unitId, subUnitId, drawingIds } = orderParams;
+        if (drawingIds.length !== 1) {
+            return null;
+        }
+
+        const orders = this.getDrawingOrder(unitId, subUnitId);
+        const drawingId = drawingIds[0];
+        const currentIndex = orders.indexOf(drawingId);
+        const targetIndex = normalizeDrawingOrderIndex(zOrder, orders.length);
+        if (currentIndex < 0 || currentIndex === targetIndex) {
+            return null;
+        }
+
+        const op = json1.moveOp(
+            [unitId, subUnitId, DrawingMapItemType.order, currentIndex],
+            [unitId, subUnitId, DrawingMapItemType.order, targetIndex]
+        );
+        const invertOp = json1.type.invertWithDoc(op, this.drawingManagerData as unknown as json1.Doc);
+        const affectedDrawingIds = orders.slice(
+            Math.min(currentIndex, targetIndex),
+            Math.max(currentIndex, targetIndex) + 1
+        );
+
+        return {
+            undo: invertOp,
+            redo: op,
+            unitId,
+            subUnitId,
+            objects: { ...orderParams, drawingIds: affectedDrawingIds },
+        };
     }
 
     private _getDrawingCount(unitId: string, subUnitId: string) {

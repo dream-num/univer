@@ -23,13 +23,15 @@ import {
     ICommandService,
     IUniverInstanceService,
     JSONX,
+    normalizeDrawingOrderIndex,
     UniverInstanceType,
 } from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
 
-export interface ISetDocDrawingArrangeCommandParams extends IDrawingOrderMapParam {
-    arrangeType: ArrangeTypeEnum;
-}
+export type ISetDocDrawingArrangeCommandParams = IDrawingOrderMapParam & (
+    { arrangeType: ArrangeTypeEnum; zOrder?: never }
+    | { arrangeType?: never; zOrder: number }
+);
 
 const DRAWINGS_ORDER_KEY = 'drawingsOrder' satisfies keyof IDocumentData;
 
@@ -72,6 +74,23 @@ function getArrangedDrawingOrder(
             : [...selected, ...unselected];
     }
 
+    return arrangedDrawingOrder;
+}
+
+function getDrawingOrderAtIndex(drawingOrder: string[], drawingIds: string[], zOrder: number): string[] {
+    if (drawingIds.length !== 1) {
+        return [...drawingOrder];
+    }
+
+    const arrangedDrawingOrder = [...drawingOrder];
+    const currentIndex = arrangedDrawingOrder.indexOf(drawingIds[0]);
+    if (currentIndex < 0) {
+        return arrangedDrawingOrder;
+    }
+
+    const [drawingId] = arrangedDrawingOrder.splice(currentIndex, 1);
+    const targetIndex = normalizeDrawingOrderIndex(zOrder, drawingOrder.length);
+    arrangedDrawingOrder.splice(targetIndex, 0, drawingId);
     return arrangedDrawingOrder;
 }
 
@@ -125,7 +144,7 @@ export const SetDocDrawingArrangeCommand: ICommand = {
             return false;
         }
 
-        const { unitId, drawingIds, arrangeType } = params;
+        const { unitId, drawingIds } = params;
         const documentDataModel = accessor.get(IUniverInstanceService)
             .getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
         const drawingOrder = documentDataModel?.getDrawingsOrder();
@@ -133,7 +152,9 @@ export const SetDocDrawingArrangeCommand: ICommand = {
             return false;
         }
 
-        const arrangedDrawingOrder = getArrangedDrawingOrder(drawingOrder, drawingIds, arrangeType);
+        const arrangedDrawingOrder = params.zOrder !== undefined
+            ? getDrawingOrderAtIndex(drawingOrder, drawingIds, params.zOrder)
+            : getArrangedDrawingOrder(drawingOrder, drawingIds, params.arrangeType);
         const actions = createDrawingOrderActions(drawingOrder, arrangedDrawingOrder);
         if (JSONX.isNoop(actions)) {
             return false;

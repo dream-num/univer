@@ -23,6 +23,7 @@ import {
     ImageSourceType,
     IUndoRedoService,
     IUniverInstanceService,
+    RedoCommand,
     UndoCommand,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -526,6 +527,34 @@ describe('sheet drawing integration', () => {
             arrangeType: ArrangeTypeEnum.back,
         })).toBe(true);
         expect(sheetDrawingService.getDrawingOrder('test', 'sheet1')).toEqual(['drawing-a', 'drawing-c', 'drawing-b']);
+    });
+
+    it('moves one drawing to a clamped zero-based order index with undo', async () => {
+        await commandService.executeCommand(InsertSheetDrawingCommand.id, {
+            unitId: 'test',
+            drawings: [
+                createSheetDrawing('drawing-a'),
+                createSheetDrawing('drawing-b'),
+                createSheetDrawing('drawing-c'),
+            ],
+        });
+
+        const sheetDrawingService = get(ISheetDrawingService);
+        expect(sheetDrawingService.getDrawingOrder('test', 'sheet1')).toEqual(['drawing-c', 'drawing-b', 'drawing-a']);
+
+        expect(await commandService.executeCommand(SetDrawingArrangeCommand.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            drawingIds: ['drawing-b'],
+            zOrder: 99,
+        })).toBe(true);
+        expect(sheetDrawingService.getDrawingOrder('test', 'sheet1')).toEqual(['drawing-c', 'drawing-a', 'drawing-b']);
+
+        expect(commandService.syncExecuteCommand(UndoCommand.id)).toBe(true);
+        expect(sheetDrawingService.getDrawingOrder('test', 'sheet1')).toEqual(['drawing-c', 'drawing-b', 'drawing-a']);
+
+        expect(commandService.syncExecuteCommand(RedoCommand.id)).toBe(true);
+        expect(sheetDrawingService.getDrawingOrder('test', 'sheet1')).toEqual(['drawing-c', 'drawing-a', 'drawing-b']);
     });
 
     it('copies sheet drawings when a worksheet is duplicated', async () => {

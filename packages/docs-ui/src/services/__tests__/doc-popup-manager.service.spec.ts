@@ -63,9 +63,14 @@ class TestRenderManagerService {
     };
 
     popupInjector = new Injector();
+    scopedPopupService = new TestCanvasPopupService();
     getInjector = vi.fn(() => this.popupInjector);
     readonly onTransformChange$ = new EventSubject();
     readonly onScrollAfter$ = new EventSubject();
+
+    constructor() {
+        this.popupInjector.add([ICanvasPopupService, { useValue: this.scopedPopupService as never }]);
+    }
 
     getRenderUnitById(unitId: string) {
         if (unitId === 'missing-doc') {
@@ -208,7 +213,7 @@ describe('DocCanvasPopManagerService', () => {
         expect(anchorRect$?.value).toEqual({ left: 25, right: 175, top: 50, bottom: 80 });
     });
 
-    it('uses a scoped popup injector only for embedded document render units', () => {
+    it('keeps regular popups global and routes embedded popups to the render scope', () => {
         const { service, popupService, renderManagerService, univerInstanceService } = createService();
 
         service.attachPopupToRect({ left: 10, right: 110, top: 20, bottom: 40 }, { componentKey: 'normal-popup' }, 'doc-1');
@@ -217,7 +222,9 @@ describe('DocCanvasPopManagerService', () => {
 
         univerInstanceService.embeddedUnitIds.add('doc-1');
         service.attachPopupToRect({ left: 10, right: 110, top: 20, bottom: 40 }, { componentKey: 'embed-popup' }, 'doc-1');
-        expect(popupService.popups.get('popup-2')?.connectorInjector).toBe(renderManagerService.popupInjector);
+        expect(popupService.popups.size).toBe(1);
+        expect(renderManagerService.scopedPopupService.popups.get('popup-1')?.componentKey).toBe('embed-popup');
+        expect(renderManagerService.scopedPopupService.popups.get('popup-1')?.connectorInjector).toBe(renderManagerService.popupInjector);
         expect(renderManagerService.getInjector).toHaveBeenCalledTimes(1);
     });
 

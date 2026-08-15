@@ -26,6 +26,7 @@ import {
     isInternalEditorID,
     IUniverInstanceService,
     RxDisposable,
+    toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
 import { IDocDrawingAdapterService, RemoveDocDrawingCommand } from '@univerjs/docs-drawing';
@@ -46,6 +47,7 @@ import { DocDrawingFloatingToolbarAdapterService } from '../services/doc-drawing
 export class DocDrawingPopupMenuController extends RxDisposable {
     private _initImagePopupMenu = new Set<string>();
     private _embeddedRenderUnits = new Set<string>();
+    private _popupMenuListeners = new Map<string, IDisposable>();
     private _disposePopups: IDisposable[] = [];
     private _isDrawingPanelOpen = false;
 
@@ -114,7 +116,7 @@ export class DocDrawingPopupMenuController extends RxDisposable {
                     return;
                 }
 
-                this._initImagePopupMenu.delete(unitId);
+                this._disposePopupMenuListener(unitId);
             })
         );
 
@@ -124,6 +126,7 @@ export class DocDrawingPopupMenuController extends RxDisposable {
     private _dispose(documentDataModel: DocumentDataModel) {
         const unitId = documentDataModel.getUnitId();
         this._clearPopups();
+        this._disposePopupMenuListener(unitId);
         this._renderManagerService.removeRender(unitId);
     }
 
@@ -142,9 +145,19 @@ export class DocDrawingPopupMenuController extends RxDisposable {
             return;
         }
         if (this._renderManagerService.has(unitId) && !this._initImagePopupMenu.has(unitId)) {
-            this._popupMenuListener(unitId);
-            this._initImagePopupMenu.add(unitId);
+            const listener = this._popupMenuListener(unitId);
+            if (listener) {
+                this._popupMenuListeners.set(unitId, listener);
+                this._initImagePopupMenu.add(unitId);
+            }
         }
+    }
+
+    private _disposePopupMenuListener(unitId: string) {
+        this._popupMenuListeners.get(unitId)?.dispose();
+        this._popupMenuListeners.delete(unitId);
+        this._initImagePopupMenu.delete(unitId);
+        this._clearPopups();
     }
 
     private _hasCropObject(scene: Scene) {
@@ -160,7 +173,7 @@ export class DocDrawingPopupMenuController extends RxDisposable {
     }
 
     // eslint-disable-next-line max-lines-per-function
-    private _popupMenuListener(unitId: string) {
+    private _popupMenuListener(unitId: string): IDisposable | undefined {
         const scene = this._renderManagerService.getRenderUnitById(unitId)?.scene;
         if (!scene) {
             return;
@@ -171,8 +184,7 @@ export class DocDrawingPopupMenuController extends RxDisposable {
         }
 
         const disposePopups: IDisposable[] = this._disposePopups;
-
-        this.disposeWithMe(
+        const subscriptions = [
             transformer.createControl$.subscribe(() => {
                 if (this._hasCropObject(scene)) {
                     return;
@@ -181,10 +193,7 @@ export class DocDrawingPopupMenuController extends RxDisposable {
                 const selectedObjects = transformer.getSelectedObjectMap();
                 disposePopups.forEach((dispose) => dispose.dispose());
                 disposePopups.length = 0;
-                if (this._isDrawingPanelOpen) {
-                    return;
-                }
-                if (selectedObjects.size > 1) {
+                if (this._isDrawingPanelOpen || selectedObjects.size > 1) {
                     return;
                 }
 
@@ -193,8 +202,7 @@ export class DocDrawingPopupMenuController extends RxDisposable {
                     return;
                 }
 
-                const oKey = object.oKey;
-                const drawingParam = this._drawingManagerService.getDrawingOKey(oKey);
+                const drawingParam = this._drawingManagerService.getDrawingOKey(object.oKey);
                 if (
                     !drawingParam ||
                     drawingParam.drawingType === DrawingTypeEnum.DRAWING_DOM ||
@@ -227,44 +235,29 @@ export class DocDrawingPopupMenuController extends RxDisposable {
                 disposePopups.push(this.disposeWithMe(popup));
 
                 const focusDrawings = this._drawingManagerService.getFocusDrawings();
-
                 const alreadyFocused = focusDrawings.find((drawing) => drawing.unitId === unitId && drawing.subUnitId === subUnitId && drawing.drawingId === drawingId);
-
-                if (alreadyFocused) {
-                    return;
+                if (!alreadyFocused) {
+                    this._drawingManagerService.focusDrawing([{ unitId, subUnitId, drawingId }]);
                 }
-
-                this._drawingManagerService.focusDrawing([{
-                    unitId,
-                    subUnitId,
-                    drawingId,
-                }]);
-            }
-            )
-        );
-
-        this.disposeWithMe(
+            }),
             transformer.clearControl$.subscribe(() => {
                 disposePopups.forEach((dispose) => dispose.dispose());
                 disposePopups.length = 0;
                 this._contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, false);
                 this._drawingManagerService.focusDrawing(null);
-            })
-        );
-        this.disposeWithMe(
+            }),
             transformer.changing$.subscribe(() => {
                 disposePopups.forEach((dispose) => dispose.dispose());
                 disposePopups.length = 0;
-            }
-            )
-        );
-
-        this.disposeWithMe(
+            }),
             transformer.changeStart$.subscribe(() => {
                 disposePopups.forEach((dispose) => dispose.dispose());
                 disposePopups.length = 0;
-            })
-        );
+            }),
+        ];
+        const disposable = toDisposable(() => subscriptions.forEach((subscription) => subscription.unsubscribe()));
+        this.disposeWithMe(disposable);
+        return disposable;
     }
 
     private _getDrawingPopupMenuItems(unitId: string, subUnitId: string, drawingId: string, drawingType: number) {

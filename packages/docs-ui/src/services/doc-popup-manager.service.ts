@@ -280,9 +280,10 @@ export class DocCanvasPopManagerService extends Disposable {
             throw new Error(`Current render not found, unitId: ${unitId}`);
         }
         const popupInjector = this._resolveEmbeddedPopupInjector(unitId, currentRender);
+        const popupManagerService = this._resolvePopupManagerService(popupInjector);
 
         const { position, position$, disposable } = this._createRectPositionObserver(rect, currentRender);
-        const id = this._globalPopupManagerService.addPopup({
+        const id = popupManagerService.addPopup({
             ...popup,
             unitId,
             subUnitId: 'default',
@@ -294,11 +295,11 @@ export class DocCanvasPopManagerService extends Disposable {
 
         return {
             dispose: () => {
-                this._globalPopupManagerService.removePopup(id);
+                popupManagerService.removePopup(id);
                 position$.complete();
                 disposable.dispose();
             },
-            canDispose: () => this._globalPopupManagerService.activePopupId !== id,
+            canDispose: () => popupManagerService.activePopupId !== id,
         };
     }
 
@@ -315,9 +316,10 @@ export class DocCanvasPopManagerService extends Disposable {
             throw new Error(`Current render not found, unitId: ${unitId}`);
         }
         const popupInjector = this._resolveEmbeddedPopupInjector(unitId, currentRender);
+        const popupManagerService = this._resolvePopupManagerService(popupInjector);
 
         const { position, position$, disposable } = this._createObjectPositionObserver(targetObject, currentRender);
-        const id = this._globalPopupManagerService.addPopup({
+        const id = popupManagerService.addPopup({
             ...popup,
             unitId,
             subUnitId: 'default',
@@ -329,11 +331,11 @@ export class DocCanvasPopManagerService extends Disposable {
 
         return {
             dispose: () => {
-                this._globalPopupManagerService.removePopup(id);
+                popupManagerService.removePopup(id);
                 position$.complete();
                 disposable.dispose();
             },
-            canDispose: () => this._globalPopupManagerService.activePopupId !== id,
+            canDispose: () => popupManagerService.activePopupId !== id,
         };
     }
 
@@ -357,11 +359,12 @@ export class DocCanvasPopManagerService extends Disposable {
             throw new Error(`Current render not found, unitId: ${unitId}`);
         }
         const popupInjector = this._resolveEmbeddedPopupInjector(unitId, currentRender);
+        const popupManagerService = this._resolvePopupManagerService(popupInjector);
 
         const { positions: bounds, positions$: bounds$, disposable } = this._createRangePositionObserver(range, currentRender);
         const position$ = bounds$.pipe(map((bounds) => direction.includes('top') ? bounds[0] : bounds[bounds.length - 1]));
 
-        const id = this._globalPopupManagerService.addPopup({
+        const id = popupManagerService.addPopup({
             ...popup,
             unitId,
             subUnitId: 'default',
@@ -380,11 +383,11 @@ export class DocCanvasPopManagerService extends Disposable {
 
         return {
             dispose: () => {
-                this._globalPopupManagerService.removePopup(id);
+                popupManagerService.removePopup(id);
                 bounds$.complete();
                 disposable.dispose();
             },
-            canDispose: () => this._globalPopupManagerService.activePopupId !== id,
+            canDispose: () => popupManagerService.activePopupId !== id,
         };
     }
     // #endregion
@@ -393,5 +396,11 @@ export class DocCanvasPopManagerService extends Disposable {
         return this._univerInstanceService.getUnitCreateOptions(unitId)?.embeddedRender === true
             ? currentRender.getInjector?.()
             : undefined;
+    }
+
+    private _resolvePopupManagerService(popupInjector: Injector | undefined): ICanvasPopupService {
+        return popupInjector?.has(ICanvasPopupService)
+            ? popupInjector.get(ICanvasPopupService)
+            : this._globalPopupManagerService;
     }
 }

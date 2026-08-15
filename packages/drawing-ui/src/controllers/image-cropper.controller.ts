@@ -17,11 +17,12 @@
 import type { ICommandInfo, IDrawingSearch, ISrcRect, ITransformState, Nullable, Workbook } from '@univerjs/core';
 import type { IImageData } from '@univerjs/drawing';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
-import type { IOpenImageCropOperationBySrcRectParams } from '../commands/operations/image-crop.operation';
+import type { ICloseImageCropOperationParams, IOpenImageCropOperationBySrcRectParams } from '../commands/operations/image-crop.operation';
 import type { LocaleKey } from '../locale/types';
 import {
     checkIfMove,
     Disposable,
+    DisposableCollection,
     ICommandService,
     Inject,
     IUniverInstanceService,
@@ -35,7 +36,7 @@ import {
     SetDrawingSelectedOperation,
 } from '@univerjs/drawing';
 import { CURSOR_TYPE, degToRad, Image, IRenderManagerService, precisionTo, Vector2 } from '@univerjs/engine-render';
-import { IMessageService } from '@univerjs/ui';
+import { IMessageService, IShortcutService, KeyCode } from '@univerjs/ui';
 import { of, switchMap } from 'rxjs';
 import {
     AutoImageCropOperation,
@@ -45,8 +46,23 @@ import {
 } from '../commands/operations/image-crop.operation';
 import { ImageCropperObject } from '../views/crop/image-cropper-object';
 
+interface IImageCropSnapshot {
+    transform: ITransformState;
+    srcRect: Nullable<ISrcRect>;
+}
+
+interface IImageCropSession {
+    scene: Scene;
+    imageShape: Image;
+    imageCropperObject: ImageCropperObject;
+}
+
 export class ImageCropperController extends Disposable {
     private _sceneListenerOnImageMap: WeakSet<Scene> = new WeakSet();
+    private readonly _cropShortcutDisposables = new DisposableCollection();
+    private readonly _cropSnapshots = new WeakMap<ImageCropperObject, IImageCropSnapshot>();
+    private _pendingCropSnapshot: Nullable<IImageCropSnapshot> = null;
+    private _activeCropSession: Nullable<IImageCropSession> = null;
 
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
@@ -54,10 +70,12 @@ export class ImageCropperController extends Disposable {
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private _univerInstanceService: IUniverInstanceService,
         @IMessageService private readonly _messageService: IMessageService,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @IShortcutService private readonly _shortcutService: IShortcutService
     ) {
         super();
 
+        this.disposeWithMe(this._cropShortcutDisposables);
         this._init();
     }
 
@@ -121,9 +139,13 @@ export class ImageCropperController extends Disposable {
                     return;
                 }
 
-                this._updateCropperObject(cropType, imageShape);
-
-                this._commandService.executeCommand(OpenImageCropOperation.id, { unitId, subUnitId, drawingId });
+                this._pendingCropSnapshot = this._captureCropSnapshot(imageShape);
+                try {
+                    this._updateCropperObject(cropType, imageShape);
+                    this._commandService.syncExecuteCommand(OpenImageCropOperation.id, { unitId, subUnitId, drawingId });
+                } finally {
+                    this._pendingCropSnapshot = null;
+                }
             })
         );
     }
@@ -226,6 +248,10 @@ export class ImageCropperController extends Disposable {
                     return;
                 }
 
+                if (this._activeCropSession != null) {
+                    this._commandService.syncExecuteCommand(CloseImageCropOperation.id, { isAuto: true });
+                }
+
                 const { unitId, subUnitId, drawingId } = params;
 
                 const renderObject = this._renderManagerService.getRenderUnitById(unitId);
@@ -271,14 +297,19 @@ export class ImageCropperController extends Disposable {
                     prstGeom: imageShape.prstGeom,
                     applyTransform: imageShape.calculateTransformWithSrcRect(),
                 });
+                this._cropSnapshots.set(imageCropperObject, this._pendingCropSnapshot ?? this._captureCropSnapshot(imageShape));
+                this._pendingCropSnapshot = null;
 
                 scene.addObject(imageCropperObject, imageShape.getLayerIndex() + 1).attachTransformerTo(imageCropperObject);
+                this._activeCropSession = { scene, imageShape, imageCropperObject };
                 transformer?.createControlForCopper(imageCropperObject);
                 this._addHoverForImageCopper(imageCropperObject);
 
                 imageShape.openRenderByCropper();
                 transformer?.refreshControls();
                 imageCropperObject.makeDirty(true);
+
+                this._registerCropShortcuts();
 
                 this._commandService.syncExecuteCommand(SetDrawingSelectedOperation.id, [{ unitId, subUnitId, drawingId }]);
             })
@@ -302,57 +333,47 @@ export class ImageCropperController extends Disposable {
                     return;
                 }
 
-                const currentUnit = this._univerInstanceService.getFocusedUnit();
-
-                if (currentUnit == null) {
+                const cropSession = this._activeCropSession;
+                if (cropSession == null) {
                     return;
                 }
-
-                const unitId = currentUnit.getUnitId();
-                const renderObject = this._renderManagerService.getRenderUnitById(unitId);
-
-                const scene = renderObject?.scene;
-
-                if (scene == null) {
-                    return true;
-                }
-
-                const imageCropperObject = this._searchCropObject(scene);
-                if (imageCropperObject == null) {
-                    return;
-                }
-                const imageShape = this._getApplyObjectByCropObject(imageCropperObject);
-                if (imageShape == null) {
-                    return;
-                }
+                const { scene, imageShape, imageCropperObject } = cropSession;
 
                 const transformer = scene.getTransformerByCreate();
                 transformer.detachFrom(imageCropperObject);
                 transformer.clearCopperControl();
 
-                const srcRect = this._getSrcRectByTransformState(imageShape, imageCropperObject);
-
-                const drawingParam = this._drawingManagerService.getDrawingOKey(imageShape.oKey);
-                if (drawingParam != null) {
-                    const { left, top, height, width } = imageCropperObject;
-                    this._drawingManagerService.featurePluginUpdateNotification([{
-                        ...drawingParam,
-                        transform: {
-                            ...drawingParam.transform,
-                            left,
-                            top,
-                            height,
-                            width,
-                        },
-                        srcRect: srcRect.srcRectAngle,
-                    }] as IImageData[]);
+                const params = command.params as ICloseImageCropOperationParams | undefined;
+                if (params?.isCancel) {
+                    this._restoreCropSnapshot(imageShape, imageCropperObject);
+                } else {
+                    const srcRect = this._getSrcRectByTransformState(imageShape, imageCropperObject);
+                    const drawingParam = this._drawingManagerService.getDrawingOKey(imageShape.oKey);
+                    if (drawingParam != null) {
+                        const { left, top, height, width } = imageCropperObject;
+                        this._drawingManagerService.featurePluginUpdateNotification([{
+                            ...drawingParam,
+                            transform: {
+                                ...drawingParam.transform,
+                                left,
+                                top,
+                                height,
+                                width,
+                            },
+                            srcRect: srcRect.srcRectAngle,
+                        }] as IImageData[]);
+                    }
+                    imageShape.setSrcRect({ ...srcRect.srcRectAngle });
                 }
-                imageShape.setSrcRect({ ...srcRect.srcRectAngle });
                 imageShape.closeRenderByCropper();
 
                 imageShape.makeDirty(true);
+                transformer.refreshControls();
 
-                imageCropperObject?.dispose();
+                this._cropSnapshots.delete(imageCropperObject);
+                imageCropperObject.dispose();
+                this._activeCropSession = null;
+                this._cropShortcutDisposables.dispose();
             })
         );
 
@@ -378,6 +399,36 @@ export class ImageCropperController extends Disposable {
         }
 
         return applyObject;
+    }
+
+    private _captureCropSnapshot(imageShape: Image): IImageCropSnapshot {
+        return {
+            transform: imageShape.getState(),
+            srcRect: imageShape.srcRect == null ? imageShape.srcRect : { ...imageShape.srcRect },
+        };
+    }
+
+    private _restoreCropSnapshot(imageShape: Image, imageCropperObject: ImageCropperObject): void {
+        const snapshot = this._cropSnapshots.get(imageCropperObject);
+        if (snapshot) {
+            imageShape.transformByStateCloseCropper(snapshot.transform);
+            imageShape.setSrcRect(snapshot.srcRect);
+        }
+    }
+
+    private _registerCropShortcuts(): void {
+        this._cropShortcutDisposables.dispose();
+        this._cropShortcutDisposables.add(this._shortcutService.registerShortcut({
+            id: CloseImageCropOperation.id,
+            binding: KeyCode.ENTER,
+            priority: 1000,
+        }));
+        this._cropShortcutDisposables.add(this._shortcutService.registerShortcut({
+            id: CloseImageCropOperation.id,
+            binding: KeyCode.ESC,
+            priority: 1000,
+            staticParameters: { isCancel: true },
+        }));
     }
 
     private _addListenerOnImage(scene: Scene) {
@@ -462,9 +513,9 @@ export class ImageCropperController extends Disposable {
     }
 
     private _getSrcRectByTransformState(applyObject: BaseObject, imageCropperObject: ImageCropperObject) {
-        const { left, top, height, width, strokeWidth, angle: copperAngle } = imageCropperObject;
+        const { left, top, height, width } = imageCropperObject;
 
-        const { left: applyLeft, top: applyTop, width: applyWidth, height: applyHeight, angle: applyAngle, strokeWidth: applyStrokeWidth } = applyObject;
+        const { left: applyLeft, top: applyTop, width: applyWidth, height: applyHeight, angle: applyAngle } = applyObject;
 
         const newLeft = left - applyLeft;
         const newTop = top - applyTop;

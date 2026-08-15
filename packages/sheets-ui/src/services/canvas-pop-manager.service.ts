@@ -39,7 +39,7 @@ import {
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
-import { IRenderManagerService, RENDER_CLASS_TYPE } from '@univerjs/engine-render';
+import { IRenderManagerService, RENDER_CLASS_TYPE, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import {
     COMMAND_LISTENER_SKELETON_CHANGE,
     IRefSelectionsService,
@@ -276,6 +276,11 @@ export class SheetCanvasPopManagerService extends Disposable {
                 position$.next(calc());
             }
         }));
+
+        const viewMain = currentRender.scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
+        if (viewMain) {
+            disposable.add(viewMain.onScrollAfter$.subscribeEvent(() => position$.next(calc())));
+        }
 
         return {
             position,

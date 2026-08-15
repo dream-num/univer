@@ -185,6 +185,7 @@ function createSheetHarness() {
     } as DOMRect);
 
     const transformChange$ = createEventSubject<unknown>();
+    const viewMainScrollAfter$ = createEventSubject<unknown>();
     const clientRect$ = new BehaviorSubject({});
     const worksheet = {
         getSheetId: () => 'sheet-1',
@@ -217,16 +218,18 @@ function createSheetHarness() {
         }),
     };
     const sheetSelectionRenderService = { selectionMoving: false };
+    const viewport = {
+        left: 0,
+        top: 0,
+        viewportScrollX: 0,
+        viewportScrollY: 0,
+        onScrollAfter$: viewMainScrollAfter$,
+    };
     const render = {
         getInjector: vi.fn(() => injector),
         scene: {
             getAncestorScale: () => ({ scaleX: 1, scaleY: 1 }),
-            getViewport: () => ({
-                left: 0,
-                top: 0,
-                viewportScrollX: 0,
-                viewportScrollY: 0,
-            }),
+            getViewport: () => viewport,
         },
         engine: {
             clientRect$,
@@ -269,8 +272,9 @@ function createSheetHarness() {
         canvas,
         clientRect$,
         transformChange$,
+        viewMainScrollAfter$,
         sheetSelectionRenderService,
-        viewport: { viewportScrollX: 0, viewportScrollY: 0 },
+        viewport,
     };
 }
 
@@ -297,7 +301,7 @@ describe('SheetCanvasPopManagerService', () => {
     });
 
     it('anchors a drawing popup with the registered menu offset and removes it when closed', () => {
-        const { service, popupService, canvas } = createSheetHarness();
+        const { service, popupService, canvas, viewport, viewMainScrollAfter$ } = createSheetHarness();
         const targetObject = {
             left: 20,
             top: 10,
@@ -318,6 +322,13 @@ describe('SheetCanvasPopManagerService', () => {
             anchorRect: { left: 50, right: 154, top: 56, bottom: 100 },
         });
         expect(disposable.canDispose()).toBe(false);
+
+        const positions: unknown[] = [];
+        popupService.lastPopup()!.anchorRect$!.subscribe((position) => positions.push(position));
+        viewport.viewportScrollX = 5;
+        viewport.viewportScrollY = 4;
+        viewMainScrollAfter$.emit({});
+        expect(positions[positions.length - 1]).toEqual({ left: 40, right: 144, top: 48, bottom: 92 });
 
         disposable.dispose();
         expect(popupService.removedIds).toEqual(['popup-1']);

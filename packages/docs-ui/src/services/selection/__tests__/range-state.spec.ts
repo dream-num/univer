@@ -69,7 +69,7 @@ function createNodePosition(glyph = 0) {
     };
 }
 
-function createTextRangeHarness(textColor?: string, themeColors: Record<string, string> = {}) {
+function createTextRangeHarness(backgroundColor?: string, themeColors: Record<string, string> = {}) {
     const addedObjects: unknown[] = [];
     const scene = {
         addObject: (object: unknown) => {
@@ -90,7 +90,7 @@ function createTextRangeHarness(textColor?: string, themeColors: Record<string, 
     const skeleton = {
         findNodePositionByCharIndex: (index: number) => createNodePosition(index),
         findGlyphByPosition: () => ({
-            ts: textColor ? { cl: { rgb: textColor } } : {},
+            ts: backgroundColor ? { bg: { rgb: backgroundColor } } : {},
         }),
         getViewModel: () => ({
             getDataModel: () => ({
@@ -147,7 +147,7 @@ describe('selection range state', () => {
         rangePointSpy.mockRestore();
     });
 
-    it('matches the caret endpoint to the current text color across theme directions', () => {
+    it('contrasts the caret endpoint with the effective text background across theme directions', () => {
         const rangePointSpy = vi.spyOn(NodePositionConvertToCursor.prototype, 'getRangePointData').mockImplementation(() => ({
             contentBoxPointGroup: [[
                 { x: 10, y: 20 },
@@ -159,8 +159,8 @@ describe('selection range state', () => {
             cursorList: [{ startOffset: 1, endOffset: 1, collapsed: true }],
         }) as never);
 
-        const createRange = (textColor: string, themeColors: Record<string, string>) => {
-            const { document, scene, skeleton } = createTextRangeHarness(textColor, themeColors);
+        const createRange = (backgroundColor: string | undefined, themeColors: Record<string, string>) => {
+            const { document, scene, skeleton } = createTextRangeHarness(backgroundColor, themeColors);
             return cursorConvertToTextRange(
                 scene as never,
                 { startOffset: 1, endOffset: 1, segmentId: '', segmentPage: -1 },
@@ -168,14 +168,17 @@ describe('selection range state', () => {
                 document as never
             )!;
         };
-        const lightThemeRange = createRange('#f5f7ff', { 'gray.0': '#ffffff', 'gray.1000': '#000000' });
-        const invertedThemeRange = createRange('#f5f7ff', { 'gray.0': '#070b19', 'gray.1000': '#f5f7ff' });
+        const lightBackgroundRange = createRange('#ffffff', { 'gray.0': '#ffffff', 'gray.1000': '#000000' });
+        const darkBackgroundRange = createRange('#070b19', { 'gray.0': '#ffffff', 'gray.1000': '#000000' });
+        const deepOceanRange = createRange(undefined, { 'gray.0': '#070b19', 'gray.1000': '#f5f7ff' });
 
-        expect(lightThemeRange.getAnchor()?.stroke).toBe('gray.0');
-        expect(invertedThemeRange.getAnchor()?.stroke).toBe('gray.1000');
+        expect(lightBackgroundRange.getAnchor()?.stroke).toBe('gray.1000');
+        expect(darkBackgroundRange.getAnchor()?.stroke).toBe('gray.0');
+        expect(deepOceanRange.getAnchor()?.stroke).toBe('gray.1000');
 
-        lightThemeRange.dispose();
-        invertedThemeRange.dispose();
+        lightBackgroundRange.dispose();
+        darkBackgroundRange.dispose();
+        deepOceanRange.dispose();
         rangePointSpy.mockRestore();
     });
 

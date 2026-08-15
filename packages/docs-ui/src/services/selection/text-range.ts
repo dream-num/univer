@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ITextRange, Nullable } from '@univerjs/core';
+import type { IColorStyle, ITextRange, Nullable } from '@univerjs/core';
 import type {
     Documents,
     DocumentSkeleton,
@@ -27,7 +27,7 @@ import type {
 } from '@univerjs/engine-render';
 import type { IDocRange } from './range-interface';
 import { BooleanNumber, ColorKit, COLORS, DOC_RANGE_TYPE, generateRandomId, getColorStyle, RANGE_DIRECTION } from '@univerjs/core';
-import { getColor, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, Rect, RegularPolygon } from '@univerjs/engine-render';
+import { DocumentSkeletonPageType, getColor, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, Rect, RegularPolygon } from '@univerjs/engine-render';
 import {
     compareNodePosition,
     compareNodePositionLogic,
@@ -514,27 +514,39 @@ export class TextRange implements IDocRange {
             return this.style.strokeActive;
         }
 
-        const textColor = glyph?.ts?.cl?.rgb ?? getColorStyle(glyph?.ts?.cl);
         const colorService = this._scene.getEngine?.()?.canvasColorService;
-        if (!textColor || !colorService) {
+        if (!colorService) {
             return DEFAULT_CARET_COLOR;
         }
 
         try {
-            const textColorKit = new ColorKit(colorService.getRenderColor(textColor));
+            const backgroundColorKit = new ColorKit(colorService.getRenderColor(this._getAnchorBackgroundColor(glyph)));
             const gray0 = new ColorKit(colorService.getRenderColor('gray.0'));
             const gray1000 = new ColorKit(colorService.getRenderColor(DEFAULT_CARET_COLOR));
-            if (!textColorKit.isValid || !gray0.isValid || !gray1000.isValid) {
+            if (!backgroundColorKit.isValid || !gray0.isValid || !gray1000.isValid) {
                 return DEFAULT_CARET_COLOR;
             }
 
-            const textLuminance = textColorKit.getLuminance();
-            return Math.abs(gray0.getLuminance() - textLuminance) < Math.abs(gray1000.getLuminance() - textLuminance)
+            return ColorKit.getContrastRatio(gray0, backgroundColorKit) > ColorKit.getContrastRatio(gray1000, backgroundColorKit)
                 ? 'gray.0'
                 : DEFAULT_CARET_COLOR;
         } catch {
             return DEFAULT_CARET_COLOR;
         }
+    }
+
+    private _getAnchorBackgroundColor(glyph: Nullable<IDocumentSkeletonGlyph>): string {
+        const line = glyph?.parent?.parent;
+        const page = line?.parent?.parent?.parent;
+        let cellBackground: IColorStyle | undefined;
+        if (page?.type === DocumentSkeletonPageType.CELL && page.parent && 'rowSource' in page.parent) {
+            const row = page.parent;
+            const cellIndex = row.cells.indexOf(page);
+            cellBackground = row.rowSource.tableCells[cellIndex]?.backgroundColor;
+        }
+
+        const background = glyph?.ts?.bg ?? line?.backgroundColor ?? cellBackground;
+        return background?.rgb ?? getColorStyle(background) ?? 'gray.0';
     }
 
     private _setCursorList(cursorList: ITextRange[]) {

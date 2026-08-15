@@ -100,6 +100,10 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
             accept: DRAWING_IMAGE_ALLOW_IMAGE_LIST.map((image) => `.${image.replace('image/', '')}`).join(','),
         });
 
+        if (this._disposed) {
+            return false;
+        }
+
         const fileLength = files.length;
         if (fileLength > DRAWING_IMAGE_COUNT_LIMIT) {
             this._messageService.show({
@@ -148,7 +152,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
             });
         }
 
-        if (imageParams.length === 0) {
+        if (this._disposed || imageParams.length === 0) {
             return false;
         }
 
@@ -161,6 +165,10 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
             }
             const { imageId, imageSourceType, source, base64Cache } = imageParam;
             const { width, height, image } = await getImageSize(base64Cache || '');
+
+            if (this._disposed) {
+                return false;
+            }
 
             this._imageIoService.addImageSourceCache(imageId, imageSourceType, image);
 

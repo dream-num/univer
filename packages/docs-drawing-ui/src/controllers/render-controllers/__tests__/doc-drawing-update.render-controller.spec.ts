@@ -28,6 +28,8 @@ function createController(options: {
     editArea?: DocumentEditArea;
     drawings?: Record<string, unknown>;
     isFocusing?: boolean;
+    openFile?: () => Promise<File[]>;
+    saveImage?: (file: File) => Promise<unknown>;
 } = {}) {
     const featurePluginOrderUpdate$ = new Subject<any>();
     const featurePluginUpdate$ = new Subject<any[]>();
@@ -117,6 +119,7 @@ function createController(options: {
         }),
     };
     const docSelectionManagerService = {
+        getActiveTextRange: vi.fn(() => null),
         refreshSelection: vi.fn(),
         replaceDocRanges: vi.fn(),
     };
@@ -143,10 +146,18 @@ function createController(options: {
             return isFocusing;
         },
         getActiveTextRange: vi.fn(() => null),
+        getAllTextRanges: vi.fn(() => []),
         getSegment: vi.fn(() => ''),
         onBlur$,
         onFocus$,
         setSegment: vi.fn(),
+    };
+    const imageIoService = {
+        addImageSourceCache: vi.fn(),
+        saveImage: vi.fn(options.saveImage),
+    };
+    const fileOpenerService = {
+        openFile: vi.fn(options.openFile ?? (async () => [])),
     };
 
     const controller = new DocDrawingUpdateRenderController(
@@ -154,7 +165,7 @@ function createController(options: {
         commandService as never,
         docSelectionManagerService as never,
         renderManagerSrv as never,
-        {} as never,
+        imageIoService as never,
         docDrawingService as never,
         drawingManagerService as never,
         contextService as never,
@@ -162,7 +173,7 @@ function createController(options: {
         { t: vi.fn((key: string) => key) } as never,
         docSelectionRenderService as never,
         { refreshDrawings$ } as never,
-        { openFile: vi.fn() } as never
+        fileOpenerService as never
     );
 
     return {
@@ -356,6 +367,31 @@ describe('DocDrawingUpdateRenderController', () => {
 
         expect(docSelectionManagerService.refreshSelection).toHaveBeenCalledTimes(1);
         vi.useRealTimers();
+    });
+
+    it('cancels an image insertion when the render controller is disposed while saving', async () => {
+        let finishSaving: (value: unknown) => void = () => {};
+        const saveImage = vi.fn(() => new Promise<unknown>((resolve) => {
+            finishSaving = resolve;
+        }));
+        const { commandService, controller } = createController({
+            openFile: async () => [{} as File],
+            saveImage,
+        });
+
+        const insertion = controller.insertDocImage();
+        await vi.waitFor(() => expect(saveImage).toHaveBeenCalledTimes(1));
+
+        controller.dispose();
+        finishSaving({
+            imageId: 'image-1',
+            imageSourceType: 'URL',
+            source: 'image.png',
+            base64Cache: 'data:image/png;base64,',
+        });
+
+        await expect(insertion).resolves.toBe(false);
+        expect(commandService.executeCommand).not.toHaveBeenCalled();
     });
 
     it('toggles drawing editability between body and header/footer edit areas', () => {

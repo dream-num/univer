@@ -53,11 +53,9 @@ describe('CanvasColorService', () => {
 
         expect(service.getRenderColor('gray.50')).toBe('#0d1422');
         expect(service.getRenderColor('white')).toBe('white');
-        expect(service.getRenderColor('token(white)')).toBe('#07111f');
 
         themeService.setTheme({
             ...theme,
-            white: '#050914',
             gray: {
                 ...theme.gray,
                 50: '#101827',
@@ -65,7 +63,6 @@ describe('CanvasColorService', () => {
         });
 
         expect(service.getRenderColor('gray.50')).toBe('#101827');
-        expect(service.getRenderColor('token(white)')).toBe('#050914');
     });
 
     it('applies dark rendering to resolved design tokens', () => {
@@ -164,7 +161,6 @@ describe('CanvasColorService', () => {
 
         expect(() => service.getRenderColor('alpha(gray.50, 1.1)')).toThrow('[CanvasColorService]: illegal color');
         expect(() => service.getRenderColor('alpha(not-a-color, 0.5)')).toThrow('[CanvasColorService]: illegal color');
-        expect(() => service.getRenderColor('token(not-a-color)')).toThrow('[CanvasColorService]: illegal color');
     });
 
     it('maps render colors for dark mode rendering', () => {

@@ -22,7 +22,7 @@ import {
     LocaleService,
 } from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import { DocumentEditArea, IRenderManagerService, Path } from '@univerjs/engine-render';
+import { DocumentEditArea, IRenderManagerService, Path, Rect } from '@univerjs/engine-render';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { CloseHeaderFooterCommand } from '../../commands/commands/doc-header-footer.command';
@@ -151,8 +151,46 @@ describe('DocHeaderFooterController', () => {
         controller.dispose();
     });
 
-    it('draws header/footer guides while editing header or footer', () => {
+    it('covers header and footer areas while editing the document body', () => {
+        const { controller, pageRender$ } = createController({ editArea: DocumentEditArea.BODY });
+        const rectSpy = vi.spyOn(Rect, 'drawWith').mockImplementation(() => undefined);
+        const pathSpy = vi.spyOn(Path, 'drawWith').mockImplementation(() => undefined);
+        const textSpy = vi.spyOn(TextBubbleShape, 'drawWith').mockImplementation(() => undefined);
+        const ctx = createCtx();
+
+        pageRender$.next({
+            ctx,
+            pageLeft: 12,
+            pageTop: 24,
+            page: {
+                pageWidth: 200,
+                pageHeight: 300,
+                marginTop: 30,
+                marginBottom: 40,
+            },
+        });
+
+        expect(ctx.translate).toHaveBeenCalledWith(11.5, 23.5);
+        expect(rectSpy).toHaveBeenCalledTimes(2);
+        expect(rectSpy.mock.calls[0][1]).toMatchObject({
+            width: 200,
+            height: 30,
+            fill: 'alpha(white, 0.5)',
+        });
+        expect(rectSpy.mock.calls[1][1]).toMatchObject({
+            width: 200,
+            height: 40,
+            fill: 'alpha(white, 0.5)',
+        });
+        expect(pathSpy).not.toHaveBeenCalled();
+        expect(textSpy).not.toHaveBeenCalled();
+
+        controller.dispose();
+    });
+
+    it('covers the body and draws header/footer guides while editing header or footer', () => {
         const { controller, pageRender$ } = createController({ editArea: DocumentEditArea.HEADER });
+        const rectSpy = vi.spyOn(Rect, 'drawWith').mockImplementation(() => undefined);
         const pathSpy = vi.spyOn(Path, 'drawWith').mockImplementation(() => undefined);
         const textSpy = vi.spyOn(TextBubbleShape, 'drawWith').mockImplementation(() => undefined);
         const ctx = createCtx();
@@ -169,6 +207,11 @@ describe('DocHeaderFooterController', () => {
             },
         });
 
+        expect(rectSpy).toHaveBeenCalledWith(ctx, expect.objectContaining({
+            top: 30,
+            width: 200,
+            height: 230,
+        }));
         expect(pathSpy).toHaveBeenCalledTimes(2);
         expect(pathSpy).toHaveBeenCalledWith(ctx, expect.objectContaining({ stroke: 'primary.600' }));
         expect(textSpy).toHaveBeenCalledWith(ctx, expect.objectContaining({

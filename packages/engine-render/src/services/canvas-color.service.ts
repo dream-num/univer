@@ -71,7 +71,6 @@ const DARK_RENDER_COLOR_OVERRIDES: Record<string, string> = {
 
 const COLOR_MIX_REGEXP = /^mix\(\s*([^,()]+)\s*,\s*([^,()]+)\s*,\s*(0(?:\.\d+)?|1(?:\.0+)?)\s*\)$/;
 const COLOR_ALPHA_REGEXP = /^alpha\(\s*([^,()]+)\s*,\s*(0(?:\.\d+)?|1(?:\.0+)?)\s*\)$/;
-const THEME_TOKEN_REGEXP = /^token\(\s*([^,()]+)\s*\)$/;
 
 /**
  * This service inverts a color for dark mode. This service is exposed
@@ -150,18 +149,6 @@ export class CanvasColorService extends Disposable implements ICanvasColorServic
         const cachedColor = this._resolvedColorCache.get(inputColor);
         if (cachedColor !== undefined) {
             return cachedColor;
-        }
-
-        const tokenMatch = inputColor.match(THEME_TOKEN_REGEXP);
-        if (tokenMatch) {
-            const token = tokenMatch[1].trim();
-            const color = this._themeService.getColorFromTheme<unknown>(token);
-            if (typeof color !== 'string' || !this._themeService.isValidThemeColor(token)) {
-                throw new Error(`[CanvasColorService]: illegal color "${inputColor}"`);
-            }
-
-            this._resolvedColorCache.set(inputColor, color);
-            return color;
         }
 
         const mixMatch = inputColor.match(COLOR_MIX_REGEXP);

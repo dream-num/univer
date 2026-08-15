@@ -343,6 +343,9 @@ export class SheetCanvasPopManagerService extends Disposable {
 
         const { position, position$, disposable } = this._createPositionObserver(bound, currentRender, skeleton, worksheet);
         const popupInjector = this._resolveEmbeddedPopupInjector(unitId, currentRender);
+        const canvasElement = currentRender.engine.getCanvasElement();
+        const scaleAdjust = canvasElement.getBoundingClientRect().width / pxToNum(canvasElement.style.width);
+        const { scaleX, scaleY } = currentRender.scene.getAncestorScale();
 
         const id = this._globalPopupManagerService.addPopup({
             ...popup,
@@ -351,7 +354,13 @@ export class SheetCanvasPopManagerService extends Disposable {
             connectorInjector: popupInjector,
             anchorRect: position,
             anchorRect$: position$,
-            canvasElement: currentRender.engine.getCanvasElement(),
+            canvasElement,
+            boundaryInsets: popup.constrainToCanvas
+                ? {
+                    left: skeleton.rowHeaderWidth * scaleAdjust * scaleX,
+                    top: skeleton.columnHeaderHeight * scaleAdjust * scaleY,
+                }
+                : popup.boundaryInsets,
         });
         const disposableCollection = new DisposableCollection();
         disposableCollection.add(disposable);

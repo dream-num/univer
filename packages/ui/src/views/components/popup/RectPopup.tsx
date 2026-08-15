@@ -89,9 +89,10 @@ export interface IRectPopupProps {
 
     autoRelayout?: boolean;
     boundaryElement?: Element;
+    boundaryInsets?: { left?: number; top?: number };
 }
 
-export interface IPopupLayoutInfo extends Pick<IRectPopupProps, 'direction'> {
+export interface IPopupLayoutInfo extends Pick<IRectPopupProps, 'boundaryInsets' | 'direction'> {
     position: IAbsolutePosition;
     width: number;
     height: number;
@@ -107,9 +108,9 @@ const PUSHING_MINIMUM_GAP = 8;
 
 function resolvePopupDirection(layout: IPopupLayoutInfo): RectPopupDirection {
     const direction = layout.direction ?? 'vertical';
-    const containerTop = layout.containerTop ?? 0;
+    const containerTop = (layout.containerTop ?? 0) + (layout.boundaryInsets?.top ?? 0);
     const availableTop = layout.position.top - containerTop;
-    const availableBottom = containerTop + layout.containerHeight - layout.position.bottom;
+    const availableBottom = (layout.containerTop ?? 0) + layout.containerHeight - layout.position.bottom;
     const placeAbove = availableTop >= availableBottom;
 
     switch (direction) {
@@ -128,10 +129,12 @@ function calcPopupPosition(layout: IPopupLayoutInfo): { top: number; left: numbe
     const { position, width, height, containerHeight, containerWidth, noPushMinimumGap = false } = layout;
     const direction = resolvePopupDirection(layout);
 
-    const containerLeft = layout.containerLeft ?? 0;
-    const containerTop = layout.containerTop ?? 0;
-    const containerRight = containerLeft + containerWidth;
-    const containerBottom = containerTop + containerHeight;
+    const boundaryLeft = layout.containerLeft ?? 0;
+    const boundaryTop = layout.containerTop ?? 0;
+    const containerLeft = boundaryLeft + (layout.boundaryInsets?.left ?? 0);
+    const containerTop = boundaryTop + (layout.boundaryInsets?.top ?? 0);
+    const containerRight = boundaryLeft + containerWidth;
+    const containerBottom = boundaryTop + containerHeight;
     const minTop = noPushMinimumGap ? -Infinity : containerTop + PUSHING_MINIMUM_GAP;
     const maxTop = noPushMinimumGap ? Infinity : containerBottom - height - PUSHING_MINIMUM_GAP;
     const minLeft = noPushMinimumGap ? -Infinity : containerLeft + PUSHING_MINIMUM_GAP;
@@ -228,6 +231,7 @@ function RectPopup(props: IRectPopupProps) {
         noPushMinimumGap,
         autoRelayout = true,
         boundaryElement,
+        boundaryInsets,
     } = props;
     const nodeRef = useRef<HTMLElement>(null);
     const clickOtherFn = useEvent(onClickOutside ?? (() => { /* empty */ }));
@@ -274,6 +278,7 @@ function RectPopup(props: IRectPopupProps) {
                 containerTop,
                 containerWidth,
                 containerHeight,
+                boundaryInsets,
                 direction,
                 noPushMinimumGap,
             };

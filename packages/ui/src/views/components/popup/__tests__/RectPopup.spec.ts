@@ -31,6 +31,22 @@ describe('RectPopup adaptive vertical placement', () => {
         })).toEqual({ left: 668, top: 160 });
     });
 
+    it('keeps a left-side popup outside the container boundary insets', () => {
+        const layout = {
+            position: { left: 40, right: 90, top: 29, bottom: 398 },
+            width: 60,
+            height: 40,
+            containerLeft: 100,
+            containerTop: 200,
+            containerWidth: 400,
+            containerHeight: 300,
+            boundaryInsets: { left: 50, top: 30 },
+            direction: 'left' as const,
+        };
+
+        expect(RectPopup.calcPopupPosition(layout)).toEqual({ left: 158, top: 238 });
+    });
+
     it('keeps a horizontal popup inside the bottom and right container edges', () => {
         expect(RectPopup.calcPopupPosition({
             position: { left: 450, right: 550, top: 480, bottom: 600 },

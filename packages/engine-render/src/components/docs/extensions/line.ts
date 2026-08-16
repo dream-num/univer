@@ -19,13 +19,14 @@ import type { IDocumentSkeletonGlyph } from '../../../basics/i-document-skeleton
 import type { IBoundRectNoAngle } from '../../../basics/vector2';
 import type { UniverRenderingContext } from '../../../context';
 import type { IDrawInfo } from '../../extension';
-import { BaselineOffset, BooleanNumber, getColorStyle, TextDecoration } from '@univerjs/core';
+import { BaselineOffset, BooleanNumber, TextDecoration } from '@univerjs/core';
 import { COLOR_BLACK_RGB, DEFAULT_OFFSET_SPACING } from '../../../basics/const';
 import { calculateRectRotate } from '../../../basics/draw';
 import { degToRad, getScale } from '../../../basics/tools';
 import { Vector2 } from '../../../basics/vector2';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../extension';
 import { docExtension } from '../doc-extension';
+import { getColorStyleForCanvas } from '../layout/style/color';
 
 const UNIQUE_KEY = 'DefaultDocsLineExtension';
 
@@ -140,7 +141,7 @@ export class Line extends docExtension {
         // ctx.translateWithPrecision(FIX_ONE_PIXEL_BLUR_OFFSET, FIX_ONE_PIXEL_BLUR_OFFSET);
 
         const color =
-            (c === BooleanNumber.TRUE ? getColorStyle(glyph.ts?.cl) : getColorStyle(colorStyle)) || COLOR_BLACK_RGB;
+            (c === BooleanNumber.TRUE ? getColorStyleForCanvas(glyph.ts?.cl) : getColorStyleForCanvas(colorStyle)) || COLOR_BLACK_RGB;
         ctx.strokeStyle = color;
 
         this._setLineType(ctx, lineType ?? TextDecoration.SINGLE, lineWidth);

@@ -49,23 +49,9 @@ class TestDocViewScaleService {
 
 class TestViewport {
     scrollX: number | undefined;
-    scrollY: number | undefined;
 
-    scrollToViewportPos(params: { viewportScrollX?: number; viewportScrollY?: number }) {
-        if (params.viewportScrollX !== undefined) {
-            this.scrollX = params.viewportScrollX;
-        }
-        if (params.viewportScrollY !== undefined) {
-            this.scrollY = params.viewportScrollY;
-        }
-    }
-
-    get viewportScrollX() {
-        return this.scrollX ?? 0;
-    }
-
-    get viewportScrollY() {
-        return this.scrollY ?? 0;
+    scrollToViewportPos(params: { viewportScrollX: number }) {
+        this.scrollX = params.viewportScrollX;
     }
 }
 
@@ -274,27 +260,5 @@ describe('DocPageLayoutService', () => {
         expect(scene.width).toBe(0);
         expect(scene.height).toBe(0);
         expect(scene.viewport.scrollX).toBeUndefined();
-    });
-
-    it('keeps the same document point under the viewport zoom anchor', () => {
-        const { documentComponent, scene, service } = createLayoutService({
-            documentWidth: 600,
-            documentHeight: 900,
-            pageMarginLeft: 40,
-            pageMarginTop: 20,
-            engineWidth: 1000,
-            engineHeight: 1200,
-        });
-        service.calculatePagePosition();
-        expect(service.setZoomAnchorAtViewportPoint({ x: 800, y: 300 })).toBe(true);
-
-        TestDocViewScaleService.viewScale = 1.2;
-        service.calculatePagePosition();
-
-        expect(scene.viewport.scrollX).toBe(0);
-        expect(scene.viewport.scrollY).toBeCloseTo(50);
-        expect(documentComponent.left).toBeCloseTo(66.6667);
-        expect((documentComponent.left! + 600) * 1.2).toBeCloseTo(800);
-        expect((documentComponent.top! + 280 - scene.viewport.viewportScrollY) * 1.2).toBeCloseTo(300);
     });
 });

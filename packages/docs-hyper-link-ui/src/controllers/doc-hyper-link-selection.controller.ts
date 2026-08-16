@@ -16,7 +16,7 @@
 
 import type { DocumentDataModel } from '@univerjs/core';
 import type { ISetTextSelectionsOperationParams } from '@univerjs/docs';
-import { Disposable, ICommandService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { CustomRangeType, Disposable, ICommandService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { SetTextSelectionsOperation } from '@univerjs/docs';
 import { DocHyperLinkPopupService } from '../services/hyper-link-popup.service';
 
@@ -40,23 +40,16 @@ export class DocHyperLinkSelectionController extends Disposable {
 
                     const doc = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
                     const primary = ranges[0];
-                    if (primary && doc) {
-                        const { startOffset, endOffset, collapsed, segmentPage } = primary;
-                        const customRanges = doc.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.customRanges;
-                        if (collapsed) {
-                            // cursor
-                            const index = customRanges?.findIndex((value) => (value.startIndex) < startOffset && value.endIndex > endOffset - 1) ?? -1;
-                            if (index > -1) {
-                                const customRange = customRanges![index];
-                                this._docHyperLinkService.showInfoPopup({ unitId, linkId: customRange.rangeId, segmentId, segmentPage, startIndex: customRange.startIndex, endIndex: customRange.endIndex });
-                                return;
-                            }
-                        } else {
-                            // range
-                            const range = customRanges?.find((value) => value.startIndex <= startOffset && value.endIndex >= (endOffset - 1));
-                            if (range) {
-                                return;
-                            }
+                    if (primary?.collapsed && doc) {
+                        const { startOffset, endOffset, segmentPage } = primary;
+                        const customRange = doc.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.customRanges?.find((value) => (
+                            value.rangeType === CustomRangeType.HYPERLINK &&
+                            value.startIndex < startOffset &&
+                            value.endIndex > endOffset - 1
+                        ));
+                        if (customRange) {
+                            this._docHyperLinkService.showInfoPopup({ unitId, linkId: customRange.rangeId, segmentId, segmentPage, startIndex: customRange.startIndex, endIndex: customRange.endIndex });
+                            return;
                         }
                     }
 

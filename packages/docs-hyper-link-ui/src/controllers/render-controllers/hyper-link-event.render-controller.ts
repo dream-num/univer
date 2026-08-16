@@ -41,6 +41,7 @@ export class DocHyperLinkEventRenderController extends Disposable implements IRe
             return;
         }
 
+        this._initPointerDown();
         this._initHover();
         this._initClick();
     }
@@ -51,6 +52,16 @@ export class DocHyperLinkEventRenderController extends Disposable implements IRe
                 ToggleDocHyperLinkInfoPopupOperation.id
             );
         }
+    }
+
+    private _initPointerDown() {
+        this.disposeWithMe(
+            this._docEventManagerService.pointerDownCustomRanges$.subscribe((ranges) => {
+                if (!ranges.some((range) => range.range.rangeType === CustomRangeType.HYPERLINK)) {
+                    this._hyperLinkPopupService.hideInfoPopupOnPointerDown();
+                }
+            })
+        );
     }
 
     private _initHover() {
@@ -88,16 +99,18 @@ export class DocHyperLinkEventRenderController extends Disposable implements IRe
         this.disposeWithMe(
             this._docEventManagerService.clickCustomRanges$.subscribe((range) => {
                 const link = range.range;
-                if (link) {
-                    this._commandService.executeCommand(
-                        ClickDocHyperLinkOperation.id,
-                        {
-                            unitId: this._context.unitId,
-                            linkId: link.rangeId,
-                            segmentId: range.segmentId,
-                        }
-                    );
+                if (link.rangeType !== CustomRangeType.HYPERLINK || (!range.ctrlKey && !range.metaKey)) {
+                    return;
                 }
+
+                this._commandService.executeCommand(
+                    ClickDocHyperLinkOperation.id,
+                    {
+                        unitId: this._context.unitId,
+                        linkId: link.rangeId,
+                        segmentId: range.segmentId,
+                    }
+                );
             })
         );
     }

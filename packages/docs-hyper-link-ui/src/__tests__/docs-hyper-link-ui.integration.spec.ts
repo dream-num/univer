@@ -46,6 +46,11 @@ function createDocData(): IDocumentData {
                 properties: {
                     url: 'https://before.invalid',
                 },
+            }, {
+                startIndex: 0,
+                endIndex: 1,
+                rangeId: 'custom-1',
+                rangeType: CustomRangeType.CUSTOM,
             }],
         },
         documentStyle: {
@@ -119,7 +124,7 @@ describe('docs-hyper-link-ui integration', () => {
         const selectionManager = get(DocSelectionManagerService);
 
         selectionManager.__TEST_ONLY_add([{
-            startOffset: 0,
+            startOffset: 2,
             endOffset: 5,
             collapsed: false,
             isActive: true,
@@ -216,6 +221,7 @@ describe('docs-hyper-link-ui integration', () => {
             segmentPage: undefined,
         }, expect.objectContaining({
             componentKey: 'univer.doc.link-info-popup',
+            offset: [0, 10],
         }), 'test-doc');
 
         expect(await commandService.executeCommand(SetTextSelectionsOperation.id, {
@@ -225,8 +231,8 @@ describe('docs-hyper-link-ui integration', () => {
             isEditing: false,
             style: null,
             ranges: [{
-                startOffset: 0,
-                endOffset: 0,
+                startOffset: 1,
+                endOffset: 1,
                 collapsed: true,
                 segmentId: '',
             }],

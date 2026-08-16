@@ -25,12 +25,17 @@ interface IEsbuildPlugin {
     setup: (build: IPluginBuild) => void;
 }
 
+function isWorkspacePackageSource(importer: string): boolean {
+    const normalizedImporter = importer.replaceAll('\\', '/');
+    return /(?:^|\/)packages(?:-experimental)?\/[^/]+\/src(?:\/|$)/.test(normalizedImporter);
+}
+
 export function ignoreGlobalCssPlugin(): IEsbuildPlugin {
     return {
         name: 'ignore-global-css',
         setup(build: IPluginBuild) {
             build.onResolve({ filter: /\/global\.css$/ }, (args: IResolveArgs) => {
-                if (args.importer.includes('packages')) {
+                if (isWorkspacePackageSource(args.importer)) {
                     return {
                         path: args.path,
                         namespace: 'ignore-global-css',

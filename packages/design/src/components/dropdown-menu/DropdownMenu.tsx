@@ -55,6 +55,7 @@ interface IDropdownMenuSeparatorItem {
 }
 
 interface IDropdownMenuOption {
+    className?: string;
     label?: ReactNode;
     value?: string;
     disabled?: boolean;
@@ -151,6 +152,7 @@ export function DropdownMenu(props: IDropdownMenuProps) {
                             return (
                                 <DropdownMenuRadioItem
                                     key={option.value}
+                                    className={option.className}
                                     value={option.value}
                                     disabled={option.disabled}
                                     hideIndicator={item.hideIndicator}

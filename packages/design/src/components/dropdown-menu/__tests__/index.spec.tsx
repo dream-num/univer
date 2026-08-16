@@ -82,19 +82,20 @@ describe('DropdownMenu', () => {
                 type: 'radio' as const,
                 value: 'a',
                 options: [
-                    { label: 'A', value: 'a' },
+                    { className: 'custom-radio-option', label: 'A', value: 'a' },
                     { label: 'B', value: 'b' },
                 ],
             },
         ];
-        const { container } = render(
-            <DropdownMenu items={items}>
+        const { container, getByText } = render(
+            <DropdownMenu open items={items}>
                 <button type="button">Trigger</button>
             </DropdownMenu>
         );
         const trigger = container.querySelector('button');
         expect(trigger).toBeTruthy();
         expect(trigger).toHaveAttribute('aria-haspopup', 'menu');
+        expect(getByText('A').closest('[role="menuitemradio"]')).toHaveClass('custom-radio-option');
     });
 
     it('should render with checkbox', () => {

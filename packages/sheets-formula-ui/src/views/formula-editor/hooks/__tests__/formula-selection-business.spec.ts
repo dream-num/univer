@@ -245,15 +245,34 @@ describe('formula selection update helpers', () => {
             })),
         };
         const editor = {
-            getDocumentData: vi.fn(() => ({
-                body: {
-                    dataStream: '=SUM(\r\n',
-                },
+            getDocumentDataModel: vi.fn(() => ({
+                getBody: () => ({ dataStream: '=SUM(\r\n' }),
             })),
         };
 
         expect(resolveFormulaSelectionDataStream(accessor as never, editor as never)).toEqual({
             dataStream: '=SUM(\r\n',
+            offset: 0,
+        });
+    });
+
+    it('falls back to the editor unit when the formula editor document model has been disposed', () => {
+        const accessor = {
+            get: vi.fn(() => ({
+                getUnit: vi.fn((unitId: string) => unitId === 'formula-editor'
+                    ? { getBody: () => ({ dataStream: '=A1\r\n' }) }
+                    : undefined),
+                getCurrentUnitOfType: vi.fn(() => ({
+                    getBody: () => ({ dataStream: 'host document text\r\n' }),
+                })),
+            })),
+        };
+        const editor = {
+            getDocumentDataModel: vi.fn(() => null),
+        };
+
+        expect(resolveFormulaSelectionDataStream(accessor as never, editor as never, 'formula-editor')).toEqual({
+            dataStream: '=A1\r\n',
             offset: 0,
         });
     });

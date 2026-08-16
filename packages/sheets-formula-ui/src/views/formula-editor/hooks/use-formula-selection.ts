@@ -28,8 +28,8 @@ import { filter } from 'rxjs';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render.service';
 import { useStateRef } from './use-state-ref';
 
-export function resolveFormulaSelectionDataStream(accssor: IAccessor, editor?: Pick<Editor, 'getDocumentData'>, editorId?: string) {
-    const editorDataStream = editor?.getDocumentData().body?.dataStream;
+export function resolveFormulaSelectionDataStream(accssor: IAccessor, editor?: Pick<Editor, 'getDocumentDataModel'>, editorId?: string) {
+    const editorDataStream = editor?.getDocumentDataModel()?.getBody()?.dataStream;
     if (editorDataStream != null) {
         return { dataStream: editorDataStream, offset: 0 };
     }

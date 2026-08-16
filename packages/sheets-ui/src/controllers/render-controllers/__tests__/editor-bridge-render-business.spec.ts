@@ -79,6 +79,7 @@ function createController(options?: {
     const selectionMoveStart$ = new Subject<any>();
     const selectionSet$ = new Subject<any>();
     const inputBefore$ = new Subject<any>();
+    const renderCreated$ = new Subject<unknown>();
     const spreadsheet = {
         onDblclick$: createEventSubject(),
         onPointerDown$: createEventSubject(),
@@ -119,7 +120,7 @@ function createController(options?: {
         setInputPosition: vi.fn(),
     };
     const renderManagerService = {
-        created$: new Subject<any>(),
+        created$: renderCreated$,
         getRenderUnitById: vi.fn((unitId: string) => unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY
             ? {
                 unitId,
@@ -205,6 +206,7 @@ function createController(options?: {
         docSelectionRenderService,
         editorBridgeService,
         inputBefore$,
+        renderCreated$,
         selectionMoveEnd$,
         selectionSet$,
         spreadsheet,
@@ -368,6 +370,41 @@ describe('EditorBridgeRenderController business flows', () => {
             initialValue: '=',
             unitId: 'unit-1',
         });
+
+        controller.dispose();
+    });
+
+    it('continues opening sheet editing after the internal editor render is recreated', () => {
+        const { commandService, controller, inputBefore$, renderCreated$, workbook$ } = createController();
+        const recreatedInputBefore$ = new Subject<unknown>();
+        const createRender = (input$: Subject<unknown>) => ({
+            unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+            with: vi.fn((token: unknown) => token === DocSelectionRenderService
+                ? { onInputBefore$: input$ }
+                : null),
+        });
+
+        inputBefore$.next({ event: { data: 'A', which: 65 } });
+        renderCreated$.next(createRender(recreatedInputBefore$));
+        inputBefore$.next({ event: { data: 'B', which: 66 } });
+        recreatedInputBefore$.next({ event: { data: 'C', which: 67 } });
+
+        expect(commandService.syncExecuteCommand).toHaveBeenCalledTimes(2);
+        expect(commandService.syncExecuteCommand).toHaveBeenLastCalledWith(SetCellEditVisibleOperation.id, {
+            visible: true,
+            eventType: DeviceInputEventType.Keyboard,
+            keycode: 67,
+            initialValue: 'C',
+            unitId: 'unit-1',
+        });
+
+        renderCreated$.next(createRender(recreatedInputBefore$));
+        recreatedInputBefore$.next({ event: { data: 'D', which: 68 } });
+        expect(commandService.syncExecuteCommand).toHaveBeenCalledTimes(3);
+
+        workbook$.next(null);
+        recreatedInputBefore$.next({ event: { data: 'E', which: 69 } });
+        expect(commandService.syncExecuteCommand).toHaveBeenCalledTimes(3);
 
         controller.dispose();
     });

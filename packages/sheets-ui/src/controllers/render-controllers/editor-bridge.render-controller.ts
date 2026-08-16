@@ -214,6 +214,9 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
     private _initialKeyboardListener(d: DisposableCollection) {
         let disposable: Nullable<IDisposable> = null;
         const addEvent = (render: IRender) => {
+            disposable?.dispose();
+            disposable = null;
+
             const docSelectionRenderService = render.with(DocSelectionRenderService);
             if (docSelectionRenderService) {
                 disposable = toDisposable(docSelectionRenderService.onInputBefore$.subscribe((config) => {
@@ -229,20 +232,19 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
                         this._showEditorByKeyboard(config);
                     }
                 }));
-
-                d.add(disposable);
             }
         };
 
         const render = this._renderManagerService.getRenderUnitById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
         if (render) {
             addEvent(render);
-        } else {
-            this.disposeWithMe(this._renderManagerService.created$.pipe(filter((render) => render.unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY)).subscribe((render) => {
-                disposable?.dispose();
-                addEvent(render);
-            }));
         }
+
+        d.add(this._renderManagerService.created$.pipe(filter((render) => render.unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY)).subscribe(addEvent));
+        d.add(toDisposable(() => {
+            disposable?.dispose();
+            disposable = null;
+        }));
     }
 
     private _initSheetFocusListener(d: DisposableCollection) {

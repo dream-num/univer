@@ -17,6 +17,7 @@
 import type { IDisposable, Nullable, Workbook } from '@univerjs/core';
 import type { ISheetLocationBase } from '@univerjs/sheets';
 import type { ISheetNote } from '@univerjs/sheets-note';
+import type { Subscription } from 'rxjs';
 import { Disposable, Inject, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 import { SheetsNoteModel } from '@univerjs/sheets-note';
 import { CellPopupManagerService } from '@univerjs/sheets-ui';
@@ -26,6 +27,10 @@ import { SHEET_NOTE_COMPONENT } from '../views/config';
 
 export class SheetsNoteAttachmentController extends Disposable {
     private _noteMatrix = new ObjectMatrix<IDisposable>();
+    private readonly _suppressedUnitIds = new Set<string>();
+    private _activeUnitId: Nullable<string> = null;
+    private _activeSheetId: Nullable<string> = null;
+    private _noteChangeSubscription: Nullable<Subscription> = null;
 
     constructor(
         @Inject(SheetsNoteModel) private readonly _sheetsNoteModel: SheetsNoteModel,
@@ -66,22 +71,45 @@ export class SheetsNoteAttachmentController extends Disposable {
 
     override dispose(): void {
         super.dispose();
-        this._noteMatrix.forValue((_, __, disposable) => {
-            disposable.dispose();
-        });
+        this._clearNoteMatrix();
+        this._suppressedUnitIds.clear();
+        this._activeUnitId = null;
+        this._activeSheetId = null;
+        this._noteChangeSubscription?.unsubscribe();
+        this._noteChangeSubscription = null;
+    }
+
+    setPopupSuppressed(unitId: string, suppressed: boolean): void {
+        if (suppressed) {
+            this._suppressedUnitIds.add(unitId);
+        } else {
+            this._suppressedUnitIds.delete(unitId);
+        }
+
+        if (unitId !== this._activeUnitId || !this._activeSheetId) {
+            return;
+        }
+
+        if (suppressed) {
+            this._clearNoteMatrix();
+        } else {
+            this._showPersistentNotes(unitId, this._activeSheetId);
+        }
     }
 
     private _initSheet(targetUnitId: string, targetSheetId: string) {
-        const oldMatrix = this._noteMatrix;
-        oldMatrix.forValue((_, __, disposable) => {
-            disposable.dispose();
-        });
-
-        this._noteMatrix = new ObjectMatrix();
+        this._clearNoteMatrix();
+        this._activeUnitId = targetUnitId;
+        this._activeSheetId = targetSheetId;
         const handleNote = (unitId: string, sheetId: string, row: number, col: number, note: Nullable<ISheetNote>) => {
             const matrix = this._noteMatrix;
             const disposable = matrix.getValue(row, col);
             if (note?.show) {
+                if (this._suppressedUnitIds.has(unitId)) {
+                    disposable?.dispose();
+                    matrix.realDeleteValue(row, col);
+                    return;
+                }
                 if (!disposable) {
                     const newDisposable = this._showPopup(unitId, sheetId, row, col);
                     if (newDisposable) {
@@ -96,9 +124,9 @@ export class SheetsNoteAttachmentController extends Disposable {
             }
         };
 
-        this._sheetsNoteModel.getSheetNotes(targetUnitId, targetSheetId)?.forEach((note) => {
-            handleNote(targetUnitId, targetSheetId, note.row, note.col, note);
-        });
+        if (!this._suppressedUnitIds.has(targetUnitId)) {
+            this._showPersistentNotes(targetUnitId, targetSheetId);
+        }
 
         return this._sheetsNoteModel.change$.subscribe((change) => {
             if (change.unitId !== targetUnitId || change.subUnitId !== targetSheetId) {
@@ -118,10 +146,7 @@ export class SheetsNoteAttachmentController extends Disposable {
                         disposable.dispose();
                         matrix.realDeleteValue(oldRow, oldCol);
                     }
-                    const newDisposable = this._showPopup(unitId, subUnitId, newRow, newCol);
-                    if (newDisposable) {
-                        matrix.setValue(newRow, newCol, newDisposable);
-                    }
+                    handleNote(unitId, subUnitId, newRow, newCol, newNote);
                     break;
                 }
                 case 'update': {
@@ -142,18 +167,36 @@ export class SheetsNoteAttachmentController extends Disposable {
             this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(
                 switchMap((workbook) => workbook?.activeSheet$ ?? of(null))
             ).subscribe((sheet) => {
+                this._noteChangeSubscription?.unsubscribe();
+                this._noteChangeSubscription = null;
                 if (sheet) {
-                    const disposable = this._initSheet(sheet.getUnitId(), sheet.getSheetId());
-                    return () => {
-                        disposable.unsubscribe();
-                    };
+                    this._noteChangeSubscription = this._initSheet(sheet.getUnitId(), sheet.getSheetId());
                 } else {
-                    this._noteMatrix.forValue((_, __, disposable) => {
-                        disposable.dispose();
-                    });
-                    this._noteMatrix = new ObjectMatrix();
+                    this._clearNoteMatrix();
+                    this._activeUnitId = null;
+                    this._activeSheetId = null;
                 }
             })
         );
+    }
+
+    private _showPersistentNotes(unitId: string, sheetId: string): void {
+        this._sheetsNoteModel.getSheetNotes(unitId, sheetId)?.forEach((note) => {
+            if (!note.show || this._noteMatrix.getValue(note.row, note.col)) {
+                return;
+            }
+
+            const disposable = this._showPopup(unitId, sheetId, note.row, note.col);
+            if (disposable) {
+                this._noteMatrix.setValue(note.row, note.col, disposable);
+            }
+        });
+    }
+
+    private _clearNoteMatrix(): void {
+        this._noteMatrix.forValue((_, __, disposable) => {
+            disposable.dispose();
+        });
+        this._noteMatrix = new ObjectMatrix();
     }
 }

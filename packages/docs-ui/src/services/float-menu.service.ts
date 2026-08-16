@@ -26,11 +26,13 @@ import {
     Inject,
     isInternalEditorID,
     IUniverInstanceService,
+    Optional,
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { FLOAT_MENU_COMPONENT_KEY } from '../views/float-toolbar/FloatToolbar';
+import { IDocEmbedRuntimeFocusCoordinator } from './doc-embed-integration.service';
 import { DocCanvasPopManagerService } from './doc-popup-manager.service';
 import { DocSelectionRenderService } from './selection/doc-selection-render.service';
 
@@ -52,6 +54,8 @@ const SKIP_SYMBOLS: string[] = [
 export class DocFloatMenuService extends Disposable implements IRenderModule {
     private _floatMenu: Nullable<{ disposable: IDisposable; start: number; end: number }> = null;
     private _suppressed = false;
+    private _embedSuppressed = false;
+    private _invalidatedSelection: Nullable<string> = null;
 
     constructor(
         private _context: IRenderContext<DocumentDataModel>,
@@ -59,7 +63,8 @@ export class DocFloatMenuService extends Disposable implements IRenderModule {
         @Inject(DocCanvasPopManagerService) private readonly _docCanvasPopManagerService: DocCanvasPopManagerService,
         @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(DocSelectionRenderService) private readonly _docSelectionRenderService: DocSelectionRenderService,
-        @IContextService private readonly _contextService: IContextService
+        @IContextService private readonly _contextService: IContextService,
+        @Optional(IDocEmbedRuntimeFocusCoordinator) private readonly _embedRuntimeFocusCoordinator?: IDocEmbedRuntimeFocusCoordinator
     ) {
         super();
 
@@ -67,6 +72,7 @@ export class DocFloatMenuService extends Disposable implements IRenderModule {
             return;
         }
         this._initSelectionChange();
+        this._initEmbedRuntimeLifecycle();
 
         this.disposeWithMe(() => {
             this._hideFloatMenu();
@@ -94,6 +100,7 @@ export class DocFloatMenuService extends Disposable implements IRenderModule {
 
     private _initSelectionChange() {
         this.disposeWithMe(this._docSelectionRenderService.onSelectionStart$.subscribe(() => {
+            this._invalidatedSelection = null;
             this._hideFloatMenu();
         }));
 
@@ -103,13 +110,19 @@ export class DocFloatMenuService extends Disposable implements IRenderModule {
                 return;
             }
 
-            if (this._suppressed || this._contextService.getContextValue(FOCUSING_COMMON_DRAWINGS)) {
+            if (this._suppressed || this._embedSuppressed || this._contextService.getContextValue(FOCUSING_COMMON_DRAWINGS)) {
                 this._hideFloatMenu();
                 return;
             }
 
             const range = (textRanges.length > 0) && textRanges.find((range) => !range.collapsed);
             if (range) {
+                const selectionKey = this._getSelectionKey(range);
+                if (selectionKey === this._invalidatedSelection) {
+                    this._hideFloatMenu();
+                    return;
+                }
+                this._invalidatedSelection = null;
                 if (range.startOffset === this._floatMenu?.start && range.endOffset === this._floatMenu?.end) {
                     return;
                 }
@@ -118,8 +131,42 @@ export class DocFloatMenuService extends Disposable implements IRenderModule {
                 return;
             }
 
+            this._invalidatedSelection = null;
             this._hideFloatMenu();
         }));
+    }
+
+    private _initEmbedRuntimeLifecycle(): void {
+        if (!this._embedRuntimeFocusCoordinator) {
+            return;
+        }
+
+        const syncSuppressedState = () => {
+            const suppressed = this._embedRuntimeFocusCoordinator?.shouldSuppressHostInteraction(this._context.unitId) === true;
+            if (this._embedSuppressed === suppressed) {
+                return;
+            }
+
+            this._embedSuppressed = suppressed;
+            if (!suppressed) {
+                return;
+            }
+
+            const expandedRange = this._docSelectionManagerService
+                .getTextRanges({ unitId: this._context.unitId, subUnitId: this._context.unitId })
+                ?.find((range) => !range.collapsed);
+            this._invalidatedSelection = expandedRange
+                ? this._getSelectionKey(expandedRange)
+                : this._floatMenu && `${this._floatMenu.start}:${this._floatMenu.end}`;
+            this._hideFloatMenu();
+        };
+
+        this.disposeWithMe(this._embedRuntimeFocusCoordinator.runtimeSessionChanged$.subscribe(syncSuppressedState));
+        syncSuppressedState();
+    }
+
+    private _getSelectionKey(range: Pick<ITextRangeParam, 'startOffset' | 'endOffset'>): string {
+        return `${range.startOffset}:${range.endOffset}`;
     }
 
     private _hideFloatMenu() {

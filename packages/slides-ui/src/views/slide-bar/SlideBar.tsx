@@ -109,19 +109,31 @@ export function SlideSideBar() {
                 {slideList.map((item, index) => (
                     <div
                         key={item.id}
-                        className={clsx('univer-my-4 univer-flex univer-gap-2', {
-                            '[&>div]:univer-border-primary-600 [&>span]:univer-text-primary-600': item.id === activatePageId,
-                        })}
+                        className="univer-my-4 univer-flex univer-justify-end"
                         onClick={() => activatePage(item.id)}
                     >
-                        <span>{index + 1}</span>
-                        <div
-                            ref={divRefs[index]}
-                            className={clsx(`
-                              univer-relative univer-box-border univer-h-32 univer-w-52 univer-bg-gray-0
-                              hover:univer-border-primary-600
-                            `, borderClassName)}
-                        />
+                        <div className="univer-relative univer-h-32 univer-w-52">
+                            <div
+                                ref={divRefs[index]}
+                                className={clsx(`
+                                  univer-box-border univer-h-full univer-w-full univer-bg-gray-0
+                                  hover:univer-border-primary-600
+                                `, borderClassName, {
+                                    'univer-border-primary-600': item.id === activatePageId,
+                                })}
+                            />
+                            <span
+                                className={clsx(`
+                                  univer-pointer-events-none univer-absolute univer-bottom-2 univer-left-2 univer-z-10
+                                  univer-inline-flex univer-h-6 univer-min-w-6 univer-items-center univer-justify-center
+                                  univer-rounded-md univer-px-1.5 univer-text-xs univer-font-medium univer-tabular-nums
+                                `, item.id === activatePageId
+                                    ? 'univer-bg-primary-100 univer-text-primary-800'
+                                    : 'univer-bg-gray-100 univer-text-gray-700')}
+                            >
+                                {index + 1}
+                            </span>
+                        </div>
                     </div>
                 ))}
             </div>

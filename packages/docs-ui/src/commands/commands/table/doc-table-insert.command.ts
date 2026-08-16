@@ -25,20 +25,19 @@ import {
     JSONX,
     TextX,
     TextXActionType,
+    Tools,
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { getCommandSkeleton } from '../../util';
 import {
     getColumnWidths,
-    getEmptyTableCell,
     getEmptyTableRow,
     getInsertColumnActionsParams,
     getInsertColumnBody,
     getInsertRowActionsParams,
     getInsertRowBody,
     getRangeInfoFromRanges,
-    getTableColumn,
     INSERT_COLUMN_POSITION,
     INSERT_ROW_POSITION,
 } from './table';
@@ -265,6 +264,14 @@ export const DocTableInsertColumnCommand: ICommand<IDocTableInsertColumnCommandP
         }
 
         const { offsets, columnIndex, tableId, rowCount } = actionParams;
+        const snapshot = docDataModel.getSnapshot();
+        const table = snapshot.tableSource?.[tableId];
+
+        if (!table) {
+            return false;
+        }
+
+        const insertColumnIndex = columnIndex + Number(position === INSERT_COLUMN_POSITION.RIGHT);
 
         const rawActions: JSONXActions = [];
 
@@ -305,22 +312,18 @@ export const DocTableInsertColumnCommand: ICommand<IDocTableInsertColumnCommandP
 
         // Step 3: Insert table cell;
         for (let i = 0; i < rowCount; i++) {
-            const insertCell = getEmptyTableCell();
-            const insertTableSource = jsonX.insertOp(['tableSource', tableId, 'tableRows', i, 'tableCells', columnIndex], insertCell);
+            const insertCell = Tools.deepClone(table.tableRows[i].tableCells[columnIndex]);
+            delete insertCell.rowSpan;
+            delete insertCell.columnSpan;
+            const insertTableSource = jsonX.insertOp(['tableSource', tableId, 'tableRows', i, 'tableCells', insertColumnIndex], insertCell);
             rawActions.push(insertTableSource!);
         }
-
-        const snapshot = docDataModel.getSnapshot();
 
         const documentStyle = snapshot.documentStyle;
 
         const { marginLeft = 0, marginRight = 0 } = documentStyle;
 
-        const tableColumns = snapshot?.tableSource?.[tableId]?.tableColumns;
-
-        if (!tableColumns) {
-            return false;
-        }
+        const tableColumns = table.tableColumns;
 
         const pageWidth = (documentStyle.pageSize?.width ?? 800) - marginLeft - marginRight;
         const tableWidth = tableColumns.reduce((sum, column) => sum + column.size.width.v, 0);
@@ -333,8 +336,9 @@ export const DocTableInsertColumnCommand: ICommand<IDocTableInsertColumnCommandP
             rawActions.push(action!);
         }
 
-        const insertCol = getTableColumn(newColWidth);
-        const insertTableColumn = jsonX.insertOp(['tableSource', tableId, 'tableColumns', columnIndex], insertCol);
+        const insertCol = Tools.deepClone(tableColumns[columnIndex]);
+        insertCol.size.width.v = newColWidth;
+        const insertTableColumn = jsonX.insertOp(['tableSource', tableId, 'tableColumns', insertColumnIndex], insertCol);
         rawActions.push(insertTableColumn!);
 
         doMutation.params.actions = rawActions.reduce((acc, cur) => {

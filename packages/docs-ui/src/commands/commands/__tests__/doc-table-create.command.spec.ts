@@ -488,8 +488,12 @@ describe('doc table create command helpers', () => {
         ]);
     });
 
-    it('executes column insertion and keeps table width distributed across all columns', async () => {
+    it('executes column insertion with the source cell style and keeps table width distributed', async () => {
         const fixture = createTableFixture();
+        const sourceColors = ['#101828', '#f8fafc', '#ffffff'];
+        fixture.documentData.tableSource![TABLE_ID].tableRows.forEach((row, rowIndex) => {
+            row.tableCells[1].backgroundColor = { rgb: sourceColors[rowIndex] };
+        });
         const testBed = createTableCommandBed(fixture);
         const commandService = testBed.get(ICommandService);
         setActiveTableRange(testBed, fixture.cellRanges[1].startIndex + 1);
@@ -500,6 +504,7 @@ describe('doc table create command helpers', () => {
         const tableSource = testBed.doc.getSnapshot().tableSource?.[TABLE_ID];
         expect(result).toBe(true);
         expect(tableSource?.tableRows.map((row) => row.tableCells.length)).toEqual([4, 4, 4]);
+        expect(tableSource?.tableRows.map((row) => [row.tableCells[1].backgroundColor?.rgb, row.tableCells[2].backgroundColor?.rgb])).toEqual(sourceColors.map((color) => [color, color]));
         expect(tableSource?.tableColumns.map((column) => column.size.width.v)).toEqual([90, 90, 90, 90]);
     });
 

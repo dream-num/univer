@@ -23,7 +23,7 @@ type ItemHeight<T> = (index: number, data: T) => number;
 const isNumber = (value: unknown): value is number => typeof value === 'number';
 
 export interface IVirtualListOptions<T> {
-    containerTarget: React.RefObject<HTMLElement>;
+    containerTarget: React.RefObject<HTMLElement | null>;
     itemHeight: number | ItemHeight<T>;
     overscan?: number;
 }

@@ -20,6 +20,7 @@ import {
     BooleanNumber,
     BorderStyleTypes,
     createSheetGapTestConfig,
+    CustomRangeType,
     HorizontalAlign,
 
     ILogService,
@@ -52,6 +53,7 @@ import {
     SpreadsheetSkeleton,
 } from '../sheet.render-skeleton';
 import { Spreadsheet } from '../spreadsheet';
+import { createDocumentModelWithStyle } from '../util';
 
 const workbookDataFactory = (): IWorkbookData => ({
     id: 'sheet-render-workbook',
@@ -281,6 +283,33 @@ describe('spreadsheet integration', () => {
         expect(scaled.body?.textRuns?.[0].ts?.fs).toBe(10);
         expect(document.documentStyle.textStyle?.fs).toBe(12);
         expect(document.body?.textRuns?.[0].ts?.fs).toBe(20);
+    });
+
+    it('applies document hyperlink styling to rich-text cells', () => {
+        const { skeleton, workbook } = fixture;
+        const worksheet = workbook.getActiveSheet()!;
+        const document = createDocumentModelWithStyle('Univer', {}).getSnapshot();
+        document.body!.customRanges = [{
+            startIndex: 0,
+            endIndex: 5,
+            rangeId: 'sheet-link',
+            rangeType: CustomRangeType.HYPERLINK,
+        }];
+        const cell = { p: document };
+        const style = worksheet.getComposedCellStyleByCellData(0, 6, cell)!;
+
+        skeleton._setFontStylesCache(0, 6, cell, style);
+
+        const pages = skeleton.getFont(0, 6)!.documentSkeleton!.getSkeletonData()!.pages;
+        const sections = pages.flatMap((page) => page.sections);
+        const columns = sections.flatMap((section) => section.columns);
+        const lines = columns.flatMap((column) => column.lines);
+        const divides = lines.flatMap((line) => line.divides);
+        const glyphs = divides.flatMap((divide) => divide.glyphGroup);
+        const linkGlyph = glyphs.find((glyph) => glyph.content === 'U');
+
+        expect(linkGlyph?.ts?.cl?.rgb).toBe('blue.600');
+        expect(linkGlyph?.ts?.ul?.s).toBe(BooleanNumber.TRUE);
     });
 
     it('applies shrink to fit while building the font cache', () => {

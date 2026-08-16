@@ -30,7 +30,7 @@ import type {
 import { Disposable, fromEventSubject, Inject, PresetListType } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { CURSOR_TYPE, documentSkeletonLineIterator, documentSkeletonTableIterator, getDocsTableRenderViewport, getTableIdAndSliceIndex, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
-import { BehaviorSubject, distinctUntilChanged, filter, map, Subject, switchMap, take, throttleTime } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, filter, map, Subject, switchMap, take, tap, throttleTime } from 'rxjs';
 import { DOC_VERTICAL_PADDING } from '../types/const/padding';
 import { transformOffset2Bound } from './doc-popup-manager.service';
 import { NodePositionConvertToCursor } from './selection/convert-text-range';
@@ -277,6 +277,11 @@ interface ICustomRangeActive {
     rects: IBoundRectNoAngle[];
 }
 
+interface ICustomRangeClickEvent extends ICustomRangeActive {
+    ctrlKey: boolean;
+    metaKey: boolean;
+}
+
 interface IBulletActive {
     paragraph: IParagraph;
     segmentId?: string;
@@ -394,8 +399,11 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
     private readonly _hoverCustomRanges$ = new BehaviorSubject<ICustomRangeActive[]>([]);
     readonly hoverCustomRanges$ = this._hoverCustomRanges$.pipe(distinctUntilChanged((pre, aft) => pre.length === aft.length && pre.every((item, i) => aft[i].range.rangeId === item.range.rangeId && aft[i].segmentId === item.segmentId && aft[i].segmentPageIndex === item.segmentPageIndex && aft[i].range.startIndex === item.range.startIndex)));
 
-    private readonly _clickCustomRanges$ = new Subject<ICustomRangeActive>();
+    private readonly _clickCustomRanges$ = new Subject<ICustomRangeClickEvent>();
     readonly clickCustomRanges$ = this._clickCustomRanges$.asObservable();
+
+    private readonly _pointerDownCustomRanges$ = new Subject<ICustomRangeActive[]>();
+    readonly pointerDownCustomRanges$ = this._pointerDownCustomRanges$.asObservable();
 
     private readonly _hoverBullet$ = new Subject<Nullable<IBulletActive>>();
     readonly hoverBullet$ = this._hoverBullet$.pipe(distinctUntilChanged((pre, aft) => pre?.paragraph.startIndex === aft?.paragraph.startIndex && pre?.segmentId === aft?.segmentId && pre?.segmentPageIndex === aft?.segmentPageIndex));
@@ -479,6 +487,7 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
     override dispose() {
         this._hoverCustomRanges$.complete();
         this._clickCustomRanges$.complete();
+        this._pointerDownCustomRanges$.complete();
         super.dispose();
     }
 
@@ -557,6 +566,14 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
         const onPointerDown$ = fromEventSubject(this._context.mainComponent!.onPointerDown$);
         const onPointerUp$ = fromEventSubject(this._context.scene!.onPointerUp$);
         this.disposeWithMe(onPointerDown$.pipe(
+            tap((down) => {
+                if (down.button !== 0) {
+                    return;
+                }
+
+                const point = transformOffset2Bound(down.offsetX, down.offsetY, this._context.scene);
+                this._pointerDownCustomRanges$.next(this._calcActiveRanges(point));
+            }),
             switchMap((down) => onPointerUp$.pipe(take(1), map((up) => ({ down, up })))),
             filter(({ down, up }) => down.target === up.target && (down.button === 2 || up.timeStamp - down.timeStamp < 300))
         ).subscribe(({ down }) => {
@@ -577,7 +594,11 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
 
             const ranges = this._calcActiveRanges(point);
             if (ranges.length) {
-                this._clickCustomRanges$.next(ranges.pop()!);
+                this._clickCustomRanges$.next({
+                    ...ranges.pop()!,
+                    ctrlKey: !!down.ctrlKey,
+                    metaKey: !!down.metaKey,
+                });
             }
 
             const bullet = this._calcActiveBullet(point);

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { EventState, EventSubject, Injector, PresetListType } from '@univerjs/core';
+import { CustomRangeType, EventState, EventSubject, Injector, PresetListType } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { setDocsTableRenderViewportProvider, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -580,6 +580,72 @@ describe('DocEventManagerService list marker helpers', () => {
 
         clickSub.unsubscribe();
         contextMenuSub.unsubscribe();
+        service.dispose();
+    });
+
+    it('includes Ctrl and Command state in custom-range click events', () => {
+        const { context, documents, service } = createDocEventManagerService();
+        const target = {};
+        const clicks: unknown[] = [];
+        const pointerDowns: unknown[] = [];
+        const internalService = service as unknown as {
+            _customRangeDirty: boolean;
+            _customRangeBounds: Array<{
+                customRange: {
+                    rangeId: string;
+                    startIndex: number;
+                    endIndex: number;
+                    rangeType: CustomRangeType;
+                };
+                rects: Array<{ top: number; bottom: number; left: number; right: number }>;
+                segmentPageIndex: number;
+            }>;
+        };
+        internalService._customRangeDirty = false;
+        internalService._customRangeBounds = [{
+            customRange: {
+                rangeId: 'link-1',
+                startIndex: 12,
+                endIndex: 15,
+                rangeType: CustomRangeType.HYPERLINK,
+            },
+            rects: [{ top: 40, bottom: 60, left: 20, right: 80 }],
+            segmentPageIndex: -1,
+        }];
+        const subscription = service.clickCustomRanges$.subscribe((event) => clicks.push(event));
+        const pointerDownSubscription = service.pointerDownCustomRanges$.subscribe((ranges) => pointerDowns.push(ranges));
+
+        documents.onPointerDown$.emitEvent({
+            button: 0,
+            ctrlKey: false,
+            metaKey: true,
+            offsetX: 25,
+            offsetY: 45,
+            target,
+            timeStamp: 100,
+        });
+
+        expect(pointerDowns).toEqual([[
+            expect.objectContaining({ range: expect.objectContaining({ rangeId: 'link-1' }) }),
+        ]]);
+        expect(clicks).toEqual([]);
+
+        context.scene.onPointerUp$.emitEvent({
+            button: 0,
+            offsetX: 25,
+            offsetY: 45,
+            target,
+            timeStamp: 180,
+        });
+
+        expect(clicks).toEqual([expect.objectContaining({
+            ctrlKey: false,
+            metaKey: true,
+            range: expect.objectContaining({ rangeId: 'link-1' }),
+        })]);
+
+        subscription.unsubscribe();
+        pointerDownSubscription.unsubscribe();
         service.dispose();
     });
 

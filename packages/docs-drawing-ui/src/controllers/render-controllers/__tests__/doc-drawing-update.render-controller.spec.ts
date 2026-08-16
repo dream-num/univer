@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { BooleanNumber, FOCUSING_COMMON_DRAWINGS } from '@univerjs/core';
+import { BooleanNumber, DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType } from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
-import { SetDocDrawingArrangeCommand } from '@univerjs/docs-drawing';
+import { SetDocDrawingArrangeCommand, UpdateDrawingDocTransformCommand } from '@univerjs/docs-drawing';
 import { DocumentEditArea } from '@univerjs/engine-render';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
@@ -30,6 +30,7 @@ function createController(options: {
     isFocusing?: boolean;
 } = {}) {
     const featurePluginOrderUpdate$ = new Subject<any>();
+    const featurePluginUpdate$ = new Subject<any[]>();
     const featurePluginGroupUpdate$ = new Subject<any>();
     const featurePluginUngroupUpdate$ = new Subject<any>();
     const focus$ = new Subject<any[] | null>();
@@ -100,6 +101,7 @@ function createController(options: {
     const context = {
         unitId: 'doc-1',
         unit: {
+            getDrawings: vi.fn(() => snapshot.drawings),
             getSnapshot: vi.fn(() => snapshot),
         },
         scene,
@@ -123,12 +125,15 @@ function createController(options: {
     };
     const docDrawingService = {
         focusDrawing: vi.fn(),
+        getDrawingByParam: vi.fn(({ drawingId }: { drawingId: string }) => options.drawings?.[drawingId]),
     };
     const drawingManagerService = {
+        featurePluginUpdate$,
         featurePluginOrderUpdate$,
         featurePluginGroupUpdate$,
         featurePluginUngroupUpdate$,
         focus$,
+        getDrawingByParam: vi.fn(({ drawingId }: { drawingId: string }) => options.drawings?.[drawingId]),
     };
     const contextService = {
         setContextValue: vi.fn(),
@@ -170,6 +175,7 @@ function createController(options: {
         docSelectionRenderService,
         drawingManagerService,
         editAreaChange$,
+        featurePluginUpdate$,
         focus$,
         getShape: (drawingId: string) => shapeByDrawingId.get(drawingId),
         onBlur$,
@@ -187,6 +193,112 @@ function createController(options: {
 }
 
 describe('DocDrawingUpdateRenderController', () => {
+    it('persists inline image crop data without moving its text anchor', () => {
+        const drawing = {
+            unitId: 'doc-1',
+            subUnitId: 'doc-1',
+            drawingId: 'body-drawing',
+            drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+            layoutType: PositionedObjectLayoutType.INLINE,
+            transform: { left: 10, top: 20, width: 100, height: 80 },
+            docTransform: {
+                size: { width: 100, height: 80 },
+                positionH: { relativeFrom: ObjectRelativeFromH.PAGE, posOffset: 10 },
+                positionV: { relativeFrom: ObjectRelativeFromV.PAGE, posOffset: 20 },
+                angle: 0,
+            },
+        };
+        const { commandService, featurePluginUpdate$ } = createController({ drawings: { 'body-drawing': drawing } });
+
+        featurePluginUpdate$.next([{
+            ...drawing,
+            transform: { left: 25, top: 30, width: 70, height: 60 },
+            srcRect: { left: 15, top: 10, right: 15, bottom: 10 },
+        }]);
+
+        expect(commandService.executeCommand).toHaveBeenCalledWith(UpdateDrawingDocTransformCommand.id, {
+            unitId: 'doc-1',
+            subUnitId: 'doc-1',
+            drawings: [
+                { drawingId: 'body-drawing', key: 'srcRect', value: { left: 15, top: 10, right: 15, bottom: 10 } },
+                { drawingId: 'body-drawing', key: 'size', value: { width: 70, height: 60 } },
+            ],
+        });
+    });
+
+    it('persists floating crop position and ignores unrelated drawing updates', () => {
+        const drawing = {
+            unitId: 'doc-1',
+            subUnitId: 'doc-1',
+            drawingId: 'body-drawing',
+            drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+            layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
+            transform: { left: 10, top: 20, width: 100, height: 80 },
+            docTransform: {
+                size: { width: 100, height: 80 },
+                positionH: { relativeFrom: ObjectRelativeFromH.PAGE, posOffset: 40 },
+                positionV: { relativeFrom: ObjectRelativeFromV.PARAGRAPH, posOffset: 50 },
+                angle: 0,
+            },
+        };
+        const { commandService, featurePluginUpdate$ } = createController({ drawings: { 'body-drawing': drawing } });
+
+        featurePluginUpdate$.next([{ ...drawing, transform: { left: 12, top: 24, width: 90, height: 70 } }]);
+        featurePluginUpdate$.next([{ ...drawing, unitId: 'other-doc', srcRect: null }]);
+        expect(commandService.executeCommand).not.toHaveBeenCalled();
+
+        featurePluginUpdate$.next([{
+            ...drawing,
+            transform: { left: 25, top: 26, width: 70, height: 60 },
+            srcRect: { left: 15, top: 6, right: 15, bottom: 14 },
+        }]);
+
+        expect(commandService.executeCommand).toHaveBeenCalledWith(UpdateDrawingDocTransformCommand.id, {
+            unitId: 'doc-1',
+            subUnitId: 'doc-1',
+            drawings: [
+                { drawingId: 'body-drawing', key: 'srcRect', value: { left: 15, top: 6, right: 15, bottom: 14 } },
+                { drawingId: 'body-drawing', key: 'size', value: { width: 70, height: 60 } },
+                { drawingId: 'body-drawing', key: 'positionH', value: { relativeFrom: ObjectRelativeFromH.PAGE, posOffset: 55 } },
+                { drawingId: 'body-drawing', key: 'positionV', value: { relativeFrom: ObjectRelativeFromV.PARAGRAPH, posOffset: 56 } },
+            ],
+        });
+    });
+
+    it('persists shared crop data for repeated header and footer drawings without moving each occurrence', () => {
+        const drawing = {
+            unitId: 'doc-1',
+            subUnitId: 'doc-1',
+            drawingId: 'header-drawing',
+            drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+            layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
+            isMultiTransform: BooleanNumber.TRUE,
+            transform: { left: 10, top: 20, width: 100, height: 80 },
+            transforms: [
+                { left: 10, top: 20, width: 100, height: 80 },
+                { left: 10, top: 820, width: 100, height: 80 },
+            ],
+            docTransform: {
+                size: { width: 100, height: 80 },
+                positionH: { relativeFrom: ObjectRelativeFromH.PAGE, posOffset: 10 },
+                positionV: { relativeFrom: ObjectRelativeFromV.PAGE, posOffset: 20 },
+                angle: 0,
+            },
+        };
+        const { commandService, featurePluginUpdate$ } = createController({ drawings: { 'header-drawing': drawing } });
+
+        featurePluginUpdate$.next([{ ...drawing, srcRect: { left: 10, top: 0, right: 10, bottom: 0 } }]);
+
+        expect(commandService.executeCommand).toHaveBeenCalledWith(UpdateDrawingDocTransformCommand.id, {
+            unitId: 'doc-1',
+            subUnitId: 'doc-1',
+            drawings: [
+                { drawingId: 'header-drawing', key: 'srcRect', value: { left: 10, top: 0, right: 10, bottom: 0 } },
+                { drawingId: 'header-drawing', key: 'size', value: { width: 100, height: 80 } },
+            ],
+        });
+    });
+
     it('forwards drawing order and group events to doc drawing commands', () => {
         const { commandService, drawingManagerService } = createController();
 

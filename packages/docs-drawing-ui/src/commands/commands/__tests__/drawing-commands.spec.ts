@@ -15,7 +15,7 @@
  */
 
 import type { Dependency, DependencyIdentifier, DocumentDataModel, ICommand, IDocumentData } from '@univerjs/core';
-import type { IInsertDocDrawingCommandParams, ISetDocDrawingArrangeCommandParams, IUpdateDrawingDocTransformCommandParams } from '@univerjs/docs-drawing';
+import type { IDocImage, IInsertDocDrawingCommandParams, ISetDocDrawingArrangeCommandParams, IUpdateDrawingDocTransformCommandParams } from '@univerjs/docs-drawing';
 import {
     ArrangeTypeEnum,
     awaitTime,
@@ -30,6 +30,8 @@ import {
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     PositionedObjectLayoutType,
+    RedoCommand,
+    UndoCommand,
     UniverInstanceType,
     WrapTextType,
 } from '@univerjs/core';
@@ -1012,6 +1014,71 @@ describe('docs drawing commands integration', () => {
         });
         expect(testBed.refreshControls).toHaveBeenCalled();
         expect(refreshDrawings).toHaveBeenCalledWith(skeleton);
+
+        testBed.univer.dispose();
+    });
+
+    it('persists image crop state as one undoable document change', async () => {
+        const docData = createDrawingDocData();
+        const initialDrawing = docData.drawings?.['shape-1'] as IDocImage;
+        delete initialDrawing.srcRect;
+        initialDrawing.docTransform = {
+            size: { width: 100, height: 80 },
+            positionH: { relativeFrom: ObjectRelativeFromH.PAGE, posOffset: 10 },
+            positionV: { relativeFrom: ObjectRelativeFromV.PARAGRAPH, posOffset: 20 },
+            angle: 0,
+        };
+        const testBed = setupDrawingTestBed(docData);
+        vi.spyOn(testBed.get(DocSkeletonManagerService), 'getSkeleton').mockReturnValue({} as never);
+
+        expect(await testBed.commandService.executeCommand<IUpdateDrawingDocTransformCommandParams>(UpdateDrawingDocTransformCommand.id, {
+            unitId: 'test-doc',
+            subUnitId: 'test-doc',
+            drawings: [
+                { drawingId: 'shape-1', key: 'srcRect', value: { left: 15, top: 6, right: 15, bottom: 14 } },
+                { drawingId: 'shape-1', key: 'size', value: { width: 70, height: 60 } },
+                { drawingId: 'shape-1', key: 'positionH', value: { relativeFrom: ObjectRelativeFromH.PAGE, posOffset: 25 } },
+                { drawingId: 'shape-1', key: 'positionV', value: { relativeFrom: ObjectRelativeFromV.PARAGRAPH, posOffset: 26 } },
+            ],
+        })).toBe(true);
+        await awaitTime(350);
+
+        const doc = testBed.get(IUniverInstanceService)
+            .getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC)!;
+        const getDrawing = () => doc.getSnapshot().drawings?.['shape-1'] as IDocImage;
+
+        expect(getDrawing()).toMatchObject({
+            srcRect: { left: 15, top: 6, right: 15, bottom: 14 },
+            docTransform: {
+                size: { width: 70, height: 60 },
+                positionH: { relativeFrom: ObjectRelativeFromH.PAGE, posOffset: 25 },
+                positionV: { relativeFrom: ObjectRelativeFromV.PARAGRAPH, posOffset: 26 },
+            },
+        });
+        expect(testBed.get(IUndoRedoService).pitchTopUndoElement()).toMatchObject({
+            undoMutations: [{ id: RichTextEditingMutation.id }],
+            redoMutations: [{ id: RichTextEditingMutation.id }],
+        });
+
+        expect(await testBed.commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(getDrawing().srcRect).toBeUndefined();
+        expect(getDrawing()).toMatchObject({
+            docTransform: {
+                size: { width: 100, height: 80 },
+                positionH: { relativeFrom: ObjectRelativeFromH.PAGE, posOffset: 10 },
+                positionV: { relativeFrom: ObjectRelativeFromV.PARAGRAPH, posOffset: 20 },
+            },
+        });
+
+        expect(await testBed.commandService.executeCommand(RedoCommand.id)).toBe(true);
+        expect(getDrawing()).toMatchObject({
+            srcRect: { left: 15, top: 6, right: 15, bottom: 14 },
+            docTransform: {
+                size: { width: 70, height: 60 },
+                positionH: { relativeFrom: ObjectRelativeFromH.PAGE, posOffset: 25 },
+                positionV: { relativeFrom: ObjectRelativeFromV.PARAGRAPH, posOffset: 26 },
+            },
+        });
 
         testBed.univer.dispose();
     });

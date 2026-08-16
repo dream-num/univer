@@ -1552,7 +1552,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             if (commandInfo.id === SetZoomRatioOperation.id) {
                 const params = (commandInfo.params) as any;
                 const { unitId } = params;
-                const subUnitIds = Array.from(this._domLayerInfoMap.values()).filter((info) => info.unitId === unitId).map((info) => info.subUnitId);
+                const subUnitIds = new Set(Array.from(this._domLayerInfoMap.values()).filter((info) => info.unitId === unitId).map((info) => info.subUnitId));
                 subUnitIds.forEach((subUnitId) => {
                     updateSheet(unitId, subUnitId);
                 });

@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IAccessor, ICommand, IObjectPositionH, IObjectPositionV, ISize, JSONXActions } from '@univerjs/core';
+import type { DocumentDataModel, IAccessor, ICommand, IObjectPositionH, IObjectPositionV, ISize, ISrcRect, JSONXActions, Nullable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import type { IDocImage } from '../../services/doc-drawing.service';
 import {
     CommandType,
     ICommandService,
@@ -28,8 +29,8 @@ import { RichTextEditingMutation } from '@univerjs/docs';
 
 export interface IDrawingDocTransform {
     drawingId: string;
-    key: 'size' | 'angle' | 'positionH' | 'positionV' | 'flipX' | 'flipY';
-    value: ISize | number | boolean | IObjectPositionH | IObjectPositionV;
+    key: 'size' | 'angle' | 'positionH' | 'positionV' | 'flipX' | 'flipY' | 'srcRect';
+    value: ISize | number | boolean | IObjectPositionH | IObjectPositionV | Nullable<ISrcRect>;
 }
 
 export interface IUpdateDrawingDocTransformCommandParams {
@@ -60,9 +61,14 @@ export const UpdateDrawingDocTransformCommand: ICommand = {
         const actions: JSONXActions = [];
 
         for (const { drawingId, key, value } of drawings) {
-            const oldValue = oldDrawings[drawingId]?.docTransform?.[key];
+            const oldDrawing = oldDrawings[drawingId];
+            const oldValue = key === 'srcRect'
+                ? (oldDrawing as IDocImage | undefined)?.srcRect
+                : oldDrawing?.docTransform?.[key];
             if (!Tools.diffValue(oldValue, value)) {
-                const path = ['drawings', drawingId, 'docTransform', key];
+                const path = key === 'srcRect'
+                    ? ['drawings', drawingId, key]
+                    : ['drawings', drawingId, 'docTransform', key];
                 // Optional transform fields such as flips do not exist in older documents.
                 actions.push(oldValue === undefined
                     ? jsonX.insertOp(path, value)!

@@ -16,7 +16,8 @@
 
 import type { DocumentDataModel, ICommandInfo, IDocDrawingPosition, IDrawingParam, IImageIoServiceParam, Nullable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import type { IDocDrawing, IInsertDocDrawingCommandParams, ISetDocDrawingArrangeCommandParams } from '@univerjs/docs-drawing';
+import type { IDocDrawing, IDrawingDocTransform, IInsertDocDrawingCommandParams, ISetDocDrawingArrangeCommandParams, IUpdateDrawingDocTransformCommandParams } from '@univerjs/docs-drawing';
+import type { IImageData } from '@univerjs/drawing';
 import type { Documents, Image, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { LocaleKey } from '../../locale/types';
 import {
@@ -35,7 +36,7 @@ import {
 } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import { buildDocTransform, docDrawingPositionToTransform, DocSelectionManagerService, DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import { IDocDrawingService, InsertDocDrawingCommand, SetDocDrawingArrangeCommand } from '@univerjs/docs-drawing';
+import { IDocDrawingService, InsertDocDrawingCommand, SetDocDrawingArrangeCommand, UpdateDrawingDocTransformCommand } from '@univerjs/docs-drawing';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import {
     DRAWING_IMAGE_ALLOW_IMAGE_LIST,
@@ -78,6 +79,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
         super();
 
         this._updateOrderListener();
+        this._updateImageCropListener();
         this._groupDrawingListener();
         this._focusDrawingListener();
         this._transformDrawingListener();
@@ -266,6 +268,78 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
                 });
             })
         );
+    }
+
+    private _updateImageCropListener() {
+        this.disposeWithMe(
+            this._drawingManagerService.featurePluginUpdate$.subscribe((params) => {
+                const drawings = (params as IImageData[]).flatMap((param) => this._getImageCropUpdates(param));
+
+                if (drawings.length > 0) {
+                    const { unitId } = this._context;
+                    this._commandService.executeCommand<IUpdateDrawingDocTransformCommandParams>(UpdateDrawingDocTransformCommand.id, {
+                        unitId,
+                        subUnitId: unitId,
+                        drawings,
+                    });
+                }
+            })
+        );
+    }
+
+    private _getImageCropUpdates(param: IImageData): IDrawingDocTransform[] {
+        const { unitId, subUnitId, drawingId, transform } = param;
+        if ([unitId, subUnitId].some((id) => id !== this._context.unitId)) {
+            return [];
+        }
+        if (transform == null || !Object.prototype.hasOwnProperty.call(param, 'srcRect')) {
+            return [];
+        }
+
+        const docDrawing = this._getDocDrawing(drawingId);
+        const renderDrawing = this._drawingManagerService.getDrawingByParam({ unitId, subUnitId, drawingId });
+        if (docDrawing?.drawingType !== DrawingTypeEnum.DRAWING_IMAGE || renderDrawing?.transform == null) {
+            return [];
+        }
+        const nextTransform = { ...renderDrawing.transform, ...transform };
+        const drawings: IDrawingDocTransform[] = [{ drawingId, key: 'srcRect', value: param.srcRect }];
+
+        if (nextTransform.width != null && nextTransform.height != null) {
+            drawings.push({
+                drawingId,
+                key: 'size',
+                value: { width: nextTransform.width, height: nextTransform.height },
+            });
+        }
+
+        if (docDrawing.layoutType === PositionedObjectLayoutType.INLINE || renderDrawing.isMultiTransform === BooleanNumber.TRUE) {
+            return drawings;
+        }
+
+        const horizontalDelta = (nextTransform.left ?? 0) - (renderDrawing.transform.left ?? 0);
+        const verticalDelta = (nextTransform.top ?? 0) - (renderDrawing.transform.top ?? 0);
+        const { positionH, positionV } = docDrawing.docTransform;
+
+        if (horizontalDelta !== 0 && positionH.posOffset != null) {
+            drawings.push({
+                drawingId,
+                key: 'positionH',
+                value: { relativeFrom: positionH.relativeFrom, posOffset: positionH.posOffset + horizontalDelta },
+            });
+        }
+        if (verticalDelta !== 0 && positionV.posOffset != null) {
+            drawings.push({
+                drawingId,
+                key: 'positionV',
+                value: { relativeFrom: positionV.relativeFrom, posOffset: positionV.posOffset + verticalDelta },
+            });
+        }
+
+        return drawings;
+    }
+
+    private _getDocDrawing(drawingId: string): IDocDrawing | undefined {
+        return this._context.unit.getDrawings()?.[drawingId] as IDocDrawing | undefined;
     }
 
     private _groupDrawingListener() {

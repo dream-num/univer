@@ -160,7 +160,11 @@ export const BreakLineCommand: ICommand<IBreakLineCommandParams> = {
             textX.push(...dos);
         }
 
-        if (prevParagraph && (prevParagraph.bullet?.listType === PresetListType.CHECK_LIST_CHECKED || prevParagraph.paragraphStyle?.headingId)) {
+        const preserveEmptyParagraphStyle = collapsed && isAtParagraphEnd;
+        const resetParagraphType = prevParagraph?.bullet?.listType === PresetListType.CHECK_LIST_CHECKED ||
+            prevParagraph?.paragraphStyle?.headingId;
+
+        if (prevParagraph && (preserveEmptyParagraphStyle || resetParagraphType)) {
             if (prevParagraphIndex != null && activeTextRange.endOffset < prevParagraphIndex) {
                 textX.push({
                     t: TextXActionType.RETAIN,
@@ -173,27 +177,40 @@ export const BreakLineCommand: ICommand<IBreakLineCommandParams> = {
                 len: 1,
                 body: {
                     dataStream: '',
-                    paragraphs: [
-                        {
-                            ...prevParagraph,
-                            paragraphStyle: {
-                                ...prevParagraph.paragraphStyle,
-                                ...isAtParagraphEnd
-                                    ? {
-                                        headingId: undefined,
-                                        namedStyleType: undefined,
-                                    }
-                                    : null,
-                            },
-                            startIndex: 0,
-                            bullet: prevParagraph.paragraphStyle?.headingId
-                                ? undefined
-                                : {
-                                    ...prevParagraph.bullet!,
-                                    listType: PresetListType.CHECK_LIST,
+                    ...preserveEmptyParagraphStyle
+                        ? {
+                            textRuns: [{
+                                st: 0,
+                                ed: 1,
+                                ts: { ...curTextRun.ts },
+                            }],
+                        }
+                        : null,
+                    ...resetParagraphType
+                        ? {
+                            paragraphs: [
+                                {
+                                    ...prevParagraph,
+                                    paragraphStyle: {
+                                        ...prevParagraph.paragraphStyle,
+                                        ...isAtParagraphEnd
+                                            ? {
+                                                headingId: undefined,
+                                                namedStyleType: undefined,
+                                            }
+                                            : null,
+                                    },
+                                    startIndex: 0,
+                                    bullet: prevParagraph.paragraphStyle?.headingId
+                                        ? undefined
+                                        : {
+                                            ...prevParagraph.bullet!,
+                                            listType: PresetListType.CHECK_LIST,
+                                        },
                                 },
-                        },
-                    ],
+                            ],
+                        }
+                        : null,
                 },
                 coverType: UpdateDocsAttributeType.REPLACE,
             });

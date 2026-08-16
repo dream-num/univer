@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, ICommand, IDocumentData, Injector, Univer } from '@univerjs/core';
-import { awaitTime, DataStreamTreeTokenType, DocumentBlockRangeType, DocumentFlavor, ICommandService, IUniverInstanceService, NamedStyleType, UniverInstanceType } from '@univerjs/core';
+import { awaitTime, DataStreamTreeTokenType, DocumentBlockRangeType, DocumentFlavor, ICommandService, IUniverInstanceService, NamedStyleType, PresetListType, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
 import { NORMAL_TEXT_SELECTION_PLUGIN_STYLE } from '@univerjs/engine-render';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -74,6 +74,40 @@ function getDocumentDataWithColumnGroup(): IDocumentData {
                 width: 594.3,
                 height: 840.51,
             },
+            marginTop: 72,
+            marginBottom: 72,
+            marginRight: 90,
+            marginLeft: 90,
+        },
+    };
+}
+
+function getStyledListDocumentData(documentFlavor: DocumentFlavor): IDocumentData {
+    const T = DataStreamTreeTokenType;
+
+    return {
+        id: 'test-doc',
+        body: {
+            dataStream: `A${T.PARAGRAPH}${T.SECTION_BREAK}`,
+            textRuns: [{
+                st: 0,
+                ed: 1,
+                ts: { fs: 24, cl: { rgb: '#00FF00' } },
+            }],
+            paragraphs: [{
+                paragraphId: 'styled-list',
+                startIndex: 1,
+                bullet: {
+                    listId: 'list-1',
+                    listType: PresetListType.BULLET_LIST,
+                    nestingLevel: 0,
+                },
+            }],
+            sectionBreaks: [{ sectionId: 'section_fixture_204', startIndex: 2 }],
+        },
+        documentStyle: {
+            documentFlavor,
+            pageSize: { width: 594.3, height: 840.51 },
             marginTop: 72,
             marginBottom: 72,
             marginRight: 90,
@@ -265,6 +299,39 @@ describe('break line command', () => {
         expect(getParagraphs()[0].paragraphStyle?.namedStyleType).toBe(NamedStyleType.HEADING_1);
         expect(getParagraphs()[1].paragraphStyle?.namedStyleType).toBeUndefined();
         expect(getParagraphs()[1].paragraphStyle?.headingId).toBeUndefined();
+    });
+
+    it.each([
+        DocumentFlavor.MODERN,
+        DocumentFlavor.TRADITIONAL,
+    ])('keeps the current text style on an empty list paragraph in %s docs', async (documentFlavor) => {
+        univer.dispose();
+        const testBed = createCommandTestBed(getStyledListDocumentData(documentFlavor));
+        univer = testBed.univer;
+        get = testBed.get;
+        commandService = get(ICommandService);
+        commandService.registerCommand(BreakLineCommand);
+        commandService.registerCommand(SetTextSelectionsOperation);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+
+        const selectionManager = get(DocSelectionManagerService);
+        selectionManager.__TEST_ONLY_setCurrentSelection({
+            unitId: 'test-doc',
+            subUnitId: 'test-doc',
+        });
+        selectionManager.__TEST_ONLY_add([{ startOffset: 1, endOffset: 1, collapsed: true, isActive: true, segmentId: '' }]);
+
+        await commandService.executeCommand(BreakLineCommand.id);
+        await awaitTime(0);
+
+        const body = getBody();
+        const emptyParagraph = body?.paragraphs?.[1];
+        const emptyParagraphTextRun = body?.textRuns?.find(({ st, ed }) =>
+            emptyParagraph != null && st <= emptyParagraph.startIndex && ed > emptyParagraph.startIndex
+        );
+
+        expect(emptyParagraph?.bullet?.listType).toBe(PresetListType.BULLET_LIST);
+        expect(emptyParagraphTextRun?.ts).toEqual({ fs: 24, cl: { rgb: '#00FF00' } });
     });
 
     it('keeps the cursor fixed for explicit gap insertion mode', async () => {

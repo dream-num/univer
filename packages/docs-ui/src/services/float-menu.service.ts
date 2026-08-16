@@ -152,7 +152,7 @@ export class DocFloatMenuService extends Disposable implements IRenderModule {
                 {
                     componentKey: FLOAT_MENU_COMPONENT_KEY,
                     direction: range.direction === 'backward' || isInSameLine((range as ITextRangeWithStyle).startNodePosition, (range as ITextRangeWithStyle).endNodePosition) ? 'top-center' : 'bottom-center',
-                    offset: [0, 4],
+                    offset: [0, 10],
                 },
                 unitId
             ),

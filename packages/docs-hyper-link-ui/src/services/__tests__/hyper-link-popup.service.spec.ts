@@ -85,12 +85,17 @@ describe('DocHyperLinkPopupService', () => {
         service.showEditPopup('doc-1', link);
         expect(service.editing).toEqual(link);
         expect(refreshes.at(-1)).toMatchObject({ docRanges: [{ startOffset: 4, endOffset: 9 }] });
-        expect(attached).toMatchObject([{ range: { startOffset: 4, endOffset: 9, collapsed: false }, unitId: 'doc-1' }]);
+        expect(attached).toMatchObject([{
+            range: { startOffset: 4, endOffset: 9, collapsed: false },
+            popup: { offset: [0, 10] },
+            unitId: 'doc-1',
+        }]);
 
         service.showInfoPopup(link);
         expect(service.showing).toEqual(link);
         expect(attached.at(-1)).toMatchObject({
             range: { startOffset: 4, endOffset: 9, collapsed: false },
+            popup: { offset: [0, 10] },
             unitId: 'doc-1',
         });
 
@@ -183,5 +188,29 @@ describe('DocHyperLinkPopupService', () => {
 
         expect(service.showing).toBeNull();
         expect(disposed).toEqual([1]);
+    });
+
+    it('prevents a stale selection refresh from restoring a popup closed on pointer down', async () => {
+        const { service, attached, disposed } = createService();
+        const link = {
+            unitId: 'doc-1',
+            linkId: 'link-1',
+            startIndex: 4,
+            endIndex: 8,
+        };
+
+        service.showInfoPopup(link);
+        service.hideInfoPopupOnPointerDown();
+        service.showInfoPopup(link);
+
+        expect(service.showing).toBeNull();
+        expect(attached).toHaveLength(1);
+        expect(disposed).toEqual([1]);
+
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        service.showInfoPopup(link);
+
+        expect(service.showing).toEqual(link);
+        expect(attached).toHaveLength(2);
     });
 });

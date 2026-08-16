@@ -19,7 +19,7 @@ import type { IBoundRectNoAngle } from '../../../basics';
 import type { IDocumentSkeletonGlyph } from '../../../basics/i-document-skeleton-cached';
 import type { UniverRenderingContext } from '../../../context';
 import type { IDrawInfo } from '../../extension';
-import { BaselineOffset, getColorStyle } from '@univerjs/core';
+import { BaselineOffset } from '@univerjs/core';
 import { GlyphType } from '../../../basics';
 import { cjk } from '../../../basics/cjk-regexp';
 import { COLOR_BLACK_RGB } from '../../../basics/const';
@@ -28,6 +28,7 @@ import { Vector2 } from '../../../basics/vector2';
 import { CheckboxShape, isCheckboxGlyph } from '../../../shape/checkbox';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../extension';
 import { docExtension } from '../doc-extension';
+import { getColorStyleForCanvas } from '../layout/style/color';
 
 const UNIQUE_KEY = 'DefaultDocsFontAndBaseLineExtension';
 
@@ -99,7 +100,7 @@ export class FontAndBaseLine extends docExtension {
         }
 
         const { cl: colorStyle, va: baselineOffset, textFill, glow, outerShadow } = textStyle;
-        const fontColor = getColorStyle(colorStyle) || COLOR_BLACK_RGB;
+        const fontColor = getColorStyleForCanvas(colorStyle) || COLOR_BLACK_RGB;
 
         if (baselineOffset === BaselineOffset.SUPERSCRIPT) {
             spanPointWithFont.y += -bBox.spo;

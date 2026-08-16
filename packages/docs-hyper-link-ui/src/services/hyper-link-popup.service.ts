@@ -39,6 +39,8 @@ export class DocHyperLinkPopupService extends Disposable {
 
     private _editPopup: Nullable<IDisposable> = null;
     private _infoPopup: Nullable<IDisposable> = null;
+    private _infoPopupSuppressed = false;
+    private _infoPopupSuppressionTimer: ReturnType<typeof setTimeout> | null = null;
 
     constructor(
         @Inject(DocCanvasPopManagerService) private readonly _docCanvasPopupManagerService: DocCanvasPopManagerService,
@@ -48,6 +50,9 @@ export class DocHyperLinkPopupService extends Disposable {
         super();
 
         this.disposeWithMe(() => {
+            if (this._infoPopupSuppressionTimer !== null) {
+                clearTimeout(this._infoPopupSuppressionTimer);
+            }
             this._editingLink$.complete();
             this._showingLink$.complete();
         });
@@ -91,6 +96,7 @@ export class DocHyperLinkPopupService extends Disposable {
                 {
                     componentKey: DocHyperLinkEdit.componentKey,
                     direction: 'bottom',
+                    offset: [0, 10],
                 },
                 unitId
             );
@@ -106,6 +112,10 @@ export class DocHyperLinkPopupService extends Disposable {
     }
 
     showInfoPopup(info: ILinkInfo): Nullable<IDisposable> {
+        if (this._infoPopupSuppressed) {
+            return;
+        }
+
         const { linkId, unitId, segmentId, segmentPage, startIndex, endIndex } = info;
         if (
             this.showing?.linkId === linkId &&
@@ -139,6 +149,7 @@ export class DocHyperLinkPopupService extends Disposable {
                 componentKey: DocLinkPopup.componentKey,
                 direction: 'top-center',
                 multipleDirection: 'top',
+                offset: [0, 10],
                 onClickOutside: () => {
                     this.hideInfoPopup();
                 },
@@ -151,5 +162,18 @@ export class DocHyperLinkPopupService extends Disposable {
     hideInfoPopup() {
         this._showingLink$.next(null);
         this._infoPopup?.dispose();
+    }
+
+    hideInfoPopupOnPointerDown() {
+        this._infoPopupSuppressed = true;
+        if (this._infoPopupSuppressionTimer !== null) {
+            clearTimeout(this._infoPopupSuppressionTimer);
+        }
+
+        this.hideInfoPopup();
+        this._infoPopupSuppressionTimer = setTimeout(() => {
+            this._infoPopupSuppressed = false;
+            this._infoPopupSuppressionTimer = null;
+        }, 0);
     }
 }

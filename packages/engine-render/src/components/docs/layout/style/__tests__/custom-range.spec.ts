@@ -16,23 +16,28 @@
 
 import { BooleanNumber, CustomRangeType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
+import { getColorStyleForCanvas } from '../color';
 import { getCustomRangeStyle } from '../custom-range';
 
 describe('custom range style', () => {
-    it('renders active hyperlink-like ranges as blue underlined text', () => {
+    it('renders hyperlink-like ranges with the theme blue token and an underline', () => {
         expect(getCustomRangeStyle({ rangeType: CustomRangeType.HYPERLINK } as never)).toEqual({
             ul: { s: BooleanNumber.TRUE },
-            cl: { rgb: '#274fee' },
+            cl: { rgb: 'blue.600' },
+        });
+        expect(getCustomRangeStyle({ rangeType: CustomRangeType.HYPERLINK, active: false } as never)).toEqual({
+            ul: { s: BooleanNumber.TRUE },
+            cl: { rgb: 'blue.600' },
         });
         expect(getCustomRangeStyle({ rangeType: CustomRangeType.MENTION, active: true } as never)).toEqual({
             ul: { s: BooleanNumber.TRUE },
-            cl: { rgb: '#274fee' },
+            cl: { rgb: 'blue.600' },
         });
     });
 
     it('keeps the link color but drops underline for inactive custom ranges', () => {
         expect(getCustomRangeStyle({ rangeType: CustomRangeType.CUSTOM, active: false } as never)).toEqual({
-            cl: { rgb: '#274fee' },
+            cl: { rgb: 'blue.600' },
         });
     });
 
@@ -47,5 +52,10 @@ describe('custom range style', () => {
 
     it('does not style unsupported custom range types', () => {
         expect(getCustomRangeStyle({ rangeType: CustomRangeType.COMMENT } as never)).toBeNull();
+    });
+
+    it('keeps palette tokens for the canvas theme color service', () => {
+        expect(getColorStyleForCanvas({ rgb: 'blue.600' })).toBe('blue.600');
+        expect(getColorStyleForCanvas({ rgb: 'rgb(39, 79, 238)' })).toBe('#274fee');
     });
 });

@@ -56,11 +56,13 @@ class InertDocSelectionRenderService {
 class RecordingDocCanvasPopManagerService {
     readonly ranges: string[] = [];
     readonly directions: string[] = [];
+    readonly offsets: Array<[number, number] | undefined> = [];
     disposedCount = 0;
 
-    attachPopupToRange(range: { startOffset: number; endOffset: number }, options: { direction: string }) {
+    attachPopupToRange(range: { startOffset: number; endOffset: number }, options: { direction: string; offset?: [number, number] }) {
         this.ranges.push(`${range.startOffset}:${range.endOffset}`);
         this.directions.push(options.direction);
+        this.offsets.push(options.offset);
 
         return {
             dispose: () => {
@@ -187,6 +189,7 @@ describe('DocFloatMenuService', () => {
 
         const popupService = injector.get(DocCanvasPopManagerService) as unknown as RecordingDocCanvasPopManagerService;
         expect(popupService.ranges).toEqual(['0:5']);
+        expect(popupService.offsets).toEqual([[0, 10]]);
         expect(service.floatMenu).toMatchObject({ start: 0, end: 5 });
 
         const selectionRenderService = injector.get(DocSelectionRenderService) as unknown as ActiveDocSelectionRenderService;

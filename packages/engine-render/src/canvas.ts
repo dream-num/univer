@@ -91,7 +91,9 @@ export class Canvas {
         }
 
         if (props.mode === CanvasRenderMode.Printing) {
-            this._context = new UniverPrintingContext(context);
+            this._context = new UniverPrintingContext(context, {
+                canvasColorService: props.colorService,
+            });
         } else {
             this._context = new UniverRenderingContext(context, {
                 canvasColorService: props.colorService,

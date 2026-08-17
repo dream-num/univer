@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { ICanvasColorService } from '../services/canvas-color.service';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Canvas, CanvasRenderMode, HitCanvas, SceneCanvas } from '../canvas';
 
@@ -23,12 +24,13 @@ describe('canvas wrapper', () => {
     });
 
     it('initializes rendering and printing contexts with sizing and ids', () => {
+        const colorService: ICanvasColorService = { getRenderColor: (color: string) => color };
         const canvas = new Canvas({
             id: 'ignored-by-constructor',
             width: 120,
             height: 80,
             pixelRatio: 2,
-            colorService: { getRenderColor: (color: string) => color } as any,
+            colorService,
         });
 
         canvas.setId('render-canvas');
@@ -50,6 +52,23 @@ describe('canvas wrapper', () => {
 
         const printing = new Canvas({ mode: CanvasRenderMode.Printing, width: 20, height: 10 });
         expect(printing.getContext().__mode).toBe('printing');
+        printing.dispose();
+    });
+
+    it('resolves theme colors in printing contexts', () => {
+        const getRenderColor = vi.fn((color: string) => color === 'primary.500' ? '#dfe5ff' : color);
+        const colorService: ICanvasColorService = { getRenderColor };
+        const printing = new Canvas({
+            mode: CanvasRenderMode.Printing,
+            width: 20,
+            height: 10,
+            colorService,
+        });
+
+        printing.getContext().fillStyle = 'primary.500';
+
+        expect(getRenderColor).toHaveBeenCalledWith('primary.500');
+        expect(printing.getContext().fillStyle).toBe('#dfe5ff');
         printing.dispose();
     });
 

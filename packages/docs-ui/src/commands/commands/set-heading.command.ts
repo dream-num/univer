@@ -85,6 +85,7 @@ export const SetParagraphNamedStyleCommand: ICommand<ISetParagraphNamedStyleComm
                 spaceAbove: undefined,
                 spaceBelow: undefined,
                 lineSpacing: undefined,
+                spacingRule: undefined,
             },
             paragraphTextRun: {},
 
@@ -223,6 +224,8 @@ export const QuickHeadingCommand: ICommand<ISetParagraphNamedStyleCommandParams>
                 ...paragraphStyle,
                 headingId: generateRandomId(6),
                 namedStyleType: value,
+                lineSpacing: undefined,
+                spacingRule: undefined,
             },
             cursor: startOffset,
             deleteLen: startOffset - paragraphStart,

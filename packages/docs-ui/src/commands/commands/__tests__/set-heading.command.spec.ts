@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, ICommand, IDocumentData, Injector, Univer } from '@univerjs/core';
-import { awaitTime, DataStreamTreeTokenType, DocumentBlockRangeType, ICommandService, IUniverInstanceService, NamedStyleType, UniverInstanceType, validateDocBodyStructure } from '@univerjs/core';
+import { awaitTime, DataStreamTreeTokenType, DocumentBlockRangeType, ICommandService, IUniverInstanceService, NamedStyleType, SpacingRule, UniverInstanceType, validateDocBodyStructure } from '@univerjs/core';
 import {
     DocContentInsertService,
     DocSelectionManagerService,
@@ -42,7 +42,14 @@ function getHeadingDocumentData(): IDocumentData {
         id: 'test-doc',
         body: {
             dataStream: 'Heading\r\n',
-            paragraphs: [{ paragraphId: 'para_docs_ui_fixture_29', startIndex: 7 }],
+            paragraphs: [{
+                paragraphId: 'para_docs_ui_fixture_29',
+                startIndex: 7,
+                paragraphStyle: {
+                    lineSpacing: 24,
+                    spacingRule: SpacingRule.EXACT,
+                },
+            }],
         },
         documentStyle: {
             pageSize: {
@@ -62,7 +69,14 @@ function getQuickHeadingDocumentData(): IDocumentData {
         id: 'test-doc',
         body: {
             dataStream: '# Heading\r\n',
-            paragraphs: [{ paragraphId: 'para_docs_ui_fixture_30', startIndex: 9 }],
+            paragraphs: [{
+                paragraphId: 'para_docs_ui_fixture_30',
+                startIndex: 9,
+                paragraphStyle: {
+                    lineSpacing: 24,
+                    spacingRule: SpacingRule.EXACT,
+                },
+            }],
         },
         documentStyle: {
             pageSize: {
@@ -201,6 +215,8 @@ describe('set heading commands', () => {
 
         expect(getBody()?.paragraphs?.[0].paragraphStyle?.namedStyleType).toBe(NamedStyleType.HEADING_1);
         expect(getBody()?.paragraphs?.[0].paragraphStyle?.headingId?.length).toBe(6);
+        expect(getBody()?.paragraphs?.[0].paragraphStyle?.lineSpacing).toBeUndefined();
+        expect(getBody()?.paragraphs?.[0].paragraphStyle?.spacingRule).toBeUndefined();
     });
 
     it('applies heading levels and document title styles through public commands', async () => {
@@ -329,5 +345,7 @@ describe('set heading commands', () => {
 
         expect(getBody()?.dataStream.startsWith('Heading')).toBe(true);
         expect(getBody()?.paragraphs?.[0].paragraphStyle?.namedStyleType).toBe(NamedStyleType.HEADING_2);
+        expect(getBody()?.paragraphs?.[0].paragraphStyle?.lineSpacing).toBeUndefined();
+        expect(getBody()?.paragraphs?.[0].paragraphStyle?.spacingRule).toBeUndefined();
     });
 });

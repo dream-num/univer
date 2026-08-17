@@ -1529,6 +1529,58 @@ describe('documents render', () => {
         documents.dispose();
     });
 
+    it('offsets table cell paragraph backgrounds by parent page margins', () => {
+        const bodyPage = createPage(DocumentSkeletonPageType.BODY, '');
+        bodyPage.marginLeft = 30;
+        bodyPage.marginTop = 40;
+        const cell = createPage(DocumentSkeletonPageType.CELL, 'cell-seg');
+        const line = createLine(LineType.PARAGRAPH, 0);
+        line.backgroundColor = { rgb: '#ffeecc' };
+        const column = cell.sections[0].columns[0];
+        column.lines = [line];
+        line.parent = column;
+
+        const documents = new Documents('docs-table-cell-background');
+        (documents as any)._drawLiquid = {
+            x: 12,
+            y: 20,
+            translateSave: vi.fn(),
+            translateRestore: vi.fn(),
+            translateSection: vi.fn(),
+            translateColumn: vi.fn(),
+            translateLine: vi.fn(),
+            translateDivide: vi.fn(),
+        };
+        const drawLineBackground = vi.spyOn(documents as any, '_drawLineBackground').mockImplementation(() => {});
+        const ctx = {
+            beginPath: vi.fn(),
+            clip: vi.fn(),
+            closePath: vi.fn(),
+            rectByPrecision: vi.fn(),
+            restore: vi.fn(),
+            save: vi.fn(),
+        } as any;
+
+        (documents as any)._drawNestedPageContent(
+            ctx,
+            bodyPage,
+            cell,
+            [],
+            null,
+            [],
+            [],
+            { x: 0, y: 0 },
+            0,
+            0,
+            {},
+            { scaleX: 1, scaleY: 1 }
+        );
+
+        expect(drawLineBackground).toHaveBeenCalledWith(ctx, cell, line, column.width, 30, 40);
+
+        documents.dispose();
+    });
+
     it('clips column group nested page content with the column align offset', () => {
         const bodyPage = createPage(DocumentSkeletonPageType.BODY, '');
         bodyPage.marginLeft = 30;

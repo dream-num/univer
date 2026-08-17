@@ -326,7 +326,10 @@ export function getLineHeightConfig(sectionBreakConfig: ISectionBreakConfig, par
     )
         ? BooleanNumber.FALSE
         : BooleanNumber.TRUE;
-    const { lineSpacing = 0, spacingRule = SpacingRule.AUTO, snapToGrid = defaultSnapToGrid } = paragraphStyle;
+    const { lineSpacing: requestedLineSpacing = 0, spacingRule: requestedSpacingRule = SpacingRule.AUTO, snapToGrid = defaultSnapToGrid } = paragraphStyle;
+    const hasValidLineSpacing = Number.isFinite(requestedLineSpacing) && requestedLineSpacing > 0;
+    const lineSpacing = hasValidLineSpacing ? requestedLineSpacing : 0;
+    const spacingRule = hasValidLineSpacing ? requestedSpacingRule : SpacingRule.AUTO;
 
     // Flavored docs use Word-style single spacing by default.
     // Embedded sheet/slides documents keep the legacy grid-based fallback.

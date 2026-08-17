@@ -1169,7 +1169,14 @@ export class Documents extends DocComponent {
                     } else {
                         this._drawLiquid.translateSave();
                         this._drawLiquid.translateLine(line, true, true);
-                        this._drawLineBackground(ctx, nestedPage, line, column.width);
+                        this._drawLineBackground(
+                            ctx,
+                            nestedPage,
+                            line,
+                            column.width,
+                            parentPage.marginLeft,
+                            parentPage.marginTop
+                        );
 
                         const divideLength = divides.length;
 

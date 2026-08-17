@@ -163,7 +163,10 @@ export class Canvas {
         if (this._width === 0 || this._height === 0) {
             return;
         }
-        this.setSize(this._width, this._height, Math.max(1, pixelRatio));
+        if (pixelRatio < 1) {
+            pixelRatio = 1;
+        }
+        this.setSize(this._width, this._height, pixelRatio);
     }
 
     dispose() {
@@ -190,11 +193,11 @@ export class Canvas {
             // If this call fails (due to browser bug, like in Firefox 3.6),
             // then revert to previous no-parameter image/png behavior
             return this.getCanvasEle().toDataURL(mimeType, quality);
-        } catch {
+        } catch (e) {
             try {
                 return this.getCanvasEle().toDataURL();
             } catch (err: unknown) {
-                const message = err instanceof Error ? err.message : String(err);
+                const { message } = err as Error;
                 console.error(
                     `Unable to get data URL. ${message} For more info read https://universheet.net/docs/Canvas.html.`
                 );

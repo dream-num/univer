@@ -16,26 +16,14 @@
 
 import type { Nullable } from '../../shared';
 import type { BaselineOffset, HorizontalAlign, TextDecoration, TextDirection, VerticalAlign } from '../../types/enum';
-import type {
-    IBorderData,
-    IColorStyle,
-    IDocumentBody,
-    IDocumentData,
-    INumberUnit,
-    IParagraphBorder,
-    IParagraphStyle,
-    ISectionColumnProperties,
-    IShading,
-    ITabStop,
-    ITextDecoration,
-    ITextStyle,
-    NamedStyleType,
-    SpacingRule,
-} from '../../types/interfaces';
+import type { IBorderData, IColorStyle, IDocumentBody, IDocumentData, INumberUnit, IParagraphBorder, IParagraphStyle, ISectionColumnProperties, IShading, ITabStop, ITextDecoration, ITextStyle, NamedStyleType, SpacingRule } from '../../types/interfaces';
 import { Tools } from '../../shared';
 import { generateRandomId } from '../../shared/random-id';
 import { BooleanNumber } from '../../types/enum';
-import { CustomRangeType } from '../../types/interfaces';
+import {
+    CustomRangeType,
+
+} from '../../types/interfaces';
 import { createParagraphId } from '../paragraph-id';
 import { createSectionId } from '../section-break-id';
 import { DocumentDataModel } from './document-data-model';
@@ -2446,6 +2434,27 @@ export class RichTextBuilder extends RichTextValue {
     }
 
     /**
+     * Appends linked text.
+     *
+     * This is the agent-friendly alias of `insertLink(text, url)`. Use `setLink(start, end, url)` only when applying a
+     * link to text that is already present and numeric offsets are unavoidable.
+     *
+     * @param text Visible link text to append. An empty string is ignored.
+     * @param url Link destination.
+     * @returns The current builder for chaining.
+     * @example
+     * ```ts
+     * const richText = univerAPI.newRichText()
+     *   .text('Read ')
+     *   .link('Univer documentation', 'https://docs.univer.ai')
+     *   .text(' for details.');
+     * ```
+     */
+    link(text: string, url: string): RichTextBuilder {
+        return text ? this.insertLink(text, url) : this;
+    }
+
+    /**
      * Appends one ordered, unordered, or checklist paragraph.
      *
      * Consecutive items with the same `type` automatically share a generated list id. Supply a semantic `listId` when
@@ -2873,6 +2882,31 @@ export class RichTextBuilder extends RichTextValue {
         return this;
     }
 
+    /**
+     * Removes a link while preserving its visible text.
+     *
+     * Link ids are available from `getLinks()`. This readable alias avoids exposing text offsets for the common case.
+     * Use `cancelLink(start, end)` only when removing every link in a known text range.
+     *
+     * @param id Link range id returned by `getLinks()`.
+     * @returns The current builder for chaining.
+     * @example
+     * ```ts
+     * const richText = univerAPI.newRichText().link('Univer', 'https://univer.ai');
+     * const [link] = richText.getLinks();
+     * if (link) richText.removeLink(link.rangeId);
+     * ```
+     */
+    removeLink(id: string): RichTextBuilder {
+        return this.cancelLink(id);
+    }
+
+    /**
+     * Updates a link destination while preserving its visible text.
+     * @param id Link range id returned by `getLinks()`.
+     * @param url New link destination.
+     * @returns The current builder for chaining.
+     */
     updateLink(id: string, url: string): RichTextBuilder {
         const current = this._data.body?.customRanges?.find((range) => range.rangeId === id);
         if (!current) {
@@ -2936,10 +2970,14 @@ export class RichTextBuilder extends RichTextValue {
     }
 
     /**
-     * Inserts a new link
-     * @param text
-     * @param url
-     * @returns
+     * Inserts linked text at the end of the builder or at an explicit text offset.
+     *
+     * Application and agent code should prefer `link(text, url)` for left-to-right construction. The positional
+     * overload remains available for advanced document-model integrations.
+     *
+     * @param text Visible link text to insert.
+     * @param url Link destination.
+     * @returns The current builder for chaining.
      */
     insertLink(text: string, url: string): RichTextBuilder;
     insertLink(start: number, text: string, url: string): RichTextBuilder;

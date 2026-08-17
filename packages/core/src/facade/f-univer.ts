@@ -14,30 +14,24 @@
  * limitations under the License.
  */
 
-import type {
-    DocumentDataModel,
-    IDisposable,
-    IDocumentData,
-    IExecutionOptions,
-    ILanguagePack,
-    IParagraphStyle,
-    ITextDecoration,
-    ITextStyle,
-    LifecycleStages,
-    LocaleType,
-} from '@univerjs/core';
+import type { DocumentDataModel, IDisposable, IDocumentData, IExecutionOptions, ILanguagePack, IParagraphStyle, ITextDecoration, ITextStyle, LifecycleStages, LocaleType } from '@univerjs/core';
 import type { Theme } from '@univerjs/themes';
 import type { Subscription } from 'rxjs';
 import type { ICommandEvent, IEventParamConfig } from './f-event';
 import {
     CanceledError,
     Disposable,
+
     ICommandService,
+
     Inject,
     Injector,
+
     IUniverInstanceService,
     LifecycleService,
+
     LocaleService,
+
     ParagraphStyleBuilder,
     ParagraphStyleValue,
     RedoCommand,
@@ -605,9 +599,9 @@ export class FUniver extends Disposable {
      * @example
      * ```ts
      * const richText = univerAPI.newRichText()
-     *   .align({ horizontal: univerAPI.Enum.HorizontalAlign.CENTER })
-     *   .text('Status: ')
-     *   .span('Ready', { bold: true, color: '#16a34a' });
+     *   .text('Read ')
+     *   .link('Univer documentation', 'https://docs.univer.ai')
+     *   .text(' for details.');
      * ```
      */
     newRichText(): RichTextBuilder {

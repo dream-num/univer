@@ -304,7 +304,7 @@ Pro 功能請參考 [Univer Pro 指南](https://docs.univer.ai/guides/pro)。這
 要求：
 
 - Node.js `>=22.18`
-- pnpm `>=10`
+- pnpm `>=11`
 
 ```bash
 git clone https://github.com/dream-num/univer.git

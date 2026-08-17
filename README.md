@@ -304,7 +304,7 @@ Package-level READMEs live beside each package under [`packages/`](./packages).
 Requirements:
 
 - Node.js `>=22.18`
-- pnpm `>=10`
+- pnpm `>=11`
 
 ```bash
 git clone https://github.com/dream-num/univer.git

@@ -3,7 +3,7 @@
     "type": "module",
     "version": "1.0.0-beta.1",
     "private": true,
-    "packageManager": "pnpm@10.33.4",
+    "packageManager": "pnpm@11.22.0",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",
     "license": "Apache-2.0",
     "funding": {
@@ -19,16 +19,10 @@
         "url": "https://github.com/dream-num/univer/issues"
     },
     "devEngines": {
-        "runtime": [
-            {
-                "name": "node",
-                "version": ">=22.18"
-            },
-            {
-                "name": "pnpm",
-                "version": ">=10"
-            }
-        ]
+        "runtime": {
+            "name": "node",
+            "version": ">=22.18"
+        }
     },
     "scripts": {
         "prepare": "husky",
@@ -84,14 +78,6 @@
         "turbo": "^2.10.8",
         "typescript": "^6.0.3",
         "vitest": "^4.1.10"
-    },
-    "pnpm": {
-        "overrides": {
-            "@types/react": "19.2.18",
-            "@types/react-dom": "19.2.4",
-            "react": "19.2.8",
-            "react-dom": "19.2.8"
-        }
     },
     "lint-staged": {
         "*": "eslint --fix"

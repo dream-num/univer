@@ -30,7 +30,7 @@ To better assist you, we recommend:
 
 ### Install dependencies
 
-The development of Univer requires Node.js >= 22.18 and pnpm >= 10. Please make sure you have the correct versions installed.
+The development of Univer requires Node.js >= 22.18 and pnpm >= 11. Please make sure you have the correct versions installed.
 
 ```shell
 git clone https://github.com/dream-num/univer

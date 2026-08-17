@@ -15,13 +15,72 @@
  */
 
 import { describe, expect, it } from 'vitest';
+import { PositionedObjectLayoutType } from '../../../../../types/interfaces/i-document-data';
 import { DrawingTypeEnum } from '../../../../../types/interfaces/i-drawing';
 import { DocumentDataModel } from '../../../document-data-model';
+import { JSONX } from '../../../json-x/json-x';
 import { DataStreamTreeTokenType } from '../../../types';
 import { getRichTextEditPath } from '../../utils';
-import { addDrawing, getCustomBlockIdsInSelections } from '../drawings';
+import { addDrawing, getCustomBlockIdsInSelections, removeDrawingReferences } from '../drawings';
 
 describe('drawing build utils', () => {
+    it('removes drawing references in reverse order for a structural text deletion', () => {
+        const doc = new DocumentDataModel({
+            id: 'doc-remove-drawings',
+            body: {
+                dataStream: '\bA\bB\b\r\n',
+                customBlocks: [
+                    { startIndex: 0, blockId: 'drawing-1' },
+                    { startIndex: 2, blockId: 'drawing-2' },
+                    { startIndex: 4, blockId: 'stale-drawing' },
+                ],
+            },
+            drawings: {
+                'drawing-1': {
+                    drawingId: 'drawing-1',
+                    drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+                    docTransform: {
+                        angle: 0,
+                        positionH: { posOffset: 0, relativeFrom: 0 },
+                        positionV: { posOffset: 0, relativeFrom: 0 },
+                        size: { height: 40, width: 80 },
+                    },
+                    layoutType: PositionedObjectLayoutType.INLINE,
+                    subUnitId: 'doc-remove-drawings',
+                    unitId: 'doc-remove-drawings',
+                },
+                'drawing-2': {
+                    drawingId: 'drawing-2',
+                    drawingType: DrawingTypeEnum.DRAWING_SHAPE,
+                    docTransform: {
+                        angle: 0,
+                        positionH: { posOffset: 0, relativeFrom: 0 },
+                        positionV: { posOffset: 0, relativeFrom: 0 },
+                        size: { height: 40, width: 80 },
+                    },
+                    layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
+                    subUnitId: 'doc-remove-drawings',
+                    unitId: 'doc-remove-drawings',
+                },
+            },
+            drawingsOrder: ['drawing-1', 'stale-drawing', 'drawing-2'],
+        });
+
+        const actions = removeDrawingReferences(doc.getSnapshot(), [
+            { startOffset: 0, endOffset: 5, collapsed: false },
+            { startOffset: 2, endOffset: 5, collapsed: false },
+        ]);
+        let composedActions = actions[0];
+        for (const action of actions.slice(1)) {
+            composedActions = JSONX.compose(composedActions, action);
+        }
+        if (!composedActions) throw new Error('Expected drawing removal actions');
+        doc.apply(composedActions);
+
+        expect(doc.getDrawings()).toEqual({});
+        expect(doc.getDrawingsOrder()).toEqual([]);
+    });
+
     it('anchors a drawing in the current table-cell paragraph at the cell structural tail', () => {
         const T = DataStreamTreeTokenType;
         const tableStream = `${T.TABLE_START}${T.TABLE_ROW_START}${T.TABLE_CELL_START}Cell${T.PARAGRAPH}${T.SECTION_BREAK}${T.TABLE_CELL_END}${T.TABLE_ROW_END}${T.TABLE_END}`;

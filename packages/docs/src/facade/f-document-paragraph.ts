@@ -294,7 +294,7 @@ export class FDocumentParagraph extends FBaseInitialable {
             },
             buildPlainTextInsertBody(text),
             this._document.getDocumentDataModel(),
-            this._injector
+            this._commandService
         );
     }
 

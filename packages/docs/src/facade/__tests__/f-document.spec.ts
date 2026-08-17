@@ -16,9 +16,9 @@
 
 import type { IDocumentData, Univer } from '@univerjs/core';
 import type { FDocument } from '../f-document';
-import { ColumnSeparatorType, DataStreamTreeTokenType, DocumentFlavor, ICommandService, IResourceManagerService, IUndoRedoService, PageOrientType, SectionType, UniverInstanceType } from '@univerjs/core';
-import { InsertTextCommand } from '@univerjs/docs';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { BlockType, ColumnSeparatorType, DataStreamTreeTokenType, DocumentFlavor, DrawingTypeEnum, ICommandService, IResourceManagerService, IUndoRedoService, PageOrientType, PositionedObjectLayoutType, SectionType, UniverInstanceType } from '@univerjs/core';
+import { DocSelectionManagerService, InsertTextCommand } from '@univerjs/docs';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createDocumentData, createSimpleDocument, createTestBed } from './create-test-bed';
 
 describe('FDocument', () => {
@@ -185,6 +185,90 @@ describe('FDocument', () => {
         expect(document.save().body?.dataStream).toBe('Document title suffix\r\r\n');
         expect(document.save().body?.paragraphs?.map((item) => item.startIndex)).toEqual([21, 22]);
         expect(document.getParagraphs()[0].getText()).toBe('Document title suffix');
+    });
+
+    it('deletes drawing references atomically without changing the interactive selection', async () => {
+        univer.dispose();
+        const data = createDocumentData('drawing-delete-doc', {
+            dataStream: '\b\r\n',
+            paragraphs: [{ startIndex: 1, paragraphId: 'para-drawing' }],
+            customBlocks: [{ blockId: 'drawing-1', blockType: BlockType.DRAWING, startIndex: 0 }],
+        });
+        data.drawings = { 'drawing-1': createDrawingData('drawing-delete-doc', 'drawing-1') };
+        data.drawingsOrder = ['drawing-1'];
+        createDocumentFacade(data);
+        get(IUndoRedoService);
+        const replaceDocRanges = vi.spyOn(get(DocSelectionManagerService), 'replaceDocRanges');
+
+        expect(document.deleteRange({ startOffset: 0, endOffset: 1 })).toBe(true);
+        await Promise.resolve();
+        expect(replaceDocRanges).not.toHaveBeenCalled();
+        expect(document.save()).toMatchObject({
+            body: { customBlocks: [] },
+            drawings: {},
+            drawingsOrder: [],
+        });
+
+        expect(document.undo()).toBe(true);
+        expect(document.save()).toMatchObject({
+            body: { customBlocks: [{ blockId: 'drawing-1', startIndex: 0 }] },
+            drawings: { 'drawing-1': { drawingId: 'drawing-1' } },
+            drawingsOrder: ['drawing-1'],
+        });
+
+        expect(document.redo()).toBe(true);
+        expect(document.save()).toMatchObject({
+            body: { customBlocks: [] },
+            drawings: {},
+            drawingsOrder: [],
+        });
+    });
+
+    it('deletes header drawing references in the header segment history', () => {
+        univer.dispose();
+        const data = createDocumentData('header-drawing-delete-doc', {
+            dataStream: 'Body\r\n',
+            paragraphs: [{ startIndex: 4, paragraphId: 'body-paragraph' }],
+        });
+        data.headers = {
+            'header-drawing': {
+                headerId: 'header-drawing',
+                body: {
+                    dataStream: '\b\r\n',
+                    paragraphs: [{ startIndex: 1, paragraphId: 'header-paragraph' }],
+                    customBlocks: [{ blockId: 'header-shape', blockType: BlockType.DRAWING, startIndex: 0 }],
+                },
+            },
+        };
+        data.drawings = { 'header-shape': createDrawingData(data.id, 'header-shape') };
+        data.drawingsOrder = ['header-shape'];
+        createDocumentFacade(data);
+        get(IUndoRedoService);
+
+        expect(document.deleteRange({ startOffset: 0, endOffset: 1, segmentId: 'header-drawing' })).toBe(true);
+        expect(document.save()).toMatchObject({
+            headers: { 'header-drawing': { body: { customBlocks: [] } } },
+            drawings: {},
+            drawingsOrder: [],
+        });
+
+        expect(document.undo()).toBe(true);
+        expect(document.save()).toMatchObject({
+            headers: {
+                'header-drawing': {
+                    body: { customBlocks: [{ blockId: 'header-shape', startIndex: 0 }] },
+                },
+            },
+            drawings: { 'header-shape': { drawingId: 'header-shape' } },
+            drawingsOrder: ['header-shape'],
+        });
+
+        expect(document.redo()).toBe(true);
+        expect(document.save()).toMatchObject({
+            headers: { 'header-drawing': { body: { customBlocks: [] } } },
+            drawings: {},
+            drawingsOrder: [],
+        });
     });
 
     it('ensures header and footer segments independently', () => {
@@ -542,3 +626,19 @@ describe('FDocument', () => {
         expect(rule?.getInfo().paragraph.paragraphStyle?.spaceBelow).toEqual({ v: 10 });
     });
 });
+
+function createDrawingData(unitId: string, drawingId: string) {
+    return {
+        drawingId,
+        drawingType: DrawingTypeEnum.DRAWING_SHAPE,
+        docTransform: {
+            angle: 0,
+            positionH: { posOffset: 0, relativeFrom: 0 },
+            positionV: { posOffset: 0, relativeFrom: 0 },
+            size: { height: 40, width: 80 },
+        },
+        layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
+        subUnitId: unitId,
+        unitId,
+    };
+}

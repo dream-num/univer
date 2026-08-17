@@ -77,4 +77,30 @@ describe('Transformer', () => {
         scene.dispose();
         engine.dispose();
     });
+
+    it('notifies change completion for external transforms', () => {
+        const engine = new Engine('transformer-notification-engine', { elementWidth: 100, elementHeight: 100, dpr: 1 });
+        const scene = new Scene('transformer-notification-scene', engine);
+        const rect = new Rect('transformer-notification-rect', { width: 10, height: 10 });
+        const transformer = new Transformer(scene);
+        const changeEnd = vi.fn();
+        const event = { offsetX: 12, offsetY: 34 } as Parameters<Transformer['changeEndNotification']>[0];
+        const changeEndSubscription = transformer.changeEnd$.subscribe(changeEnd);
+
+        transformer.setSelectedControl(rect);
+        transformer.changeEndNotification(event);
+
+        expect(changeEnd).toHaveBeenCalledWith(expect.objectContaining({
+            objects: new Map([[rect.oKey, rect]]),
+            offsetX: 12,
+            offsetY: 34,
+            event,
+        }));
+
+        changeEndSubscription.unsubscribe();
+        transformer.dispose();
+        rect.dispose();
+        scene.dispose();
+        engine.dispose();
+    });
 });

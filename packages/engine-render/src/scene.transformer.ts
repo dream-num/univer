@@ -291,6 +291,18 @@ export class Transformer extends Disposable implements ITransformerConfig {
         return this;
     }
 
+    changeEndNotification(event: IPointerEvent | IMouseEvent) {
+        this._changeEnd$.next({
+            objects: this._selectedObjectMap,
+            type: MoveObserverType.MOVE_END,
+            offsetX: event.offsetX,
+            offsetY: event.offsetY,
+            event,
+        });
+
+        return this;
+    }
+
     getSelectedObjectMap() {
         return this._selectedObjectMap;
     }

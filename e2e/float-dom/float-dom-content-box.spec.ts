@@ -101,6 +101,30 @@ async function selectFloatDom(page: Page): Promise<void> {
     await page.waitForTimeout(50);
 }
 
+async function getTransformerControlPoint(page: Page, controlKey: string): Promise<{ x: number; y: number }> {
+    return page.locator('[data-float-dom-content-box-probe]').evaluate((probe, key) => {
+        const { controls } = window.floatDomContentBoxFixture!.getTransformerGeometry();
+        const control = controls.find(({ key: currentKey }) => currentKey.startsWith(key));
+        if (!control) {
+            throw new Error(`Transformer control not found: ${key}`);
+        }
+
+        const rect = probe.parentElement!.parentElement!.getBoundingClientRect();
+        const intersectionLeft = Math.max(control.left, 0);
+        const intersectionTop = Math.max(control.top, 0);
+        const intersectionRight = Math.min(control.left + control.width, rect.width);
+        const intersectionBottom = Math.min(control.top + control.height, rect.height);
+        return {
+            x: rect.left + (intersectionLeft <= intersectionRight
+                ? (intersectionLeft + intersectionRight) / 2
+                : control.left + control.width / 2),
+            y: rect.top + (intersectionTop <= intersectionBottom
+                ? (intersectionTop + intersectionBottom) / 2
+                : control.top + control.height / 2),
+        };
+    }, controlKey);
+}
+
 async function measureCase(
     page: Page,
     caseId: string,
@@ -311,37 +335,22 @@ test('exact content box preserves transformer rendering and pointer resize/rotat
     }
 
     const resizeTargets = [
-        { name: 'left-top', x: 0, y: 0 },
-        { name: 'center-top', x: 0.5, y: 0 },
-        { name: 'right-top', x: 1, y: 0 },
-        { name: 'left-middle', x: 0, y: 0.5 },
-        { name: 'right-middle', x: 1, y: 0.5 },
-        { name: 'left-bottom', x: 0, y: 1 },
-        { name: 'center-bottom', x: 0.5, y: 1 },
-        { name: 'right-bottom', x: 1, y: 1 },
+        { name: 'left-top', controlKey: '__SpreadsheetTransformerResizeLT__' },
+        { name: 'center-top', controlKey: '__SpreadsheetTransformerResizeCT__' },
+        { name: 'right-top', controlKey: '__SpreadsheetTransformerResizeRT__' },
+        { name: 'left-middle', controlKey: '__SpreadsheetTransformerResizeLM__' },
+        { name: 'right-middle', controlKey: '__SpreadsheetTransformerResizeRM__' },
+        { name: 'left-bottom', controlKey: '__SpreadsheetTransformerResizeLB__' },
+        { name: 'center-bottom', controlKey: '__SpreadsheetTransformerResizeCB__' },
+        { name: 'right-bottom', controlKey: '__SpreadsheetTransformerResizeRB__' },
     ];
     const pointerResults: Array<{ target: string; hit: boolean; action: string; cursor: string }> = [];
 
     for (const target of resizeTargets) {
         await configureCase(page, 'exact-bounds', 1, 0, 'visible', false);
         await selectFloatDom(page);
-        const rect = await page.locator('[data-float-dom-content-box-probe]').evaluate((probe) => {
-            const value = probe.parentElement!.parentElement!.getBoundingClientRect();
-            return { left: value.left, top: value.top, width: value.width, height: value.height };
-        });
-        // Aim inside the visible anchor hit area. Pointer movement reaches the
-        // canvas through FloatDom's event-forwarding boundary.
-        const startX = target.x === 0
-            ? rect.left + 2
-            : target.x === 1
-                ? rect.left + rect.width - 2
-                : rect.left + rect.width / 2;
-        const startY = target.y === 0
-            ? rect.top + 2
-            : target.y === 1
-                ? rect.top + rect.height - 2
-                : rect.top + rect.height / 2;
-        await page.mouse.move(startX, startY);
+        const start = await getTransformerControlPoint(page, target.controlKey);
+        await page.mouse.move(start.x, start.y);
         await page.waitForTimeout(20);
         const cursor = await canvas.evaluate((element) => getComputedStyle(element).cursor);
 
@@ -371,10 +380,7 @@ test('exact content box preserves transformer rendering and pointer resize/rotat
 
     await configureCase(page, 'exact-bounds', 1, 0, 'visible', false);
     await selectFloatDom(page);
-    const resizeStart = await page.locator('[data-float-dom-content-box-probe]').evaluate((probe) => {
-        const rect = probe.parentElement!.parentElement!.getBoundingClientRect();
-        return { x: rect.left + 2, y: rect.top + 2 };
-    });
+    const resizeStart = await getTransformerControlPoint(page, '__SpreadsheetTransformerResizeLT__');
     await page.mouse.move(resizeStart.x, resizeStart.y);
     await page.mouse.down();
     // Keep the gesture inside the FloatDom so every move/up crosses the real
@@ -435,10 +441,7 @@ test('exact content box preserves transformer rendering and pointer resize/rotat
     await selectFloatDom(page);
     await page.evaluate(() => window.floatDomContentBoxFixture!.enableRotateHandle());
     await page.waitForTimeout(20);
-    const rotateStart = await page.locator('[data-float-dom-content-box-probe]').evaluate((probe) => {
-        const rect = probe.parentElement!.parentElement!.getBoundingClientRect();
-        return { x: rect.left + rect.width / 2, y: rect.top - 57 };
-    });
+    const rotateStart = await getTransformerControlPoint(page, '__SpreadsheetTransformerRotate__');
     let rotateCursor = 'default';
     let rotateHitPoint: { x: number; y: number } | undefined;
     for (let offsetY = -8; offsetY <= 8 && !rotateHitPoint; offsetY += 2) {

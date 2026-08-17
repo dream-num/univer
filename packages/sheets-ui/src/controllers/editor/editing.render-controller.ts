@@ -73,6 +73,7 @@ import {
     MoveCursorOperation,
     MoveSelectionOperation,
     ReplaceSnapshotCommand,
+    SetDocInputStyleCommand,
     VIEWPORT_KEY,
 } from '@univerjs/docs-ui';
 import { IFunctionService, LexerTreeBuilder, matchToken } from '@univerjs/engine-formula';
@@ -258,6 +259,7 @@ export class EditingRenderController extends Disposable {
             if (!docSelectionRenderManager) return;
 
             docSelectionRenderManager.sync();
+            this._cacheEmptyCellTextStyle();
         }));
     }
 
@@ -542,6 +544,20 @@ export class EditingRenderController extends Disposable {
         }
 
         this._renderManagerService.getRenderUnitById(unitId)?.scene.resetCursor();
+    }
+
+    private _cacheEmptyCellTextStyle(): void {
+        const sourceBody = this._editorBridgeService.getEditLocation()?.documentLayoutObject.documentModel?.getBody();
+        const textRun = sourceBody?.textRuns?.length === 1 ? sourceBody.textRuns[0] : null;
+        if (
+            sourceBody?.dataStream === DEFAULT_EMPTY_DOCUMENT_VALUE
+            && textRun?.st === 0
+            && textRun.ed === 0
+        ) {
+            this._commandService.syncExecuteCommand(SetDocInputStyleCommand.id, {
+                style: Tools.deepClone(textRun.ts),
+            });
+        }
     }
 
     private _refreshCurrentSelections(sheetId: string) {

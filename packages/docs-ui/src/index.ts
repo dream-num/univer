@@ -242,6 +242,8 @@ export {
 } from './services/doc-event-manager.service';
 export type { IBulletBound, IMutiPageParagraphBound } from './services/doc-event-manager.service';
 export { DocIMEInputManagerService } from './services/doc-ime-input-manager.service';
+export { SetDocInputStyleCommand } from './services/doc-menu-style.service';
+export type { ISetDocInputStyleCommandParams } from './services/doc-menu-style.service';
 export { DocPageLayoutService } from './services/doc-page-layout.service';
 export { DocParagraphMenuService } from './services/doc-paragraph-menu.service';
 export { calcDocRangePositions, DocCanvasPopManagerService } from './services/doc-popup-manager.service';

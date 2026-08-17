@@ -32,5 +32,6 @@ export * from './text-rotation';
 export * from './tools';
 export * from './transform';
 export type { ITransformerConfig } from './transformer-config';
+export { DEFAULT_TRANSFORMER_CONFIG } from './transformer-config';
 export * from './vector2';
 export * from './zoom';

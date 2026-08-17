@@ -31,6 +31,7 @@ import { CURSOR_TYPE } from './basics/const';
 import { offsetRotationAxis } from './basics/offset-rotation-axis';
 import { getCurrentScrollXY } from './basics/scroll-xy';
 import { degToRad, precisionTo, radToDeg } from './basics/tools';
+import { DEFAULT_TRANSFORMER_CONFIG } from './basics/transformer-config';
 import { Vector2 } from './basics/vector2';
 import { Group } from './group';
 import { ScrollTimer } from './scroll-timer';
@@ -162,36 +163,36 @@ export class Transformer extends Disposable implements ITransformerConfig {
     hoverEnterFunc: Nullable<(e: IPointerEvent | IMouseEvent) => void>;
     hoverLeaveFunc: Nullable<(e: IPointerEvent | IMouseEvent) => void>;
 
-    resizeEnabled = true;
+    resizeEnabled: boolean = DEFAULT_TRANSFORMER_CONFIG.resizeEnabled;
 
-    rotateEnabled = true;
+    rotateEnabled: boolean = DEFAULT_TRANSFORMER_CONFIG.rotateEnabled;
     rotationSnaps: number[] = [];
     rotationSnapTolerance = 5;
-    rotateAnchorOffset = 50;
-    rotateAnchorPosition: 'top' | 'bottom' = 'top';
-    rotateLineEnabled = true;
-    rotateSize = 10;
+    rotateAnchorOffset = DEFAULT_TRANSFORMER_CONFIG.rotateAnchorOffset;
+    rotateAnchorPosition: 'top' | 'bottom' = DEFAULT_TRANSFORMER_CONFIG.rotateAnchorPosition;
+    rotateLineEnabled: boolean = DEFAULT_TRANSFORMER_CONFIG.rotateLineEnabled;
+    rotateSize = DEFAULT_TRANSFORMER_CONFIG.rotateSize;
 
-    rotateCornerRadius = 10;
-    rotateFill: string | undefined;
-    rotateStroke: string | undefined;
-    rotateStrokeWidth: number | undefined;
-    rotateIconEnabled = false;
-    rotateIconStroke: string | undefined;
-    rotateIconStrokeWidth = 1.5;
-    borderEnabled = true;
+    rotateCornerRadius = DEFAULT_TRANSFORMER_CONFIG.rotateCornerRadius;
+    rotateFill: string | undefined = DEFAULT_TRANSFORMER_CONFIG.rotateFill;
+    rotateStroke: string | undefined = DEFAULT_TRANSFORMER_CONFIG.rotateStroke;
+    rotateStrokeWidth: number | undefined = DEFAULT_TRANSFORMER_CONFIG.rotateStrokeWidth;
+    rotateIconEnabled: boolean = DEFAULT_TRANSFORMER_CONFIG.rotateIconEnabled;
+    rotateIconStroke: string | undefined = DEFAULT_TRANSFORMER_CONFIG.rotateIconStroke;
+    rotateIconStrokeWidth = DEFAULT_TRANSFORMER_CONFIG.rotateIconStrokeWidth;
+    borderEnabled: boolean = DEFAULT_TRANSFORMER_CONFIG.borderEnabled;
 
-    borderStroke = 'rgb(97, 97, 97)';
-    borderStrokeWidth = 1;
+    borderStroke = DEFAULT_TRANSFORMER_CONFIG.borderStroke;
+    borderStrokeWidth = DEFAULT_TRANSFORMER_CONFIG.borderStrokeWidth;
     borderDash: number[] = [];
-    borderSpacing = 0;
+    borderSpacing = DEFAULT_TRANSFORMER_CONFIG.borderSpacing;
 
-    anchorFill = 'rgb(255, 255, 255)';
-    anchorStroke = 'rgb(185, 185, 185)';
-    anchorStrokeWidth = 1;
-    anchorSize = 10;
-    anchorCornerRadius = 10;
-    anchorStyle: 'default' | 'canva' = 'default';
+    anchorFill = DEFAULT_TRANSFORMER_CONFIG.anchorFill;
+    anchorStroke = DEFAULT_TRANSFORMER_CONFIG.anchorStroke;
+    anchorStrokeWidth = DEFAULT_TRANSFORMER_CONFIG.anchorStrokeWidth;
+    anchorSize = DEFAULT_TRANSFORMER_CONFIG.anchorSize;
+    anchorCornerRadius = DEFAULT_TRANSFORMER_CONFIG.anchorCornerRadius;
+    anchorStyle: 'default' | 'canva' = DEFAULT_TRANSFORMER_CONFIG.anchorStyle;
     anchorSideLongSize = 16;
     anchorSideShortSize = 5;
     anchorSideCornerRadius = 2.5;
@@ -200,12 +201,12 @@ export class Transformer extends Disposable implements ITransformerConfig {
     anchorShadowOffsetX = 0;
     anchorShadowOffsetY = 0;
 
-    keepRatio = true;
+    keepRatio: boolean = DEFAULT_TRANSFORMER_CONFIG.keepRatio;
     centeredScaling = false;
 
     zeroLeft = 0;
     zeroTop = 0;
-    moveBoundaryEnabled = true;
+    moveBoundaryEnabled: boolean = DEFAULT_TRANSFORMER_CONFIG.moveBoundaryEnabled;
 
     /**
      * leftTop centerTop rightTop

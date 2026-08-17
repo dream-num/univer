@@ -67,6 +67,7 @@ import {
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 import { disposeDrawingRenderObject, insertGroupObject } from '@univerjs/drawing-ui';
 import {
+    DEFAULT_TRANSFORMER_CONFIG,
     DRAWING_OBJECT_LAYER_INDEX,
     IRenderManagerService,
     ObjectType,
@@ -222,18 +223,8 @@ export interface IDOMAnchor {
 }
 
 const SHEET_EMBED_FLOAT_DOM_TRANSFORMER_CONFIG = {
-    borderEnabled: true,
-    borderStroke: '#4086f4',
-    borderStrokeWidth: 1,
-    borderSpacing: 2,
-    anchorFill: '#ffffff',
-    anchorStroke: '#4086f4',
-    anchorStrokeWidth: 1.5,
-    anchorSize: 8,
-    anchorCornerRadius: 2,
-    anchorStyle: 'canva',
+    ...DEFAULT_TRANSFORMER_CONFIG,
     rotateEnabled: false,
-    resizeEnabled: true,
     moveBoundaryEnabled: false,
 } as const;
 
@@ -242,18 +233,8 @@ const SHEET_EMBED_FLOAT_DOM_TRANSFORMER_CONFIG = {
  * Charts retain resize handles but do not expose a rotation control.
  */
 export const SHEET_CHART_TRANSFORMER_CONFIG = {
-    borderEnabled: true,
-    borderStroke: '#4086f4',
-    borderStrokeWidth: 1,
-    borderSpacing: 2,
-    anchorFill: '#ffffff',
-    anchorStroke: '#4086f4',
-    anchorStrokeWidth: 1.5,
-    anchorSize: 8,
-    anchorCornerRadius: 2,
-    anchorStyle: 'canva',
+    ...DEFAULT_TRANSFORMER_CONFIG,
     rotateEnabled: false,
-    resizeEnabled: true,
     keepRatio: false,
     moveBoundaryEnabled: false,
 } as const satisfies ITransformerConfig;

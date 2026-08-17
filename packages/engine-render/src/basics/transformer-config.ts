@@ -79,3 +79,31 @@ export interface ITransformerConfig {
     zeroTop?: number;
     moveBoundaryEnabled?: boolean;
 }
+
+export const DEFAULT_TRANSFORMER_CONFIG = {
+    resizeEnabled: true,
+    rotateEnabled: true,
+    rotateAnchorOffset: 28,
+    rotateAnchorPosition: 'bottom',
+    rotateLineEnabled: false,
+    rotateSize: 18,
+    rotateCornerRadius: 9,
+    rotateFill: '#ffffff',
+    rotateStroke: '#4086f4',
+    rotateStrokeWidth: 1,
+    rotateIconEnabled: true,
+    rotateIconStroke: '#4086f4',
+    rotateIconStrokeWidth: 1.25,
+    borderEnabled: true,
+    borderStroke: '#4086f4',
+    borderStrokeWidth: 1,
+    borderSpacing: 2,
+    anchorFill: '#ffffff',
+    anchorStroke: '#4086f4',
+    anchorStrokeWidth: 1.5,
+    anchorSize: 8,
+    anchorCornerRadius: 2,
+    anchorStyle: 'canva',
+    keepRatio: true,
+    moveBoundaryEnabled: true,
+} satisfies ITransformerConfig;

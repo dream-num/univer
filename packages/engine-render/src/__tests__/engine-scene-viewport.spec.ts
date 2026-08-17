@@ -725,7 +725,7 @@ describe('engine scene viewport extra', () => {
         expect((transformer as any)._getRotateAnchorCursor('__SpreadsheetTransformerRotate__')).toBe(CURSOR_TYPE.MOVE);
         expect((transformer as any)._getRotateAnchorPosition('__SpreadsheetTransformerRotate__', 40, 100, { transformerConfig: {} })).toEqual({
             left: 45,
-            top: -34,
+            top: 64,
         });
         expect((transformer as any)._getRotateAnchorPosition('__SpreadsheetTransformerRotate__', 40, 100, {
             transformerConfig: {

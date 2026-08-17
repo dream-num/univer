@@ -158,6 +158,20 @@ describe('Test set frozen commands', () => {
                     })
                 ).toBeFalsy();
             });
+
+            it('should reject incomplete freeze params without changing the worksheet', async () => {
+                const workbook = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+                const worksheet = workbook.getActiveSheet()!;
+                const originFreeze = worksheet.getFreeze();
+                const params = {
+                    startRow: 1,
+                    startColumn: 0,
+                    xSplit: 0,
+                };
+
+                expect(await commandService.executeCommand(SetFrozenCommand.id, params)).toBeFalsy();
+                expect(worksheet.getFreeze()).toEqual(originFreeze);
+            });
         });
     });
 });

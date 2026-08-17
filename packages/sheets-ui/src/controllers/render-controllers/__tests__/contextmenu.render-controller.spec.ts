@@ -16,7 +16,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { ISheetHostChromeOverrideService } from '../../../services/sheet-host-chrome-override.service';
-import { shouldSuppressSheetContextMenuForEmbedOverride } from '../contextmenu.render-controller';
+import { shouldHideSheetHostContextMenuForEmbedSession, shouldSuppressSheetContextMenuForEmbedOverride } from '../contextmenu.render-controller';
 
 describe('SheetContextMenuRenderController embed chrome bridge', () => {
     it('suppresses host sheet context menus only for active sheet-tab overrides', () => {
@@ -36,5 +36,28 @@ describe('SheetContextMenuRenderController embed chrome bridge', () => {
 
     it('uses a sheets-ui owned host chrome override service token', () => {
         expect(ISheetHostChromeOverrideService).toBeTruthy();
+    });
+
+    it('closes an open host context menu whenever a child session takes ownership', () => {
+        expect(shouldHideSheetHostContextMenuForEmbedSession('host-1', {
+            embedId: 'embed-1',
+            hostUnitId: 'host-1',
+            sessionMode: 'child-keyboard',
+        })).toBe(true);
+        expect(shouldHideSheetHostContextMenuForEmbedSession('host-1', {
+            embedId: 'embed-1',
+            hostUnitId: 'host-1',
+            sessionMode: 'child-fullscreen',
+        })).toBe(true);
+        expect(shouldHideSheetHostContextMenuForEmbedSession('host-1', {
+            embedId: 'embed-1',
+            hostUnitId: 'host-2',
+            sessionMode: 'child-fullscreen',
+        })).toBe(false);
+        expect(shouldHideSheetHostContextMenuForEmbedSession('host-1', {
+            embedId: 'embed-1',
+            hostUnitId: 'host-1',
+            sessionMode: 'host-passive',
+        })).toBe(false);
     });
 });

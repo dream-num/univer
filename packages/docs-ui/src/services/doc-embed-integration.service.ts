@@ -15,6 +15,7 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
+import type { Observable } from 'rxjs';
 import { toDisposable } from '@univerjs/core';
 import { Subject } from 'rxjs';
 
@@ -28,6 +29,7 @@ export interface IDocEmbedInteractionBoundaryService {
 }
 
 export interface IDocEmbedRuntimeFocusCoordinator {
+    readonly runtimeSessionChanged$: Observable<void>;
     isChildUnitRuntimeEvent(unitId: string | undefined, target: EventTarget | null | undefined, event?: Event): boolean;
     isChildUnitInActiveSession(unitId: string | undefined): boolean;
     shouldSuppressHostInteraction(unitId: string | undefined, target?: EventTarget | null, event?: Event): boolean;

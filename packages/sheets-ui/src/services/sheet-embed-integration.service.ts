@@ -29,11 +29,14 @@ export const SHEET_EMBED_HOST_UNIT_ID_ATTRIBUTE = 'data-embed-host-unit-id';
 export const SHEET_EMBED_CHILD_UNIT_ID_ATTRIBUTE = 'data-embed-child-unit-id';
 export const SHEET_EMBED_CHILD_TYPE_ATTRIBUTE = 'data-embed-child-type';
 
+export type SheetEmbedRuntimeSessionMode = 'host-passive' | 'child-keyboard' | 'child-fullscreen' | 'child-tab';
+
 export interface ISheetEmbedRuntimeDomScope {
     embedId: string;
     hostUnitId?: string;
     childUnitId?: string;
     childType?: UniverInstanceType;
+    sessionMode?: SheetEmbedRuntimeSessionMode;
 }
 
 export interface ISheetEmbedInteractionBoundaryService {
@@ -52,6 +55,7 @@ export interface ISheetEmbedRuntimeFocusCoordinator {
         childUnitId?: string;
         childType?: UniverInstanceType;
         associatedChildUnitIds?: string[];
+        sessionMode?: SheetEmbedRuntimeSessionMode;
     }): IDisposable;
     registerElement(options: {
         embedId: string;
@@ -128,6 +132,7 @@ export class EmbedRuntimeFocusCoordinator implements ISheetEmbedRuntimeFocusCoor
         hostUnitId?: string;
         childType?: UniverInstanceType;
         associatedChildUnitIds?: string[];
+        sessionMode?: SheetEmbedRuntimeSessionMode;
     }>();
 
     private readonly _elements = new Map<string, Set<HTMLElement>>();
@@ -141,6 +146,7 @@ export class EmbedRuntimeFocusCoordinator implements ISheetEmbedRuntimeFocusCoor
         hostUnitId?: string;
         childType?: UniverInstanceType;
         associatedChildUnitIds?: string[];
+        sessionMode?: SheetEmbedRuntimeSessionMode;
     }): IDisposable {
         this._leases.add(options);
         if (options.role === 'child-session') {
@@ -176,7 +182,7 @@ export class EmbedRuntimeFocusCoordinator implements ISheetEmbedRuntimeFocusCoor
         return !!element && this._elements.get(embedId)?.has(element) === true;
     }
 
-    registerRuntimeScope(options: { embedId: string; hostUnitId?: string; childUnitId?: string; childType?: UniverInstanceType }): IDisposable {
+    registerRuntimeScope(options: { embedId: string; hostUnitId?: string; childUnitId?: string; childType?: UniverInstanceType; sessionMode?: SheetEmbedRuntimeSessionMode }): IDisposable {
         const lease = { ...options, role: 'runtime' };
         this._leases.add(lease);
         this.runtimeSessionChanged$.next();
@@ -197,12 +203,12 @@ export class EmbedRuntimeFocusCoordinator implements ISheetEmbedRuntimeFocusCoor
 
     resolveRuntimeScopeByChildUnitId(childUnitId: string | undefined): ISheetEmbedRuntimeDomScope | undefined {
         const lease = [...this._leases].find((item) => matchesChildUnitId(item, childUnitId));
-        return lease ? { embedId: lease.embedId, hostUnitId: lease.hostUnitId, childUnitId: lease.childUnitId, childType: lease.childType } : undefined;
+        return lease ? { embedId: lease.embedId, hostUnitId: lease.hostUnitId, childUnitId: lease.childUnitId, childType: lease.childType, sessionMode: lease.sessionMode } : undefined;
     }
 
     resolveActiveChildSessionRuntimeScope(): ISheetEmbedRuntimeDomScope | undefined {
         const lease = [...this._leases].find((item) => item.role === 'child-session');
-        return lease ? { embedId: lease.embedId, hostUnitId: lease.hostUnitId, childUnitId: lease.childUnitId, childType: lease.childType } : undefined;
+        return lease ? { embedId: lease.embedId, hostUnitId: lease.hostUnitId, childUnitId: lease.childUnitId, childType: lease.childType, sessionMode: lease.sessionMode } : undefined;
     }
 
     isChildUnitInActiveSession(unitId: string | undefined): boolean {

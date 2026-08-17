@@ -39,6 +39,7 @@ import { NORMAL_TEXT_SELECTION_PLUGIN_STYLE } from '@univerjs/engine-render';
 import { ComponentManager } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { describe, expect, it } from 'vitest';
+import { EmbedRuntimeFocusCoordinator, IDocEmbedRuntimeFocusCoordinator } from '../doc-embed-integration.service';
 import { DocCanvasPopManagerService } from '../doc-popup-manager.service';
 import { DocFloatMenuService } from '../float-menu.service';
 import { DocSelectionRenderService } from '../selection/doc-selection-render.service';
@@ -86,7 +87,11 @@ const InertDocSelectionRenderServiceCtor = InertDocSelectionRenderService as unk
 const RecordingDocCanvasPopManagerServiceCtor = RecordingDocCanvasPopManagerService as unknown as typeof DocCanvasPopManagerService;
 const ActiveDocSelectionRenderServiceCtor = ActiveDocSelectionRenderService as unknown as typeof DocSelectionRenderService;
 
-function createActiveFloatMenuHarness(unitId: string, body: ConstructorParameters<typeof DocumentDataModel>[0]['body']) {
+function createActiveFloatMenuHarness(
+    unitId: string,
+    body: ConstructorParameters<typeof DocumentDataModel>[0]['body'],
+    runtimeFocusCoordinator?: EmbedRuntimeFocusCoordinator
+) {
     const injector = new Injector();
     injector.add([ILogService, { useClass: DesktopLogService }]);
     injector.add([IConfigService, { useClass: ConfigService }]);
@@ -97,6 +102,9 @@ function createActiveFloatMenuHarness(unitId: string, body: ConstructorParameter
     injector.add([DocCanvasPopManagerService, { useClass: RecordingDocCanvasPopManagerServiceCtor }]);
     injector.add([ComponentManager]);
     injector.add([DocSelectionRenderService, { useClass: ActiveDocSelectionRenderServiceCtor }]);
+    if (runtimeFocusCoordinator) {
+        injector.add([IDocEmbedRuntimeFocusCoordinator, { useValue: runtimeFocusCoordinator }]);
+    }
     injector.get(ICommandService).registerCommand(SetTextSelectionsOperation);
     const univerInstanceService = injector.get(IUniverInstanceService) as UniverInstanceService;
     univerInstanceService.__addUnit(new DocumentDataModel({ id: unitId, body }));
@@ -109,6 +117,7 @@ function createActiveFloatMenuHarness(unitId: string, body: ConstructorParameter
         popupService: injector.get(DocCanvasPopManagerService) as unknown as RecordingDocCanvasPopManagerService,
         selectionManager,
         service,
+        selectionRenderService: injector.get(DocSelectionRenderService) as unknown as ActiveDocSelectionRenderService,
         univerInstanceService,
     };
 }
@@ -400,6 +409,48 @@ describe('DocFloatMenuService', () => {
 
         expect(service.floatMenu).toBeNull();
         expect(popupService.ranges).toEqual(['0:10']);
+    });
+
+    it('does not restore a stale host text toolbar when an embed child session ends', () => {
+        const unitId = 'doc-embed-host-menu';
+        const runtimeFocusCoordinator = new EmbedRuntimeFocusCoordinator();
+        const { popupService, selectionManager, selectionRenderService, service } = createActiveFloatMenuHarness(unitId, {
+            dataStream: 'Embed host document\r\n',
+            paragraphs: [{ paragraphId: 'para_docs_ui_embed_host_menu', startIndex: 19 }],
+            sectionBreaks: [],
+            customRanges: [],
+            tables: [],
+            textRuns: [],
+        }, runtimeFocusCoordinator);
+        const selection = {
+            textRanges: [{ startOffset: 0, endOffset: 10, collapsed: false }],
+            rectRanges: [],
+            segmentId: '',
+            segmentPage: -1,
+            style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+            isEditing: true,
+        };
+
+        selectionManager.__replaceTextRangesWithNoRefresh(selection, { unitId, subUnitId: unitId });
+        expect(service.floatMenu).toMatchObject({ start: 0, end: 10 });
+
+        const lease = runtimeFocusCoordinator.acquireLease({
+            embedId: 'docs-floating-board',
+            role: 'child-session',
+            hostUnitId: unitId,
+            childUnitId: 'child-board',
+        });
+        expect(service.floatMenu).toBeNull();
+
+        lease.dispose();
+        selectionManager.__replaceTextRangesWithNoRefresh(selection, { unitId, subUnitId: unitId });
+        expect(service.floatMenu).toBeNull();
+
+        selectionRenderService.emitSelectionStart();
+        selectionManager.__replaceTextRangesWithNoRefresh(selection, { unitId, subUnitId: unitId });
+
+        expect(service.floatMenu).toMatchObject({ start: 0, end: 10 });
+        expect(popupService.ranges).toEqual(['0:10', '0:10']);
     });
 
     it('places the floating toolbar below a forward selection that spans multiple lines', () => {

@@ -16,6 +16,7 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, Spreadsheet, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
+import type { ISheetEmbedRuntimeDomScope } from '../../services/sheet-embed-integration.service';
 import type { ISheetHostChromeOverride } from '../../services/sheet-host-chrome-override.service';
 import {
     Disposable,
@@ -27,6 +28,7 @@ import { attachSelectionWithCoord, SheetsSelectionsService } from '@univerjs/she
 import { ContextMenuPosition, IContextMenuService } from '@univerjs/ui';
 import { SHEET_VIEW_KEY } from '../../common/keys';
 import { ISheetSelectionRenderService } from '../../services/selection/base-selection-render.service';
+import { ISheetEmbedRuntimeFocusCoordinator } from '../../services/sheet-embed-integration.service';
 import { ISheetHostChromeOverrideService } from '../../services/sheet-host-chrome-override.service';
 
 /**
@@ -44,6 +46,7 @@ export class SheetContextMenuRenderController extends Disposable implements IRen
         super();
 
         this._init();
+        this._initEmbedRuntimeSessionListener();
     }
 
     private _init(): void {
@@ -122,6 +125,22 @@ export class SheetContextMenuRenderController extends Disposable implements IRen
         this.disposeWithMe(colHeaderObserver);
     }
 
+    private _initEmbedRuntimeSessionListener(): void {
+        const runtimeFocusCoordinator = this._getSheetEmbedRuntimeFocusCoordinator();
+        if (!runtimeFocusCoordinator) {
+            return;
+        }
+
+        this.disposeWithMe(runtimeFocusCoordinator.runtimeSessionChanged$.subscribe(() => {
+            if (shouldHideSheetHostContextMenuForEmbedSession(
+                this._context.unitId,
+                runtimeFocusCoordinator.resolveActiveChildSessionRuntimeScope()
+            )) {
+                this._contextMenuService.hideContextMenu();
+            }
+        }));
+    }
+
     private _shouldSuppressHostContextMenu(): boolean {
         return shouldSuppressSheetContextMenuForEmbedOverride(
             this._context.unitId,
@@ -134,6 +153,19 @@ export class SheetContextMenuRenderController extends Disposable implements IRen
             ? this._injector.get(ISheetHostChromeOverrideService)
             : undefined;
     }
+
+    private _getSheetEmbedRuntimeFocusCoordinator(): ISheetEmbedRuntimeFocusCoordinator | undefined {
+        return this._injector.has(ISheetEmbedRuntimeFocusCoordinator)
+            ? this._injector.get(ISheetEmbedRuntimeFocusCoordinator)
+            : undefined;
+    }
+}
+
+export function shouldHideSheetHostContextMenuForEmbedSession(
+    hostUnitId: string,
+    activeScope: ISheetEmbedRuntimeDomScope | undefined
+): boolean {
+    return activeScope?.hostUnitId === hostUnitId && activeScope.sessionMode !== 'host-passive';
 }
 
 export function shouldSuppressSheetContextMenuForEmbedOverride(

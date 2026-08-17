@@ -825,6 +825,24 @@ describe('RichTextBuilder', () => {
     });
 
     describe('link management', () => {
+        it('should append, update, and remove links with agent-friendly methods', () => {
+            const builder = RichTextBuilder.create()
+                .text('Read ')
+                .link('Univer documentation', 'https://docs.univer.ai')
+                .text(' for details.');
+
+            expect(builder.toPlainText()).toBe('Read Univer documentation for details.');
+            const [link] = builder.getLinks();
+            expect(link.properties?.url).toBe('https://docs.univer.ai');
+
+            builder.updateLink(link.rangeId, 'https://univer.ai/docs');
+            expect(builder.getLinks()[0].properties?.url).toBe('https://univer.ai/docs');
+
+            expect(builder.removeLink(link.rangeId)).toBe(builder);
+            expect(builder.toPlainText()).toBe('Read Univer documentation for details.');
+            expect(builder.getLinks()).toEqual([]);
+        });
+
         it('should set link for text range', () => {
             const builder = RichTextBuilder.create()
                 .insertText('Hello World')

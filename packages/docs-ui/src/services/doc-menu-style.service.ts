@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ITextStyle, Nullable } from '@univerjs/core';
-import { Disposable, Inject, IUniverInstanceService, ThemeService, UniverInstanceType } from '@univerjs/core';
+import type { DocumentDataModel, ICommand, ITextStyle, Nullable } from '@univerjs/core';
+import { CommandType, Disposable, Inject, IUniverInstanceService, ThemeService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 
@@ -113,3 +113,19 @@ export class DocMenuStyleService extends Disposable {
         this._cacheStyle = null;
     }
 }
+
+export interface ISetDocInputStyleCommandParams {
+    style: ITextStyle;
+}
+
+export const SetDocInputStyleCommand: ICommand<ISetDocInputStyleCommandParams> = {
+    id: 'doc.command.set-input-style',
+    type: CommandType.COMMAND,
+    handler: (accessor, params) => {
+        if (!params) {
+            return false;
+        }
+        accessor.get(DocMenuStyleService).setStyleCache(params.style);
+        return true;
+    },
+};

@@ -24,7 +24,7 @@ import {
     LocaleType,
     UniverInstanceType,
 } from '@univerjs/core';
-import { MoveCursorOperation, MoveSelectionOperation, VIEWPORT_KEY } from '@univerjs/docs-ui';
+import { MoveCursorOperation, MoveSelectionOperation, SetDocInputStyleCommand, VIEWPORT_KEY } from '@univerjs/docs-ui';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { SetRangeValuesCommand } from '@univerjs/sheets';
@@ -92,6 +92,7 @@ function createController() {
     };
     const docModel = {
         getUnitId: vi.fn(() => DOCS_NORMAL_EDITOR_UNIT_ID_KEY),
+        getBody: vi.fn(() => normalSnapshot.body),
         getSnapshot: vi.fn(() => normalSnapshot),
         reset: vi.fn((snapshot) => {
             normalSnapshot = snapshot;
@@ -105,6 +106,7 @@ function createController() {
         }),
     };
     const documentModel = {
+        getBody: vi.fn((): IDocumentBody => ({ dataStream: 'new value\r\n' })),
         getSnapshot: vi.fn(() => ({
             body: { dataStream: 'new value\r\n' },
             documentStyle: {},
@@ -218,6 +220,7 @@ function createController() {
         controller,
         docModel,
         formulaBarEditor,
+        documentModel,
         getFormulaSnapshot: () => formulaSnapshot,
         getNormalSnapshot: () => normalSnapshot,
         workbook,
@@ -226,6 +229,23 @@ function createController() {
 }
 
 describe('EditingRenderController business methods', () => {
+    it('reuses an empty cell style for the next editor input', () => {
+        const { controller, documentModel } = createController();
+        documentModel.getBody.mockReturnValue({
+            dataStream: '\r\n',
+            textRuns: [{ st: 0, ed: 0, ts: { fs: 20, cl: { rgb: '#f05252' } } }],
+        });
+
+        controller._cacheEmptyCellTextStyle();
+
+        expect(controller._commandService.syncExecuteCommand).toHaveBeenCalledWith(SetDocInputStyleCommand.id, {
+            style: {
+                fs: 20,
+                cl: { rgb: '#f05252' },
+            },
+        });
+    });
+
     it('submits edited cell content and rolls back when validation rejects the value', async () => {
         const { controller } = createController();
         controller._sheetInterceptorService.onValidateCell.mockResolvedValue(false);

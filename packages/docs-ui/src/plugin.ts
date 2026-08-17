@@ -178,7 +178,7 @@ import { DocAutoFormatService } from './services/doc-auto-format.service';
 import { DocEventManagerService } from './services/doc-event-manager.service';
 import { DocIMEInputManagerService } from './services/doc-ime-input-manager.service';
 import { DocIMEStateChangeInterceptorService } from './services/doc-ime-state-change-interceptor.service';
-import { DocMenuStyleService } from './services/doc-menu-style.service';
+import { DocMenuStyleService, SetDocInputStyleCommand } from './services/doc-menu-style.service';
 import { DocPageLayoutService } from './services/doc-page-layout.service';
 import { DocParagraphMenuService } from './services/doc-paragraph-menu.service';
 import { DocCanvasPopManagerService } from './services/doc-popup-manager.service';
@@ -309,6 +309,7 @@ export class UniverDocsUIPlugin extends Plugin {
             ResetInlineFormatTextBackgroundColorCommand,
             SetInlineFormatTextBackgroundColorCommand,
             SetInlineFormatCommand,
+            SetDocInputStyleCommand,
             BreakLineCommand,
             DeleteCustomBlockCommand,
             MoveDocBlockCommand,

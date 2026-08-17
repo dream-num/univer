@@ -37,7 +37,7 @@ import {
     RenderManagerService,
 } from '@univerjs/engine-render';
 import { describe, expect, it } from 'vitest';
-import { DocMenuStyleService } from '../doc-menu-style.service';
+import { DocMenuStyleService, SetDocInputStyleCommand } from '../doc-menu-style.service';
 
 class TestRenderManagerService {
     editArea: DocumentEditArea | undefined;
@@ -127,6 +127,17 @@ describe('DocMenuStyleService', () => {
         service.setStyleCache({ it: 1 });
 
         expect(service.getStyleCache()).toEqual({ bl: 1, it: 1 });
+    });
+
+    it('sets the next input style through the command boundary', () => {
+        const { commandService, service } = createStyleTestBed();
+        commandService.registerCommand(SetDocInputStyleCommand);
+
+        commandService.syncExecuteCommand(SetDocInputStyleCommand.id, {
+            style: { fs: 20, cl: { rgb: '#f05252' } },
+        });
+
+        expect(service.getStyleCache()).toEqual({ fs: 20, cl: { rgb: '#f05252' } });
     });
 
     it('uses body text defaults when there is no focused document render', () => {

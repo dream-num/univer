@@ -44,6 +44,12 @@ export const SetFrozenCommand: ICommand = {
         const { startColumn, startRow, xSplit, ySplit } = params;
 
         if (
+            !Number.isInteger(startRow) ||
+            !Number.isInteger(startColumn) ||
+            !Number.isInteger(xSplit) ||
+            !Number.isInteger(ySplit) ||
+            xSplit < 0 ||
+            ySplit < 0 ||
             startRow >= worksheet.getRowCount() ||
             startColumn >= worksheet.getColumnCount() ||
             xSplit >= worksheet.getColumnCount() ||

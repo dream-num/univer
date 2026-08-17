@@ -88,5 +88,11 @@ export function mergeWorksheetSnapshotWithDefault(snapshot: Partial<IWorksheetDa
         }
     });
 
+    const freeze = snapshot.freeze!;
+    freeze.xSplit = freeze.xSplit ?? defaultSnapshot.freeze.xSplit;
+    freeze.ySplit = freeze.ySplit ?? defaultSnapshot.freeze.ySplit;
+    freeze.startRow = freeze.ySplit === 0 ? defaultSnapshot.freeze.startRow : (freeze.startRow ?? defaultSnapshot.freeze.startRow);
+    freeze.startColumn = freeze.xSplit === 0 ? defaultSnapshot.freeze.startColumn : (freeze.startColumn ?? defaultSnapshot.freeze.startColumn);
+
     return snapshot as IWorksheetData;
 }

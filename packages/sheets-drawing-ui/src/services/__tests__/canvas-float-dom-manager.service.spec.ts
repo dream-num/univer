@@ -1451,6 +1451,37 @@ describe('SheetCanvasFloatDomManagerService', () => {
         chartDom.dispose();
     });
 
+    it('initializes overlapping chart render object z-indexes from drawing order', async () => {
+        const fixture = setup();
+        disposables.push(fixture);
+
+        await fixture.commandService.executeCommand(InsertSheetDrawingCommand.id, {
+            unitId: 'test',
+            drawings: [
+                {
+                    unitId: 'test',
+                    subUnitId: 'sheet1',
+                    drawingId: 'chart-a',
+                    drawingType: DrawingTypeEnum.DRAWING_CHART,
+                    componentKey: 'ChartCard',
+                    transform: { left: 120, top: 72, width: 240, height: 144 },
+                },
+                {
+                    unitId: 'test',
+                    subUnitId: 'sheet1',
+                    drawingId: 'chart-b',
+                    drawingType: DrawingTypeEnum.DRAWING_CHART,
+                    componentKey: 'ChartCard',
+                    transform: { left: 120, top: 72, width: 240, height: 144 },
+                },
+            ],
+        });
+
+        expect(fixture.get(ISheetDrawingService).getDrawingOrder('test', 'sheet1')).toEqual(['chart-b', 'chart-a']);
+        expect(fixture.manager.getFloatDomInfo('chart-b')?.rect.zIndex).toBe(0);
+        expect(fixture.manager.getFloatDomInfo('chart-a')?.rect.zIndex).toBe(1);
+    });
+
     it('falls back to the default rect after a chart render object factory is disposed', () => {
         const fixture = setup();
         disposables.push(fixture);

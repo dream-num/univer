@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IParagraphConfig, ISectionBreakConfig } from '../../../../basics/interfaces';
 import {
     AlignTypeH,
     AlignTypeV,
@@ -27,6 +28,7 @@ import {
     SectionType,
     SpacingRule,
 } from '@univerjs/core';
+
 import { describe, expect, it, vi } from 'vitest';
 import { GlyphType } from '../../../../basics/i-document-skeleton-cached';
 import { getDocumentCompatibilityPolicy } from '../../document-compatibility';
@@ -304,6 +306,22 @@ describe('docs layout tools extra', () => {
         expect(lineCfg.snapToGrid).toBe(BooleanNumber.FALSE);
         expect(lineCfg.lineSpacing).toBe(1);
     });
+
+    it.each([undefined, 0, -1, Number.NaN, Number.POSITIVE_INFINITY])(
+        'falls back to automatic spacing for invalid fixed line spacing: %s',
+        (lineSpacing) => {
+            const lineCfg = getLineHeightConfig({} as ISectionBreakConfig, {
+                useWordStyleLineHeight: true,
+                paragraphStyle: {
+                    lineSpacing,
+                    spacingRule: SpacingRule.EXACT,
+                },
+            } as IParagraphConfig);
+
+            expect(lineCfg.lineSpacing).toBe(1);
+            expect(lineCfg.spacingRule).toBe(SpacingRule.AUTO);
+        }
+    );
 
     it('updates block index values and iterates skeleton blocks', () => {
         const { page, column } = createPageSkeleton();

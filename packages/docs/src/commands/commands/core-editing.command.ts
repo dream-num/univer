@@ -14,15 +14,7 @@
  * limitations under the License.
  */
 
-import type {
-    DocumentDataModel,
-    ICommand,
-    IDocumentBody,
-    IDocumentData,
-    IMutationInfo,
-    ITextRange,
-    UpdateDocsAttributeType,
-} from '@univerjs/core';
+import type { DocumentDataModel, ICommand, IDocumentBody, IDocumentData, IMutationInfo, ITextRange, Nullable, UpdateDocsAttributeType } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import {
@@ -46,6 +38,10 @@ export interface IInsertTextCommandParams {
     range: ITextRange;
     segmentId?: string;
     cursorOffset?: number;
+    debounce?: boolean;
+    textRanges?: Nullable<ITextRangeWithStyle[]>;
+    noNeedSetTextRange?: boolean;
+    isEditing?: boolean;
 }
 
 /**
@@ -56,7 +52,17 @@ export const InsertTextCommand: ICommand<IInsertTextCommandParams> = {
     type: CommandType.COMMAND,
     handler: (accessor, params: IInsertTextCommandParams) => {
         const commandService = accessor.get(ICommandService);
-        const { range, segmentId, body, unitId, cursorOffset } = params;
+        const {
+            range,
+            segmentId,
+            body,
+            unitId,
+            cursorOffset,
+            debounce = true,
+            textRanges,
+            noNeedSetTextRange,
+            isEditing,
+        } = params;
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
@@ -67,7 +73,7 @@ export const InsertTextCommand: ICommand<IInsertTextCommandParams> = {
         }
 
         const activeRange = docSelectionManagerService.getActiveTextRange();
-        const rangeSegmentId = 'segmentId' in range ? (range as ITextRange & { segmentId?: string }).segmentId : undefined;
+        const rangeSegmentId = 'segmentId' in range && typeof range.segmentId === 'string' ? range.segmentId : undefined;
         const targetSegmentId = segmentId ?? rangeSegmentId ?? activeRange?.segmentId ?? '';
         const originBody = docDataModel.getSelfOrHeaderFooterModel(targetSegmentId)?.getBody();
 
@@ -77,54 +83,26 @@ export const InsertTextCommand: ICommand<IInsertTextCommandParams> = {
 
         const { startOffset, collapsed } = range;
         const cursorMove = cursorOffset ?? body.dataStream.length;
-        const textRanges = [
-            {
-                startOffset: startOffset + cursorMove,
-                endOffset: startOffset + cursorMove,
-                style: activeRange?.style,
-                collapsed,
-            },
-        ];
-
-        const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
-            id: RichTextEditingMutation.id,
-            params: {
-                unitId,
-                actions: [],
-                textRanges,
-                debounce: true,
-            },
-        };
-
-        const textX = new TextX();
-        const jsonX = JSONX.getInstance();
-
-        if (collapsed) {
-            if (startOffset > 0) {
-                textX.push({
-                    t: TextXActionType.RETAIN,
-                    len: startOffset,
-                });
-            }
-
-            textX.push({
-                t: TextXActionType.INSERT,
-                body,
-                len: body.dataStream.length,
-            });
-        } else {
-            const dos = BuildTextUtils.selection.delete([range], originBody, 0, body);
-            textX.push(...dos);
-        }
-
-        doMutation.params.textRanges = [{
+        const mutationTextRanges = textRanges ?? [{
             startOffset: startOffset + cursorMove,
             endOffset: startOffset + cursorMove,
             collapsed,
         }];
 
-        const path = getRichTextEditPath(docDataModel, segmentId);
-        doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
+        const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
+            id: RichTextEditingMutation.id,
+            params: {
+                unitId,
+                segmentId: targetSegmentId,
+                actions: [],
+                textRanges: mutationTextRanges,
+                debounce,
+                noNeedSetTextRange,
+                isEditing,
+            },
+        };
+
+        doMutation.params.actions = buildInsertTextActions(docDataModel, originBody, range, body, targetSegmentId);
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,
@@ -134,6 +112,47 @@ export const InsertTextCommand: ICommand<IInsertTextCommandParams> = {
         return Boolean(result);
     },
 };
+
+function buildInsertTextActions(
+    documentDataModel: DocumentDataModel,
+    originBody: IDocumentBody,
+    range: ITextRange,
+    insertBody: IDocumentBody,
+    segmentId?: string
+): IRichTextEditingMutationParams['actions'] {
+    const { startOffset, endOffset, collapsed } = range;
+    const textX = new TextX();
+    if (collapsed) {
+        if (startOffset > 0) {
+            textX.push({ t: TextXActionType.RETAIN, len: startOffset });
+        }
+        textX.push({ t: TextXActionType.INSERT, body: insertBody, len: insertBody.dataStream.length });
+    } else {
+        textX.push(...BuildTextUtils.selection.delete([range], originBody, 0, insertBody));
+    }
+
+    const textActions = JSONX.getInstance().editOp(textX.serialize(), getRichTextEditPath(documentDataModel, segmentId));
+    return collapsed
+        ? textActions
+        : appendRemovedDrawingActions(textActions, documentDataModel, originBody, startOffset, endOffset);
+}
+
+function appendRemovedDrawingActions(
+    textActions: IRichTextEditingMutationParams['actions'],
+    documentDataModel: DocumentDataModel,
+    body: IDocumentBody,
+    startOffset: number,
+    endOffset: number
+): IRichTextEditingMutationParams['actions'] {
+    const drawingActions = BuildTextUtils.drawing.remove(documentDataModel.getSnapshot(), [{
+        startOffset,
+        endOffset,
+        collapsed: false,
+    }], body);
+    const rawActions = [textActions, ...drawingActions];
+
+    return rawActions.reduce((accumulator, action) => JSONX.compose(accumulator, action));
+}
 
 export interface IDeleteTextCommandParams {
     unitId: string;
@@ -175,6 +194,7 @@ export const DeleteTextCommand: ICommand<IDeleteTextCommandParams> = {
             id: RichTextEditingMutation.id,
             params: {
                 unitId,
+                segmentId,
                 actions: [],
                 textRanges: [{
                     startOffset: start,
@@ -196,7 +216,13 @@ export const DeleteTextCommand: ICommand<IDeleteTextCommandParams> = {
         }], body));
 
         const path = getRichTextEditPath(docDataModel, segmentId);
-        doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
+        doMutation.params.actions = appendRemovedDrawingActions(
+            jsonX.editOp(textX.serialize(), path),
+            docDataModel,
+            body,
+            start,
+            end + 1
+        );
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,

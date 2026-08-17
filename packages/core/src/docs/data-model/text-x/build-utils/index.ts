@@ -16,7 +16,7 @@
 
 import { addCustomDecorationTextX, deleteCustomDecorationTextX } from './custom-decoration';
 import { copyCustomRange, getCustomRangesInterestsWithSelection, isIntersecting } from './custom-range';
-import { addDrawing } from './drawings';
+import { addDrawing, removeDrawingReferences } from './drawings';
 import {
     changeParagraphBulletNestLevel,
     setParagraphBullet,
@@ -96,6 +96,7 @@ export class BuildTextUtils {
 
     static drawing = {
         add: addDrawing,
+        remove: removeDrawingReferences,
     };
 }
 

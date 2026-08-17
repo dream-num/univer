@@ -16,8 +16,16 @@
 
 import type { DocumentDataModel, IDocumentBody, Injector, IParagraphStyle, UpdateDocsAttributeType } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import { createParagraphId, DataStreamTreeTokenType, getRichTextEditPath, ICommandService, JSONX, TextX, TextXActionType } from '@univerjs/core';
-import { RichTextEditingMutation } from '@univerjs/docs';
+import {
+    createParagraphId,
+    DataStreamTreeTokenType,
+    getRichTextEditPath,
+    ICommandService,
+    JSONX,
+    TextX,
+    TextXActionType,
+} from '@univerjs/core';
+import { InsertTextCommand, RichTextEditingMutation } from '@univerjs/docs';
 
 export interface IBuildPlainTextInsertBodyOptions {
     paragraphStyle?: IParagraphStyle;
@@ -114,43 +122,29 @@ export function replaceBodyRange(
     range: IFDocumentTextRange,
     insertBody: IDocumentBody,
     docDataModel: DocumentDataModel,
-    injector: Injector
+    commandService: ICommandService
 ): boolean {
     const { startOffset, endOffset, segmentId } = range;
-    const textX = new TextX();
-
-    if (startOffset > 0) {
-        textX.push({ t: TextXActionType.RETAIN, len: startOffset });
-    }
-
-    if (endOffset > startOffset) {
-        textX.push({ t: TextXActionType.DELETE, len: endOffset - startOffset });
-    }
-
-    if (insertBody.dataStream.length > 0) {
-        textX.push({
-            t: TextXActionType.INSERT,
-            body: insertBody,
-            len: insertBody.dataStream.length,
-        });
-    }
-
-    const jsonX = JSONX.getInstance();
-    const actions = jsonX.editOp(textX.serialize(), getRichTextEditPath(docDataModel, segmentId));
-
-    const commandService = injector.get(ICommandService);
-    const result = commandService.syncExecuteCommand<IRichTextEditingMutationParams, IRichTextEditingMutationParams>(
-        RichTextEditingMutation.id,
+    const result = commandService.syncExecuteCommand(
+        InsertTextCommand.id,
         {
             unitId: docDataModel.getUnitId(),
+            body: insertBody,
+            range: {
+                startOffset,
+                endOffset,
+                collapsed: startOffset === endOffset,
+                segmentId,
+            },
             segmentId,
-            actions,
+            debounce: false,
             textRanges: [],
+            noNeedSetTextRange: true,
             isEditing: false,
         }
     );
 
-    return Boolean(result?.actions && result.actions.length > 0);
+    return Boolean(result);
 }
 
 export function retainBodyRange(

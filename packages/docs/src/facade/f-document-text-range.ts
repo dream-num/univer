@@ -17,7 +17,7 @@
 import type { Injector, ITextStyle } from '@univerjs/core';
 import type { FDocument } from './f-document';
 import type { IFDocumentTextRange } from './utils';
-import { Tools, UpdateDocsAttributeType } from '@univerjs/core';
+import { ICommandService, Tools, UpdateDocsAttributeType } from '@univerjs/core';
 import { FBaseInitialable } from '@univerjs/core/facade';
 import { buildPlainTextInsertBody, replaceBodyRange, retainBodyRange } from './utils';
 
@@ -54,7 +54,8 @@ export class FDocumentTextRange extends FBaseInitialable {
         protected readonly _startOffset: number,
         protected readonly _endOffset: number,
         protected readonly _segmentId: string,
-        protected override readonly _injector: Injector
+        protected override readonly _injector: Injector,
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         super(_injector);
         this._validateRange();
@@ -207,7 +208,7 @@ export class FDocumentTextRange extends FBaseInitialable {
             this.getRange(),
             buildPlainTextInsertBody(text),
             this._document.getDocumentDataModel(),
-            this._injector
+            this._commandService
         );
     }
 

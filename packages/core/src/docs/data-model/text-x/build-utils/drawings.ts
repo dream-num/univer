@@ -15,7 +15,7 @@
  */
 
 import type { ITextRange, ITextRangeParam } from '../../../../sheets/typedef';
-import type { IDocumentBody, IDrawingParam } from '../../../../types/interfaces';
+import type { IDocumentBody, IDocumentData, IDrawingParam } from '../../../../types/interfaces';
 import type { DocumentDataModel } from '../../document-data-model';
 import type { JSONXActions } from '../../json-x/json-x';
 import { createParagraphId } from '../../../paragraph-id';
@@ -53,6 +53,43 @@ export function getCustomBlockIdsInSelections(body: IDocumentBody, selections: I
     }
 
     return customBlockIds;
+}
+
+export function removeDrawingReferences(
+    documentData: Pick<IDocumentData, 'body' | 'drawings' | 'drawingsOrder'>,
+    selections: ITextRange[],
+    body: IDocumentBody | undefined = documentData.body
+): JSONXActions[] {
+    if (!body) {
+        return [];
+    }
+
+    const drawings = documentData.drawings ?? {};
+    const drawingOrder = documentData.drawingsOrder ?? [];
+    const blockIds = [...new Set(getCustomBlockIdsInSelections(body, selections))]
+        .sort((left, right) => drawingOrder.indexOf(right) - drawingOrder.indexOf(left));
+    const jsonX = JSONX.getInstance();
+    const actions: JSONXActions[] = [];
+
+    for (const blockId of blockIds) {
+        const drawing = drawings[blockId];
+        if (drawing != null) {
+            const removeDrawingAction = jsonX.removeOp(['drawings', blockId], drawing);
+            if (removeDrawingAction) {
+                actions.push(removeDrawingAction);
+            }
+        }
+
+        const drawingIndex = drawingOrder.indexOf(blockId);
+        if (drawingIndex >= 0) {
+            const removeDrawingOrderAction = jsonX.removeOp(['drawingsOrder', drawingIndex], blockId);
+            if (removeDrawingOrderAction) {
+                actions.push(removeDrawingOrderAction);
+            }
+        }
+    }
+
+    return actions;
 }
 
 // eslint-disable-next-line max-lines-per-function

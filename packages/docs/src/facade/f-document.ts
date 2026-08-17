@@ -384,7 +384,7 @@ export class FDocument extends FBaseInitialable {
             },
             buildPlainTextInsertBody(text),
             this._documentDataModel,
-            this._injector
+            this._commandService
         );
     }
 
@@ -633,7 +633,7 @@ export class FDocument extends FBaseInitialable {
                 paragraphs,
             },
             this._documentDataModel,
-            this._injector
+            this._commandService
         );
 
         return success ? this.getParagraph(paragraphId, segmentId) : null;
@@ -766,7 +766,7 @@ export class FDocument extends FBaseInitialable {
             },
             buildPlainTextInsertBody(`${text}\r`),
             this._documentDataModel,
-            this._injector
+            this._commandService
         );
 
         if (!result) {
@@ -828,7 +828,7 @@ export class FDocument extends FBaseInitialable {
                 dataStream: '',
             },
             this._documentDataModel,
-            this._injector
+            this._commandService
         );
     }
 

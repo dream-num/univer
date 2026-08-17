@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DeleteDirection, getRichTextEditPath, ICommandService, JSONX, TextXActionType } from '@univerjs/core';
+import { BlockType, DeleteDirection, DrawingTypeEnum, getRichTextEditPath, ICommandService, IUndoRedoService, JSONX, PositionedObjectLayoutType, TextXActionType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createTestBed } from '../../../facade/__tests__/create-test-bed';
 import { RichTextEditingMutation } from '../../mutations/core-editing.mutation';
@@ -46,6 +46,62 @@ describe('core editing commands', () => {
 
         expect(result).toBe(true);
         expect(testBed.univerAPI.getActiveDocument()?.save().body?.dataStream).toBe('Hello\r\n');
+    });
+
+    it('deletes a drawing with backspace and restores its references through history', () => {
+        testBed.univer.dispose();
+        testBed = createTestBed({
+            id: 'test',
+            body: {
+                dataStream: '\b\r\n',
+                paragraphs: [{ startIndex: 1, paragraphId: 'paragraph-drawing' }],
+                customBlocks: [{ blockId: 'drawing-1', blockType: BlockType.DRAWING, startIndex: 0 }],
+            },
+            drawings: {
+                'drawing-1': {
+                    drawingId: 'drawing-1',
+                    drawingType: DrawingTypeEnum.DRAWING_SHAPE,
+                    docTransform: {
+                        angle: 0,
+                        positionH: { posOffset: 0, relativeFrom: 0 },
+                        positionV: { posOffset: 0, relativeFrom: 0 },
+                        size: { height: 40, width: 80 },
+                    },
+                    layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
+                    subUnitId: 'test',
+                    unitId: 'test',
+                },
+            },
+            drawingsOrder: ['drawing-1'],
+            documentStyle: {},
+        });
+        commandService = testBed.get(ICommandService);
+        testBed.get(IUndoRedoService);
+
+        expect(commandService.syncExecuteCommand(DeleteTextCommand.id, {
+            unitId: 'test',
+            range: { startOffset: 1, endOffset: 1, collapsed: true },
+            direction: DeleteDirection.LEFT,
+        })).toBe(true);
+        expect(testBed.doc.getSnapshot()).toMatchObject({
+            body: { customBlocks: [] },
+            drawings: {},
+            drawingsOrder: [],
+        });
+
+        expect(testBed.univerAPI.getActiveDocument()?.undo()).toBe(true);
+        expect(testBed.doc.getSnapshot()).toMatchObject({
+            body: { customBlocks: [{ blockId: 'drawing-1', startIndex: 0 }] },
+            drawings: { 'drawing-1': { drawingId: 'drawing-1' } },
+            drawingsOrder: ['drawing-1'],
+        });
+
+        expect(testBed.univerAPI.getActiveDocument()?.redo()).toBe(true);
+        expect(testBed.doc.getSnapshot()).toMatchObject({
+            body: { customBlocks: [] },
+            drawings: {},
+            drawingsOrder: [],
+        });
     });
 
     it('does not delete the document minimum paragraph sentinel', () => {

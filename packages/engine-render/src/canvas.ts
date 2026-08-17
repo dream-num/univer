@@ -91,7 +91,9 @@ export class Canvas {
         }
 
         if (props.mode === CanvasRenderMode.Printing) {
-            this._context = new UniverPrintingContext(context);
+            this._context = new UniverPrintingContext(context, {
+                canvasColorService: props.colorService,
+            });
         } else {
             this._context = new UniverRenderingContext(context, {
                 canvasColorService: props.colorService,
@@ -161,10 +163,7 @@ export class Canvas {
         if (this._width === 0 || this._height === 0) {
             return;
         }
-        if (pixelRatio < 1) {
-            pixelRatio = 1;
-        }
-        this.setSize(this._width, this._height, pixelRatio);
+        this.setSize(this._width, this._height, Math.max(1, pixelRatio));
     }
 
     dispose() {
@@ -191,11 +190,11 @@ export class Canvas {
             // If this call fails (due to browser bug, like in Firefox 3.6),
             // then revert to previous no-parameter image/png behavior
             return this.getCanvasEle().toDataURL(mimeType, quality);
-        } catch (e) {
+        } catch {
             try {
                 return this.getCanvasEle().toDataURL();
             } catch (err: unknown) {
-                const { message } = err as Error;
+                const message = err instanceof Error ? err.message : String(err);
                 console.error(
                     `Unable to get data URL. ${message} For more info read https://universheet.net/docs/Canvas.html.`
                 );

@@ -23,7 +23,6 @@ import {
     CommandType,
     DataStreamTreeTokenType,
     DeleteDirection,
-    DocumentFlavor,
     getBlockRangeInterval,
     getRichTextEditPath,
     HorizontalAlign,
@@ -32,6 +31,7 @@ import {
     JSONX,
     PositionedObjectLayoutType,
     sequenceExecuteAsync,
+    SHEET_EDITOR_UNITS,
     TextX,
     TextXActionType,
     Tools,
@@ -845,8 +845,7 @@ function getEmptyCenteredParagraphAtOffset(body: IDocumentBody, offset: number) 
 }
 
 function shouldResetEmptyCenteredParagraphAlignment(docDataModel: DocumentDataModel) {
-    const documentFlavor = docDataModel.getDocumentStyle().documentFlavor;
-    return documentFlavor === DocumentFlavor.TRADITIONAL || documentFlavor === DocumentFlavor.MODERN;
+    return !SHEET_EDITOR_UNITS.includes(docDataModel.getUnitId());
 }
 
 function resetEmptyCenteredParagraphAlignment(

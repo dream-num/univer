@@ -146,7 +146,7 @@ export function createCommandTestBed(docData?: IDocumentData, dependencies?: Dep
     // Refer to packages/sheets-ui/src/services/clipboard/__tests__/clipboard-test-bed.ts
     const fakeDocSkeletonManager = new MockDocSkeletonManagerService({
         unit: doc,
-        unitId: 'test-doc',
+        unitId: doc.getUnitId(),
         type: UniverInstanceType.UNIVER_DOC,
         engine: null as any,
         scene: null as any,
@@ -177,7 +177,7 @@ export function createCommandTestBed(docData?: IDocumentData, dependencies?: Dep
         });
     }
 
-    univerInstanceService.focusUnit('test-doc');
+    univerInstanceService.focusUnit(doc.getUnitId());
 
     const logService = get(ILogService);
     logService.setLogLevel(LogLevel.SILENT);

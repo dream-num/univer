@@ -115,8 +115,8 @@ const locale: typeof enUS = {
         },
     },
     BITAND: {
-        description: 'Returns a \'Bitwise And\' of two numbers',
-        abstract: 'Returns a \'Bitwise And\' of two numbers',
+        description: '두 숫자의 비트 단위 \'AND\'를 반환합니다.',
+        abstract: '두 숫자의 비트 단위 \'AND\'를 반환합니다.',
         links: [
             {
                 title: 'Instruction',
@@ -124,8 +124,8 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'Must be in decimal form and greater than or equal to 0.' },
-            number2: { name: 'number2', detail: 'Must be in decimal form and greater than or equal to 0.' },
+            number1: { name: '번호1', detail: '0보다 크거나 같은 10진수 형식이어야 합니다.' },
+            number2: { name: '번호2', detail: '0보다 크거나 같은 10진수 형식이어야 합니다.' },
         },
     },
     BITLSHIFT: {
@@ -209,9 +209,9 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            number: { name: 'number', detail: 'is the value in from_units to convert.' },
-            fromUnit: { name: 'from_unit', detail: 'is the units for number.' },
-            toUnit: { name: 'to_unit', detail: 'is the units for the result.' },
+            number: { name: '숫자', detail: '변환할 from_unit 단위의 값입니다.' },
+            fromUnit: { name: 'from_unit', detail: '숫자의 단위입니다.' },
+            toUnit: { name: 'to_unit', detail: '결과의 단위입니다.' },
         },
     },
     DEC2BIN: {
@@ -509,8 +509,8 @@ const locale: typeof enUS = {
         },
     },
     IMDIV: {
-        description: 'Returns the quotient of two complex numbers',
-        abstract: 'Returns the quotient of two complex numbers',
+        description: 'x + yi 또는 x + yj 텍스트 형식인 두 복소수의 나눗셈 몫을 반환합니다.',
+        abstract: '두 복소수의 나눗셈 몫을 반환합니다.',
         links: [
             {
                 title: 'Instruction',
@@ -518,8 +518,8 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            inumber1: { name: 'inumber1', detail: 'The complex numerator or dividend.' },
-            inumber2: { name: 'inumber2', detail: 'The complex denominator or divisor.' },
+            inumber1: { name: 'inumber1', detail: '분자 또는 피제수인 복소수입니다.' },
+            inumber2: { name: 'inumber2', detail: '분모 또는 제수인 복소수입니다.' },
         },
     },
     IMEXP: {

@@ -568,7 +568,7 @@ describe('ThreadCommentTree', () => {
         const item = getRootCommentItem(container, 'root-thread');
         const time = item.querySelector('time');
 
-        expect(time?.getAttribute('dir')).toBe('ltr');
+        expect(time?.querySelector('bdo')?.getAttribute('dir')).toBe('ltr');
     });
 
     it('right-aligns the comment action menu in RTL', () => {

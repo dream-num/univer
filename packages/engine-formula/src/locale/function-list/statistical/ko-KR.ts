@@ -908,7 +908,7 @@ const locale: typeof enUS = {
         ],
         functionParameter: {
             range: { name: 'range', detail: 'MARGINOFERROR(A1:C3, 0.99)' },
-            confidence: { name: 'confidence', detail: 'The desired confidence level between (0, 1).' },
+            confidence: { name: '신뢰도', detail: '(0, 1) 범위에서 원하는 신뢰 수준입니다.' },
         },
     },
     MAX: {

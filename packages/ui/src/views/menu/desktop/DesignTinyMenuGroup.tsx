@@ -198,7 +198,11 @@ export function DesignTinyMenuGroup({
                 );
                 return showTooltip
                     ? (
-                        <Tooltip key={item.key} title={item.tooltip}>
+                        <Tooltip
+                            key={item.key}
+                            className="univer-fill-mode-backwards univer-delay-100"
+                            title={item.tooltip}
+                        >
                             {ele}
                         </Tooltip>
                     )

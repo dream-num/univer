@@ -212,7 +212,11 @@ function ToolbarButton(props: {
     onClick: () => void;
 }) {
     return (
-        <Tooltip title={props.title} placement="bottom">
+        <Tooltip
+            className="univer-fill-mode-backwards univer-delay-100"
+            title={props.title}
+            placement="bottom"
+        >
             <button
                 type="button"
                 disabled={props.disabled}
@@ -283,7 +287,11 @@ function ToolbarDropdownButton<T extends string | number>(props: {
             )}
         >
             <span>
-                <Tooltip title={props.title} placement="bottom">
+                <Tooltip
+                    className="univer-fill-mode-backwards univer-delay-100"
+                    title={props.title}
+                    placement="bottom"
+                >
                     <button
                         type="button"
                         className={clsx(`

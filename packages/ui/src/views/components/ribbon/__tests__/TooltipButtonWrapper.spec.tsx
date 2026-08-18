@@ -19,7 +19,7 @@
  */
 
 import type { ComponentType, ReactElement } from 'react';
-import { cleanup, fireEvent, render } from '@testing-library/react';
+import { act, cleanup, fireEvent, render } from '@testing-library/react';
 import { ILogService, Injector, LocaleService } from '@univerjs/core';
 import { ConfigProvider } from '@univerjs/design';
 import { of } from 'rxjs';
@@ -75,10 +75,14 @@ function renderWithDependencies(
     return render(<ConnectedTestRoot />);
 }
 
-afterEach(cleanup);
+afterEach(() => {
+    vi.useRealTimers();
+    cleanup();
+});
 
 describe('ToolbarTooltip', () => {
     it('stays hidden after its popup closes until a new trigger interaction', () => {
+        vi.useFakeTimers();
         const renderTooltip = (popupOpen: boolean) => (
             <ToolbarTooltip title="Fill" popupOpen={popupOpen}>
                 <button type="button">Fill trigger</button>
@@ -91,6 +95,10 @@ describe('ToolbarTooltip', () => {
         }
 
         fireEvent.mouseEnter(trigger);
+        expect(queryByRole('tooltip')).toBeNull();
+        act(() => vi.advanceTimersByTime(99));
+        expect(queryByRole('tooltip')).toBeNull();
+        act(() => vi.advanceTimersByTime(1));
         expect(getByRole('tooltip').textContent).toBe('Fill');
 
         rerender(renderTooltip(true));
@@ -99,9 +107,36 @@ describe('ToolbarTooltip', () => {
         rerender(renderTooltip(false));
         expect(queryByRole('tooltip')).toBeNull();
 
-        fireEvent.mouseLeave(trigger);
-        fireEvent.mouseEnter(trigger);
+        const nextTrigger = getByRole('button', { name: 'Fill trigger' }).parentElement;
+        if (!nextTrigger) {
+            throw new Error('Expected toolbar tooltip trigger wrapper after popup closes');
+        }
+
+        fireEvent.mouseEnter(nextTrigger);
+        act(() => vi.advanceTimersByTime(100));
         expect(getByRole('tooltip').textContent).toBe('Fill');
+    });
+
+    it('cancels a pending tooltip when its popup opens during the hover delay', () => {
+        vi.useFakeTimers();
+        const renderTooltip = (popupOpen: boolean) => (
+            <ToolbarTooltip title="Fill" popupOpen={popupOpen}>
+                <button type="button">Fill trigger</button>
+            </ToolbarTooltip>
+        );
+        const { getByRole, queryByRole, rerender } = render(renderTooltip(false));
+        const trigger = getByRole('button', { name: 'Fill trigger' }).parentElement;
+        if (!trigger) {
+            throw new Error('Expected toolbar tooltip trigger wrapper');
+        }
+
+        fireEvent.mouseEnter(trigger);
+        act(() => vi.advanceTimersByTime(50));
+        rerender(renderTooltip(true));
+        act(() => vi.advanceTimersByTime(50));
+        rerender(renderTooltip(false));
+
+        expect(queryByRole('tooltip')).toBeNull();
     });
 });
 

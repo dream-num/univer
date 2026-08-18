@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel } from '@univerjs/core';
-import type { ReactNode } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 import type { LocaleKey } from '../../locale/types';
 import {
     BooleanNumber,
@@ -33,7 +33,9 @@ import {
     TextWrapShapeIcon,
 } from '@univerjs/icons';
 import { IconManager, useDependency } from '@univerjs/ui';
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+
+const TOOLTIP_HOVER_OPEN_DELAY = 100;
 
 export interface IImagePopupMenuItem {
     label: string;
@@ -204,6 +206,34 @@ function ToolbarGroup(props: { children: ReactNode }) {
     );
 }
 
+function ImagePopupMenuTooltip(props: Omit<ComponentProps<typeof Tooltip>, 'visible' | 'onVisibleChange'>) {
+    const [visible, setVisible] = useState(false);
+    const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const clearTimer = useCallback(() => {
+        if (timerRef.current !== null) {
+            clearTimeout(timerRef.current);
+            timerRef.current = null;
+        }
+    }, []);
+
+    const handleVisibleChange = (nextVisible: boolean) => {
+        clearTimer();
+        if (nextVisible) {
+            timerRef.current = setTimeout(() => {
+                timerRef.current = null;
+                setVisible(true);
+            }, TOOLTIP_HOVER_OPEN_DELAY);
+        } else {
+            setVisible(false);
+        }
+    };
+
+    useEffect(() => clearTimer, [clearTimer]);
+
+    return <Tooltip {...props} visible={visible} onVisibleChange={handleVisibleChange} />;
+}
+
 function ToolbarButton(props: {
     title: string;
     active?: boolean;
@@ -212,7 +242,10 @@ function ToolbarButton(props: {
     onClick: () => void;
 }) {
     return (
-        <Tooltip title={props.title} placement="bottom">
+        <ImagePopupMenuTooltip
+            title={props.title}
+            placement="bottom"
+        >
             <button
                 type="button"
                 disabled={props.disabled}
@@ -231,7 +264,7 @@ function ToolbarButton(props: {
             >
                 {props.children}
             </button>
-        </Tooltip>
+        </ImagePopupMenuTooltip>
     );
 }
 
@@ -283,7 +316,10 @@ function ToolbarDropdownButton<T extends string | number>(props: {
             )}
         >
             <span>
-                <Tooltip title={props.title} placement="bottom">
+                <ImagePopupMenuTooltip
+                    title={props.title}
+                    placement="bottom"
+                >
                     <button
                         type="button"
                         className={clsx(`
@@ -300,7 +336,7 @@ function ToolbarDropdownButton<T extends string | number>(props: {
                         {activeOption.icon}
                         <MoreDownIcon className="univer-text-xs" />
                     </button>
-                </Tooltip>
+                </ImagePopupMenuTooltip>
             </span>
         </Dropdown>
     );

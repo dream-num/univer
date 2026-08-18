@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { cva, Tooltip } from '@univerjs/design';
+import { cva } from '@univerjs/design';
+import { DelayedMenuTooltip } from '../DelayedMenuTooltip';
 
 export type TinyMenuSizeVariant = 'default' | 'paragraph-t';
 export type TinyMenuLayoutVariant = 'default' | 'compact';
@@ -198,9 +199,9 @@ export function DesignTinyMenuGroup({
                 );
                 return showTooltip
                     ? (
-                        <Tooltip key={item.key} title={item.tooltip}>
+                        <DelayedMenuTooltip key={item.key} title={item.tooltip}>
                             {ele}
-                        </Tooltip>
+                        </DelayedMenuTooltip>
                     )
                     : ele;
             })}

@@ -41,7 +41,6 @@ import { IMenuManagerService } from '../../../services/menu/menu-manager.service
 import { useDependency, useObservable } from '../../../utils/di';
 import { keepInteractionInsideSameEmbedBoundary } from '../../../utils/embed-boundary';
 import { CustomLabel } from '../../custom-label/CustomLabel';
-import { DelayedMenuTooltip } from '../../menu/DelayedMenuTooltip';
 
 const TooltipWrapperContext = createContext({
     dropdownVisible: false,
@@ -67,10 +66,26 @@ export interface IToolbarTooltipProps extends Omit<ITooltipProps, 'visible' | 'o
  */
 export function ToolbarTooltip(props: IToolbarTooltipProps) {
     const { popupOpen, ...tooltipProps } = props;
+    const [tooltipVisible, setTooltipVisible] = useState(false);
 
-    return popupOpen
-        ? <Tooltip {...tooltipProps} visible={false} />
-        : <DelayedMenuTooltip {...tooltipProps} />;
+    useEffect(() => {
+        if (popupOpen) {
+            setTooltipVisible(false);
+        }
+    }, [popupOpen]);
+
+    return (
+        <Tooltip
+            {...tooltipProps}
+            className={clsx('univer-fill-mode-backwards univer-delay-100', tooltipProps.className)}
+            visible={!popupOpen && tooltipVisible}
+            onVisibleChange={(visible) => {
+                if (!popupOpen) {
+                    setTooltipVisible(visible);
+                }
+            }}
+        />
+    );
 }
 
 export function ToolbarDropdownProvider(props: { children: ReactNode }) {

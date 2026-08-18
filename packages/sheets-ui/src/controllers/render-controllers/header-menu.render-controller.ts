@@ -37,7 +37,7 @@ const HEADER_MENU_CONTROLLER_SHAPE = '__SpreadsheetHeaderMenuSHAPEControllerShap
 
 const HEADER_MENU_CONTROLLER_MENU = '__SpreadsheetHeaderMenuMAINControllerShape__';
 
-const HEADER_MENU_CONTROLLER_SHAPE_COLOR = 'gray.100';
+const HEADER_MENU_CONTROLLER_SHAPE_COLOR = 'alpha(gray.900, 0.1)';
 
 enum HEADER_HOVER_TYPE {
     ROW,

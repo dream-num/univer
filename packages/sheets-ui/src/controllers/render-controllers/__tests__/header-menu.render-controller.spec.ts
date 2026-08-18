@@ -21,7 +21,7 @@ import { HeaderMenuRenderController } from '../header-menu.render-controller';
 import { createRenderTestBed, createTestEvent } from './render-test-bed';
 
 describe('HeaderMenuRenderController', () => {
-    it('positions the column menu arrow in the base column header area when outline uses margins', () => {
+    it('renders a translucent hover state in the base column header area when outline uses margins', () => {
         const testBed = createRenderTestBed({
             dependencies: [
                 [IContextMenuService, { useValue: { triggerContextMenu: vi.fn() } }],
@@ -45,6 +45,7 @@ describe('HeaderMenuRenderController', () => {
 
         const hoverRect = (controller as any)._hoverRect;
         const hoverMenu = (controller as any)._hoverMenu;
+        expect(hoverRect.fill).toBe('alpha(gray.900, 0.1)');
         expect(hoverRect.top).toBe(40);
         expect(hoverRect.height).toBe(20);
         expect(hoverMenu.top).toBeCloseTo(40 + 20 / 2 - (20 * 0.8) / 2);

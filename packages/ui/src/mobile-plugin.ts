@@ -66,6 +66,10 @@ import { INotificationService } from './services/notification/notification.servi
 import { IUIPartsService, UIPartsService } from './services/parts/parts.service';
 import { IPlatformService, PlatformService } from './services/platform/platform.service';
 import { CanvasPopupService, ICanvasPopupService } from './services/popup/canvas-popup.service';
+import {
+    IUnitPresenceUIAdapterRegistry,
+    UnitPresenceUIAdapterRegistry,
+} from './services/presence/unit-presence-ui-adapter.service';
 import { DesktopRibbonService, IRibbonService } from './services/ribbon/ribbon.service';
 import { IUIRuntimeScopeService, UIRuntimeScopeService } from './services/runtime-scope/ui-runtime-scope.service';
 import { ShortcutPanelService } from './services/shortcut/shortcut-panel.service';
@@ -73,6 +77,7 @@ import { IShortcutService, ShortcutService } from './services/shortcut/shortcut.
 import { DesktopSidebarService } from './services/sidebar/desktop-sidebar.service';
 import { ISidebarService } from './services/sidebar/sidebar.service';
 import { ThemeSwitcherService } from './services/theme-switcher/theme-switcher.service';
+import { UndoRedoGroupService } from './services/undo-redo/undo-redo-group.service';
 import { IWorkbenchService, WorkbenchService } from './services/workbench/workbench.service';
 
 export const DISABLE_AUTO_FOCUS_KEY = 'DISABLE_AUTO_FOCUS';
@@ -118,6 +123,7 @@ export class UniverMobileUIPlugin extends Plugin {
             [IconManager],
             [ComponentsController],
             [ThemeSwitcherService],
+            [UndoRedoGroupService],
             [IWorkbenchService, { useClass: WorkbenchService }],
             [ZIndexManager],
             [ShortcutPanelService],
@@ -126,6 +132,7 @@ export class UniverMobileUIPlugin extends Plugin {
             [IRibbonService, { useClass: DesktopRibbonService }],
             [IShortcutService, { useClass: ShortcutService }],
             [IPlatformService, { useClass: PlatformService }],
+            [IUnitPresenceUIAdapterRegistry, { useClass: UnitPresenceUIAdapterRegistry }],
             [IMenuManagerService, { useClass: MenuManagerService }],
             [IContextMenuHostService, { useClass: ContextMenuHostService }],
             [IContextMenuService, { useClass: ContextMenuService }],

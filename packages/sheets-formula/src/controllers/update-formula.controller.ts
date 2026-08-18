@@ -44,7 +44,7 @@ import {
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
-import { deserializeRangeWithSheetWithCache, ErrorType, FormulaDataModel, generateStringWithSequence, IDefinedNamesService, initSheetFormulaData, LexerTreeBuilder, refactorFormulaUnitQualifier, sequenceNodeType, serializeRangeToRefString, SetArrayFormulaDataMutation, SetFormulaDataMutation, SetTriggerFormulaCalculationStartMutation, splitTableStructuredRef } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheetWithCache, ErrorType, FormulaDataModel, generateStringWithSequence, IDefinedNamesService, LexerTreeBuilder, refactorFormulaUnitQualifier, sequenceNodeType, serializeRangeToRefString, SetArrayFormulaDataMutation, SetFormulaDataMutation, SetTriggerFormulaCalculationStartMutation, splitTableStructuredRef } from '@univerjs/engine-formula';
 import {
     ClearSelectionFormatCommand,
     InsertSheetMutation,
@@ -206,6 +206,8 @@ export class UpdateFormulaController extends Disposable {
     }
 
     private _handleWorkbookDisposed(unitId: string, sheetId?: string) {
+        this._formulaDataModel.clearFormulaIdMap(unitId, sheetId);
+
         const formulaData = this._formulaDataModel.getFormulaData();
         const newFormulaData = removeFormulaData(formulaData, unitId, sheetId);
 
@@ -247,7 +249,7 @@ export class UpdateFormulaController extends Disposable {
         const formulaData = this._formulaDataModel.getFormulaData();
         const { id: sheetId, cellData } = sheet;
         const cellMatrix = new ObjectMatrix<Nullable<ICellData>>(cellData);
-        const newFormulaData = initSheetFormulaData(formulaData, unitId, sheetId, cellMatrix);
+        const newFormulaData = this._formulaDataModel.initSheetFormulaData(formulaData, unitId, sheetId, cellMatrix);
 
         this._commandService.executeCommand(
             SetFormulaDataMutation.id,
@@ -270,7 +272,7 @@ export class UpdateFormulaController extends Disposable {
             const cellMatrix = worksheet.getCellMatrix();
             const sheetId = worksheet.getSheetId();
 
-            const currentSheetData = initSheetFormulaData(formulaData, unitId, sheetId, cellMatrix);
+            const currentSheetData = this._formulaDataModel.initSheetFormulaData(formulaData, unitId, sheetId, cellMatrix);
 
             newFormulaData[unitId]![sheetId] = currentSheetData[unitId]?.[sheetId];
         });

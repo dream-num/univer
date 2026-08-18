@@ -15,13 +15,13 @@
  */
 
 import type { BaseCellValue, BaseDataModel, IBaseCellData, IBaseSnapshot, ICellData, IFieldSnapshot, IObjectArrayPrimitiveType, IObjectMatrixPrimitiveType, IRange, IRowData, ITableSnapshot, IUnitRange, Nullable, Workbook } from '@univerjs/core';
-
 import type {
     IArrayFormulaRangeType,
     IArrayFormulaUnitCellType,
     IFormulaData,
     IFormulaDataItem,
     IFormulaIdMap,
+    IFormulaIdMapData,
     IFormulaUnitNameMap,
     IRuntimeUnitDataType,
     ISheetData,
@@ -43,6 +43,8 @@ export interface IRangeChange {
 }
 
 export class FormulaDataModel extends Disposable {
+    private _formulaIdMapData: IFormulaIdMapData = {};
+
     private _arrayFormulaRange: IArrayFormulaRangeType = {};
 
     private _arrayFormulaCellData: IArrayFormulaUnitCellType = {};
@@ -58,6 +60,7 @@ export class FormulaDataModel extends Disposable {
 
     override dispose() {
         super.dispose();
+        this._formulaIdMapData = {};
         this._arrayFormulaRange = {};
         this._arrayFormulaCellData = {};
         this._unitImageFormulaData = {};
@@ -179,7 +182,7 @@ export class FormulaDataModel extends Disposable {
                 const sheetId = worksheet.getSheetId();
 
                 this._initSheetArrayFormulaData(unitId, sheetId, cellMatrix);
-                initSheetFormulaData(formulaData, unitId, sheetId, cellMatrix);
+                this.initSheetFormulaData(formulaData, unitId, sheetId, cellMatrix);
             }
         }
 
@@ -236,6 +239,39 @@ export class FormulaDataModel extends Disposable {
         return formulaData;
     }
 
+    initSheetFormulaData(
+        formulaData: IFormulaData,
+        unitId: string,
+        sheetId: string,
+        cellMatrix: ObjectMatrix<Nullable<ICellData>>
+    ): IFormulaData {
+        const result = buildSheetFormulaData(formulaData, unitId, sheetId, cellMatrix);
+
+        if (!this._formulaIdMapData[unitId]) {
+            this._formulaIdMapData[unitId] = {};
+        }
+        this._formulaIdMapData[unitId]![sheetId] = result.formulaIdMap;
+
+        return result.formulaData;
+    }
+
+    clearFormulaIdMap(unitId: string, sheetId?: string) {
+        if (sheetId == null) {
+            delete this._formulaIdMapData[unitId];
+            return;
+        }
+
+        const unitFormulaIdMap = this._formulaIdMapData[unitId];
+        if (!unitFormulaIdMap) {
+            return;
+        }
+
+        delete unitFormulaIdMap[sheetId];
+        if (Object.keys(unitFormulaIdMap).length === 0) {
+            delete this._formulaIdMapData[unitId];
+        }
+    }
+
     getSheetFormulaData(unitId: string, sheetId: string) {
         const formulaData: IFormulaData = {};
         const workbook = this._univerInstanceService.getUnit<Workbook>(unitId);
@@ -253,7 +289,7 @@ export class FormulaDataModel extends Disposable {
         const cellMatrix = worksheet.getCellMatrix();
 
         this._initSheetArrayFormulaData(unitId, sheetId, cellMatrix);
-        initSheetFormulaData(formulaData, unitId, sheetId, cellMatrix);
+        this.initSheetFormulaData(formulaData, unitId, sheetId, cellMatrix);
 
         return formulaData[unitId][sheetId];
     }
@@ -529,8 +565,7 @@ export class FormulaDataModel extends Disposable {
             }
         });
 
-        const formulaData: IFormulaData = {};
-        initSheetFormulaData(formulaData, unitId, sheetId, sharedFormulaCellMatrix);
+        const formulaData = buildSheetFormulaData({}, unitId, sheetId, sharedFormulaCellMatrix).formulaData;
         const deleteFormulaIdMap = new Map<string, string | IFormulaIdMap>();
         const sheetFormulaDataMatrix = new ObjectMatrix<Nullable<IFormulaDataItem>>(formulaData[unitId]?.[sheetId] ?? {});
 
@@ -690,28 +725,25 @@ export class FormulaDataModel extends Disposable {
         }
 
         if (isFormulaId(si)) {
-            let formulaString: Nullable<string> = null;
+            let formulaIdMap = this._formulaIdMapData[unitId]?.[sheetId];
+            let formulaInfo = formulaIdMap?.[String(si)];
+            const masterCell = formulaInfo == null ? null : cellMatrix.getValue(formulaInfo.r, formulaInfo.c);
 
-            // Get the result in one traversal, pay attention to performance
-            cellMatrix.forValue((r, c, cell) => {
-                if (cell == null) {
-                    return true;
-                }
+            if (formulaInfo == null || masterCell?.si !== si || masterCell?.f !== formulaInfo.f) {
+                this.initSheetFormulaData({}, unitId, sheetId, cellMatrix);
+                formulaIdMap = this._formulaIdMapData[unitId]?.[sheetId];
+                formulaInfo = formulaIdMap?.[String(si)];
+            }
 
-                const { f, si: currentId } = cell;
+            if (!formulaInfo) {
+                return null;
+            }
 
-                if (isFormulaString(f) && si === currentId) {
-                    formulaString = this._lexerTreeBuilder.moveFormulaRefOffset(
-                        f as string,
-                        column - c,
-                        row - r
-                    );
-
-                    return false;
-                }
-            });
-
-            return formulaString;
+            return this._lexerTreeBuilder.moveFormulaRefOffset(
+                formulaInfo.f,
+                column - formulaInfo.c,
+                row - formulaInfo.r
+            );
         }
 
         return null;
@@ -874,12 +906,12 @@ export class FormulaDataModel extends Disposable {
     }
 }
 
-export function initSheetFormulaData(
+function buildSheetFormulaData(
     formulaData: IFormulaData,
     unitId: string,
     sheetId: string,
     cellMatrix: ObjectMatrix<Nullable<ICellData>>
-): IFormulaData {
+) {
     if (!formulaData[unitId]) {
         formulaData[unitId] = {};
     }
@@ -888,7 +920,7 @@ export function initSheetFormulaData(
         formulaData[unitId][sheetId] = {};
     }
 
-    const formulaIdMap = new Map<string, { f: string; r: number; c: number }>(); // Connect the formula and ID
+    const formulaIdMap: Record<string, IFormulaIdMap> = {}; // Connect the formula and ID
     const sheetFormulaDataMatrix = new ObjectMatrix<Nullable<IFormulaDataItem>>(formulaData[unitId][sheetId]);
 
     cellMatrix.forValue((r, c, cell) => {
@@ -899,20 +931,13 @@ export function initSheetFormulaData(
         const checkFormulaId = isFormulaId(formulaId);
 
         if (checkFormulaString && checkFormulaId) {
-            sheetFormulaDataMatrix.setValue(r, c, {
-                f: formulaString,
-                si: formulaId,
-            });
-            formulaIdMap.set(formulaId, { f: formulaString, r, c });
+            sheetFormulaDataMatrix.setValue(r, c, { f: formulaString, si: formulaId });
+            const formulaInfo = { f: formulaString, r, c };
+            formulaIdMap[formulaId] = formulaInfo;
         } else if (checkFormulaString && !checkFormulaId) {
-            sheetFormulaDataMatrix.setValue(r, c, {
-                f: formulaString,
-            });
+            sheetFormulaDataMatrix.setValue(r, c, { f: formulaString });
         } else if (!checkFormulaString && checkFormulaId) {
-            sheetFormulaDataMatrix.setValue(r, c, {
-                f: '',
-                si: formulaId,
-            });
+            sheetFormulaDataMatrix.setValue(r, c, { f: '', si: formulaId });
         }
     });
 
@@ -921,7 +946,7 @@ export function initSheetFormulaData(
         const formulaId = cell?.si || '';
 
         if (isFormulaId(formulaId) && !isFormulaString(formulaString)) {
-            const formulaInfo = formulaIdMap.get(formulaId);
+            const formulaInfo = formulaIdMap[formulaId];
             if (formulaInfo) {
                 const x = c - formulaInfo.c;
                 const y = r - formulaInfo.r;
@@ -943,9 +968,12 @@ export function initSheetFormulaData(
     const newSheetFormulaData = sheetFormulaDataMatrix.getMatrix(); // Don't use clone, otherwise it will cause performance problems
 
     return {
-        [unitId]: {
-            [sheetId]: newSheetFormulaData,
+        formulaData: {
+            [unitId]: {
+                [sheetId]: newSheetFormulaData,
+            },
         },
+        formulaIdMap,
     };
 }
 

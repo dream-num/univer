@@ -275,6 +275,11 @@ export class HtmlToUSMService {
                 value = value.slice(1, -1);
             }
             const decoded = decodeMsoNumberFormat(value);
+            // Excel can emit named formats such as `Percent` that are not valid Univer numfmt patterns.
+            // Skip them so the external paste flow can infer a valid pattern from the displayed value.
+            if (!numfmt.isValidFormat(decoded)) {
+                continue;
+            }
             // A rule can have multiple comma-separated selectors
             selectors.split(',').forEach((sel) => {
                 this._msoNumfmtMap.set(sel.trim(), decoded);

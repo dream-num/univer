@@ -73,10 +73,10 @@ describe('Tooltip', () => {
         });
     });
 
-    it('should delay hover opening and cancel it when the pointer leaves', () => {
+    it('should delay hover opening by default and cancel it when the pointer leaves', () => {
         vi.useFakeTimers();
         render(
-            <Tooltip title="Delayed tip" openDelay={100}>
+            <Tooltip title="Delayed tip">
                 Delayed trigger
             </Tooltip>
         );
@@ -114,7 +114,7 @@ describe('Tooltip', () => {
     it('should notify visibility changes in controlled mode', () => {
         const onVisibleChange = vi.fn();
         render(
-            <Tooltip title="Controlled" visible={false} onVisibleChange={onVisibleChange}>
+            <Tooltip title="Controlled" openDelay={0} visible={false} onVisibleChange={onVisibleChange}>
                 Trigger
             </Tooltip>
         );

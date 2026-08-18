@@ -52,7 +52,7 @@ export interface ITooltipProps {
     showIfEllipsis?: boolean;
     /**
      * The delay in milliseconds before the tooltip is displayed on hover
-     * @default 0
+     * @default 100
      */
     openDelay?: number;
     /**
@@ -74,7 +74,7 @@ export function Tooltip(props: ITooltipProps) {
         title,
         placement = 'bottom',
         showIfEllipsis = false,
-        openDelay = 0,
+        openDelay = 100,
         visible: controlledVisible,
         onVisibleChange,
     } = props;

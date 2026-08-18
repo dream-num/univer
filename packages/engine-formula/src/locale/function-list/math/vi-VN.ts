@@ -99,8 +99,8 @@ const locale: typeof enUS = {
         },
     },
     ARABIC: {
-        description: 'Converts a Roman number to Arabic, as a number',
-        abstract: 'Converts a Roman number to Arabic, as a number',
+        description: 'Chuyển đổi một chữ số La Mã sang một chữ số Ả-rập.',
+        abstract: 'Chuyển đổi một chữ số La Mã sang một chữ số Ả-rập.',
         links: [
             {
                 title: 'Hướng dẫn',

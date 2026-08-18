@@ -322,8 +322,8 @@ const locale: typeof enUS = {
         },
     },
     EFFECT: {
-        description: 'Returns the effective annual interest rate',
-        abstract: 'Returns the effective annual interest rate',
+        description: 'Cette fonction renvoie le taux d’intérêt annuel effectif.',
+        abstract: 'Taux d’intérêt annuel effectif.',
         links: [
             {
                 title: 'Instruction',
@@ -331,8 +331,8 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            nominalRate: { name: 'nominal_rate', detail: 'The nominal interest rate.' },
-            npery: { name: 'npery', detail: 'The number of compounding periods per year.' },
+            nominalRate: { name: 'taux_nominal', detail: 'Représente le taux d’intérêt nominal.' },
+            npery: { name: 'nb_périodes', detail: 'Nombre de périodes annuelles pour le calcul des intérêts composés.' },
         },
     },
     FV: {

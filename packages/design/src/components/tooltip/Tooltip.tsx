@@ -17,6 +17,7 @@
 import type { ReactElement, ReactNode } from 'react';
 import { useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+
 import { clsx } from '../../helper/clsx';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 
@@ -50,6 +51,11 @@ export interface ITooltipProps {
      */
     showIfEllipsis?: boolean;
     /**
+     * The delay in milliseconds before the tooltip is displayed on hover
+     * @default 0
+     */
+    openDelay?: number;
+    /**
      * Whether the tooltip is visible
      * @description If not set, the tooltip will be controlled by the component itself
      */
@@ -68,6 +74,7 @@ export function Tooltip(props: ITooltipProps) {
         title,
         placement = 'bottom',
         showIfEllipsis = false,
+        openDelay = 0,
         visible: controlledVisible,
         onVisibleChange,
     } = props;
@@ -84,6 +91,7 @@ export function Tooltip(props: ITooltipProps) {
     const triggerRef = useRef<HTMLElement | null>(null);
     const tooltipRef = useRef<HTMLDivElement | null>(null);
     const arrowRef = useRef<HTMLDivElement | null>(null);
+    const openTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const [coords, setCoords] = useState<{ top: number; left: number } | null>(null);
     const [currentPlacement, setCurrentPlacement] = useState(placement);
@@ -92,7 +100,15 @@ export function Tooltip(props: ITooltipProps) {
         return Math.abs(element.scrollWidth - element.clientWidth) > 1;
     }
 
+    function clearOpenTimer() {
+        if (openTimerRef.current !== null) {
+            clearTimeout(openTimerRef.current);
+            openTimerRef.current = null;
+        }
+    }
+
     function showTooltip() {
+        clearOpenTimer();
         if (isControlled) {
             onVisibleChange?.(true);
         } else {
@@ -100,13 +116,30 @@ export function Tooltip(props: ITooltipProps) {
         }
     }
 
+    function scheduleTooltip() {
+        clearOpenTimer();
+        if (openDelay <= 0) {
+            showTooltip();
+            return;
+        }
+
+        openTimerRef.current = setTimeout(showTooltip, openDelay);
+    }
+
     function hideTooltip() {
+        clearOpenTimer();
         if (isControlled) {
             onVisibleChange?.(false);
         } else {
             setUncontrolledVisible(false);
         }
     }
+
+    useEffect(() => () => {
+        if (openTimerRef.current !== null) {
+            clearTimeout(openTimerRef.current);
+        }
+    }, []);
 
     // compute position when visible changes
     useLayoutEffect(() => {
@@ -217,7 +250,7 @@ export function Tooltip(props: ITooltipProps) {
             if (showIfEllipsis && triggerRef.current) {
                 if (!isContentOverflowing(triggerRef.current)) return;
             }
-            showTooltip();
+            scheduleTooltip();
         },
         onMouseLeave: () => hideTooltip(),
         onFocus: () => showTooltip(),

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Tooltip } from '../Tooltip';
 import '@testing-library/jest-dom/vitest';
@@ -51,6 +51,7 @@ describe('Tooltip', () => {
     });
 
     afterEach(() => {
+        vi.useRealTimers();
         vi.restoreAllMocks();
         cleanup();
     });
@@ -72,6 +73,44 @@ describe('Tooltip', () => {
         });
     });
 
+    it('should delay hover opening and cancel it when the pointer leaves', () => {
+        vi.useFakeTimers();
+        render(
+            <Tooltip title="Delayed tip" openDelay={100}>
+                Delayed trigger
+            </Tooltip>
+        );
+
+        const trigger = screen.getByText('Delayed trigger');
+        fireEvent.mouseEnter(trigger);
+        act(() => vi.advanceTimersByTime(99));
+        expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+
+        fireEvent.mouseLeave(trigger);
+        act(() => vi.advanceTimersByTime(1));
+        expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+
+        fireEvent.mouseEnter(trigger);
+        act(() => vi.advanceTimersByTime(100));
+        expect(screen.getByRole('tooltip')).toHaveTextContent('Delayed tip');
+    });
+
+    it('should cancel delayed visibility changes when unmounted', () => {
+        vi.useFakeTimers();
+        const onVisibleChange = vi.fn();
+        const { unmount } = render(
+            <Tooltip title="Delayed tip" openDelay={100} visible={false} onVisibleChange={onVisibleChange}>
+                Delayed trigger
+            </Tooltip>
+        );
+
+        fireEvent.mouseEnter(screen.getByText('Delayed trigger'));
+        unmount();
+        act(() => vi.advanceTimersByTime(100));
+
+        expect(onVisibleChange).not.toHaveBeenCalled();
+    });
+
     it('should notify visibility changes in controlled mode', () => {
         const onVisibleChange = vi.fn();
         render(
@@ -90,7 +129,7 @@ describe('Tooltip', () => {
 
     it('should support non-asChild trigger and focus/blur events', async () => {
         render(
-            <Tooltip title="From button" asChild={false}>
+            <Tooltip title="From button" asChild={false} openDelay={100}>
                 Trigger button
             </Tooltip>
         );

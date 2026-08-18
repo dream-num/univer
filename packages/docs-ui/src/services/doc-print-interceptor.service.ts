@@ -34,11 +34,17 @@ export interface IDocPrintComponentContext extends IDocPrintContext {
     documents: Documents;
 }
 
+export interface IDocPrintPreparationContext {
+    unitId: string;
+    dpr: number;
+}
+
 const PRINTING_COMPONENT_COLLECT = createInterceptorKey<undefined, IDocPrintComponentContext>('PRINTING_COMPONENT_COLLECT');
 const PRINTING_DOM_COLLECT = createInterceptorKey<DisposableCollection, IDocPrintDomtContext>('PRINTING_DOM_COLLECT');
 
 export class DocPrintInterceptorService extends Disposable {
     private _printComponentMap: Map<string, string> = new Map();
+    private readonly _printPreparationHandlers = new Set<(context: IDocPrintPreparationContext) => Promise<void>>();
 
     readonly interceptor = new InterceptorManager({
         PRINTING_COMPONENT_COLLECT,
@@ -65,5 +71,19 @@ export class DocPrintInterceptorService extends Disposable {
 
     getPrintComponent(componentKey: string) {
         return this._printComponentMap.get(componentKey);
+    }
+
+    registerPrintPreparation(handler: (context: IDocPrintPreparationContext) => Promise<void>) {
+        this._printPreparationHandlers.add(handler);
+        return () => this._printPreparationHandlers.delete(handler);
+    }
+
+    async preparePrint(context: IDocPrintPreparationContext): Promise<void> {
+        await Promise.all([...this._printPreparationHandlers].map((handler) => handler(context)));
+    }
+
+    override dispose(): void {
+        this._printPreparationHandlers.clear();
+        super.dispose();
     }
 }

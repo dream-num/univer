@@ -205,7 +205,7 @@ function getNextBlockTop(lines: IDocumentSkeletonLine[]) {
     return lastLine.top + lastLine.lineHeight;
 }
 
-function calculateColumnGroupLayout(source: IColumnGroup, availableWidth: number, columnHeights: number[]): IColumnGroupLayout {
+export function calculateColumnGroupLayout(source: IColumnGroup, availableWidth: number, columnHeights: number[]): IColumnGroupLayout {
     const width = Math.max(0, availableWidth);
     const gap = Math.max(0, source.gap?.v ?? 0);
     const columns = source.columns;
@@ -298,26 +298,19 @@ function allocateHorizontalWidths(columns: IColumn[], contentWidth: number): num
 
 function compressToFit(widths: number[], minWidths: number[], overflow: number): number[] {
     const nextWidths = [...widths];
-    let remainingOverflow = overflow;
-    let flexibleIndexes = getFlexibleIndexes(nextWidths, minWidths);
-
-    while (remainingOverflow > 0 && flexibleIndexes.length > 0) {
-        const totalShrink = flexibleIndexes.reduce((sum, item) => sum + item.shrink, 0);
-        for (const item of flexibleIndexes) {
-            const shrink = Math.min(item.shrink, remainingOverflow * item.shrink / totalShrink);
-            nextWidths[item.index] -= shrink;
-            remainingOverflow -= shrink;
-        }
-        flexibleIndexes = getFlexibleIndexes(nextWidths, minWidths);
+    const flexibleIndexes = nextWidths
+        .map((width, index) => ({ index, shrink: Math.max(0, width - minWidths[index]) }))
+        .filter((item) => item.shrink > 0);
+    const totalShrink = flexibleIndexes.reduce((sum, item) => sum + item.shrink, 0);
+    const appliedOverflow = Math.min(overflow, totalShrink);
+    if (appliedOverflow <= 0 || totalShrink <= 0) {
+        return nextWidths;
+    }
+    for (const item of flexibleIndexes) {
+        nextWidths[item.index] -= appliedOverflow * item.shrink / totalShrink;
     }
 
     return nextWidths;
-}
-
-function getFlexibleIndexes(widths: number[], minWidths: number[]) {
-    return widths
-        .map((width, index) => ({ index, shrink: Math.max(0, width - minWidths[index]) }))
-        .filter((item) => item.shrink > 0);
 }
 
 function getMinWidth(column: IColumn): number {

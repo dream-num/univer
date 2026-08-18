@@ -75,6 +75,14 @@ const getTestWorkbookData = (): IWorkbookData => {
                             v: '<25|Existing Workforce',
                             t: CellValueType.STRING,
                         },
+                        8: {
+                            v: '123',
+                            t: CellValueType.STRING,
+                        },
+                        9: {
+                            v: 123,
+                            t: CellValueType.NUMBER,
+                        },
                     },
                     1: {
                         0: {
@@ -310,6 +318,13 @@ describe('Test countif function', () => {
 
         it('Does not include same-lower-bound numeric buckets in pipe-delimited less-than criteria', async () => {
             expect(await calculate('=COUNTIF(H1:H4,"<25|New Hire (Last 12 Months)")')).toBe(2);
+        });
+
+        it('Compares numeric strings and numbers according to the criteria operator', async () => {
+            expect(await calculate('=COUNTIF(I1:J1,"=123")')).toBe(2);
+            expect(await calculate('=COUNTIF(I1:J1,"<>1")')).toBe(2);
+            expect(await calculate('=COUNTIF(I1:J1,">1")')).toBe(1);
+            expect(await calculate('=COUNTIF(I1:J1,"<=123")')).toBe(1);
         });
     });
 });

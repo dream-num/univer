@@ -22,6 +22,7 @@ import { getPairedRangeAndCriteriaResult, parsePairedRangeAndCriteria } from '..
 import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
+import { FUNCTION_NAMES_STATISTICAL } from '../function-names';
 
 export class Countifs extends BaseFunction {
     override minParams = 2;
@@ -54,7 +55,7 @@ export class Countifs extends BaseFunction {
         }
 
         const results = getPairedRangeAndCriteriaResult(_variants, {
-            formulaName: 'COUNTIFS',
+            formulaName: FUNCTION_NAMES_STATISTICAL.COUNTIFS,
             maxRowLength: criteriaMaxRowLength,
             maxColumnLength: criteriaMaxColumnLength,
             isNumberSensitive: true,

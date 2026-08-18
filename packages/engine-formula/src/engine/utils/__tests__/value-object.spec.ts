@@ -15,9 +15,10 @@
  */
 
 import { cellToRange, CellValueType } from '@univerjs/core';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { ErrorType } from '../../../basics/error-type';
 import { compareToken } from '../../../basics/token';
+import { FUNCTION_NAMES_MATH } from '../../../functions/math/function-names';
 import { CellReferenceObject } from '../../reference-object/cell-reference-object';
 import { ColumnReferenceObject } from '../../reference-object/column-reference-object';
 import { RangeReferenceObject } from '../../reference-object/range-reference-object';
@@ -25,7 +26,12 @@ import { RowReferenceObject } from '../../reference-object/row-reference-object'
 import { ArrayValueObject } from '../../value-object/array-value-object';
 import { ErrorValueObject } from '../../value-object/base-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../value-object/primitive-object';
-import { convertTonNumber, isSingleValueObject, objectValueToCellValue } from '../value-object';
+import {
+    convertTonNumber,
+    getPairedRangeAndCriteriaResult,
+    isSingleValueObject,
+    objectValueToCellValue,
+} from '../value-object';
 
 describe('Test object cover', () => {
     it('Function convertTonNumber', () => {
@@ -71,5 +77,27 @@ describe('Test object cover', () => {
         expect(objectValueToCellValue(null)).toStrictEqual({ v: null });
         expect(objectValueToCellValue(ErrorValueObject.create(ErrorType.VALUE))).toStrictEqual({ v: ErrorType.VALUE, t: CellValueType.STRING });
         expect(objectValueToCellValue(StringValueObject.create('0').withCustomData({ test: 'abc' }))).toStrictEqual({ v: '0', t: CellValueType.STRING, custom: { test: 'abc' } });
+    });
+
+    it('reduces scalar IFS criteria without comparing full arrays', () => {
+        const compareSpy = vi.spyOn(ArrayValueObject.prototype, 'compare');
+        const targetRange = ArrayValueObject.createByArray([[10], [20], [30], [40]]);
+        const firstRange = ArrayValueObject.createByArray([[1], [2], [2], [3]]);
+        const secondRange = ArrayValueObject.createByArray([[true], [true], [false], [true]]);
+
+        const result = getPairedRangeAndCriteriaResult(
+            [firstRange, NumberValueObject.create(2), secondRange, BooleanValueObject.create(true)],
+            {
+                formulaName: FUNCTION_NAMES_MATH.SUMIFS,
+                maxRowLength: 1,
+                maxColumnLength: 1,
+                isNumberSensitive: true,
+                targetRange,
+            }
+        );
+
+        expect(result[0][0].getValue()).toBe(20);
+        expect(compareSpy).not.toHaveBeenCalled();
+        compareSpy.mockRestore();
     });
 });

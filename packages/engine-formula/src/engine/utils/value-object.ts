@@ -20,12 +20,14 @@ import type { BaseValueObject } from '../value-object/base-value-object';
 import { CellValueType } from '@univerjs/core';
 import { ErrorType } from '../../basics/error-type';
 import { compareToken } from '../../basics/token';
+import { FUNCTION_NAMES_MATH } from '../../functions/math/function-names';
+import { FUNCTION_NAMES_STATISTICAL } from '../../functions/statistical/function-names';
 import { CellReferenceObject } from '../reference-object/cell-reference-object';
 import { ColumnReferenceObject } from '../reference-object/column-reference-object';
 import { RowReferenceObject } from '../reference-object/row-reference-object';
 import { ArrayValueObject } from '../value-object/array-value-object';
 import { ErrorValueObject } from '../value-object/base-value-object';
-import { BooleanValueObject, NumberValueObject } from '../value-object/primitive-object';
+import { BooleanValueObject, NullValueObject, NumberValueObject } from '../value-object/primitive-object';
 import { expandArrayValueObject } from './array-object';
 import { isWildcard } from './compare';
 import { booleanObjectIntersection, findCompareToken, valueObjectCompare } from './object-compare';
@@ -314,11 +316,18 @@ export function baseValueObjectToArrayValueObject(valueObject: BaseValueObject):
 /**
  * Get the paired range and criteria result for COUNTIFS, SUMIFS, etc.
  */
+type IfsFunctionName =
+    | FUNCTION_NAMES_MATH.SUMIFS
+    | FUNCTION_NAMES_STATISTICAL.AVERAGEIFS
+    | FUNCTION_NAMES_STATISTICAL.COUNTIFS
+    | FUNCTION_NAMES_STATISTICAL.MAXIFS
+    | FUNCTION_NAMES_STATISTICAL.MINIFS;
+
 // eslint-disable-next-line max-lines-per-function
 export function getPairedRangeAndCriteriaResult(
     variants: BaseValueObject[],
     params: {
-        formulaName: string;
+        formulaName: IfsFunctionName;
         maxRowLength: number;
         maxColumnLength: number;
         isNumberSensitive?: boolean;
@@ -357,6 +366,15 @@ export function getPairedRangeAndCriteriaResult(
      * For example, `=COUNTIFS(Q$3:Q$10002,C$3:C$5002,R$3:R$10002,L6)`.
      */
     rangeAndCriteriaArrays[0].criteriaArray.iterator((_, rowIndex, columnIndex) => {
+        const fastResult = maxRowLength === 1 && maxColumnLength === 1
+            ? tryFastCriteriaReduce(rangeAndCriteriaArrays, rowIndex, columnIndex, formulaName, targetRange, isNumberSensitive)
+            : undefined;
+
+        if (fastResult !== undefined) {
+            results[rowIndex] = [fastResult];
+            return;
+        }
+
         let finalCompareResult: ArrayValueObject | undefined;
 
         for (let i = 0; i < rangeAndCriteriaArrays.length; i++) {
@@ -385,7 +403,7 @@ export function getPairedRangeAndCriteriaResult(
 
         let result: BaseValueObject | undefined;
 
-        if (formulaName === 'COUNTIFS') {
+        if (formulaName === FUNCTION_NAMES_STATISTICAL.COUNTIFS) {
             let count = 0;
             (finalCompareResult as ArrayValueObject).iterator((value) => {
                 if (value?.isBoolean() && value.getValue() === true) {
@@ -393,21 +411,21 @@ export function getPairedRangeAndCriteriaResult(
                 }
             });
             result = NumberValueObject.create(count);
-        } else if (formulaName === 'SUMIFS') {
+        } else if (formulaName === FUNCTION_NAMES_MATH.SUMIFS) {
             result = targetRange!.pick(finalCompareResult as ArrayValueObject).sum();
-        } else if (formulaName === 'AVERAGEIFS') {
+        } else if (formulaName === FUNCTION_NAMES_STATISTICAL.AVERAGEIFS) {
             const picked = targetRange!.pick(finalCompareResult as ArrayValueObject);
             const sum = picked.sum();
             const count = picked.count();
             result = sum.divided(count);
-        } else if (formulaName === 'MAXIFS') {
+        } else if (formulaName === FUNCTION_NAMES_STATISTICAL.MAXIFS) {
             const picked = targetRange!.pick(finalCompareResult as ArrayValueObject);
             if (picked.getColumnCount() === 0) {
                 result = NumberValueObject.create(0);
             } else {
                 result = picked.max();
             }
-        } else if (formulaName === 'MINIFS') {
+        } else if (formulaName === FUNCTION_NAMES_STATISTICAL.MINIFS) {
             const picked = targetRange!.pick(finalCompareResult as ArrayValueObject);
             if (picked.getColumnCount() === 0) {
                 result = NumberValueObject.create(0);
@@ -426,6 +444,187 @@ export function getPairedRangeAndCriteriaResult(
     return results;
 }
 
+interface IRangeAndCriteriaArray {
+    range: ArrayValueObject;
+    criteriaArray: ArrayValueObject;
+}
+
+interface IParsedCriteria {
+    range: ArrayValueObject;
+    operator: compareToken;
+    criteriaObject: BaseValueObject;
+}
+
+interface IParsedCriteriaResult {
+    criteria: IParsedCriteria[];
+    rowCount: number;
+    columnCount: number;
+}
+
+function tryFastCriteriaReduce(
+    rangeAndCriteriaArrays: IRangeAndCriteriaArray[],
+    rowIndex: number,
+    columnIndex: number,
+    formulaName: IfsFunctionName,
+    targetRange: ArrayValueObject | undefined,
+    isNumberSensitive: boolean
+): BaseValueObject | undefined {
+    const isCount = formulaName === FUNCTION_NAMES_STATISTICAL.COUNTIFS;
+    const isTargetFormula = formulaName === FUNCTION_NAMES_MATH.SUMIFS ||
+        formulaName === FUNCTION_NAMES_STATISTICAL.AVERAGEIFS ||
+        formulaName === FUNCTION_NAMES_STATISTICAL.MAXIFS ||
+        formulaName === FUNCTION_NAMES_STATISTICAL.MINIFS;
+    if (!isCount && (!isTargetFormula || targetRange === undefined)) {
+        return undefined;
+    }
+
+    const parsed = parseFastCriteria(rangeAndCriteriaArrays, rowIndex, columnIndex);
+    if (!parsed || !hasMatchingDimensions(targetRange, parsed.rowCount, parsed.columnCount)) {
+        return undefined;
+    }
+
+    const matchedPositions = findMatchingPositions(parsed, isNumberSensitive);
+    return reduceMatchingPositions(formulaName, targetRange, matchedPositions, parsed.columnCount);
+}
+
+function parseFastCriteria(
+    rangeAndCriteriaArrays: IRangeAndCriteriaArray[],
+    rowIndex: number,
+    columnIndex: number
+): IParsedCriteriaResult | undefined {
+    const parsedCriteria: IParsedCriteria[] = [];
+    const firstRange = rangeAndCriteriaArrays[0].range;
+    const rowCount = firstRange.getRowCount();
+    const columnCount = firstRange.getColumnCount();
+
+    if (rowCount < 1 || columnCount < 1) {
+        return undefined;
+    }
+
+    for (const { range, criteriaArray } of rangeAndCriteriaArrays) {
+        const criteria = criteriaArray.get(rowIndex, columnIndex);
+        if (!criteria || range.getRowCount() !== rowCount || range.getColumnCount() !== columnCount) {
+            return undefined;
+        }
+
+        const [operator, criteriaObject] = criteria.isString()
+            ? findCompareToken(`${criteria.getValue()}`)
+            : [compareToken.EQUALS, criteria];
+        if (criteriaObject.isString() && isWildcard(`${criteriaObject.getValue()}`)) {
+            return undefined;
+        }
+
+        parsedCriteria.push({ range, operator, criteriaObject });
+    }
+
+    return { criteria: parsedCriteria, rowCount, columnCount };
+}
+
+function hasMatchingDimensions(targetRange: ArrayValueObject | undefined, rowCount: number, columnCount: number): boolean {
+    return targetRange === undefined ||
+        (targetRange.getRowCount() === rowCount && targetRange.getColumnCount() === columnCount);
+}
+
+function findMatchingPositions(parsed: IParsedCriteriaResult, isNumberSensitive: boolean): number[] {
+    const { criteria, rowCount, columnCount } = parsed;
+    const matchedPositions: number[] = [];
+
+    for (let criteriaIndex = 0; criteriaIndex < criteria.length; criteriaIndex++) {
+        const { range, operator, criteriaObject } = criteria[criteriaIndex];
+        if (criteriaIndex === 0) {
+            for (let row = 0; row < rowCount; row++) {
+                for (let column = 0; column < columnCount; column++) {
+                    if (isCriteriaMatch(range.get(row, column), criteriaObject, operator, isNumberSensitive)) {
+                        matchedPositions.push(row * columnCount + column);
+                    }
+                }
+            }
+        } else {
+            filterMatchingPositions(matchedPositions, range, criteriaObject, operator, columnCount, isNumberSensitive);
+        }
+
+        if (matchedPositions.length === 0) {
+            break;
+        }
+    }
+
+    return matchedPositions;
+}
+
+function filterMatchingPositions(
+    matchedPositions: number[],
+    range: ArrayValueObject,
+    criteriaObject: BaseValueObject,
+    operator: compareToken,
+    columnCount: number,
+    isNumberSensitive: boolean
+): void {
+    let writeIndex = 0;
+    for (const position of matchedPositions) {
+        const row = Math.floor(position / columnCount);
+        const column = position % columnCount;
+        if (isCriteriaMatch(range.get(row, column), criteriaObject, operator, isNumberSensitive)) {
+            matchedPositions[writeIndex++] = position;
+        }
+    }
+    matchedPositions.length = writeIndex;
+}
+
+function reduceMatchingPositions(
+    formulaName: IfsFunctionName,
+    targetRange: ArrayValueObject | undefined,
+    matchedPositions: number[],
+    columnCount: number
+): BaseValueObject | undefined {
+    if (formulaName === FUNCTION_NAMES_STATISTICAL.COUNTIFS) {
+        return NumberValueObject.create(matchedPositions.length);
+    }
+
+    const pickedValues = matchedPositions.map((position) => {
+        const row = Math.floor(position / columnCount);
+        const column = position % columnCount;
+        return targetRange!.get(row, column) ?? NullValueObject.create();
+    });
+    const picked = ArrayValueObject.create({
+        calculateValueList: [pickedValues],
+        rowCount: 1,
+        columnCount: pickedValues.length,
+        unitId: '',
+        sheetId: '',
+        row: -1,
+        column: -1,
+    });
+
+    if (formulaName === FUNCTION_NAMES_MATH.SUMIFS) {
+        return picked.sum();
+    }
+    if (formulaName === FUNCTION_NAMES_STATISTICAL.AVERAGEIFS) {
+        return picked.sum().divided(picked.count());
+    }
+    if (formulaName === FUNCTION_NAMES_STATISTICAL.MAXIFS) {
+        return picked.getColumnCount() === 0 ? NumberValueObject.create(0) : picked.max();
+    }
+    return picked.getColumnCount() === 0 ? NumberValueObject.create(0) : picked.min();
+}
+
+function isCriteriaMatch(
+    rangeValueObject: Nullable<BaseValueObject>,
+    criteriaObject: BaseValueObject,
+    operator: compareToken,
+    isNumberSensitive: boolean
+): boolean {
+    if (!rangeValueObject) {
+        return false;
+    }
+
+    let result = rangeValueObject.compare(criteriaObject, operator);
+    if (isNumberSensitive) {
+        result = filterSameValueObject(result, rangeValueObject, criteriaObject, operator);
+    }
+
+    return result.isBoolean() && result.getValue() === true;
+}
+
 /**
  * Two ArrayValueObject of the same type can be compared
  */
@@ -434,119 +633,154 @@ export function filterSameValueObjectResult(array: ArrayValueObject, range: Arra
         ? findCompareToken(`${criteria.getValue()}`)
         : [compareToken.EQUALS, criteria];
 
-    return array.mapValue((valueObject, r, c) => {
-        const rangeValueObject = range.get(r, c);
-        const isBlankStringCriteria = criteriaObject.isString() && criteriaObject.getValue() === '';
+    return array.mapValue((valueObject, r, c) => filterSameValueObject(valueObject, range.get(r, c), criteriaObject, operator));
+}
 
-        if (
-            isBlankStringCriteria &&
-            (
-                operator === compareToken.GREATER_THAN ||
-                operator === compareToken.GREATER_THAN_OR_EQUAL ||
-                operator === compareToken.LESS_THAN ||
-                operator === compareToken.LESS_THAN_OR_EQUAL
-            )
-        ) {
-            return BooleanValueObject.create(false);
-        }
+function filterSameValueObject(
+    valueObject: BaseValueObject,
+    rangeValueObject: Nullable<BaseValueObject>,
+    criteriaObject: BaseValueObject,
+    operator: compareToken
+): BaseValueObject {
+    const stringResult = filterStringCriteria(valueObject, rangeValueObject, criteriaObject, operator);
+    if (stringResult) {
+        return stringResult;
+    }
 
-        if (operator === compareToken.NOT_EQUAL && isBlankStringCriteria && rangeValueObject?.isString() && rangeValueObject.getValue() === '') {
-            return BooleanValueObject.create(true);
-        }
+    const convertedResult = filterConvertedNumber(rangeValueObject, criteriaObject, operator);
+    if (convertedResult) {
+        return convertedResult;
+    }
 
-        if (
-            criteriaObject.isString() &&
-            isWildcard(`${criteriaObject.getValue()}`) &&
-            rangeValueObject?.isString() &&
-            rangeValueObject.getValue() === ''
-        ) {
-            return valueObject;
-        }
+    if (rangeValueObject && isSameValueObjectType(rangeValueObject, criteriaObject)) {
+        return valueObject;
+    }
 
-        if (
-            criteriaObject.isString() &&
-            criteriaObject.getValue() !== '' &&
-            (operator === compareToken.LESS_THAN || operator === compareToken.LESS_THAN_OR_EQUAL) &&
-            rangeValueObject?.isString() &&
-            rangeValueObject.getValue() === ''
-        ) {
-            return BooleanValueObject.create(true);
-        }
+    if (rangeValueObject?.isError() && criteriaObject.isError() && rangeValueObject.getValue() === criteriaObject.getValue()) {
+        return BooleanValueObject.create(true);
+    }
 
-        if (
-            criteriaObject.isString() &&
-            criteriaObject.getValue() !== '' &&
-            (operator === compareToken.LESS_THAN || operator === compareToken.LESS_THAN_OR_EQUAL) &&
-            (rangeValueObject == null || rangeValueObject.isNull())
-        ) {
-            return BooleanValueObject.create(false);
-        }
+    return filterCrossTypeEquality(rangeValueObject, criteriaObject, operator);
+}
 
-        if (
-            criteriaObject.isString() &&
-            rangeValueObject?.isString() &&
-            (operator === compareToken.LESS_THAN || operator === compareToken.LESS_THAN_OR_EQUAL) &&
-            isSameLowerBoundBucket(rangeValueObject.getValue() as string, criteriaObject.getValue() as string)
-        ) {
-            return BooleanValueObject.create(false);
-        }
+function filterStringCriteria(
+    valueObject: BaseValueObject,
+    rangeValueObject: Nullable<BaseValueObject>,
+    criteriaObject: BaseValueObject,
+    operator: compareToken
+): BaseValueObject | undefined {
+    if (!criteriaObject.isString()) {
+        return undefined;
+    }
 
-        if (rangeValueObject?.isNumber() && criteriaObject.isString()) {
-            const criteriaNumber = criteriaObject.convertToNumberObjectValue();
+    const criteriaValue = `${criteriaObject.getValue()}`;
+    const blankResult = filterBlankStringCriteria(rangeValueObject, criteriaValue, operator);
+    if (blankResult) {
+        return blankResult;
+    }
+    if (isWildcard(criteriaValue) && rangeValueObject?.isString() && rangeValueObject.getValue() === '') {
+        return valueObject;
+    }
 
-            if (criteriaNumber.isNumber()) {
-                return rangeValueObject.compare(criteriaNumber, operator);
-            }
-        }
+    return filterLowerStringCriteria(rangeValueObject, criteriaValue, operator);
+}
 
-        if (criteriaObject.isNumber() && criteriaObject.isDateFormat() && rangeValueObject?.isString()) {
-            const rangeNumber = rangeValueObject.convertToNumberObjectValue();
+function filterBlankStringCriteria(
+    rangeValueObject: Nullable<BaseValueObject>,
+    criteriaValue: string,
+    operator: compareToken
+): BaseValueObject | undefined {
+    if (criteriaValue !== '') {
+        return undefined;
+    }
 
-            if (rangeNumber.isNumber()) {
-                return rangeNumber.compare(criteriaObject, operator);
-            }
-        }
-
-        if (rangeValueObject && isSameValueObjectType(rangeValueObject, criteriaObject)) {
-            return valueObject;
-        }
-
-        if (rangeValueObject?.isError() && criteriaObject.isError() && rangeValueObject.getValue() === criteriaObject.getValue()) {
-            return BooleanValueObject.create(true);
-        }
-
-        /**
-         * If the operator is '=' or '<>', we can compare string numbers against numeric criteria directly in COUNTIF, COUNTIFS, SUMIF, SUMIFS, etc.
-         * Other operators require both valueObjects to be of the same type.
-         * For example:
-         * | A1    | B1  |
-         * | '123' | 123 |
-         *
-         * =COUNTIF(A1:B1, '=123') will return 2
-         * =COUNTIF(A1:B1, '<>1') will return 2
-         * =COUNTIF(A1:B1, '>1') will return 1
-         * =COUNTIF(A1:B1, '<=123') will return 1
-         */
-        if (operator === compareToken.EQUALS || operator === compareToken.NOT_EQUAL) {
-            if (criteriaObject.isNumber() && rangeValueObject?.isString()) {
-                const rangeNumber = rangeValueObject.convertToNumberObjectValue();
-
-                if (rangeNumber.isNumber()) {
-                    return rangeNumber.compare(criteriaObject, operator);
-                }
-            }
-
-            if (operator === compareToken.EQUALS) {
-                return BooleanValueObject.create(false);
-            }
-
-            if (operator === compareToken.NOT_EQUAL) {
-                return BooleanValueObject.create(true);
-            }
-        }
-
+    const isOrderedComparison = operator === compareToken.LESS_THAN ||
+        operator === compareToken.LESS_THAN_OR_EQUAL ||
+        operator === compareToken.GREATER_THAN ||
+        operator === compareToken.GREATER_THAN_OR_EQUAL;
+    if (isOrderedComparison) {
         return BooleanValueObject.create(false);
-    });
+    }
+    if (operator === compareToken.NOT_EQUAL && rangeValueObject?.isString() && rangeValueObject.getValue() === '') {
+        return BooleanValueObject.create(true);
+    }
+
+    return undefined;
+}
+
+function filterLowerStringCriteria(
+    rangeValueObject: Nullable<BaseValueObject>,
+    criteriaValue: string,
+    operator: compareToken
+): BaseValueObject | undefined {
+    const isLowerComparison = operator === compareToken.LESS_THAN || operator === compareToken.LESS_THAN_OR_EQUAL;
+    if (criteriaValue === '' || !isLowerComparison) {
+        return undefined;
+    }
+    if (rangeValueObject?.isString() && rangeValueObject.getValue() === '') {
+        return BooleanValueObject.create(true);
+    }
+    if (rangeValueObject == null || rangeValueObject.isNull()) {
+        return BooleanValueObject.create(false);
+    }
+    if (rangeValueObject.isString() && isSameLowerBoundBucket(rangeValueObject.getValue() as string, criteriaValue)) {
+        return BooleanValueObject.create(false);
+    }
+
+    return undefined;
+}
+
+function filterConvertedNumber(
+    rangeValueObject: Nullable<BaseValueObject>,
+    criteriaObject: BaseValueObject,
+    operator: compareToken
+): BaseValueObject | undefined {
+    if (rangeValueObject?.isNumber() && criteriaObject.isString()) {
+        const criteriaNumber = criteriaObject.convertToNumberObjectValue();
+        if (criteriaNumber.isNumber()) {
+            return rangeValueObject.compare(criteriaNumber, operator);
+        }
+    }
+
+    if (criteriaObject.isNumber() && criteriaObject.isDateFormat() && rangeValueObject?.isString()) {
+        const rangeNumber = rangeValueObject.convertToNumberObjectValue();
+        if (rangeNumber.isNumber()) {
+            return rangeNumber.compare(criteriaObject, operator);
+        }
+    }
+
+    return undefined;
+}
+
+function filterCrossTypeEquality(
+    rangeValueObject: Nullable<BaseValueObject>,
+    criteriaObject: BaseValueObject,
+    operator: compareToken
+): BaseValueObject {
+    /**
+     * If the operator is '=' or '<>', we can compare string numbers against numeric criteria directly in COUNTIF, COUNTIFS, SUMIF, SUMIFS, etc.
+     * Other operators require both valueObjects to be of the same type.
+     * For example:
+     * | A1    | B1  |
+     * | '123' | 123 |
+     *
+     * =COUNTIF(A1:B1, '=123') will return 2
+     * =COUNTIF(A1:B1, '<>1') will return 2
+     * =COUNTIF(A1:B1, '>1') will return 1
+     * =COUNTIF(A1:B1, '<=123') will return 1
+     */
+    if (operator !== compareToken.EQUALS && operator !== compareToken.NOT_EQUAL) {
+        return BooleanValueObject.create(false);
+    }
+
+    if (criteriaObject.isNumber() && rangeValueObject?.isString()) {
+        const rangeNumber = rangeValueObject.convertToNumberObjectValue();
+        if (rangeNumber.isNumber()) {
+            return rangeNumber.compare(criteriaObject, operator);
+        }
+    }
+
+    return BooleanValueObject.create(operator === compareToken.NOT_EQUAL);
 }
 
 function isSameLowerBoundBucket(rangeValue: string, criteriaValue: string): boolean {

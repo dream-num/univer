@@ -22,6 +22,7 @@ import { getPairedRangeAndCriteriaResult, parsePairedRangeAndCriteria } from '..
 import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
+import { FUNCTION_NAMES_STATISTICAL } from '../function-names';
 
 export class Maxifs extends BaseFunction {
     override minParams = 3;
@@ -54,7 +55,7 @@ export class Maxifs extends BaseFunction {
         }
 
         const results = getPairedRangeAndCriteriaResult(_variants, {
-            formulaName: 'MAXIFS',
+            formulaName: FUNCTION_NAMES_STATISTICAL.MAXIFS,
             maxRowLength: criteriaMaxRowLength,
             maxColumnLength: criteriaMaxColumnLength,
             isNumberSensitive: true,

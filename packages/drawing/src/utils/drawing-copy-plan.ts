@@ -17,6 +17,10 @@
 import type { IDrawingParam } from '@univerjs/core';
 import { generateRandomId } from '@univerjs/core';
 
+/**
+ * A command-scoped cache key shared by sheet-copy interceptors so every drawing model
+ * resolves against the same copied drawing IDs.
+ */
 export const DRAWING_COPY_CONTEXT_KEY = 'univer.drawing.copy-plan';
 
 export interface ICreateDrawingCopyPlanOptions {
@@ -51,11 +55,13 @@ function copyDrawingWithIdMap<T extends IDrawingParam>(
     copied.subUnitId = options.targetSubUnitId;
     copied.drawingId = copiedDrawingId;
 
+    // Remap the parent through the shared plan instead of retaining a relationship to the source sheet.
     if (copied.groupId) {
         const copiedGroupId = idMap.get(copied.groupId);
         if (copiedGroupId) {
             copied.groupId = copiedGroupId;
         } else {
+            // The parent is not part of this copy, so avoid leaving a dangling cross-sheet group reference.
             delete copied.groupId;
         }
     }
@@ -94,6 +100,8 @@ export function getOrCreateDrawingCopyPlan<T extends IDrawingParam>(
     const cached = copyContext.get(DRAWING_COPY_CONTEXT_KEY) as IDrawingCopyPlan<T> | undefined;
     if (cached) {
         const { generateId = () => generateRandomId(10) } = options;
+        // Feature interceptors may contribute different portions of the drawing graph. Extend the plan in
+        // place to preserve IDs already consumed by earlier interceptors.
         const hasMissingDrawing = drawings.some((drawing) => !cached.idMap.has(drawing.drawingId));
         if (!hasMissingDrawing) {
             return cached;
@@ -112,6 +120,7 @@ export function getOrCreateDrawingCopyPlan<T extends IDrawingParam>(
             return originalDrawingId == null || !incomingDrawingIds.has(originalDrawingId);
         });
 
+        // Re-copy incoming nodes after extending the map so a child can resolve a group discovered later.
         cached.drawings = [
             ...drawings.map((drawing) => copyDrawingWithIdMap(drawing, cached.idMap, options)),
             ...retainedDrawings,

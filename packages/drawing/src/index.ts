@@ -35,8 +35,9 @@ export type {
 export { IDrawingManagerService } from './services/drawing-manager.service';
 export { ImageIoService } from './services/image-io-impl.service';
 export { URLImageService } from './services/url-image.service';
-export { createDrawingCopyPlan, DRAWING_COPY_CONTEXT_KEY, DRAWING_GROUPABLE_TYPES, getOrCreateDrawingCopyPlan, isGroupableDrawingType } from './utils/drawing-group';
-export type { ICreateDrawingCopyPlanOptions, IDrawingCopyPlan } from './utils/drawing-group';
+export { createDrawingCopyPlan, DRAWING_COPY_CONTEXT_KEY, getOrCreateDrawingCopyPlan } from './utils/drawing-copy-plan';
+export type { ICreateDrawingCopyPlanOptions, IDrawingCopyPlan } from './utils/drawing-copy-plan';
+export { DRAWING_GROUPABLE_TYPES, isGroupableDrawingType } from './utils/drawing-group';
 export { getDrawingShapeKeyByDrawingSearch } from './utils/get-image-shape-key';
 export { getImageSize } from './utils/get-image-size';
 export { resolveDrawingRotateEnabled } from './utils/rotate-enabled';

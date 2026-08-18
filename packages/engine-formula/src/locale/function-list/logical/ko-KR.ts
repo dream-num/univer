@@ -175,7 +175,7 @@ const locale: typeof enUS = {
             number2: { name: 'cols', detail: '배열의 열 수입니다. 0보다 커야 합니다.' },
             value3: {
                 name: 'lambda',
-                detail: ' A LAMBDA that is called to create the array. The LAMBDA takes two parameters: row (The row index of the array), col (The column index of the array).',
+                detail: '배열을 만들기 위해 호출되는 LAMBDA입니다. LAMBDA는 행 인덱스와 열 인덱스 두 매개 변수를 사용합니다.',
             },
         },
     },

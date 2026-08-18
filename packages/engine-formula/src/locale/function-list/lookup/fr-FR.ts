@@ -187,10 +187,10 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            dataField: { name: 'dataField', detail: '' },
-            pivotTable: { name: 'pivotTable', detail: '' },
-            field1: { name: 'field1', detail: '' },
-            item1: { name: 'item1', detail: '' },
+            dataField: { name: 'champ_données', detail: 'Nom du champ du tableau croisé dynamique contenant les données à récupérer. Il doit être placé entre guillemets.' },
+            pivotTable: { name: 'tableau_croisé_dyn', detail: 'Référence à une cellule, une plage ou une plage nommée du tableau croisé dynamique contenant les données.' },
+            field1: { name: 'champ1', detail: 'Paire facultative de noms de champ et d’élément décrivant les données à récupérer.' },
+            item1: { name: 'élément1', detail: 'Paire facultative de noms de champ et d’élément décrivant les données à récupérer.' },
         },
     },
     HLOOKUP: {

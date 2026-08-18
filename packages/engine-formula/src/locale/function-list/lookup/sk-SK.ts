@@ -202,10 +202,10 @@ const locale: typeof enUS = {
             },
         ],
         functionParameter: {
-            dataField: { name: 'dataField', detail: '' },
-            pivotTable: { name: 'pivotTable', detail: '' },
-            field1: { name: 'field1', detail: '' },
-            item1: { name: 'item1', detail: '' },
+            dataField: { name: 'údajové_pole', detail: 'Názov poľa kontingenčnej tabuľky obsahujúce údaje, ktoré chcete načítať. Musí byť v úvodzovkách.' },
+            pivotTable: { name: 'kontingenčná_tabuľka', detail: 'Odkaz na bunku, rozsah buniek alebo pomenovaný rozsah v kontingenčnej tabuľke obsahujúcej požadované údaje.' },
+            field1: { name: 'pole1', detail: 'Voliteľná dvojica názvu poľa a položky opisujúca údaje, ktoré chcete načítať.' },
+            item1: { name: 'položka1', detail: 'Voliteľná dvojica názvu poľa a položky opisujúca údaje, ktoré chcete načítať.' },
         },
     },
     HLOOKUP: {

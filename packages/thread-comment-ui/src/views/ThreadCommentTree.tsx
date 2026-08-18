@@ -39,7 +39,7 @@ import {
     ThreadCommentModel,
     UpdateCommentCommand,
 } from '@univerjs/thread-comment';
-import { UI_PLUGIN_CONFIG_KEY, useConfigValue, useDependency, useObservable } from '@univerjs/ui';
+import { UI_PLUGIN_CONFIG_KEY, useConfigValue, useDependency, useEvent, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { debounceTime, map, of, startWith } from 'rxjs';
 import { SetActiveCommentOperation } from '../commands/operations/comment.operations';
@@ -259,14 +259,13 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                 : null}
             {dateText && (
                 <time
-                    dir="ltr"
                     className={`
                       univer-mb-1 univer-block univer-text-xs/normal univer-text-gray-600
                       rtl:univer-text-right
                       dark:!univer-text-gray-200
                     `}
                 >
-                    {dateText}
+                    <bdo dir="ltr">{dateText}</bdo>
                 </time>
             )}
             {editing
@@ -304,23 +303,33 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                           dark:!univer-text-gray-0
                         `}
                     >
-                        {transformDocument2TextNodes(item.text).map((paragraph, i) => (
-                            <div key={i} className="univer-break-words">
-                                {paragraph.map((item, i) => {
-                                    switch (item.type) {
-                                        case 'mention':
-                                            return (
-                                                <a className="univer-text-primary-600" key={i}>
-                                                    {item.content.label}
-                                                    {' '}
-                                                </a>
-                                            );
-                                        default:
-                                            return item.content;
-                                    }
-                                })}
-                            </div>
-                        ))}
+                        {transformDocument2TextNodes(item.text).map((paragraph, paragraphIndex) => {
+                            let offset = 0;
+
+                            return (
+                                <div
+                                    key={item.text.paragraphs?.[paragraphIndex]?.paragraphId}
+                                    className="univer-break-words"
+                                >
+                                    {paragraph.map((node) => {
+                                        const key = offset;
+                                        offset += node.type === 'mention' ? node.content.label.length : node.content.length;
+
+                                        switch (node.type) {
+                                            case 'mention':
+                                                return (
+                                                    <a className="univer-text-primary-600" key={key}>
+                                                        {node.content.label}
+                                                        {' '}
+                                                    </a>
+                                                );
+                                            default:
+                                                return node.content;
+                                        }
+                                    })}
+                                </div>
+                            );
+                        })}
                     </div>
                 )}
         </div>
@@ -388,7 +397,8 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
             }],
         ...(comments?.children ?? []) as IThreadComment[],
     ];
-    const scroller = useRef<HTMLDivElement>(null);
+    const scrollerRef = useRef<HTMLDivElement>(null);
+    const handleMouseLeave = useEvent(onMouseLeave);
     const handleResolve: React.MouseEventHandler<HTMLDivElement> = (e) => {
         e.stopPropagation();
         if (!resolved) {
@@ -430,8 +440,8 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
     };
 
     useEffect(() => {
-        return onMouseLeave?.();
-    }, []);
+        return handleMouseLeave;
+    }, [handleMouseLeave]);
 
     const subUnitName = getSubUnitName(comments?.root.subUnitId ?? subUnitId);
     const editorVisible = showEdit && !editingId && !resolved;
@@ -532,7 +542,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                 )}
             </div>
             <div
-                ref={scroller}
+                ref={scrollerRef}
                 className={clsx(
                     'univer-max-h-80 univer-overflow-y-auto univer-overflow-x-hidden',
                     scrollbarClassName,
@@ -620,8 +630,8 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                                     comment,
                                 } as IAddCommentCommandParams
                             );
-                            if (scroller.current) {
-                                scroller.current.scrollTop = scroller.current.scrollHeight;
+                            if (scrollerRef.current) {
+                                scrollerRef.current.scrollTop = scrollerRef.current.scrollHeight;
                             }
                         }}
                         autoFocus={autoFocus || (!comments)}

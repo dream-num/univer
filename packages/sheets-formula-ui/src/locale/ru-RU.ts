@@ -65,7 +65,7 @@ const locale: typeof enUS = {
             array: 'Массив',
             univer: 'Универсальные',
             user: 'Пользовательские',
-            definedname: 'Defined Name',
+            definedname: 'Определенное имя',
         },
         moreFunctions: {
             confirm: 'Подтвердить',

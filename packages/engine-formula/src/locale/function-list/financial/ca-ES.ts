@@ -322,17 +322,17 @@ const locale: typeof enUS = {
         },
     },
     EFFECT: {
-        description: 'Returns the effective annual interest rate',
-        abstract: 'Returns the effective annual interest rate',
+        description: 'Devuelve la tasa de interés anual efectiva',
+        abstract: 'Devuelve la tasa de interés anual efectiva',
         links: [
             {
-                title: 'Instruction',
+                title: 'Instrucciones',
                 url: 'https://support.microsoft.com/ca-es/excel/functions/effect-function',
             },
         ],
         functionParameter: {
-            nominalRate: { name: 'nominal_rate', detail: 'The nominal interest rate.' },
-            npery: { name: 'npery', detail: 'The number of compounding periods per year.' },
+            nominalRate: { name: 'tasa_nominal', detail: 'La tasa de interés nominal.' },
+            npery: { name: 'núm_per_año', detail: 'El número de periodos de composición por año.' },
         },
     },
     FV: {
@@ -367,38 +367,38 @@ const locale: typeof enUS = {
         },
     },
     INTRATE: {
-        description: 'Returns the interest rate for a fully invested security',
-        abstract: 'Returns the interest rate for a fully invested security',
+        description: 'Devuelve la tasa de interés para la inversión total en un valor bursátil.',
+        abstract: 'Devuelve la tasa de interés para la inversión total en un valor bursátil.',
         links: [
             {
-                title: 'Instruction',
+                title: 'Instrucciones',
                 url: 'https://support.microsoft.com/ca-es/excel/functions/intrate-function',
             },
         ],
         functionParameter: {
-            settlement: { name: 'settlement', detail: "The security's settlement date." },
-            maturity: { name: 'maturity', detail: "The security's maturity date." },
-            investment: { name: 'investment', detail: 'The amount invested in the security.' },
-            redemption: { name: 'redemption', detail: 'The amount to be received at maturity.' },
-            basis: { name: 'basis', detail: 'The type of day count basis to use.' },
+            settlement: { name: 'liquidación', detail: 'Obligatorio. La fecha de liquidación del valor bursátil. La fecha de liquidación del valor bursátil es la fecha posterior a la fecha de emisión en la que el comprador adquiere el valor bursátil.' },
+            maturity: { name: 'vencimiento', detail: 'Obligatorio. La fecha de vencimiento del valor bursátil. La fecha de vencimiento es aquella en la que expira el valor bursátil.' },
+            investment: { name: 'inversión', detail: 'Obligatorio. Es la cantidad de dinero invertido en el valor bursátil.' },
+            redemption: { name: 'rescate', detail: 'Obligatorio. Es el valor que se recibirá en la fecha de vencimiento.' },
+            basis: { name: 'base', detail: 'Opcional. Determina en qué tipo de base deben contarse los días.' },
         },
     },
     IPMT: {
-        description: 'Returns the interest payment for an investment for a given period',
-        abstract: 'Returns the interest payment for an investment for a given period',
+        description: 'Devuelve el pago de intereses de una inversión durante un periodo determinado',
+        abstract: 'Devuelve el pago de intereses de una inversión durante un periodo determinado',
         links: [
             {
-                title: 'Instruction',
+                title: 'Instrucciones',
                 url: 'https://support.microsoft.com/ca-es/excel/functions/ipmt-function',
             },
         ],
         functionParameter: {
-            rate: { name: 'rate', detail: 'The interest rate per period.' },
-            per: { name: 'per', detail: 'The period for which you want to find the interest and must be in the range 1 to nper.' },
-            nper: { name: 'nper', detail: 'The total number of payment periods in an annuity.' },
-            pv: { name: 'pv', detail: 'The present value, or the lump-sum amount that a series of future payments is worth right now.' },
-            fv: { name: 'fv', detail: 'The future value, or a cash balance you want to attain after the last payment is made.' },
-            type: { name: 'type', detail: 'The number 0 or 1 and indicates when payments are due.' },
+            rate: { name: 'tasa', detail: 'La tasa de interés por periodo.' },
+            per: { name: 'periodo', detail: 'El periodo para el cual desea buscar el interés y debe estar en el rango de 1 a núm_pagos.' },
+            nper: { name: 'núm_pagos', detail: 'El número total de periodos de pago en una anualidad.' },
+            pv: { name: 'va', detail: 'El valor actual, o la cantidad total que vale ahora una serie de pagos futuros.' },
+            fv: { name: 'vf', detail: 'El valor futuro, o un saldo en efectivo que desea lograr después de realizar el último pago.' },
+            type: { name: 'tipo', detail: 'El número 0 o 1 e indica cuándo vencen los pagos.' },
         },
     },
     IRR: {

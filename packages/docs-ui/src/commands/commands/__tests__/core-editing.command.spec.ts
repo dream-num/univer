@@ -23,6 +23,7 @@ import {
     DataStreamTreeTokenType,
     DeleteDirection,
     DocumentBlockRangeType,
+    DocumentFlavor,
     HorizontalAlign,
     ICommandService,
     IUniverInstanceService,
@@ -203,7 +204,9 @@ describe('core editing commands', () => {
 
     function mockSkeleton() {
         const skeletonManager = get(DocSkeletonManagerService) as unknown as { getSkeleton: () => unknown };
-        skeletonManager.getSkeleton = () => ({});
+        skeletonManager.getSkeleton = () => ({
+            findNodeByCharIndex: () => null,
+        });
     }
 
     function registerDeleteKeyCommands() {
@@ -331,9 +334,11 @@ describe('core editing commands', () => {
         expect(getBody()?.paragraphs?.[0].paragraphStyle?.horizontalAlign).toBe(HorizontalAlign.LEFT);
     });
 
-    it('resets an empty centered paragraph to left alignment on a second backspace', async () => {
+    it('resets an empty centered paragraph to left alignment in a traditional document', async () => {
         univer.dispose();
-        const testBed = createCommandTestBed(getCenteredEmptyParagraphDocumentData());
+        const documentData = getCenteredEmptyParagraphDocumentData();
+        documentData.documentStyle.documentFlavor = DocumentFlavor.TRADITIONAL;
+        const testBed = createCommandTestBed(documentData);
         univer = testBed.univer;
         get = testBed.get;
         commandService = get(ICommandService);
@@ -347,6 +352,26 @@ describe('core editing commands', () => {
 
         expect(getDataStream()).toBe('\r\n');
         expect(getBody()?.paragraphs?.[0].paragraphStyle?.horizontalAlign).toBe(HorizontalAlign.LEFT);
+    });
+
+    it('keeps center alignment when deleting in an unspecified editor document', async () => {
+        univer.dispose();
+        const documentData = getCenteredEmptyParagraphDocumentData();
+        documentData.documentStyle.documentFlavor = DocumentFlavor.UNSPECIFIED;
+        const testBed = createCommandTestBed(documentData);
+        univer = testBed.univer;
+        get = testBed.get;
+        commandService = get(ICommandService);
+        registerDeleteKeyCommands();
+        mockSkeleton();
+        setActiveSelection(0);
+
+        await commandService.executeCommand(DeleteLeftCommand.id);
+        await commandService.executeCommand(DeleteRightCommand.id);
+        await awaitTime(0);
+
+        expect(getDataStream()).toBe('\r\n');
+        expect(getBody()?.paragraphs?.[0].paragraphStyle?.horizontalAlign).toBe(HorizontalAlign.CENTER);
     });
 
     it('detects delete offsets inside block ranges so backspace does not clear block paragraph indent', () => {

@@ -23,6 +23,7 @@ import {
     CommandType,
     DataStreamTreeTokenType,
     DeleteDirection,
+    DocumentFlavor,
     getBlockRangeInterval,
     getRichTextEditPath,
     HorizontalAlign,
@@ -478,7 +479,7 @@ export const DeleteLeftCommand: ICommand = {
 
         const actualRange = activeRange;
         const { startOffset, collapsed } = actualRange;
-        if (collapsed) {
+        if (collapsed && shouldResetEmptyCenteredParagraphAlignment(docDataModel)) {
             const emptyCenteredParagraph = getEmptyCenteredParagraphAtOffset(body, startOffset);
             if (emptyCenteredParagraph != null) {
                 return resetEmptyCenteredParagraphAlignment(commandService, docDataModel, segmentId ?? '', emptyCenteredParagraph, style);
@@ -701,7 +702,7 @@ export const DeleteRightCommand: ICommand = {
 
         const actualRange = activeRange;
         const { startOffset, endOffset, collapsed } = actualRange;
-        if (collapsed) {
+        if (collapsed && shouldResetEmptyCenteredParagraphAlignment(docDataModel)) {
             const emptyCenteredParagraph = getEmptyCenteredParagraphAtOffset(body, startOffset);
             if (emptyCenteredParagraph != null) {
                 return resetEmptyCenteredParagraphAlignment(commandService, docDataModel, segmentId ?? '', emptyCenteredParagraph, style);
@@ -841,6 +842,11 @@ function getEmptyCenteredParagraphAtOffset(body: IDocumentBody, offset: number) 
             return paragraph;
         }
     }
+}
+
+function shouldResetEmptyCenteredParagraphAlignment(docDataModel: DocumentDataModel) {
+    const documentFlavor = docDataModel.getDocumentStyle().documentFlavor;
+    return documentFlavor === DocumentFlavor.TRADITIONAL || documentFlavor === DocumentFlavor.MODERN;
 }
 
 function resetEmptyCenteredParagraphAlignment(

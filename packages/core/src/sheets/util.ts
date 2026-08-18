@@ -24,7 +24,7 @@ import { TextX } from '../docs/data-model/text-x/text-x';
 import { convertTextRotation } from '../docs/data-model/utils';
 import { createParagraphId } from '../docs/paragraph-id';
 import { createSectionId } from '../docs/section-break-id';
-import { Rectangle } from '../shared';
+import { Rectangle, Tools } from '../shared';
 import { HorizontalAlign, VerticalAlign, WrapStrategy } from '../types/enum';
 import { CustomRangeType, DocumentFlavor } from '../types/interfaces';
 
@@ -112,6 +112,10 @@ export function createDocumentModelWithStyle(content: string, textStyle: ITextSt
             }],
         },
         documentStyle: {
+            textStyle: Tools.deepClone(textStyle),
+            defaultParagraphStyle: {
+                horizontalAlign,
+            },
             pageSize: {
                 width: Number.POSITIVE_INFINITY,
                 height: Number.POSITIVE_INFINITY,

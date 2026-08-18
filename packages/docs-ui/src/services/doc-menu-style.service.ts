@@ -78,13 +78,18 @@ export class DocMenuStyleService extends Disposable {
             };
         }
 
+        const documentDefaultTextStyle = {
+            ...defaultTextStyle,
+            ...docDataModel.getDocumentStyle().textStyle,
+        };
+
         const unitId = docDataModel?.getUnitId();
         const docSkeletonManagerService = this._renderManagerService.getRenderUnitById(unitId)?.with(DocSkeletonManagerService);
         const docViewModel = docSkeletonManagerService?.getViewModel();
 
         if (docViewModel == null) {
             return {
-                ...defaultTextStyle,
+                ...documentDefaultTextStyle,
             };
         }
 
@@ -92,11 +97,11 @@ export class DocMenuStyleService extends Disposable {
 
         if (editArea === DocumentEditArea.BODY) {
             return {
-                ...defaultTextStyle,
+                ...documentDefaultTextStyle,
             };
         } else {
             return {
-                ...defaultTextStyle,
+                ...documentDefaultTextStyle,
                 fs: HEADER_FOOTER_DEFAULT_FONTSIZE,
             };
         }

@@ -67,8 +67,6 @@ export interface IToolbarTooltipProps extends Omit<ITooltipProps, 'visible' | 'o
 export function ToolbarTooltip(props: IToolbarTooltipProps) {
     const { popupOpen, ...tooltipProps } = props;
     const [tooltipVisible, setTooltipVisible] = useState(false);
-    const popupOpenRef = useRef(popupOpen);
-    popupOpenRef.current = popupOpen;
 
     useEffect(() => {
         if (popupOpen) {
@@ -81,7 +79,7 @@ export function ToolbarTooltip(props: IToolbarTooltipProps) {
             {...tooltipProps}
             visible={!popupOpen && tooltipVisible}
             onVisibleChange={(visible) => {
-                if (!popupOpenRef.current) {
+                if (!popupOpen) {
                     setTooltipVisible(visible);
                 }
             }}

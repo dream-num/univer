@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Tooltip } from '../Tooltip';
 import '@testing-library/jest-dom/vitest';
@@ -51,7 +51,6 @@ describe('Tooltip', () => {
     });
 
     afterEach(() => {
-        vi.useRealTimers();
         vi.restoreAllMocks();
         cleanup();
     });
@@ -73,46 +72,7 @@ describe('Tooltip', () => {
         });
     });
 
-    it('should delay hover opening by default and cancel it when the pointer leaves', () => {
-        vi.useFakeTimers();
-        render(
-            <Tooltip title="Delayed tip">
-                Delayed trigger
-            </Tooltip>
-        );
-
-        const trigger = screen.getByText('Delayed trigger');
-        fireEvent.mouseEnter(trigger);
-        act(() => vi.advanceTimersByTime(99));
-        expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
-
-        fireEvent.mouseLeave(trigger);
-        act(() => vi.advanceTimersByTime(1));
-        expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
-
-        fireEvent.mouseEnter(trigger);
-        act(() => vi.advanceTimersByTime(100));
-        expect(screen.getByRole('tooltip')).toHaveTextContent('Delayed tip');
-    });
-
-    it('should cancel delayed visibility changes when unmounted', () => {
-        vi.useFakeTimers();
-        const onVisibleChange = vi.fn();
-        const { unmount } = render(
-            <Tooltip title="Delayed tip" visible={false} onVisibleChange={onVisibleChange}>
-                Delayed trigger
-            </Tooltip>
-        );
-
-        fireEvent.mouseEnter(screen.getByText('Delayed trigger'));
-        unmount();
-        act(() => vi.advanceTimersByTime(100));
-
-        expect(onVisibleChange).not.toHaveBeenCalled();
-    });
-
     it('should notify visibility changes in controlled mode', () => {
-        vi.useFakeTimers();
         const onVisibleChange = vi.fn();
         render(
             <Tooltip title="Controlled" visible={false} onVisibleChange={onVisibleChange}>
@@ -122,7 +82,6 @@ describe('Tooltip', () => {
 
         const trigger = screen.getByText('Trigger');
         fireEvent.mouseEnter(trigger);
-        act(() => vi.advanceTimersByTime(100));
         fireEvent.mouseLeave(trigger);
 
         expect(onVisibleChange).toHaveBeenCalledWith(true);

@@ -14,16 +14,12 @@
  * limitations under the License.
  */
 
-import type { DrawingType } from '@univerjs/core';
 import { DrawingTypeEnum } from '@univerjs/core';
+import { describe, expect, it } from 'vitest';
+import { isGroupableDrawingType } from '../drawing-group';
 
-export const DRAWING_GROUPABLE_TYPES = [
-    DrawingTypeEnum.DRAWING_IMAGE,
-    DrawingTypeEnum.DRAWING_SHAPE,
-    DrawingTypeEnum.DRAWING_CHART,
-    DrawingTypeEnum.DRAWING_GROUP,
-] as const;
-
-export function isGroupableDrawingType(type: DrawingType): boolean {
-    return (DRAWING_GROUPABLE_TYPES as readonly DrawingType[]).includes(type);
-}
+describe('drawing group', () => {
+    it('rejects drawing types that cannot join a group', () => {
+        expect(isGroupableDrawingType(DrawingTypeEnum.DRAWING_TABLE)).toBe(false);
+    });
+});

@@ -56,11 +56,9 @@ export interface ITooltipWrapperRef {
     el: HTMLSpanElement | null;
 }
 
-export interface IToolbarTooltipProps extends Omit<ITooltipProps, 'openDelay' | 'visible' | 'onVisibleChange'> {
+export interface IToolbarTooltipProps extends Omit<ITooltipProps, 'visible' | 'onVisibleChange'> {
     popupOpen: boolean;
 }
-
-const TOOLBAR_TOOLTIP_OPEN_DELAY = 100;
 
 /**
  * Keeps toolbar tooltips controlled while a related popup opens and closes.
@@ -81,7 +79,6 @@ export function ToolbarTooltip(props: IToolbarTooltipProps) {
     return (
         <Tooltip
             {...tooltipProps}
-            openDelay={TOOLBAR_TOOLTIP_OPEN_DELAY}
             visible={!popupOpen && tooltipVisible}
             onVisibleChange={(visible) => {
                 if (!popupOpenRef.current) {

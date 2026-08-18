@@ -21,6 +21,8 @@ import { createPortal } from 'react-dom';
 import { clsx } from '../../helper/clsx';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 
+const TOOLTIP_OPEN_DELAY = 100;
+
 export interface ITooltipProps {
     /**
      * The trigger element
@@ -51,11 +53,6 @@ export interface ITooltipProps {
      */
     showIfEllipsis?: boolean;
     /**
-     * The delay in milliseconds before the tooltip is displayed on hover
-     * @default 100
-     */
-    openDelay?: number;
-    /**
      * Whether the tooltip is visible
      * @description If not set, the tooltip will be controlled by the component itself
      */
@@ -74,7 +71,6 @@ export function Tooltip(props: ITooltipProps) {
         title,
         placement = 'bottom',
         showIfEllipsis = false,
-        openDelay = 100,
         visible: controlledVisible,
         onVisibleChange,
     } = props;
@@ -118,12 +114,7 @@ export function Tooltip(props: ITooltipProps) {
 
     function scheduleTooltip() {
         clearOpenTimer();
-        if (openDelay <= 0) {
-            showTooltip();
-            return;
-        }
-
-        openTimerRef.current = setTimeout(showTooltip, openDelay);
+        openTimerRef.current = setTimeout(showTooltip, TOOLTIP_OPEN_DELAY);
     }
 
     function hideTooltip() {

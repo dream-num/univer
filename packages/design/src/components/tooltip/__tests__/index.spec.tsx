@@ -99,7 +99,7 @@ describe('Tooltip', () => {
         vi.useFakeTimers();
         const onVisibleChange = vi.fn();
         const { unmount } = render(
-            <Tooltip title="Delayed tip" openDelay={100} visible={false} onVisibleChange={onVisibleChange}>
+            <Tooltip title="Delayed tip" visible={false} onVisibleChange={onVisibleChange}>
                 Delayed trigger
             </Tooltip>
         );
@@ -112,15 +112,17 @@ describe('Tooltip', () => {
     });
 
     it('should notify visibility changes in controlled mode', () => {
+        vi.useFakeTimers();
         const onVisibleChange = vi.fn();
         render(
-            <Tooltip title="Controlled" openDelay={0} visible={false} onVisibleChange={onVisibleChange}>
+            <Tooltip title="Controlled" visible={false} onVisibleChange={onVisibleChange}>
                 Trigger
             </Tooltip>
         );
 
         const trigger = screen.getByText('Trigger');
         fireEvent.mouseEnter(trigger);
+        act(() => vi.advanceTimersByTime(100));
         fireEvent.mouseLeave(trigger);
 
         expect(onVisibleChange).toHaveBeenCalledWith(true);
@@ -129,7 +131,7 @@ describe('Tooltip', () => {
 
     it('should support non-asChild trigger and focus/blur events', async () => {
         render(
-            <Tooltip title="From button" asChild={false} openDelay={100}>
+            <Tooltip title="From button" asChild={false}>
                 Trigger button
             </Tooltip>
         );

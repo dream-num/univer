@@ -24,44 +24,15 @@ import {
     CellValueType,
     createBaseRecordIdField,
     IUniverInstanceService,
-
     LocaleType,
-
     ObjectMatrix,
     RANGE_TYPE,
-
+    Tools,
     UniverInstanceType,
-
 } from '@univerjs/core';
-
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { FormulaDataModel, initSheetFormulaData } from '../formula-data.model';
+import { FormulaDataModel } from '../formula-data.model';
 import { createCommandTestBed } from './create-command-test-bed';
-
-describe('initSheetFormulaData', () => {
-    it('propagates explicit implicit intersection to shared formula followers', () => {
-        const formula = '=RANK(E2,IF(@A$2:A$4=A2,E$2:E$4),0)';
-        const result = initSheetFormulaData(
-            {},
-            'unit',
-            'sheet',
-            new ObjectMatrix<ICellData>({
-                1: {
-                    7: {
-                        f: formula,
-                        si: '3',
-                    },
-                },
-                2: {
-                    7: { si: '3' },
-                },
-            })
-        );
-
-        expect(result.unit?.sheet?.[1]?.[7]?.f).toBe(formula);
-        expect(result.unit?.sheet?.[2]?.[7]?.f).toBe(formula);
-    });
-});
 
 const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
     id: 'test',
@@ -222,7 +193,7 @@ describe('Test formula data model', () => {
         let formulaDataModel: FormulaDataModel;
 
         beforeEach(() => {
-            const testBed = createCommandTestBed(TEST_WORKBOOK_DATA_DEMO);
+            const testBed = createCommandTestBed(Tools.deepClone(TEST_WORKBOOK_DATA_DEMO));
             univer = testBed.univer;
             get = testBed.get;
 
@@ -660,9 +631,12 @@ describe('Test formula data model', () => {
         });
 
         describe('getFormulaStringByCell', () => {
-            it('get formula string by cell', () => {
+            it('uses the initialized shared formula master index for repeated follower reads', () => {
                 const unitId = 'test';
                 const sheetId = 'sheet1';
+                const worksheet = get(IUniverInstanceService)
+                    .getUnit<Workbook>(unitId)
+                    ?.getSheetBySheetId(sheetId);
 
                 const result = [
                     ['=SUM(A1)'],
@@ -671,10 +645,70 @@ describe('Test formula data model', () => {
                     ['=SUM(A4)'],
                 ];
 
+                formulaDataModel.getFormulaData();
+                const scanWorksheet = vi.spyOn(worksheet!.getCellMatrix(), 'forValue');
+
                 for (let i = 0; i < 4; i++) {
                     const formulaString = formulaDataModel.getFormulaStringByCell(i, 3, sheetId, unitId);
                     expect(formulaString).toBe(result[i][0]);
                 }
+
+                expect(scanWorksheet).not.toHaveBeenCalled();
+            });
+
+            it('rebuilds a stale shared formula master index after the master formula changes', () => {
+                const unitId = 'test';
+                const sheetId = 'sheet1';
+                const worksheet = get(IUniverInstanceService)
+                    .getUnit<Workbook>(unitId)
+                    ?.getSheetBySheetId(sheetId);
+                const cellMatrix = worksheet!.getCellMatrix();
+
+                formulaDataModel.getFormulaData();
+                const scanWorksheet = vi.spyOn(cellMatrix, 'forValue');
+                cellMatrix.setValue(1, 3, { f: '=SUM(B2)', si: 'OSPtzm' });
+
+                expect(formulaDataModel.getFormulaStringByCell(2, 3, sheetId, unitId)).toBe('=SUM(B3)');
+                expect(scanWorksheet).toHaveBeenCalledTimes(1);
+                expect(formulaDataModel.getFormulaStringByCell(3, 3, sheetId, unitId)).toBe('=SUM(B4)');
+                expect(scanWorksheet).toHaveBeenCalledTimes(1);
+            });
+
+            it('rebuilds a stale shared formula master index after rows move', () => {
+                const unitId = 'test';
+                const sheetId = 'sheet1';
+                const worksheet = get(IUniverInstanceService)
+                    .getUnit<Workbook>(unitId)
+                    ?.getSheetBySheetId(sheetId);
+                const cellMatrix = worksheet!.getCellMatrix();
+
+                formulaDataModel.getFormulaData();
+                const scanWorksheet = vi.spyOn(cellMatrix, 'forValue');
+                cellMatrix.insertRows(0, 1);
+
+                expect(formulaDataModel.getFormulaStringByCell(3, 3, sheetId, unitId)).toBe('=SUM(A3)');
+                expect(scanWorksheet).toHaveBeenCalledTimes(1);
+                expect(formulaDataModel.getFormulaStringByCell(4, 3, sheetId, unitId)).toBe('=SUM(A4)');
+                expect(scanWorksheet).toHaveBeenCalledTimes(1);
+            });
+
+            it('rebuilds the shared formula master index when a missing master is added', () => {
+                const unitId = 'test';
+                const sheetId = 'sheet1';
+                const worksheet = get(IUniverInstanceService)
+                    .getUnit<Workbook>(unitId)
+                    ?.getSheetBySheetId(sheetId);
+                const cellMatrix = worksheet!.getCellMatrix();
+
+                formulaDataModel.getFormulaData();
+                const scanWorksheet = vi.spyOn(cellMatrix, 'forValue');
+                cellMatrix.setValue(10, 0, { f: '=B11', si: 'new-shared-formula' });
+                cellMatrix.setValue(11, 0, { si: 'new-shared-formula' });
+
+                expect(formulaDataModel.getFormulaStringByCell(11, 0, sheetId, unitId)).toBe('=B12');
+                expect(scanWorksheet).toHaveBeenCalledTimes(1);
+                expect(formulaDataModel.getFormulaStringByCell(11, 0, sheetId, unitId)).toBe('=B12');
+                expect(scanWorksheet).toHaveBeenCalledTimes(1);
             });
 
             it('should return null when formula string source cell cannot be found', () => {
@@ -1200,7 +1234,43 @@ describe('Test formula data model', () => {
         });
     });
 
-    describe('function initSheetFormulaData', () => {
+    describe('FormulaDataModel.initSheetFormulaData', () => {
+        let univer: Univer;
+        let formulaDataModel: FormulaDataModel;
+
+        beforeEach(() => {
+            const testBed = createCommandTestBed(Tools.deepClone(TEST_WORKBOOK_DATA_DEMO));
+            univer = testBed.univer;
+            formulaDataModel = testBed.get(FormulaDataModel);
+        });
+
+        afterEach(() => {
+            univer.dispose();
+        });
+
+        it('propagates explicit implicit intersection to shared formula followers', () => {
+            const formula = '=RANK(E2,IF(@A$2:A$4=A2,E$2:E$4),0)';
+            const result = formulaDataModel.initSheetFormulaData(
+                {},
+                'unit',
+                'sheet',
+                new ObjectMatrix<ICellData>({
+                    1: {
+                        7: {
+                            f: formula,
+                            si: '3',
+                        },
+                    },
+                    2: {
+                        7: { si: '3' },
+                    },
+                })
+            );
+
+            expect(result.unit?.sheet?.[1]?.[7]?.f).toBe(formula);
+            expect(result.unit?.sheet?.[2]?.[7]?.f).toBe(formula);
+        });
+
         it('init formula data', () => {
             const unitId = 'workbook-01';
             const sheetId = 'sheet-0011';
@@ -1258,7 +1328,7 @@ describe('Test formula data model', () => {
                 },
             };
 
-            initSheetFormulaData(formulaData, unitId, sheetId, cellMatrix);
+            formulaDataModel.initSheetFormulaData(formulaData, unitId, sheetId, cellMatrix);
             expect(formulaData).toStrictEqual(result);
         });
 
@@ -1292,7 +1362,7 @@ describe('Test formula data model', () => {
 
             const cellMatrix = new ObjectMatrix<Nullable<ICellData>>(cellValue);
 
-            initSheetFormulaData(formulaData, unitId, sheetId, cellMatrix);
+            formulaDataModel.initSheetFormulaData(formulaData, unitId, sheetId, cellMatrix);
 
             expect(formulaData[unitId]?.[sheetId]).toEqual({
                 5: {

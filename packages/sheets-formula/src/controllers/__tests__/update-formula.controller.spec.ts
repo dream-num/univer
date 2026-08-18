@@ -820,12 +820,24 @@ describe('UpdateFormulaController', () => {
                 name: 'Added Sheet',
                 cellData: {
                     0: {
-                        0: { f: '=Sheet1!A1' },
+                        0: { f: '=Sheet1!A1', si: 'inserted-shared-formula' },
+                    },
+                    1: {
+                        0: { si: 'inserted-shared-formula' },
                     },
                 },
             },
         });
 
+        const addedSheetCellMatrix = testBed.injector
+            .get(IUniverInstanceService)
+            .getUnit<Workbook>('test')
+            ?.getSheetBySheetId('sheet-added')
+            ?.getCellMatrix();
+        const scanAddedSheet = vi.spyOn(addedSheetCellMatrix!, 'forValue');
+
+        expect(formulaDataModel.getFormulaStringByCell(1, 0, 'sheet-added', 'test')).toBe('=Sheet1!A2');
+        expect(scanAddedSheet).not.toHaveBeenCalled();
         expect(formulaDataModel.getFormulaData().test?.['sheet-added']?.[0]?.[0]).toMatchObject({ f: '=Sheet1!A1' });
 
         await commandService.executeCommand(RemoveSheetMutation.id, {
@@ -850,7 +862,10 @@ describe('UpdateFormulaController', () => {
                     columnCount: 20,
                     cellData: {
                         0: {
-                            0: { f: '=SUM(A1)' },
+                            0: { f: '=SUM(A1)', si: 'workbook-shared-formula' },
+                        },
+                        1: {
+                            0: { si: 'workbook-shared-formula' },
                         },
                     },
                 },
@@ -858,6 +873,15 @@ describe('UpdateFormulaController', () => {
             styles: {},
         });
 
+        const secondaryCellMatrix = testBed.injector
+            .get(IUniverInstanceService)
+            .getUnit<Workbook>('secondary')
+            ?.getSheetBySheetId('sheet1')
+            ?.getCellMatrix();
+        const scanSecondarySheet = vi.spyOn(secondaryCellMatrix!, 'forValue');
+
+        expect(formulaDataModel.getFormulaStringByCell(1, 0, 'sheet1', 'secondary')).toBe('=SUM(A2)');
+        expect(scanSecondarySheet).not.toHaveBeenCalled();
         expect(formulaDataModel.getFormulaData().secondary?.sheet1?.[0]?.[0]).toMatchObject({ f: '=SUM(A1)' });
         expect(executeCommandSpy).toHaveBeenCalledWith(
             SetTriggerFormulaCalculationStartMutation.id,

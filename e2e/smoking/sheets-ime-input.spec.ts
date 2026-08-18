@@ -60,9 +60,11 @@ test('preserves cell styles after deleting all text and entering new IME text', 
     const canvas = page.locator(SHEET_MAIN_CANVAS);
     await expect(canvas).toBeVisible();
     const canvasBox = await canvas.boundingBox();
-    expect(canvasBox).not.toBeNull();
+    if (!canvasBox) {
+        throw new Error('Expected the sheet canvas to have a bounding box');
+    }
 
-    await page.mouse.click(canvasBox!.x + 200, canvasBox!.y + 120);
+    await page.mouse.click(canvasBox.x + 200, canvasBox.y + 120);
     const cell = await page.evaluate(() => {
         const range = window.univerAPI.getActiveWorkbook().getActiveRange();
         if (!range) {
@@ -80,7 +82,7 @@ test('preserves cell styles after deleting all text and entering new IME text', 
 
     await page.keyboard.press('F2');
     const inputContainer = page.locator(SHEET_EDITOR_INPUT_CONTAINER);
-    await expect.poll(async () => (await inputContainer.boundingBox())?.x).toBeGreaterThanOrEqual(canvasBox!.x);
+    await expect.poll(async () => (await inputContainer.boundingBox())?.x).toBeGreaterThanOrEqual(canvasBox.x);
 
     await page.keyboard.press('Backspace');
 

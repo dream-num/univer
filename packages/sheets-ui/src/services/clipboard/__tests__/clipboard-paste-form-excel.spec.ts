@@ -243,6 +243,17 @@ describe('Test clipboard', () => {
             expect(cellValue?.v).toEqual(45607);
         });
 
+        it('falls back to automatic parsing for unsupported named number formats', async () => {
+            const html = `
+                <style>.percent { mso-number-format: Percent; }</style>
+                <table><tr><td class="percent">12%</td></tr></table>
+            `;
+
+            await expect(sheetClipboardService.legacyPaste(html)).resolves.toBe(true);
+            expect(getValues(1, 1, 1, 1)?.[0]?.[0]?.v).toBe(0.12);
+            expect(getStyles(1, 1, 1, 1)?.[0]?.[0]?.n?.pattern).toBe('0%');
+        });
+
         it('test formula with paste', async () => {
             const worksheet = get(IUniverInstanceService).getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetId('sheet1');
             if (!worksheet) return false;

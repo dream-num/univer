@@ -74,6 +74,7 @@ test('preserves cell styles after deleting all text and entering new IME text', 
         range
             .setValue('A')
             .setHorizontalAlignment('center')
+            .setVerticalAlignment('middle')
             .setFontSize(20)
             .setFontColor('#f05252');
 
@@ -103,12 +104,14 @@ test('preserves cell styles after deleting all text and entering new IME text', 
         return {
             value: range.getValue(),
             horizontalAlignment: range.getHorizontalAlignment(),
+            verticalAlignment: range.getVerticalAlignment(),
             fontSize: style?.fs,
             fontColor: style?.cl?.rgb,
         };
     }, cell)).toEqual({
         value: '新',
         horizontalAlignment: 'center',
+        verticalAlignment: 'middle',
         fontSize: 20,
         fontColor: '#f05252',
     });

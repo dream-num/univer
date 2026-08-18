@@ -15,7 +15,7 @@
  */
 
 import { Injector } from '@univerjs/core';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { DocPrintInterceptorService } from '../doc-print-interceptor.service';
 
 function createService(): DocPrintInterceptorService {
@@ -35,5 +35,18 @@ describe('DocPrintInterceptorService', () => {
         expect(service.getPrintComponent('doc-component')).toBe('print-doc-component');
         expect(service.interceptor.fetchThroughInterceptors(interceptPoints.PRINTING_COMPONENT_COLLECT)(undefined, { unitId: 'doc-1' } as never)).toBeUndefined();
         expect(service.interceptor.fetchThroughInterceptors(interceptPoints.PRINTING_DOM_COLLECT)(domCollection as never, { unitId: 'doc-1' } as never)).toBe(domCollection);
+    });
+
+    it('waits for registered print preparation handlers', async () => {
+        const service = createService();
+        const handler = vi.fn(async () => undefined);
+        const dispose = service.registerPrintPreparation(handler);
+
+        await service.preparePrint({ unitId: 'doc-1', dpr: 2 });
+
+        expect(handler).toHaveBeenCalledWith({ unitId: 'doc-1', dpr: 2 });
+        dispose();
+        await service.preparePrint({ unitId: 'doc-2', dpr: 1 });
+        expect(handler).toHaveBeenCalledOnce();
     });
 });

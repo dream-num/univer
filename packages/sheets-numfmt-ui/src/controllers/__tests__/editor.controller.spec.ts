@@ -174,6 +174,46 @@ describe('test editor', () => {
         // The currency  format needs to be entered in the editor with real values, not with currency symbols
         expect(result!.v).toEqual('100.1234567%');
         expect(result!.t).toEqual(2);
+        expect(result!.isPercentFormat).toBe(true);
+    });
+
+    describe('after edit with percent', () => {
+        function setPercentFormat() {
+            const params: ISetNumfmtMutationParams = {
+                unitId,
+                subUnitId,
+                values: {
+                    1: {
+                        ranges: [{ startRow: 10, endRow: 10, startColumn: 0, endColumn: 0 }],
+                    },
+                },
+                refMap: {
+                    1: {
+                        pattern: '0.00%',
+                    },
+                },
+            };
+            commandService.syncExecuteCommand(SetNumfmtMutation.id, params);
+        }
+
+        it.each([
+            ['35%', 0.35],
+            ['0.35%', 0.0035],
+        ])('stores edited percent text %s as %s', (content, expected) => {
+            setPercentFormat();
+            const sheetInterceptorService = testBed.get(SheetInterceptorService);
+            const result = sheetInterceptorService.writeCellInterceptor
+                .fetchThroughInterceptors(AFTER_CELL_EDIT)({ v: content, t: CellValueType.NUMBER }, {
+                    workbook,
+                    worksheet,
+                    unitId,
+                    subUnitId,
+                    row: 10,
+                    col: 0,
+                });
+
+            expect(result?.v).toBe(expected);
+        });
     });
 
     it('after edit with data', () => {

@@ -24,6 +24,7 @@ import {
     LocaleType,
     UniverInstanceType,
 } from '@univerjs/core';
+import { InsertTextCommand } from '@univerjs/docs';
 import { MoveCursorOperation, MoveSelectionOperation, SetDocInputStyleCommand, VIEWPORT_KEY } from '@univerjs/docs-ui';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { DeviceInputEventType } from '@univerjs/engine-render';
@@ -69,7 +70,7 @@ describe('emptyBody', () => {
     });
 });
 
-function createController() {
+function createController(initialDataStream = 'new value\r\n', isPercentFormat = false, isInArrayFormulaRange = false) {
     const worksheet = {
         getSheetId: vi.fn(() => 'sheet-1'),
         getCellRaw: vi.fn(() => ({ v: 'old' })),
@@ -83,11 +84,11 @@ function createController() {
         getStyles: vi.fn(() => styles),
     };
     let normalSnapshot = {
-        body: { dataStream: 'new value\r\n', paragraphs: [{ startIndex: 9, paragraphId: 'normal-para' }] },
+        body: { dataStream: initialDataStream, paragraphs: [{ startIndex: 9, paragraphId: 'normal-para' }] },
         documentStyle: {},
     };
     let formulaSnapshot = {
-        body: { dataStream: 'new value\r\n', paragraphs: [{ startIndex: 9, paragraphId: 'formula-para' }] },
+        body: { dataStream: initialDataStream, paragraphs: [{ startIndex: 9, paragraphId: 'formula-para' }] },
         documentStyle: {},
     };
     const docModel = {
@@ -144,6 +145,8 @@ function createController() {
             row: 2,
             column: 3,
             documentLayoutObject: { documentModel },
+            isInArrayFormulaRange,
+            isPercentFormat,
         })),
         getEditLocation: vi.fn(() => ({
             unitId: 'unit-1',
@@ -151,8 +154,12 @@ function createController() {
             row: 2,
             column: 3,
             documentLayoutObject: { documentModel },
+            isInArrayFormulaRange,
+            isPercentFormat,
         })),
         getCurrentEditorId: vi.fn(() => DOCS_NORMAL_EDITOR_UNIT_ID_KEY),
+        isVisible: vi.fn(() => ({ visible: true, eventType: DeviceInputEventType.Keyboard, unitId: 'unit-1' })),
+        getEditorDirty: vi.fn(() => false),
         isForceKeepVisible: vi.fn(() => false),
         disableForceKeepVisible: vi.fn(),
         refreshEditCellPosition: vi.fn(),
@@ -346,6 +353,138 @@ describe('EditingRenderController business methods', () => {
             }
         );
         expect(controller._editorBridgeService.changeEditorDirty).not.toHaveBeenCalled();
+    });
+
+    it.each(['3', '35', '0.35', '35%'])('preserves the percent suffix when input starts with a digit: %s', (initialValue) => {
+        const { controller, getFormulaSnapshot, getNormalSnapshot } = createController('25%\r\n', true);
+
+        controller._handleEditorVisible({
+            visible: true,
+            eventType: DeviceInputEventType.Keyboard,
+            keycode: KeyCode.Digit3,
+            initialValue,
+            unitId: 'unit-1',
+        });
+
+        expect(getNormalSnapshot().body.dataStream).toBe('25%\r\n');
+        expect(getFormulaSnapshot().body.dataStream).toBe('25%\r\n');
+        expect(controller._textSelectionManagerService.replaceDocRanges).toHaveBeenCalledWith(
+            [{ startOffset: 0, endOffset: 2, collapsed: false }],
+            {
+                unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+                subUnitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+            }
+        );
+    });
+
+    it.each(['$30', '=1', 'text', '+', '-', '.', ','])('replaces percent content when input does not start with a digit: %s', (initialValue) => {
+        const { controller, getNormalSnapshot } = createController('25%\r\n', true);
+
+        controller._handleEditorVisible({
+            visible: true,
+            eventType: DeviceInputEventType.Keyboard,
+            keycode: KeyCode.Digit3,
+            initialValue,
+            unitId: 'unit-1',
+        });
+
+        expect(getNormalSnapshot().body.dataStream).toBe('\r\n');
+    });
+
+    it.each([KeyCode.BACKSPACE, KeyCode.DELETE])('keeps full-clear behavior for keycode %s', (keycode) => {
+        const { controller, getNormalSnapshot } = createController('25%\r\n', true);
+
+        controller._handleEditorVisible({
+            visible: true,
+            eventType: DeviceInputEventType.Keyboard,
+            keycode,
+            unitId: 'unit-1',
+        });
+
+        expect(getNormalSnapshot().body.dataStream).toBe('\r\n');
+    });
+
+    it('keeps full-clear behavior for array formula cells', () => {
+        const { controller, getNormalSnapshot } = createController('25%\r\n', true, true);
+
+        controller._handleEditorVisible({
+            visible: true,
+            eventType: DeviceInputEventType.Keyboard,
+            keycode: KeyCode.Digit3,
+            initialValue: '3',
+            unitId: 'unit-1',
+        });
+
+        expect(getNormalSnapshot().body.dataStream).toBe('\r\n');
+    });
+
+    it.each([
+        ['F2', { eventType: DeviceInputEventType.Keyboard, keycode: KeyCode.F2 }],
+        ['double-click', { eventType: DeviceInputEventType.Dblclick }],
+    ])('places the caret before the percent suffix for %s editing', (_name, input) => {
+        const { controller } = createController('25%\r\n', true);
+        const selection = { startOffset: 2, endOffset: 2, collapsed: true };
+
+        controller._handleEditorVisible({
+            visible: true,
+            unitId: 'unit-1',
+            ...input,
+        });
+
+        expect(controller._textSelectionManagerService.replaceDocRanges).toHaveBeenLastCalledWith(
+            [selection],
+            {
+                unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+                subUnitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+            }
+        );
+    });
+
+    it('overtypes a preserved percent suffix on subsequent percent input', () => {
+        const { controller } = createController('0.35%\r\n', true);
+        const beforeCommandListeners: Array<(command: { id: string; params: unknown }) => void> = [];
+        controller._commandService.beforeCommandExecuted = vi.fn((listener) => {
+            beforeCommandListeners.push(listener);
+            return { dispose: vi.fn() };
+        });
+        controller._commandService.onCommandExecuted = vi.fn(() => ({ dispose: vi.fn() }));
+        controller._commandExecutedListener({ add: vi.fn() });
+        const params = {
+            unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+            body: { dataStream: '%' },
+            range: { startOffset: 4, endOffset: 4, collapsed: true },
+        };
+
+        expect(beforeCommandListeners).toHaveLength(1);
+        beforeCommandListeners[0]({ id: InsertTextCommand.id, params });
+
+        expect(params.range).toEqual({ startOffset: 4, endOffset: 5, collapsed: false });
+    });
+
+    it('overtypes the original percent value on initial digit input', () => {
+        const { controller } = createController('25%\r\n', true);
+        const beforeCommandListeners: Array<(command: { id: string; params: unknown }) => void> = [];
+        controller._editorBridgeService.isVisible.mockReturnValue({
+            visible: true,
+            eventType: DeviceInputEventType.Keyboard,
+            initialValue: '3',
+            unitId: 'unit-1',
+        });
+        controller._commandService.beforeCommandExecuted = vi.fn((listener) => {
+            beforeCommandListeners.push(listener);
+            return { dispose: vi.fn() };
+        });
+        controller._commandService.onCommandExecuted = vi.fn(() => ({ dispose: vi.fn() }));
+        controller._commandExecutedListener({ add: vi.fn() });
+        const params = {
+            unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+            body: { dataStream: '3' },
+            range: { startOffset: 0, endOffset: 0, collapsed: true },
+        };
+
+        beforeCommandListeners[0]({ id: InsertTextCommand.id, params });
+
+        expect(params.range).toEqual({ startOffset: 0, endOffset: 2, collapsed: false });
     });
 
     it('syncs the active sheet editor selection instead of the host document selection on focus', () => {

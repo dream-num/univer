@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IDocumentBody, IRange, Nullable, Workbook } from '@univerjs/core';
+import type { ICellData, ICellDataForSheetInterceptor, IDocumentBody, IRange, Nullable, Workbook } from '@univerjs/core';
 import type {
     INumfmtItemWithCache,
     IRemoveNumfmtMutationParams,
@@ -133,9 +133,10 @@ export class NumfmtEditorController extends Disposable {
                                  * If the editor also display '100.12%', will lose precision when before edit.
                                  */
                                 case 'percent': {
-                                    const cell: Nullable<ICellData> = { ...context.worksheet.getCellRaw(row, col) };
+                                    const cell: Nullable<ICellDataForSheetInterceptor> = { ...context.worksheet.getCellRaw(row, col) };
                                     if (cell?.t === CellValueType.NUMBER && isRealNum(cell.v)) {
                                         cell.v = `${stripErrorMargin(Number(cell.v) * 100)}%`;
+                                        cell.isPercentFormat = true;
                                     }
                                     return next && next(cell);
                                 }

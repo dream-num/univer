@@ -282,7 +282,7 @@ describe('EditorBridgeService', () => {
             getSheetId: () => 'sheet-1',
             getFreeze: () => null,
             getCellRaw: vi.fn(() => ({ v: '=SUM(A1:A2)' })),
-            getCell: vi.fn(() => ({ isInArrayFormulaRange: true })),
+            getCell: vi.fn(() => ({ isInArrayFormulaRange: true, isPercentFormat: true })),
             getCellDocumentModelWithFormula: vi.fn(() => ({ documentModel })),
             getBlankCellDocumentModel: vi.fn(() => ({ documentModel })),
         };
@@ -310,6 +310,7 @@ describe('EditorBridgeService', () => {
             row: 1,
             column: 2,
             editorUnitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+            isPercentFormat: true,
         }));
         expect(service.getEditCellLayout()).toEqual(expect.objectContaining({
             scaleX: 2,

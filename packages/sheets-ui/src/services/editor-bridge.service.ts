@@ -74,6 +74,7 @@ export interface ICellEditorState {
     documentLayoutObject: IDocumentLayoutObject;
     editorUnitId: string;
     isInArrayFormulaRange?: Nullable<boolean>;
+    isPercentFormat?: boolean;
 }
 
 export interface ICellEditorLayout {
@@ -423,6 +424,7 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
             documentLayoutObject,
             editorUnitId: this._editorUnitId,
             isInArrayFormulaRange: cell?.isInArrayFormulaRange,
+            isPercentFormat: cell?.isPercentFormat,
         };
     }
 

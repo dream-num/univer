@@ -26,18 +26,19 @@ import type {
     IDocumentStyle,
     IMutationInfo,
     IStyleData,
+    ITextRange,
     Nullable,
     Styles,
     Workbook,
 } from '@univerjs/core';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import type { IInsertTextCommandParams, IRichTextEditingMutationParams } from '@univerjs/docs';
 import type {
     ISetRangeValuesCommandParams,
     ISetWorksheetActivateCommandParams,
     MutationsAffectRange,
 } from '@univerjs/sheets';
 import type { IUniverSheetsUIConfig } from '../../config/config';
-import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
+import type { ICellEditorState, IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import {
     CellValueType,
     createParagraphId,
@@ -66,7 +67,7 @@ import {
     UniverInstanceType,
     WrapStrategy,
 } from '@univerjs/core';
-import { DocSelectionManagerService, DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { DocSelectionManagerService, DocSkeletonManagerService, InsertTextCommand, RichTextEditingMutation } from '@univerjs/docs';
 import {
     DocSelectionRenderService,
     IEditorService,
@@ -117,6 +118,45 @@ import { normalizeString } from '../utils/char-tools';
 import { isRangeSelector } from './utils/is-range-selector';
 
 const HIDDEN_EDITOR_POSITION = -1000;
+
+function getPercentOffset(editCellState: ICellEditorState, dataStream: string | undefined): Nullable<number> {
+    if (!editCellState.isPercentFormat || editCellState.isInArrayFormulaRange) {
+        return null;
+    }
+
+    const percentSuffix = `%${DEFAULT_EMPTY_DOCUMENT_VALUE}`;
+    return dataStream?.endsWith(percentSuffix) ? dataStream.length - percentSuffix.length : null;
+}
+
+function getPercentEditorSelection(
+    editCellState: ICellEditorState,
+    visibleParam: IEditorBridgeServiceVisibleParam,
+    dataStream: string | undefined
+): Nullable<ITextRange> {
+    const percentOffset = getPercentOffset(editCellState, dataStream);
+    if (percentOffset == null) {
+        return null;
+    }
+
+    const { eventType, initialValue, keycode } = visibleParam;
+    if (
+        eventType === DeviceInputEventType.Dblclick ||
+        (eventType === DeviceInputEventType.Keyboard && keycode === KeyCode.F2)
+    ) {
+        return { startOffset: percentOffset, endOffset: percentOffset, collapsed: true };
+    }
+
+    if (
+        eventType !== DeviceInputEventType.Keyboard ||
+        keycode === KeyCode.BACKSPACE ||
+        keycode === KeyCode.DELETE ||
+        !/^\d/.test(initialValue ?? '')
+    ) {
+        return null;
+    }
+
+    return { startOffset: 0, endOffset: percentOffset, collapsed: false };
+}
 
 enum CursorChange {
     InitialState,
@@ -375,6 +415,48 @@ export class EditingRenderController extends Disposable {
      * Listen to document edits to refresh the size of the sheet editor, not for normal editor.
      */
     private _commandExecutedListener(d: DisposableCollection) {
+        d.add(this._commandService.beforeCommandExecuted((command: ICommandInfo) => {
+            if (command.id !== InsertTextCommand.id) {
+                return;
+            }
+
+            const params = command.params as IInsertTextCommandParams;
+            const visibleParam = this._editorBridgeService.isVisible();
+            const editCellState = this._editorBridgeService.getEditLocation();
+            if (params.unitId !== DOCS_NORMAL_EDITOR_UNIT_ID_KEY || !visibleParam.visible || editCellState == null) {
+                return;
+            }
+
+            const dataStream = this._getDocumentDataModel()?.getBody()?.dataStream;
+            if (dataStream == null) {
+                return;
+            }
+
+            const percentOffset = getPercentOffset(editCellState, dataStream);
+            // The input event captures its range before the editor opens, so the first digit still carries a stale range.
+            if (
+                percentOffset != null &&
+                !this._editorBridgeService.getEditorDirty() &&
+                visibleParam.eventType === DeviceInputEventType.Keyboard &&
+                /^\d/.test(visibleParam.initialValue ?? '') &&
+                /^\d/.test(params.body.dataStream)
+            ) {
+                params.range = { startOffset: 0, endOffset: percentOffset, collapsed: false };
+                return;
+            }
+
+            // Overtype the preserved suffix so entering `35%` does not produce `35%%`.
+            if (
+                percentOffset != null &&
+                params.body.dataStream === '%' &&
+                params.range.collapsed &&
+                params.range.startOffset === percentOffset &&
+                params.range.endOffset === percentOffset
+            ) {
+                params.range = { ...params.range, endOffset: percentOffset + 1, collapsed: false };
+            }
+        }));
+
         d.add(this._commandService.onCommandExecuted((command: ICommandInfo) => {
             if (command.id === RichTextEditingMutation.id) {
                 const params = command.params as IRichTextEditingMutationParams;
@@ -498,6 +580,16 @@ export class EditingRenderController extends Disposable {
                 }
             );
         };
+        const replaceSelection = (selection: ITextRange) => {
+            this._textSelectionManagerService.replaceDocRanges(
+                [selection],
+                {
+                    unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+                    subUnitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+                }
+            );
+        };
+        const percentSelection = getPercentEditorSelection(editCellState, param, documentDataModel.getBody()?.dataStream);
         const cellImage = isCellImage(documentDataModel.getSnapshot());
         this._submitEmptyCellImageEdit = cellImage && eventType === DeviceInputEventType.Keyboard && keycode === KeyCode.BACKSPACE;
 
@@ -513,34 +605,46 @@ export class EditingRenderController extends Disposable {
                 },
             ]);
             const endOffset = (documentDataModel.getBody()?.dataStream.length ?? 2) - 2;
-            this._textSelectionManagerService.replaceDocRanges(
-                [{
-                    startOffset: endOffset,
-                    endOffset,
-                }],
-                {
-                    unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-                    subUnitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-                }
-            );
+            if (percentSelection) {
+                replaceSelection(percentSelection);
+            } else {
+                this._textSelectionManagerService.replaceDocRanges(
+                    [{
+                        startOffset: endOffset,
+                        endOffset,
+                    }],
+                    {
+                        unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+                        subUnitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+                    }
+                );
+            }
         } else if (
             // clear and edit
             eventType === DeviceInputEventType.Keyboard ||
             (eventType === DeviceInputEventType.Dblclick && isInArrayFormulaRange)
         ) {
-            clearAndEdit();
+            if (percentSelection) {
+                replaceSelection(percentSelection);
+            } else {
+                clearAndEdit();
+            }
         } else if (eventType === DeviceInputEventType.Dblclick) {
             if (this._contextService.getContextValue(FOCUSING_EDITOR_INPUT_FORMULA)) {
                 return;
             }
 
             const cursor = documentDataModel.getBody()!.dataStream.length - 2 || 0;
-            this._textSelectionManagerService.replaceDocRanges([
-                {
-                    startOffset: cursor,
-                    endOffset: cursor,
-                },
-            ]);
+            if (percentSelection) {
+                replaceSelection(percentSelection);
+            } else {
+                this._textSelectionManagerService.replaceDocRanges([
+                    {
+                        startOffset: cursor,
+                        endOffset: cursor,
+                    },
+                ]);
+            }
         }
 
         this._renderManagerService.getRenderUnitById(unitId)?.scene.resetCursor();

@@ -42,6 +42,7 @@ const CUSTOM_EXTENSION_KEY = 'DefaultCustomExtension';
 const MARKER_EXTENSION_KEY = 'DefaultMarkerExtension';
 const RANGE_PROTECTION_VIEW_EXTENSION_KEY = 'RANGE_PROTECTION_CAN_VIEW_RENDER_EXTENSION_KEY';
 const RANGE_PROTECTION_HIDDEN_EXTENSION_KEY = 'RANGE_PROTECTION_CAN_NOT_VIEW_RENDER_EXTENSION_KEY';
+const PRINTING_GRIDLINES_COLOR = getColor([214, 216, 219]);
 
 interface IRepaintBound {
     bound: IBoundRectNoAngle;
@@ -932,7 +933,9 @@ export class Spreadsheet extends SheetComponent {
 
         ctx.setLineWidthByPrecision(1);
 
-        const defaultGridlinesColor = ctx.__mode === 'printing' ? getColor([214, 216, 219]) : 'mix(gray.200, gray.900, 0.07)';
+        const defaultGridlinesColor = ctx.__mode === 'printing'
+            ? PRINTING_GRIDLINES_COLOR
+            : spreadsheetSkeleton.defaultGridlinesColor;
         ctx.strokeStyle = gridlinesColor ?? ctx.renderConfig.gridlinesColor ?? defaultGridlinesColor;
 
         const columnWidthAccumulationLength = columnWidthAccumulation.length;

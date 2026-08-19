@@ -105,8 +105,10 @@ export class ScrollBar extends Disposable {
     private _thumbDefaultBackgroundColor = 'gray.300';
     private _thumbHoverBackgroundColor = 'gray.400';
     private _thumbActiveBackgroundColor = 'gray.500';
-    private _trackBackgroundColor = 'alpha(white, 0.5)';
-    private _trackBorderColor = 'alpha(white, 0.7)';
+    private _trackBackgroundColor = 'gray.0';
+    private _trackBorderColor = 'gray.0';
+    private _trackBackgroundOpacity = 0.5;
+    private _trackBorderOpacity = 0.7;
 
     /**
      * The thickness of a scrolling track
@@ -164,12 +166,20 @@ export class ScrollBar extends Disposable {
 
         themeKeys.forEach((key) => {
             if (props[key as keyof IScrollBarProps] !== undefined) {
-                (this as Record<string, any>)[`_${key}`] = props[key as keyof IScrollBarProps];
+                (this as unknown as Record<string, unknown>)[`_${key}`] = props[key as keyof IScrollBarProps];
             }
         });
 
         if (Tools.isDefine(props.thumbBackgroundColor)) {
             this._thumbDefaultBackgroundColor = props.thumbBackgroundColor;
+        }
+
+        if (Tools.isDefine(props.trackBackgroundColor)) {
+            this._trackBackgroundOpacity = 1;
+        }
+
+        if (Tools.isDefine(props.trackBorderColor)) {
+            this._trackBorderOpacity = 1;
         }
 
         if (Tools.isDefine(props.barSize)) {
@@ -635,8 +645,10 @@ export class ScrollBar extends Disposable {
         if (this._enableHorizontal) {
             this.horizonScrollTrack = new Rect('__horizonBarRect__', {
                 fill: this._trackBackgroundColor!,
+                fillOpacity: this._trackBackgroundOpacity,
                 strokeWidth: this._trackBorderThickness,
                 stroke: this._trackBorderColor!,
+                strokeOpacity: this._trackBorderOpacity,
             });
 
             this.horizonThumbRect = new Rect('__horizonThumbRect__', {
@@ -648,8 +660,10 @@ export class ScrollBar extends Disposable {
         if (this._enableVertical) {
             this.verticalScrollTrack = new Rect('__verticalBarRect__', {
                 fill: this._trackBackgroundColor!,
+                fillOpacity: this._trackBackgroundOpacity,
                 strokeWidth: this._trackBorderThickness,
                 stroke: this._trackBorderColor!,
+                strokeOpacity: this._trackBorderOpacity,
             });
 
             this.verticalThumbRect = new Rect('__verticalThumbRect__', {
@@ -661,8 +675,10 @@ export class ScrollBar extends Disposable {
         if (this._enableHorizontal && this._enableVertical) {
             this.placeholderBarRect = new Rect('__placeholderBarRect__', {
                 fill: this._trackBackgroundColor!,
+                fillOpacity: this._trackBackgroundOpacity,
                 strokeWidth: this._trackBorderThickness,
                 stroke: this._trackBorderColor!,
+                strokeOpacity: this._trackBorderOpacity,
             });
         }
     }

@@ -32,52 +32,12 @@ export class DumbCanvasColorService implements ICanvasColorService {
     }
 }
 
-const DARK_RENDER_COLOR_OVERRIDES: Record<string, string> = {
-    '#17212b': '#e2e8f0',
-    '#64748b': '#94a3b8',
-    '#d9e0e7': '#253044',
-    '#edf1f5': '#1b2535',
-    '#eef2f6': '#1b2535',
-    '#f2f5f8': '#101827',
-    '#f3f6fa': '#18243a',
-    '#f4f8ff': '#172a46',
-    '#f5f9ff': '#12233a',
-    '#f7f9fb': '#0d1422',
-    '#f7f9fc': '#0d1422',
-    '#f8fafc': '#0f172a',
-    '#fbfcfd': '#07111f',
-    '#fcfdff': '#050914',
-    '#e8f1ff': '#173a69',
-    '#eaf5ff': '#12315a',
-    '#dbeafe': '#1e3a8a',
-    '#bfdbfe': '#60a5fa',
-    '#93c5fd': '#60a5fa',
-    '#8eb6f5': '#60a5fa',
-    '#60a5fa': '#60a5fa',
-    '#2563eb': '#60a5fa',
-    '#1d64d8': '#93c5fd',
-    '#1d5cff': '#60a5fa',
-    '#0f766e': '#2dd4bf',
-    '#d7f4ef': '#134e4a',
-    'rgba(37,99,235,0.05)': 'rgba(96,165,250,0.16)',
-    'rgba(37,99,235,0.06)': 'rgba(96,165,250,0.18)',
-    'rgba(37,99,235,0.08)': 'rgba(96,165,250,0.22)',
-    'rgba(37,99,235,0.12)': 'rgba(96,165,250,0.26)',
-    'rgba(37,99,235,0.18)': 'rgba(96,165,250,0.30)',
-    'rgba(37,99,235,0.28)': 'rgba(96,165,250,0.38)',
-    'rgba(239,246,255,0.88)': 'rgba(30,64,175,0.72)',
-    'rgba(148,163,184,0.45)': 'rgba(148,163,184,0.52)',
-};
-
-const COLOR_MIX_REGEXP = /^mix\(\s*([^,()]+)\s*,\s*([^,()]+)\s*,\s*(0(?:\.\d+)?|1(?:\.0+)?)\s*\)$/;
-const COLOR_ALPHA_REGEXP = /^alpha\(\s*([^,()]+)\s*,\s*(0(?:\.\d+)?|1(?:\.0+)?)\s*\)$/;
-
 /**
  * This service inverts a color for dark mode. This service is exposed
  */
 export class CanvasColorService extends Disposable implements ICanvasColorService {
     private readonly _darkModeCache = new Map<string, string>();
-    private readonly _resolvedColorCache = new Map<string, string>();
+    private readonly _resolvedThemeColors = new Map<string, string>();
     private _invertAlgo = invertColorByMatrix;
 
     constructor(
@@ -85,14 +45,14 @@ export class CanvasColorService extends Disposable implements ICanvasColorServic
     ) {
         super();
 
-        this.disposeWithMe(this._themeService.currentTheme$.subscribe(() => {
-            this._resolvedColorCache.clear();
+        this.disposeWithMe(this._themeService.currentTheme$.subscribe((theme) => {
+            this._cacheThemeColors(theme);
             this._darkModeCache.clear();
         }));
     }
 
     getRenderColor(inputColor: string): string {
-        const color = this._resolveColor(inputColor);
+        const color = this._resolvedThemeColors.get(inputColor) ?? inputColor;
 
         if (!this._themeService.darkMode) {
             return color;
@@ -102,16 +62,13 @@ export class CanvasColorService extends Disposable implements ICanvasColorServic
             return this._darkModeCache.get(color)!;
         }
 
-        if (normalizeRenderColor(color) === 'transparent') {
+        if (color.trim().toLowerCase() === 'transparent') {
             this._darkModeCache.set(color, 'transparent');
             return 'transparent';
         }
 
         let cachedColor = '';
-        const mappedColor = getDarkRenderColorOverride(color);
-        if (mappedColor) {
-            cachedColor = mappedColor;
-        } else if (color.startsWith('#')) {
+        if (color.startsWith('#')) {
             const invertedColor = this._invertAlgo(hexToRgb(color));
             cachedColor = rgbToHex(invertedColor);
 
@@ -145,74 +102,17 @@ export class CanvasColorService extends Disposable implements ICanvasColorServic
         return cachedColor;
     }
 
-    private _resolveColor(inputColor: string): string {
-        const cachedColor = this._resolvedColorCache.get(inputColor);
-        if (cachedColor !== undefined) {
-            return cachedColor;
-        }
+    private _cacheThemeColors(theme: ReturnType<ThemeService['getCurrentTheme']>): void {
+        this._resolvedThemeColors.clear();
 
-        const mixMatch = inputColor.match(COLOR_MIX_REGEXP);
-        if (mixMatch) {
-            const color1 = this._resolveThemeColor(mixMatch[1].trim());
-            const color2 = this._resolveThemeColor(mixMatch[2].trim());
-            const amount = Number(mixMatch[3]);
-            const color = ColorKit.mix(color1, color2, amount).toHexString();
-            this._resolvedColorCache.set(inputColor, color);
-            return color;
-        }
-
-        const alphaMatch = inputColor.match(COLOR_ALPHA_REGEXP);
-        if (alphaMatch) {
-            const baseColor = this._resolveThemeColor(alphaMatch[1].trim());
-            const colorKit = new ColorKit(baseColor);
-
-            if (!colorKit.isValid) {
-                throw new Error(`[CanvasColorService]: illegal color "${inputColor}"`);
-            }
-
-            const color = colorKit.setAlpha(Number(alphaMatch[2])).toRgbString();
-            this._resolvedColorCache.set(inputColor, color);
-            return color;
-        }
-
-        if (inputColor.trim().startsWith('alpha(')) {
-            throw new Error(`[CanvasColorService]: illegal color "${inputColor}"`);
-        }
-
-        const color = this._resolveThemeColor(inputColor);
-        if (color !== inputColor) {
-            this._resolvedColorCache.set(inputColor, color);
-        }
-
-        return color;
-    }
-
-    private _resolveThemeColor(inputColor: string): string {
-        let color = inputColor;
-
-        if (color.includes('.')) {
-            const themeColor = this._themeService.getColorFromTheme<unknown>(color);
-            if (typeof themeColor === 'string' && this._themeService.isValidThemeColor(color)) {
-                color = themeColor;
+        for (const [paletteName, palette] of Object.entries(theme)) {
+            for (const [tokenName, color] of Object.entries(palette)) {
+                if (typeof color === 'string') {
+                    this._resolvedThemeColors.set(`${paletteName}.${tokenName}`, color);
+                }
             }
         }
-
-        return color;
     }
-}
-
-export function getDarkRenderColorOverride(color: string): string | null {
-    const normalized = normalizeRenderColor(color);
-    return DARK_RENDER_COLOR_OVERRIDES[normalized] ?? null;
-}
-
-function normalizeRenderColor(color: string): string {
-    const trimmed = color.trim().toLowerCase();
-    if (trimmed.startsWith('rgb')) {
-        return trimmed.replace(/\s+/g, '');
-    }
-
-    return trimmed;
 }
 
 export function hexToRgb(_hex: string): RGBColorType {

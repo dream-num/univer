@@ -532,9 +532,9 @@ export function createRenderTestBed(options?: { workbookData?: IWorkbookData; de
     (engine as any).dispose ??= () => { };
 
     const components = new Map<any, any>();
-    components.set(SHEET_VIEW_KEY.ROW, { onPointerDown$: createTestEvent<any>(), onPointerMove$: createTestEvent<any>(), onPointerLeave$: createTestEvent<any>(), dispose: () => { } });
-    components.set(SHEET_VIEW_KEY.COLUMN, { onPointerDown$: createTestEvent<any>(), onPointerMove$: createTestEvent<any>(), onPointerLeave$: createTestEvent<any>(), dispose: () => { } });
-    components.set(SHEET_VIEW_KEY.LEFT_TOP, { onPointerDown$: createTestEvent<any>(), dispose: () => { } });
+    components.set(SHEET_VIEW_KEY.ROW, { onPointerDown$: createTestEvent<any>(), onPointerMove$: createTestEvent<any>(), onPointerLeave$: createTestEvent<any>(), makeForceDirty: () => { }, makeDirty: () => { }, dispose: () => { } });
+    components.set(SHEET_VIEW_KEY.COLUMN, { onPointerDown$: createTestEvent<any>(), onPointerMove$: createTestEvent<any>(), onPointerLeave$: createTestEvent<any>(), makeForceDirty: () => { }, makeDirty: () => { }, dispose: () => { } });
+    components.set(SHEET_VIEW_KEY.LEFT_TOP, { onPointerDown$: createTestEvent<any>(), makeForceDirty: () => { }, makeDirty: () => { }, dispose: () => { } });
 
     const mainComponent = {
         zIndex: 1,
@@ -542,6 +542,7 @@ export function createRenderTestBed(options?: { workbookData?: IWorkbookData; de
         isForceDirty: () => false,
         getSkeleton: () => ({ worksheet: { getMergeData: () => [] } }),
         makeForceDirty: () => { },
+        makeDirty: () => { },
         onPointerDown$: createTestEvent<any>(),
     };
 

@@ -24,6 +24,7 @@ import {
     BooleanNumber,
 
     CellValueType,
+    ColorKit,
     DEFAULT_STYLES,
     DocumentDataModel,
     getColorStyle,
@@ -51,6 +52,7 @@ import {
     searchArray,
     SheetSkeleton,
 
+    ThemeService,
     Tools,
     VerticalAlign,
 
@@ -276,6 +278,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
     private _handleBorderMatrix = new ObjectMatrix<boolean>();
     private _showGridlines: BooleanNumber = BooleanNumber.TRUE;
     private _gridlinesColor: string | undefined = undefined;
+    private _defaultGridlinesColor!: string;
     private _scene: Nullable<Scene> = null;
 
     constructor(
@@ -287,6 +290,14 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         @Inject(Injector) _injector: Injector
     ) {
         super(worksheet, _styles, _localeService, _contextService, _configService, _injector);
+        const themeService = _injector.get(ThemeService);
+        this.disposeWithMe(themeService.currentTheme$.subscribe(() => {
+            const gray200 = themeService.getColorFromTheme('gray.200');
+            const gray900 = themeService.getColorFromTheme('gray.900');
+            this._defaultGridlinesColor = ColorKit.mix(gray200, gray900, 0.07).toHexString();
+            this._scene?.getViewports().forEach((viewport) => viewport.markDirty(true));
+            this._scene?.makeDirty(true);
+        }));
         this._updateLayout();
         this.disposeWithMe(
             this._contextService.subscribeContextValue$(RENDER_RAW_FORMULA_KEY).pipe(
@@ -362,6 +373,10 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
 
     get gridlinesColor(): string | undefined {
         return this._gridlinesColor;
+    }
+
+    get defaultGridlinesColor(): string {
+        return this._defaultGridlinesColor;
     }
 
     override dispose(): void {

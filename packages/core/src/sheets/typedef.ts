@@ -319,6 +319,8 @@ export interface IFontRenderExtension {
 export interface ICellDataForSheetInterceptor extends ICellData {
     interceptorStyle?: Nullable<IStyleData>;
     isInArrayFormulaRange?: Nullable<boolean>;
+    /** Marks intercepted cell data prepared for percentage editing. */
+    isPercentFormat?: boolean;
     markers?: ICellMarks;
     customRender?: Nullable<ICellCustomRender[]>;
     interceptorAutoHeight?: () => number | undefined;

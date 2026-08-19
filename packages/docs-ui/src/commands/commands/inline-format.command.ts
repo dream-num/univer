@@ -35,6 +35,7 @@ import {
     getBodySlice,
     getRichTextEditPath,
     ICommandService,
+    isInternalEditorID,
     IUniverInstanceService,
     JSONX,
     MemoryCursor,
@@ -42,9 +43,11 @@ import {
     TextXActionType,
     Tools,
     UniverInstanceType,
+    UpdateDocsAttributeType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { DocMenuStyleService } from '../../services/doc-menu-style.service';
+import { IEditorService } from '../../services/editor/editor-manager.service';
 
 function handleInlineFormat(
     preCommandId: string,
@@ -280,6 +283,7 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
     handler: async (accessor, params: ISetInlineFormatCommandParams) => {
         const { value, preCommandId } = params;
         const commandService = accessor.get(ICommandService);
+        const editorService = accessor.has(IEditorService) ? accessor.get(IEditorService) : null;
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const docMenuStyleService = accessor.get(DocMenuStyleService);
@@ -377,6 +381,32 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
 
         const textX = new TextX();
         const jsonX = JSONX.getInstance();
+        const textStylePatch = formatPatch ?? {
+            [COMMAND_ID_TO_FORMAT_KEY_MAP[preCommandId]]: formatValue,
+        };
+        const shouldClearSolidTextFill = preCommandId === SetInlineFormatTextColorCommand.id
+            && !isInternalEditorID(unitId)
+            && !editorService?.isEditor(unitId);
+
+        const pushTextStyleUpdate = (len: number, ts: Partial<ITextStyle>, replace = false) => {
+            if (len <= 0) {
+                return;
+            }
+
+            textX.push({
+                t: TextXActionType.RETAIN,
+                body: {
+                    dataStream: '',
+                    textRuns: [{
+                        st: 0,
+                        ed: len,
+                        ts,
+                    }],
+                },
+                len,
+                ...(replace ? { coverType: UpdateDocsAttributeType.REPLACE } : {}),
+            });
+        };
 
         const memoryCursor = new MemoryCursor();
         memoryCursor.reset();
@@ -416,19 +446,6 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
                 continue;
             }
 
-            const body: IDocumentBody = {
-                dataStream: '',
-                textRuns: [
-                    {
-                        st: 0,
-                        ed: endOffset - startOffset,
-                        ts: formatPatch ?? {
-                            [COMMAND_ID_TO_FORMAT_KEY_MAP[preCommandId]]: formatValue,
-                        },
-                    },
-                ],
-            };
-
             const len = startOffset - memoryCursor.cursor;
 
             if (len !== 0) {
@@ -438,11 +455,37 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
                 });
             }
 
-            textX.push({
-                t: TextXActionType.RETAIN,
-                body,
-                len: endOffset - startOffset,
-            });
+            if (shouldClearSolidTextFill) {
+                let currentOffset = startOffset;
+
+                for (const textRun of body.textRuns ?? []) {
+                    if (textRun.ts?.textFill?.type !== 'solid') {
+                        continue;
+                    }
+
+                    const solidStart = Math.max(currentOffset, textRun.st);
+                    const solidEnd = Math.min(endOffset, textRun.ed);
+
+                    if (solidStart >= solidEnd) {
+                        continue;
+                    }
+
+                    pushTextStyleUpdate(solidStart - currentOffset, textStylePatch);
+
+                    const replacementStyle = {
+                        ...textRun.ts,
+                        ...textStylePatch,
+                    };
+                    delete replacementStyle.textFill;
+                    pushTextStyleUpdate(solidEnd - solidStart, replacementStyle, true);
+
+                    currentOffset = solidEnd;
+                }
+
+                pushTextStyleUpdate(endOffset - currentOffset, textStylePatch);
+            } else {
+                pushTextStyleUpdate(endOffset - startOffset, textStylePatch);
+            }
 
             memoryCursor.reset();
             memoryCursor.moveCursor(endOffset);

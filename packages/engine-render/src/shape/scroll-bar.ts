@@ -105,8 +105,8 @@ export class ScrollBar extends Disposable {
     private _thumbDefaultBackgroundColor = 'gray.300';
     private _thumbHoverBackgroundColor = 'gray.400';
     private _thumbActiveBackgroundColor = 'gray.500';
-    private _trackBackgroundColor = 'alpha(white, 0.5)';
-    private _trackBorderColor = 'alpha(white, 0.7)';
+    private _trackBackgroundColor = 'rgba(255,255,255,0.5)';
+    private _trackBorderColor = 'rgba(255,255,255,0.7)';
 
     /**
      * The thickness of a scrolling track

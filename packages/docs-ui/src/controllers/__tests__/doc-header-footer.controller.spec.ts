@@ -20,6 +20,7 @@ import {
     Injector,
     IUniverInstanceService,
     LocaleService,
+    ThemeService,
 } from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService, Path, Rect } from '@univerjs/engine-render';
@@ -124,10 +125,11 @@ function createController(options: {
         [LocaleService, { useValue: {
             t: vi.fn((key: string) => key),
         } }],
+        [ThemeService],
     ]);
     const controller = injector.createInstance(DocHeaderFooterController, context);
 
-    return { controller, pageRender$, commandHandlers, commandService, document };
+    return { controller, pageRender$, commandHandlers, commandService, document, themeService: injector.get(ThemeService) };
 }
 
 describe('DocHeaderFooterController', () => {
@@ -152,11 +154,20 @@ describe('DocHeaderFooterController', () => {
     });
 
     it('covers header and footer areas while editing the document body', () => {
-        const { controller, pageRender$ } = createController({ editArea: DocumentEditArea.BODY });
+        const { controller, pageRender$, themeService } = createController({ editArea: DocumentEditArea.BODY });
         const rectSpy = vi.spyOn(Rect, 'drawWith').mockImplementation(() => undefined);
         const pathSpy = vi.spyOn(Path, 'drawWith').mockImplementation(() => undefined);
         const textSpy = vi.spyOn(TextBubbleShape, 'drawWith').mockImplementation(() => undefined);
         const ctx = createCtx();
+        const theme = themeService.getCurrentTheme();
+
+        themeService.setTheme({
+            ...theme,
+            gray: {
+                ...theme.gray,
+                0: '#123456',
+            },
+        });
 
         pageRender$.next({
             ctx,
@@ -175,12 +186,12 @@ describe('DocHeaderFooterController', () => {
         expect(rectSpy.mock.calls[0][1]).toMatchObject({
             width: 200,
             height: 30,
-            fill: 'alpha(gray.0, 0.5)',
+            fill: 'rgba(18,52,86,0.5)',
         });
         expect(rectSpy.mock.calls[1][1]).toMatchObject({
             width: 200,
             height: 40,
-            fill: 'alpha(gray.0, 0.5)',
+            fill: 'rgba(18,52,86,0.5)',
         });
         expect(pathSpy).not.toHaveBeenCalled();
         expect(textSpy).not.toHaveBeenCalled();
@@ -189,11 +200,20 @@ describe('DocHeaderFooterController', () => {
     });
 
     it('covers the body and draws header/footer guides while editing header or footer', () => {
-        const { controller, pageRender$ } = createController({ editArea: DocumentEditArea.HEADER });
+        const { controller, pageRender$, themeService } = createController({ editArea: DocumentEditArea.HEADER });
         const rectSpy = vi.spyOn(Rect, 'drawWith').mockImplementation(() => undefined);
         const pathSpy = vi.spyOn(Path, 'drawWith').mockImplementation(() => undefined);
         const textSpy = vi.spyOn(TextBubbleShape, 'drawWith').mockImplementation(() => undefined);
         const ctx = createCtx();
+        const theme = themeService.getCurrentTheme();
+
+        themeService.setTheme({
+            ...theme,
+            primary: {
+                ...theme.primary,
+                600: '#123456',
+            },
+        });
 
         pageRender$.next({
             ctx,
@@ -213,14 +233,14 @@ describe('DocHeaderFooterController', () => {
             height: 230,
         }));
         expect(pathSpy).toHaveBeenCalledTimes(2);
-        expect(pathSpy).toHaveBeenCalledWith(ctx, expect.objectContaining({ stroke: 'primary.600' }));
+        expect(pathSpy).toHaveBeenCalledWith(ctx, expect.objectContaining({ stroke: '#123456' }));
         expect(textSpy).toHaveBeenCalledWith(ctx, expect.objectContaining({
             text: 'docs-ui.headerFooter.header',
-            color: 'alpha(primary.600, 0.08)',
+            color: 'rgba(18,52,86,0.08)',
         }));
         expect(textSpy).toHaveBeenCalledWith(ctx, expect.objectContaining({
             text: 'docs-ui.headerFooter.footer',
-            color: 'alpha(primary.600, 0.08)',
+            color: 'rgba(18,52,86,0.08)',
         }));
 
         controller.dispose();

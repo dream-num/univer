@@ -132,12 +132,12 @@ describe('ScrollBar', () => {
     it('uses translucent white for default track colors', () => {
         const scrollBar = new ScrollBar(viewport);
 
-        expect(scrollBar.horizonScrollTrack?.fill).toBe('alpha(white, 0.5)');
-        expect(scrollBar.horizonScrollTrack?.stroke).toBe('alpha(white, 0.7)');
-        expect(scrollBar.verticalScrollTrack?.fill).toBe('alpha(white, 0.5)');
-        expect(scrollBar.verticalScrollTrack?.stroke).toBe('alpha(white, 0.7)');
-        expect(scrollBar.placeholderBarRect?.fill).toBe('alpha(white, 0.5)');
-        expect(scrollBar.placeholderBarRect?.stroke).toBe('alpha(white, 0.7)');
+        expect(scrollBar.horizonScrollTrack?.fill).toBe('rgba(255,255,255,0.5)');
+        expect(scrollBar.horizonScrollTrack?.stroke).toBe('rgba(255,255,255,0.7)');
+        expect(scrollBar.verticalScrollTrack?.fill).toBe('rgba(255,255,255,0.5)');
+        expect(scrollBar.verticalScrollTrack?.stroke).toBe('rgba(255,255,255,0.7)');
+        expect(scrollBar.placeholderBarRect?.fill).toBe('rgba(255,255,255,0.5)');
+        expect(scrollBar.placeholderBarRect?.stroke).toBe('rgba(255,255,255,0.7)');
 
         scrollBar.dispose();
     });

@@ -30,6 +30,7 @@ import {
     LogLevel,
     ObjectMatrix,
     RANGE_TYPE,
+    ThemeService,
     Univer,
     UniverInstanceType,
     VerticalAlign,
@@ -264,6 +265,38 @@ describe('spreadsheet integration', () => {
         expect(getShrinkToFitScale(80, 100, 12)).toBe(1);
         expect(getShrinkToFitScale(200, 100, 12)).toBe(0.5);
         expect(getShrinkToFitScale(2400, 100, 12)).toBeCloseTo(1 / 12);
+    });
+
+    it('updates the mixed screen gridline color after theme changes', () => {
+        const { scene, skeleton, viewport } = fixture;
+        const themeService = fixture.univer.__getInjector().get(ThemeService);
+        const nativeContext = viewport.canvas!.getCanvasEle().getContext('2d') as CanvasRenderingContext2D & {
+            __getEvents: () => Array<{ type: string; props: Record<string, unknown> }>;
+            __clearEvents: () => void;
+        };
+        const getStrokeStyles = () => nativeContext.__getEvents()
+            .filter((event) => event.type === 'strokeStyle')
+            .map((event) => event.props.value);
+
+        nativeContext.__clearEvents();
+        skeleton.updateVisibleRange(viewport.calcViewportInfo());
+        scene.makeDirty(true);
+        scene.render();
+        expect(getStrokeStyles()).toContain('#d5d7dc');
+
+        const theme = themeService.getCurrentTheme();
+        themeService.setTheme({
+            ...theme,
+            gray: {
+                ...theme.gray,
+                200: '#ccddee',
+                900: '#112233',
+            },
+        });
+
+        nativeContext.__clearEvents();
+        scene.render();
+        expect(getStrokeStyles()).toContain('#bfd0e1');
     });
 
     it('scales cloned rich-text font sizes without mutating the stored document', () => {

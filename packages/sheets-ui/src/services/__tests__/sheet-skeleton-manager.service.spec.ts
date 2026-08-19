@@ -24,6 +24,7 @@ import {
     Injector,
     IUniverInstanceService,
     LocaleService,
+    ThemeService,
     UniverInstanceService,
     UniverInstanceType,
     Workbook,
@@ -69,6 +70,7 @@ describe('SheetSkeletonManagerService', () => {
         injector.add([IContextService, { useClass: ContextService }]);
         injector.add([ILogService, { useClass: DesktopLogService }]);
         injector.add([LocaleService]);
+        injector.add([ThemeService]);
         injector.add([IUniverInstanceService, { useClass: UniverInstanceService }]);
         injector.add([SheetSkeletonService]);
         const univerInstanceService = injector.get(IUniverInstanceService) as UniverInstanceService;

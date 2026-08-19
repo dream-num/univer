@@ -47,6 +47,7 @@ export interface IDocsCustomBlockLayoutViewport {
     offsetLeft?: number;
     pageContentWidth?: number;
     viewScale?: number;
+    visibleCanvasHeight?: number;
     viewportHeight?: number;
     width: number;
 }
@@ -93,6 +94,7 @@ export function resolveDocsCustomBlockRenderViewport(params: IDocsCustomBlockRen
             offsetLeft: 0,
             pageContentWidth,
             viewScale,
+            visibleCanvasHeight,
             viewportHeight,
             width: layoutWidth,
         };
@@ -122,6 +124,7 @@ export function resolveDocsCustomBlockRenderViewport(params: IDocsCustomBlockRen
         offsetLeft: 0,
         pageContentWidth,
         viewScale,
+        visibleCanvasHeight,
         viewportHeight,
         width: layoutWidth,
     };

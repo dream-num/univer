@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommand, Injector, ITextStyle, Univer } from '@univerjs/core';
+import type { DocumentDataModel, ICommand, IDocumentData, Injector, ITextStyle, Univer } from '@univerjs/core';
 import {
     BaselineOffset,
     BooleanNumber,
+    createInternalEditorID,
     DOC_RANGE_TYPE,
     ICommandService,
     IUniverInstanceService,
@@ -423,6 +424,119 @@ describe('Test inline format commands', () => {
             await commandService.executeCommand(RedoCommand.id);
             expect(getFormatValueAt('cl', 1)).toStrictEqual({
                 rgb: null,
+            });
+        });
+
+        it('clears only solid text fills in a standalone document', async () => {
+            const docsModel = get(IUniverInstanceService)
+                .getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC)!;
+            const body = docsModel.getBody()!;
+            const gradientFill = {
+                type: 'gradient' as const,
+                gradient: {
+                    type: 'linear' as const,
+                    stops: [
+                        { offset: 0, color: '#111111' },
+                        { offset: 1, color: '#eeeeee' },
+                    ],
+                },
+            };
+            const pictureFill = {
+                type: 'picture' as const,
+                picture: {
+                    source: 'https://example.com/fill.png',
+                },
+            };
+
+            body.textRuns = [
+                {
+                    st: 0,
+                    ed: 2,
+                    ts: {
+                        bl: BooleanNumber.TRUE,
+                        cl: { rgb: '#111111' },
+                        textFill: { type: 'solid', color: '#222222' },
+                    },
+                },
+                {
+                    st: 2,
+                    ed: 4,
+                    ts: {
+                        it: BooleanNumber.TRUE,
+                        cl: { rgb: '#111111' },
+                        textFill: gradientFill,
+                    },
+                },
+                {
+                    st: 4,
+                    ed: 22,
+                    ts: {
+                        fs: 24,
+                        cl: { rgb: '#111111' },
+                        textFill: pictureFill,
+                    },
+                },
+                {
+                    st: 23,
+                    ed: 68,
+                    ts: {
+                        fs: 24,
+                        cl: { rgb: '#111111' },
+                    },
+                },
+            ];
+
+            await commandService.executeCommand(SetInlineFormatTextColorCommand.id, { value: '#ff0000' });
+
+            expect(getFormatValueAt('cl', 1)).toStrictEqual({ rgb: '#ff0000' });
+            expect(getFormatValueAt('bl', 1)).toBe(BooleanNumber.TRUE);
+            expect(getFormatValueAt('textFill', 1)).toBeUndefined();
+            expect(getFormatValueAt('textFill', 3)).toStrictEqual(gradientFill);
+            expect(getFormatValueAt('textFill', 4.5)).toStrictEqual(pictureFill);
+
+            await commandService.executeCommand(UndoCommand.id);
+            expect(getFormatValueAt('cl', 1)).toStrictEqual({ rgb: '#111111' });
+            expect(getFormatValueAt('textFill', 1)).toStrictEqual({ type: 'solid', color: '#222222' });
+
+            await commandService.executeCommand(RedoCommand.id);
+            expect(getFormatValueAt('cl', 1)).toStrictEqual({ rgb: '#ff0000' });
+            expect(getFormatValueAt('textFill', 1)).toBeUndefined();
+        });
+
+        it('preserves solid text fills in an internal editor', async () => {
+            const unitId = createInternalEditorID('shape-text');
+            const internalDoc = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, {
+                id: unitId,
+                body: {
+                    dataStream: 'abc\r\n',
+                    textRuns: [{
+                        st: 0,
+                        ed: 3,
+                        ts: {
+                            cl: { rgb: '#111111' },
+                            textFill: { type: 'solid', color: '#222222' },
+                        },
+                    }],
+                    paragraphs: [{ startIndex: 3, paragraphId: 'shape-text-paragraph' }],
+                },
+            });
+            const univerInstanceService = get(IUniverInstanceService);
+            univerInstanceService.focusUnit(unitId);
+            const selectionManager = get(DocSelectionManagerService);
+            selectionManager.__TEST_ONLY_setCurrentSelection({ unitId, subUnitId: unitId });
+            selectionManager.__TEST_ONLY_add([{
+                startOffset: 0,
+                endOffset: 3,
+                collapsed: false,
+                isActive: true,
+            }]);
+
+            await commandService.executeCommand(SetInlineFormatTextColorCommand.id, { value: '#ff0000' });
+
+            expect(internalDoc.getBody()?.textRuns?.[0].ts?.cl).toStrictEqual({ rgb: '#ff0000' });
+            expect(internalDoc.getBody()?.textRuns?.[0].ts?.textFill).toStrictEqual({
+                type: 'solid',
+                color: '#222222',
             });
         });
     });

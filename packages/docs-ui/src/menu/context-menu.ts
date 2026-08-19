@@ -206,7 +206,6 @@ export function SectionSettingMenuFactory(accessor: IAccessor): IMenuButtonItem<
     return {
         id: DocSectionSettingPanelOperation.id,
         type: MenuItemType.BUTTON,
-        icon: 'MenuIcon',
         title: 'docs-ui.doc.menu.sectionSetting',
         hidden$: combineLatest(
             getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),

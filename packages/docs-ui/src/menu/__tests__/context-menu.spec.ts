@@ -15,13 +15,20 @@
  */
 
 import { Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { DocSelectionManagerService } from '@univerjs/docs';
 import { of } from 'rxjs';
 import { describe, expect, it } from 'vitest';
-import { ParagraphSettingMenuFactory } from '../context-menu';
+import { ParagraphSettingMenuFactory, SectionSettingMenuFactory } from '../context-menu';
 
-describe('ParagraphSettingMenuFactory', () => {
-    it('does not show a leading icon in the context menu', () => {
+describe('settings context menu factories', () => {
+    it('does not show leading icons', () => {
         const accessor = new Injector([
+            [DocSelectionManagerService, {
+                useValue: {
+                    textSelection$: of(null),
+                    getActiveTextRange: () => null,
+                },
+            }],
             [IUniverInstanceService, {
                 useValue: {
                     focused$: of('doc-1'),
@@ -31,6 +38,7 @@ describe('ParagraphSettingMenuFactory', () => {
         ]);
 
         expect(ParagraphSettingMenuFactory(accessor).icon).toBeUndefined();
+        expect(SectionSettingMenuFactory(accessor).icon).toBeUndefined();
 
         accessor.dispose();
     });

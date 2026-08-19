@@ -115,6 +115,11 @@ function checkCreateHeaderFooterType(
 
 export class DocHeaderFooterController extends Disposable implements IRenderModule {
     private _loadedMap = new WeakSet<RenderComponentType>();
+    private _headerFooterColors = {
+        primary: '',
+        cover: '',
+        label: '',
+    };
 
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
@@ -133,9 +138,26 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
     }
 
     private _initialize() {
+        this._initThemeColors();
         this._init();
         this._drawHeaderFooterLabel();
         this._listenSwitchMode();
+    }
+
+    private _initThemeColors(): void {
+        this.disposeWithMe(this._themeService.currentTheme$.subscribe(() => {
+            const primary = this._themeService.getColorFromTheme('primary.600');
+
+            this._headerFooterColors = {
+                primary,
+                cover: new ColorKit(this._themeService.getColorFromTheme('gray.0'))
+                    .setAlpha(HEADER_FOOTER_COVER_ALPHA)
+                    .toRgbString(),
+                label: new ColorKit(primary)
+                    .setAlpha(HEADER_FOOTER_LABEL_ALPHA)
+                    .toRgbString(),
+            };
+        }));
     }
 
     override dispose(): void {
@@ -283,11 +305,7 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
         return documentTransform.clone().invert().applyPoint(originCoord);
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _drawHeaderFooterLabel() {
-        const localeService = this._localeService;
-
-        // eslint-disable-next-line max-lines-per-function
         this.disposeWithMe(this._instanceSrv.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_DOC).subscribe((unit) => {
             if (unit == null) {
                 return;
@@ -309,110 +327,106 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
 
             this.disposeWithMe(
                 toDisposable(
-                    // eslint-disable-next-line max-lines-per-function
-                    docsComponent.pageRender$.subscribe((config: IPageRenderConfig) => {
-                        if (this._editorService.isEditor(unitId)) {
-                            return;
-                        }
-
-                        if (!this._isTraditionalMode()) {
-                            return;
-                        }
-
-                        const viewModel = this._docSkeletonManagerService.getViewModel();
-                        const editArea = viewModel.getEditArea();
-                        const isEditBody = editArea === DocumentEditArea.BODY;
-                        const { page, pageLeft, pageTop, ctx } = config;
-                        const { pageWidth, pageHeight, marginTop, marginBottom } = page;
-                        const primaryColor = this._themeService.getColorFromTheme('primary.600');
-                        const coverColor = new ColorKit(this._themeService.getColorFromTheme('gray.0'))
-                            .setAlpha(HEADER_FOOTER_COVER_ALPHA)
-                            .toRgbString();
-                        const labelColor = new ColorKit(primaryColor)
-                            .setAlpha(HEADER_FOOTER_LABEL_ALPHA)
-                            .toRgbString();
-
-                        // Draw header footer label.
-                        ctx.save();
-                        ctx.translate(pageLeft - 0.5, pageTop - 0.5);
-
-                        // Cover header and footer.
-                        if (isEditBody) {
-                            Rect.drawWith(ctx, {
-                                left: 0,
-                                top: 0,
-                                width: pageWidth,
-                                height: marginTop,
-                                fill: coverColor,
-                            });
-                            ctx.save();
-                            ctx.translate(0, pageHeight - marginBottom);
-                            Rect.drawWith(ctx, {
-                                left: 0,
-                                top: 0,
-                                width: pageWidth,
-                                height: marginBottom,
-                                fill: coverColor,
-                            });
-                            ctx.restore();
-                        } else { // Cover body.
-                            ctx.save();
-                            ctx.translate(0, marginTop);
-                            Rect.drawWith(ctx, {
-                                left: 0,
-                                top: marginTop,
-                                width: pageWidth,
-                                height: pageHeight - marginTop - marginBottom,
-                                fill: coverColor,
-                            });
-                            ctx.restore();
-                        }
-
-                        if (!isEditBody) {
-                            const headerPathConfigIPathProps = {
-                                dataArray: [{
-                                    command: 'M',
-                                    points: [0, marginTop],
-                                }, {
-                                    command: 'L',
-                                    points: [pageWidth, marginTop],
-                                }] as unknown as IPathProps['dataArray'],
-                                strokeWidth: 1,
-                                stroke: primaryColor,
-                            };
-
-                            const footerPathConfigIPathProps = {
-                                dataArray: [{
-                                    command: 'M',
-                                    points: [0, pageHeight - marginBottom],
-                                }, {
-                                    command: 'L',
-                                    points: [pageWidth, pageHeight - marginBottom],
-                                }] as unknown as IPathProps['dataArray'],
-                                strokeWidth: 1,
-                                stroke: primaryColor,
-                            };
-
-                            Path.drawWith(ctx, headerPathConfigIPathProps);
-                            Path.drawWith(ctx, footerPathConfigIPathProps);
-
-                            ctx.translate(0, marginTop + 1);
-                            TextBubbleShape.drawWith(ctx, {
-                                text: localeService.t<LocaleKey>('docs-ui.headerFooter.header'),
-                                color: labelColor,
-                            });
-                            ctx.translate(0, pageHeight - marginTop - marginBottom);
-                            TextBubbleShape.drawWith(ctx, {
-                                text: localeService.t<LocaleKey>('docs-ui.headerFooter.footer'),
-                                color: labelColor,
-                            });
-                        }
-                        ctx.restore();
-                    })
+                    docsComponent.pageRender$.subscribe((config: IPageRenderConfig) => this._drawHeaderFooterPage(config, unitId))
                 )
             );
-        })
-        );
+        }));
+    }
+
+    private _drawHeaderFooterPage(config: IPageRenderConfig, unitId: string): void {
+        if (this._editorService.isEditor(unitId) || !this._isTraditionalMode()) {
+            return;
+        }
+
+        const editArea = this._docSkeletonManagerService.getViewModel().getEditArea();
+        const isEditBody = editArea === DocumentEditArea.BODY;
+        const { pageLeft, pageTop, ctx } = config;
+
+        ctx.save();
+        ctx.translate(pageLeft - 0.5, pageTop - 0.5);
+        this._drawHeaderFooterCover(config, isEditBody);
+
+        if (!isEditBody) {
+            this._drawHeaderFooterGuides(config);
+        }
+
+        ctx.restore();
+    }
+
+    private _drawHeaderFooterCover({ page, ctx }: IPageRenderConfig, isEditBody: boolean): void {
+        const { pageWidth, pageHeight, marginTop, marginBottom } = page;
+
+        if (isEditBody) {
+            Rect.drawWith(ctx, {
+                left: 0,
+                top: 0,
+                width: pageWidth,
+                height: marginTop,
+                fill: this._headerFooterColors.cover,
+            });
+            ctx.save();
+            ctx.translate(0, pageHeight - marginBottom);
+            Rect.drawWith(ctx, {
+                left: 0,
+                top: 0,
+                width: pageWidth,
+                height: marginBottom,
+                fill: this._headerFooterColors.cover,
+            });
+            ctx.restore();
+            return;
+        }
+
+        ctx.save();
+        ctx.translate(0, marginTop);
+        Rect.drawWith(ctx, {
+            left: 0,
+            top: marginTop,
+            width: pageWidth,
+            height: pageHeight - marginTop - marginBottom,
+            fill: this._headerFooterColors.cover,
+        });
+        ctx.restore();
+    }
+
+    private _drawHeaderFooterGuides({ page, ctx }: IPageRenderConfig): void {
+        const { pageWidth, pageHeight, marginTop, marginBottom } = page;
+        const headerPathConfig = {
+            dataArray: [{
+                command: 'M',
+                points: [0, marginTop],
+            }, {
+                command: 'L',
+                points: [pageWidth, marginTop],
+            }] as unknown as IPathProps['dataArray'],
+            strokeWidth: 1,
+            stroke: this._headerFooterColors.primary,
+        };
+        const footerPathConfig = {
+            dataArray: [{
+                command: 'M',
+                points: [0, pageHeight - marginBottom],
+            }, {
+                command: 'L',
+                points: [pageWidth, pageHeight - marginBottom],
+            }] as unknown as IPathProps['dataArray'],
+            strokeWidth: 1,
+            stroke: this._headerFooterColors.primary,
+        };
+
+        Path.drawWith(ctx, headerPathConfig);
+        Path.drawWith(ctx, footerPathConfig);
+
+        ctx.translate(0, marginTop + 1);
+        TextBubbleShape.drawWith(ctx, {
+            text: this._localeService.t<LocaleKey>('docs-ui.headerFooter.header'),
+            color: this._headerFooterColors.label,
+        });
+        ctx.translate(0, pageHeight - marginTop - marginBottom);
+        TextBubbleShape.drawWith(ctx, {
+            text: this._localeService.t<LocaleKey>('docs-ui.headerFooter.footer'),
+            color: this._headerFooterColors.label,
+        });
     }
 
     private _isEditorReadOnly(unitId: string) {

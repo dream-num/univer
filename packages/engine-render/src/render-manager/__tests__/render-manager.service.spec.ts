@@ -28,8 +28,9 @@ import {
 import { RenderUnit } from '../render-unit';
 
 describe('render manager service', () => {
-    it('covers render map lifecycle and dark mode listener', () => {
+    it('marks render components dirty when the theme changes', () => {
         const darkMode$ = new Subject<boolean>();
+        const currentTheme$ = new Subject();
         const injector = {
             createInstance: vi.fn(() => new Engine()),
         } as unknown as Injector;
@@ -38,7 +39,7 @@ describe('render manager service', () => {
             getUnitType: vi.fn(() => UniverInstanceType.UNIVER_SHEET),
             getCurrentUnitOfType: vi.fn(() => null),
         } as any;
-        const themeService = { darkMode$ } as any;
+        const themeService = { currentTheme$, darkMode$ } as any;
 
         const service = new RenderManagerService(injector, instanceService, themeService);
         const engine = new Engine('render-service-test', { elementWidth: 100, elementHeight: 80, dpr: 1 });
@@ -70,6 +71,11 @@ describe('render manager service', () => {
         expect(component.makeForceDirty).toHaveBeenCalledWith(true);
         expect(component.makeDirty).toHaveBeenCalledWith(true);
 
+        vi.clearAllMocks();
+        currentTheme$.next({});
+        expect(component.makeForceDirty).toHaveBeenCalledWith(true);
+        expect(component.makeDirty).toHaveBeenCalledWith(true);
+
         service.removeRender('u-1');
         expect(service.has('u-1')).toBe(false);
         service.dispose();
@@ -77,6 +83,7 @@ describe('render manager service', () => {
 
     it('covers dependency registration, render creation branches and helper funcs', () => {
         const darkMode$ = new Subject<boolean>();
+        const currentTheme$ = new Subject();
         const createdRenderUnit = {
             unitId: 'u-2',
             type: UniverInstanceType.UNIVER_SHEET,
@@ -109,7 +116,7 @@ describe('render manager service', () => {
             getUnitType: vi.fn(() => UniverInstanceType.UNIVER_SHEET),
             getCurrentUnitOfType: vi.fn(() => null),
         } as any;
-        const themeService = { darkMode$ } as any;
+        const themeService = { currentTheme$, darkMode$ } as any;
 
         const service = new RenderManagerService(injector, instanceService, themeService);
 
@@ -156,6 +163,7 @@ describe('render manager service', () => {
 
     it('deduplicates render dependencies by identifier', () => {
         const darkMode$ = new Subject<boolean>();
+        const currentTheme$ = new Subject();
         const injector = {
             createInstance: vi.fn(() => new Engine()),
         } as unknown as Injector;
@@ -164,7 +172,7 @@ describe('render manager service', () => {
             getUnitType: vi.fn(() => UniverInstanceType.UNIVER_SHEET),
             getCurrentUnitOfType: vi.fn(() => null),
         } as any;
-        const service = new RenderManagerService(injector, instanceService, { darkMode$ } as any);
+        const service = new RenderManagerService(injector, instanceService, { currentTheme$, darkMode$ } as any);
         const token = Symbol('render-dep') as any;
         const otherToken = Symbol('other-render-dep') as any;
         const firstDep = [token, { useClass: class FirstRenderModule {} }] as any;
@@ -189,6 +197,7 @@ describe('render manager service', () => {
 
     it('deduplicates identifier decorators by stable name across module copies', () => {
         const darkMode$ = new Subject<boolean>();
+        const currentTheme$ = new Subject();
         const injector = {
             createInstance: vi.fn(() => new Engine()),
         } as unknown as Injector;
@@ -197,7 +206,7 @@ describe('render manager service', () => {
             getUnitType: vi.fn(() => UniverInstanceType.UNIVER_SHEET),
             getCurrentUnitOfType: vi.fn(() => null),
         } as any;
-        const service = new RenderManagerService(injector, instanceService, { darkMode$ } as any);
+        const service = new RenderManagerService(injector, instanceService, { currentTheme$, darkMode$ } as any);
         const tokenA = Object.assign(() => undefined, { decoratorName: 'univer.sheet.selection-render-service' }) as any;
         const tokenB = Object.assign(() => undefined, { decoratorName: 'univer.sheet.selection-render-service' }) as any;
         const firstDep = [tokenA, { useClass: class FirstRenderModule {} }] as any;

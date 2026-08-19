@@ -245,4 +245,38 @@ describe('DocHeaderFooterController', () => {
 
         controller.dispose();
     });
+
+    it('keeps theme color lookups out of the page render hot path', () => {
+        const { controller, pageRender$, themeService } = createController({ editArea: DocumentEditArea.BODY });
+        const getColorFromTheme = vi.spyOn(themeService, 'getColorFromTheme');
+        vi.spyOn(Rect, 'drawWith').mockImplementation(() => undefined);
+        const theme = themeService.getCurrentTheme();
+        const config = {
+            ctx: createCtx(),
+            pageLeft: 0,
+            pageTop: 0,
+            page: {
+                pageWidth: 200,
+                pageHeight: 300,
+                marginTop: 30,
+                marginBottom: 40,
+            },
+        };
+
+        themeService.setTheme({
+            ...theme,
+            gray: {
+                ...theme.gray,
+                0: '#123456',
+            },
+        });
+        getColorFromTheme.mockClear();
+
+        pageRender$.next(config);
+        pageRender$.next(config);
+
+        expect(getColorFromTheme).not.toHaveBeenCalled();
+
+        controller.dispose();
+    });
 });

@@ -129,15 +129,31 @@ describe('ScrollBar', () => {
         scrollBar.dispose();
     });
 
-    it('uses translucent white for default track colors', () => {
+    it('uses the theme surface color with distinct track opacities', () => {
         const scrollBar = new ScrollBar(viewport);
 
-        expect(scrollBar.horizonScrollTrack?.fill).toBe('rgba(255,255,255,0.5)');
-        expect(scrollBar.horizonScrollTrack?.stroke).toBe('rgba(255,255,255,0.7)');
-        expect(scrollBar.verticalScrollTrack?.fill).toBe('rgba(255,255,255,0.5)');
-        expect(scrollBar.verticalScrollTrack?.stroke).toBe('rgba(255,255,255,0.7)');
-        expect(scrollBar.placeholderBarRect?.fill).toBe('rgba(255,255,255,0.5)');
-        expect(scrollBar.placeholderBarRect?.stroke).toBe('rgba(255,255,255,0.7)');
+        for (const track of [
+            scrollBar.horizonScrollTrack,
+            scrollBar.verticalScrollTrack,
+            scrollBar.placeholderBarRect,
+        ]) {
+            expect(track?.fill).toBe('gray.0');
+            expect(track?.stroke).toBe('gray.0');
+            expect(track?.fillOpacity).toBe(0.5);
+            expect(track?.strokeOpacity).toBe(0.7);
+        }
+
+        scrollBar.dispose();
+    });
+
+    it('does not alter the opacity of custom track colors', () => {
+        const scrollBar = new ScrollBar(viewport, {
+            trackBackgroundColor: 'rgba(1,2,3,0.4)',
+            trackBorderColor: 'rgba(4,5,6,0.6)',
+        });
+
+        expect(scrollBar.horizonScrollTrack?.fillOpacity).toBe(1);
+        expect(scrollBar.horizonScrollTrack?.strokeOpacity).toBe(1);
 
         scrollBar.dispose();
     });

@@ -25,7 +25,8 @@ import { ListItem } from '../dropdown-item';
 import { Rect } from '../rect';
 
 function createShapeCtx() {
-    return {
+    const alphaStack: number[] = [];
+    const ctx = {
         save: vi.fn(),
         restore: vi.fn(),
         transform: vi.fn(),
@@ -54,6 +55,13 @@ function createShapeCtx() {
         shadowOffsetX: 0,
         shadowOffsetY: 0,
     } as any;
+
+    ctx.save.mockImplementation(() => alphaStack.push(ctx.globalAlpha));
+    ctx.restore.mockImplementation(() => {
+        ctx.globalAlpha = alphaStack.pop() ?? 1;
+    });
+
+    return ctx;
 }
 
 describe('basic shape and position helpers', () => {
@@ -139,6 +147,25 @@ describe('basic shape and position helpers', () => {
         expect(ctx.arc).not.toHaveBeenCalled();
         expect(ctx.fill).toHaveBeenCalled();
         expect(ctx.restore).toHaveBeenCalled();
+    });
+
+    it('applies fill and stroke opacity independently', () => {
+        const ctx = createShapeCtx();
+        const paintAlpha: number[] = [];
+        ctx.fill.mockImplementation(() => paintAlpha.push(ctx.globalAlpha));
+        ctx.stroke.mockImplementation(() => paintAlpha.push(ctx.globalAlpha));
+
+        Rect.drawWith(ctx, {
+            width: 80,
+            height: 32,
+            fill: 'gray.0',
+            fillOpacity: 0.5,
+            stroke: 'gray.0',
+            strokeOpacity: 0.7,
+            strokeWidth: 1,
+        });
+
+        expect(paintAlpha).toEqual([0.5, 0.7]);
     });
 
     it('skips non-positive and non-finite stroke widths', () => {

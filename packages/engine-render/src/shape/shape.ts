@@ -50,8 +50,10 @@ export interface IShapeProps extends IObjectFullState, ISize, IOffset, IScale {
     paintFirst?: PaintFirst;
 
     stroke?: Nullable<string | CanvasGradient>;
+    strokeOpacity?: number;
     strokeScaleEnabled?: boolean; // strokeUniform: boolean;
     fill?: Nullable<string | CanvasGradient>;
+    fillOpacity?: number;
     fillAfterStrokeEnabled?: boolean;
     hitStrokeWidth?: number | string;
     strokeLineJoin?: LineJoin;
@@ -79,8 +81,10 @@ export const SHAPE_OBJECT_ARRAY = [
     'globalCompositeOperation',
     'paintFirst',
     'stroke',
+    'strokeOpacity',
     'strokeScaleEnabled',
     'fill',
+    'fillOpacity',
     'fillAfterStrokeEnabled',
     'hitStrokeWidth',
     'strokeLineJoin',
@@ -116,9 +120,13 @@ export abstract class Shape<T extends IShapeProps> extends BaseObject {
 
     private _stroke: Nullable<string | CanvasGradient>;
 
+    private _strokeOpacity?: number;
+
     private _strokeScaleEnabled: boolean = false; // strokeUniform: boolean;
 
     private _fill: Nullable<string | CanvasGradient>;
+
+    private _fillOpacity?: number;
 
     private _fillAfterStrokeEnabled: boolean = false;
 
@@ -184,12 +192,20 @@ export abstract class Shape<T extends IShapeProps> extends BaseObject {
         return this._stroke;
     }
 
+    get strokeOpacity() {
+        return this._strokeOpacity;
+    }
+
     get strokeScaleEnabled() {
         return this._strokeScaleEnabled;
     }
 
     get fill() {
         return this._fill;
+    }
+
+    get fillOpacity() {
+        return this._fillOpacity;
     }
 
     get fillAfterStrokeEnabled() {
@@ -277,6 +293,7 @@ export abstract class Shape<T extends IShapeProps> extends BaseObject {
 
         ctx.save();
         this._setFillStyles(ctx, props);
+        ctx.globalAlpha *= props.fillOpacity ?? 1;
         if (props.fillRule === 'evenodd') {
             ctx.fill('evenodd');
         } else {
@@ -290,7 +307,7 @@ export abstract class Shape<T extends IShapeProps> extends BaseObject {
      * @param {UniverRenderingContext} ctx SheetContext to render on
      */
     private static _renderStroke(ctx: UniverRenderingContext, props: IShapeProps) {
-        const { stroke, strokeWidth, strokeScaleEnabled } = props;
+        const { stroke, strokeWidth } = props;
 
         // let { scaleX, scaleY } = props;
         // const { scaleX = 1, scaleY = 1 } = ctx.getScale();
@@ -306,6 +323,7 @@ export abstract class Shape<T extends IShapeProps> extends BaseObject {
         // }
         // this._setLineDash(ctx);
         this._setStrokeStyles(ctx, props);
+        ctx.globalAlpha *= props.strokeOpacity ?? 1;
 
         ctx.stroke();
         ctx.restore();

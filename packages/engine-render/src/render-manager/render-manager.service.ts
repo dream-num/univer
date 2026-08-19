@@ -39,7 +39,7 @@ import {
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
-import { Subject } from 'rxjs';
+import { merge, Subject } from 'rxjs';
 import { Engine } from '../engine';
 import { Scene } from '../scene';
 import { RenderUnit } from './render-unit';
@@ -109,7 +109,7 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
     ) {
         super();
 
-        this._initDarkModeListener();
+        this._initThemeListener();
     }
 
     override dispose(): void {
@@ -179,8 +179,8 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         return Array.from(this._renderDependencies.get(type) ?? []);
     }
 
-    private _initDarkModeListener(): void {
-        this.disposeWithMe(this._themeService.darkMode$.subscribe(() => {
+    private _initThemeListener(): void {
+        this.disposeWithMe(merge(this._themeService.currentTheme$, this._themeService.darkMode$).subscribe(() => {
             this.getRenderAll().forEach((renderer) => {
                 renderer.components.forEach((component) => {
                     component.makeForceDirty(true);

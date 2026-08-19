@@ -646,14 +646,12 @@ export function splitCustomRangesByIndex(customRanges: ICustomRange[], currentIn
 
     if (matchedCustomRange) {
         customRanges.splice(matchedCustomRangeIndex, 1, {
-            rangeId: matchedCustomRange.rangeId,
-            rangeType: matchedCustomRange.rangeType,
+            ...matchedCustomRange,
             startIndex: matchedCustomRange.startIndex,
             endIndex: currentIndex - 1,
             properties: { ...matchedCustomRange.properties },
         }, {
-            rangeId: matchedCustomRange.rangeId,
-            rangeType: matchedCustomRange.rangeType,
+            ...matchedCustomRange,
             startIndex: currentIndex,
             endIndex: matchedCustomRange.endIndex,
             properties: { ...matchedCustomRange.properties },

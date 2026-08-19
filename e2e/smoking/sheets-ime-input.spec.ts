@@ -51,3 +51,68 @@ test('keeps the IME anchor on the active cell across edits', async ({ page }) =>
 
     expect(anchorPositions[1].y).toBeGreaterThan(anchorPositions[0].y);
 });
+
+test('preserves cell styles after deleting all text and entering new IME text', async ({ page }) => {
+    await page.goto('/sheets/');
+    await page.waitForFunction(() => !!window.univerAPI && !!window.E2EControllerAPI);
+    await page.evaluate(() => window.E2EControllerAPI.loadDefaultSheet());
+
+    const canvas = page.locator(SHEET_MAIN_CANVAS);
+    await expect(canvas).toBeVisible();
+    const canvasBox = await canvas.boundingBox();
+    if (!canvasBox) {
+        throw new Error('Expected the sheet canvas to have a bounding box');
+    }
+
+    await page.mouse.click(canvasBox.x + 200, canvasBox.y + 120);
+    const cell = await page.evaluate(() => {
+        const range = window.univerAPI.getActiveWorkbook().getActiveRange();
+        if (!range) {
+            throw new Error('Expected an active sheet range');
+        }
+
+        range
+            .setValue('A')
+            .setHorizontalAlignment('center')
+            .setVerticalAlignment('middle')
+            .setFontSize(20)
+            .setFontColor('#f05252');
+
+        return range.getA1Notation();
+    });
+
+    await page.keyboard.press('F2');
+    const inputContainer = page.locator(SHEET_EDITOR_INPUT_CONTAINER);
+    await expect.poll(async () => (await inputContainer.boundingBox())?.x).toBeGreaterThanOrEqual(canvasBox.x);
+
+    await page.keyboard.press('Backspace');
+
+    const client = await page.context().newCDPSession(page);
+    await client.send('Input.imeSetComposition', {
+        text: 'xin',
+        selectionStart: 3,
+        selectionEnd: 3,
+        replacementStart: 0,
+        replacementEnd: 0,
+    });
+    await client.send('Input.insertText', { text: '新' });
+    await page.keyboard.press('Enter');
+
+    await expect.poll(() => page.evaluate((a1Notation) => {
+        const range = window.univerAPI.getActiveWorkbook().getActiveSheet().getRange(a1Notation);
+        const style = range.getCellStyleData('cell');
+        return {
+            value: range.getValue(),
+            horizontalAlignment: range.getHorizontalAlignment(),
+            verticalAlignment: range.getVerticalAlignment(),
+            fontSize: style?.fs,
+            fontColor: style?.cl?.rgb,
+        };
+    }, cell)).toEqual({
+        value: '新',
+        horizontalAlignment: 'center',
+        verticalAlignment: 'middle',
+        fontSize: 20,
+        fontColor: '#f05252',
+    });
+});

@@ -31,6 +31,7 @@ import {
     JSONX,
     PositionedObjectLayoutType,
     sequenceExecuteAsync,
+    SHEET_EDITOR_UNITS,
     TextX,
     TextXActionType,
     Tools,
@@ -478,7 +479,7 @@ export const DeleteLeftCommand: ICommand = {
 
         const actualRange = activeRange;
         const { startOffset, collapsed } = actualRange;
-        if (collapsed) {
+        if (collapsed && shouldResetEmptyCenteredParagraphAlignment(docDataModel)) {
             const emptyCenteredParagraph = getEmptyCenteredParagraphAtOffset(body, startOffset);
             if (emptyCenteredParagraph != null) {
                 return resetEmptyCenteredParagraphAlignment(commandService, docDataModel, segmentId ?? '', emptyCenteredParagraph, style);
@@ -701,7 +702,7 @@ export const DeleteRightCommand: ICommand = {
 
         const actualRange = activeRange;
         const { startOffset, endOffset, collapsed } = actualRange;
-        if (collapsed) {
+        if (collapsed && shouldResetEmptyCenteredParagraphAlignment(docDataModel)) {
             const emptyCenteredParagraph = getEmptyCenteredParagraphAtOffset(body, startOffset);
             if (emptyCenteredParagraph != null) {
                 return resetEmptyCenteredParagraphAlignment(commandService, docDataModel, segmentId ?? '', emptyCenteredParagraph, style);
@@ -841,6 +842,10 @@ function getEmptyCenteredParagraphAtOffset(body: IDocumentBody, offset: number) 
             return paragraph;
         }
     }
+}
+
+function shouldResetEmptyCenteredParagraphAlignment(docDataModel: DocumentDataModel) {
+    return !SHEET_EDITOR_UNITS.includes(docDataModel.getUnitId());
 }
 
 function resetEmptyCenteredParagraphAlignment(

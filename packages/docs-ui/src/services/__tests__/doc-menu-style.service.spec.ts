@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { ITextStyle } from '@univerjs/core';
 import {
     CommandService,
     ConfigService,
@@ -84,7 +85,7 @@ function createService(defaultTextColor?: string): DocMenuStyleService {
     return injector.get(DocMenuStyleService);
 }
 
-function createStyleTestBed() {
+function createStyleTestBed(textStyle?: ITextStyle) {
     const injector = new Injector();
     injector.add([ILogService, { useClass: DesktopLogService }]);
     injector.add([IConfigService, { useClass: ConfigService }]);
@@ -106,6 +107,9 @@ function createStyleTestBed() {
             customRanges: [],
             tables: [],
             textRuns: [],
+        },
+        documentStyle: {
+            textStyle,
         },
     }));
     univerInstanceService.setCurrentUnitForType('doc-menu-style');
@@ -154,6 +158,23 @@ describe('DocMenuStyleService', () => {
 
         renderManagerService.editArea = DocumentEditArea.FOOTER;
         expect(service.getDefaultStyle()).toEqual({ ff: 'Arial', fs: 9, cl: { rgb: '#1B1C1F' } });
+    });
+
+    it('uses active document text defaults for the next body input', () => {
+        const { service, renderManagerService } = createStyleTestBed({ fs: 20, cl: { rgb: '#f05252' } });
+
+        renderManagerService.editArea = DocumentEditArea.BODY;
+
+        expect(service.getDefaultStyle()).toEqual({ ff: 'Arial', fs: 20, cl: { rgb: '#f05252' } });
+
+        renderManagerService.editArea = DocumentEditArea.FOOTER;
+        expect(service.getDefaultStyle()).toEqual({ ff: 'Arial', fs: 9, cl: { rgb: '#f05252' } });
+    });
+
+    it('uses active document text defaults before its render is available', () => {
+        const { service } = createStyleTestBed({ fs: 20, cl: { rgb: '#f05252' } });
+
+        expect(service.getDefaultStyle()).toEqual({ ff: 'Arial', fs: 20, cl: { rgb: '#f05252' } });
     });
 
     it('clears cached input style when document selection changes', () => {

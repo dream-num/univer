@@ -22,7 +22,10 @@ import {
     CustomRangeType,
     DataStreamTreeTokenType,
     DeleteDirection,
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     DocumentBlockRangeType,
+    DocumentFlavor,
     HorizontalAlign,
     ICommandService,
     IUniverInstanceService,
@@ -172,10 +175,11 @@ describe('core editing commands', () => {
     let univer: Univer;
     let get: Injector['get'];
     let commandService: ICommandService;
+    let unitId = 'test-doc';
 
     function getBody() {
         const univerInstanceService = get(IUniverInstanceService);
-        return univerInstanceService.getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC)?.getBody();
+        return univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC)?.getBody();
     }
 
     function getDataStream() {
@@ -195,15 +199,17 @@ describe('core editing commands', () => {
     function setActiveSelection(offset: number) {
         const selectionManager = get(DocSelectionManagerService);
         selectionManager.__TEST_ONLY_setCurrentSelection({
-            unitId: 'test-doc',
-            subUnitId: 'test-doc',
+            unitId,
+            subUnitId: unitId,
         });
         selectionManager.__TEST_ONLY_add([{ startOffset: offset, endOffset: offset, collapsed: true, isActive: true, segmentId: '', style: null as never }]);
     }
 
     function mockSkeleton() {
         const skeletonManager = get(DocSkeletonManagerService) as unknown as { getSkeleton: () => unknown };
-        skeletonManager.getSkeleton = () => ({});
+        skeletonManager.getSkeleton = () => ({
+            findNodeByCharIndex: () => null,
+        });
     }
 
     function registerDeleteKeyCommands() {
@@ -215,6 +221,7 @@ describe('core editing commands', () => {
     }
 
     beforeEach(() => {
+        unitId = 'test-doc';
         const testBed = createCommandTestBed(getDocumentData());
         univer = testBed.univer;
         get = testBed.get;
@@ -331,9 +338,11 @@ describe('core editing commands', () => {
         expect(getBody()?.paragraphs?.[0].paragraphStyle?.horizontalAlign).toBe(HorizontalAlign.LEFT);
     });
 
-    it('resets an empty centered paragraph to left alignment on a second backspace', async () => {
+    it('resets an empty centered paragraph to left alignment in a traditional document', async () => {
         univer.dispose();
-        const testBed = createCommandTestBed(getCenteredEmptyParagraphDocumentData());
+        const documentData = getCenteredEmptyParagraphDocumentData();
+        documentData.documentStyle.documentFlavor = DocumentFlavor.TRADITIONAL;
+        const testBed = createCommandTestBed(documentData);
         univer = testBed.univer;
         get = testBed.get;
         commandService = get(ICommandService);
@@ -343,6 +352,49 @@ describe('core editing commands', () => {
 
         await commandService.executeCommand(DeleteLeftCommand.id);
 
+        await awaitTime(0);
+
+        expect(getDataStream()).toBe('\r\n');
+        expect(getBody()?.paragraphs?.[0].paragraphStyle?.horizontalAlign).toBe(HorizontalAlign.LEFT);
+    });
+
+    it.each([
+        [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DeleteLeftCommand.id],
+        [DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DeleteRightCommand.id],
+    ])('keeps center alignment in Sheet editor %s', async (editorUnitId, commandId) => {
+        univer.dispose();
+        const documentData = getCenteredEmptyParagraphDocumentData();
+        documentData.id = editorUnitId;
+        documentData.documentStyle.documentFlavor = DocumentFlavor.UNSPECIFIED;
+        unitId = editorUnitId;
+        const testBed = createCommandTestBed(documentData);
+        univer = testBed.univer;
+        get = testBed.get;
+        commandService = get(ICommandService);
+        registerDeleteKeyCommands();
+        mockSkeleton();
+        setActiveSelection(0);
+
+        await commandService.executeCommand(commandId);
+        await awaitTime(0);
+
+        expect(getDataStream()).toBe('\r\n');
+        expect(getBody()?.paragraphs?.[0].paragraphStyle?.horizontalAlign).toBe(HorizontalAlign.CENTER);
+    });
+
+    it('resets center alignment in a non-Sheet unspecified document', async () => {
+        univer.dispose();
+        const documentData = getCenteredEmptyParagraphDocumentData();
+        documentData.documentStyle.documentFlavor = DocumentFlavor.UNSPECIFIED;
+        const testBed = createCommandTestBed(documentData);
+        univer = testBed.univer;
+        get = testBed.get;
+        commandService = get(ICommandService);
+        registerDeleteKeyCommands();
+        mockSkeleton();
+        setActiveSelection(0);
+
+        await commandService.executeCommand(DeleteLeftCommand.id);
         await awaitTime(0);
 
         expect(getDataStream()).toBe('\r\n');

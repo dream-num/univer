@@ -48,6 +48,8 @@ describe('sheet util helpers', () => {
             }],
         });
         expect(documentModel.getSnapshot().documentStyle).toMatchObject({
+            textStyle: { ff: 'Inter', fs: 12, va: BaselineOffset.SUPERSCRIPT },
+            defaultParagraphStyle: { horizontalAlign: HorizontalAlign.CENTER },
             marginTop: 1,
             marginRight: 4,
             marginBottom: 3,

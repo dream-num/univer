@@ -129,7 +129,6 @@ export function ParagraphSettingMenuFactory(accessor: IAccessor): IMenuButtonIte
     return {
         id: DocParagraphSettingPanelOperation.id,
         type: MenuItemType.BUTTON,
-        icon: 'MenuIcon',
         title: 'docs-ui.doc.menu.paragraphSetting',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };

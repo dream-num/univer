@@ -162,6 +162,7 @@ describe('resolveDocsCustomBlockRenderViewport', () => {
         })).toEqual(expect.objectContaining({
             contentHeight: 720,
             height: 720,
+            visibleCanvasHeight: 900,
             viewportHeight: 720,
         }));
 
@@ -182,6 +183,7 @@ describe('resolveDocsCustomBlockRenderViewport', () => {
         })).toEqual(expect.objectContaining({
             contentHeight: 1200,
             height: 1200,
+            visibleCanvasHeight: 900,
             viewportHeight: 900,
         }));
     });

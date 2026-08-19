@@ -157,6 +157,48 @@ describe('apply method', () => {
         expect(doc.paragraphs?.[0]).not.toBe(actions[0].body?.paragraphs?.[0]);
     });
 
+    it('preserves whole-entity metadata when inserting inside a custom range', () => {
+        const doc: IDocumentBody = {
+            dataStream: 'formula\r\n',
+            customRanges: [{
+                startIndex: 0,
+                endIndex: 6,
+                rangeId: 'formula-range',
+                rangeType: CustomRangeType.CUSTOM,
+                wholeEntity: true,
+                properties: { kind: 'formula' },
+            }],
+        };
+
+        TextX.apply(doc, [
+            { t: TextXActionType.RETAIN, len: 3 },
+            {
+                t: TextXActionType.INSERT,
+                len: 1,
+                body: {
+                    dataStream: 'X',
+                    customRanges: [{
+                        startIndex: 0,
+                        endIndex: 0,
+                        rangeId: 'formula-range',
+                        rangeType: CustomRangeType.CUSTOM,
+                        wholeEntity: true,
+                        properties: { kind: 'formula' },
+                    }],
+                },
+            },
+        ]);
+
+        expect(doc.customRanges).toEqual([{
+            startIndex: 0,
+            endIndex: 7,
+            rangeId: 'formula-range',
+            rangeType: CustomRangeType.CUSTOM,
+            wholeEntity: true,
+            properties: { kind: 'formula' },
+        }]);
+    });
+
     it('should get the same result when apply two actions by order OR composed first case 1', () => {
         const actionsA: TextXAction[] = [
             {

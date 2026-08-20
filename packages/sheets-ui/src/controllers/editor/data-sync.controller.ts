@@ -360,7 +360,9 @@ export class EditorDataSyncController extends Disposable {
             snapshot.documentStyle.renderConfig = renderConfig;
         }
         const position = isFormulaBar ? this._formulaEditorManagerService.getPosition() : null;
-        if (isFormulaBar && position) {
+        // A zero box means "not laid out yet" or "not on screen", not a real page width:
+        // keeping it would give doc layout a zero-width column.
+        if (isFormulaBar && position && position.width > 0) {
             const width = position.width;
             snapshot.documentStyle.pageSize = {
                 width,

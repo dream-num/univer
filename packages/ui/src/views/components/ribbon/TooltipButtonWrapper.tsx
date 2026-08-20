@@ -201,10 +201,11 @@ export function DropdownWrapper(props: Omit<Partial<IDropdownProps>, 'overlay'> 
     );
 }
 
-export function DropdownMenuLabel({ icon, value, option, onOptionSelect }: {
+export function DropdownMenuLabel({ icon, value, option, preserveStrokeWidth, onOptionSelect }: {
     icon?: IMenuItem['icon'];
     value?: string | number;
     option: IValueOption;
+    preserveStrokeWidth?: boolean;
     onOptionSelect?: (option: IValueOption) => void;
 }) {
     const onChange = (v: string | number) => {
@@ -220,6 +221,7 @@ export function DropdownMenuLabel({ icon, value, option, onOptionSelect }: {
                 <CustomLabel
                     className="univer-text-sm"
                     icon={icon}
+                    preserveStrokeWidth={preserveStrokeWidth}
                     value$={option.value$}
                     value={option.value}
                     label={option.label}
@@ -229,7 +231,10 @@ export function DropdownMenuLabel({ icon, value, option, onOptionSelect }: {
             {hasCheckMark && (
                 <span className="univer-ml-auto univer-flex univer-w-4 univer-flex-shrink-0 univer-justify-end">
                     {selected && (
-                        <CheckMarkIcon className="univer-text-primary-600" />
+                        <CheckMarkIcon
+                            className="univer-text-primary-600"
+                            preserveStrokeWidth={preserveStrokeWidth}
+                        />
                     )}
                 </span>
             )}
@@ -248,6 +253,7 @@ export function DropdownMenuWrapper({
     options,
     children,
     disabled,
+    preserveStrokeWidth,
     onOptionSelect,
 }: {
     menuId: string;
@@ -256,6 +262,7 @@ export function DropdownMenuWrapper({
     options: IValueOption[];
     children: ReactNode;
     disabled?: boolean;
+    preserveStrokeWidth?: boolean;
     onOptionSelect: (option: IValueOption) => void;
 }) {
     const { dropdownVisible, setDropdownVisible } = useContext(TooltipWrapperContext);
@@ -325,6 +332,7 @@ export function DropdownMenuWrapper({
                         key={getOptionKey(option)}
                         value={value}
                         option={option}
+                        preserveStrokeWidth={preserveStrokeWidth}
                         onOptionSelect={handleOptionSelect}
                     />
                 ))}
@@ -352,6 +360,7 @@ export function DropdownMenuWrapper({
                     icon={option.icon}
                     value={value}
                     option={option}
+                    preserveStrokeWidth={preserveStrokeWidth}
                     onOptionSelect={handleOptionSelect}
                 />
             ),
@@ -386,6 +395,7 @@ export function DropdownMenuWrapper({
                     <DropdownMenuLabel
                         icon={icon}
                         value={value}
+                        preserveStrokeWidth={preserveStrokeWidth}
                         option={{
                             label: {
                                 name: title,
@@ -434,6 +444,7 @@ export function DropdownMenuWrapper({
                         <DropdownMenuLabel
                             icon={icon}
                             value={value}
+                            preserveStrokeWidth={preserveStrokeWidth}
                             option={{
                                 label: {
                                     name: title,

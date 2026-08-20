@@ -32,6 +32,7 @@ export interface IIconProps {
     className?: string;
     style?: CSSProperties;
     extend?: IIconExtendProps;
+    preserveStrokeWidth?: boolean;
     onClick?: MouseEventHandler<SVGSVGElement>;
 }
 

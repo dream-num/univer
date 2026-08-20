@@ -37,6 +37,7 @@ type IToolbarItemProps = IDisplayMenuItem<IMenuItem> & {
     iconSize?: number;
     iconColor?: string;
     fullWidth?: boolean;
+    preserveStrokeWidth?: boolean;
 };
 
 const toolbarDisabledClassName = 'univer-pointer-events-none univer-cursor-not-allowed univer-text-gray-300 dark:!univer-text-gray-600';
@@ -201,7 +202,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
         commandService.executeCommand(commandId, params);
     };
 
-    const { tooltip, shortcut, icon, title, label, id, commandId, type, slot, params, grid, large, showLabel, iconSize, iconColor, fullWidth } = props;
+    const { tooltip, shortcut, icon, title, label, id, commandId, type, slot, params, grid, large, showLabel, iconSize, iconColor, fullWidth, preserveStrokeWidth } = props;
     const gridLabel = title ?? tooltip;
 
     const shortcutDisplay = useToolbarShortcutDisplay({ id, commandId, shortcut });
@@ -288,6 +289,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                         <CustomLabel
                             icon={iconToDisplay}
                             iconSize={iconSize}
+                            preserveStrokeWidth={preserveStrokeWidth}
                             title={titleToDisplay}
                             value={iconColor ?? value}
                             label={label}
@@ -301,6 +303,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                         value={value}
                         options={options}
                         disabled={disabled}
+                        preserveStrokeWidth={preserveStrokeWidth}
                         onOptionSelect={handleSelect}
                     >
                         <div
@@ -310,7 +313,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                             })}
                             data-disabled={disabled}
                         >
-                            <MoreDownIcon />
+                            <MoreDownIcon preserveStrokeWidth={preserveStrokeWidth} />
                         </div>
                     </DropdownMenuWrapper>
                 </div>
@@ -323,6 +326,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                     value={value}
                     options={options}
                     disabled={disabled}
+                    preserveStrokeWidth={preserveStrokeWidth}
                     onOptionSelect={handleSelect}
                 >
                     <div
@@ -337,7 +341,11 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                         {grid && large
                             ? (
                                 <>
-                                    <CustomLabel icon={iconToDisplay} iconSize={iconSize} />
+                                    <CustomLabel
+                                        icon={iconToDisplay}
+                                        iconSize={iconSize}
+                                        preserveStrokeWidth={preserveStrokeWidth}
+                                    />
                                     <div
                                         className={clsx(
                                             toolbarSelectorTriggerVariants({ disabled }),
@@ -350,7 +358,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                                             label={label}
                                             onChange={handleSelectionsValueChange}
                                         />
-                                        <MoreDownIcon />
+                                        <MoreDownIcon preserveStrokeWidth={preserveStrokeWidth} />
                                     </div>
                                 </>
                             )
@@ -359,6 +367,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                                     <CustomLabel
                                         icon={iconToDisplay}
                                         iconSize={iconSize}
+                                        preserveStrokeWidth={preserveStrokeWidth}
                                         title={titleToDisplay}
                                         value={value}
                                         label={label}
@@ -369,7 +378,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                                             'univer-ml-auto rtl:univer-ml-0 rtl:univer-mr-auto': grid && !large && !icon,
                                         })}
                                     >
-                                        <MoreDownIcon />
+                                        <MoreDownIcon preserveStrokeWidth={preserveStrokeWidth} />
                                     </div>
                                 </>
                             )}
@@ -437,7 +446,14 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                 onDoubleClick={() => props.subId && executeCommand(props.subId)}
             >
                 {icon
-                    ? <CustomLabel icon={icon} iconSize={iconSize} title={grid && (large || showLabel) ? gridLabel : undefined} />
+                    ? (
+                        <CustomLabel
+                            icon={icon}
+                            iconSize={iconSize}
+                            preserveStrokeWidth={preserveStrokeWidth}
+                            title={grid && (large || showLabel) ? gridLabel : undefined}
+                        />
+                    )
                     : <CustomLabel title={title!} />}
             </ToolbarButton>
         );

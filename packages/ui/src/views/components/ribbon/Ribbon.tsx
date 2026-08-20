@@ -200,6 +200,7 @@ export function Ribbon(props: IRibbonProps) {
                                     <ToolbarItem
                                         key={child.key}
                                         {...child.item}
+                                        preserveStrokeWidth
                                         ref={(ref) => {
                                             if (ref?.el) {
                                                 toolbarItemRefs.current[child.key] = {
@@ -334,7 +335,13 @@ export function Ribbon(props: IRibbonProps) {
                                         "
                                     >
                                         {groupItem.children && groupItem.children?.map((child) => (
-                                            child.item && <ToolbarItem key={child.key} {...child.item} />
+                                            child.item && (
+                                                <ToolbarItem
+                                                    key={child.key}
+                                                    {...child.item}
+                                                    preserveStrokeWidth
+                                                />
+                                            )
                                         ))}
                                     </div>
                                 </Fragment>
@@ -366,10 +373,22 @@ export function Ribbon(props: IRibbonProps) {
                                                         <div className="univer-flex univer-flex-wrap univer-gap-2">
                                                             {groupItem.children
                                                                 ? groupItem.children?.map((child) => (
-                                                                    child.item && <ToolbarItem key={child.key} {...child.item} />
+                                                                    child.item && (
+                                                                        <ToolbarItem
+                                                                            key={child.key}
+                                                                            {...child.item}
+                                                                            preserveStrokeWidth
+                                                                        />
+                                                                    )
                                                                 ))
                                                                 : (
-                                                                    groupItem.item && <ToolbarItem key={groupItem.key} {...groupItem.item} />
+                                                                    groupItem.item && (
+                                                                        <ToolbarItem
+                                                                            key={groupItem.key}
+                                                                            {...groupItem.item}
+                                                                            preserveStrokeWidth
+                                                                        />
+                                                                    )
                                                                 )}
                                                         </div>
                                                     </div>
@@ -381,7 +400,7 @@ export function Ribbon(props: IRibbonProps) {
                                             type="button"
                                             className={toolbarButtonClassName}
                                         >
-                                            <MoreVerticalIcon />
+                                            <MoreVerticalIcon preserveStrokeWidth />
                                         </button>
                                     </Dropdown>
                                 </div>

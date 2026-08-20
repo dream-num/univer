@@ -118,12 +118,102 @@ import { CellPopup } from '../views/CellPopup';
 import { DEFINED_NAME_CONTAINER } from '../views/defined-name/component-name';
 import { DefinedNameContainer } from '../views/defined-name/DefinedNameContainer';
 import { dropdownMap } from '../views/dropdown';
-import { MENU_ITEM_FROZEN_COMPONENT, MenuItemFrozen } from '../views/menu-item-frozen/index';
-import { MENU_ITEM_INPUT_COMPONENT, MenuItemInput } from '../views/menu-item-input/index';
-import { SheetPermissionDialog, SheetPermissionPanel, SheetPermissionUserDialog } from '../views/permission';
+import { MENU_ITEM_FROZEN_COMPONENT } from '../views/menu-item-frozen/interface';
+import { MenuItemFrozen } from '../views/menu-item-frozen/MenuItemFrozen';
+import { MENU_ITEM_INPUT_COMPONENT } from '../views/menu-item-input/interface';
+import { MenuItemInput } from '../views/menu-item-input/MenuItemInput';
 import { AlertDialog } from '../views/permission/AlertDialog';
 import { UNIVER_SHEET_PERMISSION_ALERT_DIALOG } from '../views/permission/error-msg-dialog/interface';
+import { SheetPermissionDialog } from '../views/permission/SheetPermissionDialog';
+import { SheetPermissionPanel } from '../views/permission/SheetPermissionPanel';
+import { SheetPermissionUserDialog } from '../views/permission/SheetPermissionUserDialog';
 import { SHEET_ZOOM_INPUT_COMPONENT, SheetZoomInput } from '../views/sheet-slider/SheetZoomInput';
+
+const sheetUiIcons = {
+    AdjustHeightDoubleIcon,
+    AdjustWidthDoubleIcon,
+    AddImageIcon,
+    AlignBottomIcon,
+    AlignTopIcon,
+    AllBorderIcon,
+    AutoHeightDoubleIcon,
+    AutoWidthDoubleIcon,
+    AutowrapIcon,
+    BackSlashDoubleIcon,
+    BoldIcon,
+    BrushIcon,
+    CancelFreezeIcon,
+    CancelMergeIcon,
+    CheckMarkIcon,
+    ClearFormatDoubleIcon,
+    CodeIcon,
+    ConvertToNumberIcon,
+    CopyDoubleIcon,
+    CutIcon,
+    DeleteCellShiftLeftDoubleIcon,
+    DeleteCellShiftUpDoubleIcon,
+    DeleteColumnDoubleIcon,
+    DeleteIcon,
+    DeleteRowDoubleIcon,
+    DownBorderDoubleIcon,
+    DownloadImageIcon,
+    EyeIcon,
+    FontColorDoubleIcon,
+    FontSizeIncreaseIcon,
+    FontSizeReduceIcon,
+    FreezeColumnIcon,
+    FreezeRowIcon,
+    FreezeToSelectedIcon,
+    HideDoubleIcon,
+    HideGridlinesIcon,
+    HorizontalBorderDoubleIcon,
+    HorizontalMergeIcon,
+    HorizontallyIcon,
+    InnerBorderDoubleIcon,
+    InsertCellDownDoubleIcon,
+    InsertCellShiftRightDoubleIcon,
+    InsertDoubleIcon,
+    InsertRowAboveDoubleIcon,
+    InsertRowBelowDoubleIcon,
+    ItalicIcon,
+    LeftBorderDoubleIcon,
+    LeftDoubleDiagonalDoubleIcon,
+    LeftInsertColumnDoubleIcon,
+    LeftJustifyingIcon,
+    LeftRotationFortyFiveDegreesIcon,
+    LeftRotationNinetyDegreesIcon,
+    LeftTridiagonalDoubleIcon,
+    LockIcon,
+    MergeAllIcon,
+    NoBorderIcon,
+    NoColorDoubleIcon,
+    NoRotationIcon,
+    OuterBorderDoubleIcon,
+    OverflowIcon,
+    PaintBucketDoubleIcon,
+    PasteSpecialDoubleIcon,
+    ProtectIcon,
+    ReduceDoubleIcon,
+    RightBorderDoubleIcon,
+    RightDoubleDiagonalDoubleIcon,
+    RightInsertColumnDoubleIcon,
+    RightJustifyingIcon,
+    RightRotationFortyFiveDegreesIcon,
+    RightRotationNinetyDegreesIcon,
+    ShrinkToFitIcon,
+    SlashDoubleIcon,
+    StrikethroughIcon,
+    SubscriptIcon,
+    SuperscriptIcon,
+    TruncationIcon,
+    UnderlineIcon,
+    UpBorderDoubleIcon,
+    VerticalBorderDoubleIcon,
+    VerticalCenterIcon,
+    VerticalIntegrationIcon,
+    VerticalTextIcon,
+    WriteIcon,
+};
 
 export class ComponentsController extends Disposable {
     constructor(
@@ -134,7 +224,6 @@ export class ComponentsController extends Disposable {
         super();
 
         this._registerComponents();
-        this._registerParts();
         this._registerIcons();
     }
 
@@ -166,114 +255,20 @@ export class ComponentsController extends Disposable {
                 })
             );
         }
-    }
-
-    private _registerParts(): void {
-        const componentManager = this._componentManager;
 
         // init custom components
-        this.disposeWithMe(componentManager.register(MENU_ITEM_INPUT_COMPONENT, MenuItemInput));
-        this.disposeWithMe(componentManager.register(MENU_ITEM_FROZEN_COMPONENT, MenuItemFrozen));
-        this.disposeWithMe(componentManager.register(SHEET_ZOOM_INPUT_COMPONENT, SheetZoomInput));
-        this.disposeWithMe(componentManager.register(BORDER_PANEL_COMPONENT, BorderPanel));
-        this.disposeWithMe(componentManager.register(DEFINED_NAME_CONTAINER, DefinedNameContainer));
-        this.disposeWithMe(componentManager.register(CELL_POPUP_COMPONENT_KEY, CellPopup));
+        this.disposeWithMe(this._componentManager.register(MENU_ITEM_INPUT_COMPONENT, MenuItemInput));
+        this.disposeWithMe(this._componentManager.register(MENU_ITEM_FROZEN_COMPONENT, MenuItemFrozen));
+        this.disposeWithMe(this._componentManager.register(SHEET_ZOOM_INPUT_COMPONENT, SheetZoomInput));
+        this.disposeWithMe(this._componentManager.register(BORDER_PANEL_COMPONENT, BorderPanel));
+        this.disposeWithMe(this._componentManager.register(DEFINED_NAME_CONTAINER, DefinedNameContainer));
+        this.disposeWithMe(this._componentManager.register(CELL_POPUP_COMPONENT_KEY, CellPopup));
         Object.values(dropdownMap).forEach((component) => {
-            this.disposeWithMe(componentManager.register(component.componentKey, component));
+            this.disposeWithMe(this._componentManager.register(component.componentKey, component));
         });
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _registerIcons(): void {
-        this.disposeWithMe(this._iconManager.register({
-            ProtectIcon,
-            DeleteIcon,
-            WriteIcon,
-            CheckMarkIcon,
-            LockIcon,
-        }));
-
-        this.disposeWithMe(this._iconManager.register({
-            AdjustHeightDoubleIcon,
-            AdjustWidthDoubleIcon,
-            AddImageIcon,
-            AlignBottomIcon,
-            AlignTopIcon,
-            AllBorderIcon,
-            AutoHeightDoubleIcon,
-            AutoWidthDoubleIcon,
-            AutowrapIcon,
-            BackSlashDoubleIcon,
-            BoldIcon,
-            BrushIcon,
-            CancelFreezeIcon,
-            CancelMergeIcon,
-            ClearFormatDoubleIcon,
-            CodeIcon,
-            ConvertToNumberIcon,
-            CopyDoubleIcon,
-            CutIcon,
-            DeleteCellShiftLeftDoubleIcon,
-            DeleteCellShiftUpDoubleIcon,
-            DeleteColumnDoubleIcon,
-            DeleteRowDoubleIcon,
-            DownBorderDoubleIcon,
-            DownloadImageIcon,
-            EyeIcon,
-            FontColorDoubleIcon,
-            FontSizeIncreaseIcon,
-            FontSizeReduceIcon,
-            FreezeColumnIcon,
-            FreezeRowIcon,
-            FreezeToSelectedIcon,
-            HideDoubleIcon,
-            HideGridlinesIcon,
-            HorizontalBorderDoubleIcon,
-            HorizontalMergeIcon,
-            HorizontallyIcon,
-            InnerBorderDoubleIcon,
-            InsertCellDownDoubleIcon,
-            InsertCellShiftRightDoubleIcon,
-            InsertDoubleIcon,
-            InsertRowAboveDoubleIcon,
-            InsertRowBelowDoubleIcon,
-            ItalicIcon,
-            LeftBorderDoubleIcon,
-            LeftDoubleDiagonalDoubleIcon,
-            LeftInsertColumnDoubleIcon,
-            LeftJustifyingIcon,
-            LeftRotationFortyFiveDegreesIcon,
-            LeftRotationNinetyDegreesIcon,
-            LeftTridiagonalDoubleIcon,
-            LockIcon,
-            MergeAllIcon,
-            NoBorderIcon,
-            NoColorDoubleIcon,
-            NoRotationIcon,
-            OuterBorderDoubleIcon,
-            OverflowIcon,
-            PaintBucketDoubleIcon,
-            PasteSpecialDoubleIcon,
-            ProtectIcon,
-            ReduceDoubleIcon,
-            RightBorderDoubleIcon,
-            RightDoubleDiagonalDoubleIcon,
-            RightInsertColumnDoubleIcon,
-            RightJustifyingIcon,
-            RightRotationFortyFiveDegreesIcon,
-            RightRotationNinetyDegreesIcon,
-            ShrinkToFitIcon,
-            SlashDoubleIcon,
-            StrikethroughIcon,
-            SubscriptIcon,
-            SuperscriptIcon,
-            TruncationIcon,
-            UnderlineIcon,
-            UpBorderDoubleIcon,
-            VerticalBorderDoubleIcon,
-            VerticalCenterIcon,
-            VerticalIntegrationIcon,
-            VerticalTextIcon,
-        }));
+        this.disposeWithMe(this._iconManager.register(sheetUiIcons));
     }
 }

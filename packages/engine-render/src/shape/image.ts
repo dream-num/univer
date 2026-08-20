@@ -272,6 +272,10 @@ export class Image extends Shape<IImageProps> {
         return this._native;
     }
 
+    isSourceLoaded(): boolean {
+        return this._native?.complete === true && this._native.naturalWidth > 0 && this._native.naturalHeight > 0;
+    }
+
     getNativeSize() {
         if (this._native == null) {
             return { width: this.width, height: this.height };

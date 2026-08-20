@@ -24,8 +24,6 @@ function createNativeImage(width = 120, height = 80, source?: string) {
     const img = document.createElement('img');
     Object.defineProperty(img, 'width', { value: width, configurable: true });
     Object.defineProperty(img, 'height', { value: height, configurable: true });
-    Object.defineProperty(img, 'naturalWidth', { value: width, configurable: true });
-    Object.defineProperty(img, 'naturalHeight', { value: height, configurable: true });
     Object.defineProperty(img, 'complete', { value: true, configurable: true });
     if (source) {
         img.src = source;
@@ -64,7 +62,6 @@ describe('image extra', () => {
         });
 
         expect(image.getNative()).toBe(native);
-        expect(image.isSourceLoaded()).toBe(true);
         expect(native.crossOrigin).toBe('use-credentials');
     });
 

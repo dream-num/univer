@@ -27,11 +27,25 @@ export const SheetsThreadCommentCell = () => {
     const sheetsThreadCommentPopupService = useDependency(SheetsThreadCommentPopupService);
     const activePopup = useObservable(sheetsThreadCommentPopupService.activePopup$);
     const sheetThreadCommentModel = useDependency(SheetsThreadCommentModel);
+    const getRootId = () => {
+        if (!activePopup) {
+            return undefined;
+        }
+
+        const { unitId, subUnitId, row, col, commentId } = activePopup;
+        const activeComment = commentId
+            ? sheetThreadCommentModel.getAllByLocation(unitId, subUnitId, row, col).find((comment) => comment.id === commentId)
+            : undefined;
+
+        return activeComment && !activeComment.resolved
+            ? activeComment.id
+            : sheetThreadCommentModel.getByLocation(unitId, subUnitId, row, col);
+    };
     const rootId = useObservable(
         activePopup
             ? () => sheetThreadCommentModel.commentUpdate$.pipe(
-                map(() => sheetThreadCommentModel.getByLocation(activePopup.unitId, activePopup.subUnitId, activePopup.row, activePopup.col)),
-                startWith(sheetThreadCommentModel.getByLocation(activePopup.unitId, activePopup.subUnitId, activePopup.row, activePopup.col))
+                map(() => getRootId()),
+                startWith(getRootId())
             )
             : null,
         undefined,

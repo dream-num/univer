@@ -1,6 +1,8 @@
 import type { Univer } from '@univerjs/core';
 import type { FUniver } from '@univerjs/core/facade';
+import type { IBoundRectNoAngle, IScrollRenderInfo } from '@univerjs/engine-render';
 import { awaitTime, Disposable, DocumentFlavor, Inject, IUniverInstanceService, ThemeService, UniverInstanceType } from '@univerjs/core';
+import { scrollAndClearCanvas, UniverRenderingContext } from '@univerjs/engine-render';
 import { DEFAULT_WORKBOOK_DATA_DEMO, DEFAULT_WORKBOOK_DATA_DEMO_DEFAULT_STYLE } from '@univerjs/mockdata';
 import { getDefaultDocData } from './data/default-doc';
 import { getDefaultWorkbookData } from './data/default-sheet';
@@ -21,6 +23,12 @@ export interface IE2EControllerAPI {
     setDarkMode(darkMode: boolean): void;
     disposeUniver(): Promise<void>;
     disposeCurrSheetUnit(disposeTimeout?: number): Promise<void>;
+    scrollAndClearCanvas(
+        canvas: HTMLCanvasElement,
+        pixelRatio: number,
+        scrollRenderInfos: IScrollRenderInfo[],
+        dirtyBounds: IBoundRectNoAngle[]
+    ): void;
 }
 
 declare global {
@@ -62,7 +70,23 @@ export class E2EController extends Disposable {
             loadDefaultDoc: (loadTimeout) => this._loadDefaultDoc(loadTimeout),
             loadDocLayoutFixture: (documentFlavor, loadTimeout) => this._loadDocLayoutFixture(documentFlavor, loadTimeout),
             disposeUniver: () => this._disposeUniver(),
+            scrollAndClearCanvas: (canvas, pixelRatio, scrollRenderInfos, dirtyBounds) =>
+                this._scrollAndClearCanvas(canvas, pixelRatio, scrollRenderInfos, dirtyBounds),
         };
+    }
+
+    private _scrollAndClearCanvas(
+        canvas: HTMLCanvasElement,
+        pixelRatio: number,
+        scrollRenderInfos: IScrollRenderInfo[],
+        dirtyBounds: IBoundRectNoAngle[]
+    ): void {
+        const nativeContext = canvas.getContext('2d');
+        if (nativeContext == null) {
+            throw new Error('Canvas does not have a 2D context.');
+        }
+
+        scrollAndClearCanvas(new UniverRenderingContext(nativeContext), pixelRatio, scrollRenderInfos, dirtyBounds);
     }
 
     private _setDarkMode(darkMode: boolean): void {

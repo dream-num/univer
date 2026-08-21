@@ -341,6 +341,7 @@ export class EditorDataSyncController extends Disposable {
         }
 
         const isFormulaBar = snapshot.id === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY;
+        const previousPageWidth = snapshot.documentStyle?.pageSize?.width;
         if (isFormulaBar) {
             snapshot.documentStyle = {
                 ...formulaEditorStyle,
@@ -360,14 +361,15 @@ export class EditorDataSyncController extends Disposable {
             snapshot.documentStyle.renderConfig = renderConfig;
         }
         const position = isFormulaBar ? this._formulaEditorManagerService.getPosition() : null;
-        // A zero box means "not laid out yet" or "not on screen", not a real page width:
-        // keeping it would give doc layout a zero-width column.
-        if (isFormulaBar && position && position.width > 0) {
-            const width = position.width;
-            snapshot.documentStyle.pageSize = {
-                width,
-                height: Infinity,
-            };
+        if (isFormulaBar && position) {
+            // A non-positive width means the formula bar is not laid out, so keep the last valid width.
+            const width = position.width > 0 ? position.width : previousPageWidth;
+            if (width != null && width > 0) {
+                snapshot.documentStyle.pageSize = {
+                    width,
+                    height: Infinity,
+                };
+            }
         }
 
         const isFormula = (snapshot.body?.dataStream ?? '').startsWith('=');

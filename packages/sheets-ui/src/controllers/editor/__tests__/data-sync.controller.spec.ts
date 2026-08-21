@@ -132,6 +132,7 @@ describe('EditorDataSyncController', () => {
         const { controller } = createController({ formulaBarPosition: { width: 0, height: 28 } });
         const formulaBarSnapshot: IDocumentData = {
             id: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+            documentStyle: {},
             body: {
                 dataStream: 'text\r\n',
             },
@@ -146,6 +147,7 @@ describe('EditorDataSyncController', () => {
         const { controller } = createController({ formulaBarPosition: { width: 320, height: 28 } });
         const formulaBarSnapshot: IDocumentData = {
             id: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+            documentStyle: {},
             body: {
                 dataStream: 'text\r\n',
             },
@@ -154,6 +156,24 @@ describe('EditorDataSyncController', () => {
         checkAndSetRenderStyleConfig(controller, formulaBarSnapshot);
 
         expect(formulaBarSnapshot.documentStyle?.pageSize?.width).toBe(320);
+    });
+
+    it('keeps the previous formula bar width when the latest position has zero width', () => {
+        const formulaBarPosition = { width: 320, height: 28 };
+        const { controller } = createController({ formulaBarPosition });
+        const formulaBarSnapshot: IDocumentData = {
+            id: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+            documentStyle: {},
+            body: {
+                dataStream: 'text\r\n',
+            },
+        };
+
+        checkAndSetRenderStyleConfig(controller, formulaBarSnapshot);
+        formulaBarPosition.width = 0;
+        checkAndSetRenderStyleConfig(controller, formulaBarSnapshot);
+
+        expect(formulaBarSnapshot.documentStyle.pageSize?.width).toBe(320);
     });
 
     it('refreshes the current edit cell when set-values updates the edited cell', () => {

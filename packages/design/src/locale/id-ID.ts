@@ -20,6 +20,9 @@ const locale: typeof enUS = {
     design: {
         Accessibility: {
             closeBadge: 'Tutup lencana',
+            close: 'Tutup',
+            previous: 'Sebelumnya',
+            next: 'Berikutnya',
             imageGallery: 'Galeri gambar',
             image: 'Gambar {0} dari {1}',
             zoomIn: 'Perbesar',

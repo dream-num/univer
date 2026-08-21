@@ -20,6 +20,9 @@ const locale: typeof enUS = {
     design: {
         Accessibility: {
             closeBadge: 'بستن نشان',
+            close: 'بستن',
+            previous: 'قبلی',
+            next: 'بعدی',
             imageGallery: 'گالری تصاویر',
             image: 'تصویر {0} از {1}',
             zoomIn: 'بزرگ‌نمایی',

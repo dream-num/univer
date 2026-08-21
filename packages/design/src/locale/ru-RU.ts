@@ -20,6 +20,9 @@ const locale: typeof enUS = {
     design: {
         Accessibility: {
             closeBadge: 'Закрыть метку',
+            close: 'Закрыть',
+            previous: 'Предыдущее',
+            next: 'Следующее',
             imageGallery: 'Галерея изображений',
             image: 'Изображение {0} из {1}',
             zoomIn: 'Увеличить',

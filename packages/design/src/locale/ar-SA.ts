@@ -20,6 +20,9 @@ const locale: typeof enUS = {
     design: {
         Accessibility: {
             closeBadge: 'إغلاق الشارة',
+            close: 'إغلاق',
+            previous: 'السابق',
+            next: 'التالي',
             imageGallery: 'معرض الصور',
             image: 'الصورة {0} من {1}',
             zoomIn: 'تكبير',

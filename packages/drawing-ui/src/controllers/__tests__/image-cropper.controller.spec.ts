@@ -18,12 +18,12 @@ import type { ICommandInfo } from '@univerjs/core';
 import { DrawingTypeEnum } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import { getDrawingShapeKeyByDrawingSearch, SetDrawingSelectedOperation } from '@univerjs/drawing';
-import { ImageCropperObject } from '@univerjs/drawing-ui';
 import { CURSOR_TYPE, Image } from '@univerjs/engine-render';
 import { KeyCode } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { AutoImageCropOperation, CloseImageCropOperation, CropType, OpenImageCropOperation } from '../../commands/operations/image-crop.operation';
+import { ImageCropperObject } from '../../views/crop/image-cropper-object';
 import { ImageCropperController } from '../image-cropper.controller';
 
 function createImage(id: string) {
@@ -80,7 +80,8 @@ describe('ImageCropperController', () => {
             { getCurrentTypeOfUnit$: vi.fn(() => new Subject()), getFocusedUnit: vi.fn() } as never,
             { show: vi.fn() } as never,
             { t: vi.fn((key: string) => key) } as never,
-            { registerShortcut: vi.fn(() => ({ dispose: vi.fn() })) } as never
+            { registerShortcut: vi.fn(() => ({ dispose: vi.fn() })) } as never,
+            { focus: vi.fn() } as never
         );
 
         // handlers: [OpenImageCrop, CloseImageCrop, AutoImageCrop]
@@ -124,7 +125,8 @@ describe('ImageCropperController', () => {
             { getCurrentTypeOfUnit$: vi.fn(() => new Subject()), getFocusedUnit: vi.fn() } as never,
             messageService as never,
             { t: vi.fn((key: string) => key) } as never,
-            { registerShortcut: vi.fn(() => ({ dispose: vi.fn() })) } as never
+            { registerShortcut: vi.fn(() => ({ dispose: vi.fn() })) } as never,
+            { focus: vi.fn() } as never
         );
 
         commandHandlers[2]({ id: AutoImageCropOperation.id, params: { cropType: CropType.R1_1 } } as never);
@@ -179,6 +181,7 @@ describe('ImageCropperController', () => {
             }),
         };
         const renderManagerService = { getRenderUnitById: vi.fn(() => ({ scene })) };
+        const layoutService = { focus: vi.fn() };
 
         const controller = new ImageCropperController(
             commandService as never,
@@ -187,7 +190,8 @@ describe('ImageCropperController', () => {
             { getCurrentTypeOfUnit$: vi.fn(() => new Subject()), getFocusedUnit: vi.fn() } as never,
             { show: vi.fn() } as never,
             { t: vi.fn((key: string) => key) } as never,
-            { registerShortcut: vi.fn(() => ({ dispose: vi.fn() })) } as never
+            { registerShortcut: vi.fn(() => ({ dispose: vi.fn() })) } as never,
+            layoutService as never
         );
 
         // OpenImageCrop handler
@@ -200,6 +204,7 @@ describe('ImageCropperController', () => {
         expect(createdCropper!.cursor).toBe(CURSOR_TYPE.DEFAULT);
 
         expect(commandService.syncExecuteCommand).toHaveBeenCalledWith(SetDrawingSelectedOperation.id, [focusDrawing]);
+        expect(layoutService.focus).toHaveBeenCalledOnce();
         controller.dispose();
     });
 
@@ -266,7 +271,8 @@ describe('ImageCropperController', () => {
             { getCurrentTypeOfUnit$: vi.fn(() => new Subject()), getFocusedUnit: vi.fn(() => null) } as never,
             { show: vi.fn() } as never,
             { t: vi.fn((key: string) => key) } as never,
-            shortcutService as never
+            shortcutService as never,
+            { focus: vi.fn() } as never
         );
 
         commandHandlers[0]({ id: OpenImageCropOperation.id, params: focusDrawing } as never);
@@ -353,7 +359,8 @@ describe('ImageCropperController', () => {
             { getCurrentTypeOfUnit$: vi.fn(() => new Subject()), getFocusedUnit: vi.fn(() => ({ getUnitId: () => focusDrawing.unitId })) } as never,
             { show: vi.fn() } as never,
             { t: vi.fn((key: string) => key) } as never,
-            { registerShortcut: vi.fn(() => ({ dispose: vi.fn() })) } as never
+            { registerShortcut: vi.fn(() => ({ dispose: vi.fn() })) } as never,
+            { focus: vi.fn() } as never
         );
 
         commandHandlers[2]({ id: AutoImageCropOperation.id, params: { cropType: CropType.R1_1 } } as never);

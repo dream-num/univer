@@ -67,7 +67,13 @@ import {
     UniverInstanceType,
     WrapStrategy,
 } from '@univerjs/core';
-import { DocSelectionManagerService, DocSkeletonManagerService, InsertTextCommand, RichTextEditingMutation } from '@univerjs/docs';
+import {
+    DocSelectionManagerService,
+    DocSkeletonManagerService,
+    DocStateChangeManagerService,
+    InsertTextCommand,
+    RichTextEditingMutation,
+} from '@univerjs/docs';
 import {
     DocSelectionRenderService,
     IEditorService,
@@ -193,7 +199,8 @@ export class EditingRenderController extends Disposable {
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
         @Inject(SheetCellEditorResizeService) private readonly _sheetCellEditorResizeService: SheetCellEditorResizeService,
         @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
-        @IConfigService private readonly _configService: IConfigService
+        @IConfigService private readonly _configService: IConfigService,
+        @Inject(DocStateChangeManagerService) private readonly _docStateChangeManagerService: DocStateChangeManagerService
     ) {
         super();
 
@@ -523,6 +530,8 @@ export class EditingRenderController extends Disposable {
         }
 
         const { unitId, isInArrayFormulaRange = false } = editCellState;
+
+        this._clearEditorHistory();
 
         this._commandService.syncExecuteCommand(ScrollToRangeOperation.id, {
             unitId,
@@ -865,8 +874,14 @@ export class EditingRenderController extends Disposable {
         if (editorUnitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
             this._getEditorSkeleton(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)?.resetInitialWidth();
         }
-        this._undoRedoService.clearUndoRedo(editorUnitId);
+        this._clearEditorHistory();
+    }
+
+    private _clearEditorHistory(): void {
+        this._undoRedoService.clearUndoRedo(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
         this._undoRedoService.clearUndoRedo(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
+        this._docStateChangeManagerService.clearHistory(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+        this._docStateChangeManagerService.clearHistory(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
     }
 
     private _moveSelection(keycode: KeyCode | undefined, currentUnitId: string, worksheetId: string) {

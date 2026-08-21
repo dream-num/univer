@@ -26,7 +26,6 @@ import type { IRectProps } from './shape/rect';
 import type { IRegularPolygonProps } from './shape/regular-polygon';
 import { Disposable, MOVE_BUFFER_VALUE, requestImmediateMacroTask, toDisposable } from '@univerjs/core';
 import { Subject } from 'rxjs';
-import { ObjectType } from './base-object';
 import { CURSOR_TYPE } from './basics/const';
 import { offsetRotationAxis } from './basics/offset-rotation-axis';
 import { getCurrentScrollXY } from './basics/scroll-xy';
@@ -99,10 +98,6 @@ const MINI_WIDTH_LIMIT = 20;
 const MINI_HEIGHT_LIMIT = 20;
 
 const DEFAULT_CONTROL_PLUS_INDEX = 5000;
-
-const SINGLE_ACTIVE_OBJECT_TYPE_MAP = new Set<ObjectType>([
-    ObjectType.CHART,
-]);
 
 const ROTATE_ICON_SIZE = 14;
 
@@ -1981,7 +1976,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
             return;
         }
 
-        if (!evt.ctrlKey || SINGLE_ACTIVE_OBJECT_TYPE_MAP.has(targetObject.objectType)) {
+        if (!evt.ctrlKey) {
             this._selectedObjectMap.clear();
             this._clearControlMap();
         }

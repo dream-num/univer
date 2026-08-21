@@ -20,6 +20,9 @@ const locale: typeof enUS = {
     design: {
         Accessibility: {
             closeBadge: '배지 닫기',
+            close: '닫기',
+            previous: '이전',
+            next: '다음',
             imageGallery: '이미지 갤러리',
             image: '이미지 {0}/{1}',
             zoomIn: '확대',

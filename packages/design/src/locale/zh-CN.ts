@@ -20,6 +20,9 @@ const locale: typeof enUS = {
     design: {
         Accessibility: {
             closeBadge: '关闭徽章',
+            close: '关闭',
+            previous: '上一个',
+            next: '下一个',
             imageGallery: '图片库',
             image: '第 {0} 张图片，共 {1} 张',
             zoomIn: '放大',

@@ -20,6 +20,9 @@ const locale: typeof enUS = {
     design: {
         Accessibility: {
             closeBadge: 'Fechar selo',
+            close: 'Fechar',
+            previous: 'Anterior',
+            next: 'Próximo',
             imageGallery: 'Galeria de imagens',
             image: 'Imagem {0} de {1}',
             zoomIn: 'Ampliar',

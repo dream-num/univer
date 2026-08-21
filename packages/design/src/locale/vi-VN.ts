@@ -20,6 +20,9 @@ const locale: typeof enUS = {
     design: {
         Accessibility: {
             closeBadge: 'Đóng huy hiệu',
+            close: 'Đóng',
+            previous: 'Trước',
+            next: 'Tiếp theo',
             imageGallery: 'Thư viện ảnh',
             image: 'Ảnh {0} trên {1}',
             zoomIn: 'Phóng to',

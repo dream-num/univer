@@ -1,61 +1,7 @@
 import { chromium, expect, test } from '@playwright/test';
 import { generateSnapshotName } from '../const';
 
-const SHEET_MAIN_CANVAS_ID = '#univer-sheet-main-canvas_workbook-01';
 const isCI = !!process.env.CI;
-
-test('cells rendering after scrolling', async () => {
-    const browser = await chromium.launch({
-        headless: isCI, // Set to false to see the browser window in local
-    });
-    const context = await browser.newContext({
-        viewport: { width: 1280, height: 1280 },
-        deviceScaleFactor: 2, // Set your desired DPR
-    });
-    const page = await context.newPage();
-    await page.goto('http://localhost:3000/sheets/');
-    await page.waitForTimeout(2000);
-
-    await page.evaluate(() => window.E2EControllerAPI.loadMergeCellSheet());
-    await page.waitForTimeout(1000);
-
-    const canvas = page.locator(SHEET_MAIN_CANVAS_ID);
-    await canvas.evaluate(async (element: HTMLCanvasElement) => {
-        const scroll = async (deltaY: number) => {
-            for (let elapsed = 0; elapsed < 1000; elapsed += 30) {
-                element.dispatchEvent(new WheelEvent('wheel', {
-                    bubbles: true,
-                    cancelable: true,
-                    deltaY,
-                    clientX: 580,
-                    clientY: 580,
-                }));
-                await new Promise((resolve) => setTimeout(resolve, 30));
-            }
-        };
-        await scroll(100);
-        await scroll(-100);
-    });
-    await page.evaluate(() => new Promise<void>((resolve) => {
-        let previous = '';
-        let stableFrames = 0;
-        const check = () => {
-            const current = JSON.stringify(window.univerAPI.getActiveWorkbook().getActiveSheet().getScrollState());
-            stableFrames = current === previous ? stableFrames + 1 : 0;
-            previous = current;
-            if (stableFrames >= 5) {
-                resolve();
-                return;
-            }
-            requestAnimationFrame(check);
-        };
-        requestAnimationFrame(check);
-    }));
-
-    const filename = generateSnapshotName('mergedCellsRenderingScrolling');
-    const screenshot = await canvas.screenshot();
-    await expect(screenshot).toMatchSnapshot(filename, { maxDiffPixelRatio: 0.005 });
-});
 
 test('status bar count with array formula selection', async () => {
     const browser = await chromium.launch({

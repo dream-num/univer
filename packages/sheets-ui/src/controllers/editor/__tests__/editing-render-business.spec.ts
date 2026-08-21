@@ -126,6 +126,9 @@ function createController(initialDataStream = 'new value\r\n', isPercentFormat =
         rollback: vi.fn(),
         clearUndoRedo: vi.fn(),
     };
+    controller._docStateChangeManagerService = {
+        clearHistory: vi.fn(),
+    };
     controller._contextService = {
         setContextValue: vi.fn(),
         getContextValue: vi.fn(() => false),

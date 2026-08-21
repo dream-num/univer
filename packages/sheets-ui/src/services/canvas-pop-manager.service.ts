@@ -346,7 +346,7 @@ export class SheetCanvasPopManagerService extends Disposable {
         const canvasElement = currentRender.engine.getCanvasElement();
         const scaleAdjust = canvasElement.getBoundingClientRect().width / pxToNum(canvasElement.style.width);
         const { scaleX, scaleY } = currentRender.scene.getAncestorScale();
-
+        const viewMain = currentRender.scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
         const id = this._globalPopupManagerService.addPopup({
             ...popup,
             unitId,
@@ -357,8 +357,8 @@ export class SheetCanvasPopManagerService extends Disposable {
             canvasElement,
             boundaryInsets: popup.constrainToCanvas
                 ? {
-                    left: skeleton.rowHeaderWidth * scaleAdjust * scaleX,
-                    top: skeleton.columnHeaderHeight * scaleAdjust * scaleY,
+                    left: (viewMain?.left ?? skeleton.rowHeaderWidth * scaleX) * scaleAdjust,
+                    top: (viewMain?.top ?? skeleton.columnHeaderHeight * scaleY) * scaleAdjust,
                 }
                 : popup.boundaryInsets,
         });

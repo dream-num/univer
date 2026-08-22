@@ -85,15 +85,6 @@ export class ResourceManagerService extends Disposable implements IResourceManag
     }
 
     public loadResources(unitId: string, resources?: IResources) {
-        const resourceShape = describeResourceShape(resources);
-        this._logService.debug('[ResourceManagerService]', `loadResources start unitId=${unitId} resources=${resourceShape}`);
-        if (resources != null && !Array.isArray(resources)) {
-            this._logService.error(
-                '[ResourceManagerService]',
-                `loadResources received non-array resources unitId=${unitId} resources=${resourceShape}`
-            );
-        }
-
         const hooks = this.getAllResourceHooks();
         for (let i = 0; i < hooks.length; i++) {
             const hook = hooks[i];
@@ -124,25 +115,4 @@ export class ResourceManagerService extends Disposable implements IResourceManag
         this._register$.complete();
         this._resourceMap.clear();
     }
-}
-
-function describeResourceShape(resources: unknown): string {
-    if (Array.isArray(resources)) {
-        const names = resources
-            .slice(0, 20)
-            .map((resource) => (resource && typeof resource === 'object' ? (resource as { name?: unknown }).name : undefined))
-            .filter((name): name is string => typeof name === 'string');
-        return JSON.stringify({ isArray: true, length: resources.length, names });
-    }
-
-    if (resources && typeof resources === 'object') {
-        return JSON.stringify({
-            isArray: false,
-            valueType: typeof resources,
-            tag: Object.prototype.toString.call(resources),
-            keys: Object.keys(resources).slice(0, 20),
-        });
-    }
-
-    return JSON.stringify({ isArray: false, valueType: typeof resources, tag: Object.prototype.toString.call(resources) });
 }

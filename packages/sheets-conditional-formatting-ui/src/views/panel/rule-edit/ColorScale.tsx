@@ -69,7 +69,7 @@ const TextInput = (props: { id: string; type: CFValueType | 'none'; value: numbe
 
     if (type === CFValueType.formula) {
         return (
-            <div className="univer-ml-1 univer-w-full">
+            <div className="univer-w-full">
                 <FormulaEditor
                     ref={formulaEditorRef}
                     className={clsx(`
@@ -283,7 +283,6 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                 />
                 <TextInput
                     id="min"
-                    className="univer-ml-1"
                     value={minValue}
                     type={minType}
                     onChange={(v) => {
@@ -302,7 +301,6 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                     }}
                 />
                 <ColorPicker
-                    className="univer-ml-1"
                     color={minColor}
                     onChange={(v) => {
                         setMinColor(v);
@@ -353,7 +351,6 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
 
                 <TextInput
                     id="median"
-                    className="univer-ml-1"
                     value={medianValue}
                     type={medianType}
                     onChange={(v) => {
@@ -371,26 +368,27 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                         });
                     }}
                 />
-                {medianType !== 'none' && (
-                    <ColorPicker
-                        className="univer-ml-1"
-                        color={medianColor}
-                        onChange={(v) => {
-                            setMedianColor(v);
-                            handleChange({
-                                minType,
-                                medianType,
-                                maxType,
-                                minValue,
-                                medianValue,
-                                maxValue,
-                                minColor,
-                                medianColor: v,
-                                maxColor,
-                            });
-                        }}
-                    />
-                )}
+                {medianType !== 'none'
+                    ? (
+                        <ColorPicker
+                            color={medianColor}
+                            onChange={(v) => {
+                                setMedianColor(v);
+                                handleChange({
+                                    minType,
+                                    medianType,
+                                    maxType,
+                                    minValue,
+                                    medianValue,
+                                    maxValue,
+                                    minColor,
+                                    medianColor: v,
+                                    maxColor,
+                                });
+                            }}
+                        />
+                    )
+                    : <div aria-hidden className="univer-size-6 univer-flex-shrink-0" />}
 
             </div>
             <div

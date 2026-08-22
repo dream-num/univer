@@ -25,12 +25,14 @@ import { UniverInstanceType } from '../../common/unit';
 import { Tools } from '../../shared';
 import { Disposable } from '../../shared/lifecycle';
 import { IUniverInstanceService } from '../instance/instance.service';
+import { ILogService } from '../log/log.service';
 import { IResourceManagerService } from '../resource-manager/type';
 
 export class ResourceLoaderService extends Disposable implements IResourceLoaderService {
     constructor(
         @Inject(IResourceManagerService) private readonly _resourceManagerService: IResourceManagerService,
-        @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService
+        @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService,
+        @ILogService private readonly _logService: ILogService
     ) {
         super();
         this._init();
@@ -44,6 +46,7 @@ export class ResourceLoaderService extends Disposable implements IResourceLoader
             resources: IResources = [],
             errorLabel: string
         ) => {
+            this._logService.debug('[ResourceLoaderService]', `loadHookResource unitId=${unitId} errorLabel=${errorLabel} resources=${describeResourceShape(resources)}`);
             const plugin = resources.find((r) => r.name === hook.pluginName);
             if (plugin) {
                 try {
@@ -167,8 +170,30 @@ export class ResourceLoaderService extends Disposable implements IResourceLoader
             return null;
         }
         const resources = this._resourceManagerService.getResources(unitId, unit.type);
+        this._logService.debug('[ResourceLoaderService]', `saveUnit unitId=${unitId} type=${unit.type} resources=${describeResourceShape(resources)}`);
         const snapshot = Tools.deepClone(unit.getSnapshot()) as { resources: typeof resources } & T;
         snapshot.resources = resources;
         return snapshot;
     }
+}
+
+function describeResourceShape(resources: unknown): string {
+    if (Array.isArray(resources)) {
+        const names = resources
+            .slice(0, 20)
+            .map((resource) => (resource && typeof resource === 'object' ? (resource as { name?: unknown }).name : undefined))
+            .filter((name): name is string => typeof name === 'string');
+        return JSON.stringify({ isArray: true, length: resources.length, names });
+    }
+
+    if (resources && typeof resources === 'object') {
+        return JSON.stringify({
+            isArray: false,
+            valueType: typeof resources,
+            tag: Object.prototype.toString.call(resources),
+            keys: Object.keys(resources).slice(0, 20),
+        });
+    }
+
+    return JSON.stringify({ isArray: false, valueType: typeof resources, tag: Object.prototype.toString.call(resources) });
 }

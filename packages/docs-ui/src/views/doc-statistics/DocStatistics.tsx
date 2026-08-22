@@ -17,10 +17,10 @@
 import type { IDocumentStatistics } from '@univerjs/core';
 import type { LocaleKey } from '../../locale/types';
 import { LOCALE_META, LocaleService } from '@univerjs/core';
+import { Dropdown } from '@univerjs/design';
 import { LoadingMultiIcon, StatisticalFunctionIcon } from '@univerjs/icons';
-import { RectPopup, ToolbarButton, useDependency } from '@univerjs/ui';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { ToolbarButton, useDependency } from '@univerjs/ui';
+import { useState } from 'react';
 import { useDocStatistics } from './use-doc-statistics';
 
 type DisplayStatistics = IDocumentStatistics & { pages: number; lines: number };
@@ -41,20 +41,12 @@ const STATISTIC_ROWS: IStatisticRow[] = [
     { key: 'asianCharactersAndKoreanWords', label: 'docs-ui.statistics.asianCharactersAndKoreanWords' },
 ];
 
-function StatisticsPanel({ statistics, selection, showPages }: { statistics: DisplayStatistics; selection: boolean; showPages: boolean }) {
+function StatisticsContent({ statistics, selection, showPages }: { statistics: DisplayStatistics; selection: boolean; showPages: boolean }) {
     const localeService = useDependency(LocaleService);
     const localeTag = LOCALE_META[localeService.getCurrentLocale()].tag;
 
     return (
-        <div
-            role="dialog"
-            aria-label={localeService.t<LocaleKey>('docs-ui.statistics.title')}
-            className={`
-              univer-w-80 univer-rounded-lg univer-border univer-border-gray-200 univer-bg-gray-0 univer-p-4
-              univer-shadow-lg
-              dark:!univer-border-gray-600 dark:!univer-bg-gray-800
-            `}
-        >
+        <div className="univer-w-80 univer-p-4">
             <div className="univer-mb-3">
                 <div className="univer-text-sm univer-font-medium">
                     {localeService.t<LocaleKey>('docs-ui.statistics.title')}
@@ -86,45 +78,27 @@ export function DocStatistics() {
     const localeService = useDependency(LocaleService);
     const [open, setOpen] = useState(false);
     const { document, selection, loading, showPages } = useDocStatistics(open);
-    const triggerRef = useRef<HTMLSpanElement>(null);
-    const anchorRect$ = useMemo(() => new BehaviorSubject({ left: 0, right: 0, top: 0, bottom: 0 }), []);
     const localeTag = LOCALE_META[localeService.getCurrentLocale()].tag;
     const displayedStatistics = selection ?? document;
     const openLabel = localeService.t<LocaleKey>('docs-ui.statistics.open');
+    const title = localeService.t<LocaleKey>('docs-ui.statistics.title');
     const label = selection
         ? localeService.t<LocaleKey>('docs-ui.statistics.selectedWords', selection.words.toLocaleString(localeTag), document.words.toLocaleString(localeTag))
         : localeService.t<LocaleKey>('docs-ui.statistics.wordCount', document.words.toLocaleString(localeTag));
 
-    useEffect(() => {
-        if (!open) return;
-
-        const updatePosition = () => {
-            const rect = triggerRef.current?.getBoundingClientRect();
-            if (!rect) return;
-
-            anchorRect$.next({ left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom });
-        };
-        const closeOnEscape = (event: KeyboardEvent) => {
-            if (event.key === 'Escape') {
-                setOpen(false);
-            }
-        };
-
-        updatePosition();
-        window.addEventListener('resize', updatePosition);
-        window.addEventListener('scroll', updatePosition, true);
-        window.addEventListener('keydown', closeOnEscape);
-
-        return () => {
-            window.removeEventListener('resize', updatePosition);
-            window.removeEventListener('scroll', updatePosition, true);
-            window.removeEventListener('keydown', closeOnEscape);
-        };
-    }, [anchorRect$, open]);
-
     return (
-        <>
-            <span ref={triggerRef} title={open ? undefined : openLabel}>
+        <Dropdown
+            align="start"
+            className="univer-shadow-lg"
+            side="top"
+            open={open}
+            aria-label={title}
+            onOpenChange={setOpen}
+            overlay={(
+                <StatisticsContent statistics={displayedStatistics} selection={selection != null} showPages={showPages} />
+            )}
+        >
+            <span title={open ? undefined : openLabel}>
                 <ToolbarButton
                     noIcon
                     active={open}
@@ -136,7 +110,6 @@ export function DocStatistics() {
                     aria-expanded={open}
                     aria-haspopup="dialog"
                     aria-label={openLabel}
-                    onClick={() => setOpen((visible) => !visible)}
                 >
                     <span className="univer-flex univer-items-center univer-gap-1.5">
                         <StatisticalFunctionIcon className="univer-size-4" />
@@ -145,17 +118,6 @@ export function DocStatistics() {
                     </span>
                 </ToolbarButton>
             </span>
-            {open && (
-                <RectPopup
-                    portal
-                    anchorRect$={anchorRect$}
-                    direction="top-left"
-                    onClickOutside={() => setOpen(false)}
-                    onContextMenu={() => setOpen(false)}
-                >
-                    <StatisticsPanel statistics={displayedStatistics} selection={selection != null} showPages={showPages} />
-                </RectPopup>
-            )}
-        </>
+        </Dropdown>
     );
 }

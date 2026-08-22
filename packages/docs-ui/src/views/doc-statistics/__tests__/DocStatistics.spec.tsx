@@ -50,9 +50,6 @@ function renderStatistics() {
     localeService.setLocale(LocaleType.EN_US);
 
     const container = document.createElement('div');
-    const popupRoot = document.createElement('div');
-    popupRoot.id = 'univer-popup-portal';
-    document.body.appendChild(popupRoot);
     document.body.appendChild(container);
     const root = createRoot(container);
 
@@ -118,6 +115,14 @@ describe('DocStatistics', () => {
         expect(document.body.textContent).toContain('Pages');
         expect(document.body.textContent).toContain('Characters (no spaces)');
         expect(document.body.textContent).toContain('Asian characters and Korean words');
+        expect(document.querySelector('[role="dialog"]')?.getAttribute('aria-label')).toBe('Document statistics');
+
+        act(() => {
+            document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+        });
+
+        expect(document.body.textContent).not.toContain('Document statistics');
+        expect(useDocStatistics).toHaveBeenLastCalledWith(false);
     });
 
     it('hides pages in modern documents', () => {

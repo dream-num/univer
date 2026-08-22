@@ -926,6 +926,19 @@ describe('DocSelectionRenderService', () => {
         expect(TestLayoutService.registeredElements).toEqual([]);
     });
 
+    it('focuses the editable input without scrolling the host page', () => {
+        const { input, renderUnit, service, univer } = createRealSelectionRenderService();
+        let hostPageScrolled = false;
+        const focusMock = vi.spyOn(input, 'focus').mockImplementation((options) => {
+            hostPageScrolled = options?.preventScroll !== true;
+        });
+        cleanup.push(() => focusMock.mockRestore(), () => renderUnit.dispose(), () => univer.dispose());
+
+        service.focus();
+
+        expect(hostPageScrolled).toBe(false);
+    });
+
     it('does not steal focus back from an embedded runtime during selection sync', () => {
         const embedCanvas = document.createElement('canvas');
         embedCanvas.tabIndex = 0;

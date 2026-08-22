@@ -445,7 +445,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         if (!this._input.hasAttribute('tabindex')) {
             this._input.tabIndex = -1;
         }
-        this._input.focus();
+        this._input.focus({ preventScroll: true });
     }
 
     blur() {

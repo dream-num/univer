@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/docs-find-replace",
-    "version": "1.0.0-beta.1",
+    "version": "1.0.0-beta.2",
     "private": false,
     "description": "Find and replace support for Univer Docs.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

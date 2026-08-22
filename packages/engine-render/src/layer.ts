@@ -33,7 +33,9 @@ export interface IScrollRenderInfo {
 export interface ILayerRenderOptions {
     dirtyBounds?: IBoundRectNoAngle[];
     preserveCache?: boolean;
+    preserveDirty?: boolean;
     viewportInfos?: Map<string, IViewportInfo>;
+    viewportKeys?: ReadonlySet<string>;
 }
 
 function clipContextToBounds(ctx: UniverRenderingContext, bounds: IBoundRectNoAngle[]) {
@@ -304,16 +306,18 @@ export class Layer extends Disposable {
     render(parentCtx?: UniverRenderingContext, isMaxLayer = false, options: ILayerRenderOptions = {}) {
         const mainCtx = parentCtx || this._scene.getEngine()?.getCanvas().getContext();
         if (mainCtx) {
-            const { dirtyBounds, preserveCache = false, viewportInfos } = options;
+            const { dirtyBounds, preserveCache = false, preserveDirty = false, viewportInfos, viewportKeys } = options;
             if (this._allowCache && this._cacheCanvas) {
                 if (preserveCache && dirtyBounds) {
                     mainCtx.save();
                     clipContextToBounds(mainCtx, dirtyBounds);
-                    this._draw(mainCtx, isMaxLayer, viewportInfos);
+                    this._draw(mainCtx, isMaxLayer, viewportInfos, viewportKeys, preserveDirty);
                     mainCtx.restore();
                     // The visible frame is current, but the offscreen layer cache still represents the pre-scroll frame.
                     this._cacheValid = false;
-                    this.makeDirty(false);
+                    if (!preserveDirty) {
+                        this.makeDirty(false);
+                    }
                     return this;
                 }
                 if (this.isDirty() || !this._cacheValid) {
@@ -324,7 +328,7 @@ export class Layer extends Disposable {
                     ctx.save();
 
                     ctx.setTransform(mainCtx.getTransform());
-                    this._draw(ctx, isMaxLayer, viewportInfos);
+                    this._draw(ctx, isMaxLayer, viewportInfos, viewportKeys, preserveDirty);
 
                     ctx.restore();
                     this._cacheValid = true;
@@ -335,12 +339,14 @@ export class Layer extends Disposable {
                 if (dirtyBounds) {
                     clipContextToBounds(mainCtx, dirtyBounds);
                 }
-                this._draw(mainCtx, isMaxLayer, viewportInfos);
+                this._draw(mainCtx, isMaxLayer, viewportInfos, viewportKeys, preserveDirty);
                 mainCtx.restore();
             }
         }
 
-        this.makeDirty(false);
+        if (!options.preserveDirty) {
+            this.makeDirty(false);
+        }
         return this;
     }
 
@@ -368,16 +374,26 @@ export class Layer extends Disposable {
         this._cacheValid = false;
     }
 
-    private _draw(mainCtx: UniverRenderingContext, isMaxLayer: boolean, viewportInfos?: Map<string, IViewportInfo>) {
-        const viewports = this._scene.getViewports().filter((vp) => vp.shouldIntoRender());
+    private _draw(
+        mainCtx: UniverRenderingContext,
+        isMaxLayer: boolean,
+        viewportInfos?: Map<string, IViewportInfo>,
+        viewportKeys?: ReadonlySet<string>,
+        preserveDirty = false
+    ) {
+        const viewports = this._scene
+            .getViewports()
+            .filter((viewport) => viewport.shouldIntoRender() && (viewportKeys == null || viewportKeys.has(viewport.viewportKey)));
         const objects = this.getObjectsByOrder();
         for (const [_index, vp] of viewports.entries()) {
             vp.render(mainCtx, objects, isMaxLayer, viewportInfos?.get(vp.viewportKey));
         }
-        objects.forEach((o) => {
-            o.makeDirty(false);
-            o.makeForceDirty?.(false);
-        });
+        if (!preserveDirty) {
+            objects.forEach((o) => {
+                o.makeDirty(false);
+                o.makeForceDirty?.(false);
+            });
+        }
     }
 
     private _applyCache(ctx?: UniverRenderingContext) {

@@ -452,35 +452,145 @@ describe('engine scene viewport extra', () => {
         engine.dispose();
     });
 
-    it('keeps expensive content stable until a large scrollbar seek settles', () => {
+    it('samples main content and row-header detail while expensive scrollbar seeking is deferred', () => {
+        const { engine, scene, viewport } = createFixture();
+        viewport.setViewportSize({ left: 40, width: 260 });
+        const rowHeaderViewport = new Viewport('viewRowBottom', scene, {
+            left: 0,
+            top: 0,
+            width: 40,
+            height: 180,
+            active: true,
+        });
+        const layer = scene.getLayer(1);
+        const engineCtx = engine.getCanvas().getContext();
+        const drawImageSpy = vi.spyOn(engineCtx, 'drawImage');
+        const renderSpy = vi.spyOn(layer, 'render');
+        const mainViewportRenderSpy = vi.spyOn(viewport, 'render');
+        const rowHeaderViewportRenderSpy = vi.spyOn(rowHeaderViewport, 'render');
+        const mainViewportInfoSpy = vi.spyOn(viewport, 'calcViewportInfo');
+        const clearCanvasSpy = vi.spyOn(engine, 'clearCanvas');
+        const nowSpy = vi.spyOn(Tools, 'now');
+        vi.spyOn(engine, 'getEstimatedFrameInterval').mockReturnValue(1000 / 120);
+        const updateScrollbarDrag = (scrollY: number) => {
+            viewport.scrollToViewportPos({ viewportScrollY: scrollY });
+            rowHeaderViewport.updateScrollVal({
+                scrollX: 0,
+                scrollY,
+                viewportScrollX: 0,
+                viewportScrollY: scrollY,
+            });
+            scene.updateScrollbarDrag(viewport);
+        };
+
+        nowSpy.mockReturnValueOnce(0).mockReturnValueOnce(32);
+        scene.render();
+        drawImageSpy.mockClear();
+        renderSpy.mockClear();
+        mainViewportRenderSpy.mockClear();
+        rowHeaderViewportRenderSpy.mockClear();
+        clearCanvasSpy.mockClear();
+
+        let now = 50;
+        nowSpy.mockImplementation(() => now);
+        scene.beginScrollbarDrag(viewport);
+        updateScrollbarDrag(240);
+        scene.render();
+
+        expect(renderSpy).toHaveBeenCalledTimes(1);
+        expect(mainViewportRenderSpy).toHaveBeenCalled();
+        expect(rowHeaderViewportRenderSpy).toHaveBeenCalled();
+        expect(mainViewportRenderSpy.mock.calls.every(([, , , viewportInfo]) =>
+            viewportInfo?.preserveRenderState && viewportInfo.renderViewportScrollY === 240)).toBe(true);
+        expect(clearCanvasSpy).not.toHaveBeenCalled();
+
+        renderSpy.mockClear();
+        mainViewportRenderSpy.mockClear();
+        rowHeaderViewportRenderSpy.mockClear();
+
+        now = 58;
+        updateScrollbarDrag(260);
+        scene.render();
+
+        expect(drawImageSpy).not.toHaveBeenCalled();
+        expect(renderSpy).not.toHaveBeenCalled();
+        expect(mainViewportRenderSpy).not.toHaveBeenCalled();
+        expect(rowHeaderViewportRenderSpy).not.toHaveBeenCalled();
+        expect(clearCanvasSpy).not.toHaveBeenCalled();
+
+        for (const [sampleTime, scrollY] of [
+            [66, 280],
+            [82, 300],
+            [98, 320],
+            [114, 340],
+            [130, 360],
+        ]) {
+            now = sampleTime;
+            updateScrollbarDrag(scrollY);
+            scene.render();
+            if (sampleTime < 130) {
+                expect(drawImageSpy).not.toHaveBeenCalled();
+            }
+        }
+
+        expect(renderSpy).toHaveBeenCalledTimes(5);
+        expect(mainViewportRenderSpy).toHaveBeenCalled();
+        expect(rowHeaderViewportRenderSpy).toHaveBeenCalled();
+        expect(mainViewportRenderSpy.mock.calls.every(([, , , viewportInfo]) =>
+            viewportInfo?.preserveRenderState && viewportInfo.renderViewportScrollY === 240)).toBe(true);
+        expect(drawImageSpy).toHaveBeenCalledTimes(2);
+
+        renderSpy.mockClear();
+        mainViewportInfoSpy.mockClear();
+        now = 138;
+        updateScrollbarDrag(100);
+        scene.endScrollbarDrag(viewport);
+        scene.render();
+
+        expect(clearCanvasSpy).toHaveBeenCalledTimes(1);
+        expect(renderSpy).toHaveBeenCalledTimes(1);
+        expect(mainViewportInfoSpy.mock.results.some(({ value }) => value?.isForceDirty)).toBe(true);
+
+        scene.dispose();
+        engine.dispose();
+    });
+
+    it('preserves after-render canvas mutations instead of replacing them with sampled frames', () => {
         const { engine, scene, viewport } = createFixture();
         const layer = scene.getLayer(1);
-        const renderSpy = vi.spyOn(layer, 'render');
+        const engineCtx = engine.getCanvas().getContext();
+        const subscription = scene.afterRender$.subscribe((canvas) => {
+            canvas?.getContext().fillText('viewport overlay', 10, 10);
+        });
         const nowSpy = vi.spyOn(Tools, 'now');
         vi.spyOn(engine, 'getEstimatedFrameInterval').mockReturnValue(1000 / 120);
 
-        nowSpy.mockReturnValueOnce(0).mockReturnValueOnce(40);
+        nowSpy.mockReturnValueOnce(0).mockReturnValueOnce(32);
         scene.render();
-        renderSpy.mockClear();
 
+        const drawImageSpy = vi.spyOn(engineCtx, 'drawImage');
+        const renderSpy = vi.spyOn(layer, 'render');
         let now = 50;
         nowSpy.mockImplementation(() => now);
         scene.beginScrollbarDrag(viewport);
         viewport.scrollToViewportPos({ viewportScrollY: 240 });
         scene.updateScrollbarDrag(viewport);
         scene.render();
-        expect(renderSpy).not.toHaveBeenCalled();
 
-        now = 220;
+        now = 114;
         viewport.scrollToViewportPos({ viewportScrollY: 300 });
         scene.updateScrollbarDrag(viewport);
         scene.render();
+
+        expect(drawImageSpy).not.toHaveBeenCalled();
         expect(renderSpy).not.toHaveBeenCalled();
 
-        now = 284;
+        now = 122;
+        scene.endScrollbarDrag(viewport);
         scene.render();
         expect(renderSpy).toHaveBeenCalledTimes(1);
 
+        subscription.unsubscribe();
         scene.dispose();
         engine.dispose();
     });

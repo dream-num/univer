@@ -59,6 +59,7 @@ const STATISTIC_ROW_GROUPS: IStatisticRow[][] = [
 function StatisticsContent({ statistics, selection, showPages, loading }: IStatisticsContentProps) {
     const localeService = useDependency(LocaleService);
     const regionService = useDependency(RegionService);
+    const direction = useObservable(localeService.direction$, localeService.getDirection());
     const currentRegion = useObservable(regionService.currentRegion$, regionService.getCurrentRegion());
     const regionTag = LOCALE_META[currentRegion].tag;
     const statisticGroups = STATISTIC_ROW_GROUPS
@@ -69,13 +70,8 @@ function StatisticsContent({ statistics, selection, showPages, loading }: IStati
         .every(({ key }) => statistics[key] === 0);
 
     return (
-        <div className="univer-w-full">
-            <header
-                className={`
-                  univer-flex univer-items-center univer-gap-3 univer-px-4 univer-py-3
-                  rtl:univer-flex-row-reverse
-                `}
-            >
+        <div className="univer-w-full" dir={direction}>
+            <header className="univer-flex univer-items-center univer-gap-3 univer-px-4 univer-py-3">
                 <div
                     className={`
                       univer-min-w-0 univer-flex-1
@@ -112,7 +108,6 @@ function StatisticsContent({ statistics, selection, showPages, loading }: IStati
                                 className={`
                                   univer-flex univer-items-center univer-justify-between univer-gap-4 univer-rounded-md
                                   univer-px-2 univer-py-1
-                                  rtl:univer-flex-row-reverse
                                 `}
                             >
                                 <dt

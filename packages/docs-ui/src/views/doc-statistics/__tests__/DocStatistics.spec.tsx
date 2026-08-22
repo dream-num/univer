@@ -42,7 +42,7 @@ globalThis.requestAnimationFrame = (callback: FrameRequestCallback) => {
     return 0;
 };
 
-function renderStatistics() {
+function renderStatistics(direction: 'ltr' | 'rtl' = 'ltr') {
     const injector = new Injector();
     injector.add([LocaleService]);
     injector.add([RegionService]);
@@ -50,6 +50,7 @@ function renderStatistics() {
     const localeService = injector.get(LocaleService);
     localeService.load({ [LocaleType.EN_US]: enUS });
     localeService.setLocale(LocaleType.EN_US);
+    localeService.setDirection(direction);
     const regionService = injector.get(RegionService);
 
     const container = document.createElement('div');
@@ -190,6 +191,34 @@ describe('DocStatistics', () => {
         expect(dialog?.getAttribute('aria-busy')).toBe('true');
         expect(values.length).toBeGreaterThan(0);
         expect(values.every((value) => value === '—')).toBe(true);
+    });
+
+    it('preserves RTL direction in the statistics content', () => {
+        vi.mocked(useDocStatistics).mockReturnValue({
+            document: {
+                pages: 1,
+                words: 12,
+                charactersWithoutSpaces: 31,
+                charactersWithSpaces: 36,
+                paragraphs: 3,
+                lines: 3,
+                nonAsianWords: 6,
+                asianCharactersAndKoreanWords: 6,
+            },
+            selection: null,
+            loading: false,
+            showPages: true,
+        });
+
+        const rendered = renderStatistics('rtl');
+        root = rendered.root;
+        container = rendered.container;
+
+        act(() => {
+            rendered.container.querySelector('button')?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        });
+
+        expect(document.querySelector('[role="dialog"] dl')?.parentElement?.getAttribute('dir')).toBe('rtl');
     });
 
     it('formats word counts using the current region', () => {

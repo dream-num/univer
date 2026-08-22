@@ -17,7 +17,7 @@
 import type { IDocumentStatistics } from '@univerjs/core';
 import type { LocaleKey } from '../../locale/types';
 import { LOCALE_META, LocaleService } from '@univerjs/core';
-import { Dropdown } from '@univerjs/design';
+import { Dropdown, Separator } from '@univerjs/design';
 import { LoadingMultiIcon, StatisticalFunctionIcon } from '@univerjs/icons';
 import { ToolbarButton, useDependency } from '@univerjs/ui';
 import { useState } from 'react';
@@ -30,43 +30,97 @@ interface IStatisticRow {
     label: LocaleKey;
 }
 
-const STATISTIC_ROWS: IStatisticRow[] = [
-    { key: 'pages', label: 'docs-ui.statistics.pages' },
-    { key: 'words', label: 'docs-ui.statistics.words' },
-    { key: 'charactersWithoutSpaces', label: 'docs-ui.statistics.charactersWithoutSpaces' },
-    { key: 'charactersWithSpaces', label: 'docs-ui.statistics.charactersWithSpaces' },
-    { key: 'paragraphs', label: 'docs-ui.statistics.paragraphs' },
-    { key: 'lines', label: 'docs-ui.statistics.lines' },
-    { key: 'nonAsianWords', label: 'docs-ui.statistics.nonAsianWords' },
-    { key: 'asianCharactersAndKoreanWords', label: 'docs-ui.statistics.asianCharactersAndKoreanWords' },
+interface IStatisticsContentProps {
+    statistics: DisplayStatistics;
+    selection: boolean;
+    showPages: boolean;
+    loading: boolean;
+}
+
+const STATISTIC_ROW_GROUPS: IStatisticRow[][] = [
+    [
+        { key: 'pages', label: 'docs-ui.statistics.pages' },
+        { key: 'words', label: 'docs-ui.statistics.words' },
+    ],
+    [
+        { key: 'charactersWithoutSpaces', label: 'docs-ui.statistics.charactersWithoutSpaces' },
+        { key: 'charactersWithSpaces', label: 'docs-ui.statistics.charactersWithSpaces' },
+    ],
+    [
+        { key: 'paragraphs', label: 'docs-ui.statistics.paragraphs' },
+        { key: 'lines', label: 'docs-ui.statistics.lines' },
+    ],
+    [
+        { key: 'nonAsianWords', label: 'docs-ui.statistics.nonAsianWords' },
+        { key: 'asianCharactersAndKoreanWords', label: 'docs-ui.statistics.asianCharactersAndKoreanWords' },
+    ],
 ];
 
-function StatisticsContent({ statistics, selection, showPages }: { statistics: DisplayStatistics; selection: boolean; showPages: boolean }) {
+function StatisticsContent({ statistics, selection, showPages, loading }: IStatisticsContentProps) {
     const localeService = useDependency(LocaleService);
     const localeTag = LOCALE_META[localeService.getCurrentLocale()].tag;
+    const statisticGroups = STATISTIC_ROW_GROUPS
+        .map((rows) => rows.filter(({ key }) => showPages || key !== 'pages'))
+        .filter((rows) => rows.length > 0);
+    const showLoadingPlaceholder = loading && statisticGroups
+        .flat()
+        .every(({ key }) => statistics[key] === 0);
 
     return (
-        <div className="univer-w-80 univer-p-4">
-            <div className="univer-mb-3">
-                <div className="univer-text-sm univer-font-medium">
-                    {localeService.t<LocaleKey>('docs-ui.statistics.title')}
+        <div className="univer-w-full">
+            <header className="univer-flex univer-items-center univer-gap-3 univer-px-4 univer-py-3">
+                <div className="univer-min-w-0 univer-flex-1">
+                    <div className="univer-truncate univer-text-sm univer-font-semibold univer-leading-5">
+                        {localeService.t<LocaleKey>('docs-ui.statistics.title')}
+                    </div>
+                    <div
+                        className={`
+                          univer-truncate univer-text-xs univer-leading-4 univer-text-gray-500
+                          dark:!univer-text-gray-400
+                        `}
+                    >
+                        {localeService.t<LocaleKey>(selection ? 'docs-ui.statistics.selection' : 'docs-ui.statistics.document')}
+                    </div>
                 </div>
-                <div
-                    className={`
-                      univer-mt-0.5 univer-text-xs univer-text-gray-500
-                      dark:!univer-text-gray-400
-                    `}
-                >
-                    {localeService.t<LocaleKey>(selection ? 'docs-ui.statistics.selection' : 'docs-ui.statistics.document')}
-                </div>
-            </div>
-            <dl className="univer-grid univer-grid-cols-[1fr_auto] univer-gap-x-5 univer-gap-y-2 univer-text-sm">
-                {STATISTIC_ROWS.filter(({ key }) => showPages || key !== 'pages').map(({ key, label }) => (
-                    <div className="univer-contents" key={String(key)}>
-                        <dt>{localeService.t<LocaleKey>(label)}</dt>
-                        <dd className="univer-m-0 univer-text-right univer-font-medium univer-tabular-nums">
-                            {statistics[key].toLocaleString(localeTag)}
-                        </dd>
+                {loading && (
+                    <LoadingMultiIcon
+                        aria-hidden="true"
+                        className="univer-size-4 univer-shrink-0 univer-animate-spin univer-text-primary-600"
+                    />
+                )}
+            </header>
+            <Separator />
+            <dl className="univer-m-0 univer-p-2">
+                {statisticGroups.map((rows, groupIndex) => (
+                    <div key={rows[0].key}>
+                        {groupIndex > 0 && <Separator className="univer-my-1" />}
+                        {rows.map(({ key, label }) => (
+                            <div
+                                key={key}
+                                className={`
+                                  univer-grid univer-grid-cols-[minmax(0,1fr)_auto] univer-items-center univer-gap-4
+                                  univer-rounded-md univer-px-2 univer-py-1
+                                `}
+                            >
+                                <dt
+                                    className={`
+                                      univer-min-w-0 univer-text-sm univer-leading-5 univer-text-gray-600
+                                      dark:!univer-text-gray-300
+                                    `}
+                                >
+                                    {localeService.t<LocaleKey>(label)}
+                                </dt>
+                                <dd
+                                    className={`
+                                      univer-m-0 univer-min-w-12 univer-text-right univer-text-sm univer-font-semibold
+                                      univer-tabular-nums univer-leading-5 univer-text-gray-900
+                                      dark:!univer-text-gray-0
+                                    `}
+                                >
+                                    {showLoadingPlaceholder ? '—' : statistics[key].toLocaleString(localeTag)}
+                                </dd>
+                            </div>
+                        ))}
                     </div>
                 ))}
             </dl>
@@ -89,13 +143,19 @@ export function DocStatistics() {
     return (
         <Dropdown
             align="start"
-            className="univer-shadow-lg"
+            className="univer-w-80 univer-shadow-xl"
             side="top"
             open={open}
+            aria-busy={loading}
             aria-label={title}
             onOpenChange={setOpen}
             overlay={(
-                <StatisticsContent statistics={displayedStatistics} selection={selection != null} showPages={showPages} />
+                <StatisticsContent
+                    statistics={displayedStatistics}
+                    selection={selection != null}
+                    showPages={showPages}
+                    loading={loading}
+                />
             )}
         >
             <span title={open ? undefined : openLabel}>

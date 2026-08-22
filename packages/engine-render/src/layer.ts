@@ -69,6 +69,12 @@ export function scrollAndClearCanvas(
         const targetY = (bounds.top + Math.max(0, offsetY)) * pixelRatio;
         const pixelCopyWidth = copyWidth * pixelRatio;
         const pixelCopyHeight = copyHeight * pixelRatio;
+
+        // Keep each `copy` operation from clearing pixels retained by the other viewports.
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(targetX, targetY, pixelCopyWidth, pixelCopyHeight);
+        ctx.clip();
         ctx.drawImage(
             ctx.canvas,
             sourceX,
@@ -80,6 +86,7 @@ export function scrollAndClearCanvas(
             pixelCopyWidth,
             pixelCopyHeight
         );
+        ctx.restore();
     }
 
     clearCanvasBounds(ctx, pixelRatio, dirtyBounds);

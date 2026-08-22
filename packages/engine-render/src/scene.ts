@@ -169,6 +169,7 @@ export class Scene extends Disposable {
     private _layers: Layer[] = [];
     private _viewports: Viewport[] = [];
     private _preserveEngineOnRender = false;
+    private _hasPostRenderCanvasMutation = false;
     private _scrollbarDragViewport: Nullable<Viewport> = null;
     private _isScrollbarSeeking = false;
     private _isScrollbarPreviewDirty = false;
@@ -954,6 +955,15 @@ export class Scene extends Disposable {
             (duration - this._estimatedFullRenderDuration) * SCROLLBAR_SEEK_RENDER_COST_SAMPLE_WEIGHT;
     }
 
+    private _notifyAfterRender(canvasInstance: Nullable<Canvas>) {
+        if (!canvasInstance) {
+            this._afterRender$.next(canvasInstance);
+            return false;
+        }
+
+        return canvasInstance.getContext().detectBitmapMutation(() => this._afterRender$.next(canvasInstance));
+    }
+
     render(parentCtx?: UniverRenderingContext) {
         if (!this.isDirty()) {
             return;
@@ -961,7 +971,10 @@ export class Scene extends Disposable {
 
         const layers = this._layers.sort(sortRules);
         const canvasInstance = this.getEngine()?.getCanvas();
-        const shouldTryPreservingEngine = this._preserveEngineOnRender && parentCtx == null && canvasInstance != null;
+        const shouldTryPreservingEngine = this._preserveEngineOnRender &&
+            !this._hasPostRenderCanvasMutation &&
+            parentCtx == null &&
+            canvasInstance != null;
         const isScrollbarSeekRender = this._isScrollbarSeeking && parentCtx == null && canvasInstance != null;
         const shouldMeasureFullRender = parentCtx == null && canvasInstance != null;
         const fullRenderStartedAt = Tools.now();
@@ -1003,7 +1016,7 @@ export class Scene extends Disposable {
         for (let i = 0, len = layers.length; i < len; i++) {
             layers[i].render(parentCtx, i === len - 1, layerRenderOptions);
         }
-        this._afterRender$.next(canvasInstance);
+        this._hasPostRenderCanvasMutation = this._notifyAfterRender(canvasInstance);
         this._recordRenderedViewportScrollPositions();
         if (shouldMeasureFullRender) {
             this._recordFullRenderDuration(Tools.now() - fullRenderStartedAt, isScrollbarSeekRender);

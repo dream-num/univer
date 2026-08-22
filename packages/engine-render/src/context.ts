@@ -28,6 +28,8 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     __mode = 'rendering';
 
     private _transformCache: Nullable<DOMMatrix>;
+    private _bitmapMutationId = 0;
+    private _bitmapMutationTrackingDepth = 0;
     readonly canvas: HTMLCanvasElement;
 
     _context: CanvasRenderingContext2D;
@@ -53,6 +55,23 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
 
     setId(id: string) {
         this._id = id;
+    }
+
+    detectBitmapMutation(callback: () => void) {
+        const mutationId = this._bitmapMutationId;
+        this._bitmapMutationTrackingDepth++;
+        try {
+            callback();
+        } finally {
+            this._bitmapMutationTrackingDepth--;
+        }
+        return mutationId !== this._bitmapMutationId;
+    }
+
+    private _markBitmapMutation() {
+        if (this._bitmapMutationTrackingDepth > 0) {
+            this._bitmapMutationId++;
+        }
     }
 
     isContextLost(): boolean {
@@ -421,7 +440,9 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     drawFocusIfNeeded(element: Element): void;
     drawFocusIfNeeded(path: Path2D, element: Element): void;
     drawFocusIfNeeded(...args: [any]) {
-        return this._context.drawFocusIfNeeded(...args);
+        const result = this._context.drawFocusIfNeeded(...args);
+        this._markBitmapMutation();
+        return result;
     }
 
     /**
@@ -431,6 +452,7 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     reset() {
         this._transformCache = null;
         this._context.reset();
+        this._markBitmapMutation();
     }
 
     /**
@@ -515,6 +537,7 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
      */
     clearRect(x: number, y: number, width: number, height: number) {
         this._context.clearRect(x, y, width, height);
+        this._markBitmapMutation();
     }
 
     /**
@@ -668,6 +691,7 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
         } else if (a.length === 9) {
             _context.drawImage(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8]);
         }
+        this._markBitmapMutation();
     }
 
     /**
@@ -718,6 +742,7 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
         // this._context.fill();
 
         this._context.fill(...args);
+        this._markBitmapMutation();
     }
 
     /**
@@ -726,6 +751,7 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
      */
     fillRect(x: number, y: number, width: number, height: number) {
         this._context.fillRect(x, y, width, height);
+        this._markBitmapMutation();
     }
 
     /**
@@ -748,6 +774,7 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
      */
     strokeRect(x: number, y: number, width: number, height: number) {
         this._context.strokeRect(x, y, width, height);
+        this._markBitmapMutation();
     }
 
     /**
@@ -780,6 +807,7 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
         } else {
             this._context.fillText(text, x, y);
         }
+        this._markBitmapMutation();
     }
 
     /**
@@ -798,6 +826,7 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
         } else {
             this._context.fillText(text, x, y);
         }
+        this._markBitmapMutation();
     }
 
     /**
@@ -890,6 +919,7 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
      */
     putImageData(imageData: ImageData, dx: number, dy: number) {
         this._context.putImageData(imageData, dx, dy);
+        this._markBitmapMutation();
     }
 
     /**
@@ -989,6 +1019,7 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
         } else {
             this._context.stroke();
         }
+        this._markBitmapMutation();
     }
 
     /**
@@ -997,6 +1028,7 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
      */
     strokeText(text: string, x: number, y: number, maxWidth?: number) {
         this._context.strokeText(text, x, y, maxWidth);
+        this._markBitmapMutation();
     }
 
     /**

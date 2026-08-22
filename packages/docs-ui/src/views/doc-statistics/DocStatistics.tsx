@@ -16,10 +16,10 @@
 
 import type { IDocumentStatistics } from '@univerjs/core';
 import type { LocaleKey } from '../../locale/types';
-import { LOCALE_META, LocaleService } from '@univerjs/core';
+import { LOCALE_META, LocaleService, RegionService } from '@univerjs/core';
 import { Dropdown, Separator } from '@univerjs/design';
 import { LoadingMultiIcon, StatisticalFunctionIcon } from '@univerjs/icons';
-import { ToolbarButton, useDependency } from '@univerjs/ui';
+import { ToolbarButton, useDependency, useObservable } from '@univerjs/ui';
 import { useState } from 'react';
 import { useDocStatistics } from './use-doc-statistics';
 
@@ -58,7 +58,9 @@ const STATISTIC_ROW_GROUPS: IStatisticRow[][] = [
 
 function StatisticsContent({ statistics, selection, showPages, loading }: IStatisticsContentProps) {
     const localeService = useDependency(LocaleService);
-    const localeTag = LOCALE_META[localeService.getCurrentLocale()].tag;
+    const regionService = useDependency(RegionService);
+    const currentRegion = useObservable(regionService.currentRegion$, regionService.getCurrentRegion());
+    const regionTag = LOCALE_META[currentRegion].tag;
     const statisticGroups = STATISTIC_ROW_GROUPS
         .map((rows) => rows.filter(({ key }) => showPages || key !== 'pages'))
         .filter((rows) => rows.length > 0);
@@ -68,8 +70,18 @@ function StatisticsContent({ statistics, selection, showPages, loading }: IStati
 
     return (
         <div className="univer-w-full">
-            <header className="univer-flex univer-items-center univer-gap-3 univer-px-4 univer-py-3">
-                <div className="univer-min-w-0 univer-flex-1">
+            <header
+                className={`
+                  univer-flex univer-items-center univer-gap-3 univer-px-4 univer-py-3
+                  rtl:univer-flex-row-reverse
+                `}
+            >
+                <div
+                    className={`
+                      univer-min-w-0 univer-flex-1
+                      rtl:univer-text-right
+                    `}
+                >
                     <div className="univer-truncate univer-text-sm univer-font-semibold univer-leading-5">
                         {localeService.t<LocaleKey>('docs-ui.statistics.title')}
                     </div>
@@ -98,13 +110,15 @@ function StatisticsContent({ statistics, selection, showPages, loading }: IStati
                             <div
                                 key={key}
                                 className={`
-                                  univer-grid univer-grid-cols-[minmax(0,1fr)_auto] univer-items-center univer-gap-4
-                                  univer-rounded-md univer-px-2 univer-py-1
+                                  univer-flex univer-items-center univer-justify-between univer-gap-4 univer-rounded-md
+                                  univer-px-2 univer-py-1
+                                  rtl:univer-flex-row-reverse
                                 `}
                             >
                                 <dt
                                     className={`
-                                      univer-min-w-0 univer-text-sm univer-leading-5 univer-text-gray-600
+                                      univer-min-w-0 univer-flex-1 univer-text-sm univer-leading-5 univer-text-gray-600
+                                      rtl:univer-text-right
                                       dark:!univer-text-gray-300
                                     `}
                                 >
@@ -112,12 +126,13 @@ function StatisticsContent({ statistics, selection, showPages, loading }: IStati
                                 </dt>
                                 <dd
                                     className={`
-                                      univer-m-0 univer-min-w-12 univer-text-right univer-text-sm univer-font-semibold
-                                      univer-tabular-nums univer-leading-5 univer-text-gray-900
+                                      univer-m-0 univer-min-w-12 univer-shrink-0 univer-text-right univer-text-sm
+                                      univer-font-semibold univer-tabular-nums univer-leading-5 univer-text-gray-900
+                                      rtl:univer-text-left
                                       dark:!univer-text-gray-0
                                     `}
                                 >
-                                    {showLoadingPlaceholder ? '—' : statistics[key].toLocaleString(localeTag)}
+                                    {showLoadingPlaceholder ? '—' : statistics[key].toLocaleString(regionTag)}
                                 </dd>
                             </div>
                         ))}
@@ -130,15 +145,17 @@ function StatisticsContent({ statistics, selection, showPages, loading }: IStati
 
 export function DocStatistics() {
     const localeService = useDependency(LocaleService);
+    const regionService = useDependency(RegionService);
     const [open, setOpen] = useState(false);
     const { document, selection, loading, showPages } = useDocStatistics(open);
-    const localeTag = LOCALE_META[localeService.getCurrentLocale()].tag;
+    const currentRegion = useObservable(regionService.currentRegion$, regionService.getCurrentRegion());
+    const regionTag = LOCALE_META[currentRegion].tag;
     const displayedStatistics = selection ?? document;
     const openLabel = localeService.t<LocaleKey>('docs-ui.statistics.open');
     const title = localeService.t<LocaleKey>('docs-ui.statistics.title');
     const label = selection
-        ? localeService.t<LocaleKey>('docs-ui.statistics.selectedWords', selection.words.toLocaleString(localeTag), document.words.toLocaleString(localeTag))
-        : localeService.t<LocaleKey>('docs-ui.statistics.wordCount', document.words.toLocaleString(localeTag));
+        ? localeService.t<LocaleKey>('docs-ui.statistics.selectedWords', selection.words.toLocaleString(regionTag), document.words.toLocaleString(regionTag))
+        : localeService.t<LocaleKey>('docs-ui.statistics.wordCount', document.words.toLocaleString(regionTag));
 
     return (
         <Dropdown

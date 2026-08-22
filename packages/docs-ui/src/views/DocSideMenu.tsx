@@ -27,7 +27,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { useConfigValue, useDependency, useEvent, useObservable } from '@univerjs/ui';
+import { IWorkbenchService, useConfigValue, useDependency, useEvent, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo, useState } from 'react';
 import { debounceTime, map, startWith, throttleTime } from 'rxjs';
 import { VIEWPORT_KEY } from '../basics/docs-view-key';
@@ -85,8 +85,10 @@ const TITLE_ID = '__title';
 
 export function DocSideMenu() {
     const config = useConfigValue<IUniverDocsUIConfig>(DOCS_UI_PLUGIN_CONFIG_KEY);
+    const workbenchService = useDependency(IWorkbenchService);
+    const rootUnitType = useObservable(workbenchService.rootUnitType$, null, true);
 
-    if (config?.toc) {
+    if (rootUnitType === UniverInstanceType.UNIVER_DOC && config?.toc) {
         return <DocSideMenuContent />;
     }
 
@@ -95,7 +97,12 @@ export function DocSideMenu() {
 
 function DocSideMenuContent() {
     const instanceService = useDependency(IUniverInstanceService);
-    const currentDoc = useObservable(useMemo(() => instanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC), []));
+    const currentDoc = useObservable(
+        () => instanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC),
+        undefined,
+        false,
+        [instanceService]
+    );
     const renderManagerService = useDependency(IRenderManagerService);
     const documentData = useObservable(
         currentDoc
@@ -134,7 +141,7 @@ function DocSideMenuContent() {
     );
     const { left, canvasHeight, scaleY } = layout;
 
-    const paragraphs = documentData?.body?.paragraphs ?? [];
+    const paragraphs = useMemo(() => documentData?.body?.paragraphs ?? [], [documentData?.body?.paragraphs]);
     const paragraphMap = useMemo(() => {
         const map = new Map<number, IParagraph>();
         paragraphs.forEach((p) => {
@@ -143,8 +150,6 @@ function DocSideMenuContent() {
         return map;
     }, [paragraphs]);
     const mode = left < 180 ? 'float' : 'side-bar';
-    let minLevel = Infinity;
-
     const paragraphMenus = paragraphs
         ?.filter((p) =>
             p.paragraphStyle?.namedStyleType !== undefined &&
@@ -153,7 +158,6 @@ function DocSideMenuContent() {
         )
         .map((p) => {
             const level = transformNamedStyleTypeToLevel(p.paragraphStyle!.namedStyleType!);
-            minLevel = Math.min(minLevel, level);
             const bound = paragraphBounds?.get(p.startIndex);
             if (!bound) return null;
             const { paragraphStart, paragraphEnd } = bound;
@@ -203,7 +207,7 @@ function DocSideMenuContent() {
         return () => {
             sub.unsubscribe();
         };
-    }, [renderer]);
+    }, [handleScroll, renderer]);
 
     const handleClick = useEvent((menu: ISideMenuItem) => {
         const viewport = renderer?.scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);

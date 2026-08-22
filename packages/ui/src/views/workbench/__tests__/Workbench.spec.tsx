@@ -22,12 +22,18 @@ import type { IDisposable } from '@univerjs/core';
 import type { ComponentType } from 'react';
 import { act, cleanup, render } from '@testing-library/react';
 import {
+    ContextService,
+    DesktopLogService,
     IConfigService,
+    IContextService,
+    ILogService,
     Injector,
+    IUniverInstanceService,
     LifecycleService,
     LifecycleStages,
     LocaleService,
     ThemeService,
+    UniverInstanceService,
 } from '@univerjs/core';
 import { BehaviorSubject, of, Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -67,6 +73,9 @@ describe('DesktopWorkbenchContent lifecycle', () => {
             }],
             [ThemeSwitcherService, { useValue: { injectThemeToHead: () => {} } }],
             [IConfigService, { useValue: { getConfig: () => ({ popupRootId: 'test-popup-root' }) } }],
+            [IContextService, { useClass: ContextService }],
+            [ILogService, { useClass: DesktopLogService }],
+            [IUniverInstanceService, { useClass: UniverInstanceService }],
             [IUIPartsService, { useClass: UIPartsService }],
             [IWorkbenchService, { useClass: WorkbenchService }],
             [ISidebarService, {

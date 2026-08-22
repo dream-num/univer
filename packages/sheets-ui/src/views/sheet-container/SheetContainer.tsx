@@ -18,12 +18,11 @@ import type { Workbook, Worksheet } from '@univerjs/core';
 import type { IUniverSheetsUIConfig } from '../../config/config';
 import {
     Injector,
-    isInternalEditorID,
     IUniverInstanceService,
     UniverInstanceType,
 } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { ComponentManager, ContextMenuPosition, IMenuManagerService, ToolbarItem, useConfigValue, useDependency, useObservable } from '@univerjs/ui';
+import { ComponentManager, ContextMenuPosition, IMenuManagerService, IWorkbenchService, ToolbarItem, useConfigValue, useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo } from 'react';
 import { EMPTY, merge } from 'rxjs';
 import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
@@ -46,11 +45,11 @@ export function RenderSheetFooter() {
     const showFooter = config?.footer ?? true;
     const workbook = useRootWorkbenchWorkbook();
     const activeWorkbookEmbeddedRender = useActiveWorkbookIsEmbeddedRender(workbook);
-    const focusedUnitType = useFocusedUnitType();
+    const rootUnitType = useWorkbenchRootUnitType();
     const activeEmbedTab = useActiveSheetEmbedTabData(workbook);
     if (!workbook || !showFooter) return null;
     if (activeWorkbookEmbeddedRender) return null;
-    if (!activeEmbedTab && focusedUnitType != null && focusedUnitType !== UniverInstanceType.UNIVER_SHEET) return null;
+    if (rootUnitType !== UniverInstanceType.UNIVER_SHEET) return null;
 
     const footerMenus = menuManagerService.getMenuByPositionKey(ContextMenuPosition.FOOTER_MENU);
     const {
@@ -100,23 +99,12 @@ export function RenderSheetHeader() {
     const workbook = useRootWorkbenchWorkbook();
     const hasWorkbook = !!workbook;
     const activeWorkbookEmbeddedRender = useActiveWorkbookIsEmbeddedRender(workbook);
-    const focusedUnitType = useFocusedUnitType();
+    const rootUnitType = useWorkbenchRootUnitType();
     const activeEmbedTab = useActiveSheetEmbedTabData(workbook);
     if (!hasWorkbook) return null;
     if (activeWorkbookEmbeddedRender) return null;
     if (activeEmbedTab) return null;
-    if (focusedUnitType != null && focusedUnitType !== UniverInstanceType.UNIVER_SHEET) {
-        return (
-            <div
-                aria-hidden
-                className="
-                  univer-h-7 univer-border-b univer-border-gray-200 univer-bg-gray-0
-                  dark:!univer-border-gray-700 dark:!univer-bg-gray-900
-                "
-                data-u-comp="formula-bar-placeholder"
-            />
-        );
-    }
+    if (rootUnitType !== UniverInstanceType.UNIVER_SHEET) return null;
     if (config?.formulaBar !== false) {
         return <FormulaBar />;
     }
@@ -134,9 +122,8 @@ export function RenderSheetContent() {
     const activeEmbedTab = useActiveSheetEmbedTabData(workbook);
     const injector = useDependency(Injector);
     const activeWorkbookEmbeddedRender = useActiveWorkbookIsEmbeddedRender(workbook);
-    const focusedUnitType = useFocusedUnitType();
-    // An active embed tab remains the root Sheet surface; other product focus hides the Sheet workbench.
-    const rootWorkbenchOwnsSheet = activeEmbedTab != null || focusedUnitType == null || focusedUnitType === UniverInstanceType.UNIVER_SHEET;
+    const rootUnitType = useWorkbenchRootUnitType();
+    const rootWorkbenchOwnsSheet = rootUnitType === UniverInstanceType.UNIVER_SHEET;
 
     // We use string keys to avoid a hard dependency on sheets-shape-ui.
     const ShapeTextEditorContainer = componentManager.get('SheetShapeTextEditorContainer') ?? componentManager.get('ShapeTextEditorContainer');
@@ -274,19 +261,9 @@ function useRootWorkbenchWorkbook(): Workbook | null {
     }, [activeWorkbook, instanceService, runtimeFocusCoordinator, runtimeSessionLifecycle]);
 }
 
-function useFocusedUnitType(): UniverInstanceType | null {
-    const univerInstanceService = useDependency(IUniverInstanceService);
-    const focusedUnitId = useObservable(() => univerInstanceService.focused$, null, false, [univerInstanceService]);
-    return useMemo(() => {
-        if (!focusedUnitId) return null;
-
-        if (isInternalEditorID(focusedUnitId) && univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_SHEET)) {
-            return UniverInstanceType.UNIVER_SHEET;
-        }
-
-        const focusedUnit = univerInstanceService.getUnit(focusedUnitId);
-        return focusedUnit?.type ?? null;
-    }, [focusedUnitId, univerInstanceService]);
+function useWorkbenchRootUnitType(): UniverInstanceType | null {
+    const workbenchService = useDependency(IWorkbenchService);
+    return useObservable(workbenchService.rootUnitType$, null, true);
 }
 
 function useActiveSheetEmbedTabData(workbook: Workbook | null): { worksheet: Worksheet } | undefined {

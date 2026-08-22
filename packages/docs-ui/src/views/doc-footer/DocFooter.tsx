@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
 import type { IUniverDocsUIConfig } from '../../config/config';
-import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { useConfigValue, useDependency, useObservable } from '@univerjs/ui';
+import { UniverInstanceType } from '@univerjs/core';
+import { IWorkbenchService, useConfigValue, useDependency, useObservable } from '@univerjs/ui';
 import { DOCS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { CountBar } from '../count-bar';
 import { DocStatistics } from '../doc-statistics/DocStatistics';
@@ -39,13 +38,12 @@ function DocFooterContent() {
 }
 
 export function DocFooter() {
-    const univerInstanceService = useDependency(IUniverInstanceService);
-    const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), undefined, undefined, []);
-    const slide = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SLIDE), undefined, undefined, []);
+    const workbenchService = useDependency(IWorkbenchService);
+    const rootUnitType = useObservable(workbenchService.rootUnitType$, null, true);
 
-    if (workbook || slide) {
+    if (rootUnitType !== UniverInstanceType.UNIVER_DOC) {
         return null;
     }
 
     return <DocFooterContent />;
-};
+}

@@ -15,7 +15,17 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
-import { Injector, LifecycleStages, LifecycleUnreachableError } from '@univerjs/core';
+import {
+    ContextService,
+    DesktopLogService,
+    IContextService,
+    ILogService,
+    Injector,
+    IUniverInstanceService,
+    LifecycleStages,
+    LifecycleUnreachableError,
+    UniverInstanceService,
+} from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { IWorkbenchService, WorkbenchService } from '../../../services/workbench/workbench.service';
@@ -78,6 +88,9 @@ describe('SingleUnitUIController', () => {
         });
 
         const injector = new Injector([
+            [IContextService, { useClass: ContextService }],
+            [ILogService, { useClass: DesktopLogService }],
+            [IUniverInstanceService, { useClass: UniverInstanceService }],
             [IWorkbenchService, { useClass: WorkbenchService }],
         ]);
         const skeletonStates: boolean[] = [];

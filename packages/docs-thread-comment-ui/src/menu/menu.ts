@@ -23,9 +23,19 @@ import { DocumentEditArea, IRenderManagerService, withCurrentTypeOfRenderer } fr
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { debounceTime, Observable } from 'rxjs';
 import {
+    AddDocDrawingCommentOperation,
     StartAddCommentOperation,
     ToggleCommentPanelOperation,
 } from '../commands/operations/show-comment-panel.operation';
+
+export function AddDocDrawingCommentMenuItemFactory(): IMenuButtonItem<LocaleKey> {
+    return {
+        id: AddDocDrawingCommentOperation.id,
+        type: MenuItemType.BUTTON,
+        icon: 'CommentIcon',
+        title: 'docs-thread-comment-ui.panel.addComment',
+    };
+}
 
 export const shouldDisableAddComment = (accessor: IAccessor) => {
     const renderManagerService = accessor.get(IRenderManagerService);

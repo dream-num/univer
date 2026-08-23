@@ -20,7 +20,6 @@ import type {
     ICreateUnitOptions,
     IDisposable,
     Nullable,
-    UnitModel,
 } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import type { BaseObject } from '../base-object';
@@ -75,7 +74,7 @@ export interface IRenderManagerService extends IDisposable {
      * @param type
      * @param dep
      */
-    registerRenderModule<T extends UnitModel>(type: UniverInstanceType, dep: Dependency<T>): IDisposable;
+    registerRenderModule(type: UniverInstanceType, dep: Dependency): IDisposable;
 }
 
 const DEFAULT_SCENE_SIZE = { width: 1500, height: 1000 };

@@ -31,6 +31,7 @@ const locale = {
         item: {
             edit: 'Edit',
             delete: 'Delete This Comment',
+            more: 'More',
         },
         filter: {
             sheet: {

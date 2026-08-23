@@ -60,7 +60,6 @@ import { ThreadCommentEditor } from '../ThreadCommentEditor';
 const EDITOR_ID = 'thread-comment-editor';
 const REPLY_LABEL = 'thread-comment-ui.editor.reply';
 const CANCEL_LABEL = 'thread-comment-ui.editor.cancel';
-const PLACEHOLDER_LABEL = 'thread-comment-ui.editor.placeholder';
 const IRenderManagerService = createIdentifier<TestRenderManagerService>('engine-render.render-manager.service');
 
 interface IEditorRecord {
@@ -388,15 +387,6 @@ function getButton(container: HTMLElement, text: string): HTMLButtonElement {
     return button as HTMLButtonElement;
 }
 
-function getEditorSurface(container: HTMLElement): HTMLElement {
-    const placeholder = Array.from(container.querySelectorAll('div')).find((item) => item.textContent === PLACEHOLDER_LABEL);
-    if (!placeholder) {
-        throw new Error('Editor placeholder was not found.');
-    }
-
-    return placeholder.parentElement?.parentElement?.parentElement ?? placeholder as HTMLElement;
-}
-
 function body(dataStream: string): IDocumentBody {
     return { dataStream };
 }
@@ -472,7 +462,7 @@ describe('ThreadCommentEditor', () => {
         expect(TestState.records.get(EDITOR_ID)?.preserveHostFocus).toBe(true);
     });
 
-    it('saves reply content, clears the editor, and does not submit an outer form', () => {
+    it('saves reply content, clears the editor, and does not submit an outer form', async () => {
         const testBed = createEditorTestBed();
         const editorRef = createRef<{ reply: (text: IDocumentBody) => void }>();
         const rendered = renderEditor(
@@ -506,7 +496,7 @@ describe('ThreadCommentEditor', () => {
 
         expect(getButton(container, REPLY_LABEL).disabled).toBe(false);
 
-        act(() => {
+        await act(async () => {
             getButton(container!, REPLY_LABEL).dispatchEvent(new MouseEvent('click', { bubbles: true }));
         });
 
@@ -516,8 +506,92 @@ describe('ThreadCommentEditor', () => {
         const record = TestState.records.get(EDITOR_ID)!;
         expect(record.data.body?.dataStream).toBe('\r\n');
         expect(record.selections).toEqual([]);
+        expect(record.order.indexOf('onSave')).toBeLessThan(record.order.indexOf('editor.blur'));
         expect(record.order.indexOf('editor.blur')).toBeLessThan(record.order.indexOf('editor.replaceText'));
-        expect(record.order.indexOf('editor.replaceText')).toBeLessThan(record.order.indexOf('onSave'));
+    });
+
+    it('preserves a reply draft and prevents duplicate submits when permission is revoked during save', async () => {
+        const testBed = createEditorTestBed();
+        const editorRef = createRef<{ reply: (text: IDocumentBody) => void }>();
+        let saveCount = 0;
+        let failSave: ((error: Error) => void) | undefined;
+        const rendered = renderEditor(
+            testBed.injector,
+            <ThreadCommentEditor
+                ref={editorRef}
+                autoFocus={false}
+                editorId={EDITOR_ID}
+                onSave={() => {
+                    saveCount += 1;
+                    return new Promise<boolean>((_resolve, reject) => {
+                        failSave = reject;
+                    });
+                }}
+                subUnitId="subUnit"
+                type={UniverInstanceType.UNIVER_SHEET}
+                unitId="unit"
+            />
+        );
+        root = rendered.root;
+        container = rendered.container;
+
+        act(() => {
+            editorRef.current?.reply(body('retry this reply\r\n'));
+        });
+
+        await act(async () => {
+            const replyButton = getButton(container!, REPLY_LABEL);
+            replyButton.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            replyButton.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        });
+
+        expect(saveCount).toBe(1);
+        expect(getButton(container, REPLY_LABEL).disabled).toBe(true);
+
+        await act(async () => {
+            failSave?.(new Error('forbidden'));
+        });
+
+        expect(TestState.records.get(EDITOR_ID)?.data.body?.dataStream).toBe('retry this reply\r\n');
+        expect(getButton(container, REPLY_LABEL).disabled).toBe(false);
+    });
+
+    it('does not mutate a disposed editor when a pending save finishes', async () => {
+        const testBed = createEditorTestBed();
+        const editorRef = createRef<{ reply: (text: IDocumentBody) => void }>();
+        let finishSave: ((success: boolean) => void) | undefined;
+        const rendered = renderEditor(
+            testBed.injector,
+            <ThreadCommentEditor
+                ref={editorRef}
+                autoFocus={false}
+                editorId={EDITOR_ID}
+                onSave={() => new Promise<boolean>((resolve) => {
+                    finishSave = resolve;
+                })}
+                subUnitId="subUnit"
+                type={UniverInstanceType.UNIVER_SHEET}
+                unitId="unit"
+            />
+        );
+        root = rendered.root;
+        container = rendered.container;
+
+        act(() => editorRef.current?.reply(body('pending reply\r\n')));
+        await act(async () => {
+            getButton(container!, REPLY_LABEL).dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        });
+        const record = TestState.records.get(EDITOR_ID)!;
+
+        act(() => root!.unmount());
+        root = undefined;
+        await act(async () => {
+            finishSave?.(true);
+            await Promise.resolve();
+        });
+
+        expect(record.order).not.toContain('editor.blur');
+        expect(record.data.body?.dataStream).toBe('pending reply\r\n');
     });
 
     it('cancels editing by clearing content and resetting the active comment', () => {

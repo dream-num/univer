@@ -16,10 +16,20 @@
 
 import type { Nullable } from '@univerjs/core';
 import type { IUpdateCommentPayload, IUpdateCommentRefPayload } from '../commands/mutations/comment.mutation';
+import type { ThreadCommentAnchorKind } from '../types/comment-anchor';
 import type { IBaseComment, IThreadComment } from '../types/interfaces/i-thread-comment';
 import { Disposable, Inject, LifecycleService, LifecycleStages } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { IThreadCommentDataSourceService } from '../services/tc-datasource.service';
+import { deserializeThreadCommentAnchor } from '../types/comment-anchor';
+
+export interface IThreadCommentQuery {
+    unitIds?: string[];
+    subUnitIds?: string[];
+    anchorKinds?: ThreadCommentAnchorKind[];
+    authorIds?: string[];
+    resolved?: boolean;
+}
 
 export type CommentUpdate = {
     unitId: string;
@@ -66,6 +76,8 @@ export interface IThreadInfo {
 export class ThreadCommentModel extends Disposable {
     private _commentsMap: Map<string, Map<string, Map<string, IThreadComment>>> = new Map();
     private _threadMap: Map<string, Map<string, Map<string, IThreadComment>>> = new Map();
+    private _syncVersions = new Map<string, number>();
+    private _nextSyncVersion = 0;
 
     private _commentUpdate$ = new Subject<CommentUpdate>();
     commentUpdate$ = this._commentUpdate$.asObservable();
@@ -149,6 +161,14 @@ export class ThreadCommentModel extends Disposable {
         return subUnitMap;
     }
 
+    private _syncKey(unitId: string, subUnitId: string, threadId: string): string {
+        return `${unitId}\0${subUnitId}\0${threadId}`;
+    }
+
+    private _invalidateSync(unitId: string, subUnitId: string, threadId: string): void {
+        this._syncVersions.delete(this._syncKey(unitId, subUnitId, threadId));
+    }
+
     private _replaceComment(unitId: string, subUnitId: string, comment: IBaseComment) {
         const commentMap = this._ensureCommentMap(unitId, subUnitId);
         const currentComment = commentMap.get(comment.id);
@@ -158,16 +178,40 @@ export class ThreadCommentModel extends Disposable {
             return;
         }
 
-        const { children, ...rest } = comment;
+        const { children = [], ...rest } = comment;
+        const seenChildIds = new Set([comment.id]);
+        const safeChildren = children.filter((child) => {
+            const current = commentMap.get(child.id);
+            if (
+                child.threadId !== comment.threadId
+                || seenChildIds.has(child.id)
+                || (current && current.threadId !== comment.threadId)
+            ) {
+                return false;
+            }
+            seenChildIds.add(child.id);
+            return true;
+        });
         const newComment = {
             ...rest,
             ref: currentComment.ref,
         };
         commentMap.set(comment.id, newComment);
+        if (!newComment.parentId) {
+            this._ensureThreadMap(unitId, subUnitId).set(newComment.threadId, newComment);
+        }
 
-        children?.forEach((child) => {
+        const remoteCommentIds = new Set([comment.id, ...safeChildren.map((child) => child.id)]);
+        commentMap.forEach((localComment, commentId) => {
+            if (localComment.threadId === comment.threadId && !remoteCommentIds.has(commentId)) {
+                this._deleteComment(unitId, subUnitId, commentId);
+            }
+        });
+
+        safeChildren.forEach((child) => {
             commentMap.set(child.id, {
                 ...child,
+                parentId: comment.id,
                 ref: '',
             });
         });
@@ -198,13 +242,38 @@ export class ThreadCommentModel extends Disposable {
             return;
         }
 
-        const threadMap = this._ensureThreadMap(unitId, subUnitId);
-        const commentMap = this._ensureCommentMap(unitId, subUnitId);
-        const comments = await this._dataSourceService.listThreadComments(unitId, subUnitId, threadIds);
+        const versions = new Map(threadIds.map((threadId) => {
+            const key = this._syncKey(unitId, subUnitId, threadId);
+            const version = ++this._nextSyncVersion;
+            this._syncVersions.set(key, version);
+            return [threadId, { key, version }] as const;
+        }));
+        const releaseVersions = () => versions.forEach(({ key, version }) => {
+            if (this._syncVersions.get(key) === version) {
+                this._syncVersions.delete(key);
+            }
+        });
+        let comments: IBaseComment[] | false;
+        try {
+            comments = await this._dataSourceService.listThreadComments(unitId, subUnitId, threadIds);
+        } catch (error) {
+            releaseVersions();
+            throw error;
+        }
         if (!comments) {
+            releaseVersions();
             return;
         }
-        const deleteThreads = new Set<string>(threadIds);
+        const deleteThreads = new Set(threadIds.filter((threadId) => {
+            const request = versions.get(threadId)!;
+            return this._syncVersions.get(request.key) === request.version;
+        }));
+        if (!deleteThreads.size) {
+            releaseVersions();
+            return;
+        }
+        const threadMap = this._ensureThreadMap(unitId, subUnitId);
+        const commentMap = this._ensureCommentMap(unitId, subUnitId);
         comments.forEach((comment) => {
             if (!deleteThreads.has(comment.threadId)) {
                 return;
@@ -218,14 +287,18 @@ export class ThreadCommentModel extends Disposable {
             threadMap.delete(id);
             commentMap.forEach((comment, commentId) => {
                 if (comment.threadId === id) {
-                    commentMap.delete(commentId);
+                    this._deleteComment(unitId, subUnitId, commentId);
                 }
             });
         });
+        releaseVersions();
     }
 
     addComment(unitId: string, subUnitId: string, origin: IThreadComment, shouldSync?: boolean) {
         const commentMap = this._ensureCommentMap(unitId, subUnitId);
+        if (commentMap.has(origin.id)) {
+            return true;
+        }
         const { parentId, children = [], ...rest } = origin;
         const comment = {
             ...rest,
@@ -234,6 +307,7 @@ export class ThreadCommentModel extends Disposable {
         if (!comment.threadId) {
             comment.threadId = comment.parentId || comment.id;
         }
+        this._invalidateSync(unitId, subUnitId, comment.threadId);
 
         const addCommentItem = (item: IThreadComment) => {
             commentMap.set(item.id, item);
@@ -251,7 +325,18 @@ export class ThreadCommentModel extends Disposable {
         if (!comment.parentId) {
             threadMap.set(comment.threadId, comment);
             for (const child of children) {
-                addCommentItem(child as IThreadComment);
+                if (
+                    child.id === comment.id
+                    || child.threadId !== comment.threadId
+                    || commentMap.has(child.id)
+                ) {
+                    continue;
+                }
+                addCommentItem({
+                    ...child,
+                    parentId: comment.id,
+                    ref: '',
+                } as IThreadComment);
             }
         }
 
@@ -265,8 +350,9 @@ export class ThreadCommentModel extends Disposable {
         const commentMap = this._ensureCommentMap(unitId, subUnitId);
         const oldComment = commentMap.get(payload.commentId);
         if (!oldComment) {
-            return true;
+            return false;
         }
+        this._invalidateSync(unitId, subUnitId, oldComment.threadId);
 
         oldComment.updated = true;
         oldComment.text = payload.text;
@@ -290,6 +376,7 @@ export class ThreadCommentModel extends Disposable {
             return false;
         }
 
+        this._invalidateSync(unitId, subUnitId, oldComment.threadId);
         oldComment.ref = payload.ref;
         this._commentUpdate$.next({
             unitId,
@@ -309,6 +396,7 @@ export class ThreadCommentModel extends Disposable {
             return false;
         }
 
+        this._invalidateSync(unitId, subUnitId, oldComment.threadId);
         oldComment.resolved = resolved;
         this._commentUpdate$.next({
             unitId,
@@ -379,6 +467,7 @@ export class ThreadCommentModel extends Disposable {
             return;
         }
 
+        this._invalidateSync(unitId, subUnitId, current.threadId);
         commentMap.delete(commentId);
 
         this._commentUpdate$.next({
@@ -394,6 +483,7 @@ export class ThreadCommentModel extends Disposable {
     }
 
     deleteThread(unitId: string, subUnitId: string, threadId: string) {
+        this._invalidateSync(unitId, subUnitId, threadId);
         const threadMap = this._ensureThreadMap(unitId, subUnitId);
         threadMap.delete(threadId);
 
@@ -423,30 +513,54 @@ export class ThreadCommentModel extends Disposable {
 
     deleteUnit(unitId: string) {
         const unitMap = this._commentsMap.get(unitId);
-        if (!unitMap) {
-            return;
-        }
-
-        unitMap.forEach((subUnitMap, subUnitId) => {
+        unitMap?.forEach((subUnitMap, subUnitId) => {
             subUnitMap.forEach((comment) => {
                 this.deleteComment(unitId, subUnitId, comment.id);
             });
         });
+        this._commentsMap.delete(unitId);
+        this._threadMap.delete(unitId);
+        this._tasks = this._tasks.filter((task) => task.unitId !== unitId);
+        const syncPrefix = `${unitId}\0`;
+        this._syncVersions.forEach((_version, key) => {
+            if (key.startsWith(syncPrefix)) {
+                this._syncVersions.delete(key);
+            }
+        });
     }
 
     getUnit(unitId: string) {
-        const unitMap = this._threadMap.get(unitId);
+        const unitMap = this._commentsMap.get(unitId);
         if (!unitMap) {
             return [];
         }
 
         const threads: IThreadInfo[] = [];
 
-        unitMap.forEach((subUnitSet, subUnitId) => {
-            subUnitSet.forEach((threadComment, threadId) => {
-                const thread = this.getThread(unitId, subUnitId, threadId);
-                if (thread) {
-                    threads.push(thread);
+        unitMap.forEach((commentMap, subUnitId) => {
+            const threadInfos = new Map<string, Omit<IThreadInfo, 'root'> & { root?: IThreadComment }>();
+            commentMap.forEach((comment) => {
+                let thread = threadInfos.get(comment.threadId);
+                if (!thread) {
+                    thread = {
+                        unitId,
+                        subUnitId,
+                        threadId: comment.threadId,
+                        children: [],
+                        relativeUsers: new Set(),
+                    };
+                    threadInfos.set(comment.threadId, thread);
+                }
+                if (comment.parentId) {
+                    thread.children.push(comment);
+                } else {
+                    thread.root = comment;
+                }
+                thread.relativeUsers.add(comment.personId);
+            });
+            threadInfos.forEach((thread) => {
+                if (thread.root) {
+                    threads.push(thread as IThreadInfo);
                 }
             });
         });
@@ -464,5 +578,37 @@ export class ThreadCommentModel extends Disposable {
         });
 
         return all;
+    }
+
+    query(query: IThreadCommentQuery = {}): IThreadInfo[] {
+        const unitIds = query.unitIds ? new Set(query.unitIds) : null;
+        const subUnitIds = query.subUnitIds ? new Set(query.subUnitIds) : null;
+        const anchorKinds = query.anchorKinds ? new Set(query.anchorKinds) : null;
+        const authorIds = query.authorIds ? new Set(query.authorIds) : null;
+
+        return this.getAll().flatMap(({ unitId, threads }) => {
+            if (unitIds && !unitIds.has(unitId)) {
+                return [];
+            }
+
+            return threads.filter((thread) => {
+                if (subUnitIds && !subUnitIds.has(thread.subUnitId)) {
+                    return false;
+                }
+                if (query.resolved !== undefined && Boolean(thread.root.resolved) !== query.resolved) {
+                    return false;
+                }
+                if (anchorKinds) {
+                    const anchor = deserializeThreadCommentAnchor(thread.root.ref);
+                    if (!anchor || !anchorKinds.has(anchor.kind)) {
+                        return false;
+                    }
+                }
+                if (authorIds && ![thread.root, ...thread.children].some((comment) => authorIds.has(comment.personId))) {
+                    return false;
+                }
+                return true;
+            });
+        });
     }
 }

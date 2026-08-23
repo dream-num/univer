@@ -27,6 +27,21 @@ import {
     UpdateCommentMutation,
 } from '../mutations/comment.mutation';
 
+type CommentWriteKind = 'resolve' | 'update';
+const latestWriteVersions = new WeakMap<IThreadComment, Record<CommentWriteKind, number>>();
+
+function startCommentWrite(comment: IThreadComment, kind: CommentWriteKind): number {
+    const versions = latestWriteVersions.get(comment) ?? { resolve: 0, update: 0 };
+    const version = versions[kind] + 1;
+    versions[kind] = version;
+    latestWriteVersions.set(comment, versions);
+    return version;
+}
+
+function isLatestCommentWrite(comment: IThreadComment, kind: CommentWriteKind, version: number): boolean {
+    return latestWriteVersions.get(comment)?.[kind] === version;
+}
+
 export interface IAddCommentCommandParams {
     unitId: string;
     subUnitId: string;
@@ -42,10 +57,31 @@ export const AddCommentCommand: ICommand<IAddCommentCommandParams> = {
         }
         const commandService = accessor.get(ICommandService);
         const dataSourceService = accessor.get(IThreadCommentDataSourceService);
+        const threadCommentModel = accessor.get(ThreadCommentModel);
         const { comment: originComment } = params;
-        const comment = await dataSourceService.addComment(originComment);
-        const syncUpdateMutationToColla = dataSourceService.syncUpdateMutationToColla;
         const isRoot = !originComment.parentId;
+        if (!isRoot && threadCommentModel.getRootComment(params.unitId, params.subUnitId, originComment.threadId)?.id !== originComment.parentId) {
+            return false;
+        }
+        const savedComment = await dataSourceService.addComment(originComment);
+        const comment = {
+            ...savedComment,
+            unitId: params.unitId,
+            subUnitId: params.subUnitId,
+            ref: originComment.ref,
+            parentId: originComment.parentId,
+            ...(!isRoot ? { threadId: originComment.threadId } : {}),
+        };
+        const syncUpdateMutationToColla = dataSourceService.syncUpdateMutationToColla;
+
+        if (!isRoot && threadCommentModel.getRootComment(params.unitId, params.subUnitId, originComment.threadId)?.id !== originComment.parentId) {
+            try {
+                await dataSourceService.deleteComment(params.unitId, params.subUnitId, comment.threadId, comment.id);
+            } catch {
+                // The local thread is already gone. Server-side parent validation remains authoritative.
+            }
+            return false;
+        }
 
         const redo = {
             id: AddCommentMutation.id,
@@ -95,12 +131,17 @@ export const UpdateCommentCommand: ICommand<IUpdateCommentCommandParams> = {
         }
 
         const { children, ...currentComment } = current;
+        const writeVersion = startCommentWrite(current, 'update');
         const success = await dataSourceService.updateComment({
             ...currentComment,
             ...payload,
         });
 
-        if (!success) {
+        if (
+            !success
+            || threadCommentModel.getComment(unitId, subUnitId, payload.commentId) !== current
+            || !isLatestCommentWrite(current, 'update', writeVersion)
+        ) {
             return false;
         }
 
@@ -109,8 +150,7 @@ export const UpdateCommentCommand: ICommand<IUpdateCommentCommandParams> = {
             params,
         };
 
-        commandService.executeCommand(redo.id, redo.params, { onlyLocal: !syncUpdateMutationToColla });
-        return true;
+        return commandService.executeCommand(redo.id, redo.params, { onlyLocal: !syncUpdateMutationToColla });
     },
 };
 
@@ -137,12 +177,17 @@ export const ResolveCommentCommand: ICommand<IResolveCommentCommandParams> = {
             return false;
         }
 
+        const writeVersion = startCommentWrite(currentComment, 'resolve');
         const success = await dataSourceService.resolveComment({
             ...currentComment,
             resolved,
         });
 
-        if (!success) {
+        if (
+            !success
+            || threadCommentModel.getComment(unitId, subUnitId, commentId) !== currentComment
+            || !isLatestCommentWrite(currentComment, 'resolve', writeVersion)
+        ) {
             return false;
         }
 
@@ -219,7 +264,7 @@ export const DeleteCommentTreeCommand: ICommand<IDeleteCommentCommandParams> = {
             return false;
         }
 
-        if (!(await dataSourceService.deleteComment(unitId, subUnitId, commentWithChildren.root.threadId, commentId))) {
+        if (!(await dataSourceService.deleteComment(unitId, subUnitId, commentWithChildren.root.threadId))) {
             return false;
         }
 

@@ -60,7 +60,7 @@ import { IShortcutService, ISidebarService, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SetActiveCommentOperation } from '../../commands/operations/comment.operations';
 import { ThreadCommentPanelService } from '../../services/thread-comment-panel.service';
 import { transformTextNodes2Document } from '../thread-comment-editor/util';
@@ -489,6 +489,81 @@ describe('ThreadCommentPanel', () => {
         expect(panelText.indexOf('thread-comment-ui.panel.solved')).toBeLessThan(panelText.indexOf('Resolved comment'));
     });
 
+    it('keeps an empty-id temporary target active and shows its editor', () => {
+        const testBed = createPanelTestBed();
+        testBed.panelService.setActiveComment({
+            unitId: UNIT_ID,
+            subUnitId: SHEET_ID,
+            commentId: '',
+        });
+        const rendered = renderPanel(
+            testBed.injector,
+            <ThreadCommentPanel
+                unitId={UNIT_ID}
+                subUnitId$={new BehaviorSubject<string | undefined>(SHEET_ID)}
+                type={UniverInstanceType.UNIVER_SHEET}
+                onAdd={() => undefined}
+                getSubUnitName={(subUnitId) => subUnitId}
+                tempComment={createComment({ id: '', threadId: '', ref: '#shape-1' })}
+            />
+        );
+        root = rendered.root;
+        container = rendered.container;
+
+        expect(container.textContent).toContain('thread-comment-ui.editor.placeholder');
+        expect(testBed.panelService.activeCommentId).toEqual({
+            unitId: UNIT_ID,
+            subUnitId: SHEET_ID,
+            commentId: '',
+        });
+    });
+
+    it('closes a temporary comment when the active subunit changes', () => {
+        const testBed = createPanelTestBed();
+        const activeSubUnit$ = new BehaviorSubject<string | undefined>(SHEET_ID);
+        const onTempCommentClose = vi.fn();
+        const rendered = renderPanel(
+            testBed.injector,
+            <ThreadCommentPanel
+                unitId={UNIT_ID}
+                subUnitId$={activeSubUnit$}
+                type={UniverInstanceType.UNIVER_SHEET}
+                onAdd={() => undefined}
+                getSubUnitName={(subUnitId) => subUnitId}
+                tempComment={createComment({ id: '', threadId: '', ref: '#shape-1' })}
+                onTempCommentClose={onTempCommentClose}
+            />
+        );
+        root = rendered.root;
+        container = rendered.container;
+
+        act(() => activeSubUnit$.next('sheet-2'));
+
+        expect(onTempCommentClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not render a temporary comment owned by another unit', () => {
+        const testBed = createPanelTestBed();
+        const onTempCommentClose = vi.fn();
+        const rendered = renderPanel(
+            testBed.injector,
+            <ThreadCommentPanel
+                unitId={UNIT_ID}
+                subUnitId$={new BehaviorSubject<string | undefined>(SHEET_ID)}
+                type={UniverInstanceType.UNIVER_SHEET}
+                onAdd={() => undefined}
+                getSubUnitName={(subUnitId) => subUnitId}
+                tempComment={createComment({ id: '', threadId: '', unitId: 'other-unit' })}
+                onTempCommentClose={onTempCommentClose}
+            />
+        );
+        root = rendered.root;
+        container = rendered.container;
+
+        expect(container.textContent).not.toContain('thread-comment-ui.editor.placeholder');
+        expect(onTempCommentClose).toHaveBeenCalledTimes(1);
+    });
+
     it('sets active comment from unresolved panel items and clears it for resolved items', () => {
         const testBed = createPanelTestBed();
         addRootComment(testBed.threadCommentModel, createComment({ id: 'open-thread', ref: 'A1' }));
@@ -514,5 +589,21 @@ describe('ThreadCommentPanel', () => {
         });
 
         expect(testBed.panelService.activeCommentId).toBeUndefined();
+    });
+
+    it('renders hundreds of comment threads within a bounded time', () => {
+        const testBed = createPanelTestBed();
+        for (let index = 0; index < 250; index += 1) {
+            addRootComment(testBed.threadCommentModel, createComment({ id: `bulk-${index}` }));
+        }
+
+        const startedAt = performance.now();
+        const rendered = renderDefaultPanel(testBed.injector);
+        const elapsed = performance.now() - startedAt;
+        root = rendered.root;
+        container = rendered.container;
+
+        expect(container.querySelectorAll(`[id^="PANEL-${UNIT_ID}-${SHEET_ID}-bulk-"]`)).toHaveLength(250);
+        expect(elapsed).toBeLessThan(5_000);
     });
 });

@@ -50,9 +50,30 @@ export {
     ThreadCommentResourceController,
 } from './controllers/tc-resource.controller';
 export { ThreadCommentModel } from './models/thread-comment.model';
-export type { CommentUpdate, IThreadInfo } from './models/thread-comment.model';
+export type { CommentUpdate, IThreadCommentQuery, IThreadInfo } from './models/thread-comment.model';
 export { UniverThreadCommentPlugin } from './plugin';
 export { IThreadCommentDataSourceService, ThreadCommentDataSourceService } from './services/tc-datasource.service';
 export type { IThreadCommentDataSource, ThreadCommentJSON } from './services/tc-datasource.service';
+export { isThreadCommentDocumentBody, ThreadCommentFacadeService } from './services/thread-comment-api.service';
+export type {
+    ICreateThreadCommentOptions,
+    IDeleteThreadCommentOptions,
+    IFacadeThreadCommentInfo,
+    IReplyThreadCommentOptions,
+    IUpdateThreadCommentOptions,
+    ThreadCommentContent,
+} from './services/thread-comment-api.service';
+export {
+    deserializeThreadCommentAnchor,
+    isThreadCommentAnchor,
+    serializeThreadCommentAnchor,
+    ThreadCommentAnchorKind,
+} from './types/comment-anchor';
+export type {
+    IThreadCommentAnchor,
+    IThreadCommentBaseRecordAnchor,
+    IThreadCommentElementAnchor,
+    IThreadCommentPositionAnchor,
+} from './types/comment-anchor';
 export { TC_PLUGIN_NAME } from './types/const';
 export type { IBaseComment, IThreadComment, IThreadCommentMention } from './types/interfaces/i-thread-comment';

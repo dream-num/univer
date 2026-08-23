@@ -22,7 +22,9 @@ import {
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     DocumentBlockRangeType,
+    FOCUSING_COMMON_DRAWINGS,
     ICommandService,
+    IContextService,
     Inject,
     IUniverInstanceService,
     UniverInstanceType,
@@ -48,6 +50,7 @@ export class DocContextMenuRenderController extends Disposable implements IRende
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(DocEventManagerService) private readonly _docEventManagerService: DocEventManagerService,
         @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService,
+        @IContextService private readonly _contextService: IContextService,
         @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
@@ -70,7 +73,10 @@ export class DocContextMenuRenderController extends Disposable implements IRende
                     return;
                 }
 
-                this._contextMenuService.triggerContextMenu(event, ContextMenuPosition.MAIN_AREA);
+                const position = this._contextService.getContextValue(FOCUSING_COMMON_DRAWINGS)
+                    ? ContextMenuPosition.DRAWING
+                    : ContextMenuPosition.MAIN_AREA;
+                this._contextMenuService.triggerContextMenu(event, position);
             }
         });
         this.disposeWithMe(documentsSubscription);

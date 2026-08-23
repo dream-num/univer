@@ -24,7 +24,7 @@ import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverThreadCommentPlugin } from '@univerjs/thread-comment';
 import { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
 import pkg from '../package.json';
-import { ShowAddSheetCommentModalOperation, ToggleSheetCommentPanelOperation } from './commands/operations/comment.operation';
+import { AddSheetDrawingCommentOperation, ShowAddSheetCommentModalOperation, ToggleSheetCommentPanelOperation } from './commands/operations/comment.operation';
 import { defaultPluginConfig, SHEETS_THREAD_COMMENT_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { ComponentsController } from './controllers/components.controller';
 import { SheetsThreadCommentRenderController } from './controllers/render-controllers/render.controller';
@@ -86,6 +86,7 @@ export class UniverSheetsThreadCommentUIPlugin extends Plugin {
         });
 
         [
+            AddSheetDrawingCommentOperation,
             ShowAddSheetCommentModalOperation,
             ToggleSheetCommentPanelOperation,
         ].forEach((command) => {

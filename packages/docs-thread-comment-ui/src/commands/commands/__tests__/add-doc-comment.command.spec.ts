@@ -27,7 +27,7 @@ import {
 } from '@univerjs/thread-comment';
 import { SetActiveCommentOperation, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import { DesktopSidebarService, ISidebarService } from '@univerjs/ui';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DEFAULT_DOC_SUBUNIT_ID } from '../../../common/const';
 import { AddDocCommentComment } from '../add-doc-comment.command';
 
@@ -165,8 +165,62 @@ describe('AddDocCommentComment', () => {
         });
     });
 
+    it('uses the server-assigned id for the document anchor', async () => {
+        const selectionManager = get(DocSelectionManagerService);
+        selectionManager.__TEST_ONLY_setCurrentSelection({
+            unitId: DOC_ID,
+            subUnitId: DOC_ID,
+        });
+        selectionManager.__TEST_ONLY_add([{
+            startOffset: 0,
+            endOffset: 5,
+            collapsed: false,
+            isActive: true,
+            segmentId: '',
+            style: null as never,
+        }]);
+        get(IThreadCommentDataSourceService).dataSource = {
+            addComment: vi.fn(async (comment: IThreadComment) => ({
+                ...comment,
+                id: 'server-comment-id',
+                threadId: 'server-comment-id',
+            })),
+            updateComment: vi.fn(),
+            resolveComment: vi.fn(),
+            deleteComment: vi.fn(),
+            listComments: vi.fn(),
+            saveCommentToSnapshot: (value) => value,
+        };
+
+        const result = await commandService.executeCommand(AddDocCommentComment.id, {
+            unitId: DOC_ID,
+            comment: createComment('client-comment-id'),
+            range: { startOffset: 0, endOffset: 5 },
+        });
+
+        expect(result).toBe(true);
+        expect(getDocBody()?.customDecorations).toEqual([
+            expect.objectContaining({ id: 'server-comment-id' }),
+        ]);
+        expect(get(ThreadCommentModel).getThread(
+            DOC_ID,
+            DEFAULT_DOC_SUBUNIT_ID,
+            'server-comment-id'
+        )?.root.id).toBe('server-comment-id');
+        expect(get(ThreadCommentPanelService).activeCommentId?.commentId).toBe('server-comment-id');
+    });
+
     it('does not attach a comment when the document has no selected text', async () => {
         const comment = createComment('comment-without-selection');
+        const addComment = vi.fn(async (value: IThreadComment) => value);
+        get(IThreadCommentDataSourceService).dataSource = {
+            addComment,
+            updateComment: vi.fn(),
+            resolveComment: vi.fn(),
+            deleteComment: vi.fn(),
+            listComments: vi.fn(),
+            saveCommentToSnapshot: (value) => value,
+        };
         const result = await commandService.executeCommand(AddDocCommentComment.id, {
             unitId: DOC_ID,
             comment,
@@ -180,6 +234,7 @@ describe('AddDocCommentComment', () => {
         expect(get(ThreadCommentModel).getThread(DOC_ID, DEFAULT_DOC_SUBUNIT_ID, comment.id)).toBeUndefined();
         expect(getDocBody()?.customDecorations).toEqual([]);
         expect(get(ThreadCommentPanelService).activeCommentId).toBeUndefined();
+        expect(addComment).not.toHaveBeenCalled();
     });
 
     it('rejects an incomplete add-comment request without changing the document', async () => {

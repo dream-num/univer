@@ -22,6 +22,7 @@ import {
     DrawingTypeEnum,
     ICommandService,
 } from '@univerjs/core';
+import { FBase } from '@univerjs/core/facade';
 import {
     RemoveDocDrawingCommand,
     SetDocDrawingArrangeCommand,
@@ -33,12 +34,14 @@ import {
  * Facade API for an image in a document.
  * @hideconstructor
  */
-export class FDocumentImage {
+export class FDocumentImage extends FBase {
     constructor(
         private readonly _document: FDocument,
         private readonly _imageId: string,
-        private readonly _injector: Injector
-    ) {}
+        protected readonly _injector: Injector
+    ) {
+        super();
+    }
 
     /**
      * Gets the id of the document containing the image.

@@ -20,6 +20,7 @@ import { IMenuManagerService } from '@univerjs/ui';
 import { AddDocCommentComment } from '../commands/commands/add-doc-comment.command';
 import { DeleteDocCommentComment } from '../commands/commands/delete-doc-comment.command';
 import {
+    AddDocDrawingCommentOperation,
     ShowCommentPanelOperation,
     StartAddCommentOperation,
     ToggleCommentPanelOperation,
@@ -38,6 +39,7 @@ export class DocThreadCommentUIController extends Disposable {
 
     private _initCommands() {
         [
+            AddDocDrawingCommentOperation,
             AddDocCommentComment,
             DeleteDocCommentComment,
             ShowCommentPanelOperation,

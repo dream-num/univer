@@ -832,6 +832,16 @@ export class FOverGridImage extends FBase {
         return this._image.drawingId;
     }
 
+    /** Returns the workbook unit id that owns this image. */
+    getUnitId(): string {
+        return this._image.unitId;
+    }
+
+    /** Returns the worksheet id that owns this image. */
+    getSubUnitId(): string {
+        return this._image.subUnitId;
+    }
+
     /**
      * Get the drawing type of the image
      * @returns {DrawingTypeEnum} The drawing type of the image

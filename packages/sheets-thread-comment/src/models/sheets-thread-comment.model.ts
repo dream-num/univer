@@ -17,7 +17,7 @@
 import type { CommentUpdate, IThreadComment } from '@univerjs/thread-comment';
 import { Disposable, Inject, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 import { singleReferenceToGrid } from '@univerjs/engine-formula';
-import { ThreadCommentModel } from '@univerjs/thread-comment';
+import { deserializeThreadCommentAnchor, ThreadCommentModel } from '@univerjs/thread-comment';
 import { Subject } from 'rxjs';
 
 export type SheetCommentUpdate = CommentUpdate & {
@@ -118,6 +118,9 @@ export class SheetsThreadCommentModel extends Disposable {
     }
 
     private _addComment(unitId: string, subUnitId: string, comment: IThreadComment) {
+        if (deserializeThreadCommentAnchor(comment.ref)) {
+            return;
+        }
         const location = singleReferenceToGrid(comment.ref);
         const parentId = comment.parentId;
         const { row, column } = location;
@@ -163,6 +166,9 @@ export class SheetsThreadCommentModel extends Disposable {
                 }
                 case 'delete': {
                     const { isRoot, comment } = update.payload;
+                    if (deserializeThreadCommentAnchor(comment.ref)) {
+                        return;
+                    }
                     if (isRoot) {
                         const location = singleReferenceToGrid(comment.ref);
                         const { row, column } = location;
@@ -180,6 +186,9 @@ export class SheetsThreadCommentModel extends Disposable {
                     if (!comment) {
                         return;
                     }
+                    if (deserializeThreadCommentAnchor(comment.ref)) {
+                        return;
+                    }
                     const location = singleReferenceToGrid(comment.ref);
                     this._commentUpdate$.next({
                         ...update,
@@ -188,6 +197,9 @@ export class SheetsThreadCommentModel extends Disposable {
                     break;
                 }
                 case 'updateRef': {
+                    if (deserializeThreadCommentAnchor(update.payload.ref)) {
+                        return;
+                    }
                     const location = singleReferenceToGrid(update.payload.ref);
                     const { commentId } = update.payload;
                     const currentLoc = locationMap.get(commentId);

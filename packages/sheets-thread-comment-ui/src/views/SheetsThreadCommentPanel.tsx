@@ -16,10 +16,11 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { IThreadComment } from '@univerjs/thread-comment';
-import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { singleReferenceToGrid } from '@univerjs/engine-formula';
 import { IMarkSelectionService } from '@univerjs/sheets-ui';
-import { ThreadCommentPanel, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
+import { deserializeThreadCommentAnchor, serializeThreadCommentAnchor, ThreadCommentAnchorKind } from '@univerjs/thread-comment';
+import { ThreadCommentDraftService, ThreadCommentPanel, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { map } from 'rxjs';
@@ -33,6 +34,21 @@ export const SheetsThreadCommentPanel = () => {
     const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const unitId = workbook.getUnitId();
     const commandService = useDependency(ICommandService);
+    const draftService = useDependency(ThreadCommentDraftService);
+    const userManagerService = useDependency(UserManagerService);
+    const draft = useObservable(draftService.draft$, draftService.draft);
+    const tempDrawingComment = draft?.anchor.kind === ThreadCommentAnchorKind.SHEET_DRAWING && draft.unitId === unitId
+        ? {
+            id: '',
+            threadId: '',
+            unitId: draft.unitId,
+            subUnitId: draft.subUnitId,
+            ref: serializeThreadCommentAnchor(draft.anchor),
+            dT: '',
+            personId: userManagerService.getCurrentUser().userID,
+            text: { dataStream: '\r\n' },
+        }
+        : null;
     const subUnitId$ = useMemo(() => workbook.activeSheet$.pipe(map((i) => i?.getSheetId())), [workbook.activeSheet$]);
     const subUnitId = useObservable(subUnitId$, workbook.getActiveSheet()?.getSheetId());
     const hoverShapeId = useRef<string | null>(null);
@@ -48,6 +64,10 @@ export const SheetsThreadCommentPanel = () => {
 
         const sort = (comments: IThreadComment[]) => {
             return comments.map((comment) => {
+                const anchor = deserializeThreadCommentAnchor(comment.ref);
+                if (anchor?.kind === ThreadCommentAnchorKind.SHEET_DRAWING) {
+                    return { ...comment, p: [sheetIndex[comment.subUnitId] ?? 0, Number.MAX_SAFE_INTEGER, 0] };
+                }
                 const ref = singleReferenceToGrid(comment.ref);
                 const p = [sheetIndex[comment.subUnitId] ?? 0, ref.row, ref.column];
                 return { ...comment, p };
@@ -70,6 +90,9 @@ export const SheetsThreadCommentPanel = () => {
     }, [workbook]);
 
     const showShape = useCallback((comment: IThreadComment) => {
+        if (deserializeThreadCommentAnchor(comment.ref)) {
+            return null;
+        }
         if (comment.unitId === unitId && comment.subUnitId === subUnitId && !comment.resolved) {
             const { row, column } = singleReferenceToGrid(comment.ref);
             const worksheet = workbook.getSheetBySheetId(comment.subUnitId);
@@ -156,6 +179,12 @@ export const SheetsThreadCommentPanel = () => {
             onDeleteComment={() => {
                 handleLeave();
                 return true;
+            }}
+            tempComment={tempDrawingComment}
+            onTempCommentClose={() => draftService.cancel()}
+            formatRef={(comment) => {
+                const anchor = deserializeThreadCommentAnchor(comment.ref);
+                return anchor?.kind === ThreadCommentAnchorKind.SHEET_DRAWING ? `#${anchor.elementId}` : comment.ref;
             }}
         />
     );

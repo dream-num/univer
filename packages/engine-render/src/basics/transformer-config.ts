@@ -48,6 +48,7 @@ export interface ITransformerConfig {
     borderSpacing?: number;
 
     resizeEnabled?: boolean;
+    moveEnabled?: boolean;
     enabledAnchors?: number[];
     anchorFill?: string;
     anchorStroke?: string;
@@ -81,6 +82,7 @@ export interface ITransformerConfig {
 }
 
 export const DEFAULT_TRANSFORMER_CONFIG = {
+    moveEnabled: true,
     resizeEnabled: true,
     rotateEnabled: true,
     rotateAnchorOffset: 28,

@@ -24,6 +24,7 @@ export {
 } from './f-document';
 export { FDocumentParagraph, isParagraphFacade } from './f-document-paragraph';
 export type { IFDocumentFindTextOptions, IFDocumentParagraphInfo } from './f-document-paragraph';
+export { FDocumentObjectPermission, FDocumentPermission } from './f-document-permission';
 export { DocsSectionUnsupportedDocumentFlavorError, FDocumentSection } from './f-document-section';
 export type { FDocumentSectionPageSetup, IFDocumentSectionColumnOptions, IFDocumentSectionDescription } from './f-document-section';
 export { FDocumentTextRange } from './f-document-text-range';

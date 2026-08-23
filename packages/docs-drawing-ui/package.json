@@ -87,6 +87,7 @@
     "devDependencies": {
         "@testing-library/react": "^16.3.2",
         "@univerjs-infra/shared": "workspace:*",
+        "@univerjs/protocol": "workspace:*",
         "postcss": "^8.5.26",
         "react": "18.3.1",
         "rxjs": "^7.8.2",

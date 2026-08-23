@@ -18,8 +18,9 @@ import type { IResolvedSectionHeaderFooterReference, ISectionBreak, ISectionColu
 import type { IEffectiveSectionPageSetup, IHeaderFooterProps } from '@univerjs/docs';
 import type { FDocument } from './f-document';
 import type { IFDocumentTextRange } from './utils';
-import { ColumnSeparatorType, DocumentFlavor, generateRandomId, getSectionHeaderFooterReferenceKey, ICommandService, PageOrientType, resolveSectionHeaderFooterReference, SectionType, Tools } from '@univerjs/core';
-import { CreateHeaderFooterCommand, createSectionColumnProperties, DeleteDocumentSectionBreakCommand, getEffectiveSectionPageSetup, getSectionContentWidth, getTopLevelSectionBreaks, HeaderFooterType, SetSectionHeaderFooterLinkCommand, UpdateDocumentSectionCommand } from '@univerjs/docs';
+import { ColumnSeparatorType, DocumentFlavor, generateRandomId, getSectionHeaderFooterReferenceKey, ICommandService, IPermissionService, PageOrientType, resolveSectionHeaderFooterReference, SectionType, Tools } from '@univerjs/core';
+import { CreateHeaderFooterCommand, createSectionColumnProperties, DeleteDocumentSectionBreakCommand, getDocumentSectionPermissionObjectId, getEffectiveSectionPageSetup, getSectionContentWidth, getTopLevelSectionBreaks, HeaderFooterType, SetSectionHeaderFooterLinkCommand, UpdateDocumentSectionCommand } from '@univerjs/docs';
+import { FDocumentObjectPermission } from './f-document-permission';
 
 export interface IFDocumentSectionColumnOptions {
     /** Gap after each column except the last, in 96-DPI layout pixels. */
@@ -92,7 +93,8 @@ export class FDocumentSection {
     constructor(
         private readonly _document: FDocument,
         private readonly _sectionId: string,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @IPermissionService private readonly _permissionService: IPermissionService
     ) {}
 
     /**
@@ -105,6 +107,16 @@ export class FDocumentSection {
      */
     getId(): string {
         return this._sectionId;
+    }
+
+    /** Returns the effective edit permission facade for this section. */
+    getPermission(): FDocumentObjectPermission {
+        return new FDocumentObjectPermission(
+            this._document.getId(),
+            getDocumentSectionPermissionObjectId('', this._sectionId),
+            this._commandService,
+            this._permissionService
+        );
     }
 
     /**

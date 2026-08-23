@@ -158,6 +158,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
     hoverEnterFunc: Nullable<(e: IPointerEvent | IMouseEvent) => void>;
     hoverLeaveFunc: Nullable<(e: IPointerEvent | IMouseEvent) => void>;
 
+    moveEnabled: boolean = DEFAULT_TRANSFORMER_CONFIG.moveEnabled;
     resizeEnabled: boolean = DEFAULT_TRANSFORMER_CONFIG.resizeEnabled;
 
     rotateEnabled: boolean = DEFAULT_TRANSFORMER_CONFIG.rotateEnabled;
@@ -356,6 +357,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
             hoverEnabled,
             hoverEnterFunc,
             hoverLeaveFunc,
+            moveEnabled,
             resizeEnabled,
             rotateEnabled,
             rotationSnaps,
@@ -404,6 +406,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
             hoverEnabled = objectTransformerConfig.hoverEnabled ?? hoverEnabled;
             hoverEnterFunc = objectTransformerConfig.hoverEnterFunc ?? hoverEnterFunc;
             hoverLeaveFunc = objectTransformerConfig.hoverLeaveFunc ?? hoverLeaveFunc;
+            moveEnabled = objectTransformerConfig.moveEnabled ?? moveEnabled;
             resizeEnabled = objectTransformerConfig.resizeEnabled ?? resizeEnabled;
             rotateEnabled = objectTransformerConfig.rotateEnabled ?? rotateEnabled;
             rotationSnaps = objectTransformerConfig.rotationSnaps ?? rotationSnaps;
@@ -453,6 +456,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
             hoverEnabled,
             hoverEnterFunc,
             hoverLeaveFunc,
+            moveEnabled,
             resizeEnabled,
             rotateEnabled,
             rotationSnaps,
@@ -509,7 +513,12 @@ export class Transformer extends Disposable implements ITransformerConfig {
             this._startOffsetX = evtOffsetX;
             this._startOffsetY = evtOffsetY;
 
-            const { isCropper } = this._getConfig(applyObject);
+            const { isCropper, moveEnabled } = this._getConfig(applyObject);
+
+            if (!isCropper && !moveEnabled) {
+                this._updateActiveObjectList(applyObject, evt);
+                return;
+            }
 
             const scene = this._getTopScene();
 

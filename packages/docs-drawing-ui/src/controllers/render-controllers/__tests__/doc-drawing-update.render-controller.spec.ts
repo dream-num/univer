@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import { BooleanNumber, DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType } from '@univerjs/core';
-import { RichTextEditingMutation } from '@univerjs/docs';
+import { BooleanNumber, DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, ObjectRelativeFromH, ObjectRelativeFromV, PermissionService, PositionedObjectLayoutType } from '@univerjs/core';
+import { RichTextEditingMutation, setDocumentPermissionValue } from '@univerjs/docs';
 import { SetDocDrawingArrangeCommand, UpdateDrawingDocTransformCommand } from '@univerjs/docs-drawing';
 import { DocumentEditArea } from '@univerjs/engine-render';
+import { UnitAction } from '@univerjs/protocol';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { GroupDocDrawingCommand } from '../../../commands/commands/group-doc-drawing.command';
@@ -36,6 +37,8 @@ function createController(options: {
     const featurePluginGroupUpdate$ = new Subject<any>();
     const featurePluginUngroupUpdate$ = new Subject<any>();
     const focus$ = new Subject<any[] | null>();
+    const add$ = new Subject<Array<{ unitId: string }>>();
+    const update$ = new Subject<Array<{ unitId: string }>>();
     const changeEnd$ = new Subject<any>();
     const editAreaChange$ = new Subject<void>();
     const refreshDrawings$ = new Subject<unknown>();
@@ -47,6 +50,7 @@ function createController(options: {
 
     const transformer = {
         changeEnd$,
+        clearControlByIds: vi.fn(),
         resetProps: vi.fn(),
     };
     const shapeByDrawingId = new Map<string, any>();
@@ -57,13 +61,17 @@ function createController(options: {
             if (!shapeByDrawingId.has(drawingId)) {
                 shapeByDrawingId.set(drawingId, {
                     drawingId,
+                    evented: true,
+                    oKey: drawingId,
                     setOpacity: vi.fn(),
+                    transformerConfig: {},
                 });
             }
             return [shapeByDrawingId.get(drawingId)];
         }),
         attachTransformerTo: vi.fn(),
         detachTransformerFrom: vi.fn(),
+        getTransformer: vi.fn(() => transformer),
     };
     const viewModel = {
         editAreaChange$,
@@ -76,6 +84,7 @@ function createController(options: {
     };
     const snapshot = {
         body: {
+            dataStream: 'abcdefghij\r\n',
             customBlocks: [
                 { blockId: 'body-drawing', startIndex: 4 },
             ],
@@ -83,6 +92,7 @@ function createController(options: {
         headers: {
             'header-1': {
                 body: {
+                    dataStream: 'abcdefghij\r\n',
                     customBlocks: [
                         { blockId: 'header-drawing', startIndex: 2 },
                     ],
@@ -92,6 +102,7 @@ function createController(options: {
         footers: {
             'footer-1': {
                 body: {
+                    dataStream: 'abcdefghij\r\n',
                     customBlocks: [
                         { blockId: 'footer-drawing', startIndex: 7 },
                     ],
@@ -105,6 +116,10 @@ function createController(options: {
         unit: {
             getDrawings: vi.fn(() => snapshot.drawings),
             getSnapshot: vi.fn(() => snapshot),
+            getBody: vi.fn(() => snapshot.body),
+            getSelfOrHeaderFooterModel: vi.fn((segmentId: string) => ({
+                getBody: () => segmentId ? snapshot.headers[segmentId as keyof typeof snapshot.headers]?.body ?? snapshot.footers[segmentId as keyof typeof snapshot.footers]?.body : snapshot.body,
+            })),
         },
         scene,
         mainComponent: {
@@ -131,12 +146,16 @@ function createController(options: {
         getDrawingByParam: vi.fn(({ drawingId }: { drawingId: string }) => options.drawings?.[drawingId]),
     };
     const drawingManagerService = {
+        add$,
         featurePluginUpdate$,
         featurePluginOrderUpdate$,
         featurePluginGroupUpdate$,
         featurePluginUngroupUpdate$,
         focus$,
+        update$,
         getDrawingByParam: vi.fn(({ drawingId }: { drawingId: string }) => options.drawings?.[drawingId]),
+        focusDrawing: vi.fn(),
+        getFocusDrawings: vi.fn(() => []),
     };
     const contextService = {
         setContextValue: vi.fn(),
@@ -160,6 +179,7 @@ function createController(options: {
         openFile: vi.fn(options.openFile ?? (async () => [])),
     };
 
+    const permissionService = new PermissionService();
     const controller = new DocDrawingUpdateRenderController(
         context as never,
         commandService as never,
@@ -168,6 +188,7 @@ function createController(options: {
         imageIoService as never,
         docDrawingService as never,
         drawingManagerService as never,
+        permissionService,
         contextService as never,
         { show: vi.fn() } as never,
         { t: vi.fn((key: string) => key) } as never,
@@ -191,6 +212,7 @@ function createController(options: {
         getShape: (drawingId: string) => shapeByDrawingId.get(drawingId),
         onBlur$,
         onFocus$,
+        permissionService,
         refreshDrawings$,
         scene,
         setEditArea: (value: DocumentEditArea) => {
@@ -200,6 +222,7 @@ function createController(options: {
             isFocusing = value;
         },
         transformer,
+        update$,
     };
 }
 
@@ -394,6 +417,41 @@ describe('DocDrawingUpdateRenderController', () => {
         expect(commandService.executeCommand).not.toHaveBeenCalled();
     });
 
+    it('does not open the image picker when Document Edit is denied', async () => {
+        const openFile = vi.fn(async () => [{} as File]);
+        const { commandService, controller, permissionService } = createController({ openFile });
+        setDocumentPermissionValue(permissionService, 'doc-1', 'doc-1', UnitAction.Edit, false);
+
+        await expect(controller.insertDocImage()).resolves.toBe(false);
+
+        expect(openFile).not.toHaveBeenCalled();
+        expect(commandService.executeCommand).not.toHaveBeenCalled();
+    });
+
+    it('does not insert an image when Document Edit is revoked during upload', async () => {
+        let finishSaving: (value: unknown) => void = () => {};
+        const saveImage = vi.fn(() => new Promise<unknown>((resolve) => {
+            finishSaving = resolve;
+        }));
+        const { commandService, controller, permissionService } = createController({
+            openFile: async () => [{} as File],
+            saveImage,
+        });
+
+        const insertion = controller.insertDocImage();
+        await vi.waitFor(() => expect(saveImage).toHaveBeenCalledTimes(1));
+        setDocumentPermissionValue(permissionService, 'doc-1', 'doc-1', UnitAction.Edit, false);
+        finishSaving({
+            imageId: 'image-1',
+            imageSourceType: 'URL',
+            source: 'image.png',
+            base64Cache: 'data:image/png;base64,',
+        });
+
+        await expect(insertion).resolves.toBe(false);
+        expect(commandService.executeCommand).not.toHaveBeenCalled();
+    });
+
     it('toggles drawing editability between body and header/footer edit areas', () => {
         const bodyDrawing = {
             drawingId: 'body-drawing',
@@ -421,6 +479,53 @@ describe('DocDrawingUpdateRenderController', () => {
         expect(scene.attachTransformerTo).toHaveBeenCalledWith(getShape('header-drawing'));
         expect(getShape('header-drawing').setOpacity).toHaveBeenLastCalledWith(1);
         expect(getShape('body-drawing').setOpacity).toHaveBeenLastCalledWith(0.5);
+    });
+
+    it('removes read-only drawings from picking and transformer interaction, then restores both', async () => {
+        const { getShape, permissionService, scene, transformer } = createController({
+            drawings: {
+                'body-drawing': {
+                    drawingId: 'body-drawing',
+                    isMultiTransform: BooleanNumber.FALSE,
+                },
+            },
+        });
+
+        setDocumentPermissionValue(permissionService, 'doc-1', 'doc-1', UnitAction.Edit, false);
+
+        expect(getShape('body-drawing').evented).toBe(false);
+        expect(transformer.clearControlByIds).toHaveBeenCalledWith(['body-drawing']);
+        expect(getShape('body-drawing').transformerConfig).toMatchObject({
+            moveEnabled: false,
+            resizeEnabled: false,
+            rotateEnabled: false,
+        });
+
+        setDocumentPermissionValue(permissionService, 'doc-1', 'doc-1', UnitAction.Edit, true);
+        expect(getShape('body-drawing').evented).toBe(true);
+        expect(scene.attachTransformerTo).toHaveBeenLastCalledWith(getShape('body-drawing'));
+        expect(getShape('body-drawing').transformerConfig).not.toHaveProperty('moveEnabled', false);
+        expect(getShape('body-drawing').transformerConfig).not.toHaveProperty('resizeEnabled', false);
+        expect(getShape('body-drawing').transformerConfig).not.toHaveProperty('rotateEnabled', false);
+    });
+
+    it('keeps a remotely updated drawing non-interactive while local permission is read-only', async () => {
+        const { getShape, permissionService, scene, update$ } = createController({
+            drawings: {
+                'body-drawing': {
+                    drawingId: 'body-drawing',
+                    isMultiTransform: BooleanNumber.FALSE,
+                },
+            },
+        });
+        setDocumentPermissionValue(permissionService, 'doc-1', 'doc-1', UnitAction.Edit, false);
+        scene.attachTransformerTo.mockClear();
+
+        update$.next([{ unitId: 'doc-1' }]);
+        await Promise.resolve();
+
+        expect(getShape('body-drawing').evented).toBe(false);
+        expect(scene.attachTransformerTo).not.toHaveBeenCalled();
     });
 
     it('keeps all drawings opaque while the document input is not focused', () => {

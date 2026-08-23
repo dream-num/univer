@@ -77,4 +77,30 @@ describe('Transformer', () => {
         scene.dispose();
         engine.dispose();
     });
+
+    it('keeps read-only objects selectable without starting a move gesture', () => {
+        const engine = new Engine('transformer-readonly-engine', { elementWidth: 100, elementHeight: 100, dpr: 1 });
+        const scene = new Scene('transformer-readonly-scene', engine);
+        const rect = new Rect('transformer-readonly-rect', { width: 10, height: 10 });
+        rect.transformerConfig = {
+            moveEnabled: false,
+            resizeEnabled: false,
+            rotateEnabled: false,
+        };
+        const transformer = new Transformer(scene);
+        const changeStart = vi.fn();
+        const subscription = transformer.changeStart$.subscribe(changeStart);
+
+        transformer.attachTo(rect);
+        rect.onPointerDown$.emitEvent({ offsetX: 5, offsetY: 5 } as never);
+
+        expect(transformer.getSelectedObjectMap().get(rect.oKey)).toBe(rect);
+        expect(changeStart).not.toHaveBeenCalled();
+
+        subscription.unsubscribe();
+        transformer.dispose();
+        rect.dispose();
+        scene.dispose();
+        engine.dispose();
+    });
 });

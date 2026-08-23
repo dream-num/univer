@@ -24,13 +24,15 @@ import {
     FOCUSING_COMMON_DRAWINGS,
     IContextService,
     Inject,
+    IPermissionService,
     isInternalEditorID,
     IUniverInstanceService,
     Optional,
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
-import { DocSelectionManagerService } from '@univerjs/docs';
+import { DocSelectionManagerService, getDocumentPermissionValue } from '@univerjs/docs';
+import { UnitAction } from '@univerjs/protocol';
 import { FLOAT_MENU_COMPONENT_KEY } from '../views/float-toolbar/FloatToolbar';
 import { IDocEmbedRuntimeFocusCoordinator } from './doc-embed-integration.service';
 import { DocCanvasPopManagerService } from './doc-popup-manager.service';
@@ -64,6 +66,7 @@ export class DocFloatMenuService extends Disposable implements IRenderModule {
         @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(DocSelectionRenderService) private readonly _docSelectionRenderService: DocSelectionRenderService,
         @IContextService private readonly _contextService: IContextService,
+        @IPermissionService private readonly _permissionService: IPermissionService,
         @Optional(IDocEmbedRuntimeFocusCoordinator) private readonly _embedRuntimeFocusCoordinator?: IDocEmbedRuntimeFocusCoordinator
     ) {
         super();
@@ -71,6 +74,7 @@ export class DocFloatMenuService extends Disposable implements IRenderModule {
         if (isInternalEditorID(this._context.unitId)) {
             return;
         }
+        this._initPermissionLifecycle();
         this._initSelectionChange();
         this._initEmbedRuntimeLifecycle();
 
@@ -136,6 +140,23 @@ export class DocFloatMenuService extends Disposable implements IRenderModule {
         }));
     }
 
+    private _initPermissionLifecycle(): void {
+        this.disposeWithMe(this._permissionService.permissionPointUpdate$.subscribe(() => {
+            if (!this._canEditDocument()) {
+                this._hideFloatMenu();
+            }
+        }));
+    }
+
+    private _canEditDocument(): boolean {
+        return getDocumentPermissionValue(
+            this._permissionService,
+            this._context.unitId,
+            this._context.unitId,
+            UnitAction.Edit
+        );
+    }
+
     private _initEmbedRuntimeLifecycle(): void {
         if (!this._embedRuntimeFocusCoordinator) {
             return;
@@ -176,7 +197,7 @@ export class DocFloatMenuService extends Disposable implements IRenderModule {
 
     private _showFloatMenu(unitId: string, range: ITextRangeParam) {
         const documentDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
-        if (!documentDataModel || documentDataModel.getDisabled()) {
+        if (!documentDataModel || documentDataModel.getDisabled() || !this._canEditDocument()) {
             return;
         }
 

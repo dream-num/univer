@@ -27,6 +27,7 @@ import {
     DocumentFlavor,
     HorizontalAlign,
     ICommandService,
+    IPermissionService,
     IUniverInstanceService,
     NAMED_STYLE_MAP,
     NamedStyleType,
@@ -39,10 +40,12 @@ import {
 import {
     DocSelectionManagerService,
     DocSkeletonManagerService,
+    getDocumentPermissionValue,
     RichTextEditingMutation,
     SetTextSelectionsOperation,
 } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
+import { UnitAction } from '@univerjs/protocol';
 import {
     COLOR_PICKER_COMPONENT,
     COMMON_LABEL_COMPONENT,
@@ -58,7 +61,7 @@ import {
     SYMBOL_PICKER_COMPONENT,
 } from '@univerjs/ui';
 
-import { combineLatest, distinctUntilChanged, map, Observable, shareReplay } from 'rxjs';
+import { combineLatest, distinctUntilChanged, map, Observable, shareReplay, startWith } from 'rxjs';
 import { OpenHeaderFooterPanelCommand } from '../commands/commands/doc-header-footer.command';
 import { HorizontalLineCommand } from '../commands/commands/doc-horizontal-line.command';
 import {
@@ -327,8 +330,9 @@ function getTableDisabledObservable(accessor: IAccessor): Observable<boolean> {
 export function disableMenuWhenNoDocRange(accessor: IAccessor): Observable<boolean> {
     const docSelectionManagerService = accessor.get(DocSelectionManagerService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
+    const permissionService = accessor.get(IPermissionService);
 
-    return new Observable((subscriber) => {
+    const selectionDisabled$ = new Observable<boolean>((subscriber) => {
         const subscription = docSelectionManagerService.textSelection$.subscribe((selection) => {
             if (selection == null) {
                 subscriber.next(true);
@@ -356,6 +360,20 @@ export function disableMenuWhenNoDocRange(accessor: IAccessor): Observable<boole
 
         return () => subscription.unsubscribe();
     });
+
+    const permissionDisabled$ = combineLatest([
+        univerInstanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC),
+        permissionService.permissionPointUpdate$.pipe(startWith(undefined)),
+    ]).pipe(map(([document]) => !document || !getDocumentPermissionValue(
+        permissionService,
+        document.getUnitId(),
+        document.getUnitId(),
+        UnitAction.Edit
+    )));
+
+    return combineLatest([selectionDisabled$, permissionDisabled$]).pipe(
+        map(([selectionDisabled, permissionDisabled]) => selectionDisabled || permissionDisabled)
+    );
 }
 
 export const DOC_INSERT_EMOJI_MENU_ID = 'doc.menu.insert-emoji';

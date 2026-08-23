@@ -20,6 +20,8 @@ export { SetActiveCommentOperation } from './commands/operations/comment.operati
 export type { ISetActiveCommentOperationParams } from './commands/operations/comment.operations';
 export type { IUniverThreadCommentUIConfig } from './config/config';
 export { UniverThreadCommentUIPlugin } from './plugin';
+export { ThreadCommentDraftService } from './services/thread-comment-draft.service';
+export type { IThreadCommentDraft } from './services/thread-comment-draft.service';
 export { ThreadCommentPanelService } from './services/thread-comment-panel.service';
 export type { ActiveCommentInfo } from './services/thread-comment-panel.service';
 export { ThreadCommentPanel } from './views/ThreadCommentPanel';

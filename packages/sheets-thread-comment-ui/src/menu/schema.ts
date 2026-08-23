@@ -16,8 +16,8 @@
 
 import type { MenuSchemaType } from '@univerjs/ui';
 import { ContextMenuGroup, ContextMenuPosition, RibbonInsertGroup } from '@univerjs/ui';
-import { ShowAddSheetCommentModalOperation, ToggleSheetCommentPanelOperation } from '../commands/operations/comment.operation';
-import { threadCommentMenuFactory, threadPanelMenuFactory } from './menu';
+import { AddSheetDrawingCommentOperation, ShowAddSheetCommentModalOperation, ToggleSheetCommentPanelOperation } from '../commands/operations/comment.operation';
+import { drawingCommentMenuFactory, threadCommentMenuFactory, threadPanelMenuFactory } from './menu';
 
 export const menuSchema: MenuSchemaType = {
     [RibbonInsertGroup.MEDIA]: {
@@ -32,6 +32,14 @@ export const menuSchema: MenuSchemaType = {
             [ShowAddSheetCommentModalOperation.id]: {
                 order: 0,
                 menuItemFactory: threadCommentMenuFactory,
+            },
+        },
+    },
+    [ContextMenuPosition.DRAWING]: {
+        [ContextMenuGroup.OTHERS]: {
+            [AddSheetDrawingCommentOperation.id]: {
+                order: 0,
+                menuItemFactory: drawingCommentMenuFactory,
             },
         },
     },

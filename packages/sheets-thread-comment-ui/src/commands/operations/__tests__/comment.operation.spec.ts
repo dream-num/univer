@@ -19,6 +19,7 @@ import type { ISelectionWithStyle } from '@univerjs/sheets';
 import type { IThreadComment } from '@univerjs/thread-comment';
 import {
     ICommandService,
+    Injector,
     IUniverInstanceService,
     LifecycleService,
     LifecycleStages,
@@ -27,6 +28,7 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
+import { IDrawingManagerService } from '@univerjs/drawing';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
 import { CellPopupManagerService, SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
@@ -41,7 +43,7 @@ import { DesktopSidebarService, ISidebarService } from '@univerjs/ui';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SheetsThreadCommentPopupService } from '../../../services/sheets-thread-comment-popup.service';
 import { SHEETS_THREAD_COMMENT_PANEL } from '../../../types/const';
-import { ShowAddSheetCommentModalOperation, ToggleSheetCommentPanelOperation } from '../comment.operation';
+import { AddSheetDrawingCommentOperation, ShowAddSheetCommentModalOperation, ToggleSheetCommentPanelOperation } from '../comment.operation';
 
 const unitId = 'comment-workbook';
 const subUnitId = 'sheet-1';
@@ -192,5 +194,23 @@ describe('sheet thread comment operations', () => {
         expect(closeResult).toBe(true);
         expect(panelService.panelVisible).toBe(false);
         expect(sidebarService.visible).toBe(false);
+    });
+
+    it('rejects a focused drawing from another workbook or worksheet', () => {
+        const injector = new Injector();
+        injector.add([IDrawingManagerService, {
+            useValue: { getFocusDrawings: () => [{ unitId: 'other-book', subUnitId, drawingId: 'drawing-1' }] },
+        }]);
+        injector.add([IUniverInstanceService, {
+            useValue: {
+                getCurrentUnitOfType: () => ({
+                    getUnitId: () => unitId,
+                    getActiveSheet: () => ({ getSheetId: () => subUnitId }),
+                }),
+            },
+        }]);
+
+        expect(AddSheetDrawingCommentOperation.handler(injector)).toBe(false);
+        injector.dispose();
     });
 });

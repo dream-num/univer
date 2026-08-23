@@ -20,7 +20,14 @@ import { UniverInstanceType } from '@univerjs/core';
 import { RangeProtectionPermissionViewPoint, WorkbookCommentPermission, WorksheetViewPermission } from '@univerjs/sheets';
 import { getCurrentRangeDisable$, whenSheetEditorFocused } from '@univerjs/sheets-ui';
 import { getMenuHiddenObservable, KeyCode, MenuItemType, MetaKeys } from '@univerjs/ui';
-import { ShowAddSheetCommentModalOperation, ToggleSheetCommentPanelOperation } from '../commands/operations/comment.operation';
+import { AddSheetDrawingCommentOperation, ShowAddSheetCommentModalOperation, ToggleSheetCommentPanelOperation } from '../commands/operations/comment.operation';
+
+export const drawingCommentMenuFactory = () => ({
+    id: AddSheetDrawingCommentOperation.id,
+    type: MenuItemType.BUTTON,
+    icon: 'CommentIcon',
+    title: 'sheets-thread-comment-ui.menu.addComment',
+});
 
 export const threadCommentMenuFactory = (accessor: IAccessor) => {
     return {

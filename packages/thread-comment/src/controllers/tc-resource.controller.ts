@@ -18,11 +18,35 @@ import type { IThreadComment } from '../types/interfaces/i-thread-comment';
 import { Disposable, Inject, IResourceManagerService, UniverInstanceType } from '@univerjs/core';
 import { ThreadCommentModel } from '../models/thread-comment.model';
 import { IThreadCommentDataSourceService } from '../services/tc-datasource.service';
+import { isThreadCommentDocumentBody } from '../services/thread-comment-api.service';
 import { TC_PLUGIN_NAME } from '../types/const';
 
 export type UnitThreadCommentJSON = Record<string, IThreadComment[]>;
 
 export const SHEET_UNIVER_THREAD_COMMENT_PLUGIN = `SHEET_${TC_PLUGIN_NAME}`;
+
+function isStringArray(value: unknown): value is string[] {
+    return Array.isArray(value) && value.every((item) => typeof item === 'string');
+}
+
+function isSnapshotComment(value: unknown, allowChildren = true): value is IThreadComment {
+    if (!value || typeof value !== 'object') {
+        return false;
+    }
+    const comment = value as Record<string, unknown>;
+    return typeof comment.id === 'string'
+        && comment.id.length > 0
+        && typeof comment.threadId === 'string'
+        && comment.threadId.length > 0
+        && typeof comment.ref === 'string'
+        && (comment.text === undefined || isThreadCommentDocumentBody(comment.text))
+        && (comment.attachments === undefined || isStringArray(comment.attachments))
+        && (comment.mentions === undefined || isStringArray(comment.mentions))
+        && (!allowChildren || comment.children === undefined || (
+            Array.isArray(comment.children)
+            && comment.children.every((child) => isSnapshotComment(child, false))
+        ));
+}
 
 export class ThreadCommentResourceController extends Disposable {
     constructor(
@@ -57,8 +81,16 @@ export class ThreadCommentResourceController extends Disposable {
                 return {};
             }
             try {
-                return JSON.parse(json);
-            } catch (err) {
+                const value: unknown = JSON.parse(json);
+                if (!value || typeof value !== 'object' || Array.isArray(value)) {
+                    return {};
+                }
+                return Object.fromEntries(Object.entries(value).flatMap(([subUnitId, comments]) => (
+                    Array.isArray(comments)
+                        ? [[subUnitId, comments.filter((comment) => isSnapshotComment(comment))]]
+                        : []
+                )));
+            } catch {
                 return {};
             }
         };
@@ -66,7 +98,13 @@ export class ThreadCommentResourceController extends Disposable {
         this.disposeWithMe(
             this._resourceManagerService.registerPluginResource({
                 pluginName: SHEET_UNIVER_THREAD_COMMENT_PLUGIN,
-                businesses: [UniverInstanceType.UNIVER_SHEET, UniverInstanceType.UNIVER_DOC],
+                businesses: [
+                    UniverInstanceType.UNIVER_SHEET,
+                    UniverInstanceType.UNIVER_DOC,
+                    UniverInstanceType.UNIVER_SLIDE,
+                    UniverInstanceType.UNIVER_BOARD,
+                    UniverInstanceType.UNIVER_BASE,
+                ],
                 toJson: (unitID) => toJson(unitID),
                 parseJson: (json) => parseJson(json),
                 onUnLoad: (unitID) => {
@@ -76,7 +114,20 @@ export class ThreadCommentResourceController extends Disposable {
                     Object.keys(value).forEach((subunitId) => {
                         const commentList = value[subunitId];
                         commentList.forEach((comment: IThreadComment) => {
-                            this._threadCommentModel.addComment(unitID, subunitId, comment);
+                            const seenIds = new Set([comment.id]);
+                            const children = comment.children?.filter((child) => {
+                                if (child.threadId !== comment.threadId || seenIds.has(child.id)) {
+                                    return false;
+                                }
+                                seenIds.add(child.id);
+                                return true;
+                            }).map((child) => ({ ...child, unitId: unitID, subUnitId: subunitId }));
+                            this._threadCommentModel.addComment(unitID, subunitId, {
+                                ...comment,
+                                unitId: unitID,
+                                subUnitId: subunitId,
+                                children,
+                            });
                         });
 
                         this._threadCommentModel.syncThreadComments(unitID, subunitId, commentList.map((i) => i.threadId));

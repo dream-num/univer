@@ -18,7 +18,7 @@ import type { IDocumentBody } from '@univerjs/core';
 import type { IThreadComment } from '../../types/interfaces/i-thread-comment';
 import type { IThreadCommentDataSource } from '../tc-datasource.service';
 import { Injector } from '@univerjs/core';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { IThreadCommentDataSourceService, ThreadCommentDataSourceService } from '../tc-datasource.service';
 
 function createBody(text: string): IDocumentBody {
@@ -197,5 +197,50 @@ describe('ThreadCommentDataSourceService', () => {
             id: 'server-id',
             threadId: 'server-id',
         });
+    });
+
+    it('coalesces concurrent adds with the same client comment id', async () => {
+        const service = createService();
+        const comment = createComment({ id: 'idempotent-client-id' });
+        let finishAdd: ((comment: IThreadComment) => void) | undefined;
+        const addComment = vi.fn(() => new Promise<IThreadComment>((resolve) => {
+            finishAdd = resolve;
+        }));
+        service.dataSource = {
+            addComment,
+            updateComment: async () => true,
+            resolveComment: async () => true,
+            deleteComment: async () => true,
+            listComments: async () => [],
+            saveCommentToSnapshot: (input) => input,
+        };
+
+        const first = service.addComment(comment);
+        const duplicate = service.addComment(comment);
+        expect(duplicate).toBe(first);
+        expect(addComment).toHaveBeenCalledTimes(1);
+
+        finishAdd?.(comment);
+        await expect(Promise.all([first, duplicate])).resolves.toEqual([comment, comment]);
+    });
+
+    it('allows an add to be retried after the previous request fails', async () => {
+        const service = createService();
+        const comment = createComment({ id: 'retry-client-id' });
+        const addComment = vi.fn()
+            .mockRejectedValueOnce(new Error('network failure'))
+            .mockResolvedValueOnce(comment);
+        service.dataSource = {
+            addComment,
+            updateComment: async () => true,
+            resolveComment: async () => true,
+            deleteComment: async () => true,
+            listComments: async () => [],
+            saveCommentToSnapshot: (input) => input,
+        };
+
+        await expect(service.addComment(comment)).rejects.toThrow('network failure');
+        await expect(service.addComment(comment)).resolves.toEqual(comment);
+        expect(addComment).toHaveBeenCalledTimes(2);
     });
 });

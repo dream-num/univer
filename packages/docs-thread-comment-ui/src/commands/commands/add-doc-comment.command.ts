@@ -17,7 +17,7 @@
 import type { ICommand, ITextRange } from '@univerjs/core';
 import type { IThreadComment } from '@univerjs/thread-comment';
 import { CommandType, CustomDecorationType, ICommandService, sequenceExecute } from '@univerjs/core';
-import { addCustomDecorationBySelectionFactory } from '@univerjs/docs-ui';
+import { addCustomDecorationBySelectionFactory, addCustomDecorationFactory } from '@univerjs/docs-ui';
 import { AddCommentMutation, IThreadCommentDataSourceService } from '@univerjs/thread-comment';
 import { SetActiveCommentOperation } from '@univerjs/thread-comment-ui';
 import { DEFAULT_DOC_SUBUNIT_ID } from '../../common/const';
@@ -36,19 +36,28 @@ export const AddDocCommentComment: ICommand<IAddDocCommentComment> = {
             return false;
         }
         const { comment: originComment, unitId } = params;
-        const dataSourceService = accessor.get(IThreadCommentDataSourceService);
-        const comment = await dataSourceService.addComment(originComment);
-        const commandService = accessor.get(ICommandService);
-
-        const doMutation = addCustomDecorationBySelectionFactory(
+        const selectionMutation = addCustomDecorationBySelectionFactory(
             accessor,
             {
-                id: comment.threadId,
+                id: originComment.threadId || originComment.id,
                 type: CustomDecorationType.COMMENT,
                 unitId,
             }
         );
-        if (doMutation) {
+        if (selectionMutation) {
+            const dataSourceService = accessor.get(IThreadCommentDataSourceService);
+            const comment = await dataSourceService.addComment(originComment);
+            const doMutation = addCustomDecorationFactory({
+                id: comment.id,
+                type: CustomDecorationType.COMMENT,
+                unitId,
+                ranges: [{
+                    ...params.range,
+                    collapsed: false,
+                    isActive: true,
+                }],
+            });
+            const commandService = accessor.get(ICommandService);
             const addComment = {
                 id: AddCommentMutation.id,
                 params: {

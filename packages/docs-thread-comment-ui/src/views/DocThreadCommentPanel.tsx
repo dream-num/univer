@@ -17,9 +17,10 @@
 import type { DocumentDataModel } from '@univerjs/core';
 import type { IAddDocCommentComment } from '../commands/commands/add-doc-comment.command';
 import type { IDeleteDocCommentComment } from '../commands/commands/delete-doc-comment.command';
-import { ICommandService, Injector, isInternalEditorID, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, Injector, isInternalEditorID, IUniverInstanceService, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import { ThreadCommentPanel } from '@univerjs/thread-comment-ui';
+import { deserializeThreadCommentAnchor, serializeThreadCommentAnchor, ThreadCommentAnchorKind, ThreadCommentModel } from '@univerjs/thread-comment';
+import { ThreadCommentDraftService, ThreadCommentPanel } from '@univerjs/thread-comment-ui';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo, useState } from 'react';
 import { debounceTime, filter, map, Observable } from 'rxjs';
@@ -30,12 +31,21 @@ import { DEFAULT_DOC_SUBUNIT_ID } from '../common/const';
 import { shouldDisableAddComment } from '../menu/menu';
 import { DocThreadCommentService } from '../services/doc-thread-comment.service';
 
+export function getDocCommentPanelSubUnitId(draft: { unitId: string; subUnitId: string } | null, unitId: string | undefined): string {
+    return draft && draft.unitId === unitId ? draft.subUnitId : DEFAULT_DOC_SUBUNIT_ID;
+}
+
 export const DocThreadCommentPanel = () => {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const injector = useDependency(Injector);
     const doc$ = useMemo(() => univerInstanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC).pipe(filter((doc) => !!doc && !isInternalEditorID(doc.getUnitId()))), [univerInstanceService]);
     const doc = useObservable(doc$);
-    const subUnitId$ = useMemo(() => new Observable<string>((sub) => sub.next(DEFAULT_DOC_SUBUNIT_ID)), []);
+    const draftService = useDependency(ThreadCommentDraftService);
+    const drawingDraft = useObservable(draftService.draft$, draftService.draft);
+    const subUnitId$ = useMemo(
+        () => new Observable<string>((sub) => sub.next(getDocCommentPanelSubUnitId(drawingDraft, doc?.getUnitId()))),
+        [doc, drawingDraft]
+    );
     const docSelectionManagerService = useDependency(DocSelectionManagerService);
     const selectionChange$ = useMemo(
         () => docSelectionManagerService.textSelection$.pipe(debounceTime(16)),
@@ -48,8 +58,35 @@ export const DocThreadCommentPanel = () => {
         [injector, selectionChange$]
     );
     const commandService = useDependency(ICommandService);
+    const threadCommentModel = useDependency(ThreadCommentModel);
+    useObservable(threadCommentModel.commentUpdate$);
     const docCommentService = useDependency(DocThreadCommentService);
-    const tempComment = useObservable(docCommentService.addingComment$);
+    const textTempComment = useObservable(docCommentService.addingComment$);
+    const userManagerService = useDependency(UserManagerService);
+    const drawingTempComment = drawingDraft?.anchor.kind === ThreadCommentAnchorKind.DOC_DRAWING && drawingDraft.unitId === doc?.getUnitId()
+        ? {
+            id: '',
+            threadId: '',
+            unitId: drawingDraft.unitId,
+            subUnitId: drawingDraft.subUnitId,
+            ref: serializeThreadCommentAnchor(drawingDraft.anchor),
+            dT: '',
+            personId: userManagerService.getCurrentUser().userID,
+            text: { dataStream: '\r\n' },
+        }
+        : null;
+    const tempComment = drawingTempComment ?? textTempComment;
+    const drawingIds = new Set(Object.keys(doc?.getSnapshot().drawings ?? {}));
+    const isDrawingComment = (comment: { ref: string }) => {
+        const anchor = deserializeThreadCommentAnchor(comment.ref);
+        return anchor?.kind === ThreadCommentAnchorKind.DOC_DRAWING
+            || (comment.ref.startsWith('#') && drawingIds.has(comment.ref.slice(1)));
+    };
+    const drawingCommentIds = doc
+        ? threadCommentModel.getUnit(doc.getUnitId())
+            .filter((thread) => isDrawingComment(thread.root))
+            .map((thread) => thread.root.id)
+        : [];
     const [commentIds, setCommentIds] = useState<string[]>([]);
 
     useEffect(() => {
@@ -94,33 +131,48 @@ export const DocThreadCommentPanel = () => {
             getSubUnitName={() => ''}
             disableAdd={disableAdd}
             tempComment={tempComment}
-            onAddComment={(comment) => {
+            onAddComment={async (comment) => {
+                if (drawingTempComment && !comment.parentId) {
+                    return true;
+                }
                 // attach an comment to an custom-range
                 if (!comment.parentId) {
                     const params: IAddDocCommentComment = {
                         unitId,
-                        range: tempComment!,
+                        range: textTempComment!,
                         comment,
                     };
-                    commandService.executeCommand(AddDocCommentComment.id, params);
+                    const success = await commandService.executeCommand(AddDocCommentComment.id, params);
+                    if (!success) {
+                        throw new Error('Failed to add document comment.');
+                    }
                     docCommentService.endAdd();
                     return false;
                 }
 
                 return true;
             }}
-            onDeleteComment={(comment) => {
+            onAfterDeleteComment={async (comment) => {
                 if (!comment.parentId) {
+                    if (isDrawingComment(comment)) {
+                        return;
+                    }
                     const params: IDeleteDocCommentComment = {
                         unitId,
                         commentId: comment.id,
                     };
-                    commandService.executeCommand(DeleteDocCommentComment.id, params);
-                    return false;
+                    await commandService.executeCommand(DeleteDocCommentComment.id, params);
                 }
-                return true;
             }}
-            showComments={commentIds}
+            showComments={[
+                ...commentIds,
+                ...drawingCommentIds,
+            ]}
+            onTempCommentClose={() => draftService.cancel()}
+            formatRef={(comment) => {
+                const anchor = deserializeThreadCommentAnchor(comment.ref);
+                return anchor?.kind === ThreadCommentAnchorKind.DOC_DRAWING ? `#${anchor.elementId}` : comment.ref;
+            }}
         />
     );
 };

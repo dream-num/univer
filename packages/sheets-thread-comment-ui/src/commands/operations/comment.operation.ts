@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import type { IOperation } from '@univerjs/core';
+import type { IOperation, Workbook } from '@univerjs/core';
 import type { ISheetLocation } from '@univerjs/sheets';
-import { CommandType, IUniverInstanceService } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { IDrawingManagerService } from '@univerjs/drawing';
 import { getSheetCommandTarget, SheetsSelectionsService } from '@univerjs/sheets';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
-import { ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
+import { ThreadCommentAnchorKind } from '@univerjs/thread-comment';
+import { ThreadCommentDraftService, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import { ISidebarService } from '@univerjs/ui';
 import { SheetsThreadCommentPopupService } from '../../services/sheets-thread-comment-popup.service';
 import { SHEETS_THREAD_COMMENT_PANEL } from '../../types/const';
@@ -88,6 +90,42 @@ export const ToggleSheetCommentPanelOperation: IOperation = {
             panelService.setPanelVisible(true);
         }
 
+        return true;
+    },
+};
+
+export const AddSheetDrawingCommentOperation: IOperation = {
+    id: 'sheet.operation.add-drawing-comment',
+    type: CommandType.OPERATION,
+    handler(accessor) {
+        const drawing = accessor.get(IDrawingManagerService).getFocusDrawings()[0];
+        const workbook = accessor.get(IUniverInstanceService)
+            .getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        if (
+            !drawing
+            || !workbook
+            || drawing.unitId !== workbook.getUnitId()
+            || drawing.subUnitId !== workbook.getActiveSheet()?.getSheetId()
+        ) {
+            return false;
+        }
+        accessor.get(ThreadCommentDraftService).place({
+            unitId: drawing.unitId,
+            subUnitId: drawing.subUnitId,
+            anchor: {
+                kind: ThreadCommentAnchorKind.SHEET_DRAWING,
+                pageId: drawing.subUnitId,
+                elementId: drawing.drawingId,
+            },
+        });
+        const panelService = accessor.get(ThreadCommentPanelService);
+        accessor.get(ISidebarService).open({
+            header: { title: 'sheets-thread-comment-ui.panel.title' },
+            children: { label: SHEETS_THREAD_COMMENT_PANEL },
+            width: 360,
+            onClose: () => panelService.setPanelVisible(false),
+        });
+        panelService.setPanelVisible(true);
         return true;
     },
 };

@@ -15,7 +15,7 @@
  */
 
 import type { IWorkbookData } from '@univerjs/core';
-import { IUniverInstanceService, LocaleType, Univer, UniverInstanceType } from '@univerjs/core';
+import { LocaleType, Univer, UniverInstanceType } from '@univerjs/core';
 import { DesktopSidebarService, ISidebarService } from '@univerjs/ui';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ThreadCommentPanelService } from '../thread-comment-panel.service';
@@ -40,7 +40,6 @@ describe('ThreadCommentPanelService', () => {
     let univer: Univer;
     let service: ThreadCommentPanelService;
     let sidebarService: ISidebarService;
-    let univerInstanceService: IUniverInstanceService;
 
     beforeEach(() => {
         univer = new Univer();
@@ -49,9 +48,6 @@ describe('ThreadCommentPanelService', () => {
         injector.add([ThreadCommentPanelService]);
 
         univer.createUnit(UniverInstanceType.UNIVER_SHEET, workbookData);
-        univerInstanceService = injector.get(IUniverInstanceService);
-        univerInstanceService.focusUnit(workbookData.id);
-
         service = injector.get(ThreadCommentPanelService);
         sidebarService = injector.get(ISidebarService);
     });
@@ -80,15 +76,5 @@ describe('ThreadCommentPanelService', () => {
 
         expect(service.activeCommentId).toEqual({ unitId: 'book-1', subUnitId: 'sheet-1', commentId: 'c-1', trigger: 'cell' });
         expect(activeComments.at(-1)).toEqual({ unitId: 'book-1', subUnitId: 'sheet-1', commentId: 'c-1', trigger: 'cell' });
-    });
-
-    it('closes the sidebar when the current sheet is removed', () => {
-        sidebarService.open({});
-        service.setPanelVisible(true);
-
-        univerInstanceService.disposeUnit(workbookData.id);
-
-        expect(sidebarService.visible).toBe(false);
-        expect(service.panelVisible).toBe(false);
     });
 });

@@ -15,9 +15,9 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { Disposable, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { Disposable, Inject } from '@univerjs/core';
 import { ISidebarService } from '@univerjs/ui';
-import { BehaviorSubject, filter } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 export type ActiveCommentInfo = Nullable<{ unitId: string; subUnitId: string; commentId: string; trigger?: string }>;
 
@@ -32,8 +32,7 @@ export class ThreadCommentPanelService extends Disposable {
     activeCommentId$ = this._activeCommentId$.asObservable();
 
     constructor(
-        @Inject(ISidebarService) private readonly _sidebarService: ISidebarService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
+        @Inject(ISidebarService) private readonly _sidebarService: ISidebarService
     ) {
         super();
         this._init();
@@ -51,13 +50,6 @@ export class ThreadCommentPanelService extends Disposable {
                     this.setPanelVisible(false);
                 }
             })
-        );
-
-        this.disposeWithMe(
-            this._univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET)
-                .pipe(filter((sheet) => !sheet)).subscribe(() => {
-                    this._sidebarService.close();
-                })
         );
     }
 

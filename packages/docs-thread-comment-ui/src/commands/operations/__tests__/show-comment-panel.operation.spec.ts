@@ -20,12 +20,14 @@ import type { ISidebarMethodOptions } from '@univerjs/ui';
 import {
     Disposable,
     ICommandService,
+    Injector,
     IUniverInstanceService,
     toDisposable,
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
+import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import { ISidebarService } from '@univerjs/ui';
@@ -34,6 +36,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { DEFAULT_DOC_SUBUNIT_ID, DOCS_THREAD_COMMENT_PANEL } from '../../../common/const';
 import { DocThreadCommentService } from '../../../services/doc-thread-comment.service';
 import {
+    AddDocDrawingCommentOperation,
     ShowCommentPanelOperation,
     StartAddCommentOperation,
     ToggleCommentPanelOperation,
@@ -217,5 +220,18 @@ describe('doc thread comment panel operations', () => {
         expect(result).toBe(false);
         expect(docThreadCommentService.addingComment).toBeUndefined();
         expect(panelService.panelVisible).toBe(false);
+    });
+
+    it('rejects a focused drawing left over from another document', () => {
+        const injector = new Injector();
+        injector.add([IDrawingManagerService, {
+            useValue: { getFocusDrawings: () => [{ unitId: 'other-doc', subUnitId: 'other-doc', drawingId: 'drawing-1' }] },
+        }]);
+        injector.add([IUniverInstanceService, {
+            useValue: { getCurrentUnitOfType: () => ({ getUnitId: () => unitId }) },
+        }]);
+
+        expect(AddDocDrawingCommentOperation.handler(injector)).toBe(false);
+        injector.dispose();
     });
 });

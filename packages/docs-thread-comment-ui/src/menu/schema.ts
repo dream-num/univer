@@ -18,10 +18,11 @@ import type { MenuSchemaType } from '@univerjs/ui';
 import { FLOAT_TOOLBAR_MENU_POSITION } from '@univerjs/docs-ui';
 import { ContextMenuGroup, ContextMenuPosition, RibbonInsertGroup } from '@univerjs/ui';
 import {
+    AddDocDrawingCommentOperation,
     StartAddCommentOperation,
     ToggleCommentPanelOperation,
 } from '../commands/operations/show-comment-panel.operation';
-import { AddDocCommentMenuItemFactory, ToolbarDocCommentMenuItemFactory } from './menu';
+import { AddDocCommentMenuItemFactory, AddDocDrawingCommentMenuItemFactory, ToolbarDocCommentMenuItemFactory } from './menu';
 
 export const menuSchema: MenuSchemaType = {
     [RibbonInsertGroup.MEDIA]: {
@@ -41,6 +42,14 @@ export const menuSchema: MenuSchemaType = {
             [StartAddCommentOperation.id]: {
                 order: 1,
                 menuItemFactory: AddDocCommentMenuItemFactory,
+            },
+        },
+    },
+    [ContextMenuPosition.DRAWING]: {
+        [ContextMenuGroup.DATA]: {
+            [AddDocDrawingCommentOperation.id]: {
+                order: 1,
+                menuItemFactory: AddDocDrawingCommentMenuItemFactory,
             },
         },
     },

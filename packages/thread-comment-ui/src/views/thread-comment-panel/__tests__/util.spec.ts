@@ -16,7 +16,7 @@
 
 import type { IThreadComment } from '@univerjs/thread-comment';
 import { describe, expect, it } from 'vitest';
-import { getThreadCommentPanelItemKey } from '../util';
+import { getThreadCommentPanelItemKey, isSameThreadCommentTarget, shouldClearThreadCommentTarget } from '../util';
 
 describe('getThreadCommentPanelItemKey', () => {
     it('returns unique keys for comments with empty ids', () => {
@@ -53,5 +53,24 @@ describe('getThreadCommentPanelItemKey', () => {
         } as IThreadComment;
 
         expect(getThreadCommentPanelItemKey(comment, 0, 'unsolved')).toBe('comment-1');
+    });
+});
+
+describe('isSameThreadCommentTarget', () => {
+    const comment = { id: 'comment-1', unitId: 'unit-1', subUnitId: 'sub-unit-1' } as IThreadComment;
+
+    it('requires the unit, subunit, and comment ids to match', () => {
+        expect(isSameThreadCommentTarget({ unitId: 'unit-1', subUnitId: 'sub-unit-1', commentId: 'comment-1' }, comment)).toBe(true);
+        expect(isSameThreadCommentTarget({ unitId: 'unit-2', subUnitId: 'sub-unit-1', commentId: 'comment-1' }, comment)).toBe(false);
+        expect(isSameThreadCommentTarget({ unitId: 'unit-1', subUnitId: 'sub-unit-2', commentId: 'comment-1' }, comment)).toBe(false);
+    });
+});
+
+describe('shouldClearThreadCommentTarget', () => {
+    it('clears deleted targets and targets from a previously active unit', () => {
+        expect(shouldClearThreadCommentTarget({ unitId: 'unit-1' }, 'unit-1', true)).toBe(false);
+        expect(shouldClearThreadCommentTarget({ unitId: 'unit-1' }, 'unit-1', false)).toBe(true);
+        expect(shouldClearThreadCommentTarget({ unitId: 'unit-1' }, 'unit-2', true)).toBe(true);
+        expect(shouldClearThreadCommentTarget(undefined, 'unit-1', false)).toBe(false);
     });
 });

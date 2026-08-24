@@ -889,27 +889,6 @@ export type BaseHitTestResult =
         value: number;
     }
     | {
-        type: 'grid-attachment-add' | 'grid-attachment-expand';
-        tableId: TableId;
-        viewId: ViewId;
-        recordId: RecordId;
-        fieldId: FieldId;
-        cellRect: IBaseRect;
-        virtual?: boolean;
-    }
-    | {
-        type: 'grid-attachment-item';
-        tableId: TableId;
-        viewId: ViewId;
-        recordId: RecordId;
-        fieldId: FieldId;
-        cellRect: IBaseRect;
-        attachmentIndex: number;
-        attachmentId?: string;
-        attachmentPreviewable: boolean;
-        virtual?: boolean;
-    }
-    | {
         type: 'grid-row-header' | 'grid-row-checkbox';
         tableId: TableId;
         viewId: ViewId;

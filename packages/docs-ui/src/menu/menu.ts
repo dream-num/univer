@@ -330,7 +330,6 @@ function getTableDisabledObservable(accessor: IAccessor): Observable<boolean> {
 export function disableMenuWhenNoDocRange(accessor: IAccessor): Observable<boolean> {
     const docSelectionManagerService = accessor.get(DocSelectionManagerService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const permissionService = accessor.get(IPermissionService);
 
     const selectionDisabled$ = new Observable<boolean>((subscriber) => {
         const subscription = docSelectionManagerService.textSelection$.subscribe((selection) => {
@@ -361,7 +360,15 @@ export function disableMenuWhenNoDocRange(accessor: IAccessor): Observable<boole
         return () => subscription.unsubscribe();
     });
 
-    const permissionDisabled$ = combineLatest([
+    return combineLatest([selectionDisabled$, disableMenuWithoutDocumentEditPermission(accessor)]).pipe(
+        map(([selectionDisabled, permissionDisabled]) => selectionDisabled || permissionDisabled)
+    );
+}
+
+function disableMenuWithoutDocumentEditPermission(accessor: IAccessor): Observable<boolean> {
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    const permissionService = accessor.get(IPermissionService);
+    return combineLatest([
         univerInstanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC),
         permissionService.permissionPointUpdate$.pipe(startWith(undefined)),
     ]).pipe(map(([document]) => !document || !getDocumentPermissionValue(
@@ -370,10 +377,6 @@ export function disableMenuWhenNoDocRange(accessor: IAccessor): Observable<boole
         document.getUnitId(),
         UnitAction.Edit
     )));
-
-    return combineLatest([selectionDisabled$, permissionDisabled$]).pipe(
-        map(([selectionDisabled, permissionDisabled]) => selectionDisabled || permissionDisabled)
-    );
 }
 
 export const DOC_INSERT_EMOJI_MENU_ID = 'doc.menu.insert-emoji';
@@ -1759,5 +1762,6 @@ export function PageSettingMenuItemFactory(accessor: IAccessor): IMenuButtonItem
         icon: 'DocSettingIcon',
         tooltip: 'docs-ui.toolbar.pageSetup',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+        disabled$: disableMenuWithoutDocumentEditPermission(accessor),
     };
 }

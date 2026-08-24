@@ -1314,6 +1314,9 @@ importers:
       '@univerjs-infra/shared':
         specifier: workspace:*
         version: link:../../common/shared
+      '@univerjs/protocol':
+        specifier: workspace:*
+        version: link:../protocol
       postcss:
         specifier: ^8.5.26
         version: 8.5.26

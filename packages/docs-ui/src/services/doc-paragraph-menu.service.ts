@@ -18,8 +18,8 @@ import type { DocumentDataModel, ICustomBlock, ICustomTable, IDocumentBlockRange
 import type { IBoundRectNoAngle, IRenderContext, IRenderModule, ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IMutiPageParagraphBound, ITableBound, ITableParagraphBound } from './doc-event-manager.service';
 import type { IEditorInputConfig } from './selection/doc-selection-render.service';
-import { BlockType, DataStreamTreeTokenType, Disposable, DOC_RANGE_TYPE, DocumentBlockType, getParagraphContentStartOffset, Inject, isInternalEditorID, PresetListType } from '@univerjs/core';
-import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
+import { BlockType, DataStreamTreeTokenType, Disposable, DOC_RANGE_TYPE, DocumentBlockType, getParagraphContentStartOffset, Inject, IPermissionService, isInternalEditorID, PresetListType } from '@univerjs/core';
+import { canEditDocumentTargets, DocSelectionManagerService, DocSkeletonManagerService, getDocumentEditTargetObjectIds } from '@univerjs/docs';
 import { DocumentEditArea } from '@univerjs/engine-render';
 import { BehaviorSubject, combineLatest, first, throttleTime } from 'rxjs';
 import { VIEWPORT_KEY } from '../basics/docs-view-key';
@@ -151,7 +151,8 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
         @Inject(DocCanvasPopManagerService) private _docPopupManagerService: DocCanvasPopManagerService,
         @Inject(DocSkeletonManagerService) private _docSkeletonManagerService: DocSkeletonManagerService,
         @Inject(DocFloatMenuService) private _floatMenuService: DocFloatMenuService,
-        @Inject(DocSelectionRenderService) private _docSelectionRenderService: DocSelectionRenderService
+        @Inject(DocSelectionRenderService) private _docSelectionRenderService: DocSelectionRenderService,
+        @IPermissionService private readonly _permissionService: IPermissionService
     ) {
         super();
 
@@ -160,6 +161,13 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
         }
 
         this._init();
+        this.disposeWithMe(this._permissionService.permissionPointUpdate$.subscribe(() => {
+            const menu = this._paragraphMenu;
+            if (!this._canEditDocument(menu?.target.menuRange, menu?.paragraph.segmentId)) {
+                this._isBlockMenuDragging = false;
+                this.hideParagraphMenu(true);
+            }
+        }));
     }
 
     private _isCursorInActiveParagraph() {
@@ -263,7 +271,8 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
             if (
                 viewModel.getEditArea() === DocumentEditArea.BODY &&
                 !this._floatMenuService.floatMenu &&
-                !this._context.unit.getDisabled()
+                !this._context.unit.getDisabled() &&
+                this._canEditDocument()
             ) {
                 if (this._paragraphMenu?.active) {
                     return;
@@ -393,21 +402,23 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
 
     private _shouldOpenSlashMenu(config: IEditorInputConfig): boolean {
         const event = config.event as KeyboardEvent;
-        if (event.key !== '/' || event.altKey || event.ctrlKey || event.metaKey) {
+        const range = this._getCollapsedTextRange(config);
+        if (!range || !this._canEditDocument(range, range.segmentId) || event.key !== '/' || event.altKey || event.ctrlKey || event.metaKey) {
             return false;
         }
 
-        return this._getCollapsedTextRange(config) != null;
+        return true;
     }
 
     private _shouldOpenSlashMenuFromInput(config: IEditorInputConfig): boolean {
         const event = config.event as InputEvent;
         const content = config.content ?? event.data ?? '';
-        if (content !== '/') {
+        const range = this._getCollapsedTextRange(config);
+        if (!range || !this._canEditDocument(range, range.segmentId) || content !== '/') {
             return false;
         }
 
-        return this._getCollapsedTextRange(config) != null;
+        return true;
     }
 
     private _getCollapsedTextRange(config: IEditorInputConfig): ITextRangeWithStyle | null {
@@ -473,7 +484,7 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
         }
 
         const target = this._buildParagraphMenuTarget(paragraph);
-        if (!target) {
+        if (!target || !this._canEditDocument(target.menuRange, paragraph.segmentId)) {
             this.hideParagraphMenu(true);
             return;
         }
@@ -560,6 +571,10 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
             emptyMode: false,
             draggable: true,
         };
+        if (!this._canEditDocument(target.menuRange)) {
+            this.hideParagraphMenu(true);
+            return;
+        }
 
         if (this._shouldKeepCurrentCellMenuForTable(table)) {
             return;
@@ -672,6 +687,17 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
             this._slashMenuRequest$.next(null);
             this._activeTarget$.next(null);
         }
+    }
+
+    private _canEditDocument(
+        range?: { startOffset: number; endOffset: number },
+        segmentId = ''
+    ): boolean {
+        return canEditDocumentTargets(
+            this._permissionService,
+            this._context.unitId,
+            range ? getDocumentEditTargetObjectIds(this._context.unit, segmentId, range) : []
+        );
     }
 
     private _buildParagraphMenuTarget(paragraph: IMutiPageParagraphBound): IDocBlockMenuTarget | null {

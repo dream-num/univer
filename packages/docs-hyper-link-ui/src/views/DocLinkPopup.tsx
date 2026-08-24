@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel } from '@univerjs/core';
 import type { LocaleKey } from '../locale/types';
 import {
     CustomRangeType,
+    DocumentDataModel,
     ICommandService,
     IUniverInstanceService,
     LocaleService,
@@ -42,8 +42,10 @@ export const DocLinkPopup = () => {
     }
 
     const { unitId, linkId, segmentId, startIndex, endIndex } = currentPopup;
-    const doc = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
-    const body = doc?.getSelfOrHeaderFooterModel(segmentId)?.getBody();
+    const doc = univerInstanceService.getUnit(unitId, UniverInstanceType.UNIVER_DOC);
+    const body = doc instanceof DocumentDataModel
+        ? doc.getSelfOrHeaderFooterModel(segmentId)?.getBody()
+        : undefined;
     const link = body?.customRanges?.find((range) => range.rangeId === linkId && range.rangeType === CustomRangeType.HYPERLINK && range.startIndex === startIndex && range.endIndex === endIndex);
 
     if (!link) {
@@ -51,7 +53,7 @@ export const DocLinkPopup = () => {
     }
 
     const url = link.properties?.url;
-
+    const canEdit = hyperLinkService.canEditLink(unitId, currentPopup);
     return (
         <div
             className={clsx(`
@@ -102,38 +104,42 @@ export const DocLinkPopup = () => {
                     </Tooltip>
 
                 </div>
-                <div
-                    className={`
-                      univer-ml-2 univer-flex univer-size-6 univer-cursor-pointer univer-items-center
-                      univer-justify-center univer-rounded univer-text-base
-                    `}
-                    onClick={() => {
-                        commandService.executeCommand(ShowDocHyperLinkEditPopupOperation.id, {
-                            link: currentPopup,
-                        });
-                    }}
-                >
-                    <Tooltip placement="bottom" title={localeService.t<LocaleKey>('docs-hyper-link-ui.info.edit')}>
-                        <WriteIcon />
-                    </Tooltip>
-                </div>
-                <div
-                    className={`
-                      univer-ml-2 univer-flex univer-size-6 univer-cursor-pointer univer-items-center
-                      univer-justify-center univer-rounded univer-text-base
-                    `}
-                    onClick={() => {
-                        commandService.executeCommand(DeleteDocHyperLinkCommand.id, {
-                            unitId,
-                            linkId: link.rangeId,
-                            segmentId,
-                        });
-                    }}
-                >
-                    <Tooltip placement="bottom" title={localeService.t<LocaleKey>('docs-hyper-link-ui.info.cancel')}>
-                        <UnlinkIcon />
-                    </Tooltip>
-                </div>
+                {canEdit && (
+                    <>
+                        <div
+                            className={`
+                              univer-ml-2 univer-flex univer-size-6 univer-cursor-pointer univer-items-center
+                              univer-justify-center univer-rounded univer-text-base
+                            `}
+                            onClick={() => {
+                                commandService.executeCommand(ShowDocHyperLinkEditPopupOperation.id, {
+                                    link: currentPopup,
+                                });
+                            }}
+                        >
+                            <Tooltip placement="bottom" title={localeService.t<LocaleKey>('docs-hyper-link-ui.info.edit')}>
+                                <WriteIcon />
+                            </Tooltip>
+                        </div>
+                        <div
+                            className={`
+                              univer-ml-2 univer-flex univer-size-6 univer-cursor-pointer univer-items-center
+                              univer-justify-center univer-rounded univer-text-base
+                            `}
+                            onClick={() => {
+                                commandService.executeCommand(DeleteDocHyperLinkCommand.id, {
+                                    unitId,
+                                    linkId: link.rangeId,
+                                    segmentId,
+                                });
+                            }}
+                        >
+                            <Tooltip placement="bottom" title={localeService.t<LocaleKey>('docs-hyper-link-ui.info.cancel')}>
+                                <UnlinkIcon />
+                            </Tooltip>
+                        </div>
+                    </>
+                )}
             </div>
         </div>
     );

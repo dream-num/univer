@@ -14,17 +14,14 @@
  * limitations under the License.
  */
 
-import type { IMouseEvent } from '@univerjs/engine-render';
-import type { IContextMenuTriggerContext } from '../../../services/contextmenu/contextmenu.service';
-import type { IContextMenuAnchorRect } from './AnchoredContextMenu';
 import { ICommandService } from '@univerjs/core';
 import { useEffect, useRef, useState } from 'react';
-import { IContextMenuService } from '../../../services/contextmenu/contextmenu.service';
+import { IContextMenuService, type IContextMenuTriggerContext } from '../../../services/contextmenu/contextmenu.service';
 import { ILayoutService } from '../../../services/layout/layout.service';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
 import { IUIRuntimeScopeService } from '../../../services/runtime-scope/ui-runtime-scope.service';
 import { useDependency } from '../../../utils/di';
-import { AnchoredContextMenu } from './AnchoredContextMenu';
+import { AnchoredContextMenu, type IContextMenuAnchorRect } from './AnchoredContextMenu';
 
 const DESKTOP_CONTEXT_MENU_HOST_ID = 'desktop-context-menu';
 
@@ -58,7 +55,7 @@ export function DesktopContextMenu() {
     }, [contextMenuService]);
 
     /** A function to open context menu with given position and menu type. */
-    function handleContextMenu(event: IMouseEvent, menuType: string, context?: IContextMenuTriggerContext) {
+    function handleContextMenu(event: MouseEvent, menuType: string, context?: IContextMenuTriggerContext) {
         setVisible(false);
         requestAnimationFrame(() => {
             setMenuType(menuType);
@@ -93,6 +90,7 @@ export function DesktopContextMenu() {
             visible={visible}
             anchorRect={anchorRect}
             menuType={menuType}
+            autoFocus={menuContext?.autoFocus}
             menuManagerService={activeMenuManagerService}
             layoutService={activeLayoutService}
             onRequestClose={handleClose}

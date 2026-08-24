@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-import type { ReactNode } from 'react';
 import type { LocaleKey } from '../../../locale/types';
-import type { ICustomLabelProps } from '../../custom-label/CustomLabel';
 import { LocaleService } from '@univerjs/core';
 import { borderLeftBottomClassName, clsx, scrollbarClassName } from '@univerjs/design';
 import { CloseIcon } from '@univerjs/icons';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ISidebarService } from '../../../services/sidebar/sidebar.service';
 import { useDependency, useObservable } from '../../../utils/di';
-import { CustomLabel } from '../../custom-label/CustomLabel';
+import { CustomLabel, type ICustomLabelProps } from '../../custom-label/CustomLabel';
 
 export interface ISidebarMethodOptions {
     id?: string;
@@ -188,6 +186,7 @@ export function Sidebar() {
             ref={sidebarRef}
             data-u-comp="sidebar"
             role="complementary"
+            aria-hidden={!options?.visible}
             aria-expanded={!!options?.visible}
             aria-label={localeService.t<LocaleKey>('ui.sidebar.panel')}
             className={clsx(`
@@ -195,7 +194,7 @@ export function Sidebar() {
               dark:!univer-bg-gray-900 dark:!univer-text-gray-0
             `, {
                 'univer-w-96 univer-translate-x-0': options?.visible,
-                'univer-w-0 univer-translate-x-full': !options?.visible,
+                'univer-hidden univer-w-0 univer-translate-x-full': !options?.visible,
             })}
             style={{ width: isDragging ? undefined : width }}
         >

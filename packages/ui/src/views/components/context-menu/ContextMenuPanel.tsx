@@ -14,25 +14,34 @@
  * limitations under the License.
  */
 
-import type { Dispatch, KeyboardEvent, SetStateAction } from 'react';
-import type {
-    IDisplayMenuItem,
-    IMenuButtonItem,
-    IMenuItem,
-    IMenuSelectorItem,
-    IValueOption,
-    MenuItemDefaultValueType,
-} from '../../../services/menu/menu';
-import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import { isRealNum, LocaleService } from '@univerjs/core';
 import { borderBottomClassName, borderClassName, clsx, cva, scrollbarClassName } from '@univerjs/design';
 import { CheckMarkIcon, MoreLeftIcon, MoreRightIcon } from '@univerjs/icons';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+    type Dispatch,
+    type KeyboardEvent,
+    type SetStateAction,
+    useCallback,
+    useEffect,
+    useId,
+    useLayoutEffect,
+    useMemo,
+    useRef,
+    useState,
+} from 'react';
 import { createPortal } from 'react-dom';
 import { combineLatest, isObservable, map, merge, of, scan, startWith } from 'rxjs';
 import { ILayoutService } from '../../../services/layout/layout.service';
-import { MenuItemType } from '../../../services/menu/menu';
-import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
+import {
+    type IDisplayMenuItem,
+    type IMenuButtonItem,
+    type IMenuItem,
+    type IMenuSelectorItem,
+    type IValueOption,
+    type MenuItemDefaultValueType,
+    MenuItemType,
+} from '../../../services/menu/menu';
+import { IMenuManagerService, type IMenuSchema } from '../../../services/menu/menu-manager.service';
 import { useDependency, useObservable } from '../../../utils/di';
 import { CustomLabel } from '../../custom-label/CustomLabel';
 import { useScrollYOverContainer } from '../../hooks/layout';
@@ -711,12 +720,13 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
         return preventBrowserZoomInContainers([menuElement]);
     }, [menuElement]);
 
-    const getFocusableMenuButtons = useCallback(() => {
-        if (!menuElement) {
+    const getFocusableMenuButtons = useCallback((scope?: Element | null) => {
+        const menuScope = scope ?? menuElement;
+        if (!menuScope) {
             return [];
         }
 
-        return Array.from(menuElement.querySelectorAll<HTMLButtonElement>('button:not(:disabled)'));
+        return Array.from(menuScope.querySelectorAll<HTMLButtonElement>('button:not(:disabled)'));
     }, [menuElement]);
 
     useEffect(() => {
@@ -754,7 +764,9 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
             return;
         }
 
-        const focusableButtons = getFocusableMenuButtons();
+        const activeElement = menuElement?.ownerDocument.activeElement;
+        const activeSubmenu = activeElement?.closest(`[${CONTEXT_MENU_SUBMENU_PORTAL_ATTR}]`) ?? null;
+        const focusableButtons = getFocusableMenuButtons(activeSubmenu);
         if (!focusableButtons.length) {
             return;
         }
@@ -762,7 +774,6 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
         event.preventDefault();
         event.stopPropagation();
 
-        const activeElement = menuElement?.ownerDocument.activeElement;
         const activeIndex = focusableButtons.findIndex((button) => button === activeElement);
 
         if (event.key === 'Enter') {
@@ -1140,9 +1151,12 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
     });
     const [submenuPositionReady, setSubmenuPositionReady] = useState(false);
     const [submenuPlacement, setSubmenuPlacement] = useState<'left' | 'right'>('right');
+    const [keyboardSubmenuFocusRequested, setKeyboardSubmenuFocusRequested] = useState(false);
     const menuItemElementRef = useRef<HTMLDivElement | null>(null);
+    const menuButtonRef = useRef<HTMLButtonElement | null>(null);
     const submenuElementRef = useRef<HTMLDivElement | null>(null);
     const submenuCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const submenuId = useId();
 
     const selections = useMemo(() => {
         if (menuItem.type !== MenuItemType.SELECTOR && menuItem.type !== MenuItemType.BUTTON_SELECTOR) {
@@ -1212,6 +1226,15 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
 
         return preventBrowserZoomInContainers([submenuElement]);
     }, [submenuVisible]);
+
+    useLayoutEffect(() => {
+        if (!submenuVisible || !submenuPositionReady || !keyboardSubmenuFocusRequested) {
+            return;
+        }
+
+        const firstEnabledButton = submenuElementRef.current?.querySelector<HTMLButtonElement>('button:not(:disabled)');
+        firstEnabledButton?.focus();
+    }, [keyboardSubmenuFocusRequested, submenuPositionReady, submenuVisible]);
 
     useEffect(() => {
         if (!submenuVisible) {
@@ -1316,6 +1339,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
             onMouseEnter={() => {
                 clearSubmenuCloseTimer();
                 if (hasSubmenu && !disabled && !hoverSuppressed) {
+                    setKeyboardSubmenuFocusRequested(false);
                     setSubmenuPositionReady(false);
                     setActiveSubmenuKey(menuKey);
                     return;
@@ -1359,14 +1383,32 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                 )
                 : (
                     <button
+                        ref={menuButtonRef}
                         type="button"
                         className={interactiveItemClassName}
                         disabled={disabled}
                         title={typeof menuItem.tooltip === 'string' ? localeService.t(menuItem.tooltip) : undefined}
-                        onClick={() => {
+                        aria-haspopup={hasSubmenu ? 'menu' : undefined}
+                        aria-expanded={hasSubmenu ? submenuVisible : undefined}
+                        aria-controls={hasSubmenu ? submenuId : undefined}
+                        onKeyDown={(event) => {
+                            const openDirection = direction === 'rtl' ? 'ArrowLeft' : 'ArrowRight';
+                            if (!hasSubmenu || event.key !== openDirection) {
+                                return;
+                            }
+
+                            event.preventDefault();
+                            event.stopPropagation();
+                            clearSubmenuCloseTimer();
+                            setKeyboardSubmenuFocusRequested(true);
+                            setSubmenuPositionReady(false);
+                            setActiveSubmenuKey(menuKey);
+                        }}
+                        onClick={(event) => {
                             clearSubmenuCloseTimer();
                             if (hasSubmenu) {
                                 if (headerAction) {
+                                    setKeyboardSubmenuFocusRequested(event.detail === 0);
                                     setSubmenuPositionReady(false);
                                     setActiveSubmenuKey(menuKey);
                                     return;
@@ -1384,6 +1426,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                                     return;
                                 }
 
+                                setKeyboardSubmenuFocusRequested(event.detail === 0);
                                 setSubmenuPositionReady(false);
                                 setActiveSubmenuKey(menuKey);
                                 return;
@@ -1421,6 +1464,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                     ? createPortal(
                         <div
                             ref={submenuElementRef}
+                            id={submenuId}
                             dir={direction}
                             data-u-context-menu-submenu="true"
                             className="univer-z-[1080] univer-w-max univer-max-w-[calc(100vw-16px)]"
@@ -1451,6 +1495,17 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
                                 }
 
                                 scheduleSubmenuClose();
+                            }}
+                            onKeyDown={(event) => {
+                                const closeDirection = direction === 'rtl' ? 'ArrowRight' : 'ArrowLeft';
+                                if (event.key !== closeDirection) {
+                                    return;
+                                }
+
+                                event.preventDefault();
+                                event.stopPropagation();
+                                closeSubmenu();
+                                menuButtonRef.current?.focus();
                             }}
                             onWheel={(event) => event.stopPropagation()}
                         >

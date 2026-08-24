@@ -51,41 +51,62 @@ export interface ICreateThreadCommentOptions {
 }
 
 export interface IReplyThreadCommentOptions {
+    /** Univer unit that owns the thread. */
     unitId: string;
+    /** Sheet, page, table, or product subunit that owns the thread. */
     subUnitId: string;
+    /** Stable ID of the root thread being replied to. */
     threadId: string;
+    /** Plain text or a Univer document body for rich reply content. */
     content: ThreadCommentContent;
+    /** Attachment resource IDs. */
     attachments?: string[];
+    /** Caller-supplied stable reply ID, useful for idempotent agent workflows. */
     id?: string;
+    /** Author user ID. Defaults to the current user managed by `UserManagerService`. */
     personId?: string;
+    /** Creation time. Defaults to the current time. */
     dateTime?: Date;
 }
 
 export interface IUpdateThreadCommentOptions {
+    /** Univer unit that owns the comment. */
     unitId: string;
+    /** Sheet, page, table, or product subunit that owns the comment. */
     subUnitId: string;
+    /** Stable ID of the root comment or reply to update. */
     commentId: string;
+    /** Replacement plain text or Univer document body. */
     content: ThreadCommentContent;
+    /** Replacement attachment resource IDs. Omit to preserve the current attachments. */
     attachments?: string[];
+    /** Update time. Defaults to the current time. */
     dateTime?: Date;
 }
 
 export interface IDeleteThreadCommentOptions {
+    /** Univer unit that owns the comment. */
     unitId: string;
+    /** Sheet, page, table, or product subunit that owns the comment. */
     subUnitId: string;
+    /** Stable ID of the root comment or reply to delete. */
     commentId: string;
     /** Deletes the complete root and reply tree when true. */
     deleteThread?: boolean;
 }
 
 export interface IResolveThreadCommentOptions {
+    /** Univer unit that owns the thread. */
     unitId: string;
+    /** Sheet, page, table, or product subunit that owns the thread. */
     subUnitId: string;
+    /** Stable ID of the root comment or a reply in the target thread. */
     commentId: string;
     /** Defaults to `true`. Pass `false` to reopen the thread. */
     resolved?: boolean;
 }
 
+/** Plain text or a Univer document body used as comment content. */
 export type ThreadCommentContent = string | IDocumentBody;
 
 const DOCUMENT_BODY_ARRAY_FIELDS = [
@@ -143,7 +164,9 @@ export function normalizeThreadCommentContent(content: ThreadCommentContent): ID
 }
 
 export interface IFacadeThreadCommentInfo extends Omit<IThreadInfo, 'relativeUsers'> {
+    /** Parsed stable product anchor, or `null` for a legacy comment reference. */
     anchor: IThreadCommentAnchor | null;
+    /** Unique IDs of authors participating in the root and reply tree. */
     relativeUserIds: string[];
 }
 

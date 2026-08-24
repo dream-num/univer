@@ -14,30 +14,21 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody, Nullable } from '@univerjs/core';
-import type { ICreateThreadCommentOptions, IThreadComment, ThreadCommentContent } from '@univerjs/thread-comment';
-import { generateRandomId, ICommandService, Range, Tools, UserManagerService } from '@univerjs/core';
+import * as UniverCore from '@univerjs/core';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
 import { FRange } from '@univerjs/sheets/facade';
-import {
-    AddCommentCommand,
-    DeleteCommentTreeCommand,
-    getDT,
-
-    normalizeThreadCommentContent,
-
-} from '@univerjs/thread-comment';
+import * as ThreadComment from '@univerjs/thread-comment';
 import { FTheadCommentBuilder, FThreadComment } from './f-thread-comment';
 
 export type ISheetCellCommentCreateOptions = Pick<
-    ICreateThreadCommentOptions,
+    ThreadComment.ICreateThreadCommentOptions,
     'attachments' | 'dateTime' | 'id' | 'personId' | 'threadId'
 >;
 
 interface IRangeCommentDependencies {
-    commandService: ICommandService;
+    commandService: UniverCore.ICommandService;
     model: SheetsThreadCommentModel;
-    userManagerService: UserManagerService;
+    userManagerService: UniverCore.UserManagerService;
 }
 
 const DEPENDENCIES_CACHE = new WeakMap<FRange, IRangeCommentDependencies>();
@@ -48,7 +39,7 @@ function firstNonEmpty(...values: Array<string | undefined>): string {
             return value;
         }
     }
-    return generateRandomId();
+    return UniverCore.generateRandomId();
 }
 
 /**
@@ -66,7 +57,7 @@ export interface IFRangeSheetsThreadCommentMixin {
      * const comment = range.getComment();
      * ```
      */
-    getComment(): Nullable<FThreadComment>;
+    getComment(): UniverCore.Nullable<FThreadComment>;
 
     /**
      * Get the comments in the current range.
@@ -87,7 +78,9 @@ export interface IFRangeSheetsThreadCommentMixin {
     /**
      * Add a comment to the start cell in the current range.
      * @param content The content of the comment.
+     * @param options Optional stable IDs, author, attachments, and creation time.
      * @returns Whether the comment is added successfully.
+     * @throws {TypeError} If the content is empty.
      * @example
      * ```ts
      * await univerAPI.getActiveWorkbook()
@@ -111,14 +104,20 @@ export interface IFRangeSheetsThreadCommentMixin {
      * ```
      */
     addCommentAsync(
-        content: ThreadCommentContent | FTheadCommentBuilder,
+        content: ThreadComment.ThreadCommentContent | FTheadCommentBuilder,
         options?: ISheetCellCommentCreateOptions
     ): Promise<boolean>;
 
-     /**
-      * Clear the comment of the start cell in the current range.
-      * @returns Whether the comment is cleared successfully.
-      */
+    /**
+     * Clear the comment of the start cell in the current range.
+     * @returns Whether the comment is cleared successfully.
+     * @example
+     * ```ts
+     * const range = univerAPI.getActiveWorkbook().getActiveSheet().getRange('A1');
+     * const success = await range.clearCommentAsync();
+     * console.log(success);
+     * ```
+     */
     clearCommentAsync(): Promise<boolean>;
 
     /**
@@ -146,20 +145,20 @@ export class FRangeSheetsThreadCommentMixin extends FRange implements IFRangeShe
         }
 
         const dependencies = {
-            commandService: this._injector.get(ICommandService),
+            commandService: this._injector.get(UniverCore.ICommandService),
             model: this._injector.get(SheetsThreadCommentModel),
-            userManagerService: this._injector.get(UserManagerService),
+            userManagerService: this._injector.get(UniverCore.UserManagerService),
         };
         DEPENDENCIES_CACHE.set(this, dependencies);
         return dependencies;
     }
 
-    private _getCommentDataInRange(): IThreadComment[] {
+    private _getCommentDataInRange(): ThreadComment.IThreadComment[] {
         const model = this._getDependencies().model;
         const unitId = this._workbook.getUnitId();
         const sheetId = this._worksheet.getSheetId();
-        const comments: IThreadComment[] = [];
-        Range.foreach(this._range, (row, col) => {
+        const comments: ThreadComment.IThreadComment[] = [];
+        UniverCore.Range.foreach(this._range, (row, col) => {
             const commentId = model.getByLocation(unitId, sheetId, row, col);
             const comment = commentId ? model.getComment(unitId, sheetId, commentId) : null;
             if (comment) {
@@ -169,7 +168,7 @@ export class FRangeSheetsThreadCommentMixin extends FRange implements IFRangeShe
         return comments;
     }
 
-    private _getStartCellCommentData(): IThreadComment | null {
+    private _getStartCellCommentData(): ThreadComment.IThreadComment | null {
         const model = this._getDependencies().model;
         const unitId = this._workbook.getUnitId();
         const sheetId = this._worksheet.getSheetId();
@@ -177,7 +176,7 @@ export class FRangeSheetsThreadCommentMixin extends FRange implements IFRangeShe
         return commentId ? model.getComment(unitId, sheetId, commentId) ?? null : null;
     }
 
-    override getComment(): Nullable<FThreadComment> {
+    override getComment(): UniverCore.Nullable<FThreadComment> {
         const comment = this._getStartCellCommentData();
         return comment ? this._injector.createInstance(FThreadComment, comment) : null;
     }
@@ -187,30 +186,30 @@ export class FRangeSheetsThreadCommentMixin extends FRange implements IFRangeShe
     }
 
     override addCommentAsync(
-        content: ThreadCommentContent | FTheadCommentBuilder,
+        content: ThreadComment.ThreadCommentContent | FTheadCommentBuilder,
         options: ISheetCellCommentCreateOptions = {}
     ): Promise<boolean> {
         const { commandService, userManagerService } = this._getDependencies();
         const currentComment = this._getStartCellCommentData();
         const unitId = this._workbook.getUnitId();
         const sheetId = this._worksheet.getSheetId();
-        const refStr = `${Tools.chatAtABC(this._range.startColumn)}${this._range.startRow + 1}`;
+        const refStr = `${UniverCore.Tools.chatAtABC(this._range.startColumn)}${this._range.startRow + 1}`;
         const currentUser = userManagerService.getCurrentUser();
-        let commentData: IThreadComment | null = null;
-        let text: IDocumentBody;
+        let commentData: ThreadComment.IThreadComment | null = null;
+        let text: UniverCore.IDocumentBody;
         if (content instanceof FTheadCommentBuilder) {
             commentData = content.build();
             text = commentData.text;
         } else {
-            text = normalizeThreadCommentContent(content);
+            text = ThreadComment.normalizeThreadCommentContent(content);
         }
 
-        return commandService.executeCommand(AddCommentCommand.id, {
+        return commandService.executeCommand(ThreadComment.AddCommentCommand.id, {
             unitId,
             subUnitId: sheetId,
             comment: {
                 text,
-                dT: options.dateTime ? getDT(options.dateTime) : commentData?.dT || getDT(),
+                dT: options.dateTime ? ThreadComment.getDT(options.dateTime) : commentData?.dT || ThreadComment.getDT(),
                 attachments: options.attachments ?? commentData?.attachments ?? [],
                 id: firstNonEmpty(options.id, commentData?.id),
                 ref: refStr,
@@ -230,7 +229,7 @@ export class FRangeSheetsThreadCommentMixin extends FRange implements IFRangeShe
         const sheetId = this._worksheet.getSheetId();
 
         if (currentComment) {
-            return commandService.executeCommand(DeleteCommentTreeCommand.id, {
+            return commandService.executeCommand(ThreadComment.DeleteCommentTreeCommand.id, {
                 unitId,
                 subUnitId: sheetId,
                 threadId: currentComment.threadId,
@@ -246,7 +245,7 @@ export class FRangeSheetsThreadCommentMixin extends FRange implements IFRangeShe
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
         const results = await Promise.all(this._getCommentDataInRange().map((comment) => commandService.executeCommand(
-            DeleteCommentTreeCommand.id,
+            ThreadComment.DeleteCommentTreeCommand.id,
             { unitId, subUnitId, threadId: comment.threadId, commentId: comment.id }
         )));
         return results.every(Boolean);

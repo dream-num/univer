@@ -22,58 +22,112 @@ const SERVICE_CACHE = new WeakMap<FUniver, ThreadComment.ThreadCommentFacadeServ
 export interface IFUniverThreadCommentMixin {
     /**
      * Creates a root comment on a serialized product anchor.
+     * @param options Comment content, owner IDs, stable anchor, and optional caller-controlled IDs.
+     * @returns `true` when the command succeeds; otherwise, `false`.
+     * @throws {TypeError} If the content is empty or the anchor is invalid.
      * @example
      * ```ts
+     * const presentation = univerAPI.getActivePresentation();
+     * if (!presentation) throw new Error('No active presentation');
+     * const slide = presentation.getSlideByIndex(0);
+     * const element = slide?.getElements()[0];
+     * if (!slide || !element) throw new Error('No commentable slide element');
+     *
      * await univerAPI.createCommentAsync({
-     *   unitId: 'presentation-1',
-     *   subUnitId: 'slide-1',
+     *   unitId: presentation.getId(),
+     *   subUnitId: slide.getId(),
      *   anchor: {
      *     kind: univerAPI.Enum.ThreadCommentAnchorKind.SLIDE_ELEMENT,
-     *     pageId: 'slide-1',
-     *     elementId: 'shape-1',
+     *     pageId: slide.getId(),
+     *     elementId: element.getId(),
      *   },
      *   content: 'Verify this value.',
-     *   id: 'review-shape-1',
      * });
      * ```
      */
     createCommentAsync(options: ThreadComment.ICreateThreadCommentOptions): Promise<boolean>;
     /**
      * Adds a reply to an existing root thread.
+     * @param options Reply content and the owning unit, subunit, and thread IDs.
+     * @returns `true` when the reply is created. Returns `false` when the root thread is not loaded or the command fails.
+     * @throws {TypeError} If the content is empty.
      * @example
      * ```ts
-     * await univerAPI.replyCommentAsync({
-     *   unitId: 'board-1',
-     *   subUnitId: 'page-1',
-     *   threadId: 'review-shape-1',
-     *   id: 'review-shape-1-reply',
-     *   content: 'Verified.',
-     * });
+     * const [thread] = univerAPI.getComments({ resolved: false });
+     * if (thread) {
+     *   await univerAPI.replyCommentAsync({
+     *     unitId: thread.unitId,
+     *     subUnitId: thread.subUnitId,
+     *     threadId: thread.threadId,
+     *     content: 'Verified.',
+     *   });
+     * }
      * ```
      */
     replyCommentAsync(options: ThreadComment.IReplyThreadCommentOptions): Promise<boolean>;
-    /** Updates the body or attachments of an existing root comment or reply. */
+    /**
+     * Updates the content or attachments of an existing root comment or reply.
+     * @param options Updated content and the owning unit, subunit, and comment IDs.
+     * @returns `true` when the update command succeeds; otherwise, `false`.
+     * @throws {TypeError} If the content is empty.
+     * @example
+     * ```ts
+     * const [comment] = univerAPI.getComments({ resolved: false });
+     * if (comment) {
+     *   await univerAPI.updateCommentAsync({
+     *     unitId: comment.unitId,
+     *     subUnitId: comment.subUnitId,
+     *     commentId: comment.root.id,
+     *     content: 'Updated review result.',
+     *   });
+     * }
+     * ```
+     */
     updateCommentAsync(options: ThreadComment.IUpdateThreadCommentOptions): Promise<boolean>;
-    /** Deletes one comment, or the complete thread when `deleteThread` is true. */
+    /**
+     * Deletes one comment, or the complete root and reply tree when `deleteThread` is `true`.
+     * @param options Owning IDs, target comment ID, and the optional whole-thread flag.
+     * @returns `true` when the delete command succeeds; otherwise, `false`.
+     * @example
+     * ```ts
+     * const [comment] = univerAPI.getComments({ resolved: false });
+     * if (comment) {
+     *   await univerAPI.deleteCommentAsync({
+     *     unitId: comment.unitId,
+     *     subUnitId: comment.subUnitId,
+     *     commentId: comment.root.id,
+     *     deleteThread: true,
+     *   });
+     * }
+     * ```
+     */
     deleteCommentAsync(options: ThreadComment.IDeleteThreadCommentOptions): Promise<boolean>;
     /**
      * Resolves a thread. Pass `resolved: false` to reopen it.
+     * @param options Owning IDs, a comment ID in the thread, and the desired resolution state.
+     * @returns `true` when the resolve command succeeds; otherwise, `false`.
      * @example
      * ```ts
-     * await univerAPI.resolveCommentAsync({
-     *   unitId: 'board-1',
-     *   subUnitId: 'page-1',
-     *   commentId: 'review-shape-1',
-     * });
+     * const [comment] = univerAPI.getComments({ resolved: false });
+     * if (comment) {
+     *   await univerAPI.resolveCommentAsync({
+     *     unitId: comment.unitId,
+     *     subUnitId: comment.subUnitId,
+     *     commentId: comment.root.id,
+     *   });
+     * }
      * ```
      */
     resolveCommentAsync(options: ThreadComment.IResolveThreadCommentOptions): Promise<boolean>;
     /**
      * Queries locally loaded threads by unit, subunit, anchor kind, author, or resolution state.
+     * @param query Optional filters. Omit the argument to return every locally loaded thread.
+     * @returns Matching root threads, their replies, parsed anchors, and related user IDs.
      * @example
      * ```ts
+     * const presentation = univerAPI.getActivePresentation();
      * const openAgentReviews = univerAPI.getComments({
-     *   unitIds: ['presentation-1'],
+     *   unitIds: presentation ? [presentation.getId()] : [],
      *   authorIds: ['agent-reviewer'],
      *   anchorKinds: [univerAPI.Enum.ThreadCommentAnchorKind.SLIDE_ELEMENT],
      *   resolved: false,
@@ -84,7 +138,24 @@ export interface IFUniverThreadCommentMixin {
      * ```
      */
     getComments(query?: ThreadComment.IThreadCommentQuery): ThreadComment.IFacadeThreadCommentInfo[];
-    /** Synchronizes known threads before applying the same filters as `getComments`. */
+    /**
+     * Synchronizes locally known threads from the configured datasource, then applies the same filters as `getComments`.
+     * This method does not discover thread IDs that have never been loaded into the model.
+     * @param query Optional filters. Omit the argument to synchronize and return every known thread.
+     * @returns A promise resolving to the synchronized matching threads.
+     * @example
+     * ```ts
+     * const presentation = univerAPI.getActivePresentation();
+     * const comments = await univerAPI.listCommentsAsync({
+     *   unitIds: presentation ? [presentation.getId()] : [],
+     *   anchorKinds: [univerAPI.Enum.ThreadCommentAnchorKind.SLIDE_ELEMENT],
+     *   resolved: false,
+     * });
+     * comments.forEach(({ root, children, anchor }) => {
+     *   console.log(root.id, children.length, anchor);
+     * });
+     * ```
+     */
     listCommentsAsync(query?: ThreadComment.IThreadCommentQuery): Promise<ThreadComment.IFacadeThreadCommentInfo[]>;
 }
 

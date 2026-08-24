@@ -69,11 +69,17 @@ export type CommentUpdate = {
 });
 
 export interface IThreadInfo {
+    /** Univer unit that owns the thread. */
     unitId: string;
+    /** Sheet, page, table, or product subunit that owns the thread. */
     subUnitId: string;
+    /** Stable root thread ID. */
     threadId: string;
+    /** Root comment. */
     root: IThreadComment;
+    /** Replies ordered by the comment model. */
     children: IThreadComment[];
+    /** Unique user IDs participating in the root and reply tree. */
     relativeUsers: Set<string>;
 }
 

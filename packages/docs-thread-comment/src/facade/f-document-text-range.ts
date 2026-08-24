@@ -14,28 +14,16 @@
  * limitations under the License.
  */
 
-import type { ICreateDocTextRangeCommentParams } from '@univerjs/docs-thread-comment';
-import type { IFDocumentTextRange } from '@univerjs/docs/facade';
-import type { IFacadeThreadCommentInfo, ThreadCommentContent } from '@univerjs/thread-comment';
 import { CustomDecorationType, ICommandService } from '@univerjs/core';
-import {
-    CreateDocTextRangeCommentCommand,
-    DEFAULT_DOC_SUBUNIT_ID,
+import * as DocsThreadComment from '@univerjs/docs-thread-comment';
+import * as DocsFacade from '@univerjs/docs/facade';
+import * as ThreadComment from '@univerjs/thread-comment';
 
-} from '@univerjs/docs-thread-comment';
-import { FDocumentTextRange } from '@univerjs/docs/facade';
-import {
-
-    ThreadCommentAnchorKind,
-
-    ThreadCommentFacadeService,
-} from '@univerjs/thread-comment';
-
-const COMMAND_SERVICE_CACHE = new WeakMap<FDocumentTextRange, ICommandService>();
-const COMMENT_SERVICE_CACHE = new WeakMap<FDocumentTextRange, ThreadCommentFacadeService>();
+const COMMAND_SERVICE_CACHE = new WeakMap<DocsFacade.FDocumentTextRange, ICommandService>();
+const COMMENT_SERVICE_CACHE = new WeakMap<DocsFacade.FDocumentTextRange, ThreadComment.ThreadCommentFacadeService>();
 
 export type IDocumentTextRangeCommentCreateOptions = Omit<
-    ICreateDocTextRangeCommentParams,
+    DocsThreadComment.ICreateDocTextRangeCommentParams,
     'unitId' | 'range' | 'content'
 >;
 
@@ -43,6 +31,10 @@ export type IDocumentTextRangeCommentCreateOptions = Omit<
 export interface IFDocumentTextRangeThreadCommentMixin {
     /**
      * Creates a comment on this text range.
+     * @param content Plain text or a Univer document body for rich comment content.
+     * @param options Optional stable IDs, author, attachments, and creation time.
+     * @returns `true` when the create command succeeds; otherwise, `false`.
+     * @throws {TypeError} If the content is empty.
      * @example
      * ```ts
      * const range = univerAPI.getActiveDocument()?.getTextRange(0, 12);
@@ -50,16 +42,34 @@ export interface IFDocumentTextRangeThreadCommentMixin {
      * ```
      */
     createCommentAsync(
-        content: ThreadCommentContent,
+        content: ThreadComment.ThreadCommentContent,
         options?: IDocumentTextRangeCommentCreateOptions
     ): Promise<boolean>;
-    /** Returns locally loaded comments whose decorations overlap this text range. */
-    getComments(): IFacadeThreadCommentInfo[];
-    /** Synchronizes document threads and returns comments whose decorations overlap this text range. */
-    listCommentsAsync(): Promise<IFacadeThreadCommentInfo[]>;
+    /**
+     * Returns locally loaded comments whose comment decorations overlap this text range.
+     * @returns Matching comment threads. The returned anchors use `DOC_TEXT_RANGE`.
+     * @example
+     * ```ts
+     * const range = univerAPI.getActiveDocument()?.getTextRange(0, 12);
+     * const comments = range?.getComments() ?? [];
+     * comments.forEach(({ root, children }) => console.log(root.id, children.length));
+     * ```
+     */
+    getComments(): ThreadComment.IFacadeThreadCommentInfo[];
+    /**
+     * Synchronizes known document threads and returns comments whose decorations overlap this text range.
+     * @returns A promise resolving to the synchronized matching comment threads.
+     * @example
+     * ```ts
+     * const range = univerAPI.getActiveDocument()?.getTextRange(0, 12);
+     * const comments = range ? await range.listCommentsAsync() : [];
+     * console.log(comments.length);
+     * ```
+     */
+    listCommentsAsync(): Promise<ThreadComment.IFacadeThreadCommentInfo[]>;
 }
 
-export class FDocumentTextRangeThreadCommentMixin extends FDocumentTextRange implements IFDocumentTextRangeThreadCommentMixin {
+export class FDocumentTextRangeThreadCommentMixin extends DocsFacade.FDocumentTextRange implements IFDocumentTextRangeThreadCommentMixin {
     private _getCommandService(): ICommandService {
         const cached = COMMAND_SERVICE_CACHE.get(this);
         if (cached) {
@@ -70,22 +80,22 @@ export class FDocumentTextRangeThreadCommentMixin extends FDocumentTextRange imp
         return service;
     }
 
-    private _getCommentService(): ThreadCommentFacadeService {
+    private _getCommentService(): ThreadComment.ThreadCommentFacadeService {
         const cached = COMMENT_SERVICE_CACHE.get(this);
         if (cached) {
             return cached;
         }
-        const service = this._injector.get(ThreadCommentFacadeService);
+        const service = this._injector.get(ThreadComment.ThreadCommentFacadeService);
         COMMENT_SERVICE_CACHE.set(this, service);
         return service;
     }
 
     /** @inheritdoc */
     override createCommentAsync(
-        content: ThreadCommentContent,
+        content: ThreadComment.ThreadCommentContent,
         options: IDocumentTextRangeCommentCreateOptions = {}
     ): Promise<boolean> {
-        return this._getCommandService().executeCommand(CreateDocTextRangeCommentCommand.id, {
+        return this._getCommandService().executeCommand(DocsThreadComment.CreateDocTextRangeCommentCommand.id, {
             ...options,
             unitId: this._document.getId(),
             range: { ...this.getRange(), collapsed: false },
@@ -94,29 +104,29 @@ export class FDocumentTextRangeThreadCommentMixin extends FDocumentTextRange imp
     }
 
     /** @inheritdoc */
-    override getComments(): IFacadeThreadCommentInfo[] {
+    override getComments(): ThreadComment.IFacadeThreadCommentInfo[] {
         const range = this.getRange();
         const commentIds = this._getOverlappingCommentIds(range);
         return this._getCommentService().getComments({
             unitIds: [this._document.getId()],
-            subUnitIds: [DEFAULT_DOC_SUBUNIT_ID],
-            anchorKinds: [ThreadCommentAnchorKind.DOC_TEXT_RANGE],
+            subUnitIds: [DocsThreadComment.DEFAULT_DOC_SUBUNIT_ID],
+            anchorKinds: [ThreadComment.ThreadCommentAnchorKind.DOC_TEXT_RANGE],
         }).filter((comment) => commentIds.has(comment.root.id));
     }
 
     /** @inheritdoc */
-    override async listCommentsAsync(): Promise<IFacadeThreadCommentInfo[]> {
+    override async listCommentsAsync(): Promise<ThreadComment.IFacadeThreadCommentInfo[]> {
         const range = this.getRange();
         const commentIds = this._getOverlappingCommentIds(range);
         const comments = await this._getCommentService().listCommentsAsync({
             unitIds: [this._document.getId()],
-            subUnitIds: [DEFAULT_DOC_SUBUNIT_ID],
-            anchorKinds: [ThreadCommentAnchorKind.DOC_TEXT_RANGE],
+            subUnitIds: [DocsThreadComment.DEFAULT_DOC_SUBUNIT_ID],
+            anchorKinds: [ThreadComment.ThreadCommentAnchorKind.DOC_TEXT_RANGE],
         });
         return comments.filter((comment) => commentIds.has(comment.root.id));
     }
 
-    private _getOverlappingCommentIds(range: IFDocumentTextRange): Set<string> {
+    private _getOverlappingCommentIds(range: DocsFacade.IFDocumentTextRange): Set<string> {
         const decorations = this._document.getBody(range.segmentId).customDecorations ?? [];
         return new Set(decorations.filter((decoration) => decoration.type === CustomDecorationType.COMMENT
             && decoration.startIndex < range.endOffset
@@ -124,7 +134,7 @@ export class FDocumentTextRangeThreadCommentMixin extends FDocumentTextRange imp
     }
 }
 
-FDocumentTextRange.extend(FDocumentTextRangeThreadCommentMixin);
+DocsFacade.FDocumentTextRange.extend(FDocumentTextRangeThreadCommentMixin);
 
 declare module '@univerjs/docs/facade' {
     interface FDocumentTextRange extends IFDocumentTextRangeThreadCommentMixin {}

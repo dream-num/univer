@@ -83,6 +83,6 @@
         "@univerjs-infra/shared": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "typescript": "^6.0.3",
-        "vitest": "^4.1.10"
+        "vitest": "^4.1.11"
     }
 }

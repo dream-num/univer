@@ -4,6 +4,7 @@
     "private": false,
     "description": "Telemetry service interface for Univer packages.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",
+    "license": "Apache-2.0",
     "funding": {
         "type": "opencollective",
         "url": "https://opencollective.com/univer"
@@ -68,6 +69,6 @@
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
         "typescript": "^6.0.3",
-        "vitest": "^4.1.10"
+        "vitest": "^4.1.11"
     }
 }

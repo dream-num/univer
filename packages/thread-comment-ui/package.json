@@ -47,11 +47,6 @@
                 "require": "./lib/cjs/*",
                 "types": "./lib/types/index.d.ts"
             },
-            "./render-objects/thread-comment-canvas-overlay": {
-                "import": "./lib/es/render-objects/thread-comment-canvas-overlay.js",
-                "require": "./lib/cjs/render-objects/thread-comment-canvas-overlay.js",
-                "types": "./lib/types/render-objects/thread-comment-canvas-overlay.d.ts"
-            },
             "./locale/*": {
                 "import": "./lib/es/locale/*.js",
                 "require": "./lib/cjs/locale/*.js",

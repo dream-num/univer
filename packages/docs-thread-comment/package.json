@@ -40,6 +40,11 @@
                 "require": "./lib/cjs/index.js",
                 "types": "./lib/types/index.d.ts"
             },
+            "./*": {
+                "import": "./lib/es/*",
+                "require": "./lib/cjs/*",
+                "types": "./lib/types/index.d.ts"
+            },
             "./facade": {
                 "import": "./lib/es/facade.js",
                 "require": "./lib/cjs/facade.js",
@@ -49,11 +54,6 @@
                 "import": "./lib/es/facade.js",
                 "require": "./lib/cjs/facade.js",
                 "types": "./lib/types/facade/index.d.ts"
-            },
-            "./*": {
-                "import": "./lib/es/*",
-                "require": "./lib/cjs/*",
-                "types": "./lib/types/index.d.ts"
             },
             "./lib/*": "./lib/*"
         }
@@ -72,9 +72,6 @@
         "build:bundle": "univer-cli build",
         "build:types": "tsc -p tsconfig.node.json",
         "build": "pnpm run build:bundle && pnpm run build:types"
-    },
-    "peerDependencies": {
-        "rxjs": ">=7.0.0"
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",

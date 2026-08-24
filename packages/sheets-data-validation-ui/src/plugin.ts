@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Dependency, Workbook } from '@univerjs/core';
+import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsDataValidationUIConfig } from './config/config';
 import { DependentOn, ICommandService, IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverDataValidationPlugin } from '@univerjs/data-validation';
@@ -119,7 +119,7 @@ export class UniverSheetsDataValidationUIPlugin extends Plugin {
         this._injector.get(DataValidationAlertController);
 
         const renderManager = this._injector.get(IRenderManagerService);
-        renderManager.registerRenderModule<Workbook>(
+        renderManager.registerRenderModule(
             UniverInstanceType.UNIVER_SHEET,
             [SheetsDataValidationReRenderController] as Dependency
         );

@@ -1,7 +1,3 @@
-import { defineConfig } from 'vitest/config';
+import createConfig from '@univerjs-infra/shared/vitest';
 
-export default defineConfig({
-    test: {
-        environment: 'jsdom',
-    },
-});
+export default createConfig();

@@ -39,7 +39,12 @@ export interface IThreadCommentDataSource {
     /**
      * handler for delete-comment, throw error means fail and stop the process.
      */
-    deleteComment: (unitId: string, subUnitId: string, threadId: string, commentId?: string) => Promise<Success>;
+    deleteComment: (unitId: string, subUnitId: string, threadId: string, commentId: string) => Promise<Success>;
+    /**
+     * Delete a complete thread. Legacy data sources can omit this method and
+     * fall back to deleting the root comment through `deleteComment`.
+     */
+    deleteThread?: (unitId: string, subUnitId: string, threadId: string) => Promise<Success>;
     /**
      * handler for batch-fetch-comment, throw error means fail and stop the process.
      */
@@ -70,7 +75,8 @@ export interface IThreadCommentDataSourceService {
     /**
      * handler for delete-comment, throw error means fail and stop the process.
      */
-    deleteComment: (unitId: string, subUnitId: string, threadId: string, commentId?: string) => Promise<Success>;
+    deleteComment: (unitId: string, subUnitId: string, threadId: string, commentId: string) => Promise<Success>;
+    deleteThread?: (unitId: string, subUnitId: string, threadId: string) => Promise<Success>;
     saveToSnapshot: (unitComments: Record<string, IThreadComment[]>, unitId: string) => Record<string, ThreadCommentJSON[]>;
     getThreadComment: (unitId: string, subUnitId: string, threadId: string) => Promise<Nullable<IBaseComment>>;
     listThreadComments: (unitId: string, subUnitId: string, threadId: string[]) => Promise<IBaseComment[] | false>;
@@ -141,11 +147,18 @@ export class ThreadCommentDataSourceService extends Disposable implements IThrea
         return true;
     }
 
-    async deleteComment(unitId: string, subUnitId: string, threadId: string, commentId?: string) {
+    async deleteComment(unitId: string, subUnitId: string, threadId: string, commentId: string) {
         if (this._dataSource) {
             return this._dataSource.deleteComment(unitId, subUnitId, threadId, commentId);
         }
         return true;
+    }
+
+    async deleteThread(unitId: string, subUnitId: string, threadId: string) {
+        if (this._dataSource?.deleteThread) {
+            return this._dataSource.deleteThread(unitId, subUnitId, threadId);
+        }
+        return this.deleteComment(unitId, subUnitId, threadId, threadId);
     }
 
     async listThreadComments(unitId: string, subUnitId: string, threadIds: string[]) {

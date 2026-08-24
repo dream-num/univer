@@ -67,6 +67,7 @@ describe('ThreadCommentDataSourceService', () => {
         await expect(service.updateComment(comment)).resolves.toBe(true);
         await expect(service.resolveComment(comment)).resolves.toBe(true);
         await expect(service.deleteComment('unit-1', 'sheet-1', 'thread-1', 'comment-1')).resolves.toBe(true);
+        await expect(service.deleteThread?.('unit-1', 'sheet-1', 'thread-1')).resolves.toBe(true);
         await expect(service.getThreadComment('unit-1', 'sheet-1', 'thread-1')).resolves.toBeNull();
         await expect(service.listThreadComments('unit-1', 'sheet-1', ['thread-1'])).resolves.toBe(false);
 
@@ -197,6 +198,30 @@ describe('ThreadCommentDataSourceService', () => {
             id: 'server-id',
             threadId: 'server-id',
         });
+    });
+
+    it('uses the thread delete capability when provided and preserves the legacy fallback', async () => {
+        const service = createService();
+        const deleteComment = vi.fn(async () => true);
+        const deleteThread = vi.fn(async () => true);
+        const dataSource: IThreadCommentDataSource = {
+            addComment: async (comment) => comment,
+            updateComment: async () => true,
+            resolveComment: async () => true,
+            deleteComment,
+            deleteThread,
+            listComments: async () => [],
+            saveCommentToSnapshot: (comment) => comment,
+        };
+        service.dataSource = dataSource;
+
+        await expect(service.deleteThread?.('unit-1', 'sheet-1', 'thread-1')).resolves.toBe(true);
+        expect(deleteThread).toHaveBeenCalledWith('unit-1', 'sheet-1', 'thread-1');
+        expect(deleteComment).not.toHaveBeenCalled();
+
+        delete dataSource.deleteThread;
+        await expect(service.deleteThread?.('unit-1', 'sheet-1', 'thread-1')).resolves.toBe(true);
+        expect(deleteComment).toHaveBeenCalledWith('unit-1', 'sheet-1', 'thread-1', 'thread-1');
     });
 
     it('coalesces concurrent adds with the same client comment id', async () => {

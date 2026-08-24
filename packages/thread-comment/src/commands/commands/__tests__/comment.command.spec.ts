@@ -234,7 +234,7 @@ describe('Thread comment commands', () => {
             },
         ]);
         expect(deletedCommentIds).toEqual(['root-2', 'reply-2']);
-        expect(deleteComment).toHaveBeenCalledWith('unit-1', 'sheet-1', root.threadId, undefined);
+        expect(deleteComment).toHaveBeenCalledWith('unit-1', 'sheet-1', root.threadId, root.id);
     });
 
     it('updates comment content and keeps the thread relationship', async () => {

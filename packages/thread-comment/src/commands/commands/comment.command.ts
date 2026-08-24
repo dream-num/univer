@@ -264,7 +264,15 @@ export const DeleteCommentTreeCommand: ICommand<IDeleteCommentCommandParams> = {
             return false;
         }
 
-        if (!(await dataSourceService.deleteComment(unitId, subUnitId, commentWithChildren.root.threadId))) {
+        const deleted = dataSourceService.deleteThread
+            ? await dataSourceService.deleteThread(unitId, subUnitId, commentWithChildren.root.threadId)
+            : await dataSourceService.deleteComment(
+                unitId,
+                subUnitId,
+                commentWithChildren.root.threadId,
+                commentWithChildren.root.id
+            );
+        if (!deleted) {
             return false;
         }
 

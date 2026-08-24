@@ -4,6 +4,7 @@
     "private": false,
     "description": "Telemetry service interface for Univer packages.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",
+    "license": "Apache-2.0",
     "funding": {
         "type": "opencollective",
         "url": "https://opencollective.com/univer"

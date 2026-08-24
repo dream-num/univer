@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/docs-hyper-link-ui",
-    "version": "1.0.0-beta.1",
+    "version": "1.0.0-beta.2",
     "private": false,
     "description": "Hyperlink editing UI for Univer Docs.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",
@@ -80,7 +80,7 @@
         "@univerjs/docs-hyper-link": "workspace:*",
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "1.35.0",
+        "@univerjs/icons": "1.38.0",
         "@univerjs/ui": "workspace:*"
     },
     "devDependencies": {

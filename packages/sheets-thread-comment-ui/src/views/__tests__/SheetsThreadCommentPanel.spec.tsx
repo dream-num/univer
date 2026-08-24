@@ -1049,6 +1049,42 @@ describe('SheetsThreadCommentPanel', () => {
         }));
     });
 
+    it('switches the cell thread when the active popup selects another thread at the same location', () => {
+        const testBed = createTestBed();
+        univer = testBed.univer;
+        testBed.threadCommentModel.addComment(unitId, sheet1, createComment('first-thread', sheet1, 'B2', 'First B2 thread'));
+        testBed.threadCommentModel.addComment(unitId, sheet1, createComment('second-thread', sheet1, 'B2', 'Second B2 thread'));
+        testBed.popupService.showPopup({
+            unitId,
+            subUnitId: sheet1,
+            row: 1,
+            col: 1,
+            commentId: 'first-thread',
+        });
+
+        const rendered = renderCell(testBed.injector);
+        root = rendered.root;
+        container = rendered.container;
+
+        expect(container.querySelector(`#CELL-${unitId}-${sheet1}-first-thread`)).toBeInstanceOf(HTMLElement);
+        expect(container.textContent).toContain('First B2 thread');
+        expect(container.textContent).not.toContain('Second B2 thread');
+
+        act(() => {
+            testBed.popupService.showPopup({
+                unitId,
+                subUnitId: sheet1,
+                row: 1,
+                col: 1,
+                commentId: 'second-thread',
+            });
+        });
+
+        expect(container.querySelector(`#CELL-${unitId}-${sheet1}-second-thread`)).toBeInstanceOf(HTMLElement);
+        expect(container.textContent).toContain('Second B2 thread');
+        expect(container.textContent).not.toContain('First B2 thread');
+    });
+
     it('updates an open cell popup when a thread is added at that cell location', () => {
         const testBed = createTestBed();
         univer = testBed.univer;

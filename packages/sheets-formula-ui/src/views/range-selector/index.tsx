@@ -173,12 +173,7 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
             mask={false}
             maskClosable={false}
             footer={(
-                <footer
-                    className="
-                      univer-flex univer-gap-2
-                      rtl:univer-flex-row-reverse
-                    "
-                >
+                <footer className="univer-flex univer-gap-2">
                     <Button onClick={onClose}>{localeService.t<LocaleKey>('sheets-formula-ui.rangeSelector.cancel')}</Button>
                     <Button
                         variant="primary"
@@ -204,13 +199,7 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
                 className={clsx('-univer-mx-6 univer-max-h-60 univer-overflow-y-auto univer-px-6', scrollbarClassName)}
             >
                 {ranges.map((text, index) => (
-                    <div
-                        key={index}
-                        className="
-                          univer-mb-2 univer-flex univer-items-center univer-gap-4
-                          rtl:univer-flex-row-reverse
-                        "
-                    >
+                    <div key={index} className="univer-mb-2 univer-flex univer-items-center univer-gap-4">
                         <Input
                             className={clsx('univer-w-full', {
                                 'univer-border-primary-600': focusIndex === index,
@@ -343,6 +332,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
                     <RichTextEditor
                         isSingle
                         {...props}
+                        className={clsx(props.className, 'rtl:[&>div]:univer-flex-row-reverse')}
                         preserveHostFocus
                         onFocusChange={(focusing, newValue) => {
                             setFocusing(focusing);

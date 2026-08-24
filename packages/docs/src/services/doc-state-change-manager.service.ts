@@ -73,6 +73,10 @@ export class DocStateChangeManagerService extends RxDisposable {
         this._changeStateCache.set(unitId, cache.collaboration);
     }
 
+    clearHistory(unitId: string): void {
+        this._historyStateCache.delete(unitId);
+    }
+
     private _setChangeState(changeState: IDocStateChangeParams) {
         this._cacheChangeState(changeState, 'history');
         // Mutations by user or historyService need collaboration.

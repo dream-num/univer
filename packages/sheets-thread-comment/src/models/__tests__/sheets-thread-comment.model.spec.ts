@@ -36,6 +36,42 @@ function createComment(overrides: Record<string, unknown> = {}) {
 }
 
 describe('SheetsThreadCommentModel', () => {
+    it('keeps the newer unresolved thread as the default when an older thread is reopened', () => {
+        const olderComment = createComment({ id: 'older-comment', threadId: 'older-thread', resolved: true });
+        const newerComment = createComment({ id: 'newer-comment', threadId: 'newer-thread' });
+        const comments = new Map([
+            [olderComment.id, olderComment],
+            [newerComment.id, newerComment],
+        ]);
+        const updates$ = new Subject<unknown>();
+        const threadCommentModel = {
+            getAll: () => [{ threads: [
+                { unitId: 'unit-1', subUnitId: 'sheet-1', root: olderComment },
+                { unitId: 'unit-1', subUnitId: 'sheet-1', root: newerComment },
+            ] }],
+            commentUpdate$: updates$,
+            getComment: (_unitId: string, _subUnitId: string, commentId: string) => comments.get(commentId),
+        };
+        const univerInstanceService = {
+            getUnitType: () => UniverInstanceType.UNIVER_SHEET,
+        };
+        const model = new SheetsThreadCommentModel(threadCommentModel as never, univerInstanceService as never);
+
+        expect(model.getByLocation('unit-1', 'sheet-1', 0, 0)).toBe(newerComment.id);
+
+        olderComment.resolved = false;
+        updates$.next({
+            type: 'resolve',
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
+            payload: { commentId: olderComment.id, resolved: false },
+        });
+
+        expect(model.getByLocation('unit-1', 'sheet-1', 0, 0)).toBe(newerComment.id);
+
+        model.dispose();
+    });
+
     it('should build location indexes from existing root comments and expose thread data', () => {
         const root = createComment();
         const reply = createComment({ id: 'reply-1', parentId: root.id, ref: '', resolved: false });

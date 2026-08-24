@@ -89,6 +89,7 @@ export function RibbonGrid({ groups, title, className, ...props }: IRibbonGridPr
                                             showLabel={placement.showLabel}
                                             iconSize={placement.iconSize}
                                             fullWidth={placement.width !== undefined}
+                                            preserveStrokeWidth
                                         />
                                     </div>
                                 ))}

@@ -92,6 +92,7 @@ export function DefaultMenu({
                                           univer-text-gray-500
                                           dark:!univer-text-gray-300
                                         `}
+                                        preserveStrokeWidth
                                     />
                                 </span>
                                 <span className="univer-flex univer-flex-col">
@@ -129,6 +130,7 @@ export function DefaultMenu({
                       univer-text-gray-200
                       dark:!univer-text-gray-500
                     `}
+                    preserveStrokeWidth
                 />
             </a>
         </HoverCard>

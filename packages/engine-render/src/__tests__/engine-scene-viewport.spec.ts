@@ -333,6 +333,50 @@ describe('engine scene viewport extra', () => {
         engine.dispose();
     });
 
+    it('uses a full render after an after-render observer mutates the engine canvas', () => {
+        const { engine, scene, viewport } = createFixture();
+        const layer = scene.getLayer(1);
+        let shouldDrawOverlay = true;
+        const subscription = scene.afterRender$.subscribe((canvas) => {
+            if (canvas && shouldDrawOverlay) {
+                canvas.getContext().fillText('viewport overlay', 10, 10);
+            }
+        });
+
+        scene.render();
+        const renderSpy = vi.spyOn(layer, 'render');
+        const clearCanvasSpy = vi.spyOn(engine, 'clearCanvas');
+
+        viewport.scrollToViewportPos({ viewportScrollY: 16 });
+        scene.makeDirtyForScrolling();
+        scene.render();
+
+        expect(clearCanvasSpy).toHaveBeenCalledTimes(1);
+        expect(renderSpy).toHaveBeenLastCalledWith(undefined, false, undefined);
+
+        shouldDrawOverlay = false;
+        renderSpy.mockClear();
+        clearCanvasSpy.mockClear();
+        viewport.scrollToViewportPos({ viewportScrollY: 32 });
+        scene.makeDirtyForScrolling();
+        scene.render();
+        expect(clearCanvasSpy).toHaveBeenCalledTimes(1);
+
+        renderSpy.mockClear();
+        clearCanvasSpy.mockClear();
+        viewport.scrollToViewportPos({ viewportScrollY: 48 });
+        scene.makeDirtyForScrolling();
+        scene.render();
+        expect(clearCanvasSpy).not.toHaveBeenCalled();
+        expect(renderSpy).toHaveBeenLastCalledWith(undefined, false, expect.objectContaining({
+            preserveCache: true,
+        }));
+
+        subscription.unsubscribe();
+        scene.dispose();
+        engine.dispose();
+    });
+
     it('keeps cheap content live during a large scrollbar seek', () => {
         const { engine, scene, viewport } = createFixture();
         const layer = scene.getLayer(1);

@@ -341,6 +341,7 @@ export class EditorDataSyncController extends Disposable {
         }
 
         const isFormulaBar = snapshot.id === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY;
+        const previousPageWidth = snapshot.documentStyle?.pageSize?.width;
         if (isFormulaBar) {
             snapshot.documentStyle = {
                 ...formulaEditorStyle,
@@ -361,11 +362,14 @@ export class EditorDataSyncController extends Disposable {
         }
         const position = isFormulaBar ? this._formulaEditorManagerService.getPosition() : null;
         if (isFormulaBar && position) {
-            const width = position.width;
-            snapshot.documentStyle.pageSize = {
-                width,
-                height: Infinity,
-            };
+            // A non-positive width means the formula bar is not laid out, so keep the last valid width.
+            const width = position.width > 0 ? position.width : previousPageWidth;
+            if (width != null && width > 0) {
+                snapshot.documentStyle.pageSize = {
+                    width,
+                    height: Infinity,
+                };
+            }
         }
 
         const isFormula = (snapshot.body?.dataStream ?? '').startsWith('=');

@@ -45,6 +45,7 @@ import { Canvas } from '../../../canvas';
 import { Engine } from '../../../engine';
 import { MAIN_VIEW_PORT_KEY, Scene } from '../../../scene';
 import { Viewport } from '../../../viewport';
+import { Font } from '../extensions/font';
 import { SHEET_VIEWPORT_KEY } from '../interfaces';
 import {
     convertTransformToOffsetX,
@@ -707,6 +708,38 @@ describe('spreadsheet integration', () => {
             endY: 0,
         });
         noSkeletonSpreadsheet.dispose();
+    });
+
+    it('repaints text across the cleared incremental scroll bound', () => {
+        const { spreadsheet, skeleton, scene, cacheCanvas, mainCanvas } = fixture;
+        const context = mainCanvas.getContext();
+        const viewportInfo = createViewportInfo(scene, cacheCanvas, {
+            diffBounds: [createBound(46, 28, 118, 52)],
+            diffX: 0,
+            diffY: 24,
+            isDirty: 0,
+            isForceDirty: false,
+        });
+
+        skeleton.setStylesCache(createViewportInfo(scene, cacheCanvas));
+        const fontExtension = new Font();
+        spreadsheet.register(fontExtension);
+        Reflect.set(spreadsheet, '_fontExtension', fontExtension);
+        Reflect.set(skeleton, '_incrementalFontRenderRanges', [{
+            startRow: 10,
+            endRow: 10,
+            startColumn: 0,
+            endColumn: 0,
+        }]);
+        Reflect.set(spreadsheet, '_refreshIncrementalState', true);
+        const renderFontSpy = vi.spyOn(
+            fontExtension as unknown as { _renderFontEachCell: (...args: unknown[]) => void },
+            '_renderFontEachCell'
+        );
+
+        spreadsheet.draw(context, viewportInfo);
+
+        expect(renderFontSpy.mock.calls.some(([, row, column]) => row === 0 && column === 0)).toBe(true);
     });
 
     it('skips merge gridline cleanup during merge-free drawing', () => {

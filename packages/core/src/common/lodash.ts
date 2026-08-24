@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export { debounce, get, merge, mergeWith, set } from 'lodash-es';
+export { debounce, get, merge, mergeWith, set, setWith } from 'lodash-es';

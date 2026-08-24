@@ -347,6 +347,7 @@ const IconSetRuleEdit = (props: {
                                         `}
                                     >
                                         {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.iconSet.when')}
+                                        {' '}
                                         {localeService.t(`sheets-conditional-formatting-ui.symbol.${getOppositeOperator(preItem.operator)}`)}
                                         {lessThanText}
                                         {isEnd ? '' : ` ${localeService.t<LocaleKey>('sheets-conditional-formatting-ui.iconSet.and')} `}
@@ -405,6 +406,7 @@ const IconSetRuleEdit = (props: {
                                     {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.iconSet.rule')}
                                     <span className="univer-font-medium">
                                         {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.iconSet.when')}
+                                        {' '}
                                         {localeService.t(`sheets-conditional-formatting-ui.symbol.${getOppositeOperator(preItem.operator)}`)}
                                         {lessThanText}
                                         {isEnd ? '' : ` ${localeService.t<LocaleKey>('sheets-conditional-formatting-ui.iconSet.and')} `}

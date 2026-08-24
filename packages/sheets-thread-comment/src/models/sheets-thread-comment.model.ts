@@ -242,7 +242,7 @@ export class SheetsThreadCommentModel extends Disposable {
     getByLocation(unitId: string, subUnitId: string, row: number, column: number): string | undefined {
         const comments = this.getAllByLocation(unitId, subUnitId, row, column);
         const activeComments = comments.filter((comment) => !comment.resolved);
-        return activeComments[0]?.id;
+        return activeComments[activeComments.length - 1]?.id;
     }
 
     getAllByLocation(unitId: string, subUnitId: string, row: number, column: number): IThreadComment[] {

@@ -36,7 +36,7 @@ import {
     SetDrawingSelectedOperation,
 } from '@univerjs/drawing';
 import { CURSOR_TYPE, degToRad, Image, IRenderManagerService, precisionTo, Vector2 } from '@univerjs/engine-render';
-import { IMessageService, IShortcutService, KeyCode } from '@univerjs/ui';
+import { ILayoutService, IMessageService, IShortcutService, KeyCode } from '@univerjs/ui';
 import { of, switchMap } from 'rxjs';
 import {
     AutoImageCropOperation,
@@ -71,7 +71,8 @@ export class ImageCropperController extends Disposable {
         @IUniverInstanceService private _univerInstanceService: IUniverInstanceService,
         @IMessageService private readonly _messageService: IMessageService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @IShortcutService private readonly _shortcutService: IShortcutService
+        @IShortcutService private readonly _shortcutService: IShortcutService,
+        @ILayoutService private readonly _layoutService: ILayoutService
     ) {
         super();
 
@@ -310,8 +311,8 @@ export class ImageCropperController extends Disposable {
                 imageCropperObject.makeDirty(true);
 
                 this._registerCropShortcuts();
-
                 this._commandService.syncExecuteCommand(SetDrawingSelectedOperation.id, [{ unitId, subUnitId, drawingId }]);
+                this._layoutService.focus();
             })
         );
     }

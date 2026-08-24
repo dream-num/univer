@@ -15,8 +15,9 @@
  */
 
 import type { ComponentProps, PropsWithChildren } from 'react';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 import enUS from '../../../locale/en-US';
 import { ConfigProvider } from '../../config-provider/ConfigProvider';
 import { Gallery } from '../Gallery';
@@ -36,8 +37,18 @@ function renderGallery(props: ComponentProps<typeof Gallery>) {
     return render(<Gallery {...props} />, { wrapper: LocaleProvider });
 }
 
+function FocusHarness({ open }: { open: boolean }) {
+    return (
+        <>
+            <button type="button">Open gallery trigger</button>
+            <Gallery images={images} open={open} />
+        </>
+    );
+}
+
 afterEach(() => {
     cleanup();
+    vi.useRealTimers();
 });
 
 describe('Gallery', () => {
@@ -77,11 +88,46 @@ describe('Gallery', () => {
         expect(onOpenChange).toHaveBeenCalledWith(false);
     });
 
-    it('toolbar buttons have correct aria-labels', () => {
+    it('provides named close, pagination, and zoom controls', () => {
         renderGallery({ images, open: true });
+        expect(screen.getByRole('button', { name: 'Close' })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Previous' })).toBeDisabled();
+        expect(screen.getByRole('button', { name: 'Next' })).toBeEnabled();
         expect(screen.getByRole('button', { name: /zoom in/i })).toBeInTheDocument();
         expect(screen.getByRole('button', { name: /zoom out/i })).toBeInTheDocument();
         expect(screen.getByRole('button', { name: /reset zoom/i })).toBeInTheDocument();
+    });
+
+    it('calls onOpenChange(false) when clicking the close button', () => {
+        const onOpenChange = vi.fn();
+        renderGallery({ images, open: true, onOpenChange });
+
+        fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+
+        expect(onOpenChange).toHaveBeenCalledWith(false);
+    });
+
+    it('contains focus while open and restores it after closing', () => {
+        vi.useFakeTimers();
+        const { rerender } = render(<FocusHarness open={false} />, { wrapper: LocaleProvider });
+        const trigger = screen.getByRole('button', { name: 'Open gallery trigger' });
+        trigger.focus();
+
+        rerender(<FocusHarness open />);
+
+        const closeButton = screen.getByRole('button', { name: 'Close' });
+        const zoomOutButton = screen.getByRole('button', { name: /zoom out/i });
+        expect(closeButton).toHaveFocus();
+
+        fireEvent.keyDown(window, { key: 'Tab', shiftKey: true });
+        expect(zoomOutButton).toHaveFocus();
+
+        fireEvent.keyDown(window, { key: 'Tab' });
+        expect(closeButton).toHaveFocus();
+
+        rerender(<FocusHarness open={false} />);
+        act(() => vi.advanceTimersByTime(150));
+        expect(trigger).toHaveFocus();
     });
 
     it('keeps the toolbar controls in logical order in RTL', () => {

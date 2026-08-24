@@ -1,3 +1,5 @@
+import type { IBoundRectNoAngle, IScrollRenderInfo } from '@univerjs/engine-render';
+
 // The type definition is copied from:
 // common/debugger/src/controllers/e2e/e2e.controller.ts
 export interface IE2EControllerAPI {
@@ -11,6 +13,12 @@ export interface IE2EControllerAPI {
     setDarkMode(darkMode: boolean): void;
     disposeUniver(): Promise<void>;
     disposeCurrSheetUnit(disposeTimeout?: number): Promise<void>;
+    scrollAndClearCanvas(
+        canvas: HTMLCanvasElement,
+        pixelRatio: number,
+        scrollRenderInfos: IScrollRenderInfo[],
+        dirtyBounds: IBoundRectNoAngle[]
+    ): void;
 }
 
 declare global {

@@ -18,6 +18,9 @@ const locale = {
     design: {
         Accessibility: {
             closeBadge: 'Close badge',
+            close: 'Close',
+            previous: 'Previous',
+            next: 'Next',
             imageGallery: 'Image gallery',
             image: 'Image {0} of {1}',
             zoomIn: 'Zoom in',

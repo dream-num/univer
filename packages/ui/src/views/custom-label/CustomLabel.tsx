@@ -20,13 +20,16 @@ import type { IMenuSelectorItem } from '../../services/menu/menu';
 import { ColorKit, LocaleService } from '@univerjs/core';
 import { useMemo } from 'react';
 import { isObservable } from 'rxjs';
-import { ComponentManager, IconManager } from '../../common';
+import { ComponentManager } from '../../common/component-manager';
+import { IconManager } from '../../common/icon-manager';
 import { useDependency, useObservable } from '../../utils/di';
 
 export type ICustomLabelProps<T = undefined> = {
     className?: string;
 
     iconSize?: number;
+
+    preserveStrokeWidth?: boolean;
 
     value?: string | number | undefined;
 
@@ -42,7 +45,7 @@ export type ICustomLabelProps<T = undefined> = {
  * @param props
  */
 export function CustomLabel(props: ICustomLabelProps) {
-    const { className, iconSize, title, icon, label, value, value$ } = props;
+    const { className, iconSize, preserveStrokeWidth, title, icon, label, value, value$ } = props;
     const localeService = useDependency(LocaleService);
     const componentManager = useDependency(ComponentManager);
     const iconManager = useDependency(IconManager);
@@ -76,6 +79,7 @@ export function CustomLabel(props: ICustomLabelProps) {
                     className="univer-text-base"
                     style={iconSize ? { width: iconSize, height: iconSize } : undefined}
                     extend={{ colorChannel1: isValid ? String(realValue) : 'var(--univer-primary-600)' }}
+                    preserveStrokeWidth={preserveStrokeWidth}
                 />
             );
         }

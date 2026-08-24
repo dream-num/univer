@@ -45,13 +45,15 @@ export const SingleCanvasPopup = ({ popup, children }: ISingleCanvasPopupProps) 
     const hiddenRects$ = useMemo(() => popup.hiddenRects$?.pipe(throttleTime(0, animationFrameScheduler)) ?? of([]), [popup.hiddenRects$]);
     const excludeRects$ = useMemo(() => popup.excludeRects$?.pipe(throttleTime(0, animationFrameScheduler)), [popup.excludeRects$]);
     const excludeRectsRef = useObservableRef(excludeRects$, popup.excludeRects);
-    const { canvasElement, constrainToCanvas = false, hideOnInvisible = true, hiddenType = 'destroy' } = popup;
+    const { boundaryInsets, canvasElement, constrainToCanvas = false, hideOnInvisible = true, hiddenType = 'destroy' } = popup;
 
     const hidden = useObservable(
         hideOnInvisible
             ? () => combineLatest([anchorRect$, hiddenRects$]).pipe(map(([rectWithOffset, hiddenRects]) => {
                 const rect = canvasElement.getBoundingClientRect();
                 const { top, left, bottom, right } = rect;
+                const insetTop = constrainToCanvas ? boundaryInsets?.top ?? 0 : 0;
+                const insetLeft = constrainToCanvas ? boundaryInsets?.left ?? 0 : 0;
                 const rectHeight = rectWithOffset.bottom - rectWithOffset.top;
                 const rectWidth = rectWithOffset.right - rectWithOffset.left;
 
@@ -64,13 +66,13 @@ export const SingleCanvasPopup = ({ popup, children }: ISingleCanvasPopupProps) 
                         rectWithOffset.right <= (hiddenRect.right + bufferX);
                 });
 
-                return rectWithOffset.bottom < top || rectWithOffset.top > bottom ||
-                    rectWithOffset.right < left || rectWithOffset.left > right || isInHiddenRect;
+                return rectWithOffset.bottom < top + insetTop || rectWithOffset.top > bottom ||
+                    rectWithOffset.right < left + insetLeft || rectWithOffset.left > right || isInHiddenRect;
             }))
             : null,
         false,
         false,
-        [anchorRect$, canvasElement, hiddenRects$, hideOnInvisible]
+        [anchorRect$, boundaryInsets, canvasElement, constrainToCanvas, hiddenRects$, hideOnInvisible]
     );
 
     if ((hidden && hiddenType === 'destroy')) {

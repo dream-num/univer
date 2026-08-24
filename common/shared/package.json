@@ -1,7 +1,7 @@
 {
     "name": "@univerjs-infra/shared",
     "type": "module",
-    "version": "1.0.0-beta.1",
+    "version": "1.0.0-beta.2",
     "private": true,
     "description": "Some infrastructures for univerjs",
     "author": "DreamNum <developer@univer.ai>",
@@ -51,8 +51,8 @@
         "vitest": "^4.1.10"
     },
     "devDependencies": {
-        "@univerjs/icons": "1.35.0",
-        "@univerjs/icons-svg": "^1.35.0",
+        "@univerjs/icons": "1.38.0",
+        "@univerjs/icons-svg": "^1.38.0",
         "typescript": "^6.0.3",
         "vue-tsc": "^3.3.8"
     }

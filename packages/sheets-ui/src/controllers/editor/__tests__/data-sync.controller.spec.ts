@@ -67,7 +67,11 @@ describe('EditorDataSyncController', () => {
         controllers.splice(0).forEach((controller) => controller.dispose());
     });
 
-    function createController(options: { isFocusFxBar?: boolean; themeTextColor?: string } = {}) {
+    function createController(options: {
+        isFocusFxBar?: boolean;
+        themeTextColor?: string;
+        formulaBarPosition?: { width: number; height: number } | null;
+    } = {}) {
         const commandService = new TestCommandService();
         const editorBridgeService = {
             currentEditCellState$: new BehaviorSubject(null),
@@ -93,7 +97,9 @@ describe('EditorDataSyncController', () => {
         injector.add([RangeProtectionRuleModel, { useValue: { getRangeRuleInitState: () => true } as never }]);
         injector.add([WorksheetProtectionRuleModel, { useValue: { getSheetRuleInitState: () => true } as never }]);
         injector.add([FormulaEditorController, { useValue: { autoScroll: vi.fn() } as never }]);
-        injector.add([IFormulaEditorManagerService, { useValue: { getPosition: () => null } as never }]);
+        injector.add([IFormulaEditorManagerService, {
+            useValue: { getPosition: () => options.formulaBarPosition ?? null } as never,
+        }]);
         injector.add([IContextService, { useValue: contextService as never }]);
         injector.add([ThemeService, {
             useValue: {
@@ -121,6 +127,54 @@ describe('EditorDataSyncController', () => {
             getSnapshot: vi.fn(() => snapshot),
         });
     }
+
+    it('ignores a zero-width formula bar position', () => {
+        const { controller } = createController({ formulaBarPosition: { width: 0, height: 28 } });
+        const formulaBarSnapshot: IDocumentData = {
+            id: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+            documentStyle: {},
+            body: {
+                dataStream: 'text\r\n',
+            },
+        };
+
+        checkAndSetRenderStyleConfig(controller, formulaBarSnapshot);
+
+        expect(formulaBarSnapshot.documentStyle?.pageSize?.width).toBe(Number.POSITIVE_INFINITY);
+    });
+
+    it('applies a measured formula bar width', () => {
+        const { controller } = createController({ formulaBarPosition: { width: 320, height: 28 } });
+        const formulaBarSnapshot: IDocumentData = {
+            id: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+            documentStyle: {},
+            body: {
+                dataStream: 'text\r\n',
+            },
+        };
+
+        checkAndSetRenderStyleConfig(controller, formulaBarSnapshot);
+
+        expect(formulaBarSnapshot.documentStyle?.pageSize?.width).toBe(320);
+    });
+
+    it('keeps the previous formula bar width when the latest position has zero width', () => {
+        const formulaBarPosition = { width: 320, height: 28 };
+        const { controller } = createController({ formulaBarPosition });
+        const formulaBarSnapshot: IDocumentData = {
+            id: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+            documentStyle: {},
+            body: {
+                dataStream: 'text\r\n',
+            },
+        };
+
+        checkAndSetRenderStyleConfig(controller, formulaBarSnapshot);
+        formulaBarPosition.width = 0;
+        checkAndSetRenderStyleConfig(controller, formulaBarSnapshot);
+
+        expect(formulaBarSnapshot.documentStyle.pageSize?.width).toBe(320);
+    });
 
     it('refreshes the current edit cell when set-values updates the edited cell', () => {
         const { commandService, editorBridgeService } = createController();

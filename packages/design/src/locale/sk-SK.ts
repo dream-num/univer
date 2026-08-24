@@ -20,6 +20,9 @@ const locale: typeof enUS = {
     design: {
         Accessibility: {
             closeBadge: 'Zavrieť odznak',
+            close: 'Zavrieť',
+            previous: 'Predchádzajúci',
+            next: 'Nasledujúci',
             imageGallery: 'Galéria obrázkov',
             image: 'Obrázok {0} z {1}',
             zoomIn: 'Priblížiť',

@@ -383,9 +383,6 @@ export class Spreadsheet extends SheetComponent {
             extension.draw(ctx, parentScale, spreadsheetSkeleton, extensionDiffRanges, {
                 viewRanges: extensionViewRanges,
                 checkOutOfViewBound: true,
-                fontRenderRanges: extension === this._fontExtension && !isMergeRepair
-                    ? spreadsheetSkeleton.incrementalFontRenderRanges
-                    : undefined,
                 hasMergeData,
                 viewportKey: viewportInfo.viewportKey,
                 viewBound: viewportInfo.cacheBound,

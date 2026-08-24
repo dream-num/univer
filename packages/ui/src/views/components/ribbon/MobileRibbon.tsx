@@ -150,7 +150,10 @@ export function MobileRibbon(props: IMobileRibbonProps) {
                         aria-label={localeService.t<LocaleKey>('ui.navigation.previous')}
                         onClick={() => selectTab(activeIndex - 1)}
                     >
-                        <MoreLeftIcon className="univer-rotate-180 univer-text-sm" />
+                        <MoreLeftIcon
+                            className="univer-rotate-180 univer-text-sm"
+                            preserveStrokeWidth
+                        />
                     </button>
                 </div>
 
@@ -212,7 +215,7 @@ export function MobileRibbon(props: IMobileRibbonProps) {
                         aria-label={localeService.t<LocaleKey>('ui.navigation.next')}
                         onClick={() => selectTab(activeIndex + 1)}
                     >
-                        <MoreRightIcon className="univer-text-sm" />
+                        <MoreRightIcon className="univer-text-sm" preserveStrokeWidth />
                     </button>
 
                     {hasHeaderMenu && (
@@ -251,7 +254,7 @@ export function MobileRibbon(props: IMobileRibbonProps) {
                     aria-label={localeService.t<LocaleKey>('ui.navigation.previous')}
                     onClick={() => scrollToolbar('left')}
                 >
-                    <MoreLeftIcon className="univer-text-sm" />
+                    <MoreLeftIcon className="univer-text-sm" preserveStrokeWidth />
                 </button>
 
                 <div
@@ -325,7 +328,7 @@ export function MobileRibbon(props: IMobileRibbonProps) {
                                               [&_input]:!univer-outline-none
                                             `)}
                                         >
-                                            <ToolbarItem {...child.item} />
+                                            <ToolbarItem {...child.item} preserveStrokeWidth />
                                         </div>
                                     )
                                 ))}
@@ -347,7 +350,7 @@ export function MobileRibbon(props: IMobileRibbonProps) {
                     aria-label={localeService.t<LocaleKey>('ui.navigation.next')}
                     onClick={() => scrollToolbar('right')}
                 >
-                    <MoreRightIcon className="univer-text-sm" />
+                    <MoreRightIcon className="univer-text-sm" preserveStrokeWidth />
                 </button>
             </div>
         </div>

@@ -336,7 +336,7 @@ describe('SheetCanvasPopManagerService', () => {
     });
 
     it('adds scaled sheet header insets to a canvas-constrained drawing popup', () => {
-        const { service, popupService } = createSheetHarness();
+        const { service, popupService, viewport } = createSheetHarness();
         const targetObject = {
             left: 20,
             top: 10,
@@ -345,6 +345,8 @@ describe('SheetCanvasPopManagerService', () => {
             classType: RENDER_CLASS_TYPE.SHAPE,
             getPropByKey: () => 'image',
         };
+        viewport.left = 20;
+        viewport.top = 20;
 
         service.attachPopupToObject(targetObject as never, {
             componentKey: 'drawing-toolbar',
@@ -352,6 +354,27 @@ describe('SheetCanvasPopManagerService', () => {
         });
 
         expect(popupService.lastPopup()?.boundaryInsets).toEqual({ left: 40, top: 40 });
+    });
+
+    it('includes frozen panes in the boundary insets of a canvas-constrained drawing popup', () => {
+        const { service, popupService, viewport } = createSheetHarness();
+        const targetObject = {
+            left: 80,
+            top: 90,
+            width: 40,
+            height: 30,
+            classType: RENDER_CLASS_TYPE.SHAPE,
+            getPropByKey: () => 'image',
+        };
+        viewport.left = 80;
+        viewport.top = 100;
+
+        service.attachPopupToObject(targetObject as never, {
+            componentKey: 'drawing-toolbar',
+            constrainToCanvas: true,
+        });
+
+        expect(popupService.lastPopup()?.boundaryInsets).toEqual({ left: 160, top: 200 });
     });
 
     it('keeps absolute-position popups hidden while a selection is being dragged unless the popup opts in', () => {

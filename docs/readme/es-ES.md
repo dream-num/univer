@@ -89,7 +89,7 @@ Univer no es solo un visor de archivos de hojas de cálculo. Es un framework par
 
 - **Diseño isomórfico**: ejecuta aplicaciones UI en navegadores y procesamiento headless en Node.js.
 - **Arquitectura basada en plugins**: cada capacidad se entrega como un plugin componible, por lo que las funciones se pueden añadir, quitar, reemplazar o cargar bajo demanda.
-- **Preset mode para integración rápida**: usa bundles de plugins preparados desde [`univer-presets`](https://github.com/dream-num/univer-presets) cuando quieras una aplicación funcional rápidamente.
+- **Preset mode para integración rápida**: usa las colecciones de plugins preparadas en [`presets/`](../../presets) cuando quieras una aplicación funcional rápidamente.
 - **Plugin mode para control total**: compón paquetes manualmente cuando necesites carga personalizada, bundles más pequeños o integración profunda.
 - **Facade API**: trabaja con libros, hojas, rangos, documentos, fórmulas, comandos y eventos mediante una API de alto nivel.
 - **Motor de renderizado Canvas**: soporta superficies editables grandes y comparte la capa de renderizado entre distintos tipos de documento.
@@ -97,45 +97,12 @@ Univer no es solo un visor de archivos de hojas de cálculo. Es un framework par
 
 ## ⚡ Inicio rápido
 
-Para la mayoría de las aplicaciones, empieza con **Preset Mode**. Usa **Plugin Mode** cuando necesites componer paquetes manualmente y controlar el registro de plugins.
+Usa **Plugin Mode** para obtener una cobertura completa del producto y controlar con precisión la composición. Para los perfiles compatibles de Sheets, Docs y Node, **Preset Mode** ofrece una configuración curada más breve.
 
 <details open>
-<summary><strong>Preset Mode (recomendado)</strong></summary>
-
-Los presets son colecciones curadas de plugins de Univer que incluyen los registros de Facade API y estilos necesarios.
-
-```bash
-pnpm add @univerjs/presets @univerjs/preset-sheets-core
-```
-
-```ts
-import { UniverSheetsCorePreset } from '@univerjs/preset-sheets-core'
-import UniverPresetSheetsCoreEnUS from '@univerjs/preset-sheets-core/locales/en-US'
-import { createUniver, LocaleType, mergeLocales } from '@univerjs/presets'
-
-import '@univerjs/preset-sheets-core/lib/index.css'
-
-const { univerAPI } = createUniver({
-  locale: LocaleType.EN_US,
-  locales: {
-    [LocaleType.EN_US]: mergeLocales(UniverPresetSheetsCoreEnUS),
-  },
-  presets: [
-    UniverSheetsCorePreset({
-      container: 'app',
-    }),
-  ],
-})
-
-univerAPI.createWorkbook({})
-```
-
-</details>
-
-<details>
 <summary><strong>Plugin Mode</strong></summary>
 
-Plugin Mode te da control de bajo nivel sobre paquetes, imports de estilos, combinación de locales, registro de Facade API y orden de plugins.
+Plugin Mode te da control de bajo nivel sobre paquetes, imports de estilos, combinación de locales, registro de Facade API y configuración de plugins.
 
 ```bash
 pnpm add @univerjs/core @univerjs/design @univerjs/docs @univerjs/docs-ui @univerjs/engine-formula @univerjs/engine-render @univerjs/sheets @univerjs/sheets-formula @univerjs/sheets-formula-ui @univerjs/sheets-numfmt @univerjs/sheets-numfmt-ui @univerjs/sheets-ui @univerjs/ui
@@ -212,6 +179,39 @@ univerAPI.createWorkbook({})
 
 </details>
 
+<details>
+<summary><strong>Preset Mode</strong></summary>
+
+Los presets son colecciones curadas de plugins de Univer que incluyen los registros de Facade API y estilos necesarios.
+
+```bash
+pnpm add @univerjs/presets @univerjs/preset-sheets-core
+```
+
+```ts
+import { UniverSheetsCorePreset } from '@univerjs/preset-sheets-core'
+import UniverPresetSheetsCoreEnUS from '@univerjs/preset-sheets-core/locales/en-US'
+import { createUniver, LocaleType, mergeLocales } from '@univerjs/presets'
+
+import '@univerjs/preset-sheets-core/lib/index.css'
+
+const { univerAPI } = createUniver({
+  locale: LocaleType.EN_US,
+  locales: {
+    [LocaleType.EN_US]: mergeLocales(UniverPresetSheetsCoreEnUS),
+  },
+  presets: [
+    UniverSheetsCorePreset({
+      container: 'app',
+    }),
+  ],
+})
+
+univerAPI.createWorkbook({})
+```
+
+</details>
+
 Tu página necesita un contenedor:
 
 ```html
@@ -224,8 +224,8 @@ Consulta más detalles en la [guía de instalación y uso básico](https://docs.
 
 | Opción | Cuándo usarla | Empieza aquí |
 | --- | --- | --- |
-| **Preset Mode** | Quieres una configuración funcional de Sheets, Docs o Node con mínima configuración. | [`univer-presets`](https://github.com/dream-num/univer-presets) y la [guía de inicio](https://docs.univer.ai/guides/sheets/getting-started/installation) |
-| **Plugin Mode** | Necesitas control estricto sobre paquetes, orden de registro de plugins, carga bajo demanda o composición personalizada en tiempo de ejecución. | Los [`examples/`](../../examples) de este repositorio y la [guía de arquitectura](https://docs.univer.ai/guides/recipes/architecture/univer) |
+| **Plugin Mode** | Necesitas control estricto sobre paquetes, dependencias configuradas, carga bajo demanda o composición personalizada en tiempo de ejecución. | Los [`examples/`](../../examples) de este repositorio y la [guía de arquitectura](https://docs.univer.ai/guides/recipes/architecture/univer) |
+| **Preset Mode** | Quieres una configuración funcional de Sheets, Docs o Node con mínima configuración. | Los [`presets/`](../../presets) de este repositorio y la [guía de inicio](https://docs.univer.ai/guides/sheets/getting-started/installation) |
 | **Headless Mode** | Necesitas procesamiento de libros/documentos en servidor, cálculo de fórmulas o automatización sin UI. | [Headless Univer](https://docs.univer.ai/guides/sheets/getting-started/node) |
 
 Mantén todos los paquetes `@univerjs/*` en la misma versión. Si usas paquetes de Univer Pro, mantén también alineadas las versiones de `@univerjs-pro/*`.
@@ -278,7 +278,7 @@ Principios de separación:
 ## 🌐 Ecosistema
 
 - **Core SDK**: [`dream-num/univer`](https://github.com/dream-num/univer), este monorepo.
-- **Presets**: [`dream-num/univer-presets`](https://github.com/dream-num/univer-presets), bundles de plugins para aplicaciones en navegador y Node.js.
+- **Presets**: los [`presets/`](../../presets) de este repositorio, colecciones de plugins para aplicaciones en navegador y Node.js.
 - **AI agent skills**: [`dream-num/univer-sdk-skills`](https://github.com/dream-num/univer-sdk-skills), instrucciones reutilizables para agentes de IA que trabajan con integración de Univer, funciones Pro, desarrollo de plugins y backends Node. Consulta la [guía de AI Skills](https://docs.univer.ai/guides/skills).
 - **Documentación**: [docs.univer.ai](https://docs.univer.ai), con guías de Sheets, Docs, Slides, recipes y Pro.
 - **API Reference**: [docs.univer.ai/reference](https://docs.univer.ai/reference/classes/univer), Facade API y referencia de API generada.

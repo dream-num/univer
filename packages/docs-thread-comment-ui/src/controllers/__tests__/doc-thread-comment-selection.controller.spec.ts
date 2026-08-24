@@ -15,11 +15,11 @@
  */
 
 import { SetTextSelectionsOperation } from '@univerjs/docs';
+import { DEFAULT_DOC_SUBUNIT_ID } from '@univerjs/docs-thread-comment';
 import { SetActiveCommentOperation } from '@univerjs/thread-comment-ui';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { ShowCommentPanelOperation } from '../../commands/operations/show-comment-panel.operation';
-import { DEFAULT_DOC_SUBUNIT_ID } from '../../common/const';
 import { DocThreadCommentSelectionController } from '../doc-thread-comment-selection.controller';
 
 describe('DocThreadCommentSelectionController', () => {

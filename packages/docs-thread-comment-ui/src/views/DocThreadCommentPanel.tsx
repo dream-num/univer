@@ -19,6 +19,7 @@ import type { IAddDocCommentComment } from '../commands/commands/add-doc-comment
 import type { IDeleteDocCommentComment } from '../commands/commands/delete-doc-comment.command';
 import { ICommandService, Injector, isInternalEditorID, IUniverInstanceService, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { DEFAULT_DOC_SUBUNIT_ID } from '@univerjs/docs-thread-comment';
 import { deserializeThreadCommentAnchor, serializeThreadCommentAnchor, ThreadCommentAnchorKind, ThreadCommentModel } from '@univerjs/thread-comment';
 import { ThreadCommentDraftService, ThreadCommentPanel } from '@univerjs/thread-comment-ui';
 import { useDependency, useObservable } from '@univerjs/ui';
@@ -27,7 +28,6 @@ import { debounceTime, filter, map, Observable } from 'rxjs';
 import { AddDocCommentComment } from '../commands/commands/add-doc-comment.command';
 import { DeleteDocCommentComment } from '../commands/commands/delete-doc-comment.command';
 import { StartAddCommentOperation } from '../commands/operations/show-comment-panel.operation';
-import { DEFAULT_DOC_SUBUNIT_ID } from '../common/const';
 import { shouldDisableAddComment } from '../menu/menu';
 import { DocThreadCommentService } from '../services/doc-thread-comment.service';
 

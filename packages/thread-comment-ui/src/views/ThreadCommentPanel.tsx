@@ -98,8 +98,9 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
     const location = ThreadCommentTreeLocation.PANEL;
     const currentUser = useObservable(userService.currentUser$);
     const comments = useMemo(() => {
-        const allComments =
-            (unit === 'all' ? unitComments : unitComments.filter((i) => i.subUnitId === subUnitId) ?? []);
+        const allComments = unit === 'all' && type !== UniverInstanceType.UNIVER_SLIDE
+            ? unitComments
+            : unitComments.filter((i) => i.subUnitId === subUnitId);
 
         const sort = sortComments ?? ((a) => a);
         const res: IThreadCommentWithUsers[] = allComments.map((i) => ({ ...i.root, children: i.children ?? [], users: i.relativeUsers }));
@@ -114,7 +115,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
         } else {
             return sort(res) as IThreadCommentWithUsers[];
         }
-    }, [showComments, unit, unitComments, sortComments, subUnitId]);
+    }, [showComments, unit, unitComments, sortComments, subUnitId, type]);
 
     const commentsSorted = useMemo(() => [
         ...comments.filter((comment) => !comment.resolved),
@@ -209,8 +210,21 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                     commandService.executeCommand(SetActiveCommentOperation.id);
                 }
             }}
-            onMouseEnter={() => onItemEnter?.(comment)}
-            onMouseLeave={() => onItemLeave?.(comment)}
+            onMouseEnter={() => {
+                panelService.setHoveredComment({
+                    unitId: comment.unitId,
+                    subUnitId: comment.subUnitId,
+                    commentId: comment.id,
+                    trigger: 'panel-hover',
+                });
+                onItemEnter?.(comment);
+            }}
+            onMouseLeave={() => {
+                if (isSameThreadCommentTarget(panelService.hoveredCommentId, comment)) {
+                    panelService.setHoveredComment(undefined);
+                }
+                onItemLeave?.(comment);
+            }}
             onAddComment={onAddComment}
             onDeleteComment={onDeleteComment}
             onAfterDeleteComment={onAfterDeleteComment}

@@ -26,6 +26,7 @@ const locale: typeof enUS = {
         },
         menu: {
             addComment: 'افزودن نظر',
+            openComments: 'باز کردن نظرات',
             commentManagement: 'مدیریت نظر',
         },
     },

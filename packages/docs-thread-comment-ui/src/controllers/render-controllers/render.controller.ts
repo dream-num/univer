@@ -26,10 +26,10 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { DOC_INTERCEPTOR_POINT, DocInterceptorService, RichTextEditingMutation } from '@univerjs/docs';
+import { DEFAULT_DOC_SUBUNIT_ID } from '@univerjs/docs-thread-comment';
 import { DocRenderController } from '@univerjs/docs-ui';
 import { ThreadCommentModel } from '@univerjs/thread-comment';
 import { ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
-import { DEFAULT_DOC_SUBUNIT_ID } from '../../common/const';
 
 export class DocThreadCommentRenderController extends Disposable implements IRenderModule {
     constructor(

@@ -28,12 +28,14 @@ import {
     ToggleCommentPanelOperation,
 } from '../commands/operations/show-comment-panel.operation';
 
-export function AddDocDrawingCommentMenuItemFactory(): IMenuButtonItem<LocaleKey> {
+export function AddDocDrawingCommentMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {
         id: AddDocDrawingCommentOperation.id,
         type: MenuItemType.BUTTON,
-        icon: 'CommentIcon',
+        icon: 'InsertCommentDoubleIcon',
         title: 'docs-thread-comment-ui.panel.addComment',
+        tooltip: 'docs-thread-comment-ui.panel.addComment',
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
 
@@ -65,7 +67,7 @@ export function AddDocCommentMenuItemFactory(accessor: IAccessor): IMenuButtonIt
     return {
         id: StartAddCommentOperation.id,
         type: MenuItemType.BUTTON,
-        icon: 'CommentIcon',
+        icon: 'InsertCommentDoubleIcon',
         title: 'docs-thread-comment-ui.panel.addComment',
         tooltip: 'docs-thread-comment-ui.panel.addComment',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC, undefined, SHEET_EDITOR_UNITS),
@@ -87,8 +89,8 @@ export function ToolbarDocCommentMenuItemFactory(accessor: IAccessor): IMenuButt
         id: ToggleCommentPanelOperation.id,
         type: MenuItemType.BUTTON,
         icon: 'CommentIcon',
-        title: 'docs-thread-comment-ui.panel.addComment',
-        tooltip: 'docs-thread-comment-ui.panel.addComment',
+        title: 'docs-thread-comment-ui.panel.openComments',
+        tooltip: 'docs-thread-comment-ui.panel.openComments',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }

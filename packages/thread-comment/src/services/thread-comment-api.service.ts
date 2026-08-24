@@ -22,6 +22,7 @@ import {
     AddCommentCommand,
     DeleteCommentCommand,
     DeleteCommentTreeCommand,
+    ResolveCommentCommand,
     UpdateCommentCommand,
 } from '../commands/commands/comment.command';
 import { getDT } from '../common/utils';
@@ -29,14 +30,23 @@ import { ThreadCommentModel } from '../models/thread-comment.model';
 import { deserializeThreadCommentAnchor, serializeThreadCommentAnchor } from '../types/comment-anchor';
 
 export interface ICreateThreadCommentOptions {
+    /** Univer unit that owns the comment. */
     unitId: string;
+    /** Sheet, page, table, or product subunit that owns the comment. */
     subUnitId: string;
+    /** Stable, serializable product anchor. */
     anchor: IThreadCommentAnchor;
+    /** Plain text or a Univer document body for rich comment content. */
     content: ThreadCommentContent;
+    /** Attachment resource IDs. */
     attachments?: string[];
+    /** Caller-supplied stable comment ID, useful for idempotent agent workflows. */
     id?: string;
+    /** Caller-supplied thread ID. Defaults to the root comment ID. */
     threadId?: string;
+    /** Author user ID. Defaults to the current user managed by `UserManagerService`. */
     personId?: string;
+    /** Creation time. Defaults to the current time. */
     dateTime?: Date;
 }
 
@@ -64,7 +74,16 @@ export interface IDeleteThreadCommentOptions {
     unitId: string;
     subUnitId: string;
     commentId: string;
+    /** Deletes the complete root and reply tree when true. */
     deleteThread?: boolean;
+}
+
+export interface IResolveThreadCommentOptions {
+    unitId: string;
+    subUnitId: string;
+    commentId: string;
+    /** Defaults to `true`. Pass `false` to reopen the thread. */
+    resolved?: boolean;
 }
 
 export type ThreadCommentContent = string | IDocumentBody;
@@ -86,18 +105,21 @@ export function isThreadCommentDocumentBody(value: unknown): value is IDocumentB
     if (!value || typeof value !== 'object') {
         return false;
     }
-    const body = value as Record<string, unknown>;
-    if (typeof body.dataStream !== 'string') {
+    if (typeof Reflect.get(value, 'dataStream') !== 'string') {
         return false;
     }
-    if (DOCUMENT_BODY_ARRAY_FIELDS.some((field) => body[field] !== undefined && !Array.isArray(body[field]))) {
+    if (DOCUMENT_BODY_ARRAY_FIELDS.some((field) => {
+        const fieldValue = Reflect.get(value, field);
+        return fieldValue !== undefined && !Array.isArray(fieldValue);
+    })) {
         return false;
     }
-    return body.payloads === undefined || (
-        body.payloads !== null
-        && typeof body.payloads === 'object'
-        && !Array.isArray(body.payloads)
-        && Object.values(body.payloads).every((item) => typeof item === 'string')
+    const payloads = Reflect.get(value, 'payloads');
+    return payloads === undefined || (
+        payloads !== null
+        && typeof payloads === 'object'
+        && !Array.isArray(payloads)
+        && Object.values(payloads).every((item) => typeof item === 'string')
     );
 }
 
@@ -212,6 +234,15 @@ export class ThreadCommentFacadeService {
                 commentId: options.commentId,
             }
         );
+    }
+
+    resolveCommentAsync(options: IResolveThreadCommentOptions): Promise<boolean> {
+        return this._commandService.executeCommand(ResolveCommentCommand.id, {
+            unitId: options.unitId,
+            subUnitId: options.subUnitId,
+            commentId: options.commentId,
+            resolved: options.resolved ?? true,
+        });
     }
 
     getComments(query: IThreadCommentQuery = {}): IFacadeThreadCommentInfo[] {

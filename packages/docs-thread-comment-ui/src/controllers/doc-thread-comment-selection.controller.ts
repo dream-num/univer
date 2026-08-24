@@ -26,12 +26,12 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { SetTextSelectionsOperation } from '@univerjs/docs';
+import { DEFAULT_DOC_SUBUNIT_ID } from '@univerjs/docs-thread-comment';
 import { DocBackScrollRenderController } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ThreadCommentModel } from '@univerjs/thread-comment';
 import { SetActiveCommentOperation, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import { ShowCommentPanelOperation } from '../commands/operations/show-comment-panel.operation';
-import { DEFAULT_DOC_SUBUNIT_ID } from '../common/const';
 import { DocThreadCommentService } from '../services/doc-thread-comment.service';
 
 export class DocThreadCommentSelectionController extends Disposable {

@@ -414,6 +414,11 @@ describe('Thread comment commands', () => {
         expect(thread.root.text.dataStream).toBe('updated\r\n');
         expect(thread.children.map((comment) => comment.id)).toEqual([replyId]);
 
+        await facade.resolveCommentAsync({ ...location, commentId: rootId });
+        expect(facade.getComments({ anchorKinds: [anchor.kind], resolved: true })).toHaveLength(1);
+        await facade.resolveCommentAsync({ ...location, commentId: rootId, resolved: false });
+        expect(facade.getComments({ anchorKinds: [anchor.kind], resolved: false })).toHaveLength(1);
+
         await facade.deleteCommentAsync({ ...location, commentId: replyId });
         expect(facade.getComments({ anchorKinds: [anchor.kind] })[0].children).toEqual([]);
         await facade.deleteCommentAsync({ ...location, commentId: rootId, deleteThread: true });

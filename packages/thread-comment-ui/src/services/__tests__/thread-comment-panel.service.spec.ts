@@ -61,10 +61,12 @@ describe('ThreadCommentPanelService', () => {
         service.panelVisible$.subscribe((visible) => visibleStates.push(visible));
 
         service.setPanelVisible(true);
+        service.setHoveredComment({ unitId: 'book-1', subUnitId: 'sheet-1', commentId: 'c-1' });
         sidebarService.open({});
         sidebarService.close();
 
         expect(service.panelVisible).toBe(false);
+        expect(service.hoveredCommentId).toBeUndefined();
         expect(visibleStates).toEqual([false, true, false]);
     });
 
@@ -76,5 +78,30 @@ describe('ThreadCommentPanelService', () => {
 
         expect(service.activeCommentId).toEqual({ unitId: 'book-1', subUnitId: 'sheet-1', commentId: 'c-1', trigger: 'cell' });
         expect(activeComments.at(-1)).toEqual({ unitId: 'book-1', subUnitId: 'sheet-1', commentId: 'c-1', trigger: 'cell' });
+    });
+
+    it('publishes the thread comment hovered in the panel', () => {
+        const hoveredComments: unknown[] = [];
+        service.hoveredCommentId$.subscribe((comment) => hoveredComments.push(comment));
+
+        service.setHoveredComment({
+            unitId: 'book-1',
+            subUnitId: 'sheet-1',
+            commentId: 'c-1',
+            trigger: 'panel-hover',
+        });
+        service.setHoveredComment(undefined);
+
+        expect(service.hoveredCommentId).toBeUndefined();
+        expect(hoveredComments).toEqual([
+            undefined,
+            {
+                unitId: 'book-1',
+                subUnitId: 'sheet-1',
+                commentId: 'c-1',
+                trigger: 'panel-hover',
+            },
+            undefined,
+        ]);
     });
 });

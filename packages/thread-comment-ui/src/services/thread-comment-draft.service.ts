@@ -16,7 +16,7 @@
 
 import type { UniverInstanceType } from '@univerjs/core';
 import type { IThreadCommentAnchor } from '@univerjs/thread-comment';
-import { Disposable, Inject, IUniverInstanceService, UserManagerService } from '@univerjs/core';
+import { Disposable, Inject, IUniverInstanceService, toDisposable, UserManagerService } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
 
 export interface IThreadCommentDraft {
@@ -28,6 +28,7 @@ export interface IThreadCommentDraft {
 export class ThreadCommentDraftService extends Disposable {
     private readonly _placementType$ = new BehaviorSubject<UniverInstanceType | null>(null);
     private readonly _draft$ = new BehaviorSubject<IThreadCommentDraft | null>(null);
+    private _placementUnitId: string | undefined;
     private _ownerUserId: string | undefined;
 
     readonly placementType$ = this._placementType$.asObservable();
@@ -39,7 +40,12 @@ export class ThreadCommentDraftService extends Disposable {
     ) {
         super();
         this.disposeWithMe(instanceService.unitDisposed$.subscribe((unit) => {
-            if (this.draft?.unitId === unit.getUnitId()) {
+            if (this.draft?.unitId === unit.getUnitId() || this._placementUnitId === unit.getUnitId()) {
+                this.cancel();
+            }
+        }));
+        this.disposeWithMe(instanceService.focused$.subscribe((unitId) => {
+            if (unitId && this._placementUnitId && unitId !== this._placementUnitId) {
                 this.cancel();
             }
         }));
@@ -48,6 +54,15 @@ export class ThreadCommentDraftService extends Disposable {
                 this.cancel();
             }
         }));
+        if (typeof window !== 'undefined') {
+            const cancelPlacement = (event: KeyboardEvent) => {
+                if (event.key === 'Escape' && (this.placementType || this.draft)) {
+                    this.cancel();
+                }
+            };
+            window.addEventListener('keydown', cancelPlacement);
+            this.disposeWithMe(toDisposable(() => window.removeEventListener('keydown', cancelPlacement)));
+        }
     }
 
     get placementType(): UniverInstanceType | null {
@@ -58,20 +73,27 @@ export class ThreadCommentDraftService extends Disposable {
         return this._draft$.value;
     }
 
-    startPlacement(type: UniverInstanceType): void {
+    startPlacement(type: UniverInstanceType, unitId: string): void {
+        if (this.placementType === type && this._placementUnitId === unitId) {
+            this.cancel();
+            return;
+        }
         this._ownerUserId = this._userManagerService.getCurrentUser().userID;
+        this._placementUnitId = unitId;
         this._draft$.next(null);
         this._placementType$.next(type);
     }
 
     place(draft: IThreadCommentDraft): void {
         this._ownerUserId = this._userManagerService.getCurrentUser().userID;
+        this._placementUnitId = undefined;
         this._placementType$.next(null);
         this._draft$.next(draft);
     }
 
     cancel(): void {
         this._ownerUserId = undefined;
+        this._placementUnitId = undefined;
         this._placementType$.next(null);
         this._draft$.next(null);
     }

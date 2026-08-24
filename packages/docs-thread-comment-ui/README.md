@@ -15,9 +15,9 @@
 ## Installation
 
 ```sh
-pnpm add @univerjs/docs-thread-comment-ui
+pnpm add @univerjs/docs-thread-comment @univerjs/docs-thread-comment-ui
 # or
-npm install @univerjs/docs-thread-comment-ui
+npm install @univerjs/docs-thread-comment @univerjs/docs-thread-comment-ui
 ```
 
 Keep all `@univerjs/*` packages on the same version.
@@ -26,14 +26,18 @@ Keep all `@univerjs/*` packages on the same version.
 
 ```ts
 import '@univerjs/docs-thread-comment-ui/lib/index.css';
+import '@univerjs/docs-thread-comment/facade';
 import { UniverDocsThreadCommentUIPlugin } from '@univerjs/docs-thread-comment-ui';
 
 univer.registerPlugin(UniverDocsThreadCommentUIPlugin);
+
+const range = univerAPI.getActiveDocument()?.getTextRange(0, 12);
+await range?.createCommentAsync('Verify this introduction.', { id: 'review-intro' });
 ```
 
 ## Integration Notes
 
-Use this package with `@univerjs/thread-comment` and `@univerjs/thread-comment-ui` for shared comment behavior.
+Use `@univerjs/docs-thread-comment` for headless model commands and Facade APIs. This UI package adds menus, rendering, and the shared side panel.
 
 ## Resources
 

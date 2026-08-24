@@ -542,6 +542,36 @@ describe('ThreadCommentPanel', () => {
         expect(onTempCommentClose).toHaveBeenCalledTimes(1);
     });
 
+    it('shows only the active subunit and updates when it changes', () => {
+        const testBed = createPanelTestBed();
+        const activeSubUnit$ = new BehaviorSubject<string | undefined>(SHEET_ID);
+        addRootComment(testBed.threadCommentModel, createComment({ id: 'sheet-1-thread' }));
+        addRootComment(testBed.threadCommentModel, createComment({
+            id: 'sheet-2-thread',
+            subUnitId: 'sheet-2',
+        }));
+        const rendered = renderPanel(
+            testBed.injector,
+            <ThreadCommentPanel
+                unitId={UNIT_ID}
+                subUnitId$={activeSubUnit$}
+                type={UniverInstanceType.UNIVER_SLIDE}
+                onAdd={() => undefined}
+                getSubUnitName={(subUnitId) => subUnitId}
+            />
+        );
+        root = rendered.root;
+        container = rendered.container;
+
+        expect(container.textContent).toContain('sheet-1-thread');
+        expect(container.textContent).not.toContain('sheet-2-thread');
+
+        act(() => activeSubUnit$.next('sheet-2'));
+
+        expect(container.textContent).not.toContain('sheet-1-thread');
+        expect(container.textContent).toContain('sheet-2-thread');
+    });
+
     it('does not render a temporary comment owned by another unit', () => {
         const testBed = createPanelTestBed();
         const onTempCommentClose = vi.fn();
@@ -586,6 +616,25 @@ describe('ThreadCommentPanel', () => {
 
         act(() => {
             getPanelItem(container!, 'resolved-thread').dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        });
+
+        expect(testBed.panelService.activeCommentId).toBeUndefined();
+    });
+
+    it('clears the active target when a remote update deletes its thread', () => {
+        const testBed = createPanelTestBed();
+        addRootComment(testBed.threadCommentModel, createComment({ id: 'remote-thread', ref: 'A1' }));
+        const rendered = renderDefaultPanel(testBed.injector);
+        root = rendered.root;
+        container = rendered.container;
+
+        act(() => {
+            getPanelItem(container!, 'remote-thread').dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        });
+        expect(testBed.panelService.activeCommentId?.commentId).toBe('remote-thread');
+
+        act(() => {
+            testBed.threadCommentModel.deleteThread(UNIT_ID, SHEET_ID, 'remote-thread');
         });
 
         expect(testBed.panelService.activeCommentId).toBeUndefined();

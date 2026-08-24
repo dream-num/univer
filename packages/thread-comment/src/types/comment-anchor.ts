@@ -15,12 +15,23 @@
  */
 
 export enum ThreadCommentAnchorKind {
+    /** A cell comment managed by the Sheets range Facade. */
+    SHEET_CELL = 'sheet-cell',
+    /** A Sheet image, chart, Shape, or other drawing element. */
     SHEET_DRAWING = 'sheet-drawing',
+    /** A fixed text range comment managed by the Docs text range Facade. */
+    DOC_TEXT_RANGE = 'doc-text-range',
+    /** A Document image, chart, Shape, or other drawing element. */
     DOC_DRAWING = 'doc-drawing',
+    /** A Slide page element identified by a stable element ID. */
     SLIDE_ELEMENT = 'slide-element',
+    /** A free position normalized to the Slide page size. */
     SLIDE_POSITION = 'slide-position',
+    /** A Board element identified by a stable element ID. */
     BOARD_ELEMENT = 'board-element',
+    /** A free position in Board world coordinates. */
     BOARD_POSITION = 'board-position',
+    /** A Base record identified by stable table and record IDs. */
     BASE_RECORD = 'base-record',
 }
 
@@ -31,6 +42,7 @@ export interface IThreadCommentElementAnchor {
         | ThreadCommentAnchorKind.SLIDE_ELEMENT
         | ThreadCommentAnchorKind.BOARD_ELEMENT;
     elementId: string;
+    /** Slide or Board page ID when the host product has pages. */
     pageId?: string;
 }
 
@@ -38,6 +50,7 @@ export interface IThreadCommentPositionAnchor {
     kind: ThreadCommentAnchorKind.SLIDE_POSITION | ThreadCommentAnchorKind.BOARD_POSITION;
     x: number;
     y: number;
+    /** Slide or Board page ID when the host product has pages. */
     pageId?: string;
 }
 
@@ -76,18 +89,19 @@ export function isThreadCommentAnchor(value: unknown): value is IThreadCommentAn
         return false;
     }
 
-    const anchor = value as Record<string, unknown>;
-    switch (anchor.kind) {
+    const kind = Reflect.get(value, 'kind');
+    switch (kind) {
         case ThreadCommentAnchorKind.SHEET_DRAWING:
         case ThreadCommentAnchorKind.DOC_DRAWING:
         case ThreadCommentAnchorKind.SLIDE_ELEMENT:
         case ThreadCommentAnchorKind.BOARD_ELEMENT:
-            return isNonEmptyString(anchor.elementId) && isOptionalString(anchor.pageId);
+            return isNonEmptyString(Reflect.get(value, 'elementId')) && isOptionalString(Reflect.get(value, 'pageId'));
         case ThreadCommentAnchorKind.SLIDE_POSITION:
         case ThreadCommentAnchorKind.BOARD_POSITION:
-            return isFiniteNumber(anchor.x) && isFiniteNumber(anchor.y) && isOptionalString(anchor.pageId);
+            return isFiniteNumber(Reflect.get(value, 'x')) && isFiniteNumber(Reflect.get(value, 'y'))
+                && isOptionalString(Reflect.get(value, 'pageId'));
         case ThreadCommentAnchorKind.BASE_RECORD:
-            return isNonEmptyString(anchor.tableId) && isNonEmptyString(anchor.recordId);
+            return isNonEmptyString(Reflect.get(value, 'tableId')) && isNonEmptyString(Reflect.get(value, 'recordId'));
         default:
             return false;
     }
@@ -108,8 +122,12 @@ export function deserializeThreadCommentAnchor(ref: string): IThreadCommentAncho
     }
 
     try {
-        const value = JSON.parse(ref.slice(THREAD_COMMENT_ANCHOR_PREFIX.length)) as Partial<ISerializedThreadCommentAnchor>;
-        return value.v === 1 && isThreadCommentAnchor(value.anchor) ? value.anchor : null;
+        const value: unknown = JSON.parse(ref.slice(THREAD_COMMENT_ANCHOR_PREFIX.length));
+        if (!value || typeof value !== 'object' || Reflect.get(value, 'v') !== 1) {
+            return null;
+        }
+        const anchor = Reflect.get(value, 'anchor');
+        return isThreadCommentAnchor(anchor) ? anchor : null;
     } catch {
         return null;
     }

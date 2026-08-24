@@ -27,6 +27,7 @@
     "exports": {
         ".": "./src/index.ts",
         "./*": "./src/*",
+        "./render-objects/thread-comment-canvas-overlay": "./src/render-objects/thread-comment-canvas-overlay.ts",
         "./locale/*": "./src/locale/*.ts"
     },
     "main": "./src/index.ts",
@@ -45,6 +46,11 @@
                 "import": "./lib/es/*",
                 "require": "./lib/cjs/*",
                 "types": "./lib/types/index.d.ts"
+            },
+            "./render-objects/thread-comment-canvas-overlay": {
+                "import": "./lib/es/render-objects/thread-comment-canvas-overlay.js",
+                "require": "./lib/cjs/render-objects/thread-comment-canvas-overlay.js",
+                "types": "./lib/types/render-objects/thread-comment-canvas-overlay.d.ts"
             },
             "./locale/*": {
                 "import": "./lib/es/locale/*.js",
@@ -77,13 +83,13 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/docs-ui": "workspace:*",
+        "@univerjs/engine-render": "workspace:*",
         "@univerjs/icons": "1.35.0",
         "@univerjs/thread-comment": "workspace:*",
         "@univerjs/ui": "workspace:*"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
-        "@univerjs/engine-render": "workspace:*",
         "postcss": "^8.5.25",
         "react": "18.3.1",
         "rxjs": "^7.8.2",

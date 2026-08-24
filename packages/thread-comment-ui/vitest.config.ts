@@ -5,9 +5,6 @@ const require = createRequire(import.meta.url);
 const reactRequire = createRequire(require.resolve('react'));
 
 export default createConfig({
-    ssr: {
-        noExternal: true,
-    },
     resolve: {
         alias: [
             { find: /^react$/, replacement: require.resolve('react') },

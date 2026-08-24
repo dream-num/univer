@@ -39,6 +39,7 @@ import {
     OpenImageCropOperation,
 } from '@univerjs/drawing-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { FloatingObjectToolbarPosition, IMenuManagerService, MenuItemType } from '@univerjs/ui';
 import { takeUntil } from 'rxjs';
 import { EditDocDrawingOperation } from '../commands/operations/edit-doc-drawing.operation';
 import { SidebarDocDrawingOperation } from '../commands/operations/open-drawing-panel.operation';
@@ -59,7 +60,8 @@ export class DocDrawingPopupMenuController extends RxDisposable {
         @IContextService private readonly _contextService: IContextService,
         @IDocDrawingAdapterService private readonly _drawingAdapterService: IDocDrawingAdapterService,
         @Inject(DocDrawingFloatingToolbarAdapterService) private readonly _floatingToolbarAdapterService: DocDrawingFloatingToolbarAdapterService,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @IMenuManagerService private readonly _menuManagerService: IMenuManagerService
 
     ) {
         super();
@@ -265,15 +267,11 @@ export class DocDrawingPopupMenuController extends RxDisposable {
         const floatingToolbarMenuItems = drawing
             ? this._floatingToolbarAdapterService.getItems({ unitId, subUnitId, drawing })
             : null;
-        if (floatingToolbarMenuItems) {
-            return floatingToolbarMenuItems;
-        }
-
         const editCommandInfo = drawing
             ? this._drawingAdapterService.getEditDrawingCommandInfo({ unitId, subUnitId, drawing })
             : null;
 
-        return [
+        const defaultItems = [
             {
                 label: editCommandInfo?.label ?? 'docs-drawing-ui.image-popup.edit',
                 index: 0,
@@ -307,5 +305,30 @@ export class DocDrawingPopupMenuController extends RxDisposable {
                 disable: true, // TODO: @JOCS, feature is not ready.
             },
         ];
+
+        return [
+            ...(floatingToolbarMenuItems ?? defaultItems),
+            ...this._getFloatingObjectMenuItems(),
+        ];
+    }
+
+    private _getFloatingObjectMenuItems() {
+        return this._menuManagerService
+            .getFlatMenuByPositionKey(FloatingObjectToolbarPosition.DOC)
+            .flatMap(({ item }, index) => {
+                if (!item || item.type !== MenuItemType.BUTTON || !item.title || typeof item.icon !== 'string') {
+                    return [];
+                }
+
+                return [{
+                    type: 'button' as const,
+                    label: item.title,
+                    index: 100 + index,
+                    commandId: item.commandId ?? item.id,
+                    commandParams: typeof item.params === 'function' ? item.params() : item.params,
+                    disable: false,
+                    icon: item.icon,
+                }];
+            });
     }
 }

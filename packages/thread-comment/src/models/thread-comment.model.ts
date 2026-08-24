@@ -16,18 +16,22 @@
 
 import type { Nullable } from '@univerjs/core';
 import type { IUpdateCommentPayload, IUpdateCommentRefPayload } from '../commands/mutations/comment.mutation';
-import type { ThreadCommentAnchorKind } from '../types/comment-anchor';
 import type { IBaseComment, IThreadComment } from '../types/interfaces/i-thread-comment';
-import { Disposable, Inject, LifecycleService, LifecycleStages } from '@univerjs/core';
+import { Disposable, Inject, IUniverInstanceService, LifecycleService, LifecycleStages, UniverInstanceType } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { IThreadCommentDataSourceService } from '../services/tc-datasource.service';
-import { deserializeThreadCommentAnchor } from '../types/comment-anchor';
+import { deserializeThreadCommentAnchor, ThreadCommentAnchorKind } from '../types/comment-anchor';
 
 export interface IThreadCommentQuery {
+    /** Match comments in any of these Univer units. */
     unitIds?: string[];
+    /** Match comments in any of these sheets, pages, tables, or product subunits. */
     subUnitIds?: string[];
+    /** Match product targets such as ranges, drawings, slide elements, or base records. */
     anchorKinds?: ThreadCommentAnchorKind[];
+    /** Match threads containing a root comment or reply written by any of these user IDs. */
     authorIds?: string[];
+    /** Match resolved or unresolved root threads. */
     resolved?: boolean;
 }
 
@@ -86,7 +90,8 @@ export class ThreadCommentModel extends Disposable {
 
     constructor(
         @Inject(IThreadCommentDataSourceService) private readonly _dataSourceService: IThreadCommentDataSourceService,
-        @Inject(LifecycleService) private readonly _lifecycleService: LifecycleService
+        @Inject(LifecycleService) private readonly _lifecycleService: LifecycleService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
 
@@ -174,7 +179,9 @@ export class ThreadCommentModel extends Disposable {
         const currentComment = commentMap.get(comment.id);
 
         if (!currentComment) {
-            this.addComment(unitId, subUnitId, comment as IThreadComment);
+            if ('ref' in comment && typeof comment.ref === 'string') {
+                this.addComment(unitId, subUnitId, { ...comment, ref: comment.ref });
+            }
             return;
         }
 
@@ -336,7 +343,7 @@ export class ThreadCommentModel extends Disposable {
                     ...child,
                     parentId: comment.id,
                     ref: '',
-                } as IThreadComment);
+                });
             }
         }
 
@@ -412,7 +419,7 @@ export class ThreadCommentModel extends Disposable {
 
     getComment(unitId: string, subUnitId: string, commentId: string) {
         const commentMap = this._ensureCommentMap(unitId, subUnitId);
-        return commentMap.get(commentId) as IThreadComment | undefined;
+        return commentMap.get(commentId);
     }
 
     getRootComment(unitId: string, subUnitId: string, threadId: string) {
@@ -560,7 +567,7 @@ export class ThreadCommentModel extends Disposable {
             });
             threadInfos.forEach((thread) => {
                 if (thread.root) {
-                    threads.push(thread as IThreadInfo);
+                    threads.push({ ...thread, root: thread.root });
                 }
             });
         });
@@ -578,6 +585,22 @@ export class ThreadCommentModel extends Disposable {
         });
 
         return all;
+    }
+
+    private _getAnchorKind(unitId: string, ref: string): ThreadCommentAnchorKind | null {
+        const anchor = deserializeThreadCommentAnchor(ref);
+        if (anchor) {
+            return anchor.kind;
+        }
+
+        switch (this._univerInstanceService.getUnitType(unitId)) {
+            case UniverInstanceType.UNIVER_SHEET:
+                return ThreadCommentAnchorKind.SHEET_CELL;
+            case UniverInstanceType.UNIVER_DOC:
+                return ThreadCommentAnchorKind.DOC_TEXT_RANGE;
+            default:
+                return null;
+        }
     }
 
     query(query: IThreadCommentQuery = {}): IThreadInfo[] {
@@ -599,8 +622,8 @@ export class ThreadCommentModel extends Disposable {
                     return false;
                 }
                 if (anchorKinds) {
-                    const anchor = deserializeThreadCommentAnchor(thread.root.ref);
-                    if (!anchor || !anchorKinds.has(anchor.kind)) {
+                    const anchorKind = this._getAnchorKind(unitId, thread.root.ref);
+                    if (!anchorKind || !anchorKinds.has(anchorKind)) {
                         return false;
                     }
                 }

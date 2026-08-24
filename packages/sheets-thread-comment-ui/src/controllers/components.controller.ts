@@ -15,7 +15,7 @@
  */
 
 import { Disposable, Inject } from '@univerjs/core';
-import { CommentIcon } from '@univerjs/icons';
+import { CommentIcon, InsertCommentDoubleIcon } from '@univerjs/icons';
 import { ComponentManager, IconManager } from '@univerjs/ui';
 import { SHEETS_THREAD_COMMENT_MODAL, SHEETS_THREAD_COMMENT_PANEL } from '../types/const';
 import { SheetsThreadCommentCell } from '../views/SheetsThreadCommentCell';
@@ -46,6 +46,7 @@ export class ComponentsController extends Disposable {
     private _registerIcons(): void {
         this.disposeWithMe(this._iconManager.register({
             CommentIcon,
+            InsertCommentDoubleIcon,
         }));
     }
 }

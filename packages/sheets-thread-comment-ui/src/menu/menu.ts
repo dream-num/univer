@@ -22,18 +22,20 @@ import { getCurrentRangeDisable$, whenSheetEditorFocused } from '@univerjs/sheet
 import { getMenuHiddenObservable, KeyCode, MenuItemType, MetaKeys } from '@univerjs/ui';
 import { AddSheetDrawingCommentOperation, ShowAddSheetCommentModalOperation, ToggleSheetCommentPanelOperation } from '../commands/operations/comment.operation';
 
-export const drawingCommentMenuFactory = () => ({
+export const drawingCommentMenuFactory = (accessor: IAccessor) => ({
     id: AddSheetDrawingCommentOperation.id,
     type: MenuItemType.BUTTON,
-    icon: 'CommentIcon',
+    icon: 'InsertCommentDoubleIcon',
     title: 'sheets-thread-comment-ui.menu.addComment',
+    tooltip: 'sheets-thread-comment-ui.menu.addComment',
+    hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
 });
 
 export const threadCommentMenuFactory = (accessor: IAccessor) => {
     return {
         id: ShowAddSheetCommentModalOperation.id,
         type: MenuItemType.BUTTON,
-        icon: 'CommentIcon',
+        icon: 'InsertCommentDoubleIcon',
         title: 'sheets-thread-comment-ui.menu.addComment',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentRangeDisable$(accessor, {
@@ -49,7 +51,8 @@ export const threadPanelMenuFactory = (accessor: IAccessor) => {
         id: ToggleSheetCommentPanelOperation.id,
         type: MenuItemType.BUTTON,
         icon: 'CommentIcon',
-        tooltip: 'sheets-thread-comment-ui.menu.commentManagement',
+        title: 'sheets-thread-comment-ui.menu.openComments',
+        tooltip: 'sheets-thread-comment-ui.menu.openComments',
         disabled$: getCurrentRangeDisable$(accessor, {
             workbookTypes: [WorkbookCommentPermission],
             worksheetTypes: [WorksheetViewPermission],

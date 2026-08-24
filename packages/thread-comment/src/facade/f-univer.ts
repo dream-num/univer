@@ -20,11 +20,71 @@ import * as ThreadComment from '@univerjs/thread-comment';
 const SERVICE_CACHE = new WeakMap<FUniver, ThreadComment.ThreadCommentFacadeService>();
 
 export interface IFUniverThreadCommentMixin {
+    /**
+     * Creates a root comment on a serialized product anchor.
+     * @example
+     * ```ts
+     * await univerAPI.createCommentAsync({
+     *   unitId: 'presentation-1',
+     *   subUnitId: 'slide-1',
+     *   anchor: {
+     *     kind: univerAPI.Enum.ThreadCommentAnchorKind.SLIDE_ELEMENT,
+     *     pageId: 'slide-1',
+     *     elementId: 'shape-1',
+     *   },
+     *   content: 'Verify this value.',
+     *   id: 'review-shape-1',
+     * });
+     * ```
+     */
     createCommentAsync(options: ThreadComment.ICreateThreadCommentOptions): Promise<boolean>;
+    /**
+     * Adds a reply to an existing root thread.
+     * @example
+     * ```ts
+     * await univerAPI.replyCommentAsync({
+     *   unitId: 'board-1',
+     *   subUnitId: 'page-1',
+     *   threadId: 'review-shape-1',
+     *   id: 'review-shape-1-reply',
+     *   content: 'Verified.',
+     * });
+     * ```
+     */
     replyCommentAsync(options: ThreadComment.IReplyThreadCommentOptions): Promise<boolean>;
+    /** Updates the body or attachments of an existing root comment or reply. */
     updateCommentAsync(options: ThreadComment.IUpdateThreadCommentOptions): Promise<boolean>;
+    /** Deletes one comment, or the complete thread when `deleteThread` is true. */
     deleteCommentAsync(options: ThreadComment.IDeleteThreadCommentOptions): Promise<boolean>;
+    /**
+     * Resolves a thread. Pass `resolved: false` to reopen it.
+     * @example
+     * ```ts
+     * await univerAPI.resolveCommentAsync({
+     *   unitId: 'board-1',
+     *   subUnitId: 'page-1',
+     *   commentId: 'review-shape-1',
+     * });
+     * ```
+     */
+    resolveCommentAsync(options: ThreadComment.IResolveThreadCommentOptions): Promise<boolean>;
+    /**
+     * Queries locally loaded threads by unit, subunit, anchor kind, author, or resolution state.
+     * @example
+     * ```ts
+     * const openAgentReviews = univerAPI.getComments({
+     *   unitIds: ['presentation-1'],
+     *   authorIds: ['agent-reviewer'],
+     *   anchorKinds: [univerAPI.Enum.ThreadCommentAnchorKind.SLIDE_ELEMENT],
+     *   resolved: false,
+     * });
+     * const sheetCellReviews = univerAPI.getComments({
+     *   anchorKinds: [univerAPI.Enum.ThreadCommentAnchorKind.SHEET_CELL],
+     * });
+     * ```
+     */
     getComments(query?: ThreadComment.IThreadCommentQuery): ThreadComment.IFacadeThreadCommentInfo[];
+    /** Synchronizes known threads before applying the same filters as `getComments`. */
     listCommentsAsync(query?: ThreadComment.IThreadCommentQuery): Promise<ThreadComment.IFacadeThreadCommentInfo[]>;
 }
 
@@ -39,26 +99,37 @@ export class FUniverThreadCommentMixin extends FUniver implements IFUniverThread
         return service;
     }
 
+    /** @inheritdoc */
     override createCommentAsync(options: ThreadComment.ICreateThreadCommentOptions): Promise<boolean> {
         return this._getThreadCommentService().createCommentAsync(options);
     }
 
+    /** @inheritdoc */
     override replyCommentAsync(options: ThreadComment.IReplyThreadCommentOptions): Promise<boolean> {
         return this._getThreadCommentService().replyCommentAsync(options);
     }
 
+    /** @inheritdoc */
     override updateCommentAsync(options: ThreadComment.IUpdateThreadCommentOptions): Promise<boolean> {
         return this._getThreadCommentService().updateCommentAsync(options);
     }
 
+    /** @inheritdoc */
     override deleteCommentAsync(options: ThreadComment.IDeleteThreadCommentOptions): Promise<boolean> {
         return this._getThreadCommentService().deleteCommentAsync(options);
     }
 
+    /** @inheritdoc */
+    override resolveCommentAsync(options: ThreadComment.IResolveThreadCommentOptions): Promise<boolean> {
+        return this._getThreadCommentService().resolveCommentAsync(options);
+    }
+
+    /** @inheritdoc */
     override getComments(query: ThreadComment.IThreadCommentQuery = {}): ThreadComment.IFacadeThreadCommentInfo[] {
         return this._getThreadCommentService().getComments(query);
     }
 
+    /** @inheritdoc */
     override async listCommentsAsync(query: ThreadComment.IThreadCommentQuery = {}): Promise<ThreadComment.IFacadeThreadCommentInfo[]> {
         return this._getThreadCommentService().listCommentsAsync(query);
     }

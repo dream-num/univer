@@ -54,12 +54,13 @@ export type { CommentUpdate, IThreadCommentQuery, IThreadInfo } from './models/t
 export { UniverThreadCommentPlugin } from './plugin';
 export { IThreadCommentDataSourceService, ThreadCommentDataSourceService } from './services/tc-datasource.service';
 export type { IThreadCommentDataSource, ThreadCommentJSON } from './services/tc-datasource.service';
-export { isThreadCommentDocumentBody, ThreadCommentFacadeService } from './services/thread-comment-api.service';
+export { isThreadCommentDocumentBody, normalizeThreadCommentContent, ThreadCommentFacadeService } from './services/thread-comment-api.service';
 export type {
     ICreateThreadCommentOptions,
     IDeleteThreadCommentOptions,
     IFacadeThreadCommentInfo,
     IReplyThreadCommentOptions,
+    IResolveThreadCommentOptions,
     IUpdateThreadCommentOptions,
     ThreadCommentContent,
 } from './services/thread-comment-api.service';

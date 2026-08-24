@@ -94,6 +94,7 @@ describe('ThreadCommentModel', () => {
         univer = new Univer();
         univer.registerPlugin(UniverThreadCommentPlugin);
         univer.createUnit(UniverInstanceType.UNIVER_SHEET, createWorkbookData());
+        univer.createUnit(UniverInstanceType.UNIVER_DOC, { id: 'doc-1', body: createBody('Document text') });
 
         const injector = univer.__getInjector();
         get = injector.get.bind(injector);
@@ -526,6 +527,13 @@ describe('ThreadCommentModel', () => {
     });
 
     it('queries threads by anchor kind, author, subunit, and resolved status', () => {
+        const sheetRangeComment = createComment({ id: 'sheet-range-comment', ref: 'A1:B2' });
+        const docTextComment = createComment({
+            id: 'doc-text-comment',
+            unitId: 'doc-1',
+            subUnitId: 'doc-1',
+            ref: 'Document text',
+        });
         const recordComment = createComment({
             id: 'record-comment',
             personId: 'owner',
@@ -554,6 +562,8 @@ describe('ThreadCommentModel', () => {
             resolved: true,
         });
 
+        threadCommentModel.addComment('unit-1', 'sheet-1', sheetRangeComment);
+        threadCommentModel.addComment('doc-1', 'doc-1', docTextComment);
         threadCommentModel.addComment('unit-1', 'sheet-1', recordComment);
         threadCommentModel.addComment('unit-1', 'sheet-1', reply);
         threadCommentModel.addComment('unit-1', 'sheet-2', positionComment);
@@ -564,6 +574,12 @@ describe('ThreadCommentModel', () => {
             resolved: false,
             subUnitIds: ['sheet-1'],
         }).map((thread) => thread.threadId)).toEqual([recordComment.threadId]);
+        expect(threadCommentModel.query({
+            anchorKinds: [ThreadCommentAnchorKind.SHEET_CELL],
+        }).map((thread) => thread.threadId)).toEqual([sheetRangeComment.threadId]);
+        expect(threadCommentModel.query({
+            anchorKinds: [ThreadCommentAnchorKind.DOC_TEXT_RANGE],
+        }).map((thread) => thread.threadId)).toEqual([docTextComment.threadId]);
         expect(threadCommentModel.query({ authorIds: ['missing'] })).toEqual([]);
     });
 

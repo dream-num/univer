@@ -18,8 +18,8 @@ import type { IWorkbookData } from '@univerjs/core';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import type { IThreadComment } from '@univerjs/thread-comment';
 import {
+    DrawingTypeEnum,
     ICommandService,
-    Injector,
     IUniverInstanceService,
     LifecycleService,
     LifecycleStages,
@@ -28,7 +28,7 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-import { IDrawingManagerService } from '@univerjs/drawing';
+import { DrawingManagerService, IDrawingManagerService } from '@univerjs/drawing';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
 import { CellPopupManagerService, SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
@@ -197,20 +197,23 @@ describe('sheet thread comment operations', () => {
     });
 
     it('rejects a focused drawing from another workbook or worksheet', () => {
-        const injector = new Injector();
+        const injector = univer.__getInjector();
+        const drawing = {
+            unitId: 'other-book',
+            subUnitId,
+            drawingId: 'drawing-1',
+            drawingType: DrawingTypeEnum.DRAWING_SHAPE,
+        };
+        const drawingManager = new DrawingManagerService();
+        drawingManager.registerDrawingData(drawing.unitId, {
+            [drawing.subUnitId]: { data: { [drawing.drawingId]: drawing }, order: [drawing.drawingId] },
+        });
+        drawingManager.focusDrawing([drawing]);
         injector.add([IDrawingManagerService, {
-            useValue: { getFocusDrawings: () => [{ unitId: 'other-book', subUnitId, drawingId: 'drawing-1' }] },
-        }]);
-        injector.add([IUniverInstanceService, {
-            useValue: {
-                getCurrentUnitOfType: () => ({
-                    getUnitId: () => unitId,
-                    getActiveSheet: () => ({ getSheetId: () => subUnitId }),
-                }),
-            },
+            useValue: drawingManager,
         }]);
 
-        expect(AddSheetDrawingCommentOperation.handler(injector)).toBe(false);
-        injector.dispose();
+        expect(AddSheetDrawingCommentOperation.handler(injector, {})).toBe(false);
+        drawingManager.dispose();
     });
 });

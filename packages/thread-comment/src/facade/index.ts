@@ -14,5 +14,6 @@
  * limitations under the License.
  */
 
+export { FThreadCommentEnumMixin, type IFThreadCommentEnumMixin } from './f-enum';
 export type { IFUniverThreadCommentMixin } from './f-univer';
 export { FUniverThreadCommentMixin } from './f-univer';

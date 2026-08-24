@@ -24,8 +24,9 @@ describe('ThreadCommentDraftService', () => {
     it('moves from placement mode to an anchored draft and can cancel', () => {
         const injector = new Injector();
         const unitDisposed$ = new Subject<{ getUnitId: () => string }>();
+        const focused$ = new BehaviorSubject<string | null>('board-1');
         const currentUser$ = new BehaviorSubject({ userID: 'user-1', name: 'User 1' });
-        injector.add([IUniverInstanceService, { useValue: { unitDisposed$ } as never }]);
+        injector.add([IUniverInstanceService, { useValue: { focused$, unitDisposed$ } as never }]);
         injector.add([UserManagerService, {
             useValue: {
                 currentUser$,
@@ -34,8 +35,26 @@ describe('ThreadCommentDraftService', () => {
         }]);
         injector.add([ThreadCommentDraftService]);
         const service = injector.get(ThreadCommentDraftService);
-        service.startPlacement(UniverInstanceType.UNIVER_BOARD);
+        service.startPlacement(UniverInstanceType.UNIVER_BOARD, 'board-1');
         expect(service.placementType).toBe(UniverInstanceType.UNIVER_BOARD);
+
+        service.startPlacement(UniverInstanceType.UNIVER_BOARD, 'board-1');
+        expect(service.placementType).toBeNull();
+
+        service.startPlacement(UniverInstanceType.UNIVER_BOARD, 'board-1');
+        unitDisposed$.next({ getUnitId: () => 'other-board' });
+        expect(service.placementType).toBe(UniverInstanceType.UNIVER_BOARD);
+        focused$.next('board-2');
+        expect(service.placementType).toBeNull();
+
+        focused$.next('board-1');
+        service.startPlacement(UniverInstanceType.UNIVER_BOARD, 'board-1');
+        unitDisposed$.next({ getUnitId: () => 'board-1' });
+        expect(service.placementType).toBeNull();
+
+        service.startPlacement(UniverInstanceType.UNIVER_BOARD, 'board-1');
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+        expect(service.placementType).toBeNull();
 
         service.place({
             unitId: 'board-1',
@@ -56,6 +75,14 @@ describe('ThreadCommentDraftService', () => {
             anchor: { kind: ThreadCommentAnchorKind.BOARD_POSITION, x: 1, y: 2 },
         });
         currentUser$.next({ userID: 'user-2', name: 'User 2' });
+        expect(service.draft).toBeNull();
+
+        service.place({
+            unitId: 'board-2',
+            subUnitId: 'page-1',
+            anchor: { kind: ThreadCommentAnchorKind.BOARD_POSITION, x: 3, y: 4 },
+        });
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
         expect(service.draft).toBeNull();
 
         service.cancel();

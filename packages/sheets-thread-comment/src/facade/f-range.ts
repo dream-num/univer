@@ -15,12 +15,41 @@
  */
 
 import type { IDocumentBody, Nullable } from '@univerjs/core';
-import type { IThreadComment } from '@univerjs/thread-comment';
+import type { ICreateThreadCommentOptions, IThreadComment, ThreadCommentContent } from '@univerjs/thread-comment';
 import { generateRandomId, ICommandService, Range, Tools, UserManagerService } from '@univerjs/core';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
 import { FRange } from '@univerjs/sheets/facade';
-import { AddCommentCommand, DeleteCommentTreeCommand, getDT } from '@univerjs/thread-comment';
+import {
+    AddCommentCommand,
+    DeleteCommentTreeCommand,
+    getDT,
+
+    normalizeThreadCommentContent,
+
+} from '@univerjs/thread-comment';
 import { FTheadCommentBuilder, FThreadComment } from './f-thread-comment';
+
+export type ISheetCellCommentCreateOptions = Pick<
+    ICreateThreadCommentOptions,
+    'attachments' | 'dateTime' | 'id' | 'personId' | 'threadId'
+>;
+
+interface IRangeCommentDependencies {
+    commandService: ICommandService;
+    model: SheetsThreadCommentModel;
+    userManagerService: UserManagerService;
+}
+
+const DEPENDENCIES_CACHE = new WeakMap<FRange, IRangeCommentDependencies>();
+
+function firstNonEmpty(...values: Array<string | undefined>): string {
+    for (const value of values) {
+        if (value) {
+            return value;
+        }
+    }
+    return generateRandomId();
+}
 
 /**
  * @ignore
@@ -61,6 +90,11 @@ export interface IFRangeSheetsThreadCommentMixin {
      * @returns Whether the comment is added successfully.
      * @example
      * ```ts
+     * await univerAPI.getActiveWorkbook()
+     *   .getActiveSheet()
+     *   .getRange('A1')
+     *   .addCommentAsync('Verify this value.', { id: 'review-a1' });
+     *
      * // Create a new comment
      * const richText = univerAPI.newRichText().insertText('hello univer');
      * const commentBuilder = univerAPI.newTheadComment()
@@ -76,7 +110,10 @@ export interface IFRangeSheetsThreadCommentMixin {
      * console.log(result);
      * ```
      */
-    addCommentAsync(content: IDocumentBody | FTheadCommentBuilder): Promise<boolean>;
+    addCommentAsync(
+        content: ThreadCommentContent | FTheadCommentBuilder,
+        options?: ISheetCellCommentCreateOptions
+    ): Promise<boolean>;
 
      /**
       * Clear the comment of the start cell in the current range.
@@ -102,81 +139,98 @@ export interface IFRangeSheetsThreadCommentMixin {
  * @ignore
  */
 export class FRangeSheetsThreadCommentMixin extends FRange implements IFRangeSheetsThreadCommentMixin {
-    override getComment(): Nullable<FThreadComment> {
-        const injector = this._injector;
-        const sheetsTheadCommentModel = injector.get(SheetsThreadCommentModel);
-        const unitId = this._workbook.getUnitId();
-        const sheetId = this._worksheet.getSheetId();
-        const commentId = sheetsTheadCommentModel.getByLocation(unitId, sheetId, this._range.startRow, this._range.startColumn);
-        if (!commentId) {
-            return null;
+    private _getDependencies(): IRangeCommentDependencies {
+        const cached = DEPENDENCIES_CACHE.get(this);
+        if (cached) {
+            return cached;
         }
 
-        const comment = sheetsTheadCommentModel.getComment(unitId, sheetId, commentId);
-        if (comment) {
-            return this._injector.createInstance(FThreadComment, comment);
-        }
-
-        return null;
+        const dependencies = {
+            commandService: this._injector.get(ICommandService),
+            model: this._injector.get(SheetsThreadCommentModel),
+            userManagerService: this._injector.get(UserManagerService),
+        };
+        DEPENDENCIES_CACHE.set(this, dependencies);
+        return dependencies;
     }
 
-    override getComments(): FThreadComment[] {
-        const injector = this._injector;
-        const sheetsTheadCommentModel = injector.get(SheetsThreadCommentModel);
+    private _getCommentDataInRange(): IThreadComment[] {
+        const model = this._getDependencies().model;
         const unitId = this._workbook.getUnitId();
         const sheetId = this._worksheet.getSheetId();
-        const comments: FThreadComment[] = [];
+        const comments: IThreadComment[] = [];
         Range.foreach(this._range, (row, col) => {
-            const commentId = sheetsTheadCommentModel.getByLocation(unitId, sheetId, row, col);
-            if (commentId) {
-                const comment = sheetsTheadCommentModel.getComment(unitId, sheetId, commentId);
-                if (comment) {
-                    comments.push(this._injector.createInstance(FThreadComment, comment));
-                }
+            const commentId = model.getByLocation(unitId, sheetId, row, col);
+            const comment = commentId ? model.getComment(unitId, sheetId, commentId) : null;
+            if (comment) {
+                comments.push(comment);
             }
         });
-
         return comments;
     }
 
-    override addCommentAsync(content: IDocumentBody | FTheadCommentBuilder): Promise<boolean> {
-        const injector = this._injector;
-        const currentComment = this.getComment()?.getCommentData();
-        const commentService = injector.get(ICommandService);
-        const userService = injector.get(UserManagerService);
+    private _getStartCellCommentData(): IThreadComment | null {
+        const model = this._getDependencies().model;
+        const unitId = this._workbook.getUnitId();
+        const sheetId = this._worksheet.getSheetId();
+        const commentId = model.getByLocation(unitId, sheetId, this._range.startRow, this._range.startColumn);
+        return commentId ? model.getComment(unitId, sheetId, commentId) ?? null : null;
+    }
+
+    override getComment(): Nullable<FThreadComment> {
+        const comment = this._getStartCellCommentData();
+        return comment ? this._injector.createInstance(FThreadComment, comment) : null;
+    }
+
+    override getComments(): FThreadComment[] {
+        return this._getCommentDataInRange().map((comment) => this._injector.createInstance(FThreadComment, comment));
+    }
+
+    override addCommentAsync(
+        content: ThreadCommentContent | FTheadCommentBuilder,
+        options: ISheetCellCommentCreateOptions = {}
+    ): Promise<boolean> {
+        const { commandService, userManagerService } = this._getDependencies();
+        const currentComment = this._getStartCellCommentData();
         const unitId = this._workbook.getUnitId();
         const sheetId = this._worksheet.getSheetId();
         const refStr = `${Tools.chatAtABC(this._range.startColumn)}${this._range.startRow + 1}`;
-        const currentUser = userService.getCurrentUser();
-        const commentData: Partial<IThreadComment> = content instanceof FTheadCommentBuilder ? content.build() : { text: content };
+        const currentUser = userManagerService.getCurrentUser();
+        let commentData: IThreadComment | null = null;
+        let text: IDocumentBody;
+        if (content instanceof FTheadCommentBuilder) {
+            commentData = content.build();
+            text = commentData.text;
+        } else {
+            text = normalizeThreadCommentContent(content);
+        }
 
-        return commentService.executeCommand(AddCommentCommand.id, {
+        return commandService.executeCommand(AddCommentCommand.id, {
             unitId,
             subUnitId: sheetId,
             comment: {
-                text: commentData.text,
-                dT: commentData.dT || getDT(),
-                attachments: [],
-                id: commentData.id || generateRandomId(),
+                text,
+                dT: options.dateTime ? getDT(options.dateTime) : commentData?.dT || getDT(),
+                attachments: options.attachments ?? commentData?.attachments ?? [],
+                id: firstNonEmpty(options.id, commentData?.id),
                 ref: refStr,
-                personId: commentData.personId || currentUser.userID,
+                personId: firstNonEmpty(options.personId, commentData?.personId, currentUser.userID),
                 parentId: currentComment?.id,
                 unitId,
                 subUnitId: sheetId,
-                threadId: currentComment?.threadId || generateRandomId(),
+                threadId: firstNonEmpty(currentComment?.threadId, options.threadId, commentData?.threadId),
             },
         });
     }
 
     override clearCommentAsync(): Promise<boolean> {
-        const injector = this._injector;
-        const currentComment = this.getComment()?.getCommentData();
-        const commentService = injector.get(ICommandService);
+        const { commandService } = this._getDependencies();
+        const currentComment = this._getStartCellCommentData();
         const unitId = this._workbook.getUnitId();
         const sheetId = this._worksheet.getSheetId();
 
         if (currentComment) {
-            return commentService.executeCommand(DeleteCommentTreeCommand.id, {
+            return commandService.executeCommand(DeleteCommentTreeCommand.id, {
                 unitId,
                 subUnitId: sheetId,
                 threadId: currentComment.threadId,
@@ -187,16 +241,19 @@ export class FRangeSheetsThreadCommentMixin extends FRange implements IFRangeShe
         return Promise.resolve(true);
     }
 
-    override clearCommentsAsync(): Promise<boolean> {
-        const comments = this.getComments();
-        const promises = comments.map((comment) => comment.deleteAsync());
-
-        return Promise.all(promises).then(() => true);
+    override async clearCommentsAsync(): Promise<boolean> {
+        const { commandService } = this._getDependencies();
+        const unitId = this._workbook.getUnitId();
+        const subUnitId = this._worksheet.getSheetId();
+        const results = await Promise.all(this._getCommentDataInRange().map((comment) => commandService.executeCommand(
+            DeleteCommentTreeCommand.id,
+            { unitId, subUnitId, threadId: comment.threadId, commentId: comment.id }
+        )));
+        return results.every(Boolean);
     }
 }
 
 FRange.extend(FRangeSheetsThreadCommentMixin);
 declare module '@univerjs/sheets/facade' {
-    // eslint-disable-next-line ts/naming-convention
     interface FRange extends IFRangeSheetsThreadCommentMixin { }
 }

@@ -16,9 +16,9 @@
 
 import { CustomDecorationType } from '@univerjs/core';
 import { DOC_INTERCEPTOR_POINT, RichTextEditingMutation } from '@univerjs/docs';
+import { DEFAULT_DOC_SUBUNIT_ID } from '@univerjs/docs-thread-comment';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
-import { DEFAULT_DOC_SUBUNIT_ID } from '../../../common/const';
 import { DocThreadCommentRenderController } from '../render.controller';
 
 describe('DocThreadCommentRenderController', () => {

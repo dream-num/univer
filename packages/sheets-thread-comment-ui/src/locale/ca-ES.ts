@@ -26,6 +26,7 @@ const locale: typeof enUS = {
         },
         menu: {
             addComment: 'Afegeix un comentari',
+            openComments: 'Obre els comentaris',
             commentManagement: 'Gestió de comentaris',
         },
     },

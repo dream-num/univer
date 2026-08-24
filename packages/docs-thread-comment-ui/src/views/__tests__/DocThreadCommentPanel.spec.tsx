@@ -31,6 +31,7 @@ import {
     UserManagerService,
 } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
+import { DEFAULT_DOC_SUBUNIT_ID } from '@univerjs/docs-thread-comment';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IThreadCommentDataSourceService, ThreadCommentDataSourceService, ThreadCommentModel } from '@univerjs/thread-comment';
 import { SetActiveCommentOperation, ThreadCommentDraftService, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
@@ -40,7 +41,6 @@ import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { DEFAULT_DOC_SUBUNIT_ID } from '../../common/const';
 import { DocThreadCommentService } from '../../services/doc-thread-comment.service';
 import { DocThreadCommentPanel, getDocCommentPanelSubUnitId } from '../DocThreadCommentPanel';
 

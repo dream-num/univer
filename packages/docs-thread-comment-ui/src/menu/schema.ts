@@ -16,7 +16,7 @@
 
 import type { MenuSchemaType } from '@univerjs/ui';
 import { FLOAT_TOOLBAR_MENU_POSITION } from '@univerjs/docs-ui';
-import { ContextMenuGroup, ContextMenuPosition, RibbonInsertGroup } from '@univerjs/ui';
+import { ContextMenuGroup, ContextMenuPosition, FloatingObjectToolbarPosition, RibbonInsertGroup } from '@univerjs/ui';
 import {
     AddDocDrawingCommentOperation,
     StartAddCommentOperation,
@@ -28,13 +28,25 @@ export const menuSchema: MenuSchemaType = {
     [RibbonInsertGroup.MEDIA]: {
         [ToggleCommentPanelOperation.id]: {
             order: 3,
+            gridLayout: { row: 1, column: 4, showLabel: true },
             menuItemFactory: ToolbarDocCommentMenuItemFactory,
+        },
+        [StartAddCommentOperation.id]: {
+            order: 3.1,
+            gridLayout: { row: 2, column: 4, showLabel: true },
+            menuItemFactory: AddDocCommentMenuItemFactory,
         },
     },
     [FLOAT_TOOLBAR_MENU_POSITION]: {
         [StartAddCommentOperation.id]: {
             order: 21,
             menuItemFactory: AddDocCommentMenuItemFactory,
+        },
+    },
+    [FloatingObjectToolbarPosition.DOC]: {
+        [AddDocDrawingCommentOperation.id]: {
+            order: 10,
+            menuItemFactory: AddDocDrawingCommentMenuItemFactory,
         },
     },
     [ContextMenuPosition.MAIN_AREA]: {

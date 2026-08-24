@@ -18,13 +18,14 @@ import type { DocumentDataModel, ICommand } from '@univerjs/core';
 import type { ActiveCommentInfo } from '@univerjs/thread-comment-ui';
 import { BuildTextUtils, CommandType, ICommandService, IUniverInstanceService, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
+import { DEFAULT_DOC_SUBUNIT_ID } from '@univerjs/docs-thread-comment';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { getDT, ThreadCommentAnchorKind } from '@univerjs/thread-comment';
 import { ThreadCommentDraftService, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import { ISidebarService } from '@univerjs/ui';
-import { DEFAULT_DOC_SUBUNIT_ID, DOCS_THREAD_COMMENT_PANEL } from '../../common/const';
+import { DOCS_THREAD_COMMENT_PANEL } from '../../common/const';
 import { DocThreadCommentService } from '../../services/doc-thread-comment.service';
 
 export interface IShowCommentPanelOperationParams {

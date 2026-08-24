@@ -21,6 +21,7 @@ import {
     DocumentFlavor,
     DrawingTypeEnum,
     ICommandService,
+    IPermissionService,
     IUndoRedoService,
     IUniverInstanceService,
     JSONX,
@@ -36,6 +37,7 @@ import { DeleteDocumentSectionBreakCommand } from '../../commands/commands/updat
 import { RichTextEditingMutation } from '../../commands/mutations/core-editing.mutation';
 import { DocsRenameMutation } from '../../commands/mutations/docs-rename.mutation';
 import { createDocumentData, createTableDocument, createTestBed } from '../../facade/__tests__/create-test-bed';
+import { DOCUMENT_UNIT_PERMISSION_ACTIONS, DocumentPermission } from '../../services/permission/document-permission';
 
 function createTwoSectionDocument(): IDocumentData {
     const data = createDocumentData('permission-test', {
@@ -101,6 +103,15 @@ describe('DocPermissionController', () => {
 
     afterEach(() => {
         univer.dispose();
+    });
+
+    it('registers every whole-Document permission point when the unit is created', () => {
+        const permissionService = get(IPermissionService);
+        DOCUMENT_UNIT_PERMISSION_ACTIONS.forEach((action) => {
+            expect(permissionService.getPermissionPoint(
+                new DocumentPermission(document.getId(), document.getId(), action).id
+            )).not.toBeNull();
+        });
     });
 
     it('enforces document edit permission through the facade and command pipeline', async () => {

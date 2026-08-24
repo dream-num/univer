@@ -56,6 +56,8 @@ import { DocsRenameMutation } from '../commands/mutations/docs-rename.mutation';
 import {
     canEditDocumentTargets,
     clearDocumentPermissionValuesForUnit,
+    DOCUMENT_UNIT_PERMISSION_ACTIONS,
+    DocumentPermission,
     getDocumentEntityPermissionObjectId,
     getDocumentPermissionValue,
     getDocumentSectionPermissionObjectId,
@@ -89,6 +91,11 @@ export class DocPermissionController extends Disposable {
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
+        this._univerInstanceService.getAllUnitsForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)
+            .forEach((unit) => this._registerUnitPermissionPoints(unit.getUnitId()));
+        this.disposeWithMe(this._univerInstanceService
+            .getTypeOfUnitAdded$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)
+            .subscribe(({ unit }) => this._registerUnitPermissionPoints(unit.getUnitId())));
         this.disposeWithMe(this._commandService.beforeCommandExecuted((commandInfo, options) => {
             this._check(commandInfo, options);
         }));
@@ -98,6 +105,15 @@ export class DocPermissionController extends Disposable {
                 this._permissionService,
                 unit.getUnitId()
             )));
+    }
+
+    private _registerUnitPermissionPoints(unitId: string): void {
+        DOCUMENT_UNIT_PERMISSION_ACTIONS.forEach((action) => {
+            const point = new DocumentPermission(unitId, unitId, action);
+            if (!this._permissionService.getPermissionPoint(point.id)) {
+                this._permissionService.addPermissionPoint(point);
+            }
+        });
     }
 
     private _check(commandInfo: Readonly<ICommandInfo>, options?: IExecutionOptions): void {

@@ -22,6 +22,6 @@ import './f-univer';
 
 export type * from './f-enum';
 export type * from './f-event';
-export type * from './f-over-grid-image';
+export { FOverGridImage, type FOverGridImageBuilder, type IFOverGridImage } from './f-over-grid-image';
 export type * from './f-univer';
 export type * from './f-worksheet';

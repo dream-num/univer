@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
+import type { ReactNode } from 'react';
 import type { LocaleKey } from '../../../locale/types';
+import type { ICustomLabelProps } from '../../custom-label/CustomLabel';
 import { LocaleService } from '@univerjs/core';
 import { borderLeftBottomClassName, clsx, scrollbarClassName } from '@univerjs/design';
 import { CloseIcon } from '@univerjs/icons';
-import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ISidebarService } from '../../../services/sidebar/sidebar.service';
 import { useDependency, useObservable } from '../../../utils/di';
-import { CustomLabel, type ICustomLabelProps } from '../../custom-label/CustomLabel';
+import { CustomLabel } from '../../custom-label/CustomLabel';
 
 export interface ISidebarMethodOptions {
     id?: string;

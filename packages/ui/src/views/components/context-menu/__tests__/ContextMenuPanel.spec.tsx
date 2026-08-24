@@ -15,14 +15,16 @@
  */
 
 import type { ComponentType, ReactElement } from 'react';
+import type { IValueOption } from '../../../../services/menu/menu';
+import type { IMenuSchema } from '../../../../services/menu/menu-manager.service';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { ILogService, Injector, LocaleService } from '@univerjs/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ComponentManager, IconManager } from '../../../../common';
 import { ILayoutService } from '../../../../services/layout/layout.service';
-import { type IValueOption, MenuItemType } from '../../../../services/menu/menu';
-import { IMenuManagerService, type IMenuSchema } from '../../../../services/menu/menu-manager.service';
+import { MenuItemType } from '../../../../services/menu/menu';
+import { IMenuManagerService } from '../../../../services/menu/menu-manager.service';
 import { connectInjector } from '../../../../utils/di';
 import {
     CONTEXT_MENU_SUBMENU_CLOSE_DELAY,

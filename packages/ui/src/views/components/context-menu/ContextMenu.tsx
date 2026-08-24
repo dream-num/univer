@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
+import type { IContextMenuTriggerContext } from '../../../services/contextmenu/contextmenu.service';
+import type { IContextMenuAnchorRect } from './AnchoredContextMenu';
 import { ICommandService } from '@univerjs/core';
 import { useEffect, useRef, useState } from 'react';
-import { IContextMenuService, type IContextMenuTriggerContext } from '../../../services/contextmenu/contextmenu.service';
+import { IContextMenuService } from '../../../services/contextmenu/contextmenu.service';
 import { ILayoutService } from '../../../services/layout/layout.service';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
 import { IUIRuntimeScopeService } from '../../../services/runtime-scope/ui-runtime-scope.service';
 import { useDependency } from '../../../utils/di';
-import { AnchoredContextMenu, type IContextMenuAnchorRect } from './AnchoredContextMenu';
+import { AnchoredContextMenu } from './AnchoredContextMenu';
 
 const DESKTOP_CONTEXT_MENU_HOST_ID = 'desktop-context-menu';
 

@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { createIdentifier, Disposable, type IDisposable, toDisposable } from '@univerjs/core';
+import type { IDisposable } from '@univerjs/core';
+import { createIdentifier, Disposable, toDisposable } from '@univerjs/core';
 
 export interface IContextMenuTriggerContext {
     autoFocus?: boolean;

@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { BooleanNumber, DrawingTypeEnum, type IDrawingParam, type IDrawingSearch, Injector, JSON1 } from '@univerjs/core';
+import type { IDrawingParam, IDrawingSearch } from '@univerjs/core';
+import { BooleanNumber, DrawingTypeEnum, Injector, JSON1 } from '@univerjs/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { UnitDrawingService } from '../drawing-manager-impl.service';
 

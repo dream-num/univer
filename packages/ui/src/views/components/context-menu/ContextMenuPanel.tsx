@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
+import type { Dispatch, KeyboardEvent, SetStateAction } from 'react';
+import type { IDisplayMenuItem, IMenuButtonItem, IMenuItem, IMenuSelectorItem, IValueOption, MenuItemDefaultValueType } from '../../../services/menu/menu';
+import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import { isRealNum, LocaleService } from '@univerjs/core';
 import { borderBottomClassName, borderClassName, clsx, cva, scrollbarClassName } from '@univerjs/design';
 import { CheckMarkIcon, MoreLeftIcon, MoreRightIcon } from '@univerjs/icons';
 import {
-    type Dispatch,
-    type KeyboardEvent,
-    type SetStateAction,
+
     useCallback,
     useEffect,
     useId,
@@ -33,15 +34,10 @@ import { createPortal } from 'react-dom';
 import { combineLatest, isObservable, map, merge, of, scan, startWith } from 'rxjs';
 import { ILayoutService } from '../../../services/layout/layout.service';
 import {
-    type IDisplayMenuItem,
-    type IMenuButtonItem,
-    type IMenuItem,
-    type IMenuSelectorItem,
-    type IValueOption,
-    type MenuItemDefaultValueType,
+
     MenuItemType,
 } from '../../../services/menu/menu';
-import { IMenuManagerService, type IMenuSchema } from '../../../services/menu/menu-manager.service';
+import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
 import { useDependency, useObservable } from '../../../utils/di';
 import { CustomLabel } from '../../custom-label/CustomLabel';
 import { useScrollYOverContainer } from '../../hooks/layout';

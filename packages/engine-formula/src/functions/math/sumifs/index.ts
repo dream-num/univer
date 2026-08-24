@@ -21,6 +21,7 @@ import { getPairedRangeAndCriteriaResult, parsePairedRangeAndCriteria } from '..
 import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
+import { FUNCTION_NAMES_MATH } from '../function-names';
 
 export class Sumifs extends BaseFunction {
     override minParams = 3;
@@ -53,7 +54,7 @@ export class Sumifs extends BaseFunction {
         }
 
         const results = getPairedRangeAndCriteriaResult(_variants, {
-            formulaName: 'SUMIFS',
+            formulaName: FUNCTION_NAMES_MATH.SUMIFS,
             maxRowLength: criteriaMaxRowLength,
             maxColumnLength: criteriaMaxColumnLength,
             isNumberSensitive: true,

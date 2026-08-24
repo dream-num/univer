@@ -130,6 +130,30 @@ describe('ThreadCommentResourceController', () => {
         });
     });
 
+    it.each([
+        UniverInstanceType.UNIVER_SLIDE,
+        UniverInstanceType.UNIVER_BOARD,
+        UniverInstanceType.UNIVER_BASE,
+    ])('serializes thread comments for business type %s', (businessType) => {
+        const root = createComment({ id: 'root-business', ref: 'element-1', subUnitId: 'page-1' });
+        threadCommentModel.addComment('unit-1', 'page-1', root);
+
+        const resource = resourceManagerService.getResourcesByType('unit-1', businessType)
+            .find((item) => item.name === SHEET_UNIVER_THREAD_COMMENT_PLUGIN);
+
+        expect(resource).toBeDefined();
+        if (resource === undefined) {
+            return;
+        }
+
+        expect(JSON.parse(resource.data)).toEqual({
+            'page-1': [{
+                ...root,
+                children: [],
+            }],
+        });
+    });
+
     it('loads serialized comments and clears them on unload', async () => {
         const root = createComment({
             id: 'root-3',

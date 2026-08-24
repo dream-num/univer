@@ -143,7 +143,7 @@ function checkSheetClipboardPermission(accessor: IAccessor, commandId: string, p
                 worksheetTypes: [WorksheetCopyPermission, WorksheetEditPermission],
                 rangeTypes: [RangeProtectionPermissionViewPoint, RangeProtectionPermissionEditPoint],
             });
-            errorKey = 'sheets-ui.permission.dialog.copyErr';
+            errorKey = 'sheets-ui.permission.dialog.cutErr';
             break;
         case PasteCommand.id:
             permission = checkSheetPastePermission(permissionCheckController, params);

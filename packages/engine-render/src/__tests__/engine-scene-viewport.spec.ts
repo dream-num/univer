@@ -950,6 +950,7 @@ describe('engine scene viewport extra', () => {
             throw new TypeError('Fixture should contain the main rectangle');
         }
         rect.transformerConfig = {
+            keepRatio: false,
             controlStateResolver: (object) => ({
                 ...object.getState(),
                 left: object.left - 8,
@@ -986,6 +987,18 @@ describe('engine scene viewport extra', () => {
             top: 34,
             width: 124,
             height: 78,
+        }));
+
+        const resizeAnchor = control.getObjects().find((object) => object.oKey.includes('__SpreadsheetTransformerResizeRB__'));
+        if (!resizeAnchor) {
+            throw new TypeError('Transformer should create a bottom-right resize anchor');
+        }
+        resizeAnchor.triggerPointerDown(createInputEvent('pointerdown', { offsetX: 146, offsetY: 112 }));
+        scene.onPointerMove$.emitEvent(createInputEvent('pointermove', { offsetX: 186, offsetY: 137 }));
+        scene.onPointerUp$.emitEvent(createInputEvent('pointerup', { offsetX: 186, offsetY: 137 }));
+        expect(rect.getState()).toEqual(expect.objectContaining({
+            width: 140,
+            height: 85,
         }));
 
         transformer.dispose();

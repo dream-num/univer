@@ -150,7 +150,7 @@ export class FDocumentObjectPermission {
      * @example Restore editing for a paragraph
      * ```ts
      * const document = univerAPI.getActiveDocument();
-     * const paragraph = document?.getParagraph('paragraph-1');
+     * const paragraph = document?.getParagraphs()[0];
      * if (!paragraph) throw new Error('Paragraph not found.');
      * await paragraph.getPermission().setEditable();
      * ```

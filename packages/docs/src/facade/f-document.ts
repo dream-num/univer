@@ -207,11 +207,14 @@ export class FDocument extends FBaseInitialable {
      * @param {string} entityType Stable entity type used by the owning Doc feature.
      * @param {string} entityId Stable entity id.
      * @returns {FDocumentObjectPermission} Effective permission facade for the entity.
-     * @example Make one table read-only
+     * @example Make one drawing read-only
      * ```ts
      * const document = univerAPI.getActiveDocument();
      * if (!document) throw new Error('No active Document.');
-     * await document.getEntityPermission('', 'table', 'table-1').setReadOnly();
+     * const snapshot = document.getDocumentDataModel().getSnapshot();
+     * const drawingId = snapshot.drawingsOrder?.[0];
+     * if (!drawingId) throw new Error('Drawing not found.');
+     * await document.getEntityPermission('', 'drawing', drawingId).setReadOnly();
      * ```
      */
     getEntityPermission(segmentId: string, entityType: string, entityId: string): FDocumentObjectPermission {

@@ -124,8 +124,9 @@ describe('DocPermissionController', () => {
 
     it('uses section and paragraph ids as hierarchical edit boundaries', async () => {
         const firstSection = document.getSection(0)!;
-        const firstParagraph = document.getParagraph('paragraph-one')!;
+        const firstParagraph = document.getParagraphs()[0];
         const secondParagraph = document.getParagraph('paragraph-two')!;
+        if (!firstParagraph) throw new Error('Paragraph not found.');
 
         await firstSection.getPermission().setReadOnly();
 
@@ -206,9 +207,11 @@ describe('DocPermissionController', () => {
         univer = testBed.univer;
         get = testBed.get;
         document = testBed.univerAPI.getActiveDocument()!;
-        await document.getEntityPermission('', 'drawing', 'drawing-one').setEditable(false);
+        const drawingId = document.getDocumentDataModel().getSnapshot().drawingsOrder?.[0];
+        if (!drawingId) throw new Error('Drawing not found.');
+        await document.getEntityPermission('', 'drawing', drawingId).setReadOnly();
         const actions = JSONX.getInstance().replaceOp(
-            ['drawings', 'drawing-one', 'docTransform', 'angle'],
+            ['drawings', drawingId, 'docTransform', 'angle'],
             0,
             15
         );
@@ -219,7 +222,7 @@ describe('DocPermissionController', () => {
             actions,
             textRanges: [],
         })).toBe(false);
-        expect(document.getDocumentDataModel().getSnapshot().drawings?.['drawing-one'].docTransform?.angle).toBe(0);
+        expect(document.getDocumentDataModel().getSnapshot().drawings?.[drawingId].docTransform?.angle).toBe(0);
     });
 
     it('enforces paragraph permission on direct RichText mutations used by paste and undo/redo', async () => {

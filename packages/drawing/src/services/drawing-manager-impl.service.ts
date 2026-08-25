@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
-import type { IDrawingGroupNestedIds, IDrawingGroupNestedParam, IDrawingParam, IDrawingSearch, Nullable } from '@univerjs/core';
+import type {
+    IDrawingGroupNestedIds,
+    IDrawingGroupNestedParam,
+    IDrawingParam,
+    IDrawingSearch,
+    Nullable,
+} from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import type {
     IDrawingGroupUpdateParam,
@@ -26,14 +32,7 @@ import type {
     IDrawingVisibleParam,
     IUnitDrawingService,
 } from './drawing-manager.service';
-import {
-    DrawingTypeEnum,
-
-    normalizeDrawingOrderIndex,
-
-    sortRules,
-    sortRulesByDesc,
-} from '@univerjs/core';
+import { DrawingTypeEnum, normalizeDrawingOrderIndex, sortRules, sortRulesByDesc } from '@univerjs/core';
 import * as json1 from 'ot-json1';
 import { Subject } from 'rxjs';
 

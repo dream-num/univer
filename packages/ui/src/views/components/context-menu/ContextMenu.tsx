@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IMouseEvent } from '@univerjs/engine-render';
 import type { IContextMenuTriggerContext } from '../../../services/contextmenu/contextmenu.service';
 import type { IContextMenuAnchorRect } from './AnchoredContextMenu';
 import { ICommandService } from '@univerjs/core';
@@ -57,7 +58,7 @@ export function DesktopContextMenu() {
     }, [contextMenuService]);
 
     /** A function to open context menu with given position and menu type. */
-    function handleContextMenu(event: MouseEvent, menuType: string, context?: IContextMenuTriggerContext) {
+    function handleContextMenu(event: IMouseEvent, menuType: string, context?: IContextMenuTriggerContext) {
         setVisible(false);
         requestAnimationFrame(() => {
             setMenuType(menuType);

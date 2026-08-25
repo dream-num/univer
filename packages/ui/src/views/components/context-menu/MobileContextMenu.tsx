@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IMouseEvent } from '@univerjs/engine-render';
 import type { LocaleKey } from '../../../locale/types';
 import type { IContextMenuTriggerContext } from '../../../services/contextmenu/contextmenu.service';
 import { ICommandService, LocaleService } from '@univerjs/core';
@@ -71,7 +72,7 @@ export function MobileContextMenu() {
         };
     }, [contextMenuHostService, contextMenuService]);
 
-    function handleContextMenu(_event: MouseEvent, nextMenuType: string, context?: IContextMenuTriggerContext) {
+    function handleContextMenu(_event: IMouseEvent, nextMenuType: string, context?: IContextMenuTriggerContext) {
         contextMenuHostService.activateMenu(MOBILE_CONTEXT_MENU_HOST_ID);
         setMenuType(nextMenuType);
         setMenuContext(context);

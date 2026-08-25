@@ -232,7 +232,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
 
     async paste(items?: ClipboardItem[]): Promise<boolean> {
         const targetUnitId = this._getCurrentDocumentUnitId();
-        if (!targetUnitId || !this._canPaste(targetUnitId)) {
+        if (!targetUnitId || !this._canEditTargets(targetUnitId)) {
             return false;
         }
         if (!items?.length) {
@@ -240,7 +240,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         }
 
         const partDocData = await this._genDocDataFromClipboardItems(items);
-        if (!this._canPaste(targetUnitId)) {
+        if (!this._canEditTargets(targetUnitId)) {
             return false;
         }
 
@@ -255,7 +255,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
     }): Promise<boolean> {
         const currentDocInstance = this._univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_DOC);
         const docUnitId = currentDocInstance?.getUnitId() || '';
-        if (!docUnitId || !this._canPaste(docUnitId)) {
+        if (!docUnitId || !this._canEditTargets(docUnitId)) {
             return false;
         }
         let { html, internalJson, text, files } = options;
@@ -265,7 +265,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             html += await this._createImagePasteHtml(files);
         }
         html = await this._uploadBase64ImagesInHtml(html);
-        if (!this._canPaste(docUnitId)) {
+        if (!this._canEditTargets(docUnitId)) {
             return false;
         }
         if (!html && !text) {
@@ -291,17 +291,20 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             ?.getUnitId() ?? null;
     }
 
-    private _canPaste(expectedUnitId?: string): boolean {
+    private _canEditTargets(
+        expectedUnitId?: string,
+        ranges?: ReadonlyArray<ITextRangeWithStyle | IRectRangeWithStyle>
+    ): boolean {
         const document = this._univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         if (!document || (expectedUnitId && document.getUnitId() !== expectedUnitId)) {
             return false;
         }
         const objectIds = new Set<string>();
-        const ranges = [
+        const targetRanges = ranges ?? [
             ...(this._docSelectionManagerService.getTextRanges() ?? []),
             ...(this._docSelectionManagerService.getRectRanges() ?? []),
         ];
-        ranges.forEach((range) => {
+        targetRanges.forEach((range) => {
             if (range.startOffset == null || range.endOffset == null) {
                 return;
             }
@@ -324,6 +327,11 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         }
 
         if (textRanges.length === 0 && rectRanges.length === 0) {
+            return false;
+        }
+
+        const unitId = this._getCurrentDocumentUnitId();
+        if (!unitId || !this._canEditTargets(unitId, [...textRanges, ...rectRanges])) {
             return false;
         }
 

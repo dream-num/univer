@@ -390,6 +390,52 @@ describe('DocClipboardService table copy helpers', () => {
         testBed.univer.dispose();
     });
 
+    it('does not write to the clipboard when Cut lacks Unit Edit permission', async () => {
+        const documentData: IDocumentData = {
+            id: 'copy-only-cut-doc',
+            body: {
+                dataStream: 'Keep me\r\n',
+                paragraphs: [{ paragraphId: 'copy-only-cut-paragraph', startIndex: 7 }],
+                sectionBreaks: [],
+                customBlocks: [],
+                textRuns: [],
+            },
+            documentStyle: {},
+        };
+        const clipboard = new TestClipboardInterfaceService();
+        const testBed = createCommandTestBed(documentData, [
+            [IClipboardInterfaceService, { useValue: clipboard }],
+            [IDocClipboardService, { useClass: DocClipboardService }],
+        ]);
+        const selectionManager = testBed.get(DocSelectionManagerService);
+        selectionManager.__TEST_ONLY_setCurrentSelection({ unitId: documentData.id, subUnitId: '' });
+        const ranges: ITextRangeWithStyle[] = [{
+            startOffset: 0,
+            endOffset: 4,
+            collapsed: false,
+            isActive: true,
+            segmentId: '',
+            rangeType: DOC_RANGE_TYPE.TEXT,
+        }];
+        selectionManager.__TEST_ONLY_add(ranges);
+        setDocumentPermissionValue(
+            testBed.get(IPermissionService),
+            documentData.id,
+            documentData.id,
+            UnitAction.Edit,
+            false
+        );
+
+        expect(await testBed.get(IDocClipboardService).cut(ranges)).toBe(false);
+        expect(clipboard.writes).toEqual([]);
+        expect(testBed.get(IUniverInstanceService)
+            .getUnit<DocumentDataModel>(documentData.id, UniverInstanceType.UNIVER_DOC)
+            ?.getBody()
+            ?.dataStream).toBe('Keep me\r\n');
+
+        testBed.univer.dispose();
+    });
+
     it('does not delete selected text when writing cut content to the clipboard fails', async () => {
         const documentData: IDocumentData = {
             id: 'failed-cut-doc',

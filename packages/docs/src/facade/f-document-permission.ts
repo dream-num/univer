@@ -85,7 +85,12 @@ export class FDocumentPermission {
      * @returns {Promise<void>} Resolves after the permission command finishes.
      */
     async setEditable(editable = true): Promise<void> {
-        await this.setPoint(UnitAction.Edit, editable);
+        await this._commandService.executeCommand(SetDocumentPermissionCommand.id, {
+            unitId: this._unitId,
+            objectId: this._unitId,
+            action: UnitAction.Edit,
+            value: editable,
+        });
     }
 
     /**
@@ -99,7 +104,12 @@ export class FDocumentPermission {
      * ```
      */
     async setReadOnly(): Promise<void> {
-        await this.setEditable(false);
+        await this._commandService.executeCommand(SetDocumentPermissionCommand.id, {
+            unitId: this._unitId,
+            objectId: this._unitId,
+            action: UnitAction.Edit,
+            value: false,
+        });
     }
 
     /**
@@ -107,7 +117,12 @@ export class FDocumentPermission {
      * @returns {boolean} Whether Document editing is allowed.
      */
     canEdit(): boolean {
-        return this.getPoint(UnitAction.Edit);
+        return getDocumentPermissionValue(
+            this._permissionService,
+            this._unitId,
+            this._unitId,
+            UnitAction.Edit
+        );
     }
 }
 
@@ -161,7 +176,12 @@ export class FDocumentObjectPermission {
      * ```
      */
     async setReadOnly(): Promise<void> {
-        await this.setEditable(false);
+        await this._commandService.executeCommand(SetDocumentPermissionCommand.id, {
+            unitId: this._unitId,
+            objectId: this._objectId,
+            action: UnitAction.Edit,
+            value: false,
+        });
     }
 
     /**

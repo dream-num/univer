@@ -19,12 +19,15 @@ import {
     CustomRangeType,
     DocumentDataModel,
     ICommandService,
+    IPermissionService,
     IUniverInstanceService,
     LocaleService,
     UniverInstanceType,
 } from '@univerjs/core';
 import { borderClassName, clsx, MessageType, Tooltip } from '@univerjs/design';
+import { getDocumentPermissionValue } from '@univerjs/docs';
 import { CopyIcon, LinkIcon, UnlinkIcon, WriteIcon } from '@univerjs/icons';
+import { UnitAction } from '@univerjs/protocol';
 import { IMessageService, useDependency, useObservable } from '@univerjs/ui';
 import { DeleteDocHyperLinkCommand } from '../commands/commands/delete-link.command';
 import { ShowDocHyperLinkEditPopupOperation } from '../commands/operations/popup.operation';
@@ -37,6 +40,7 @@ export const DocLinkPopup = () => {
     const localeService = useDependency(LocaleService);
     const currentPopup = useObservable(hyperLinkService.showingLink$);
     const univerInstanceService = useDependency(IUniverInstanceService);
+    const permissionService = useDependency(IPermissionService);
     if (!currentPopup) {
         return null;
     }
@@ -54,6 +58,7 @@ export const DocLinkPopup = () => {
 
     const url = link.properties?.url;
     const canEdit = hyperLinkService.canEditLink(unitId, currentPopup);
+    const canCopy = getDocumentPermissionValue(permissionService, unitId, unitId, UnitAction.Copy);
     return (
         <div
             className={clsx(`
@@ -86,24 +91,25 @@ export const DocLinkPopup = () => {
                 </Tooltip>
             </div>
             <div className="univer-flex univer-h-6 univer-flex-[0_0_auto] univer-items-center univer-justify-center">
-                <div
-                    className={`
-                      univer-ml-2 univer-flex univer-size-6 univer-cursor-pointer univer-items-center
-                      univer-justify-center univer-rounded univer-text-base
-                    `}
-                    onClick={() => {
-                        navigator.clipboard.writeText(url);
-                        messageService.show({
-                            content: localeService.t<LocaleKey>('docs-hyper-link-ui.info.coped'),
-                            type: MessageType.Info,
-                        });
-                    }}
-                >
-                    <Tooltip placement="bottom" title={localeService.t<LocaleKey>('docs-hyper-link-ui.info.copy')}>
-                        <CopyIcon />
-                    </Tooltip>
-
-                </div>
+                {canCopy && (
+                    <div
+                        className={`
+                          univer-ml-2 univer-flex univer-size-6 univer-cursor-pointer univer-items-center
+                          univer-justify-center univer-rounded univer-text-base
+                        `}
+                        onClick={() => {
+                            navigator.clipboard.writeText(url);
+                            messageService.show({
+                                content: localeService.t<LocaleKey>('docs-hyper-link-ui.info.coped'),
+                                type: MessageType.Info,
+                            });
+                        }}
+                    >
+                        <Tooltip placement="bottom" title={localeService.t<LocaleKey>('docs-hyper-link-ui.info.copy')}>
+                            <CopyIcon />
+                        </Tooltip>
+                    </div>
+                )}
                 {canEdit && (
                     <>
                         <div

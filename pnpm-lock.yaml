@@ -1307,6 +1307,9 @@ importers:
       '@univerjs/icons':
         specifier: 1.38.0
         version: 1.38.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@univerjs/protocol':
+        specifier: workspace:*
+        version: link:../protocol
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
@@ -1314,9 +1317,6 @@ importers:
       '@univerjs-infra/shared':
         specifier: workspace:*
         version: link:../../common/shared
-      '@univerjs/protocol':
-        specifier: workspace:*
-        version: link:../protocol
       postcss:
         specifier: ^8.5.26
         version: 8.5.26

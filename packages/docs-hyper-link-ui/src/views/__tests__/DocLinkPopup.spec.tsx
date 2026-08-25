@@ -19,6 +19,7 @@ import type { Root } from 'react-dom/client';
 import {
     CustomRangeType,
     ICommandService,
+    IPermissionService,
     IUniverInstanceService,
     LocaleService,
     LocaleType,
@@ -26,9 +27,10 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-import { DocSelectionManagerService, DocStateEmitService, RichTextEditingMutation } from '@univerjs/docs';
+import { DocSelectionManagerService, DocStateEmitService, RichTextEditingMutation, setDocumentPermissionValue } from '@univerjs/docs';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
+import { UnitAction } from '@univerjs/protocol';
 import { IMessageService, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -230,6 +232,25 @@ describe('DocLinkPopup', () => {
                 },
             },
         });
+    });
+
+    it('hides the copy action when document copy permission is denied', () => {
+        currentTestBed = createPopupTestBed();
+        setDocumentPermissionValue(
+            currentTestBed.injector.get(IPermissionService),
+            UNIT_ID,
+            UNIT_ID,
+            UnitAction.Copy,
+            false
+        );
+        showExistingLink(currentTestBed);
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        renderPopup(root, container, currentTestBed);
+
+        expect(container.querySelectorAll('.univer-ml-2')).toHaveLength(2);
     });
 
     it('removes the displayed hyperlink while keeping the document text', async () => {

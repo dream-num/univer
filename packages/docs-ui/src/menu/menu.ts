@@ -365,7 +365,7 @@ export function disableMenuWhenNoDocRange(accessor: IAccessor): Observable<boole
     );
 }
 
-function disableMenuWithoutDocumentEditPermission(accessor: IAccessor): Observable<boolean> {
+export function disableMenuWithoutDocumentUnitPermission(accessor: IAccessor, action: UnitAction): Observable<boolean> {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const permissionService = accessor.get(IPermissionService);
     return combineLatest([
@@ -375,8 +375,12 @@ function disableMenuWithoutDocumentEditPermission(accessor: IAccessor): Observab
         permissionService,
         document.getUnitId(),
         document.getUnitId(),
-        UnitAction.Edit
+        action
     )));
+}
+
+function disableMenuWithoutDocumentEditPermission(accessor: IAccessor): Observable<boolean> {
+    return disableMenuWithoutDocumentUnitPermission(accessor, UnitAction.Edit);
 }
 
 export const DOC_INSERT_EMOJI_MENU_ID = 'doc.menu.insert-emoji';

@@ -81,11 +81,11 @@
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/icons": "1.38.0",
+        "@univerjs/protocol": "workspace:*",
         "@univerjs/ui": "workspace:*"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
-        "@univerjs/protocol": "workspace:*",
         "postcss": "^8.5.26",
         "react": "18.3.1",
         "rxjs": "^7.8.2",

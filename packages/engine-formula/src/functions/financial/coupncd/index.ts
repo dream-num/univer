@@ -39,13 +39,13 @@ export class Coupncd extends BaseFunction {
 
         const [settlementObject, maturityObject, frequencyObject, basisObject] = variants as BaseValueObject[];
 
-        const settlementSerialNumber = getDateSerialNumberByObject(settlementObject);
+        const settlementSerialNumber = getDateSerialNumberByObject(settlementObject, this.getDateSystem());
 
         if (typeof settlementSerialNumber !== 'number') {
             return settlementSerialNumber;
         }
 
-        const maturitySerialNumber = getDateSerialNumberByObject(maturityObject);
+        const maturitySerialNumber = getDateSerialNumberByObject(maturityObject, this.getDateSystem());
 
         if (typeof maturitySerialNumber !== 'number') {
             return maturitySerialNumber;
@@ -67,7 +67,7 @@ export class Coupncd extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        const result = calculateCoupncd(settlementSerialNumber, maturitySerialNumber, frequencyValue);
+        const result = calculateCoupncd(settlementSerialNumber, maturitySerialNumber, frequencyValue, this.getDateSystem());
 
         return NumberValueObject.create(result);
     }

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DateSystem } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
@@ -176,6 +177,40 @@ describe('Test accrint function', () => {
             const frequency = NumberValueObject.create(2);
             const result = testFunction.calculate(issue, firstInterest, settlement, rate, par, frequency);
             expect(getObjectValue(result)).toBe(ErrorType.VALUE);
+        });
+        it('checks the serial-zero boundary in both date systems', () => {
+            const args = [
+                NumberValueObject.create(0),
+                NumberValueObject.create(182),
+                NumberValueObject.create(183),
+                NumberValueObject.create(0.1),
+                NumberValueObject.create(100),
+                NumberValueObject.create(2),
+                NumberValueObject.create(1),
+            ] as const;
+
+            testFunction.setDateSystem(DateSystem.Date1900);
+            expect(getObjectValue(testFunction.calculate(...args))).toBe(ErrorType.NUM);
+
+            testFunction.setDateSystem(DateSystem.Date1904);
+            expect(getObjectValue(testFunction.calculate(...args))).toBeCloseTo(5.027472527472527, 12);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
+        });
+
+        it('handles serial 60 as the Excel 1900 leap-day boundary', () => {
+            const args = [
+                NumberValueObject.create(31),
+                NumberValueObject.create(366),
+                NumberValueObject.create(60),
+                NumberValueObject.create(0.1),
+                NumberValueObject.create(100),
+                NumberValueObject.create(2),
+                NumberValueObject.create(1),
+            ] as const;
+
+            testFunction.setDateSystem(DateSystem.Date1900);
+            expect(getObjectValue(testFunction.calculate(...args))).toBe(0);
         });
     });
 });

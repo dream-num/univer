@@ -17,13 +17,11 @@
 import type { CellValue, ICellData, IObjectMatrixPrimitiveType, IRange, Nullable } from '@univerjs/core';
 import type { IConditionFormattingRule, IValueConfig } from '../type';
 import type { IContext } from './base-calculate-unit';
-import { BooleanNumber, CellValueType, ColorKit, dateKit, ObjectMatrix, Range } from '@univerjs/core';
+import { BooleanNumber, CellValueType, ColorKit, DateSystem, excelSerialToDateTime, ObjectMatrix, Range } from '@univerjs/core';
 import { BooleanValue, FormulaResultStatus } from '@univerjs/engine-formula';
 import { CFNumberOperator, CFValueType } from '../../base/const';
 import { ConditionalFormattingFormulaService } from '../../services/conditional-formatting-formula.service';
 import { ConditionalFormattingViewModel } from '../conditional-formatting-view-model';
-
-;
 
 export function isFloatsEqual(a: number, b: number) {
     return Math.abs(a - b) < Number.EPSILON;
@@ -40,54 +38,21 @@ export const getCellValue = (cell?: ICellData) => {
     const dataStream = cell.p?.body?.dataStream.replace(/\r\n$/, '');
     return !isNullable(v) ? v : !isNullable(dataStream) ? dataStream : null;
 };
-const DAY_SIZE = 86400;
-
-export function toYMD_1900(ord: number, leap1900 = true) {
-    if (leap1900 && ord >= 0) {
-        if (ord === 0) {
-            return [1900, 1, 0];
-        }
-        if (ord === 60) {
-            return [1900, 2, 29];
-        }
-        if (ord < 60) {
-            return [1900, (ord < 32 ? 1 : 2), ((ord - 1) % 31) + 1];
-        }
+export const serialTimeToTimestamp = (value: number, dateSystem = DateSystem.Date1900) => {
+    const utcDate = excelSerialToDateTime(value, dateSystem);
+    if (Number.isNaN(utcDate.getTime())) {
+        return Number.NaN;
     }
-    let l = ord + 68569 + 2415019;
-    const n = Math.floor((4 * l) / 146097);
-    l = l - Math.floor((146097 * n + 3) / 4);
-    const i = Math.floor((4000 * (l + 1)) / 1461001);
-    l = l - Math.floor((1461 * i) / 4) + 31;
-    const j = Math.floor((80 * l) / 2447);
-    const nDay = l - Math.floor((2447 * j) / 80);
-    l = Math.floor(j / 11);
-    const nMonth = j + 2 - (12 * l);
-    const nYear = 100 * (n - 49) + i + l;
-    return [nYear | 0, nMonth | 0, nDay | 0];
-}
-export const serialTimeToTimestamp = (value: number) => {
-    let date = (value | 0);
-    const t = DAY_SIZE * (value - date);
-    let time = Math.floor(t); // in seconds
-    // date "epsilon" correction
-    if ((t - time) > 0.9999) {
-        time += 1;
-        if (time === DAY_SIZE) {
-            time = 0;
-            date += 1;
-        }
-    }
-    // serial date/time to gregorian calendar
-    const x = (time < 0) ? DAY_SIZE + time : time;
-    const [y, m, d] = toYMD_1900(value, true);
-    const hh = Math.floor((x / 60) / 60) % 60;
-    const mm = Math.floor(x / 60) % 60;
-    const ss = Math.floor(x) % 60;
-    // return it as a native date object
-    const dt = dateKit(`${y}/${m}/${d} ${hh}:${mm}:${ss}`);
-    const result = dt.valueOf();
-    return result;
+    // Conditional-formatting date comparisons use local Date timestamps for compatibility with existing predicates.
+    return new Date(
+        utcDate.getUTCFullYear(),
+        utcDate.getUTCMonth(),
+        utcDate.getUTCDate(),
+        utcDate.getUTCHours(),
+        utcDate.getUTCMinutes(),
+        utcDate.getUTCSeconds(),
+        utcDate.getUTCMilliseconds()
+    ).getTime();
 };
 // eslint-disable-next-line max-lines-per-function
 export const getValueByType = (value: IValueConfig, matrix: ObjectMatrix<number>, context: IContext & { cfId: string }) => {

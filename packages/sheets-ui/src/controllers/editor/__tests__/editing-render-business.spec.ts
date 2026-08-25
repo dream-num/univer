@@ -167,6 +167,7 @@ function createController(initialDataStream = 'new value\r\n', isPercentFormat =
         disableForceKeepVisible: vi.fn(),
         refreshEditCellPosition: vi.fn(),
         changeEditorDirty: vi.fn(),
+        getEditorDirty: vi.fn(() => true),
     };
     controller._sheetInterceptorService = {
         onWriteCell: vi.fn((_workbook, _worksheet, _row, _column, cellData) => cellData),
@@ -239,6 +240,21 @@ function createController(initialDataStream = 'new value\r\n', isPercentFormat =
 }
 
 describe('EditingRenderController business methods', () => {
+    it('bypasses parsing, interceptors, and commands when the editor is clean', async () => {
+        const { controller, worksheet } = createController();
+        controller._editorBridgeService.getEditorDirty.mockReturnValue(false);
+
+        const result = await controller._submitEdit({
+            body: { dataStream: 'canonical display value\r\n' },
+            documentStyle: {},
+        });
+
+        expect(result).toBe(true);
+        expect(worksheet.getCellRaw).not.toHaveBeenCalled();
+        expect(controller._sheetInterceptorService.onWriteCell).not.toHaveBeenCalled();
+        expect(controller._commandService.syncExecuteCommand).not.toHaveBeenCalled();
+    });
+
     it('reuses an empty cell style for the next editor input', () => {
         const { controller, documentModel } = createController();
         documentModel.getBody.mockReturnValue({

@@ -14,39 +14,153 @@
  * limitations under the License.
  */
 
+import { DateSystem, excelDateSerial, excelDateTimePartsToSerial, excelSerialToDate, excelSerialToDateTimeParts } from '@univerjs/core';
 import { ErrorValueObject } from '../engine/value-object/base-value-object';
 import {
     dateAddMonths,
-    excelDateSerial,
-    excelSerialToDate,
     getDaysInMonth,
     getTwoDateDaysByBasis,
     lastDayOfMonth,
 } from './date';
 import { ErrorType } from './error-type';
 
-export function calculateCoupdaybs(settlementSerialNumber: number, maturitySerialNumber: number, frequency: number, basis: number): number {
-    const coupDateSerialNumber = calculateCouppcd(settlementSerialNumber, maturitySerialNumber, frequency);
+interface ICouponDateParts {
+    year: number;
+    month: number;
+    day: number;
+    monthEnd: boolean;
+}
 
-    const { days } = getTwoDateDaysByBasis(coupDateSerialNumber, settlementSerialNumber, basis);
+interface ICouponSchedule {
+    previousSerial: number;
+    nextSerial: number;
+    count: number;
+}
+
+const COUPON_DATE_PARTS_OPTIONS = { hours: 0, minutes: 0, seconds: 0, fractionalSecond: 0 };
+
+function getCouponDateParts(serial: number, dateSystem: DateSystem): ICouponDateParts {
+    const parts = excelSerialToDateTimeParts(serial, { dateSystem });
+
+    if (parts) {
+        return {
+            year: parts.year,
+            month: parts.month,
+            day: parts.day,
+            monthEnd: parts.day === getDaysInMonth(parts.year, parts.month - 1),
+        };
+    }
+
+    const date = excelSerialToDate(serial, dateSystem);
+    const year = date.getUTCFullYear();
+    const month = date.getUTCMonth() + 1;
+    const day = date.getUTCDate();
+
+    return { year, month, day, monthEnd: day === getDaysInMonth(year, month - 1) };
+}
+
+function getCouponDateSerial(parts: ICouponDateParts, dateSystem: DateSystem): number {
+    if (dateSystem === DateSystem.Date1900 && parts.year === 1900 && parts.month === 1 && parts.day === 0) {
+        return 0;
+    }
+
+    if (dateSystem === DateSystem.Date1900 && parts.year === 1900 && parts.month === 2 && parts.day === 29) {
+        return 60;
+    }
+
+    const serial = excelDateTimePartsToSerial({
+        year: parts.year,
+        month: parts.month,
+        day: parts.day,
+        ...COUPON_DATE_PARTS_OPTIONS,
+    }, { dateSystem });
+
+    if (serial != null) {
+        return serial;
+    }
+
+    return excelDateSerial(new Date(Date.UTC(parts.year, parts.month - 1, parts.day)), dateSystem);
+}
+
+function compareCouponDate(left: ICouponDateParts, right: ICouponDateParts): number {
+    if (left.year !== right.year) {
+        return left.year - right.year;
+    }
+
+    if (left.month !== right.month) {
+        return left.month - right.month;
+    }
+
+    return left.day - right.day;
+}
+
+// Excel keeps the maturity day/month-end rule for every coupon period; it must not be inferred from an intermediate date.
+function addCouponMonths(parts: ICouponDateParts, months: number): ICouponDateParts {
+    const monthIndex = parts.year * 12 + parts.month - 1 + months;
+    const year = Math.floor(monthIndex / 12);
+    const month = monthIndex - year * 12 + 1;
+    const maxDay = getDaysInMonth(year, month - 1);
+    const day = parts.monthEnd ? maxDay : Math.min(parts.day, maxDay);
+
+    return { year, month, day, monthEnd: parts.monthEnd };
+}
+
+function getCouponSchedule(
+    settlementSerialNumber: number,
+    maturitySerialNumber: number,
+    frequency: number,
+    dateSystem: DateSystem
+): ICouponSchedule {
+    const settlement = getCouponDateParts(settlementSerialNumber, dateSystem);
+    const maturity = getCouponDateParts(maturitySerialNumber, dateSystem);
+    const periodMonths = 12 / frequency;
+    let candidate: ICouponDateParts = {
+        ...maturity,
+        year: settlement.year,
+    };
+
+    if (compareCouponDate(candidate, settlement) < 0) {
+        candidate = { ...candidate, year: candidate.year + 1 };
+    }
+
+    while (compareCouponDate(candidate, settlement) > 0) {
+        candidate = addCouponMonths(candidate, -periodMonths);
+    }
+
+    const previousSerial = getCouponDateSerial(candidate, dateSystem);
+    const nextSerial = getCouponDateSerial(addCouponMonths(candidate, periodMonths), dateSystem);
+
+    let count = 0;
+    let countCandidate = maturity;
+    while (compareCouponDate(countCandidate, settlement) > 0) {
+        countCandidate = addCouponMonths(countCandidate, -periodMonths);
+        count++;
+    }
+
+    return { previousSerial, nextSerial, count };
+}
+
+export function calculateCoupdaybs(settlementSerialNumber: number, maturitySerialNumber: number, frequency: number, basis: number, dateSystem = DateSystem.Date1900): number {
+    const coupDateSerialNumber = calculateCouppcd(settlementSerialNumber, maturitySerialNumber, frequency, dateSystem);
+
+    const { days } = getTwoDateDaysByBasis(coupDateSerialNumber, settlementSerialNumber, basis, dateSystem);
 
     return days;
 }
 
-export function calculateCoupdays(settlementSerialNumber: number, maturitySerialNumber: number, frequency: number, basis: number): number {
+export function calculateCoupdays(settlementSerialNumber: number, maturitySerialNumber: number, frequency: number, basis: number, dateSystem = DateSystem.Date1900): number {
     let result;
 
     if (basis === 1) {
-        const beforeSettlementDateSerialNumber = calculateCouppcd(settlementSerialNumber, maturitySerialNumber, frequency);
+        const beforeSettlementDateSerialNumber = calculateCouppcd(settlementSerialNumber, maturitySerialNumber, frequency, dateSystem);
 
-        let coupDate = excelSerialToDate(beforeSettlementDateSerialNumber);
-        coupDate = dateAddMonths(coupDate, 12 / frequency);
-
-        const afterSettlementDateSerialNumber = excelDateSerial(coupDate);
+        const afterSettlementDateSerialNumber = getCouponSchedule(settlementSerialNumber, maturitySerialNumber, frequency, dateSystem).nextSerial;
 
         // special handle for excel
         if (beforeSettlementDateSerialNumber < 0 && frequency === 1) {
             result = 365;
+        } else if (dateSystem === DateSystem.Date1900 && settlementSerialNumber === 0 && frequency === 2 && beforeSettlementDateSerialNumber < 0) {
+            result = 184;
         } else {
             result = afterSettlementDateSerialNumber - beforeSettlementDateSerialNumber;
         }
@@ -59,64 +173,22 @@ export function calculateCoupdays(settlementSerialNumber: number, maturitySerial
     return result;
 }
 
-export function calculateCoupncd(settlementSerialNumber: number, maturitySerialNumber: number, frequency: number): number {
-    const settlementDate = excelSerialToDate(settlementSerialNumber);
-    let coupDate = excelSerialToDate(maturitySerialNumber);
-
-    coupDate.setUTCFullYear(settlementDate.getUTCFullYear());
-
-    if (coupDate < settlementDate) {
-        coupDate.setUTCFullYear(coupDate.getUTCFullYear() + 1);
-    }
-
-    while (coupDate > settlementDate) {
-        coupDate = dateAddMonths(coupDate, -12 / frequency);
-    }
-
-    coupDate = dateAddMonths(coupDate, 12 / frequency);
-
-    const coupDateSerialNumber = excelDateSerial(coupDate);
-
-    return coupDateSerialNumber;
+export function calculateCoupncd(settlementSerialNumber: number, maturitySerialNumber: number, frequency: number, dateSystem = DateSystem.Date1900): number {
+    return getCouponSchedule(settlementSerialNumber, maturitySerialNumber, frequency, dateSystem).nextSerial;
 }
 
-export function calculateCoupnum(settlementSerialNumber: number, maturitySerialNumber: number, frequency: number): number {
-    let result = 0;
-
-    const settlementDate = excelSerialToDate(settlementSerialNumber);
-    let coupDate = excelSerialToDate(maturitySerialNumber);
-
-    while (coupDate > settlementDate) {
-        coupDate = dateAddMonths(coupDate, -12 / frequency);
-        result++;
-    }
-
-    return result;
+export function calculateCoupnum(settlementSerialNumber: number, maturitySerialNumber: number, frequency: number, dateSystem = DateSystem.Date1900): number {
+    return getCouponSchedule(settlementSerialNumber, maturitySerialNumber, frequency, dateSystem).count;
 }
 
-export function calculateCouppcd(settlementSerialNumber: number, maturitySerialNumber: number, frequency: number): number {
-    const settlementDate = excelSerialToDate(settlementSerialNumber);
-    let coupDate = excelSerialToDate(maturitySerialNumber);
-
-    coupDate.setUTCFullYear(settlementDate.getUTCFullYear());
-
-    if (coupDate < settlementDate) {
-        coupDate.setUTCFullYear(coupDate.getUTCFullYear() + 1);
-    }
-
-    while (coupDate > settlementDate) {
-        coupDate = dateAddMonths(coupDate, -12 / frequency);
-    }
-
-    const coupDateSerialNumber = excelDateSerial(coupDate);
-
-    return coupDateSerialNumber;
+export function calculateCouppcd(settlementSerialNumber: number, maturitySerialNumber: number, frequency: number, dateSystem = DateSystem.Date1900): number {
+    return getCouponSchedule(settlementSerialNumber, maturitySerialNumber, frequency, dateSystem).previousSerial;
 }
 
-export function calculateDuration(settlementSerialNumber: number, maturitySerialNumber: number, coupon: number, yld: number, frequency: number, basis: number): number {
-    const coupdaybs = calculateCoupdaybs(settlementSerialNumber, maturitySerialNumber, frequency, basis);
-    const coupdays = calculateCoupdays(settlementSerialNumber, maturitySerialNumber, frequency, basis);
-    const coupnum = calculateCoupnum(settlementSerialNumber, maturitySerialNumber, frequency);
+export function calculateDuration(settlementSerialNumber: number, maturitySerialNumber: number, coupon: number, yld: number, frequency: number, basis: number, dateSystem = DateSystem.Date1900): number {
+    const coupdaybs = calculateCoupdaybs(settlementSerialNumber, maturitySerialNumber, frequency, basis, dateSystem);
+    const coupdays = calculateCoupdays(settlementSerialNumber, maturitySerialNumber, frequency, basis, dateSystem);
+    const coupnum = calculateCoupnum(settlementSerialNumber, maturitySerialNumber, frequency, dateSystem);
 
     const coupdaysDiff = (coupdays - coupdaybs) / coupdays - 1;
     const _yld = yld / frequency + 1;
@@ -213,13 +285,14 @@ export function calculateOddFPrice(
     yld: number,
     redemption: number,
     frequency: number,
-    basis: number
+    basis: number,
+    dateSystem = DateSystem.Date1900
 ): number {
     // DFC = number of days from the beginning of the odd first coupon to the first coupon date.
-    const DFC = getPositiveDaysBetween(issueSerialNumber, firstCouponSerialNumber, basis);
+    const DFC = getPositiveDaysBetween(issueSerialNumber, firstCouponSerialNumber, basis, dateSystem);
 
     // E = number of days in the coupon period.
-    const E = calculateCoupdays(settlementSerialNumber, firstCouponSerialNumber, frequency, basis);
+    const E = calculateCoupdays(settlementSerialNumber, firstCouponSerialNumber, frequency, basis, dateSystem);
 
     if (DFC < E) {
         return calculateOddShortFirstCoupon(
@@ -233,7 +306,8 @@ export function calculateOddFPrice(
             frequency,
             basis,
             DFC,
-            E
+            E,
+            dateSystem
         );
     } else {
         return calculateOddLongFirstCoupon(
@@ -246,7 +320,8 @@ export function calculateOddFPrice(
             redemption,
             frequency,
             basis,
-            E
+            E,
+            dateSystem
         );
     }
 }
@@ -262,7 +337,8 @@ function calculateOddShortFirstCoupon(
     frequency: number,
     basis: number,
     DFC: number,
-    E: number
+    E: number,
+    dateSystem: DateSystem
 ): number {
     // calculate method from
     // https://support.microsoft.com/en-us/office/oddfprice-function-d7d664a8-34df-4233-8d2b-922bcf6a69e1
@@ -270,10 +346,10 @@ function calculateOddShortFirstCoupon(
     let result = 0;
 
     // N = number of coupons payable between the settlement date and the redemption date. (If this number contains a fraction, it is raised to the next whole number.)
-    const N = calculateCoupnum(settlementSerialNumber, maturitySerialNumber, frequency);
+    const N = calculateCoupnum(settlementSerialNumber, maturitySerialNumber, frequency, dateSystem);
 
     // DSC = number of days from the settlement to the next coupon date.
-    const DSC = getPositiveDaysBetween(settlementSerialNumber, firstCouponSerialNumber, basis);
+    const DSC = getPositiveDaysBetween(settlementSerialNumber, firstCouponSerialNumber, basis, dateSystem);
 
     result += redemption / ((1 + yld / frequency) ** (N - 1 + DSC / E));
 
@@ -284,7 +360,7 @@ function calculateOddShortFirstCoupon(
     }
 
     // A = number of days from the beginning of the coupon period to the settlement date (accrued days).
-    const A = getPositiveDaysBetween(issueSerialNumber, settlementSerialNumber, basis);
+    const A = getPositiveDaysBetween(issueSerialNumber, settlementSerialNumber, basis, dateSystem);
 
     result -= 100 * rate / frequency * A / E;
 
@@ -301,7 +377,8 @@ function calculateOddLongFirstCoupon(
     redemption: number,
     frequency: number,
     basis: number,
-    E: number
+    E: number,
+    dateSystem: DateSystem
 ): number {
     // calculate method from
     // https://support.microsoft.com/en-us/office/oddfprice-function-d7d664a8-34df-4233-8d2b-922bcf6a69e1
@@ -309,42 +386,42 @@ function calculateOddLongFirstCoupon(
     let result = 0;
 
     // N = number of coupons payable between the first real coupon date and redemption date. (If this number contains a fraction, it is raised to the next whole number.)
-    const N = calculateCoupnum(firstCouponSerialNumber, maturitySerialNumber, frequency);
+    const N = calculateCoupnum(firstCouponSerialNumber, maturitySerialNumber, frequency, dateSystem);
 
     // Nq = number of whole quasi-coupon periods between settlement date and first coupon.
-    const Nq = getCouponsNumber(firstCouponSerialNumber, settlementSerialNumber, 12 / frequency, true);
+    const Nq = getCouponsNumber(firstCouponSerialNumber, settlementSerialNumber, 12 / frequency, true, dateSystem);
 
     // DSC = number of days from the settlement to the next coupon date.
     let DSC;
 
     if (basis === 2 || basis === 3) {
-        const coupncd = calculateCoupncd(settlementSerialNumber, firstCouponSerialNumber, frequency);
-        DSC = getPositiveDaysBetween(settlementSerialNumber, coupncd, basis);
+        const coupncd = calculateCoupncd(settlementSerialNumber, firstCouponSerialNumber, frequency, dateSystem);
+        DSC = getPositiveDaysBetween(settlementSerialNumber, coupncd, basis, dateSystem);
     } else {
-        const couppcd = calculateCouppcd(settlementSerialNumber, firstCouponSerialNumber, frequency);
-        const { days } = getTwoDateDaysByBasis(couppcd, settlementSerialNumber, basis);
+        const couppcd = calculateCouppcd(settlementSerialNumber, firstCouponSerialNumber, frequency, dateSystem);
+        const { days } = getTwoDateDaysByBasis(couppcd, settlementSerialNumber, basis, dateSystem);
         DSC = E - days;
     }
 
     result += redemption / ((1 + yld / frequency) ** (N + Nq + DSC / E));
 
     // NC = number of quasi-coupon periods that fit in odd period. (If this number contains a fraction, it is raised to the next whole number.)
-    const NC = calculateCoupnum(issueSerialNumber, firstCouponSerialNumber, frequency);
+    const NC = calculateCoupnum(issueSerialNumber, firstCouponSerialNumber, frequency, dateSystem);
 
     let lateCoupon = firstCouponSerialNumber;
     let DCiDivNLiSum = 0;
     let AiDivNLiSum = 0;
 
     for (let index = NC; index >= 1; index--) {
-        const earlyCoupon = getDateSerialNumberByMonths(lateCoupon, -12 / frequency, false);
-        const NLi = basis === 1 ? getPositiveDaysBetween(earlyCoupon, lateCoupon, basis) : E;
-        const DCi = index > 1 ? NLi : getPositiveDaysBetween(issueSerialNumber, lateCoupon, basis);
+        const earlyCoupon = getDateSerialNumberByMonths(lateCoupon, -12 / frequency, false, dateSystem);
+        const NLi = basis === 1 ? getPositiveDaysBetween(earlyCoupon, lateCoupon, basis, dateSystem) : E;
+        const DCi = index > 1 ? NLi : getPositiveDaysBetween(issueSerialNumber, lateCoupon, basis, dateSystem);
 
         DCiDivNLiSum += DCi / NLi;
 
         const startDate = issueSerialNumber > earlyCoupon ? issueSerialNumber : earlyCoupon;
         const endDate = settlementSerialNumber < lateCoupon ? settlementSerialNumber : lateCoupon;
-        const Ai = getPositiveDaysBetween(startDate, endDate, basis);
+        const Ai = getPositiveDaysBetween(startDate, endDate, basis, dateSystem);
 
         AiDivNLiSum += Ai / NLi;
 
@@ -362,20 +439,20 @@ function calculateOddLongFirstCoupon(
     return result;
 }
 
-function getPositiveDaysBetween(startDateSerialNumber: number, endDateSerialNumber: number, basis: number): number {
-    const { days } = getTwoDateDaysByBasis(startDateSerialNumber, endDateSerialNumber, basis);
+function getPositiveDaysBetween(startDateSerialNumber: number, endDateSerialNumber: number, basis: number, dateSystem: DateSystem): number {
+    const { days } = getTwoDateDaysByBasis(startDateSerialNumber, endDateSerialNumber, basis, dateSystem);
 
     return startDateSerialNumber < endDateSerialNumber ? days : 0;
 }
 
-export function validDaysBetweenIsWholeFrequencyByTwoDate(date1SerialNumber: number, date2SerialNumber: number, frequency: number): boolean {
-    const date1 = excelSerialToDate(date1SerialNumber);
+export function validDaysBetweenIsWholeFrequencyByTwoDate(date1SerialNumber: number, date2SerialNumber: number, frequency: number, dateSystem = DateSystem.Date1900): boolean {
+    const date1 = excelSerialToDate(date1SerialNumber, dateSystem);
     const date1Year = date1.getUTCFullYear();
     const date1Month = date1.getUTCMonth();
     const date1Day = date1.getUTCDate();
     const date1LastDayOfMonth = lastDayOfMonth(date1Year, date1Month, date1Day);
 
-    const date2 = excelSerialToDate(date2SerialNumber);
+    const date2 = excelSerialToDate(date2SerialNumber, dateSystem);
     const date2Year = date2.getUTCFullYear();
     const date2Month = date2.getUTCMonth();
     const date2Day = date2.getUTCDate();
@@ -394,13 +471,13 @@ export function validDaysBetweenIsWholeFrequencyByTwoDate(date1SerialNumber: num
     return true;
 }
 
-export function validCouppcdIsGte0ByTwoDate(date1SerialNumber: number, date2SerialNumber: number, frequency: number): boolean {
-    const couppcd = calculateCouppcd(date1SerialNumber, date2SerialNumber, frequency);
+export function validCouppcdIsGte0ByTwoDate(date1SerialNumber: number, date2SerialNumber: number, frequency: number, dateSystem = DateSystem.Date1900): boolean {
+    const couppcd = calculateCouppcd(date1SerialNumber, date2SerialNumber, frequency, dateSystem);
     return couppcd >= 0;
 }
 
-export function getDateSerialNumberByMonths(serialNumber: number, months: number, returnLastDay: boolean): number {
-    let date = excelSerialToDate(serialNumber);
+export function getDateSerialNumberByMonths(serialNumber: number, months: number, returnLastDay: boolean, dateSystem = DateSystem.Date1900): number {
+    let date = excelSerialToDate(serialNumber, dateSystem);
     date = dateAddMonths(date, months);
 
     if (returnLastDay) {
@@ -410,12 +487,12 @@ export function getDateSerialNumberByMonths(serialNumber: number, months: number
         date.setUTCDate(daysInMonth);
     }
 
-    return excelDateSerial(date);
+    return excelDateSerial(date, dateSystem);
 }
 
-function getCouponsNumber(startDateSerialNumber: number, endDateSerialNumber: number, months: number, isWholeNumber: boolean): number {
-    const startDate = excelSerialToDate(startDateSerialNumber);
-    const endDate = excelSerialToDate(endDateSerialNumber);
+function getCouponsNumber(startDateSerialNumber: number, endDateSerialNumber: number, months: number, isWholeNumber: boolean, dateSystem: DateSystem): number {
+    const startDate = excelSerialToDate(startDateSerialNumber, dateSystem);
+    const endDate = excelSerialToDate(endDateSerialNumber, dateSystem);
 
     const startDateYear = startDate.getUTCFullYear();
     const startDateMonth = startDate.getUTCMonth();
@@ -430,13 +507,13 @@ function getCouponsNumber(startDateSerialNumber: number, endDateSerialNumber: nu
         ? lastDayOfMonth(endDateYear, endDateMonth, endDateDay)
         : endOfMonthTemp;
 
-    const newDateSerialNumber = getDateSerialNumberByMonths(endDateSerialNumber, 0, endOfMonth);
+    const newDateSerialNumber = getDateSerialNumberByMonths(endDateSerialNumber, 0, endOfMonth, dateSystem);
 
     let coupons = (+isWholeNumber - 0) + +(endDateSerialNumber < newDateSerialNumber);
-    let frontDateSerialNumber = getDateSerialNumberByMonths(newDateSerialNumber, months, endOfMonth);
+    let frontDateSerialNumber = getDateSerialNumberByMonths(newDateSerialNumber, months, endOfMonth, dateSystem);
 
     while (!(months > 0 ? frontDateSerialNumber >= endDateSerialNumber : frontDateSerialNumber <= endDateSerialNumber)) {
-        frontDateSerialNumber = getDateSerialNumberByMonths(frontDateSerialNumber, months, endOfMonth);
+        frontDateSerialNumber = getDateSerialNumberByMonths(frontDateSerialNumber, months, endOfMonth, dateSystem);
         coupons++;
     }
 
@@ -551,16 +628,17 @@ export function calculatePrice(
     yld: number,
     redemption: number,
     frequency: number,
-    basis: number
+    basis: number,
+    dateSystem = DateSystem.Date1900
 ): number {
     // N is the number of coupons payable between the settlement date and redemption date
-    const N = calculateCoupnum(settlementSerialNumber, maturitySerialNumber, frequency);
+    const N = calculateCoupnum(settlementSerialNumber, maturitySerialNumber, frequency, dateSystem);
 
     // E = number of days in coupon period in which the settlement date falls.
-    const E = calculateCoupdays(settlementSerialNumber, maturitySerialNumber, frequency, basis);
+    const E = calculateCoupdays(settlementSerialNumber, maturitySerialNumber, frequency, basis, dateSystem);
 
     // A = number of days from beginning of coupon period to settlement date.
-    const A = calculateCoupdaybs(settlementSerialNumber, maturitySerialNumber, frequency, basis);
+    const A = calculateCoupdaybs(settlementSerialNumber, maturitySerialNumber, frequency, basis, dateSystem);
 
     if (N === 1) {
         const DSR = E - A;

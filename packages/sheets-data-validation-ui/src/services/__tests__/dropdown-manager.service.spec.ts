@@ -23,6 +23,8 @@ import {
     DataValidationErrorStyle,
     DataValidationRenderMode,
     dateKit,
+    DateSystem,
+    excelDateTimePartsToSerial,
     ICommandService,
     Inject,
     Injector,
@@ -73,7 +75,7 @@ class TestSheetDataValidationModel {
     rule: IRule | null = null;
 
     getRuleByLocation(_unitId: string, _subUnitId: string, row: number, col: number): IRule | null {
-        return col === 2 && row >= 1 && row <= 4 ? this.rule : null;
+        return col === 2 && row >= 1 && row <= 10 ? this.rule : null;
     }
 }
 
@@ -114,11 +116,12 @@ interface ITestBed {
     executedCommands: ICommandInfo[];
 }
 
-function createWorkbookData(): IWorkbookData {
+function createWorkbookData(dateSystem = DateSystem.Date1904): IWorkbookData {
     return {
         id: 'book-1',
         appVersion: '3.0.0-alpha',
         locale: LocaleType.EN_US,
+        dateSystem,
         name: 'test',
         sheetOrder: ['sheet-1'],
         sheets: {
@@ -137,7 +140,22 @@ function createWorkbookData(): IWorkbookData {
                         2: { v: '#ff0000' },
                     },
                     4: {
-                        2: { v: 45800 },
+                        2: { v: 1.5 },
+                    },
+                    5: {
+                        2: { v: 0.5 },
+                    },
+                    6: {
+                        2: { v: 2.5 },
+                    },
+                    7: {
+                        2: { v: 60.25 + 0.456 / 86400 },
+                    },
+                    8: {
+                        2: { v: 1.25, s: { n: { pattern: '[h]:mm:ss.000' } } },
+                    },
+                    9: {
+                        2: { v: -1 },
                     },
                 },
             },
@@ -146,7 +164,7 @@ function createWorkbookData(): IWorkbookData {
     };
 }
 
-function createTestBed(): ITestBed {
+function createTestBed(dateSystem = DateSystem.Date1904): ITestBed {
     const univer = new Univer();
     const injector = univer.__getInjector();
     const executedCommands: ICommandInfo[] = [];
@@ -176,7 +194,7 @@ function createTestBed(): ITestBed {
     }
 
     univer.registerPlugin(TestPlugin);
-    const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, createWorkbookData());
+    const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, createWorkbookData(dateSystem));
     const commandService = injector.get(ICommandService);
     [SetRangeValuesCommand.id, SetCellEditVisibleOperation.id, OpenValidationPanelOperation.id].forEach((id) => {
         commandService.registerCommand({
@@ -354,8 +372,10 @@ describe('DataValidationDropdownManagerService', () => {
             showTime: false,
             patternType: 'date',
         });
+        expect((dropdown.props as { defaultValue: ReturnType<typeof dateKit> }).defaultValue.format('YYYY-MM-DD HH:mm:ss')).toBe('1904-01-02 12:00:00');
         await expect((dropdown.props as { onChange: (value: ReturnType<typeof dateKit>) => Promise<boolean> }).onChange(dateKit('2026-06-17'))).resolves.toBe(true);
         expect(getSetRangeValue(testBed)).toEqual(expect.objectContaining({
+            v: excelDateTimePartsToSerial({ year: 2026, month: 6, day: 17, hours: 12, minutes: 0, seconds: 0, fractionalSecond: 0 }, { dateSystem: DateSystem.Date1904 }),
             t: 2,
             s: {
                 n: {
@@ -374,10 +394,14 @@ describe('DataValidationDropdownManagerService', () => {
             validator: () => true,
         });
 
-        showDropdown(testBed, 4);
+        showDropdown(testBed, 5);
         const timeDropdown = getDropdown(testBed);
         expect(timeDropdown.props).toMatchObject({ patternType: 'time' });
-        await expect((timeDropdown.props as { onChange: (value: ReturnType<typeof dateKit>) => Promise<boolean> }).onChange(dateKit('2026-06-17 12:30:00'))).resolves.toBe(true);
+        const defaultTime = (timeDropdown.props as { defaultValue: ReturnType<typeof dateKit> }).defaultValue;
+        expect(defaultTime.format('YYYY-MM-DD HH:mm:ss')).toBe('1904-01-01 12:00:00');
+        const changedTime = defaultTime.toDate();
+        changedTime.setHours(12, 30, 0, 0);
+        await expect((timeDropdown.props as { onChange: (value: ReturnType<typeof dateKit>) => Promise<boolean> }).onChange(dateKit(changedTime))).resolves.toBe(true);
         expect(testBed.executedCommands.at(-2)?.params).toMatchObject({
             value: expect.objectContaining({
                 s: {
@@ -387,6 +411,169 @@ describe('DataValidationDropdownManagerService', () => {
                 },
             }),
         });
+    });
+
+    it('keeps an unchanged date value and closes cell editing when confirmed', async () => {
+        testBed = createTestBed();
+        setRule(testBed, {
+            uid: 'rule-date',
+            type: 'date',
+            errorStyle: DataValidationErrorStyle.STOP,
+        }, {
+            dropdownType: DataValidatorDropdownType.DATE,
+            validator: () => true,
+        });
+
+        showDropdown(testBed, 4);
+        const dropdown = getDropdown(testBed);
+        await expect((dropdown.props as { onChange: (value?: ReturnType<typeof dateKit>) => Promise<boolean> }).onChange()).resolves.toBe(true);
+
+        expect(testBed.executedCommands).not.toContainEqual(expect.objectContaining({ id: SetRangeValuesCommand.id }));
+        expect(testBed.executedCommands).toContainEqual(expect.objectContaining({ id: SetCellEditVisibleOperation.id }));
+    });
+
+    it('stores a date selected for an empty cell at midnight', async () => {
+        testBed = createTestBed();
+        setRule(testBed, {
+            uid: 'rule-date',
+            type: 'date',
+            errorStyle: DataValidationErrorStyle.STOP,
+        }, {
+            dropdownType: DataValidatorDropdownType.DATE,
+            validator: () => true,
+        });
+
+        showDropdown(testBed, 10);
+        const dropdown = getDropdown(testBed);
+        await expect((dropdown.props as { onChange: (value: ReturnType<typeof dateKit>) => Promise<boolean> }).onChange(
+            dateKit('2026-08-21 14:30:45')
+        )).resolves.toBe(true);
+
+        expect(getSetRangeValue(testBed)).toMatchObject({
+            v: excelDateTimePartsToSerial({
+                year: 2026,
+                month: 8,
+                day: 21,
+                hours: 0,
+                minutes: 0,
+                seconds: 0,
+                fractionalSecond: 0,
+            }, { dateSystem: DateSystem.Date1904 }),
+        });
+    });
+
+    it('saves a time selected for an empty cell using the 1904 date-system epoch', async () => {
+        testBed = createTestBed(DateSystem.Date1904);
+        setRule(testBed, {
+            uid: 'rule-time',
+            type: 'time',
+            errorStyle: DataValidationErrorStyle.STOP,
+        }, {
+            dropdownType: DataValidatorDropdownType.TIME,
+            validator: () => true,
+        });
+
+        showDropdown(testBed, 10);
+        const dropdown = getDropdown(testBed);
+        const defaultValue = (dropdown.props as { defaultValue: ReturnType<typeof dateKit> }).defaultValue;
+        expect(defaultValue.format('YYYY-MM-DD HH:mm:ss')).toBe('1904-01-01 00:00:00');
+
+        const changedTime = defaultValue.toDate();
+        changedTime.setHours(12, 30, 0, 0);
+        await expect((dropdown.props as { onChange: (value: ReturnType<typeof dateKit>, changeType: 'time') => Promise<boolean> }).onChange(dateKit(changedTime), 'time')).resolves.toBe(true);
+
+        expect(getSetRangeValue(testBed)).toMatchObject({ v: 12.5 / 24 });
+    });
+
+    it('preserves the original calendar date when editing a time value', async () => {
+        testBed = createTestBed();
+        setRule(testBed, {
+            uid: 'rule-time',
+            type: 'time',
+            errorStyle: DataValidationErrorStyle.STOP,
+        }, {
+            dropdownType: DataValidatorDropdownType.TIME,
+            validator: () => true,
+        });
+
+        showDropdown(testBed, 6);
+        const dropdown = getDropdown(testBed);
+        await expect((dropdown.props as { onChange: (value: ReturnType<typeof dateKit>) => Promise<boolean> }).onChange(dateKit('1900-01-01 12:30:00'))).resolves.toBe(true);
+        expect(getSetRangeValue(testBed)).toMatchObject({ v: 2 + 12.5 / 24 });
+    });
+
+    it('preserves serial 60 when only its datetime clock value changes', async () => {
+        testBed = createTestBed(DateSystem.Date1900);
+        setRule(testBed, {
+            uid: 'rule-datetime',
+            type: 'datetime',
+            errorStyle: DataValidationErrorStyle.STOP,
+        }, {
+            dropdownType: DataValidatorDropdownType.DATETIME,
+            validator: () => true,
+        });
+
+        showDropdown(testBed, 7);
+        const dropdown = getDropdown(testBed);
+        expect((dropdown.props as { defaultValue: ReturnType<typeof dateKit> }).defaultValue.format('YYYY-MM-DD HH:mm:ss')).toBe('1900-02-28 06:00:00');
+        expect(dropdown.props).toMatchObject({ exceptionalDateLabel: '1900-02-29 06:00:00' });
+        await expect((dropdown.props as { onChange: (value: ReturnType<typeof dateKit>, changeType: 'time') => Promise<boolean> }).onChange(dateKit('1900-02-28 12:30:00'), 'time')).resolves.toBe(true);
+        expect(getSetRangeValue(testBed)).toMatchObject({ v: 60 + 12.5 / 24 });
+    });
+
+    it('replaces serial 60 when the user selects a real calendar date', async () => {
+        testBed = createTestBed(DateSystem.Date1900);
+        setRule(testBed, {
+            uid: 'rule-datetime',
+            type: 'datetime',
+            errorStyle: DataValidationErrorStyle.STOP,
+        }, {
+            dropdownType: DataValidatorDropdownType.DATETIME,
+            validator: () => true,
+        });
+
+        showDropdown(testBed, 7);
+        const dropdown = getDropdown(testBed);
+        await expect((dropdown.props as { onChange: (value: ReturnType<typeof dateKit>, changeType: 'date') => Promise<boolean> }).onChange(dateKit('1900-02-28 06:00:00'), 'date')).resolves.toBe(true);
+        expect(getSetRangeValue(testBed)).toMatchObject({ v: 59.25 });
+    });
+
+    it('edits accumulated duration without wrapping at 24 hours', async () => {
+        testBed = createTestBed();
+        setRule(testBed, {
+            uid: 'rule-duration',
+            type: 'time',
+            errorStyle: DataValidationErrorStyle.STOP,
+        }, {
+            dropdownType: DataValidatorDropdownType.TIME,
+            validator: () => true,
+        });
+
+        showDropdown(testBed, 8);
+        const dropdown = getDropdown(testBed);
+        expect(dropdown.props).toMatchObject({ patternType: 'duration', durationValue: 1.25 });
+        await expect((dropdown.props as { onDurationChange: (value: number) => Promise<boolean> }).onDurationChange(1.5)).resolves.toBe(true);
+        expect(getSetRangeValue(testBed)).toMatchObject({
+            v: 1.5,
+            s: { n: { pattern: '[h]:mm:ss.000' } },
+        });
+    });
+
+    it('exposes an unsupported negative temporal serial instead of falling back to today', () => {
+        testBed = createTestBed(DateSystem.Date1900);
+        setRule(testBed, {
+            uid: 'rule-date',
+            type: 'date',
+            errorStyle: DataValidationErrorStyle.STOP,
+        }, {
+            dropdownType: DataValidatorDropdownType.DATE,
+            validator: () => true,
+        });
+
+        showDropdown(testBed, 9);
+
+        expect(getDropdown(testBed).props).toMatchObject({ unsupportedValue: -1 });
+        expect(getDropdown(testBed).props).not.toHaveProperty('defaultValue');
     });
 
     it('hides the active dropdown when selection leaves validation cells', () => {

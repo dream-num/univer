@@ -19,12 +19,29 @@
 
 // @vitest-environment node
 
+import { DateSystem } from '../../../types/enum/date-system';
 import { format } from '../api';
 import { getTimeZoneName, numfmtTest } from './test-utils';
 
 /* global process */
 
 const excelOpts = { dateSpanLarge: false, dateErrorNumber: false };
+
+numfmtTest('option: Excel date system', (t) => {
+    t.format('yyyy-mm-dd', 0, '1904-01-01', { dateSystem: DateSystem.Date1904 });
+    t.format('yyyy-mm-dd', 1, '1904-01-02', { dateSystem: DateSystem.Date1904 });
+    t.format('dddd', 0, 'Friday', { dateSystem: DateSystem.Date1904 });
+    t.format('yyyy-mm-dd', 0, '1900-01-00', { dateSystem: DateSystem.Date1900 });
+    t.format('yyyy-mm-dd', 1, '1900-01-01', { dateSystem: DateSystem.Date1900 });
+    t.format('yyyy-mm-dd', 2958465, '9999-12-31', { dateSystem: DateSystem.Date1900 });
+    t.format('yyyy-mm-dd', 2958466, '######', { dateSystem: DateSystem.Date1900 });
+    t.format('yyyy-mm-dd', 2957003, '9999-12-31', { dateSystem: DateSystem.Date1904 });
+    t.format('yyyy-mm-dd', 2957004, '######', { dateSystem: DateSystem.Date1904 });
+});
+
+numfmtTest('default: Excel date overflow', (t) => {
+    t.format('yyyy', -1, '######');
+});
 
 numfmtTest('option: overflow', (t) => {
     t.format('yyyy', -1, '######', { ...excelOpts });
@@ -58,14 +75,14 @@ numfmtTest('option: leap1900', (t) => {
 });
 
 numfmtTest('option: dateErrorThrows', (t) => {
-    t.format('yyyy', -694325, '-694325', {});
-    t.format('yyyy', -1, '-1', { dateSpanLarge: false });
+    t.format('yyyy', -694325, '######', {});
+    t.format('yyyy', -1, '######', { dateSpanLarge: false });
     t.formatThrows('yyyy', -1, '-1', { dateSpanLarge: false, dateErrorThrows: true });
     t.formatThrows('yyyy', -694325, '-694325', { dateErrorThrows: true });
 });
 
 numfmtTest('option: dateErrorNumber', (t) => {
-    t.format('yyyy', -1, '-1', { dateSpanLarge: false });
+    t.format('yyyy', -1, '######', { dateSpanLarge: false });
     t.format('yyyy', -1, '-1', { dateSpanLarge: false, dateErrorNumber: true });
     t.format('yyyy', -1, '######', { dateSpanLarge: false, dateErrorNumber: false });
 });

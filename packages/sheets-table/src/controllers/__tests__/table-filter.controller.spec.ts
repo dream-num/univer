@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DateSystem } from '@univerjs/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { TableFilterController } from '../table-filter.controller';
@@ -59,6 +60,7 @@ describe('TableFilterController', () => {
             getActiveSheet: () => ({ getSheetId: () => 's1' }),
             activeSheet$,
             getSheetBySheetId: vi.fn(() => ({ id: 'sheet1' })),
+            getDateSystem: () => DateSystem.Date1904,
         };
 
         const workbookType$ = new Subject<any>();
@@ -81,7 +83,11 @@ describe('TableFilterController', () => {
 
         tableFilterChanged$.next({ unitId: 'u1', subUnitId: 's1', tableId: 't1' });
 
-        expect(mainFilter.doFilter).toHaveBeenCalledWith({ id: 'sheet1' }, { startRow: 1, endRow: 10, startColumn: 1, endColumn: 2 });
+        expect(mainFilter.doFilter).toHaveBeenCalledWith(
+            { id: 'sheet1' },
+            { startRow: 1, endRow: 10, startColumn: 1, endColumn: 2 },
+            DateSystem.Date1904
+        );
         expect(zebraCrossingCacheController.updateZebraCrossingCache).toHaveBeenCalledWith('u1', 's1');
         expect(rowFilteredHandler(false, { unitId: 'u1', subUnitId: 's1', row: 4 }, vi.fn(() => false))).toBe(true);
         expect(rowFilteredHandler(false, { unitId: 'u1', subUnitId: 's2', row: 4 }, vi.fn(() => false))).toBe(false);

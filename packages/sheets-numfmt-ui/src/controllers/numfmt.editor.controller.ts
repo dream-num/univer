@@ -48,8 +48,9 @@ import {
     SheetInterceptorService,
     transformCellsToRange,
 } from '@univerjs/sheets';
-import { getPatternType } from '@univerjs/sheets-numfmt';
+import { getPatternType, SheetsNumfmtCellContentController } from '@univerjs/sheets-numfmt';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
+import { parseTemporalEditorValue, serializeTemporalEditorValue } from '../utils/temporal-editor-value';
 
 const createCollectEffectMutation = () => {
     interface IConfig {
@@ -82,6 +83,7 @@ export class NumfmtEditorController extends Disposable {
         @Inject(INumfmtService) private _numfmtService: INumfmtService,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
         @Inject(Injector) private _injector: Injector,
+        @Inject(SheetsNumfmtCellContentController) private _sheetsNumfmtCellContentController: SheetsNumfmtCellContentController,
         @Optional(IEditorBridgeService) private _editorBridgeService?: IEditorBridgeService
     ) {
         super();
@@ -112,6 +114,20 @@ export class NumfmtEditorController extends Disposable {
                             col
                         );
                         if (numfmtCell) {
+                            const rawCell = context.worksheet.getCellRaw(row, col);
+                            if (!rawCell?.f && rawCell?.t === CellValueType.NUMBER && isRealNum(rawCell.v)) {
+                                // Excel completes omitted components in the active date/clock format without changing the stored numfmt.
+                                const canonicalValue = serializeTemporalEditorValue({
+                                    serial: Number(rawCell.v),
+                                    pattern: numfmtCell.pattern,
+                                    locale: this._sheetsNumfmtCellContentController.getLocale(context.workbook),
+                                    dateSystem: context.workbook.getDateSystem(),
+                                });
+                                if (canonicalValue != null) {
+                                    return next && next({ ...rawCell, v: canonicalValue });
+                                }
+                            }
+
                             const type = getPatternType(numfmtCell.pattern);
                             switch (type) {
                                 /**
@@ -192,7 +208,9 @@ export class NumfmtEditorController extends Disposable {
 
                         const body = value.p?.body;
                         const content = value?.p?.body?.dataStream ? value.p.body.dataStream.replace(/\r\n$/, '') : String(value.v);
-                        const numfmtInfo = getNumfmtParseValueFilter(content);
+                        const locale = this._sheetsNumfmtCellContentController.getLocale(context.workbook);
+                        const dateSystem = context.workbook.getDateSystem();
+                        const numfmtInfo = getNumfmtParseValueFilter(content, { locale, dateSystem });
 
                         if (body) {
                             if (!canConvertRichTextToNumfmt(body)) {
@@ -204,6 +222,19 @@ export class NumfmtEditorController extends Disposable {
                                 if (Number.isNaN(num) && !numfmtInfo) {
                                     return next(value);
                                 }
+                            }
+                        }
+
+                        if (currentNumfmtValue?.pattern && originCell?.t === CellValueType.NUMBER && isRealNum(originCell.v)) {
+                            const temporalValue = parseTemporalEditorValue({
+                                content,
+                                originalSerial: Number(originCell.v),
+                                pattern: currentNumfmtValue.pattern,
+                                locale,
+                                dateSystem,
+                            });
+                            if (temporalValue != null) {
+                                return next({ ...value, p: undefined, v: stripErrorMargin(temporalValue, 16), t: CellValueType.NUMBER });
                             }
                         }
 

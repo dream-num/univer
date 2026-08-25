@@ -17,7 +17,7 @@
 import type { IDocumentData, Worksheet } from '@univerjs/core';
 import type { TableStringCompareTypeEnum } from '../../types/enum';
 import type { ICalculatedOptions, ITableConditionFilterItem, ITableDateFilterInfo, ITableNumberFilterInfo, ITableStringFilterInfo } from '../../types/type';
-import { CellValueType } from '@univerjs/core';
+import { CellValueType, DateSystem, excelSerialToDateTime } from '@univerjs/core';
 import { TableConditionTypeEnum, TableDateCompareTypeEnum, TableNumberCompareTypeEnum } from '../../types/enum';
 import { getDateFilterExecuteFunc } from './date-filter-util';
 import { getNumberFilterExecuteFunc } from './number-filter-util';
@@ -77,12 +77,18 @@ export function getConditionExecuteFunc(filter: ITableConditionFilterItem, calcu
     }
 }
 
-export function getCellValueWithConditionType(sheet: Worksheet, row: number, col: number, conditionType: TableConditionTypeEnum) {
+export function getCellValueWithConditionType(
+    sheet: Worksheet,
+    row: number,
+    col: number,
+    conditionType: TableConditionTypeEnum,
+    dateSystem = DateSystem.Date1900
+) {
     switch (conditionType) {
         case TableConditionTypeEnum.Date:
         {
             const dateNumber = getNumberCellValue(sheet, row, col);
-            return dateNumber ? excelSerialToDateTime(dateNumber) : null;
+            return dateNumber == null ? null : excelSerialToDateTimeLocal(dateNumber, dateSystem);
         }
         case TableConditionTypeEnum.Number:
             return getNumberCellValue(sheet, row, col);
@@ -135,21 +141,21 @@ function getNumberCellValue(sheet: Worksheet, row: number, col: number) {
     return Number(v);
 }
 
-export function excelSerialToDateTime(serial: number): Date {
-    const baseDate = new Date(Date.UTC(1900, 0, 1, 0, 0, 0)); // January 1, 1900, UTC
-    const leapDayDate = new Date(Date.UTC(1900, 1, 28, 0, 0, 0)); // February 28, 1900, UTC
-
-    let dayDifference = serial - 1; // Adjust for Excel serial number starting from 1
-
-    // If the serial number corresponds to a date later than February 28, 1900, adjust the day difference
-    if (dayDifference > (leapDayDate.getTime() - baseDate.getTime()) / (1000 * 3600 * 24)) {
-        dayDifference -= 1;
+function excelSerialToDateTimeLocal(serial: number, dateSystem = DateSystem.Date1900): Date {
+    const utcDate = excelSerialToDateTime(serial, dateSystem);
+    if (Number.isNaN(utcDate.getTime())) {
+        return utcDate;
     }
-
-    if (dayDifference < 0) {
-        dayDifference = serial;
-    }
-
-    const resultDate = new Date(baseDate.getTime() + dayDifference * (1000 * 3600 * 24));
-    return resultDate;
+    // Table date predicates use local Date components; keep the spreadsheet fields stable across host time zones.
+    return new Date(
+        utcDate.getUTCFullYear(),
+        utcDate.getUTCMonth(),
+        utcDate.getUTCDate(),
+        utcDate.getUTCHours(),
+        utcDate.getUTCMinutes(),
+        utcDate.getUTCSeconds(),
+        utcDate.getUTCMilliseconds()
+    );
 }
+
+export { excelSerialToDateTimeLocal as excelSerialToDateTime };

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
+import type { DateSystem, Nullable } from '@univerjs/core';
 import type { BaseAstNode } from '../ast-node/base-ast-node';
 import type { LambdaNode } from '../ast-node/lambda-node';
 import type { ReferenceNode } from '../ast-node/reference-node';
@@ -27,6 +27,7 @@ import { Disposable } from '@univerjs/core';
 import { AstNodePromiseType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME } from '../../basics/token-type';
+import { IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
 import { NodeType } from '../ast-node/node-type';
 import { ErrorValueObject } from '../value-object/base-value-object';
@@ -34,11 +35,14 @@ import { BooleanValueObject, NumberValueObject } from '../value-object/primitive
 
 type InterpreterRuntimeService = Pick<
     IFormulaRuntimeService,
-    'currentColumn' | 'currentRow' | 'isStopExecution'
+    'currentColumn' | 'currentRow' | 'currentUnitId' | 'isStopExecution'
 >;
 
 export class Interpreter extends Disposable {
-    constructor(@IFormulaRuntimeService private readonly _runtimeService: InterpreterRuntimeService) {
+    constructor(
+        @IFormulaRuntimeService private readonly _runtimeService: InterpreterRuntimeService,
+        @IFormulaCurrentConfigService private readonly _currentConfigService: IFormulaCurrentConfigService
+    ) {
         super();
     }
 
@@ -55,7 +59,7 @@ export class Interpreter extends Disposable {
         const refOffsetX = nodeData.refOffsetX;
         const refOffsetY = nodeData.refOffsetY;
 
-        await this._executeAsync(node, refOffsetX, refOffsetY);
+        await this._executeAsync(node, this.getDateSystem(), refOffsetX, refOffsetY);
 
         const value = node.getValue();
 
@@ -79,7 +83,7 @@ export class Interpreter extends Disposable {
         const refOffsetX = nodeData.refOffsetX;
         const refOffsetY = nodeData.refOffsetY;
 
-        this._execute(node, refOffsetX, refOffsetY);
+        this._execute(node, this.getDateSystem(), refOffsetX, refOffsetY);
 
         const value = node.getValue();
 
@@ -91,7 +95,7 @@ export class Interpreter extends Disposable {
     }
 
     executePreCalculateNode(node: PreCalculateNodeType) {
-        node.execute();
+        node.execute(this.getDateSystem());
         return node.getValue();
     }
 
@@ -125,11 +129,16 @@ export class Interpreter extends Disposable {
         }
     }
 
-    private async _executeAsync(node: BaseAstNode, refOffsetX = 0, refOffsetY = 0): Promise<AstNodePromiseType> {
+    private async _executeAsync(
+        node: BaseAstNode,
+        dateSystem: DateSystem,
+        refOffsetX = 0,
+        refOffsetY = 0
+    ): Promise<AstNodePromiseType> {
         if (this._runtimeService.isStopExecution()) {
             return Promise.resolve(AstNodePromiseType.ERROR);
         }
-        if (await this._executeLazyFunctionAsync(node, refOffsetX, refOffsetY)) {
+        if (await this._executeLazyFunctionAsync(node, dateSystem, refOffsetX, refOffsetY)) {
             return Promise.resolve(AstNodePromiseType.SUCCESS);
         }
         const children = node.getChildren();
@@ -144,10 +153,10 @@ export class Interpreter extends Disposable {
                 token.toUpperCase() === DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME &&
                 (item as LambdaNode).isEmptyParamFunction()
             ) {
-                item.execute();
+                item.execute(dateSystem);
                 continue;
             }
-            await this._executeAsync(item, refOffsetX, refOffsetY);
+            await this._executeAsync(item, dateSystem, refOffsetX, refOffsetY);
         }
 
         if (node.nodeType === NodeType.REFERENCE) {
@@ -155,19 +164,24 @@ export class Interpreter extends Disposable {
         }
 
         if (node.isAsync()) {
-            await node.executeAsync();
+            await node.executeAsync(dateSystem);
         } else {
-            node.execute();
+            node.execute(dateSystem);
         }
 
         return Promise.resolve(AstNodePromiseType.SUCCESS);
     }
 
-    private _execute(node: BaseAstNode, refOffsetX = 0, refOffsetY = 0): AstNodePromiseType {
+    private _execute(
+        node: BaseAstNode,
+        dateSystem: DateSystem,
+        refOffsetX = 0,
+        refOffsetY = 0
+    ): AstNodePromiseType {
         if (this._runtimeService.isStopExecution()) {
             return AstNodePromiseType.ERROR;
         }
-        if (this._executeLazyFunction(node, refOffsetX, refOffsetY)) {
+        if (this._executeLazyFunction(node, dateSystem, refOffsetX, refOffsetY)) {
             return AstNodePromiseType.SUCCESS;
         }
         const children = node.getChildren();
@@ -182,58 +196,73 @@ export class Interpreter extends Disposable {
                 token.toUpperCase() === DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME &&
                 (item as LambdaNode).isEmptyParamFunction()
             ) {
-                item.execute();
+                item.execute(dateSystem);
                 continue;
             }
-            this._execute(item, refOffsetX, refOffsetY);
+            this._execute(item, dateSystem, refOffsetX, refOffsetY);
         }
 
         if (node.nodeType === NodeType.REFERENCE) {
             (node as ReferenceNode).setRefOffset(refOffsetX, refOffsetY);
         }
 
-        node.execute();
+        node.execute(dateSystem);
 
         return AstNodePromiseType.SUCCESS;
     }
 
-    private async _executeLazyFunctionAsync(node: BaseAstNode, refOffsetX: number, refOffsetY: number): Promise<boolean> {
+    private async _executeLazyFunctionAsync(
+        node: BaseAstNode,
+        dateSystem: DateSystem,
+        refOffsetX: number,
+        refOffsetY: number
+    ): Promise<boolean> {
         if (node.nodeType !== NodeType.FUNCTION) {
             return false;
         }
 
         const token = node.getToken().toUpperCase();
         if (token === 'IF') {
-            return await this._executeLazyIfAsync(node, refOffsetX, refOffsetY);
+            return await this._executeLazyIfAsync(node, dateSystem, refOffsetX, refOffsetY);
         }
         if (token === 'IFERROR') {
-            return await this._executeLazyIfErrorAsync(node, refOffsetX, refOffsetY);
+            return await this._executeLazyIfErrorAsync(node, dateSystem, refOffsetX, refOffsetY);
         }
         return false;
     }
 
-    private _executeLazyFunction(node: BaseAstNode, refOffsetX: number, refOffsetY: number): boolean {
+    private _executeLazyFunction(
+        node: BaseAstNode,
+        dateSystem: DateSystem,
+        refOffsetX: number,
+        refOffsetY: number
+    ): boolean {
         if (node.nodeType !== NodeType.FUNCTION) {
             return false;
         }
 
         const token = node.getToken().toUpperCase();
         if (token === 'IF') {
-            return this._executeLazyIf(node, refOffsetX, refOffsetY);
+            return this._executeLazyIf(node, dateSystem, refOffsetX, refOffsetY);
         }
         if (token === 'IFERROR') {
-            return this._executeLazyIfError(node, refOffsetX, refOffsetY);
+            return this._executeLazyIfError(node, dateSystem, refOffsetX, refOffsetY);
         }
         return false;
     }
 
-    private async _executeLazyIfAsync(node: BaseAstNode, refOffsetX: number, refOffsetY: number): Promise<boolean> {
+    private async _executeLazyIfAsync(
+        node: BaseAstNode,
+        dateSystem: DateSystem,
+        refOffsetX: number,
+        refOffsetY: number
+    ): Promise<boolean> {
         const children = node.getChildren();
         if (children.length < 2 || children.length > 3) {
             return false;
         }
 
-        await this._executeAsync(children[0], refOffsetX, refOffsetY);
+        await this._executeAsync(children[0], dateSystem, refOffsetX, refOffsetY);
         const condition = children[0].getValue();
         if (condition == null || condition.isReferenceObject() || condition.isArray()) {
             return false;
@@ -249,18 +278,23 @@ export class Interpreter extends Disposable {
             return true;
         }
 
-        await this._executeAsync(selected, refOffsetX, refOffsetY);
+        await this._executeAsync(selected, dateSystem, refOffsetX, refOffsetY);
         node.setValue(this._toLazyIfSelectedValue(selected.getValue(), node));
         return true;
     }
 
-    private _executeLazyIf(node: BaseAstNode, refOffsetX: number, refOffsetY: number): boolean {
+    private _executeLazyIf(
+        node: BaseAstNode,
+        dateSystem: DateSystem,
+        refOffsetX: number,
+        refOffsetY: number
+    ): boolean {
         const children = node.getChildren();
         if (children.length < 2 || children.length > 3) {
             return false;
         }
 
-        this._execute(children[0], refOffsetX, refOffsetY);
+        this._execute(children[0], dateSystem, refOffsetX, refOffsetY);
         const condition = children[0].getValue();
         if (condition == null || condition.isReferenceObject() || condition.isArray()) {
             return false;
@@ -276,18 +310,23 @@ export class Interpreter extends Disposable {
             return true;
         }
 
-        this._execute(selected, refOffsetX, refOffsetY);
+        this._execute(selected, dateSystem, refOffsetX, refOffsetY);
         node.setValue(this._toLazyIfSelectedValue(selected.getValue(), node));
         return true;
     }
 
-    private async _executeLazyIfErrorAsync(node: BaseAstNode, refOffsetX: number, refOffsetY: number): Promise<boolean> {
+    private async _executeLazyIfErrorAsync(
+        node: BaseAstNode,
+        dateSystem: DateSystem,
+        refOffsetX: number,
+        refOffsetY: number
+    ): Promise<boolean> {
         const children = node.getChildren();
         if (children.length !== 2) {
             return false;
         }
 
-        await this._executeAsync(children[0], refOffsetX, refOffsetY);
+        await this._executeAsync(children[0], dateSystem, refOffsetX, refOffsetY);
         const rawValue = children[0].getValue();
         const value = this._toLazyIfErrorValue(rawValue);
         if (value == null || value.isArray()) {
@@ -298,18 +337,23 @@ export class Interpreter extends Disposable {
             return true;
         }
 
-        await this._executeAsync(children[1], refOffsetX, refOffsetY);
+        await this._executeAsync(children[1], dateSystem, refOffsetX, refOffsetY);
         node.setValue(children[1].getValue() ?? ErrorValueObject.create(ErrorType.VALUE));
         return true;
     }
 
-    private _executeLazyIfError(node: BaseAstNode, refOffsetX: number, refOffsetY: number): boolean {
+    private _executeLazyIfError(
+        node: BaseAstNode,
+        dateSystem: DateSystem,
+        refOffsetX: number,
+        refOffsetY: number
+    ): boolean {
         const children = node.getChildren();
         if (children.length !== 2) {
             return false;
         }
 
-        this._execute(children[0], refOffsetX, refOffsetY);
+        this._execute(children[0], dateSystem, refOffsetX, refOffsetY);
         const rawValue = children[0].getValue();
         const value = this._toLazyIfErrorValue(rawValue);
         if (value == null || value.isArray()) {
@@ -320,9 +364,13 @@ export class Interpreter extends Disposable {
             return true;
         }
 
-        this._execute(children[1], refOffsetX, refOffsetY);
+        this._execute(children[1], dateSystem, refOffsetX, refOffsetY);
         node.setValue(children[1].getValue() ?? ErrorValueObject.create(ErrorType.VALUE));
         return true;
+    }
+
+    getDateSystem(): DateSystem {
+        return this._currentConfigService.getDateSystem(this._runtimeService.currentUnitId);
     }
 
     private _toLazyIfErrorValue(value: Nullable<FunctionVariantType>): Nullable<BaseValueObject> {

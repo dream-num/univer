@@ -49,7 +49,14 @@ export class Isdate extends BaseFunction {
             return BooleanValueObject.create(isDate(_value.getPattern()));
         }
 
-        if (_value.isString() && (parseFormattedDate(`${_value.getValue()}`) || parseFormattedTime(`${_value.getValue()}`))) {
+        const options = { dateSystem: this.getDateSystem() };
+        if (
+            _value.isString() &&
+            (
+                parseFormattedDate(`${_value.getValue()}`, options) ||
+                parseFormattedTime(`${_value.getValue()}`, options)
+            )
+        ) {
             return BooleanValueObject.create(true);
         }
 

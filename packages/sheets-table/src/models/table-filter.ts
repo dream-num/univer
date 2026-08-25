@@ -17,6 +17,7 @@
 import type { ICellData, Nullable, Worksheet } from '@univerjs/core';
 import type { SheetsTableButtonStateEnum } from '../types/enum';
 import type { ICalculatedOptions, ITableFilterItem, ITableFilterJSON, ITableRange } from '../types/type';
+import { DateSystem } from '@univerjs/core';
 import { TABLE_FILTER_EMPTY_VALUE } from '../const';
 import { SheetsTableSortStateEnum, TableColumnFilterTypeEnum, TableConditionTypeEnum } from '../types/enum';
 import { getTableFilterState, isConditionFilter } from '../util';
@@ -68,20 +69,20 @@ export class TableFilters {
         return this._filterOutRows;
     }
 
-    doFilter(sheet: Worksheet, range: ITableRange) {
+    doFilter(sheet: Worksheet, range: ITableRange, dateSystem = DateSystem.Date1900) {
         const filterOutRows = new Set<number>();
         const tableColumnFilterList = this._tableColumnFilterList;
         for (let i = 0; i < tableColumnFilterList.length; i++) {
             const filter = tableColumnFilterList[i];
             if (filter) {
-                this.doColumnFilter(sheet, range, i, filterOutRows);
+                this.doColumnFilter(sheet, range, i, filterOutRows, dateSystem);
             }
         }
         this._filterOutRows = filterOutRows;
         return filterOutRows;
     }
 
-    doColumnFilter(sheet: Worksheet, range: ITableRange, columnIndex: number, filterOutRows: Set<number>) {
+    doColumnFilter(sheet: Worksheet, range: ITableRange, columnIndex: number, filterOutRows: Set<number>, dateSystem = DateSystem.Date1900) {
         const filter = this._tableColumnFilterList[columnIndex];
         if (filter && sheet) {
             const { startRow, endRow, startColumn } = range;
@@ -90,10 +91,10 @@ export class TableFilters {
             for (let row = startRow; row <= endRow; row++) {
                 // const cellValue = sheet.getCell(row, column);
                 const conditionType = isConditionFilter(filter) ? filter.filterInfo.conditionType : TableConditionTypeEnum.String;
-                const cellValue = getCellValueWithConditionType(sheet, row, column, conditionType);
+                const cellValue = getCellValueWithConditionType(sheet, row, column, conditionType, dateSystem);
                 if (cellValue === null && !executeFunc(cellValue)) {
                     filterOutRows.add(row);
-                } else if (!executeFunc(getCellValueWithConditionType(sheet, row, column, conditionType))) {
+                } else if (!executeFunc(getCellValueWithConditionType(sheet, row, column, conditionType, dateSystem))) {
                     filterOutRows.add(row);
                 }
             }

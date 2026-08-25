@@ -67,7 +67,7 @@ export class Days360 extends BaseFunction {
                 return startDateObject;
             }
 
-            const startDateSerialNumber = getDateSerialNumberByObject(startDateObject);
+            const startDateSerialNumber = getDateSerialNumberByObject(startDateObject, this.getDateSystem());
 
             if (typeof startDateSerialNumber !== 'number') {
                 return startDateSerialNumber;
@@ -77,7 +77,7 @@ export class Days360 extends BaseFunction {
                 return endDateObject;
             }
 
-            const endDateSerialNumber = getDateSerialNumberByObject(endDateObject);
+            const endDateSerialNumber = getDateSerialNumberByObject(endDateObject, this.getDateSystem());
 
             if (typeof endDateSerialNumber !== 'number') {
                 return endDateSerialNumber;
@@ -93,7 +93,7 @@ export class Days360 extends BaseFunction {
 
             const methodValue = +methodObject.getValue();
 
-            const { days } = getTwoDateDaysByBasis(startDateSerialNumber, endDateSerialNumber, !methodValue ? 0 : 4);
+            const { days } = getTwoDateDaysByBasis(startDateSerialNumber, endDateSerialNumber, !methodValue ? 0 : 4, this.getDateSystem());
 
             const result = endDateSerialNumber >= startDateSerialNumber ? days : -days;
 

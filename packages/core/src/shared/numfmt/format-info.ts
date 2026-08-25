@@ -229,6 +229,7 @@ export function dateInfo(partitions: Array<FormatSection | undefined>): FormatDa
         hours: !!(date & u_HOUR),
         minutes: !!(date & u_MIN),
         seconds: !!(date & u_SEC),
+        isDuration: positive?.tokens.some((token) => token.type.endsWith('-elap')) ?? false,
         clockType: positive?.clock === 12 ? 12 : 24,
     };
 }

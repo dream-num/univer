@@ -17,9 +17,11 @@
 import type { IAccessor } from '@univerjs/core';
 import {
     CellValueType,
+    DateSystem,
     ICommandService,
     IUndoRedoService,
     IUniverInstanceService,
+    LocaleType,
     ObjectMatrix,
     PresetListType,
 } from '@univerjs/core';
@@ -73,6 +75,8 @@ function createWorkbook(worksheet: unknown) {
         getSheetBySheetId: (subUnitId: string) => subUnitId === 'sheet-1' ? worksheet : null,
         getActiveSheet: () => worksheet,
         getStyles: createStyles,
+        getSnapshot: () => ({ locale: LocaleType.EN_US }),
+        getDateSystem: () => DateSystem.Date1904,
     };
 }
 
@@ -435,6 +439,7 @@ describe('TextToNumberCommand', () => {
                 1: { v: '003', t: CellValueType.NUMBER, s: 'text-style' },
                 2: { v: 'abc', t: CellValueType.STRING },
                 3: { v: '20%', t: CellValueType.FORCE_STRING },
+                4: { v: '01/02/1904', t: CellValueType.STRING },
             },
         });
         const worksheet = {
@@ -456,7 +461,7 @@ describe('TextToNumberCommand', () => {
         expect(TextToNumberCommand.handler(accessor, {
             unitId: 'unit-1',
             subUnitId: 'sheet-1',
-            ranges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 3 }],
+            ranges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 4 }],
         })).toBe(true);
         expect(executed.map((call) => call.id)).toEqual([SetRangeValuesMutation.id, SetNumfmtMutation.id, RemoveNumfmtMutation.id]);
         expect(executed[0].params).toMatchObject({
@@ -467,6 +472,7 @@ describe('TextToNumberCommand', () => {
                     0: { v: 42, t: CellValueType.NUMBER },
                     1: { v: 3, t: CellValueType.NUMBER },
                     3: { v: 0.2, t: CellValueType.NUMBER },
+                    4: { v: 1, t: CellValueType.NUMBER },
                 },
             },
         });

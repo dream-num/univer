@@ -21,6 +21,7 @@ import type { ISheetCommandSharedParams } from '../utils/interface';
 import {
     CellValueType,
     CommandType,
+    getNumfmtLocaleTag,
     getNumfmtParseValueFilter,
     ICommandService,
     isRealNum,
@@ -65,7 +66,11 @@ export const TextToNumberCommand: ICommand = {
 
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const { worksheet, unitId, subUnitId } = target;
+        const { workbook, worksheet, unitId, subUnitId } = target;
+        const parseOptions = {
+            locale: getNumfmtLocaleTag(workbook.getSnapshot().locale),
+            dateSystem: workbook.getDateSystem(),
+        };
 
         const newCellValue = new ObjectMatrix<ICellData>();
         const setNumfmtCells: ISetCellsNumfmt = [];
@@ -80,7 +85,7 @@ export const TextToNumberCommand: ICommand = {
 
                     const cell = worksheet.getCellRaw(r, c);
                     const pattern = typeof cell?.s === 'string' ? worksheet.getStyleDataByHash(cell.s)?.n?.pattern : cell?.s?.n?.pattern;
-                    const parsedValue = typeof cell?.v === 'string' ? getNumfmtParseValueFilter(cell.v) : null;
+                    const parsedValue = typeof cell?.v === 'string' ? getNumfmtParseValueFilter(cell.v, parseOptions) : null;
                     const numberValue = isRealNum(cell?.v)
                         ? Number(cell?.v)
                         : typeof parsedValue?.v === 'number' ? parsedValue.v : null;

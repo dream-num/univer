@@ -32,18 +32,24 @@ export * from './lifecycle';
 export * from './locale';
 export { LRUHelper, LRUMap } from './lru/lru-map';
 export * from './max-row-column';
-export type { INumfmtLocaleTag } from './numfmt';
+export type { IExcelDateTimeParts, INumfmtLocaleTag, ParseOptions } from './numfmt';
 export {
     currencySymbols,
     DEFAULT_NUMBER_FORMAT,
     DEFAULT_TEXT_FORMAT,
     DEFAULT_TEXT_FORMAT_EXCEL,
+    EXCEL_1904_OFFSET,
+    excelDateTimePartsToSerial,
+    excelSerialToDateTimeParts,
+    getDateSystemMaxSerial,
+    getNumfmtLocaleTag,
     getNumfmtParseValueFilter,
     isDefaultFormat,
     isPatternEqualWithoutDecimal,
     isTextFormat,
     numfmt,
 } from './numfmt';
+export { excelDateSerial, excelDateTimeSerial, excelSerialToDate, excelSerialToDateTime } from './numfmt/serial-date';
 export * from './object-matrix';
 export * from './random-id';
 export { moveRangeByOffset, splitIntoGrid } from './range';

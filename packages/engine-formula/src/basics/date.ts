@@ -15,91 +15,21 @@
  */
 
 import type { BaseValueObject } from '../engine/value-object/base-value-object';
-import { isRealNum, numfmt } from '@univerjs/core';
+import {
+    DateSystem,
+    excelDateSerial,
+    excelDateTimeSerial,
+    excelSerialToDate,
+    getDateSystemMaxSerial,
+    isRealNum,
+    numfmt,
+} from '@univerjs/core';
 import { ErrorValueObject } from '../engine/value-object/base-value-object';
 import { ErrorType } from './error-type';
 
 export const DEFAULT_DATE_FORMAT = 'yyyy/mm/dd;@';
 export const DEFAULT_NOW_FORMAT = 'yyyy/mm/dd hh:mm';
 export const DEFAULT_TIME_FORMAT = 'h:mm A/P';
-
-const perDayMilliseconds = 24 * 60 * 60 * 1000;
-
-/**
- * Excel stores dates as sequential serial numbers so they can be used in calculations. By default, January 1, 1900 is serial number 1, and January 1, 2008 is serial number 39448 because it is 39,447 days after January 1, 1900.
- *
- * Excel has a leap year error in 1900. February 29, 1900 is considered a legal date. In fact, there is no February 29 in 1900.
- * 1900.2.28 Date Serial 59
- * 1900.2.29 Date Serial 61
- * 1900.3.1 Date Serial 61
- * 1901.1.1 Date Serial 367
- */
-export function excelDateSerial(date: Date): number {
-    const baseDateTime = Date.UTC(1900, 0, 1); // January 1, 1900, UTC
-    const leapDayDateTime = Date.UTC(1900, 1, 28); // February 28, 1900, UTC
-    const dateTime = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()); // Input date at UTC
-
-    // Calculate the difference in days between the base date and the input date
-    let dayDifference = (dateTime - baseDateTime) / perDayMilliseconds;
-
-    // If the date is later than February 28, 1900, the day difference needs to be adjusted to account for Excel errors
-    if (dateTime > leapDayDateTime) {
-        dayDifference += 1;
-    }
-
-    return Math.floor(dayDifference) + 1; // Excel serial number starts from 1
-}
-
-/**
- * Time serial number with date
- */
-export function excelDateTimeSerial(date: Date): number {
-    const baseDateTime = Date.UTC(1900, 0, 1, 0, 0, 0); // January 1, 1900, UTC at midnight
-    const leapDayDateTime = Date.UTC(1900, 1, 28, 0, 0, 0); // February 28, 1900, UTC at midnight
-    const dateTime = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds(), date.getUTCMilliseconds()); // Input date at UTC midnight
-
-    // Calculate the difference in milliseconds between the input date and the base date
-    let dayDifference = (dateTime - baseDateTime) / perDayMilliseconds;
-
-    // Adjusting for the Excel leap year bug
-    if (dateTime > leapDayDateTime) {
-        dayDifference += 1;
-    }
-
-    return dayDifference + 1; // Excel serial number starts from 1
-}
-
-export function excelSerialToDate(serial: number): Date {
-    const baseDateTime = Date.UTC(1900, 0, 1); // January 1, 1900, UTC
-    const leapDayDateTime = Date.UTC(1900, 1, 28); // February 28, 1900, UTC
-
-    let dayDifference = Math.floor(serial) - 1; // Adjust for Excel serial number starting from 1
-
-    // If the serial number corresponds to a date later than February 28, 1900, adjust the day difference
-    if (dayDifference > (leapDayDateTime - baseDateTime) / perDayMilliseconds) {
-        dayDifference -= 1;
-    }
-
-    return new Date(baseDateTime + dayDifference * perDayMilliseconds);
-}
-
-export function excelSerialToDateTime(serial: number): Date {
-    const baseDateTime = Date.UTC(1900, 0, 1, 0, 0, 0); // January 1, 1900, UTC at midnight
-    const leapDayDateTime = Date.UTC(1900, 1, 28, 0, 0, 0); // February 28, 1900, UTC at midnight
-
-    let dayDifference = serial - 1; // Adjust for Excel serial number starting from 1
-
-    // If the serial number corresponds to a date later than February 28, 1900, adjust the day difference
-    if (dayDifference > (leapDayDateTime - baseDateTime) / perDayMilliseconds) {
-        dayDifference -= 1;
-    }
-
-    if (dayDifference < 0) {
-        dayDifference = serial;
-    }
-
-    return new Date(baseDateTime + dayDifference * perDayMilliseconds);
-}
 
 export function formatDateDefault(date: Date): string {
     // Get the year from the date object
@@ -150,12 +80,12 @@ export function isValidDateStr(dateStr: string): boolean {
     return dateStrPad === reconstructedDateStr;
 }
 
-export function parseFormattedDate(value: string) {
-    return numfmt.parseDate(value);
+export function parseFormattedDate(value: string, options?: { dateSystem?: DateSystem }) {
+    return numfmt.parseDate(value, options);
 }
 
-export function parseFormattedTime(value: string) {
-    return numfmt.parseTime(value);
+export function parseFormattedTime(value: string, options?: { dateSystem?: DateSystem }) {
+    return numfmt.parseTime(value, options);
 }
 
 function parseEnglishMonthNameDate(value: string): Date | null {
@@ -271,7 +201,7 @@ export function getWeekendArray(weekend: number | string): number[] {
     return weekendNumberMap[Number(weekend)] || [];
 }
 
-export function countWorkingDays(startDateSerialNumber: number, endDateSerialNumber: number, weekend: number | string = 1, holidays?: number[]): number {
+export function countWorkingDays(startDateSerialNumber: number, endDateSerialNumber: number, weekend: number | string = 1, holidays?: number[], dateSystem = DateSystem.Date1900): number {
     const weekendArray = getWeekendArray(weekend);
 
     const start = Math.floor(startDateSerialNumber);
@@ -289,7 +219,7 @@ export function countWorkingDays(startDateSerialNumber: number, endDateSerialNum
             continue;
         }
 
-        const weekDay = getWeekDayByDateSerialNumber(currentDateSerialNumber);
+        const weekDay = getWeekDayByDateSerialNumber(currentDateSerialNumber, dateSystem);
 
         if (weekendArray.includes(weekDay)) {
             continue;
@@ -301,7 +231,7 @@ export function countWorkingDays(startDateSerialNumber: number, endDateSerialNum
     return end >= start ? workingDays : -workingDays;
 }
 
-export function getDateSerialNumberByWorkingDays(startDateSerialNumber: number, workingDays: number, weekend: number | string = 1, holidays?: number[]): (number | ErrorValueObject) {
+export function getDateSerialNumberByWorkingDays(startDateSerialNumber: number, workingDays: number, weekend: number | string = 1, holidays?: number[], dateSystem = DateSystem.Date1900): number | ErrorValueObject {
     const weekendArray = getWeekendArray(weekend);
 
     const _startDateSerialNumber = Math.floor(startDateSerialNumber);
@@ -321,7 +251,7 @@ export function getDateSerialNumberByWorkingDays(startDateSerialNumber: number, 
             continue;
         }
 
-        const weekDay = getWeekDayByDateSerialNumber(currentDateSerialNumber);
+        const weekDay = getWeekDayByDateSerialNumber(currentDateSerialNumber, dateSystem);
 
         if (weekendArray.includes(weekDay)) {
             days++;
@@ -334,20 +264,25 @@ export function getDateSerialNumberByWorkingDays(startDateSerialNumber: number, 
     return targetDateSerialNumber;
 }
 
-export function getDateSerialNumberByObject(serialNumberObject: BaseValueObject): (ErrorValueObject | number) {
+export function getDateSerialNumberByObject(
+    serialNumberObject: BaseValueObject,
+    dateSystem?: DateSystem
+): ErrorValueObject | number {
     if (serialNumberObject.isError()) {
         return serialNumberObject as ErrorValueObject;
     }
 
     const dateValue = serialNumberObject.getValue();
+    const maxSerial = getDateSystemMaxSerial(dateSystem);
 
     if (serialNumberObject.isString()) {
         let dateSerial: any;
+        const options = { dateSystem };
 
-        if (parseFormattedDate(`${dateValue}`)) {
-            dateSerial = parseFormattedDate(`${dateValue}`)!.v;
-        } else if (parseFormattedTime(`${dateValue}`)) {
-            dateSerial = parseFormattedTime(`${dateValue}`)!.v;
+        if (parseFormattedDate(`${dateValue}`, options)) {
+            dateSerial = parseFormattedDate(`${dateValue}`, options)!.v;
+        } else if (parseFormattedTime(`${dateValue}`, options)) {
+            dateSerial = parseFormattedTime(`${dateValue}`, options)!.v;
         } else if (parseEnglishMonthNameDate(`${dateValue}`)) {
             dateSerial = parseEnglishMonthNameDate(`${dateValue}`)!;
         } else if (isRealNum(dateValue)) {
@@ -357,10 +292,10 @@ export function getDateSerialNumberByObject(serialNumberObject: BaseValueObject)
         }
 
         if (dateSerial instanceof Date) {
-            dateSerial = excelDateTimeSerial(dateSerial);
+            dateSerial = excelDateTimeSerial(dateSerial, dateSystem);
         }
 
-        if (+dateSerial < 0 || +dateSerial > 2958465) { // 2958465 = 9999/12/31
+        if (+dateSerial < 0 || +dateSerial > maxSerial) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
@@ -368,7 +303,7 @@ export function getDateSerialNumberByObject(serialNumberObject: BaseValueObject)
     } else {
         const dateSerial = +serialNumberObject.getValue();
 
-        if (dateSerial < 0 || dateSerial > 2958465) { // 2958465 = 9999/12/31
+        if (dateSerial < 0 || dateSerial > maxSerial) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
@@ -376,20 +311,9 @@ export function getDateSerialNumberByObject(serialNumberObject: BaseValueObject)
     }
 }
 
-export function getWeekDayByDateSerialNumber(dateSerialNumber: number): number {
-    // special date 1900-02-29(serialNumber = 60)
-    const isDate19000229 = Math.floor(dateSerialNumber) === 60;
-
-    let date = excelSerialToDate(dateSerialNumber);
-
-    const leapDayDateTime = Date.UTC(1900, 1, 28); // February 28, 1900, UTC
-    const dateTime = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
-
-    if (!isDate19000229 && dateTime <= leapDayDateTime) {
-        date = new Date(dateTime - perDayMilliseconds);
-    }
-
-    return date.getUTCDay();
+export function getWeekDayByDateSerialNumber(dateSerialNumber: number, dateSystem = DateSystem.Date1900): number {
+    const offset = dateSystem === DateSystem.Date1904 ? 5 : 6;
+    return ((Math.floor(dateSerialNumber) + offset) % 7 + 7) % 7;
 }
 
 interface ITwoDateDaysType {
@@ -397,14 +321,14 @@ interface ITwoDateDaysType {
     yearDays: number;
 }
 
-export function getTwoDateDaysByBasis(startDateSerialNumber: number, endDateSerialNumber: number, basis: number): ITwoDateDaysType {
+export function getTwoDateDaysByBasis(startDateSerialNumber: number, endDateSerialNumber: number, basis: number, dateSystem = DateSystem.Date1900): ITwoDateDaysType {
     switch (basis) {
         case 0:
             // U.S. (NASD) method 30/360.
-            return getDaysByNASD(startDateSerialNumber, endDateSerialNumber);
+            return getDaysByNASD(startDateSerialNumber, endDateSerialNumber, dateSystem);
         case 1:
             // Actual/actual
-            return getDaysByActual(startDateSerialNumber, endDateSerialNumber);
+            return getDaysByActual(startDateSerialNumber, endDateSerialNumber, dateSystem);
         case 2:
             // Actual/360
             return {
@@ -419,7 +343,7 @@ export function getTwoDateDaysByBasis(startDateSerialNumber: number, endDateSeri
             };
         case 4:
             // European method 30/360.
-            return getDaysByEuropean(startDateSerialNumber, endDateSerialNumber);
+            return getDaysByEuropean(startDateSerialNumber, endDateSerialNumber, dateSystem);
         default:
             return {
                 days: Math.abs(endDateSerialNumber - startDateSerialNumber),
@@ -428,16 +352,18 @@ export function getTwoDateDaysByBasis(startDateSerialNumber: number, endDateSeri
     }
 }
 
-function getDaysByNASD(startDateSerialNumber: number, endDateSerialNumber: number): ITwoDateDaysType {
-    const startDateDate = excelSerialToDate(startDateSerialNumber);
-    const startYear = startDateSerialNumber > 0 ? startDateDate.getUTCFullYear() : 1900;
-    const startMonth = startDateSerialNumber > 0 ? startDateDate.getUTCMonth() + 1 : 1;
-    let startDay = startDateSerialNumber > 0 ? startDateDate.getUTCDate() : 0;
+function getDaysByNASD(startDateSerialNumber: number, endDateSerialNumber: number, dateSystem: DateSystem): ITwoDateDaysType {
+    const startDateDate = excelSerialToDate(startDateSerialNumber, dateSystem);
+    const startIsDate1900SerialZero = dateSystem === DateSystem.Date1900 && startDateSerialNumber === 0;
+    const startYear = startIsDate1900SerialZero ? 1900 : startDateDate.getUTCFullYear();
+    const startMonth = startIsDate1900SerialZero ? 1 : startDateDate.getUTCMonth() + 1;
+    let startDay = startIsDate1900SerialZero ? 0 : startDateDate.getUTCDate();
 
-    let endDateDate = excelSerialToDate(endDateSerialNumber);
-    let endYear = endDateSerialNumber > 0 ? endDateDate.getUTCFullYear() : 1900;
-    let endMonth = endDateSerialNumber > 0 ? endDateDate.getUTCMonth() + 1 : 1;
-    let endDay = endDateSerialNumber > 0 ? endDateDate.getUTCDate() : 0;
+    let endDateDate = excelSerialToDate(endDateSerialNumber, dateSystem);
+    const endIsDate1900SerialZero = dateSystem === DateSystem.Date1900 && endDateSerialNumber === 0;
+    let endYear = endIsDate1900SerialZero ? 1900 : endDateDate.getUTCFullYear();
+    let endMonth = endIsDate1900SerialZero ? 1 : endDateDate.getUTCMonth() + 1;
+    let endDay = endIsDate1900SerialZero ? 0 : endDateDate.getUTCDate();
 
     const startIsLastDayOfFebruary = startMonth === 2 && startDay === getDaysInMonth(startYear, startMonth - 1);
 
@@ -453,7 +379,7 @@ function getDaysByNASD(startDateSerialNumber: number, endDateSerialNumber: numbe
         endDay = 30;
     } else if (endDay === 31) {
         if (startDay < 30) {
-            endDateDate = excelSerialToDate(endDateSerialNumber + 1);
+            endDateDate = excelSerialToDate(endDateSerialNumber + 1, dateSystem);
             endYear = endDateDate.getUTCFullYear();
             endMonth = endDateDate.getUTCMonth() + 1;
             endDay = endDateDate.getUTCDate();
@@ -474,14 +400,30 @@ function getDaysByNASD(startDateSerialNumber: number, endDateSerialNumber: numbe
     };
 }
 
-function getDaysByActual(startDateSerialNumber: number, endDateSerialNumber: number): ITwoDateDaysType {
-    const startDateDate = excelSerialToDate(startDateSerialNumber);
-    const startYear = startDateSerialNumber > 0 ? startDateDate.getUTCFullYear() : 1900;
+function getDaysByActual(startDateSerialNumber: number, endDateSerialNumber: number, dateSystem: DateSystem): ITwoDateDaysType {
+    const startDateDate = excelSerialToDate(startDateSerialNumber, dateSystem);
+    const startIsDate1900SerialZero = dateSystem === DateSystem.Date1900 && startDateSerialNumber === 0;
+    const startYear = startIsDate1900SerialZero ? 1900 : startDateDate.getUTCFullYear();
+    const startMonth = startIsDate1900SerialZero ? 1 : startDateDate.getUTCMonth() + 1;
+    const startDay = startIsDate1900SerialZero ? 0 : startDateDate.getUTCDate();
 
-    const endDateDate = excelSerialToDate(endDateSerialNumber);
-    const endYear = endDateSerialNumber > 0 ? endDateDate.getUTCFullYear() : 1900;
+    const endDateDate = excelSerialToDate(endDateSerialNumber, dateSystem);
+    const endIsDate1900SerialZero = dateSystem === DateSystem.Date1900 && endDateSerialNumber === 0;
+    const endYear = endIsDate1900SerialZero ? 1900 : endDateDate.getUTCFullYear();
+    const endMonth = endIsDate1900SerialZero ? 1 : endDateDate.getUTCMonth() + 1;
+    const endDay = endIsDate1900SerialZero ? 0 : endDateDate.getUTCDate();
 
     const totalDays = Math.abs(endDateSerialNumber - startDateSerialNumber);
+
+    // A period from a date to the same date in a later year is a whole number of years.
+    // Excel uses the actual length of those years instead of averaging both boundary years.
+    if (endDateSerialNumber >= startDateSerialNumber && endYear > startYear && startMonth === endMonth && startDay === endDay) {
+        return {
+            days: totalDays,
+            yearDays: totalDays / (endYear - startYear),
+        };
+    }
+
     const totalYear = Math.abs(endYear - startYear) + 1;
 
     let startYearFirstDaySerialNumber;
@@ -491,20 +433,20 @@ function getDaysByActual(startDateSerialNumber: number, endDateSerialNumber: num
         const startYearFirstDay = new Date(Date.UTC(endYear, 0, 1));
         const endYearLastDay = new Date(Date.UTC(startYear, 11, 31));
 
-        startYearFirstDaySerialNumber = excelDateSerial(startYearFirstDay);
-        endYearLastDaySerialNumber = excelDateSerial(endYearLastDay);
+        startYearFirstDaySerialNumber = excelDateSerial(startYearFirstDay, dateSystem);
+        endYearLastDaySerialNumber = excelDateSerial(endYearLastDay, dateSystem);
 
-        if (endYear === 1900) { // Special handle. excel 1900 days = 365, 1900/12/31 SerialNumber = 366. so start add 1
+        if (dateSystem === DateSystem.Date1900 && endYear === 1900) { // Special handle. excel 1900 days = 365, 1900/12/31 SerialNumber = 366. so start add 1
             startYearFirstDaySerialNumber += 1;
         }
     } else {
         const startYearFirstDay = new Date(Date.UTC(startYear, 0, 1));
         const endYearLastDay = new Date(Date.UTC(endYear, 11, 31));
 
-        startYearFirstDaySerialNumber = excelDateSerial(startYearFirstDay);
-        endYearLastDaySerialNumber = excelDateSerial(endYearLastDay);
+        startYearFirstDaySerialNumber = excelDateSerial(startYearFirstDay, dateSystem);
+        endYearLastDaySerialNumber = excelDateSerial(endYearLastDay, dateSystem);
 
-        if (startYear === 1900) { // Special handle. excel 1900 days = 365, 1900/12/31 SerialNumber = 366. so start add 1
+        if (dateSystem === DateSystem.Date1900 && startYear === 1900) { // Special handle. excel 1900 days = 365, 1900/12/31 SerialNumber = 366. so start add 1
             startYearFirstDaySerialNumber += 1;
         }
     }
@@ -515,16 +457,18 @@ function getDaysByActual(startDateSerialNumber: number, endDateSerialNumber: num
     };
 }
 
-function getDaysByEuropean(startDateSerialNumber: number, endDateSerialNumber: number): ITwoDateDaysType {
-    const startDateDate = excelSerialToDate(startDateSerialNumber);
-    const startYear = startDateSerialNumber > 0 ? startDateDate.getUTCFullYear() : 1900;
-    const startMonth = startDateSerialNumber > 0 ? startDateDate.getUTCMonth() + 1 : 1;
-    let startDay = startDateSerialNumber > 0 ? startDateDate.getUTCDate() : 0;
+function getDaysByEuropean(startDateSerialNumber: number, endDateSerialNumber: number, dateSystem: DateSystem): ITwoDateDaysType {
+    const startDateDate = excelSerialToDate(startDateSerialNumber, dateSystem);
+    const startIsDate1900SerialZero = dateSystem === DateSystem.Date1900 && startDateSerialNumber === 0;
+    const startYear = startIsDate1900SerialZero ? 1900 : startDateDate.getUTCFullYear();
+    const startMonth = startIsDate1900SerialZero ? 1 : startDateDate.getUTCMonth() + 1;
+    let startDay = startIsDate1900SerialZero ? 0 : startDateDate.getUTCDate();
 
-    const endDateDate = excelSerialToDate(endDateSerialNumber);
-    const endYear = endDateSerialNumber > 0 ? endDateDate.getUTCFullYear() : 1900;
-    const endMonth = endDateSerialNumber > 0 ? endDateDate.getUTCMonth() + 1 : 1;
-    let endDay = endDateSerialNumber > 0 ? endDateDate.getUTCDate() : 0;
+    const endDateDate = excelSerialToDate(endDateSerialNumber, dateSystem);
+    const endIsDate1900SerialZero = dateSystem === DateSystem.Date1900 && endDateSerialNumber === 0;
+    const endYear = endIsDate1900SerialZero ? 1900 : endDateDate.getUTCFullYear();
+    const endMonth = endIsDate1900SerialZero ? 1 : endDateDate.getUTCMonth() + 1;
+    let endDay = endIsDate1900SerialZero ? 0 : endDateDate.getUTCDate();
 
     // Starting dates and ending dates that occur on the 31st day of a month become equal to the 30th day of the same month.
     if (startDay === 31) {
@@ -567,14 +511,14 @@ export function getDaysInYear(year: number): number {
     return isLeapYear1900(year) ? 366 : 365;
 }
 
-export function getNormalYearDaysByBasis(dateSerialNumber: number, basis: number): number {
+export function getNormalYearDaysByBasis(dateSerialNumber: number, basis: number, dateSystem = DateSystem.Date1900): number {
     switch (basis) {
         case 0:
         case 2:
         case 4:
             return 360;
         case 1:
-            return getDaysInYear(excelSerialToDate(dateSerialNumber).getUTCFullYear());
+            return getDaysInYear(excelSerialToDate(dateSerialNumber, dateSystem).getUTCFullYear());
         case 3:
             return 365;
         default:

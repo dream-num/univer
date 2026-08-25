@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DateSystem } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { stripErrorMargin } from '../../../../engine/utils/math-kit';
 import { FUNCTION_NAMES_DATE } from '../../function-names';
@@ -35,6 +36,17 @@ describe('Test now function', () => {
         it('Normal', () => {
             const result = testFunction.calculate();
             expect(stripErrorMargin(result.getValue())).toBe(43831.085462963);
+        });
+
+        it('uses the configured date system', () => {
+            testFunction.setDateSystem(DateSystem.Date1900);
+            const date1900 = testFunction.calculate().getValue();
+
+            testFunction.setDateSystem(DateSystem.Date1904);
+            const date1904 = testFunction.calculate().getValue();
+
+            expect(date1900 - date1904).toBeCloseTo(1462, 10);
+            testFunction.setDateSystem(DateSystem.Date1900);
         });
     });
 });

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+import { DateSystem, excelDateSerial } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
-import { excelDateSerial } from '../../../../basics/date';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { NumberValueObject } from '../../../../engine/value-object/primitive-object';
 import { FUNCTION_NAMES_DATE } from '../../function-names';
@@ -30,6 +30,19 @@ describe('Test edate function', () => {
             const months = NumberValueObject.create(1);
             const result = testFunction.calculate(startDate, months);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([[43862]]);
+        });
+
+        it('uses the configured date system for serials around the epoch', () => {
+            const startDate = NumberValueObject.create(31);
+            const months = NumberValueObject.create(1);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
+            expect(transformToValue(testFunction.calculate(startDate, months).getArrayValue())).toStrictEqual([[59]]);
+
+            testFunction.setDateSystem(DateSystem.Date1904);
+            expect(transformToValue(testFunction.calculate(startDate, months).getArrayValue())).toStrictEqual([[60]]);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
         });
 
         it('Clamps month-end overflow to the target month last day', () => {
@@ -107,6 +120,27 @@ describe('Test edate function', () => {
             });
             const result = testFunction.calculate(startDate, months);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([[43862, '#VALUE!', 43862, '#VALUE!', '#VALUE!', 43831], [43831, 46874, 43891, '#VALUE!', 43739, 101660]]);
+        });
+
+        it('checks the serial-zero boundary in both date systems', () => {
+            const startDate = NumberValueObject.create(0);
+            const months = NumberValueObject.create(1);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
+            expect(transformToValue(testFunction.calculate(startDate, months).getArrayValue())).toStrictEqual([[31]]);
+
+            testFunction.setDateSystem(DateSystem.Date1904);
+            expect(transformToValue(testFunction.calculate(startDate, months).getArrayValue())).toStrictEqual([[31]]);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
+        });
+
+        it('preserves Excel serial 60 when no month is added', () => {
+            testFunction.setDateSystem(DateSystem.Date1900);
+
+            const result = testFunction.calculate(NumberValueObject.create(60), NumberValueObject.create(0));
+
+            expect(transformToValue(result.getArrayValue())).toStrictEqual([[59]]);
         });
     });
 });

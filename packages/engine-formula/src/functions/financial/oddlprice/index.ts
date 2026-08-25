@@ -15,7 +15,8 @@
  */
 
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { excelDateSerial, excelSerialToDate, getDateSerialNumberByObject, getTwoDateDaysByBasis } from '../../../basics/date';
+import { DateSystem, excelDateSerial, excelSerialToDate } from '@univerjs/core';
+import { getDateSerialNumberByObject, getTwoDateDaysByBasis } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
 import { calculateCoupdays, validCouppcdIsGte0ByTwoDate } from '../../../basics/financial';
 import { checkVariantsErrorIsNullorArrayOrBoolean } from '../../../engine/utils/check-variant-error';
@@ -52,19 +53,19 @@ export class Oddlprice extends BaseFunction {
 
         const [settlementObject, maturityObject, lastInterestObject, rateObject, yldObject, redemptionObject, frequencyObject, basisObject] = variants as BaseValueObject[];
 
-        const settlementSerialNumber = getDateSerialNumberByObject(settlementObject);
+        const settlementSerialNumber = getDateSerialNumberByObject(settlementObject, this.getDateSystem());
 
         if (typeof settlementSerialNumber !== 'number') {
             return settlementSerialNumber;
         }
 
-        const maturitySerialNumber = getDateSerialNumberByObject(maturityObject);
+        const maturitySerialNumber = getDateSerialNumberByObject(maturityObject, this.getDateSystem());
 
         if (typeof maturitySerialNumber !== 'number') {
             return maturitySerialNumber;
         }
 
-        const lastInterestSerialNumber = getDateSerialNumberByObject(lastInterestObject);
+        const lastInterestSerialNumber = getDateSerialNumberByObject(lastInterestObject, this.getDateSystem());
 
         if (typeof lastInterestSerialNumber !== 'number') {
             return lastInterestSerialNumber;
@@ -99,9 +100,13 @@ export class Oddlprice extends BaseFunction {
     }
 
     private _validDate(maturitySerialNumber: number, settlementSerialNumber: number, lastInterestSerialNumber: number, frequencyValue: number): boolean {
+        // These financial functions reject the fictitious 1900-02-29 settlement date even though
+        // the serial is preserved by the general date functions for Excel compatibility.
         return Math.floor(maturitySerialNumber) > Math.floor(settlementSerialNumber)
             && Math.floor(settlementSerialNumber) > Math.floor(lastInterestSerialNumber)
-            && validCouppcdIsGte0ByTwoDate(lastInterestSerialNumber, maturitySerialNumber, frequencyValue);
+            && !(this.getDateSystem() === DateSystem.Date1900 && Math.floor(settlementSerialNumber) === 60)
+            && !(this.getDateSystem() === DateSystem.Date1900 && lastInterestSerialNumber <= 0)
+            && validCouppcdIsGte0ByTwoDate(lastInterestSerialNumber, maturitySerialNumber, frequencyValue, this.getDateSystem());
     }
 
     private _getResult(
@@ -126,8 +131,8 @@ export class Oddlprice extends BaseFunction {
     }
 
     private _getCoupDate(maturitySerialNumber: number, lastInterestSerialNumber: number, frequency: number): number {
-        const maturityDate = excelSerialToDate(maturitySerialNumber);
-        const coupDate = excelSerialToDate(lastInterestSerialNumber);
+        const maturityDate = excelSerialToDate(maturitySerialNumber, this.getDateSystem());
+        const coupDate = excelSerialToDate(lastInterestSerialNumber, this.getDateSystem());
 
         coupDate.setUTCFullYear(maturityDate.getUTCFullYear());
 
@@ -140,13 +145,13 @@ export class Oddlprice extends BaseFunction {
             coupDate.setUTCMonth(coupDate.getUTCMonth() + 12 / frequency);
         }
 
-        return excelDateSerial(coupDate);
+        return excelDateSerial(coupDate, this.getDateSystem());
     }
 
     private _getFrac(startDateSerialNumber: number, endDateSerialNumber: number, coupDateSerialNumber: number, frequency: number, basis: number): number {
-        const startDate = excelSerialToDate(startDateSerialNumber);
-        const endDate = excelSerialToDate(endDateSerialNumber);
-        const coupDate = excelSerialToDate(coupDateSerialNumber);
+        const startDate = excelSerialToDate(startDateSerialNumber, this.getDateSystem());
+        const endDate = excelSerialToDate(endDateSerialNumber, this.getDateSystem());
+        const coupDate = excelSerialToDate(coupDateSerialNumber, this.getDateSystem());
 
         coupDate.setUTCFullYear(startDate.getUTCFullYear());
 
@@ -159,25 +164,25 @@ export class Oddlprice extends BaseFunction {
             coupDate.setUTCMonth(coupDate.getUTCMonth() - 12 / frequency);
         }
 
-        let earlyCouponSerialNumber = excelDateSerial(coupDate);
+        let earlyCouponSerialNumber = excelDateSerial(coupDate, this.getDateSystem());
 
         coupDate.setUTCMonth(coupDate.getUTCMonth() + 12 / frequency);
 
-        let lateCouponSerialNumber = excelDateSerial(coupDate);
+        let lateCouponSerialNumber = excelDateSerial(coupDate, this.getDateSystem());
 
         if (lateCouponSerialNumber >= endDateSerialNumber) {
-            const { days } = getTwoDateDaysByBasis(startDateSerialNumber, endDateSerialNumber, basis);
-            const coupdays = calculateCoupdays(earlyCouponSerialNumber, lateCouponSerialNumber, frequency, basis);
+            const { days } = getTwoDateDaysByBasis(startDateSerialNumber, endDateSerialNumber, basis, this.getDateSystem());
+            const coupdays = calculateCoupdays(earlyCouponSerialNumber, lateCouponSerialNumber, frequency, basis, this.getDateSystem());
 
             return days / coupdays;
         }
 
-        const { days: daysF } = getTwoDateDaysByBasis(startDateSerialNumber, lateCouponSerialNumber, basis);
-        const coupdaysF = calculateCoupdays(earlyCouponSerialNumber, lateCouponSerialNumber, frequency, basis);
+        const { days: daysF } = getTwoDateDaysByBasis(startDateSerialNumber, lateCouponSerialNumber, basis, this.getDateSystem());
+        const coupdaysF = calculateCoupdays(earlyCouponSerialNumber, lateCouponSerialNumber, frequency, basis, this.getDateSystem());
         let result = daysF / coupdaysF;
 
-        const earlyCoupon = excelSerialToDate(lateCouponSerialNumber);
-        const lateCoupon = excelSerialToDate(lateCouponSerialNumber);
+        const earlyCoupon = excelSerialToDate(lateCouponSerialNumber, this.getDateSystem());
+        const lateCoupon = excelSerialToDate(lateCouponSerialNumber, this.getDateSystem());
         lateCoupon.setUTCMonth(lateCoupon.getUTCMonth() + 12 / frequency);
 
         // eslint-disable-next-line
@@ -187,11 +192,11 @@ export class Oddlprice extends BaseFunction {
             result += 1;
         }
 
-        earlyCouponSerialNumber = excelDateSerial(earlyCoupon);
-        lateCouponSerialNumber = excelDateSerial(lateCoupon);
+        earlyCouponSerialNumber = excelDateSerial(earlyCoupon, this.getDateSystem());
+        lateCouponSerialNumber = excelDateSerial(lateCoupon, this.getDateSystem());
 
-        const { days: daysL } = getTwoDateDaysByBasis(earlyCouponSerialNumber, endDateSerialNumber, basis);
-        const coupdaysL = calculateCoupdays(earlyCouponSerialNumber, lateCouponSerialNumber, frequency, basis);
+        const { days: daysL } = getTwoDateDaysByBasis(earlyCouponSerialNumber, endDateSerialNumber, basis, this.getDateSystem());
+        const coupdaysL = calculateCoupdays(earlyCouponSerialNumber, lateCouponSerialNumber, frequency, basis, this.getDateSystem());
 
         result += daysL / coupdaysL;
 

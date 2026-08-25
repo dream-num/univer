@@ -429,9 +429,13 @@ export function getPairedRangeAndCriteriaResult(
 /**
  * Two ArrayValueObject of the same type can be compared
  */
-export function filterSameValueObjectResult(array: ArrayValueObject, range: ArrayValueObject, criteria: BaseValueObject): ArrayValueObject {
+export function filterSameValueObjectResult(
+    array: ArrayValueObject,
+    range: ArrayValueObject,
+    criteria: BaseValueObject
+): ArrayValueObject {
     const [operator, criteriaObject] = criteria.isString()
-        ? findCompareToken(`${criteria.getValue()}`)
+        ? findCompareToken(`${criteria.getValue()}`, criteria.getDateSystem())
         : [compareToken.EQUALS, criteria];
 
     return array.mapValue((valueObject, r, c) => {

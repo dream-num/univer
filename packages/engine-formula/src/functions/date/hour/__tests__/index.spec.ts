@@ -32,6 +32,10 @@ describe('Test hour function', () => {
             expect(result.getValue()).toStrictEqual(5);
         });
 
+        it('keeps the time portion when the date portion is serial 60', () => {
+            expect(testFunction.calculate(NumberValueObject.create(60.5)).getValue()).toBe(12);
+        });
+
         it('Serial number is error', () => {
             const serialNumber = ErrorValueObject.create(ErrorType.NAME);
             const result = testFunction.calculate(serialNumber);

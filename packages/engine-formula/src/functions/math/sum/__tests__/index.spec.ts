@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DateSystem } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { stripErrorMargin } from '../../../../engine/utils/math-kit';
@@ -44,6 +45,14 @@ describe('Test sum function', () => {
             const var2 = StringValueObject.create('2');
             const result = testFunction.calculate(var1, var2);
             expect(result.getValue()).toBe(3);
+        });
+
+        it('uses the date system bound to a date string', () => {
+            const date1900 = StringValueObject.create('1904-1-1').withDateSystem(DateSystem.Date1900);
+            const date1904 = StringValueObject.create('1904-1-1').withDateSystem(DateSystem.Date1904);
+
+            expect(testFunction.calculate(date1900).getValue()).toBe(1462);
+            expect(testFunction.calculate(date1904).getValue()).toBe(0);
         });
         it('Var1 is number, var2 is boolean', () => {
             const var1 = NumberValueObject.create(2);

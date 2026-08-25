@@ -17,6 +17,7 @@
 import type { IResources } from '../services/resource-manager/type';
 import type { IObjectArrayPrimitiveType, IObjectMatrixPrimitiveType, Nullable } from '../shared';
 import type { BooleanNumber } from '../types/enum';
+import type { DateSystem } from '../types/enum/date-system';
 import type { LocaleType } from '../types/enum/locale-type';
 import type { IDocumentData } from '../types/interfaces';
 import type { ICellCustomRender } from '../types/interfaces/i-cell-custom-render';
@@ -52,6 +53,9 @@ export interface IWorkbookData {
      * Locale of the document.
      */
     locale: LocaleType;
+
+    /** Date serial system used by this workbook. Missing values mean Excel 1900. */
+    dateSystem?: DateSystem;
 
     /**
      * Style references.

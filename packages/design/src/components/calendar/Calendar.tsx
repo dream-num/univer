@@ -56,14 +56,15 @@ function DayButton(props: ButtonHTMLAttributes<HTMLButtonElement>) {
 interface ICalendarProps {
     className?: string;
     showTime?: boolean;
+    showSelection?: boolean;
     max?: Date;
     min?: Date;
     value?: Date;
-    onValueChange?: (date: Date) => void;
+    onValueChange?: (date: Date, changeType: 'date' | 'time') => void;
 }
 
 export function Calendar(props: ICalendarProps) {
-    const { className, max, min, showTime = false, value, onValueChange } = props;
+    const { className, max, min, showSelection = true, showTime = false, value, onValueChange } = props;
 
     const { direction = 'ltr', locale } = useContext(ConfigContext);
 
@@ -151,7 +152,7 @@ export function Calendar(props: ICalendarProps) {
     }, [daysInMonth, firstDay]);
 
     function isSelected(day: number) {
-        return day && currentYear === value?.getFullYear() && currentMonth === value?.getMonth() && day === value?.getDate();
+        return showSelection && day && currentYear === value?.getFullYear() && currentMonth === value?.getMonth() && day === value?.getDate();
     }
 
     function isToday(day: number) {
@@ -163,7 +164,8 @@ export function Calendar(props: ICalendarProps) {
         const hours = value?.getHours() ?? today.getHours();
         const minutes = value?.getMinutes() ?? today.getMinutes();
         const seconds = value?.getSeconds() ?? today.getSeconds();
-        const d = new Date(currentYear, currentMonth, day, hours, minutes, seconds);
+        const milliseconds = value?.getMilliseconds() ?? today.getMilliseconds();
+        const d = new Date(currentYear, currentMonth, day, hours, minutes, seconds, milliseconds);
         if (min && d < min) return true;
         if (max && d > max) return true;
         return false;
@@ -174,20 +176,22 @@ export function Calendar(props: ICalendarProps) {
         const hours = value?.getHours() ?? today.getHours();
         const minutes = value?.getMinutes() ?? today.getMinutes();
         const seconds = value?.getSeconds() ?? today.getSeconds();
+        const milliseconds = value?.getMilliseconds() ?? today.getMilliseconds();
 
-        const selectedDate = new Date(currentYear, currentMonth, day, hours, minutes, seconds);
+        const selectedDate = new Date(currentYear, currentMonth, day, hours, minutes, seconds, milliseconds);
 
-        onValueChange?.(selectedDate);
+        onValueChange?.(selectedDate, 'date');
     }
 
     function handleChangeTime(time: Date) {
         const hours = time.getHours();
         const minutes = time.getMinutes();
         const seconds = time.getSeconds();
+        const milliseconds = time.getMilliseconds();
 
-        const updatedDate = new Date(currentYear, currentMonth, value?.getDate() ?? today.getDate(), hours, minutes, seconds);
+        const updatedDate = new Date(currentYear, currentMonth, value?.getDate() ?? today.getDate(), hours, minutes, seconds, milliseconds);
 
-        onValueChange?.(updatedDate);
+        onValueChange?.(updatedDate, 'time');
     }
 
     return (

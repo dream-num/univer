@@ -162,12 +162,11 @@ function createController(initialDataStream = 'new value\r\n', isPercentFormat =
         })),
         getCurrentEditorId: vi.fn(() => DOCS_NORMAL_EDITOR_UNIT_ID_KEY),
         isVisible: vi.fn(() => ({ visible: true, eventType: DeviceInputEventType.Keyboard, unitId: 'unit-1' })),
-        getEditorDirty: vi.fn(() => false),
+        getEditorDirty: vi.fn(() => true),
         isForceKeepVisible: vi.fn(() => false),
         disableForceKeepVisible: vi.fn(),
         refreshEditCellPosition: vi.fn(),
         changeEditorDirty: vi.fn(),
-        getEditorDirty: vi.fn(() => true),
     };
     controller._sheetInterceptorService = {
         onWriteCell: vi.fn((_workbook, _worksheet, _row, _column, cellData) => cellData),
@@ -482,6 +481,7 @@ describe('EditingRenderController business methods', () => {
 
     it('overtypes the original percent value on initial digit input', () => {
         const { controller } = createController('25%\r\n', true);
+        controller._editorBridgeService.getEditorDirty.mockReturnValue(false);
         const beforeCommandListeners: Array<(command: { id: string; params: unknown }) => void> = [];
         controller._editorBridgeService.isVisible.mockReturnValue({
             visible: true,

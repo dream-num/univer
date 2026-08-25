@@ -234,7 +234,7 @@ describe('DocLinkPopup', () => {
         });
     });
 
-    it('hides the copy action when document copy permission is denied', () => {
+    it('disables the copy action when document copy permission is denied', () => {
         currentTestBed = createPopupTestBed();
         setDocumentPermissionValue(
             currentTestBed.injector.get(IPermissionService),
@@ -250,7 +250,9 @@ describe('DocLinkPopup', () => {
 
         renderPopup(root, container, currentTestBed);
 
-        expect(container.querySelectorAll('.univer-ml-2')).toHaveLength(2);
+        const copy = container.querySelector<HTMLButtonElement>('button[aria-label="Copy"]');
+        expect(copy).toBeInstanceOf(HTMLButtonElement);
+        expect(copy?.disabled).toBe(true);
     });
 
     it('removes the displayed hyperlink while keeping the document text', async () => {

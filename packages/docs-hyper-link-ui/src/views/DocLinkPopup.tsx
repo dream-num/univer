@@ -91,25 +91,28 @@ export const DocLinkPopup = () => {
                 </Tooltip>
             </div>
             <div className="univer-flex univer-h-6 univer-flex-[0_0_auto] univer-items-center univer-justify-center">
-                {canCopy && (
-                    <div
-                        className={`
-                          univer-ml-2 univer-flex univer-size-6 univer-cursor-pointer univer-items-center
-                          univer-justify-center univer-rounded univer-text-base
-                        `}
-                        onClick={() => {
-                            navigator.clipboard.writeText(url);
-                            messageService.show({
-                                content: localeService.t<LocaleKey>('docs-hyper-link-ui.info.coped'),
-                                type: MessageType.Info,
-                            });
-                        }}
-                    >
-                        <Tooltip placement="bottom" title={localeService.t<LocaleKey>('docs-hyper-link-ui.info.copy')}>
-                            <CopyIcon />
-                        </Tooltip>
-                    </div>
-                )}
+                <button
+                    type="button"
+                    aria-label={localeService.t<LocaleKey>('docs-hyper-link-ui.info.copy')}
+                    className="
+                      univer-ml-2 univer-flex univer-size-6 univer-cursor-pointer univer-items-center
+                      univer-justify-center univer-rounded univer-border-0 univer-bg-transparent univer-p-0
+                      univer-text-base
+                      disabled:univer-cursor-not-allowed disabled:univer-opacity-40
+                    "
+                    disabled={!canCopy}
+                    onClick={() => {
+                        navigator.clipboard.writeText(url);
+                        messageService.show({
+                            content: localeService.t<LocaleKey>('docs-hyper-link-ui.info.coped'),
+                            type: MessageType.Info,
+                        });
+                    }}
+                >
+                    <Tooltip placement="bottom" title={localeService.t<LocaleKey>('docs-hyper-link-ui.info.copy')}>
+                        <CopyIcon />
+                    </Tooltip>
+                </button>
                 {canEdit && (
                     <>
                         <div

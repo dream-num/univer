@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DateSystem } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
@@ -35,6 +36,15 @@ describe('Test tbillprice function', () => {
             expect(getObjectValue(result, true)).toBe(98.4258888889);
         });
 
+        it('uses the configured date system for first-year serial dates', () => {
+            const args = [NumberValueObject.create(0), NumberValueObject.create(366), NumberValueObject.create(0.0914)] as const;
+            testFunction.setDateSystem(DateSystem.Date1900);
+            expect(getObjectValue(testFunction.calculate(...args), true)).toBeCloseTo(90.7076666667, 10);
+            testFunction.setDateSystem(DateSystem.Date1904);
+            expect(getObjectValue(testFunction.calculate(...args), true)).toBeCloseTo(90.7076666667, 10);
+            testFunction.setDateSystem(DateSystem.Date1900);
+        });
+
         it('Settlement >= maturity', () => {
             const settlement = StringValueObject.create('2018-3-31');
             const maturity = StringValueObject.create('2008-6-1');
@@ -49,6 +59,13 @@ describe('Test tbillprice function', () => {
             const discount = NumberValueObject.create(0.0914);
             const result = testFunction.calculate(settlement, maturity, discount);
             expect(getObjectValue(result)).toBe(ErrorType.NUM);
+        });
+
+        it('handles serial 60 at the 1900 leap-day boundary', () => {
+            const args = [NumberValueObject.create(60), NumberValueObject.create(366), NumberValueObject.create(0.0914)] as const;
+
+            testFunction.setDateSystem(DateSystem.Date1900);
+            expect(getObjectValue(testFunction.calculate(...args), true)).toBeCloseTo(92.231, 12);
         });
 
         it('Discount <= 0 || discount to result < 0 or NaN', () => {

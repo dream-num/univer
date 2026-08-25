@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { DateSystem } from '@univerjs/core';
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../engine/value-object/base-value-object';
 import { isRealNum } from '@univerjs/core';
@@ -212,7 +213,12 @@ export function checkCriteria(criteria: BaseValueObject) {
  * Criteria match logic:
  * Boolean AND in row direction, then Boolean OR in column direction
  */
-export function isCriteriaMatch(criteria: DatabaseValueType[][], database: DatabaseValueType[][], databaseRowIndex: number) {
+export function isCriteriaMatch(
+    criteria: DatabaseValueType[][],
+    database: DatabaseValueType[][],
+    databaseRowIndex: number,
+    dateSystem: DateSystem
+) {
     const rowCount = criteria.length;
     const columnCount = criteria[0].length;
 
@@ -255,8 +261,8 @@ export function isCriteriaMatch(criteria: DatabaseValueType[][], database: Datab
                     break;
                 }
 
-                const [compareToken, criteriaObject] = findCompareToken(`${criteriaValue}`);
-                const compareObject = ValueObjectFactory.create(`${databaseValue}`).compare(criteriaObject, compareToken);
+                const [compareToken, criteriaObject] = findCompareToken(`${criteriaValue}`, dateSystem);
+                const compareObject = ValueObjectFactory.create(`${databaseValue}`, false, dateSystem).compare(criteriaObject, compareToken);
                 const compareValue = compareObject.getValue();
 
                 if (!compareValue) {

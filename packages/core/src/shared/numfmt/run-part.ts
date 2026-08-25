@@ -25,11 +25,12 @@ import type {
     ParsedFormatSection,
     ResolvedFormatOptions,
 } from './types';
+import { DateSystem } from '../../types/enum/date-system';
 import { clamp } from './clamp';
 import {
     EPOCH_1317,
+    EPOCH_1904,
     MAX_L_DATE,
-    MAX_S_DATE,
     MIN_L_DATE,
     MIN_S_DATE,
     u_CSEC,
@@ -42,17 +43,19 @@ import { general } from './general';
 import { defaultLocale } from './locale';
 import { getExponent, getSignificand } from './number-props';
 import { pad } from './pad';
+import { getDateSystemMaxSerial } from './serial-date';
 import { toYMD } from './to-ymd';
 
 const DAYSIZE = 86400;
 
 type RuntimeFormatSection = ParsedFormatSection & Partial<ErrorFormatSection>;
 
-function dateOverflows(inputValue: number, roundedValue: number, bigRange: boolean): boolean {
+function dateOverflows(inputValue: number, roundedValue: number, bigRange: boolean, dateSystem: DateSystem): boolean {
     if (bigRange) {
         return inputValue < MIN_L_DATE || roundedValue >= MAX_L_DATE;
     }
-    return inputValue < MIN_S_DATE || roundedValue >= MAX_S_DATE;
+    const maxDate = getDateSystemMaxSerial(dateSystem) + 1;
+    return inputValue < MIN_S_DATE || roundedValue >= maxDate;
 }
 
 function legacyRound(number: number, places = 0): number {
@@ -263,8 +266,12 @@ export function runPart(
             }
         }
         // serial date/time to gregorian calendar
+        // Explicit non-Gregorian calendar tokens keep their own epoch; ordinary date tokens follow the workbook's system.
+        const dateSystem = section.date_system === EPOCH_1317
+            ? EPOCH_1317
+            : options.dateSystem === DateSystem.Date1904 ? EPOCH_1904 : section.date_system;
         if (date || section.date_system) {
-            const dateOutput = toYMD(numericValue, section.date_system, options.leap1900);
+            const dateOutput = toYMD(numericValue, dateSystem, options.leap1900);
             year = dateOutput[0];
             month = dateOutput[1];
             day = dateOutput[2];
@@ -275,10 +282,10 @@ export function runPart(
             minute = Math.floor(normalizedTime / 60) % 60;
             hour = Math.floor((normalizedTime / 60) / 60) % 60;
         }
-        weekday = (6 + date) % 7;
+        weekday = ((dateSystem === EPOCH_1904 ? 5 : 6) + date) % 7;
         if (
             section.date_eval &&
-            dateOverflows(numericValue, date + (time / DAYSIZE), options.dateSpanLarge)
+            dateOverflows(numericValue, date + (time / DAYSIZE), options.dateSpanLarge, options.dateSystem)
         ) {
             // if value is out of bounds and formatting is date Excel emits a
             // stream of "######" that fills the cell width.

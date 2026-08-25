@@ -15,8 +15,8 @@
  */
 
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { getNumfmtParseValueFilter } from '@univerjs/core';
-import { excelDateTimeSerial, isDate } from '../../../basics/date';
+import { excelDateTimeSerial, getNumfmtParseValueFilter } from '@univerjs/core';
+import { isDate } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
 import { getFractionalPart } from '../../../engine/utils/math-kit';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
@@ -47,13 +47,15 @@ export class Timevalue extends BaseFunction {
 
         if (timeTextObject.isString()) {
             const value = `${timeTextObject.getValue()}`;
-            const parsedTime = getNumfmtParseValueFilter(value);
+            const parsedTime = getNumfmtParseValueFilter(value, {
+                dateSystem: this.getDateSystem(),
+            });
             if (parsedTime) {
                 let { v, z } = parsedTime;
 
                 if (z && isDate(z)) {
                     if ((v as any) instanceof Date) {
-                        v = excelDateTimeSerial((v as any));
+                        v = excelDateTimeSerial((v as any), this.getDateSystem());
                     }
 
                     return NumberValueObject.create(getFractionalPart(+v));

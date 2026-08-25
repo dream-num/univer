@@ -17,6 +17,8 @@
 // Derived from numfmt 3.2.6 (MIT), commit c2cfdfa01bb1f24df51e985825671eb480daed4c.
 // See packages/core/src/shared/numfmt/LICENSE.
 
+import type { DateSystem } from '../../types/enum/date-system';
+
 export type ConditionOperator = '<' | '<=' | '=' | '>=' | '>' | '<>';
 export type FormatCondition = [ConditionOperator, number];
 
@@ -70,6 +72,7 @@ export interface FormatOptions {
     bigintErrorNumber?: boolean;
     dateSpanLarge?: boolean;
     leap1900?: boolean;
+    dateSystem?: DateSystem;
     nbsp?: boolean;
     throws?: boolean;
     invalid?: string;
@@ -88,6 +91,7 @@ export interface ResolvedFormatOptions {
     bigintErrorNumber: boolean;
     dateSpanLarge: boolean;
     leap1900: boolean;
+    dateSystem: DateSystem;
     nbsp: boolean;
     throws: boolean;
     invalid: string;
@@ -190,6 +194,7 @@ export interface FormatDateInfo {
     hours: boolean;
     minutes: boolean;
     seconds: boolean;
+    isDuration: boolean;
     clockType: 12 | 24;
 }
 

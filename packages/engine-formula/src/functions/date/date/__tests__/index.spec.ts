@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DateSystem } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
@@ -48,6 +49,28 @@ describe('Test date function', () => {
             const day = NumberValueObject.create(0);
             const result = testFunction.calculate(year, month, day);
             expect(getObjectValue(result)).toBe(0);
+        });
+
+        it('preserves Excel 1900 leap-year compatibility dates', () => {
+            const month = NumberValueObject.create(2);
+
+            expect(getObjectValue(testFunction.calculate(NumberValueObject.create(1900), month, NumberValueObject.create(29)))).toBe(60);
+            expect(getObjectValue(testFunction.calculate(NumberValueObject.create(1900), month, NumberValueObject.create(30)))).toBe(61);
+        });
+
+        it('uses the configured Excel date system', () => {
+            const month = NumberValueObject.create(1);
+            const day = NumberValueObject.create(1);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
+            expect(getObjectValue(testFunction.calculate(NumberValueObject.create(1904), month, day))).toBe(1462);
+            expect(getObjectValue(testFunction.calculate(NumberValueObject.create(2000), month, day))).toBe(36526);
+
+            testFunction.setDateSystem(DateSystem.Date1904);
+            expect(getObjectValue(testFunction.calculate(NumberValueObject.create(1904), month, day))).toBe(0);
+            expect(getObjectValue(testFunction.calculate(NumberValueObject.create(2000), month, day))).toBe(35064);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
         });
 
         it('Edge case, 1900.1.-1', () => {

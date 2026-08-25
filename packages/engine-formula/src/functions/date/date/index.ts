@@ -16,7 +16,8 @@
 
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { DEFAULT_DATE_FORMAT, excelDateSerial } from '../../../basics/date';
+import { excelDateSerial } from '@univerjs/core';
+import { DEFAULT_DATE_FORMAT } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
@@ -81,9 +82,11 @@ export class DateFunction extends BaseFunction {
                 yearValue += 1900;
             }
 
-            const date = new Date(Date.UTC(yearValue, monthValue - 1, dayValue));
-
-            const currentSerial = excelDateSerial(date);
+            // Build the serial from the first day of the normalized month. This keeps
+            // Excel's fictitious 1900-02-29 (serial 60) instead of letting native Date
+            // normalize it to 1900-03-01.
+            const firstDateOfMonth = new Date(Date.UTC(yearValue, monthValue - 1, 1));
+            const currentSerial = excelDateSerial(firstDateOfMonth, this.getDateSystem()) + dayValue - 1;
 
             if (currentSerial < 0) {
                 return ErrorValueObject.create(ErrorType.NUM);

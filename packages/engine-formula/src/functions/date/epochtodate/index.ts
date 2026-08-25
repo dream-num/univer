@@ -17,7 +17,7 @@
 import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { excelDateTimeSerial } from '../../../basics/date';
+import { excelDateTimeSerial } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
@@ -75,11 +75,11 @@ export class Epochtodate extends BaseFunction {
         const date = new Date(Date.UTC(1970, 0, 1, 0, 0, 0, 0) + timestampValue);
 
         if (!Number.isNaN(date.getTime())) {
-            const dateSerialNumber = excelDateTimeSerial(date);
+            const dateSerialNumber = excelDateTimeSerial(date, this.getDateSystem());
 
             return NumberValueObject.create(dateSerialNumber, 'yyyy-MM-dd AM/PM hh:mm:ss');
         } else {
-            const result = 25569 + timestampValue / 86400000;
+            const result = excelDateTimeSerial(new Date(0), this.getDateSystem()) + timestampValue / 86400000;
 
             return NumberValueObject.create(result);
         }

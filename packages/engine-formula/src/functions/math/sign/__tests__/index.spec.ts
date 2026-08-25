@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DateSystem } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
@@ -43,6 +44,13 @@ describe('Test sign function', () => {
             const number = StringValueObject.create('1.5');
             const result = testFunction.calculate(number);
             expect(getObjectValue(result)).toStrictEqual(1);
+        });
+
+        it('uses the date system bound to a string value', () => {
+            const number = StringValueObject.create('1904-1-1').withDateSystem(DateSystem.Date1904);
+            const result = testFunction.calculate(number);
+
+            expect(getObjectValue(result)).toBe(0);
         });
 
         it('Value is normal string', () => {

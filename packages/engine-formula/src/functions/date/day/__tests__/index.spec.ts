@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DateSystem } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
@@ -30,6 +31,18 @@ describe('Test day function', () => {
             const serialNumber = NumberValueObject.create(43832);
             const result = testFunction.calculate(serialNumber);
             expect(result.getValue()).toStrictEqual(2);
+        });
+
+        it('uses the configured date system at the epoch boundary', () => {
+            const serialNumber = NumberValueObject.create(0);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
+            expect(testFunction.calculate(serialNumber).getValue()).toBe(0);
+
+            testFunction.setDateSystem(DateSystem.Date1904);
+            expect(testFunction.calculate(serialNumber).getValue()).toBe(1);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
         });
         it('Serial number is error', () => {
             const serialNumber = ErrorValueObject.create(ErrorType.NAME);

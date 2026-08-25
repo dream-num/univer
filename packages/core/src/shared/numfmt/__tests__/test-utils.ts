@@ -78,6 +78,7 @@ const COMMON_DATE_INFO: FormatDateInfo = {
     hours: false,
     minutes: false,
     seconds: false,
+    isDuration: false,
     clockType: 24,
 };
 

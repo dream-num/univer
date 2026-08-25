@@ -15,12 +15,16 @@
  */
 
 export * as numfmt from './api';
+export type { ParseOptions } from './parse-value';
+export type { IExcelDateTimeParts } from './serial-date';
+export { EXCEL_1904_OFFSET, excelDateTimePartsToSerial, excelSerialToDateTimeParts, getDateSystemMaxSerial } from './serial-date';
 export type { INumfmtLocaleTag } from './utils';
 export {
     currencySymbols,
     DEFAULT_NUMBER_FORMAT,
     DEFAULT_TEXT_FORMAT,
     DEFAULT_TEXT_FORMAT_EXCEL,
+    getNumfmtLocaleTag,
     getNumfmtParseValueFilter,
     isDefaultFormat,
     isPatternEqualWithoutDecimal,

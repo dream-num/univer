@@ -124,8 +124,9 @@ export class TableManager extends Disposable {
         });
 
         if (options?.filters) {
-            const worksheet = this._univerInstanceService.getUnit<Workbook>(unitId)?.getSheetBySheetId(subUnitId);
-            table.getTableFilters().doFilter(worksheet!, range);
+            const workbook = this._univerInstanceService.getUnit<Workbook>(unitId);
+            const worksheet = workbook?.getSheetBySheetId(subUnitId);
+            table.getTableFilters().doFilter(worksheet!, range, workbook?.getDateSystem());
             this._tableFilterChanged$.next({
                 unitId,
                 subUnitId,
@@ -464,7 +465,7 @@ export class TableManager extends Disposable {
                 if (table.filters) {
                     const tableFilter = tableInstance.getTableFilters();
                     tableFilter.fromJSON(table.filters);
-                    tableFilter.doFilter(sheet, tableInstance.getTableFilterRange());
+                    tableFilter.doFilter(sheet, tableInstance.getTableFilterRange(), target.workbook.getDateSystem());
                 }
                 tableInstance.setSubunitId(subUnitId);
                 unitMap.set(table.id, tableInstance);

@@ -57,7 +57,7 @@ export class Dvarp extends BaseFunction {
                 continue;
             }
 
-            if (isCriteriaMatch(criteriaValues, databaseValues, r)) {
+            if (isCriteriaMatch(criteriaValues, databaseValues, r, criteria.getDateSystem())) {
                 values.push(value);
                 sum += value;
                 count++;

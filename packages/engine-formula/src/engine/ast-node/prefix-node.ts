@@ -16,9 +16,9 @@
 
 import type { Nullable } from '@univerjs/core';
 import type { BaseFunction } from '../../functions/base-function';
-
 import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
 import type { BaseValueObject } from '../value-object/base-value-object';
+import { DateSystem } from '@univerjs/core';
 import { ErrorType } from '../../basics/error-type';
 import { OPERATOR_TOKEN_COMPARE_SET, prefixToken } from '../../basics/token';
 import { FUNCTION_NAMES_LOOKUP } from '../../functions/lookup/function-names';
@@ -46,7 +46,7 @@ export class PrefixNode extends BaseAstNode {
         return NodeType.PREFIX;
     }
 
-    override execute() {
+    override execute(dateSystem: DateSystem = DateSystem.Date1900) {
         const children = this.getChildren();
         let value = children[0].getValue();
         let result: FunctionVariantType;
@@ -58,18 +58,18 @@ export class PrefixNode extends BaseAstNode {
 
         if (this._operatorString === prefixToken.MINUS) {
             if (value.isReferenceObject()) {
-                value = (value as BaseReferenceObject).toArrayValueObject();
+                value = (value as BaseReferenceObject).withDateSystem(dateSystem).toArrayValueObject();
             }
             result = this._functionExecutor!.calculate(
                 NumberValueObject.create(0),
-                value as BaseValueObject
+                (value as BaseValueObject).withDateSystem(dateSystem)
             ) as FunctionVariantType;
         } else if (this._operatorString === prefixToken.AT) {
             result = this._handlerAT(value);
         } else {
             result = ErrorValueObject.create(ErrorType.VALUE);
         }
-        this.setValue(result);
+        this.setValue(result.withDateSystem(dateSystem));
     }
 
     private _handlerAT(value: FunctionVariantType) {

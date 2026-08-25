@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { cellToRange, CellValueType } from '@univerjs/core';
+import { cellToRange, CellValueType, DateSystem } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../basics/error-type';
 import { compareToken } from '../../../basics/token';
@@ -25,7 +25,8 @@ import { RowReferenceObject } from '../../reference-object/row-reference-object'
 import { ArrayValueObject } from '../../value-object/array-value-object';
 import { ErrorValueObject } from '../../value-object/base-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../value-object/primitive-object';
-import { convertTonNumber, isSingleValueObject, objectValueToCellValue } from '../value-object';
+import { valueObjectCompare } from '../object-compare';
+import { convertTonNumber, filterSameValueObjectResult, isSingleValueObject, objectValueToCellValue } from '../value-object';
 
 describe('Test object cover', () => {
     it('Function convertTonNumber', () => {
@@ -36,6 +37,17 @@ describe('Test object cover', () => {
     it('Boolean values are not equal to text values', () => {
         expect(BooleanValueObject.create(false).compare(StringValueObject.create(''), compareToken.EQUALS).getValue()).toBe(false);
         expect(BooleanValueObject.create(false).compare(StringValueObject.create(''), compareToken.NOT_EQUAL).getValue()).toBe(true);
+    });
+
+    it('uses the supplied date system when matching date criteria against serial numbers', () => {
+        const range = ArrayValueObject.createByArray([[0]]);
+        const criteria = StringValueObject.create('1904-1-1').withDateSystem(DateSystem.Date1904);
+        const comparison = valueObjectCompare(range, criteria) as ArrayValueObject;
+
+        expect(comparison.get(0, 0)?.getValue()).toBe(true);
+        const result = filterSameValueObjectResult(comparison, range, criteria);
+
+        expect(result.get(0, 0)?.getValue()).toBe(true);
     });
 
     it('Function isSingleValueObject', () => {

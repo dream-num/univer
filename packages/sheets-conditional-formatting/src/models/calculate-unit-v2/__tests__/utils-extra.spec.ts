@@ -31,7 +31,6 @@ import {
     isFloatsEqual,
     isNullable,
     serialTimeToTimestamp,
-    toYMD_1900,
 } from '../utils';
 
 describe('conditional formatting calculate utilities', () => {
@@ -48,10 +47,7 @@ describe('conditional formatting calculate utilities', () => {
     });
 
     it('converts spreadsheet serial dates and filters ranges to sheet bounds', () => {
-        expect(toYMD_1900(0)).toEqual([1900, 1, 0]);
-        expect(toYMD_1900(60)).toEqual([1900, 2, 29]);
-        expect(toYMD_1900(59)).toEqual([1900, 2, 28]);
-        expect(Number.isFinite(serialTimeToTimestamp(44927.5))).toBe(true);
+        expect(serialTimeToTimestamp(44927.5)).toBe(new Date(2023, 0, 1, 12).getTime());
 
         expect(filterRange([
             { startRow: 0, startColumn: 0, endRow: 10, endColumn: 10 },

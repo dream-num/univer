@@ -15,6 +15,7 @@
  */
 
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { DateSystem } from '@univerjs/core';
 import { getDateSerialNumberByObject } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
 import { calculateCoupnum, calculateCouppcd } from '../../../basics/financial';
@@ -39,13 +40,13 @@ export class Coupnum extends BaseFunction {
 
         const [settlementObject, maturityObject, frequencyObject, basisObject] = variants as BaseValueObject[];
 
-        const settlementSerialNumber = getDateSerialNumberByObject(settlementObject);
+        const settlementSerialNumber = getDateSerialNumberByObject(settlementObject, this.getDateSystem());
 
         if (typeof settlementSerialNumber !== 'number') {
             return settlementSerialNumber;
         }
 
-        const maturitySerialNumber = getDateSerialNumberByObject(maturityObject);
+        const maturitySerialNumber = getDateSerialNumberByObject(maturityObject, this.getDateSystem());
 
         if (typeof maturitySerialNumber !== 'number') {
             return maturitySerialNumber;
@@ -67,14 +68,14 @@ export class Coupnum extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        const coupDateSerialNumber = calculateCouppcd(settlementSerialNumber, maturitySerialNumber, frequencyValue);
+        const coupDateSerialNumber = calculateCouppcd(settlementSerialNumber, maturitySerialNumber, frequencyValue, this.getDateSystem());
 
         // special handle for excel
-        if (coupDateSerialNumber < 0) {
+        if (this.getDateSystem() === DateSystem.Date1900 && coupDateSerialNumber < 0) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        const result = calculateCoupnum(settlementSerialNumber, maturitySerialNumber, frequencyValue);
+        const result = calculateCoupnum(settlementSerialNumber, maturitySerialNumber, frequencyValue, this.getDateSystem());
 
         return NumberValueObject.create(result);
     }

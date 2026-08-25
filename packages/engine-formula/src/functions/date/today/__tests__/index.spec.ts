@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DateSystem } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { FUNCTION_NAMES_DATE } from '../../function-names';
 import { Today } from '../index';
@@ -34,6 +35,16 @@ describe('Test today function', () => {
         it('Normal', () => {
             const result = testFunction.calculate();
             expect(result.getValue()).toBe(43831);
+        });
+
+        it('uses the configured date system', () => {
+            testFunction.setDateSystem(DateSystem.Date1900);
+            expect(testFunction.calculate().getValue()).toBe(43831);
+
+            testFunction.setDateSystem(DateSystem.Date1904);
+            expect(testFunction.calculate().getValue()).toBe(42369);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
         });
 
         it('uses the local calendar day instead of the UTC calendar day', () => {

@@ -16,6 +16,7 @@
 
 import { describe, expect, it, vi } from 'vitest';
 import { AstNodePromiseType } from '../../../basics/common';
+import { createFunctionTestBed } from '../../../functions/__tests__/create-function-test-bed';
 import { BaseAstNode } from '../../ast-node/base-ast-node';
 import { NumberValueObject } from '../../value-object/primitive-object';
 import { Interpreter } from '../interpreter';
@@ -38,11 +39,8 @@ class AsyncReferenceLikeNode extends BaseAstNode {
 
 describe('Interpreter async nodes', () => {
     it('detects and awaits an async root node regardless of node type', async () => {
-        const interpreter = new Interpreter({
-            currentColumn: 0,
-            currentRow: 0,
-            isStopExecution: () => false,
-        });
+        const testBed = createFunctionTestBed();
+        const interpreter = testBed.get(Interpreter);
         const node = new AsyncReferenceLikeNode();
 
         expect(interpreter.checkAsyncNode(node)).toBe(true);

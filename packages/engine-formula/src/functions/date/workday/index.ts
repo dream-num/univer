@@ -69,7 +69,7 @@ export class Workday extends BaseFunction {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        const startDateSerialNumber = getDateSerialNumberByObject(_startDate);
+        const startDateSerialNumber = getDateSerialNumberByObject(_startDate, this.getDateSystem());
 
         if (typeof startDateSerialNumber !== 'number') {
             return startDateSerialNumber;
@@ -85,7 +85,7 @@ export class Workday extends BaseFunction {
             return this._getResultByHolidays(startDateSerialNumber, workingDays, holidays);
         }
 
-        const result = getDateSerialNumberByWorkingDays(startDateSerialNumber, workingDays);
+        const result = getDateSerialNumberByWorkingDays(startDateSerialNumber, workingDays, 1, undefined, this.getDateSystem());
 
         if (typeof result !== 'number') {
             return result;
@@ -113,7 +113,7 @@ export class Workday extends BaseFunction {
                         continue;
                     }
 
-                    const holidaySerialNumber = getDateSerialNumberByObject(cell);
+                    const holidaySerialNumber = getDateSerialNumberByObject(cell, this.getDateSystem());
 
                     if (typeof holidaySerialNumber !== 'number') {
                         if (cell.isString()) {
@@ -130,7 +130,7 @@ export class Workday extends BaseFunction {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 
-            const holidaySerialNumber = getDateSerialNumberByObject(holidays);
+            const holidaySerialNumber = getDateSerialNumberByObject(holidays, this.getDateSystem());
 
             if (typeof holidaySerialNumber !== 'number') {
                 return holidaySerialNumber;
@@ -139,7 +139,7 @@ export class Workday extends BaseFunction {
             holidaysValueArray.push(holidaySerialNumber);
         }
 
-        const result = getDateSerialNumberByWorkingDays(startDateSerialNumber, workingDays, 1, holidaysValueArray);
+        const result = getDateSerialNumberByWorkingDays(startDateSerialNumber, workingDays, 1, holidaysValueArray, this.getDateSystem());
 
         if (typeof result !== 'number') {
             return result;

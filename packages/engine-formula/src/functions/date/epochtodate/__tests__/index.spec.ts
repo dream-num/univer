@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DateSystem } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
@@ -31,6 +32,18 @@ describe('Test epochtodate function', () => {
             const timestamp = NumberValueObject.create(1655906710);
             const result = testFunction.calculate(timestamp);
             expect(getObjectValue(result)).toBe(44734.58692129629);
+        });
+
+        it('uses the configured date system for Unix epoch', () => {
+            const timestamp = NumberValueObject.create(0);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
+            expect(getObjectValue(testFunction.calculate(timestamp))).toBe(25569);
+
+            testFunction.setDateSystem(DateSystem.Date1904);
+            expect(getObjectValue(testFunction.calculate(timestamp))).toBe(24107);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
         });
 
         it('Timestamp value test', () => {

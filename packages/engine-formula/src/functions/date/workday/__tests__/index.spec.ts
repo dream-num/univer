@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DateSystem } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
@@ -51,6 +52,19 @@ describe('Test workday function', () => {
             });
             const result3 = testFunction.calculate(startDate, days, holidays3);
             expect(result3.getValue()).toStrictEqual(39938);
+        });
+
+        it('uses the configured date system for serial zero', () => {
+            const startDate = NumberValueObject.create(0);
+            const days = NumberValueObject.create(1);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
+            expect(testFunction.calculate(startDate, days).getValue()).toBe(2);
+
+            testFunction.setDateSystem(DateSystem.Date1904);
+            expect(testFunction.calculate(startDate, days).getValue()).toBe(3);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
         });
 
         it('Value is not date string', () => {
@@ -123,6 +137,18 @@ describe('Test workday function', () => {
             const holidays3 = ErrorValueObject.create(ErrorType.NAME);
             const result3 = testFunction.calculate(startDate3, days3, holidays3);
             expect(result3.getValue()).toStrictEqual(ErrorType.NAME);
+        });
+        it('checks the serial-zero boundary in both date systems', () => {
+            const startDate = NumberValueObject.create(0);
+            const days = NumberValueObject.create(1);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
+            expect(testFunction.calculate(startDate, days).getValue()).toBe(2);
+
+            testFunction.setDateSystem(DateSystem.Date1904);
+            expect(testFunction.calculate(startDate, days).getValue()).toBe(3);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
         });
     });
 });

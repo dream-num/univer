@@ -18,6 +18,7 @@
 // See packages/core/src/shared/numfmt/LICENSE.
 
 import type { ResolvedFormatOptions } from './types';
+import { DateSystem } from '../../types/enum/date-system';
 
 export const defaultOptions: Readonly<ResolvedFormatOptions> = {
     // Overflow error string
@@ -25,13 +26,14 @@ export const defaultOptions: Readonly<ResolvedFormatOptions> = {
     // Should it throw when there is an overflow error?
     dateErrorThrows: false,
     // Should it emit a number when date has an overflow error? (Sheets does this)
-    dateErrorNumber: true, // dateErrorThrow needs to be off!
+    dateErrorNumber: false, // dateErrorThrow needs to be off!
     // Should it emit a number when bigint has an is an overflow error?
     bigintErrorNumber: false,
     // Sheets mode (see #3)
-    dateSpanLarge: true,
+    dateSpanLarge: false,
     // Simulate the Lotus 1-2-3 leap year bug
     leap1900: true,
+    dateSystem: DateSystem.Date1900,
     // Emit regular vs. non-breaking spaces
     nbsp: false,
     // Robust/throw mode

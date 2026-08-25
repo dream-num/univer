@@ -58,6 +58,20 @@ describe('Calendar', () => {
         expect(calledDate.getDate()).toBe(20);
     });
 
+    it('should preserve fractional seconds when only the calendar date changes', () => {
+        const date = new Date(2023, 7, 15, 1, 2, 3, 456);
+        const { getByText } = render(
+            <ConfigProvider mountContainer={null} locale={{ Calendar: enUS.design.Calendar }}>
+                <Calendar value={date} onValueChange={onChange} />
+            </ConfigProvider>
+        );
+
+        getByText('20').click();
+
+        expect((onChange.mock.calls[0][0] as Date).getMilliseconds()).toBe(456);
+        expect(onChange).toHaveBeenCalledWith(expect.any(Date), 'date');
+    });
+
     it('should show TimeInput when showTime is true', () => {
         const { container } = renderCalendar({ showTime: true });
         expect(container.querySelector('[data-u-comp="time-input"]')).toBeInTheDocument();
@@ -138,6 +152,6 @@ describe('Calendar', () => {
 
         const timeInput = container.querySelector('input[type="time"]') as HTMLInputElement;
         fireEvent.change(timeInput, { target: { value: '11:22:33' } });
-        expect(onChange).toHaveBeenCalled();
+        expect(onChange).toHaveBeenCalledWith(expect.any(Date), 'time');
     });
 });

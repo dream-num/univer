@@ -70,7 +70,7 @@ export class WorkdayIntl extends BaseFunction {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        const startDateSerialNumber = getDateSerialNumberByObject(startDate);
+        const startDateSerialNumber = getDateSerialNumberByObject(startDate, this.getDateSystem());
 
         if (typeof startDateSerialNumber !== 'number') {
             return startDateSerialNumber;
@@ -101,7 +101,7 @@ export class WorkdayIntl extends BaseFunction {
             return this._getResultByHolidays(startDateSerialNumber, workingDays, weekendValue, holidays);
         }
 
-        const result = getDateSerialNumberByWorkingDays(startDateSerialNumber, workingDays, weekendValue);
+        const result = getDateSerialNumberByWorkingDays(startDateSerialNumber, workingDays, weekendValue, undefined, this.getDateSystem());
 
         if (typeof result !== 'number') {
             return result;
@@ -150,7 +150,7 @@ export class WorkdayIntl extends BaseFunction {
                         continue;
                     }
 
-                    const holidaySerialNumber = getDateSerialNumberByObject(cell);
+                    const holidaySerialNumber = getDateSerialNumberByObject(cell, this.getDateSystem());
 
                     if (typeof holidaySerialNumber !== 'number') {
                         if (cell.isString()) {
@@ -167,7 +167,7 @@ export class WorkdayIntl extends BaseFunction {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 
-            const holidaySerialNumber = getDateSerialNumberByObject(holidays);
+            const holidaySerialNumber = getDateSerialNumberByObject(holidays, this.getDateSystem());
 
             if (typeof holidaySerialNumber !== 'number') {
                 return holidaySerialNumber;
@@ -176,7 +176,7 @@ export class WorkdayIntl extends BaseFunction {
             holidaysValueArray.push(holidaySerialNumber);
         }
 
-        const result = getDateSerialNumberByWorkingDays(startDateSerialNumber, workingDays, weekendValue, holidaysValueArray);
+        const result = getDateSerialNumberByWorkingDays(startDateSerialNumber, workingDays, weekendValue, holidaysValueArray, this.getDateSystem());
 
         if (typeof result !== 'number') {
             return result;

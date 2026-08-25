@@ -171,6 +171,38 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
         if (!activeCommentId) {
             return;
         }
+
+        const handlePointerDown = (event: PointerEvent) => {
+            const activeComment = panelService.activeCommentId;
+            const target = event.target;
+            if (event.button !== 0 || !activeComment || !(target instanceof Element)) {
+                return;
+            }
+
+            const activeElement = document.getElementById(
+                `${location}-${activeComment.unitId}-${activeComment.subUnitId}-${activeComment.commentId}`
+            );
+            if (
+                activeElement?.contains(target) ||
+                target.closest('button, input, textarea, select, a, [contenteditable="true"], [role="menu"], [role="menuitem"], [role="option"], [role="listbox"], [role="combobox"], [role="separator"]')
+            ) {
+                return;
+            }
+
+            commandService.executeCommand(SetActiveCommentOperation.id);
+            if (scopedTempComment && isSameThreadCommentTarget(activeComment, scopedTempComment)) {
+                onTempCommentClose?.();
+            }
+        };
+
+        document.addEventListener('pointerdown', handlePointerDown, true);
+        return () => document.removeEventListener('pointerdown', handlePointerDown, true);
+    }, [activeCommentId, commandService, location, onTempCommentClose, panelService, scopedTempComment]);
+
+    useEffect(() => {
+        if (!activeCommentId) {
+            return;
+        }
         if (!shouldScrollRef.current) {
             shouldScrollRef.current = true;
             return;

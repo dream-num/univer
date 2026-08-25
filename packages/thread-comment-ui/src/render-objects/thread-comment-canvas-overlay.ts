@@ -15,10 +15,12 @@
  */
 
 import type { IViewportInfo, UniverRenderingContext, Vector2 } from '@univerjs/engine-render';
-import { BaseObject } from '@univerjs/engine-render';
+import { BaseObject, DEFAULT_FONTFACE_PLANE } from '@univerjs/engine-render';
 
 export interface IThreadCommentCanvasMarker {
     commentId: string;
+    commentIds?: readonly string[];
+    count?: number;
     x: number;
     y: number;
 }
@@ -56,6 +58,28 @@ const MARKER_PREVIEW_OPACITY = 0.42;
 const UNDERLINE_WIDTH = 2;
 const UNDERLINE_HIT_PADDING = 4;
 const OUTLINE_PADDING = 2;
+
+export function groupThreadCommentCanvasMarkers(
+    markers: readonly IThreadCommentCanvasMarker[]
+): IThreadCommentCanvasMarker[] {
+    const groups = new Map<string, IThreadCommentCanvasMarker & { commentIds: string[]; count: number }>();
+    markers.forEach((marker) => {
+        const key = `${marker.x}\0${marker.y}`;
+        const current = groups.get(key);
+        if (current) {
+            current.commentId = marker.commentId;
+            current.commentIds.push(marker.commentId);
+            current.count += 1;
+            return;
+        }
+        groups.set(key, {
+            ...marker,
+            commentIds: [marker.commentId],
+            count: 1,
+        });
+    });
+    return Array.from(groups.values());
+}
 
 export class ThreadCommentCanvasOverlay extends BaseObject {
     private _state: IThreadCommentCanvasOverlayState;
@@ -155,7 +179,8 @@ export class ThreadCommentCanvasOverlay extends BaseObject {
             ctx,
             marker,
             zoomRatio,
-            marker.commentId === this._hoveredCommentId || this._state.focusedCommentIds?.includes(marker.commentId)
+            this._markerContainsComment(marker, this._hoveredCommentId)
+                || this._state.focusedCommentIds?.some((commentId) => this._markerContainsComment(marker, commentId))
                 ? 1
                 : MARKER_IDLE_OPACITY
         ));
@@ -174,8 +199,13 @@ export class ThreadCommentCanvasOverlay extends BaseObject {
     }
 
     private _containsComment(commentId: string): boolean {
-        return this._state.markers.some((marker) => marker.commentId === commentId)
+        return this._state.markers.some((marker) => this._markerContainsComment(marker, commentId))
             || this._state.underlines.some((underline) => underline.commentId === commentId);
+    }
+
+    private _markerContainsComment(marker: IThreadCommentCanvasMarker, commentId: string | null): boolean {
+        return commentId != null
+            && (marker.commentId === commentId || marker.commentIds?.includes(commentId) === true);
     }
 
     private _renderUnderline(
@@ -248,13 +278,20 @@ export class ThreadCommentCanvasOverlay extends BaseObject {
         ctx.stroke();
 
         ctx.fillStyle = this._state.foregroundColor;
-        const dotRadius = 1.2 / zoomRatio;
-        const dotY = top + size * 0.43;
-        [0.32, 0.5, 0.68].forEach((ratio) => {
-            ctx.beginPath();
-            ctx.arc(left + size * ratio, dotY, dotRadius, 0, Math.PI * 2);
-            ctx.fill();
-        });
+        if ((marker.count ?? 1) > 1) {
+            ctx.font = `600 ${11 / zoomRatio}px ${DEFAULT_FONTFACE_PLANE}`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(String(marker.count), marker.x, top + size * 0.42);
+        } else {
+            const dotRadius = 1.2 / zoomRatio;
+            const dotY = top + size * 0.43;
+            [0.32, 0.5, 0.68].forEach((ratio) => {
+                ctx.beginPath();
+                ctx.arc(left + size * ratio, dotY, dotRadius, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        }
         ctx.restore();
     }
 }

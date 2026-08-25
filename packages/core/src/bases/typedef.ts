@@ -868,7 +868,7 @@ export type BaseHitTestResult =
         recordId: RecordId;
     }
     | {
-        type: 'base-record-action';
+        type: 'base-record-action' | 'base-record-action-badge';
         tableId: TableId;
         viewId: ViewId;
         recordId: RecordId;

@@ -27,7 +27,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { Button, clsx } from '@univerjs/design';
-import { BreakLineCommand, IEditorService, RichTextEditor } from '@univerjs/docs-ui';
+import { BreakLineCommand, DeleteLeftCommand, DeleteRightCommand, IEditorService, RichTextEditor } from '@univerjs/docs-ui';
 import { KeyCode, useDependency } from '@univerjs/ui';
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { SetActiveCommentOperation } from '../commands/operations/comment.operations';
@@ -74,16 +74,37 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
 
     const keyboardEventConfig: IKeyboardEventConfig = useMemo(() => (
         {
-            keyCodes: [{ keyCode: KeyCode.ENTER }],
+            keyCodes: [
+                { keyCode: KeyCode.ENTER },
+                { keyCode: KeyCode.BACKSPACE },
+                { keyCode: KeyCode.DELETE },
+            ],
             handler: (keyCode) => {
-                if (keyCode === KeyCode.ENTER) {
-                    commandService.executeCommand(
-                        BreakLineCommand.id
-                    );
+                let commandId: string;
+                switch (keyCode) {
+                    case KeyCode.ENTER:
+                        commandId = BreakLineCommand.id;
+                        break;
+                    case KeyCode.BACKSPACE:
+                        commandId = DeleteLeftCommand.id;
+                        break;
+                    case KeyCode.DELETE:
+                        commandId = DeleteRightCommand.id;
+                        break;
+                    default:
+                        return;
                 }
+
+                focusThreadCommentEditor(editorService, editorId, editorRef.current);
+                commandService.executeCommand(commandId).then(() => {
+                    if (keyCode !== KeyCode.ENTER && mountedRef.current) {
+                        const dataStream = editorRef.current?.getDocumentData().body?.dataStream ?? '';
+                        setCanSubmit(BuildTextUtils.transform.getPlainText(dataStream));
+                    }
+                });
             },
         }
-    ), [commandService]);
+    ), [commandService, editorId, editorService]);
 
     useImperativeHandle(ref, () => ({
         reply(text) {

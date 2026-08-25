@@ -32,6 +32,7 @@ export class UniverDocsThreadCommentPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_DOC;
 
     constructor(
+        _config: undefined,
         @Inject(Injector) protected override _injector: Injector,
         @ICommandService private readonly _commandService: ICommandService
     ) {

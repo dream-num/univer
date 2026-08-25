@@ -16,9 +16,43 @@
 
 import { Vector2 } from '@univerjs/engine-render';
 import { describe, expect, it, vi } from 'vitest';
-import { ThreadCommentCanvasOverlay } from '../thread-comment-canvas-overlay';
+import { groupThreadCommentCanvasMarkers, ThreadCommentCanvasOverlay } from '../thread-comment-canvas-overlay';
 
 describe('ThreadCommentCanvasOverlay', () => {
+    it('groups comments at the same canvas anchor and keeps the newest one clickable', () => {
+        expect(groupThreadCommentCanvasMarkers([
+            { commentId: 'first-comment', x: 100, y: 100 },
+            { commentId: 'other-position', x: 120, y: 100 },
+            { commentId: 'newest-comment', x: 100, y: 100 },
+        ])).toEqual([
+            {
+                commentId: 'newest-comment',
+                commentIds: ['first-comment', 'newest-comment'],
+                count: 2,
+                x: 100,
+                y: 100,
+            },
+            {
+                commentId: 'other-position',
+                commentIds: ['other-position'],
+                count: 1,
+                x: 120,
+                y: 100,
+            },
+        ]);
+    });
+
+    it('decrements and removes an anchor marker as root comments resolve or delete', () => {
+        const comments = [
+            { commentId: 'first-comment', x: 100, y: 100 },
+            { commentId: 'second-comment', x: 100, y: 100 },
+        ];
+
+        expect(groupThreadCommentCanvasMarkers(comments)[0]).toEqual(expect.objectContaining({ count: 2 }));
+        expect(groupThreadCommentCanvasMarkers(comments.slice(1))[0]).toEqual(expect.objectContaining({ count: 1 }));
+        expect(groupThreadCommentCanvasMarkers([])).toEqual([]);
+    });
+
     it('repaints pointer previews immediately without debounce', () => {
         const overlay = new ThreadCommentCanvasOverlay('test-comment-preview', {
             accentColor: 'yellow',
@@ -90,6 +124,37 @@ describe('ThreadCommentCanvasOverlay', () => {
 
         expect(overlay.isHit(new Vector2(100, 100))).toBe(true);
         expect(overlay.hitCommentId).toBe('top-comment');
+    });
+
+    it('keeps an aggregated marker focused for every comment at the same anchor', () => {
+        const overlay = new ThreadCommentCanvasOverlay('test-comment-group', {
+            accentColor: 'yellow',
+            foregroundColor: 'black',
+            outlineColor: 'white',
+            zoomRatio: 1,
+            markers: [{
+                commentId: 'newest-comment',
+                commentIds: ['older-comment', 'newest-comment'],
+                count: 2,
+                x: 100,
+                y: 100,
+            }],
+            underlines: [],
+            focusedCommentIds: ['older-comment'],
+        });
+        const renderMarker = vi.fn();
+        Reflect.set(overlay, '_renderMarker', renderMarker);
+
+        overlay.render(undefined as never, undefined as never);
+
+        expect(renderMarker).toHaveBeenCalledWith(
+            undefined,
+            expect.objectContaining({ commentId: 'newest-comment', count: 2 }),
+            1,
+            1
+        );
+        expect(overlay.isHit(new Vector2(100, 100))).toBe(true);
+        expect(overlay.hitCommentId).toBe('newest-comment');
     });
 
     it('reconciles underline hit geometry after an object transform and restore', () => {

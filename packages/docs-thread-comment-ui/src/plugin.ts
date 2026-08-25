@@ -19,6 +19,7 @@ import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, UniverIns
 import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsThreadCommentPlugin } from '@univerjs/docs-thread-comment';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
+import { UniverDrawingPlugin } from '@univerjs/drawing';
 import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { UniverThreadCommentPlugin } from '@univerjs/thread-comment';
 import { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
@@ -41,6 +42,7 @@ const STARTING_DEPENDENCIES: Array<Parameters<Injector['add']>[0]> = [
     UniverDocsPlugin,
     UniverDocsThreadCommentPlugin,
     UniverThreadCommentPlugin,
+    UniverDrawingPlugin,
     UniverRenderEnginePlugin,
     UniverDocsUIPlugin,
     UniverThreadCommentUIPlugin

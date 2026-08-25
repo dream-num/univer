@@ -31,8 +31,6 @@ interface IRangeCommentDependencies {
     userManagerService: UniverCore.UserManagerService;
 }
 
-const DEPENDENCIES_CACHE = new WeakMap<FRange, IRangeCommentDependencies>();
-
 function firstNonEmpty(...values: Array<string | undefined>): string {
     for (const value of values) {
         if (value) {
@@ -138,23 +136,18 @@ export interface IFRangeSheetsThreadCommentMixin {
  * @ignore
  */
 export class FRangeSheetsThreadCommentMixin extends FRange implements IFRangeSheetsThreadCommentMixin {
-    private _getDependencies(): IRangeCommentDependencies {
-        const cached = DEPENDENCIES_CACHE.get(this);
-        if (cached) {
-            return cached;
-        }
+    declare private _dependencies: IRangeCommentDependencies;
 
-        const dependencies = {
-            commandService: this._injector.get(UniverCore.ICommandService),
-            model: this._injector.get(SheetsThreadCommentModel),
-            userManagerService: this._injector.get(UniverCore.UserManagerService),
+    override _initialize(injector: UniverCore.Injector): void {
+        this._dependencies = {
+            commandService: injector.get(UniverCore.ICommandService),
+            model: injector.get(SheetsThreadCommentModel),
+            userManagerService: injector.get(UniverCore.UserManagerService),
         };
-        DEPENDENCIES_CACHE.set(this, dependencies);
-        return dependencies;
     }
 
     private _getCommentDataInRange(): ThreadComment.IThreadComment[] {
-        const model = this._getDependencies().model;
+        const model = this._dependencies.model;
         const unitId = this._workbook.getUnitId();
         const sheetId = this._worksheet.getSheetId();
         const comments: ThreadComment.IThreadComment[] = [];
@@ -169,7 +162,7 @@ export class FRangeSheetsThreadCommentMixin extends FRange implements IFRangeShe
     }
 
     private _getStartCellCommentData(): ThreadComment.IThreadComment | null {
-        const model = this._getDependencies().model;
+        const model = this._dependencies.model;
         const unitId = this._workbook.getUnitId();
         const sheetId = this._worksheet.getSheetId();
         const commentId = model.getByLocation(unitId, sheetId, this._range.startRow, this._range.startColumn);
@@ -189,7 +182,7 @@ export class FRangeSheetsThreadCommentMixin extends FRange implements IFRangeShe
         content: ThreadComment.ThreadCommentContent | FTheadCommentBuilder,
         options: ISheetCellCommentCreateOptions = {}
     ): Promise<boolean> {
-        const { commandService, userManagerService } = this._getDependencies();
+        const { commandService, userManagerService } = this._dependencies;
         const currentComment = this._getStartCellCommentData();
         const unitId = this._workbook.getUnitId();
         const sheetId = this._worksheet.getSheetId();
@@ -223,7 +216,7 @@ export class FRangeSheetsThreadCommentMixin extends FRange implements IFRangeShe
     }
 
     override clearCommentAsync(): Promise<boolean> {
-        const { commandService } = this._getDependencies();
+        const { commandService } = this._dependencies;
         const currentComment = this._getStartCellCommentData();
         const unitId = this._workbook.getUnitId();
         const sheetId = this._worksheet.getSheetId();
@@ -241,7 +234,7 @@ export class FRangeSheetsThreadCommentMixin extends FRange implements IFRangeShe
     }
 
     override async clearCommentsAsync(): Promise<boolean> {
-        const { commandService } = this._getDependencies();
+        const { commandService } = this._dependencies;
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
         const results = await Promise.all(this._getCommentDataInRange().map((comment) => commandService.executeCommand(

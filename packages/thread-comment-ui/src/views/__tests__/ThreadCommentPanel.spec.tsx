@@ -491,6 +491,7 @@ describe('ThreadCommentPanel', () => {
 
     it('keeps an empty-id temporary target active and shows its editor', () => {
         const testBed = createPanelTestBed();
+        const onTempCommentClose = vi.fn();
         testBed.panelService.setActiveComment({
             unitId: UNIT_ID,
             subUnitId: SHEET_ID,
@@ -505,6 +506,7 @@ describe('ThreadCommentPanel', () => {
                 onAdd={() => undefined}
                 getSubUnitName={(subUnitId) => subUnitId}
                 tempComment={createComment({ id: '', threadId: '', ref: '#shape-1' })}
+                onTempCommentClose={onTempCommentClose}
             />
         );
         root = rendered.root;
@@ -516,6 +518,12 @@ describe('ThreadCommentPanel', () => {
             subUnitId: SHEET_ID,
             commentId: '',
         });
+
+        act(() => {
+            container!.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true, button: 0 }));
+        });
+        expect(testBed.panelService.activeCommentId).toBeUndefined();
+        expect(onTempCommentClose).toHaveBeenCalledTimes(1);
     });
 
     it('closes a temporary comment when the active subunit changes', () => {
@@ -618,6 +626,37 @@ describe('ThreadCommentPanel', () => {
             getPanelItem(container!, 'resolved-thread').dispatchEvent(new MouseEvent('click', { bubbles: true }));
         });
 
+        expect(testBed.panelService.activeCommentId).toBeUndefined();
+    });
+
+    it('clears the active comment when the primary pointer hits a blank area', () => {
+        const testBed = createPanelTestBed();
+        addRootComment(testBed.threadCommentModel, createComment({ id: 'open-thread', ref: 'A1' }));
+
+        const rendered = renderDefaultPanel(testBed.injector);
+        root = rendered.root;
+        container = rendered.container;
+        const panelItem = getPanelItem(container, 'open-thread');
+
+        act(() => {
+            panelItem.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            panelItem.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true, button: 0 }));
+        });
+        expect(testBed.panelService.activeCommentId?.commentId).toBe('open-thread');
+
+        act(() => {
+            container!.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true, button: 0 }));
+        });
+        expect(testBed.panelService.activeCommentId).toBeUndefined();
+
+        const canvas = document.createElement('canvas');
+        document.body.appendChild(canvas);
+        act(() => {
+            panelItem.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        });
+        act(() => {
+            canvas.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true, button: 0 }));
+        });
         expect(testBed.panelService.activeCommentId).toBeUndefined();
     });
 

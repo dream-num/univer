@@ -593,7 +593,7 @@ export class ThreadCommentModel extends Disposable {
         return all;
     }
 
-    private _getAnchorKind(unitId: string, ref: string): ThreadCommentAnchorKind | null {
+    getAnchorKind(unitId: string, ref: string): ThreadCommentAnchorKind | null {
         const anchor = deserializeThreadCommentAnchor(ref);
         if (anchor) {
             return anchor.kind;
@@ -628,7 +628,7 @@ export class ThreadCommentModel extends Disposable {
                     return false;
                 }
                 if (anchorKinds) {
-                    const anchorKind = this._getAnchorKind(unitId, thread.root.ref);
+                    const anchorKind = this.getAnchorKind(unitId, thread.root.ref);
                     if (!anchorKind || !anchorKinds.has(anchorKind)) {
                         return false;
                     }

@@ -410,6 +410,7 @@ describe('Thread comment commands', () => {
         });
 
         const thread = facade.getComments({ anchorKinds: [anchor.kind] })[0];
+        expect(thread.anchorKind).toBe(anchor.kind);
         expect(thread.anchor).toEqual(anchor);
         expect(thread.root.text.dataStream).toBe('updated\r\n');
         expect(thread.children.map((comment) => comment.id)).toEqual([replyId]);
@@ -423,6 +424,23 @@ describe('Thread comment commands', () => {
         expect(facade.getComments({ anchorKinds: [anchor.kind] })[0].children).toEqual([]);
         await facade.deleteCommentAsync({ ...location, commentId: rootId, deleteThread: true });
         expect(facade.getComments({ anchorKinds: [anchor.kind] })).toEqual([]);
+    });
+
+    it('exposes a stable anchor kind for legacy sheet comments', async () => {
+        const root = createComment({ id: 'legacy-sheet-comment', ref: 'A1' });
+        await commandService.executeCommand(AddCommentCommand.id, {
+            unitId: root.unitId,
+            subUnitId: root.subUnitId,
+            comment: root,
+        });
+
+        const [thread] = get(ThreadCommentFacadeService).getComments({
+            anchorKinds: [ThreadCommentAnchorKind.SHEET_CELL],
+        });
+
+        expect(thread.anchorKind).toBe(ThreadCommentAnchorKind.SHEET_CELL);
+        expect(thread.anchor).toBeNull();
+        expect(thread.root.ref).toBe('A1');
     });
 
     it('returns false when updating or deleting a missing comment', async () => {

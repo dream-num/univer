@@ -16,7 +16,7 @@
 
 import type { IDocumentBody } from '@univerjs/core';
 import type { IThreadCommentQuery, IThreadInfo } from '../models/thread-comment.model';
-import type { IThreadCommentAnchor } from '../types/comment-anchor';
+import type { IThreadCommentAnchor, ThreadCommentAnchorKind } from '../types/comment-anchor';
 import { generateRandomId, ICommandService, Inject, UserManagerService } from '@univerjs/core';
 import {
     AddCommentCommand,
@@ -164,19 +164,26 @@ export function normalizeThreadCommentContent(content: ThreadCommentContent): ID
 }
 
 export interface IFacadeThreadCommentInfo extends Omit<IThreadInfo, 'relativeUsers'> {
+    /**
+     * Product anchor category. Facade query results always populate this field, including for legacy
+     * Sheet cell and Document range comments. It remains optional for source compatibility with
+     * existing `IFacadeThreadCommentInfo` implementations.
+     */
+    anchorKind?: ThreadCommentAnchorKind | null;
     /** Parsed stable product anchor, or `null` for a legacy comment reference. */
     anchor: IThreadCommentAnchor | null;
     /** Unique IDs of authors participating in the root and reply tree. */
     relativeUserIds: string[];
 }
 
-function toFacadeInfo(thread: IThreadInfo): IFacadeThreadCommentInfo {
+function toFacadeInfo(thread: IThreadInfo, anchorKind: ThreadCommentAnchorKind | null): IFacadeThreadCommentInfo {
     return {
         unitId: thread.unitId,
         subUnitId: thread.subUnitId,
         threadId: thread.threadId,
         root: thread.root,
         children: thread.children,
+        anchorKind,
         anchor: deserializeThreadCommentAnchor(thread.root.ref),
         relativeUserIds: Array.from(thread.relativeUsers),
     };
@@ -269,7 +276,10 @@ export class ThreadCommentFacadeService {
     }
 
     getComments(query: IThreadCommentQuery = {}): IFacadeThreadCommentInfo[] {
-        return this._model.query(query).map(toFacadeInfo);
+        return this._model.query(query).map((thread) => toFacadeInfo(
+            thread,
+            this._model.getAnchorKind(thread.unitId, thread.root.ref)
+        ));
     }
 
     async listCommentsAsync(query: IThreadCommentQuery = {}): Promise<IFacadeThreadCommentInfo[]> {
@@ -286,6 +296,9 @@ export class ThreadCommentFacadeService {
             group.subUnitId,
             group.threadIds
         )));
-        return this._model.query(query).map(toFacadeInfo);
+        return this._model.query(query).map((thread) => toFacadeInfo(
+            thread,
+            this._model.getAnchorKind(thread.unitId, thread.root.ref)
+        ));
     }
 }

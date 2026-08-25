@@ -82,17 +82,39 @@ export const ToggleSheetCommentPanelOperation: IOperation = {
             sidebarService.close();
             panelService.setPanelVisible(false);
         } else {
-            sidebarService.open({
-                header: { title: 'sheets-thread-comment-ui.panel.title' },
-                children: { label: SHEETS_THREAD_COMMENT_PANEL },
-                width: 360,
-            });
-            panelService.setPanelVisible(true);
+            openSheetCommentPanel(sidebarService, panelService);
         }
 
         return true;
     },
 };
+
+export const OpenSheetCommentPanelOperation: IOperation = {
+    id: 'sheet.operation.open-comment-panel',
+    type: CommandType.OPERATION,
+    handler(accessor) {
+        openSheetCommentPanel(
+            accessor.get(ISidebarService),
+            accessor.get(ThreadCommentPanelService)
+        );
+        return true;
+    },
+};
+
+function openSheetCommentPanel(
+    sidebarService: ISidebarService,
+    panelService: ThreadCommentPanelService
+): void {
+    if (!panelService.panelVisible || sidebarService.options.children?.label !== SHEETS_THREAD_COMMENT_PANEL) {
+        sidebarService.open({
+            header: { title: 'sheets-thread-comment-ui.panel.title' },
+            children: { label: SHEETS_THREAD_COMMENT_PANEL },
+            width: 360,
+            onClose: () => panelService.setPanelVisible(false),
+        });
+    }
+    panelService.setPanelVisible(true);
+}
 
 export const AddSheetDrawingCommentOperation: IOperation = {
     id: 'sheet.operation.add-drawing-comment',

@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
+import type { Injector } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import * as ThreadComment from '@univerjs/thread-comment';
-
-const SERVICE_CACHE = new WeakMap<FUniver, ThreadComment.ThreadCommentFacadeService>();
 
 export interface IFUniverThreadCommentMixin {
     /**
@@ -122,7 +121,7 @@ export interface IFUniverThreadCommentMixin {
     /**
      * Queries locally loaded threads by unit, subunit, anchor kind, author, or resolution state.
      * @param query Optional filters. Omit the argument to return every locally loaded thread.
-     * @returns Matching root threads, their replies, parsed anchors, and related user IDs.
+     * @returns Matching root threads, their replies, anchor kinds, parsed anchors, and related user IDs.
      * @example
      * ```ts
      * const presentation = univerAPI.getActivePresentation();
@@ -151,8 +150,8 @@ export interface IFUniverThreadCommentMixin {
      *   anchorKinds: [univerAPI.Enum.ThreadCommentAnchorKind.SLIDE_ELEMENT],
      *   resolved: false,
      * });
-     * comments.forEach(({ root, children, anchor }) => {
-     *   console.log(root.id, children.length, anchor);
+     * comments.forEach(({ root, children, anchorKind, anchor }) => {
+     *   console.log(root.id, children.length, anchorKind, anchor);
      * });
      * ```
      */
@@ -160,49 +159,45 @@ export interface IFUniverThreadCommentMixin {
 }
 
 export class FUniverThreadCommentMixin extends FUniver implements IFUniverThreadCommentMixin {
-    private _getThreadCommentService(): ThreadComment.ThreadCommentFacadeService {
-        const cached = SERVICE_CACHE.get(this);
-        if (cached) {
-            return cached;
-        }
-        const service = this._injector.get(ThreadComment.ThreadCommentFacadeService);
-        SERVICE_CACHE.set(this, service);
-        return service;
+    declare private _threadCommentService: ThreadComment.ThreadCommentFacadeService;
+
+    override _initialize(injector: Injector): void {
+        this._threadCommentService = injector.get(ThreadComment.ThreadCommentFacadeService);
     }
 
     /** @inheritdoc */
     override createCommentAsync(options: ThreadComment.ICreateThreadCommentOptions): Promise<boolean> {
-        return this._getThreadCommentService().createCommentAsync(options);
+        return this._threadCommentService.createCommentAsync(options);
     }
 
     /** @inheritdoc */
     override replyCommentAsync(options: ThreadComment.IReplyThreadCommentOptions): Promise<boolean> {
-        return this._getThreadCommentService().replyCommentAsync(options);
+        return this._threadCommentService.replyCommentAsync(options);
     }
 
     /** @inheritdoc */
     override updateCommentAsync(options: ThreadComment.IUpdateThreadCommentOptions): Promise<boolean> {
-        return this._getThreadCommentService().updateCommentAsync(options);
+        return this._threadCommentService.updateCommentAsync(options);
     }
 
     /** @inheritdoc */
     override deleteCommentAsync(options: ThreadComment.IDeleteThreadCommentOptions): Promise<boolean> {
-        return this._getThreadCommentService().deleteCommentAsync(options);
+        return this._threadCommentService.deleteCommentAsync(options);
     }
 
     /** @inheritdoc */
     override resolveCommentAsync(options: ThreadComment.IResolveThreadCommentOptions): Promise<boolean> {
-        return this._getThreadCommentService().resolveCommentAsync(options);
+        return this._threadCommentService.resolveCommentAsync(options);
     }
 
     /** @inheritdoc */
     override getComments(query: ThreadComment.IThreadCommentQuery = {}): ThreadComment.IFacadeThreadCommentInfo[] {
-        return this._getThreadCommentService().getComments(query);
+        return this._threadCommentService.getComments(query);
     }
 
     /** @inheritdoc */
     override async listCommentsAsync(query: ThreadComment.IThreadCommentQuery = {}): Promise<ThreadComment.IFacadeThreadCommentInfo[]> {
-        return this._getThreadCommentService().listCommentsAsync(query);
+        return this._threadCommentService.listCommentsAsync(query);
     }
 }
 

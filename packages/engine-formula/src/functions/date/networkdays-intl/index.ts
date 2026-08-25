@@ -107,13 +107,13 @@ export class NetworkdaysIntl extends BaseFunction {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        const startDateSerialNumber = getDateSerialNumberByObject(_startDate);
+        const startDateSerialNumber = getDateSerialNumberByObject(_startDate, this.getDateSystem());
 
         if (typeof startDateSerialNumber !== 'number') {
             return startDateSerialNumber;
         }
 
-        const endDateSerialNumber = getDateSerialNumberByObject(_endDate);
+        const endDateSerialNumber = getDateSerialNumberByObject(_endDate, this.getDateSystem());
 
         if (typeof endDateSerialNumber !== 'number') {
             return endDateSerialNumber;
@@ -123,7 +123,7 @@ export class NetworkdaysIntl extends BaseFunction {
             return this._getResultByHolidays(startDateSerialNumber, endDateSerialNumber, weekendValue, holidays);
         }
 
-        const result = countWorkingDays(startDateSerialNumber, endDateSerialNumber, weekendValue);
+        const result = countWorkingDays(startDateSerialNumber, endDateSerialNumber, weekendValue, undefined, this.getDateSystem());
 
         return NumberValueObject.create(result);
     }
@@ -147,7 +147,7 @@ export class NetworkdaysIntl extends BaseFunction {
                         continue;
                     }
 
-                    const holidaySerialNumber = getDateSerialNumberByObject(cell);
+                    const holidaySerialNumber = getDateSerialNumberByObject(cell, this.getDateSystem());
 
                     if (typeof holidaySerialNumber !== 'number') {
                         if (cell.isString()) {
@@ -164,7 +164,7 @@ export class NetworkdaysIntl extends BaseFunction {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 
-            const holidaySerialNumber = getDateSerialNumberByObject(holidays);
+            const holidaySerialNumber = getDateSerialNumberByObject(holidays, this.getDateSystem());
 
             if (typeof holidaySerialNumber !== 'number') {
                 return holidaySerialNumber;
@@ -173,7 +173,7 @@ export class NetworkdaysIntl extends BaseFunction {
             holidaysValueArray.push(holidaySerialNumber);
         }
 
-        const result = countWorkingDays(startDateSerialNumber, endDateSerialNumber, weekendValue, holidaysValueArray);
+        const result = countWorkingDays(startDateSerialNumber, endDateSerialNumber, weekendValue, holidaysValueArray, this.getDateSystem());
 
         return NumberValueObject.create(result);
     }

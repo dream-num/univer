@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
+import type { IAccessor, IRange, Workbook, Worksheet } from '@univerjs/core';
 import {
     ICommandService,
     IConfirmService,
@@ -50,7 +50,7 @@ import { DeleteRangeMoveUpConfirmCommand } from '../delete-range-move-up-confirm
 import { InsertRangeMoveDownConfirmCommand } from '../insert-range-move-down-confirm.command';
 import { InsertRangeMoveRightConfirmCommand } from '../insert-range-move-right-confirm.command';
 
-function createAccessor(pairs: Array<[unknown, unknown]>) {
+function createAccessor(pairs: Array<[unknown, unknown]>): IAccessor {
     const map = new Map<unknown, unknown>(pairs);
     return {
         get(token: unknown) {
@@ -59,7 +59,7 @@ function createAccessor(pairs: Array<[unknown, unknown]>) {
             }
             return map.get(token);
         },
-    } as any;
+    } as unknown as IAccessor;
 }
 
 function createWorksheet(options?: {
@@ -67,14 +67,23 @@ function createWorksheet(options?: {
     colCount?: number;
     filteredRows?: number[];
     merges?: IRange[];
-}) {
+}): Worksheet {
     const filtered = new Set(options?.filteredRows ?? []);
     return {
         getRowCount: () => options?.rowCount ?? 10,
         getColumnCount: () => options?.colCount ?? 8,
         getRowFiltered: (row: number) => filtered.has(row),
         getMergeData: () => options?.merges ?? [],
-    } as any;
+    } as unknown as Worksheet;
+}
+
+function mockSheetCommandTarget(worksheet: Worksheet): void {
+    vi.spyOn(sheets, 'getSheetCommandTarget').mockReturnValue({
+        workbook: {} as unknown as Workbook,
+        worksheet,
+        unitId: 'unit-1',
+        subUnitId: 'sheet-1',
+    });
 }
 
 function createSelectionService(range?: IRange | null) {
@@ -95,9 +104,7 @@ describe('insert/delete range confirm commands', () => {
         const rowSelection = { startRow: 1, endRow: 1, startColumn: 0, endColumn: 0 } as IRange;
 
         const filteredWorksheet = createWorksheet({ filteredRows: [2] });
-        vi.spyOn(sheets, 'getSheetCommandTarget').mockReturnValue({
-            worksheet: filteredWorksheet,
-        } as any);
+        mockSheetCommandTarget(filteredWorksheet);
         const accessorFiltered = createAccessor([
             [IConfirmService, { confirm }],
             [ICommandService, { executeCommand }],
@@ -111,9 +118,7 @@ describe('insert/delete range confirm commands', () => {
         const mergeWorksheet = createWorksheet({
             merges: [{ startRow: 0, endRow: 3, startColumn: 0, endColumn: 2 } as IRange],
         });
-        vi.spyOn(sheets, 'getSheetCommandTarget').mockReturnValue({
-            worksheet: mergeWorksheet,
-        } as any);
+        mockSheetCommandTarget(mergeWorksheet);
         const accessorMerge = createAccessor([
             [IConfirmService, { confirm }],
             [ICommandService, { executeCommand }],
@@ -127,9 +132,7 @@ describe('insert/delete range confirm commands', () => {
         expect(executeCommand).toHaveBeenCalledWith(InsertRangeMoveDownCommand.id);
 
         const noMergeWorksheet = createWorksheet();
-        vi.spyOn(sheets, 'getSheetCommandTarget').mockReturnValue({
-            worksheet: noMergeWorksheet,
-        } as any);
+        mockSheetCommandTarget(noMergeWorksheet);
         expect(await InsertRangeMoveDownConfirmCommand.handler(accessorMerge)).toBe(true);
         expect(executeCommand).toHaveBeenCalledWith(InsertRangeMoveDownCommand.id);
     });
@@ -147,17 +150,13 @@ describe('insert/delete range confirm commands', () => {
             [IUniverInstanceService, {}],
         ]);
 
-        vi.spyOn(sheets, 'getSheetCommandTarget').mockReturnValue({
-            worksheet: createWorksheet(),
-        } as any);
+        mockSheetCommandTarget(createWorksheet());
         expect(await InsertRangeMoveRightConfirmCommand.handler(accessor)).toBe(true);
         expect(executeCommand).toHaveBeenCalledWith(InsertRangeMoveRightCommand.id);
 
-        vi.spyOn(sheets, 'getSheetCommandTarget').mockReturnValue({
-            worksheet: createWorksheet({
-                merges: [{ startRow: 0, endRow: 3, startColumn: 0, endColumn: 2 } as IRange],
-            }),
-        } as any);
+        mockSheetCommandTarget(createWorksheet({
+            merges: [{ startRow: 0, endRow: 3, startColumn: 0, endColumn: 2 } as IRange],
+        }));
         expect(await InsertRangeMoveRightConfirmCommand.handler(accessor)).toBe(true);
         expect(await InsertRangeMoveRightConfirmCommand.handler(accessor)).toBe(true);
     });
@@ -175,23 +174,17 @@ describe('insert/delete range confirm commands', () => {
             [IUniverInstanceService, {}],
         ]);
 
-        vi.spyOn(sheets, 'getSheetCommandTarget').mockReturnValue({
-            worksheet: createWorksheet({ filteredRows: [2] }),
-        } as any);
+        mockSheetCommandTarget(createWorksheet({ filteredRows: [2] }));
         expect(await DeleteRangeMoveUpConfirmCommand.handler(accessor)).toBe(false);
 
-        vi.spyOn(sheets, 'getSheetCommandTarget').mockReturnValue({
-            worksheet: createWorksheet({
-                merges: [{ startRow: 0, endRow: 3, startColumn: 0, endColumn: 2 } as IRange],
-            }),
-        } as any);
+        mockSheetCommandTarget(createWorksheet({
+            merges: [{ startRow: 0, endRow: 3, startColumn: 0, endColumn: 2 } as IRange],
+        }));
         expect(await DeleteRangeMoveUpConfirmCommand.handler(accessor)).toBe(true);
         expect(await DeleteRangeMoveUpConfirmCommand.handler(accessor)).toBe(true);
         expect(executeCommand).toHaveBeenCalledWith(DeleteRangeMoveUpCommand.id);
 
-        vi.spyOn(sheets, 'getSheetCommandTarget').mockReturnValue({
-            worksheet: createWorksheet(),
-        } as any);
+        mockSheetCommandTarget(createWorksheet());
         expect(await DeleteRangeMoveUpConfirmCommand.handler(accessor)).toBe(true);
     });
 
@@ -208,17 +201,13 @@ describe('insert/delete range confirm commands', () => {
             [IUniverInstanceService, {}],
         ]);
 
-        vi.spyOn(sheets, 'getSheetCommandTarget').mockReturnValue({
-            worksheet: createWorksheet({
-                merges: [{ startRow: 0, endRow: 3, startColumn: 0, endColumn: 2 } as IRange],
-            }),
-        } as any);
+        mockSheetCommandTarget(createWorksheet({
+            merges: [{ startRow: 0, endRow: 3, startColumn: 0, endColumn: 2 } as IRange],
+        }));
         expect(await DeleteRangeMoveLeftConfirmCommand.handler(accessor)).toBe(true);
         expect(await DeleteRangeMoveLeftConfirmCommand.handler(accessor)).toBe(true);
 
-        vi.spyOn(sheets, 'getSheetCommandTarget').mockReturnValue({
-            worksheet: createWorksheet(),
-        } as any);
+        mockSheetCommandTarget(createWorksheet());
         expect(await DeleteRangeMoveLeftConfirmCommand.handler(accessor)).toBe(true);
         expect(executeCommand).toHaveBeenCalledWith(DeleteRangeMoveLeftCommand.id);
 
@@ -339,7 +328,7 @@ describe('clipboard command branches', () => {
         ]);
 
         await expect(SheetCopyCommand.handler(accessor)).rejects.toThrow('translated:sheets-ui.permission.dialog.copyErr');
-        await expect(SheetCutCommand.handler(accessor)).rejects.toThrow('translated:sheets-ui.permission.dialog.copyErr');
+        await expect(SheetCutCommand.handler(accessor)).rejects.toThrow('translated:sheets-ui.permission.dialog.cutErr');
         await expect(SheetPasteCommand.handler(accessor, { value: PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE })).rejects.toThrow('translated:sheets-ui.permission.dialog.pasteErr');
         await expect(SheetPasteShortKeyCommand.handler(accessor, {})).rejects.toThrow('translated:sheets-ui.permission.dialog.pasteErr');
 

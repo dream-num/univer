@@ -347,6 +347,7 @@ const locale: typeof enUS = {
                 pasteErr: 'El rango está protegido y no tienes permiso para pegar. Para pegar, contacta al creador.',
                 setStyleErr: 'El rango está protegido y no tienes permiso para establecer estilos. Para establecer estilos, contacta al creador.',
                 copyErr: 'El rango está protegido y no tienes permiso para copiar. Para copiar, contacta al creador.',
+                cutErr: 'El rango está protegido y no tienes permiso para cortar. Para cortar, contacta al creador.',
                 workbookCopyErr: 'El libro de trabajo está protegido y no tienes permiso para copiar. Para copiar, contacta al creador.',
                 setRowColStyleErr: 'El rango está protegido y no tienes permiso para establecer estilos de fila y columna. Para establecer estilos de fila y columna, contacta al creador.',
             },

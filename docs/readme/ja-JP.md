@@ -90,7 +90,7 @@ Univer は単なるスプレッドシートファイルビューアではあり�
 
 - **アイソモーフィック設計**：ブラウザの UI アプリと Node.js のヘッドレス処理の両方で動作します。
 - **プラグイン優先アーキテクチャ**：すべての機能は組み合わせ可能なプラグインとして提供され、追加、削除、置換、遅延読み込みが可能です。
-- **Preset Mode による高速な統合**：すぐに動くアプリが必要な場合は、[`univer-presets`](https://github.com/dream-num/univer-presets) の curated plugin bundle を利用できます。
+- **Preset Mode による高速な統合**：すぐに動くアプリが必要な場合は、このリポジトリの [`presets/`](../../presets) にある curated plugin collection を利用できます。
 - **Plugin Mode による完全な制御**：カスタム読み込み、より小さなバンドル、深い統合が必要な場合は、パッケージを手動で組み合わせられます。
 - **Facade API**：ワークブック、ワークシート、範囲、ドキュメント、数式、コマンド、イベントを高レベル API で扱えます。
 - **Canvas レンダリングエンジン**：大規模な編集可能ドキュメント面をサポートし、複数の文書タイプでレンダリング層を共有します。
@@ -98,45 +98,12 @@ Univer は単なるスプレッドシートファイルビューアではあり�
 
 ## ⚡ クイックスタート
 
-多くのアプリケーションでは **Preset Mode** から始めるのがおすすめです。パッケージを手動で組み合わせ、プラグイン登録を制御したい場合は **Plugin Mode** を使います。
+製品機能を広く利用し、構成を細かく制御するには **Plugin Mode** を使用します。対応する Sheets、Docs、Node の構成では、**Preset Mode** を使うと curated setup をより短く記述できます。
 
 <details open>
-<summary><strong>Preset Mode（推奨）</strong></summary>
-
-Preset は、必要な Facade API 登録とスタイルを含む Univer プラグインの curated collection です。
-
-```bash
-pnpm add @univerjs/presets @univerjs/preset-sheets-core
-```
-
-```ts
-import { UniverSheetsCorePreset } from '@univerjs/preset-sheets-core'
-import UniverPresetSheetsCoreEnUS from '@univerjs/preset-sheets-core/locales/en-US'
-import { createUniver, LocaleType, mergeLocales } from '@univerjs/presets'
-
-import '@univerjs/preset-sheets-core/lib/index.css'
-
-const { univerAPI } = createUniver({
-  locale: LocaleType.EN_US,
-  locales: {
-    [LocaleType.EN_US]: mergeLocales(UniverPresetSheetsCoreEnUS),
-  },
-  presets: [
-    UniverSheetsCorePreset({
-      container: 'app',
-    }),
-  ],
-})
-
-univerAPI.createWorkbook({})
-```
-
-</details>
-
-<details>
 <summary><strong>Plugin Mode</strong></summary>
 
-Plugin Mode では、パッケージ、スタイルの import、locale の merge、Facade API 登録、プラグイン順序をより低レベルで制御できます。
+Plugin Mode では、パッケージ、スタイルの import、locale の merge、Facade API 登録、プラグイン設定をより低レベルで制御できます。
 
 ```bash
 pnpm add @univerjs/core @univerjs/design @univerjs/docs @univerjs/docs-ui @univerjs/engine-formula @univerjs/engine-render @univerjs/sheets @univerjs/sheets-formula @univerjs/sheets-formula-ui @univerjs/sheets-numfmt @univerjs/sheets-numfmt-ui @univerjs/sheets-ui @univerjs/ui
@@ -213,6 +180,39 @@ univerAPI.createWorkbook({})
 
 </details>
 
+<details>
+<summary><strong>Preset Mode</strong></summary>
+
+Preset は、必要な Facade API 登録とスタイルを含む Univer プラグインの curated collection です。
+
+```bash
+pnpm add @univerjs/presets @univerjs/preset-sheets-core
+```
+
+```ts
+import { UniverSheetsCorePreset } from '@univerjs/preset-sheets-core'
+import UniverPresetSheetsCoreEnUS from '@univerjs/preset-sheets-core/locales/en-US'
+import { createUniver, LocaleType, mergeLocales } from '@univerjs/presets'
+
+import '@univerjs/preset-sheets-core/lib/index.css'
+
+const { univerAPI } = createUniver({
+  locale: LocaleType.EN_US,
+  locales: {
+    [LocaleType.EN_US]: mergeLocales(UniverPresetSheetsCoreEnUS),
+  },
+  presets: [
+    UniverSheetsCorePreset({
+      container: 'app',
+    }),
+  ],
+})
+
+univerAPI.createWorkbook({})
+```
+
+</details>
+
 ページにはコンテナが必要です。
 
 ```html
@@ -225,8 +225,8 @@ univerAPI.createWorkbook({})
 
 | 選択肢 | 使う場面 | はじめに読むもの |
 | --- | --- | --- |
-| **Preset Mode** | 最小限の設定で Sheets、Docs、Node の動作環境を作りたい場合。 | [`univer-presets`](https://github.com/dream-num/univer-presets) と [getting started guide](https://docs.univer.ai/guides/sheets/getting-started/installation) |
-| **Plugin Mode** | パッケージ、プラグイン登録順、遅延読み込み、実行時の構成を厳密に制御したい場合。 | このリポジトリの [`examples/`](../../examples) と [architecture guide](https://docs.univer.ai/guides/recipes/architecture/univer) |
+| **Plugin Mode** | パッケージ、構成済みの依存関係、遅延読み込み、実行時の構成を厳密に制御したい場合。 | このリポジトリの [`examples/`](../../examples) と [architecture guide](https://docs.univer.ai/guides/recipes/architecture/univer) |
+| **Preset Mode** | 最小限の設定で Sheets、Docs、Node の動作環境を作りたい場合。 | このリポジトリの [`presets/`](../../presets) と [getting started guide](https://docs.univer.ai/guides/sheets/getting-started/installation) |
 | **Headless Mode** | UI なしでサーバー側のワークブック/ドキュメント処理、数式計算、自動化を行いたい場合。 | [Headless Univer](https://docs.univer.ai/guides/sheets/getting-started/node) |
 
 すべての `@univerjs/*` パッケージは同じバージョンに揃えてください。Univer Pro パッケージを使う場合も、`@univerjs-pro/*` のバージョンを揃えてください。
@@ -279,7 +279,7 @@ Boundary principles:
 ## 🌐 エコシステム
 
 - **Core SDK**：[`dream-num/univer`](https://github.com/dream-num/univer)、この monorepo です。
-- **Presets**：[`dream-num/univer-presets`](https://github.com/dream-num/univer-presets)、ブラウザと Node.js アプリ向けの curated plugin bundle。
+- **Presets**：このリポジトリの [`presets/`](../../presets)。ブラウザと Node.js アプリ向けの curated plugin collection です。
 - **AI agent skills**：[`dream-num/univer-sdk-skills`](https://github.com/dream-num/univer-sdk-skills)、Univer 統合、Pro 機能、プラグイン開発、Node バックエンドに取り組む AI agent 向けの再利用可能な指示集です。[AI Skills guide](https://docs.univer.ai/guides/skills) も参照してください。
 - **Documentation**：[docs.univer.ai](https://docs.univer.ai)、Sheets、Docs、Slides、recipes、Pro guides を含みます。
 - **API Reference**：[docs.univer.ai/reference](https://docs.univer.ai/reference/classes/univer)、Facade API と生成された API reference。

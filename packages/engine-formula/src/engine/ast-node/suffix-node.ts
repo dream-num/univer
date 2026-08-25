@@ -15,11 +15,10 @@
  */
 
 import type { BaseFunction } from '../../functions/base-function';
-
 import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
 import type { CellReferenceObject } from '../reference-object/cell-reference-object';
 import type { BaseValueObject } from '../value-object/base-value-object';
-import { Inject } from '@univerjs/core';
+import { DateSystem, Inject } from '@univerjs/core';
 import { ErrorType } from '../../basics/error-type';
 import { suffixToken } from '../../basics/token';
 import { FUNCTION_NAMES_META } from '../../functions/meta/function-names';
@@ -47,7 +46,7 @@ export class SuffixNode extends BaseAstNode {
         return NodeType.SUFFIX;
     }
 
-    override execute() {
+    override execute(dateSystem: DateSystem = DateSystem.Date1900) {
         const children = this.getChildren();
         let value = children[0]?.getValue();
         let result: FunctionVariantType;
@@ -58,10 +57,10 @@ export class SuffixNode extends BaseAstNode {
 
         if (this._operatorString === suffixToken.PERCENTAGE) {
             if (value.isReferenceObject()) {
-                value = (value as BaseReferenceObject).toArrayValueObject();
+                value = (value as BaseReferenceObject).withDateSystem(dateSystem).toArrayValueObject();
             }
             result = this._functionExecutor!.calculate(
-                value as BaseValueObject,
+                (value as BaseValueObject).withDateSystem(dateSystem),
                 NumberValueObject.create(100)
             ) as FunctionVariantType;
 
@@ -75,7 +74,7 @@ export class SuffixNode extends BaseAstNode {
         } else {
             result = ErrorValueObject.create(ErrorType.VALUE);
         }
-        this.setValue(result);
+        this.setValue(result.withDateSystem(dateSystem));
     }
 
     private _handlerPound(value: FunctionVariantType) {

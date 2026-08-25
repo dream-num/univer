@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { DateSystem } from '@univerjs/core';
 import type { ArrayValueObject } from '../value-object/array-value-object';
 import type { BaseValueObject } from '../value-object/base-value-object';
 import { compareToken } from '../../basics/token';
@@ -21,7 +22,7 @@ import { ValueObjectFactory } from '../value-object/array-value-object';
 import { BooleanValueObject, createBooleanValueObjectByRawValue } from '../value-object/primitive-object';
 import { expandArrayValueObject } from './array-object';
 
-export function findCompareToken(str: string): [compareToken, BaseValueObject] {
+export function findCompareToken(str: string, dateSystem?: DateSystem): [compareToken, BaseValueObject] {
     const comparisonTokens: compareToken[] = [
         compareToken.EQUALS,
         compareToken.NOT_EQUAL,
@@ -34,11 +35,11 @@ export function findCompareToken(str: string): [compareToken, BaseValueObject] {
     for (const token of comparisonTokens) {
         if (str.startsWith(token)) {
             const content = str.substring(token.length);
-            return [token, ValueObjectFactory.create(content) as BaseValueObject];
+            return [token, ValueObjectFactory.create(content, false, dateSystem) as BaseValueObject];
         }
     }
 
-    return [compareToken.EQUALS, ValueObjectFactory.create(str) as BaseValueObject];
+    return [compareToken.EQUALS, ValueObjectFactory.create(str, false, dateSystem) as BaseValueObject];
 }
 
 /**
@@ -53,7 +54,10 @@ export function valueObjectCompare(range: BaseValueObject, criteria: BaseValueOb
         // TODO: criteria: 32, ">32", B5, "3?", "apple*", "*~?", TODAY(), ">"&A1:B3
         if (criteria.isString()) {
             const criteriaValueString = `${criteria.getValue()}`;
-            const [token, criteriaStringObject] = findCompareToken(criteriaValueString);
+            const [token, criteriaStringObject] = findCompareToken(
+                criteriaValueString,
+                criteria.getDateSystem()
+            );
             operator = token;
             criteria = criteriaStringObject;
         } else {

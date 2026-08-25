@@ -52,7 +52,7 @@ export class Dcount extends BaseFunction {
                 continue;
             }
 
-            if (isCriteriaMatch(criteriaValues, databaseValues, r)) {
+            if (isCriteriaMatch(criteriaValues, databaseValues, r, criteria.getDateSystem())) {
                 count++;
             }
         }

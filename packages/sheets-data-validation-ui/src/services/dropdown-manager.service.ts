@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { CellValue, DateKit, IDisposable, Nullable, Workbook } from '@univerjs/core';
+import type { CellValue, DateKit, IDisposable, IExcelDateTimeParts, Nullable, Workbook } from '@univerjs/core';
 import type { ISetRangeValuesCommandParams, ISheetLocation } from '@univerjs/sheets';
 import type { ListValidator } from '@univerjs/sheets-data-validation';
 import type { IDropdownParam, IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';
 import type { IUniverSheetsDataValidationUIConfig } from '../config/config';
-import { CellValueType, DataValidationErrorStyle, DataValidationRenderMode, dateKit, Disposable, DisposableCollection, ICommandService, IConfigService, Inject, Injector, IUniverInstanceService, numfmt, UniverInstanceType } from '@univerjs/core';
+import { CellValueType, DataValidationErrorStyle, DataValidationRenderMode, dateKit, DateSystem, Disposable, DisposableCollection, excelDateTimePartsToSerial, excelSerialToDateTimeParts, ICommandService, IConfigService, Inject, Injector, IUniverInstanceService, numfmt, UniverInstanceType } from '@univerjs/core';
 import { DataValidatorDropdownType, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { serializeListOptions, SetRangeValuesCommand, SheetsSelectionsService } from '@univerjs/sheets';
@@ -46,16 +46,43 @@ export interface IDropdownComponentProps {
     hideFn: () => void;
 }
 
-const transformDate = (value: Nullable<CellValue>) => {
-    if (value === undefined || value === null || typeof value === 'boolean') {
+type DatePatternType = 'datetime' | 'date' | 'time' | 'duration';
+type DateChangeType = 'date' | 'time';
+
+function getExceptionalDateLabel(parts: IExcelDateTimeParts | null, patternType: DatePatternType): string | undefined {
+    if (!parts || (parts.day !== 0 && !(parts.year === 1900 && parts.month === 2 && parts.day === 29))) {
+        return undefined;
+    }
+    const date = `${String(parts.year).padStart(4, '0')}-${String(parts.month).padStart(2, '0')}-${String(parts.day).padStart(2, '0')}`;
+    if (patternType === 'date') return date;
+    const time = `${String(parts.hours).padStart(2, '0')}:${String(parts.minutes).padStart(2, '0')}:${String(parts.seconds).padStart(2, '0')}`;
+    return `${date} ${time}`;
+}
+
+const transformDate = (value: Nullable<CellValue>, dateSystem: DateSystem, patternType: Exclude<DatePatternType, 'duration'>) => {
+    // A pure-time picker needs a native Date anchor that is valid in the workbook's date system.
+    const timeAnchorYear = dateSystem === DateSystem.Date1904 ? 1904 : 1900;
+    if (value === undefined || value === null) {
+        return patternType === 'time' ? dateKit(new Date(timeAnchorYear, 0, 1)) : undefined;
+    }
+    if (typeof value === 'boolean') {
         return undefined;
     }
 
-    // If the value is an empty string, return the current date
-    if (value === '') return dateKit();
+    if (value === '') return patternType === 'time' ? dateKit(new Date(timeAnchorYear, 0, 1)) : dateKit();
 
     if (typeof value === 'number' || !Number.isNaN(+value)) {
-        return dateKit(numfmt.format('yyyy-MM-dd HH:mm:ss', Number(value)));
+        const parts = excelSerialToDateTimeParts(Number(value), { dateSystem });
+        if (!parts) return undefined;
+        const year = patternType === 'time' ? timeAnchorYear : parts.year;
+        const month = patternType === 'time' ? 1 : parts.month;
+        // The picker needs a real Date anchor; the original pseudo-date is restored during save unless the date was changed.
+        const day = patternType === 'time'
+            ? 1
+            : parts.day === 0
+                ? 1
+                : parts.year === 1900 && parts.month === 2 && parts.day === 29 ? 28 : parts.day;
+        return dateKit(new Date(year, month - 1, day, parts.hours, parts.minutes, parts.seconds, Math.round(parts.fractionalSecond * 1000)));
     }
 
     const date = dateKit(value);
@@ -65,7 +92,11 @@ const transformDate = (value: Nullable<CellValue>) => {
     return undefined;
 };
 
-function getDefaultFormat(patternType: 'datetime' | 'date' | 'time', format: string) {
+function getDefaultFormat(patternType: DatePatternType, format: string) {
+    // Numfmt categorizes elapsed-time formats as time, so detect duration before comparing the general type.
+    if (patternType === 'duration' && numfmt.getFormatDateInfo(format).isDuration) {
+        return format;
+    }
     const originPartternType = getPatternType(format);
     if (patternType === originPartternType) {
         return format;
@@ -78,6 +109,8 @@ function getDefaultFormat(patternType: 'datetime' | 'date' | 'time', format: str
             return 'yyyy-MM-dd';
         case 'time':
             return 'HH:mm:ss';
+        case 'duration':
+            return '[h]:mm:ss';
     }
 }
 
@@ -166,29 +199,38 @@ export class DataValidationDropdownManagerService extends Disposable {
 
         let popupDisposable: Nullable<IDisposable>;
 
-        const handleSave = async (date: DateKit | undefined, targetPatternType: 'datetime' | 'date' | 'time') => {
-            if (!date) {
-                return true;
-            }
-            const newValue = date;
-            const cellData = worksheet.getCell(row, col);
-            const dateStr = newValue.format(targetPatternType === 'date' ? 'YYYY-MM-DD 00:00:00' : 'YYYY-MM-DD HH:mm:ss');
-            const serialNum = numfmt.parseDate(dateStr)?.v as number;
-            const serialTime = targetPatternType === 'time' ? (serialNum) % 1 : serialNum;
-            const cellStyle = workbook.getStyles().getStyleByCell(cellData);
-            const format = cellStyle?.n?.pattern ?? '';
+        const dateSystem = workbook.getDateSystem();
+        const originalValue = getCellValueOrigin(worksheet.getCellRaw(row, col));
+        const originalSerial = typeof originalValue === 'number'
+            ? originalValue
+            : typeof originalValue === 'string' && originalValue !== '' && !Number.isNaN(+originalValue) ? Number(originalValue) : null;
+        const originalParts = originalSerial == null ? null : excelSerialToDateTimeParts(originalSerial, { dateSystem });
+        const cellData = worksheet.getCell(row, col);
+        const cellStyle = workbook.getStyles().getStyleByCell(cellData);
+        const format = cellStyle?.n?.pattern ?? '';
 
+        const finishCellEditing = async () => {
+            await this._commandService.executeCommand(SetCellEditVisibleOperation.id, {
+                visible: false,
+                eventType: DeviceInputEventType.Keyboard,
+                unitId,
+                keycode: KeyCode.ESC,
+            } as IEditorBridgeServiceVisibleParam);
+            return true;
+        };
+
+        const handleSerialSave = async (serial: number, targetPatternType: DatePatternType, interceptValue: string) => {
             if (
                 rule.errorStyle !== DataValidationErrorStyle.STOP ||
                 (await validator.validator({
-                    value: serialTime,
+                    value: serial,
                     unitId,
                     subUnitId,
                     row,
                     column: col,
                     worksheet,
                     workbook,
-                    interceptValue: dateStr.replace('Z', '').replace('T', ' '),
+                    interceptValue,
                     t: CellValueType.NUMBER,
                 }, rule))
             ) {
@@ -202,8 +244,8 @@ export class DataValidationDropdownManagerService extends Disposable {
                         endRow: row,
                     },
                     value: {
-                        v: serialTime,
-                        t: 2,
+                        v: serial,
+                        t: CellValueType.NUMBER,
                         p: null,
                         f: null,
                         si: null,
@@ -214,27 +256,76 @@ export class DataValidationDropdownManagerService extends Disposable {
                         },
                     },
                 });
-                await this._commandService.executeCommand(SetCellEditVisibleOperation.id, {
-                    visible: false,
-                    eventType: DeviceInputEventType.Keyboard,
-                    unitId,
-                    keycode: KeyCode.ESC,
-                } as IEditorBridgeServiceVisibleParam);
-                return true;
-            } else {
-                if (this._injector.has(DataValidationRejectInputController)) {
-                    const rejectInputController = this._injector.get(DataValidationRejectInputController);
-                    rejectInputController.showReject(validator.getRuleFinalError(rule, { row, col, unitId, subUnitId }));
-                }
-                return false;
+                return finishCellEditing();
             }
+
+            if (this._injector.has(DataValidationRejectInputController)) {
+                const rejectInputController = this._injector.get(DataValidationRejectInputController);
+                rejectInputController.showReject(validator.getRuleFinalError(rule, { row, col, unitId, subUnitId }));
+            }
+            return false;
+        };
+
+        const handleSave = async (date: DateKit | undefined, targetPatternType: Exclude<DatePatternType, 'duration'>, changeType?: DateChangeType) => {
+            if (!date) {
+                return finishCellEditing();
+            }
+            const nativeDate = date.toDate();
+            const selectedParts = {
+                year: nativeDate.getFullYear(),
+                month: nativeDate.getMonth() + 1,
+                day: nativeDate.getDate(),
+                hours: nativeDate.getHours(),
+                minutes: nativeDate.getMinutes(),
+                seconds: nativeDate.getSeconds(),
+                fractionalSecond: nativeDate.getMilliseconds() / 1000,
+            };
+            // Native Date uses the nearest real date for Excel's serial 0/60; a time-only change must restore the pseudo-day.
+            const isExceptionalDateAnchor = originalParts != null && (
+                (originalParts.day === 0 && selectedParts.year === 1900 && selectedParts.month === 1 && selectedParts.day === 1) ||
+                (originalParts.year === 1900 && originalParts.month === 2 && originalParts.day === 29 && selectedParts.year === 1900 && selectedParts.month === 2 && selectedParts.day === 28)
+            );
+            // An empty pure-date cell starts at midnight; only an existing serial can supply hidden time fields.
+            const timeParts = targetPatternType === 'date'
+                ? (originalParts ?? { hours: 0, minutes: 0, seconds: 0, fractionalSecond: 0 })
+                : selectedParts;
+            const dateParts = {
+                year: targetPatternType === 'time' && originalParts && (originalSerial ?? 0) >= 1 ? originalParts.year : selectedParts.year,
+                month: targetPatternType === 'time' && originalParts && (originalSerial ?? 0) >= 1 ? originalParts.month : selectedParts.month,
+                day: targetPatternType === 'time' && originalParts && (originalSerial ?? 0) >= 1
+                    ? originalParts.day
+                    : targetPatternType === 'datetime' && changeType === 'time' && isExceptionalDateAnchor ? originalParts!.day : selectedParts.day,
+                hours: timeParts.hours,
+                minutes: timeParts.minutes,
+                seconds: timeParts.seconds,
+                fractionalSecond: timeParts.fractionalSecond,
+            };
+            const serialNum = excelDateTimePartsToSerial(dateParts, { dateSystem });
+            if (serialNum == null) return false;
+            const serialTime = targetPatternType === 'time' && (originalSerial == null || originalSerial < 1)
+                ? serialNum - Math.floor(serialNum)
+                : serialNum;
+            const dateStr = date.format(targetPatternType === 'date' ? 'YYYY-MM-DD 00:00:00' : 'YYYY-MM-DD HH:mm:ss');
+            return handleSerialSave(serialTime, targetPatternType, dateStr.replace('Z', '').replace('T', ' '));
         };
 
         let dropdownParam: IDropdownParam;
+        // Keep an out-of-range serial editable as a number instead of coercing it through an invalid native Date.
+        const unsupportedValue = originalSerial != null && !originalParts ? originalSerial : undefined;
+        const serialProps = unsupportedValue == null
+            ? {}
+            : {
+                unsupportedValue,
+                onSerialChange: (newValue: number | undefined) => {
+                    if (newValue == null || !excelSerialToDateTimeParts(newValue, { dateSystem })) {
+                        return Promise.resolve(false);
+                    }
+                    return handleSerialSave(newValue, validator.dropdownType === DataValidatorDropdownType.DATE ? 'date' : validator.dropdownType === DataValidatorDropdownType.TIME ? 'time' : 'datetime', String(newValue));
+                },
+            };
         switch (validator.dropdownType) {
             case DataValidatorDropdownType.DATE: {
-                const cellStr = getCellValueOrigin(worksheet.getCellRaw(row, col));
-                const originDate = transformDate(cellStr);
+                const originDate = transformDate(originalValue, dateSystem, 'date');
                 const showTime = Boolean(rule.bizInfo?.showTime);
 
                 dropdownParam = {
@@ -242,39 +333,60 @@ export class DataValidationDropdownManagerService extends Disposable {
                     type: 'datepicker',
                     props: {
                         showTime,
-                        onChange: (newValue) => handleSave(newValue, showTime ? 'datetime' : 'date'),
-                        defaultValue: originDate,
+                        onChange: (newValue, changeType) => handleSave(newValue, showTime ? 'datetime' : 'date', changeType),
+                        ...(originDate ? { defaultValue: originDate } : {}),
+                        exceptionalDateLabel: getExceptionalDateLabel(originalParts, showTime ? 'datetime' : 'date'),
                         patternType: 'date',
+                        preserveDefaultValue: true,
+                        ...serialProps,
                     },
                 };
                 break;
             }
 
             case DataValidatorDropdownType.TIME: {
-                const cellStr = getCellValueOrigin(worksheet.getCellRaw(row, col));
-                const originDate = transformDate(cellStr);
+                if (numfmt.getFormatDateInfo(format).isDuration) {
+                    dropdownParam = {
+                        location,
+                        type: 'datepicker',
+                        props: {
+                            durationValue: originalSerial ?? undefined,
+                            onDurationChange: (newValue) => newValue == null
+                                ? finishCellEditing()
+                                : handleSerialSave(newValue, 'duration', String(newValue)),
+                            patternType: 'duration',
+                            preserveDefaultValue: true,
+                        },
+                    };
+                    break;
+                }
+                const originDate = transformDate(originalValue, dateSystem, 'time');
 
                 dropdownParam = {
                     location,
                     type: 'datepicker',
                     props: {
-                        onChange: (newValue) => handleSave(newValue, 'time'),
-                        defaultValue: originDate,
+                        onChange: (newValue, changeType) => handleSave(newValue, 'time', changeType),
+                        ...(originDate ? { defaultValue: originDate } : {}),
                         patternType: 'time',
+                        preserveDefaultValue: true,
+                        ...serialProps,
                     },
                 };
                 break;
             }
             case DataValidatorDropdownType.DATETIME: {
-                const cellStr = getCellValueOrigin(worksheet.getCellRaw(row, col));
-                const originDate = transformDate(cellStr);
+                const originDate = transformDate(originalValue, dateSystem, 'datetime');
                 dropdownParam = {
                     location,
                     type: 'datepicker',
                     props: {
-                        onChange: (newValue) => handleSave(newValue, 'datetime'),
-                        defaultValue: originDate,
+                        onChange: (newValue, changeType) => handleSave(newValue, 'datetime', changeType),
+                        ...(originDate ? { defaultValue: originDate } : {}),
+                        exceptionalDateLabel: getExceptionalDateLabel(originalParts, 'datetime'),
                         patternType: 'datetime',
+                        preserveDefaultValue: true,
+                        ...serialProps,
                     },
                 };
                 break;

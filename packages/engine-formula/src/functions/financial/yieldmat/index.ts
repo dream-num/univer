@@ -49,19 +49,19 @@ export class Yieldmat extends BaseFunction {
 
         const [settlementObject, maturityObject, issueObject, rateObject, prObject, basisObject] = variants as BaseValueObject[];
 
-        const settlementSerialNumber = getDateSerialNumberByObject(settlementObject);
+        const settlementSerialNumber = getDateSerialNumberByObject(settlementObject, this.getDateSystem());
 
         if (typeof settlementSerialNumber !== 'number') {
             return settlementSerialNumber;
         }
 
-        const maturitySerialNumber = getDateSerialNumberByObject(maturityObject);
+        const maturitySerialNumber = getDateSerialNumberByObject(maturityObject, this.getDateSystem());
 
         if (typeof maturitySerialNumber !== 'number') {
             return maturitySerialNumber;
         }
 
-        const issueSerialNumber = getDateSerialNumberByObject(issueObject);
+        const issueSerialNumber = getDateSerialNumberByObject(issueObject, this.getDateSystem());
 
         if (typeof issueSerialNumber !== 'number') {
             return issueSerialNumber;
@@ -91,10 +91,10 @@ export class Yieldmat extends BaseFunction {
         // DSM = number of days from settlement to maturity.
         // DIM = number of days from issue to maturity.
         // A = number of days from issue to settlement.
-        const B = getNormalYearDaysByBasis(settlementSerialNumber, basisValue);
-        const { days: DSM } = getTwoDateDaysByBasis(settlementSerialNumber, maturitySerialNumber, basisValue);
-        const { days: DIM } = getTwoDateDaysByBasis(issueSerialNumber, maturitySerialNumber, basisValue);
-        const { days: A } = getTwoDateDaysByBasis(issueSerialNumber, settlementSerialNumber, basisValue);
+        const B = getNormalYearDaysByBasis(settlementSerialNumber, basisValue, this.getDateSystem());
+        const { days: DSM } = getTwoDateDaysByBasis(settlementSerialNumber, maturitySerialNumber, basisValue, this.getDateSystem());
+        const { days: DIM } = getTwoDateDaysByBasis(issueSerialNumber, maturitySerialNumber, basisValue, this.getDateSystem());
+        const { days: A } = getTwoDateDaysByBasis(issueSerialNumber, settlementSerialNumber, basisValue, this.getDateSystem());
 
         const result = ((1 + DIM / B * rateValue) / (prValue / 100 + A / B * rateValue) - 1) / (DSM / B);
 

@@ -347,6 +347,7 @@ const locale: typeof enUS = {
                 pasteErr: 'O intervalo está protegido e você não tem permissão para colar. Para colar, entre em contato com o criador.',
                 setStyleErr: 'O intervalo está protegido e você não tem permissão para definir estilos. Para definir estilos, entre em contato com o criador.',
                 copyErr: 'O intervalo está protegido e você não tem permissão para copiar. Para copiar, entre em contato com o criador.',
+                cutErr: 'O intervalo está protegido e você não tem permissão para recortar. Para recortar, entre em contato com o criador.',
                 workbookCopyErr: 'A pasta de trabalho está protegida e você não tem permissão para copiar. Para copiar, entre em contato com o criador.',
                 setRowColStyleErr: 'O intervalo está protegido e você não tem permissão para definir estilos de linha e coluna. Para definir estilos de linha e coluna, entre em contato com o criador.',
             },

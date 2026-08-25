@@ -18,12 +18,15 @@
 // See packages/core/src/shared/numfmt/LICENSE.
 
 import type { LocaleData, ParseData } from './types';
+import { DateSystem } from '../../types/enum/date-system';
 import { currencySymbols, reCurrencySymbols } from './constants';
 import { defaultLocale, getLocale } from './locale';
+import { excelDateTimePartsToSerial } from './serial-date';
 
 // eslint-disable-next-line ts/naming-convention
 export interface ParseOptions {
     locale?: string;
+    dateSystem?: DateSystem;
 }
 
 /*
@@ -181,8 +184,6 @@ okDateFormats.forEach((format) => {
         addFormatToTrie(format, dateTrieMD);
     }
 });
-
-const currentYear = new Date().getUTCFullYear();
 
 const PT = '.';
 const CM = ',';
@@ -396,9 +397,10 @@ interface IDateLocaleData {
     day: LocaleLookup[];
     dp: boolean;
     locale?: string;
+    dateSystem: DateSystem;
 }
 
-type DateLocaleLookups = Omit<IDateLocaleData, 'locale'>;
+type DateLocaleLookups = Omit<IDateLocaleData, 'dateSystem' | 'locale'>;
 
 interface ICachedDateLocaleLookups {
     lookups: DateLocaleLookups;
@@ -495,7 +497,7 @@ const nextToken = (
                     );
                 }
             } else if (token === 'j' || token === 'd') {
-                const match = /^(0?[1-9]|1\d|2\d|3[01])\b/.exec(string);
+                const match = /^(0{1,2}|0?[1-9]|1\d|2\d|3[01])\b/.exec(string);
                 if (match) {
                     result = nextToken(
                         string.slice(match[0].length),
@@ -569,10 +571,11 @@ const nextToken = (
                 throw new Error(`Unknown date token "${token}"`);
             }
         }
-        if (
-            result &&
-            isValidDate(data.year || 1916, data.month || 1, data.day ? +data.day : 1)
-        ) {
+        const year = result?.year || 1916;
+        const month = result?.month || 1;
+        const day = result?.day ? +result.day : 1;
+        const isDate1900SerialZero = localeData.dateSystem === DateSystem.Date1900 && year === 1900 && month === 1 && day === 0;
+        if (result && (isDate1900SerialZero || isValidDate(year, month, day))) {
             return result;
         }
     }
@@ -627,12 +630,12 @@ const getDateLocaleLookups = (locale: LocaleData): DateLocaleLookups => {
 };
 
 /** Parse a date or datetime string and return its serial value and format. */
-// eslint-disable-next-line complexity
 export function parseDate(value: string, options: ParseOptions = {}): ParseData<number> | null {
     const l10n = getLocale(options.locale || '') || defaultLocale;
     const localeData: IDateLocaleData = {
         ...getDateLocaleLookups(l10n),
         locale: options.locale,
+        dateSystem: options.dateSystem ?? DateSystem.Date1900,
     };
     const date = nextToken(
         normDateStr(value),
@@ -650,20 +653,32 @@ export function parseDate(value: string, options: ParseOptions = {}): ParseData<
         return null;
     }
 
-    const year = +(date.year ?? currentYear);
+    const year = +(date.year ?? new Date().getUTCFullYear());
     const day = date.day ?? '1';
-    let epoch = -Infinity;
-    if (year < 1900) {
+    const dateSystem = options.dateSystem ?? DateSystem.Date1900;
+    const dateSerial = excelDateTimePartsToSerial({
+        year,
+        month: date.month,
+        day: +day,
+        hours: 0,
+        minutes: 0,
+        seconds: 0,
+        fractionalSecond: 0,
+    }, { dateSystem });
+    if (dateSerial == null) {
         return null;
-    } else if (year <= 1900 && date.month <= 2) {
-        epoch = 25568;
-    } else if (year < 10000) {
-        epoch = 25569;
     }
-    const dateValue = (
-        Date.UTC(year, date.month - 1, +day) / 864e5
-    ) + epoch + (date.time || 0);
-    if (dateValue < 0 || dateValue > 2958465) {
+    const dateValue = dateSerial + (date.time || 0);
+    const maxDateSerial = excelDateTimePartsToSerial({
+        year: 9999,
+        month: 12,
+        day: 31,
+        hours: 0,
+        minutes: 0,
+        seconds: 0,
+        fractionalSecond: 0,
+    }, { dateSystem })!;
+    if (dateValue >= maxDateSerial + 1) {
         return null;
     }
 

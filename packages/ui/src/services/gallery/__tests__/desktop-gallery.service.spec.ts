@@ -44,6 +44,17 @@ describe('DesktopGalleryService', () => {
         sub.unsubscribe();
     });
 
+    it('replays the open state when the global gallery UI subscribes after the first open', () => {
+        const service = createService();
+        service.open({ images: ['a.png'] });
+        const snapshots: IGalleryProps[] = [];
+
+        const sub = service.gallery$.subscribe((value) => snapshots.push(value));
+
+        expect(snapshots).toEqual([{ open: true, images: ['a.png'] }]);
+        sub.unsubscribe();
+    });
+
     it('completes gallery state when the open handle is disposed', () => {
         const service = createService();
         let completed = false;

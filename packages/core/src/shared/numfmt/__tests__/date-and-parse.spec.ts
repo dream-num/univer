@@ -19,7 +19,8 @@
 
 // @vitest-environment node
 
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { DateSystem } from '../../../types/enum/date-system';
 import {
     isValidDate,
     parseBool,
@@ -29,6 +30,11 @@ import {
     parseValue,
 } from '../parse-value';
 import { dateFromSerial, dateToSerial } from '../serial-date';
+import { getNumfmtParseValueFilter } from '../utils';
+
+afterEach(() => {
+    vi.useRealTimers();
+});
 
 describe('numfmt dates and value parsing', () => {
     it('converts the spreadsheet serial epoch', () => {
@@ -39,6 +45,27 @@ describe('numfmt dates and value parsing', () => {
     it('keeps the Excel 1900 leap-day contract', () => {
         expect(dateFromSerial(60)).toEqual([1900, 2, 29, 0, 0, 0]);
         expect(dateFromSerial(60, { leap1900: false })).toEqual([1900, 2, 28, 0, 0, 0]);
+    });
+
+    it('parses dates into the selected Excel date system', () => {
+        expect(parseDate('1904-1-1', { dateSystem: DateSystem.Date1904 })).toEqual({ v: 0, z: 'yyyy-m-d' });
+        expect(parseDate('1/0/1900', { dateSystem: DateSystem.Date1900 })).toEqual({ v: 0, z: 'mm/dd/yyyy' });
+        expect(parseDate('2/29/1900', { dateSystem: DateSystem.Date1900 })).toEqual({ v: 60, z: 'm/d/yyyy' });
+        expect(parseDate('2/29/1900', { dateSystem: DateSystem.Date1904 })).toBeNull();
+    });
+
+    it('resolves an omitted year when parsing instead of when loading the module', () => {
+        vi.useFakeTimers();
+        vi.setSystemTime(new Date('2031-06-01T00:00:00Z'));
+
+        expect(parseDate('1/2', { dateSystem: DateSystem.Date1900 })).toEqual({ v: 47850, z: 'm/d' });
+    });
+
+    it('passes workbook parsing options through the common value filter', () => {
+        expect(getNumfmtParseValueFilter('31/12/2025', {
+            locale: 'en_GB',
+            dateSystem: DateSystem.Date1904,
+        })).toEqual({ v: 44560, z: 'dd/mm/yyyy' });
     });
 
     it('parses representative values', () => {

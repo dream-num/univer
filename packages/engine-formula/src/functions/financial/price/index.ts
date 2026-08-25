@@ -15,6 +15,7 @@
  */
 
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { DateSystem } from '@univerjs/core';
 import { getDateSerialNumberByObject } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
 import { calculatePrice, validCouppcdIsGte0ByTwoDate } from '../../../basics/financial';
@@ -51,13 +52,13 @@ export class Price extends BaseFunction {
 
         const [settlementObject, maturityObject, rateObject, yldObject, redemptionObject, frequencyObject, basisObject] = variants as BaseValueObject[];
 
-        const settlementSerialNumber = getDateSerialNumberByObject(settlementObject);
+        const settlementSerialNumber = getDateSerialNumberByObject(settlementObject, this.getDateSystem());
 
         if (typeof settlementSerialNumber !== 'number') {
             return settlementSerialNumber;
         }
 
-        const maturitySerialNumber = getDateSerialNumberByObject(maturityObject);
+        const maturitySerialNumber = getDateSerialNumberByObject(maturityObject, this.getDateSystem());
 
         if (typeof maturitySerialNumber !== 'number') {
             return maturitySerialNumber;
@@ -73,6 +74,7 @@ export class Price extends BaseFunction {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
+        // Excel treats serial zero as an invalid settlement date in the 1900 date system.
         if (
             rateValue < 0 ||
             yldValue < 0 ||
@@ -81,12 +83,13 @@ export class Price extends BaseFunction {
             basisValue < 0 ||
             basisValue > 4 ||
             settlementSerialNumber >= maturitySerialNumber ||
-            !validCouppcdIsGte0ByTwoDate(settlementSerialNumber, maturitySerialNumber, frequencyValue)
+            (this.getDateSystem() === DateSystem.Date1900 && settlementSerialNumber <= 0) ||
+            !validCouppcdIsGte0ByTwoDate(settlementSerialNumber, maturitySerialNumber, frequencyValue, this.getDateSystem())
         ) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        const result = calculatePrice(settlementSerialNumber, maturitySerialNumber, rateValue, yldValue, redemptionValue, frequencyValue, basisValue);
+        const result = calculatePrice(settlementSerialNumber, maturitySerialNumber, rateValue, yldValue, redemptionValue, frequencyValue, basisValue, this.getDateSystem());
 
         return NumberValueObject.create(result);
     }

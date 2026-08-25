@@ -68,6 +68,7 @@ describe('numfmt pattern parser', () => {
             hours: true,
             minutes: true,
             seconds: true,
+            isDuration: false,
             clockType: 24,
         });
     });

@@ -15,13 +15,9 @@
  */
 
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import {
-    excelDateSerial,
-    excelSerialToDate,
-    getDateSerialNumberByObject,
-    getTwoDateDaysByBasis,
-} from '../../../basics/date';
+import { getDateSerialNumberByObject, getTwoDateDaysByBasis } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
+import { calculateCoupncd } from '../../../basics/financial';
 import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
@@ -43,13 +39,13 @@ export class Coupdaysnc extends BaseFunction {
 
         const [settlementObject, maturityObject, frequencyObject, basisObject] = variants as BaseValueObject[];
 
-        const settlementSerialNumber = getDateSerialNumberByObject(settlementObject);
+        const settlementSerialNumber = getDateSerialNumberByObject(settlementObject, this.getDateSystem());
 
         if (typeof settlementSerialNumber !== 'number') {
             return settlementSerialNumber;
         }
 
-        const maturitySerialNumber = getDateSerialNumberByObject(maturityObject);
+        const maturitySerialNumber = getDateSerialNumberByObject(maturityObject, this.getDateSystem());
 
         if (typeof maturitySerialNumber !== 'number') {
             return maturitySerialNumber;
@@ -71,25 +67,14 @@ export class Coupdaysnc extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        const settlementDate = excelSerialToDate(settlementSerialNumber);
-        const coupDate = excelSerialToDate(maturitySerialNumber);
+        const coupDateSerialNumber = calculateCoupncd(
+            settlementSerialNumber,
+            maturitySerialNumber,
+            frequencyValue,
+            this.getDateSystem()
+        );
 
-        coupDate.setUTCFullYear(settlementDate.getUTCFullYear());
-
-        if (coupDate < settlementDate) {
-            coupDate.setUTCFullYear(coupDate.getUTCFullYear() + 1);
-        }
-
-        // eslint-disable-next-line
-        while (coupDate > settlementDate) {
-            coupDate.setUTCMonth(coupDate.getUTCMonth() - 12 / frequencyValue);
-        }
-
-        coupDate.setUTCMonth(coupDate.getUTCMonth() + 12 / frequencyValue);
-
-        const coupDateSerialNumber = excelDateSerial(coupDate);
-
-        const { days } = getTwoDateDaysByBasis(settlementSerialNumber, coupDateSerialNumber, basisValue);
+        const { days } = getTwoDateDaysByBasis(settlementSerialNumber, coupDateSerialNumber, basisValue, this.getDateSystem());
 
         return NumberValueObject.create(days);
     }

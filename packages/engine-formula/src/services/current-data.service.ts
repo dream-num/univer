@@ -36,6 +36,7 @@ import type {
 } from '../basics/common';
 import {
     createIdentifier,
+    DateSystem,
     Disposable,
     Inject,
     IUniverInstanceService,
@@ -125,6 +126,7 @@ export interface IFormulaCurrentConfigService {
     getClearDependencyTreeCache(): IDirtyUnitSheetNameMap;
 
     getLocale(): LocaleType;
+    getDateSystem(unitId?: string): DateSystem;
 
     getSheetsInfo(): {
         sheetOrder: string[];
@@ -314,6 +316,11 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 
     getLocale() {
         return this._localeService.getCurrentLocale();
+    }
+
+    getDateSystem(unitId = this._executeUnitId ?? undefined): DateSystem {
+        if (!unitId) return DateSystem.Date1900;
+        return this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)?.getDateSystem() ?? DateSystem.Date1900;
     }
 
     getSheetsInfo() {

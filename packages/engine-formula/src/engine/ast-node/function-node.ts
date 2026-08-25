@@ -15,7 +15,6 @@
  */
 
 import type { BaseFunction } from '../../functions/base-function';
-
 import type { LexerNode } from '../analysis/lexer-node';
 import type {
     AsyncArrayObject,
@@ -26,7 +25,7 @@ import type {
 } from '../reference-object/base-reference-object';
 import type { BaseValueObject } from '../value-object/base-value-object';
 import type { FormulaFunctionResultValueType } from '../value-object/primitive-object';
-import { Inject, Injector } from '@univerjs/core';
+import { DateSystem, Inject, Injector } from '@univerjs/core';
 import { AstNodePromiseType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { matchToken } from '../../basics/token';
@@ -90,14 +89,14 @@ export class FunctionNode extends BaseAstNode {
         return this._functionExecutor.lazyIfReferenceArrayArgumentIndexes.includes(this.getChildren().indexOf(child));
     }
 
-    override async executeAsync() {
+    override async executeAsync(dateSystem: DateSystem = DateSystem.Date1900) {
         const children = this.getChildren();
 
         this._compatibility();
 
         const resultVariant = this._functionExecutor.needsAstChildren
-            ? this._calculateAst(children)
-            : await this._calculateAsync(this._collectVariants(children));
+            ? this._calculateAst(children, dateSystem)
+            : await this._calculateAsync(this._collectVariants(children, dateSystem), dateSystem);
         let result: FunctionVariantType;
 
         if (resultVariant.isAsyncObject() || resultVariant.isAsyncArrayObject()) {
@@ -106,7 +105,7 @@ export class FunctionNode extends BaseAstNode {
             result = resultVariant as FunctionVariantType;
         }
 
-        result = this._normalizeTopLevelLegacyArrayResult(result);
+        result = this._normalizeTopLevelLegacyArrayResult(result).withDateSystem(dateSystem) as FunctionVariantType;
 
         this._setEmbeddedArrayFormulaToResult(result);
 
@@ -117,16 +116,16 @@ export class FunctionNode extends BaseAstNode {
         return Promise.resolve(AstNodePromiseType.SUCCESS);
     }
 
-    override execute() {
+    override execute(dateSystem: DateSystem = DateSystem.Date1900) {
         const children = this.getChildren();
 
         this._compatibility();
 
         const resultVariant = (this._functionExecutor.needsAstChildren
-            ? this._calculateAst(children)
-            : this._calculate(this._collectVariants(children))) as FunctionVariantType;
+            ? this._calculateAst(children, dateSystem)
+            : this._calculate(this._collectVariants(children, dateSystem), dateSystem)) as FunctionVariantType;
 
-        const result = this._normalizeTopLevelLegacyArrayResult(resultVariant);
+        const result = this._normalizeTopLevelLegacyArrayResult(resultVariant).withDateSystem(dateSystem) as FunctionVariantType;
 
         this._setEmbeddedArrayFormulaToResult(result);
 
@@ -135,12 +134,12 @@ export class FunctionNode extends BaseAstNode {
         this.setValue(result as FunctionVariantType);
     }
 
-    private _collectVariants(children: BaseAstNode[]): BaseValueObject[] {
+    private _collectVariants(children: BaseAstNode[], dateSystem: DateSystem): BaseValueObject[] {
         const variants: BaseValueObject[] = [];
         const childrenCount = children.length;
 
         for (let i = 0; i < childrenCount; i++) {
-            const object = this._getChildVariant(children[i]);
+            const object = this._getChildVariant(children[i], dateSystem);
 
             if (object == null) {
                 continue;
@@ -152,7 +151,7 @@ export class FunctionNode extends BaseAstNode {
         return variants;
     }
 
-    private _getChildVariant(child: BaseAstNode): FunctionVariantType | undefined {
+    private _getChildVariant(child: BaseAstNode, dateSystem: DateSystem): FunctionVariantType | undefined {
         const object = child.getValue();
 
         if (object == null) {
@@ -166,10 +165,10 @@ export class FunctionNode extends BaseAstNode {
         // In the SUBTOTAL function, we need to get rowData information, we can only use ReferenceObject
         if (object.isReferenceObject() && !this._functionExecutor.needsReferenceObject) {
             // Array converted from reference object needs to be marked
-            return (object as BaseReferenceObject).toArrayValueObject();
+            return (object as BaseReferenceObject).withDateSystem(dateSystem).toArrayValueObject();
         }
 
-        return object;
+        return object.withDateSystem(dateSystem);
     }
 
     isFunctionExecutorArgumentsIgnoreNumberPattern() {
@@ -279,12 +278,15 @@ export class FunctionNode extends BaseAstNode {
     /**
      * Transform the result of a custom function to a NodeValueType.
      */
-    private _handleCustomResult(resultVariantCustom: FormulaFunctionResultValueType): NodeValueType {
+    private _handleCustomResult(
+        resultVariantCustom: FormulaFunctionResultValueType,
+        dateSystem: DateSystem
+    ): NodeValueType {
         if (typeof resultVariantCustom !== 'object' || resultVariantCustom == null) {
-            return ValueObjectFactory.create(resultVariantCustom);
+            return ValueObjectFactory.create(resultVariantCustom, false, dateSystem);
         }
 
-        const arrayValues = transformToValueObject(resultVariantCustom);
+        const arrayValues = transformToValueObject(resultVariantCustom, false, dateSystem);
         return ArrayValueObject.create({
             calculateValueList: arrayValues,
             rowCount: arrayValues.length,
@@ -322,7 +324,7 @@ export class FunctionNode extends BaseAstNode {
         });
     }
 
-    private _calculate(variants: BaseValueObject[]) {
+    private _calculate(variants: BaseValueObject[], dateSystem: DateSystem) {
         // Check the number of parameters
         const { minParams, maxParams } = this._functionExecutor;
         if (minParams !== -1 && maxParams !== -1 && (variants.length < minParams || variants.length > maxParams)) {
@@ -337,7 +339,7 @@ export class FunctionNode extends BaseAstNode {
                 ...this._mapVariantsToValues(variants)
             ) as FormulaFunctionResultValueType;
 
-            resultVariant = this._handleCustomResult(resultVariantCustom);
+            resultVariant = this._handleCustomResult(resultVariantCustom, dateSystem);
         } else {
             this._handleAddressFunction();
             resultVariant = this._functionExecutor.calculate(...variants);
@@ -346,7 +348,7 @@ export class FunctionNode extends BaseAstNode {
         return resultVariant;
     }
 
-    private _calculateAst(children: BaseAstNode[]) {
+    private _calculateAst(children: BaseAstNode[], dateSystem: DateSystem) {
         const { minParams, maxParams } = this._functionExecutor;
         if (minParams !== -1 && maxParams !== -1 && (children.length < minParams || children.length > maxParams)) {
             return ErrorValueObject.create(ErrorType.NA);
@@ -355,10 +357,10 @@ export class FunctionNode extends BaseAstNode {
         this._setRefInfo();
         this._handleAddressFunction();
 
-        return this._functionExecutor.calculateAst(children, (node) => this._getChildVariant(node) ?? null);
+        return this._functionExecutor.calculateAst(children, (node) => this._getChildVariant(node, dateSystem) ?? null);
     }
 
-    private async _calculateAsync(variants: BaseValueObject[]) {
+    private async _calculateAsync(variants: BaseValueObject[], dateSystem: DateSystem) {
         // Check the number of parameters
         const { minParams, maxParams } = this._functionExecutor;
         if (minParams !== -1 && maxParams !== -1 && (variants.length < minParams || variants.length > maxParams)) {
@@ -374,7 +376,7 @@ export class FunctionNode extends BaseAstNode {
                 ...this._mapVariantsToValues(variants)
             );
 
-            resultVariant = this._handleCustomResult(resultVariantCustom);
+            resultVariant = this._handleCustomResult(resultVariantCustom, dateSystem);
         } else {
             this._handleAddressFunction();
             resultVariant = this._functionExecutor.calculate(...variants);
@@ -400,6 +402,7 @@ export class FunctionNode extends BaseAstNode {
         const { currentUnitId, currentSubUnitId, currentRow, currentColumn, currentRowCount, currentColumnCount } = this._runtimeService;
 
         this._functionExecutor.setRefInfo(currentUnitId, currentSubUnitId, currentRow, currentColumn, currentRowCount, currentColumnCount);
+        this._functionExecutor.setDateSystem(this._currentConfigService.getDateSystem(currentUnitId));
 
         if (this._functionExecutor.needsSheetRowColumnCount) {
             const { rowCount, columnCount } = this._currentConfigService.getSheetRowColumnCount(currentUnitId, currentSubUnitId);

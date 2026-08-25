@@ -15,6 +15,7 @@
  */
 
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { DateSystem, EXCEL_1904_OFFSET } from '@univerjs/core';
 import { getDateSerialNumberByObject } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
 import { calculateCouppcd } from '../../../basics/financial';
@@ -39,13 +40,13 @@ export class Couppcd extends BaseFunction {
 
         const [settlementObject, maturityObject, frequencyObject, basisObject] = variants as BaseValueObject[];
 
-        const settlementSerialNumber = getDateSerialNumberByObject(settlementObject);
+        const settlementSerialNumber = getDateSerialNumberByObject(settlementObject, this.getDateSystem());
 
         if (typeof settlementSerialNumber !== 'number') {
             return settlementSerialNumber;
         }
 
-        const maturitySerialNumber = getDateSerialNumberByObject(maturityObject);
+        const maturitySerialNumber = getDateSerialNumberByObject(maturityObject, this.getDateSystem());
 
         if (typeof maturitySerialNumber !== 'number') {
             return maturitySerialNumber;
@@ -67,11 +68,20 @@ export class Couppcd extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        let result = calculateCouppcd(settlementSerialNumber, maturitySerialNumber, frequencyValue);
+        let result = calculateCouppcd(settlementSerialNumber, maturitySerialNumber, frequencyValue, this.getDateSystem());
 
         // special handle for excel
-        if (result < 0) {
+        if (this.getDateSystem() === DateSystem.Date1900 && result < 0) {
             result = 0;
+        }
+
+        // Excel's 1904 COUPPCD text path keeps the legacy 1900 serial offset.
+        if (
+            this.getDateSystem() === DateSystem.Date1904 &&
+            settlementObject.isString() &&
+            maturityObject.isString()
+        ) {
+            result -= EXCEL_1904_OFFSET;
         }
 
         return NumberValueObject.create(result);

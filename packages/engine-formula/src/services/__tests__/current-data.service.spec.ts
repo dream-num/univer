@@ -14,7 +14,15 @@
  * limitations under the License.
  */
 
-import { Injector, IUniverInstanceService, LocaleService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
+import {
+    DateSystem,
+    Injector,
+    IUniverInstanceService,
+    LocaleService,
+    LocaleType,
+    ObjectMatrix,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { FormulaDataModel } from '../../models/formula-data.model';
 import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from '../current-data.service';
@@ -160,7 +168,7 @@ describe('FormulaCurrentConfigService', () => {
     });
 
     it('should load sheet data from model when allUnitData is omitted and expose workbook info', () => {
-        const { service, formulaDataModel, localeService } = createService();
+        const { service, workbookById, formulaDataModel, localeService } = createService();
 
         formulaDataModel.getCalculateData.mockReturnValue({
             allUnitData: {
@@ -205,8 +213,14 @@ describe('FormulaCurrentConfigService', () => {
             sheetOrder: ['sheet-current'],
             sheetNameMap: { 'sheet-current': 'Main' },
         });
+        workbookById.set('unit-current', {
+            getSnapshot: () => ({ locale: LocaleType.FR_FR }),
+        });
         expect(service.getLocale()).toBe('zhCN');
         expect(localeService.getCurrentLocale).toHaveBeenCalled();
+        workbookById.set('date-1904', { getDateSystem: () => DateSystem.Date1904 });
+        expect(service.getDateSystem('date-1904')).toBe(DateSystem.Date1904);
+        expect(service.getDateSystem('missing')).toBe(DateSystem.Date1900);
     });
 
     it('should resolve sheet size, filtered rows and lightweight data loading', () => {

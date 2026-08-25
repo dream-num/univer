@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DateSystem } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
@@ -24,7 +25,7 @@ import { FUNCTION_NAMES_DATE } from '../../function-names';
 import { NetworkdaysIntl } from '../index';
 
 describe('Test networkdays.intl function', () => {
-    const testFunction = new NetworkdaysIntl(FUNCTION_NAMES_DATE.NETWORKDAYS);
+    const testFunction = new NetworkdaysIntl(FUNCTION_NAMES_DATE.NETWORKDAYS_INTL);
 
     describe('NetworkdaysIntl', () => {
         it('Value is all date string', () => {
@@ -54,6 +55,19 @@ describe('Test networkdays.intl function', () => {
             });
             const result3 = testFunction.calculate(startDate, endDate, weekend3, holidays3);
             expect(getObjectValue(result3)).toStrictEqual(85);
+        });
+
+        it('uses the configured date system for serial zero', () => {
+            const startDate = NumberValueObject.create(0);
+            const endDate = NumberValueObject.create(0);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
+            expect(getObjectValue(testFunction.calculate(startDate, endDate))).toBe(0);
+
+            testFunction.setDateSystem(DateSystem.Date1904);
+            expect(getObjectValue(testFunction.calculate(startDate, endDate))).toBe(1);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
         });
 
         it('Value is number or date string', () => {
@@ -217,6 +231,19 @@ describe('Test networkdays.intl function', () => {
             const endDate3 = StringValueObject.create('2024-11-26');
             const result3 = testFunction.calculate(startDate3, endDate3);
             expect(getObjectValue(result3)).toBe(2);
+        });
+        it('checks the serial-zero boundary in both date systems', () => {
+            const startDate = NumberValueObject.create(0);
+            const endDate = NumberValueObject.create(366);
+            const weekend = NumberValueObject.create(1);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
+            expect(getObjectValue(testFunction.calculate(startDate, endDate, weekend))).toBe(261);
+
+            testFunction.setDateSystem(DateSystem.Date1904);
+            expect(getObjectValue(testFunction.calculate(startDate, endDate, weekend))).toBe(261);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
         });
     });
 });

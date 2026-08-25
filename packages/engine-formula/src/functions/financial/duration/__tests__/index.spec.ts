@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DateSystem } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
@@ -58,6 +59,23 @@ describe('Test duration function', () => {
             const basis = NumberValueObject.create(1);
             const result = testFunction.calculate(settlement, maturity, coupon, yld, frequency, basis);
             expect(getObjectValue(result)).toBe(ErrorType.NUM);
+        });
+
+        it('accepts valid first-year dates in the 1904 date system', () => {
+            const dateSystemFunction = new Duration(FUNCTION_NAMES_FINANCIAL.DURATION);
+            const calculate = () => dateSystemFunction.calculate(
+                NumberValueObject.create(1),
+                NumberValueObject.create(182),
+                NumberValueObject.create(0.08),
+                NumberValueObject.create(0.09),
+                NumberValueObject.create(2),
+                NumberValueObject.create(1)
+            );
+
+            dateSystemFunction.setDateSystem(DateSystem.Date1900);
+            expect(getObjectValue(calculate())).toBe(ErrorType.NUM);
+            dateSystemFunction.setDateSystem(DateSystem.Date1904);
+            expect(getObjectValue(calculate(), true)).toBe(0.497252747253);
         });
 
         it('Coupon < 0', () => {
@@ -193,6 +211,24 @@ describe('Test duration function', () => {
             const basis = NumberValueObject.create(1);
             const result = testFunction.calculate(settlement, maturity, coupon, yld, frequency, basis);
             expect(getObjectValue(result)).toBe(ErrorType.VALUE);
+        });
+        it('checks the serial-zero boundary in both date systems', () => {
+            const args = [
+                NumberValueObject.create(0),
+                NumberValueObject.create(366),
+                NumberValueObject.create(0.08),
+                NumberValueObject.create(0.09),
+                NumberValueObject.create(2),
+                NumberValueObject.create(1),
+            ] as const;
+
+            testFunction.setDateSystem(DateSystem.Date1900);
+            expect(getObjectValue(testFunction.calculate(...args))).toBe(ErrorType.NUM);
+
+            testFunction.setDateSystem(DateSystem.Date1904);
+            expect(getObjectValue(testFunction.calculate(...args))).toBeCloseTo(0.9806803475688667, 12);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
         });
     });
 });

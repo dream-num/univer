@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DateSystem } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
@@ -35,6 +36,15 @@ describe('Test tbillyield function', () => {
             expect(getObjectValue(result, true)).toBe(0.0914169629253);
         });
 
+        it('uses the configured date system for first-year serial dates', () => {
+            const args = [NumberValueObject.create(0), NumberValueObject.create(366), NumberValueObject.create(98.45)] as const;
+            testFunction.setDateSystem(DateSystem.Date1900);
+            expect(getObjectValue(testFunction.calculate(...args), true)).toBeCloseTo(0.0154859336103, 10);
+            testFunction.setDateSystem(DateSystem.Date1904);
+            expect(getObjectValue(testFunction.calculate(...args), true)).toBeCloseTo(0.0154859336103, 10);
+            testFunction.setDateSystem(DateSystem.Date1900);
+        });
+
         it('Settlement >= maturity', () => {
             const settlement = StringValueObject.create('2018-3-31');
             const maturity = StringValueObject.create('2008-6-1');
@@ -49,6 +59,13 @@ describe('Test tbillyield function', () => {
             const pr = NumberValueObject.create(98.45);
             const result = testFunction.calculate(settlement, maturity, pr);
             expect(getObjectValue(result)).toBe(ErrorType.NUM);
+        });
+
+        it('handles serial 60 at the 1900 leap-day boundary', () => {
+            const args = [NumberValueObject.create(60), NumberValueObject.create(366), NumberValueObject.create(90)] as const;
+
+            testFunction.setDateSystem(DateSystem.Date1900);
+            expect(getObjectValue(testFunction.calculate(...args), true)).toBeCloseTo(0.13071895424836602, 12);
         });
 
         it('pr <= 0', () => {

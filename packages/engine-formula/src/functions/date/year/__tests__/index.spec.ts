@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DateSystem } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
@@ -33,6 +34,20 @@ describe('Test year function', () => {
             const serialNumber = StringValueObject.create('2020-01-02');
             const result = testFunction.calculate(serialNumber);
             expect(result.getValue()).toStrictEqual(2020);
+        });
+
+        it('uses the configured Excel date system', () => {
+            const serialNumber = NumberValueObject.create(0);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
+            expect(testFunction.calculate(serialNumber).getValue()).toBe(1900);
+            expect(testFunction.calculate(NumberValueObject.create(59)).getValue()).toBe(1900);
+
+            testFunction.setDateSystem(DateSystem.Date1904);
+            expect(testFunction.calculate(serialNumber).getValue()).toBe(1904);
+            expect(testFunction.calculate(NumberValueObject.create(59)).getValue()).toBe(1904);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
         });
 
         it('Serial number is array', () => {

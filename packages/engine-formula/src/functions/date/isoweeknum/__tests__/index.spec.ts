@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DateSystem } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
@@ -40,6 +41,14 @@ describe('Test isoweeknum function', () => {
             const date = StringValueObject.create('2011-1-1');
             const result = testFunction.calculate(date);
             expect(result.getValue()).toStrictEqual(52);
+        });
+
+        it('uses the 1904 epoch when serial is zero', () => {
+            testFunction.setDateSystem(DateSystem.Date1900);
+            expect(testFunction.calculate(NumberValueObject.create(0)).getValue()).toBe(52);
+            testFunction.setDateSystem(DateSystem.Date1904);
+            expect(testFunction.calculate(NumberValueObject.create(0)).getValue()).toBe(53);
+            testFunction.setDateSystem(DateSystem.Date1900);
         });
 
         it('date is error', () => {
@@ -76,6 +85,23 @@ describe('Test isoweeknum function', () => {
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
                 [52, 52, 52, 52, ErrorType.NAME, 4, 8],
             ]);
+        });
+        it('checks the serial-zero boundary in both date systems', () => {
+            const date = NumberValueObject.create(0);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
+            expect(testFunction.calculate(date).getValue()).toBe(52);
+
+            testFunction.setDateSystem(DateSystem.Date1904);
+            expect(testFunction.calculate(date).getValue()).toBe(53);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
+        });
+
+        it('uses the Excel weekday for serial 60 in the 1900 date system', () => {
+            testFunction.setDateSystem(DateSystem.Date1900);
+
+            expect(testFunction.calculate(NumberValueObject.create(60)).getValue()).toBe(9);
         });
     });
 });

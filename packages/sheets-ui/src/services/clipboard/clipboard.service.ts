@@ -54,6 +54,7 @@ import {
     extractPureTextFromCell,
     generateRandomId,
     getEmptyCell,
+    getNumfmtLocaleTag,
     ICommandService,
     ILogService,
     Inject,
@@ -252,6 +253,12 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                 this._univerInstanceService,
                 this._renderManagerService
             )?.getCurrentParam(),
+            getNumfmtParseOptions: () => {
+                const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+                return workbook
+                    ? { locale: getNumfmtLocaleTag(workbook.getSnapshot().locale), dateSystem: workbook.getDateSystem() }
+                    : undefined;
+            },
         });
 
         this._usmToHtml = new USMToHtmlService();

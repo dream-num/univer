@@ -53,7 +53,7 @@ export class Dmin extends BaseFunction {
                 continue;
             }
 
-            if (isCriteriaMatch(criteriaValues, databaseValues, r)) {
+            if (isCriteriaMatch(criteriaValues, databaseValues, r, criteria.getDateSystem())) {
                 result = Math.min(result, value);
                 count++;
             }

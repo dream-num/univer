@@ -16,7 +16,8 @@
 
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { excelDateSerial, excelSerialToDate, getDateSerialNumberByObject, getDaysInMonth } from '../../../basics/date';
+import { DateSystem, excelDateSerial, excelSerialToDate, excelSerialToDateTimeParts } from '@univerjs/core';
+import { getDateSerialNumberByObject, getDaysInMonth } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
@@ -56,13 +57,13 @@ export class Datedif extends BaseFunction {
             return _unit;
         }
 
-        const startDateSerialNumber = getDateSerialNumberByObject(_startDate);
+        const startDateSerialNumber = getDateSerialNumberByObject(_startDate, this.getDateSystem());
 
         if (typeof startDateSerialNumber !== 'number') {
             return startDateSerialNumber;
         }
 
-        const endDateSerialNumber = getDateSerialNumberByObject(_endDate);
+        const endDateSerialNumber = getDateSerialNumberByObject(_endDate, this.getDateSystem());
 
         if (typeof endDateSerialNumber !== 'number') {
             return endDateSerialNumber;
@@ -80,15 +81,20 @@ export class Datedif extends BaseFunction {
     }
 
     private _getResultByUnit(startDateSerialNumber: number, endDateSerialNumber: number, unit: BaseValueObject): BaseValueObject {
-        const startDateDate = excelSerialToDate(startDateSerialNumber);
-        const startYear = startDateDate.getUTCFullYear();
-        const startMonth = startDateDate.getUTCMonth() + 1;
-        const startDay = startDateDate.getUTCDate();
+        const startDateDate = excelSerialToDate(startDateSerialNumber, this.getDateSystem());
+        // Native Date cannot represent Excel's fictitious 1900-02-29 (serial 60), so use
+        // the decoded Excel fields for calendar calculations that depend on the day value.
+        const startDateParts = excelSerialToDateTimeParts(startDateSerialNumber, { dateSystem: this.getDateSystem() });
+        const startIs1900SerialZero = this.getDateSystem() === DateSystem.Date1900 && startDateSerialNumber === 0;
+        const startYear = startIs1900SerialZero ? 1900 : startDateParts?.year ?? startDateDate.getUTCFullYear();
+        const startMonth = startIs1900SerialZero ? 1 : startDateParts?.month ?? startDateDate.getUTCMonth() + 1;
+        const startDay = startIs1900SerialZero ? 0 : startDateParts?.day ?? startDateDate.getUTCDate();
 
-        const endDateDate = excelSerialToDate(endDateSerialNumber);
-        const endYear = endDateDate.getUTCFullYear();
-        const endMonth = endDateDate.getUTCMonth() + 1;
-        const endDay = endDateDate.getUTCDate();
+        const endDateDate = excelSerialToDate(endDateSerialNumber, this.getDateSystem());
+        const endDateParts = excelSerialToDateTimeParts(endDateSerialNumber, { dateSystem: this.getDateSystem() });
+        const endYear = endDateParts?.year ?? endDateDate.getUTCFullYear();
+        const endMonth = endDateParts?.month ?? endDateDate.getUTCMonth() + 1;
+        const endDay = endDateParts?.day ?? endDateDate.getUTCDate();
 
         const unitValue = `${unit.getValue()}`.toLocaleUpperCase();
 
@@ -146,7 +152,7 @@ export class Datedif extends BaseFunction {
                     newDate = new Date(Date.UTC(startYear + 1, endMonth - 1, endDay));
                 }
 
-                diff = Math.floor(excelDateSerial(newDate)) - Math.floor(startDateSerialNumber);
+                diff = Math.floor(excelDateSerial(newDate, this.getDateSystem())) - Math.floor(startDateSerialNumber);
                 break;
             default:
                 return ErrorValueObject.create(ErrorType.NUM);

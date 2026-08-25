@@ -15,7 +15,7 @@
  */
 
 import type { IWorkbookData, Workbook } from '@univerjs/core';
-import { CellValueType, LocaleType, Univer, UniverInstanceType } from '@univerjs/core';
+import { CellValueType, DateSystem, LocaleType, Univer, UniverInstanceType } from '@univerjs/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
     TableColumnFilterTypeEnum,
@@ -104,6 +104,7 @@ function createWorkbookData(): IWorkbookData {
                         0: { v: '42', t: CellValueType.NUMBER },
                         1: { v: 44927, t: CellValueType.NUMBER },
                         2: { v: undefined },
+                        3: { v: 0, t: CellValueType.NUMBER },
                     },
                 },
             },
@@ -167,6 +168,17 @@ describe('table filter utilities', () => {
         expect(dateQ2(new Date(2024, 4, 1))).toBe(true);
         expect(dateQ3(new Date(2024, 7, 1))).toBe(true);
         expect(dateQ4(new Date(2024, 10, 1))).toBe(true);
+    });
+
+    it('preserves spreadsheet calendar components in western time zones', () => {
+        vi.stubEnv('TZ', 'America/Los_Angeles');
+        try {
+            const date = excelSerialToDateTime(0, DateSystem.Date1904);
+
+            expect([date.getFullYear(), date.getMonth(), date.getDate(), date.getHours()]).toEqual([1904, 0, 1, 0]);
+        } finally {
+            vi.unstubAllEnvs();
+        }
     });
 
     it('builds executable date predicates for fixed and relative date filters', () => {
@@ -492,6 +504,10 @@ describe('table filter utilities', () => {
         expect(getCellValueWithConditionType(worksheet, 0, 4, TableConditionTypeEnum.Number)).toBeNull();
         expect(getCellValueWithConditionType(worksheet, 1, 2, TableConditionTypeEnum.String)).toBeUndefined();
         expect(getCellValueWithConditionType(worksheet, 1, 1, TableConditionTypeEnum.Date)).toEqual(excelSerialToDateTime(44927));
+        const serialZeroDate = getCellValueWithConditionType(worksheet, 1, 3, TableConditionTypeEnum.Date, DateSystem.Date1904);
+        expect(serialZeroDate).toBeInstanceOf(Date);
+        expect(serialZeroDate).toEqual(new Date(1904, 0, 1));
+        expect(excelSerialToDateTime(0, DateSystem.Date1904)).toEqual(new Date(1904, 0, 1));
         expect(getCellValueWithConditionType(worksheet, 9, 9, TableConditionTypeEnum.String)).toBeNull();
     });
 });

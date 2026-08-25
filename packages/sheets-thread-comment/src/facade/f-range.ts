@@ -139,11 +139,14 @@ export class FRangeSheetsThreadCommentMixin extends FRange implements IFRangeShe
     declare private _dependencies: IRangeCommentDependencies;
 
     override _initialize(injector: UniverCore.Injector): void {
-        this._dependencies = {
-            commandService: injector.get(UniverCore.ICommandService),
-            model: injector.get(SheetsThreadCommentModel),
-            userManagerService: injector.get(UniverCore.UserManagerService),
-        };
+        let dependencies: IRangeCommentDependencies | undefined;
+        Object.defineProperty(this, '_dependencies', {
+            get: () => dependencies ??= {
+                commandService: injector.get(UniverCore.ICommandService),
+                model: injector.get(SheetsThreadCommentModel),
+                userManagerService: injector.get(UniverCore.UserManagerService),
+            },
+        });
     }
 
     private _getCommentDataInRange(): ThreadComment.IThreadComment[] {

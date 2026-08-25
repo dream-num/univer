@@ -73,7 +73,10 @@ export class FDocumentTextRangeThreadCommentMixin extends DocsFacade.FDocumentTe
 
     override _initialize(injector: Injector): void {
         this._threadCommentCommandService = injector.get(ICommandService);
-        this._threadCommentFacadeService = injector.get(ThreadComment.ThreadCommentFacadeService);
+        let commentService: ThreadComment.ThreadCommentFacadeService | undefined;
+        Object.defineProperty(this, '_threadCommentFacadeService', {
+            get: () => commentService ??= injector.get(ThreadComment.ThreadCommentFacadeService),
+        });
     }
 
     /** @inheritdoc */

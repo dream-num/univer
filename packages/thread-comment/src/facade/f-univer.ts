@@ -162,7 +162,10 @@ export class FUniverThreadCommentMixin extends FUniver implements IFUniverThread
     declare private _threadCommentService: ThreadComment.ThreadCommentFacadeService;
 
     override _initialize(injector: Injector): void {
-        this._threadCommentService = injector.get(ThreadComment.ThreadCommentFacadeService);
+        let service: ThreadComment.ThreadCommentFacadeService | undefined;
+        Object.defineProperty(this, '_threadCommentService', {
+            get: () => service ??= injector.get(ThreadComment.ThreadCommentFacadeService),
+        });
     }
 
     /** @inheritdoc */

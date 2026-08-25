@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
+import type { DateSystem } from '@univerjs/core';
 import type { BaseValueObject } from '../engine/value-object/base-value-object';
 import { numfmt } from '@univerjs/core';
 import { stripErrorMargin } from '../engine/utils/math-kit';
 
 /**
- * covert number to preview string by pattern
- * @TODODushusir: Internationalization, reuse with numfmt
+ * Convert a number to a preview string using the specified pattern.
  *
- * @param pattern
- * @param value
- * @returns
+ * @param pattern Number format pattern.
+ * @param value Number to format.
+ * @returns Formatted preview string.
  */
-export const getFormatPreview = (pattern: string, value: number) => {
-    return numfmt.format(pattern, value, { throws: false });
+export const getFormatPreview = (pattern: string, value: number, dateSystem?: DateSystem) => {
+    return numfmt.format(pattern, value, { dateSystem, throws: false });
 };
 
 export const getTextValueOfNumberFormat = (text: BaseValueObject): string => {
@@ -43,7 +43,7 @@ export const getTextValueOfNumberFormat = (text: BaseValueObject): string => {
 
     if (text.isNumber()) {
         if (text.getPattern() !== '') {
-            textValue = getFormatPreview(text.getPattern(), +text.getValue());
+            textValue = getFormatPreview(text.getPattern(), +text.getValue(), text.getDateSystem());
         } else {
             // Specify Number.EPSILON to not discard necessary digits in the case of non-precision errors, for example, the length of 1/3 is 17
             textValue = `${stripErrorMargin(+text.getValue())}`;

@@ -31,6 +31,7 @@ describe('local numfmt API', () => {
             'dec2frac',
             'format',
             'formatColor',
+            'getDateTimeEditPattern',
             'getFormatDateInfo',
             'getFormatInfo',
             'getLocale',

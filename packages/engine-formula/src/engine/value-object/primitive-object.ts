@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { getNumfmtParseValueFilter, isRealNum, numfmt, Tools } from '@univerjs/core';
+import { DateSystem, getNumfmtParseValueFilter, isRealNum, numfmt, Tools } from '@univerjs/core';
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { reverseCompareOperator } from '../../basics/calculate';
 import { BooleanValue, ConcatenateType } from '../../basics/common';
@@ -447,8 +447,8 @@ export class NumberValueObject extends BaseValueObject {
         return instance;
     }
 
-    constructor(rawValue: number) {
-        super();
+    constructor(rawValue: number, dateSystem: DateSystem = DateSystem.Date1900) {
+        super(dateSystem);
 
         this._value = Number(rawValue);
     }
@@ -1432,8 +1432,8 @@ export class StringValueObject extends BaseValueObject {
         return true;
     };
 
-    constructor(rawValue: string) {
-        super();
+    constructor(rawValue: string, dateSystem: DateSystem = DateSystem.Date1900) {
+        super(dateSystem);
         this._value = rawValue;
     }
 
@@ -1581,13 +1581,13 @@ export class StringValueObject extends BaseValueObject {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        const parseData = getNumfmtParseValueFilter(rawValue);
+        const parseData = getNumfmtParseValueFilter(rawValue, { dateSystem: this.getDateSystem() });
 
         if (parseData && parseData.z) {
-            return createNumberValueObjectByRawValue(parseData.v, parseData.z);
+            return createNumberValueObjectByRawValue(parseData.v, parseData.z).withDateSystem(this.getDateSystem());
         }
 
-        return createNumberValueObjectByRawValue(rawValue);
+        return createNumberValueObjectByRawValue(rawValue).withDateSystem(this.getDateSystem());
     }
 
     override convertToBooleanObjectValue() {

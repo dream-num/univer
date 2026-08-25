@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DateSystem } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
@@ -60,6 +61,41 @@ describe('Test dsum function', () => {
             });
             const result = testFunction.calculate(database, field, criteria);
             expect(getObjectValue(result)).toStrictEqual(24);
+        });
+
+        it('uses the date system for date criteria comparisons', () => {
+            const database = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    ['日期', '金额'],
+                    [0, 10],
+                    [1, 20],
+                ]),
+                rowCount: 3,
+                columnCount: 2,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const field = StringValueObject.create('金额');
+            const createCriteria = () => ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    ['日期'],
+                    ['>1904-01-01'],
+                ]),
+                rowCount: 2,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+
+            const criteria1900 = createCriteria().withDateSystem(DateSystem.Date1900);
+            expect(getObjectValue(testFunction.calculate(database, field, criteria1900))).toBe(0);
+
+            const criteria1904 = createCriteria().withDateSystem(DateSystem.Date1904);
+            expect(getObjectValue(testFunction.calculate(database, field, criteria1904))).toBe(20);
         });
 
         it('Database value test', () => {

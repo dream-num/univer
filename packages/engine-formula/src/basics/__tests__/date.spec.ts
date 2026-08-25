@@ -14,9 +14,17 @@
  * limitations under the License.
  */
 
+import { DateSystem, excelDateSerial, excelDateTimeSerial, excelSerialToDate } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { stripErrorMargin } from '../../engine/utils/math-kit';
-import { excelDateSerial, excelDateTimeSerial, excelSerialToDate, formatDateDefault, isValidDateStr } from '../date';
+import { NumberValueObject } from '../../engine/value-object/primitive-object';
+import {
+    formatDateDefault,
+    getDateSerialNumberByObject,
+    getTwoDateDaysByBasis,
+    isValidDateStr,
+} from '../date';
+import { ErrorType } from '../error-type';
 
 describe('Test date', () => {
     it('Function excelDateSerial', () => {
@@ -42,11 +50,29 @@ describe('Test date', () => {
         expect(formatDateDefault(excelSerialToDate(61))).toBe('1900/03/01');
         expect(formatDateDefault(excelSerialToDate(367))).toBe('1901/01/01');
         expect(formatDateDefault(excelSerialToDate(45324))).toBe('2024/02/02');
+        expect(formatDateDefault(excelSerialToDate(0, DateSystem.Date1904))).toBe('1904/01/01');
+        expect(excelDateSerial(new Date(Date.UTC(1904, 0, 2)), DateSystem.Date1904)).toBe(1);
     });
     it('Function isValidDateStr', () => {
         expect(isValidDateStr('2020-1-1')).toBeTruthy();
         expect(isValidDateStr('2020/1/31')).toBeTruthy();
         expect(isValidDateStr('2020-2-31')).toBeFalsy();
         expect(isValidDateStr('2020/001/31')).toBeFalsy();
+    });
+
+    it('uses the decoded 1904 date when day-count calculations receive serial zero', () => {
+        expect(getTwoDateDaysByBasis(0, 1, 0, DateSystem.Date1904).days).toBe(1);
+        expect(getTwoDateDaysByBasis(0, 1, 1, DateSystem.Date1904)).toEqual({ days: 1, yearDays: 366 });
+        expect(getTwoDateDaysByBasis(0, 1, 4, DateSystem.Date1904).days).toBe(1);
+    });
+
+    it('validates the maximum serial against the active Excel date system', () => {
+        const invalid1900 = getDateSerialNumberByObject(NumberValueObject.create(2958466), DateSystem.Date1900);
+        const invalid1904 = getDateSerialNumberByObject(NumberValueObject.create(2957004), DateSystem.Date1904);
+
+        expect(getDateSerialNumberByObject(NumberValueObject.create(2958465), DateSystem.Date1900)).toBe(2958465);
+        expect(typeof invalid1900 === 'number' ? invalid1900 : invalid1900.getValue()).toBe(ErrorType.NUM);
+        expect(getDateSerialNumberByObject(NumberValueObject.create(2957003), DateSystem.Date1904)).toBe(2957003);
+        expect(typeof invalid1904 === 'number' ? invalid1904 : invalid1904.getValue()).toBe(ErrorType.NUM);
     });
 });

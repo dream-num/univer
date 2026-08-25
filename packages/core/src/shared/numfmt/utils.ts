@@ -15,7 +15,9 @@
  */
 
 import type { ParseData } from './api';
+import type { ParseOptions } from './parse-value';
 import { regexp } from '../../common/regexp';
+import { LocaleType } from '../../types/enum/locale-type';
 import { parseDate, parseNumber, parseTime, tokenize, tokenTypes } from './api';
 
 export const DEFAULT_TEXT_FORMAT = '@@@'; // Compatible with old data
@@ -59,6 +61,48 @@ export type INumfmtLocaleTag =
     | 'th'
     | 'tr'
     | 'vi';
+
+export function getNumfmtLocaleTag(locale: LocaleType): INumfmtLocaleTag {
+    switch (locale) {
+        case LocaleType.FR_FR:
+            return 'fr';
+        case LocaleType.RU_RU:
+            return 'ru';
+        case LocaleType.VI_VN:
+            return 'vi';
+        case LocaleType.ZH_CN:
+            return 'zh-CN';
+        case LocaleType.KO_KR:
+            return 'ko';
+        case LocaleType.ZH_TW:
+            return 'zh-TW';
+        case LocaleType.ZH_HK:
+            return 'zh-HK';
+        case LocaleType.ES_ES:
+        case LocaleType.CA_ES:
+            return 'es';
+        case LocaleType.SK_SK:
+            return 'sk';
+        case LocaleType.JA_JP:
+            return 'ja';
+        case LocaleType.PT_BR:
+            return 'pt';
+        case LocaleType.DE_DE:
+            return 'de';
+        case LocaleType.IT_IT:
+            return 'it';
+        case LocaleType.ID_ID:
+            return 'id';
+        case LocaleType.PL_PL:
+            return 'pl';
+        case LocaleType.AR_SA:
+            return 'ar';
+        case LocaleType.EN_US:
+        case LocaleType.FA_IR:
+        default:
+            return 'en';
+    }
+}
 
 /**
  * Determines whether two patterns are equal, excluding differences in decimal places.
@@ -165,8 +209,8 @@ const CURRENCY_SYMBOL_PREFIX_REG = new RegExp(`^${regexp.charset(...Array.from(n
 /**
  * Get the numfmt parse value, and filter out the parse error.
  */
-export const getNumfmtParseValueFilter = (value: string): ParseData | null => {
-    const parseData = parseDate(value) ?? parseTime(value) ?? parseNumber(value);
+export const getNumfmtParseValueFilter = (value: string, options: ParseOptions = {}): ParseData | null => {
+    const parseData = parseDate(value, options) ?? parseTime(value, options) ?? parseNumber(value, options);
 
     if (!parseData) return null;
 

@@ -72,14 +72,15 @@ export class TableFilterController extends Disposable {
         this.disposeWithMe(
             this._tableManager.tableFilterChanged$.subscribe((event) => {
                 const { unitId, subUnitId, tableId } = event;
-                const worksheet = this._univerInstanceService.getUnit<Workbook>(unitId)?.getSheetBySheetId(subUnitId);
+                const workbook = this._univerInstanceService.getUnit<Workbook>(unitId);
+                const worksheet = workbook?.getSheetBySheetId(subUnitId);
                 const table = this._tableManager.getTable(unitId, tableId);
                 if (!worksheet || !table) {
                     return;
                 }
 
                 const tableFilter = table.getTableFilters();
-                tableFilter.doFilter(worksheet, table.getTableFilterRange());
+                tableFilter.doFilter(worksheet, table.getTableFilterRange(), workbook?.getDateSystem());
 
                 this._refreshTableFilteredOutRows(unitId, subUnitId);
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, Nullable, Styles } from '@univerjs/core';
+import type { DateSystem, ICellData, Nullable, Styles } from '@univerjs/core';
 import { currencySymbols, getNumfmtParseValueFilter, LocaleType, numfmt } from '@univerjs/core';
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { operatorToken } from '../../basics/token';
@@ -128,7 +128,7 @@ export function handleNumfmtInCell(oldCell: Nullable<ICellData>, cell: Nullable<
  *
  * @param oldPattern
  * @param pattern
- * @returns
+ * @returns The parsed number and format pattern when the input is recognized.
  */
 export function compareNumfmtPriority(oldPattern: string, pattern: string) {
     const oldPatternType = getNumberFormatType(oldPattern);
@@ -306,7 +306,8 @@ export function applyCurrencyFormat(locale: LocaleType, number: number, numberDi
  * "2012-12-12"
  * "16:48:00"
  *
- * @param locale
+ * @param input Raw formula value to inspect.
+ * @param options Workbook-dependent parsing options.
  * @returns
  */
 const stringToNumberPatternCache = new FormulaAstLRU<{
@@ -314,14 +315,18 @@ const stringToNumberPatternCache = new FormulaAstLRU<{
     pattern: string;
 }>(100000);
 
-export function stringIsNumberPattern(input: string) {
+export function stringIsNumberPattern(
+    input: string,
+    options?: { dateSystem?: DateSystem }
+) {
     let _input = input;
 
     if (_input.startsWith('"') && _input.endsWith('"')) {
         _input = _input.slice(1, -1);
     }
 
-    const cacheValue = stringToNumberPatternCache.get(_input);
+    const cacheKey = `${options?.dateSystem ?? ''}\u0000${_input}`;
+    const cacheValue = stringToNumberPatternCache.get(cacheKey);
 
     if (cacheValue) {
         return {
@@ -331,10 +336,10 @@ export function stringIsNumberPattern(input: string) {
         };
     }
 
-    const parseData = getNumfmtParseValueFilter(_input);
+    const parseData = getNumfmtParseValueFilter(_input, options);
 
     if (parseData && parseData.z) {
-        return setNumberPatternCache(_input, parseData.v as number, parseData.z as string);
+        return setNumberPatternCache(cacheKey, parseData.v as number, parseData.z as string);
     }
 
     return {

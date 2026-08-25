@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DateSystem } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
@@ -53,6 +54,28 @@ describe('Test datedif function', () => {
             unit = StringValueObject.create('yd');
             result = testFunction.calculate(startDate, endDate, unit);
             expect(result.getValue()).toStrictEqual(61);
+        });
+
+        it('uses the configured date system for numeric serials', () => {
+            const startDate = NumberValueObject.create(0);
+            const endDate = NumberValueObject.create(60);
+            const unit = StringValueObject.create('M');
+
+            testFunction.setDateSystem(DateSystem.Date1900);
+            expect(testFunction.calculate(startDate, endDate, unit).getValue()).toBe(1);
+
+            testFunction.setDateSystem(DateSystem.Date1904);
+            expect(testFunction.calculate(startDate, endDate, unit).getValue()).toBe(2);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
+        });
+
+        it('handles the 1900 leap-year boundary serial without normalizing it away', () => {
+            testFunction.setDateSystem(DateSystem.Date1900);
+
+            const result = testFunction.calculate(NumberValueObject.create(60), NumberValueObject.create(90), StringValueObject.create('MD'));
+
+            expect(result.getValue()).toBe(1);
         });
 
         it('value is normal, endDate < startDate', () => {
@@ -240,6 +263,21 @@ describe('Test datedif function', () => {
             const endDate3 = StringValueObject.create('2012/1/1');
             const result3 = testFunction.calculate(startDate3, endDate3, unit);
             expect(result3.getValue()).toStrictEqual(364);
+        });
+
+        it('checks serial-zero day and year differences in both date systems', () => {
+            const startDate = NumberValueObject.create(0);
+            const endDate = NumberValueObject.create(366);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
+            expect(testFunction.calculate(startDate, endDate, StringValueObject.create('D')).getValue()).toBe(366);
+            expect(testFunction.calculate(startDate, endDate, StringValueObject.create('Y')).getValue()).toBe(0);
+
+            testFunction.setDateSystem(DateSystem.Date1904);
+            expect(testFunction.calculate(startDate, endDate, StringValueObject.create('D')).getValue()).toBe(366);
+            expect(testFunction.calculate(startDate, endDate, StringValueObject.create('Y')).getValue()).toBe(1);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
         });
     });
 });

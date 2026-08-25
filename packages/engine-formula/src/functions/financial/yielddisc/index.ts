@@ -48,13 +48,13 @@ export class Yielddisc extends BaseFunction {
 
         const [settlementObject, maturityObject, prObject, redemptionObject, basisObject] = variants as BaseValueObject[];
 
-        const settlementSerialNumber = getDateSerialNumberByObject(settlementObject);
+        const settlementSerialNumber = getDateSerialNumberByObject(settlementObject, this.getDateSystem());
 
         if (typeof settlementSerialNumber !== 'number') {
             return settlementSerialNumber;
         }
 
-        const maturitySerialNumber = getDateSerialNumberByObject(maturityObject);
+        const maturitySerialNumber = getDateSerialNumberByObject(maturityObject, this.getDateSystem());
 
         if (typeof maturitySerialNumber !== 'number') {
             return maturitySerialNumber;
@@ -80,7 +80,7 @@ export class Yielddisc extends BaseFunction {
 
         // B = number of days in year, depending on year basis.
         // DSM = number of days from settlement to maturity.
-        const { days: DSM, yearDays: B } = getTwoDateDaysByBasis(settlementSerialNumber, maturitySerialNumber, basisValue);
+        const { days: DSM, yearDays: B } = getTwoDateDaysByBasis(settlementSerialNumber, maturitySerialNumber, basisValue, this.getDateSystem());
 
         const result = ((redemptionValue / prValue) - 1) / (DSM / B);
 

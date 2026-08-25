@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DateSystem, LocaleType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
@@ -51,6 +52,18 @@ describe('Test isdate function', () => {
             const value2 = StringValueObject.create('50%');
             const result2 = testFunction.calculate(value2);
             expect(getObjectValue(result2)).toBe(false);
+        });
+
+        it('uses the date system without using the formula locale for parsing', () => {
+            const localizedFunction = new Isdate(FUNCTION_NAMES_INFORMATION.ISDATE);
+            localizedFunction.setLocale(LocaleType.FR_FR);
+
+            expect(getObjectValue(localizedFunction.calculate(StringValueObject.create('31/01/2024')))).toBe(false);
+
+            localizedFunction.setDateSystem(DateSystem.Date1900);
+            expect(getObjectValue(localizedFunction.calculate(StringValueObject.create('01/01/1900')))).toBe(true);
+            localizedFunction.setDateSystem(DateSystem.Date1904);
+            expect(getObjectValue(localizedFunction.calculate(StringValueObject.create('01/01/1900')))).toBe(false);
         });
 
         it('value is blank cell', () => {

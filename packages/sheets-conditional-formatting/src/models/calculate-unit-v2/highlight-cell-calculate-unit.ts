@@ -302,7 +302,7 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                     if (isNullable(value) || Number.isNaN(Number(value)) || cellValue?.t !== CellValueType.NUMBER || !preComputingResult) {
                         return;
                     }
-                    const v = serialTimeToTimestamp(Number(value));
+                    const v = serialTimeToTimestamp(Number(value), context.workbook.getDateSystem());
                     const { start, end } = preComputingResult.value!;
                     return v >= start && v <= end;
                 }

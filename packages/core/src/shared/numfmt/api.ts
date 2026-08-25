@@ -61,6 +61,7 @@ import {
     TOKEN_TEXT,
     TOKEN_ZERO,
 } from './constants';
+import { createDateTimeEditPattern } from './date-time-edit-pattern';
 import { dateInfo, info, isDate, isPercent, isText } from './format-info';
 import { formatValue, formatColor as formatValueColor } from './format-number';
 import { defaultOptions } from './options';
@@ -70,10 +71,10 @@ import { dateToSerial as handleDates } from './serial-date';
 export { dec2frac } from './dec-to-frac';
 export { addLocale, getLocale, parseLocale } from './locale';
 export { parseBool, parseDate, parseNumber, parseTime, parseValue } from './parse-value';
+export type { ParseOptions } from './parse-value';
 export { round } from './round';
 export { dateFromSerial, dateToSerial } from './serial-date';
 export { tokenize } from './tokenize';
-
 export type {
     FormatDateInfo,
     FormatInfo,
@@ -190,6 +191,12 @@ export function getFormatDateInfo(pattern: string): FormatDateInfo {
         data.dateInfo = dateInfo(data.partitions);
     }
     return data.dateInfo;
+}
+
+/** Completes omitted components in a calendar-date or clock pattern for editing; elapsed durations return null. */
+export function getDateTimeEditPattern(pattern: string, value: number): string | null {
+    const data = prepareFormatterData(pattern, false);
+    return createDateTimeEditPattern(data.partitions, value);
 }
 
 /** A dictionary of the types used to identify token variants. */

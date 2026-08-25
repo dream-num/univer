@@ -15,12 +15,12 @@
  */
 
 import type { compareToken } from '../../basics/token';
-
 import type { BaseFunction } from '../../functions/base-function';
 import type { Compare } from '../../functions/meta/compare';
 import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
 import type { ArrayValueObject } from '../value-object/array-value-object';
 import type { BaseValueObject } from '../value-object/base-value-object';
+import { DateSystem } from '@univerjs/core';
 import { ErrorType } from '../../basics/error-type';
 import { OPERATOR_TOKEN_COMPARE_SET, OPERATOR_TOKEN_SET, operatorToken } from '../../basics/token';
 import { FUNCTION_NAMES_MATH } from '../../functions/math/function-names';
@@ -48,7 +48,7 @@ export class OperatorNode extends BaseAstNode {
         return NodeType.OPERATOR;
     }
 
-    override execute() {
+    override execute(dateSystem: DateSystem = DateSystem.Date1900) {
         const children = this.getChildren();
         if (this._functionExecutor.name === FUNCTION_NAMES_META.COMPARE) {
             (this._functionExecutor as Compare).setCompareType(this.getToken() as compareToken);
@@ -83,6 +83,8 @@ export class OperatorNode extends BaseAstNode {
             object2 = this._referenceToOperatorValue(object2 as BaseReferenceObject);
         }
 
+        object1 = object1.withDateSystem(dateSystem);
+        object2 = object2.withDateSystem(dateSystem);
         const result = this._functionExecutor.calculate(
             object1 as BaseValueObject,
             object2 as BaseValueObject
@@ -90,7 +92,7 @@ export class OperatorNode extends BaseAstNode {
 
         this._setEmbeddedArrayFormulaToResult(result);
 
-        this.setValue(result);
+        this.setValue(result.withDateSystem(dateSystem));
     }
 
     private _referenceToOperatorValue(reference: BaseReferenceObject): BaseValueObject {

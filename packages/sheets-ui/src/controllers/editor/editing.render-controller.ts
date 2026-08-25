@@ -757,6 +757,10 @@ export class EditingRenderController extends Disposable {
         if (editCellState == null) {
             return true;
         }
+        // The editor may display an expanded date/time value; do not write that intercepted text back unless it was edited.
+        if (!this._editorBridgeService.getEditorDirty()) {
+            return true;
+        }
         const { unitId, sheetId, row, column } = editCellState;
 
         const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);

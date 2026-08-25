@@ -15,6 +15,7 @@
  */
 
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { DateSystem } from '@univerjs/core';
 import { getDateSerialNumberByObject } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
 import { calculateDuration } from '../../../basics/financial';
@@ -50,13 +51,13 @@ export class Duration extends BaseFunction {
 
         const [settlementObject, maturityObject, couponObject, yldObject, frequencyObject, basisObject] = variants as BaseValueObject[];
 
-        const settlementSerialNumber = getDateSerialNumberByObject(settlementObject);
+        const settlementSerialNumber = getDateSerialNumberByObject(settlementObject, this.getDateSystem());
 
         if (typeof settlementSerialNumber !== 'number') {
             return settlementSerialNumber;
         }
 
-        const maturitySerialNumber = getDateSerialNumberByObject(maturityObject);
+        const maturitySerialNumber = getDateSerialNumberByObject(maturityObject, this.getDateSystem());
 
         if (typeof maturitySerialNumber !== 'number') {
             return maturitySerialNumber;
@@ -83,11 +84,14 @@ export class Duration extends BaseFunction {
         }
 
         // Special handle for excel (1900)
-        if (settlementSerialNumber <= 0 || maturitySerialNumber <= 366) {
+        if (
+            this.getDateSystem() === DateSystem.Date1900 &&
+            (settlementSerialNumber <= 0 || maturitySerialNumber <= 366)
+        ) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        const result = calculateDuration(settlementSerialNumber, maturitySerialNumber, couponValue, yldValue, frequencyValue, basisValue);
+        const result = calculateDuration(settlementSerialNumber, maturitySerialNumber, couponValue, yldValue, frequencyValue, basisValue, this.getDateSystem());
 
         return NumberValueObject.create(result);
     }

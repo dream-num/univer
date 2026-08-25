@@ -20,6 +20,7 @@ import type { IUniverSheetsNumfmtConfig } from '../config/config';
 import {
     CellValueType,
     Disposable,
+    getNumfmtLocaleTag,
     getNumfmtParseValueFilter,
     ICommandService,
     IConfigService,
@@ -29,7 +30,6 @@ import {
     isTextFormat,
     IUniverInstanceService,
     LocaleService,
-    LocaleType,
     ObjectMatrix,
     Range,
     ThemeService,
@@ -55,7 +55,7 @@ const TEXT_FORMAT_MARK = {
     },
 };
 export class SheetsNumfmtCellContentController extends Disposable {
-    private _locale$ = new BehaviorSubject<INumfmtLocaleTag>('en');
+    private _locale$ = new BehaviorSubject<INumfmtLocaleTag | null>(null);
     public locale$ = this._locale$.asObservable();
     constructor(
         @IUniverInstanceService private readonly _instanceService: IUniverInstanceService,
@@ -71,52 +71,11 @@ export class SheetsNumfmtCellContentController extends Disposable {
     }
 
     public get locale(): INumfmtLocaleTag {
-        const _locale = this._locale$.getValue();
-        if (_locale) {
-            return _locale;
-        }
-        const currentLocale = this._localeService.getCurrentLocale();
+        return this.getLocale();
+    }
 
-        switch (currentLocale) {
-            case LocaleType.FR_FR:
-                return 'fr';
-            case LocaleType.RU_RU:
-                return 'ru';
-            case LocaleType.VI_VN:
-                return 'vi';
-            case LocaleType.ZH_CN:
-                return 'zh-CN';
-            case LocaleType.KO_KR:
-                return 'ko';
-            case LocaleType.ZH_TW:
-                return 'zh-TW';
-            case LocaleType.ZH_HK:
-                return 'zh-HK';
-            case LocaleType.ES_ES:
-            case LocaleType.CA_ES:
-                return 'es';
-            case LocaleType.SK_SK:
-                return 'sk';
-            case LocaleType.JA_JP:
-                return 'ja';
-            case LocaleType.PT_BR:
-                return 'pt';
-            case LocaleType.DE_DE:
-                return 'de';
-            case LocaleType.IT_IT:
-                return 'it';
-            case LocaleType.ID_ID:
-                return 'id';
-            case LocaleType.PL_PL:
-                return 'pl';
-            case LocaleType.AR_SA:
-                return 'ar';
-            case LocaleType.EN_US:
-            case LocaleType.FA_IR:
-            default: {
-                return 'en';
-            }
-        }
+    public getLocale(workbook?: Workbook): INumfmtLocaleTag {
+        return this._locale$.getValue() ?? getNumfmtLocaleTag(workbook?.getSnapshot().locale ?? this._localeService.getCurrentLocale());
     }
 
     // eslint-disable-next-line max-lines-per-function
@@ -140,6 +99,8 @@ export class SheetsNumfmtCellContentController extends Disposable {
 
                 const unitId = location.unitId;
                 const sheetId = location.subUnitId;
+                const locale = this.getLocale(location.workbook);
+                const dateSystem = location.workbook.getDateSystem();
                 let numfmtValue;
 
                 if (cell?.s) {
@@ -168,7 +129,7 @@ export class SheetsNumfmtCellContentController extends Disposable {
                         !(
                             isTextFormat(numfmtValue?.pattern) &&
                             typeof cell.v === 'string' &&
-                            typeof getNumfmtParseValueFilter(cell.v)?.v === 'number'
+                            typeof getNumfmtParseValueFilter(cell.v, { locale, dateSystem })?.v === 'number'
                         )
                     ) {
                         return next(cell);
@@ -193,12 +154,13 @@ export class SheetsNumfmtCellContentController extends Disposable {
                     return next(cell);
                 }
 
+                const cacheParameters = `${unitId}_${sheetId}_${originCellValue.v}_${numfmtValue?.pattern}_${locale}_${dateSystem}`;
                 const cache = renderCache.getValue(location.row, location.col);
-                if (cache && cache.parameters === `${originCellValue.v}_${numfmtValue?.pattern}`) {
+                if (cache && cache.parameters === cacheParameters) {
                     return next({ ...cell, ...cache.result });
                 }
 
-                const info = getPatternPreviewIgnoreGeneral(numfmtValue?.pattern as string, Number(originCellValue.v), this.locale);
+                const info = getPatternPreviewIgnoreGeneral(numfmtValue?.pattern as string, Number(originCellValue.v), locale, dateSystem);
                 const numfmtRes = info.result;
                 const res: ICellDataForSheetInterceptor = { v: numfmtRes, t: CellValueType.NUMBER };
                 if (numfmtRes === '') {
@@ -214,7 +176,7 @@ export class SheetsNumfmtCellContentController extends Disposable {
 
                 renderCache.setValue(location.row, location.col, {
                     result: res,
-                    parameters: `${originCellValue.v}_${numfmtValue?.pattern}`,
+                    parameters: cacheParameters,
                 });
                 Object.assign(cell, res);
                 return next(cell);

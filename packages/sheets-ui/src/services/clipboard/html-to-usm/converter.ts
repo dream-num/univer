@@ -79,6 +79,7 @@ function matchFilter(node: HTMLElement, filter: IStyleRule['filter']) {
 
 interface IHtmlToUSMServiceProps {
     getCurrentSkeleton: () => Nullable<ISheetSkeletonManagerParam>;
+    getNumfmtParseOptions?: () => Parameters<typeof getNumfmtParseValueFilter>[1];
 }
 
 export class HtmlToUSMService {
@@ -114,13 +115,18 @@ export class HtmlToUSMService {
     private _msoNumfmtMap = new Map<string, string>();
 
     private _getCurrentSkeleton: () => Nullable<ISheetSkeletonManagerParam>;
+    private _getNumfmtParseOptions?: () => Parameters<typeof getNumfmtParseValueFilter>[1];
+    private _numfmtParseOptions?: Parameters<typeof getNumfmtParseValueFilter>[1];
 
     constructor(props: IHtmlToUSMServiceProps) {
         this._getCurrentSkeleton = props.getCurrentSkeleton;
+        this._getNumfmtParseOptions = props.getNumfmtParseOptions;
     }
 
     // eslint-disable-next-line max-lines-per-function
     convert(html: string): IUniverSheetCopyDataModel {
+        // This service outlives the active workbook, so resolve locale and date system for every paste operation.
+        this._numfmtParseOptions = this._getNumfmtParseOptions?.();
         const pastePlugin = HtmlToUSMService._pluginList.find((plugin) => plugin.checkPasteType(html));
         if (pastePlugin) {
             this._styleRules = [...pastePlugin.stylesRules];
@@ -509,13 +515,13 @@ export class HtmlToUSMService {
                         cellText = cleanMsoSpaceRun(cellText);
                     }
 
-                    const parseData = getNumfmtParseValueFilter(cellText);
+                    const parseData = getNumfmtParseValueFilter(cellText, this._numfmtParseOptions);
 
                     if (
                         typeof parseData?.v === 'number' &&
                         (
                             parseData.z === pattern ||
-                            numfmt.format(pattern, parseData.v) === cellText
+                            numfmt.format(pattern, parseData.v, this._numfmtParseOptions) === cellText
                         )
                     ) {
                         cellText = parseData.v.toString();
@@ -526,7 +532,7 @@ export class HtmlToUSMService {
                     } else if (!parseData) {
                         const extractedNumber = extractNumber(cellText);
 
-                        if (extractedNumber !== null && !Number.isNaN(extractedNumber) && numfmt.format(pattern, extractedNumber) === cellText) {
+                        if (extractedNumber !== null && !Number.isNaN(extractedNumber) && numfmt.format(pattern, extractedNumber, this._numfmtParseOptions) === cellText) {
                             cellText = extractedNumber.toString();
                             numfmtPattern = pattern;
                         }
@@ -630,7 +636,7 @@ export class HtmlToUSMService {
          */
         if (cellHtml.includes('mso-spacerun:yes')) {
             const cellText = cleanMsoSpaceRun(cellHtml);
-            const parseInfo = getNumfmtParseValueFilter(cellText);
+            const parseInfo = getNumfmtParseValueFilter(cellText, this._numfmtParseOptions);
 
             if (parseInfo && parseInfo.z && typeof parseInfo.v === 'number') {
                 return {

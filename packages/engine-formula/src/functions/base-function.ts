@@ -29,6 +29,7 @@ import type { FormulaFunctionResultValueType, FormulaFunctionValueType } from '.
 import type { FormulaDataModel } from '../models/formula-data.model';
 import type { IDefinedNameMapItem } from '../services/defined-names.service';
 import type { IFormulaUnitReferenceResolver } from '../services/unit-reference-resolver.service';
+import { DateSystem } from '@univerjs/core';
 import { ErrorType } from '../basics/error-type';
 import { regexTestSingeRange, regexTestSingleColumn, regexTestSingleRow } from '../basics/regex';
 import { compareToken } from '../basics/token';
@@ -52,6 +53,7 @@ export class BaseFunction {
     private _currentFormulaColumnCount: number = 1;
     private _definedNames: Nullable<IDefinedNameMapItem>;
     private _locale: LocaleType;
+    private _dateSystem = DateSystem.Date1900;
     private _sheetOrder: string[];
     private _sheetNameMap: { [sheetId: string]: string };
     protected _formulaDataModel: Nullable<FormulaDataModel>;
@@ -186,6 +188,14 @@ export class BaseFunction {
 
     setLocale(locale: LocaleType) {
         this._locale = locale;
+    }
+
+    getDateSystem() {
+        return this._dateSystem;
+    }
+
+    setDateSystem(dateSystem: DateSystem) {
+        this._dateSystem = dateSystem;
     }
 
     getSheetsInfo() {

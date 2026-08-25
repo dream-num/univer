@@ -18,7 +18,7 @@ import type { IDisposable } from '@univerjs/core';
 import type { IGalleryProps } from '@univerjs/design';
 import type { IGalleryService } from './gallery.service';
 import { Disposable, Inject, Injector, toDisposable } from '@univerjs/core';
-import { Subject } from 'rxjs';
+import { ReplaySubject } from 'rxjs';
 import { connectInjector } from '../../utils/di';
 import { GalleryPart } from '../../views/components/gallery-part/GalleryPart';
 import { BuiltInUIPart, IUIPartsService } from '../parts/parts.service';
@@ -33,7 +33,7 @@ export class DesktopGalleryService extends Disposable implements IGalleryService
         this._initUIPart();
     }
 
-    gallery$ = new Subject<IGalleryProps>();
+    gallery$ = new ReplaySubject<IGalleryProps>(1);
 
     override dispose(): void {
         super.dispose();

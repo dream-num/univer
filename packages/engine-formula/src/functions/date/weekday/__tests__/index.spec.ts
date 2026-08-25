@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DateSystem } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
@@ -36,6 +37,18 @@ describe('Test weekday function', () => {
             const returnType2 = NumberValueObject.create(1);
             const result2 = testFunction.calculate(serialNumber2, returnType2);
             expect(result2.getValue()).toStrictEqual(4);
+        });
+
+        it('uses the configured Excel date system', () => {
+            testFunction.setDateSystem(DateSystem.Date1900);
+            expect(testFunction.calculate(NumberValueObject.create(0)).getValue()).toStrictEqual(7);
+            expect(testFunction.calculate(NumberValueObject.create(59)).getValue()).toStrictEqual(3);
+            expect(testFunction.calculate(NumberValueObject.create(60)).getValue()).toStrictEqual(4);
+            testFunction.setDateSystem(DateSystem.Date1904);
+            expect(testFunction.calculate(NumberValueObject.create(0)).getValue()).toStrictEqual(6);
+            expect(testFunction.calculate(NumberValueObject.create(59)).getValue()).toStrictEqual(2);
+            expect(testFunction.calculate(NumberValueObject.create(60)).getValue()).toStrictEqual(3);
+            testFunction.setDateSystem(DateSystem.Date1900);
         });
 
         it('Value is error', () => {
@@ -113,6 +126,18 @@ describe('Test weekday function', () => {
                 [ErrorType.NUM, ErrorType.NUM, ErrorType.NUM],
                 [ErrorType.NUM, ErrorType.NUM, ErrorType.NUM],
             ]);
+        });
+        it('checks the serial-zero boundary in both date systems', () => {
+            const date = NumberValueObject.create(0);
+            const returnType = NumberValueObject.create(1);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
+            expect(testFunction.calculate(date, returnType).getValue()).toBe(7);
+
+            testFunction.setDateSystem(DateSystem.Date1904);
+            expect(testFunction.calculate(date, returnType).getValue()).toBe(6);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
         });
     });
 });

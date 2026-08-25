@@ -24,6 +24,7 @@ import * as numfmt from '../api';
 
 it('preserves the numfmt 3.2.6 type exports', () => {
     expectTypeOf<numfmt.FormatDateInfo['clockType']>().toEqualTypeOf<12 | 24>();
+    expectTypeOf<numfmt.FormatDateInfo['isDuration']>().toEqualTypeOf<boolean>();
     expectTypeOf<numfmt.FormatInfo['type']>().toMatchTypeOf<string>();
     expectTypeOf<numfmt.FormatToken['raw']>().toEqualTypeOf<string>();
     expectTypeOf<numfmt.LocaleData['decimal']>().toEqualTypeOf<string>();
@@ -39,6 +40,7 @@ it('preserves the numfmt 3.2.6 runtime exports', () => {
         'dec2frac',
         'format',
         'formatColor',
+        'getDateTimeEditPattern',
         'getFormatDateInfo',
         'getFormatInfo',
         'getLocale',

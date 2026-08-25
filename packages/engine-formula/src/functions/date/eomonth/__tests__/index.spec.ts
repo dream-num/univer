@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DateSystem } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
@@ -71,6 +72,16 @@ describe('Test eomonth function', () => {
             expect(result.getValue()).toStrictEqual(42429);
         });
 
+        it('treats serial zero as 1904-01-01 in the 1904 date system', () => {
+            testFunction.setDateSystem(DateSystem.Date1900);
+            expect(testFunction.calculate(NumberValueObject.create(0), NumberValueObject.create(0)).getValue()).toBe(31);
+            expect(testFunction.calculate(NumberValueObject.create(31), NumberValueObject.create(0)).getValue()).toBe(31);
+            testFunction.setDateSystem(DateSystem.Date1904);
+            expect(testFunction.calculate(NumberValueObject.create(0), NumberValueObject.create(0)).getValue()).toBe(30);
+            expect(testFunction.calculate(NumberValueObject.create(31), NumberValueObject.create(0)).getValue()).toBe(59);
+            testFunction.setDateSystem(DateSystem.Date1900);
+        });
+
         it('value is array', () => {
             const startDate = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
@@ -86,6 +97,25 @@ describe('Test eomonth function', () => {
             const months = NumberValueObject.create(1);
             const result = testFunction.calculate(startDate, months);
             expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+        });
+
+        it('checks the serial-zero boundary in both date systems', () => {
+            const startDate = NumberValueObject.create(0);
+            const months = NumberValueObject.create(0);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
+            expect(testFunction.calculate(startDate, months).getValue()).toBe(31);
+
+            testFunction.setDateSystem(DateSystem.Date1904);
+            expect(testFunction.calculate(startDate, months).getValue()).toBe(30);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
+        });
+
+        it('keeps the fictitious 1900-02-29 serial when it is the month end', () => {
+            testFunction.setDateSystem(DateSystem.Date1900);
+
+            expect(testFunction.calculate(NumberValueObject.create(60), NumberValueObject.create(0)).getValue()).toBe(59);
         });
     });
 });

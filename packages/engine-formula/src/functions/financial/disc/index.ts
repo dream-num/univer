@@ -38,13 +38,13 @@ export class Disc extends BaseFunction {
 
         const [settlementObject, maturityObject, prObject, redemptionObject, basisObject] = variants as BaseValueObject[];
 
-        const settlementSerialNumber = getDateSerialNumberByObject(settlementObject);
+        const settlementSerialNumber = getDateSerialNumberByObject(settlementObject, this.getDateSystem());
 
         if (typeof settlementSerialNumber !== 'number') {
             return settlementSerialNumber;
         }
 
-        const maturitySerialNumber = getDateSerialNumberByObject(maturityObject);
+        const maturitySerialNumber = getDateSerialNumberByObject(maturityObject, this.getDateSystem());
 
         if (typeof maturitySerialNumber !== 'number') {
             return maturitySerialNumber;
@@ -68,7 +68,7 @@ export class Disc extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        const { days, yearDays } = getTwoDateDaysByBasis(settlementSerialNumber, maturitySerialNumber, basisValue);
+        const { days, yearDays } = getTwoDateDaysByBasis(settlementSerialNumber, maturitySerialNumber, basisValue, this.getDateSystem());
 
         const result = ((redemptionValue - prValue) / redemptionValue) * (yearDays / days);
 

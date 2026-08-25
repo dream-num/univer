@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DateSystem } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
@@ -39,6 +40,27 @@ describe('Test oddfprice function', () => {
             const basis = NumberValueObject.create(1);
             const result = testFunction.calculate(settlement, maturity, issue, firstCoupon, rate, yld, redemption, frequency, basis);
             expect(getObjectValue(result, true)).toBe(113.597717474);
+        });
+
+        it('returns #NUM! for the serial boundary formula in both date systems', () => {
+            const args = [
+                NumberValueObject.create(31),
+                NumberValueObject.create(366),
+                NumberValueObject.create(0),
+                NumberValueObject.create(0.08),
+                NumberValueObject.create(0.09),
+                NumberValueObject.create(100),
+                NumberValueObject.create(2),
+                NumberValueObject.create(1),
+            ] as const;
+
+            testFunction.setDateSystem(DateSystem.Date1900);
+            expect(getObjectValue(testFunction.calculate(...args))).toBe(ErrorType.NUM);
+
+            testFunction.setDateSystem(DateSystem.Date1904);
+            expect(getObjectValue(testFunction.calculate(...args))).toBe(ErrorType.NUM);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
         });
 
         it('Value is normal, but date valid error, return #NUM!', () => {

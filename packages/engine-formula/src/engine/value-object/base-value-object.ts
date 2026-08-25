@@ -15,6 +15,7 @@
  */
 
 import type { CustomData, Nullable } from '@univerjs/core';
+import { DateSystem } from '@univerjs/core';
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { ConcatenateType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
@@ -36,6 +37,12 @@ export interface IArrayValueObject {
 }
 export class BaseValueObject extends ObjectClassType {
     private _customData: CustomData;
+    private _dateSystem: DateSystem;
+
+    constructor(dateSystem: DateSystem = DateSystem.Date1900) {
+        super();
+        this._dateSystem = dateSystem;
+    }
 
     override isValueObject() {
         return true;
@@ -79,6 +86,16 @@ export class BaseValueObject extends ObjectClassType {
 
     getCustomData() {
         return this._customData;
+    }
+
+    getDateSystem() {
+        return this._dateSystem;
+    }
+
+    /** Bind the current calculation context in place before the value is used. */
+    withDateSystem(dateSystem: DateSystem): this {
+        this._dateSystem = dateSystem;
+        return this;
     }
 
     isCube() {

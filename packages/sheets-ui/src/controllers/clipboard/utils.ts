@@ -31,6 +31,7 @@ import {
     createSectionId,
     CustomRangeType,
     generateRandomId,
+    getNumfmtLocaleTag,
     getNumfmtParseValueFilter,
     isTextFormat,
     IUniverInstanceService,
@@ -158,7 +159,8 @@ export function getMoveRangeMutations(
 
 function getExternalPasteNumberFormatResult(
     value: ICellData['v'],
-    currentCellStyle: Nullable<IStyleData> | undefined
+    currentCellStyle: Nullable<IStyleData> | undefined,
+    parseOptions?: Parameters<typeof getNumfmtParseValueFilter>[1]
 ): IExternalPasteNumberFormatResult {
     if (isTextFormat(currentCellStyle?.n?.pattern)) {
         return {
@@ -168,7 +170,7 @@ function getExternalPasteNumberFormatResult(
     }
 
     const content = String(value).trim();
-    const numfmtValue = getNumfmtParseValueFilter(content);
+    const numfmtValue = getNumfmtParseValueFilter(content, parseOptions);
     const result: IExternalPasteNumberFormatResult = {};
 
     if (numfmtValue?.v !== undefined && typeof numfmtValue.v === 'number') {
@@ -201,6 +203,9 @@ export function getSetCellDataMutations(
     const { unitId, subUnitId, range } = pasteTo;
     const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), { unitId, subUnitId });
     const worksheet = target?.worksheet;
+    const parseOptions = target
+        ? { locale: getNumfmtLocaleTag(target.workbook.getSnapshot().locale), dateSystem: target.workbook.getDateSystem() }
+        : undefined;
     const { mapFunc } = virtualizeDiscreteRanges([range]);
 
     const cellValueMatrix = new ObjectMatrix<ICellData>();
@@ -238,7 +243,7 @@ export function getSetCellDataMutations(
              * 2. If the above case does not apply, parse the value to check whether it has a number format.
              */
             const currentCellStyle = worksheet?.getCellStyle(row, col);
-            const numfmtResult = getExternalPasteNumberFormatResult(value.v, currentCellStyle);
+            const numfmtResult = getExternalPasteNumberFormatResult(value.v, currentCellStyle, parseOptions);
 
             if (numfmtResult.n) {
                 newStyle.n = numfmtResult.n;
@@ -291,6 +296,9 @@ export function getSetCellValueMutations(
     const { unitId, subUnitId, range } = pasteTo;
     const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), { unitId, subUnitId });
     const worksheet = target?.worksheet;
+    const parseOptions = target
+        ? { locale: getNumfmtLocaleTag(target.workbook.getSnapshot().locale), dateSystem: target.workbook.getDateSystem() }
+        : undefined;
     const { mapFunc } = virtualizeDiscreteRanges([range]);
 
     const cellValueMatrix = new ObjectMatrix<ICellData>();
@@ -318,7 +326,7 @@ export function getSetCellValueMutations(
              * 2. If the above case does not apply, parse the value to check whether it has a number format.
              */
             const currentCellStyle = worksheet?.getCellStyle(row, col);
-            const numfmtResult = getExternalPasteNumberFormatResult(value.v, currentCellStyle);
+            const numfmtResult = getExternalPasteNumberFormatResult(value.v, currentCellStyle, parseOptions);
 
             if (numfmtResult.t !== undefined) {
                 cellValue.t = numfmtResult.t;
@@ -365,6 +373,9 @@ export function getSetCellStyleMutations(
     const { unitId, subUnitId, range } = pasteTo;
     const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), { unitId, subUnitId });
     const worksheet = target?.worksheet;
+    const parseOptions = target
+        ? { locale: getNumfmtLocaleTag(target.workbook.getSnapshot().locale), dateSystem: target.workbook.getDateSystem() }
+        : undefined;
     const { mapFunc } = virtualizeDiscreteRanges([range]);
 
     const cellValueMatrix = new ObjectMatrix<ICellData>();
@@ -391,7 +402,7 @@ export function getSetCellStyleMutations(
              * 2. If the above case does not apply, parse the value to check whether it has a number format.
              */
             const currentCellStyle = worksheet?.getCellStyle(row, col);
-            const numfmtResult = getExternalPasteNumberFormatResult(value.v, currentCellStyle);
+            const numfmtResult = getExternalPasteNumberFormatResult(value.v, currentCellStyle, parseOptions);
 
             if (numfmtResult.n) {
                 newStyle.n = numfmtResult.n;

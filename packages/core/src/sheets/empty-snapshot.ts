@@ -16,6 +16,7 @@
 
 import type { IWorkbookData } from './typedef';
 import pkg from '../../package.json';
+import { DateSystem } from '../types/enum/date-system';
 import { LocaleType } from '../types/enum/locale-type';
 
 export function getEmptySnapshot(
@@ -29,6 +30,7 @@ export function getEmptySnapshot(
         name,
         appVersion: pkg.version,
         locale,
+        dateSystem: DateSystem.Date1900,
         styles: {},
         sheets: {},
         resources: [],

@@ -38,13 +38,13 @@ export class Accrintm extends BaseFunction {
 
         const [issueObject, settlementObject, rateObject, parObject, basisObject] = variants as BaseValueObject[];
 
-        const issueSerialNumber = getDateSerialNumberByObject(issueObject);
+        const issueSerialNumber = getDateSerialNumberByObject(issueObject, this.getDateSystem());
 
         if (typeof issueSerialNumber !== 'number') {
             return issueSerialNumber;
         }
 
-        const settlementSerialNumber = getDateSerialNumberByObject(settlementObject);
+        const settlementSerialNumber = getDateSerialNumberByObject(settlementObject, this.getDateSystem());
 
         if (typeof settlementSerialNumber !== 'number') {
             return settlementSerialNumber;
@@ -66,7 +66,7 @@ export class Accrintm extends BaseFunction {
             return NumberValueObject.create(0);
         }
 
-        const { days, yearDays } = getTwoDateDaysByBasis(issueSerialNumber, settlementSerialNumber, basisValue);
+        const { days, yearDays } = getTwoDateDaysByBasis(issueSerialNumber, settlementSerialNumber, basisValue, this.getDateSystem());
 
         const result = parValue * rateValue * days / yearDays;
 

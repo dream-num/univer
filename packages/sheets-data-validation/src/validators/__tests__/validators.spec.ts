@@ -15,7 +15,7 @@
  */
 
 import type { Injector, LocaleService } from '@univerjs/core';
-import { CellValueType, DataValidationOperator, DataValidationType, WrapStrategy } from '@univerjs/core';
+import { CellValueType, DataValidationOperator, DataValidationType, DateSystem, LocaleType, WrapStrategy } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { describe, expect, it, vi } from 'vitest';
 import { DataValidationCustomFormulaService } from '../../services/dv-custom-formula.service';
@@ -45,6 +45,8 @@ function createContext() {
     };
     const univerInstanceService = {
         getUnit: vi.fn(() => ({
+            getDateSystem: (): DateSystem => DateSystem.Date1900,
+            getSnapshot: () => ({ locale: LocaleType.EN_US }),
             getSheetBySheetId: vi.fn(() => ({
                 getName: () => 'sheet-1',
             })),
@@ -87,6 +89,7 @@ function createContext() {
         listCacheService,
         lexerTreeBuilder,
         injector,
+        univerInstanceService,
     };
 }
 
@@ -146,7 +149,7 @@ describe('validators', () => {
     });
 
     it('covers date validation parsing, normalization, and messages', async () => {
-        const { localeService, injector, customFormulaService, lexerTreeBuilder } = createContext();
+        const { localeService, injector, customFormulaService, lexerTreeBuilder, univerInstanceService } = createContext();
         const date = new DateValidator(localeService, injector);
 
         customFormulaService.getCellFormulaValue.mockResolvedValueOnce({ v: '2024-01-02' });
@@ -168,6 +171,14 @@ describe('validators', () => {
             formula1: '2024-01-02',
             formula2: '',
         });
+        univerInstanceService.getUnit.mockReturnValue({
+            getDateSystem: (): DateSystem => DateSystem.Date1904,
+            getSnapshot: () => ({ locale: LocaleType.EN_US }),
+            getSheetBySheetId: vi.fn(() => ({
+                getName: () => 'sheet-1',
+            })),
+        });
+        expect(date.normalizeFormula({ formula1: '1', bizInfo: { showTime: false } } as never, 'u', 's').formula1).toBe('1904-01-02');
         expect(date.transform({ value: '2024-01-02' } as never, {} as never, {} as never).value).toBeTypeOf('number');
         expect(date.generateRuleName({ operator: DataValidationOperator.EQUAL, formula1: '2024-01-02' } as never)).toContain('sheets-data-validation.date.title');
         expect(date.generateRuleErrorMessage({ operator: DataValidationOperator.EQUAL, formula1: '=A1', ranges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }] } as never, { row: 0, col: 0 } as never)).toBe('sheets-data-validation.date.errorMsg.equal');

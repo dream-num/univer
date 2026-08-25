@@ -15,7 +15,8 @@
  */
 
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { excelSerialToDateTime, getDateSerialNumberByObject } from '../../../basics/date';
+import { excelSerialToDateTime } from '@univerjs/core';
+import { getDateSerialNumberByObject } from '../../../basics/date';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
@@ -43,7 +44,7 @@ export class Second extends BaseFunction {
     }
 
     private _handleSingleObject(serialNumberObject: BaseValueObject) {
-        const dateSerialNumber = getDateSerialNumberByObject(serialNumberObject);
+        const dateSerialNumber = getDateSerialNumberByObject(serialNumberObject, this.getDateSystem());
 
         if (typeof dateSerialNumber !== 'number') {
             return dateSerialNumber;
@@ -53,7 +54,7 @@ export class Second extends BaseFunction {
             return NumberValueObject.create(0);
         }
 
-        const date = excelSerialToDateTime(dateSerialNumber);
+        const date = excelSerialToDateTime(dateSerialNumber, this.getDateSystem());
         const seconds = date.getUTCSeconds();
 
         return NumberValueObject.create(seconds);

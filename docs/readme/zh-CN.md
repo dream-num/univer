@@ -89,7 +89,7 @@ Univer 不只是一个电子表格文件查看器。它是用于构建你自己�
 
 - **同构设计**：既可以在浏览器中运行 UI 应用，也可以在 Node.js 中运行无头处理逻辑。
 - **插件优先架构**：每个能力都以可组合插件的形式提供，功能可以添加、移除、替换或延迟加载。
-- **Preset Mode 便于快速集成**：当你希望快速获得可运行应用时，可以使用 [`univer-presets`](https://github.com/dream-num/univer-presets) 提供的预设插件组合。
+- **Preset Mode 便于快速集成**：当你希望快速获得可运行应用时，可以使用本仓库 [`presets/`](../../presets) 中的预设插件集合。
 - **Plugin Mode 提供完整控制**：当你需要自定义加载、更小包体或深度集成时，可以手动组合包和插件。
 - **Facade API**：通过更高层 API 操作工作簿、工作表、区域、文档、公式、命令和事件。
 - **Canvas 渲染引擎**：支持大型可编辑文档界面，并在多种文档类型之间复用渲染层。
@@ -97,45 +97,12 @@ Univer 不只是一个电子表格文件查看器。它是用于构建你自己�
 
 ## ⚡ 快速开始
 
-大多数应用应该从 **Preset Mode** 开始。当你需要手动组合包并控制插件注册时，可以使用 **Plugin Mode**。
+使用 **Plugin Mode** 可以获得完整的产品能力覆盖并精确控制组合方式。对于受支持的 Sheets、Docs 和 Node 配置，**Preset Mode** 提供了更简短的预设方案。
 
 <details open>
-<summary><strong>Preset Mode（推荐）</strong></summary>
-
-Preset 是一组经过整理的 Univer 插件集合，包含所需的 Facade API 注册和样式。
-
-```bash
-pnpm add @univerjs/presets @univerjs/preset-sheets-core
-```
-
-```ts
-import { UniverSheetsCorePreset } from '@univerjs/preset-sheets-core'
-import UniverPresetSheetsCoreEnUS from '@univerjs/preset-sheets-core/locales/en-US'
-import { createUniver, LocaleType, mergeLocales } from '@univerjs/presets'
-
-import '@univerjs/preset-sheets-core/lib/index.css'
-
-const { univerAPI } = createUniver({
-  locale: LocaleType.EN_US,
-  locales: {
-    [LocaleType.EN_US]: mergeLocales(UniverPresetSheetsCoreEnUS),
-  },
-  presets: [
-    UniverSheetsCorePreset({
-      container: 'app',
-    }),
-  ],
-})
-
-univerAPI.createWorkbook({})
-```
-
-</details>
-
-<details>
 <summary><strong>Plugin Mode</strong></summary>
 
-Plugin Mode 让你更底层地控制包、样式导入、locale 合并、Facade API 注册和插件顺序。
+Plugin Mode 让你更底层地控制包、样式导入、locale 合并、Facade API 注册和插件配置。
 
 ```bash
 pnpm add @univerjs/core @univerjs/design @univerjs/docs @univerjs/docs-ui @univerjs/engine-formula @univerjs/engine-render @univerjs/sheets @univerjs/sheets-formula @univerjs/sheets-formula-ui @univerjs/sheets-numfmt @univerjs/sheets-numfmt-ui @univerjs/sheets-ui @univerjs/ui
@@ -212,6 +179,39 @@ univerAPI.createWorkbook({})
 
 </details>
 
+<details>
+<summary><strong>Preset Mode</strong></summary>
+
+Preset 是一组经过整理的 Univer 插件集合，包含所需的 Facade API 注册和样式。
+
+```bash
+pnpm add @univerjs/presets @univerjs/preset-sheets-core
+```
+
+```ts
+import { UniverSheetsCorePreset } from '@univerjs/preset-sheets-core'
+import UniverPresetSheetsCoreEnUS from '@univerjs/preset-sheets-core/locales/en-US'
+import { createUniver, LocaleType, mergeLocales } from '@univerjs/presets'
+
+import '@univerjs/preset-sheets-core/lib/index.css'
+
+const { univerAPI } = createUniver({
+  locale: LocaleType.EN_US,
+  locales: {
+    [LocaleType.EN_US]: mergeLocales(UniverPresetSheetsCoreEnUS),
+  },
+  presets: [
+    UniverSheetsCorePreset({
+      container: 'app',
+    }),
+  ],
+})
+
+univerAPI.createWorkbook({})
+```
+
+</details>
+
 页面需要一个容器：
 
 ```html
@@ -224,8 +224,8 @@ univerAPI.createWorkbook({})
 
 | 选择 | 适用场景 | 从这里开始 |
 | --- | --- | --- |
-| **Preset Mode** | 你希望用最少配置获得可运行的 Sheets、Docs 或 Node 设置。 | [`univer-presets`](https://github.com/dream-num/univer-presets) 和 [快速入门指南](https://docs.univer.ai/guides/sheets/getting-started/installation) |
-| **Plugin Mode** | 你需要严格控制包、插件注册顺序、延迟加载或自定义运行时组合。 | 本仓库的 [`examples/`](../../examples) 和 [架构指南](https://docs.univer.ai/guides/recipes/architecture/univer) |
+| **Plugin Mode** | 你需要严格控制包、已配置的依赖、延迟加载或自定义运行时组合。 | 本仓库的 [`examples/`](../../examples) 和 [架构指南](https://docs.univer.ai/guides/recipes/architecture/univer) |
+| **Preset Mode** | 你希望用最少配置获得可运行的 Sheets、Docs 或 Node 设置。 | 本仓库的 [`presets/`](../../presets) 和 [快速入门指南](https://docs.univer.ai/guides/sheets/getting-started/installation) |
 | **Headless Mode** | 你需要在没有 UI 的情况下进行服务端工作簿/文档处理、公式计算或自动化。 | [Headless Univer](https://docs.univer.ai/guides/sheets/getting-started/node) |
 
 请保持所有 `@univerjs/*` 包版本一致。如果使用 Univer Pro 包，也请保持 `@univerjs-pro/*` 版本一致。
@@ -278,7 +278,7 @@ Pro 功能请参考 [Univer Pro 指南](https://docs.univer.ai/guides/pro)。这
 ## 🌐 生态
 
 - **核心 SDK**：[`dream-num/univer`](https://github.com/dream-num/univer)，也就是当前 monorepo。
-- **Presets**：[`dream-num/univer-presets`](https://github.com/dream-num/univer-presets)，面向浏览器和 Node.js 应用的预设插件组合。
+- **Presets**：本仓库的 [`presets/`](../../presets)，面向浏览器和 Node.js 应用的预设插件集合。
 - **AI agent skills**：[`dream-num/univer-sdk-skills`](https://github.com/dream-num/univer-sdk-skills)，供 AI agent 使用的可复用说明，覆盖 Univer 集成、Pro 功能、插件开发和 Node 后端。参见 [AI Skills 指南](https://docs.univer.ai/guides/skills)。
 - **文档**：[docs.univer.ai](https://docs.univer.ai)，包含 Sheets、Docs、Slides、recipes 和 Pro 指南。
 - **API 参考**：[docs.univer.ai/reference](https://docs.univer.ai/reference/classes/univer)，包含 Facade API 和生成的 API 参考。

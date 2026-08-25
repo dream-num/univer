@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DateSystem } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
@@ -28,6 +29,18 @@ describe('Test month function', () => {
             const serialNumber = NumberValueObject.create(43831);
             const result = testFunction.calculate(serialNumber);
             expect(result.getValue()).toStrictEqual(1);
+        });
+
+        it('uses the configured date system for serials around 1904', () => {
+            const serialNumber = NumberValueObject.create(31);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
+            expect(testFunction.calculate(serialNumber).getValue()).toBe(1);
+
+            testFunction.setDateSystem(DateSystem.Date1904);
+            expect(testFunction.calculate(serialNumber).getValue()).toBe(2);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
         });
 
         it('Serial number is date string', () => {

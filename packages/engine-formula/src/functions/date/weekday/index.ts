@@ -80,7 +80,7 @@ export class Weekday extends BaseFunction {
             return _returnTypeObject;
         }
 
-        const dateSerialNumber = getDateSerialNumberByObject(serialNumberObject);
+        const dateSerialNumber = getDateSerialNumberByObject(serialNumberObject, this.getDateSystem());
 
         if (typeof dateSerialNumber !== 'number') {
             return dateSerialNumber;
@@ -100,7 +100,7 @@ export class Weekday extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        const weekDay = getWeekDayByDateSerialNumber(dateSerialNumber);
+        const weekDay = getWeekDayByDateSerialNumber(dateSerialNumber, this.getDateSystem());
 
         const result = this._returnTypeMap[returnTypeValue][weekDay];
 

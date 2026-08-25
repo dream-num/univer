@@ -15,6 +15,7 @@
  */
 
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { DateSystem } from '@univerjs/core';
 import { getDateSerialNumberByObject } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
 import { calculateCoupdaybs } from '../../../basics/financial';
@@ -39,13 +40,13 @@ export class Coupdaybs extends BaseFunction {
 
         const [settlementObject, maturityObject, frequencyObject, basisObject] = variants as BaseValueObject[];
 
-        const settlementSerialNumber = getDateSerialNumberByObject(settlementObject);
+        const settlementSerialNumber = getDateSerialNumberByObject(settlementObject, this.getDateSystem());
 
         if (typeof settlementSerialNumber !== 'number') {
             return settlementSerialNumber;
         }
 
-        const maturitySerialNumber = getDateSerialNumberByObject(maturityObject);
+        const maturitySerialNumber = getDateSerialNumberByObject(maturityObject, this.getDateSystem());
 
         if (typeof maturitySerialNumber !== 'number') {
             return maturitySerialNumber;
@@ -67,7 +68,11 @@ export class Coupdaybs extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        const result = calculateCoupdaybs(settlementSerialNumber, maturitySerialNumber, frequencyValue, basisValue);
+        const result = calculateCoupdaybs(settlementSerialNumber, maturitySerialNumber, frequencyValue, basisValue, this.getDateSystem());
+
+        if (this.getDateSystem() === DateSystem.Date1900 && settlementSerialNumber === 0 && result === 1) {
+            return NumberValueObject.create(0);
+        }
 
         return NumberValueObject.create(result);
     }

@@ -109,7 +109,16 @@ export class FDocumentSection {
         return this._sectionId;
     }
 
-    /** Returns the effective edit permission facade for this section. */
+    /**
+     * Returns this Section's permission facade.
+     * @returns {FDocumentObjectPermission} Permission facade combining Document and Section Edit points.
+     * @example
+     * ```ts
+     * const section = univerAPI.getActiveDocument()?.getSection(0);
+     * if (!section) throw new Error('Section not found.');
+     * await section.getPermission().setReadOnly();
+     * ```
+     */
     getPermission(): FDocumentObjectPermission {
         return new FDocumentObjectPermission(
             this._document.getId(),

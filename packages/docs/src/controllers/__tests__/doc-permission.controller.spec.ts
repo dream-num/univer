@@ -127,7 +127,7 @@ describe('DocPermissionController', () => {
         const firstParagraph = document.getParagraph('paragraph-one')!;
         const secondParagraph = document.getParagraph('paragraph-two')!;
 
-        await firstSection.getPermission().setEditable(false);
+        await firstSection.getPermission().setReadOnly();
 
         expect(firstSection.getPermission().canEdit()).toBe(false);
         expect(firstParagraph.getPermission().canEdit()).toBe(false);
@@ -135,7 +135,7 @@ describe('DocPermissionController', () => {
         expect(firstParagraph.setText('Denied')).toBe(false);
         expect(secondParagraph.setText('Allowed')).toBe(true);
 
-        await document.getSection(0)!.getPermission().setEditable(true);
+        await document.getSection(0)!.getPermission().setEditable();
         await document.getParagraph('paragraph-one')!.getPermission().setEditable(false);
         expect(document.getParagraph('paragraph-one')!.setText('Denied again')).toBe(false);
     });

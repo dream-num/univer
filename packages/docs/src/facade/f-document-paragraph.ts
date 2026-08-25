@@ -106,7 +106,16 @@ export class FDocumentParagraph extends FBaseInitialable {
         return this._segmentId;
     }
 
-    /** Returns the effective edit permission facade for this paragraph. */
+    /**
+     * Returns this Paragraph's permission facade.
+     * @returns {FDocumentObjectPermission} Permission facade combining Document, Section, and Paragraph Edit points.
+     * @example
+     * ```ts
+     * const paragraph = univerAPI.getActiveDocument()?.getParagraphs()[0];
+     * if (!paragraph) throw new Error('Paragraph not found.');
+     * await paragraph.getPermission().setReadOnly();
+     * ```
+     */
     getPermission(): FDocumentObjectPermission {
         return new FDocumentObjectPermission(
             this._document.getId(),

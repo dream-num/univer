@@ -185,12 +185,35 @@ export class FDocument extends FBaseInitialable {
         return this.id;
     }
 
-    /** Returns the effective permission facade for this document. */
+    /**
+     * Returns the Document unit permission facade.
+     * @returns {FDocumentPermission} Permission facade for Edit, Copy, Print, Export, and Comment.
+     * @example
+     * ```ts
+     * const document = univerAPI.getActiveDocument();
+     * if (!document) throw new Error('No active Document.');
+     * await document.getPermission().setReadOnly();
+     * ```
+     */
     getPermission(): FDocumentPermission {
         return new FDocumentPermission(this.id, this._commandService, this._permissionService);
     }
 
-    /** Returns an edit permission facade for a stable document entity id. */
+    /**
+     * Returns the permission facade for an entity with a stable id, such as a Table, Drawing, or Custom Block.
+     *
+     * Parent Section and Paragraph permission ceilings are resolved from the current Document model.
+     * @param {string} segmentId Segment id, or an empty string for the main body.
+     * @param {string} entityType Stable entity type used by the owning Doc feature.
+     * @param {string} entityId Stable entity id.
+     * @returns {FDocumentObjectPermission} Effective permission facade for the entity.
+     * @example Make one table read-only
+     * ```ts
+     * const document = univerAPI.getActiveDocument();
+     * if (!document) throw new Error('No active Document.');
+     * await document.getEntityPermission('', 'table', 'table-1').setReadOnly();
+     * ```
+     */
     getEntityPermission(segmentId: string, entityType: string, entityId: string): FDocumentObjectPermission {
         return new FDocumentObjectPermission(
             this.id,

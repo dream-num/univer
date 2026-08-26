@@ -19,6 +19,7 @@ export enum DocHistoryAction {
     EditTableCell = 'edit-table-cell',
     FormatParagraph = 'format-paragraph',
     InsertCustomRange = 'insert-custom-range',
+    UpdateImage = 'update-image',
     UpdatePageLayout = 'update-page-layout',
 }
 

@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+export enum DocHistoryAction {
+    DeleteDivider = 'delete-divider',
+    EditTableCell = 'edit-table-cell',
+    FormatParagraph = 'format-paragraph',
+    InsertCustomRange = 'insert-custom-range',
+    UpdatePageLayout = 'update-page-layout',
+}
+
 export { DeleteTextCommand, InsertTextCommand, UpdateTextCommand } from './commands/commands/core-editing.command';
 export type {
     IDeleteTextCommandParams,

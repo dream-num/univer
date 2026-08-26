@@ -17,7 +17,7 @@
 import type { DocumentDataModel, IAccessor, ICommand, IMutationInfo, IParagraphStyle } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { BuildTextUtils, CommandType, getRichTextEditPath, ICommandService, IUniverInstanceService, JSONX, MemoryCursor, TextX, TextXActionType, UniverInstanceType, UpdateDocsAttributeType } from '@univerjs/core';
-import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { DocHistoryAction, DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 
 export interface IDocParagraphSettingCommandParams {
     paragraph?: Partial<Pick<IParagraphStyle, 'hanging' | 'horizontalAlign' | 'spaceBelow' | 'spaceAbove' | 'indentEnd' | 'indentStart' | 'lineSpacing' | 'indentFirstLine' | 'snapToGrid' | 'spacingRule'>>;
@@ -52,6 +52,7 @@ export const DocParagraphSettingCommand: ICommand<IDocParagraphSettingCommandPar
             id: RichTextEditingMutation.id,
             params: {
                 unitId,
+                historyAction: DocHistoryAction.FormatParagraph,
                 actions: [],
                 textRanges: docRanges,
             },

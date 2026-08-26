@@ -25,6 +25,7 @@ import { DocStateEmitService } from '../../services/doc-state-emit.service';
 
 export interface IRichTextEditingMutationParams extends IMutationCommonParams {
     unitId: string;
+    historyAction?: string;
     actions: JSONXActions;
     textRanges: Nullable<ITextRangeWithStyle[]>;
     segmentId?: string;

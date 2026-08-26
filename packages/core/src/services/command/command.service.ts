@@ -106,7 +106,7 @@ export interface IMultiCommand<P extends object = object, R = boolean> extends I
 
 export interface IMutationCommonParams {
     /**
-     * It is used to indicate which {@link CommandType.COMMAND} triggers the mutation.
+     * It is used to indicate which {@link CommandType.COMMAND} or {@link CommandType.OPERATION} triggers the mutation.
      */
     trigger?: string;
 
@@ -433,6 +433,8 @@ export class CommandService extends Disposable implements ICommandService {
                     params,
                 };
 
+                this._attachMutationTrigger(command, params);
+
                 const stackItemDisposable = this._pushCommandExecutionStack(commandInfo);
                 const _options = options ?? {};
 
@@ -492,18 +494,7 @@ export class CommandService extends Disposable implements ICommandService {
                     params,
                 };
 
-                // If the executed command is of type `Mutation`, we should add a trigger params,
-                // whose value is the command's ID that triggers the mutation.
-                if (command.type === CommandType.MUTATION) {
-                    const triggerCommand = findLast(
-                        this._commandExecutionStack,
-                        (item) => item.type === CommandType.COMMAND
-                    );
-                    if (triggerCommand) {
-                        commandInfo.params = commandInfo.params ?? {};
-                        (commandInfo.params as IMutationCommonParams).trigger = triggerCommand.id;
-                    }
-                }
+                this._attachMutationTrigger(command, params);
 
                 const stackItemDisposable = this._pushCommandExecutionStack(commandInfo);
                 const _options = options ?? {};
@@ -580,6 +571,33 @@ export class CommandService extends Disposable implements ICommandService {
                 this._multiCommandDisposables.get(command.id)?.dispose();
             }
         });
+    }
+
+    private _attachMutationTrigger<P extends object>(command: ICommand<P>, params?: P): void {
+        if (command.type !== CommandType.MUTATION || !params) {
+            return;
+        }
+
+        const triggerCommand = findLast(
+            this._commandExecutionStack,
+            (item) => item.type === CommandType.COMMAND
+        );
+        if (triggerCommand) {
+            Reflect.set(params, 'trigger', triggerCommand.id);
+            return;
+        }
+
+        if (Reflect.get(params, 'trigger') !== undefined) {
+            return;
+        }
+
+        const triggerOperation = findLast(
+            this._commandExecutionStack,
+            (item) => item.type === CommandType.OPERATION
+        );
+        if (triggerOperation) {
+            Reflect.set(params, 'trigger', triggerOperation.id);
+        }
     }
 
     private async _execute<P extends object, R = boolean>(command: ICommand<P, R>, params?: P, options?: IExecutionOptions): Promise<R> {

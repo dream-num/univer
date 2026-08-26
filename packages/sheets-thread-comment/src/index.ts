@@ -16,6 +16,8 @@
 
 export type { IUniverSheetsThreadCommentConfig } from './config/config';
 export { SheetsThreadCommentRefRangeController } from './controllers/sheets-thread-comment-ref-range.controller';
+export { SheetsThreadCommentResourceController } from './controllers/sheets-thread-comment-resource.controller';
 export { SheetsThreadCommentModel } from './models/sheets-thread-comment.model';
 export { UniverSheetsThreadCommentPlugin } from './plugin';
+export { SHEET_UNIVER_THREAD_COMMENT_PLUGIN } from './types/const';
 export type { ISheetThreadComment } from './types/interfaces/i-sheet-thread-comment';

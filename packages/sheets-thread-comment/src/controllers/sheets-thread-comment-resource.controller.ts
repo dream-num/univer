@@ -16,19 +16,44 @@
 
 import type { IMutationInfo, Workbook } from '@univerjs/core';
 import type { ICopySheetCommandParams, IRemoveSheetCommandParams } from '@univerjs/sheets';
-import { Disposable, generateRandomId, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import {
+    Disposable,
+    generateRandomId,
+    Inject,
+    IResourceManagerService,
+    IUniverInstanceService,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { CopySheetCommand, RemoveSheetCommand, SheetInterceptorService } from '@univerjs/sheets';
-import { AddCommentMutation, DeleteCommentMutation, IThreadCommentDataSourceService, ThreadCommentModel } from '@univerjs/thread-comment';
+import {
+    AddCommentMutation,
+    createThreadCommentResourceHook,
+    DeleteCommentMutation,
+    IThreadCommentDataSourceService,
+    ThreadCommentModel,
+} from '@univerjs/thread-comment';
+import { SHEET_UNIVER_THREAD_COMMENT_PLUGIN } from '../types/const';
 
 export class SheetsThreadCommentResourceController extends Disposable {
     constructor(
+        @IResourceManagerService private readonly _resourceManagerService: IResourceManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
-        @Inject(ThreadCommentModel) private _threadCommentModel: ThreadCommentModel,
-        @IThreadCommentDataSourceService private _threadCommentDataSourceService: IThreadCommentDataSourceService
+        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
+        @Inject(ThreadCommentModel) private readonly _threadCommentModel: ThreadCommentModel,
+        @IThreadCommentDataSourceService private readonly _threadCommentDataSourceService: IThreadCommentDataSourceService
     ) {
         super();
+        this._initSnapshot();
         this._initSheetChange();
+    }
+
+    private _initSnapshot() {
+        this.disposeWithMe(this._resourceManagerService.registerPluginResource(createThreadCommentResourceHook(
+            this._threadCommentModel,
+            this._threadCommentDataSourceService,
+            SHEET_UNIVER_THREAD_COMMENT_PLUGIN,
+            [UniverInstanceType.UNIVER_SHEET]
+        )));
     }
 
     // eslint-disable-next-line max-lines-per-function

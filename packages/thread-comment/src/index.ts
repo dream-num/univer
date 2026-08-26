@@ -43,12 +43,11 @@ export type {
     IUpdateCommentPayload,
     IUpdateCommentRefMutationParams,
 } from './commands/mutations/comment.mutation';
+export {
+    createThreadCommentResourceHook,
+} from './common/tc-resource';
 export { getDT } from './common/utils';
 export type { IUniverThreadCommentConfig } from './config/config';
-export {
-    SHEET_UNIVER_THREAD_COMMENT_PLUGIN,
-    ThreadCommentResourceController,
-} from './controllers/tc-resource.controller';
 export { ThreadCommentModel } from './models/thread-comment.model';
 export type { CommentUpdate, IThreadCommentQuery, IThreadInfo } from './models/thread-comment.model';
 export { UniverThreadCommentPlugin } from './plugin';

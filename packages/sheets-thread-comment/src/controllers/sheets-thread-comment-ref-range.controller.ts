@@ -21,7 +21,7 @@ import type { ISheetThreadComment } from '../types/interfaces/i-sheet-thread-com
 import { Disposable, ICommandService, Inject, sequenceExecuteAsync, toDisposable } from '@univerjs/core';
 import { serializeRange, singleReferenceToGrid } from '@univerjs/engine-formula';
 import { handleCommonRangeChangeWithEffectRefCommandsSkipNoInterests, RefRangeService, SheetsSelectionsService } from '@univerjs/sheets';
-import { AddCommentMutation, DeleteCommentMutation, ThreadCommentModel, UpdateCommentRefMutation } from '@univerjs/thread-comment';
+import { AddCommentMutation, DeleteCommentMutation, deserializeThreadCommentAnchor, ThreadCommentModel, UpdateCommentRefMutation } from '@univerjs/thread-comment';
 import { SheetsThreadCommentModel } from '../models/sheets-thread-comment.model';
 
 export class SheetsThreadCommentRefRangeController extends Disposable {
@@ -163,6 +163,9 @@ export class SheetsThreadCommentRefRangeController extends Disposable {
         for (const data of datas) {
             for (const thread of data.threads) {
                 const { unitId, subUnitId, root } = thread;
+                if (deserializeThreadCommentAnchor(root.ref)) {
+                    continue;
+                }
                 const pos = singleReferenceToGrid(root.ref);
                 const sheetComment = {
                     ...root,

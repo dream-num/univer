@@ -31,18 +31,18 @@ import {
     UserManagerService,
 } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
+import { DEFAULT_DOC_SUBUNIT_ID } from '@univerjs/docs-thread-comment';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IThreadCommentDataSourceService, ThreadCommentDataSourceService, ThreadCommentModel } from '@univerjs/thread-comment';
-import { SetActiveCommentOperation, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
+import { SetActiveCommentOperation, ThreadCommentDraftService, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import threadCommentEnUS from '@univerjs/thread-comment-ui/locale/en-US';
 import { ISidebarService, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { DEFAULT_DOC_SUBUNIT_ID } from '../../common/const';
 import { DocThreadCommentService } from '../../services/doc-thread-comment.service';
-import { DocThreadCommentPanel } from '../DocThreadCommentPanel';
+import { DocThreadCommentPanel, getDocCommentPanelSubUnitId } from '../DocThreadCommentPanel';
 
 const DOC_ID = 'doc-thread-comment-panel-test';
 
@@ -179,6 +179,7 @@ function createPanelTestBed(decorationIds: string[]) {
     injector.add([IThreadCommentDataSourceService, { useClass: ThreadCommentDataSourceService }]);
     injector.add([ThreadCommentModel]);
     injector.add([ISidebarService, { useClass: TestSidebarService as never }]);
+    injector.add([ThreadCommentDraftService]);
     injector.add([ThreadCommentPanelService]);
     injector.add([DocThreadCommentService]);
 
@@ -255,5 +256,12 @@ describe('DocThreadCommentPanel', () => {
         expect(container.textContent).toContain('Visible document feedback');
         expect(container.textContent).not.toContain('Detached feedback');
         expect(container.textContent?.match(/Visible document feedback/g)).toHaveLength(1);
+    });
+
+    it('uses the drawing subunit while a drawing comment draft is active', () => {
+        expect(getDocCommentPanelSubUnitId({ unitId: DOC_ID, subUnitId: DOC_ID }, DOC_ID)).toBe(DOC_ID);
+        expect(getDocCommentPanelSubUnitId({ unitId: 'other-doc', subUnitId: 'other-doc' }, DOC_ID)).toBe(DEFAULT_DOC_SUBUNIT_ID);
+        expect(getDocCommentPanelSubUnitId(null, DOC_ID)).toBe(DEFAULT_DOC_SUBUNIT_ID);
+        expect(getDocCommentPanelSubUnitId(null, undefined)).toBe(DEFAULT_DOC_SUBUNIT_ID);
     });
 });

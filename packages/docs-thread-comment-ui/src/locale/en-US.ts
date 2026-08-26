@@ -19,6 +19,7 @@ const locale = {
         panel: {
             title: 'Comment Management',
             addComment: 'Add Comment',
+            openComments: 'Open Comments',
         },
     },
 };

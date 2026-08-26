@@ -28,7 +28,7 @@ import { useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { SetActiveCommentOperation } from '../commands/operations/comment.operations';
 import { ThreadCommentPanelService } from '../services/thread-comment-panel.service';
-import { getThreadCommentPanelItemKey } from './thread-comment-panel/util';
+import { getThreadCommentPanelItemKey, isSameThreadCommentTarget, shouldClearThreadCommentTarget } from './thread-comment-panel/util';
 import { ThreadCommentTree, ThreadCommentTreeLocation } from './ThreadCommentTree';
 
 export interface IThreadCommentPanelProps {
@@ -45,7 +45,10 @@ export interface IThreadCommentPanelProps {
     tempComment?: Nullable<IThreadComment>;
     onAddComment?: IThreadCommentTreeProps['onAddComment'];
     onDeleteComment?: IThreadCommentTreeProps['onDeleteComment'];
+    onAfterDeleteComment?: IThreadCommentTreeProps['onAfterDeleteComment'];
     showComments?: string[];
+    formatRef?: (comment: IThreadComment) => string;
+    onTempCommentClose?: () => void;
 }
 
 interface IThreadCommentWithUsers extends IThreadComment {
@@ -67,25 +70,37 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
         tempComment,
         onAddComment,
         onDeleteComment,
+        onAfterDeleteComment,
         showComments,
+        formatRef,
+        onTempCommentClose,
     } = props;
     const [unit, setUnit] = useState('all');
     const [status, setStatus] = useState('all');
     const localeService = useDependency(LocaleService);
     const userService = useDependency(UserManagerService);
     const threadCommentModel = useDependency(ThreadCommentModel);
-    const [unitComments, setUnitComments] = useState(() => threadCommentModel.getUnit(unitId));
     const panelService = useDependency(ThreadCommentPanelService);
     const activeCommentId = useObservable(panelService.activeCommentId$);
-    const update = useObservable(threadCommentModel.commentUpdate$);
+    useObservable(threadCommentModel.commentUpdate$);
+    const unitComments = threadCommentModel.getUnit(unitId);
+    const scopedTempComment = tempComment?.unitId === unitId ? tempComment : null;
+    const activeExists = activeCommentId
+        ? Boolean(
+            threadCommentModel.getComment(activeCommentId.unitId, activeCommentId.subUnitId, activeCommentId.commentId) ||
+            (scopedTempComment && isSameThreadCommentTarget(activeCommentId, scopedTempComment))
+        )
+        : false;
+    const shouldClearActiveTarget = shouldClearThreadCommentTarget(activeCommentId, unitId, activeExists);
     const commandService = useDependency(ICommandService);
     const subUnitId = useObservable(subUnitId$);
-    const shouldScroll = useRef(true);
+    const shouldScrollRef = useRef(true);
     const location = ThreadCommentTreeLocation.PANEL;
     const currentUser = useObservable(userService.currentUser$);
     const comments = useMemo(() => {
-        const allComments =
-            (unit === 'all' ? unitComments : unitComments.filter((i) => i.subUnitId === subUnitId) ?? []);
+        const allComments = unit === 'all' && type !== UniverInstanceType.UNIVER_SLIDE
+            ? unitComments
+            : unitComments.filter((i) => i.subUnitId === subUnitId);
 
         const sort = sortComments ?? ((a) => a);
         const res: IThreadCommentWithUsers[] = allComments.map((i) => ({ ...i.root, children: i.children ?? [], users: i.relativeUsers }));
@@ -100,7 +115,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
         } else {
             return sort(res) as IThreadCommentWithUsers[];
         }
-    }, [showComments, unit, unitComments, sortComments, subUnitId]);
+    }, [showComments, unit, unitComments, sortComments, subUnitId, type]);
 
     const commentsSorted = useMemo(() => [
         ...comments.filter((comment) => !comment.resolved),
@@ -126,8 +141,8 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
         return commentsSorted;
     }, [commentsSorted, currentUser?.userID, status]);
 
-    const renderComments = tempComment
-        ? [tempComment, ...statuedComments]
+    const renderComments = scopedTempComment
+        ? [scopedTempComment, ...statuedComments]
         : statuedComments;
 
     const unSolvedComments = renderComments.filter((comment) => !comment.resolved);
@@ -141,25 +156,61 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
     };
 
     useEffect(() => {
-        if (unitId) {
-            setUnitComments(
-                threadCommentModel.getUnit(unitId)
-            );
+        if (shouldClearActiveTarget) {
+            panelService.setActiveComment(undefined);
         }
-    }, [unitId, threadCommentModel, update]);
+    }, [panelService, shouldClearActiveTarget]);
+
+    useEffect(() => {
+        if (tempComment && (tempComment.unitId !== unitId || (subUnitId && tempComment.subUnitId !== subUnitId))) {
+            onTempCommentClose?.();
+        }
+    }, [onTempCommentClose, subUnitId, tempComment, unitId]);
 
     useEffect(() => {
         if (!activeCommentId) {
             return;
         }
-        if (!shouldScroll.current) {
-            shouldScroll.current = true;
+
+        const handlePointerDown = (event: PointerEvent) => {
+            const activeComment = panelService.activeCommentId;
+            const target = event.target;
+            if (event.button !== 0 || !activeComment || !(target instanceof Element)) {
+                return;
+            }
+
+            const activeElement = document.getElementById(
+                `${location}-${activeComment.unitId}-${activeComment.subUnitId}-${activeComment.commentId}`
+            );
+            if (
+                activeElement?.contains(target) ||
+                target.closest('button, input, textarea, select, a, [contenteditable="true"], [role="menu"], [role="menuitem"], [role="option"], [role="listbox"], [role="combobox"], [role="separator"]')
+            ) {
+                return;
+            }
+
+            commandService.executeCommand(SetActiveCommentOperation.id);
+            if (scopedTempComment && isSameThreadCommentTarget(activeComment, scopedTempComment)) {
+                onTempCommentClose?.();
+            }
+        };
+
+        document.addEventListener('pointerdown', handlePointerDown, true);
+        return () => document.removeEventListener('pointerdown', handlePointerDown, true);
+    }, [activeCommentId, commandService, location, onTempCommentClose, panelService, scopedTempComment]);
+
+    useEffect(() => {
+        if (!activeCommentId) {
+            return;
+        }
+        if (!shouldScrollRef.current) {
+            shouldScrollRef.current = true;
             return;
         }
         const { unitId, subUnitId, commentId } = activeCommentId;
         const id = `${location}-${unitId}-${subUnitId}-${commentId}`;
         document.getElementById(id)?.scrollIntoView({ block: 'center' });
-    }, [activeCommentId]);
+    }, [activeCommentId, location]);
 
     const renderComment = (section: ThreadCommentPanelSection) => (comment: IThreadComment, index: number) => (
         <ThreadCommentTree
@@ -171,11 +222,12 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
             unitId={comment.unitId}
             subUnitId={comment.subUnitId}
             refStr={comment.ref}
+            displayRef={formatRef?.(comment)}
             type={type}
-            showEdit={activeCommentId?.commentId === comment.id}
-            showHighlight={activeCommentId?.commentId === comment.id}
+            showEdit={!comment.id || isSameThreadCommentTarget(activeCommentId, comment)}
+            showHighlight={isSameThreadCommentTarget(activeCommentId, comment)}
             onClick={() => {
-                shouldScroll.current = false;
+                shouldScrollRef.current = false;
                 if (!comment.resolved) {
                     commandService.executeCommand(
                         SetActiveCommentOperation.id,
@@ -190,11 +242,26 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                     commandService.executeCommand(SetActiveCommentOperation.id);
                 }
             }}
-            onMouseEnter={() => onItemEnter?.(comment)}
-            onMouseLeave={() => onItemLeave?.(comment)}
+            onMouseEnter={() => {
+                panelService.setHoveredComment({
+                    unitId: comment.unitId,
+                    subUnitId: comment.subUnitId,
+                    commentId: comment.id,
+                    trigger: 'panel-hover',
+                });
+                onItemEnter?.(comment);
+            }}
+            onMouseLeave={() => {
+                if (isSameThreadCommentTarget(panelService.hoveredCommentId, comment)) {
+                    panelService.setHoveredComment(undefined);
+                }
+                onItemLeave?.(comment);
+            }}
             onAddComment={onAddComment}
             onDeleteComment={onDeleteComment}
+            onAfterDeleteComment={onAfterDeleteComment}
             onResolve={(resolved: boolean) => onResolve?.(comment.id, resolved)}
+            onClose={!comment.id ? onTempCommentClose : undefined}
         />
     );
 

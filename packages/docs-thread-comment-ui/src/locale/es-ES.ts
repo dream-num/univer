@@ -21,6 +21,7 @@ const locale: typeof enUS = {
         panel: {
             title: 'Gestión de comentarios',
             addComment: 'Añadir comentario',
+            openComments: 'Abrir comentarios',
         },
     },
 };

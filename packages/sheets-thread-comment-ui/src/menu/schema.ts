@@ -15,16 +15,21 @@
  */
 
 import type { MenuSchemaType } from '@univerjs/ui';
-import { ContextMenuGroup, ContextMenuPosition, RibbonInsertGroup } from '@univerjs/ui';
-import { ShowAddSheetCommentModalOperation, ToggleSheetCommentPanelOperation } from '../commands/operations/comment.operation';
-import { threadCommentMenuFactory, threadPanelMenuFactory } from './menu';
+import { ContextMenuGroup, ContextMenuPosition, FloatingObjectToolbarPosition, RibbonInsertGroup } from '@univerjs/ui';
+import { AddSheetDrawingCommentOperation, ShowAddSheetCommentModalOperation, ToggleSheetCommentPanelOperation } from '../commands/operations/comment.operation';
+import { drawingCommentMenuFactory, threadCommentMenuFactory, threadPanelMenuFactory } from './menu';
 
 export const menuSchema: MenuSchemaType = {
     [RibbonInsertGroup.MEDIA]: {
         [ToggleSheetCommentPanelOperation.id]: {
             order: 2,
-            gridLayout: { row: 1, column: 3, rowSpan: 2, showLabel: true },
+            gridLayout: { row: 1, column: 3, showLabel: true },
             menuItemFactory: threadPanelMenuFactory,
+        },
+        [ShowAddSheetCommentModalOperation.id]: {
+            order: 2.1,
+            gridLayout: { row: 2, column: 3, showLabel: true },
+            menuItemFactory: threadCommentMenuFactory,
         },
     },
     [ContextMenuPosition.MAIN_AREA]: {
@@ -32,6 +37,20 @@ export const menuSchema: MenuSchemaType = {
             [ShowAddSheetCommentModalOperation.id]: {
                 order: 0,
                 menuItemFactory: threadCommentMenuFactory,
+            },
+        },
+    },
+    [FloatingObjectToolbarPosition.SHEET]: {
+        [AddSheetDrawingCommentOperation.id]: {
+            order: 10,
+            menuItemFactory: drawingCommentMenuFactory,
+        },
+    },
+    [ContextMenuPosition.DRAWING]: {
+        [ContextMenuGroup.OTHERS]: {
+            [AddSheetDrawingCommentOperation.id]: {
+                order: 0,
+                menuItemFactory: drawingCommentMenuFactory,
             },
         },
     },

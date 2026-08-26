@@ -67,6 +67,13 @@ describe('FRangeSheetsThreadCommentMixin', () => {
             getCurrentUser = () => ({ userID: 'current-user' });
         }
 
+        const worksheet = {
+            getSheetId: () => 'sheet-1',
+            getRowCount: () => 100,
+            getColumnCount: () => 100,
+        };
+        const workbook = { getUnitId: () => 'book-1', getSheetBySheetId: () => worksheet };
+
         class TestUniverInstanceService {
             getUnit = (_unitId: string, type: UniverInstanceType) => (type === UniverInstanceType.UNIVER_SHEET ? workbook : null);
         }
@@ -87,12 +94,6 @@ describe('FRangeSheetsThreadCommentMixin', () => {
         injector.add([FormulaDataModel, { useClass: TestFormulaDataModel as never }]);
         injector.add([ILogService, { useClass: TestLogService as never }]);
 
-        const workbook = { getUnitId: () => 'book-1', getSheetBySheetId: () => worksheet };
-        const worksheet = {
-            getSheetId: () => 'sheet-1',
-            getRowCount: () => 100,
-            getColumnCount: () => 100,
-        };
         const range = injector.createInstance(
             FRangeSheetsThreadCommentMixin,
             workbook as never,
@@ -112,6 +113,18 @@ describe('FRangeSheetsThreadCommentMixin', () => {
                 parentId: 'comment-1',
                 unitId: 'book-1',
                 subUnitId: 'sheet-1',
+            }),
+        }));
+
+        await expect(range.addCommentAsync('Agent review', {
+            id: 'agent-comment',
+            personId: 'agent-user',
+        })).resolves.toBe(true);
+        expect(commandService.executeCommand).toHaveBeenCalledWith(AddCommentCommand.id, expect.objectContaining({
+            comment: expect.objectContaining({
+                id: 'agent-comment',
+                personId: 'agent-user',
+                text: expect.objectContaining({ dataStream: 'Agent review\r\n' }),
             }),
         }));
 

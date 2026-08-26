@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import type { Dependency, IDisposable, IDocumentData, Nullable } from '@univerjs/core';
+import type { Dependency, ICommand, IDisposable, IDocumentData, Nullable } from '@univerjs/core';
 import type { ISuccinctDocRangeParam } from '@univerjs/engine-render';
 import type { IThreadComment } from '@univerjs/thread-comment';
 import type { IShortcutItem } from '@univerjs/ui';
 import type { Root } from 'react-dom/client';
 import {
     CommandService,
+    CommandType,
     ConfigService,
     ContextService,
     createIdentifier,
@@ -346,6 +347,12 @@ class TestUniverInstanceService {
     }
 }
 
+const TestRichTextEditingMutation: ICommand = {
+    id: 'doc.mutation.rich-text-editing',
+    type: CommandType.MUTATION,
+    handler: () => true,
+};
+
 function createComment(overrides: Partial<IThreadComment>): IThreadComment {
     const id = overrides.id ?? 'thread-1';
 
@@ -406,9 +413,11 @@ function createTreeTestBed() {
         SetActiveCommentOperation,
         UpdateCommentCommand,
         UpdateCommentMutation,
+        TestRichTextEditingMutation,
     ].forEach((command) => commandService.registerCommand(command));
 
     return {
+        commandService,
         injector,
         editorService: injector.get(IEditorService),
         panelService: injector.get(ThreadCommentPanelService),
@@ -640,6 +649,49 @@ describe('ThreadCommentTree', () => {
         expect(container.querySelector('time')).toBeNull();
     });
 
+    it('treats HTML-looking comment content as text instead of DOM', () => {
+        const testBed = createTreeTestBed();
+        addRootComment(testBed.threadCommentModel, createComment({
+            id: 'untrusted-thread',
+            text: { dataStream: '<img src=x onerror=alert(1)><script>alert(2)</script>\r\n' },
+        }));
+
+        const rendered = renderDefaultTree(testBed.injector, 'untrusted-thread');
+        root = rendered.root;
+        container = rendered.container;
+
+        expect(container.querySelector('img[src="x"]')).toBeNull();
+        expect(container.querySelector('script')).toBeNull();
+    });
+
+    it('exposes icon-only thread actions as labeled keyboard controls', () => {
+        const testBed = createTreeTestBed();
+        addRootComment(testBed.threadCommentModel, createComment({ id: 'accessible-thread' }));
+
+        const rendered = renderDefaultTree(testBed.injector, 'accessible-thread');
+        root = rendered.root;
+        container = rendered.container;
+
+        expect(container.querySelector('button[aria-label="thread-comment-ui.item.more"]')).not.toBeNull();
+        expect(container.querySelector('button[aria-label="thread-comment-ui.filter.status.resolved"]')).not.toBeNull();
+        expect(container.querySelector('button[aria-label="thread-comment-ui.item.delete"]')).not.toBeNull();
+    });
+
+    it('keeps comment content visible when its author is no longer in the user directory', () => {
+        const testBed = createTreeTestBed();
+        addRootComment(testBed.threadCommentModel, createComment({
+            id: 'removed-author-thread',
+            personId: 'removed-user',
+            text: transformTextNodes2Document([{ type: 'text', content: 'kept after user removal' }]),
+        }));
+
+        const rendered = renderDefaultTree(testBed.injector, 'removed-author-thread');
+        root = rendered.root;
+        container = rendered.container;
+
+        expect(container.textContent).toContain('kept after user removal');
+    });
+
     it('adds a reply through the tree editor and stores it under the root thread', async () => {
         const testBed = createTreeTestBed();
         addRootComment(testBed.threadCommentModel, createComment({ id: 'root-thread', ref: 'A1' }));
@@ -675,6 +727,53 @@ describe('ThreadCommentTree', () => {
         expect(thread?.children[0].text.dataStream).toBe('Reply from tree\r\n');
         expect(TestState.addedComments).toHaveLength(1);
         expect(TestState.addedComments[0].parentId).toBe('root-thread');
+    });
+
+    it('awaits a product-handled root add and closes the temporary thread without adding it twice', async () => {
+        const testBed = createTreeTestBed();
+        let closeCount = 0;
+        const handledComments: IThreadComment[] = [];
+        const rendered = renderTree(
+            testBed.injector,
+            <ThreadCommentTree
+                unitId={UNIT_ID}
+                subUnitId={SHEET_ID}
+                refStr="A1"
+                type={UniverInstanceType.UNIVER_SHEET}
+                getSubUnitName={() => ''}
+                location={ThreadCommentTreeLocation.PANEL}
+                onAddComment={async (comment) => {
+                    await Promise.resolve();
+                    handledComments.push(comment);
+                    return false;
+                }}
+                onClose={() => {
+                    closeCount += 1;
+                }}
+            />
+        );
+        root = rendered.root;
+        container = rendered.container;
+
+        await act(async () => {
+            const editorMouseTarget = container!.lastElementChild?.lastElementChild?.firstElementChild?.firstElementChild;
+            if (!editorMouseTarget) {
+                throw new Error('Editor mouse target was not found.');
+            }
+            editorMouseTarget.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+            const editor = getOnlyEditor(testBed);
+            editor.replaceText('Handled by host');
+            await testBed.commandService.executeCommand(TestRichTextEditingMutation.id, { unitId: editor.getEditorId() });
+            await waitForFrame();
+        });
+        await act(async () => {
+            getButton(container!, REPLY_LABEL).dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            await waitForTreeRefresh();
+        });
+
+        expect(handledComments).toHaveLength(1);
+        expect(testBed.threadCommentModel.getUnit(UNIT_ID)).toEqual([]);
+        expect(closeCount).toBe(1);
     });
 
     it('toggles the resolved state and updates the active comment target', async () => {

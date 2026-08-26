@@ -75,6 +75,7 @@
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
+        "@univerjs/drawing": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/icons": "1.38.0",

@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-import type { ICommand, ITextRange } from '@univerjs/core';
-import type { IThreadComment } from '@univerjs/thread-comment';
-import { CommandType, CustomDecorationType, ICommandService, sequenceExecute } from '@univerjs/core';
-import { addCustomDecorationBySelectionFactory } from '@univerjs/docs-ui';
-import { AddCommentMutation, IThreadCommentDataSourceService } from '@univerjs/thread-comment';
+import type { ICommand } from '@univerjs/core';
+import type { IAddDocTextRangeCommentParams } from '@univerjs/docs-thread-comment';
+import { CommandType, ICommandService, sequenceExecute } from '@univerjs/core';
+import { RichTextEditingMutation } from '@univerjs/docs';
+import {
+
+    prepareDocTextRangeComment,
+} from '@univerjs/docs-thread-comment';
 import { SetActiveCommentOperation } from '@univerjs/thread-comment-ui';
-import { DEFAULT_DOC_SUBUNIT_ID } from '../../common/const';
 
-export interface IAddDocCommentComment {
-    unitId: string;
-    comment: IThreadComment;
-    range: ITextRange;
-}
+export type IAddDocCommentComment = IAddDocTextRangeCommentParams;
 
+/** Adds a document comment and activates it in the UI comment panel. */
 export const AddDocCommentComment: ICommand<IAddDocCommentComment> = {
     id: 'docs.command.add-comment',
     type: CommandType.COMMAND,
@@ -35,41 +34,31 @@ export const AddDocCommentComment: ICommand<IAddDocCommentComment> = {
         if (!params) {
             return false;
         }
-        const { comment: originComment, unitId } = params;
-        const dataSourceService = accessor.get(IThreadCommentDataSourceService);
-        const comment = await dataSourceService.addComment(originComment);
-        const commandService = accessor.get(ICommandService);
 
-        const doMutation = addCustomDecorationBySelectionFactory(
-            accessor,
-            {
-                id: comment.threadId,
-                type: CustomDecorationType.COMMENT,
-                unitId,
-            }
-        );
-        if (doMutation) {
-            const addComment = {
-                id: AddCommentMutation.id,
-                params: {
-                    unitId,
-                    subUnitId: DEFAULT_DOC_SUBUNIT_ID,
-                    comment,
-                },
-            };
-
-            const activeOperation = {
-                id: SetActiveCommentOperation.id,
-                params: {
-                    unitId,
-                    subUnitId: DEFAULT_DOC_SUBUNIT_ID,
-                    commentId: comment.id,
-                },
-            };
-
-            return (await sequenceExecute([addComment, doMutation, activeOperation], commandService)).result;
+        const prepared = await prepareDocTextRangeComment(accessor, params);
+        if (!prepared) {
+            return false;
         }
-
-        return false;
+        const activeOperation = {
+            id: SetActiveCommentOperation.id,
+            params: {
+                unitId: prepared.comment.unitId,
+                subUnitId: prepared.comment.subUnitId,
+                commentId: prepared.comment.id,
+            },
+        };
+        const decorationMutation = {
+            id: RichTextEditingMutation.id,
+            params: {
+                ...prepared.decorationMutationParams,
+                textRanges: null,
+                noNeedSetTextRange: true,
+            },
+        };
+        return (await sequenceExecute([
+            prepared.commentMutation,
+            decorationMutation,
+            activeOperation,
+        ], accessor.get(ICommandService))).result;
     },
 };

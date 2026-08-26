@@ -19,6 +19,7 @@ import { ConfigService, IConfigService, Injector } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { isMenuButtonSelectorItem, isMenuSelectorItem, MenuItemType } from '../menu';
 import { IMenuManagerService, MenuManagerService } from '../menu-manager.service';
+import { FloatingObjectToolbarPosition } from '../types';
 
 function createService(): IMenuManagerService {
     const injector = new Injector();
@@ -53,6 +54,18 @@ describe('MenuManagerService', () => {
         expect(service.getFlatMenuByPositionKey('testMerge').map((item) => item.key)).toEqual(['group', 'command']);
         expect(changes.length).toBeGreaterThanOrEqual(2);
         sub.unsubscribe();
+    });
+
+    it.each(Object.values(FloatingObjectToolbarPosition))('accepts contributions for %s', (position) => {
+        const service = createService();
+
+        service.mergeMenu({
+            [position]: {
+                comment: { order: 1, menuItemFactory: () => ({ id: 'comment' }) },
+            },
+        });
+
+        expect(service.getFlatMenuByPositionKey(position).map((item) => item.item?.id)).toEqual(['comment']);
     });
 
     it('returns an empty array for missing menu positions', () => {

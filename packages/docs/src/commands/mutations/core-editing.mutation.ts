@@ -23,9 +23,22 @@ import { DocSelectionManagerService } from '../../services/doc-selection-manager
 import { DocSkeletonManagerService } from '../../services/doc-skeleton-manager.service';
 import { DocStateEmitService } from '../../services/doc-state-emit.service';
 
+export enum DocHistoryAction {
+    DeleteChart = 'delete-chart',
+    DeleteDivider = 'delete-divider',
+    DeleteImage = 'delete-image',
+    DeleteShape = 'delete-shape',
+    EditTableCell = 'edit-table-cell',
+    FormatParagraph = 'format-paragraph',
+    InsertCustomRange = 'insert-custom-range',
+    UpdateImage = 'update-image',
+    UpdatePageLayout = 'update-page-layout',
+}
+
 export interface IRichTextEditingMutationParams extends IMutationCommonParams {
     unitId: string;
     historyAction?: string;
+    historyActions?: string[];
     actions: JSONXActions;
     textRanges: Nullable<ITextRangeWithStyle[]>;
     segmentId?: string;

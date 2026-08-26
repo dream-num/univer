@@ -110,6 +110,7 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
             >
                 <button
                     type="button"
+                    data-u-comp="cell-link-popup-copy"
                     aria-label={localeService.t<LocaleKey>('sheets-hyper-link-ui.popup.copy')}
                     className={clsx(`
                       univer-flex univer-size-6 univer-cursor-pointer univer-flex-row univer-items-center

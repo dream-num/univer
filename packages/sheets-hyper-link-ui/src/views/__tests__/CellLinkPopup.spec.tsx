@@ -355,7 +355,7 @@ function renderPopup(
     });
 
     return {
-        copy: container.querySelector<HTMLButtonElement>('button[aria-label="Copy"]'),
+        copy: container.querySelector<HTMLButtonElement>('[data-u-comp="cell-link-popup-copy"]'),
         edit: container.querySelector('[data-u-comp="cell-link-popup-edit"]') as HTMLElement,
         remove: container.querySelector('[data-u-comp="cell-link-popup-remove"]') as HTMLElement,
     };

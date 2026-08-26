@@ -159,8 +159,12 @@ function getTextXActions(actions: JSONXActions): TextXAction[] | null {
 }
 
 function isTextXAction(value: unknown): value is TextXAction {
-    if (!isRecord(value) || typeof value.len !== 'number') return false;
-    if (value.t === TextXActionType.INSERT) return isRecord(value.body);
+    if (!isRecord(value) || typeof value.len !== 'number') {
+        return false;
+    }
+    if (value.t === TextXActionType.INSERT) {
+        return isRecord(value.body);
+    }
     return value.t === TextXActionType.RETAIN || value.t === TextXActionType.DELETE;
 }
 

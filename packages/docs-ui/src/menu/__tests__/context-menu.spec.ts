@@ -65,7 +65,9 @@ describe('settings context menu factories', () => {
 
         setDocumentPermissionValue(permissionService, 'doc-1', 'doc-1', UnitAction.Copy, false);
         const copyDisabled$ = CopyMenuFactory(accessor).disabled$;
-        if (!copyDisabled$) throw new Error('Copy menu must expose disabled state.');
+        if (!copyDisabled$) {
+            throw new Error('Copy menu must expose disabled state.');
+        }
         expect(await firstValueFrom(copyDisabled$)).toBe(true);
 
         setDocumentPermissionValue(permissionService, 'doc-1', 'doc-1', UnitAction.Copy, true);
@@ -89,7 +91,9 @@ describe('settings context menu factories', () => {
 
         const pasteDisabled$ = PasteMenuFactory(accessor).disabled$;
         const paragraphSettingDisabled$ = ParagraphSettingMenuFactory(accessor).disabled$;
-        if (!pasteDisabled$ || !paragraphSettingDisabled$) throw new Error('Mutating menus must expose disabled state.');
+        if (!pasteDisabled$ || !paragraphSettingDisabled$) {
+            throw new Error('Mutating menus must expose disabled state.');
+        }
         expect(await firstValueFrom(pasteDisabled$)).toBe(true);
         expect(await firstValueFrom(paragraphSettingDisabled$)).toBe(true);
 

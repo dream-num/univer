@@ -169,9 +169,13 @@ export class DocPermissionController extends Disposable {
         }
         const knownTargets = resolveTextTargets(documentDataModel, commandInfo) ??
             resolveSectionTargets(documentDataModel, commandInfo);
-        if (knownTargets) return knownTargets;
+        if (knownTargets) {
+            return knownTargets;
+        }
         const entityTargets = resolveEntityTargets(documentDataModel, commandInfo);
-        if (entityTargets.length) return entityTargets;
+        if (entityTargets.length) {
+            return entityTargets;
+        }
         return isDocumentEditCommand(commandInfo.id) || isDocumentDataMutation(commandInfo)
             ? []
             : null;
@@ -179,7 +183,9 @@ export class DocPermissionController extends Disposable {
 }
 
 function isDocumentEditCommand(id: string): boolean {
-    if (NON_EDIT_DOCUMENT_COMMAND_IDS.has(id)) return false;
+    if (NON_EDIT_DOCUMENT_COMMAND_IDS.has(id)) {
+        return false;
+    }
     return id.startsWith('doc.command.') ||
         id.startsWith('docs.command.') ||
         id.startsWith('doc.command-') ||
@@ -188,7 +194,9 @@ function isDocumentEditCommand(id: string): boolean {
 
 function isDocumentDataMutation(commandInfo: Readonly<ICommandInfo>): boolean {
     const { id } = commandInfo;
-    if (isDerivedDocumentMutation(commandInfo)) return false;
+    if (isDerivedDocumentMutation(commandInfo)) {
+        return false;
+    }
     return id.startsWith('doc.mutation.') ||
         id.startsWith('docs.mutation.') ||
         /^docs-[^.]+\.mutation\./.test(id);
@@ -206,7 +214,9 @@ function resolveEntityTargets(
     commandInfo: Readonly<ICommandInfo>
 ): string[] {
     const params = commandInfo.params;
-    if (!isRecord(params)) return [];
+    if (!isRecord(params)) {
+        return [];
+    }
     const result = new Set<string>();
     const add = (segmentId: string, entityType: string, entityId: string): void => {
         result.add(getDocumentEntityPermissionObjectId(segmentId, entityType, entityId));
@@ -247,7 +257,9 @@ function collectEntityReferences(value: unknown): Array<{ entityType: string; en
             candidate.forEach((item) => visit(item, singularKey));
             return;
         }
-        if (!isRecord(candidate)) return;
+        if (!isRecord(candidate)) {
+            return;
+        }
         Object.entries(candidate).forEach(([childKey, child]) => visit(child, childKey));
     };
     visit(value);
@@ -267,8 +279,12 @@ function getDocumentUnitAction(commandId: string): UnitAction | undefined {
     if (commandId === 'doc.command.copy-current-paragraph' || commandId === 'docs-table.command.copy-selection') {
         return UnitAction.Copy;
     }
-    if (commandId === 'docs.operation.print') return UnitAction.Print;
-    if (commandId === 'docs-exchange-client.operation.export-doc') return UnitAction.Export;
+    if (commandId === 'docs.operation.print') {
+        return UnitAction.Print;
+    }
+    if (commandId === 'docs-exchange-client.operation.export-doc') {
+        return UnitAction.Export;
+    }
     if (commandId === 'docs.operation.start-add-comment' ||
         commandId === 'docs.operation.add-drawing-comment' ||
         (commandId.startsWith('docs.command.') && commandId.includes('comment')) ||

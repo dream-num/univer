@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
+import type { IPermissionPoint } from '@univerjs/core';
 import { PermissionStatus } from '@univerjs/core';
 import { UnitAction, UnitObject } from '@univerjs/protocol';
 
-export class DocumentParagraphEditPermission {
+export class DocumentParagraphEditPermission implements IPermissionPoint {
     readonly type = UnitObject.DocumentParagraph;
     readonly subType = UnitAction.Edit;
     readonly status = PermissionStatus.INIT;

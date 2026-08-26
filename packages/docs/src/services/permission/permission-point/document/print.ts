@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
+import type { IPermissionPoint } from '@univerjs/core';
 import { PermissionStatus } from '@univerjs/core';
 import { UnitAction, UnitObject } from '@univerjs/protocol';
 
-export class DocumentPrintPermission {
+export class DocumentPrintPermission implements IPermissionPoint {
     readonly type = UnitObject.Document;
     readonly subType = UnitAction.Print;
     readonly status = PermissionStatus.INIT;

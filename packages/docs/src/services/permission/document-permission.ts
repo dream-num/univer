@@ -41,13 +41,16 @@ const DOCUMENT_PERMISSION_OBJECT_TYPES = new Set([
     UnitObject.DocumentParagraph,
     UnitObject.DocumentEntity,
 ]);
+const DOCUMENT_SECTION_PERMISSION_OBJECT_PREFIX = 'section/';
+const DOCUMENT_PARAGRAPH_PERMISSION_OBJECT_PREFIX = 'paragraph/';
+const DOCUMENT_ENTITY_PERMISSION_OBJECT_PREFIX = 'entity/';
 
 export function getDocumentSectionPermissionObjectId(segmentId: string, sectionId: string): string {
-    return `section/${encodeURIComponent(segmentId)}/${encodeURIComponent(sectionId)}`;
+    return `${DOCUMENT_SECTION_PERMISSION_OBJECT_PREFIX}${encodeURIComponent(segmentId)}/${encodeURIComponent(sectionId)}`;
 }
 
 export function getDocumentParagraphPermissionObjectId(segmentId: string, paragraphId: string): string {
-    return `paragraph/${encodeURIComponent(segmentId)}/${encodeURIComponent(paragraphId)}`;
+    return `${DOCUMENT_PARAGRAPH_PERMISSION_OBJECT_PREFIX}${encodeURIComponent(segmentId)}/${encodeURIComponent(paragraphId)}`;
 }
 
 export function getDocumentEntityPermissionObjectId(
@@ -55,7 +58,7 @@ export function getDocumentEntityPermissionObjectId(
     entityType: string,
     entityId: string
 ): string {
-    return `entity/${encodeURIComponent(segmentId)}/${encodeURIComponent(entityType)}/${encodeURIComponent(entityId)}`;
+    return `${DOCUMENT_ENTITY_PERMISSION_OBJECT_PREFIX}${encodeURIComponent(segmentId)}/${encodeURIComponent(entityType)}/${encodeURIComponent(entityId)}`;
 }
 
 export function createDocumentPermissionPoint(
@@ -83,13 +86,13 @@ export function createDocumentPermissionPoint(
     if (action !== UnitAction.Edit) {
         throw new Error(`Document object permissions only support Edit: ${objectId}`);
     }
-    if (objectId.startsWith('section/')) {
+    if (objectId.startsWith(DOCUMENT_SECTION_PERMISSION_OBJECT_PREFIX)) {
         return new DocumentSectionEditPermission(unitId, objectId);
     }
-    if (objectId.startsWith('paragraph/')) {
+    if (objectId.startsWith(DOCUMENT_PARAGRAPH_PERMISSION_OBJECT_PREFIX)) {
         return new DocumentParagraphEditPermission(unitId, objectId);
     }
-    if (objectId.startsWith('entity/')) {
+    if (objectId.startsWith(DOCUMENT_ENTITY_PERMISSION_OBJECT_PREFIX)) {
         return new DocumentEntityEditPermission(unitId, objectId);
     }
     throw new Error(`Unsupported Document permission object: ${objectId}`);

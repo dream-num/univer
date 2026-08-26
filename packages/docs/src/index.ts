@@ -96,6 +96,7 @@ export type {
 } from './services/doc-text-resolver.service';
 export {
     canEditDocumentTargets,
+    createDocumentPermissionPoint,
     getDocumentEntityPermissionObjectId,
     getDocumentParagraphPermissionObjectId,
     getDocumentPermissionValue,
@@ -109,14 +110,6 @@ export {
     getDocumentEntityParentPermissionObjectIds,
     getDocumentParagraphParentPermissionObjectIds,
 } from './services/permission/document-permission-resolver';
-export { DocumentCommentPermission } from './services/permission/permission-point/document/comment';
-export { DocumentCopyPermission } from './services/permission/permission-point/document/copy';
-export { DocumentEditablePermission } from './services/permission/permission-point/document/editable';
-export { DocumentExportPermission } from './services/permission/permission-point/document/export';
-export { DocumentPrintPermission } from './services/permission/permission-point/document/print';
-export { DocumentEntityEditPermission } from './services/permission/permission-point/entity/edit';
-export { DocumentParagraphEditPermission } from './services/permission/permission-point/paragraph/edit';
-export { DocumentSectionEditPermission } from './services/permission/permission-point/section/edit';
 export {
     addCustomRangeBySelectionFactory,
     addCustomRangeFactory,

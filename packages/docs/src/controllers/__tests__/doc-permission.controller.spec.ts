@@ -151,7 +151,9 @@ describe('DocPermissionController', () => {
         const firstSection = document.getSection(0)!;
         const firstParagraph = document.getParagraphs()[0];
         const secondParagraph = document.getParagraph('paragraph-two')!;
-        if (!firstParagraph) throw new Error('Paragraph not found.');
+        if (!firstParagraph) {
+            throw new Error('Paragraph not found.');
+        }
 
         await firstSection.getPermission().setReadOnly();
 
@@ -233,7 +235,9 @@ describe('DocPermissionController', () => {
         get = testBed.get;
         document = testBed.univerAPI.getActiveDocument()!;
         const drawingId = document.getDocumentDataModel().getSnapshot().drawingsOrder?.[0];
-        if (!drawingId) throw new Error('Drawing not found.');
+        if (!drawingId) {
+            throw new Error('Drawing not found.');
+        }
         await document.getEntityPermission('', 'drawing', drawingId).setReadOnly();
         const actions = JSONX.getInstance().replaceOp(
             ['drawings', drawingId, 'docTransform', 'angle'],

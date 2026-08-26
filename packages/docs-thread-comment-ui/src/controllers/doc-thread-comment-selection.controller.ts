@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ITextRange } from '@univerjs/core';
+import type { DocumentDataModel, ICustomDecoration, ITextRange } from '@univerjs/core';
 import type { ISetTextSelectionsOperationParams } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import {
+    CustomDecorationType,
     Disposable,
     ICommandService,
     Inject,
@@ -26,12 +27,12 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { SetTextSelectionsOperation } from '@univerjs/docs';
+import { DEFAULT_DOC_SUBUNIT_ID } from '@univerjs/docs-thread-comment';
 import { DocBackScrollRenderController } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ThreadCommentModel } from '@univerjs/thread-comment';
 import { SetActiveCommentOperation, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import { ShowCommentPanelOperation } from '../commands/operations/show-comment-panel.operation';
-import { DEFAULT_DOC_SUBUNIT_ID } from '../common/const';
 import { DocThreadCommentService } from '../services/doc-thread-comment.service';
 
 export class DocThreadCommentSelectionController extends Disposable {
@@ -65,25 +66,17 @@ export class DocThreadCommentSelectionController extends Disposable {
                     lastSelection = primary;
                     if (primary && doc) {
                         const { startOffset, endOffset, collapsed } = primary;
-                        let customRange;
-
-                        if (collapsed) { // cursor
-                            customRange = doc.getBody()?.customDecorations?.find((value) => value.startIndex <= startOffset && value.endIndex >= (endOffset - 1));
-                        } else { // range
-                            customRange = doc.getBody()?.customDecorations?.find((value) => value.startIndex <= startOffset && value.endIndex >= (endOffset - 1));
-                        }
+                        const selectionEnd = collapsed ? startOffset : endOffset - 1;
+                        const customRange = this._findActiveCommentDecoration(doc, unitId, startOffset, selectionEnd);
 
                         if (customRange) {
-                            const comment = this._threadCommentModel.getComment(unitId, DEFAULT_DOC_SUBUNIT_ID, customRange.id);
-                            if (comment && !comment.resolved) {
-                                this._commandService.executeCommand(ShowCommentPanelOperation.id, {
-                                    activeComment: {
-                                        unitId,
-                                        subUnitId: DEFAULT_DOC_SUBUNIT_ID,
-                                        commentId: customRange.id,
-                                    },
-                                });
-                            }
+                            this._commandService.executeCommand(ShowCommentPanelOperation.id, {
+                                activeComment: {
+                                    unitId,
+                                    subUnitId: DEFAULT_DOC_SUBUNIT_ID,
+                                    commentId: customRange.id,
+                                },
+                            });
                             return;
                         }
                     }
@@ -107,6 +100,24 @@ export class DocThreadCommentSelectionController extends Disposable {
                 }
             })
         );
+    }
+
+    private _findActiveCommentDecoration(
+        doc: DocumentDataModel,
+        unitId: string,
+        selectionStart: number,
+        selectionEnd: number
+    ): ICustomDecoration | undefined {
+        return [...(doc.getBody()?.customDecorations ?? [])]
+            .reverse()
+            .filter((decoration) => decoration.type === CustomDecorationType.COMMENT
+                && decoration.startIndex <= selectionStart
+                && decoration.endIndex >= selectionEnd)
+            .sort((left, right) => (left.endIndex - left.startIndex) - (right.endIndex - right.startIndex))
+            .find((decoration) => {
+                const comment = this._threadCommentModel.getComment(unitId, DEFAULT_DOC_SUBUNIT_ID, decoration.id);
+                return comment && !comment.resolved;
+            });
     }
 
     private _initActiveCommandChange() {

@@ -41,6 +41,11 @@ export interface IThreadCommentDataSource {
      */
     deleteComment: (unitId: string, subUnitId: string, threadId: string, commentId: string) => Promise<Success>;
     /**
+     * Delete a complete thread. Legacy data sources can omit this method and
+     * fall back to deleting the root comment through `deleteComment`.
+     */
+    deleteThread?: (unitId: string, subUnitId: string, threadId: string) => Promise<Success>;
+    /**
      * handler for batch-fetch-comment, throw error means fail and stop the process.
      */
     listComments: (unitId: string, subUnitId: string, threadId: string[]) => Promise<IBaseComment[]>;
@@ -71,6 +76,7 @@ export interface IThreadCommentDataSourceService {
      * handler for delete-comment, throw error means fail and stop the process.
      */
     deleteComment: (unitId: string, subUnitId: string, threadId: string, commentId: string) => Promise<Success>;
+    deleteThread?: (unitId: string, subUnitId: string, threadId: string) => Promise<Success>;
     saveToSnapshot: (unitComments: Record<string, IThreadComment[]>, unitId: string) => Record<string, ThreadCommentJSON[]>;
     getThreadComment: (unitId: string, subUnitId: string, threadId: string) => Promise<Nullable<IBaseComment>>;
     listThreadComments: (unitId: string, subUnitId: string, threadId: string[]) => Promise<IBaseComment[] | false>;
@@ -81,6 +87,7 @@ export interface IThreadCommentDataSourceService {
  */
 export class ThreadCommentDataSourceService extends Disposable implements IThreadCommentDataSourceService {
     private _dataSource: Nullable<IThreadCommentDataSource> = null;
+    private readonly _pendingAdds = new Map<string, Promise<IThreadComment>>();
     syncUpdateMutationToColla = true;
 
     set dataSource(dataSource: Nullable<IThreadCommentDataSource>) {
@@ -104,12 +111,26 @@ export class ThreadCommentDataSourceService extends Disposable implements IThrea
         return null;
     }
 
-    async addComment(comment: IThreadComment) {
-        const savedComment = this._dataSource
-            ? await this._dataSource.addComment(comment)
-            : comment;
+    addComment(comment: IThreadComment): Promise<IThreadComment> {
+        const key = `${comment.unitId}\0${comment.subUnitId}\0${comment.id}`;
+        const pending = this._pendingAdds.get(key);
+        if (pending) {
+            return pending;
+        }
 
-        return { ...savedComment, threadId: savedComment.threadId || savedComment.id };
+        const request = (async () => {
+            const savedComment = this._dataSource
+                ? await this._dataSource.addComment(comment)
+                : comment;
+            return { ...savedComment, threadId: savedComment.threadId || savedComment.id };
+        })();
+        this._pendingAdds.set(key, request);
+        request.finally(() => {
+            if (this._pendingAdds.get(key) === request) {
+                this._pendingAdds.delete(key);
+            }
+        }).catch(() => undefined);
+        return request;
     }
 
     async updateComment(comment: IThreadComment) {
@@ -133,6 +154,13 @@ export class ThreadCommentDataSourceService extends Disposable implements IThrea
         return true;
     }
 
+    async deleteThread(unitId: string, subUnitId: string, threadId: string) {
+        if (this._dataSource?.deleteThread) {
+            return this._dataSource.deleteThread(unitId, subUnitId, threadId);
+        }
+        return this.deleteComment(unitId, subUnitId, threadId, threadId);
+    }
+
     async listThreadComments(unitId: string, subUnitId: string, threadIds: string[]) {
         if (this.dataSource) {
             return this.dataSource.listComments(unitId, subUnitId, threadIds);
@@ -141,7 +169,7 @@ export class ThreadCommentDataSourceService extends Disposable implements IThrea
         return false;
     }
 
-    saveToSnapshot(unitComments: Record<string, IThreadComment[]>, unitId: string) {
+    saveToSnapshot(unitComments: Record<string, IThreadComment[]>, _unitId: string) {
         if (this._dataSource) {
             const map: Record<string, ThreadCommentJSON[]> = {};
             Object.keys(unitComments).forEach((subUnitId) => {

@@ -17,15 +17,16 @@
 import type { Nullable, Workbook } from '@univerjs/core';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import type { IDeleteCommentMutationParams } from '@univerjs/thread-comment';
+import type { ActiveCommentInfo } from '@univerjs/thread-comment-ui';
 import { Disposable, ICommandService, Inject, IUniverInstanceService, RANGE_TYPE, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { singleReferenceToGrid } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { RangeProtectionPermissionViewPoint, SetWorksheetActiveOperation, SheetPermissionCheckController, SheetsSelectionsService, WorkbookCommentPermission, WorksheetViewPermission } from '@univerjs/sheets';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
 import { IEditorBridgeService, IMarkSelectionService, ScrollToRangeOperation, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
-import { DeleteCommentMutation } from '@univerjs/thread-comment';
+import { DeleteCommentMutation, deserializeThreadCommentAnchor, ThreadCommentAnchorKind } from '@univerjs/thread-comment';
 import { SetActiveCommentOperation, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
-import { debounceTime } from 'rxjs';
+import { combineLatest, debounceTime } from 'rxjs';
 import { SheetsThreadCommentPopupService } from '../services/sheets-thread-comment-popup.service';
 
 interface ISelectionShapeInfo {
@@ -33,6 +34,20 @@ interface ISelectionShapeInfo {
     unitId: string;
     subUnitId: string;
     commentId: string;
+}
+
+export function resolveFocusedSheetComment(
+    activeComment: ActiveCommentInfo,
+    hoveredComment: ActiveCommentInfo,
+    unitId: string | undefined,
+    subUnitId: string | undefined
+): Exclude<ActiveCommentInfo, null | undefined> | undefined {
+    for (const comment of [hoveredComment, activeComment]) {
+        if (comment && comment.unitId === unitId && comment.subUnitId === subUnitId) {
+            return comment;
+        }
+    }
+    return undefined;
 }
 
 export class SheetsThreadCommentPopupController extends Disposable {
@@ -149,6 +164,10 @@ export class SheetsThreadCommentPopupController extends Disposable {
                 if (!comment || comment.resolved) {
                     return;
                 }
+                const anchor = deserializeThreadCommentAnchor(comment.ref);
+                if (anchor?.kind === ThreadCommentAnchorKind.SHEET_DRAWING) {
+                    return;
+                }
 
                 const currentUnit = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
                 if (!currentUnit) {
@@ -209,8 +228,20 @@ export class SheetsThreadCommentPopupController extends Disposable {
     }
 
     private _initMarkSelection() {
-        this.disposeWithMe(this._threadCommentPanelService.activeCommentId$.pipe(debounceTime(100)).subscribe((activeComment) => {
-            if (!activeComment) {
+        this.disposeWithMe(combineLatest([
+            this._threadCommentPanelService.activeCommentId$,
+            this._threadCommentPanelService.hoveredCommentId$,
+        ]).pipe(debounceTime(100)).subscribe(([activeComment, hoveredComment]) => {
+            const currentUnit = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+            const currentUnitId = currentUnit?.getUnitId();
+            const currentSheetId = currentUnit?.getActiveSheet()?.getSheetId();
+            const focusedComment = resolveFocusedSheetComment(
+                activeComment,
+                hoveredComment,
+                currentUnitId,
+                currentSheetId
+            );
+            if (!focusedComment) {
                 if (this._selectionShapeInfo) {
                     this._markSelectionService.removeShape(this._selectionShapeInfo.shapeId);
                     this._selectionShapeInfo = null;
@@ -218,7 +249,7 @@ export class SheetsThreadCommentPopupController extends Disposable {
                 return;
             }
 
-            const { unitId, subUnitId, commentId } = activeComment;
+            const { unitId, subUnitId, commentId } = focusedComment;
             if (this._selectionShapeInfo) {
                 this._markSelectionService.removeShape(this._selectionShapeInfo.shapeId);
                 this._selectionShapeInfo = null;
@@ -266,7 +297,7 @@ export class SheetsThreadCommentPopupController extends Disposable {
             }
 
             this._selectionShapeInfo = {
-                ...activeComment,
+                ...focusedComment,
                 shapeId,
             };
         }));

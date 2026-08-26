@@ -232,6 +232,11 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._reserveRanges = status;
     }
 
+    refreshRanges() {
+        this._rangeList.forEach((range) => range.refresh());
+        this._rectRangeList.forEach((range) => range.refresh());
+    }
+
     private _setRangeStyle(style: ITextSelectionStyle = NORMAL_TEXT_SELECTION_PLUGIN_STYLE) {
         this._selectionStyle = style;
     }

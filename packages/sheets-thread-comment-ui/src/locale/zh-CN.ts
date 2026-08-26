@@ -26,6 +26,7 @@ const locale: typeof enUS = {
         },
         menu: {
             addComment: '添加评论',
+            openComments: '打开评论',
             commentManagement: '评论管理',
         },
     },

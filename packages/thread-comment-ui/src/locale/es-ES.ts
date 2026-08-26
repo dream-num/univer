@@ -33,6 +33,7 @@ const locale: typeof enUS = {
         item: {
             edit: 'Editar',
             delete: 'Eliminar este comentario',
+            more: 'Más',
         },
         filter: {
             sheet: {

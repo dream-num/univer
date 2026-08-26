@@ -28,6 +28,7 @@ import {
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ThreadCommentModel } from '../../models/thread-comment.model';
 import { UniverThreadCommentPlugin } from '../../plugin';
+import { serializeThreadCommentAnchor, ThreadCommentAnchorKind } from '../../types/comment-anchor';
 import { SHEET_UNIVER_THREAD_COMMENT_PLUGIN } from '../tc-resource.controller';
 
 function createWorkbookData(): IWorkbookData {
@@ -129,9 +130,47 @@ describe('ThreadCommentResourceController', () => {
         });
     });
 
+    it.each([
+        UniverInstanceType.UNIVER_SLIDE,
+        UniverInstanceType.UNIVER_BOARD,
+        UniverInstanceType.UNIVER_BASE,
+    ])('serializes thread comments for business type %s', (businessType) => {
+        const root = createComment({ id: 'root-business', ref: 'element-1', subUnitId: 'page-1' });
+        threadCommentModel.addComment('unit-1', 'page-1', root);
+
+        const resource = resourceManagerService.getResourcesByType('unit-1', businessType)
+            .find((item) => item.name === SHEET_UNIVER_THREAD_COMMENT_PLUGIN);
+
+        expect(resource).toBeDefined();
+        if (resource === undefined) {
+            return;
+        }
+
+        expect(JSON.parse(resource.data)).toEqual({
+            'page-1': [{
+                ...root,
+                children: [],
+            }],
+        });
+    });
+
     it('loads serialized comments and clears them on unload', async () => {
-        const root = createComment({ id: 'root-3', ref: 'C3' });
-        const reply = createComment({ id: 'reply-3', parentId: root.id, threadId: root.id, ref: '' });
+        const root = createComment({
+            id: 'root-3',
+            ref: serializeThreadCommentAnchor({ kind: ThreadCommentAnchorKind.SHEET_DRAWING, elementId: 'drawing-1' }),
+            attachments: ['root.png'],
+            mentions: ['user-2'],
+            resolved: true,
+            updated: true,
+            updateT: '2024-01-02T00:00:00.000Z',
+        });
+        const reply = createComment({
+            id: 'reply-3',
+            parentId: root.id,
+            threadId: root.id,
+            ref: '',
+            attachments: ['reply.png'],
+        });
 
         resourceManagerService.loadResources('unit-1', [{
             name: SHEET_UNIVER_THREAD_COMMENT_PLUGIN,
@@ -170,5 +209,39 @@ describe('ThreadCommentResourceController', () => {
         await Promise.resolve();
 
         expect(threadCommentModel.getUnit('unit-1')).toEqual([]);
+    });
+
+    it('filters malformed snapshot entries and keeps loaded comments inside their resource unit', async () => {
+        const root = createComment({
+            id: 'safe-root',
+            unitId: 'spoofed-unit',
+            subUnitId: 'spoofed-sheet',
+            children: [
+                createComment({ id: 'safe-root', threadId: 'safe-root', parentId: 'safe-root' }),
+                createComment({ id: 'wrong-thread', threadId: 'other-thread', parentId: 'safe-root' }),
+                createComment({ id: 'safe-reply', threadId: 'safe-root', parentId: 'safe-root' }),
+            ],
+        });
+        resourceManagerService.loadResources('unit-1', [{
+            name: SHEET_UNIVER_THREAD_COMMENT_PLUGIN,
+            data: JSON.stringify({
+                'not-an-array': {},
+                'sheet-1': [
+                    null,
+                    { id: '', threadId: 'bad', ref: 'A1' },
+                    { id: 'bad-body', threadId: 'bad-body', ref: 'A1', text: { dataStream: 1 } },
+                    root,
+                ],
+            }),
+        }]);
+
+        await Promise.resolve();
+
+        expect(threadCommentModel.getUnit('spoofed-unit')).toEqual([]);
+        expect(threadCommentModel.getThread('unit-1', 'sheet-1', root.threadId)).toMatchObject({
+            root: { id: root.id, unitId: 'unit-1', subUnitId: 'sheet-1' },
+            children: [{ id: 'safe-reply', unitId: 'unit-1', subUnitId: 'sheet-1' }],
+        });
+        expect(threadCommentModel.getComment('unit-1', 'sheet-1', 'wrong-thread')).toBeUndefined();
     });
 });

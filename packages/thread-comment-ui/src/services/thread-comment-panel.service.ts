@@ -15,9 +15,9 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { Disposable, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { Disposable, Inject } from '@univerjs/core';
 import { ISidebarService } from '@univerjs/ui';
-import { BehaviorSubject, filter } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 export type ActiveCommentInfo = Nullable<{ unitId: string; subUnitId: string; commentId: string; trigger?: string }>;
 
@@ -28,18 +28,22 @@ export class ThreadCommentPanelService extends Disposable {
     private _activeCommentId: ActiveCommentInfo;
     private _activeCommentId$ = new BehaviorSubject<ActiveCommentInfo>(undefined);
 
+    private _hoveredCommentId: ActiveCommentInfo;
+    private _hoveredCommentId$ = new BehaviorSubject<ActiveCommentInfo>(undefined);
+
     panelVisible$ = this._panelVisible$.asObservable();
     activeCommentId$ = this._activeCommentId$.asObservable();
+    hoveredCommentId$ = this._hoveredCommentId$.asObservable();
 
     constructor(
-        @Inject(ISidebarService) private readonly _sidebarService: ISidebarService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
+        @Inject(ISidebarService) private readonly _sidebarService: ISidebarService
     ) {
         super();
         this._init();
 
         this.disposeWithMe(() => {
             this._activeCommentId$.complete();
+            this._hoveredCommentId$.complete();
             this._panelVisible$.complete();
         });
     }
@@ -52,13 +56,6 @@ export class ThreadCommentPanelService extends Disposable {
                 }
             })
         );
-
-        this.disposeWithMe(
-            this._univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET)
-                .pipe(filter((sheet) => !sheet)).subscribe(() => {
-                    this._sidebarService.close();
-                })
-        );
     }
 
     get panelVisible() {
@@ -69,13 +66,25 @@ export class ThreadCommentPanelService extends Disposable {
         return this._activeCommentId;
     }
 
+    get hoveredCommentId() {
+        return this._hoveredCommentId;
+    }
+
     setPanelVisible(visible: boolean) {
         this._panelVisible = visible;
         this._panelVisible$.next(visible);
+        if (!visible) {
+            this.setHoveredComment(undefined);
+        }
     }
 
     setActiveComment(commentInfo: ActiveCommentInfo) {
         this._activeCommentId = commentInfo;
         this._activeCommentId$.next(commentInfo);
+    }
+
+    setHoveredComment(commentInfo: ActiveCommentInfo) {
+        this._hoveredCommentId = commentInfo;
+        this._hoveredCommentId$.next(commentInfo);
     }
 }

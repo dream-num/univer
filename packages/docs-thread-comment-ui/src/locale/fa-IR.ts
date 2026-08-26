@@ -21,6 +21,7 @@ const locale: typeof enUS = {
         panel: {
             title: 'مدیریت نظرات',
             addComment: 'افزودن نظر',
+            openComments: 'باز کردن نظرات',
         },
     },
 };

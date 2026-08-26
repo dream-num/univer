@@ -59,6 +59,7 @@ export interface IThreadCommentTreeProps {
     subUnitId: string;
     type: UniverInstanceType;
     refStr?: string;
+    displayRef?: string;
     showEdit?: boolean;
     onClick?: () => void;
     showHighlight?: boolean;
@@ -68,8 +69,9 @@ export interface IThreadCommentTreeProps {
     autoFocus?: boolean;
     onMouseEnter?: () => void;
     onMouseLeave?: () => void;
-    onAddComment?: (comment: IThreadComment) => boolean;
+    onAddComment?: (comment: IThreadComment) => boolean | void | Promise<boolean | void>;
     onDeleteComment?: (comment: IThreadComment) => boolean;
+    onAfterDeleteComment?: (comment: IThreadComment) => void | Promise<void>;
     onResolve?: (resolved: boolean) => void;
     style?: React.CSSProperties;
 }
@@ -85,8 +87,8 @@ export interface IThreadCommentItemProps {
     onReply: (user: IUser | undefined) => void;
     isRoot?: boolean;
     onClose?: () => void;
-    onAddComment?: (comment: IThreadComment) => boolean;
     onDeleteComment?: (comment: IThreadComment) => boolean;
+    onAfterDeleteComment?: (comment: IThreadComment) => void | Promise<void>;
     type: UniverInstanceType;
     threadCommentEditorId: string;
 }
@@ -120,6 +122,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
         isRoot,
         onClose,
         onDeleteComment,
+        onAfterDeleteComment,
         type,
         threadCommentEditorId,
     } = props;
@@ -138,21 +141,32 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
     const direction = useObservable(localeService.direction$, localeService.getDirection());
     const dateText = isMock ? null : formatCommentDateTime(item.dT, currentRegion);
 
-    const handleDeleteItem = () => {
+    const handleDeleteItem = async () => {
         if (onDeleteComment?.(item) === false) {
             return;
         }
 
-        commandService.executeCommand(
-            isRoot ? DeleteCommentTreeCommand.id : DeleteCommentCommand.id,
-            {
-                unitId,
-                subUnitId,
-                commentId: item.id,
+        try {
+            const success = await commandService.executeCommand(
+                isRoot ? DeleteCommentTreeCommand.id : DeleteCommentCommand.id,
+                {
+                    unitId,
+                    subUnitId,
+                    commentId: item.id,
+                }
+            );
+            if (success) {
+                try {
+                    await onAfterDeleteComment?.(item);
+                } catch {
+                    // The comment is already deleted; auxiliary anchor cleanup must not reopen it.
+                }
+                if (isRoot) {
+                    onClose?.();
+                }
             }
-        );
-        if (isRoot) {
-            onClose?.();
+        } catch {
+            // Keep the thread visible so the user can retry after the remote failure.
         }
     };
 
@@ -187,11 +201,13 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                                 : (
                                     showReply && user
                                         ? (
-                                            <div
+                                            <button
+                                                type="button"
+                                                aria-label={localeService.t<LocaleKey>('thread-comment-ui.editor.reply')}
                                                 className={`
                                                   univer-ml-1 univer-inline-flex univer-size-6 univer-cursor-pointer
                                                   univer-items-center univer-justify-center univer-rounded-sm
-                                                  univer-text-base
+                                                  univer-border-0 univer-bg-transparent univer-p-0 univer-text-base
                                                   hover:univer-bg-gray-50
                                                   rtl:univer-ml-0 rtl:univer-mr-1
                                                   dark:hover:!univer-bg-gray-800
@@ -199,7 +215,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                                                 onClick={() => onReply(user)}
                                             >
                                                 <ReplyToCommentIcon />
-                                            </div>
+                                            </button>
                                         )
                                         : null
                                 )}
@@ -213,43 +229,50 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                                                       univer-m-0 univer-box-border univer-grid univer-list-none
                                                       univer-p-1.5 univer-text-sm
                                                       rtl:univer-text-right
-                                                      [&_a]:univer-block [&_a]:univer-cursor-pointer
-                                                      [&_a]:univer-rounded [&_a]:univer-px-2 [&_a]:univer-py-1.5
-                                                      [&_a]:univer-transition-colors
+                                                      [&_button]:univer-block [&_button]:univer-w-full
+                                                      [&_button]:univer-cursor-pointer [&_button]:univer-rounded
+                                                      [&_button]:univer-border-0 [&_button]:univer-bg-transparent
+                                                      [&_button]:univer-px-2 [&_button]:univer-py-1.5
+                                                      [&_button]:univer-text-left [&_button]:univer-transition-colors
+                                                      rtl:[&_button]:univer-text-right
                                                     `}
                                                 >
                                                     <li>
-                                                        <a
+                                                        <button
+                                                            type="button"
                                                             className="hover:univer-bg-gray-200"
                                                             onClick={() => onEditingChange?.(true)}
                                                         >
                                                             {localeService.t<LocaleKey>('thread-comment-ui.item.edit')}
-                                                        </a>
+                                                        </button>
                                                     </li>
                                                     <li>
-                                                        <a
+                                                        <button
+                                                            type="button"
                                                             className="hover:univer-bg-gray-200"
                                                             onClick={handleDeleteItem}
                                                         >
                                                             {localeService.t<LocaleKey>('thread-comment-ui.item.delete')}
-                                                        </a>
+                                                        </button>
                                                     </li>
                                                 </ul>
                                             </div>
                                         )}
                                     >
-                                        <div
+                                        <button
+                                            type="button"
+                                            aria-label={localeService.t<LocaleKey>('thread-comment-ui.item.more')}
                                             className={`
                                               univer-ml-1 univer-inline-flex univer-size-6 univer-cursor-pointer
                                               univer-items-center univer-justify-center univer-rounded-sm
-                                              univer-text-base
+                                              univer-border-0 univer-bg-transparent univer-p-0 univer-text-base
                                               hover:univer-bg-gray-50
                                               rtl:univer-ml-0 rtl:univer-mr-1
                                               dark:hover:!univer-bg-gray-800
                                             `}
                                         >
                                             <MoreHorizontalIcon />
-                                        </div>
+                                        </button>
                                     </Dropdown>
                                 )
                                 : null}
@@ -279,9 +302,8 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                         unitId={unitId}
                         subUnitId={subUnitId}
                         editorId={threadCommentEditorId}
-                        onSave={({ text, attachments }) => {
-                            onEditingChange?.(false);
-                            commandService.executeCommand(
+                        onSave={async ({ text, attachments }) => {
+                            const success = await commandService.executeCommand(
                                 UpdateCommentCommand.id,
                                 {
                                     unitId,
@@ -293,6 +315,10 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                                     },
                                 } as IUpdateCommentCommandParams
                             );
+                            if (success) {
+                                onEditingChange?.(false);
+                            }
+                            return success;
                         }}
                     />
                 )
@@ -342,6 +368,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
         unitId,
         subUnitId,
         refStr,
+        displayRef,
         showEdit = true,
         onClick,
         showHighlight,
@@ -353,6 +380,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
         onMouseLeave,
         onAddComment,
         onDeleteComment,
+        onAfterDeleteComment,
         onResolve,
         type,
         style,
@@ -374,6 +402,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
         [id, subUnitId, threadCommentModel, unitId, updte$]
     );
     const commandService = useDependency(ICommandService);
+    const localeService = useDependency(LocaleService);
     const userManagerService = useDependency(UserManagerService);
     const resolved = comments?.root.resolved;
     const currentUser = useObservable(userManagerService.currentUser$);
@@ -399,44 +428,56 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
     ];
     const scrollerRef = useRef<HTMLDivElement>(null);
     const handleMouseLeave = useEvent(onMouseLeave);
-    const handleResolve: React.MouseEventHandler<HTMLDivElement> = (e) => {
+    const handleResolve: React.MouseEventHandler<HTMLButtonElement> = async (e) => {
         e.stopPropagation();
-        if (!resolved) {
-            commandService.executeCommand(SetActiveCommentOperation.id);
-        } else {
-            commandService.executeCommand(SetActiveCommentOperation.id, {
+        try {
+            const success = await commandService.executeCommand(ResolveCommentCommand.id, {
                 unitId,
                 subUnitId,
                 commentId: id,
+                resolved: !resolved,
             });
+            if (!success) {
+                return;
+            }
+
+            await commandService.executeCommand(SetActiveCommentOperation.id, resolved
+                ? { unitId, subUnitId, commentId: id }
+                : undefined);
+            onResolve?.(!resolved);
+        } catch {
+            // Keep the current resolved state when the remote write fails.
         }
-
-        commandService.executeCommand(ResolveCommentCommand.id, {
-            unitId,
-            subUnitId,
-            commentId: id,
-            resolved: !resolved,
-        });
-
-        onResolve?.(!resolved);
     };
 
-    const handleDeleteRoot: React.MouseEventHandler<HTMLDivElement> = (e) => {
+    const handleDeleteRoot: React.MouseEventHandler<HTMLButtonElement> = async (e) => {
         e.stopPropagation();
-        commandService.executeCommand(SetActiveCommentOperation.id);
-        if (comments?.root && (onDeleteComment?.(comments.root) === false)) {
+        const root = comments?.root;
+        if (!root || onDeleteComment?.(root) === false) {
             return;
         }
 
-        commandService.executeCommand(
-            DeleteCommentTreeCommand.id,
-            {
-                unitId,
-                subUnitId,
-                commentId: id,
+        try {
+            const success = await commandService.executeCommand(
+                DeleteCommentTreeCommand.id,
+                {
+                    unitId,
+                    subUnitId,
+                    commentId: id,
+                }
+            );
+            if (success) {
+                try {
+                    await onAfterDeleteComment?.(root);
+                } catch {
+                    // The comment is already deleted; auxiliary anchor cleanup must not reopen it.
+                }
+                await commandService.executeCommand(SetActiveCommentOperation.id);
+                onClose?.();
             }
-        );
-        onClose?.();
+        } catch {
+            // Keep the thread visible so the user can retry after the remote failure.
+        }
     };
 
     useEffect(() => {
@@ -445,7 +486,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
 
     const subUnitName = getSubUnitName(comments?.root.subUnitId ?? subUnitId);
     const editorVisible = showEdit && !editingId && !resolved;
-    const title = `${refStr || comments?.root.ref || ''}${subUnitName ? ' · ' : ''}${subUnitName}`;
+    const title = `${displayRef ?? refStr ?? comments?.root.ref ?? ''}${subUnitName ? ' · ' : ''}${subUnitName}`;
     const threadCommentEditorId = getThreadCommentEditorId({
         location,
         unitId,
@@ -508,10 +549,15 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                 </div>
                 {!!comments && (
                     <div className="univer-flex univer-flex-shrink-0 univer-flex-grow-0 univer-flex-row">
-                        <div
+                        <button
+                            type="button"
+                            aria-label={localeService.t<LocaleKey>(resolved
+                                ? 'thread-comment-ui.filter.status.unsolved'
+                                : 'thread-comment-ui.filter.status.resolved')}
                             className={clsx(`
                               univer-ml-1 univer-inline-flex univer-size-6 univer-cursor-pointer univer-items-center
-                              univer-justify-center univer-rounded-[3px] univer-text-base
+                              univer-justify-center univer-rounded-[3px] univer-border-0 univer-bg-transparent
+                              univer-p-0 univer-text-base
                               hover:univer-bg-gray-50
                               rtl:univer-ml-0 rtl:univer-mr-1
                               dark:hover:!univer-bg-gray-800
@@ -521,13 +567,16 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                             onClick={handleResolve}
                         >
                             {resolved ? <SuccessIcon /> : <SuccessOutlineIcon />}
-                        </div>
+                        </button>
                         {currentUser?.userID === comments.root.personId
                             ? (
-                                <div
+                                <button
+                                    type="button"
+                                    aria-label={localeService.t<LocaleKey>('thread-comment-ui.item.delete')}
                                     className={`
                                       univer-ml-1 univer-inline-flex univer-size-6 univer-cursor-pointer
-                                      univer-items-center univer-justify-center univer-rounded-[3px] univer-text-base
+                                      univer-items-center univer-justify-center univer-rounded-[3px] univer-border-0
+                                      univer-bg-transparent univer-p-0 univer-text-base
                                       hover:univer-bg-gray-50
                                       rtl:univer-ml-0 rtl:univer-mr-1
                                       dark:hover:!univer-bg-gray-800
@@ -535,7 +584,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                                     onClick={handleDeleteRoot}
                                 >
                                     <DeleteIcon />
-                                </div>
+                                </button>
                             )
                             : null}
                     </div>
@@ -589,8 +638,8 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                                     ]));
                                 });
                             }}
-                            onAddComment={onAddComment}
                             onDeleteComment={onDeleteComment}
+                            onAfterDeleteComment={onAfterDeleteComment}
                         />
                     )
                 )}
@@ -618,11 +667,14 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                                 threadId: comments?.root.threadId ?? '',
                             };
 
-                            if (onAddComment?.(comment) === false) {
-                                return;
+                            if (await onAddComment?.(comment) === false) {
+                                if (!comments) {
+                                    onClose?.();
+                                }
+                                return true;
                             }
 
-                            await commandService.executeCommand(
+                            const success = await commandService.executeCommand(
                                 AddCommentCommand.id,
                                 {
                                     unitId,
@@ -630,9 +682,13 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                                     comment,
                                 } as IAddCommentCommandParams
                             );
-                            if (scrollerRef.current) {
+                            if (success && scrollerRef.current) {
                                 scrollerRef.current.scrollTop = scrollerRef.current.scrollHeight;
                             }
+                            if (success && !comments) {
+                                onClose?.();
+                            }
+                            return success;
                         }}
                         autoFocus={autoFocus || (!comments)}
                         onCancel={() => {

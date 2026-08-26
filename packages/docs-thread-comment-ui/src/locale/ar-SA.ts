@@ -21,6 +21,7 @@ const locale: typeof enUS = {
         panel: {
             title: 'إدارة التعليقات',
             addComment: 'إضافة تعليق',
+            openComments: 'فتح التعليقات',
         },
     },
 };

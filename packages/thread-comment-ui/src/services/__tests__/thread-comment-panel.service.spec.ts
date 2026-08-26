@@ -15,7 +15,7 @@
  */
 
 import type { IWorkbookData } from '@univerjs/core';
-import { IUniverInstanceService, LocaleType, Univer, UniverInstanceType } from '@univerjs/core';
+import { LocaleType, Univer, UniverInstanceType } from '@univerjs/core';
 import { DesktopSidebarService, ISidebarService } from '@univerjs/ui';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ThreadCommentPanelService } from '../thread-comment-panel.service';
@@ -40,7 +40,6 @@ describe('ThreadCommentPanelService', () => {
     let univer: Univer;
     let service: ThreadCommentPanelService;
     let sidebarService: ISidebarService;
-    let univerInstanceService: IUniverInstanceService;
 
     beforeEach(() => {
         univer = new Univer();
@@ -49,9 +48,6 @@ describe('ThreadCommentPanelService', () => {
         injector.add([ThreadCommentPanelService]);
 
         univer.createUnit(UniverInstanceType.UNIVER_SHEET, workbookData);
-        univerInstanceService = injector.get(IUniverInstanceService);
-        univerInstanceService.focusUnit(workbookData.id);
-
         service = injector.get(ThreadCommentPanelService);
         sidebarService = injector.get(ISidebarService);
     });
@@ -65,10 +61,12 @@ describe('ThreadCommentPanelService', () => {
         service.panelVisible$.subscribe((visible) => visibleStates.push(visible));
 
         service.setPanelVisible(true);
+        service.setHoveredComment({ unitId: 'book-1', subUnitId: 'sheet-1', commentId: 'c-1' });
         sidebarService.open({});
         sidebarService.close();
 
         expect(service.panelVisible).toBe(false);
+        expect(service.hoveredCommentId).toBeUndefined();
         expect(visibleStates).toEqual([false, true, false]);
     });
 
@@ -82,13 +80,28 @@ describe('ThreadCommentPanelService', () => {
         expect(activeComments.at(-1)).toEqual({ unitId: 'book-1', subUnitId: 'sheet-1', commentId: 'c-1', trigger: 'cell' });
     });
 
-    it('closes the sidebar when the current sheet is removed', () => {
-        sidebarService.open({});
-        service.setPanelVisible(true);
+    it('publishes the thread comment hovered in the panel', () => {
+        const hoveredComments: unknown[] = [];
+        service.hoveredCommentId$.subscribe((comment) => hoveredComments.push(comment));
 
-        univerInstanceService.disposeUnit(workbookData.id);
+        service.setHoveredComment({
+            unitId: 'book-1',
+            subUnitId: 'sheet-1',
+            commentId: 'c-1',
+            trigger: 'panel-hover',
+        });
+        service.setHoveredComment(undefined);
 
-        expect(sidebarService.visible).toBe(false);
-        expect(service.panelVisible).toBe(false);
+        expect(service.hoveredCommentId).toBeUndefined();
+        expect(hoveredComments).toEqual([
+            undefined,
+            {
+                unitId: 'book-1',
+                subUnitId: 'sheet-1',
+                commentId: 'c-1',
+                trigger: 'panel-hover',
+            },
+            undefined,
+        ]);
     });
 });

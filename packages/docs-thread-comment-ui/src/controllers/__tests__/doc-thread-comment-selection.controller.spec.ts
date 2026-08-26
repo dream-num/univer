@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
+import { CustomDecorationType } from '@univerjs/core';
 import { SetTextSelectionsOperation } from '@univerjs/docs';
+import { DEFAULT_DOC_SUBUNIT_ID } from '@univerjs/docs-thread-comment';
 import { SetActiveCommentOperation } from '@univerjs/thread-comment-ui';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { ShowCommentPanelOperation } from '../../commands/operations/show-comment-panel.operation';
-import { DEFAULT_DOC_SUBUNIT_ID } from '../../common/const';
 import { DocThreadCommentSelectionController } from '../doc-thread-comment-selection.controller';
 
 describe('DocThreadCommentSelectionController', () => {
@@ -31,7 +32,14 @@ describe('DocThreadCommentSelectionController', () => {
         };
 
         const doc = {
-            getBody: () => ({ customDecorations: [{ id: 'c1', startIndex: 0, endIndex: 5 }] }),
+            getBody: () => ({
+                customDecorations: [
+                    { id: 'outer', type: CustomDecorationType.COMMENT, startIndex: 0, endIndex: 10 },
+                    { id: 'older', type: CustomDecorationType.COMMENT, startIndex: 0, endIndex: 5 },
+                    { id: 'not-comment', type: CustomDecorationType.DELETED, startIndex: 0, endIndex: 5 },
+                    { id: 'newest', type: CustomDecorationType.COMMENT, startIndex: 0, endIndex: 5 },
+                ],
+            }),
         };
 
         const univerInstanceService = {
@@ -70,7 +78,7 @@ describe('DocThreadCommentSelectionController', () => {
         });
 
         expect(executeCommand).toHaveBeenCalledWith(ShowCommentPanelOperation.id, {
-            activeComment: { unitId: 'doc-1', subUnitId: DEFAULT_DOC_SUBUNIT_ID, commentId: 'c1' },
+            activeComment: { unitId: 'doc-1', subUnitId: DEFAULT_DOC_SUBUNIT_ID, commentId: 'newest' },
         });
 
         controller.dispose();
@@ -84,7 +92,7 @@ describe('DocThreadCommentSelectionController', () => {
         };
 
         const doc = {
-            getBody: () => ({ customDecorations: [{ id: 'c1', startIndex: 0, endIndex: 5 }] }),
+            getBody: () => ({ customDecorations: [{ id: 'c1', type: CustomDecorationType.COMMENT, startIndex: 0, endIndex: 5 }] }),
         };
 
         const univerInstanceService = { getUnit: vi.fn(() => doc) };

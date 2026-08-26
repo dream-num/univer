@@ -22,7 +22,7 @@ import type {
     IDocumentData,
     Nullable,
 } from '@univerjs/core';
-import type { ISuccinctDocRangeParam } from '@univerjs/engine-render';
+import type { ISuccinctDocRangeParam, ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IShortcutItem } from '@univerjs/ui';
 import type { FormEvent } from 'react';
 import type { Root } from 'react-dom/client';
@@ -46,7 +46,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { IEditorService } from '@univerjs/docs-ui';
-import { IShortcutService, ISidebarService, RediContext } from '@univerjs/ui';
+import { IShortcutService, ISidebarService, KeyCode, RediContext } from '@univerjs/ui';
 import { act, createRef } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -60,7 +60,6 @@ import { ThreadCommentEditor } from '../ThreadCommentEditor';
 const EDITOR_ID = 'thread-comment-editor';
 const REPLY_LABEL = 'thread-comment-ui.editor.reply';
 const CANCEL_LABEL = 'thread-comment-ui.editor.cancel';
-const PLACEHOLDER_LABEL = 'thread-comment-ui.editor.placeholder';
 const IRenderManagerService = createIdentifier<TestRenderManagerService>('engine-render.render-manager.service');
 
 interface IEditorRecord {
@@ -78,6 +77,9 @@ class TestState {
     static submitCount = 0;
     static cancelCount = 0;
     static shortcuts: IShortcutItem[] = [];
+    static editorCommandIds: string[] = [];
+    static focusRender: (() => void) | undefined;
+    static blurRender: (() => void) | undefined;
 
     static reset() {
         this.records = new Map();
@@ -85,6 +87,9 @@ class TestState {
         this.submitCount = 0;
         this.cancelCount = 0;
         this.shortcuts = [];
+        this.editorCommandIds = [];
+        this.focusRender = undefined;
+        this.blurRender = undefined;
     }
 }
 
@@ -131,12 +136,14 @@ class TestEditor {
     focus(): void {
         this._record.focused = true;
         this._record.order.push('editor.focus');
+        TestState.focusRender?.();
         this.focus$.next(undefined);
     }
 
     blur(): void {
         this._record.focused = false;
         this._record.order.push('editor.blur');
+        TestState.blurRender?.();
         this.blur$.next(undefined);
     }
 
@@ -261,15 +268,46 @@ class TestEditorService {
     }
 }
 
+class TestDocSelectionRenderService {
+    readonly textSelectionInner$ = new BehaviorSubject({
+        textRanges: [] as ITextRangeWithStyle[],
+    });
+
+    isFocusing = false;
+
+    focus(): void {
+        this.isFocusing = true;
+        this.textSelectionInner$.next({
+            textRanges: [{ startOffset: 0, endOffset: 0, collapsed: true }],
+        });
+    }
+
+    blur(): void {
+        this.isFocusing = false;
+        this.textSelectionInner$.next({ textRanges: [] });
+    }
+
+    getSkeleton() {
+        return { getActualSize: () => ({ actualWidth: 0, actualHeight: 0 }) };
+    }
+}
+
 class TestRenderManagerService {
     readonly created$ = new Subject<unknown>();
     readonly disposed$ = new Subject<string>();
     readonly defaultEngine = {};
+    private readonly _renderService = new TestDocSelectionRenderService();
+    private readonly _renderer = { with: () => this._renderService };
+
+    constructor() {
+        TestState.focusRender = () => this._renderService.focus();
+        TestState.blurRender = () => this._renderService.blur();
+    }
 
     addRender(): void {}
     createRender() { return undefined; }
     removeRender(): void {}
-    getRenderUnitById() { return undefined; }
+    getRenderUnitById() { return this._renderer; }
     getAllRenderersOfType() { return []; }
     getRenderAll() { return new Map(); }
     create(): void {}
@@ -333,6 +371,26 @@ const BreakLineCommand: ICommand = {
     type: CommandType.COMMAND,
     handler: () => true,
 };
+const DeleteLeftCommand: ICommand = {
+    id: 'doc.command.delete-left',
+    type: CommandType.COMMAND,
+    handler: () => {
+        TestState.editorCommandIds.push(DeleteLeftCommand.id);
+        const record = TestState.records.get(EDITOR_ID);
+        if (record) {
+            record.data = { ...record.data, body: { dataStream: '\r\n' } };
+        }
+        return true;
+    },
+};
+const DeleteRightCommand: ICommand = {
+    id: 'doc.command.delete-right',
+    type: CommandType.COMMAND,
+    handler: () => {
+        TestState.editorCommandIds.push(DeleteRightCommand.id);
+        return true;
+    },
+};
 
 function createEditorTestBed() {
     const injector = new Injector();
@@ -354,7 +412,8 @@ function createEditorTestBed() {
     injector.get(ILogService).setLogLevel(LogLevel.SILENT);
 
     const commandService = injector.get(ICommandService);
-    [SetActiveCommentOperation, BreakLineCommand].forEach((command) => commandService.registerCommand(command));
+    [SetActiveCommentOperation, BreakLineCommand, DeleteLeftCommand, DeleteRightCommand]
+        .forEach((command) => commandService.registerCommand(command));
 
     return {
         injector,
@@ -386,15 +445,6 @@ function getButton(container: HTMLElement, text: string): HTMLButtonElement {
     }
 
     return button as HTMLButtonElement;
-}
-
-function getEditorSurface(container: HTMLElement): HTMLElement {
-    const placeholder = Array.from(container.querySelectorAll('div')).find((item) => item.textContent === PLACEHOLDER_LABEL);
-    if (!placeholder) {
-        throw new Error('Editor placeholder was not found.');
-    }
-
-    return placeholder.parentElement?.parentElement?.parentElement ?? placeholder as HTMLElement;
 }
 
 function body(dataStream: string): IDocumentBody {
@@ -472,7 +522,42 @@ describe('ThreadCommentEditor', () => {
         expect(TestState.records.get(EDITOR_ID)?.preserveHostFocus).toBe(true);
     });
 
-    it('saves reply content, clears the editor, and does not submit an outer form', () => {
+    it('routes Backspace and Delete to the comment editor commands while preserving host focus', async () => {
+        const testBed = createEditorTestBed();
+        const editorRef = createRef<{ reply: (text: IDocumentBody) => void }>();
+        const rendered = renderEditor(
+            testBed.injector,
+            <ThreadCommentEditor
+                ref={editorRef}
+                autoFocus={false}
+                editorId={EDITOR_ID}
+                subUnitId="subUnit"
+                type={UniverInstanceType.UNIVER_SLIDE}
+                unitId="unit"
+            />
+        );
+        root = rendered.root;
+        container = rendered.container;
+
+        act(() => editorRef.current?.reply(body('draft reply\r\n')));
+
+        const backspace = TestState.shortcuts.find((shortcut) => shortcut.binding === KeyCode.BACKSPACE)!;
+        const deleteRight = TestState.shortcuts.find((shortcut) => shortcut.binding === KeyCode.DELETE)!;
+        expect(backspace).toBeDefined();
+        expect(deleteRight).toBeDefined();
+
+        await act(async () => {
+            await testBed.commandService.executeCommand(backspace.id, backspace.staticParameters);
+            await testBed.commandService.executeCommand(deleteRight.id, deleteRight.staticParameters);
+            await Promise.resolve();
+        });
+
+        expect(TestState.editorCommandIds).toEqual([DeleteLeftCommand.id, DeleteRightCommand.id]);
+        expect(TestState.records.get(EDITOR_ID)?.preserveHostFocus).toBe(true);
+        expect(getButton(container, REPLY_LABEL).disabled).toBe(true);
+    });
+
+    it('saves reply content, clears the editor, and does not submit an outer form', async () => {
         const testBed = createEditorTestBed();
         const editorRef = createRef<{ reply: (text: IDocumentBody) => void }>();
         const rendered = renderEditor(
@@ -506,7 +591,7 @@ describe('ThreadCommentEditor', () => {
 
         expect(getButton(container, REPLY_LABEL).disabled).toBe(false);
 
-        act(() => {
+        await act(async () => {
             getButton(container!, REPLY_LABEL).dispatchEvent(new MouseEvent('click', { bubbles: true }));
         });
 
@@ -516,8 +601,92 @@ describe('ThreadCommentEditor', () => {
         const record = TestState.records.get(EDITOR_ID)!;
         expect(record.data.body?.dataStream).toBe('\r\n');
         expect(record.selections).toEqual([]);
+        expect(record.order.indexOf('onSave')).toBeLessThan(record.order.indexOf('editor.blur'));
         expect(record.order.indexOf('editor.blur')).toBeLessThan(record.order.indexOf('editor.replaceText'));
-        expect(record.order.indexOf('editor.replaceText')).toBeLessThan(record.order.indexOf('onSave'));
+    });
+
+    it('preserves a reply draft and prevents duplicate submits when permission is revoked during save', async () => {
+        const testBed = createEditorTestBed();
+        const editorRef = createRef<{ reply: (text: IDocumentBody) => void }>();
+        let saveCount = 0;
+        let failSave: ((error: Error) => void) | undefined;
+        const rendered = renderEditor(
+            testBed.injector,
+            <ThreadCommentEditor
+                ref={editorRef}
+                autoFocus={false}
+                editorId={EDITOR_ID}
+                onSave={() => {
+                    saveCount += 1;
+                    return new Promise<boolean>((_resolve, reject) => {
+                        failSave = reject;
+                    });
+                }}
+                subUnitId="subUnit"
+                type={UniverInstanceType.UNIVER_SHEET}
+                unitId="unit"
+            />
+        );
+        root = rendered.root;
+        container = rendered.container;
+
+        act(() => {
+            editorRef.current?.reply(body('retry this reply\r\n'));
+        });
+
+        await act(async () => {
+            const replyButton = getButton(container!, REPLY_LABEL);
+            replyButton.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            replyButton.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        });
+
+        expect(saveCount).toBe(1);
+        expect(getButton(container, REPLY_LABEL).disabled).toBe(true);
+
+        await act(async () => {
+            failSave?.(new Error('forbidden'));
+        });
+
+        expect(TestState.records.get(EDITOR_ID)?.data.body?.dataStream).toBe('retry this reply\r\n');
+        expect(getButton(container, REPLY_LABEL).disabled).toBe(false);
+    });
+
+    it('does not mutate a disposed editor when a pending save finishes', async () => {
+        const testBed = createEditorTestBed();
+        const editorRef = createRef<{ reply: (text: IDocumentBody) => void }>();
+        let finishSave: ((success: boolean) => void) | undefined;
+        const rendered = renderEditor(
+            testBed.injector,
+            <ThreadCommentEditor
+                ref={editorRef}
+                autoFocus={false}
+                editorId={EDITOR_ID}
+                onSave={() => new Promise<boolean>((resolve) => {
+                    finishSave = resolve;
+                })}
+                subUnitId="subUnit"
+                type={UniverInstanceType.UNIVER_SHEET}
+                unitId="unit"
+            />
+        );
+        root = rendered.root;
+        container = rendered.container;
+
+        act(() => editorRef.current?.reply(body('pending reply\r\n')));
+        await act(async () => {
+            getButton(container!, REPLY_LABEL).dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        });
+        const record = TestState.records.get(EDITOR_ID)!;
+
+        act(() => root!.unmount());
+        root = undefined;
+        await act(async () => {
+            finishSave?.(true);
+            await Promise.resolve();
+        });
+
+        expect(record.order).not.toContain('editor.blur');
+        expect(record.data.body?.dataStream).toBe('pending reply\r\n');
     });
 
     it('cancels editing by clearing content and resetting the active comment', () => {

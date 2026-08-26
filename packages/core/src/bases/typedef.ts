@@ -876,6 +876,13 @@ export type BaseHitTestResult =
         recordId: RecordId;
     }
     | {
+        type: 'base-record-action' | 'base-record-action-badge';
+        tableId: TableId;
+        viewId: ViewId;
+        recordId: RecordId;
+        actionId: string;
+    }
+    | {
         type: 'grid-hierarchy-toggle' | 'grid-hierarchy-add-child';
         tableId: TableId;
         viewId: ViewId;

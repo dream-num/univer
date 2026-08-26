@@ -17,16 +17,19 @@
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { Disposable, fromEventSubject, Inject, isInternalEditorID } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
-import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
-import { animationFrameScheduler, filter, throttleTime } from 'rxjs';
+import { ISidebarService } from '@univerjs/ui';
+import { animationFrameScheduler, observeOn, throttleTime } from 'rxjs';
 import { DocPageLayoutService } from '../../services/doc-page-layout.service';
+import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 
 // REFACTOR: @JOCS, move to new-docs package.
 export class DocResizeRenderController extends Disposable implements IRenderModule {
     constructor(
         private _context: IRenderContext,
         @Inject(DocPageLayoutService) private readonly _docPageLayoutService: DocPageLayoutService,
-        @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService
+        @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService,
+        @Inject(DocSelectionRenderService) private readonly _docSelectionRenderService: DocSelectionRenderService,
+        @ISidebarService private readonly _sidebarService: ISidebarService
     ) {
         super();
 
@@ -39,16 +42,24 @@ export class DocResizeRenderController extends Disposable implements IRenderModu
     private _initResize() {
         this.disposeWithMe(
             fromEventSubject(this._context.engine.onTransformChange$).pipe(
-                filter((evt) => evt.type === TRANSFORM_CHANGE_OBSERVABLE_TYPE.resize),
                 throttleTime(0, animationFrameScheduler)
-            ).subscribe(() => {
-                if (this._disposed) {
-                    return;
-                }
-
-                this._docPageLayoutService.calculatePagePosition();
-                this._textSelectionManagerService.refreshSelection();
-            })
+            ).subscribe(() => this._refreshLayoutAndSelection())
         );
+
+        this.disposeWithMe(
+            this._sidebarService.sidebarOptions$.pipe(
+                observeOn(animationFrameScheduler)
+            ).subscribe(() => this._refreshLayoutAndSelection())
+        );
+    }
+
+    private _refreshLayoutAndSelection() {
+        if (this._disposed) {
+            return;
+        }
+
+        this._docPageLayoutService.calculatePagePosition();
+        this._docSelectionRenderService.refreshRanges();
+        this._textSelectionManagerService.refreshSelection();
     }
 }

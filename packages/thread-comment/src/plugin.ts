@@ -42,7 +42,6 @@ import {
     UpdateCommentRefMutation,
 } from './commands/mutations/comment.mutation';
 import { defaultPluginConfig, THREAD_COMMENT_PLUGIN_CONFIG_KEY } from './config/config';
-import { ThreadCommentResourceController } from './controllers/tc-resource.controller';
 import { ThreadCommentModel } from './models/thread-comment.model';
 import { IThreadCommentDataSourceService, ThreadCommentDataSourceService } from './services/tc-datasource.service';
 import { ThreadCommentFacadeService } from './services/thread-comment-api.service';
@@ -76,7 +75,6 @@ export class UniverThreadCommentPlugin extends Plugin {
             [IThreadCommentDataSourceService, { useClass: ThreadCommentDataSourceService }],
             [ThreadCommentModel],
             [ThreadCommentFacadeService],
-            [ThreadCommentResourceController],
         ], this._config?.overrides) as Dependency[]).forEach(
             (d) => {
                 this._injector.add(d);
@@ -97,7 +95,5 @@ export class UniverThreadCommentPlugin extends Plugin {
         ].forEach((command) => {
             this._commandService.registerCommand(command);
         });
-
-        this._injector.get(ThreadCommentResourceController);
     }
 }

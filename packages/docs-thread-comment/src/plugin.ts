@@ -34,6 +34,7 @@ import {
 } from './commands/commands/create-doc-text-range-comment.command';
 import { DOCS_THREAD_COMMENT_PLUGIN_NAME } from './common/const';
 import { defaultPluginConfig, DOCS_THREAD_COMMENT_PLUGIN_CONFIG_KEY } from './config/config';
+import { DocsThreadCommentResourceController } from './controllers/docs-thread-comment-resource.controller';
 
 @DependentOn(UniverDocsPlugin, UniverThreadCommentPlugin)
 export class UniverDocsThreadCommentPlugin extends Plugin {
@@ -59,6 +60,8 @@ export class UniverDocsThreadCommentPlugin extends Plugin {
     }
 
     override onStarting(): void {
+        this._injector.add([DocsThreadCommentResourceController]);
+        this._injector.get(DocsThreadCommentResourceController);
         this.disposeWithMe(this._commandService.registerCommand(CreateDocTextRangeCommentCommand));
         this.disposeWithMe(this._commandService.registerCommand(AddDocCommentDecorationMutation));
     }

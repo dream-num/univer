@@ -14,9 +14,14 @@
  * limitations under the License.
  */
 
+import { UniverInstanceType } from '@univerjs/core';
 import { CopySheetCommand, RemoveSheetCommand } from '@univerjs/sheets';
-import { AddCommentMutation, DeleteCommentMutation } from '@univerjs/thread-comment';
+import {
+    AddCommentMutation,
+    DeleteCommentMutation,
+} from '@univerjs/thread-comment';
 import { describe, expect, it, vi } from 'vitest';
+import { SHEET_UNIVER_THREAD_COMMENT_PLUGIN } from '../../types/const';
 import { SheetsThreadCommentResourceController } from '../sheets-thread-comment-resource.controller';
 
 function createRootComment() {
@@ -40,6 +45,9 @@ describe('SheetsThreadCommentResourceController', () => {
         const rootComment = createRootComment();
 
         const controller = new SheetsThreadCommentResourceController(
+            {
+                registerPluginResource: () => ({ dispose: vi.fn() }),
+            } as any,
             {
                 getCurrentUnitOfType: () => ({
                     getUnitId: () => 'unit-1',
@@ -94,6 +102,9 @@ describe('SheetsThreadCommentResourceController', () => {
         const rootComment = createRootComment();
 
         const controller = new SheetsThreadCommentResourceController(
+            {
+                registerPluginResource: () => ({ dispose: vi.fn() }),
+            } as any,
             {} as any,
             {
                 interceptCommand: (config: any) => {
@@ -147,6 +158,26 @@ describe('SheetsThreadCommentResourceController', () => {
             },
         ]);
 
+        controller.dispose();
+    });
+
+    it('registers sheet thread comment snapshot resources for sheet units', () => {
+        let hook: any;
+        const controller = new SheetsThreadCommentResourceController(
+            {
+                registerPluginResource: (nextHook: any) => {
+                    hook = nextHook;
+                    return { dispose: vi.fn() };
+                },
+            } as any,
+            {} as any,
+            { interceptCommand: () => ({ dispose: vi.fn() }) } as any,
+            { getUnit: () => [] } as any,
+            { saveToSnapshot: (value: unknown) => value } as any
+        );
+
+        expect(hook.pluginName).toBe(SHEET_UNIVER_THREAD_COMMENT_PLUGIN);
+        expect(hook.businesses).toEqual([UniverInstanceType.UNIVER_SHEET]);
         controller.dispose();
     });
 });

@@ -26,10 +26,14 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { createThreadCommentResourceHook } from '../../common/tc-resource';
 import { ThreadCommentModel } from '../../models/thread-comment.model';
 import { UniverThreadCommentPlugin } from '../../plugin';
+import { IThreadCommentDataSourceService } from '../../services/tc-datasource.service';
 import { serializeThreadCommentAnchor, ThreadCommentAnchorKind } from '../../types/comment-anchor';
-import { SHEET_UNIVER_THREAD_COMMENT_PLUGIN } from '../tc-resource.controller';
+import { TC_PLUGIN_NAME } from '../../types/const';
+
+const TEST_RESOURCE_PLUGIN = `UNIVER_${TC_PLUGIN_NAME}`;
 
 function createWorkbookData(): IWorkbookData {
     return {
@@ -77,7 +81,7 @@ function createComment(overrides: Partial<IThreadComment> = {}): IThreadComment 
     };
 }
 
-describe('ThreadCommentResourceController', () => {
+describe('ThreadCommentResourceHook', () => {
     let univer: Univer;
     let get: Injector['get'];
     let resourceManagerService: IResourceManagerService;
@@ -95,6 +99,12 @@ describe('ThreadCommentResourceController', () => {
 
         resourceManagerService = get(IResourceManagerService);
         threadCommentModel = get(ThreadCommentModel);
+        resourceManagerService.registerPluginResource(createThreadCommentResourceHook(
+            threadCommentModel,
+            get(IThreadCommentDataSourceService),
+            TEST_RESOURCE_PLUGIN,
+            [UniverInstanceType.UNIVER_SHEET]
+        ));
     });
 
     afterEach(() => {
@@ -111,7 +121,7 @@ describe('ThreadCommentResourceController', () => {
         threadCommentModel.addComment('unit-1', 'sheet-2', sideThread);
 
         const resource = resourceManagerService.getResourcesByType('unit-1', UniverInstanceType.UNIVER_SHEET)
-            .find((item) => item.name === SHEET_UNIVER_THREAD_COMMENT_PLUGIN);
+            .find((item) => item.name === TEST_RESOURCE_PLUGIN);
 
         expect(resource).toBeDefined();
         expect(JSON.parse(resource!.data)).toEqual({
@@ -127,30 +137,6 @@ describe('ThreadCommentResourceController', () => {
                     children: [],
                 },
             ],
-        });
-    });
-
-    it.each([
-        UniverInstanceType.UNIVER_SLIDE,
-        UniverInstanceType.UNIVER_BOARD,
-        UniverInstanceType.UNIVER_BASE,
-    ])('serializes thread comments for business type %s', (businessType) => {
-        const root = createComment({ id: 'root-business', ref: 'element-1', subUnitId: 'page-1' });
-        threadCommentModel.addComment('unit-1', 'page-1', root);
-
-        const resource = resourceManagerService.getResourcesByType('unit-1', businessType)
-            .find((item) => item.name === SHEET_UNIVER_THREAD_COMMENT_PLUGIN);
-
-        expect(resource).toBeDefined();
-        if (resource === undefined) {
-            return;
-        }
-
-        expect(JSON.parse(resource.data)).toEqual({
-            'page-1': [{
-                ...root,
-                children: [],
-            }],
         });
     });
 
@@ -173,7 +159,7 @@ describe('ThreadCommentResourceController', () => {
         });
 
         resourceManagerService.loadResources('unit-1', [{
-            name: SHEET_UNIVER_THREAD_COMMENT_PLUGIN,
+            name: TEST_RESOURCE_PLUGIN,
             data: JSON.stringify({
                 'sheet-1': [
                     {
@@ -202,7 +188,7 @@ describe('ThreadCommentResourceController', () => {
 
     it('ignores invalid snapshot payloads', async () => {
         resourceManagerService.loadResources('unit-1', [{
-            name: SHEET_UNIVER_THREAD_COMMENT_PLUGIN,
+            name: TEST_RESOURCE_PLUGIN,
             data: '{invalid-json',
         }]);
 
@@ -223,7 +209,7 @@ describe('ThreadCommentResourceController', () => {
             ],
         });
         resourceManagerService.loadResources('unit-1', [{
-            name: SHEET_UNIVER_THREAD_COMMENT_PLUGIN,
+            name: TEST_RESOURCE_PLUGIN,
             data: JSON.stringify({
                 'not-an-array': {},
                 'sheet-1': [

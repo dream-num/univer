@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/docs-thread-comment",
-    "version": "1.0.0-beta.1",
+    "version": "1.0.0-beta.2",
     "private": false,
     "description": "Thread comment model integration and Facade APIs for Univer Docs.",
     "author": "DreamNum Co., Ltd. <developer@univer.ai>",

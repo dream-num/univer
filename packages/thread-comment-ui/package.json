@@ -27,7 +27,6 @@
     "exports": {
         ".": "./src/index.ts",
         "./*": "./src/*",
-        "./render-objects/thread-comment-canvas-overlay": "./src/render-objects/thread-comment-canvas-overlay.ts",
         "./locale/*": "./src/locale/*.ts"
     },
     "main": "./src/index.ts",

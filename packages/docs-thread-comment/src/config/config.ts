@@ -14,17 +14,11 @@
  * limitations under the License.
  */
 
-export {
-    AddDocCommentDecorationMutation,
-    CreateDocTextRangeCommentCommand,
-    prepareDocTextRangeComment,
-} from './commands/commands/create-doc-text-range-comment.command';
-export type {
-    IAddDocTextRangeCommentParams,
-    ICreateDocTextRangeCommentParams,
-    IDocCommentDecorationMutationParams,
-    IPreparedDocTextRangeComment,
-} from './commands/commands/create-doc-text-range-comment.command';
-export { DEFAULT_DOC_SUBUNIT_ID } from './common/const';
-export type { IUniverDocsThreadCommentConfig } from './config/config';
-export { UniverDocsThreadCommentPlugin } from './plugin';
+export const DOCS_THREAD_COMMENT_PLUGIN_CONFIG_KEY = 'docs-thread-comment.config';
+
+export const configSymbol = Symbol(DOCS_THREAD_COMMENT_PLUGIN_CONFIG_KEY);
+
+export interface IUniverDocsThreadCommentConfig {
+}
+
+export const defaultPluginConfig: IUniverDocsThreadCommentConfig = {};

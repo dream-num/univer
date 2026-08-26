@@ -14,7 +14,17 @@
  * limitations under the License.
  */
 
-import { DependentOn, ICommandService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
+import type { IUniverDocsThreadCommentConfig } from './config/config';
+import {
+    DependentOn,
+    ICommandService,
+    IConfigService,
+    Inject,
+    Injector,
+    merge,
+    Plugin,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverThreadCommentPlugin } from '@univerjs/thread-comment';
 import pkg from '../package.json';
@@ -23,6 +33,7 @@ import {
     CreateDocTextRangeCommentCommand,
 } from './commands/commands/create-doc-text-range-comment.command';
 import { DOCS_THREAD_COMMENT_PLUGIN_NAME } from './common/const';
+import { defaultPluginConfig, DOCS_THREAD_COMMENT_PLUGIN_CONFIG_KEY } from './config/config';
 
 @DependentOn(UniverDocsPlugin, UniverThreadCommentPlugin)
 export class UniverDocsThreadCommentPlugin extends Plugin {
@@ -32,11 +43,19 @@ export class UniverDocsThreadCommentPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_DOC;
 
     constructor(
-        _config: undefined,
+        private readonly _config: Partial<IUniverDocsThreadCommentConfig> = defaultPluginConfig,
         @Inject(Injector) protected override _injector: Injector,
+        @IConfigService private readonly _configService: IConfigService,
         @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
+
+        const { ...rest } = merge(
+            {},
+            defaultPluginConfig,
+            this._config
+        );
+        this._configService.setConfig(DOCS_THREAD_COMMENT_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {

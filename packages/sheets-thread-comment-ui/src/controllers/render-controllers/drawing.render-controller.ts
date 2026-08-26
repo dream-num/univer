@@ -16,12 +16,11 @@
 
 import type { EventState, Workbook } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import type { IThreadCommentCanvasOutline, IThreadCommentCanvasUnderline } from '@univerjs/thread-comment-ui/render-objects/thread-comment-canvas-overlay';
+import type { IThreadCommentCanvasOutline, IThreadCommentCanvasUnderline } from '@univerjs/thread-comment-ui';
 import { ICommandService, Inject, RxDisposable, ThemeService, toDisposable } from '@univerjs/core';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 import { deserializeThreadCommentAnchor, ThreadCommentAnchorKind, ThreadCommentModel } from '@univerjs/thread-comment';
-import { ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
-import { ThreadCommentCanvasOverlay } from '@univerjs/thread-comment-ui/render-objects/thread-comment-canvas-overlay';
+import { ThreadCommentCanvasOverlay, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import { OpenSheetCommentPanelOperation } from '../../commands/operations/comment.operation';
 
 const SHEET_COMMENT_DRAWING_OVERLAY_KEY = 'sheet-thread-comment-drawing-overlay';

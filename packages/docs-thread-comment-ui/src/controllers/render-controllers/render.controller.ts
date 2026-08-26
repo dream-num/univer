@@ -17,7 +17,7 @@
 import type { DocumentDataModel, EventState } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import type { IThreadCommentCanvasOutline, IThreadCommentCanvasUnderline } from '@univerjs/thread-comment-ui/render-objects/thread-comment-canvas-overlay';
+import type { IThreadCommentCanvasOutline, IThreadCommentCanvasUnderline } from '@univerjs/thread-comment-ui';
 import {
     CustomDecorationType,
     Disposable,
@@ -33,8 +33,7 @@ import { DEFAULT_DOC_SUBUNIT_ID } from '@univerjs/docs-thread-comment';
 import { DocRenderController } from '@univerjs/docs-ui';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 import { deserializeThreadCommentAnchor, ThreadCommentAnchorKind, ThreadCommentModel } from '@univerjs/thread-comment';
-import { ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
-import { ThreadCommentCanvasOverlay } from '@univerjs/thread-comment-ui/render-objects/thread-comment-canvas-overlay';
+import { ThreadCommentCanvasOverlay, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import { pairwise, startWith } from 'rxjs';
 import { ShowCommentPanelOperation } from '../../commands/operations/show-comment-panel.operation';
 

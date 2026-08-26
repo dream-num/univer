@@ -114,9 +114,7 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
                     size="small"
                     data-u-comp="cell-link-popup-copy"
                     aria-label={localeService.t<LocaleKey>('sheets-hyper-link-ui.popup.copy')}
-                    className={clsx(`
-                      univer-size-6 !univer-p-0 univer-text-base
-                    `, { 'univer-text-red-500': isError })}
+                    className={clsx('univer-size-6 !univer-p-0 univer-text-base', { 'univer-text-red-500': isError })}
                     disabled={!copyPermission || isError}
                     onClick={() => {
                         if (linkObj.type !== SheetHyperLinkType.URL) {

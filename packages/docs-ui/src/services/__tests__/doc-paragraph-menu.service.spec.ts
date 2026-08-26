@@ -23,9 +23,8 @@ import {
     DocumentBlockType,
     PresetListType,
 } from '@univerjs/core';
-import { DocumentPermission, getDocumentParagraphPermissionObjectId } from '@univerjs/docs';
+import { DocumentParagraphEditPermission, getDocumentParagraphPermissionObjectId } from '@univerjs/docs';
 import { DocumentEditArea } from '@univerjs/engine-render';
-import { UnitAction } from '@univerjs/protocol';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import {
@@ -77,10 +76,9 @@ describe('DocParagraphMenuService', () => {
 
     it('does not show a menu for a paragraph without paragraph edit permission', () => {
         const attachPopupToRect = vi.fn(() => ({ canDispose: () => true, dispose: vi.fn() }));
-        const paragraphPermissionId = new DocumentPermission(
+        const paragraphPermissionId = new DocumentParagraphEditPermission(
             'doc-1',
-            getDocumentParagraphPermissionObjectId('', 'paragraph-1'),
-            UnitAction.Edit
+            getDocumentParagraphPermissionObjectId('', 'paragraph-1')
         ).id;
         const service = createService({
             attachPopupToRect,

@@ -56,8 +56,8 @@ import { DocsRenameMutation } from '../commands/mutations/docs-rename.mutation';
 import {
     canEditDocumentTargets,
     clearDocumentPermissionValuesForUnit,
+    createDocumentPermissionPoint,
     DOCUMENT_UNIT_PERMISSION_ACTIONS,
-    DocumentPermission,
     getDocumentEntityPermissionObjectId,
     getDocumentPermissionValue,
     getDocumentSectionPermissionObjectId,
@@ -109,7 +109,7 @@ export class DocPermissionController extends Disposable {
 
     private _registerUnitPermissionPoints(unitId: string): void {
         DOCUMENT_UNIT_PERMISSION_ACTIONS.forEach((action) => {
-            const point = new DocumentPermission(unitId, unitId, action);
+            const point = createDocumentPermissionPoint(unitId, unitId, action);
             if (!this._permissionService.getPermissionPoint(point.id)) {
                 this._permissionService.addPermissionPoint(point);
             }

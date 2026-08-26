@@ -14,9 +14,16 @@
  * limitations under the License.
  */
 
-import type { IPermissionPoint, IPermissionService } from '@univerjs/core';
-import { PermissionStatus } from '@univerjs/core';
+import type { IPermissionService } from '@univerjs/core';
 import { UnitAction, UnitObject } from '@univerjs/protocol';
+import { DocumentCommentPermission } from './permission-point/document/comment';
+import { DocumentCopyPermission } from './permission-point/document/copy';
+import { DocumentEditablePermission } from './permission-point/document/editable';
+import { DocumentExportPermission } from './permission-point/document/export';
+import { DocumentPrintPermission } from './permission-point/document/print';
+import { DocumentEntityEditPermission } from './permission-point/entity/edit';
+import { DocumentParagraphEditPermission } from './permission-point/paragraph/edit';
+import { DocumentSectionEditPermission } from './permission-point/section/edit';
 
 export const DOCUMENT_UNIT_PERMISSION_ACTIONS = [
     UnitAction.Edit,
@@ -27,6 +34,13 @@ export const DOCUMENT_UNIT_PERMISSION_ACTIONS = [
 ] as const;
 
 export type DocumentUnitPermissionAction = typeof DOCUMENT_UNIT_PERMISSION_ACTIONS[number];
+
+const DOCUMENT_PERMISSION_OBJECT_TYPES = new Set([
+    UnitObject.Document,
+    UnitObject.DocumentSection,
+    UnitObject.DocumentParagraph,
+    UnitObject.DocumentEntity,
+]);
 
 export function getDocumentSectionPermissionObjectId(segmentId: string, sectionId: string): string {
     return `section/${encodeURIComponent(segmentId)}/${encodeURIComponent(sectionId)}`;
@@ -44,21 +58,41 @@ export function getDocumentEntityPermissionObjectId(
     return `entity/${encodeURIComponent(segmentId)}/${encodeURIComponent(entityType)}/${encodeURIComponent(entityId)}`;
 }
 
-export class DocumentPermission implements IPermissionPoint {
-    readonly type = UnitObject.Document;
-    status = PermissionStatus.INIT;
-    readonly id: string;
-    value = true;
-
-    constructor(
-        readonly unitId: string,
-        readonly objectId: string,
-        readonly subType: UnitAction
-    ) {
-        this.id = objectId === unitId
-            ? `${this.type}.${this.subType}_${unitId}`
-            : `${this.type}.${this.subType}_${unitId}_${objectId}`;
+export function createDocumentPermissionPoint(
+    unitId: string,
+    objectId: string,
+    action: UnitAction
+) {
+    if (objectId === unitId) {
+        switch (action) {
+            case UnitAction.Edit:
+                return new DocumentEditablePermission(unitId);
+            case UnitAction.Copy:
+                return new DocumentCopyPermission(unitId);
+            case UnitAction.Print:
+                return new DocumentPrintPermission(unitId);
+            case UnitAction.Export:
+                return new DocumentExportPermission(unitId);
+            case UnitAction.Comment:
+                return new DocumentCommentPermission(unitId);
+            default:
+                throw new Error(`Unsupported Document permission action: ${action}`);
+        }
     }
+
+    if (action !== UnitAction.Edit) {
+        throw new Error(`Document object permissions only support Edit: ${objectId}`);
+    }
+    if (objectId.startsWith('section/')) {
+        return new DocumentSectionEditPermission(unitId, objectId);
+    }
+    if (objectId.startsWith('paragraph/')) {
+        return new DocumentParagraphEditPermission(unitId, objectId);
+    }
+    if (objectId.startsWith('entity/')) {
+        return new DocumentEntityEditPermission(unitId, objectId);
+    }
+    throw new Error(`Unsupported Document permission object: ${objectId}`);
 }
 
 export function getDocumentPermissionValue(
@@ -67,7 +101,7 @@ export function getDocumentPermissionValue(
     objectId: string,
     action: UnitAction
 ): boolean {
-    return permissionService.getPermissionPoint(new DocumentPermission(unitId, objectId, action).id)?.value ?? true;
+    return permissionService.getPermissionPoint(createDocumentPermissionPoint(unitId, objectId, action).id)?.value ?? true;
 }
 
 export function setDocumentPermissionValue(
@@ -77,7 +111,7 @@ export function setDocumentPermissionValue(
     action: UnitAction,
     value: boolean
 ): void {
-    const point = new DocumentPermission(unitId, objectId, action);
+    const point = createDocumentPermissionPoint(unitId, objectId, action);
     if (!permissionService.getPermissionPoint(point.id)) {
         permissionService.addPermissionPoint(point);
     }
@@ -90,7 +124,7 @@ export function clearDocumentPermissionValuesForUnit(
 ): void {
     permissionService.getAllPermissionPoint().forEach((point$, id) => {
         const subscription = point$.subscribe((point) => {
-            if (point.type === UnitObject.Document && 'unitId' in point && point.unitId === unitId) {
+            if (DOCUMENT_PERMISSION_OBJECT_TYPES.has(point.type) && 'unitId' in point && point.unitId === unitId) {
                 permissionService.deletePermissionPoint(id);
             }
         });

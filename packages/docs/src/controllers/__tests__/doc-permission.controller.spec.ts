@@ -30,14 +30,20 @@ import {
     UndoCommand,
     UniverInstanceType,
 } from '@univerjs/core';
-import { UnitAction } from '@univerjs/protocol';
+import { UnitAction, UnitObject } from '@univerjs/protocol';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { InsertTextCommand } from '../../commands/commands/core-editing.command';
 import { DeleteDocumentSectionBreakCommand } from '../../commands/commands/update-document-section.command';
 import { RichTextEditingMutation } from '../../commands/mutations/core-editing.mutation';
 import { DocsRenameMutation } from '../../commands/mutations/docs-rename.mutation';
 import { createDocumentData, createTableDocument, createTestBed } from '../../facade/__tests__/create-test-bed';
-import { DOCUMENT_UNIT_PERMISSION_ACTIONS, DocumentPermission } from '../../services/permission/document-permission';
+import {
+    createDocumentPermissionPoint,
+    DOCUMENT_UNIT_PERMISSION_ACTIONS,
+    getDocumentEntityPermissionObjectId,
+    getDocumentParagraphPermissionObjectId,
+    getDocumentSectionPermissionObjectId,
+} from '../../services/permission/document-permission';
 
 function createTwoSectionDocument(): IDocumentData {
     const data = createDocumentData('permission-test', {
@@ -109,9 +115,28 @@ describe('DocPermissionController', () => {
         const permissionService = get(IPermissionService);
         DOCUMENT_UNIT_PERMISSION_ACTIONS.forEach((action) => {
             expect(permissionService.getPermissionPoint(
-                new DocumentPermission(document.getId(), document.getId(), action).id
+                createDocumentPermissionPoint(document.getId(), document.getId(), action).id
             )).not.toBeNull();
         });
+    });
+
+    it('uses dedicated UnitObject values for stable Document scopes', () => {
+        const unitId = document.getId();
+        expect(createDocumentPermissionPoint(
+            unitId,
+            getDocumentSectionPermissionObjectId('', 'section-one'),
+            UnitAction.Edit
+        ).type).toBe(UnitObject.DocumentSection);
+        expect(createDocumentPermissionPoint(
+            unitId,
+            getDocumentParagraphPermissionObjectId('', 'paragraph-one'),
+            UnitAction.Edit
+        ).type).toBe(UnitObject.DocumentParagraph);
+        expect(createDocumentPermissionPoint(
+            unitId,
+            getDocumentEntityPermissionObjectId('', 'table', 'table-one'),
+            UnitAction.Edit
+        ).type).toBe(UnitObject.DocumentEntity);
     });
 
     it('enforces document edit permission through the facade and command pipeline', async () => {

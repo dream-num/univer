@@ -29,6 +29,10 @@ export const drawingCommentMenuFactory = (accessor: IAccessor) => ({
     title: 'sheets-thread-comment-ui.menu.addComment',
     tooltip: 'sheets-thread-comment-ui.menu.addComment',
     hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+    disabled$: getCurrentRangeDisable$(accessor, {
+        workbookTypes: [WorkbookCommentPermission],
+        worksheetTypes: [WorksheetViewPermission],
+    }),
 });
 
 export const threadCommentMenuFactory = (accessor: IAccessor) => {

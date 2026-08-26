@@ -25,7 +25,7 @@ import {
     UpdateCommentCommand,
 } from '@univerjs/thread-comment';
 import { describe, expect, it, vi } from 'vitest';
-import { ShowAddSheetCommentModalOperation } from '../../commands/operations/comment.operation';
+import { AddSheetDrawingCommentOperation, ShowAddSheetCommentModalOperation } from '../../commands/operations/comment.operation';
 import { SheetsThreadCommentPermissionController } from '../sheets-thread-comment-permission.controller';
 
 type BeforeCommandHandler = (command: { id: string; params?: unknown }) => void;
@@ -67,6 +67,7 @@ describe('SheetsThreadCommentPermissionController', () => {
         const beforeCommandHandler = getBeforeCommandHandler();
 
         beforeCommandHandler?.({ id: ShowAddSheetCommentModalOperation.id });
+        beforeCommandHandler?.({ id: AddSheetDrawingCommentOperation.id });
         beforeCommandHandler?.({
             id: AddCommentCommand.id,
             params: {
@@ -92,7 +93,7 @@ describe('SheetsThreadCommentPermissionController', () => {
             },
         });
 
-        expect(permissionCheck.permissionCheckWithoutRange).toHaveBeenCalledTimes(1);
+        expect(permissionCheck.permissionCheckWithoutRange).toHaveBeenCalledTimes(2);
         expect(permissionCheck.permissionCheckWithRanges).toHaveBeenCalledWith(expect.any(Object), [{
             startRow: 1,
             startColumn: 1,
@@ -105,7 +106,7 @@ describe('SheetsThreadCommentPermissionController', () => {
             endRow: 3,
             endColumn: 2,
         }], 'unit-1', 'sheet-1');
-        expect(permissionCheck.blockExecuteWithoutPermission).toHaveBeenCalledTimes(4);
+        expect(permissionCheck.blockExecuteWithoutPermission).toHaveBeenCalledTimes(5);
         expect(permissionCheck.blockExecuteWithoutPermission).toHaveBeenLastCalledWith('sheets-thread-comment-ui.permission.commentErr');
 
         controller.dispose();

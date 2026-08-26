@@ -270,6 +270,7 @@ function getDocumentUnitAction(commandId: string): UnitAction | undefined {
     if (commandId === 'docs.operation.print') return UnitAction.Print;
     if (commandId === 'docs-exchange-client.operation.export-doc') return UnitAction.Export;
     if (commandId === 'docs.operation.start-add-comment' ||
+        commandId === 'docs.operation.add-drawing-comment' ||
         (commandId.startsWith('docs.command.') && commandId.includes('comment')) ||
         commandId.startsWith('thread-comment.command.') ||
         commandId.startsWith('thread-comment.mutation.')) {

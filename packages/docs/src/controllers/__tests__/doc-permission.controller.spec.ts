@@ -307,6 +307,7 @@ describe('DocPermissionController', () => {
         [UnitAction.Print, 'docs.operation.print'],
         [UnitAction.Export, 'docs-exchange-client.operation.export-doc'],
         [UnitAction.Comment, 'docs.command.add-comment'],
+        [UnitAction.Comment, 'docs.operation.add-drawing-comment'],
     ] as const)('enforces unit action %s on its existing command surface', async (point, commandId) => {
         const commandService = get(ICommandService);
         commandService.registerCommand({ id: commandId, type: CommandType.OPERATION, handler: () => true });

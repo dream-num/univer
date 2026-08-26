@@ -1442,6 +1442,9 @@ importers:
       '@univerjs/icons':
         specifier: 1.38.0
         version: 1.38.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@univerjs/protocol':
+        specifier: workspace:*
+        version: link:../protocol
       '@univerjs/thread-comment':
         specifier: workspace:*
         version: link:../thread-comment

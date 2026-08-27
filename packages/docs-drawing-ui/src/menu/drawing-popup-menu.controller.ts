@@ -305,8 +305,13 @@ export class DocDrawingPopupMenuController extends RxDisposable {
             }),
             transformer.clearControl$.subscribe(() => {
                 this._clearPopups(unitId);
-                this._contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, false);
-                this._drawingManagerService.focusDrawing(null);
+                queueMicrotask(() => {
+                    if (transformer.getSelectedObjectMap().size > 0) {
+                        return;
+                    }
+                    this._contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, false);
+                    this._drawingManagerService.focusDrawing(null);
+                });
             }),
             transformer.changing$.subscribe(() => {
                 this._clearPopups(unitId, true);

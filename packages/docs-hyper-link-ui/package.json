@@ -81,6 +81,7 @@
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/icons": "1.38.0",
+        "@univerjs/protocol": "workspace:*",
         "@univerjs/ui": "workspace:*"
     },
     "devDependencies": {

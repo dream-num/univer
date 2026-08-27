@@ -41,7 +41,7 @@ import {
     ThreadCommentAnchorKind,
     UpdateCommentCommand,
 } from '@univerjs/thread-comment';
-import { ShowAddSheetCommentModalOperation, ToggleSheetCommentPanelOperation } from '../commands/operations/comment.operation';
+import { AddSheetDrawingCommentOperation, ShowAddSheetCommentModalOperation, ToggleSheetCommentPanelOperation } from '../commands/operations/comment.operation';
 
 export class SheetsThreadCommentPermissionController extends Disposable {
     constructor(
@@ -60,7 +60,7 @@ export class SheetsThreadCommentPermissionController extends Disposable {
             this._commandService.beforeCommandExecuted((command: ICommandInfo) => {
                 const { id } = command;
 
-                if (id === ShowAddSheetCommentModalOperation.id || id === ToggleSheetCommentPanelOperation.id) {
+                if (id === AddSheetDrawingCommentOperation.id || id === ShowAddSheetCommentModalOperation.id || id === ToggleSheetCommentPanelOperation.id) {
                     const permission = this._sheetPermissionCheckController.permissionCheckWithoutRange({
                         workbookTypes: [WorkbookCommentPermission],
                         worksheetTypes: [WorksheetViewPermission],

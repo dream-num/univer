@@ -43,6 +43,7 @@ import { DocSelectionRenderService } from '../../services/selection/doc-selectio
 
 export class DocSelectionRenderController extends Disposable implements IRenderModule {
     private _loadedMap = new WeakSet<RenderComponentType>();
+    private _deferredEditorFocusTimer: ReturnType<typeof setTimeout> | null = null;
 
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
@@ -192,7 +193,11 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
                 this._setEditorFocus(unitId);
                 const { offsetX, offsetY } = evt;
 
-                setTimeout(() => {
+                if (this._deferredEditorFocusTimer != null) {
+                    clearTimeout(this._deferredEditorFocusTimer);
+                }
+                this._deferredEditorFocusTimer = setTimeout(() => {
+                    this._deferredEditorFocusTimer = null;
                     if (unitId === this._editorService.getFocusId() || this._docSelectionRenderService.isOnPointerEvent) {
                         return;
                     }
@@ -227,6 +232,14 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
 
             this._docSelectionRenderService.__handleTripleClick(evt);
         }));
+    }
+
+    override dispose(): void {
+        if (this._deferredEditorFocusTimer != null) {
+            clearTimeout(this._deferredEditorFocusTimer);
+            this._deferredEditorFocusTimer = null;
+        }
+        super.dispose();
     }
 
     private _getTransformCoordForDocumentOffset(evtOffsetX: number, evtOffsetY: number) {

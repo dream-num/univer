@@ -79,7 +79,8 @@
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
-        "@univerjs/engine-render": "workspace:*"
+        "@univerjs/engine-render": "workspace:*",
+        "@univerjs/protocol": "workspace:*"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",

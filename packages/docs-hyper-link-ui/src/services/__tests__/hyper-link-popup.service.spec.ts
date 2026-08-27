@@ -25,11 +25,14 @@ import {
     IContextService,
     ILogService,
     Injector,
+    IPermissionService,
     IUniverInstanceService,
+    PermissionService,
     UniverInstanceService,
 } from '@univerjs/core';
-import { DocSelectionManagerService } from '@univerjs/docs';
+import { DocSelectionManagerService, setDocumentPermissionValue } from '@univerjs/docs';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
+import { UnitAction } from '@univerjs/protocol';
 import { describe, expect, it } from 'vitest';
 import { DocHyperLinkPopupService } from '../hyper-link-popup.service';
 
@@ -53,6 +56,7 @@ function createService() {
     injector.add([IContextService, { useClass: ContextService }]);
     injector.add([ICommandService, { useClass: CommandService }]);
     injector.add([IUniverInstanceService, { useClass: UniverInstanceService }]);
+    injector.add([IPermissionService, { useClass: PermissionService }]);
     injector.add([DocCanvasPopManagerService, { useClass: CapturingDocCanvasPopManagerServiceCtor }]);
     injector.add([DocSelectionManagerService]);
     injector.add([DocHyperLinkPopupService]);
@@ -61,12 +65,14 @@ function createService() {
     const selectionManager = injector.get(DocSelectionManagerService);
     selectionManager.__TEST_ONLY_setCurrentSelection({ unitId: 'doc-1', subUnitId: 'doc-1' });
     const popupManager = injector.get(DocCanvasPopManagerService) as unknown as CapturingDocCanvasPopManagerService;
+    const permissionService = injector.get(IPermissionService);
 
     return {
         service: injector.get(DocHyperLinkPopupService),
         selectionManager,
         attached: popupManager.attached,
         disposed: popupManager.disposed,
+        permissionService,
     };
 }
 
@@ -212,5 +218,19 @@ describe('DocHyperLinkPopupService', () => {
 
         expect(service.showing).toEqual(link);
         expect(attached).toHaveLength(2);
+    });
+
+    it('does not open an edit popup without document edit permission', () => {
+        const { service, attached, permissionService } = createService();
+        setDocumentPermissionValue(
+            permissionService,
+            'doc-1',
+            'doc-1',
+            UnitAction.Edit,
+            false
+        );
+
+        expect(service.showEditPopup('doc-1', null)).toBeNull();
+        expect(attached).toEqual([]);
     });
 });

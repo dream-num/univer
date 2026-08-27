@@ -62,7 +62,7 @@ export const ShowDocHyperLinkEditPopupOperation: ICommand<IShowDocHyperLinkEditP
         if (!unitId) {
             return false;
         }
-        hyperLinkService.showEditPopup(unitId, linkInfo);
+        hyperLinkService.showEditPopup(unitId, linkInfo ?? null);
         return true;
     },
 };

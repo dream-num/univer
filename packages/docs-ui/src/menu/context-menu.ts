@@ -21,8 +21,9 @@ import type { Subscriber } from 'rxjs';
 import type { LocaleKey } from '../locale/types';
 import { DOC_RANGE_TYPE, DocumentFlavor, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
+import { UnitAction } from '@univerjs/protocol';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
-import { combineLatest, Observable } from 'rxjs';
+import { combineLatest, map, Observable } from 'rxjs';
 import { DocCopyCommand, DocCutCommand, DocPasteCommand } from '../commands/commands/clipboard.command';
 import { DeleteLeftCommand } from '../commands/commands/doc-delete.command';
 import {
@@ -38,6 +39,7 @@ import {
 } from '../commands/commands/table/doc-table-insert.command';
 import { DocParagraphSettingPanelOperation } from '../commands/operations/doc-paragraph-setting-panel.operation';
 import { DocSectionSettingPanelOperation } from '../commands/operations/doc-section-setting-panel.operation';
+import { disableMenuWithoutDocumentUnitPermission } from './menu';
 
 const getDisableOnCollapsedObservable = (accessor: IAccessor) => {
     const docSelectionManagerService = accessor.get(DocSelectionManagerService);
@@ -55,6 +57,10 @@ const getDisableOnCollapsedObservable = (accessor: IAccessor) => {
         return () => observable.unsubscribe();
     });
 };
+
+function combineMenuDisabled(...states: Observable<boolean>[]): Observable<boolean> {
+    return combineLatest(states).pipe(map((values) => values.some(Boolean)));
+}
 
 function inSameTable(rectRanges: Readonly<IRectRangeWithStyle[]>) {
     if (rectRanges.length < 2) {
@@ -120,7 +126,10 @@ export function CopyMenuFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey>
         type: MenuItemType.BUTTON,
         icon: 'CopyDoubleIcon',
         title: 'docs-ui.rightClick.copy',
-        disabled$: getDisableOnCollapsedObservable(accessor),
+        disabled$: combineMenuDisabled(
+            getDisableOnCollapsedObservable(accessor),
+            disableMenuWithoutDocumentUnitPermission(accessor, UnitAction.Copy)
+        ),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 };
@@ -130,6 +139,7 @@ export function ParagraphSettingMenuFactory(accessor: IAccessor): IMenuButtonIte
         id: DocParagraphSettingPanelOperation.id,
         type: MenuItemType.BUTTON,
         title: 'docs-ui.doc.menu.paragraphSetting',
+        disabled$: disableMenuWithoutDocumentUnitPermission(accessor, UnitAction.Edit),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 };
@@ -140,7 +150,11 @@ export function CutMenuFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> 
         type: MenuItemType.BUTTON,
         icon: 'CopyDoubleIcon',
         title: 'docs-ui.rightClick.cut',
-        disabled$: getDisableOnCollapsedObservable(accessor),
+        disabled$: combineMenuDisabled(
+            getDisableOnCollapsedObservable(accessor),
+            disableMenuWithoutDocumentUnitPermission(accessor, UnitAction.Copy),
+            disableMenuWithoutDocumentUnitPermission(accessor, UnitAction.Edit)
+        ),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 };
@@ -151,6 +165,7 @@ export function PasteMenuFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey
         type: MenuItemType.BUTTON,
         icon: 'PasteSpecialDoubleIcon',
         title: 'docs-ui.rightClick.paste',
+        disabled$: disableMenuWithoutDocumentUnitPermission(accessor, UnitAction.Edit),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 };
@@ -161,7 +176,10 @@ export function DeleteMenuFactory(accessor: IAccessor): IMenuButtonItem<LocaleKe
         type: MenuItemType.BUTTON,
         icon: 'PasteSpecialDoubleIcon',
         title: 'docs-ui.rightClick.delete',
-        disabled$: getDisableOnCollapsedObservable(accessor),
+        disabled$: combineMenuDisabled(
+            getDisableOnCollapsedObservable(accessor),
+            disableMenuWithoutDocumentUnitPermission(accessor, UnitAction.Edit)
+        ),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 };
@@ -173,6 +191,7 @@ export function TableInsertMenuItemFactory(accessor: IAccessor): IMenuSelectorIt
         type: MenuItemType.SUBITEMS,
         title: 'docs-ui.table.insert',
         icon: 'InsertDoubleIcon',
+        disabled$: disableMenuWithoutDocumentUnitPermission(accessor, UnitAction.Edit),
         hidden$: combineLatest(getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC), getDisableWhenSelectionNotInTableObservable(accessor), (one, two) => {
             return one || two;
         }),
@@ -207,6 +226,7 @@ export function SectionSettingMenuFactory(accessor: IAccessor): IMenuButtonItem<
         id: DocSectionSettingPanelOperation.id,
         type: MenuItemType.BUTTON,
         title: 'docs-ui.doc.menu.sectionSetting',
+        disabled$: disableMenuWithoutDocumentUnitPermission(accessor, UnitAction.Edit),
         hidden$: combineLatest(
             getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
             getSectionSettingUnavailableObservable(accessor),
@@ -221,7 +241,10 @@ export function InsertRowBeforeMenuItemFactory(accessor: IAccessor): IMenuButton
         type: MenuItemType.BUTTON,
         title: 'docs-ui.table.insertRowAbove',
         icon: 'InsertRowAboveDoubleIcon',
-        disabled$: getDisableWhenSelectionNotInTableObservable(accessor),
+        disabled$: combineMenuDisabled(
+            getDisableWhenSelectionNotInTableObservable(accessor),
+            disableMenuWithoutDocumentUnitPermission(accessor, UnitAction.Edit)
+        ),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
@@ -232,7 +255,10 @@ export function InsertRowAfterMenuItemFactory(accessor: IAccessor): IMenuButtonI
         type: MenuItemType.BUTTON,
         title: 'docs-ui.table.insertRowBelow',
         icon: 'InsertRowBelowDoubleIcon',
-        disabled$: getDisableWhenSelectionNotInTableObservable(accessor),
+        disabled$: combineMenuDisabled(
+            getDisableWhenSelectionNotInTableObservable(accessor),
+            disableMenuWithoutDocumentUnitPermission(accessor, UnitAction.Edit)
+        ),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
@@ -243,7 +269,10 @@ export function InsertColumnLeftMenuItemFactory(accessor: IAccessor): IMenuButto
         type: MenuItemType.BUTTON,
         title: 'docs-ui.table.insertColumnLeft',
         icon: 'LeftInsertColumnDoubleIcon',
-        disabled$: getDisableWhenSelectionNotInTableObservable(accessor),
+        disabled$: combineMenuDisabled(
+            getDisableWhenSelectionNotInTableObservable(accessor),
+            disableMenuWithoutDocumentUnitPermission(accessor, UnitAction.Edit)
+        ),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
@@ -254,7 +283,10 @@ export function InsertColumnRightMenuItemFactory(accessor: IAccessor): IMenuButt
         type: MenuItemType.BUTTON,
         title: 'docs-ui.table.insertColumnRight',
         icon: 'RightInsertColumnDoubleIcon',
-        disabled$: getDisableWhenSelectionNotInTableObservable(accessor),
+        disabled$: combineMenuDisabled(
+            getDisableWhenSelectionNotInTableObservable(accessor),
+            disableMenuWithoutDocumentUnitPermission(accessor, UnitAction.Edit)
+        ),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
@@ -266,6 +298,7 @@ export function TableDeleteMenuItemFactory(accessor: IAccessor): IMenuSelectorIt
         type: MenuItemType.SUBITEMS,
         title: 'docs-ui.table.delete',
         icon: 'ReduceDoubleIcon',
+        disabled$: disableMenuWithoutDocumentUnitPermission(accessor, UnitAction.Edit),
         hidden$: combineLatest(getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC), getDisableWhenSelectionNotInTableObservable(accessor), (one, two) => {
             return one || two;
         }),
@@ -278,7 +311,10 @@ export function DeleteRowsMenuItemFactory(accessor: IAccessor): IMenuButtonItem<
         type: MenuItemType.BUTTON,
         title: 'docs-ui.table.deleteRows',
         icon: 'DeleteRowDoubleIcon',
-        disabled$: getDisableWhenSelectionNotInTableObservable(accessor),
+        disabled$: combineMenuDisabled(
+            getDisableWhenSelectionNotInTableObservable(accessor),
+            disableMenuWithoutDocumentUnitPermission(accessor, UnitAction.Edit)
+        ),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
@@ -289,7 +325,10 @@ export function DeleteColumnsMenuItemFactory(accessor: IAccessor): IMenuButtonIt
         type: MenuItemType.BUTTON,
         title: 'docs-ui.table.deleteColumns',
         icon: 'DeleteColumnDoubleIcon',
-        disabled$: getDisableWhenSelectionNotInTableObservable(accessor),
+        disabled$: combineMenuDisabled(
+            getDisableWhenSelectionNotInTableObservable(accessor),
+            disableMenuWithoutDocumentUnitPermission(accessor, UnitAction.Edit)
+        ),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
@@ -300,7 +339,10 @@ export function DeleteTableMenuItemFactory(accessor: IAccessor): IMenuButtonItem
         type: MenuItemType.BUTTON,
         title: 'docs-ui.table.deleteTable',
         icon: 'DeleteTableDoubleIcon',
-        disabled$: getDisableWhenSelectionNotInTableObservable(accessor),
+        disabled$: combineMenuDisabled(
+            getDisableWhenSelectionNotInTableObservable(accessor),
+            disableMenuWithoutDocumentUnitPermission(accessor, UnitAction.Edit)
+        ),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }

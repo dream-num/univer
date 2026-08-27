@@ -355,6 +355,7 @@ function renderPopup(
     });
 
     return {
+        copy: container.querySelector<HTMLButtonElement>('[data-u-comp="cell-link-popup-copy"]'),
         edit: container.querySelector('[data-u-comp="cell-link-popup-edit"]') as HTMLElement,
         remove: container.querySelector('[data-u-comp="cell-link-popup-remove"]') as HTMLElement,
     };
@@ -386,6 +387,7 @@ describe('CellLinkPopupPure', () => {
             executedCommands.push({ id: command.id, params: command.params });
         });
         const actions = renderPopup(root, container, currentTestBed);
+        expect(actions.copy?.disabled).toBe(true);
 
         await act(async () => {
             actions.edit.click();

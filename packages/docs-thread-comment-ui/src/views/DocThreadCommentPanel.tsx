@@ -17,14 +17,14 @@
 import type { DocumentDataModel } from '@univerjs/core';
 import type { IAddDocCommentComment } from '../commands/commands/add-doc-comment.command';
 import type { IDeleteDocCommentComment } from '../commands/commands/delete-doc-comment.command';
-import { ICommandService, Injector, isInternalEditorID, IUniverInstanceService, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import { ICommandService, Injector, IPermissionService, isInternalEditorID, IUniverInstanceService, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { DEFAULT_DOC_SUBUNIT_ID } from '@univerjs/docs-thread-comment';
 import { deserializeThreadCommentAnchor, serializeThreadCommentAnchor, ThreadCommentAnchorKind, ThreadCommentModel } from '@univerjs/thread-comment';
 import { ThreadCommentDraftService, ThreadCommentPanel } from '@univerjs/thread-comment-ui';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo, useState } from 'react';
-import { debounceTime, filter, map, Observable } from 'rxjs';
+import { debounceTime, filter, map, merge, Observable } from 'rxjs';
 import { AddDocCommentComment } from '../commands/commands/add-doc-comment.command';
 import { DeleteDocCommentComment } from '../commands/commands/delete-doc-comment.command';
 import { StartAddCommentOperation } from '../commands/operations/show-comment-panel.operation';
@@ -51,11 +51,16 @@ export const DocThreadCommentPanel = () => {
         () => docSelectionManagerService.textSelection$.pipe(debounceTime(16)),
         [docSelectionManagerService.textSelection$]
     );
+    const permissionService = useDependency(IPermissionService);
+    const disableAddChange$ = useMemo(
+        () => merge(selectionChange$, permissionService.permissionPointUpdate$),
+        [permissionService.permissionPointUpdate$, selectionChange$]
+    );
     const disableAdd = useObservable(
-        () => selectionChange$.pipe(map(() => shouldDisableAddComment(injector))),
+        () => disableAddChange$.pipe(map(() => shouldDisableAddComment(injector))),
         shouldDisableAddComment(injector),
         false,
-        [injector, selectionChange$]
+        [disableAddChange$, injector]
     );
     const commandService = useDependency(ICommandService);
     const threadCommentModel = useDependency(ThreadCommentModel);

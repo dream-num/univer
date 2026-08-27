@@ -105,7 +105,7 @@ describe('doc hyperlink popup operations', () => {
         const result = await commandService.executeCommand(ShowDocHyperLinkEditPopupOperation.id);
 
         expect(result).toBe(true);
-        expect(popupService.editing).toBeUndefined();
+        expect(popupService.editing).toBeNull();
     });
 
     it('keeps the hyperlink editor closed when there is no selected text', async () => {

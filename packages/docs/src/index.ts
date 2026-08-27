@@ -33,6 +33,8 @@ export type {
 } from './commands/commands/set-document-default-paragraph-style.command';
 export { SetDocumentNameCommand } from './commands/commands/set-document-name.command';
 export type { ISetDocumentNameCommandParams } from './commands/commands/set-document-name.command';
+export { SetDocumentPermissionCommand } from './commands/commands/set-document-permission.command';
+export type { ISetDocumentPermissionCommandParams } from './commands/commands/set-document-permission.command';
 export { SetSectionHeaderFooterLinkCommand } from './commands/commands/set-section-header-footer-link.command';
 export type { ISetSectionHeaderFooterLinkCommandParams } from './commands/commands/set-section-header-footer-link.command';
 export { UpdateDocumentParagraphStyleCommand } from './commands/commands/update-document-paragraph-style.command';
@@ -92,6 +94,22 @@ export type {
     IResolvedDocText,
     IResolvedDocTextCharacter,
 } from './services/doc-text-resolver.service';
+export {
+    canEditDocumentTargets,
+    createDocumentPermissionPoint,
+    getDocumentEntityPermissionObjectId,
+    getDocumentParagraphPermissionObjectId,
+    getDocumentPermissionValue,
+    getDocumentSectionPermissionObjectId,
+    setDocumentPermissionValue,
+} from './services/permission/document-permission';
+export type { DocumentUnitPermissionAction } from './services/permission/document-permission';
+export {
+    getDocumentDrawingSegmentId,
+    getDocumentEditTargetObjectIds,
+    getDocumentEntityParentPermissionObjectIds,
+    getDocumentParagraphParentPermissionObjectIds,
+} from './services/permission/document-permission-resolver';
 export {
     addCustomRangeBySelectionFactory,
     addCustomRangeFactory,

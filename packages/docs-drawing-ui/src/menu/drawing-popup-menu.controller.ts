@@ -23,12 +23,19 @@ import {
     ICommandService,
     IContextService,
     Inject,
+    IPermissionService,
     isInternalEditorID,
     IUniverInstanceService,
     RxDisposable,
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
+import {
+    canEditDocumentTargets,
+    getDocumentDrawingSegmentId,
+    getDocumentEntityParentPermissionObjectIds,
+    getDocumentEntityPermissionObjectId,
+} from '@univerjs/docs';
 import { IDocDrawingAdapterService, RemoveDocDrawingCommand } from '@univerjs/docs-drawing';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
@@ -61,8 +68,8 @@ export class DocDrawingPopupMenuController extends RxDisposable {
         @IDocDrawingAdapterService private readonly _drawingAdapterService: IDocDrawingAdapterService,
         @Inject(DocDrawingFloatingToolbarAdapterService) private readonly _floatingToolbarAdapterService: DocDrawingFloatingToolbarAdapterService,
         @ICommandService private readonly _commandService: ICommandService,
-        @IMenuManagerService private readonly _menuManagerService: IMenuManagerService
-
+        @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
+        @IPermissionService private readonly _permissionService: IPermissionService
     ) {
         super();
 
@@ -92,6 +99,14 @@ export class DocDrawingPopupMenuController extends RxDisposable {
                 }
             })
         );
+        this.disposeWithMe(this._permissionService.permissionPointUpdate$.subscribe(() => {
+            if (this._drawingManagerService.getFocusDrawings().some((drawing) =>
+                this._univerInstanceService.getUnitType(drawing.unitId) === UniverInstanceType.UNIVER_DOC &&
+                !this._canEditDrawing(drawing.unitId, drawing.drawingId)
+            )) {
+                this._clearPopups();
+            }
+        }));
 
         this.disposeWithMe(
             this._univerInstanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC).pipe(takeUntil(this.dispose$)).subscribe((documentDataModel) => this._create(documentDataModel))
@@ -214,6 +229,9 @@ export class DocDrawingPopupMenuController extends RxDisposable {
                 }
 
                 const { unitId, subUnitId, drawingId, drawingType } = drawingParam;
+                if (!this._canEditDrawing(unitId, drawingId)) {
+                    return;
+                }
                 const isImage = drawingType === DrawingTypeEnum.DRAWING_IMAGE;
                 // Charts use the document toolbar placement, while retaining chart-specific actions and controls.
                 const isChart = drawingType === DrawingTypeEnum.DRAWING_CHART;
@@ -260,6 +278,21 @@ export class DocDrawingPopupMenuController extends RxDisposable {
         const disposable = toDisposable(() => subscriptions.forEach((subscription) => subscription.unsubscribe()));
         this.disposeWithMe(disposable);
         return disposable;
+    }
+
+    private _canEditDrawing(unitId: string, drawingId: string): boolean {
+        const documentDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(
+            unitId,
+            UniverInstanceType.UNIVER_DOC
+        );
+        if (!documentDataModel) {
+            return false;
+        }
+        const segmentId = getDocumentDrawingSegmentId(documentDataModel, drawingId);
+        return canEditDocumentTargets(this._permissionService, unitId, [
+            ...getDocumentEntityParentPermissionObjectIds(documentDataModel, segmentId, 'drawing', drawingId),
+            getDocumentEntityPermissionObjectId(segmentId, 'drawing', drawingId),
+        ]);
     }
 
     private _getDrawingPopupMenuItems(unitId: string, subUnitId: string, drawingId: string, drawingType: number) {

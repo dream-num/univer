@@ -47,6 +47,7 @@ const TooltipWrapperContext = createContext({
     setDropdownVisible: (_visible: boolean) => {},
 });
 
+// Ribbon dropdowns share one open key; disabled items must only clear it when they own it.
 const ToolbarDropdownContext = createContext<{
     openDropdownKey: string | null;
     setOpenDropdownKey: (key: string | null) => void;
@@ -158,10 +159,10 @@ export function DropdownWrapper(props: Omit<Partial<IDropdownProps>, 'overlay'> 
     const overlayRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        if (disabled) {
+        if (disabled && dropdownVisible) {
             setDropdownVisible(false);
         }
-    }, [disabled, setDropdownVisible]);
+    }, [disabled, dropdownVisible, setDropdownVisible]);
 
     useEffect(() => {
         const ownerDocument = triggerRef.current?.ownerDocument;
@@ -268,10 +269,10 @@ export function DropdownMenuWrapper({
     const { dropdownVisible, setDropdownVisible } = useContext(TooltipWrapperContext);
 
     useEffect(() => {
-        if (disabled) {
+        if (disabled && dropdownVisible) {
             setDropdownVisible(false);
         }
-    }, [disabled, setDropdownVisible]);
+    }, [disabled, dropdownVisible, setDropdownVisible]);
 
     const menuManagerService = useDependency(IMenuManagerService);
     const resolveMenuItems = () => menuId ? menuManagerService.getMenuByPositionKey(menuId) : [];

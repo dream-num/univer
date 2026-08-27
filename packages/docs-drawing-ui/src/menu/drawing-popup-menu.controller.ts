@@ -57,6 +57,7 @@ export class DocDrawingPopupMenuController extends RxDisposable {
     private _embeddedRenderUnits = new Set<string>();
     private _popupMenuListeners = new Map<string, IDisposable>();
     private _disposePopups: IDisposable[] = [];
+    private _popupTargetObject: BaseObject | null = null;
     private _isDrawingPanelOpen = false;
 
     constructor(
@@ -150,6 +151,7 @@ export class DocDrawingPopupMenuController extends RxDisposable {
     private _clearPopups() {
         this._disposePopups.forEach((dispose) => dispose.dispose());
         this._disposePopups.length = 0;
+        this._popupTargetObject = null;
     }
 
     private _create(documentDataModel: Nullable<DocumentDataModel>) {
@@ -204,18 +206,19 @@ export class DocDrawingPopupMenuController extends RxDisposable {
         const subscriptions = [
             transformer.createControl$.subscribe(() => {
                 if (this._hasCropObject(scene)) {
+                    this._clearPopups();
                     return;
                 }
 
                 const selectedObjects = transformer.getSelectedObjectMap();
-                disposePopups.forEach((dispose) => dispose.dispose());
-                disposePopups.length = 0;
                 if (this._isDrawingPanelOpen || selectedObjects.size > 1) {
+                    this._clearPopups();
                     return;
                 }
 
                 const object = selectedObjects.values().next().value as Nullable<BaseObject>;
                 if (!object) {
+                    this._clearPopups();
                     return;
                 }
 
@@ -225,13 +228,20 @@ export class DocDrawingPopupMenuController extends RxDisposable {
                     drawingParam.drawingType === DrawingTypeEnum.DRAWING_DOM ||
                     drawingParam.drawingType === DrawingTypeEnum.DRAWING_SHAPE
                 ) {
+                    this._clearPopups();
                     return;
                 }
 
                 const { unitId, subUnitId, drawingId, drawingType } = drawingParam;
                 if (!this._canEditDrawing(unitId, drawingId)) {
+                    this._clearPopups();
                     return;
                 }
+                if (this._popupTargetObject === object && disposePopups.length > 0) {
+                    return;
+                }
+
+                this._clearPopups();
                 const isImage = drawingType === DrawingTypeEnum.DRAWING_IMAGE;
                 // Charts use the document toolbar placement, while retaining chart-specific actions and controls.
                 const isChart = drawingType === DrawingTypeEnum.DRAWING_CHART;
@@ -253,6 +263,7 @@ export class DocDrawingPopupMenuController extends RxDisposable {
                 );
 
                 disposePopups.push(this.disposeWithMe(popup));
+                this._popupTargetObject = object;
 
                 const focusDrawings = this._drawingManagerService.getFocusDrawings();
                 const alreadyFocused = focusDrawings.find((drawing) => drawing.unitId === unitId && drawing.subUnitId === subUnitId && drawing.drawingId === drawingId);

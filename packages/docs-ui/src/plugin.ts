@@ -154,6 +154,7 @@ import { DocParagraphSettingController } from './controllers/doc-paragraph-setti
 import { DocSectionSettingController } from './controllers/doc-section-setting.controller';
 import { DocTableController } from './controllers/doc-table.controller';
 import { DocBackScrollRenderController } from './controllers/render-controllers/back-scroll.render-controller';
+import { DocCanvasPopupLayoutInteractionController } from './controllers/render-controllers/doc-canvas-popup-layout-interaction.controller';
 import { DocChecklistRenderController } from './controllers/render-controllers/doc-checklist.render-controller';
 import { DocClipboardController } from './controllers/render-controllers/doc-clipboard.controller';
 import { DocContextMenuRenderController } from './controllers/render-controllers/doc-contextmenu.render-controller';
@@ -485,6 +486,7 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocViewScaleService],
             [DocPageLayoutService],
             [DocLayoutInteractionService],
+            [DocCanvasPopupLayoutInteractionController],
             [DocIMEInputManagerService],
             [DocRenderController],
             [DocZoomRenderController],

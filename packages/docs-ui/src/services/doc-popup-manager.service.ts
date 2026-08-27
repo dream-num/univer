@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { INeedCheckDisposable, Injector, ITextRangeParam } from '@univerjs/core';
+import type { IDisposable, INeedCheckDisposable, Injector, ITextRangeParam } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { BaseObject, Documents, IBoundRectNoAngle, IRender, Scene } from '@univerjs/engine-render';
 import type { IPopup } from '@univerjs/ui';
@@ -129,6 +129,10 @@ export const calcDocRangePositions = (range: ITextRangeParam, currentRender: IRe
 };
 
 export class DocCanvasPopManagerService extends Disposable {
+    private readonly _popupCountByUnit = new Map<string, number>();
+    private readonly _popupUnits$ = new BehaviorSubject<ReadonlySet<string>>(new Set());
+    readonly popupUnits$ = this._popupUnits$.asObservable();
+
     constructor(
         @Inject(ICanvasPopupService) private readonly _globalPopupManagerService: ICanvasPopupService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
@@ -136,6 +140,40 @@ export class DocCanvasPopManagerService extends Disposable {
         @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
+    }
+
+    override dispose(): void {
+        this._popupCountByUnit.clear();
+        this._popupUnits$.next(new Set());
+        this._popupUnits$.complete();
+        super.dispose();
+    }
+
+    private _beginPopupActivity(unitId: string): IDisposable {
+        this._popupCountByUnit.set(unitId, (this._popupCountByUnit.get(unitId) ?? 0) + 1);
+        this._publishPopupUnits();
+
+        let disposed = false;
+        return {
+            dispose: () => {
+                if (disposed) {
+                    return;
+                }
+                disposed = true;
+
+                const count = this._popupCountByUnit.get(unitId) ?? 0;
+                if (count <= 1) {
+                    this._popupCountByUnit.delete(unitId);
+                } else {
+                    this._popupCountByUnit.set(unitId, count - 1);
+                }
+                this._publishPopupUnits();
+            },
+        };
+    }
+
+    private _publishPopupUnits(): void {
+        this._popupUnits$.next(new Set(this._popupCountByUnit.keys()));
     }
 
     private _shouldUpdateForCommand(commandInfo: { id: string; params?: unknown }, unitId: string): boolean {
@@ -292,12 +330,14 @@ export class DocCanvasPopManagerService extends Disposable {
             anchorRect$: position$,
             canvasElement: currentRender.engine.getCanvasElement(),
         });
+        const popupActivity = this._beginPopupActivity(unitId);
 
         return {
             dispose: () => {
                 popupManagerService.removePopup(id);
                 position$.complete();
                 disposable.dispose();
+                popupActivity.dispose();
             },
             canDispose: () => popupManagerService.activePopupId !== id,
         };
@@ -328,12 +368,14 @@ export class DocCanvasPopManagerService extends Disposable {
             anchorRect$: position$,
             canvasElement: currentRender.engine.getCanvasElement(),
         });
+        const popupActivity = this._beginPopupActivity(unitId);
 
         return {
             dispose: () => {
                 popupManagerService.removePopup(id);
                 position$.complete();
                 disposable.dispose();
+                popupActivity.dispose();
             },
             canDispose: () => popupManagerService.activePopupId !== id,
         };
@@ -380,12 +422,14 @@ export class DocCanvasPopManagerService extends Disposable {
                 : direction,
             canvasElement: currentRender.engine.getCanvasElement(),
         });
+        const popupActivity = this._beginPopupActivity(unitId);
 
         return {
             dispose: () => {
                 popupManagerService.removePopup(id);
                 bounds$.complete();
                 disposable.dispose();
+                popupActivity.dispose();
             },
             canDispose: () => popupManagerService.activePopupId !== id,
         };

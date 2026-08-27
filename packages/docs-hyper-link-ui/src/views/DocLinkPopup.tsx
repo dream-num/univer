@@ -24,7 +24,7 @@ import {
     LocaleService,
     UniverInstanceType,
 } from '@univerjs/core';
-import { borderClassName, clsx, MessageType, Tooltip } from '@univerjs/design';
+import { borderClassName, Button, clsx, MessageType, Tooltip } from '@univerjs/design';
 import { getDocumentPermissionValue } from '@univerjs/docs';
 import { CopyIcon, LinkIcon, UnlinkIcon, WriteIcon } from '@univerjs/icons';
 import { UnitAction } from '@univerjs/protocol';
@@ -91,14 +91,17 @@ export const DocLinkPopup = () => {
                 </Tooltip>
             </div>
             <div className="univer-flex univer-h-6 univer-flex-[0_0_auto] univer-items-center univer-justify-center">
-                <button
+                <Button
                     type="button"
+                    variant="text"
+                    size="small"
                     aria-label={localeService.t<LocaleKey>('docs-hyper-link-ui.info.copy')}
                     className="
-                      univer-ml-2 univer-flex univer-size-6 univer-cursor-pointer univer-items-center
-                      univer-justify-center univer-rounded univer-border-0 univer-bg-transparent univer-p-0
-                      univer-text-base
-                      disabled:univer-cursor-not-allowed disabled:univer-opacity-40
+                      univer-ml-2 !univer-flex univer-size-6 !univer-rounded !univer-border-0 !univer-bg-transparent
+                      !univer-p-0 !univer-text-base !univer-font-normal
+                      hover:!univer-bg-transparent
+                      active:!univer-bg-transparent
+                      disabled:!univer-pointer-events-auto disabled:!univer-opacity-40
                     "
                     disabled={!canCopy}
                     onClick={() => {
@@ -112,7 +115,7 @@ export const DocLinkPopup = () => {
                     <Tooltip placement="bottom" title={localeService.t<LocaleKey>('docs-hyper-link-ui.info.copy')}>
                         <CopyIcon />
                     </Tooltip>
-                </button>
+                </Button>
                 {canEdit && (
                     <>
                         <div

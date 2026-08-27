@@ -252,6 +252,7 @@ describe('DocLinkPopup', () => {
 
         const copy = container.querySelector<HTMLButtonElement>('button[aria-label="Copy"]');
         expect(copy).toBeInstanceOf(HTMLButtonElement);
+        expect(copy?.dataset.uComp).toBe('button');
         expect(copy?.disabled).toBe(true);
     });
 

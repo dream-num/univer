@@ -73,6 +73,7 @@ function createController(options: {
     const renderUnit = {
         scene,
         engine: { getCanvasElement: () => canvas },
+        isDisposed: vi.fn(() => false),
         with: vi.fn(() => ({
             currentSkeleton$,
             getSkeleton: () => skeleton,
@@ -366,6 +367,22 @@ describe('DocFloatDomController', () => {
             width: 100,
             height: 120,
         });
+
+        controller.dispose();
+    });
+
+    it('does not resolve layout services from a disposed render unit', () => {
+        const { controller, add$, renderUnit, refreshDrawings } = createController({
+            drawing: {
+                data: { version: 1, embedId: 'embed-1', hostAnchorId: 'anchor-1' },
+            },
+        });
+        renderUnit.isDisposed.mockReturnValue(true);
+
+        add$.next([{ unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'dom-1' }]);
+
+        expect(renderUnit.with).not.toHaveBeenCalled();
+        expect(refreshDrawings).not.toHaveBeenCalled();
 
         controller.dispose();
     });

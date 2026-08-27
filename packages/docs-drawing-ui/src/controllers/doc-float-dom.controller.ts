@@ -246,7 +246,7 @@ export class DocFloatDomController extends Disposable {
 
     private _refreshDrawingsFromCurrentLayout(unitId: string): void {
         const render = this._renderManagerService.getRenderUnitById(unitId);
-        if (render == null) {
+        if (render == null || render.isDisposed()) {
             return;
         }
 

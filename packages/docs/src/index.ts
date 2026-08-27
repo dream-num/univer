@@ -40,7 +40,7 @@ export type { ISetSectionHeaderFooterLinkCommandParams } from './commands/comman
 export { UpdateDocumentParagraphStyleCommand } from './commands/commands/update-document-paragraph-style.command';
 export { DeleteDocumentSectionBreakCommand, InsertDocumentColumnBreakCommand, InsertDocumentSectionBreakCommand, UpdateDocumentSectionCommand } from './commands/commands/update-document-section.command';
 export type { IDeleteDocumentSectionBreakCommandParams, IDocumentSectionConfig, IDocumentSectionUpdate, IInsertDocumentColumnBreakCommandParams, IInsertDocumentSectionBreakCommandParams, IUpdateDocumentSectionCommandParams } from './commands/commands/update-document-section.command';
-export { RichTextEditingMutation } from './commands/mutations/core-editing.mutation';
+export { DocHistoryAction, RichTextEditingMutation } from './commands/mutations/core-editing.mutation';
 export type { IRichTextEditingMutationParams } from './commands/mutations/core-editing.mutation';
 export { SetTextSelectionsOperation } from './commands/operations/text-selection.operation';
 export type { ISetTextSelectionsOperationParams } from './commands/operations/text-selection.operation';

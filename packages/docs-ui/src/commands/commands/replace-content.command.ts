@@ -271,6 +271,7 @@ function getMutationParams(unitId: string, segmentId: string, docDatModel: Docum
 
 export interface IReplaceSelectionCommandParams {
     unitId: string;
+    historyAction?: string;
     selection?: ITextRange;
     body: IDocumentBody; // Do not contain `\r\n` at the end.
     textRanges?: ITextRangeWithStyle[];
@@ -285,7 +286,7 @@ export const ReplaceSelectionCommand: ICommand<IReplaceSelectionCommandParams> =
             return false;
         }
         const commandService = accessor.get(ICommandService);
-        const { unitId, body: insertBody, textRanges, segmentId } = params;
+        const { unitId, body: insertBody, historyAction, textRanges, segmentId } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId);
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
@@ -332,6 +333,7 @@ export const ReplaceSelectionCommand: ICommand<IReplaceSelectionCommandParams> =
             id: RichTextEditingMutation.id,
             params: {
                 unitId,
+                historyAction,
                 actions: [],
                 textRanges: textRanges ?? [{
                     startOffset: insertOffset + insertBody.dataStream.length,

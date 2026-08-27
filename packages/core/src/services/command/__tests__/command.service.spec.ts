@@ -335,6 +335,56 @@ describe('Test CommandService', () => {
             expect(params.trigger).toBe(commandID);
         });
 
+        it('Should attach the triggering operation id when no command wraps a synchronous mutation', () => {
+            const mutationID = 'nested-operation-trigger-mutation';
+            const operationID = 'nested-trigger-operation';
+            const params: { trigger?: string } = {};
+
+            commandService.registerCommand({
+                id: mutationID,
+                type: CommandType.MUTATION,
+                handler: (_accessor, mutationParams: { trigger?: string }) => {
+                    expect(mutationParams.trigger).toBe(operationID);
+                    return true;
+                },
+            });
+            commandService.registerCommand({
+                id: operationID,
+                type: CommandType.OPERATION,
+                handler: (accessor) => accessor.get(ICommandService).syncExecuteCommand(mutationID, params),
+            });
+
+            expect(commandService.syncExecuteCommand(operationID)).toBe(true);
+            expect(params.trigger).toBe(operationID);
+        });
+
+        it('Should attach operation triggers to asynchronous mutations without replacing explicit triggers', async () => {
+            const mutationID = 'nested-async-operation-trigger-mutation';
+            const operationID = 'nested-async-trigger-operation';
+            const inferredParams: { trigger?: string } = {};
+            const explicitParams = { trigger: 'semantic-trigger' };
+
+            commandService.registerCommand({
+                id: mutationID,
+                type: CommandType.MUTATION,
+                handler: () => true,
+            });
+            commandService.registerCommand({
+                id: operationID,
+                type: CommandType.OPERATION,
+                handler: async (accessor) => {
+                    const service = accessor.get(ICommandService);
+                    const inferred = await service.executeCommand(mutationID, inferredParams);
+                    const explicit = await service.executeCommand(mutationID, explicitParams);
+                    return inferred && explicit;
+                },
+            });
+
+            await expect(commandService.executeCommand(operationID)).resolves.toBe(true);
+            expect(inferredParams.trigger).toBe(operationID);
+            expect(explicitParams.trigger).toBe('semantic-trigger');
+        });
+
         it('Should convert custom command execution errors into a false result', async () => {
             const customErrorCommandID = 'custom-error-command';
             commandService.registerCommand({

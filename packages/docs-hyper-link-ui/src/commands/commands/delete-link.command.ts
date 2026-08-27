@@ -17,6 +17,7 @@
 import type { ICommand } from '@univerjs/core';
 import { CommandType, ICommandService } from '@univerjs/core';
 import { deleteCustomRangeFactory } from '@univerjs/docs';
+import { DocHyperLinkCommandId } from '@univerjs/docs-hyper-link';
 
 export interface IDeleteDocHyperLinkMutationParams {
     unitId: string;
@@ -26,7 +27,7 @@ export interface IDeleteDocHyperLinkMutationParams {
 
 export const DeleteDocHyperLinkCommand: ICommand<IDeleteDocHyperLinkMutationParams> = {
     type: CommandType.COMMAND,
-    id: 'docs.command.delete-hyper-link',
+    id: DocHyperLinkCommandId.Delete,
     async handler(accessor, params) {
         if (!params) {
             return false;

@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-export enum DocHyperLinkCommandId {
-    Add = 'docs.command.add-hyper-link',
-    Update = 'docs.command.update-hyper-link',
-    Delete = 'docs.command.delete-hyper-link',
-}
+import { describe, expect, it } from 'vitest';
+import { DocHyperLinkCommandId } from '../index';
 
-export type { IUniverDocsHyperLinkConfig } from './config/config';
-export { UniverDocsHyperLinkPlugin } from './plugin';
+describe('DocHyperLinkCommandId', () => {
+    it('keeps the public command identifiers stable', () => {
+        expect(DocHyperLinkCommandId).toEqual({
+            Add: 'docs.command.add-hyper-link',
+            Update: 'docs.command.update-hyper-link',
+            Delete: 'docs.command.delete-hyper-link',
+        });
+    });
+});

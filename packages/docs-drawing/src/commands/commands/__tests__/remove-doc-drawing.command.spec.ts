@@ -14,22 +14,12 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
-import type { IUpdateDocDrawingWrappingStyleParams } from '@univerjs/docs-drawing';
-import {
-    BooleanNumber,
-    ICommandService,
-    ImageSourceType,
-    IUniverInstanceService,
-    ObjectRelativeFromH,
-    ObjectRelativeFromV,
-    PositionedObjectLayoutType,
-    UniverInstanceType,
-} from '@univerjs/core';
+import type { IRemoveDocDrawingCommandParams } from '../remove-doc-drawing.command';
+import { DrawingTypeEnum, ICommandService, ImageSourceType } from '@univerjs/core';
 import { DocHistoryAction, RichTextEditingMutation } from '@univerjs/docs';
-import { TextWrappingStyle, UpdateDocDrawingWrappingStyleCommand } from '@univerjs/docs-drawing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createFacadeTestBed } from '../../../facade/__tests__/create-test-bed';
+import { RemoveDocDrawingCommand } from '../remove-doc-drawing.command';
 
 class MockImage {
     width = 800;
@@ -46,7 +36,7 @@ class MockImage {
     }
 }
 
-describe('UpdateDocDrawingWrappingStyleCommand', () => {
+describe('RemoveDocDrawingCommand', () => {
     let testBed: ReturnType<typeof createFacadeTestBed>;
 
     beforeEach(() => {
@@ -59,7 +49,11 @@ describe('UpdateDocDrawingWrappingStyleCommand', () => {
         vi.unstubAllGlobals();
     });
 
-    it('updates the requested document without render services or current-unit dependence', async () => {
+    it.each([
+        [DrawingTypeEnum.DRAWING_IMAGE, DocHistoryAction.DeleteImage],
+        [DrawingTypeEnum.DRAWING_SHAPE, DocHistoryAction.DeleteShape],
+        [DrawingTypeEnum.DRAWING_CHART, DocHistoryAction.DeleteChart],
+    ])('records the drawing type %s in history metadata', async (drawingType, historyAction) => {
         const image = await testBed.document.insertImage({
             source: 'data:image/png;base64,image',
             imageSourceType: ImageSourceType.BASE64,
@@ -72,46 +66,26 @@ describe('UpdateDocDrawingWrappingStyleCommand', () => {
                 segmentId: '',
             },
         });
-        const positionH = { relativeFrom: ObjectRelativeFromH.MARGIN, posOffset: 80 };
-        const positionV = { relativeFrom: ObjectRelativeFromV.PAGE, posOffset: 120 };
-        const drawing = image!.getImageData()!;
-        const otherDocument = testBed.univer.createUnit<IDocumentData, DocumentDataModel>(
-            UniverInstanceType.UNIVER_DOC,
-            {
-                id: 'other-doc',
-                documentStyle: {},
-                body: { dataStream: '\r\n', paragraphs: [{ startIndex: 0, paragraphId: 'other-paragraph' }], customBlocks: [] },
-                drawings: {},
-                drawingsOrder: [],
-            }
-        );
-        testBed.injector.get(IUniverInstanceService).focusUnit(otherDocument.getUnitId());
-
         const commandService = testBed.injector.get(ICommandService);
         const mutationSpy = vi.spyOn(commandService, 'syncExecuteCommand');
-        const result = commandService.syncExecuteCommand<IUpdateDocDrawingWrappingStyleParams>(
-            UpdateDocDrawingWrappingStyleCommand.id,
+
+        const result = commandService.syncExecuteCommand<IRemoveDocDrawingCommandParams>(
+            RemoveDocDrawingCommand.id,
             {
                 unitId: 'test-doc',
-                subUnitId: 'test-doc',
                 drawings: [{
-                    ...drawing,
-                    docTransform: { ...drawing.docTransform, positionH, positionV },
+                    unitId: 'test-doc',
+                    subUnitId: 'test-doc',
+                    drawingId: image!.getId(),
+                    drawingType,
                 }],
-                wrappingStyle: TextWrappingStyle.BEHIND_TEXT,
             }
         );
 
         expect(result).toBe(true);
         expect(mutationSpy).toHaveBeenCalledWith(
             RichTextEditingMutation.id,
-            expect.objectContaining({ historyAction: DocHistoryAction.UpdateImage })
+            expect.objectContaining({ historyActions: [historyAction] })
         );
-        expect(testBed.document.getImage(image!.getId())?.getImageData()).toMatchObject({
-            layoutType: PositionedObjectLayoutType.WRAP_NONE,
-            behindDoc: BooleanNumber.TRUE,
-            docTransform: { positionH, positionV },
-        });
-        expect(otherDocument.getSnapshot().drawings).toEqual({});
     });
 });

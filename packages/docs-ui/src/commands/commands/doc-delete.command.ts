@@ -40,6 +40,7 @@ import {
 } from '@univerjs/core';
 import {
     DeleteTextCommand,
+    DocHistoryAction,
     DocSelectionManagerService,
     RichTextEditingMutation,
     UpdateTextCommand,
@@ -313,6 +314,7 @@ export const RemoveHorizontalLineCommand: ICommand = {
             id: RichTextEditingMutation.id,
             params: {
                 unitId,
+                historyAction: DocHistoryAction.DeleteDivider,
                 actions: [],
                 textRanges,
             },

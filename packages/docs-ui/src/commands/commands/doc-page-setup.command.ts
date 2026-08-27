@@ -35,7 +35,7 @@ import {
     MODERN_DOCUMENT_DEFAULT_MARGIN,
     UniverInstanceType,
 } from '@univerjs/core';
-import { RichTextEditingMutation } from '@univerjs/docs';
+import { DocHistoryAction, RichTextEditingMutation } from '@univerjs/docs';
 
 export interface IDocPageSetupCommandParams {
     pageSize: ISize;
@@ -215,6 +215,7 @@ export const DocPageSetupCommand: ICommand<IDocPageSetupCommandParams> = {
             id: RichTextEditingMutation.id,
             params: {
                 unitId: docDataModel.getUnitId(),
+                historyAction: DocHistoryAction.UpdatePageLayout,
                 actions: [],
                 textRanges: undefined,
             },

@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, DrawingTypeEnum, IAccessor, ICommand, IDisposable, IMutationInfo, ITextRangeParam, JSONXActions } from '@univerjs/core';
+import type { DocumentDataModel, IAccessor, ICommand, IDisposable, IMutationInfo, ITextRangeParam, JSONXActions } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IDocDrawing } from '../../services/doc-drawing.service';
 import {
     CommandType,
+    DrawingTypeEnum,
     getRichTextEditPath,
     ICommandService,
     IUndoRedoService,
@@ -29,7 +30,7 @@ import {
     TextXActionType,
     UniverInstanceType,
 } from '@univerjs/core';
-import { DocSelectionManagerService, getContentInsertRange, normalizeTextRange, RichTextEditingMutation } from '@univerjs/docs';
+import { DocHistoryAction, DocSelectionManagerService, getContentInsertRange, normalizeTextRange, RichTextEditingMutation } from '@univerjs/docs';
 import { IDocDrawingAdapterService } from '../../services/doc-drawing-adapter.service';
 
 export interface IRemoveDocDrawingCommandParam {
@@ -136,9 +137,10 @@ export const RemoveDocDrawingCommand: ICommand = {
         const memoryCursor = new MemoryCursor();
         const cursorIndex = removeCustomBlocks[0]!.startIndex;
         const textRanges = [{ startOffset: cursorIndex, endOffset: cursorIndex }] as IRichTextEditingMutationParams['textRanges'];
+        const historyActions = getHistoryActions(removeDrawings);
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
-            params: { unitId, actions: [], textRanges },
+            params: { unitId, actions: [], textRanges, historyActions },
         };
         const rawActions: JSONXActions = [];
 
@@ -173,6 +175,22 @@ export const RemoveDocDrawingCommand: ICommand = {
         return Boolean(result);
     },
 };
+
+function getHistoryActions(drawings: IRemoveDocDrawingCommandParam[]): DocHistoryAction[] {
+    const historyActions = drawings.flatMap((drawing): DocHistoryAction[] => {
+        switch (drawing.drawingType) {
+            case DrawingTypeEnum.DRAWING_IMAGE:
+                return [DocHistoryAction.DeleteImage];
+            case DrawingTypeEnum.DRAWING_SHAPE:
+                return [DocHistoryAction.DeleteShape];
+            case DrawingTypeEnum.DRAWING_CHART:
+                return [DocHistoryAction.DeleteChart];
+            default:
+                return [];
+        }
+    });
+    return [...new Set(historyActions)];
+}
 
 function executeResourceMutationGroups(
     mutationGroups: Array<{ redoMutations: IMutationInfo[]; undoMutations: IMutationInfo[] }>,

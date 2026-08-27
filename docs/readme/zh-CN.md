@@ -1,9 +1,6 @@
 <div align="center">
 
-<picture>
-    <source media="(prefers-color-scheme: dark)" srcset="../img/banner-light.png">
-    <img src="../img/banner-dark.png" alt="Univer" width="420" />
-</picture>
+<img src="../img/banner.png" alt="Univer SDK" width="800" />
 
 **用于构建电子表格、文档和演示文稿的全栈、同构办公 SDK。**
 

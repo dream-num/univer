@@ -1,9 +1,6 @@
 <div align="center">
 
-<picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./docs/img/banner-light.png">
-    <img src="./docs/img/banner-dark.png" alt="Univer" width="420" />
-</picture>
+<img src="./docs/img/banner.png" alt="Univer SDK" width="800" />
 
 **A full-stack, isomorphic office SDK for building spreadsheets, documents, and presentations.**
 

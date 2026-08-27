@@ -42,6 +42,7 @@ function createController(options: {
     drawing?: Record<string, unknown>;
     rects?: Rect[];
     page?: any;
+    renderType?: UniverInstanceType;
     refreshDrawingOnAdd?: { left: number; top: number; width: number; height: number; angle: number };
     resolveRefreshDrawing?: () => { left: number; top: number; width: number; height: number; angle: number } | undefined;
 } = {}) {
@@ -74,6 +75,7 @@ function createController(options: {
     };
     const renderUnit = {
         unitId: 'doc-1',
+        type: options.renderType ?? UniverInstanceType.UNIVER_DOC,
         scene,
         engine: { getCanvasElement: () => canvas },
         isDisposed: vi.fn(() => false),
@@ -385,6 +387,22 @@ describe('DocFloatDomController', () => {
             },
         });
         renderUnit.isDisposed.mockReturnValue(true);
+
+        add$.next([{ unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'dom-1' }]);
+
+        expect(renderUnit.with).not.toHaveBeenCalled();
+        expect(refreshDrawings).not.toHaveBeenCalled();
+
+        controller.dispose();
+    });
+
+    it('does not resolve Doc layout services from a non-Doc render unit', () => {
+        const { controller, add$, renderUnit, refreshDrawings } = createController({
+            drawing: {
+                data: { version: 1, embedId: 'embed-1', hostAnchorId: 'anchor-1' },
+            },
+            renderType: UniverInstanceType.UNIVER_SHEET,
+        });
 
         add$.next([{ unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'dom-1' }]);
 

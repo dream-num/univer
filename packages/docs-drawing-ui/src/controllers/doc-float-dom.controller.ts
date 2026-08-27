@@ -230,7 +230,10 @@ export class DocFloatDomController extends Disposable {
                 const refreshUnitIds = new Set<string>();
                 for (const param of params) {
                     const drawing = this._drawingManagerService.getDrawingByParam(param);
-                    if (isEmbedFloatDomRuntimeParam(drawing)) {
+                    if (
+                        isEmbedFloatDomRuntimeParam(drawing) &&
+                        this._univerInstanceService.getUnit(param.unitId, UniverInstanceType.UNIVER_DOC) != null
+                    ) {
                         this._pendingRuntimeGeometryInsert.set(param.drawingId, param);
                         refreshUnitIds.add(param.unitId);
                         if (this._pendingRuntimeGeometry.has(param.drawingId)) {
@@ -258,7 +261,11 @@ export class DocFloatDomController extends Disposable {
 
     private _refreshDrawingsFromCurrentLayout(unitId: string): void {
         const render = this._renderManagerService.getRenderUnitById(unitId);
-        if (render == null || render.isDisposed()) {
+        if (
+            render == null ||
+            render.type !== UniverInstanceType.UNIVER_DOC ||
+            render.isDisposed()
+        ) {
             return;
         }
 

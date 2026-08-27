@@ -28,6 +28,7 @@ export interface ICopyContentCacheData {
     range: IDiscreteRange;
     copyType: COPY_TYPE;
     matrix: Nullable<ObjectMatrix<ICellDataWithSpanInfo>>;
+    skipCellCopy?: boolean;
 }
 
 export function extractId(html: string) {

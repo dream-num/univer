@@ -107,7 +107,15 @@ interface IPrivateClipboardServiceAccess {
     _pasteUSM(
         data: { cellMatrix: ObjectMatrix<ITestCell>; rowProperties: unknown[]; colProperties: unknown[] },
         target: { unitId: string; subUnitId: string; pastedRange: ITestDiscreteRange },
-        pasteType: string
+        pasteType: string,
+        source?: {
+            unitId: string;
+            subUnitId: string;
+            range: ITestDiscreteRange;
+            copyId: string;
+            copyType: COPY_TYPE;
+            skipCellCopy?: boolean;
+        }
     ): boolean;
     _transformPastedData(
         rowCount: number,
@@ -537,6 +545,92 @@ describe('SheetClipboardService', () => {
         expect(copyContent?.plain).toBe('Projected revenue');
         expect(copyContent?.matrixFragment.getValue(0, 0)?.v).toBe('=SUM(A1:A4)');
         expect(lifecycle).toEqual(['before', 'after']);
+    });
+
+    it('does not copy or mark cell data when a copy hook handles a focused object', async () => {
+        const { injector, service } = createTestContext();
+        selectCell(injector);
+        const workbook = injector.get(IUniverInstanceService).getUnit<Workbook>('unit-1');
+        const worksheet = workbook!.getSheetBySheetId('sheet-1')!;
+        const getMatrixWithMergedCells = vi.spyOn(worksheet, 'getMatrixWithMergedCells');
+        const addCopyMark = vi.spyOn(injector.get(IMarkSelectionService), 'addShape');
+        const cellBeforeCopy = vi.fn();
+
+        service.addClipboardHook({
+            id: 'focused-object-copy',
+            onBeforeCopyFocusedObject() {
+                return true;
+            },
+        } as never);
+        service.addClipboardHook({ id: 'cell-feature-copy', onBeforeCopy: cellBeforeCopy } as never);
+
+        expect(await service.copy()).toBe(true);
+
+        const clipboard = injector.get(IClipboardInterfaceService) as unknown as TestClipboardInterfaceService;
+        const copied = clipboard.writes[0];
+        const copyId = copied.html.match(/data-copy-id="([^"]+)"/)?.[1];
+        const cachedCopy = copyId ? service.copyContentCache().get(copyId) : undefined;
+
+        expect(getMatrixWithMergedCells).not.toHaveBeenCalled();
+        expect(cellBeforeCopy).not.toHaveBeenCalled();
+        expect(addCopyMark).not.toHaveBeenCalled();
+        expect(copied.text).toBe('');
+        expect(copied.html).not.toContain('Quarterly revenue');
+        expect(cachedCopy?.matrix?.getValue(0, 0)?.v).toBeNull();
+        expect(cachedCopy?.skipCellCopy).toBe(true);
+    });
+
+    it('keeps explicit range content generation independent from focused objects', () => {
+        const service = createService();
+        const focusedObjectBeforeCopy = vi.fn(() => true);
+        const rangeBeforeCopy = vi.fn();
+        service.addClipboardHook({
+            id: 'focused-object-copy',
+            onBeforeCopyFocusedObject: focusedObjectBeforeCopy,
+            onBeforeCopy: rangeBeforeCopy,
+        } as never);
+
+        const copyContent = service.generateCopyContent('unit-1', 'sheet-1', {
+            startRow: 0,
+            startColumn: 0,
+            endRow: 0,
+            endColumn: 0,
+        });
+
+        expect(copyContent?.plain).toBe('Quarterly revenue');
+        expect(focusedObjectBeforeCopy).not.toHaveBeenCalled();
+        expect(rangeBeforeCopy).toHaveBeenCalledOnce();
+    });
+
+    it('runs only the focused object hook when pasting an object-only copy', () => {
+        const service = createService();
+        const objectPaste = vi.fn(() => ({ redos: [], undos: [] }));
+        const cellPaste = vi.fn(() => ({ redos: [], undos: [] }));
+        const matrix = new ObjectMatrix<ITestCell>({ 0: { 0: {} } });
+
+        service.addClipboardHook({
+            id: 'focused-object-copy',
+            onBeforeCopyFocusedObject: () => false,
+            onPasteCells: objectPaste,
+        } as never);
+        service.addClipboardHook({ id: 'cell-feature-copy', onPasteCells: cellPaste } as never);
+
+        (service as unknown as IPrivateClipboardServiceAccess)._pasteUSM(
+            { cellMatrix: matrix, rowProperties: [], colProperties: [] },
+            { unitId: 'unit-1', subUnitId: 'sheet-1', pastedRange: { rows: [0], cols: [0] } },
+            PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE,
+            {
+                unitId: 'unit-1',
+                subUnitId: 'sheet-1',
+                range: { rows: [0], cols: [0] },
+                copyId: 'object-copy',
+                copyType: COPY_TYPE.COPY,
+                skipCellCopy: true,
+            }
+        );
+
+        expect(objectPaste).toHaveBeenCalledOnce();
+        expect(cellPaste).not.toHaveBeenCalled();
     });
 
     it('stops paste execution when a hook blocks the target range', async () => {

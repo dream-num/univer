@@ -65,6 +65,7 @@ export interface IRangeSelectorProps extends IRichTextEditorProps {
     hideEditor?: boolean;
     forceShowDialogWhenSelectionChanged?: boolean;
     resetRange?: ISelectionWithStyle[];
+    onClose?: () => void;
 };
 
 export interface IRangeSelectorDialogProps {
@@ -258,6 +259,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
         forceShowDialogWhenSelectionChanged,
         hideEditor,
         resetRange,
+        onClose,
     } = props;
     const [focusing, setFocusing] = useState(autoFocus ?? false);
     const [popupVisible, setPopupVisible] = useState(false);
@@ -378,6 +380,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
                 onClose={() => {
                     setPopupVisible(false);
                     setRangeSelectorRanges([]);
+                    onClose?.();
                 }}
                 supportAcrossSheet={supportAcrossSheet}
                 keepSheetReference={keepSheetReference}

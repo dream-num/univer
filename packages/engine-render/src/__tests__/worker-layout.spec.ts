@@ -1511,6 +1511,50 @@ describe('worker document layout session', () => {
         const protectedContinuousPage = targetSkeleton.getSkeletonData()?.pages[0];
         expect(protectedContinuousPage).toBeDefined();
 
+        const probeProtectedEndOffset = anchor + insertedText.length;
+        targetSkeleton.beginExternalLayout({
+            reason: 'edit',
+            protectedRange: {
+                mode: 'continuous',
+                startOffset: anchor,
+                endOffset: probeProtectedEndOffset,
+            },
+        });
+        const probeGeneration = session.start({
+            reason: 'edit',
+            anchor,
+            invalidation: {
+                oldStart: anchor,
+                oldEnd: anchor,
+                newEnd: anchor + insertedText.length,
+            },
+        });
+        let probeResult = session.step(probeGeneration, 0);
+        let deferredVerticalBoundaryMismatch = false;
+        for (let step = 0; step < 1_000 && !probeResult.progress.complete; step++) {
+            const publication = probeResult.publication;
+            if (publication?.kind === 'block') {
+                const transferredPublication = structuredClone(publication);
+                const firstUnprotectedLineIndex = transferredPublication.block.flow.lines.findIndex(
+                    (line) => line.st > probeProtectedEndOffset
+                );
+                const workerBoundaryLine = transferredPublication.block.flow.lines[firstUnprotectedLineIndex - 1];
+                if (workerBoundaryLine != null) {
+                    workerBoundaryLine.top += 1;
+                    expect(() => targetSkeleton.applyLayoutPublication(
+                        transferredPublication,
+                        probeResult.progress
+                    )).not.toThrow();
+                    deferredVerticalBoundaryMismatch = true;
+                    break;
+                }
+            }
+            probeResult = session.step(probeGeneration, 0);
+        }
+        expect(deferredVerticalBoundaryMismatch).toBe(true);
+        expect(targetSkeleton.getSkeletonData()?.pages[0]).toBe(protectedContinuousPage);
+        targetSkeleton.cancelExternalLayout();
+
         targetSkeleton.beginExternalLayout({
             reason: 'edit',
             protectedRange: {

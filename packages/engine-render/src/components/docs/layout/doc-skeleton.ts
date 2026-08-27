@@ -2566,11 +2566,20 @@ export class DocumentSkeleton extends Skeleton {
                 mainBoundaryLine == null ||
                 mainBoundaryLine.st !== workerBoundaryLine.st ||
                 mainBoundaryLine.ed !== workerBoundaryLine.ed ||
-                mainBoundaryLine.top !== workerBoundaryLine.top ||
                 mainBoundaryLine.lineHeight !== workerBoundaryLine.lineHeight ||
                 mainBoundaryLine.width !== workerBoundaryLine.width
             ) {
                 throw new Error(`Continuous layout Main and Worker boundaries do not share the same continuation checkpoint: Main ${mainBoundaryLine?.st}:${mainBoundaryLine?.ed}@${mainBoundaryLine?.top}/${mainBoundaryLine?.lineHeight}/${mainBoundaryLine?.width}, Worker ${workerBoundaryLine.st}:${workerBoundaryLine.ed}@${workerBoundaryLine.top}/${workerBoundaryLine.lineHeight}/${workerBoundaryLine.width}.`);
+            }
+            if (mainBoundaryLine.top !== workerBoundaryLine.top) {
+                // A Custom Block can finish measuring after Main publishes the
+                // interaction window but before Worker captures its viewport.
+                // The continuation identity still matches, while every absolute
+                // coordinate after it belongs to a different vertical geometry.
+                // Keep Main visible and commit the canonical Worker result only
+                // after completion instead of translating a partial collection of
+                // lines, tables, drawings, and column groups independently.
+                return null;
             }
         }
 

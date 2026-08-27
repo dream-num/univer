@@ -188,9 +188,21 @@ export class DocFloatDomController extends Disposable {
     }
 
     private _initialize() {
+        this._renderLifecycleListener();
         this._drawingAddRemoveListener();
         this._drawingRuntimePropsListener();
         this._initScrollAndZoomEvent();
+    }
+
+    private _renderLifecycleListener(): void {
+        this.disposeWithMe(this._renderManagerService.disposed$.subscribe((unitId) => {
+            this._disposePendingRuntimeGeometryRefresh(unitId);
+        }));
+        this.disposeWithMe(this._renderManagerService.created$.subscribe((render) => {
+            if (this._hasPendingRuntimeGeometryForUnit(render.unitId)) {
+                this._refreshDrawingsFromCurrentLayout(render.unitId);
+            }
+        }));
     }
 
     private _getSceneAndTransformerByDrawingSearch(unitId: Nullable<string>) {

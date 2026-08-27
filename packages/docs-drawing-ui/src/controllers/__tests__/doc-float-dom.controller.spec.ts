@@ -50,6 +50,8 @@ function createController(options: {
     const refreshTransform$ = new Subject<any[]>();
     const currentSkeleton$ = new Subject<any>();
     const skeletonDirty$ = new Subject<boolean>();
+    const renderCreated$ = new Subject<any>();
+    const renderDisposed$ = new Subject<string>();
     const commandHandlers: Array<(command: { id: string; params?: unknown }) => void> = [];
     const scene = createScene();
     const canvas = { dispatchEvent: vi.fn() };
@@ -71,6 +73,7 @@ function createController(options: {
         getSkeletonData: () => ({ pages: [options.page ?? { pageWidth: 240, marginLeft: 20, marginRight: 30 }] }),
     };
     const renderUnit = {
+        unitId: 'doc-1',
         scene,
         engine: { getCanvasElement: () => canvas },
         isDisposed: vi.fn(() => false),
@@ -80,6 +83,8 @@ function createController(options: {
         })),
     };
     const renderManagerService = {
+        created$: renderCreated$,
+        disposed$: renderDisposed$,
         getRenderUnitById: vi.fn(() => renderUnit),
     };
     const drawing = {
@@ -152,6 +157,8 @@ function createController(options: {
         canvasFloatDomService,
         commandService,
         refreshDrawings,
+        renderCreated$,
+        renderDisposed$,
         skeletonDirty$,
     };
 }
@@ -383,6 +390,40 @@ describe('DocFloatDomController', () => {
 
         expect(renderUnit.with).not.toHaveBeenCalled();
         expect(refreshDrawings).not.toHaveBeenCalled();
+
+        controller.dispose();
+    });
+
+    it('resumes pending embed geometry when the host render is recreated', () => {
+        const rect = new Rect('dom-rect', {
+            left: 10,
+            top: 20,
+            width: 50,
+            height: 40,
+        });
+        const {
+            controller,
+            add$,
+            canvasFloatDomService,
+            renderCreated$,
+            renderDisposed$,
+            renderUnit,
+        } = createController({
+            rects: [rect],
+            drawing: {
+                data: { version: 1, embedId: 'embed-1', hostAnchorId: 'anchor-1' },
+            },
+            refreshDrawingOnAdd: { left: 300, top: 500, width: 50, height: 40, angle: 0 },
+        });
+        renderUnit.isDisposed.mockReturnValue(true);
+        add$.next([{ unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'dom-1' }]);
+        expect(canvasFloatDomService.addFloatDom).not.toHaveBeenCalled();
+
+        renderDisposed$.next('doc-1');
+        renderUnit.isDisposed.mockReturnValue(false);
+        renderCreated$.next(renderUnit);
+
+        expect(canvasFloatDomService.addFloatDom).toHaveBeenCalledOnce();
 
         controller.dispose();
     });

@@ -291,9 +291,8 @@ Boundary principles:
 ```text
 .
 ├── packages/      コアパッケージ、エンジン、文書タイプ、UI プラグイン、機能プラグイン
-├── examples/      開発用のローカルブラウザ/Node.js デモ
-├── common/        共有内部ツール、mock data、storybook、ユーティリティ
-├── e2e/           Playwright とビジュアル比較テスト
+├── examples/      ローカルブラウザ開発用のオールインワン Vite ワークベンチ
+├── common/        共有内部ツール、storybook、ユーティリティ
 ├── tests/         追加の統合テストプロジェクト
 └── docs/          アーキテクチャメモ、画像、リポジトリ内ドキュメント
 ```
@@ -318,12 +317,12 @@ pnpm dev
 
 | コマンド | 用途 |
 | --- | --- |
-| `pnpm dev` | ローカル examples アプリを起動します。 |
+| `pnpm dev` | 低メモリのオールインワンワークベンチをビルドし、HMR なしでプレビューします。 |
+| `pnpm dev:source` | HMR 対応でソースから起動します。コールドスタートとメモリ使用量は増加します。 |
 | `pnpm build` | 内部 common パッケージを除いて workspace パッケージをビルドします。 |
 | `pnpm test` | Turbo 経由でユニットテストを実行します。 |
 | `pnpm typecheck` | Turbo 経由で TypeScript チェックを実行します。 |
 | `pnpm lint` | ESLint を実行します。 |
-| `pnpm test:e2e` | Playwright テストを実行します。 |
 | `pnpm storybook:dev` | UI コンポーネント開発用の Storybook を起動します。 |
 
 Pull request を作成する前に [CONTRIBUTING.md](../../CONTRIBUTING.md) を読んでください。

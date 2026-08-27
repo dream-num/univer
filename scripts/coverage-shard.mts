@@ -12,7 +12,6 @@ interface IWorkspacePackage {
 const workspaceRoots = [
     'common',
     'examples',
-    'mockdata',
     'presets',
     'presets/packages',
     'packages',

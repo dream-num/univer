@@ -291,9 +291,8 @@ Boundary principles:
 ```text
 .
 ├── packages/      Core packages, engines, document types, UI plugins, feature plugins
-├── examples/      개발에 사용하는 로컬 브라우저 및 Node.js 데모
-├── common/        공유 내부 도구, mock data, storybook, utilities
-├── e2e/           Playwright 및 visual comparison tests
+├── examples/      로컬 브라우저 개발을 위한 올인원 Vite workbench
+├── common/        공유 내부 도구, storybook, utilities
 ├── tests/         추가 integration test projects
 └── docs/          architecture notes, images, repository-local documentation
 ```
@@ -318,12 +317,12 @@ pnpm dev
 
 | 명령 | 목적 |
 | --- | --- |
-| `pnpm dev` | 로컬 examples 앱을 시작합니다. |
+| `pnpm dev` | 저메모리 올인원 workbench를 빌드하고 HMR 없이 미리 봅니다. |
+| `pnpm dev:source` | HMR로 소스 workbench를 시작하며 콜드 스타트와 메모리 사용량이 더 큽니다. |
 | `pnpm build` | 내부 common 패키지를 제외하고 workspace 패키지를 빌드합니다. |
 | `pnpm test` | Turbo를 통해 unit tests를 실행합니다. |
 | `pnpm typecheck` | Turbo를 통해 TypeScript checks를 실행합니다. |
 | `pnpm lint` | ESLint를 실행합니다. |
-| `pnpm test:e2e` | Playwright tests를 실행합니다. |
 | `pnpm storybook:dev` | UI component 개발용 Storybook을 시작합니다. |
 
 Pull request를 열기 전에 [CONTRIBUTING.md](../../CONTRIBUTING.md)를 읽어 주세요.

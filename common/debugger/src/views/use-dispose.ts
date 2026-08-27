@@ -1,3 +1,4 @@
+import type { Univer } from '@univerjs/core';
 import { IUniverInstanceService } from '@univerjs/core';
 import { useDependency } from '@univerjs/ui';
 
@@ -17,9 +18,10 @@ export function useDispose() {
 
     const onSelect = (value: string) => {
         if (value === 'univer') {
-            window.univer?.dispose();
-            window.univer = undefined;
-            window.univerAPI = undefined;
+            const debuggerWindow = window as typeof window & { univer?: Univer };
+            debuggerWindow.univer?.dispose();
+            Reflect.deleteProperty(debuggerWindow, 'univer');
+            Reflect.deleteProperty(debuggerWindow, 'univerAPI');
         } else if (value === 'unit') {
             const focused = univerInstanceService.getFocusedUnit();
             if (!focused) return false;

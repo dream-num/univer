@@ -19,6 +19,7 @@ import type { RibbonType } from '../../../controllers/ui/ui.controller';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import { LocaleService, throttle } from '@univerjs/core';
 import { borderBottomClassName, clsx, ConfigContext, ConfigProvider, divideXClassName, Dropdown } from '@univerjs/design';
+
 import { MoreVerticalIcon } from '@univerjs/icons';
 import { Fragment, useCallback, useContext, useEffect, useMemo, useRef } from 'react';
 import { RibbonPosition } from '../../../services/menu/types';
@@ -52,7 +53,7 @@ export function Ribbon(props: IRibbonProps) {
     const ribbonService = ribbonOverride?.ribbonService ?? defaultRibbonService;
 
     const containerRef = useRef<HTMLDivElement>(null!);
-    const toolbarItemRefs = useRef<Record<string, {
+    const toolbarItemsRef = useRef<Record<string, {
         el: HTMLElement;
         key: string;
         order: number;
@@ -80,18 +81,19 @@ export function Ribbon(props: IRibbonProps) {
 
         return ribbonData;
     }, [ribbonType, ribbonData]);
+    const effectiveActivatedTab = ribbonType === 'simple' ? RibbonPosition.START : activatedTab;
 
     const activatedTabTitle = useMemo(() => {
-        return ribbon.find((group) => group.key === activatedTab)?.title || activatedTab;
-    }, [ribbon, activatedTab]);
+        return ribbon.find((group) => group.key === effectiveActivatedTab)?.title || effectiveActivatedTab;
+    }, [ribbon, effectiveActivatedTab]);
 
     const handleSelectTab = useCallback((group: IMenuSchema) => {
-        toolbarItemRefs.current = {};
+        toolbarItemsRef.current = {};
         ribbonService.setActivatedTab(group.key);
     }, [ribbonService]);
 
     const activeGroup = useMemo(() => {
-        const allGroups = ribbon.find((group) => group.key === activatedTab)?.children ?? [];
+        const allGroups = ribbon.find((group) => group.key === effectiveActivatedTab)?.children ?? [];
         const visibleGroups: IMenuSchema[] = [];
         const hiddenGroups: IMenuSchema[] = [];
 
@@ -119,11 +121,11 @@ export function Ribbon(props: IRibbonProps) {
             visibleGroups,
             hiddenGroups,
         };
-    }, [collapsedIds, ribbon, activatedTab]);
+    }, [collapsedIds, ribbon, effectiveActivatedTab]);
 
     useEffect(() => {
         if (hideToolbar || ribbonType === 'grid') {
-            toolbarItemRefs.current = {};
+            toolbarItemsRef.current = {};
             ribbonService.setCollapsedIds([]);
             ribbonService.setFakeToolbarVisible(false);
             return;
@@ -140,14 +142,14 @@ export function Ribbon(props: IRibbonProps) {
 
                 timer = requestAnimationFrame(() => {
                     const { width: avaliableWidth } = entry.contentRect;
-                    const toolbarItems = Object.values(toolbarItemRefs.current);
+                    const toolbarItems = Object.values(toolbarItemsRef.current);
                     const sortedToolbarItems = toolbarItems.sort((a, b) => {
                         return a.order - b.order || a.groupOrder - b.groupOrder || a.itemOrder - b.itemOrder;
                     });
 
                     const newCollapsedIds: string[] = [];
                     let totalWidth = 32;
-                    const allGroups = ribbon.find((group) => group.key === activatedTab)?.children ?? [];
+                    const allGroups = ribbon.find((group) => group.key === effectiveActivatedTab)?.children ?? [];
 
                     const gapWidth = (allGroups.length - 1) * 8;
                     totalWidth += gapWidth;
@@ -174,7 +176,7 @@ export function Ribbon(props: IRibbonProps) {
             timer && cancelAnimationFrame(timer);
             observer.disconnect();
         };
-    }, [hideToolbar, ribbon, activatedTab, ribbonService, ribbonType]);
+    }, [hideToolbar, ribbon, effectiveActivatedTab, ribbonService, ribbonType]);
 
     const fakeToolbar = useMemo(() => {
         return (
@@ -203,7 +205,7 @@ export function Ribbon(props: IRibbonProps) {
                                         preserveStrokeWidth
                                         ref={(ref) => {
                                             if (ref?.el) {
-                                                toolbarItemRefs.current[child.key] = {
+                                                toolbarItemsRef.current[child.key] = {
                                                     el: ref.el,
                                                     key: child.key,
                                                     order: index,
@@ -325,7 +327,7 @@ export function Ribbon(props: IRibbonProps) {
                         role="toolbar"
                         aria-label={localeService.t(activatedTabTitle)}
                     >
-                        <ToolbarDropdownProvider key={activatedTab}>
+                        <ToolbarDropdownProvider key={effectiveActivatedTab}>
                             {activeGroup.visibleGroups.map((groupItem) => (groupItem.children?.length || groupItem.item) && (
                                 <Fragment key={groupItem.key}>
                                     <div

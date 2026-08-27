@@ -268,11 +268,12 @@ export class DocDrawingPopupMenuController extends RxDisposable {
                 }
                 const disposePopups = this._disposePopupsByUnit.get(unitId);
                 const popupTargetKey = `${drawingUnitId}:${subUnitId}:${drawingId}`;
-                if (this._popupTargetKeys.get(unitId) === popupTargetKey && disposePopups && disposePopups.length > 0) {
+                const previousPopupTargetKey = this._popupTargetKeys.get(unitId);
+                if (previousPopupTargetKey === popupTargetKey && disposePopups && disposePopups.length > 0) {
                     return;
                 }
 
-                this._clearPopups(unitId);
+                this._clearPopups(unitId, previousPopupTargetKey != null);
                 const isImage = drawingType === DrawingTypeEnum.DRAWING_IMAGE;
                 // Charts use the document toolbar placement, while retaining chart-specific actions and controls.
                 const isChart = drawingType === DrawingTypeEnum.DRAWING_CHART;

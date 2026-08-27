@@ -281,10 +281,6 @@ export class DocDrawingPopupMenuController extends RxDisposable {
                 disposePopups.forEach((dispose) => dispose.dispose());
                 disposePopups.length = 0;
             }),
-            transformer.changeStart$.subscribe(() => {
-                disposePopups.forEach((dispose) => dispose.dispose());
-                disposePopups.length = 0;
-            }),
         ];
         const disposable = toDisposable(() => subscriptions.forEach((subscription) => subscription.unsubscribe()));
         this.disposeWithMe(disposable);

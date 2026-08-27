@@ -96,7 +96,6 @@ export class RenderUnit extends Disposable implements IRender {
     get type(): UniverInstanceType { return this._renderContext.type; }
 
     private readonly _injector: Injector;
-    private _injectorDisposed = false;
 
     private _renderContext: IRenderContext<UnitModel>;
     private readonly _dependencyService: RenderUnitDependencyService;
@@ -119,9 +118,6 @@ export class RenderUnit extends Disposable implements IRender {
 
         const renderParentInjector = init.createUnitOptions?.renderParentInjector ?? parentInjector;
         this._injector = renderParentInjector.createChild();
-        this._injector.onDispose(() => {
-            this._injectorDisposed = true;
-        });
         this._dependencyService = new RenderUnitDependencyService(
             this._injector,
             () => this._renderContext
@@ -162,7 +158,7 @@ export class RenderUnit extends Disposable implements IRender {
     }
 
     isDisposed(): boolean {
-        return this._disposed || this._injectorDisposed;
+        return this._disposed;
     }
 
     /**

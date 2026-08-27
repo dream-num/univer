@@ -557,11 +557,11 @@ export class CommandService extends Disposable implements ICommandService {
 
             this._multiCommandDisposables.set(command.id, disposableCollection);
         } else {
-            if ((registry[0] as Record<string, any>).multi !== true) {
-                throw new Error('Command has registered as a single command.');
-            } else {
-                multiCommand = registry[0] as MultiCommand;
+            const registeredCommand = registry[0];
+            if (!(registeredCommand instanceof MultiCommand)) {
+                throw new TypeError('Command has registered as a single command.');
             }
+            multiCommand = registeredCommand;
         }
 
         const implementationDisposable = multiCommand.registerImplementation(command as IMultiCommand);
@@ -583,11 +583,11 @@ export class CommandService extends Disposable implements ICommandService {
             (item) => item.type === CommandType.COMMAND
         );
         if (triggerCommand) {
-            Reflect.set(params, 'trigger', triggerCommand.id);
+            this._setMutationTrigger(params, triggerCommand.id);
             return;
         }
 
-        if (Reflect.get(params, 'trigger') !== undefined) {
+        if ('trigger' in params && params.trigger !== undefined) {
             return;
         }
 
@@ -596,8 +596,12 @@ export class CommandService extends Disposable implements ICommandService {
             (item) => item.type === CommandType.OPERATION
         );
         if (triggerOperation) {
-            Reflect.set(params, 'trigger', triggerOperation.id);
+            this._setMutationTrigger(params, triggerOperation.id);
         }
+    }
+
+    private _setMutationTrigger(params: object, trigger: string): void {
+        Object.assign(params, { trigger } satisfies IMutationCommonParams);
     }
 
     private async _execute<P extends object, R = boolean>(command: ICommand<P, R>, params?: P, options?: IExecutionOptions): Promise<R> {

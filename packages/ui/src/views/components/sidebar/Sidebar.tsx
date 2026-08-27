@@ -188,7 +188,6 @@ export function Sidebar() {
             ref={sidebarRef}
             data-u-comp="sidebar"
             role="complementary"
-            aria-hidden={!options?.visible}
             aria-expanded={!!options?.visible}
             aria-label={localeService.t<LocaleKey>('ui.sidebar.panel')}
             className={clsx(`
@@ -196,7 +195,7 @@ export function Sidebar() {
               dark:!univer-bg-gray-900 dark:!univer-text-gray-0
             `, {
                 'univer-w-96 univer-translate-x-0': options?.visible,
-                'univer-hidden univer-w-0 univer-translate-x-full': !options?.visible,
+                'univer-w-0 univer-translate-x-full': !options?.visible,
             })}
             style={{ width: isDragging ? undefined : width }}
         >

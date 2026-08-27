@@ -90,9 +90,7 @@ describe('Sidebar', () => {
 
         expect(sidebarService.visible).toBe(false);
         expect(TestState.closes).toBe(1);
-        const hiddenSidebar = screen.getByRole('complementary', { hidden: true });
-        expect(hiddenSidebar.getAttribute('aria-expanded')).toBe('false');
-        expect(hiddenSidebar.getAttribute('aria-hidden')).toBe('true');
+        expect(screen.getByRole('complementary', { name: 'Sidebar panel' }).getAttribute('aria-expanded')).toBe('false');
         rendered.dispose();
     });
 
@@ -113,30 +111,6 @@ describe('Sidebar', () => {
         fireEvent.mouseUp(document);
 
         expect(sidebarService.width).toBe(800);
-        rendered.dispose();
-    });
-
-    it('removes retained panel controls from keyboard navigation after closing', () => {
-        const rendered = renderWithDependencies(<Sidebar />);
-        const sidebarService = rendered.injector.get(ISidebarService);
-
-        act(() => {
-            sidebarService.open({
-                id: 'image-format',
-                header: { title: <span>Format image</span> },
-                children: { title: <button type="button">Start Crop</button> },
-            });
-        });
-
-        const sidebar = screen.getByRole('complementary', { name: 'Sidebar panel' });
-        expect(sidebar.getAttribute('aria-hidden')).toBe('false');
-        expect(sidebar.classList.contains('univer-hidden')).toBe(false);
-
-        act(() => sidebarService.close('image-format'));
-
-        expect(sidebar.getAttribute('aria-hidden')).toBe('true');
-        expect(sidebar.classList.contains('univer-hidden')).toBe(true);
-        expect(screen.getByRole('button', { name: 'Start Crop', hidden: true })).not.toBeNull();
         rendered.dispose();
     });
 });

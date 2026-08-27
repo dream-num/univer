@@ -183,6 +183,38 @@ describe('layer', () => {
         layer.dispose();
     });
 
+    it('renders only sampled viewports without consuming the pending full render', () => {
+        const scene = createScene();
+        const sampledViewport = {
+            viewportKey: 'sampled',
+            shouldIntoRender: vi.fn(() => true),
+            render: vi.fn(),
+        };
+        scene.getViewports = vi.fn(() => [scene.__viewport, sampledViewport]);
+        const object = new TestObject('sampled-object', 1);
+        const layer = new Layer(scene, [object], 1, true);
+        const ctx = createCtx();
+        scene.__resizeCache();
+
+        layer.render(ctx, false, {
+            dirtyBounds: [{ left: 0, top: 0, right: 40, bottom: 90 }],
+            preserveCache: true,
+            preserveDirty: true,
+            viewportKeys: new Set(['sampled']),
+        });
+
+        expect(scene.__viewport.render).not.toHaveBeenCalled();
+        expect(sampledViewport.render).toHaveBeenCalledTimes(1);
+        expect(layer.isDirty()).toBe(true);
+        expect(object.isDirty()).toBe(true);
+
+        layer.render(ctx);
+        expect(scene.__viewport.render).toHaveBeenCalledTimes(1);
+        expect(layer.isDirty()).toBe(false);
+
+        layer.dispose();
+    });
+
     it('uses cache canvas rendering, resizing and disposal paths', () => {
         const scene = createScene();
         const object = new TestObject('cached', 1);

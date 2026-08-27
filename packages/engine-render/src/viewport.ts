@@ -767,7 +767,9 @@ export class Viewport {
         // this._scene.transform --> [scale, 0, 0, scale, - viewportScrollX * scaleX, - viewportScrollY * scaleY]
         // see transform.ts@multiply
         const sceneTrans = this._scene.transform.clone();
-        sceneTrans.multiply(Transform.create([1, 0, 0, 1, -this.viewportScrollX || 0, -this.viewportScrollY || 0]));
+        const viewportScrollX = viewportInfo?.renderViewportScrollX ?? this.viewportScrollX;
+        const viewportScrollY = viewportInfo?.renderViewportScrollY ?? this.viewportScrollY;
+        sceneTrans.multiply(Transform.create([1, 0, 0, 1, -viewportScrollX || 0, -viewportScrollY || 0]));
 
         // Logical translation & scaling, unrelated to dpr.
         const tm = sceneTrans.getMatrix();
@@ -790,13 +792,6 @@ export class Viewport {
             objects[i].render(mainCtx, viewPortInfo);
         }
 
-        this.markDirty(false);
-        this.markForceDirty(false);
-
-        this._preViewBound = this._viewBound;
-        if (viewPortInfo.shouldCacheUpdate) {
-            this.preCacheBound = this._cacheBound;
-        }
         mainCtx.restore();
 
         if (this._scrollBar && isMaxLayer) {
@@ -805,6 +800,20 @@ export class Viewport {
             mainCtx.transform(scrollbarTM[0], scrollbarTM[1], scrollbarTM[2], scrollbarTM[3], scrollbarTM[4], scrollbarTM[5]);
             this._drawScrollbar(mainCtx);
             mainCtx.restore();
+        }
+        this._updateRenderState(viewPortInfo);
+    }
+
+    private _updateRenderState(viewportInfo: IViewportInfo) {
+        if (viewportInfo.preserveRenderState) {
+            return;
+        }
+
+        this.markDirty(false);
+        this.markForceDirty(false);
+        this._preViewBound = this._viewBound;
+        if (viewportInfo.shouldCacheUpdate) {
+            this.preCacheBound = this._cacheBound;
         }
         // TODO @lumixraku, preScrollX is also handled by updateScroll(), this method is empty.
         this._afterRender();

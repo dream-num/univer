@@ -887,6 +887,11 @@ export interface IViewportInfo {
     sceneTrans: Transform;
     cacheCanvas?: Canvas;
 
+    // Snapshot render passes can override the live scroll offset without advancing viewport caches or dirty state.
+    preserveRenderState?: boolean;
+    renderViewportScrollX?: number;
+    renderViewportScrollY?: number;
+
     leftOrigin: number;
     topOrigin: number;
 

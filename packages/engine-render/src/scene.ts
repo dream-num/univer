@@ -20,7 +20,6 @@ import type { IDragEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './basi
 import type { ISceneTransformState, ITransformChangeState } from './basics/interfaces';
 import type { ITransformerConfig } from './basics/transformer-config';
 import type { IBoundRectNoAngle, IViewportInfo, Vector2 } from './basics/vector2';
-import type { Canvas } from './canvas';
 import type { UniverRenderingContext } from './context';
 import type { Engine } from './engine';
 import type { ILayerRenderOptions, IScrollRenderInfo } from './layer';
@@ -32,6 +31,7 @@ import { CURSOR_TYPE, RENDER_CLASS_TYPE } from './basics/const';
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './basics/interfaces';
 import { precisionTo, requestNewFrame } from './basics/tools';
 import { Transform } from './basics/transform';
+import { Canvas } from './canvas';
 import { Layer, scrollAndClearCanvas } from './layer';
 import { InputManager } from './scene.input-manager';
 import { Transformer } from './scene.transformer';
@@ -42,6 +42,12 @@ const SCROLLBAR_SEEK_SETTLE_MS = 64;
 const SCROLLBAR_SEEK_EXPENSIVE_RENDER_MIN_MS = 32;
 const SCROLLBAR_SEEK_EXPENSIVE_RENDER_FRAME_INTERVALS = 2;
 const SCROLLBAR_SEEK_RENDER_COST_SAMPLE_WEIGHT = 0.25;
+// Keep seek previews visibly sampled while each tile stays within a 60 Hz frame budget.
+const SCROLLBAR_SEEK_SAMPLE_MIN_INTERVAL_MS = 16;
+const SCROLLBAR_SEEK_SAMPLE_COST_MULTIPLIER = 1;
+const SCROLLBAR_SEEK_SAMPLE_TARGET_DURATION_MS = 12;
+const SCROLLBAR_SEEK_SAMPLE_MIN_TILE_COUNT = 6;
+const SCROLLBAR_SEEK_SAMPLE_MAX_TILE_COUNT = 12;
 
 export interface ISceneInputControlOptions {
     enableDown: boolean;
@@ -69,6 +75,19 @@ interface IViewportScrollRenderState {
 interface IViewportScrollPosition {
     viewportScrollX: number;
     viewportScrollY: number;
+}
+
+interface IScrollbarSeekSampleViewportState {
+    bounds: IBoundRectNoAngle;
+    position: IViewportScrollPosition;
+    viewport: Viewport;
+    viewportInfo: IViewportInfo;
+}
+
+interface IScrollbarSeekSampleState {
+    tileCount: number;
+    tileIndex: number;
+    viewports: IScrollbarSeekSampleViewportState[];
 }
 
 function createExposedScrollBounds(bounds: IBoundRectNoAngle, offsetX: number, offsetY: number) {
@@ -151,6 +170,97 @@ function createViewportScrollRenderState(viewport: Viewport, scaleX: number, sca
     };
 }
 
+function createViewportRenderBounds(viewport: Viewport): IBoundRectNoAngle {
+    const scrollBar = viewport.getScrollBar();
+    return {
+        left: viewport.left,
+        top: viewport.top,
+        right: viewport.left + (viewport.width ?? 0) - (scrollBar?.enableVertical ? scrollBar.totalSize : 0),
+        bottom: viewport.top + (viewport.height ?? 0) - (scrollBar?.enableHorizontal ? scrollBar.totalSize : 0),
+    };
+}
+
+function copyCanvasBounds(source: Canvas, target: Canvas, bounds: IBoundRectNoAngle[]) {
+    const sourcePixelRatio = source.getPixelRatio();
+    const targetPixelRatio = target.getPixelRatio();
+    const targetCtx = target.getContext();
+    targetCtx.save();
+    targetCtx.setTransform(1, 0, 0, 1, 0, 0);
+    for (const bound of bounds) {
+        const width = bound.right - bound.left;
+        const height = bound.bottom - bound.top;
+        if (width <= 0 || height <= 0) {
+            continue;
+        }
+
+        targetCtx.save();
+        targetCtx.beginPath();
+        targetCtx.rect(
+            bound.left * targetPixelRatio,
+            bound.top * targetPixelRatio,
+            width * targetPixelRatio,
+            height * targetPixelRatio
+        );
+        targetCtx.clip();
+        targetCtx.drawImage(
+            source.getCanvasEle(),
+            bound.left * sourcePixelRatio,
+            bound.top * sourcePixelRatio,
+            width * sourcePixelRatio,
+            height * sourcePixelRatio,
+            bound.left * targetPixelRatio,
+            bound.top * targetPixelRatio,
+            width * targetPixelRatio,
+            height * targetPixelRatio
+        );
+        targetCtx.restore();
+    }
+    targetCtx.restore();
+}
+
+function createScrollbarSeekSampleTileBounds(bounds: IBoundRectNoAngle, tileIndex: number, tileCount: number) {
+    const height = bounds.bottom - bounds.top;
+    return {
+        ...bounds,
+        top: bounds.top + height * tileIndex / tileCount,
+        bottom: bounds.top + height * (tileIndex + 1) / tileCount,
+    };
+}
+
+function createScrollbarSeekSampleViewportInfo(
+    sampleViewport: IScrollbarSeekSampleViewportState,
+    tileBounds: IBoundRectNoAngle
+): IViewportInfo {
+    const { bounds, position, viewportInfo } = sampleViewport;
+    const height = bounds.bottom - bounds.top;
+    const topRatio = height === 0 ? 0 : (tileBounds.top - bounds.top) / height;
+    const bottomRatio = height === 0 ? 1 : (tileBounds.bottom - bounds.top) / height;
+    const viewBoundHeight = viewportInfo.viewBound.bottom - viewportInfo.viewBound.top;
+    const tileViewBound = {
+        ...viewportInfo.viewBound,
+        top: viewportInfo.viewBound.top + viewBoundHeight * topRatio,
+        bottom: viewportInfo.viewBound.top + viewBoundHeight * bottomRatio,
+    };
+
+    return {
+        ...viewportInfo,
+        allowCache: false,
+        cacheBound: tileViewBound,
+        cacheCanvas: undefined,
+        cacheViewPortPosition: tileBounds,
+        diffBounds: [tileViewBound],
+        diffCacheBounds: [tileViewBound],
+        isDirty: 0b10,
+        isForceDirty: true,
+        preserveRenderState: true,
+        renderViewportScrollX: position.viewportScrollX,
+        renderViewportScrollY: position.viewportScrollY,
+        shouldCacheUpdate: 0,
+        viewBound: tileViewBound,
+        viewPortPosition: tileBounds,
+    };
+}
+
 export class Scene extends Disposable {
     private _sceneKey: string = '';
     /**
@@ -175,7 +285,12 @@ export class Scene extends Disposable {
     private _isScrollbarPreviewDirty = false;
     private _lastScrollbarSeekInputAt = Number.NEGATIVE_INFINITY;
     private _estimatedFullRenderDuration = 0;
+    private _estimatedScrollbarSeekSampleDuration = 0;
+    private _lastScrollbarSeekSampleAt = Number.NEGATIVE_INFINITY;
     private _renderedViewportScrollPositions = new Map<string, IViewportScrollPosition>();
+    private _hasScrollbarSeekPartialRender = false;
+    private _scrollbarSeekSampleCanvas: Canvas | null = null;
+    private _scrollbarSeekSampleState: IScrollbarSeekSampleState | null = null;
 
     private _cursor: CURSOR_TYPE = CURSOR_TYPE.DEFAULT;
     private _defaultCursor: CURSOR_TYPE = CURSOR_TYPE.DEFAULT;
@@ -404,6 +519,8 @@ export class Scene extends Disposable {
         this._scrollbarDragViewport = viewport;
         this._isScrollbarSeeking = false;
         this._isScrollbarPreviewDirty = false;
+        this._lastScrollbarSeekSampleAt = Number.NEGATIVE_INFINITY;
+        this._disposeScrollbarSeekSample();
     }
 
     updateScrollbarDrag(viewport: Viewport) {
@@ -441,6 +558,7 @@ export class Scene extends Disposable {
         this._scrollbarDragViewport = null;
         this._isScrollbarSeeking = false;
         this._isScrollbarPreviewDirty = false;
+        this._disposeScrollbarSeekSample();
     }
 
     isScrollRenderPending() {
@@ -847,6 +965,7 @@ export class Scene extends Disposable {
             if (viewport.viewportKey === key) {
                 this._viewports.splice(i, 1);
                 this._renderedViewportScrollPositions.delete(key);
+                this._disposeScrollbarSeekSample();
                 if (viewport === this._scrollbarDragViewport) {
                     this._scrollbarDragViewport = null;
                     this._isScrollbarSeeking = false;
@@ -916,6 +1035,138 @@ export class Scene extends Disposable {
         this._isScrollbarPreviewDirty = false;
     }
 
+    private _getScrollbarSeekSampleViewports() {
+        return this._viewports.filter((viewport) => {
+            if (!viewport.shouldIntoRender()) {
+                return false;
+            }
+
+            const renderedPosition = this._renderedViewportScrollPositions.get(viewport.viewportKey);
+            return renderedPosition != null && (
+                renderedPosition.viewportScrollX !== viewport.viewportScrollX ||
+                renderedPosition.viewportScrollY !== viewport.viewportScrollY
+            );
+        });
+    }
+
+    private _shouldSampleDeferredScrollbarSeek(now: number) {
+        const sampleInterval = Math.max(
+            SCROLLBAR_SEEK_SAMPLE_MIN_INTERVAL_MS,
+            this._estimatedScrollbarSeekSampleDuration * SCROLLBAR_SEEK_SAMPLE_COST_MULTIPLIER
+        );
+        return now - this._lastScrollbarSeekSampleAt >= sampleInterval;
+    }
+
+    private _recordScrollbarSeekSampleDuration(duration: number) {
+        if (this._estimatedScrollbarSeekSampleDuration === 0) {
+            this._estimatedScrollbarSeekSampleDuration = duration;
+            return;
+        }
+
+        this._estimatedScrollbarSeekSampleDuration +=
+            (duration - this._estimatedScrollbarSeekSampleDuration) * SCROLLBAR_SEEK_RENDER_COST_SAMPLE_WEIGHT;
+    }
+
+    private _createScrollbarSeekSampleState(canvas: Canvas) {
+        const sampleViewports = this._getScrollbarSeekSampleViewports();
+        if (sampleViewports.length === 0) {
+            return;
+        }
+
+        const sampleCanvas = this._scrollbarSeekSampleCanvas ??= new Canvas({
+            colorService: this.getEngine()?.canvasColorService,
+        });
+        if (sampleCanvas.getWidth() !== canvas.getWidth() ||
+            sampleCanvas.getHeight() !== canvas.getHeight() ||
+            sampleCanvas.getPixelRatio() !== canvas.getPixelRatio()) {
+            sampleCanvas.setSize(canvas.getWidth(), canvas.getHeight(), canvas.getPixelRatio());
+        } else {
+            sampleCanvas.clear();
+        }
+
+        const tileCount = Tools.clamp(
+            Math.ceil(this._estimatedFullRenderDuration / SCROLLBAR_SEEK_SAMPLE_TARGET_DURATION_MS),
+            SCROLLBAR_SEEK_SAMPLE_MIN_TILE_COUNT,
+            SCROLLBAR_SEEK_SAMPLE_MAX_TILE_COUNT
+        );
+        return {
+            tileCount,
+            tileIndex: 0,
+            viewports: sampleViewports.map((viewport) => ({
+                bounds: createViewportRenderBounds(viewport),
+                position: {
+                    viewportScrollX: viewport.viewportScrollX,
+                    viewportScrollY: viewport.viewportScrollY,
+                },
+                viewport,
+                viewportInfo: viewport.calcViewportInfo(),
+            })),
+        } satisfies IScrollbarSeekSampleState;
+    }
+
+    private _recordCompletedScrollbarSeekSample(state: IScrollbarSeekSampleState) {
+        for (const { position, viewport } of state.viewports) {
+            this._renderedViewportScrollPositions.set(viewport.viewportKey, position);
+        }
+    }
+
+    private _disposeScrollbarSeekSample() {
+        this._scrollbarSeekSampleCanvas?.dispose();
+        this._scrollbarSeekSampleCanvas = null;
+        this._scrollbarSeekSampleState = null;
+    }
+
+    private _renderDeferredScrollbarSeekSample(canvas: Canvas, layers: Layer[], now: number) {
+        if (this._hasPostRenderCanvasMutation || !this._shouldSampleDeferredScrollbarSeek(now)) {
+            return;
+        }
+
+        const sampleState = this._scrollbarSeekSampleState ?? this._createScrollbarSeekSampleState(canvas);
+        if (!sampleState || !this._scrollbarSeekSampleCanvas) {
+            return;
+        }
+        this._scrollbarSeekSampleState = sampleState;
+
+        const sampleViewports = sampleState.viewports;
+        const dirtyBounds = sampleViewports.map(({ bounds }) => createScrollbarSeekSampleTileBounds(
+            bounds,
+            sampleState.tileIndex,
+            sampleState.tileCount
+        ));
+        const viewportKeys = new Set(sampleViewports.map(({ viewport }) => viewport.viewportKey));
+        const viewportInfos = new Map(sampleViewports.map((sampleViewport, index) => [
+            sampleViewport.viewport.viewportKey,
+            createScrollbarSeekSampleViewportInfo(sampleViewport, dirtyBounds[index]),
+        ]));
+        for (let i = 0, len = layers.length; i < len; i++) {
+            layers[i].render(this._scrollbarSeekSampleCanvas.getContext(), i === len - 1, {
+                dirtyBounds,
+                preserveCache: true,
+                preserveDirty: true,
+                viewportInfos,
+                viewportKeys,
+            });
+        }
+        sampleState.tileIndex += 1;
+        if (sampleState.tileIndex === sampleState.tileCount) {
+            const completedBounds = sampleViewports.map(({ bounds }) => bounds);
+            scrollAndClearCanvas(canvas.getContext(), canvas.getPixelRatio(), [], completedBounds);
+            copyCanvasBounds(this._scrollbarSeekSampleCanvas, canvas, completedBounds);
+            this._recordCompletedScrollbarSeekSample(sampleState);
+            this._scrollbarSeekSampleState = null;
+        }
+
+        const sampleFinishedAt = Tools.now();
+        this._lastScrollbarSeekSampleAt = sampleFinishedAt;
+        this._recordScrollbarSeekSampleDuration(sampleFinishedAt - now);
+        this._hasScrollbarSeekPartialRender = true;
+    }
+
+    private _renderDeferredScrollbarSeek(canvas: Canvas, layers: Layer[], now: number) {
+        this._renderDeferredScrollbarSeekSample(canvas, layers, now);
+        this.getEngine()?.renderFrameTags$.next(['scrollDetailDeferred', true]);
+    }
+
     private _shouldDeferScrollbarSeekRender(now: number) {
         if (!this._isScrollbarSeeking) {
             return false;
@@ -964,6 +1215,23 @@ export class Scene extends Disposable {
         return canvasInstance.getContext().detectBitmapMutation(() => this._afterRender$.next(canvasInstance));
     }
 
+    private _isEngineBitmapReusable() {
+        return !this._hasScrollbarSeekPartialRender && !this._hasPostRenderCanvasMutation;
+    }
+
+    private _forceRefreshAfterScrollbarSeekPreview() {
+        if (!this._hasScrollbarSeekPartialRender) {
+            return;
+        }
+
+        // The visible engine contains a sampled preview, so settling must rebuild the complete frame and caches.
+        for (const viewport of this._viewports) {
+            if (viewport.shouldIntoRender()) {
+                viewport.markForceDirty(true);
+            }
+        }
+    }
+
     render(parentCtx?: UniverRenderingContext) {
         if (!this.isDirty()) {
             return;
@@ -972,7 +1240,7 @@ export class Scene extends Disposable {
         const layers = this._layers.sort(sortRules);
         const canvasInstance = this.getEngine()?.getCanvas();
         const shouldTryPreservingEngine = this._preserveEngineOnRender &&
-            !this._hasPostRenderCanvasMutation &&
+            this._isEngineBitmapReusable() &&
             parentCtx == null &&
             canvasInstance != null;
         const isScrollbarSeekRender = this._isScrollbarSeeking && parentCtx == null && canvasInstance != null;
@@ -982,9 +1250,11 @@ export class Scene extends Disposable {
             this._renderScrollbarSeekPreview(canvasInstance);
         }
         if (isScrollbarSeekRender && this._shouldDeferScrollbarSeekRender(fullRenderStartedAt)) {
-            this.getEngine()?.renderFrameTags$.next(['scrollDetailDeferred', true]);
+            this._renderDeferredScrollbarSeek(canvasInstance, layers, fullRenderStartedAt);
             return;
         }
+
+        this._forceRefreshAfterScrollbarSeekPreview();
 
         this._preserveEngineOnRender = false;
         let layerRenderOptions: ILayerRenderOptions | undefined;
@@ -1018,6 +1288,8 @@ export class Scene extends Disposable {
         }
         this._hasPostRenderCanvasMutation = this._notifyAfterRender(canvasInstance);
         this._recordRenderedViewportScrollPositions();
+        this._disposeScrollbarSeekSample();
+        this._hasScrollbarSeekPartialRender = false;
         if (shouldMeasureFullRender) {
             this._recordFullRenderDuration(Tools.now() - fullRenderStartedAt, isScrollbarSeekRender);
         }
@@ -1195,6 +1467,7 @@ export class Scene extends Disposable {
         this.clearLayer();
         this.clearViewports();
         this._renderedViewportScrollPositions.clear();
+        this._disposeScrollbarSeekSample();
         this._scrollbarDragViewport = null;
         this.detachControl();
         this.onTransformChange$?.complete();

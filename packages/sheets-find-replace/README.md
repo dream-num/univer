@@ -10,7 +10,7 @@
 
 | Package | UMD global | CSS | Locales | Facade entry |
 | --- | --- | :---: | :---: | :---: |
-| `@univerjs/sheets-find-replace` | `UniverSheetsFindReplace` | No | Yes | Yes |
+| `@univerjs/sheets-find-replace` | `UniverSheetsFindReplace` | No | No | Yes |
 
 ## Installation
 
@@ -25,12 +25,9 @@ Keep all `@univerjs/*` packages on the same version.
 ## Usage
 
 ```ts
-import EnUS from '@univerjs/sheets-find-replace/locale/en-US';
 import { UniverSheetsFindReplacePlugin } from '@univerjs/sheets-find-replace';
 
 univer.registerPlugin(UniverSheetsFindReplacePlugin);
-
-// Merge EnUS into your Univer locale map when this package contributes UI text.
 ```
 
 ## Integration Notes
@@ -42,4 +39,3 @@ Use this package with `@univerjs/find-replace` to share find and replace infrast
 - [Documentation](https://docs.univer.ai)
 - [NPM package](https://npmjs.com/package/@univerjs/sheets-find-replace)
 - [GitHub repository](https://github.com/dream-num/univer)
-

@@ -43,4 +43,3 @@ Register this package after the Docs, Docs UI, and Docs hyperlink core packages.
 - [Documentation](https://docs.univer.ai)
 - [NPM package](https://npmjs.com/package/@univerjs/docs-hyper-link-ui)
 - [GitHub repository](https://github.com/dream-num/univer)
-

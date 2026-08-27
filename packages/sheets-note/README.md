@@ -39,4 +39,3 @@ Use this package with `@univerjs/sheets-note-ui` when users need note editing UI
 - [Documentation](https://docs.univer.ai)
 - [NPM package](https://npmjs.com/package/@univerjs/sheets-note)
 - [GitHub repository](https://github.com/dream-num/univer)
-

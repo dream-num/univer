@@ -20,7 +20,7 @@ Univer 以外掛化架構、Canvas 渲染引擎、公式引擎和統一的 Facad
 [![Stars](https://img.shields.io/github/stars/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/stargazers)
 [![Contributors](https://img.shields.io/github/contributors/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/graphs/contributors)
 [![Issues](https://img.shields.io/github/issues/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/issues)
-[![Last Commit](https://img.shields.io/github/last-commit/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/commits/main/)
+[![Last Commit](https://img.shields.io/github/last-commit/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/commits/dev/)
 
 [![Discord](https://img.shields.io/discord/1136129819961217077?logo=discord&logoColor=FFFFFF&label=discord&color=5865F2&style=flat-square)](https://discord.gg/z3NKNT6D2f)
 [![Twitter](https://img.shields.io/twitter/follow/univerhq?style=flat-square&logo=x)](https://twitter.com/univerhq)
@@ -225,7 +225,7 @@ univerAPI.createWorkbook({})
 | **Preset Mode** | 你希望用最少配置取得可執行的 Sheets、Docs 或 Node 設定。 | 本倉庫的 [`presets/`](../../presets) 和 [快速入門指南](https://docs.univer.ai/guides/sheets/getting-started/installation) |
 | **Headless Mode** | 你需要在沒有 UI 的情況下進行伺服器端活頁簿/文件處理、公式計算或自動化。 | [Headless Univer](https://docs.univer.ai/guides/sheets/getting-started/node) |
 
-請保持所有 `@univerjs/*` 套件版本一致。如果使用 Univer Pro 套件，也請保持 `@univerjs-pro/*` 版本一致。
+同一 Univer 協調發布線中的 `@univerjs/*` SDK 套件應保持版本一致。`@univerjs/icons`、`@univerjs/icons-svg` 等獨立發布的套件應使用各套件資訊清單所宣告的相容版本，而不是跟隨 SDK 版本。使用 Univer Pro 時，也請讓 `@univerjs-pro/*` 與對應的協調發布線保持一致。
 
 關於 API 相容性預期、實驗性 API、內部 API 和棄用規則，請閱讀 [API 穩定性政策](../API_STABILITY.md)。
 

@@ -43,4 +43,3 @@ Product-specific packages such as `@univerjs/sheets-thread-comment-ui` and `@uni
 - [Documentation](https://docs.univer.ai)
 - [NPM package](https://npmjs.com/package/@univerjs/thread-comment-ui)
 - [GitHub repository](https://github.com/dream-num/univer)
-

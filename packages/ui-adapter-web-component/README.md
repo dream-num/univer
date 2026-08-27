@@ -34,7 +34,7 @@ Register custom elements with the `web-component` framework option. Runtime prop
 
 ```ts
 class MyPopup extends HTMLElement {
-    set data(value) {
+    set data(value: { label?: string } | undefined) {
         this.textContent = value?.label ?? '';
     }
 }

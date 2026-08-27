@@ -21,7 +21,7 @@ Univer は、プラグインアーキテクチャ、Canvas ベースのレンダ
 [![Stars](https://img.shields.io/github/stars/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/stargazers)
 [![Contributors](https://img.shields.io/github/contributors/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/graphs/contributors)
 [![Issues](https://img.shields.io/github/issues/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/issues)
-[![Last Commit](https://img.shields.io/github/last-commit/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/commits/main/)
+[![Last Commit](https://img.shields.io/github/last-commit/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/commits/dev/)
 
 [![Discord](https://img.shields.io/discord/1136129819961217077?logo=discord&logoColor=FFFFFF&label=discord&color=5865F2&style=flat-square)](https://discord.gg/z3NKNT6D2f)
 [![Twitter](https://img.shields.io/twitter/follow/univerhq?style=flat-square&logo=x)](https://twitter.com/univerhq)
@@ -226,7 +226,7 @@ univerAPI.createWorkbook({})
 | **Preset Mode** | 最小限の設定で Sheets、Docs、Node の動作環境を作りたい場合。 | このリポジトリの [`presets/`](../../presets) と [getting started guide](https://docs.univer.ai/guides/sheets/getting-started/installation) |
 | **Headless Mode** | UI なしでサーバー側のワークブック/ドキュメント処理、数式計算、自動化を行いたい場合。 | [Headless Univer](https://docs.univer.ai/guides/sheets/getting-started/node) |
 
-すべての `@univerjs/*` パッケージは同じバージョンに揃えてください。Univer Pro パッケージを使う場合も、`@univerjs-pro/*` のバージョンを揃えてください。
+同じ Univer の協調リリースラインに含まれる `@univerjs/*` SDK パッケージは、同一バージョンに揃えてください。`@univerjs/icons` や `@univerjs/icons-svg` など独立してリリースされるパッケージは、SDK のバージョンではなく、各パッケージマニフェストに宣言された互換バージョンを使用します。Univer Pro を使用する場合は、`@univerjs-pro/*` も対応する協調リリースラインに揃えてください。
 
 API 互換性、experimental API、internal API、deprecation rules については [API Stability Policy](../API_STABILITY.md) を参照してください。
 

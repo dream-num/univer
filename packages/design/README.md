@@ -34,4 +34,3 @@ import DesignEnUS from '@univerjs/design/locale/en-US';
 - [Documentation](https://docs.univer.ai)
 - [NPM package](https://npmjs.com/package/@univerjs/design)
 - [GitHub repository](https://github.com/dream-num/univer)
-

@@ -31,7 +31,7 @@ For example: dream-num/univer@6423ff8/packages/sheets-drawing-ui/src/controllers
 
 It is very common to cause memory leak if you get the current unit in singleton modules and subscribe to it. Singleton modules are defined as modules that are registered in the Univer root injector instead of injectors held by render units.
 
-For example: https://github.com/dream-num/univer/blob/dev/packages/sheets-drawing-ui/src/services/canvas-float-dom-manager.service.ts#L433.
+For example, see the [historical implementation before the leak was fixed](https://github.com/dream-num/univer/blob/7550f1cef8c7ff17caecba7ac3305dd56b30b62e/packages/sheets-drawing-ui/src/services/canvas-float-dom-manager.service.ts#L433-L468).
 
 **HOW TO FIX**: Please consider extracting the related logic to an `IRenderModule` instead.
 

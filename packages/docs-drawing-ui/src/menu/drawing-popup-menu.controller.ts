@@ -57,7 +57,7 @@ export class DocDrawingPopupMenuController extends RxDisposable {
     private _embeddedRenderUnits = new Set<string>();
     private _popupMenuListeners = new Map<string, IDisposable>();
     private _disposePopupsByUnit = new Map<string, INeedCheckDisposable[]>();
-    private _popupTargetObjects = new Map<string, BaseObject>();
+    private _popupTargetKeys = new Map<string, string>();
     private _isDrawingPanelOpen = false;
 
     constructor(
@@ -169,7 +169,7 @@ export class DocDrawingPopupMenuController extends RxDisposable {
 
         if (popups.length === 0) {
             this._disposePopupsByUnit.delete(unitId);
-            this._popupTargetObjects.delete(unitId);
+            this._popupTargetKeys.delete(unitId);
         }
     }
 
@@ -267,7 +267,8 @@ export class DocDrawingPopupMenuController extends RxDisposable {
                     return;
                 }
                 const disposePopups = this._disposePopupsByUnit.get(unitId);
-                if (this._popupTargetObjects.get(unitId) === object && disposePopups && disposePopups.length > 0) {
+                const popupTargetKey = `${drawingUnitId}:${subUnitId}:${drawingId}`;
+                if (this._popupTargetKeys.get(unitId) === popupTargetKey && disposePopups && disposePopups.length > 0) {
                     return;
                 }
 
@@ -294,7 +295,7 @@ export class DocDrawingPopupMenuController extends RxDisposable {
 
                 this.disposeWithMe(popup);
                 this._getDisposePopups(unitId).push(popup);
-                this._popupTargetObjects.set(unitId, object);
+                this._popupTargetKeys.set(unitId, popupTargetKey);
 
                 const focusDrawings = this._drawingManagerService.getFocusDrawings();
                 const alreadyFocused = focusDrawings.find((drawing) => drawing.unitId === drawingUnitId && drawing.subUnitId === subUnitId && drawing.drawingId === drawingId);

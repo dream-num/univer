@@ -333,6 +333,53 @@ describe('engine scene viewport extra', () => {
         engine.dispose();
     });
 
+    it('keeps shared viewport boundary pixels out of incremental scroll copies', () => {
+        const { engine, scene, viewport } = createFixture();
+        viewport.setViewportSize({ left: 46, top: 20, width: 260, height: 160 });
+        const rowHeaderViewport = new Viewport('viewRowBottom', scene, {
+            left: 0,
+            top: 20,
+            width: 47,
+            height: 160,
+            active: true,
+            allowCache: true,
+        });
+        new Viewport('viewColumnRight', scene, {
+            left: 46,
+            top: 0,
+            width: 260,
+            height: 21,
+            active: true,
+            allowCache: true,
+        });
+
+        viewport.updateScrollVal({ scrollX: 0, scrollY: 35, viewportScrollX: 0, viewportScrollY: 35 });
+        rowHeaderViewport.updateScrollVal({ scrollX: 0, scrollY: 35, viewportScrollX: 0, viewportScrollY: 35 });
+        scene.render();
+
+        const ctx = engine.getCanvas().getContext();
+        const drawImageSpy = vi.spyOn(ctx, 'drawImage');
+        const clearRectSpy = vi.spyOn(ctx, 'clearRect');
+
+        viewport.updateScrollVal({ scrollX: 0, scrollY: 0, viewportScrollX: 0, viewportScrollY: 0 });
+        rowHeaderViewport.updateScrollVal({ scrollX: 0, scrollY: 0, viewportScrollX: 0, viewportScrollY: 0 });
+        scene.makeDirtyForScrolling();
+        scene.render();
+
+        const engineScrollCopies = drawImageSpy.mock.calls.filter(([source]) => source === ctx.canvas);
+        const mainCopy = engineScrollCopies.find(([, sourceX, sourceY, sourceWidth]) =>
+            sourceX === 47 && sourceY === 21 && Number(sourceWidth) > 200
+        );
+        expect(mainCopy).toBeDefined();
+        expect(mainCopy?.[5]).toBe(47);
+        expect(Number(mainCopy?.[6])).toBeGreaterThan(Number(mainCopy?.[2]));
+        const copiedOffsetY = Number(mainCopy?.[6]) - Number(mainCopy?.[2]);
+        expect(clearRectSpy.mock.calls).toContainEqual([47, 21, expect.any(Number), copiedOffsetY]);
+
+        scene.dispose();
+        engine.dispose();
+    });
+
     it('uses a full render after an after-render observer mutates the engine canvas', () => {
         const { engine, scene, viewport } = createFixture();
         const layer = scene.getLayer(1);

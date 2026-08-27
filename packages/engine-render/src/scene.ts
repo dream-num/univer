@@ -42,6 +42,7 @@ const SCROLLBAR_SEEK_SETTLE_MS = 64;
 const SCROLLBAR_SEEK_EXPENSIVE_RENDER_MIN_MS = 32;
 const SCROLLBAR_SEEK_EXPENSIVE_RENDER_FRAME_INTERVALS = 2;
 const SCROLLBAR_SEEK_RENDER_COST_SAMPLE_WEIGHT = 0.25;
+const VIEWPORT_SHARED_EDGE_TOLERANCE = 1;
 
 export interface ISceneInputControlOptions {
     enableDown: boolean;
@@ -108,6 +109,50 @@ function createScrollbarBounds(viewport: Viewport, contentBounds: IBoundRectNoAn
     return scrollbarBounds;
 }
 
+// Viewports are rendered in order, so a later viewport owns any shared boundary pixel.
+// Excluding that pixel from earlier canvas copies prevents fixed headers from leaking into scrollable content.
+function trimSharedViewportEdges(bounds: IBoundRectNoAngle, followingViewportBounds: IBoundRectNoAngle[]) {
+    const result = { ...bounds };
+
+    for (const other of followingViewportBounds) {
+        const overlapWidth = Math.min(result.right, other.right) - Math.max(result.left, other.left);
+        const overlapHeight = Math.min(result.bottom, other.bottom) - Math.max(result.top, other.top);
+        if (overlapWidth <= 0 || overlapHeight <= 0) {
+            continue;
+        }
+
+        const width = result.right - result.left;
+        const height = result.bottom - result.top;
+        const coversWidth = overlapWidth >= width - VIEWPORT_SHARED_EDGE_TOLERANCE;
+        const coversHeight = overlapHeight >= height - VIEWPORT_SHARED_EDGE_TOLERANCE;
+
+        if (coversHeight && other.left <= result.left && other.right > result.left) {
+            result.left = Math.min(other.right, result.right);
+        } else if (coversHeight && other.left < result.right && other.right >= result.right) {
+            result.right = Math.max(other.left, result.left);
+        }
+
+        if (coversWidth && other.top <= result.top && other.bottom > result.top) {
+            result.top = Math.min(other.bottom, result.bottom);
+        } else if (coversWidth && other.top < result.bottom && other.bottom >= result.bottom) {
+            result.bottom = Math.max(other.top, result.top);
+        }
+    }
+
+    return result;
+}
+
+function isInvalidScrollBounds(bounds: IBoundRectNoAngle, offsetX: number, offsetY: number) {
+    const width = bounds.right - bounds.left;
+    const height = bounds.bottom - bounds.top;
+    return !Number.isFinite(offsetX) ||
+        !Number.isFinite(offsetY) ||
+        width <= 0 ||
+        height <= 0 ||
+        Math.abs(offsetX) >= width ||
+        Math.abs(offsetY) >= height;
+}
+
 function createViewportScrollRenderState(viewport: Viewport, scaleX: number, scaleY: number): IViewportScrollRenderState {
     const viewportInfo = viewport.calcViewportInfo();
     const { diffX = 0, diffY = 0, viewPortPosition } = viewportInfo;
@@ -128,24 +173,13 @@ function createViewportScrollRenderState(viewport: Viewport, scaleX: number, sca
         right: viewPortPosition.right - (scrollBar?.enableVertical ? scrollBar.totalSize : 0),
         bottom: viewPortPosition.bottom - (scrollBar?.enableHorizontal ? scrollBar.totalSize : 0),
     };
-    const width = bounds.right - bounds.left;
-    const height = bounds.bottom - bounds.top;
-    const isInvalidScroll = !Number.isFinite(offsetX) ||
-        !Number.isFinite(offsetY) ||
-        width <= 0 ||
-        height <= 0 ||
-        Math.abs(offsetX) >= width ||
-        Math.abs(offsetY) >= height;
-    if (isInvalidScroll) {
+    if (isInvalidScrollBounds(bounds, offsetX, offsetY)) {
         return { canPreserveEngine: false, dirtyBounds: [], viewportInfo };
     }
 
     return {
         canPreserveEngine: true,
-        dirtyBounds: [
-            ...createExposedScrollBounds(bounds, offsetX, offsetY),
-            ...createScrollbarBounds(viewport, bounds, viewPortPosition),
-        ],
+        dirtyBounds: createScrollbarBounds(viewport, bounds, viewPortPosition),
         scrollRenderInfo: { bounds, offsetX, offsetY },
         viewportInfo,
     };
@@ -880,21 +914,31 @@ export class Scene extends Disposable {
         const { scaleX, scaleY } = this.getAncestorScale();
         let canPreserveEngine = true;
 
-        for (const viewport of this._viewports) {
-            if (!viewport.shouldIntoRender()) {
-                continue;
-            }
+        const viewportStates = this._viewports
+            .filter((viewport) => viewport.shouldIntoRender())
+            .map((viewport) => createViewportScrollRenderState(viewport, scaleX, scaleY));
 
-            const viewportState = createViewportScrollRenderState(viewport, scaleX, scaleY);
+        for (const [index, viewportState] of viewportStates.entries()) {
             const { viewportInfo, scrollRenderInfo } = viewportState;
-            viewportInfos.set(viewport.viewportKey, viewportInfo);
+            viewportInfos.set(viewportInfo.viewportKey, viewportInfo);
             if (!viewportState.canPreserveEngine) {
                 canPreserveEngine = false;
                 continue;
             }
             dirtyBounds.push(...viewportState.dirtyBounds);
             if (scrollRenderInfo) {
-                scrollRenderInfos.push(scrollRenderInfo);
+                const followingViewportBounds = viewportStates
+                    .slice(index + 1)
+                    .map((state) => state.viewportInfo.viewPortPosition)
+                    .filter((bounds): bounds is IBoundRectNoAngle => bounds != null);
+                const bounds = trimSharedViewportEdges(scrollRenderInfo.bounds, followingViewportBounds);
+                const { offsetX, offsetY } = scrollRenderInfo;
+                if (isInvalidScrollBounds(bounds, offsetX, offsetY)) {
+                    canPreserveEngine = false;
+                    continue;
+                }
+                dirtyBounds.push(...createExposedScrollBounds(bounds, offsetX, offsetY));
+                scrollRenderInfos.push({ bounds, offsetX, offsetY });
             }
         }
 

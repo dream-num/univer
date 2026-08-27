@@ -135,6 +135,27 @@ describe('DropdownMenuLabel', () => {
 });
 
 describe('DropdownWrapper', () => {
+    it('keeps an enabled dropdown open when a sibling is disabled', () => {
+        const { getByRole, queryByText } = render(
+            <ToolbarDropdownProvider>
+                <TooltipWrapper dropdownKey="disabled-dropdown">
+                    <DropdownWrapper disabled overlay={<div>Disabled content</div>}>
+                        <button type="button">Disabled dropdown</button>
+                    </DropdownWrapper>
+                </TooltipWrapper>
+                <TooltipWrapper dropdownKey="enabled-dropdown">
+                    <DropdownWrapper overlay={<div>Enabled content</div>}>
+                        <button type="button">Enabled dropdown</button>
+                    </DropdownWrapper>
+                </TooltipWrapper>
+            </ToolbarDropdownProvider>
+        );
+
+        fireEvent.click(getByRole('button', { name: 'Enabled dropdown' }));
+
+        expect(queryByText('Enabled content')).not.toBeNull();
+    });
+
     it('opens toward the left in RTL layouts', async () => {
         const { findByText, getByRole } = render(
             <ConfigProvider direction="rtl" mountContainer={document.body}>

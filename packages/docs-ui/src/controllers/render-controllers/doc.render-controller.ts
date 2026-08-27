@@ -554,13 +554,12 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
             : this._accumulateWorkerEditBatch(options);
         if (isInitialLayout) {
             this._pendingWorkerEditBatch = null;
-            this._scheduleWorkerLayout(
+            this._scheduleInitialInteractionWindow(
                 layoutRequestId,
                 unitId,
                 skeleton,
                 options,
                 workerOptions,
-                undefined,
                 mainThreadCallbacks,
                 preserveInactiveViewportAnchor
             );
@@ -577,6 +576,39 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
             refreshMainSelection,
             preserveInactiveViewportAnchor
         );
+    }
+
+    private _scheduleInitialInteractionWindow(
+        layoutRequestId: number,
+        unitId: string,
+        skeleton: DocumentSkeleton,
+        options: IDocLayoutScheduleOptions,
+        workerOptions: IDocLayoutScheduleOptions,
+        mainThreadCallbacks: DocLayoutCoordinatorCallbacks,
+        preserveInactiveViewportAnchor: boolean
+    ): void {
+        this._layoutCoordinator.schedule(skeleton, options, {
+            onProgress: mainThreadCallbacks.onProgress,
+            onForegroundReady: (progress) => {
+                if (progress.complete) {
+                    return;
+                }
+
+                const protectedRange = this._resolveProtectedRange(skeleton, 0, progress);
+                this._queueWorkerHandoff(layoutRequestId, () => {
+                    this._scheduleWorkerLayout(
+                        layoutRequestId,
+                        unitId,
+                        skeleton,
+                        options,
+                        workerOptions,
+                        protectedRange,
+                        mainThreadCallbacks,
+                        preserveInactiveViewportAnchor
+                    );
+                });
+            },
+        });
     }
 
     private _prepareReservedLayoutExtent(skeleton: DocumentSkeleton, docsComponent: Documents): void {

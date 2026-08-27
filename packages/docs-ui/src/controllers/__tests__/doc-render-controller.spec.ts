@@ -573,6 +573,56 @@ describe('doc render controller', () => {
         controller.dispose();
     });
 
+    it('publishes the initial interaction window on Main before handing the tail to the Worker', async () => {
+        const { controller, layoutExecutorService, skeletonManager } = createControllerFixture({
+            useWorker: true,
+            hasCompleteLayout: false,
+            initialSkeletonDataMissing: true,
+            pages: Array.from({ length: 5 }, () => ({
+                pageWidth: 640,
+                pageHeight: 900,
+                skeDrawings: new Map(),
+                skeTables: new Map(),
+            })),
+            layoutProgress: Array.from({ length: 5 }, (_, pageIndex) => ({
+                complete: false,
+                anchorReady: true,
+                didPublishAnchor: pageIndex === 0,
+                interactionWindowComplete: pageIndex === 4,
+                elapsedTime: 1,
+                pageCount: 20,
+                publishedPageCount: pageIndex + 1,
+            })),
+        });
+        const skeleton = skeletonManager.getSkeleton();
+
+        skeletonManager.currentSkeletonBefore$.next(skeleton);
+
+        expect(skeleton.startIncrementalLayout).toHaveBeenCalledTimes(1);
+        expect(skeleton.startIncrementalLayout).toHaveBeenCalledWith(expect.objectContaining({
+            reason: 'initial',
+        }));
+        expect(skeleton.beginExternalLayout).not.toHaveBeenCalled();
+
+        for (let pageIndex = 0; pageIndex < 5; pageIndex++) {
+            await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+        }
+
+        await vi.waitFor(() => {
+            expect(skeleton.beginExternalLayout).toHaveBeenCalledWith({
+                reason: 'initial',
+                protectedRange: {
+                    mode: 'paginated',
+                    startPageIndex: 0,
+                    endPageIndex: 4,
+                },
+            });
+        });
+        expect(layoutExecutorService.startLayout).toHaveBeenCalledTimes(1);
+
+        controller.dispose();
+    });
+
     it('refreshes page layout and selection after rich text mutations resize the document', async () => {
         const { commandCallbacks, pageLayoutService, selectionManager } = createControllerFixture();
 
@@ -1936,23 +1986,42 @@ describe('doc render controller', () => {
             workerCompletes: true,
             hasCompleteLayout: false,
             initialSkeletonDataMissing: true,
+            pages: Array.from({ length: 5 }, () => ({
+                pageWidth: 640,
+                pageHeight: 900,
+                skeDrawings: new Map(),
+                skeTables: new Map(),
+            })),
+            layoutProgress: Array.from({ length: 5 }, (_, pageIndex) => ({
+                complete: false,
+                anchorReady: true,
+                didPublishAnchor: pageIndex === 0,
+                interactionWindowComplete: pageIndex === 4,
+                elapsedTime: 1,
+                pageCount: 20,
+                publishedPageCount: pageIndex + 1,
+            })),
         });
 
         skeletonManager.currentSkeletonBefore$.next(skeletonManager.getSkeleton());
-        await vi.waitFor(() => {
-            expect(skeletonManager.getSkeleton().beginExternalLayout).toHaveBeenCalledTimes(1);
-        });
         engineBeginFrame$.next(1);
 
         expect(skeletonManager.getSkeleton().applyLayoutPublication).not.toHaveBeenCalled();
         expect(pageLayoutService.calculatePagePosition).not.toHaveBeenCalled();
+        expect(skeletonManager.getSkeleton().beginExternalLayout).not.toHaveBeenCalled();
 
         sceneParent.width = 1_280;
         sceneParent.height = 900;
-        engineBeginFrame$.next(2);
+        for (let frame = 2; frame <= 6; frame++) {
+            engineBeginFrame$.next(frame);
+        }
+        await vi.waitFor(() => {
+            expect(skeletonManager.getSkeleton().beginExternalLayout).toHaveBeenCalledTimes(1);
+        });
+        engineBeginFrame$.next(7);
 
         expect(skeletonManager.getSkeleton().applyLayoutPublication).toHaveBeenCalledTimes(1);
-        expect(pageLayoutService.calculatePagePosition).toHaveBeenCalledTimes(1);
+        expect(pageLayoutService.calculatePagePosition).toHaveBeenCalled();
     });
 
     it('preserves only the vertical flow extent from the last complete layout', async () => {

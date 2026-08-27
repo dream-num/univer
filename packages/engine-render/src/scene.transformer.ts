@@ -1982,6 +1982,9 @@ export class Transformer extends Disposable implements ITransformerConfig {
         const targetObject = this._findGroupObject(applyObject);
 
         if (this._selectedObjectMap.has(targetObject.oKey)) {
+            if (!this._transformerControlMap.has(targetObject.oKey)) {
+                this._createControl(targetObject);
+            }
             return;
         }
 

@@ -256,6 +256,28 @@ describe('render unit', () => {
         renderUnit.dispose();
     });
 
+    it('reports disposal when its render parent injector is disposed first', () => {
+        const rootInjector = new Injector();
+        const renderParentInjector = rootInjector.createChild();
+        const unit = {
+            getUnitId: () => 'unit-1',
+            type: UniverInstanceType.UNIVER_SHEET,
+        } as any;
+        const renderUnit = rootInjector.createInstance(RenderUnit, {
+            engine: {} as any,
+            scene: {} as any,
+            isMainScene: true,
+            unit,
+            createUnitOptions: { renderParentInjector },
+        });
+
+        expect(renderUnit.isDisposed()).toBe(false);
+        renderParentInjector.dispose();
+        expect(renderUnit.isDisposed()).toBe(true);
+
+        renderUnit.dispose();
+    });
+
     it('exposes mutable render context state for scene lifecycle coordination', () => {
         const renderUnit = createRenderUnit({ makeCurrent: false });
         const states: boolean[] = [];

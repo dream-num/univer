@@ -386,6 +386,40 @@ describe('ContextMenuPanel', () => {
         expect(TestState.cancels).toBe(1);
     });
 
+    it('enters, navigates, and exits a submenu with arrow keys', async () => {
+        renderWithDependencies(<ContextMenuPanel menuType="root" />, {
+            root: [
+                {
+                    key: 'arrange',
+                    order: 0,
+                    item: {
+                        id: 'arrange',
+                        type: MenuItemType.SUBITEMS,
+                        title: 'Arrange',
+                    },
+                },
+            ],
+            arrange: [
+                createButtonItem('bring-front', { title: 'Bring to Front' }),
+                createButtonItem('send-back', { title: 'Send to Back' }),
+            ],
+        });
+        const trigger = screen.getByRole('button', { name: 'translated:Arrange' });
+        trigger.focus();
+
+        fireEvent.keyDown(trigger, { key: 'ArrowRight' });
+        const first = await screen.findByRole('button', { name: 'translated:Bring to Front' });
+        await nextFrame();
+        await waitFor(() => expect(document.activeElement).toBe(first));
+
+        fireEvent.keyDown(first, { key: 'ArrowDown' });
+        const second = screen.getByRole('button', { name: 'translated:Send to Back' });
+        expect(document.activeElement).toBe(second);
+
+        fireEvent.keyDown(second, { key: 'ArrowLeft' });
+        expect(document.activeElement).toBe(trigger);
+    });
+
     it('selects an option from a selector submenu with the selector command id', () => {
         renderWithDependencies(
             <ContextMenuPanel

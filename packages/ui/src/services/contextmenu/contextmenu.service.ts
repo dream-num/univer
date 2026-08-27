@@ -19,6 +19,7 @@ import type { IMouseEvent, IPointerEvent } from '@univerjs/engine-render';
 import { createIdentifier, Disposable, toDisposable } from '@univerjs/core';
 
 export interface IContextMenuTriggerContext {
+    autoFocus?: boolean;
     unitId?: string;
 }
 

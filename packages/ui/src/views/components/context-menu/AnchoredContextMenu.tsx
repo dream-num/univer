@@ -35,6 +35,7 @@ export interface IAnchoredContextMenuProps {
     anchorRect: IContextMenuAnchorRect | null;
     menuType: string;
     anchorVertical?: 'top' | 'bottom';
+    autoFocus?: boolean;
     menuOffset?: number;
     menuManagerService?: IMenuManagerService;
     layoutService?: ILayoutService;
@@ -49,6 +50,7 @@ export function AnchoredContextMenu(props: IAnchoredContextMenuProps) {
         anchorRect,
         menuType,
         anchorVertical = 'bottom',
+        autoFocus,
         menuOffset = 0,
         menuManagerService,
         layoutService,
@@ -61,6 +63,7 @@ export function AnchoredContextMenu(props: IAnchoredContextMenuProps) {
     const menuSessionVersionRef = useRef(0);
     const visibleRef = useRef(visible);
     const menuTypeRef = useRef(menuType);
+    const focusReturnTargetRef = useRef<HTMLElement | null>(null);
 
     useEffect(() => {
         onRequestCloseRef.current = onRequestClose;
@@ -85,10 +88,32 @@ export function AnchoredContextMenu(props: IAnchoredContextMenuProps) {
 
     useLayoutEffect(() => {
         if (visible) {
+            const ownerDocument = contentRef.current?.ownerDocument ?? document;
+            const activeElement = ownerDocument.activeElement;
+            const isFocusInMenu = activeElement !== null
+                && (contentRef.current?.contains(activeElement)
+                    || !!activeElement.closest(`[${CONTEXT_MENU_SUBMENU_PORTAL_ATTR}]`));
+            const HTMLElementConstructor = ownerDocument.defaultView?.HTMLElement;
+
+            if (!isFocusInMenu) {
+                focusReturnTargetRef.current = HTMLElementConstructor && activeElement instanceof HTMLElementConstructor
+                    ? activeElement
+                    : null;
+            }
             contextMenuHostService.activateMenu(hostId);
             return;
         }
 
+        const ownerDocument = contentRef.current?.ownerDocument ?? document;
+        const activeElement = ownerDocument.activeElement;
+        const isFocusInMenu = activeElement !== null
+            && (contentRef.current?.contains(activeElement)
+                || !!activeElement.closest(`[${CONTEXT_MENU_SUBMENU_PORTAL_ATTR}]`));
+        const focusReturnTarget = focusReturnTargetRef.current;
+        if (isFocusInMenu && focusReturnTarget?.isConnected) {
+            focusReturnTarget.focus();
+        }
+        focusReturnTargetRef.current = null;
         contextMenuHostService.deactivateMenu(hostId);
     }, [contextMenuHostService, hostId, visible]);
 
@@ -167,9 +192,11 @@ export function AnchoredContextMenu(props: IAnchoredContextMenuProps) {
                 {menuType && (
                     <ContextMenuPanel
                         menuType={menuType}
+                        autoFocus={autoFocus}
                         menuManagerService={menuManagerService}
                         layoutService={layoutService}
                         menuSessionVersion={menuSessionVersionRef.current}
+                        onCancel={onRequestClose}
                         onOptionSelect={onOptionSelect}
                     />
                 )}

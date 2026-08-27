@@ -15,12 +15,25 @@
  */
 
 import type { IDrawingParam, IDrawingSearch } from '@univerjs/core';
-import { BooleanNumber, DrawingTypeEnum, Injector } from '@univerjs/core';
+import { BooleanNumber, DrawingTypeEnum, Injector, JSON1 } from '@univerjs/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { UnitDrawingService } from '../drawing-manager-impl.service';
 
 const unitId = 'unit';
 const subUnitId = 'subUnit';
+
+type SlideDrawingTestParam = IDrawingParam & {
+    element: {
+        name: string;
+        shapeData: { text: string };
+    };
+};
+
+function createSlideDrawingService(): UnitDrawingService<SlideDrawingTestParam> {
+    const injector = new Injector();
+    injector.add([UnitDrawingService]);
+    return injector.get<UnitDrawingService<SlideDrawingTestParam>>(UnitDrawingService);
+}
 
 function createDrawing(drawingId: string, overrides: Partial<IDrawingParam> = {}): IDrawingParam {
     return {
@@ -120,6 +133,59 @@ describe('UnitDrawingService', () => {
         expect(service.getDrawingByParam(createSearch('a'))).toMatchObject({
             drawingId: 'a',
             hidden: true,
+        });
+    });
+
+    it('preserves disjoint nested fields across concurrent drawing updates', () => {
+        const base: SlideDrawingTestParam = {
+            ...createDrawing('shape-1'),
+            element: {
+                name: 'before',
+                shapeData: { text: 'before' },
+            },
+            transform: { height: 80, left: 100, top: 100, width: 200 },
+        };
+        const textService = createSlideDrawingService();
+        const nameService = createSlideDrawingService();
+        [textService, nameService].forEach((drawingService) => {
+            drawingService.applyJson1(unitId, subUnitId, drawingService.getBatchAddOp([base]).redo);
+        });
+
+        const textOp = textService.getBatchUpdateOp([{
+            ...base,
+            element: {
+                ...base.element,
+                shapeData: { text: 'offline once' },
+            },
+            transform: { ...base.transform, left: 360 },
+        }]).redo;
+        const nameOp = nameService.getBatchUpdateOp([{
+            ...base,
+            element: { ...base.element, name: 'server while offline' },
+        }]).redo;
+        if (!textOp || !nameOp) {
+            throw new Error('Expected both drawing updates to produce JSON1 operations');
+        }
+
+        const textPrime = JSON1.type.transform(textOp, nameOp, 'left');
+        const namePrime = JSON1.type.transform(nameOp, textOp, 'right');
+        if (!textPrime || !namePrime) {
+            throw new Error('Expected concurrent drawing operations to transform');
+        }
+
+        textService.applyJson1(unitId, subUnitId, nameOp);
+        textService.applyJson1(unitId, subUnitId, textPrime);
+        nameService.applyJson1(unitId, subUnitId, textOp);
+        nameService.applyJson1(unitId, subUnitId, namePrime);
+
+        [textService, nameService].forEach((drawingService) => {
+            expect(drawingService.getDrawingByParam(createSearch('shape-1'))).toMatchObject({
+                element: {
+                    name: 'server while offline',
+                    shapeData: { text: 'offline once' },
+                },
+                transform: { left: 360 },
+            });
         });
     });
 

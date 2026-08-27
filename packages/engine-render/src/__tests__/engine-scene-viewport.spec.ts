@@ -941,6 +941,71 @@ describe('engine scene viewport extra', () => {
         engine.dispose();
     });
 
+    it('renders controls from resolved display geometry without changing the selected object', () => {
+        const { engine, scene } = createFixture();
+        engine.setActiveScene(scene.sceneKey);
+
+        const rect = scene.getObject('rect-main');
+        if (!(rect instanceof Rect)) {
+            throw new TypeError('Fixture should contain the main rectangle');
+        }
+        rect.transformerConfig = {
+            keepRatio: false,
+            controlStateResolver: (object) => ({
+                ...object.getState(),
+                left: object.left - 8,
+                top: object.top - 6,
+                width: object.width + 24,
+                height: object.height + 18,
+            }),
+        };
+        const transformer = new Transformer(scene);
+
+        transformer.setSelectedControl(rect);
+        const control = scene.getObject(`__SpreadsheetTransformer___${rect.oKey}`);
+        if (!(control instanceof Group)) {
+            throw new TypeError('Transformer should create a control group');
+        }
+
+        expect(control.getState()).toEqual(expect.objectContaining({
+            left: 2,
+            top: 4,
+            width: 124,
+            height: 78,
+        }));
+        expect(rect.getState()).toEqual(expect.objectContaining({
+            left: 10,
+            top: 10,
+            width: 100,
+            height: 60,
+        }));
+
+        rect.translate(30, 40);
+        transformer.updateControl();
+        expect(control.getState()).toEqual(expect.objectContaining({
+            left: 22,
+            top: 34,
+            width: 124,
+            height: 78,
+        }));
+
+        const resizeAnchor = control.getObjects().find((object) => object.oKey.includes('__SpreadsheetTransformerResizeRB__'));
+        if (!resizeAnchor) {
+            throw new TypeError('Transformer should create a bottom-right resize anchor');
+        }
+        resizeAnchor.triggerPointerDown(createInputEvent('pointerdown', { offsetX: 146, offsetY: 112 }));
+        scene.onPointerMove$.emitEvent(createInputEvent('pointermove', { offsetX: 186, offsetY: 137 }));
+        scene.onPointerUp$.emitEvent(createInputEvent('pointerup', { offsetX: 186, offsetY: 137 }));
+        expect(rect.getState()).toEqual(expect.objectContaining({
+            width: 140,
+            height: 85,
+        }));
+
+        transformer.dispose();
+        scene.dispose();
+        engine.dispose();
+    });
+
     it('insets the icon inside a small rotate control and matches the connector to its border', () => {
         const { engine, scene } = createFixture();
         engine.setActiveScene(scene.sceneKey);

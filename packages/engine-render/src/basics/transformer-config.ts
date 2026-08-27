@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
+import type { ITransformState, Nullable } from '@univerjs/core';
 import type { BaseObject } from '../base-object';
 import type { IMouseEvent, IPointerEvent } from './i-events';
 
@@ -75,6 +75,9 @@ export interface ITransformerConfig {
 
     /** Render transformer controls on a layer independent from the selected object. */
     controlLayerIndex?: number;
+
+    /** Resolve display geometry for controls without changing the object's persisted transform. */
+    controlStateResolver?: (object: BaseObject) => ITransformState;
 
     zeroLeft?: number;
     zeroTop?: number;

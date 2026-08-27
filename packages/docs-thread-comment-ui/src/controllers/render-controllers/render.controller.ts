@@ -34,7 +34,7 @@ import { DocRenderController } from '@univerjs/docs-ui';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 import { deserializeThreadCommentAnchor, ThreadCommentAnchorKind, ThreadCommentModel } from '@univerjs/thread-comment';
 import { ThreadCommentCanvasOverlay, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
-import { pairwise, startWith } from 'rxjs';
+import { pairwise, skip, startWith } from 'rxjs';
 import { ShowCommentPanelOperation } from '../../commands/operations/show-comment-panel.operation';
 
 const DOC_COMMENT_DRAWING_OVERLAY_KEY = 'doc-thread-comment-drawing-overlay';
@@ -76,6 +76,7 @@ export class DocThreadCommentRenderController extends Disposable implements IRen
             this._threadCommentPanelService.activeCommentId$,
             this._threadCommentPanelService.hoveredCommentId$,
         ].forEach((observable) => this.disposeWithMe(observable.pipe(
+            skip(1),
             startWith(undefined),
             pairwise()
         ).subscribe(([previous, current]) => {

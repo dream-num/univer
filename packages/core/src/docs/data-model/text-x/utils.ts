@@ -21,6 +21,8 @@ import type {
     ICustomRange,
     IDocumentBlockRange,
     IDocumentBody,
+    IDocxExportExcludedRange,
+    IDocxRawBlock,
     IParagraph,
     ISectionBreak,
     ITextRun,
@@ -88,10 +90,10 @@ export function getTextRunSlice(
         const newTextRuns: ITextRun[] = [];
 
         for (const textRun of textRuns) {
-            const clonedTextRun = Tools.deepClone(textRun);
-            const { st, ed } = clonedTextRun;
+            const { st, ed } = textRun;
 
             if (Tools.hasIntersectionBetweenTwoRanges(st, ed, startOffset, endOffset)) {
+                const clonedTextRun = Tools.deepClone(textRun);
                 if (startOffset >= st && startOffset <= ed) {
                     newTextRuns.push({
                         ...clonedTextRun,
@@ -283,7 +285,22 @@ export function getCustomBlockSlice(
     startOffset: number,
     endOffset: number
 ) {
-    const { customBlocks = [] } = body;
+    return getCustomBlockMetadataSlice(body.customBlocks ?? [], startOffset, endOffset);
+}
+
+function getDocxRawCustomBlockSlice(
+    body: IDocumentBody,
+    startOffset: number,
+    endOffset: number
+) {
+    return getCustomBlockMetadataSlice(body.docxRawCustomBlocks ?? [], startOffset, endOffset);
+}
+
+function getCustomBlockMetadataSlice(
+    customBlocks: ICustomBlock[],
+    startOffset: number,
+    endOffset: number
+) {
     const newCustomBlocks: ICustomBlock[] = [];
 
     for (const block of customBlocks) {
@@ -299,6 +316,24 @@ export function getCustomBlockSlice(
             startIndex: b.startIndex - startOffset,
         }));
     }
+}
+
+function getDocxRawBlockSlice(body: IDocumentBody, startOffset: number, endOffset: number): IDocxRawBlock[] {
+    return (body.docxRawBlocks ?? [])
+        .filter((rawBlock) => rawBlock.startIndex >= startOffset && rawBlock.startIndex < endOffset)
+        .map((rawBlock) => ({ ...Tools.deepClone(rawBlock), startIndex: rawBlock.startIndex - startOffset }));
+}
+
+function getDocxExportExcludedRangeSlice(
+    body: IDocumentBody,
+    startOffset: number,
+    endOffset: number
+): IDocxExportExcludedRange[] {
+    return (body.docxExportExcludedRanges ?? []).flatMap((range) => {
+        const start = Math.max(range.start, startOffset);
+        const end = Math.min(range.end, endOffset);
+        return end > start ? [{ start: start - startOffset, end: end - startOffset }] : [];
+    });
 }
 
 export function getBodySlice(
@@ -360,6 +395,15 @@ export function getBodySlice(
     }
 
     docBody.customBlocks = getCustomBlockSlice(body, startOffset, endOffset);
+    if (body.docxRawCustomBlocks != null) {
+        docBody.docxRawCustomBlocks = getDocxRawCustomBlockSlice(body, startOffset, endOffset) ?? [];
+    }
+    if (body.docxRawBlocks != null) {
+        docBody.docxRawBlocks = getDocxRawBlockSlice(body, startOffset, endOffset);
+    }
+    if (body.docxExportExcludedRanges != null) {
+        docBody.docxExportExcludedRanges = getDocxExportExcludedRangeSlice(body, startOffset, endOffset);
+    }
 
     return docBody;
 }
@@ -384,8 +428,47 @@ export function getBodySliceForSplitTextXAction(
     return getBodySlice(body, startOffset, endOffset, returnEmptyArray, type, SliceStructuralRangeMode.ending);
 }
 
+function shiftBodyMetadata(body: IDocumentBody, leftOffset: number, rightOffset: number): void {
+    body.textRuns?.forEach((textRun) => {
+        textRun.st += leftOffset;
+        textRun.ed += leftOffset;
+    });
+    body.paragraphs?.forEach((paragraph) => {
+        paragraph.startIndex += leftOffset;
+    });
+    body.customBlocks?.forEach((customBlock) => {
+        customBlock.startIndex += leftOffset;
+    });
+    body.docxRawCustomBlocks?.forEach((customBlock) => {
+        customBlock.startIndex += leftOffset;
+    });
+    body.docxRawBlocks?.forEach((rawBlock) => {
+        rawBlock.startIndex += leftOffset;
+    });
+    body.docxExportExcludedRanges?.forEach((range) => {
+        range.start += leftOffset;
+        range.end += leftOffset;
+    });
+    body.customRanges?.forEach((range) => {
+        range.startIndex += leftOffset;
+        range.endIndex += leftOffset;
+    });
+    body.customDecorations?.forEach((decoration) => {
+        decoration.startIndex += leftOffset;
+        decoration.endIndex += rightOffset;
+    });
+    body.tables?.forEach((table) => {
+        table.startIndex += leftOffset;
+        table.endIndex += rightOffset;
+    });
+    body.columnGroups?.forEach((columnGroup) => {
+        columnGroup.startIndex += leftOffset;
+        columnGroup.endIndex += rightOffset;
+    });
+}
+
 export function normalizeBody(body: IDocumentBody): IDocumentBody {
-    const { dataStream, textRuns, paragraphs, customRanges, customDecorations, tables, columnGroups, blockRanges } = body;
+    const { dataStream, textRuns, customRanges } = body;
     let leftOffset = 0;
     let rightOffset = 0;
 
@@ -411,45 +494,11 @@ export function normalizeBody(body: IDocumentBody): IDocumentBody {
         }
     }
 
-    textRuns?.forEach((textRun) => {
-        textRun.st += leftOffset;
-        textRun.ed += leftOffset;
-    });
-
-    paragraphs?.forEach((p) => {
-        p.startIndex += leftOffset;
-    });
-
-    customRanges?.forEach((range) => {
-        range.startIndex += leftOffset;
-        range.endIndex += leftOffset;
-    });
-
-    customDecorations?.forEach((d) => {
-        d.startIndex += leftOffset;
-        d.endIndex += rightOffset;
-    });
-
-    tables?.forEach((table) => {
-        table.startIndex += leftOffset;
-        table.endIndex += rightOffset;
-    });
-
-    columnGroups?.forEach((columnGroup) => {
-        columnGroup.startIndex += leftOffset;
-        columnGroup.endIndex += rightOffset;
-    });
+    shiftBodyMetadata(body, leftOffset, rightOffset);
 
     return {
         ...body,
         dataStream: newData,
-        textRuns,
-        paragraphs,
-        customRanges,
-        customDecorations,
-        tables,
-        columnGroups,
-        blockRanges,
     };
 }
 
@@ -706,9 +755,9 @@ export function isUselessRetainAction(action: IRetainAction): boolean {
         return true;
     }
 
-    const { textRuns, paragraphs, customRanges, customBlocks, customDecorations, tables, columnGroups, blockRanges } = body;
+    const { textRuns, paragraphs, customRanges, customBlocks, docxRawCustomBlocks, docxRawBlocks, docxExportExcludedRanges, customDecorations, tables, columnGroups, blockRanges } = body;
 
-    if (textRuns == null && paragraphs == null && customRanges == null && customBlocks == null && customDecorations == null && tables == null && columnGroups == null && blockRanges == null) {
+    if (textRuns == null && paragraphs == null && customRanges == null && customBlocks == null && docxRawCustomBlocks == null && docxRawBlocks == null && docxExportExcludedRanges == null && customDecorations == null && tables == null && columnGroups == null && blockRanges == null) {
         return true;
     }
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { clsx, Tooltip } from '@univerjs/design';
+import { Button, clsx, Tooltip } from '@univerjs/design';
 import { CloseIcon } from '@univerjs/icons';
 import { useEffect, useRef, useState } from 'react';
 
@@ -100,13 +100,10 @@ export function ProgressBar(props: IProgressBarProps) {
                     }}
                 />
             </div>
-            <button
-                className={`
-                  univer-flex univer-size-4 univer-cursor-pointer univer-items-center univer-justify-center
-                  univer-border-none univer-bg-transparent univer-p-0
-                  hover:univer-opacity-50
-                `}
-                type="button"
+            <Button
+                className="univer-size-4 univer-p-0"
+                size="small"
+                variant="text"
                 onClick={onTerminate}
             >
                 <CloseIcon
@@ -115,7 +112,7 @@ export function ProgressBar(props: IProgressBarProps) {
                       dark:!univer-text-gray-0
                     `}
                 />
-            </button>
+            </Button>
         </div>
     );
 };

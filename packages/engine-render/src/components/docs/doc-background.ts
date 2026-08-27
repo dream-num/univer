@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IDocumentSkeletonPage } from '../../basics/i-document-skeleton-cached';
 import type { IViewportInfo } from '../../basics/vector2';
 import type { UniverRenderingContext } from '../../context';
 import type { IPathProps } from '../../shape';
@@ -29,6 +30,10 @@ const PAGE_FILL_COLOR = 'gray.0';
 const UNSPECIFIED_PAGE_FILL_COLOR = 'gray.50';
 const DOCS_WORKSPACE_FILL_COLOR = 'gray.100';
 const MARGIN_STROKE_COLOR = 'gray.300';
+const SKELETON_BASE_COLOR = 'rgba(148, 163, 184, 0.18)';
+const SKELETON_HIGHLIGHT_COLOR = 'rgba(255, 255, 255, 0.5)';
+const SKELETON_LINE_HEIGHT = 12;
+const SKELETON_LINE_GAP = 14;
 
 export class DocBackground extends DocComponent {
     private _drawLiquid: Liquid;
@@ -86,6 +91,7 @@ export class DocBackground extends DocComponent {
         this._drawWorkspaceBackground(ctx, workspaceFill, bounds);
 
         if (documentFlavor === DocumentFlavor.MODERN) {
+            this._drawContinuousLayoutSkeleton(ctx, bounds);
             return;
         }
 
@@ -175,6 +181,19 @@ export class DocBackground extends DocComponent {
             Path.drawWith(ctx, marginIdentification);
             ctx.restore();
 
+            if (page.isLayoutPlaceholder || page.isMaterializationPlaceholder) {
+                const contentWidth = Math.max(80, pageWidth - marginLeft - marginRight);
+                const contentHeight = Math.max(160, pageHeight - originMarginTop - originMarginBottom - 48);
+                this._drawSkeletonLines(
+                    ctx,
+                    pageLeft + marginLeft,
+                    pageTop + originMarginTop + 24,
+                    contentWidth,
+                    contentHeight,
+                    bounds
+                );
+            }
+
             const { x, y } = this._drawLiquid.translatePage(
                 page,
                 this.pageLayoutType,
@@ -185,6 +204,8 @@ export class DocBackground extends DocComponent {
             pageLeft += x;
             pageTop += y;
         }
+
+        this._drawPaginatedPlaceholderPages(ctx, pages[pages.length - 1], pageLeft, pageTop, bounds);
     }
 
     private _drawWorkspaceBackground(ctx: UniverRenderingContext, fill: string, bounds?: IViewportInfo) {
@@ -207,6 +228,125 @@ export class DocBackground extends DocComponent {
             zIndex: 0,
         });
         ctx.restore();
+    }
+
+    private _drawPaginatedPlaceholderPages(
+        ctx: UniverRenderingContext,
+        templatePage: IDocumentSkeletonPage,
+        initialPageLeft: number,
+        initialPageTop: number,
+        bounds?: IViewportInfo
+    ): void {
+        const progress = this.getSkeleton()?.getLayoutProgress?.();
+        const publishedPageCount = this.getSkeleton()?.getSkeletonData()?.pages.length ?? progress?.pageCount ?? 0;
+        if (progress == null || progress.complete || progress.estimatedPageCount <= publishedPageCount) {
+            return;
+        }
+
+        const visibleBound = bounds?.cacheBound ?? bounds?.viewBound;
+        let pageLeft = initialPageLeft;
+        let pageTop = initialPageTop;
+
+        for (let pageIndex = publishedPageCount; pageIndex < progress.estimatedPageCount; pageIndex++) {
+            const isVisible = visibleBound == null || !(
+                pageLeft + templatePage.pageWidth < visibleBound.left ||
+                pageLeft > visibleBound.right ||
+                pageTop + templatePage.pageHeight < visibleBound.top ||
+                pageTop > visibleBound.bottom
+            );
+
+            if (isVisible) {
+                ctx.save();
+                ctx.translate(pageLeft - 0.5, pageTop - 0.5);
+                Rect.drawWith(ctx, {
+                    width: templatePage.pageWidth,
+                    height: templatePage.pageHeight,
+                    strokeWidth: 1,
+                    stroke: this._pageStrokeColor ?? PAGE_STROKE_COLOR,
+                    fill: this._pageFillColor ?? PAGE_FILL_COLOR,
+                    zIndex: 3,
+                });
+                ctx.restore();
+
+                const contentLeft = pageLeft + templatePage.marginLeft;
+                const contentTop = pageTop + templatePage.marginTop + 24;
+                const contentWidth = Math.max(
+                    80,
+                    templatePage.pageWidth - templatePage.marginLeft - templatePage.marginRight
+                );
+                const contentHeight = Math.max(
+                    160,
+                    templatePage.pageHeight - templatePage.marginTop - templatePage.marginBottom - 48
+                );
+                this._drawSkeletonLines(ctx, contentLeft, contentTop, contentWidth, contentHeight, bounds);
+            }
+
+            const offset = this._drawLiquid.translatePage(
+                templatePage,
+                this.pageLayoutType,
+                this.pageMarginLeft,
+                this.pageMarginTop
+            );
+            pageLeft += offset.x;
+            pageTop += offset.y;
+        }
+    }
+
+    private _drawContinuousLayoutSkeleton(ctx: UniverRenderingContext, bounds?: IViewportInfo): void {
+        const skeleton = this.getSkeleton();
+        const progress = skeleton?.getLayoutProgress?.();
+        const page = skeleton?.getSkeletonData()?.pages[0];
+        if (progress == null || progress.complete || page == null) {
+            return;
+        }
+
+        const visibleBound = bounds?.cacheBound ?? bounds?.viewBound;
+        const startX = page.marginLeft;
+        const startY = Math.max(page.marginTop, page.height + 20);
+        const width = Math.max(80, page.pageWidth - page.marginLeft - page.marginRight);
+        const visibleBottom = visibleBound?.bottom ?? startY + 320;
+        this._drawSkeletonLines(ctx, startX, startY, width, Math.max(160, visibleBottom - startY), bounds);
+    }
+
+    private _drawSkeletonLines(
+        ctx: UniverRenderingContext,
+        left: number,
+        top: number,
+        width: number,
+        height: number,
+        bounds?: IViewportInfo
+    ): void {
+        if (height <= SKELETON_LINE_HEIGHT) {
+            return;
+        }
+
+        const visibleBound = bounds?.cacheBound ?? bounds?.viewBound;
+        const animationPhase = (Date.now() % 1200) / 1200;
+        const highlightWidth = Math.max(80, width * 0.35);
+        const highlightLeft = left - highlightWidth + (width + highlightWidth * 2) * animationPhase;
+        const gradient = ctx.createLinearGradient(highlightLeft, 0, highlightLeft + highlightWidth, 0);
+        gradient.addColorStop(0, SKELETON_BASE_COLOR);
+        gradient.addColorStop(0.5, SKELETON_HIGHLIGHT_COLOR);
+        gradient.addColorStop(1, SKELETON_BASE_COLOR);
+
+        ctx.save();
+        ctx.fillStyle = gradient;
+        const lineStep = SKELETON_LINE_HEIGHT + SKELETON_LINE_GAP;
+        const lineCount = Math.min(12, Math.ceil(height / lineStep));
+        for (let index = 0; index < lineCount; index++) {
+            const y = top + index * lineStep;
+            if (visibleBound != null && (y + SKELETON_LINE_HEIGHT < visibleBound.top || y > visibleBound.bottom)) {
+                continue;
+            }
+            const lineWidth = index % 4 === 3 ? width * 0.62 : width * (0.82 + (index % 3) * 0.07);
+            ctx.beginPath();
+            ctx.roundRect(left, y, lineWidth, SKELETON_LINE_HEIGHT, SKELETON_LINE_HEIGHT / 2);
+            ctx.fill();
+        }
+        ctx.restore();
+
+        // Keep only the lightweight background layer animating while layout is incomplete.
+        this.makeDirty(true);
     }
 
     private _drawPageBackgroundImage(ctx: UniverRenderingContext, source: string | undefined, width: number, height: number) {

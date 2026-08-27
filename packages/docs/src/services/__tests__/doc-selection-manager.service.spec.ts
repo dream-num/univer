@@ -127,6 +127,57 @@ describe('DocSelectionManagerService', () => {
         sub.unsubscribe();
     });
 
+    it('preserves active editing state when refreshed layout geometry replaces the selection', () => {
+        const service = createService();
+        const refreshes: unknown[] = [];
+        const sub = service.refreshSelection$.subscribe((value) => refreshes.push(value));
+        service.__TEST_ONLY_setCurrentSelection({ unitId: 'doc-1', subUnitId: 'doc-1' });
+        service.__TEST_ONLY_add([{
+            startOffset: 2,
+            endOffset: 2,
+            collapsed: true,
+            isActive: true,
+        }]);
+
+        service.refreshSelection(undefined, true);
+
+        expect(refreshes.at(-1)).toEqual({
+            unitId: 'doc-1',
+            subUnitId: 'doc-1',
+            docRanges: [expect.objectContaining({ startOffset: 2, endOffset: 2 })],
+            isEditing: true,
+            options: undefined,
+        });
+        sub.unsubscribe();
+    });
+
+    it('replaces logical selection state without publishing a render refresh', () => {
+        const service = createService();
+        const refreshes: unknown[] = [];
+        const sub = service.refreshSelection$.subscribe((value) => refreshes.push(value));
+        service.__TEST_ONLY_setCurrentSelection({ unitId: 'doc-1', subUnitId: 'doc-1' });
+
+        service.replaceSelectionInfoWithoutRefresh({
+            textRanges: [{
+                startOffset: 20,
+                endOffset: 20,
+                collapsed: true,
+                isActive: true,
+            }],
+            rectRanges: [],
+            segmentId: '',
+            segmentPage: -1,
+            isEditing: true,
+            style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+            options: { keepVisible: true },
+        }, { unitId: 'doc-1', subUnitId: 'doc-1' });
+
+        expect(service.getActiveTextRange()?.endOffset).toBe(20);
+        expect(service.getSelectionInfo()?.isEditing).toBe(true);
+        expect(refreshes).toEqual([null]);
+        sub.unsubscribe();
+    });
+
     it('replaces render selections, publishes them, and sorts text and rect ranges together', async () => {
         const service = createService();
         const selections: unknown[] = [];

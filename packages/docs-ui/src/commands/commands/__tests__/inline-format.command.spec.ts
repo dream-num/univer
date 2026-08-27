@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommand, IDocumentData, Injector, ITextStyle, Univer } from '@univerjs/core';
+import type { DocumentDataModel, ICommand, IDocumentBody, IDocumentData, Injector, ITextStyle, Univer } from '@univerjs/core';
+import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import {
     BaselineOffset,
     BooleanNumber,
@@ -23,12 +24,14 @@ import {
     ICommandService,
     IUniverInstanceService,
     RedoCommand,
+    Tools,
     UndoCommand,
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
+    getStyleInTextRange,
     ResetInlineFormatTextBackgroundColorCommand,
     ResetInlineFormatTextColorCommand,
     SetInlineFormatBoldCommand,
@@ -45,6 +48,30 @@ import {
     SetInlineFormatUnderlineCommand,
 } from '../inline-format.command';
 import { createCommandTestBed } from './create-command-test-bed';
+
+describe('getStyleInTextRange', () => {
+    it('reads an expanded selection without cloning unrelated text runs', () => {
+        const body = {
+            dataStream: 'x'.repeat(10_000),
+            textRuns: Array.from({ length: 1_000 }, (_value, index) => ({
+                st: index * 10,
+                ed: index * 10 + 5,
+                ts: { fs: 10 + index % 3 },
+            })),
+        } satisfies IDocumentBody;
+        const range = {
+            startOffset: 5_001,
+            endOffset: 5_004,
+            collapsed: false,
+        } satisfies ITextRangeWithStyle;
+        const cloneSpy = vi.spyOn(Tools, 'deepClone');
+
+        expect(getStyleInTextRange(body, range, {})).toMatchObject({ fs: 12 });
+        expect(cloneSpy.mock.calls.length).toBeLessThan(10);
+
+        cloneSpy.mockRestore();
+    });
+});
 
 describe('Test inline format commands', () => {
     let univer: Univer;

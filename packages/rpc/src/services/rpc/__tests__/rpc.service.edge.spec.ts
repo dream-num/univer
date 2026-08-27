@@ -175,10 +175,23 @@ describe('rpc.service edge cases', () => {
         protocol.emit({ seq: subscribeSeq, type: SUBSCRIBE_COMPLETE });
         stream.unsubscribe();
 
-        (client as unknown as { _disposed: boolean })._disposed = true;
+        const pendingCall = channel.call('pending');
+        const subscriptionError = vi.fn();
+        channel.subscribe('pending$').subscribe({ error: subscriptionError });
+        client.dispose();
+
+        await expect(pendingCall).rejects.toThrow('[ChannelClient]: client is disposed!');
+        expect(subscriptionError).toHaveBeenCalledWith(expect.objectContaining({
+            message: '[ChannelClient]: client is disposed!',
+        }));
         await expect(channel.call('disposed')).rejects.toThrow('[ChannelClient]: client is disposed!');
         expect(() => channel.subscribe('disposed$')).toThrow('[ChannelClient]: client is disposed!');
         client.dispose();
+
+        const uninitializedClient = new ChannelClient(new TestMessageProtocol() as IMessageProtocol);
+        const waitingCall = uninitializedClient.getChannel('waiting').call('pending');
+        uninitializedClient.dispose();
+        await expect(waitingCall).rejects.toThrow('[ChannelClient]: client is disposed!');
     });
 
     it('ChannelServer should handle request branches, call/subscribe failures and unsubscription', async () => {
@@ -260,6 +273,15 @@ describe('rpc.service edge cases', () => {
         protocol.emit({ type: UNSUBSCRIBE, seq: 30, channelName: 'stream', method: 'stream$' });
         expect(unsubscribed).toBe(true);
 
+        let disposedSubscription = false;
+        server.registerChannel('dispose-stream', {
+            call: async () => true,
+            subscribe: () => new Observable<string>(() => () => {
+                disposedSubscription = true;
+            }),
+        } as IChannel);
+        protocol.emit({ type: SUBSCRIBE, seq: 31, channelName: 'dispose-stream', method: 'stream$' });
         server.dispose();
+        expect(disposedSubscription).toBe(true);
     });
 });

@@ -61,7 +61,7 @@ interface IGlyphHorizonData {
 export class FontCache {
     private static _getTextHeightCache: { [key: string]: { width: number; height: number } } = {};
 
-    private static _context: CanvasRenderingContext2D;
+    private static _context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null;
 
     private static _fontDataMap: Map<string, IFontData> = new Map();
 
@@ -105,7 +105,6 @@ export class FontCache {
     static autoCleanFontMeasureCache(cacheLimit: number = 1000000) {
         let allSize = 0;
         let isDelete = false;
-        let i = 0;
 
         for (const item of this._globalFontMeasureCache) {
             const [, values] = item;
@@ -114,7 +113,6 @@ export class FontCache {
                 isDelete = true;
                 break;
             }
-            i++;
         }
 
         if (isDelete) {
@@ -169,6 +167,13 @@ export class FontCache {
             return this._getTextHeightCache[fontStyle];
         }
 
+        if (typeof document === 'undefined') {
+            return {
+                width: 0,
+                height: this._getFontSizeFromStyle(fontStyle),
+            };
+        }
+
         let dom = document.getElementById('universheetTextSizeTest');
         const defaultStyle = 'float:left;white-space:nowrap;visibility:hidden;margin:0;padding:0;';
         if (!dom) {
@@ -213,8 +218,7 @@ export class FontCache {
      */
     static getMeasureText(content: string, fontString: string): IMeasureTextCache {
         if (!this._context) {
-            const canvas = document.createElement('canvas');
-            this._context = canvas.getContext('2d')!;
+            this._context = this._createMeasureContext();
         }
         if (!this._context) {
             return {
@@ -260,7 +264,10 @@ export class FontCache {
             Number.isNaN(fontBoundingBoxAscent) ||
             Number.isNaN(fontBoundingBoxDescent)
         ) {
-            const oneLineTextHeight = this.getTextSizeByDom(DEFAULT_MEASURE_TEXT, fontString).height;
+            const measuredHeight = actualBoundingBoxAscent + actualBoundingBoxDescent;
+            const oneLineTextHeight = typeof document === 'undefined' && typeof OffscreenCanvas !== 'undefined' && Number.isFinite(measuredHeight) && measuredHeight > 0
+                ? measuredHeight
+                : this.getTextSizeByDom(DEFAULT_MEASURE_TEXT, fontString).height;
 
             if (ctx.textBaseline === 'top') {
                 cache.fontBoundingBoxAscent = cache.actualBoundingBoxAscent = oneLineTextHeight;
@@ -277,6 +284,23 @@ export class FontCache {
         this.setFontMeasureCache(fontString, content, cache);
 
         return cache;
+    }
+
+    private static _createMeasureContext(): CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null {
+        if (typeof document !== 'undefined') {
+            return document.createElement('canvas').getContext('2d');
+        }
+
+        if (typeof OffscreenCanvas !== 'undefined') {
+            return new OffscreenCanvas(1, 1).getContext('2d');
+        }
+
+        return null;
+    }
+
+    private static _getFontSizeFromStyle(fontStyle: string): number {
+        const match = /(?:^|\s)(\d+(?:\.\d+)?)px(?:\s|\/|$)/.exec(fontStyle);
+        return match == null ? 0 : Number(match[1]);
     }
 
     private static _clearMeasureCache(limit: number, values: Map<string, IMeasureTextCache>) {

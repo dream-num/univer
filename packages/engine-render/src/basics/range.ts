@@ -49,7 +49,9 @@ export interface IRectRangeWithStyle extends ITextRangeWithStyle {
 }
 
 // Only use in add/replaceDocRanges methods.
-export type ISuccinctDocRangeParam = Pick<ITextRangeWithStyle, 'startOffset' | 'endOffset' | 'segmentId' | 'segmentPage' | 'style' | 'rangeType'>;
+export type ISuccinctDocRangeParam =
+    Pick<ITextRangeWithStyle, 'startOffset' | 'endOffset' | 'segmentId' | 'segmentPage' | 'style' | 'rangeType'> &
+    Partial<Pick<ITextRangeWithStyle, 'collapsed' | 'direction' | 'isActive' | 'startNodePosition' | 'endNodePosition'>>;
 
 export interface IDocSelectionInnerParam {
     textRanges: ITextRangeWithStyle[];

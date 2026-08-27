@@ -80,7 +80,8 @@
     "dependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/protocol": "workspace:*"
+        "@univerjs/protocol": "workspace:*",
+        "@univerjs/rpc": "workspace:*"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",

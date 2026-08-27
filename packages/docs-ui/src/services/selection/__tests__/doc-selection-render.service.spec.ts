@@ -83,6 +83,8 @@ interface IFakeTextRange {
     style?: { strokeWidth: number };
     segmentId?: string;
     segmentPage?: number;
+    startOffset?: number;
+    endOffset?: number;
 }
 
 interface IFakeRectRange {
@@ -123,9 +125,11 @@ interface IServiceHarness {
     _isEmpty(): boolean;
     _getCanvasOffset(): { left: number; top: number };
     _moving(moveOffsetX: number, moveOffsetY: number): void;
+    _isAnotherEditorFocused: Mock<() => boolean>;
     _updateInputPosition(): void;
     addDocRanges(ranges: Array<Record<string, unknown>>, isEditing?: boolean, options?: Record<string, boolean>): void;
     cancelPointerSelection(): void;
+    replaceDocRanges(ranges: Array<Record<string, unknown>>, isEditing?: boolean, options?: Record<string, boolean>): boolean;
     setCursorManually(evtOffsetX: number, evtOffsetY: number): void;
 }
 
@@ -196,6 +200,7 @@ function createService() {
         _getAllRectRanges: vi.fn(() => ['serialized-rect']),
         _findNodeByCoord: vi.fn(),
         _getNodePosition: vi.fn(),
+        _isAnotherEditorFocused: vi.fn(() => false),
         focus: vi.fn(),
     }, DocSelectionRenderService.prototype) as IServiceHarness;
 
@@ -447,6 +452,19 @@ describe('doc selection render service internals', () => {
         expect(service.focus).toHaveBeenCalledTimes(1);
     });
 
+    it('does not steal focus from another editor when input anchor is unavailable', () => {
+        const { service } = createService();
+        service._isAnotherEditorFocused.mockReturnValue(true);
+        service._rangeList = [createTextRange({
+            getAnchor: vi.fn(() => null),
+            isActive: vi.fn(() => true),
+        })];
+
+        service._updateInputPosition();
+
+        expect(service.focus).not.toHaveBeenCalled();
+    });
+
     it('creates a text range from anchor position with current skeleton and segment context', () => {
         const { service } = createService();
         const oldText = createTextRange();
@@ -656,6 +674,32 @@ describe('doc selection render service internals', () => {
         expect(getTextRangeFromCharIndexMock).not.toHaveBeenCalled();
         expect(getRangeListFromCharIndexMock).not.toHaveBeenCalled();
         expect(service._rangeList).toEqual([cursorRange]);
+    });
+
+    it('keeps the rendered caret when its replacement page is not resolved yet', () => {
+        const { service } = createService();
+        const currentCaret = createTextRange({
+            collapsed: true,
+            startOffset: 34,
+            endOffset: 34,
+        });
+        const unresolvedCaret = createTextRange({
+            collapsed: true,
+        });
+        service._rangeList = [currentCaret];
+        cursorConvertToTextRangeMock.mockReturnValueOnce(unresolvedCaret);
+
+        const replaced = service.replaceDocRanges([{
+            startOffset: 35,
+            endOffset: 35,
+            collapsed: true,
+        }], true);
+
+        expect(replaced).toBe(false);
+        expect(service._rangeList).toEqual([currentCaret]);
+        expect(currentCaret.dispose).not.toHaveBeenCalled();
+        expect(unresolvedCaret.dispose).toHaveBeenCalledTimes(1);
+        expect(service._textSelectionInner$.next).not.toHaveBeenCalled();
     });
 
     it('deactivates structural carets when document ranges contain a visible selection', () => {

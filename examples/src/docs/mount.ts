@@ -1,5 +1,6 @@
 import type { MountExample } from '../mount-example';
 import type { IWorkbenchMountOptions } from '../workbench-settings';
+import { UniverDocsLayoutWorkerPlugin } from '@univerjs/docs';
 import { SetDocZoomRatioOperation } from '@univerjs/docs-ui';
 import { UniverDocsCorePreset } from '@univerjs/preset-docs-core';
 import { UniverDocsDrawingPreset } from '@univerjs/preset-docs-drawing';
@@ -54,6 +55,9 @@ export const mount: MountExample = async (host, options) => {
             UniverDocsHyperLinkPreset(),
             UniverDocsThreadCommentPreset(),
         ],
+    });
+    univer.registerPlugin(UniverDocsLayoutWorkerPlugin, {
+        workerFactory: () => new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' }),
     });
 
     try {

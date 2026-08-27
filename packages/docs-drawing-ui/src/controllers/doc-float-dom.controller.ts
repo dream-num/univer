@@ -43,6 +43,7 @@ import { DrawingRenderService } from '@univerjs/drawing-ui';
 import { CURSOR_TYPE, IRenderManagerService } from '@univerjs/engine-render';
 import { CanvasFloatDomService } from '@univerjs/ui';
 import { BehaviorSubject, map, of, switchMap } from 'rxjs';
+import { DocRefreshDrawingsService } from '../services/doc-refresh-drawings.service';
 
 export function calcDocFloatDomPositionByRect(
     rect: IBoundRectNoAngle,
@@ -97,13 +98,14 @@ interface IDocFloatDomParams extends IDocFloatDomDataBase {
 
 type IDocFloatDomRuntimeViewport = Partial<Pick<IDocsCustomBlockRenderViewport, 'bleedLeft' | 'bleedWidth' | 'contentHeight' | 'contentWidth' | 'height' | 'pageContentWidth' | 'viewScale' | 'viewportHeight'>>;
 
-interface IDocFloatDomRuntimeParam extends IDocFloatDom {
+interface IDocFloatDomRuntimeGeometry {
     customBlockRenderViewport?: IDocFloatDomRuntimeViewport;
-    transform?: Partial<ITransformState>;
-    transforms?: Array<Partial<ITransformState>>;
+    hidden?: boolean;
+    transform?: Nullable<ITransformState>;
+    transforms?: Nullable<ITransformState[]>;
 }
 
-export function mergeDocFloatDomRuntimeProps(existingProps: Record<string, unknown> | undefined, param: IDocFloatDomRuntimeParam): Record<string, unknown> | undefined {
+export function mergeDocFloatDomRuntimeProps(existingProps: Record<string, unknown> | undefined, param: IDocFloatDomRuntimeGeometry): Record<string, unknown> | undefined {
     const customBlockRenderViewport = pickValidCustomBlockRenderViewport(param.customBlockRenderViewport);
     if (!customBlockRenderViewport) {
         return existingProps;
@@ -157,6 +159,9 @@ function isNonNegativeNumber(value: unknown): value is number {
 
 export class DocFloatDomController extends Disposable {
     private _domLayerInfoMap = new Map<string, ICanvasFloatDomInfo>();
+    private _pendingRuntimeGeometry = new Map<string, IDocFloatDomRuntimeGeometry>();
+    private _pendingRuntimeGeometryInsert = new Map<string, IDrawingSearch>();
+    private _pendingRuntimeGeometryRefresh = new Map<string, IDisposable>();
 
     constructor(
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
@@ -164,7 +169,8 @@ export class DocFloatDomController extends Disposable {
         @Inject(DrawingRenderService) private readonly _drawingRenderService: DrawingRenderService,
         @Inject(CanvasFloatDomService) private readonly _canvasFloatDomService: CanvasFloatDomService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @Inject(DocRefreshDrawingsService) private readonly _docRefreshDrawingsService: DocRefreshDrawingsService
     ) {
         super();
 
@@ -172,6 +178,12 @@ export class DocFloatDomController extends Disposable {
     }
 
     override dispose(): void {
+        this._pendingRuntimeGeometry.clear();
+        this._pendingRuntimeGeometryInsert.clear();
+        for (const disposable of this._pendingRuntimeGeometryRefresh.values()) {
+            disposable.dispose();
+        }
+        this._pendingRuntimeGeometryRefresh.clear();
         super.dispose();
     }
 
@@ -202,7 +214,24 @@ export class DocFloatDomController extends Disposable {
     private _drawingAddRemoveListener() {
         this.disposeWithMe(
             this._drawingManagerService.add$.subscribe((params) => {
-                this._insertRects(params);
+                const ready: IDrawingSearch[] = [];
+                const refreshUnitIds = new Set<string>();
+                for (const param of params) {
+                    const drawing = this._drawingManagerService.getDrawingByParam(param);
+                    if (isEmbedFloatDomRuntimeParam(drawing)) {
+                        this._pendingRuntimeGeometryInsert.set(param.drawingId, param);
+                        refreshUnitIds.add(param.unitId);
+                        if (this._pendingRuntimeGeometry.has(param.drawingId)) {
+                            ready.push(param);
+                        }
+                    } else {
+                        ready.push(param);
+                    }
+                }
+                this._insertRects(ready);
+                for (const unitId of refreshUnitIds) {
+                    this._refreshDrawingsFromCurrentLayout(unitId);
+                }
             })
         );
 
@@ -215,34 +244,81 @@ export class DocFloatDomController extends Disposable {
         );
     }
 
+    private _refreshDrawingsFromCurrentLayout(unitId: string): void {
+        const render = this._renderManagerService.getRenderUnitById(unitId);
+        if (render == null) {
+            return;
+        }
+
+        const skeleton = render.with(DocSkeletonManagerService).getSkeleton();
+        if (skeleton != null) {
+            if (!this._pendingRuntimeGeometryRefresh.has(unitId)) {
+                const subscription = skeleton.dirty$.subscribe(() => {
+                    if (!this._hasPendingRuntimeGeometryForUnit(unitId)) {
+                        this._disposePendingRuntimeGeometryRefresh(unitId);
+                        return;
+                    }
+                    this._docRefreshDrawingsService.refreshDrawings(skeleton);
+                });
+                this._pendingRuntimeGeometryRefresh.set(
+                    unitId,
+                    toDisposable(() => subscription.unsubscribe())
+                );
+            }
+            this._docRefreshDrawingsService.refreshDrawings(skeleton);
+        }
+    }
+
+    private _hasPendingRuntimeGeometryForUnit(unitId: string): boolean {
+        for (const pending of this._pendingRuntimeGeometryInsert.values()) {
+            if (pending.unitId === unitId) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private _disposePendingRuntimeGeometryRefresh(unitId: string): void {
+        this._pendingRuntimeGeometryRefresh.get(unitId)?.dispose();
+        this._pendingRuntimeGeometryRefresh.delete(unitId);
+    }
+
     private _insertRects(params: IDrawingSearch[]) {
-        (params).forEach(async (param) => {
+        for (const param of params) {
             const { unitId } = param;
             const documentDataModel = this._univerInstanceService.getUnit(unitId, UniverInstanceType.UNIVER_DOC);
             if (!documentDataModel) {
-                return;
+                continue;
             }
 
             const renderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
 
             if (renderObject == null) {
-                return;
+                continue;
             }
 
             const rectParam = this._drawingManagerService.getDrawingByParam(param) as IDocFloatDom;
             if (rectParam == null) {
-                return;
+                continue;
             }
 
-            const rects = await this._drawingRenderService.renderFloatDom(rectParam, renderObject.scene);
+            const preserveRuntimeGeometry = isEmbedFloatDomRuntimeParam(rectParam);
+            const publishedRuntimeParam = this._pendingRuntimeGeometry.get(param.drawingId);
+            if (
+                preserveRuntimeGeometry &&
+                (publishedRuntimeParam == null || this._pendingRuntimeGeometryInsert.get(param.drawingId) !== param)
+            ) {
+                continue;
+            }
+
+            const rects = this._drawingRenderService.renderFloatDom(rectParam, renderObject.scene);
             if (rects == null || rects.length === 0) {
-                return;
+                continue;
             }
 
             for (const rect of rects) {
-                const runtimeParam = rectParam as IDocFloatDomRuntimeParam;
+                const runtimeParam: IDocFloatDomRuntimeGeometry = publishedRuntimeParam ?? rectParam;
                 const runtimeViewport = pickValidCustomBlockRenderViewport(runtimeParam.customBlockRenderViewport);
-                const preserveRuntimeGeometry = isEmbedFloatDomRuntimeParam(runtimeParam);
                 syncRectWithRuntimeParam(rect, runtimeParam, runtimeViewport, undefined, preserveRuntimeGeometry);
                 const runtimeTransform = runtimeViewport || preserveRuntimeGeometry ? createTransformFromRect(rect) : undefined;
                 this._addHoverForRect(rect);
@@ -266,7 +342,7 @@ export class DocFloatDomController extends Disposable {
                     position$,
                     id: rectParam.drawingId,
                     componentKey: rectParam.componentKey,
-                    contentBox: isSheetLikeEmbedFloatDomRuntimeParam(runtimeParam)
+                    contentBox: isSheetLikeEmbedFloatDomRuntimeParam(rectParam)
                         ? { contentInset: 0, wrapperInset: 0 }
                         : undefined,
                     eventPassThrough: preserveRuntimeGeometry ? false : undefined,
@@ -284,7 +360,7 @@ export class DocFloatDomController extends Disposable {
                         canvas.dispatchEvent(new WheelEvent(evt.type, evt));
                     },
                     data,
-                    props: mergeDocFloatDomRuntimeProps(undefined, rectParam as IDocFloatDomRuntimeParam),
+                    props: mergeDocFloatDomRuntimeProps(undefined, rectParam),
                     unitId,
                 });
 
@@ -306,7 +382,12 @@ export class DocFloatDomController extends Disposable {
                 scrollListener && disposableCollection.add(scrollListener);
                 this._domLayerInfoMap.set(rectParam.drawingId, info);
             }
-        });
+            this._pendingRuntimeGeometry.delete(param.drawingId);
+            this._pendingRuntimeGeometryInsert.delete(param.drawingId);
+            if (!this._hasPendingRuntimeGeometryForUnit(unitId)) {
+                this._disposePendingRuntimeGeometryRefresh(unitId);
+            }
+        }
     }
 
     private _drawingRuntimePropsListener() {
@@ -314,11 +395,28 @@ export class DocFloatDomController extends Disposable {
             this._drawingManagerService.refreshTransform$.subscribe((params) => {
                 params.forEach((param) => {
                     const floatDomInfo = this._domLayerInfoMap.get(param.drawingId);
-                    if (!floatDomInfo || floatDomInfo.unitId !== param.unitId) {
+                    if (!floatDomInfo) {
+                        const pendingInsert = this._pendingRuntimeGeometryInsert.get(param.drawingId);
+                        const drawing = this._drawingManagerService.getDrawingByParam(param);
+                        if (pendingInsert != null || isEmbedFloatDomRuntimeParam(drawing)) {
+                            if (param.hidden === true) {
+                                return;
+                            }
+                            this._pendingRuntimeGeometry.set(param.drawingId, param);
+                            if (pendingInsert != null) {
+                                this._insertRects([pendingInsert]);
+                            }
+                        }
+                        return;
+                    }
+                    if (floatDomInfo.unitId !== param.unitId) {
+                        return;
+                    }
+                    if (floatDomInfo.preserveRuntimeGeometry && param.hidden === true) {
                         return;
                     }
 
-                    const runtimeParam = param as IDocFloatDomRuntimeParam;
+                    const runtimeParam: IDocFloatDomRuntimeGeometry = param;
                     const runtimeViewport = pickValidCustomBlockRenderViewport(runtimeParam.customBlockRenderViewport);
                     if (runtimeViewport) {
                         floatDomInfo.runtimeViewport = runtimeViewport;
@@ -343,7 +441,7 @@ export class DocFloatDomController extends Disposable {
 
                     const currentProps = this._canvasFloatDomService.domLayers.find(([id]) => id === param.drawingId)?.[1].props;
                     this._canvasFloatDomService.updateFloatDom(param.drawingId, {
-                        props: mergeDocFloatDomRuntimeProps(currentProps, param as IDocFloatDomRuntimeParam),
+                        props: mergeDocFloatDomRuntimeProps(currentProps, param),
                     });
                 });
             })
@@ -369,6 +467,12 @@ export class DocFloatDomController extends Disposable {
     }
 
     private _removeDom(id: string) {
+        const pendingUnitId = this._pendingRuntimeGeometryInsert.get(id)?.unitId;
+        this._pendingRuntimeGeometry.delete(id);
+        this._pendingRuntimeGeometryInsert.delete(id);
+        if (pendingUnitId != null && !this._hasPendingRuntimeGeometryForUnit(pendingUnitId)) {
+            this._disposePendingRuntimeGeometryRefresh(pendingUnitId);
+        }
         const info = this._domLayerInfoMap.get(id);
         if (!info) {
             return;
@@ -480,7 +584,7 @@ export class DocFloatDomController extends Disposable {
 
 function syncRectWithRuntimeParam(
     rect: Rect,
-    param: IDocFloatDomRuntimeParam,
+    param: IDocFloatDomRuntimeGeometry,
     fallbackViewport?: IDocFloatDomRuntimeViewport,
     fallbackTransform?: Partial<ITransformState>,
     preserveRuntimeGeometry?: boolean
@@ -495,7 +599,7 @@ function syncRectWithRuntimeParam(
 }
 
 function getRuntimeTransform(
-    param: IDocFloatDomRuntimeParam,
+    param: IDocFloatDomRuntimeGeometry,
     rect: Rect,
     fallbackViewport?: IDocFloatDomRuntimeViewport,
     fallbackTransform?: Partial<ITransformState>,
@@ -537,7 +641,11 @@ function getRuntimeTransform(
     };
 }
 
-function isEmbedFloatDomRuntimeParam(param: IDocFloatDomRuntimeParam): boolean {
+function isEmbedFloatDomRuntimeParam(param: unknown): param is IDocFloatDom {
+    if (param == null || typeof param !== 'object' || !('data' in param)) {
+        return false;
+    }
+
     const data = param.data;
     if (!data || typeof data !== 'object') {
         return false;
@@ -547,7 +655,7 @@ function isEmbedFloatDomRuntimeParam(param: IDocFloatDomRuntimeParam): boolean {
     return candidate.version === 1 && typeof candidate.embedId === 'string' && typeof candidate.hostAnchorId === 'string';
 }
 
-function isSheetLikeEmbedFloatDomRuntimeParam(param: IDocFloatDomRuntimeParam): boolean {
+function isSheetLikeEmbedFloatDomRuntimeParam(param: unknown): param is IDocFloatDom {
     if (!isEmbedFloatDomRuntimeParam(param)) {
         return false;
     }

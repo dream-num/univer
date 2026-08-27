@@ -32,7 +32,7 @@ import {
     LocaleType,
 } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
-import { CutContentCommand, DocCanvasPopManagerService, DocEventManagerService } from '@univerjs/docs-ui';
+import { CutContentCommand, DocCanvasPopManagerService, DocEventManagerService, DocLayoutInteractionService } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import {
     ComponentManager,
@@ -102,6 +102,14 @@ class TestDocCanvasPopManagerService {
     }
 }
 
+class TestDocLayoutInteractionService {
+    beginInteraction() {
+        return {
+            dispose: () => {},
+        };
+    }
+}
+
 class TestRenderManagerService {
     getRenderUnitById() {
         return {
@@ -154,6 +162,7 @@ function createQuickInsertPopupTestBed(options?: {
     injector.add([IconManager, { useClass: IconManager }]);
     injector.add([IUniverInstanceService, { useClass: TestUniverInstanceService as never }]);
     injector.add([DocCanvasPopManagerService, { useClass: TestDocCanvasPopManagerService as never }]);
+    injector.add([DocLayoutInteractionService, { useClass: TestDocLayoutInteractionService as never }]);
     injector.add([IRenderManagerService, { useClass: TestRenderManagerService as never }]);
     injector.add([DocSelectionManagerService, { useClass: TestDocSelectionManagerService as never }]);
     injector.add([DocQuickInsertPopupService, { useClass: DocQuickInsertPopupService }]);

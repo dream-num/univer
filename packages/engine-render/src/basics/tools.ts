@@ -407,6 +407,12 @@ export function isEmojiGrapheme(grapheme: string): boolean {
 }
 
 export function startWithEmoji(text: string): boolean {
+    const firstCodeUnit = text.charCodeAt(0);
+    const canStartKeycapEmoji = firstCodeUnit === 0x23 || firstCodeUnit === 0x2A || (firstCodeUnit >= 0x30 && firstCodeUnit <= 0x39);
+    if (firstCodeUnit <= 0x7F && !canStartKeycapEmoji) {
+        return false;
+    }
+
     const first = getFirstGrapheme(text);
     return first ? isEmojiGrapheme(first) : false;
 }

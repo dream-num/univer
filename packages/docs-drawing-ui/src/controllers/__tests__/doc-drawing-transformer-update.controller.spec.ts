@@ -37,6 +37,7 @@ import {
     getDocsTableCellAnchorContext,
     shouldUseDocsDrawingOuterPageOrigin,
 } from '../doc-drawing-transformer-update.controller';
+import { getDocsOverlayRuntimeDrawing } from '../render-controllers/doc-drawing-transform-update.controller';
 
 function createController() {
     const controller = Object.create(DocDrawingTransformerController.prototype) as any;
@@ -85,6 +86,28 @@ function drawing(drawingId = 'drawing-1') {
 }
 
 describe('DocDrawingTransformerController business methods', () => {
+    it('uses the latest model transform only while both drawing states are overlay-only', () => {
+        const skeletonOverlay = {
+            ...drawing(),
+            layoutType: PositionedObjectLayoutType.WRAP_NONE,
+        };
+        const currentOverlay = {
+            ...skeletonOverlay,
+            docTransform: {
+                ...skeletonOverlay.docTransform,
+                size: { width: 160, height: 120 },
+                positionH: {
+                    relativeFrom: ObjectRelativeFromH.PAGE,
+                    posOffset: 50,
+                },
+            },
+        };
+
+        expect(getDocsOverlayRuntimeDrawing(skeletonOverlay, currentOverlay)).toBe(currentOverlay);
+        expect(getDocsOverlayRuntimeDrawing(drawing(), currentOverlay)).not.toBe(currentOverlay);
+        expect(getDocsOverlayRuntimeDrawing(skeletonOverlay, drawing())).not.toBe(currentOverlay);
+    });
+
     it('builds drawing transform updates for multi-select resize, rotation, and move changes', () => {
         const controller = createController();
         const drawingData = drawing();

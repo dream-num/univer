@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, Nullable } from '@univerjs/core';
-import type { Documents, Engine, IDocSelectionInnerParam, IFindNodeRestrictions, IMouseEvent, INodeInfo, INodePosition, IPointerEvent, IRenderContext, IRenderModule, IScrollObserverParam, ISuccinctDocRangeParam, ITextRangeWithStyle, ITextSelectionStyle } from '@univerjs/engine-render';
+import type { Documents, DocumentSkeleton, Engine, IDocSelectionInnerParam, IFindNodeRestrictions, IMouseEvent, INodeInfo, INodePosition, IPointerEvent, IRenderContext, IRenderModule, IScrollObserverParam, ISuccinctDocRangeParam, ITextRangeWithStyle, ITextSelectionStyle } from '@univerjs/engine-render';
 import type { Subscription } from 'rxjs';
 import type { RectRange } from './rect-range';
 import { DataStreamTreeTokenType, DOC_RANGE_TYPE, ILogService, Inject, isInternalEditorID, IUniverInstanceService, Optional, RxDisposable, UniverInstanceType } from '@univerjs/core';
@@ -241,8 +241,52 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._selectionStyle = style;
     }
 
+    replaceDocRanges(ranges: ISuccinctDocRangeParam[], isEditing = true, options?: { [key: string]: boolean }): boolean {
+        return this.addDocRanges(ranges, isEditing, options, true);
+    }
+
+    private _canResolveCollapsedRanges(
+        ranges: ISuccinctDocRangeParam[],
+        scene: IRenderContext<DocumentDataModel>['scene'],
+        document: Documents,
+        docSkeleton: DocumentSkeleton
+    ): boolean {
+        for (const range of ranges) {
+            if (range.rangeType === DOC_RANGE_TYPE.RECT || range.startOffset !== range.endOffset) {
+                continue;
+            }
+
+            const textRange = cursorConvertToTextRange(
+                scene,
+                {
+                    ...range,
+                    segmentId: this._currentSegmentId,
+                    segmentPage: this._currentSegmentPage,
+                    style: range.style ?? this._selectionStyle,
+                },
+                docSkeleton,
+                document
+            );
+            if (textRange == null) {
+                return false;
+            }
+            const resolved = textRange.startOffset != null && textRange.endOffset != null;
+            textRange.dispose();
+            if (!resolved) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     // eslint-disable-next-line max-lines-per-function
-    addDocRanges(ranges: ISuccinctDocRangeParam[], isEditing = true, options?: { [key: string]: boolean }) {
+    addDocRanges(
+        ranges: ISuccinctDocRangeParam[],
+        isEditing = true,
+        options?: { [key: string]: boolean },
+        replace = false
+    ): boolean {
         const {
             _currentSegmentId: segmentId,
             _currentSegmentPage: segmentPage,
@@ -251,6 +295,12 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         const { scene, mainComponent } = this._context;
         const document = mainComponent as Documents;
         const docSkeleton = this._docSkeletonManagerService.getSkeleton();
+        if (replace && !this._canResolveCollapsedRanges(ranges, scene, document, docSkeleton)) {
+            return false;
+        }
+        if (replace) {
+            this.removeAllRanges();
+        }
 
         const generalAddRange = (
             startOffset: number,
@@ -282,7 +332,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         };
 
         for (const range of ranges) {
-            const { startOffset, endOffset, rangeType, startNodePosition, endNodePosition } = range as ITextRangeWithStyle;
+            const { startOffset, endOffset, rangeType, startNodePosition, endNodePosition } = range;
             const rangeStyle = range.style ?? style;
 
             if (rangeType !== DOC_RANGE_TYPE.RECT && startOffset === endOffset) {
@@ -371,8 +421,9 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
             options,
         });
 
-        if (!ranges.length || options?.shouldFocus === false) return;
+        if (!ranges.length || options?.shouldFocus === false) return true;
         this._updateInputPosition(options?.forceFocus);
+        return true;
     }
 
     setCursorManually(evtOffsetX: number, evtOffsetY: number) {
@@ -1061,7 +1112,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         const anchor = activeRangeInstance?.getAnchor();
 
         if (!anchor || (anchor && !anchor.visible) || this.activeViewPort == null) {
-            if (this._shouldPreserveExternalFocus()) {
+            if (this._shouldPreserveExternalFocus() || (!forceFocus && this._isAnotherEditorFocused())) {
                 return;
             }
             this.focus();
@@ -1532,6 +1583,13 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         }
 
         return this._embedInteractionBoundaryService?.hasRecentInteractionFor?.(currentEmbedOwner, ownerDocument) === true;
+    }
+
+    private _isAnotherEditorFocused(): boolean {
+        const activeElement = this._getOwnerDocument().activeElement;
+        return activeElement instanceof HTMLElement &&
+            activeElement !== this._input &&
+            activeElement.dataset.uComp === this._input.dataset.uComp;
     }
 
     private _containsCurrentEmbedRuntimeElement(element: HTMLElement): boolean {

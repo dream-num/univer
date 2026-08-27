@@ -17,7 +17,21 @@
 import { EventSubject } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
-import { DocResizeRenderController } from '../doc-resize.render-controller';
+import { DocResizeRenderController, hasRenderableDocSkeleton } from '../doc-resize.render-controller';
+
+describe('hasRenderableDocSkeleton', () => {
+    it('rejects missing and empty skeletons', () => {
+        expect(hasRenderableDocSkeleton(undefined)).toBe(false);
+        expect(hasRenderableDocSkeleton({ getSkeleton: () => null })).toBe(false);
+        expect(hasRenderableDocSkeleton({ getSkeleton: () => ({ getSkeletonData: () => ({ pages: [] }) }) })).toBe(false);
+    });
+
+    it('accepts a skeleton with at least one page', () => {
+        expect(hasRenderableDocSkeleton({
+            getSkeleton: () => ({ getSkeletonData: () => ({ pages: [{}] }) }),
+        })).toBe(true);
+    });
+});
 
 describe('DocResizeRenderController', () => {
     it('refreshes page layout and text selection after sidebar layout changes', async () => {
@@ -30,6 +44,9 @@ describe('DocResizeRenderController', () => {
                 unitId: 'doc-1',
                 engine: {
                     onTransformChange$: new EventSubject(),
+                },
+                mainComponent: {
+                    getSkeleton: () => ({ getSkeletonData: () => ({ pages: [{}] }) }),
                 },
             } as never,
             { calculatePagePosition } as never,

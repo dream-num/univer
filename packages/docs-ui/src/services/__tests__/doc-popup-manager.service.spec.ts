@@ -101,7 +101,6 @@ class TestRenderManagerService {
                         getSkeleton: () => skeleton,
                     };
                 }
-
                 throw new Error(`Unexpected render dependency: ${String(token)}`);
             },
         };

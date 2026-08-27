@@ -323,9 +323,11 @@ describe('tools extra', () => {
 
     it('Emoji test', () => {
         expect(startWithEmoji('🐱‍🏍One Team, One Dream!!! 🐱‍🏍')).toBe(true);
+        expect(startWithEmoji('ordinary text')).toBe(false);
         expect(startWithEmoji('1abc')).toBe(false);
         expect(startWithEmoji('#tag')).toBe(false);
         expect(startWithEmoji('1️⃣')).toBe(true);
+        expect(startWithEmoji('*️⃣')).toBe(true);
         expect(startWithEmoji('31️⃣2')).toBe(false);
         expect(startWithEmoji('👨‍👩‍👧‍👦abc')).toBe(true);
         expect(startWithEmoji('1👨‍👩‍👧‍👦abc')).toBe(false);

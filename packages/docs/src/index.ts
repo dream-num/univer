@@ -40,7 +40,7 @@ export type { ISetSectionHeaderFooterLinkCommandParams } from './commands/comman
 export { UpdateDocumentParagraphStyleCommand } from './commands/commands/update-document-paragraph-style.command';
 export { DeleteDocumentSectionBreakCommand, InsertDocumentColumnBreakCommand, InsertDocumentSectionBreakCommand, UpdateDocumentSectionCommand } from './commands/commands/update-document-section.command';
 export type { IDeleteDocumentSectionBreakCommandParams, IDocumentSectionConfig, IDocumentSectionUpdate, IInsertDocumentColumnBreakCommandParams, IInsertDocumentSectionBreakCommandParams, IUpdateDocumentSectionCommandParams } from './commands/commands/update-document-section.command';
-export { DocHistoryAction, RichTextEditingMutation } from './commands/mutations/core-editing.mutation';
+export { DocHistoryAction, RichTextEditingMutation, transformDocumentTextRanges } from './commands/mutations/core-editing.mutation';
 export type { IRichTextEditingMutationParams } from './commands/mutations/core-editing.mutation';
 export { SetTextSelectionsOperation } from './commands/operations/text-selection.operation';
 export type { ISetTextSelectionsOperationParams } from './commands/operations/text-selection.operation';
@@ -63,6 +63,8 @@ export type {
     IDocsCustomBlockMutationParams,
     IEmbedDocsCustomBlockData,
 } from './embed-host-anchor';
+export { DocsLayoutWorkerCapabilityError, DocsLayoutWorkerClientService, startDocsLayoutWorker, UniverDocsLayoutWorkerPlugin } from './layout-worker';
+export type { IDocsLayoutWorkerCapabilities, IDocsLayoutWorkerFontProbe, IDocsLayoutWorkerRuntime, IUniverDocsLayoutWorkerConfig } from './layout-worker';
 export { UniverDocsPlugin } from './plugin';
 export { DocBlockMoveValidatorService } from './services/doc-block-move-validator.service';
 export type {
@@ -76,6 +78,30 @@ export { DocContentInsertService } from './services/doc-content-insert.service';
 export type { IDocContentInsertRange } from './services/doc-content-insert.service';
 export { DocInterceptorService } from './services/doc-interceptor/doc-interceptor.service';
 export { DOC_INTERCEPTOR_POINT } from './services/doc-interceptor/interceptor-const';
+export {
+    DocLayoutExecutorService,
+    DocLayoutExecutorState,
+    DocLayoutExecutorType,
+    DocLayoutSessionStatus,
+} from './services/doc-layout-executor.service';
+export type {
+    IDocLayoutCancelRequest,
+    IDocLayoutCreateSessionRequest,
+    IDocLayoutDisposeMountRequest,
+    IDocLayoutDisposeSessionRequest,
+    IDocLayoutExecutor,
+    IDocLayoutExecutorStatus,
+    IDocLayoutMountIdentity,
+    IDocLayoutMutationProjection,
+    IDocLayoutPageRequest,
+    IDocLayoutPageResult,
+    IDocLayoutPerformanceMetrics,
+    IDocLayoutStartOptions,
+    IDocLayoutStartRequest,
+    IDocLayoutStartResult,
+    IDocLayoutStepRequest,
+    IDocLayoutStepResult,
+} from './services/doc-layout-executor.service';
 export {
     DOC_SELECTION_OPTION_PRESERVE_CARET,
     DocSelectionManagerService,

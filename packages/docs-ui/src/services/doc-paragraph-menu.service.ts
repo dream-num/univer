@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICustomBlock, ICustomTable, IDocumentBlockRange, INeedCheckDisposable, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, ICustomBlock, ICustomTable, IDisposable, IDocumentBlockRange, INeedCheckDisposable, Nullable } from '@univerjs/core';
 import type { IBoundRectNoAngle, IRenderContext, IRenderModule, ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IMutiPageParagraphBound, ITableBound, ITableParagraphBound } from './doc-event-manager.service';
 import type { IEditorInputConfig } from './selection/doc-selection-render.service';
@@ -28,6 +28,7 @@ import {
     DOC_TABLE_BLOCK_MENU_COMPONENT_KEY,
 } from '../views/paragraph-menu/component-keys';
 import { DocEventManagerService } from './doc-event-manager.service';
+import { DocLayoutInteractionService } from './doc-layout-interaction.service';
 import {
     calcDocRangePositions,
     DocCanvasPopManagerService,
@@ -127,6 +128,8 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
     private _isBlockMenuDragging = false;
     private _isSlashMenuActive = false;
     private _slashMenuRequestNonce = 0;
+    private _menuInteraction: IDisposable | null = null;
+    private _dragInteraction: IDisposable | null = null;
 
     get activeParagraph() {
         return this._paragraphMenu?.paragraph;
@@ -138,6 +141,12 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
 
     setBlockMenuDragging(isDragging: boolean) {
         this._isBlockMenuDragging = isDragging;
+        if (isDragging) {
+            this._dragInteraction ??= this._docLayoutInteractionService.beginInteraction();
+        } else {
+            this._dragInteraction?.dispose();
+            this._dragInteraction = null;
+        }
     }
 
     get isBlockMenuDragging() {
@@ -152,7 +161,8 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
         @Inject(DocSkeletonManagerService) private _docSkeletonManagerService: DocSkeletonManagerService,
         @Inject(DocFloatMenuService) private _floatMenuService: DocFloatMenuService,
         @Inject(DocSelectionRenderService) private _docSelectionRenderService: DocSelectionRenderService,
-        @IPermissionService private readonly _permissionService: IPermissionService
+        @IPermissionService private readonly _permissionService: IPermissionService,
+        @Inject(DocLayoutInteractionService) private _docLayoutInteractionService: DocLayoutInteractionService
     ) {
         super();
 
@@ -233,6 +243,12 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
     setParagraphMenuActive(active: boolean) {
         if (this._paragraphMenu) {
             this._paragraphMenu.active = active;
+        }
+        if (active && this._paragraphMenu) {
+            this._menuInteraction ??= this._docLayoutInteractionService.beginInteraction();
+        } else {
+            this._menuInteraction?.dispose();
+            this._menuInteraction = null;
         }
     }
 
@@ -683,6 +699,8 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
         if (this._paragraphMenu && ((this._paragraphMenu.disposable.canDispose() || force))) {
             this._paragraphMenu.disposable.dispose();
             this._paragraphMenu = null;
+            this._menuInteraction?.dispose();
+            this._menuInteraction = null;
             this._isSlashMenuActive = false;
             this._slashMenuRequest$.next(null);
             this._activeTarget$.next(null);
@@ -698,6 +716,14 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
             this._context.unitId,
             range ? getDocumentEditTargetObjectIds(this._context.unit, segmentId, range) : []
         );
+    }
+
+    override dispose(): void {
+        this._menuInteraction?.dispose();
+        this._menuInteraction = null;
+        this._dragInteraction?.dispose();
+        this._dragInteraction = null;
+        super.dispose();
     }
 
     private _buildParagraphMenuTarget(paragraph: IMutiPageParagraphBound): IDocBlockMenuTarget | null {

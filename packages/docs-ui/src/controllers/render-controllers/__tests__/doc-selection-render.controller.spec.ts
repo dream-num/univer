@@ -101,6 +101,7 @@ function createController(options: { readonly?: boolean; hasEditor?: boolean; pr
     const docSelectionRenderService = {
         removeAllRanges: vi.fn(),
         addDocRanges: vi.fn(),
+        replaceDocRanges: vi.fn(),
         textSelectionInner$,
         focus: vi.fn(),
         __onPointDown: vi.fn(),
@@ -193,8 +194,7 @@ describe('DocSelectionRenderController', () => {
         refreshSelection$.next({ unitId: 'doc-1', docRanges, isEditing: true, options: { segmentId: 'header' } });
         textSelectionInner$.next([{ startOffset: 3, endOffset: 4 }]);
 
-        expect(docSelectionRenderService.removeAllRanges).toHaveBeenCalledTimes(1);
-        expect(docSelectionRenderService.addDocRanges).toHaveBeenCalledWith(docRanges, true, { segmentId: 'header' });
+        expect(docSelectionRenderService.replaceDocRanges).toHaveBeenCalledWith(docRanges, true, { segmentId: 'header' });
         expect(docSelectionManagerService.__replaceTextRangesWithNoRefresh).toHaveBeenCalledWith(
             [{ startOffset: 3, endOffset: 4 }],
             { unitId: 'doc-1', subUnitId: 'doc-1' }

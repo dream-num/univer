@@ -457,25 +457,17 @@ function isVerticallyCoveredGridColumn(table: ITable, row: number, gridColumn: n
     return false;
 }
 
-export function createSkeletonCellPages(
+function getCellLineGridOptions(
     ctx: ILayoutContext,
-    viewModel: DocumentViewModel,
     cellNode: DataStreamTreeNode,
-    sectionBreakConfig: ISectionBreakConfig,
-    tableConfig: ITable,
-    row: number,
-    col: number,
-    availableHeight: number = Number.POSITIVE_INFINITY,
-    maxCellPageHeight: number = Number.POSITIVE_INFINITY
-) {
-    // Table cell only has one section.
-    const sectionNode = cellNode.children[0];
+    sectionBreakConfig: ISectionBreakConfig
+): { inheritDocumentLinePitch: boolean; enableDocumentTableLineGrid: boolean } {
     const body = ctx.dataModel?.getBody?.();
     const linePitch = sectionBreakConfig.linePitch ?? 0;
-    const usesLineGrid = sectionBreakConfig.gridType === GridType.LINES || sectionBreakConfig.gridType === GridType.LINES_AND_CHARS;
+    const usesLineGrid = sectionBreakConfig.gridType === GridType.LINES ||
+        sectionBreakConfig.gridType === GridType.LINES_AND_CHARS;
     const documentCompatibilityPolicy = sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy();
-    const isTraditionalLineGrid = isTraditionalDocumentCompatibility(documentCompatibilityPolicy) &&
-        usesLineGrid;
+    const isTraditionalLineGrid = isTraditionalDocumentCompatibility(documentCompatibilityPolicy) && usesLineGrid;
     const usesNextDocumentGridLine = (paragraph: IParagraph) => {
         const paragraphStyle = paragraph.paragraphStyle;
         const lineSpacing = paragraphStyle?.lineSpacing;
@@ -498,6 +490,29 @@ export function createSkeletonCellPages(
                 paragraph.startIndex < table.endIndex &&
                 usesNextDocumentGridLine(paragraph)
         )) === true;
+
+    return { enableDocumentTableLineGrid, inheritDocumentLinePitch };
+}
+
+export function createSkeletonCellPages(
+    ctx: ILayoutContext,
+    viewModel: DocumentViewModel,
+    cellNode: DataStreamTreeNode,
+    sectionBreakConfig: ISectionBreakConfig,
+    tableConfig: ITable,
+    row: number,
+    col: number,
+    availableHeight: number = Number.POSITIVE_INFINITY,
+    maxCellPageHeight: number = Number.POSITIVE_INFINITY
+) {
+    // Table cell only has one section.
+    const sectionNode = cellNode.children[0];
+    const body = ctx.dataModel?.getBody?.();
+    const { enableDocumentTableLineGrid, inheritDocumentLinePitch } = getCellLineGridOptions(
+        ctx,
+        cellNode,
+        sectionBreakConfig
+    );
 
     const { page: areaPage, sectionBreakConfig: cellSectionBreakConfig } = createNullCellPage(
         ctx,
@@ -563,6 +578,133 @@ export function createSkeletonCellPages(
     expandCellPageHeightForFlowTables(pages);
 
     return pages;
+}
+
+export interface ICellSkeletonBuildState {
+    ctx: ILayoutContext;
+    viewModel: DocumentViewModel;
+    cellNode: DataStreamTreeNode;
+    sectionNode: DataStreamTreeNode;
+    sectionBreakConfig: ISectionBreakConfig;
+    cellSectionBreakConfig: ISectionBreakConfig;
+    tableConfig: ITable;
+    paragraphIndex: number;
+    layoutAnchor: Nullable<number>;
+    pages: IDocumentSkeletonPage[];
+    complete: boolean;
+    requiresSyncFallback: boolean;
+}
+
+export function startSkeletonCellPagesBuild(
+    ctx: ILayoutContext,
+    viewModel: DocumentViewModel,
+    cellNode: DataStreamTreeNode,
+    sectionBreakConfig: ISectionBreakConfig,
+    tableConfig: ITable,
+    row: number,
+    col: number,
+    availableHeight: number = Number.POSITIVE_INFINITY,
+    maxCellPageHeight: number = Number.POSITIVE_INFINITY
+): ICellSkeletonBuildState {
+    const sectionNode = cellNode.children[0];
+    const { enableDocumentTableLineGrid, inheritDocumentLinePitch } = getCellLineGridOptions(
+        ctx,
+        cellNode,
+        sectionBreakConfig
+    );
+    const { page, sectionBreakConfig: cellSectionBreakConfig } = createNullCellPage(
+        ctx,
+        sectionBreakConfig,
+        tableConfig,
+        row,
+        col,
+        availableHeight,
+        maxCellPageHeight,
+        inheritDocumentLinePitch,
+        enableDocumentTableLineGrid
+    );
+    page.type = DocumentSkeletonPageType.CELL;
+    page.segmentId = tableConfig.tableId;
+
+    const layoutAnchor = ctx.layoutStartPointer[tableConfig.tableId];
+    ctx.layoutStartPointer[tableConfig.tableId] = null;
+
+    return {
+        ctx,
+        viewModel,
+        cellNode,
+        sectionNode,
+        sectionBreakConfig,
+        cellSectionBreakConfig,
+        tableConfig,
+        paragraphIndex: 0,
+        layoutAnchor,
+        pages: [page],
+        complete: false,
+        requiresSyncFallback: false,
+    };
+}
+
+export function stepSkeletonCellPagesBuild(state: ICellSkeletonBuildState): boolean {
+    if (state.complete) {
+        return true;
+    }
+
+    const currentPage = state.pages[state.pages.length - 1];
+    const result = dealWithSection(
+        state.ctx,
+        state.viewModel,
+        state.sectionNode,
+        currentPage,
+        state.cellSectionBreakConfig,
+        state.layoutAnchor,
+        {
+            startParagraphIndex: state.paragraphIndex,
+            maxParagraphs: 1,
+        }
+    );
+
+    if (result.pages[0] === currentPage) {
+        result.pages.shift();
+    }
+    state.pages.push(...result.pages);
+    state.paragraphIndex = result.nextParagraphIndex;
+    state.layoutAnchor = null;
+
+    if (state.ctx.isDirty) {
+        state.requiresSyncFallback = true;
+        state.complete = true;
+        return true;
+    }
+
+    if (result.complete) {
+        for (const page of state.pages) {
+            page.type = DocumentSkeletonPageType.CELL;
+            page.segmentId = state.tableConfig.tableId;
+        }
+        updateBlockIndex(
+            state.pages,
+            state.cellNode.startIndex,
+            state.sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy()
+        );
+        applyTrailingBlockRangeSpaceBelow(
+            state.pages,
+            state.ctx.dataModel?.getBody?.(),
+            state.cellNode.endIndex
+        );
+        applyTrailingCellParagraphSpaceBelow(
+            state.pages,
+            state.ctx.dataModel?.getBody?.(),
+            state.cellNode.endIndex,
+            state.cellSectionBreakConfig
+        );
+        updateInlineDrawingCoordsAndBorder(state.ctx, state.pages);
+        expandCellPageHeightForInlineDrawings(state.pages);
+        expandCellPageHeightForFlowTables(state.pages);
+        state.complete = true;
+    }
+
+    return state.complete;
 }
 
 function applyTrailingCellParagraphSpaceBelow(

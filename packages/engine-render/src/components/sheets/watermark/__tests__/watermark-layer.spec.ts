@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { Layer } from '../../../../layer';
 import { IWatermarkTypeEnum } from '../type';
 import { WatermarkLayer } from '../watermark-layer';
 
@@ -36,6 +37,9 @@ function createCtx(id = 'main') {
     return {
         getId: vi.fn(() => id),
         save: vi.fn(),
+        beginPath: vi.fn(),
+        rect: vi.fn(),
+        clip: vi.fn(),
         restore: vi.fn(),
     } as any;
 }
@@ -43,6 +47,10 @@ function createCtx(id = 'main') {
 describe('WatermarkLayer', () => {
     beforeEach(() => {
         renderWatermarkMock.mockClear();
+    });
+
+    afterEach(() => {
+        vi.restoreAllMocks();
     });
 
     it('renders configured text watermark with the latest user info', () => {
@@ -136,5 +144,22 @@ describe('WatermarkLayer', () => {
         layer.render(createCtx(''));
 
         expect(renderWatermarkMock).not.toHaveBeenCalled();
+    });
+
+    it('clips incremental watermark rendering to dirty bounds', () => {
+        const layer = new WatermarkLayer(createScene() as never);
+        const ctx = createCtx();
+        const options = {
+            dirtyBounds: [{ left: 10, top: 20, right: 30, bottom: 50 }],
+            preserveCache: true,
+            viewportInfos: new Map(),
+        };
+        const baseRenderSpy = vi.spyOn(Layer.prototype, 'render').mockReturnThis();
+
+        layer.render(ctx, false, options);
+
+        expect(baseRenderSpy).toHaveBeenCalledWith(ctx, false, options);
+        expect(ctx.rect).toHaveBeenCalledWith(10, 20, 20, 30);
+        expect(ctx.clip).toHaveBeenCalledOnce();
     });
 });

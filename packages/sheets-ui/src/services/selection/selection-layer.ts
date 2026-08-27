@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { Engine, UniverRenderingContext } from '@univerjs/engine-render';
+import type { Engine, ILayerRenderOptions, UniverRenderingContext } from '@univerjs/engine-render';
 import { Tools } from '@univerjs/core';
 import { Layer } from '@univerjs/engine-render';
 
 export class SelectionLayer extends Layer {
-    override render(ctx?: UniverRenderingContext, isMaxLayer = false) {
+    override render(ctx?: UniverRenderingContext, isMaxLayer = false, options: ILayerRenderOptions = {}) {
         const startTime = Tools.now();
-        super.render(ctx, isMaxLayer);
+        super.render(ctx, isMaxLayer, options);
         this._afterRender(startTime);
         return this;
     }

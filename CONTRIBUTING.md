@@ -63,9 +63,7 @@ The structure of the repository is as follows:
 .
 ├── common/ shared configuration and utilities
 ├── docs/ documentation
-├── e2e/ e2e test cases
-├── examples/ demos running on the web
-├── mockdata/ mock data for development
+├── examples/ all-in-one Vite workbench for browser development
 ├── packages/ Univer core and plugins
 ```
 
@@ -172,25 +170,9 @@ Also, with the help of vscode and its rich ecosystem, you could directly debug u
 
 ![vitest](./docs/img/vitest.png)
 
-### E2E test
+### Browser workbench
 
-You may need to install dependencies of Playwright manually by running the following command:
-
-```shell
-pnpm exec playwright install
-```
-
-If you would like to develop E2E tests, you can use the following command to run the dev server:
-
-```shell
-pnpm dev:e2e
-```
-
-and then run the following command to run E2E tests:
-
-```shell
-pnpm test:e2e
-```
+`pnpm dev` starts one Vite workbench with lazy-loaded Sheets, Docs, and Slides routes. Use the navigation bar or `#sheets`, `#docs`, and `#slides` URLs to switch products; only one Univer instance stays mounted. The Settings menu provides every built-in language, LTR/RTL direction, region, theme, appearance, ribbon, UI chrome, and zoom controls. Preferences are stored in localStorage and applied to the active instance through runtime APIs without remounting it. Development locale data is loaded on demand so unused product and language graphs do not remain in Vite's memory. End-to-end suites should consume built packages outside this repository instead of coupling tests to source examples.
 
 ### Build Preview
 
@@ -200,10 +182,6 @@ After building, the output may differ from the source code. To test for any diff
 pnpm build
 pnpm dev:libs
 ```
-
-### Update Snapshots
-
-Univer uses Playwright to perform visual comparison tests. If you have made changes to the UI, the CI may fail due to visual differences. You can update the snapshots by running this GitHub Action [📸 Manually Update Snapshots · Workflow runs · dream-num/univer (github.com)](https://github.com/dream-num/univer/actions/workflows/update-snapshots-manually.yml) on your branch.
 
 ### Clean code
 

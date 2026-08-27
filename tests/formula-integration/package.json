@@ -11,18 +11,10 @@
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
-        "@univerjs/data-validation": "workspace:*",
-        "@univerjs/docs": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
-        "@univerjs/mockdata": "workspace:*",
-        "@univerjs/rpc": "workspace:*",
         "@univerjs/sheets": "workspace:*",
-        "@univerjs/sheets-conditional-formatting": "workspace:*",
-        "@univerjs/sheets-data-validation": "workspace:*",
         "@univerjs/sheets-filter": "workspace:*",
-        "@univerjs/sheets-formula": "workspace:*",
-        "@univerjs/sheets-numfmt": "workspace:*",
-        "univer-examples": "workspace:*"
+        "@univerjs/sheets-formula": "workspace:*"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",

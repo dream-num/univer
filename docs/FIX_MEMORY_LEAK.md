@@ -2,27 +2,22 @@
 
 ## How to Investigate Memory Leak
 
-First you need to run the demo in E2E mode:
+Start the workbench and select the smallest route that reproduces the leak from the navigation bar:
 
 ```shell
-pnpm dev:e2e
+pnpm dev
 ```
 
-Then, you can use the Chrome DevTools to investigate the memory leak.
-
-You can create a `Workbook` and then dispose it from Console by running:
+Take a baseline heap snapshot in Chrome DevTools, exercise the behavior, then dispose the mounted instance from the Console:
 
 ```javascript
-E2EControllerAPI.loadAndRelease()
+window.univer?.dispose();
+delete window.univer;
+delete window.univerAPI;
+document.querySelector('#app')?.replaceChildren();
 ```
 
-And you can take profiles of the application and see if `Workbook` instances are being retained.
-
-You can also see if the `Univer` instance is being retained after we dispose it by running in Console:
-
-```javascript
-E2EControllerAPI.disposeUniver()
-```
+Force garbage collection and take another snapshot. Reload the page between runs so each measurement starts from a fresh fixture.
 
 ## Frequent Reasons for Memory Leak
 

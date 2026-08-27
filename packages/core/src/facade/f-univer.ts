@@ -35,6 +35,7 @@ import {
     ParagraphStyleBuilder,
     ParagraphStyleValue,
     RedoCommand,
+    RegionService,
     RichTextBuilder,
     RichTextValue,
     TextDecorationBuilder,
@@ -92,12 +93,12 @@ export class FUniver extends Disposable {
     /**
      * @ignore
      */
-    _initialize(injector: Injector): void { }
+    _initialize(_injector: Injector): void { }
 
     /**
      * @ignore
      */
-    static extend(source: any): void {
+    static extend(source: { prototype: object }): void {
         Object.getOwnPropertyNames(source.prototype).forEach((name) => {
             if (name === '_initialize') {
                 let initializers = this.prototype[InitializerSymbol];
@@ -106,17 +107,15 @@ export class FUniver extends Disposable {
                     this.prototype[InitializerSymbol] = initializers;
                 }
 
-                initializers.push(source.prototype._initialize);
+                initializers.push(Reflect.get(source.prototype, name));
             } else if (name !== 'constructor') {
-                // @ts-ignore
-                this.prototype[name] = source.prototype[name];
+                Reflect.set(this.prototype, name, Reflect.get(source.prototype, name));
             }
         });
 
         Object.getOwnPropertyNames(source).forEach((name) => {
             if (name !== 'prototype' && name !== 'name' && name !== 'length') {
-                // @ts-ignore
-                this[name] = source[name];
+                Reflect.set(this, name, Reflect.get(source, name));
             }
         });
     }
@@ -156,9 +155,8 @@ export class FUniver extends Disposable {
 
         const initializers = Object.getPrototypeOf(this)[InitializerSymbol];
         if (initializers) {
-            const self = this;
-            initializers.forEach(function (fn: (_injector: Injector) => void) {
-                fn.apply(self, [_injector]);
+            initializers.forEach((fn: (injector: Injector) => void) => {
+                fn.call(this, this._injector);
             });
         }
     }
@@ -454,6 +452,46 @@ export class FUniver extends Disposable {
     setLocale(locale: string): void {
         const localeService = this._injector.get(LocaleService);
         localeService.setLocale(locale as LocaleType);
+    }
+
+    /**
+     * Set the region used for locale-sensitive formatting.
+     * @param {string} region - A unique region identifier.
+     * @example
+     * ```ts
+     * univerAPI.setRegion('enUS');
+     * ```
+     */
+    setRegion(region: string): void {
+        const regionService = this._injector.get(RegionService);
+        regionService.setRegion(region as LocaleType);
+    }
+
+    /**
+     * Get the region currently used for locale-sensitive formatting.
+     * @returns {string} The current region identifier.
+     * @example
+     * ```ts
+     * const currentRegion = univerAPI.getCurrentRegion();
+     * console.log(currentRegion);
+     * ```
+     */
+    getCurrentRegion(): string {
+        const regionService = this._injector.get(RegionService);
+        return regionService.getCurrentRegion();
+    }
+
+    /**
+     * Set the current layout direction.
+     * @param {('ltr' | 'rtl')} direction - The layout direction.
+     * @example
+     * ```ts
+     * univerAPI.setDirection('rtl');
+     * ```
+     */
+    setDirection(direction: 'ltr' | 'rtl'): void {
+        const localeService = this._injector.get(LocaleService);
+        localeService.setDirection(direction);
     }
 
     /**

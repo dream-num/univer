@@ -290,9 +290,8 @@ Pro 功能請參考 [Univer Pro 指南](https://docs.univer.ai/guides/pro)。這
 ```text
 .
 ├── packages/      核心套件、引擎、文件類型、UI 外掛和功能外掛
-├── examples/      用於開發的本地瀏覽器和 Node.js 示例
-├── common/        共享內部工具、mock 資料、storybook 和工具函式
-├── e2e/           Playwright 和視覺比較測試
+├── examples/      用於本地瀏覽器開發的一體化 Vite 工作台
+├── common/        共享內部工具、storybook 和工具函式
 ├── tests/         其他整合測試專案
 └── docs/          架構說明、圖片和倉庫內文件
 ```
@@ -317,12 +316,12 @@ pnpm dev
 
 | 命令 | 用途 |
 | --- | --- |
-| `pnpm dev` | 啟動本地 examples 應用。 |
+| `pnpm dev` | 構建並預覽低記憶體、無 HMR 的一體化工作台。 |
+| `pnpm dev:source` | 啟動支援 HMR 的原始碼工作台，冷啟動和記憶體用量較高。 |
 | `pnpm build` | 構建 workspace 套件，不包含內部 common 套件。 |
 | `pnpm test` | 透過 Turbo 執行單元測試。 |
 | `pnpm typecheck` | 透過 Turbo 執行 TypeScript 檢查。 |
 | `pnpm lint` | 執行 ESLint。 |
-| `pnpm test:e2e` | 執行 Playwright 測試。 |
 | `pnpm storybook:dev` | 啟動用於 UI 元件開發的 Storybook。 |
 
 提交 pull request 前請閱讀 [CONTRIBUTING.md](../../CONTRIBUTING.md)。

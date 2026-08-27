@@ -8,8 +8,8 @@
             "name": "Launch Sheet (Chrome)",
             "request": "launch",
             "type": "chrome",
-            "url": "http://localhost:3002/sheets/",
-            "webRoot": "${workspaceFolder}/examples/local/sheets",
+            "url": "http://localhost:5173/#sheets",
+            "webRoot": "${workspaceFolder}/examples",
             "presentation": {
                 "group": "0_example",
                 "order": 2
@@ -19,8 +19,8 @@
             "name": "Launch Sheet (Edge)",
             "request": "launch",
             "type": "msedge",
-            "url": "http://localhost:3002/sheets",
-            "webRoot": "${workspaceFolder}/examples/sheets/local/",
+            "url": "http://localhost:5173/#sheets",
+            "webRoot": "${workspaceFolder}/examples",
             "presentation": {
                 "group": "0_example",
                 "order": 1
@@ -30,8 +30,8 @@
             "name": "Launch Doc (Chrome)",
             "request": "launch",
             "type": "chrome",
-            "url": "http://localhost:3002",
-            "webRoot": "${workspaceFolder}/examples/local/docs",
+            "url": "http://localhost:5173/#docs",
+            "webRoot": "${workspaceFolder}/examples",
             "presentation": {
                 "group": "0_example",
                 "order": 4
@@ -41,8 +41,8 @@
             "name": "Launch Doc (Edge)",
             "request": "launch",
             "type": "msedge",
-            "url": "http://localhost:3002",
-            "webRoot": "${workspaceFolder}/examples/local/docs",
+            "url": "http://localhost:5173/#docs",
+            "webRoot": "${workspaceFolder}/examples",
             "presentation": {
                 "group": "0_example",
                 "order": 3
@@ -52,8 +52,8 @@
             "name": "Launch Slide (Chrome)",
             "request": "launch",
             "type": "chrome",
-            "url": "http://localhost:3004",
-            "webRoot": "${workspaceFolder}/examples/slides/local/",
+            "url": "http://localhost:5173/#slides",
+            "webRoot": "${workspaceFolder}/examples",
             "presentation": {
                 "group": "0_example",
                 "order": 6
@@ -63,8 +63,8 @@
             "name": "Launch Slide (Edge)",
             "request": "launch",
             "type": "msedge",
-            "url": "http://localhost:3004",
-            "webRoot": "${workspaceFolder}/examples/slides/local/",
+            "url": "http://localhost:5173/#slides",
+            "webRoot": "${workspaceFolder}/examples",
             "presentation": {
                 "group": "0_example",
                 "order": 5

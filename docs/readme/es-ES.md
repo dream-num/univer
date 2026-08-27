@@ -290,9 +290,8 @@ Principios de separación:
 ```text
 .
 ├── packages/      Paquetes core, motores, tipos de documento, plugins UI y plugins de funciones
-├── examples/      Demos locales de navegador y Node.js usadas para desarrollo
-├── common/        Herramientas internas compartidas, mock data, storybook y utilidades
-├── e2e/           Pruebas Playwright y de comparación visual
+├── examples/      Banco de trabajo Vite todo-en-uno para desarrollo local en navegador
+├── common/        Herramientas internas compartidas, storybook y utilidades
 ├── tests/         Proyectos adicionales de pruebas de integración
 └── docs/          Notas de arquitectura, imágenes y documentación local del repositorio
 ```
@@ -317,12 +316,12 @@ Comandos útiles:
 
 | Comando | Propósito |
 | --- | --- |
-| `pnpm dev` | Inicia la aplicación local de ejemplos. |
+| `pnpm dev` | Compila y previsualiza el banco de trabajo todo-en-uno de bajo consumo sin HMR. |
+| `pnpm dev:source` | Inicia el banco de trabajo desde el código fuente con HMR; el arranque y el uso de memoria son mayores. |
 | `pnpm build` | Compila los paquetes del workspace, excluyendo paquetes internos de common. |
 | `pnpm test` | Ejecuta pruebas unitarias mediante Turbo. |
 | `pnpm typecheck` | Ejecuta comprobaciones TypeScript mediante Turbo. |
 | `pnpm lint` | Ejecuta ESLint. |
-| `pnpm test:e2e` | Ejecuta pruebas Playwright. |
 | `pnpm storybook:dev` | Inicia Storybook para desarrollo de componentes UI. |
 
 Lee [CONTRIBUTING.md](../../CONTRIBUTING.md) antes de abrir un pull request.

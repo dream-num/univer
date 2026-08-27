@@ -17,6 +17,7 @@
 import {
     CommandType,
     ICommandService,
+    IConfigService,
     ILogService,
     Injector,
     IUniverInstanceService,
@@ -48,6 +49,7 @@ import {
     PasteCommand,
     PlatformService,
     ShortcutService,
+    UI_PLUGIN_CONFIG_KEY,
     UIPartsService,
     UIRuntimeScopeService,
 } from '@univerjs/ui';
@@ -163,6 +165,20 @@ describe('ui facade', () => {
 
         disposable.dispose();
         expect(uiPartsService.getComponents(BuiltInUIPart.CUSTOM_HEADER).size).toBe(0);
+    });
+
+    it('changes the ribbon type without replacing the remaining UI config', () => {
+        const configService = univer.__getInjector().get(IConfigService);
+        configService.setConfig(UI_PLUGIN_CONFIG_KEY, {
+            ribbonType: 'classic',
+            toolbar: false,
+        });
+
+        expect(univerAPI.setRibbonType('grid')).toBe(univerAPI);
+        expect(configService.getConfig(UI_PLUGIN_CONFIG_KEY)).toEqual({
+            ribbonType: 'grid',
+            toolbar: false,
+        });
     });
 
     it('dispatches shortcut events unless the shortcut facade is disabled', () => {

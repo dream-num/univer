@@ -1,32 +1,51 @@
 import type { Config } from 'tailwindcss';
-import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import preset from '@univerjs-infra/shared/tailwind';
+import preset, { createTailwindContent } from '@univerjs-infra/shared/tailwind';
 import animate from 'tailwindcss-animate';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const configs = {
+    docs: [
+        '../presets/packages/preset-docs-core/tailwind.config.ts',
+        '../presets/packages/preset-docs-drawing/tailwind.config.ts',
+        '../presets/packages/preset-docs-hyper-link/tailwind.config.ts',
+        '../presets/packages/preset-docs-thread-comment/tailwind.config.ts',
+    ],
+    sheets: [
+        '../presets/packages/preset-sheets-core/tailwind.config.ts',
+        '../presets/packages/preset-sheets-conditional-formatting/tailwind.config.ts',
+        '../presets/packages/preset-sheets-data-validation/tailwind.config.ts',
+        '../presets/packages/preset-sheets-drawing/tailwind.config.ts',
+        '../presets/packages/preset-sheets-filter/tailwind.config.ts',
+        '../presets/packages/preset-sheets-find-replace/tailwind.config.ts',
+        '../presets/packages/preset-sheets-hyper-link/tailwind.config.ts',
+        '../presets/packages/preset-sheets-note/tailwind.config.ts',
+        '../presets/packages/preset-sheets-sort/tailwind.config.ts',
+        '../presets/packages/preset-sheets-table/tailwind.config.ts',
+        '../presets/packages/preset-sheets-thread-comment/tailwind.config.ts',
+    ],
+    slides: [
+        '../packages/slides-ui/tailwind.config.ts',
+    ],
+} as const;
 
-const packagesDir = fs.readdirSync(path.resolve(__dirname, '../packages')).map((dir) => path.resolve(__dirname, `../packages/${dir}`));
-const packagesExperimentalDir = fs.readdirSync(path.resolve(__dirname, '../common')).map((dir) => path.resolve(__dirname, `../common/${dir}`));
+export type ExampleTarget = keyof typeof configs;
 
-const tailwindProjects = packagesDir.concat(packagesExperimentalDir).reduce((acc, dir) => {
-    const tailwindConfig = path.resolve(dir, 'tailwind.config.ts');
-    if (fs.existsSync(tailwindConfig)) {
-        acc.push(`${dir}/src/**/*.{js,ts,jsx,tsx}`);
+export function createTailwindConfig(target: ExampleTarget): Config {
+    const content = new Set<string>([`./src/${target}/**/*.{js,ts,jsx,tsx}`]);
+
+    for (const configUrl of configs[target]) {
+        const configPath = fileURLToPath(new URL(configUrl, import.meta.url));
+        for (const pattern of createTailwindContent(configPath, { includeStyleDependencies: true })) {
+            content.add(path.resolve(path.dirname(configPath), pattern));
+        }
     }
-    return acc;
-}, [] as string[]);
 
-const config: Config = {
-    presets: [preset],
-    content: [
-        './src/**/*.{js,ts,jsx,tsx}',
-        ...tailwindProjects,
-    ],
-    plugins: [
-        animate,
-    ],
-};
+    return {
+        presets: [preset],
+        content: [...content],
+        plugins: [animate],
+    };
+}
 
-export default config;
+export default createTailwindConfig('sheets');

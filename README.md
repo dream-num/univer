@@ -290,9 +290,8 @@ Boundary principles:
 ```text
 .
 ├── packages/      Core packages, engines, document types, UI plugins, and feature plugins
-├── examples/      Local browser and Node.js demos used for development
-├── common/        Shared internal tooling, mock data, storybook, and utilities
-├── e2e/           Playwright and visual comparison tests
+├── examples/      All-in-one Vite workbench used for local browser development
+├── common/        Shared internal tooling, storybook, and utilities
 ├── tests/         Additional integration test projects
 └── docs/          Architecture notes, images, and repository-local documentation
 ```
@@ -317,12 +316,11 @@ Useful commands:
 
 | Command | Purpose |
 | --- | --- |
-| `pnpm dev` | Start the local examples app. |
+| `pnpm dev` | Start the all-in-one Sheets, Docs, and Slides workbench with Vite 8 Bundled Dev and HMR. |
 | `pnpm build` | Build workspace packages, excluding internal common packages. |
 | `pnpm test` | Run unit tests through Turbo. |
 | `pnpm typecheck` | Run TypeScript checks through Turbo. |
 | `pnpm lint` | Run ESLint. |
-| `pnpm test:e2e` | Run Playwright tests. |
 | `pnpm storybook:dev` | Start Storybook for UI component development. |
 
 Read [CONTRIBUTING.md](./CONTRIBUTING.md) before opening a pull request.

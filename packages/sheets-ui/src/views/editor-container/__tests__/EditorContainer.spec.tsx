@@ -164,6 +164,7 @@ function createTestBed(options: { disableAutoFocus?: boolean; docSelectionIsFocu
         isFocusing: options.docSelectionIsFocusing ?? true,
         focus: vi.fn(),
     };
+    const cellEditorManagerService = new TestCellEditorManagerService();
 
     latestFormulaEditorProps = undefined;
     componentManager.register(EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, (props: {
@@ -176,7 +177,7 @@ function createTestBed(options: { disableAutoFocus?: boolean; docSelectionIsFocu
     injector.add([Injector, injector]);
     injector.add([ComponentManager, componentManager]);
     injector.add([IEditorBridgeService, { useValue: editorBridgeService as never }]);
-    injector.add([ICellEditorManagerService, { useClass: TestCellEditorManagerService as never }]);
+    injector.add([ICellEditorManagerService, { useValue: cellEditorManagerService }]);
     injector.add([IEditorService, {
         useValue: {
             getEditor: () => ({
@@ -232,7 +233,7 @@ function createTestBed(options: { disableAutoFocus?: boolean; docSelectionIsFocu
     injector.add([ISheetEmbedRuntimeFocusCoordinator, { useValue: focusCoordinator }]);
     injector.add([ISheetEmbedInteractionBoundaryService, { useValue: interactionBoundaryService }]);
 
-    return { injector, editorBridgeService, focusCoordinator, interactionBoundaryService, docSelectionRenderService, cellEditorResizeService, validViewportScrollInfo$, activeSheet$, otherSheet };
+    return { injector, editorBridgeService, focusCoordinator, interactionBoundaryService, docSelectionRenderService, cellEditorManagerService, cellEditorResizeService, validViewportScrollInfo$, activeSheet$, otherSheet };
 }
 
 function renderEditorContainer(root: Root, injector: Injector): void {
@@ -775,8 +776,7 @@ describe('EditorContainer embed focus lease', () => {
     });
 
     it('does not request editor focus while automatic focus is disabled', async () => {
-        const { injector } = createTestBed({ disableAutoFocus: true });
-        const cellEditorManagerService = injector.get(ICellEditorManagerService) as unknown as TestCellEditorManagerService;
+        const { cellEditorManagerService, injector } = createTestBed({ disableAutoFocus: true });
         container = document.createElement('div');
         document.body.appendChild(container);
         root = createRoot(container);

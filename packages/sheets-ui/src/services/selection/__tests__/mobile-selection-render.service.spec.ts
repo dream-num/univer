@@ -165,15 +165,15 @@ describe('shouldKeepCurrentSelectionOnMobileLongPress', () => {
             ],
         });
         const { injector, sheet, commandService, sheetSkeletonManagerService, skeleton, context, contextService } = testBed;
-        (context.mainComponent as never as { onPointerUp$: unknown }).onPointerUp$ = createTestEvent();
+        Object.assign(context.mainComponent, { onPointerUp$: createTestEvent() });
         commandService.registerCommand(SetSelectionsOperation);
-        const service = injector.createInstance(MobileSheetsSelectionRenderService, context as never);
+        const service = injector.createInstance(MobileSheetsSelectionRenderService, context);
         expect(contextService.getContextValue(SELECTIONS_ENABLED)).toBe(true);
 
         sheetSkeletonManagerService.emitCurrentSkeleton({
             unitId: sheet.getUnitId(),
             sheetId: 'sheet1',
-            skeleton: skeleton as never,
+            skeleton,
         });
         injector.get(SheetsSelectionsService).setSelections(sheet.getUnitId(), 'sheet1', [{
             range: {
@@ -340,10 +340,12 @@ describe('shouldKeepCurrentSelectionOnMobileLongPress', () => {
             ],
         });
         const { injector, sheet, commandService, sheetSkeletonManagerService, skeleton, context, scene } = testBed;
-        (context.mainComponent as never as { onPointerUp$: unknown }).onPointerUp$ = createTestEvent();
+        Object.assign(context.mainComponent, { onPointerUp$: createTestEvent() });
         let clearSelectedObjectsCount = 0;
-        (scene as never as { getTransformer: () => { clearSelectedObjects: () => void } }).getTransformer = () => ({
-            clearSelectedObjects: () => clearSelectedObjectsCount++,
+        Object.assign(scene, {
+            getTransformer: () => ({
+                clearSelectedObjects: () => clearSelectedObjectsCount++,
+            }),
         });
         (skeleton as never as {
             getCellByOffset: (x: number, y: number, scaleX: number, scaleY: number, scrollXY: { x: number; y: number }) => unknown;
@@ -363,12 +365,12 @@ describe('shouldKeepCurrentSelectionOnMobileLongPress', () => {
         (skeleton as never as { getColumnCount: () => number }).getColumnCount = () => skeleton.worksheet.getColumnCount();
         (skeleton as never as { getRowCount: () => number }).getRowCount = () => skeleton.worksheet.getRowCount();
         commandService.registerCommand(SetSelectionsOperation);
-        const service = injector.createInstance(MobileSheetsSelectionRenderService, context as never);
+        const service = injector.createInstance(MobileSheetsSelectionRenderService, context);
 
         sheetSkeletonManagerService.emitCurrentSkeleton({
             unitId: sheet.getUnitId(),
             sheetId: 'sheet1',
-            skeleton: skeleton as never,
+            skeleton,
         });
 
         service.createNewSelection({ offsetX: 150, offsetY: 45 } as never, 0, RANGE_TYPE.NORMAL);
@@ -422,16 +424,16 @@ describe('shouldKeepCurrentSelectionOnMobileLongPress', () => {
             ],
         });
         const { injector, sheet, commandService, sheetSkeletonManagerService, skeleton, context, scene, contextService } = testBed;
-        (context.mainComponent as never as { onPointerUp$: unknown }).onPointerUp$ = createTestEvent();
+        Object.assign(context.mainComponent, { onPointerUp$: createTestEvent() });
         installCellLookupForMobileSelection(skeleton);
-        (scene as never as { getTransformer: () => { clearSelectedObjects: () => void } }).getTransformer = () => ({ clearSelectedObjects: () => { } });
+        Object.assign(scene, { getTransformer: () => ({ clearSelectedObjects: () => { } }) });
         commandService.registerCommand(SetSelectionsOperation);
-        const service = injector.createInstance(MobileSheetsSelectionRenderService, context as never);
+        const service = injector.createInstance(MobileSheetsSelectionRenderService, context);
 
         sheetSkeletonManagerService.emitCurrentSkeleton({
             unitId: sheet.getUnitId(),
             sheetId: 'sheet1',
-            skeleton: skeleton as never,
+            skeleton,
         });
 
         service.createNewSelection({ offsetX: 150, offsetY: 45 } as never, 0, RANGE_TYPE.NORMAL);
@@ -466,10 +468,12 @@ describe('shouldKeepCurrentSelectionOnMobileLongPress', () => {
             ],
         });
         const { injector, sheet, commandService, sheetSkeletonManagerService, skeleton, context, contextService, scene } = testBed;
-        (context.mainComponent as never as { onPointerUp$: unknown }).onPointerUp$ = createTestEvent();
+        Object.assign(context.mainComponent, { onPointerUp$: createTestEvent() });
         let clearSelectedObjectsCount = 0;
-        (scene as never as { getTransformer: () => { clearSelectedObjects: () => void } }).getTransformer = () => ({
-            clearSelectedObjects: () => clearSelectedObjectsCount++,
+        Object.assign(scene, {
+            getTransformer: () => ({
+                clearSelectedObjects: () => clearSelectedObjectsCount++,
+            }),
         });
         (skeleton as never as {
             getCellByOffset: (x: number, y: number, scaleX: number, scaleY: number, scrollXY: { x: number; y: number }) => unknown;
@@ -502,12 +506,12 @@ describe('shouldKeepCurrentSelectionOnMobileLongPress', () => {
         (skeleton as never as { getRowCount: () => number }).getRowCount = () => skeleton.worksheet.getRowCount();
         (skeleton as never as { expandRangeByMerge: <T>(range: T) => T }).expandRangeByMerge = (range) => range;
         commandService.registerCommand(SetSelectionsOperation);
-        const service = injector.createInstance(MobileSheetsSelectionRenderService, context as never);
+        const service = injector.createInstance(MobileSheetsSelectionRenderService, context);
 
         sheetSkeletonManagerService.emitCurrentSkeleton({
             unitId: sheet.getUnitId(),
             sheetId: 'sheet1',
-            skeleton: skeleton as never,
+            skeleton,
         });
 
         const spreadsheet = context.mainComponent as never as {

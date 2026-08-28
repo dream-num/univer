@@ -225,7 +225,7 @@ describe('EditorBridgeService', () => {
 
     it('selects the internal editor without focusing its DOM input when automatic focus is disabled', () => {
         const { service, mocks } = createService({ disableAutoFocus: true });
-        vi.spyOn(service, 'getLatestEditCellState').mockReturnValue(null as never);
+        vi.spyOn(service, 'getLatestEditCellState').mockReturnValue(null);
 
         service.setEditCell(createEditCellParam());
 

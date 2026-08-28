@@ -14,10 +14,23 @@
  * limitations under the License.
  */
 
-import type { IFontConfig, IMenuSchema } from '@univerjs/ui';
+import type { IDisplayMenuItem, IMenuItem, IMenuSchema } from '@univerjs/ui';
 import type { ComponentProps } from 'react';
 import type { Root } from 'react-dom/client';
-import { BorderStyleTypes, HorizontalAlign, ILogService, Injector, LocaleService, ThemeService, VerticalAlign } from '@univerjs/core';
+import type { MobileNumberFormatItem } from '../MobileStylePanel';
+import {
+    BorderStyleTypes,
+    ConfigService,
+    DesktopLogService,
+    HorizontalAlign,
+    IConfigService,
+    ILogService,
+    Injector,
+    LocaleService,
+    LocaleType,
+    ThemeService,
+    VerticalAlign,
+} from '@univerjs/core';
 import {
     AddWorksheetMergeAllCommand,
     AddWorksheetMergeCommand,
@@ -33,7 +46,7 @@ import {
     SetTextWrapCommand,
     SetVerticalTextAlignCommand,
 } from '@univerjs/sheets';
-import { IconManager, IFontService, MenuItemType, RediContext } from '@univerjs/ui';
+import { FontService, IconManager, IFontService, MenuItemType, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BehaviorSubject } from 'rxjs';
@@ -50,40 +63,15 @@ import {
 import { BORDER_LINE_CHILDREN, BORDER_SIZE_CHILDREN } from '../../../border-panel/interface';
 import { MobileStylePanel } from '../MobileStylePanel';
 
-class TestLocaleService {
-    t(key: string): string {
-        return key;
-    }
-}
-
-class TestThemeService {
-    getColorFromTheme(): string {
-        return '#111111';
-    }
-}
-
-class TestLogService {
-    warn(): void {}
-}
-
-class TestFontService {
-    readonly fonts$ = new BehaviorSubject<IFontConfig[]>([
-        { label: 'Arial', value: 'Arial' },
-        { label: 'Times New Roman', value: 'Times New Roman' },
-    ]);
-
-    getFonts(): IFontConfig[] {
-        return this.fonts$.getValue();
-    }
-}
-
 function renderStylePanel(props: Partial<ComponentProps<typeof MobileStylePanel>> = {}) {
     const injector = new Injector();
-    injector.add([LocaleService, { useClass: TestLocaleService as never }]);
-    injector.add([ThemeService, { useClass: TestThemeService as never }]);
-    injector.add([ILogService, { useClass: TestLogService as never }]);
+    injector.add([LocaleService]);
+    injector.add([ThemeService]);
+    injector.add([ILogService, { useClass: DesktopLogService }]);
+    injector.add([IConfigService, { useClass: ConfigService }]);
     injector.add([IconManager]);
-    injector.add([IFontService, { useClass: TestFontService as never }]);
+    injector.add([IFontService, { useClass: FontService }]);
+    injector.get(LocaleService).load({ [LocaleType.ZH_CN]: {} });
     const resolvedProps: ComponentProps<typeof MobileStylePanel> = {
         groups: [],
         currentView: null,
@@ -386,6 +374,13 @@ describe('MobileStylePanel', () => {
             [AddWorksheetMergeHorizontalCommand.id, 'Merge horizontal'],
             [RemoveWorksheetMergeCommand.id, 'Unmerge'],
         ];
+        const numberFormatItem: MobileNumberFormatItem = {
+            id: 'more-format',
+            type: MenuItemType.SELECTOR,
+            selections: [],
+            value$: new BehaviorSubject('General'),
+            mobileStyle: numfmtConfig,
+        };
         const groups: IMenuSchema[] = [{
             key: 'layout',
             order: 0,
@@ -424,13 +419,7 @@ describe('MobileStylePanel', () => {
                 {
                     key: 'more-format',
                     order: 0,
-                    item: {
-                        id: 'more-format',
-                        type: MenuItemType.SELECTOR,
-                        selections: [],
-                        value$: new BehaviorSubject('General'),
-                        mobileStyle: numfmtConfig,
-                    } as never,
+                    item: numberFormatItem,
                 },
                 ...['percent', 'currency', 'subtract-decimal', 'add-decimal'].map((id) => ({
                     key: id,
@@ -474,11 +463,11 @@ describe('MobileStylePanel', () => {
             style: BorderStyleTypes.THIN,
             activeBorderType: false,
         };
-        const item = {
+        const item: IDisplayMenuItem<IMenuItem> = {
             id: SetBorderBasicCommand.id,
             type: MenuItemType.BUTTON,
             value$: new BehaviorSubject(borderValue),
-        } as never;
+        };
         let rendered = renderStylePanel({
             currentView: { kind: 'border', title: 'Border', item },
             onExecute,
@@ -580,13 +569,13 @@ describe('MobileStylePanel', () => {
             ],
             customPatterns: ['0.00', 'yyyy-mm-dd'],
         };
-        const item = {
+        const item: MobileNumberFormatItem = {
             id: 'more-format',
             type: MenuItemType.SELECTOR,
             selections: [],
             value$: new BehaviorSubject('Date'),
             mobileStyle: config,
-        } as never;
+        };
         const rendered = renderStylePanel({
             currentView: { kind: 'number-format', title: 'More formats', item, config },
             onExecute,
@@ -616,7 +605,7 @@ describe('MobileStylePanel', () => {
             detailOptions: [],
             customPatterns: ['0.00', 'yyyy-mm-dd'],
         };
-        const item = { id: 'more-format', type: MenuItemType.SELECTOR, selections: [] } as never;
+        const item: MobileNumberFormatItem = { id: 'more-format', type: MenuItemType.SELECTOR, selections: [] };
         const rendered = renderStylePanel({
             currentView: { kind: 'custom-number-format', title: 'Custom format', item, config },
             onExecute,

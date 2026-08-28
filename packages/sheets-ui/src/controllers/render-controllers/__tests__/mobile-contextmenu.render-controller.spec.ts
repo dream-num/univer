@@ -17,11 +17,14 @@
 // @vitest-environment jsdom
 
 import { RANGE_TYPE } from '@univerjs/core';
+import { SelectionMoveType, SheetsSelectionsService } from '@univerjs/sheets';
+import { ContextMenuService, DesktopLayoutService, IContextMenuService, ILayoutService } from '@univerjs/ui';
 import { describe, expect, it, vi } from 'vitest';
 import {
     SheetContextMenuMobileRenderController,
     shouldKeepCurrentSelectionForMobileContextMenu,
 } from '../mobile/mobile-contextmenu.render-controller';
+import { createRenderTestBed } from './render-test-bed';
 
 function createEventSubject() {
     const listeners: Array<() => void> = [];
@@ -67,7 +70,7 @@ describe('mobile context menu helpers', () => {
         })).toBe(false);
     });
 
-    it('delays the selected-tap menu so a double-tap remains available for editing', () => {
+    it('delays the selected-tap menu so a double-tap remains available for editing', async () => {
         vi.useFakeTimers();
         const contentElement = document.createElement('div');
         const canvas = document.createElement('canvas');
@@ -76,33 +79,56 @@ describe('mobile context menu helpers', () => {
 
         const triggerContextMenu = vi.fn();
         const onDblclick$ = createEventSubject();
-        const controller = new SheetContextMenuMobileRenderController(
-            {
-                unitId: 'unit-1',
-                unit: { getActiveSheet: () => ({ getSheetId: () => 'sheet-1' }) },
-                scene: { pick: () => null },
-                mainComponent: { onDblclick$ },
-            } as never,
-            { getContentElement: () => contentElement } as never,
-            { visible: false, triggerContextMenu, hideContextMenu: vi.fn() } as never,
-            { getContextValue: () => false } as never,
-            { getRenderUnitById: () => null } as never,
-            {
-                getCurrentSelections: () => [],
-                setSelections: vi.fn(),
-            } as never,
-            { getCurrentParam: () => null } as never
-        );
-        Object.assign(controller as object, {
-            _getTargetCellByOffset: () => ({
-                mergeInfo: { startRow: 1, endRow: 1, startColumn: 1, endColumn: 1 },
-            }),
-            _getSelectionSnapshot: () => [{
+        const testBed = createRenderTestBed({
+            dependencies: [
+                [IContextMenuService, { useClass: ContextMenuService }],
+                [ILayoutService, { useClass: DesktopLayoutService }],
+            ],
+        });
+        const { context, injector, scene, sheet, skeleton } = testBed;
+        const layoutRegistration = injector.get(ILayoutService).registerContentElement(contentElement);
+        const contextMenuRegistration = injector.get(IContextMenuService).registerContextMenuHandler({
+            visible: false,
+            handleContextMenu: triggerContextMenu,
+            hideContextMenu: vi.fn(),
+        });
+        const worksheet = sheet.getActiveSheet();
+        injector.get(SheetsSelectionsService).setSelections(
+            sheet.getUnitId(),
+            worksheet.getSheetId(),
+            [{
                 range: { startRow: 1, endRow: 2, startColumn: 1, endColumn: 2 },
                 primary: null,
                 style: null,
             }],
+            SelectionMoveType.MOVE_END
+        );
+        Object.assign(scene, { pick: () => null });
+        Object.assign(skeleton, {
+            getCellWithCoordByOffset: () => ({
+                actualColumn: 1,
+                actualRow: 1,
+                endX: 200,
+                endY: 40,
+                isMerged: false,
+                isMergedMainCell: false,
+                mergeInfo: {
+                    endColumn: 1,
+                    endRow: 1,
+                    endX: 200,
+                    endY: 40,
+                    startColumn: 1,
+                    startRow: 1,
+                    startX: 100,
+                    startY: 20,
+                },
+                startX: 100,
+                startY: 20,
+            }),
         });
+        Object.assign(context.mainComponent, { onDblclick$ });
+        testBed.renderManagerService.removeRender(sheet.getUnitId());
+        const controller = injector.createInstance(SheetContextMenuMobileRenderController, context);
         canvas.addEventListener('pointerup', (event) => event.stopPropagation());
 
         const dispatchPointer = (type: string) => {
@@ -118,7 +144,7 @@ describe('mobile context menu helpers', () => {
         dispatchPointer('pointerup');
 
         expect(triggerContextMenu).not.toHaveBeenCalled();
-        vi.advanceTimersByTime(500);
+        await vi.advanceTimersByTimeAsync(500);
         expect(triggerContextMenu).toHaveBeenCalledOnce();
 
         triggerContextMenu.mockClear();
@@ -127,11 +153,14 @@ describe('mobile context menu helpers', () => {
         dispatchPointer('pointerdown');
         dispatchPointer('pointerup');
         onDblclick$.emit();
-        vi.advanceTimersByTime(500);
+        await vi.advanceTimersByTimeAsync(500);
         expect(triggerContextMenu).not.toHaveBeenCalled();
 
         controller.dispose();
+        contextMenuRegistration.dispose();
+        layoutRegistration.dispose();
         contentElement.remove();
+        testBed.univer.dispose();
         vi.useRealTimers();
     });
 });

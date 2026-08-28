@@ -26,12 +26,32 @@ import { SheetScrollManagerService } from '../../../../services/scroll-manager.s
 import { createRenderTestBed } from '../../__tests__/render-test-bed';
 import { MobileSheetsScrollRenderController } from '../mobile-scroll.render-controller';
 
+function dispatchTouchEvent(
+    listeners: Map<string, EventListener>,
+    type: string,
+    touches: Array<{ clientX: number; clientY: number }>,
+    preventDefault = vi.fn()
+): void {
+    const listener = listeners.get(type);
+    if (listener == null) {
+        throw new Error(`Missing ${type} listener`);
+    }
+
+    const event = new Event(type);
+    Object.defineProperties(event, {
+        preventDefault: { value: preventDefault },
+        touches: { value: touches },
+    });
+    listener(event);
+}
+
 function createController() {
     const rawScrollInfo$ = new Subject<any>();
     const validViewportScrollInfo$ = new Subject<any>();
     const transformerChangeStart$ = new Subject<unknown>();
     const transformerChangeEnd$ = new Subject<unknown>();
     let sceneObjectsEvented = true;
+    let sceneOverlayOwnsTouch = false;
     const scrollStates = new Map<string, any>();
     const scrollManagerService = {
         rawScrollInfo$,
@@ -77,9 +97,12 @@ function createController() {
         ySplit: 0,
         xSplit: 0,
     } as any);
+    const canvasListeners = new Map<string, EventListener>();
     const canvasElement = {
         parentElement: document.createElement('div'),
-        addEventListener: vi.fn(),
+        addEventListener: vi.fn((type: string, listener: EventListener) => {
+            canvasListeners.set(type, listener);
+        }),
         removeEventListener: vi.fn(),
         getBoundingClientRect: vi.fn(() => ({ left: 0, top: 0 })),
     };
@@ -88,20 +111,27 @@ function createController() {
         width: 800,
         height: 600,
     } as any);
-    Object.assign(scene, { getTransformerByCreate: vi.fn(() => ({
-        changeStart$: transformerChangeStart$,
-        changeEnd$: transformerChangeEnd$,
-    })) });
+    Object.defineProperty(scene, 'getTransformerByCreate', {
+        configurable: true,
+        value: () => ({
+            changeStart$: transformerChangeStart$,
+            changeEnd$: transformerChangeEnd$,
+        }),
+    });
     Object.defineProperty(scene, 'objectsEvented', {
         configurable: true,
         get: () => sceneObjectsEvented,
     });
-    (scene as any).pick ??= vi.fn(() => null);
+    Object.defineProperty(scene, 'pick', {
+        configurable: true,
+        value: () => sceneOverlayOwnsTouch ? scene : null,
+    });
 
     const controller = injector.createInstance(MobileSheetsScrollRenderController, context as any);
 
     return {
         canvasElement,
+        canvasListeners,
         controller,
         executeCommand,
         rawScrollInfo$,
@@ -114,6 +144,9 @@ function createController() {
         syncExecuteCommand,
         setSceneObjectsEvented: (value: boolean) => {
             sceneObjectsEvented = value;
+        },
+        setSceneOverlayOwnsTouch: (value: boolean) => {
+            sceneOverlayOwnsTouch = value;
         },
         testBed,
         transformerChangeEnd$,
@@ -308,59 +341,33 @@ describe('MobileSheetsScrollRenderController', () => {
     });
 
     it('does not pan the sheet when a canvas overlay owns the touch gesture', () => {
-        const { canvasElement, executeCommand, scene, testBed } = createController();
-        const listeners = new Map<string, EventListener>();
-        canvasElement.addEventListener.mock.calls.forEach(([type, handler]) => {
-            listeners.set(type, handler as EventListener);
-        });
-        (scene as any).pick = vi.fn(() => ({ oKey: 'drawing-1' }));
+        const { canvasListeners, executeCommand, setSceneOverlayOwnsTouch, testBed } = createController();
+        setSceneOverlayOwnsTouch(true);
 
-        listeners.get('touchstart')!({
-            touches: [{ clientX: 120, clientY: 120 }],
-            preventDefault: vi.fn(),
-        } as unknown as Event);
-        listeners.get('touchmove')!({
-            touches: [{ clientX: 90, clientY: 80 }],
-            preventDefault: vi.fn(),
-        } as unknown as Event);
+        dispatchTouchEvent(canvasListeners, 'touchstart', [{ clientX: 120, clientY: 120 }]);
+        dispatchTouchEvent(canvasListeners, 'touchmove', [{ clientX: 90, clientY: 80 }]);
 
         expect(executeCommand).not.toHaveBeenCalledWith(SetScrollRelativeCommand.id, expect.anything());
         testBed.univer.dispose();
     });
 
     it('yields an active touch gesture to the drawing transformer', () => {
-        const { canvasElement, executeCommand, testBed, transformerChangeEnd$, transformerChangeStart$ } = createController();
-        const listeners = new Map<string, EventListener>();
-        canvasElement.addEventListener.mock.calls.forEach(([type, handler]) => {
-            listeners.set(type, handler as EventListener);
-        });
+        const { canvasListeners, executeCommand, testBed, transformerChangeEnd$, transformerChangeStart$ } = createController();
         const preventDefault = vi.fn();
         const now = vi.spyOn(performance, 'now');
         now.mockReturnValueOnce(0).mockReturnValueOnce(16).mockReturnValueOnce(32);
 
-        listeners.get('touchstart')!({
-            touches: [{ clientX: 120, clientY: 120 }],
-            preventDefault,
-        } as unknown as Event);
+        dispatchTouchEvent(canvasListeners, 'touchstart', [{ clientX: 120, clientY: 120 }], preventDefault);
         transformerChangeStart$.next({});
-        listeners.get('touchmove')!({
-            touches: [{ clientX: 90, clientY: 80 }],
-            preventDefault,
-        } as unknown as Event);
+        dispatchTouchEvent(canvasListeners, 'touchmove', [{ clientX: 90, clientY: 80 }], preventDefault);
 
         expect(preventDefault).toHaveBeenCalled();
         expect(executeCommand).not.toHaveBeenCalledWith(SetScrollRelativeCommand.id, expect.anything());
 
-        listeners.get('touchend')!({ touches: [] } as unknown as Event);
+        dispatchTouchEvent(canvasListeners, 'touchend', []);
         transformerChangeEnd$.next({});
-        listeners.get('touchstart')!({
-            touches: [{ clientX: 120, clientY: 120 }],
-            preventDefault,
-        } as unknown as Event);
-        listeners.get('touchmove')!({
-            touches: [{ clientX: 90, clientY: 80 }],
-            preventDefault,
-        } as unknown as Event);
+        dispatchTouchEvent(canvasListeners, 'touchstart', [{ clientX: 120, clientY: 120 }], preventDefault);
+        dispatchTouchEvent(canvasListeners, 'touchmove', [{ clientX: 90, clientY: 80 }], preventDefault);
 
         expect(executeCommand).toHaveBeenCalledWith(SetScrollRelativeCommand.id, {
             offsetX: 30,
@@ -372,22 +379,12 @@ describe('MobileSheetsScrollRenderController', () => {
     });
 
     it('yields an active touch gesture to shape adjustment controls', () => {
-        const { canvasElement, executeCommand, setSceneObjectsEvented, testBed } = createController();
-        const listeners = new Map<string, EventListener>();
-        canvasElement.addEventListener.mock.calls.forEach(([type, handler]) => {
-            listeners.set(type, handler as EventListener);
-        });
+        const { canvasListeners, executeCommand, setSceneObjectsEvented, testBed } = createController();
         const preventDefault = vi.fn();
 
-        listeners.get('touchstart')!({
-            touches: [{ clientX: 120, clientY: 120 }],
-            preventDefault,
-        } as unknown as Event);
+        dispatchTouchEvent(canvasListeners, 'touchstart', [{ clientX: 120, clientY: 120 }], preventDefault);
         setSceneObjectsEvented(false);
-        listeners.get('touchmove')!({
-            touches: [{ clientX: 90, clientY: 80 }],
-            preventDefault,
-        } as unknown as Event);
+        dispatchTouchEvent(canvasListeners, 'touchmove', [{ clientX: 90, clientY: 80 }], preventDefault);
 
         expect(preventDefault).toHaveBeenCalled();
         expect(executeCommand).not.toHaveBeenCalledWith(SetScrollRelativeCommand.id, expect.anything());

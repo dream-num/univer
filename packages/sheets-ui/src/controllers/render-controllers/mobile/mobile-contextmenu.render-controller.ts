@@ -187,7 +187,7 @@ export class SheetContextMenuMobileRenderController extends Disposable implement
         return selectionRenderService?.getSelectionControls().map((control) => convertSelectionDataToRange(control.getValue())) ?? [];
     }
 
-    private _cloneSelections(selections: ISelectionWithStyle[]): ISelectionWithStyle[] {
+    private _cloneSelections(selections: Readonly<ISelectionWithStyle[]>): ISelectionWithStyle[] {
         return selections.map((selection) => ({
             range: { ...selection.range },
             primary: selection.primary ? { ...selection.primary } : selection.primary,
@@ -201,7 +201,7 @@ export class SheetContextMenuMobileRenderController extends Disposable implement
             return this._cloneSelections(renderedSelections);
         }
 
-        return this._cloneSelections(this._selectionManagerService.getCurrentSelections() as ISelectionWithStyle[]);
+        return this._cloneSelections(this._selectionManagerService.getCurrentSelections());
     }
 
     private _restoreSelectionSnapshot(selectionSnapshot: ISelectionWithStyle[]): void {

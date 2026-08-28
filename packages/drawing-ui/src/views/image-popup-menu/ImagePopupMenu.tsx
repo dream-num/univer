@@ -112,14 +112,14 @@ export function ImagePopupMenu(props: IImagePopupMenuProps) {
                           dark:!univer-bg-gray-800 dark:!univer-text-gray-0
                           dark:active:!univer-bg-gray-700
                         "
-                        onClick={() => {
-                            commandService.executeCommand(item.commandId, item.commandParams);
+                        onClick={async () => {
+                            await commandService.executeCommand(item.commandId, item.commandParams);
                             if (popup.extraProps?.dialogId) {
                                 dialogService.close(popup.extraProps.dialogId);
                             }
                         }}
                     >
-                        {localeService.t(item.label as LocaleKey)}
+                        {localeService.t(item.label)}
                     </button>
                 ))}
             </div>

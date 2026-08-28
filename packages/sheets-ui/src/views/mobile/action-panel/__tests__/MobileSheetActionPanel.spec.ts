@@ -55,7 +55,7 @@ describe('mobile style selection normalization', () => {
         ];
         const worksheet = { getMergedCell: () => null };
 
-        const normalized = normalizeMobileSelectionPrimary(selections, worksheet as never);
+        const normalized = normalizeMobileSelectionPrimary(selections, worksheet);
 
         expect(normalized?.[0].primary).toMatchObject({
             actualRow: 3,
@@ -82,7 +82,7 @@ describe('mobile style selection normalization', () => {
             style: null,
         }];
 
-        expect(normalizeMobileSelectionPrimary(selections, {} as never)).toBeNull();
+        expect(normalizeMobileSelectionPrimary(selections, { getMergedCell: () => null })).toBeNull();
     });
 });
 
@@ -114,10 +114,10 @@ describe('mobile menu command mapping', () => {
             expected: { commandId: 'set-format', commandParams: { pattern: 'general' } },
         },
     ])('maps $name', ({ input, expected }) => {
-        expect(getMobileMenuCommand(input as never)).toEqual(expected);
+        expect(getMobileMenuCommand(input)).toEqual(expected);
     });
 
     it('ignores a menu entry without an executable command id', () => {
-        expect(getMobileMenuCommand({ id: undefined } as never)).toBeNull();
+        expect(getMobileMenuCommand({ id: undefined })).toBeNull();
     });
 });

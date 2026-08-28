@@ -100,7 +100,7 @@ interface IMobileNumberFormatMenuConfig {
     customPatterns: string[];
 }
 
-type MobileNumberFormatItem = IDisplayMenuItem<IMenuSelectorItem<string, MenuItemDefaultValueType, unknown>> & {
+export type MobileNumberFormatItem = IDisplayMenuItem<IMenuSelectorItem<string, MenuItemDefaultValueType, unknown>> & {
     mobileStyle?: IMobileNumberFormatMenuConfig;
 };
 

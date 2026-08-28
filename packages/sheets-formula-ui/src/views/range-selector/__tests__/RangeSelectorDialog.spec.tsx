@@ -513,7 +513,12 @@ describe('RangeSelectorDialog', () => {
         expect(picker).toBeTruthy();
         expect(picker?.className).toContain('univer-pointer-events-none');
         expect(picker?.querySelector('section')?.className).toContain('univer-pointer-events-auto');
-        expect((picker?.querySelector('input') as HTMLInputElement).value).toBe('Sheet1!A1:B2');
+        const input = picker?.querySelector('input');
+        expect(input).toBeInstanceOf(HTMLInputElement);
+        if (!(input instanceof HTMLInputElement)) {
+            throw new TypeError('Mobile range selector input was not rendered.');
+        }
+        expect(input.value).toBe('Sheet1!A1:B2');
 
         await emitSelection(injector, {
             startRow: 3,
@@ -523,7 +528,7 @@ describe('RangeSelectorDialog', () => {
             rangeType: RANGE_TYPE.NORMAL,
         });
 
-        expect((picker?.querySelector('input') as HTMLInputElement).value).toBe('A4:C7');
+        expect(input.value).toBe('A4:C7');
         await clickButton('Confirm');
         expect(RangeDialogState.confirmed[0][0].range).toEqual(expect.objectContaining({
             startRow: 3,

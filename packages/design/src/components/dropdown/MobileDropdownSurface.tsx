@@ -18,9 +18,9 @@ import type { ReactNode } from 'react';
 import { useContext } from 'react';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 import {
+    Dialog,
     DialogContent,
     DialogDescription,
-    Dialog as DialogRoot,
     DialogTitle,
     DialogTrigger,
 } from '../dialog/DialogPrimitive';
@@ -36,7 +36,7 @@ export function MobileDropdownSurface(props: {
     const { mountContainer } = useContext(ConfigContext);
 
     return (
-        <DialogRoot open={open} onOpenChange={onOpenChange} modal>
+        <Dialog open={open} onOpenChange={onOpenChange} modal>
             <DialogTrigger asChild disabled={disabled}>
                 {children}
             </DialogTrigger>
@@ -75,6 +75,6 @@ export function MobileDropdownSurface(props: {
                 <DialogDescription className="univer-hidden" />
                 {content}
             </DialogContent>
-        </DialogRoot>
+        </Dialog>
     );
 }

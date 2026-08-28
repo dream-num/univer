@@ -120,7 +120,7 @@ describe('ColorPicker', () => {
         const handleChange = vi.fn();
         const { container } = render(<ColorPicker onChange={handleChange} />);
         getMoreColorButton(container).dispatchEvent(new MouseEvent('click', { bubbles: true }));
-        const rgbInputs = Array.from(document.querySelectorAll('input')).filter((input) => input.maxLength === 3) as HTMLInputElement[];
+        const rgbInputs = Array.from(document.querySelectorAll('input')).filter((input) => input.maxLength === 3);
         if (rgbInputs.length === 3) {
             rgbInputs[0].value = '1';
             rgbInputs[0].dispatchEvent(new Event('input', { bubbles: true }));

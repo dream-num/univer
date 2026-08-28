@@ -48,6 +48,11 @@ class TestSheetScrollManagerService {
     readonly validViewportScrollInfo$ = new BehaviorSubject<{ viewportScrollX: number; viewportScrollY: number } | null>(null);
 }
 
+function installPointerUpEvent(mainComponent: ReturnType<typeof createRenderTestBed>['context']['mainComponent']) {
+    if (!mainComponent) throw new Error('Expected the sheet render component to be available.');
+    Object.assign(mainComponent, { onPointerUp$: createTestEvent() });
+}
+
 function createMobileControl(rangeType: RANGE_TYPE) {
     const injector = new Injector();
     injector.add([ThemeService, { useClass: TestThemeService }]);
@@ -165,7 +170,7 @@ describe('shouldKeepCurrentSelectionOnMobileLongPress', () => {
             ],
         });
         const { injector, sheet, commandService, sheetSkeletonManagerService, skeleton, context, contextService } = testBed;
-        Object.assign(context.mainComponent, { onPointerUp$: createTestEvent() });
+        installPointerUpEvent(context.mainComponent);
         commandService.registerCommand(SetSelectionsOperation);
         const service = injector.createInstance(MobileSheetsSelectionRenderService, context);
         expect(contextService.getContextValue(SELECTIONS_ENABLED)).toBe(true);
@@ -340,7 +345,7 @@ describe('shouldKeepCurrentSelectionOnMobileLongPress', () => {
             ],
         });
         const { injector, sheet, commandService, sheetSkeletonManagerService, skeleton, context, scene } = testBed;
-        Object.assign(context.mainComponent, { onPointerUp$: createTestEvent() });
+        installPointerUpEvent(context.mainComponent);
         let clearSelectedObjectsCount = 0;
         Object.assign(scene, {
             getTransformer: () => ({
@@ -424,7 +429,7 @@ describe('shouldKeepCurrentSelectionOnMobileLongPress', () => {
             ],
         });
         const { injector, sheet, commandService, sheetSkeletonManagerService, skeleton, context, scene, contextService } = testBed;
-        Object.assign(context.mainComponent, { onPointerUp$: createTestEvent() });
+        installPointerUpEvent(context.mainComponent);
         installCellLookupForMobileSelection(skeleton);
         Object.assign(scene, { getTransformer: () => ({ clearSelectedObjects: () => { } }) });
         commandService.registerCommand(SetSelectionsOperation);
@@ -468,7 +473,7 @@ describe('shouldKeepCurrentSelectionOnMobileLongPress', () => {
             ],
         });
         const { injector, sheet, commandService, sheetSkeletonManagerService, skeleton, context, contextService, scene } = testBed;
-        Object.assign(context.mainComponent, { onPointerUp$: createTestEvent() });
+        installPointerUpEvent(context.mainComponent);
         let clearSelectedObjectsCount = 0;
         Object.assign(scene, {
             getTransformer: () => ({

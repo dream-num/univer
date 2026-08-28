@@ -126,7 +126,9 @@ describe('mobile context menu helpers', () => {
                 startY: 20,
             }),
         });
-        Object.assign(context.mainComponent, { onDblclick$ });
+        const mainComponent = context.mainComponent;
+        if (!mainComponent) throw new Error('Expected the sheet render component to be available.');
+        Object.assign(mainComponent, { onDblclick$ });
         testBed.renderManagerService.removeRender(sheet.getUnitId());
         const controller = injector.createInstance(SheetContextMenuMobileRenderController, context);
         canvas.addEventListener('pointerup', (event) => event.stopPropagation());

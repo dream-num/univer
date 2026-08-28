@@ -17,9 +17,8 @@
 import type { IBorderInfo } from '@univerjs/sheets';
 import type { IDisplayMenuItem, IFontConfig, IMenuItem, IMenuSchema, IMenuSelectorItem, IValueOption, MenuItemDefaultValueType } from '@univerjs/ui';
 import type { ReactNode } from 'react';
-import type { Observable } from 'rxjs';
 import type { LocaleKey } from '../../../locale/types';
-import { BorderStyleTypes, LocaleService, ThemeService } from '@univerjs/core';
+import { BorderStyleTypes, BorderType, LocaleService, ThemeService } from '@univerjs/core';
 import { borderBottomClassName, clsx, ColorPickerPanel, ColorPresets, resetButtonClassName } from '@univerjs/design';
 import { CheckMarkIcon, MoreRightIcon, NoColorDoubleIcon } from '@univerjs/icons';
 import {
@@ -79,6 +78,7 @@ const SPECIAL_MOBILE_STYLE_COMMANDS = new Set([
     SetTextRotationCommand.id,
     AddWorksheetMergeCommand.id,
 ]);
+const BORDER_TYPES = new Set<unknown>(Object.values(BorderType));
 
 interface IMobileNumberFormatOption {
     label?: string;
@@ -169,7 +169,11 @@ export function MobileStylePanel(props: {
     const { groups, currentView, recentColors, onOpenView, onBack, onExecute, onUseColor } = props;
     const localeService = useDependency(LocaleService);
     const themeService = useDependency(ThemeService);
-    const currentBorderInfo = useObservable(currentView?.item.value$ as Observable<IBorderInfo> | undefined, undefined);
+    const borderView = currentView?.kind === 'border' || currentView?.kind === 'border-color' || currentView?.kind === 'border-style'
+        ? currentView
+        : null;
+    const currentValue = useObservable<unknown>(borderView?.item.value$, undefined);
+    const currentBorderInfo = isBorderInfo(currentValue) ? currentValue : undefined;
     const customColorTitle = localeService.t<LocaleKey>('sheets-ui.mobile.customColor');
 
     if (!currentView) {
@@ -223,12 +227,12 @@ export function MobileStylePanel(props: {
         return <MobileCustomNumberFormat config={currentView.config} onBack={onBack} onExecute={onExecute} />;
     }
 
-    const value = currentBorderInfo ?? {
-        type: BORDER_LINE_CHILDREN[5].value,
+    const value: IBorderInfo = currentBorderInfo ?? {
+        type: BorderType.ALL,
         color: themeService.getColorFromTheme('gray.900'),
         style: BorderStyleTypes.THIN,
         activeBorderType: false,
-    } as IBorderInfo;
+    };
 
     if (currentView.kind === 'border-color') {
         return (
@@ -1223,7 +1227,7 @@ function MobileBorderView(props: {
                             `, {
                                 'univer-ring-2 univer-ring-primary-600 dark:!univer-ring-primary-400': selected,
                             })}
-                            onClick={() => apply({ type: option.value as IBorderInfo['type'] })}
+                            onClick={() => apply({ type: option.value })}
                         >
                             {Icon && <Icon className="univer-size-5" />}
                             <span className="univer-line-clamp-1">{localeService.t(option.label)}</span>
@@ -1446,4 +1450,17 @@ function executeColor(
     }
 
     onExecute({ id: target === 'text' ? SetRangeTextColorCommand.id : SetBackgroundColorCommand.id, value: color });
+}
+
+function isBorderInfo(value: unknown): value is IBorderInfo {
+    if (!value || typeof value !== 'object') return false;
+
+    return 'type' in value
+        && BORDER_TYPES.has(value.type)
+        && 'color' in value
+        && (typeof value.color === 'string' || value.color === undefined)
+        && 'style' in value
+        && typeof value.style === 'number'
+        && 'activeBorderType' in value
+        && typeof value.activeBorderType === 'boolean';
 }

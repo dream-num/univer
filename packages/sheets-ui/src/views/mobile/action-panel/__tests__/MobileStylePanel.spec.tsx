@@ -20,6 +20,7 @@ import type { Root } from 'react-dom/client';
 import type { MobileNumberFormatItem } from '../MobileStylePanel';
 import {
     BorderStyleTypes,
+    BorderType,
     ConfigService,
     DesktopLogService,
     HorizontalAlign,
@@ -95,6 +96,7 @@ function renderStylePanel(props: Partial<ComponentProps<typeof MobileStylePanel>
 
     return {
         container,
+        injector,
         root,
         props: resolvedProps,
     };
@@ -457,16 +459,9 @@ describe('MobileStylePanel', () => {
         const onExecute = vi.fn();
         const onOpenView = vi.fn();
         const onUseColor = vi.fn();
-        const borderValue = {
-            type: 'all',
-            color: '#222222',
-            style: BorderStyleTypes.THIN,
-            activeBorderType: false,
-        };
         const item: IDisplayMenuItem<IMenuItem> = {
             id: SetBorderBasicCommand.id,
             type: MenuItemType.BUTTON,
-            value$: new BehaviorSubject(borderValue),
         };
         let rendered = renderStylePanel({
             currentView: { kind: 'border', title: 'Border', item },
@@ -475,6 +470,12 @@ describe('MobileStylePanel', () => {
         });
         root = rendered.root;
         container = rendered.container;
+        const borderValue = {
+            type: BorderType.ALL,
+            color: rendered.injector.get(ThemeService).getColorFromTheme('gray.900'),
+            style: BorderStyleTypes.THIN,
+            activeBorderType: false,
+        };
 
         BORDER_LINE_CHILDREN.forEach((option) => clickButton(rendered.container, option.label));
         expect(onExecute.mock.calls.map(([command]) => command)).toEqual(BORDER_LINE_CHILDREN.map((option) => ({

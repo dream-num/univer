@@ -99,7 +99,7 @@ export function getMobileEditingMenuBottomOffset(formulaOperatorsVisible: boolea
 
 export function normalizeMobileSelectionPrimary(
     selections: Readonly<ISelectionWithStyle[]>,
-    worksheet: Worksheet
+    worksheet: Pick<Worksheet, 'getMergedCell'>
 ): ISelectionWithStyle[] | null {
     const lastIndex = selections.length - 1;
     if (lastIndex < 0 || selections[lastIndex].primary) return null;

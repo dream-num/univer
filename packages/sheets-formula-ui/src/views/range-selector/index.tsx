@@ -21,7 +21,7 @@ import type { MobileDrawerSnap } from '@univerjs/ui';
 import type { RefObject } from 'react';
 import type { LocaleKey } from '../../locale/types';
 import { ICommandService, LocaleService, RichTextBuilder } from '@univerjs/core';
-import { Button, clsx, Dialog, Input, scrollbarClassName, Tooltip } from '@univerjs/design';
+import { Button, clsx, ConfigContext, Dialog, Input, scrollbarClassName, Tooltip } from '@univerjs/design';
 import { IEditorService, RichTextEditor } from '@univerjs/docs-ui';
 import {
     deserializeRangeWithSheet,
@@ -33,8 +33,8 @@ import {
 } from '@univerjs/engine-formula';
 import { DeleteIcon, IncreaseIcon, SelectRangeIcon } from '@univerjs/icons';
 import { SetSelectionsOperation } from '@univerjs/sheets';
-import { IDialogService, isMobileDialogService, MobileDrawer, useDependency, useEvent } from '@univerjs/ui';
-import { useEffect, useRef, useState } from 'react';
+import { MobileDrawer, useDependency, useEvent } from '@univerjs/ui';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { useStateRef } from '../formula-editor/hooks/use-state-ref';
 import { useRangesHighlight } from './hooks/use-ranges-highlight';
 import { useRangeSelectorSelectionChange } from './hooks/use-selection-change';
@@ -326,7 +326,7 @@ export function stringifyRanges(ranges: IUnitRangeName[]) {
 
 export function RangeSelector(props: IRangeSelectorProps) {
     const [editor, setEditor] = useState<Editor | null>(null);
-    const dialogService = useDependency(IDialogService);
+    const { mobile = false } = useContext(ConfigContext);
     const {
         onVerify,
         selectorRef,
@@ -348,7 +348,6 @@ export function RangeSelector(props: IRangeSelectorProps) {
     const [focusing, setFocusing] = useState(autoFocus ?? false);
     const [popupVisible, setPopupVisible] = useState(false);
     const [rangeSelectorRanges, setRangeSelectorRanges] = useState<IUnitRangeName[]>([]);
-    const mobileDialogService = isMobileDialogService(dialogService) ? dialogService : null;
     const localeService = useDependency(LocaleService);
     const editorService = useDependency(IEditorService);
     const { sequenceNodes } = useRangesHighlight(editor, focusing, unitId, subUnitId);
@@ -398,12 +397,6 @@ export function RangeSelector(props: IRangeSelectorProps) {
     useEffect(() => {
         onRangeSelectorDialogVisibleChange?.(popupVisible);
     }, [popupVisible]);
-
-    useEffect(() => {
-        if (!popupVisible || !mobileDialogService) return;
-        const suspension = mobileDialogService.suspendOverlays();
-        return () => suspension.dispose();
-    }, [mobileDialogService, popupVisible]);
 
     useEffect(() => {
         if (popupVisible && resetRange) {
@@ -456,7 +449,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
                 unitId={unitId}
                 subUnitId={subUnitId}
                 visible={popupVisible}
-                mobile={Boolean(mobileDialogService)}
+                mobile={mobile}
                 maxRangeCount={maxRangeCount}
                 onConfirm={(ranges) => {
                     const resultStr = stringifyRanges(ranges);

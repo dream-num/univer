@@ -78,7 +78,7 @@ export function ToolbarTooltip(props: IToolbarTooltipProps) {
     return (
         <Tooltip
             {...tooltipProps}
-            className={clsx('univer-fill-mode-backwards univer-delay-100', tooltipProps.className)}
+            className={clsx('univer-fill-mode-backwards !univer-pointer-events-none univer-delay-100', tooltipProps.className)}
             visible={!popupOpen && tooltipVisible}
             onVisibleChange={(visible) => {
                 if (!popupOpen) {

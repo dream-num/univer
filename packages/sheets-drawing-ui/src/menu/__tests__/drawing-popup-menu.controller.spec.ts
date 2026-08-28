@@ -27,7 +27,7 @@ import {
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
-import { IMenuManagerService, IMessageService, MenuItemType } from '@univerjs/ui';
+import { IDialogService, IMenuManagerService, IMessageService, MenuItemType } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { DrawingPopupMenuController } from '../drawing-popup-menu.controller';
@@ -56,6 +56,7 @@ describe('DrawingPopupMenuController', () => {
         });
 
         injector.add([LocaleService]);
+        injector.add([IDialogService, { useValue: {} as never }]);
         injector.add([IDrawingManagerService, {
             useValue: {
                 getDrawingOKey: () => ({

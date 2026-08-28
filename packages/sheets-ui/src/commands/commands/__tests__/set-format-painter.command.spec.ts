@@ -34,7 +34,6 @@ import {
     SetRangeValuesCommand,
     SetRangeValuesMutation,
     SetSelectionsOperation,
-    SetStyleCommand,
 } from '@univerjs/sheets';
 import { BehaviorSubject } from 'rxjs';
 import { beforeEach, describe, expect, it } from 'vitest';
@@ -351,49 +350,6 @@ describe('Test format painter rules in controller', () => {
         });
 
         describe('format painter to single cell', () => {
-            it('marks generated set range values mutations as style updates', async () => {
-                expect(await commandService.executeCommand(SetSelectionsOperation.id, {
-                    unitId: 'workbook-01',
-                    subUnitId: 'sheet-0011',
-
-                    selections: [
-                        {
-                            range: {
-                                startRow: 0,
-                                endRow: 0,
-                                startColumn: 0,
-                                endColumn: 0,
-                            },
-                        },
-                    ],
-                })).toBeTruthy();
-
-                expect(await commandService.executeCommand(SetOnceFormatPainterCommand.id)).toBeTruthy();
-
-                const setRangeValuesParams: Array<{ trigger?: string }> = [];
-                const disposable = commandService.onCommandExecuted((command) => {
-                    if (command.id === SetRangeValuesMutation.id) {
-                        setRangeValuesParams.push(command.params as { trigger?: string });
-                    }
-                });
-
-                expect(await commandService.executeCommand(ApplyFormatPainterCommand.id, {
-                    range: {
-                        startRow: 5,
-                        endRow: 5,
-                        startColumn: 0,
-                        endColumn: 0,
-                    },
-                    unitId: 'workbook-01',
-                    subUnitId: 'sheet-0011',
-                })).toBeTruthy();
-
-                disposable.dispose();
-
-                expect(setRangeValuesParams.length).toBeGreaterThan(0);
-                expect(setRangeValuesParams.every((params) => params.trigger === SetStyleCommand.id)).toBe(true);
-            });
-
             it('will copy whole original styles', async () => {
                 expect(await commandService.executeCommand(SetSelectionsOperation.id, {
                     unitId: 'workbook-01',

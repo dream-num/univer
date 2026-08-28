@@ -20,6 +20,7 @@ import { DocZoomRenderController, shouldHandleDocWheelZoom } from '../zoom.rende
 
 const mockSceneScale = vi.hoisted(() => vi.fn());
 const mockClearSelectedObjects = vi.hoisted(() => vi.fn());
+const mockSceneScaleState = vi.hoisted(() => ({ x: undefined as number | undefined, y: undefined as number | undefined }));
 
 vi.mock('../../../basics/component-tools', async (importOriginal) => {
     const actual = await importOriginal<typeof import('../../../basics/component-tools')>();
@@ -28,6 +29,12 @@ vi.mock('../../../basics/component-tools', async (importOriginal) => {
         ...actual,
         neoGetDocObject: () => ({
             scene: {
+                get scaleX() {
+                    return mockSceneScaleState.x;
+                },
+                get scaleY() {
+                    return mockSceneScaleState.y;
+                },
                 scale: mockSceneScale,
                 getTransformer: () => ({
                     clearSelectedObjects: mockClearSelectedObjects,
@@ -41,6 +48,8 @@ describe('DocZoomRenderController', () => {
     beforeEach(() => {
         mockSceneScale.mockClear();
         mockClearSelectedObjects.mockClear();
+        mockSceneScaleState.x = undefined;
+        mockSceneScaleState.y = undefined;
     });
 
     it('handles wheel zoom intent for focused modern docs', () => {
@@ -168,5 +177,77 @@ describe('DocZoomRenderController', () => {
         controller.updateViewZoom(1.25);
 
         expect(refreshSelection).not.toHaveBeenCalled();
+    });
+
+    it('preserves drawing selection during skeleton-only zoom refreshes', () => {
+        const controller = Object.create(DocZoomRenderController.prototype) as DocZoomRenderController;
+        Object.assign(controller, {
+            _context: {
+                unitId: 'doc-unit',
+                scene: {
+                    makeDirty: vi.fn(),
+                    render: vi.fn(),
+                },
+            },
+            _docViewScaleService: {
+                getViewScale: vi.fn(() => 1.875),
+            },
+            _editorService: {
+                isEditor: vi.fn(() => false),
+            },
+            _docPageLayoutService: {
+                calculatePagePosition: vi.fn(),
+            },
+            _textSelectionManagerService: {
+                refreshSelection: vi.fn(),
+            },
+            _embedInteractionBoundaryService: {
+                hasRecentInteraction: vi.fn(() => false),
+            },
+            _univerInstanceService: {
+                getUnitCreateOptions: vi.fn(() => undefined),
+            },
+        });
+
+        controller.updateViewZoom(1.25, false);
+
+        expect(mockClearSelectedObjects).not.toHaveBeenCalled();
+    });
+
+    it('preserves drawing selection when a repeated zoom operation keeps the same view scale', () => {
+        const controller = Object.create(DocZoomRenderController.prototype) as DocZoomRenderController;
+        mockSceneScaleState.x = 1.875;
+        mockSceneScaleState.y = 1.875;
+        Object.assign(controller, {
+            _context: {
+                unitId: 'doc-unit',
+                scene: {
+                    makeDirty: vi.fn(),
+                    render: vi.fn(),
+                },
+            },
+            _docViewScaleService: {
+                getViewScale: vi.fn(() => 1.875),
+            },
+            _editorService: {
+                isEditor: vi.fn(() => false),
+            },
+            _docPageLayoutService: {
+                calculatePagePosition: vi.fn(),
+            },
+            _textSelectionManagerService: {
+                refreshSelection: vi.fn(),
+            },
+            _embedInteractionBoundaryService: {
+                hasRecentInteraction: vi.fn(() => false),
+            },
+            _univerInstanceService: {
+                getUnitCreateOptions: vi.fn(() => undefined),
+            },
+        });
+
+        controller.updateViewZoom(1.25);
+
+        expect(mockClearSelectedObjects).not.toHaveBeenCalled();
     });
 });

@@ -75,6 +75,15 @@ const locale: typeof enUS = {
             allFunctions: 'Semua Fungsi',
             syntax: 'SINTAKS',
         },
+        mobileFunction: {
+            title: 'Sisipkan fungsi',
+            recommended: 'Direkomendasikan',
+            recent: 'Terbaru',
+            details: 'Detail',
+            insert: 'Sisipkan fungsi',
+            empty: 'Tidak ada fungsi',
+            close: 'Tutup',
+        },
         operation: {
             copyFormulaOnly: 'Salin Hanya Rumus',
             pasteFormula: 'Tempel Rumus',

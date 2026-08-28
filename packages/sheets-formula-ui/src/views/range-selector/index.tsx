@@ -17,6 +17,7 @@
 import type { IUnitRangeName, Nullable } from '@univerjs/core';
 import type { Editor, IRichTextEditorProps } from '@univerjs/docs-ui';
 import type { ISelectionWithStyle, ISetSelectionsOperationParams } from '@univerjs/sheets';
+import type { MobileDrawerSnap } from '@univerjs/ui';
 import type { RefObject } from 'react';
 import type { LocaleKey } from '../../locale/types';
 import { ICommandService, LocaleService, RichTextBuilder } from '@univerjs/core';
@@ -32,7 +33,7 @@ import {
 } from '@univerjs/engine-formula';
 import { DeleteIcon, IncreaseIcon, SelectRangeIcon } from '@univerjs/icons';
 import { SetSelectionsOperation } from '@univerjs/sheets';
-import { useDependency, useEvent } from '@univerjs/ui';
+import { IDialogService, isMobileDialogService, MobileDrawer, useDependency, useEvent } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
 import { useStateRef } from '../formula-editor/hooks/use-state-ref';
 import { useRangesHighlight } from './hooks/use-ranges-highlight';
@@ -78,6 +79,7 @@ export interface IRangeSelectorDialogProps {
     onConfirm: (ranges: IUnitRangeName[]) => void;
     onClose: () => void;
     onShowBySelection?: (ranges: IUnitRangeName[]) => boolean;
+    mobile?: boolean;
 }
 
 export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
@@ -92,11 +94,13 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
         onConfirm,
         onClose,
         onShowBySelection,
+        mobile = false,
     } = props;
     const localeService = useDependency(LocaleService);
     const lexerTreeBuilder = useDependency(LexerTreeBuilder);
     const [ranges, setRanges] = useState<string[]>([]);
     const [focusIndex, setFocusIndex] = useState(0);
+    const [drawerSnap, setDrawerSnap] = useState<MobileDrawerSnap>('compact');
     const scrollbarRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -164,6 +168,125 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
         },
     });
 
+    const confirmRanges = () => {
+        onConfirm(
+            ranges
+                .filter((text) => {
+                    const nodes = lexerTreeBuilder.sequenceNodesBuilder(text);
+                    return nodes && nodes.length === 1 && typeof nodes[0] !== 'string' && nodes[0].nodeType === sequenceNodeType.REFERENCE;
+                })
+                .map((text) => deserializeRangeWithSheet(text))
+                .map((unitRange) => ({ ...unitRange, range: rangePreProcess(unitRange.range) }))
+        );
+    };
+
+    const rangeInputs = (mobileLayout = false) => (
+        <div
+            ref={scrollbarRef}
+            className={clsx(
+                'univer-overflow-y-auto',
+                scrollbarClassName,
+                mobileLayout ? 'univer-max-h-[22dvh]' : '-univer-mx-6 univer-max-h-60 univer-px-6'
+            )}
+        >
+            {ranges.map((text, index) => (
+                <div
+                    key={index}
+                    className={clsx('univer-mb-2 univer-flex univer-items-center', mobileLayout
+                        ? 'univer-gap-2'
+                        : 'univer-gap-4')}
+                >
+                    <Input
+                        className={clsx('univer-box-border univer-h-10 univer-w-full', {
+                            'univer-border-primary-600': focusIndex === index,
+                        })}
+                        placeholder={localeService.t<LocaleKey>('sheets-formula-ui.rangeSelector.placeHolder')}
+                        onFocus={() => setFocusIndex(index)}
+                        value={text}
+                        onChange={(value) => handleRangeInput(index, value)}
+                    />
+                    {ranges.length > 1 && (
+                        <button
+                            type="button"
+                            className="
+                              univer-flex univer-size-10 univer-shrink-0 univer-items-center univer-justify-center
+                              univer-rounded-lg univer-border-0 univer-bg-transparent univer-text-gray-600
+                              active:univer-bg-gray-100
+                              dark:!univer-text-gray-300
+                              dark:active:!univer-bg-gray-700
+                            "
+                            onClick={() => handleRangeRemove(index)}
+                        >
+                            <DeleteIcon className="univer-cursor-pointer" />
+                        </button>
+                    )}
+                </div>
+            ))}
+            {ranges.length < maxRangeCount && (
+                <Button className={mobileLayout ? 'univer-h-10 univer-w-full' : undefined} variant="link" onClick={handleRangeAdd}>
+                    <IncreaseIcon />
+                    <span>{localeService.t<LocaleKey>('sheets-formula-ui.rangeSelector.addAnotherRange')}</span>
+                </Button>
+            )}
+        </div>
+    );
+
+    if (mobile) {
+        if (!visible) return null;
+
+        return (
+            <div
+                data-u-comp="mobile-range-selector"
+                className="univer-pointer-events-none univer-visible univer-fixed univer-inset-0 univer-z-[1300]"
+            >
+                <MobileDrawer
+                    componentName="mobile-range-selector-drawer"
+                    snap={drawerSnap}
+                    expandLabel={localeService.t<LocaleKey>('sheets-formula-ui.rangeSelector.title')}
+                    collapseLabel={localeService.t<LocaleKey>('sheets-formula-ui.rangeSelector.title')}
+                    onSnapChange={setDrawerSnap}
+                    onClose={onClose}
+                    role="dialog"
+                    ariaLabel={localeService.t<LocaleKey>('sheets-formula-ui.rangeSelector.title')}
+                    panelClassName="
+                      univer-pointer-events-auto univer-bg-gray-0 univer-text-gray-900
+                      dark:!univer-bg-gray-900 dark:!univer-text-gray-0
+                    "
+                    contentClassName="univer-min-h-0 univer-px-4"
+                    header={(
+                        <header
+                            className="
+                              univer-flex univer-h-12 univer-flex-1 univer-items-center univer-px-4 univer-text-base
+                              univer-font-semibold
+                            "
+                        >
+                            {localeService.t<LocaleKey>('sheets-formula-ui.rangeSelector.title')}
+                        </header>
+                    )}
+                    footer={(
+                        <footer
+                            data-u-comp="mobile-actions"
+                            className="univer-box-border univer-flex univer-shrink-0 univer-gap-3 univer-p-4"
+                        >
+                            <Button className="univer-h-12 univer-min-w-0 univer-flex-1 univer-rounded-xl" onClick={onClose}>
+                                {localeService.t<LocaleKey>('sheets-formula-ui.rangeSelector.cancel')}
+                            </Button>
+                            <Button
+                                className="univer-h-12 univer-min-w-0 univer-flex-1 univer-rounded-xl"
+                                variant="primary"
+                                onClick={confirmRanges}
+                            >
+                                {localeService.t<LocaleKey>('sheets-formula-ui.rangeSelector.confirm')}
+                            </Button>
+                        </footer>
+                    )}
+                >
+                    {rangeInputs(true)}
+                </MobileDrawer>
+            </div>
+        );
+    }
+
     return (
         <Dialog
             width="328px"
@@ -177,16 +300,7 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
                     <Button onClick={onClose}>{localeService.t<LocaleKey>('sheets-formula-ui.rangeSelector.cancel')}</Button>
                     <Button
                         variant="primary"
-                        onClick={() => {
-                            onConfirm(
-                                ranges
-                                    .filter((text) => {
-                                        const nodes = lexerTreeBuilder.sequenceNodesBuilder(text);
-                                        return nodes && nodes.length === 1 && typeof nodes[0] !== 'string' && nodes[0].nodeType === sequenceNodeType.REFERENCE;
-                                    })
-                                    .map((text) => deserializeRangeWithSheet(text)).map((unitRange) => ({ ...unitRange, range: rangePreProcess(unitRange.range) }))
-                            );
-                        }}
+                        onClick={confirmRanges}
                     >
                         {localeService.t<LocaleKey>('sheets-formula-ui.rangeSelector.confirm')}
                     </Button>
@@ -194,38 +308,7 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
             )}
             onClose={onClose}
         >
-            <div
-                ref={scrollbarRef}
-                className={clsx('-univer-mx-6 univer-max-h-60 univer-overflow-y-auto univer-px-6', scrollbarClassName)}
-            >
-                {ranges.map((text, index) => (
-                    <div key={index} className="univer-mb-2 univer-flex univer-items-center univer-gap-4">
-                        <Input
-                            className={clsx('univer-w-full', {
-                                'univer-border-primary-600': focusIndex === index,
-                            })}
-                            placeholder={localeService.t<LocaleKey>('sheets-formula-ui.rangeSelector.placeHolder')}
-                            onFocus={() => setFocusIndex(index)}
-                            value={text}
-                            onChange={(value) => handleRangeInput(index, value)}
-                        />
-                        {ranges.length > 1 && (
-                            <DeleteIcon
-                                className="univer-cursor-pointer"
-                                onClick={() => handleRangeRemove(index)}
-                            />
-                        )}
-                    </div>
-                ))}
-                {ranges.length < maxRangeCount && (
-                    <div>
-                        <Button variant="link" onClick={handleRangeAdd}>
-                            <IncreaseIcon />
-                            <span>{localeService.t<LocaleKey>('sheets-formula-ui.rangeSelector.addAnotherRange')}</span>
-                        </Button>
-                    </div>
-                )}
-            </div>
+            {rangeInputs()}
         </Dialog>
     );
 }
@@ -242,6 +325,7 @@ export function stringifyRanges(ranges: IUnitRangeName[]) {
 
 export function RangeSelector(props: IRangeSelectorProps) {
     const [editor, setEditor] = useState<Editor | null>(null);
+    const dialogService = useDependency(IDialogService);
     const {
         onVerify,
         selectorRef,
@@ -262,6 +346,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
     const [focusing, setFocusing] = useState(autoFocus ?? false);
     const [popupVisible, setPopupVisible] = useState(false);
     const [rangeSelectorRanges, setRangeSelectorRanges] = useState<IUnitRangeName[]>([]);
+    const mobileDialogService = isMobileDialogService(dialogService) ? dialogService : null;
     const localeService = useDependency(LocaleService);
     const editorService = useDependency(IEditorService);
     const { sequenceNodes } = useRangesHighlight(editor, focusing, unitId, subUnitId);
@@ -311,6 +396,12 @@ export function RangeSelector(props: IRangeSelectorProps) {
     useEffect(() => {
         onRangeSelectorDialogVisibleChange?.(popupVisible);
     }, [popupVisible]);
+
+    useEffect(() => {
+        if (!popupVisible || !mobileDialogService) return;
+        const suspension = mobileDialogService.suspendOverlays();
+        return () => suspension.dispose();
+    }, [mobileDialogService, popupVisible]);
 
     useEffect(() => {
         if (popupVisible && resetRange) {
@@ -363,6 +454,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
                 unitId={unitId}
                 subUnitId={subUnitId}
                 visible={popupVisible}
+                mobile={Boolean(mobileDialogService)}
                 maxRangeCount={maxRangeCount}
                 onConfirm={(ranges) => {
                     const resultStr = stringifyRanges(ranges);

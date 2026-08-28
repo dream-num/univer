@@ -75,6 +75,15 @@ const locale: typeof enUS = {
             allFunctions: 'كل الدوال',
             syntax: 'الصيغة',
         },
+        mobileFunction: {
+            title: 'إدراج دالة',
+            recommended: 'موصى بها',
+            recent: 'الأخيرة',
+            details: 'التفاصيل',
+            insert: 'إدراج الدالة',
+            empty: 'لا توجد دوال',
+            close: 'إغلاق',
+        },
         operation: {
             copyFormulaOnly: 'نسخ الصيغة فقط',
             pasteFormula: 'لصق الصيغة',

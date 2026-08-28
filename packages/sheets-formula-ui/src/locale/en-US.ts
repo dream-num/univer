@@ -73,6 +73,15 @@ const locale = {
             allFunctions: 'All Functions',
             syntax: 'SYNTAX',
         },
+        mobileFunction: {
+            title: 'Insert function',
+            recommended: 'Recommended',
+            recent: 'Recent',
+            details: 'Details',
+            insert: 'Insert function',
+            empty: 'No functions',
+            close: 'Close',
+        },
         operation: {
             copyFormulaOnly: 'Copy Formula Only',
             pasteFormula: 'Paste Formula',

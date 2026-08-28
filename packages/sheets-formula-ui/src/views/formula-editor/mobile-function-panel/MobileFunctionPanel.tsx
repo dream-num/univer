@@ -78,18 +78,23 @@ export function MobileFunctionPanel(props: {
         setDetails(null);
     }, [open]);
 
-    const categories = useMemo(() => [
-        { label: copy.recommended, value: 'recommended' as const },
-        { label: copy.recent, value: 'recent' as const },
-        { label: copy.all, value: 'all' as const },
-        ...getFunctionTypeValues(localeService, false).map((item) => ({ label: item.label, value: Number(item.value) })),
-    ].filter((item) => typeof item.value !== 'number' || (
-        item.value !== FunctionType.DefinedName &&
-        item.value !== FunctionType.Table &&
-        descriptionService.getSearchListByType(item.value).length > 0
-    )), [copy.all, copy.recent, copy.recommended, descriptionService, localeService]);
+    const categories = useMemo(() => {
+        if (!open) return [];
+
+        return [
+            { label: copy.recommended, value: 'recommended' as const },
+            { label: copy.recent, value: 'recent' as const },
+            { label: copy.all, value: 'all' as const },
+            ...getFunctionTypeValues(localeService, false).map((item) => ({ label: item.label, value: Number(item.value) })),
+        ].filter((item) => typeof item.value !== 'number' || (
+            item.value !== FunctionType.DefinedName &&
+            item.value !== FunctionType.Table &&
+            descriptionService.getSearchListByType(item.value).length > 0
+        ));
+    }, [copy.all, copy.recent, copy.recommended, descriptionService, localeService, open]);
 
     const functions = useMemo<ISearchItem[]>(() => {
+        if (!open) return [];
         if (query.trim()) return descriptionService.getSearchListByName(query).slice(0, 60);
 
         if (category === 'recommended') {
@@ -107,7 +112,7 @@ export function MobileFunctionPanel(props: {
         }
 
         return descriptionService.getSearchListByType(category === 'all' ? -1 : category).slice(0, 100);
-    }, [category, descriptionService, query, recentVersion]);
+    }, [category, descriptionService, open, query, recentVersion]);
 
     const handleInsert = (name: string) => {
         rememberFunction(name);

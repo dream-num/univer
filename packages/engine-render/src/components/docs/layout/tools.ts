@@ -374,12 +374,69 @@ export function getCharSpaceConfig(sectionBreakConfig: ISectionBreakConfig, para
     };
 }
 
+/**
+ * Reconciles visible glyph flow with the model's paragraph endpoint.
+ *
+ * Imported documents can contain non-rendering flow tokens between paragraphs.
+ * Counting only visible glyphs then shifts every following caret and hit-test
+ * offset. A complete paragraph provides a model-owned checkpoint from which its
+ * visible range can be derived without changing the layout algorithm.
+ */
+function getParagraphLogicalStartAnchors(pages: IDocumentSkeletonPage[]): Map<IDocumentSkeletonLine, number> {
+    const paragraphs = new Map<number, {
+        firstLine: IDocumentSkeletonLine;
+        glyphCount: number;
+        terminal?: string;
+    }>();
+
+    for (const page of pages) {
+        for (const section of page.sections) {
+            for (const column of section.columns) {
+                for (const line of column.lines) {
+                    const glyphCount = line.divides.reduce((divideCount, divide) =>
+                        divideCount + divide.glyphGroup.reduce((count, glyph) =>
+                            count + (glyph.glyphType === GlyphType.LIST ? 0 : glyph.count), 0), 0);
+                    const lastDivide = line.divides[line.divides.length - 1];
+                    const lastGlyph = lastDivide?.glyphGroup[lastDivide.glyphGroup.length - 1];
+                    const paragraph = paragraphs.get(line.paragraphIndex);
+                    paragraphs.set(line.paragraphIndex, {
+                        firstLine: paragraph?.firstLine ?? line,
+                        glyphCount: (paragraph?.glyphCount ?? 0) + glyphCount,
+                        terminal: lastGlyph?.raw ?? lastGlyph?.streamType,
+                    });
+                }
+            }
+        }
+    }
+
+    const anchors = new Map<IDocumentSkeletonLine, number>();
+    for (const [paragraphIndex, paragraph] of paragraphs) {
+        const { firstLine, glyphCount, terminal } = paragraph;
+        if (!firstLine.paragraphStart || paragraphIndex < 0) {
+            continue;
+        }
+
+        if (
+            terminal !== DataStreamTreeTokenType.PARAGRAPH &&
+            terminal !== DataStreamTreeTokenType.SECTION_BREAK &&
+            terminal !== DataStreamTreeTokenType.DOCS_END
+        ) {
+            continue;
+        }
+
+        anchors.set(firstLine, paragraphIndex - glyphCount + 1);
+    }
+
+    return anchors;
+}
+
 export function updateBlockIndex(
     pages: IDocumentSkeletonPage[],
     start: number = -1,
     documentCompatibilityPolicy?: IDocumentCompatibilityPolicy
 ) {
     let prePageStartIndex = start;
+    const paragraphLogicalStartAnchors = getParagraphLogicalStartAnchors(pages);
     // Real docs declare a classic/modern compatibility mode, so their measured layout column
     // width can be reused. Embedded editors keep the mode unspecified and must fall back to
     // content width; otherwise a sheet cell editor may stretch to the far edge of the canvas.
@@ -419,6 +476,10 @@ export function updateBlockIndex(
                         if (table) {
                             lineStartIndex = table.ed;
                         }
+                    }
+                    const paragraphLogicalStart = paragraphLogicalStartAnchors.get(line);
+                    if (paragraphLogicalStart != null) {
+                        lineStartIndex = Math.max(lineStartIndex, paragraphLogicalStart - 1);
                     }
 
                     if (line.type === LineType.BLOCK && divides.length === 0) {
@@ -767,10 +828,11 @@ export function documentSkeletonTableIterator(
         unitId = '',
     } = options;
     const contexts: IDocumentSkeletonTableContext[] = [];
+    let rootPageDocumentTop = docsTop;
 
     pages.forEach((rootPage, pageIndex) => {
         const rootPageHeight = rootPage.pageHeight === Infinity ? 0 : rootPage.pageHeight;
-        const rootPageTop = (rootPageHeight + pageMarginTop) * pageIndex + rootPage.marginTop + docsTop;
+        const rootPageTop = rootPageDocumentTop + rootPage.marginTop;
         const rootPageLeft = rootPage.marginLeft + docsLeft;
 
         collectPageTables({
@@ -788,7 +850,6 @@ export function documentSkeletonTableIterator(
             unitId,
         });
 
-        const rootPageDocumentTop = rootPageTop - rootPage.marginTop;
         const rootPageDocumentLeft = docsLeft + rootPage.marginLeft;
         const headerPage = rootPage.headerId == null ? undefined : skeHeaders?.get(rootPage.headerId)?.get(rootPage.pageWidth);
         if (headerPage != null) {
@@ -848,6 +909,8 @@ export function documentSkeletonTableIterator(
                 });
             });
         });
+
+        rootPageDocumentTop += rootPageHeight + pageMarginTop;
     });
 
     return contexts;
@@ -1698,6 +1761,18 @@ export interface ILayoutContext {
     sectionBreakConfigCache: Map<number, ISectionBreakConfig>;
     paragraphsOpenNewPage: Set<number>;
     paginationMetrics?: IDocumentPaginationMetrics;
+    /**
+     * Incremental layout may defer an expensive split-table calculation after
+     * the normal line-layout path has resolved its exact pagination context.
+     * Synchronous callers leave this unset.
+     */
+    deferSlicedTableLayout?: (request: {
+        curPage: IDocumentSkeletonPage;
+        viewModel: DocumentViewModel;
+        tableNode: DataStreamTreeNode;
+        sectionBreakConfig: ISectionBreakConfig;
+        availableHeight: number;
+    }) => boolean;
     // Use for hyphenation.
     hyphen: Hyphen;
     // Use for detect language for paragraph content.

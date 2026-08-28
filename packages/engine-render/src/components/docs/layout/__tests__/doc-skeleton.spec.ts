@@ -22,6 +22,7 @@ import {
     DataStreamTreeTokenType,
     DocumentDataModel,
     DocumentFlavor,
+    DrawingTypeEnum,
     GridType,
     LocaleService,
     ObjectRelativeFromH,
@@ -30,16 +31,114 @@ import {
     PositionedObjectLayoutType,
     SectionType,
     SpacingRule,
+    TableAlignmentType,
+    TableRowHeightRule,
     TableSizeType,
+    TableTextWrapType,
     Univer,
+    VerticalAlignmentType,
     WrapTextType,
 } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
-import { DocumentSkeletonPageType, GlyphType, PageLayoutType } from '../../../../basics/i-document-skeleton-cached';
+import {
+    DocumentSkeletonPageType,
+    GlyphType,
+    PageLayoutType,
+} from '../../../../basics/i-document-skeleton-cached';
 import { Vector2 } from '../../../../basics/vector2';
+import { setDocsCustomBlockRenderViewportProvider } from '../../custom-block-render-viewport';
 import { DocumentViewModel } from '../../view-model/document-view-model';
 import { DocumentSkeleton } from '../doc-skeleton';
 import { FontCache } from '../shaping-engine/font-cache';
+
+function normalizeSkeleton(value: unknown): unknown {
+    if (typeof value === 'number' && Object.is(value, -0)) {
+        return 0;
+    }
+    if (value instanceof Map) {
+        return [...value.entries()]
+            .sort(([left], [right]) => String(left).localeCompare(String(right)))
+            .map(([key, entryValue]) => [key, normalizeSkeleton(entryValue)]);
+    }
+    if (Array.isArray(value)) {
+        return value.map(normalizeSkeleton);
+    }
+    if (value != null && typeof value === 'object') {
+        return Object.fromEntries(
+            Object.entries(value)
+                .filter(([key]) => key !== 'parent')
+                .map(([key, entryValue]) => [key, normalizeSkeleton(entryValue)])
+        );
+    }
+    return value;
+}
+
+function completeIncrementalLayout(skeleton: DocumentSkeleton, anchor?: number) {
+    const generation = skeleton.startIncrementalLayout({
+        reason: anchor == null ? 'initial' : 'edit',
+        anchor,
+    });
+    let progress = skeleton.stepIncrementalLayout(generation, 0);
+    for (let step = 0; step < 20_000 && !progress.complete; step++) {
+        progress = skeleton.stepIncrementalLayout(generation, 0);
+    }
+
+    expect(progress).toMatchObject({ complete: true, cancelled: false });
+    return progress;
+}
+
+function createSkeletonDrawing(drawingId: string, unitId: string) {
+    return {
+        drawingId,
+        aLeft: 0,
+        aTop: 0,
+        width: 100,
+        height: 50,
+        angle: 0,
+        initialState: true,
+        drawingOrigin: {
+            drawingId,
+            drawingType: DrawingTypeEnum.DRAWING_BLOCK,
+            unitId,
+            subUnitId: unitId,
+            docTransform: {
+                angle: 0,
+                positionH: { relativeFrom: ObjectRelativeFromH.PAGE, posOffset: 0 },
+                positionV: { relativeFrom: ObjectRelativeFromV.PARAGRAPH, posOffset: 0 },
+                size: { width: 100, height: 50 },
+            },
+            layoutType: PositionedObjectLayoutType.INLINE,
+        },
+        columnLeft: 0,
+        isPageBreak: false,
+        lineTop: 0,
+        lineHeight: 50,
+        blockAnchorTop: 0,
+        customBlockRenderViewport: { contentHeight: 50, viewportHeight: 10, viewScale: 1 },
+    };
+}
+
+function expectIncrementalSkeletonToEqualSynchronous(
+    snapshot: ConstructorParameters<typeof DocumentDataModel>[0],
+    localeService: LocaleService,
+    anchor?: number
+) {
+    const synchronous = DocumentSkeleton.create(
+        new DocumentViewModel(new DocumentDataModel(structuredClone(snapshot))),
+        localeService
+    );
+    const incremental = DocumentSkeleton.create(
+        new DocumentViewModel(new DocumentDataModel(structuredClone(snapshot))),
+        localeService
+    );
+
+    synchronous.calculate();
+    completeIncrementalLayout(incremental, anchor);
+    expect(normalizeSkeleton(incremental.getSkeletonData())).toEqual(normalizeSkeleton(synchronous.getSkeletonData()));
+
+    incremental.dispose();
+    synchronous.dispose();
+}
 
 function createPage(type: DocumentSkeletonPageType, st: number, tableId = '') {
     const listGlyph = { st, ed: st, count: 1, width: 3, left: 0, xOffset: 0, content: '•', glyphType: GlyphType.LIST } as any;
@@ -111,6 +210,44 @@ function createPage(type: DocumentSkeletonPageType, st: number, tableId = '') {
 }
 
 describe('doc skeleton', () => {
+    it('publishes one presentation batch while preserving incompatible flow metrics', () => {
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        const documentModel = createDocumentModelWithStyle('Presentation refresh\r', {});
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(documentModel), localeService);
+        skeleton.calculate();
+
+        const drawings = skeleton.getSkeletonData()?.pages[0].skeDrawings;
+        expect(drawings).toBeDefined();
+        drawings?.set('stable', createSkeletonDrawing('stable', documentModel.getUnitId()));
+        drawings?.set('flow-change', createSkeletonDrawing('flow-change', documentModel.getUnitId()));
+
+        const unregister = setDocsCustomBlockRenderViewportProvider((_unitId, drawingId) => ({
+            width: drawingId === 'flow-change' ? 101 : 100,
+            height: 50,
+            contentHeight: 60,
+            viewScale: 0.5,
+            viewportHeight: 99,
+        }));
+        const result = skeleton.refreshCustomBlockPresentationViewports();
+
+        expect(result).toEqual({ didRefresh: true, requiresLayout: true });
+        expect(drawings?.get('stable')?.customBlockRenderViewport).toMatchObject({
+            contentHeight: 60,
+            viewScale: 0.5,
+            viewportHeight: 99,
+        });
+        expect(drawings?.get('flow-change')?.customBlockRenderViewport).toMatchObject({
+            contentHeight: 50,
+            viewScale: 0.5,
+            viewportHeight: 99,
+        });
+
+        unregister();
+        skeleton.dispose();
+        univer.dispose();
+    });
+
     it('uses empty paragraph glyphs as mouse hit-test targets', () => {
         const body = createPage(DocumentSkeletonPageType.BODY, 0);
         const emptyParagraphGlyph = {
@@ -913,6 +1050,17 @@ describe('doc skeleton', () => {
         expect(createSkeletonSpy.mock.calls.length).toBeGreaterThan(1);
         expect(skeleton.getSkeletonData()?.pages.map(({ pageNumber }) => pageNumber)).toEqual([1, 2]);
 
+        const incremental = DocumentSkeleton.create(new DocumentViewModel(documentModel), localeService);
+        const generation = incremental.startIncrementalLayout({ reason: 'initial' });
+        let progress = incremental.stepIncrementalLayout(generation, 0);
+        for (let step = 0; step < 1_000 && !progress.complete; step++) {
+            progress = incremental.stepIncrementalLayout(generation, 0);
+        }
+
+        expect(progress.complete).toBe(true);
+        expect(normalizeSkeleton(incremental.getSkeletonData())).toEqual(normalizeSkeleton(skeleton.getSkeletonData()));
+
+        incremental.dispose();
         skeleton.dispose();
         univer.dispose();
     });
@@ -929,7 +1077,9 @@ describe('doc skeleton', () => {
 
         const viewModel = new DocumentViewModel(documentModel);
         const skeleton = DocumentSkeleton.create(viewModel, localeService);
+        expect(skeleton.hasCompleteLayout()).toBe(false);
         skeleton.calculate();
+        expect(skeleton.hasCompleteLayout()).toBe(true);
 
         const skeletonData = skeleton.getSkeletonData();
         expect(skeletonData?.pages.length).toBeGreaterThan(0);
@@ -955,6 +1105,1032 @@ describe('doc skeleton', () => {
             expect(skeleton.findNodeByCharIndex(index as number)).toBeTruthy();
         }
 
+        skeleton.dispose();
+        univer.dispose();
+    });
+
+    it.each([
+        ['traditional', DocumentFlavor.TRADITIONAL],
+        ['modern', DocumentFlavor.MODERN],
+    ])('incremental %s layout converges to the synchronous skeleton', (_, documentFlavor) => {
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        const content = Array.from(
+            { length: 18 },
+            (_, index) => `Paragraph ${index} contains enough words to wrap and exercise resumable document layout.\r`
+        ).join('');
+        const sourceModel = createDocumentModelWithStyle(content, {});
+        sourceModel.updateDocumentStyle({ documentFlavor });
+        const snapshot = structuredClone(sourceModel.getSnapshot());
+        const syncSkeleton = DocumentSkeleton.create(
+            new DocumentViewModel(new DocumentDataModel(structuredClone(snapshot))),
+            localeService
+        );
+        const incrementalSkeleton = DocumentSkeleton.create(
+            new DocumentViewModel(new DocumentDataModel(structuredClone(snapshot))),
+            localeService
+        );
+
+        syncSkeleton.calculate();
+        const generation = incrementalSkeleton.startIncrementalLayout({ anchor: Math.floor(content.length / 3) });
+        const progressSnapshots: ReturnType<DocumentSkeleton['stepIncrementalLayout']>[] = [];
+        for (let index = 0; index < 100; index++) {
+            const progress = incrementalSkeleton.stepIncrementalLayout(generation, 0);
+            progressSnapshots.push(progress);
+            if (progress.complete) {
+                break;
+            }
+        }
+
+        expect(progressSnapshots.some((progress) => !progress.complete)).toBe(true);
+        expect(progressSnapshots.at(-1)?.complete).toBe(true);
+        expect(progressSnapshots.at(-1)?.mode).toBe(documentFlavor === DocumentFlavor.MODERN ? 'continuous' : 'paginated');
+        expect(normalizeSkeleton(incrementalSkeleton.getSkeletonData())).toEqual(normalizeSkeleton(syncSkeleton.getSkeletonData()));
+
+        syncSkeleton.dispose();
+        incrementalSkeleton.dispose();
+        univer.dispose();
+    });
+
+    it('keeps a paginated body table structurally identical after incremental layout', () => {
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        const T = DataStreamTreeTokenType;
+        const cellText = 'A long table cell keeps flowing across physical pages. '.repeat(80);
+        const tableStream = [
+            T.TABLE_START,
+            T.TABLE_ROW_START,
+            T.TABLE_CELL_START,
+            cellText,
+            T.PARAGRAPH,
+            T.SECTION_BREAK,
+            T.TABLE_CELL_END,
+            T.TABLE_ROW_END,
+            T.TABLE_END,
+        ].join('');
+        const trailingText = `Paragraph after the table.${T.PARAGRAPH}${T.SECTION_BREAK}`;
+        const dataStream = `${tableStream}${trailingText}`;
+        const cellParagraphIndex = 3 + cellText.length;
+        const snapshot = {
+            id: 'incremental-table-equivalence',
+            body: {
+                dataStream,
+                paragraphs: [
+                    { startIndex: cellParagraphIndex, paragraphId: 'cell-paragraph' },
+                    { startIndex: dataStream.length - 2, paragraphId: 'trailing-paragraph' },
+                ],
+                sectionBreaks: [
+                    { sectionId: 'cell-section', startIndex: cellParagraphIndex + 1 },
+                    { sectionId: 'body-section', startIndex: dataStream.length - 1 },
+                ],
+                tables: [{ startIndex: 0, endIndex: tableStream.length, tableId: 'body-table' }],
+            },
+            tableSource: {
+                'body-table': {
+                    tableId: 'body-table',
+                    align: TableAlignmentType.CENTER,
+                    indent: { v: 0 },
+                    textWrap: TableTextWrapType.NONE,
+                    position: {
+                        positionH: { relativeFrom: ObjectRelativeFromH.PAGE },
+                        positionV: { relativeFrom: ObjectRelativeFromV.PAGE },
+                    },
+                    dist: { distT: 0, distB: 0, distL: 0, distR: 0 },
+                    size: { type: TableSizeType.SPECIFIED, width: { v: 220 } },
+                    tableColumns: [{ size: { type: TableSizeType.SPECIFIED, width: { v: 220 } } }],
+                    tableRows: [{
+                        repeatHeaderRow: BooleanNumber.FALSE,
+                        trHeight: {
+                            hRule: TableRowHeightRule.AUTO,
+                            val: { v: 0 },
+                        },
+                        tableCells: [{ vAlign: VerticalAlignmentType.TOP }],
+                    }],
+                },
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageSize: { width: 280, height: 220 },
+                marginTop: 20,
+                marginBottom: 20,
+                marginLeft: 20,
+                marginRight: 20,
+            },
+        };
+
+        expectIncrementalSkeletonToEqualSynchronous(snapshot, localeService, Math.floor(cellText.length / 2));
+
+        univer.dispose();
+    });
+
+    it('publishes a traditional first-open layout one stable page at a time', () => {
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        const content = Array.from(
+            { length: 100 },
+            (_, index) => `Opening paragraph ${index} wraps onto compact physical pages.\r`
+        ).join('');
+        const documentModel = createDocumentModelWithStyle(content, {});
+        documentModel.updateDocumentDataPageSize(160, 180);
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(documentModel), localeService);
+
+        const generation = skeleton.startIncrementalLayout({ reason: 'initial' });
+        const publications: number[] = [];
+        let progress = skeleton.stepIncrementalLayout(generation, 0);
+        for (let index = 0; index < 500 && !progress.complete; index++) {
+            if (progress.didPublish) {
+                publications.push(progress.publishedPageCount);
+            }
+            progress = skeleton.stepIncrementalLayout(generation, 0);
+        }
+        if (progress.didPublish) {
+            publications.push(progress.publishedPageCount);
+        }
+
+        expect(progress.complete).toBe(true);
+        expect(publications.length).toBeGreaterThan(2);
+        expect(publications[0]).toBe(1);
+        expect(publications.every((count, index) => index === 0 || count - publications[index - 1] === 1)).toBe(true);
+
+        skeleton.dispose();
+        univer.dispose();
+    });
+
+    it('publishes computed page backlog without advancing layout work', () => {
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        const content = Array.from(
+            { length: 100 },
+            (_, index) => `Backlog paragraph ${index} wraps onto compact physical pages.\r`
+        ).join('');
+        const documentModel = createDocumentModelWithStyle(content, {});
+        documentModel.updateDocumentDataPageSize(160, 180);
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(documentModel), localeService);
+
+        const generation = skeleton.startIncrementalLayout({ reason: 'initial' });
+        const first = skeleton.stepIncrementalLayout(generation, 10_000);
+        const backlog = skeleton.publishIncrementalLayoutBacklog(generation);
+
+        expect(first.didPublish).toBe(true);
+        expect(first.publishedPageCount).toBe(1);
+        expect(first.processedBlockCount).toBe(first.totalBlockCount);
+        expect(backlog.didPublish).toBe(true);
+        expect(backlog.publishedPageCount).toBe(2);
+        expect(backlog.processedBlockCount).toBe(first.processedBlockCount);
+
+        skeleton.dispose();
+        univer.dispose();
+    });
+
+    it('does not report a page backlog for continuous layout', () => {
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        const content = Array.from(
+            { length: 100 },
+            (_, index) => `Continuous paragraph ${index} remains in one document flow.\r`
+        ).join('');
+        const documentModel = createDocumentModelWithStyle(content, {});
+        documentModel.updateDocumentStyle({ documentFlavor: DocumentFlavor.MODERN });
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(documentModel), localeService);
+
+        const generation = skeleton.startIncrementalLayout({ reason: 'initial' });
+        const first = skeleton.stepIncrementalLayout(generation, 0);
+        const backlog = skeleton.publishIncrementalLayoutBacklog(generation);
+
+        expect(first.didPublish).toBe(true);
+        expect(backlog.didPublish).toBe(false);
+        expect(backlog.processedBlockCount).toBe(first.processedBlockCount);
+        expect(backlog.publicationRevision).toBe(first.publicationRevision);
+
+        skeleton.dispose();
+        univer.dispose();
+    });
+
+    it('merges legacy section identities into one continuous modern page', () => {
+        const first = `First modern section${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
+        const second = `Second modern section${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        const documentModel = new DocumentDataModel({
+            id: 'modern-legacy-sections',
+            body: {
+                dataStream: `${first}${second}`,
+                paragraphs: [
+                    { startIndex: first.length - 2, paragraphId: 'first-paragraph' },
+                    { startIndex: first.length + second.length - 2, paragraphId: 'second-paragraph' },
+                ],
+                sectionBreaks: [
+                    { sectionId: 'legacy-first-section', startIndex: first.length - 1 },
+                    { sectionId: 'legacy-second-section', startIndex: first.length + second.length - 1 },
+                ],
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.MODERN,
+                pageSize: { width: 320, height: 400 },
+            },
+        });
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(documentModel), localeService);
+
+        const generation = skeleton.startIncrementalLayout({ reason: 'initial' });
+        let progress = skeleton.stepIncrementalLayout(generation, 0);
+        for (let step = 0; step < 20 && !progress.complete; step++) {
+            progress = skeleton.stepIncrementalLayout(generation, 0);
+        }
+
+        expect(progress).toMatchObject({ complete: true, mode: 'continuous', pageCount: 1 });
+        expect(skeleton.getSkeletonData()?.pages).toHaveLength(1);
+
+        skeleton.dispose();
+        univer.dispose();
+    });
+
+    it('drains pages sequentially when the final block creates a multi-page tail', () => {
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        const pageBreak = DataStreamTreeTokenType.PAGE_BREAK;
+        const tail = Array.from({ length: 20 }, (_, index) => `Tail page ${index}${pageBreak}`).join('');
+        const documentModel = createDocumentModelWithStyle(
+            `${tail}\r`,
+            {}
+        );
+        documentModel.updateDocumentStyle({ documentFlavor: DocumentFlavor.TRADITIONAL });
+        documentModel.updateDocumentDataPageSize(160, 180);
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(documentModel), localeService);
+
+        const generation = skeleton.startIncrementalLayout({ reason: 'initial' });
+        const publications: number[] = [];
+        let progress = skeleton.stepIncrementalLayout(generation, 0);
+        for (let index = 0; index < 2_000 && !progress.complete; index++) {
+            if (progress.didPublish) {
+                publications.push(progress.publishedPageCount);
+            }
+            progress = skeleton.stepIncrementalLayout(generation, 0);
+        }
+        if (progress.didPublish) {
+            publications.push(progress.publishedPageCount);
+        }
+
+        expect(progress.complete).toBe(true);
+        expect(publications.length).toBeGreaterThan(10);
+        expect(publications.every((count, index) => index === 0 || count - publications[index - 1] === 1)).toBe(true);
+        expect(publications.at(-1)).toBe(skeleton.getSkeletonData()?.pages.length);
+
+        skeleton.dispose();
+        univer.dispose();
+    });
+
+    it('publishes the edited page first and then advances the affected tail one page at a time', () => {
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        const content = Array.from(
+            { length: 140 },
+            (_, index) => `Editing paragraph ${index} wraps onto compact physical pages.\r`
+        ).join('');
+        const documentModel = createDocumentModelWithStyle(content, {});
+        documentModel.updateDocumentDataPageSize(160, 180);
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(documentModel), localeService);
+        skeleton.calculate();
+        const previousPages = skeleton.getSkeletonData()!.pages;
+        expect(previousPages.length).toBeGreaterThan(7);
+        const editedPageIndex = 6;
+
+        const generation = skeleton.startIncrementalLayout({
+            reason: 'edit',
+            anchor: previousPages[editedPageIndex].st,
+        });
+        const publications: number[] = [];
+        const anchorPublications: boolean[] = [];
+        let progress = skeleton.stepIncrementalLayout(generation, 0);
+        for (let index = 0; index < 500 && !progress.complete; index++) {
+            if (progress.didPublish) {
+                publications.push(progress.publishedPageCount);
+                anchorPublications.push(progress.didPublishAnchor);
+            }
+            progress = skeleton.stepIncrementalLayout(generation, 0);
+        }
+        if (progress.didPublish) {
+            publications.push(progress.publishedPageCount);
+            anchorPublications.push(progress.didPublishAnchor);
+        }
+
+        expect(progress.complete).toBe(true);
+        expect(publications[0]).toBe(editedPageIndex + 1);
+        expect(publications.every((count, index) => index === 0 || count - publications[index - 1] === 1)).toBe(true);
+        expect(anchorPublications[0]).toBe(true);
+        expect(anchorPublications.slice(1).every((didPublishAnchor) => !didPublishAnchor)).toBe(true);
+
+        skeleton.dispose();
+        univer.dispose();
+    });
+
+    it('reuses the unaffected tail when an insertion keeps the edited page boundary stable', () => {
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        const content = Array.from(
+            { length: 140 },
+            (_, index) => `Stable paragraph ${index} leaves room for a local insertion.\r`
+        ).join('');
+        const oldModel = createDocumentModelWithStyle(content, {});
+        oldModel.updateDocumentDataPageSize(240, 260);
+        const viewModel = new DocumentViewModel(oldModel);
+        const skeleton = DocumentSkeleton.create(viewModel, localeService);
+        skeleton.calculate();
+        const previousPages = skeleton.getSkeletonData()!.pages;
+        expect(previousPages.length).toBeGreaterThan(7);
+        const editedPageIndex = 6;
+        const anchor = previousPages[editedPageIndex].st + 5;
+        const oldDataStream = oldModel.getBody()!.dataStream;
+        const nextContent = `${oldDataStream.slice(0, anchor)}x${oldDataStream.slice(anchor)}`;
+        const nextSnapshot = structuredClone(oldModel.getSnapshot());
+        nextSnapshot.body!.dataStream = nextContent;
+        for (const paragraph of nextSnapshot.body!.paragraphs ?? []) {
+            if (paragraph.startIndex >= anchor) {
+                paragraph.startIndex++;
+            }
+        }
+        for (const sectionBreak of nextSnapshot.body!.sectionBreaks ?? []) {
+            if (sectionBreak.startIndex >= anchor) {
+                sectionBreak.startIndex++;
+            }
+        }
+        const nextModel = new DocumentDataModel(nextSnapshot);
+        viewModel.reset(nextModel);
+        const expected = DocumentSkeleton.create(new DocumentViewModel(nextModel), localeService);
+        expected.calculate();
+        const expectedPageCount = expected.getSkeletonData()!.pages.length;
+
+        const generation = skeleton.startIncrementalLayout({
+            reason: 'edit',
+            anchor,
+            invalidation: {
+                oldStart: anchor,
+                oldEnd: anchor,
+                newEnd: anchor + 1,
+            },
+        });
+        const publications: ReturnType<DocumentSkeleton['stepIncrementalLayout']>[] = [];
+        let progress = skeleton.stepIncrementalLayout(generation, 0);
+        for (let index = 0; index < 500 && !progress.complete; index++) {
+            if (progress.didPublish) {
+                publications.push(progress);
+            }
+            progress = skeleton.stepIncrementalLayout(generation, 0);
+        }
+        if (progress.didPublish) {
+            publications.push(progress);
+        }
+
+        expect(progress.complete).toBe(true);
+        expect(publications).toHaveLength(1);
+        expect(publications[0]).toMatchObject({
+            didPublishAnchor: true,
+            publishedPageCount: expectedPageCount,
+        });
+        expect(normalizeSkeleton(skeleton.getSkeletonData()?.pages)).toEqual(
+            normalizeSkeleton(expected.getSkeletonData()?.pages)
+        );
+
+        expected.dispose();
+        skeleton.dispose();
+        univer.dispose();
+    });
+
+    it('rebuilds the active interaction page without synchronously traversing an earlier remote edit', () => {
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        const content = Array.from(
+            { length: 180 },
+            (_, index) => `Collaborative paragraph ${index} wraps onto compact physical pages.\r`
+        ).join('');
+        const oldModel = createDocumentModelWithStyle(content, {});
+        oldModel.updateDocumentDataPageSize(180, 200);
+        const viewModel = new DocumentViewModel(oldModel);
+        const skeleton = DocumentSkeleton.create(viewModel, localeService);
+        skeleton.calculate();
+        const previousPages = skeleton.getSkeletonData()!.pages;
+        expect(previousPages.length).toBeGreaterThan(10);
+
+        const dirtyPageIndex = 1;
+        const activePageIndex = 8;
+        const dirtyOffset = previousPages[dirtyPageIndex].st + 2;
+        const previousActiveOffset = previousPages[activePageIndex].st + 5;
+        const nextSnapshot = structuredClone(oldModel.getSnapshot());
+        const previousDataStream = nextSnapshot.body!.dataStream;
+        nextSnapshot.body!.dataStream = `${previousDataStream.slice(0, dirtyOffset)}B${previousDataStream.slice(dirtyOffset)}`;
+        for (const paragraph of nextSnapshot.body!.paragraphs ?? []) {
+            if (paragraph.startIndex >= dirtyOffset) {
+                paragraph.startIndex++;
+            }
+        }
+        const nextModel = new DocumentDataModel(nextSnapshot);
+        viewModel.reset(nextModel);
+
+        const priorityAnchor = previousActiveOffset + 1;
+        const generation = skeleton.startIncrementalLayout({
+            reason: 'edit',
+            anchor: priorityAnchor,
+            priorityAnchor,
+            invalidation: {
+                oldStart: dirtyOffset,
+                oldEnd: dirtyOffset,
+                newEnd: dirtyOffset + 1,
+            },
+            preserveInteractionWindow: true,
+        });
+        let progress = skeleton.stepIncrementalLayout(generation, 0);
+        for (let step = 0; step < 500 && !progress.anchorReady; step++) {
+            progress = skeleton.stepIncrementalLayout(generation, 0);
+        }
+
+        expect(progress.anchorReady).toBe(true);
+        expect(progress.publishedPageCount).toBeGreaterThanOrEqual(activePageIndex + 1);
+        expect(skeleton.getSkeletonData()?.pages[dirtyPageIndex]).toMatchObject({
+            isLayoutPlaceholder: true,
+        });
+        expect(skeleton.findNodePositionByCharIndex(priorityAnchor)?.page).toBeGreaterThanOrEqual(activePageIndex - 1);
+
+        skeleton.dispose();
+        nextModel.dispose();
+        univer.dispose();
+    });
+
+    it('preserves logical offsets after explicit page breaks in a foreground interaction publication', () => {
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        const pageBreak = DataStreamTreeTokenType.PAGE_BREAK;
+        const content = [
+            `First explicit page${pageBreak}`,
+            `Second explicit page${pageBreak}`,
+            `Third explicit page${pageBreak}`,
+            `Fourth explicit page${pageBreak}`,
+            'The target paragraph ends here.\r',
+        ].join('');
+        const initialModel = createDocumentModelWithStyle(content, {});
+        initialModel.updateDocumentDataPageSize(240, 260);
+        const viewModel = new DocumentViewModel(initialModel);
+        const skeleton = DocumentSkeleton.create(viewModel, localeService);
+        skeleton.calculate();
+
+        const initialBody = initialModel.getBody();
+        if (initialBody == null) {
+            throw new Error('Expected an initial document body');
+        }
+        const initialStream = initialBody.dataStream;
+        const insertionOffset = initialStream.indexOf('ends here') + 'ends here'.length;
+        const nextSnapshot = structuredClone(initialModel.getSnapshot());
+        if (nextSnapshot.body == null) {
+            throw new Error('Expected a cloned document body');
+        }
+        nextSnapshot.body.dataStream = `${initialStream.slice(0, insertionOffset)}Y${initialStream.slice(insertionOffset)}`;
+        for (const paragraph of nextSnapshot.body.paragraphs ?? []) {
+            if (paragraph.startIndex >= insertionOffset) {
+                paragraph.startIndex++;
+            }
+        }
+        const nextModel = new DocumentDataModel(nextSnapshot);
+        viewModel.reset(nextModel);
+
+        const priorityAnchor = insertionOffset + 1;
+        const generation = skeleton.startIncrementalLayout({
+            reason: 'edit',
+            anchor: insertionOffset,
+            priorityAnchor,
+            invalidation: {
+                oldStart: insertionOffset,
+                oldEnd: insertionOffset,
+                newEnd: priorityAnchor,
+            },
+            preserveInteractionWindow: true,
+        });
+        let progress = skeleton.stepIncrementalLayout(generation, 0);
+        for (let step = 0; step < 500 && !progress.anchorReady; step++) {
+            progress = skeleton.stepIncrementalLayout(generation, 0);
+        }
+
+        expect(progress.anchorReady).toBe(true);
+        const position = skeleton.findNodePositionByCharIndex(priorityAnchor, true);
+        if (position == null) {
+            throw new Error('Expected a caret position for the foreground anchor');
+        }
+        expect(skeleton.findCharIndexByPosition(position)).toBe(priorityAnchor);
+        const skeletonData = skeleton.getSkeletonData();
+        if (skeletonData == null) {
+            throw new Error('Expected foreground skeleton data');
+        }
+        const targetGlyph = skeletonData.pages
+            .flatMap((page) => page.sections)
+            .flatMap((section) => section.columns)
+            .flatMap((column) => column.lines)
+            .flatMap((line) => line.divides)
+            .flatMap((divide) => divide.glyphGroup)
+            .find((glyph) => (glyph.raw ?? glyph.content) === 'Y');
+        if (targetGlyph == null) {
+            throw new Error('Expected the inserted glyph in the foreground skeleton');
+        }
+        const targetPosition = skeleton.findPositionByGlyph(targetGlyph, -1);
+        if (targetPosition == null) {
+            throw new Error('Expected a caret position for the inserted glyph');
+        }
+        expect(skeleton.findCharIndexByPosition({ ...targetPosition, isBack: false })).toBe(priorityAnchor);
+
+        skeleton.dispose();
+        nextModel.dispose();
+        univer.dispose();
+    });
+
+    it('preserves explicit page-break offsets when foreground layout restarts at the document start', () => {
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        const pageBreak = DataStreamTreeTokenType.PAGE_BREAK;
+        const phrase = 'The target paragraph ends here.';
+        const content = [
+            `First explicit page${pageBreak}`,
+            `Second explicit page${pageBreak}`,
+            `Third explicit page${pageBreak}`,
+            `Fourth explicit page${pageBreak}`,
+            `${phrase}\r`,
+        ].join('');
+        const dataModel = createDocumentModelWithStyle(content, {});
+        dataModel.updateDocumentDataPageSize(240, 260);
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(dataModel), localeService);
+        skeleton.calculate();
+
+        const generation = skeleton.startIncrementalLayout({
+            reason: 'edit',
+            anchor: 0,
+            priorityAnchor: 0,
+        });
+        let progress = skeleton.stepIncrementalLayout(generation, 0);
+        for (let step = 0; step < 500 && progress.publishedPageCount < 5; step++) {
+            progress = skeleton.stepIncrementalLayout(generation, 0);
+        }
+
+        const expectedOffset = content.indexOf(phrase) + phrase.length;
+        const skeletonData = skeleton.getSkeletonData();
+        if (skeletonData == null) {
+            throw new Error('Expected foreground skeleton data');
+        }
+        const targetLine = skeletonData.pages
+            .flatMap((page) => page.sections)
+            .flatMap((section) => section.columns)
+            .flatMap((column) => column.lines)
+            .find((line) => line.divides
+                .flatMap((divide) => divide.glyphGroup)
+                .map((glyph) => glyph.raw ?? glyph.content)
+                .join('')
+                .includes(phrase));
+        if (targetLine == null) {
+            throw new Error('Expected the target paragraph in the foreground skeleton');
+        }
+        const targetText = targetLine.divides
+            .flatMap((divide) => divide.glyphGroup)
+            .map((glyph) => glyph.raw ?? glyph.content)
+            .join('');
+        expect(targetLine.st + targetText.indexOf(phrase) + phrase.length).toBe(expectedOffset);
+
+        skeleton.dispose();
+        dataModel.dispose();
+        univer.dispose();
+    });
+
+    it('keeps cancelled typing generations anchored to the first dirty physical page', () => {
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        const content = Array.from(
+            { length: 140 },
+            (_, index) => `Typing paragraph ${index} wraps onto compact physical pages.\r`
+        ).join('');
+        const initialModel = createDocumentModelWithStyle(content, {});
+        initialModel.updateDocumentDataPageSize(160, 180);
+        const viewModel = new DocumentViewModel(initialModel);
+        const skeleton = DocumentSkeleton.create(viewModel, localeService);
+        skeleton.calculate();
+
+        const initialPages = skeleton.getSkeletonData()!.pages;
+        expect(initialPages.length).toBeGreaterThan(7);
+        const editedPageIndex = 6;
+        const firstDirtyOffset = initialPages[editedPageIndex].ed - 8;
+        skeleton.startIncrementalLayout({
+            reason: 'edit',
+            anchor: firstDirtyOffset,
+            invalidation: {
+                oldStart: firstDirtyOffset,
+                oldEnd: firstDirtyOffset,
+                newEnd: firstDirtyOffset + 1,
+            },
+        });
+
+        // Continuous typing can advance the logical caret past the stale page end
+        // before the previous generation completes. The replacement page must still
+        // be the physical page containing the first uncommitted edit.
+        const latestOffset = initialPages[editedPageIndex].ed + 8;
+        const latestGeneration = skeleton.startIncrementalLayout({
+            reason: 'edit',
+            anchor: latestOffset,
+            invalidation: {
+                oldStart: latestOffset,
+                oldEnd: latestOffset,
+                newEnd: latestOffset + 1,
+            },
+        });
+        let progress = skeleton.stepIncrementalLayout(latestGeneration, 0);
+        for (let step = 0; step < 500 && !progress.anchorReady; step++) {
+            progress = skeleton.stepIncrementalLayout(latestGeneration, 0);
+        }
+        expect(progress.anchorReady).toBe(true);
+        expect(progress.laidOutThrough).toBeGreaterThanOrEqual(latestOffset + 1);
+
+        skeleton.dispose();
+        univer.dispose();
+    });
+
+    it('reuses a safe single-column prefix for an anchored modern layout', () => {
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        const paragraphs = Array.from(
+            { length: 120 },
+            (_, index) => `Modern paragraph ${index} keeps the continuous prefix stable.\r`
+        );
+        const content = paragraphs.join('');
+        const documentModel = createDocumentModelWithStyle(content, {});
+        documentModel.updateDocumentStyle({ documentFlavor: DocumentFlavor.MODERN });
+        const snapshot = structuredClone(documentModel.getSnapshot());
+        const skeleton = DocumentSkeleton.create(
+            new DocumentViewModel(new DocumentDataModel(structuredClone(snapshot))),
+            localeService
+        );
+        const expected = DocumentSkeleton.create(
+            new DocumentViewModel(new DocumentDataModel(structuredClone(snapshot))),
+            localeService
+        );
+        skeleton.calculate();
+        expected.calculate();
+
+        const anchor = paragraphs.slice(0, 100).join('').length + 5;
+        const generation = skeleton.startIncrementalLayout({ anchor });
+        const firstProgress = skeleton.stepIncrementalLayout(generation, 0);
+
+        expect(firstProgress.anchorReady).toBe(true);
+        expect(firstProgress.processedBlockCount).toBeGreaterThan(100);
+        let finalProgress = firstProgress;
+        for (let index = 0; index < 30 && !finalProgress.complete; index++) {
+            finalProgress = skeleton.stepIncrementalLayout(generation, 0);
+        }
+        expect(finalProgress.complete).toBe(true);
+        const actualNormalized = normalizeSkeleton(skeleton.getSkeletonData());
+        const expectedNormalized = normalizeSkeleton(expected.getSkeletonData());
+        expect(actualNormalized).toEqual(expectedNormalized);
+
+        skeleton.dispose();
+        expected.dispose();
+        univer.dispose();
+    });
+
+    it('falls back to full incremental layout for a complex modern page', () => {
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        const paragraphs = Array.from(
+            { length: 20 },
+            (_, index) => `Modern fallback paragraph ${index}.\r`
+        );
+        const documentModel = createDocumentModelWithStyle(paragraphs.join(''), {});
+        documentModel.updateDocumentStyle({ documentFlavor: DocumentFlavor.MODERN });
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(documentModel), localeService);
+        skeleton.calculate();
+        skeleton.getSkeletonData()?.pages[0].skeDrawings.set(
+            'complex-drawing',
+            createSkeletonDrawing('complex-drawing', documentModel.getUnitId())
+        );
+
+        const anchor = paragraphs.slice(0, 15).join('').length + 2;
+        const generation = skeleton.startIncrementalLayout({ anchor });
+        const firstProgress = skeleton.stepIncrementalLayout(generation, 0);
+
+        expect(firstProgress.anchorReady).toBe(false);
+        expect(firstProgress.processedBlockCount).toBe(1);
+
+        skeleton.dispose();
+        univer.dispose();
+    });
+
+    it('reuses the stable page prefix when an edit anchors a later traditional page', () => {
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        const content = Array.from(
+            { length: 120 },
+            (_, index) => `Paragraph ${index} has enough text to wrap across several lines on a compact page.\r`
+        ).join('');
+        const documentModel = createDocumentModelWithStyle(content, {});
+        documentModel.updateDocumentDataPageSize(160, 180);
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(documentModel), localeService);
+
+        skeleton.calculate();
+        const initialSkeleton = normalizeSkeleton(skeleton.getSkeletonData());
+        const initialPages = skeleton.getSkeletonData()?.pages ?? [];
+        expect(initialPages.length).toBeGreaterThan(8);
+
+        const anchorPageIndex = 6;
+        const anchor = initialPages[anchorPageIndex].st;
+        const generation = skeleton.startIncrementalLayout({ anchor });
+        const firstProgress = skeleton.stepIncrementalLayout(generation, 0);
+
+        expect(firstProgress.anchorReady).toBe(false);
+        let foregroundProgress = firstProgress;
+        for (let index = 0; index < 200 && !foregroundProgress.anchorReady; index++) {
+            foregroundProgress = skeleton.stepIncrementalLayout(generation, 0);
+        }
+        expect(foregroundProgress.anchorReady).toBe(true);
+        expect(foregroundProgress.pageCount).toBeGreaterThanOrEqual(anchorPageIndex + 1);
+        expect(foregroundProgress.estimatedPageCount).toBe(initialPages.length);
+        expect(foregroundProgress.processedBlockCount).toBeGreaterThan(1);
+        expect(skeleton.getSkeletonData()?.pages.every((page) => page.ed >= page.st)).toBe(true);
+        expect(skeleton.getSkeletonData()?.pages).toHaveLength(initialPages.length);
+        expect(skeleton.findNodePositionByCharIndex(anchor, false)?.page).toBe(anchorPageIndex);
+        expect(skeleton.getSkeletonData()?.pages[anchorPageIndex]).toMatchObject({
+            st: initialPages[anchorPageIndex].st,
+            ed: initialPages[anchorPageIndex].ed,
+            height: initialPages[anchorPageIndex].height,
+        });
+        const publishedAnchorPage = skeleton.getSkeletonData()?.pages[anchorPageIndex];
+        const publishedGlyph = publishedAnchorPage?.sections[0]?.columns[0]?.lines[0]?.divides[0]?.glyphGroup[0];
+        if (publishedGlyph == null) {
+            throw new Error('Expected the foreground publication to contain an addressable glyph.');
+        }
+        const publishedPosition = skeleton.findPositionByGlyph(publishedGlyph, -1);
+        if (publishedPosition == null) {
+            throw new Error('Expected the foreground glyph to resolve to a node position.');
+        }
+        expect(publishedPosition.page).toBe(anchorPageIndex);
+        expect(publishedPosition.path).toEqual(['pages', anchorPageIndex]);
+        expect(skeleton.findCharIndexByPosition({ ...publishedPosition, isBack: true })).toBeTypeOf('number');
+        expect(skeleton.getSkeletonData()?.pages[anchorPageIndex + 1]).toMatchObject({
+            isLayoutPlaceholder: true,
+            sections: [],
+            st: -1,
+            ed: -1,
+            pageWidth: initialPages[anchorPageIndex + 1].pageWidth,
+            pageHeight: initialPages[anchorPageIndex + 1].pageHeight,
+        });
+
+        let finalProgress = foregroundProgress;
+        for (let index = 0; index < 200 && !finalProgress.complete; index++) {
+            finalProgress = skeleton.stepIncrementalLayout(generation, 0);
+        }
+
+        expect(finalProgress).toMatchObject({ complete: true, cancelled: false });
+        expect(normalizeSkeleton(skeleton.getSkeletonData())).toEqual(initialSkeleton);
+
+        skeleton.dispose();
+        univer.dispose();
+    });
+
+    it('reuses a geometrically stable page tail after a Worker interaction edit', () => {
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        const content = Array.from(
+            { length: 300 },
+            (_, index) => `Short paragraph ${index}.\r`
+        ).join('');
+        const documentModel = createDocumentModelWithStyle(content, {});
+        documentModel.updateDocumentDataPageSize(600, 600);
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(documentModel), localeService);
+
+        skeleton.calculate();
+        const initialPages = skeleton.getSkeletonData()?.pages ?? [];
+        expect(initialPages.length).toBeGreaterThan(3);
+        const anchorPageIndex = 2;
+        const anchorPage = initialPages[anchorPageIndex];
+        const anchorLines = anchorPage.sections[0].columns[0].lines;
+        expect(anchorLines.length).toBeGreaterThan(2);
+        const anchor = anchorLines[Math.floor(anchorLines.length / 2)].st + 1;
+        const nextSnapshot = structuredClone(documentModel.getSnapshot());
+        const previousDataStream = nextSnapshot.body!.dataStream;
+        nextSnapshot.body!.dataStream = `${previousDataStream.slice(0, anchor)}x${previousDataStream.slice(anchor)}`;
+        for (const paragraph of nextSnapshot.body!.paragraphs ?? []) {
+            if (paragraph.startIndex >= anchor) {
+                paragraph.startIndex++;
+            }
+        }
+        for (const sectionBreak of nextSnapshot.body!.sectionBreaks ?? []) {
+            if (sectionBreak.startIndex >= anchor) {
+                sectionBreak.startIndex++;
+            }
+        }
+        const nextModel = new DocumentDataModel(nextSnapshot);
+        const viewModel = skeleton.getViewModel();
+        viewModel.reset(nextModel);
+        const generation = skeleton.startIncrementalLayout({
+            reason: 'edit',
+            anchor,
+            priorityAnchor: anchor + 1,
+            invalidation: {
+                oldStart: anchor,
+                oldEnd: anchor,
+                newEnd: anchor + 1,
+            },
+            reuseUnaffectedTail: false,
+        });
+        let foregroundProgress = skeleton.stepIncrementalLayout(generation, 0);
+        let foregroundSteps = 1;
+        for (; foregroundSteps < 100 && !foregroundProgress.anchorReady; foregroundSteps++) {
+            foregroundProgress = skeleton.stepIncrementalLayout(generation, 0);
+        }
+
+        expect(foregroundProgress.anchorReady).toBe(true);
+        expect(foregroundSteps).toBeLessThan(anchorLines.length);
+        expect(skeleton.findNodePositionByCharIndex(anchor + 1, false)?.page).toBe(anchorPageIndex);
+
+        skeleton.cancelIncrementalLayout(generation);
+        const secondInsertionOffset = anchor + 1;
+        const secondSnapshot = structuredClone(nextModel.getSnapshot());
+        const onceEditedDataStream = secondSnapshot.body!.dataStream;
+        secondSnapshot.body!.dataStream = `${onceEditedDataStream.slice(0, secondInsertionOffset)}y${onceEditedDataStream.slice(secondInsertionOffset)}`;
+        for (const paragraph of secondSnapshot.body!.paragraphs ?? []) {
+            if (paragraph.startIndex >= secondInsertionOffset) {
+                paragraph.startIndex++;
+            }
+        }
+        for (const sectionBreak of secondSnapshot.body!.sectionBreaks ?? []) {
+            if (sectionBreak.startIndex >= secondInsertionOffset) {
+                sectionBreak.startIndex++;
+            }
+        }
+        const secondModel = new DocumentDataModel(secondSnapshot);
+        viewModel.reset(secondModel);
+        const secondExpected = DocumentSkeleton.create(new DocumentViewModel(secondModel), localeService);
+        secondExpected.calculate();
+        const secondExpectedSkeleton = normalizeSkeleton(secondExpected.getSkeletonData());
+        const secondGeneration = skeleton.startIncrementalLayout({
+            reason: 'edit',
+            anchor: secondInsertionOffset,
+            priorityAnchor: secondInsertionOffset + 1,
+            invalidation: {
+                oldStart: secondInsertionOffset,
+                oldEnd: secondInsertionOffset,
+                newEnd: secondInsertionOffset + 1,
+            },
+            reuseUnaffectedTail: false,
+        });
+        let finalProgress = skeleton.stepIncrementalLayout(secondGeneration, 0);
+        let secondForegroundSteps = 1;
+        for (; secondForegroundSteps < 100 && !finalProgress.anchorReady; secondForegroundSteps++) {
+            finalProgress = skeleton.stepIncrementalLayout(secondGeneration, 0);
+        }
+        expect(secondForegroundSteps).toBeLessThan(anchorLines.length);
+        for (let index = 0; index < 300 && !finalProgress.complete; index++) {
+            finalProgress = skeleton.stepIncrementalLayout(secondGeneration, 0);
+        }
+
+        expect(finalProgress).toMatchObject({ complete: true, cancelled: false });
+        expect(normalizeSkeleton(skeleton.getSkeletonData())).toEqual(secondExpectedSkeleton);
+
+        secondExpected.dispose();
+        secondModel.dispose();
+        nextModel.dispose();
+        skeleton.dispose();
+        univer.dispose();
+    });
+
+    it('rebuilds an edit batch without scalar invalidation instead of reusing a stale page tail', () => {
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        const content = Array.from(
+            { length: 180 },
+            (_, index) => `Batch paragraph ${index} keeps enough text on each physical page.\r`
+        ).join('');
+        const documentModel = createDocumentModelWithStyle(content, {});
+        documentModel.updateDocumentDataPageSize(240, 260);
+        const batchViewModel = new DocumentViewModel(documentModel);
+        const preciseViewModel = new DocumentViewModel(documentModel);
+        const batchSkeleton = DocumentSkeleton.create(batchViewModel, localeService);
+        const preciseSkeleton = DocumentSkeleton.create(preciseViewModel, localeService);
+
+        batchSkeleton.calculate();
+        preciseSkeleton.calculate();
+        const initialPages = batchSkeleton.getSkeletonData()?.pages ?? [];
+        expect(initialPages.length).toBeGreaterThan(3);
+        const anchorPage = initialPages[2];
+        const anchorLine = anchorPage.sections[0]?.columns[0]?.lines[1];
+        if (anchorLine == null) {
+            throw new Error('Expected an editable line on the third physical page');
+        }
+        const anchor = anchorLine.st + 2;
+        const insertion = '\rBATCH-LINE';
+        const nextSnapshot = structuredClone(documentModel.getSnapshot());
+        const previousDataStream = nextSnapshot.body!.dataStream;
+        nextSnapshot.body!.dataStream = `${previousDataStream.slice(0, anchor)}${insertion}${previousDataStream.slice(anchor)}`;
+        for (const paragraph of nextSnapshot.body!.paragraphs ?? []) {
+            if (paragraph.startIndex >= anchor) {
+                paragraph.startIndex += insertion.length;
+            }
+        }
+        for (const sectionBreak of nextSnapshot.body!.sectionBreaks ?? []) {
+            if (sectionBreak.startIndex >= anchor) {
+                sectionBreak.startIndex += insertion.length;
+            }
+        }
+
+        const nextModel = new DocumentDataModel(nextSnapshot);
+        batchViewModel.reset(nextModel);
+        preciseViewModel.reset(nextModel);
+        const expected = DocumentSkeleton.create(new DocumentViewModel(nextModel), localeService);
+        expected.calculate();
+        const batchGeneration = batchSkeleton.startIncrementalLayout({
+            reason: 'edit',
+            anchor,
+            priorityAnchor: anchor + insertion.length,
+            reuseUnaffectedTail: false,
+        });
+        let batchProgress = batchSkeleton.stepIncrementalLayout(batchGeneration, 0);
+        for (let step = 0; step < 2_000 && !batchProgress.complete; step++) {
+            batchProgress = batchSkeleton.stepIncrementalLayout(batchGeneration, 0);
+        }
+        const preciseGeneration = preciseSkeleton.startIncrementalLayout({
+            reason: 'edit',
+            anchor,
+            priorityAnchor: anchor + insertion.length,
+            invalidation: {
+                newEnd: anchor + insertion.length,
+                oldEnd: anchor,
+                oldStart: anchor,
+            },
+            reuseUnaffectedTail: false,
+        });
+        let preciseProgress = preciseSkeleton.stepIncrementalLayout(preciseGeneration, 0);
+        for (let step = 0; step < 2_000 && !preciseProgress.complete; step++) {
+            preciseProgress = preciseSkeleton.stepIncrementalLayout(preciseGeneration, 0);
+        }
+
+        const expectedSkeleton = normalizeSkeleton(expected.getSkeletonData());
+        expect(batchProgress).toMatchObject({ complete: true, cancelled: false });
+        expect(preciseProgress).toMatchObject({ complete: true, cancelled: false });
+        expect(normalizeSkeleton(batchSkeleton.getSkeletonData())).toEqual(expectedSkeleton);
+        expect(normalizeSkeleton(preciseSkeleton.getSkeletonData())).toEqual(expectedSkeleton);
+
+        expected.dispose();
+        nextModel.dispose();
+        preciseSkeleton.dispose();
+        batchSkeleton.dispose();
+        univer.dispose();
+    });
+
+    it('reuses a plain-paragraph checkpoint when only aggregate page ranges overlap the anchor', () => {
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        const content = Array.from(
+            { length: 120 },
+            (_, index) => `Paragraph ${index} has enough text to wrap across several lines on a compact page.\r`
+        ).join('');
+        const documentModel = createDocumentModelWithStyle(content, {});
+        documentModel.updateDocumentDataPageSize(160, 180);
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(documentModel), localeService);
+
+        skeleton.calculate();
+        const initialPages = skeleton.getSkeletonData()?.pages ?? [];
+        const anchorPageIndex = 6;
+        const anchorPage = initialPages[anchorPageIndex];
+        const anchor = anchorPage.sections[0].columns[0].lines[0].st;
+        const previousFirstPage = initialPages[0];
+        initialPages[0].ed = anchorPage.ed;
+        anchorPage.st = initialPages[0].st;
+        anchorPage.ed = content.length - 1;
+
+        const generation = skeleton.startIncrementalLayout({ anchor });
+        let progress = skeleton.stepIncrementalLayout(generation, 0);
+        for (let index = 0; index < 200 && !progress.anchorReady; index++) {
+            progress = skeleton.stepIncrementalLayout(generation, 0);
+        }
+        const rebuiltPages = skeleton.getSkeletonData()?.pages ?? [];
+
+        expect(progress.anchorReady).toBe(true);
+        expect(progress.laidOutThrough).toBeLessThan(content.length - 1);
+        expect(rebuiltPages[0]).toBe(previousFirstPage);
+
+        skeleton.dispose();
+        univer.dispose();
+    });
+
+    it('cancels an obsolete incremental generation before it can commit', () => {
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        const documentModel = createDocumentModelWithStyle('First paragraph.\rSecond paragraph.\rThird paragraph.\r', {});
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(documentModel), localeService);
+        const cancelledProgress: number[] = [];
+        const subscription = skeleton.layoutProgress$.subscribe((progress) => {
+            if (progress.cancelled) {
+                cancelledProgress.push(progress.generation);
+            }
+        });
+
+        const obsoleteGeneration = skeleton.startIncrementalLayout({ anchor: 40 });
+        skeleton.stepIncrementalLayout(obsoleteGeneration, 0);
+        const currentGeneration = skeleton.startIncrementalLayout({ anchor: 2 });
+
+        expect(skeleton.stepIncrementalLayout(obsoleteGeneration, 0).cancelled).toBe(true);
+        expect(cancelledProgress).toContain(obsoleteGeneration);
+        expect(skeleton.stepIncrementalLayout(currentGeneration, 0).cancelled).toBe(false);
+
+        subscription.unsubscribe();
         skeleton.dispose();
         univer.dispose();
     });
@@ -2592,6 +3768,10 @@ describe('doc skeleton', () => {
 
         expect(() => skeleton.calculate()).not.toThrow();
         expect(skeleton.getSkeletonData()?.pages.length).toBeGreaterThan(0);
+        expect(skeleton.getSkeletonData()?.skeHeaders.size).toBeGreaterThan(0);
+        expect(skeleton.getSkeletonData()?.skeFooters.size).toBeGreaterThan(0);
+
+        expectIncrementalSkeletonToEqualSynchronous(documentModel.getSnapshot(), localeService);
 
         skeleton.dispose();
         univer.dispose();

@@ -41,6 +41,7 @@ import { DocCustomRangeController } from './controllers/custom-range.controller'
 import { DocPermissionController } from './controllers/doc-permission.controller';
 import { DocBlockMoveValidatorService } from './services/doc-block-move-validator.service';
 import { DocContentInsertService } from './services/doc-content-insert.service';
+import { DocLayoutExecutorService } from './services/doc-layout-executor.service';
 import { DocSelectionManagerService } from './services/doc-selection-manager.service';
 import { DocStateChangeManagerService } from './services/doc-state-change-manager.service';
 import { DocStateEmitService } from './services/doc-state-emit.service';
@@ -106,6 +107,7 @@ export class UniverDocsPlugin extends Plugin {
                 [DocStateChangeManagerService],
                 [DocBlockMoveValidatorService],
                 [DocContentInsertService],
+                [DocLayoutExecutorService],
                 [DocTextResolverService],
                 [DocCustomRangeController],
                 [DocPermissionController],

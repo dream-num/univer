@@ -26,6 +26,21 @@ import { TextX } from '../text-x';
 import { getBodySlice, getBodySliceForTextXAction, getParagraphsSlice, SliceBodyType } from '../utils';
 
 describe('document block ranges', () => {
+    it('keeps a collapsed deletion as a no-op during structural normalization', () => {
+        const body: IDocumentBody = {
+            dataStream: 'A\r\n',
+            paragraphs: [{ paragraphId: 'paragraph-1', startIndex: 1 }],
+            sectionBreaks: [{ sectionId: 'section-1', startIndex: 2 }],
+        };
+
+        const actions = BuildTextUtils.selection.delete([
+            { startOffset: 1, endOffset: 1, collapsed: true },
+        ], body);
+        TextX.apply(body, actions);
+
+        expect(body.dataStream).toBe('A\r\n');
+    });
+
     it('moves following block ranges when text is inserted before them', () => {
         const body: IDocumentBody = {
             dataStream: 'A\rB\r\n',

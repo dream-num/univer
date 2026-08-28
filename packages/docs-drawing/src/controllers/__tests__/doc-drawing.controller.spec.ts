@@ -107,7 +107,10 @@ describe('DocDrawingController', () => {
                 unitId: 'doc-1',
                 subUnitId: 'doc-1',
                 data: {
+                    mask: expect.objectContaining({ hidden: true }),
+                    photo: expect.objectContaining({ hidden: true }),
                     d2: expect.objectContaining({
+                        hidden: true,
                         docTransform: {
                             size: { width: 320, height: 180 },
                             positionH: { posOffset: 12 },
@@ -121,6 +124,7 @@ describe('DocDrawingController', () => {
         });
         const loadedDocDrawingData = registerDrawingData.mock.calls.at(-1)?.[1];
         expect(loadedDocDrawingData?.['doc-1']?.order).toEqual(['mask', 'photo', 'd2']);
+        expect(loadedDocDrawingData?.['doc-1']?.data?.d2).not.toHaveProperty('hidden');
         expect(loadedDrawingData?.['doc-1']?.data?.d2).not.toHaveProperty('transform');
 
         capturedResource.onUnLoad('doc-1');

@@ -35,6 +35,7 @@ import { DocSelectionManagerService, getDocumentPermissionValue } from '@univerj
 import { UnitAction } from '@univerjs/protocol';
 import { FLOAT_MENU_COMPONENT_KEY } from '../views/float-toolbar/FloatToolbar';
 import { IDocEmbedRuntimeFocusCoordinator } from './doc-embed-integration.service';
+import { DocLayoutInteractionService } from './doc-layout-interaction.service';
 import { DocCanvasPopManagerService } from './doc-popup-manager.service';
 import { DocSelectionRenderService } from './selection/doc-selection-render.service';
 
@@ -67,6 +68,7 @@ export class DocFloatMenuService extends Disposable implements IRenderModule {
         @Inject(DocSelectionRenderService) private readonly _docSelectionRenderService: DocSelectionRenderService,
         @IContextService private readonly _contextService: IContextService,
         @IPermissionService private readonly _permissionService: IPermissionService,
+        @Inject(DocLayoutInteractionService) private readonly _docLayoutInteractionService: DocLayoutInteractionService,
         @Optional(IDocEmbedRuntimeFocusCoordinator) private readonly _embedRuntimeFocusCoordinator?: IDocEmbedRuntimeFocusCoordinator
     ) {
         super();
@@ -214,16 +216,21 @@ export class DocFloatMenuService extends Disposable implements IRenderModule {
             return;
         }
 
+        const popup = this._docCanvasPopManagerService.attachPopupToRange(
+            range,
+            {
+                componentKey: FLOAT_MENU_COMPONENT_KEY,
+                direction: range.direction === 'backward' || isInSameLine((range as ITextRangeWithStyle).startNodePosition, (range as ITextRangeWithStyle).endNodePosition) ? 'top-center' : 'bottom-center',
+                offset: [0, 10],
+            },
+            unitId
+        );
+        const layoutInteraction = this._docLayoutInteractionService.beginInteraction();
         this._floatMenu = {
-            disposable: this._docCanvasPopManagerService.attachPopupToRange(
-                range,
-                {
-                    componentKey: FLOAT_MENU_COMPONENT_KEY,
-                    direction: range.direction === 'backward' || isInSameLine((range as ITextRangeWithStyle).startNodePosition, (range as ITextRangeWithStyle).endNodePosition) ? 'top-center' : 'bottom-center',
-                    offset: [0, 10],
-                },
-                unitId
-            ),
+            disposable: toDisposable(() => {
+                popup.dispose();
+                layoutInteraction.dispose();
+            }),
             start: range.startOffset,
             end: range.endOffset,
         };

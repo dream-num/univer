@@ -20,6 +20,7 @@ import { SetDocZoomRatioOperation } from '@univerjs/docs-ui';
 import { Rect } from '@univerjs/engine-render';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
+import { DocRefreshDrawingsService } from '../../services/doc-refresh-drawings.service';
 import {
     calcDocFloatDomPositionByRect,
     DocFloatDomController,
@@ -37,25 +38,55 @@ function createScene() {
     };
 }
 
-function createController(options: { drawing?: Record<string, unknown>; rects?: Rect[]; page?: any } = {}) {
+function createController(options: {
+    drawing?: Record<string, unknown>;
+    rects?: Rect[];
+    page?: any;
+    renderType?: UniverInstanceType;
+    refreshDrawingOnAdd?: { left: number; top: number; width: number; height: number; angle: number };
+    resolveRefreshDrawing?: () => { left: number; top: number; width: number; height: number; angle: number } | undefined;
+} = {}) {
     const add$ = new Subject<any[]>();
     const remove$ = new Subject<any[]>();
     const refreshTransform$ = new Subject<any[]>();
     const currentSkeleton$ = new Subject<any>();
+    const skeletonDirty$ = new Subject<boolean>();
+    const renderCreated$ = new Subject<any>();
+    const renderDisposed$ = new Subject<string>();
     const commandHandlers: Array<(command: { id: string; params?: unknown }) => void> = [];
     const scene = createScene();
     const canvas = { dispatchEvent: vi.fn() };
+    const docRefreshDrawingsService = new DocRefreshDrawingsService();
+    const refreshDrawings = vi.spyOn(docRefreshDrawingsService, 'refreshDrawings');
+    docRefreshDrawingsService.refreshDrawings$.subscribe((skeleton) => {
+        const transform = options.resolveRefreshDrawing?.() ?? options.refreshDrawingOnAdd;
+        if (skeleton != null && transform) {
+            refreshTransform$.next([{
+                unitId: 'doc-1',
+                subUnitId: 'doc-1',
+                drawingId: 'dom-1',
+                transform,
+            }]);
+        }
+    });
+    const skeleton = {
+        dirty$: skeletonDirty$,
+        getSkeletonData: () => ({ pages: [options.page ?? { pageWidth: 240, marginLeft: 20, marginRight: 30 }] }),
+    };
     const renderUnit = {
+        unitId: 'doc-1',
+        type: options.renderType ?? UniverInstanceType.UNIVER_DOC,
         scene,
         engine: { getCanvasElement: () => canvas },
+        isDisposed: vi.fn(() => false),
         with: vi.fn(() => ({
             currentSkeleton$,
-            getSkeleton: () => ({
-                getSkeletonData: () => ({ pages: [options.page ?? { pageWidth: 240, marginLeft: 20, marginRight: 30 }] }),
-            }),
+            getSkeleton: () => skeleton,
         })),
     };
     const renderManagerService = {
+        created$: renderCreated$,
+        disposed$: renderDisposed$,
         getRenderUnitById: vi.fn(() => renderUnit),
     };
     const drawing = {
@@ -74,7 +105,7 @@ function createController(options: { drawing?: Record<string, unknown>; rects?: 
         getDrawingByParam: vi.fn(() => drawing),
     };
     const drawingRenderService = {
-        renderFloatDom: vi.fn(async () => options.rects ?? []),
+        renderFloatDom: vi.fn(() => options.rects ?? []),
     };
     const domLayers: Array<[string, any]> = [];
     const canvasFloatDomService = {
@@ -110,7 +141,8 @@ function createController(options: { drawing?: Record<string, unknown>; rects?: 
         drawingRenderService as never,
         canvasFloatDomService as never,
         univerInstanceService as never,
-        commandService as never
+        commandService as never,
+        docRefreshDrawingsService
     );
 
     return {
@@ -126,7 +158,23 @@ function createController(options: { drawing?: Record<string, unknown>; rects?: 
         drawingRenderService,
         canvasFloatDomService,
         commandService,
+        refreshDrawings,
+        renderCreated$,
+        renderDisposed$,
+        skeletonDirty$,
     };
+}
+
+function publishEmbedRuntimeGeometry(
+    refreshTransform$: ReturnType<typeof createController>['refreshTransform$'],
+    transform = { left: 30, top: 50, width: 50, height: 40, angle: 0 }
+) {
+    refreshTransform$.next([{
+        unitId: 'doc-1',
+        subUnitId: 'doc-1',
+        drawingId: 'dom-1',
+        transform,
+    }]);
 }
 
 describe('DocFloatDomController', () => {
@@ -251,13 +299,14 @@ describe('DocFloatDomController', () => {
             width: 50,
             height: 40,
         } as never);
-        const { controller, add$, canvasFloatDomService } = createController({
+        const { controller, add$, refreshTransform$, canvasFloatDomService } = createController({
             rects: [rect],
             drawing: {
                 data: { version: 1, embedId: 'embed-1', hostAnchorId: 'anchor-1' },
             },
         });
 
+        publishEmbedRuntimeGeometry(refreshTransform$);
         add$.next([{ unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'dom-1' }]);
         await Promise.resolve();
 
@@ -265,6 +314,231 @@ describe('DocFloatDomController', () => {
             eventPassThrough: false,
             preserveOnFocusChange: true,
         }));
+
+        controller.dispose();
+    });
+
+    it('waits for layout runtime geometry before mounting an embed custom block', () => {
+        const rect = new Rect('dom-rect', {
+            left: 10,
+            top: 20,
+            width: 50,
+            height: 40,
+        });
+        const { controller, add$, refreshTransform$, drawingRenderService, canvasFloatDomService } = createController({
+            rects: [rect],
+            drawing: {
+                data: { version: 1, embedId: 'embed-1', hostAnchorId: 'anchor-1' },
+            },
+        });
+
+        add$.next([{ unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'dom-1' }]);
+
+        expect(drawingRenderService.renderFloatDom).not.toHaveBeenCalled();
+        expect(canvasFloatDomService.addFloatDom).not.toHaveBeenCalled();
+
+        publishEmbedRuntimeGeometry(refreshTransform$, { left: 300, top: 500, width: 50, height: 40, angle: 0 });
+
+        expect(drawingRenderService.renderFloatDom).toHaveBeenCalledOnce();
+        expect(canvasFloatDomService.addFloatDom).toHaveBeenCalledOnce();
+        expect(canvasFloatDomService.addFloatDom.mock.calls[0][0].position$.getValue()).toMatchObject({
+            startX: 580,
+            startY: 1440,
+            width: 100,
+            height: 120,
+        });
+
+        controller.dispose();
+    });
+
+    it('refreshes current layout geometry when an embed drawing is added after publication', () => {
+        const rect = new Rect('dom-rect', {
+            left: 10,
+            top: 20,
+            width: 50,
+            height: 40,
+        });
+        const { controller, add$, refreshDrawings, canvasFloatDomService } = createController({
+            rects: [rect],
+            drawing: {
+                data: { version: 1, embedId: 'embed-1', hostAnchorId: 'anchor-1' },
+            },
+            refreshDrawingOnAdd: { left: 300, top: 500, width: 50, height: 40, angle: 0 },
+        });
+
+        add$.next([{ unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'dom-1' }]);
+
+        expect(refreshDrawings).toHaveBeenCalledOnce();
+        expect(canvasFloatDomService.addFloatDom).toHaveBeenCalledOnce();
+        expect(canvasFloatDomService.addFloatDom.mock.calls[0][0].position$.getValue()).toMatchObject({
+            startX: 580,
+            startY: 1440,
+            width: 100,
+            height: 120,
+        });
+
+        controller.dispose();
+    });
+
+    it('does not resolve layout services from a disposed render unit', () => {
+        const { controller, add$, renderUnit, refreshDrawings } = createController({
+            drawing: {
+                data: { version: 1, embedId: 'embed-1', hostAnchorId: 'anchor-1' },
+            },
+        });
+        renderUnit.isDisposed.mockReturnValue(true);
+
+        add$.next([{ unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'dom-1' }]);
+
+        expect(renderUnit.with).not.toHaveBeenCalled();
+        expect(refreshDrawings).not.toHaveBeenCalled();
+
+        controller.dispose();
+    });
+
+    it('does not resolve Doc layout services from a non-Doc render unit', () => {
+        const { controller, add$, renderUnit, refreshDrawings } = createController({
+            drawing: {
+                data: { version: 1, embedId: 'embed-1', hostAnchorId: 'anchor-1' },
+            },
+            renderType: UniverInstanceType.UNIVER_SHEET,
+        });
+
+        add$.next([{ unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'dom-1' }]);
+
+        expect(renderUnit.with).not.toHaveBeenCalled();
+        expect(refreshDrawings).not.toHaveBeenCalled();
+
+        controller.dispose();
+    });
+
+    it('resumes pending embed geometry when the host render is recreated', () => {
+        const rect = new Rect('dom-rect', {
+            left: 10,
+            top: 20,
+            width: 50,
+            height: 40,
+        });
+        const {
+            controller,
+            add$,
+            canvasFloatDomService,
+            renderCreated$,
+            renderDisposed$,
+            renderUnit,
+        } = createController({
+            rects: [rect],
+            drawing: {
+                data: { version: 1, embedId: 'embed-1', hostAnchorId: 'anchor-1' },
+            },
+            refreshDrawingOnAdd: { left: 300, top: 500, width: 50, height: 40, angle: 0 },
+        });
+        renderUnit.isDisposed.mockReturnValue(true);
+        add$.next([{ unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'dom-1' }]);
+        expect(canvasFloatDomService.addFloatDom).not.toHaveBeenCalled();
+
+        renderDisposed$.next('doc-1');
+        renderUnit.isDisposed.mockReturnValue(false);
+        renderCreated$.next(renderUnit);
+
+        expect(canvasFloatDomService.addFloatDom).toHaveBeenCalledOnce();
+
+        controller.dispose();
+    });
+
+    it('refreshes a pending embed drawing when the current skeleton becomes dirty', () => {
+        let geometry: { left: number; top: number; width: number; height: number; angle: number } | undefined;
+        const rect = new Rect('dom-rect', {
+            left: 10,
+            top: 20,
+            width: 50,
+            height: 40,
+        });
+        const { controller, add$, skeletonDirty$, refreshDrawings, canvasFloatDomService } = createController({
+            rects: [rect],
+            drawing: {
+                data: { version: 1, embedId: 'embed-1', hostAnchorId: 'anchor-1' },
+            },
+            resolveRefreshDrawing: () => geometry,
+        });
+
+        add$.next([{ unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'dom-1' }]);
+        expect(canvasFloatDomService.addFloatDom).not.toHaveBeenCalled();
+
+        geometry = { left: 300, top: 500, width: 50, height: 40, angle: 0 };
+        skeletonDirty$.next(true);
+
+        expect(canvasFloatDomService.addFloatDom).toHaveBeenCalledOnce();
+        const refreshCountAfterMount = refreshDrawings.mock.calls.length;
+        skeletonDirty$.next(true);
+        expect(refreshDrawings).toHaveBeenCalledTimes(refreshCountAfterMount);
+
+        controller.dispose();
+    });
+
+    it('ignores hidden fallback geometry while an embed layout is incomplete', () => {
+        const rect = new Rect('dom-rect', {
+            left: 10,
+            top: 20,
+            width: 50,
+            height: 40,
+        });
+        const { controller, add$, refreshTransform$, drawingRenderService, canvasFloatDomService } = createController({
+            rects: [rect],
+            drawing: {
+                data: { version: 1, embedId: 'embed-1', hostAnchorId: 'anchor-1' },
+            },
+        });
+
+        add$.next([{ unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'dom-1' }]);
+        refreshTransform$.next([{
+            unitId: 'doc-1',
+            subUnitId: 'doc-1',
+            drawingId: 'dom-1',
+            hidden: true,
+            transform: { left: 10, top: 20, width: 50, height: 40, angle: 0 },
+        }]);
+
+        expect(drawingRenderService.renderFloatDom).not.toHaveBeenCalled();
+        expect(canvasFloatDomService.addFloatDom).not.toHaveBeenCalled();
+
+        publishEmbedRuntimeGeometry(refreshTransform$, { left: 300, top: 500, width: 50, height: 40, angle: 0 });
+        const position$ = canvasFloatDomService.addFloatDom.mock.calls[0][0].position$;
+        const publishedPosition = position$.getValue();
+
+        refreshTransform$.next([{
+            unitId: 'doc-1',
+            subUnitId: 'doc-1',
+            drawingId: 'dom-1',
+            hidden: true,
+            transform: { left: 10, top: 20, width: 50, height: 40, angle: 0 },
+        }]);
+
+        expect(position$.getValue()).toEqual(publishedPosition);
+
+        controller.dispose();
+    });
+
+    it('does not mount a removed embed custom block when runtime geometry arrives later', () => {
+        const rect = new Rect('dom-rect', {
+            left: 10,
+            top: 20,
+            width: 50,
+            height: 40,
+        });
+        const { controller, add$, remove$, refreshTransform$, drawingRenderService, canvasFloatDomService } = createController({
+            rects: [rect],
+            drawing: {
+                data: { version: 1, embedId: 'embed-1', hostAnchorId: 'anchor-1' },
+            },
+        });
+
+        add$.next([{ unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'dom-1' }]);
+        remove$.next([{ drawingId: 'dom-1' }]);
+        publishEmbedRuntimeGeometry(refreshTransform$);
+
+        expect(drawingRenderService.renderFloatDom).not.toHaveBeenCalled();
+        expect(canvasFloatDomService.addFloatDom).not.toHaveBeenCalled();
 
         controller.dispose();
     });
@@ -313,6 +587,7 @@ describe('DocFloatDomController', () => {
             },
         });
 
+        publishEmbedRuntimeGeometry(refreshTransform$);
         add$.next([{ unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'dom-1' }]);
         await Promise.resolve();
 
@@ -390,7 +665,7 @@ describe('DocFloatDomController', () => {
             width: 50,
             height: 40,
         } as never);
-        const { controller, add$, canvasFloatDomService } = createController({
+        const { controller, add$, refreshTransform$, canvasFloatDomService } = createController({
             rects: [rect],
             drawing: {
                 data: {
@@ -402,6 +677,7 @@ describe('DocFloatDomController', () => {
             },
         });
 
+        publishEmbedRuntimeGeometry(refreshTransform$);
         add$.next([{ unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'dom-1' }]);
         await Promise.resolve();
 
@@ -420,7 +696,7 @@ describe('DocFloatDomController', () => {
             width: 50,
             height: 40,
         } as never);
-        const { controller, add$, canvasFloatDomService } = createController({
+        const { controller, add$, refreshTransform$, canvasFloatDomService } = createController({
             rects: [rect],
             drawing: {
                 data: {
@@ -432,6 +708,7 @@ describe('DocFloatDomController', () => {
             },
         });
 
+        publishEmbedRuntimeGeometry(refreshTransform$);
         add$.next([{ unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'dom-1' }]);
         await Promise.resolve();
 
@@ -457,6 +734,7 @@ describe('DocFloatDomController', () => {
             },
         });
 
+        publishEmbedRuntimeGeometry(refreshTransform$);
         add$.next([{ unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'dom-1' }]);
         await Promise.resolve();
 
@@ -495,6 +773,7 @@ describe('DocFloatDomController', () => {
             },
         });
 
+        publishEmbedRuntimeGeometry(refreshTransform$);
         add$.next([{ unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'dom-1' }]);
         await Promise.resolve();
 
@@ -540,6 +819,7 @@ describe('DocFloatDomController', () => {
             },
         });
 
+        publishEmbedRuntimeGeometry(refreshTransform$, { left: 30, top: 240, width: 720, height: 405, angle: 0 });
         add$.next([{ unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'dom-1' }]);
         await Promise.resolve();
 

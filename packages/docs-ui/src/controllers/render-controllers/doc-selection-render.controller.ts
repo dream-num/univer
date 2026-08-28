@@ -94,8 +94,7 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
                 if (unitId !== this._context.unitId) {
                     return;
                 }
-                this._docSelectionRenderService.removeAllRanges();
-                this._docSelectionRenderService.addDocRanges(docRanges, isEditing, options);
+                this._docSelectionRenderService.replaceDocRanges(docRanges, isEditing, options);
             })
         );
     }

@@ -17,6 +17,7 @@
 import type { ITable } from '@univerjs/core';
 import type { IParagraphList } from '../../../../../basics/i-document-skeleton-cached';
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
+import type { ILayoutContext } from '../../tools';
 import {
     BooleanNumber,
     DocumentFlavor,
@@ -29,6 +30,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { BreakType, DocumentSkeletonPageType } from '../../../../../basics/i-document-skeleton-cached';
 import { getDocumentCompatibilityPolicy } from '../../../document-compatibility';
 import {
+    cachePrecomputedSlicedTableSkeletons,
+    cachePrecomputedTableSkeleton,
     createTableSkeleton,
     createTableSkeletons,
     getNullTableSkeleton,
@@ -36,6 +39,10 @@ import {
     getTableLeft,
     getTableSliceId,
     rollbackListCache,
+    startTableSkeletonBuild,
+    startTableSkeletonsBuild,
+    stepTableSkeletonBuild,
+    stepTableSkeletonsBuild,
 } from '../table';
 
 const createSkeletonCellPagesMock = vi.fn();
@@ -44,6 +51,17 @@ const createNullCellPageMock = vi.fn();
 vi.mock('../../model/page', () => ({
     createSkeletonCellPages: (...args: unknown[]) => createSkeletonCellPagesMock(...args),
     createNullCellPage: (...args: unknown[]) => createNullCellPageMock(...args),
+    startSkeletonCellPagesBuild: (...args: unknown[]) => ({
+        args,
+        complete: false,
+        requiresSyncFallback: false,
+        pages: [],
+    }),
+    stepSkeletonCellPagesBuild: (state: { args: unknown[]; complete: boolean; pages: unknown[] }) => {
+        state.pages = createSkeletonCellPagesMock(...state.args);
+        state.complete = true;
+        return true;
+    },
 }));
 
 function createMockTable(overrides: Partial<ITable> = {}): ITable {
@@ -327,6 +345,122 @@ describe('docs table layout', () => {
         expect(skeleton?.left).toBeGreaterThanOrEqual(0);
         expect(skeleton?.rows[0].cells[0].marginTop).toBeGreaterThanOrEqual(1);
         expect(skeleton?.rows[0].cells[1].marginTop).toBeGreaterThanOrEqual(1);
+    });
+
+    it('builds a table one source cell at a time', () => {
+        const { ctx, curPage, viewModel, tableNode, sectionBreakConfig } = createContextAndTable();
+        const state = startTableSkeletonBuild(ctx, curPage, viewModel, tableNode, sectionBreakConfig);
+
+        expect(state).not.toBeNull();
+        expect(stepTableSkeletonBuild(state!)).toBe(false);
+        expect(state).toMatchObject({ rowIndex: 0, currentColumnIndex: 1, complete: false });
+        expect(state?.tableSkeleton.rows).toHaveLength(1);
+
+        expect(stepTableSkeletonBuild(state!)).toBe(false);
+        expect(state).toMatchObject({ rowIndex: 1, currentColumnIndex: 0, complete: false });
+
+        while (!stepTableSkeletonBuild(state!)) {
+            // Continue until all source cells are complete.
+        }
+        expect(state).toMatchObject({ rowIndex: 2, complete: true });
+        expect(state?.tableSkeleton.rows).toHaveLength(2);
+    });
+
+    it('reuses incrementally precomputed rows when a table is split', () => {
+        const { ctx, curPage, viewModel, tableNode, sectionBreakConfig } = createContextAndTable();
+        const state = startTableSkeletonBuild(ctx, curPage, viewModel, tableNode, sectionBreakConfig)!;
+        while (!stepTableSkeletonBuild(state)) {
+            // Build all source rows through the resumable path before pagination consumes them.
+        }
+        cachePrecomputedTableSkeleton(ctx, tableNode.startIndex, state.tableSkeleton);
+        const callsBeforePagination = createSkeletonCellPagesMock.mock.calls.length;
+
+        const result = createTableSkeletons(ctx, curPage, viewModel, tableNode, sectionBreakConfig, 90);
+
+        expect(result.skeTables.flatMap((table) => table.rows).filter((row) => !row.isRepeatRow)).toHaveLength(2);
+        expect(createSkeletonCellPagesMock.mock.calls.length).toBe(callsBeforePagination);
+    });
+
+    it('builds exact paginated cell pages incrementally before the synchronous consumer needs them', () => {
+        const { ctx, curPage, viewModel, tableNode, sectionBreakConfig } = createContextAndTable();
+        const state = startTableSkeletonsBuild(
+            ctx,
+            curPage,
+            viewModel,
+            tableNode,
+            sectionBreakConfig,
+            90
+        )!;
+
+        expect(stepTableSkeletonsBuild(state)).toBe(false);
+        expect(state).toMatchObject({ rowIndex: 0, columnIndex: 1, complete: false });
+        while (!stepTableSkeletonsBuild(state)) {
+            // Continue through each cell paragraph until exact pagination is ready.
+        }
+        expect(state.result).not.toBeNull();
+
+        cachePrecomputedSlicedTableSkeletons(ctx, tableNode.startIndex, 90, state.result!);
+        const callsBeforeConsume = createSkeletonCellPagesMock.mock.calls.length;
+        const result = createTableSkeletons(ctx, curPage, viewModel, tableNode, sectionBreakConfig, 90);
+
+        expect(result).toBe(state.result);
+        expect(createSkeletonCellPagesMock.mock.calls.length).toBe(callsBeforeConsume);
+    });
+
+    it('defers split-table work only after the normal layout path provides its exact context', () => {
+        const { ctx, curPage, viewModel, tableNode, sectionBreakConfig } = createContextAndTable();
+        type DeferredRequest = Parameters<NonNullable<ILayoutContext['deferSlicedTableLayout']>>[0];
+        let request: DeferredRequest | undefined;
+        ctx.deferSlicedTableLayout = (value: DeferredRequest) => {
+            request = value;
+            return true;
+        };
+
+        const provisional = createTableSkeletons(
+            ctx,
+            curPage,
+            viewModel,
+            tableNode,
+            sectionBreakConfig,
+            90
+        );
+
+        expect(provisional).toEqual({ skeTables: [], fromCurrentPage: false });
+        expect(request).toMatchObject({
+            curPage,
+            viewModel,
+            tableNode,
+            sectionBreakConfig,
+            availableHeight: 90,
+        });
+
+        ctx.deferSlicedTableLayout = undefined;
+        const state = startTableSkeletonsBuild(
+            ctx,
+            request!.curPage,
+            request!.viewModel,
+            request!.tableNode,
+            request!.sectionBreakConfig,
+            request!.availableHeight
+        )!;
+        while (!stepTableSkeletonsBuild(state)) {
+            // Resume the exact deferred request one cell paragraph at a time.
+        }
+        cachePrecomputedSlicedTableSkeletons(
+            ctx,
+            tableNode.startIndex,
+            request!.availableHeight,
+            state.result!
+        );
+
+        expect(createTableSkeletons(
+            ctx,
+            curPage,
+            viewModel,
+            tableNode,
+            sectionBreakConfig,
+            90
+        )).toBe(state.result);
     });
 
     it('uses every nested cell page when estimating a table inside a cell', () => {

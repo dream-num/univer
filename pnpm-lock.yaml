@@ -809,6 +809,9 @@ importers:
       '@univerjs/protocol':
         specifier: workspace:*
         version: link:../protocol
+      '@univerjs/rpc':
+        specifier: workspace:*
+        version: link:../rpc
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*

@@ -105,6 +105,26 @@ describe('DocumentDataModel + RichTextBuilder integration', () => {
         model.dispose();
     });
 
+    it('should normalize missing and duplicate legacy section ids at the model boundary', () => {
+        const model = new DocumentDataModel({
+            id: 'legacy-section-ids',
+            body: {
+                dataStream: 'A\nB\n',
+                sectionBreaks: [
+                    { startIndex: 1, sectionId: '' },
+                    { startIndex: 3, sectionId: '' },
+                ],
+            },
+        });
+        const sectionIds = model.getBody()?.sectionBreaks?.map((sectionBreak) => sectionBreak.sectionId) ?? [];
+
+        expect(sectionIds).toHaveLength(2);
+        expect(sectionIds.every(Boolean)).toBe(true);
+        expect(new Set(sectionIds).size).toBe(2);
+
+        model.dispose();
+    });
+
     it('should keep internal editor document snapshots shallow', () => {
         const model = new DocumentDataModel({
             id: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
@@ -312,6 +332,28 @@ describe('DocumentDataModel + RichTextBuilder integration', () => {
         expect(model.getBody()?.dataStream).toBe('Reset\r\n');
         expect(model.getUnitId()).toBe('doc-reset');
         expect(model.sliceBody(0, 5)?.dataStream).toContain('Reset');
+        model.dispose();
+    });
+
+    it('normalizes legacy section metadata that follows page breaks when loading a document', () => {
+        const model = new DocumentDataModel({
+            id: 'legacy-page-breaks',
+            body: {
+                dataStream: 'Before\r\n\fAfter\r\n\fTail\r\n\n',
+                paragraphs: [
+                    { startIndex: 6, paragraphId: 'before' },
+                    { startIndex: 14, paragraphId: 'after' },
+                    { startIndex: 21, paragraphId: 'tail' },
+                ],
+                sectionBreaks: [
+                    { startIndex: 9, sectionId: 'legacy-1' },
+                    { startIndex: 17, sectionId: 'legacy-2' },
+                    { startIndex: 23, sectionId: 'final' },
+                ],
+            },
+        });
+
+        expect(model.getBody()?.sectionBreaks).toEqual([{ startIndex: 23, sectionId: 'final' }]);
         model.dispose();
     });
 });

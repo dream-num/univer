@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { DocSkeletonManagerService } from '@univerjs/docs';
+import { DocEventManagerService } from '@univerjs/docs-ui';
 import { of } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { DeleteSearchKeyCommand } from '../../commands/commands/doc-quick-insert.command';
@@ -65,17 +67,17 @@ function createServiceTestBed() {
     const docEventManagerService = {
         findParagraphBoundByIndex: vi.fn(() => paragraphBound),
     };
+    let layoutInteractionActive = false;
     const skeleton = {
         findNodeByCharIndex: vi.fn(() => glyph),
         findNodePositionByCharIndex: vi.fn(() => undefined),
     };
     const currentRender = {
         with: vi.fn((token: unknown) => {
-            const name = (token as { name?: string })?.name;
-            if (name === 'DocEventManagerService') {
+            if (token === DocEventManagerService) {
                 return docEventManagerService;
             }
-            if (name === 'DocSkeletonManagerService') {
+            if (token === DocSkeletonManagerService) {
                 return { getSkeleton: () => skeleton };
             }
             return undefined;
@@ -89,6 +91,16 @@ function createServiceTestBed() {
             const disposable = createPopupDisposable();
             popupEntries.push({ rect, popup, disposable });
             return disposable;
+        }),
+    };
+    const docLayoutInteractionService = {
+        beginInteraction: vi.fn(() => {
+            layoutInteractionActive = true;
+            return {
+                dispose: () => {
+                    layoutInteractionActive = false;
+                },
+            };
         }),
     };
     const commandService = {
@@ -107,13 +119,15 @@ function createServiceTestBed() {
         } as never,
         {
             getActiveTextRange: vi.fn(() => activeRange),
-        } as never
+        } as never,
+        docLayoutInteractionService as never
     );
 
     return {
         service,
         popupEntries,
         commandService,
+        isLayoutInteractionActive: () => layoutInteractionActive,
         paragraphBound,
         setDataStream: (value: string) => {
             dataStream = value;
@@ -159,7 +173,7 @@ describe('DocQuickInsertPopupService', () => {
     });
 
     it('shows the popup on an empty line and remounts the keyword placeholder as input state changes', () => {
-        const { service, popupEntries, setDataStream } = createServiceTestBed();
+        const { service, popupEntries, isLayoutInteractionActive, setDataStream } = createServiceTestBed();
         const popup = {
             keyword: '/',
             menus$: of([]),
@@ -170,6 +184,7 @@ describe('DocQuickInsertPopupService', () => {
         expect(popupEntries).toHaveLength(2);
         expect(popupEntries[0].popup.componentKey).toBe(KeywordInputPlaceholder.componentKey);
         expect(popupEntries[1].popup.componentKey).toBe(QuickInsertPopup.componentKey);
+        expect(isLayoutInteractionActive()).toBe(true);
         expect(service.editPopup).toEqual(expect.objectContaining({ popup, anchor: 0, unitId: 'doc-1' }));
 
         setDataStream('/a');
@@ -192,6 +207,7 @@ describe('DocQuickInsertPopupService', () => {
         expect(popupEntries[1].disposable.dispose).toHaveBeenCalledTimes(1);
         expect(popupEntries[3].disposable.dispose).toHaveBeenCalledTimes(1);
         expect(service.editPopup).toBeNull();
+        expect(isLayoutInteractionActive()).toBe(false);
 
         service.dispose();
     });

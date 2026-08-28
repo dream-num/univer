@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { BlockType, DeleteDirection, DrawingTypeEnum, getRichTextEditPath, ICommandService, IUndoRedoService, JSONX, PositionedObjectLayoutType, TextXActionType } from '@univerjs/core';
+import { BlockType, DataStreamTreeTokenType, DeleteDirection, DrawingTypeEnum, getRichTextEditPath, ICommandService, IUndoRedoService, JSONX, PositionedObjectLayoutType, TextXActionType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createTestBed } from '../../../facade/__tests__/create-test-bed';
 import { RichTextEditingMutation } from '../../mutations/core-editing.mutation';
@@ -235,7 +235,7 @@ describe('core editing commands', () => {
         expect(testBed.doc.getSnapshot().footers?.['footer-1'].body.dataStream).toBe('Y\r\n');
     });
 
-    it('rejects invalid rich text mutations in header segments and rolls them back', () => {
+    it('rejects invalid rich text mutations after validating a structure-preserving header edit', () => {
         testBed.univer.dispose();
         testBed = createTestBed({
             id: 'test',
@@ -258,8 +258,20 @@ describe('core editing commands', () => {
         });
         commandService = testBed.get(ICommandService);
 
+        expect(commandService.syncExecuteCommand(InsertTextCommand.id, {
+            unitId: 'test',
+            segmentId: 'header-1',
+            body: { dataStream: 'X' },
+            range: {
+                startOffset: 0,
+                endOffset: 0,
+                collapsed: true,
+                segmentId: 'header-1',
+            },
+        })).toBe(true);
+
         const actions = JSONX.getInstance().editOp([
-            { t: TextXActionType.RETAIN, len: 4 },
+            { t: TextXActionType.RETAIN, len: 5 },
             { t: TextXActionType.DELETE, len: 2 },
         ], getRichTextEditPath(testBed.doc, 'header-1'));
 
@@ -269,7 +281,77 @@ describe('core editing commands', () => {
             actions,
             textRanges: null,
         })).toThrow('[DocStructure] header header-1');
-        expect(testBed.doc.getSnapshot().headers?.['header-1'].body.dataStream).toBe('Head\r\n');
+        expect(testBed.doc.getSnapshot().headers?.['header-1'].body.dataStream).toBe('XHead\r\n');
+    });
+
+    it('allows structure-preserving text edits in documents with legacy orphan custom-block tokens', () => {
+        testBed.univer.dispose();
+        testBed = createTestBed({
+            id: 'test',
+            body: {
+                dataStream: 'A\b\r\n',
+                paragraphs: [{ startIndex: 2, paragraphId: 'body' }],
+                sectionBreaks: [{ sectionId: 'section_fixture_109', startIndex: 3 }],
+            },
+            documentStyle: {},
+        });
+        commandService = testBed.get(ICommandService);
+
+        expect(commandService.syncExecuteCommand(InsertTextCommand.id, {
+            unitId: 'test',
+            body: { dataStream: 'X' },
+            range: {
+                startOffset: 1,
+                endOffset: 1,
+                collapsed: true,
+            },
+        })).toBe(true);
+        expect(testBed.doc.getBody()?.dataStream).toBe('AX\b\r\n');
+    });
+
+    it('inserts a paragraph around imported DOCX raw custom blocks without rolling back Enter', () => {
+        testBed.univer.dispose();
+        testBed = createTestBed({
+            id: 'test',
+            body: {
+                dataStream: `A${DataStreamTreeTokenType.CUSTOM_BLOCK}B${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`,
+                paragraphs: [{ startIndex: 3, paragraphId: 'body' }],
+                sectionBreaks: [{ sectionId: 'section_fixture_110', startIndex: 4 }],
+                docxRawCustomBlocks: [{
+                    startIndex: 1,
+                    blockId: 'raw-footnote-1',
+                    blockType: 1,
+                    docxRawXml: '<w:footnoteReference w:id="1"/>',
+                }],
+            },
+            documentStyle: {},
+        });
+        commandService = testBed.get(ICommandService);
+
+        expect(commandService.syncExecuteCommand(InsertTextCommand.id, {
+            unitId: 'test',
+            body: {
+                dataStream: DataStreamTreeTokenType.PARAGRAPH,
+                paragraphs: [{ startIndex: 0, paragraphId: 'inserted' }],
+            },
+            range: {
+                startOffset: 2,
+                endOffset: 2,
+                collapsed: true,
+            },
+        })).toBe(true);
+        expect(testBed.doc.getBody()).toMatchObject({
+            dataStream: `A${DataStreamTreeTokenType.CUSTOM_BLOCK}${DataStreamTreeTokenType.PARAGRAPH}B${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`,
+            paragraphs: [
+                { startIndex: 2 },
+                { startIndex: 4 },
+            ],
+            sectionBreaks: [{ sectionId: 'section_fixture_110', startIndex: 5 }],
+            docxRawCustomBlocks: [{
+                startIndex: 1,
+                blockId: 'raw-footnote-1',
+            }],
+        });
     });
 
     it('expands deletion to whole custom entities', () => {

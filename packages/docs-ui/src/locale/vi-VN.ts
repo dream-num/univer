@@ -18,6 +18,9 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'docs-ui': {
+        layout: {
+            recovering: 'Đang khôi phục bố cục tài liệu…',
+        },
         toolbar: {
             font: 'Phông chữ',
             fontSize: 'Cỡ chữ',

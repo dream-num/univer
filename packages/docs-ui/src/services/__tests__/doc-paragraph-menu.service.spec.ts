@@ -37,6 +37,7 @@ import {
     getTableBlockMenuHoverRect,
     getTableHorizontalViewportGeometry,
 } from '../doc-event-manager.service';
+import { DocLayoutInteractionService } from '../doc-layout-interaction.service';
 import { DocParagraphMenuService } from '../doc-paragraph-menu.service';
 
 describe('DocParagraphMenuService', () => {
@@ -411,6 +412,29 @@ describe('DocParagraphMenuService', () => {
         expect(replaceDocRanges).not.toHaveBeenCalled();
     });
 
+    it('protects layout while the paragraph menu is actively used', () => {
+        const layoutInteractionService = new DocLayoutInteractionService();
+        const attachPopupToRect = vi.fn(() => ({ canDispose: () => true, dispose: vi.fn() }));
+        const service = createService({
+            attachPopupToRect,
+            dataStream: 'Body\r',
+            layoutInteractionService,
+        });
+
+        service.showParagraphMenu(createParagraphBound({
+            paragraphStart: 0,
+            paragraphEnd: 4,
+            startIndex: 4,
+        }));
+        service.setParagraphMenuActive(true);
+
+        expect(layoutInteractionService.isActive).toBe(true);
+
+        service.setParagraphMenuActive(false);
+
+        expect(layoutInteractionService.isActive).toBe(false);
+    });
+
     it('does not show paragraph menus while a table rect selection is active', () => {
         const attachPopupToRect = vi.fn(() => ({ canDispose: () => true, dispose: vi.fn() }));
         const service = createService({
@@ -754,6 +778,21 @@ describe('DocParagraphMenuService', () => {
 
         expect(dispose).toHaveBeenCalledTimes(1);
         expect(service.activeTarget).toBeNull();
+    });
+
+    it('protects layout for the full block drag lifetime', () => {
+        const layoutInteractionService = new DocLayoutInteractionService();
+        const service = createService({
+            attachPopupToRect: vi.fn(() => ({ canDispose: () => true, dispose: vi.fn() })),
+            dataStream: 'Title\r',
+            layoutInteractionService,
+        });
+
+        service.setBlockMenuDragging(true);
+        expect(layoutInteractionService.isActive).toBe(true);
+
+        service.setBlockMenuDragging(false);
+        expect(layoutInteractionService.isActive).toBe(false);
     });
 
     it('hides the paragraph menu on keyboard input', () => {
@@ -1313,6 +1352,7 @@ function createService(options: {
     isOnPointerEvent?: boolean;
     inputBefore$?: Subject<unknown>;
     keydown$?: Subject<unknown>;
+    layoutInteractionService?: DocLayoutInteractionService;
     replaceDocRanges?: ReturnType<typeof vi.fn>;
     scrollAfter$?: { subscribeEvent: (callback: (event: { scrollY: number }) => void) => { dispose: () => void } };
     selectionStart$?: Subject<unknown>;
@@ -1398,7 +1438,8 @@ function createService(options: {
                 value: options.getPermissionValue?.(permissionId) ?? options.canEdit ?? true,
             }),
             permissionPointUpdate$: new Subject(),
-        } as never
+        } as never,
+        options.layoutInteractionService ?? new DocLayoutInteractionService()
     );
 }
 

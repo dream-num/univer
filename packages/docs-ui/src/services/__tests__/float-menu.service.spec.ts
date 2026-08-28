@@ -43,6 +43,7 @@ import { ComponentManager } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { describe, expect, it } from 'vitest';
 import { EmbedRuntimeFocusCoordinator, IDocEmbedRuntimeFocusCoordinator } from '../doc-embed-integration.service';
+import { DocLayoutInteractionService } from '../doc-layout-interaction.service';
 import { DocCanvasPopManagerService } from '../doc-popup-manager.service';
 import { DocFloatMenuService } from '../float-menu.service';
 import { DocSelectionRenderService } from '../selection/doc-selection-render.service';
@@ -103,6 +104,7 @@ function createActiveFloatMenuHarness(
     injector.add([ICommandService, { useClass: CommandService }]);
     injector.add([IUniverInstanceService, { useClass: UniverInstanceService }]);
     injector.add([DocSelectionManagerService]);
+    injector.add([DocLayoutInteractionService]);
     injector.add([DocCanvasPopManagerService, { useClass: RecordingDocCanvasPopManagerServiceCtor }]);
     injector.add([ComponentManager]);
     injector.add([DocSelectionRenderService, { useClass: ActiveDocSelectionRenderServiceCtor }]);
@@ -136,6 +138,7 @@ describe('DocFloatMenuService', () => {
         injector.add([ICommandService, { useClass: CommandService }]);
         injector.add([IUniverInstanceService, { useClass: UniverInstanceService }]);
         injector.add([DocSelectionManagerService]);
+        injector.add([DocLayoutInteractionService]);
         injector.add([DocCanvasPopManagerService, { useClass: InertDocCanvasPopManagerServiceCtor }]);
         injector.add([ComponentManager]);
         injector.add([DocSelectionRenderService, { useClass: InertDocSelectionRenderServiceCtor }]);
@@ -155,6 +158,7 @@ describe('DocFloatMenuService', () => {
         injector.add([ICommandService, { useClass: CommandService }]);
         injector.add([IUniverInstanceService, { useClass: UniverInstanceService }]);
         injector.add([DocSelectionManagerService]);
+        injector.add([DocLayoutInteractionService]);
         injector.add([DocCanvasPopManagerService, { useClass: RecordingDocCanvasPopManagerServiceCtor }]);
         injector.add([ComponentManager]);
         injector.add([DocSelectionRenderService, { useClass: ActiveDocSelectionRenderServiceCtor }]);
@@ -203,14 +207,17 @@ describe('DocFloatMenuService', () => {
         }, { unitId, subUnitId: unitId });
 
         const popupService = injector.get(DocCanvasPopManagerService) as unknown as RecordingDocCanvasPopManagerService;
+        const layoutInteractionService = injector.get(DocLayoutInteractionService);
         expect(popupService.ranges).toEqual(['0:5']);
         expect(popupService.offsets).toEqual([[0, 10]]);
         expect(service.floatMenu).toMatchObject({ start: 0, end: 5 });
+        expect(layoutInteractionService.isActive).toBe(true);
 
         const selectionRenderService = injector.get(DocSelectionRenderService) as unknown as ActiveDocSelectionRenderService;
         selectionRenderService.emitSelectionStart();
         expect(service.floatMenu).toBeNull();
         expect(popupService.disposedCount).toBe(1);
+        expect(layoutInteractionService.isActive).toBe(false);
     });
 
     it('hides the floating toolbar when document edit permission is revoked', () => {
@@ -260,6 +267,7 @@ describe('DocFloatMenuService', () => {
         injector.add([ICommandService, { useClass: CommandService }]);
         injector.add([IUniverInstanceService, { useClass: UniverInstanceService }]);
         injector.add([DocSelectionManagerService]);
+        injector.add([DocLayoutInteractionService]);
         injector.add([DocCanvasPopManagerService, { useClass: RecordingDocCanvasPopManagerServiceCtor }]);
         injector.add([ComponentManager]);
         injector.add([DocSelectionRenderService, { useClass: ActiveDocSelectionRenderServiceCtor }]);

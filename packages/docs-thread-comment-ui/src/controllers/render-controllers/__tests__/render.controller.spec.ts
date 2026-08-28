@@ -39,8 +39,8 @@ describe('DocThreadCommentRenderController', () => {
         const reRender = vi.fn();
         const docRenderController = { reRender };
 
-        const activeCommentId$ = new Subject<any>();
-        const hoveredCommentId$ = new Subject<any>();
+        const activeCommentId$ = new BehaviorSubject<any>(undefined);
+        const hoveredCommentId$ = new BehaviorSubject<any>(undefined);
         const threadCommentPanelService = {
             activeCommentId: { unitId: 'doc-1', subUnitId: DEFAULT_DOC_SUBUNIT_ID, commentId: 'c2' },
             activeCommentId$,
@@ -109,6 +109,7 @@ describe('DocThreadCommentRenderController', () => {
             themeService as any
         );
 
+        expect(reRender).not.toHaveBeenCalled();
         expect(threadCommentModel.addComment).not.toHaveBeenCalled();
 
         const next = (v: any) => v;

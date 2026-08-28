@@ -484,7 +484,8 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
         const snapshot = docDataModel.getSnapshot();
         const { drawings = {} } = snapshot;
         const isEditBody = viewModel.getEditArea() === DocumentEditArea.BODY;
-        const isDocInputFocusing = this._docSelectionRenderService.isFocusing;
+        const isDocInteractionFocusing = this._docSelectionRenderService.isFocusing
+            || this._drawingManagerService.getFocusDrawings().some((drawing) => drawing.unitId === unitId);
         const readOnlyDrawingIds = new Set<string>();
 
         for (const key of Object.keys(drawings)) {
@@ -503,10 +504,10 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
                     scene.detachTransformerFrom(shape);
                     this._setTransformerEditable(shape, editable);
                     try {
-                        (shape as Image).setOpacity(isDocInputFocusing ? 0.5 : 1);
+                        (shape as Image).setOpacity(isDocInteractionFocusing ? 0.5 : 1);
                     } catch {
                     }
-                    if (!isDocInputFocusing) {
+                    if (!isDocInteractionFocusing) {
                         continue;
                     }
                     if (

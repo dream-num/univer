@@ -65,6 +65,39 @@ interface IValidationContext {
     segmentId?: string;
 }
 
+interface IPairedTokenRanges {
+    pairs: Map<number, number>;
+    unmatchedEnds: number[];
+    unmatchedStarts: number[];
+}
+
+interface IDocumentStructuralTokenScan {
+    hasRootParagraph: boolean;
+    hasRootSectionBreak: boolean;
+    tableRanges: IPairedTokenRanges;
+    blockRanges: IPairedTokenRanges;
+    columnGroupRanges: IPairedTokenRanges;
+    customBlockIndexes: Set<number>;
+}
+
+const DOCUMENT_STRUCTURAL_TOKEN_PATTERN_SOURCE = `[${[
+    DataStreamTreeTokenType.PARAGRAPH,
+    DataStreamTreeTokenType.SECTION_BREAK,
+    DataStreamTreeTokenType.TABLE_START,
+    DataStreamTreeTokenType.TABLE_ROW_START,
+    DataStreamTreeTokenType.TABLE_CELL_START,
+    DataStreamTreeTokenType.TABLE_CELL_END,
+    DataStreamTreeTokenType.TABLE_ROW_END,
+    DataStreamTreeTokenType.TABLE_END,
+    DataStreamTreeTokenType.COLUMN_GROUP_START,
+    DataStreamTreeTokenType.COLUMN_START,
+    DataStreamTreeTokenType.COLUMN_END,
+    DataStreamTreeTokenType.COLUMN_GROUP_END,
+    DataStreamTreeTokenType.BLOCK_START,
+    DataStreamTreeTokenType.BLOCK_END,
+    DataStreamTreeTokenType.CUSTOM_BLOCK,
+].join('')}]`;
+
 function createIssue(
     context: IValidationContext,
     code: DocStructureIssueCode,
@@ -79,12 +112,12 @@ function createIssue(
     };
 }
 
-function validateMinimumRootSentinels(body: IDocumentBody, issues: IDocStructureIssue[], context: IValidationContext) {
-    if (!body.dataStream.includes(DataStreamTreeTokenType.PARAGRAPH)) {
+function validateMinimumRootSentinels(scan: IDocumentStructuralTokenScan, issues: IDocStructureIssue[], context: IValidationContext) {
+    if (!scan.hasRootParagraph) {
         issues.push(createIssue(context, 'missing-root-paragraph', 'Document body must contain at least one paragraph sentinel.'));
     }
 
-    if (!body.dataStream.includes(DataStreamTreeTokenType.SECTION_BREAK)) {
+    if (!scan.hasRootSectionBreak) {
         issues.push(createIssue(context, 'missing-root-section-break', 'Document body must contain at least one section break sentinel.'));
     }
 }
@@ -162,43 +195,85 @@ function validatePointMetadataDuplicates(
     }
 }
 
-function collectPairedTokenRanges(
-    dataStream: string,
-    startToken: string,
-    endToken: string,
-    exclusiveEnd: boolean
-) {
-    const pairs = new Map<number, number>();
-    const stack: number[] = [];
-    const unmatchedEnds: number[] = [];
-
-    for (let index = 0; index < dataStream.length; index++) {
-        if (dataStream[index] === startToken) {
-            stack.push(index);
-        } else if (dataStream[index] === endToken) {
-            const startIndex = stack.pop();
-            if (startIndex === undefined) {
-                unmatchedEnds.push(index);
-            } else {
-                pairs.set(startIndex, exclusiveEnd ? index + 1 : index);
-            }
+function sortStructuralRanges<T extends { startIndex: number; endIndex: number }>(ranges: readonly T[]): readonly T[] {
+    for (let index = 1; index < ranges.length; index++) {
+        const previous = ranges[index - 1];
+        const current = ranges[index];
+        if (
+            current.startIndex < previous.startIndex ||
+            (current.startIndex === previous.startIndex && current.endIndex < previous.endIndex)
+        ) {
+            return [...ranges].sort((left, right) =>
+                left.startIndex - right.startIndex || left.endIndex - right.endIndex
+            );
         }
     }
 
-    return { pairs, unmatchedEnds, unmatchedStarts: stack };
+    return ranges;
 }
 
-function validateTableMetadata(body: IDocumentBody, issues: IDocStructureIssue[], context: IValidationContext) {
-    const pairedTables = collectPairedTokenRanges(
-        body.dataStream,
-        DataStreamTreeTokenType.TABLE_START,
-        DataStreamTreeTokenType.TABLE_END,
-        true
-    ).pairs;
+function createPairedTokenRanges(): IPairedTokenRanges {
+    return {
+        pairs: new Map(),
+        unmatchedEnds: [],
+        unmatchedStarts: [],
+    };
+}
+
+function closeTokenRange(ranges: IPairedTokenRanges, index: number, exclusiveEnd: boolean): void {
+    const startIndex = ranges.unmatchedStarts.pop();
+    if (startIndex === undefined) {
+        ranges.unmatchedEnds.push(index);
+        return;
+    }
+
+    ranges.pairs.set(startIndex, exclusiveEnd ? index + 1 : index);
+}
+
+function scanDocumentStructuralTokens(dataStream: string): IDocumentStructuralTokenScan {
+    const scan: IDocumentStructuralTokenScan = {
+        hasRootParagraph: false,
+        hasRootSectionBreak: false,
+        tableRanges: createPairedTokenRanges(),
+        blockRanges: createPairedTokenRanges(),
+        columnGroupRanges: createPairedTokenRanges(),
+        customBlockIndexes: new Set(),
+    };
+
+    const tokenPattern = new RegExp(DOCUMENT_STRUCTURAL_TOKEN_PATTERN_SOURCE, 'g');
+    for (const match of dataStream.matchAll(tokenPattern)) {
+        const index = match.index;
+        const token = match[0];
+        if (token === DataStreamTreeTokenType.PARAGRAPH) {
+            scan.hasRootParagraph = true;
+        } else if (token === DataStreamTreeTokenType.SECTION_BREAK) {
+            scan.hasRootSectionBreak = true;
+        } else if (token === DataStreamTreeTokenType.TABLE_START) {
+            scan.tableRanges.unmatchedStarts.push(index);
+        } else if (token === DataStreamTreeTokenType.TABLE_END) {
+            closeTokenRange(scan.tableRanges, index, true);
+        } else if (token === DataStreamTreeTokenType.BLOCK_START) {
+            scan.blockRanges.unmatchedStarts.push(index);
+        } else if (token === DataStreamTreeTokenType.BLOCK_END) {
+            closeTokenRange(scan.blockRanges, index, false);
+        } else if (token === DataStreamTreeTokenType.COLUMN_GROUP_START) {
+            scan.columnGroupRanges.unmatchedStarts.push(index);
+        } else if (token === DataStreamTreeTokenType.COLUMN_GROUP_END) {
+            closeTokenRange(scan.columnGroupRanges, index, false);
+        } else if (token === DataStreamTreeTokenType.CUSTOM_BLOCK) {
+            scan.customBlockIndexes.add(index);
+        }
+    }
+
+    return scan;
+}
+
+function validateTableMetadata(body: IDocumentBody, scan: IDocumentStructuralTokenScan, issues: IDocStructureIssue[], context: IValidationContext) {
+    const pairedTables = scan.tableRanges.pairs;
     const metadataStarts = new Set<number>();
     let previousTable: ICustomTable | undefined;
 
-    const tables = [...(body.tables ?? [])].sort((a, b) => a.startIndex - b.startIndex || a.endIndex - b.endIndex);
+    const tables = sortStructuralRanges(body.tables ?? []);
     for (const table of tables) {
         metadataStarts.add(table.startIndex);
         if (!Number.isInteger(table.startIndex) || body.dataStream[table.startIndex] !== DataStreamTreeTokenType.TABLE_START) {
@@ -238,18 +313,13 @@ function validateTableMetadata(body: IDocumentBody, issues: IDocStructureIssue[]
     }
 }
 
-function validateBlockRangeMetadata(body: IDocumentBody, issues: IDocStructureIssue[], context: IValidationContext) {
-    const pairedBlocks = collectPairedTokenRanges(
-        body.dataStream,
-        DataStreamTreeTokenType.BLOCK_START,
-        DataStreamTreeTokenType.BLOCK_END,
-        false
-    );
+function validateBlockRangeMetadata(body: IDocumentBody, scan: IDocumentStructuralTokenScan, issues: IDocStructureIssue[], context: IValidationContext) {
+    const pairedBlocks = scan.blockRanges;
     for (const index of [...pairedBlocks.unmatchedStarts, ...pairedBlocks.unmatchedEnds]) {
         issues.push(createIssue(context, 'unbalanced-block', 'Block sentinel has no matching boundary.', index));
     }
 
-    const blockRanges = [...(body.blockRanges ?? [])].sort((a, b) => a.startIndex - b.startIndex || a.endIndex - b.endIndex);
+    const blockRanges = sortStructuralRanges(body.blockRanges ?? []);
     const metadataStarts = new Set<number>();
     let previousBlockRange: (typeof blockRanges)[number] | undefined;
     for (let i = 0; i < blockRanges.length; i++) {
@@ -285,15 +355,10 @@ function validateBlockRangeMetadata(body: IDocumentBody, issues: IDocStructureIs
     }
 }
 
-function validateColumnGroupMetadata(body: IDocumentBody, issues: IDocStructureIssue[], context: IValidationContext) {
-    const pairedColumnGroups = collectPairedTokenRanges(
-        body.dataStream,
-        DataStreamTreeTokenType.COLUMN_GROUP_START,
-        DataStreamTreeTokenType.COLUMN_GROUP_END,
-        false
-    ).pairs;
+function validateColumnGroupMetadata(body: IDocumentBody, scan: IDocumentStructuralTokenScan, issues: IDocStructureIssue[], context: IValidationContext) {
+    const pairedColumnGroups = scan.columnGroupRanges.pairs;
     const metadataStarts = new Set<number>();
-    const columnGroups = [...(body.columnGroups ?? [])].sort((a, b) => a.startIndex - b.startIndex || a.endIndex - b.endIndex);
+    const columnGroups = sortStructuralRanges(body.columnGroups ?? []);
     let previousColumnGroup: (typeof columnGroups)[number] | undefined;
 
     for (const columnGroup of columnGroups) {
@@ -341,9 +406,10 @@ function validateColumnGroupMetadata(body: IDocumentBody, issues: IDocStructureI
     }
 }
 
-function validateCustomBlockMetadata(body: IDocumentBody, issues: IDocStructureIssue[], context: IValidationContext) {
+function validateCustomBlockMetadata(body: IDocumentBody, scan: IDocumentStructuralTokenScan, issues: IDocStructureIssue[], context: IValidationContext) {
     const metadataCounts = new Map<number, number>();
-    for (const customBlock of body.customBlocks ?? []) {
+    const customBlocks = [...(body.customBlocks ?? []), ...(body.docxRawCustomBlocks ?? [])];
+    for (const customBlock of customBlocks) {
         const { startIndex } = customBlock;
         if (!Number.isInteger(startIndex) || body.dataStream[startIndex] !== DataStreamTreeTokenType.CUSTOM_BLOCK) {
             issues.push(createIssue(
@@ -364,8 +430,8 @@ function validateCustomBlockMetadata(body: IDocumentBody, issues: IDocStructureI
         duplicateMessage: 'Custom block sentinel must have exactly one custom block metadata entry.',
     }, issues);
 
-    for (let index = 0; index < body.dataStream.length; index++) {
-        if (body.dataStream[index] === DataStreamTreeTokenType.CUSTOM_BLOCK && !metadataCounts.has(index)) {
+    for (const index of scan.customBlockIndexes) {
+        if (!metadataCounts.has(index)) {
             issues.push(createIssue(
                 context,
                 'missing-custom-block-metadata',
@@ -383,8 +449,10 @@ function validateStructuralContainers(body: IDocumentBody, issues: IDocStructure
     const tableRowStack: number[] = [];
     const tableCellStack: Array<{ startIndex: number; hasParagraph: boolean; hasSectionBreak: boolean }> = [];
 
-    for (let i = 0; i < body.dataStream.length; i++) {
-        const char = body.dataStream[i];
+    const tokenPattern = new RegExp(DOCUMENT_STRUCTURAL_TOKEN_PATTERN_SOURCE, 'g');
+    for (const match of body.dataStream.matchAll(tokenPattern)) {
+        const i = match.index;
+        const char = match[0];
         const column = columnStack[columnStack.length - 1];
         const cell = tableCellStack[tableCellStack.length - 1];
 
@@ -467,14 +535,15 @@ export function validateDocBodyStructure(
     context: IValidationContext = { segmentType: 'body' }
 ): IDocStructureIssue[] {
     const issues: IDocStructureIssue[] = [];
+    const scan = scanDocumentStructuralTokens(body.dataStream);
 
-    validateMinimumRootSentinels(body, issues, context);
+    validateMinimumRootSentinels(scan, issues, context);
     validateParagraphMetadata(body, issues, context);
     validateSectionBreakMetadata(body, issues, context);
-    validateTableMetadata(body, issues, context);
-    validateBlockRangeMetadata(body, issues, context);
-    validateColumnGroupMetadata(body, issues, context);
-    validateCustomBlockMetadata(body, issues, context);
+    validateTableMetadata(body, scan, issues, context);
+    validateBlockRangeMetadata(body, scan, issues, context);
+    validateColumnGroupMetadata(body, scan, issues, context);
+    validateCustomBlockMetadata(body, scan, issues, context);
     validateStructuralContainers(body, issues, context);
 
     return issues;

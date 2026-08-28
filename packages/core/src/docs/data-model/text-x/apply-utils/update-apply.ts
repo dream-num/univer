@@ -33,6 +33,7 @@ import {
     deleteBlockRanges,
     deleteColumnGroups,
     deleteCustomBlocks,
+    deleteDocxRawCustomBlocks,
     deleteParagraphs,
     deleteSectionBreaks,
     deleteTables,
@@ -40,6 +41,7 @@ import {
     insertBlockRanges,
     insertColumnGroups,
     insertCustomBlocks,
+    insertDocxRawCustomBlocks,
     insertParagraphs,
     insertSectionBreaks,
     insertTables,
@@ -62,6 +64,7 @@ export function updateAttribute(
     const removeParagraphs = updateParagraphs(body, updateBody, textLength, currentIndex, coverType);
     const removeSectionBreaks = updateSectionBreaks(body, updateBody, textLength, currentIndex, coverType);
     const removeCustomBlocks = updateCustomBlocks(body, updateBody, textLength, currentIndex, coverType);
+    const removeDocxRawCustomBlocks = updateDocxRawCustomBlocks(body, updateBody, textLength, currentIndex, coverType);
     const removeTables = updateTables(body, updateBody, textLength, currentIndex, coverType);
     const removeColumnGroups = updateColumnGroups(body, updateBody, textLength, currentIndex, coverType);
     const removeBlockRanges = updateBlockRanges(body, updateBody, textLength, currentIndex, coverType);
@@ -74,6 +77,7 @@ export function updateAttribute(
         paragraphs: removeParagraphs,
         sectionBreaks: removeSectionBreaks,
         customBlocks: removeCustomBlocks,
+        docxRawCustomBlocks: removeDocxRawCustomBlocks,
         tables: removeTables,
         columnGroups: removeColumnGroups,
         blockRanges: removeBlockRanges,
@@ -390,7 +394,7 @@ function updateCustomBlocks(
         return;
     }
 
-    const removeCustomBlocks = deleteCustomBlocks(body, textLength, currentIndex);
+    const removeCustomBlocks = deleteCustomBlocks(body, textLength, currentIndex) ?? [];
     if (coverType !== UpdateDocsAttributeType.REPLACE) {
         const newUpdateCustomBlocks: ICustomBlock[] = [];
         for (const updateCustomBlock of updateDataCustomBlocks) {
@@ -422,6 +426,43 @@ function updateCustomBlocks(
 
     if (customBlocks.length && !body.customBlocks) {
         body.customBlocks = customBlocks;
+    }
+    return removeCustomBlocks;
+}
+
+function updateDocxRawCustomBlocks(
+    body: IDocumentBody,
+    updateBody: IDocumentBody,
+    textLength: number,
+    currentIndex: number,
+    coverType: UpdateDocsAttributeType
+) {
+    const customBlocks = body.docxRawCustomBlocks;
+    const updateDataCustomBlocks = updateBody.docxRawCustomBlocks;
+
+    if (customBlocks == null || updateDataCustomBlocks == null) {
+        return;
+    }
+
+    const removeCustomBlocks = deleteDocxRawCustomBlocks(body, textLength, currentIndex) ?? [];
+    if (coverType !== UpdateDocsAttributeType.REPLACE) {
+        const newUpdateCustomBlocks: ICustomBlock[] = [];
+        for (const updateCustomBlock of updateDataCustomBlocks) {
+            const removed = removeCustomBlocks.find((customBlock) =>
+                customBlock.startIndex === updateCustomBlock.startIndex
+            );
+            if (removed) {
+                newUpdateCustomBlocks.push(coverType === UpdateDocsAttributeType.COVER
+                    ? { ...removed, ...updateCustomBlock }
+                    : { ...updateCustomBlock, ...removed });
+            }
+        }
+        updateBody.docxRawCustomBlocks = newUpdateCustomBlocks;
+    }
+    insertDocxRawCustomBlocks(body, updateBody, textLength, currentIndex);
+
+    if (customBlocks.length && !body.docxRawCustomBlocks) {
+        body.docxRawCustomBlocks = customBlocks;
     }
     return removeCustomBlocks;
 }

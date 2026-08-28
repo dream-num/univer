@@ -2119,4 +2119,63 @@ describe('documents render', () => {
 
         documents.dispose();
     });
+
+    it('visits only viewport-adjacent lines when imported modern geometry keeps a finite page height', () => {
+        const bodyPage = createPage(DocumentSkeletonPageType.BODY, '');
+        bodyPage.pageHeight = 120;
+        bodyPage.height = 100_020;
+        bodyPage.skeTables.clear();
+        bodyPage.renderConfig.centerAngle = 0;
+        bodyPage.renderConfig.vertexAngle = 0;
+
+        const column = bodyPage.sections[0].columns[0];
+        const lines = Array.from({ length: 5_000 }, (_, index) => createLine(LineType.PARAGRAPH, index * 20));
+        for (const line of lines) {
+            line.parent = column;
+        }
+        let numericLineReads = 0;
+        column.lines = new Proxy(lines, {
+            get(target, property, receiver) {
+                if (typeof property === 'string' && /^\d+$/.test(property)) {
+                    numericLineReads++;
+                }
+                return Reflect.get(target, property, receiver);
+            },
+        });
+
+        const skeletonData = {
+            pages: [bodyPage],
+            skeHeaders: new Map(),
+            skeFooters: new Map(),
+        };
+        bodyPage.parent = skeletonData;
+
+        const documents = new Documents('docs-modern-viewport', {
+            getSkeletonData: () => skeletonData,
+            getViewModel: () => ({
+                getDataModel: () => ({ documentStyle: { documentFlavor: DocumentFlavor.MODERN } }),
+            }),
+        } as any, {
+            pageLayoutType: PageLayoutType.VERTICAL,
+            pageMarginLeft: 0,
+            pageMarginTop: 0,
+        });
+        const spanDraw = vi.fn();
+        vi.spyOn(documents as any, 'getExtensionsByOrder').mockReturnValue([{
+            uKey: 'DocsSpanExtension',
+            type: DOCS_EXTENSION_TYPE.SPAN,
+            extensionOffset: {},
+            clearCache: vi.fn(),
+            draw: spanDraw,
+        }] as any);
+
+        documents.draw(canvas.getContext(), {
+            viewBound: { left: 0, top: 50_000, right: 900, bottom: 50_100 },
+            cacheBound: { left: 0, top: 50_000, right: 900, bottom: 50_100 },
+        } as any);
+
+        expect(spanDraw).toHaveBeenCalled();
+        expect(numericLineReads).toBeLessThan(160);
+        documents.dispose();
+    });
 });

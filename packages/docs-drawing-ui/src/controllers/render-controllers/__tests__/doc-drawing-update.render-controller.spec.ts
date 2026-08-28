@@ -47,6 +47,11 @@ function createController(options: {
     const commandHandlers: Array<(command: { id: string; params?: Record<string, unknown> }) => void> = [];
     let editArea = options.editArea ?? DocumentEditArea.BODY;
     let isFocusing = options.isFocusing ?? true;
+    let focusDrawings: Array<{ unitId: string; subUnitId: string; drawingId: string }> = [];
+
+    focus$.subscribe((drawings) => {
+        focusDrawings = drawings ?? [];
+    });
 
     const transformer = {
         changeEnd$,
@@ -155,7 +160,7 @@ function createController(options: {
         update$,
         getDrawingByParam: vi.fn(({ drawingId }: { drawingId: string }) => options.drawings?.[drawingId]),
         focusDrawing: vi.fn(),
-        getFocusDrawings: vi.fn(() => []),
+        getFocusDrawings: vi.fn(() => focusDrawings),
     };
     const contextService = {
         setContextValue: vi.fn(),
@@ -567,6 +572,32 @@ describe('DocDrawingUpdateRenderController', () => {
 
         expect(getShape('body-drawing').setOpacity).toHaveBeenLastCalledWith(1);
         expect(getShape('header-drawing').setOpacity).toHaveBeenLastCalledWith(1);
+    });
+
+    it('keeps peer drawings interactive while a drawing owns focus', () => {
+        const {
+            focus$,
+            getShape,
+            scene,
+        } = createController({
+            drawings: {
+                'body-drawing': {
+                    drawingId: 'body-drawing',
+                    isMultiTransform: BooleanNumber.FALSE,
+                },
+                'peer-drawing': {
+                    drawingId: 'peer-drawing',
+                    isMultiTransform: BooleanNumber.FALSE,
+                },
+            },
+            isFocusing: false,
+        });
+
+        scene.attachTransformerTo.mockClear();
+        focus$.next([{ unitId: 'doc-1', subUnitId: 'doc-1', drawingId: 'body-drawing' }]);
+
+        expect(scene.attachTransformerTo).toHaveBeenCalledWith(getShape('body-drawing'));
+        expect(scene.attachTransformerTo).toHaveBeenCalledWith(getShape('peer-drawing'));
     });
 
     it('ignores rich text mutations from other document units', async () => {

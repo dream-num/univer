@@ -154,12 +154,14 @@ import { DocParagraphSettingController } from './controllers/doc-paragraph-setti
 import { DocSectionSettingController } from './controllers/doc-section-setting.controller';
 import { DocTableController } from './controllers/doc-table.controller';
 import { DocBackScrollRenderController } from './controllers/render-controllers/back-scroll.render-controller';
+import { DocCanvasPopupLayoutInteractionController } from './controllers/render-controllers/doc-canvas-popup-layout-interaction.controller';
 import { DocChecklistRenderController } from './controllers/render-controllers/doc-checklist.render-controller';
 import { DocClipboardController } from './controllers/render-controllers/doc-clipboard.controller';
 import { DocContextMenuRenderController } from './controllers/render-controllers/doc-contextmenu.render-controller';
 import { DocEditorBridgeController } from './controllers/render-controllers/doc-editor-bridge.controller';
 import { DocIMEInputController } from './controllers/render-controllers/doc-ime-input.controller';
 import { DocInputController } from './controllers/render-controllers/doc-input.controller';
+import { DocLayoutRecoveryRenderController } from './controllers/render-controllers/doc-layout-recovery.render-controller';
 import {
     DocParagraphPlaceholderRenderController,
 } from './controllers/render-controllers/doc-paragraph-placeholder.render-controller';
@@ -178,6 +180,7 @@ import { DocAutoFormatService } from './services/doc-auto-format.service';
 import { DocEventManagerService } from './services/doc-event-manager.service';
 import { DocIMEInputManagerService } from './services/doc-ime-input-manager.service';
 import { DocIMEStateChangeInterceptorService } from './services/doc-ime-state-change-interceptor.service';
+import { DocLayoutInteractionService } from './services/doc-layout-interaction.service';
 import { DocMenuStyleService, SetDocInputStyleCommand } from './services/doc-menu-style.service';
 import { DocPageLayoutService } from './services/doc-page-layout.service';
 import { DocParagraphMenuService } from './services/doc-paragraph-menu.service';
@@ -482,6 +485,8 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocInterceptorService],
             [DocViewScaleService],
             [DocPageLayoutService],
+            [DocLayoutInteractionService],
+            [DocCanvasPopupLayoutInteractionController],
             [DocIMEInputManagerService],
             [DocRenderController],
             [DocZoomRenderController],
@@ -505,6 +510,7 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocClipboardController],
             [DocInputController],
             [DocIMEInputController],
+            [DocLayoutRecoveryRenderController],
             [DocEditorBridgeController],
         ] as Dependency[]).forEach((m) => {
             this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, m);

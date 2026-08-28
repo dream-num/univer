@@ -516,6 +516,9 @@ function normalizeSelectionsForStructuralSentinels(
     const structuralSelections = insertBody == null
         ? expandFullyCoveredStructuralSelections(selections, body)
         : selections;
+    if (!structuralSelections.length) {
+        return selections;
+    }
 
     const insertOffset = structuralSelections[0].startOffset;
     const protectedOffsets = new Set<number>();

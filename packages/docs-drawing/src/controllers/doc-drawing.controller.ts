@@ -157,9 +157,14 @@ export class DocDrawingController extends Disposable {
                 order: drawingOrderModel,
             },
         };
+        const renderDrawingData: IDrawingMapItemData<IDocDrawing> = {};
+        for (const [drawingId, drawing] of Object.entries(drawingDataModels)) {
+            renderDrawingData[drawingId] = { ...drawing, hidden: true };
+        }
         const renderSubDrawings = {
             [subUnitId]: {
                 ...subDrawings[subUnitId],
+                data: renderDrawingData,
                 order: getDocDrawingRenderOrder(drawingOrderModel, drawingDataModels),
             },
         };

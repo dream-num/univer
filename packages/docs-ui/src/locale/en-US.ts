@@ -16,6 +16,9 @@
 
 const locale = {
     'docs-ui': {
+        layout: {
+            recovering: 'Restoring document layout…',
+        },
         toolbar: {
             font: 'Font',
             fontSize: 'Font size',

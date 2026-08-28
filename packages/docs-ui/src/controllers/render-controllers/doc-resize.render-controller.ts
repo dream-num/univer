@@ -22,6 +22,23 @@ import { animationFrameScheduler, observeOn, throttleTime } from 'rxjs';
 import { DocPageLayoutService } from '../../services/doc-page-layout.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 
+export function hasRenderableDocSkeleton(component: unknown): boolean {
+    if (typeof component !== 'object' || component == null ||
+        !('getSkeleton' in component) || typeof component.getSkeleton !== 'function') {
+        return false;
+    }
+
+    const skeleton = component.getSkeleton();
+    if (typeof skeleton !== 'object' || skeleton == null ||
+        !('getSkeletonData' in skeleton) || typeof skeleton.getSkeletonData !== 'function') {
+        return false;
+    }
+
+    const skeletonData = skeleton.getSkeletonData();
+    return typeof skeletonData === 'object' && skeletonData != null &&
+        'pages' in skeletonData && Array.isArray(skeletonData.pages) && skeletonData.pages.length > 0;
+}
+
 // REFACTOR: @JOCS, move to new-docs package.
 export class DocResizeRenderController extends Disposable implements IRenderModule {
     constructor(
@@ -55,6 +72,12 @@ export class DocResizeRenderController extends Disposable implements IRenderModu
 
     private _refreshLayoutAndSelection() {
         if (this._disposed) {
+            return;
+        }
+
+        // Keep the default document component offscreen until the first stable
+        // publication supplies real geometry, avoiding a left-aligned blank flash.
+        if (!hasRenderableDocSkeleton(this._context.mainComponent)) {
             return;
         }
 

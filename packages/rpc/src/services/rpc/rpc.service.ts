@@ -180,6 +180,7 @@ interface IRPCResponse {
 
 interface IResponseHandler {
     handle(response: IRPCResponse): void;
+    dispose(error: Error): void;
 }
 
 /**
@@ -199,7 +200,17 @@ export class ChannelClient extends RxDisposable implements IChannelClient {
     }
 
     override dispose(): void {
+        if (this._disposed) {
+            return;
+        }
+
+        const error = new Error('[ChannelClient]: client is disposed!');
+        this._initialized.error(error);
+        for (const responseHandler of this._pendingRequests.values()) {
+            responseHandler.dispose(error);
+        }
         this._pendingRequests.clear();
+        super.dispose();
     }
 
     getChannel<T extends IChannel>(channelName: string): T {
@@ -263,6 +274,9 @@ export class ChannelClient extends RxDisposable implements IChannelClient {
                             throw new Error('[ChannelClient]: unknown response type!');
                     }
                 },
+                dispose(error: Error) {
+                    reject(error);
+                },
             };
 
             this._pendingRequests.set(sequence, responseHandler);
@@ -294,6 +308,9 @@ export class ChannelClient extends RxDisposable implements IChannelClient {
                             default:
                                 throw new Error('[ChannelClient]: unknown response type!');
                         }
+                    },
+                    dispose(error: Error) {
+                        subscriber.error(error);
                     },
                 };
 
@@ -364,6 +381,9 @@ export class ChannelServer extends RxDisposable implements IChannelServer {
     override dispose(): void {
         super.dispose();
 
+        for (const subscription of this._subscriptions.values()) {
+            subscription.unsubscribe();
+        }
         this._subscriptions.clear();
         this._channels.clear();
     }

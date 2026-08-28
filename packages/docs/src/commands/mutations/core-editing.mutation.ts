@@ -14,14 +14,23 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IExecutionOptions, IMutation, IMutationCommonParams, JSONXActions, Nullable } from '@univerjs/core';
-import type { ITextRangeWithStyle } from '@univerjs/engine-render';
+import type { DocumentDataModel, IExecutionOptions, IMutation, IMutationCommonParams, JSONXActions, Nullable, TPriority } from '@univerjs/core';
+import type { DocumentViewModel, ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IDocStateChangeInfo } from '../../services/doc-state-emit.service';
-import { CommandType, IUniverInstanceService, JSONX, UniverInstanceType, validateDocBodyStructure } from '@univerjs/core';
+import {
+    CommandType,
+
+    IUniverInstanceService,
+    JSONX,
+
+    UniverInstanceType,
+} from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { DocSelectionManagerService } from '../../services/doc-selection-manager.service';
 import { DocSkeletonManagerService } from '../../services/doc-skeleton-manager.service';
 import { DocStateEmitService } from '../../services/doc-state-emit.service';
+import { RICH_TEXT_EDITING_MUTATION_ID } from './core-editing.mutation-id';
+import { validateDocStructureMutation } from './doc-structure-mutation-validation';
 
 export enum DocHistoryAction {
     DeleteChart = 'delete-chart',
@@ -55,41 +64,128 @@ export interface IRichTextEditingMutationParams extends IMutationCommonParams {
     syncer?: string;
 }
 
-const RichTextEditingMutationId = 'doc.mutation.rich-text-editing';
-
-function getSegmentType(documentDataModel: DocumentDataModel, segmentId: string) {
-    if (!segmentId) {
-        return 'body' as const;
+function extractDocumentBodyActions(actions: JSONXActions, segmentId: string): Nullable<JSONXActions> {
+    if (!Array.isArray(actions)) {
+        return;
+    }
+    const bodyActions = actions.indexOf('body') > -1
+        ? actions
+        : actions.find((action) => Array.isArray(action) && action.indexOf('body') > -1);
+    if (!Array.isArray(bodyActions)) {
+        return;
     }
 
-    const { headers, footers } = documentDataModel.getSnapshot();
-    if (headers?.[segmentId]) {
-        return 'header' as const;
+    const bodyIndex = bodyActions.indexOf('body');
+    if (bodyIndex === -1) {
+        return;
     }
-
-    if (footers?.[segmentId]) {
-        return 'footer' as const;
-    }
-
-    return 'body' as const;
+    const actionSegmentId = bodyIndex === 0 ? '' : bodyActions[bodyIndex - 1];
+    return actionSegmentId === segmentId ? bodyActions.slice(bodyIndex) : undefined;
 }
 
-function assertValidDocBodyStructure(documentDataModel: DocumentDataModel, segmentId: string) {
-    const segmentModel = documentDataModel.getSelfOrHeaderFooterModel(segmentId);
-    const body = segmentModel?.getBody();
-    if (!body) {
-        return;
+/**
+ * Transforms document selections through the same JSONX actions applied by a rich-text mutation.
+ * Collaboration and rendering use this shared offset rule so the Main interaction window follows
+ * the transformed local caret before an authoritative background layout is published.
+ */
+export function transformDocumentTextRanges(
+    actions: JSONXActions,
+    textRanges: ITextRangeWithStyle[],
+    priority: TPriority = 'right'
+): ITextRangeWithStyle[] {
+    if (textRanges.length === 0) {
+        return [];
     }
 
-    const segmentType = getSegmentType(documentDataModel, segmentId);
-    const issues = validateDocBodyStructure(body, { segmentType, segmentId: segmentId || undefined });
-    if (!issues.length) {
-        return;
+    const segmentId = textRanges[0].segmentId ?? '';
+
+    const bodyActions = extractDocumentBodyActions(actions, segmentId);
+    if (bodyActions == null) {
+        return textRanges;
     }
 
-    const detail = issues.map((issue) => `${issue.code}${issue.index == null ? '' : `@${issue.index}`}`).join(', ');
-    const segmentLabel = segmentId ? `${segmentType} ${segmentId}` : segmentType;
-    throw new Error(`[DocStructure] ${segmentLabel}: ${detail}`);
+    return textRanges.map((textRange) => {
+        const startOffset = JSONX.transformPosition(bodyActions, textRange.startOffset, priority);
+        const endOffset = JSONX.transformPosition(bodyActions, textRange.endOffset, priority);
+        return {
+            ...textRange,
+            startOffset,
+            endOffset,
+            collapsed: startOffset === endOffset,
+        };
+    });
+}
+
+function applyValidatedDocumentActions(
+    documentDataModel: DocumentDataModel,
+    segmentId: string,
+    actions: JSONXActions
+): { undoActions: JSONXActions; preservesStructure: boolean } {
+    const undoActions = JSONX.invertWithDoc(actions, documentDataModel.getSnapshot());
+    documentDataModel.apply(actions);
+    try {
+        return {
+            undoActions,
+            preservesStructure: validateDocStructureMutation(documentDataModel, segmentId, actions, undoActions),
+        };
+    } catch (error) {
+        documentDataModel.apply(undoActions);
+        throw error;
+    }
+}
+
+function resetDocumentViewModel(
+    documentViewModel: DocumentViewModel | null | undefined,
+    documentDataModel: DocumentDataModel,
+    segmentId: string,
+    actions: JSONXActions,
+    preservesStructure: boolean
+): void {
+    if (documentViewModel == null) {
+        return;
+    }
+    const didResetIncrementally = segmentId === '' && preservesStructure &&
+        documentViewModel.resetByValidatedTextMutation(documentDataModel, actions);
+    if (!didResetIncrementally) {
+        documentViewModel.reset(documentDataModel);
+    }
+}
+
+function scheduleDocumentSelectionUpdate(
+    selectionManager: DocSelectionManagerService,
+    params: IRichTextEditingMutationParams,
+    isSync: boolean
+): void {
+    const { unitId, textRanges, trigger, noNeedSetTextRange, isEditing = true } = params;
+    if (noNeedSetTextRange || textRanges == null || trigger == null || isSync) {
+        return;
+    }
+    queueMicrotask(() => {
+        const selectionTarget = { unitId, subUnitId: unitId };
+        const currentSelection = selectionManager.getSelectionInfo(selectionTarget);
+        if (currentSelection == null) {
+            selectionManager.replaceDocRanges(textRanges, selectionTarget, isEditing, params.options);
+            return;
+        }
+
+        const logicalTextRanges = textRanges.map((textRange, index) => ({
+            ...textRange,
+            collapsed: textRange.startOffset === textRange.endOffset,
+            isActive: index === textRanges.length - 1,
+        }));
+
+        // The logical range advances with the mutation even if its new physical
+        // page has not been published yet. Keeping that intent in the model lets
+        // the render layer retry the same caret after foreground pagination.
+        selectionManager.replaceSelectionInfoWithoutRefresh({
+            ...currentSelection,
+            textRanges: logicalTextRanges,
+            rectRanges: [],
+            isEditing,
+            options: params.options,
+        }, selectionTarget);
+        selectionManager.refreshSelection(selectionTarget, isEditing);
+    });
 }
 
 /**
@@ -97,11 +193,10 @@ function assertValidDocBodyStructure(documentDataModel: DocumentDataModel, segme
  * send to undo redo service (will be used by the triggering command).
  */
 export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, IRichTextEditingMutationParams> = {
-    id: RichTextEditingMutationId,
+    id: RICH_TEXT_EDITING_MUTATION_ID,
 
     type: CommandType.MUTATION,
 
-    // eslint-disable-next-line max-lines-per-function
     handler: (accessor, params, options?: IExecutionOptions) => {
         const {
             unitId,
@@ -112,13 +207,12 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
             trigger,
             noHistory,
             isCompositionEnd,
-            noNeedSetTextRange,
             debounce,
             isEditing = true,
             isSync: paramsIsSync,
             syncer,
         } = params;
-        const isSync = paramsIsSync || options?.fromCollab || options?.fromChangeset;
+        const isSync = Boolean(paramsIsSync || options?.fromCollab || options?.fromChangeset);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const renderManagerService = accessor.get(IRenderManagerService);
         const docStateEmitService = accessor.get(DocStateEmitService);
@@ -147,29 +241,18 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
             };
         }
 
-        // Step 1: Update Doc Data Model.
-        const undoActions = JSONX.invertWithDoc(actions, documentDataModel.getSnapshot());
-        documentDataModel.apply(actions);
-        try {
-            assertValidDocBodyStructure(documentDataModel, segmentId);
-        } catch (error) {
-            documentDataModel.apply(undoActions);
-            throw error;
-        }
+        const { undoActions, preservesStructure } = applyValidatedDocumentActions(
+            documentDataModel,
+            segmentId,
+            actions
+        );
 
-        // Step 2: Update Doc View Model.
-        documentViewModel?.reset(documentDataModel);
-        // Step 3: Update cursor & selection.
-        // Make sure update cursor & selection after doc skeleton is calculated.
-        if (!noNeedSetTextRange && textRanges && trigger != null && !isSync) {
-            queueMicrotask(() => {
-                docSelectionManagerService.replaceDocRanges(textRanges, { unitId, subUnitId: unitId }, isEditing, params.options);
-            });
-        }
+        resetDocumentViewModel(documentViewModel, documentDataModel, segmentId, actions, preservesStructure);
+        scheduleDocumentSelectionUpdate(docSelectionManagerService, params, isSync);
 
         // Step 4: Emit state change event.
         const changeState: IDocStateChangeInfo = {
-            commandId: RichTextEditingMutationId,
+            commandId: RICH_TEXT_EDITING_MUTATION_ID,
             unitId,
             segmentId,
             trigger,

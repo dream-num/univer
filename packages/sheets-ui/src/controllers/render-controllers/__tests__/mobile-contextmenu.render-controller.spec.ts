@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+// @vitest-environment jsdom
+
 import { RANGE_TYPE } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import {

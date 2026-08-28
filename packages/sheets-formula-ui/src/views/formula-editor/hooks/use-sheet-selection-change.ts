@@ -27,7 +27,6 @@ import {
     ICommandService,
     IContextService,
     IUniverInstanceService,
-    noop,
     Rectangle,
     ThemeService,
     UniverInstanceType,
@@ -263,7 +262,7 @@ export const useSheetSelectionChange = (
     isSupportAcrossSheet: boolean,
     listenSelectionSet: boolean,
     editor?: Editor,
-    handleRangeChange: ((refString: string, offset: number, isEnd: boolean, isModify?: boolean) => void) = noop as any,
+    handleRangeChange: ((refString: string, offset: number, isEnd: boolean, isModify?: boolean) => void) = () => {},
     allowMissingEditorFocus = false
 ) => {
     const renderManagerService = useDependency(IRenderManagerService);

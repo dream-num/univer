@@ -15,7 +15,7 @@
  */
 
 import type { ICellWithCoord, IRange, Nullable, Workbook } from '@univerjs/core';
-import type { IPointerEvent, IRenderContext, IRenderModule, Viewport } from '@univerjs/engine-render';
+import type { IRenderContext, IRenderModule, Viewport } from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import { Disposable, IContextService, Inject, Rectangle, toDisposable } from '@univerjs/core';
 import { IRenderManagerService, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
@@ -219,12 +219,8 @@ export class SheetContextMenuMobileRenderController extends Disposable implement
     }
 
     private _openMenu(clientX: number, clientY: number): void {
-        this._contextMenuService.triggerContextMenu({
-            clientX,
-            clientY,
-            preventDefault: () => {},
-            stopPropagation: () => {},
-        } as unknown as IPointerEvent, ContextMenuPosition.MAIN_AREA, { unitId: this._context.unitId });
+        const event = new MouseEvent('contextmenu', { clientX, clientY });
+        this._contextMenuService.triggerContextMenu(event, ContextMenuPosition.MAIN_AREA, { unitId: this._context.unitId });
     }
 
     private _handlePointerDown(contentElement: HTMLElement, state: ITapState, event: PointerEvent): void {

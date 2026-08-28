@@ -17,7 +17,7 @@
 import type { IDisposable, Nullable } from '@univerjs/core';
 import { Disposable, IContextService, Inject } from '@univerjs/core';
 import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
-import { IDialogService } from '@univerjs/ui';
+import { IDialogService, isMobileDialogService } from '@univerjs/ui';
 import { distinctUntilChanged, startWith } from 'rxjs';
 import { SHEETS_TABLE_FILTER_PANEL_OPENED_KEY, UNIVER_SHEET_TABLE_FILTER_PANEL_ID } from '../const';
 
@@ -97,6 +97,17 @@ export class SheetsTableComponentController extends Disposable {
         }
 
         const { row: startRow, column: col } = currentFilterModel;
+        if (isMobileDialogService(this._dialogService)) {
+            this._dialogService.open({
+                id: UNIVER_SHEET_TABLE_FILTER_PANEL_ID,
+                title: { title: 'sheets-table-ui.filter.by-values' },
+                children: { label: SHEETS_TABLE_FILTER_PANEL_OPENED_KEY },
+                onClose: () => {
+                    this._contextService.setContextValue(SHEETS_TABLE_FILTER_PANEL_OPENED_KEY, false);
+                },
+            });
+            return;
+        }
         this._popupDisposable = this._sheetCanvasPopupService.attachPopupToCell(startRow, col, {
             componentKey: SHEETS_TABLE_FILTER_PANEL_OPENED_KEY,
             direction: 'horizontal',
@@ -110,6 +121,7 @@ export class SheetsTableComponentController extends Disposable {
     }
 
     private _closeFilterPopup(): void {
+        this._dialogService.close(UNIVER_SHEET_TABLE_FILTER_PANEL_ID);
         this._popupDisposable?.dispose();
         this._popupDisposable = null;
         this.clearCurrentTableFilterInfo();

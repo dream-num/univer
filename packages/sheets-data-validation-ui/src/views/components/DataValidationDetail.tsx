@@ -417,7 +417,7 @@ function DataValidationDetailInner(props: { activeRuleInfo: { unitId: string; su
                 </Checkbox>
             </FormLayout>
             <DataValidationOptions value={options} onChange={handleUpdateRuleOptions} extraComponent={validator.optionsInput} />
-            <div className="univer-mt-5 univer-flex univer-flex-row univer-justify-end">
+            <div data-u-comp="mobile-actions" className="univer-mt-5 univer-flex univer-flex-row univer-justify-end">
                 <Button className="univer-ml-3" onClick={handleDelete}>
                     {localeService.t<LocaleKey>('sheets-data-validation-ui.panel.removeRule')}
                 </Button>

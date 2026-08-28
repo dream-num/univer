@@ -32,7 +32,7 @@ import {
     MoreDownIcon,
     TextWrapShapeIcon,
 } from '@univerjs/icons';
-import { IconManager, useDependency } from '@univerjs/ui';
+import { IconManager, IDialogService, isMobileDialogService, useDependency } from '@univerjs/ui';
 import { useState } from 'react';
 
 export interface IImagePopupMenuItem {
@@ -55,6 +55,7 @@ export interface IImagePopupMenuExtraProps {
     unitId?: string;
     subUnitId?: string;
     drawingId?: string;
+    dialogId?: string;
 }
 
 export interface IImagePopupMenuProps {
@@ -69,6 +70,7 @@ export function ImagePopupMenu(props: IImagePopupMenuProps) {
     const menuItems = popup?.extraProps?.menuItems;
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
+    const dialogService = useDependency(IDialogService);
     const [visible, setVisible] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
 
@@ -92,6 +94,36 @@ export function ImagePopupMenu(props: IImagePopupMenuProps) {
 
     if (popup.extraProps?.variant === 'doc-chart-floating-toolbar') {
         return <DocChartFloatingToolbar menuItems={menuItems} />;
+    }
+
+    if (isMobileDialogService(dialogService)) {
+        return (
+            <div className="univer-flex univer-flex-col univer-gap-2" data-u-comp="mobile-image-actions">
+                {menuItems.map((item) => (
+                    <button
+                        key={`${item.commandId}-${item.label}`}
+                        type="button"
+                        disabled={item.disable}
+                        className="
+                          univer-flex univer-h-12 univer-w-full univer-items-center univer-rounded-xl univer-border-0
+                          univer-bg-gray-100 univer-px-4 univer-text-left univer-text-base univer-text-gray-900
+                          active:univer-bg-gray-200
+                          disabled:univer-opacity-40
+                          dark:!univer-bg-gray-800 dark:!univer-text-gray-0
+                          dark:active:!univer-bg-gray-700
+                        "
+                        onClick={() => {
+                            commandService.executeCommand(item.commandId, item.commandParams);
+                            if (popup.extraProps?.dialogId) {
+                                dialogService.close(popup.extraProps.dialogId);
+                            }
+                        }}
+                    >
+                        {localeService.t(item.label as LocaleKey)}
+                    </button>
+                ))}
+            </div>
+        );
     }
 
     const handleMouseEnter = () => {

@@ -26,7 +26,7 @@ import {
     SheetsHyperLinkParserService,
 } from '@univerjs/sheets-hyper-link';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
-import { IMessageService, useDependency, useObservable } from '@univerjs/ui';
+import { IDialogService, IMessageService, isMobileDialogService, useDependency, useObservable } from '@univerjs/ui';
 import { OpenHyperLinkEditPanelOperation } from '../commands/operations/popup.operations';
 import { SheetsHyperLinkPopupService } from '../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../services/resolver.service';
@@ -59,6 +59,7 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
     const resolverService = useDependency(SheetsHyperLinkResolverService);
     const editorBridgeService = useDependency(IEditorBridgeService);
     const parserHyperLinkService = useDependency(SheetsHyperLinkParserService);
+    const dialogService = useDependency(IDialogService);
     const { customRange, row, col, unitId, subUnitId, editPermission, copyPermission, type } = props;
 
     if (!customRange?.properties?.url) {
@@ -66,6 +67,97 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
     }
     const linkObj = parserHyperLinkService.parseHyperLink(customRange.properties.url ?? '');
     const isError = linkObj.type === SheetHyperLinkType.INVALID;
+
+    if (isMobileDialogService(dialogService)) {
+        const rowClassName = `
+          univer-flex univer-h-12 univer-w-full univer-items-center univer-rounded-xl univer-border-0
+          univer-bg-gray-100 univer-px-4 univer-text-left univer-text-base univer-text-gray-900
+          active:univer-bg-gray-200
+          disabled:univer-opacity-40
+          dark:!univer-bg-gray-800 dark:!univer-text-gray-0 dark:active:!univer-bg-gray-700
+        `;
+        const close = () => popupService.hideCurrentPopup(undefined, true);
+        return (
+            <div className="univer-flex univer-flex-col univer-gap-2" data-u-comp="mobile-hyper-link-actions">
+                <button
+                    type="button"
+                    className={rowClassName}
+                    disabled={isError}
+                    onClick={() => {
+                        resolverService.navigate(linkObj);
+                        close();
+                    }}
+                >
+                    <span className="univer-truncate">{linkObj.name}</span>
+                </button>
+                {copyPermission && (
+                    <button
+                        type="button"
+                        className={rowClassName}
+                        disabled={isError}
+                        onClick={() => {
+                            if (linkObj.type !== SheetHyperLinkType.URL) {
+                                const url = new URL(window.location.href);
+                                url.hash = linkObj.url.slice(1);
+                                navigator.clipboard.writeText(url.href);
+                            } else {
+                                navigator.clipboard.writeText(linkObj.url);
+                            }
+                            messageService.show({
+                                content: localeService.t<LocaleKey>('sheets-hyper-link-ui.message.coped'),
+                                type: MessageType.Info,
+                            });
+                            close();
+                        }}
+                    >
+                        {localeService.t<LocaleKey>('sheets-hyper-link-ui.popup.copy')}
+                    </button>
+                )}
+                {editPermission && (
+                    <>
+                        <button
+                            type="button"
+                            className={rowClassName}
+                            onClick={() => {
+                                close();
+                                commandService.executeCommand(OpenHyperLinkEditPanelOperation.id, {
+                                    unitId,
+                                    subUnitId,
+                                    row,
+                                    col,
+                                    customRangeId: customRange.rangeId,
+                                    type,
+                                });
+                            }}
+                        >
+                            {localeService.t<LocaleKey>('sheets-hyper-link-ui.popup.edit')}
+                        </button>
+                        <button
+                            type="button"
+                            className={rowClassName}
+                            onClick={() => {
+                                const commandId = type === HyperLinkEditSourceType.EDITING
+                                    ? CancelRichHyperLinkCommand.id
+                                    : CancelHyperLinkCommand.id;
+                                if (commandService.syncExecuteCommand(commandId, {
+                                    unitId,
+                                    subUnitId,
+                                    id: customRange.rangeId,
+                                    row,
+                                    column: col,
+                                    documentId: editorBridgeService.getCurrentEditorId(),
+                                })) {
+                                    close();
+                                }
+                            }}
+                        >
+                            {localeService.t<LocaleKey>('sheets-hyper-link-ui.popup.cancel')}
+                        </button>
+                    </>
+                )}
+            </div>
+        );
+    }
 
     return (
         <div

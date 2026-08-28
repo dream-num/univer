@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import './global.css';
+import { describe, expect, it } from 'vitest';
+import { OpenValidationPanelOperation } from '../../commands/operations/data-validation.operation';
+import { openDataValidationMenuFactory } from '../dv.menu';
 
-export {
-    ShowAddSheetCommentModalOperation,
-    ToggleSheetCommentPanelOperation,
-} from './commands/operations/comment.operation';
-export type { IUniverSheetsThreadCommentUIConfig } from './config/config';
-export { menuSchema as SheetsThreadCommentUIMenuSchema } from './menu/schema';
-export { UniverSheetsThreadCommentMobileUIPlugin } from './mobile-plugin';
-export { UniverSheetsThreadCommentUIPlugin } from './plugin';
-export { SheetsThreadCommentPopupService } from './services/sheets-thread-comment-popup.service';
+describe('data validation menu', () => {
+    it('passes the empty parameter object required to open the manager', () => {
+        expect(openDataValidationMenuFactory()).toMatchObject({
+            id: OpenValidationPanelOperation.id,
+            params: {},
+        });
+    });
+});

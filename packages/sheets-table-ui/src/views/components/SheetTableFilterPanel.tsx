@@ -313,6 +313,7 @@ export function SheetTableFilterPanel() {
                 </div>
             </div>
             <div
+                data-u-comp="mobile-actions"
                 className={`
                   univer-flex-wrap-nowrap univer-mt-4 univer-inline-flex univer-flex-shrink-0 univer-flex-grow-0
                   univer-justify-between univer-gap-6 univer-overflow-hidden
@@ -324,7 +325,7 @@ export function SheetTableFilterPanel() {
                 >
                     {localeService.t<LocaleKey>('sheets-table-ui.filter.clear-filter')}
                 </Button>
-                <div className="univer-flex univer-gap-x-2">
+                <div data-u-comp="mobile-actions" className="univer-flex univer-flex-1 univer-gap-x-2">
                     <Button onClick={onCancel}>{localeService.t<LocaleKey>('sheets-table-ui.filter.cancel')}</Button>
                     <Button variant="primary" onClick={onApply}>{localeService.t<LocaleKey>('sheets-table-ui.filter.confirm')}</Button>
                 </div>

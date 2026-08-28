@@ -115,8 +115,10 @@ export function DataValidationList(props: { workbook: Workbook }) {
                     disable={rule.disable ?? false}
                 />
             ))}
-            <div className="univer-mt-4 univer-flex univer-flex-row univer-justify-end univer-gap-2">
-
+            <div
+                data-u-comp="mobile-actions"
+                className="univer-mt-4 univer-flex univer-flex-row univer-justify-end univer-gap-2"
+            >
                 {(rules.length && !hasDisableRule)
                     ? (
                         <Button onClick={handleRemoveAll}>

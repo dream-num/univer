@@ -52,7 +52,7 @@ import {
     UpdateRichHyperLinkCommand,
 } from '@univerjs/sheets-hyper-link';
 import { IEditorBridgeService, IMarkSelectionService, ScrollToRangeOperation } from '@univerjs/sheets-ui';
-import { KeyCode, useDependency, useEvent, useObservable } from '@univerjs/ui';
+import { IDialogService, isMobileDialogService, KeyCode, useDependency, useEvent, useObservable } from '@univerjs/ui';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CloseHyperLinkPopupOperation } from '../commands/operations/popup.operations';
 import { isLegalLink, serializeUrl } from '../common/util';
@@ -71,6 +71,8 @@ export const CellLinkEdit = () => {
     const [payload, setPayload] = useState('');
 
     const localeService = useDependency(LocaleService);
+    const dialogService = useDependency(IDialogService);
+    const mobile = isMobileDialogService(dialogService);
     const definedNameService = useDependency(IDefinedNamesService);
     const editorBridgeService = useDependency(IEditorBridgeService);
     const univerInstanceService = useDependency(IUniverInstanceService);
@@ -426,10 +428,15 @@ export const CellLinkEdit = () => {
 
     return (
         <div
-            className={clsx(`
-              univer-box-border univer-w-[296px] univer-rounded-xl univer-bg-gray-0 univer-p-4 univer-shadow-md
-              dark:!univer-bg-gray-900
-            `, borderClassName)}
+            className={clsx(
+                `
+                  univer-box-border univer-bg-gray-0
+                  dark:!univer-bg-gray-900
+                `,
+                mobile
+                    ? 'univer-w-full univer-p-0'
+                    : clsx('univer-w-[296px] univer-rounded-xl univer-p-4 univer-shadow-md', borderClassName)
+            )}
         >
             {showLabel
                 ? (
@@ -566,7 +573,13 @@ export const CellLinkEdit = () => {
                     setPayload={setPayload}
                 />
             )}
-            <div className="univer-flex univer-flex-row univer-justify-end univer-gap-2">
+            <div
+                data-u-comp={mobile ? 'mobile-actions' : undefined}
+                className={clsx(
+                    'univer-flex univer-flex-row univer-justify-end univer-gap-2',
+                    mobile && 'univer-mt-5 univer-w-full'
+                )}
+            >
                 <Button
                     onClick={() => {
                         if (editing) {

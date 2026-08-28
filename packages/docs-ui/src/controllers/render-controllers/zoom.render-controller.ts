@@ -38,8 +38,8 @@ import { DocPageSetupCommand } from '../../commands/commands/doc-page-setup.comm
 import { SetDocZoomRatioCommand } from '../../commands/commands/set-doc-zoom-ratio.command';
 import { SwitchDocModeCommand } from '../../commands/commands/switch-doc-mode.command';
 import { SetDocZoomRatioOperation } from '../../commands/operations/set-doc-zoom-ratio.operation';
-import { DocPageLayoutService } from '../../services/doc-page-layout.service';
 import { IDocEmbedInteractionBoundaryService } from '../../services/doc-embed-integration.service';
+import { DocPageLayoutService } from '../../services/doc-page-layout.service';
 import { DocViewScaleService } from '../../services/doc-view-scale';
 import { DEFAULT_MODERN_DOC_ZOOM_RATIO, getDocEffectiveZoomRatio } from '../../services/doc-zoom';
 import { IEditorService } from '../../services/editor/editor-manager.service';
@@ -144,6 +144,7 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
     updateViewZoom(zoomRatio: number, needRefreshSelection = true) {
         const docObject = neoGetDocObject(this._context);
         const viewScale = this._docViewScaleService.getViewScale(zoomRatio);
+        const viewScaleChanged = docObject.scene.scaleX !== viewScale || docObject.scene.scaleY !== viewScale;
         docObject.scene.scale(viewScale, viewScale);
 
         if (!this._editorService.isEditor(this._context.unitId)) {
@@ -158,7 +159,7 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
             this._textSelectionManagerService.refreshSelection();
         }
 
-        if (!isInternalEditorID(this._context.unitId)) {
+        if (needRefreshSelection && viewScaleChanged && !isInternalEditorID(this._context.unitId)) {
             docObject.scene.getTransformer()?.clearSelectedObjects();
         }
 

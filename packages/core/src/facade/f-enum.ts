@@ -40,6 +40,7 @@ import {
     LifecycleStages,
     LocaleType,
     MentionType,
+    NamedStyleType,
     NumberUnitType,
     PresetListType,
     ProtectionType,
@@ -241,6 +242,18 @@ export class FEnum {
      */
     get HorizontalAlign(): typeof HorizontalAlign {
         return HorizontalAlign;
+    }
+
+    /**
+     * Named paragraph style types
+     *
+     * @example
+     * ```ts
+     * console.log(univerAPI.Enum.NamedStyleType.HEADING_1);
+     * ```
+     */
+    get NamedStyleType(): typeof NamedStyleType {
+        return NamedStyleType;
     }
 
     /**

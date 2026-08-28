@@ -208,7 +208,11 @@ export {
 export { menuSchema as DocsUIMenuSchema } from './menu/schema';
 export { UniverDocsUIPlugin } from './plugin';
 export * from './services';
-export { IDocClipboardService } from './services/clipboard/clipboard.service';
+export {
+    convertClipboardHtmlToDocumentData,
+    IDocClipboardService,
+    removeClipboardHtmlImages,
+} from './services/clipboard/clipboard.service';
 export type {
     IDocClipboardCopyContentContext,
     IDocClipboardHook,
@@ -226,6 +230,7 @@ export type {
     IDocClipboardPasteMutationInfoParams,
     IDocClipboardPasteMutationInfos,
 } from './services/clipboard/doc-paste-mutation-adapter.service';
+export { convertClipboardRtfToPlainText } from './services/clipboard/rtf-to-plain-text';
 export { convertBodyToHtml } from './services/clipboard/udm-to-html/convertor';
 export { DocHtmlExportService } from './services/clipboard/udm-to-html/doc-html-export.service';
 export type { DocHtmlExportTransformer } from './services/clipboard/udm-to-html/doc-html-export.service';

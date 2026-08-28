@@ -16,7 +16,7 @@
 
 import type { IUniverSheetsThreadCommentUIConfig } from './config/config';
 import { DependentOn, ICommandService, IConfigService, Inject, Injector } from '@univerjs/core';
-import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
+import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment';
 import { UniverSheetsMobileUIPlugin } from '@univerjs/sheets-ui';
@@ -45,9 +45,10 @@ export class UniverSheetsThreadCommentMobileUIPlugin extends UniverSheetsThreadC
         config: Partial<IUniverSheetsThreadCommentUIConfig> = defaultPluginConfig,
         @Inject(Injector) injector: Injector,
         @Inject(ICommandService) commandService: ICommandService,
+        @IRenderManagerService renderManagerService: IRenderManagerService,
         @IConfigService configService: IConfigService
     ) {
-        super(config, injector, commandService, configService);
+        super(config, injector, commandService, renderManagerService, configService);
     }
 
     override onRendered(): void {

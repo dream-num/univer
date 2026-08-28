@@ -14,35 +14,17 @@
  * limitations under the License.
  */
 
-import type { ComponentProps, ComponentType } from 'react';
+import type { ComponentProps } from 'react';
 import type { IMenuSchema } from '../../../../services/menu/menu-manager.service';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { ILogService, Injector, LocaleService } from '@univerjs/core';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { DesktopLogService, ILogService, Injector, LocaleService } from '@univerjs/core';
+import { BehaviorSubject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ComponentManager, IconManager } from '../../../../common';
 import { MenuItemType } from '../../../../services/menu/menu';
-import { IMenuManagerService } from '../../../../services/menu/menu-manager.service';
-import { connectInjector } from '../../../../utils/di';
+import { IMenuManagerService, MenuManagerService } from '../../../../services/menu/menu-manager.service';
+import { RediProvider } from '../../../../utils/di';
 import { MobileMenu } from '../MobileMenu';
-
-class TestLocaleService {
-    t(key: string) {
-        return key;
-    }
-}
-
-class TestMenuManagerService {
-    readonly menuChanged$ = new Subject<void>();
-
-    getMenuByPositionKey() {
-        return [];
-    }
-}
-
-class TestLogService {
-    warn(): void {}
-}
 
 function renderWithDependencies(
     schemas: IMenuSchema[],
@@ -50,9 +32,9 @@ function renderWithDependencies(
     props?: Pick<ComponentProps<typeof MobileMenu>, 'showHeader' | 'onNavigationChange' | 'presentation'>
 ) {
     const injector = new Injector();
-    injector.add([LocaleService, { useClass: TestLocaleService as never }]);
-    injector.add([ILogService, { useClass: TestLogService as never }]);
-    injector.add([IMenuManagerService, { useClass: TestMenuManagerService as never }]);
+    injector.add([LocaleService]);
+    injector.add([ILogService, { useClass: DesktopLogService }]);
+    injector.add([IMenuManagerService, { useClass: MenuManagerService }]);
     injector.add([ComponentManager]);
     injector.add([IconManager]);
     injector.get(ComponentManager).register('interactive-test-label', () => <button type="button">Nested control</button>);
@@ -63,13 +45,17 @@ function renderWithDependencies(
     ));
     injector.get(ComponentManager).register('plain-custom-label', () => <span>Plain custom action</span>);
 
-    const ConnectedTestRoot = connectInjector(MobileMenu, injector) as ComponentType<ComponentProps<typeof MobileMenu>>;
-    const result = render(<ConnectedTestRoot schemas={schemas} onOptionSelect={onOptionSelect} {...props} />);
+    const renderMenu = (nextSchemas: IMenuSchema[]) => (
+        <RediProvider value={{ injector }}>
+            <MobileMenu schemas={nextSchemas} onOptionSelect={onOptionSelect} {...props} />
+        </RediProvider>
+    );
+    const result = render(renderMenu(schemas));
 
     return {
         ...result,
         rerenderWithSchemas(nextSchemas: IMenuSchema[]) {
-            result.rerender(<ConnectedTestRoot schemas={nextSchemas} onOptionSelect={onOptionSelect} {...props} />);
+            result.rerender(renderMenu(nextSchemas));
         },
     };
 }
@@ -263,10 +249,10 @@ describe('MobileMenu', () => {
 
         fireEvent.click(screen.getByRole('button', { name: 'Print' }));
         const child = screen.getByRole('button', { name: 'Print layout' });
-        expect((child as HTMLButtonElement).disabled).toBe(false);
+        expect(child.hasAttribute('disabled')).toBe(false);
 
         act(() => disabled$.next(true));
-        await waitFor(() => expect((child as HTMLButtonElement).disabled).toBe(true));
+        await waitFor(() => expect(child.hasAttribute('disabled')).toBe(true));
         fireEvent.click(child);
         expect(onOptionSelect).not.toHaveBeenCalled();
     });
@@ -291,10 +277,10 @@ describe('MobileMenu', () => {
         }], vi.fn());
 
         const insert = screen.getByRole('button', { name: 'Insert' });
-        await waitFor(() => expect((insert as HTMLButtonElement).disabled).toBe(true));
+        await waitFor(() => expect(insert.hasAttribute('disabled')).toBe(true));
 
         act(() => childHidden$.next(false));
-        await waitFor(() => expect((insert as HTMLButtonElement).disabled).toBe(false));
+        await waitFor(() => expect(insert.hasAttribute('disabled')).toBe(false));
     });
 
     it('keeps a button-selector action available beside its auxiliary submenu items', () => {

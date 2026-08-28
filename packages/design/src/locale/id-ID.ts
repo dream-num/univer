@@ -21,6 +21,7 @@ const locale: typeof enUS = {
         Accessibility: {
             closeBadge: 'Tutup lencana',
             close: 'Tutup',
+            menu: 'Menu',
             previous: 'Sebelumnya',
             next: 'Berikutnya',
             imageGallery: 'Galeri gambar',

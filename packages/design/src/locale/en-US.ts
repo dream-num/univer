@@ -19,6 +19,7 @@ const locale = {
         Accessibility: {
             closeBadge: 'Close badge',
             close: 'Close',
+            menu: 'Menu',
             previous: 'Previous',
             next: 'Next',
             imageGallery: 'Image gallery',

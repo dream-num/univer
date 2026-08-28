@@ -18,7 +18,6 @@ import type { Observable } from 'rxjs';
 import type { LocaleKey } from '../../../locale/types';
 import type {
     IDisplayMenuItem,
-    IMenuButtonItem,
     IMenuItem,
     IMenuSelectorItem,
     IValueOption,
@@ -49,7 +48,7 @@ type MobileMenuView =
         kind: 'options';
         title?: string;
         options: IValueOption[];
-        menuItem: IDisplayMenuItem<IMenuSelectorItem<string, MenuItemDefaultValueType, any>>;
+        menuItem: IDisplayMenuItem<IMenuSelectorItem<string, MenuItemDefaultValueType, unknown>>;
         menuKey: string;
         currentValue: MenuItemDefaultValueType;
         disabled$?: Observable<boolean>;
@@ -520,8 +519,6 @@ function MobileSchemaRow(props: {
     const { menuItem, activated, disabled, value, currentValueText, hasSubmenu, onPress } = interaction;
 
     if (typeof menuItem.label === 'object' && menuItem.label) {
-        const buttonItem = menuItem as IDisplayMenuItem<IMenuButtonItem<string, MenuItemDefaultValueType>>;
-
         return (
             <div
                 role="group"
@@ -538,8 +535,7 @@ function MobileSchemaRow(props: {
                 )}
                 data-u-command={menuItem.id}
                 onClick={(event) => {
-                    const target = event.target as HTMLElement;
-                    if (target.closest('button, input, select, textarea, [role="button"]')) {
+                    if (event.target instanceof Element && event.target.closest('button, input, select, textarea, [role="button"]')) {
                         return;
                     }
 
@@ -556,11 +552,11 @@ function MobileSchemaRow(props: {
                         }
 
                         onExecute?.({
-                            commandId: buttonItem.commandId,
+                            commandId: menuItem.commandId,
                             value: nextValue,
-                            id: buttonItem.id,
+                            id: menuItem.id,
                             label: schema.key,
-                            params: buttonItem.params,
+                            params: menuItem.params,
                         });
                     }}
                 />
@@ -633,7 +629,7 @@ function MobileSchemaRow(props: {
 function MobileSelectionOptionsView(props: {
     options: IValueOption[];
     menuKey: string;
-    menuItem: IDisplayMenuItem<IMenuSelectorItem<string, MenuItemDefaultValueType, any>>;
+    menuItem: IDisplayMenuItem<IMenuSelectorItem<string, MenuItemDefaultValueType, unknown>>;
     currentValue: MenuItemDefaultValueType;
     inheritedDisabled$?: Observable<boolean>;
     onExecute?: IBaseMenuProps['onOptionSelect'];
@@ -662,7 +658,7 @@ function MobileSelectionOptionsView(props: {
 function MobileSelectionOptionRow(props: {
     option: IValueOption;
     menuKey: string;
-    menuItem: IDisplayMenuItem<IMenuSelectorItem<string, MenuItemDefaultValueType, any>>;
+    menuItem: IDisplayMenuItem<IMenuSelectorItem<string, MenuItemDefaultValueType, unknown>>;
     currentValue: MenuItemDefaultValueType;
     disabled: boolean;
     bordered: boolean;
@@ -778,8 +774,8 @@ function useMobileSchemaInteraction(props: {
 }) {
     const { schema, menuManagerService, onOpenView, inheritedDisabled$ } = props;
     const localeService = useDependency(LocaleService);
-    const menuItem = schema.item as IDisplayMenuItem<IMenuItem> | undefined;
-    const selectorItem = menuItem as IDisplayMenuItem<IMenuSelectorItem<string, MenuItemDefaultValueType, any>> | undefined;
+    const menuItem = schema.item;
+    const selectorItem = menuItem?.type === MenuItemType.BUTTON ? undefined : menuItem;
     const disabled$ = useMemo(() => {
         const sources = [inheritedDisabled$, menuItem?.disabled$].filter((source): source is Observable<boolean> => Boolean(source));
         return sources.length
@@ -873,13 +869,12 @@ function useMobileSchemaInteraction(props: {
             return;
         }
 
-        const buttonItem = menuItem as IDisplayMenuItem<IMenuButtonItem<string, MenuItemDefaultValueType>>;
         onExecute?.({
-            commandId: buttonItem.commandId,
+            commandId: menuItem.commandId,
             value,
-            id: buttonItem.id,
+            id: menuItem.id,
             label: schema.key,
-            params: buttonItem.params,
+            params: menuItem.params,
         });
     };
 

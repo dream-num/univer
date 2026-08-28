@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type * as React from 'react';
+import type { AriaRole, MouseEvent, PointerEvent, ReactNode, TouchEvent } from 'react';
 import { clsx, resetButtonClassName, scrollbarClassName } from '@univerjs/design';
 import { useRef, useState } from 'react';
 
@@ -45,16 +45,16 @@ export function MobileDrawer(props: {
     collapseLabel: string;
     onSnapChange: (snap: MobileDrawerSnap) => void;
     onClose: () => void;
-    children?: React.ReactNode;
-    header?: React.ReactNode;
-    floatingActions?: React.ReactNode;
+    children?: ReactNode;
+    header?: ReactNode;
+    floatingActions?: ReactNode;
     componentName?: string;
     panelRef?: MobileDrawerRef<HTMLElement>;
     contentRef?: MobileDrawerRef<HTMLDivElement>;
     panelClassName?: string;
     contentClassName?: string;
-    footer?: React.ReactNode;
-    role?: React.AriaRole;
+    footer?: ReactNode;
+    role?: AriaRole;
     ariaLabel?: string;
 }) {
     const {
@@ -132,7 +132,7 @@ export function MobileDrawer(props: {
         }
     }
 
-    function handlePointerDown(event: React.PointerEvent<HTMLButtonElement>) {
+    function handlePointerDown(event: PointerEvent<HTMLButtonElement>) {
         try {
             event.currentTarget.setPointerCapture(event.pointerId);
         } catch {
@@ -141,20 +141,20 @@ export function MobileDrawer(props: {
         beginDrag(event.clientY);
     }
 
-    function handlePointerMove(event: React.PointerEvent<HTMLButtonElement>) {
+    function handlePointerMove(event: PointerEvent<HTMLButtonElement>) {
         moveDrag(event.clientY);
     }
 
-    function handlePointerUp(event: React.PointerEvent<HTMLButtonElement>) {
+    function handlePointerUp(event: PointerEvent<HTMLButtonElement>) {
         endDrag(event.clientY);
     }
 
-    function handleTouchStart(event: React.TouchEvent<HTMLButtonElement>) {
+    function handleTouchStart(event: TouchEvent<HTMLButtonElement>) {
         const touch = event.touches[0];
         if (touch) beginDrag(touch.clientY);
     }
 
-    function handleTouchMove(event: React.TouchEvent<HTMLButtonElement>) {
+    function handleTouchMove(event: TouchEvent<HTMLButtonElement>) {
         const touch = event.touches[0];
         if (!touch) return;
 
@@ -162,20 +162,20 @@ export function MobileDrawer(props: {
         moveDrag(touch.clientY);
     }
 
-    function handleTouchEnd(event: React.TouchEvent<HTMLButtonElement>) {
+    function handleTouchEnd(event: TouchEvent<HTMLButtonElement>) {
         const touch = event.changedTouches[0];
         if (touch) endDrag(touch.clientY);
     }
 
-    function handleMouseDown(event: React.MouseEvent<HTMLButtonElement>) {
+    function handleMouseDown(event: MouseEvent<HTMLButtonElement>) {
         beginDrag(event.clientY);
     }
 
-    function handleMouseMove(event: React.MouseEvent<HTMLButtonElement>) {
+    function handleMouseMove(event: MouseEvent<HTMLButtonElement>) {
         moveDrag(event.clientY);
     }
 
-    function handleMouseUp(event: React.MouseEvent<HTMLButtonElement>) {
+    function handleMouseUp(event: MouseEvent<HTMLButtonElement>) {
         endDrag(event.clientY);
     }
 

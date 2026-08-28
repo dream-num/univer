@@ -23,12 +23,12 @@ import { ComponentManager, IconManager } from '../../../../common';
 import enUS from '../../../../locale/en-US';
 import { DesktopDialogService } from '../../../../services/dialog/desktop-dialog.service';
 import { IDialogService } from '../../../../services/dialog/dialog.service';
-import { MobileDialogService } from '../../../../services/dialog/mobile-dialog.service';
+import { isMobileDialogService, MobileDialogService } from '../../../../services/dialog/mobile-dialog.service';
 import { IUIPartsService, UIPartsService } from '../../../../services/parts/parts.service';
 import { RediProvider } from '../../../../utils/di';
 import { MobileDialogPart } from '../MobileDialogPart';
 
-(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+Object.defineProperty(globalThis, 'IS_REACT_ACT_ENVIRONMENT', { configurable: true, value: true });
 
 function renderWithDependencies(element: ReactElement, mobileService = false) {
     const injector = new Injector();
@@ -133,7 +133,8 @@ describe('MobileDialogPart', () => {
 
     it('suspends mobile dialogs without unmounting their business state', () => {
         const rendered = renderWithDependencies(<MobileDialogPart />, true);
-        const dialogService = rendered.injector.get(IDialogService) as MobileDialogService;
+        const dialogService = rendered.injector.get(IDialogService);
+        if (!isMobileDialogService(dialogService)) throw new Error('Expected the mobile dialog service.');
 
         act(() => {
             dialogService.open({

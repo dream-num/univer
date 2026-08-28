@@ -15,8 +15,7 @@
  */
 
 import type { ICommandInfo, Workbook } from '@univerjs/core';
-import type { IPointerEvent } from '@univerjs/engine-render';
-import type { ISetWorksheetActiveOperationParams } from '@univerjs/sheets';
+import type { MouseEvent } from 'react';
 import type { LocaleKey } from '../../../locale/types';
 import type { IBaseSheetBarProps } from '../../sheet-bar/sheet-bar-tabs/SheetBarItem';
 import { ICommandService, LocaleService, nameCharacterCheck } from '@univerjs/core';
@@ -124,13 +123,11 @@ function MobileSheetBarImpl(props: { workbook: Workbook }) {
         commandService.executeCommand(SetWorksheetActiveOperation.id, {
             unitId: workbook.getUnitId(),
             subUnitId: sheetId,
-        } as ISetWorksheetActiveOperationParams);
+        });
     }, [commandService, workbook]);
 
-    const openSheetMenu = useCallback(() => {
-        contextMenuService.triggerContextMenu({
-            stopPropagation() {},
-        } as IPointerEvent, ContextMenuPosition.FOOTER_TABS, {
+    const openSheetMenu = useCallback((event: MouseEvent<HTMLButtonElement>) => {
+        contextMenuService.triggerContextMenu(event, ContextMenuPosition.FOOTER_TABS, {
             unitId: workbook.getUnitId(),
             subUnitId: workbook.getActiveSheet()?.getSheetId(),
         });
@@ -241,10 +238,7 @@ function MobileSheetBarImpl(props: { workbook: Workbook }) {
                                           dark:!univer-text-primary-400
                                           dark:active:!univer-bg-gray-600
                                         `)}
-                                        onClick={(event) => {
-                                            event.stopPropagation();
-                                            openSheetMenu();
-                                        }}
+                                        onClick={openSheetMenu}
                                     >
                                         <MoreDownIcon />
                                     </button>

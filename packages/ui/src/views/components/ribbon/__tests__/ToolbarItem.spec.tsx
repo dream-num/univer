@@ -165,7 +165,9 @@ describe('ToolbarItem', () => {
             />
         );
 
-        fireEvent.click(container.querySelector('[data-u-command="test-mobile-subitems"]') as HTMLElement);
+        const button = container.querySelector<HTMLElement>('[data-u-command="test-mobile-subitems"]');
+        if (!button) throw new Error('Expected the mobile subitems button to be rendered.');
+        fireEvent.click(button);
 
         expect(onOpenSubItems).toHaveBeenCalledOnce();
         expect(container.querySelector('.univer-toolbar-selector-root')).toBeNull();

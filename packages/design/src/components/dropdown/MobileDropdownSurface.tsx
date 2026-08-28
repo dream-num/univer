@@ -33,7 +33,7 @@ export function MobileDropdownSurface(props: {
     onOpenChange: (open: boolean) => void;
 }) {
     const { children, content, open, disabled, onOpenChange } = props;
-    const { mountContainer } = useContext(ConfigContext);
+    const { locale, mountContainer } = useContext(ConfigContext);
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange} modal>
@@ -71,7 +71,7 @@ export function MobileDropdownSurface(props: {
                       dark:!univer-bg-gray-600
                     "
                 />
-                <DialogTitle className="univer-sr-only">Menu</DialogTitle>
+                <DialogTitle className="univer-sr-only">{locale?.design.Accessibility.menu}</DialogTitle>
                 <DialogDescription className="univer-hidden" />
                 {content}
             </DialogContent>

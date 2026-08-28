@@ -370,7 +370,7 @@ describe('MobileStylePanel', () => {
             detailOptions: [{ label: 'General', value: null }, { label: 'Custom format', custom: true }],
             customPatterns: ['0.00'],
         };
-        const mergeChildren = [
+        const mergeChildren: Array<[string, string]> = [
             [AddWorksheetMergeAllCommand.id, 'Merge all'],
             [AddWorksheetMergeVerticalCommand.id, 'Merge vertical'],
             [AddWorksheetMergeHorizontalCommand.id, 'Merge horizontal'],
@@ -440,15 +440,15 @@ describe('MobileStylePanel', () => {
         ['Percent', 'Currency', 'Date', 'Text', 'Decrease decimal', 'Increase decimal', 'More formats']
             .forEach((title) => expect(getButton(rendered.container, title)).toBeTruthy());
 
-        const expectedCommands = [
+        const expectedCommands: Array<[string, { id: string; value?: string }]> = [
             ['Percent', { id: 'percent' }],
             ['Currency', { id: 'currency' }],
             ['Date', { id: 'set-pattern', value: 'yyyy-mm-dd' }],
             ['Text', { id: 'set-pattern', value: '@' }],
             ['Decrease decimal', { id: 'subtract-decimal' }],
             ['Increase decimal', { id: 'add-decimal' }],
-            ...mergeChildren.map(([id, title]) => [title, { id }]),
-        ] as Array<[string, { id: string; value?: string }]>;
+            ...mergeChildren.map(([id, title]): [string, { id: string }] => [title, { id }]),
+        ];
         expectedCommands.forEach(([label]) => clickButton(rendered.container, label));
         expect(onExecute.mock.calls.map(([command]) => command)).toEqual(expectedCommands.map(([, command]) => command));
         clickButton(rendered.container, 'More formats');
@@ -515,7 +515,7 @@ describe('MobileStylePanel', () => {
         clickButton(rendered.container, 'sheets-ui.mobile.customColor');
         expect(onExecute).toHaveBeenNthCalledWith(1, {
             id: SetBorderBasicCommand.id,
-            value: { ...borderValue, color: '#111111' },
+            value: borderValue,
         });
         expect(onExecute).toHaveBeenNthCalledWith(2, {
             id: SetBorderBasicCommand.id,

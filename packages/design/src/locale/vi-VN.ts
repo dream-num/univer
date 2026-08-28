@@ -21,6 +21,7 @@ const locale: typeof enUS = {
         Accessibility: {
             closeBadge: 'Đóng huy hiệu',
             close: 'Đóng',
+            menu: 'Trình đơn',
             previous: 'Trước',
             next: 'Tiếp theo',
             imageGallery: 'Thư viện ảnh',

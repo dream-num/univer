@@ -451,12 +451,13 @@ describe('FormulaBar', () => {
         root = rendered.root;
         container = rendered.container;
 
-        const expandButton = rendered.container.querySelector('[data-u-comp="formula-bar-expand"]');
+        const expandButton = rendered.container.querySelector<HTMLElement>('[data-u-comp="formula-bar-expand"]');
         const icon = expandButton?.querySelector('svg');
         expect(icon?.classList).toContain('univer-rotate-180');
         expect(icon?.classList).toContain('univer-size-5');
 
-        await clickElement(expandButton as HTMLElement);
+        if (!expandButton) throw new Error('Expected the formula bar expand button to be rendered.');
+        await clickElement(expandButton);
         expect(onExpandedChange).toHaveBeenCalledWith(true);
     });
 

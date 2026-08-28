@@ -104,6 +104,18 @@ export type MobileNumberFormatItem = IDisplayMenuItem<IMenuSelectorItem<string, 
     mobileStyle?: IMobileNumberFormatMenuConfig;
 };
 
+type ConfiguredMobileNumberFormatItem = MobileNumberFormatItem & {
+    mobileStyle: IMobileNumberFormatMenuConfig;
+};
+
+type MenuSchemaWithItem = IMenuSchema & {
+    item: IMenuItem;
+};
+
+type SelectorMenuSchema = IMenuSchema & {
+    item: IDisplayMenuItem<IMenuSelectorItem<string, MenuItemDefaultValueType, unknown>>;
+};
+
 export interface IMobileStyleCommand {
     id: string;
     value?: unknown;
@@ -276,26 +288,28 @@ function MobileStyleRoot(props: {
     return (
         <div className="univer-grid univer-gap-3">
             {groups.map((group) => {
-                const items = group.children?.filter((schema) => schema.item) ?? [];
+                const items = group.children?.filter(hasMenuItem) ?? [];
                 if (items.length === 0) return null;
-                const textStyleItems = items.filter((schema) => TEXT_STYLE_COMMANDS.has(schema.item!.id));
-                const inlineSelectorItems = items.filter((schema) => INLINE_SELECTOR_COMMANDS.has(schema.item!.id));
-                const navigationItems = items.filter((schema) => NAVIGATION_STYLE_COMMANDS.has(schema.item!.id));
-                const rotationSchema = items.find((schema) => schema.item!.id === SetTextRotationCommand.id);
-                const mergeSchema = items.find((schema) => schema.item!.id === AddWorksheetMergeCommand.id);
-                const numberFormatSchema = items.find((schema) =>
-                    (schema.item as MobileNumberFormatItem).mobileStyle?.kind === 'number-format');
-                const numberFormatConfig = (numberFormatSchema?.item as MobileNumberFormatItem | undefined)?.mobileStyle;
+                const textStyleItems = items.filter((schema) => TEXT_STYLE_COMMANDS.has(schema.item.id));
+                const inlineSelectorItems = items
+                    .filter(isMobileSelectorSchema)
+                    .filter((schema) => INLINE_SELECTOR_COMMANDS.has(schema.item.id));
+                const navigationItems = items.filter((schema) => NAVIGATION_STYLE_COMMANDS.has(schema.item.id));
+                const rotationSchema = items.find((schema): schema is SelectorMenuSchema =>
+                    schema.item.id === SetTextRotationCommand.id && isMobileSelectorItem(schema.item));
+                const mergeSchema = items.find((schema) => schema.item.id === AddWorksheetMergeCommand.id);
+                const numberFormatSchema = items.find(isMobileNumberFormatSchema);
+                const numberFormatConfig = numberFormatSchema?.item.mobileStyle;
                 const numberFormatCommandIds = new Set([
                     ...(numberFormatConfig?.quickOptions ?? []),
                     ...(numberFormatConfig?.decimalOptions ?? []),
                 ].map((option) => option.commandId));
                 const gridItems = items.filter((schema) =>
-                    !TEXT_STYLE_COMMANDS.has(schema.item!.id) &&
-                    !INLINE_SELECTOR_COMMANDS.has(schema.item!.id) &&
-                    !NAVIGATION_STYLE_COMMANDS.has(schema.item!.id) &&
-                    !SPECIAL_MOBILE_STYLE_COMMANDS.has(schema.item!.id) &&
-                    !numberFormatCommandIds.has(schema.item!.id) &&
+                    !TEXT_STYLE_COMMANDS.has(schema.item.id) &&
+                    !INLINE_SELECTOR_COMMANDS.has(schema.item.id) &&
+                    !NAVIGATION_STYLE_COMMANDS.has(schema.item.id) &&
+                    !SPECIAL_MOBILE_STYLE_COMMANDS.has(schema.item.id) &&
+                    !numberFormatCommandIds.has(schema.item.id) &&
                     schema !== numberFormatSchema
                 );
 
@@ -379,11 +393,11 @@ function MobileStyleRoot(props: {
 }
 
 function MobileRotationNavigation(props: {
-    schema: IMenuSchema;
+    schema: SelectorMenuSchema;
     onOpenView: (view: MobileStyleView) => void;
 }) {
     const { schema, onOpenView } = props;
-    const item = schema.item! as IDisplayMenuItem<IMenuSelectorItem<string, MenuItemDefaultValueType, unknown>>;
+    const item = schema.item;
     const localeService = useDependency(LocaleService);
     const status = useToolbarItemStatus(item);
     const selections = Array.isArray(item.selections) ? item.selections : [];
@@ -413,16 +427,16 @@ function MobileRotationNavigation(props: {
 }
 
 function MobileMergeGroup(props: {
-    schema: IMenuSchema;
+    schema: MenuSchemaWithItem;
     onExecute: (params: IMobileStyleCommand) => void;
 }) {
     const { schema, onExecute } = props;
-    const item = schema.item! as IDisplayMenuItem<IMenuItem>;
+    const item = schema.item;
     const localeService = useDependency(LocaleService);
     const status = useToolbarItemStatus(item);
     const titleKey = item.title ?? item.tooltip;
     const title = typeof titleKey === 'string' ? localeService.t(titleKey) : schema.key;
-    const children = schema.children?.filter((child) => child.item) ?? [];
+    const children = schema.children?.filter(hasMenuItem) ?? [];
 
     if (status.hidden || children.length === 0) return null;
 
@@ -452,12 +466,12 @@ function MobileMergeGroup(props: {
 }
 
 function MobileMergeOption(props: {
-    schema: IMenuSchema;
+    schema: MenuSchemaWithItem;
     parentDisabled: boolean;
     onExecute: (params: IMobileStyleCommand) => void;
 }) {
     const { schema, parentDisabled, onExecute } = props;
-    const item = schema.item! as IDisplayMenuItem<IMenuItem>;
+    const item = schema.item;
     const localeService = useDependency(LocaleService);
     const status = useToolbarItemStatus(item);
     const titleKey = item.title ?? item.tooltip;
@@ -487,13 +501,13 @@ function MobileMergeOption(props: {
 
 function MobileNumberFormatGroup(props: {
     schemas: IMenuSchema[];
-    schema: IMenuSchema;
+    schema: MenuSchemaWithItem & { item: ConfiguredMobileNumberFormatItem };
     onOpenView: (view: MobileStyleView) => void;
     onExecute: (params: IMobileStyleCommand) => void;
 }) {
     const { schemas, schema, onOpenView, onExecute } = props;
-    const item = schema.item! as MobileNumberFormatItem;
-    const config = item.mobileStyle!;
+    const item = schema.item;
+    const config = item.mobileStyle;
     const localeService = useDependency(LocaleService);
     const status = useToolbarItemStatus(item);
 
@@ -570,7 +584,7 @@ function MobileNumberFormatTabs(props: {
                     <MobileNumberFormatTab
                         key={`${option.commandId}-${option.label}`}
                         option={option}
-                        statusItem={(schema?.item as IDisplayMenuItem<IMenuItem> | undefined) ?? parentItem}
+                        statusItem={schema?.item ?? parentItem}
                         currentValue={currentValue}
                         onExecute={onExecute}
                     />
@@ -782,11 +796,11 @@ function getOptionLabel(localeService: LocaleService, option: IValueOption<strin
 }
 
 function MobileTextStyleItem(props: {
-    schema: IMenuSchema;
+    schema: MenuSchemaWithItem;
     onExecute: (params: IMobileStyleCommand) => void;
 }) {
     const { schema, onExecute } = props;
-    const item = schema.item! as IDisplayMenuItem<IMenuItem>;
+    const item = schema.item;
     const iconManager = useDependency(IconManager);
     const localeService = useDependency(LocaleService);
     const status = useToolbarItemStatus(item);
@@ -820,9 +834,9 @@ function MobileTextStyleItem(props: {
     );
 }
 
-function MobileInlineSelector(props: { schema: IMenuSchema; onExecute: (params: IMobileStyleCommand) => void }) {
+function MobileInlineSelector(props: { schema: SelectorMenuSchema; onExecute: (params: IMobileStyleCommand) => void }) {
     const { schema, onExecute } = props;
-    const item = schema.item! as IDisplayMenuItem<IMenuSelectorItem<string, MenuItemDefaultValueType, unknown>>;
+    const item = schema.item;
     const status = useToolbarItemStatus(item);
     const selections$ = useMemo(() => isObservable(item.selections) ? item.selections : undefined, [item.selections]);
     const observableSelections = useObservable(selections$);
@@ -900,12 +914,12 @@ function MobileInlineSelectorOption(props: {
 }
 
 function MobileStyleNavigationItem(props: {
-    schema: IMenuSchema;
+    schema: MenuSchemaWithItem;
     bordered: boolean;
     onOpenView: (view: MobileStyleView) => void;
 }) {
     const { schema, bordered, onOpenView } = props;
-    const item = schema.item! as IDisplayMenuItem<IMenuItem>;
+    const item = schema.item;
     const localeService = useDependency(LocaleService);
     const status = useToolbarItemStatus(item);
     const titleKey = item.title ?? item.tooltip;
@@ -927,9 +941,9 @@ function MobileStyleNavigationItem(props: {
     );
 }
 
-function MobileStyleRootItem(props: { schema: IMenuSchema; onOpenView: (view: MobileStyleView) => void }) {
+function MobileStyleRootItem(props: { schema: MenuSchemaWithItem; onOpenView: (view: MobileStyleView) => void }) {
     const { schema, onOpenView } = props;
-    const item = schema.item! as IDisplayMenuItem<IMenuItem>;
+    const item = schema.item;
     const localeService = useDependency(LocaleService);
     const iconManager = useDependency(IconManager);
     const status = useToolbarItemStatus(item);
@@ -952,8 +966,7 @@ function MobileStyleRootItem(props: { schema: IMenuSchema; onOpenView: (view: Mo
     if (
         !target &&
         !isBorder &&
-        (item.type === MenuItemType.SELECTOR || item.type === MenuItemType.BUTTON_SELECTOR) &&
-        ('selections' in item)
+        isMobileSelectorItem(item)
     ) {
         if (status.hidden) return null;
         return (
@@ -973,7 +986,7 @@ function MobileStyleRootItem(props: { schema: IMenuSchema; onOpenView: (view: Mo
                 onClick={() => onOpenView({
                     kind: 'options',
                     title,
-                    item: item as IDisplayMenuItem<IMenuSelectorItem<string, MenuItemDefaultValueType, unknown>>,
+                    item,
                 })}
             >
                 {Icon
@@ -1016,9 +1029,13 @@ function MobileStyleRootItem(props: { schema: IMenuSchema; onOpenView: (view: Mo
               dark:active:!univer-bg-gray-700
               [&>svg]:univer-size-4
             `)}
-            onClick={() => onOpenView(isBorder
-                ? { kind: 'border', title, item }
-                : { kind: 'color', target: target!, title, item })}
+            onClick={() => {
+                if (isBorder) {
+                    onOpenView({ kind: 'border', title, item });
+                } else if (target) {
+                    onOpenView({ kind: 'color', target, title, item });
+                }
+            }}
         >
             {Icon && <Icon />}
         </button>
@@ -1463,4 +1480,44 @@ function isBorderInfo(value: unknown): value is IBorderInfo {
         && typeof value.style === 'number'
         && 'activeBorderType' in value
         && typeof value.activeBorderType === 'boolean';
+}
+
+function hasMenuItem(schema: IMenuSchema): schema is MenuSchemaWithItem {
+    return schema.item !== undefined;
+}
+
+function isMobileSelectorItem(item: IMenuItem): item is SelectorMenuSchema['item'] {
+    return item.type !== MenuItemType.BUTTON;
+}
+
+function isMobileSelectorSchema(schema: MenuSchemaWithItem): schema is SelectorMenuSchema {
+    return isMobileSelectorItem(schema.item);
+}
+
+function isMobileNumberFormatSchema(
+    schema: MenuSchemaWithItem
+): schema is MenuSchemaWithItem & { item: ConfiguredMobileNumberFormatItem } {
+    if (!isMobileSelectorItem(schema.item) || !('mobileStyle' in schema.item)) return false;
+
+    const config = schema.item.mobileStyle;
+    if (!config || typeof config !== 'object') return false;
+
+    return 'kind' in config
+        && config.kind === 'number-format'
+        && 'title' in config
+        && typeof config.title === 'string'
+        && 'commandId' in config
+        && typeof config.commandId === 'string'
+        && 'detailTitle' in config
+        && typeof config.detailTitle === 'string'
+        && 'customTitle' in config
+        && typeof config.customTitle === 'string'
+        && 'quickOptions' in config
+        && Array.isArray(config.quickOptions)
+        && 'decimalOptions' in config
+        && Array.isArray(config.decimalOptions)
+        && 'detailOptions' in config
+        && Array.isArray(config.detailOptions)
+        && 'customPatterns' in config
+        && Array.isArray(config.customPatterns);
 }

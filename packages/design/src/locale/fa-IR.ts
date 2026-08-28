@@ -21,6 +21,7 @@ const locale: typeof enUS = {
         Accessibility: {
             closeBadge: 'بستن نشان',
             close: 'بستن',
+            menu: 'منو',
             previous: 'قبلی',
             next: 'بعدی',
             imageGallery: 'گالری تصاویر',

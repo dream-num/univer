@@ -55,23 +55,7 @@ describe('useEditor', () => {
         expect(snapshot.body?.paragraphs?.map((paragraph) => paragraph.startIndex)).toEqual([2]);
     });
 
-    it('registers an editor that preserves its host focus', () => {
-        getEditor.mockReturnValue(editor);
-
-        useEditor({
-            editorId: 'range-editor',
-            initialValue: 'A1',
-            container: { current: { clientWidth: 320 } } as RefObject<HTMLDivElement>,
-            preserveHostFocus: true,
-        });
-
-        expect(register).toHaveBeenLastCalledWith(
-            expect.objectContaining({ preserveHostFocus: true }),
-            expect.anything()
-        );
-    });
-
-    it('registers an editor with its canvas style', () => {
+    it('registers an editor with its host focus and canvas style', () => {
         getEditor.mockReturnValue(editor);
         const canvasStyle = { backgroundColor: '#000000' };
 
@@ -79,11 +63,12 @@ describe('useEditor', () => {
             editorId: 'range-editor',
             initialValue: 'A1',
             container: { current: { clientWidth: 320 } } as RefObject<HTMLDivElement>,
+            preserveHostFocus: true,
             canvasStyle,
         });
 
         expect(register).toHaveBeenLastCalledWith(
-            expect.objectContaining({ canvasStyle }),
+            expect.objectContaining({ canvasStyle, preserveHostFocus: true }),
             expect.anything()
         );
     });

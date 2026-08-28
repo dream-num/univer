@@ -99,27 +99,6 @@ const MOBILE_FORMULA_OPERATORS = [
 
 const MIN_EDITOR_TEXT_CONTRAST = 4.5;
 
-function resolveMobileEditorBackground(
-    backgroundColor: string | null | undefined,
-    textColor: string | null | undefined,
-    lightBackground: string | null | undefined,
-    darkBackground: string | null | undefined
-): string | undefined {
-    const background = backgroundColor ?? lightBackground ?? undefined;
-    if (!background || !textColor || !lightBackground || !darkBackground
-        || !new ColorKit(textColor).isValid || !new ColorKit(background).isValid) {
-        return background;
-    }
-
-    if (ColorKit.getContrastRatio(textColor, background) >= MIN_EDITOR_TEXT_CONTRAST) {
-        return background;
-    }
-
-    return ColorKit.getContrastRatio(textColor, darkBackground) >= ColorKit.getContrastRatio(textColor, lightBackground)
-        ? darkBackground
-        : lightBackground;
-}
-
 export function FormulaBar(props: IProps) {
     const { className, disableDefinedName, expanded = false, mobile = false, onExpandedChange } = props;
     const editorBridgeService = useDependency(IEditorBridgeService);
@@ -161,6 +140,26 @@ export function FormulaBar(props: IProps) {
     const contextService = useDependency(IContextService);
     const themeService = useDependency(ThemeService);
     useObservable(() => themeService.currentTheme$, undefined, false, [themeService]);
+    function resolveEditorBackground(
+        backgroundColor: string | null | undefined,
+        textColor: string | null | undefined,
+        lightBackground: string | null | undefined,
+        darkBackground: string | null | undefined
+    ): string | undefined {
+        const background = backgroundColor ?? lightBackground ?? undefined;
+        if (!background || !textColor || !lightBackground || !darkBackground
+            || !new ColorKit(textColor).isValid || !new ColorKit(background).isValid) {
+            return background;
+        }
+
+        if (ColorKit.getContrastRatio(textColor, background) >= MIN_EDITOR_TEXT_CONTRAST) {
+            return background;
+        }
+
+        return ColorKit.getContrastRatio(textColor, darkBackground) >= ColorKit.getContrastRatio(textColor, lightBackground)
+            ? darkBackground
+            : lightBackground;
+    }
     const isFocusFxBar = useObservable(
         useMemo(() => contextService.subscribeContextValue$(FOCUSING_FX_BAR_EDITOR), [contextService]),
         contextService.getContextValue(FOCUSING_FX_BAR_EDITOR)
@@ -400,7 +399,7 @@ export function FormulaBar(props: IProps) {
         ?? darkEditorBackground;
     const cellBackground = cellStyle?.bg?.rgb ?? undefined;
     const editorBackground = mobile
-        ? resolveMobileEditorBackground(
+        ? resolveEditorBackground(
             cellBackground,
             editorTextColor,
             lightEditorBackground,

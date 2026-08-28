@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ReactNode } from 'react';
+import type { Attributes, ReactNode } from 'react';
 import type { LocaleKey } from '../../../locale/types';
 import type { ICustomLabelProps } from '../../custom-label/CustomLabel';
 import type { MobileDrawerSnap } from '../mobile-drawer/MobileDrawer';
@@ -27,11 +27,13 @@ import { useDependency, useObservable } from '../../../utils/di';
 import { CustomLabel } from '../../custom-label/CustomLabel';
 import { MobileDrawer } from '../mobile-drawer/MobileDrawer';
 
+type SidebarCustomLabelProps = ICustomLabelProps & Attributes;
+
 export interface ISidebarMethodOptions {
     id?: string;
-    header?: ICustomLabelProps;
-    children?: ICustomLabelProps;
-    footer?: ICustomLabelProps;
+    header?: SidebarCustomLabelProps;
+    children?: SidebarCustomLabelProps;
+    footer?: SidebarCustomLabelProps;
 
     visible?: boolean;
 
@@ -298,19 +300,20 @@ export function MobileSidebar() {
     const options = useMemo(() => {
         if (!sidebarOptions) return null;
 
-        const copy = { ...sidebarOptions } as Omit<ISidebarMethodOptions, 'children'> & {
-            children?: ReactNode;
-            header?: ReactNode;
-            footer?: ReactNode;
+        const { children, header, footer, ...rest } = sidebarOptions;
+        const renderLabel = (label?: SidebarCustomLabelProps) => {
+            if (!label) return undefined;
+
+            const { key, ...props } = label;
+            return <CustomLabel key={key} {...props} />;
         };
-        for (const key of ['children', 'header', 'footer'] as const) {
-            const label = sidebarOptions[key];
-            if (label) {
-                const { key: itemKey, ...props } = label as any;
-                copy[key] = <CustomLabel key={itemKey} {...props} />;
-            }
-        }
-        return copy;
+
+        return {
+            ...rest,
+            children: renderLabel(children),
+            header: renderLabel(header),
+            footer: renderLabel(footer),
+        };
     }, [sidebarOptions]);
 
     useEffect(() => {

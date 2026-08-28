@@ -31,6 +31,14 @@ import '@testing-library/jest-dom/vitest';
 
 afterEach(cleanup);
 
+function getMoreColorButton(container: HTMLElement): HTMLButtonElement {
+    const button = Array.from(
+        container.querySelectorAll<HTMLButtonElement>('[data-u-comp="color-picker"] button')
+    ).at(-1);
+    if (!button) throw new Error('More color button was not rendered.');
+    return button;
+}
+
 describe('ColorPicker', () => {
     it('should not contain duplicate preset colors', () => {
         const flattenedPresets = colorPresets.flat().map((color) => color.toUpperCase());
@@ -84,11 +92,8 @@ describe('ColorPicker', () => {
                 <ColorPicker />
             </ConfigProvider>
         );
-        const moreLink = Array.from(container.querySelectorAll('a')).find((a) => a.textContent?.includes('更多') || a.textContent?.toLowerCase().includes('more'));
-        if (moreLink) {
-            fireEvent.click(moreLink);
-            expect(document.body.innerHTML).toContain('univer-grid univer-w-64 univer-gap-2');
-        }
+        fireEvent.click(getMoreColorButton(container));
+        expect(document.body.innerHTML).toContain('univer-grid univer-w-64 univer-gap-2');
     });
 
     it('should place custom color dialog above parent popovers', () => {
@@ -114,22 +119,19 @@ describe('ColorPicker', () => {
     it('should call onChange when rgb input changes in dialog', () => {
         const handleChange = vi.fn();
         const { container } = render(<ColorPicker onChange={handleChange} />);
-        const moreLink = Array.from(container.querySelectorAll('a')).find((a) => a.textContent?.includes('更多') || a.textContent?.toLowerCase().includes('more'));
-        if (moreLink) {
-            moreLink.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-            const rgbInputs = Array.from(document.querySelectorAll('input')).filter((input) => input.maxLength === 3) as HTMLInputElement[];
-            if (rgbInputs.length === 3) {
-                rgbInputs[0].value = '1';
-                rgbInputs[0].dispatchEvent(new Event('input', { bubbles: true }));
-                rgbInputs[1].value = '2';
-                rgbInputs[1].dispatchEvent(new Event('input', { bubbles: true }));
-                rgbInputs[2].value = '3';
-                rgbInputs[2].dispatchEvent(new Event('input', { bubbles: true }));
-                const confirmBtn = Array.from(document.querySelectorAll('button')).find((btn) => btn.textContent?.includes('确定') || btn.textContent?.toLowerCase().includes('confirm'));
-                if (confirmBtn) {
-                    confirmBtn.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-                    expect(handleChange).toHaveBeenCalled();
-                }
+        getMoreColorButton(container).dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        const rgbInputs = Array.from(document.querySelectorAll('input')).filter((input) => input.maxLength === 3) as HTMLInputElement[];
+        if (rgbInputs.length === 3) {
+            rgbInputs[0].value = '1';
+            rgbInputs[0].dispatchEvent(new Event('input', { bubbles: true }));
+            rgbInputs[1].value = '2';
+            rgbInputs[1].dispatchEvent(new Event('input', { bubbles: true }));
+            rgbInputs[2].value = '3';
+            rgbInputs[2].dispatchEvent(new Event('input', { bubbles: true }));
+            const confirmBtn = Array.from(document.querySelectorAll('button')).find((btn) => btn.textContent?.includes('确定') || btn.textContent?.toLowerCase().includes('confirm'));
+            if (confirmBtn) {
+                confirmBtn.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+                expect(handleChange).toHaveBeenCalled();
             }
         }
     });

@@ -20,11 +20,11 @@ import { RANGE_TYPE } from '@univerjs/core';
 import { SelectionMoveType, SheetsSelectionsService } from '@univerjs/sheets';
 import { ContextMenuService, DesktopLayoutService, IContextMenuService, ILayoutService } from '@univerjs/ui';
 import { describe, expect, it, vi } from 'vitest';
+import { createRenderTestBed } from '../../__tests__/render-test-bed';
 import {
     SheetContextMenuMobileRenderController,
     shouldKeepCurrentSelectionForMobileContextMenu,
-} from '../mobile/mobile-contextmenu.render-controller';
-import { createRenderTestBed } from './render-test-bed';
+} from '../mobile-contextmenu.render-controller';
 
 function createEventSubject() {
     const listeners: Array<() => void> = [];

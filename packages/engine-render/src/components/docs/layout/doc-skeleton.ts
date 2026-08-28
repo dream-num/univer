@@ -2565,17 +2565,19 @@ export class DocumentSkeleton extends Skeleton {
             if (
                 mainBoundaryLine == null ||
                 mainBoundaryLine.st !== workerBoundaryLine.st ||
-                mainBoundaryLine.ed !== workerBoundaryLine.ed ||
-                mainBoundaryLine.lineHeight !== workerBoundaryLine.lineHeight ||
-                mainBoundaryLine.width !== workerBoundaryLine.width
+                mainBoundaryLine.ed !== workerBoundaryLine.ed
             ) {
                 throw new Error(`Continuous layout Main and Worker boundaries do not share the same continuation checkpoint: Main ${mainBoundaryLine?.st}:${mainBoundaryLine?.ed}@${mainBoundaryLine?.top}/${mainBoundaryLine?.lineHeight}/${mainBoundaryLine?.width}, Worker ${workerBoundaryLine.st}:${workerBoundaryLine.ed}@${workerBoundaryLine.top}/${workerBoundaryLine.lineHeight}/${workerBoundaryLine.width}.`);
             }
-            if (mainBoundaryLine.top !== workerBoundaryLine.top) {
-                // A Custom Block can finish measuring after Main publishes the
-                // interaction window but before Worker captures its viewport.
-                // The continuation identity still matches, while every absolute
-                // coordinate after it belongs to a different vertical geometry.
+            if (
+                mainBoundaryLine.top !== workerBoundaryLine.top ||
+                mainBoundaryLine.lineHeight !== workerBoundaryLine.lineHeight ||
+                mainBoundaryLine.width !== workerBoundaryLine.width
+            ) {
+                // A Custom Block, font, or host viewport can finish measuring
+                // after Main publishes the interaction window but before Worker
+                // captures its geometry. The continuation identity still matches,
+                // while every coordinate after it belongs to a different layout.
                 // Keep Main visible and commit the canonical Worker result only
                 // after completion instead of translating a partial collection of
                 // lines, tables, drawings, and column groups independently.

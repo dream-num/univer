@@ -1530,7 +1530,7 @@ describe('worker document layout session', () => {
             },
         });
         let probeResult = session.step(probeGeneration, 0);
-        let deferredVerticalBoundaryMismatch = false;
+        let deferredBoundaryGeometryMismatch = false;
         for (let step = 0; step < 1_000 && !probeResult.progress.complete; step++) {
             const publication = probeResult.publication;
             if (publication?.kind === 'block') {
@@ -1541,17 +1541,19 @@ describe('worker document layout session', () => {
                 const workerBoundaryLine = transferredPublication.block.flow.lines[firstUnprotectedLineIndex - 1];
                 if (workerBoundaryLine != null) {
                     workerBoundaryLine.top += 1;
+                    workerBoundaryLine.lineHeight += 1;
+                    workerBoundaryLine.width = (workerBoundaryLine.width ?? 0) + 1;
                     expect(() => targetSkeleton.applyLayoutPublication(
                         transferredPublication,
                         probeResult.progress
                     )).not.toThrow();
-                    deferredVerticalBoundaryMismatch = true;
+                    deferredBoundaryGeometryMismatch = true;
                     break;
                 }
             }
             probeResult = session.step(probeGeneration, 0);
         }
-        expect(deferredVerticalBoundaryMismatch).toBe(true);
+        expect(deferredBoundaryGeometryMismatch).toBe(true);
         expect(targetSkeleton.getSkeletonData()?.pages[0]).toBe(protectedContinuousPage);
         targetSkeleton.cancelExternalLayout();
 

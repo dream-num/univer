@@ -28,7 +28,7 @@ import { IUIPartsService, UIPartsService } from '../../../../services/parts/part
 import { RediProvider } from '../../../../utils/di';
 import { MobileDialogPart } from '../MobileDialogPart';
 
-Object.defineProperty(globalThis, 'IS_REACT_ACT_ENVIRONMENT', { configurable: true, value: true });
+Object.defineProperty(globalThis, 'IS_REACT_ACT_ENVIRONMENT', { configurable: true, value: true, writable: true });
 
 function renderWithDependencies(element: ReactElement, mobileService = false) {
     const injector = new Injector();

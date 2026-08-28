@@ -21,12 +21,14 @@ import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, FOCUSING_FX_BAR_EDITOR, FOCUSING_SHEET 
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { ClearSelectionFormatCommand, SetWorksheetActiveOperation } from '@univerjs/sheets';
+import { DISABLE_AUTO_FOCUS_KEY } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { SetZoomRatioCommand } from '../../../commands/commands/set-zoom-ratio.command';
 import { SetActivateCellEditOperation } from '../../../commands/operations/activate-cell-edit.operation';
 import { SetCellEditVisibleOperation } from '../../../commands/operations/cell-edit.operation';
 import { SHEET_VIEW_KEY } from '../../../common/keys';
+import { MOBILE_KEYBOARD_VISIBLE } from '../../../consts/mobile-context';
 import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE } from '../../../services/sheet-embed-integration.service';
 import { EditorBridgeRenderController } from '../editor-bridge.render-controller';
 
@@ -72,6 +74,8 @@ function createController(options?: {
     isEmbedRuntimeEvent?: boolean;
     isEmbedActiveSession?: boolean;
     focusingSheet?: boolean;
+    disableAutoFocus?: boolean;
+    keyboardVisible?: boolean;
     isEmbedRuntimeEventImpl?: (unitId: string | undefined, target?: EventTarget | null, event?: Event) => boolean;
 }) {
     const workbook$ = new Subject<any>();
@@ -100,6 +104,8 @@ function createController(options?: {
     const contextValues = new Map<string, unknown>([
         [FOCUSING_SHEET, options?.focusingSheet ?? true],
         [FOCUSING_FX_BAR_EDITOR, false],
+        [DISABLE_AUTO_FOCUS_KEY, options?.disableAutoFocus ?? false],
+        [MOBILE_KEYBOARD_VISIBLE, options?.keyboardVisible ?? false],
     ]);
     const focusingSheet$ = new Subject<boolean>();
     const context = {
@@ -128,6 +134,7 @@ function createController(options?: {
             }
             : null),
     };
+    let editorVisible = options?.editorVisible ?? false;
     const editorBridgeService = {
         getEditCellState: vi.fn(() => options?.currentEditCellState ?? null),
         getEditCellLayout: vi.fn(() => ({
@@ -135,10 +142,20 @@ function createController(options?: {
             canvasOffset: { left: 30, top: 20 },
         })),
         getEditLocation: vi.fn(() => options?.currentEditLocation ?? null),
-        isVisible: vi.fn(() => ({ visible: options?.editorVisible ?? false })),
+        isVisible: vi.fn(() => ({ visible: editorVisible })),
         isForceKeepVisible: vi.fn(() => options?.forceKeepVisible ?? false),
         refreshEditCellState: vi.fn(),
     };
+    commandService.syncExecuteCommand.mockImplementation((commandId: string, params?: { visible?: boolean }) => {
+        if (
+            options?.keyboardVisible &&
+            commandId === SetCellEditVisibleOperation.id &&
+            typeof params?.visible === 'boolean'
+        ) {
+            editorVisible = params.visible;
+        }
+        return true;
+    });
     const controller = new EditorBridgeRenderController(
         context as any,
         {
@@ -316,6 +333,22 @@ describe('EditorBridgeRenderController business flows', () => {
         controller.dispose();
     });
 
+    it('requires an explicit edit action when mobile auto focus is disabled', () => {
+        const { commandService, controller, inputBefore$, spreadsheet } = createController({ disableAutoFocus: true });
+
+        inputBefore$.next({ event: { data: 'A', which: 65 } });
+        expect(commandService.syncExecuteCommand).not.toHaveBeenCalledWith(SetCellEditVisibleOperation.id, expect.anything());
+
+        spreadsheet.onDblclick$.emit({ button: 0 });
+        expect(commandService.executeCommand).toHaveBeenCalledWith(SetCellEditVisibleOperation.id, {
+            visible: true,
+            eventType: DeviceInputEventType.Dblclick,
+            unitId: 'unit-1',
+        });
+
+        controller.dispose();
+    });
+
     it('moves the hidden input when the user finishes selecting a cell', () => {
         const { controller, docSelectionRenderService, selectionMoveEnd$ } = createController();
 
@@ -331,6 +364,41 @@ describe('EditorBridgeRenderController business flows', () => {
         }]);
 
         expect(docSelectionRenderService.setInputPosition).toHaveBeenCalledWith(150, 100);
+
+        controller.dispose();
+    });
+
+    it('commits and reopens editing on the selected cell while the mobile keyboard stays visible', () => {
+        const { commandService, controller, selectionMoveEnd$, spreadsheet } = createController({
+            editorVisible: true,
+            keyboardVisible: true,
+        });
+
+        spreadsheet.onPointerDown$.emit({});
+        expect(commandService.syncExecuteCommand).not.toHaveBeenCalled();
+
+        selectionMoveEnd$.next([{
+            primary: {
+                actualRow: 3,
+                actualColumn: 4,
+                startRow: 3,
+                startColumn: 4,
+                endRow: 3,
+                endColumn: 4,
+            },
+        }]);
+
+        expect(commandService.syncExecuteCommand).toHaveBeenNthCalledWith(1, SetCellEditVisibleOperation.id, {
+            visible: false,
+            eventType: DeviceInputEventType.PointerDown,
+            unitId: 'unit-1',
+        });
+        expect(commandService.executeCommand).toHaveBeenCalledWith(SetActivateCellEditOperation.id, expect.anything());
+        expect(commandService.syncExecuteCommand).toHaveBeenNthCalledWith(2, SetCellEditVisibleOperation.id, {
+            visible: true,
+            eventType: DeviceInputEventType.PointerDown,
+            unitId: 'unit-1',
+        });
 
         controller.dispose();
     });

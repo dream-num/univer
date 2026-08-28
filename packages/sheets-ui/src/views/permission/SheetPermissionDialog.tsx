@@ -231,6 +231,7 @@ export const SheetPermissionDialog = () => {
                 })}
 
                 <div
+                    data-u-comp="mobile-actions"
                     className={clsx(`
                       univer-flex univer-h-9 univer-items-center univer-justify-end univer-gap-2 univer-pt-2
                     `, borderTopClassName)}

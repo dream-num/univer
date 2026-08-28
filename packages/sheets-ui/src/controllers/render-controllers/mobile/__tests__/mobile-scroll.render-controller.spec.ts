@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+// @vitest-environment jsdom
+
 import { ICommandService, RANGE_TYPE } from '@univerjs/core';
 import { SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { Subject } from 'rxjs';
@@ -27,6 +29,9 @@ import { MobileSheetsScrollRenderController } from '../mobile-scroll.render-cont
 function createController() {
     const rawScrollInfo$ = new Subject<any>();
     const validViewportScrollInfo$ = new Subject<any>();
+    const transformerChangeStart$ = new Subject<unknown>();
+    const transformerChangeEnd$ = new Subject<unknown>();
+    let sceneObjectsEvented = true;
     const scrollStates = new Map<string, any>();
     const scrollManagerService = {
         rawScrollInfo$,
@@ -83,6 +88,15 @@ function createController() {
         width: 800,
         height: 600,
     } as any);
+    Object.assign(scene, { getTransformerByCreate: vi.fn(() => ({
+        changeStart$: transformerChangeStart$,
+        changeEnd$: transformerChangeEnd$,
+    })) });
+    Object.defineProperty(scene, 'objectsEvented', {
+        configurable: true,
+        get: () => sceneObjectsEvented,
+    });
+    (scene as any).pick ??= vi.fn(() => null);
 
     const controller = injector.createInstance(MobileSheetsScrollRenderController, context as any);
 
@@ -98,7 +112,12 @@ function createController() {
         sheet,
         sheetSkeletonManagerService: testBed.sheetSkeletonManagerService,
         syncExecuteCommand,
+        setSceneObjectsEvented: (value: boolean) => {
+            sceneObjectsEvented = value;
+        },
         testBed,
+        transformerChangeEnd$,
+        transformerChangeStart$,
         validViewportScrollInfo$,
         viewportMain,
     };
@@ -285,6 +304,95 @@ describe('MobileSheetsScrollRenderController', () => {
         expect(canvasElement.parentElement.textContent).toContain('150%');
 
         now.mockRestore();
+        testBed.univer.dispose();
+    });
+
+    it('does not pan the sheet when a canvas overlay owns the touch gesture', () => {
+        const { canvasElement, executeCommand, scene, testBed } = createController();
+        const listeners = new Map<string, EventListener>();
+        canvasElement.addEventListener.mock.calls.forEach(([type, handler]) => {
+            listeners.set(type, handler as EventListener);
+        });
+        (scene as any).pick = vi.fn(() => ({ oKey: 'drawing-1' }));
+
+        listeners.get('touchstart')!({
+            touches: [{ clientX: 120, clientY: 120 }],
+            preventDefault: vi.fn(),
+        } as unknown as Event);
+        listeners.get('touchmove')!({
+            touches: [{ clientX: 90, clientY: 80 }],
+            preventDefault: vi.fn(),
+        } as unknown as Event);
+
+        expect(executeCommand).not.toHaveBeenCalledWith(SetScrollRelativeCommand.id, expect.anything());
+        testBed.univer.dispose();
+    });
+
+    it('yields an active touch gesture to the drawing transformer', () => {
+        const { canvasElement, executeCommand, testBed, transformerChangeEnd$, transformerChangeStart$ } = createController();
+        const listeners = new Map<string, EventListener>();
+        canvasElement.addEventListener.mock.calls.forEach(([type, handler]) => {
+            listeners.set(type, handler as EventListener);
+        });
+        const preventDefault = vi.fn();
+        const now = vi.spyOn(performance, 'now');
+        now.mockReturnValueOnce(0).mockReturnValueOnce(16).mockReturnValueOnce(32);
+
+        listeners.get('touchstart')!({
+            touches: [{ clientX: 120, clientY: 120 }],
+            preventDefault,
+        } as unknown as Event);
+        transformerChangeStart$.next({});
+        listeners.get('touchmove')!({
+            touches: [{ clientX: 90, clientY: 80 }],
+            preventDefault,
+        } as unknown as Event);
+
+        expect(preventDefault).toHaveBeenCalled();
+        expect(executeCommand).not.toHaveBeenCalledWith(SetScrollRelativeCommand.id, expect.anything());
+
+        listeners.get('touchend')!({ touches: [] } as unknown as Event);
+        transformerChangeEnd$.next({});
+        listeners.get('touchstart')!({
+            touches: [{ clientX: 120, clientY: 120 }],
+            preventDefault,
+        } as unknown as Event);
+        listeners.get('touchmove')!({
+            touches: [{ clientX: 90, clientY: 80 }],
+            preventDefault,
+        } as unknown as Event);
+
+        expect(executeCommand).toHaveBeenCalledWith(SetScrollRelativeCommand.id, {
+            offsetX: 30,
+            offsetY: 40,
+        });
+
+        now.mockRestore();
+        testBed.univer.dispose();
+    });
+
+    it('yields an active touch gesture to shape adjustment controls', () => {
+        const { canvasElement, executeCommand, setSceneObjectsEvented, testBed } = createController();
+        const listeners = new Map<string, EventListener>();
+        canvasElement.addEventListener.mock.calls.forEach(([type, handler]) => {
+            listeners.set(type, handler as EventListener);
+        });
+        const preventDefault = vi.fn();
+
+        listeners.get('touchstart')!({
+            touches: [{ clientX: 120, clientY: 120 }],
+            preventDefault,
+        } as unknown as Event);
+        setSceneObjectsEvented(false);
+        listeners.get('touchmove')!({
+            touches: [{ clientX: 90, clientY: 80 }],
+            preventDefault,
+        } as unknown as Event);
+
+        expect(preventDefault).toHaveBeenCalled();
+        expect(executeCommand).not.toHaveBeenCalledWith(SetScrollRelativeCommand.id, expect.anything());
+
+        setSceneObjectsEvented(true);
         testBed.univer.dispose();
     });
 });

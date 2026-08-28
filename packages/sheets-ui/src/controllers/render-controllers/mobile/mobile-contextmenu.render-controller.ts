@@ -17,17 +17,17 @@
 import type { ICellWithCoord, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { IPointerEvent, IRenderContext, IRenderModule, Viewport } from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
-import { Disposable, IContextService, Inject, RANGE_TYPE, Rectangle, toDisposable } from '@univerjs/core';
+import { Disposable, IContextService, Inject, Rectangle, toDisposable } from '@univerjs/core';
 import { IRenderManagerService, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
-import { convertPrimaryWithCoordToPrimary, convertSelectionDataToRange, SelectionMoveType, SheetsSelectionsService } from '@univerjs/sheets';
+import { convertSelectionDataToRange, SelectionMoveType, SheetsSelectionsService } from '@univerjs/sheets';
 import { ContextMenuPosition, IContextMenuService, ILayoutService } from '@univerjs/ui';
 import { MOBILE_EXPANDING_SELECTION, MOBILE_PINCH_ZOOMING } from '../../../consts/mobile-context';
 import { ISheetSelectionRenderService } from '../../../services/selection/base-selection-render.service';
 import { SELECTION_MANAGER_KEY } from '../../../services/selection/selection-control';
 import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
 
-const LONG_PRESS_DURATION = 500;
-const LONG_PRESS_MOVE_THRESHOLD = 10;
+const TAP_MOVE_THRESHOLD = 10;
+const TAP_MENU_DELAY = 500;
 const MAIN_AREA_VIEWPORT_KEYS = new Set<string>([
     SHEET_VIEWPORT_KEY.VIEW_MAIN,
     SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT,
@@ -56,12 +56,11 @@ interface ITouchPosition {
     offsetY: number;
 }
 
-interface ILongPressState {
-    longPressTimer: ReturnType<typeof setTimeout> | null;
+interface ITapState {
     activeTouch: Nullable<ITouchPosition>;
-    longPressTriggered: boolean;
+    menuTimer: Nullable<ReturnType<typeof setTimeout>>;
+    shouldOpenMenu: boolean;
     selectionSnapshot: ISelectionWithStyle[];
-    shouldRestoreSelectionSnapshot: boolean;
 }
 
 function isSelectionObjectKey(objectKey?: string | null): boolean {
@@ -73,9 +72,8 @@ export function shouldKeepCurrentSelectionForMobileContextMenu(currentSelections
 }
 
 /**
- * On mobile devices, the context menu pops up after a native touch long press.
- * This bypasses the older "selection event -> menu" chain, which was unreliable
- * when the touch target was the selection overlay itself.
+ * On mobile devices, tapping inside the current selection a second time opens
+ * the context menu. Tapping elsewhere remains a normal selection gesture.
  *
  * @ignore
  */
@@ -100,54 +98,59 @@ export class SheetContextMenuMobileRenderController extends Disposable implement
             return;
         }
 
-        const state = this._createLongPressState();
-        const handleTouchStart = (event: TouchEvent) => this._handleTouchStart(contentElement, state, event);
-        const handleTouchMove = (event: TouchEvent) => this._handleTouchMove(contentElement, state, event);
-        const handleTouchEnd = (event: TouchEvent) => this._handleTouchEnd(state, event);
+        const state = this._createTapState();
+        const handlePointerDown = (event: PointerEvent) => this._handlePointerDown(contentElement, state, event);
+        const handlePointerMove = (event: PointerEvent) => this._handlePointerMove(contentElement, state, event);
+        const handlePointerUp = (event: PointerEvent) => this._handlePointerUp(state, event);
+        const handlePointerCancel = () => this._resetTapState(state);
+        const dblclickSubscription = this._context.mainComponent?.onDblclick$.subscribeEvent(() => this._cancelPendingMenu(state));
+        if (dblclickSubscription) {
+            this.disposeWithMe(dblclickSubscription);
+        }
 
-        contentElement.addEventListener('touchstart', handleTouchStart, { passive: true });
-        contentElement.addEventListener('touchmove', handleTouchMove, { passive: true });
-        contentElement.addEventListener('touchend', handleTouchEnd, { passive: false });
-        contentElement.addEventListener('touchcancel', handleTouchEnd, { passive: false });
+        contentElement.addEventListener('pointerdown', handlePointerDown, true);
+        contentElement.addEventListener('pointermove', handlePointerMove, true);
+        contentElement.addEventListener('pointerup', handlePointerUp, true);
+        contentElement.addEventListener('pointercancel', handlePointerCancel, true);
 
         this.disposeWithMe(toDisposable(() => {
-            this._clearLongPressTimer(state);
-            contentElement.removeEventListener('touchstart', handleTouchStart);
-            contentElement.removeEventListener('touchmove', handleTouchMove);
-            contentElement.removeEventListener('touchend', handleTouchEnd);
-            contentElement.removeEventListener('touchcancel', handleTouchEnd);
+            contentElement.removeEventListener('pointerdown', handlePointerDown, true);
+            contentElement.removeEventListener('pointermove', handlePointerMove, true);
+            contentElement.removeEventListener('pointerup', handlePointerUp, true);
+            contentElement.removeEventListener('pointercancel', handlePointerCancel, true);
+            this._cancelPendingMenu(state);
         }));
     }
 
-    private _createLongPressState(): ILongPressState {
+    private _createTapState(): ITapState {
         return {
-            longPressTimer: null,
             activeTouch: null,
-            longPressTriggered: false,
+            menuTimer: null,
+            shouldOpenMenu: false,
             selectionSnapshot: [],
-            shouldRestoreSelectionSnapshot: false,
         };
     }
 
-    private _clearLongPressTimer(state: ILongPressState): void {
-        if (state.longPressTimer) {
-            clearTimeout(state.longPressTimer);
-            state.longPressTimer = null;
-        }
-    }
-
-    private _resetLongPressState(state: ILongPressState): void {
-        this._clearLongPressTimer(state);
+    private _resetTapState(state: ITapState): void {
         state.activeTouch = null;
+        state.shouldOpenMenu = false;
     }
 
-    private _getTouchOffset(contentElement: HTMLElement, touch: Touch): ITouchPosition {
+    private _cancelPendingMenu(state: ITapState): void {
+        if (state.menuTimer == null) {
+            return;
+        }
+        clearTimeout(state.menuTimer);
+        state.menuTimer = null;
+    }
+
+    private _getPointerOffset(contentElement: HTMLElement, event: PointerEvent): ITouchPosition {
         const rect = contentElement.getBoundingClientRect();
         return {
-            clientX: touch.clientX,
-            clientY: touch.clientY,
-            offsetX: touch.clientX - rect.left,
-            offsetY: touch.clientY - rect.top,
+            clientX: event.clientX,
+            clientY: event.clientY,
+            offsetX: event.clientX - rect.left,
+            offsetY: event.clientY - rect.top,
         };
     }
 
@@ -215,120 +218,75 @@ export class SheetContextMenuMobileRenderController extends Disposable implement
         );
     }
 
-    private _replaceSelectionWithTargetCell(targetCell: ICellWithCoord): void {
-        const worksheet = this._context.unit.getActiveSheet();
-        if (!worksheet) {
-            return;
-        }
-
-        this._selectionManagerService.setSelections(this._context.unitId, worksheet.getSheetId(), [{
-            range: {
-                startRow: targetCell.mergeInfo.startRow,
-                endRow: targetCell.mergeInfo.endRow,
-                startColumn: targetCell.mergeInfo.startColumn,
-                endColumn: targetCell.mergeInfo.endColumn,
-                rangeType: RANGE_TYPE.NORMAL,
-                unitId: this._context.unitId,
-                sheetId: worksheet.getSheetId(),
-            },
-            primary: convertPrimaryWithCoordToPrimary(targetCell),
-            style: null,
-        }], SelectionMoveType.MOVE_END);
-    }
-
     private _openMenu(clientX: number, clientY: number): void {
         this._contextMenuService.triggerContextMenu({
             clientX,
             clientY,
             preventDefault: () => {},
             stopPropagation: () => {},
-        } as unknown as IPointerEvent, ContextMenuPosition.MAIN_AREA);
+        } as unknown as IPointerEvent, ContextMenuPosition.MAIN_AREA, { unitId: this._context.unitId });
     }
 
-    private _triggerLongPressMenu(state: ILongPressState): void {
-        if (!state.activeTouch || this._contextMenuService.visible) {
+    private _handlePointerDown(contentElement: HTMLElement, state: ITapState, event: PointerEvent): void {
+        this._cancelPendingMenu(state);
+        if (this._contextMenuService.visible) {
+            this._contextMenuService.hideContextMenu();
+            this._resetTapState(state);
             return;
         }
 
-        if (this._contextService.getContextValue(MOBILE_PINCH_ZOOMING) || this._contextService.getContextValue(MOBILE_EXPANDING_SELECTION)) {
+        if (!event.isPrimary || this._contextService.getContextValue(MOBILE_PINCH_ZOOMING) || this._contextService.getContextValue(MOBILE_EXPANDING_SELECTION)) {
+            this._resetTapState(state);
             return;
         }
 
-        const targetCell = this._getTargetCellByOffset(state.activeTouch.offsetX, state.activeTouch.offsetY);
+        const touch = this._getPointerOffset(contentElement, event);
+        const targetCell = this._getTargetCellByOffset(touch.offsetX, touch.offsetY);
         if (!targetCell) {
+            this._resetTapState(state);
             return;
         }
 
-        const pickedObject = this._context.scene.pick(Vector2.FromArray([state.activeTouch.offsetX, state.activeTouch.offsetY])) as { oKey?: string } | null;
-        const snapshotRanges = state.selectionSnapshot.map((selection) => selection.range);
-        const shouldKeepSelection = isSelectionObjectKey(pickedObject?.oKey)
-            || shouldKeepCurrentSelectionForMobileContextMenu(snapshotRanges, targetCell.mergeInfo);
-
-        state.longPressTriggered = true;
-        state.shouldRestoreSelectionSnapshot = shouldKeepSelection;
-
-        if (shouldKeepSelection) {
-            this._restoreSelectionSnapshot(state.selectionSnapshot);
-            queueMicrotask(() => this._restoreSelectionSnapshot(state.selectionSnapshot));
-        }
-
-        this._openMenu(state.activeTouch.clientX, state.activeTouch.clientY);
-
-        if (!shouldKeepSelection) {
-            queueMicrotask(() => this._replaceSelectionWithTargetCell(targetCell));
-        }
-    }
-
-    private _handleTouchStart(contentElement: HTMLElement, state: ILongPressState, event: TouchEvent): void {
-        if (event.touches.length !== 1 || this._contextMenuService.visible) {
-            this._resetLongPressState(state);
-            return;
-        }
-
-        if (this._contextService.getContextValue(MOBILE_PINCH_ZOOMING) || this._contextService.getContextValue(MOBILE_EXPANDING_SELECTION)) {
-            this._resetLongPressState(state);
-            return;
-        }
-
-        const touch = this._getTouchOffset(contentElement, event.touches[0]);
-        if (!this._getTargetCellByOffset(touch.offsetX, touch.offsetY)) {
-            this._resetLongPressState(state);
-            return;
-        }
-
-        state.longPressTriggered = false;
-        state.shouldRestoreSelectionSnapshot = false;
         state.selectionSnapshot = this._getSelectionSnapshot();
         state.activeTouch = touch;
-        this._clearLongPressTimer(state);
-        state.longPressTimer = setTimeout(() => this._triggerLongPressMenu(state), LONG_PRESS_DURATION);
+        const pickedObject = this._context.scene.pick(Vector2.FromArray([touch.offsetX, touch.offsetY]));
+        state.shouldOpenMenu = isSelectionObjectKey(pickedObject && 'oKey' in pickedObject ? pickedObject.oKey : undefined)
+            || shouldKeepCurrentSelectionForMobileContextMenu(state.selectionSnapshot, targetCell.mergeInfo);
     }
 
-    private _handleTouchMove(contentElement: HTMLElement, state: ILongPressState, event: TouchEvent): void {
-        if (!state.activeTouch || event.touches.length !== 1) {
-            this._resetLongPressState(state);
+    private _handlePointerMove(contentElement: HTMLElement, state: ITapState, event: PointerEvent): void {
+        if (!state.activeTouch || !event.isPrimary) {
+            this._resetTapState(state);
             return;
         }
 
-        const touch = this._getTouchOffset(contentElement, event.touches[0]);
+        const touch = this._getPointerOffset(contentElement, event);
         if (
-            Math.abs(touch.offsetX - state.activeTouch.offsetX) > LONG_PRESS_MOVE_THRESHOLD ||
-            Math.abs(touch.offsetY - state.activeTouch.offsetY) > LONG_PRESS_MOVE_THRESHOLD
+            Math.abs(touch.offsetX - state.activeTouch.offsetX) > TAP_MOVE_THRESHOLD ||
+            Math.abs(touch.offsetY - state.activeTouch.offsetY) > TAP_MOVE_THRESHOLD
         ) {
-            this._resetLongPressState(state);
+            this._resetTapState(state);
         }
     }
 
-    private _handleTouchEnd(state: ILongPressState, event: TouchEvent): void {
-        if (state.longPressTriggered) {
+    private _handlePointerUp(state: ITapState, event: PointerEvent): void {
+        if (
+            state.activeTouch &&
+            state.shouldOpenMenu &&
+            !this._contextService.getContextValue(MOBILE_PINCH_ZOOMING) &&
+            !this._contextService.getContextValue(MOBILE_EXPANDING_SELECTION)
+        ) {
             event.preventDefault();
-            if (state.shouldRestoreSelectionSnapshot) {
-                queueMicrotask(() => this._restoreSelectionSnapshot(state.selectionSnapshot));
-            }
+            const { clientX, clientY } = state.activeTouch;
+            const selectionSnapshot = this._cloneSelections(state.selectionSnapshot);
+            state.menuTimer = setTimeout(() => {
+                state.menuTimer = null;
+                this._restoreSelectionSnapshot(selectionSnapshot);
+                queueMicrotask(() => this._restoreSelectionSnapshot(selectionSnapshot));
+                this._openMenu(clientX, clientY);
+            }, TAP_MENU_DELAY);
         }
 
-        state.longPressTriggered = false;
-        state.shouldRestoreSelectionSnapshot = false;
-        this._resetLongPressState(state);
+        this._resetTapState(state);
     }
 }

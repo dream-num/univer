@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { shouldKeepCurrentSelectionOnMobileLongPress } from '../mobile-selection-render.service';
+import { shouldHandleMobileNormalSelectionPointerDown, shouldKeepCurrentSelectionOnMobileLongPress } from '../mobile-selection-render.service';
 
 describe('MobileSheetsSelectionRenderService', () => {
     it('keeps the current mobile selection when a long press stays inside an existing range', () => {
@@ -28,5 +28,11 @@ describe('MobileSheetsSelectionRenderService', () => {
             [{ startRow: 1, endRow: 3, startColumn: 1, endColumn: 3 }],
             { startRow: 4, endRow: 4, startColumn: 2, endColumn: 2 }
         )).toBe(false);
+    });
+
+    it('lets the formula reference renderer own pointer down while reference selection is enabled', () => {
+        expect(shouldHandleMobileNormalSelectionPointerDown(true, false)).toBe(false);
+        expect(shouldHandleMobileNormalSelectionPointerDown(false, true)).toBe(false);
+        expect(shouldHandleMobileNormalSelectionPointerDown(false, false)).toBe(true);
     });
 });

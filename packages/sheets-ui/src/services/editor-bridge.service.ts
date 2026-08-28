@@ -47,6 +47,7 @@ import {
     SheetInterceptorService,
     SheetSkeletonService,
 } from '@univerjs/sheets';
+import { DISABLE_AUTO_FOCUS_KEY } from '@univerjs/ui';
 import { BehaviorSubject, map, switchMap } from 'rxjs';
 import { getViewportByCell } from '../common/utils';
 
@@ -255,12 +256,16 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
          * todo: wzhudev: In boundless mode, it is necessary to switch to the corresponding editorId based on the host's unitId.
          */
         if (!this._editorService.getFocusEditor()) {
-            this._editorService.focus(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
-            /**
-             * Fix: When the sheet loads for the first time, copying and pasting triggers the editor, and the edits are ineffective.
-             */
-            this._contextService.setContextValue(EDITOR_ACTIVATED, false);
-            this._contextService.setContextValue(FOCUSING_EDITOR_STANDALONE, false);
+            if (this._contextService.getContextValue(DISABLE_AUTO_FOCUS_KEY)) {
+                this._univerInstanceService.setCurrentUnitForType(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+            } else {
+                this._editorService.focus(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+                /**
+                 * Fix: When the sheet loads for the first time, copying and pasting triggers the editor, and the edits are ineffective.
+                 */
+                this._contextService.setContextValue(EDITOR_ACTIVATED, false);
+                this._contextService.setContextValue(FOCUSING_EDITOR_STANDALONE, false);
+            }
         }
 
         const editCellState = this.getLatestEditCellState();

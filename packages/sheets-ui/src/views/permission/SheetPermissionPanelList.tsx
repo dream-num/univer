@@ -405,7 +405,7 @@ function SheetPermissionPanelListContent() {
                 )}
 
             {hasSetProtectPermission && (
-                <div className="univer-mt-auto univer-py-5">
+                <div data-u-comp="mobile-actions" className="univer-mt-auto univer-py-5">
                     <Button
                         className="univer-w-full"
                         variant="primary"

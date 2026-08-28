@@ -43,6 +43,7 @@ import { ReplaceSnapshotCommand } from '@univerjs/docs-ui';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import { MoveRangeMutation, RangeProtectionRuleModel, SetRangeValuesMutation, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { skip } from 'rxjs';
+import { MOBILE_SHEET_FX_EDITOR } from '../../consts/mobile-context';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
 import { FormulaEditorController } from './formula-editor.controller';
@@ -345,6 +346,8 @@ export class EditorDataSyncController extends Disposable {
         if (isFormulaBar) {
             snapshot.documentStyle = {
                 ...formulaEditorStyle,
+                pageSize: { ...formulaEditorStyle.pageSize },
+                renderConfig: { ...formulaEditorStyle.renderConfig },
                 textStyle: {
                     cl: {
                         rgb: this._themeService.getColorFromTheme('gray.900'),
@@ -374,7 +377,10 @@ export class EditorDataSyncController extends Disposable {
 
         const isFormula = (snapshot.body?.dataStream ?? '').startsWith('=');
         if (!isFormula) {
-            renderConfig.isRenderStyle = isFormulaBar ? BooleanNumber.FALSE : BooleanNumber.TRUE;
+            renderConfig.isRenderStyle = shouldRenderSourceStyle(
+                isFormulaBar,
+                this._contextService.getContextValue(MOBILE_SHEET_FX_EDITOR)
+            );
             return;
         }
 
@@ -392,4 +398,8 @@ export class EditorDataSyncController extends Disposable {
 
         return newParagraphs;
     }
+}
+
+function shouldRenderSourceStyle(isFormulaBar: boolean, mobile: boolean): BooleanNumber {
+    return isFormulaBar && !mobile ? BooleanNumber.FALSE : BooleanNumber.TRUE;
 }

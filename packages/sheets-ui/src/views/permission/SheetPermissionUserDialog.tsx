@@ -120,7 +120,10 @@ export const SheetPermissionUserDialog = () => {
                     )}
             </div>
             <div className="univer-h-px univer-w-full univer-bg-gray-200" />
-            <div className="univer-flex univer-items-center univer-justify-end univer-gap-1 univer-py-2">
+            <div
+                data-u-comp="mobile-actions"
+                className="univer-flex univer-items-center univer-justify-end univer-gap-1 univer-py-2"
+            >
                 <Button
                     onClick={() => dialogService.close(UNIVER_SHEET_PERMISSION_USER_DIALOG_ID)}
                 >

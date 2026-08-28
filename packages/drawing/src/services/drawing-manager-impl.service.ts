@@ -95,16 +95,39 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
     return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
-function isJsonDocument(value: unknown): value is json1.Doc {
+function hasOnlyEnumerableOwnProperties(value: Record<string, unknown>): boolean {
+    return Object.getOwnPropertyNames(value).every((key) => Object.prototype.propertyIsEnumerable.call(value, key));
+}
+
+function createJsonRemoveOp(path: Array<number | string>, value: json1.Doc): JSONOp {
+    return json1.type.writeCursor().writeAtPath(path, 'r', value).get();
+}
+
+function normalizeJsonDocument(value: unknown): json1.Doc | undefined {
+    if (value === undefined) {
+        return undefined;
+    }
+
     if (value === null || typeof value === 'boolean' || typeof value === 'number' || typeof value === 'string') {
-        return true;
+        return value;
     }
 
     if (Array.isArray(value)) {
-        return value.every(isJsonDocument);
+        return value.map((item) => normalizeJsonDocument(item) ?? null);
     }
 
-    return isPlainObject(value) && Object.values(value).every(isJsonDocument);
+    if (!isPlainObject(value)) {
+        return undefined;
+    }
+
+    const normalizedValue: Record<string, json1.Doc> = {};
+    Object.entries(value).forEach(([key, item]) => {
+        const normalizedItem = normalizeJsonDocument(item);
+        if (normalizedItem !== undefined) {
+            normalizedValue[key] = normalizedItem;
+        }
+    });
+    return normalizedValue;
 }
 
 function appendJsonUpdateOps(
@@ -114,16 +137,20 @@ function appendJsonUpdateOps(
     oldValue: unknown,
     hasOldValue: boolean
 ): void {
-    if (hasOldValue && isJsonValueEqual(oldValue, newValue)) {
+    const normalizedOldValue = normalizeJsonDocument(oldValue);
+    const normalizedNewValue = normalizeJsonDocument(newValue);
+    const hasNormalizedOldValue = hasOldValue && normalizedOldValue !== undefined;
+
+    if (hasNormalizedOldValue && isJsonValueEqual(normalizedOldValue, normalizedNewValue)) {
         return;
     }
 
     if (
-        hasOldValue &&
-        oldValue != null &&
-        newValue != null &&
+        hasNormalizedOldValue &&
         isPlainObject(oldValue) &&
-        isPlainObject(newValue)
+        isPlainObject(newValue) &&
+        hasOnlyEnumerableOwnProperties(oldValue) &&
+        hasOnlyEnumerableOwnProperties(newValue)
     ) {
         const keys = new Set([...Object.keys(oldValue), ...Object.keys(newValue)]);
         keys.forEach((key) => appendJsonUpdateOps(
@@ -131,18 +158,16 @@ function appendJsonUpdateOps(
             [...path, key],
             newValue[key],
             oldValue[key],
-            Object.prototype.hasOwnProperty.call(oldValue, key)
+            Object.prototype.hasOwnProperty.call(oldValue, key) && oldValue[key] !== undefined
         ));
         return;
     }
 
-    const op = !hasOldValue
-        ? newValue === undefined || !isJsonDocument(newValue) ? null : json1.insertOp(path, newValue)
-        : newValue === undefined
-            ? json1.removeOp(path, true)
-            : isJsonDocument(oldValue) && isJsonDocument(newValue)
-                ? json1.replaceOp(path, oldValue, newValue)
-                : null;
+    const op = !hasNormalizedOldValue
+        ? normalizedNewValue === undefined ? null : json1.insertOp(path, normalizedNewValue)
+        : normalizedNewValue === undefined
+            ? createJsonRemoveOp(path, normalizedOldValue)
+            : json1.replaceOp(path, normalizedOldValue, normalizedNewValue);
     if (op && isNonEmptyOp(op)) {
         ops.push(op);
     }
@@ -1046,7 +1071,7 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
 
         const op = ops.reduce(json1.type.compose, null);
 
-        const invertOp = json1.type.invertWithDoc(op, this.drawingManagerData as unknown as json1.Doc);
+        const invertOp = json1.type.invert(op);
 
         return { op, invertOp };
     }

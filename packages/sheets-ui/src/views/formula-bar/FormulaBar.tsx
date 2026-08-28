@@ -18,12 +18,14 @@ import type { IUniverSheetsUIConfig } from '../../config/config';
 import type { LocaleKey } from '../../locale/types';
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import {
+    ColorKit,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     FOCUSING_FX_BAR_EDITOR,
     ICommandService,
     IContextService,
     IPermissionService,
     LocaleService,
+    ThemeService,
 } from '@univerjs/core';
 import { borderBottomClassName, borderRightClassName, clsx, resetButtonClassName } from '@univerjs/design';
 import { IEditorService, MobileRichTextToolbar } from '@univerjs/docs-ui';
@@ -95,6 +97,29 @@ const MOBILE_FORMULA_OPERATORS = [
     { label: '!', value: '!' },
 ] as const;
 
+const MIN_EDITOR_TEXT_CONTRAST = 4.5;
+
+function resolveMobileEditorBackground(
+    backgroundColor: string | null | undefined,
+    textColor: string | null | undefined,
+    lightBackground: string | null | undefined,
+    darkBackground: string | null | undefined
+): string | undefined {
+    const background = backgroundColor ?? lightBackground ?? undefined;
+    if (!background || !textColor || !lightBackground || !darkBackground
+        || !new ColorKit(textColor).isValid || !new ColorKit(background).isValid) {
+        return background;
+    }
+
+    if (ColorKit.getContrastRatio(textColor, background) >= MIN_EDITOR_TEXT_CONTRAST) {
+        return background;
+    }
+
+    return ColorKit.getContrastRatio(textColor, darkBackground) >= ColorKit.getContrastRatio(textColor, lightBackground)
+        ? darkBackground
+        : lightBackground;
+}
+
 export function FormulaBar(props: IProps) {
     const { className, disableDefinedName, expanded = false, mobile = false, onExpandedChange } = props;
     const editorBridgeService = useDependency(IEditorBridgeService);
@@ -134,6 +159,8 @@ export function FormulaBar(props: IProps) {
     const FormulaEditor = componentManager.get(EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY);
     const formulaAuxUIParts = useComponentsOfPart(SheetsUIPart.FORMULA_AUX);
     const contextService = useDependency(IContextService);
+    const themeService = useDependency(ThemeService);
+    useObservable(() => themeService.currentTheme$, undefined, false, [themeService]);
     const isFocusFxBar = useObservable(
         useMemo(() => contextService.subscribeContextValue$(FOCUSING_FX_BAR_EDITOR), [contextService]),
         contextService.getContextValue(FOCUSING_FX_BAR_EDITOR)
@@ -361,6 +388,25 @@ export function FormulaBar(props: IProps) {
 
     const cellImage = isCellImage(editState?.documentLayoutObject.documentModel?.getSnapshot());
     const hideEditor = cellImage || viewDisable;
+    const editorDocument = editState?.documentLayoutObject.documentModel?.getSnapshot();
+    const cellStyle = editState
+        ? workbook?.getSheetBySheetId(editState.sheetId)?.getCellStyle(editState.row, editState.column)
+        : undefined;
+    const lightEditorBackground = themeService.getColorFromTheme('gray.0') || undefined;
+    const darkEditorBackground = themeService.getColorFromTheme('gray.900') || undefined;
+    const editorTextColor = editorDocument?.body?.textRuns?.[0]?.ts?.cl?.rgb
+        ?? editorDocument?.documentStyle?.textStyle?.cl?.rgb
+        ?? cellStyle?.cl?.rgb
+        ?? darkEditorBackground;
+    const cellBackground = cellStyle?.bg?.rgb ?? undefined;
+    const editorBackground = mobile
+        ? resolveMobileEditorBackground(
+            cellBackground,
+            editorTextColor,
+            lightEditorBackground,
+            darkEditorBackground
+        )
+        : undefined;
 
     return (
         <div
@@ -515,8 +561,11 @@ export function FormulaBar(props: IProps) {
 
                 <div
                     className={clsx(
-                        'univer-flex univer-w-full univer-flex-1 univer-overflow-hidden univer-pl-3',
-                        { 'univer-pt-24': mobile && isExpanded }
+                        'univer-flex univer-w-full univer-flex-1 univer-overflow-hidden',
+                        {
+                            'univer-pl-3': !mobile,
+                            'univer-pt-24': mobile && isExpanded,
+                        }
                     )}
                 >
                     <div
@@ -524,15 +573,19 @@ export function FormulaBar(props: IProps) {
                         className={clsx(`
                           univer-relative univer-flex-1 univer-bg-gray-0
                           dark:!univer-bg-gray-800
-                        `, { 'univer-my-2': mobile && !isExpanded })}
+                        `, {
+                            'univer-box-border univer-pl-2': mobile,
+                            'univer-my-2': mobile && !isExpanded,
+                        })}
                         onPointerDown={handlePointerDown}
                         onPointerUp={handlePointerUp}
-                        style={{ pointerEvents: hideEditor ? 'none' : 'auto' }}
+                        style={{ backgroundColor: editorBackground, pointerEvents: hideEditor ? 'none' : 'auto' }}
                     >
                         {FormulaEditor && (
                             <FormulaEditor
                                 className="univer-relative univer-size-full univer-break-words univer-outline-none"
                                 borderless
+                                canvasStyle={{ backgroundColor: editorBackground }}
                                 disableSelectionOnClick
                                 editorId={DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY}
                                 initValue=""

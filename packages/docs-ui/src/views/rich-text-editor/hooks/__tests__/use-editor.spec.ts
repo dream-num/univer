@@ -70,4 +70,21 @@ describe('useEditor', () => {
             expect.anything()
         );
     });
+
+    it('registers an editor with its canvas style', () => {
+        getEditor.mockReturnValue(editor);
+        const canvasStyle = { backgroundColor: '#000000' };
+
+        useEditor({
+            editorId: 'range-editor',
+            initialValue: 'A1',
+            container: { current: { clientWidth: 320 } } as RefObject<HTMLDivElement>,
+            canvasStyle,
+        });
+
+        expect(register).toHaveBeenLastCalledWith(
+            expect.objectContaining({ canvasStyle }),
+            expect.anything()
+        );
+    });
 });

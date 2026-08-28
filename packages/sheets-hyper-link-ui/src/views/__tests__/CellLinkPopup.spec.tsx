@@ -52,9 +52,10 @@ import {
     ScrollToRangeOperation,
     SheetCanvasPopManagerService,
 } from '@univerjs/sheets-ui';
-import { IMessageService, RediContext } from '@univerjs/ui';
+import { IDialogService, IMessageService, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
+import { of } from 'rxjs';
 import { afterEach, describe, expect, it } from 'vitest';
 import { CloseHyperLinkPopupOperation, OpenHyperLinkEditPanelOperation } from '../../commands/operations/popup.operations';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
@@ -181,6 +182,20 @@ class TestMessageService {
     }
 }
 
+class TestDialogService {
+    open() {
+        return toDisposable(() => undefined);
+    }
+
+    close(): void {}
+
+    closeAll(): void {}
+
+    getDialogs$() {
+        return of([]);
+    }
+}
+
 function createCellDocument(text: string, range: ICustomRange) {
     return {
         id: `${range.rangeId}-doc`,
@@ -246,6 +261,7 @@ function createPopupTestBed() {
     injector.add([IDefinedNamesService, { useClass: TestDefinedNamesService as never }]);
     injector.add([IRenderManagerService, { useClass: TestRenderManagerService as never }]);
     injector.add([IMessageService, { useClass: TestMessageService as never }]);
+    injector.add([IDialogService, { useClass: TestDialogService }]);
     injector.add([IEditorBridgeService, { useClass: TestEditorBridgeService as never }]);
     injector.add([IMarkSelectionService, { useClass: TestMarkSelectionService as never }]);
     injector.add([SheetCanvasPopManagerService, { useClass: TestCanvasPopManagerService as never }]);

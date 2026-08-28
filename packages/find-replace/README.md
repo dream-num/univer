@@ -39,4 +39,3 @@ univer.registerPlugin(UniverFindReplacePlugin);
 - [Documentation](https://docs.univer.ai)
 - [NPM package](https://npmjs.com/package/@univerjs/find-replace)
 - [GitHub repository](https://github.com/dream-num/univer)
-

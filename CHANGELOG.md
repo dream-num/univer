@@ -1,5 +1,45 @@
 # Changelog
 
+## [1.0.0-beta.2](https://github.com/dream-num/univer/compare/v1.0.0-beta.1...v1.0.0-beta.2) (2026-08-22)
+
+### Features
+
+* **core:** add fluent rich-text link APIs ([bc72e1f](https://github.com/dream-num/univer/commit/bc72e1f1f)) and export the lodash `setWith` helper ([f37937c](https://github.com/dream-num/univer/commit/f37937c4e))
+
+### Performance Improvements
+
+* **engine-formula:** optimize shared-formula lookup ([9251e0d](https://github.com/dream-num/univer/commit/9251e0d30))
+* **sheets:** deduplicate floating-DOM zoom updates ([d3114d8](https://github.com/dream-num/univer/commit/d3114d89f))
+
+### Bug Fixes
+
+* **docs:** preserve list marker styling, image crops, hyperlink interactions, floating drawings, text layout, and print preparation ([a66bbae](https://github.com/dream-num/univer/commit/a66bbae18), [f24306c](https://github.com/dream-num/univer/commit/f24306c35), [07d42e3](https://github.com/dream-num/univer/commit/07d42e36e), [e84e978](https://github.com/dream-num/univer/commit/e84e978ef), [7248730](https://github.com/dream-num/univer/commit/72487307c), [9954e52](https://github.com/dream-num/univer/commit/9954e5274))
+* **sheets:** preserve cell styles, normalize freeze data, validate pasted number formats, and stabilize conditional formatting and editor history ([5585cff](https://github.com/dream-num/univer/commit/5585cfff1), [e635af8](https://github.com/dream-num/univer/commit/e635af8a7), [7b9b8fb](https://github.com/dream-num/univer/commit/7b9b8fb0e), [5410a1a](https://github.com/dream-num/univer/commit/5410a1a75), [45377b1](https://github.com/dream-num/univer/commit/45377b158), [1d4112c](https://github.com/dream-num/univer/commit/1d4112c46))
+* **ui/embed:** stabilize runtime ownership, print preparation, mobile service registration, and root-workbench surface scoping ([dc06ed8](https://github.com/dream-num/univer/commit/dc06ed889), [bbad43f](https://github.com/dream-num/univer/commit/bbad43f70), [8c856a5](https://github.com/dream-num/univer/commit/8c856a5bc), [ee000ad](https://github.com/dream-num/univer/commit/ee000ad14))
+* **render/drawing:** resolve theme colors for print and canvas rendering, repaint and clip scrolling copies, and preserve drawing z-order and selection behavior ([603016f](https://github.com/dream-num/univer/commit/603016f6a), [4933359](https://github.com/dream-num/univer/commit/49333595c), [5885b67](https://github.com/dream-num/univer/commit/5885b675b), [8a70e42](https://github.com/dream-num/univer/commit/8a70e42b1), [7f671e4](https://github.com/dream-num/univer/commit/7f671e4db), [60890d7](https://github.com/dream-num/univer/commit/60890d786))
+* **accessibility/RTL/comments:** improve gallery and pager accessibility, formula range-selection RTL layout, and thread selection and localization ([c40c116](https://github.com/dream-num/univer/commit/c40c1165e), [b2cd404](https://github.com/dream-num/univer/commit/b2cd4049f), [fd88260](https://github.com/dream-num/univer/commit/fd88260ce), [c0906a3](https://github.com/dream-num/univer/commit/c0906a3a4))
+
+## [1.0.0-beta.1](https://github.com/dream-num/univer/compare/v1.0.0-beta.0...v1.0.0-beta.1) (2026-08-15)
+
+### Features
+
+* **theme/core:** add dark-theme support, expose theme controls through the Facade, and add generic unit-presence adapters ([b838449](https://github.com/dream-num/univer/commit/b83844961), [dae6d8f](https://github.com/dream-num/univer/commit/dae6d8f40), [e47c8fa](https://github.com/dream-num/univer/commit/e47c8faf3))
+* **docs:** add document statistics, a document-name setter, pre-text background extensions, and exported list-type pickers ([60c9628](https://github.com/dream-num/univer/commit/60c9628dd), [0b9c6f1](https://github.com/dream-num/univer/commit/0b9c6f173), [4636f66](https://github.com/dream-num/univer/commit/4636f66a0), [783638c](https://github.com/dream-num/univer/commit/783638c3d))
+* **sheets/ui:** add text-to-number alerts, embedded presentation tabs, concurrent runtime-scope resolution, adaptive toolbar popups, and grouped emoji skin-tone variants ([7c20c35](https://github.com/dream-num/univer/commit/7c20c355b), [fa702ad](https://github.com/dream-num/univer/commit/fa702adaa), [36575dd](https://github.com/dream-num/univer/commit/36575dd71), [83e48d9](https://github.com/dream-num/univer/commit/83e48d927), [95320cc](https://github.com/dream-num/univer/commit/95320cc27))
+* **render/drawing/core:** support transformer control layers, absolute drawing z-order, Base text-preview hit testing, and improved undo/redo history handling ([0d524ee](https://github.com/dream-num/univer/commit/0d524ee46), [2693cdf](https://github.com/dream-num/univer/commit/2693cdf4e), [f178881](https://github.com/dream-num/univer/commit/f17888196), [9f0cad6](https://github.com/dream-num/univer/commit/9f0cad68f))
+
+### Performance Improvements
+
+* **engine-render:** cache complex SVG rasters, reuse shape caches during transforms, and adapt scrollbar seek rendering ([a49557e](https://github.com/dream-num/univer/commit/a49557e08), [09a0772](https://github.com/dream-num/univer/commit/09a077211), [823663e](https://github.com/dream-num/univer/commit/823663e32))
+* **sheets/docs:** skip invisible text work, replace object-matrix queries with range operations, optimize large-sheet scrolling, and coalesce document refreshes ([bf9940c](https://github.com/dream-num/univer/commit/bf9940c2a), [2423350](https://github.com/dream-num/univer/commit/24233500a), [4f74db6](https://github.com/dream-num/univer/commit/4f74db67a), [0a8432f](https://github.com/dream-num/univer/commit/0a8432f81))
+
+### Bug Fixes
+
+* **formula:** align lookup, table, implicit-intersection, and `PERCENTOF` semantics with Excel while preserving Base and external-table references ([bcf059a](https://github.com/dream-num/univer/commit/bcf059aa8), [9940766](https://github.com/dream-num/univer/commit/994076619), [f974894](https://github.com/dream-num/univer/commit/f9748943d), [ef49abd](https://github.com/dream-num/univer/commit/ef49abd9c))
+* **docs:** improve traditional layout, list-marker styling, atomic structure deletion, table selection, document-flavor backgrounds, overlays, and scrolling ([b930f76](https://github.com/dream-num/univer/commit/b930f76e6), [dad0ab7](https://github.com/dream-num/univer/commit/dad0ab75b), [7bc5fc4](https://github.com/dream-num/univer/commit/7bc5fc421), [2bdddf6](https://github.com/dream-num/univer/commit/2bdddf669), [770642a](https://github.com/dream-num/univer/commit/770642a03), [f2aa09b](https://github.com/dream-num/univer/commit/f2aa09b61), [889d109](https://github.com/dream-num/univer/commit/889d10961))
+* **ui/embed:** improve RTL layout, constrain canvas popups, prevent browser zoom, preserve embed editing state and hosts, and defer Facade pointer events until a workbook exists ([185b916](https://github.com/dream-num/univer/commit/185b9169a), [fc73e51](https://github.com/dream-num/univer/commit/fc73e5179), [5a8680f](https://github.com/dream-num/univer/commit/5a8680fba), [fe5cc4d](https://github.com/dream-num/univer/commit/fe5cc4d07), [151f828](https://github.com/dream-num/univer/commit/151f8283a), [765afaf](https://github.com/dream-num/univer/commit/765afaf76))
+* **sheets/drawing:** write Excel-compatible clipboard HTML, correct gridline and scrollbar themes, preview cell images, render chart option icons, and stabilize drawing interactions and popup bounds ([04a7e8e](https://github.com/dream-num/univer/commit/04a7e8ee6), [2cfea02](https://github.com/dream-num/univer/commit/2cfea02f7), [cca8d19](https://github.com/dream-num/univer/commit/cca8d1918), [ca07bd9](https://github.com/dream-num/univer/commit/ca07bd938), [41f3d4d](https://github.com/dream-num/univer/commit/41f3d4d02), [26404c5](https://github.com/dream-num/univer/commit/26404c5fb))
+
 ## [1.0.0-beta.0](https://github.com/dream-num/univer/compare/v1.0.0-alpha.8...v1.0.0-beta.0) (2026-08-05)
 
 ### Bug Fixes
@@ -963,7 +1003,7 @@ No classifiable changes.
 * **shape:** add option handle in interface ([#6369](https://github.com/dream-num/univer/issues/6369)) ([603da2d](https://github.com/dream-num/univer/commit/603da2d751101ff93cc6dadd669600c5d32724cc))
 * **ui:** allow overriding custom fonts in configuration ([#6375](https://github.com/dream-num/univer/issues/6375)) ([c3d75e3](https://github.com/dream-num/univer/commit/c3d75e36f5962e860843f1521f45356e18db1fc6))
 
-# [0.14.0](/compare/v0.13.0...v0.14.0) (2025-12-20)
+# [0.14.0](https://github.com/dream-num/univer/compare/v0.13.0...v0.14.0) (2025-12-20)
 
 
 ### Bug Fixes
@@ -996,7 +1036,7 @@ No classifiable changes.
 * **sheets-conditional-formatting:** use other-formula-service on conditional-formatting (#6322) a1b7d95, closes #6322
 * **sheets:** add biz info on other formula (#6296) 23f6ae2, closes #6296
 
-# [0.13.0](/compare/v0.12.4...v0.13.0) (2025-12-13)
+# [0.13.0](https://github.com/dream-num/univer/compare/v0.12.4...v0.13.0) (2025-12-13)
 
 
 ### Bug Fixes
@@ -1031,7 +1071,7 @@ No classifiable changes.
 * **formula:** dependency tree and calculation api (#6258) e67908f, closes #6258
 * set active selections by defined name input (#6138) 972097c, closes #6138
 
-## [0.12.4](/compare/v0.12.3...v0.12.4) (2025-12-06)
+## [0.12.4](https://github.com/dream-num/univer/compare/v0.12.3...v0.12.4) (2025-12-06)
 
 
 ### Bug Fixes
@@ -1052,7 +1092,7 @@ No classifiable changes.
 * **sheets:** split insert sheet command on large data (#6214) 09cc69a, closes #6214
 * **ui:** add font management service & support appending custom font family (#6237) 7c1c2c9, closes #6237
 
-## [0.12.3](/compare/v0.12.2...v0.12.3) (2025-11-29)
+## [0.12.3](https://github.com/dream-num/univer/compare/v0.12.2...v0.12.3) (2025-11-29)
 
 
 ### Bug Fixes

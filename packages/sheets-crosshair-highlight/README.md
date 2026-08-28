@@ -39,4 +39,3 @@ univer.registerPlugin(UniverSheetsCrosshairHighlightPlugin);
 - [Documentation](https://docs.univer.ai)
 - [NPM package](https://npmjs.com/package/@univerjs/sheets-crosshair-highlight)
 - [GitHub repository](https://github.com/dream-num/univer)
-

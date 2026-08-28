@@ -39,4 +39,3 @@ Use this package with `@univerjs/docs-hyper-link-ui` when users need hyperlink e
 - [Documentation](https://docs.univer.ai)
 - [NPM package](https://npmjs.com/package/@univerjs/docs-hyper-link)
 - [GitHub repository](https://github.com/dream-num/univer)
-

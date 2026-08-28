@@ -10,7 +10,7 @@
 
 | Package | UMD global | CSS | Locales | Facade entry |
 | --- | --- | :---: | :---: | :---: |
-| `@univerjs/data-validation` | `UniverDataValidation` | No | No | No |
+| `@univerjs/data-validation` | `UniverDataValidation` | No | Yes | No |
 
 ## Installation
 
@@ -25,7 +25,16 @@ Keep all `@univerjs/*` packages on the same version.
 ## Usage
 
 ```ts
+import { LocaleType, mergeLocales, Univer } from '@univerjs/core';
 import { UniverDataValidationPlugin } from '@univerjs/data-validation';
+import DataValidationEnUS from '@univerjs/data-validation/locale/en-US';
+
+const univer = new Univer({
+    locale: LocaleType.EN_US,
+    locales: {
+        [LocaleType.EN_US]: mergeLocales(DataValidationEnUS),
+    },
+});
 
 univer.registerPlugin(UniverDataValidationPlugin);
 ```
@@ -35,4 +44,3 @@ univer.registerPlugin(UniverDataValidationPlugin);
 - [Documentation](https://docs.univer.ai)
 - [NPM package](https://npmjs.com/package/@univerjs/data-validation)
 - [GitHub repository](https://github.com/dream-num/univer)
-

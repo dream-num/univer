@@ -35,4 +35,3 @@ univer.registerPlugin(UniverVue3AdapterPlugin);
 - [Documentation](https://docs.univer.ai)
 - [NPM package](https://npmjs.com/package/@univerjs/ui-adapter-vue3)
 - [GitHub repository](https://github.com/dream-num/univer)
-

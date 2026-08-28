@@ -63,5 +63,6 @@ export class MobileDialogService extends DesktopDialogService {
 }
 
 export function isMobileDialogService(dialogService: IDialogService): dialogService is MobileDialogService {
-    return dialogService instanceof MobileDialogService;
+    return typeof Reflect.get(dialogService, 'getOverlaysSuspended$') === 'function' &&
+        typeof Reflect.get(dialogService, 'suspendOverlays') === 'function';
 }

@@ -17,10 +17,19 @@
 import type { ComponentProps } from 'react';
 import type { IMenuSchema } from '../../../../services/menu/menu-manager.service';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { DesktopLogService, ILogService, Injector, LocaleService } from '@univerjs/core';
+import {
+    ConfigService,
+    DesktopLogService,
+    IConfigService,
+    ILogService,
+    Injector,
+    LocaleService,
+    LocaleType,
+} from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ComponentManager, IconManager } from '../../../../common';
+import enUS from '../../../../locale/en-US';
 import { MenuItemType } from '../../../../services/menu/menu';
 import { IMenuManagerService, MenuManagerService } from '../../../../services/menu/menu-manager.service';
 import { RediProvider } from '../../../../utils/di';
@@ -32,7 +41,10 @@ function renderWithDependencies(
     props?: Pick<ComponentProps<typeof MobileMenu>, 'showHeader' | 'onNavigationChange' | 'presentation'>
 ) {
     const injector = new Injector();
+    injector.add([IConfigService, { useClass: ConfigService }]);
     injector.add([LocaleService]);
+    injector.get(LocaleService).load({ [LocaleType.EN_US]: enUS });
+    injector.get(LocaleService).setLocale(LocaleType.EN_US);
     injector.add([ILogService, { useClass: DesktopLogService }]);
     injector.add([IMenuManagerService, { useClass: MenuManagerService }]);
     injector.add([ComponentManager]);
@@ -371,7 +383,7 @@ describe('MobileMenu', () => {
         expect(screen.getByRole('button', { name: 'First' }).getAttribute('aria-pressed')).toBe('true');
         fireEvent.click(screen.getByRole('button', { name: 'First' }));
         fireEvent.click(screen.getByRole('button', { name: 'Disabled' }));
-        fireEvent.click(screen.getByRole('button', { name: 'ui.navigation.back' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Back' }));
         fireEvent.click(screen.getByRole('button', { name: 'Submenu' }));
         fireEvent.click(screen.getByRole('button', { name: 'Nested' }));
 

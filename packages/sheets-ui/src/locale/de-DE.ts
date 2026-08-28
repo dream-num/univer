@@ -366,6 +366,7 @@ const locale: typeof enUS = {
                 pasteErr: 'Der Bereich ist geschützt und Sie haben keine Einfügeberechtigung. Um einzufügen, kontaktieren Sie bitte den Ersteller.',
                 setStyleErr: 'Der Bereich ist geschützt und Sie haben keine Berechtigung zum Festlegen von Stilen. Um Stile festzulegen, kontaktieren Sie bitte den Ersteller.',
                 copyErr: 'Der Bereich ist geschützt und Sie haben keine Kopierberechtigung. Um zu kopieren, kontaktieren Sie bitte den Ersteller.',
+                cutErr: 'Der Bereich ist geschützt und Sie haben keine Berechtigung zum Ausschneiden. Um auszuschneiden, kontaktieren Sie bitte den Ersteller.',
                 workbookCopyErr: 'Die Arbeitsmappe ist geschützt und Sie haben keine Berechtigung zum Kopieren. Um zu kopieren, kontaktieren Sie bitte den Ersteller.',
                 setRowColStyleErr: 'Der Bereich ist geschützt und Sie haben keine Berechtigung zum Festlegen von Zeilen- und Spaltenstilen. Um Zeilen- und Spaltenstile festzulegen, kontaktieren Sie bitte den Ersteller.',
             },

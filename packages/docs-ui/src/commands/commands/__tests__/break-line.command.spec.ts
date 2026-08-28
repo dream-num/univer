@@ -17,8 +17,7 @@
 import type { DocumentDataModel, ICommand, IDocumentData, Injector, Univer } from '@univerjs/core';
 import { awaitTime, DataStreamTreeTokenType, DocumentBlockRangeType, DocumentFlavor, ICommandService, IUniverInstanceService, NamedStyleType, PresetListType, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
-import { NORMAL_TEXT_SELECTION_PLUGIN_STYLE } from '@univerjs/engine-render';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { BreakLineCommand, BreakLineInsertionMode } from '../break-line.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
@@ -246,28 +245,11 @@ describe('break line command', () => {
     }
 
     async function executeBreakLineAndApplyRenderedSelection(selectionManager: DocSelectionManagerService) {
-        const replaceDocRanges = vi.spyOn(selectionManager, 'replaceDocRanges');
-
         await commandService.executeCommand(BreakLineCommand.id);
         await awaitTime(0);
-        const refreshedRanges = replaceDocRanges.mock.calls.at(-1)?.[0];
-        replaceDocRanges.mockRestore();
-        if (!refreshedRanges?.length) {
-            throw new Error('BreakLineCommand did not request a rendered selection refresh');
+        if (selectionManager.getActiveTextRange() == null) {
+            throw new Error('BreakLineCommand did not preserve an active text range');
         }
-
-        selectionManager.__replaceTextRangesWithNoRefresh({
-            textRanges: refreshedRanges.map((range, index) => ({
-                ...range,
-                collapsed: range.startOffset === range.endOffset,
-                isActive: index === refreshedRanges.length - 1,
-            })),
-            rectRanges: [],
-            segmentId: '',
-            segmentPage: -1,
-            style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
-            isEditing: true,
-        }, { unitId: 'test-doc', subUnitId: 'test-doc' });
     }
 
     beforeEach(() => {
@@ -336,14 +318,11 @@ describe('break line command', () => {
 
     it('keeps the cursor fixed for explicit gap insertion mode', async () => {
         const selectionManager = get(DocSelectionManagerService);
-        const replaceDocRanges = vi.spyOn(selectionManager, 'replaceDocRanges');
 
         await commandService.executeCommand(BreakLineCommand.id, { insertionMode: BreakLineInsertionMode.InsertGap });
         await awaitTime(0);
 
-        expect(replaceDocRanges).toHaveBeenCalledWith([
-            expect.objectContaining({ startOffset: 5, endOffset: 5 }),
-        ], { unitId: 'test-doc', subUnitId: 'test-doc' }, true, undefined);
+        expect(selectionManager.getActiveTextRange()).toMatchObject({ startOffset: 5, endOffset: 5 });
     });
 
     it('keeps column groups when breaking a blank paragraph below a column group', async () => {

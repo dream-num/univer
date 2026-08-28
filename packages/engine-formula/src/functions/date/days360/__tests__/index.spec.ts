@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DateSystem } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
@@ -36,6 +37,19 @@ describe('Test days360 function', () => {
             const method = NumberValueObject.create(1);
             result = testFunction.calculate(startDate, endDate, method);
             expect(result.getValue()).toStrictEqual(61);
+        });
+
+        it('uses the configured date system for numeric serials', () => {
+            const startDate = NumberValueObject.create(0);
+            const endDate = NumberValueObject.create(31);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
+            expect(testFunction.calculate(startDate, endDate).getValue()).toBe(31);
+
+            testFunction.setDateSystem(DateSystem.Date1904);
+            expect(testFunction.calculate(startDate, endDate).getValue()).toBe(30);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
         });
 
         it('value is normal, endDate < startDate', () => {
@@ -125,6 +139,19 @@ describe('Test days360 function', () => {
                 [ErrorType.NA, ErrorType.VALUE, ErrorType.NA, ErrorType.NA, ErrorType.NAME],
                 [ErrorType.NA, ErrorType.VALUE, ErrorType.NA, ErrorType.NA, ErrorType.NAME],
             ]);
+        });
+        it('checks the serial-zero boundary in both date systems', () => {
+            const startDate = NumberValueObject.create(0);
+            const endDate = NumberValueObject.create(366);
+            const method = NumberValueObject.create(0);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
+            expect(testFunction.calculate(startDate, endDate, method).getValue()).toBe(361);
+
+            testFunction.setDateSystem(DateSystem.Date1904);
+            expect(testFunction.calculate(startDate, endDate, method).getValue()).toBe(360);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
         });
     });
 });

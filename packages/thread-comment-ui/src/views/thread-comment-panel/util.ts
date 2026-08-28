@@ -18,6 +18,26 @@ import type { IThreadComment } from '@univerjs/thread-comment';
 
 export type ThreadCommentPanelSection = 'unsolved' | 'solved';
 
+export function isSameThreadCommentTarget(
+    active: { unitId: string; subUnitId: string; commentId: string } | null | undefined | void,
+    comment: Pick<IThreadComment, 'id' | 'unitId' | 'subUnitId'>
+): boolean {
+    return active?.unitId === comment.unitId &&
+        active.subUnitId === comment.subUnitId &&
+        active.commentId === comment.id;
+}
+
+export function shouldClearThreadCommentTarget(
+    active: { unitId: string } | null | undefined | void,
+    currentUnitId: string,
+    commentExists: boolean
+): boolean {
+    if (!active) {
+        return false;
+    }
+    return active.unitId !== currentUnitId || !commentExists;
+}
+
 export function getThreadCommentPanelItemKey(
     comment: IThreadComment,
     index: number,

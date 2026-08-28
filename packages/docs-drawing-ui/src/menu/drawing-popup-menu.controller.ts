@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDisposable, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, IDisposable, INeedCheckDisposable, Nullable } from '@univerjs/core';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
 import {
@@ -23,12 +23,19 @@ import {
     ICommandService,
     IContextService,
     Inject,
+    IPermissionService,
     isInternalEditorID,
     IUniverInstanceService,
     RxDisposable,
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
+import {
+    canEditDocumentTargets,
+    getDocumentDrawingSegmentId,
+    getDocumentEntityParentPermissionObjectIds,
+    getDocumentEntityPermissionObjectId,
+} from '@univerjs/docs';
 import { IDocDrawingAdapterService, RemoveDocDrawingCommand } from '@univerjs/docs-drawing';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
@@ -39,6 +46,7 @@ import {
     OpenImageCropOperation,
 } from '@univerjs/drawing-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { FloatingObjectToolbarPosition, IMenuManagerService, MenuItemType } from '@univerjs/ui';
 import { takeUntil } from 'rxjs';
 import { EditDocDrawingOperation } from '../commands/operations/edit-doc-drawing.operation';
 import { SidebarDocDrawingOperation } from '../commands/operations/open-drawing-panel.operation';
@@ -48,7 +56,8 @@ export class DocDrawingPopupMenuController extends RxDisposable {
     private _initImagePopupMenu = new Set<string>();
     private _embeddedRenderUnits = new Set<string>();
     private _popupMenuListeners = new Map<string, IDisposable>();
-    private _disposePopups: IDisposable[] = [];
+    private _disposePopupsByUnit = new Map<string, INeedCheckDisposable[]>();
+    private _popupTargetKeys = new Map<string, string>();
     private _isDrawingPanelOpen = false;
 
     constructor(
@@ -59,8 +68,9 @@ export class DocDrawingPopupMenuController extends RxDisposable {
         @IContextService private readonly _contextService: IContextService,
         @IDocDrawingAdapterService private readonly _drawingAdapterService: IDocDrawingAdapterService,
         @Inject(DocDrawingFloatingToolbarAdapterService) private readonly _floatingToolbarAdapterService: DocDrawingFloatingToolbarAdapterService,
-        @ICommandService private readonly _commandService: ICommandService
-
+        @ICommandService private readonly _commandService: ICommandService,
+        @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
+        @IPermissionService private readonly _permissionService: IPermissionService
     ) {
         super();
 
@@ -72,13 +82,13 @@ export class DocDrawingPopupMenuController extends RxDisposable {
             this._commandService.onCommandExecuted((command) => {
                 if (command.id === EditDocDrawingOperation.id) {
                     this._isDrawingPanelOpen = true;
-                    this._clearPopups();
+                    this._clearPopups(undefined, true);
                 }
                 if (command.id === SidebarDocDrawingOperation.id) {
                     const params = command.params as { value?: string } | undefined;
                     this._isDrawingPanelOpen = params?.value === 'open';
                     if (this._isDrawingPanelOpen) {
-                        this._clearPopups();
+                        this._clearPopups(undefined, true);
                     }
                 }
             })
@@ -90,6 +100,14 @@ export class DocDrawingPopupMenuController extends RxDisposable {
                 }
             })
         );
+        this.disposeWithMe(this._permissionService.permissionPointUpdate$.subscribe(() => {
+            if (this._drawingManagerService.getFocusDrawings().some((drawing) =>
+                this._univerInstanceService.getUnitType(drawing.unitId) === UniverInstanceType.UNIVER_DOC &&
+                !this._canEditDrawing(drawing.unitId, drawing.drawingId)
+            )) {
+                this._clearPopups(undefined, true);
+            }
+        }));
 
         this.disposeWithMe(
             this._univerInstanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC).pipe(takeUntil(this.dispose$)).subscribe((documentDataModel) => this._create(documentDataModel))
@@ -125,14 +143,45 @@ export class DocDrawingPopupMenuController extends RxDisposable {
 
     private _dispose(documentDataModel: DocumentDataModel) {
         const unitId = documentDataModel.getUnitId();
-        this._clearPopups();
+        this._clearPopups(unitId, true);
         this._disposePopupMenuListener(unitId);
         this._renderManagerService.removeRender(unitId);
     }
 
-    private _clearPopups() {
-        this._disposePopups.forEach((dispose) => dispose.dispose());
-        this._disposePopups.length = 0;
+    private _clearPopups(unitId?: string, force = false) {
+        if (unitId == null) {
+            [...this._disposePopupsByUnit.keys()].forEach((popupUnitId) => this._clearPopups(popupUnitId, force));
+            return;
+        }
+
+        const popups = this._disposePopupsByUnit.get(unitId);
+        if (!popups) {
+            return;
+        }
+
+        for (let index = popups.length - 1; index >= 0; index -= 1) {
+            const popup = popups[index];
+            if (force || popup.canDispose()) {
+                popup.dispose();
+                popups.splice(index, 1);
+            }
+        }
+
+        if (popups.length === 0) {
+            this._disposePopupsByUnit.delete(unitId);
+            this._popupTargetKeys.delete(unitId);
+        }
+    }
+
+    private _getDisposePopups(unitId: string): INeedCheckDisposable[] {
+        const popups = this._disposePopupsByUnit.get(unitId);
+        if (popups) {
+            return popups;
+        }
+
+        const nextPopups: INeedCheckDisposable[] = [];
+        this._disposePopupsByUnit.set(unitId, nextPopups);
+        return nextPopups;
     }
 
     private _create(documentDataModel: Nullable<DocumentDataModel>) {
@@ -157,7 +206,7 @@ export class DocDrawingPopupMenuController extends RxDisposable {
         this._popupMenuListeners.get(unitId)?.dispose();
         this._popupMenuListeners.delete(unitId);
         this._initImagePopupMenu.delete(unitId);
-        this._clearPopups();
+        this._clearPopups(unitId, true);
     }
 
     private _hasCropObject(scene: Scene) {
@@ -183,22 +232,22 @@ export class DocDrawingPopupMenuController extends RxDisposable {
             return;
         }
 
-        const disposePopups: IDisposable[] = this._disposePopups;
         const subscriptions = [
             transformer.createControl$.subscribe(() => {
                 if (this._hasCropObject(scene)) {
+                    this._clearPopups(unitId, true);
                     return;
                 }
 
                 const selectedObjects = transformer.getSelectedObjectMap();
-                disposePopups.forEach((dispose) => dispose.dispose());
-                disposePopups.length = 0;
                 if (this._isDrawingPanelOpen || selectedObjects.size > 1) {
+                    this._clearPopups(unitId, this._isDrawingPanelOpen);
                     return;
                 }
 
                 const object = selectedObjects.values().next().value as Nullable<BaseObject>;
                 if (!object) {
+                    this._clearPopups(unitId);
                     return;
                 }
 
@@ -208,10 +257,23 @@ export class DocDrawingPopupMenuController extends RxDisposable {
                     drawingParam.drawingType === DrawingTypeEnum.DRAWING_DOM ||
                     drawingParam.drawingType === DrawingTypeEnum.DRAWING_SHAPE
                 ) {
+                    this._clearPopups(unitId);
                     return;
                 }
 
-                const { unitId, subUnitId, drawingId, drawingType } = drawingParam;
+                const { unitId: drawingUnitId, subUnitId, drawingId, drawingType } = drawingParam;
+                if (!this._canEditDrawing(drawingUnitId, drawingId)) {
+                    this._clearPopups(unitId, true);
+                    return;
+                }
+                const disposePopups = this._disposePopupsByUnit.get(unitId);
+                const popupTargetKey = `${drawingUnitId}:${subUnitId}:${drawingId}`;
+                const previousPopupTargetKey = this._popupTargetKeys.get(unitId);
+                if (previousPopupTargetKey === popupTargetKey && disposePopups && disposePopups.length > 0) {
+                    return;
+                }
+
+                this._clearPopups(unitId, previousPopupTargetKey != null);
                 const isImage = drawingType === DrawingTypeEnum.DRAWING_IMAGE;
                 // Charts use the document toolbar placement, while retaining chart-specific actions and controls.
                 const isChart = drawingType === DrawingTypeEnum.DRAWING_CHART;
@@ -222,37 +284,38 @@ export class DocDrawingPopupMenuController extends RxDisposable {
                         direction: isImage || isChart ? 'top-center' : 'horizontal',
                         offset: isImage || isChart ? [0, 8] : [2, 0],
                         extraProps: {
-                            menuItems: this._getDrawingPopupMenuItems(unitId, subUnitId, drawingId, drawingType),
+                            menuItems: this._getDrawingPopupMenuItems(drawingUnitId, subUnitId, drawingId, drawingType),
                             variant: isImage ? 'doc-floating-toolbar' : isChart ? 'doc-chart-floating-toolbar' : undefined,
-                            unitId,
+                            unitId: drawingUnitId,
                             subUnitId,
                             drawingId,
                         },
                     },
-                    unitId
+                    drawingUnitId
                 );
 
-                disposePopups.push(this.disposeWithMe(popup));
+                this.disposeWithMe(popup);
+                this._getDisposePopups(unitId).push(popup);
+                this._popupTargetKeys.set(unitId, popupTargetKey);
 
                 const focusDrawings = this._drawingManagerService.getFocusDrawings();
-                const alreadyFocused = focusDrawings.find((drawing) => drawing.unitId === unitId && drawing.subUnitId === subUnitId && drawing.drawingId === drawingId);
+                const alreadyFocused = focusDrawings.find((drawing) => drawing.unitId === drawingUnitId && drawing.subUnitId === subUnitId && drawing.drawingId === drawingId);
                 if (!alreadyFocused) {
-                    this._drawingManagerService.focusDrawing([{ unitId, subUnitId, drawingId }]);
+                    this._drawingManagerService.focusDrawing([{ unitId: drawingUnitId, subUnitId, drawingId }]);
                 }
             }),
             transformer.clearControl$.subscribe(() => {
-                disposePopups.forEach((dispose) => dispose.dispose());
-                disposePopups.length = 0;
-                this._contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, false);
-                this._drawingManagerService.focusDrawing(null);
+                this._clearPopups(unitId);
+                queueMicrotask(() => {
+                    if (transformer.getSelectedObjectMap().size > 0) {
+                        return;
+                    }
+                    this._contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, false);
+                    this._drawingManagerService.focusDrawing(null);
+                });
             }),
             transformer.changing$.subscribe(() => {
-                disposePopups.forEach((dispose) => dispose.dispose());
-                disposePopups.length = 0;
-            }),
-            transformer.changeStart$.subscribe(() => {
-                disposePopups.forEach((dispose) => dispose.dispose());
-                disposePopups.length = 0;
+                this._clearPopups(unitId, true);
             }),
         ];
         const disposable = toDisposable(() => subscriptions.forEach((subscription) => subscription.unsubscribe()));
@@ -260,20 +323,31 @@ export class DocDrawingPopupMenuController extends RxDisposable {
         return disposable;
     }
 
+    private _canEditDrawing(unitId: string, drawingId: string): boolean {
+        const documentDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(
+            unitId,
+            UniverInstanceType.UNIVER_DOC
+        );
+        if (!documentDataModel) {
+            return false;
+        }
+        const segmentId = getDocumentDrawingSegmentId(documentDataModel, drawingId);
+        return canEditDocumentTargets(this._permissionService, unitId, [
+            ...getDocumentEntityParentPermissionObjectIds(documentDataModel, segmentId, 'drawing', drawingId),
+            getDocumentEntityPermissionObjectId(segmentId, 'drawing', drawingId),
+        ]);
+    }
+
     private _getDrawingPopupMenuItems(unitId: string, subUnitId: string, drawingId: string, drawingType: number) {
         const drawing = this._drawingManagerService.getDrawingByParam({ unitId, subUnitId, drawingId }) as IDocDrawing | null;
         const floatingToolbarMenuItems = drawing
             ? this._floatingToolbarAdapterService.getItems({ unitId, subUnitId, drawing })
             : null;
-        if (floatingToolbarMenuItems) {
-            return floatingToolbarMenuItems;
-        }
-
         const editCommandInfo = drawing
             ? this._drawingAdapterService.getEditDrawingCommandInfo({ unitId, subUnitId, drawing })
             : null;
 
-        return [
+        const defaultItems = [
             {
                 label: editCommandInfo?.label ?? 'docs-drawing-ui.image-popup.edit',
                 index: 0,
@@ -307,5 +381,30 @@ export class DocDrawingPopupMenuController extends RxDisposable {
                 disable: true, // TODO: @JOCS, feature is not ready.
             },
         ];
+
+        return [
+            ...(floatingToolbarMenuItems ?? defaultItems),
+            ...this._getFloatingObjectMenuItems(),
+        ];
+    }
+
+    private _getFloatingObjectMenuItems() {
+        return this._menuManagerService
+            .getFlatMenuByPositionKey(FloatingObjectToolbarPosition.DOC)
+            .flatMap(({ item }, index) => {
+                if (!item || item.type !== MenuItemType.BUTTON || !item.title || typeof item.icon !== 'string') {
+                    return [];
+                }
+
+                return [{
+                    type: 'button' as const,
+                    label: item.title,
+                    index: 100 + index,
+                    commandId: item.commandId ?? item.id,
+                    commandParams: typeof item.params === 'function' ? item.params() : item.params,
+                    disable: false,
+                    icon: item.icon,
+                }];
+            });
     }
 }

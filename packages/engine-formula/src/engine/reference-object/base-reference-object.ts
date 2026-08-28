@@ -17,7 +17,7 @@
 import type { ICellData, IRange, IUnitRange, Nullable } from '@univerjs/core';
 import type { IArrayFormulaRangeType, IRuntimeUnitDataType, IUnitData, IUnitSheetNameMap, IUnitStylesData } from '../../basics/common';
 import type { BaseValueObject, IArrayValueObject } from '../value-object/base-value-object';
-import { CellValueType, isNullCell, isTextFormat, moveRangeByOffset, ObjectMatrix } from '@univerjs/core';
+import { CellValueType, DateSystem, isNullCell, isTextFormat, moveRangeByOffset, ObjectMatrix } from '@univerjs/core';
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { ObjectClassType } from '../../basics/object-class-type';
@@ -41,6 +41,8 @@ const FORMULA_CACHE_LRU_COUNT = 10000;
 
 export const FORMULA_REF_TO_ARRAY_CACHE = new FormulaAstLRU<ArrayValueObject>(FORMULA_CACHE_LRU_COUNT);
 export class BaseReferenceObject extends ObjectClassType {
+    private _dateSystem = DateSystem.Date1900;
+
     private _forcedSheetId: Nullable<string> = '';
 
     private _forcedSheetName: string = '';
@@ -154,6 +156,15 @@ export class BaseReferenceObject extends ObjectClassType {
         return true;
     }
 
+    getDateSystem() {
+        return this._dateSystem;
+    }
+
+    withDateSystem(dateSystem: DateSystem): this {
+        this._dateSystem = dateSystem;
+        return this;
+    }
+
     iterator(
         callback: (valueObject: Nullable<BaseValueObject>, rowIndex: number, columnIndex: number) => Nullable<boolean>
     ) {
@@ -187,7 +198,7 @@ export class BaseReferenceObject extends ObjectClassType {
                     const pattern = this.getCellPattern(unitId, sheetId, r, c);
                     if (pattern && resultObjectValue.isNumber()) {
                         const value = Number(resultObjectValue.getValue());
-                        resultObjectValue = NumberValueObject.create(value, pattern);
+                        resultObjectValue = NumberValueObject.create(value, pattern).withDateSystem(this._dateSystem);
                     }
                 }
 
@@ -221,7 +232,7 @@ export class BaseReferenceObject extends ObjectClassType {
         const pattern = this.getCellPattern(unitId, sheetId, startRow, startColumn);
         if (pattern && cellValueObject.isNumber()) {
             const value = Number(cellValueObject.getValue());
-            cellValueObject = NumberValueObject.create(value, pattern);
+            cellValueObject = NumberValueObject.create(value, pattern).withDateSystem(this._dateSystem);
         }
 
         return cellValueObject;
@@ -464,20 +475,20 @@ export class BaseReferenceObject extends ObjectClassType {
             const pattern = this._getPatternByCell(cell);
 
             if (isTextFormat(pattern)) {
-                return StringValueObject.create(value.toString());
+                return StringValueObject.create(value.toString()).withDateSystem(this._dateSystem);
             }
 
-            return createNumberValueObjectByRawValue(value, pattern);
+            return createNumberValueObjectByRawValue(value, pattern).withDateSystem(this._dateSystem);
         }
         if (cellValueType === CellValueType.STRING || cellValueType === CellValueType.FORCE_STRING) {
             // A1 is `"test"`, =A1 also needs to get `"test"`
-            return StringValueObject.create(value.toString());
+            return StringValueObject.create(value.toString()).withDateSystem(this._dateSystem);
         }
         if (cellValueType === CellValueType.BOOLEAN) {
             return createBooleanValueObjectByRawValue(value);
         }
 
-        return ValueObjectFactory.create(value);
+        return ValueObjectFactory.create(value, false, this._dateSystem);
     }
 
     private _getPatternByCell(cell: ICellData) {
@@ -629,7 +640,8 @@ export class BaseReferenceObject extends ObjectClassType {
     toArrayValueObject(useCache: boolean = true): ArrayValueObject {
         const { startRow, endRow, startColumn, endColumn } = this.getRangePosition();
 
-        const key = `${this.getUnitId()}_${this.getSheetId()}_${startRow}_${endRow}_${startColumn}_${endColumn}`;
+        // A cached range can be reused only when its string and formatted-number interpretation matches.
+        const key = `${this.getUnitId()}_${this.getSheetId()}_${startRow}_${endRow}_${startColumn}_${endColumn}_${this._dateSystem}`;
 
         const array = FORMULA_REF_TO_ARRAY_CACHE.get(key);
 
@@ -670,7 +682,7 @@ export class BaseReferenceObject extends ObjectClassType {
             useInvertedIndexCache: true,
         };
 
-        const arrayValueObject = ArrayValueObject.create(arrayValueObjectData);
+        const arrayValueObject = ArrayValueObject.create(arrayValueObjectData, this._dateSystem);
 
         useCache && FORMULA_REF_TO_ARRAY_CACHE.set(key, arrayValueObject);
 
@@ -707,7 +719,7 @@ export class BaseReferenceObject extends ObjectClassType {
             column: 0,
         };
 
-        return ArrayValueObject.create(arrayValueObjectData);
+        return ArrayValueObject.create(arrayValueObjectData, this._dateSystem);
     }
 }
 

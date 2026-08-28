@@ -366,6 +366,7 @@ const locale: typeof enUS = {
                 pasteErr: 'Phạm vi này đã được bảo vệ, hiện không có quyền dán. Nếu cần dán, vui lòng liên hệ với người tạo.',
                 setStyleErr: 'Phạm vi này đã được bảo vệ, hiện không có quyền thiết lập kiểu. Nếu cần thiết lập kiểu, vui lòng liên hệ với người tạo.',
                 copyErr: 'Phạm vi này đã được bảo vệ, hiện không có quyền sao chép. Nếu cần sao chép, vui lòng liên hệ với người tạo.',
+                cutErr: 'Phạm vi này đã được bảo vệ, hiện không có quyền cắt. Nếu cần cắt, vui lòng liên hệ với người tạo.',
                 workbookCopyErr: 'Sổ làm việc này đã được bảo vệ, hiện không có quyền sao chép. Nếu cần sao chép, vui lòng liên hệ với người tạo.',
                 setRowColStyleErr: 'Phạm vi này đã được bảo vệ, hiện không có quyền thiết lập kiểu hàng cột. Nếu cần thiết lập kiểu hàng cột, vui lòng liên hệ với người tạo.',
             },

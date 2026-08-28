@@ -24,6 +24,7 @@ import { ILogService } from '../services/log/log.service';
 import { Tools } from '../shared';
 import { generateRandomId } from '../shared/random-id';
 import { BooleanNumber } from '../types/enum';
+import { DateSystem } from '../types/enum/date-system';
 import { getEmptySnapshot } from './empty-snapshot';
 import { Styles } from './styles';
 import { Worksheet } from './worksheet';
@@ -93,6 +94,12 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
             this._snapshot = DEFAULT_WORKBOOK;
         } else {
             this._snapshot = Tools.commonExtend(DEFAULT_WORKBOOK, workbookData);
+            if (workbookData.dateSystem == null) {
+                delete this._snapshot.dateSystem;
+            } else if (workbookData.dateSystem !== DateSystem.Date1900 && workbookData.dateSystem !== DateSystem.Date1904) {
+                this._logService.warn('[Workbook]', `Unknown date system "${String(workbookData.dateSystem)}"; falling back to Excel 1900.`);
+                this._snapshot.dateSystem = DateSystem.Date1900;
+            }
         }
 
         const { styles } = this._snapshot;
@@ -151,6 +158,12 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
 
     getUnitId() {
         return this._unitId;
+    }
+
+    getDateSystem(): DateSystem {
+        return this._snapshot.dateSystem === DateSystem.Date1904
+            ? DateSystem.Date1904
+            : DateSystem.Date1900;
     }
 
     override getRev(): number {

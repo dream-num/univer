@@ -56,7 +56,7 @@ import {
     ThreadCommentDataSourceService,
     ThreadCommentModel,
 } from '@univerjs/thread-comment';
-import { SetActiveCommentOperation, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
+import { SetActiveCommentOperation, ThreadCommentDraftService, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import threadCommentEnUS from '@univerjs/thread-comment-ui/locale/en-US';
 import { IShortcutService, ISidebarService, RediContext } from '@univerjs/ui';
 import { act } from 'react';
@@ -486,6 +486,7 @@ function createTestBed(testWorkbookData: IWorkbookData = workbookData) {
     injector.add([SheetsSelectionsService]);
     injector.add([SheetsThreadCommentPopupService]);
     injector.add([ISidebarService, { useClass: TestSidebarService as never }]);
+    injector.add([ThreadCommentDraftService]);
     injector.add([ThreadCommentPanelService]);
 
     univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, testWorkbookData);
@@ -700,7 +701,7 @@ describe('SheetsThreadCommentPanel', () => {
         expect(container.textContent).not.toContain('Sheet one B2');
     });
 
-    it('highlights only unresolved comments on the current sheet and closes the cell popup when resolved', () => {
+    it('highlights only unresolved comments on the current sheet and closes the cell popup when resolved', async () => {
         const testBed = createTestBed();
         univer = testBed.univer;
         testBed.threadCommentModel.addComment(unitId, sheet1, createComment('current-sheet-thread', sheet1, 'B2', 'Current sheet B2'));
@@ -750,8 +751,9 @@ describe('SheetsThreadCommentPanel', () => {
         const resolveButton = currentThread!.querySelector('.univer-flex-shrink-0 .univer-cursor-pointer');
         expect(resolveButton).toBeInstanceOf(HTMLElement);
 
-        act(() => {
+        await act(async () => {
             resolveButton!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            await Promise.resolve();
         });
 
         expect(testBed.popupService.activePopup).toBeNull();

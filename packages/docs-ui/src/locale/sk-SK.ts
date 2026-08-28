@@ -18,6 +18,9 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'docs-ui': {
+        layout: {
+            recovering: 'Obnovuje sa rozloženie dokumentu…',
+        },
         toolbar: {
             font: 'Písmo',
             fontSize: 'Veľkosť písma',

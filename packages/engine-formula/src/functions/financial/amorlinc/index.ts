@@ -46,13 +46,13 @@ export class Amorlinc extends BaseFunction {
 
         const [costObject, datePurchasedObject, firstPeriodObject, salvageObject, periodObject, rateObject, basisObject] = variants as BaseValueObject[];
 
-        const datePurchasedSerialNumber = getDateSerialNumberByObject(datePurchasedObject);
+        const datePurchasedSerialNumber = getDateSerialNumberByObject(datePurchasedObject, this.getDateSystem());
 
         if (typeof datePurchasedSerialNumber !== 'number') {
             return datePurchasedSerialNumber;
         }
 
-        const firstPeriodSerialNumber = getDateSerialNumberByObject(firstPeriodObject);
+        const firstPeriodSerialNumber = getDateSerialNumberByObject(firstPeriodObject, this.getDateSystem());
 
         if (typeof firstPeriodSerialNumber !== 'number') {
             return firstPeriodSerialNumber;
@@ -100,7 +100,7 @@ export class Amorlinc extends BaseFunction {
     ): NumberValueObject {
         const totalDepreciation = costValue - salvageValue;
         const baseDepreciation = costValue * rateValue;
-        const { days, yearDays } = getTwoDateDaysByBasis(datePurchasedSerialNumber, firstPeriodSerialNumber, basisValue);
+        const { days, yearDays } = getTwoDateDaysByBasis(datePurchasedSerialNumber, firstPeriodSerialNumber, basisValue, this.getDateSystem());
         const firstPeriodYearsFraction = days / yearDays;
         const life = Math.ceil(totalDepreciation / baseDepreciation - firstPeriodYearsFraction);
 

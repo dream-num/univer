@@ -1,9 +1,6 @@
 <div align="center">
 
-<picture>
-    <source media="(prefers-color-scheme: dark)" srcset="../img/banner-light.png">
-    <img src="../img/banner-dark.png" alt="Univer" width="420" />
-</picture>
+<img src="../img/banner.png" alt="Univer SDK" width="800" />
 
 **用于构建电子表格、文档和演示文稿的全栈、同构办公 SDK。**
 
@@ -23,7 +20,7 @@ Univer 以插件化架构、Canvas 渲染引擎、公式引擎和统一的 Facad
 [![Stars](https://img.shields.io/github/stars/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/stargazers)
 [![Contributors](https://img.shields.io/github/contributors/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/graphs/contributors)
 [![Issues](https://img.shields.io/github/issues/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/issues)
-[![Last Commit](https://img.shields.io/github/last-commit/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/commits/main/)
+[![Last Commit](https://img.shields.io/github/last-commit/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/commits/dev/)
 
 [![Discord](https://img.shields.io/discord/1136129819961217077?logo=discord&logoColor=FFFFFF&label=discord&color=5865F2&style=flat-square)](https://discord.gg/z3NKNT6D2f)
 [![Twitter](https://img.shields.io/twitter/follow/univerhq?style=flat-square&logo=x)](https://twitter.com/univerhq)
@@ -89,7 +86,7 @@ Univer 不只是一个电子表格文件查看器。它是用于构建你自己�
 
 - **同构设计**：既可以在浏览器中运行 UI 应用，也可以在 Node.js 中运行无头处理逻辑。
 - **插件优先架构**：每个能力都以可组合插件的形式提供，功能可以添加、移除、替换或延迟加载。
-- **Preset Mode 便于快速集成**：当你希望快速获得可运行应用时，可以使用 [`univer-presets`](https://github.com/dream-num/univer-presets) 提供的预设插件组合。
+- **Preset Mode 便于快速集成**：当你希望快速获得可运行应用时，可以使用本仓库 [`presets/`](../../presets) 中的预设插件集合。
 - **Plugin Mode 提供完整控制**：当你需要自定义加载、更小包体或深度集成时，可以手动组合包和插件。
 - **Facade API**：通过更高层 API 操作工作簿、工作表、区域、文档、公式、命令和事件。
 - **Canvas 渲染引擎**：支持大型可编辑文档界面，并在多种文档类型之间复用渲染层。
@@ -97,45 +94,12 @@ Univer 不只是一个电子表格文件查看器。它是用于构建你自己�
 
 ## ⚡ 快速开始
 
-大多数应用应该从 **Preset Mode** 开始。当你需要手动组合包并控制插件注册时，可以使用 **Plugin Mode**。
+使用 **Plugin Mode** 可以获得完整的产品能力覆盖并精确控制组合方式。对于受支持的 Sheets、Docs 和 Node 配置，**Preset Mode** 提供了更简短的预设方案。
 
 <details open>
-<summary><strong>Preset Mode（推荐）</strong></summary>
-
-Preset 是一组经过整理的 Univer 插件集合，包含所需的 Facade API 注册和样式。
-
-```bash
-pnpm add @univerjs/presets @univerjs/preset-sheets-core
-```
-
-```ts
-import { UniverSheetsCorePreset } from '@univerjs/preset-sheets-core'
-import UniverPresetSheetsCoreEnUS from '@univerjs/preset-sheets-core/locales/en-US'
-import { createUniver, LocaleType, mergeLocales } from '@univerjs/presets'
-
-import '@univerjs/preset-sheets-core/lib/index.css'
-
-const { univerAPI } = createUniver({
-  locale: LocaleType.EN_US,
-  locales: {
-    [LocaleType.EN_US]: mergeLocales(UniverPresetSheetsCoreEnUS),
-  },
-  presets: [
-    UniverSheetsCorePreset({
-      container: 'app',
-    }),
-  ],
-})
-
-univerAPI.createWorkbook({})
-```
-
-</details>
-
-<details>
 <summary><strong>Plugin Mode</strong></summary>
 
-Plugin Mode 让你更底层地控制包、样式导入、locale 合并、Facade API 注册和插件顺序。
+Plugin Mode 让你更底层地控制包、样式导入、locale 合并、Facade API 注册和插件配置。
 
 ```bash
 pnpm add @univerjs/core @univerjs/design @univerjs/docs @univerjs/docs-ui @univerjs/engine-formula @univerjs/engine-render @univerjs/sheets @univerjs/sheets-formula @univerjs/sheets-formula-ui @univerjs/sheets-numfmt @univerjs/sheets-numfmt-ui @univerjs/sheets-ui @univerjs/ui
@@ -212,6 +176,39 @@ univerAPI.createWorkbook({})
 
 </details>
 
+<details>
+<summary><strong>Preset Mode</strong></summary>
+
+Preset 是一组经过整理的 Univer 插件集合，包含所需的 Facade API 注册和样式。
+
+```bash
+pnpm add @univerjs/presets @univerjs/preset-sheets-core
+```
+
+```ts
+import { UniverSheetsCorePreset } from '@univerjs/preset-sheets-core'
+import UniverPresetSheetsCoreEnUS from '@univerjs/preset-sheets-core/locales/en-US'
+import { createUniver, LocaleType, mergeLocales } from '@univerjs/presets'
+
+import '@univerjs/preset-sheets-core/lib/index.css'
+
+const { univerAPI } = createUniver({
+  locale: LocaleType.EN_US,
+  locales: {
+    [LocaleType.EN_US]: mergeLocales(UniverPresetSheetsCoreEnUS),
+  },
+  presets: [
+    UniverSheetsCorePreset({
+      container: 'app',
+    }),
+  ],
+})
+
+univerAPI.createWorkbook({})
+```
+
+</details>
+
 页面需要一个容器：
 
 ```html
@@ -224,11 +221,11 @@ univerAPI.createWorkbook({})
 
 | 选择 | 适用场景 | 从这里开始 |
 | --- | --- | --- |
-| **Preset Mode** | 你希望用最少配置获得可运行的 Sheets、Docs 或 Node 设置。 | [`univer-presets`](https://github.com/dream-num/univer-presets) 和 [快速入门指南](https://docs.univer.ai/guides/sheets/getting-started/installation) |
-| **Plugin Mode** | 你需要严格控制包、插件注册顺序、延迟加载或自定义运行时组合。 | 本仓库的 [`examples/`](../../examples) 和 [架构指南](https://docs.univer.ai/guides/recipes/architecture/univer) |
+| **Plugin Mode** | 你需要严格控制包、已配置的依赖、延迟加载或自定义运行时组合。 | 本仓库的 [`examples/`](../../examples) 和 [架构指南](https://docs.univer.ai/guides/recipes/architecture/univer) |
+| **Preset Mode** | 你希望用最少配置获得可运行的 Sheets、Docs 或 Node 设置。 | 本仓库的 [`presets/`](../../presets) 和 [快速入门指南](https://docs.univer.ai/guides/sheets/getting-started/installation) |
 | **Headless Mode** | 你需要在没有 UI 的情况下进行服务端工作簿/文档处理、公式计算或自动化。 | [Headless Univer](https://docs.univer.ai/guides/sheets/getting-started/node) |
 
-请保持所有 `@univerjs/*` 包版本一致。如果使用 Univer Pro 包，也请保持 `@univerjs-pro/*` 版本一致。
+同一 Univer 协调发布线中的 `@univerjs/*` SDK 包应保持版本一致。`@univerjs/icons`、`@univerjs/icons-svg` 等独立发布的包应使用各包清单声明的兼容版本，而不是跟随 SDK 版本。使用 Univer Pro 时，也请让 `@univerjs-pro/*` 与对应的协调发布线保持一致。
 
 关于 API 兼容性预期、实验性 API、内部 API 和废弃规则，请阅读 [API 稳定性政策](../API_STABILITY.md)。
 
@@ -278,7 +275,7 @@ Pro 功能请参考 [Univer Pro 指南](https://docs.univer.ai/guides/pro)。这
 ## 🌐 生态
 
 - **核心 SDK**：[`dream-num/univer`](https://github.com/dream-num/univer)，也就是当前 monorepo。
-- **Presets**：[`dream-num/univer-presets`](https://github.com/dream-num/univer-presets)，面向浏览器和 Node.js 应用的预设插件组合。
+- **Presets**：本仓库的 [`presets/`](../../presets)，面向浏览器和 Node.js 应用的预设插件集合。
 - **AI agent skills**：[`dream-num/univer-sdk-skills`](https://github.com/dream-num/univer-sdk-skills)，供 AI agent 使用的可复用说明，覆盖 Univer 集成、Pro 功能、插件开发和 Node 后端。参见 [AI Skills 指南](https://docs.univer.ai/guides/skills)。
 - **文档**：[docs.univer.ai](https://docs.univer.ai)，包含 Sheets、Docs、Slides、recipes 和 Pro 指南。
 - **API 参考**：[docs.univer.ai/reference](https://docs.univer.ai/reference/classes/univer)，包含 Facade API 和生成的 API 参考。
@@ -290,9 +287,8 @@ Pro 功能请参考 [Univer Pro 指南](https://docs.univer.ai/guides/pro)。这
 ```text
 .
 ├── packages/      核心包、引擎、文档类型、UI 插件和功能插件
-├── examples/      用于开发的本地浏览器和 Node.js 示例
-├── common/        共享内部工具、mock 数据、storybook 和工具函数
-├── e2e/           Playwright 和视觉对比测试
+├── examples/      用于本地浏览器开发的一体化 Vite 工作台
+├── common/        共享内部工具、storybook 和工具函数
 ├── tests/         其他集成测试项目
 └── docs/          架构说明、图片和仓库内文档
 ```
@@ -317,12 +313,12 @@ pnpm dev
 
 | 命令 | 用途 |
 | --- | --- |
-| `pnpm dev` | 启动本地 examples 应用。 |
+| `pnpm dev` | 构建并预览低内存、无 HMR 的一体化工作台。 |
+| `pnpm dev:source` | 启动支持 HMR 的源码工作台，冷启动和内存占用更高。 |
 | `pnpm build` | 构建 workspace 包，不包含内部 common 包。 |
 | `pnpm test` | 通过 Turbo 运行单元测试。 |
 | `pnpm typecheck` | 通过 Turbo 运行 TypeScript 检查。 |
 | `pnpm lint` | 运行 ESLint。 |
-| `pnpm test:e2e` | 运行 Playwright 测试。 |
 | `pnpm storybook:dev` | 启动用于 UI 组件开发的 Storybook。 |
 
 提交 pull request 前请阅读 [CONTRIBUTING.md](../../CONTRIBUTING.md)。

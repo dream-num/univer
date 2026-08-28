@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { DEFAULT_NOW_FORMAT, excelDateTimeSerial } from '../../../basics/date';
+import { excelDateTimeSerial } from '@univerjs/core';
+import { DEFAULT_NOW_FORMAT } from '../../../basics/date';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
@@ -27,7 +28,7 @@ export class Now extends BaseFunction {
         const now = new Date();
         // Here we use local time to calculate UTC date time serial number
         const utcNow = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes(), now.getSeconds()));
-        const currentSerial = excelDateTimeSerial(utcNow);
+        const currentSerial = excelDateTimeSerial(utcNow, this.getDateSystem());
         const valueObject = NumberValueObject.create(currentSerial, DEFAULT_NOW_FORMAT);
         return valueObject;
     }

@@ -20,6 +20,7 @@ import type { IDocDrawing } from '../../services/doc-drawing.service';
 import {
     BooleanNumber,
     CommandType,
+    DrawingTypeEnum,
     ICommandService,
     IUniverInstanceService,
     JSONX,
@@ -27,7 +28,7 @@ import {
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
-import { RichTextEditingMutation } from '@univerjs/docs';
+import { DocHistoryAction, RichTextEditingMutation } from '@univerjs/docs';
 
 /**
  * Controls how a document drawing participates in text layout.
@@ -106,6 +107,11 @@ export const UpdateDocDrawingWrappingStyleCommand: ICommand = {
         }
 
         const oldDrawings = documentDataModel.getDrawings() ?? {};
+        const historyAction = drawings.length > 0 && drawings.every(({ drawingId }) =>
+            oldDrawings[drawingId]?.drawingType === DrawingTypeEnum.DRAWING_IMAGE
+        )
+            ? DocHistoryAction.UpdateImage
+            : undefined;
         const jsonX = JSONX.getInstance();
         const rawActions: JSONXActions = [];
 
@@ -142,6 +148,7 @@ export const UpdateDocDrawingWrappingStyleCommand: ICommand = {
             id: RichTextEditingMutation.id,
             params: {
                 unitId,
+                historyAction,
                 actions: rawActions.reduce(
                     (actions, action) => JSONX.compose(actions, action as JSONXActions),
                     null as JSONXActions

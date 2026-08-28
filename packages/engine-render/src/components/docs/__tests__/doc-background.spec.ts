@@ -46,9 +46,10 @@ function createPage(overrides: Partial<IDocumentSkeletonPage> = {}) {
     } as IDocumentSkeletonPage;
 }
 
-function createSkeleton(pages: IDocumentSkeletonPage[], documentFlavor = DocumentFlavor.TRADITIONAL) {
+function createSkeleton(pages: IDocumentSkeletonPage[], documentFlavor = DocumentFlavor.TRADITIONAL, progress?: object) {
     return {
         getSkeletonData: () => ({ pages }),
+        getLayoutProgress: () => progress,
         getViewModel: () => ({
             getDataModel: () => ({
                 getSnapshot: () => ({
@@ -175,6 +176,78 @@ describe('DocBackground', () => {
         } as any);
         expect(rectDraw).not.toHaveBeenCalled();
 
+        background.dispose();
+    });
+
+    it('draws viewport-visible placeholder pages beyond the completed tail', () => {
+        const background = DocBackground.create(
+            'incremental-background',
+            createSkeleton([createPage()], DocumentFlavor.TRADITIONAL, {
+                complete: false,
+                pageCount: 1,
+                estimatedPageCount: 3,
+            }),
+            {
+                pageLayoutType: PageLayoutType.VERTICAL,
+                pageMarginLeft: 24,
+                pageMarginTop: 18,
+            }
+        );
+        background.resize(240, 432);
+        const gradient = { addColorStop: vi.fn() };
+        const ctx = {
+            ...createCtx(),
+            beginPath: vi.fn(),
+            createLinearGradient: vi.fn(() => gradient),
+            fill: vi.fn(),
+            roundRect: vi.fn(),
+            set fillStyle(_value: unknown) {},
+        } as any;
+        const rectDraw = vi.spyOn(Rect, 'drawWith').mockImplementation(() => {});
+        vi.spyOn(Path, 'drawWith').mockImplementation(() => {});
+
+        background.draw(ctx, {
+            viewBound: { left: 0, top: 270, right: 240, bottom: 400 },
+            cacheBound: { left: 0, top: 270, right: 240, bottom: 400 },
+        } as any);
+
+        expect(rectDraw).toHaveBeenCalledTimes(2);
+        expect(rectDraw.mock.calls[1][1]).toMatchObject({ width: 200, height: 120 });
+        expect(ctx.fill).toHaveBeenCalled();
+        background.dispose();
+    });
+
+    it('does not draw layout skeleton lines inside the current published traditional page', () => {
+        const background = DocBackground.create(
+            'incremental-current-page-background',
+            createSkeleton([createPage()], DocumentFlavor.TRADITIONAL, {
+                complete: false,
+                pageCount: 1,
+                estimatedPageCount: 1,
+                publishedPageCount: 1,
+            }),
+            {
+                pageLayoutType: PageLayoutType.VERTICAL,
+                pageMarginLeft: 24,
+                pageMarginTop: 18,
+            }
+        );
+        background.resize(240, 160);
+        const gradient = { addColorStop: vi.fn() };
+        const ctx = Object.assign(createCtx(), {
+            beginPath: vi.fn(),
+            createLinearGradient: vi.fn(() => gradient),
+            fill: vi.fn(),
+            roundRect: vi.fn(),
+            fillStyle: '',
+        });
+        vi.spyOn(Rect, 'drawWith').mockImplementation(() => {});
+        vi.spyOn(Path, 'drawWith').mockImplementation(() => {});
+
+        background.draw(ctx);
+
+        expect(ctx.createLinearGradient).not.toHaveBeenCalled();
+        expect(ctx.fill).not.toHaveBeenCalled();
         background.dispose();
     });
 });

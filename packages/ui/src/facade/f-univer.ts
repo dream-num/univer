@@ -16,11 +16,13 @@
 
 import type { IDisposable } from '@univerjs/core';
 import type { IMessageProps } from '@univerjs/design';
-import type { BuiltInUIPart, ComponentType, IComponentOptions, IDialogPartMethodOptions, IFontConfig, ISidebarMethodOptions } from '@univerjs/ui';
+import type { BuiltInUIPart, ComponentType, IComponentOptions, IDialogPartMethodOptions, IFontConfig, ISidebarMethodOptions, RibbonType } from '@univerjs/ui';
 import type { IFacadeMenuItem, IFacadeSubmenuItem } from './f-menu-builder';
+import { IConfigService } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { ComponentManager, connectInjector, CopyCommand, IDialogService, IFontService, IMessageService, ISidebarService, IUIPartsService, PasteCommand } from '@univerjs/ui';
+
+import { ComponentManager, connectInjector, CopyCommand, IDialogService, IFontService, IMessageService, ISidebarService, IUIPartsService, PasteCommand, UI_PLUGIN_CONFIG_KEY } from '@univerjs/ui';
 import { FMenu, FSubmenu } from './f-menu-builder';
 import { FShortcut } from './f-shortcut';
 
@@ -308,6 +310,17 @@ export interface IFUniverUIMixin {
     showMessage(options: IMessageProps): FUniver;
 
     /**
+     * Set the ribbon layout type.
+     * @param {RibbonType} ribbonType The ribbon layout type.
+     * @returns the {@link FUniver} instance for chaining
+     * @example
+     * ```ts
+     * univerAPI.setRibbonType('grid');
+     * ```
+     */
+    setRibbonType(ribbonType: RibbonType): FUniver;
+
+    /**
      * Set the visibility of a built-in UI part.
      * @param {BuiltInUIPart} key the built-in UI part
      * @param {boolean} visible the visibility
@@ -351,7 +364,7 @@ export interface IFUniverUIMixin {
      * univerAPI.registerUIPart(univerAPI.Enum.BuiltInUIPart.CUSTOM_HEADER, () => React.createElement('h1', null, 'Custom Header'));
      * ```
      */
-    registerUIPart(key: BuiltInUIPart, component: any): IDisposable;
+    registerUIPart(key: BuiltInUIPart, component: ComponentType): IDisposable;
 
     /**
      * Register an component.
@@ -491,6 +504,12 @@ export class FUniverUIMixin extends FUniver implements IFUniverUIMixin {
         return this;
     }
 
+    override setRibbonType(ribbonType: RibbonType): FUniver {
+        const configService = this._injector.get(IConfigService);
+        configService.setConfig(UI_PLUGIN_CONFIG_KEY, { ribbonType }, { merge: true });
+        return this;
+    }
+
     override setUIVisible(ui: BuiltInUIPart, visible: boolean): FUniver {
         const uiPartService = this._injector.get(IUIPartsService);
         uiPartService.setUIVisible(ui, visible);
@@ -502,12 +521,12 @@ export class FUniverUIMixin extends FUniver implements IFUniverUIMixin {
         return uiPartService.isUIVisible(ui);
     }
 
-    override registerUIPart(key: BuiltInUIPart, component: any): IDisposable {
+    override registerUIPart(key: BuiltInUIPart, component: ComponentType): IDisposable {
         const uiPartService = this._injector.get(IUIPartsService);
         return uiPartService.registerComponent(key, () => connectInjector(component, this._injector));
     }
 
-    override registerComponent(name: string, component: any, options?: IComponentOptions): IDisposable {
+    override registerComponent(name: string, component: ComponentType, options?: IComponentOptions): IDisposable {
         const componentManager = this._injector.get(ComponentManager);
         return this.disposeWithMe(componentManager.register(name, component, options));
     }

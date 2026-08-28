@@ -78,41 +78,37 @@ export class SheetsDrawingGroupCopyPasteController extends Disposable {
         this._sheetClipboardService.addClipboardHook({
             id: 'SHEET_DRAWING_GROUP',
 
-            onBeforeCopy: (_unitId, _subUnitId) => {
+            onBeforeCopyFocusedObject: (_unitId, _subUnitId) => {
                 this._copyInfo = null;
 
                 const focusDrawings = this._focusedDrawings;
-                if (focusDrawings.length === 0) return;
+                if (focusDrawings.length === 0) return false;
 
                 // Only handle the first focused group drawing.
                 const groupDrawing = focusDrawings.find((d) => d.drawingType === DrawingTypeEnum.DRAWING_GROUP);
-                if (!groupDrawing) return;
+                if (!groupDrawing) return false;
 
                 const groupNestedParam = this._drawingManagerService.getDrawingsByGroupNested({
                     unitId: groupDrawing.unitId,
                     subUnitId: groupDrawing.subUnitId,
                     drawingId: groupDrawing.drawingId,
                 });
-                if (!groupNestedParam) return;
+                if (!groupNestedParam) return false;
 
                 this._copyInfo = {
                     unitId: groupDrawing.unitId,
                     subUnitId: groupDrawing.subUnitId,
                     groupNestedParam,
                 };
+                return true;
             },
 
-            onPasteCells: (_pasteFrom, pasteTo, _data, payload) => {
-                if (!this._copyInfo) return { redos: [], undos: [] };
+            onPasteCells: (pasteFrom, pasteTo, _data, payload) => {
+                if (!payload.copyId || !pasteFrom || !this._copyInfo) return { redos: [], undos: [] };
 
                 const { pasteType } = payload;
                 if (specialPastes.includes(pasteType)) return { redos: [], undos: [] };
 
-                return this._generateGroupPasteMutations(pasteTo);
-            },
-
-            onPasteUnrecognized: (pasteTo) => {
-                if (!this._copyInfo) return { redos: [], undos: [] };
                 return this._generateGroupPasteMutations(pasteTo);
             },
         });

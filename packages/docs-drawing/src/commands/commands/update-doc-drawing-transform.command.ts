@@ -19,13 +19,14 @@ import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IDocImage } from '../../services/doc-drawing.service';
 import {
     CommandType,
+    DrawingTypeEnum,
     ICommandService,
     IUniverInstanceService,
     JSONX,
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
-import { RichTextEditingMutation } from '@univerjs/docs';
+import { DocHistoryAction, RichTextEditingMutation } from '@univerjs/docs';
 
 export interface IDrawingDocTransform {
     drawingId: string;
@@ -57,6 +58,11 @@ export const UpdateDrawingDocTransformCommand: ICommand = {
         }
 
         const oldDrawings = documentDataModel.getSnapshot().drawings ?? {};
+        const historyAction = drawings.length > 0 && drawings.every(({ drawingId }) =>
+            oldDrawings[drawingId]?.drawingType === DrawingTypeEnum.DRAWING_IMAGE
+        )
+            ? DocHistoryAction.UpdateImage
+            : undefined;
         const jsonX = JSONX.getInstance();
         const actions: JSONXActions = [];
 
@@ -78,6 +84,7 @@ export const UpdateDrawingDocTransformCommand: ICommand = {
 
         return Boolean(commandService.syncExecuteCommand<IRichTextEditingMutationParams, IRichTextEditingMutationParams>(RichTextEditingMutation.id, {
             unitId,
+            historyAction,
             actions: actions.reduce((acc, action) => JSONX.compose(acc, action as JSONXActions), null as JSONXActions),
             textRanges: null,
             debounce: true,

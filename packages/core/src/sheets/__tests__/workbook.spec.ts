@@ -18,7 +18,7 @@ import type { Univer } from '../../univer';
 import type { IWorkbookData } from '../typedef';
 import type { Workbook } from '../workbook';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { BooleanNumber } from '../../types/enum';
+import { BooleanNumber, DateSystem } from '../../types/enum';
 import { LocaleType } from '../../types/enum/locale-type';
 import { createCoreTestBed } from './create-core-test-bed';
 
@@ -77,6 +77,21 @@ describe('Test workbook', () => {
             expect(workbook.getRev()).toBe(6);
             expect(workbook.getCustomMetadata()).toEqual({ owner: 'tester' });
             expect(workbook.getConfig()).toBe(workbook.getSnapshot());
+        });
+
+        it('should resolve the workbook date system without materializing legacy metadata', () => {
+            expect(workbook.getDateSystem()).toBe(DateSystem.Date1900);
+            expect(workbook.save().dateSystem).toBeUndefined();
+
+            const date1904TestBed = createCoreTestBed({
+                ...workbook.save(),
+                id: 'date-1904',
+                dateSystem: DateSystem.Date1904,
+            });
+
+            expect(date1904TestBed.sheet.getDateSystem()).toBe(DateSystem.Date1904);
+            expect(date1904TestBed.sheet.save().dateSystem).toBe(DateSystem.Date1904);
+            date1904TestBed.univer.dispose();
         });
 
         it('should manage sheets and lookups', () => {

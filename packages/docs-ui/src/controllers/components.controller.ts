@@ -68,6 +68,7 @@ import {
     UnorderIcon,
 } from '@univerjs/icons';
 import { ComponentManager, IconManager } from '@univerjs/ui';
+import { DOC_LAYOUT_RECOVERY_COMPONENT, DocLayoutRecovery } from '../views/DocLayoutRecovery';
 import { FLOAT_MENU_COMPONENT_KEY, FloatToolbar } from '../views/float-toolbar/FloatToolbar';
 import { COMPONENT_DOC_HEADER_FOOTER_PANEL } from '../views/header-footer/panel/component-name';
 import { DocHeaderFooterPanel } from '../views/header-footer/panel/DocHeaderFooterPanel';
@@ -233,6 +234,7 @@ export class ComponentsController extends Disposable {
             [DOC_TABLE_BLOCK_MENU_COMPONENT_KEY, TableBlockMenu],
             [FLOAT_MENU_COMPONENT_KEY, FloatToolbar],
             [PAGE_SETTING_COMPONENT_ID, PageSettings],
+            [DOC_LAYOUT_RECOVERY_COMPONENT, DocLayoutRecovery],
         ] as const).forEach(([key, comp]) => {
             this.disposeWithMe(
                 this._componentManager.register(key, comp)

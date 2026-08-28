@@ -158,6 +158,7 @@ export enum BaseViewType {
     Calendar = 'calendar',
     Gantt = 'gantt',
     Gallery = 'gallery',
+    Pivot = 'pivot',
 }
 
 export type FieldConfig = Record<string, unknown>;
@@ -702,12 +703,19 @@ export interface IInvalidViewProjection {
     fieldId?: FieldId;
 }
 
+/** Marker projection for view types rendered by a registered DOM view renderer. */
+export interface IBaseCustomViewProjection {
+    type: 'custom';
+    viewType: BaseViewType;
+}
+
 export type BaseViewProjection =
     | IGridProjection
     | IKanbanProjection
     | ICalendarProjection
     | IGanttProjection
     | IGalleryProjection
+    | IBaseCustomViewProjection
     | IInvalidViewProjection;
 
 export interface IBaseViewport {
@@ -866,6 +874,13 @@ export type BaseHitTestResult =
         tableId: TableId;
         viewId: ViewId;
         recordId: RecordId;
+    }
+    | {
+        type: 'base-record-action' | 'base-record-action-badge';
+        tableId: TableId;
+        viewId: ViewId;
+        recordId: RecordId;
+        actionId: string;
     }
     | {
         type: 'grid-hierarchy-toggle' | 'grid-hierarchy-add-child';

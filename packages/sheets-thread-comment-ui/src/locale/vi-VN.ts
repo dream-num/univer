@@ -26,6 +26,7 @@ const locale: typeof enUS = {
         },
         menu: {
             addComment: 'Thêm bình luận',
+            openComments: 'Mở bình luận',
             commentManagement: 'Quản lý bình luận',
         },
     },

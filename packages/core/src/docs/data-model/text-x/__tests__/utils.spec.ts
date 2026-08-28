@@ -16,13 +16,40 @@
 
 import type { IDocumentBody } from '../../../../types/interfaces/i-document-data';
 import type { IRetainAction } from '../action-types';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+import { Tools } from '../../../../shared/tools';
 import { BooleanNumber } from '../../../../types/enum/text-style';
 import { PresetListType } from '../../preset-list-type';
 import { TextXActionType } from '../action-types';
-import { composeBody, getBodySlice, isUselessRetainAction } from '../utils';
+import { composeBody, getBodySlice, getTextRunSlice, isUselessRetainAction } from '../utils';
 
 describe('test text-x utils', () => {
+    it('only clones text runs intersecting the requested slice', () => {
+        const body: IDocumentBody = {
+            dataStream: 'a'.repeat(10_000),
+            textRuns: Array.from({ length: 1_000 }, (_, index) => ({
+                st: index * 10,
+                ed: index * 10 + 10,
+                ts: {
+                    bl: index % 2 === 0 ? BooleanNumber.TRUE : BooleanNumber.FALSE,
+                },
+            })),
+        };
+        const deepClone = vi.spyOn(Tools, 'deepClone');
+
+        const slice = getTextRunSlice(body, 5_000, 5_010);
+
+        expect(slice).toEqual([{
+            st: 0,
+            ed: 10,
+            ts: {
+                bl: BooleanNumber.TRUE,
+            },
+        }]);
+        expect(deepClone.mock.calls.length).toBeLessThan(50);
+        deepClone.mockRestore();
+    });
+
     it('test getBodySlice fn', () => {
         const body: IDocumentBody = {
             dataStream: 'hello\nworld',

@@ -27,7 +27,7 @@ import {
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
-import { IMessageService } from '@univerjs/ui';
+import { IMenuManagerService, IMessageService, MenuItemType } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { DrawingPopupMenuController } from '../drawing-popup-menu.controller';
@@ -46,10 +46,14 @@ describe('DrawingPopupMenuController', () => {
         const currentWorkbook$ = new Subject<never>();
         const disposedWorkbook$ = new Subject<never>();
         const imageObject = { oKey: 'image-1' };
-        const attachPopupToObject = vi.fn(() => ({
-            dispose: vi.fn(),
-            canDispose: () => true,
-        }));
+        let attachedPopup: { extraProps?: Record<string, unknown> } | undefined;
+        const attachPopupToObject = vi.fn((_targetObject: unknown, popup: { extraProps?: Record<string, unknown> }) => {
+            attachedPopup = popup;
+            return {
+                dispose: vi.fn(),
+                canDispose: () => true,
+            };
+        });
 
         injector.add([LocaleService]);
         injector.add([IDrawingManagerService, {
@@ -92,6 +96,19 @@ describe('DrawingPopupMenuController', () => {
             } as never,
         }]);
         injector.add([IMessageService, { useValue: { show: () => toDisposable(() => {}) } as never }]);
+        injector.add([IMenuManagerService, {
+            useValue: {
+                getFlatMenuByPositionKey: () => [{
+                    key: 'add-comment',
+                    order: 0,
+                    item: {
+                        id: 'sheet.operation.add-drawing-comment',
+                        type: MenuItemType.BUTTON,
+                        title: 'sheets-thread-comment-ui.menu.addComment',
+                    },
+                }],
+            } as never,
+        }]);
         injector.add([IContextService, {
             useValue: {
                 contextChanged$,
@@ -113,6 +130,12 @@ describe('DrawingPopupMenuController', () => {
                 direction: 'left',
             })
         );
+        expect(attachedPopup?.extraProps?.menuItems).toEqual(expect.arrayContaining([
+            expect.objectContaining({
+                commandId: 'sheet.operation.add-drawing-comment',
+                label: 'sheets-thread-comment-ui.menu.addComment',
+            }),
+        ]));
 
         controller.dispose();
         injector.dispose();

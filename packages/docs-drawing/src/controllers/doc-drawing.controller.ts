@@ -91,7 +91,7 @@ export class DocDrawingController extends Disposable {
             }
             try {
                 return JSON.parse(json);
-            } catch (err) {
+            } catch {
                 return { data: {}, order: [] };
             }
         };
@@ -103,13 +103,23 @@ export class DocDrawingController extends Disposable {
                 toJson: (unitId) => toJson(unitId),
                 parseJson: (json) => parseJson(json),
                 onUnLoad: (unitId) => {
-                    this._setDrawingDataForUnit(unitId, { data: {}, order: [] });
+                    this._unloadDrawingDataForUnit(unitId);
                 },
                 onLoad: (unitId, value) => {
                     this._setDrawingDataForUnit(unitId, { data: value.data ?? {}, order: value.order ?? [] });
                 },
             })
         );
+    }
+
+    private _unloadDrawingDataForUnit(unitId: string): void {
+        const documentDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(
+            unitId,
+            UniverInstanceType.UNIVER_DOC
+        );
+        documentDataModel?.resetDrawing({}, []);
+        this._docDrawingService.removeDrawingDataForUnit(unitId);
+        this._drawingManagerService.removeDrawingDataForUnit(unitId);
     }
 
     private _setDrawingDataForUnit(unitId: string, drawingMapItem: IDrawingMapItem<IDocDrawing>) {
@@ -147,9 +157,14 @@ export class DocDrawingController extends Disposable {
                 order: drawingOrderModel,
             },
         };
+        const renderDrawingData: IDrawingMapItemData<IDocDrawing> = {};
+        for (const [drawingId, drawing] of Object.entries(drawingDataModels)) {
+            renderDrawingData[drawingId] = { ...drawing, hidden: true };
+        }
         const renderSubDrawings = {
             [subUnitId]: {
                 ...subDrawings[subUnitId],
+                data: renderDrawingData,
                 order: getDocDrawingRenderOrder(drawingOrderModel, drawingDataModels),
             },
         };

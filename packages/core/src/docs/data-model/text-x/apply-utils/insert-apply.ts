@@ -22,6 +22,9 @@ import {
     insertCustomBlocks,
     insertCustomDecorations,
     insertCustomRanges,
+    insertDocxExportExcludedRanges,
+    insertDocxRawBlocks,
+    insertDocxRawCustomBlocks,
     insertParagraphs,
     insertSectionBreaks,
     insertTables,
@@ -44,6 +47,12 @@ export function updateAttributeByInsert(
     insertSectionBreaks(body, insertBody, textLength, currentIndex);
 
     insertCustomBlocks(body, insertBody, textLength, currentIndex);
+
+    insertDocxRawCustomBlocks(body, insertBody, textLength, currentIndex);
+
+    insertDocxRawBlocks(body, insertBody, textLength, currentIndex);
+
+    insertDocxExportExcludedRanges(body, insertBody, textLength, currentIndex);
 
     insertTables(body, insertBody, textLength, currentIndex);
 

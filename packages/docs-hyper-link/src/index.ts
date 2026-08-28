@@ -14,5 +14,11 @@
  * limitations under the License.
  */
 
+export enum DocHyperLinkCommandId {
+    Add = 'docs.command.add-hyper-link',
+    Update = 'docs.command.update-hyper-link',
+    Delete = 'docs.command.delete-hyper-link',
+}
+
 export type { IUniverDocsHyperLinkConfig } from './config/config';
 export { UniverDocsHyperLinkPlugin } from './plugin';

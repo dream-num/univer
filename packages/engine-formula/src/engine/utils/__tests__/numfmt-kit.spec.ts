@@ -14,9 +14,15 @@
  * limitations under the License.
  */
 
+import { DateSystem } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { operatorToken } from '../../../basics/token';
-import { compareNumfmtPriority, comparePatternPriority } from '../numfmt-kit';
+import {
+    clearStringToNumberPatternCache,
+    compareNumfmtPriority,
+    comparePatternPriority,
+    stringIsNumberPattern,
+} from '../numfmt-kit';
 
 const numfmtMap = {
     currency: '"¥"#,##0.00_);[Red]("¥"#,##0.00)',
@@ -183,5 +189,15 @@ describe('Test numfmt kit', () => {
 
         expect(comparePatternPriority(numfmtMap.date, '', operatorToken.PLUS)).toBe(numfmtMap.date);
         expect(comparePatternPriority('', numfmtMap.accounting, operatorToken.MINUS)).toBe(numfmtMap.accounting);
+    });
+
+    it('isolates parsed string-number patterns by date system', () => {
+        clearStringToNumberPatternCache();
+        expect(stringIsNumberPattern('1904-1-1', {
+            dateSystem: DateSystem.Date1900,
+        })).toMatchObject({ isNumberPattern: true, value: 1462 });
+        expect(stringIsNumberPattern('1904-1-1', {
+            dateSystem: DateSystem.Date1904,
+        })).toMatchObject({ isNumberPattern: true, value: 0 });
     });
 });

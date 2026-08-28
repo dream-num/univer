@@ -30,16 +30,20 @@ import {
     IContextService,
     ILogService,
     Injector,
+    IPermissionService,
     IUniverInstanceService,
+    PermissionService,
     RANGE_DIRECTION,
     UniverInstanceService,
 } from '@univerjs/core';
-import { DocSelectionManagerService, SetTextSelectionsOperation } from '@univerjs/docs';
+import { DocSelectionManagerService, setDocumentPermissionValue, SetTextSelectionsOperation } from '@univerjs/docs';
 import { NORMAL_TEXT_SELECTION_PLUGIN_STYLE } from '@univerjs/engine-render';
+import { UnitAction } from '@univerjs/protocol';
 import { ComponentManager } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { describe, expect, it } from 'vitest';
 import { EmbedRuntimeFocusCoordinator, IDocEmbedRuntimeFocusCoordinator } from '../doc-embed-integration.service';
+import { DocLayoutInteractionService } from '../doc-layout-interaction.service';
 import { DocCanvasPopManagerService } from '../doc-popup-manager.service';
 import { DocFloatMenuService } from '../float-menu.service';
 import { DocSelectionRenderService } from '../selection/doc-selection-render.service';
@@ -93,12 +97,14 @@ function createActiveFloatMenuHarness(
     runtimeFocusCoordinator?: EmbedRuntimeFocusCoordinator
 ) {
     const injector = new Injector();
+    injector.add([IPermissionService, { useClass: PermissionService }]);
     injector.add([ILogService, { useClass: DesktopLogService }]);
     injector.add([IConfigService, { useClass: ConfigService }]);
     injector.add([IContextService, { useClass: ContextService }]);
     injector.add([ICommandService, { useClass: CommandService }]);
     injector.add([IUniverInstanceService, { useClass: UniverInstanceService }]);
     injector.add([DocSelectionManagerService]);
+    injector.add([DocLayoutInteractionService]);
     injector.add([DocCanvasPopManagerService, { useClass: RecordingDocCanvasPopManagerServiceCtor }]);
     injector.add([ComponentManager]);
     injector.add([DocSelectionRenderService, { useClass: ActiveDocSelectionRenderServiceCtor }]);
@@ -125,12 +131,14 @@ function createActiveFloatMenuHarness(
 describe('DocFloatMenuService', () => {
     it('does not register or show a floating toolbar inside internal document editors', () => {
         const injector = new Injector();
+        injector.add([IPermissionService, { useClass: PermissionService }]);
         injector.add([ILogService, { useClass: DesktopLogService }]);
         injector.add([IConfigService, { useClass: ConfigService }]);
         injector.add([IContextService, { useClass: ContextService }]);
         injector.add([ICommandService, { useClass: CommandService }]);
         injector.add([IUniverInstanceService, { useClass: UniverInstanceService }]);
         injector.add([DocSelectionManagerService]);
+        injector.add([DocLayoutInteractionService]);
         injector.add([DocCanvasPopManagerService, { useClass: InertDocCanvasPopManagerServiceCtor }]);
         injector.add([ComponentManager]);
         injector.add([DocSelectionRenderService, { useClass: InertDocSelectionRenderServiceCtor }]);
@@ -143,12 +151,14 @@ describe('DocFloatMenuService', () => {
 
     it('shows one floating toolbar for a text selection and hides it when selection restarts', () => {
         const injector = new Injector();
+        injector.add([IPermissionService, { useClass: PermissionService }]);
         injector.add([ILogService, { useClass: DesktopLogService }]);
         injector.add([IConfigService, { useClass: ConfigService }]);
         injector.add([IContextService, { useClass: ContextService }]);
         injector.add([ICommandService, { useClass: CommandService }]);
         injector.add([IUniverInstanceService, { useClass: UniverInstanceService }]);
         injector.add([DocSelectionManagerService]);
+        injector.add([DocLayoutInteractionService]);
         injector.add([DocCanvasPopManagerService, { useClass: RecordingDocCanvasPopManagerServiceCtor }]);
         injector.add([ComponentManager]);
         injector.add([DocSelectionRenderService, { useClass: ActiveDocSelectionRenderServiceCtor }]);
@@ -197,24 +207,67 @@ describe('DocFloatMenuService', () => {
         }, { unitId, subUnitId: unitId });
 
         const popupService = injector.get(DocCanvasPopManagerService) as unknown as RecordingDocCanvasPopManagerService;
+        const layoutInteractionService = injector.get(DocLayoutInteractionService);
         expect(popupService.ranges).toEqual(['0:5']);
         expect(popupService.offsets).toEqual([[0, 10]]);
         expect(service.floatMenu).toMatchObject({ start: 0, end: 5 });
+        expect(layoutInteractionService.isActive).toBe(true);
 
         const selectionRenderService = injector.get(DocSelectionRenderService) as unknown as ActiveDocSelectionRenderService;
         selectionRenderService.emitSelectionStart();
         expect(service.floatMenu).toBeNull();
         expect(popupService.disposedCount).toBe(1);
+        expect(layoutInteractionService.isActive).toBe(false);
+    });
+
+    it('hides the floating toolbar when document edit permission is revoked', () => {
+        const unitId = 'doc-read-only-float-menu';
+        const harness = createActiveFloatMenuHarness(unitId, {
+            dataStream: 'Hello world\r\n',
+            paragraphs: [{ paragraphId: 'para_docs_ui_read_only_float_menu', startIndex: 11 }],
+            sectionBreaks: [],
+            customRanges: [],
+            tables: [],
+            textRuns: [],
+        });
+        const selection = {
+            textRanges: [{ startOffset: 0, endOffset: 5, collapsed: false }],
+            rectRanges: [],
+            segmentId: '',
+            segmentPage: -1,
+            style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+            isEditing: true,
+        };
+        harness.selectionManager.__replaceTextRangesWithNoRefresh(selection, { unitId, subUnitId: unitId });
+        expect(harness.service.floatMenu).toMatchObject({ start: 0, end: 5 });
+
+        setDocumentPermissionValue(
+            harness.injector.get(IPermissionService),
+            unitId,
+            unitId,
+            UnitAction.Edit,
+            false
+        );
+
+        expect(harness.service.floatMenu).toBeNull();
+        expect(harness.popupService.disposedCount).toBe(1);
+        harness.selectionManager.__replaceTextRangesWithNoRefresh({
+            ...selection,
+            textRanges: [{ startOffset: 6, endOffset: 11, collapsed: false }],
+        }, { unitId, subUnitId: unitId });
+        expect(harness.popupService.ranges).toEqual(['0:5']);
     });
 
     it('does not show the floating toolbar for selections inside code blocks', () => {
         const injector = new Injector();
+        injector.add([IPermissionService, { useClass: PermissionService }]);
         injector.add([ILogService, { useClass: DesktopLogService }]);
         injector.add([IConfigService, { useClass: ConfigService }]);
         injector.add([IContextService, { useClass: ContextService }]);
         injector.add([ICommandService, { useClass: CommandService }]);
         injector.add([IUniverInstanceService, { useClass: UniverInstanceService }]);
         injector.add([DocSelectionManagerService]);
+        injector.add([DocLayoutInteractionService]);
         injector.add([DocCanvasPopManagerService, { useClass: RecordingDocCanvasPopManagerServiceCtor }]);
         injector.add([ComponentManager]);
         injector.add([DocSelectionRenderService, { useClass: ActiveDocSelectionRenderServiceCtor }]);

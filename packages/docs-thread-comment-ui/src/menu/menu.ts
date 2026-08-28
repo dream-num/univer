@@ -14,26 +14,64 @@
  * limitations under the License.
  */
 
-import type { IAccessor } from '@univerjs/core';
-import type { IMenuButtonItem } from '@univerjs/ui';
-import type { LocaleKey } from '../locale/types';
-import { IUniverInstanceService, SHEET_EDITOR_UNITS, UniverInstanceType } from '@univerjs/core';
-import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
+import { IPermissionService, IUniverInstanceService, SHEET_EDITOR_UNITS, UniverInstanceType } from '@univerjs/core';
+import { DocSelectionManagerService, DocSkeletonManagerService, getDocumentPermissionValue } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService, withCurrentTypeOfRenderer } from '@univerjs/engine-render';
+import { UnitAction } from '@univerjs/protocol';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
-import { debounceTime, Observable } from 'rxjs';
+import { combineLatest, debounceTime, map, startWith } from 'rxjs';
 import {
+    AddDocDrawingCommentOperation,
     StartAddCommentOperation,
     ToggleCommentPanelOperation,
 } from '../commands/operations/show-comment-panel.operation';
 
-export const shouldDisableAddComment = (accessor: IAccessor) => {
+type MenuAccessor = Parameters<typeof getMenuHiddenObservable>[0];
+
+function getCommentPermissionDisabled$(accessor: MenuAccessor) {
+    const instanceService = accessor.get(IUniverInstanceService);
+    const permissionService = accessor.get(IPermissionService);
+    return combineLatest([
+        instanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_DOC),
+        permissionService.permissionPointUpdate$.pipe(startWith(undefined)),
+    ]).pipe(map(([document]) => !document || !getDocumentPermissionValue(
+        permissionService,
+        document.getUnitId(),
+        document.getUnitId(),
+        UnitAction.Comment
+    )));
+}
+
+export function AddDocDrawingCommentMenuItemFactory(accessor: MenuAccessor) {
+    return {
+        id: AddDocDrawingCommentOperation.id,
+        type: MenuItemType.BUTTON,
+        icon: 'InsertCommentDoubleIcon',
+        title: 'docs-thread-comment-ui.panel.addComment',
+        tooltip: 'docs-thread-comment-ui.panel.addComment',
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+        disabled$: getCommentPermissionDisabled$(accessor),
+    };
+}
+
+export const shouldDisableAddComment = (accessor: MenuAccessor) => {
     const renderManagerService = accessor.get(IRenderManagerService);
     const docSelectionManagerService = accessor.get(DocSelectionManagerService);
+    const instanceService = accessor.get(IUniverInstanceService);
+    const permissionService = accessor.get(IPermissionService);
+    const document = instanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_DOC);
+    if (!document || !getDocumentPermissionValue(
+        permissionService,
+        document.getUnitId(),
+        document.getUnitId(),
+        UnitAction.Comment
+    )) {
+        return true;
+    }
     const skeleton = withCurrentTypeOfRenderer(
         UniverInstanceType.UNIVER_DOC,
         DocSkeletonManagerService,
-        accessor.get(IUniverInstanceService),
+        instanceService,
         renderManagerService
     )?.getSkeleton();
 
@@ -51,34 +89,33 @@ export const shouldDisableAddComment = (accessor: IAccessor) => {
     return false;
 };
 
-export function AddDocCommentMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
+export function AddDocCommentMenuItemFactory(accessor: MenuAccessor) {
     return {
         id: StartAddCommentOperation.id,
         type: MenuItemType.BUTTON,
-        icon: 'CommentIcon',
+        icon: 'InsertCommentDoubleIcon',
         title: 'docs-thread-comment-ui.panel.addComment',
         tooltip: 'docs-thread-comment-ui.panel.addComment',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC, undefined, SHEET_EDITOR_UNITS),
-        disabled$: new Observable(function (subscribe) {
-            const textSelectionService = accessor.get(DocSelectionManagerService);
-            const observer = textSelectionService.textSelection$.pipe(debounceTime(16)).subscribe(() => {
-                subscribe.next(shouldDisableAddComment(accessor));
-            });
-
-            return () => {
-                observer.unsubscribe();
-            };
-        }),
+        disabled$: combineLatest([
+            accessor.get(DocSelectionManagerService).textSelection$.pipe(
+                debounceTime(16),
+                map(() => shouldDisableAddComment(accessor)),
+                startWith(shouldDisableAddComment(accessor))
+            ),
+            getCommentPermissionDisabled$(accessor),
+        ]).pipe(map(([selectionDisabled, permissionDisabled]) =>
+            selectionDisabled || permissionDisabled)),
     };
 }
 
-export function ToolbarDocCommentMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
+export function ToolbarDocCommentMenuItemFactory(accessor: MenuAccessor) {
     return {
         id: ToggleCommentPanelOperation.id,
         type: MenuItemType.BUTTON,
         icon: 'CommentIcon',
-        title: 'docs-thread-comment-ui.panel.addComment',
-        tooltip: 'docs-thread-comment-ui.panel.addComment',
+        title: 'docs-thread-comment-ui.panel.openComments',
+        tooltip: 'docs-thread-comment-ui.panel.openComments',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }

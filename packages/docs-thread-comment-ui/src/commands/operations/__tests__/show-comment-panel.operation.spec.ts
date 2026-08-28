@@ -19,6 +19,7 @@ import type { IRender } from '@univerjs/engine-render';
 import type { ISidebarMethodOptions } from '@univerjs/ui';
 import {
     Disposable,
+    DrawingTypeEnum,
     ICommandService,
     IUniverInstanceService,
     toDisposable,
@@ -26,14 +27,17 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
+import { DEFAULT_DOC_SUBUNIT_ID } from '@univerjs/docs-thread-comment';
+import { DrawingManagerService, IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import { ISidebarService } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { DEFAULT_DOC_SUBUNIT_ID, DOCS_THREAD_COMMENT_PANEL } from '../../../common/const';
+import { DOCS_THREAD_COMMENT_PANEL } from '../../../common/const';
 import { DocThreadCommentService } from '../../../services/doc-thread-comment.service';
 import {
+    AddDocDrawingCommentOperation,
     ShowCommentPanelOperation,
     StartAddCommentOperation,
     ToggleCommentPanelOperation,
@@ -217,5 +221,26 @@ describe('doc thread comment panel operations', () => {
         expect(result).toBe(false);
         expect(docThreadCommentService.addingComment).toBeUndefined();
         expect(panelService.panelVisible).toBe(false);
+    });
+
+    it('rejects a focused drawing left over from another document', () => {
+        const injector = univer.__getInjector();
+        const drawing = {
+            unitId: 'other-doc',
+            subUnitId: 'other-doc',
+            drawingId: 'drawing-1',
+            drawingType: DrawingTypeEnum.DRAWING_SHAPE,
+        };
+        const drawingManager = new DrawingManagerService();
+        drawingManager.registerDrawingData(drawing.unitId, {
+            [drawing.subUnitId]: { data: { [drawing.drawingId]: drawing }, order: [drawing.drawingId] },
+        });
+        drawingManager.focusDrawing([drawing]);
+        injector.add([IDrawingManagerService, {
+            useValue: drawingManager,
+        }]);
+
+        expect(AddDocDrawingCommentOperation.handler(injector)).toBe(false);
+        drawingManager.dispose();
     });
 });

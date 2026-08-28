@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { DocumentDrawingPublicationProgress } from '../doc-drawing-transform-update.controller';
 import {
     AlignTypeH,
     AlignTypeV,
@@ -26,7 +27,9 @@ import { Liquid, setDocsTableRenderViewportProvider } from '@univerjs/engine-ren
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { getDocsTableCellAnchorContext } from '../../doc-drawing-transformer-update.controller';
 import {
+    DocDrawingPublicationTracker,
     DocDrawingTransformUpdateController,
+
     getDocsDrawingBehindText,
     getDocsDrawingClipPage,
     getDocsDrawingPageClipBounds,
@@ -39,6 +42,113 @@ import {
 describe('DocDrawingTransformUpdateController', () => {
     afterEach(() => {
         setDocsTableRenderViewportProvider(null);
+    });
+
+    it('refreshes only incremental publications that can change drawing transforms', () => {
+        const drawing = {};
+        const pages = [
+            { headerId: '', footerId: '', pageWidth: 100, skeDrawings: new Map([['cover', drawing]]), skeTables: new Map(), skeColumnGroups: new Map() },
+            { headerId: '', footerId: '', pageWidth: 100, skeDrawings: new Map(), skeTables: new Map(), skeColumnGroups: new Map() },
+            { headerId: '', footerId: '', pageWidth: 100, skeDrawings: new Map([['later', drawing]]), skeTables: new Map(), skeColumnGroups: new Map() },
+        ];
+        const skeleton = {
+            getSkeletonData: () => ({
+                pages,
+                skeHeaders: new Map(),
+                skeFooters: new Map(),
+            }),
+        };
+        const tracker = new DocDrawingPublicationTracker();
+        const progress = (overrides: Partial<DocumentDrawingPublicationProgress>): DocumentDrawingPublicationProgress => ({
+            generation: 1,
+            didPublish: true,
+            didPublishAnchor: false,
+            publishedPageCount: 1,
+            reason: 'initial',
+            complete: false,
+            ...overrides,
+        });
+
+        expect(tracker.shouldRefresh(skeleton, progress({}))).toBe(true);
+        expect(tracker.shouldRefresh(skeleton, progress({ publishedPageCount: 2 }))).toBe(false);
+        expect(tracker.shouldRefresh(skeleton, progress({ publishedPageCount: 3 }))).toBe(true);
+        expect(tracker.shouldRefresh(skeleton, progress({
+            generation: 2,
+            reason: 'edit',
+            publishedPageCount: 3,
+        }))).toBe(false);
+        expect(tracker.shouldRefresh(skeleton, progress({
+            generation: 2,
+            reason: 'edit',
+            didPublishAnchor: true,
+            publishedPageCount: 3,
+        }))).toBe(true);
+    });
+
+    it('refreshes when a later anchor resolves a drawing onto an already published page', () => {
+        const firstPageDrawings = new Map();
+        const pages = [
+            { headerId: '', footerId: '', pageWidth: 100, skeDrawings: firstPageDrawings, skeTables: new Map(), skeColumnGroups: new Map() },
+            { headerId: '', footerId: '', pageWidth: 100, skeDrawings: new Map(), skeTables: new Map(), skeColumnGroups: new Map() },
+        ];
+        const skeleton = {
+            getSkeletonData: () => ({
+                pages,
+                skeHeaders: new Map(),
+                skeFooters: new Map(),
+            }),
+        };
+        const tracker = new DocDrawingPublicationTracker();
+        const progress = (publishedPageCount: number): DocumentDrawingPublicationProgress => ({
+            generation: 1,
+            didPublish: true,
+            didPublishAnchor: false,
+            publishedPageCount,
+            reason: 'edit',
+            complete: false,
+        });
+
+        expect(tracker.shouldRefresh(skeleton, progress(1))).toBe(false);
+        expect(tracker.shouldRefresh(skeleton, progress(2))).toBe(false);
+
+        firstPageDrawings.set('late-drawing', {});
+
+        expect(tracker.shouldRefresh(skeleton, progress(2))).toBe(true);
+    });
+
+    it('refreshes when a published column group contains drawings', () => {
+        const nestedPage = {
+            skeDrawings: new Map([['column-drawing', {}]]),
+            skeTables: new Map(),
+            skeColumnGroups: new Map(),
+        };
+        const pages = [{
+            headerId: '',
+            footerId: '',
+            pageWidth: 100,
+            skeDrawings: new Map(),
+            skeTables: new Map(),
+            skeColumnGroups: new Map([['column-group', {
+                columns: [{ page: nestedPage }],
+            }]]),
+        }];
+        const skeleton = {
+            getSkeletonData: () => ({
+                pages,
+                skeHeaders: new Map(),
+                skeFooters: new Map(),
+            }),
+        };
+        const tracker = new DocDrawingPublicationTracker();
+
+        expect(tracker.shouldRefresh(skeleton, {
+            generation: 1,
+            didPublish: true,
+            didPublishAnchor: false,
+            publishedPageCount: 1,
+            reason: 'initial',
+            complete: false,
+        })).toBe(true);
     });
 
     it('projects drawings in table cells through table, row, cell and scroll offsets', () => {
@@ -118,12 +228,16 @@ describe('DocDrawingTransformUpdateController', () => {
 
     it('refreshes normal, table-cell, header, and multi-transform drawings into drawing notifications', () => {
         const selectedShape = {};
+        const currentDrawings: Record<string, unknown> = {};
         const transformer = {
             getSelectedObjectMap: vi.fn(() => new Map([['multi-drawing', selectedShape]])),
             setSelectedControl: vi.fn(),
         };
         const context = {
             unitId: 'unit-1',
+            unit: {
+                getSnapshot: vi.fn(() => ({ drawings: currentDrawings })),
+            },
             mainComponent: {
                 left: 5,
                 top: 7,
@@ -150,7 +264,7 @@ describe('DocDrawingTransformUpdateController', () => {
             removeNotification: vi.fn(),
             addNotification: vi.fn(),
         };
-        const controller = Object.create(DocDrawingTransformUpdateController.prototype) as any;
+        const controller = Object.create(DocDrawingTransformUpdateController.prototype);
         controller._context = context;
         controller._drawingManagerService = drawingManagerService;
         controller._liquid = new Liquid();
@@ -181,6 +295,16 @@ describe('DocDrawingTransformUpdateController', () => {
                     positionH: { relativeFrom: ObjectRelativeFromH.PAGE, posOffset: 99 },
                     positionV: { relativeFrom: ObjectRelativeFromV.PAGE, posOffset: 88 },
                 },
+            },
+        };
+        currentDrawings['page-relative-drawing'] = {
+            ...pageRelativeDrawing.drawingOrigin,
+            behindDoc: BooleanNumber.FALSE,
+            docTransform: {
+                angle: 6,
+                size: { width: 31, height: 41 },
+                positionH: { relativeFrom: ObjectRelativeFromH.PAGE, posOffset: 109 },
+                positionV: { relativeFrom: ObjectRelativeFromV.PAGE, posOffset: 98 },
             },
         };
         const squareDrawing = {
@@ -225,6 +349,16 @@ describe('DocDrawingTransformUpdateController', () => {
                 layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
                 docTransform: defaultDocTransform,
             },
+        };
+        const columnDrawing = {
+            ...tableCellDrawing,
+            aLeft: 2,
+            aTop: 3,
+            drawingId: 'column-drawing',
+        };
+        const columnTableCellDrawing = {
+            ...tableCellDrawing,
+            drawingId: 'column-table-cell-drawing',
         };
         const inlineDrawing = {
             aLeft: 15,
@@ -277,6 +411,39 @@ describe('DocDrawingTransformUpdateController', () => {
                 cells: [cell],
             }],
         };
+        const columnTableCell = {
+            left: 3,
+            marginLeft: 1,
+            marginTop: 1,
+            skeDrawings: new Map([['column-table-cell-drawing', columnTableCellDrawing]]),
+            skeTables: new Map(),
+            skeColumnGroups: new Map(),
+        };
+        const columnTable = {
+            left: 4,
+            top: 5,
+            tableId: 'column-table#-#0',
+            rows: [{
+                top: 2,
+                cells: [columnTableCell],
+            }],
+        };
+        const columnPage = {
+            marginLeft: 0,
+            marginTop: 0,
+            skeDrawings: new Map([['column-drawing', columnDrawing]]),
+            skeTables: new Map([['column-table', columnTable]]),
+            skeColumnGroups: new Map(),
+        };
+        const columnGroup = {
+            left: 50,
+            top: 60,
+            columns: [{
+                left: 8,
+                top: 9,
+                page: columnPage,
+            }],
+        };
         const page = {
             headerId: 'header-1',
             pageWidth: 200,
@@ -293,6 +460,7 @@ describe('DocDrawingTransformUpdateController', () => {
                 ['multi-drawing', multiDrawingOnPage],
             ]),
             skeTables: [table],
+            skeColumnGroups: new Map([['column-group', columnGroup]]),
         };
         const headerPage = {
             marginTop: 19,
@@ -324,8 +492,8 @@ describe('DocDrawingTransformUpdateController', () => {
             }),
             expect.objectContaining({
                 drawingId: 'page-relative-drawing',
-                behindText: true,
-                transform: expect.objectContaining({ left: 104, top: 95, width: 30, height: 40, angle: 5 }),
+                behindText: false,
+                transform: expect.objectContaining({ left: 114, top: 105, width: 31, height: 41, angle: 6 }),
             }),
             expect.objectContaining({
                 drawingId: 'square-drawing',
@@ -342,6 +510,14 @@ describe('DocDrawingTransformUpdateController', () => {
             expect.objectContaining({
                 drawingId: 'cell-drawing',
                 transform: expect.objectContaining({ left: 56, top: 69, width: 11, height: 12, angle: 0 }),
+            }),
+            expect.objectContaining({
+                drawingId: 'column-drawing',
+                transform: expect.objectContaining({ left: 76, top: 92, width: 11, height: 12, angle: 0 }),
+            }),
+            expect.objectContaining({
+                drawingId: 'column-table-cell-drawing',
+                transform: expect.objectContaining({ left: 83, top: 99, width: 11, height: 12, angle: 0 }),
             }),
             expect.objectContaining({
                 drawingId: 'stale-normal',

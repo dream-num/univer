@@ -18,6 +18,9 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'docs-ui': {
+        layout: {
+            recovering: 'Memulihkan tata letak dokumen…',
+        },
         toolbar: {
             font: 'Font',
             fontSize: 'Ukuran font',

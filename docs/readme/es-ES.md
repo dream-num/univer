@@ -1,9 +1,6 @@
 <div align="center">
 
-<picture>
-    <source media="(prefers-color-scheme: dark)" srcset="../img/banner-light.png">
-    <img src="../img/banner-dark.png" alt="Univer" width="420" />
-</picture>
+<img src="../img/banner.png" alt="Univer SDK" width="800" />
 
 **Un SDK ofimático full-stack e isomórfico para crear hojas de cálculo, documentos y presentaciones.**
 
@@ -23,7 +20,7 @@ renderizado basado en Canvas, un motor de fórmulas y una Facade API que funcion
 [![Stars](https://img.shields.io/github/stars/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/stargazers)
 [![Contributors](https://img.shields.io/github/contributors/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/graphs/contributors)
 [![Issues](https://img.shields.io/github/issues/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/issues)
-[![Last Commit](https://img.shields.io/github/last-commit/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/commits/main/)
+[![Last Commit](https://img.shields.io/github/last-commit/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/commits/dev/)
 
 [![Discord](https://img.shields.io/discord/1136129819961217077?logo=discord&logoColor=FFFFFF&label=discord&color=5865F2&style=flat-square)](https://discord.gg/z3NKNT6D2f)
 [![Twitter](https://img.shields.io/twitter/follow/univerhq?style=flat-square&logo=x)](https://twitter.com/univerhq)
@@ -89,7 +86,7 @@ Univer no es solo un visor de archivos de hojas de cálculo. Es un framework par
 
 - **Diseño isomórfico**: ejecuta aplicaciones UI en navegadores y procesamiento headless en Node.js.
 - **Arquitectura basada en plugins**: cada capacidad se entrega como un plugin componible, por lo que las funciones se pueden añadir, quitar, reemplazar o cargar bajo demanda.
-- **Preset mode para integración rápida**: usa bundles de plugins preparados desde [`univer-presets`](https://github.com/dream-num/univer-presets) cuando quieras una aplicación funcional rápidamente.
+- **Preset mode para integración rápida**: usa las colecciones de plugins preparadas en [`presets/`](../../presets) cuando quieras una aplicación funcional rápidamente.
 - **Plugin mode para control total**: compón paquetes manualmente cuando necesites carga personalizada, bundles más pequeños o integración profunda.
 - **Facade API**: trabaja con libros, hojas, rangos, documentos, fórmulas, comandos y eventos mediante una API de alto nivel.
 - **Motor de renderizado Canvas**: soporta superficies editables grandes y comparte la capa de renderizado entre distintos tipos de documento.
@@ -97,45 +94,12 @@ Univer no es solo un visor de archivos de hojas de cálculo. Es un framework par
 
 ## ⚡ Inicio rápido
 
-Para la mayoría de las aplicaciones, empieza con **Preset Mode**. Usa **Plugin Mode** cuando necesites componer paquetes manualmente y controlar el registro de plugins.
+Usa **Plugin Mode** para obtener una cobertura completa del producto y controlar con precisión la composición. Para los perfiles compatibles de Sheets, Docs y Node, **Preset Mode** ofrece una configuración curada más breve.
 
 <details open>
-<summary><strong>Preset Mode (recomendado)</strong></summary>
-
-Los presets son colecciones curadas de plugins de Univer que incluyen los registros de Facade API y estilos necesarios.
-
-```bash
-pnpm add @univerjs/presets @univerjs/preset-sheets-core
-```
-
-```ts
-import { UniverSheetsCorePreset } from '@univerjs/preset-sheets-core'
-import UniverPresetSheetsCoreEnUS from '@univerjs/preset-sheets-core/locales/en-US'
-import { createUniver, LocaleType, mergeLocales } from '@univerjs/presets'
-
-import '@univerjs/preset-sheets-core/lib/index.css'
-
-const { univerAPI } = createUniver({
-  locale: LocaleType.EN_US,
-  locales: {
-    [LocaleType.EN_US]: mergeLocales(UniverPresetSheetsCoreEnUS),
-  },
-  presets: [
-    UniverSheetsCorePreset({
-      container: 'app',
-    }),
-  ],
-})
-
-univerAPI.createWorkbook({})
-```
-
-</details>
-
-<details>
 <summary><strong>Plugin Mode</strong></summary>
 
-Plugin Mode te da control de bajo nivel sobre paquetes, imports de estilos, combinación de locales, registro de Facade API y orden de plugins.
+Plugin Mode te da control de bajo nivel sobre paquetes, imports de estilos, combinación de locales, registro de Facade API y configuración de plugins.
 
 ```bash
 pnpm add @univerjs/core @univerjs/design @univerjs/docs @univerjs/docs-ui @univerjs/engine-formula @univerjs/engine-render @univerjs/sheets @univerjs/sheets-formula @univerjs/sheets-formula-ui @univerjs/sheets-numfmt @univerjs/sheets-numfmt-ui @univerjs/sheets-ui @univerjs/ui
@@ -212,6 +176,39 @@ univerAPI.createWorkbook({})
 
 </details>
 
+<details>
+<summary><strong>Preset Mode</strong></summary>
+
+Los presets son colecciones curadas de plugins de Univer que incluyen los registros de Facade API y estilos necesarios.
+
+```bash
+pnpm add @univerjs/presets @univerjs/preset-sheets-core
+```
+
+```ts
+import { UniverSheetsCorePreset } from '@univerjs/preset-sheets-core'
+import UniverPresetSheetsCoreEnUS from '@univerjs/preset-sheets-core/locales/en-US'
+import { createUniver, LocaleType, mergeLocales } from '@univerjs/presets'
+
+import '@univerjs/preset-sheets-core/lib/index.css'
+
+const { univerAPI } = createUniver({
+  locale: LocaleType.EN_US,
+  locales: {
+    [LocaleType.EN_US]: mergeLocales(UniverPresetSheetsCoreEnUS),
+  },
+  presets: [
+    UniverSheetsCorePreset({
+      container: 'app',
+    }),
+  ],
+})
+
+univerAPI.createWorkbook({})
+```
+
+</details>
+
 Tu página necesita un contenedor:
 
 ```html
@@ -224,11 +221,11 @@ Consulta más detalles en la [guía de instalación y uso básico](https://docs.
 
 | Opción | Cuándo usarla | Empieza aquí |
 | --- | --- | --- |
-| **Preset Mode** | Quieres una configuración funcional de Sheets, Docs o Node con mínima configuración. | [`univer-presets`](https://github.com/dream-num/univer-presets) y la [guía de inicio](https://docs.univer.ai/guides/sheets/getting-started/installation) |
-| **Plugin Mode** | Necesitas control estricto sobre paquetes, orden de registro de plugins, carga bajo demanda o composición personalizada en tiempo de ejecución. | Los [`examples/`](../../examples) de este repositorio y la [guía de arquitectura](https://docs.univer.ai/guides/recipes/architecture/univer) |
+| **Plugin Mode** | Necesitas control estricto sobre paquetes, dependencias configuradas, carga bajo demanda o composición personalizada en tiempo de ejecución. | Los [`examples/`](../../examples) de este repositorio y la [guía de arquitectura](https://docs.univer.ai/guides/recipes/architecture/univer) |
+| **Preset Mode** | Quieres una configuración funcional de Sheets, Docs o Node con mínima configuración. | Los [`presets/`](../../presets) de este repositorio y la [guía de inicio](https://docs.univer.ai/guides/sheets/getting-started/installation) |
 | **Headless Mode** | Necesitas procesamiento de libros/documentos en servidor, cálculo de fórmulas o automatización sin UI. | [Headless Univer](https://docs.univer.ai/guides/sheets/getting-started/node) |
 
-Mantén todos los paquetes `@univerjs/*` en la misma versión. Si usas paquetes de Univer Pro, mantén también alineadas las versiones de `@univerjs-pro/*`.
+Mantén en la misma versión los paquetes del SDK `@univerjs/*` que formen parte de una misma línea de lanzamiento coordinada de Univer. Los paquetes con un ciclo de publicación independiente, como `@univerjs/icons` y `@univerjs/icons-svg`, deben usar las versiones compatibles declaradas en los manifiestos de los paquetes, no la versión del SDK. Si usas paquetes de Univer Pro, mantén `@univerjs-pro/*` alineados con la línea de lanzamiento coordinada correspondiente.
 
 Para expectativas de compatibilidad de API, APIs experimentales, APIs internas y reglas de deprecación, consulta la [política de estabilidad de API](../API_STABILITY.md).
 
@@ -278,7 +275,7 @@ Principios de separación:
 ## 🌐 Ecosistema
 
 - **Core SDK**: [`dream-num/univer`](https://github.com/dream-num/univer), este monorepo.
-- **Presets**: [`dream-num/univer-presets`](https://github.com/dream-num/univer-presets), bundles de plugins para aplicaciones en navegador y Node.js.
+- **Presets**: los [`presets/`](../../presets) de este repositorio, colecciones de plugins para aplicaciones en navegador y Node.js.
 - **AI agent skills**: [`dream-num/univer-sdk-skills`](https://github.com/dream-num/univer-sdk-skills), instrucciones reutilizables para agentes de IA que trabajan con integración de Univer, funciones Pro, desarrollo de plugins y backends Node. Consulta la [guía de AI Skills](https://docs.univer.ai/guides/skills).
 - **Documentación**: [docs.univer.ai](https://docs.univer.ai), con guías de Sheets, Docs, Slides, recipes y Pro.
 - **API Reference**: [docs.univer.ai/reference](https://docs.univer.ai/reference/classes/univer), Facade API y referencia de API generada.
@@ -290,9 +287,8 @@ Principios de separación:
 ```text
 .
 ├── packages/      Paquetes core, motores, tipos de documento, plugins UI y plugins de funciones
-├── examples/      Demos locales de navegador y Node.js usadas para desarrollo
-├── common/        Herramientas internas compartidas, mock data, storybook y utilidades
-├── e2e/           Pruebas Playwright y de comparación visual
+├── examples/      Banco de trabajo Vite todo-en-uno para desarrollo local en navegador
+├── common/        Herramientas internas compartidas, storybook y utilidades
 ├── tests/         Proyectos adicionales de pruebas de integración
 └── docs/          Notas de arquitectura, imágenes y documentación local del repositorio
 ```
@@ -317,12 +313,12 @@ Comandos útiles:
 
 | Comando | Propósito |
 | --- | --- |
-| `pnpm dev` | Inicia la aplicación local de ejemplos. |
+| `pnpm dev` | Compila y previsualiza el banco de trabajo todo-en-uno de bajo consumo sin HMR. |
+| `pnpm dev:source` | Inicia el banco de trabajo desde el código fuente con HMR; el arranque y el uso de memoria son mayores. |
 | `pnpm build` | Compila los paquetes del workspace, excluyendo paquetes internos de common. |
 | `pnpm test` | Ejecuta pruebas unitarias mediante Turbo. |
 | `pnpm typecheck` | Ejecuta comprobaciones TypeScript mediante Turbo. |
 | `pnpm lint` | Ejecuta ESLint. |
-| `pnpm test:e2e` | Ejecuta pruebas Playwright. |
 | `pnpm storybook:dev` | Inicia Storybook para desarrollo de componentes UI. |
 
 Lee [CONTRIBUTING.md](../../CONTRIBUTING.md) antes de abrir un pull request.

@@ -10,7 +10,7 @@
 
 | Package | UMD global | CSS | Locales | Facade entry |
 | --- | --- | :---: | :---: | :---: |
-| `@univerjs/sheets-conditional-formatting` | `UniverSheetsConditionalFormatting` | No | No | Yes |
+| `@univerjs/sheets-conditional-formatting` | `UniverSheetsConditionalFormatting` | No | Yes | Yes |
 
 ## Installation
 
@@ -25,7 +25,16 @@ Keep all `@univerjs/*` packages on the same version.
 ## Usage
 
 ```ts
+import { LocaleType, mergeLocales, Univer } from '@univerjs/core';
 import { UniverSheetsConditionalFormattingPlugin } from '@univerjs/sheets-conditional-formatting';
+import EnUS from '@univerjs/sheets-conditional-formatting/locale/en-US';
+
+const univer = new Univer({
+    locale: LocaleType.EN_US,
+    locales: {
+        [LocaleType.EN_US]: mergeLocales(EnUS),
+    },
+});
 
 univer.registerPlugin(UniverSheetsConditionalFormattingPlugin);
 ```
@@ -39,4 +48,3 @@ Use this package with `@univerjs/sheets-conditional-formatting-ui` when users ne
 - [Documentation](https://docs.univer.ai)
 - [NPM package](https://npmjs.com/package/@univerjs/sheets-conditional-formatting)
 - [GitHub repository](https://github.com/dream-num/univer)
-

@@ -23,6 +23,7 @@ import {
     IUndoRedoService,
     IUniverInstanceService,
     LocaleService,
+    RegionService,
     ThemeService,
     Univer,
     UniverInstanceType,
@@ -81,6 +82,7 @@ describe('FUniver integration', () => {
         const injector = univer.__getInjector();
         const commandService = injector.get(ICommandService);
         const localeService = injector.get(LocaleService);
+        const regionService = injector.get(RegionService);
         const logs: string[] = [];
         const disposables: IDisposable[] = [];
 
@@ -102,8 +104,13 @@ describe('FUniver integration', () => {
             facade: { hello: 'Hola {0}' },
         } as never);
         univerAPI.setLocale('esES');
+        univerAPI.setRegion('frFR');
+        univerAPI.setDirection('rtl');
 
         expect(localeService.getCurrentLocale()).toBe('esES');
+        expect(regionService.getCurrentRegion()).toBe('frFR');
+        expect(univerAPI.getCurrentRegion()).toBe('frFR');
+        expect(localeService.getDirection()).toBe('rtl');
         expect(localeService.t('facade.hello', 'Univer')).toBe('Hola Univer');
 
         expect(await univerAPI.executeCommand(TEST_COMMAND_ID, { value: 'ok' })).toBe(true);

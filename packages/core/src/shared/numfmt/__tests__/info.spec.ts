@@ -416,6 +416,10 @@ numfmtTest('dateInfo', (t) => {
     t.assertDateInfo('h', { hours: true });
     t.assertDateInfo('h:mm', { hours: true, minutes: true });
     t.assertDateInfo('h:m', { hours: true, minutes: true });
+    t.assertDateInfo('[h]:mm', { hours: true, minutes: true, isDuration: true });
+    t.assertDateInfo('[m]:ss', { minutes: true, seconds: true, isDuration: true });
+    t.assertDateInfo('[s]', { seconds: true, isDuration: true });
+    t.assertDateInfo('h:mm', { hours: true, minutes: true, isDuration: false });
     t.assertDateInfo('ss', { seconds: true });
     t.assertDateInfo('s', { seconds: true });
     t.assertDateInfo('hh am/pm', { hours: true, clockType: 12 });

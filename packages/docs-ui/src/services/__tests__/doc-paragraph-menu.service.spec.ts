@@ -23,7 +23,9 @@ import {
     DocumentBlockType,
     PresetListType,
 } from '@univerjs/core';
+import { createDocumentPermissionPoint, getDocumentParagraphPermissionObjectId } from '@univerjs/docs';
 import { DocumentEditArea } from '@univerjs/engine-render';
+import { UnitAction } from '@univerjs/protocol';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import {
@@ -35,6 +37,7 @@ import {
     getTableBlockMenuHoverRect,
     getTableHorizontalViewportGeometry,
 } from '../doc-event-manager.service';
+import { DocLayoutInteractionService } from '../doc-layout-interaction.service';
 import { DocParagraphMenuService } from '../doc-paragraph-menu.service';
 
 describe('DocParagraphMenuService', () => {
@@ -52,6 +55,44 @@ describe('DocParagraphMenuService', () => {
         }));
 
         expect(attachPopupToRect).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not show paragraph or table menus without document edit permission', () => {
+        const attachPopupToRect = vi.fn(() => ({ canDispose: () => true, dispose: vi.fn() }));
+        const service = createService({
+            attachPopupToRect,
+            canEdit: false,
+            dataStream: 'Text\r',
+            tables: [{ tableId: 'table-1', startIndex: 0, endIndex: 4 }],
+        });
+
+        service.showParagraphMenu(createParagraphBound({ paragraphStart: 0, paragraphEnd: 4, startIndex: 4 }));
+        service.showTableMenu({
+            pageIndex: 0,
+            rect: { bottom: 40, left: 20, right: 120, top: 10 },
+            tableId: 'table-1',
+        });
+
+        expect(attachPopupToRect).not.toHaveBeenCalled();
+    });
+
+    it('does not show a menu for a paragraph without paragraph edit permission', () => {
+        const attachPopupToRect = vi.fn(() => ({ canDispose: () => true, dispose: vi.fn() }));
+        const paragraphPermissionId = createDocumentPermissionPoint(
+            'doc-1',
+            getDocumentParagraphPermissionObjectId('', 'paragraph-1'),
+            UnitAction.Edit
+        ).id;
+        const service = createService({
+            attachPopupToRect,
+            dataStream: 'Text\r',
+            getPermissionValue: (permissionId) => permissionId !== paragraphPermissionId,
+            paragraphs: [{ paragraphId: 'paragraph-1', startIndex: 4 }],
+        });
+
+        service.showParagraphMenu(createParagraphBound({ paragraphStart: 0, paragraphEnd: 4, startIndex: 4 }));
+
+        expect(attachPopupToRect).not.toHaveBeenCalled();
     });
 
     it('treats empty column paragraphs as empty paragraph menu targets', () => {
@@ -369,6 +410,29 @@ describe('DocParagraphMenuService', () => {
         service.setParagraphMenuActive(true);
 
         expect(replaceDocRanges).not.toHaveBeenCalled();
+    });
+
+    it('protects layout while the paragraph menu is actively used', () => {
+        const layoutInteractionService = new DocLayoutInteractionService();
+        const attachPopupToRect = vi.fn(() => ({ canDispose: () => true, dispose: vi.fn() }));
+        const service = createService({
+            attachPopupToRect,
+            dataStream: 'Body\r',
+            layoutInteractionService,
+        });
+
+        service.showParagraphMenu(createParagraphBound({
+            paragraphStart: 0,
+            paragraphEnd: 4,
+            startIndex: 4,
+        }));
+        service.setParagraphMenuActive(true);
+
+        expect(layoutInteractionService.isActive).toBe(true);
+
+        service.setParagraphMenuActive(false);
+
+        expect(layoutInteractionService.isActive).toBe(false);
     });
 
     it('does not show paragraph menus while a table rect selection is active', () => {
@@ -714,6 +778,21 @@ describe('DocParagraphMenuService', () => {
 
         expect(dispose).toHaveBeenCalledTimes(1);
         expect(service.activeTarget).toBeNull();
+    });
+
+    it('protects layout for the full block drag lifetime', () => {
+        const layoutInteractionService = new DocLayoutInteractionService();
+        const service = createService({
+            attachPopupToRect: vi.fn(() => ({ canDispose: () => true, dispose: vi.fn() })),
+            dataStream: 'Title\r',
+            layoutInteractionService,
+        });
+
+        service.setBlockMenuDragging(true);
+        expect(layoutInteractionService.isActive).toBe(true);
+
+        service.setBlockMenuDragging(false);
+        expect(layoutInteractionService.isActive).toBe(false);
     });
 
     it('hides the paragraph menu on keyboard input', () => {
@@ -1257,13 +1336,15 @@ function createService(options: {
     activeTextRange?: { collapsed: boolean; endOffset: number; startOffset: number };
     attachPopupToRect: ReturnType<typeof vi.fn>;
     blockRanges?: Array<{ blockId: string; blockType: string; endIndex: number; startIndex: number }>;
+    canEdit?: boolean;
     clickCustomRanges$?: Subject<unknown>;
     customBlocks?: Array<{ blockId: string; blockType: BlockType; startIndex: number }>;
     dataStream: string;
     findParagraphBoundByIndex?: (index: number) => unknown;
     docRanges?: Array<{ collapsed?: boolean; endOffset?: number; rangeType?: DOC_RANGE_TYPE | string; startOffset?: number }>;
     getDocRanges?: () => Array<{ collapsed?: boolean; endOffset?: number; rangeType?: DOC_RANGE_TYPE | string; startOffset?: number }>;
-    paragraphs?: Array<{ bullet?: { listType?: PresetListType }; paragraphStyle?: Record<string, unknown>; startIndex: number }>;
+    getPermissionValue?: (permissionId: string) => boolean;
+    paragraphs?: Array<{ bullet?: { listType?: PresetListType }; paragraphId?: string; paragraphStyle?: Record<string, unknown>; startIndex: number }>;
     paragraphBounds?: Map<number, IMutiPageParagraphBound>;
     hoverParagraphLeft$?: BehaviorSubject<IMutiPageParagraphBound | null>;
     hoverParagraphRealTime$?: BehaviorSubject<IMutiPageParagraphBound | null>;
@@ -1271,6 +1352,7 @@ function createService(options: {
     isOnPointerEvent?: boolean;
     inputBefore$?: Subject<unknown>;
     keydown$?: Subject<unknown>;
+    layoutInteractionService?: DocLayoutInteractionService;
     replaceDocRanges?: ReturnType<typeof vi.fn>;
     scrollAfter$?: { subscribeEvent: (callback: (event: { scrollY: number }) => void) => { dispose: () => void } };
     selectionStart$?: Subject<unknown>;
@@ -1279,18 +1361,21 @@ function createService(options: {
     tables?: Array<{ endIndex: number; startIndex: number; tableId: string }>;
     viewportScrollY?: number;
 }) {
+    const body = {
+        blockRanges: options.blockRanges ?? [],
+        customBlocks: options.customBlocks ?? [],
+        dataStream: options.dataStream,
+        paragraphs: options.paragraphs ?? [],
+        tables: options.tables ?? [],
+    };
     return new DocParagraphMenuService(
         {
             unitId: 'doc-1',
             unit: {
-                getBody: () => ({
-                    blockRanges: options.blockRanges ?? [],
-                    customBlocks: options.customBlocks ?? [],
-                    dataStream: options.dataStream,
-                    paragraphs: options.paragraphs ?? [],
-                    tables: options.tables ?? [],
-                }),
+                getBody: () => body,
                 getDisabled: () => false,
+                getSelfOrHeaderFooterModel: () => ({ getBody: () => body }),
+                getSnapshot: () => ({ body, drawings: {} }),
             },
             engine: {
                 getCanvasElement: () => ({
@@ -1347,7 +1432,14 @@ function createService(options: {
             onKeydown$: options.keydown$ ?? new Subject(),
             onSelectionStart$: options.selectionStart$ ?? new Subject(),
             isOnPointerEvent: options.isOnPointerEvent ?? false,
-        } as never
+        } as never,
+        {
+            getPermissionPoint: (permissionId: string) => ({
+                value: options.getPermissionValue?.(permissionId) ?? options.canEdit ?? true,
+            }),
+            permissionPointUpdate$: new Subject(),
+        } as never,
+        options.layoutInteractionService ?? new DocLayoutInteractionService()
     );
 }
 

@@ -97,12 +97,15 @@ export class DocSelectionManagerService extends RxDisposable {
         return this._getTextRanges(params);
     }
 
-    refreshSelection(params: Nullable<IDocSelectionManagerSearchParam> = this._currentSelection) {
+    refreshSelection(
+        params: Nullable<IDocSelectionManagerSearchParam> = this._currentSelection,
+        isEditing = false
+    ) {
         if (params == null) {
             return;
         }
 
-        this._refresh(params);
+        this._refresh(params, isEditing);
     }
 
     // **Only used in test case** because this does not go through the render layer.
@@ -196,6 +199,25 @@ export class DocSelectionManagerService extends RxDisposable {
         });
     }
 
+    /**
+     * Replaces logical selection state without rebuilding render ranges. Atomic
+     * external mutations use this before applying document actions so layout can
+     * follow transformed offsets, then refresh after new geometry is available.
+     */
+    replaceSelectionInfoWithoutRefresh(
+        selectionInfo: IDocSelectionInnerParam,
+        params: Nullable<IDocSelectionManagerSearchParam> = this._currentSelection
+    ): void {
+        if (params == null) {
+            return;
+        }
+
+        this._replaceByParam({
+            ...selectionInfo,
+            ...params,
+        });
+    }
+
     // Only use in doc-selection-render.controller.ts
     __replaceTextRangesWithNoRefresh(textSelectionInfo: IDocSelectionInnerParam, search: IDocSelectionManagerSearchParam) {
         if (this._currentSelection == null) {
@@ -257,7 +279,7 @@ export class DocSelectionManagerService extends RxDisposable {
         return this._textSelectionInfo.get(unitId)?.get(subUnitId);
     }
 
-    private _refresh(param: IDocSelectionManagerSearchParam): void {
+    private _refresh(param: IDocSelectionManagerSearchParam, isEditing = false): void {
         const allTextSelectionInfo = this._getTextRanges(param);
 
         if (allTextSelectionInfo == null) {
@@ -274,7 +296,7 @@ export class DocSelectionManagerService extends RxDisposable {
             unitId,
             subUnitId,
             docRanges,
-            isEditing: false,
+            isEditing,
             options,
         });
     }

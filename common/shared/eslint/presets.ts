@@ -233,7 +233,6 @@ export const noBarrelImportPreset = (): Linter.Config => {
             '**/*.tsx',
             '**/*.d.ts',
             '**/tsdown.config.ts',
-            'playwright.config.ts',
             '**/*.spec.ts',
             '**/*.spec.tsx',
             '**/*.test.ts',

@@ -18,7 +18,7 @@ import type { DocumentDataModel, ICommandInfo, IDocDrawingPosition, IDrawingPara
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IDocDrawing, IDrawingDocTransform, IInsertDocDrawingCommandParams, ISetDocDrawingArrangeCommandParams, IUpdateDrawingDocTransformCommandParams } from '@univerjs/docs-drawing';
 import type { IImageData } from '@univerjs/drawing';
-import type { Documents, Image, IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import type { BaseObject, Documents, Image, IRenderContext, IRenderModule, ITransformerConfig } from '@univerjs/engine-render';
 import type { LocaleKey } from '../../locale/types';
 import {
     BooleanNumber,
@@ -30,12 +30,24 @@ import {
     IImageIoService,
     ImageUploadStatusType,
     Inject,
+    IPermissionService,
     LocaleService,
     PositionedObjectLayoutType,
     WrapTextType,
 } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
-import { buildDocTransform, docDrawingPositionToTransform, DocSelectionManagerService, DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import {
+    buildDocTransform,
+    canEditDocumentTargets,
+    docDrawingPositionToTransform,
+    DocSelectionManagerService,
+    DocSkeletonManagerService,
+    getDocumentDrawingSegmentId,
+    getDocumentEditTargetObjectIds,
+    getDocumentEntityParentPermissionObjectIds,
+    getDocumentEntityPermissionObjectId,
+    RichTextEditingMutation,
+} from '@univerjs/docs';
 import { IDocDrawingService, InsertDocDrawingCommand, SetDocDrawingArrangeCommand, UpdateDrawingDocTransformCommand } from '@univerjs/docs-drawing';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import {
@@ -61,6 +73,10 @@ interface IImageInsertPosition {
 }
 
 export class DocDrawingUpdateRenderController extends Disposable implements IRenderModule {
+    private readonly _editableTransformerConfigs = new WeakMap<BaseObject, ITransformerConfig>();
+    private readonly _editableEventedStates = new WeakMap<BaseObject, boolean>();
+    private _editStatusUpdateScheduled = false;
+
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
         @ICommandService private readonly _commandService: ICommandService,
@@ -69,6 +85,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
         @IImageIoService private readonly _imageIoService: IImageIoService,
         @IDocDrawingService private readonly _docDrawingService: IDocDrawingService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
+        @IPermissionService private readonly _permissionService: IPermissionService,
         @IContextService private readonly _contextService: IContextService,
         @IMessageService private readonly _messageService: IMessageService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
@@ -84,6 +101,16 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
         this._focusDrawingListener();
         this._transformDrawingListener();
         this._editAreaChangeListener();
+        const scheduleEditStatusUpdate = (drawings: Array<{ unitId: string }>) => {
+            if (drawings.some((drawing) => drawing.unitId === this._context?.unitId)) {
+                this._scheduleDrawingsEditStatusUpdate();
+            }
+        };
+        this.disposeWithMe(this._drawingManagerService.add$.subscribe(scheduleEditStatusUpdate));
+        this.disposeWithMe(this._drawingManagerService.update$.subscribe(scheduleEditStatusUpdate));
+        this.disposeWithMe(this._permissionService.permissionPointUpdate$.subscribe(() => {
+            this._updateDrawingsEditStatus();
+        }));
     }
 
     override dispose(): void {
@@ -95,12 +122,15 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
     async insertDocImage(): Promise<boolean> {
         const insertPosition = this._getCurrentImageInsertPosition();
         const textRange = this._getCurrentImageInsertTextRange();
+        if (!this._canInsertDocImage(textRange)) {
+            return false;
+        }
         const files = await this._fileOpenerService.openFile({
             multiple: true,
             accept: DRAWING_IMAGE_ALLOW_IMAGE_LIST.map((image) => `.${image.replace('image/', '')}`).join(','),
         });
 
-        if (this._disposed) {
+        if (this._disposed || !this._canInsertDocImage(textRange)) {
             return false;
         }
 
@@ -152,7 +182,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
             });
         }
 
-        if (this._disposed || imageParams.length === 0) {
+        if (this._disposed || imageParams.length === 0 || !this._canInsertDocImage(textRange)) {
             return false;
         }
 
@@ -166,7 +196,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
             const { imageId, imageSourceType, source, base64Cache } = imageParam;
             const { width, height, image } = await getImageSize(base64Cache || '');
 
-            if (this._disposed) {
+            if (this._disposed || !this._canInsertDocImage(textRange)) {
                 return false;
             }
 
@@ -418,7 +448,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
                     this._docDrawingService.focusDrawing(params);
                     this._setDrawingSelections(params);
                     const prevSegmentId = this._docSelectionRenderService.getSegment();
-                    const segmentId = this._findSegmentIdByDrawingId(params[0].drawingId);
+                    const segmentId = getDocumentDrawingSegmentId(this._context.unit, params[0].drawingId);
 
                     // Change segmentId when click drawing in different segment.
                     if (prevSegmentId !== segmentId) {
@@ -435,32 +465,6 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
                 this._updateDrawingsEditStatus();
             })
         );
-    }
-
-    private _findSegmentIdByDrawingId(drawingId: string) {
-        const { unit: DocDataModel } = this._context;
-
-        const { body, headers = {}, footers = {} } = DocDataModel.getSnapshot();
-
-        const bodyCustomBlocks = body?.customBlocks ?? [];
-
-        if (bodyCustomBlocks.some((b) => b.blockId === drawingId)) {
-            return '';
-        }
-
-        for (const headerId of Object.keys(headers)) {
-            if (headers[headerId].body.customBlocks?.some((b) => b.blockId === drawingId)) {
-                return headerId;
-            }
-        }
-
-        for (const footerId of Object.keys(footers)) {
-            if (footers[footerId].body.customBlocks?.some((b) => b.blockId === drawingId)) {
-                return footerId;
-            }
-        }
-
-        return '';
     }
 
     // Update drawings edit status and opacity. You can not edit header footer images when you are editing body. and vice verse.
@@ -480,30 +484,37 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
         const snapshot = docDataModel.getSnapshot();
         const { drawings = {} } = snapshot;
         const isEditBody = viewModel.getEditArea() === DocumentEditArea.BODY;
-        const isDocInputFocusing = this._docSelectionRenderService.isFocusing;
+        const isDocInteractionFocusing = this._docSelectionRenderService.isFocusing
+            || this._drawingManagerService.getFocusDrawings().some((drawing) => drawing.unitId === unitId);
+        const readOnlyDrawingIds = new Set<string>();
 
         for (const key of Object.keys(drawings)) {
             const drawing = drawings[key];
+            const segmentId = getDocumentDrawingSegmentId(docDataModel, drawing.drawingId);
+            const editable = canEditDocumentTargets(this._permissionService, unitId, [
+                ...getDocumentEntityParentPermissionObjectIds(docDataModel, segmentId, 'drawing', drawing.drawingId),
+                getDocumentEntityPermissionObjectId(segmentId, 'drawing', drawing.drawingId),
+            ]);
+            this._recordReadOnlyDrawing(readOnlyDrawingIds, drawing.drawingId, editable);
             const objectKey = getDrawingShapeKeyByDrawingSearch({ unitId, drawingId: drawing.drawingId, subUnitId: unitId });
             const drawingShapes = scene.fuzzyMathObjects(objectKey, true);
 
             if (drawingShapes.length) {
                 for (const shape of drawingShapes) {
                     scene.detachTransformerFrom(shape);
+                    this._setTransformerEditable(shape, editable);
                     try {
-                        (shape as Image).setOpacity(isDocInputFocusing ? 0.5 : 1);
+                        (shape as Image).setOpacity(isDocInteractionFocusing ? 0.5 : 1);
                     } catch {
                     }
-                    if (!isDocInputFocusing) {
+                    if (!isDocInteractionFocusing) {
                         continue;
                     }
                     if (
                         (isEditBody && drawing.isMultiTransform !== BooleanNumber.TRUE)
                         || (!isEditBody && drawing.isMultiTransform === BooleanNumber.TRUE)
                     ) {
-                        if (drawing.allowTransform !== false) {
-                            scene.attachTransformerTo(shape);
-                        }
+                        this._attachTransformerIfEditable(shape, editable, drawing.allowTransform);
 
                         try {
                             (shape as Image).setOpacity(1);
@@ -513,6 +524,84 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
                 }
             }
         }
+
+        this._clearReadOnlyDrawingFocus(unitId, readOnlyDrawingIds);
+    }
+
+    private _recordReadOnlyDrawing(readOnlyDrawingIds: Set<string>, drawingId: string, editable: boolean): void {
+        if (!editable) {
+            readOnlyDrawingIds.add(drawingId);
+        }
+    }
+
+    private _attachTransformerIfEditable(shape: BaseObject, editable: boolean, allowTransform?: boolean): void {
+        if (editable && allowTransform !== false) {
+            this._context.scene.attachTransformerTo(shape);
+        }
+    }
+
+    private _clearReadOnlyDrawingFocus(unitId: string, readOnlyDrawingIds: Set<string>): void {
+        if (readOnlyDrawingIds.size === 0) {
+            return;
+        }
+        const focusedDrawings = this._drawingManagerService.getFocusDrawings();
+        const editableFocus = focusedDrawings.filter((drawing) =>
+            drawing.unitId !== unitId || !readOnlyDrawingIds.has(drawing.drawingId));
+        if (editableFocus.length !== focusedDrawings.length) {
+            this._drawingManagerService.focusDrawing(editableFocus);
+        }
+    }
+
+    private _setTransformerEditable(shape: BaseObject, editable: boolean): void {
+        if (editable) {
+            const config = this._editableTransformerConfigs.get(shape);
+            if (config) {
+                shape.transformerConfig = config;
+                this._editableTransformerConfigs.delete(shape);
+            }
+            const evented = this._editableEventedStates.get(shape);
+            if (evented !== undefined) {
+                shape.evented = evented;
+                this._editableEventedStates.delete(shape);
+            }
+            return;
+        }
+
+        if (!this._editableTransformerConfigs.has(shape)) {
+            this._editableTransformerConfigs.set(shape, shape.transformerConfig);
+        }
+        if (!this._editableEventedStates.has(shape)) {
+            this._editableEventedStates.set(shape, shape.evented);
+        }
+        shape.evented = false;
+        this._context.scene.getTransformer()?.clearControlByIds([shape.oKey]);
+        shape.transformerConfig = {
+            ...shape.transformerConfig,
+            moveEnabled: false,
+            resizeEnabled: false,
+            rotateEnabled: false,
+        };
+    }
+
+    private _scheduleDrawingsEditStatusUpdate(): void {
+        if (this._editStatusUpdateScheduled) {
+            return;
+        }
+        this._editStatusUpdateScheduled = true;
+        queueMicrotask(() => {
+            this._editStatusUpdateScheduled = false;
+            if (!this._disposed) {
+                this._updateDrawingsEditStatus();
+            }
+        });
+    }
+
+    private _canInsertDocImage(textRange: Nullable<ITextRangeParam>): boolean {
+        const { unit, unitId } = this._context;
+        const objectIds = textRange?.startOffset == null || textRange.endOffset == null
+            ? []
+            : getDocumentEditTargetObjectIds(unit, textRange.segmentId ?? '', textRange);
+        return canEditDocumentTargets(this._permissionService, unitId, objectIds);
     }
 
     private _editAreaChangeListener() {

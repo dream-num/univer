@@ -17,7 +17,7 @@
 import type { ICustomRange, Nullable, Workbook } from '@univerjs/core';
 import type { LocaleKey } from '../locale/types';
 import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
-import { borderClassName, clsx, MessageType, Tooltip } from '@univerjs/design';
+import { borderClassName, Button, clsx, MessageType, Tooltip } from '@univerjs/design';
 import { AllBorderIcon, CopyIcon, LinkIcon, SheetsMultiIcon, UnlinkIcon, WriteIcon } from '@univerjs/icons';
 import {
     CancelHyperLinkCommand,
@@ -200,36 +200,36 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
                   univer-gap-2
                 `}
             >
-                {copyPermission && (
-                    <div
-                        className={clsx(`
-                          univer-flex univer-size-6 univer-cursor-pointer univer-flex-row univer-items-center
-                          univer-justify-center univer-rounded univer-text-base
-                          hover:univer-bg-gray-100
-                          dark:hover:!univer-bg-gray-700
-                        `, { 'univer-text-red-500': isError })}
-                        onClick={() => {
-                            if (isError) {
-                                return;
-                            }
-                            if (linkObj.type !== SheetHyperLinkType.URL) {
-                                const url = new URL(window.location.href);
-                                url.hash = linkObj.url.slice(1);
-                                navigator.clipboard.writeText(url.href);
-                            } else {
-                                navigator.clipboard.writeText(linkObj.url);
-                            }
-                            messageService.show({
-                                content: localeService.t<LocaleKey>('sheets-hyper-link-ui.message.coped'),
-                                type: MessageType.Info,
-                            });
-                        }}
-                    >
-                        <Tooltip placement="bottom" title={localeService.t<LocaleKey>('sheets-hyper-link-ui.popup.copy')}>
-                            <CopyIcon className="dark:!univer-text-gray-0" />
-                        </Tooltip>
-                    </div>
-                )}
+                <Button
+                    type="button"
+                    variant="text"
+                    size="small"
+                    data-u-comp="cell-link-popup-copy"
+                    aria-label={localeService.t<LocaleKey>('sheets-hyper-link-ui.popup.copy')}
+                    className={clsx(`
+                      !univer-flex univer-size-6 !univer-rounded !univer-border-0 !univer-p-0 !univer-text-base
+                      !univer-font-normal
+                      disabled:!univer-pointer-events-auto
+                    `, { 'univer-text-red-500': isError })}
+                    disabled={!copyPermission || isError}
+                    onClick={() => {
+                        if (linkObj.type !== SheetHyperLinkType.URL) {
+                            const url = new URL(window.location.href);
+                            url.hash = linkObj.url.slice(1);
+                            navigator.clipboard.writeText(url.href);
+                        } else {
+                            navigator.clipboard.writeText(linkObj.url);
+                        }
+                        messageService.show({
+                            content: localeService.t<LocaleKey>('sheets-hyper-link-ui.message.coped'),
+                            type: MessageType.Info,
+                        });
+                    }}
+                >
+                    <Tooltip placement="bottom" title={localeService.t<LocaleKey>('sheets-hyper-link-ui.popup.copy')}>
+                        <CopyIcon className="dark:!univer-text-gray-0" />
+                    </Tooltip>
+                </Button>
                 {editPermission && (
                     <>
                         <div

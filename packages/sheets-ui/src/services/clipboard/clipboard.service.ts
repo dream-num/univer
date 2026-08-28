@@ -54,6 +54,7 @@ import {
     extractPureTextFromCell,
     generateRandomId,
     getEmptyCell,
+    getNumfmtLocaleTag,
     ICommandService,
     ILogService,
     Inject,
@@ -252,6 +253,12 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                 this._univerInstanceService,
                 this._renderManagerService
             )?.getCurrentParam(),
+            getNumfmtParseOptions: () => {
+                const workbook = this._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+                return workbook
+                    ? { locale: getNumfmtLocaleTag(workbook.getSnapshot().locale), dateSystem: workbook.getDateSystem() }
+                    : undefined;
+            },
         });
 
         this._usmToHtml = new USMToHtmlService();
@@ -316,7 +323,15 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         const worksheetId = worksheet.getSheetId();
         const { copyType = COPY_TYPE.COPY, copyHookType = PREDEFINED_HOOK_NAME_COPY.DEFAULT_COPY } = options || {};
 
-        const copyContent = this.generateCopyContent(workbookId, worksheetId, selection.range, { copyType, copyHookType });
+        const focusedObjectHooks = copyHookType === PREDEFINED_HOOK_NAME_COPY.SPECIAL_COPY_FORMULA_ONLY
+            ? []
+            : this._clipboardHooks.filter((hook) => hook.onBeforeCopyFocusedObject);
+        const focusedObjectCopied = focusedObjectHooks
+            .map((hook) => hook.onBeforeCopyFocusedObject?.(workbookId, worksheetId, copyType))
+            .some(Boolean);
+        const copyContent = focusedObjectCopied
+            ? this._generateObjectCopyContent(workbookId, worksheetId, selection.range)
+            : this.generateCopyContent(workbookId, worksheetId, selection.range, { copyType, copyHookType });
 
         if (!copyContent) {
             return false;
@@ -332,6 +347,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             range: discreteRange,
             matrix: matrixFragment,
             copyType,
+            skipCellCopy: focusedObjectCopied,
         });
 
         // 4. write html and get plain text info the clipboard interface
@@ -343,9 +359,12 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
         // 5. mark the copy range
         this._markSelectionService.removeAllShapes();
-
-        const style = createCopyPasteSelectionStyle(this._themeService);
-        this._copyMarkId = this._markSelectionService.addShape({ ...selection, style });
+        if (focusedObjectCopied) {
+            this._copyMarkId = null;
+        } else {
+            const style = createCopyPasteSelectionStyle(this._themeService);
+            this._copyMarkId = this._markSelectionService.addShape({ ...selection, style });
+        }
 
         return true;
     }
@@ -497,6 +516,30 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
     getClipboardHooks(): ISheetClipboardHook[] {
         return this._clipboardHooks;
+    }
+
+    private _generateObjectCopyContent(unitId: string, subUnitId: string, range: IRange): Nullable<ICopyContent> {
+        const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
+        const worksheet = workbook?.getSheetBySheetId(subUnitId);
+        if (!worksheet) {
+            return null;
+        }
+
+        const copyId = generateRandomId(6);
+        const matrixFragment = new ObjectMatrix<ICellDataWithSpanAndDisplay>();
+        matrixFragment.setValue(0, 0, getEmptyCell());
+        const discreteRange: IDiscreteRange = {
+            rows: [range.startRow],
+            cols: [range.startColumn],
+        };
+
+        return {
+            copyId,
+            plain: '',
+            html: this._usmToHtml.convert(matrixFragment, discreteRange, [], copyId),
+            matrixFragment,
+            discreteRange,
+        };
     }
 
     private _generateCopyContent(unitId: string, subUnitId: string, range: IRange, hooks: ISheetClipboardHook[], copyHookType: ICopyHookValueType = PREDEFINED_HOOK_NAME_COPY.DEFAULT_COPY): Nullable<ICopyContent> {
@@ -861,7 +904,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         // const target = this._getPastingTarget();
         // const { selection, unitId, subUnitId } = target;
         const cachedData = this._copyContentCache.get(copyId);
-        const { range, matrix: cachedMatrix, unitId: copyUnitId, subUnitId: copySubUnitId } = cachedData || {};
+        const { range, matrix: cachedMatrix, unitId: copyUnitId, subUnitId: copySubUnitId, skipCellCopy } = cachedData || {};
         if (!cachedMatrix || !cachedData || !range || !copyUnitId || !copySubUnitId) {
             return false;
         }
@@ -958,6 +1001,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                 subUnitId: cachedData.subUnitId,
                 copyType: cachedData.copyType,
                 copyId,
+                skipCellCopy,
             }
         );
 
@@ -975,7 +1019,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         data: IUniverSheetCopyDataModel,
         target: IPasteTarget,
         pasteType: IPasteHookValueType,
-        source?: ISheetDiscreteRangeLocation & { copyId: string; copyType: COPY_TYPE }
+        source?: ISheetDiscreteRangeLocation & { copyId: string; copyType: COPY_TYPE; skipCellCopy?: boolean }
     ): boolean {
         const { rowProperties, colProperties, cellMatrix } = data;
         const { unitId, subUnitId, pastedRange } = target;
@@ -1009,7 +1053,10 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
         // if hooks are not special or default, it will be executed in any case.
         // other hooks will be executed only when the paste type is the same as the hook name, including the default one
-        const filteredHooks: ISheetClipboardHook[] = enabledHooks.filter(
+        const pasteHooks = source?.skipCellCopy
+            ? enabledHooks.filter((hook) => hook.onBeforeCopyFocusedObject)
+            : enabledHooks;
+        const filteredHooks: ISheetClipboardHook[] = pasteHooks.filter(
             (h) => (!h.specialPasteInfo && h.id !== PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE) || pasteType === h.id
         );
         filteredHooks.forEach((h) => {

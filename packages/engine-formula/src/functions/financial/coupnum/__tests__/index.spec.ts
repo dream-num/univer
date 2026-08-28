@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DateSystem } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
@@ -33,6 +34,24 @@ describe('Test coupnum function', () => {
             const basis = NumberValueObject.create(1);
             const result = testFunction.calculate(settlement, maturity, frequency, basis);
             expect(result.getValue()).toStrictEqual(2);
+        });
+
+        it('uses the configured date system for serial dates', () => {
+            const args = [NumberValueObject.create(365), NumberValueObject.create(730), NumberValueObject.create(2), NumberValueObject.create(1)] as const;
+            testFunction.setDateSystem(DateSystem.Date1900);
+            expect(testFunction.calculate(...args).getValue()).toStrictEqual(2);
+            testFunction.setDateSystem(DateSystem.Date1904);
+            expect(testFunction.calculate(...args).getValue()).toStrictEqual(2);
+            testFunction.setDateSystem(DateSystem.Date1900);
+        });
+
+        it('matches Excel serial-zero boundary behavior', () => {
+            const args = [NumberValueObject.create(0), NumberValueObject.create(365), NumberValueObject.create(2), NumberValueObject.create(1)] as const;
+            testFunction.setDateSystem(DateSystem.Date1900);
+            expect(testFunction.calculate(...args).getValue()).toStrictEqual(ErrorType.NUM);
+            testFunction.setDateSystem(DateSystem.Date1904);
+            expect(testFunction.calculate(...args).getValue()).toStrictEqual(2);
+            testFunction.setDateSystem(DateSystem.Date1900);
         });
 
         it('Value is normal, settlement and maturity test', () => {

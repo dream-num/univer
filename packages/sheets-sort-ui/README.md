@@ -39,4 +39,3 @@ univer.registerPlugin(UniverSheetsSortUIPlugin);
 - [Documentation](https://docs.univer.ai)
 - [NPM package](https://npmjs.com/package/@univerjs/sheets-sort-ui)
 - [GitHub repository](https://github.com/dream-num/univer)
-

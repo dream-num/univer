@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DocumentBlockRangeType, UniverInstanceType } from '@univerjs/core';
+import { DocumentBlockRangeType, FOCUSING_COMMON_DRAWINGS, UniverInstanceType } from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { ContextMenuPosition } from '@univerjs/ui';
 import { describe, expect, it, vi } from 'vitest';
@@ -38,6 +38,7 @@ function createController(options?: {
     textRanges?: Array<{ startOffset: number; endOffset: number }>;
     blockRanges?: Array<{ startIndex: number; endIndex: number; blockType: DocumentBlockRangeType }>;
     menuVisible?: boolean;
+    focusingDrawing?: boolean;
 }) {
     const onPointerDown$ = createEventSubject();
     let commandHandler: ((command: { id: string }) => void) | undefined;
@@ -61,6 +62,9 @@ function createController(options?: {
         { isPointerOnNonChecklistBullet: vi.fn(() => options?.pointerOnBullet ?? false) } as never,
         { getTextRanges: vi.fn(() => options?.textRanges ?? []) } as never,
         {
+            getContextValue: vi.fn((key) => key === FOCUSING_COMMON_DRAWINGS && (options?.focusingDrawing ?? false)),
+        } as never,
+        {
             getCurrentUnitOfType: vi.fn((type) => type === UniverInstanceType.UNIVER_DOC
                 ? { getBody: () => ({ blockRanges: options?.blockRanges ?? [] }) }
                 : null),
@@ -78,6 +82,16 @@ describe('DocContextMenuRenderController', () => {
         onPointerDown$.emit(event);
 
         expect(contextMenuService.triggerContextMenu).toHaveBeenCalledWith(event, ContextMenuPosition.MAIN_AREA);
+        controller.dispose();
+    });
+
+    it('opens the drawing context menu when a drawing is focused', () => {
+        const { controller, onPointerDown$, contextMenuService } = createController({ focusingDrawing: true });
+        const event = { button: 2, offsetX: 10, offsetY: 20 };
+
+        onPointerDown$.emit(event);
+
+        expect(contextMenuService.triggerContextMenu).toHaveBeenCalledWith(event, ContextMenuPosition.DRAWING);
         controller.dispose();
     });
 

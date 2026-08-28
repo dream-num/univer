@@ -38,7 +38,8 @@ function isParsedSection(part: FormatSection | undefined): part is ParsedFormatS
     return !!part && 'scale' in part;
 }
 
-function getPart(
+/** Select the same conditional/sign format section for both display formatting and editor-value formatting. */
+export function getValueFormatSection(
     value: number | bigint,
     parts: Array<FormatSection | undefined>
 ): FormatSection | undefined {
@@ -89,7 +90,7 @@ export function formatColor(
         // eslint-disable-next-line unicorn/prefer-number-properties
         isFinite(value as number)
     ) {
-        part = getPart(value, parts);
+        part = getValueFormatSection(value, parts);
     }
     if (isParsedSection(part) && part.color) {
         color = part.color;
@@ -130,7 +131,7 @@ export function formatValue(
         return ((renderValue as number) < 0 ? resolvedLocale.negative : '') + resolvedLocale.infinity;
     }
     // find and run the pattern part that applies to this number
-    const part = getPart(value as number | bigint, parts);
+    const part = getValueFormatSection(value as number | bigint, parts);
     const decimalValue =
         part && typeof value === 'number' && Number.isFinite(value)
             ? decimalFromNumber(value)

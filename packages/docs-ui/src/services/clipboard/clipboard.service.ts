@@ -32,6 +32,7 @@ import {
     ILogService,
     ImageSourceType,
     Inject,
+    IPermissionService,
     IUniverInstanceService,
     normalizeBody,
     ObjectRelativeFromH,
@@ -42,7 +43,13 @@ import {
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
-import { DocSelectionManagerService } from '@univerjs/docs';
+import {
+    canEditDocumentTargets,
+    DocSelectionManagerService,
+    getDocumentEditTargetObjectIds,
+    getDocumentPermissionValue,
+} from '@univerjs/docs';
+import { UnitAction } from '@univerjs/protocol';
 import {
     FILE__BMP_CLIPBOARD_MIME_TYPE,
     FILE__JPEG_CLIPBOARD_MIME_TYPE,
@@ -172,6 +179,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ILogService private readonly _logService: ILogService,
         @ICommandService private readonly _commandService: ICommandService,
+        @IPermissionService private readonly _permissionService: IPermissionService,
         @IClipboardInterfaceService private readonly _clipboardInterfaceService: IClipboardInterfaceService,
         @Inject(DocHtmlExportService) docHtmlExportService: DocHtmlExportService,
         @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService
@@ -181,6 +189,15 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
     }
 
     async copy(sliceType: SliceBodyType = SliceBodyType.copy, ranges?: ITextRangeWithStyle[]): Promise<boolean> {
+        const document = this._univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        if (!document || !getDocumentPermissionValue(
+            this._permissionService,
+            document.getUnitId(),
+            document.getUnitId(),
+            UnitAction.Copy
+        )) {
+            return false;
+        }
         const {
             newSnapshotList = [],
             needCache = false,
@@ -214,13 +231,20 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
     }
 
     async paste(items?: ClipboardItem[]): Promise<boolean> {
+        const targetUnitId = this._getCurrentDocumentUnitId();
+        if (!targetUnitId || !this._canEditTargets(targetUnitId)) {
+            return false;
+        }
         if (!items?.length) {
-            return this._memoryClipboardData ? this._paste(Tools.deepClone(this._memoryClipboardData)) : false;
+            return this._memoryClipboardData ? this._paste(Tools.deepClone(this._memoryClipboardData), targetUnitId) : false;
         }
 
         const partDocData = await this._genDocDataFromClipboardItems(items);
+        if (!this._canEditTargets(targetUnitId)) {
+            return false;
+        }
 
-        return this._paste(partDocData);
+        return this._paste(partDocData, targetUnitId);
     }
 
     async legacyPaste(options: {
@@ -229,15 +253,21 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         text?: string;
         files: File[];
     }): Promise<boolean> {
-        let { html, internalJson, text, files } = options;
         const currentDocInstance = this._univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_DOC);
         const docUnitId = currentDocInstance?.getUnitId() || '';
+        if (!docUnitId || !this._canEditTargets(docUnitId)) {
+            return false;
+        }
+        let { html, internalJson, text, files } = options;
         if (!html && !text && files.length) {
             html = await this._createImagePasteHtml(files);
         } else if (html && files.length) {
             html += await this._createImagePasteHtml(files);
         }
         html = await this._uploadBase64ImagesInHtml(html);
+        if (!this._canEditTargets(docUnitId)) {
+            return false;
+        }
         if (!html && !text) {
             this._logService.warn('[DocClipboardController] html and text cannot be both empty!');
             return false;
@@ -247,12 +277,41 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         if (docUnitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
             if (text) {
                 const textDocData = BuildTextUtils.transform.fromPlainText(text);
-                return this._paste({ body: textDocData });
+                return this._paste({ body: textDocData }, docUnitId);
             } else {
                 partDocData.body!.textRuns = [];
             }
         }
-        return this._paste(partDocData);
+        return this._paste(partDocData, docUnitId);
+    }
+
+    private _getCurrentDocumentUnitId(): string | null {
+        return this._univerInstanceService
+            .getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)
+            ?.getUnitId() ?? null;
+    }
+
+    private _canEditTargets(
+        expectedUnitId?: string,
+        ranges?: ReadonlyArray<ITextRangeWithStyle | IRectRangeWithStyle>
+    ): boolean {
+        const document = this._univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        if (!document || (expectedUnitId && document.getUnitId() !== expectedUnitId)) {
+            return false;
+        }
+        const objectIds = new Set<string>();
+        const targetRanges = ranges ?? [
+            ...(this._docSelectionManagerService.getTextRanges() ?? []),
+            ...(this._docSelectionManagerService.getRectRanges() ?? []),
+        ];
+        targetRanges.forEach((range) => {
+            if (range.startOffset == null || range.endOffset == null) {
+                return;
+            }
+            getDocumentEditTargetObjectIds(document, range.segmentId ?? '', range)
+                .forEach((objectId) => objectIds.add(objectId));
+        });
+        return canEditDocumentTargets(this._permissionService, document.getUnitId(), objectIds);
     }
 
     private async _cut(ranges?: ITextRangeWithStyle[]): Promise<boolean> {
@@ -271,8 +330,15 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             return false;
         }
 
+        const unitId = this._getCurrentDocumentUnitId();
+        if (!unitId || !this._canEditTargets(unitId, [...textRanges, ...rectRanges])) {
+            return false;
+        }
+
         // Set content to clipboard.
-        this.copy(SliceBodyType.cut, ranges);
+        if (!await this.copy(SliceBodyType.cut, ranges)) {
+            return false;
+        }
 
         try {
             let cursor = 0;
@@ -315,7 +381,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         }
     }
 
-    private async _paste(docData: Partial<IDocumentData>): Promise<boolean> {
+    private async _paste(docData: Partial<IDocumentData>, expectedUnitId?: string): Promise<boolean> {
         const { body: _body } = docData;
 
         if (_body == null) {
@@ -325,7 +391,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         let body = normalizeBody(_body);
 
         const currentDocument = this._univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
-        if (!currentDocument) {
+        if (!currentDocument || (expectedUnitId && currentDocument.getUnitId() !== expectedUnitId)) {
             return false;
         }
 

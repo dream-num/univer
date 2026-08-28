@@ -333,6 +333,53 @@ describe('engine scene viewport extra', () => {
         engine.dispose();
     });
 
+    it('keeps shared viewport boundary pixels out of incremental scroll copies', () => {
+        const { engine, scene, viewport } = createFixture();
+        viewport.setViewportSize({ left: 46, top: 20, width: 260, height: 160 });
+        const rowHeaderViewport = new Viewport('viewRowBottom', scene, {
+            left: 0,
+            top: 20,
+            width: 47,
+            height: 160,
+            active: true,
+            allowCache: true,
+        });
+        new Viewport('viewColumnRight', scene, {
+            left: 46,
+            top: 0,
+            width: 260,
+            height: 21,
+            active: true,
+            allowCache: true,
+        });
+
+        viewport.updateScrollVal({ scrollX: 0, scrollY: 35, viewportScrollX: 0, viewportScrollY: 35 });
+        rowHeaderViewport.updateScrollVal({ scrollX: 0, scrollY: 35, viewportScrollX: 0, viewportScrollY: 35 });
+        scene.render();
+
+        const ctx = engine.getCanvas().getContext();
+        const drawImageSpy = vi.spyOn(ctx, 'drawImage');
+        const clearRectSpy = vi.spyOn(ctx, 'clearRect');
+
+        viewport.updateScrollVal({ scrollX: 0, scrollY: 0, viewportScrollX: 0, viewportScrollY: 0 });
+        rowHeaderViewport.updateScrollVal({ scrollX: 0, scrollY: 0, viewportScrollX: 0, viewportScrollY: 0 });
+        scene.makeDirtyForScrolling();
+        scene.render();
+
+        const engineScrollCopies = drawImageSpy.mock.calls.filter(([source]) => source === ctx.canvas);
+        const mainCopy = engineScrollCopies.find(([, sourceX, sourceY, sourceWidth]) =>
+            sourceX === 47 && sourceY === 21 && Number(sourceWidth) > 200
+        );
+        expect(mainCopy).toBeDefined();
+        expect(mainCopy?.[5]).toBe(47);
+        expect(Number(mainCopy?.[6])).toBeGreaterThan(Number(mainCopy?.[2]));
+        const copiedOffsetY = Number(mainCopy?.[6]) - Number(mainCopy?.[2]);
+        expect(clearRectSpy.mock.calls).toContainEqual([47, 21, expect.any(Number), copiedOffsetY]);
+
+        scene.dispose();
+        engine.dispose();
+    });
+
     it('uses a full render after an after-render observer mutates the engine canvas', () => {
         const { engine, scene, viewport } = createFixture();
         const layer = scene.getLayer(1);
@@ -888,6 +935,71 @@ describe('engine scene viewport extra', () => {
 
         expect(controlObjects.some((o) => o.oKey.includes('__SpreadsheetTransformerRotateLine__'))).toBe(false);
         expect(controlObjects.some((o) => o.oKey.includes('_ICON_'))).toBe(true);
+
+        transformer.dispose();
+        scene.dispose();
+        engine.dispose();
+    });
+
+    it('renders controls from resolved display geometry without changing the selected object', () => {
+        const { engine, scene } = createFixture();
+        engine.setActiveScene(scene.sceneKey);
+
+        const rect = scene.getObject('rect-main');
+        if (!(rect instanceof Rect)) {
+            throw new TypeError('Fixture should contain the main rectangle');
+        }
+        rect.transformerConfig = {
+            keepRatio: false,
+            controlStateResolver: (object) => ({
+                ...object.getState(),
+                left: object.left - 8,
+                top: object.top - 6,
+                width: object.width + 24,
+                height: object.height + 18,
+            }),
+        };
+        const transformer = new Transformer(scene);
+
+        transformer.setSelectedControl(rect);
+        const control = scene.getObject(`__SpreadsheetTransformer___${rect.oKey}`);
+        if (!(control instanceof Group)) {
+            throw new TypeError('Transformer should create a control group');
+        }
+
+        expect(control.getState()).toEqual(expect.objectContaining({
+            left: 2,
+            top: 4,
+            width: 124,
+            height: 78,
+        }));
+        expect(rect.getState()).toEqual(expect.objectContaining({
+            left: 10,
+            top: 10,
+            width: 100,
+            height: 60,
+        }));
+
+        rect.translate(30, 40);
+        transformer.updateControl();
+        expect(control.getState()).toEqual(expect.objectContaining({
+            left: 22,
+            top: 34,
+            width: 124,
+            height: 78,
+        }));
+
+        const resizeAnchor = control.getObjects().find((object) => object.oKey.includes('__SpreadsheetTransformerResizeRB__'));
+        if (!resizeAnchor) {
+            throw new TypeError('Transformer should create a bottom-right resize anchor');
+        }
+        resizeAnchor.triggerPointerDown(createInputEvent('pointerdown', { offsetX: 146, offsetY: 112 }));
+        scene.onPointerMove$.emitEvent(createInputEvent('pointermove', { offsetX: 186, offsetY: 137 }));
+        scene.onPointerUp$.emitEvent(createInputEvent('pointerup', { offsetX: 186, offsetY: 137 }));
+        expect(rect.getState()).toEqual(expect.objectContaining({
+            width: 140,
+            height: 85,
+        }));
 
         transformer.dispose();
         scene.dispose();

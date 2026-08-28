@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DateSystem } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
@@ -137,6 +138,23 @@ describe('Test accrintm function', () => {
             const par = NumberValueObject.create(1000);
             const result = testFunction.calculate(issue, settlement, rate, par);
             expect(getObjectValue(result)).toBe(ErrorType.VALUE);
+        });
+        it('checks the serial-zero boundary in both date systems', () => {
+            const args = [
+                NumberValueObject.create(0),
+                NumberValueObject.create(366),
+                NumberValueObject.create(0.1),
+                NumberValueObject.create(100),
+                NumberValueObject.create(1),
+            ] as const;
+
+            testFunction.setDateSystem(DateSystem.Date1900);
+            expect(getObjectValue(testFunction.calculate(...args))).toBeCloseTo(10.027397260273972, 12);
+
+            testFunction.setDateSystem(DateSystem.Date1904);
+            expect(getObjectValue(testFunction.calculate(...args))).toBeCloseTo(10, 12);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
         });
     });
 });

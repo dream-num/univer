@@ -18,6 +18,9 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'docs-ui': {
+        layout: {
+            recovering: '문서 레이아웃을 복구하는 중…',
+        },
         toolbar: {
             font: '글꼴',
             fontSize: '글꼴 크기',

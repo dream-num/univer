@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DateSystem } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject, ValueObjectFactory } from '../../../../engine/value-object/array-value-object';
@@ -82,6 +83,14 @@ describe('Test value function', () => {
             const text4 = ValueObjectFactory.create('2012-12-12');
             const result4 = testFunction.calculate(text4);
             expect(getObjectValue(result4)).toStrictEqual(41255);
+        });
+
+        it('uses the date system bound to date text', () => {
+            const date1900 = StringValueObject.create('1904-1-1').withDateSystem(DateSystem.Date1900);
+            const date1904 = StringValueObject.create('1904-1-1').withDateSystem(DateSystem.Date1904);
+
+            expect(getObjectValue(testFunction.calculate(date1900))).toBe(1462);
+            expect(getObjectValue(testFunction.calculate(date1904))).toBe(0);
         });
     });
 });

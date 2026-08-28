@@ -26,6 +26,7 @@ const locale: typeof enUS = {
         },
         menu: {
             addComment: '댓글 추가',
+            openComments: '댓글 열기',
             commentManagement: '댓글 관리',
         },
     },

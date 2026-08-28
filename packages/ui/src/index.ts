@@ -101,6 +101,7 @@ export type { IMenuSchema, IRibbonGridLayout, MenuSchemaType } from './services/
 export {
     ContextMenuGroup,
     ContextMenuPosition,
+    FloatingObjectToolbarPosition,
     MenuManagerPosition,
     RibbonDataGroup,
     RibbonFormulasGroup,

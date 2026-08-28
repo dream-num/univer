@@ -60,6 +60,18 @@ export {
 export * from './components/docs/layout/doc-simple-skeleton';
 export { DocumentSkeleton } from './components/docs/layout/doc-skeleton';
 export type { IFindNodeRestrictions } from './components/docs/layout/doc-skeleton';
+export type { IDocumentLayoutPagePublication } from './components/docs/layout/document-layout-publication';
+export type {
+    DocumentLayoutMode,
+    DocumentLayoutReason,
+    IDocumentLayoutApplyResult,
+    IDocumentLayoutInvalidation,
+    IDocumentLayoutPageRange,
+    IDocumentLayoutProgress,
+    IDocumentLayoutProtectedContinuousRange,
+    IDocumentLayoutProtectedPageRange,
+    IDocumentLayoutProtectedRange,
+} from './components/docs/layout/document-layout-types';
 export {
     compareDocumentSkeletonNestedPagePathOrder,
     documentSkeletonLineIterator,
@@ -115,3 +127,5 @@ export * from './scroll-timer';
 export { CanvasColorService, DumbCanvasColorService, ICanvasColorService } from './services/canvas-color.service';
 export * from './shape';
 export * from './viewport';
+export { DocumentLayoutSession } from './worker-layout';
+export type { IDocumentLayoutSessionStartOptions, IDocumentLayoutStepResult } from './worker-layout';

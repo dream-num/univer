@@ -21,7 +21,6 @@ import type {
     IDrawingSearch,
     Nullable,
 } from '@univerjs/core';
-import type { JSONOp, JSONOpList } from 'ot-json1';
 import type { Observable } from 'rxjs';
 import type {
     IDrawingGroupUpdateParam,
@@ -37,12 +36,17 @@ import { DrawingTypeEnum, normalizeDrawingOrderIndex, sortRules, sortRulesByDesc
 import * as json1 from 'ot-json1';
 import { Subject } from 'rxjs';
 
-export interface IDrawingJsonUndo1 {
+type JSONOp = json1.JSONOp;
+type JSONOpList = json1.JSONOpList;
+
+export interface IDrawingJsonUndo1<
+    TObjects = IDrawingSearch[] | IDrawingOrderMapParam | IDrawingGroupUpdateParam | IDrawingGroupUpdateParam[]
+> {
     undo: JSONOp;
     redo: JSONOp;
     unitId: string;
     subUnitId: string;
-    objects: IDrawingSearch[] | IDrawingOrderMapParam | IDrawingGroupUpdateParam | IDrawingGroupUpdateParam[];
+    objects: TObjects;
 }
 
 export interface IDrawingJson1Type {
@@ -66,10 +70,6 @@ function isJsonValueEqual(left: unknown, right: unknown): boolean {
         return true;
     }
 
-    if (left == null || right == null || typeof left !== 'object' || typeof right !== 'object') {
-        return false;
-    }
-
     if (Array.isArray(left) || Array.isArray(right)) {
         if (!Array.isArray(left) || !Array.isArray(right) || left.length !== right.length) {
             return false;
@@ -78,15 +78,99 @@ function isJsonValueEqual(left: unknown, right: unknown): boolean {
         return left.every((item, index) => isJsonValueEqual(item, right[index]));
     }
 
-    const leftRecord = left as Record<string, unknown>;
-    const rightRecord = right as Record<string, unknown>;
-    const leftKeys = Object.keys(leftRecord);
-    const rightKeys = Object.keys(rightRecord);
+    if (!isPlainObject(left) || !isPlainObject(right)) {
+        return false;
+    }
+
+    const leftKeys = Object.keys(left);
+    const rightKeys = Object.keys(right);
     if (leftKeys.length !== rightKeys.length) {
         return false;
     }
 
-    return leftKeys.every((key) => Object.prototype.hasOwnProperty.call(rightRecord, key) && isJsonValueEqual(leftRecord[key], rightRecord[key]));
+    return leftKeys.every((key) => Object.prototype.hasOwnProperty.call(right, key) && isJsonValueEqual(left[key], right[key]));
+}
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+    return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function hasOnlyEnumerableOwnProperties(value: Record<string, unknown>): boolean {
+    return Object.getOwnPropertyNames(value).every((key) => Object.prototype.propertyIsEnumerable.call(value, key));
+}
+
+function createJsonRemoveOp(path: Array<number | string>, value: json1.Doc): JSONOp {
+    return json1.type.writeCursor().writeAtPath(path, 'r', value).get();
+}
+
+function normalizeJsonDocument(value: unknown): json1.Doc | undefined {
+    if (value === undefined) {
+        return undefined;
+    }
+
+    if (value === null || typeof value === 'boolean' || typeof value === 'number' || typeof value === 'string') {
+        return value;
+    }
+
+    if (Array.isArray(value)) {
+        return value.map((item) => normalizeJsonDocument(item) ?? null);
+    }
+
+    if (!isPlainObject(value)) {
+        return undefined;
+    }
+
+    const normalizedValue: Record<string, json1.Doc> = {};
+    Object.entries(value).forEach(([key, item]) => {
+        const normalizedItem = normalizeJsonDocument(item);
+        if (normalizedItem !== undefined) {
+            normalizedValue[key] = normalizedItem;
+        }
+    });
+    return normalizedValue;
+}
+
+function appendJsonUpdateOps(
+    ops: JSONOp[],
+    path: Array<number | string>,
+    newValue: unknown,
+    oldValue: unknown,
+    hasOldValue: boolean
+): void {
+    const normalizedOldValue = normalizeJsonDocument(oldValue);
+    const normalizedNewValue = normalizeJsonDocument(newValue);
+    const hasNormalizedOldValue = hasOldValue && normalizedOldValue !== undefined;
+
+    if (hasNormalizedOldValue && isJsonValueEqual(normalizedOldValue, normalizedNewValue)) {
+        return;
+    }
+
+    if (
+        hasNormalizedOldValue &&
+        isPlainObject(oldValue) &&
+        isPlainObject(newValue) &&
+        hasOnlyEnumerableOwnProperties(oldValue) &&
+        hasOnlyEnumerableOwnProperties(newValue)
+    ) {
+        const keys = new Set([...Object.keys(oldValue), ...Object.keys(newValue)]);
+        keys.forEach((key) => appendJsonUpdateOps(
+            ops,
+            [...path, key],
+            newValue[key],
+            oldValue[key],
+            Object.prototype.hasOwnProperty.call(oldValue, key) && oldValue[key] !== undefined
+        ));
+        return;
+    }
+
+    const op = !hasNormalizedOldValue
+        ? normalizedNewValue === undefined ? null : json1.insertOp(path, normalizedNewValue)
+        : normalizedNewValue === undefined
+            ? createJsonRemoveOp(path, normalizedOldValue)
+            : json1.replaceOp(path, normalizedOldValue, normalizedNewValue);
+    if (op && isNonEmptyOp(op)) {
+        ops.push(op);
+    }
 }
 
 interface IDrawingRefreshMetadata {
@@ -408,7 +492,7 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
         return { undo: invertOp, redo: op, unitId, subUnitId, objects: allToRemove };
     }
 
-    getBatchUpdateOp(updateParams: T[]): IDrawingJsonUndo1 {
+    getBatchUpdateOp(updateParams: T[]): IDrawingJsonUndo1<IDrawingSearch[]> {
         const objects: IDrawingSearch[] = [];
         const ops: JSONOp[] = [];
         const invertOps: JSONOp[] = [];
@@ -987,7 +1071,7 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
 
         const op = ops.reduce(json1.type.compose, null);
 
-        const invertOp = json1.type.invertWithDoc(op, this.drawingManagerData as unknown as json1.Doc);
+        const invertOp = json1.type.invert(op);
 
         return { op, invertOp };
     }
@@ -1007,36 +1091,8 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
             const newVal = newParam[key as keyof IDrawingParam];
             const hasOldKey = Object.prototype.hasOwnProperty.call(oldParam, key);
             const oldVal = oldParam[key as keyof IDrawingParam];
-
-            if (hasOldKey && isJsonValueEqual(oldVal, newVal)) {
-                return;
-            }
-
             const path = [unitId, subUnitId, DrawingMapItemType.data, drawingId, key];
-            if (!hasOldKey) {
-                if (newVal === undefined) {
-                    return;
-                }
-
-                const op = json1.insertOp(path, newVal as unknown as json1.Doc);
-                if (isNonEmptyOp(op)) {
-                    ops.push(op);
-                }
-                return;
-            }
-
-            if (newVal === undefined) {
-                const op = json1.removeOp(path, true);
-                if (isNonEmptyOp(op)) {
-                    ops.push(op);
-                }
-                return;
-            }
-
-            const op = json1.replaceOp(path, oldVal as unknown as json1.Doc, newVal as unknown as json1.Doc);
-            if (isNonEmptyOp(op)) {
-                ops.push(op);
-            }
+            appendJsonUpdateOps(ops, path, newVal, oldVal, hasOldKey);
         });
         return ops;
     }

@@ -26,6 +26,7 @@ import {
     PositionedObjectLayoutType,
     UniverInstanceType,
 } from '@univerjs/core';
+import { DocHistoryAction, RichTextEditingMutation } from '@univerjs/docs';
 import { TextWrappingStyle, UpdateDocDrawingWrappingStyleCommand } from '@univerjs/docs-drawing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createFacadeTestBed } from '../../../facade/__tests__/create-test-bed';
@@ -86,7 +87,9 @@ describe('UpdateDocDrawingWrappingStyleCommand', () => {
         );
         testBed.injector.get(IUniverInstanceService).focusUnit(otherDocument.getUnitId());
 
-        const result = testBed.injector.get(ICommandService).syncExecuteCommand<IUpdateDocDrawingWrappingStyleParams>(
+        const commandService = testBed.injector.get(ICommandService);
+        const mutationSpy = vi.spyOn(commandService, 'syncExecuteCommand');
+        const result = commandService.syncExecuteCommand<IUpdateDocDrawingWrappingStyleParams>(
             UpdateDocDrawingWrappingStyleCommand.id,
             {
                 unitId: 'test-doc',
@@ -100,6 +103,10 @@ describe('UpdateDocDrawingWrappingStyleCommand', () => {
         );
 
         expect(result).toBe(true);
+        expect(mutationSpy).toHaveBeenCalledWith(
+            RichTextEditingMutation.id,
+            expect.objectContaining({ historyAction: DocHistoryAction.UpdateImage })
+        );
         expect(testBed.document.getImage(image!.getId())?.getImageData()).toMatchObject({
             layoutType: PositionedObjectLayoutType.WRAP_NONE,
             behindDoc: BooleanNumber.TRUE,

@@ -1,3 +1,226 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+html,
+body {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    display: flex;
+    overflow: hidden;
+    flex-direction: column;
+    color: #1f2329;
+    background: #fff;
+    font-family:
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        'Segoe UI',
+        sans-serif;
+}
+
+html.univer-dark body {
+    color: #f8fafc;
+    background: #111827;
+}
+
+.workbench-header {
+    --workbench-border: #e2e8f0;
+    --workbench-muted: #64748b;
+    --workbench-surface: #fff;
+    --workbench-surface-hover: #f8fafc;
+    --workbench-text: #1e293b;
+
+    z-index: 10;
+    isolation: isolate;
+    display: flex;
+    min-width: 0;
+    min-height: 36px;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 8px;
+    padding-inline: 12px;
+    border-bottom: 1px solid var(--workbench-border);
+    color: var(--workbench-text);
+    background: var(--workbench-surface);
+    font-family:
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        'Segoe UI',
+        sans-serif;
+    font-size: 13px;
+    line-height: 1.25;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.workbench-header,
+.workbench-header * {
+    box-sizing: border-box;
+}
+
+.workbench-primary,
+.workbench-header nav {
+    display: flex;
+    align-items: center;
+}
+
+.workbench-primary {
+    min-width: 0;
+    min-height: 35px;
+    flex: 1 1 auto;
+    gap: 16px;
+}
+
+.workbench-brand {
+    display: flex;
+    width: 68px;
+    height: 20px;
+    align-items: center;
+    flex: 0 0 auto;
+    background: url('../../docs/img/banner-dark.png') center / contain no-repeat;
+}
+
+.workbench-header nav {
+    min-width: 0;
+    align-self: stretch;
+    gap: 2px;
+}
+
+.workbench-settings {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+}
+
+.workbench-settings-trigger[data-state='open'] svg {
+    transform: rotate(180deg);
+}
+
+.workbench-settings-trigger svg {
+    transition: transform 120ms ease-out;
+}
+
+.workbench-settings-menu {
+    width: 240px;
+}
+
+.workbench-setting-label {
+    display: flex;
+    min-width: 184px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.workbench-setting-value {
+    max-width: 112px;
+    overflow: hidden;
+    color: var(--univer-gray-400, #7d8698);
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+html.univer-dark .workbench-header {
+    --workbench-border: #334155;
+    --workbench-muted: #cbd5e1;
+    --workbench-surface: #111827;
+    --workbench-surface-hover: #1e293b;
+    --workbench-text: #f8fafc;
+
+    color-scheme: dark;
+}
+
+html.univer-dark .workbench-brand {
+    background-image: url('../../docs/img/banner-light.png');
+}
+
+.workbench-header a {
+    display: flex;
+    min-height: 35px;
+    align-items: center;
+    padding-inline: 10px;
+    border-radius: 4px 4px 0 0;
+    color: var(--workbench-muted);
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1;
+    text-decoration: none;
+}
+
+.workbench-header a:hover {
+    color: var(--workbench-text);
+    background: var(--workbench-surface-hover);
+}
+
+.workbench-header a[aria-current='page'] {
+    color: var(--workbench-accent, #274fee);
+    background: color-mix(in srgb, var(--workbench-accent, #274fee) 7%, transparent);
+    font-weight: 600;
+    box-shadow: inset 0 -2px var(--workbench-accent, #274fee);
+}
+
+.workbench-header a:focus-visible,
+.workbench-settings-trigger:focus-visible {
+    outline: 2px solid var(--workbench-accent, #274fee);
+    outline-offset: -2px;
+}
+
+.workbench-status {
+    position: absolute;
+    z-index: 20;
+    top: 44px;
+    left: 50%;
+    padding: 8px 12px;
+    border: 1px solid #c7d2fe;
+    border-radius: 6px;
+    color: #312e81;
+    background: #eef2ff;
+    font-family:
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        'Segoe UI',
+        sans-serif;
+    font-size: 12px;
+    line-height: 1.25;
+    transform: translateX(-50%);
+}
+
+.workbench-status[data-error='true'] {
+    color: #991b1b;
+    background: #fee2e2;
+}
+
+#app {
+    isolation: isolate;
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    flex: 1;
+}
+
+@media (max-width: 680px) {
+    .workbench-header {
+        padding-inline: 8px;
+    }
+
+    .workbench-primary {
+        gap: 8px;
+    }
+
+    .workbench-header nav {
+        gap: 0;
+    }
+
+    .workbench-header a {
+        padding-inline: 8px;
+    }
+}

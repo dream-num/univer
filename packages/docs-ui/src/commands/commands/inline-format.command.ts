@@ -14,17 +14,7 @@
  * limitations under the License.
  */
 
-import type {
-    DocumentDataModel,
-    ICommand,
-    IDocumentBody,
-    IMutationInfo,
-    IStyleBase,
-    ITextDecoration,
-    ITextRun,
-    ITextStyle,
-    Nullable,
-} from '@univerjs/core';
+import type { DocumentDataModel, ICommand, IDocumentBody, IMutationInfo, IStyleBase, ITextDecoration, ITextRun, ITextStyle, Nullable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import {
@@ -32,8 +22,8 @@ import {
     BooleanNumber,
     CommandType,
     DOC_RANGE_TYPE,
-    getBodySlice,
     getRichTextEditPath,
+    getTextRunSlice,
     ICommandService,
     isInternalEditorID,
     IUniverInstanceService,
@@ -562,7 +552,11 @@ export function getStyleInTextRange(
         return textRun?.ts ? { ...defaultStyle, ...textRun.ts } : defaultStyle;
     }
 
-    const { textRuns = [] } = getBodySlice(body, startOffset, endOffset);
+    // Menu state only reads text style. Building a full body slice also scans and
+    // clones tables, paragraphs, decorations and custom ranges for every toolbar
+    // observable. The text-run slice preserves normalization without touching those
+    // unrelated structures.
+    const textRuns = getTextRunSlice(body, startOffset, endOffset) ?? [];
 
     const style = Tools.deepClone(defaultStyle);
 

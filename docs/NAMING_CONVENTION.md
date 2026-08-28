@@ -119,7 +119,7 @@ export interface ISomeCommandParams {
     // Define the parameters here
 }
 
-export const SomeCommand = ICommand<ISomeCommandParams> = {
+export const SomeCommand: ICommand<ISomeCommandParams> = {
     id: '<business-type>.<command-type>.<command-name>',
 };
 ```
@@ -153,7 +153,7 @@ export const ResolveCommentCommand: ICommand<IResolveCommentCommandParams> = {
 
 ## Id
 
-All IDs should be in pascal case: `id` or `Id`.
+Within camelCase or PascalCase identifiers, use `Id` instead of `ID` (for example, `unitId` and `getUnitId`). Keep the standalone property name `id` lowercase.
 
 ## Locale Keys
 

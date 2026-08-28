@@ -366,6 +366,7 @@ const locale: typeof enUS = {
                 pasteErr: 'Zakres jest chroniony i nie masz uprawnień do wklejania. Aby wkleić, skontaktuj się z twórcą.',
                 setStyleErr: 'Zakres jest chroniony i nie masz uprawnień do ustawiania stylów. Aby ustawić style, skontaktuj się z twórcą.',
                 copyErr: 'Zakres jest chroniony i nie masz uprawnień do kopiowania. Aby skopiować, skontaktuj się z twórcą.',
+                cutErr: 'Zakres jest chroniony i nie masz uprawnień do wycinania. Aby wyciąć, skontaktuj się z twórcą.',
                 workbookCopyErr: 'Skoroszyt jest chroniony i nie masz uprawnień do kopiowania. Aby skopiować, skontaktuj się z twórcą.',
                 setRowColStyleErr: 'Zakres jest chroniony i nie masz uprawnień do ustawiania stylów wierszy i kolumn. Aby ustawić style wierszy i kolumn, skontaktuj się z twórcą.',
             },

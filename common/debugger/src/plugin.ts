@@ -5,7 +5,6 @@ import pkg from '../package.json';
 import { DEBUGGER_PLUGIN_CONFIG_KEY, defaultPluginConfig } from './config/config';
 import { ComponentsController } from './controllers/components.controller';
 import { DebuggerController } from './controllers/debugger.controller';
-import { E2EController } from './controllers/e2e/e2e.controller';
 import { PerformanceMonitorController } from './controllers/performance-monitor.controller';
 
 export class UniverDebuggerPlugin extends Plugin {
@@ -38,7 +37,6 @@ export class UniverDebuggerPlugin extends Plugin {
         const dependencies: Dependency[] = [
             [DebuggerController],
             [ComponentsController],
-            [E2EController],
         ];
 
         if (this._config.performanceMonitor?.enabled !== false) {
@@ -46,10 +44,6 @@ export class UniverDebuggerPlugin extends Plugin {
         }
 
         registerDependencies(this._injector, dependencies);
-
-        touchDependencies(this._injector, [
-            [E2EController],
-        ]);
     }
 
     override onReady(): void {

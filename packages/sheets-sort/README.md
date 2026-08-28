@@ -10,7 +10,7 @@
 
 | Package | UMD global | CSS | Locales | Facade entry |
 | --- | --- | :---: | :---: | :---: |
-| `@univerjs/sheets-sort` | `UniverSheetsSort` | No | Yes | Yes |
+| `@univerjs/sheets-sort` | `UniverSheetsSort` | No | No | Yes |
 
 ## Installation
 
@@ -25,12 +25,9 @@ Keep all `@univerjs/*` packages on the same version.
 ## Usage
 
 ```ts
-import EnUS from '@univerjs/sheets-sort/locale/en-US';
 import { UniverSheetsSortPlugin } from '@univerjs/sheets-sort';
 
 univer.registerPlugin(UniverSheetsSortPlugin);
-
-// Merge EnUS into your Univer locale map when this package contributes UI text.
 ```
 
 ## Integration Notes
@@ -42,4 +39,3 @@ Use this package with `@univerjs/sheets-sort-ui` when users need sorting menus a
 - [Documentation](https://docs.univer.ai)
 - [NPM package](https://npmjs.com/package/@univerjs/sheets-sort)
 - [GitHub repository](https://github.com/dream-num/univer)
-

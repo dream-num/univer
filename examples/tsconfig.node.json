@@ -1,7 +1,0 @@
-{
-    "extends": "@univerjs-infra/shared/tsconfigs/node",
-    "compilerOptions": {
-        "target": "ESNext"
-    },
-    "include": ["esbuild.config.mts", "scripts/**/*.mts"]
-}

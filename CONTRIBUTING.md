@@ -61,12 +61,12 @@ The structure of the repository is as follows:
 
 ```txt
 .
-├── common/ shared configuration and utilities
+├── common/ shared configuration, mock data, Storybook, and utilities
 ├── docs/ documentation
-├── e2e/ e2e test cases
-├── examples/ demos running on the web
-├── mockdata/ mock data for development
+├── examples/ all-in-one Vite workbench for browser development
 ├── packages/ Univer core and plugins
+├── presets/ curated plugin collections
+└── tests/ additional integration test projects
 ```
 
 The file structure of a plugin should be organized as follows:
@@ -137,7 +137,7 @@ Please refer to [Univer Naming Convention](./docs/NAMING_CONVENTION.md).
 
 Before merging a pull request, please make sure the following requirements are met:
 
-- All tests are passed. ESLint and Prettier errors are fixed.
+- All tests pass. ESLint, including its formatting checks, passes.
 - Test coverage is not decreased.
 
 We provide preview deployments for pull requests. You can view the preview deployment by clicking the "Preview" link in the "View Deployment" section.
@@ -168,42 +168,22 @@ To ensure the quality of the code and move with confidence, we require that all 
 pnpm test
 ```
 
-Also, with the help of vscode and its rich ecosystem, you could directly debug unit tests in vscode. Please install the extension we recommend, and you will see the debug button in the side bar. In addition, if you add a new plugin, you should update `vitest.workspace.js` to include the new plugin.
+Also, with the help of vscode and its rich ecosystem, you could directly debug unit tests in vscode. Please install the extension we recommend, and you will see the debug button in the side bar. The `packages/*` glob in `vitest.workspace.ts` automatically includes new plugins created under `packages/`.
 
 ![vitest](./docs/img/vitest.png)
 
-### E2E test
+### Browser workbench
 
-You may need to install dependencies of Playwright manually by running the following command:
-
-```shell
-pnpm exec playwright install
-```
-
-If you would like to develop E2E tests, you can use the following command to run the dev server:
-
-```shell
-pnpm dev:e2e
-```
-
-and then run the following command to run E2E tests:
-
-```shell
-pnpm test:e2e
-```
+`pnpm dev` starts one Vite workbench with lazy-loaded Sheets, Docs, and Slides routes. Use the navigation bar or `#sheets`, `#docs`, and `#slides` URLs to switch products; only one Univer instance stays mounted. The Settings menu provides every built-in language, LTR/RTL direction, region, theme, appearance, ribbon, UI chrome, and zoom controls. Preferences are stored in localStorage and applied to the active instance through runtime APIs without remounting it. Development locale data is loaded on demand so unused product and language graphs do not remain in Vite's memory. End-to-end suites should consume built packages outside this repository instead of coupling tests to source examples.
 
 ### Build Preview
 
-After building, the output may differ from the source code. To test for any differences, you can link to the built artifacts using:
+Build the production artifacts to check for differences between the source and compiled output:
 
 ```shell
 pnpm build
-pnpm dev:libs
+pnpm dev:umd
 ```
-
-### Update Snapshots
-
-Univer uses Playwright to perform visual comparison tests. If you have made changes to the UI, the CI may fail due to visual differences. You can update the snapshots by running this GitHub Action [📸 Manually Update Snapshots · Workflow runs · dream-num/univer (github.com)](https://github.com/dream-num/univer/actions/workflows/update-snapshots-manually.yml) on your branch.
 
 ### Clean code
 

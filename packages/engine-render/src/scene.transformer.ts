@@ -158,6 +158,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
     hoverEnterFunc: Nullable<(e: IPointerEvent | IMouseEvent) => void>;
     hoverLeaveFunc: Nullable<(e: IPointerEvent | IMouseEvent) => void>;
 
+    moveEnabled: boolean = DEFAULT_TRANSFORMER_CONFIG.moveEnabled;
     resizeEnabled: boolean = DEFAULT_TRANSFORMER_CONFIG.resizeEnabled;
 
     rotateEnabled: boolean = DEFAULT_TRANSFORMER_CONFIG.rotateEnabled;
@@ -356,6 +357,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
             hoverEnabled,
             hoverEnterFunc,
             hoverLeaveFunc,
+            moveEnabled,
             resizeEnabled,
             rotateEnabled,
             rotationSnaps,
@@ -404,6 +406,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
             hoverEnabled = objectTransformerConfig.hoverEnabled ?? hoverEnabled;
             hoverEnterFunc = objectTransformerConfig.hoverEnterFunc ?? hoverEnterFunc;
             hoverLeaveFunc = objectTransformerConfig.hoverLeaveFunc ?? hoverLeaveFunc;
+            moveEnabled = objectTransformerConfig.moveEnabled ?? moveEnabled;
             resizeEnabled = objectTransformerConfig.resizeEnabled ?? resizeEnabled;
             rotateEnabled = objectTransformerConfig.rotateEnabled ?? rotateEnabled;
             rotationSnaps = objectTransformerConfig.rotationSnaps ?? rotationSnaps;
@@ -453,6 +456,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
             hoverEnabled,
             hoverEnterFunc,
             hoverLeaveFunc,
+            moveEnabled,
             resizeEnabled,
             rotateEnabled,
             rotationSnaps,
@@ -509,7 +513,12 @@ export class Transformer extends Disposable implements ITransformerConfig {
             this._startOffsetX = evtOffsetX;
             this._startOffsetY = evtOffsetY;
 
-            const { isCropper } = this._getConfig(applyObject);
+            const { isCropper, moveEnabled } = this._getConfig(applyObject);
+
+            if (!isCropper && !moveEnabled) {
+                this._updateActiveObjectList(applyObject, evt);
+                return;
+            }
 
             const scene = this._getTopScene();
 
@@ -1545,7 +1554,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
     }
 
     private _createResizeAnchor(type: TransformerManagerType, applyObject: BaseObject, zIndex: number) {
-        const { height = 0, width = 0, scaleX = 1, scaleY = 1 } = applyObject.getState();
+        const { height = 0, width = 0 } = this._getControlState(applyObject);
 
         const {
             anchorFill,
@@ -1586,7 +1595,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
     }
 
     private _createCopperResizeAnchor(type: TransformerManagerType, applyObject: BaseObject, zIndex: number) {
-        const { height = 0, width = 0, scaleX = 1, scaleY = 1 } = applyObject.getState();
+        const { height = 0, width = 0 } = this._getControlState(applyObject);
 
         const { anchorFill, anchorStroke, anchorStrokeWidth, anchorSize } = this._getConfig(applyObject);
 
@@ -1749,9 +1758,13 @@ export class Transformer extends Disposable implements ITransformerConfig {
         });
     }
 
+    private _getControlState(applyObject: BaseObject): ReturnType<BaseObject['getState']> {
+        return applyObject.transformerConfig?.controlStateResolver?.(applyObject) ?? applyObject.getState();
+    }
+
     private _updateControl() {
         this._updateControlIterator((control, applyObject) => {
-            const { left, top, height, width, angle } = applyObject.getState();
+            const { left, top, height, width, angle } = this._getControlState(applyObject);
             control.transformByState({
                 left,
                 top,
@@ -1815,8 +1828,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
     // eslint-disable-next-line max-lines-per-function, complexity
     private _createControl(applyObject: BaseObject, isSkipOnCropper = true) {
-        const { left = 0, top = 0, height = 0, width = 0 } = applyObject.getState();
-        const angle = applyObject.angle;
+        const { left = 0, top = 0, height = 0, width = 0, angle = 0 } = this._getControlState(applyObject);
         const {
             isCropper,
             resizeEnabled,
@@ -1931,11 +1943,11 @@ export class Transformer extends Disposable implements ITransformerConfig {
         transformerControl.evented = false;
         transformerControl.openSelfSizeMode();
         transformerControl.transformByState({
-            left: applyObject.left || left,
-            top: applyObject.top || top,
-            angle: applyObject.angle || angle,
-            width: applyObject.width || width,
-            height: applyObject.height || height,
+            left,
+            top,
+            angle,
+            width,
+            height,
         });
         const scene = this.getScene();
         scene.addObject(transformerControl, layerIndex);
@@ -1973,6 +1985,9 @@ export class Transformer extends Disposable implements ITransformerConfig {
         const targetObject = this._findGroupObject(applyObject);
 
         if (this._selectedObjectMap.has(targetObject.oKey)) {
+            if (!this._transformerControlMap.has(targetObject.oKey)) {
+                this._createControl(targetObject);
+            }
             return;
         }
 

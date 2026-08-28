@@ -46,7 +46,14 @@ import {
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { RemoveSheetDrawingCommand } from '@univerjs/sheets-drawing';
 import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
-import { IDialogService, IMessageService, isMobileDialogService } from '@univerjs/ui';
+import {
+    FloatingObjectToolbarPosition,
+    IDialogService,
+    IMenuManagerService,
+    IMessageService,
+    isMobileDialogService,
+    MenuItemType,
+} from '@univerjs/ui';
 import { FlipSheetDrawingCommand } from '../commands/commands/flip-drawings.command';
 import { EditSheetDrawingOperation } from '../commands/operations/edit-sheet-drawing.operation';
 
@@ -62,6 +69,7 @@ export class DrawingPopupMenuController extends RxDisposable {
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IMessageService private readonly _messageService: IMessageService,
+        @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
         @IContextService private readonly _contextService: IContextService,
         @IImageIoService private readonly _ioService: ImageIoService,
         @ICommandService private readonly _commandService: ICommandService,
@@ -174,7 +182,10 @@ export class DrawingPopupMenuController extends RxDisposable {
             }
 
             const menus = this._canvasPopManagerService.getFeatureMenu(unitId, subUnitId, drawingId, drawingType);
-            const menuItems = menus || this._getImageMenuItems(unitId, subUnitId, drawingId, drawingType);
+            const menuItems = [
+                ...(menus || this._getImageMenuItems(unitId, subUnitId, drawingId, drawingType)),
+                ...this._getFloatingObjectMenuItems(),
+            ];
             singletonPopupDisposer?.dispose();
             const mobileDialogService = this._getMobileDialogService();
             if (mobileDialogService) {
@@ -279,5 +290,23 @@ export class DrawingPopupMenuController extends RxDisposable {
                 disable: drawingType === DrawingTypeEnum.DRAWING_DOM,
             },
         ];
+    }
+
+    private _getFloatingObjectMenuItems() {
+        return this._menuManagerService
+            .getFlatMenuByPositionKey(FloatingObjectToolbarPosition.SHEET)
+            .flatMap(({ item }, index) => {
+                if (!item || item.type !== MenuItemType.BUTTON || !item.title) {
+                    return [];
+                }
+
+                return [{
+                    label: item.title,
+                    index: 100 + index,
+                    commandId: item.commandId ?? item.id,
+                    commandParams: typeof item.params === 'function' ? item.params() : item.params,
+                    disable: false,
+                }];
+            });
     }
 }

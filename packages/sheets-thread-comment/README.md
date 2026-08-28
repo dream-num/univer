@@ -39,4 +39,3 @@ Use this package with `@univerjs/sheets-thread-comment-ui` when users need comme
 - [Documentation](https://docs.univer.ai)
 - [NPM package](https://npmjs.com/package/@univerjs/sheets-thread-comment)
 - [GitHub repository](https://github.com/dream-num/univer)
-

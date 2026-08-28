@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Dependency, Workbook } from '@univerjs/core';
+import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsHyperLinkUIConfig } from './config/config';
 import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverDocsPlugin } from '@univerjs/docs';
@@ -94,7 +94,7 @@ export class UniverSheetsHyperLinkUIPlugin extends Plugin {
 
     override onReady(): void {
         const renderManager = this._injector.get(IRenderManagerService);
-        renderManager.registerRenderModule<Workbook>(UniverInstanceType.UNIVER_SHEET, [SheetsHyperLinkRenderController] as Dependency);
+        renderManager.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [SheetsHyperLinkRenderController] as Dependency);
 
         this._injector.get(SheetsHyperLinkAutoFillController);
         this._injector.get(SheetsHyperLinkCopyPasteController);

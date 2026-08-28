@@ -15,7 +15,8 @@
  */
 
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { excelDateTimeSerial, isDate, parseFormattedDate, parseFormattedTime } from '../../../basics/date';
+import { excelDateTimeSerial } from '@univerjs/core';
+import { isDate, parseFormattedDate, parseFormattedTime } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
@@ -45,9 +46,10 @@ export class Datevalue extends BaseFunction {
 
         if (dateTextObject.isString()) {
             const value = `${dateTextObject.getValue()}`;
-            let parsedDate = parseFormattedDate(value);
+            const options = { dateSystem: this.getDateSystem() };
+            let parsedDate = parseFormattedDate(value, options);
             if (parsedDate === null) {
-                parsedDate = parseFormattedTime(value);
+                parsedDate = parseFormattedTime(value, options);
             }
             if (parsedDate) {
                 let { v, z } = parsedDate;
@@ -55,7 +57,7 @@ export class Datevalue extends BaseFunction {
                 // currently, we the v is a number by numfmt the 3.2
                 if (z && isDate(z)) {
                     if ((v as any) instanceof Date) {
-                        v = excelDateTimeSerial(v as any);
+                        v = excelDateTimeSerial(v as any, this.getDateSystem());
                     }
 
                     return NumberValueObject.create(Math.trunc(+v));

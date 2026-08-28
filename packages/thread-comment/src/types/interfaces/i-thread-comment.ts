@@ -41,4 +41,12 @@ export interface IBaseComment {
 
 export interface IThreadComment extends IBaseComment {
     ref: string;
+    /** Inclusive start offset for a document text-range comment. */
+    startOffset?: number;
+    /** Exclusive end offset for a document text-range comment. */
+    endOffset?: number;
+    /** Document segment that owns the text range. Empty string means the document body. */
+    segmentId?: string;
+    /** Whether the document text range is collapsed. */
+    collapsed?: boolean;
 }

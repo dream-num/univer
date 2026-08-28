@@ -140,6 +140,18 @@ export interface IDocumentBody {
 
     customBlocks?: ICustomBlock[]; // customBlock user-defined block through plug-in
 
+    /**
+     * Opaque DOCX runs represented by custom-block sentinels for lossless round-trip.
+     * They participate in text offsets like regular custom blocks but are not rendered as drawings.
+     */
+    docxRawCustomBlocks?: ICustomBlock[];
+
+    /** Opaque DOCX XML anchored at a document offset for lossless round-trip. */
+    docxRawBlocks?: IDocxRawBlock[];
+
+    /** Document ranges excluded from generated DOCX content because their raw XML is preserved separately. */
+    docxExportExcludedRanges?: IDocxExportExcludedRange[];
+
     tables?: ICustomTable[]; // Table
 
     columnGroups?: ICustomColumnGroup[]; // ColumnGroup
@@ -441,6 +453,22 @@ export interface ICustomBlock {
     blockType?: BlockType;
     // A unique ID associated with a custom block.
     blockId: string;
+
+    /** Original DOCX run XML retained by the exchange layer for lossless round-trip. */
+    docxRawXml?: string;
+
+    /** Original DOCX text style retained by the exchange layer for lossless round-trip. */
+    docxExportTs?: ITextStyle;
+}
+
+export interface IDocxRawBlock {
+    startIndex: number;
+    xml: string;
+}
+
+export interface IDocxExportExcludedRange {
+    start: number;
+    end: number;
 }
 
 export enum CustomDecorationType {

@@ -47,6 +47,7 @@ import {
     CreateHeaderFooterCommand,
     DeleteTextCommand,
     DocContentInsertService,
+    DocHistoryAction,
     DocSelectionManagerService,
     DocSkeletonManagerService,
     HeaderFooterType,
@@ -634,6 +635,16 @@ describe('misc document commands', () => {
         return getDoc()?.getBody();
     }
 
+    function collectRichTextMutationParams() {
+        const params: unknown[] = [];
+        commandService.onCommandExecuted((commandInfo) => {
+            if (commandInfo.id === RichTextEditingMutation.id) {
+                params.push(commandInfo.params);
+            }
+        });
+        return params;
+    }
+
     function setCollapsedSelection(startOffset: number, endOffset = startOffset) {
         const selectionManager = get(DocSelectionManagerService);
         selectionManager.__TEST_ONLY_setCurrentSelection({
@@ -679,6 +690,7 @@ describe('misc document commands', () => {
         commandService.registerCommand(SetTextSelectionsOperation);
         commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
         setCollapsedSelection(5);
+        const mutationParams = collectRichTextMutationParams();
 
         await commandService.executeCommand(InsertCustomRangeCommand.id, {
             unitId: 'test-doc',
@@ -703,6 +715,9 @@ describe('misc document commands', () => {
                 source: 'test',
             },
         })]);
+        expect(mutationParams).toContainEqual(expect.objectContaining({
+            historyAction: DocHistoryAction.InsertCustomRange,
+        }));
     });
 
     it('updates paragraph styles across selected paragraphs', async () => {
@@ -712,6 +727,7 @@ describe('misc document commands', () => {
         commandService.registerCommand(SetTextSelectionsOperation);
         commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
         setCollapsedSelection(0, 10);
+        const mutationParams = collectRichTextMutationParams();
 
         await commandService.executeCommand(DocParagraphSettingCommand.id, {
             paragraph: {
@@ -731,6 +747,9 @@ describe('misc document commands', () => {
         expect(getBody()?.paragraphs?.[1].paragraphStyle).toEqual(expect.objectContaining({
             spaceAbove: { v: 24 },
             indentFirstLine: { v: 12 },
+        }));
+        expect(mutationParams).toContainEqual(expect.objectContaining({
+            historyAction: DocHistoryAction.FormatParagraph,
         }));
     });
 
@@ -1085,11 +1104,15 @@ describe('misc document commands', () => {
         commandService.registerCommand(RemoveHorizontalLineCommand);
         commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
         setCollapsedSelection(6);
+        const mutationParams = collectRichTextMutationParams();
 
         expect(await commandService.executeCommand(RemoveHorizontalLineCommand.id)).toBe(true);
         await awaitTime(0);
 
         expect(getBody()?.paragraphs?.[0].paragraphStyle?.borderBottom).toBeUndefined();
+        expect(mutationParams).toContainEqual(expect.objectContaining({
+            historyAction: DocHistoryAction.DeleteDivider,
+        }));
     });
 
     it('merges adjacent paragraphs through the delete merge command', async () => {
@@ -1490,6 +1513,7 @@ describe('misc document commands', () => {
         commandService = get(ICommandService);
         commandService.registerCommand(DocPageSetupCommand);
         commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+        const mutationParams = collectRichTextMutationParams();
 
         const result = await commandService.executeCommand(DocPageSetupCommand.id, {
             documentFlavor: DocumentFlavor.TRADITIONAL,
@@ -1511,6 +1535,9 @@ describe('misc document commands', () => {
             marginBottom: 42,
             marginLeft: 48,
             marginRight: 54,
+        }));
+        expect(mutationParams).toContainEqual(expect.objectContaining({
+            historyAction: DocHistoryAction.UpdatePageLayout,
         }));
     });
 

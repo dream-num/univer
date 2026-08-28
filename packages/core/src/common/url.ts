@@ -329,7 +329,7 @@ export function isLegalUrl(url: string) {
         return false;
     }
 
-    if (url.startsWith('http://localhost:3002') || url.startsWith('localhost:3002')) {
+    if (url.startsWith('http://localhost:5173') || url.startsWith('localhost:5173')) {
         return true;
     }
 
@@ -345,7 +345,7 @@ export function isLegalUrl(url: string) {
                 if (topLevelDomain && topLevelDomainSet.has(topLevelDomain)) {
                     return true;
                 };
-            } catch (error) {
+            } catch {
                 return false;
             }
         }
@@ -368,12 +368,6 @@ export function normalizeUrl(urlStr: string) {
     return hasProtocol(urlStr) ? urlStr : isEmail(urlStr) ? `mailto://${urlStr}` : `https://${urlStr}`;
 }
 
-/**
- * Resolve a URL with a base URL, ensuring the path from the base URL is preserved.
- * @param {string} url - The URL to resolve.
- * @param {string} baseURL - The base URL to use for resolution.
- * @returns {string} - The resolved URL.
- */
 export function isSafeUrl(url: string): boolean {
     if (!url || typeof url !== 'string') {
         return false;
@@ -387,6 +381,12 @@ export function isSafeUrl(url: string): boolean {
     }
 }
 
+/**
+ * Resolve a URL with a base URL, ensuring the path from the base URL is preserved.
+ * @param {string} url - The URL to resolve.
+ * @param {string} baseURL - The base URL to use for resolution.
+ * @returns {string} - The resolved URL.
+ */
 export function resolveWithBasePath(url: string, baseURL: string): string {
     try {
         const base = new URL(baseURL);

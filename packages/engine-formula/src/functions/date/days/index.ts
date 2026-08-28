@@ -59,13 +59,13 @@ export class Days extends BaseFunction {
                 return startDateObject;
             }
 
-            const endDateSerialNumber = getDateSerialNumberByObject(endDateObject);
+            const endDateSerialNumber = getDateSerialNumberByObject(endDateObject, this.getDateSystem());
 
             if (typeof endDateSerialNumber !== 'number') {
                 return endDateSerialNumber;
             }
 
-            const startDateSerialNumber = getDateSerialNumberByObject(startDateObject);
+            const startDateSerialNumber = getDateSerialNumberByObject(startDateObject, this.getDateSystem());
 
             if (typeof startDateSerialNumber !== 'number') {
                 return startDateSerialNumber;

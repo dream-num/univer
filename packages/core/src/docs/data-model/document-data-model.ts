@@ -33,6 +33,7 @@ import { mergeWith } from '../../common/lodash';
 import { UnitModel, UniverInstanceType } from '../../common/unit';
 import { generateRandomId } from '../../shared/random-id';
 import { Tools } from '../../shared/tools';
+import { createSectionId } from '../section-break-id';
 import { calculateDocumentStatistics } from './document-statistics';
 import { getEmptySnapshot } from './empty-snapshot';
 import { JSONX } from './json-x/json-x';
@@ -58,6 +59,29 @@ export interface IDocumentStatisticsOptions {
     locale?: LocaleType;
     ranges?: Readonly<ITextRangeParam[]>;
     signal?: AbortSignal;
+}
+
+function normalizeLegacyPageBreakSectionMetadata(body: IDocumentBody | undefined): IDocumentBody | undefined {
+    if (body?.dataStream == null || body.sectionBreaks == null) {
+        return body;
+    }
+
+    const compatibleSectionBreaks = body.sectionBreaks.filter(({ startIndex }) =>
+        body.dataStream[startIndex] === '\n' || startIndex <= 0 || body.dataStream[startIndex - 1] !== '\f'
+    );
+    const existingSectionIds = new Set<string>();
+    let didChange = compatibleSectionBreaks.length !== body.sectionBreaks.length;
+    const sectionBreaks = compatibleSectionBreaks.map((sectionBreak) => {
+        if (sectionBreak.sectionId && !existingSectionIds.has(sectionBreak.sectionId)) {
+            existingSectionIds.add(sectionBreak.sectionId);
+            return sectionBreak;
+        }
+
+        didChange = true;
+        return { ...sectionBreak, sectionId: createSectionId(existingSectionIds) };
+    });
+
+    return didChange ? { ...body, sectionBreaks } : body;
 }
 
 function createDocumentSnapshot(snapshot: Partial<IDocumentData>): IDocumentData {
@@ -87,6 +111,8 @@ function createDocumentSnapshot(snapshot: Partial<IDocumentData>): IDocumentData
         delete mergedSnapshot.documentStyle.defaultParagraphStyle;
     }
 
+    mergedSnapshot.body = normalizeLegacyPageBreakSectionMetadata(mergedSnapshot.body);
+
     return mergedSnapshot;
 }
 
@@ -108,6 +134,7 @@ class DocumentDataModelSimple extends UnitModel<IDocumentData, UniverInstanceTyp
     override name$ = this._name$.asObservable();
 
     protected snapshot: IDocumentData;
+    private _mutationRevision = 0;
 
     constructor(snapshot: Partial<IDocumentData>) {
         super();
@@ -130,6 +157,7 @@ class DocumentDataModelSimple extends UnitModel<IDocumentData, UniverInstanceTyp
 
     setName(name: string) {
         this.snapshot.title = name;
+        this._markMutation();
         this._name$.next(name);
     }
 
@@ -152,6 +180,7 @@ class DocumentDataModelSimple extends UnitModel<IDocumentData, UniverInstanceTyp
     resetDrawing(drawings: IDrawings, drawingsOrder: string[]) {
         this.snapshot.drawings = drawings;
         this.snapshot.drawingsOrder = drawingsOrder;
+        this._markMutation();
     }
 
     getBody() {
@@ -187,6 +216,7 @@ class DocumentDataModelSimple extends UnitModel<IDocumentData, UniverInstanceTyp
                 ...config,
             };
         }
+        this._markMutation();
     }
 
     getDocumentStyle() {
@@ -202,6 +232,7 @@ class DocumentDataModelSimple extends UnitModel<IDocumentData, UniverInstanceTyp
                 ...config,
             };
         }
+        this._markMutation();
     }
 
     updateDocumentDataMargin(data: IPaddingData) {
@@ -223,6 +254,7 @@ class DocumentDataModelSimple extends UnitModel<IDocumentData, UniverInstanceTyp
         if (r != null) {
             documentStyle.marginRight = r;
         }
+        this._markMutation();
     }
 
     updateDocumentDataPageSize(width?: number, height?: number) {
@@ -233,7 +265,7 @@ class DocumentDataModelSimple extends UnitModel<IDocumentData, UniverInstanceTyp
                 width: width ?? Number.POSITIVE_INFINITY,
                 height: height ?? Number.POSITIVE_INFINITY,
             };
-
+            this._markMutation();
             return;
         }
 
@@ -244,6 +276,7 @@ class DocumentDataModelSimple extends UnitModel<IDocumentData, UniverInstanceTyp
         if (height !== undefined) {
             documentStyle.pageSize.height = height;
         }
+        this._markMutation();
     }
 
     updateDrawing(id: string, config: IDrawingUpdateConfig) {
@@ -262,6 +295,7 @@ class DocumentDataModelSimple extends UnitModel<IDocumentData, UniverInstanceTyp
 
         objectTransform.positionH.posOffset = left;
         objectTransform.positionV.posOffset = top;
+        this._markMutation();
     }
 
     setZoomRatio(zoomRatio: number = 1) {
@@ -272,10 +306,12 @@ class DocumentDataModelSimple extends UnitModel<IDocumentData, UniverInstanceTyp
         } else {
             this.snapshot.settings.zoomRatio = zoomRatio;
         }
+        this._markMutation();
     }
 
     setDisabled(disabled: boolean) {
         this.snapshot.disabled = disabled;
+        this._markMutation();
     }
 
     getDisabled() {
@@ -284,6 +320,14 @@ class DocumentDataModelSimple extends UnitModel<IDocumentData, UniverInstanceTyp
 
     getTitle() {
         return this.snapshot.title;
+    }
+
+    getMutationRevision(): number {
+        return this._mutationRevision;
+    }
+
+    protected _markMutation(): void {
+        this._mutationRevision++;
     }
 }
 
@@ -347,6 +391,7 @@ export class DocumentDataModel extends DocumentDataModelSimple {
 
         this.snapshot = createDocumentSnapshot(snapshot);
         this._initializeHeaderFooterModel();
+        this._markMutation();
         this.change$.next(this.change$.value + 1);
     }
 
@@ -376,6 +421,7 @@ export class DocumentDataModel extends DocumentDataModelSimple {
         }
 
         this.snapshot = JSONX.apply(this.snapshot, actions) as unknown as IDocumentData;
+        this._markMutation();
 
         // FIXME: @JOCS, ANY better solution to find action that create or delete header/footer?
         if (actions?.some((a) => Array.isArray(a) && (a?.[0] === 'headers' || a?.[0] === 'footers'))) {

@@ -21,6 +21,7 @@ const locale: typeof enUS = {
         panel: {
             title: '댓글 관리',
             addComment: '댓글 추가',
+            openComments: '댓글 열기',
         },
     },
 };

@@ -48,4 +48,19 @@ describe('TimeInput', () => {
         expect(changed.getMinutes()).toBe(34);
         expect(changed.getSeconds()).toBe(56);
     });
+
+    it('should hide stored fractional seconds and clear them when time changes', () => {
+        const onValueChange = vi.fn();
+        const value = new Date(2024, 0, 1, 1, 2, 3, 456);
+        const { container, getByDisplayValue } = render(<TimeInput value={value} onValueChange={onValueChange} />);
+
+        expect(getByDisplayValue('01:02:03')).toBeInTheDocument();
+
+        const input = container.querySelector('input[type="time"]') as HTMLInputElement;
+        expect(input).toHaveAttribute('step', '1');
+        fireEvent.change(input, { target: { value: '12:34:56' } });
+
+        const changed = onValueChange.mock.calls[0][0] as Date;
+        expect(changed.getMilliseconds()).toBe(0);
+    });
 });

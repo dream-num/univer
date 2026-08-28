@@ -36,6 +36,7 @@ import { SetTextSelectionsOperation } from '../commands/operations/text-selectio
 import { UniverDocsPlugin } from '../plugin';
 import { DocInterceptorService } from '../services/doc-interceptor/doc-interceptor.service';
 import { DOC_INTERCEPTOR_POINT } from '../services/doc-interceptor/interceptor-const';
+import { DocLayoutExecutorService } from '../services/doc-layout-executor.service';
 import { DocSelectionManagerService } from '../services/doc-selection-manager.service';
 import { DocSkeletonManagerService } from '../services/doc-skeleton-manager.service';
 import { DocStateChangeManagerService } from '../services/doc-state-change-manager.service';
@@ -57,7 +58,8 @@ function registerRenderManagerForDoc(
     const skeletonManager = new DocSkeletonManagerService(
         context,
         injector.get(LocaleService),
-        univerInstanceService
+        univerInstanceService,
+        injector.get(DocLayoutExecutorService)
     );
 
     injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
@@ -384,6 +386,7 @@ describe('docs integration', () => {
     });
 
     it('builds skeleton/view-model and applies interceptors for custom ranges', () => {
+        injector.add([DocLayoutExecutorService]);
         const doc = univer.createUnit<IDocumentData, DocumentDataModel>(
             UniverInstanceType.UNIVER_DOC,
             createTestDocData('doc-3')
@@ -400,7 +403,8 @@ describe('docs integration', () => {
         const skeletonManager = new DocSkeletonManagerService(
             context,
             injector.get(LocaleService),
-            univerInstanceService
+            univerInstanceService,
+            injector.get(DocLayoutExecutorService)
         );
 
         const viewModelManager = new DocViewModelManagerService(context, univerInstanceService);

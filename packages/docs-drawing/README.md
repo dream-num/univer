@@ -10,7 +10,7 @@
 
 | Package | UMD global | CSS | Locales | Facade entry |
 | --- | --- | :---: | :---: | :---: |
-| `@univerjs/docs-drawing` | `UniverDocsDrawing` | No | No | No |
+| `@univerjs/docs-drawing` | `UniverDocsDrawing` | No | No | Yes |
 
 ## Installation
 
@@ -35,4 +35,3 @@ univer.registerPlugin(UniverDocsDrawingPlugin);
 - [Documentation](https://docs.univer.ai)
 - [NPM package](https://npmjs.com/package/@univerjs/docs-drawing)
 - [GitHub repository](https://github.com/dream-num/univer)
-

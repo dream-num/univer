@@ -366,6 +366,7 @@ const locale: typeof enUS = {
                 pasteErr: 'Rozsah je chránený a nemáte oprávnenie na prilepenie. Ak chcete prilepiť, kontaktujte autora.',
                 setStyleErr: 'Rozsah je chránený a nemáte oprávnenie nastavovať štýly. Ak chcete nastavovať štýly, kontaktujte autora.',
                 copyErr: 'Rozsah je chránený a nemáte oprávnenie na kopírovanie. Ak chcete kopírovať, kontaktujte autora.',
+                cutErr: 'Rozsah je chránený a nemáte oprávnenie na vystrihnutie. Ak chcete vystrihnúť, kontaktujte autora.',
                 workbookCopyErr: 'Zošit je chránený a nemáte oprávnenie na kopírovanie. Ak chcete kopírovať, kontaktujte autora.',
                 setRowColStyleErr: 'Rozsah je chránený a nemáte oprávnenie nastavovať štýly riadkov a stĺpcov. Ak chcete nastavovať štýly riadkov a stĺpcov, kontaktujte autora.',
             },

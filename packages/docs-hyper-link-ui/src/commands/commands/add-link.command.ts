@@ -17,6 +17,7 @@
 import type { ICommand, ITextRangeParam } from '@univerjs/core';
 import { CommandType, CustomRangeType, generateRandomId, ICommandService } from '@univerjs/core';
 import { addCustomRangeBySelectionFactory } from '@univerjs/docs';
+import { DocHyperLinkCommandId } from '@univerjs/docs-hyper-link';
 
 export interface IAddDocHyperLinkCommandParams {
     payload: string;
@@ -26,7 +27,7 @@ export interface IAddDocHyperLinkCommandParams {
 
 export const AddDocHyperLinkCommand: ICommand<IAddDocHyperLinkCommandParams> = {
     type: CommandType.COMMAND,
-    id: 'docs.command.add-hyper-link',
+    id: DocHyperLinkCommandId.Add,
     async handler(accessor, params) {
         if (!params) {
             return false;

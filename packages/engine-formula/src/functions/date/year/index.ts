@@ -15,7 +15,8 @@
  */
 
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { excelSerialToDate, isValidDateStr } from '../../../basics/date';
+import { excelSerialToDateTimeParts } from '@univerjs/core';
+import { isValidDateStr } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
@@ -55,13 +56,8 @@ export class Year extends BaseFunction {
                 return ErrorValueObject.create(ErrorType.NUM);
             }
 
-            // Excel serial 0 is 1900-01-00
-            // Google Sheets serial 0 is 1899-12-30
-            if (dateSerial === 0) {
-                return NumberValueObject.create(1900);
-            }
-
-            date = excelSerialToDate(dateSerial);
+            const parts = excelSerialToDateTimeParts(dateSerial, { dateSystem: this.getDateSystem() });
+            return parts ? NumberValueObject.create(parts.year) : ErrorValueObject.create(ErrorType.NUM);
         }
 
         const year = date.getUTCFullYear();

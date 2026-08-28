@@ -16,6 +16,7 @@
 
 import type { Nullable } from '@univerjs/core';
 import type { BaseValueObject } from '../base-value-object';
+import { DateSystem } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../basics/error-type';
 import { getObjectValue } from '../../../functions/util';
@@ -36,6 +37,38 @@ describe('arrayValueObject test', () => {
         sheetId: '',
         row: 0,
         column: 0,
+    });
+
+    it('binds child values when the array already uses the requested date system', () => {
+        const array = ArrayValueObject.create({
+            calculateValueList: [[StringValueObject.create('1904-1-1')]],
+            rowCount: 1,
+            columnCount: 1,
+            unitId: '',
+            sheetId: '',
+            row: 0,
+            column: 0,
+        }, DateSystem.Date1904);
+
+        const value = array.withDateSystem(DateSystem.Date1904).get(0, 0) as BaseValueObject;
+
+        expect(value.convertToNumberObjectValue().getValue()).toBe(0);
+    });
+
+    it('binds the date system in place and updates child values', () => {
+        const array = ArrayValueObject.create({
+            calculateValueList: [[StringValueObject.create('1904-1-1')]],
+            rowCount: 1,
+            columnCount: 1,
+            unitId: '',
+            sheetId: '',
+            row: 0,
+            column: 0,
+        });
+
+        expect(array.withDateSystem(DateSystem.Date1904)).toBe(array);
+        expect(array.getDateSystem()).toBe(DateSystem.Date1904);
+        expect(array.get(0, 0)?.getDateSystem()).toBe(DateSystem.Date1904);
     });
 
     it('maps sparse comparison arrays with their default value', () => {

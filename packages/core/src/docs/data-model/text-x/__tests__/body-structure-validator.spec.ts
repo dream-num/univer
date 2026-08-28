@@ -275,6 +275,22 @@ describe('validateDocBodyStructure', () => {
         }).map((issue) => issue.code)).toContain('custom-block-token-mismatch');
     });
 
+    it('accepts DOCX raw custom-block metadata as the owner of its sentinel', () => {
+        const T = DataStreamTreeTokenType;
+        const body: IDocumentBody = {
+            dataStream: `${T.CUSTOM_BLOCK}${T.PARAGRAPH}${T.SECTION_BREAK}`,
+            paragraphs: [{ startIndex: 1, paragraphId: 'after-raw-block' }],
+            sectionBreaks: [{ sectionId: 'section_raw_block', startIndex: 2 }],
+            docxRawCustomBlocks: [{
+                startIndex: 0,
+                blockId: 'raw-0',
+                docxRawXml: '<w:r><w:footnoteReference w:id="1"/></w:r>',
+            }],
+        };
+
+        expect(validateDocBodyStructure(body)).toEqual([]);
+    });
+
     it('reports unbalanced structural tokens', () => {
         const T = DataStreamTreeTokenType;
         const body: IDocumentBody = {

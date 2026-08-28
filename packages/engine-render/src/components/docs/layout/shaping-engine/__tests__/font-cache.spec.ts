@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { FontCache } from '../font-cache';
 
 describe('font cache', () => {
@@ -23,6 +23,42 @@ describe('font cache', () => {
         (FontCache as any)._fontDataMap = new Map();
         (FontCache as any)._getTextHeightCache = {};
         (FontCache as any)._context = null;
+    });
+
+    afterEach(() => {
+        vi.unstubAllGlobals();
+    });
+
+    it('measures text with OffscreenCanvas when the DOM is unavailable', () => {
+        const measureText = vi.fn(() => ({
+            width: 16,
+            fontBoundingBoxAscent: 9,
+            fontBoundingBoxDescent: 3,
+            actualBoundingBoxAscent: 8,
+            actualBoundingBoxDescent: 2,
+        }));
+
+        vi.stubGlobal('document', undefined);
+        vi.stubGlobal('OffscreenCanvas', class {
+            getContext() {
+                return {
+                    font: '',
+                    textBaseline: 'alphabetic',
+                    measureText,
+                };
+            }
+        });
+
+        const result = FontCache.getMeasureText('W', '12px Arial');
+
+        expect(result).toEqual({
+            width: 16,
+            fontBoundingBoxAscent: 9,
+            fontBoundingBoxDescent: 3,
+            actualBoundingBoxAscent: 8,
+            actualBoundingBoxDescent: 2,
+        });
+        expect(measureText).toHaveBeenCalledWith('W');
     });
 
     it('handles measure cache lifecycle and fallback metrics', () => {

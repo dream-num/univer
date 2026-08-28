@@ -40,8 +40,10 @@ export const GlobalRangeSelector = () => {
         <RangeSelector
             unitId={current?.unitId ?? ''}
             subUnitId={current?.subUnitId ?? ''}
+            maxRangeCount={current?.maxRangeCount}
             hideEditor
             selectorRef={instance}
+            onClose={() => current?.callback([])}
             onChange={(_, value) => {
                 current?.callback(value?.split(',').map((i) => deserializeRangeWithSheet(i)) ?? []);
             }}

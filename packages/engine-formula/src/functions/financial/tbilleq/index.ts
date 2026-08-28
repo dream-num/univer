@@ -15,7 +15,8 @@
  */
 
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { excelSerialToDate, getDateSerialNumberByObject, getDaysInYear } from '../../../basics/date';
+import { DateSystem, excelSerialToDate } from '@univerjs/core';
+import { getDateSerialNumberByObject, getDaysInYear } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
 import { checkVariantsErrorIsNullorArrayOrBoolean } from '../../../engine/utils/check-variant-error';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
@@ -36,13 +37,13 @@ export class Tbilleq extends BaseFunction {
 
         const [settlementObject, maturityObject, discountObject] = variants as BaseValueObject[];
 
-        const settlementSerialNumber = getDateSerialNumberByObject(settlementObject);
+        const settlementSerialNumber = getDateSerialNumberByObject(settlementObject, this.getDateSystem());
 
         if (typeof settlementSerialNumber !== 'number') {
             return settlementSerialNumber;
         }
 
-        const maturitySerialNumber = getDateSerialNumberByObject(maturityObject);
+        const maturitySerialNumber = getDateSerialNumberByObject(maturityObject, this.getDateSystem());
 
         if (typeof maturitySerialNumber !== 'number') {
             return maturitySerialNumber;
@@ -64,8 +65,10 @@ export class Tbilleq extends BaseFunction {
         // where DSM is the number of days between settlement and maturity computed according to the 360 days per year basis.
         const DSM = Math.floor(maturitySerialNumber) - Math.floor(settlementSerialNumber);
 
-        const date = excelSerialToDate(settlementSerialNumber);
-        const year = date.getUTCFullYear();
+        const date = excelSerialToDate(settlementSerialNumber, this.getDateSystem());
+        // Native Date normalizes Excel's 1900 serial zero to 1899-12-31; retain Excel's 1900 leap-year boundary.
+        const isSerialZero = settlementSerialNumber === 0;
+        const year = this.getDateSystem() === DateSystem.Date1900 && isSerialZero ? 1900 : date.getUTCFullYear();
         const yearDays = getDaysInYear(year);
 
         // if maturity is more than one year after settlement, TBILLEQ returns the #NUM! error value.
@@ -78,7 +81,7 @@ export class Tbilleq extends BaseFunction {
 
         if (DSM > 182) {
             const tbillPrice = 100 * (1 - discountValue * DSM / 360);
-            const fraction = DSM / 365;
+            const fraction = isSerialZero ? DSM / yearDays : DSM / 365;
 
             result = (-fraction + Math.sqrt(fraction * fraction - (fraction * 2 - 1) * (1 - 100 / tbillPrice))) / (fraction - 0.5);
 

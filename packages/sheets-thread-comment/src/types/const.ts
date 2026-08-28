@@ -14,4 +14,7 @@
  * limitations under the License.
  */
 
+import { TC_PLUGIN_NAME } from '@univerjs/thread-comment';
+
 export const SHEET_THREAD_COMMENT_BASE = 'SHEET_THREAD_COMMENT_BASE_PLUGIN';
+export const SHEET_UNIVER_THREAD_COMMENT_PLUGIN = `SHEET_${TC_PLUGIN_NAME}`;

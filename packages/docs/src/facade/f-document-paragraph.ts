@@ -17,9 +17,10 @@
 import type { IDocumentBody, Injector, IParagraph, IParagraphStyle } from '@univerjs/core';
 import type { FDocument } from './f-document';
 import type { IFDocumentTextRange } from './utils';
-import { getParagraphContentStartOffset, ICommandService, PresetListType, regexp, RESTORE_INSERTED_PARAGRAPH_IDS, UpdateDocsAttributeType } from '@univerjs/core';
+import { getParagraphContentStartOffset, ICommandService, IPermissionService, PresetListType, regexp, RESTORE_INSERTED_PARAGRAPH_IDS, UpdateDocsAttributeType } from '@univerjs/core';
 import { FBaseInitialable } from '@univerjs/core/facade';
-import { UpdateDocumentParagraphStyleCommand } from '@univerjs/docs';
+import { getDocumentParagraphParentPermissionObjectIds, getDocumentParagraphPermissionObjectId, UpdateDocumentParagraphStyleCommand } from '@univerjs/docs';
+import { FDocumentObjectPermission } from './f-document-permission';
 import { FDocumentTextRange } from './f-document-text-range';
 import { buildPlainTextInsertBody, replaceBodyRange, retainBodyRange } from './utils';
 
@@ -69,7 +70,8 @@ export class FDocumentParagraph extends FBaseInitialable {
         protected readonly _paragraphId: string,
         protected readonly _segmentId = '',
         protected override readonly _injector: Injector,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @IPermissionService private readonly _permissionService: IPermissionService
     ) {
         super(_injector);
     }
@@ -102,6 +104,30 @@ export class FDocumentParagraph extends FBaseInitialable {
      */
     getSegmentId(): string {
         return this._segmentId;
+    }
+
+    /**
+     * Returns this Paragraph's permission facade.
+     * @returns {FDocumentObjectPermission} Permission facade combining Document, Section, and Paragraph Edit points.
+     * @example
+     * ```ts
+     * const paragraph = univerAPI.getActiveDocument()?.getParagraphs()[0];
+     * if (!paragraph) throw new Error('Paragraph not found.');
+     * await paragraph.getPermission().setReadOnly();
+     * ```
+     */
+    getPermission(): FDocumentObjectPermission {
+        return new FDocumentObjectPermission(
+            this._document.getId(),
+            getDocumentParagraphPermissionObjectId(this._segmentId, this._paragraphId),
+            this._commandService,
+            this._permissionService,
+            () => getDocumentParagraphParentPermissionObjectIds(
+                this._document.getDocumentDataModel(),
+                this._segmentId,
+                this._paragraphId
+            )
+        );
     }
 
     /**

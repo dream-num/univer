@@ -21,6 +21,7 @@ const locale: typeof enUS = {
         panel: {
             title: '评论管理',
             addComment: '添加评论',
+            openComments: '打开评论',
         },
     },
 };

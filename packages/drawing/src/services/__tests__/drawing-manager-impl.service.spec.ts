@@ -15,12 +15,36 @@
  */
 
 import type { IDrawingParam, IDrawingSearch } from '@univerjs/core';
-import { BooleanNumber, DrawingTypeEnum, Injector } from '@univerjs/core';
+import { BooleanNumber, DrawingTypeEnum, Injector, JSON1 } from '@univerjs/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { UnitDrawingService } from '../drawing-manager-impl.service';
 
 const unitId = 'unit';
 const subUnitId = 'subUnit';
+
+type NestedDrawingTestParam = IDrawingParam & {
+    element: {
+        name: string;
+        shapeData: {
+            text: string;
+            fontFamily?: string;
+            dataModel?: {
+                horizontalAlign?: number;
+                doc: { body: { dataStream: string } };
+            };
+        };
+        style?: {
+            dash?: number[];
+            stroke?: string;
+        };
+    };
+};
+
+function createNestedDrawingService(): UnitDrawingService<NestedDrawingTestParam> {
+    const injector = new Injector();
+    injector.add([UnitDrawingService]);
+    return injector.get<UnitDrawingService<NestedDrawingTestParam>>(UnitDrawingService);
+}
 
 function createDrawing(drawingId: string, overrides: Partial<IDrawingParam> = {}): IDrawingParam {
     return {
@@ -121,6 +145,175 @@ describe('UnitDrawingService', () => {
             drawingId: 'a',
             hidden: true,
         });
+    });
+
+    it('preserves disjoint nested fields across concurrent drawing updates', () => {
+        const base: NestedDrawingTestParam = {
+            ...createDrawing('shape-1'),
+            element: {
+                name: 'before',
+                shapeData: { text: 'before' },
+            },
+            transform: { height: 80, left: 100, top: 100, width: 200 },
+        };
+        const textService = createNestedDrawingService();
+        const nameService = createNestedDrawingService();
+        [textService, nameService].forEach((drawingService) => {
+            drawingService.applyJson1(unitId, subUnitId, drawingService.getBatchAddOp([base]).redo);
+        });
+
+        const textOp = textService.getBatchUpdateOp([{
+            ...base,
+            element: {
+                ...base.element,
+                shapeData: { text: 'offline once' },
+            },
+            transform: { ...base.transform, left: 360 },
+        }]).redo;
+        const nameOp = nameService.getBatchUpdateOp([{
+            ...base,
+            element: { ...base.element, name: 'server while offline' },
+        }]).redo;
+        if (!textOp || !nameOp) {
+            throw new Error('Expected both drawing updates to produce JSON1 operations');
+        }
+
+        const textPrime = JSON1.type.transform(textOp, nameOp, 'left');
+        const namePrime = JSON1.type.transform(nameOp, textOp, 'right');
+        if (!textPrime || !namePrime) {
+            throw new Error('Expected concurrent drawing operations to transform');
+        }
+
+        textService.applyJson1(unitId, subUnitId, nameOp);
+        textService.applyJson1(unitId, subUnitId, textPrime);
+        nameService.applyJson1(unitId, subUnitId, textOp);
+        nameService.applyJson1(unitId, subUnitId, namePrime);
+
+        [textService, nameService].forEach((drawingService) => {
+            expect(drawingService.getDrawingByParam(createSearch('shape-1'))).toMatchObject({
+                element: {
+                    name: 'server while offline',
+                    shapeData: { text: 'offline once' },
+                },
+                transform: { left: 360 },
+            });
+        });
+    });
+
+    it('inserts nested drawing data when optional properties are undefined', () => {
+        const drawingService = createNestedDrawingService();
+        const base: NestedDrawingTestParam = {
+            ...createDrawing('shape-with-text'),
+            element: {
+                name: 'shape',
+                shapeData: { text: 'before' },
+            },
+        };
+        drawingService.applyJson1(unitId, subUnitId, drawingService.getBatchAddOp([base]).redo);
+
+        const updated: NestedDrawingTestParam = {
+            ...base,
+            element: {
+                ...base.element,
+                shapeData: {
+                    text: 'after',
+                    dataModel: {
+                        horizontalAlign: undefined,
+                        doc: { body: { dataStream: 'after\r\n' } },
+                    },
+                },
+            },
+        };
+        const updateOp = drawingService.getBatchUpdateOp([updated]);
+        drawingService.applyJson1(unitId, subUnitId, updateOp.redo);
+
+        expect(drawingService.getDrawingByParam(createSearch('shape-with-text'))).toMatchObject({
+            element: {
+                shapeData: {
+                    text: 'after',
+                    dataModel: {
+                        doc: { body: { dataStream: 'after\r\n' } },
+                    },
+                },
+            },
+        });
+    });
+
+    it('treats undefined drawing properties as absent when updating nested data', () => {
+        const drawingService = createNestedDrawingService();
+        const base: NestedDrawingTestParam = {
+            ...createDrawing('connector'),
+            element: {
+                name: 'connector',
+                shapeData: { text: '' },
+                style: {
+                    dash: undefined,
+                    stroke: '#000000',
+                },
+            },
+        };
+        drawingService.applyJson1(unitId, subUnitId, drawingService.getBatchAddOp([base]).redo);
+
+        const updated: NestedDrawingTestParam = {
+            ...base,
+            element: {
+                ...base.element,
+                style: {
+                    dash: [1, 6],
+                    stroke: '#00aa55',
+                },
+            },
+        };
+        const updateOp = drawingService.getBatchUpdateOp([updated]);
+        drawingService.applyJson1(unitId, subUnitId, updateOp.redo);
+
+        expect(drawingService.getDrawingByParam(createSearch('connector'))).toMatchObject({
+            element: {
+                style: {
+                    dash: [1, 6],
+                    stroke: '#00aa55',
+                },
+            },
+        });
+    });
+
+    it('updates drawing objects with non-enumerable runtime defaults atomically', () => {
+        const drawingService = createNestedDrawingService();
+        const shapeData = { text: 'before' };
+        Object.defineProperty(shapeData, 'fontFamily', {
+            configurable: true,
+            value: 'Calibri',
+            writable: true,
+        });
+        const base: NestedDrawingTestParam = {
+            ...createDrawing('shape-with-defaults'),
+            element: {
+                name: 'shape',
+                shapeData,
+            },
+        };
+        drawingService.applyJson1(unitId, subUnitId, drawingService.getBatchAddOp([base]).redo);
+
+        const updatedShapeData = { fontFamily: 'Inter', text: 'after' };
+        const updateOp = drawingService.getBatchUpdateOp([{
+            ...base,
+            element: {
+                ...base.element,
+                shapeData: updatedShapeData,
+            },
+        }]);
+        drawingService.applyJson1(unitId, subUnitId, updateOp.redo);
+
+        const updatedDrawing = drawingService.getDrawingByParam(createSearch('shape-with-defaults'));
+        expect(updatedDrawing?.element.shapeData).toMatchObject({
+            fontFamily: 'Inter',
+            text: 'after',
+        });
+
+        drawingService.applyJson1(unitId, subUnitId, updateOp.undo);
+        const restoredShapeData = drawingService.getDrawingByParam(createSearch('shape-with-defaults'))?.element.shapeData;
+        expect(restoredShapeData).toMatchObject({ text: 'before' });
+        expect(restoredShapeData).not.toHaveProperty('fontFamily');
     });
 
     it('preserves previous drawing data when docs replace a subunit snapshot', () => {

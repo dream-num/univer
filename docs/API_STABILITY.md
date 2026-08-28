@@ -72,9 +72,9 @@ Pull requests that introduce breaking changes should include a `BREAKING CHANGE:
 
 ## Package Version Alignment
 
-Keep all `@univerjs/*` packages on the same version. If an application uses Univer Pro packages, keep all `@univerjs-pro/*` packages aligned with the matching Univer release line as well.
+Keep the `@univerjs/*` SDK packages that participate in the same coordinated Univer release line on the same version. Independently released packages, including `@univerjs/icons` and `@univerjs/icons-svg`, follow the compatible versions declared by package manifests rather than the SDK version. If an application uses Univer Pro packages, keep `@univerjs-pro/*` aligned with the matching coordinated Univer release line.
 
-Mixing package versions can bypass compatibility checks and produce runtime failures, especially around plugin registration, Facade API composition, locales, commands, and shared data models.
+Mixing versions within a coordinated SDK release line can bypass compatibility checks and produce runtime failures, especially around plugin registration, Facade API composition, locales, commands, and shared data models.
 
 ## Public API Checklist
 

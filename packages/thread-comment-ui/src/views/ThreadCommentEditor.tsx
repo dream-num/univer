@@ -27,7 +27,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { Button, clsx } from '@univerjs/design';
-import { BreakLineCommand, IEditorService, RichTextEditor } from '@univerjs/docs-ui';
+import { BreakLineCommand, DeleteLeftCommand, DeleteRightCommand, IEditorService, RichTextEditor } from '@univerjs/docs-ui';
 import { KeyCode, useDependency } from '@univerjs/ui';
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { SetActiveCommentOperation } from '../commands/operations/comment.operations';
@@ -36,7 +36,7 @@ import { focusThreadCommentEditor } from './thread-comment-editor/util';
 export interface IThreadCommentEditorProps {
     id?: string;
     comment?: Pick<IThreadComment, 'attachments' | 'text' | 'mentions'>;
-    onSave?: (comment: Pick<IThreadComment, 'attachments' | 'text'>) => void;
+    onSave?: (comment: Pick<IThreadComment, 'attachments' | 'text'>) => boolean | void | Promise<boolean | void>;
     onCancel?: () => void;
     autoFocus?: boolean;
     unitId: string;
@@ -62,8 +62,11 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const [editing, setEditing] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
+    const submittingRef = useRef(false);
+    const mountedRef = useRef(true);
     const editorService = useDependency(IEditorService);
-    const editor = useRef<Editor>(null);
+    const editorRef = useRef<Editor>(null);
     const rootEditorId = type === UniverInstanceType.UNIVER_DOC ? DOCS_NORMAL_EDITOR_UNIT_ID_KEY : unitId;
     const [canSubmit, setCanSubmit] = useState(() => (
         BuildTextUtils.transform.getPlainText(comment?.text?.dataStream ?? '')
@@ -71,25 +74,46 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
 
     const keyboardEventConfig: IKeyboardEventConfig = useMemo(() => (
         {
-            keyCodes: [{ keyCode: KeyCode.ENTER }],
+            keyCodes: [
+                { keyCode: KeyCode.ENTER },
+                { keyCode: KeyCode.BACKSPACE },
+                { keyCode: KeyCode.DELETE },
+            ],
             handler: (keyCode) => {
-                if (keyCode === KeyCode.ENTER) {
-                    commandService.executeCommand(
-                        BreakLineCommand.id
-                    );
+                let commandId: string;
+                switch (keyCode) {
+                    case KeyCode.ENTER:
+                        commandId = BreakLineCommand.id;
+                        break;
+                    case KeyCode.BACKSPACE:
+                        commandId = DeleteLeftCommand.id;
+                        break;
+                    case KeyCode.DELETE:
+                        commandId = DeleteRightCommand.id;
+                        break;
+                    default:
+                        return;
                 }
+
+                focusThreadCommentEditor(editorService, editorId, editorRef.current);
+                commandService.executeCommand(commandId).then(() => {
+                    if (keyCode !== KeyCode.ENTER && mountedRef.current) {
+                        const dataStream = editorRef.current?.getDocumentData().body?.dataStream ?? '';
+                        setCanSubmit(BuildTextUtils.transform.getPlainText(dataStream));
+                    }
+                });
             },
         }
-    ), [commandService]);
+    ), [commandService, editorId, editorService]);
 
     useImperativeHandle(ref, () => ({
         reply(text) {
-            if (!editor.current) {
+            if (!editorRef.current) {
                 return;
             }
-            focusThreadCommentEditor(editorService, editorId, editor.current);
+            focusThreadCommentEditor(editorService, editorId, editorRef.current);
             const documentData = getSnapshot(text);
-            editor.current?.setDocumentData(documentData, [{
+            editorRef.current?.setDocumentData(documentData, [{
                 startOffset: documentData.body!.dataStream.length - 2,
                 endOffset: documentData.body!.dataStream.length - 2,
                 collapsed: true,
@@ -99,26 +123,53 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
         },
     }));
 
-    const handleSave = () => {
-        const currentEditor = editor.current;
-        if (currentEditor) {
-            const newText = Tools.deepClone(currentEditor.getDocumentData().body);
+    const handleSave = async () => {
+        const currentEditor = editorRef.current;
+        if (!currentEditor || submittingRef.current) {
+            return;
+        }
+
+        const newText = Tools.deepClone(currentEditor.getDocumentData().body);
+        submittingRef.current = true;
+        setSubmitting(true);
+        try {
+            const success = await onSave?.({
+                ...comment,
+                text: newText!,
+            });
+            if (success === false) {
+                return;
+            }
+            if (!mountedRef.current) {
+                return;
+            }
+
             currentEditor.blur();
             currentEditor.replaceText('', false);
             currentEditor.setSelectionRanges([], false);
             setCanSubmit('');
             setEditing(false);
-            onSave?.({
-                ...comment,
-                text: newText!,
-            });
+        } catch {
+            return;
+        } finally {
+            submittingRef.current = false;
+            if (mountedRef.current) {
+                setSubmitting(false);
+            }
         }
     };
 
     const handleEditorMouseDown = () => {
-        focusThreadCommentEditor(editorService, editorId, editor.current);
+        focusThreadCommentEditor(editorService, editorId, editorRef.current);
         setEditing(true);
     };
+
+    useEffect(() => {
+        mountedRef.current = true;
+        return () => {
+            mountedRef.current = false;
+        };
+    }, []);
 
     useEffect(() => {
         if (!autoFocus) {
@@ -126,7 +177,7 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
         }
 
         const timer = setTimeout(() => {
-            focusThreadCommentEditor(editorService, editorId, editor.current);
+            focusThreadCommentEditor(editorService, editorId, editorRef.current);
         });
 
         return () => clearTimeout(timer);
@@ -138,7 +189,7 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
                 {/* Comments are hosted by Sheets/Docs, so editing should not replace the host's global focus. */}
                 <RichTextEditor
                     className="univer-w-full"
-                    editorRef={editor}
+                    editorRef={editorRef}
                     editorId={editorId}
                     preserveHostFocus
                     autoFocus={autoFocus}
@@ -165,7 +216,7 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
                         <Button
                             type="button"
                             onClick={() => {
-                                const currentEditor = editor.current;
+                                const currentEditor = editorRef.current;
                                 currentEditor?.blur();
                                 currentEditor?.replaceText('', false);
                                 currentEditor?.setSelectionRanges([], false);
@@ -180,7 +231,7 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
                         <Button
                             type="button"
                             variant="primary"
-                            disabled={!canSubmit}
+                            disabled={!canSubmit || submitting}
                             onClick={handleSave}
                         >
                             {localeService.t<LocaleKey>(id ? 'thread-comment-ui.editor.save' : 'thread-comment-ui.editor.reply')}

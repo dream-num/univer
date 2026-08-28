@@ -33,12 +33,14 @@ export type {
 } from './commands/commands/set-document-default-paragraph-style.command';
 export { SetDocumentNameCommand } from './commands/commands/set-document-name.command';
 export type { ISetDocumentNameCommandParams } from './commands/commands/set-document-name.command';
+export { SetDocumentPermissionCommand } from './commands/commands/set-document-permission.command';
+export type { ISetDocumentPermissionCommandParams } from './commands/commands/set-document-permission.command';
 export { SetSectionHeaderFooterLinkCommand } from './commands/commands/set-section-header-footer-link.command';
 export type { ISetSectionHeaderFooterLinkCommandParams } from './commands/commands/set-section-header-footer-link.command';
 export { UpdateDocumentParagraphStyleCommand } from './commands/commands/update-document-paragraph-style.command';
 export { DeleteDocumentSectionBreakCommand, InsertDocumentColumnBreakCommand, InsertDocumentSectionBreakCommand, UpdateDocumentSectionCommand } from './commands/commands/update-document-section.command';
 export type { IDeleteDocumentSectionBreakCommandParams, IDocumentSectionConfig, IDocumentSectionUpdate, IInsertDocumentColumnBreakCommandParams, IInsertDocumentSectionBreakCommandParams, IUpdateDocumentSectionCommandParams } from './commands/commands/update-document-section.command';
-export { RichTextEditingMutation } from './commands/mutations/core-editing.mutation';
+export { DocHistoryAction, RichTextEditingMutation, transformDocumentTextRanges } from './commands/mutations/core-editing.mutation';
 export type { IRichTextEditingMutationParams } from './commands/mutations/core-editing.mutation';
 export { SetTextSelectionsOperation } from './commands/operations/text-selection.operation';
 export type { ISetTextSelectionsOperationParams } from './commands/operations/text-selection.operation';
@@ -61,6 +63,8 @@ export type {
     IDocsCustomBlockMutationParams,
     IEmbedDocsCustomBlockData,
 } from './embed-host-anchor';
+export { DocsLayoutWorkerCapabilityError, DocsLayoutWorkerClientService, startDocsLayoutWorker, UniverDocsLayoutWorkerPlugin } from './layout-worker';
+export type { IDocsLayoutWorkerCapabilities, IDocsLayoutWorkerFontProbe, IDocsLayoutWorkerRuntime, IUniverDocsLayoutWorkerConfig } from './layout-worker';
 export { UniverDocsPlugin } from './plugin';
 export { DocBlockMoveValidatorService } from './services/doc-block-move-validator.service';
 export type {
@@ -74,6 +78,30 @@ export { DocContentInsertService } from './services/doc-content-insert.service';
 export type { IDocContentInsertRange } from './services/doc-content-insert.service';
 export { DocInterceptorService } from './services/doc-interceptor/doc-interceptor.service';
 export { DOC_INTERCEPTOR_POINT } from './services/doc-interceptor/interceptor-const';
+export {
+    DocLayoutExecutorService,
+    DocLayoutExecutorState,
+    DocLayoutExecutorType,
+    DocLayoutSessionStatus,
+} from './services/doc-layout-executor.service';
+export type {
+    IDocLayoutCancelRequest,
+    IDocLayoutCreateSessionRequest,
+    IDocLayoutDisposeMountRequest,
+    IDocLayoutDisposeSessionRequest,
+    IDocLayoutExecutor,
+    IDocLayoutExecutorStatus,
+    IDocLayoutMountIdentity,
+    IDocLayoutMutationProjection,
+    IDocLayoutPageRequest,
+    IDocLayoutPageResult,
+    IDocLayoutPerformanceMetrics,
+    IDocLayoutStartOptions,
+    IDocLayoutStartRequest,
+    IDocLayoutStartResult,
+    IDocLayoutStepRequest,
+    IDocLayoutStepResult,
+} from './services/doc-layout-executor.service';
 export {
     DOC_SELECTION_OPTION_PRESERVE_CARET,
     DocSelectionManagerService,
@@ -92,6 +120,22 @@ export type {
     IResolvedDocText,
     IResolvedDocTextCharacter,
 } from './services/doc-text-resolver.service';
+export {
+    canEditDocumentTargets,
+    createDocumentPermissionPoint,
+    getDocumentEntityPermissionObjectId,
+    getDocumentParagraphPermissionObjectId,
+    getDocumentPermissionValue,
+    getDocumentSectionPermissionObjectId,
+    setDocumentPermissionValue,
+} from './services/permission/document-permission';
+export type { DocumentUnitPermissionAction } from './services/permission/document-permission';
+export {
+    getDocumentDrawingSegmentId,
+    getDocumentEditTargetObjectIds,
+    getDocumentEntityParentPermissionObjectIds,
+    getDocumentParagraphParentPermissionObjectIds,
+} from './services/permission/document-permission-resolver';
 export {
     addCustomRangeBySelectionFactory,
     addCustomRangeFactory,

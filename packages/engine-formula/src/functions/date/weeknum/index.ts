@@ -16,9 +16,8 @@
 
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { DateSystem, excelDateSerial, excelSerialToDate } from '@univerjs/core';
 import {
-    excelDateSerial,
-    excelSerialToDate,
     getDateSerialNumberByObject,
     getWeekDayByDateSerialNumber,
 } from '../../../basics/date';
@@ -74,7 +73,7 @@ export class Weeknum extends BaseFunction {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        const dateSerialNumber = getDateSerialNumberByObject(_serialNumber);
+        const dateSerialNumber = getDateSerialNumberByObject(_serialNumber, this.getDateSystem());
 
         if (typeof dateSerialNumber !== 'number') {
             return dateSerialNumber;
@@ -98,11 +97,13 @@ export class Weeknum extends BaseFunction {
     }
 
     private _getResult(dateSerialNumber: number, returnTypeValue: number) {
-        const currentDate = excelSerialToDate(dateSerialNumber);
-        const currentYear = dateSerialNumber > 0 ? currentDate.getUTCFullYear() : 1900;
+        const currentDate = excelSerialToDate(dateSerialNumber, this.getDateSystem());
+        const currentYear = this.getDateSystem() === DateSystem.Date1900 && dateSerialNumber === 0
+            ? 1900
+            : currentDate.getUTCFullYear();
         let yearStart = new Date(Date.UTC(currentYear, 0, 1));
-        let yearStartSerialNumber = excelDateSerial(yearStart);
-        let yearStartWeekDay = getWeekDayByDateSerialNumber(yearStartSerialNumber);
+        let yearStartSerialNumber = excelDateSerial(yearStart, this.getDateSystem());
+        let yearStartWeekDay = getWeekDayByDateSerialNumber(yearStartSerialNumber, this.getDateSystem());
 
         let yearWeekStartSerialNumber: number;
 
@@ -119,8 +120,8 @@ export class Weeknum extends BaseFunction {
 
             if (dateSerialNumber < yearWeekStartSerialNumber) {
                 yearStart = new Date(Date.UTC(currentYear - 1, 0, 1));
-                yearStartSerialNumber = excelDateSerial(yearStart);
-                yearStartWeekDay = getWeekDayByDateSerialNumber(yearStartSerialNumber);
+                yearStartSerialNumber = excelDateSerial(yearStart, this.getDateSystem());
+                yearStartWeekDay = getWeekDayByDateSerialNumber(yearStartSerialNumber, this.getDateSystem());
 
                 if (yearStartWeekDay < 1) {
                     yearWeekStartSerialNumber = yearStartSerialNumber + 1;

@@ -14,11 +14,48 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
 import type { DataStreamTreeNode } from '../data-stream-tree-node';
-import { DataStreamTreeNodeType, DataStreamTreeTokenType } from '@univerjs/core';
+import { DataStreamTreeNodeType, DataStreamTreeTokenType, DocumentDataModel, JSONX, TextX, TextXActionType } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { DocumentEditArea, DocumentViewModel, parseDataStreamToTree } from '../document-view-model';
+
+interface ITreeNodeSnapshot {
+    blocks: number[];
+    children: ITreeNodeSnapshot[];
+    content: string | undefined;
+    endIndex: number;
+    nodeType: DataStreamTreeNodeType;
+    startIndex: number;
+}
+
+function snapshotTreeNode(node: DataStreamTreeNode): ITreeNodeSnapshot {
+    return {
+        blocks: [...node.blocks],
+        children: node.children.map(snapshotTreeNode),
+        content: node.content,
+        endIndex: node.endIndex,
+        nodeType: node.nodeType,
+        startIndex: node.startIndex,
+    };
+}
+
+function createPlainTextActions(offset: number, deleteCount: number, insertText: string) {
+    const textX = new TextX();
+    if (offset > 0) {
+        textX.push({ t: TextXActionType.RETAIN, len: offset });
+    }
+    if (deleteCount > 0) {
+        textX.push({ t: TextXActionType.DELETE, len: deleteCount });
+    }
+    if (insertText.length > 0) {
+        textX.push({
+            t: TextXActionType.INSERT,
+            len: insertText.length,
+            body: { dataStream: insertText },
+        });
+    }
+    return JSONX.getInstance().editOp(textX.serialize(), ['body']);
+}
 
 function createDocumentDataModel(overrides?: {
     body?: Record<string, unknown>;
@@ -50,7 +87,7 @@ function createDocumentDataModel(overrides?: {
     } as any;
 }
 
-function findFirstNodeByType(node: any, type: DataStreamTreeNodeType): Nullable<any> {
+function findFirstNodeByType(node: any, type: DataStreamTreeNodeType): any | null {
     if (!node) return null;
     if (node.nodeType === type) return node;
     for (const child of node.children ?? []) {
@@ -294,6 +331,399 @@ describe('DocumentViewModel', () => {
     });
 
     describe('DocumentViewModel class', () => {
+        it('updates the data stream tree incrementally for plain text edits', () => {
+            const model = createDocumentDataModel({
+                body: {
+                    dataStream: `AB${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`,
+                    textRuns: [{ st: 0, ed: 2, ts: { fs: 10 } }],
+                    paragraphs: [{ startIndex: 0, paragraphId: 'plain-edit-paragraph' }],
+                    sectionBreaks: [{ sectionId: 'plain-edit-section', startIndex: 3 }],
+                },
+            });
+            const viewModel = new DocumentViewModel(model);
+            const insertTextX = new TextX();
+            insertTextX.push({ t: TextXActionType.RETAIN, len: 1 });
+            insertTextX.push({
+                t: TextXActionType.INSERT,
+                len: 1,
+                body: { dataStream: 'X' },
+            });
+            const insertActions = JSONX.getInstance().editOp(insertTextX.serialize(), ['body']);
+            const body = model.getBody();
+            body.dataStream = `AXB${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
+            body.textRuns = [{ st: 0, ed: 3, ts: { fs: 10 } }];
+            body.sectionBreaks = [{ sectionId: 'plain-edit-section', startIndex: 4 }];
+
+            expect(viewModel.resetByValidatedTextMutation(model, insertActions)).toBe(true);
+            expect(viewModel.getChildren()[0].children[0].content).toBe(`AXB${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`);
+            expect(viewModel.getChildren()[0].endIndex).toBe(4);
+            expect(viewModel.getTextRun(2)?.ed).toBe(3);
+            expect(viewModel.getSectionBreak(4)?.sectionId).toBe('plain-edit-section');
+            expect(viewModel.getSectionBreak(3)).toBeUndefined();
+
+            const deleteTextX = new TextX();
+            deleteTextX.push({ t: TextXActionType.RETAIN, len: 1 });
+            deleteTextX.push({ t: TextXActionType.DELETE, len: 1 });
+            const deleteActions = JSONX.getInstance().editOp(deleteTextX.serialize(), ['body']);
+            body.dataStream = `AB${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
+            body.textRuns = [{ st: 0, ed: 2, ts: { fs: 10 } }];
+            body.sectionBreaks = [{ sectionId: 'plain-edit-section', startIndex: 3 }];
+
+            expect(viewModel.resetByValidatedTextMutation(model, deleteActions)).toBe(true);
+            expect(viewModel.getChildren()[0].children[0].content).toBe(`AB${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`);
+            expect(viewModel.getChildren()[0].endIndex).toBe(3);
+            expect(viewModel.getTextRun(2)).toBeUndefined();
+            expect(viewModel.getSectionBreak(3)?.sectionId).toBe('plain-edit-section');
+            expect(viewModel.getSectionBreak(4)).toBeUndefined();
+        });
+
+        it('updates nested table-cell and column-group paragraphs without rebuilding their element trees', () => {
+            const T = DataStreamTreeTokenType;
+            const tableStream = [
+                T.TABLE_START,
+                T.TABLE_ROW_START,
+                T.TABLE_CELL_START,
+                'AB',
+                T.PARAGRAPH,
+                T.SECTION_BREAK,
+                T.TABLE_CELL_END,
+                T.TABLE_ROW_END,
+                T.TABLE_END,
+                T.PARAGRAPH,
+                T.SECTION_BREAK,
+            ].join('');
+            const tableModel = createDocumentDataModel({
+                body: {
+                    dataStream: tableStream,
+                    paragraphs: [
+                        { startIndex: tableStream.indexOf(T.PARAGRAPH), paragraphId: 'table-cell-paragraph' },
+                        { startIndex: tableStream.lastIndexOf(T.PARAGRAPH), paragraphId: 'after-table-paragraph' },
+                    ],
+                    sectionBreaks: [
+                        { startIndex: tableStream.indexOf(T.SECTION_BREAK), sectionId: 'table-cell-section' },
+                        { startIndex: tableStream.lastIndexOf(T.SECTION_BREAK), sectionId: 'table-body-section' },
+                    ],
+                },
+            });
+            const tableViewModel = new DocumentViewModel(tableModel);
+            const tableInsertOffset = tableStream.indexOf('B');
+            const tableInsert = new TextX();
+            tableInsert.push({ t: TextXActionType.RETAIN, len: tableInsertOffset });
+            tableInsert.push({ t: TextXActionType.INSERT, len: 1, body: { dataStream: 'X' } });
+            const tableActions = JSONX.getInstance().editOp(tableInsert.serialize(), ['body']);
+            const tableBody = tableModel.getBody();
+            tableBody.dataStream = `${tableStream.slice(0, tableInsertOffset)}X${tableStream.slice(tableInsertOffset)}`;
+            tableBody.paragraphs = [
+                { startIndex: tableStream.indexOf(T.PARAGRAPH) + 1, paragraphId: 'table-cell-paragraph' },
+                { startIndex: tableStream.lastIndexOf(T.PARAGRAPH) + 1, paragraphId: 'after-table-paragraph' },
+            ];
+            tableBody.sectionBreaks = [
+                { startIndex: tableStream.indexOf(T.SECTION_BREAK) + 1, sectionId: 'table-cell-section' },
+                { startIndex: tableStream.lastIndexOf(T.SECTION_BREAK) + 1, sectionId: 'table-body-section' },
+            ];
+
+            expect(tableViewModel.resetByValidatedTextMutation(tableModel, tableActions)).toBe(true);
+            const tableCell = findFirstNodeByType(tableViewModel.getChildren()[0], DataStreamTreeNodeType.TABLE_CELL);
+            const tableCellParagraph = findFirstNodeByType(tableCell, DataStreamTreeNodeType.PARAGRAPH);
+            expect(tableCellParagraph?.content).toBe(`AXB${T.PARAGRAPH}${T.SECTION_BREAK}`);
+            expect(tableCell?.endIndex).toBe(tableStream.indexOf(T.TABLE_CELL_END) + 1);
+            expect(tableViewModel.getParagraph(tableStream.indexOf(T.PARAGRAPH) + 1)?.paragraphId)
+                .toBe('table-cell-paragraph');
+
+            const columnStream = [
+                T.COLUMN_GROUP_START,
+                T.COLUMN_START,
+                `Left${T.PARAGRAPH}`,
+                T.COLUMN_END,
+                T.COLUMN_START,
+                `Right${T.PARAGRAPH}`,
+                T.COLUMN_END,
+                T.COLUMN_GROUP_END,
+                T.SECTION_BREAK,
+            ].join('');
+            const columnModel = createDocumentDataModel({
+                body: {
+                    dataStream: columnStream,
+                    paragraphs: [
+                        { startIndex: columnStream.indexOf(T.PARAGRAPH), paragraphId: 'left-column-paragraph' },
+                        { startIndex: columnStream.lastIndexOf(T.PARAGRAPH), paragraphId: 'right-column-paragraph' },
+                    ],
+                    sectionBreaks: [{
+                        startIndex: columnStream.lastIndexOf(T.SECTION_BREAK),
+                        sectionId: 'column-body-section',
+                    }],
+                },
+            });
+            const columnViewModel = new DocumentViewModel(columnModel);
+            const columnInsertOffset = columnStream.indexOf('Right') + 2;
+            const columnInsert = new TextX();
+            columnInsert.push({ t: TextXActionType.RETAIN, len: columnInsertOffset });
+            columnInsert.push({ t: TextXActionType.INSERT, len: 1, body: { dataStream: 'X' } });
+            const columnActions = JSONX.getInstance().editOp(columnInsert.serialize(), ['body']);
+            const columnBody = columnModel.getBody();
+            columnBody.dataStream = `${columnStream.slice(0, columnInsertOffset)}X${columnStream.slice(columnInsertOffset)}`;
+            columnBody.paragraphs = [
+                { startIndex: columnStream.indexOf(T.PARAGRAPH), paragraphId: 'left-column-paragraph' },
+                { startIndex: columnStream.lastIndexOf(T.PARAGRAPH) + 1, paragraphId: 'right-column-paragraph' },
+            ];
+            columnBody.sectionBreaks = [{
+                startIndex: columnStream.lastIndexOf(T.SECTION_BREAK) + 1,
+                sectionId: 'column-body-section',
+            }];
+
+            expect(columnViewModel.resetByValidatedTextMutation(columnModel, columnActions)).toBe(true);
+            const columnGroup = findFirstNodeByType(
+                columnViewModel.getChildren()[0],
+                DataStreamTreeNodeType.COLUMN_GROUP
+            );
+            const rightColumnParagraph = findFirstNodeByType(
+                columnGroup?.children[1],
+                DataStreamTreeNodeType.PARAGRAPH
+            );
+            expect(rightColumnParagraph?.content).toBe(`RiXght${T.PARAGRAPH}`);
+            expect(columnGroup?.endIndex).toBe(columnStream.indexOf(T.COLUMN_GROUP_END) + 1);
+            expect(columnViewModel.getParagraph(columnStream.lastIndexOf(T.PARAGRAPH) + 1)?.paragraphId)
+                .toBe('right-column-paragraph');
+        });
+
+        it('matches a fresh Main view model after sequential edits in body, table, columns, and trailing content', () => {
+            const T = DataStreamTreeTokenType;
+            const tableId = 'incremental-differential-table';
+            const columnGroupId = 'incremental-differential-columns';
+            const tableStream = [
+                T.TABLE_START,
+                T.TABLE_ROW_START,
+                T.TABLE_CELL_START,
+                `Table cell text${T.PARAGRAPH}${T.SECTION_BREAK}`,
+                T.TABLE_CELL_END,
+                T.TABLE_ROW_END,
+                T.TABLE_END,
+            ].join('');
+            const columnGroupStream = [
+                T.COLUMN_GROUP_START,
+                T.COLUMN_START,
+                `Left column${T.PARAGRAPH}`,
+                T.COLUMN_END,
+                T.COLUMN_START,
+                `Right column${T.PARAGRAPH}`,
+                T.COLUMN_END,
+                T.COLUMN_GROUP_END,
+            ].join('');
+            const dataStream = [
+                `Top paragraph${T.PARAGRAPH}`,
+                tableStream,
+                T.PARAGRAPH,
+                columnGroupStream,
+                T.PARAGRAPH,
+                `Tail paragraph${T.PARAGRAPH}${T.SECTION_BREAK}`,
+            ].join('');
+            const tableStart = dataStream.indexOf(T.TABLE_START);
+            const columnGroupStart = dataStream.indexOf(T.COLUMN_GROUP_START);
+            const model = new DocumentDataModel({
+                id: 'incremental-differential-document',
+                body: {
+                    dataStream,
+                    paragraphs: [...dataStream.matchAll(new RegExp(T.PARAGRAPH, 'g'))].map((match, index) => ({
+                        startIndex: match.index,
+                        paragraphId: `incremental-differential-paragraph-${index}`,
+                    })),
+                    sectionBreaks: [
+                        {
+                            sectionId: 'incremental-differential-table-section',
+                            startIndex: tableStart + tableStream.indexOf(T.SECTION_BREAK),
+                        },
+                        {
+                            sectionId: 'incremental-differential-body-section',
+                            startIndex: dataStream.length - 1,
+                        },
+                    ],
+                    tables: [{
+                        startIndex: tableStart,
+                        endIndex: tableStart + tableStream.length,
+                        tableId,
+                    }],
+                    columnGroups: [{
+                        startIndex: columnGroupStart,
+                        endIndex: columnGroupStart + columnGroupStream.length - 1,
+                        columnGroupId,
+                        columns: [
+                            { columnId: 'incremental-differential-left', widthRatio: 1 },
+                            { columnId: 'incremental-differential-right', widthRatio: 1 },
+                        ],
+                    }],
+                    textRuns: [
+                        { st: 0, ed: dataStream.indexOf(T.PARAGRAPH), ts: { fs: 12 } },
+                        {
+                            st: dataStream.indexOf('Table cell text'),
+                            ed: dataStream.indexOf('Table cell text') + 'Table cell text'.length,
+                            ts: { fs: 14 },
+                        },
+                    ],
+                },
+                documentStyle: {},
+            });
+            const incrementalViewModel = new DocumentViewModel(model);
+            const operations = [
+                { deleteCount: 0, insertText: ' inserted', locate: (stream: string) => stream.indexOf(' paragraph') },
+                { deleteCount: 5, insertText: '', locate: (stream: string) => stream.indexOf('cell text') },
+                { deleteCount: 0, insertText: '宽字符', locate: (stream: string) => stream.indexOf('Right column') + 5 },
+                { deleteCount: 4, insertText: 'ending', locate: (stream: string) => stream.indexOf('Tail paragraph') + 5 },
+            ];
+
+            for (const operation of operations) {
+                const body = model.getBody();
+                if (body == null) {
+                    throw new Error('Expected the differential document body');
+                }
+                const offset = operation.locate(body.dataStream);
+                expect(offset).toBeGreaterThanOrEqual(0);
+                const actions = createPlainTextActions(offset, operation.deleteCount, operation.insertText);
+                model.apply(actions);
+
+                expect(incrementalViewModel.resetByValidatedTextMutation(model, actions)).toBe(true);
+                const rebuiltViewModel = new DocumentViewModel(model);
+                expect(incrementalViewModel.getChildren().map(snapshotTreeNode)).toEqual(
+                    rebuiltViewModel.getChildren().map(snapshotTreeNode)
+                );
+                const incrementalTableNode = incrementalViewModel.findTableNodeById(tableId);
+                const rebuiltTableNode = rebuiltViewModel.findTableNodeById(tableId);
+                if (incrementalTableNode == null || rebuiltTableNode == null) {
+                    throw new Error('Expected both differential table nodes');
+                }
+                expect(snapshotTreeNode(incrementalTableNode)).toEqual(snapshotTreeNode(rebuiltTableNode));
+                const currentBody = model.getBody();
+                if (currentBody == null) {
+                    throw new Error('Expected the mutated differential document body');
+                }
+                const currentColumnGroupStart = currentBody.columnGroups?.[0]?.startIndex;
+                if (currentColumnGroupStart == null) {
+                    throw new Error('Expected the differential column group metadata');
+                }
+                expect(incrementalViewModel.getColumnGroupByStartIndex(currentColumnGroupStart)?.columnGroup).toEqual(
+                    rebuiltViewModel.getColumnGroupByStartIndex(currentColumnGroupStart)?.columnGroup
+                );
+                for (let index = 0; index < currentBody.dataStream.length; index++) {
+                    expect(incrementalViewModel.getParagraph(index)).toEqual(rebuiltViewModel.getParagraph(index));
+                    expect(incrementalViewModel.getSectionBreak(index)).toEqual(rebuiltViewModel.getSectionBreak(index));
+                    expect(incrementalViewModel.getTextRun(index)).toEqual(rebuiltViewModel.getTextRun(index));
+                }
+                rebuiltViewModel.dispose();
+            }
+
+            incrementalViewModel.dispose();
+            model.dispose();
+        });
+
+        it('matches a fresh Main view model for disjoint edits and falls back across paragraph boundaries', () => {
+            const T = DataStreamTreeTokenType;
+            const dataStream = `Alpha${T.PARAGRAPH}Beta${T.PARAGRAPH}${T.SECTION_BREAK}`;
+            const model = new DocumentDataModel({
+                id: 'incremental-disjoint-document',
+                body: {
+                    dataStream,
+                    paragraphs: [
+                        { startIndex: dataStream.indexOf(T.PARAGRAPH), paragraphId: 'incremental-disjoint-first' },
+                        { startIndex: dataStream.lastIndexOf(T.PARAGRAPH), paragraphId: 'incremental-disjoint-second' },
+                    ],
+                    sectionBreaks: [{
+                        startIndex: dataStream.length - 1,
+                        sectionId: 'incremental-disjoint-section',
+                    }],
+                },
+                documentStyle: {},
+            });
+            const incrementalViewModel = new DocumentViewModel(model);
+            const disjointTextX = new TextX();
+            disjointTextX.push({ t: TextXActionType.RETAIN, len: 2 });
+            disjointTextX.push({ t: TextXActionType.INSERT, len: 1, body: { dataStream: 'X' } });
+            disjointTextX.push({ t: TextXActionType.RETAIN, len: 6 });
+            disjointTextX.push({ t: TextXActionType.INSERT, len: 1, body: { dataStream: 'Y' } });
+            const disjointActions = JSONX.getInstance().editOp(disjointTextX.serialize(), ['body']);
+            model.apply(disjointActions);
+            expect(incrementalViewModel.resetByValidatedTextMutation(model, disjointActions)).toBe(true);
+
+            const rebuiltAfterDisjoint = new DocumentViewModel(model);
+            expect(incrementalViewModel.getChildren().map(snapshotTreeNode)).toEqual(
+                rebuiltAfterDisjoint.getChildren().map(snapshotTreeNode)
+            );
+            rebuiltAfterDisjoint.dispose();
+
+            const currentDataStream = model.getBody()?.dataStream;
+            if (currentDataStream == null) {
+                throw new Error('Expected the disjoint document body');
+            }
+            const paragraphBoundary = currentDataStream.indexOf(T.PARAGRAPH);
+            const crossingActions = createPlainTextActions(paragraphBoundary - 1, 3, 'Z');
+            model.apply(crossingActions);
+            expect(incrementalViewModel.resetByValidatedTextMutation(model, crossingActions)).toBe(false);
+            incrementalViewModel.reset(model);
+
+            const rebuiltAfterFallback = new DocumentViewModel(model);
+            expect(incrementalViewModel.getChildren().map(snapshotTreeNode)).toEqual(
+                rebuiltAfterFallback.getChildren().map(snapshotTreeNode)
+            );
+            rebuiltAfterFallback.dispose();
+            incrementalViewModel.dispose();
+            model.dispose();
+        });
+
+        it('resolves shifted paragraph metadata without rebuilding whole-document caches', () => {
+            const model = createDocumentDataModel({
+                body: {
+                    dataStream: `A${DataStreamTreeTokenType.PARAGRAPH}B${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`,
+                    paragraphs: [
+                        { startIndex: 0, paragraphId: 'first' },
+                        { startIndex: 2, paragraphId: 'second' },
+                    ],
+                    sectionBreaks: [{ sectionId: 'section', startIndex: 4 }],
+                },
+            });
+            const viewModel = new DocumentViewModel(model);
+            const insertTextX = new TextX();
+            insertTextX.push({ t: TextXActionType.RETAIN, len: 1 });
+            insertTextX.push({
+                t: TextXActionType.INSERT,
+                len: 1,
+                body: { dataStream: 'X' },
+            });
+            const actions = JSONX.getInstance().editOp(insertTextX.serialize(), ['body']);
+            const body = model.getBody();
+            body.dataStream = `AX${DataStreamTreeTokenType.PARAGRAPH}B${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`;
+            body.paragraphs = [
+                { startIndex: 0, paragraphId: 'first' },
+                { startIndex: 3, paragraphId: 'second' },
+            ];
+            body.sectionBreaks = [{ sectionId: 'section', startIndex: 5 }];
+
+            expect(viewModel.resetByValidatedTextMutation(model, actions)).toBe(true);
+            expect(viewModel.getParagraph(3)?.paragraphId).toBe('second');
+            expect(viewModel.getParagraph(2)).toBeUndefined();
+            expect(viewModel.getSectionBreak(5)?.sectionId).toBe('section');
+        });
+
+        it('indexes long and overlapping text runs by range buckets', () => {
+            const content = 'A'.repeat(2005);
+            const model = createDocumentDataModel({
+                body: {
+                    dataStream: `${content}${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`,
+                    textRuns: [
+                        { st: 0, ed: content.length, ts: { fs: 10 } },
+                        { st: 995, ed: 1005, ts: { fs: 20 } },
+                        { st: 1500, ed: 1500, ts: { fs: 30 } },
+                    ],
+                },
+            });
+
+            const viewModel = new DocumentViewModel(model);
+            expect(viewModel.getTextRun(0)?.ts?.fs).toBe(10);
+            expect(viewModel.getTextRun(994)?.ts?.fs).toBe(10);
+            expect(viewModel.getTextRun(995)?.ts?.fs).toBe(20);
+            expect(viewModel.getTextRun(1004)?.ts?.fs).toBe(20);
+            expect(viewModel.getTextRun(1005)?.ts?.fs).toBe(10);
+            expect(viewModel.getTextRun(2004)?.ts?.fs).toBe(10);
+            expect(viewModel.getTextRun(2005)).toBeUndefined();
+        });
+
         it('covers cache/interceptor/reset/header-footer flows', () => {
             const headerModel = createDocumentDataModel({
                 body: {
@@ -383,6 +813,9 @@ describe('DocumentViewModel', () => {
             viewModel.reset(newModel);
             expect(viewModel.getDataModel()).toBe(newModel);
             expect(viewModel.getTextRun(0)?.ed).toBe(1);
+            expect(viewModel.getSectionBreak(2)).toBeUndefined();
+            expect(viewModel.getCustomBlock(1)).toBeUndefined();
+            expect(viewModel.getTableByStartIndex(3)).toBeUndefined();
 
             expect(viewModel.findTableNodeById('not-exists')).toBeUndefined();
             const maps = viewModel.getHeaderFooterTreeMap();

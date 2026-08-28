@@ -36,7 +36,7 @@ import { RediContext } from '@univerjs/ui';
 import { act, createRef } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Subject } from 'rxjs';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { GlobalRangeSelectorService } from '../../../services/range-selector.service';
 import { GlobalRangeSelector } from '../Global';
 import { RangeSelector } from '../index';
@@ -273,6 +273,60 @@ describe('GlobalRangeSelector', () => {
                 }),
             ],
         ]);
+    });
+
+    it('applies maxRangeCount to the global selector dialog', async () => {
+        const { injector, service } = createGlobalRangeSelectorTestBed();
+
+        await act(async () => {
+            root.render(
+                <RediContext.Provider value={{ injector }}>
+                    <GlobalRangeSelector />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        await act(async () => {
+            service.showRangeSelectorDialog({
+                unitId: 'book-1',
+                subUnitId: 'sheet-1',
+                maxRangeCount: 1,
+                callback: vi.fn(),
+            });
+            await Promise.resolve();
+        });
+
+        expect(document.body.textContent).not.toContain('Add range');
+    });
+
+    it('calls the callback with an empty range when the global selector dialog is cancelled', async () => {
+        const { injector, service } = createGlobalRangeSelectorTestBed();
+        const callback = vi.fn();
+
+        await act(async () => {
+            root.render(
+                <RediContext.Provider value={{ injector }}>
+                    <GlobalRangeSelector />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        let promise!: Promise<IUnitRangeName[]>;
+        await act(async () => {
+            promise = service.showRangeSelectorDialog({
+                unitId: 'book-1',
+                subUnitId: 'sheet-1',
+                callback,
+            });
+            await Promise.resolve();
+        });
+
+        await clickButton('Cancel');
+
+        expect(callback).toHaveBeenCalledWith([]);
+        await expect(promise).resolves.toEqual([]);
     });
 
     it('restores the caller selection when a range selector dialog is cancelled', async () => {

@@ -1,9 +1,6 @@
 <div align="center">
 
-<picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./docs/img/banner-light.png">
-    <img src="./docs/img/banner-dark.png" alt="Univer" width="420" />
-</picture>
+<img src="./docs/img/banner.png" alt="Univer SDK" width="800" />
 
 **A full-stack, isomorphic office SDK for building spreadsheets, documents, and presentations.**
 
@@ -23,7 +20,7 @@ English | [简体中文](./docs/readme/zh-CN.md) | [繁體中文](./docs/readme/
 [![Stars](https://img.shields.io/github/stars/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/stargazers)
 [![Contributors](https://img.shields.io/github/contributors/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/graphs/contributors)
 [![Issues](https://img.shields.io/github/issues/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/issues)
-[![Last Commit](https://img.shields.io/github/last-commit/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/commits/main/)
+[![Last Commit](https://img.shields.io/github/last-commit/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/commits/dev/)
 
 [![Discord](https://img.shields.io/discord/1136129819961217077?logo=discord&logoColor=FFFFFF&label=discord&color=5865F2&style=flat-square)](https://discord.gg/z3NKNT6D2f)
 [![Twitter](https://img.shields.io/twitter/follow/univerhq?style=flat-square&logo=x)](https://twitter.com/univerhq)
@@ -89,7 +86,7 @@ Univer is not a spreadsheet file viewer only. It is a framework for building you
 
 - **Isomorphic by design**: run UI apps in browsers and headless processing in Node.js.
 - **Plugin-first architecture**: every capability is delivered as a composable plugin, so features can be added, removed, replaced, or lazy-loaded.
-- **Preset mode for fast integration**: use curated plugin bundles from [`univer-presets`](https://github.com/dream-num/univer-presets) when you want a working app quickly.
+- **Preset mode for fast integration**: use the curated plugin collections in [`presets/`](./presets) when you want a working app quickly.
 - **Plugin mode for full control**: manually compose packages when you need custom loading, smaller bundles, or deep integration.
 - **Facade API**: work with workbooks, worksheets, ranges, documents, formulas, commands, and events through a higher-level API.
 - **Canvas rendering engine**: support large editable document surfaces with a rendering layer shared across document types.
@@ -97,45 +94,12 @@ Univer is not a spreadsheet file viewer only. It is a framework for building you
 
 ## ⚡ Quick Start
 
-For most applications, start with **Preset Mode**. Use **Plugin Mode** when you need to manually compose packages and control plugin registration.
+Use **Plugin Mode** for complete product coverage and precise composition. For supported Sheets, Docs, and Node profiles, **Preset Mode** provides a shorter curated setup.
 
 <details open>
-<summary><strong>Preset Mode (recommended)</strong></summary>
-
-Presets are curated collections of Univer plugins that include the required Facade API registrations and styles.
-
-```bash
-pnpm add @univerjs/presets @univerjs/preset-sheets-core
-```
-
-```ts
-import { UniverSheetsCorePreset } from '@univerjs/preset-sheets-core'
-import UniverPresetSheetsCoreEnUS from '@univerjs/preset-sheets-core/locales/en-US'
-import { createUniver, LocaleType, mergeLocales } from '@univerjs/presets'
-
-import '@univerjs/preset-sheets-core/lib/index.css'
-
-const { univerAPI } = createUniver({
-  locale: LocaleType.EN_US,
-  locales: {
-    [LocaleType.EN_US]: mergeLocales(UniverPresetSheetsCoreEnUS),
-  },
-  presets: [
-    UniverSheetsCorePreset({
-      container: 'app',
-    }),
-  ],
-})
-
-univerAPI.createWorkbook({})
-```
-
-</details>
-
-<details>
 <summary><strong>Plugin Mode</strong></summary>
 
-Plugin Mode gives you lower-level control over packages, style imports, locale merging, Facade API registration, and plugin order.
+Plugin Mode gives you lower-level control over packages, style imports, locale merging, Facade API registration, and plugin configuration.
 
 ```bash
 pnpm add @univerjs/core @univerjs/design @univerjs/docs @univerjs/docs-ui @univerjs/engine-formula @univerjs/engine-render @univerjs/sheets @univerjs/sheets-formula @univerjs/sheets-formula-ui @univerjs/sheets-numfmt @univerjs/sheets-numfmt-ui @univerjs/sheets-ui @univerjs/ui
@@ -212,6 +176,39 @@ univerAPI.createWorkbook({})
 
 </details>
 
+<details>
+<summary><strong>Preset Mode</strong></summary>
+
+Presets are curated collections of Univer plugins that include the required Facade API registrations and styles.
+
+```bash
+pnpm add @univerjs/presets @univerjs/preset-sheets-core
+```
+
+```ts
+import { UniverSheetsCorePreset } from '@univerjs/preset-sheets-core'
+import UniverPresetSheetsCoreEnUS from '@univerjs/preset-sheets-core/locales/en-US'
+import { createUniver, LocaleType, mergeLocales } from '@univerjs/presets'
+
+import '@univerjs/preset-sheets-core/lib/index.css'
+
+const { univerAPI } = createUniver({
+  locale: LocaleType.EN_US,
+  locales: {
+    [LocaleType.EN_US]: mergeLocales(UniverPresetSheetsCoreEnUS),
+  },
+  presets: [
+    UniverSheetsCorePreset({
+      container: 'app',
+    }),
+  ],
+})
+
+univerAPI.createWorkbook({})
+```
+
+</details>
+
 Your page needs a container:
 
 ```html
@@ -224,11 +221,11 @@ Learn more in the [Installation & Basic Usage guide](https://docs.univer.ai/guid
 
 | Choose | When to use it | Start here |
 | --- | --- | --- |
-| **Preset Mode** | You want a working Sheets, Docs, or Node setup with minimal configuration. | [`univer-presets`](https://github.com/dream-num/univer-presets) and the [getting started guide](https://docs.univer.ai/guides/sheets/getting-started/installation) |
-| **Plugin Mode** | You need strict control over packages, plugin registration order, lazy loading, or custom runtime composition. | This repository's [`examples/`](./examples) and [architecture guide](https://docs.univer.ai/guides/recipes/architecture/univer) |
+| **Plugin Mode** | You need strict control over packages, configured dependencies, lazy loading, or custom runtime composition. | This repository's [`examples/`](./examples) and [architecture guide](https://docs.univer.ai/guides/recipes/architecture/univer) |
+| **Preset Mode** | You want a working Sheets, Docs, or Node setup with minimal configuration. | This repository's [`presets/`](./presets) and the [getting started guide](https://docs.univer.ai/guides/sheets/getting-started/installation) |
 | **Headless Mode** | You need server-side workbook/document processing, formula calculation, or automation without UI. | [Headless Univer](https://docs.univer.ai/guides/sheets/getting-started/node) |
 
-Keep all `@univerjs/*` packages on the same version. If you use Univer Pro packages, keep `@univerjs-pro/*` versions aligned as well.
+Keep the `@univerjs/*` SDK packages in the same coordinated Univer release line on the same version. Independently released packages, including `@univerjs/icons` and `@univerjs/icons-svg`, use the compatible versions declared by package manifests instead of the SDK version. If you use Univer Pro packages, keep `@univerjs-pro/*` aligned with the matching coordinated release line.
 
 For API compatibility expectations, experimental APIs, internal APIs, and deprecation rules, see the [API Stability Policy](./docs/API_STABILITY.md).
 
@@ -278,7 +275,7 @@ Boundary principles:
 ## 🌐 Ecosystem
 
 - **Core SDK**: [`dream-num/univer`](https://github.com/dream-num/univer), this monorepo.
-- **Presets**: [`dream-num/univer-presets`](https://github.com/dream-num/univer-presets), curated plugin bundles for browser and Node.js apps.
+- **Presets**: this repository's [`presets/`](./presets), curated plugin collections for browser and Node.js apps.
 - **AI agent skills**: [`dream-num/univer-sdk-skills`](https://github.com/dream-num/univer-sdk-skills), reusable instructions for AI agents working with Univer integration, Pro features, plugin development, and Node backends. See the [AI Skills guide](https://docs.univer.ai/guides/skills).
 - **Documentation**: [docs.univer.ai](https://docs.univer.ai), including Sheets, Docs, Slides, recipes, and Pro guides.
 - **API Reference**: [docs.univer.ai/reference](https://docs.univer.ai/reference/classes/univer), the Facade API and generated API reference.
@@ -290,9 +287,8 @@ Boundary principles:
 ```text
 .
 ├── packages/      Core packages, engines, document types, UI plugins, and feature plugins
-├── examples/      Local browser and Node.js demos used for development
-├── common/        Shared internal tooling, mock data, storybook, and utilities
-├── e2e/           Playwright and visual comparison tests
+├── examples/      All-in-one Vite workbench used for local browser development
+├── common/        Shared internal tooling, storybook, and utilities
 ├── tests/         Additional integration test projects
 └── docs/          Architecture notes, images, and repository-local documentation
 ```
@@ -317,12 +313,11 @@ Useful commands:
 
 | Command | Purpose |
 | --- | --- |
-| `pnpm dev` | Start the local examples app. |
+| `pnpm dev` | Start the all-in-one Sheets, Docs, and Slides workbench with Vite 8 Bundled Dev and HMR. |
 | `pnpm build` | Build workspace packages, excluding internal common packages. |
 | `pnpm test` | Run unit tests through Turbo. |
 | `pnpm typecheck` | Run TypeScript checks through Turbo. |
 | `pnpm lint` | Run ESLint. |
-| `pnpm test:e2e` | Run Playwright tests. |
 | `pnpm storybook:dev` | Start Storybook for UI component development. |
 
 Read [CONTRIBUTING.md](./CONTRIBUTING.md) before opening a pull request.

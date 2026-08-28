@@ -79,6 +79,13 @@ export enum DocumentSkeletonPageType {
 };
 
 export interface IDocumentSkeletonPage {
+    /**
+     * Preserves page geometry while incremental pagination rebuilds a later page.
+     * Layout placeholders intentionally contain no editable flow nodes.
+     */
+    isLayoutPlaceholder?: boolean;
+    /** Canonical page geometry is available in the layout executor but not materialized on Main. */
+    isMaterializationPlaceholder?: boolean;
     /** Stable id of the document section that owns this body page. */
     sectionId?: string;
     sections: IDocumentSkeletonSection[];
@@ -119,7 +126,7 @@ export interface IDocumentSkeletonPage {
     segmentId: string; // header/footer id if header/footer, empty string if body page
     type: DocumentSkeletonPageType; // page type: header, footer, body, or cell
     renderConfig?: IDocumentRenderConfig;
-    parent?: IDocumentSkeletonCached | IDocumentSkeletonRow;
+    parent?: IDocumentSkeletonCached | IDocumentSkeletonRow | IDocumentSkeletonColumnGroupColumn;
 }
 
 export interface IDocumentSkeletonHeaderFooter extends IDocumentSkeletonPage {}

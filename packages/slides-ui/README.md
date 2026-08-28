@@ -39,4 +39,3 @@ univer.registerPlugin(UniverSlidesUIPlugin);
 - [Documentation](https://docs.univer.ai)
 - [NPM package](https://npmjs.com/package/@univerjs/slides-ui)
 - [GitHub repository](https://github.com/dream-num/univer)
-

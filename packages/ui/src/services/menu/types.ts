@@ -19,6 +19,13 @@ export enum MenuManagerPosition {
     CONTEXT_MENU = 'contextMenu',
 }
 
+export enum FloatingObjectToolbarPosition {
+    SHEET = 'floatingObjectToolbar.sheet',
+    DOC = 'floatingObjectToolbar.doc',
+    SLIDE = 'floatingObjectToolbar.slide',
+    BOARD = 'floatingObjectToolbar.board',
+}
+
 export enum RibbonPosition {
     START = 'ribbon.start', // RibbonStartGroup
     INSERT = 'ribbon.insert', // RibbonInsertGroup

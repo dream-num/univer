@@ -18,6 +18,7 @@ import type { ICommand } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IReplaceSelectionCommandParams } from './replace-content.command';
 import { CommandType, CustomRangeType, generateRandomId, ICommandService } from '@univerjs/core';
+import { DocHistoryAction } from '@univerjs/docs';
 import { ReplaceSelectionCommand } from './replace-content.command';
 
 export interface IInsertCustomRangeCommandParams {
@@ -38,6 +39,7 @@ export const InsertCustomRangeCommand: ICommand<IInsertCustomRangeCommandParams>
         const { unitId, rangeId = generateRandomId(), textRanges, properties, text, wholeEntity } = params;
         const replaceSelectionParams: IReplaceSelectionCommandParams = {
             unitId,
+            historyAction: DocHistoryAction.InsertCustomRange,
             textRanges,
             body: {
                 dataStream: text,

@@ -20,13 +20,13 @@ import {
     CellModeEnum,
     CellValueType,
     createInterceptorKey,
+    excelDateSerial,
     ICommandService,
     InterceptorManager,
     IUniverInstanceService,
     LocaleType,
     UniverInstanceType,
 } from '@univerjs/core';
-import { excelDateSerial } from '@univerjs/engine-formula';
 import { SetNumfmtMutation, SheetInterceptorService } from '@univerjs/sheets';
 import { SheetsNumfmtCellContentController } from '@univerjs/sheets-numfmt';
 import { getMatrixPlainText, IEditorBridgeService } from '@univerjs/sheets-ui';
@@ -117,7 +117,7 @@ describe('test editor', () => {
             },
             refMap: {
                 1: {
-                    pattern: 'A/P h:mm:ss',
+                    pattern: 'h:mm',
                 },
             },
         };
@@ -135,8 +135,8 @@ describe('test editor', () => {
         };
 
         const result = sheetInterceptorService.writeCellInterceptor.fetchThroughInterceptors(BEFORE_CELL_EDIT)(cellData, location);
-        // The data format needs to be entered in the editor with data string, not with real values
-        expect(result!.v).toEqual(cellData!.v);
+        expect(cellData!.v).toEqual('0:00');
+        expect(result!.v).toEqual('0:00:00');
     });
 
     it('before edit with percent', () => {
@@ -222,12 +222,12 @@ describe('test editor', () => {
             subUnitId,
             values: {
                 1: {
-                    ranges: [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }],
+                    ranges: [{ startRow: 0, endRow: 0, startColumn: 2, endColumn: 2 }],
                 },
             },
             refMap: {
                 1: {
-                    pattern: 'h:mm:ss',
+                    pattern: 'h:mm',
                 },
             },
         };
@@ -240,12 +240,12 @@ describe('test editor', () => {
             unitId,
             subUnitId,
             row: 0,
-            col: 0,
+            col: 2,
             origin: cellData,
         };
         const result = sheetInterceptorService.writeCellInterceptor.fetchThroughInterceptors(AFTER_CELL_EDIT)(cellData, location);
         // The date-time drop is a numeric value, not a literal string
-        expect(result?.v).toBe(0.5231712962962963);
+        expect(result?.v).toBe(2.523171296296296);
     });
 
     it('edit number will throw style in this editing', () => {

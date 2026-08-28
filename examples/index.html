@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+        <link href="/favicon.svg" rel="icon" />
+        <title>Univer Workbench</title>
+    </head>
+    <body>
+        <header class="workbench-header" lang="en">
+            <div class="workbench-primary">
+                <span aria-label="Univer" class="workbench-brand" role="img"></span>
+                <nav aria-label="Product workbenches">
+                    <a data-example="sheets" href="#sheets">Sheets</a>
+                    <a data-example="docs" href="#docs">Docs</a>
+                    <a data-example="slides" href="#slides">Slides</a>
+                </nav>
+            </div>
+            <div class="workbench-settings" id="workbench-settings"></div>
+        </header>
+        <div aria-live="polite" class="workbench-status" hidden id="workbench-status" role="status"></div>
+        <main id="app"></main>
+        <script src="/src/main.ts" type="module"></script>
+    </body>
+</html>

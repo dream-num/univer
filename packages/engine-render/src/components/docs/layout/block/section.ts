@@ -26,18 +26,24 @@ import { dealWithBlockError } from './block-error';
 import { appendColumnGroupBlockLine, createColumnGroupSkeleton } from './column';
 import { dealWidthParagraph } from './paragraph/paragraph-layout';
 
+export interface IDealWithSectionOptions {
+    startParagraphIndex?: number;
+    maxParagraphs?: number;
+}
+
 export function dealWithSection(
     ctx: ILayoutContext,
     viewModel: DocumentViewModel,
     sectionNode: DataStreamTreeNode,
     curPage: IDocumentSkeletonPage,
     sectionBreakConfig: ISectionBreakConfig,
-    layoutAnchor: Nullable<number>
+    layoutAnchor: Nullable<number>,
+    options?: IDealWithSectionOptions
 ) {
     const allCurrentSkeletonPages: IDocumentSkeletonPage[] = [];
     const renderedBlockIdMap = new Map<string, boolean>();
 
-    let paragraphStartIndex = 0;
+    let paragraphStartIndex = options?.startParagraphIndex ?? 0;
 
     if (layoutAnchor != null) {
         const { startIndex, endIndex } = sectionNode;
@@ -52,7 +58,12 @@ export function dealWithSection(
         }
     }
 
-    for (let i = paragraphStartIndex; i < sectionNode.children.length; i++) {
+    const paragraphEndIndex = Math.min(
+        sectionNode.children.length,
+        paragraphStartIndex + (options?.maxParagraphs ?? Number.POSITIVE_INFINITY)
+    );
+
+    for (let i = paragraphStartIndex; i < paragraphEndIndex; i++) {
         const paragraphNode = sectionNode.children[i];
         // const { paragraph, table, tableOfContents, blockType, customBlock, blockId } = block;
         // if (preRenderedBlockIdMap?.get(blockId)) {
@@ -124,6 +135,8 @@ export function dealWithSection(
     return {
         pages: allCurrentSkeletonPages,
         renderedBlockIdMap,
+        nextParagraphIndex: paragraphEndIndex,
+        complete: paragraphEndIndex >= sectionNode.children.length,
     };
 }
 

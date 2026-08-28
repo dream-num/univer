@@ -27,7 +27,7 @@ import {
 } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { AUTO_FILL_APPLY_TYPE, IAutoFillService, RefillCommand } from '@univerjs/sheets';
-import { RediContext } from '@univerjs/ui';
+import { ILayoutService, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BehaviorSubject } from 'rxjs';
@@ -119,6 +119,16 @@ class TestRenderManagerService {
     }
 }
 
+class TestLayoutService {
+    focusCount = 0;
+    menuOpenWhenFocused = false;
+
+    focus(): void {
+        this.focusCount += 1;
+        this.menuOpenWhenFocused = document.querySelector('[role="menu"][data-state="open"]') !== null;
+    }
+}
+
 function createWorkbookData(): IWorkbookData {
     return {
         id: UNIT_ID,
@@ -143,6 +153,7 @@ function createAutoFillPopupTestBed() {
 
     injector.add([IRenderManagerService, { useClass: TestRenderManagerService as never }]);
     injector.add([IAutoFillService, { useClass: TestAutoFillService as never }]);
+    injector.add([ILayoutService, { useClass: TestLayoutService as never }]);
 
     const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, createWorkbookData());
     injector.get(IUniverInstanceService).focusUnit(UNIT_ID);
@@ -173,7 +184,7 @@ async function clickElement(element: HTMLElement): Promise<void> {
     await act(async () => {
         element.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
         element.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-        await Promise.resolve();
+        await new Promise((resolve) => setTimeout(resolve, 0));
     });
 }
 
@@ -230,6 +241,30 @@ describe('AutoFillPopupMenu', () => {
         await clickElement(getByText('sheets.autoFill.copy'));
 
         expect(autoFillService.refillTypes).toEqual([AUTO_FILL_APPLY_TYPE.COPY]);
+    });
+
+    it('restores focus after selecting an auto fill option', async () => {
+        currentBed = createAutoFillPopupTestBed();
+        const autoFillService = currentBed.injector.get(IAutoFillService) as unknown as TestAutoFillService;
+        const layoutService = currentBed.injector.get(ILayoutService) as unknown as TestLayoutService;
+        const rendered = renderWithDependencies(<AutoFillPopupMenu />, currentBed.injector);
+        root = rendered.root;
+        container = rendered.container;
+
+        act(() => {
+            autoFillService.setShowMenu(true);
+        });
+
+        const trigger = rendered.container.querySelector('[data-slot="dropdown-menu-trigger"]');
+        if (!(trigger instanceof HTMLElement)) {
+            throw new TypeError('Auto fill menu trigger not found');
+        }
+
+        await clickElement(trigger);
+        await clickElement(getByText('sheets.autoFill.copy'));
+
+        await expect.poll(() => layoutService.focusCount).toBe(1);
+        expect(layoutService.menuOpenWhenFocused).toBe(false);
     });
 
     it('keeps the overlay origin on the physical left edge in rtl', () => {

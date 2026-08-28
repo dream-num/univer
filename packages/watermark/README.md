@@ -35,4 +35,3 @@ univer.registerPlugin(UniverWatermarkPlugin);
 - [Documentation](https://docs.univer.ai)
 - [NPM package](https://npmjs.com/package/@univerjs/watermark)
 - [GitHub repository](https://github.com/dream-num/univer)
-

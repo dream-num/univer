@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DateSystem } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
@@ -48,6 +49,14 @@ describe('Test weeknum function', () => {
             const returnType2 = NumberValueObject.create(21);
             const result2 = testFunction.calculate(serialNumber2, returnType2);
             expect(result2.getValue()).toStrictEqual(52);
+        });
+
+        it('uses the 1904 epoch when serial is zero', () => {
+            testFunction.setDateSystem(DateSystem.Date1900);
+            expect(testFunction.calculate(NumberValueObject.create(0), NumberValueObject.create(1)).getValue()).toBe(0);
+            testFunction.setDateSystem(DateSystem.Date1904);
+            expect(testFunction.calculate(NumberValueObject.create(0), NumberValueObject.create(1)).getValue()).toBe(1);
+            testFunction.setDateSystem(DateSystem.Date1900);
         });
 
         it('Value is error', () => {
@@ -101,6 +110,24 @@ describe('Test weeknum function', () => {
             const returnType = NumberValueObject.create(1);
             const result = testFunction.calculate(serialNumber, returnType);
             expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+        });
+        it('checks the serial-zero boundary in both date systems', () => {
+            const serialNumber = NumberValueObject.create(0);
+            const returnType = NumberValueObject.create(1);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
+            expect(testFunction.calculate(serialNumber, returnType).getValue()).toBe(0);
+
+            testFunction.setDateSystem(DateSystem.Date1904);
+            expect(testFunction.calculate(serialNumber, returnType).getValue()).toBe(1);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
+        });
+
+        it('uses the Excel weekday for serial 60 in the 1900 date system', () => {
+            testFunction.setDateSystem(DateSystem.Date1900);
+
+            expect(testFunction.calculate(NumberValueObject.create(60), NumberValueObject.create(1)).getValue()).toBe(9);
         });
     });
 });

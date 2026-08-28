@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DateSystem } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
@@ -90,6 +91,18 @@ describe('Test days function', () => {
                 [40951, ErrorType.VALUE, 1, 0, ErrorType.NAME, 0],
                 [40950, ErrorType.VALUE, 0, -1, ErrorType.NAME, -1],
             ]);
+        });
+        it('uses the configured date system for serial-zero inputs', () => {
+            const startDate = NumberValueObject.create(0);
+            const endDate = NumberValueObject.create(366);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
+            expect(testFunction.calculate(endDate, startDate).getValue()).toBe(366);
+
+            testFunction.setDateSystem(DateSystem.Date1904);
+            expect(testFunction.calculate(endDate, startDate).getValue()).toBe(366);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
         });
     });
 });

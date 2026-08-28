@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentFlavor, ICustomRange, IDocumentRenderConfig, IScale, ITableCell, ITableCellBorder, Nullable } from '@univerjs/core';
+import type { ICustomRange, IDocumentRenderConfig, IScale, ITableCell, ITableCellBorder, Nullable } from '@univerjs/core';
 import type {
     IDocumentSkeletonColumnGroup,
     IDocumentSkeletonColumnGroupColumn,
@@ -33,7 +33,7 @@ import type { ComponentExtension, IDrawInfo, IExtensionConfig } from '../extensi
 import type { IDocumentsConfig, IPageMarginLayout } from './doc-component';
 import type { DocumentSkeleton } from './layout/doc-skeleton';
 import type { IDocsTableRenderViewport } from './table-render-viewport';
-import { CellValueType, ColumnSeparatorType, DashStyleType, HorizontalAlign, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import { CellValueType, ColumnSeparatorType, DashStyleType, DocumentFlavor, HorizontalAlign, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { BORDER_TYPE as BORDER_LTRB, drawLineByBorderType } from '../../basics';
 import { calculateRectRotate, getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
@@ -59,6 +59,46 @@ const DEFAULT_BORDER_COLOR: ITableCellBorder = {
 };
 const TABLE_VIEWPORT_BORDER_CLIP_PADDING = 2;
 const TABLE_OVERFLOW_INTERACTION_PADDING = 24;
+const CONTINUOUS_LAYOUT_LINE_OVERSCAN = 240;
+
+function getLineTop(line: IDocumentSkeletonLine): number {
+    return line.top + (line.marginTop ?? 0) + (line.paddingTop ?? 0);
+}
+
+function getVisibleContinuousLineRange(
+    lines: IDocumentSkeletonLine[],
+    viewportTop: number,
+    viewportBottom: number,
+    flowTop: number
+): { start: number; end: number } {
+    const visibleTop = viewportTop - CONTINUOUS_LAYOUT_LINE_OVERSCAN - flowTop;
+    const visibleBottom = viewportBottom + CONTINUOUS_LAYOUT_LINE_OVERSCAN - flowTop;
+    let low = 0;
+    let high = lines.length;
+
+    while (low < high) {
+        const middle = (low + high) >>> 1;
+        const line = lines[middle];
+        const lineBottom = getLineTop(line) + (line.lineHeight ?? 0);
+        if (lineBottom < visibleTop) {
+            low = middle + 1;
+        } else {
+            high = middle;
+        }
+    }
+    const start = low;
+    high = lines.length;
+    while (low < high) {
+        const middle = (low + high) >>> 1;
+        if (getLineTop(lines[middle]) <= visibleBottom) {
+            low = middle + 1;
+        } else {
+            high = middle;
+        }
+    }
+
+    return { start, end: low };
+}
 
 export function resolveHeaderFooterFieldGlyph(
     glyph: IDocumentSkeletonGlyph,
@@ -239,6 +279,7 @@ export class Documents extends DocComponent {
         this._drawLiquid.reset();
 
         const { pages, skeHeaders, skeFooters } = skeletonData;
+        const isContinuousLayout = this.getSkeleton()?.getViewModel?.().getDataModel().documentStyle.documentFlavor === DocumentFlavor.MODERN;
         const parentScale = this.getParentScale();
         // const scale = getScale(parentScale);
         const extensions = this.getExtensionsByOrder();
@@ -304,7 +345,7 @@ export class Documents extends DocComponent {
             const vertexAngle = degToRad(vertexAngleDeg);
             const finalAngle = vertexAngle - centerAngle;
 
-            if (this.isSkipByDiffBounds(page, pageTop, pageLeft, bounds)) {
+            if (!isContinuousLayout && this.isSkipByDiffBounds(page, pageTop, pageLeft, bounds)) {
                 const { x, y } = this._drawLiquid.translatePage(
                     page,
                     this.pageLayoutType,
@@ -390,6 +431,14 @@ export class Documents extends DocComponent {
                     this._drawLiquid.translateColumn(column);
 
                     const linesCount = lines.length;
+                    const visibleLineRange = isContinuousLayout && bounds != null
+                        ? getVisibleContinuousLineRange(
+                            lines,
+                            bounds.viewBound.top,
+                            bounds.viewBound.bottom,
+                            pageTop + pagePaddingTop + section.top
+                        )
+                        : { start: 0, end: linesCount };
 
                     let alignOffset = alignOffsetNoAngle;
                     let rotateTranslateXListApply = null;
@@ -453,9 +502,26 @@ export class Documents extends DocComponent {
                         alignOffset.x = pagePaddingLeft;
                     }
 
-                    for (let i = 0; i < linesCount; i++) {
+                    for (let i = visibleLineRange.start; i < visibleLineRange.end; i++) {
                         const line = lines[i];
                         const { divides, asc = 0, type, lineHeight = 0 } = line;
+
+                        if (
+                            !isContinuousLayout &&
+                            page.pageHeight === Number.POSITIVE_INFINITY &&
+                            bounds != null
+                        ) {
+                            const lineTop = pageTop + pagePaddingTop + section.top + line.top +
+                                (line.marginTop ?? 0) + (line.paddingTop ?? 0);
+                            const lineBottom = lineTop + lineHeight;
+                            const { top, bottom } = bounds.viewBound;
+                            if (
+                                lineBottom < top - CONTINUOUS_LAYOUT_LINE_OVERSCAN ||
+                                lineTop > bottom + CONTINUOUS_LAYOUT_LINE_OVERSCAN
+                            ) {
+                                continue;
+                            }
+                        }
 
                         const maxLineAsc = asc;
 

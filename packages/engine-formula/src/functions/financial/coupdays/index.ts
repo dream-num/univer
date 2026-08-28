@@ -39,13 +39,13 @@ export class Coupdays extends BaseFunction {
 
         const [settlementObject, maturityObject, frequencyObject, basisObject] = variants as BaseValueObject[];
 
-        const settlementSerialNumber = getDateSerialNumberByObject(settlementObject);
+        const settlementSerialNumber = getDateSerialNumberByObject(settlementObject, this.getDateSystem());
 
         if (typeof settlementSerialNumber !== 'number') {
             return settlementSerialNumber;
         }
 
-        const maturitySerialNumber = getDateSerialNumberByObject(maturityObject);
+        const maturitySerialNumber = getDateSerialNumberByObject(maturityObject, this.getDateSystem());
 
         if (typeof maturitySerialNumber !== 'number') {
             return maturitySerialNumber;
@@ -67,7 +67,7 @@ export class Coupdays extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        const result = calculateCoupdays(settlementSerialNumber, maturitySerialNumber, frequencyValue, basisValue);
+        const result = calculateCoupdays(settlementSerialNumber, maturitySerialNumber, frequencyValue, basisValue, this.getDateSystem());
 
         return NumberValueObject.create(result);
     }

@@ -18,11 +18,11 @@
 
 import type { EmbedInteractionBoundaryService } from '../../../services/doc-embed-integration.service';
 import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY } from '@univerjs/core';
-import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, EmbedRuntimeFocusCoordinator } from '../../../services/doc-embed-integration.service';
 import { CURSOR_TYPE, DocumentEditArea } from '@univerjs/engine-render';
 import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { SetDocZoomRatioOperation } from '../../../commands/operations/set-doc-zoom-ratio.operation';
+import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, EmbedRuntimeFocusCoordinator } from '../../../services/doc-embed-integration.service';
 import { DocSelectionRenderController } from '../doc-selection-render.controller';
 
 const neoGetDocObjectMock = vi.hoisted(() => vi.fn());
@@ -101,6 +101,7 @@ function createController(options: { readonly?: boolean; hasEditor?: boolean; pr
     const docSelectionRenderService = {
         removeAllRanges: vi.fn(),
         addDocRanges: vi.fn(),
+        replaceDocRanges: vi.fn(),
         textSelectionInner$,
         focus: vi.fn(),
         __onPointDown: vi.fn(),
@@ -193,8 +194,7 @@ describe('DocSelectionRenderController', () => {
         refreshSelection$.next({ unitId: 'doc-1', docRanges, isEditing: true, options: { segmentId: 'header' } });
         textSelectionInner$.next([{ startOffset: 3, endOffset: 4 }]);
 
-        expect(docSelectionRenderService.removeAllRanges).toHaveBeenCalledTimes(1);
-        expect(docSelectionRenderService.addDocRanges).toHaveBeenCalledWith(docRanges, true, { segmentId: 'header' });
+        expect(docSelectionRenderService.replaceDocRanges).toHaveBeenCalledWith(docRanges, true, { segmentId: 'header' });
         expect(docSelectionManagerService.__replaceTextRangesWithNoRefresh).toHaveBeenCalledWith(
             [{ startOffset: 3, endOffset: 4 }],
             { unitId: 'doc-1', subUnitId: 'doc-1' }
@@ -411,6 +411,21 @@ describe('DocSelectionRenderController', () => {
         expect(docSelectionRenderService.__handleTripleClick).toHaveBeenCalled();
 
         controller.dispose();
+    });
+
+    it('cancels deferred editor focus when the render controller is disposed', () => {
+        vi.useFakeTimers();
+        const { controller, document, docSelectionRenderService, editorService } = createController({ hasEditor: true });
+
+        document.onPointerDown$.emit(
+            { offsetX: 11, offsetY: 22, button: 0 },
+            { stopPropagation: vi.fn() }
+        );
+        controller.dispose();
+        vi.runOnlyPendingTimers();
+
+        expect(editorService.focus).toHaveBeenCalledTimes(1);
+        expect(docSelectionRenderService.setCursorManually).not.toHaveBeenCalled();
     });
 
     it('preserves the host unit focus for configured editors', () => {

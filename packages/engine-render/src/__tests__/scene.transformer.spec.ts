@@ -77,4 +77,52 @@ describe('Transformer', () => {
         scene.dispose();
         engine.dispose();
     });
+
+    it('restores a missing control when an already selected object is activated again', () => {
+        const engine = new Engine('transformer-restore-engine', { elementWidth: 100, elementHeight: 100, dpr: 1 });
+        const scene = new Scene('transformer-restore-scene', engine);
+        const rect = new Rect('transformer-restore-rect', { width: 10, height: 10 });
+        scene.addObject(rect);
+        const transformer = new Transformer(scene);
+        const createControl = vi.fn();
+        const subscription = transformer.createControl$.subscribe(createControl);
+
+        transformer.setSelectedControl(rect);
+        transformer.clearControls();
+        transformer.activeAnObject(rect);
+
+        expect(transformer.getSelectedObjectMap().get(rect.oKey)).toBe(rect);
+        expect(createControl).toHaveBeenCalledTimes(2);
+
+        subscription.unsubscribe();
+        transformer.dispose();
+        scene.dispose();
+        engine.dispose();
+    });
+
+    it('keeps read-only objects selectable without starting a move gesture', () => {
+        const engine = new Engine('transformer-readonly-engine', { elementWidth: 100, elementHeight: 100, dpr: 1 });
+        const scene = new Scene('transformer-readonly-scene', engine);
+        const rect = new Rect('transformer-readonly-rect', { width: 10, height: 10 });
+        rect.transformerConfig = {
+            moveEnabled: false,
+            resizeEnabled: false,
+            rotateEnabled: false,
+        };
+        const transformer = new Transformer(scene);
+        const changeStart = vi.fn();
+        const subscription = transformer.changeStart$.subscribe(changeStart);
+
+        transformer.attachTo(rect);
+        rect.onPointerDown$.emitEvent({ offsetX: 5, offsetY: 5 } as never);
+
+        expect(transformer.getSelectedObjectMap().get(rect.oKey)).toBe(rect);
+        expect(changeStart).not.toHaveBeenCalled();
+
+        subscription.unsubscribe();
+        transformer.dispose();
+        rect.dispose();
+        scene.dispose();
+        engine.dispose();
+    });
 });

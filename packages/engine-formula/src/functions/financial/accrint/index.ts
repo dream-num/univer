@@ -15,8 +15,8 @@
  */
 
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { DateSystem, excelSerialToDate } from '@univerjs/core';
 import {
-    excelSerialToDate,
     getDateSerialNumberByObject,
     getTwoDateDaysByBasis,
     lastDayOfMonth,
@@ -54,19 +54,19 @@ export class Accrint extends BaseFunction {
 
         const [issueObject, firstInterestObject, settlementObject, rateObject, parObject, frequencyObject, basisObject] = variants as BaseValueObject[];
 
-        const issueSerialNumber = getDateSerialNumberByObject(issueObject);
+        const issueSerialNumber = getDateSerialNumberByObject(issueObject, this.getDateSystem());
 
         if (typeof issueSerialNumber !== 'number') {
             return issueSerialNumber;
         }
 
-        const firstInterestSerialNumber = getDateSerialNumberByObject(firstInterestObject);
+        const firstInterestSerialNumber = getDateSerialNumberByObject(firstInterestObject, this.getDateSystem());
 
         if (typeof firstInterestSerialNumber !== 'number') {
             return firstInterestSerialNumber;
         }
 
-        const settlementSerialNumber = getDateSerialNumberByObject(settlementObject);
+        const settlementSerialNumber = getDateSerialNumberByObject(settlementObject, this.getDateSystem());
 
         if (typeof settlementSerialNumber !== 'number') {
             return settlementSerialNumber;
@@ -93,6 +93,11 @@ export class Accrint extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
+        // Excel treats serial 0 as an invalid issue date in the 1900 date system.
+        if (this.getDateSystem() === DateSystem.Date1900 && issueSerialNumber === 0) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
         return this._getResult(issueSerialNumber, firstInterestSerialNumber, settlementSerialNumber, rateValue, parValue, frequencyValue, basisValue, calcMethodValue);
     }
 
@@ -106,48 +111,54 @@ export class Accrint extends BaseFunction {
         basisValue: number,
         calcMethodValue: number
     ): NumberValueObject {
-        let couppcd = calculateCouppcd(issueSerialNumber, firstInterestSerialNumber, frequencyValue);
-        if (couppcd <= 0) {
+        const issueCouppcd = calculateCouppcd(issueSerialNumber, firstInterestSerialNumber, frequencyValue, this.getDateSystem());
+        // Excel's 1900 date system treats an issue coupon boundary at serial 0 as invalid.
+        if (this.getDateSystem() === DateSystem.Date1900 && issueCouppcd <= 0) {
             return NumberValueObject.create(0);
         }
-        couppcd = calculateCouppcd(settlementSerialNumber, firstInterestSerialNumber, frequencyValue);
+        const couppcd = calculateCouppcd(settlementSerialNumber, firstInterestSerialNumber, frequencyValue, this.getDateSystem());
 
         const numMonths = 12 / frequencyValue;
-        const firstInterestDate = excelSerialToDate(firstInterestSerialNumber);
+        const firstInterestDate = excelSerialToDate(firstInterestSerialNumber, this.getDateSystem());
         const firstInterestDateYear = firstInterestDate.getUTCFullYear();
         const firstInterestDateMonth = firstInterestDate.getUTCMonth();
         const firstInterestDateDay = firstInterestDate.getUTCDate();
         const lastDayOfMonthF = lastDayOfMonth(firstInterestDateYear, firstInterestDateMonth, firstInterestDateDay);
 
-        let coupDateSerialNumber = getDateSerialNumberByMonths(firstInterestSerialNumber, -numMonths, lastDayOfMonthF);
+        let coupDateSerialNumber = getDateSerialNumberByMonths(firstInterestSerialNumber, -numMonths, lastDayOfMonthF, this.getDateSystem());
+        // In the 1904 system serial 0 can be the start of the first coupon period.
+        // Keep the first-interest date as the period boundary instead of advancing to the next coupon.
+        const startsAtFirstCoupon = issueSerialNumber === 0 && issueCouppcd === 0;
         if (settlementSerialNumber > firstInterestSerialNumber && calcMethodValue) {
             coupDateSerialNumber = firstInterestSerialNumber;
-            while (coupDateSerialNumber < settlementSerialNumber) {
-                coupDateSerialNumber = getDateSerialNumberByMonths(coupDateSerialNumber, numMonths, lastDayOfMonthF);
+            if (!startsAtFirstCoupon) {
+                while (coupDateSerialNumber < settlementSerialNumber) {
+                    coupDateSerialNumber = getDateSerialNumberByMonths(coupDateSerialNumber, numMonths, lastDayOfMonthF, this.getDateSystem());
+                }
             }
         }
 
         let firstDateSerialNumber = issueSerialNumber > coupDateSerialNumber ? issueSerialNumber : coupDateSerialNumber;
 
-        let { days } = getTwoDateDaysByBasis(firstDateSerialNumber, settlementSerialNumber, basisValue);
+        let { days } = getTwoDateDaysByBasis(firstDateSerialNumber, settlementSerialNumber, basisValue, this.getDateSystem());
         if (couppcd >= issueSerialNumber) {
-            const { days: DFS } = getTwoDateDaysByBasis(firstDateSerialNumber, settlementSerialNumber, !basisValue ? 0 : 4);
+            const { days: DFS } = getTwoDateDaysByBasis(firstDateSerialNumber, settlementSerialNumber, !basisValue ? 0 : 4, this.getDateSystem());
             days = DFS;
         }
         if (settlementSerialNumber < firstDateSerialNumber) {
             days = -days;
         }
 
-        let coupdays = calculateCoupdays(coupDateSerialNumber, firstInterestSerialNumber, frequencyValue, basisValue);
+        let coupdays = calculateCoupdays(startsAtFirstCoupon ? issueSerialNumber : coupDateSerialNumber, firstInterestSerialNumber, frequencyValue, basisValue, this.getDateSystem());
         let accruedDaysSum = days / coupdays;
         let startDateSerialNumber = coupDateSerialNumber;
         let endDateSerialNumber = issueSerialNumber;
 
         while (startDateSerialNumber > issueSerialNumber) {
             endDateSerialNumber = startDateSerialNumber;
-            startDateSerialNumber = getDateSerialNumberByMonths(startDateSerialNumber, -numMonths, lastDayOfMonthF);
+            startDateSerialNumber = getDateSerialNumberByMonths(startDateSerialNumber, -numMonths, lastDayOfMonthF, this.getDateSystem());
             firstDateSerialNumber = issueSerialNumber > startDateSerialNumber ? issueSerialNumber : startDateSerialNumber;
-            const { days: DFE } = getTwoDateDaysByBasis(firstDateSerialNumber, endDateSerialNumber, basisValue);
+            const { days: DFE } = getTwoDateDaysByBasis(firstDateSerialNumber, endDateSerialNumber, basisValue, this.getDateSystem());
 
             if (basisValue === 0) {
                 if (endDateSerialNumber >= firstDateSerialNumber || issueSerialNumber <= startDateSerialNumber) {
@@ -156,14 +167,14 @@ export class Accrint extends BaseFunction {
                     days = -DFE;
                 }
 
-                coupdays = calculateCoupdays(startDateSerialNumber, endDateSerialNumber, frequencyValue, basisValue);
+                coupdays = calculateCoupdays(startDateSerialNumber, endDateSerialNumber, frequencyValue, basisValue, this.getDateSystem());
             } else {
                 days = endDateSerialNumber < firstDateSerialNumber ? -DFE : DFE;
 
                 if (basisValue === 3) {
                     coupdays = 365 / frequencyValue;
                 } else {
-                    const { days: DSE } = getTwoDateDaysByBasis(startDateSerialNumber, endDateSerialNumber, basisValue);
+                    const { days: DSE } = getTwoDateDaysByBasis(startDateSerialNumber, endDateSerialNumber, basisValue, this.getDateSystem());
                     coupdays = endDateSerialNumber < startDateSerialNumber ? -DSE : DSE;
                 }
             }

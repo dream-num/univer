@@ -21,6 +21,7 @@ const locale: typeof enUS = {
         panel: {
             title: 'Správa komentárov',
             addComment: 'Pridať komentár',
+            openComments: 'Otvoriť komentáre',
         },
     },
 };

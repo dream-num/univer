@@ -1,9 +1,6 @@
 <div align="center">
 
-<picture>
-    <source media="(prefers-color-scheme: dark)" srcset="../img/banner-light.png">
-    <img src="../img/banner-dark.png" alt="Univer" width="420" />
-</picture>
+<img src="../img/banner.png" alt="Univer SDK" width="800" />
 
 **스프레드시트, 문서, 프레젠테이션을 만들기 위한 풀스택 동형 오피스 SDK.**
 
@@ -24,7 +21,7 @@ Univer는 플러그인 아키텍처, Canvas 기반 렌더링, 수식 엔진,
 [![Stars](https://img.shields.io/github/stars/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/stargazers)
 [![Contributors](https://img.shields.io/github/contributors/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/graphs/contributors)
 [![Issues](https://img.shields.io/github/issues/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/issues)
-[![Last Commit](https://img.shields.io/github/last-commit/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/commits/main/)
+[![Last Commit](https://img.shields.io/github/last-commit/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/commits/dev/)
 
 [![Discord](https://img.shields.io/discord/1136129819961217077?logo=discord&logoColor=FFFFFF&label=discord&color=5865F2&style=flat-square)](https://discord.gg/z3NKNT6D2f)
 [![Twitter](https://img.shields.io/twitter/follow/univerhq?style=flat-square&logo=x)](https://twitter.com/univerhq)
@@ -90,7 +87,7 @@ Univer는 단순한 스프레드시트 파일 뷰어가 아닙니다. 자체 생
 
 - **동형 설계**: 브라우저 UI 앱과 Node.js headless 처리를 모두 실행할 수 있습니다.
 - **플러그인 우선 아키텍처**: 모든 기능은 조합 가능한 플러그인으로 제공되어 추가, 제거, 교체, 지연 로딩이 가능합니다.
-- **빠른 통합을 위한 Preset Mode**: 빠르게 동작하는 앱이 필요할 때 [`univer-presets`](https://github.com/dream-num/univer-presets)의 curated plugin bundle을 사용할 수 있습니다.
+- **빠른 통합을 위한 Preset Mode**: 빠르게 동작하는 앱이 필요할 때 이 저장소의 [`presets/`](../../presets)에 있는 curated plugin collection을 사용할 수 있습니다.
 - **완전한 제어를 위한 Plugin Mode**: 커스텀 로딩, 더 작은 번들, 깊은 통합이 필요할 때 패키지를 직접 조합할 수 있습니다.
 - **Facade API**: 워크북, 워크시트, 범위, 문서, 수식, 명령, 이벤트를 고수준 API로 다룰 수 있습니다.
 - **Canvas 렌더링 엔진**: 큰 편집 가능한 문서 표면을 지원하고 여러 문서 타입이 렌더링 레이어를 공유합니다.
@@ -98,45 +95,12 @@ Univer는 단순한 스프레드시트 파일 뷰어가 아닙니다. 자체 생
 
 ## ⚡ 빠른 시작
 
-대부분의 애플리케이션은 **Preset Mode**로 시작하는 것을 권장합니다. 패키지를 직접 조합하고 플러그인 등록을 제어해야 한다면 **Plugin Mode**를 사용하세요.
+전체 제품 기능을 활용하고 구성을 정밀하게 제어하려면 **Plugin Mode**를 사용하세요. 지원되는 Sheets, Docs, Node 프로필에서는 **Preset Mode**가 더 짧은 curated setup을 제공합니다.
 
 <details open>
-<summary><strong>Preset Mode (권장)</strong></summary>
-
-Presets는 필요한 Facade API 등록과 스타일을 포함하는 Univer 플러그인의 curated collection입니다.
-
-```bash
-pnpm add @univerjs/presets @univerjs/preset-sheets-core
-```
-
-```ts
-import { UniverSheetsCorePreset } from '@univerjs/preset-sheets-core'
-import UniverPresetSheetsCoreEnUS from '@univerjs/preset-sheets-core/locales/en-US'
-import { createUniver, LocaleType, mergeLocales } from '@univerjs/presets'
-
-import '@univerjs/preset-sheets-core/lib/index.css'
-
-const { univerAPI } = createUniver({
-  locale: LocaleType.EN_US,
-  locales: {
-    [LocaleType.EN_US]: mergeLocales(UniverPresetSheetsCoreEnUS),
-  },
-  presets: [
-    UniverSheetsCorePreset({
-      container: 'app',
-    }),
-  ],
-})
-
-univerAPI.createWorkbook({})
-```
-
-</details>
-
-<details>
 <summary><strong>Plugin Mode</strong></summary>
 
-Plugin Mode는 패키지, 스타일 import, locale 병합, Facade API 등록, 플러그인 순서를 더 낮은 수준에서 제어할 수 있게 해줍니다.
+Plugin Mode는 패키지, 스타일 import, locale 병합, Facade API 등록, 플러그인 구성를 더 낮은 수준에서 제어할 수 있게 해줍니다.
 
 ```bash
 pnpm add @univerjs/core @univerjs/design @univerjs/docs @univerjs/docs-ui @univerjs/engine-formula @univerjs/engine-render @univerjs/sheets @univerjs/sheets-formula @univerjs/sheets-formula-ui @univerjs/sheets-numfmt @univerjs/sheets-numfmt-ui @univerjs/sheets-ui @univerjs/ui
@@ -213,6 +177,39 @@ univerAPI.createWorkbook({})
 
 </details>
 
+<details>
+<summary><strong>Preset Mode</strong></summary>
+
+Presets는 필요한 Facade API 등록과 스타일을 포함하는 Univer 플러그인의 curated collection입니다.
+
+```bash
+pnpm add @univerjs/presets @univerjs/preset-sheets-core
+```
+
+```ts
+import { UniverSheetsCorePreset } from '@univerjs/preset-sheets-core'
+import UniverPresetSheetsCoreEnUS from '@univerjs/preset-sheets-core/locales/en-US'
+import { createUniver, LocaleType, mergeLocales } from '@univerjs/presets'
+
+import '@univerjs/preset-sheets-core/lib/index.css'
+
+const { univerAPI } = createUniver({
+  locale: LocaleType.EN_US,
+  locales: {
+    [LocaleType.EN_US]: mergeLocales(UniverPresetSheetsCoreEnUS),
+  },
+  presets: [
+    UniverSheetsCorePreset({
+      container: 'app',
+    }),
+  ],
+})
+
+univerAPI.createWorkbook({})
+```
+
+</details>
+
 페이지에는 컨테이너가 필요합니다.
 
 ```html
@@ -225,11 +222,11 @@ univerAPI.createWorkbook({})
 
 | 선택 | 사용 시점 | 시작하기 |
 | --- | --- | --- |
-| **Preset Mode** | 최소 설정으로 동작하는 Sheets, Docs, Node 구성이 필요할 때. | [`univer-presets`](https://github.com/dream-num/univer-presets) 및 [getting started guide](https://docs.univer.ai/guides/sheets/getting-started/installation) |
-| **Plugin Mode** | 패키지, 플러그인 등록 순서, 지연 로딩, 런타임 구성을 엄격하게 제어해야 할 때. | 이 저장소의 [`examples/`](../../examples) 및 [architecture guide](https://docs.univer.ai/guides/recipes/architecture/univer) |
+| **Plugin Mode** | 패키지, 구성된 종속성, 지연 로딩, 런타임 구성을 엄격하게 제어해야 할 때. | 이 저장소의 [`examples/`](../../examples) 및 [architecture guide](https://docs.univer.ai/guides/recipes/architecture/univer) |
+| **Preset Mode** | 최소 설정으로 동작하는 Sheets, Docs, Node 구성이 필요할 때. | 이 저장소의 [`presets/`](../../presets) 및 [getting started guide](https://docs.univer.ai/guides/sheets/getting-started/installation) |
 | **Headless Mode** | UI 없이 서버 측 워크북/문서 처리, 수식 계산, 자동화가 필요할 때. | [Headless Univer](https://docs.univer.ai/guides/sheets/getting-started/node) |
 
-모든 `@univerjs/*` 패키지는 같은 버전으로 유지하세요. Univer Pro 패키지를 사용하는 경우 `@univerjs-pro/*` 버전도 맞춰야 합니다.
+동일한 Univer 통합 릴리스 라인에 포함되는 `@univerjs/*` SDK 패키지는 같은 버전으로 맞추세요. `@univerjs/icons`, `@univerjs/icons-svg`처럼 독립적으로 릴리스되는 패키지는 SDK 버전이 아니라 각 패키지 매니페스트에 선언된 호환 버전을 사용합니다. Univer Pro 패키지를 사용한다면 `@univerjs-pro/*`도 해당 통합 릴리스 라인에 맞추세요.
 
 API 호환성 기대치, experimental APIs, internal APIs, deprecation rules는 [API Stability Policy](../API_STABILITY.md)를 참고하세요.
 
@@ -279,7 +276,7 @@ Boundary principles:
 ## 🌐 생태계
 
 - **Core SDK**: [`dream-num/univer`](https://github.com/dream-num/univer), 이 monorepo입니다.
-- **Presets**: [`dream-num/univer-presets`](https://github.com/dream-num/univer-presets), 브라우저와 Node.js 앱을 위한 curated plugin bundle입니다.
+- **Presets**: 이 저장소의 [`presets/`](../../presets), 브라우저와 Node.js 앱을 위한 curated plugin collection입니다.
 - **AI agent skills**: [`dream-num/univer-sdk-skills`](https://github.com/dream-num/univer-sdk-skills), Univer 통합, Pro 기능, 플러그인 개발, Node 백엔드를 다루는 AI agent용 재사용 지침입니다. [AI Skills guide](https://docs.univer.ai/guides/skills)를 참고하세요.
 - **Documentation**: [docs.univer.ai](https://docs.univer.ai), Sheets, Docs, Slides, recipes, Pro guides를 포함합니다.
 - **API Reference**: [docs.univer.ai/reference](https://docs.univer.ai/reference/classes/univer), Facade API와 생성된 API reference입니다.
@@ -291,9 +288,8 @@ Boundary principles:
 ```text
 .
 ├── packages/      Core packages, engines, document types, UI plugins, feature plugins
-├── examples/      개발에 사용하는 로컬 브라우저 및 Node.js 데모
-├── common/        공유 내부 도구, mock data, storybook, utilities
-├── e2e/           Playwright 및 visual comparison tests
+├── examples/      로컬 브라우저 개발을 위한 올인원 Vite workbench
+├── common/        공유 내부 도구, storybook, utilities
 ├── tests/         추가 integration test projects
 └── docs/          architecture notes, images, repository-local documentation
 ```
@@ -318,12 +314,12 @@ pnpm dev
 
 | 명령 | 목적 |
 | --- | --- |
-| `pnpm dev` | 로컬 examples 앱을 시작합니다. |
+| `pnpm dev` | 저메모리 올인원 workbench를 빌드하고 HMR 없이 미리 봅니다. |
+| `pnpm dev:source` | HMR로 소스 workbench를 시작하며 콜드 스타트와 메모리 사용량이 더 큽니다. |
 | `pnpm build` | 내부 common 패키지를 제외하고 workspace 패키지를 빌드합니다. |
 | `pnpm test` | Turbo를 통해 unit tests를 실행합니다. |
 | `pnpm typecheck` | Turbo를 통해 TypeScript checks를 실행합니다. |
 | `pnpm lint` | ESLint를 실행합니다. |
-| `pnpm test:e2e` | Playwright tests를 실행합니다. |
 | `pnpm storybook:dev` | UI component 개발용 Storybook을 시작합니다. |
 
 Pull request를 열기 전에 [CONTRIBUTING.md](../../CONTRIBUTING.md)를 읽어 주세요.

@@ -696,7 +696,7 @@ export class EditingRenderController extends Disposable {
         const editCellState = this._editorBridgeService.getEditCellState();
         const documentDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
         const snapshot = Tools.deepClone(documentDataModel?.getSnapshot());
-        const { keycode } = param;
+        const { keycode, isShift } = param;
         const shouldSubmitEmptyCellImageEdit = this._submitEmptyCellImageEdit;
         this._submitEmptyCellImageEdit = false;
         this._cursorChange = CursorChange.InitialState;
@@ -747,7 +747,7 @@ export class EditingRenderController extends Disposable {
 
         // moveSelection need to put behind of SetRangeValuesCommand, fix https://github.com/dream-num/univer/issues/1155
         if (keycode !== undefined) {
-            this._moveSelection(keycode, currentUnitId, worksheetId);
+            this._moveSelection(keycode, currentUnitId, worksheetId, isShift);
         }
     }
 
@@ -768,6 +768,10 @@ export class EditingRenderController extends Disposable {
     private async _submitEdit(snapshot: IDocumentData, wholeSelection = false) {
         const editCellState = this._editorBridgeService.getEditCellState();
         if (editCellState == null) {
+            return true;
+        }
+        // The editor may display an expanded date/time value; do not write that intercepted text back unless it was edited.
+        if (!this._editorBridgeService.getEditorDirty()) {
             return true;
         }
         const { unitId, sheetId, row, column } = editCellState;
@@ -897,7 +901,7 @@ export class EditingRenderController extends Disposable {
         this._docStateChangeManagerService.clearHistory(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
     }
 
-    private _moveSelection(keycode: KeyCode | undefined, currentUnitId: string, worksheetId: string) {
+    private _moveSelection(keycode: KeyCode | undefined, currentUnitId: string, worksheetId: string, isShift = false) {
         if (keycode == null || !MOVE_SELECTION_KEYCODE_LIST.includes(keycode)) {
             this._refreshCurrentSelections(worksheetId);
             return;
@@ -907,10 +911,10 @@ export class EditingRenderController extends Disposable {
 
         switch (keycode) {
             case KeyCode.ENTER:
-                direction = Direction.DOWN;
+                direction = isShift ? Direction.UP : Direction.DOWN;
                 break;
             case KeyCode.TAB:
-                direction = Direction.RIGHT;
+                direction = isShift ? Direction.LEFT : Direction.RIGHT;
                 break;
             case KeyCode.ARROW_DOWN:
                 direction = Direction.DOWN;

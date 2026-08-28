@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DateSystem } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
@@ -51,6 +52,19 @@ describe('Test networkdays function', () => {
             });
             const result3 = testFunction.calculate(startDate, endDate, holidays3);
             expect(result3.getValue()).toStrictEqual(107);
+        });
+
+        it('uses the configured date system for serial zero', () => {
+            const startDate = NumberValueObject.create(0);
+            const endDate = NumberValueObject.create(0);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
+            expect(testFunction.calculate(startDate, endDate).getValue()).toBe(0);
+
+            testFunction.setDateSystem(DateSystem.Date1904);
+            expect(testFunction.calculate(startDate, endDate).getValue()).toBe(1);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
         });
 
         it('Value is number or date string', () => {
@@ -134,6 +148,18 @@ describe('Test networkdays function', () => {
             const holidays3 = ErrorValueObject.create(ErrorType.NAME);
             const result3 = testFunction.calculate(startDate3, endDate3, holidays3);
             expect(result3.getValue()).toStrictEqual(ErrorType.NAME);
+        });
+        it('checks the serial-zero boundary in both date systems', () => {
+            const startDate = NumberValueObject.create(0);
+            const endDate = NumberValueObject.create(366);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
+            expect(testFunction.calculate(startDate, endDate).getValue()).toBe(261);
+
+            testFunction.setDateSystem(DateSystem.Date1904);
+            expect(testFunction.calculate(startDate, endDate).getValue()).toBe(261);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
         });
     });
 });

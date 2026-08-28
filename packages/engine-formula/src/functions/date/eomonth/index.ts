@@ -16,7 +16,8 @@
 
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { excelDateSerial, excelSerialToDate, getDateSerialNumberByObject } from '../../../basics/date';
+import { DateSystem, excelDateSerial, excelSerialToDate } from '@univerjs/core';
+import { getDateSerialNumberByObject } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
@@ -61,7 +62,7 @@ export class Eomonth extends BaseFunction {
             return _months;
         }
 
-        const startDateSerialNumber = getDateSerialNumberByObject(_startDate);
+        const startDateSerialNumber = getDateSerialNumberByObject(_startDate, this.getDateSystem());
 
         if (typeof startDateSerialNumber !== 'number') {
             return startDateSerialNumber;
@@ -71,9 +72,10 @@ export class Eomonth extends BaseFunction {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        const startDateDate = excelSerialToDate(startDateSerialNumber);
-        const startYear = startDateSerialNumber > 0 ? startDateDate.getUTCFullYear() : 1900;
-        const startMonth = startDateSerialNumber > 0 ? startDateDate.getUTCMonth() : 0;
+        const startDateDate = excelSerialToDate(startDateSerialNumber, this.getDateSystem());
+        const isDate1900SerialZero = this.getDateSystem() === DateSystem.Date1900 && startDateSerialNumber === 0;
+        const startYear = isDate1900SerialZero ? 1900 : startDateDate.getUTCFullYear();
+        const startMonth = isDate1900SerialZero ? 0 : startDateDate.getUTCMonth();
 
         const monthsValue = Math.floor(+_months.getValue());
 
@@ -82,7 +84,7 @@ export class Eomonth extends BaseFunction {
         }
 
         const targetDate = new Date(Date.UTC(startYear, startMonth + monthsValue + 1, 0));
-        const result = excelDateSerial(targetDate);
+        const result = excelDateSerial(targetDate, this.getDateSystem());
 
         return NumberValueObject.create(result);
     }

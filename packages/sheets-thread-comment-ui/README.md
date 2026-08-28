@@ -15,9 +15,9 @@
 ## Installation
 
 ```sh
-pnpm add @univerjs/sheets-thread-comment-ui
+pnpm add @univerjs/sheets-thread-comment-ui @univerjs/thread-comment-ui
 # or
-npm install @univerjs/sheets-thread-comment-ui
+npm install @univerjs/sheets-thread-comment-ui @univerjs/thread-comment-ui
 ```
 
 Keep all `@univerjs/*` packages on the same version.
@@ -25,14 +25,23 @@ Keep all `@univerjs/*` packages on the same version.
 ## Usage
 
 ```ts
+import { LocaleType, mergeLocales, Univer } from '@univerjs/core';
+import { UniverSheetsThreadCommentUIPlugin } from '@univerjs/sheets-thread-comment-ui';
+import SheetsThreadCommentUIEnUS from '@univerjs/sheets-thread-comment-ui/locale/en-US';
+import { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
+import ThreadCommentUIEnUS from '@univerjs/thread-comment-ui/locale/en-US';
 import '@univerjs/sheets-thread-comment-ui/lib/index.css';
-import EnUS from '@univerjs/sheets-thread-comment-ui/locale/en-US';
-import { UniverSheetsThreadCommentUIPlugin, UniverThreadCommentUIPlugin } from '@univerjs/sheets-thread-comment-ui';
+import '@univerjs/thread-comment-ui/lib/index.css';
 
-univer.registerPlugin(UniverSheetsThreadCommentUIPlugin);
+const univer = new Univer({
+    locale: LocaleType.EN_US,
+    locales: {
+        [LocaleType.EN_US]: mergeLocales(SheetsThreadCommentUIEnUS, ThreadCommentUIEnUS),
+    },
+});
+
 univer.registerPlugin(UniverThreadCommentUIPlugin);
-
-// Merge EnUS into your Univer locale map when this package contributes UI text.
+univer.registerPlugin(UniverSheetsThreadCommentUIPlugin);
 ```
 
 ## Resources
@@ -40,4 +49,3 @@ univer.registerPlugin(UniverThreadCommentUIPlugin);
 - [Documentation](https://docs.univer.ai)
 - [NPM package](https://npmjs.com/package/@univerjs/sheets-thread-comment-ui)
 - [GitHub repository](https://github.com/dream-num/univer)
-

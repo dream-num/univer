@@ -366,6 +366,7 @@ const locale: typeof enUS = {
                 pasteErr: 'La plage est protégée, et vous n\'avez pas la permission de coller. Pour coller, veuillez contacter le créateur.',
                 setStyleErr: 'La plage est protégée, et vous n\'avez pas la permission de définir les styles. Pour définir les styles, veuillez contacter le créateur.',
                 copyErr: 'La plage est protégée, et vous n\'avez pas la permission de copier. Pour copier, veuillez contacter le créateur.',
+                cutErr: 'La plage est protégée, et vous n\'avez pas la permission de couper. Pour couper, veuillez contacter le créateur.',
                 workbookCopyErr: 'Le classeur est protégé, et vous n\'avez pas la permission de copier. Pour copier, veuillez contacter le créateur.',
                 setRowColStyleErr: 'La plage est protégée, et vous n\'avez pas la permission de définir les styles de ligne et de colonne. Pour définir les styles de ligne et de colonne, veuillez contacter le créateur.',
             },

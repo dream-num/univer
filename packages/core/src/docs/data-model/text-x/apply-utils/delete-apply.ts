@@ -22,6 +22,9 @@ import {
     deleteCustomBlocks,
     deleteCustomDecorations,
     deleteCustomRanges,
+    deleteDocxExportExcludedRanges,
+    deleteDocxRawBlocks,
+    deleteDocxRawCustomBlocks,
     deleteParagraphs,
     deleteSectionBreaks,
     deleteTables,
@@ -41,6 +44,12 @@ export function updateAttributeByDelete(body: IDocumentBody, textLength: number,
     const removeSectionBreaks = deleteSectionBreaks(body, textLength, currentIndex);
 
     const removeCustomBlocks = deleteCustomBlocks(body, textLength, currentIndex);
+
+    const removeDocxRawCustomBlocks = deleteDocxRawCustomBlocks(body, textLength, currentIndex);
+
+    const removeDocxRawBlocks = deleteDocxRawBlocks(body, textLength, currentIndex);
+
+    const removeDocxExportExcludedRanges = deleteDocxExportExcludedRanges(body, textLength, currentIndex);
 
     const removeTables = deleteTables(body, textLength, currentIndex);
 
@@ -64,6 +73,9 @@ export function updateAttributeByDelete(body: IDocumentBody, textLength: number,
         paragraphs: removeParagraphs,
         sectionBreaks: removeSectionBreaks,
         customBlocks: removeCustomBlocks,
+        docxRawCustomBlocks: removeDocxRawCustomBlocks,
+        docxRawBlocks: removeDocxRawBlocks,
+        docxExportExcludedRanges: removeDocxExportExcludedRanges,
         tables: removeTables,
         columnGroups: removeColumnGroups,
         blockRanges: removeBlockRanges,

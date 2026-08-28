@@ -24,6 +24,7 @@ const locale = {
         },
         menu: {
             addComment: 'Add Comment',
+            openComments: 'Open Comments',
             commentManagement: 'Comment Management',
         },
     },

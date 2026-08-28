@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DateSystem } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
@@ -23,7 +24,7 @@ import { FUNCTION_NAMES_DATE } from '../../function-names';
 import { WorkdayIntl } from '../index';
 
 describe('Test workday.intl function', () => {
-    const testFunction = new WorkdayIntl(FUNCTION_NAMES_DATE.NETWORKDAYS);
+    const testFunction = new WorkdayIntl(FUNCTION_NAMES_DATE.WORKDAY_INTL);
 
     describe('WorkdayIntl', () => {
         it('Value is all normal', () => {
@@ -53,6 +54,19 @@ describe('Test workday.intl function', () => {
             });
             const result3 = testFunction.calculate(startDate, days, weekend3, holidays3);
             expect(result3.getValue()).toStrictEqual(39986);
+        });
+
+        it('uses the configured date system for serial zero', () => {
+            const startDate = NumberValueObject.create(0);
+            const days = NumberValueObject.create(1);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
+            expect(testFunction.calculate(startDate, days).getValue()).toBe(2);
+
+            testFunction.setDateSystem(DateSystem.Date1904);
+            expect(testFunction.calculate(startDate, days).getValue()).toBe(3);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
         });
 
         it('Value is not date string', () => {
@@ -192,6 +206,19 @@ describe('Test workday.intl function', () => {
                 [ErrorType.NUM, ErrorType.NUM, ErrorType.NUM],
                 [39938, ErrorType.NUM, ErrorType.NUM],
             ]);
+        });
+        it('checks the serial-zero boundary in both date systems', () => {
+            const startDate = NumberValueObject.create(0);
+            const days = NumberValueObject.create(1);
+            const weekend = NumberValueObject.create(1);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
+            expect(testFunction.calculate(startDate, days, weekend).getValue()).toBe(2);
+
+            testFunction.setDateSystem(DateSystem.Date1904);
+            expect(testFunction.calculate(startDate, days, weekend).getValue()).toBe(3);
+
+            testFunction.setDateSystem(DateSystem.Date1900);
         });
     });
 });

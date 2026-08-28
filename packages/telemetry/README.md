@@ -33,4 +33,3 @@ import { ITelemetryService } from '@univerjs/telemetry';
 - [Documentation](https://docs.univer.ai)
 - [NPM package](https://npmjs.com/package/@univerjs/telemetry)
 - [GitHub repository](https://github.com/dream-num/univer)
-

@@ -16,6 +16,7 @@
 
 import type { IUser, Nullable } from '@univerjs/core';
 import type { UniverRenderingContext } from '../../../context';
+import type { ILayerRenderOptions } from '../../../layer';
 import type { IWatermarkConfigWithType } from './type';
 import { Layer } from '../../../layer';
 import { IWatermarkTypeEnum } from './type';
@@ -26,11 +27,20 @@ export class WatermarkLayer extends Layer {
     private _image: Nullable<HTMLImageElement>;
     private _user: Nullable<IUser>;
 
-    override render(ctx?: UniverRenderingContext, isMaxLayer = false) {
-        super.render(ctx, isMaxLayer);
+    override render(ctx?: UniverRenderingContext, isMaxLayer = false, options: ILayerRenderOptions = {}) {
+        super.render(ctx, isMaxLayer, options);
         const mainCtx = ctx || this.scene.getEngine()?.getCanvas().getContext();
         if (mainCtx && mainCtx.getId()) {
+            mainCtx.save();
+            if (options.dirtyBounds) {
+                mainCtx.beginPath();
+                for (const bound of options.dirtyBounds) {
+                    mainCtx.rect(bound.left, bound.top, bound.right - bound.left, bound.bottom - bound.top);
+                }
+                mainCtx.clip();
+            }
             this._renderWatermark(mainCtx);
+            mainCtx.restore();
         }
         return this;
     }

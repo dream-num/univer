@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDisposable, Nullable } from '@univerjs/core';
-import { Disposable, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { DocSelectionManagerService } from '@univerjs/docs';
+import { Disposable, DocumentDataModel, Inject, IPermissionService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { canEditDocumentTargets, DocSelectionManagerService, getDocumentEntityParentPermissionObjectIds, getDocumentEntityPermissionObjectId } from '@univerjs/docs';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { BehaviorSubject } from 'rxjs';
 import { DocHyperLinkEdit } from '../views/DocHyperLinkEdit';
@@ -31,21 +30,24 @@ export interface ILinkInfo {
     endIndex: number;
 }
 
+type LinkPopupDisposable = ReturnType<DocCanvasPopManagerService['attachPopupToRange']>;
+
 export class DocHyperLinkPopupService extends Disposable {
-    private readonly _editingLink$ = new BehaviorSubject<Nullable<ILinkInfo>>(null);
-    private readonly _showingLink$ = new BehaviorSubject<Nullable<ILinkInfo>>(null);
+    private readonly _editingLink$ = new BehaviorSubject<ILinkInfo | null>(null);
+    private readonly _showingLink$ = new BehaviorSubject<ILinkInfo | null>(null);
     readonly editingLink$ = this._editingLink$.asObservable();
     readonly showingLink$ = this._showingLink$.asObservable();
 
-    private _editPopup: Nullable<IDisposable> = null;
-    private _infoPopup: Nullable<IDisposable> = null;
+    private _editPopup: LinkPopupDisposable | null = null;
+    private _infoPopup: LinkPopupDisposable | null = null;
     private _infoPopupSuppressed = false;
     private _infoPopupSuppressionTimer: ReturnType<typeof setTimeout> | null = null;
 
     constructor(
         @Inject(DocCanvasPopManagerService) private readonly _docCanvasPopupManagerService: DocCanvasPopManagerService,
         @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @IPermissionService private readonly _permissionService: IPermissionService
     ) {
         super();
 
@@ -56,6 +58,17 @@ export class DocHyperLinkPopupService extends Disposable {
             this._editingLink$.complete();
             this._showingLink$.complete();
         });
+
+        this.disposeWithMe(this._permissionService.permissionPointUpdate$.subscribe(() => {
+            const editing = this.editing;
+            if (editing && !this.canEditLink(editing.unitId, editing)) {
+                this.hideEditPopup();
+            }
+            const showing = this.showing;
+            if (showing) {
+                this._showingLink$.next({ ...showing });
+            }
+        }));
     }
 
     get editing() {
@@ -66,7 +79,10 @@ export class DocHyperLinkPopupService extends Disposable {
         return this._showingLink$.value;
     }
 
-    showEditPopup(unitId: string, linkInfo: Nullable<ILinkInfo>): Nullable<IDisposable> {
+    showEditPopup(unitId: string, linkInfo: ILinkInfo | null): LinkPopupDisposable | null {
+        if (!this.canEditLink(unitId, linkInfo)) {
+            return null;
+        }
         if (this._editPopup) {
             this._editPopup.dispose();
         }
@@ -111,7 +127,7 @@ export class DocHyperLinkPopupService extends Disposable {
         this._editPopup?.dispose();
     }
 
-    showInfoPopup(info: ILinkInfo): Nullable<IDisposable> {
+    showInfoPopup(info: ILinkInfo): LinkPopupDisposable | null | undefined {
         if (this._infoPopupSuppressed) {
             return;
         }
@@ -131,8 +147,8 @@ export class DocHyperLinkPopupService extends Disposable {
         if (this._infoPopup) {
             this._infoPopup.dispose();
         }
-        const doc = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
-        if (!doc) {
+        const doc = this._univerInstanceService.getUnit(unitId, UniverInstanceType.UNIVER_DOC);
+        if (!(doc instanceof DocumentDataModel)) {
             return;
         }
         this._showingLink$.next({ unitId, linkId, segmentId, segmentPage, startIndex, endIndex });
@@ -175,5 +191,20 @@ export class DocHyperLinkPopupService extends Disposable {
             this._infoPopupSuppressed = false;
             this._infoPopupSuppressionTimer = null;
         }, 0);
+    }
+
+    canEditLink(unitId: string, linkInfo: ILinkInfo | null): boolean {
+        const document = this._univerInstanceService.getUnit(unitId, UniverInstanceType.UNIVER_DOC);
+        if (!(document instanceof DocumentDataModel)) {
+            return false;
+        }
+        if (!linkInfo) {
+            return canEditDocumentTargets(this._permissionService, unitId, []);
+        }
+        const segmentId = linkInfo.segmentId ?? '';
+        return canEditDocumentTargets(this._permissionService, unitId, [
+            ...getDocumentEntityParentPermissionObjectIds(document, segmentId, 'custom-range', linkInfo.linkId),
+            getDocumentEntityPermissionObjectId(segmentId, 'custom-range', linkInfo.linkId),
+        ]);
     }
 }

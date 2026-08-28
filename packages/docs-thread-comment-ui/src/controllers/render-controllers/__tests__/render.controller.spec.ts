@@ -16,9 +16,12 @@
 
 import { CustomDecorationType } from '@univerjs/core';
 import { DOC_INTERCEPTOR_POINT, RichTextEditingMutation } from '@univerjs/docs';
-import { Subject } from 'rxjs';
+import { DEFAULT_DOC_SUBUNIT_ID } from '@univerjs/docs-thread-comment';
+import { getDrawingShapeKeyByDrawingSearch } from '@univerjs/drawing';
+import { Vector2 } from '@univerjs/engine-render';
+import { serializeThreadCommentAnchor, ThreadCommentAnchorKind } from '@univerjs/thread-comment';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
-import { DEFAULT_DOC_SUBUNIT_ID } from '../../../common/const';
 import { DocThreadCommentRenderController } from '../render.controller';
 
 describe('DocThreadCommentRenderController', () => {
@@ -36,10 +39,13 @@ describe('DocThreadCommentRenderController', () => {
         const reRender = vi.fn();
         const docRenderController = { reRender };
 
-        const activeCommentId$ = new Subject<any>();
+        const activeCommentId$ = new BehaviorSubject<any>(undefined);
+        const hoveredCommentId$ = new BehaviorSubject<any>(undefined);
         const threadCommentPanelService = {
             activeCommentId: { unitId: 'doc-1', subUnitId: DEFAULT_DOC_SUBUNIT_ID, commentId: 'c2' },
             activeCommentId$,
+            hoveredCommentId: undefined as any,
+            hoveredCommentId$,
         };
 
         const univerInstanceService = {
@@ -49,7 +55,8 @@ describe('DocThreadCommentRenderController', () => {
         const commentUpdate$ = new Subject<any>();
         const threadCommentModel = {
             commentUpdate$,
-            getComment: vi.fn((_unitId: string, _subUnitId: string, id: string) => (id === 'c1' ? null : { id, resolved: false })),
+            getComment: vi.fn((_unitId: string, _subUnitId: string, id: string) => (id === 'c1' ? null : { id, ref: 'text', resolved: false })),
+            query: vi.fn(() => []),
             addComment: vi.fn(),
             syncThreadComments: vi.fn(),
         };
@@ -66,7 +73,29 @@ describe('DocThreadCommentRenderController', () => {
             getUnitId: () => 'doc-1',
             getBody: () => ({ customDecorations: [{ id: 'c1', type: CustomDecorationType.COMMENT }, { id: 'c2', type: CustomDecorationType.COMMENT }] }),
         };
-        const context = { unit };
+        const context = {
+            unit,
+            unitId: 'doc-1',
+            scene: {
+                addObject: vi.fn(),
+                getObject: vi.fn(),
+                getObjectIncludeInGroup: vi.fn(),
+            },
+            engine: {
+                onTransformChange$: {
+                    subscribeEvent: vi.fn(() => ({ dispose: vi.fn() })),
+                },
+            },
+        };
+        const drawingManagerService = {
+            add$: new Subject<never[]>(),
+            update$: new Subject<never[]>(),
+            remove$: new Subject<never[]>(),
+        };
+        const themeService = {
+            currentTheme$: new Subject<void>(),
+            getColorFromTheme: vi.fn((token: string) => token),
+        };
 
         const controller = new DocThreadCommentRenderController(
             context as any,
@@ -75,9 +104,12 @@ describe('DocThreadCommentRenderController', () => {
             docRenderController as any,
             univerInstanceService as any,
             threadCommentModel as any,
-            commandService as any
+            commandService as any,
+            drawingManagerService as any,
+            themeService as any
         );
 
+        expect(reRender).not.toHaveBeenCalled();
         expect(threadCommentModel.addComment).not.toHaveBeenCalled();
 
         const next = (v: any) => v;
@@ -104,10 +136,52 @@ describe('DocThreadCommentRenderController', () => {
         );
         expect(outResolved.show).toBe(false);
 
+        threadCommentPanelService.hoveredCommentId = {
+            unitId: 'doc-1',
+            subUnitId: DEFAULT_DOC_SUBUNIT_ID,
+            commentId: 'c3',
+        };
+        const outOverlapping = handler(
+            { id: 'c2' },
+            {
+                unitId: 'doc-1',
+                index: 3,
+                customDecorations: [
+                    { id: 'c2', startIndex: 0, endIndex: 5 },
+                    { id: 'c3', startIndex: 2, endIndex: 4 },
+                ],
+            },
+            next
+        );
+        expect(outOverlapping.active).toBe(true);
+        const outHovered = handler(
+            { id: 'c3' },
+            {
+                unitId: 'doc-1',
+                index: 3,
+                customDecorations: [
+                    { id: 'c2', startIndex: 0, endIndex: 5 },
+                    { id: 'c3', startIndex: 2, endIndex: 4 },
+                ],
+            },
+            next
+        );
+        expect(outHovered.active).toBe(true);
+
+        threadCommentPanelService.hoveredCommentId = {
+            unitId: 'other-doc',
+            subUnitId: DEFAULT_DOC_SUBUNIT_ID,
+            commentId: 'c3',
+        };
+        const outActiveWithForeignHover = handler({ id: 'c2' }, { unitId: 'doc-1' }, next);
+        expect(outActiveWithForeignHover.active).toBe(true);
+        hoveredCommentId$.next(threadCommentPanelService.hoveredCommentId);
+        expect(reRender).toHaveBeenCalledWith('doc-1');
+
         // resolved branch triggers rerender
         threadCommentModel.getComment.mockImplementation((_unitId: string, _subUnitId: string, id: string) => {
             if (id === 'c1') return null;
-            return { id, resolved: id === 'c2' };
+            return { id, ref: 'text', resolved: id === 'c2' };
         });
         const outResolvedComment = handler(
             { id: 'c2' },
@@ -143,6 +217,82 @@ describe('DocThreadCommentRenderController', () => {
         expect(threadCommentModel.addComment).not.toHaveBeenCalled();
         expect(threadCommentModel.syncThreadComments).toHaveBeenCalledWith('doc-1', DEFAULT_DOC_SUBUNIT_ID, ['c3']);
 
+        controller.dispose();
+    });
+
+    it('keeps drawing comment underlines attached to the rendered object', () => {
+        const ref = serializeThreadCommentAnchor({
+            kind: ThreadCommentAnchorKind.DOC_DRAWING,
+            pageId: 'doc-1',
+            elementId: 'shape-1',
+        });
+        const drawingKey = getDrawingShapeKeyByDrawingSearch({
+            unitId: 'doc-1',
+            subUnitId: 'doc-1',
+            drawingId: 'shape-1',
+        });
+        let bounds = { left: 20, top: 40, width: 80, height: 60 };
+        let roots = ['first-comment', 'newest-comment'];
+        const scene = {
+            addObject: vi.fn(),
+            getObjectIncludeInGroup: vi.fn((key: string) => key === drawingKey ? { getRealBound: () => bounds } : null),
+            getObject: vi.fn(),
+        };
+        const context = {
+            unitId: 'doc-1',
+            unit: { getUnitId: () => 'doc-1', getBody: () => ({ customDecorations: [] }) },
+            scene,
+            engine: { onTransformChange$: { subscribeEvent: vi.fn(() => ({ dispose: vi.fn() })) } },
+        };
+        const activeCommentId$ = new BehaviorSubject({
+            unitId: 'doc-1',
+            subUnitId: 'doc-1',
+            commentId: 'first-comment',
+        });
+        const hoveredCommentId$ = new BehaviorSubject<undefined>(undefined);
+        const panelService = {
+            activeCommentId: activeCommentId$.value,
+            hoveredCommentId: hoveredCommentId$.value,
+            activeCommentId$,
+            hoveredCommentId$,
+        };
+        const commentUpdate$ = new Subject<{ type: string; unitId: string }>();
+        const commentModel = {
+            commentUpdate$,
+            query: vi.fn(() => roots.map((id) => ({ root: { id, ref }, subUnitId: 'doc-1' }))),
+            getComment: vi.fn((_unitId: string, _subUnitId: string, id: string) => ({ id, ref, resolved: false })),
+            syncThreadComments: vi.fn(),
+        };
+        const drawingManager = { add$: new Subject(), update$: new Subject(), remove$: new Subject() };
+        const controller = new DocThreadCommentRenderController(
+            context as never,
+            { intercept: vi.fn(() => ({ dispose: vi.fn() })) } as never,
+            panelService as never,
+            { reRender: vi.fn() } as never,
+            { getCurrentUnitOfType: vi.fn(() => context.unit) } as never,
+            commentModel as never,
+            { executeCommand: vi.fn(() => Promise.resolve(true)), onCommandExecuted: vi.fn(() => ({ dispose: vi.fn() })) } as never,
+            drawingManager as never,
+            { currentTheme$: new Subject(), getColorFromTheme: vi.fn((token: string) => token) } as never
+        );
+        const overlay = scene.addObject.mock.calls[0][0];
+
+        expect(overlay.isHit(new Vector2(60, 102))).toBe(true);
+        expect(overlay.hitCommentId).toBe('newest-comment');
+
+        roots = ['first-comment'];
+        commentUpdate$.next({ type: 'delete', unitId: 'doc-1' });
+        expect(overlay.isHit(new Vector2(60, 102))).toBe(true);
+        expect(overlay.hitCommentId).toBe('first-comment');
+
+        bounds = { left: 120, top: 140, width: 100, height: 70 };
+        drawingManager.update$.next([{ unitId: 'doc-1' }]);
+        expect(overlay.isHit(new Vector2(60, 102))).toBe(false);
+        expect(overlay.isHit(new Vector2(170, 212))).toBe(true);
+
+        roots = [];
+        commentUpdate$.next({ type: 'resolve', unitId: 'doc-1' });
+        expect(overlay.isHit(new Vector2(170, 212))).toBe(false);
         controller.dispose();
     });
 });

@@ -76,6 +76,7 @@ export interface IRenderManagerService extends IDisposable {
      * @param dep
      */
     registerRenderModule<T extends UnitModel>(type: UniverInstanceType, dep: Dependency<T>): IDisposable;
+    registerRenderModule(type: UniverInstanceType, dep: Dependency): IDisposable;
 }
 
 const DEFAULT_SCENE_SIZE = { width: 1500, height: 1000 };
@@ -148,6 +149,8 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
      * @param type
      * @param depCtor
      */
+    registerRenderModule<T extends UnitModel>(type: UniverInstanceType, depCtor: Dependency<T>): IDisposable;
+    registerRenderModule(type: UniverInstanceType, depCtor: Dependency): IDisposable;
     registerRenderModule(type: UniverInstanceType, depCtor: Dependency): IDisposable {
         if (!this._renderDependencies.has(type)) {
             this._renderDependencies.set(type, []);

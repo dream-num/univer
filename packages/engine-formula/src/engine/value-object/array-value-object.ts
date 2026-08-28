@@ -16,7 +16,7 @@
 
 import type { Nullable } from '@univerjs/core';
 import type { callbackMapFnType, IArrayValueObject } from './base-value-object';
-import { isRealNum } from '@univerjs/core';
+import { DateSystem, isRealNum } from '@univerjs/core';
 import { BooleanValue } from '../../basics/common';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { CELL_INVERTED_INDEX_CACHE } from '../../basics/inverted-index-cache';
@@ -58,7 +58,11 @@ enum ArrayCalculateType {
     SINGLE,
 }
 
-export function transformToValueObject(array: Array<Array<number | string | boolean | null>> = [], isIgnoreNumberPattern: boolean = false) {
+export function transformToValueObject(
+    array: Array<Array<number | string | boolean | null>> = [],
+    isIgnoreNumberPattern: boolean = false,
+    dateSystem?: DateSystem
+) {
     const arrayValueList: BaseValueObject[][] = [];
 
     for (let r = 0; r < array.length; r++) {
@@ -71,7 +75,7 @@ export function transformToValueObject(array: Array<Array<number | string | bool
         for (let c = 0; c < row.length; c++) {
             const cell = row[c];
 
-            arrayValueList[r][c] = ValueObjectFactory.create(cell, isIgnoreNumberPattern);
+            arrayValueList[r][c] = ValueObjectFactory.create(cell, isIgnoreNumberPattern, dateSystem);
         }
     }
 
@@ -110,8 +114,8 @@ export class ArrayValueObject extends BaseValueObject {
      * @param rawValue
      * @returns
      */
-    static create(rawValue: string | IArrayValueObject) {
-        return new ArrayValueObject(rawValue);
+    static create(rawValue: string | IArrayValueObject, dateSystem?: DateSystem) {
+        return new ArrayValueObject(rawValue, dateSystem);
     }
 
     /**
@@ -168,10 +172,10 @@ export class ArrayValueObject extends BaseValueObject {
         numberPosition: number[];
     }>;
 
-    constructor(rawValue: string | IArrayValueObject) {
-        super();
+    constructor(rawValue: string | IArrayValueObject, dateSystem?: DateSystem) {
+        super(dateSystem);
 
-        this._values = this._formatValue(rawValue);
+        this._values = this._formatValue(rawValue, dateSystem);
     }
 
     override dispose(): void {
@@ -955,6 +959,14 @@ export class ArrayValueObject extends BaseValueObject {
         });
 
         return accumulatorAll;
+    }
+
+    override withDateSystem(dateSystem: DateSystem): this {
+        super.withDateSystem(dateSystem);
+        // Child values read their own date system during parsing and formatting.
+        this._values.forEach((row) => row.forEach((valueObject) => valueObject?.withDateSystem(dateSystem)));
+        this._defaultValue?.withDateSystem(dateSystem);
+        return this;
     }
 
     override getNegative(): BaseValueObject {
@@ -1902,7 +1914,7 @@ export class ArrayValueObject extends BaseValueObject {
         return ArrayCalculateType.PRODUCT;
     }
 
-    private _formatValue(rawValue: string | IArrayValueObject) {
+    private _formatValue(rawValue: string | IArrayValueObject, dateSystem?: DateSystem) {
         if (typeof rawValue !== 'string') {
             rawValue = rawValue as IArrayValueObject;
 
@@ -1941,7 +1953,7 @@ export class ArrayValueObject extends BaseValueObject {
             const row: BaseValueObject[] = [];
             for (let c = 0; c < columnArrayCount; c++) {
                 const cellRaw = columnArray[c].trim();
-                row.push(ValueObjectFactory.create(cellRaw));
+                row.push(ValueObjectFactory.create(cellRaw, false, dateSystem));
             }
             result.push(row);
         }
@@ -1975,12 +1987,16 @@ export class ArrayValueObject extends BaseValueObject {
             column,
         };
 
-        return ArrayValueObject.create(arrayValueObjectData);
+        return ArrayValueObject.create(arrayValueObjectData, this.getDateSystem());
     }
 }
 
 export class ValueObjectFactory {
-    static create(rawValue: string | number | boolean | null, isIgnoreNumberPattern: boolean = false): BaseValueObject {
+    static create(
+        rawValue: string | number | boolean | null,
+        isIgnoreNumberPattern: boolean = false,
+        dateSystem: DateSystem = DateSystem.Date1900
+    ): BaseValueObject {
         if (rawValue == null) {
             return NullValueObject.create();
         }
@@ -1997,31 +2013,32 @@ export class ValueObjectFactory {
             }
 
             if (isStringWrappedByDoubleQuotes(rawValue)) {
-                return createStringValueObjectByRawValue(rawValue);
+                return createStringValueObjectByRawValue(rawValue).withDateSystem(dateSystem);
             }
 
             // "000123456" should be treated as string, not number, but "123456" should be treated as number
             if (isRealNum(rawValue) && Number(rawValue).toString() === rawValue.trim()) {
-                return NumberValueObject.create(Number(rawValue));
+                return NumberValueObject.create(Number(rawValue)).withDateSystem(dateSystem);
             }
 
             // value ignore whether it is a number pattern
             if (!isIgnoreNumberPattern) {
-                const { isNumberPattern, value, pattern } = stringIsNumberPattern(rawValue);
+                // Date text must be converted to a serial using the current workbook date system.
+                const { isNumberPattern, value, pattern } = stringIsNumberPattern(rawValue, { dateSystem });
                 if (isNumberPattern) {
-                    return NumberValueObject.create(value as number, pattern as string);
+                    return NumberValueObject.create(value as number, pattern as string).withDateSystem(dateSystem);
                 }
             }
 
             const rawValueSingleLine = rawValue.replace(/\n/g, '').replace(/\r/g, '');
             if (!isStringWrappedByDoubleQuotes(rawValueSingleLine) && regexTestArrayValue(rawValueSingleLine)) {
-                return ArrayValueObject.create(rawValueSingleLine);
+                return ArrayValueObject.create(rawValueSingleLine, dateSystem);
             }
 
-            return createStringValueObjectByRawValue(rawValue);
+            return createStringValueObjectByRawValue(rawValue).withDateSystem(dateSystem);
         }
         if (typeof rawValue === 'number') {
-            return createNumberValueObjectByRawValue(rawValue);
+            return createNumberValueObjectByRawValue(rawValue).withDateSystem(dateSystem);
         }
         return ErrorValueObject.create(ErrorType.VALUE);
     }

@@ -366,6 +366,7 @@ const locale: typeof enUS = {
                 pasteErr: 'Rentang ini dilindungi, dan Anda tidak memiliki izin menempel. Untuk menempel, silakan hubungi pembuatnya.',
                 setStyleErr: 'Rentang ini dilindungi, dan Anda tidak memiliki izin untuk mengatur gaya. Untuk mengatur gaya, silakan hubungi pembuatnya.',
                 copyErr: 'Rentang ini dilindungi, dan Anda tidak memiliki izin menyalin. Untuk menyalin, silakan hubungi pembuatnya.',
+                cutErr: 'Rentang ini dilindungi, dan Anda tidak memiliki izin memotong. Untuk memotong, silakan hubungi pembuatnya.',
                 workbookCopyErr: 'Buku kerja ini dilindungi, dan Anda tidak memiliki izin untuk menyalin. Untuk menyalin, silakan hubungi pembuatnya.',
                 setRowColStyleErr: 'Rentang ini dilindungi, dan Anda tidak memiliki izin untuk mengatur gaya baris dan kolom. Untuk mengatur gaya baris dan kolom, silakan hubungi pembuatnya.',
             },

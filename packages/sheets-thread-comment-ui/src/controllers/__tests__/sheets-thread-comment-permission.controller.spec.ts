@@ -14,34 +14,60 @@
  * limitations under the License.
  */
 
-import { AddCommentCommand, DeleteCommentCommand, UpdateCommentCommand } from '@univerjs/thread-comment';
+import { ICommandService, Injector, LocaleService } from '@univerjs/core';
+import { SheetPermissionCheckController } from '@univerjs/sheets';
+import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
+import {
+    AddCommentCommand,
+    DeleteCommentCommand,
+    serializeThreadCommentAnchor,
+    ThreadCommentAnchorKind,
+    UpdateCommentCommand,
+} from '@univerjs/thread-comment';
 import { describe, expect, it, vi } from 'vitest';
-import { ShowAddSheetCommentModalOperation } from '../../commands/operations/comment.operation';
+import { AddSheetDrawingCommentOperation, ShowAddSheetCommentModalOperation } from '../../commands/operations/comment.operation';
 import { SheetsThreadCommentPermissionController } from '../sheets-thread-comment-permission.controller';
+
+type BeforeCommandHandler = (command: { id: string; params?: unknown }) => void;
+
+function createTestBed(permissionCheck: object, commentModel: object = { getComment: vi.fn() }) {
+    let beforeCommandHandler: BeforeCommandHandler | undefined;
+    const injector = new Injector([
+        [ICommandService, { useValue: {
+            beforeCommandExecuted: vi.fn((handler: BeforeCommandHandler) => {
+                beforeCommandHandler = handler;
+                return { dispose: vi.fn() };
+            }),
+        } }],
+        [LocaleService, { useValue: { t: (key: string) => key } }],
+        [SheetPermissionCheckController, { useValue: permissionCheck }],
+        [SheetsThreadCommentModel, { useValue: commentModel }],
+        [SheetsThreadCommentPermissionController],
+    ]);
+
+    return {
+        controller: injector.get(SheetsThreadCommentPermissionController),
+        getBeforeCommandHandler: () => beforeCommandHandler,
+    };
+}
 
 describe('SheetsThreadCommentPermissionController', () => {
     it('blocks comment panel, add, update and delete actions when comment permissions are denied', () => {
-        let beforeCommandHandler: ((command: { id: string; params?: unknown }) => void) | undefined;
         const permissionCheck = {
             permissionCheckWithoutRange: vi.fn(() => false),
             permissionCheckWithRanges: vi.fn(() => false),
             blockExecuteWithoutPermission: vi.fn(),
         };
-        const controller = new SheetsThreadCommentPermissionController(
-            { t: (key: string) => key } as never,
-            {
-                beforeCommandExecuted: vi.fn((handler) => {
-                    beforeCommandHandler = handler;
-                    return { dispose: vi.fn() };
-                }),
-            } as never,
-            permissionCheck as never,
+        const { controller, getBeforeCommandHandler } = createTestBed(
+            permissionCheck,
             {
                 getComment: vi.fn(() => ({ id: 'comment-1', ref: 'C4' })),
-            } as never
+            }
         );
+        const beforeCommandHandler = getBeforeCommandHandler();
 
         beforeCommandHandler?.({ id: ShowAddSheetCommentModalOperation.id });
+        beforeCommandHandler?.({ id: AddSheetDrawingCommentOperation.id });
         beforeCommandHandler?.({
             id: AddCommentCommand.id,
             params: {
@@ -67,7 +93,7 @@ describe('SheetsThreadCommentPermissionController', () => {
             },
         });
 
-        expect(permissionCheck.permissionCheckWithoutRange).toHaveBeenCalledTimes(1);
+        expect(permissionCheck.permissionCheckWithoutRange).toHaveBeenCalledTimes(2);
         expect(permissionCheck.permissionCheckWithRanges).toHaveBeenCalledWith(expect.any(Object), [{
             startRow: 1,
             startColumn: 1,
@@ -80,9 +106,47 @@ describe('SheetsThreadCommentPermissionController', () => {
             endRow: 3,
             endColumn: 2,
         }], 'unit-1', 'sheet-1');
-        expect(permissionCheck.blockExecuteWithoutPermission).toHaveBeenCalledTimes(4);
+        expect(permissionCheck.blockExecuteWithoutPermission).toHaveBeenCalledTimes(5);
         expect(permissionCheck.blockExecuteWithoutPermission).toHaveBeenLastCalledWith('sheets-thread-comment-ui.permission.commentErr');
 
+        controller.dispose();
+    });
+
+    it('rechecks drawing comment permissions without creating an invalid cell range', () => {
+        const permissionCheck = {
+            permissionCheckWithoutRange: vi.fn()
+                .mockReturnValueOnce(true)
+                .mockReturnValueOnce(false),
+            permissionCheckWithRanges: vi.fn(),
+            blockExecuteWithoutPermission: vi.fn(),
+        };
+        const { controller, getBeforeCommandHandler } = createTestBed(permissionCheck);
+        const beforeCommandHandler = getBeforeCommandHandler();
+        const command = {
+            id: AddCommentCommand.id,
+            params: {
+                unitId: 'unit-1',
+                subUnitId: 'sheet-1',
+                comment: {
+                    ref: serializeThreadCommentAnchor({
+                        kind: ThreadCommentAnchorKind.SHEET_DRAWING,
+                        elementId: 'drawing-1',
+                    }),
+                },
+            },
+        };
+
+        beforeCommandHandler?.(command);
+        beforeCommandHandler?.(command);
+
+        expect(permissionCheck.permissionCheckWithoutRange).toHaveBeenCalledTimes(2);
+        expect(permissionCheck.permissionCheckWithoutRange).toHaveBeenLastCalledWith(
+            expect.any(Object),
+            'unit-1',
+            'sheet-1'
+        );
+        expect(permissionCheck.permissionCheckWithRanges).not.toHaveBeenCalled();
+        expect(permissionCheck.blockExecuteWithoutPermission).toHaveBeenCalledTimes(1);
         controller.dispose();
     });
 });

@@ -366,6 +366,7 @@ const locale: typeof enUS = {
                 pasteErr: 'L\'interval està protegit i no teniu permís per enganxar. Per enganxar, contacteu amb el creador.',
                 setStyleErr: 'L\'interval està protegit i no teniu permís per establir estils. Per establir estils, contacteu amb el creador.',
                 copyErr: 'L\'interval està protegit i no teniu permís per copiar. Per copiar, contacteu amb el creador.',
+                cutErr: 'L\'interval està protegit i no teniu permís per retallar. Per retallar, contacteu amb el creador.',
                 workbookCopyErr: 'El llibre de treball està protegit i no teniu permís per copiar. Per copiar, contacteu amb el creador.',
                 setRowColStyleErr: 'L\'interval està protegit i no teniu permís per establir estils de fila i columna. Per establir estils de fila i columna, contacteu amb el creador.',
             },

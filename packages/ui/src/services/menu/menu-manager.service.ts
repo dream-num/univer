@@ -20,7 +20,19 @@ import type { IMenuItem } from './menu';
 import { createIdentifier, Disposable, IConfigService, Inject, Injector, merge } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { mergeMenuConfigs } from '../../common/menu-merge-configs';
-import { ContextMenuGroup, ContextMenuPosition, MenuManagerPosition, RibbonDataGroup, RibbonFormulasGroup, RibbonInsertGroup, RibbonOthersGroup, RibbonPosition, RibbonStartGroup, RibbonViewGroup } from './types';
+import {
+    ContextMenuGroup,
+    ContextMenuPosition,
+    FloatingObjectToolbarPosition,
+    MenuManagerPosition,
+    RibbonDataGroup,
+    RibbonFormulasGroup,
+    RibbonInsertGroup,
+    RibbonOthersGroup,
+    RibbonPosition,
+    RibbonStartGroup,
+    RibbonViewGroup,
+} from './types';
 
 export const IMenuManagerService = createIdentifier<IMenuManagerService>('univer.menu-manager-service');
 
@@ -272,6 +284,10 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
                 },
             },
         },
+        [FloatingObjectToolbarPosition.SHEET]: {},
+        [FloatingObjectToolbarPosition.DOC]: {},
+        [FloatingObjectToolbarPosition.SLIDE]: {},
+        [FloatingObjectToolbarPosition.BOARD]: {},
     };
 
     constructor(

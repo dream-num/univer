@@ -116,8 +116,9 @@ export class LambdaValueObjectObject extends BaseValueObject {
      * @param variants
      */
     executeCustom(...variants: PrimitiveValueType[]) {
-        // Create base value object from primitive value, then execute
-        const baseValueObjects = variants.map((variant) => ValueObjectFactory.create(variant));
+        const dateSystem = this._interpreter?.getDateSystem();
+        // Primitive arguments must be converted before nested execution, using the same workbook context.
+        const baseValueObjects = variants.map((variant) => ValueObjectFactory.create(variant, false, dateSystem));
         return this.execute(...baseValueObjects);
     }
 

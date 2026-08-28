@@ -21,6 +21,7 @@ const locale: typeof enUS = {
         panel: {
             title: 'Quản lý Bình luận',
             addComment: 'Thêm bình luận',
+            openComments: 'Mở bình luận',
         },
     },
 };

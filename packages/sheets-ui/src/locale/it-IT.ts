@@ -366,6 +366,7 @@ const locale: typeof enUS = {
                 pasteErr: 'L\'intervallo è protetto e non hai l\'autorizzazione di incolla. Per incollare, contatta il creatore.',
                 setStyleErr: 'L\'intervallo è protetto e non hai l\'autorizzazione per impostare gli stili. Per impostare gli stili, contatta il creatore.',
                 copyErr: 'L\'intervallo è protetto e non hai l\'autorizzazione di copia. Per copiare, contatta il creatore.',
+                cutErr: 'L\'intervallo è protetto e non hai l\'autorizzazione per tagliare. Per tagliare, contatta il creatore.',
                 workbookCopyErr: 'La cartella di lavoro è protetta e non hai l\'autorizzazione di copia. Per copiare, contatta il creatore.',
                 setRowColStyleErr: 'L\'intervallo è protetto e non hai l\'autorizzazione per impostare gli stili di riga e colonna. Per impostare gli stili di riga e colonna, contatta il creatore.',
             },

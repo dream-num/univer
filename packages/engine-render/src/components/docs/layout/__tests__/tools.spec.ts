@@ -345,6 +345,20 @@ describe('docs layout tools extra', () => {
         expect(columns.length).toBe(1);
     });
 
+    it('anchors a complete paragraph to its model paragraph index when hidden flow tokens create a gap', () => {
+        const { page, line1, divide1, divide2 } = createPageSkeleton();
+        line1.paragraphStart = true;
+        line1.paragraphIndex = 10;
+        const paragraphMark = divide2.glyphGroup[divide2.glyphGroup.length - 1];
+        paragraphMark.raw = DataStreamTreeTokenType.PARAGRAPH;
+        paragraphMark.streamType = DataStreamTreeTokenType.PARAGRAPH;
+
+        updateBlockIndex([page], -1);
+
+        expect(divide1.st).toBe(8);
+        expect(line1.ed).toBe(10);
+    });
+
     it('uses content width for unspecified editor documents when updating block indexes', () => {
         const { page, column } = createPageSkeleton();
 
@@ -971,6 +985,45 @@ describe('docs layout tools extra', () => {
                 top: 44,
             },
         }]);
+    });
+
+    it('uses the accumulated height of preceding pages for table coordinates', () => {
+        const createPageWithTable = (pageHeight: number, tableId: string) => {
+            const { page } = createPageSkeleton();
+            page.marginBottom = 20;
+            page.marginLeft = 30;
+            page.marginRight = 30;
+            page.marginTop = 20;
+            page.pageHeight = pageHeight;
+            page.pageWidth = 300;
+            page.sections = [];
+            page.skeTables = new Map([[tableId, {
+                tableId,
+                height: 30,
+                left: 10,
+                rows: [],
+                top: 15,
+                width: 100,
+            }]]);
+            return page;
+        };
+
+        const tables = documentSkeletonTableIterator([
+            createPageWithTable(400, 'short-page-table'),
+            createPageWithTable(700, 'tall-page-table'),
+        ], {
+            docsTop: 8,
+            pageMarginTop: 12,
+        });
+
+        expect(tables.map(({ pageIndex, tableId, tableRect }) => ({
+            pageIndex,
+            tableId,
+            top: tableRect.top,
+        }))).toEqual([
+            { pageIndex: 0, tableId: 'short-page-table', top: 43 },
+            { pageIndex: 1, tableId: 'tall-page-table', top: 455 },
+        ]);
     });
 
     it('resolves column child page offsets from skeleton parents', () => {

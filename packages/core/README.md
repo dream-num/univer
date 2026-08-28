@@ -37,4 +37,3 @@ const univer = new Univer({
 - [Documentation](https://docs.univer.ai)
 - [NPM package](https://npmjs.com/package/@univerjs/core)
 - [GitHub repository](https://github.com/dream-num/univer)
-

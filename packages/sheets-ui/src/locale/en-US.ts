@@ -364,6 +364,7 @@ const locale = {
                 pasteErr: 'The range is protected, and you do not have paste permission. To paste, please contact the creator.',
                 setStyleErr: 'The range is protected, and you do not have permission to set styles. To set styles, please contact the creator.',
                 copyErr: 'The range is protected, and you do not have copy permission. To copy, please contact the creator.',
+                cutErr: 'The range is protected, and you do not have cut permission. To cut, please contact the creator.',
                 workbookCopyErr: 'The workbook is protected, and you do not have permission to copy. To copy, please contact the creator.',
                 setRowColStyleErr: 'The range is protected, and you do not have permission to set row and column styles. To set row and column styles, please contact the creator.',
             },

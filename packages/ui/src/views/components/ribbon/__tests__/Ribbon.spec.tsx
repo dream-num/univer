@@ -19,14 +19,17 @@
  */
 
 import type { ComponentType } from 'react';
+import type { IMenuSchema } from '../../../../services/menu/menu-manager.service';
 import { cleanup, render } from '@testing-library/react';
 import { Injector, LocaleService } from '@univerjs/core';
+import { connectInjector } from '@wendellhu/redi/react-bindings';
 import { of } from 'rxjs';
+
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { ComponentManager } from '../../../../common';
+import { ComponentManager } from '../../../../common/component-manager';
+import { RibbonPosition } from '../../../../services/menu/types';
 import { IRibbonOverrideService } from '../../../../services/ribbon/ribbon-override.service';
 import { IRibbonService } from '../../../../services/ribbon/ribbon.service';
-import { connectInjector } from '../../../../utils/di';
 import { Ribbon } from '../Ribbon';
 
 describe('Ribbon override chrome', () => {
@@ -80,12 +83,43 @@ describe('Ribbon override chrome', () => {
         expect(container.querySelectorAll('[data-embed-ribbon-override="true"]')).toHaveLength(1);
         expect(observeCount).toBe(0);
     });
+
+    it('uses the start group in simple mode when another ribbon tab is active', () => {
+        const ribbon: IMenuSchema[] = [{
+            key: RibbonPosition.START,
+            title: 'Start',
+            order: 0,
+            children: [],
+        }];
+        const injector = new Injector([
+            [ComponentManager],
+            [LocaleService, { useValue: { t: (key: string) => key } }],
+            [IRibbonService, { useValue: createRibbonService(ribbon, RibbonPosition.INSERT) }],
+            [IRibbonOverrideService, {
+                useValue: {
+                    override$: of(null),
+                    getOverride: () => null,
+                    activate: () => {},
+                    clear: () => {},
+                },
+            }],
+        ]);
+
+        const ConnectedRibbon = connectInjector(Ribbon, injector) as ComponentType<{ ribbonType: 'simple' }>;
+        const { getByRole } = render(<ConnectedRibbon ribbonType="simple" />);
+
+        expect(getByRole('toolbar', { name: RibbonPosition.START })).toBeTruthy();
+    });
 });
 
 function createEmptyRibbonService() {
+    return createRibbonService([], '');
+}
+
+function createRibbonService(ribbon: IMenuSchema[], activatedTab: string) {
     return {
-        ribbon$: of([]),
-        activatedTab$: of(''),
+        ribbon$: of(ribbon),
+        activatedTab$: of(activatedTab),
         collapsedIds$: of([]),
         fakeToolbarVisible$: of(false),
         setActivatedTab: () => {},

@@ -108,6 +108,18 @@ export enum UnitObject {
     Base = 6,
     Board = 7,
     Pdf = 8,
+    DocumentSection = 9,
+    DocumentParagraph = 10,
+    DocumentEntity = 11,
+    SlidePage = 12,
+    SlideElement = 13,
+    SlideMaster = 14,
+    BaseTable = 15,
+    BaseField = 16,
+    BaseRecord = 17,
+    BaseView = 18,
+    BaseDashboard = 19,
+    BoardElement = 20,
     UNRECOGNIZED = -1,
 }
 

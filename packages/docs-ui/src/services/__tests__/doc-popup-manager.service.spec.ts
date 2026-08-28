@@ -101,7 +101,6 @@ class TestRenderManagerService {
                         getSkeleton: () => skeleton,
                     };
                 }
-
                 throw new Error(`Unexpected render dependency: ${String(token)}`);
             },
         };
@@ -228,6 +227,39 @@ describe('DocCanvasPopManagerService', () => {
         expect(renderManagerService.scopedPopupService.popups.get('popup-1')?.componentKey).toBe('embed-popup');
         expect(renderManagerService.scopedPopupService.popups.get('popup-1')?.connectorInjector).toBe(renderManagerService.popupInjector);
         expect(renderManagerService.getInjector).toHaveBeenCalledTimes(1);
+    });
+
+    it('publishes popup ownership until the last popup for a document is disposed', () => {
+        const { service } = createService();
+        const popupUnits: string[][] = [];
+        const subscription = service.popupUnits$.subscribe((units) => {
+            popupUnits.push(Array.from(units).sort());
+        });
+
+        const first = service.attachPopupToRect(
+            { left: 10, right: 110, top: 20, bottom: 40 },
+            { componentKey: 'first-popup' },
+            'doc-1'
+        );
+        const second = service.attachPopupToRect(
+            { left: 10, right: 110, top: 20, bottom: 40 },
+            { componentKey: 'second-popup' },
+            'doc-1'
+        );
+        const other = service.attachPopupToRect(
+            { left: 10, right: 110, top: 20, bottom: 40 },
+            { componentKey: 'other-popup' },
+            'doc-2'
+        );
+
+        first.dispose();
+        expect(popupUnits.at(-1)).toEqual(['doc-1', 'doc-2']);
+        second.dispose();
+        expect(popupUnits.at(-1)).toEqual(['doc-2']);
+        other.dispose();
+        expect(popupUnits.at(-1)).toEqual([]);
+
+        subscription.unsubscribe();
     });
 
     it('uses embedded unit creation metadata when the render has no scene ownership flag', () => {

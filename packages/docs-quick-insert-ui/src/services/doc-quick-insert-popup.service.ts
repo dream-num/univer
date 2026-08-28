@@ -16,19 +16,14 @@
 
 import type { DocumentDataModel, IDisposable, Nullable } from '@univerjs/core';
 import type { IInsertTextCommandParams } from '@univerjs/docs';
-import type {
-    Documents,
-    DocumentSkeleton,
-    IBoundRectNoAngle,
-    IDocumentSkeletonGlyph,
-    ITextRangeWithStyle,
-} from '@univerjs/engine-render';
+import type { Documents, DocumentSkeleton, IBoundRectNoAngle, IDocumentSkeletonGlyph, ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { Observable } from 'rxjs';
-import { Disposable, ICommandService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { Disposable, DisposableCollection, ICommandService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import {
     DocCanvasPopManagerService,
     DocEventManagerService,
+    DocLayoutInteractionService,
     getAnchorBounding,
     NodePositionConvertToCursor,
 } from '@univerjs/docs-ui';
@@ -122,7 +117,7 @@ export class DocQuickInsertPopupService extends Disposable {
         mount: () => void;
     } | null = null;
 
-    private getDocEventManagerService(unitId: string) {
+    private _getDocEventManagerService(unitId: string) {
         return this._renderManagerService.getRenderUnitById(unitId)?.with(DocEventManagerService);
     }
 
@@ -131,7 +126,8 @@ export class DocQuickInsertPopupService extends Disposable {
         @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(ICommandService) private readonly _commandService: ICommandService,
         @Inject(IRenderManagerService) private readonly _renderManagerService: IRenderManagerService,
-        @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService
+        @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService,
+        @Inject(DocLayoutInteractionService) private readonly _docLayoutInteractionService: DocLayoutInteractionService
     ) {
         super();
 
@@ -225,7 +221,7 @@ export class DocQuickInsertPopupService extends Disposable {
             return null;
         }
 
-        const docEventManagerService = this.getDocEventManagerService(unitId);
+        const docEventManagerService = this._getDocEventManagerService(unitId);
         return docEventManagerService?.findParagraphBoundByIndex(paragraph.startIndex) ?? null;
     }
 
@@ -318,7 +314,8 @@ export class DocQuickInsertPopupService extends Disposable {
         this._inputPlaceholderRenderRoot = this._createInputPlaceholderRenderRoot(() => this._mountInputPlaceholder(unitId, paragraphBound.firstLine));
         this._inputPlaceholderRenderRoot.mount();
 
-        const disposable = this._docCanvasPopupManagerService.attachPopupToRect(
+        const layoutInteraction = this._docLayoutInteractionService.beginInteraction();
+        const popupDisposable = this._docCanvasPopupManagerService.attachPopupToRect(
             paragraphBound.firstLine,
             {
                 componentKey: QuickInsertPopup.componentKey,
@@ -329,6 +326,9 @@ export class DocQuickInsertPopupService extends Disposable {
             },
             unitId
         );
+        const disposable = new DisposableCollection();
+        disposable.add(popupDisposable);
+        disposable.add(layoutInteraction);
 
         this._editPopup$.next({ disposable, popup, anchor: index, unitId });
     }

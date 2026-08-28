@@ -47,6 +47,7 @@ import {
     DEFAULT_WORKSHEET_COLUMN_WIDTH_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     extractPureTextFromCell,
+    getNumfmtLocaleTag,
     getNumfmtParseValueFilter,
     handleStyleToString,
     ICommandService,
@@ -539,6 +540,10 @@ export class SheetClipboardController extends RxDisposable {
 
     private _onPastePlainText(pasteTo: ISheetDiscreteRangeLocation, text: string, payload: ICopyPastePayload) {
         const { range, unitId, subUnitId } = pasteTo;
+        const workbook = this._instanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
+        const parseOptions = workbook
+            ? { locale: getNumfmtLocaleTag(workbook.getSnapshot().locale), dateSystem: workbook.getDateSystem() }
+            : undefined;
         let cellValue: IObjectMatrixPrimitiveType<ICellData>;
         if (/\r|\n/.test(text) || Tools.isLegalUrl(text)) {
             const body = generateBody(text);
@@ -564,7 +569,7 @@ export class SheetClipboardController extends RxDisposable {
                     },
                 };
             } else {
-                const pattern = getNumfmtParseValueFilter(text);
+                const pattern = getNumfmtParseValueFilter(text, parseOptions);
                 if (pattern?.z) {
                     cellValue = {
                         [range.rows[0]]: {

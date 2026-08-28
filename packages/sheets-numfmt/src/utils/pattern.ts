@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { INumfmtLocaleTag } from '@univerjs/core';
+import type { DateSystem, INumfmtLocaleTag } from '@univerjs/core';
 import type { FormatType } from '@univerjs/sheets';
 import { DEFAULT_NUMBER_FORMAT, numfmt } from '@univerjs/core';
 import { stripErrorMargin } from '@univerjs/engine-formula';
@@ -25,12 +25,17 @@ interface IPatternPreview {
     color?: string;
 }
 
-export const getPatternPreview = (pattern: string, value: number, locale: INumfmtLocaleTag = 'en'): IPatternPreview => {
+export const getPatternPreview = (
+    pattern: string,
+    value: number,
+    locale: INumfmtLocaleTag = 'en',
+    dateSystem?: DateSystem
+): IPatternPreview => {
     // in the source code of numfmt, the formatColor function will read the the partitions[3]
     try {
         const formatColor = numfmt.formatColor(pattern, value);
         const color = formatColor ? String(formatColor) : undefined;
-        const result = numfmt.format(pattern, value, { locale, throws: false });
+        const result = numfmt.format(pattern, value, { locale, dateSystem, throws: false });
         if (value < 0) {
             // pay attention, controllers/ui.controller.ts
             // in the pattern, the negative value color may be upper case one , so if we read a color with UpperCase, we should return the color with lower case for our theme system
@@ -51,11 +56,16 @@ export const getPatternPreview = (pattern: string, value: number, locale: INumfm
     };
 };
 
-export const getPatternPreviewIgnoreGeneral = (pattern: string, value: number, locale?: INumfmtLocaleTag): IPatternPreview => {
+export const getPatternPreviewIgnoreGeneral = (
+    pattern: string,
+    value: number,
+    locale?: INumfmtLocaleTag,
+    dateSystem?: DateSystem
+): IPatternPreview => {
     if (pattern === DEFAULT_NUMBER_FORMAT) {
         return {
             result: String(stripErrorMargin(value)), // In Excel, the default General format also needs to handle numeric precision.
         };
     }
-    return getPatternPreview(pattern, value, locale);
+    return getPatternPreview(pattern, value, locale, dateSystem);
 };

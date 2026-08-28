@@ -16,9 +16,10 @@
 
 import type { DocumentDataModel, Nullable } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { Inject, isInternalEditorID, IUniverInstanceService, LocaleService, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import { DocumentFlavor, Inject, isInternalEditorID, IUniverInstanceService, LocaleService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { DocumentSkeleton, DocumentViewModel } from '@univerjs/engine-render';
 import { BehaviorSubject, takeUntil } from 'rxjs';
+import { DocLayoutExecutorService } from './doc-layout-executor.service';
 
 /**
  * This service is for document build and manage doc skeletons. It also manages
@@ -39,9 +40,10 @@ export class DocSkeletonManagerService extends RxDisposable implements IRenderMo
     readonly currentViewModel$ = this._currentViewModel$.asObservable();
 
     constructor(
-        private readonly _context: IRenderContext<DocumentDataModel>,
+        private readonly _context: Pick<IRenderContext<DocumentDataModel>, 'type' | 'unit' | 'unitId'>,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @Inject(DocLayoutExecutorService) private readonly _docLayoutExecutorService: DocLayoutExecutorService
     ) {
         super();
 
@@ -77,12 +79,28 @@ export class DocSkeletonManagerService extends RxDisposable implements IRenderMo
         return this._docViewModel;
     }
 
+    getLayoutPerformanceMetrics(): ReturnType<DocLayoutExecutorService['getPerformanceMetrics']> {
+        return this._docLayoutExecutorService.getPerformanceMetrics(this._context.unitId);
+    }
+
+    supportsIncrementalLayout(): boolean {
+        const documentFlavor = this._context.unit.getSnapshot().documentStyle?.documentFlavor;
+
+        return this._docLayoutExecutorService.getExecutor() != null &&
+            !isInternalEditorID(this._context.unitId) &&
+            (documentFlavor === DocumentFlavor.TRADITIONAL || documentFlavor === DocumentFlavor.MODERN);
+    }
+
     recalculate(): DocumentSkeleton {
         const skeleton = this._skeleton;
         skeleton.calculate();
+        this._publishSkeleton(skeleton);
+        return skeleton;
+    }
+
+    private _publishSkeleton(skeleton: DocumentSkeleton): void {
         this._currentSkeletonBefore$.next(skeleton);
         this._currentSkeleton$.next(skeleton);
-        return skeleton;
     }
 
     private _init() {
@@ -111,7 +129,15 @@ export class DocSkeletonManagerService extends RxDisposable implements IRenderMo
             this._skeleton = this._buildSkeleton(this._docViewModel);
         }
 
-        this.recalculate();
+        if (this.supportsIncrementalLayout()) {
+            // The optional layout executor owns interactive progressive layout. Consumers that
+            // do not register it keep the historical synchronous initialization and editing path.
+            this._publishSkeleton(this._skeleton);
+        } else {
+            // Internal editors, UNSPECIFIED documents, and applications without the optional
+            // executor depend on a complete skeleton immediately for caret/input geometry.
+            this.recalculate();
+        }
 
         // sub: packages/docs/src/services/doc-interceptor/doc-interceptor.service.ts
         this._currentViewModel$.next(this._docViewModel);

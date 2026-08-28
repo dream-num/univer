@@ -28,14 +28,16 @@ import {
     ICommandService,
     Inject,
     Injector,
+    IPermissionService,
     IResourceLoaderService,
     IUniverInstanceService,
     RedoCommand,
     UndoCommand,
 } from '@univerjs/core';
 import { FBaseInitialable } from '@univerjs/core/facade';
-import { CreateHeaderFooterCommand, generateParagraphs, getTopLevelSectionBreaks, HeaderFooterType, InsertDocumentColumnBreakCommand, InsertDocumentSectionBreakCommand, SetDocumentNameCommand } from '@univerjs/docs';
+import { CreateHeaderFooterCommand, generateParagraphs, getDocumentEntityParentPermissionObjectIds, getDocumentEntityPermissionObjectId, getTopLevelSectionBreaks, HeaderFooterType, InsertDocumentColumnBreakCommand, InsertDocumentSectionBreakCommand, SetDocumentNameCommand } from '@univerjs/docs';
 import { FDocumentParagraph } from './f-document-paragraph';
+import { FDocumentObjectPermission, FDocumentPermission } from './f-document-permission';
 import { DocsSectionUnsupportedDocumentFlavorError, FDocumentSection } from './f-document-section';
 import { FDocumentTextRange } from './f-document-text-range';
 import { buildPlainTextInsertBody, replaceBodyRange } from './utils';
@@ -89,7 +91,8 @@ export class FDocument extends FBaseInitialable {
         @Inject(Injector) protected override readonly _injector: Injector,
         @IUniverInstanceService protected readonly _univerInstanceService: IUniverInstanceService,
         @Inject(IResourceLoaderService) protected readonly _resourceLoaderService: IResourceLoaderService,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @IPermissionService private readonly _permissionService: IPermissionService
     ) {
         super(_injector);
 
@@ -180,6 +183,48 @@ export class FDocument extends FBaseInitialable {
      */
     getId(): string {
         return this.id;
+    }
+
+    /**
+     * Returns the Document unit permission facade.
+     * @returns {FDocumentPermission} Permission facade for Edit, Copy, Print, Export, and Comment.
+     * @example
+     * ```ts
+     * const document = univerAPI.getActiveDocument();
+     * if (!document) throw new Error('No active Document.');
+     * await document.getPermission().setReadOnly();
+     * ```
+     */
+    getPermission(): FDocumentPermission {
+        return new FDocumentPermission(this.id, this._commandService, this._permissionService);
+    }
+
+    /**
+     * Returns the permission facade for an entity with a stable id, such as a Table, Drawing, or Custom Block.
+     *
+     * Parent Section and Paragraph permission ceilings are resolved from the current Document model.
+     * @param {string} segmentId Segment id, or an empty string for the main body.
+     * @param {string} entityType Stable entity type used by the owning Doc feature.
+     * @param {string} entityId Stable entity id.
+     * @returns {FDocumentObjectPermission} Effective permission facade for the entity.
+     * @example Make one drawing read-only
+     * ```ts
+     * const document = univerAPI.getActiveDocument();
+     * if (!document) throw new Error('No active Document.');
+     * const snapshot = document.getDocumentDataModel().getSnapshot();
+     * const drawingId = snapshot.drawingsOrder?.[0];
+     * if (!drawingId) throw new Error('Drawing not found.');
+     * await document.getEntityPermission('', 'drawing', drawingId).setReadOnly();
+     * ```
+     */
+    getEntityPermission(segmentId: string, entityType: string, entityId: string): FDocumentObjectPermission {
+        return new FDocumentObjectPermission(
+            this.id,
+            getDocumentEntityPermissionObjectId(segmentId, entityType, entityId),
+            this._commandService,
+            this._permissionService,
+            () => getDocumentEntityParentPermissionObjectIds(this._documentDataModel, segmentId, entityType, entityId)
+        );
     }
 
     /**

@@ -53,25 +53,25 @@ export class Oddfprice extends BaseFunction {
 
         const [settlementObject, maturityObject, issueObject, firstCouponObject, rateObject, yldObject, redemptionObject, frequencyObject, basisObject] = variants as BaseValueObject[];
 
-        const settlementSerialNumber = getDateSerialNumberByObject(settlementObject);
+        const settlementSerialNumber = getDateSerialNumberByObject(settlementObject, this.getDateSystem());
 
         if (typeof settlementSerialNumber !== 'number') {
             return settlementSerialNumber;
         }
 
-        const maturitySerialNumber = getDateSerialNumberByObject(maturityObject);
+        const maturitySerialNumber = getDateSerialNumberByObject(maturityObject, this.getDateSystem());
 
         if (typeof maturitySerialNumber !== 'number') {
             return maturitySerialNumber;
         }
 
-        const issueSerialNumber = getDateSerialNumberByObject(issueObject);
+        const issueSerialNumber = getDateSerialNumberByObject(issueObject, this.getDateSystem());
 
         if (typeof issueSerialNumber !== 'number') {
             return issueSerialNumber;
         }
 
-        const firstCouponSerialNumber = getDateSerialNumberByObject(firstCouponObject);
+        const firstCouponSerialNumber = getDateSerialNumberByObject(firstCouponObject, this.getDateSystem());
 
         if (typeof firstCouponSerialNumber !== 'number') {
             return firstCouponSerialNumber;
@@ -99,15 +99,15 @@ export class Oddfprice extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        const result = calculateOddFPrice(settlementSerialNumber, maturitySerialNumber, issueSerialNumber, firstCouponSerialNumber, rateValue, yldValue, redemptionValue, frequencyValue, basisValue);
+        const result = calculateOddFPrice(settlementSerialNumber, maturitySerialNumber, issueSerialNumber, firstCouponSerialNumber, rateValue, yldValue, redemptionValue, frequencyValue, basisValue, this.getDateSystem());
 
         return NumberValueObject.create(result);
     }
 
     private _validDate(maturitySerialNumber: number, firstCouponSerialNumber: number, settlementSerialNumber: number, issueSerialNumber: number, frequencyValue: number): boolean {
         return this._getDateCorrectOrder(maturitySerialNumber, firstCouponSerialNumber, settlementSerialNumber, issueSerialNumber)
-            && validDaysBetweenIsWholeFrequencyByTwoDate(maturitySerialNumber, firstCouponSerialNumber, frequencyValue)
-            && validCouppcdIsGte0ByTwoDate(issueSerialNumber, maturitySerialNumber, frequencyValue);
+            && validDaysBetweenIsWholeFrequencyByTwoDate(maturitySerialNumber, firstCouponSerialNumber, frequencyValue, this.getDateSystem())
+            && validCouppcdIsGte0ByTwoDate(issueSerialNumber, maturitySerialNumber, frequencyValue, this.getDateSystem());
     }
 
     private _getDateCorrectOrder(maturitySerialNumber: number, firstCouponSerialNumber: number, settlementSerialNumber: number, issueSerialNumber: number): boolean {

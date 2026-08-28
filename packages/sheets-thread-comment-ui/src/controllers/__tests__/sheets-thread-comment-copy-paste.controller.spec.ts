@@ -129,4 +129,29 @@ describe('SheetsThreadCommentCopyPasteController', () => {
 
         controller.dispose();
     });
+
+    it('does not implicitly clone a comment during a normal cell copy', async () => {
+        await testBed.commandService.executeCommand(AddCommentMutation.id, {
+            unitId: 'test',
+            subUnitId: 'sheet1',
+            comment: createRootComment(),
+        });
+        const controller = testBed.injector.createInstance(SheetsThreadCommentCopyPasteController);
+        const hook = testBed.getClipboardHook()!;
+        hook.onBeforeCopy('test', 'sheet1', {
+            startRow: 0,
+            endRow: 0,
+            startColumn: 0,
+            endColumn: 0,
+        });
+
+        expect(hook.onPasteCells(
+            null,
+            { unitId: 'test', subUnitId: 'sheet2', range: { rows: [2], cols: [3] } },
+            null,
+            { copyType: COPY_TYPE.COPY }
+        )).toEqual({ redos: [], undos: [] });
+
+        controller.dispose();
+    });
 });

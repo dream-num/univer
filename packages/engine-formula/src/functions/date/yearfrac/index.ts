@@ -52,13 +52,13 @@ export class Yearfrac extends BaseFunction {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        const startDateSerialNumber = getDateSerialNumberByObject(_startDate);
+        const startDateSerialNumber = getDateSerialNumberByObject(_startDate, this.getDateSystem());
 
         if (typeof startDateSerialNumber !== 'number') {
             return startDateSerialNumber;
         }
 
-        const endDateSerialNumber = getDateSerialNumberByObject(_endDate);
+        const endDateSerialNumber = getDateSerialNumberByObject(_endDate, this.getDateSystem());
 
         if (typeof endDateSerialNumber !== 'number') {
             return endDateSerialNumber;
@@ -74,7 +74,7 @@ export class Yearfrac extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        const { days, yearDays } = getTwoDateDaysByBasis(startDateSerialNumber, endDateSerialNumber, basisValue);
+        const { days, yearDays } = getTwoDateDaysByBasis(startDateSerialNumber, endDateSerialNumber, basisValue, this.getDateSystem());
 
         const result = days / yearDays;
 

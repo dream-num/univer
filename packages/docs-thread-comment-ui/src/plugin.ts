@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import type { Dependency } from '@univerjs/core';
 import type { IUniverDocsThreadCommentUIConfig } from './config/config';
 import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverDocsPlugin } from '@univerjs/docs';
+import { UniverDocsThreadCommentPlugin } from '@univerjs/docs-thread-comment';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
+import { UniverDrawingPlugin } from '@univerjs/drawing';
 import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { UniverThreadCommentPlugin } from '@univerjs/thread-comment';
 import { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
@@ -31,9 +32,17 @@ import { DocThreadCommentRenderController } from './controllers/render-controlle
 import { DocThreadCommentUIController } from './controllers/ui.controller';
 import { DocThreadCommentService } from './services/doc-thread-comment.service';
 
+const STARTING_DEPENDENCIES: Array<Parameters<Injector['add']>[0]> = [
+    [DocThreadCommentUIController],
+    [DocThreadCommentSelectionController],
+    [DocThreadCommentService],
+];
+
 @DependentOn(
     UniverDocsPlugin,
+    UniverDocsThreadCommentPlugin,
     UniverThreadCommentPlugin,
+    UniverDrawingPlugin,
     UniverRenderEnginePlugin,
     UniverDocsUIPlugin,
     UniverThreadCommentUIPlugin
@@ -67,11 +76,7 @@ export class UniverDocsThreadCommentUIPlugin extends Plugin {
     override onStarting(): void {
         this._injector.add([ComponentsController]);
         this._injector.get(ComponentsController);
-        ([
-            [DocThreadCommentUIController],
-            [DocThreadCommentSelectionController],
-            [DocThreadCommentService],
-        ] as Dependency[]).forEach((dep) => {
+        STARTING_DEPENDENCIES.forEach((dep) => {
             this._injector.add(dep);
         });
     }
@@ -84,8 +89,6 @@ export class UniverDocsThreadCommentUIPlugin extends Plugin {
     }
 
     private _initRenderModule() {
-        [DocThreadCommentRenderController].forEach((dep) => {
-            this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, dep as unknown as Dependency);
-        });
+        this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, [DocThreadCommentRenderController]);
     }
 }

@@ -21,6 +21,7 @@ describe('Test url utils', () => {
     it('should return true on legal url', () => {
         expect(isLegalUrl('https://univer.ai/')).toBeTruthy();
         expect(isLegalUrl('univer.ai')).toBeTruthy();
+        expect(isLegalUrl('http://localhost:5173')).toBeTruthy();
     });
 
     it('should return false on illegal url', () => {

@@ -19,6 +19,7 @@ import type { IMenuButtonItem, IMenuItem, IMenuSelectorItem } from '@univerjs/ui
 import type { LocaleKey } from '../locale/types';
 import { ICommandService, NamedStyleType, ThemeService, UniverInstanceType } from '@univerjs/core';
 import { SetTextSelectionsOperation } from '@univerjs/docs';
+import { UnitAction } from '@univerjs/protocol';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 
 import { Observable } from 'rxjs';
@@ -64,6 +65,7 @@ import { getHighlightBackgroundColor } from '../views/paragraph-menu/theme-color
 import {
     BackgroundColorSelectorMenuItemFactory,
     disableMenuWhenNoDocRange,
+    disableMenuWithoutDocumentUnitPermission,
     getParagraphStyleAtCursor,
     shouldSuppressDocMenuStateRefresh,
     TextColorSelectorMenuItemFactory,
@@ -336,21 +338,23 @@ export function EmptyParagraphHorizontalLineMenuItemFactory(): IMenuButtonItem<L
     };
 }
 
-export function CopyCurrentParagraphMenuItemFactory(): IMenuItem<LocaleKey> {
+export function CopyCurrentParagraphMenuItemFactory(accessor: IAccessor): IMenuItem<LocaleKey> {
     return {
         id: DocCopyCurrentParagraphCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'CopyDoubleIcon',
         title: 'docs-ui.rightClick.copy',
+        disabled$: disableMenuWithoutDocumentUnitPermission(accessor, UnitAction.Copy),
     };
 }
 
-export function CutCurrentParagraphMenuItemFactory(): IMenuItem<LocaleKey> {
+export function CutCurrentParagraphMenuItemFactory(accessor: IAccessor): IMenuItem<LocaleKey> {
     return {
         id: DocCutCurrentParagraphCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'CutIcon',
         title: 'docs-ui.rightClick.cut',
+        disabled$: disableMenuWithoutDocumentUnitPermission(accessor, UnitAction.Copy),
     };
 }
 
@@ -421,13 +425,14 @@ export function getDocBlockRangeMenuId(blockType: string): string {
     return `doc.block-range.${blockType}.menu`;
 }
 
-export function TableBlockCopyMenuItemFactory(): IMenuItem<LocaleKey> {
+export function TableBlockCopyMenuItemFactory(accessor: IAccessor): IMenuItem<LocaleKey> {
     return {
         id: DocCopyCommand.name,
         commandId: DocCopyCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'CopyDoubleIcon',
         title: 'docs-ui.rightClick.copy',
+        disabled$: disableMenuWithoutDocumentUnitPermission(accessor, UnitAction.Copy),
     };
 }
 

@@ -93,6 +93,7 @@ export function DesktopContextMenu() {
             visible={visible}
             anchorRect={anchorRect}
             menuType={menuType}
+            autoFocus={menuContext?.autoFocus}
             menuManagerService={activeMenuManagerService}
             layoutService={activeLayoutService}
             onRequestClose={handleClose}

@@ -23,14 +23,10 @@ import {
     CustomRangeType,
     Disposable,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-
     Inject,
     Injector,
-
     IUniverInstanceService,
-
     UniverInstanceType,
-
 } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { calcDocRangePositions } from '@univerjs/docs-ui';

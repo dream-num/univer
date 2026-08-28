@@ -28,6 +28,7 @@ import {
     IUniverInstanceService,
     SliceBodyType,
     UniverInstanceType,
+    validateDocBodyStructure,
 } from '@univerjs/core';
 import {
     DocSelectionManagerService,
@@ -41,11 +42,18 @@ import { IClipboardInterfaceService } from '@univerjs/ui';
 import { describe, expect, it, vi } from 'vitest';
 import { createCommandTestBed } from '../../../commands/commands/__tests__/create-command-test-bed';
 import { CutContentCommand, InnerPasteCommand } from '../../../commands/commands/clipboard.inner.command';
-import { DocClipboardService, getTableClipboardBodySlice, IDocClipboardService } from '../clipboard.service';
+import {
+    convertClipboardHtmlToDocumentData,
+    DocClipboardService,
+    getTableClipboardBodySlice,
+    IDocClipboardService,
+    removeClipboardHtmlImages,
+} from '../clipboard.service';
 import {
     DocClipboardPasteAdapterService,
     IDocClipboardPasteAdapterService,
 } from '../doc-paste-mutation-adapter.service';
+import { HtmlToUDMService } from '../html-to-udm/converter';
 import {
     createInternalClipboardFragment,
     DOC_INTERNAL_FRAGMENT_MIME,
@@ -73,6 +81,80 @@ class RejectingClipboardInterfaceService extends TestClipboardInterfaceService {
         throw new Error('clipboard write failed');
     }
 }
+
+describe('clipboard HTML helpers', () => {
+    it('creates a standalone rich-text document that can be opened by shape editors', () => {
+        const documentData = convertClipboardHtmlToDocumentData('<p><strong>Rich</strong> text</p>');
+        const body = documentData.body!;
+
+        expect(body.dataStream).toBe('Rich text\r\n');
+        expect(body.paragraphs?.some((paragraph) => paragraph.startIndex === body.dataStream.length - 2)).toBe(true);
+        expect(body.sectionBreaks?.some((sectionBreak) => sectionBreak.startIndex === body.dataStream.length - 1)).toBe(true);
+        expect(body.textRuns).toContainEqual(expect.objectContaining({ st: 0, ed: 4 }));
+    });
+
+    it('creates structurally valid quote and code blocks for shape editors', () => {
+        const documentData = convertClipboardHtmlToDocumentData(`
+            <blockquote><p>Quoted documentation</p></blockquote>
+            <pre><code>const value = 1;</code></pre>
+        `);
+
+        expect(validateDocBodyStructure(documentData.body!)).toEqual([]);
+    });
+
+    it('falls back to plain text when converted HTML metadata is structurally invalid', () => {
+        const convert = vi.spyOn(HtmlToUDMService.prototype, 'convert').mockReturnValue({
+            id: 'invalid-html',
+            body: {
+                dataStream: 'Readable content',
+                blockRanges: [{
+                    blockId: 'broken-block',
+                    blockType: DocumentBlockRangeType.QUOTE,
+                    startIndex: 0,
+                    endIndex: 15,
+                }],
+            },
+            documentStyle: {},
+        });
+
+        try {
+            const documentData = convertClipboardHtmlToDocumentData('<blockquote>Readable content</blockquote>');
+
+            expect(documentData.body?.dataStream).toBe('Readable content\r\n');
+            expect(documentData.body?.blockRanges).toBeUndefined();
+            expect(validateDocBodyStructure(documentData.body!)).toEqual([]);
+        } finally {
+            convert.mockRestore();
+        }
+    });
+
+    it('ignores HTML content hidden from the source page', () => {
+        const documentData = convertClipboardHtmlToDocumentData(`
+            <p>Visible content</p>
+            <p aria-hidden="true">ARIA hidden</p>
+            <p class="sr-only">Screen reader only</p>
+            <p hidden>Hidden attribute</p>
+            <p style="display: none !important">Display none</p>
+            <p style="visibility: hidden">Visibility hidden</p>
+        `);
+
+        expect(documentData.body?.dataStream).toContain('Visible content');
+        expect(documentData.body?.dataStream).not.toMatch(/ARIA hidden|Screen reader only|Hidden attribute|Display none|Visibility hidden/);
+    });
+
+    it('removes image elements without dropping Word style metadata', () => {
+        const html = '<html><head><style>.word { font-weight: bold; }</style></head><body><p class="word">Text<img src="data:image/png;base64,AA=="></p></body></html>';
+        const sanitized = removeClipboardHtmlImages(html);
+
+        expect(sanitized).toContain('.word { font-weight: bold; }');
+        expect(sanitized).toContain('<p class="word">Text</p>');
+        expect(sanitized).not.toContain('<img');
+    });
+
+    it('keeps HTML fragments as fragments when removing images', () => {
+        expect(removeClipboardHtmlImages('<b>Text</b><img src="data:image/png;base64,AA==">')).toBe('<b>Text</b>');
+    });
+});
 
 describe('DocClipboardService table copy helpers', () => {
     it('should keep table metadata when copying an entire selected docs table', () => {
@@ -953,8 +1035,16 @@ describe('DocClipboardService table copy helpers', () => {
             naturalHeight = 10;
             private _onload: (() => void) | null = null;
 
+            get src(): string {
+                return '';
+            }
+
             set src(_value: string) {
                 queueMicrotask(() => this._onload?.());
+            }
+
+            get onload(): (() => void) | null {
+                return this._onload;
             }
 
             set onload(value: (() => void) | null) {

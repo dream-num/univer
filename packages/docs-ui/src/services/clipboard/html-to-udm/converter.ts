@@ -173,6 +173,8 @@ export class HtmlToUDMService {
                         ts: style,
                     });
                 }
+            } else if (node instanceof HTMLElement && isHiddenClipboardElement(node)) {
+                continue;
             } else if (node.nodeName === 'IMG') {
                 const element = node as HTMLImageElement;
                 const imageSourceType = element.dataset.imageSourceType ?? (element.src ? inferImageSourceType(element.src) : undefined);
@@ -260,9 +262,11 @@ export class HtmlToUDMService {
 
         const body = doc.body!;
         const startIndex = body.dataStream.length;
+        body.dataStream += DataStreamTreeTokenType.BLOCK_START;
         const text = node.textContent ?? '';
         body.dataStream += text;
         this._appendParagraph(doc, node);
+        body.dataStream += DataStreamTreeTokenType.BLOCK_END;
         body.blockRanges ??= [];
         body.blockRanges.push({
             blockId: generateRandomId(6),
@@ -279,7 +283,10 @@ export class HtmlToUDMService {
             return null;
         }
 
-        return doc.body!.dataStream.length;
+        const body = doc.body!;
+        const startIndex = body.dataStream.length;
+        body.dataStream += DataStreamTreeTokenType.BLOCK_START;
+        return startIndex;
     }
 
     private _processAfterStructuredBlock(node: HTMLElement, doc: Partial<IDocumentData>, startIndex: number | null): void {
@@ -289,6 +296,7 @@ export class HtmlToUDMService {
             return;
         }
 
+        body.dataStream += DataStreamTreeTokenType.BLOCK_END;
         body.blockRanges ??= [];
         body.blockRanges.push({
             blockId: generateRandomId(6),
@@ -665,7 +673,11 @@ function normalizeTextNode(node: ChildNode): string {
     }
 
     if (!hasExplicitSpacing) {
-        return '';
+        return /[ \r\n]/.test(value) &&
+            hasInlineTextSibling(node.previousSibling, 'previous') &&
+            hasInlineTextSibling(node.nextSibling, 'next')
+            ? ' '
+            : '';
     }
 
     return hasTextSibling(node.previousSibling, 'previous') && hasTextSibling(node.nextSibling, 'next') ? ' ' : '';
@@ -684,6 +696,25 @@ function hasTextSibling(node: ChildNode | null, direction: 'previous' | 'next'):
 
         if (current.nodeType === Node.ELEMENT_NODE && (current.textContent ?? '').trim()) {
             return true;
+        }
+
+        current = direction === 'previous' ? current.previousSibling : current.nextSibling;
+    }
+
+    return false;
+}
+
+function hasInlineTextSibling(node: ChildNode | null, direction: 'previous' | 'next'): boolean {
+    let current = node;
+    while (current) {
+        if (current.nodeType === Node.TEXT_NODE && current.nodeValue?.trim()) {
+            return true;
+        }
+        if (current.nodeType === Node.ELEMENT_NODE) {
+            const element = current as HTMLElement;
+            return !isDefaultParagraphElement(element) &&
+                !['BR', 'OL', 'PRE', 'TABLE', 'UL'].includes(element.tagName) &&
+                Boolean(element.textContent?.trim());
         }
 
         current = direction === 'previous' ? current.previousSibling : current.nextSibling;
@@ -959,6 +990,21 @@ function getStructuredBlockType(node: HTMLElement): DocumentBlockRangeType | nul
     }
 
     return null;
+}
+
+function isHiddenClipboardElement(node: HTMLElement): boolean {
+    if (node.hidden || node.getAttribute('aria-hidden')?.toLowerCase() === 'true') {
+        return true;
+    }
+
+    const classes = node.classList;
+    if (classes.contains('sr-only') || classes.contains('visually-hidden') || classes.contains('screen-reader-only')) {
+        return true;
+    }
+
+    const style = node.getAttribute('style') ?? '';
+    return /(?:^|;)\s*display\s*:\s*none(?:\s*!important)?\s*(?:;|$)/i.test(style) ||
+        /(?:^|;)\s*visibility\s*:\s*(?:hidden|collapse)(?:\s*!important)?\s*(?:;|$)/i.test(style);
 }
 
 function isDefaultParagraphElement(node: HTMLElement): boolean {

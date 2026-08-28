@@ -192,8 +192,8 @@ export const MoveSelectionEnterAndTabCommand: ICommand<IMoveSelectionEnterAndTab
         }
         // for shift tab or shift enter, the direction should be reversed. so we need find the previous selection.
         const delta = isReverse ? -1 : 1;
-        const nextSelection = currentSelectionIndex + delta !== selections.length ? selections[currentSelectionIndex + delta] : selections[0];
-        const nextSelectionIndex = selections.findIndex((s) => s === nextSelection);
+        const nextSelectionIndex = (currentSelectionIndex + delta + selections.length) % selections.length;
+        const nextSelection = selections[nextSelectionIndex];
 
         const unitId = workbook.getUnitId();
         const sheetId = worksheet.getSheetId();
@@ -269,7 +269,7 @@ export const MoveSelectionEnterAndTabCommand: ICommand<IMoveSelectionEnterAndTab
         } else {
             // Handle the regular situation of moving the selection area.
             if (keycode === KeyCode.TAB) {
-                if (shortcutExperienceParam == null) {
+                if (direction === Direction.RIGHT && shortcutExperienceParam == null) {
                     shortcutExperienceService.addOrUpdate({
                         unitId,
                         sheetId,

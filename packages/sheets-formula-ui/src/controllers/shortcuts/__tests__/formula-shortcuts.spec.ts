@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { QuickSumCommand } from '@univerjs/sheets-formula';
+import type { IInsertFunctionOperationParams } from '../../../commands/operations/insert-function.operation';
 import { KeyCode, MetaKeys } from '@univerjs/ui';
 import { describe, expect, it, vi } from 'vitest';
 import { ReferenceAbsoluteOperation } from '../../../commands/operations/reference-absolute.operation';
@@ -44,10 +44,12 @@ describe('formula shortcuts', () => {
         expect(whenSheetEditorActivatedMock).toHaveBeenCalledWith(contextService);
     });
 
-    it('binds quick sum to platform shortcuts while the sheet editor is focused', async () => {
+    it('binds quick sum to SUM insertion while the sheet editor is focused', async () => {
+        const { InsertFunctionOperation } = await import('../../../commands/operations/insert-function.operation');
         const { QuickSumShortcut } = await import('../quick-sum.shortcut');
 
-        expect(QuickSumShortcut.id).toBe(QuickSumCommand.id);
+        expect(QuickSumShortcut.id).toBe(InsertFunctionOperation.id);
+        expect(QuickSumShortcut.staticParameters).toEqual({ value: 'SUM' } satisfies IInsertFunctionOperationParams);
         expect(QuickSumShortcut.binding).toBe(MetaKeys.ALT | KeyCode.EQUAL);
         expect(QuickSumShortcut.mac).toBe(MetaKeys.CTRL_COMMAND | MetaKeys.ALT | KeyCode.EQUAL);
         expect(QuickSumShortcut.preconditions).toBe(whenSheetEditorFocusedMock);

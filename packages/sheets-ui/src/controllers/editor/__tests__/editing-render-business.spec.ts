@@ -16,6 +16,7 @@
 
 import type { IDocumentBody } from '@univerjs/core';
 import {
+    Direction,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     EDITOR_ACTIVATED,
@@ -329,6 +330,27 @@ describe('EditingRenderController business methods', () => {
         expect(controller._commandService.syncExecuteCommand).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({
             subUnitId: 'sheet-1',
         }));
+    });
+
+    it.each([
+        ['Enter', KeyCode.ENTER, Direction.UP],
+        ['Tab', KeyCode.TAB, Direction.LEFT],
+    ])('moves the sheet selection in reverse after finishing edit with Shift+%s', async (_name, keycode, direction) => {
+        const { controller } = createController();
+        controller._editorBridgeService.getEditorDirty.mockReturnValue(false);
+
+        await controller._handleEditorInvisible({
+            visible: false,
+            eventType: DeviceInputEventType.Keyboard,
+            unitId: 'unit-1',
+            keycode,
+            isShift: true,
+        });
+
+        expect(controller._commandService.executeCommand).toHaveBeenCalledWith(MoveSelectionEnterAndTabCommand.id, {
+            keycode,
+            direction,
+        });
     });
 
     it('moves the cursor inside the editor and resets editor state on exit', () => {

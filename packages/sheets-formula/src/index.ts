@@ -16,7 +16,6 @@
 
 export { InsertFunctionCommand } from './commands/commands/insert-function.command';
 export type { IInsertFunction, IInsertFunctionCommandParams } from './commands/commands/insert-function.command';
-export { QuickSumCommand } from './commands/commands/quick-sum.command';
 export { CalculationMode, PLUGIN_CONFIG_KEY_BASE } from './config/config';
 export type { IUniverSheetsFormulaBaseConfig, IUniverSheetsFormulaRemoteConfig } from './config/config';
 export { FormulaAutoFillController } from './controllers/formula-auto-fill.controller';

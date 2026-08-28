@@ -20,7 +20,7 @@ import { borderClassName, clsx, DropdownMenu } from '@univerjs/design';
 import { convertTransformToOffsetX, convertTransformToOffsetY, IRenderManagerService } from '@univerjs/engine-render';
 import { AutofillDoubleIcon, MoreDownIcon } from '@univerjs/icons';
 import { AUTO_FILL_APPLY_TYPE, IAutoFillService, RefillCommand } from '@univerjs/sheets';
-import { useDependency, useObservable } from '@univerjs/ui';
+import { ILayoutService, useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo, useReducer, useState } from 'react';
 import { map } from 'rxjs';
 import { SetScrollOperation } from '../../commands/operations/scroll.operation';
@@ -46,6 +46,7 @@ export function AutoFillPopupMenu() {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const renderManagerService = useDependency(IRenderManagerService);
     const autoFillService = useDependency(IAutoFillService);
+    const layoutService = useDependency(ILayoutService);
     const localeService = useDependency(LocaleService);
     const menu = useObservable(
         () => autoFillService.menu$.pipe(map((items) => items.map((item) => ({
@@ -153,7 +154,6 @@ export function AutoFillPopupMenu() {
 
     const handleClick = (item: IAutoFillPopupMenuItem) => {
         commandService.executeCommand(RefillCommand.id, { type: item.value });
-        setVisible(false);
     };
 
     const showMore = visible || isHovered;
@@ -170,6 +170,10 @@ export function AutoFillPopupMenu() {
             >
                 <DropdownMenu
                     align="start"
+                    onCloseAutoFocus={(event) => {
+                        event.preventDefault();
+                        layoutService.focus();
+                    }}
                     items={availableMenu.map((item) => ({
                         type: 'radio',
                         value: selected,

@@ -55,6 +55,7 @@ export interface IEditorBridgeServiceVisibleParam {
     eventType: DeviceInputEventType;
     unitId: string;
     keycode?: KeyCode;
+    isShift?: boolean;
     initialValue?: string;
 }
 

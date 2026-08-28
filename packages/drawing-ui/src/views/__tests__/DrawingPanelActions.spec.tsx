@@ -20,9 +20,10 @@ import type { ReactElement } from 'react';
 import type { Root } from 'react-dom/client';
 import { ArrangeTypeEnum, CommandType, DrawingTypeEnum, ICommandService, LocaleType, Univer } from '@univerjs/core';
 import { DrawingManagerService, IDrawingManagerService } from '@univerjs/drawing';
-import { ComponentManager, IconManager, RediContext } from '@univerjs/ui';
+import { ComponentManager, IconManager, IDialogService, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
+import { of } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SetDrawingArrangeOperation } from '../../commands/operations/drawing-arrange.operation';
 import {
@@ -118,6 +119,14 @@ describe('drawing panel actions', () => {
         injector.add([IconManager]);
         injector.add([ComponentManager]);
         injector.add([DrawingImageClipService]);
+        injector.add([IDialogService, {
+            useValue: {
+                open: () => ({ dispose: () => undefined }),
+                close: () => undefined,
+                closeAll: () => undefined,
+                getDialogs$: () => of([]),
+            },
+        }]);
         injector.get(IconManager).register({ DrawingEditIcon: () => <span /> });
 
         commandService = injector.get(ICommandService);

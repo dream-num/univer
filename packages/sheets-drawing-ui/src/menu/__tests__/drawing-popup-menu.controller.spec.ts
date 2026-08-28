@@ -45,6 +45,7 @@ describe('DrawingPopupMenuController', () => {
         const imageIoChange$ = new Subject<number>();
         const currentWorkbook$ = new Subject<never>();
         const disposedWorkbook$ = new Subject<never>();
+        const dialogs$ = new Subject<never>();
         const imageObject = { oKey: 'image-1' };
         let attachedPopup: { extraProps?: Record<string, unknown> } | undefined;
         const attachPopupToObject = vi.fn((_targetObject: unknown, popup: { extraProps?: Record<string, unknown> }) => {
@@ -56,7 +57,14 @@ describe('DrawingPopupMenuController', () => {
         });
 
         injector.add([LocaleService]);
-        injector.add([IDialogService, { useValue: {} as never }]);
+        injector.add([IDialogService, {
+            useValue: {
+                open: () => toDisposable(() => undefined),
+                close: () => undefined,
+                closeAll: () => undefined,
+                getDialogs$: () => dialogs$,
+            },
+        }]);
         injector.add([IDrawingManagerService, {
             useValue: {
                 getDrawingOKey: () => ({

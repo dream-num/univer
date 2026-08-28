@@ -1411,7 +1411,7 @@ describe('sheet table view components', () => {
         clickElement(headerColorButton);
 
         const colorPicker = document.querySelector('[data-u-comp="color-picker"]');
-        const moreColorControl = colorPicker?.querySelector('a');
+        const moreColorControl = colorPicker?.querySelector('button');
         if (!moreColorControl) {
             throw new Error('More color control was not found.');
         }

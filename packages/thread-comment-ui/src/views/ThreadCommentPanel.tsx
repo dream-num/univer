@@ -256,7 +256,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                         {localeService.t<LocaleKey>('thread-comment-ui.panel.empty')}
                         {isFiltering
                             ? (
-                                <div className="univer-mt-2 univer-flex univer-flex-row">
+                                <div data-u-comp="mobile-actions" className="univer-mt-2 univer-flex univer-flex-row">
                                     <Button onClick={onReset}>
                                         {localeService.t<LocaleKey>('thread-comment-ui.panel.reset')}
                                     </Button>
@@ -264,7 +264,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                             )
                             : !disableAdd
                                 ? (
-                                    <div className="univer-mt-2 univer-flex univer-flex-row">
+                                    <div data-u-comp="mobile-actions"className="univer-mt-2 univer-flex univer-flex-row">
                                         <Button onClick={onAdd}>
                                             <IncreaseIcon className="univer-mr-1.5" />
                                             {localeService.t<LocaleKey>('thread-comment-ui.panel.addComment')}

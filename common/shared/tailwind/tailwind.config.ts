@@ -76,6 +76,9 @@ export function createTailwindContent(configUrl: string, options: ITailwindConte
 const config: Omit<Config, 'content'> = {
     prefix: 'univer-',
     darkMode: 'selector',
+    future: {
+        hoverOnlyWhenSupported: true,
+    },
     corePlugins: {
         preflight: false,
     },

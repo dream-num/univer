@@ -17,6 +17,7 @@
 import type { ReactNode } from 'react';
 import type { LocaleKey } from '../../../locale/types';
 import type { ICustomLabelProps } from '../../custom-label/CustomLabel';
+import type { MobileDrawerSnap } from '../mobile-drawer/MobileDrawer';
 import { LocaleService } from '@univerjs/core';
 import { borderLeftBottomClassName, clsx, scrollbarClassName } from '@univerjs/design';
 import { CloseIcon } from '@univerjs/icons';
@@ -24,6 +25,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ISidebarService } from '../../../services/sidebar/sidebar.service';
 import { useDependency, useObservable } from '../../../utils/di';
 import { CustomLabel } from '../../custom-label/CustomLabel';
+import { MobileDrawer } from '../mobile-drawer/MobileDrawer';
 
 export interface ISidebarMethodOptions {
     id?: string;
@@ -283,5 +285,129 @@ export function Sidebar() {
                 )}
             </section>
         </section>
+    );
+}
+
+export function MobileSidebar() {
+    const localeService = useDependency(LocaleService);
+    const sidebarService = useDependency(ISidebarService);
+    const sidebarOptions = useObservable<ISidebarMethodOptions>(sidebarService.sidebarOptions$);
+    const scrollRef = useRef<HTMLDivElement>(null);
+    const closeButtonRef = useRef<HTMLButtonElement>(null);
+    const [drawerSnap, setDrawerSnap] = useState<MobileDrawerSnap>('expanded');
+    const options = useMemo(() => {
+        if (!sidebarOptions) return null;
+
+        const copy = { ...sidebarOptions } as Omit<ISidebarMethodOptions, 'children'> & {
+            children?: ReactNode;
+            header?: ReactNode;
+            footer?: ReactNode;
+        };
+        for (const key of ['children', 'header', 'footer'] as const) {
+            const label = sidebarOptions[key];
+            if (label) {
+                const { key: itemKey, ...props } = label as any;
+                copy[key] = <CustomLabel key={itemKey} {...props} />;
+            }
+        }
+        return copy;
+    }, [sidebarOptions]);
+
+    useEffect(() => {
+        if (options?.visible) closeButtonRef.current?.focus();
+    }, [options?.visible]);
+
+    useEffect(() => {
+        const scrollElement = scrollRef.current;
+        sidebarService.setContainer(scrollElement ?? undefined);
+        const handleScroll = (event: Event) => sidebarService.scrollEvent$.next(event);
+        scrollElement?.addEventListener('scroll', handleScroll);
+        return () => {
+            scrollElement?.removeEventListener('scroll', handleScroll);
+            sidebarService.setContainer(undefined);
+        };
+    }, [options?.visible, sidebarService]);
+
+    if (!options?.visible) return null;
+
+    const close = () => sidebarService.close(sidebarOptions?.id);
+
+    return (
+        <div className="univer-fixed univer-inset-0 univer-z-[1100]" data-u-comp="mobile-sidebar">
+            <button
+                type="button"
+                aria-label={localeService.t<LocaleKey>('ui.sidebar.close')}
+                className="
+                  univer-absolute univer-inset-0 univer-m-0 univer-appearance-none univer-rounded-none univer-border-0
+                  univer-bg-black/35 univer-p-0
+                "
+                onClick={close}
+            />
+            <MobileDrawer
+                componentName="mobile-sidebar-drawer"
+                snap={drawerSnap}
+                expandLabel={localeService.t<LocaleKey>('ui.ribbon.more')}
+                collapseLabel={localeService.t<LocaleKey>('ui.ribbon.more')}
+                onSnapChange={setDrawerSnap}
+                onClose={close}
+                role="dialog"
+                ariaLabel={localeService.t<LocaleKey>('ui.sidebar.panel')}
+                contentRef={scrollRef}
+                panelClassName="
+                  univer-bg-gray-0 univer-text-gray-900
+                  dark:!univer-bg-gray-900 dark:!univer-text-gray-0
+                  [&_[data-u-comp='mobile-actions']>button]:!univer-m-0
+                  [&_[data-u-comp='mobile-actions']>button]:!univer-h-12
+                  [&_[data-u-comp='mobile-actions']>button]:!univer-min-w-0
+                  [&_[data-u-comp='mobile-actions']>button]:!univer-flex-1
+                  [&_[data-u-comp='mobile-actions']>button]:!univer-rounded-xl
+                  [&_[data-u-comp='mobile-actions']]:!univer-flex [&_[data-u-comp='mobile-actions']]:!univer-w-full
+                  [&_[data-u-comp='mobile-actions']]:!univer-justify-stretch
+                  [&_[data-u-comp='mobile-actions']]:!univer-gap-3
+                "
+                contentClassName="univer-min-h-0 univer-px-4 univer-pb-4"
+                header={(
+                    <header
+                        className="
+                          univer-flex univer-h-12 univer-flex-1 univer-items-center univer-justify-between univer-px-4
+                        "
+                    >
+                        <div className="univer-min-w-0 univer-truncate univer-text-base univer-font-semibold">{options.header}</div>
+                        <button
+                            ref={closeButtonRef}
+                            type="button"
+                            className="
+                              univer-flex univer-size-10 univer-shrink-0 univer-items-center univer-justify-center
+                              univer-rounded-full univer-border-0 univer-bg-transparent univer-text-xl
+                              univer-text-gray-600 univer-outline-none
+                              active:univer-bg-gray-100
+                              dark:!univer-text-gray-300
+                              dark:active:!univer-bg-gray-700
+                            "
+                            onClick={close}
+                            aria-label={localeService.t<LocaleKey>('ui.sidebar.close')}
+                        >
+                            <CloseIcon />
+                        </button>
+                    </header>
+                )}
+                footer={options.footer
+                    ? (
+                        <footer
+                            data-u-comp="mobile-actions"
+                            className="
+                              univer-shrink-0 univer-border-0 univer-border-t univer-border-solid univer-border-gray-200
+                              univer-p-4
+                              dark:!univer-border-gray-700
+                            "
+                        >
+                            {options.footer}
+                        </footer>
+                    )
+                    : undefined}
+            >
+                {options.children}
+            </MobileDrawer>
+        </div>
     );
 }

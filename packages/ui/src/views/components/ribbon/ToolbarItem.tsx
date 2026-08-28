@@ -38,6 +38,7 @@ type IToolbarItemProps = IDisplayMenuItem<IMenuItem> & {
     iconColor?: string;
     fullWidth?: boolean;
     preserveStrokeWidth?: boolean;
+    onOpenSubItems?: () => void;
 };
 
 const toolbarDisabledClassName = 'univer-pointer-events-none univer-cursor-not-allowed univer-text-gray-300 dark:!univer-text-gray-600';
@@ -202,7 +203,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
         commandService.executeCommand(commandId, params);
     };
 
-    const { tooltip, shortcut, icon, title, label, id, commandId, type, slot, params, grid, large, showLabel, iconSize, iconColor, fullWidth, preserveStrokeWidth } = props;
+    const { tooltip, shortcut, icon, title, label, id, commandId, type, slot, params, grid, large, showLabel, iconSize, iconColor, fullWidth, preserveStrokeWidth, onOpenSubItems } = props;
     const gridLabel = title ?? tooltip;
 
     const shortcutDisplay = useToolbarShortcutDisplay({ id, commandId, shortcut });
@@ -267,6 +268,25 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                 const commandParams = typeof params === 'function' ? params() : params;
                 executeCommand(bId, commandParams ?? { value });
             }
+        }
+
+        if (menuType === MenuItemType.SUBITEMS && onOpenSubItems) {
+            return (
+                <ToolbarButton
+                    data-u-command={id}
+                    noIcon={!iconToDisplay}
+                    active={activated}
+                    disabled={disabled}
+                    onClick={onOpenSubItems}
+                >
+                    <CustomLabel
+                        icon={iconToDisplay}
+                        iconSize={iconSize}
+                        preserveStrokeWidth={preserveStrokeWidth}
+                        title={titleToDisplay}
+                    />
+                </ToolbarButton>
+            );
         }
 
         if (menuType === MenuItemType.BUTTON_SELECTOR) {

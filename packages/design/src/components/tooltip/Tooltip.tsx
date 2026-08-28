@@ -72,14 +72,14 @@ export function Tooltip(props: ITooltipProps) {
         onVisibleChange,
     } = props;
 
-    const { direction } = useContext(ConfigContext);
+    const { direction, disableTooltips } = useContext(ConfigContext);
 
     // Internal state for uncontrolled mode
     const [uncontrolledVisible, setUncontrolledVisible] = useState(false);
 
     // Determine whether the tooltip is controlled or uncontrolled
     const isControlled = controlledVisible !== undefined;
-    const visible = isControlled ? controlledVisible : uncontrolledVisible;
+    const visible = !disableTooltips && (isControlled ? controlledVisible : uncontrolledVisible);
 
     const triggerRef = useRef<HTMLElement | null>(null);
     const tooltipRef = useRef<HTMLDivElement | null>(null);
@@ -93,6 +93,8 @@ export function Tooltip(props: ITooltipProps) {
     }
 
     function showTooltip() {
+        if (disableTooltips) return;
+
         if (isControlled) {
             onVisibleChange?.(true);
         } else {
@@ -101,6 +103,8 @@ export function Tooltip(props: ITooltipProps) {
     }
 
     function hideTooltip() {
+        if (disableTooltips) return;
+
         if (isControlled) {
             onVisibleChange?.(false);
         } else {

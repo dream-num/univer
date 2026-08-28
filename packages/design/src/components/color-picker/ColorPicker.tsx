@@ -15,6 +15,7 @@
  */
 
 import { memo, useCallback, useContext, useEffect, useState } from 'react';
+import { clsx } from '../../helper/clsx';
 import { isBrowser } from '../../helper/is-browser';
 import { Button } from '../button/Button';
 import { ConfigContext } from '../config-provider/ConfigProvider';
@@ -39,7 +40,7 @@ export interface IColorPickerProps {
 }
 
 export function ColorPicker({ format = 'hex', value, onChange }: IColorPickerProps) {
-    const { direction, locale } = useContext(ConfigContext);
+    const { direction, locale, mobile } = useContext(ConfigContext);
 
     const [hsv, setHsv] = useState<[number, number, number]>([0, 100, 100]);
     const [alpha, setAlpha] = useState(1);
@@ -109,6 +110,7 @@ export function ColorPicker({ format = 'hex', value, onChange }: IColorPickerPro
         >
             <MemoizedColorPresets
                 hsv={hsv}
+                variant={mobile ? 'mobile' : 'compact'}
                 onChange={(h, s, v) => {
                     handleColorChange(h, s, v);
                     handleAlphaChange(1);
@@ -116,17 +118,27 @@ export function ColorPicker({ format = 'hex', value, onChange }: IColorPickerPro
                 }}
             />
 
-            <div className="univer-flex univer-h-7 univer-items-center">
-                <a
-                    className={`
-                      univer-cursor-pointer univer-gap-2 univer-text-sm univer-text-gray-900 univer-transition-opacity
-                      hover:univer-opacity-80
+            <div className={clsx('univer-flex univer-items-center', mobile ? 'univer-h-12' : 'univer-h-7')}>
+                <button
+                    type="button"
+                    className={clsx(`
+                      univer-cursor-pointer univer-border-0 univer-text-sm univer-text-gray-900
                       dark:!univer-text-gray-0
-                    `}
+                    `, mobile
+                        ? `
+                          univer-h-11 univer-w-full univer-rounded-xl univer-bg-gray-100 univer-font-medium
+                          active:univer-bg-gray-200
+                          dark:!univer-bg-gray-800
+                          dark:active:!univer-bg-gray-700
+                        `
+                        : `
+                          univer-bg-transparent univer-p-0 univer-transition-opacity
+                          hover:univer-opacity-80
+                        `)}
                     onClick={() => setVisible(true)}
                 >
                     {locale?.ColorPicker.more}
-                </a>
+                </button>
             </div>
 
             <Dialog

@@ -35,6 +35,8 @@ export { Checkbox } from './components/checkbox/Checkbox';
 export type { ICheckboxProps } from './components/checkbox/Checkbox';
 export { ColorPicker } from './components/color-picker/ColorPicker';
 export type { IColorPickerProps } from './components/color-picker/ColorPicker';
+export { ColorPickerPanel } from './components/color-picker/ColorPickerPanel';
+export type { IColorPickerPanelProps } from './components/color-picker/ColorPickerPanel';
 export { ColorPresets } from './components/color-picker/ColorPresets';
 export {
     Command,

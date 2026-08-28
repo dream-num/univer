@@ -66,6 +66,7 @@ export { ContextMenuService, IContextMenuService } from './services/contextmenu/
 export type { IContextMenuHandler } from './services/contextmenu/contextmenu.service';
 export { DesktopDialogService } from './services/dialog/desktop-dialog.service';
 export { IDialogService } from './services/dialog/dialog.service';
+export { isMobileDialogService, MobileDialogService } from './services/dialog/mobile-dialog.service';
 export { CanvasFloatDomPreviewService, CanvasFloatDomService } from './services/dom/canvas-dom-layer.service';
 export type {
     ICanvasFloatDomPreview,
@@ -163,6 +164,8 @@ export { FloatDomSingle } from './views/components/dom/FloatDom';
 export { FloatDom } from './views/components/dom/FloatDom';
 export { PrintFloatDomSingle } from './views/components/dom/Print';
 export { HOVER_TRACK_HOST_CLASS_NAME, HoverTrack } from './views/components/hover-track/HoverTrack';
+export { MobileDrawer, resolveMobileDrawerRelease } from './views/components/mobile-drawer/MobileDrawer';
+export type { MobileDrawerRelease, MobileDrawerSnap } from './views/components/mobile-drawer/MobileDrawer';
 export { CanvasPopup, SingleCanvasPopup } from './views/components/popup/CanvasPopup';
 export { RectPopup } from './views/components/popup/RectPopup';
 export type { RectPopupDirection } from './views/components/popup/RectPopup';
@@ -183,5 +186,6 @@ export { FONT_SIZE_COMPONENT, FONT_SIZE_LIST, HEADING_LIST } from './views/font-
 export * from './views/hooks/index';
 export { preventBrowserZoomInContainers } from './views/hooks/prevent-browser-zoom';
 export * from './views/index';
+export { MobileMenu } from './views/menu/mobile/MobileMenu';
 export { type INotificationOptions } from './views/notification/Notification';
 export { ProgressBar } from './views/progress-bar/ProgressBar';

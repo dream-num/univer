@@ -27,7 +27,7 @@ import { IWorkbenchService } from '../../services/workbench/workbench.service';
 import { connectInjector, useDependency, useObservable } from '../../utils/di';
 import { ComponentContainer, useComponentsOfPart } from '../components/ComponentContainer';
 import { MobileContextMenu } from '../components/context-menu/MobileContextMenu';
-import { Sidebar } from '../components/sidebar/Sidebar';
+import { MobileSidebar } from '../components/sidebar/Sidebar';
 import { WorkbenchSkeleton } from '../components/workbench-skeleton/WorkbenchSkeleton';
 
 export interface IUniverAppProps extends IWorkbenchOptions {
@@ -73,6 +73,7 @@ export function MobileWorkbench(props: IUniverAppProps) {
     const themeSwitcherService = useDependency(ThemeSwitcherService);
 
     const contentRef = useRef<HTMLDivElement>(null);
+    const viewportRef = useRef<HTMLDivElement>(null);
 
     const footerComponents = useComponentsOfPart(BuiltInUIPart.FOOTER);
     const headerComponents = useComponentsOfPart(BuiltInUIPart.HEADER);
@@ -126,14 +127,74 @@ export function MobileWorkbench(props: IUniverAppProps) {
         portalContainer.dir = direction;
     }, [direction, portalContainer]);
 
+    useLayoutEffect(() => {
+        document.documentElement.classList.toggle('univer-dark', darkMode);
+    }, [darkMode]);
+
+    useEffect(() => {
+        const visualViewport = window.visualViewport;
+        const viewportElement = viewportRef.current;
+        if (!viewportElement) {
+            return undefined;
+        }
+
+        let stableHeight = Math.round(mountContainer.getBoundingClientRect().height || window.innerHeight);
+        let stableWidth = Math.round(mountContainer.getBoundingClientRect().width || window.innerWidth);
+
+        const updateKeyboardInset = () => {
+            const visibleBottom = visualViewport
+                ? visualViewport.offsetTop + visualViewport.height
+                : window.innerHeight;
+            viewportElement.style.setProperty(
+                '--univer-mobile-keyboard-inset',
+                `${Math.max(0, Math.round(stableHeight - visibleBottom))}px`
+            );
+        };
+        const updateStableViewport = () => {
+            const width = Math.round(mountContainer.getBoundingClientRect().width || window.innerWidth);
+            const activeElement = document.activeElement;
+            const editing = activeElement instanceof HTMLInputElement ||
+                activeElement instanceof HTMLTextAreaElement ||
+                activeElement?.getAttribute('contenteditable') === 'true';
+
+            if (!editing || width !== stableWidth) {
+                stableHeight = Math.round(mountContainer.getBoundingClientRect().height || window.innerHeight);
+                stableWidth = width;
+                viewportElement.style.height = `${stableHeight}px`;
+            }
+            updateKeyboardInset();
+        };
+
+        viewportElement.style.height = `${stableHeight}px`;
+        updateKeyboardInset();
+        window.addEventListener('resize', updateStableViewport);
+        visualViewport?.addEventListener('resize', updateKeyboardInset);
+        visualViewport?.addEventListener('scroll', updateKeyboardInset);
+
+        return () => {
+            window.removeEventListener('resize', updateStableViewport);
+            visualViewport?.removeEventListener('resize', updateKeyboardInset);
+            visualViewport?.removeEventListener('scroll', updateKeyboardInset);
+        };
+    }, [mountContainer]);
+
+    // Keep the inner layout focusable so focusin bubbles from editors and the layout service can refocus input.
     return (
-        <ConfigProvider locale={locale?.design} direction={direction} mountContainer={portalContainer}>
-            <div className="univer-relative univer-h-full univer-min-h-0">
-                {/**
-                  * IMPORTANT! This `tabIndex` should not be moved. This attribute allows the element to catch
-                  * all focusin event merged from its descendants. The DesktopLayoutService would listen to focusin events
-                  * bubbled to this element and refocus the input element.
-                  */}
+        <ConfigProvider
+            locale={locale?.design}
+            direction={direction}
+            mountContainer={portalContainer}
+            disableTooltips
+            mobile
+        >
+            <div
+                ref={viewportRef}
+                className="
+                  univer-relative univer-h-full univer-min-h-0
+                  [&_button:active]:!univer-opacity-70
+                  [&_button]:univer-touch-manipulation
+                "
+            >
                 <div
                     data-u-comp="app-layout"
                     className={clsx(`
@@ -198,9 +259,7 @@ export function MobileWorkbench(props: IUniverAppProps) {
                                 </section>
                             </section>
 
-                            <aside className="univer-h-full">
-                                <Sidebar />
-                            </aside>
+                            <aside className="univer-h-full" />
                         </div>
 
                         {/* footer */}
@@ -215,9 +274,16 @@ export function MobileWorkbench(props: IUniverAppProps) {
                     <WorkbenchSkeleton darkMode={darkMode} direction={direction} overlay />
                 )}
             </div>
-            <div dir={direction}>
+            <div
+                className="
+                  [&_button:active]:!univer-opacity-70
+                  [&_button]:univer-touch-manipulation
+                "
+                dir={direction}
+            >
                 <ComponentContainer key="global" components={globalComponents} />
                 {contextMenu && <MobileContextMenu />}
+                <MobileSidebar />
             </div>
         </ConfigProvider>
     );

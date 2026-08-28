@@ -20,6 +20,7 @@ import { createIdentifier, Disposable, toDisposable } from '@univerjs/core';
 
 export interface IContextMenuTriggerContext {
     unitId?: string;
+    subUnitId?: string;
 }
 
 export interface IContextMenuHandler {

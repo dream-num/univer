@@ -23,7 +23,7 @@ import enUS from '../../../../locale/en-US';
 import { DesktopSidebarService } from '../../../../services/sidebar/desktop-sidebar.service';
 import { ISidebarService } from '../../../../services/sidebar/sidebar.service';
 import { RediProvider } from '../../../../utils/di';
-import { Sidebar } from '../Sidebar';
+import { MobileSidebar, Sidebar } from '../Sidebar';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -111,6 +111,28 @@ describe('Sidebar', () => {
         fireEvent.mouseUp(document);
 
         expect(sidebarService.width).toBe(800);
+        rendered.dispose();
+    });
+
+    it('renders sidebar content as a modal bottom drawer on mobile', () => {
+        const rendered = renderWithDependencies(<MobileSidebar />);
+        const sidebarService = rendered.injector.get(ISidebarService);
+
+        act(() => {
+            sidebarService.open({
+                id: 'comments',
+                header: { title: <span>Comments</span> },
+                children: { title: <span>Comment list</span> },
+            });
+        });
+
+        const drawer = screen.getByRole('dialog', { name: 'Sidebar panel' });
+        expect(drawer.className).toContain('univer-bottom-0');
+        expect(drawer.className).toContain("[&_[data-u-comp='mobile-actions']>button]:!univer-h-12");
+        expect(screen.getByText('Comment list')).toBeTruthy();
+
+        fireEvent.click(screen.getAllByRole('button', { name: 'Close sidebar' })[0]);
+        expect(screen.queryByRole('dialog', { name: 'Sidebar panel' })).toBeNull();
         rendered.dispose();
     });
 });

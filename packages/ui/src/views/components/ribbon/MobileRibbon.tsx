@@ -16,18 +16,22 @@
 
 import type { ComponentType } from 'react';
 import type { LocaleKey } from '../../../locale/types';
-import { LocaleService } from '@univerjs/core';
+import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
+import { LocaleService, UniverInstanceType } from '@univerjs/core';
 import {
     borderBottomClassName,
     borderClassName,
     borderRightClassName,
     clsx,
+    ConfigContext,
     resetButtonClassName,
 } from '@univerjs/design';
-import { MoreLeftIcon, MoreRightIcon } from '@univerjs/icons';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { RibbonPosition } from '../../../services/menu/types';
+import { MoreHorizontalIcon, MoreLeftIcon, MoreRightIcon } from '@univerjs/icons';
+import { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { RibbonPosition, RibbonStartGroup } from '../../../services/menu/types';
 import { IRibbonService } from '../../../services/ribbon/ribbon.service';
+import { IWorkbenchService } from '../../../services/workbench/workbench.service';
 import { useDependency, useObservable } from '../../../utils/di';
 import { ComponentContainer } from '../ComponentContainer';
 import { ToolbarItem } from './ToolbarItem';
@@ -44,9 +48,21 @@ export function MobileRibbon(props: IMobileRibbonProps) {
 
     const localeService = useDependency(LocaleService);
     const ribbonService = useDependency(IRibbonService);
+    const workbenchService = useDependency(IWorkbenchService);
 
     const ribbon = useObservable(ribbonService.ribbon$, []);
     const activatedTab = useObservable(ribbonService.activatedTab$, RibbonPosition.START);
+    const rootUnitType = useObservable(workbenchService.rootUnitType$, null, true);
+
+    if (rootUnitType === UniverInstanceType.UNIVER_SHEET) {
+        return (
+            <MobileSheetTopBar
+                ribbon={ribbon}
+                headerMenu={headerMenu}
+                headerMenuComponents={headerMenuComponents}
+            />
+        );
+    }
 
     const activeIndex = useMemo(() => {
         const index = ribbon.findIndex((group) => group.key === activatedTab);
@@ -354,5 +370,128 @@ export function MobileRibbon(props: IMobileRibbonProps) {
                 </button>
             </div>
         </div>
+    );
+}
+
+function MobileSheetTopBar(props: IMobileRibbonProps & { ribbon: IMenuSchema[] }) {
+    const { headerMenuComponents, headerMenu = true, ribbon } = props;
+    const [moreOpen, setMoreOpen] = useState(false);
+    const moreTriggerRef = useRef<HTMLButtonElement>(null);
+    const { mountContainer } = useContext(ConfigContext);
+    const localeService = useDependency(LocaleService);
+    const startGroup = ribbon.find((group) => group.key === RibbonPosition.START);
+    const historyItems = startGroup?.children?.find((group) => group.key === RibbonStartGroup.HISTORY)?.children ?? [];
+    const otherItems = startGroup?.children?.find((group) => group.key === RibbonStartGroup.OTHERS)?.children ?? [];
+    const items = historyItems.filter((schema) => schema.item);
+    const moreItems = otherItems.flatMap((schema) => schema.children?.length ? schema.children : [schema])
+        .filter((schema) => schema.item);
+    const hasHeaderMenu = !!(headerMenu && headerMenuComponents && headerMenuComponents.size > 0);
+
+    if (items.length === 0 && moreItems.length === 0 && !hasHeaderMenu) {
+        return null;
+    }
+
+    const triggerRect = moreOpen ? moreTriggerRef.current?.getBoundingClientRect() : undefined;
+    const viewportWidth = moreTriggerRef.current?.ownerDocument.defaultView?.innerWidth ?? 0;
+    const moreMenu = moreOpen && mountContainer && createPortal(
+        <>
+            <button
+                type="button"
+                aria-label={localeService.t<LocaleKey>('ui.rangeSelector.cancel')}
+                className={clsx(
+                    resetButtonClassName,
+                    'univer-fixed univer-inset-0 univer-z-[1390] !univer-rounded-none !univer-bg-transparent'
+                )}
+                onClick={() => setMoreOpen(false)}
+            />
+            <div
+                data-u-comp="mobile-sheet-more-menu"
+                className={clsx(`
+                  univer-fixed univer-z-[1400] univer-flex univer-w-60 univer-max-w-[calc(100vw-24px)] univer-flex-col
+                  univer-gap-1 univer-rounded-2xl univer-bg-gray-0 univer-p-2 univer-shadow-lg
+                  dark:!univer-bg-gray-800
+                `, borderClassName)}
+                style={{
+                    top: (triggerRect?.bottom ?? 48) + 8,
+                    right: Math.max(12, viewportWidth - (triggerRect?.right ?? viewportWidth)),
+                }}
+            >
+                {moreItems.map((schema) => (
+                    <div
+                        key={schema.key}
+                        className="
+                          univer-w-full
+                          [&>span]:univer-block [&>span]:univer-w-full
+                          [&_button]:!univer-h-12 [&_button]:!univer-w-full [&_button]:!univer-justify-start
+                          [&_button]:!univer-gap-3 [&_button]:!univer-rounded-xl [&_button]:!univer-px-4
+                          [&_button]:!univer-text-base
+                        "
+                        onClick={() => setMoreOpen(false)}
+                    >
+                        <ToolbarItem {...schema.item!} grid showLabel preserveStrokeWidth />
+                    </div>
+                ))}
+            </div>
+        </>,
+        mountContainer
+    );
+
+    return (
+        <>
+            <div
+                data-u-comp="mobile-sheet-top-bar"
+                className={clsx(`
+                  univer-flex univer-h-12 univer-items-center univer-justify-end univer-gap-1 univer-bg-gray-0
+                  univer-px-3
+                  dark:!univer-bg-gray-800
+                `, borderBottomClassName)}
+            >
+                <div
+                    className="
+                      univer-flex univer-items-center univer-gap-1
+                      [&_button]:!univer-min-h-10 [&_button]:!univer-min-w-10 [&_button]:!univer-rounded-lg
+                      [&_button_svg]:!univer-size-5
+                    "
+                >
+                    {items.map((schema) => (
+                        <ToolbarItem
+                            key={schema.key}
+                            {...schema.item!}
+                        />
+                    ))}
+                </div>
+                {hasHeaderMenu && (
+                    <div
+                        className="
+                          univer-flex univer-items-center univer-gap-1
+                          [&>*]:univer-m-0 [&>*]:univer-inline-flex [&>*]:univer-min-h-10 [&>*]:univer-min-w-10
+                          [&>*]:univer-items-center [&>*]:univer-justify-center [&>*]:univer-rounded-lg
+                        "
+                    >
+                        <ComponentContainer components={headerMenuComponents!} />
+                    </div>
+                )}
+                {moreItems.length > 0 && (
+                    <button
+                        ref={moreTriggerRef}
+                        type="button"
+                        data-u-comp="mobile-sheet-more-trigger"
+                        aria-label={localeService.t<LocaleKey>('ui.ribbon.more')}
+                        aria-expanded={moreOpen}
+                        className={clsx(resetButtonClassName, `
+                          univer-flex univer-size-10 univer-items-center univer-justify-center univer-rounded-lg
+                          univer-text-gray-700 univer-transition-colors
+                          active:univer-bg-gray-100
+                          dark:!univer-text-gray-200
+                          dark:active:!univer-bg-gray-700
+                        `)}
+                        onClick={() => setMoreOpen((open) => !open)}
+                    >
+                        <MoreHorizontalIcon className="univer-size-5" preserveStrokeWidth />
+                    </button>
+                )}
+            </div>
+            {moreMenu}
+        </>
     );
 }

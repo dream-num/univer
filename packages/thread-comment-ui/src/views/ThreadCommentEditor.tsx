@@ -158,7 +158,10 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
             </div>
             {editing
                 ? (
-                    <div className="univer-mt-3 univer-flex univer-flex-row univer-justify-end univer-gap-2">
+                    <div
+                        data-u-comp="mobile-actions"
+                        className="univer-mt-3 univer-flex univer-flex-row univer-justify-end univer-gap-2"
+                    >
                         <Button
                             type="button"
                             onClick={() => {

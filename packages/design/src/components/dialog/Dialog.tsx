@@ -270,7 +270,7 @@ export function Dialog(props: IDialogProps) {
         onCancel,
     } = props;
 
-    const { locale, mountContainer, direction } = useContext(ConfigContext);
+    const { locale, mountContainer, direction, mobile } = useContext(ConfigContext);
 
     const { position, isDragging, setElementRef, handleMouseDown } = useDraggable({ defaultPosition, enabled: draggable });
 
@@ -324,6 +324,16 @@ export function Dialog(props: IDialogProps) {
                 ref={handleContentRef}
                 className={clsx(className, {
                     '!univer-animate-none': draggable,
+                    [`
+                      !univer-bottom-0 !univer-left-0 !univer-right-0 !univer-top-auto !univer-max-h-[80dvh]
+                      !univer-max-w-none !univer-translate-x-0 !univer-translate-y-0 !univer-gap-4
+                      !univer-overflow-y-auto !univer-rounded-t-2xl !univer-p-4
+                      [&_[data-slot='dialog-footer']]:!univer-flex-row [&_[data-slot='dialog-footer']]:!univer-gap-3
+                      [&_[data-slot='dialog-footer']_button]:!univer-h-12
+                      [&_[data-slot='dialog-footer']_button]:!univer-flex-1
+                      [&_button[data-slot='close']]:!univer-right-3 [&_button[data-slot='close']]:!univer-top-3
+                      [&_button[data-slot='close']]:!univer-size-10
+                    `]: mobile,
                 })}
                 style={{
                     ...style,
@@ -338,6 +348,18 @@ export function Dialog(props: IDialogProps) {
                             transform: `translate(${position.x}px, ${position.y}px)`,
                             transition: isDragging ? 'none' : undefined,
                             cursor: isDragging ? 'grabbing' : undefined,
+                        }
+                        : {}),
+                    ...(mobile
+                        ? {
+                            position: 'fixed',
+                            insetInline: 0,
+                            top: 'auto',
+                            bottom: 0,
+                            width: '100%',
+                            maxWidth: 'none',
+                            margin: 0,
+                            transform: 'none',
                         }
                         : {}),
                 }}

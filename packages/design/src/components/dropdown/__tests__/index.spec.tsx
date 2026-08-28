@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import { cleanup, render } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { ConfigProvider } from '../../config-provider/ConfigProvider';
 import { Dropdown } from '../Dropdown';
 import '@testing-library/jest-dom/vitest';
 
@@ -50,5 +51,18 @@ describe('Dropdown', () => {
         );
         getByText('Trigger').click();
         expect(handleOpenChange).toHaveBeenCalled();
+    });
+
+    it('should render a touch-first dialog surface under a mobile provider', () => {
+        render(
+            <ConfigProvider mountContainer={document.body} mobile>
+                <Dropdown overlay={<div>Overlay Content</div>} open>
+                    <button type="button">Trigger</button>
+                </Dropdown>
+            </ConfigProvider>
+        );
+
+        expect(screen.getByRole('dialog')).toHaveTextContent('Overlay Content');
+        expect(screen.getByRole('dialog')).toHaveClass('!univer-bottom-0');
     });
 });

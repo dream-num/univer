@@ -46,7 +46,6 @@ const toolbarScrollOffset = 168;
 export function MobileRibbon(props: IMobileRibbonProps) {
     const { headerMenuComponents, headerMenu = true } = props;
 
-    const localeService = useDependency(LocaleService);
     const ribbonService = useDependency(IRibbonService);
     const workbenchService = useDependency(IWorkbenchService);
 
@@ -63,6 +62,21 @@ export function MobileRibbon(props: IMobileRibbonProps) {
             />
         );
     }
+
+    return (
+        <MobileRibbonToolbar
+            ribbon={ribbon}
+            activatedTab={activatedTab}
+            headerMenu={headerMenu}
+            headerMenuComponents={headerMenuComponents}
+        />
+    );
+}
+
+function MobileRibbonToolbar(props: IMobileRibbonProps & { ribbon: IMenuSchema[]; activatedTab: string }) {
+    const { ribbon, activatedTab, headerMenuComponents, headerMenu = true } = props;
+    const localeService = useDependency(LocaleService);
+    const ribbonService = useDependency(IRibbonService);
 
     const activeIndex = useMemo(() => {
         const index = ribbon.findIndex((group) => group.key === activatedTab);

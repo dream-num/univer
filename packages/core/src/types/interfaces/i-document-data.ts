@@ -531,6 +531,8 @@ export interface IDocumentStyle extends IDocStyleBase, IDocumentLayout, IHeaderA
     textStyle?: ITextStyle; // default style for text
     defaultParagraphStyle?: IDocumentDefaultParagraphStyle; // default style inherited by paragraphs
     background?: IDocumentBackground; // Page background image.
+    /** Enables compatibility-only font metric scaling. Defaults to true. */
+    fontMetricScaleEnabled?: BooleanNumber;
 }
 
 export interface IDocumentBackground {
@@ -563,6 +565,10 @@ export interface IDocumentRenderConfig {
     cellValueType?: CellValueType; // sheet cell type, In a spreadsheet cell, without any alignment settings applied, text should be left-aligned, numbers should be right-aligned, and Boolean values should be center-aligned.
     isRenderStyle?: BooleanNumber; // Whether to render the style(textRuns), used in formula bar editor. the default value is TRUE.
     zeroWidthParagraphBreak?: BooleanNumber; // Whether to render the paragraph \r to zero width. the default value is false.
+    /** Keep glyphs top-aligned when exact line spacing is smaller than the glyph line box. */
+    topAlignExactLineSpacing?: BooleanNumber;
+    /** Prevent pointer selection from moving the document viewport. */
+    disableSelectionAutoScroll?: BooleanNumber;
     shapeTextOpticalVerticalAlign?: BooleanNumber; // Align shape text by visible glyph bounds instead of the font line box.
 }
 
@@ -851,6 +857,9 @@ export interface IDocTextFill {
 export interface IDocTextOutline {
     color?: string;
     width?: number;
+    lineCap?: 'butt' | 'round' | 'square';
+    lineJoin?: 'bevel' | 'miter' | 'round';
+    miterLimit?: number;
 }
 
 export interface ITextStyle extends IStyleBase {
@@ -858,6 +867,14 @@ export interface ITextStyle extends IStyleBase {
     sc?: number; // character spacing in points
     pos?: number; // position
     sa?: number; // scale
+    /** Source glyph paint scale relative to its stored font size. */
+    fontRenderScale?: number;
+    /** Fixed advance per Unicode character in 96-DPI layout pixels. */
+    textAdvance?: number;
+    /** Fixed line ascent in 96-DPI layout pixels. */
+    lineAscent?: number;
+    /** Fixed line descent in 96-DPI layout pixels. */
+    lineDescent?: number;
     textFill?: IDocTextFill;
     textOutline?: IDocTextOutline;
     /**
@@ -881,6 +898,8 @@ export interface IIndentStart {
     hanging?: INumberUnit; // hanging，offset of first word except first line
     indentStart?: INumberUnit; // indentStart
     tabStops?: ITabStop[]; // tabStops
+    /** Bind each tab character to the tab stop at the same ordinal instead of skipping passed stops. */
+    fixedTabStops?: BooleanNumber;
     indentEnd?: INumberUnit; // indentEnd
 }
 
@@ -1140,6 +1159,12 @@ export interface ICustomColumnGroup {
     columnGroupId: string;
     columns?: IColumn[];
     gap?: INumberUnit;
+    /** Horizontal padding applied inside each column. Defaults to 8 px. */
+    horizontalPadding?: INumberUnit;
+    /** Minimum rendered height of each column. Defaults to 72 px. */
+    minHeight?: INumberUnit;
+    /** Whether column content is clipped to the column bounds. Defaults to true. */
+    clipContent?: BooleanNumber;
     layout?: ColumnLayoutType;
     responsive?: ColumnResponsiveType;
     version?: number;
@@ -1159,6 +1184,9 @@ export interface IColumnGroup {
     columnGroupId: string;
     columns: IColumn[];
     gap: INumberUnit;
+    horizontalPadding?: INumberUnit;
+    minHeight?: INumberUnit;
+    clipContent?: BooleanNumber;
     layout: ColumnLayoutType;
     responsive: ColumnResponsiveType;
     version?: number;

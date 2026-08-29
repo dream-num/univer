@@ -19,7 +19,7 @@ import type { Editor } from '../../../services/editor/editor';
 import { debounce } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { ScrollBar } from '@univerjs/engine-render';
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo } from 'react';
 import { DOCS_VIEW_KEY, VIEWPORT_KEY } from '../../../basics/docs-view-key';
 
 interface IUseResizeReturn {
@@ -27,45 +27,77 @@ interface IUseResizeReturn {
     checkScrollBar: () => void;
 }
 
-// eslint-disable-next-line max-lines-per-function
-export const useResize = (editor?: Editor, isSingle = true, autoScrollbar?: boolean, autoScroll?: boolean): IUseResizeReturn => {
+export function resizeEditor(
+    editor: Editor,
+    isSingle: boolean,
+    layoutSize?: Readonly<Pick<DOMRectReadOnly, 'width' | 'height'>>,
+    pixelRatio?: number,
+    documentLayoutSize?: Readonly<Pick<DOMRectReadOnly, 'width' | 'height'>>
+): void {
+    const { scene, mainComponent } = editor.render;
+    const docSkeletonManagerService = editor.render.with(DocSkeletonManagerService);
+    const { width, height } = layoutSize ?? editor.getBoundingClientRect();
+
+    editor.render.engine.resizeBySize(width, height);
+    if (pixelRatio !== undefined) {
+        editor.render.engine.getCanvas().setPixelRatio(pixelRatio);
+    }
+
+    const documentWidth = documentLayoutSize?.width ?? width;
+    docSkeletonManagerService.getViewModel().getDataModel().updateDocumentDataPageSize(
+        isSingle ? Infinity : documentWidth,
+        Infinity
+    );
+    scene.transformByState({
+        width,
+        height,
+    });
+
+    mainComponent?.resize(documentWidth, height);
+    mainComponent?.translate(0, 0);
+    editor.render.components.get(DOCS_VIEW_KEY.BACKGROUND)?.translate(0, 0);
+
+    const selectionRanges = editor.getSelectionRanges();
+    if (selectionRanges.length > 0) {
+        editor.setSelectionRanges(selectionRanges, false);
+    }
+}
+
+export const useResize = (
+    editor?: Editor,
+    isSingle = true,
+    autoScrollbar?: boolean,
+    autoScroll?: boolean,
+    layoutSize?: Readonly<Pick<DOMRectReadOnly, 'width' | 'height'>>,
+    pixelRatio?: number,
+    documentLayoutSize?: Readonly<Pick<DOMRectReadOnly, 'width' | 'height'>>
+): IUseResizeReturn => {
     const resize = useCallback(() => {
         if (editor) {
-            const { scene, mainComponent } = editor.render;
-            const docSkeletonManagerService = editor.render.with(DocSkeletonManagerService);
-            const { width, height } = editor.getBoundingClientRect();
-
-            docSkeletonManagerService.getViewModel().getDataModel().updateDocumentDataPageSize(isSingle ? Infinity : width, Infinity);
-            scene.transformByState({
-                width,
-                height,
-            });
-
-            mainComponent?.resize(width, height);
-            mainComponent?.translate(0, 0);
-            editor.render.components.get(DOCS_VIEW_KEY.BACKGROUND)?.translate(0, 0);
-
-            const selectionRanges = editor.getSelectionRanges();
-            if (selectionRanges.length > 0) {
-                editor.setSelectionRanges(selectionRanges, false);
-            }
+            resizeEditor(editor, isSingle, layoutSize, pixelRatio, documentLayoutSize);
         }
-    }, [editor, isSingle]);
+    }, [documentLayoutSize, editor, isSingle, layoutSize, pixelRatio]);
 
     const checkScrollBar = useMemo(() => {
         // eslint-disable-next-line complexity
         return debounce(() => {
-            if (!autoScrollbar) return;
-            if (!editor || !autoScrollbar || editor.render.isDisposed()) {
+            if (!editor || editor.render.isDisposed()) {
                 return;
             }
 
             const docSkeletonManagerService = editor.render.with(DocSkeletonManagerService);
-            const skeleton = docSkeletonManagerService.getSkeleton();
             const { scene, mainComponent } = editor.render;
             const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+            if (!autoScrollbar) {
+                if (!autoScroll) {
+                    viewportMain?.scrollToBarPos({ x: 0, y: 0 });
+                    viewportMain?.getScrollBar()?.dispose();
+                }
+                return;
+            }
+            const skeleton = docSkeletonManagerService.getSkeleton();
             const { actualWidth, actualHeight } = skeleton.getActualSize();
-            const { width, height } = editor.getBoundingClientRect();
+            const { width, height } = layoutSize ?? editor.getBoundingClientRect();
             let scrollBar = viewportMain?.getScrollBar() as Nullable<ScrollBar>;
             const contentWidth = Math.max(actualWidth, width);
             const contentHeight = Math.max(actualHeight, height);
@@ -116,7 +148,13 @@ export const useResize = (editor?: Editor, isSingle = true, autoScrollbar?: bool
                 }
             }
         }, 30);
-    }, [editor, autoScrollbar, isSingle, autoScroll]);
+    }, [editor, autoScrollbar, isSingle, autoScroll, layoutSize]);
+
+    useLayoutEffect(() => {
+        if (editor) {
+            resize();
+        }
+    }, [editor, resize]);
 
     useEffect(() => {
         if (!autoScrollbar) return;
@@ -132,7 +170,7 @@ export const useResize = (editor?: Editor, isSingle = true, autoScrollbar?: bool
     }, [editor, autoScrollbar, resize, checkScrollBar]);
 
     useEffect(() => {
-        if (!autoScrollbar) return;
+        if (!autoScrollbar && autoScroll) return;
         if (editor) {
             const d = editor.input$.subscribe(() => {
                 checkScrollBar();
@@ -141,7 +179,7 @@ export const useResize = (editor?: Editor, isSingle = true, autoScrollbar?: bool
                 d.unsubscribe();
             };
         }
-    }, [editor, autoScrollbar, checkScrollBar]);
+    }, [autoScroll, editor, autoScrollbar, checkScrollBar]);
 
     return { resize, checkScrollBar };
 };

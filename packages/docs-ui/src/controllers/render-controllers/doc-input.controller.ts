@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, ITextRun, Nullable } from '@univerjs/core';
 import type { IInsertTextCommandParams } from '@univerjs/docs';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { Subscription } from 'rxjs';
@@ -97,13 +97,7 @@ export class DocInputController extends Disposable implements IRenderModule {
             const insertBody = {
                 dataStream: content,
                 textRuns: curTextRun
-                    ? [
-                        {
-                            ...curTextRun,
-                            st: 0,
-                            ed: content.length,
-                        },
-                    ]
+                    ? [createInheritedInputTextRun(curTextRun, content.length)]
                     : [],
                 customRanges: curCustomRange
                     ? [{
@@ -163,4 +157,17 @@ export class DocInputController extends Disposable implements IRenderModule {
 
         return false;
     }
+}
+
+function createInheritedInputTextRun(textRun: ITextRun, length: number): ITextRun {
+    const textStyle = textRun.ts ? { ...textRun.ts } : undefined;
+    if (textStyle) {
+        delete textStyle.textAdvance;
+    }
+    return {
+        ...textRun,
+        st: 0,
+        ed: length,
+        ...(textStyle ? { ts: textStyle } : {}),
+    };
 }

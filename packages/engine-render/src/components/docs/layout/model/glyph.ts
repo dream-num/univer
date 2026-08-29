@@ -267,6 +267,32 @@ export function _createSkeletonWordOrLetter(
         bBox = { ...bBox, width: 0 };
     }
 
+    const requestedHorizontalScale = textStyle.sa;
+    const horizontalScale = typeof requestedHorizontalScale === 'number'
+        && Number.isFinite(requestedHorizontalScale)
+        && requestedHorizontalScale > 0
+        ? requestedHorizontalScale
+        : 1;
+    if (horizontalScale !== 1) {
+        bBox = { ...bBox, width: bBox.width * horizontalScale };
+    }
+    const requestedLineAscent = textStyle.lineAscent;
+    const requestedLineDescent = textStyle.lineDescent;
+    if (
+        typeof requestedLineAscent === 'number'
+        && Number.isFinite(requestedLineAscent)
+        && requestedLineAscent >= 0
+        && typeof requestedLineDescent === 'number'
+        && Number.isFinite(requestedLineDescent)
+        && requestedLineDescent >= 0
+    ) {
+        bBox = {
+            ...bBox,
+            ba: requestedLineAscent,
+            bd: requestedLineDescent,
+            normalLineHeight: requestedLineAscent + requestedLineDescent,
+        };
+    }
     const { width: contentWidth = 0 } = bBox;
     let width = glyphWidth ?? contentWidth;
 
@@ -277,6 +303,22 @@ export function _createSkeletonWordOrLetter(
         if (gridType === GridType.SNAP_TO_CHARS) {
             xOffset = (width - contentWidth) / 2;
         }
+    }
+    const requestedCharacterSpacing = textStyle.sc;
+    const characterSpacing = typeof requestedCharacterSpacing === 'number' && Number.isFinite(requestedCharacterSpacing)
+        ? requestedCharacterSpacing * 4 / 3
+        : 0;
+    if (characterSpacing !== 0 && streamType !== DataStreamTreeTokenType.PARAGRAPH) {
+        width = Math.max(0, width + characterSpacing * Array.from(content).length);
+    }
+    const requestedTextAdvance = textStyle.textAdvance;
+    if (
+        typeof requestedTextAdvance === 'number'
+        && Number.isFinite(requestedTextAdvance)
+        && requestedTextAdvance >= 0
+        && streamType !== DataStreamTreeTokenType.PARAGRAPH
+    ) {
+        width = requestedTextAdvance * Array.from(content).length;
     }
 
     return {

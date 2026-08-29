@@ -33,7 +33,7 @@ import type { ComponentExtension, IDrawInfo, IExtensionConfig } from '../extensi
 import type { IDocumentsConfig, IPageMarginLayout } from './doc-component';
 import type { DocumentSkeleton } from './layout/doc-skeleton';
 import type { IDocsTableRenderViewport } from './table-render-viewport';
-import { CellValueType, ColumnSeparatorType, DashStyleType, HorizontalAlign, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import { BooleanNumber, CellValueType, ColumnSeparatorType, DashStyleType, HorizontalAlign, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { BORDER_TYPE as BORDER_LTRB, drawLineByBorderType } from '../../basics';
 import { calculateRectRotate, getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
@@ -1086,11 +1086,13 @@ export class Documents extends DocComponent {
         ctx.save();
         const { x, y } = this._drawLiquid;
         const { pageWidth, pageHeight } = nestedPage;
-        const clipOrigin = getNestedPageClipOrigin(parentPage, nestedPage, { x, y }, alignOffset);
-        ctx.beginPath();
-        ctx.rectByPrecision(clipOrigin.x, clipOrigin.y, pageWidth, pageHeight);
-        ctx.closePath();
-        ctx.clip();
+        if (shouldClipNestedPageContent(nestedPage)) {
+            const clipOrigin = getNestedPageClipOrigin(parentPage, nestedPage, { x, y }, alignOffset);
+            ctx.beginPath();
+            ctx.rectByPrecision(clipOrigin.x, clipOrigin.y, pageWidth, pageHeight);
+            ctx.closePath();
+            ctx.clip();
+        }
 
         if (skeTables.size > 0) {
             if (isColumnGroupNestedPage(nestedPage)) {
@@ -1684,6 +1686,12 @@ function isColumnGroupNestedPage(page: IDocumentSkeletonPage): boolean {
     const parent = page.parent as IDocumentSkeletonColumnGroupColumn | undefined;
 
     return parent?.columnId != null && parent.parent?.columnGroupId != null;
+}
+
+function shouldClipNestedPageContent(page: IDocumentSkeletonPage): boolean {
+    const parent = page.parent as IDocumentSkeletonColumnGroupColumn | undefined;
+    return !isColumnGroupNestedPage(page)
+        || parent?.parent?.columnGroupSource.clipContent !== BooleanNumber.FALSE;
 }
 
 function getNestedPageClipOrigin(

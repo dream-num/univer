@@ -17,11 +17,13 @@
 // @vitest-environment jsdom
 
 import type { IDisposable, IDocumentData } from '@univerjs/core';
+import type { IDocSelectionInnerParam } from '@univerjs/engine-render';
 import type { Mock } from 'vitest';
-import { DataStreamTreeTokenType, DOC_RANGE_TYPE, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, Univer, UniverInstanceType } from '@univerjs/core';
+import { BooleanNumber, DataStreamTreeTokenType, DOC_RANGE_TYPE, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, Univer, UniverInstanceType } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
-import { GlyphType, RenderUnit } from '@univerjs/engine-render';
+import { GlyphType, RenderUnit, ScrollTimer, ScrollTimerType } from '@univerjs/engine-render';
 import { ILayoutService } from '@univerjs/ui';
+import { Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, EmbedInteractionBoundaryService, EmbedRuntimeFocusCoordinator } from '../../doc-embed-integration.service';
 import { DocSelectionRenderService } from '../doc-selection-render.service';
@@ -105,6 +107,8 @@ interface IServiceHarness {
     _scrollTimers: Array<{ dispose: VoidMock }>;
     _selectionStyle: { strokeWidth: number };
     _textSelectionInner$: { next: Mock<(...args: unknown[]) => void> };
+    _movingSelection$: Subject<IDocSelectionInnerParam>;
+    movingSelection$: Subject<IDocSelectionInnerParam>;
     focus: Mock<() => void>;
     _getAllTextRanges: Mock<() => string[]>;
     _getAllRectRanges: Mock<() => string[]>;
@@ -122,6 +126,7 @@ interface IServiceHarness {
     _createTextRangeByAnchorPosition(position: Record<string, unknown>): void;
     _isEmpty(): boolean;
     _getCanvasOffset(): { left: number; top: number };
+    _getScenePointerOffset(evt: { offsetX: number; offsetY: number; target?: EventTarget }): { offsetX: number; offsetY: number };
     _moving(moveOffsetX: number, moveOffsetY: number): void;
     _updateInputPosition(): void;
     addDocRanges(ranges: Array<Record<string, unknown>>, isEditing?: boolean, options?: Record<string, boolean>): void;
@@ -162,6 +167,7 @@ function createService() {
         getEngine: vi.fn(() => engine),
         getViewports: vi.fn(() => []),
     };
+    const movingSelection$ = new Subject<IDocSelectionInnerParam>();
 
     const service = Object.setPrototypeOf({
         _rangeList: [],
@@ -192,6 +198,8 @@ function createService() {
         _textSelectionInner$: {
             next: vi.fn(),
         },
+        _movingSelection$: movingSelection$,
+        movingSelection$,
         _getAllTextRanges: vi.fn(() => ['serialized-text']),
         _getAllRectRanges: vi.fn(() => ['serialized-rect']),
         _findNodeByCoord: vi.fn(),
@@ -288,6 +296,7 @@ class TestRenderEvent<T> {
 }
 
 function createRealSelectionRenderService(options: {
+    disableSelectionAutoScroll?: boolean;
     embedInteractionBoundaryService?: Partial<EmbedInteractionBoundaryService>;
     embedRuntimeFocusCoordinator?: EmbedRuntimeFocusCoordinator;
     mainComponent?: unknown;
@@ -311,7 +320,9 @@ function createRealSelectionRenderService(options: {
             paragraphs: [{ paragraphId: 'para_docs_ui_selection_fixture_1', startIndex: 5 }],
             sectionBreaks: [],
         },
-        documentStyle: {},
+        documentStyle: options.disableSelectionAutoScroll
+            ? { renderConfig: { disableSelectionAutoScroll: BooleanNumber.TRUE } }
+            : {},
     };
     const doc = univer.createUnit(UniverInstanceType.UNIVER_DOC, documentData);
     const renderUnit = injector.createInstance(RenderUnit, {
@@ -760,6 +771,8 @@ describe('doc selection render service internals', () => {
             isBack: false,
         };
         const textRange = createTextRange({ collapsed: false });
+        const movingSelections: IDocSelectionInnerParam[] = [];
+        service.movingSelection$.subscribe((selection) => movingSelections.push(selection));
 
         service._anchorNodePosition = anchorPosition;
         service._findNodeByCoord.mockReturnValue({ node: firstGlyph });
@@ -786,6 +799,14 @@ describe('doc selection render service internals', () => {
             2
         );
         expect(service._rangeListCache).toEqual([textRange]);
+        expect(movingSelections).toEqual([{
+            textRanges: [expect.objectContaining({ collapsed: false })],
+            rectRanges: [],
+            segmentId: 'segment-1',
+            segmentPage: 2,
+            style: service._selectionStyle,
+            isEditing: false,
+        }]);
         expect(engine.setCapture).toHaveBeenCalledTimes(1);
     });
 
@@ -1542,9 +1563,10 @@ describe('DocSelectionRenderService', () => {
         const enableObjectsEvent = vi.fn();
         const clearSelectedObjects = vi.fn();
         const setCursor = vi.fn();
+        const setCapture = vi.fn();
         const scene = {
             getViewports: () => [],
-            getEngine: () => ({ name: 'engine' }),
+            getEngine: () => ({ name: 'engine', setCapture }),
             findViewportByPosToScene: () => ({
                 top: 0,
                 left: 0,
@@ -1560,8 +1582,12 @@ describe('DocSelectionRenderService', () => {
             onPointerMove$: pointerMove$,
             onPointerUp$: pointerUp$,
         };
-        const { renderUnit, service, univer } = createRealSelectionRenderService({ scene });
+        const { renderUnit, service, univer } = createRealSelectionRenderService({
+            disableSelectionAutoScroll: true,
+            scene,
+        });
         cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
+        const createScrollTimer = vi.spyOn(ScrollTimer, 'create');
         const dragRange = {
             ...createTextRange({ isActive: vi.fn(() => true) }),
             startOffset: 2,
@@ -1571,6 +1597,17 @@ describe('DocSelectionRenderService', () => {
             segmentId: '',
             segmentPage: -1,
             direction: 'forward',
+            startNodePosition: null,
+            endNodePosition: null,
+        };
+        const staleCollapsedRange = {
+            ...createTextRange({ collapsed: true }),
+            startOffset: 0,
+            endOffset: 0,
+            rangeType: DOC_RANGE_TYPE.TEXT,
+            segmentId: '',
+            segmentPage: -1,
+            direction: 'none',
             startNodePosition: null,
             endNodePosition: null,
         };
@@ -1599,6 +1636,7 @@ describe('DocSelectionRenderService', () => {
         });
         (service as unknown as { _moving: () => void })._moving = () => {
             (service as unknown as { _focusNodePosition: unknown })._focusNodePosition = focusNodePosition;
+            (service as unknown as { _rangeList: TextRange[] })._rangeList = [staleCollapsedRange as never];
             (service as unknown as { _rangeListCache: TextRange[] })._rangeListCache = [dragRange as never];
         };
         const selections: string[] = [];
@@ -1620,7 +1658,33 @@ describe('DocSelectionRenderService', () => {
         expect(enableObjectsEvent).toHaveBeenCalledTimes(1);
         expect(clearSelectedObjects).toHaveBeenCalledTimes(1);
         expect(setCursor).toHaveBeenCalledWith('text');
+        expect(setCapture).toHaveBeenCalledOnce();
+        expect(createScrollTimer).toHaveBeenCalledWith(scene, ScrollTimerType.NONE);
+        expect(staleCollapsedRange.dispose).toHaveBeenCalledOnce();
         expect(selections.at(-1)).toBe('2:6');
+    });
+
+    it('normalizes pointer offsets from a nested canvas to the document engine canvas', () => {
+        const { engine, service } = createService();
+        const engineCanvas = document.createElement('canvas');
+        const nestedCanvas = document.createElement('canvas');
+        Object.defineProperties(engineCanvas, {
+            offsetLeft: { value: 10 },
+            offsetParent: { value: null },
+            offsetTop: { value: 20 },
+        });
+        Object.defineProperties(nestedCanvas, {
+            offsetLeft: { value: 10 },
+            offsetParent: { value: null },
+            offsetTop: { value: 43 },
+        });
+        Object.assign(engine, { getCanvasElement: () => engineCanvas });
+
+        expect(service._getScenePointerOffset({
+            offsetX: 138,
+            offsetY: 15,
+            target: nestedCanvas,
+        })).toEqual({ offsetX: 138, offsetY: 38 });
     });
 
     it('places the manual cursor from transformed document coordinates', () => {

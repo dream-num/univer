@@ -1465,7 +1465,10 @@ export class DocumentSkeleton extends Skeleton {
             drawings,
 
             localeService: this._localeService,
-            documentCompatibilityPolicy: getDocumentCompatibilityPolicy(documentStyle.documentFlavor),
+            documentCompatibilityPolicy: getDocumentCompatibilityPolicy(
+                documentStyle.documentFlavor,
+                documentStyle.fontMetricScaleEnabled !== BooleanNumber.FALSE
+            ),
             paragraphLineGapDefault,
             defaultTabStop,
             documentTextStyle: textStyle,

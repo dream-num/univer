@@ -72,6 +72,8 @@ function punctuationSpaceAdjustment(shapedGlyphs: IDocumentSkeletonGlyph[]) {
         if (
             cjk.hasCJKPunctuation(content) &&
             cjk.hasCJKPunctuation(nextGlyph.content) &&
+            curGlyph.ts?.textAdvance === undefined &&
+            nextGlyph.ts?.textAdvance === undefined &&
             curGlyph.adjustability.shrinkability[1] + nextGlyph.adjustability.shrinkability[0] >= delta
         ) {
             const leftDelta = Math.min(curGlyph.adjustability.shrinkability[1], delta);
@@ -97,13 +99,25 @@ function addCJKLatinSpacing(shapedTextList: IShapedText[]) {
         const { width } = curGlyph;
 
         // Case 1: CJ followed by a Latin character.
-        if (cjk.hasCJKText(curGlyph.content) && nextGlyph && LATIN_REG.test(nextGlyph.content)) {
+        if (
+            cjk.hasCJKText(curGlyph.content)
+            && nextGlyph
+            && LATIN_REG.test(nextGlyph.content)
+            && curGlyph.ts?.textAdvance === undefined
+            && nextGlyph.ts?.textAdvance === undefined
+        ) {
             curGlyph.width += width / 4;
             curGlyph.adjustability.shrinkability[1] += width / 8;
         }
 
         // Case 2: Latin followed by a CJ character.
-        if (cjk.hasCJKText(curGlyph.content) && prevGlyph && LATIN_REG.test(prevGlyph.content)) {
+        if (
+            cjk.hasCJKText(curGlyph.content)
+            && prevGlyph
+            && LATIN_REG.test(prevGlyph.content)
+            && curGlyph.ts?.textAdvance === undefined
+            && prevGlyph.ts?.textAdvance === undefined
+        ) {
             curGlyph.width += width / 4;
             curGlyph.xOffset += width / 4;
             curGlyph.adjustability.shrinkability[0] += width / 8;

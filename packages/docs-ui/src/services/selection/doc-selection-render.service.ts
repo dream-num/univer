@@ -18,7 +18,7 @@ import type { DocumentDataModel, Nullable } from '@univerjs/core';
 import type { Documents, Engine, IDocSelectionInnerParam, IFindNodeRestrictions, IMouseEvent, INodeInfo, INodePosition, IPointerEvent, IRenderContext, IRenderModule, IScrollObserverParam, ISuccinctDocRangeParam, ITextRangeWithStyle, ITextSelectionStyle } from '@univerjs/engine-render';
 import type { Subscription } from 'rxjs';
 import type { RectRange } from './rect-range';
-import { DataStreamTreeTokenType, DOC_RANGE_TYPE, ILogService, Inject, isInternalEditorID, IUniverInstanceService, Optional, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import { BooleanNumber, DataStreamTreeTokenType, DOC_RANGE_TYPE, ILogService, Inject, isInternalEditorID, IUniverInstanceService, Optional, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import {
     CURSOR_TYPE,
@@ -27,6 +27,7 @@ import {
     NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
     PageLayoutType,
     ScrollTimer,
+    ScrollTimerType,
     Vector2,
 } from '@univerjs/engine-render';
 import { ILayoutService, KeyCode } from '@univerjs/ui';
@@ -86,6 +87,9 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
     private readonly _textSelectionInner$ = new BehaviorSubject<Nullable<IDocSelectionInnerParam>>(null);
     readonly textSelectionInner$ = this._textSelectionInner$.asObservable();
+
+    private readonly _movingSelection$ = new Subject<IDocSelectionInnerParam>();
+    readonly movingSelection$ = this._movingSelection$.asObservable();
 
     private readonly _onFocus$ = new Subject<IEditorInputConfig>();
     readonly onFocus$ = this._onFocus$.asObservable();
@@ -460,7 +464,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
     // Handler double click.
     __handleDblClick(evt: IPointerEvent | IMouseEvent) {
-        const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
+        const { offsetX: evtOffsetX, offsetY: evtOffsetY } = this._getScenePointerOffset(evt);
 
         const startNode = this._findNodeByCoord(evtOffsetX, evtOffsetY, {
             strict: false,
@@ -587,8 +591,16 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         }
 
         scene.disableObjectsEvent();
+        scene.getEngine()?.setCapture();
 
-        const scrollTimer = ScrollTimer.create(scene);
+        const disablesEditorAutoScroll = this._context.unit
+            .getDocumentStyle()
+            .renderConfig
+            ?.disableSelectionAutoScroll === BooleanNumber.TRUE;
+        const scrollTimer = ScrollTimer.create(
+            scene,
+            disablesEditorAutoScroll ? ScrollTimerType.NONE : ScrollTimerType.ALL
+        );
         this._scrollTimers.push(scrollTimer);
         scrollTimer.startScroll(evtOffsetX, evtOffsetY);
 
@@ -600,8 +612,8 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
         let preMoveOffsetY = evtOffsetY;
         this._onPointerEvent = true;
-        this._scenePointerMoveSubs.push(scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
-            const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
+        const handlePointerMove = (moveEvt: IPointerEvent | IMouseEvent) => {
+            const { offsetX: moveOffsetX, offsetY: moveOffsetY } = this._getScenePointerOffset(moveEvt);
             scene.setCursor(CURSOR_TYPE.TEXT);
 
             if (Math.sqrt((moveOffsetX - preMoveOffsetX) ** 2 + (moveOffsetY - preMoveOffsetY) ** 2) < 3) {
@@ -616,14 +628,19 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
             preMoveOffsetX = moveOffsetX;
             preMoveOffsetY = moveOffsetY;
-        }));
+        };
 
-        this._scenePointerUpSubs.push(scene.onPointerUp$.subscribeEvent(() => {
+        const handlePointerUp = () => {
             [...this._scenePointerMoveSubs, ...this._scenePointerUpSubs].forEach((e) => {
                 e.unsubscribe();
             });
             this._onPointerEvent = false;
             scene.enableObjectsEvent();
+
+            if (!evt.ctrlKey && !evt.shiftKey) {
+                this._removeAllTextRanges();
+                this._removeAllRectRanges();
+            }
 
             // Add cursor.
             if (this._anchorNodePosition && !this._focusNodePosition) {
@@ -671,7 +688,10 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
             this._disposeScrollTimers();
 
             this._updateInputPosition(true);
-        }));
+        };
+
+        this._scenePointerMoveSubs.push(scene.onPointerMove$.subscribeEvent(handlePointerMove));
+        this._scenePointerUpSubs.push(scene.onPointerUp$.subscribeEvent(handlePointerUp));
     }
 
     removeAllRanges() {
@@ -1038,6 +1058,8 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._addTextRangesToCache(textRanges);
         this._addRectRangesToCache(rectRanges);
 
+        this._emitMovingSelection();
+
         this.deactivate();
     }
 
@@ -1049,6 +1071,35 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         // This is quiet ambiguous, when did the engine's canvas offset changes?
         const engine = this._context.scene?.getEngine() as Engine;
         return getCanvasOffsetByEngine(engine);
+    }
+
+    private _getScenePointerOffset(evt: IPointerEvent | IMouseEvent): { offsetX: number; offsetY: number } {
+        const rawOffset = { offsetX: evt.offsetX, offsetY: evt.offsetY };
+        const engineCanvas = this._context.scene?.getEngine()?.getCanvasElement?.();
+        const eventTarget = evt.target;
+        if (!(engineCanvas instanceof HTMLElement) || !(eventTarget instanceof HTMLElement) || eventTarget === engineCanvas) {
+            return rawOffset;
+        }
+
+        const engineOffset = this._getElementLayoutOffset(engineCanvas);
+        const targetOffset = this._getElementLayoutOffset(eventTarget);
+        return {
+            offsetX: evt.offsetX + targetOffset.left - engineOffset.left,
+            offsetY: evt.offsetY + targetOffset.top - engineOffset.top,
+        };
+    }
+
+    private _getElementLayoutOffset(element: HTMLElement): { left: number; top: number } {
+        let current: Nullable<HTMLElement> = element;
+        let left = 0;
+        let top = 0;
+        while (current) {
+            left += current.offsetLeft;
+            top += current.offsetTop;
+            current = current.offsetParent as Nullable<HTMLElement>;
+        }
+
+        return { left, top };
     }
 
     private _updateInputPosition(forceFocus = false) {
@@ -1160,9 +1211,22 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._addTextRangesToCache(textRanges);
         this._addRectRangesToCache(rectRanges);
 
+        this._emitMovingSelection();
+
         this.deactivate();
 
         this._context.scene?.getEngine()?.setCapture();
+    }
+
+    private _emitMovingSelection(): void {
+        this._movingSelection$.next({
+            textRanges: this._rangeListCache.map(serializeTextRange),
+            rectRanges: this._rectRangeListCache.map(serializeRectRange),
+            segmentId: this._currentSegmentId,
+            segmentPage: this._currentSegmentPage,
+            style: this._selectionStyle,
+            isEditing: false,
+        });
     }
 
     private _hasVisibleSelectionRanges(textRanges: TextRange[], rectRanges: RectRange[]): boolean {
@@ -1590,6 +1654,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._onCompositionend$.complete();
         this._onSelectionStart$.complete();
         this._textSelectionInner$.complete();
+        this._movingSelection$.complete();
         this._onPaste$.complete();
         this._onFocus$.complete();
         this._onBlur$.complete();

@@ -41,8 +41,8 @@ interface IColumnGroupLayout {
     columns: IColumnGroupLayoutColumn[];
 }
 
-const EMPTY_COLUMN_GROUP_MIN_HEIGHT = 72;
-const COLUMN_GROUP_HORIZONTAL_PADDING = 8;
+const DEFAULT_COLUMN_GROUP_MIN_HEIGHT = 72;
+const DEFAULT_COLUMN_GROUP_HORIZONTAL_PADDING = 8;
 
 export function createColumnGroupSkeleton(
     ctx: ILayoutContext,
@@ -62,13 +62,18 @@ export function createColumnGroupSkeleton(
         return null;
     }
 
+    const horizontalPadding = Math.max(
+        0,
+        columnGroupSource.horizontalPadding?.v ?? DEFAULT_COLUMN_GROUP_HORIZONTAL_PADDING
+    );
+    const minHeight = Math.max(0, columnGroupSource.minHeight?.v ?? DEFAULT_COLUMN_GROUP_MIN_HEIGHT);
     const columnPages = columnGroupNode.children.map((columnNode, index) => {
         const sourceColumn = columnGroupSource.columns[index];
         const width = Math.max(0, getInitialColumnWidth(columnGroupSource, sourceColumn, hostColumn.width));
 
-        return createColumnContentPage(ctx, viewModel, columnNode, sectionBreakConfig, width);
+        return createColumnContentPage(ctx, viewModel, columnNode, sectionBreakConfig, width, horizontalPadding);
     });
-    const columnHeights = columnPages.map((page) => Math.max(page.height, EMPTY_COLUMN_GROUP_MIN_HEIGHT));
+    const columnHeights = columnPages.map((page) => Math.max(page.height, minHeight));
     const layout = calculateColumnGroupLayout(columnGroupSource, hostColumn.width, columnHeights);
     const columns = layout.columns.map((layoutColumn, index): IDocumentSkeletonColumnGroupColumn => {
         const page = columnPages[index];
@@ -128,7 +133,8 @@ function createColumnContentPage(
     viewModel: DocumentViewModel,
     columnNode: DataStreamTreeNode,
     sectionBreakConfig: ISectionBreakConfig,
-    width: number
+    width: number,
+    horizontalPadding: number
 ): IDocumentSkeletonPage {
     const columnSectionBreakConfig: ISectionBreakConfig = {
         ...sectionBreakConfig,
@@ -138,8 +144,8 @@ function createColumnContentPage(
         },
         marginTop: 0,
         marginBottom: 0,
-        marginLeft: COLUMN_GROUP_HORIZONTAL_PADDING,
-        marginRight: COLUMN_GROUP_HORIZONTAL_PADDING,
+        marginLeft: horizontalPadding,
+        marginRight: horizontalPadding,
         columnProperties: [],
     };
     const page = createSkeletonPage(ctx, columnSectionBreakConfig, ctx.skeletonResourceReference);
@@ -202,7 +208,7 @@ function getNextBlockTop(lines: IDocumentSkeletonLine[]) {
         return 0;
     }
 
-    return lastLine.top + lastLine.lineHeight;
+    return lastLine.top + lastLine.lineHeight + Math.max(0, lastLine.spaceBelowApply ?? 0);
 }
 
 export function calculateColumnGroupLayout(source: IColumnGroup, availableWidth: number, columnHeights: number[]): IColumnGroupLayout {

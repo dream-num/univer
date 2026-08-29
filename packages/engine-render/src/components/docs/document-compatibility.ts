@@ -90,6 +90,13 @@ const TRADITIONAL_DOCUMENT_COMPATIBILITY_POLICY: IDocumentCompatibilityPolicy = 
     },
 };
 
+const TRADITIONAL_DOCUMENT_COMPATIBILITY_WITHOUT_FONT_METRIC_SCALE_POLICY: IDocumentCompatibilityPolicy = {
+    ...TRADITIONAL_DOCUMENT_COMPATIBILITY_POLICY,
+    font: {
+        metricScaleRules: [],
+    },
+};
+
 const UNSPECIFIED_DOCUMENT_COMPATIBILITY_POLICY: IDocumentCompatibilityPolicy = {
     mode: 'unspecified',
     applyDocumentDefaultParagraphStyle: false,
@@ -104,13 +111,18 @@ const UNSPECIFIED_DOCUMENT_COMPATIBILITY_POLICY: IDocumentCompatibilityPolicy = 
     },
 };
 
-export function getDocumentCompatibilityPolicy(documentFlavor?: DocumentFlavor): IDocumentCompatibilityPolicy {
+export function getDocumentCompatibilityPolicy(
+    documentFlavor?: DocumentFlavor,
+    fontMetricScaleEnabled = true
+): IDocumentCompatibilityPolicy {
     if (documentFlavor === DocumentFlavor.MODERN) {
         return MODERN_DOCUMENT_COMPATIBILITY_POLICY;
     }
 
     if (documentFlavor === DocumentFlavor.TRADITIONAL) {
-        return TRADITIONAL_DOCUMENT_COMPATIBILITY_POLICY;
+        return fontMetricScaleEnabled
+            ? TRADITIONAL_DOCUMENT_COMPATIBILITY_POLICY
+            : TRADITIONAL_DOCUMENT_COMPATIBILITY_WITHOUT_FONT_METRIC_SCALE_POLICY;
     }
 
     return UNSPECIFIED_DOCUMENT_COMPATIBILITY_POLICY;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ColumnSeparatorType, DashStyleType, DocumentFlavor } from '@univerjs/core';
+import { BooleanNumber, ColumnSeparatorType, DashStyleType, DocumentFlavor } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { setupRenderTestEnv } from '../../../__tests__/render-test-utils';
 import {
@@ -1626,6 +1626,53 @@ describe('documents render', () => {
         );
 
         expect(ctx.rectByPrecision).toHaveBeenCalledWith(116, 226, 200, 420);
+
+        documents.dispose();
+    });
+
+    it('allows a column group to render overflowing content without clipping', () => {
+        const bodyPage = createPage(DocumentSkeletonPageType.BODY, '');
+        attachColumnGroup(bodyPage);
+        const columnGroup = bodyPage.skeColumnGroups.get('column-group-1')!;
+        columnGroup.columnGroupSource.clipContent = BooleanNumber.FALSE;
+        const nestedPage = columnGroup.columns[0].page;
+        nestedPage.sections[0].columns[0].lines = [];
+
+        const documents = new Documents('docs-column-group-overflow');
+        (documents as any)._drawLiquid = {
+            x: 12,
+            y: 20,
+            translateSave: vi.fn(),
+            translateRestore: vi.fn(),
+            translateSection: vi.fn(),
+            translateColumn: vi.fn(),
+        };
+        const ctx = {
+            beginPath: vi.fn(),
+            clip: vi.fn(),
+            closePath: vi.fn(),
+            rectByPrecision: vi.fn(),
+            restore: vi.fn(),
+            save: vi.fn(),
+        } as any;
+
+        (documents as any)._drawNestedPageContent(
+            ctx,
+            bodyPage,
+            nestedPage,
+            [],
+            null,
+            [],
+            [],
+            { x: 0, y: 0 },
+            0,
+            0,
+            {},
+            { scaleX: 1, scaleY: 1 }
+        );
+
+        expect(ctx.rectByPrecision).not.toHaveBeenCalled();
+        expect(ctx.clip).not.toHaveBeenCalled();
 
         documents.dispose();
     });

@@ -106,6 +106,8 @@ export interface IEditorConfigParams {
     /** Keep the globally focused unit on the editor's host while this editor receives input focus. */
     preserveHostFocus?: boolean;
     cancelDefaultResizeListener?: boolean;
+    /** Use a fixed canvas backing-store ratio for an editor managed by an external layout host. */
+    pixelRatio?: number;
     canvasStyle?: IEditorCanvasStyle;
     // A Boolean attribute which, if present, indicates that the editor should automatically have focus.
     // No more than one editor in the document may have the autofocus attribute.
@@ -115,6 +117,7 @@ export interface IEditorConfigParams {
     readonly?: boolean;
 
     backScrollOffset?: number;
+    disableBackScroll?: boolean;
     // The unique id of editor.
     editorUnitId?: string;
 
@@ -151,6 +154,7 @@ export class Editor extends Disposable implements IEditor {
     // Emit when doc selection changed.
     private readonly _selectionChange$ = new Subject<IDocSelectionInnerParam>();
     selectionChange$: Observable<IDocSelectionInnerParam> = this._selectionChange$.asObservable();
+    private _movingSelectionRanges?: ITextRangeWithStyle[];
 
     constructor(
         private _param: IEditorOptions,
@@ -174,6 +178,7 @@ export class Editor extends Disposable implements IEditor {
 
         this.disposeWithMe(
             docSelectionRenderService.onBlur$.subscribe((e) => {
+                this._movingSelectionRanges = undefined;
                 this._blur$.next(e);
 
                 const data = this.getDocumentData();
@@ -238,8 +243,16 @@ export class Editor extends Disposable implements IEditor {
                 const editorId = this.getEditorId();
 
                 if (unitId === editorId) {
+                    this._movingSelectionRanges = undefined;
                     this._selectionChange$.next(params);
                 }
+            })
+        );
+
+        this.disposeWithMe(
+            docSelectionRenderService.movingSelection$.subscribe((selection) => {
+                this._movingSelectionRanges = selection.textRanges;
+                this._selectionChange$.next(selection);
             })
         );
     }
@@ -286,6 +299,7 @@ export class Editor extends Disposable implements IEditor {
 
     // Selects the specified range of characters within editor.
     setSelectionRanges(ranges: ISuccinctDocRangeParam[], shouldFocus = true): void {
+        this._movingSelectionRanges = undefined;
         const editorUnitId = this.getEditorId();
         const params = {
             unitId: editorUnitId,
@@ -297,6 +311,9 @@ export class Editor extends Disposable implements IEditor {
 
     // Get current doc ranges. include text range and rect range.
     getSelectionRanges(): ITextRangeWithStyle[] {
+        if (this._movingSelectionRanges) {
+            return this._movingSelectionRanges;
+        }
         const editorUnitId = this.getEditorId();
         const params = {
             unitId: editorUnitId,
@@ -339,18 +356,27 @@ export class Editor extends Disposable implements IEditor {
 
     replaceText(text: string, resetCursor: boolean | ITextRangeWithStyle[] = true) {
         const data = this.getDocumentData();
+        const normalizedText = text.replace(/\r\n?/g, '\n');
+        const paragraphIds = new Set<string>();
+        const paragraphs = [];
+        let dataStream = '';
+        for (const line of normalizedText.split('\n')) {
+            dataStream += `${line}\r`;
+            paragraphs.push({
+                startIndex: dataStream.length - 1,
+                paragraphId: createParagraphId(paragraphIds),
+            });
+        }
+        dataStream += '\n';
 
         this.setDocumentData(
             {
                 ...data,
                 body: {
-                    dataStream: `${text}\r\n`,
-                    paragraphs: [{
-                        startIndex: text.length,
-                        paragraphId: createParagraphId(new Set()),
-                    }],
+                    dataStream,
+                    paragraphs,
                     customRanges: [],
-                    sectionBreaks: [{ sectionId: createSectionId(new Set()), startIndex: text.length + 1 }],
+                    sectionBreaks: [{ sectionId: createSectionId(new Set()), startIndex: dataStream.length - 1 }],
                     tables: [],
                     textRuns: [],
                 },
@@ -359,8 +385,8 @@ export class Editor extends Disposable implements IEditor {
                 ? resetCursor
                 : resetCursor
                     ? [{
-                        startOffset: text.length,
-                        endOffset: text.length,
+                        startOffset: normalizedText.length,
+                        endOffset: normalizedText.length,
                         collapsed: true,
                     }]
                     : null

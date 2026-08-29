@@ -309,13 +309,19 @@ function shrinkStartAndEndCJKPunctuation(line: IDocumentSkeletonLine) {
         const firstGlyph = divide.glyphGroup[0];
         const lastGlyph = divide.glyphGroup[glyphGroupLength - 1];
 
-        if (isCjkRightAlignedPunctuation(firstGlyph.content)) {
+        if (
+            firstGlyph.ts?.textAdvance === undefined
+            && isCjkRightAlignedPunctuation(firstGlyph.content)
+        ) {
             const shrinkAmount = firstGlyph.adjustability.shrinkability[0];
 
             glyphShrinkLeft(firstGlyph, shrinkAmount);
         }
 
-        if (isCjkLeftAlignedPunctuation(lastGlyph.content)) {
+        if (
+            lastGlyph.ts?.textAdvance === undefined
+            && isCjkLeftAlignedPunctuation(lastGlyph.content)
+        ) {
             const shrinkAmount = lastGlyph.adjustability.shrinkability[1];
 
             glyphShrinkRight(lastGlyph, shrinkAmount);

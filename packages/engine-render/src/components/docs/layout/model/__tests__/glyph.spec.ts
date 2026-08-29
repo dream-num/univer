@@ -272,6 +272,44 @@ describe('Glyph utils test cases', () => {
     });
 
     describe('test font compatibility policy', () => {
+        it('uses explicit line metrics without changing glyph ink metrics', () => {
+            vi.stubGlobal('document', {
+                createElement: () => ({
+                    getContext: () => ({
+                        font: '',
+                        textBaseline: 'alphabetic',
+                        measureText: () => ({
+                            width: 16,
+                            fontBoundingBoxAscent: 30,
+                            fontBoundingBoxDescent: 9,
+                            actualBoundingBoxAscent: 24,
+                            actualBoundingBoxDescent: 6,
+                        }),
+                    }),
+                }),
+            });
+            const glyph = createSkeletonLetterGlyph('A', {
+                fontStyle: {
+                    fontString: 'normal normal 12pt Arial',
+                    fontSize: 12,
+                    originFontSize: 12,
+                    fontFamily: 'Arial',
+                    fontCache: 'normal normal 12pt Arial',
+                },
+                textStyle: { lineAscent: 13, lineDescent: 5 },
+                charSpace: 0,
+                snapToGrid: 0,
+            } as any);
+
+            expect(glyph.bBox).toMatchObject({
+                ba: 13,
+                bd: 5,
+                aba: 24,
+                abd: 6,
+                normalLineHeight: 18,
+            });
+        });
+
         it('should apply traditional font metric width rules to letter glyphs only when enabled', () => {
             vi.stubGlobal('document', {
                 createElement: () => ({

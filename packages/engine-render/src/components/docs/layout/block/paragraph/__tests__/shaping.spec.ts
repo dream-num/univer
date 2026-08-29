@@ -306,6 +306,23 @@ describe('shaping', () => {
         expect(allGlyphs.some((g) => g.content === '。')).toBe(true);
     });
 
+    it('preserves authoritative advances for consecutive CJK punctuation', () => {
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('）：', {
+            body: {
+                textRuns: [{
+                    st: 0,
+                    ed: 2,
+                    ts: { textAdvance: 10 },
+                }],
+            },
+        });
+        const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+        const glyphs = result.flatMap((item) => item.glyphs).filter((glyph) => glyph.content && glyph.content !== '\r');
+
+        expect(glyphs.map((glyph) => glyph.width)).toEqual([10, 10]);
+        expect(glyphs.map((glyph) => glyph.xOffset)).toEqual([0, 0]);
+    });
+
     it('adds CJK Latin spacing for mixed text', () => {
         const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('A好B');
 
@@ -314,6 +331,31 @@ describe('shaping', () => {
         expect(result.length).toBeGreaterThan(0);
         const allGlyphs = result.flatMap((r) => r.glyphs);
         expect(allGlyphs.length).toBeGreaterThan(0);
+    });
+
+    it('does not add CJK Latin spacing when fixed advances define the source layout', () => {
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('好5号', {
+            body: {
+                textRuns: [{
+                    st: 0,
+                    ed: 3,
+                    ts: { textAdvance: 10 },
+                }],
+            },
+        });
+
+        const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+        const allGlyphs = result.flatMap((item) => item.glyphs).filter((glyph) => glyph.content && glyph.content !== '\r');
+
+        expect(allGlyphs.map((glyph) => ({
+            content: glyph.content,
+            width: glyph.width,
+            xOffset: glyph.xOffset,
+        }))).toEqual([
+            { content: '好', width: 10, xOffset: 0 },
+            { content: '5', width: 10, xOffset: 0 },
+            { content: '号', width: 10, xOffset: 0 },
+        ]);
     });
 
     it('shapes paragraph break with zero width when configured', () => {

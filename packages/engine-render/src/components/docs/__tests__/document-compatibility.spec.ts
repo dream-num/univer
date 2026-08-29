@@ -87,4 +87,20 @@ describe('document compatibility policy', () => {
         expect(applyFontMetricCompatibility('中', simSunFallback, { ...bBox, width: 10 }, traditional).width)
             .toBeCloseTo(9.7);
     });
+
+    it('keeps traditional layout behavior while allowing font metric scaling to be disabled', () => {
+        const policy = getDocumentCompatibilityPolicy(DocumentFlavor.TRADITIONAL, false);
+        const simSunFallback = {
+            ...fontStyle,
+            fontString: 'normal normal 12pt "Times New Roman", 宋体',
+            fontSize: 12,
+            originFontSize: 12,
+            fontFamily: '"Times New Roman", 宋体',
+            fontCache: 'normal normal 12pt "Times New Roman", 宋体',
+        } as IDocumentSkeletonFontStyle;
+
+        expect(policy.mode).toBe('traditional');
+        expect(policy.useWordStyleLineHeight).toBe(true);
+        expect(applyFontMetricCompatibility('中', simSunFallback, { ...bBox, width: 10 }, policy).width).toBe(10);
+    });
 });

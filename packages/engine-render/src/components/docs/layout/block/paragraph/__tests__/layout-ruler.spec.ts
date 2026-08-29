@@ -249,6 +249,24 @@ describe('layout-ruler', () => {
         expect(tab.tabLeader).toBe(2);
     });
 
+    it('does not skip a fixed tab stop after preceding text crosses it', () => {
+        const tab = createGlyph(DataStreamTreeTokenType.TAB, 36);
+        tab.glyphType = GlyphType.TAB;
+        tab.left = 120;
+        const divide = { glyphGroup: [tab], width: 580 } as IDocumentSkeletonDivide;
+        const paragraphConfig = {
+            paragraphStyle: {
+                tabStops: [{ offset: 100, alignment: 1 }, { offset: 200, alignment: 1 }],
+                fixedTabStops: BooleanNumber.TRUE,
+            },
+        } as IParagraphConfig;
+
+        __testing.adjustExplicitTabStop(divide, [], paragraphConfig);
+
+        expect(tab.width).toBe(0);
+        expect(tab.bBox.width).toBe(0);
+    });
+
     it('uses trailing CJK punctuation shrinkability when deciding line overflow', () => {
         const text = createGlyph('字', 10);
         const punctuation = createGlyph('，', 10);
@@ -654,6 +672,27 @@ describe('layout-ruler', () => {
 
         expect(getLineBoxHeight(metrics)).toBeCloseTo(10, 4);
         expect(metrics.contentHeight).toBeGreaterThan(getLineBoxHeight(metrics));
+    });
+
+    it('top-aligns glyphs in compact exact line boxes when requested by an embedded editor', () => {
+        const metrics = getLineHeightMetrics(
+            18,
+            0,
+            15.6,
+            GridType.LINES,
+            14,
+            SpacingRule.EXACT,
+            BooleanNumber.FALSE,
+            true,
+            true,
+            undefined,
+            false,
+            true
+        );
+
+        expect(metrics.paddingTop).toBe(0);
+        expect(metrics.paddingBottom).toBe(-4);
+        expect(getLineBoxHeight(metrics)).toBe(14);
     });
 
     it('uses document grid line pitch as the minimum exact line box height for snapped docx paragraphs', () => {

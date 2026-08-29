@@ -107,6 +107,9 @@ export class DocBackScrollRenderController extends RxDisposable implements IRend
         let offsetX = 0;
 
         const editorRenderConfig = this._editorService.getEditorRenderConfig(unitId);
+        if (editorRenderConfig?.disableBackScroll) {
+            return;
+        }
         const delta = editorRenderConfig ? editorRenderConfig.backScrollOffset ?? 0 : 100;
 
         if (top < boundTop) {

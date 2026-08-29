@@ -92,6 +92,36 @@ describe('line-adjustment', () => {
         expect(() => lineAdjustment(pages, viewModel, paragraphNode, sectionBreakConfig)).not.toThrow();
     });
 
+    it('preserves authoritative advances for punctuation at line boundaries', () => {
+        const firstGlyph = createGlyph('（', 20, {
+            ts: { textAdvance: 20 },
+            adjustability: {
+                stretchability: [0, 0],
+                shrinkability: [10, 0],
+            },
+        });
+        const lastGlyph = createGlyph('）', 20, {
+            ts: { textAdvance: 20 },
+            adjustability: {
+                stretchability: [0, 0],
+                shrinkability: [0, 10],
+            },
+        });
+        const divide = {
+            width: 40,
+            isFull: false,
+            paddingLeft: 0,
+            glyphGroup: [firstGlyph, lastGlyph],
+        } as any;
+        const context = createPagesWithLine(divide, HorizontalAlign.LEFT);
+
+        lineAdjustment(context.pages, context.viewModel, context.paragraphNode, context.sectionBreakConfig);
+
+        expect(firstGlyph.xOffset).toBe(0);
+        expect(firstGlyph.width).toBe(20);
+        expect(lastGlyph.width).toBe(20);
+    });
+
     it('handles horizontal align CENTER', () => {
         const { viewModel, ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed('Hello', {
             body: {

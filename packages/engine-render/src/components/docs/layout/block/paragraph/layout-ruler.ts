@@ -590,9 +590,11 @@ function _adjustExplicitTabStop(
         return;
     }
 
-    const tabStop = [...tabStops]
-        .sort((left, right) => left.offset - right.offset)
-        .find(({ offset }) => offset > tabGlyph.left);
+    const sortedTabStops = [...tabStops].sort((left, right) => left.offset - right.offset);
+    const usesFixedTabStops = paragraphConfig.paragraphStyle?.fixedTabStops === BooleanNumber.TRUE;
+    const tabStop = usesFixedTabStops
+        ? sortedTabStops[divide.glyphGroup.filter((glyph) => glyph.glyphType === GlyphType.TAB).length - 1]
+        : sortedTabStops.find(({ offset }) => offset > tabGlyph.left);
     if (!tabStop) {
         return;
     }
@@ -610,6 +612,11 @@ function _adjustExplicitTabStop(
     const targetOffset = Math.min(tabStop.offset, divide.width);
     const width = targetOffset - tabGlyph.left - alignmentOffset;
     if (width <= 0) {
+        if (usesFixedTabStops) {
+            tabGlyph.width = 0;
+            tabGlyph.bBox.width = 0;
+            tabGlyph.tabLeader = tabStop.leader;
+        }
         return;
     }
 
@@ -742,7 +749,8 @@ function _lineOperator(
         paragraphConfig.useWordStyleLineHeight,
         !hasInlineCustomBlock,
         normalLineHeight,
-        snapMultilineParagraphToWholeGrid
+        snapMultilineParagraphToWholeGrid,
+        sectionBreakConfig.renderConfig?.topAlignExactLineSpacing === BooleanNumber.TRUE
     );
 
     if (snapMultilineParagraphToWholeGrid && preLine?.paragraphIndex === paragraphIndex) {
@@ -762,7 +770,8 @@ function _lineOperator(
                 paragraphConfig.useWordStyleLineHeight,
                 true,
                 undefined,
-                true
+                true,
+                sectionBreakConfig.renderConfig?.topAlignExactLineSpacing === BooleanNumber.TRUE
             );
             const heightDelta = preLineMetrics.lineSpacingApply -
                 (preLine.paddingTop + preLine.contentHeight + preLine.paddingBottom);
@@ -1726,7 +1735,8 @@ export function getLineHeightMetrics(
     useWordStyleLineHeight = true,
     scaleAutoLineSpacingByGlyphHeight = true,
     normalLineHeight?: number,
-    snapAutoLineSpacingToWholeGridLines = false
+    snapAutoLineSpacingToWholeGridLines = false,
+    topAlignExactLineSpacing = false
 ) {
     const usesLineGridType = gridType === GridType.LINES || gridType === GridType.LINES_AND_CHARS;
     if (!useWordStyleLineHeight) {
@@ -1833,8 +1843,8 @@ export function getLineHeightMetrics(
     const exactPadding = (exactLineSpacingApply - glyphLineHeight) / 2;
 
     return {
-        paddingTop: exactPadding,
-        paddingBottom: exactPadding,
+        paddingTop: topAlignExactLineSpacing ? 0 : exactPadding,
+        paddingBottom: topAlignExactLineSpacing ? exactLineSpacingApply - glyphLineHeight : exactPadding,
         contentHeight: glyphLineHeight,
         lineSpacingApply: exactLineSpacingApply,
     };

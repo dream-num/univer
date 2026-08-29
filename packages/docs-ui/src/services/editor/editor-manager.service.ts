@@ -31,6 +31,7 @@ export interface IEditorRenderConfig {
     preserveHostFocus?: boolean;
     scrollBar?: boolean;
     backScrollOffset?: number;
+    disableBackScroll?: boolean;
 }
 
 /**
@@ -228,6 +229,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
             canvasStyle,
             scrollBar: config.scrollBar,
             ...(config.backScrollOffset === undefined ? {} : { backScrollOffset: config.backScrollOffset }),
+            ...(config.disableBackScroll === undefined ? {} : { disableBackScroll: config.disableBackScroll }),
             ...(config.preserveHostFocus === undefined ? {} : { preserveHostFocus: config.preserveHostFocus }),
         });
 
@@ -247,7 +249,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         }
 
         if (render) {
-            render.engine.mount(container);
+            render.engine.mount(container, !config.cancelDefaultResizeListener);
 
             const editor = new Editor(
                 { ...config, render, editorDom: container, canvasStyle },
@@ -296,6 +298,10 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         if (editor == null) {
             this._editorRenderConfigs.delete(editorUnitId);
             return;
+        }
+
+        if (this._focusEditorUnitId === editorUnitId) {
+            this.blur(true);
         }
 
         this._renderManagerService.removeRender(editorUnitId);

@@ -48,7 +48,7 @@ const DialogOverlay = forwardRef<
 ));
 DialogOverlay.displayName = Overlay.displayName;
 
-interface IDialogContentProps {
+export interface IDialogContentProps {
     closable?: boolean;
     onClickClose?: () => void;
     mountContainer?: HTMLElement | null;

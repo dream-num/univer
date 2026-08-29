@@ -176,6 +176,7 @@ const testFormulaEditor = {
         body: { dataStream: 'Existing\r\n' },
         documentStyle: {},
     }),
+    getSelectionRanges: () => [],
     setSelectionRanges: vi.fn(),
 };
 
@@ -468,7 +469,7 @@ describe('FormulaBar', () => {
         container = rendered.container;
 
         const editorHost = rendered.container.querySelector('[data-editor-id]')?.parentElement;
-        expect(editorHost?.style.backgroundColor).toBe('rgb(0, 0, 0)');
+        expect(editorHost?.style.backgroundColor).toBe('#000000');
     });
 
     it('opens immersive mobile editing from the compact up arrow', async () => {

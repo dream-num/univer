@@ -398,6 +398,7 @@ describe('MobileStylePanel', () => {
                     item: {
                         id: SetTextRotationCommand.id,
                         type: MenuItemType.SELECTOR,
+                        title: 'Text rotation',
                         tooltip: 'Text rotation',
                         selections: [{ label: 'No rotation', value: 0 }],
                         value$: new BehaviorSubject(0),

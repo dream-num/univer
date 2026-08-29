@@ -276,6 +276,8 @@ export { getAnchorBounding, getLineBounding, TEXT_RANGE_LAYER_INDEX, TextRange }
 export { whenDocAndEditorFocused } from './shortcuts/utils';
 export { DOC_VERTICAL_PADDING } from './types/const/padding';
 export { BulletListTypePicker, OrderListTypePicker } from './views/list-type-picker/Picker';
+export { MobileRichTextToolbar } from './views/mobile-rich-text-toolbar/MobileRichTextToolbar';
+export type { IMobileRichTextToolbarProps } from './views/mobile-rich-text-toolbar/MobileRichTextToolbar';
 export {
     createEditorUndoRedoKeyboardConfig,
     executeEditorUndoRedoCommand,

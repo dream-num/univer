@@ -29,7 +29,7 @@ import {
     UniverInstanceType,
     UserManagerService,
 } from '@univerjs/core';
-import { Avatar, borderClassName, Button, clsx, Tooltip } from '@univerjs/design';
+import { ActionRow, Avatar, borderClassName, Button, clsx, Tooltip } from '@univerjs/design';
 import { serializeRange } from '@univerjs/engine-formula';
 import { DeleteIcon, WriteIcon } from '@univerjs/icons';
 import { UnitAction, UnitObject } from '@univerjs/protocol';
@@ -405,7 +405,7 @@ function SheetPermissionPanelListContent() {
                 )}
 
             {hasSetProtectPermission && (
-                <div className="univer-mt-auto univer-py-5">
+                <ActionRow className="univer-mt-auto univer-py-5">
                     <Button
                         className="univer-w-full"
                         variant="primary"
@@ -424,7 +424,7 @@ function SheetPermissionPanelListContent() {
                         <div>+ </div>
                         {localeService.t<LocaleKey>('sheets-ui.permission.button.addNewPermission')}
                     </Button>
-                </div>
+                </ActionRow>
             )}
         </div>
     );

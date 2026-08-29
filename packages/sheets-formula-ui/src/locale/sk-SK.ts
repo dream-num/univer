@@ -75,6 +75,15 @@ const locale: typeof enUS = {
             allFunctions: 'Všetky funkcie',
             syntax: 'SYNTAX',
         },
+        mobileFunction: {
+            title: 'Vložiť funkciu',
+            recommended: 'Odporúčané',
+            recent: 'Nedávne',
+            details: 'Podrobnosti',
+            insert: 'Vložiť funkciu',
+            empty: 'Žiadne funkcie',
+            close: 'Zavrieť',
+        },
         operation: {
             copyFormulaOnly: 'Kopírovať iba vzorec',
             pasteFormula: 'Prilepiť vzorec',

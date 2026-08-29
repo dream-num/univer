@@ -32,10 +32,10 @@ import { IEditorService } from '@univerjs/docs-ui';
 import { IDescriptionService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { IMarkSelectionService } from '@univerjs/sheets-ui';
-import { RediContext } from '@univerjs/ui';
+import { IDialogService, RediContext } from '@univerjs/ui';
 import { act, createRef } from 'react';
 import { createRoot } from 'react-dom/client';
-import { Subject } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { GlobalRangeSelectorService } from '../../../services/range-selector.service';
 import { GlobalRangeSelector } from '../Global';
@@ -79,6 +79,20 @@ class TestCommandService {
 
     getCommand(): ICommandInfo {
         return { id: 'test.command', type: CommandType.OPERATION };
+    }
+}
+
+class TestDialogService {
+    open(): IDisposable {
+        return { dispose: () => {} };
+    }
+
+    close(): void {}
+
+    closeAll(): void {}
+
+    getDialogs$() {
+        return of([]);
     }
 }
 
@@ -157,6 +171,7 @@ function createGlobalRangeSelectorTestBed() {
     injector.add([IMarkSelectionService, { useClass: TestMarkSelectionService as never }]);
     injector.add([SheetsSelectionsService, { useClass: TestSheetsSelectionsService as never }]);
     injector.add([IUniverInstanceService, { useClass: TestUniverInstanceService as never }]);
+    injector.add([IDialogService, { useClass: TestDialogService }]);
     injector.add([GlobalRangeSelectorService]);
 
     injector.get(LocaleService).load({

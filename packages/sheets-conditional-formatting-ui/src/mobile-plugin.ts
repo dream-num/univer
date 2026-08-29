@@ -23,6 +23,8 @@ import {
     Injector,
     merge,
     Plugin,
+    registerDependencies,
+    touchDependencies,
     UniverInstanceType,
 } from '@univerjs/core';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
@@ -46,8 +48,11 @@ import { defaultPluginConfig, SHEETS_CONDITIONAL_FORMATTING_UI_PLUGIN_CONFIG_KEY
 import { ConditionalFormattingFormulaRefRangeController } from './controllers/cf-formula-ref-range.controller';
 import { ConditionalFormattingCopyPasteController } from './controllers/cf.copy-paste.controller';
 import { ConditionalFormattingI18nController } from './controllers/cf.i18n.controller';
+import { ConditionalFormattingPanelController } from './controllers/cf.panel.controller';
 import { ConditionalFormattingPermissionController } from './controllers/cf.permission.controller';
 import { SheetsCfRenderController } from './controllers/cf.render.controller';
+import { ComponentsController } from './controllers/components.controller';
+import { ConditionalFormattingMenuController } from './menu/cf.menu.controller';
 
 @DependentOn(
     UniverRenderEnginePlugin,
@@ -82,12 +87,39 @@ export class UniverSheetsConditionalFormattingMobileUIPlugin extends Plugin {
         this._configService.setConfig(SHEETS_CONDITIONAL_FORMATTING_UI_PLUGIN_CONFIG_KEY, rest);
 
         this._initCommand();
+    }
 
-        this._injector.add([SheetsCfRenderController]);
-        this._injector.add([ConditionalFormattingCopyPasteController]);
-        this._injector.add([ConditionalFormattingPermissionController]);
-        this._injector.add([ConditionalFormattingI18nController]);
-        this._injector.add([ConditionalFormattingFormulaRefRangeController]);
+    override onStarting(): void {
+        registerDependencies(this._injector, [
+            [ComponentsController],
+            [SheetsCfRenderController],
+            [ConditionalFormattingCopyPasteController],
+            [ConditionalFormattingPermissionController],
+            [ConditionalFormattingI18nController],
+            [ConditionalFormattingFormulaRefRangeController],
+            [ConditionalFormattingPanelController],
+            [ConditionalFormattingMenuController],
+        ]);
+        touchDependencies(this._injector, [
+            [ComponentsController],
+            [SheetsCfRenderController],
+            [ConditionalFormattingFormulaRefRangeController],
+        ]);
+    }
+
+    override onReady(): void {
+        touchDependencies(this._injector, [
+            [ConditionalFormattingMenuController],
+            [ConditionalFormattingPanelController],
+        ]);
+    }
+
+    override onRendered(): void {
+        touchDependencies(this._injector, [
+            [ConditionalFormattingCopyPasteController],
+            [ConditionalFormattingPermissionController],
+            [ConditionalFormattingI18nController],
+        ]);
     }
 
     private _initCommand() {

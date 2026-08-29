@@ -17,7 +17,7 @@
 import type { IBorderInfo } from '@univerjs/sheets';
 import type { ICustomComponentProps } from '@univerjs/ui';
 import type { LocaleKey } from '../../locale/types';
-import { BorderStyleTypes } from '@univerjs/core';
+import { BorderStyleTypes, BorderType } from '@univerjs/core';
 import { COMPONENT_PREFIX } from '../const';
 
 export const BORDER_PANEL_COMPONENT = `${COMPONENT_PREFIX}_BORDER_PANEL_COMPONENT`;
@@ -28,80 +28,80 @@ export const BORDER_LINE_CHILDREN = [
     {
         label: 'sheets-ui.borderLine.borderTop',
         icon: 'UpBorderDoubleIcon',
-        value: 'top',
+        value: BorderType.TOP,
     },
     {
         label: 'sheets-ui.borderLine.borderBottom',
         icon: 'DownBorderDoubleIcon',
-        value: 'bottom',
+        value: BorderType.BOTTOM,
     },
     {
         label: 'sheets-ui.borderLine.borderLeft',
         icon: 'LeftBorderDoubleIcon',
-        value: 'left',
+        value: BorderType.LEFT,
     },
     {
         label: 'sheets-ui.borderLine.borderRight',
         icon: 'RightBorderDoubleIcon',
-        value: 'right',
+        value: BorderType.RIGHT,
     },
     {
         label: 'sheets-ui.borderLine.borderNone',
         icon: 'NoBorderIcon',
-        value: 'none',
+        value: BorderType.NONE,
     },
     {
         label: 'sheets-ui.borderLine.borderAll',
         icon: 'AllBorderIcon',
-        value: 'all',
+        value: BorderType.ALL,
     },
     {
         label: 'sheets-ui.borderLine.borderOutside',
         icon: 'OuterBorderDoubleIcon',
-        value: 'outside',
+        value: BorderType.OUTSIDE,
     },
     {
         label: 'sheets-ui.borderLine.borderInside',
         icon: 'InnerBorderDoubleIcon',
-        value: 'inside',
+        value: BorderType.INSIDE,
     },
     {
         label: 'sheets-ui.borderLine.borderHorizontal',
         icon: 'HorizontalBorderDoubleIcon',
-        value: 'horizontal',
+        value: BorderType.HORIZONTAL,
     },
     {
         label: 'sheets-ui.borderLine.borderVertical',
         icon: 'VerticalBorderDoubleIcon',
-        value: 'vertical',
+        value: BorderType.VERTICAL,
     },
 
     {
         label: 'sheets-ui.borderLine.borderTlbr',
         icon: 'BackSlashDoubleIcon',
-        value: 'tlbr',
+        value: BorderType.TLBR,
     },
     {
         label: 'sheets-ui.borderLine.borderTlbcTlmr',
         icon: 'LeftDoubleDiagonalDoubleIcon',
-        value: 'tlbc_tlmr',
+        value: BorderType.TLBC_TLMR,
     },
     {
         label: 'sheets-ui.borderLine.borderTlbrTlbcTlmr',
         icon: 'LeftTridiagonalDoubleIcon',
-        value: 'tlbr_tlbc_tlmr',
+        value: BorderType.TLBR_TLBC_TLMR,
     },
     {
         label: 'sheets-ui.borderLine.borderBlTr',
         icon: 'SlashDoubleIcon',
-        value: 'bltr',
+        value: BorderType.BLTR,
     },
     {
         label: 'sheets-ui.borderLine.borderMltrBctr',
         icon: 'RightDoubleDiagonalDoubleIcon',
-        value: 'mltr_bctr',
+        value: BorderType.MLTR_BCTR,
     },
-] satisfies Array<{ label: LocaleKey; icon: string; value: string }>;
+] satisfies Array<{ label: LocaleKey; icon: string; value: BorderType }>;
 
 export const BORDER_SIZE_CHILDREN = [
     {

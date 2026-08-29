@@ -21,6 +21,7 @@ const locale: typeof enUS = {
         Accessibility: {
             closeBadge: 'Tanca la insígnia',
             close: 'Tanca',
+            menu: 'Menú',
             previous: 'Anterior',
             next: 'Següent',
             imageGallery: 'Galeria d’imatges',

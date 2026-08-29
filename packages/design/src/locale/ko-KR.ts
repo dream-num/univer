@@ -21,6 +21,7 @@ const locale: typeof enUS = {
         Accessibility: {
             closeBadge: '배지 닫기',
             close: '닫기',
+            menu: '메뉴',
             previous: '이전',
             next: '다음',
             imageGallery: '이미지 갤러리',

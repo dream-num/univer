@@ -21,6 +21,7 @@ const locale: typeof enUS = {
         Accessibility: {
             closeBadge: 'バッジを閉じる',
             close: '閉じる',
+            menu: 'メニュー',
             previous: '前へ',
             next: '次へ',
             imageGallery: '画像ギャラリー',

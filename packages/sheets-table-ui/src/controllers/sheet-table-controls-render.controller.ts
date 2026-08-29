@@ -30,6 +30,7 @@ import {
     Disposable,
     fromCallback,
     ICommandService,
+    IContextService,
     Inject,
     Injector,
     IPermissionService,
@@ -64,7 +65,7 @@ import {
     SheetCanvasPopManagerService,
     SheetSkeletonManagerService,
 } from '@univerjs/sheets-ui';
-import { IDialogService, ISidebarService } from '@univerjs/ui';
+import { IDialogService, ISidebarService, MOBILE_UI_MODE } from '@univerjs/ui';
 import { filter, merge } from 'rxjs';
 import { openRangeSelector } from '../commands/operations/open-table-selector.operation';
 import {
@@ -80,6 +81,7 @@ import { SheetTableThemeUIController } from './sheet-table-theme-ui.controller';
 
 const TABLE_CONTROLS_LAYER_INDEX = 5002;
 const TABLE_CONTROL_GAP_ROW = 0;
+const SHEET_TABLE_MOBILE_MENU_DIALOG_ID = 'sheet-table-mobile-menu';
 
 const TABLE_RENDER_REFRESH_COMMANDS = new Set([
     SetScrollOperation.id,
@@ -121,6 +123,7 @@ export class SheetTableControlsRenderController extends Disposable implements IR
         @ISheetSelectionRenderService private readonly _selectionRenderService: ISheetSelectionRenderService,
         @Inject(SheetTableThemeUIController) private readonly _sheetTableThemeUIController: SheetTableThemeUIController,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @IContextService private readonly _contextService: IContextService,
         @IDialogService private readonly _dialogService: IDialogService,
         @ISidebarService private readonly _sidebarService: ISidebarService,
         @Inject(SheetCanvasPopManagerService) private readonly _sheetCanvasPopupService: SheetCanvasPopManagerService
@@ -338,6 +341,34 @@ export class SheetTableControlsRenderController extends Disposable implements IR
         this._closeFloatingControls();
         this._shape.setOpenedMenuTableId(tableId);
         const range = table.getRange();
+        const extraProps = {
+            anchorWidth: anchor.width,
+            tableName: table.getDisplayName(),
+            labels: {
+                rename: this._localeService.t<LocaleKey>('sheets-table-ui.rename'),
+                'update-range': this._localeService.t<LocaleKey>('sheets-table-ui.updateRange'),
+                'set-theme': this._localeService.t<LocaleKey>('sheets-table-ui.setTheme'),
+                delete: this._localeService.t<LocaleKey>('sheets-table-ui.removeTable'),
+            },
+            onSelect: (action: SheetTableMenuAction) => this._handleTableMenuAction(action, unitId, subUnitId, tableId),
+            onClose: () => this._closeFloatingControls(),
+        };
+
+        if (this._contextService.getContextValue(MOBILE_UI_MODE)) {
+            this._dialogService.open({
+                id: SHEET_TABLE_MOBILE_MENU_DIALOG_ID,
+                title: { title: table.getDisplayName() },
+                children: {
+                    label: {
+                        name: SHEET_TABLE_MENU,
+                        props: { popup: { extraProps } },
+                    },
+                },
+                onClose: () => this._closeFloatingControls(),
+            });
+            this._menuPopup = toDisposable(() => this._dialogService.close(SHEET_TABLE_MOBILE_MENU_DIALOG_ID));
+            return;
+        }
 
         this._menuPopup = this._sheetCanvasPopupService.attachPopupByPosition(
             {
@@ -349,18 +380,7 @@ export class SheetTableControlsRenderController extends Disposable implements IR
             {
                 componentKey: SHEET_TABLE_MENU,
                 direction: 'bottom-left',
-                extraProps: {
-                    anchorWidth: anchor.width,
-                    tableName: table.getDisplayName(),
-                    labels: {
-                        rename: this._localeService.t<LocaleKey>('sheets-table-ui.rename'),
-                        'update-range': this._localeService.t<LocaleKey>('sheets-table-ui.updateRange'),
-                        'set-theme': this._localeService.t<LocaleKey>('sheets-table-ui.setTheme'),
-                        delete: this._localeService.t<LocaleKey>('sheets-table-ui.removeTable'),
-                    },
-                    onSelect: (action: SheetTableMenuAction) => this._handleTableMenuAction(action, unitId, subUnitId, tableId),
-                    onClose: () => this._closeFloatingControls(),
-                },
+                extraProps,
             },
             {
                 unitId,

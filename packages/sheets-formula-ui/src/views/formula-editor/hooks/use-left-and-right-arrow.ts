@@ -35,6 +35,7 @@ export interface IFormulaEditorInteractionOwnerOptions {
     fxBarFocused?: boolean;
     formulaBarEditorId?: string;
     normalEditorId?: string;
+    allowMissingFocus?: boolean;
 }
 
 export function isFormulaEditorInteractionOwner(
@@ -51,7 +52,10 @@ export function isFormulaEditorInteractionOwner(
     }
 
     return editorId === (options.formulaBarEditorId ?? DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) &&
-        focusEditorId === (options.normalEditorId ?? DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+        (
+            focusEditorId === (options.normalEditorId ?? DOCS_NORMAL_EDITOR_UNIT_ID_KEY) ||
+            Boolean(options.allowMissingFocus && !focusEditorId)
+        );
 }
 
 export const useLeftAndRightArrow = (

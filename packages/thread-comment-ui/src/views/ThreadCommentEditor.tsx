@@ -26,7 +26,7 @@ import {
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
-import { Button, clsx } from '@univerjs/design';
+import { ActionRow, Button, clsx } from '@univerjs/design';
 import { BreakLineCommand, DeleteLeftCommand, DeleteRightCommand, IEditorService, RichTextEditor } from '@univerjs/docs-ui';
 import { KeyCode, useDependency } from '@univerjs/ui';
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
@@ -209,7 +209,9 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
             </div>
             {editing
                 ? (
-                    <div className="univer-mt-3 univer-flex univer-flex-row univer-justify-end univer-gap-2">
+                    <ActionRow
+                        className="univer-mt-3 univer-flex univer-flex-row univer-justify-end univer-gap-2"
+                    >
                         <Button
                             type="button"
                             onClick={() => {
@@ -233,7 +235,7 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
                         >
                             {localeService.t<LocaleKey>(id ? 'thread-comment-ui.editor.save' : 'thread-comment-ui.editor.reply')}
                         </Button>
-                    </div>
+                    </ActionRow>
                 )
                 : null}
         </div>

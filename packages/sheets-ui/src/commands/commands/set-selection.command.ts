@@ -158,6 +158,7 @@ export const MoveSelectionCommand: ICommand<IMoveSelectionCommandParams> = {
             selections,
             type: SelectionMoveType.MOVE_END,
             extra,
+            fromCurrentSelection: params.fromCurrentSelection,
             reveal: true,
         } as ISetSelectionsOperationParams);
         return rs;
@@ -180,7 +181,7 @@ export const MoveSelectionEnterAndTabCommand: ICommand<IMoveSelectionEnterAndTab
         if (!target) return false;
 
         const { workbook, worksheet } = target;
-        const selectionsService = getSelectionsService(accessor);
+        const selectionsService = getSelectionsService(accessor, params.fromCurrentSelection);
         const { direction, keycode } = params;
         const isReverse = direction === Direction.LEFT || direction === Direction.UP;
 
@@ -336,6 +337,7 @@ export const MoveSelectionEnterAndTabCommand: ICommand<IMoveSelectionEnterAndTab
             selections,
             reveal: true,
             extra: params.extra,
+            fromCurrentSelection: params.fromCurrentSelection,
         });
         const renderManagerService = accessor.get(IRenderManagerService);
         const selectionService = renderManagerService.getRenderUnitById(unitId)?.with(ISheetSelectionRenderService);

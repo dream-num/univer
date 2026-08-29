@@ -97,6 +97,7 @@ import { IMarkSelectionService } from '@univerjs/sheets-ui';
 import {
     ComponentManager,
     DesktopSidebarService,
+    IDialogService,
     ILayoutService,
     IPlatformService,
     IShortcutService,
@@ -109,7 +110,7 @@ import {
 } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
-import { Subject } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { afterEach, describe, expect, it } from 'vitest';
 import { DataValidationPanelService } from '../../../services/data-validation-panel.service';
 import { DataValidationDetail } from '../DataValidationDetail';
@@ -165,6 +166,20 @@ class TestRenderManagerService {
 }
 
 class TestDescriptionService {
+}
+
+class TestDialogService {
+    open(): IDisposable {
+        return toDisposable(() => undefined);
+    }
+
+    close(): void {}
+
+    closeAll(): void {}
+
+    getDialogs$() {
+        return of([]);
+    }
 }
 
 const IEditorService = createIdentifier<TestEditorService>('univer.editor.service');
@@ -404,6 +419,7 @@ function createDetailTestBed(rule: ISheetDataValidationRule) {
                 [SheetInterceptorService],
                 [SheetSkeletonService],
                 [ComponentManager],
+                [IDialogService, { useClass: TestDialogService }],
                 [IEditorService, { useClass: TestEditorService }],
                 [IDescriptionService, { useClass: TestDescriptionService }],
                 [IRenderManagerService, { useClass: TestRenderManagerService as never }],

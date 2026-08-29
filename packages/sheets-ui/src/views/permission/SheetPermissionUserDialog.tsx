@@ -17,7 +17,7 @@
 import type { ICollaborator } from '@univerjs/protocol';
 import type { LocaleKey } from '../../locale/types';
 import { IAuthzIoService, LocaleService } from '@univerjs/core';
-import { Avatar, Button, clsx, Input, scrollbarClassName } from '@univerjs/design';
+import { ActionRow, Avatar, Button, clsx, Input, scrollbarClassName } from '@univerjs/design';
 import { CheckMarkIcon } from '@univerjs/icons';
 import { UnitRole } from '@univerjs/protocol';
 import { IDialogService, useDependency, useObservable } from '@univerjs/ui';
@@ -120,7 +120,9 @@ export const SheetPermissionUserDialog = () => {
                     )}
             </div>
             <div className="univer-h-px univer-w-full univer-bg-gray-200" />
-            <div className="univer-flex univer-items-center univer-justify-end univer-gap-1 univer-py-2">
+            <ActionRow
+                className="univer-flex univer-items-center univer-justify-end univer-gap-1 univer-py-2"
+            >
                 <Button
                     onClick={() => dialogService.close(UNIVER_SHEET_PERMISSION_USER_DIALOG_ID)}
                 >
@@ -135,7 +137,7 @@ export const SheetPermissionUserDialog = () => {
                 >
                     {localeService.t<LocaleKey>('sheets-ui.permission.button.confirm')}
                 </Button>
-            </div>
+            </ActionRow>
         </div>
     );
 };

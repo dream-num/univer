@@ -25,11 +25,12 @@ import {
 import { IEditorService } from '@univerjs/docs-ui';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import { SheetInterceptorService, SheetSkeletonService } from '@univerjs/sheets';
+import { DISABLE_AUTO_FOCUS_KEY } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { EditorBridgeService, IEditorBridgeService } from '../editor-bridge.service';
 
-function createService(options?: { hasFocusEditor?: boolean }) {
+function createService(options?: { disableAutoFocus?: boolean; hasFocusEditor?: boolean }) {
     const unitDisposed$ = new Subject<any>();
     const workbook = {
         getUnitId: () => 'unit-1',
@@ -57,6 +58,7 @@ function createService(options?: { hasFocusEditor?: boolean }) {
             getUnit: vi.fn((unitId: string, type?: UniverInstanceType) => unitId === 'unit-1'
                 ? mocks.univerInstanceService.getCurrentUnitOfType(type as never)
                 : null),
+            setCurrentUnitForType: vi.fn(),
         },
         editorService: {
             getFocusEditor: vi.fn(() => (options?.hasFocusEditor ? { id: 'existing' } : null)),
@@ -64,6 +66,7 @@ function createService(options?: { hasFocusEditor?: boolean }) {
         },
         contextService: {
             setContextValue: vi.fn(),
+            getContextValue: vi.fn((key: string) => key === DISABLE_AUTO_FOCUS_KEY && Boolean(options?.disableAutoFocus)),
         },
     };
 
@@ -87,6 +90,7 @@ function createService(options?: { hasFocusEditor?: boolean }) {
         getTypeOfUnitDisposed$ = mocks.univerInstanceService.getTypeOfUnitDisposed$;
         getCurrentUnitOfType = mocks.univerInstanceService.getCurrentUnitOfType;
         getUnit = mocks.univerInstanceService.getUnit;
+        setCurrentUnitForType = mocks.univerInstanceService.setCurrentUnitForType;
     }
 
     class TestEditorService {
@@ -96,6 +100,7 @@ function createService(options?: { hasFocusEditor?: boolean }) {
 
     class TestContextService {
         setContextValue = mocks.contextService.setContextValue;
+        getContextValue = mocks.contextService.getContextValue;
     }
 
     const injector = new Injector();
@@ -216,6 +221,17 @@ describe('EditorBridgeService', () => {
         });
         expect(service.getEditCellState()).toBeNull();
         expect(service.getEditCellLayout()).toBeNull();
+    });
+
+    it('selects the internal editor without focusing its DOM input when automatic focus is disabled', () => {
+        const { service, mocks } = createService({ disableAutoFocus: true });
+        vi.spyOn(service, 'getLatestEditCellState').mockReturnValue(undefined);
+
+        service.setEditCell(createEditCellParam());
+
+        expect(mocks.univerInstanceService.setCurrentUnitForType).toHaveBeenCalledWith(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+        expect(mocks.editorService.focus).not.toHaveBeenCalled();
+        expect(mocks.contextService.setContextValue).not.toHaveBeenCalled();
     });
 
     it('manages visible/dirty/force-keep states and null-latest branches', () => {

@@ -75,6 +75,15 @@ const locale: typeof enUS = {
             allFunctions: '모든 함수',
             syntax: '구문',
         },
+        mobileFunction: {
+            title: '함수 삽입',
+            recommended: '추천',
+            recent: '최근',
+            details: '세부 정보',
+            insert: '함수 삽입',
+            empty: '함수가 없습니다',
+            close: '닫기',
+        },
         operation: {
             copyFormulaOnly: '수식만 복사',
             pasteFormula: '수식 붙여넣기',

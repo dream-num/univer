@@ -2,7 +2,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
-import { createTailwindContent } from '../tailwind.config';
+import tailwindConfig, { createTailwindContent } from '../tailwind.config';
 
 const roots: string[] = [];
 
@@ -31,6 +31,10 @@ afterEach(() => {
 });
 
 describe('createTailwindContent', () => {
+    it('limits hover styles to devices that support hover', () => {
+        expect(tailwindConfig.future).toMatchObject({ hoverOnlyWhenSupported: true });
+    });
+
     it('returns current package source content by default', () => {
         const packageRoot = makePackageRoot();
         writeJson(path.join(packageRoot, 'package.json'), {

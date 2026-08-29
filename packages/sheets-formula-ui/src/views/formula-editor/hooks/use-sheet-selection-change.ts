@@ -27,7 +27,6 @@ import {
     ICommandService,
     IContextService,
     IUniverInstanceService,
-    noop,
     Rectangle,
     ThemeService,
     UniverInstanceType,
@@ -263,7 +262,8 @@ export const useSheetSelectionChange = (
     isSupportAcrossSheet: boolean,
     listenSelectionSet: boolean,
     editor?: Editor,
-    handleRangeChange: ((refString: string, offset: number, isEnd: boolean, isModify?: boolean) => void) = noop as any
+    handleRangeChange: ((refString: string, offset: number, isEnd: boolean, isModify?: boolean) => void) = () => {},
+    allowMissingEditorFocus = false
 ) => {
     const renderManagerService = useDependency(IRenderManagerService);
     const univerInstanceService = useDependency(IUniverInstanceService);
@@ -290,6 +290,7 @@ export const useSheetSelectionChange = (
     const onSelectionsChange = useEvent((selections: IRange[], isEnd: boolean, isCtrlAddMode?: boolean) => {
         if (!editor || !isFormulaEditorInteractionOwner(editorService.getFocusId(), editor.getEditorId(), {
             fxBarFocused: contextService.getContextValue(FOCUSING_FX_BAR_EDITOR),
+            allowMissingFocus: allowMissingEditorFocus,
         })) {
             return;
         }
@@ -435,6 +436,14 @@ export const useSheetSelectionChange = (
 
     useEffect(() => {
         if (refSelectionsRenderService && isNeed) {
+            const isInteractionOwner = () => Boolean(editor && isFormulaEditorInteractionOwner(
+                editorService.getFocusId(),
+                editor.getEditorId(),
+                {
+                    fxBarFocused: contextService.getContextValue(FOCUSING_FX_BAR_EDITOR),
+                    allowMissingFocus: allowMissingEditorFocus,
+                }
+            ));
             const initialSelectionsCount = getInitialFormulaReferenceSelectionCount(
                 refSelectionsRenderService.getSelectionDataWithStyle().length,
                 getRefSelections().length,
@@ -461,12 +470,15 @@ export const useSheetSelectionChange = (
 
             const disposableCollection = new DisposableCollection();
             disposableCollection.add(refSelectionsRenderService.selectionMoveStart$.subscribe((selections) => {
+                if (!isInteractionOwner()) return;
                 handleSelectionsChange(selections, false);
             }));
             disposableCollection.add(refSelectionsRenderService.selectionMoving$.subscribe((selections) => {
+                if (!isInteractionOwner()) return;
                 handleSelectionsChange(selections, false);
             }));
             disposableCollection.add(refSelectionsRenderService.selectionMoveEnd$.subscribe((selections) => {
+                if (!isInteractionOwner()) return;
                 handleSelectionsChange(selections, true, { initial: isInitialMoveEnd });
                 isInitialMoveEnd = false;
             }));
@@ -475,7 +487,7 @@ export const useSheetSelectionChange = (
                 disposableCollection.dispose();
             };
         }
-    }, [getRefSelections, isNeed, onSelectionsChange, refSelectionsRenderService, refSelectionsService]);
+    }, [allowMissingEditorFocus, contextService, editor, editorService, getRefSelections, isNeed, onSelectionsChange, refSelectionsRenderService, refSelectionsService]);
 
     useEffect(() => {
         if (isFocus && refSelectionsRenderService && editor) {
@@ -535,6 +547,7 @@ export const useSheetSelectionChange = (
                 }
                 if (!editor || !isFormulaEditorInteractionOwner(editorService.getFocusId(), editor.getEditorId(), {
                     fxBarFocused: contextService.getContextValue(FOCUSING_FX_BAR_EDITOR),
+                    allowMissingFocus: allowMissingEditorFocus,
                 })) {
                     return;
                 }

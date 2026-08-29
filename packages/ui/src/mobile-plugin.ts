@@ -36,6 +36,7 @@ import { ComponentManager } from './common/component-manager';
 import { IconManager } from './common/icon-manager';
 import { ZIndexManager } from './common/z-index-manager';
 import { defaultPluginConfig, UI_PLUGIN_CONFIG_KEY } from './config/config';
+import { MOBILE_UI_MODE } from './const';
 import { ComponentsController } from './controllers/components.controller';
 import { ErrorController } from './controllers/error/error.controller';
 import { FeatureSearchController } from './controllers/feature-search/feature-search.controller';
@@ -48,8 +49,8 @@ import { BrowserClipboardService, IClipboardInterfaceService } from './services/
 import { DesktopConfirmService } from './services/confirm/desktop-confirm.service';
 import { ContextMenuHostService, IContextMenuHostService } from './services/contextmenu/contextmenu-host.service';
 import { ContextMenuService, IContextMenuService } from './services/contextmenu/contextmenu.service';
-import { DesktopDialogService } from './services/dialog/desktop-dialog.service';
 import { IDialogService } from './services/dialog/dialog.service';
+import { MobileDialogService } from './services/dialog/mobile-dialog.service';
 import { CanvasFloatDomPreviewService, CanvasFloatDomService } from './services/dom/canvas-dom-layer.service';
 import { FontService, IFontService } from './services/font.service';
 import { DesktopGalleryService } from './services/gallery/desktop-gallery.service';
@@ -103,6 +104,7 @@ export class UniverMobileUIPlugin extends Plugin {
         const { menu, ...rest } = merge(
             {
                 popupRootId: `univer-popup-portal-${generateRandomId(6)}`,
+                disableAutoFocus: true,
             },
             defaultPluginConfig,
             this._config
@@ -111,6 +113,7 @@ export class UniverMobileUIPlugin extends Plugin {
         if (rest.disableAutoFocus) {
             this._contextService.setContextValue(DISABLE_AUTO_FOCUS_KEY, true);
         }
+        this._contextService.setContextValue(MOBILE_UI_MODE, true);
         if (menu) {
             this._configService.setConfig('menu', menu, { merge: true });
         }
@@ -140,7 +143,7 @@ export class UniverMobileUIPlugin extends Plugin {
             [IClipboardInterfaceService, { useClass: BrowserClipboardService, lazy: true }],
             [INotificationService, { useClass: DesktopNotificationService, lazy: true }],
             [IGalleryService, { useClass: DesktopGalleryService, lazy: true }],
-            [IDialogService, { useClass: DesktopDialogService, lazy: true }],
+            [IDialogService, { useClass: MobileDialogService, lazy: true }],
             [IConfirmService, { useClass: DesktopConfirmService, lazy: true }],
             [ISidebarService, { useClass: DesktopSidebarService, lazy: true }],
             [IMessageService, { useClass: DesktopMessageService, lazy: true }],

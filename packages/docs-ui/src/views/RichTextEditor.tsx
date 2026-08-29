@@ -16,7 +16,7 @@
 
 import type { IDocumentData } from '@univerjs/core';
 import type { CSSProperties, ReactNode, RefObject } from 'react';
-import type { Editor } from '../services/editor/editor';
+import type { Editor, IEditorCanvasStyle } from '../services/editor/editor';
 import type { IKeyboardEventConfig } from './rich-text-editor/hooks';
 import { BuildTextUtils, createInternalEditorID, generateRandomId, getPlainText, ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { borderClassName, clsx } from '@univerjs/design';
@@ -53,6 +53,7 @@ export interface IRichTextEditorProps {
     icon?: ReactNode;
     editorRef?: RefObject<Editor | null> | ((editor: Editor | null) => void);
     noStyle?: boolean;
+    canvasStyle?: IEditorCanvasStyle;
 }
 
 export const RichTextEditor = (props: IRichTextEditorProps) => {
@@ -76,6 +77,7 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
         editorRef,
         placeholder,
         noStyle,
+        canvasStyle,
     } = props;
     const editorService = useDependency(IEditorService);
     const commandService = useDependency(ICommandService);
@@ -92,6 +94,7 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
         preserveHostFocus,
         autoFocus,
         isSingle,
+        canvasStyle,
     });
     const renderManagerService = useDependency(IRenderManagerService);
     const renderer = renderManagerService.getRenderUnitById(editorId);

@@ -29,7 +29,7 @@ import { SetCellEditVisibleOperation } from '../../../commands/operations/cell-e
 import { FormulaEditorController } from '../formula-editor.controller';
 
 function createController() {
-    const fxBtnClick$ = new Subject<void>();
+    const fxBtnClick$ = new Subject<boolean>();
     const position = { width: 240, height: 40 };
     let focusEditorId = DOCS_NORMAL_EDITOR_UNIT_ID_KEY;
     const contextValues = new Map<string, unknown>([
@@ -121,7 +121,7 @@ describe('FormulaEditorController business methods', () => {
         vi.stubGlobal('requestAnimationFrame', raf);
 
         controller._listenFxBtnClick();
-        fxBtnClick$.next();
+        fxBtnClick$.next(false);
 
         expect(controller._univerInstanceService.setCurrentUnitForType).toHaveBeenCalledWith(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
         expect(controller._commandService.syncExecuteCommand).toHaveBeenCalledWith(SetCellEditVisibleOperation.id, {
@@ -138,6 +138,34 @@ describe('FormulaEditorController business methods', () => {
         expect(controller._textSelectionManagerService.replaceDocRanges).toHaveBeenCalledWith([], {
             unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
             subUnitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+        });
+        expect(controller._contextService.setContextValue).toHaveBeenCalledWith(FOCUSING_FX_BAR_EDITOR, true);
+
+        vi.stubGlobal('requestAnimationFrame', originalRequestAnimationFrame);
+    });
+
+    it('enters formula mode from an active mobile formula bar', () => {
+        const { contextValues, controller, fxBtnClick$ } = createController();
+        const originalRequestAnimationFrame = globalThis.requestAnimationFrame;
+        contextValues.set(EDITOR_ACTIVATED, true);
+        controller._editorBridgeService.isVisible.mockReturnValue({ visible: true });
+        vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
+            callback(0);
+            return 1;
+        });
+
+        controller._listenFxBtnClick();
+        fxBtnClick$.next(true);
+
+        expect(controller._commandService.syncExecuteCommand).not.toHaveBeenCalledWith(
+            SetCellEditVisibleOperation.id,
+            expect.anything()
+        );
+        expect(controller._commandService.syncExecuteCommand).toHaveBeenCalledWith(CoverContentCommand.id, {
+            unitId: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+            body: { dataStream: '=SUM(A1:A3)' },
+            segmentId: '',
+            textRanges: [{ startOffset: 11, endOffset: 11 }],
         });
         expect(controller._contextService.setContextValue).toHaveBeenCalledWith(FOCUSING_FX_BAR_EDITOR, true);
 

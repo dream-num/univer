@@ -39,8 +39,11 @@ import {
 } from '@univerjs/sheets';
 import {
     AddDecimalCommand,
+    CURRENCYFORMAT,
+    DATEFMTLISG,
     getCurrencySymbolByLocale,
     getCurrencySymbolIconByLocale,
+    NUMBERFORMAT,
     SetCurrencyCommand,
     SetPercentCommand,
     SubtractDecimalCommand,
@@ -48,6 +51,7 @@ import {
 import { deriveStateFromActiveSheet$, getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { filter, map, merge, Observable } from 'rxjs';
+import { SetMobileNumfmtCommand } from '../commands/commands/set-mobile-numfmt.command';
 import { OpenNumfmtPanelOperator } from '../commands/operations/open.numfmt.panel.operation';
 import { MORE_NUMFMT_TYPE_KEY, OPTIONS_KEY } from '../views/components/MoreNumfmtType';
 
@@ -119,6 +123,63 @@ export const MENU_OPTIONS = (currencySymbol: string): Array<{
     ];
 };
 
+export interface IMobileNumberFormatMenuConfig {
+    kind: 'number-format';
+    title: LocaleKey;
+    commandId: string;
+    detailTitle: LocaleKey;
+    customTitle: LocaleKey;
+    quickOptions: Array<{
+        label: LocaleKey;
+        commandId: string;
+        value?: string;
+    }>;
+    decimalOptions: Array<{
+        label: LocaleKey;
+        commandId: string;
+    }>;
+    detailOptions: Array<{
+        label?: LocaleKey;
+        value?: string | null;
+        divider?: boolean;
+        custom?: boolean;
+    }>;
+    customPatterns: string[];
+}
+
+function createMobileNumberFormatMenuConfig(currencySymbol: string): IMobileNumberFormatMenuConfig {
+    const detailOptions: IMobileNumberFormatMenuConfig['detailOptions'] = MENU_OPTIONS(currencySymbol)
+        .slice(0, -1)
+        .map((item) => item === '|'
+            ? { divider: true }
+            : { label: item.label, value: item.pattern });
+    detailOptions.push({ label: 'sheets-numfmt-ui.customFormat', custom: true });
+
+    return {
+        kind: 'number-format',
+        title: 'sheets-numfmt-ui.title',
+        commandId: SetMobileNumfmtCommand.id,
+        detailTitle: 'sheets-numfmt-ui.moreFmt',
+        customTitle: 'sheets-numfmt-ui.customFormat',
+        quickOptions: [
+            { label: 'sheets-numfmt-ui.percent', commandId: SetPercentCommand.id },
+            { label: 'sheets-numfmt-ui.currency', commandId: SetCurrencyCommand.id },
+            { label: 'sheets-numfmt-ui.date', commandId: SetMobileNumfmtCommand.id, value: 'yyyy-mm-dd;@' },
+            { label: 'sheets-numfmt-ui.text', commandId: SetMobileNumfmtCommand.id, value: DEFAULT_TEXT_FORMAT_EXCEL },
+        ],
+        decimalOptions: [
+            { label: 'sheets-numfmt-ui.subtractDecimal', commandId: SubtractDecimalCommand.id },
+            { label: 'sheets-numfmt-ui.addDecimal', commandId: AddDecimalCommand.id },
+        ],
+        detailOptions,
+        customPatterns: [...new Set([
+            ...CURRENCYFORMAT.map((item) => item.suffix(currencySymbol)),
+            ...DATEFMTLISG.map((item) => item.suffix),
+            ...NUMBERFORMAT.map((item) => item.suffix),
+        ])],
+    };
+}
+
 export function CurrencySymbolIconMenuItem(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     const regionService = accessor.get(RegionService);
 
@@ -186,7 +247,7 @@ export function PercentMenuItem(accessor: IAccessor): IMenuButtonItem<LocaleKey>
     };
 };
 
-export function FactoryOtherMenuItem(accessor: IAccessor): IMenuSelectorItem<LocaleKey, string> {
+export function FactoryOtherMenuItem(accessor: IAccessor): IMenuSelectorItem<LocaleKey, string> & { mobileStyle: IMobileNumberFormatMenuConfig } {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const commandService = accessor.get(ICommandService);
     const localeService = accessor.get(LocaleService);
@@ -259,5 +320,6 @@ export function FactoryOtherMenuItem(accessor: IAccessor): IMenuSelectorItem<Loc
             worksheetTypes: [WorksheetSetCellStylePermission, WorksheetEditPermission],
             rangeTypes: [RangeProtectionPermissionEditPoint],
         }),
+        mobileStyle: createMobileNumberFormatMenuConfig(getCurrencySymbolByLocale(regionService.getCurrentRegion())),
     };
 };

@@ -137,7 +137,7 @@ export function setEndForRange(range: IRange, rowCount: number, columnCount: num
  * @param range
  * @param worksheet
  */
-export function getPrimaryForRange(range: IRange, worksheet: Worksheet): ISelectionCell {
+export function getPrimaryForRange(range: IRange, worksheet: Pick<Worksheet, 'getMergedCell'>): ISelectionCell {
     const startRow = Number.isNaN(range.startRow) ? 0 : range.startRow;
     const startColumn = Number.isNaN(range.startColumn) ? 0 : range.startColumn;
     const mergedRange = worksheet.getMergedCell(startRow, startColumn);
@@ -172,7 +172,7 @@ export interface IInterval {
 /**
  * Calculate the real length of the intervals
  * @param intervalsObject
- * @returns
+ * @returns The combined length covered by all intervals.
  */
 export function calculateTotalLength(intervalsObject: IInterval): number {
     const points: number[] = [];

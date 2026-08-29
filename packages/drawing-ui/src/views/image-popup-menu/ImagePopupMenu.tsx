@@ -25,15 +25,16 @@ import {
     PositionedObjectLayoutType,
     UniverInstanceType,
 } from '@univerjs/core';
-import { borderClassName, clsx, Dropdown, DropdownMenu, Separator, Tooltip } from '@univerjs/design';
+import { borderClassName, clsx, ConfigContext, Dropdown, DropdownMenu, Separator, Tooltip } from '@univerjs/design';
 import {
     AutofillDoubleIcon,
     ChartIcon,
     MoreDownIcon,
     TextWrapShapeIcon,
 } from '@univerjs/icons';
-import { IconManager, useDependency } from '@univerjs/ui';
-import { useState } from 'react';
+import { IconManager, IDialogService, useDependency } from '@univerjs/ui';
+import { useContext, useState } from 'react';
+import { MobileImagePopupMenu } from './MobileImagePopupMenu';
 
 export interface IImagePopupMenuItem {
     label: string;
@@ -55,6 +56,7 @@ export interface IImagePopupMenuExtraProps {
     unitId?: string;
     subUnitId?: string;
     drawingId?: string;
+    dialogId?: string;
 }
 
 export interface IImagePopupMenuProps {
@@ -69,6 +71,8 @@ export function ImagePopupMenu(props: IImagePopupMenuProps) {
     const menuItems = popup?.extraProps?.menuItems;
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
+    const dialogService = useDependency(IDialogService);
+    const { mobile } = useContext(ConfigContext);
     const [visible, setVisible] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
 
@@ -92,6 +96,21 @@ export function ImagePopupMenu(props: IImagePopupMenuProps) {
 
     if (popup.extraProps?.variant === 'doc-chart-floating-toolbar') {
         return <DocChartFloatingToolbar menuItems={menuItems} />;
+    }
+
+    if (mobile) {
+        return (
+            <MobileImagePopupMenu
+                menuItems={menuItems}
+                getLabel={(item) => localeService.t(item.label)}
+                onSelect={async (item) => {
+                    await commandService.executeCommand(item.commandId, item.commandParams);
+                    if (popup.extraProps?.dialogId) {
+                        dialogService.close(popup.extraProps.dialogId);
+                    }
+                }}
+            />
+        );
     }
 
     const handleMouseEnter = () => {

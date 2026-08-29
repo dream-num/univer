@@ -40,6 +40,7 @@ import type {
 import type { IUniverSheetsUIConfig } from '../../config/config';
 import type { ICellEditorState, IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import {
+    BooleanNumber,
     CellValueType,
     createParagraphId,
     DEFAULT_EMPTY_DOCUMENT_VALUE,
@@ -103,7 +104,7 @@ import {
     SheetInterceptorService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { KeyCode, MetaKeys } from '@univerjs/ui';
+import { DISABLE_AUTO_FOCUS_KEY, KeyCode, MetaKeys } from '@univerjs/ui';
 import { distinctUntilChanged, filter } from 'rxjs';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
 import { MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../commands/commands/set-selection.command';
@@ -402,18 +403,24 @@ export class EditingRenderController extends Disposable {
                 {
                     unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
                     subUnitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-                }
+                },
+                true,
+                { shouldFocus: !this._contextService.getContextValue(DISABLE_AUTO_FOCUS_KEY) }
             );
 
             const cellSelectionRenderManager = this._renderManagerService.getRenderUnitById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)?.with(DocSelectionRenderService);
             const formulaSelectionRenderManager = this._renderManagerService.getRenderUnitById(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY)?.with(DocSelectionRenderService);
             if (cellSelectionRenderManager?.canFocusing || formulaSelectionRenderManager?.canFocusing) {
                 this._univerInstanceService.setCurrentUnitForType(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
-                cellSelectionRenderManager?.activate(
-                    HIDDEN_EDITOR_POSITION,
-                    HIDDEN_EDITOR_POSITION,
-                    true
-                );
+                if (this._contextService.getContextValue(DISABLE_AUTO_FOCUS_KEY)) {
+                    cellSelectionRenderManager?.setInputPosition(HIDDEN_EDITOR_POSITION, HIDDEN_EDITOR_POSITION);
+                } else {
+                    cellSelectionRenderManager?.activate(
+                        HIDDEN_EDITOR_POSITION,
+                        HIDDEN_EDITOR_POSITION,
+                        true
+                    );
+                }
             }
         }));
     }
@@ -749,7 +756,13 @@ export class EditingRenderController extends Disposable {
     }
 
     submitCellData(documentDataModel: DocumentDataModel) {
-        return this._submitEdit(documentDataModel.getSnapshot());
+        const snapshot = Tools.deepClone(documentDataModel.getSnapshot());
+        const renderConfig = snapshot.documentStyle?.renderConfig;
+        if (renderConfig) {
+            renderConfig.isRenderStyle = BooleanNumber.FALSE;
+        }
+
+        return this._submitEdit(snapshot);
     }
 
     private async _submitEdit(snapshot: IDocumentData, wholeSelection = false) {
@@ -1041,9 +1054,10 @@ export function getCellDataByInput(
         cellData.si = null;
         cellData.p = snapshot;
         cellData.t = CellValueType.STRING;
-    }
-    // Text format ('@' or '@@@') has the highest priority
-    else if (cellData.s && isTextFormat(styles?.get(cellData.s)?.n?.pattern)) {
+    } else if (
+        // Text format ('@' or '@@@') has the highest priority
+        cellData.s && isTextFormat(styles?.get(cellData.s)?.n?.pattern)
+    ) {
         // If the style is text format ('@'or  '@@@'), the data should be set as a string.
         cellData.v = newDataStream;
         cellData.f = null;

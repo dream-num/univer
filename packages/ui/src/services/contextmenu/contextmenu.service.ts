@@ -15,17 +15,20 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent } from '@univerjs/engine-render';
+import type { IMouseEvent } from '@univerjs/engine-render';
 import { createIdentifier, Disposable, toDisposable } from '@univerjs/core';
 
 export interface IContextMenuTriggerContext {
     autoFocus?: boolean;
     unitId?: string;
+    subUnitId?: string;
 }
+
+export type ContextMenuEvent = Pick<IMouseEvent, 'clientX' | 'clientY' | 'stopPropagation'>;
 
 export interface IContextMenuHandler {
     /** A callback to open context menu with given position and menu type. */
-    handleContextMenu(event: IPointerEvent | IMouseEvent, menuType: string, context?: IContextMenuTriggerContext): void;
+    handleContextMenu(event: ContextMenuEvent, menuType: string, context?: IContextMenuTriggerContext): void;
     hideContextMenu(): void;
 
     get visible(): boolean;
@@ -37,7 +40,7 @@ export interface IContextMenuService {
 
     enable(): void;
     disable(): void;
-    triggerContextMenu(event: IPointerEvent | IMouseEvent, menuType: string, context?: IContextMenuTriggerContext): void;
+    triggerContextMenu(event: ContextMenuEvent, menuType: string, context?: IContextMenuTriggerContext): void;
     hideContextMenu(): void;
     registerContextMenuHandler(handler: IContextMenuHandler): IDisposable;
 }
@@ -60,7 +63,7 @@ export class ContextMenuService extends Disposable implements IContextMenuServic
         this.disabled = false;
     }
 
-    triggerContextMenu(event: IPointerEvent | IMouseEvent, menuType: string, context?: IContextMenuTriggerContext): void {
+    triggerContextMenu(event: ContextMenuEvent, menuType: string, context?: IContextMenuTriggerContext): void {
         event.stopPropagation();
 
         if (this.disabled) return;

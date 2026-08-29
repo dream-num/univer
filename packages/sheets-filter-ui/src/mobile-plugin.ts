@@ -25,6 +25,7 @@ import { UniverMobileUIPlugin } from '@univerjs/ui';
 import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_FILTER_UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { ComponentsController } from './controllers/components.controller';
+import { SheetsFilterMobileMenuController } from './controllers/mobile-menu.controller';
 import { SheetsFilterPermissionController } from './controllers/sheets-filter-permission.controller';
 import { SheetsFilterUIMobileController } from './controllers/ui-mobile.controller';
 
@@ -65,12 +66,14 @@ export class UniverSheetsFilterMobileUIPlugin extends Plugin {
         this._injector.get(ComponentsController);
         ([
             [SheetsFilterPermissionController],
+            [SheetsFilterMobileMenuController],
             [SheetsFilterUIMobileController],
         ] as Dependency[]).forEach((d) => this._injector.add(d));
     }
 
     override onReady(): void {
         this._injector.get(SheetsFilterPermissionController);
+        this._injector.get(SheetsFilterMobileMenuController);
     }
 
     override onRendered(): void {

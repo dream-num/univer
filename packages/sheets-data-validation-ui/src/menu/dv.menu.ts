@@ -205,6 +205,7 @@ export function openDataValidationMenuFactory(): IMenuItem<LocaleKey> {
         id: OpenValidationPanelOperation.id,
         title: 'sheets-data-validation-ui.panel.title',
         type: MenuItemType.BUTTON,
+        params: {},
     };
 }
 

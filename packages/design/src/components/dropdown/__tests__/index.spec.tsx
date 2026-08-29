@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
-import { cleanup, render } from '@testing-library/react';
+/**
+ * @vitest-environment jsdom
+ */
+
+import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import enUS from '../../../locale/en-US';
+import { ConfigProvider } from '../../config-provider/ConfigProvider';
 import { Dropdown } from '../Dropdown';
-import '@testing-library/jest-dom/vitest';
 
 afterEach(cleanup);
 
@@ -28,8 +33,8 @@ describe('Dropdown', () => {
                 <button type="button">Trigger</button>
             </Dropdown>
         );
-        expect(getByText('Trigger')).toBeInTheDocument();
-        expect(queryByText('Overlay Content')).not.toBeInTheDocument();
+        expect(getByText('Trigger')).toBeTruthy();
+        expect(queryByText('Overlay Content')).toBeNull();
     });
 
     it('should show overlay when open is true', () => {
@@ -38,7 +43,7 @@ describe('Dropdown', () => {
                 <button type="button">Trigger</button>
             </Dropdown>
         );
-        expect(getByText('Overlay Content')).toBeInTheDocument();
+        expect(getByText('Overlay Content')).toBeTruthy();
     });
 
     it('should call onOpenChange when trigger is clicked', () => {
@@ -50,5 +55,20 @@ describe('Dropdown', () => {
         );
         getByText('Trigger').click();
         expect(handleOpenChange).toHaveBeenCalled();
+    });
+
+    it('should render a touch-first dialog surface under a mobile provider', () => {
+        render(
+            <ConfigProvider locale={enUS.design} mountContainer={document.body} mobile>
+                <Dropdown overlay={<div>Overlay Content</div>} open>
+                    <button type="button">Trigger</button>
+                </Dropdown>
+            </ConfigProvider>
+        );
+
+        const dialog = screen.getByRole('dialog');
+        expect(dialog.textContent).toContain('Overlay Content');
+        expect(dialog.classList.contains('!univer-bottom-0')).toBe(true);
+        expect(screen.getByText(enUS.design.Accessibility.menu)).toBeTruthy();
     });
 });

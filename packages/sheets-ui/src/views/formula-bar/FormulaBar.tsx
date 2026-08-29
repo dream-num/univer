@@ -15,6 +15,7 @@
  */
 
 import type { IUniverSheetsUIConfig } from '../../config/config';
+import type { LocaleKey } from '../../locale/types';
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import {
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
@@ -22,6 +23,7 @@ import {
     ICommandService,
     IContextService,
     IPermissionService,
+    LocaleService,
 } from '@univerjs/core';
 import { borderBottomClassName, borderRightClassName, clsx } from '@univerjs/design';
 import { IEditorService } from '@univerjs/docs-ui';
@@ -52,12 +54,17 @@ import { EMPTY, map, merge, of, switchMap } from 'rxjs';
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
 import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY } from '../../common/keys';
 import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
+import {
+    MOBILE_FORMULA_BAR_SUBMIT_COMMAND_ID,
+    MOBILE_FORMULA_OPERATORS_VISIBLE,
+} from '../../consts/mobile-context';
 import { SheetsUIPart } from '../../consts/ui-name';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
 import { DefinedName } from '../defined-name/DefinedName';
 import { useKeyEventConfig } from '../editor-container/hooks';
 import { useActiveWorkbook } from '../hook';
+import { MobileFormulaBarActions, MobileFormulaBarOverlays } from '../mobile/formula-bar/MobileFormulaBarControls';
 
 enum ArrowDirection {
     Down,
@@ -67,11 +74,15 @@ enum ArrowDirection {
 interface IProps {
     className?: string;
     disableDefinedName?: boolean;
+    mobile?: boolean;
+    expanded?: boolean;
+    onExpandedChange?: (expanded: boolean) => void;
 }
 
 export function FormulaBar(props: IProps) {
-    const { className, disableDefinedName } = props;
+    const { className, disableDefinedName, expanded = false, mobile = false, onExpandedChange } = props;
     const editorBridgeService = useDependency(IEditorBridgeService);
+    const localeService = useDependency(LocaleService);
     const iconActivated = useObservable(
         () => editorBridgeService.visible$.pipe(map((visibleInfo) => visibleInfo.visible)),
         false,
@@ -79,6 +90,12 @@ export function FormulaBar(props: IProps) {
         [editorBridgeService]
     );
     const [arrowDirection, setArrowDirection] = useState<ArrowDirection>(ArrowDirection.Down);
+    const [mobileFxRequest, setMobileFxRequest] = useState(0);
+    const [mobileFunctionPanelRequest, setMobileFunctionPanelRequest] = useState(0);
+    const [mobileFormulaActive, setMobileFormulaActive] = useState(false);
+    const [mobileOperatorRequest, setMobileOperatorRequest] = useState({ id: 0, value: '' });
+    const isExpanded = mobile ? expanded : arrowDirection === ArrowDirection.Up;
+    const mobileFormulaOperatorsVisible = mobile && mobileFormulaActive && !isExpanded;
     const formulaEditorManagerService = useDependency(IFormulaEditorManagerService);
     const worksheetProtectionRuleModel = useDependency(WorksheetProtectionRuleModel);
     const rangeProtectionRuleModel = useDependency(RangeProtectionRuleModel);
@@ -105,6 +122,16 @@ export function FormulaBar(props: IProps) {
         useMemo(() => contextService.subscribeContextValue$(FOCUSING_FX_BAR_EDITOR), [contextService]),
         contextService.getContextValue(FOCUSING_FX_BAR_EDITOR)
     );
+    useEffect(() => {
+        if (mobile) {
+            contextService.setContextValue(MOBILE_FORMULA_OPERATORS_VISIBLE, mobileFormulaOperatorsVisible);
+        }
+    }, [contextService, mobile, mobileFormulaOperatorsVisible]);
+    useEffect(() => () => {
+        if (mobile) {
+            contextService.setContextValue(MOBILE_FORMULA_OPERATORS_VISIBLE, false);
+        }
+    }, [contextService, mobile]);
     const workbookEditablePermission = useObservable(useMemo(() => {
         if (!workbook) {
             return undefined;
@@ -204,6 +231,12 @@ export function FormulaBar(props: IProps) {
     }, [formulaEditorManagerService]);
 
     function handleArrowClick() {
+        if (mobile) {
+            onExpandedChange?.(!isExpanded);
+            setTimeout(() => formulaEditorManagerService.handleFoldBtnClick(isExpanded), 150);
+            return;
+        }
+
         setArrowDirection(arrowDirection === ArrowDirection.Down ? ArrowDirection.Up : ArrowDirection.Down);
 
         const ANIMATION_DURATION = 150;
@@ -223,10 +256,19 @@ export function FormulaBar(props: IProps) {
                 unitId: editState!.unitId,
             });
         }
+        onExpandedChange?.(false);
     }
 
     // Handle click the "√" button.
-    function handleConfirmBtnClick() {
+    async function handleConfirmBtnClick() {
+        if (mobile) {
+            const submitted = await commandService.executeCommand(MOBILE_FORMULA_BAR_SUBMIT_COMMAND_ID);
+            if (submitted) {
+                onExpandedChange?.(false);
+            }
+            return;
+        }
+
         const visibleState = editorBridgeService.isVisible();
         if (visibleState.visible) {
             commandService.executeCommand(SetCellEditVisibleOperation.id, {
@@ -235,10 +277,19 @@ export function FormulaBar(props: IProps) {
                 unitId: editState!.unitId,
             });
         }
+        onExpandedChange?.(false);
     }
 
     function handlerFxBtnClick() {
-        formulaEditorManagerService.handleFxBtnClick(true);
+        if (mobile) {
+            const formulaEditor = editorService.getEditor(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
+            const formulaText = formulaEditor?.getDocumentData().body?.dataStream?.replace(/\r?\n$/, '') ?? '';
+            if (formulaText.startsWith('=')) {
+                setMobileFxRequest((value) => value + 1);
+                setMobileFunctionPanelRequest((value) => value + 1);
+            }
+        }
+        formulaEditorManagerService.handleFxBtnClick(mobile);
     }
 
     // TODO Is there a need to disable an editor here?
@@ -294,88 +345,140 @@ export function FormulaBar(props: IProps) {
 
     const cellImage = isCellImage(editState?.documentLayoutObject.documentModel?.getSnapshot());
     const hideEditor = cellImage || viewDisable;
+    const cellStyle = editState
+        ? workbook?.getSheetBySheetId(editState.sheetId)?.getCellStyle(editState.row, editState.column)
+        : undefined;
+    const editorBackground = mobile ? cellStyle?.bg?.rgb ?? undefined : undefined;
 
     return (
         <div
             dir="ltr"
             data-u-comp="formula-bar"
+            data-expanded={isExpanded}
             className={clsx(`
               univer-box-border univer-flex univer-bg-gray-0 univer-text-gray-900 univer-transition-[height]
               univer-ease-linear
               dark:!univer-bg-gray-800
             `, borderBottomClassName, className, {
-                'univer-h-7': arrowDirection === ArrowDirection.Down,
-                'univer-h-20': arrowDirection === ArrowDirection.Up,
+                'univer-relative': mobile,
+                '!univer-h-12': mobile && !isExpanded,
+                '!univer-h-full': mobile && isExpanded,
+                'univer-h-7': !mobile && !isExpanded,
+                'univer-h-20': !mobile && isExpanded,
                 'univer-pointer-events-none': editDisable,
             })}
         >
             <div className="univer-relative univer-box-border univer-h-full univer-w-[100px]">
                 <DefinedName disable={disableDefinedName ?? editDisable} />
             </div>
+            {mobile && (
+                <MobileFormulaBarOverlays
+                    expanded={isExpanded}
+                    formulaActive={mobileFormulaActive}
+                    operatorsVisible={mobileFormulaOperatorsVisible}
+                    editorId={DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY}
+                    onOperator={(value) => setMobileOperatorRequest(({ id }) => ({ id: id + 1, value }))}
+                />
+            )}
 
             <div className="univer-flex univer-size-full">
-                <div className={clsx('univer-py-1.5', { 'univer-cursor-not-allowed univer-text-gray-200': disabled })}>
-                    <div
-                        className={clsx(`
-                          univer-relative univer-box-border univer-flex univer-h-full univer-w-20 univer-items-center
-                          univer-justify-center univer-text-xs
-                        `, borderRightClassName)}
-                    >
-                        {/* TODO: use buttons to replace these re-implementation of buttons. */}
-                        <span
-                            className={clsx(`
-                              univer-flex univer-items-center univer-justify-center univer-rounded univer-p-1
-                              univer-text-base
-                              dark:!univer-text-gray-0
-                            `, {
-                                'univer-cursor-pointer univer-text-red-600 hover:univer-bg-gray-100 dark:!univer-text-green-400 dark:hover:!univer-bg-gray-700': iconActivated,
+                {mobile
+                    ? (
+                        <MobileFormulaBarActions
+                            expanded={isExpanded}
+                            cancelLabel={localeService.t<LocaleKey>('sheets-ui.button.cancel')}
+                            confirmLabel={localeService.t<LocaleKey>('sheets-ui.button.confirm')}
+                            formulaLabel={localeService.t<LocaleKey>('sheets-ui.mobile.formula')}
+                            collapseLabel={localeService.t<LocaleKey>('sheets-ui.mobile.collapseEditor')}
+                            onCancel={handleCloseBtnClick}
+                            onConfirm={handleConfirmBtnClick}
+                            onFormula={handlerFxBtnClick}
+                            onCollapse={handleArrowClick}
+                        />
+                    )
+                    : (
+                        <div
+                            className={clsx({
+                                'univer-py-1.5': !mobile,
+                                'univer-py-1': mobile,
+                                'univer-cursor-not-allowed univer-text-gray-200': disabled,
                             })}
-                            onClick={handleCloseBtnClick}
                         >
-                            <CloseIcon />
-                        </span>
-                        <span
-                            className={clsx(`
-                              univer-flex univer-items-center univer-justify-center univer-rounded univer-p-1
-                              univer-text-base
-                              dark:!univer-text-gray-0
-                            `, {
-                                'univer-cursor-pointer univer-text-green-600 hover:univer-bg-gray-100 dark:!univer-text-red-400 dark:hover:!univer-bg-gray-700': iconActivated,
-                            })}
-                            onClick={handleConfirmBtnClick}
-                        >
-                            <CheckMarkIcon />
-                        </span>
-                        <span
-                            className={`
-                              univer-flex univer-cursor-pointer univer-items-center univer-justify-center univer-rounded
-                              univer-p-1 univer-text-base
-                              hover:univer-bg-gray-100
-                              dark:!univer-text-gray-0
-                              dark:hover:!univer-bg-gray-700
-                            `}
-                            onClick={handlerFxBtnClick}
-                        >
-                            <FxIcon />
-                        </span>
-                    </div>
-                </div>
+                            <div
+                                data-u-comp="formula-bar-actions"
+                                className={clsx(`
+                                  univer-relative univer-box-border univer-flex univer-h-full univer-w-20
+                                  univer-items-center univer-justify-center univer-text-xs
+                                `, borderRightClassName, { '!univer-w-32': mobile })}
+                            >
+                                {/* TODO: use buttons to replace these re-implementation of buttons. */}
+                                <span
+                                    className={clsx(`
+                                      univer-flex univer-items-center univer-justify-center univer-rounded univer-p-1
+                                      univer-text-base
+                                      dark:!univer-text-gray-0
+                                    `, {
+                                        'univer-cursor-pointer univer-text-red-600 hover:univer-bg-gray-100 dark:!univer-text-green-400 dark:hover:!univer-bg-gray-700': iconActivated,
+                                    })}
+                                    onClick={handleCloseBtnClick}
+                                >
+                                    <CloseIcon />
+                                </span>
+                                <span
+                                    className={clsx(`
+                                      univer-flex univer-items-center univer-justify-center univer-rounded univer-p-1
+                                      univer-text-base
+                                      dark:!univer-text-gray-0
+                                    `, {
+                                        'univer-cursor-pointer univer-text-green-600 hover:univer-bg-gray-100 dark:!univer-text-red-400 dark:hover:!univer-bg-gray-700': iconActivated,
+                                    })}
+                                    onClick={handleConfirmBtnClick}
+                                >
+                                    <CheckMarkIcon />
+                                </span>
+                                <span
+                                    className={`
+                                      univer-flex univer-cursor-pointer univer-items-center univer-justify-center
+                                      univer-rounded univer-p-1 univer-text-base
+                                      hover:univer-bg-gray-100
+                                      dark:!univer-text-gray-0
+                                      dark:hover:!univer-bg-gray-700
+                                    `}
+                                    onClick={handlerFxBtnClick}
+                                >
+                                    <FxIcon />
+                                </span>
+                            </div>
+                        </div>
+                    )}
 
-                <div className="univer-flex univer-w-full univer-flex-1 univer-overflow-hidden univer-pl-3">
+                <div
+                    className={clsx(
+                        'univer-flex univer-w-full univer-flex-1 univer-overflow-hidden',
+                        {
+                            'univer-pl-3': !mobile,
+                            'univer-pt-24': mobile && isExpanded,
+                        }
+                    )}
+                >
                     <div
                         ref={ref}
-                        className="
+                        className={clsx(`
                           univer-relative univer-flex-1 univer-bg-gray-0
                           dark:!univer-bg-gray-800
-                        "
+                        `, {
+                            'univer-box-border univer-pl-2': mobile,
+                            'univer-my-2': mobile && !isExpanded,
+                        })}
                         onPointerDown={handlePointerDown}
                         onPointerUp={handlePointerUp}
-                        style={{ pointerEvents: hideEditor ? 'none' : 'auto' }}
+                        style={{ backgroundColor: editorBackground, pointerEvents: hideEditor ? 'none' : 'auto' }}
                     >
                         {FormulaEditor && (
                             <FormulaEditor
                                 className="univer-relative univer-size-full univer-break-words univer-outline-none"
                                 borderless
+                                canvasStyle={{ backgroundColor: editorBackground }}
                                 disableSelectionOnClick
                                 editorId={DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY}
                                 initValue=""
@@ -397,6 +500,11 @@ export function FormulaBar(props: IProps) {
                                 }}
                                 autoScrollbar={false}
                                 disableContextMenu={false}
+                                mobile={mobile}
+                                mobileFxRequest={mobileFxRequest}
+                                mobileFunctionPanelRequest={mobileFunctionPanelRequest}
+                                mobileOperatorRequest={mobileOperatorRequest}
+                                onMobileFormulaActiveChange={setMobileFormulaActive}
                             />
                         )}
                         {/* Cover the hidden editor instead of re-instantiating the formula editor. */}
@@ -410,20 +518,27 @@ export function FormulaBar(props: IProps) {
                             />
                         )}
                     </div>
-                    <div
-                        className={clsx(`
-                          univer-flex univer-h-full univer-w-5 univer-cursor-pointer univer-items-center
-                          univer-justify-center univer-text-xs univer-text-gray-700
-                          dark:!univer-text-gray-200
-                        `, { 'univer-cursor-not-allowed univer-text-gray-200 dark:!univer-text-gray-700': editDisable })}
-                        onClick={handleArrowClick}
-                    >
-                        <DownIcon
-                            className={clsx({
-                                'univer-rotate-180': arrowDirection === ArrowDirection.Up,
+                    {(!mobile || !isExpanded) && (
+                        <div
+                            data-u-comp="formula-bar-expand"
+                            className={clsx(`
+                              univer-flex univer-h-full univer-w-5 univer-cursor-pointer univer-items-center
+                              univer-justify-center univer-text-xs univer-text-gray-700
+                              dark:!univer-text-gray-200
+                            `, {
+                                'univer-w-10': mobile,
+                                'univer-cursor-not-allowed univer-text-gray-200 dark:!univer-text-gray-700': editDisable,
                             })}
-                        />
-                    </div>
+                            onClick={handleArrowClick}
+                        >
+                            <DownIcon
+                                className={clsx({
+                                    'univer-size-5 univer-rotate-180': mobile,
+                                    'univer-rotate-180': !mobile && isExpanded,
+                                })}
+                            />
+                        </div>
+                    )}
                 </div>
             </div>
 

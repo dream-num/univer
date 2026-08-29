@@ -21,6 +21,7 @@ const locale: typeof enUS = {
         Accessibility: {
             closeBadge: 'Badge schließen',
             close: 'Schließen',
+            menu: 'Menü',
             previous: 'Zurück',
             next: 'Weiter',
             imageGallery: 'Bildergalerie',

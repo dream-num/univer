@@ -75,6 +75,15 @@ const locale: typeof enUS = {
             allFunctions: 'همه توابع',
             syntax: 'سینتکس',
         },
+        mobileFunction: {
+            title: 'درج تابع',
+            recommended: 'پیشنهادی',
+            recent: 'اخیر',
+            details: 'جزئیات',
+            insert: 'درج تابع',
+            empty: 'تابعی وجود ندارد',
+            close: 'بستن',
+        },
         operation: {
             copyFormulaOnly: 'کپی فقط فرمول',
             pasteFormula: 'چسباندن فرمول',

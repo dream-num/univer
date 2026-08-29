@@ -133,12 +133,12 @@ export class FormulaEditorController extends RxDisposable {
     }
 
     private _listenFxBtnClick() {
-        this._formulaEditorManagerService.fxBtnClick$.pipe(takeUntil(this.dispose$)).subscribe(() => {
+        this._formulaEditorManagerService.fxBtnClick$.pipe(takeUntil(this.dispose$)).subscribe((forceFormulaMode) => {
             const isFocusButHidden =
                 this._contextService.getContextValue(FOCUSING_UNIVER_EDITOR) &&
                 !this._contextService.getContextValue(EDITOR_ACTIVATED);
 
-            if (isFocusButHidden) {
+            if (isFocusButHidden || forceFormulaMode) {
                 this._univerInstanceService.setCurrentUnitForType(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
                 const formulaEditorDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(
                     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,

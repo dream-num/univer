@@ -24,6 +24,14 @@ afterEach(() => {
     cleanup();
 });
 
+function getMoreColorButton(container: HTMLElement): HTMLButtonElement {
+    const button = Array.from(
+        container.querySelectorAll<HTMLButtonElement>('[data-u-comp="color-picker"] button')
+    ).at(-1);
+    if (!button) throw new Error('More color button was not rendered.');
+    return button;
+}
+
 describe('ColorPicker extra', () => {
     it('should handle rgba mode and confirm custom color', () => {
         const onChange = vi.fn();
@@ -31,9 +39,8 @@ describe('ColorPicker extra', () => {
             <ColorPicker format="rgba" value="rgba(10, 20, 30, 0.5)" onChange={onChange} />
         );
 
-        const moreLink = container.querySelector('[data-u-comp="color-picker"] a') as HTMLAnchorElement;
-        expect(moreLink).toBeTruthy();
-        fireEvent.click(moreLink);
+        const moreButton = getMoreColorButton(container);
+        fireEvent.click(moreButton);
 
         const buttons = Array.from(document.querySelectorAll('button'));
         const confirmBtn = buttons[buttons.length - 1] as HTMLButtonElement;
@@ -71,15 +78,15 @@ describe('ColorPicker extra', () => {
         fireEvent.click(presetButton);
         expect(onChange.mock.calls.some(([value]) => String(value).startsWith('rgba('))).toBe(true);
 
-        const moreLink = container.querySelector('[data-u-comp="color-picker"] a') as HTMLAnchorElement;
-        fireEvent.click(moreLink);
+        const moreButton = getMoreColorButton(container);
+        fireEvent.click(moreButton);
 
         const alphaInput = document.querySelector('input[maxlength="4"]') as HTMLInputElement;
         fireEvent.change(alphaInput, { target: { value: '0.6' } });
 
         const [cancelBtn, confirmBtn] = Array.from(document.querySelectorAll('footer button')) as HTMLButtonElement[];
         fireEvent.click(cancelBtn);
-        fireEvent.click(moreLink);
+        fireEvent.click(moreButton);
         fireEvent.click(confirmBtn);
         expect(onChange).toHaveBeenCalled();
     });
@@ -87,9 +94,9 @@ describe('ColorPicker extra', () => {
     it('should confirm custom color in hex mode', () => {
         const onChange = vi.fn();
         const { container } = render(<ColorPicker format="hex" value="#00ff00" onChange={onChange} />);
-        const moreLink = container.querySelector('[data-u-comp="color-picker"] a') as HTMLAnchorElement;
+        const moreButton = getMoreColorButton(container);
 
-        fireEvent.click(moreLink);
+        fireEvent.click(moreButton);
         const confirmBtn = Array.from(document.querySelectorAll('footer button')).at(-1) as HTMLButtonElement;
         fireEvent.click(confirmBtn);
 

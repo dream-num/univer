@@ -15,7 +15,9 @@
  */
 
 import type { ComponentProps, ReactNode } from 'react';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
+import { ConfigContext } from '../config-provider/ConfigProvider';
+import { MobileDropdownSurface } from './MobileDropdownSurface';
 import { PopoverContent, PopoverPrimitive, PopoverTrigger } from './PopoverPrimitive';
 
 export interface IDropdownProps extends ComponentProps<typeof PopoverContent> {
@@ -37,6 +39,7 @@ export function Dropdown(props: IDropdownProps) {
     } = props;
 
     const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+    const { mobile } = useContext(ConfigContext);
 
     const isControlled = controlledOpen !== undefined;
     const open = isControlled ? controlledOpen : uncontrolledOpen;
@@ -49,6 +52,19 @@ export function Dropdown(props: IDropdownProps) {
         }
 
         controlledOnOpenChange?.(newOpen);
+    }
+
+    if (mobile) {
+        return (
+            <MobileDropdownSurface
+                open={open}
+                disabled={disabled}
+                onOpenChange={handleChangeOpen}
+                content={overlay}
+            >
+                {children}
+            </MobileDropdownSurface>
+        );
     }
 
     return (

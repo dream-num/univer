@@ -16,7 +16,7 @@
 
 import type { LocaleKey } from '../../locale/types';
 import { ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
-import { Button, Input } from '@univerjs/design';
+import { ActionRow, Button, Input } from '@univerjs/design';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
 import {
     getExistingNamesSet,
@@ -102,10 +102,12 @@ export function SheetTableRenameDialog(props: ISheetTableRenameDialogProps) {
                 autoFocus
             />
             {error ? <div className="-univer-mt-2 univer-text-sm univer-text-red-500">{error}</div> : null}
-            <div className="univer-flex univer-w-full univer-items-center univer-justify-end univer-gap-2">
+            <ActionRow
+                className="univer-flex univer-w-full univer-items-center univer-justify-end univer-gap-2"
+            >
                 <Button className="univer-min-w-16" onClick={onClose}>{localeService.t<LocaleKey>('sheets-table-ui.cancel')}</Button>
                 <Button className="univer-min-w-16" variant="primary" onClick={handleConfirm}>{localeService.t<LocaleKey>('sheets-table-ui.confirm')}</Button>
-            </div>
+            </ActionRow>
         </div>
     );
 }

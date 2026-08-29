@@ -30,6 +30,12 @@ export interface ITooltipProps {
      */
     className?: string;
     /**
+     * Whether the pointer can enter the tooltip content.
+     * Use a Popover instead when the content contains interactive controls.
+     * @default true
+     */
+    interactive?: boolean;
+    /**
      * Whether the tooltip is a child of the trigger element
      * @default false
      */
@@ -64,6 +70,7 @@ export function Tooltip(props: ITooltipProps) {
     const {
         children,
         className,
+        interactive = true,
         asChild = true,
         title,
         placement = 'bottom',
@@ -249,18 +256,18 @@ export function Tooltip(props: ITooltipProps) {
                 dir={direction}
                 role="tooltip"
                 className={clsx(`
-                  univer-animate-in univer-fade-in-0 univer-zoom-in-95 univer-pointer-events-auto univer-absolute
-                  univer-z-[1081] univer-box-border univer-w-fit univer-max-w-sm univer-text-balance univer-rounded-lg
-                  univer-bg-gray-700 univer-px-2.5 univer-py-2 univer-text-xs univer-font-medium univer-text-gray-0
-                  univer-shadow-lg univer-drop-shadow-sm
+                  univer-animate-in univer-fade-in-0 univer-zoom-in-95 univer-absolute univer-z-[1081] univer-box-border
+                  univer-w-fit univer-max-w-sm univer-text-balance univer-rounded-lg univer-bg-gray-700 univer-px-2.5
+                  univer-py-2 univer-text-xs univer-font-medium univer-text-gray-0 univer-shadow-lg
+                  univer-drop-shadow-sm
                   dark:!univer-bg-gray-100 dark:!univer-text-gray-900
-                `, className)}
+                `, interactive ? 'univer-pointer-events-auto' : 'univer-pointer-events-none', className)}
                 style={{
                     top: coords?.top ?? -9999,
                     left: coords?.left ?? -9999,
                 }}
-                onMouseEnter={() => showTooltip()}
-                onMouseLeave={() => hideTooltip()}
+                onMouseEnter={interactive ? () => showTooltip() : undefined}
+                onMouseLeave={interactive ? () => hideTooltip() : undefined}
             >
                 <div className="univer-break-words">{title}</div>
                 <div

@@ -93,7 +93,7 @@ describe('ToolbarTooltip', () => {
         fireEvent.mouseEnter(trigger);
         const tooltip = getByRole('tooltip');
         expect(tooltip.textContent).toBe('Fill');
-        expect(tooltip.classList.contains('!univer-pointer-events-none')).toBe(true);
+        expect(tooltip.classList.contains('univer-pointer-events-none')).toBe(true);
 
         rerender(renderTooltip(true));
         expect(queryByRole('tooltip')).toBeNull();

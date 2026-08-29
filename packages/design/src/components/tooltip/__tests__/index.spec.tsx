@@ -208,6 +208,27 @@ describe('Tooltip', () => {
         });
     });
 
+    it('should support a noninteractive tooltip surface', async () => {
+        render(
+            <Tooltip title="pass-through-tip">
+                interactive-trigger
+            </Tooltip>
+        );
+        fireEvent.mouseEnter(screen.getByText('interactive-trigger'));
+        expect(await screen.findByRole('tooltip')).toHaveClass('univer-pointer-events-auto');
+
+        cleanup();
+        render(
+            <Tooltip title="pass-through-tip" interactive={false}>
+                pass-through-trigger
+            </Tooltip>
+        );
+        fireEvent.mouseEnter(screen.getByText('pass-through-trigger'));
+        const tooltip = await screen.findByRole('tooltip');
+        expect(tooltip).toHaveClass('univer-pointer-events-none');
+        expect(tooltip).not.toHaveClass('univer-pointer-events-auto');
+    });
+
     it('should execute left-placement recompute branch on scroll', async () => {
         vi.restoreAllMocks();
         vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function getRect(this: HTMLElement) {

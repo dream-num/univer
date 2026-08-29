@@ -206,10 +206,63 @@ class LocalStorageDriver implements IStorageDriver {
     }
 }
 
+class FallbackStorageDriver implements IStorageDriver {
+    private _fallbackEnabled = false;
+
+    constructor(
+        private readonly _primary: IStorageDriver,
+        private readonly _fallback: IStorageDriver
+    ) {}
+
+    private async _run<T>(primary: () => Promise<T>, fallback: () => Promise<T>): Promise<T> {
+        if (this._fallbackEnabled) {
+            return fallback();
+        }
+
+        try {
+            return await primary();
+        } catch {
+            this._fallbackEnabled = true;
+            return fallback();
+        }
+    }
+
+    getItem<T>(key: string): Promise<T | null> {
+        return this._run(() => this._primary.getItem<T>(key), () => this._fallback.getItem<T>(key));
+    }
+
+    setItem<T>(key: string, value: T): Promise<T> {
+        return this._run(() => this._primary.setItem(key, value), () => this._fallback.setItem(key, value));
+    }
+
+    removeItem(key: string): Promise<void> {
+        return this._run(() => this._primary.removeItem(key), () => this._fallback.removeItem(key));
+    }
+
+    clear(): Promise<void> {
+        return this._run(() => this._primary.clear(), () => this._fallback.clear());
+    }
+
+    key(index: number): Promise<string | null> {
+        return this._run(() => this._primary.key(index), () => this._fallback.key(index));
+    }
+
+    keys(): Promise<string[]> {
+        return this._run(() => this._primary.keys(), () => this._fallback.keys());
+    }
+
+    iterate<T, U>(iteratee: (value: T, key: string, iterationNumber: number) => U): Promise<U> {
+        return this._run(
+            () => this._primary.iterate(iteratee),
+            () => this._fallback.iterate(iteratee)
+        );
+    }
+}
+
 function createDriver(): IStorageDriver {
     try {
         if (typeof indexedDB !== 'undefined') {
-            return new IndexedDBDriver();
+            return new FallbackStorageDriver(new IndexedDBDriver(), new LocalStorageDriver());
         }
     } catch {
         // fall through

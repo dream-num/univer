@@ -27,7 +27,7 @@ import { IWorkbenchService } from '../../services/workbench/workbench.service';
 import { connectInjector, useDependency, useObservable } from '../../utils/di';
 import { ComponentContainer, useComponentsOfPart } from '../components/ComponentContainer';
 import { MobileContextMenu } from '../components/context-menu/MobileContextMenu';
-import { MobileSidebar } from '../components/sidebar/Sidebar';
+import { MobileSidebar } from '../components/sidebar/MobileSidebar';
 import { WorkbenchSkeleton } from '../components/workbench-skeleton/WorkbenchSkeleton';
 
 export interface IUniverAppProps extends IWorkbenchOptions {

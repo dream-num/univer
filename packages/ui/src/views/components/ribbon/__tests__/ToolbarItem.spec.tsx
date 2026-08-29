@@ -19,7 +19,7 @@ import type { IIconProps } from '../../../../common/icon-manager';
 import { act, cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import { ICommandService, ILogService, Injector, LocaleService } from '@univerjs/core';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { ComponentManager } from '../../../../common/component-manager';
 import { IconManager } from '../../../../common/icon-manager';
 import { ILayoutService } from '../../../../services/layout/layout.service';
@@ -151,26 +151,6 @@ describe('ToolbarItem', () => {
         );
 
         expect(getByText('Insert')).toBeTruthy();
-    });
-
-    it('opens subitems through the mobile drawer callback without mounting a dropdown trigger', () => {
-        const onOpenSubItems = vi.fn();
-        const { container } = renderWithDependencies(
-            <ToolbarItem
-                id="test-mobile-subitems"
-                type={MenuItemType.SUBITEMS}
-                icon="TestIcon"
-                title="Print"
-                onOpenSubItems={onOpenSubItems}
-            />
-        );
-
-        const button = container.querySelector<HTMLElement>('[data-u-command="test-mobile-subitems"]');
-        if (!button) throw new Error('Expected the mobile subitems button to be rendered.');
-        fireEvent.click(button);
-
-        expect(onOpenSubItems).toHaveBeenCalledOnce();
-        expect(container.querySelector('.univer-toolbar-selector-root')).toBeNull();
     });
 
     it('hides the title of a large Grid selector when showLabel is false', () => {

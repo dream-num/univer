@@ -23,7 +23,8 @@ import enUS from '../../../../locale/en-US';
 import { DesktopSidebarService } from '../../../../services/sidebar/desktop-sidebar.service';
 import { ISidebarService } from '../../../../services/sidebar/sidebar.service';
 import { RediProvider } from '../../../../utils/di';
-import { MobileSidebar, Sidebar } from '../Sidebar';
+import { MobileSidebar } from '../MobileSidebar';
+import { Sidebar } from '../Sidebar';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 

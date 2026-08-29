@@ -23,9 +23,9 @@ import { ConfigProvider } from '../../config-provider/ConfigProvider';
 import { ColorInput } from '../ColorInput';
 import { ColorPicker } from '../ColorPicker';
 import { ColorPickerPanel } from '../ColorPickerPanel';
-import { ColorPresets } from '../ColorPresets';
 import { ColorSpectrum } from '../ColorSpectrum';
 import { HueSlider } from '../HueSlider';
+import { MobileColorPresets } from '../MobileColorPresets';
 import { colorPresets } from '../presets';
 import '@testing-library/jest-dom/vitest';
 
@@ -140,8 +140,8 @@ describe('ColorPicker', () => {
 describe('mobile color picker views', () => {
     it('renders large preset targets and applies the selected color', () => {
         const onSelect = vi.fn();
-        const { container } = render(<ColorPresets value="#FFFFFF" variant="mobile" onSelect={onSelect} />);
-        const buttons = container.querySelectorAll('[data-u-comp="color-picker-presets"] button');
+        const { container } = render(<MobileColorPresets value="#FFFFFF" onSelect={onSelect} />);
+        const buttons = container.querySelectorAll('button');
 
         expect(buttons).toHaveLength(colorPresets.flat().length);
         expect(buttons[0]).toHaveAttribute('aria-pressed', 'true');

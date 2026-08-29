@@ -38,6 +38,8 @@ export type { IColorPickerProps } from './components/color-picker/ColorPicker';
 export { ColorPickerPanel } from './components/color-picker/ColorPickerPanel';
 export type { IColorPickerPanelProps } from './components/color-picker/ColorPickerPanel';
 export { ColorPresets } from './components/color-picker/ColorPresets';
+export { MobileColorPresets } from './components/color-picker/MobileColorPresets';
+export type { IMobileColorPresetsProps } from './components/color-picker/MobileColorPresets';
 export {
     Command,
     CommandEmpty,

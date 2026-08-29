@@ -26,12 +26,14 @@ import { ColorInput } from './ColorInput';
 import { ColorPresets } from './ColorPresets';
 import { ColorSpectrum } from './ColorSpectrum';
 import { HueSlider } from './HueSlider';
+import { MobileColorPresets } from './MobileColorPresets';
 
 const MemoizedColorSpectrum = memo(ColorSpectrum);
 const MemoizedHueSlider = memo(HueSlider);
 const MemoizedAlphaSlider = memo(AlphaSlider);
 const MemoizedColorInput = memo(ColorInput);
 const MemoizedColorPresets = memo(ColorPresets);
+const MemoizedMobileColorPresets = memo(MobileColorPresets);
 
 export interface IColorPickerProps {
     format?: 'hex' | 'rgba';
@@ -108,15 +110,28 @@ export function ColorPicker({ format = 'hex', value, onChange }: IColorPickerPro
             className="univer-cursor-default univer-space-y-2 univer-rounded-lg"
             onClick={(e) => e.stopPropagation()}
         >
-            <MemoizedColorPresets
-                hsv={hsv}
-                variant={mobile ? 'mobile' : 'compact'}
-                onChange={(h, s, v) => {
-                    handleColorChange(h, s, v);
-                    handleAlphaChange(1);
-                    handleColorChanged(h, s, v, 1);
-                }}
-            />
+            {mobile
+                ? (
+                    <MemoizedMobileColorPresets
+                        value={hsvToHex(...hsv)}
+                        onSelect={(color) => {
+                            const [h, s, v] = hexToHsv(color);
+                            handleColorChange(h, s, v);
+                            handleAlphaChange(1);
+                            handleColorChanged(h, s, v, 1);
+                        }}
+                    />
+                )
+                : (
+                    <MemoizedColorPresets
+                        hsv={hsv}
+                        onChange={(h, s, v) => {
+                            handleColorChange(h, s, v);
+                            handleAlphaChange(1);
+                            handleColorChanged(h, s, v, 1);
+                        }}
+                    />
+                )}
 
             <div className={clsx('univer-flex univer-items-center', mobile ? 'univer-h-12' : 'univer-h-7')}>
                 <button

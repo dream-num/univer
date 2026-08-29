@@ -19,7 +19,7 @@ import type { IDisplayMenuItem, IFontConfig, IMenuItem, IMenuSchema, IMenuSelect
 import type { ReactNode } from 'react';
 import type { LocaleKey } from '../../../locale/types';
 import { BorderStyleTypes, BorderType, LocaleService, ThemeService } from '@univerjs/core';
-import { borderBottomClassName, clsx, ColorPickerPanel, ColorPresets, resetButtonClassName } from '@univerjs/design';
+import { borderBottomClassName, clsx, ColorPickerPanel, MobileColorPresets, resetButtonClassName } from '@univerjs/design';
 import { CheckMarkIcon, MoreRightIcon, NoColorDoubleIcon } from '@univerjs/icons';
 import {
     AddWorksheetMergeCommand,
@@ -1173,7 +1173,7 @@ function MobileColorView(props: {
                     setSelectedColor(undefined);
                 }}
             />
-            <ColorPresets value={selectedColor} variant="mobile" onSelect={selectColor} />
+            <MobileColorPresets value={selectedColor} onSelect={selectColor} />
             {recentColors.length > 0 && (
                 <section className="univer-grid univer-gap-2">
                     <div
@@ -1300,7 +1300,7 @@ function MobileBorderColorView(props: {
                 title={localeService.t<LocaleKey>('sheets-ui.toolbar.resetColor')}
                 onClick={() => onExecute({ id: SetBorderBasicCommand.id, value: { ...value, color: defaultColor } })}
             />
-            <ColorPresets value={value.color} variant="mobile" onSelect={selectColor} />
+            <MobileColorPresets value={value.color} onSelect={selectColor} />
             {recentColors.length > 0 && (
                 <div className="univer-flex univer-flex-wrap univer-gap-2">
                     {recentColors.map((color) => (

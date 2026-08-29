@@ -19,7 +19,14 @@ import type { FormatType } from '@univerjs/sheets';
 import { DEFAULT_NUMBER_FORMAT, numfmt } from '@univerjs/core';
 import { stripErrorMargin } from '@univerjs/engine-formula';
 
-export const getPatternType = (pattern: string): FormatType => numfmt.getFormatInfo(pattern).type || 'unknown';
+export const getPatternType = (pattern: string): FormatType => {
+    const type = numfmt.getFormatInfo(pattern).type || 'unknown';
+    if (type === 'general' && numfmt.tokenize(pattern).some((token) => token.type === numfmt.tokenTypes.CONDITION)) {
+        return 'number';
+    }
+
+    return type;
+};
 interface IPatternPreview {
     result: string;
     color?: string;

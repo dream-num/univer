@@ -239,6 +239,8 @@ export interface INestingLevel {
     // Union field glyph_kind can be only one of the following:
     glyphType?: ListGlyphType; // ordered list string is to support custom rules https://developers.google.com/docs/api/reference/rest/v1/documents#glyphtype， ms numFmt: GlyphType
     glyphSymbol?: string; // the tag of the unordered list
+    /** Display all numbered placeholders as decimal values, matching Word's w:isLgl. */
+    isLegal?: boolean;
     // End of list of possible types for union field glyph_kind.
 }
 

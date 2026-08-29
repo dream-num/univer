@@ -171,6 +171,30 @@ describe('bullet', () => {
             expect(result?.symbol).toBe('2.2.');
         });
 
+        it('renders legal numbering placeholders as decimal values', () => {
+            const bullet = createBullet({ nestingLevel: 1 });
+            const lists = createLists([
+                createNestingLevel({ glyphType: ListGlyphType.UPPER_ROMAN }),
+                createNestingLevel({
+                    glyphFormat: '%1.%2.',
+                    glyphType: ListGlyphType.DECIMAL,
+                    isLegal: true,
+                }),
+            ]);
+            const listLevelAncestors: Array<Record<string, unknown> | null> = [
+                { startIndexItem: 3, startNumber: 0, symbol: 'III.' },
+                null,
+            ];
+
+            const result = dealWithBullet(
+                bullet,
+                lists as unknown as ILists,
+                listLevelAncestors as unknown as Parameters<typeof dealWithBullet>[2]
+            );
+
+            expect(result?.symbol).toBe('2.2.');
+        });
+
         it('merges textStyle from bullet and nestingLevel', () => {
             const bullet = createBullet({ textStyle: { fs: 14 } });
             const lists = createLists([

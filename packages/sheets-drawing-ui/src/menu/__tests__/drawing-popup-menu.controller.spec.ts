@@ -15,6 +15,7 @@
  */
 
 import {
+    ContextService,
     DrawingTypeEnum,
     ICommandService,
     IContextService,
@@ -41,7 +42,6 @@ describe('DrawingPopupMenuController', () => {
         const createControl$ = new Subject<void>();
         const clearControl$ = new Subject<void>();
         const changing$ = new Subject<void>();
-        const contextChanged$ = new Subject<Record<string, boolean>>();
         const imageIoChange$ = new Subject<number>();
         const currentWorkbook$ = new Subject<never>();
         const disposedWorkbook$ = new Subject<never>();
@@ -118,12 +118,7 @@ describe('DrawingPopupMenuController', () => {
                 }],
             } as never,
         }]);
-        injector.add([IContextService, {
-            useValue: {
-                contextChanged$,
-                setContextValue: vi.fn(),
-            } as never,
-        }]);
+        injector.add([IContextService, { useValue: new ContextService() }]);
         injector.add([IImageIoService, { useValue: { change$: imageIoChange$ } as never }]);
         injector.add([ICommandService, { useValue: { syncExecuteCommand: vi.fn() } as never }]);
         injector.add([DrawingPopupMenuController]);

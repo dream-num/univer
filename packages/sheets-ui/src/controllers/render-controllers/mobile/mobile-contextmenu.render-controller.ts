@@ -248,6 +248,18 @@ export class SheetContextMenuMobileRenderController extends Disposable implement
         const pickedObject = this._context.scene.pick(Vector2.FromArray([touch.offsetX, touch.offsetY]));
         state.shouldOpenMenu = isSelectionObjectKey(pickedObject && 'oKey' in pickedObject ? pickedObject.oKey : undefined)
             || shouldKeepCurrentSelectionForMobileContextMenu(state.selectionSnapshot, targetCell.mergeInfo);
+
+        if (state.shouldOpenMenu) {
+            const selectionSnapshot = this._cloneSelections(state.selectionSnapshot);
+            queueMicrotask(() => {
+                if (
+                    !this._contextService.getContextValue(MOBILE_PINCH_ZOOMING) &&
+                    !this._contextService.getContextValue(MOBILE_EXPANDING_SELECTION)
+                ) {
+                    this._restoreSelectionSnapshot(selectionSnapshot);
+                }
+            });
+        }
     }
 
     private _handlePointerMove(contentElement: HTMLElement, state: ITapState, event: PointerEvent): void {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { AriaRole, MouseEvent, PointerEvent, ReactNode, TouchEvent } from 'react';
+import type { AriaRole, PointerEvent, ReactNode } from 'react';
 import { clsx, resetButtonClassName, scrollbarClassName } from '@univerjs/design';
 import { useRef, useState } from 'react';
 
@@ -149,36 +149,6 @@ export function MobileDrawer(props: {
         endDrag(event.clientY);
     }
 
-    function handleTouchStart(event: TouchEvent<HTMLButtonElement>) {
-        const touch = event.touches[0];
-        if (touch) beginDrag(touch.clientY);
-    }
-
-    function handleTouchMove(event: TouchEvent<HTMLButtonElement>) {
-        const touch = event.touches[0];
-        if (!touch) return;
-
-        event.preventDefault();
-        moveDrag(touch.clientY);
-    }
-
-    function handleTouchEnd(event: TouchEvent<HTMLButtonElement>) {
-        const touch = event.changedTouches[0];
-        if (touch) endDrag(touch.clientY);
-    }
-
-    function handleMouseDown(event: MouseEvent<HTMLButtonElement>) {
-        beginDrag(event.clientY);
-    }
-
-    function handleMouseMove(event: MouseEvent<HTMLButtonElement>) {
-        moveDrag(event.clientY);
-    }
-
-    function handleMouseUp(event: MouseEvent<HTMLButtonElement>) {
-        endDrag(event.clientY);
-    }
-
     return (
         <>
             {floatingActions && (
@@ -224,13 +194,6 @@ export function MobileDrawer(props: {
                         onPointerMove={handlePointerMove}
                         onPointerUp={handlePointerUp}
                         onPointerCancel={handlePointerUp}
-                        onTouchStart={handleTouchStart}
-                        onTouchMove={handleTouchMove}
-                        onTouchEnd={handleTouchEnd}
-                        onTouchCancel={handleTouchEnd}
-                        onMouseDown={handleMouseDown}
-                        onMouseMove={handleMouseMove}
-                        onMouseUp={handleMouseUp}
                         onClick={() => {
                             if (suppressHandleClickRef.current) {
                                 suppressHandleClickRef.current = false;

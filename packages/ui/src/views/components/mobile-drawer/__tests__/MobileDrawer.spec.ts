@@ -29,7 +29,7 @@ describe('mobile drawer snap behavior', () => {
         expect(resolveMobileDrawerRelease({ snap: 'compact', deltaY: 120, durationMs: 150, percent: 25 })).toBe('closed');
     });
 
-    it('expands when the handle is dragged upward with a touch gesture', () => {
+    it('expands when the handle is dragged upward', () => {
         const onSnapChange = vi.fn();
         const onClose = vi.fn();
         const { container } = render(createElement(MobileDrawer, {
@@ -41,16 +41,16 @@ describe('mobile drawer snap behavior', () => {
         }, 'Drawer content'));
         const handle = screen.getByRole('button', { name: 'Expand drawer' });
 
-        fireEvent.touchStart(handle, { touches: [{ clientY: 600 }] });
-        fireEvent.touchMove(handle, { touches: [{ clientY: 500 }] });
+        fireEvent.pointerDown(handle, { pointerId: 1, clientY: 600 });
+        fireEvent.pointerMove(handle, { pointerId: 1, clientY: 500 });
         expect(container.querySelector('section')?.style.height).not.toBe('40dvh');
-        fireEvent.touchEnd(handle, { changedTouches: [{ clientY: 500 }] });
+        fireEvent.pointerUp(handle, { pointerId: 1, clientY: 500 });
 
         expect(onSnapChange).toHaveBeenCalledWith('expanded');
         expect(onClose).not.toHaveBeenCalled();
     });
 
-    it('closes when the compact handle is flicked downward with a touch gesture', () => {
+    it('closes when the compact handle is flicked downward', () => {
         const onSnapChange = vi.fn();
         const onClose = vi.fn();
         render(createElement(MobileDrawer, {
@@ -62,9 +62,9 @@ describe('mobile drawer snap behavior', () => {
         }, 'Drawer content'));
         const handle = screen.getByRole('button', { name: 'Expand drawer' });
 
-        fireEvent.touchStart(handle, { touches: [{ clientY: 500 }] });
-        fireEvent.touchMove(handle, { touches: [{ clientY: 650 }] });
-        fireEvent.touchEnd(handle, { changedTouches: [{ clientY: 650 }] });
+        fireEvent.pointerDown(handle, { pointerId: 1, clientY: 500 });
+        fireEvent.pointerMove(handle, { pointerId: 1, clientY: 650 });
+        fireEvent.pointerUp(handle, { pointerId: 1, clientY: 650 });
 
         expect(onClose).toHaveBeenCalledOnce();
         expect(onSnapChange).not.toHaveBeenCalled();

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IWorkbookData, Nullable, Workbook } from '@univerjs/core';
+import type { IStyleData, IWorkbookData, Nullable, Workbook } from '@univerjs/core';
 import type { ReactElement } from 'react';
 import type { Root } from 'react-dom/client';
 import type {
@@ -201,7 +201,7 @@ function TestFormulaEditor(props: {
     return <div data-editor-id={props.editorId} data-unit-id={props.unitId} />;
 }
 
-function createWorkbookData(): IWorkbookData {
+function createWorkbookData(cellStyle?: IStyleData): IWorkbookData {
     return {
         id: UNIT_ID,
         appVersion: '3.0.0-alpha',
@@ -213,7 +213,7 @@ function createWorkbookData(): IWorkbookData {
             [SHEET_ID]: {
                 id: SHEET_ID,
                 name: 'Sheet1',
-                cellData: {},
+                cellData: cellStyle ? { 0: { 0: { s: cellStyle } } } : {},
             },
         },
     };
@@ -236,7 +236,7 @@ function createCellEditState(): ICellEditorState {
     };
 }
 
-function createFormulaBarTestBed() {
+function createFormulaBarTestBed(cellStyle?: IStyleData) {
     const originalResizeObserver = globalThis.ResizeObserver;
     globalThis.ResizeObserver = TestResizeObserver as typeof ResizeObserver;
 
@@ -261,7 +261,10 @@ function createFormulaBarTestBed() {
     injector.add([IEditorBridgeService, { useClass: TestEditorBridgeService as never }]);
     injector.add([ILayoutService, { useClass: TestLayoutService as never }]);
     injector.add([IEditorService, { useClass: TestEditorService as never }]);
-    const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, createWorkbookData());
+    const workbook = univer.createUnit<IWorkbookData, Workbook>(
+        UniverInstanceType.UNIVER_SHEET,
+        createWorkbookData(cellStyle)
+    );
     injector.get(IUniverInstanceService).focusUnit(UNIT_ID);
     injector.get(IConfigService).setConfig(SHEETS_UI_PLUGIN_CONFIG_KEY, {});
 
@@ -439,6 +442,19 @@ describe('FormulaBar', () => {
 
         expect(currentBed.mobileSubmit).toHaveBeenCalledOnce();
         expect(currentBed.editorBridgeService.visibleHistory.at(-1)?.visible).toBe(true);
+    });
+
+    it('inherits the selected cell background in the mobile editor', () => {
+        currentBed = createFormulaBarTestBed({
+            bg: { rgb: '#000000' },
+            cl: { rgb: '#0000FF' },
+        });
+        const rendered = renderWithDependencies(<FormulaBar disableDefinedName mobile />, currentBed.injector);
+        root = rendered.root;
+        container = rendered.container;
+
+        const editorHost = rendered.container.querySelector('[data-editor-id]')?.parentElement;
+        expect(editorHost?.style.backgroundColor).toBe('rgb(0, 0, 0)');
     });
 
     it('opens immersive mobile editing from the compact up arrow', async () => {

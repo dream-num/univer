@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IStyleData, IWorkbookData, Nullable, Workbook } from '@univerjs/core';
+import type { IDocumentData, IStyleData, IWorkbookData, Nullable, Workbook } from '@univerjs/core';
 import type { ReactElement } from 'react';
 import type { Root } from 'react-dom/client';
 import type {
@@ -25,6 +25,7 @@ import type {
 } from '../../../services/editor-bridge.service';
 import {
     CommandType,
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     ICommandService,
     IConfigService,
@@ -169,12 +170,21 @@ class TestEditorBridgeService implements IEditorBridgeService {
     }
 }
 
+const testFormulaEditor = {
+    getDocumentData: (): IDocumentData => ({
+        id: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+        body: { dataStream: 'Existing\r\n' },
+        documentStyle: {},
+    }),
+    setSelectionRanges: vi.fn(),
+};
+
 class TestEditorService {
     readonly focusedEditorIds: string[] = [];
     readonly blurHistory: boolean[] = [];
 
-    getEditor(): null {
-        return null;
+    getEditor(editorId: string) {
+        return editorId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY ? testFormulaEditor : null;
     }
 
     getFocusId(): null {
@@ -372,6 +382,10 @@ describe('FormulaBar', () => {
         await act(async () => Promise.resolve());
 
         expect(currentBed.editorBridgeService.refreshEditCellState).toHaveBeenCalledOnce();
+        expect(testFormulaEditor.setSelectionRanges).toHaveBeenCalledWith([{
+            startOffset: 8,
+            endOffset: 8,
+        }], false);
     });
 
     it('keeps its toolbar layout LTR when the sheet host is RTL', () => {

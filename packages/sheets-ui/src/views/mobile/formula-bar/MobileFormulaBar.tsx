@@ -43,13 +43,24 @@ export function MobileFormulaBar() {
         if (!visible) return undefined;
 
         contextService.setContextValue(FOCUSING_FX_BAR_EDITOR, true);
-        const frame = requestAnimationFrame(() => {
+        let cursorFrame: number | undefined;
+        const contentFrame = requestAnimationFrame(() => {
             // The mobile formula editor is mounted lazily. Replay the selected cell after mount so
             // its current value is not lost when the earlier selection sync ran before this editor existed.
             editorBridgeService.refreshEditCellState();
             editorService.focus(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
+            cursorFrame = requestAnimationFrame(() => {
+                const editor = editorService.getEditor(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
+                const end = Math.max(0, (editor?.getDocumentData().body?.dataStream.length ?? 2) - 2);
+                editor?.setSelectionRanges([{ startOffset: end, endOffset: end }], false);
+            });
         });
-        return () => cancelAnimationFrame(frame);
+        return () => {
+            cancelAnimationFrame(contentFrame);
+            if (cursorFrame !== undefined) {
+                cancelAnimationFrame(cursorFrame);
+            }
+        };
     }, [contextService, editorBridgeService, editorService, visible]);
 
     if (!visible) {

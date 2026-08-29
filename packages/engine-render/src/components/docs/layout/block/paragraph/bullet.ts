@@ -16,6 +16,7 @@
 
 import type { IBullet, ILists, INestingLevel, ITextStyle, LocaleService, Nullable } from '@univerjs/core';
 import type { IDocumentSkeletonBullet } from '../../../../../basics/i-document-skeleton-cached';
+import { ListGlyphType } from '@univerjs/core';
 import { getFontStyleString } from '../../../../../basics/tools';
 import { getBulletOrderedSymbol } from './bullet-ruler';
 
@@ -215,7 +216,12 @@ function __generateOrderedListSymbol(
         const startNumber = level === nestingLevel
             ? currentStartNumber
             : ancestor?.startNumber ?? nestings[level].startNumber;
-        const singleSymbol = ___getSymbolByBesting(startIndexItem, nestings[level], startNumber);
+        const placeholderNesting = nestings[level];
+        const glyphType = nestings[nestingLevel]?.isLegal
+            && placeholderNesting.glyphType !== ListGlyphType.DECIMAL_ZERO
+            ? ListGlyphType.DECIMAL
+            : placeholderNesting.glyphType;
+        const singleSymbol = ___getSymbolByBesting(startIndexItem, placeholderNesting, startNumber, glyphType);
         // console.log(
         //     '___getSymbolByBesting',
         //     singleSymbol,
@@ -232,8 +238,13 @@ function __generateOrderedListSymbol(
     return resultSymbol.join('');
 }
 
-function ___getSymbolByBesting(startIndex: number = 1, nesting: INestingLevel, startNumber = nesting.startNumber) {
-    const { glyphType, glyphSymbol } = nesting;
+function ___getSymbolByBesting(
+    startIndex: number = 1,
+    nesting: INestingLevel,
+    startNumber = nesting.startNumber,
+    glyphType = nesting.glyphType
+) {
+    const { glyphSymbol } = nesting;
 
     if (glyphSymbol) {
         // Unordered list uses directly

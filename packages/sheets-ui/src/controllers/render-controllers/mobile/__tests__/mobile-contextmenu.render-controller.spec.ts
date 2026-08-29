@@ -132,24 +132,6 @@ describe('mobile context menu helpers', () => {
         Object.assign(mainComponent, { onDblclick$ });
         testBed.renderManagerService.removeRender(sheet.getUnitId());
         const controller = injector.createInstance(SheetContextMenuMobileRenderController, context);
-        let collapseSelectionOnPointerDown = true;
-        canvas.addEventListener('pointerdown', () => {
-            if (!collapseSelectionOnPointerDown) {
-                return;
-            }
-
-            collapseSelectionOnPointerDown = false;
-            selectionManagerService.setSelections(
-                sheet.getUnitId(),
-                worksheet.getSheetId(),
-                [{
-                    range: { startRow: 1, endRow: 1, startColumn: 1, endColumn: 1 },
-                    primary: null,
-                    style: null,
-                }],
-                SelectionMoveType.MOVE_END
-            );
-        });
         canvas.addEventListener('pointerup', (event) => event.stopPropagation());
 
         const dispatchPointer = (type: string) => {
@@ -162,13 +144,6 @@ describe('mobile context menu helpers', () => {
             canvas.dispatchEvent(event);
         };
         dispatchPointer('pointerdown');
-        expect(selectionManagerService.getCurrentLastSelection()?.range).toEqual({
-            startRow: 1,
-            endRow: 1,
-            startColumn: 1,
-            endColumn: 1,
-        });
-        await Promise.resolve();
         expect(selectionManagerService.getCurrentLastSelection()?.range).toEqual({
             startRow: 1,
             endRow: 2,

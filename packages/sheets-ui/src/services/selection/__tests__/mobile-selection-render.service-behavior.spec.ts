@@ -15,16 +15,16 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { shouldHandleMobileNormalSelectionPointerDown, shouldKeepCurrentSelectionOnMobileLongPress } from '../mobile-selection-render.service';
+import { shouldHandleMobileNormalSelectionPointerDown, shouldKeepCurrentSelectionOnMobileTap } from '../mobile-selection-render.service';
 
 describe('MobileSheetsSelectionRenderService', () => {
-    it('keeps the current mobile selection when a long press stays inside an existing range', () => {
-        expect(shouldKeepCurrentSelectionOnMobileLongPress(
+    it('keeps the current mobile selection when a tap stays inside an existing range', () => {
+        expect(shouldKeepCurrentSelectionOnMobileTap(
             [{ startRow: 1, endRow: 3, startColumn: 1, endColumn: 3 }],
             { startRow: 2, endRow: 2, startColumn: 2, endColumn: 2 }
         )).toBe(true);
 
-        expect(shouldKeepCurrentSelectionOnMobileLongPress(
+        expect(shouldKeepCurrentSelectionOnMobileTap(
             [{ startRow: 1, endRow: 3, startColumn: 1, endColumn: 3 }],
             { startRow: 4, endRow: 4, startColumn: 2, endColumn: 2 }
         )).toBe(false);

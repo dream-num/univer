@@ -60,7 +60,7 @@ enum ExpandingControl {
     BOTTOM = 'bottom',
 }
 
-export function shouldKeepCurrentSelectionOnMobileLongPress(currentSelections: IRange[], targetRange: IRange): boolean {
+export function shouldKeepCurrentSelectionOnMobileTap(currentSelections: IRange[], targetRange: IRange): boolean {
     return currentSelections.some((selection) => Rectangle.contains(selection, targetRange));
 }
 
@@ -344,6 +344,16 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         if (!selectCell) return;
 
         scene.getTransformer()?.clearSelectedObjects();
+        if (
+            rangeType === RANGE_TYPE.NORMAL &&
+            shouldKeepCurrentSelectionOnMobileTap(
+                this._workbookSelections.getCurrentSelections().map((selection) => selection.range),
+                selectCell
+            )
+        ) {
+            return;
+        }
+
         switch (rangeType) {
             case RANGE_TYPE.NORMAL:
                 break;
@@ -395,7 +405,8 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
      * Not same as PC version,
      * new selection control for mobile do one more thing: bind event for two control points.
      * @param scene
-     * @param rangeType
+     * @param skeleton
+     * @param selection
      */
     override newSelectionControl(scene: Scene, skeleton: SpreadsheetSkeleton, selection: ISelectionWithStyle): MobileSelectionControl {
         const selectionControls = this.getSelectionControls();
@@ -607,8 +618,8 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         activeSelectionControl: MobileSelectionControl,
         rangeType: RANGE_TYPE,
         scrollTimerType: ScrollTimerType = ScrollTimerType.ALL,
-        moveStartPosX: number,
-        moveStartPosY: number
+        _moveStartPosX: number,
+        _moveStartPosY: number
     ): void {
         this._scrollTimer = ScrollTimer.create(this._scene, scrollTimerType);
         this._scrollTimer.startScroll(viewportMain?.left ?? 0, viewportMain?.top ?? 0, viewportMain);

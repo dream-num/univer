@@ -19,7 +19,7 @@ import type { IRenderContext, IRenderModule, Viewport } from '@univerjs/engine-r
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import { Disposable, IContextService, Inject, Rectangle, toDisposable } from '@univerjs/core';
 import { IRenderManagerService, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
-import { convertSelectionDataToRange, SelectionMoveType, SheetsSelectionsService } from '@univerjs/sheets';
+import { convertSelectionDataToRange, SheetsSelectionsService } from '@univerjs/sheets';
 import { ContextMenuPosition, IContextMenuService, ILayoutService } from '@univerjs/ui';
 import { MOBILE_EXPANDING_SELECTION, MOBILE_PINCH_ZOOMING } from '../../../consts/mobile-context';
 import { ISheetSelectionRenderService } from '../../../services/selection/base-selection-render.service';
@@ -204,20 +204,6 @@ export class SheetContextMenuMobileRenderController extends Disposable implement
         return this._cloneSelections(this._selectionManagerService.getCurrentSelections());
     }
 
-    private _restoreSelectionSnapshot(selectionSnapshot: ISelectionWithStyle[]): void {
-        const worksheet = this._context.unit.getActiveSheet();
-        if (!worksheet || !selectionSnapshot.length) {
-            return;
-        }
-
-        this._selectionManagerService.setSelections(
-            this._context.unitId,
-            worksheet.getSheetId(),
-            this._cloneSelections(selectionSnapshot),
-            SelectionMoveType.MOVE_END
-        );
-    }
-
     private _openMenu(clientX: number, clientY: number): void {
         const event = new MouseEvent('contextmenu', { clientX, clientY });
         this._contextMenuService.triggerContextMenu(event, ContextMenuPosition.MAIN_AREA, { unitId: this._context.unitId });
@@ -248,18 +234,6 @@ export class SheetContextMenuMobileRenderController extends Disposable implement
         const pickedObject = this._context.scene.pick(Vector2.FromArray([touch.offsetX, touch.offsetY]));
         state.shouldOpenMenu = isSelectionObjectKey(pickedObject && 'oKey' in pickedObject ? pickedObject.oKey : undefined)
             || shouldKeepCurrentSelectionForMobileContextMenu(state.selectionSnapshot, targetCell.mergeInfo);
-
-        if (state.shouldOpenMenu) {
-            const selectionSnapshot = this._cloneSelections(state.selectionSnapshot);
-            queueMicrotask(() => {
-                if (
-                    !this._contextService.getContextValue(MOBILE_PINCH_ZOOMING) &&
-                    !this._contextService.getContextValue(MOBILE_EXPANDING_SELECTION)
-                ) {
-                    this._restoreSelectionSnapshot(selectionSnapshot);
-                }
-            });
-        }
     }
 
     private _handlePointerMove(contentElement: HTMLElement, state: ITapState, event: PointerEvent): void {
@@ -286,11 +260,8 @@ export class SheetContextMenuMobileRenderController extends Disposable implement
         ) {
             event.preventDefault();
             const { clientX, clientY } = state.activeTouch;
-            const selectionSnapshot = this._cloneSelections(state.selectionSnapshot);
             state.menuTimer = setTimeout(() => {
                 state.menuTimer = null;
-                this._restoreSelectionSnapshot(selectionSnapshot);
-                queueMicrotask(() => this._restoreSelectionSnapshot(selectionSnapshot));
                 this._openMenu(clientX, clientY);
             }, TAP_MENU_DELAY);
         }

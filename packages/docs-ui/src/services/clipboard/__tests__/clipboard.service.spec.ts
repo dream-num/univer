@@ -1029,6 +1029,59 @@ describe('DocClipboardService table copy helpers', () => {
         testBed.univer.dispose();
     });
 
+    it('pastes into an explicitly targeted embedded Document when another Document is current', async () => {
+        const targetDocument: IDocumentData = {
+            id: 'embedded-paste-target-doc',
+            body: {
+                dataStream: 'Target\r\n',
+                paragraphs: [{ paragraphId: 'embedded-paste-target-paragraph', startIndex: 6 }],
+            },
+            documentStyle: {},
+        };
+        const currentDocument: IDocumentData = {
+            id: 'embedded-paste-current-doc',
+            body: {
+                dataStream: 'Current\r\n',
+                paragraphs: [{ paragraphId: 'embedded-paste-current-paragraph', startIndex: 7 }],
+            },
+            documentStyle: {},
+        };
+        const testBed = createCommandTestBed(targetDocument, [
+            [IClipboardInterfaceService, { useClass: TestClipboardInterfaceService }],
+            [IDocClipboardService, { useClass: DocClipboardService }],
+        ]);
+        const commandService = testBed.get(ICommandService);
+        commandService.registerCommand(InnerPasteCommand);
+        commandService.registerCommand(RichTextEditingMutation);
+        commandService.registerCommand(SetTextSelectionsOperation);
+        const selectionManager = testBed.get(DocSelectionManagerService);
+        selectionManager.__TEST_ONLY_setCurrentSelection({ unitId: targetDocument.id, subUnitId: targetDocument.id });
+        selectionManager.__TEST_ONLY_add([{
+            startOffset: 6,
+            endOffset: 6,
+            collapsed: true,
+            isActive: true,
+            segmentId: '',
+        }]);
+        testBed.univer.createUnit(UniverInstanceType.UNIVER_DOC, currentDocument);
+        testBed.get(IUniverInstanceService).focusUnit(currentDocument.id);
+
+        const pasted = await testBed.get(IDocClipboardService).legacyPaste({
+            text: ' embedded',
+            files: [],
+            unitId: targetDocument.id,
+        });
+
+        const instanceService = testBed.get(IUniverInstanceService);
+        expect(pasted).toBe(true);
+        expect(instanceService.getUnit<DocumentDataModel>(targetDocument.id, UniverInstanceType.UNIVER_DOC)?.getBody()?.dataStream)
+            .toBe('Target embedded\r\n');
+        expect(instanceService.getUnit<DocumentDataModel>(currentDocument.id, UniverInstanceType.UNIVER_DOC)?.getBody()?.dataStream)
+            .toBe('Current\r\n');
+
+        testBed.univer.dispose();
+    });
+
     it('turns pasted image files into inline document drawings through the image paste hook', async () => {
         class TestImage {
             naturalWidth = 20;

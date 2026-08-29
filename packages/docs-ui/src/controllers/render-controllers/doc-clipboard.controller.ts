@@ -79,7 +79,13 @@ export class DocClipboardController extends RxDisposable implements IRenderModul
                 htmlContent = '';
             }
 
-            this._docClipboardService.legacyPaste({ html: htmlContent, internalJson, text: textContent, files });
+            this._docClipboardService.legacyPaste({
+                html: htmlContent,
+                internalJson,
+                text: textContent,
+                files,
+                unitId: this._context.unitId,
+            }).catch(() => undefined);
         });
     }
 }

@@ -191,7 +191,7 @@ export interface IDocClipboardService {
     copy(sliceType?: SliceBodyType, ranges?: ITextRangeWithStyle[]): Promise<boolean>;
     cut(ranges?: ITextRangeWithStyle[]): Promise<boolean>;
     paste(items?: ClipboardItem[]): Promise<boolean>;
-    legacyPaste(options: { html?: string; text?: string; internalJson?: string; files: File[] }): Promise<boolean>;
+    legacyPaste(options: { html?: string; text?: string; internalJson?: string; files: File[]; unitId?: string }): Promise<boolean>;
     addClipboardHook(hook: IDocClipboardHook): IDisposable;
 }
 
@@ -330,9 +330,9 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         internalJson?: string;
         text?: string;
         files: File[];
+        unitId?: string;
     }): Promise<boolean> {
-        const currentDocInstance = this._univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_DOC);
-        const docUnitId = currentDocInstance?.getUnitId() || '';
+        const docUnitId = options.unitId ?? this._getCurrentDocumentUnitId() ?? '';
         if (!docUnitId || !this._canEditTargets(docUnitId)) {
             return false;
         }
@@ -373,14 +373,17 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         expectedUnitId?: string,
         ranges?: ReadonlyArray<ITextRangeWithStyle | IRectRangeWithStyle>
     ): boolean {
-        const document = this._univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
-        if (!document || (expectedUnitId && document.getUnitId() !== expectedUnitId)) {
+        const document = expectedUnitId
+            ? this._univerInstanceService.getUnit<DocumentDataModel>(expectedUnitId, UniverInstanceType.UNIVER_DOC)
+            : this._univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        if (!document) {
             return false;
         }
+        const selectionParams = this._getSelectionParams(document.getUnitId());
         const objectIds = new Set<string>();
         const targetRanges = ranges ?? [
-            ...(this._docSelectionManagerService.getTextRanges() ?? []),
-            ...(this._docSelectionManagerService.getRectRanges() ?? []),
+            ...(this._docSelectionManagerService.getTextRanges(selectionParams) ?? []),
+            ...(this._docSelectionManagerService.getRectRanges(selectionParams) ?? []),
         ];
         targetRanges.forEach((range) => {
             if (range.startOffset == null || range.endOffset == null) {
@@ -468,10 +471,14 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
 
         let body = normalizeBody(_body);
 
-        const currentDocument = this._univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
-        if (!currentDocument || (expectedUnitId && currentDocument.getUnitId() !== expectedUnitId)) {
+        const currentDocument = expectedUnitId
+            ? this._univerInstanceService.getUnit<DocumentDataModel>(expectedUnitId, UniverInstanceType.UNIVER_DOC)
+            : this._univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        if (!currentDocument) {
             return false;
         }
+        const unitId = currentDocument.getUnitId();
+        const selectionParams = this._getSelectionParams(unitId);
 
         this._clipboardHooks.forEach((hook) => {
             if (hook.onBeforePaste) {
@@ -495,11 +502,11 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             }
         });
 
-        const activeRange = this._docSelectionManagerService.getActiveTextRange();
-        const docRanges = this._docSelectionManagerService.getDocRanges();
+        const ranges = this._docSelectionManagerService.getTextRanges(selectionParams) ?? [];
+        const activeRange = ranges.find((range) => range.isActive);
+        const docRanges = this._docSelectionManagerService.getDocRanges(selectionParams);
         const insertionAnchor = activeRange ?? docRanges.find((range) => range.isActive) ?? docRanges[0];
         const { segmentId, endOffset: activeEndOffset, style } = insertionAnchor || {};
-        const ranges = this._docSelectionManagerService.getTextRanges() ?? [];
 
         if (segmentId == null) {
             this._logService.error('[DocClipboardController] segmentId does not exist!');
@@ -538,6 +545,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             ];
 
             return this._commandService.executeCommand(InnerPasteCommand.id, {
+                unitId,
                 doc: {
                     ...docData,
                     body,
@@ -602,6 +610,13 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
 
         await this._clipboardInterfaceService.write(text, html, internalJson ? { [DOC_INTERNAL_FRAGMENT_MIME]: internalJson } : undefined);
         this._memoryClipboardData = Tools.deepClone(internalDocData);
+    }
+
+    private _getSelectionParams(unitId: string): { unitId: string; subUnitId: string } {
+        const currentSelection = this._docSelectionManagerService.__getCurrentSelection();
+        return currentSelection?.unitId === unitId
+            ? currentSelection
+            : { unitId, subUnitId: unitId };
     }
 
     addClipboardHook(hook: IDocClipboardHook): IDisposable {

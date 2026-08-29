@@ -49,7 +49,7 @@ export function RenderSheetFooter() {
     const activeEmbedTab = useActiveSheetEmbedTabData(workbook);
     if (!workbook || !showFooter) return null;
     if (activeWorkbookEmbeddedRender) return null;
-    if (rootUnitType !== UniverInstanceType.UNIVER_SHEET) return null;
+    if (rootUnitType !== UniverInstanceType.UNIVER_SHEET && !activeEmbedTab) return null;
 
     const footerMenus = menuManagerService.getMenuByPositionKey(ContextMenuPosition.FOOTER_MENU);
     const {
@@ -123,7 +123,7 @@ export function RenderSheetContent() {
     const injector = useDependency(Injector);
     const activeWorkbookEmbeddedRender = useActiveWorkbookIsEmbeddedRender(workbook);
     const rootUnitType = useWorkbenchRootUnitType();
-    const rootWorkbenchOwnsSheet = rootUnitType === UniverInstanceType.UNIVER_SHEET;
+    const rootWorkbenchOwnsSheet = rootUnitType === UniverInstanceType.UNIVER_SHEET || Boolean(activeEmbedTab);
 
     // We use string keys to avoid a hard dependency on sheets-shape-ui.
     const ShapeTextEditorContainer = componentManager.get('SheetShapeTextEditorContainer') ?? componentManager.get('ShapeTextEditorContainer');

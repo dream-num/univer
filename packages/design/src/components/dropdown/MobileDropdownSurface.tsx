@@ -71,7 +71,7 @@ export function MobileDropdownSurface(props: {
                       dark:!univer-bg-gray-600
                     "
                 />
-                <DialogTitle className="univer-sr-only">{locale?.design.Accessibility.menu}</DialogTitle>
+                <DialogTitle className="univer-sr-only">{locale?.Accessibility.menu}</DialogTitle>
                 <DialogDescription className="univer-hidden" />
                 {content}
             </DialogContent>

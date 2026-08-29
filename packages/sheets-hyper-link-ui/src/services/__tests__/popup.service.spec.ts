@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { CustomRangeType, Injector, IUniverInstanceService } from '@univerjs/core';
+import { ContextService, CustomRangeType, IContextService, Injector, IUniverInstanceService } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IEditorBridgeService, SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
@@ -120,6 +120,7 @@ class TestDialogService {
 function createService() {
     const injector = new Injector();
 
+    injector.add([IContextService, { useClass: ContextService }]);
     injector.add([SheetCanvasPopManagerService, { useClass: TestSheetCanvasPopManagerService as never }]);
     injector.add([IUniverInstanceService, { useClass: TestUniverInstanceService as never }]);
     injector.add([IEditorBridgeService, { useClass: TestEditorBridgeService as never }]);

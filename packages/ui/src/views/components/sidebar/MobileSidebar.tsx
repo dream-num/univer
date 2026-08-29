@@ -18,6 +18,7 @@ import type { LocaleKey } from '../../../locale/types';
 import type { MobileDrawerSnap } from '../mobile-drawer/MobileDrawer';
 import type { ISidebarMethodOptions } from './Sidebar';
 import { LocaleService } from '@univerjs/core';
+import { ActionRow } from '@univerjs/design';
 import { CloseIcon } from '@univerjs/icons';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ISidebarService } from '../../../services/sidebar/sidebar.service';
@@ -77,14 +78,6 @@ export function MobileSidebar() {
                 panelClassName="
                   univer-bg-gray-0 univer-text-gray-900
                   dark:!univer-bg-gray-900 dark:!univer-text-gray-0
-                  [&_[data-u-comp='mobile-actions']>button]:!univer-m-0
-                  [&_[data-u-comp='mobile-actions']>button]:!univer-h-12
-                  [&_[data-u-comp='mobile-actions']>button]:!univer-min-w-0
-                  [&_[data-u-comp='mobile-actions']>button]:!univer-flex-1
-                  [&_[data-u-comp='mobile-actions']>button]:!univer-rounded-xl
-                  [&_[data-u-comp='mobile-actions']]:!univer-flex [&_[data-u-comp='mobile-actions']]:!univer-w-full
-                  [&_[data-u-comp='mobile-actions']]:!univer-justify-stretch
-                  [&_[data-u-comp='mobile-actions']]:!univer-gap-3
                 "
                 contentClassName="univer-min-h-0 univer-px-4 univer-pb-4"
                 header={(
@@ -115,14 +108,13 @@ export function MobileSidebar() {
                 footer={options.footer
                     ? (
                         <footer
-                            data-u-comp="mobile-actions"
                             className="
                               univer-shrink-0 univer-border-0 univer-border-t univer-border-solid univer-border-gray-200
                               univer-p-4
                               dark:!univer-border-gray-700
                             "
                         >
-                            {options.footer}
+                            <ActionRow>{options.footer}</ActionRow>
                         </footer>
                     )
                     : undefined}

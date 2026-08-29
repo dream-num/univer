@@ -18,7 +18,7 @@ import type { ISheetDataValidationRule, Workbook } from '@univerjs/core';
 import type { IAddSheetDataValidationCommandParams } from '@univerjs/sheets-data-validation';
 import type { LocaleKey } from '../../locale/types';
 import { ICommandService, Injector, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
-import { Button } from '@univerjs/design';
+import { ActionRow, Button } from '@univerjs/design';
 import { checkRangesEditablePermission } from '@univerjs/sheets';
 import {
     AddSheetDataValidationCommand,
@@ -115,8 +115,7 @@ export function DataValidationList(props: { workbook: Workbook }) {
                     disable={rule.disable ?? false}
                 />
             ))}
-            <div
-                data-u-comp="mobile-actions"
+            <ActionRow
                 className="univer-mt-4 univer-flex univer-flex-row univer-justify-end univer-gap-2"
             >
                 {(rules.length && !hasDisableRule)
@@ -129,7 +128,7 @@ export function DataValidationList(props: { workbook: Workbook }) {
                 <Button variant="primary" onClick={handleAddRule}>
                     {localeService.t<LocaleKey>('sheets-data-validation-ui.panel.add')}
                 </Button>
-            </div>
+            </ActionRow>
         </div>
     );
 };

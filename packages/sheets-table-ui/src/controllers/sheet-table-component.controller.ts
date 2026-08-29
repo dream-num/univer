@@ -17,7 +17,7 @@
 import type { IDisposable, Nullable } from '@univerjs/core';
 import { Disposable, IContextService, Inject } from '@univerjs/core';
 import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
-import { IDialogService, isMobileDialogService } from '@univerjs/ui';
+import { IDialogService, MOBILE_UI_MODE } from '@univerjs/ui';
 import { distinctUntilChanged, startWith } from 'rxjs';
 import { SHEETS_TABLE_FILTER_PANEL_OPENED_KEY, UNIVER_SHEET_TABLE_FILTER_PANEL_ID } from '../const';
 
@@ -97,7 +97,7 @@ export class SheetsTableComponentController extends Disposable {
         }
 
         const { row: startRow, column: col } = currentFilterModel;
-        if (isMobileDialogService(this._dialogService)) {
+        if (this._contextService.getContextValue(MOBILE_UI_MODE)) {
             this._dialogService.open({
                 id: UNIVER_SHEET_TABLE_FILTER_PANEL_ID,
                 title: { title: 'sheets-table-ui.filter.by-values' },

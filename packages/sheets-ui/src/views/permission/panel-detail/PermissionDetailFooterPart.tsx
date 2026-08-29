@@ -25,7 +25,7 @@ import {
     LocaleService,
     UniverInstanceType,
 } from '@univerjs/core';
-import { Button } from '@univerjs/design';
+import { ActionRow, Button } from '@univerjs/design';
 import { ObjectScope, UnitAction, UnitObject, UnitRole } from '@univerjs/protocol';
 import {
     AddRangeProtectionCommand,
@@ -71,8 +71,7 @@ export const PermissionDetailFooterPart = (props: IPermissionDetailFooterPartPro
     const subUnitId = worksheet.getSheetId();
 
     return (
-        <div
-            data-u-comp="mobile-actions"
+        <ActionRow
             className="univer-mt-auto univer-flex univer-flex-row-reverse univer-gap-2 univer-py-5"
         >
             <Button
@@ -236,6 +235,6 @@ export const PermissionDetailFooterPart = (props: IPermissionDetailFooterPartPro
             >
                 {localeService.t<LocaleKey>('sheets-ui.permission.button.cancel')}
             </Button>
-        </div>
+        </ActionRow>
     );
 };

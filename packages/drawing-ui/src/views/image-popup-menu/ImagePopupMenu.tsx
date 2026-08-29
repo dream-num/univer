@@ -25,15 +25,16 @@ import {
     PositionedObjectLayoutType,
     UniverInstanceType,
 } from '@univerjs/core';
-import { borderClassName, clsx, Dropdown, DropdownMenu, Separator, Tooltip } from '@univerjs/design';
+import { borderClassName, clsx, ConfigContext, Dropdown, DropdownMenu, Separator, Tooltip } from '@univerjs/design';
 import {
     AutofillDoubleIcon,
     ChartIcon,
     MoreDownIcon,
     TextWrapShapeIcon,
 } from '@univerjs/icons';
-import { IconManager, IDialogService, isMobileDialogService, useDependency } from '@univerjs/ui';
-import { useState } from 'react';
+import { IconManager, IDialogService, useDependency } from '@univerjs/ui';
+import { useContext, useState } from 'react';
+import { MobileImagePopupMenu } from './MobileImagePopupMenu';
 
 export interface IImagePopupMenuItem {
     label: string;
@@ -71,6 +72,7 @@ export function ImagePopupMenu(props: IImagePopupMenuProps) {
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const dialogService = useDependency(IDialogService);
+    const { mobile } = useContext(ConfigContext);
     const [visible, setVisible] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
 
@@ -96,33 +98,18 @@ export function ImagePopupMenu(props: IImagePopupMenuProps) {
         return <DocChartFloatingToolbar menuItems={menuItems} />;
     }
 
-    if (isMobileDialogService(dialogService)) {
+    if (mobile) {
         return (
-            <div className="univer-flex univer-flex-col univer-gap-2" data-u-comp="mobile-image-actions">
-                {menuItems.map((item) => (
-                    <button
-                        key={`${item.commandId}-${item.label}`}
-                        type="button"
-                        disabled={item.disable}
-                        className="
-                          univer-flex univer-h-12 univer-w-full univer-items-center univer-rounded-xl univer-border-0
-                          univer-bg-gray-100 univer-px-4 univer-text-left univer-text-base univer-text-gray-900
-                          active:univer-bg-gray-200
-                          disabled:univer-opacity-40
-                          dark:!univer-bg-gray-800 dark:!univer-text-gray-0
-                          dark:active:!univer-bg-gray-700
-                        "
-                        onClick={async () => {
-                            await commandService.executeCommand(item.commandId, item.commandParams);
-                            if (popup.extraProps?.dialogId) {
-                                dialogService.close(popup.extraProps.dialogId);
-                            }
-                        }}
-                    >
-                        {localeService.t(item.label)}
-                    </button>
-                ))}
-            </div>
+            <MobileImagePopupMenu
+                menuItems={menuItems}
+                getLabel={(item) => localeService.t(item.label)}
+                onSelect={async (item) => {
+                    await commandService.executeCommand(item.commandId, item.commandParams);
+                    if (popup.extraProps?.dialogId) {
+                        dialogService.close(popup.extraProps.dialogId);
+                    }
+                }}
+            />
         );
     }
 

@@ -17,7 +17,7 @@
 import type { ICustomRange, Nullable, Workbook } from '@univerjs/core';
 import type { LocaleKey } from '../locale/types';
 import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
-import { borderClassName, Button, clsx, MessageType, Tooltip } from '@univerjs/design';
+import { borderClassName, Button, clsx, ConfigContext, MessageType, Tooltip } from '@univerjs/design';
 import { AllBorderIcon, CopyIcon, LinkIcon, SheetsMultiIcon, UnlinkIcon, WriteIcon } from '@univerjs/icons';
 import {
     CancelHyperLinkCommand,
@@ -26,11 +26,13 @@ import {
     SheetsHyperLinkParserService,
 } from '@univerjs/sheets-hyper-link';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
-import { IDialogService, IMessageService, isMobileDialogService, useDependency, useObservable } from '@univerjs/ui';
+import { IMessageService, useDependency, useObservable } from '@univerjs/ui';
+import { useContext } from 'react';
 import { OpenHyperLinkEditPanelOperation } from '../commands/operations/popup.operations';
 import { SheetsHyperLinkPopupService } from '../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../services/resolver.service';
 import { HyperLinkEditSourceType } from '../types/enums/edit-source';
+import { MobileCellLinkPopup } from './MobileCellLinkPopup';
 
 const iconsMap = {
     [SheetHyperLinkType.URL]: <LinkIcon />,
@@ -59,7 +61,7 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
     const resolverService = useDependency(SheetsHyperLinkResolverService);
     const editorBridgeService = useDependency(IEditorBridgeService);
     const parserHyperLinkService = useDependency(SheetsHyperLinkParserService);
-    const dialogService = useDependency(IDialogService);
+    const { mobile } = useContext(ConfigContext);
     const { customRange, row, col, unitId, subUnitId, editPermission, copyPermission, type } = props;
 
     if (!customRange?.properties?.url) {
@@ -68,94 +70,62 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
     const linkObj = parserHyperLinkService.parseHyperLink(customRange.properties.url ?? '');
     const isError = linkObj.type === SheetHyperLinkType.INVALID;
 
-    if (isMobileDialogService(dialogService)) {
-        const rowClassName = `
-          univer-flex univer-h-12 univer-w-full univer-items-center univer-rounded-xl univer-border-0
-          univer-bg-gray-100 univer-px-4 univer-text-left univer-text-base univer-text-gray-900
-          active:univer-bg-gray-200
-          disabled:univer-opacity-40
-          dark:!univer-bg-gray-800 dark:!univer-text-gray-0 dark:active:!univer-bg-gray-700
-        `;
+    if (mobile) {
         const close = () => popupService.hideCurrentPopup(undefined, true);
         return (
-            <div className="univer-flex univer-flex-col univer-gap-2" data-u-comp="mobile-hyper-link-actions">
-                <button
-                    type="button"
-                    className={rowClassName}
-                    disabled={isError}
-                    onClick={() => {
-                        resolverService.navigate(linkObj);
+            <MobileCellLinkPopup
+                name={linkObj.name}
+                invalid={isError}
+                copyPermission={Boolean(copyPermission)}
+                editPermission={Boolean(editPermission)}
+                copyText={localeService.t<LocaleKey>('sheets-hyper-link-ui.popup.copy')}
+                editText={localeService.t<LocaleKey>('sheets-hyper-link-ui.popup.edit')}
+                removeText={localeService.t<LocaleKey>('sheets-hyper-link-ui.popup.cancel')}
+                onNavigate={() => {
+                    resolverService.navigate(linkObj);
+                    close();
+                }}
+                onCopy={() => {
+                    if (linkObj.type !== SheetHyperLinkType.URL) {
+                        const url = new URL(window.location.href);
+                        url.hash = linkObj.url.slice(1);
+                        navigator.clipboard.writeText(url.href);
+                    } else {
+                        navigator.clipboard.writeText(linkObj.url);
+                    }
+                    messageService.show({
+                        content: localeService.t<LocaleKey>('sheets-hyper-link-ui.message.coped'),
+                        type: MessageType.Info,
+                    });
+                    close();
+                }}
+                onEdit={() => {
+                    close();
+                    commandService.executeCommand(OpenHyperLinkEditPanelOperation.id, {
+                        unitId,
+                        subUnitId,
+                        row,
+                        col,
+                        customRangeId: customRange.rangeId,
+                        type,
+                    });
+                }}
+                onRemove={() => {
+                    const commandId = type === HyperLinkEditSourceType.EDITING
+                        ? CancelRichHyperLinkCommand.id
+                        : CancelHyperLinkCommand.id;
+                    if (commandService.syncExecuteCommand(commandId, {
+                        unitId,
+                        subUnitId,
+                        id: customRange.rangeId,
+                        row,
+                        column: col,
+                        documentId: editorBridgeService.getCurrentEditorId(),
+                    })) {
                         close();
-                    }}
-                >
-                    <span className="univer-truncate">{linkObj.name}</span>
-                </button>
-                {copyPermission && (
-                    <button
-                        type="button"
-                        className={rowClassName}
-                        disabled={isError}
-                        onClick={() => {
-                            if (linkObj.type !== SheetHyperLinkType.URL) {
-                                const url = new URL(window.location.href);
-                                url.hash = linkObj.url.slice(1);
-                                navigator.clipboard.writeText(url.href);
-                            } else {
-                                navigator.clipboard.writeText(linkObj.url);
-                            }
-                            messageService.show({
-                                content: localeService.t<LocaleKey>('sheets-hyper-link-ui.message.coped'),
-                                type: MessageType.Info,
-                            });
-                            close();
-                        }}
-                    >
-                        {localeService.t<LocaleKey>('sheets-hyper-link-ui.popup.copy')}
-                    </button>
-                )}
-                {editPermission && (
-                    <>
-                        <button
-                            type="button"
-                            className={rowClassName}
-                            onClick={() => {
-                                close();
-                                commandService.executeCommand(OpenHyperLinkEditPanelOperation.id, {
-                                    unitId,
-                                    subUnitId,
-                                    row,
-                                    col,
-                                    customRangeId: customRange.rangeId,
-                                    type,
-                                });
-                            }}
-                        >
-                            {localeService.t<LocaleKey>('sheets-hyper-link-ui.popup.edit')}
-                        </button>
-                        <button
-                            type="button"
-                            className={rowClassName}
-                            onClick={() => {
-                                const commandId = type === HyperLinkEditSourceType.EDITING
-                                    ? CancelRichHyperLinkCommand.id
-                                    : CancelHyperLinkCommand.id;
-                                if (commandService.syncExecuteCommand(commandId, {
-                                    unitId,
-                                    subUnitId,
-                                    id: customRange.rangeId,
-                                    row,
-                                    column: col,
-                                    documentId: editorBridgeService.getCurrentEditorId(),
-                                })) {
-                                    close();
-                                }
-                            }}
-                        >
-                            {localeService.t<LocaleKey>('sheets-hyper-link-ui.popup.cancel')}
-                        </button>
-                    </>
-                )}
-            </div>
+                    }
+                }}
+            />
         );
     }
 

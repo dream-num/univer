@@ -31,7 +31,7 @@ import {
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
-import { borderClassName, Button, clsx, FormLayout, Input, Select } from '@univerjs/design';
+import { ActionRow, borderClassName, Button, clsx, ConfigContext, FormLayout, Input, Select } from '@univerjs/design';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import {
@@ -52,8 +52,8 @@ import {
     UpdateRichHyperLinkCommand,
 } from '@univerjs/sheets-hyper-link';
 import { IEditorBridgeService, IMarkSelectionService, ScrollToRangeOperation } from '@univerjs/sheets-ui';
-import { IDialogService, isMobileDialogService, KeyCode, useDependency, useEvent, useObservable } from '@univerjs/ui';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { KeyCode, useDependency, useEvent, useObservable } from '@univerjs/ui';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { CloseHyperLinkPopupOperation } from '../commands/operations/popup.operations';
 import { isLegalLink, serializeUrl } from '../common/util';
 import { SheetsHyperLinkPopupService } from '../services/popup.service';
@@ -71,8 +71,7 @@ export const CellLinkEdit = () => {
     const [payload, setPayload] = useState('');
 
     const localeService = useDependency(LocaleService);
-    const dialogService = useDependency(IDialogService);
-    const mobile = isMobileDialogService(dialogService);
+    const { mobile } = useContext(ConfigContext);
     const definedNameService = useDependency(IDefinedNamesService);
     const editorBridgeService = useDependency(IEditorBridgeService);
     const univerInstanceService = useDependency(IUniverInstanceService);
@@ -573,8 +572,7 @@ export const CellLinkEdit = () => {
                     setPayload={setPayload}
                 />
             )}
-            <div
-                data-u-comp={mobile ? 'mobile-actions' : undefined}
+            <ActionRow
                 className={clsx(
                     'univer-flex univer-flex-row univer-justify-end univer-gap-2',
                     mobile && 'univer-mt-5 univer-w-full'
@@ -598,7 +596,7 @@ export const CellLinkEdit = () => {
                 >
                     {localeService.t<LocaleKey>('sheets-hyper-link-ui.form.ok')}
                 </Button>
-            </div>
+            </ActionRow>
         </div>
     );
 };

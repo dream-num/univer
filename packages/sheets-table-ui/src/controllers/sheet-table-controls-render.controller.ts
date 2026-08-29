@@ -30,6 +30,7 @@ import {
     Disposable,
     fromCallback,
     ICommandService,
+    IContextService,
     Inject,
     Injector,
     IPermissionService,
@@ -64,7 +65,7 @@ import {
     SheetCanvasPopManagerService,
     SheetSkeletonManagerService,
 } from '@univerjs/sheets-ui';
-import { IDialogService, ISidebarService, isMobileDialogService } from '@univerjs/ui';
+import { IDialogService, ISidebarService, MOBILE_UI_MODE } from '@univerjs/ui';
 import { filter, merge } from 'rxjs';
 import { openRangeSelector } from '../commands/operations/open-table-selector.operation';
 import {
@@ -122,6 +123,7 @@ export class SheetTableControlsRenderController extends Disposable implements IR
         @ISheetSelectionRenderService private readonly _selectionRenderService: ISheetSelectionRenderService,
         @Inject(SheetTableThemeUIController) private readonly _sheetTableThemeUIController: SheetTableThemeUIController,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @IContextService private readonly _contextService: IContextService,
         @IDialogService private readonly _dialogService: IDialogService,
         @ISidebarService private readonly _sidebarService: ISidebarService,
         @Inject(SheetCanvasPopManagerService) private readonly _sheetCanvasPopupService: SheetCanvasPopManagerService
@@ -352,7 +354,7 @@ export class SheetTableControlsRenderController extends Disposable implements IR
             onClose: () => this._closeFloatingControls(),
         };
 
-        if (isMobileDialogService(this._dialogService)) {
+        if (this._contextService.getContextValue(MOBILE_UI_MODE)) {
             this._dialogService.open({
                 id: SHEET_TABLE_MOBILE_MENU_DIALOG_ID,
                 title: { title: table.getDisplayName() },

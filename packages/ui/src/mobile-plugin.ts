@@ -36,6 +36,7 @@ import { ComponentManager } from './common/component-manager';
 import { IconManager } from './common/icon-manager';
 import { ZIndexManager } from './common/z-index-manager';
 import { defaultPluginConfig, UI_PLUGIN_CONFIG_KEY } from './config/config';
+import { MOBILE_UI_MODE } from './const';
 import { ComponentsController } from './controllers/components.controller';
 import { ErrorController } from './controllers/error/error.controller';
 import { FeatureSearchController } from './controllers/feature-search/feature-search.controller';
@@ -112,6 +113,7 @@ export class UniverMobileUIPlugin extends Plugin {
         if (rest.disableAutoFocus) {
             this._contextService.setContextValue(DISABLE_AUTO_FOCUS_KEY, true);
         }
+        this._contextService.setContextValue(MOBILE_UI_MODE, true);
         if (menu) {
             this._configService.setConfig('menu', menu, { merge: true });
         }

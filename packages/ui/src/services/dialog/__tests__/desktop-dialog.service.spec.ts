@@ -15,23 +15,11 @@
  */
 
 import type { IDialogPartMethodOptions } from '../../../views/components/dialog-part/interface';
-import { Injector, toDisposable } from '@univerjs/core';
-import { of } from 'rxjs';
+import { Injector } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { BuiltInUIPart, IUIPartsService, UIPartsService } from '../../parts/parts.service';
 import { DesktopDialogService } from '../desktop-dialog.service';
 import { IDialogService } from '../dialog.service';
-import { isMobileDialogService } from '../mobile-dialog.service';
-
-class CompatibleMobileDialogService extends DesktopDialogService {
-    getOverlaysSuspended$() {
-        return of(false);
-    }
-
-    suspendOverlays() {
-        return toDisposable(() => undefined);
-    }
-}
 
 function createService(): IDialogService {
     const injector = new Injector();
@@ -74,14 +62,5 @@ describe('DesktopDialogService', () => {
 
         injector.get(IDialogService);
         expect(injector.get(IUIPartsService).getComponents(BuiltInUIPart.GLOBAL).size).toBe(1);
-    });
-
-    it('recognizes a mobile dialog implementation by its public capabilities', () => {
-        const injector = new Injector();
-        injector.add([IUIPartsService, { useClass: UIPartsService }]);
-        injector.add([IDialogService, { useClass: CompatibleMobileDialogService }]);
-
-        expect(isMobileDialogService(injector.get(IDialogService))).toBe(true);
-        expect(isMobileDialogService(createService())).toBe(false);
     });
 });

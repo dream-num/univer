@@ -18,6 +18,8 @@ import './global.css';
 
 export { Accordion } from './components/accordion/Accordion';
 export type { IAccordionProps } from './components/accordion/Accordion';
+export { ActionRow } from './components/action-row/ActionRow';
+export type { IActionRowProps } from './components/action-row/ActionRow';
 export { Avatar } from './components/avatar/Avatar';
 export type { IAvatarProps } from './components/avatar/Avatar';
 export { Badge } from './components/badge/Badge';
@@ -85,6 +87,8 @@ export { KBD } from './components/kbd/Kbd';
 export type { IKBDProps } from './components/kbd/Kbd';
 export { message, Messager, MessageType, removeMessage } from './components/message/Message';
 export type { IMessageProps } from './components/message/Message';
+export { MobileActionRow } from './components/mobile-action-row/MobileActionRow';
+export type { IMobileActionRowProps } from './components/mobile-action-row/MobileActionRow';
 export { Pager } from './components/pager/Pager';
 export type { IPagerProps } from './components/pager/Pager';
 export { Panel, PanelField, PanelSection } from './components/panel/Panel';

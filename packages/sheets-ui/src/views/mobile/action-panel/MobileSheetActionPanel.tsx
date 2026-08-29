@@ -36,11 +36,9 @@ import { getPrimaryForRange, SheetsSelectionsService } from '@univerjs/sheets';
 import {
     ContextMenuGroup,
     ContextMenuPosition,
-    IDialogService,
     ILayoutService,
     IMenuManagerService,
     IRibbonService,
-    isMobileDialogService,
     MobileDrawer,
     MobileMenu,
     RibbonPosition,
@@ -146,16 +144,11 @@ export function MobileSheetActionPanel() {
     const contextService = useDependency(IContextService);
     const editorBridgeService = useDependency(IEditorBridgeService);
     const editorService = useDependency(IEditorService);
-    const dialogService = useDependency(IDialogService);
     const layoutService = useDependency(ILayoutService);
     const localeService = useDependency(LocaleService);
     const menuManagerService = useDependency(IMenuManagerService);
     const ribbonService = useDependency(IRibbonService);
     const selectionManagerService = useDependency(SheetsSelectionsService);
-    const overlaysSuspended = useObservable(
-        isMobileDialogService(dialogService) ? dialogService.getOverlaysSuspended$() : null,
-        false
-    );
     const ribbon = useObservable(ribbonService.ribbon$, []);
     const operationSchemas = useObservable(
         () => menuManagerService.menuChanged$.pipe(
@@ -362,10 +355,6 @@ export function MobileSheetActionPanel() {
 
         ensureSelectionPrimary();
         commandService.executeCommand(command.commandId, command.commandParams);
-    }
-
-    if (overlaysSuspended) {
-        return null;
     }
 
     if (editing) {

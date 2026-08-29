@@ -33,11 +33,12 @@ import {
 } from '@univerjs/engine-formula';
 import { DeleteIcon, IncreaseIcon, SelectRangeIcon } from '@univerjs/icons';
 import { SetSelectionsOperation } from '@univerjs/sheets';
-import { MobileDrawer, useDependency, useEvent } from '@univerjs/ui';
+import { useDependency, useEvent } from '@univerjs/ui';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { useStateRef } from '../formula-editor/hooks/use-state-ref';
 import { useRangesHighlight } from './hooks/use-ranges-highlight';
 import { useRangeSelectorSelectionChange } from './hooks/use-selection-change';
+import { MobileRangeSelectorDialog } from './MobileRangeSelectorDialog';
 import { rangePreProcess } from './utils/range-pre-process';
 import { verifyRange } from './utils/verify-range';
 
@@ -233,58 +234,19 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
     );
 
     if (mobile) {
-        if (!visible) return null;
-
         return (
-            <div
-                data-u-comp="mobile-range-selector"
-                className="univer-pointer-events-none univer-visible univer-fixed univer-inset-0 univer-z-[1300]"
+            <MobileRangeSelectorDialog
+                visible={visible}
+                snap={drawerSnap}
+                title={localeService.t<LocaleKey>('sheets-formula-ui.rangeSelector.title')}
+                cancelText={localeService.t<LocaleKey>('sheets-formula-ui.rangeSelector.cancel')}
+                confirmText={localeService.t<LocaleKey>('sheets-formula-ui.rangeSelector.confirm')}
+                onSnapChange={setDrawerSnap}
+                onClose={onClose}
+                onConfirm={confirmRanges}
             >
-                <MobileDrawer
-                    componentName="mobile-range-selector-drawer"
-                    snap={drawerSnap}
-                    expandLabel={localeService.t<LocaleKey>('sheets-formula-ui.rangeSelector.title')}
-                    collapseLabel={localeService.t<LocaleKey>('sheets-formula-ui.rangeSelector.title')}
-                    onSnapChange={setDrawerSnap}
-                    onClose={onClose}
-                    role="dialog"
-                    ariaLabel={localeService.t<LocaleKey>('sheets-formula-ui.rangeSelector.title')}
-                    panelClassName="
-                      univer-pointer-events-auto univer-bg-gray-0 univer-text-gray-900
-                      dark:!univer-bg-gray-900 dark:!univer-text-gray-0
-                    "
-                    contentClassName="univer-min-h-0 univer-px-4"
-                    header={(
-                        <header
-                            className="
-                              univer-flex univer-h-12 univer-flex-1 univer-items-center univer-px-4 univer-text-base
-                              univer-font-semibold
-                            "
-                        >
-                            {localeService.t<LocaleKey>('sheets-formula-ui.rangeSelector.title')}
-                        </header>
-                    )}
-                    footer={(
-                        <footer
-                            data-u-comp="mobile-actions"
-                            className="univer-box-border univer-flex univer-shrink-0 univer-gap-3 univer-p-4"
-                        >
-                            <Button className="univer-h-12 univer-min-w-0 univer-flex-1 univer-rounded-xl" onClick={onClose}>
-                                {localeService.t<LocaleKey>('sheets-formula-ui.rangeSelector.cancel')}
-                            </Button>
-                            <Button
-                                className="univer-h-12 univer-min-w-0 univer-flex-1 univer-rounded-xl"
-                                variant="primary"
-                                onClick={confirmRanges}
-                            >
-                                {localeService.t<LocaleKey>('sheets-formula-ui.rangeSelector.confirm')}
-                            </Button>
-                        </footer>
-                    )}
-                >
-                    {rangeInputs(true)}
-                </MobileDrawer>
-            </div>
+                {rangeInputs(true)}
+            </MobileRangeSelectorDialog>
         );
     }
 

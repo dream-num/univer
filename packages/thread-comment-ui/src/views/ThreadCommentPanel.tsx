@@ -21,7 +21,7 @@ import type { LocaleKey } from '../locale/types';
 import type { ThreadCommentPanelSection } from './thread-comment-panel/util';
 import type { IThreadCommentTreeProps } from './ThreadCommentTree';
 import { ICommandService, LocaleService, UniverInstanceType, UserManagerService } from '@univerjs/core';
-import { Button, Select } from '@univerjs/design';
+import { ActionRow, Button, Select } from '@univerjs/design';
 import { IncreaseIcon } from '@univerjs/icons';
 import { ThreadCommentModel } from '@univerjs/thread-comment';
 import { useDependency, useObservable } from '@univerjs/ui';
@@ -323,23 +323,22 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                         {localeService.t<LocaleKey>('thread-comment-ui.panel.empty')}
                         {isFiltering
                             ? (
-                                <div data-u-comp="mobile-actions" className="univer-mt-2 univer-flex univer-flex-row">
+                                <ActionRow className="univer-mt-2 univer-flex univer-flex-row">
                                     <Button onClick={onReset}>
                                         {localeService.t<LocaleKey>('thread-comment-ui.panel.reset')}
                                     </Button>
-                                </div>
+                                </ActionRow>
                             )
                             : !disableAdd
                                 ? (
-                                    <div
-                                        data-u-comp="mobile-actions"
+                                    <ActionRow
                                         className="univer-mt-2 univer-flex univer-flex-row"
                                     >
                                         <Button onClick={onAdd}>
                                             <IncreaseIcon className="univer-mr-1.5" />
                                             {localeService.t<LocaleKey>('thread-comment-ui.panel.addComment')}
                                         </Button>
-                                    </div>
+                                    </ActionRow>
                                 )
                                 : null}
                     </div>

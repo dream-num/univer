@@ -509,10 +509,11 @@ describe('RangeSelectorDialog', () => {
             );
         });
 
-        const picker = document.body.querySelector('[data-u-comp="mobile-range-selector"]');
+        const dialog = document.body.querySelector('[role="dialog"]');
+        const picker = dialog?.parentElement;
         expect(picker).toBeTruthy();
         expect(picker?.className).toContain('univer-pointer-events-none');
-        expect(picker?.querySelector('section')?.className).toContain('univer-pointer-events-auto');
+        expect(dialog?.className).toContain('univer-pointer-events-auto');
         const input = picker?.querySelector('input');
         expect(input).toBeInstanceOf(HTMLInputElement);
         if (!(input instanceof HTMLInputElement)) {

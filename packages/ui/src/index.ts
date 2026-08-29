@@ -23,7 +23,7 @@ export { getHeaderFooterMenuHiddenObservable, getMenuHiddenObservable } from './
 export { mergeMenuConfigs } from './common/menu-merge-configs';
 export { UI_PLUGIN_CONFIG_KEY } from './config/config';
 export type { IUniverUIConfig } from './config/config';
-export { UNI_DISABLE_CHANGING_FOCUS_KEY } from './const';
+export { MOBILE_UI_MODE, UNI_DISABLE_CHANGING_FOCUS_KEY } from './const';
 export { ErrorController } from './controllers/error/error.controller';
 export {
     CopyShortcutItem,
@@ -66,7 +66,7 @@ export { ContextMenuService, IContextMenuService } from './services/contextmenu/
 export type { IContextMenuHandler } from './services/contextmenu/contextmenu.service';
 export { DesktopDialogService } from './services/dialog/desktop-dialog.service';
 export { IDialogService } from './services/dialog/dialog.service';
-export { isMobileDialogService, MobileDialogService } from './services/dialog/mobile-dialog.service';
+export { MobileDialogService } from './services/dialog/mobile-dialog.service';
 export { CanvasFloatDomPreviewService, CanvasFloatDomService } from './services/dom/canvas-dom-layer.service';
 export type {
     ICanvasFloatDomPreview,

@@ -15,8 +15,9 @@
  */
 
 import type { ICanvasPopup } from '@univerjs/sheets-ui';
-import { DropdownMenu } from '@univerjs/design';
-import { IDialogService, isMobileDialogService, useDependency } from '@univerjs/ui';
+import { ConfigContext, DropdownMenu } from '@univerjs/design';
+import { useContext } from 'react';
+import { MobileSheetTableMenu } from './MobileSheetTableMenu';
 
 export type SheetTableMenuAction = 'rename' | 'update-range' | 'set-theme' | 'delete';
 
@@ -34,34 +35,14 @@ interface ISheetTableMenuProps {
 
 export function SheetTableMenu({ popup }: ISheetTableMenuProps) {
     const menu = popup.extraProps as unknown as ISheetTableMenuExtraProps | undefined;
-    const dialogService = useDependency(IDialogService);
+    const { mobile } = useContext(ConfigContext);
 
     if (!menu) {
         return null;
     }
 
-    if (isMobileDialogService(dialogService)) {
-        const actions: SheetTableMenuAction[] = ['rename', 'update-range', 'set-theme', 'delete'];
-        return (
-            <div className="univer-flex univer-flex-col univer-gap-2" data-u-comp="mobile-table-menu">
-                {actions.map((action) => (
-                    <button
-                        key={action}
-                        type="button"
-                        className="
-                          univer-flex univer-h-12 univer-w-full univer-items-center univer-rounded-xl univer-border-0
-                          univer-bg-gray-100 univer-px-4 univer-text-left univer-text-base univer-text-gray-900
-                          active:univer-bg-gray-200
-                          dark:!univer-bg-gray-800 dark:!univer-text-gray-0
-                          dark:active:!univer-bg-gray-700
-                        "
-                        onClick={() => menu.onSelect(action)}
-                    >
-                        {menu.labels[action]}
-                    </button>
-                ))}
-            </div>
-        );
+    if (mobile) {
+        return <MobileSheetTableMenu menu={menu} />;
     }
 
     return (

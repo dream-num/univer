@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { CommandType } from '@univerjs/core';
+import { CommandType, ContextService } from '@univerjs/core';
 import { SelectRangeCommand } from '@univerjs/sheets';
 import { DeleteSheetTableCommand } from '@univerjs/sheets-table';
 import { MoveSelectionCommand, SelectAllCommand } from '@univerjs/sheets-ui';
@@ -92,6 +92,7 @@ function createController(hasSkeleton = true, tables: ITestTable[] = []) {
         { resetSelectionsByModelData: vi.fn() } as never,
         { refreshTable$: new Subject() } as never,
         { t: (key: string) => key } as never,
+        new ContextService(),
         {} as never,
         {} as never,
         { attachPopupByPosition } as never

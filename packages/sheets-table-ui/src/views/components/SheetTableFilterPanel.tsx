@@ -19,7 +19,7 @@ import type { ITableConditionFilterItem, ITableManualFilterItem } from '@univerj
 import type { LocaleKey } from '../../locale/types';
 import type { IConditionInfo } from './type';
 import { ICommandService, IPermissionService, LocaleService } from '@univerjs/core';
-import { Button, ButtonGroup, Segmented } from '@univerjs/design';
+import { ActionRow, Button, ButtonGroup, Segmented } from '@univerjs/design';
 import {
     AscendingIcon,
     DeleteColumnDoubleIcon,
@@ -312,8 +312,7 @@ export function SheetTableFilterPanel() {
                         )}
                 </div>
             </div>
-            <div
-                data-u-comp="mobile-actions"
+            <ActionRow
                 className={`
                   univer-flex-wrap-nowrap univer-mt-4 univer-inline-flex univer-flex-shrink-0 univer-flex-grow-0
                   univer-justify-between univer-gap-6 univer-overflow-hidden
@@ -325,11 +324,11 @@ export function SheetTableFilterPanel() {
                 >
                     {localeService.t<LocaleKey>('sheets-table-ui.filter.clear-filter')}
                 </Button>
-                <div data-u-comp="mobile-actions" className="univer-flex univer-flex-1 univer-gap-x-2">
+                <ActionRow className="univer-flex univer-flex-1 univer-gap-x-2">
                     <Button onClick={onCancel}>{localeService.t<LocaleKey>('sheets-table-ui.filter.cancel')}</Button>
                     <Button variant="primary" onClick={onApply}>{localeService.t<LocaleKey>('sheets-table-ui.filter.confirm')}</Button>
-                </div>
-            </div>
+                </ActionRow>
+            </ActionRow>
         </div>
     );
 }

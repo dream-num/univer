@@ -23,6 +23,7 @@ import {
     CustomRangeType,
     Disposable,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    IContextService,
     Inject,
     Injector,
     IUniverInstanceService,
@@ -32,7 +33,7 @@ import { DocSelectionManagerService } from '@univerjs/docs';
 import { calcDocRangePositions } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { getCustomRangePosition, getEditingCustomRangePosition, IEditorBridgeService, SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
-import { IDialogService, isMobileDialogService } from '@univerjs/ui';
+import { IDialogService, MOBILE_UI_MODE } from '@univerjs/ui';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { HyperLinkEditSourceType } from '../types/enums/edit-source';
 import { CellLinkEdit } from '../views/CellLinkEdit';
@@ -109,6 +110,7 @@ export class SheetsHyperLinkPopupService extends Disposable {
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @IContextService private readonly _contextService: IContextService,
         @IDialogService private readonly _dialogService: IDialogService
     ) {
         super();
@@ -311,7 +313,7 @@ export class SheetsHyperLinkPopupService extends Disposable {
     }
 
     private _getMobileDialogService(): IDialogService | null {
-        return isMobileDialogService(this._dialogService) ? this._dialogService : null;
+        return this._contextService.getContextValue(MOBILE_UI_MODE) ? this._dialogService : null;
     }
 
     startAddEditing(link: IHyperLinkEditing) {

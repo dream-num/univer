@@ -51,8 +51,8 @@ import {
     IDialogService,
     IMenuManagerService,
     IMessageService,
-    isMobileDialogService,
     MenuItemType,
+    MOBILE_UI_MODE,
 } from '@univerjs/ui';
 import { FlipSheetDrawingCommand } from '../commands/commands/flip-drawings.command';
 import { EditSheetDrawingOperation } from '../commands/operations/edit-sheet-drawing.operation';
@@ -242,7 +242,7 @@ export class DrawingPopupMenuController extends RxDisposable {
     }
 
     private _getMobileDialogService(): IDialogService | null {
-        return isMobileDialogService(this._dialogService) ? this._dialogService : null;
+        return this._contextService.getContextValue(MOBILE_UI_MODE) ? this._dialogService : null;
     }
 
     private _getImageMenuItems(unitId: string, subUnitId: string, drawingId: string, drawingType: number) {

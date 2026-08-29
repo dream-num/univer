@@ -129,7 +129,6 @@ describe('Sidebar', () => {
 
         const drawer = screen.getByRole('dialog', { name: 'Sidebar panel' });
         expect(drawer.className).toContain('univer-bottom-0');
-        expect(drawer.className).toContain("[&_[data-u-comp='mobile-actions']>button]:!univer-h-12");
         expect(screen.getByText('Comment list')).toBeTruthy();
 
         fireEvent.click(screen.getAllByRole('button', { name: 'Close sidebar' })[0]);

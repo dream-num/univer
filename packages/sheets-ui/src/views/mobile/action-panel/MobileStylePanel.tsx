@@ -16,10 +16,9 @@
 
 import type { IBorderInfo } from '@univerjs/sheets';
 import type { IDisplayMenuItem, IFontConfig, IMenuItem, IMenuSchema, IMenuSelectorItem, IValueOption, MenuItemDefaultValueType } from '@univerjs/ui';
-import type { ReactNode } from 'react';
 import type { LocaleKey } from '../../../locale/types';
 import { BorderStyleTypes, BorderType, LocaleService, ThemeService } from '@univerjs/core';
-import { borderBottomClassName, clsx, ColorPickerPanel, MobileColorPresets, resetButtonClassName } from '@univerjs/design';
+import { borderBottomClassName, clsx, ColorPickerPanel, MobileActionRow, MobileColorPresets, resetButtonClassName } from '@univerjs/design';
 import { CheckMarkIcon, MoreRightIcon, NoColorDoubleIcon } from '@univerjs/icons';
 import {
     AddWorksheetMergeCommand,
@@ -1373,57 +1372,6 @@ function MobileBorderStyleView(props: {
                 </button>
             ))}
         </div>
-    );
-}
-
-function MobileActionRow(props: {
-    title: string;
-    icon?: ReactNode;
-    value?: string;
-    valueType?: 'color' | 'text';
-    trailing?: ReactNode;
-    bordered?: boolean;
-    onClick: () => void;
-}) {
-    const { title, icon, value, valueType = 'color', trailing, bordered, onClick } = props;
-
-    return (
-        <button
-            type="button"
-            aria-label={title}
-            className={clsx(resetButtonClassName, `
-              univer-flex univer-min-h-12 univer-w-full univer-items-center univer-gap-3 univer-rounded-xl
-              univer-bg-gray-0 univer-px-4 univer-text-left univer-text-base univer-font-medium univer-text-gray-900
-              active:univer-bg-gray-100
-              dark:!univer-bg-gray-800 dark:!univer-text-gray-100
-              dark:active:!univer-bg-gray-700
-              [&>svg]:univer-size-5
-            `, bordered && borderBottomClassName)}
-            onClick={onClick}
-        >
-            {icon}
-            <span className="univer-flex-1">{title}</span>
-            {value && valueType === 'color' && (
-                <span
-                    className="
-                      univer-size-6 univer-rounded-md univer-border univer-border-solid univer-border-gray-200
-                      dark:!univer-border-gray-600
-                    "
-                    style={{ backgroundColor: value }}
-                />
-            )}
-            {value && valueType === 'text' && (
-                <span
-                    className="
-                      univer-max-w-32 univer-truncate univer-text-sm univer-font-normal univer-text-gray-500
-                      dark:!univer-text-gray-400
-                    "
-                >
-                    {value}
-                </span>
-            )}
-            {trailing}
-        </button>
     );
 }
 

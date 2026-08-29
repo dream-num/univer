@@ -27,8 +27,8 @@ import {
     LocaleService,
     ThemeService,
 } from '@univerjs/core';
-import { borderBottomClassName, borderRightClassName, clsx, resetButtonClassName } from '@univerjs/design';
-import { IEditorService, MobileRichTextToolbar } from '@univerjs/docs-ui';
+import { borderBottomClassName, borderRightClassName, clsx } from '@univerjs/design';
+import { IEditorService } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { CheckMarkIcon, CloseIcon, DownIcon, FxIcon } from '@univerjs/icons';
 import { UnitAction } from '@univerjs/protocol';
@@ -58,7 +58,6 @@ import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY } from '../../common/keys';
 import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import {
     MOBILE_FORMULA_BAR_SUBMIT_COMMAND_ID,
-    MOBILE_FORMULA_OPERATOR_BAR_HEIGHT,
     MOBILE_FORMULA_OPERATORS_VISIBLE,
 } from '../../consts/mobile-context';
 import { SheetsUIPart } from '../../consts/ui-name';
@@ -67,6 +66,7 @@ import { IFormulaEditorManagerService } from '../../services/editor/formula-edit
 import { DefinedName } from '../defined-name/DefinedName';
 import { useKeyEventConfig } from '../editor-container/hooks';
 import { useActiveWorkbook } from '../hook';
+import { MobileFormulaBarActions, MobileFormulaBarOverlays } from '../mobile/formula-bar/MobileFormulaBarControls';
 
 enum ArrowDirection {
     Down,
@@ -80,22 +80,6 @@ interface IProps {
     expanded?: boolean;
     onExpandedChange?: (expanded: boolean) => void;
 }
-
-const MOBILE_FORMULA_OPERATORS = [
-    { label: '+', value: '+' },
-    { label: '−', value: '-' },
-    { label: '×', value: '*' },
-    { label: '÷', value: '/' },
-    { label: '=', value: '=' },
-    { label: '>', value: '>' },
-    { label: '<', value: '<' },
-    { label: ',', value: ',' },
-    { label: ':', value: ':' },
-    { label: '(', value: '(' },
-    { label: ')', value: ')' },
-    { label: '&', value: '&' },
-    { label: '!', value: '!' },
-] as const;
 
 const MIN_EDITOR_TEXT_CONTRAST = 4.5;
 
@@ -428,79 +412,30 @@ export function FormulaBar(props: IProps) {
             <div className="univer-relative univer-box-border univer-h-full univer-w-[100px]">
                 <DefinedName disable={disableDefinedName ?? editDisable} />
             </div>
-            {mobileFormulaOperatorsVisible && (
-                <div
-                    data-u-comp="mobile-formula-operators"
-                    className="
-                      univer-absolute univer-inset-x-0 univer-bottom-full univer-z-20 univer-box-border univer-flex
-                      univer-items-center univer-gap-0 univer-overflow-x-auto univer-bg-gray-0 univer-px-0
-                      univer-shadow-[0_-4px_12px_rgba(0,0,0,0.08)]
-                      dark:!univer-bg-gray-800
-                    "
-                    style={{ height: MOBILE_FORMULA_OPERATOR_BAR_HEIGHT, scrollbarWidth: 'none', touchAction: 'pan-x' }}
-                >
-                    {MOBILE_FORMULA_OPERATORS.map((operator) => (
-                        <button
-                            key={operator.label}
-                            type="button"
-                            className="
-                              univer-flex univer-size-8 univer-shrink-0 univer-appearance-none univer-items-center
-                              univer-justify-center univer-rounded-lg univer-border-0 univer-bg-transparent univer-p-0
-                              univer-text-base univer-font-medium univer-text-gray-800 univer-outline-none
-                              active:univer-scale-95 active:univer-bg-primary-100 active:univer-text-primary-700
-                              dark:!univer-text-gray-100
-                              dark:active:!univer-bg-primary-900
-                            "
-                            onPointerDown={(event) => {
-                                event.stopPropagation();
-                            }}
-                            onClick={() => setMobileOperatorRequest(({ id }) => ({ id: id + 1, value: operator.value }))}
-                        >
-                            {operator.label}
-                        </button>
-                    ))}
-                </div>
-            )}
-            {mobile && isExpanded && !mobileFormulaActive && (
-                <MobileRichTextToolbar
+            {mobile && (
+                <MobileFormulaBarOverlays
+                    expanded={isExpanded}
+                    formulaActive={mobileFormulaActive}
+                    operatorsVisible={mobileFormulaOperatorsVisible}
                     editorId={DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY}
-                    className="univer-absolute univer-inset-x-0 univer-top-12 univer-z-20"
+                    onOperator={(value) => setMobileOperatorRequest(({ id }) => ({ id: id + 1, value }))}
                 />
             )}
 
             <div className="univer-flex univer-size-full">
-                {mobile && isExpanded
+                {mobile
                     ? (
-                        <div
-                            data-u-comp="formula-bar-actions"
-                            className="
-                              univer-absolute univer-inset-x-0 univer-top-0 univer-z-30 univer-grid univer-h-12
-                              univer-grid-cols-4 univer-gap-1 univer-bg-gray-0 univer-px-1
-                              dark:!univer-bg-gray-800
-                            "
-                        >
-                            {[
-                                { label: localeService.t<LocaleKey>('sheets-ui.button.cancel'), icon: <CloseIcon />, onClick: handleCloseBtnClick, color: 'univer-text-red-600 dark:!univer-text-red-400' },
-                                { label: localeService.t<LocaleKey>('sheets-ui.button.confirm'), icon: <CheckMarkIcon />, onClick: handleConfirmBtnClick, color: 'univer-text-green-600 dark:!univer-text-green-400' },
-                                { label: localeService.t<LocaleKey>('sheets-ui.mobile.formula'), icon: <FxIcon />, onClick: handlerFxBtnClick, color: 'univer-text-gray-700 dark:!univer-text-gray-100' },
-                                { label: localeService.t<LocaleKey>('sheets-ui.mobile.collapseEditor'), icon: <DownIcon />, onClick: handleArrowClick, color: 'univer-text-gray-700 dark:!univer-text-gray-100' },
-                            ].map((action) => (
-                                <button
-                                    key={action.label}
-                                    type="button"
-                                    aria-label={action.label}
-                                    className={clsx(resetButtonClassName, `
-                                      univer-flex univer-h-full univer-items-center univer-justify-center
-                                      univer-rounded-lg univer-text-xl
-                                      active:univer-scale-95 active:univer-bg-gray-100
-                                      dark:active:!univer-bg-gray-700
-                                    `, action.color)}
-                                    onClick={action.onClick}
-                                >
-                                    {action.icon}
-                                </button>
-                            ))}
-                        </div>
+                        <MobileFormulaBarActions
+                            expanded={isExpanded}
+                            cancelLabel={localeService.t<LocaleKey>('sheets-ui.button.cancel')}
+                            confirmLabel={localeService.t<LocaleKey>('sheets-ui.button.confirm')}
+                            formulaLabel={localeService.t<LocaleKey>('sheets-ui.mobile.formula')}
+                            collapseLabel={localeService.t<LocaleKey>('sheets-ui.mobile.collapseEditor')}
+                            onCancel={handleCloseBtnClick}
+                            onConfirm={handleConfirmBtnClick}
+                            onFormula={handlerFxBtnClick}
+                            onCollapse={handleArrowClick}
+                        />
                     )
                     : (
                         <div

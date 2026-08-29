@@ -19,11 +19,10 @@ import type { LocaleKey } from '../../../locale/types';
 import type { MobileDrawerSnap } from '../mobile-drawer/MobileDrawer';
 import type { IDialogPartMethodOptions } from './interface';
 import { LocaleService } from '@univerjs/core';
-import { clsx } from '@univerjs/design';
+import { ActionRow } from '@univerjs/design';
 import { CloseIcon } from '@univerjs/icons';
 import { useMemo, useState } from 'react';
 import { IDialogService } from '../../../services/dialog/dialog.service';
-import { isMobileDialogService } from '../../../services/dialog/mobile-dialog.service';
 import { useDependency, useObservable } from '../../../utils/di';
 import { CustomLabel } from '../../custom-label/CustomLabel';
 import { MobileDrawer } from '../mobile-drawer/MobileDrawer';
@@ -48,10 +47,6 @@ export function MobileDialogPart() {
     const dialogService = useDependency(IDialogService);
     const localeService = useDependency(LocaleService);
     const dialogOptions = useObservable(dialogService.getDialogs$(), []);
-    const overlaysSuspended = useObservable(
-        isMobileDialogService(dialogService) ? dialogService.getOverlaysSuspended$() : null,
-        false
-    );
     const options = useMemo(() => {
         const activeDialogs = dialogOptions.filter((item) => item.open !== false);
         const active = activeDialogs[activeDialogs.length - 1];
@@ -68,14 +63,7 @@ export function MobileDialogPart() {
     };
 
     return (
-        <div
-            className={clsx(
-                'univer-fixed univer-inset-0 univer-z-[1200]',
-                overlaysSuspended && 'univer-pointer-events-none univer-invisible'
-            )}
-            data-u-comp="mobile-dialog"
-            data-suspended={overlaysSuspended || undefined}
-        >
+        <div className="univer-fixed univer-inset-0 univer-z-[1200]" data-u-comp="mobile-dialog">
             <button
                 type="button"
                 aria-label={localeService.t<LocaleKey>('ui.sidebar.close')}
@@ -96,14 +84,6 @@ export function MobileDialogPart() {
                 panelClassName="
                   univer-bg-gray-0 univer-text-gray-900
                   dark:!univer-bg-gray-900 dark:!univer-text-gray-0
-                  [&_[data-u-comp='mobile-actions']>button]:!univer-m-0
-                  [&_[data-u-comp='mobile-actions']>button]:!univer-h-12
-                  [&_[data-u-comp='mobile-actions']>button]:!univer-min-w-0
-                  [&_[data-u-comp='mobile-actions']>button]:!univer-flex-1
-                  [&_[data-u-comp='mobile-actions']>button]:!univer-rounded-xl
-                  [&_[data-u-comp='mobile-actions']]:!univer-flex [&_[data-u-comp='mobile-actions']]:!univer-w-full
-                  [&_[data-u-comp='mobile-actions']]:!univer-justify-stretch
-                  [&_[data-u-comp='mobile-actions']]:!univer-gap-3
                 "
                 contentClassName="univer-min-h-0 univer-px-4 univer-pb-4"
                 header={(
@@ -135,14 +115,13 @@ export function MobileDialogPart() {
                 footer={options.footer
                     ? (
                         <footer
-                            data-u-comp="mobile-actions"
                             className="
                               univer-shrink-0 univer-border-0 univer-border-t univer-border-solid univer-border-gray-200
                               univer-p-4
                               dark:!univer-border-gray-700
                             "
                         >
-                            {options.footer}
+                            <ActionRow>{options.footer}</ActionRow>
                         </footer>
                     )
                     : undefined}

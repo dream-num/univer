@@ -46,7 +46,7 @@ import {
     getRuleSetting,
     TWO_FORMULA_OPERATOR_COUNT,
 } from '@univerjs/data-validation';
-import { Button, Checkbox, FormLayout, Select } from '@univerjs/design';
+import { ActionRow, Button, Checkbox, FormLayout, Select } from '@univerjs/design';
 import { deserializeRangeWithSheet, serializeRange } from '@univerjs/engine-formula';
 import { SetWorksheetActiveOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import {
@@ -417,14 +417,14 @@ function DataValidationDetailInner(props: { activeRuleInfo: { unitId: string; su
                 </Checkbox>
             </FormLayout>
             <DataValidationOptions value={options} onChange={handleUpdateRuleOptions} extraComponent={validator.optionsInput} />
-            <div data-u-comp="mobile-actions" className="univer-mt-5 univer-flex univer-flex-row univer-justify-end">
+            <ActionRow className="univer-mt-5 univer-flex univer-flex-row univer-justify-end">
                 <Button className="univer-ml-3" onClick={handleDelete}>
                     {localeService.t<LocaleKey>('sheets-data-validation-ui.panel.removeRule')}
                 </Button>
                 <Button className="univer-ml-3" variant="primary" onClick={handleOk}>
                     {localeService.t<LocaleKey>('sheets-data-validation-ui.panel.done')}
                 </Button>
-            </div>
+            </ActionRow>
         </div>
     );
 }

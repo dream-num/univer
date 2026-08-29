@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { IDisposable } from '@univerjs/core';
 import type { ReactElement } from 'react';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { DesktopLogService, ILogService, Injector, LocaleService, LocaleType } from '@univerjs/core';
@@ -23,7 +22,7 @@ import { ComponentManager, IconManager } from '../../../../common';
 import enUS from '../../../../locale/en-US';
 import { DesktopDialogService } from '../../../../services/dialog/desktop-dialog.service';
 import { IDialogService } from '../../../../services/dialog/dialog.service';
-import { isMobileDialogService, MobileDialogService } from '../../../../services/dialog/mobile-dialog.service';
+import { MobileDialogService } from '../../../../services/dialog/mobile-dialog.service';
 import { IUIPartsService, UIPartsService } from '../../../../services/parts/parts.service';
 import { RediProvider } from '../../../../utils/di';
 import { MobileDialogPart } from '../MobileDialogPart';
@@ -73,7 +72,6 @@ describe('MobileDialogPart', () => {
         expect(screen.getByText('Range selector')).toBeTruthy();
         expect(screen.getByText('Second')).toBeTruthy();
         expect(screen.getByText('Actions')).toBeTruthy();
-        expect(screen.getByText('Actions').closest('[data-u-comp="mobile-actions"]')).toBeTruthy();
     });
 
     it('closes with the close button and invokes dialog callbacks', () => {
@@ -129,37 +127,5 @@ describe('MobileDialogPart', () => {
         expect(() => fireEvent.click(screen.getAllByRole('button', { name: 'Close sidebar' })[1])).not.toThrow();
         expect(onClose).toHaveBeenCalledOnce();
         expect(screen.queryByRole('dialog')).toBeNull();
-    });
-
-    it('suspends mobile dialogs without unmounting their business state', () => {
-        const rendered = renderWithDependencies(<MobileDialogPart />, true);
-        const dialogService = rendered.injector.get(IDialogService);
-        if (!isMobileDialogService(dialogService)) throw new Error('Expected the mobile dialog service.');
-
-        act(() => {
-            dialogService.open({
-                id: 'table-selector',
-                children: { title: <span>Preserved table selector</span> },
-            });
-        });
-
-        let firstSuspension!: IDisposable;
-        let secondSuspension!: IDisposable;
-        act(() => {
-            firstSuspension = dialogService.suspendOverlays();
-            secondSuspension = dialogService.suspendOverlays();
-        });
-        const dialogRoot = rendered.container.querySelector('[data-u-comp="mobile-dialog"]');
-
-        expect(dialogRoot?.getAttribute('data-suspended')).toBe('true');
-        expect(dialogRoot?.className).toContain('univer-invisible');
-        expect(screen.getByText('Preserved table selector')).toBeTruthy();
-
-        act(() => firstSuspension.dispose());
-        expect(dialogRoot?.getAttribute('data-suspended')).toBe('true');
-
-        act(() => secondSuspension.dispose());
-        expect(dialogRoot?.getAttribute('data-suspended')).toBeNull();
-        expect(screen.getByText('Preserved table selector')).toBeTruthy();
     });
 });

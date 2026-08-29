@@ -56,7 +56,7 @@ import {
 import { ComponentManager, ILayoutService, IUIPartsService, KeyCode, RediContext, UIPartsService } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, EMPTY } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { SetCellEditVisibleOperation } from '../../../commands/operations/cell-edit.operation';
 import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY } from '../../../common/keys';
@@ -171,6 +171,8 @@ class TestEditorBridgeService implements IEditorBridgeService {
 }
 
 const testFormulaEditor = {
+    input$: EMPTY,
+    selectionChange$: EMPTY,
     getDocumentData: (): IDocumentData => ({
         id: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
         body: { dataStream: 'Existing\r\n' },

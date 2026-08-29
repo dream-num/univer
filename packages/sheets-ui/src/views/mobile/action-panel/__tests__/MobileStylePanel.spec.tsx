@@ -440,8 +440,11 @@ describe('MobileStylePanel', () => {
             element.textContent?.includes('Text rotation'));
         expect(rotationButton?.textContent).toContain('No rotation');
         mergeChildren.forEach(([, title]) => expect(getButton(rendered.container, title)).toBeTruthy());
-        ['Percent', 'Currency', 'Date', 'Text', 'Decrease decimal', 'Increase decimal', 'More formats']
+        ['Percent', 'Currency', 'Date', 'Text', 'Decrease decimal', 'Increase decimal']
             .forEach((title) => expect(getButton(rendered.container, title)).toBeTruthy());
+        const moreFormatsButton = Array.from(rendered.container.querySelectorAll('button')).find((element) =>
+            element.textContent?.includes('More formats'));
+        expect(moreFormatsButton).toBeTruthy();
 
         const expectedCommands: Array<[string, { id: string; value?: string }]> = [
             ['Percent', { id: 'percent' }],
@@ -454,7 +457,7 @@ describe('MobileStylePanel', () => {
         ];
         expectedCommands.forEach(([label]) => clickButton(rendered.container, label));
         expect(onExecute.mock.calls.map(([command]) => command)).toEqual(expectedCommands.map(([, command]) => command));
-        clickButton(rendered.container, 'More formats');
+        act(() => moreFormatsButton?.dispatchEvent(new MouseEvent('click', { bubbles: true })));
         expect(onOpenView).toHaveBeenCalledWith(expect.objectContaining({ kind: 'number-format' }));
     });
 

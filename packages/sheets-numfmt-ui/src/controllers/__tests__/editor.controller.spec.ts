@@ -106,6 +106,41 @@ describe('test editor', () => {
         expect(result!.t).toEqual(2);
     });
 
+    it('before edit with a conditional text format uses the raw value', () => {
+        const params: ISetNumfmtMutationParams = {
+            unitId,
+            subUnitId,
+            values: {
+                1: {
+                    ranges: [{ startRow: 0, endRow: 0, startColumn: 1, endColumn: 1 }],
+                },
+            },
+            refMap: {
+                1: {
+                    pattern: '[>0]"A";[<0]"B";"B"',
+                },
+            },
+        };
+        commandService.syncExecuteCommand(SetNumfmtMutation.id, params);
+        const sheetInterceptorService = testBed.get(SheetInterceptorService);
+        const cellData = worksheet.getCell(0, 1);
+        const location = {
+            workbook,
+            worksheet,
+            unitId,
+            subUnitId,
+            row: 0,
+            col: 1,
+            origin: cellData,
+        };
+
+        expect(cellData!.v).toBe('A');
+
+        const result = sheetInterceptorService.writeCellInterceptor.fetchThroughInterceptors(BEFORE_CELL_EDIT)(cellData, location);
+        expect(result!.v).toBe(1);
+        expect(result!.t).toBe(CellValueType.NUMBER);
+    });
+
     it('before edit with data', () => {
         const params: ISetNumfmtMutationParams = {
             unitId,

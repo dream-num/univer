@@ -436,7 +436,9 @@ describe('MobileStylePanel', () => {
         container = rendered.container;
 
         expect(rendered.container.textContent).not.toContain('Shrink to fit');
-        expect(getButton(rendered.container, 'Text rotation').textContent).toContain('No rotation');
+        const rotationButton = Array.from(rendered.container.querySelectorAll('button')).find((element) =>
+            element.textContent?.includes('Text rotation'));
+        expect(rotationButton?.textContent).toContain('No rotation');
         mergeChildren.forEach(([, title]) => expect(getButton(rendered.container, title)).toBeTruthy());
         ['Percent', 'Currency', 'Date', 'Text', 'Decrease decimal', 'Increase decimal', 'More formats']
             .forEach((title) => expect(getButton(rendered.container, title)).toBeTruthy());

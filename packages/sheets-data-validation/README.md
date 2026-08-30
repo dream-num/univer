@@ -10,7 +10,7 @@
 
 | Package | UMD global | CSS | Locales | Facade entry |
 | --- | --- | :---: | :---: | :---: |
-| `@univerjs/sheets-data-validation` | `UniverSheetsDataValidation` | No | No | Yes |
+| `@univerjs/sheets-data-validation` | `UniverSheetsDataValidation` | No | Yes | Yes |
 
 ## Installation
 
@@ -25,7 +25,16 @@ Keep all `@univerjs/*` packages on the same version.
 ## Usage
 
 ```ts
+import { LocaleType, mergeLocales, Univer } from '@univerjs/core';
 import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validation';
+import EnUS from '@univerjs/sheets-data-validation/locale/en-US';
+
+const univer = new Univer({
+    locale: LocaleType.EN_US,
+    locales: {
+        [LocaleType.EN_US]: mergeLocales(EnUS),
+    },
+});
 
 univer.registerPlugin(UniverSheetsDataValidationPlugin);
 ```
@@ -39,4 +48,3 @@ Use this package with `@univerjs/sheets-data-validation-ui` when users need vali
 - [Documentation](https://docs.univer.ai)
 - [NPM package](https://npmjs.com/package/@univerjs/sheets-data-validation)
 - [GitHub repository](https://github.com/dream-num/univer)
-

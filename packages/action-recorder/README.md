@@ -39,4 +39,3 @@ univer.registerPlugin(UniverActionRecorderPlugin);
 - [Documentation](https://docs.univer.ai)
 - [NPM package](https://npmjs.com/package/@univerjs/action-recorder)
 - [GitHub repository](https://github.com/dream-num/univer)
-

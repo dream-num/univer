@@ -24,6 +24,7 @@ import {
     DocumentFlavor,
     GridType,
     HorizontalAlign,
+    ListGlyphType,
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     PositionedObjectLayoutType,
@@ -1362,6 +1363,60 @@ describe('linebreaking', () => {
         const result = lineBreaking(ctx, viewModel, shapedTextList, curPage, paragraphNode, sectionBreakConfig, null);
 
         expect(result.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('continues numbering when the first paragraph starts at a deeper level', () => {
+        const { viewModel, ctx, sectionNode, sectionBreakConfig, curPage } = createSectionLayoutTestBed(
+            ['Section', 'Article', 'Article', 'Article'],
+            {
+                body: {
+                    paragraphs: [
+                        { startIndex: 7, bullet: { listId: 'list-1', listType: 'legal-list', nestingLevel: 1 } },
+                        { startIndex: 15, bullet: { listId: 'list-1', listType: 'legal-list', nestingLevel: 0 } },
+                        { startIndex: 23, bullet: { listId: 'list-1', listType: 'legal-list', nestingLevel: 0 } },
+                        { startIndex: 31, bullet: { listId: 'list-1', listType: 'legal-list', nestingLevel: 0 } },
+                    ],
+                },
+                lists: {
+                    'legal-list': {
+                        listType: 'legal-list',
+                        nestingLevel: [
+                            {
+                                glyphFormat: 'Article %1.',
+                                glyphType: ListGlyphType.UPPER_ROMAN,
+                                startNumber: 0,
+                                bulletAlignment: 1,
+                            },
+                            {
+                                glyphFormat: 'Section %1.%2',
+                                glyphType: ListGlyphType.DECIMAL_ZERO,
+                                startNumber: 0,
+                                bulletAlignment: 1,
+                                isLegal: true,
+                            },
+                        ],
+                    },
+                },
+            }
+        );
+
+        let page = curPage;
+        const symbols: string[] = [];
+        for (const paragraphNode of sectionNode.children) {
+            const pages = lineBreaking(
+                ctx,
+                viewModel,
+                shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig),
+                page,
+                paragraphNode,
+                sectionBreakConfig,
+                null
+            );
+            page = pages[pages.length - 1];
+            symbols.push(ctx.paragraphConfigCache.get(page.segmentId)?.get(paragraphNode.endIndex)?.bulletSkeleton?.symbol ?? '');
+        }
+
+        expect(symbols).toEqual(['Section 1.01', 'Article II.', 'Article III.', 'Article IV.']);
     });
 
     it('aligns wrapped list lines with the body text after the hanging marker', () => {

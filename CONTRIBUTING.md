@@ -61,10 +61,12 @@ The structure of the repository is as follows:
 
 ```txt
 .
-├── common/ shared configuration and utilities
+├── common/ shared configuration, mock data, Storybook, and utilities
 ├── docs/ documentation
 ├── examples/ all-in-one Vite workbench for browser development
 ├── packages/ Univer core and plugins
+├── presets/ curated plugin collections
+└── tests/ additional integration test projects
 ```
 
 The file structure of a plugin should be organized as follows:
@@ -135,7 +137,7 @@ Please refer to [Univer Naming Convention](./docs/NAMING_CONVENTION.md).
 
 Before merging a pull request, please make sure the following requirements are met:
 
-- All tests are passed. ESLint and Prettier errors are fixed.
+- All tests pass. ESLint, including its formatting checks, passes.
 - Test coverage is not decreased.
 
 We provide preview deployments for pull requests. You can view the preview deployment by clicking the "Preview" link in the "View Deployment" section.
@@ -166,7 +168,7 @@ To ensure the quality of the code and move with confidence, we require that all 
 pnpm test
 ```
 
-Also, with the help of vscode and its rich ecosystem, you could directly debug unit tests in vscode. Please install the extension we recommend, and you will see the debug button in the side bar. In addition, if you add a new plugin, you should update `vitest.workspace.js` to include the new plugin.
+Also, with the help of vscode and its rich ecosystem, you could directly debug unit tests in vscode. Please install the extension we recommend, and you will see the debug button in the side bar. The `packages/*` glob in `vitest.workspace.ts` automatically includes new plugins created under `packages/`.
 
 ![vitest](./docs/img/vitest.png)
 
@@ -176,11 +178,11 @@ Also, with the help of vscode and its rich ecosystem, you could directly debug u
 
 ### Build Preview
 
-After building, the output may differ from the source code. To test for any differences, you can link to the built artifacts using:
+Build the production artifacts to check for differences between the source and compiled output:
 
 ```shell
 pnpm build
-pnpm dev:libs
+pnpm dev:umd
 ```
 
 ### Clean code

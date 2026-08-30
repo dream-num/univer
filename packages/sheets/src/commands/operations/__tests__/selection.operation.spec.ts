@@ -95,6 +95,25 @@ describe('selection.operation', () => {
         expect(refSelectionService.setSelections).toHaveBeenCalledWith('unit-1', 'sheet-1', [], undefined);
     });
 
+    it('SetSelectionsOperation can target the current sheet selection while in ref mode', () => {
+        const sheetSelectionService = { setSelections: vi.fn() };
+        const refSelectionService = { setSelections: vi.fn() };
+        const accessor = createAccessor(new Map<unknown, unknown>([
+            [IContextService, { getContextValue: vi.fn(() => true) }],
+            [SheetsSelectionsService, sheetSelectionService],
+            [IRefSelectionsService, refSelectionService],
+        ]));
+
+        expect(SetSelectionsOperation.handler(accessor, {
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
+            selections: [],
+            fromCurrentSelection: true,
+        })).toBe(true);
+        expect(sheetSelectionService.setSelections).toHaveBeenCalledWith('unit-1', 'sheet-1', [], undefined);
+        expect(refSelectionService.setSelections).not.toHaveBeenCalled();
+    });
+
     it('SelectRangeCommand returns false without params or target', () => {
         const commandService = {
             syncExecuteCommand: vi.fn(),

@@ -39,4 +39,3 @@ univer.registerPlugin(UniverSheetsHyperLinkUIPlugin);
 - [Documentation](https://docs.univer.ai)
 - [NPM package](https://npmjs.com/package/@univerjs/sheets-hyper-link-ui)
 - [GitHub repository](https://github.com/dream-num/univer)
-

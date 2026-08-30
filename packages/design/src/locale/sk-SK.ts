@@ -21,6 +21,7 @@ const locale: typeof enUS = {
         Accessibility: {
             closeBadge: 'Zavrieť odznak',
             close: 'Zavrieť',
+            menu: 'Ponuka',
             previous: 'Predchádzajúci',
             next: 'Nasledujúci',
             imageGallery: 'Galéria obrázkov',

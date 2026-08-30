@@ -29,10 +29,10 @@ import {
     CFValueType,
     IIconSetType,
 } from '@univerjs/sheets-conditional-formatting';
-import { IContextMenuService, ILayoutService, IShortcutService, RediContext } from '@univerjs/ui';
+import { IContextMenuService, IDialogService, ILayoutService, IShortcutService, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
-import { Subject } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { afterEach, describe, expect, it } from 'vitest';
 import { createCfUiTestBed } from '../../../../__tests__/create-cf-ui-test-bed';
 import enUS from '../../../../locale/en-US';
@@ -87,6 +87,20 @@ class TestDescriptionService {
     }
 }
 
+class TestDialogService {
+    open() {
+        return { dispose: () => {} };
+    }
+
+    close(): void {}
+
+    closeAll(): void {}
+
+    getDialogs$() {
+        return of([]);
+    }
+}
+
 class TestRefSelectionsService {
     setSelections(): void {}
 
@@ -111,6 +125,7 @@ function createEditorTestBed() {
     testBed.injector.add([IEditorService, { useClass: TestEditorService as never }]);
     testBed.injector.add([IRenderManagerService, { useClass: TestRenderManagerService as never }]);
     testBed.injector.add([IDescriptionService, { useClass: TestDescriptionService as never }]);
+    testBed.injector.add([IDialogService, { useClass: TestDialogService }]);
     testBed.injector.add([IRefSelectionsService, { useClass: TestRefSelectionsService as never }]);
     testBed.injector.add([IShortcutService, { useClass: TestShortcutService as never }]);
     testBed.injector.add([IContextMenuService, { useClass: TestContextMenuService as never }]);

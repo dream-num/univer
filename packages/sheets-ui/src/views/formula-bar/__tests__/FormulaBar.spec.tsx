@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IWorkbookData, Nullable, Workbook } from '@univerjs/core';
+import type { IDocumentData, IStyleData, IWorkbookData, Nullable, Workbook } from '@univerjs/core';
 import type { ReactElement } from 'react';
 import type { Root } from 'react-dom/client';
 import type {
@@ -24,10 +24,13 @@ import type {
     IEditorBridgeServiceVisibleParam,
 } from '../../../services/editor-bridge.service';
 import {
+    CommandType,
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     ICommandService,
     IConfigService,
     IUniverInstanceService,
+    LocaleService,
     LocaleType,
     Univer,
     UniverInstanceType,
@@ -53,13 +56,16 @@ import {
 import { ComponentManager, ILayoutService, IUIPartsService, KeyCode, RediContext, UIPartsService } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
-import { BehaviorSubject } from 'rxjs';
-import { afterEach, describe, expect, it } from 'vitest';
+import { BehaviorSubject, EMPTY } from 'rxjs';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { SetCellEditVisibleOperation } from '../../../commands/operations/cell-edit.operation';
 import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY } from '../../../common/keys';
 import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../../config/config';
+import { MOBILE_FORMULA_BAR_SUBMIT_COMMAND_ID } from '../../../consts/mobile-context';
+import enUS from '../../../locale/en-US';
 import { IEditorBridgeService } from '../../../services/editor-bridge.service';
 import { FormulaEditorManagerService, IFormulaEditorManagerService } from '../../../services/editor/formula-editor-manager.service';
+import { MobileFormulaBar } from '../../mobile/formula-bar/MobileFormulaBar';
 import { FormulaBar } from '../FormulaBar';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -103,7 +109,7 @@ class TestEditorBridgeService implements IEditorBridgeService {
         this._currentEditCellState$.next(state);
     }
 
-    refreshEditCellState(): void {}
+    readonly refreshEditCellState = vi.fn();
     refreshEditCellPosition(): void {}
     setEditCell(): void {}
     getEditCellState(): Readonly<Nullable<IEditorBridgeServiceParam>> {
@@ -164,9 +170,29 @@ class TestEditorBridgeService implements IEditorBridgeService {
     }
 }
 
+const testFormulaEditor = {
+    input$: EMPTY,
+    selectionChange$: EMPTY,
+    getDocumentData: (): IDocumentData => ({
+        id: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+        body: { dataStream: 'Existing\r\n' },
+        documentStyle: {},
+    }),
+    getSelectionRanges: () => [],
+    setSelectionRanges: vi.fn(),
+};
+
 class TestEditorService {
     readonly focusedEditorIds: string[] = [];
     readonly blurHistory: boolean[] = [];
+
+    getEditor(editorId: string) {
+        return editorId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY ? testFormulaEditor : null;
+    }
+
+    getFocusId(): null {
+        return null;
+    }
 
     focus(editorId: string): void {
         this.focusedEditorIds.push(editorId);
@@ -181,11 +207,14 @@ class TestLayoutService {
     focus(): void {}
 }
 
-function TestFormulaEditor(props: { editorId: string; unitId?: string }) {
+function TestFormulaEditor(props: {
+    editorId: string;
+    unitId?: string;
+}) {
     return <div data-editor-id={props.editorId} data-unit-id={props.unitId} />;
 }
 
-function createWorkbookData(): IWorkbookData {
+function createWorkbookData(cellStyle?: IStyleData): IWorkbookData {
     return {
         id: UNIT_ID,
         appVersion: '3.0.0-alpha',
@@ -197,7 +226,7 @@ function createWorkbookData(): IWorkbookData {
             [SHEET_ID]: {
                 id: SHEET_ID,
                 name: 'Sheet1',
-                cellData: {},
+                cellData: cellStyle ? { 0: { 0: { s: cellStyle } } } : {},
             },
         },
     };
@@ -220,12 +249,15 @@ function createCellEditState(): ICellEditorState {
     };
 }
 
-function createFormulaBarTestBed() {
+function createFormulaBarTestBed(cellStyle?: IStyleData) {
     const originalResizeObserver = globalThis.ResizeObserver;
     globalThis.ResizeObserver = TestResizeObserver as typeof ResizeObserver;
 
     const univer = new Univer();
     const injector = univer.__getInjector();
+
+    injector.get(LocaleService).load({ [LocaleType.EN_US]: enUS });
+    injector.get(LocaleService).setLocale(LocaleType.EN_US);
 
     injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
     injector.add([ISuperTableService, { useClass: SuperTableService }]);
@@ -242,7 +274,10 @@ function createFormulaBarTestBed() {
     injector.add([IEditorBridgeService, { useClass: TestEditorBridgeService as never }]);
     injector.add([ILayoutService, { useClass: TestLayoutService as never }]);
     injector.add([IEditorService, { useClass: TestEditorService as never }]);
-    const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, createWorkbookData());
+    const workbook = univer.createUnit<IWorkbookData, Workbook>(
+        UniverInstanceType.UNIVER_SHEET,
+        createWorkbookData(cellStyle)
+    );
     injector.get(IUniverInstanceService).focusUnit(UNIT_ID);
     injector.get(IConfigService).setConfig(SHEETS_UI_PLUGIN_CONFIG_KEY, {});
 
@@ -251,6 +286,12 @@ function createFormulaBarTestBed() {
 
     const commandService = injector.get(ICommandService);
     commandService.registerCommand(SetCellEditVisibleOperation);
+    const mobileSubmit = vi.fn(() => true);
+    commandService.registerCommand({
+        id: MOBILE_FORMULA_BAR_SUBMIT_COMMAND_ID,
+        type: CommandType.COMMAND,
+        handler: mobileSubmit,
+    });
 
     const editorBridgeService = injector.get(IEditorBridgeService) as TestEditorBridgeService;
     editorBridgeService.setCurrentEditCell(createCellEditState());
@@ -265,6 +306,7 @@ function createFormulaBarTestBed() {
         injector,
         workbook,
         editorBridgeService,
+        mobileSubmit,
         restoreResizeObserver: () => {
             globalThis.ResizeObserver = originalResizeObserver;
         },
@@ -293,7 +335,9 @@ function getActionElement(container: HTMLElement, index: number): HTMLElement {
         throw new TypeError('Formula bar not rendered');
     }
 
-    const elements = formulaBar.querySelectorAll('span');
+    const elements = formulaBar.querySelectorAll(
+        '[data-u-comp="formula-bar-actions"] > button, [data-u-comp="formula-bar-actions"] > span'
+    );
     const element = elements.item(index);
     if (!(element instanceof HTMLElement)) {
         throw new TypeError(`Formula bar action ${index} not rendered`);
@@ -324,6 +368,27 @@ describe('FormulaBar', () => {
         root = undefined;
         container = undefined;
         currentBed = undefined;
+        vi.unstubAllGlobals();
+    });
+
+    it('replays the selected cell after the lazy mobile formula editor mounts', async () => {
+        vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
+            callback(0);
+            return 1;
+        });
+        vi.stubGlobal('cancelAnimationFrame', vi.fn());
+        currentBed = createFormulaBarTestBed();
+        const rendered = renderWithDependencies(<MobileFormulaBar />, currentBed.injector);
+        root = rendered.root;
+        container = rendered.container;
+
+        await act(async () => Promise.resolve());
+
+        expect(currentBed.editorBridgeService.refreshEditCellState).toHaveBeenCalledOnce();
+        expect(testFormulaEditor.setSelectionRanges).toHaveBeenCalledWith([{
+            startOffset: 8,
+            endOffset: 8,
+        }], false);
     });
 
     it('keeps its toolbar layout LTR when the sheet host is RTL', () => {
@@ -379,5 +444,87 @@ describe('FormulaBar', () => {
             eventType: DeviceInputEventType.PointerDown,
             unitId: UNIT_ID,
         });
+    });
+
+    it('commits and moves down from the compact mobile formula bar', async () => {
+        currentBed = createFormulaBarTestBed();
+        const rendered = renderWithDependencies(<FormulaBar disableDefinedName mobile />, currentBed.injector);
+        root = rendered.root;
+        container = rendered.container;
+
+        const editorHost = rendered.container.querySelector('[data-editor-id]')?.parentElement;
+        expect(editorHost?.classList).toContain('univer-my-2');
+
+        await clickElement(getActionElement(rendered.container, 1));
+
+        expect(currentBed.mobileSubmit).toHaveBeenCalledOnce();
+        expect(currentBed.editorBridgeService.visibleHistory.at(-1)?.visible).toBe(true);
+    });
+
+    it('inherits the selected cell background in the mobile editor', () => {
+        currentBed = createFormulaBarTestBed({
+            bg: { rgb: '#000000' },
+            cl: { rgb: '#0000FF' },
+        });
+        const rendered = renderWithDependencies(<FormulaBar disableDefinedName mobile />, currentBed.injector);
+        root = rendered.root;
+        container = rendered.container;
+
+        const editorHost = rendered.container.querySelector('[data-editor-id]')?.parentElement;
+        expect(editorHost?.style.backgroundColor).toBe('#000000');
+    });
+
+    it('opens immersive mobile editing from the compact up arrow', async () => {
+        currentBed = createFormulaBarTestBed();
+        const onExpandedChange = vi.fn();
+        const rendered = renderWithDependencies(
+            <FormulaBar disableDefinedName mobile onExpandedChange={onExpandedChange} />,
+            currentBed.injector
+        );
+        root = rendered.root;
+        container = rendered.container;
+
+        const expandButton = rendered.container.querySelector<HTMLElement>('[data-u-comp="formula-bar-expand"]');
+        const icon = expandButton?.querySelector('svg');
+        expect(icon?.classList).toContain('univer-rotate-180');
+        expect(icon?.classList).toContain('univer-size-5');
+
+        if (!expandButton) throw new Error('Expected the formula bar expand button to be rendered.');
+        await clickElement(expandButton);
+        expect(onExpandedChange).toHaveBeenCalledWith(true);
+    });
+
+    it('commits, moves down, and collapses immersive mobile editing', async () => {
+        currentBed = createFormulaBarTestBed();
+        const onExpandedChange = vi.fn();
+        const rendered = renderWithDependencies(
+            <FormulaBar disableDefinedName expanded mobile onExpandedChange={onExpandedChange} />,
+            currentBed.injector
+        );
+        root = rendered.root;
+        container = rendered.container;
+
+        await clickElement(getActionElement(rendered.container, 1));
+
+        expect(currentBed.mobileSubmit).toHaveBeenCalledOnce();
+        expect(currentBed.editorBridgeService.visibleHistory.at(-1)?.visible).toBe(true);
+        expect(onExpandedChange).toHaveBeenCalledWith(false);
+    });
+
+    it('fills the mobile viewport while the formula bar is expanded', () => {
+        currentBed = createFormulaBarTestBed();
+        const onExpandedChange = vi.fn();
+        const rendered = renderWithDependencies(
+            <FormulaBar disableDefinedName expanded mobile onExpandedChange={onExpandedChange} />,
+            currentBed.injector
+        );
+        root = rendered.root;
+        container = rendered.container;
+
+        const formulaBar = rendered.container.querySelector('[data-u-comp="formula-bar"]');
+        const editorHost = rendered.container.querySelector('[data-editor-id]')?.parentElement;
+        expect(formulaBar?.getAttribute('data-expanded')).toBe('true');
+        expect(formulaBar?.classList).toContain('!univer-h-full');
+        expect(editorHost?.classList).not.toContain('univer-my-2');
     });
 });

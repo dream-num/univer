@@ -1,9 +1,6 @@
 <div align="center">
 
-<picture>
-    <source media="(prefers-color-scheme: dark)" srcset="../img/banner-light.png">
-    <img src="../img/banner-dark.png" alt="Univer" width="420" />
-</picture>
+<img src="../img/banner.png" alt="Univer SDK" width="800" />
 
 **用于构建电子表格、文档和演示文稿的全栈、同构办公 SDK。**
 
@@ -23,7 +20,7 @@ Univer 以插件化架构、Canvas 渲染引擎、公式引擎和统一的 Facad
 [![Stars](https://img.shields.io/github/stars/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/stargazers)
 [![Contributors](https://img.shields.io/github/contributors/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/graphs/contributors)
 [![Issues](https://img.shields.io/github/issues/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/issues)
-[![Last Commit](https://img.shields.io/github/last-commit/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/commits/main/)
+[![Last Commit](https://img.shields.io/github/last-commit/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/commits/dev/)
 
 [![Discord](https://img.shields.io/discord/1136129819961217077?logo=discord&logoColor=FFFFFF&label=discord&color=5865F2&style=flat-square)](https://discord.gg/z3NKNT6D2f)
 [![Twitter](https://img.shields.io/twitter/follow/univerhq?style=flat-square&logo=x)](https://twitter.com/univerhq)
@@ -228,7 +225,7 @@ univerAPI.createWorkbook({})
 | **Preset Mode** | 你希望用最少配置获得可运行的 Sheets、Docs 或 Node 设置。 | 本仓库的 [`presets/`](../../presets) 和 [快速入门指南](https://docs.univer.ai/guides/sheets/getting-started/installation) |
 | **Headless Mode** | 你需要在没有 UI 的情况下进行服务端工作簿/文档处理、公式计算或自动化。 | [Headless Univer](https://docs.univer.ai/guides/sheets/getting-started/node) |
 
-请保持所有 `@univerjs/*` 包版本一致。如果使用 Univer Pro 包，也请保持 `@univerjs-pro/*` 版本一致。
+同一 Univer 协调发布线中的 `@univerjs/*` SDK 包应保持版本一致。`@univerjs/icons`、`@univerjs/icons-svg` 等独立发布的包应使用各包清单声明的兼容版本，而不是跟随 SDK 版本。使用 Univer Pro 时，也请让 `@univerjs-pro/*` 与对应的协调发布线保持一致。
 
 关于 API 兼容性预期、实验性 API、内部 API 和废弃规则，请阅读 [API 稳定性政策](../API_STABILITY.md)。
 

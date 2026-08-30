@@ -40,6 +40,7 @@ export function useEditor(opts: IUseEditorProps) {
 
     useLayoutEffect(() => {
         if (container.current) {
+            let focusFrame: number | undefined;
             const initialDoc = typeof initialValue === 'string'
                 ? RichTextBuilder.create().insertText(initialValue).getData()
                 : Tools.deepClone(initialValue);
@@ -81,10 +82,15 @@ export function useEditor(opts: IUseEditorProps) {
             if (autoFocus) {
                 editorService.focus(editorId);
                 const end = (snapshot.body?.dataStream.length ?? 2) - 2;
-                editor.setSelectionRanges([{ startOffset: end, endOffset: end }]);
+                focusFrame = requestAnimationFrame(() => {
+                    editor.setSelectionRanges([{ startOffset: end, endOffset: end }]);
+                });
             }
 
             return () => {
+                if (focusFrame !== undefined) {
+                    cancelAnimationFrame(focusFrame);
+                }
                 dispose?.dispose();
             };
         }

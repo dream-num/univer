@@ -39,4 +39,3 @@ univer.registerPlugin(UniverSheetsNoteUIPlugin);
 - [Documentation](https://docs.univer.ai)
 - [NPM package](https://npmjs.com/package/@univerjs/sheets-note-ui)
 - [GitHub repository](https://github.com/dream-num/univer)
-

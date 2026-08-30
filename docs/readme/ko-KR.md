@@ -1,9 +1,6 @@
 <div align="center">
 
-<picture>
-    <source media="(prefers-color-scheme: dark)" srcset="../img/banner-light.png">
-    <img src="../img/banner-dark.png" alt="Univer" width="420" />
-</picture>
+<img src="../img/banner.png" alt="Univer SDK" width="800" />
 
 **스프레드시트, 문서, 프레젠테이션을 만들기 위한 풀스택 동형 오피스 SDK.**
 
@@ -24,7 +21,7 @@ Univer는 플러그인 아키텍처, Canvas 기반 렌더링, 수식 엔진,
 [![Stars](https://img.shields.io/github/stars/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/stargazers)
 [![Contributors](https://img.shields.io/github/contributors/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/graphs/contributors)
 [![Issues](https://img.shields.io/github/issues/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/issues)
-[![Last Commit](https://img.shields.io/github/last-commit/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/commits/main/)
+[![Last Commit](https://img.shields.io/github/last-commit/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/commits/dev/)
 
 [![Discord](https://img.shields.io/discord/1136129819961217077?logo=discord&logoColor=FFFFFF&label=discord&color=5865F2&style=flat-square)](https://discord.gg/z3NKNT6D2f)
 [![Twitter](https://img.shields.io/twitter/follow/univerhq?style=flat-square&logo=x)](https://twitter.com/univerhq)
@@ -229,7 +226,7 @@ univerAPI.createWorkbook({})
 | **Preset Mode** | 최소 설정으로 동작하는 Sheets, Docs, Node 구성이 필요할 때. | 이 저장소의 [`presets/`](../../presets) 및 [getting started guide](https://docs.univer.ai/guides/sheets/getting-started/installation) |
 | **Headless Mode** | UI 없이 서버 측 워크북/문서 처리, 수식 계산, 자동화가 필요할 때. | [Headless Univer](https://docs.univer.ai/guides/sheets/getting-started/node) |
 
-모든 `@univerjs/*` 패키지는 같은 버전으로 유지하세요. Univer Pro 패키지를 사용하는 경우 `@univerjs-pro/*` 버전도 맞춰야 합니다.
+동일한 Univer 통합 릴리스 라인에 포함되는 `@univerjs/*` SDK 패키지는 같은 버전으로 맞추세요. `@univerjs/icons`, `@univerjs/icons-svg`처럼 독립적으로 릴리스되는 패키지는 SDK 버전이 아니라 각 패키지 매니페스트에 선언된 호환 버전을 사용합니다. Univer Pro 패키지를 사용한다면 `@univerjs-pro/*`도 해당 통합 릴리스 라인에 맞추세요.
 
 API 호환성 기대치, experimental APIs, internal APIs, deprecation rules는 [API Stability Policy](../API_STABILITY.md)를 참고하세요.
 

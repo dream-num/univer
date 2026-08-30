@@ -31,6 +31,7 @@ export interface ISetSelectionsOperationParams {
     /** If should scroll to the selected range. */
     reveal?: boolean;
     extra?: string;
+    fromCurrentSelection?: boolean;
 }
 
 /**
@@ -42,8 +43,8 @@ export const SetSelectionsOperation: IOperation<ISetSelectionsOperationParams> =
     handler: (accessor, params) => {
         if (!params) return false;
 
-        const { selections, type, unitId, subUnitId } = params;
-        const selectionManagerService = getSelectionsService(accessor);
+        const { selections, type, unitId, subUnitId, fromCurrentSelection } = params;
+        const selectionManagerService = getSelectionsService(accessor, fromCurrentSelection);
 
         // Must update selections array ref.
         // See https://github.com/dream-num/univer/issues/2199

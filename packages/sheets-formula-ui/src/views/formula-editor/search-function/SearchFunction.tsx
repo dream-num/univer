@@ -35,10 +35,11 @@ interface ISearchFunctionProps {
     onChange?: (functionName: string) => void;
     editor: Editor;
     onClose?: () => void;
+    mobile?: boolean;
 };
 export const SearchFunction = forwardRef<HTMLElement, ISearchFunctionProps>(SearchFunctionFactory);
 function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
-    const { isFocus, sequenceNodes, onSelect, editor, onClose = noop } = props;
+    const { isFocus, sequenceNodes, onSelect, editor, onClose = noop, mobile = false } = props;
     const editorId = editor.getEditorId();
     const shortcutService = useDependency(IShortcutService);
     const commandService = useDependency(ICommandService);
@@ -196,12 +197,12 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
                     }
                 }}
                 data-u-comp="sheets-formula-editor"
+                data-presentation={mobile ? 'mobile' : 'desktop'}
                 className={clsx(`
-                  univer-m-0 univer-box-border univer-max-h-[400px] univer-w-[250px] univer-list-none
-                  univer-overflow-y-auto univer-rounded-lg univer-bg-gray-0 univer-p-2 univer-leading-5 univer-shadow-md
-                  univer-outline-none
+                  univer-m-0 univer-box-border univer-list-none univer-overflow-y-auto univer-rounded-lg
+                  univer-bg-gray-0 univer-p-2 univer-leading-5 univer-shadow-md univer-outline-none
                   dark:!univer-bg-gray-900
-                `, borderClassName, scrollbarClassName)}
+                `, mobile ? 'univer-max-h-[38dvh] univer-w-[calc(100vw-16px)]' : 'univer-max-h-[400px] univer-w-[250px]', borderClassName, scrollbarClassName)}
             >
                 {searchList.map((item, index) => (
                     <li
@@ -210,7 +211,7 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
                           univer-box-border univer-cursor-pointer univer-rounded univer-px-2 univer-py-1
                           univer-text-gray-900 univer-transition-colors
                           dark:!univer-text-gray-0
-                        `, {
+                        `, { 'univer-flex univer-min-h-12 univer-flex-col univer-justify-center univer-px-3 univer-py-2': mobile }, {
                             'univer-bg-gray-200 dark:!univer-bg-gray-600': active === index,
                         })}
                         onMouseEnter={() => handleLiMouseEnter(index)}

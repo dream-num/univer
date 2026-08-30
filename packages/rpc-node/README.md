@@ -25,10 +25,14 @@ Keep all `@univerjs/*` packages on the same version.
 ## Usage
 
 ```ts
+import { fileURLToPath } from 'node:url';
 import { UniverRPCNodeMainPlugin } from '@univerjs/rpc-node';
 
-univer.registerPlugin(UniverRPCNodeMainPlugin);
+const workerSrc = fileURLToPath(new URL('./worker.js', import.meta.url));
+univer.registerPlugin(UniverRPCNodeMainPlugin, { workerSrc });
 ```
+
+The referenced worker module must create its own Univer instance and register `UniverRPCNodeWorkerPlugin`; see the [Node.js worker example](../../examples/src/node/sdk/worker.ts).
 
 Exported plugin classes:
 
@@ -40,4 +44,3 @@ Exported plugin classes:
 - [Documentation](https://docs.univer.ai)
 - [NPM package](https://npmjs.com/package/@univerjs/rpc-node)
 - [GitHub repository](https://github.com/dream-num/univer)
-

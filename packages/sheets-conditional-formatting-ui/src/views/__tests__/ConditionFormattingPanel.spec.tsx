@@ -23,9 +23,10 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { AddCfCommand, CFNumberOperator, CFRuleType, CFSubRuleType, SetCfCommand } from '@univerjs/sheets-conditional-formatting';
 import { IMarkSelectionService } from '@univerjs/sheets-ui';
-import { IShortcutService, RediContext } from '@univerjs/ui';
+import { IDialogService, IShortcutService, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
+import { of } from 'rxjs';
 import { afterEach, describe, expect, it } from 'vitest';
 import { createCfUiTestBed } from '../../__tests__/create-cf-ui-test-bed';
 import { ConditionalFormattingI18nController } from '../../controllers/cf.i18n.controller';
@@ -88,6 +89,20 @@ class TestDescriptionService {
     }
 }
 
+class TestDialogService {
+    open() {
+        return { dispose: () => {} };
+    }
+
+    close(): void {}
+
+    closeAll(): void {}
+
+    getDialogs$() {
+        return of([]);
+    }
+}
+
 function createNumberHighlightRule(cfId: string, value: number): IConditionFormattingRule {
     return {
         cfId,
@@ -113,6 +128,7 @@ function createPanelTestBed() {
     testBed.injector.add([IShortcutService, { useClass: TestShortcutService as never }]);
     testBed.injector.add([IMarkSelectionService, { useClass: TestMarkSelectionService as never }]);
     testBed.injector.add([IDescriptionService, { useClass: TestDescriptionService as never }]);
+    testBed.injector.add([IDialogService, { useClass: TestDialogService }]);
     testBed.injector.add([LexerTreeBuilder]);
     testBed.commandService.registerCommand(AddCfCommand);
     testBed.commandService.registerCommand(SetCfCommand);

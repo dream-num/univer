@@ -75,6 +75,15 @@ const locale: typeof enUS = {
             allFunctions: 'すべての関数',
             syntax: '構文',
         },
+        mobileFunction: {
+            title: '関数を挿入',
+            recommended: 'おすすめ',
+            recent: '最近使用した関数',
+            details: '詳細',
+            insert: '関数を挿入',
+            empty: '関数がありません',
+            close: '閉じる',
+        },
         operation: {
             copyFormulaOnly: '数式のみをコピー',
             pasteFormula: '数式を貼り付け',

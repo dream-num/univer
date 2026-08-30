@@ -21,6 +21,7 @@ import type {
     IDocumentBody,
     IDocumentStyle,
     IDrawings,
+    ILists,
     IParagraph,
     IParagraphStyle,
     Nullable,
@@ -269,7 +270,8 @@ function _updateListLevelAncestors(
     paragraph: IParagraph,
     bullet?: IBullet,
     bulletSkeleton?: IDocumentSkeletonBullet,
-    listLevel?: Map<string, IParagraphList[][]>
+    listLevel?: Map<string, IParagraphList[][]>,
+    lists?: ILists
 ) {
     if (!bullet || !bulletSkeleton) {
         return;
@@ -278,6 +280,22 @@ function _updateListLevelAncestors(
     const { listId, nestingLevel } = bullet;
 
     const cacheItem: IParagraphList[][] = [...(listLevel?.get(listId) || [])];
+
+    const nestingLevels = lists?.[bullet.listType]?.nestingLevel;
+    for (let level = 0; level < nestingLevel; level++) {
+        if (cacheItem[level]?.length || nestingLevels?.[level] == null) {
+            continue;
+        }
+
+        cacheItem[level] = [{
+            bullet: {
+                ...bulletSkeleton,
+                startIndexItem: 2,
+                startNumber: nestingLevels[level].startNumber,
+            },
+            paragraph,
+        }];
+    }
 
     // [[nestingLevel, bulletSkeleton]];
 
@@ -837,7 +855,7 @@ export function lineBreaking(
         const listLevelAncestors = _getListLevelAncestors(bullet, skeListLevel); // Get the cache of all levels of the list
         const bulletSkeleton = dealWithBullet(bullet, lists, listLevelAncestors, localeService); // Generate bullet
 
-        _updateListLevelAncestors(paragraph, bullet, bulletSkeleton, skeListLevel); // Update the latest level cache list
+        _updateListLevelAncestors(paragraph, bullet, bulletSkeleton, skeListLevel, lists); // Update the latest level cache list
 
         paragraphConfig.bulletSkeleton = bulletSkeleton;
     }

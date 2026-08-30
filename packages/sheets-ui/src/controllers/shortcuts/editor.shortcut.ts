@@ -110,6 +110,18 @@ export const EditorCursorEnterShortcut: IShortcutItem = {
     },
 };
 
+export const EditorCursorShiftEnterShortcut: IShortcutItem = {
+    id: SetCellEditVisibleOperation.id,
+    binding: KeyCode.ENTER | MetaKeys.SHIFT,
+    preconditions: (contextService) => whenEditorDidNotInputFormulaActivated(contextService),
+    staticParameters: {
+        visible: false,
+        eventType: DeviceInputEventType.Keyboard,
+        keycode: KeyCode.ENTER,
+        isShift: true,
+    },
+};
+
 export const EditorCursorTabShortcut: IShortcutItem = {
     id: SetCellEditVisibleOperation.id,
     binding: KeyCode.TAB,
@@ -118,6 +130,18 @@ export const EditorCursorTabShortcut: IShortcutItem = {
         visible: false,
         eventType: DeviceInputEventType.Keyboard,
         keycode: KeyCode.TAB,
+    },
+};
+
+export const EditorCursorShiftTabShortcut: IShortcutItem = {
+    id: SetCellEditVisibleOperation.id,
+    binding: KeyCode.TAB | MetaKeys.SHIFT,
+    preconditions: (contextService) => whenEditorDidNotInputFormulaActivated(contextService),
+    staticParameters: {
+        visible: false,
+        eventType: DeviceInputEventType.Keyboard,
+        keycode: KeyCode.TAB,
+        isShift: true,
     },
 };
 

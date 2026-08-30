@@ -19,6 +19,7 @@ import './global.css';
 export { SetActiveCommentOperation } from './commands/operations/comment.operations';
 export type { ISetActiveCommentOperationParams } from './commands/operations/comment.operations';
 export type { IUniverThreadCommentUIConfig } from './config/config';
+export { UniverThreadCommentMobileUIPlugin } from './mobile-plugin';
 export { UniverThreadCommentUIPlugin } from './plugin';
 export { ThreadCommentCanvasOverlay } from './render-objects/thread-comment-canvas-overlay';
 export type {

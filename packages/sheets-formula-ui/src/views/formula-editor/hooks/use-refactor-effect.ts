@@ -22,7 +22,7 @@ import { IContextMenuService, useDependency, useObservable } from '@univerjs/ui'
 import { useEffect, useLayoutEffect, useMemo } from 'react';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render.service';
 
-export const useRefactorEffect = (isNeed: boolean, selecting: boolean | number, unitId: string, editorId: string, disableContextMenu = true) => {
+export const useRefactorEffect = (isNeed: boolean, selecting: boolean | number, unitId: string, editorId: string, disableContextMenu = true, keepRefSelectionsEnabled = false) => {
     const renderManagerService = useDependency(IRenderManagerService);
     const contextService = useDependency(IContextService);
     const contextMenuService = useDependency(IContextMenuService);
@@ -51,15 +51,27 @@ export const useRefactorEffect = (isNeed: boolean, selecting: boolean | number, 
 
     useLayoutEffect(() => {
         if (isNeed && Boolean(selecting)) {
+            let active = true;
             const d1 = refSelectionsRenderService?.enableSelectionChanging();
             contextService.setContextValue(REF_SELECTIONS_ENABLED, true);
+            const subscription = keepRefSelectionsEnabled
+                ? contextService.subscribeContextValue$(REF_SELECTIONS_ENABLED).subscribe((enabled) => {
+                    if (!enabled) {
+                        queueMicrotask(() => {
+                            if (active) contextService.setContextValue(REF_SELECTIONS_ENABLED, true);
+                        });
+                    }
+                })
+                : null;
 
             return () => {
+                active = false;
+                subscription?.unsubscribe();
                 contextService.setContextValue(REF_SELECTIONS_ENABLED, false);
                 d1?.dispose();
             };
         }
-    }, [contextService, isNeed, refSelectionsRenderService, selecting]);
+    }, [contextService, isNeed, keepRefSelectionsEnabled, refSelectionsRenderService, selecting]);
 
     // reset setSkipLastEnabled
     useEffect(() => {

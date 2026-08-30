@@ -15,6 +15,7 @@
  */
 
 import {
+    ContextService,
     DrawingTypeEnum,
     ICommandService,
     IContextService,
@@ -27,7 +28,7 @@ import {
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
-import { IMenuManagerService, IMessageService, MenuItemType } from '@univerjs/ui';
+import { IDialogService, IMenuManagerService, IMessageService, MenuItemType } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { DrawingPopupMenuController } from '../drawing-popup-menu.controller';
@@ -41,10 +42,10 @@ describe('DrawingPopupMenuController', () => {
         const createControl$ = new Subject<void>();
         const clearControl$ = new Subject<void>();
         const changing$ = new Subject<void>();
-        const contextChanged$ = new Subject<Record<string, boolean>>();
         const imageIoChange$ = new Subject<number>();
         const currentWorkbook$ = new Subject<never>();
         const disposedWorkbook$ = new Subject<never>();
+        const dialogs$ = new Subject<never>();
         const imageObject = { oKey: 'image-1' };
         let attachedPopup: { extraProps?: Record<string, unknown> } | undefined;
         const attachPopupToObject = vi.fn((_targetObject: unknown, popup: { extraProps?: Record<string, unknown> }) => {
@@ -56,6 +57,14 @@ describe('DrawingPopupMenuController', () => {
         });
 
         injector.add([LocaleService]);
+        injector.add([IDialogService, {
+            useValue: {
+                open: () => toDisposable(() => undefined),
+                close: () => undefined,
+                closeAll: () => undefined,
+                getDialogs$: () => dialogs$,
+            },
+        }]);
         injector.add([IDrawingManagerService, {
             useValue: {
                 getDrawingOKey: () => ({
@@ -109,12 +118,7 @@ describe('DrawingPopupMenuController', () => {
                 }],
             } as never,
         }]);
-        injector.add([IContextService, {
-            useValue: {
-                contextChanged$,
-                setContextValue: vi.fn(),
-            } as never,
-        }]);
+        injector.add([IContextService, { useValue: new ContextService() }]);
         injector.add([IImageIoService, { useValue: { change$: imageIoChange$ } as never }]);
         injector.add([ICommandService, { useValue: { syncExecuteCommand: vi.fn() } as never }]);
         injector.add([DrawingPopupMenuController]);

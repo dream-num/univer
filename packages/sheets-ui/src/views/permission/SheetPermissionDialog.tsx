@@ -25,7 +25,7 @@ import {
     LocaleService,
     UniverInstanceType,
 } from '@univerjs/core';
-import { borderTopClassName, Button, clsx, Switch } from '@univerjs/design';
+import { ActionRow, borderTopClassName, Button, clsx, Switch } from '@univerjs/design';
 import { ObjectScope, UnitObject, UnitRole } from '@univerjs/protocol';
 import {
     getAllWorksheetPermissionPoint,
@@ -230,7 +230,7 @@ export const SheetPermissionDialog = () => {
                     );
                 })}
 
-                <div
+                <ActionRow
                     className={clsx(`
                       univer-flex univer-h-9 univer-items-center univer-justify-end univer-gap-2 univer-pt-2
                     `, borderTopClassName)}
@@ -251,7 +251,7 @@ export const SheetPermissionDialog = () => {
                     >
                         {localeService.t<LocaleKey>('sheets-ui.permission.button.confirm')}
                     </Button>
-                </div>
+                </ActionRow>
             </div>
         </Spin>
     );

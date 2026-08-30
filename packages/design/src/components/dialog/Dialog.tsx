@@ -27,6 +27,7 @@ import {
     Dialog as DialogProvider,
     DialogTitle,
 } from './DialogPrimitive';
+import { MobileDialogContent } from './MobileDialogContent';
 
 export interface IDialogProps {
     children: ReactNode;
@@ -270,7 +271,7 @@ export function Dialog(props: IDialogProps) {
         onCancel,
     } = props;
 
-    const { locale, mountContainer, direction } = useContext(ConfigContext);
+    const { locale, mountContainer, direction, mobile } = useContext(ConfigContext);
 
     const { position, isDragging, setElementRef, handleMouseDown } = useDraggable({ defaultPosition, enabled: draggable });
 
@@ -314,13 +315,15 @@ export function Dialog(props: IDialogProps) {
         onClose?.();
     }
 
+    const Content = mobile ? MobileDialogContent : DialogContent;
+
     return (
         <DialogProvider
             open={open}
             onOpenChange={handleOpenChange}
             modal={mask !== false}
         >
-            <DialogContent
+            <Content
                 ref={handleContentRef}
                 className={clsx(className, {
                     '!univer-animate-none': draggable,
@@ -382,7 +385,7 @@ export function Dialog(props: IDialogProps) {
                         {footer}
                     </DialogFooter>
                 )}
-            </DialogContent>
+            </Content>
         </DialogProvider>
     );
 }

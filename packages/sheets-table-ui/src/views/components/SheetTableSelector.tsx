@@ -17,7 +17,7 @@
 import type { ITableSelectionInfo } from '../../commands/operations/open-table-selector.operation';
 import type { LocaleKey } from '../../locale/types';
 import { IUniverInstanceService, LocaleService, Rectangle } from '@univerjs/core';
-import { Button } from '@univerjs/design';
+import { ActionRow, Button } from '@univerjs/design';
 import { deserializeRangeWithSheet, serializeRange } from '@univerjs/engine-formula';
 import { getSheetCommandTarget } from '@univerjs/sheets';
 import { RangeSelector } from '@univerjs/sheets-formula-ui';
@@ -116,7 +116,7 @@ export const SheetTableSelector = (props: ITableSelectionInfo & {
                 </div>
             )}
 
-            <div className="univer-mt-4 univer-flex univer-justify-end univer-gap-2">
+            <ActionRow className="univer-mt-4 univer-flex univer-justify-end univer-gap-2">
                 <Button onClick={onCancel}>{localeService.t<LocaleKey>('sheets-table-ui.cancel')}</Button>
                 <Button
                     variant="primary"
@@ -133,7 +133,7 @@ export const SheetTableSelector = (props: ITableSelectionInfo & {
                 >
                     {localeService.t<LocaleKey>('sheets-table-ui.confirm')}
                 </Button>
-            </div>
+            </ActionRow>
         </>
     );
 };

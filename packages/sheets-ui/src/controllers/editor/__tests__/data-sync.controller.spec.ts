@@ -35,6 +35,7 @@ import {
 } from '@univerjs/sheets';
 import { BehaviorSubject, EMPTY } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { MOBILE_SHEET_FX_EDITOR } from '../../../consts/mobile-context';
 import { IEditorBridgeService } from '../../../services/editor-bridge.service';
 import { IFormulaEditorManagerService } from '../../../services/editor/formula-editor-manager.service';
 import { EditorDataSyncController } from '../data-sync.controller';
@@ -69,6 +70,7 @@ describe('EditorDataSyncController', () => {
 
     function createController(options: {
         isFocusFxBar?: boolean;
+        mobile?: boolean;
         themeTextColor?: string;
         formulaBarPosition?: { width: number; height: number } | null;
     } = {}) {
@@ -83,8 +85,11 @@ describe('EditorDataSyncController', () => {
             isForceKeepVisible: vi.fn(() => false),
         };
         const contextService = {
-            getContextValue: vi.fn((key: string) =>
-                key === FOCUSING_FX_BAR_EDITOR ? options.isFocusFxBar ?? false : false),
+            getContextValue: vi.fn((key: string) => {
+                if (key === FOCUSING_FX_BAR_EDITOR) return options.isFocusFxBar ?? false;
+                if (key === MOBILE_SHEET_FX_EDITOR) return options.mobile ?? false;
+                return false;
+            }),
             subscribeContextValue$: vi.fn(() => EMPTY),
         };
         const currentTheme$ = new BehaviorSubject({});
@@ -277,6 +282,30 @@ describe('EditorDataSyncController', () => {
         checkAndSetRenderStyleConfig(controller, formulaBarSnapshot);
 
         expect(formulaBarSnapshot.documentStyle.textStyle?.cl?.rgb).toBe('#f7f9fc');
+    });
+
+    it('renders source rich-text styles in the mobile formula bar without changing the desktop behavior', () => {
+        const desktop = createController().controller;
+        const mobile = createController({ mobile: true }).controller;
+        const createSnapshot = (): IDocumentData => ({
+            id: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+            body: {
+                dataStream: 'Rich text\r\n',
+                textRuns: [{ st: 0, ed: 4, ts: { bl: BooleanNumber.TRUE, cl: { rgb: '#ef4444' } } }],
+            },
+            documentStyle: {},
+        });
+        const desktopSnapshot = createSnapshot();
+        const mobileSnapshot = createSnapshot();
+
+        checkAndSetRenderStyleConfig(desktop, desktopSnapshot);
+        checkAndSetRenderStyleConfig(mobile, mobileSnapshot);
+
+        expect(desktopSnapshot.documentStyle.renderConfig?.isRenderStyle).toBe(BooleanNumber.FALSE);
+        expect(mobileSnapshot.documentStyle.renderConfig?.isRenderStyle).toBe(BooleanNumber.TRUE);
+        expect(mobileSnapshot.body?.textRuns).toEqual([
+            { st: 0, ed: 4, ts: { bl: BooleanNumber.TRUE, cl: { rgb: '#ef4444' } } },
+        ]);
     });
 
     it('renders formula reference styles in the formula bar when the formula bar is focused', () => {

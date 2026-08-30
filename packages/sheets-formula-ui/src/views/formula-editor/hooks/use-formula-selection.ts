@@ -121,9 +121,20 @@ export function resolveFormulaSelectingIntent(adding: boolean, editing: boolean)
     return FormulaSelectingType.NOT_SELECT;
 }
 
+export function shouldAddFormulaReference(dataStream: string, index: number): boolean {
+    const char = dataStream[index - 1];
+    const nextChar = dataStream[index];
+
+    return Boolean(
+        char &&
+        (matchRefDrawToken(char) || char === '!') &&
+        (!nextChar || (isFormulaLexerToken(nextChar) && nextChar !== matchToken.OPEN_BRACKET))
+    );
+}
+
 // eslint-disable-next-line max-lines-per-function
-export function useFormulaSelecting(opts: { editor?: Editor; editorId: string; isFocus: boolean; disableOnClick?: boolean; unitId: string; subUnitId: string }) {
-    const { editor, editorId, isFocus, disableOnClick, unitId, subUnitId } = opts;
+export function useFormulaSelecting(opts: { editor?: Editor; editorId: string; isFocus: boolean; disableOnClick?: boolean; resetSignal?: number; unitId: string; subUnitId: string }) {
+    const { editor, editorId, isFocus, disableOnClick, resetSignal, unitId, subUnitId } = opts;
     const renderManagerService = useDependency(IRenderManagerService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const sheetRenderer = renderManagerService.getRenderUnitById(unitId);
@@ -179,10 +190,8 @@ export function useFormulaSelecting(opts: { editor?: Editor; editorId: string; i
 
             return node;
         });
-        const char = dataStream[index - 1];
-        const nextChar = dataStream[index];
         const focusingNode = nodes.find((node) => typeof node === 'object' && node.nodeType === sequenceNodeType.REFERENCE && index === node.endIndex + 2) as unknown as (ISequenceNode & { range: IUnitRangeName });
-        const adding = (char && matchRefDrawToken(char)) && (!nextChar || (isFormulaLexerToken(nextChar) && nextChar !== matchToken.OPEN_BRACKET));
+        const adding = shouldAddFormulaReference(dataStream, index);
         const editing = Boolean(focusingNode);
         const selectingIntent = resolveFormulaSelectingIntent(Boolean(adding), editing);
 
@@ -277,6 +286,12 @@ export function useFormulaSelecting(opts: { editor?: Editor; editorId: string; i
             isDisabledByPointer.current = true;
         }
     }, [isFocus, setIsSelecting]);
+
+    useEffect(() => {
+        if (resetSignal === undefined) return;
+        setIsSelecting(FormulaSelectingType.NOT_SELECT);
+        isDisabledByPointer.current = true;
+    }, [resetSignal, setIsSelecting]);
 
     useEffect(() => {
         if (!disableOnClick) return;

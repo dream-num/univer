@@ -57,6 +57,40 @@ describe('browserStorage (LocalStorageDriver fallback)', () => {
     });
 
     describe('getItem / setItem', () => {
+        it('should fall back to localStorage when IndexedDB cannot be opened', async () => {
+            const originalIndexedDB = globalThis.indexedDB;
+            let onerror: IDBRequest['onerror'] = null;
+            const request = {
+                error: new DOMException('IndexedDB is unavailable'),
+                get onerror() {
+                    return onerror;
+                },
+                set onerror(value: IDBRequest['onerror']) {
+                    onerror = value;
+                },
+                onsuccess: null,
+                onupgradeneeded: null,
+            };
+
+            vi.stubGlobal('indexedDB', {
+                open: () => {
+                    queueMicrotask(() => {
+                        if (onerror) {
+                            Reflect.apply(onerror, request, [new Event('error')]);
+                        }
+                    });
+                    return request;
+                },
+            });
+            vi.resetModules();
+
+            const { browserStorage: fallbackStorage } = await import('../storage-driver');
+            await fallbackStorage.setItem('fallback', 'local');
+
+            expect(await fallbackStorage.getItem('fallback')).toBe('local');
+            vi.stubGlobal('indexedDB', originalIndexedDB);
+        });
+
         it('should store and retrieve a string', async () => {
             await browserStorage.setItem('str', 'hello');
             const value = await browserStorage.getItem<string>('str');

@@ -158,6 +158,7 @@ export const MoveSelectionCommand: ICommand<IMoveSelectionCommandParams> = {
             selections,
             type: SelectionMoveType.MOVE_END,
             extra,
+            fromCurrentSelection: params.fromCurrentSelection,
             reveal: true,
         } as ISetSelectionsOperationParams);
         return rs;
@@ -180,7 +181,7 @@ export const MoveSelectionEnterAndTabCommand: ICommand<IMoveSelectionEnterAndTab
         if (!target) return false;
 
         const { workbook, worksheet } = target;
-        const selectionsService = getSelectionsService(accessor);
+        const selectionsService = getSelectionsService(accessor, params.fromCurrentSelection);
         const { direction, keycode } = params;
         const isReverse = direction === Direction.LEFT || direction === Direction.UP;
 
@@ -192,8 +193,8 @@ export const MoveSelectionEnterAndTabCommand: ICommand<IMoveSelectionEnterAndTab
         }
         // for shift tab or shift enter, the direction should be reversed. so we need find the previous selection.
         const delta = isReverse ? -1 : 1;
-        const nextSelection = currentSelectionIndex + delta !== selections.length ? selections[currentSelectionIndex + delta] : selections[0];
-        const nextSelectionIndex = selections.findIndex((s) => s === nextSelection);
+        const nextSelectionIndex = (currentSelectionIndex + delta + selections.length) % selections.length;
+        const nextSelection = selections[nextSelectionIndex];
 
         const unitId = workbook.getUnitId();
         const sheetId = worksheet.getSheetId();
@@ -269,7 +270,7 @@ export const MoveSelectionEnterAndTabCommand: ICommand<IMoveSelectionEnterAndTab
         } else {
             // Handle the regular situation of moving the selection area.
             if (keycode === KeyCode.TAB) {
-                if (shortcutExperienceParam == null) {
+                if (direction === Direction.RIGHT && shortcutExperienceParam == null) {
                     shortcutExperienceService.addOrUpdate({
                         unitId,
                         sheetId,
@@ -336,6 +337,7 @@ export const MoveSelectionEnterAndTabCommand: ICommand<IMoveSelectionEnterAndTab
             selections,
             reveal: true,
             extra: params.extra,
+            fromCurrentSelection: params.fromCurrentSelection,
         });
         const renderManagerService = accessor.get(IRenderManagerService);
         const selectionService = renderManagerService.getRenderUnitById(unitId)?.with(ISheetSelectionRenderService);

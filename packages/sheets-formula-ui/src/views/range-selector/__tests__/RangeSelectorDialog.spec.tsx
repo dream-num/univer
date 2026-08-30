@@ -477,4 +477,65 @@ describe('RangeSelectorDialog', () => {
         ]]);
         expect(RangeDialogState.closed).toBe(0);
     });
+
+    it('renders a compact mobile range picker and keeps the canvas area unmasked', async () => {
+        const injector = createRangeDialogTestBed();
+        act(() => {
+            root.render(
+                <RediContext.Provider value={{ injector }}>
+                    <RangeSelectorDialog
+                        visible
+                        mobile
+                        initialValue={[{
+                            unitId: 'book-1',
+                            sheetName: 'Sheet1',
+                            range: {
+                                startRow: 0,
+                                endRow: 1,
+                                startColumn: 0,
+                                endColumn: 1,
+                                rangeType: RANGE_TYPE.NORMAL,
+                            },
+                        }]}
+                        unitId="book-1"
+                        subUnitId="sheet-1"
+                        maxRangeCount={1}
+                        onConfirm={(ranges) => RangeDialogState.confirmed.push(ranges)}
+                        onClose={() => {
+                            RangeDialogState.closed += 1;
+                        }}
+                    />
+                </RediContext.Provider>
+            );
+        });
+
+        const dialog = document.body.querySelector('[role="dialog"]');
+        const picker = dialog?.parentElement;
+        expect(picker).toBeTruthy();
+        expect(picker?.className).toContain('univer-pointer-events-none');
+        expect(dialog?.className).toContain('univer-pointer-events-auto');
+        const input = picker?.querySelector('input');
+        expect(input).toBeInstanceOf(HTMLInputElement);
+        if (!(input instanceof HTMLInputElement)) {
+            throw new TypeError('Mobile range selector input was not rendered.');
+        }
+        expect(input.value).toBe('Sheet1!A1:B2');
+
+        await emitSelection(injector, {
+            startRow: 3,
+            endRow: 6,
+            startColumn: 0,
+            endColumn: 2,
+            rangeType: RANGE_TYPE.NORMAL,
+        });
+
+        expect(input.value).toBe('A4:C7');
+        await clickButton('Confirm');
+        expect(RangeDialogState.confirmed[0][0].range).toEqual(expect.objectContaining({
+            startRow: 3,
+            endRow: 6,
+            startColumn: 0,
+            endColumn: 2,
+        }));
+    });
 });

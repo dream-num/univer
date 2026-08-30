@@ -35,4 +35,3 @@ univer.registerPlugin(UniverDocsPlugin);
 - [Documentation](https://docs.univer.ai)
 - [NPM package](https://npmjs.com/package/@univerjs/docs)
 - [GitHub repository](https://github.com/dream-num/univer)
-

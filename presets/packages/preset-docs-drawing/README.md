@@ -10,7 +10,7 @@
 
 | Package                         | CSS | Locales | Facade entry |
 | ------------------------------- | :-: | :-----: | :----------: |
-| `@univerjs/preset-docs-drawing` | Yes |   Yes   |      No      |
+| `@univerjs/preset-docs-drawing` | Yes |   Yes   |     Yes      |
 
 ## Installation
 

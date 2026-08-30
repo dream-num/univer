@@ -15,15 +15,17 @@
  */
 
 import type { IShortcutItem } from '@univerjs/ui';
-import { QuickSumCommand } from '@univerjs/sheets-formula';
+import type { IInsertFunctionOperationParams } from '../../commands/operations/insert-function.operation';
 import { whenSheetEditorFocused } from '@univerjs/sheets-ui';
 import { KeyCode, MetaKeys } from '@univerjs/ui';
+import { InsertFunctionOperation } from '../../commands/operations/insert-function.operation';
 
-export const QuickSumShortcut: IShortcutItem = {
-    id: QuickSumCommand.id,
+export const QuickSumShortcut: IShortcutItem<IInsertFunctionOperationParams> = {
+    id: InsertFunctionOperation.id,
     binding: MetaKeys.ALT | KeyCode.EQUAL,
     preconditions: whenSheetEditorFocused,
     mac: MetaKeys.CTRL_COMMAND | MetaKeys.ALT | KeyCode.EQUAL,
+    staticParameters: { value: 'SUM' },
     description: 'sheets-formula-ui.shortcut.quick-sum',
     group: '4_sheet-edit',
     groupTitle: 'sheets-ui.shortcut.sheet-edit',

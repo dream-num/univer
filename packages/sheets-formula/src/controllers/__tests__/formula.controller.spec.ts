@@ -15,28 +15,21 @@
  */
 
 import { ICommandService } from '@univerjs/core';
-import { afterEach, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { InsertFunctionCommand } from '../../commands/commands/insert-function.command';
-import { QuickSumCommand } from '../../commands/commands/quick-sum.command';
 import { createFacadeTestBed } from '../../facade/__tests__/create-test-bed';
 import { FormulaController } from '../formula.controller';
 
 describe('FormulaController', () => {
-    afterEach(() => {
-        // each test disposes its own univer instance
-    });
-
-    it('registers formula-related commands through the real command service', () => {
+    it('registers InsertFunctionCommand through the real command service', () => {
         const testBed = createFacadeTestBed(undefined, [[FormulaController]]);
         const commandService = testBed.injector.get(ICommandService);
 
         expect(commandService.hasCommand(InsertFunctionCommand.id)).toBe(false);
-        expect(commandService.hasCommand(QuickSumCommand.id)).toBe(false);
 
         testBed.injector.get(FormulaController);
 
         expect(commandService.hasCommand(InsertFunctionCommand.id)).toBe(true);
-        expect(commandService.hasCommand(QuickSumCommand.id)).toBe(true);
 
         testBed.univer.dispose();
     });

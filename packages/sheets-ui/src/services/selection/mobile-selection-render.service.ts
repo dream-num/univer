@@ -40,7 +40,7 @@ import {
     toDisposable,
 } from '@univerjs/core';
 import { ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
-import { attachSelectionWithCoord, convertSelectionDataToRange, REF_SELECTIONS_ENABLED, SelectionMoveType, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
+import { attachSelectionWithCoord, convertSelectionDataToRange, REF_SELECTIONS_ENABLED, SelectionMoveType, SELECTIONS_ENABLED, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
 import { distinctUntilChanged, merge, startWith } from 'rxjs';
 import { MOBILE_EXPANDING_SELECTION, MOBILE_PINCH_ZOOMING } from '../../consts/mobile-context';
@@ -60,8 +60,12 @@ enum ExpandingControl {
     BOTTOM = 'bottom',
 }
 
-export function shouldKeepCurrentSelectionOnMobileLongPress(currentSelections: IRange[], targetRange: IRange): boolean {
+export function shouldKeepCurrentSelectionOnMobileTap(currentSelections: IRange[], targetRange: IRange): boolean {
     return currentSelections.some((selection) => Rectangle.contains(selection, targetRange));
+}
+
+export function shouldHandleMobileNormalSelectionPointerDown(refSelectionsEnabled: boolean, pinchZooming: boolean): boolean {
+    return !refSelectionsEnabled && !pinchZooming;
 }
 
 export class MobileSheetsSelectionRenderService extends BaseSelectionRenderService implements IRenderModule {
@@ -103,6 +107,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
     private _init() {
         const sheetObject = this._getSheetObject();
 
+        this._contextService.setContextValue(SELECTIONS_ENABLED, true);
         this._initEventListeners(sheetObject);
         this._initSelectionChangeListener();
         // this._initThemeChangeListener();
@@ -198,6 +203,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         this.disposeWithMe(spreadsheetLeftTopPlaceholder?.onPointerDown$.subscribeEvent((_evt: IPointerEvent | IMouseEvent, state: EventState) => {
             if (this._normalSelectionDisabled()) return;
 
+            scene.getTransformer()?.clearSelectedObjects();
             this._reset(); // remove all other selections
 
             const skeleton = this._sheetSkeletonManagerService.getCurrentParam()!.skeleton;
@@ -228,8 +234,12 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
             this._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
         };
         const spreadsheetPointerDownSub = spreadsheet?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
-            // Don't start long press timer during pinch zoom
-            if (this._contextService.getContextValue(MOBILE_PINCH_ZOOMING)) return;
+            if (!shouldHandleMobileNormalSelectionPointerDown(
+                this._normalSelectionDisabled(),
+                this._contextService.getContextValue(MOBILE_PINCH_ZOOMING)
+            )) {
+                return;
+            }
             pointerDownPos.x = evt.offsetX;
             pointerDownPos.y = evt.offsetY;
 
@@ -263,7 +273,8 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
                 if (disabled) {
                     this._renderDisposable?.dispose();
                     this._renderDisposable = null;
-                    this._reset();
+                    // The mobile in-cell editor is hidden, so this control is the only visible marker
+                    // for the cell being edited while formula reference controls are rendered separately.
                 } else {
                     this._renderDisposable = toDisposable(
                         this.selectionMoveEnd$.subscribe((params) => this._updateSelections(params, SelectionMoveType.MOVE_END))
@@ -331,6 +342,18 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         // const { rangeWithCoord: cursorCellRange, primaryWithCoord: primaryCursorCellRange } = cursorCellRangeInfo;
         const selectCell = this._skeleton.getCellByOffset(offsetX, offsetY, scaleX, scaleY, scrollXY);
         if (!selectCell) return;
+
+        scene.getTransformer()?.clearSelectedObjects();
+        if (
+            rangeType === RANGE_TYPE.NORMAL &&
+            shouldKeepCurrentSelectionOnMobileTap(
+                this._workbookSelections.getCurrentSelections().map((selection) => selection.range),
+                selectCell
+            )
+        ) {
+            return;
+        }
+
         switch (rangeType) {
             case RANGE_TYPE.NORMAL:
                 break;
@@ -382,7 +405,8 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
      * Not same as PC version,
      * new selection control for mobile do one more thing: bind event for two control points.
      * @param scene
-     * @param rangeType
+     * @param skeleton
+     * @param selection
      */
     override newSelectionControl(scene: Scene, skeleton: SpreadsheetSkeleton, selection: ISelectionWithStyle): MobileSelectionControl {
         const selectionControls = this.getSelectionControls();
@@ -594,8 +618,8 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         activeSelectionControl: MobileSelectionControl,
         rangeType: RANGE_TYPE,
         scrollTimerType: ScrollTimerType = ScrollTimerType.ALL,
-        moveStartPosX: number,
-        moveStartPosY: number
+        _moveStartPosX: number,
+        _moveStartPosY: number
     ): void {
         this._scrollTimer = ScrollTimer.create(this._scene, scrollTimerType);
         this._scrollTimer.startScroll(viewportMain?.left ?? 0, viewportMain?.top ?? 0, viewportMain);

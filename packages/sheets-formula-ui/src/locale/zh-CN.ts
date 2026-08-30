@@ -78,6 +78,15 @@ const locale: typeof enUS = {
             syntax: '语法',
         },
 
+        mobileFunction: {
+            title: '插入函数',
+            recommended: '推荐',
+            recent: '最近',
+            details: '详情',
+            insert: '插入函数',
+            empty: '暂无函数',
+            close: '关闭',
+        },
         operation: {
             copyFormulaOnly: '仅复制公式',
             pasteFormula: '仅粘贴公式',

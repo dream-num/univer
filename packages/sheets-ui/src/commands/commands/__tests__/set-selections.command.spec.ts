@@ -709,6 +709,44 @@ describe('Test commands used for change selections', () => {
             commandService.registerCommand(MoveSelectionEnterAndTabCommand);
         });
 
+        it('should move a single-cell selection left for Shift+Tab', async () => {
+            select(1, 1, 1, 1, 1, 1, false, false);
+
+            await commandService.executeCommand<IMoveSelectionEnterAndTabCommandParams>(MoveSelectionEnterAndTabCommand.id, {
+                direction: Direction.LEFT,
+                keycode: KeyCode.TAB,
+            });
+
+            expectSelectionToBe(1, 0, 1, 0);
+        });
+
+        it('should move down from the current cell after Shift+Tab', async () => {
+            select(2, 2, 2, 2, 2, 2, false, false);
+
+            await commandService.executeCommand<IMoveSelectionEnterAndTabCommandParams>(MoveSelectionEnterAndTabCommand.id, {
+                direction: Direction.LEFT,
+                keycode: KeyCode.TAB,
+            });
+            expectSelectionToBe(2, 1, 2, 1);
+
+            await commandService.executeCommand<IMoveSelectionEnterAndTabCommandParams>(MoveSelectionEnterAndTabCommand.id, {
+                direction: Direction.DOWN,
+                keycode: KeyCode.ENTER,
+            });
+            expectSelectionToBe(3, 1, 3, 1);
+        });
+
+        it('should move a single-cell selection up for Shift+Enter', async () => {
+            select(1, 1, 1, 1, 1, 1, false, false);
+
+            await commandService.executeCommand<IMoveSelectionEnterAndTabCommandParams>(MoveSelectionEnterAndTabCommand.id, {
+                direction: Direction.UP,
+                keycode: KeyCode.ENTER,
+            });
+
+            expectSelectionToBe(0, 1, 0, 1);
+        });
+
         it('should move active cell inside multi-selections and wrap to the next selection', async () => {
             const refreshSelectionMoveEnd = vi.fn();
             const renderManagerService = get(IRenderManagerService);

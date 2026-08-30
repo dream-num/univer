@@ -73,6 +73,7 @@ import { useSheetSelectionChange } from './hooks/use-sheet-selection-change';
 import { useStateRef } from './hooks/use-state-ref';
 import { useSwitchSheet } from './hooks/use-switch-sheet';
 import { useVerify } from './hooks/use-verify';
+import { MobileFunctionPanel } from './mobile-function-panel/MobileFunctionPanel';
 import { SearchFunction } from './search-function/SearchFunction';
 import { getFormulaText } from './utils/get-formula-text';
 
@@ -108,6 +109,11 @@ export interface IFormulaEditorProps {
         backgroundColor?: string;
         fontSize?: number;
     };
+    mobile?: boolean;
+    mobileFxRequest?: number;
+    mobileFunctionPanelRequest?: number;
+    mobileOperatorRequest?: { id: number; value: string };
+    onMobileFormulaActiveChange?: (active: boolean) => void;
 }
 
 export interface IFormulaEditorRef {
@@ -148,6 +154,40 @@ export function syncCounterpartFormulaEditorSelection(
     editorService.getEditor(syncEditorId)?.setSelectionRanges(selections, false);
 }
 
+export function buildFormulaFunctionInsertion(
+    formulaText: string,
+    selection: Pick<ITextRange, 'startOffset' | 'endOffset'> | undefined,
+    functionName: string
+): { text: string; caretOffset: number } {
+    const normalizedText = formulaText.replace(/\r?\n$/, '');
+    const text = normalizedText.startsWith('=') ? normalizedText : `=${normalizedText}`;
+    const selectionAdjustment = normalizedText.startsWith('=') ? 0 : 1;
+    const startOffset = Math.max(1, Math.min(text.length, (selection?.startOffset ?? text.length) + selectionAdjustment));
+    const endOffset = Math.max(startOffset, Math.min(text.length, (selection?.endOffset ?? startOffset) + selectionAdjustment));
+
+    return {
+        text: `${text.slice(0, startOffset)}${functionName}()${text.slice(endOffset)}`,
+        caretOffset: startOffset + functionName.length + 1,
+    };
+}
+
+export function buildFormulaOperatorInsertion(
+    formulaText: string,
+    selection: Pick<ITextRange, 'startOffset' | 'endOffset'> | undefined,
+    value: string
+): { text: string; caretOffset: number } {
+    const normalizedText = formulaText.replace(/\r?\n$/, '');
+    const text = normalizedText.startsWith('=') ? normalizedText : `=${normalizedText}`;
+    const selectionAdjustment = normalizedText.startsWith('=') ? 0 : 1;
+    const startOffset = Math.max(1, Math.min(text.length, (selection?.startOffset ?? text.length) + selectionAdjustment));
+    const endOffset = Math.max(startOffset, Math.min(text.length, (selection?.endOffset ?? startOffset) + selectionAdjustment));
+
+    return {
+        text: `${text.slice(0, startOffset)}${value}${text.slice(endOffset)}`,
+        caretOffset: startOffset + value.length,
+    };
+}
+
 export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IFormulaEditorRef>) => {
     const {
         errorText,
@@ -175,6 +215,11 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
         style,
         borderless = false,
         canvasStyle,
+        mobile = false,
+        mobileFxRequest,
+        mobileFunctionPanelRequest,
+        mobileOperatorRequest,
+        onMobileFormulaActiveChange: propOnMobileFormulaActiveChange,
     } = props;
 
     const editorService = useDependency(IEditorService);
@@ -191,6 +236,7 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
         },
     }));
     const onFormulaSelectingChange = useEvent(propOnFormulaSelectingChange);
+    const onMobileFormulaActiveChange = useEvent(propOnMobileFormulaActiveChange);
     const searchFunctionRef = useRef<HTMLElement>(null);
     const editorRef = useRef<Editor>(undefined);
     const [editor, setEditor] = useState<Editor>();
@@ -212,7 +258,16 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
     const formulaTextRef = useStateRef(formulaText);
     const formulaWithoutEqualSymbol = useMemo(() => getFormulaText(formulaText), [formulaText]);
     const sequenceNodes = useMemo(() => getFormulaToken(formulaWithoutEqualSymbol), [formulaWithoutEqualSymbol, getFormulaToken]);
-    const { isSelecting, isSelectingRef } = useFormulaSelecting({ unitId, subUnitId, editor, editorId, isFocus, disableOnClick: disableSelectionOnClick });
+    const [mobileFunctionPanelOpen, setMobileFunctionPanelOpen] = useState(false);
+    const { isSelecting, isSelectingRef } = useFormulaSelecting({
+        unitId,
+        subUnitId,
+        editor,
+        editorId,
+        isFocus,
+        disableOnClick: disableSelectionOnClick,
+        resetSignal: mobile ? mobileFxRequest : undefined,
+    });
     const highTextRef = useRef('');
     const renderManagerService = useDependency(IRenderManagerService);
     const renderer = renderManagerService.getRenderUnitById(editorId);
@@ -233,6 +288,12 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
     useUpdateEffect(() => {
         onChange(formulaText);
     }, [formulaText, onChange]);
+
+    useEffect(() => {
+        if (mobile) {
+            onMobileFormulaActiveChange?.(formulaText.replace(/\r?\n$/, '').startsWith('='));
+        }
+    }, [formulaText, mobile, onMobileFormulaActiveChange]);
 
     useEffect(() => {
         if (!isFocus || !editor) {
@@ -260,6 +321,21 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
 
         return () => subscription.unsubscribe();
     }, [editor, editorId, editorService, isFocus]);
+
+    const handledMobileFunctionPanelRequestRef = useRef(mobileFunctionPanelRequest);
+    useEffect(() => {
+        if (
+            !mobile ||
+            mobileFunctionPanelRequest === undefined ||
+            mobileFunctionPanelRequest === handledMobileFunctionPanelRequestRef.current
+        ) {
+            return;
+        }
+
+        handledMobileFunctionPanelRequestRef.current = mobileFunctionPanelRequest;
+        setMobileFunctionPanelOpen(true);
+        editor?.blur();
+    }, [editor, mobile, mobileFunctionPanelRequest]);
 
     const highlightDoc = useDocHight('=');
     const highlightSheet = useSheetHighlight(unitId, subUnitId);
@@ -454,7 +530,7 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
     }, [_isFocus, docSelectionRenderService, editor, focus, resetSelection, resetSelectionOnBlur]);
 
     const { checkScrollBar } = useResize(editor, isSingle, autoScrollbar);
-    useRefactorEffect(isFocus, isSelecting, unitId, editorId, disableContextMenu);
+    useRefactorEffect(isFocus, isSelecting, unitId, editorId, disableContextMenu, mobile);
     useLeftAndRightArrow(Boolean(isFocus && isFocusing && moveCursor), selectingMode, editor, onMoveInEditor, getRefSelectionCount);
 
     const handleSelectionChange = useEvent((refString: string, offset: number, isEnd: boolean) => {
@@ -491,7 +567,8 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
         isSupportAcrossSheet,
         Boolean(selectingMode),
         editor,
-        handleSelectionChange
+        handleSelectionChange,
+        mobile
     );
     useSwitchSheet(isFocus && Boolean(isSelecting && docFocusing), unitId, isSupportAcrossSheet, setIsFocus, onBlur, () => {
         highlight(formulaTextRef.current, false, true);
@@ -512,6 +589,67 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
             focus();
             highlight(`=${res.text}`);
         }
+    };
+
+    const closeMobileFunctionPanel = () => {
+        setMobileFunctionPanelOpen(false);
+        requestAnimationFrame(() => focus());
+    };
+
+    const applyMobileInsertion = useEvent((result: { text: string; caretOffset: number }) => {
+        if (!editor) return;
+        const selection = {
+            startOffset: result.caretOffset,
+            endOffset: result.caretOffset,
+            collapsed: true,
+        };
+
+        editor.replaceText(result.text, false);
+        editor.setSelectionRanges([selection], false);
+
+        const counterpartEditorId = editorId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY
+            ? DOCS_NORMAL_EDITOR_UNIT_ID_KEY
+            : editorId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY
+                ? DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY
+                : null;
+        if (counterpartEditorId) {
+            const counterpartEditor = editorService.getEditor(counterpartEditorId);
+            counterpartEditor?.replaceText(result.text, false);
+            counterpartEditor?.setSelectionRanges([selection], false);
+        }
+
+        highlight(result.text, false, true, [selection]);
+        requestAnimationFrame(() => focus());
+    });
+
+    const handledMobileOperatorRequestRef = useRef(mobileOperatorRequest?.id);
+    useEffect(() => {
+        if (
+            !mobile ||
+            !editor ||
+            !mobileOperatorRequest?.value ||
+            mobileOperatorRequest.id === handledMobileOperatorRequestRef.current
+        ) {
+            return;
+        }
+
+        handledMobileOperatorRequestRef.current = mobileOperatorRequest.id;
+        const currentText = BuildTextUtils.transform.getPlainText(editor.getDocumentData().body?.dataStream ?? '');
+        applyMobileInsertion(buildFormulaOperatorInsertion(
+            currentText,
+            editor.getSelectionRanges()?.[0],
+            mobileOperatorRequest.value
+        ));
+    }, [applyMobileInsertion, editor, mobile, mobileOperatorRequest]);
+
+    const handleMobileFunctionInsert = (functionName: string) => {
+        if (!editor) return;
+
+        const currentText = BuildTextUtils.transform.getPlainText(editor.getDocumentData().body?.dataStream ?? '');
+        const currentSelection = editor.getSelectionRanges()?.[0];
+        const result = buildFormulaFunctionInsertion(currentText, currentSelection, functionName);
+        applyMobileInsertion(result);
+        setMobileFunctionPanelOpen(false);
     };
 
     const handleMouseUp = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -555,7 +693,7 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
                     {errorText}
                 </div>
             )}
-            {(functionScreenTips && editor && formulaWithoutEqualSymbol !== '') && (
+            {(!mobile && functionScreenTips && editor && formulaWithoutEqualSymbol !== '') && (
                 <HelpFunction
                     editor={editor}
                     isFocus={isFocus}
@@ -570,8 +708,14 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
                     onSelect={handleFunctionSelect}
                     ref={searchFunctionRef}
                     editor={editor}
+                    mobile={mobile}
                 />
             )}
+            <MobileFunctionPanel
+                open={mobile && mobileFunctionPanelOpen}
+                onClose={closeMobileFunctionPanel}
+                onInsert={handleMobileFunctionInsert}
+            />
         </div>
     );
 });

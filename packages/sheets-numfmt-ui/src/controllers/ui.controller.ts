@@ -52,6 +52,7 @@ import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { ISidebarService } from '@univerjs/ui';
 import { combineLatest, merge, Observable } from 'rxjs';
 import { debounceTime, map, switchMap, tap } from 'rxjs/operators';
+import { SetMobileNumfmtCommand } from '../commands/commands/set-mobile-numfmt.command';
 import { CloseNumfmtPanelOperator } from '../commands/operations/close.numfmt.panel.operation';
 import { OpenNumfmtPanelOperator } from '../commands/operations/open.numfmt.panel.operation';
 
@@ -188,6 +189,7 @@ export class SheetNumfmtUIController extends Disposable {
         [
             OpenNumfmtPanelOperator,
             CloseNumfmtPanelOperator,
+            SetMobileNumfmtCommand,
         ].forEach((config) => {
             this.disposeWithMe(this._commandService.registerCommand(config));
         });

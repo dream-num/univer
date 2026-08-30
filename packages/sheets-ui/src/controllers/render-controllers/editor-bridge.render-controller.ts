@@ -29,10 +29,12 @@ import {
     SetWorksheetActiveOperation,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
+import { DISABLE_AUTO_FOCUS_KEY } from '@univerjs/ui';
 import { filter, merge } from 'rxjs';
 import { SetZoomRatioCommand } from '../../commands/commands/set-zoom-ratio.command';
 import { SetActivateCellEditOperation } from '../../commands/operations/activate-cell-edit.operation';
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
+import { MOBILE_KEYBOARD_VISIBLE } from '../../consts/mobile-context';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { ISheetEmbedRuntimeFocusCoordinator, SHEET_EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE } from '../../services/sheet-embed-integration.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
@@ -89,6 +91,31 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
             this._selectionManagerService.selectionMoveStart$
         ).subscribe((params) => this._updateEditorPosition(params)));
         d.add(this._selectionManagerService.selectionMoveEnd$.subscribe((params) => {
+            if (
+                this._contextService.getContextValue(MOBILE_KEYBOARD_VISIBLE) &&
+                !this._editorBridgeService.isForceKeepVisible()
+            ) {
+                const primary = params?.[params.length - 1]?.primary;
+                if (!primary) {
+                    return;
+                }
+
+                if (this._editorBridgeService.isVisible().visible) {
+                    this._commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, {
+                        visible: false,
+                        eventType: DeviceInputEventType.PointerDown,
+                        unitId: this._context.unitId,
+                    });
+                }
+                this._updateEditorPosition(params);
+                this._commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, {
+                    visible: true,
+                    eventType: DeviceInputEventType.PointerDown,
+                    unitId: this._context.unitId,
+                });
+                return;
+            }
+
             this._updateEditorPosition(params);
             if (params?.[params.length - 1]?.primary) {
                 this._updateInputPosition();
@@ -220,6 +247,9 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
             const docSelectionRenderService = render.with(DocSelectionRenderService);
             if (docSelectionRenderService) {
                 disposable = toDisposable(docSelectionRenderService.onInputBefore$.subscribe((config) => {
+                    if (this._contextService.getContextValue(DISABLE_AUTO_FOCUS_KEY)) {
+                        return;
+                    }
                     if (!this._isCurrentSheetFocused()) {
                         return;
                     }
@@ -250,6 +280,7 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
     private _initSheetFocusListener(d: DisposableCollection) {
         d.add(this._contextService.subscribeContextValue$(FOCUSING_SHEET).subscribe((isFocusingSheet) => {
             if (
+                this._contextService.getContextValue(DISABLE_AUTO_FOCUS_KEY) ||
                 !isFocusingSheet ||
                 !this._isCurrentSheetFocused() ||
                 this._contextService.getContextValue(FOCUSING_FX_BAR_EDITOR) ||
@@ -318,6 +349,10 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
     }
 
     private _tryHideEditor(evt?: Event | { target?: EventTarget | null; clientX?: number; clientY?: number; x?: number; y?: number }) {
+        if (this._contextService.getContextValue(MOBILE_KEYBOARD_VISIBLE)) {
+            return;
+        }
+
         // In the activated state of formula editing,
         // prohibit closing the editor according to the state to facilitate generating selection reference text.
         if (this._editorBridgeService.isForceKeepVisible()) {

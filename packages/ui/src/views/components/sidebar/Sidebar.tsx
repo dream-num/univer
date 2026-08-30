@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ReactNode } from 'react';
+import type { Attributes, ReactNode } from 'react';
 import type { LocaleKey } from '../../../locale/types';
 import type { ICustomLabelProps } from '../../custom-label/CustomLabel';
 import { LocaleService } from '@univerjs/core';
@@ -25,11 +25,13 @@ import { ISidebarService } from '../../../services/sidebar/sidebar.service';
 import { useDependency, useObservable } from '../../../utils/di';
 import { CustomLabel } from '../../custom-label/CustomLabel';
 
+type SidebarCustomLabelProps = ICustomLabelProps & Attributes;
+
 export interface ISidebarMethodOptions {
     id?: string;
-    header?: ICustomLabelProps;
-    children?: ICustomLabelProps;
-    footer?: ICustomLabelProps;
+    header?: SidebarCustomLabelProps;
+    children?: SidebarCustomLabelProps;
+    footer?: SidebarCustomLabelProps;
 
     visible?: boolean;
 
@@ -37,6 +39,31 @@ export interface ISidebarMethodOptions {
 
     onClose?: (id?: string) => void;
     onOpen?: () => void;
+}
+
+export interface IRenderedSidebarOptions extends Omit<ISidebarMethodOptions, 'children' | 'footer' | 'header'> {
+    children?: ReactNode;
+    footer?: ReactNode;
+    header?: ReactNode;
+}
+
+export function renderSidebarOptions(options?: ISidebarMethodOptions): IRenderedSidebarOptions | null {
+    if (!options) return null;
+
+    const { children, footer, header, ...rest } = options;
+    const renderLabel = (label?: SidebarCustomLabelProps) => {
+        if (!label) return undefined;
+
+        const { key, ...props } = label;
+        return <CustomLabel key={key} {...props} />;
+    };
+
+    return {
+        ...rest,
+        children: renderLabel(children),
+        footer: renderLabel(footer),
+        header: renderLabel(header),
+    };
 }
 
 const MIN_SIDEBAR_WIDTH = 280;
@@ -52,31 +79,7 @@ export function Sidebar() {
     const [isDragging, setIsDragging] = useState(false);
     const dragWidthRef = useRef<number | null>(null);
 
-    const options = useMemo(() => {
-        if (!sidebarOptions) {
-            return null;
-        }
-
-        const copy = { ...sidebarOptions } as Omit<ISidebarMethodOptions, 'children'> & {
-            children?: ReactNode;
-            header?: ReactNode;
-            footer?: ReactNode;
-        };
-
-        for (const key of ['children', 'header', 'footer']) {
-            const k = key as keyof ISidebarMethodOptions;
-
-            if (sidebarOptions[k]) {
-                const { key: itemKey, ...props } = sidebarOptions[k] as any;
-
-                if (props) {
-                    (copy as any)[k] = <CustomLabel key={itemKey} {...props} />;
-                }
-            }
-        }
-
-        return copy;
-    }, [sidebarOptions]);
+    const options = useMemo(() => renderSidebarOptions(sidebarOptions), [sidebarOptions]);
 
     // Focus management: move focus into the sidebar when it opens
     useEffect(() => {

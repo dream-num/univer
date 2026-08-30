@@ -183,6 +183,13 @@ describe('test case in html and udm convert', () => {
             expect(udm.body?.dataStream).toBe('Nové místo Plasy parkoviště u lékařského domu\r');
         });
 
+        it('should preserve collapsed spaces between inline formatting runs', () => {
+            const convertor = new HtmlToUDMService();
+            const udm = convertor.convert('<p><b>Bold</b> <i>Italic</i> <span>Plain</span></p>');
+
+            expect(udm.body?.dataStream).toBe('Bold Italic Plain\r');
+        });
+
         it('should preserve Word mso spacer and tab runs', () => {
             const convertor = new HtmlToUDMService();
             const udm = convertor.convert('<p class="MsoNormal"><span>New</span><span style="mso-spacerun:yes">&nbsp;&nbsp;&nbsp;</span><span>place</span><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;</span><span>Plasy</span></p>');

@@ -17,11 +17,12 @@
 import type { IDocumentData } from '@univerjs/core';
 import type { RefObject } from 'react';
 import { validateDocBodyStructure } from '@univerjs/core';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { useEditor } from '../use-editor';
 
-const { editor, getEditor, register, setEditor } = vi.hoisted(() => ({
-    editor: {},
+const { editor, focus, getEditor, register, setEditor } = vi.hoisted(() => ({
+    editor: { setSelectionRanges: vi.fn() },
+    focus: vi.fn(),
     getEditor: vi.fn(),
     register: vi.fn(),
     setEditor: vi.fn(),
@@ -29,7 +30,7 @@ const { editor, getEditor, register, setEditor } = vi.hoisted(() => ({
 
 vi.mock('@univerjs/ui', async (importOriginal) => ({
     ...await importOriginal<typeof import('@univerjs/ui')>(),
-    useDependency: () => ({ getEditor, register }),
+    useDependency: () => ({ focus, getEditor, register }),
 }));
 
 vi.mock('react', async (importOriginal) => ({
@@ -40,6 +41,11 @@ vi.mock('react', async (importOriginal) => ({
 }));
 
 describe('useEditor', () => {
+    afterEach(() => {
+        vi.clearAllMocks();
+        vi.unstubAllGlobals();
+    });
+
     it('registers a structurally valid document for a string initial value', () => {
         getEditor.mockReturnValue(editor);
 
@@ -55,19 +61,46 @@ describe('useEditor', () => {
         expect(snapshot.body?.paragraphs?.map((paragraph) => paragraph.startIndex)).toEqual([2]);
     });
 
-    it('registers an editor that preserves its host focus', () => {
+    it('registers an editor with its host focus and canvas style', () => {
         getEditor.mockReturnValue(editor);
+        const canvasStyle = { backgroundColor: '#000000' };
 
         useEditor({
             editorId: 'range-editor',
             initialValue: 'A1',
             container: { current: { clientWidth: 320 } } as RefObject<HTMLDivElement>,
             preserveHostFocus: true,
+            canvasStyle,
         });
 
         expect(register).toHaveBeenLastCalledWith(
-            expect.objectContaining({ preserveHostFocus: true }),
+            expect.objectContaining({ canvasStyle, preserveHostFocus: true }),
             expect.anything()
         );
+    });
+
+    it('restores an auto-focused cursor at the content end after layout', () => {
+        let frameCallback: FrameRequestCallback | undefined;
+        vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
+            frameCallback = callback;
+            return 1;
+        });
+        getEditor.mockReturnValue(editor);
+
+        useEditor({
+            editorId: 'range-editor',
+            initialValue: 'A1',
+            container: { current: { clientWidth: 320 } } as RefObject<HTMLDivElement>,
+            autoFocus: true,
+        });
+
+        expect(focus).toHaveBeenCalledWith('range-editor');
+        expect(editor.setSelectionRanges).not.toHaveBeenCalled();
+        if (!frameCallback) {
+            throw new Error('Focus frame was not scheduled');
+        }
+        frameCallback(0);
+        expect(editor.setSelectionRanges).toHaveBeenLastCalledWith([{ startOffset: 2, endOffset: 2 }]);
+        expect(editor.setSelectionRanges).toHaveBeenCalledOnce();
     });
 });

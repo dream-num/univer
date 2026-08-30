@@ -75,6 +75,15 @@ const locale: typeof enUS = {
             allFunctions: 'Alle Funktionen',
             syntax: 'SYNTAX',
         },
+        mobileFunction: {
+            title: 'Funktion einfügen',
+            recommended: 'Empfohlen',
+            recent: 'Zuletzt verwendet',
+            details: 'Details',
+            insert: 'Funktion einfügen',
+            empty: 'Keine Funktionen',
+            close: 'Schließen',
+        },
         operation: {
             copyFormulaOnly: 'Nur Formel kopieren',
             pasteFormula: 'Formel einfügen',

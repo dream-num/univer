@@ -21,6 +21,7 @@ const locale: typeof enUS = {
         Accessibility: {
             closeBadge: '關閉徽章',
             close: '關閉',
+            menu: '選單',
             previous: '上一個',
             next: '下一個',
             imageGallery: '圖片庫',

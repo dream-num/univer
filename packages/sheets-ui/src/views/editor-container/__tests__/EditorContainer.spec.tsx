@@ -136,7 +136,7 @@ class TestEditorBridgeService {
     dispose(): void {}
 }
 
-function createTestBed(options: { docSelectionIsFocusing?: boolean; focusedUnitId?: string | null; sheetUnitIds?: string[] } = {}) {
+function createTestBed(options: { disableAutoFocus?: boolean; docSelectionIsFocusing?: boolean; focusedUnitId?: string | null; sheetUnitIds?: string[] } = {}) {
     const injector = new Injector();
     const componentManager = new ComponentManager();
     const focusCoordinator = new EmbedRuntimeFocusCoordinator();
@@ -164,6 +164,7 @@ function createTestBed(options: { docSelectionIsFocusing?: boolean; focusedUnitI
         isFocusing: options.docSelectionIsFocusing ?? true,
         focus: vi.fn(),
     };
+    const cellEditorManagerService = new TestCellEditorManagerService();
 
     latestFormulaEditorProps = undefined;
     componentManager.register(EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, (props: {
@@ -176,7 +177,7 @@ function createTestBed(options: { docSelectionIsFocusing?: boolean; focusedUnitI
     injector.add([Injector, injector]);
     injector.add([ComponentManager, componentManager]);
     injector.add([IEditorBridgeService, { useValue: editorBridgeService as never }]);
-    injector.add([ICellEditorManagerService, { useClass: TestCellEditorManagerService as never }]);
+    injector.add([ICellEditorManagerService, { useValue: cellEditorManagerService }]);
     injector.add([IEditorService, {
         useValue: {
             getEditor: () => ({
@@ -205,9 +206,9 @@ function createTestBed(options: { docSelectionIsFocusing?: boolean; focusedUnitI
     }]);
     injector.add([IContextService, {
         useValue: {
-            subscribeContextValue$: () => of(false),
+            subscribeContextValue$: () => of(options.disableAutoFocus ?? false),
             setContextValue: vi.fn(),
-            getContextValue: vi.fn(),
+            getContextValue: vi.fn(() => options.disableAutoFocus ?? false),
         } as never,
     }]);
     injector.add([ThemeService, {
@@ -232,7 +233,7 @@ function createTestBed(options: { docSelectionIsFocusing?: boolean; focusedUnitI
     injector.add([ISheetEmbedRuntimeFocusCoordinator, { useValue: focusCoordinator }]);
     injector.add([ISheetEmbedInteractionBoundaryService, { useValue: interactionBoundaryService }]);
 
-    return { injector, editorBridgeService, focusCoordinator, interactionBoundaryService, docSelectionRenderService, cellEditorResizeService, validViewportScrollInfo$, activeSheet$, otherSheet };
+    return { injector, editorBridgeService, focusCoordinator, interactionBoundaryService, docSelectionRenderService, cellEditorManagerService, cellEditorResizeService, validViewportScrollInfo$, activeSheet$, otherSheet };
 }
 
 function renderEditorContainer(root: Root, injector: Injector): void {
@@ -457,6 +458,65 @@ describe('EditorContainer embed focus lease', () => {
 
         activeSession!.dispose();
         runtimeScope!.dispose();
+        selectionContainer.remove();
+        hostCanvas.remove();
+    });
+
+    it('does not focus the hidden sheet editor when automatic focus is disabled', async () => {
+        const { injector, editorBridgeService, focusCoordinator } = createTestBed({
+            disableAutoFocus: true,
+            focusedUnitId: 'host-doc',
+            sheetUnitIds: ['scoped-child-sheet'],
+        });
+        const selectionContainer = document.createElement('div');
+        selectionContainer.id = `univer-doc-selection-container-${DOCS_NORMAL_EDITOR_UNIT_ID_KEY}`;
+        const internalEditor = document.createElement('div');
+        internalEditor.id = `__editor_${DOCS_NORMAL_EDITOR_UNIT_ID_KEY}`;
+        internalEditor.tabIndex = -1;
+        selectionContainer.appendChild(internalEditor);
+        document.body.appendChild(selectionContainer);
+        const hostCanvas = document.createElement('canvas');
+        hostCanvas.tabIndex = -1;
+        document.body.appendChild(hostCanvas);
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        editorBridgeService.changeVisible({
+            visible: false,
+            eventType: DeviceInputEventType.PointerUp,
+            unitId: 'scoped-child-sheet',
+        });
+        hostCanvas.focus();
+
+        await act(async () => {
+            renderEditorContainer(root!, injector);
+            await new Promise((resolve) => setTimeout(resolve, 0));
+        });
+
+        const runtimeScope = focusCoordinator.registerRuntimeScope({
+            embedId: 'embed-1',
+            hostUnitId: 'host-doc',
+            childUnitId: 'scoped-child-sheet',
+            childType: UniverInstanceType.UNIVER_SHEET,
+        });
+        const activeSession = focusCoordinator.acquireLease({
+            embedId: 'embed-1',
+            role: 'child-session',
+            owner: 'doc-block-stage2-runtime',
+            hostUnitId: 'host-doc',
+            childUnitId: 'scoped-child-sheet',
+            childType: UniverInstanceType.UNIVER_SHEET,
+        });
+
+        await act(async () => {
+            await new Promise((resolve) => setTimeout(resolve, 0));
+        });
+
+        expect(document.activeElement).toBe(hostCanvas);
+
+        activeSession.dispose();
+        runtimeScope.dispose();
         selectionContainer.remove();
         hostCanvas.remove();
     });
@@ -713,6 +773,20 @@ describe('EditorContainer embed focus lease', () => {
 
         expect(editorRoot.getAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE)).toBeNull();
         expect(editorRoot.getAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE)).toBeNull();
+    });
+
+    it('does not request editor focus while automatic focus is disabled', async () => {
+        const { cellEditorManagerService, injector } = createTestBed({ disableAutoFocus: true });
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        await act(async () => {
+            renderEditorContainer(root!, injector);
+            await new Promise((resolve) => setTimeout(resolve, 0));
+        });
+
+        expect(cellEditorManagerService.setFocus).not.toHaveBeenCalled();
     });
 
     it('does not keep refocusing the embedded sheet cell editor on delayed timers after it becomes visible', async () => {

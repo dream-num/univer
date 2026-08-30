@@ -1,9 +1,6 @@
 <div align="center">
 
-<picture>
-    <source media="(prefers-color-scheme: dark)" srcset="../img/banner-light.png">
-    <img src="../img/banner-dark.png" alt="Univer" width="420" />
-</picture>
+<img src="../img/banner.png" alt="Univer SDK" width="800" />
 
 **Un SDK ofimático full-stack e isomórfico para crear hojas de cálculo, documentos y presentaciones.**
 
@@ -23,7 +20,7 @@ renderizado basado en Canvas, un motor de fórmulas y una Facade API que funcion
 [![Stars](https://img.shields.io/github/stars/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/stargazers)
 [![Contributors](https://img.shields.io/github/contributors/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/graphs/contributors)
 [![Issues](https://img.shields.io/github/issues/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/issues)
-[![Last Commit](https://img.shields.io/github/last-commit/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/commits/main/)
+[![Last Commit](https://img.shields.io/github/last-commit/dream-num/univer?style=flat-square)](https://github.com/dream-num/univer/commits/dev/)
 
 [![Discord](https://img.shields.io/discord/1136129819961217077?logo=discord&logoColor=FFFFFF&label=discord&color=5865F2&style=flat-square)](https://discord.gg/z3NKNT6D2f)
 [![Twitter](https://img.shields.io/twitter/follow/univerhq?style=flat-square&logo=x)](https://twitter.com/univerhq)
@@ -228,7 +225,7 @@ Consulta más detalles en la [guía de instalación y uso básico](https://docs.
 | **Preset Mode** | Quieres una configuración funcional de Sheets, Docs o Node con mínima configuración. | Los [`presets/`](../../presets) de este repositorio y la [guía de inicio](https://docs.univer.ai/guides/sheets/getting-started/installation) |
 | **Headless Mode** | Necesitas procesamiento de libros/documentos en servidor, cálculo de fórmulas o automatización sin UI. | [Headless Univer](https://docs.univer.ai/guides/sheets/getting-started/node) |
 
-Mantén todos los paquetes `@univerjs/*` en la misma versión. Si usas paquetes de Univer Pro, mantén también alineadas las versiones de `@univerjs-pro/*`.
+Mantén en la misma versión los paquetes del SDK `@univerjs/*` que formen parte de una misma línea de lanzamiento coordinada de Univer. Los paquetes con un ciclo de publicación independiente, como `@univerjs/icons` y `@univerjs/icons-svg`, deben usar las versiones compatibles declaradas en los manifiestos de los paquetes, no la versión del SDK. Si usas paquetes de Univer Pro, mantén `@univerjs-pro/*` alineados con la línea de lanzamiento coordinada correspondiente.
 
 Para expectativas de compatibilidad de API, APIs experimentales, APIs internas y reglas de deprecación, consulta la [política de estabilidad de API](../API_STABILITY.md).
 

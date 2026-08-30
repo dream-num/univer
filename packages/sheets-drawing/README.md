@@ -39,4 +39,3 @@ Use this package with `@univerjs/sheets-drawing-ui` when users need drawing inte
 - [Documentation](https://docs.univer.ai)
 - [NPM package](https://npmjs.com/package/@univerjs/sheets-drawing)
 - [GitHub repository](https://github.com/dream-num/univer)
-

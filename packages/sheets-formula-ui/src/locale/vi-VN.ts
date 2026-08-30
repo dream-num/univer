@@ -78,6 +78,15 @@ const locale: typeof enUS = {
             syntax: 'Cú pháp',
         },
 
+        mobileFunction: {
+            title: 'Chèn hàm',
+            recommended: 'Đề xuất',
+            recent: 'Gần đây',
+            details: 'Chi tiết',
+            insert: 'Chèn hàm',
+            empty: 'Không có hàm',
+            close: 'Đóng',
+        },
         operation: {
             copyFormulaOnly: 'Chỉ sao chép công thức',
             pasteFormula: 'Chỉ dán công thức',

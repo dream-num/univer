@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import { CustomRangeType, Injector, IUniverInstanceService } from '@univerjs/core';
+import { ContextService, CustomRangeType, IContextService, Injector, IUniverInstanceService } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IEditorBridgeService, SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
+import { IDialogService } from '@univerjs/ui';
+import { of } from 'rxjs';
 import { describe, expect, it } from 'vitest';
 import { HyperLinkEditSourceType } from '../../types/enums/edit-source';
 import { SheetsHyperLinkPopupService } from '../popup.service';
@@ -101,14 +103,30 @@ class TestRenderManagerService {
     }
 }
 
+class TestDialogService {
+    open(): TestDisposable {
+        return new TestDisposable();
+    }
+
+    close(): void {}
+
+    closeAll(): void {}
+
+    getDialogs$() {
+        return of([]);
+    }
+}
+
 function createService() {
     const injector = new Injector();
 
+    injector.add([IContextService, { useClass: ContextService }]);
     injector.add([SheetCanvasPopManagerService, { useClass: TestSheetCanvasPopManagerService as never }]);
     injector.add([IUniverInstanceService, { useClass: TestUniverInstanceService as never }]);
     injector.add([IEditorBridgeService, { useClass: TestEditorBridgeService as never }]);
     injector.add([DocSelectionManagerService, { useClass: TestDocSelectionManagerService as never }]);
     injector.add([IRenderManagerService, { useClass: TestRenderManagerService as never }]);
+    injector.add([IDialogService, { useClass: TestDialogService }]);
     injector.add([SheetsHyperLinkPopupService]);
 
     return {

@@ -29,7 +29,7 @@ import {
     RANGE_TYPE,
     toDisposable,
 } from '@univerjs/core';
-import { IRenderManagerService, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
+import { IRenderManagerService, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import { ScrollToCellOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { ScrollCommand, SetScrollRelativeCommand } from '../../../commands/commands/set-scroll.command';
 import { ExpandSelectionCommand, MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../../commands/commands/set-selection.command';
@@ -316,9 +316,11 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
 
         const scene = sheetObject.scene;
         const spreadsheet = sheetObject.spreadsheet;
+        const transformer = scene.getTransformerByCreate();
         const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
         const lastTouchPos: IPoint = { x: 0, y: 0 };
         let _touchScrolling: boolean = false;
+        let _drawingTransforming: boolean = false;
 
         // Velocity tracking for smooth inertia (iOS-like)
         const velocity = { x: 0, y: 0 };
@@ -452,6 +454,16 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
             velocity.x = 0;
             velocity.y = 0;
         };
+
+        this.disposeWithMe(toDisposable(transformer.changeStart$.subscribe(() => {
+            _drawingTransforming = true;
+            _touchScrolling = false;
+            velocityHistory.length = 0;
+            cancelInertiaAnimation();
+        })));
+        this.disposeWithMe(toDisposable(transformer.changeEnd$.subscribe(() => {
+            _drawingTransforming = false;
+        })));
 
         const scrollInertia = (currentTime: number) => {
             if (!viewportMain) return;
@@ -719,6 +731,10 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
         const handleTouchStart = (e: TouchEvent) => {
             // Handle pinch-to-zoom (two fingers)
             cancelInertiaAnimation();
+            if (_drawingTransforming || scene.objectsEvented === false) {
+                e.preventDefault();
+                return;
+            }
             if (e.touches.length === 2) {
                 const touch1 = e.touches[0];
                 const touch2 = e.touches[1];
@@ -759,6 +775,12 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
             // Only start scrolling if touch is on spreadsheet area
             if (!isTouchOnSpreadsheet(offsetX, offsetY)) return;
 
+            // A drawing, selection handle, or another canvas overlay owns this gesture.
+            // Native touch listeners bypass the render event propagation chain, so the
+            // sheet scroller must explicitly yield to the picked overlay object.
+            const pickedObject = scene.pick(Vector2.FromArray([offsetX, offsetY]));
+            if (pickedObject && pickedObject !== spreadsheet) return;
+
             lastTouchPos.x = offsetX;
             lastTouchPos.y = offsetY;
             lastMoveTime = performance.now();
@@ -774,6 +796,14 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
 
         // eslint-disable-next-line max-lines-per-function
         const handleTouchMove = (e: TouchEvent) => {
+            if (_drawingTransforming || scene.objectsEvented === false) {
+                _touchScrolling = false;
+                velocityHistory.length = 0;
+                cancelInertiaAnimation();
+                e.preventDefault();
+                return;
+            }
+
             // Handle pinch-to-zoom
             if (_pinchZooming && e.touches.length === 2) {
                 // Extra protection: ensure inertia is cancelled during zoom
@@ -883,6 +913,10 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
         };
 
         const handleTouchEnd = (e: TouchEvent) => {
+            if (e.touches.length === 0) {
+                _drawingTransforming = false;
+            }
+
             // Handle pinch zoom end
             if (_pinchZooming) {
                 if (e.touches.length < 2) {
@@ -943,6 +977,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
         };
 
         const handleTouchCancel = () => {
+            _drawingTransforming = false;
             if (_pinchZooming) {
                 _pinchZooming = false;
                 this._contextService.setContextValue(MOBILE_PINCH_ZOOMING, false);

@@ -27,8 +27,12 @@ Keep all `@univerjs/*` packages on the same version.
 ```ts
 import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
 
-univer.registerPlugin(UniverRPCMainThreadPlugin);
+const worker = new Worker(new URL('./worker.js', import.meta.url), { type: 'module' });
+univer.registerPlugin(UniverRPCMainThreadPlugin, { workerURL: worker });
+univer.onDispose(() => worker.terminate());
 ```
+
+The referenced worker module must create its own Univer instance and register `UniverRPCWorkerThreadPlugin`; see the [browser worker example](../../examples/src/sheets-mobile/worker.ts).
 
 Exported plugin classes:
 
@@ -40,4 +44,3 @@ Exported plugin classes:
 - [Documentation](https://docs.univer.ai)
 - [NPM package](https://npmjs.com/package/@univerjs/rpc)
 - [GitHub repository](https://github.com/dream-num/univer)
-

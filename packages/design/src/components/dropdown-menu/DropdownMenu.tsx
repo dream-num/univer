@@ -15,7 +15,8 @@
  */
 
 import type { ComponentProps, ReactNode } from 'react';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
+import { ConfigContext } from '../config-provider/ConfigProvider';
 import {
     DropdownMenuCheckboxItem,
     DropdownMenuContent,
@@ -30,6 +31,7 @@ import {
     DropdownMenuSubTrigger,
     DropdownMenuTrigger,
 } from './DropdownMenuPrimitive';
+import { MobileDropdownMenu } from './MobileDropdownMenu';
 
 interface IDropdownMenuNormalItem {
     type: 'item';
@@ -85,7 +87,7 @@ interface IDropdownMenuCustomItem {
     children: ReactNode;
 }
 
-type DropdownMenuType = IDropdownMenuNormalItem | IDropdownMenuNormalSubItem | IDropdownMenuSeparatorItem | IDropdownMenuRadioItem | IDropdownMenuCheckItem | IDropdownMenuCustomItem;
+export type DropdownMenuType = IDropdownMenuNormalItem | IDropdownMenuNormalSubItem | IDropdownMenuSeparatorItem | IDropdownMenuRadioItem | IDropdownMenuCheckItem | IDropdownMenuCustomItem;
 
 export interface IDropdownMenuProps extends ComponentProps<typeof DropdownMenuContent> {
     children: ReactNode;
@@ -106,6 +108,7 @@ export function DropdownMenu(props: IDropdownMenuProps) {
     } = props;
 
     const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+    const { mobile } = useContext(ConfigContext);
 
     const isControlled = controlledOpen !== undefined;
     const open = isControlled ? controlledOpen : uncontrolledOpen;
@@ -205,6 +208,19 @@ export function DropdownMenu(props: IDropdownMenuProps) {
                 </DropdownMenuSub>
             );
         }
+    }
+
+    if (mobile) {
+        return (
+            <MobileDropdownMenu
+                open={open}
+                disabled={disabled}
+                items={items}
+                onOpenChange={handleChangeOpen}
+            >
+                {children}
+            </MobileDropdownMenu>
+        );
     }
 
     return (

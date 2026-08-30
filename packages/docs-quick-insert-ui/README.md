@@ -39,4 +39,3 @@ univer.registerPlugin(UniverDocsQuickInsertUIPlugin);
 - [Documentation](https://docs.univer.ai)
 - [NPM package](https://npmjs.com/package/@univerjs/docs-quick-insert-ui)
 - [GitHub repository](https://github.com/dream-num/univer)
-

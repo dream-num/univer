@@ -16,7 +16,7 @@
 
 import { Injector, RANGE_TYPE, ThemeService } from '@univerjs/core';
 import { SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
-import { SetSelectionsOperation } from '@univerjs/sheets';
+import { SelectionMoveType, SELECTIONS_ENABLED, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
 import { BehaviorSubject } from 'rxjs';
 import { beforeAll, describe, expect, it } from 'vitest';
@@ -29,7 +29,7 @@ import {
     createTestEvent,
 } from '../../../controllers/render-controllers/__tests__/render-test-bed';
 import { SheetScrollManagerService } from '../../scroll-manager.service';
-import { MobileSheetsSelectionRenderService, shouldKeepCurrentSelectionOnMobileLongPress } from '../mobile-selection-render.service';
+import { MobileSheetsSelectionRenderService, shouldKeepCurrentSelectionOnMobileTap } from '../mobile-selection-render.service';
 import { MobileSelectionControl } from '../mobile-selection-shape';
 
 class TestThemeService {
@@ -46,6 +46,11 @@ class TestShortcutService {
 
 class TestSheetScrollManagerService {
     readonly validViewportScrollInfo$ = new BehaviorSubject<{ viewportScrollX: number; viewportScrollY: number } | null>(null);
+}
+
+function installPointerUpEvent(mainComponent: ReturnType<typeof createRenderTestBed>['context']['mainComponent']) {
+    if (!mainComponent) throw new Error('Expected the sheet render component to be available.');
+    Object.assign(mainComponent, { onPointerUp$: createTestEvent() });
 }
 
 function createMobileControl(rangeType: RANGE_TYPE) {
@@ -149,7 +154,7 @@ function installCellLookupForMobileSelection(skeleton: ReturnType<typeof createF
     (skeleton as never as { expandRangeByMerge: <T>(range: T) => T }).expandRangeByMerge = (range) => range;
 }
 
-describe('shouldKeepCurrentSelectionOnMobileLongPress', () => {
+describe('shouldKeepCurrentSelectionOnMobileTap', () => {
     beforeAll(() => {
         globalThis.window = {
             cancelAnimationFrame: () => { },
@@ -157,8 +162,77 @@ describe('shouldKeepCurrentSelectionOnMobileLongPress', () => {
         } as unknown as Window & typeof globalThis;
     });
 
-    it('keeps the existing selection when long press is inside it', () => {
-        expect(shouldKeepCurrentSelectionOnMobileLongPress([
+    it('restores a keyboard-moved selection when cell editing ends', () => {
+        const testBed = createRenderTestBed({
+            dependencies: [
+                [IShortcutService, { useClass: TestShortcutService }],
+                [SheetScrollManagerService, { useClass: TestSheetScrollManagerService }],
+            ],
+        });
+        const { injector, sheet, commandService, sheetSkeletonManagerService, skeleton, context, contextService } = testBed;
+        installPointerUpEvent(context.mainComponent);
+        commandService.registerCommand(SetSelectionsOperation);
+        const service = injector.createInstance(MobileSheetsSelectionRenderService, context);
+        expect(contextService.getContextValue(SELECTIONS_ENABLED)).toBe(true);
+
+        sheetSkeletonManagerService.emitCurrentSkeleton({
+            unitId: sheet.getUnitId(),
+            sheetId: 'sheet1',
+            skeleton,
+        });
+        injector.get(SheetsSelectionsService).setSelections(sheet.getUnitId(), 'sheet1', [{
+            range: {
+                startRow: 2,
+                endRow: 2,
+                startColumn: 1,
+                endColumn: 1,
+            },
+            primary: {
+                startRow: 2,
+                endRow: 2,
+                startColumn: 1,
+                endColumn: 1,
+                actualRow: 2,
+                actualColumn: 1,
+                isMerged: false,
+                isMergedMainCell: false,
+            },
+        }], SelectionMoveType.MOVE_END);
+
+        expect(service.getSelectionControls()).toHaveLength(1);
+        injector.get(SheetsSelectionsService).setSelections(sheet.getUnitId(), 'sheet1', [], SelectionMoveType.MOVE_END);
+        expect(service.getSelectionControls()).toHaveLength(0);
+        injector.get(SheetsSelectionsService).setSelections(sheet.getUnitId(), 'sheet1', [{
+            range: {
+                startRow: 3,
+                endRow: 3,
+                startColumn: 1,
+                endColumn: 1,
+            },
+            primary: {
+                startRow: 3,
+                endRow: 3,
+                startColumn: 1,
+                endColumn: 1,
+                actualRow: 3,
+                actualColumn: 1,
+                isMerged: false,
+                isMergedMainCell: false,
+            },
+        }], SelectionMoveType.MOVE_END);
+        expect(service.getActiveRange()).toEqual({
+            startRow: 3,
+            endRow: 3,
+            startColumn: 1,
+            endColumn: 1,
+        });
+
+        service.dispose();
+        testBed.univer.dispose();
+    });
+
+    it('keeps the existing selection when a tap is inside it', () => {
+        expect(shouldKeepCurrentSelectionOnMobileTap([
             {
                 startRow: 1,
                 endRow: 3,
@@ -175,8 +249,8 @@ describe('shouldKeepCurrentSelectionOnMobileLongPress', () => {
         })).toBe(true);
     });
 
-    it('does not keep the existing selection when long press is outside it', () => {
-        expect(shouldKeepCurrentSelectionOnMobileLongPress([
+    it('does not keep the existing selection when a tap is outside it', () => {
+        expect(shouldKeepCurrentSelectionOnMobileTap([
             {
                 startRow: 1,
                 endRow: 3,
@@ -194,7 +268,7 @@ describe('shouldKeepCurrentSelectionOnMobileLongPress', () => {
     });
 
     it('checks all existing selections', () => {
-        expect(shouldKeepCurrentSelectionOnMobileLongPress([
+        expect(shouldKeepCurrentSelectionOnMobileTap([
             {
                 startRow: 1,
                 endRow: 1,
@@ -270,8 +344,14 @@ describe('shouldKeepCurrentSelectionOnMobileLongPress', () => {
                 [SheetScrollManagerService, { useClass: TestSheetScrollManagerService }],
             ],
         });
-        const { injector, sheet, commandService, sheetSkeletonManagerService, skeleton, context } = testBed;
-        (context.mainComponent as never as { onPointerUp$: unknown }).onPointerUp$ = createTestEvent();
+        const { injector, sheet, commandService, sheetSkeletonManagerService, skeleton, context, scene } = testBed;
+        installPointerUpEvent(context.mainComponent);
+        let clearSelectedObjectsCount = 0;
+        Object.assign(scene, {
+            getTransformer: () => ({
+                clearSelectedObjects: () => clearSelectedObjectsCount++,
+            }),
+        });
         (skeleton as never as {
             getCellByOffset: (x: number, y: number, scaleX: number, scaleY: number, scrollXY: { x: number; y: number }) => unknown;
             getColumnCount: () => number;
@@ -290,15 +370,16 @@ describe('shouldKeepCurrentSelectionOnMobileLongPress', () => {
         (skeleton as never as { getColumnCount: () => number }).getColumnCount = () => skeleton.worksheet.getColumnCount();
         (skeleton as never as { getRowCount: () => number }).getRowCount = () => skeleton.worksheet.getRowCount();
         commandService.registerCommand(SetSelectionsOperation);
-        const service = injector.createInstance(MobileSheetsSelectionRenderService, context as never);
+        const service = injector.createInstance(MobileSheetsSelectionRenderService, context);
 
         sheetSkeletonManagerService.emitCurrentSkeleton({
             unitId: sheet.getUnitId(),
             sheetId: 'sheet1',
-            skeleton: skeleton as never,
+            skeleton,
         });
 
         service.createNewSelection({ offsetX: 150, offsetY: 45 } as never, 0, RANGE_TYPE.NORMAL);
+        expect(clearSelectedObjectsCount).toBe(1);
         expect(service.getSelectionControls()).toHaveLength(1);
         expect(service.getActiveRange()).toEqual({
             startRow: 2,
@@ -308,6 +389,7 @@ describe('shouldKeepCurrentSelectionOnMobileLongPress', () => {
         });
 
         service.createNewSelection({ offsetX: 150, offsetY: 45 } as never, 0, RANGE_TYPE.ROW);
+        expect(clearSelectedObjectsCount).toBe(2);
         expect(service.getActiveRange()).toMatchObject({
             startRow: 2,
             endRow: 2,
@@ -327,6 +409,7 @@ describe('shouldKeepCurrentSelectionOnMobileLongPress', () => {
             },
         });
         expect(stopped).toBe(true);
+        expect(clearSelectedObjectsCount).toBe(3);
         expect(service.getActiveRange()).toMatchObject({
             startRow: 0,
             startColumn: 0,
@@ -346,16 +429,16 @@ describe('shouldKeepCurrentSelectionOnMobileLongPress', () => {
             ],
         });
         const { injector, sheet, commandService, sheetSkeletonManagerService, skeleton, context, scene, contextService } = testBed;
-        (context.mainComponent as never as { onPointerUp$: unknown }).onPointerUp$ = createTestEvent();
+        installPointerUpEvent(context.mainComponent);
         installCellLookupForMobileSelection(skeleton);
-        (scene as never as { getTransformer: () => { clearSelectedObjects: () => void } }).getTransformer = () => ({ clearSelectedObjects: () => { } });
+        Object.assign(scene, { getTransformer: () => ({ clearSelectedObjects: () => { } }) });
         commandService.registerCommand(SetSelectionsOperation);
-        const service = injector.createInstance(MobileSheetsSelectionRenderService, context as never);
+        const service = injector.createInstance(MobileSheetsSelectionRenderService, context);
 
         sheetSkeletonManagerService.emitCurrentSkeleton({
             unitId: sheet.getUnitId(),
             sheetId: 'sheet1',
-            skeleton: skeleton as never,
+            skeleton,
         });
 
         service.createNewSelection({ offsetX: 150, offsetY: 45 } as never, 0, RANGE_TYPE.NORMAL);
@@ -389,8 +472,14 @@ describe('shouldKeepCurrentSelectionOnMobileLongPress', () => {
                 [SheetScrollManagerService, { useClass: TestSheetScrollManagerService }],
             ],
         });
-        const { injector, sheet, commandService, sheetSkeletonManagerService, skeleton, context, contextService } = testBed;
-        (context.mainComponent as never as { onPointerUp$: unknown }).onPointerUp$ = createTestEvent();
+        const { injector, sheet, commandService, sheetSkeletonManagerService, skeleton, context, contextService, scene } = testBed;
+        installPointerUpEvent(context.mainComponent);
+        let clearSelectedObjectsCount = 0;
+        Object.assign(scene, {
+            getTransformer: () => ({
+                clearSelectedObjects: () => clearSelectedObjectsCount++,
+            }),
+        });
         (skeleton as never as {
             getCellByOffset: (x: number, y: number, scaleX: number, scaleY: number, scrollXY: { x: number; y: number }) => unknown;
             getColumnCount: () => number;
@@ -422,12 +511,12 @@ describe('shouldKeepCurrentSelectionOnMobileLongPress', () => {
         (skeleton as never as { getRowCount: () => number }).getRowCount = () => skeleton.worksheet.getRowCount();
         (skeleton as never as { expandRangeByMerge: <T>(range: T) => T }).expandRangeByMerge = (range) => range;
         commandService.registerCommand(SetSelectionsOperation);
-        const service = injector.createInstance(MobileSheetsSelectionRenderService, context as never);
+        const service = injector.createInstance(MobileSheetsSelectionRenderService, context);
 
         sheetSkeletonManagerService.emitCurrentSkeleton({
             unitId: sheet.getUnitId(),
             sheetId: 'sheet1',
-            skeleton: skeleton as never,
+            skeleton,
         });
 
         const spreadsheet = context.mainComponent as never as {
@@ -446,12 +535,41 @@ describe('shouldKeepCurrentSelectionOnMobileLongPress', () => {
             },
         });
         expect(stopped).toBe(true);
+        expect(clearSelectedObjectsCount).toBe(1);
         expect(service.getActiveRange()).toEqual({
             startRow: 2,
             endRow: 2,
             startColumn: 1,
             endColumn: 1,
         });
+
+        injector.get(SheetsSelectionsService).setSelections(sheet.getUnitId(), 'sheet1', [{
+            range: {
+                startRow: 2,
+                endRow: 4,
+                startColumn: 1,
+                endColumn: 3,
+            },
+            primary: null,
+            style: null,
+        }], SelectionMoveType.MOVE_END);
+        spreadsheet.onPointerDown$.emit({ offsetX: 154, offsetY: 49, button: 0 }, {
+            stopPropagation: () => {
+                stopped = true;
+            },
+        });
+        spreadsheet.onPointerUp$.emit({ offsetX: 154, offsetY: 49, button: 0 }, {
+            stopPropagation: () => {
+                stopped = true;
+            },
+        });
+        expect(service.getActiveRange()).toEqual({
+            startRow: 2,
+            endRow: 4,
+            startColumn: 1,
+            endColumn: 3,
+        });
+        expect(clearSelectedObjectsCount).toBe(2);
 
         contextService.setContextValue('MOBILE_PINCH_ZOOMING', true);
         spreadsheet.onPointerDown$.emit({ offsetX: 250, offsetY: 65, button: 0 }, {
@@ -466,10 +584,11 @@ describe('shouldKeepCurrentSelectionOnMobileLongPress', () => {
         });
         expect(service.getActiveRange()).toEqual({
             startRow: 2,
-            endRow: 2,
+            endRow: 4,
             startColumn: 1,
-            endColumn: 1,
+            endColumn: 3,
         });
+        expect(clearSelectedObjectsCount).toBe(2);
         contextService.setContextValue('MOBILE_PINCH_ZOOMING', false);
 
         const rowHeader = context.components.get(SHEET_VIEW_KEY.ROW)!;
@@ -484,6 +603,7 @@ describe('shouldKeepCurrentSelectionOnMobileLongPress', () => {
             startColumn: 0,
             endColumn: 49,
         });
+        expect(clearSelectedObjectsCount).toBe(3);
 
         const columnHeader = context.components.get(SHEET_VIEW_KEY.COLUMN)!;
         (columnHeader.onPointerDown$ as unknown as { emit: (evt: unknown, state: unknown) => void }).emit({
@@ -497,6 +617,7 @@ describe('shouldKeepCurrentSelectionOnMobileLongPress', () => {
             startColumn: 3,
             endColumn: 3,
         });
+        expect(clearSelectedObjectsCount).toBe(4);
 
         service.dispose();
         testBed.univer.dispose();

@@ -47,4 +47,3 @@ Register this package with `@univerjs/engine-formula` and `@univerjs/sheets` bef
 - [Documentation](https://docs.univer.ai)
 - [NPM package](https://npmjs.com/package/@univerjs/sheets-formula)
 - [GitHub repository](https://github.com/dream-num/univer)
-

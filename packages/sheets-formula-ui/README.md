@@ -39,4 +39,3 @@ univer.registerPlugin(UniverSheetsFormulaUIPlugin);
 - [Documentation](https://docs.univer.ai)
 - [NPM package](https://npmjs.com/package/@univerjs/sheets-formula-ui)
 - [GitHub repository](https://github.com/dream-num/univer)
-

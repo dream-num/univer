@@ -21,6 +21,7 @@ import {
     BuildTextUtils,
     createIdentifier,
     createParagraphId,
+    createSectionId,
     DataStreamTreeTokenType,
     Disposable,
     DOC_RANGE_TYPE,
@@ -42,6 +43,7 @@ import {
     toDisposable,
     Tools,
     UniverInstanceType,
+    validateDocBodyStructure,
 } from '@univerjs/core';
 import {
     canEditDocumentTargets,
@@ -83,6 +85,82 @@ import { DocHtmlExportService } from './udm-to-html/doc-html-export.service';
 HtmlToUDMService.use(LarkPastePlugin);
 HtmlToUDMService.use(UniverPastePlugin);
 HtmlToUDMService.use(WordPastePlugin);
+
+export function convertClipboardHtmlToDocumentData(html: string, unitId = ''): Partial<IDocumentData> {
+    const documentData = new HtmlToUDMService().convert(html, { unitId });
+    const body = finalizeClipboardDocumentBody(documentData.body);
+    if (!body?.dataStream) {
+        return documentData;
+    }
+
+    if (validateDocBodyStructure(body).length === 0) {
+        return documentData;
+    }
+
+    const plainText = [
+        DataStreamTreeTokenType.COLUMN_GROUP_START,
+        DataStreamTreeTokenType.COLUMN_START,
+        DataStreamTreeTokenType.COLUMN_END,
+        DataStreamTreeTokenType.COLUMN_GROUP_END,
+        DataStreamTreeTokenType.CUSTOM_RANGE_START,
+        DataStreamTreeTokenType.CUSTOM_RANGE_END,
+        DataStreamTreeTokenType.COLUMN_BREAK,
+        DataStreamTreeTokenType.PAGE_BREAK,
+        DataStreamTreeTokenType.DOCS_END,
+        DataStreamTreeTokenType.CUSTOM_BLOCK,
+    ].reduce(
+        (text, token) => text.replaceAll(token, ''),
+        BuildTextUtils.transform.getPlainText(body.dataStream)
+    );
+    return {
+        id: documentData.id,
+        body: finalizeClipboardDocumentBody(BuildTextUtils.transform.fromPlainText(plainText)),
+        documentStyle: documentData.documentStyle,
+    };
+}
+
+function finalizeClipboardDocumentBody(body: IDocumentBody | undefined): IDocumentBody | undefined {
+    if (!body?.dataStream) {
+        return body;
+    }
+
+    if (!body.dataStream.endsWith('\r\n')) {
+        if (!body.dataStream.endsWith('\r')) {
+            body.dataStream += '\r';
+        }
+        body.dataStream += '\n';
+    }
+
+    normalizeBody(body);
+
+    const paragraphs = body.paragraphs ?? [];
+    const paragraphIndex = body.dataStream.length - 2;
+    if (!paragraphs.some((paragraph) => paragraph.startIndex === paragraphIndex)) {
+        paragraphs.push({
+            paragraphId: createParagraphId(new Set(paragraphs.map((paragraph) => paragraph.paragraphId))),
+            startIndex: paragraphIndex,
+        });
+        body.paragraphs = paragraphs;
+    }
+
+    const sectionBreaks = body.sectionBreaks ?? [];
+    const sectionBreakIndex = body.dataStream.length - 1;
+    if (!sectionBreaks.some((sectionBreak) => sectionBreak.startIndex === sectionBreakIndex)) {
+        sectionBreaks.push({
+            sectionId: createSectionId(new Set(sectionBreaks.map((sectionBreak) => sectionBreak.sectionId))),
+            startIndex: sectionBreakIndex,
+        });
+        body.sectionBreaks = sectionBreaks;
+    }
+
+    return body;
+}
+
+export function removeClipboardHtmlImages(html: string): string {
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    doc.querySelectorAll('img, svg').forEach((image) => image.remove());
+    return /<(?:html|head)\b/i.test(html) ? doc.documentElement.outerHTML : doc.body.innerHTML;
+}
 
 export interface IClipboardPropertyItem { }
 
@@ -468,7 +546,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
                 segmentId,
                 textRanges,
             });
-        } catch (_) {
+        } catch {
             this._logService.error('[DocClipboardController]', 'clipboard is empty.');
             return false;
         }
@@ -683,13 +761,9 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             }
         }
 
-        if (!_unitId) {
-            const currentDocInstance = this._univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_DOC);
-            const docUnitId = currentDocInstance?.getUnitId() || '';
-            _unitId = docUnitId;
-        }
-
-        const doc = this._htmlToUDM.convert(html, { unitId: _unitId });
+        const currentDocInstance = this._univerInstanceService.getCurrentUnitOfType(UniverInstanceType.UNIVER_DOC);
+        const unitId = _unitId || currentDocInstance?.getUnitId() || '';
+        const doc = this._htmlToUDM.convert(html, { unitId });
 
         if (copyId) {
             copyContentCache.set(copyId, doc);

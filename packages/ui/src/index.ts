@@ -23,7 +23,7 @@ export { getHeaderFooterMenuHiddenObservable, getMenuHiddenObservable } from './
 export { mergeMenuConfigs } from './common/menu-merge-configs';
 export { UI_PLUGIN_CONFIG_KEY } from './config/config';
 export type { IUniverUIConfig } from './config/config';
-export { UNI_DISABLE_CHANGING_FOCUS_KEY } from './const';
+export { MOBILE_UI_MODE, UNI_DISABLE_CHANGING_FOCUS_KEY } from './const';
 export { ErrorController } from './controllers/error/error.controller';
 export {
     CopyShortcutItem,
@@ -66,6 +66,7 @@ export { ContextMenuService, IContextMenuService } from './services/contextmenu/
 export type { IContextMenuHandler } from './services/contextmenu/contextmenu.service';
 export { DesktopDialogService } from './services/dialog/desktop-dialog.service';
 export { IDialogService } from './services/dialog/dialog.service';
+export { MobileDialogService } from './services/dialog/mobile-dialog.service';
 export { CanvasFloatDomPreviewService, CanvasFloatDomService } from './services/dom/canvas-dom-layer.service';
 export type {
     ICanvasFloatDomPreview,
@@ -164,6 +165,8 @@ export { FloatDomSingle } from './views/components/dom/FloatDom';
 export { FloatDom } from './views/components/dom/FloatDom';
 export { PrintFloatDomSingle } from './views/components/dom/Print';
 export { HOVER_TRACK_HOST_CLASS_NAME, HoverTrack } from './views/components/hover-track/HoverTrack';
+export { MobileDrawer } from './views/components/mobile-drawer/MobileDrawer';
+export type { MobileDrawerSnap } from './views/components/mobile-drawer/MobileDrawer';
 export { CanvasPopup, SingleCanvasPopup } from './views/components/popup/CanvasPopup';
 export { RectPopup } from './views/components/popup/RectPopup';
 export type { RectPopupDirection } from './views/components/popup/RectPopup';
@@ -184,5 +187,6 @@ export { FONT_SIZE_COMPONENT, FONT_SIZE_LIST, HEADING_LIST } from './views/font-
 export * from './views/hooks/index';
 export { preventBrowserZoomInContainers } from './views/hooks/prevent-browser-zoom';
 export * from './views/index';
+export { MobileMenu } from './views/menu/mobile/MobileMenu';
 export { type INotificationOptions } from './views/notification/Notification';
 export { ProgressBar } from './views/progress-bar/ProgressBar';

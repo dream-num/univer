@@ -528,8 +528,12 @@ export class FontAndBaseLine extends docExtension {
     ) {
         const requestedRenderScale = glyph.ts?.fontRenderScale;
         const contextScaleY = ctx.getScale().scaleY;
-        const pixelRatio = ctx.canvas.clientWidth > 0
-            ? ctx.canvas.width / ctx.canvas.clientWidth
+        // Canvas.setSize retains its fractional logical width here. clientWidth rounds it,
+        // which would turn backing-store density into an unintended font-size adjustment.
+        const inlineWidth = ctx.canvas.style?.width;
+        const logicalWidth = inlineWidth?.endsWith('px') ? Number.parseFloat(inlineWidth) : ctx.canvas.clientWidth;
+        const pixelRatio = Number.isFinite(logicalWidth) && logicalWidth > 0
+            ? ctx.canvas.width / logicalWidth
             : 1;
         const logicalScaleY = contextScaleY / (Number.isFinite(pixelRatio) && pixelRatio > 0 ? pixelRatio : 1);
         const renderScale = typeof requestedRenderScale === 'number'

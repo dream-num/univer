@@ -316,6 +316,34 @@ describe('docs font and baseline extension', () => {
         expect(TestContext.fillText).toHaveBeenCalledWith('A', 12, 20);
     });
 
+    it.each([1.000296950340271, 1.25, 2])('preserves the source font size at fractional canvas density %s', (pixelRatio) => {
+        const extension = new FontAndBaseLine();
+        const TestContext = createContext();
+        const canvasWidth = 721;
+        const logicalWidth = canvasWidth / pixelRatio;
+        Object.assign(TestContext.canvas, {
+            width: canvasWidth,
+            clientWidth: Math.round(logicalWidth),
+            style: { width: `${logicalWidth}px` },
+        });
+        TestContext.getScale.mockReturnValue({ scaleX: pixelRatio, scaleY: pixelRatio });
+        const paintedFonts: string[] = [];
+        TestContext.fillText.mockImplementation(() => paintedFonts.push(TestContext.font));
+        extension.extensionOffset = {
+            spanPointWithFont: Vector2.create(12, 20),
+            spanStartPoint: Vector2.create(10, 10),
+            centerPoint: Vector2.create(8, 8),
+            renderConfig: { vertexAngle: 0, centerAngle: 0 },
+        };
+
+        extension.draw(TestContext, DEFAULT_SCALE, createGlyph('A', {
+            ts: { fs: 12, fontRenderScale: 1 },
+        }));
+
+        expect(paintedFonts).toEqual(['12px Arial']);
+        expect(TestContext.scale).not.toHaveBeenCalled();
+    });
+
     it('uses a registered runtime glyph painter for the primary font family', () => {
         const extension = new FontAndBaseLine();
         const TestContext = createContext();

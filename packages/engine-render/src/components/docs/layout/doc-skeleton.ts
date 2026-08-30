@@ -18,6 +18,7 @@ import type { ColumnSeparatorType, ISectionColumnProperties, LocaleService, Null
 import type {
     IDocumentSkeletonCached,
     IDocumentSkeletonColumn,
+    IDocumentSkeletonColumnGroupColumn,
     IDocumentSkeletonGlyph,
     IDocumentSkeletonLine,
     IDocumentSkeletonPage,
@@ -392,6 +393,34 @@ function getBoundaryGlyphInPage(page: IDocumentSkeletonPage, useLast: boolean) {
 function isHitTestAddressableGlyph(glyph: IDocumentSkeletonGlyph): boolean {
     return Boolean(glyph.content?.length) ||
         (glyph.streamType === DataStreamTreeTokenType.PARAGRAPH && glyph.count > 0);
+}
+
+function resolveUnclippedColumnHitBounds(column: IDocumentSkeletonColumnGroupColumn) {
+    const bounds = { left: 0, top: 0, right: column.width, bottom: column.height };
+    const page = column.page;
+    for (const section of page.sections) {
+        for (const nestedColumn of section.columns) {
+            for (const line of nestedColumn.lines) {
+                if (line.type === LineType.BLOCK) {
+                    continue;
+                }
+                const top = page.marginTop + section.top + line.top;
+                bounds.top = Math.min(bounds.top, top);
+                bounds.bottom = Math.max(bounds.bottom, top + line.lineHeight);
+                for (const divide of line.divides) {
+                    const left = page.marginLeft + nestedColumn.left + (divide.left ?? 0) + (divide.paddingLeft ?? 0);
+                    for (const glyph of divide.glyphGroup) {
+                        if (!isHitTestAddressableGlyph(glyph)) {
+                            continue;
+                        }
+                        bounds.left = Math.min(bounds.left, left + glyph.left);
+                        bounds.right = Math.max(bounds.right, left + glyph.left + glyph.width);
+                    }
+                }
+            }
+        }
+    }
+    return bounds;
 }
 
 function resolveMostSpecificPageByCharIndex(page: IDocumentSkeletonPage, charIndex: number): IDocumentSkeletonPage {
@@ -1066,9 +1095,9 @@ export class DocumentSkeleton extends Skeleton {
         x: number,
         y: number,
         pageLength: number,
-        nestLevel: number = 0
-        // eslint-disable-next-line ts/no-explicit-any
-    ): any {
+        nestLevel: number = 0,
+        allowPageOverflow = false
+    ): Nullable<INodeInfo> {
         const { sections, skeTables, skeColumnGroups = new Map() } = segmentPage;
         this._findLiquid.translateSave();
 
@@ -1077,10 +1106,10 @@ export class DocumentSkeleton extends Skeleton {
         const pageTop = this._findLiquid.y + (pageType === DocumentSkeletonPageType.FOOTER ? page.pageHeight - segmentPage.pageHeight : 0);
         const pageBottom = pageTop + segmentPage.pageHeight;
 
-        let pointInPage = x >= pageLeft
+        let pointInPage = allowPageOverflow || (x >= pageLeft
             && x <= pageRight
             && y >= pageTop
-            && y <= pageBottom;
+            && y <= pageBottom);
 
         // Handle the outmost page.
         if (nestLevel === 0 && pageType === DocumentSkeletonPageType.BODY) {
@@ -1310,12 +1339,13 @@ export class DocumentSkeleton extends Skeleton {
                 const { top: columnGroupTop, left: columnGroupLeft, width: columnGroupWidth, height: columnGroupHeight, columns } = columnGroup;
                 const absoluteColumnGroupLeft = this._findLiquid.x + columnGroupLeft;
                 const absoluteColumnGroupTop = this._findLiquid.y + columnGroupTop;
+                const allowOverflow = columnGroup.columnGroupSource?.clipContent === BooleanNumber.FALSE;
 
                 if (
-                    x < absoluteColumnGroupLeft ||
+                    !allowOverflow && (x < absoluteColumnGroupLeft ||
                     x > absoluteColumnGroupLeft + columnGroupWidth ||
                     y < absoluteColumnGroupTop ||
-                    y > absoluteColumnGroupTop + columnGroupHeight
+                    y > absoluteColumnGroupTop + columnGroupHeight)
                 ) {
                     continue;
                 }
@@ -1326,12 +1356,15 @@ export class DocumentSkeleton extends Skeleton {
                 for (const column of columns) {
                     const absoluteColumnLeft = absoluteColumnGroupLeft + column.left;
                     const absoluteColumnTop = absoluteColumnGroupTop + column.top;
+                    const bounds = allowOverflow
+                        ? resolveUnclippedColumnHitBounds(column)
+                        : { left: 0, top: 0, right: column.width, bottom: column.height };
 
                     if (
-                        x < absoluteColumnLeft ||
-                        x > absoluteColumnLeft + column.width ||
-                        y < absoluteColumnTop ||
-                        y > absoluteColumnTop + column.height
+                        x < absoluteColumnLeft + bounds.left ||
+                        x > absoluteColumnLeft + bounds.right ||
+                        y < absoluteColumnTop + bounds.top ||
+                        y > absoluteColumnTop + bounds.bottom
                     ) {
                         continue;
                     }
@@ -1354,7 +1387,8 @@ export class DocumentSkeleton extends Skeleton {
                         x,
                         y,
                         pageLength,
-                        nestLevel + 1
+                        nestLevel + 1,
+                        allowOverflow
                     ) ?? this._getNearestNode(nestedCache.nearestNodeList, nestedCache.nearestNodeDistanceList);
 
                     this._findLiquid?.translateRestore();

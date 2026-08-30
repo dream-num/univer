@@ -424,7 +424,16 @@ describe('doc skeleton', () => {
         expect((skeleton as any)._findLiquid.x).toBeGreaterThanOrEqual(0);
     });
 
-    it('finds nodes by coordinate inside column group columns', () => {
+    it.each([
+        { clipContent: undefined, glyphLeft: 0, lineTop: 0, pointerOffset: 0, hit: true },
+        { clipContent: undefined, glyphLeft: 110, lineTop: 0, pointerOffset: 0, hit: false },
+        { clipContent: BooleanNumber.TRUE, glyphLeft: 110, lineTop: 0, pointerOffset: 0, hit: false },
+        { clipContent: BooleanNumber.FALSE, glyphLeft: 110, lineTop: 0, pointerOffset: 0, hit: true },
+        { clipContent: BooleanNumber.FALSE, glyphLeft: 150, lineTop: 0, pointerOffset: 0, hit: true },
+        { clipContent: BooleanNumber.FALSE, glyphLeft: -20, lineTop: 0, pointerOffset: 0, hit: true },
+        { clipContent: BooleanNumber.FALSE, glyphLeft: 0, lineTop: 110, pointerOffset: 0, hit: true },
+        { clipContent: BooleanNumber.FALSE, glyphLeft: 150, lineTop: 0, pointerOffset: 20, hit: false },
+    ])('hits painted column text within its clipping policy: %o', ({ clipContent, glyphLeft, lineTop, pointerOffset, hit }) => {
         const body = createPage(DocumentSkeletonPageType.BODY, 0);
         const columnPage = createPage(DocumentSkeletonPageType.CELL, 100);
         body.column.lines = [];
@@ -437,8 +446,9 @@ describe('doc skeleton', () => {
         columnPage.page.marginTop = 0;
         columnPage.page.marginRight = 0;
         columnPage.page.marginBottom = 0;
-        columnPage.glyphs.glyphA.left = 0;
+        columnPage.glyphs.glyphA.left = glyphLeft;
         columnPage.glyphs.glyphA.width = 10;
+        columnPage.line.top = lineTop;
         columnPage.divide.glyphGroup = [columnPage.glyphs.glyphA];
 
         const columnGroup = {
@@ -461,6 +471,7 @@ describe('doc skeleton', () => {
             st: 90,
             ed: 110,
             columnGroupId: 'cg-1',
+            columnGroupSource: { clipContent },
             parent: body.page,
         } as any;
         columnGroup.columns[0].parent = columnGroup;
@@ -489,13 +500,13 @@ describe('doc skeleton', () => {
         (skeleton as any)._skeletonData = skeletonData;
 
         const node = skeleton.findNodeByCoord(
-            Vector2.FromArray([90, 45]),
+            Vector2.FromArray([90 + glyphLeft + pointerOffset, 45 + lineTop]),
             PageLayoutType.VERTICAL,
             0,
             0
         );
 
-        expect(node?.node).toBe(columnPage.glyphs.glyphA);
+        expect(node?.node).toBe(hit ? columnPage.glyphs.glyphA : undefined);
         expect(skeleton.findNodeByCharIndex(100)).toBe(columnPage.glyphs.glyphA);
         expect(skeleton.findNodePositionByCharIndex(110)?.path).toEqual([
             'pages',

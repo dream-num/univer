@@ -227,21 +227,23 @@ export function calculateColumnGroupLayout(source: IColumnGroup, availableWidth:
     if (shouldStack(columns, width, gap, source.responsive)) {
         let top = 0;
 
+        const layoutColumns = columns.map((column, index) => {
+            const topOffset = getColumnTopOffset(column);
+            const layoutColumn = {
+                columnId: column.columnId,
+                left: 0,
+                top: top + topOffset,
+                width,
+            };
+            top += Math.max(0, topOffset + (columnHeights[index] ?? 0));
+
+            return layoutColumn;
+        });
         return {
             mode: 'stack',
             width,
-            height: sumHeights(columnHeights),
-            columns: columns.map((column, index) => {
-                const layoutColumn = {
-                    columnId: column.columnId,
-                    left: 0,
-                    top,
-                    width,
-                };
-                top += Math.max(0, columnHeights[index] ?? 0);
-
-                return layoutColumn;
-            }),
+            height: top,
+            columns: layoutColumns,
         };
     }
 
@@ -249,22 +251,30 @@ export function calculateColumnGroupLayout(source: IColumnGroup, availableWidth:
     const widths = allocateHorizontalWidths(columns, contentWidth);
     let left = 0;
 
+    const layoutColumns = columns.map((column, index) => {
+        const layoutColumn = {
+            columnId: column.columnId,
+            left,
+            top: getColumnTopOffset(column),
+            width: widths[index],
+        };
+        left += widths[index] + gap;
+
+        return layoutColumn;
+    });
     return {
         mode: 'horizontal',
         width,
-        height: Math.max(0, ...columnHeights),
-        columns: columns.map((column, index) => {
-            const layoutColumn = {
-                columnId: column.columnId,
-                left,
-                top: 0,
-                width: widths[index],
-            };
-            left += widths[index] + gap;
-
-            return layoutColumn;
-        }),
+        height: Math.max(0, ...layoutColumns.map((column, index) => (
+            column.top + Math.max(0, columnHeights[index] ?? 0)
+        ))),
+        columns: layoutColumns,
     };
+}
+
+function getColumnTopOffset(column: IColumn): number {
+    const offset = column.topOffset?.v;
+    return typeof offset === 'number' && Number.isFinite(offset) ? offset : 0;
 }
 
 function shouldStack(columns: IColumn[], availableWidth: number, gap: number, responsive: ColumnResponsiveType): boolean {
@@ -321,8 +331,4 @@ function compressToFit(widths: number[], minWidths: number[], overflow: number):
 
 function getMinWidth(column: IColumn): number {
     return Math.max(0, column.minWidth?.v ?? 0);
-}
-
-function sumHeights(heights: number[]): number {
-    return heights.reduce((sum, height) => sum + Math.max(0, height), 0);
 }

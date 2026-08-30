@@ -461,6 +461,10 @@ export class FontAndBaseLine extends docExtension {
                     && requestedHorizontalScale > 0
                     ? requestedHorizontalScale
                     : 1;
+                const requestedTextSkewX = glyph.ts?.textSkewX;
+                const textSkewX = typeof requestedTextSkewX === 'number' && Number.isFinite(requestedTextSkewX)
+                    ? requestedTextSkewX
+                    : 0;
                 const requestedCharacterSpacing = glyph.ts?.sc;
                 const characterSpacing = typeof requestedCharacterSpacing === 'number'
                     && Number.isFinite(requestedCharacterSpacing)
@@ -478,7 +482,7 @@ export class FontAndBaseLine extends docExtension {
                     let cursor = 0;
                     ctx.save();
                     ctx.translate(spanPointWithFont.x + x_offset, spanPointWithFont.y + y_offset);
-                    ctx.scale(horizontalScale, 1);
+                    ctx.transform(horizontalScale, 0, textSkewX, 1, 0, 0);
                     characters.forEach((character) => {
                         this._paintText(ctx, glyph, character, cursor, 0);
                         cursor += localTextAdvance;
@@ -490,16 +494,16 @@ export class FontAndBaseLine extends docExtension {
                     let cursor = 0;
                     ctx.save();
                     ctx.translate(spanPointWithFont.x + x_offset, spanPointWithFont.y + y_offset);
-                    ctx.scale(horizontalScale, 1);
+                    ctx.transform(horizontalScale, 0, textSkewX, 1, 0, 0);
                     characters.forEach((character) => {
                         this._paintText(ctx, glyph, character, cursor, 0);
                         cursor += ctx.measureText(character).width + localCharacterSpacing;
                     });
                     ctx.restore();
-                } else if (!isVertical && horizontalScale !== 1) {
+                } else if (!isVertical && (horizontalScale !== 1 || textSkewX !== 0)) {
                     ctx.save();
                     ctx.translate(spanPointWithFont.x + x_offset, spanPointWithFont.y + y_offset);
-                    ctx.scale(horizontalScale, 1);
+                    ctx.transform(horizontalScale, 0, textSkewX, 1, 0, 0);
                     this._paintText(ctx, glyph, content, 0, 0);
                     ctx.restore();
                 } else {

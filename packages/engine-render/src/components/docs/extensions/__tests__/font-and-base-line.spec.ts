@@ -33,6 +33,7 @@ type MockRenderContext = UniverRenderingContext & {
     fillText: ReturnType<typeof vi.fn>;
     strokeText: ReturnType<typeof vi.fn>;
     translate: ReturnType<typeof vi.fn>;
+    transform: ReturnType<typeof vi.fn>;
     rotate: ReturnType<typeof vi.fn>;
     scale: ReturnType<typeof vi.fn>;
     measureText: ReturnType<typeof vi.fn>;
@@ -83,6 +84,7 @@ function createContext(): MockRenderContext {
         fillText: vi.fn(),
         strokeText: vi.fn(),
         translate: vi.fn(),
+        transform: vi.fn(),
         rotate: vi.fn(),
         scale: vi.fn(),
         measureText: vi.fn((text: string) => ({ width: text.length * 8 })),
@@ -227,9 +229,32 @@ describe('docs font and baseline extension', () => {
         }));
 
         expect(TestContext.translate).toHaveBeenCalledWith(12, 20);
-        expect(TestContext.scale).toHaveBeenCalledWith(0.5, 1);
+        expect(TestContext.transform).toHaveBeenCalledWith(0.5, 0, 0, 1, 0, 0);
         expect(TestContext.fillText).toHaveBeenNthCalledWith(1, 'A', 0, 0);
         expect(TestContext.fillText).toHaveBeenNthCalledWith(2, 'B', 40, 0);
+    });
+
+    it('paints source glyphs with a horizontal shear without changing their advances', () => {
+        const extension = new FontAndBaseLine();
+        const TestContext = createContext();
+        extension.extensionOffset = {
+            spanPointWithFont: Vector2.create(12, 20),
+            spanStartPoint: Vector2.create(10, 10),
+            centerPoint: Vector2.create(8, 8),
+            renderConfig: {
+                vertexAngle: 0,
+                centerAngle: 0,
+            },
+        };
+
+        extension.draw(TestContext, DEFAULT_SCALE, createGlyph('AB', {
+            ts: { fs: 12, textAdvance: 20, textSkewX: -0.25 },
+        }));
+
+        expect(TestContext.translate).toHaveBeenCalledWith(12, 20);
+        expect(TestContext.transform).toHaveBeenCalledWith(1, 0, -0.25, 1, 0, 0);
+        expect(TestContext.fillText).toHaveBeenNthCalledWith(1, 'A', 0, 0);
+        expect(TestContext.fillText).toHaveBeenNthCalledWith(2, 'B', 20, 0);
     });
 
     it('repeats glyph paint at source-relative offsets', () => {

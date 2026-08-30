@@ -869,6 +869,8 @@ export interface ITextStyle extends IStyleBase {
     sa?: number; // scale
     /** Source glyph paint scale relative to its stored font size. */
     fontRenderScale?: number;
+    /** Horizontal glyph shear applied while painting, in canvas transform units. */
+    textSkewX?: number;
     /** Fixed advance per Unicode character in 96-DPI layout pixels. */
     textAdvance?: number;
     /** Fixed line ascent in 96-DPI layout pixels. */
@@ -1198,6 +1200,8 @@ export interface IColumn {
     columnId: string;
     widthRatio: number;
     minWidth?: INumberUnit;
+    /** Vertical offset relative to the column group origin. Defaults to 0. */
+    topOffset?: INumberUnit;
 }
 
 /**

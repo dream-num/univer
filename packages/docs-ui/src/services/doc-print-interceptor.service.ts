@@ -20,6 +20,7 @@ import { createInterceptorKey, Disposable, InterceptorManager } from '@univerjs/
 
 export interface IDocPrintContext {
     unitId: string;
+    pageIndex?: number;
     scene: Scene;
     engine: Engine;
     root: HTMLElement;

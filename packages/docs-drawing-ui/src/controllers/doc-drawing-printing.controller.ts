@@ -42,11 +42,13 @@ export class DocDrawingPrintingController extends Disposable {
                 this._docPrintInterceptorService.interceptor.getInterceptPoints().PRINTING_COMPONENT_COLLECT,
                 {
                     handler: (_param, pos, next) => {
-                        const { unitId, scene } = pos;
+                        const { unitId, scene, skeleton, pageIndex } = pos;
                         const unitData = this._drawingManagerService.getDrawingDataForUnit(unitId);
                         const subUnitData = unitData?.[unitId];
+                        const visibleDrawingIds = getTraditionalPageDrawingIds(skeleton, pageIndex);
                         if (subUnitData) {
                             subUnitData.order.forEach((id) => {
+                                if (visibleDrawingIds && !visibleDrawingIds.has(id)) return;
                                 const drawing = subUnitData.data[id];
                                 if (drawing.drawingType !== DrawingTypeEnum.DRAWING_CHART && drawing.drawingType !== DrawingTypeEnum.DRAWING_DOM) {
                                     this._drawingRenderService.renderDrawing(drawing, scene);
@@ -67,11 +69,12 @@ export class DocDrawingPrintingController extends Disposable {
                 this._docPrintInterceptorService.interceptor.getInterceptPoints().PRINTING_DOM_COLLECT,
                 {
                     handler: (disposableCollection, pos, next) => {
-                        const { unitId } = pos;
+                        const { unitId, skeleton, pageIndex } = pos;
                         const unitData = this._drawingManagerService.getDrawingDataForUnit(unitId);
                         const subUnitData = unitData?.[unitId];
+                        const visibleDrawingIds = getTraditionalPageDrawingIds(skeleton, pageIndex);
                         if (subUnitData) {
-                            const floatDomInfos = subUnitData.order.map((id) => {
+                            const floatDomInfos = subUnitData.order.filter((id) => !visibleDrawingIds || visibleDrawingIds.has(id)).map((id) => {
                                 const drawing = subUnitData.data[id] as IDocFloatDom;
                                 if (drawing.drawingType === DrawingTypeEnum.DRAWING_CHART) {
                                     return {
@@ -115,4 +118,13 @@ export class DocDrawingPrintingController extends Disposable {
             )
         );
     }
+}
+
+function getTraditionalPageDrawingIds(
+    skeleton: { getSkeletonData?: () => { pages?: Array<{ skeDrawings?: Map<string, unknown> }> } | null | undefined | void } | undefined,
+    pageIndex: number | undefined
+): Set<string> | null {
+    const pages = skeleton?.getSkeletonData?.()?.pages;
+    if (!pages || pages.length <= 1 || pageIndex == null) return null;
+    return new Set(pages[pageIndex]?.skeDrawings?.keys() ?? []);
 }

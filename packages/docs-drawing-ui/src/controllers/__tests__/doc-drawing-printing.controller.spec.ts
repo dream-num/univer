@@ -117,3 +117,57 @@ describe('DocDrawingPrintingController', () => {
         controller.dispose();
     });
 });
+describe('DocDrawingPrintingController page filtering', () => {
+    it('renders only drawings that belong to the current traditional print page', () => {
+        const interceptors = new Map<string, any>();
+        const points = {
+            PRINTING_COMPONENT_COLLECT: 'PRINTING_COMPONENT_COLLECT',
+            PRINTING_DOM_COLLECT: 'PRINTING_DOM_COLLECT',
+        };
+        const renderDrawing = vi.fn();
+        const controller = new DocDrawingPrintingController(
+            {
+                interceptor: {
+                    getInterceptPoints: () => points,
+                    intercept: (point: string, config: unknown) => {
+                        interceptors.set(point, config);
+                        return { dispose: vi.fn() };
+                    },
+                },
+            } as never,
+            { renderDrawing } as never,
+            {
+                getDrawingDataForUnit: () => ({
+                    'unit-1': {
+                        order: ['image-1', 'image-2'],
+                        data: {
+                            'image-1': { drawingId: 'image-1', drawingType: DrawingTypeEnum.DRAWING_IMAGE },
+                            'image-2': { drawingId: 'image-2', drawingType: DrawingTypeEnum.DRAWING_IMAGE },
+                        },
+                    },
+                }),
+            } as never,
+            { get: vi.fn() } as never,
+            {} as never
+        );
+        const scene = {};
+        const skeleton = {
+            getSkeletonData: () => ({
+                pages: [
+                    { skeDrawings: new Map([['image-1', {}]]) },
+                    { skeDrawings: new Map([['image-2', {}]]) },
+                ],
+            }),
+        };
+
+        interceptors.get(points.PRINTING_COMPONENT_COLLECT).handler(
+            undefined,
+            { unitId: 'unit-1', scene, skeleton, pageIndex: 1 },
+            vi.fn()
+        );
+
+        expect(renderDrawing).toHaveBeenCalledTimes(1);
+        expect(renderDrawing).toHaveBeenCalledWith(expect.objectContaining({ drawingId: 'image-2' }), scene);
+        controller.dispose();
+    });
+});

@@ -351,6 +351,51 @@ describe('docs font and baseline extension', () => {
         expect(TestContext.fillText).toHaveBeenCalledWith('A', 12, 20);
     });
 
+    it('strokes the registered glyph outline and releases both painters on disposal', () => {
+        const extension = new FontAndBaseLine();
+        const TestContext = createContext();
+        const renderer = vi.fn(() => true);
+        const strokeRenderer = vi.fn(() => {
+            expect(TestContext.strokeStyle).toBe('#123456');
+            expect(TestContext.lineWidth).toBe(0.16);
+            return true;
+        });
+        const registration = registerDocCustomGlyphRenderer({ fontFamily: 'PdfOutline', renderer, strokeRenderer });
+        extension.extensionOffset = {
+            spanPointWithFont: Vector2.create(12, 20),
+            spanStartPoint: Vector2.create(10, 10),
+            centerPoint: Vector2.create(8, 8),
+            renderConfig: { vertexAngle: 0, centerAngle: 0 },
+        };
+        const glyph = createGlyph('A', {
+            ts: { fs: 12, ff: '"PdfOutline", serif', textOutline: { color: '#123456', width: 0.16 } },
+        });
+
+        extension.draw(TestContext, DEFAULT_SCALE, glyph);
+
+        expect(strokeRenderer).toHaveBeenCalledWith({
+            content: 'A',
+            context: TestContext,
+            fontSizePx: 12,
+            x: 12,
+            y: 20,
+        });
+        expect(renderer.mock.invocationCallOrder[0]).toBeLessThan(strokeRenderer.mock.invocationCallOrder[0]);
+        expect(TestContext.fillText).not.toHaveBeenCalled();
+        expect(TestContext.strokeText).not.toHaveBeenCalled();
+
+        strokeRenderer.mockReturnValue(false);
+        extension.draw(TestContext, DEFAULT_SCALE, glyph);
+        expect(TestContext.strokeText).toHaveBeenCalledWith('A', 12, 20);
+
+        registration.dispose();
+        extension.draw(TestContext, DEFAULT_SCALE, glyph);
+        expect(renderer).toHaveBeenCalledTimes(2);
+        expect(strokeRenderer).toHaveBeenCalledTimes(2);
+        expect(TestContext.fillText).toHaveBeenCalledWith('A', 12, 20);
+        expect(TestContext.strokeText).toHaveBeenCalledTimes(2);
+    });
+
     it('uses the resolved glyph font family when the source text style omits it', () => {
         const extension = new FontAndBaseLine();
         const TestContext = createContext();

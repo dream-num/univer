@@ -31,20 +31,29 @@ export type DocCustomGlyphRenderer = (input: IDocCustomGlyphRenderInput) => bool
 export interface IDocCustomGlyphRendererRegistration {
     fontFamily: string;
     renderer: DocCustomGlyphRenderer;
+    strokeRenderer?: DocCustomGlyphRenderer;
 }
 
-const CUSTOM_GLYPH_RENDERERS = new Map<string, DocCustomGlyphRenderer>();
+const CUSTOM_GLYPH_RENDERERS = new Map<string, IDocCustomGlyphRendererRegistration>();
 
 export function registerDocCustomGlyphRenderer(registration: IDocCustomGlyphRendererRegistration): IDisposable {
-    CUSTOM_GLYPH_RENDERERS.set(registration.fontFamily, registration.renderer);
+    CUSTOM_GLYPH_RENDERERS.set(registration.fontFamily, registration);
     return toDisposable(() => {
-        if (CUSTOM_GLYPH_RENDERERS.get(registration.fontFamily) === registration.renderer) {
+        if (CUSTOM_GLYPH_RENDERERS.get(registration.fontFamily) === registration) {
             CUSTOM_GLYPH_RENDERERS.delete(registration.fontFamily);
         }
     });
 }
 
 export function getDocCustomGlyphRenderer(fontFamily: string | undefined): DocCustomGlyphRenderer | undefined {
+    return getDocCustomGlyphRegistration(fontFamily)?.renderer;
+}
+
+export function getDocCustomGlyphStrokeRenderer(fontFamily: string | undefined): DocCustomGlyphRenderer | undefined {
+    return getDocCustomGlyphRegistration(fontFamily)?.strokeRenderer;
+}
+
+function getDocCustomGlyphRegistration(fontFamily: string | undefined): IDocCustomGlyphRendererRegistration | undefined {
     if (!fontFamily) {
         return undefined;
     }

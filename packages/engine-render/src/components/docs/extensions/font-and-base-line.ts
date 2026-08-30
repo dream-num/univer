@@ -27,7 +27,7 @@ import { resolveGlowEffect, resolveOuterShadowEffect } from '../../../basics/dra
 import { Vector2 } from '../../../basics/vector2';
 import { CheckboxShape, isCheckboxGlyph } from '../../../shape/checkbox';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../extension';
-import { getDocCustomGlyphRenderer } from '../custom-glyph-renderer';
+import { getDocCustomGlyphRenderer, getDocCustomGlyphStrokeRenderer } from '../custom-glyph-renderer';
 import { docExtension } from '../doc-extension';
 import { getColorStyleForCanvas } from '../layout/style/color';
 
@@ -577,9 +577,8 @@ export class FontAndBaseLine extends docExtension {
         x: number,
         y: number
     ) {
-        const customRenderer = getDocCustomGlyphRenderer(
-            glyph.ts?.ff ?? glyph.fontStyle?.fontFamily ?? undefined
-        );
+        const fontFamily = glyph.ts?.ff ?? glyph.fontStyle?.fontFamily ?? undefined;
+        const customRenderer = getDocCustomGlyphRenderer(fontFamily);
         const fontSizePx = canvasFontPixelSize(ctx.font);
         const customRendered = customRenderer && fontSizePx !== undefined
             ? customRenderer({ content, context: ctx, fontSizePx, x, y })
@@ -601,7 +600,13 @@ export class FontAndBaseLine extends docExtension {
             if (outline.miterLimit !== undefined) {
                 ctx.miterLimit = outline.miterLimit;
             }
-            ctx.strokeText(content, x, y);
+            const strokeRenderer = getDocCustomGlyphStrokeRenderer(fontFamily);
+            const customStroked = strokeRenderer && fontSizePx !== undefined
+                ? strokeRenderer({ content, context: ctx, fontSizePx, x, y })
+                : false;
+            if (!customStroked) {
+                ctx.strokeText(content, x, y);
+            }
             ctx.restore();
         }
     }

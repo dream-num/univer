@@ -557,6 +557,22 @@ export class FontAndBaseLine extends docExtension {
         x: number,
         y: number
     ) {
+        this._paintTextAtSinglePoint(ctx, glyph, content, x, y);
+        glyph.ts?.textPaintOffsets?.forEach((offset) => {
+            if (!Number.isFinite(offset.x) || !Number.isFinite(offset.y) || (offset.x === 0 && offset.y === 0)) {
+                return;
+            }
+            this._paintTextAtSinglePoint(ctx, glyph, content, x + offset.x, y + offset.y);
+        });
+    }
+
+    private _paintTextAtSinglePoint(
+        ctx: UniverRenderingContext,
+        glyph: IDocumentSkeletonGlyph,
+        content: string,
+        x: number,
+        y: number
+    ) {
         const customRenderer = getDocCustomGlyphRenderer(
             glyph.ts?.ff ?? glyph.fontStyle?.fontFamily ?? undefined
         );

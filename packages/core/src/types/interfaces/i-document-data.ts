@@ -875,6 +875,8 @@ export interface ITextStyle extends IStyleBase {
     lineAscent?: number;
     /** Fixed line descent in 96-DPI layout pixels. */
     lineDescent?: number;
+    /** Additional relative glyph paint origins in 96-DPI layout pixels. */
+    textPaintOffsets?: Array<{ x: number; y: number }>;
     textFill?: IDocTextFill;
     textOutline?: IDocTextOutline;
     /**

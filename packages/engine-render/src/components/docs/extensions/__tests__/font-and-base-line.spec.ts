@@ -232,6 +232,27 @@ describe('docs font and baseline extension', () => {
         expect(TestContext.fillText).toHaveBeenNthCalledWith(2, 'B', 40, 0);
     });
 
+    it('repeats glyph paint at source-relative offsets', () => {
+        const extension = new FontAndBaseLine();
+        const TestContext = createContext();
+        extension.extensionOffset = {
+            spanPointWithFont: Vector2.create(12, 20),
+            spanStartPoint: Vector2.create(10, 10),
+            centerPoint: Vector2.create(8, 8),
+            renderConfig: {
+                vertexAngle: 0,
+                centerAngle: 0,
+            },
+        };
+
+        extension.draw(TestContext, DEFAULT_SCALE, createGlyph('A', {
+            ts: { fs: 12, textPaintOffsets: [{ x: 0.4, y: 0.1 }] },
+        }));
+
+        expect(TestContext.fillText).toHaveBeenNthCalledWith(1, 'A', 12, 20);
+        expect(TestContext.fillText).toHaveBeenNthCalledWith(2, 'A', 12.4, 20.1);
+    });
+
     it('reconstructs the source glyph raster scale relative to the current document transform', () => {
         const extension = new FontAndBaseLine();
         const TestContext = createContext();

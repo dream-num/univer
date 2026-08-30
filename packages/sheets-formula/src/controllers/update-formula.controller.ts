@@ -23,7 +23,7 @@ import type {
     Nullable,
     Workbook,
 } from '@univerjs/core';
-import type { IDirtyUnitDefinedNameMap, IDirtyUnitFeatureMap, IDirtyUnitOtherFormulaMap, IDirtyUnitSheetNameMap, IFormulaData, IFormulaDataItem, IFormulaDirtyData, IUnitSheetNameMap } from '@univerjs/engine-formula';
+import type { IDirtyUnitDefinedNameMap, IDirtyUnitFeatureMap, IDirtyUnitOtherFormulaMap, IDirtyUnitSheetNameMap, IFormulaData, IFormulaDataItem, IFormulaDirtyData, ISequenceNode, IUnitSheetNameMap } from '@univerjs/engine-formula';
 import type {
     IInsertSheetMutationParams,
     IRemoveSheetMutationParams,
@@ -47,7 +47,15 @@ import {
 import { deserializeRangeWithSheetWithCache, ErrorType, FormulaDataModel, generateStringWithSequence, IDefinedNamesService, LexerTreeBuilder, refactorFormulaUnitQualifier, sequenceNodeType, serializeRangeToRefString, SetArrayFormulaDataMutation, SetFormulaDataMutation, SetTriggerFormulaCalculationStartMutation, splitTableStructuredRef } from '@univerjs/engine-formula';
 import {
     ClearSelectionFormatCommand,
+    InsertColByRangeCommand,
+    InsertColCommand,
+    InsertRowByRangeCommand,
+    InsertRowCommand,
     InsertSheetMutation,
+    RemoveColByRangeCommand,
+    RemoveColCommand,
+    RemoveRowByRangeCommand,
+    RemoveRowCommand,
     RemoveSheetMutation,
     SetBorderCommand,
     SetRangeCustomMetadataCommand,
@@ -62,6 +70,14 @@ import { checkIsSameUnitAndSheet, formulaDataToCellData, FormulaReferenceMoveTyp
 import { getNewRangeByMoveParam } from './utils/ref-range-move';
 import { getReferenceMoveParams } from './utils/ref-range-param';
 
+interface IFormulaReferenceIndexEntry {
+    unitId: string;
+    sheetId: string;
+    row: number;
+    column: number;
+    formulaDataItem: IFormulaDataItem;
+}
+
 /**
  * Update formula process
  *
@@ -74,6 +90,11 @@ import { getReferenceMoveParams } from './utils/ref-range-param';
  * 3. onCommandExecuted, before formula calculation, use the setRangeValues information to delete the old formulaData, ArrayFormula and ArrayFormulaCellData, and send the worker (complementary setRangeValues after collaborative conflicts, normal operation triggers formula update, undo/redo are captured and processed here)
  */
 export class UpdateFormulaController extends Disposable {
+    private readonly _formulaReferenceEntries = new Map<string, IFormulaReferenceIndexEntry>();
+    private readonly _formulaReferenceTargets = new Map<string, Map<string, { maxRow: number; maxColumn: number }>>();
+    private readonly _dynamicFormulaKeys = new Set<string>();
+    private readonly _parsedFormulaCache = new Map<string, ReadonlyArray<string | Readonly<ISequenceNode>> | undefined>();
+
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
@@ -87,6 +108,152 @@ export class UpdateFormulaController extends Disposable {
         super();
 
         this._commandExecutedListener();
+        this._rebuildFormulaReferenceIndex();
+    }
+
+    private _getFormulaKey(unitId: string, sheetId: string, row: number, column: number) {
+        return `${unitId}\0${sheetId}\0${row}\0${column}`;
+    }
+
+    private _getTargetKey(unitId: string, sheetId: string) {
+        return `${unitId}\0${sheetId}`;
+    }
+
+    private _cacheParsedFormula(formulaString: string, sequenceNodes: Array<string | ISequenceNode> | undefined) {
+        const immutableNodes = sequenceNodes == null
+            ? undefined
+            : Object.freeze(sequenceNodes.map((node) => typeof node === 'string' ? node : Object.freeze({ ...node })));
+
+        this._parsedFormulaCache.set(formulaString, immutableNodes);
+    }
+
+    private _getParsedFormula(formulaString: string): Array<string | ISequenceNode> | undefined {
+        if (!this._parsedFormulaCache.has(formulaString)) {
+            this._cacheParsedFormula(formulaString, this._lexerTreeBuilder.sequenceNodesBuilder(formulaString));
+        }
+
+        return this._parsedFormulaCache.get(formulaString)?.map((node) => typeof node === 'string' ? node : { ...node });
+    }
+
+    // eslint-disable-next-line max-lines-per-function
+    private _rebuildFormulaReferenceIndex() {
+        this._formulaReferenceEntries.clear();
+        this._formulaReferenceTargets.clear();
+        this._dynamicFormulaKeys.clear();
+
+        const formulaData = this._formulaDataModel.getFormulaData();
+        const { unitSheetNameMap } = this._formulaDataModel.getCalculateData();
+
+        for (const unitId of Object.keys(formulaData)) {
+            const sheets = formulaData[unitId];
+            if (!sheets) continue;
+
+            for (const sheetId of Object.keys(sheets)) {
+                // eslint-disable-next-line complexity
+                new ObjectMatrix(sheets[sheetId] || {}).forValue((row, column, formulaDataItem) => {
+                    if (!formulaDataItem || typeof formulaDataItem.f !== 'string' || formulaDataItem.f.length === 0) return true;
+                    if (formulaDataItem.si && ((formulaDataItem.x || 0) !== 0 || (formulaDataItem.y || 0) !== 0)) return true;
+
+                    const key = this._getFormulaKey(unitId, sheetId, row, column);
+                    const sequenceNodes = this._getParsedFormula(formulaDataItem.f);
+                    this._formulaReferenceEntries.set(key, { unitId, sheetId, row, column, formulaDataItem });
+
+                    if (!sequenceNodes) {
+                        this._dynamicFormulaKeys.add(key);
+                        return true;
+                    }
+
+                    if (
+                        formulaDataItem.f.includes('[') ||
+                        formulaDataItem.f.includes('#') ||
+                        formulaDataItem.f.includes('{') ||
+                        /^=[A-Za-z_\\][A-Za-z_.]*$/.test(formulaDataItem.f) ||
+                        formulaDataItem.si
+                    ) {
+                        this._dynamicFormulaKeys.add(key);
+                    }
+
+                    let hasDirectReference = false;
+                    let hasSemanticNode = false;
+
+                    for (const node of sequenceNodes) {
+                        if (typeof node === 'string') continue;
+
+                        hasSemanticNode = true;
+                        if (
+                            node.nodeType === sequenceNodeType.FUNCTION &&
+                            ['INDIRECT', 'OFFSET', 'INDEX', 'CHOOSE', 'ADDRESS'].includes(node.token.toUpperCase())
+                        ) {
+                            this._dynamicFormulaKeys.add(key);
+                        }
+                        if (node.nodeType === sequenceNodeType.DEFINED_NAME) {
+                            this._dynamicFormulaKeys.add(key);
+                        }
+                        if (node.nodeType !== sequenceNodeType.REFERENCE) continue;
+
+                        hasDirectReference = true;
+                        const { range, sheetName, unitId: sequenceUnitId } = deserializeRangeWithSheetWithCache(node.token);
+                        const targetUnitId = sequenceUnitId || unitId;
+                        const targetSheetId = sheetName ? unitSheetNameMap?.[targetUnitId]?.[sheetName] : sheetId;
+                        if (!targetSheetId) continue;
+
+                        const targetKey = this._getTargetKey(targetUnitId, targetSheetId);
+                        let targetEntries = this._formulaReferenceTargets.get(targetKey);
+                        if (!targetEntries) {
+                            targetEntries = new Map();
+                            this._formulaReferenceTargets.set(targetKey, targetEntries);
+                        }
+
+                        const bounds = targetEntries.get(key) || { maxRow: -1, maxColumn: -1 };
+                        bounds.maxRow = Math.max(bounds.maxRow, range.endRow);
+                        bounds.maxColumn = Math.max(bounds.maxColumn, range.endColumn);
+                        targetEntries.set(key, bounds);
+                    }
+
+                    if (!hasDirectReference && hasSemanticNode) {
+                        this._dynamicFormulaKeys.add(key);
+                    }
+
+                    return true;
+                });
+            }
+        }
+    }
+
+    private _queryFormulaReferenceIndex(moveParam: IFormulaReferenceMoveParam) {
+        const targetEntries = this._formulaReferenceTargets.get(this._getTargetKey(moveParam.unitId, moveParam.sheetId));
+        const keys = new Set<string>();
+        const isRowOperation = moveParam.type === FormulaReferenceMoveType.InsertRow || moveParam.type === FormulaReferenceMoveType.RemoveRow;
+        const threshold = isRowOperation ? moveParam.range?.startRow : moveParam.range?.startColumn;
+
+        if (targetEntries && threshold != null) {
+            for (const [key, bounds] of targetEntries) {
+                if ((isRowOperation ? bounds.maxRow : bounds.maxColumn) >= threshold) {
+                    keys.add(key);
+                }
+            }
+        }
+
+        for (const key of this._dynamicFormulaKeys) {
+            keys.add(key);
+        }
+
+        return [...keys]
+            .map((key) => this._formulaReferenceEntries.get(key))
+            .filter((entry): entry is NonNullable<typeof entry> => entry != null);
+    }
+
+    private _getIndexedFormulaData(entries: IFormulaReferenceIndexEntry[]): IFormulaData {
+        const formulaData: IFormulaData = {};
+
+        for (const entry of entries) {
+            formulaData[entry.unitId] ||= {};
+            formulaData[entry.unitId]![entry.sheetId] ||= {};
+            formulaData[entry.unitId]![entry.sheetId]![entry.row] ||= {};
+            formulaData[entry.unitId]![entry.sheetId]![entry.row]![entry.column] = entry.formulaDataItem;
+        }
+
+        return formulaData;
     }
 
     private _commandExecutedListener() {
@@ -98,11 +265,28 @@ export class UpdateFormulaController extends Disposable {
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (!command.params) return;
 
+                if (command.id === SetFormulaDataMutation.id) {
+                    this._rebuildFormulaReferenceIndex();
+                }
+
                 if (command.id === RemoveSheetMutation.id) {
                     const { subUnitId: sheetId, unitId } = command.params as IRemoveSheetMutationParams;
                     this._handleWorkbookDisposed(unitId, sheetId);
                 } else if (command.id === InsertSheetMutation.id) {
                     this._handleInsertSheetMutation(command.params as IInsertSheetMutationParams);
+                }
+
+                if ([
+                    InsertRowCommand.id,
+                    InsertRowByRangeCommand.id,
+                    InsertColCommand.id,
+                    InsertColByRangeCommand.id,
+                    RemoveRowCommand.id,
+                    RemoveRowByRangeCommand.id,
+                    RemoveColCommand.id,
+                    RemoveColByRangeCommand.id,
+                ].includes(command.id)) {
+                    this._rebuildFormulaReferenceIndex();
                 }
             })
         );
@@ -285,6 +469,7 @@ export class UpdateFormulaController extends Disposable {
         const params = this._getDirtyDataByCalculationMode(calculationMode);
 
         this._commandService.executeCommand(SetTriggerFormulaCalculationStartMutation.id, params, { onlyLocal: true });
+        this._rebuildFormulaReferenceIndex();
     }
 
     private _getDirtyDataByCalculationMode(calculationMode: CalculationMode): IFormulaDirtyData {
@@ -328,10 +513,19 @@ export class UpdateFormulaController extends Disposable {
                 result.oldUnitName = unitNameMap?.[result.unitId]?.name;
             }
             const oldFormulaData = this._formulaDataModel.getFormulaData();
+            const indexedStructuralOperation = [
+                FormulaReferenceMoveType.InsertRow,
+                FormulaReferenceMoveType.InsertColumn,
+                FormulaReferenceMoveType.RemoveRow,
+                FormulaReferenceMoveType.RemoveColumn,
+            ].includes(result.type);
+            const formulaData = indexedStructuralOperation
+                ? this._getIndexedFormulaData(this._queryFormulaReferenceIndex(result))
+                : oldFormulaData;
 
             // change formula reference
             const { newFormulaData } = this._getFormulaReferenceMoveInfo(
-                oldFormulaData,
+                formulaData,
                 unitSheetNameMap,
                 result
             );
@@ -404,7 +598,7 @@ export class UpdateFormulaController extends Disposable {
                         return true;
                     }
 
-                    const sequenceNodes = this._lexerTreeBuilder.sequenceNodesBuilder(formulaString);
+                    const sequenceNodes = this._getParsedFormula(formulaString);
 
                     if (sequenceNodes == null) {
                         return true;
@@ -655,9 +849,9 @@ export class UpdateFormulaController extends Disposable {
 
                     const newSequenceNodes = updateRefOffset(sequenceNodes, refChangeIds, x, y);
 
-                    newFormulaDataItem.setValue(row, column, {
-                        f: `=${generateStringWithSequence(newSequenceNodes)}`,
-                    });
+                    const newFormulaString = `=${generateStringWithSequence(newSequenceNodes)}`;
+                    this._cacheParsedFormula(newFormulaString, newSequenceNodes);
+                    newFormulaDataItem.setValue(row, column, { f: newFormulaString });
                 });
 
                 if (newFormulaData[unitId]) {

@@ -118,9 +118,11 @@ export function RenderSheetHeader() {
 export function RenderSheetContent() {
     const config = useConfigValue<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
     const componentManager = useDependency(ComponentManager);
+    const activeWorkbook = useActiveWorkbook();
     const workbook = useRootWorkbenchWorkbook();
     const activeEmbedTab = useActiveSheetEmbedTabData(workbook);
     const injector = useDependency(Injector);
+    const activeUnitEmbeddedRender = useActiveWorkbookIsEmbeddedRender(activeWorkbook);
     const activeWorkbookEmbeddedRender = useActiveWorkbookIsEmbeddedRender(workbook);
     const rootUnitType = useWorkbenchRootUnitType();
     const rootWorkbenchOwnsSheet = rootUnitType === UniverInstanceType.UNIVER_SHEET || Boolean(activeEmbedTab);
@@ -129,15 +131,40 @@ export function RenderSheetContent() {
     const ShapeTextEditorContainer = componentManager.get('SheetShapeTextEditorContainer') ?? componentManager.get('ShapeTextEditorContainer');
 
     useEffect(() => {
-        if (!workbook || activeEmbedTab || activeWorkbookEmbeddedRender || !rootWorkbenchOwnsSheet) {
+        if (
+            !workbook ||
+            activeEmbedTab ||
+            activeWorkbook?.getUnitId() !== workbook.getUnitId() ||
+            activeUnitEmbeddedRender ||
+            activeWorkbookEmbeddedRender ||
+            !rootWorkbenchOwnsSheet
+        ) {
             return;
         }
 
         const instanceService = injector.get(IUniverInstanceService);
+        const currentWorkbook = instanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        const runtimeFocusCoordinator = injector.has(ISheetEmbedRuntimeFocusCoordinator)
+            ? injector.get(ISheetEmbedRuntimeFocusCoordinator)
+            : undefined;
+        const currentRuntimeScope = runtimeFocusCoordinator?.resolveRuntimeScopeByChildUnitId(
+            currentWorkbook?.getUnitId()
+        );
+        const currentWorkbookEmbeddedRender = currentWorkbook != null && (
+            injector.get(IRenderManagerService).getRenderUnitById(currentWorkbook.getUnitId())?.isMainScene === false ||
+            instanceService.getUnitCreateOptions(currentWorkbook.getUnitId())?.embeddedRender === true
+        );
+        if (
+            currentWorkbook?.getUnitId() !== workbook.getUnitId() &&
+            (currentRuntimeScope?.hostUnitId === workbook.getUnitId() || currentWorkbookEmbeddedRender)
+        ) {
+            return;
+        }
+
         instanceService.setCurrentUnitForType(workbook.getUnitId());
         instanceService.focusUnit(workbook.getUnitId());
         tryGetSheetEmbedRuntimeService(injector)?.clearTab();
-    }, [activeEmbedTab, activeWorkbookEmbeddedRender, injector, rootWorkbenchOwnsSheet, workbook]);
+    }, [activeEmbedTab, activeUnitEmbeddedRender, activeWorkbook, activeWorkbookEmbeddedRender, injector, rootWorkbenchOwnsSheet, workbook]);
 
     if (!workbook) return null;
     if (!rootWorkbenchOwnsSheet) return null;

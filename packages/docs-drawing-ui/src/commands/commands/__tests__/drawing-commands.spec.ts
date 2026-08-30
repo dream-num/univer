@@ -17,6 +17,7 @@
 import type { Dependency, DependencyIdentifier, DocumentDataModel, ICommand, IDocumentData } from '@univerjs/core';
 import type { IDocImage, IInsertDocDrawingCommandParams, ISetDocDrawingArrangeCommandParams, IUpdateDrawingDocTransformCommandParams } from '@univerjs/docs-drawing';
 import {
+    AlignTypeH,
     ArrangeTypeEnum,
     awaitTime,
     BooleanNumber,
@@ -759,7 +760,9 @@ describe('docs drawing commands integration', () => {
 
     it('moves a focused floating drawing by updating the persisted doc transform', async () => {
         const testBed = setupDrawingTestBed(createDrawingDocData());
-        vi.spyOn(testBed.get(DocSkeletonManagerService), 'getSkeleton').mockReturnValue({} as never);
+        vi.spyOn(testBed.get(DocSkeletonManagerService), 'getSkeleton').mockReturnValue({
+            getSkeletonData: () => null,
+        } as never);
 
         testBed.docDrawingService.focusDrawing([{ unitId: 'test-doc', subUnitId: 'test-doc', drawingId: 'shape-1' }]);
 
@@ -773,6 +776,56 @@ describe('docs drawing commands integration', () => {
 
         expect(doc.getSnapshot().drawings?.['shape-1'].docTransform.positionH).toEqual({ posOffset: 3 });
         expect(testBed.refreshControls).toHaveBeenCalled();
+
+        testBed.univer.dispose();
+    });
+
+    it('converts aligned drawing positions to offsets before an arrow-key move', async () => {
+        const data = createDrawingDocData();
+        data.drawings!['shape-1'].docTransform.positionH = {
+            relativeFrom: ObjectRelativeFromH.PAGE,
+            align: AlignTypeH.CENTER,
+        };
+        data.drawings!['shape-1'].docTransform.positionV = {
+            relativeFrom: ObjectRelativeFromV.PAGE,
+            posOffset: 20,
+        };
+        const testBed = setupDrawingTestBed(data);
+        vi.spyOn(testBed.get(DocSkeletonManagerService), 'getSkeleton').mockReturnValue({
+            getSkeletonData: () => ({
+                pages: [{
+                    footerId: '',
+                    headerId: '',
+                    marginBottom: 72,
+                    marginLeft: 90,
+                    marginTop: 72,
+                    pageHeight: 840,
+                    pageWidth: 594,
+                    skeDrawings: new Map([['shape-1', {
+                        aLeft: 247,
+                        aTop: 10,
+                        blockAnchorTop: 0,
+                        columnLeft: 90,
+                        lineTop: 0,
+                    }]]),
+                    skeTables: new Map(),
+                }],
+                skeFooters: new Map(),
+                skeHeaders: new Map(),
+            }),
+        } as never);
+        testBed.docDrawingService.focusDrawing([{ unitId: 'test-doc', subUnitId: 'test-doc', drawingId: 'shape-1' }]);
+
+        expect(await testBed.commandService.executeCommand(MoveDocDrawingsCommand.id, {
+            direction: Direction.RIGHT,
+        })).toBe(true);
+
+        const doc = testBed.get(IUniverInstanceService)
+            .getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC)!;
+        expect(doc.getSnapshot().drawings?.['shape-1'].docTransform.positionH).toEqual({
+            relativeFrom: ObjectRelativeFromH.PAGE,
+            posOffset: 249,
+        });
 
         testBed.univer.dispose();
     });
@@ -1013,7 +1066,7 @@ describe('docs drawing commands integration', () => {
             posOffset: 18,
         });
         expect(testBed.refreshControls).toHaveBeenCalled();
-        expect(refreshDrawings).toHaveBeenCalledWith(skeleton);
+        expect(refreshDrawings).not.toHaveBeenCalled();
 
         testBed.univer.dispose();
     });

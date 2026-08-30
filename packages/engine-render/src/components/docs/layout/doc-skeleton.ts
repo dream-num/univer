@@ -1730,7 +1730,10 @@ export class DocumentSkeleton extends Skeleton {
         for (const [key, value] of source.skeListLevel ?? []) {
             target.skeListLevel?.set(
                 key,
-                value.map((level) => level.filter(({ paragraph }) => paragraph.startIndex < endIndexExclusive))
+                Array.from(
+                    value,
+                    (level) => (level ?? []).filter(({ paragraph }) => paragraph.startIndex < endIndexExclusive)
+                )
             );
         }
         for (const [key, value] of source.drawingAnchor ?? []) {
@@ -2432,7 +2435,10 @@ export class DocumentSkeleton extends Skeleton {
                 skeletonData.skeListLevel = new Map(
                     publicationToApply.resources.skeListLevel.map(([listId, levels]) => [
                         listId,
-                        levels.map((level) => level.map(({ bullet, paragraph }) => ({ bullet, paragraph }))),
+                        Array.from(
+                            levels,
+                            (level) => (level ?? []).map(({ bullet, paragraph }) => ({ bullet, paragraph }))
+                        ),
                     ])
                 );
             }
@@ -4117,7 +4123,7 @@ export class DocumentSkeleton extends Skeleton {
             skeListLevel: new Map(
                 [...ctx.skeletonResourceReference.skeListLevel!].map(([key, levels]) => [
                     key,
-                    levels.map((level) => [...level]),
+                    Array.from(levels, (level) => [...(level ?? [])]),
                 ])
             ),
             drawingAnchor: new Map(

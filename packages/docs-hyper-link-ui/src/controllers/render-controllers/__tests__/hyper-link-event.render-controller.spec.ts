@@ -54,18 +54,22 @@ describe('DocHyperLinkEventRenderController', () => {
         }
     });
 
-    it('opens document hyperlinks only with Ctrl or Command click', () => {
+    it('shows hyperlink details on click and opens only with Ctrl or Command click', () => {
         const hoverCustomRanges$ = new Subject<unknown[]>();
         const clickCustomRanges$ = new Subject<unknown>();
         const pointerDownCustomRanges$ = new Subject<unknown[]>();
         const commandService = {
             executeCommand: vi.fn(),
         };
+        const hyperLinkPopupService = {
+            showing: false,
+            showInfoPopup: vi.fn(),
+        };
         const controller = new DocHyperLinkEventRenderController(
             { unitId: 'doc-unit' } as never,
             { hoverCustomRanges$, clickCustomRanges$, pointerDownCustomRanges$ } as never,
             commandService as never,
-            { showing: false } as never,
+            hyperLinkPopupService as never,
             { getSkeleton: vi.fn() } as never,
             { getTextRanges: () => [] } as never
         );
@@ -73,6 +77,8 @@ describe('DocHyperLinkEventRenderController', () => {
             range: {
                 rangeId: 'link-1',
                 rangeType: CustomRangeType.HYPERLINK,
+                startIndex: 4,
+                endIndex: 10,
             },
             segmentId: 'header-1',
             segmentPageIndex: 0,
@@ -81,6 +87,14 @@ describe('DocHyperLinkEventRenderController', () => {
 
         clickCustomRanges$.next({ ...clickedRange, ctrlKey: false, metaKey: false });
         expect(commandService.executeCommand).not.toHaveBeenCalled();
+        expect(hyperLinkPopupService.showInfoPopup).toHaveBeenCalledWith({
+            unitId: 'doc-unit',
+            linkId: 'link-1',
+            segmentId: 'header-1',
+            segmentPage: 0,
+            startIndex: 4,
+            endIndex: 10,
+        });
 
         clickCustomRanges$.next({ ...clickedRange, ctrlKey: true, metaKey: false });
         expect(commandService.executeCommand).toHaveBeenLastCalledWith(ClickDocHyperLinkOperation.id, {

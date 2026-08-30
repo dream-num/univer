@@ -144,8 +144,10 @@ function resetDocumentViewModel(
     if (documentViewModel == null) {
         return;
     }
-    const didResetIncrementally = segmentId === '' && preservesStructure &&
-        documentViewModel.resetByValidatedTextMutation(documentDataModel, actions);
+    const didResetIncrementally = segmentId === '' && preservesStructure && (
+        documentViewModel.resetByValidatedTextMutation?.(documentDataModel, actions) ||
+        documentViewModel.resetByValidatedMetadataMutation?.(documentDataModel, actions)
+    );
     if (!didResetIncrementally) {
         documentViewModel.reset(documentDataModel);
     }
@@ -157,7 +159,7 @@ function scheduleDocumentSelectionUpdate(
     isSync: boolean
 ): void {
     const { unitId, textRanges, trigger, noNeedSetTextRange, isEditing = true } = params;
-    if (noNeedSetTextRange || textRanges == null || trigger == null || isSync) {
+    if (noNeedSetTextRange || textRanges == null || textRanges.length === 0 || trigger == null || isSync) {
         return;
     }
     queueMicrotask(() => {

@@ -136,3 +136,60 @@ describe('DocDrawingController', () => {
         controller.dispose();
     });
 });
+describe('DocDrawingController imported drawing identity regression', () => {
+    it('normalizes drawing unit identity when registering imported snapshot data', () => {
+        const registerDocDrawingData = vi.fn();
+        const registerRenderDrawingData = vi.fn();
+        const snapshot = {
+            drawings: {
+                shape1: {
+                    unitId: 'doc-1',
+                    subUnitId: 'stale-import-unit',
+                    drawingId: 'shape1',
+                    drawingType: 1,
+                },
+            },
+            drawingsOrder: ['shape1'],
+        };
+        const documentDataModel = {
+            getDrawings: () => snapshot.drawings,
+            getDrawingsOrder: () => snapshot.drawingsOrder,
+        };
+        const resourceManagerService = {
+            registerPluginResource: vi.fn(() => ({ dispose: vi.fn() })),
+        };
+        const controller = new DocDrawingController(
+            { registerDrawingData: registerDocDrawingData } as never,
+            { registerDrawingData: registerRenderDrawingData } as never,
+            resourceManagerService as never,
+            {
+                getUnit: vi.fn((_unitId: string, _type?: UniverInstanceType) => documentDataModel),
+            } as never,
+            { registerCommand: vi.fn(() => ({ dispose: vi.fn() })) } as never
+        );
+
+        expect(controller.loadDrawingDataForUnit('doc-1')).toBe(true);
+        expect(registerDocDrawingData).toHaveBeenCalledWith('doc-1', expect.objectContaining({
+            'doc-1': expect.objectContaining({
+                data: {
+                    shape1: expect.objectContaining({
+                        unitId: 'doc-1',
+                        subUnitId: 'doc-1',
+                    }),
+                },
+            }),
+        }));
+        expect(registerRenderDrawingData).toHaveBeenCalledWith('doc-1', expect.objectContaining({
+            'doc-1': expect.objectContaining({
+                data: {
+                    shape1: expect.objectContaining({
+                        unitId: 'doc-1',
+                        subUnitId: 'doc-1',
+                    }),
+                },
+            }),
+        }));
+
+        controller.dispose();
+    });
+});

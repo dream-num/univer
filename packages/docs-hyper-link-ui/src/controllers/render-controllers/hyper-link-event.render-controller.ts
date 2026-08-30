@@ -99,7 +99,19 @@ export class DocHyperLinkEventRenderController extends Disposable implements IRe
         this.disposeWithMe(
             this._docEventManagerService.clickCustomRanges$.subscribe((range) => {
                 const link = range.range;
-                if (link.rangeType !== CustomRangeType.HYPERLINK || (!range.ctrlKey && !range.metaKey)) {
+                if (link.rangeType !== CustomRangeType.HYPERLINK) {
+                    return;
+                }
+
+                if (!range.ctrlKey && !range.metaKey) {
+                    this._hyperLinkPopupService.showInfoPopup({
+                        unitId: this._context.unitId,
+                        linkId: link.rangeId,
+                        segmentId: range.segmentId,
+                        segmentPage: range.segmentPageIndex,
+                        startIndex: link.startIndex,
+                        endIndex: link.endIndex,
+                    });
                     return;
                 }
 

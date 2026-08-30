@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommandInfo, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, ICommandInfo } from '@univerjs/core';
 import type {
     Documents,
-    DocumentViewModel,
-    IDocumentSkeletonPage,
     IMouseEvent,
     IPageRenderConfig,
     IPathProps,
@@ -29,7 +27,6 @@ import type {
 } from '@univerjs/engine-render';
 import type { LocaleKey } from '../locale/types';
 import {
-    BooleanNumber,
     ColorKit,
     Disposable,
     DocumentFlavor,
@@ -42,76 +39,17 @@ import {
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
-import { DocSkeletonManagerService, HeaderFooterType, RichTextEditingMutation } from '@univerjs/docs';
+import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService, PageLayoutType, Path, Rect, Vector2 } from '@univerjs/engine-render';
 import { neoGetDocObject } from '../basics/component-tools';
 import { CloseHeaderFooterCommand, CoreHeaderFooterCommand } from '../commands/commands/doc-header-footer.command';
 import { IEditorService } from '../services/editor/editor-manager.service';
 import { DocSelectionRenderService } from '../services/selection/doc-selection-render.service';
-import { getDocPageSectionContext } from '../utils/section-header-footer';
+import { getHeaderFooterTarget } from '../utils/section-header-footer';
 import { TextBubbleShape } from '../views/header-footer/text-bubble';
 
 const HEADER_FOOTER_COVER_ALPHA = 0.5;
 const HEADER_FOOTER_LABEL_ALPHA = 0.08;
-
-interface IHeaderFooterCreate {
-    createType: Nullable<HeaderFooterType>;
-    headerFooterId: Nullable<string>;
-    sectionId?: string;
-}
-
-function checkCreateHeaderFooterType(
-    viewModel: DocumentViewModel,
-    editArea: DocumentEditArea,
-    segmentPage: number,
-    page?: IDocumentSkeletonPage
-): IHeaderFooterCreate {
-    const snapshot = viewModel.getDataModel().getSnapshot();
-    const { sectionId, config } = getDocPageSectionContext(snapshot, page);
-    const {
-        defaultHeaderId,
-        defaultFooterId,
-        evenPageHeaderId,
-        evenPageFooterId,
-        firstPageHeaderId,
-        firstPageFooterId,
-        evenAndOddHeaders,
-        useFirstPageHeaderFooter,
-    } = config;
-    const isFirstPage = page ? page.pageNumber === page.pageNumberStart : segmentPage === 0;
-    const isEvenPage = page ? page.pageNumber % 2 === 0 : segmentPage % 2 === 1;
-
-    if (editArea === DocumentEditArea.BODY) {
-        return { createType: null, headerFooterId: null, sectionId };
-    }
-
-    const isHeader = editArea === DocumentEditArea.HEADER;
-    if (!isHeader && editArea !== DocumentEditArea.FOOTER) {
-        throw new Error(`Invalid editArea: ${editArea}`);
-    }
-    const variants = isHeader
-        ? {
-            first: [firstPageHeaderId, HeaderFooterType.FIRST_PAGE_HEADER] as const,
-            even: [evenPageHeaderId, HeaderFooterType.EVEN_PAGE_HEADER] as const,
-            default: [defaultHeaderId, HeaderFooterType.DEFAULT_HEADER] as const,
-        }
-        : {
-            first: [firstPageFooterId, HeaderFooterType.FIRST_PAGE_FOOTER] as const,
-            even: [evenPageFooterId, HeaderFooterType.EVEN_PAGE_FOOTER] as const,
-            default: [defaultFooterId, HeaderFooterType.DEFAULT_FOOTER] as const,
-        };
-    const [headerFooterId, createType] = useFirstPageHeaderFooter === BooleanNumber.TRUE && isFirstPage
-        ? variants.first
-        : evenAndOddHeaders === BooleanNumber.TRUE && isEvenPage
-            ? variants.even
-            : variants.default;
-
-    return {
-        createType: headerFooterId ? null : createType,
-        headerFooterId: headerFooterId ?? null,
-        sectionId,
-    };
-}
 
 export class DocHeaderFooterController extends Disposable implements IRenderModule {
     private _loadedMap = new WeakSet<RenderComponentType>();
@@ -262,7 +200,7 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
             viewModel.setEditArea(editArea);
 
             const page = skeleton.getSkeletonData()?.pages[pageNumber];
-            const { createType, headerFooterId, sectionId } = checkCreateHeaderFooterType(viewModel, editArea, pageNumber, page);
+            const { createType, headerFooterId, sectionId } = getHeaderFooterTarget(viewModel, editArea, pageNumber, page);
 
             if (editArea === DocumentEditArea.BODY) {
                 this._docSelectionRenderService.setSegment('');

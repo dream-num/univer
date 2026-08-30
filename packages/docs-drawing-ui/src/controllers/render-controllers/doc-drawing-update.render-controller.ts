@@ -66,6 +66,7 @@ import { debounceTime } from 'rxjs';
 import { GroupDocDrawingCommand } from '../../commands/commands/group-doc-drawing.command';
 import { UngroupDocDrawingCommand } from '../../commands/commands/ungroup-doc-drawing.command';
 import { DocRefreshDrawingsService } from '../../services/doc-refresh-drawings.service';
+import { getDocMutationAffectedDrawingIds } from './doc-drawing-mutation';
 
 interface IImageInsertPosition {
     left: number;
@@ -76,6 +77,8 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
     private readonly _editableTransformerConfigs = new WeakMap<BaseObject, ITransformerConfig>();
     private readonly _editableEventedStates = new WeakMap<BaseObject, boolean>();
     private _editStatusUpdateScheduled = false;
+    private _pendingEditStatusDrawingIds: Set<string> | null | undefined;
+    private _lastEditStatusContextKey: string | null = null;
 
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
@@ -101,15 +104,21 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
         this._focusDrawingListener();
         this._transformDrawingListener();
         this._editAreaChangeListener();
-        const scheduleEditStatusUpdate = (drawings: Array<{ unitId: string }>) => {
-            if (drawings.some((drawing) => drawing.unitId === this._context?.unitId)) {
-                this._scheduleDrawingsEditStatusUpdate();
+        const scheduleEditStatusUpdate = (drawings: Array<{ unitId: string; drawingId: string }>) => {
+            const relevantDrawings = drawings.filter((drawing) => drawing.unitId === this._context?.unitId);
+            if (relevantDrawings.length > 0) {
+                const drawingIds = relevantDrawings
+                    .map((drawing) => drawing.drawingId)
+                    .filter((drawingId): drawingId is string => typeof drawingId === 'string' && drawingId.length > 0);
+                this._scheduleDrawingsEditStatusUpdate(
+                    drawingIds.length === relevantDrawings.length ? new Set(drawingIds) : undefined
+                );
             }
         };
         this.disposeWithMe(this._drawingManagerService.add$.subscribe(scheduleEditStatusUpdate));
         this.disposeWithMe(this._drawingManagerService.update$.subscribe(scheduleEditStatusUpdate));
         this.disposeWithMe(this._permissionService.permissionPointUpdate$.subscribe(() => {
-            this._updateDrawingsEditStatus();
+            this._updateDrawingsEditStatus(undefined, true);
         }));
     }
 
@@ -468,7 +477,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
     }
 
     // Update drawings edit status and opacity. You can not edit header footer images when you are editing body. and vice verse.
-    private _updateDrawingsEditStatus() {
+    private _updateDrawingsEditStatus(drawingIds?: ReadonlySet<string>, force = false) {
         if (!this._context) return;
 
         const { unit: docDataModel, scene, unitId } = this._context;
@@ -486,18 +495,31 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
         const isEditBody = viewModel.getEditArea() === DocumentEditArea.BODY;
         const isDocInteractionFocusing = this._docSelectionRenderService.isFocusing
             || this._drawingManagerService.getFocusDrawings().some((drawing) => drawing.unitId === unitId);
+        const contextKey = `${viewModel.getEditArea()}:${isDocInteractionFocusing}`;
+        const effectiveDrawingIds = drawingIds != null && contextKey === this._lastEditStatusContextKey
+            ? drawingIds
+            : undefined;
+        if (effectiveDrawingIds == null) {
+            if (!force && contextKey === this._lastEditStatusContextKey) {
+                return;
+            }
+            this._lastEditStatusContextKey = contextKey;
+        }
         const readOnlyDrawingIds = new Set<string>();
+        const drawingShapesById = this._indexDrawingShapes(scene.getAllObjects(), unitId);
 
         for (const key of Object.keys(drawings)) {
             const drawing = drawings[key];
+            if (effectiveDrawingIds != null && !effectiveDrawingIds.has(drawing.drawingId)) {
+                continue;
+            }
             const segmentId = getDocumentDrawingSegmentId(docDataModel, drawing.drawingId);
             const editable = canEditDocumentTargets(this._permissionService, unitId, [
                 ...getDocumentEntityParentPermissionObjectIds(docDataModel, segmentId, 'drawing', drawing.drawingId),
                 getDocumentEntityPermissionObjectId(segmentId, 'drawing', drawing.drawingId),
             ]);
             this._recordReadOnlyDrawing(readOnlyDrawingIds, drawing.drawingId, editable);
-            const objectKey = getDrawingShapeKeyByDrawingSearch({ unitId, drawingId: drawing.drawingId, subUnitId: unitId });
-            const drawingShapes = scene.fuzzyMathObjects(objectKey, true);
+            const drawingShapes = drawingShapesById.get(drawing.drawingId) ?? [];
 
             if (drawingShapes.length) {
                 for (const shape of drawingShapes) {
@@ -526,6 +548,24 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
         }
 
         this._clearReadOnlyDrawingFocus(unitId, readOnlyDrawingIds);
+    }
+
+    private _indexDrawingShapes(shapes: BaseObject[], unitId: string): Map<string, BaseObject[]> {
+        const prefix = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId: unitId, drawingId: '' });
+        const result = new Map<string, BaseObject[]>();
+        for (const shape of shapes) {
+            if (!shape.oKey.startsWith(prefix)) {
+                continue;
+            }
+            const drawingId = shape.oKey.slice(prefix.length).split('#-#', 1)[0];
+            if (!drawingId) {
+                continue;
+            }
+            const drawingShapes = result.get(drawingId) ?? [];
+            drawingShapes.push(shape);
+            result.set(drawingId, drawingShapes);
+        }
+        return result;
     }
 
     private _recordReadOnlyDrawing(readOnlyDrawingIds: Set<string>, drawingId: string, editable: boolean): void {
@@ -583,7 +623,14 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
         };
     }
 
-    private _scheduleDrawingsEditStatusUpdate(): void {
+    private _scheduleDrawingsEditStatusUpdate(drawingIds?: ReadonlySet<string>): void {
+        if (drawingIds == null) {
+            this._pendingEditStatusDrawingIds = null;
+            this._lastEditStatusContextKey = null;
+        } else if (this._pendingEditStatusDrawingIds !== null) {
+            this._pendingEditStatusDrawingIds ??= new Set<string>();
+            drawingIds.forEach((drawingId) => this._pendingEditStatusDrawingIds?.add(drawingId));
+        }
         if (this._editStatusUpdateScheduled) {
             return;
         }
@@ -591,7 +638,9 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
         queueMicrotask(() => {
             this._editStatusUpdateScheduled = false;
             if (!this._disposed) {
-                this._updateDrawingsEditStatus();
+                const pendingDrawingIds = this._pendingEditStatusDrawingIds;
+                this._pendingEditStatusDrawingIds = undefined;
+                this._updateDrawingsEditStatus(pendingDrawingIds ?? undefined);
             }
         });
     }
@@ -643,7 +692,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
 
             // To wait the image is rendered.
                 queueMicrotask(() => {
-                    this._updateDrawingsEditStatus();
+                    this._updateDrawingsEditStatus(undefined, true);
                 });
             })
         );
@@ -657,11 +706,13 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
                 if (params?.unitId && params.unitId !== this._context.unitId) {
                     return;
                 }
+                const drawingIds = getDocMutationAffectedDrawingIds(params?.actions ?? null);
+                if (drawingIds?.size === 0) {
+                    return;
+                }
 
                 // To wait the image is rendered.
-                queueMicrotask(() => {
-                    this._updateDrawingsEditStatus();
-                });
+                this._scheduleDrawingsEditStatusUpdate(drawingIds ?? undefined);
             })
         );
     }

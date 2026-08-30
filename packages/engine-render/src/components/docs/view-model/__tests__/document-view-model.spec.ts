@@ -377,6 +377,32 @@ describe('DocumentViewModel', () => {
             expect(viewModel.getSectionBreak(4)).toBeUndefined();
         });
 
+        it('refreshes table metadata without rebuilding the document tree', () => {
+            const model = createDocumentDataModel({
+                body: {
+                    tables: [{ tableId: 'table-1', startIndex: 0, endIndex: 1 }],
+                },
+                snapshot: {
+                    tableSource: {
+                        'table-1': { id: 'before' },
+                    },
+                },
+            });
+            const viewModel = new DocumentViewModel(model);
+            const children = viewModel.getChildren();
+            const snapshot = model.getSnapshot();
+            snapshot.tableSource['table-1'] = { id: 'after' };
+            const actions = JSONX.getInstance().replaceOp(
+                ['tableSource', 'table-1', 'id'],
+                'before',
+                'after'
+            );
+
+            expect(viewModel.resetByValidatedMetadataMutation(model, actions)).toBe(true);
+            expect(viewModel.getChildren()).toBe(children);
+            expect(viewModel.getTableByStartIndex(0)?.tableSource).toEqual({ id: 'after' });
+        });
+
         it('updates nested table-cell and column-group paragraphs without rebuilding their element trees', () => {
             const T = DataStreamTreeTokenType;
             const tableStream = [

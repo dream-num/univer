@@ -36,8 +36,7 @@ describe('DocThreadCommentRenderController', () => {
             }),
         };
 
-        const reRender = vi.fn();
-        const docRenderController = { reRender };
+        const makeDirty = vi.fn();
 
         const activeCommentId$ = new BehaviorSubject<any>(undefined);
         const hoveredCommentId$ = new BehaviorSubject<any>(undefined);
@@ -76,6 +75,7 @@ describe('DocThreadCommentRenderController', () => {
         const context = {
             unit,
             unitId: 'doc-1',
+            mainComponent: { makeDirty },
             scene: {
                 addObject: vi.fn(),
                 getObject: vi.fn(),
@@ -101,7 +101,6 @@ describe('DocThreadCommentRenderController', () => {
             context as any,
             docInterceptorService as any,
             threadCommentPanelService as any,
-            docRenderController as any,
             univerInstanceService as any,
             threadCommentModel as any,
             commandService as any,
@@ -109,7 +108,7 @@ describe('DocThreadCommentRenderController', () => {
             themeService as any
         );
 
-        expect(reRender).not.toHaveBeenCalled();
+        expect(makeDirty).not.toHaveBeenCalled();
         expect(threadCommentModel.addComment).not.toHaveBeenCalled();
 
         const next = (v: any) => v;
@@ -176,7 +175,7 @@ describe('DocThreadCommentRenderController', () => {
         const outActiveWithForeignHover = handler({ id: 'c2' }, { unitId: 'doc-1' }, next);
         expect(outActiveWithForeignHover.active).toBe(true);
         hoveredCommentId$.next(threadCommentPanelService.hoveredCommentId);
-        expect(reRender).toHaveBeenCalledWith('doc-1');
+        expect(makeDirty).toHaveBeenCalledWith(true);
 
         // resolved branch triggers rerender
         threadCommentModel.getComment.mockImplementation((_unitId: string, _subUnitId: string, id: string) => {
@@ -196,11 +195,11 @@ describe('DocThreadCommentRenderController', () => {
 
         // rerender on active comment changes
         activeCommentId$.next({ unitId: 'doc-1', subUnitId: DEFAULT_DOC_SUBUNIT_ID, commentId: 'c1' });
-        expect(reRender).toHaveBeenCalledWith('doc-1');
+        expect(makeDirty).toHaveBeenCalledWith(true);
 
         // rerender on resolve updates
         commentUpdate$.next({ type: 'resolve', unitId: 'doc-1' });
-        expect(reRender).toHaveBeenCalledWith('doc-1');
+        expect(makeDirty).toHaveBeenCalledWith(true);
 
         // trigger sync on rich text mutations (add new decoration)
         // NOTE: `_initSyncComments` compares sorted thread ids. We emulate that the doc body returns a stable
@@ -241,6 +240,7 @@ describe('DocThreadCommentRenderController', () => {
         const context = {
             unitId: 'doc-1',
             unit: { getUnitId: () => 'doc-1', getBody: () => ({ customDecorations: [] }) },
+            mainComponent: { makeDirty: vi.fn() },
             scene,
             engine: { onTransformChange$: { subscribeEvent: vi.fn(() => ({ dispose: vi.fn() })) } },
         };
@@ -268,7 +268,6 @@ describe('DocThreadCommentRenderController', () => {
             context as never,
             { intercept: vi.fn(() => ({ dispose: vi.fn() })) } as never,
             panelService as never,
-            { reRender: vi.fn() } as never,
             { getCurrentUnitOfType: vi.fn(() => context.unit) } as never,
             commentModel as never,
             { executeCommand: vi.fn(() => Promise.resolve(true)), onCommandExecuted: vi.fn(() => ({ dispose: vi.fn() })) } as never,

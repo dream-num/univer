@@ -30,7 +30,6 @@ import {
 } from '@univerjs/core';
 import { DOC_INTERCEPTOR_POINT, DocInterceptorService, RichTextEditingMutation } from '@univerjs/docs';
 import { DEFAULT_DOC_SUBUNIT_ID } from '@univerjs/docs-thread-comment';
-import { DocRenderController } from '@univerjs/docs-ui';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 import { deserializeThreadCommentAnchor, ThreadCommentAnchorKind, ThreadCommentModel } from '@univerjs/thread-comment';
 import { ThreadCommentCanvasOverlay, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
@@ -48,7 +47,6 @@ export class DocThreadCommentRenderController extends Disposable implements IRen
         private readonly _context: IRenderContext<DocumentDataModel>,
         @Inject(DocInterceptorService) private readonly _docInterceptorService: DocInterceptorService,
         @Inject(ThreadCommentPanelService) private readonly _threadCommentPanelService: ThreadCommentPanelService,
-        @Inject(DocRenderController) private readonly _docRenderController: DocRenderController,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(ThreadCommentModel) private readonly _threadCommentModel: ThreadCommentModel,
         @ICommandService private readonly _commandService: ICommandService,
@@ -83,16 +81,14 @@ export class DocThreadCommentRenderController extends Disposable implements IRen
             const currentUnitId = this._univerInstanceService
                 .getCurrentUnitOfType(UniverInstanceType.UNIVER_DOC)
                 ?.getUnitId();
-            new Set([previous?.unitId, current?.unitId, currentUnitId]).forEach((unitId) => {
-                if (unitId) {
-                    this._docRenderController.reRender(unitId);
-                }
-            });
+            if (new Set([previous?.unitId, current?.unitId, currentUnitId]).has(this._context.unitId)) {
+                this._context.mainComponent?.makeDirty(true);
+            }
         })));
 
         this.disposeWithMe(this._threadCommentModel.commentUpdate$.subscribe((update) => {
-            if (update.type === 'resolve') {
-                this._docRenderController.reRender(update.unitId);
+            if (update.type === 'resolve' && update.unitId === this._context.unitId) {
+                this._context.mainComponent?.makeDirty(true);
             }
             if (update.unitId === this._context.unitId) {
                 this._syncDrawingOverlay();

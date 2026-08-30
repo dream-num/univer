@@ -51,6 +51,39 @@ interface IStartIndexedItem {
     startIndex: number;
 }
 
+const NON_STRUCTURAL_ROOT_FIELDS = new Set<string>([
+    'disabled',
+    'documentStyle',
+    'drawings',
+    'drawingsOrder',
+    'lists',
+    'locale',
+    'resources',
+    'rev',
+    'settings',
+    'tableSource',
+    'title',
+]);
+
+function getNonStructuralMutationRootFields(actions: JSONXActions): Set<string> | null {
+    const cursor = JSON1.type.readCursor(actions);
+    const rootFields = new Set<string>();
+    let hasComponent = false;
+    let isSupported = true;
+
+    cursor.traverse(null, () => {
+        hasComponent = true;
+        const rootField = String(cursor.getPath()[0]);
+        if (!NON_STRUCTURAL_ROOT_FIELDS.has(rootField)) {
+            isSupported = false;
+            return;
+        }
+        rootFields.add(rootField);
+    });
+
+    return hasComponent && isSupported ? rootFields : null;
+}
+
 function isOrderedByStartIndex(items: readonly IStartIndexedItem[]): boolean {
     for (let index = 1; index < items.length; index++) {
         if (items[index - 1].startIndex > items[index].startIndex) {
@@ -650,6 +683,39 @@ export class DocumentViewModel implements IDisposable {
         if (!this._textRunsOrderedAndDisjoint) {
             this._buildTextRunsCache();
         }
+        return true;
+    }
+
+    resetByValidatedMetadataMutation(documentDataModel: DocumentDataModel, actions: JSONXActions): boolean {
+        const rootFields = getNonStructuralMutationRootFields(actions);
+        if (rootFields == null) {
+            return false;
+        }
+
+        this._documentDataModel = documentDataModel;
+        this._metadataCachesDirty = true;
+        this._lastTextRun = null;
+
+        if (rootFields.has('tableSource')) {
+            const rootTableSource = documentDataModel.getSnapshot().tableSource;
+            for (const [headerId, viewModel] of this._headerTreeMap) {
+                const headerModel = documentDataModel.headerModelMap.get(headerId);
+                viewModel._tableSource = {
+                    ...rootTableSource,
+                    ...headerModel?.getSnapshot().tableSource,
+                };
+                viewModel._metadataCachesDirty = true;
+            }
+            for (const [footerId, viewModel] of this._footerTreeMap) {
+                const footerModel = documentDataModel.footerModelMap.get(footerId);
+                viewModel._tableSource = {
+                    ...rootTableSource,
+                    ...footerModel?.getSnapshot().tableSource,
+                };
+                viewModel._metadataCachesDirty = true;
+            }
+        }
+
         return true;
     }
 

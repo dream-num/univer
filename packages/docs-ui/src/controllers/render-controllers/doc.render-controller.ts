@@ -217,6 +217,7 @@ interface IDocLayoutWorkerEditBatch {
 }
 
 interface IDocLayoutScheduleOptions {
+    deferForeground?: boolean;
     reason: 'initial' | 'edit';
     anchor?: number;
     priorityAnchor?: number;
@@ -376,6 +377,8 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
     private _workerPresentationResumeTimer: ReturnType<typeof setTimeout> | null = null;
     private _pendingWorkerHandoff: IDocLayoutWorkerHandoff | null = null;
     private _pendingWorkerEditBatch: IDocLayoutWorkerEditBatch | null = null;
+    private _latestLayoutRestart: (() => void) | null = null;
+    private _pendingImeLayoutRestart: (() => void) | null = null;
     private _isImeComposing = false;
     private _recoveryViewportAnchor: IDocLayoutViewportAnchor | null = null;
     private _pendingMaterializedPageRange: IDocumentLayoutPageRange | null = null;
@@ -450,7 +453,8 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         invalidation?: IDocumentLayoutInvalidation,
         priorityAnchor?: number,
         refreshMainSelection = true,
-        preserveInactiveViewportAnchor = false
+        preserveInactiveViewportAnchor = false,
+        deferForeground = false
     ) {
         const docSkeletonManagerService = this._renderManagerService.getRenderUnitById(unitId)?.with(DocSkeletonManagerService);
         if (!docSkeletonManagerService) {
@@ -476,7 +480,13 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         const hasExplicitEditAnchor = anchor != null || priorityAnchor != null || invalidation != null;
         const layoutOptions: IDocLayoutScheduleOptions = !skeleton.hasCompleteLayout() && !hasExplicitEditAnchor
             ? { reason: 'initial' }
-            : { reason: 'edit', anchor: anchor ?? 0, priorityAnchor, invalidation };
+            : {
+                reason: 'edit',
+                anchor: anchor ?? 0,
+                priorityAnchor,
+                invalidation,
+                ...(deferForeground ? { deferForeground: true } : {}),
+            };
         this._scheduleLayout(
             unitId,
             skeleton,
@@ -498,6 +508,8 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         }
         this._pendingWorkerHandoff = null;
         this._pendingWorkerEditBatch = null;
+        this._latestLayoutRestart = null;
+        this._pendingImeLayoutRestart = null;
         this._pendingMaterializedPageRange = null;
         this._recoveryViewportAnchor = null;
         super.dispose();
@@ -525,6 +537,19 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         refreshMainSelection = true,
         preserveInactiveViewportAnchor = false
     ) {
+        this._latestLayoutRestart = () => this._scheduleLayout(
+            unitId,
+            skeleton,
+            options,
+            refreshMainSelection,
+            preserveInactiveViewportAnchor
+        );
+        if (this._isImeComposing) {
+            // A mutation scheduled during composition already supersedes the
+            // generation cancelled by compositionstart. Let that newer request
+            // continue instead of replaying the stale pre-composition request.
+            this._pendingImeLayoutRestart = null;
+        }
         const layoutRequestId = ++this._layoutRequestId;
         this._cancelWorkerHandoff();
         const isInitialLayout = options.reason === 'initial';
@@ -661,7 +686,7 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         this._layoutCoordinator.schedule(skeleton, {
             ...options,
             anchor: interactionAnchor,
-            foregroundEndOffset,
+            ...(foregroundEndOffset == null ? {} : { foregroundEndOffset }),
             preserveInteractionWindow: interactionAnchor != null && interactionAnchor !== options.anchor,
             // The authoritative Worker recomputes the suffix after the protected
             // interaction window. Deep-cloning and shifting the complete previous
@@ -1066,6 +1091,12 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
                     clearTimeout(this._workerHandoffTimer);
                     this._workerHandoffTimer = null;
                 }
+                if (
+                    this._pendingWorkerHandoff == null &&
+                    this._layoutCoordinator.hasScheduledLayout()
+                ) {
+                    this._pendingImeLayoutRestart = this._latestLayoutRestart;
+                }
                 this._layoutCoordinator.cancel();
             });
         this._docSelectionRenderService.onCompositionend$
@@ -1076,6 +1107,12 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
                 }
 
                 this._isImeComposing = false;
+                const restartLayout = this._pendingImeLayoutRestart;
+                this._pendingImeLayoutRestart = null;
+                if (restartLayout != null) {
+                    restartLayout();
+                    return;
+                }
                 this._startWorkerHandoffTimer();
             });
     }
@@ -1587,7 +1624,8 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
                 invalidation,
                 priorityAnchor,
                 !hasPendingLocalSelectionUpdate,
-                isRemoteMutation
+                isRemoteMutation,
+                Array.isArray(params.actions) && params.actions.length > 0 && bodyRanges.length === 0 && invalidation == null
             );
         }));
     }

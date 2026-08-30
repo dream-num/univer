@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import type { IDocumentData, IDocumentStyle, ISectionBreak } from '@univerjs/core';
-import type { IDocumentSkeletonPage } from '@univerjs/engine-render';
-import { resolveSectionHeaderFooterReferences } from '@univerjs/core';
-import { getTopLevelSectionBreaks } from '@univerjs/docs';
+import type { IDocumentData, IDocumentStyle, ISectionBreak, Nullable } from '@univerjs/core';
+import type { DocumentViewModel, IDocumentSkeletonPage } from '@univerjs/engine-render';
+import { BooleanNumber, resolveSectionHeaderFooterReferences } from '@univerjs/core';
+import { getTopLevelSectionBreaks, HeaderFooterType } from '@univerjs/docs';
+import { DocumentEditArea } from '@univerjs/engine-render';
 
 export interface IDocPageSectionContext {
     sectionId?: string;
@@ -26,6 +27,12 @@ export interface IDocPageSectionContext {
     section?: ISectionBreak;
     /** Effective config after applying the owning section over document defaults. */
     config: IDocumentStyle & Partial<ISectionBreak>;
+}
+
+export interface IHeaderFooterTarget {
+    createType: Nullable<HeaderFooterType>;
+    headerFooterId: Nullable<string>;
+    sectionId?: string;
 }
 
 export function getDocPageSectionContext(
@@ -49,5 +56,58 @@ export function getDocPageSectionContext(
             ...section,
             ...references,
         },
+    };
+}
+
+export function getHeaderFooterTarget(
+    viewModel: DocumentViewModel,
+    editArea: DocumentEditArea,
+    segmentPage: number,
+    page?: IDocumentSkeletonPage
+): IHeaderFooterTarget {
+    const snapshot = viewModel.getDataModel().getSnapshot();
+    const { sectionId, config } = getDocPageSectionContext(snapshot, page);
+    const {
+        defaultHeaderId,
+        defaultFooterId,
+        evenPageHeaderId,
+        evenPageFooterId,
+        firstPageHeaderId,
+        firstPageFooterId,
+        evenAndOddHeaders,
+        useFirstPageHeaderFooter,
+    } = config;
+    const isFirstPage = page ? page.pageNumber === page.pageNumberStart : segmentPage === 0;
+    const isEvenPage = page ? page.pageNumber % 2 === 0 : segmentPage % 2 === 1;
+
+    if (editArea === DocumentEditArea.BODY) {
+        return { createType: null, headerFooterId: null, sectionId };
+    }
+
+    const isHeader = editArea === DocumentEditArea.HEADER;
+    if (!isHeader && editArea !== DocumentEditArea.FOOTER) {
+        throw new Error(`Invalid editArea: ${editArea}`);
+    }
+    const variants = isHeader
+        ? {
+            first: [firstPageHeaderId, HeaderFooterType.FIRST_PAGE_HEADER] as const,
+            even: [evenPageHeaderId, HeaderFooterType.EVEN_PAGE_HEADER] as const,
+            default: [defaultHeaderId, HeaderFooterType.DEFAULT_HEADER] as const,
+        }
+        : {
+            first: [firstPageFooterId, HeaderFooterType.FIRST_PAGE_FOOTER] as const,
+            even: [evenPageFooterId, HeaderFooterType.EVEN_PAGE_FOOTER] as const,
+            default: [defaultFooterId, HeaderFooterType.DEFAULT_FOOTER] as const,
+        };
+    const [headerFooterId, createType] = useFirstPageHeaderFooter === BooleanNumber.TRUE && isFirstPage
+        ? variants.first
+        : evenAndOddHeaders === BooleanNumber.TRUE && isEvenPage
+            ? variants.even
+            : variants.default;
+
+    return {
+        createType: headerFooterId ? null : createType,
+        headerFooterId: headerFooterId ?? null,
+        sectionId,
     };
 }

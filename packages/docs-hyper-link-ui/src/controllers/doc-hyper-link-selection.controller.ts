@@ -44,7 +44,7 @@ export class DocHyperLinkSelectionController extends Disposable {
                         const { startOffset, endOffset, segmentPage } = primary;
                         const customRange = doc.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.customRanges?.find((value) => (
                             value.rangeType === CustomRangeType.HYPERLINK &&
-                            value.startIndex < startOffset &&
+                            value.startIndex <= startOffset &&
                             value.endIndex > endOffset - 1
                         ));
                         if (customRange) {

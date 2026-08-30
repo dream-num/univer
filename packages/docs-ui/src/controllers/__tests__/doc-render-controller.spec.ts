@@ -711,6 +711,9 @@ describe('doc render controller', () => {
         } satisfies ICommandInfo);
 
         expect(skeletonManager.getSkeleton().startIncrementalLayout).toHaveBeenCalledTimes(1);
+        expect(skeletonManager.getSkeleton().startIncrementalLayout).toHaveBeenCalledWith(expect.objectContaining({
+            deferForeground: true,
+        }));
     });
 
     it('reflows when a drawing switches between wrapping and overlay layout', () => {
@@ -1241,9 +1244,109 @@ describe('doc render controller', () => {
             compositionEnd$.next({});
             await vi.advanceTimersByTimeAsync(149);
             expect(layoutExecutorService.startLayout).not.toHaveBeenCalled();
-            await vi.advanceTimersByTimeAsync(1);
+            await vi.advanceTimersByTimeAsync(17);
             expect(layoutExecutorService.startLayout).toHaveBeenCalledTimes(1);
 
+            controller.dispose();
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    it('restarts a deferred interaction window when IME begins before the Worker handoff is queued', async () => {
+        vi.useFakeTimers();
+        try {
+            const { compositionEnd$, compositionStart$, controller, layoutExecutorService } = createControllerFixture({
+                useWorker: true,
+                pages: Array.from({ length: 5 }, () => ({
+                    pageWidth: 640,
+                    pageHeight: 900,
+                    skeDrawings: new Map(),
+                    skeTables: new Map(),
+                })),
+                layoutProgress: [{
+                    complete: false,
+                    anchorReady: true,
+                    didPublishAnchor: true,
+                    elapsedTime: 1,
+                    pageCount: 20,
+                    publishedPageCount: 1,
+                }],
+            });
+
+            controller.reRender('doc-unit', undefined, undefined, undefined, true, false, true);
+            compositionStart$.next({});
+            await vi.advanceTimersByTimeAsync(1_000);
+            expect(layoutExecutorService.startLayout).not.toHaveBeenCalled();
+
+            compositionEnd$.next({});
+            await vi.advanceTimersByTimeAsync(1_000);
+
+            expect(layoutExecutorService.startLayout).toHaveBeenCalledTimes(1);
+            controller.dispose();
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    it('does not restart a completed layout when IME composition makes no changes', async () => {
+        vi.useFakeTimers();
+        try {
+            const { compositionEnd$, compositionStart$, controller, skeletonManager } = createControllerFixture({
+                useWorker: true,
+                workerCompletes: true,
+                layoutProgress: [{
+                    complete: true,
+                    anchorReady: true,
+                    didPublishAnchor: true,
+                    elapsedTime: 1,
+                    pageCount: 5,
+                    publishedPageCount: 5,
+                }],
+            });
+            const skeleton = skeletonManager.getSkeleton();
+
+            controller.reRender('doc-unit', undefined, undefined, undefined, true, false, true);
+            await vi.advanceTimersByTimeAsync(1_000);
+            expect(skeleton.startIncrementalLayout).toHaveBeenCalledTimes(1);
+
+            compositionStart$.next({});
+            compositionEnd$.next({});
+            await vi.advanceTimersByTimeAsync(1_000);
+
+            expect(skeleton.startIncrementalLayout).toHaveBeenCalledTimes(1);
+            controller.dispose();
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    it('keeps a newer layout scheduled during IME instead of replaying the cancelled request', async () => {
+        vi.useFakeTimers();
+        try {
+            const { compositionEnd$, compositionStart$, controller, skeletonManager } = createControllerFixture({
+                useWorker: true,
+                layoutProgress: [{
+                    complete: false,
+                    anchorReady: true,
+                    didPublishAnchor: true,
+                    elapsedTime: 1,
+                    pageCount: 20,
+                    publishedPageCount: 1,
+                }],
+            });
+            const skeleton = skeletonManager.getSkeleton();
+
+            controller.reRender('doc-unit', 1, undefined, undefined, true, false, true);
+            compositionStart$.next({});
+            controller.reRender('doc-unit', 7, undefined, undefined, true, false, true);
+            compositionEnd$.next({});
+            await vi.advanceTimersByTimeAsync(1_000);
+
+            expect(skeleton.startIncrementalLayout).toHaveBeenCalledTimes(2);
+            expect(skeleton.startIncrementalLayout).toHaveBeenLastCalledWith(expect.objectContaining({
+                anchor: 7,
+            }));
             controller.dispose();
         } finally {
             vi.useRealTimers();
@@ -1290,9 +1393,7 @@ describe('doc render controller', () => {
             expect(layoutExecutorService.startLayout).not.toHaveBeenCalled();
 
             selectionRenderService.isOnPointerEvent = false;
-            await vi.advanceTimersByTimeAsync(149);
-            expect(layoutExecutorService.startLayout).not.toHaveBeenCalled();
-            await vi.advanceTimersByTimeAsync(1);
+            await vi.advanceTimersByTimeAsync(150);
             expect(layoutExecutorService.startLayout).toHaveBeenCalledTimes(1);
 
             controller.dispose();
@@ -1376,7 +1477,7 @@ describe('doc render controller', () => {
             commandCallbacks[0](mutation);
             await vi.advanceTimersByTimeAsync(149);
             expect(layoutExecutorService.startLayout).not.toHaveBeenCalled();
-            await vi.advanceTimersByTimeAsync(1);
+            await vi.advanceTimersByTimeAsync(17);
 
             expect(layoutExecutorService.startLayout).toHaveBeenCalledTimes(1);
 

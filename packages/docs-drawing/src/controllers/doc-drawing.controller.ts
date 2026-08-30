@@ -149,16 +149,23 @@ export class DocDrawingController extends Disposable {
 
         // TODO@wzhudev: should move to docs-drawing.
 
+        const normalizedDrawingData: IDrawingMapItemData<IDocDrawing> = {};
+        for (const [drawingId, drawing] of Object.entries(drawingDataModels)) {
+            normalizedDrawingData[drawingId] = drawing.unitId === unitId && drawing.subUnitId === subUnitId
+                ? drawing
+                : { ...drawing, unitId, subUnitId };
+        }
+
         const subDrawings = {
             [subUnitId]: {
                 unitId,
                 subUnitId,
-                data: drawingDataModels as IDrawingMapItemData<IDocDrawing>,
+                data: normalizedDrawingData,
                 order: drawingOrderModel,
             },
         };
         const renderDrawingData: IDrawingMapItemData<IDocDrawing> = {};
-        for (const [drawingId, drawing] of Object.entries(drawingDataModels)) {
+        for (const [drawingId, drawing] of Object.entries(normalizedDrawingData)) {
             renderDrawingData[drawingId] = { ...drawing, hidden: true };
         }
         const renderSubDrawings = {

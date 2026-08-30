@@ -119,6 +119,60 @@ describe('DocLayoutCoordinatorService', () => {
         coordinator.dispose();
     });
 
+    it('yields a distant edited anchor to the next visual frame after four synchronous atomic blocks', () => {
+        const requestAnimationFrameSpy = vi.fn((callback: FrameRequestCallback) =>
+            window.setTimeout(() => callback(performance.now()), 0));
+        vi.stubGlobal('requestAnimationFrame', requestAnimationFrameSpy);
+        const steps = [
+            ...Array.from({ length: 6 }, (_, index) => createProgress({
+                anchorReady: index === 5,
+                laidOutThrough: (index + 1) * 10,
+            })),
+            createProgress({ anchorReady: true, laidOutThrough: 100, complete: true }),
+        ];
+        const skeleton = {
+            startIncrementalLayout: vi.fn(() => 1),
+            stepIncrementalLayout: vi.fn(() => steps.shift()!),
+            cancelIncrementalLayout: vi.fn(),
+        } satisfies DocumentLayoutSchedulingSkeleton;
+        const coordinator = new DocLayoutCoordinatorService();
+
+        coordinator.schedule(skeleton, { reason: 'edit', anchor: 90 }, { onProgress: vi.fn() });
+
+        expect(skeleton.stepIncrementalLayout).toHaveBeenCalledTimes(4);
+        expect(skeleton.stepIncrementalLayout).toHaveBeenNthCalledWith(4, 1, 0);
+        expect(requestAnimationFrameSpy).toHaveBeenCalledTimes(1);
+        vi.runAllTimers();
+
+        expect(skeleton.stepIncrementalLayout).toHaveBeenCalledTimes(7);
+        expect(skeleton.stepIncrementalLayout).toHaveBeenNthCalledWith(5, 1, 8);
+        coordinator.dispose();
+    });
+
+    it('defers metadata-only edit layout until the next visual frame', () => {
+        const requestAnimationFrameSpy = vi.fn((callback: FrameRequestCallback) =>
+            window.setTimeout(() => callback(performance.now()), 0));
+        vi.stubGlobal('requestAnimationFrame', requestAnimationFrameSpy);
+        const skeleton = {
+            startIncrementalLayout: vi.fn(() => 1),
+            stepIncrementalLayout: vi.fn(() => createProgress({ complete: true, anchorReady: true })),
+            cancelIncrementalLayout: vi.fn(),
+        } satisfies DocumentLayoutSchedulingSkeleton;
+        const coordinator = new DocLayoutCoordinatorService();
+
+        coordinator.schedule(skeleton, {
+            reason: 'edit',
+            anchor: 0,
+            deferForeground: true,
+        }, { onProgress: vi.fn() });
+
+        expect(skeleton.stepIncrementalLayout).not.toHaveBeenCalled();
+        expect(requestAnimationFrameSpy).toHaveBeenCalledTimes(1);
+        vi.runAllTimers();
+        expect(skeleton.stepIncrementalLayout).toHaveBeenCalledTimes(1);
+        coordinator.dispose();
+    });
+
     it('lets the shell paint once before starting an initial layout', () => {
         const requestAnimationFrameSpy = vi.fn((callback: FrameRequestCallback) =>
             window.setTimeout(() => callback(performance.now()), 0));
@@ -138,6 +192,9 @@ describe('DocLayoutCoordinatorService', () => {
     });
 
     it('keeps a bounded interaction window on the main thread before handing off the tail', () => {
+        const requestAnimationFrameSpy = vi.fn((callback: FrameRequestCallback) =>
+            window.setTimeout(() => callback(performance.now()), 0));
+        vi.stubGlobal('requestAnimationFrame', requestAnimationFrameSpy);
         const steps = [
             createProgress({
                 anchorReady: true,
@@ -182,6 +239,9 @@ describe('DocLayoutCoordinatorService', () => {
             onProgress: vi.fn(),
             onForegroundReady,
         });
+
+        expect(skeleton.stepIncrementalLayout).toHaveBeenCalledTimes(1);
+        expect(requestAnimationFrameSpy).toHaveBeenCalledTimes(1);
         vi.runAllTimers();
 
         expect(skeleton.stepIncrementalLayout).toHaveBeenCalledTimes(4);

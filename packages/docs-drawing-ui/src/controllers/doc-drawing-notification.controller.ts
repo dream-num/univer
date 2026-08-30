@@ -20,15 +20,13 @@ import type { DocumentDataModel, ICommandInfo, IDrawingSearch, JSONXActions, Nul
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IDocDrawing, IUpdateDocDrawingWrappingStyleParams, IUpdateDrawingDocTransformCommandParams } from '@univerjs/docs-drawing';
 import type { IDrawingJsonUndo1, IDrawingMapItemData, IDrawingOrderMapParam } from '@univerjs/drawing';
-import type { IDocumentSkeletonDrawing, IDocumentSkeletonHeaderFooter, IDocumentSkeletonPage } from '@univerjs/engine-render';
+import type { IDrawingAnchorInPage } from '../utils/drawing-anchor-position';
 import {
     Disposable,
     ICommandService,
     Inject,
     IUniverInstanceService,
     JSONX,
-    ObjectRelativeFromH,
-    ObjectRelativeFromV,
     RedoCommand,
     UndoCommand,
     UniverInstanceType,
@@ -44,42 +42,12 @@ import {
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 import { DocRefreshDrawingsService } from '../services/doc-refresh-drawings.service';
+import { findDrawingAnchorInPage, resolveDrawingAnchorOffsets } from '../utils/drawing-anchor-position';
 
 interface IAddOrRemoveDrawing {
     type: 'add' | 'remove';
     drawingId: string;
     drawing?: IDocDrawing;
-}
-
-interface IDrawingAnchorInPage {
-    skeDrawing: IDocumentSkeletonDrawing;
-    pageMarginTop: number;
-    pageMarginLeft: number;
-}
-
-function findDrawingAnchorInPage(
-    page: IDocumentSkeletonPage | IDocumentSkeletonHeaderFooter,
-    drawingId: string,
-    pageMarginTop: number,
-    pageMarginLeft: number
-): IDrawingAnchorInPage | null {
-    const skeDrawing = page.skeDrawings.get(drawingId);
-    if (skeDrawing) {
-        return { skeDrawing, pageMarginTop, pageMarginLeft };
-    }
-
-    for (const table of page.skeTables.values()) {
-        for (const row of table.rows) {
-            for (const cell of row.cells) {
-                const cellAnchor = findDrawingAnchorInPage(cell, drawingId, cell.marginTop, cell.marginLeft);
-                if (cellAnchor) {
-                    return cellAnchor;
-                }
-            }
-        }
-    }
-
-    return null;
 }
 
 // Check whether drawings are added or deleted from the mutation and obtain the drawing ID.
@@ -281,7 +249,13 @@ export class DocDrawingAddRemoveController extends Disposable {
                     return;
                 }
 
-                this._docRefreshDrawingsService.refreshDrawings(renderObject.with(DocSkeletonManagerService).getSkeleton());
+                // Transform mutations are already refreshed incrementally by
+                // DocDrawingTransformUpdateController from the nested rich-text
+                // mutation. Wrapping changes can move anchors and still need a
+                // conservative full refresh.
+                if (command.id === UpdateDocDrawingWrappingStyleCommand.id) {
+                    this._docRefreshDrawingsService.refreshDrawings(renderObject.with(DocSkeletonManagerService).getSkeleton());
+                }
                 scene.getTransformerByCreate().refreshControls();
             })
         );
@@ -312,7 +286,6 @@ export class DocDrawingAddRemoveController extends Disposable {
         );
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _preserveWrappingStylePosition(params: IUpdateDocDrawingWrappingStyleParams): void {
         if (params.wrappingStyle === TextWrappingStyle.INLINE) {
             return;
@@ -372,25 +345,13 @@ export class DocDrawingAddRemoveController extends Disposable {
                 return drawing;
             }
 
-            const { skeDrawing, pageMarginTop, pageMarginLeft } = drawingAnchor;
             const oldPositionH = oldDrawing.docTransform.positionH;
             const oldPositionV = oldDrawing.docTransform.positionV;
-            let posOffsetH = skeDrawing.aLeft;
-            let posOffsetV = skeDrawing.aTop;
-
-            if (oldPositionH.relativeFrom === ObjectRelativeFromH.MARGIN) {
-                posOffsetH -= pageMarginLeft;
-            } else if (oldPositionH.relativeFrom === ObjectRelativeFromH.COLUMN) {
-                posOffsetH -= skeDrawing.columnLeft;
-            }
-
-            if (oldPositionV.relativeFrom === ObjectRelativeFromV.PAGE) {
-                posOffsetV += pageMarginTop;
-            } else if (oldPositionV.relativeFrom === ObjectRelativeFromV.LINE) {
-                posOffsetV -= skeDrawing.lineTop;
-            } else if (oldPositionV.relativeFrom === ObjectRelativeFromV.PARAGRAPH) {
-                posOffsetV -= skeDrawing.blockAnchorTop;
-            }
+            const { horizontal: posOffsetH, vertical: posOffsetV } = resolveDrawingAnchorOffsets(
+                drawingAnchor,
+                oldPositionH,
+                oldPositionV
+            );
 
             return {
                 ...oldDrawing,

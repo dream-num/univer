@@ -30,6 +30,7 @@ const MIN_EDIT_FOREGROUND_WINDOW_SIZE = 3;
 const MAX_EDIT_FOREGROUND_WINDOW_SIZE = 5;
 const EDIT_FOREGROUND_WINDOW_SIZE = MAX_EDIT_FOREGROUND_WINDOW_SIZE;
 const EDIT_FOREGROUND_BUDGET_MS = 28;
+const MAX_SYNCHRONOUS_EDIT_STEPS = 4;
 let docLayoutMountSequence = 0;
 
 interface IInputPendingSchedulingHost {
@@ -101,6 +102,7 @@ export type DocumentLayoutSchedulingSkeleton = Pick<
 > & Partial<Pick<DocumentSkeleton, 'publishIncrementalLayoutBacklog'>>;
 
 type DocumentLayoutSchedulingOptions = NonNullable<Parameters<DocumentSkeleton['startIncrementalLayout']>[0]> & {
+    deferForeground?: boolean;
     reason: DocumentLayoutReason;
     foregroundWindowSize?: number;
     foregroundBudgetMs?: number;
@@ -202,25 +204,34 @@ export class DocLayoutCoordinatorService extends Disposable {
             foregroundWindowSize: normalizeEditForegroundWindowSize(options.foregroundWindowSize),
             foregroundTargetProgressCount: null,
             foregroundEndOffset: options.foregroundEndOffset ?? null,
-            waitForAnimationFrame: options.reason !== 'edit',
+            waitForAnimationFrame: options.reason !== 'edit' || options.deferForeground === true,
         };
         // Rich-text mutations update their logical selection in a microtask after the
-        // command has completed. Advance the edited anchor on the main thread before
-        // returning from the command callback so that the existing selection refresh
-        // closes over the newly committed skeleton, just as it did before background
-        // layout was introduced. A zero budget advances exactly one atomic block, so
-        // stop as soon as the anchor is publishable instead of spending the whole
-        // interaction-window budget in the command turn. Modern continuous layout
-        // then spends only the remaining budget on its visible suffix; any work
-        // still needed to reach that viewport boundary remains cooperatively scheduled.
-        if (options.reason === 'edit') {
+        // command has completed. Advance a small edited prefix in the command turn so
+        // ordinary caret edits retain their existing immediate visual publication.
+        // A large table can contain hundreds of atomic blocks before its anchor becomes
+        // publishable, so cap the synchronous prefix and finish that anchor across task
+        // boundaries. The logical selection remains authoritative until the foreground
+        // publication refreshes its render geometry.
+        if (options.reason === 'edit' && options.deferForeground !== true) {
             this._scheduledLayout.foregroundStarted = true;
-            while (this._scheduledLayout != null && !this._scheduledLayout.anchorReady) {
+            let synchronousStepCount = 0;
+            while (
+                this._scheduledLayout != null &&
+                !this._scheduledLayout.anchorReady &&
+                synchronousStepCount < MAX_SYNCHRONOUS_EDIT_STEPS
+            ) {
                 this._runSlice(0, false, false);
+                synchronousStepCount++;
             }
             const foregroundLayout = this._scheduledLayout;
+            const shouldYieldContinuationToVisualFrame = foregroundLayout?.executor === 'main-thread' && (
+                !foregroundLayout.anchorReady || foregroundLayout.callbacks.onForegroundReady != null
+            );
             if (
                 foregroundLayout?.executor === 'main-thread' &&
+                !shouldYieldContinuationToVisualFrame &&
+                foregroundLayout.anchorReady &&
                 foregroundLayout.foregroundEndOffset != null &&
                 foregroundLayout.foregroundElapsedMs < foregroundLayout.foregroundBudgetMs
             ) {
@@ -232,14 +243,27 @@ export class DocLayoutCoordinatorService extends Disposable {
             }
             const scheduledLayout = this._scheduledLayout;
             if (scheduledLayout != null) {
-                if (scheduledLayout.callbacks.onForegroundReady != null) {
+                if (
+                    scheduledLayout.executor === 'main-thread' &&
+                    (!scheduledLayout.anchorReady || scheduledLayout.callbacks.onForegroundReady != null)
+                ) {
+                    // The command turn already published a bounded caret prefix.
+                    // Let that input paint before finishing a distant anchor or the
+                    // surrounding interaction window, which can contain a large
+                    // table or another atomic block whose single step exceeds its
+                    // nominal time budget.
+                    scheduledLayout.foregroundStarted = false;
+                    scheduledLayout.waitForAnimationFrame = true;
+                }
+                if (!scheduledLayout.anchorReady || scheduledLayout.callbacks.onForegroundReady != null) {
                     this._scheduleForeground();
                 } else {
                     this._scheduleBackground();
                 }
             }
         } else {
-            // Initial layout still yields one frame so the application shell can paint.
+            // Initial layout and metadata-only edits yield one frame so the shell or
+            // direct-manipulation preview can paint before pagination resumes.
             this._scheduleForeground();
         }
 
@@ -363,6 +387,10 @@ export class DocLayoutCoordinatorService extends Disposable {
         if (!paused) {
             this._pendingWorkerPresentation?.resume();
         }
+    }
+
+    hasScheduledLayout(): boolean {
+        return this._scheduledLayout != null;
     }
 
     cancel(): void {

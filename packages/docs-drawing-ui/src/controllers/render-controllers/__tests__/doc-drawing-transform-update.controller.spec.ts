@@ -26,6 +26,7 @@ import {
 import { Liquid, setDocsTableRenderViewportProvider } from '@univerjs/engine-render';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { getDocsTableCellAnchorContext } from '../../doc-drawing-transformer-update.controller';
+import { doesDocMutationAffectDrawingPresentation, getDocMutationAffectedDrawingIds } from '../doc-drawing-mutation';
 import {
     DocDrawingPublicationTracker,
     DocDrawingTransformUpdateController,
@@ -37,11 +38,65 @@ import {
     getDocsPageRelativeDrawingLeft,
     getDocsPageRelativeDrawingTop,
     getDocsTableCellDrawingOffset,
+    shouldRefreshDocDrawingTransform,
 } from '../doc-drawing-transform-update.controller';
 
 describe('DocDrawingTransformUpdateController', () => {
     afterEach(() => {
         setDocsTableRenderViewportProvider(null);
+    });
+
+    it('does not eagerly refresh drawings for table metadata mutations', () => {
+        expect(doesDocMutationAffectDrawingPresentation([
+            'tableSource',
+            'table-1',
+            'tableColumns',
+            0,
+            'size',
+            'width',
+            'v',
+            { r: 28, i: 32 },
+        ] as never)).toBe(false);
+        expect(doesDocMutationAffectDrawingPresentation([
+            'drawings',
+            'drawing-1',
+            'docTransform',
+            { r: {}, i: { angle: 1 } },
+        ] as never)).toBe(true);
+        expect([...getDocMutationAffectedDrawingIds([
+            'drawings',
+            'drawing-1',
+            'docTransform',
+            { r: {}, i: { angle: 1 } },
+        ] as never)!]).toEqual(['drawing-1']);
+        expect(getDocMutationAffectedDrawingIds([
+            'drawingsOrder',
+            { r: [], i: ['drawing-1'] },
+        ] as never)).toBeNull();
+    });
+
+    it('filters unchanged drawing transform notifications but preserves viewport refreshes', () => {
+        const current = {
+            unitId: 'doc-1',
+            subUnitId: 'doc-1',
+            drawingId: 'drawing-1',
+            drawingType: 0,
+            behindText: false,
+            hidden: false,
+            isMultiTransform: BooleanNumber.FALSE,
+            transform: { left: 10, top: 20, width: 30, height: 40 },
+            transforms: [],
+        };
+
+        expect(shouldRefreshDocDrawingTransform(current as never, { ...current } as never)).toBe(false);
+        expect(shouldRefreshDocDrawingTransform(current as never, {
+            ...current,
+            transform: { ...current.transform, left: 11 },
+        } as never)).toBe(true);
+        expect(shouldRefreshDocDrawingTransform(current as never, {
+            ...current,
+            customBlockRenderViewport: { contentWidth: 100 },
+        } as never)).toBe(true);
     });
 
     it('refreshes only incremental publications that can change drawing transforms', () => {

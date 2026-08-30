@@ -196,6 +196,7 @@ export function createTestBed(documentConfig?: IDocumentData): ITestBed {
         with: <T>() => ({
             getViewModel: () => ({
                 reset: () => undefined,
+                resetByValidatedMetadataMutation: () => false,
                 resetByValidatedTextMutation: () => false,
             }),
         }) as T,

@@ -24,6 +24,7 @@ import type {
 } from '@univerjs/core';
 import {
     getParagraphContentStartOffset,
+    getParagraphContentStartOffsets,
     resolveSectionHeaderFooterReference,
     TextX,
     TextXActionType,
@@ -44,27 +45,115 @@ const HEADER_FOOTER_REFERENCE_KEYS: SectionHeaderFooterReferenceKey[] = [
     'evenPageFooterId',
 ];
 
+interface IDocumentPermissionEntityRange extends IDocumentPermissionRange {
+    id: string;
+    type: string;
+}
+
+interface IDocumentPermissionSegmentIndex {
+    body: IDocumentBody | null;
+    entities: IDocumentPermissionEntityRange[];
+    entityRanges: Map<string, IDocumentPermissionRange>;
+    paragraphContentStartOffsets: Map<number, number>;
+    paragraphsById: Map<string, NonNullable<IDocumentBody['paragraphs']>[number]>;
+}
+
+interface IDocumentPermissionResolverIndex {
+    drawingSegmentIds: Map<string, string>;
+    mutationRevision: number;
+    segments: Map<string, IDocumentPermissionSegmentIndex>;
+    topLevelSections: ISectionBreak[];
+}
+
+const documentPermissionResolverIndexCache = new WeakMap<DocumentDataModel, IDocumentPermissionResolverIndex>();
+
 export interface IDocumentPermissionRange {
     startOffset: number;
     endOffset: number;
 }
 
+function getDocumentPermissionResolverIndex(documentDataModel: DocumentDataModel): IDocumentPermissionResolverIndex {
+    const mutationRevision = (documentDataModel as Partial<Pick<DocumentDataModel, 'getMutationRevision'>>)
+        .getMutationRevision?.() ?? Number.NaN;
+    const cached = documentPermissionResolverIndexCache.get(documentDataModel);
+    if (cached?.mutationRevision === mutationRevision) {
+        return cached;
+    }
+
+    const snapshot = documentDataModel.getSnapshot();
+    const topLevelSections = snapshot.body ? getTopLevelSectionBreaks(snapshot.body) : [];
+    const drawingSegmentIds = new Map<string, string>();
+    const addDrawingSegments = (body: IDocumentBody | undefined, segmentId: string): void => {
+        for (const block of body?.customBlocks ?? []) {
+            if (!drawingSegmentIds.has(block.blockId)) {
+                drawingSegmentIds.set(block.blockId, segmentId);
+            }
+        }
+    };
+    addDrawingSegments(snapshot.body, '');
+    Object.entries(snapshot.headers ?? {}).forEach(([segmentId, header]) => addDrawingSegments(header.body, segmentId));
+    Object.entries(snapshot.footers ?? {}).forEach(([segmentId, footer]) => addDrawingSegments(footer.body, segmentId));
+
+    const index: IDocumentPermissionResolverIndex = {
+        drawingSegmentIds,
+        mutationRevision,
+        segments: new Map(),
+        topLevelSections,
+    };
+    documentPermissionResolverIndexCache.set(documentDataModel, index);
+    return index;
+}
+
+function getDocumentPermissionSegmentIndex(
+    documentDataModel: DocumentDataModel,
+    segmentId: string,
+    resolverIndex = getDocumentPermissionResolverIndex(documentDataModel)
+): IDocumentPermissionSegmentIndex {
+    const cached = resolverIndex.segments.get(segmentId);
+    if (cached) {
+        return cached;
+    }
+
+    const body = documentDataModel.getSelfOrHeaderFooterModel(segmentId)?.getBody() ?? null;
+    const drawings = documentDataModel.getSnapshot().drawings ?? {};
+    const entities: IDocumentPermissionEntityRange[] = body == null
+        ? []
+        : [
+            ...(body.tables ?? []).map((item) => ({ type: 'table', id: item.tableId, startOffset: item.startIndex, endOffset: item.endIndex })),
+            ...(body.customBlocks ?? []).map((item) => ({
+                type: drawings[item.blockId] ? 'drawing' : 'custom-block',
+                id: item.blockId,
+                startOffset: item.startIndex,
+                endOffset: item.startIndex + 1,
+            })),
+            ...(body.blockRanges ?? []).map((item) => ({ type: 'block-range', id: item.blockId, startOffset: item.startIndex, endOffset: item.endIndex + 1 })),
+            ...(body.customRanges ?? []).map((item) => ({ type: 'custom-range', id: item.rangeId, startOffset: item.startIndex, endOffset: item.endIndex + 1 })),
+            ...(body.columnGroups ?? []).map((item) => ({ type: 'column-group', id: item.columnGroupId, startOffset: item.startIndex, endOffset: item.endIndex + 1 })),
+        ];
+    const entityRanges = new Map(entities.map((entity) => [
+        `${entity.type}:${entity.id}`,
+        { startOffset: entity.startOffset, endOffset: entity.endOffset },
+    ]));
+    for (const block of body?.customBlocks ?? []) {
+        const range = { startOffset: block.startIndex, endOffset: block.startIndex + 1 };
+        entityRanges.set(`custom-block:${block.blockId}`, range);
+        entityRanges.set(`drawing:${block.blockId}`, range);
+    }
+    const segmentIndex: IDocumentPermissionSegmentIndex = {
+        body,
+        entities,
+        entityRanges,
+        paragraphContentStartOffsets: body == null ? new Map() : getParagraphContentStartOffsets(body),
+        paragraphsById: new Map((body?.paragraphs ?? [])
+            .filter((paragraph) => paragraph.paragraphId != null)
+            .map((paragraph) => [paragraph.paragraphId!, paragraph])),
+    };
+    resolverIndex.segments.set(segmentId, segmentIndex);
+    return segmentIndex;
+}
+
 export function getDocumentDrawingSegmentId(documentDataModel: DocumentDataModel, drawingId: string): string {
-    const { body, headers = {}, footers = {} } = documentDataModel.getSnapshot();
-    if (body?.customBlocks?.some((block) => block.blockId === drawingId)) {
-        return '';
-    }
-    for (const [segmentId, header] of Object.entries(headers)) {
-        if (header.body.customBlocks?.some((block) => block.blockId === drawingId)) {
-            return segmentId;
-        }
-    }
-    for (const [segmentId, footer] of Object.entries(footers)) {
-        if (footer.body.customBlocks?.some((block) => block.blockId === drawingId)) {
-            return segmentId;
-        }
-    }
-    return '';
+    return getDocumentPermissionResolverIndex(documentDataModel).drawingSegmentIds.get(drawingId) ?? '';
 }
 
 export function getDocumentEditTargetObjectIds(
@@ -72,14 +161,16 @@ export function getDocumentEditTargetObjectIds(
     segmentId: string,
     range: IDocumentPermissionRange
 ): string[] {
-    const body = documentDataModel.getSelfOrHeaderFooterModel(segmentId)?.getBody();
+    const resolverIndex = getDocumentPermissionResolverIndex(documentDataModel);
+    const segmentIndex = getDocumentPermissionSegmentIndex(documentDataModel, segmentId, resolverIndex);
+    const { body } = segmentIndex;
     if (!body) {
         return [];
     }
     return [
-        ...getSectionPermissionObjectIds(documentDataModel, segmentId, range),
-        ...getParagraphPermissionObjectIds(body, segmentId, range),
-        ...getEntityPermissionObjectIds(documentDataModel, body, segmentId, range),
+        ...getSectionPermissionObjectIds(documentDataModel, segmentId, range, resolverIndex),
+        ...getParagraphPermissionObjectIds(body, segmentId, range, segmentIndex),
+        ...getEntityPermissionObjectIds(segmentId, range, segmentIndex),
     ];
 }
 
@@ -178,9 +269,10 @@ export function getDocumentEntityParentPermissionObjectIds(
     entityType: string,
     entityId: string
 ): string[] {
-    const body = documentDataModel.getSelfOrHeaderFooterModel(segmentId)?.getBody();
-    const range = body ? getEntityRange(body, entityType, entityId) : null;
-    return range ? getSectionPermissionObjectIds(documentDataModel, segmentId, range) : [];
+    const resolverIndex = getDocumentPermissionResolverIndex(documentDataModel);
+    const segmentIndex = getDocumentPermissionSegmentIndex(documentDataModel, segmentId, resolverIndex);
+    const range = segmentIndex.entityRanges.get(`${entityType}:${entityId}`) ?? null;
+    return range ? getSectionPermissionObjectIds(documentDataModel, segmentId, range, resolverIndex) : [];
 }
 
 export function getDocumentParagraphParentPermissionObjectIds(
@@ -188,15 +280,17 @@ export function getDocumentParagraphParentPermissionObjectIds(
     segmentId: string,
     paragraphId: string
 ): string[] {
-    const body = documentDataModel.getSelfOrHeaderFooterModel(segmentId)?.getBody();
-    const paragraph = body?.paragraphs?.find((item) => item.paragraphId === paragraphId);
+    const resolverIndex = getDocumentPermissionResolverIndex(documentDataModel);
+    const segmentIndex = getDocumentPermissionSegmentIndex(documentDataModel, segmentId, resolverIndex);
+    const { body } = segmentIndex;
+    const paragraph = segmentIndex.paragraphsById.get(paragraphId);
     if (!body || !paragraph) {
         return [];
     }
     return getSectionPermissionObjectIds(documentDataModel, segmentId, {
-        startOffset: getParagraphContentStartOffset(body, paragraph),
+        startOffset: segmentIndex.paragraphContentStartOffsets.get(paragraph.startIndex) ?? getParagraphContentStartOffset(body, paragraph),
         endOffset: paragraph.startIndex + 1,
-    });
+    }, resolverIndex);
 }
 
 export function getDocumentSectionPermissionObjectIdsByIds(
@@ -215,30 +309,28 @@ export function getDocumentSectionIdsAtOffset(body: IDocumentBody, offset: numbe
 function getSectionPermissionObjectIds(
     documentDataModel: DocumentDataModel,
     segmentId: string,
-    range: IDocumentPermissionRange
+    range: IDocumentPermissionRange,
+    resolverIndex = getDocumentPermissionResolverIndex(documentDataModel)
 ): string[] {
     if (segmentId) {
-        return getHeaderFooterOwnerSectionIds(documentDataModel, segmentId)
+        return getHeaderFooterOwnerSectionIds(documentDataModel, segmentId, resolverIndex.topLevelSections)
             .map((sectionId) => getDocumentSectionPermissionObjectId('', sectionId));
     }
-    const body = documentDataModel.getBody();
-    if (!body) {
-        return [];
-    }
-    return getSectionsIntersectingRange(getTopLevelSectionBreaks(body), range)
+    return getSectionsIntersectingRange(resolverIndex.topLevelSections, range)
         .map((section) => getDocumentSectionPermissionObjectId('', section.sectionId));
 }
 
 function getParagraphPermissionObjectIds(
     body: IDocumentBody,
     segmentId: string,
-    range: IDocumentPermissionRange
+    range: IDocumentPermissionRange,
+    segmentIndex: IDocumentPermissionSegmentIndex
 ): string[] {
     const startOffset = Math.min(range.startOffset, range.endOffset);
     const endOffset = Math.max(range.startOffset, range.endOffset);
     return (body.paragraphs ?? [])
         .filter((paragraph) => intersectsRange(
-            getParagraphContentStartOffset(body, paragraph),
+            segmentIndex.paragraphContentStartOffsets.get(paragraph.startIndex) ?? getParagraphContentStartOffset(body, paragraph),
             paragraph.startIndex + 1,
             startOffset,
             endOffset
@@ -249,57 +341,15 @@ function getParagraphPermissionObjectIds(
 }
 
 function getEntityPermissionObjectIds(
-    documentDataModel: DocumentDataModel,
-    body: IDocumentBody,
     segmentId: string,
-    range: IDocumentPermissionRange
+    range: IDocumentPermissionRange,
+    segmentIndex: IDocumentPermissionSegmentIndex
 ): string[] {
-    const drawings = documentDataModel.getSnapshot().drawings ?? {};
-    const candidates = [
-        ...(body.tables ?? []).map((item) => ({ type: 'table', id: item.tableId, start: item.startIndex, end: item.endIndex })),
-        ...(body.customBlocks ?? []).map((item) => ({
-            type: drawings[item.blockId] ? 'drawing' : 'custom-block',
-            id: item.blockId,
-            start: item.startIndex,
-            end: item.startIndex + 1,
-        })),
-        ...(body.blockRanges ?? []).map((item) => ({ type: 'block-range', id: item.blockId, start: item.startIndex, end: item.endIndex + 1 })),
-        ...(body.customRanges ?? []).map((item) => ({ type: 'custom-range', id: item.rangeId, start: item.startIndex, end: item.endIndex + 1 })),
-        ...(body.columnGroups ?? []).map((item) => ({ type: 'column-group', id: item.columnGroupId, start: item.startIndex, end: item.endIndex + 1 })),
-    ];
     const startOffset = Math.min(range.startOffset, range.endOffset);
     const endOffset = Math.max(range.startOffset, range.endOffset);
-    return candidates
-        .filter((item) => intersectsRange(item.start, item.end, startOffset, endOffset))
+    return segmentIndex.entities
+        .filter((item) => intersectsRange(item.startOffset, item.endOffset, startOffset, endOffset))
         .map((item) => getDocumentEntityPermissionObjectId(segmentId, item.type, item.id));
-}
-
-function getEntityRange(
-    body: IDocumentBody,
-    entityType: string,
-    entityId: string
-): IDocumentPermissionRange | null {
-    if (entityType === 'table') {
-        const item = body.tables?.find((table) => table.tableId === entityId);
-        return item ? { startOffset: item.startIndex, endOffset: item.endIndex } : null;
-    }
-    if (entityType === 'custom-block' || entityType === 'drawing') {
-        const item = body.customBlocks?.find((block) => block.blockId === entityId);
-        return item ? { startOffset: item.startIndex, endOffset: item.startIndex + 1 } : null;
-    }
-    if (entityType === 'block-range') {
-        const item = body.blockRanges?.find((block) => block.blockId === entityId);
-        return item ? { startOffset: item.startIndex, endOffset: item.endIndex + 1 } : null;
-    }
-    if (entityType === 'custom-range') {
-        const item = body.customRanges?.find((customRange) => customRange.rangeId === entityId);
-        return item ? { startOffset: item.startIndex, endOffset: item.endIndex + 1 } : null;
-    }
-    if (entityType === 'column-group') {
-        const item = body.columnGroups?.find((columnGroup) => columnGroup.columnGroupId === entityId);
-        return item ? { startOffset: item.startIndex, endOffset: item.endIndex + 1 } : null;
-    }
-    return null;
 }
 
 function getSectionsIntersectingRange(
@@ -330,10 +380,10 @@ function intersectsRange(
 
 function getHeaderFooterOwnerSectionIds(
     documentDataModel: DocumentDataModel,
-    segmentId: string
+    segmentId: string,
+    sections = getDocumentPermissionResolverIndex(documentDataModel).topLevelSections
 ): string[] {
     const snapshot = documentDataModel.getSnapshot();
-    const sections = snapshot.body ? getTopLevelSectionBreaks(snapshot.body) : [];
     const result = new Set<string>();
     sections.forEach((section, sectionIndex) => {
         if (HEADER_FOOTER_REFERENCE_KEYS.some((key) =>

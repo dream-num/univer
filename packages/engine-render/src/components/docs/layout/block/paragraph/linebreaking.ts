@@ -281,8 +281,8 @@ function _updateListLevelAncestors(
 
     // [[nestingLevel, bulletSkeleton]];
 
-    if (cacheItem[nestingLevel] == null) {
-        cacheItem[nestingLevel] = [];
+    while (cacheItem.length <= nestingLevel) {
+        cacheItem.push([]);
     }
     cacheItem[nestingLevel].push({
         bullet: bulletSkeleton,

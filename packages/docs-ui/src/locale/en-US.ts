@@ -190,7 +190,7 @@ const locale = {
             noBackground: 'No background',
         },
         'page-settings': {
-            'document-setting': 'Document Setting',
+            'document-setting': 'Page Setup',
             'modern-width': 'Content width',
             'modern-width-narrow': 'Narrow',
             'modern-width-medium': 'Medium',

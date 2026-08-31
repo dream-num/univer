@@ -75,6 +75,7 @@ import {
     setPageParent,
     updateBlockIndex,
     updateInlineDrawingCoordsAndBorder,
+    updateParagraphBorders,
     validationGrid,
 } from '../tools';
 
@@ -418,6 +419,142 @@ describe('docs layout tools extra', () => {
         updateInlineDrawingCoordsAndBorder(ctx as any, [page] as any);
 
         expect(line1.backgroundColor).toEqual({ rgb: '#ffffff' });
+    });
+
+    it('copies every paragraph border without relying on a terminal paragraph glyph', () => {
+        const { page, line1 } = createPageSkeleton();
+        line1.paragraphStart = true;
+        line1.paragraphIndex = 10;
+        line1.ed = 10;
+        const paragraphStyle = {
+            borderTop: { color: { rgb: '#111111' }, width: 1, padding: 1 },
+            borderBottom: { color: { rgb: '#222222' }, width: 2, padding: 2 },
+            borderLeft: { color: { rgb: '#333333' }, width: 3, padding: 3 },
+            borderRight: { color: { rgb: '#444444' }, width: 4, padding: 4 },
+        };
+        const ctx = {
+            paragraphConfigCache: new Map([[
+                undefined,
+                new Map([[10, { paragraphStyle }]]),
+            ]]),
+        };
+
+        updateInlineDrawingCoordsAndBorder(ctx as any, [page] as any);
+
+        expect(line1).toMatchObject(paragraphStyle);
+    });
+
+    it('uses the between border only between adjacent paragraphs with matching border sets', () => {
+        const { page, line1, line2 } = createPageSkeleton();
+        line1.paragraphStart = true;
+        line1.paragraphIndex = 10;
+        line1.ed = 10;
+        line2.paragraphStart = true;
+        line2.paragraphIndex = 20;
+        line2.ed = 20;
+        const paragraphStyle = {
+            borderTop: { color: { rgb: '#111111' }, width: 1, padding: 1 },
+            borderBottom: { color: { rgb: '#222222' }, width: 2, padding: 2 },
+            borderLeft: { color: { rgb: '#333333' }, width: 3, padding: 3 },
+            borderRight: { color: { rgb: '#444444' }, width: 4, padding: 4 },
+            borderBetween: { color: { rgb: '#555555' }, width: 5, padding: 5 },
+        };
+        const ctx = {
+            paragraphConfigCache: new Map([[
+                undefined,
+                new Map([
+                    [10, { paragraphStyle }],
+                    [20, { paragraphStyle }],
+                ]),
+            ]]),
+        };
+
+        updateInlineDrawingCoordsAndBorder(ctx as any, [page] as any);
+
+        expect(line1.borderTop).toEqual(paragraphStyle.borderTop);
+        expect(line1.borderBetween).toEqual(paragraphStyle.borderBetween);
+        expect(line1.borderBottom).toBeUndefined();
+        expect(line2.borderTop).toBeUndefined();
+        expect(line2.borderBetween).toBeUndefined();
+        expect(line2.borderBottom).toEqual(paragraphStyle.borderBottom);
+    });
+
+    it('uses cached border styles at retained and reused page boundaries', () => {
+        const previous = createPageSkeleton();
+        const current = createPageSkeleton();
+        const next = createPageSkeleton();
+        const pages = [previous, current, next].map(({ page, column, line1 }) => {
+            column.lines = [line1];
+            return page;
+        });
+        const lines = [previous.line1, current.line1, next.line1];
+        const paragraphStyle = {
+            borderTop: { color: { rgb: '#111111' }, width: 1, padding: 1 },
+            borderBottom: { color: { rgb: '#222222' }, width: 2, padding: 2 },
+            borderBetween: { color: { rgb: '#555555' }, width: 5, padding: 5 },
+        };
+        lines.forEach((line, index) => {
+            line.paragraphStart = true;
+            line.paragraphIndex = (index + 1) * 10;
+            line.ed = line.paragraphIndex;
+            line.paragraphBorders = paragraphStyle;
+        });
+        const ctx = {
+            paragraphConfigCache: new Map([[
+                undefined,
+                new Map([[20, { paragraphStyle }]]),
+            ]]),
+        };
+
+        updateParagraphBorders(ctx as any, pages as any);
+
+        expect(previous.line1.borderTop).toEqual(paragraphStyle.borderTop);
+        expect(previous.line1.borderBetween).toEqual(paragraphStyle.borderBetween);
+        expect(current.line1.borderTop).toBeUndefined();
+        expect(current.line1.borderBetween).toEqual(paragraphStyle.borderBetween);
+        expect(next.line1.borderTop).toBeUndefined();
+        expect(next.line1.borderBottom).toEqual(paragraphStyle.borderBottom);
+    });
+
+    it('updates only cross-boundary attachments on context pages', () => {
+        const previous = createPageSkeleton();
+        const current = createPageSkeleton();
+        const next = createPageSkeleton();
+        const pages = [previous, current, next].map(({ page, column, line1 }) => {
+            column.lines = [line1];
+            return page;
+        });
+        const lines = [previous.line1, current.line1, next.line1];
+        const paragraphStyle = {
+            borderTop: { color: { rgb: '#111111' }, width: 1, padding: 1 },
+            borderBottom: { color: { rgb: '#222222' }, width: 2, padding: 2 },
+            borderBetween: { color: { rgb: '#555555' }, width: 5, padding: 5 },
+        };
+        lines.forEach((line, index) => {
+            line.paragraphStart = true;
+            line.paragraphIndex = (index + 1) * 10;
+            line.ed = line.paragraphIndex;
+            line.paragraphBorders = paragraphStyle;
+        });
+        const previousTop = { color: { rgb: '#aaaaaa' }, width: 6, padding: 6 };
+        const nextBottom = { color: { rgb: '#bbbbbb' }, width: 7, padding: 7 };
+        previous.line1.borderTop = previousTop;
+        next.line1.borderBottom = nextBottom;
+        const ctx = {
+            paragraphConfigCache: new Map([[
+                undefined,
+                new Map([[20, { paragraphStyle }]]),
+            ]]),
+        };
+
+        updateParagraphBorders(ctx as any, pages as any, [current.page] as any);
+
+        expect(previous.line1.borderTop).toBe(previousTop);
+        expect(previous.line1.borderBetween).toEqual(paragraphStyle.borderBetween);
+        expect(current.line1.borderTop).toBeUndefined();
+        expect(current.line1.borderBetween).toEqual(paragraphStyle.borderBetween);
+        expect(next.line1.borderTop).toBeUndefined();
+        expect(next.line1.borderBottom).toBe(nextBottom);
     });
 
     it('computes horizontal and vertical positioned object coordinates', () => {

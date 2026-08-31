@@ -416,6 +416,42 @@ function createHorizontalLineDoc(): IDocumentData {
         ...doc,
         body: {
             ...body,
+            dataStream: '\rBody\r\n',
+            textRuns: [{ st: 0, ed: 5, ts: {} }],
+            paragraphs: [
+                {
+                    ...body.paragraphs![0],
+                    startIndex: 0,
+                    paragraphStyle: {
+                        borderBottom: {
+                            padding: 5,
+                            color: { rgb: '#CDD0D8' },
+                            width: 1,
+                            dashStyle: DashStyleType.SOLID,
+                        },
+                    },
+                },
+                {
+                    ...body.paragraphs![1],
+                    startIndex: 5,
+                },
+            ],
+            sectionBreaks: [{
+                ...body.sectionBreaks![0],
+                startIndex: 6,
+            }],
+        },
+    };
+}
+
+function createParagraphBorderDoc(): IDocumentData {
+    const doc = createMultiParagraphDoc();
+    const body = doc.body!;
+
+    return {
+        ...doc,
+        body: {
+            ...body,
             paragraphs: body.paragraphs?.map((paragraph, index) => index === 0
                 ? {
                     ...paragraph,
@@ -430,6 +466,50 @@ function createHorizontalLineDoc(): IDocumentData {
                     },
                 }
                 : paragraph),
+        },
+    };
+}
+
+function createTableHorizontalLineDoc(): IDocumentData {
+    const table = genEmptyTable(1, 1);
+    const dataStream = `${table.dataStream}\r\n`;
+    const doc = createBaseDoc(dataStream);
+    const horizontalLineParagraph = table.paragraphs[0];
+
+    return {
+        ...doc,
+        body: {
+            ...doc.body!,
+            paragraphs: [
+                {
+                    ...horizontalLineParagraph,
+                    paragraphStyle: {
+                        ...horizontalLineParagraph.paragraphStyle,
+                        borderBottom: {
+                            padding: 5,
+                            color: { rgb: '#CDD0D8' },
+                            width: 1,
+                            dashStyle: DashStyleType.SOLID,
+                        },
+                    },
+                },
+                {
+                    paragraphId: 'para_after_table_horizontal_line',
+                    startIndex: table.dataStream.length,
+                },
+            ],
+            sectionBreaks: [
+                ...table.sectionBreaks,
+                {
+                    sectionId: 'section_table_horizontal_line',
+                    startIndex: dataStream.length - 1,
+                },
+            ],
+            tables: [{
+                startIndex: 0,
+                endIndex: table.dataStream.length,
+                tableId: 'table-horizontal-line',
+            }],
         },
     };
 }
@@ -1103,7 +1183,7 @@ describe('misc document commands', () => {
         commandService = get(ICommandService);
         commandService.registerCommand(RemoveHorizontalLineCommand);
         commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
-        setCollapsedSelection(6);
+        setCollapsedSelection(1);
         const mutationParams = collectRichTextMutationParams();
 
         expect(await commandService.executeCommand(RemoveHorizontalLineCommand.id)).toBe(true);
@@ -1196,6 +1276,42 @@ describe('misc document commands', () => {
         commandService.registerCommand(DeleteLeftCommand);
         commandService.registerCommand(RemoveHorizontalLineCommand);
         commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+        setCollapsedSelection(1);
+
+        const skeletonManager = get(DocSkeletonManagerService) as unknown as { getSkeleton: () => unknown };
+        skeletonManager.getSkeleton = () => useLinearSkeleton('\rBody\r\n');
+
+        expect(await commandService.executeCommand(DeleteLeftCommand.id)).toBe(true);
+        await awaitTime(0);
+
+        expect(getBody()?.paragraphs?.[0].paragraphStyle?.borderBottom).toBeUndefined();
+    });
+
+    it('removes a horizontal line from the first paragraph inside a table cell', async () => {
+        const doc = createTableHorizontalLineDoc();
+        ({ univer, get } = createCommandTestBed(doc));
+        commandService = get(ICommandService);
+        commandService.registerCommand(DeleteLeftCommand);
+        commandService.registerCommand(RemoveHorizontalLineCommand);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+        setCollapsedSelection(4);
+
+        const skeletonManager = get(DocSkeletonManagerService) as unknown as { getSkeleton: () => unknown };
+        skeletonManager.getSkeleton = () => useLinearSkeleton(doc.body!.dataStream);
+
+        expect(await commandService.executeCommand(DeleteLeftCommand.id)).toBe(true);
+        await awaitTime(0);
+
+        expect(getBody()?.paragraphs?.[0].paragraphStyle?.borderBottom).toBeUndefined();
+    });
+
+    it('merges a non-empty paragraph with a bottom border when Backspace is pressed at the next paragraph', async () => {
+        ({ univer, get } = createCommandTestBed(createParagraphBorderDoc()));
+        commandService = get(ICommandService);
+        commandService.registerCommand(DeleteLeftCommand);
+        commandService.registerCommand(MergeTwoParagraphCommand);
+        commandService.registerCommand(RemoveHorizontalLineCommand);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
         setCollapsedSelection(6);
 
         const skeletonManager = get(DocSkeletonManagerService) as unknown as { getSkeleton: () => unknown };
@@ -1204,7 +1320,8 @@ describe('misc document commands', () => {
         expect(await commandService.executeCommand(DeleteLeftCommand.id)).toBe(true);
         await awaitTime(0);
 
-        expect(getBody()?.paragraphs?.[0].paragraphStyle?.borderBottom).toBeUndefined();
+        expect(getBody()?.dataStream).toBe('TitleBody\r\n');
+        expect(getBody()?.paragraphs).toHaveLength(1);
     });
 
     it('turns a list paragraph into an indented paragraph when Backspace is pressed at its first glyph', async () => {

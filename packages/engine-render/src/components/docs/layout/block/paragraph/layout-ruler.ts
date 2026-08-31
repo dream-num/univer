@@ -940,7 +940,7 @@ function _lineOperator(
 
     // Line does not exceed column height, or line exceeds column height but there is no other content in the column, or line exceeds page height but there is no other content on the page;
     const lineIndex = preLine ? preLine.lineIndex + 1 : 0;
-    let { paddingLeft, paddingRight } = __getIndentPadding(
+    let { paddingLeft, paddingRight, paragraphPaddingLeft, paragraphPaddingRight } = __getIndentPadding(
         indentFirstLine,
         hanging,
         indentStart,
@@ -954,6 +954,12 @@ function _lineOperator(
         const leftPercent = paddingLeft / (paddingLeft + paddingRight);
         paddingLeft = column.width * leftPercent - 0.5;
         paddingRight = column.width - paddingLeft - 0.5;
+    }
+
+    if (paragraphPaddingLeft + paragraphPaddingRight >= column.width) {
+        const leftPercent = paragraphPaddingLeft / (paragraphPaddingLeft + paragraphPaddingRight);
+        paragraphPaddingLeft = column.width * leftPercent - 0.5;
+        paragraphPaddingRight = column.width - paragraphPaddingLeft - 0.5;
     }
 
     const newLine = createSkeletonLine(
@@ -983,6 +989,8 @@ function _lineOperator(
 
     column.lines.push(newLine);
     newLine.parent = column;
+    newLine.paragraphPaddingLeft = paragraphPaddingLeft;
+    newLine.paragraphPaddingRight = paragraphPaddingRight;
     const blockAnchorTop = deferredTopBottomAnchorDrawings.length > 0 ? newLineTop : lineTop;
     createAndUpdateBlockAnchor(paragraphIndex, newLine, blockAnchorTop, pDrawingAnchor);
     if (deferredTopBottomAnchorDrawings.length > 0) {
@@ -1652,6 +1660,8 @@ function __getIndentPadding(
     return {
         paddingLeft,
         paddingRight,
+        paragraphPaddingLeft: indentStartNumber,
+        paragraphPaddingRight: indentEndNumber,
     };
 }
 

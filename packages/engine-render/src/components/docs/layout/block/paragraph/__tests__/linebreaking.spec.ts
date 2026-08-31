@@ -1322,6 +1322,124 @@ describe('linebreaking', () => {
         expect(paragraphConfig?.paragraphStyle?.spaceBelow?.v).toBe(6);
     });
 
+    it('reserves the larger border-between clearance below the paragraph', () => {
+        const first = 'Rule';
+        const second = 'Next';
+        const content = `${first}${DataStreamTreeTokenType.PARAGRAPH}${second}`;
+        const paragraphStyle = {
+            spaceBelow: { v: 0 },
+            borderBottom: {
+                color: { rgb: '#cdd0d8' },
+                padding: 1,
+                width: 2,
+            },
+            borderBetween: {
+                color: { rgb: '#cdd0d8' },
+                padding: 8,
+                width: 4,
+            },
+        };
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed(content, {
+            body: {
+                paragraphs: [
+                    { startIndex: first.length, paragraphStyle },
+                    { startIndex: content.length, paragraphStyle },
+                ],
+            },
+        });
+        const shapedTextList = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+
+        lineBreaking(
+            ctx,
+            viewModel,
+            shapedTextList,
+            curPage,
+            paragraphNode,
+            sectionBreakConfig,
+            null,
+            false,
+            paragraphNode.parent?.children[1]
+        );
+
+        const paragraphConfig = ctx.paragraphConfigCache.get(curPage.segmentId)?.get(paragraphNode.endIndex);
+        expect(paragraphConfig?.paragraphStyle?.spaceBelow?.v).toBe(10);
+    });
+
+    it('does not reserve border-between clearance when the next paragraph border set differs', () => {
+        const first = 'Rule';
+        const second = 'Next';
+        const content = `${first}${DataStreamTreeTokenType.PARAGRAPH}${second}`;
+        const firstParagraphStyle = {
+            spaceBelow: { v: 0 },
+            borderBottom: {
+                color: { rgb: '#cdd0d8' },
+                padding: 1,
+                width: 2,
+            },
+            borderBetween: {
+                color: { rgb: '#cdd0d8' },
+                padding: 8,
+                width: 4,
+            },
+        };
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed(content, {
+            body: {
+                paragraphs: [
+                    { startIndex: first.length, paragraphStyle: firstParagraphStyle },
+                    { startIndex: content.length, paragraphStyle: { ...firstParagraphStyle, borderBetween: undefined } },
+                ],
+            },
+        });
+        const shapedTextList = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+
+        lineBreaking(
+            ctx,
+            viewModel,
+            shapedTextList,
+            curPage,
+            paragraphNode,
+            sectionBreakConfig,
+            null,
+            false,
+            paragraphNode.parent?.children[1]
+        );
+
+        const paragraphConfig = ctx.paragraphConfigCache.get(curPage.segmentId)?.get(paragraphNode.endIndex);
+        expect(paragraphConfig?.paragraphStyle?.spaceBelow?.v).toBe(2);
+    });
+
+    it('reserves top-border clearance and caches paragraph indentation', () => {
+        const content = 'Bordered';
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed(content, {
+            body: {
+                paragraphs: [{
+                    startIndex: content.length,
+                    paragraphStyle: {
+                        spaceAbove: { v: 0 },
+                        indentStart: { v: 18 },
+                        indentEnd: { v: 12 },
+                        borderTop: {
+                            color: { rgb: '#cdd0d8' },
+                            padding: 5,
+                            width: 2,
+                        },
+                    },
+                }],
+            },
+        });
+        const shapedTextList = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+
+        const pages = lineBreaking(ctx, viewModel, shapedTextList, curPage, paragraphNode, sectionBreakConfig, null);
+
+        const paragraphConfig = ctx.paragraphConfigCache.get(curPage.segmentId)?.get(paragraphNode.endIndex);
+        const line = pages[0].sections[0].columns[0].lines[0];
+        expect(paragraphConfig?.paragraphStyle?.spaceAbove?.v).toBe(6);
+        expect(line).toMatchObject({
+            paragraphPaddingLeft: 18,
+            paragraphPaddingRight: 12,
+        });
+    });
+
     it('lays out longer text that may span multiple lines', () => {
         const { viewModel, ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed('This is a longer text that should still fit within a reasonable page width for testing purposes');
         const shapedTextList = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);

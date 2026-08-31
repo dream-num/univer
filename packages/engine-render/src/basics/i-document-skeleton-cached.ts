@@ -48,6 +48,14 @@ export interface IParagraphList {
     paragraph: IParagraph;
 }
 
+export interface IDocumentSkeletonParagraphBorders {
+    borderTop?: IParagraphBorder;
+    borderBottom?: IParagraphBorder;
+    borderLeft?: IParagraphBorder;
+    borderRight?: IParagraphBorder;
+    borderBetween?: IParagraphBorder;
+}
+
 export interface ISkeletonResourceReference {
     skeHeaders: Map<string, Map<number, IDocumentSkeletonHeaderFooter>>; // id:{ width: IDocumentSkeletonHeaderFooter }
     skeFooters: Map<string, Map<number, IDocumentSkeletonHeaderFooter>>;
@@ -231,7 +239,14 @@ export interface IDocumentSkeletonLine {
     isBehindTable: boolean; // In DataStream, if paragraph contains table, the first line isBehindTable is true and tableId is not empty, mainly used to calculate st\ed.
     tableId: string; // tableId if paragraph contains table, tableId is not empty, mainly used to calculate st\ed.
 
+    borderBetween?: IParagraphBorder; // borderBetween
+    borderTop?: IParagraphBorder; // borderTop
     borderBottom?: IParagraphBorder; // borderBottom
+    borderLeft?: IParagraphBorder; // borderLeft
+    borderRight?: IParagraphBorder; // borderRight
+    paragraphBorders?: IDocumentSkeletonParagraphBorders;
+    paragraphPaddingLeft?: number;
+    paragraphPaddingRight?: number;
     backgroundColor?: IColorStyle; // backgroundColor
     bullet?: IDocumentSkeletonBullet; // unordered and ordered list bullet
     width?: number; // the actual width of a line

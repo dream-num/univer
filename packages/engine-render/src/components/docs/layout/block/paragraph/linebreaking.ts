@@ -53,7 +53,7 @@ import { BreakType, GlyphType } from '../../../../../basics/i-document-skeleton-
 import { getDocumentCompatibilityPolicy, isTraditionalDocumentCompatibility } from '../../../document-compatibility';
 import { createSkeletonPage } from '../../model/page';
 import { setColumnFullState } from '../../model/section';
-import { getLastNotFullColumnInfo, getLastSection, isBlankColumn } from '../../tools';
+import { getLastNotFullColumnInfo, getLastSection, hasSameParagraphBorderSet, isBlankColumn } from '../../tools';
 import { dealWithBullet } from './bullet';
 import { layoutParagraph } from './layout-ruler';
 
@@ -753,7 +753,8 @@ export function lineBreaking(
     paragraphNode: DataStreamTreeNode,
     sectionBreakConfig: ISectionBreakConfig,
     tableSkeleton: Nullable<IDocumentSkeletonTable>,
-    tablePageBreakBefore = false
+    tablePageBreakBefore = false,
+    nextParagraphNode?: DataStreamTreeNode
 ): IDocumentSkeletonPage[] {
     const { skeletonResourceReference } = ctx;
     const {
@@ -789,8 +790,9 @@ export function lineBreaking(
         drawingAnchor?.set(segmentId, segmentDrawingAnchorCache);
     }
 
+    const body = viewModel.getBody?.() ?? null;
     const resolvedParagraphStyle = _applyBlockRangeLayoutParagraphStyle(
-        viewModel.getBody?.() ?? null,
+        body,
         paragraph,
         paragraphStyle,
         documentStyle,
@@ -798,15 +800,42 @@ export function lineBreaking(
         documentSnapshot?.styles,
         paragraph.styleId
     );
+    const borderTop = resolvedParagraphStyle.borderTop;
     const borderBottom = resolvedParagraphStyle.borderBottom;
+    const borderBetween = resolvedParagraphStyle.borderBetween;
+    const nextParagraph = borderBetween && nextParagraphNode
+        ? viewModel.getParagraph(nextParagraphNode.endIndex)
+        : undefined;
+    const nextParagraphStyle = nextParagraph == null
+        ? undefined
+        : _applyBlockRangeLayoutParagraphStyle(
+            body,
+            nextParagraph,
+            nextParagraph.paragraphStyle ?? {},
+            documentStyle,
+            shouldApplyDocumentDefaults,
+            documentSnapshot?.styles,
+            nextParagraph.styleId
+        );
 
-    if (borderBottom) {
-        // Keep the stroke inside the paragraph's post-text region when spaceBelow is smaller.
+    if (borderTop) {
         _withMinSpacing(
             resolvedParagraphStyle,
-            'spaceBelow',
-            Math.max(0, borderBottom.padding ?? 0) + Math.max(0, borderBottom.width ?? 1) / 2
+            'spaceAbove',
+            Math.max(0, borderTop.padding ?? 0) + Math.max(0, borderTop.width ?? 1) / 2
         );
+    }
+
+    const bottomBorder = borderBetween && nextParagraphStyle &&
+        hasSameParagraphBorderSet(resolvedParagraphStyle, nextParagraphStyle)
+        ? borderBetween
+        : borderBottom;
+    const bottomBorderClearance = bottomBorder
+        ? Math.max(0, bottomBorder.padding ?? 0) + Math.max(0, bottomBorder.width ?? 1) / 2
+        : 0;
+    if (bottomBorderClearance > 0) {
+        // Keep the stroke inside the paragraph's post-text region when spaceBelow is smaller.
+        _withMinSpacing(resolvedParagraphStyle, 'spaceBelow', bottomBorderClearance);
     }
 
     const paragraphConfig: IParagraphConfig = {

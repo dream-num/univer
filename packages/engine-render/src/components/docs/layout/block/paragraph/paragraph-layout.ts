@@ -31,7 +31,8 @@ export function dealWidthParagraph(
     viewModel: DocumentViewModel,
     paragraphNode: DataStreamTreeNode,
     curPage: IDocumentSkeletonPage,
-    sectionBreakConfig: ISectionBreakConfig
+    sectionBreakConfig: ISectionBreakConfig,
+    nextParagraphNode?: DataStreamTreeNode
 ): IDocumentSkeletonPage[] {
     clearFontCreateConfigCache();
     const { content = '', children } = paragraphNode;
@@ -70,7 +71,8 @@ export function dealWidthParagraph(
         paragraphNode,
         sectionBreakConfig,
         tableSkeleton,
-        tablePageBreakBefore
+        tablePageBreakBefore,
+        nextParagraphNode
     );
 
     // Step 3: Line Adjustment.

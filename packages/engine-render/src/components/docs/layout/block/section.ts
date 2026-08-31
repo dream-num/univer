@@ -95,7 +95,10 @@ export function dealWithSection(
                 viewModel,
                 paragraphNode,
                 currentPageCache,
-                sectionBreakConfig
+                sectionBreakConfig,
+                sectionNode.children[i + 1]?.nodeType === DataStreamTreeNodeType.PARAGRAPH
+                    ? sectionNode.children[i + 1]
+                    : undefined
             );
         }
 

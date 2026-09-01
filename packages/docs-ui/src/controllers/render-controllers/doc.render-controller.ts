@@ -14,14 +14,69 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, EventState, ICommandInfo, IDocDrawingBase, IExecutionOptions, JSONXActions, Nullable } from '@univerjs/core';
+import type {
+    DocumentDataModel,
+    EventState,
+    ICommandInfo,
+    IDocDrawingBase,
+    IExecutionOptions,
+    JSONXActions,
+    Nullable,
+} from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import type { DocumentSkeleton, IDocumentLayoutInvalidation, IDocumentLayoutPageRange, IDocumentLayoutProgress, IDocumentLayoutProtectedRange, IDocumentSkeletonPage, IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
-import { DocumentFlavor, ICommandService, ILogService, Inject, isInternalEditorID, IUniverInstanceService, JSON1, PositionedObjectLayoutType, RxDisposable, TextX, TextXActionType, ThemeService, Tools, UniverInstanceType } from '@univerjs/core';
-import { DocLayoutExecutorService, DocSelectionManagerService, DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import { DocBackground, Documents, IRenderManagerService, Layer, PageLayoutType, ScrollBar, Viewport } from '@univerjs/engine-render';
+import type {
+    DocumentSkeleton,
+    IDocumentLayoutInvalidation,
+    IDocumentLayoutPageRange,
+    IDocumentLayoutProgress,
+    IDocumentLayoutProtectedRange,
+    IDocumentSkeletonPage,
+    IRenderContext,
+    IRenderModule,
+    IWheelEvent,
+} from '@univerjs/engine-render';
+import {
+    CustomDecorationType,
+    CustomRangeType,
+    DocumentFlavor,
+    ICommandService,
+    ILogService,
+    Inject,
+    isInternalEditorID,
+    IUniverInstanceService,
+    JSON1,
+    PositionedObjectLayoutType,
+    RxDisposable,
+    TextX,
+    TextXActionType,
+    ThemeService,
+    Tools,
+    UniverInstanceType,
+} from '@univerjs/core';
+import {
+    DocLayoutExecutorService,
+    DocSelectionManagerService,
+    DocSkeletonManagerService,
+    RichTextEditingMutation,
+} from '@univerjs/docs';
+import {
+    DocBackground,
+    Documents,
+    IRenderManagerService,
+    Layer,
+    PageLayoutType,
+    ScrollBar,
+    Viewport,
+} from '@univerjs/engine-render';
 import { combineLatest, fromEvent, merge, take, takeUntil } from 'rxjs';
-import { DOCS_COMPONENT_BACKGROUND_LAYER_INDEX, DOCS_COMPONENT_DEFAULT_Z_INDEX, DOCS_COMPONENT_HEADER_LAYER_INDEX, DOCS_COMPONENT_MAIN_LAYER_INDEX, DOCS_VIEW_KEY, VIEWPORT_KEY } from '../../basics/docs-view-key';
+import {
+    DOCS_COMPONENT_BACKGROUND_LAYER_INDEX,
+    DOCS_COMPONENT_DEFAULT_Z_INDEX,
+    DOCS_COMPONENT_HEADER_LAYER_INDEX,
+    DOCS_COMPONENT_MAIN_LAYER_INDEX,
+    DOCS_VIEW_KEY,
+    VIEWPORT_KEY,
+} from '../../basics/docs-view-key';
 import { DocLayoutCoordinatorService } from '../../services/doc-layout-coordinator.service';
 import { DocLayoutInteractionService } from '../../services/doc-layout-interaction.service';
 import { DocPageLayoutService } from '../../services/doc-page-layout.service';
@@ -66,6 +121,70 @@ function isPlainTextXRetain(action: object & { t: unknown }): boolean {
         !('body' in action) &&
         !('oldBody' in action) &&
         !('coverType' in action);
+}
+
+function isHyperlinkCustomRange(value: unknown): boolean {
+    return typeof value === 'object' && value != null &&
+        'rangeType' in value && value.rangeType === CustomRangeType.HYPERLINK;
+}
+
+function isLayoutOnlyCustomDecoration(value: unknown): boolean {
+    return typeof value === 'object' && value != null && 'type' in value &&
+        (value.type === CustomDecorationType.COMMENT || value.type === CustomDecorationType.DELETED);
+}
+
+function getLayoutMetadataCount(value: Record<string, unknown>): number | null {
+    const ranges = value.customRanges;
+    const decorations = value.customDecorations;
+    if (
+        (ranges != null && (!Array.isArray(ranges) || !ranges.every(isHyperlinkCustomRange))) ||
+        (decorations != null && (!Array.isArray(decorations) || !decorations.every(isLayoutOnlyCustomDecoration)))
+    ) {
+        return null;
+    }
+    return (Array.isArray(ranges) ? ranges.length : 0) +
+        (Array.isArray(decorations) ? decorations.length : 0);
+}
+
+function omitLayoutMetadata(value: Record<string, unknown>): Record<string, unknown> {
+    return Object.fromEntries(Object.entries(value).filter(([key]) =>
+        key !== 'customRanges' && key !== 'customDecorations'
+    ));
+}
+
+function isLayoutMetadataOnlyMutation(actions: JSONXActions, segmentId?: string): boolean {
+    const textActions = getBodyTextXActions(actions, segmentId);
+    return textActions != null && textActions.length > 0 && textActions.every((action) => {
+        if (typeof action !== 'object' || action == null || !('t' in action) || action.t !== TextXActionType.RETAIN) {
+            return false;
+        }
+        if (isPlainTextXRetain(action)) {
+            return true;
+        }
+        if (!('body' in action) || typeof action.body !== 'object' || action.body == null) {
+            return false;
+        }
+        const body = action.body as Record<string, unknown>;
+        const bodyMetadataCount = getLayoutMetadataCount(body);
+        if (
+            body.dataStream === '' &&
+            bodyMetadataCount != null && bodyMetadataCount > 0 &&
+            Object.keys(body).every((key) =>
+                key === 'dataStream' || key === 'customRanges' || key === 'customDecorations'
+            )
+        ) {
+            return true;
+        }
+        if (!('oldBody' in action) || typeof action.oldBody !== 'object' || action.oldBody == null) {
+            return false;
+        }
+        const oldBody = action.oldBody as Record<string, unknown>;
+        const oldBodyMetadataCount = getLayoutMetadataCount(oldBody);
+        return body.dataStream === '' && oldBody.dataStream === '' &&
+            bodyMetadataCount != null && oldBodyMetadataCount != null &&
+            bodyMetadataCount + oldBodyMetadataCount > 0 &&
+            Tools.diffValue(omitLayoutMetadata(body), omitLayoutMetadata(oldBody));
+    });
 }
 
 function getBodyMutationInvalidation(
@@ -218,6 +337,8 @@ interface IDocLayoutWorkerEditBatch {
 
 interface IDocLayoutScheduleOptions {
     deferForeground?: boolean;
+    reuseMainBaseline?: boolean;
+    allowMetadataOnlyStructuralTailReuse?: boolean;
     reason: 'initial' | 'edit';
     anchor?: number;
     priorityAnchor?: number;
@@ -569,6 +690,13 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
             undefined,
             false
         );
+        if (options.reuseMainBaseline) {
+            // Offset-preserving render metadata does not change Worker geometry.
+            // Keep any older pending batch intact, but do not create a false
+            // background-layout task for this Main-only publication.
+            this._layoutCoordinator.schedule(skeleton, options, mainThreadCallbacks);
+            return;
+        }
         if (this._docLayoutExecutorService.getExecutor() == null) {
             this._pendingWorkerEditBatch = null;
             this._layoutCoordinator.schedule(skeleton, options, mainThreadCallbacks);
@@ -612,7 +740,10 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         mainThreadCallbacks: DocLayoutCoordinatorCallbacks,
         preserveInactiveViewportAnchor: boolean
     ): void {
-        this._layoutCoordinator.schedule(skeleton, options, {
+        // Initial layout has no mutation anchor. Give its foreground window an
+        // explicit viewport anchor so it can hand off before Main finishes the
+        // whole document; only a stable physical page can publish this anchor.
+        this._layoutCoordinator.schedule(skeleton, { ...options, priorityAnchor: options.priorityAnchor ?? 0 }, {
             onProgress: mainThreadCallbacks.onProgress,
             onForegroundReady: (progress) => {
                 if (progress.complete) {
@@ -732,7 +863,7 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
             return;
         }
 
-        // RichTextEditingMutation advances the logical range in a microtask. The
+        // The mutation defers visual selection refresh to a microtask. The
         // foreground window can replace its adjacent page afterwards, so rebuild
         // the caret before handing the remaining suffix to the Worker.
         this._refreshPagePositionAndSelection(this._getActiveEditingRange(unitId) != null);
@@ -865,7 +996,9 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
             );
         } else if (isInitialLayout) {
             this._refreshPagePosition();
-        } else if (progress.didPublishAnchor && refreshIncompleteAnchorSelection) {
+        } else if (progress.didPublishAnchor && (
+            refreshIncompleteAnchorSelection || this._docSelectionRenderService.hasPendingSelection
+        )) {
             // The foreground pass replaces edited line and glyph objects. Rebuild
             // the caret from stable document offsets without moving the viewport.
             this._textSelectionManagerService.refreshSelection(
@@ -911,7 +1044,7 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         didReplaceProtectedPages: boolean
     ): void {
         this._docLayoutExecutorService.completeRecovery(unitId);
-        if (refreshCompleteSelection || didReplaceProtectedPages) {
+        if (refreshCompleteSelection || didReplaceProtectedPages || this._docSelectionRenderService.hasPendingSelection) {
             const isEditing = preserveEditingSelection ||
                 didReplaceProtectedPages ||
                 this._getActiveEditingRange(unitId) != null;
@@ -1598,8 +1731,8 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
             const activeRange = this._getActiveEditingRange(unitId);
             const isRemoteMutation = params.isSync === true || executionOptions?.fromCollab === true;
             // Local mutations carry the post-edit selection. Prefer it over the
-            // selection manager because the latter is advanced in a microtask after
-            // this command callback. A collaboration payload can still carry the
+            // selection manager to keep the requested edit anchor explicit.
+            // A collaboration payload can still carry the
             // remote author's ranges, so execution options—not range presence—decide
             // whether the transformed local caret remains authoritative.
             const mutationActiveRange = isRemoteMutation
@@ -1608,15 +1741,52 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
                     (bodyRanges.length === 1 ? bodyRanges[0] : undefined);
             const priorityAnchor = mutationActiveRange?.endOffset ?? activeRange?.endOffset;
             // RichTextEditingMutation preserves the original Main input
-            // contract by applying its local post-edit range in a microtask.
-            // Rebuilding the old active range during the synchronous anchor
-            // pass makes the caret visibly jump backward before that microtask.
+            // contract by refreshing its local post-edit range in a microtask,
+            // once the synchronous layout prefix has finished. Do not publish
+            // intermediate selection geometry during that prefix.
             // Remote/direct mutations do not schedule this local range update
             // and therefore still need the render controller refresh.
             const hasPendingLocalSelectionUpdate = doesMutationScheduleLocalSelectionUpdate(
                 params,
                 isRemoteMutation
             );
+
+            if (invalidation != null && isLayoutMetadataOnlyMutation(params.actions, params.segmentId)) {
+                const manager = this._renderManagerService.getRenderUnitById(unitId)?.with(DocSkeletonManagerService);
+                const skeleton = manager?.getSkeleton();
+                const pages = skeleton?.getSkeletonData()?.pages;
+                const affectedOffsets = [invalidation.oldStart, Math.max(invalidation.oldStart, invalidation.oldEnd - 1)];
+                const affectedPagesAreMaterialized = skeleton != null && pages != null && affectedOffsets.every((offset) => {
+                    const pageIndex = skeleton.findNodePositionByCharIndex(offset)?.page ?? -1;
+                    const page = pages[pageIndex];
+                    return page != null && !page.isLayoutPlaceholder && !page.isMaterializationPlaceholder;
+                });
+                if (
+                    manager?.supportsIncrementalLayout() &&
+                    this._context.unit.documentStyle.documentFlavor === DocumentFlavor.TRADITIONAL &&
+                    !this._context.unit.getSnapshot().disabled &&
+                    skeleton?.hasCompleteLayout() &&
+                    skeleton.getLayoutProgress() == null &&
+                    pages != null && pages.length > 0 &&
+                    pages.every((page) => !page.isLayoutPlaceholder) &&
+                    affectedPagesAreMaterialized
+                ) {
+                    // Initial pagination may have completed entirely on Main, before
+                    // a Worker mount exists. Reuse that complete baseline for range
+                    // metadata instead of computing the first Worker layout from zero.
+                    // The Worker needs no handoff because the mutation preserves
+                    // character offsets and layout geometry.
+                    this._scheduleLayout(unitId, skeleton, {
+                        reason: 'edit',
+                        anchor,
+                        priorityAnchor,
+                        invalidation,
+                        reuseMainBaseline: true,
+                        allowMetadataOnlyStructuralTailReuse: true,
+                    }, !hasPendingLocalSelectionUpdate, isRemoteMutation);
+                    return;
+                }
+            }
 
             this.reRender(
                 unitId,

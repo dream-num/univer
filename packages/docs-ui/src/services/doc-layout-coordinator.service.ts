@@ -188,7 +188,7 @@ export class DocLayoutCoordinatorService extends Disposable {
     ): number {
         this.cancel();
 
-        const generation = skeleton.startIncrementalLayout(options);
+        const generation = skeleton.startIncrementalLayout({ ...options, waitForHyphenationPatterns: true });
         const backgroundResumeDelayMs = getBackgroundResumeDelay(options.reason);
         this._scheduledLayout = {
             executor: 'main-thread',
@@ -562,12 +562,17 @@ export class DocLayoutCoordinatorService extends Disposable {
             return;
         }
 
-        this._runMainThreadSlice(
-            scheduledLayout,
-            budgetMs,
-            publishOneBacklogPage,
-            scheduleContinuation
-        );
+        try {
+            this._runMainThreadSlice(
+                scheduledLayout,
+                budgetMs,
+                publishOneBacklogPage,
+                scheduleContinuation
+            );
+        } catch (error) {
+            this.cancel();
+            throw error;
+        }
     }
 
     private _runMainThreadSlice(

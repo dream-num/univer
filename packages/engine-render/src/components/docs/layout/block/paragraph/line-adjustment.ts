@@ -15,12 +15,12 @@
  */
 
 import type { IParagraphStyle } from '@univerjs/core';
-import type { ISectionBreakConfig } from '../../../../../basics';
 import type {
     IDocumentSkeletonDivide,
     IDocumentSkeletonLine,
     IDocumentSkeletonPage,
 } from '../../../../../basics/i-document-skeleton-cached';
+import type { ISectionBreakConfig } from '../../../../../basics/interfaces';
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../../view-model/document-view-model';
 import { HorizontalAlign, WrapStrategy } from '@univerjs/core';
@@ -32,7 +32,7 @@ import {
 import { BreakPointType } from '../../line-breaker/break';
 import { isLetter } from '../../line-breaker/enhancers/utils';
 import { createHyphenDashGlyph, glyphShrinkLeft, glyphShrinkRight, setGlyphGroupLeft } from '../../model/glyph';
-import { getFontConfigFromLastGlyph, getGlyphGroupWidth, lineIterator } from '../../tools';
+import { getFontConfigFromLastGlyph, getGlyphGroupWidth } from '../../tools';
 
 // How much a character should hang into the end margin.
 // For more discussion, see:
@@ -362,21 +362,33 @@ export function lineAdjustment(
     const { endIndex } = paragraphNode;
     const paragraph = viewModel.getParagraph(endIndex) || { startIndex: 0, paragraphId: 'para_render_fallback' };
 
-    lineIterator(pages, (line) => {
-        // Only need to adjust the current paragraph.
-        if (line.paragraphIndex !== paragraph.startIndex) {
-            return;
+    const { paragraphStyle = {} } = paragraph;
+    const { horizontalAlign = HorizontalAlign.UNSPECIFIED } = paragraphStyle;
+    for (const page of pages) {
+        for (const section of page.sections) {
+            for (const column of section.columns) {
+                const { lines } = column;
+                // Line breaking appends logical paragraph order; pagination moves
+                // ordered suffixes. A long cell must not rescan its growing prefix
+                // for every paragraph's punctuation and alignment pass.
+                let low = 0;
+                let high = lines.length;
+                while (low < high) {
+                    const middle = Math.floor((low + high) / 2);
+                    if (lines[middle].paragraphIndex < paragraph.startIndex) {
+                        low = middle + 1;
+                    } else {
+                        high = middle;
+                    }
+                }
+                for (let index = low; index < lines.length && lines[index].paragraphIndex === paragraph.startIndex; index++) {
+                    const line = lines[index];
+                    shrinkStartAndEndCJKPunctuation(line);
+                    restoreLastCJKGlyphWidth(line);
+                    addHyphenDash(line, viewModel, paragraphNode, sectionBreakConfig, paragraphStyle);
+                    horizontalAlignHandler(line, horizontalAlign, shouldAllowOverflowHorizontalOffset(sectionBreakConfig));
+                }
+            }
         }
-
-        const { paragraphStyle = {} } = paragraph;
-        const { horizontalAlign = HorizontalAlign.UNSPECIFIED } = paragraphStyle;
-        // If the last glyph is a CJK punctuation, we want to shrink it.
-        shrinkStartAndEndCJKPunctuation(line);
-        // restore the original glyph width.
-        restoreLastCJKGlyphWidth(line);
-        // Add dash to the end of divide when divide is break by Hyphen.
-        addHyphenDash(line, viewModel, paragraphNode, sectionBreakConfig, paragraphStyle);
-        // Handle horizontal align: left\center\right\justified\distributed.
-        horizontalAlignHandler(line, horizontalAlign, shouldAllowOverflowHorizontalOffset(sectionBreakConfig));
-    });
+    }
 }

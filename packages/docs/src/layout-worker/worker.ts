@@ -189,6 +189,7 @@ export class DocsLayoutWorkerRuntime implements IDocsLayoutWorkerRuntime {
             mount.viewportEpoch = request.viewportEpoch;
         }
         const generation = mount.layoutSession.start({
+            waitForHyphenationPatterns: true,
             reason: request.reason,
             anchor: request.anchor,
             priorityAnchor: request.priorityAnchor,

@@ -14,9 +14,16 @@
  * limitations under the License.
  */
 
-import { EventSubject } from '@univerjs/core';
-import { Subject } from 'rxjs';
+import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
+import type { RenderUnit } from '@univerjs/engine-render';
+import { DocumentFlavor, IUniverInstanceService, Univer, UniverInstanceType } from '@univerjs/core';
+import { DocLayoutExecutorService, DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
+import { CanvasColorService, DocBackground, Documents, ICanvasColorService, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
+import { DesktopSidebarService, ISidebarService } from '@univerjs/ui';
 import { describe, expect, it, vi } from 'vitest';
+import { DOCS_VIEW_KEY } from '../../../basics/docs-view-key';
+import { DocPageLayoutService } from '../../../services/doc-page-layout.service';
+import { DocViewScaleService } from '../../../services/doc-view-scale';
 import { DocResizeRenderController, hasRenderableDocSkeleton } from '../doc-resize.render-controller';
 
 describe('hasRenderableDocSkeleton', () => {
@@ -34,35 +41,68 @@ describe('hasRenderableDocSkeleton', () => {
 });
 
 describe('DocResizeRenderController', () => {
-    it('refreshes page layout and text selection after sidebar layout changes', async () => {
-        const calculatePagePosition = vi.fn();
-        const refreshRanges = vi.fn();
-        const refreshSelection = vi.fn();
-        const sidebarOptions$ = new Subject();
-        const controller = new DocResizeRenderController(
-            {
-                unitId: 'doc-1',
-                engine: {
-                    onTransformChange$: new EventSubject(),
+    it('refreshes the host logical selection even while a comment editor owns the current selection', async () => {
+        vi.useFakeTimers();
+        const context = new Proxy({
+            font: '',
+            measureText: (text: string) => ({ width: text.length * 8, actualBoundingBoxAscent: 8, actualBoundingBoxDescent: 2 }),
+        }, { get: (target, key) => key in target ? Reflect.get(target, key) : () => {} });
+        vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(context as never);
+        const univer = new Univer();
+        try {
+            const injector = univer.__getInjector();
+            injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+            injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
+            injector.add([ISidebarService, { useClass: DesktopSidebarService }]);
+            injector.add([DocLayoutExecutorService]);
+            injector.add([DocSelectionManagerService]);
+            const unitId = 'resize-host';
+            univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, {
+                id: unitId,
+                body: {
+                    dataStream: 'Host text\r\n',
+                    paragraphs: [{ startIndex: 9, paragraphId: 'host-paragraph' }],
+                    sectionBreaks: [{ startIndex: 10, sectionId: 'host-section' }],
                 },
-                mainComponent: {
-                    getSkeleton: () => ({ getSkeletonData: () => ({ pages: [{}] }) }),
-                },
-            } as never,
-            { calculatePagePosition } as never,
-            { refreshSelection } as never,
-            { refreshRanges } as never,
-            { sidebarOptions$ } as never
-        );
+                documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL, pageSize: { width: 300, height: 400 } },
+            });
+            injector.get(IUniverInstanceService).setCurrentUnitForType(unitId);
+            const render = injector.get(IRenderManagerService).createRender(unitId) as RenderUnit;
+            render.deactivate();
+            render.engine.resizeBySize(800, 600);
+            render.addRenderDependencies([[DocSkeletonManagerService], [DocViewScaleService], [DocPageLayoutService]]);
+            const skeleton = render.with(DocSkeletonManagerService).getSkeleton();
+            const documents = new Documents('host-doc', skeleton);
+            documents.resize(300, 400);
+            render.mainComponent = documents;
+            render.scene.addObject(documents);
+            render.components.set(DOCS_VIEW_KEY.BACKGROUND, new DocBackground('host-background', skeleton));
+            const selections = injector.get(DocSelectionManagerService);
+            selections.__TEST_ONLY_setCurrentSelection({ unitId, subUnitId: unitId });
+            selections.__TEST_ONLY_add([{ startOffset: 1, endOffset: 4, collapsed: false }]);
+            selections.__TEST_ONLY_setCurrentSelection({ unitId: 'comment-editor', subUnitId: 'comment-editor' });
+            const refreshes: Array<{ unitId: string; offsets: number[] }> = [];
+            const subscription = selections.refreshSelection$.subscribe((event) => {
+                if (event) {
+                    refreshes.push({ unitId: event.unitId, offsets: event.docRanges.map((range) => range.startOffset) });
+                }
+            });
+            render.addRenderDependencies([[DocResizeRenderController]]);
+            render.with(DocResizeRenderController);
+            await vi.advanceTimersByTimeAsync(20);
+            refreshes.length = 0;
+            injector.get(ISidebarService).open({ children: { label: 'comment-panel' }, width: 320 });
+            await vi.advanceTimersByTimeAsync(20);
 
-        sidebarOptions$.next({ visible: true });
-        expect(calculatePagePosition).not.toHaveBeenCalled();
-
-        await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
-
-        expect(calculatePagePosition).toHaveBeenCalledOnce();
-        expect(refreshRanges).toHaveBeenCalledOnce();
-        expect(refreshSelection).toHaveBeenCalledOnce();
-        controller.dispose();
+            expect(refreshes).toContainEqual({ unitId, offsets: [1] });
+            expect(refreshes.every((event) => event.unitId === unitId)).toBe(true);
+            expect(selections.__getCurrentSelection()?.unitId).toBe('comment-editor');
+            expect(documents.left).toBeGreaterThan(0);
+            subscription.unsubscribe();
+        } finally {
+            univer.dispose();
+            vi.restoreAllMocks();
+            vi.useRealTimers();
+        }
     });
 });

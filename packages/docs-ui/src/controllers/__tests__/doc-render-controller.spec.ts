@@ -18,7 +18,7 @@
 
 import type { ICommandInfo, IExecutionOptions } from '@univerjs/core';
 import type { IDocLayoutMountIdentity } from '@univerjs/docs';
-import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DocumentFlavor, JSONX, PositionedObjectLayoutType } from '@univerjs/core';
+import { CustomDecorationType, CustomRangeType, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DocumentFlavor, JSONX, PositionedObjectLayoutType } from '@univerjs/core';
 import { DocLayoutSessionStatus, RichTextEditingMutation } from '@univerjs/docs';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
@@ -239,6 +239,7 @@ function createControllerFixture(options?: {
             publicationApplied = true;
             return { didReplaceProtectedPages: options?.workerReplacesProtectedPages ?? false };
         }),
+        getLayoutProgress: vi.fn(() => null),
         hasCompleteLayout: vi.fn(() => options?.hasCompleteLayout ?? true),
         findNodePositionByCharIndex: vi.fn(() => ({
             page: publicationApplied
@@ -299,6 +300,9 @@ function createControllerFixture(options?: {
     const context = {
         unitId,
         unit: {
+            documentStyle: {
+                documentFlavor: options?.documentFlavor ?? DocumentFlavor.TRADITIONAL,
+            },
             getUnitId: vi.fn(() => unitId),
             getSnapshot: vi.fn(() => ({
                 documentStyle: {
@@ -1653,11 +1657,13 @@ describe('doc render controller', () => {
         expect(skeletonManager.getSkeleton().startIncrementalLayout).toHaveBeenCalledWith({
             reason: 'edit',
             anchor: 1_792,
+            priorityAnchor: undefined,
             invalidation: {
                 oldStart: 1_792,
                 oldEnd: 1_792,
                 newEnd: 1_793,
             },
+            waitForHyphenationPatterns: true,
         });
         await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
         expect(viewport.scrollByViewportDeltaVal).not.toHaveBeenCalled();
@@ -1665,6 +1671,176 @@ describe('doc render controller', () => {
         // page coordinates are not stable until the background pass reaches a page
         // boundary. Never back-scroll with those transient coordinates.
         expect(backScrollController.scrollToRange).not.toHaveBeenCalled();
+    });
+
+    it('marks layout-metadata-only mutations as safe for structural tail reuse', () => {
+        const { commandCallbacks, controller, skeletonManager } = createControllerFixture({
+            pages: [
+                {
+                    marginTop: 0,
+                    pageWidth: 640,
+                    pageHeight: 900,
+                    sections: [],
+                    skeDrawings: new Map(),
+                    skeTables: new Map(),
+                },
+                {
+                    isMaterializationPlaceholder: true,
+                    marginTop: 0,
+                    pageWidth: 640,
+                    pageHeight: 900,
+                    sections: [],
+                    skeDrawings: new Map(),
+                    skeTables: new Map(),
+                },
+            ],
+        });
+
+        commandCallbacks[0]({
+            id: RichTextEditingMutation.id,
+            params: {
+                unitId: 'doc-unit',
+                textRanges: [{ startOffset: 104, endOffset: 104, collapsed: true, isActive: true }],
+                actions: ['body', {
+                    et: 'text-x',
+                    e: [
+                        { t: 'r', len: 100 },
+                        {
+                            t: 'r',
+                            len: 4,
+                            body: {
+                                dataStream: '',
+                                customRanges: [{
+                                    startIndex: 0,
+                                    endIndex: 3,
+                                    rangeId: 'link',
+                                    rangeType: CustomRangeType.HYPERLINK,
+                                }],
+                            },
+                            oldBody: {
+                                dataStream: '',
+                                textRuns: [{ st: 0, ed: 4, ts: { ff: 'Arial', fs: 12 } }],
+                                sectionBreaks: [],
+                                customDecorations: [{ id: 'comment', type: 0, startIndex: 0, endIndex: 3 }],
+                                customRanges: [],
+                            },
+                            coverType: 1,
+                        },
+                    ],
+                }],
+                segmentId: '',
+                trigger: 'docs.command.add-hyper-link',
+            },
+        } satisfies ICommandInfo);
+
+        expect(skeletonManager.getSkeleton().startIncrementalLayout).toHaveBeenCalledWith(expect.objectContaining({
+            reason: 'edit',
+            anchor: 100,
+            priorityAnchor: 104,
+            invalidation: { oldStart: 100, oldEnd: 104, newEnd: 104 },
+            allowMetadataOnlyStructuralTailReuse: true,
+        }));
+        expect((controller as unknown as { _pendingWorkerEditBatch: unknown })._pendingWorkerEditBatch).toBeNull();
+
+        skeletonManager.getSkeleton().startIncrementalLayout.mockClear();
+        const undoCommand = {
+            id: RichTextEditingMutation.id,
+            params: {
+                unitId: 'doc-unit',
+                textRanges: [{ startOffset: 104, endOffset: 104, collapsed: true, isActive: true }],
+                actions: ['body', {
+                    et: 'text-x',
+                    e: [
+                        { t: 'r', len: 100 },
+                        {
+                            t: 'r',
+                            len: 4,
+                            body: {
+                                dataStream: '',
+                                textRuns: [{ st: 0, ed: 4, ts: { ff: 'Arial', fs: 12 } }],
+                                sectionBreaks: [],
+                                customDecorations: [{ id: 'comment', type: 0, startIndex: 0, endIndex: 3 }],
+                                customRanges: [],
+                            },
+                            oldBody: {
+                                dataStream: '',
+                                textRuns: [{ st: 0, ed: 4, ts: { ff: 'Arial', fs: 12 } }],
+                                sectionBreaks: [],
+                                customDecorations: [{ id: 'comment', type: 0, startIndex: 0, endIndex: 3 }],
+                                customRanges: [{
+                                    startIndex: 0,
+                                    endIndex: 3,
+                                    rangeId: 'link',
+                                    rangeType: CustomRangeType.HYPERLINK,
+                                }],
+                            },
+                            coverType: 1,
+                        },
+                    ],
+                }],
+                segmentId: '',
+                trigger: 'univer.command.undo',
+            },
+        } satisfies ICommandInfo;
+        commandCallbacks[0](undoCommand);
+
+        expect(skeletonManager.getSkeleton().startIncrementalLayout).toHaveBeenCalledWith(expect.objectContaining({
+            allowMetadataOnlyStructuralTailReuse: true,
+        }));
+        expect((controller as unknown as { _pendingWorkerEditBatch: unknown })._pendingWorkerEditBatch).toBeNull();
+
+        skeletonManager.getSkeleton().startIncrementalLayout.mockClear();
+        const formattingCommand = structuredClone(undoCommand);
+        const formattingAction = (formattingCommand.params.actions[1] as {
+            e: Array<{ oldBody?: { textRuns?: Array<{ ts: { fs?: number } }> } }>;
+        }).e[1];
+        formattingAction.oldBody!.textRuns![0].ts.fs = 14;
+        commandCallbacks[0](formattingCommand);
+        expect(skeletonManager.getSkeleton().startIncrementalLayout).not.toHaveBeenCalledWith(expect.objectContaining({
+            allowMetadataOnlyStructuralTailReuse: true,
+        }));
+
+        skeletonManager.getSkeleton().startIncrementalLayout.mockClear();
+        commandCallbacks[0]({
+            id: RichTextEditingMutation.id,
+            params: {
+                unitId: 'doc-unit',
+                textRanges: null,
+                actions: ['body', {
+                    et: 'text-x',
+                    e: [
+                        { t: 'r', len: 100 },
+                        {
+                            t: 'r',
+                            len: 4,
+                            body: {
+                                dataStream: '',
+                                customDecorations: [{
+                                    id: 'comment',
+                                    type: CustomDecorationType.COMMENT,
+                                    startIndex: 0,
+                                    endIndex: 3,
+                                }],
+                            },
+                            oldBody: {
+                                dataStream: '',
+                                textRuns: [{ st: 0, ed: 4, ts: { ff: 'Arial', fs: 12 } }],
+                                sectionBreaks: [],
+                                customDecorations: [],
+                                customRanges: [],
+                            },
+                        },
+                    ],
+                }],
+                noNeedSetTextRange: true,
+                trigger: 'docs.command.add-comment',
+            },
+        } satisfies ICommandInfo);
+        expect(skeletonManager.getSkeleton().startIncrementalLayout).toHaveBeenCalledWith(expect.objectContaining({
+            allowMetadataOnlyStructuralTailReuse: true,
+        }));
+
+        controller.dispose();
     });
 
     it('uses the pretransformed local caret when a remote edit still carries sender ranges', () => {
@@ -1707,6 +1883,7 @@ describe('doc render controller', () => {
             },
             preserveInteractionWindow: true,
             reuseUnaffectedTail: false,
+            waitForHyphenationPatterns: true,
         });
 
         controller.dispose();
@@ -1752,6 +1929,7 @@ describe('doc render controller', () => {
             },
             preserveInteractionWindow: false,
             reuseUnaffectedTail: false,
+            waitForHyphenationPatterns: true,
         });
 
         controller.dispose();

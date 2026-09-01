@@ -14,19 +14,23 @@
  * limitations under the License.
  */
 
-/* eslint-disable ts/no-explicit-any */
-
 import type { DocumentDataModel, ICommandInfo, IDrawingSearch, JSONXActions, Nullable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import type { IDocDrawing, IUpdateDocDrawingWrappingStyleParams, IUpdateDrawingDocTransformCommandParams } from '@univerjs/docs-drawing';
+import type {
+    IDocDrawing,
+    IUpdateDocDrawingWrappingStyleParams,
+    IUpdateDrawingDocTransformCommandParams,
+} from '@univerjs/docs-drawing';
 import type { IDrawingJsonUndo1, IDrawingMapItemData, IDrawingOrderMapParam } from '@univerjs/drawing';
 import type { IDrawingAnchorInPage } from '../utils/drawing-anchor-position';
 import {
+    BooleanNumber,
     Disposable,
     ICommandService,
     Inject,
     IUniverInstanceService,
     JSONX,
+    PositionedObjectLayoutType,
     RedoCommand,
     UndoCommand,
     UniverInstanceType,
@@ -446,12 +450,36 @@ export class DocDrawingAddRemoveController extends Disposable {
 
         const { drawings = {}, drawingsOrder = [] } = documentDataModel.getSnapshot();
         const drawingData = drawings as IDrawingMapItemData<IDocDrawing>;
-        const renderOrder = getDocDrawingRenderOrder(drawingsOrder, drawings);
+        const previousDrawings = this._docDrawingService.getDrawingData(unitId, unitId);
+        const orderChanged = drawingsOrder !== this._docDrawingService.getDrawingOrder(unitId, unitId) ||
+            drawingIds.some((drawingId) => {
+                const previous = previousDrawings[drawingId];
+                const current = drawingData[drawingId];
+                const wasBehind = previous?.layoutType === PositionedObjectLayoutType.WRAP_NONE &&
+                    previous.behindDoc === BooleanNumber.TRUE;
+                const isBehind = current?.layoutType === PositionedObjectLayoutType.WRAP_NONE &&
+                    current.behindDoc === BooleanNumber.TRUE;
+                return wasBehind !== isBehind;
+            });
+
+        const renderedDrawings = { ...this._drawingManagerService.getDrawingData(unitId, unitId) };
+        for (const drawingId of drawingIds) {
+            const current = drawingData[drawingId];
+            if (current) {
+                // Layout mutates render transforms. Never share the persisted drawing object or
+                // replace unrelated drawings whose published positions are still authoritative.
+                renderedDrawings[drawingId] = { ...current };
+            } else {
+                delete renderedDrawings[drawingId];
+            }
+        }
 
         this._docDrawingService.setDrawingData(unitId, unitId, drawingData);
-        this._drawingManagerService.setDrawingData(unitId, unitId, drawingData);
-        this._docDrawingService.setDrawingOrder(unitId, unitId, drawingsOrder);
-        this._drawingManagerService.setDrawingOrder(unitId, unitId, renderOrder);
+        this._drawingManagerService.setDrawingData(unitId, unitId, renderedDrawings);
+        if (orderChanged) {
+            this._docDrawingService.setDrawingOrder(unitId, unitId, drawingsOrder);
+            this._drawingManagerService.setDrawingOrder(unitId, unitId, getDocDrawingRenderOrder(drawingsOrder, drawings));
+        }
 
         const objects = drawingIds
             .filter((drawingId) => drawingData[drawingId] != null)

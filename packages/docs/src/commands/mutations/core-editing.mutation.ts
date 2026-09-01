@@ -14,7 +14,15 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IExecutionOptions, IMutation, IMutationCommonParams, JSONXActions, Nullable, TPriority } from '@univerjs/core';
+import type {
+    DocumentDataModel,
+    IExecutionOptions,
+    IMutation,
+    IMutationCommonParams,
+    JSONXActions,
+    Nullable,
+    TPriority,
+} from '@univerjs/core';
 import type { DocumentViewModel, ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IDocStateChangeInfo } from '../../services/doc-state-emit.service';
 import {
@@ -162,23 +170,17 @@ function scheduleDocumentSelectionUpdate(
     if (noNeedSetTextRange || textRanges == null || textRanges.length === 0 || trigger == null || isSync) {
         return;
     }
-    queueMicrotask(() => {
-        const selectionTarget = { unitId, subUnitId: unitId };
-        const currentSelection = selectionManager.getSelectionInfo(selectionTarget);
-        if (currentSelection == null) {
-            selectionManager.replaceDocRanges(textRanges, selectionTarget, isEditing, params.options);
-            return;
-        }
-
+    const selectionTarget = { unitId, subUnitId: unitId };
+    const currentSelection = selectionManager.getSelectionInfo(selectionTarget);
+    if (currentSelection != null) {
         const logicalTextRanges = textRanges.map((textRange, index) => ({
             ...textRange,
             collapsed: textRange.startOffset === textRange.endOffset,
             isActive: index === textRanges.length - 1,
         }));
 
-        // The logical range advances with the mutation even if its new physical
-        // page has not been published yet. Keeping that intent in the model lets
-        // the render layer retry the same caret after foreground pagination.
+        // Advance logical intent with the mutation. Only its visual refresh is
+        // deferred; a later input or pointer selection must supersede this one.
         selectionManager.replaceSelectionInfoWithoutRefresh({
             ...currentSelection,
             textRanges: logicalTextRanges,
@@ -186,7 +188,17 @@ function scheduleDocumentSelectionUpdate(
             isEditing,
             options: params.options,
         }, selectionTarget);
-        selectionManager.refreshSelection(selectionTarget, isEditing);
+    }
+    const updatedSelection = selectionManager.getSelectionInfo(selectionTarget);
+    queueMicrotask(() => {
+        if (selectionManager.getSelectionInfo(selectionTarget) !== updatedSelection) {
+            return;
+        }
+        if (updatedSelection == null) {
+            selectionManager.replaceDocRanges(textRanges, selectionTarget, isEditing, params.options);
+        } else {
+            selectionManager.refreshSelection(selectionTarget, isEditing);
+        }
     });
 }
 

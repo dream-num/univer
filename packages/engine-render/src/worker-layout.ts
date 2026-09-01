@@ -33,6 +33,7 @@ export interface IDocumentLayoutSessionStartOptions {
     anchor?: number;
     priorityAnchor?: number;
     invalidation?: IDocumentLayoutInvalidation;
+    waitForHyphenationPatterns?: boolean;
 }
 
 export interface IDocumentLayoutStepResult {

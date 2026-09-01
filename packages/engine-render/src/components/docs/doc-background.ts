@@ -332,12 +332,17 @@ export class DocBackground extends DocComponent {
         ctx.save();
         ctx.fillStyle = gradient;
         const lineStep = SKELETON_LINE_HEIGHT + SKELETON_LINE_GAP;
-        const lineCount = Math.min(12, Math.ceil(height / lineStep));
-        for (let index = 0; index < lineCount; index++) {
+        const lineCount = Math.ceil(height / lineStep);
+        // Keep the page-local row grid, but paint only rows intersecting the
+        // cache/viewport. A fixed first-twelve-row cap leaves scrolled pages blank.
+        const firstLine = visibleBound == null
+            ? 0
+            : Math.max(0, Math.ceil((visibleBound.top - top - SKELETON_LINE_HEIGHT) / lineStep));
+        const endLine = visibleBound == null
+            ? Math.min(12, lineCount)
+            : Math.min(lineCount, Math.floor((visibleBound.bottom - top) / lineStep) + 1);
+        for (let index = firstLine; index < endLine; index++) {
             const y = top + index * lineStep;
-            if (visibleBound != null && (y + SKELETON_LINE_HEIGHT < visibleBound.top || y > visibleBound.bottom)) {
-                continue;
-            }
             const lineWidth = index % 4 === 3 ? width * 0.62 : width * (0.82 + (index % 3) * 0.07);
             ctx.beginPath();
             ctx.roundRect(left, y, lineWidth, SKELETON_LINE_HEIGHT, SKELETON_LINE_HEIGHT / 2);

@@ -14,73 +14,144 @@
  * limitations under the License.
  */
 
-import type { IDisposable } from '@univerjs/core';
+import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
 import type { ISetTextSelectionsOperationParams } from '@univerjs/docs';
-import { CustomRangeType } from '@univerjs/core';
-import { SetTextSelectionsOperation } from '@univerjs/docs';
-import { describe, expect, it, vi } from 'vitest';
+import type { RenderUnit } from '@univerjs/engine-render';
+import { BooleanNumber, CustomRangeType, DocumentFlavor, ICommandService, Univer, UniverInstanceType } from '@univerjs/core';
+import { DocLayoutExecutorService, DocSelectionManagerService, DocSkeletonManagerService, SetTextSelectionsOperation } from '@univerjs/docs';
+import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
+import { CanvasColorService, Documents, ICanvasColorService, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
+import { CanvasPopupService, ICanvasPopupService } from '@univerjs/ui';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.service';
 import { DocHyperLinkSelectionController } from '../doc-hyper-link-selection.controller';
 
-describe('DocHyperLinkSelectionController', () => {
-    it('shows hyperlink details when the caret is at the first character', () => {
-        let commandListener: ((commandInfo: { id: string; params: unknown }) => void) | undefined;
-        const commandService = {
-            onCommandExecuted: vi.fn((listener) => {
-                commandListener = listener;
-                return { dispose: vi.fn() } as IDisposable;
+describe.each([1, 3])('DocHyperLinkSelectionController with a %i-character link', (length) => {
+    let univer: Univer;
+    let commands: ICommandService;
+    let popup: DocHyperLinkPopupService;
+    const startIndex = 1;
+    const endIndex = startIndex + length - 1;
+
+    beforeEach(() => {
+        // Only Canvas is a platform stub; commands, selection, document data
+        // and popup lifecycle use their real services.
+        const context = new Proxy({
+            font: '',
+            webkitBackingStorePixelRatio: 1,
+            measureText: (text: string) => ({
+                width: text.length * 8,
+                actualBoundingBoxAscent: 8,
+                actualBoundingBoxDescent: 2,
+                fontBoundingBoxAscent: 8,
+                fontBoundingBoxDescent: 2,
             }),
-        };
-        const doc = {
-            getSelfOrHeaderFooterModel: vi.fn(() => ({
-                getBody: () => ({
-                    customRanges: [{
-                        rangeId: 'link-1',
-                        rangeType: CustomRangeType.HYPERLINK,
-                        startIndex: 5,
-                        endIndex: 10,
-                    }],
-                }),
-            })),
-        };
-        const univerInstanceService = {
-            getUnit: vi.fn(() => doc),
-        };
-        const popupService = {
-            showInfoPopup: vi.fn(),
-            hideInfoPopup: vi.fn(),
-            hideEditPopup: vi.fn(),
-        };
-        const controller = new DocHyperLinkSelectionController(
-            commandService as never,
-            univerInstanceService as never,
-            popupService as never
-        );
+        }, { get: (target, key) => key in target ? Reflect.get(target, key) : () => {} });
+        vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(context as never);
+        univer = new Univer();
+        const injector = univer.__getInjector();
+        injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+        injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
+        injector.add([ICanvasPopupService, { useClass: CanvasPopupService }]);
+        injector.add([DocLayoutExecutorService]);
+        injector.add([DocSelectionManagerService]);
+        injector.add([DocCanvasPopManagerService]);
+        injector.add([DocHyperLinkPopupService]);
+        injector.add([DocHyperLinkSelectionController]);
+        const model = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, {
+            id: 'doc-unit',
+            body: {
+                dataStream: 'A目CDZ\r\n',
+                paragraphs: [{ startIndex: 5, paragraphId: 'paragraph-1' }],
+                sectionBreaks: [{ startIndex: 6, sectionId: 'body' }],
+                customRanges: [
+                    { rangeId: 'link-1', rangeType: CustomRangeType.HYPERLINK, startIndex, endIndex },
+                    { rangeId: 'link-2', rangeType: CustomRangeType.HYPERLINK, startIndex: endIndex + 1, endIndex: endIndex + 1 },
+                ],
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                autoHyphenation: BooleanNumber.FALSE,
+                pageSize: { width: 300, height: 400 },
+                marginTop: 20,
+                marginBottom: 20,
+                marginLeft: 20,
+                marginRight: 20,
+            },
+        });
+        const render = injector.get(IRenderManagerService).createRender(model.getUnitId()) as RenderUnit;
+        render.deactivate();
+        render.engine.resizeBySize(300, 400);
+        vi.spyOn(render.engine.getCanvasElement()!, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 300, 400));
+        render.addRenderDependencies([[DocSkeletonManagerService]]);
+        const documents = new Documents('link-selection-document', render.with(DocSkeletonManagerService).getSkeleton());
+        render.mainComponent = documents;
+        render.scene.addObject(documents);
+        commands = injector.get(ICommandService);
+        commands.registerCommand(SetTextSelectionsOperation);
+        popup = injector.get(DocHyperLinkPopupService);
+        injector.get(DocHyperLinkSelectionController);
+    });
+
+    afterEach(() => {
+        univer.dispose();
+        vi.restoreAllMocks();
+    });
+
+    async function select(startOffset: number, endOffset = startOffset): Promise<void> {
         const params: ISetTextSelectionsOperationParams = {
             unitId: 'doc-unit',
             subUnitId: 'doc-unit',
             segmentId: '',
             isEditing: false,
-            style: {
-                fill: 'rgba(0, 0, 0, 0)',
-                stroke: 'rgba(0, 0, 0, 0)',
-                strokeActive: 'rgba(0, 0, 0, 0)',
-                strokeWidth: 0,
-            },
-            ranges: [{ startOffset: 5, endOffset: 5, collapsed: true }],
+            style: { fill: '', stroke: '', strokeActive: '', strokeWidth: 0 },
+            ranges: [{ startOffset, endOffset, collapsed: startOffset === endOffset, segmentPage: 0 }],
         };
+        expect(await commands.executeCommand(SetTextSelectionsOperation.id, params)).toBe(true);
+    }
 
-        commandListener?.({ id: SetTextSelectionsOperation.id, params });
+    it.each(['first', 'last', 'trailing'] as const)('keeps details visible at the %s caret boundary', async (boundary) => {
+        const offsets = { first: startIndex, last: endIndex, trailing: endIndex + 1 };
+        const info = { unitId: 'doc-unit', linkId: 'link-1', segmentId: '', segmentPage: 0, startIndex, endIndex };
+        // Pointer events open details before the asynchronous selection operation
+        // completes. Repeated clicks must not close that same popup.
+        for (let attempt = 0; attempt < 3; attempt++) {
+            popup.showInfoPopup(info);
+            await select(offsets[boundary]);
+            expect(popup.showing).toEqual(info);
+        }
+    });
 
-        expect(popupService.showInfoPopup).toHaveBeenCalledWith({
+    it.each(['before', 'after'] as const)('closes details for a caret %s the link', async (boundary) => {
+        await select(startIndex);
+        expect(popup.showing?.linkId).toBe('link-1');
+        await select(boundary === 'before' ? startIndex - 1 : endIndex + 2);
+        expect(popup.showing).toBeNull();
+    });
+
+    it('keeps the clicked adjacent link instead of switching to the preceding link', async () => {
+        const info = {
             unitId: 'doc-unit',
-            linkId: 'link-1',
+            linkId: 'link-2',
             segmentId: '',
-            segmentPage: undefined,
-            startIndex: 5,
-            endIndex: 10,
-        });
-        expect(popupService.hideInfoPopup).not.toHaveBeenCalled();
+            segmentPage: 0,
+            startIndex: endIndex + 1,
+            endIndex: endIndex + 1,
+        };
+        popup.showInfoPopup(info);
+        await select(endIndex + 1);
+        expect(popup.showing).toEqual(info);
+    });
 
-        controller.dispose();
+    it('resolves a fresh caret at an adjacent link using the character at that offset', async () => {
+        await select(endIndex + 1);
+        expect(popup.showing?.linkId).toBe('link-2');
+    });
+
+    it('closes details for an expanded selection', async () => {
+        await select(startIndex);
+        expect(popup.showing?.linkId).toBe('link-1');
+        await select(startIndex, endIndex + 1);
+        expect(popup.showing).toBeNull();
     });
 });

@@ -28,6 +28,8 @@ const ANCHOR_WIDTH = 1.5;
 
 export class DocBackScrollRenderController extends RxDisposable implements EngineRender.IRenderModule {
     private _pendingSelectionScrollFrame: number | null = null;
+    private _suppressedSelection: Nullable<ITextRangeParam> = null;
+    private _scrollingToRange = false;
 
     constructor(
         private readonly _context: EngineRender.IRenderContext<DocumentDataModel>,
@@ -41,6 +43,20 @@ export class DocBackScrollRenderController extends RxDisposable implements Engin
     }
 
     private _init() {
+        const viewport = this._context.scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+        if (viewport != null) {
+            let scrollX = viewport.viewportScrollX;
+            let scrollY = viewport.viewportScrollY;
+            this.disposeWithMe(viewport.onScrollAfter$.subscribeEvent((event) => {
+                const changed = event.viewportScrollX !== scrollX || event.viewportScrollY !== scrollY;
+                scrollX = event.viewportScrollX;
+                scrollY = event.viewportScrollY;
+                if (changed && !this._scrollingToRange) {
+                    this._suspendSelectionScroll();
+                }
+            }));
+        }
+        this.disposeWithMe(this._context.scene.onPointerDown$.subscribeEvent(() => this._suspendSelectionScroll()));
         this._textSelectionManagerService.textSelection$.pipe(takeUntil(this.dispose$)).subscribe((params) => {
             if (params == null) {
                 return;
@@ -48,7 +64,12 @@ export class DocBackScrollRenderController extends RxDisposable implements Engin
 
             const { isEditing, unitId } = params;
 
-            if (unitId !== this._context.unitId || !isEditing) {
+            if (unitId !== this._context.unitId) {
+                return;
+            }
+
+            if (!isEditing) {
+                this._suspendSelectionScroll();
                 return;
             }
 
@@ -56,16 +77,46 @@ export class DocBackScrollRenderController extends RxDisposable implements Engin
                 return;
             }
 
+            const range = params.textRanges.find((item) => item.isActive);
+            const suppressed = this._suppressedSelection;
+            if (range != null && suppressed != null &&
+                range.startOffset === suppressed.startOffset && range.endOffset === suppressed.endOffset &&
+                (range.segmentId ?? '') === (suppressed.segmentId ?? '') &&
+                (range.segmentPage ?? -1) === (suppressed.segmentPage ?? -1)) {
+                return;
+            }
+            this._suppressedSelection = null;
             this._scheduleScrollToSelection();
         });
     }
 
     override dispose(): void {
+        this._cancelPendingSelectionScroll();
+        this._suppressedSelection = null;
+        super.dispose();
+    }
+
+    private _suspendSelectionScroll(): void {
+        this._cancelPendingSelectionScroll();
+        const range = this._textSelectionManagerService.getActiveTextRange();
+        // A later layout publication can refresh the same logical caret. It must
+        // not reclaim a viewport the user has since scrolled or selected in.
+        this._suppressedSelection = range == null
+            ? null
+            : {
+                startOffset: range.startOffset,
+                endOffset: range.endOffset,
+                collapsed: range.collapsed,
+                segmentId: range.segmentId,
+                segmentPage: range.segmentPage,
+            };
+    }
+
+    private _cancelPendingSelectionScroll(): void {
         if (this._pendingSelectionScrollFrame != null && typeof cancelAnimationFrame !== 'undefined') {
             cancelAnimationFrame(this._pendingSelectionScrollFrame);
         }
         this._pendingSelectionScrollFrame = null;
-        super.dispose();
     }
 
     private _scheduleScrollToSelection(): void {
@@ -83,7 +134,17 @@ export class DocBackScrollRenderController extends RxDisposable implements Engin
         });
     }
 
-    scrollToRange(range: ITextRangeParam) {
+    scrollToRange(range: ITextRangeParam, onResolved?: () => void): void {
+        this._cancelPendingSelectionScroll();
+        this._scrollingToRange = true;
+        try {
+            this._scrollToRange(range, onResolved);
+        } finally {
+            this._scrollingToRange = false;
+        }
+    }
+
+    private _scrollToRange(range: ITextRangeParam, onResolved?: () => void): void {
         const skeleton = this._docSkeletonManagerService.getSkeleton();
         if (!skeleton) {
             return;
@@ -100,7 +161,7 @@ export class DocBackScrollRenderController extends RxDisposable implements Engin
             const page = skeleton.getSkeletonData()?.pages[pageIndex];
             if (page?.isMaterializationPlaceholder) {
                 this._scrollToPage(pageIndex);
-                this._scheduleScrollToMaterializedRange(range);
+                this._scheduleScrollToMaterializedRange(range, 0, onResolved);
             }
             return;
         }
@@ -117,9 +178,10 @@ export class DocBackScrollRenderController extends RxDisposable implements Engin
         }
 
         this.scrollToNode(anchorNodePosition);
+        onResolved?.();
     }
 
-    private _scheduleScrollToMaterializedRange(range: ITextRangeParam, attempt = 0): void {
+    private _scheduleScrollToMaterializedRange(range: ITextRangeParam, attempt = 0, onResolved?: () => void): void {
         if (typeof requestAnimationFrame === 'undefined' || attempt >= 120) {
             return;
         }
@@ -131,10 +193,10 @@ export class DocBackScrollRenderController extends RxDisposable implements Engin
             const skeleton = this._docSkeletonManagerService.getSkeleton();
             const pageIndex = skeleton.findBodyPageIndexByCharIndex(range.startOffset);
             if (skeleton.getSkeletonData()?.pages[pageIndex]?.isMaterializationPlaceholder) {
-                this._scheduleScrollToMaterializedRange(range, attempt + 1);
+                this._scheduleScrollToMaterializedRange(range, attempt + 1, onResolved);
                 return;
             }
-            this.scrollToRange(range);
+            this.scrollToRange(range, onResolved);
         });
     }
 

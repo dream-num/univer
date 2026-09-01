@@ -18,12 +18,22 @@
 
 import type { IDisposable, IDocumentData } from '@univerjs/core';
 import type { Mock } from 'vitest';
-import { DataStreamTreeTokenType, DOC_RANGE_TYPE, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, Univer, UniverInstanceType } from '@univerjs/core';
-import { DocSkeletonManagerService } from '@univerjs/docs';
+import {
+    DataStreamTreeTokenType,
+    DOC_RANGE_TYPE,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    Univer,
+    UniverInstanceType,
+} from '@univerjs/core';
+import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import { GlyphType, RenderUnit } from '@univerjs/engine-render';
 import { ILayoutService } from '@univerjs/ui';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, EmbedInteractionBoundaryService, EmbedRuntimeFocusCoordinator } from '../../doc-embed-integration.service';
+import {
+    EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE,
+    EmbedInteractionBoundaryService,
+    EmbedRuntimeFocusCoordinator,
+} from '../../doc-embed-integration.service';
 import { DocSelectionRenderService } from '../doc-selection-render.service';
 import { TextRange } from '../text-range';
 
@@ -246,15 +256,18 @@ class TestLayoutService {
 
 class TestDocSkeletonManagerService {
     static skeleton: {
+        getLayoutProgress: () => null;
         findPositionByGlyph: () => unknown;
         findNodeByCoord: () => unknown;
     } = {
+        getLayoutProgress: () => null,
         findPositionByGlyph: () => null,
         findNodeByCoord: () => null,
     };
 
     static reset() {
         this.skeleton = {
+            getLayoutProgress: () => null,
             findPositionByGlyph: () => null,
             findNodeByCoord: () => null,
         };
@@ -302,6 +315,7 @@ function createRealSelectionRenderService(options: {
     TestDocSkeletonManagerService.reset();
     const univer = new Univer();
     const injector = univer.__getInjector();
+    injector.add([DocSelectionManagerService]);
     injector.add([ILayoutService, { useClass: TestLayoutService as never }]);
     if (options.embedInteractionBoundaryService) {
         injector.add([EmbedInteractionBoundaryService, { useValue: options.embedInteractionBoundaryService as never }]);
@@ -872,19 +886,6 @@ describe('doc selection render service internals', () => {
         expect(engine.setCapture).not.toHaveBeenCalled();
     });
 
-    it('clears ranges when manual cursor placement cannot resolve a node position', () => {
-        const { service } = createService();
-        const removeAllRangesSpy = vi.fn();
-
-        service._removeAllRanges = removeAllRangesSpy;
-        service._getNodePosition.mockReturnValue(null);
-
-        service.setCursorManually(4, 8);
-
-        expect(removeAllRangesSpy).toHaveBeenCalledTimes(1);
-        expect(service._textSelectionInner$.next).not.toHaveBeenCalled();
-    });
-
     it('reads canvas offsets from the current engine', () => {
         const { engine, service } = createService();
 
@@ -953,6 +954,49 @@ describe('DocSelectionRenderService', () => {
         }
         cleanup = [];
         document.body.innerHTML = '';
+    });
+
+    it.each(['pointer', 'manual', 'double', 'triple'] as const)('clears a deferred input position when %s placement cannot resolve a caret', (placement) => {
+        const { input, renderUnit, service, univer } = createRealSelectionRenderService({
+            mainComponent: { getOffsetConfig: () => ({}) },
+        });
+        cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
+        const manager = univer.__getInjector().get(DocSelectionManagerService);
+        manager.__TEST_ONLY_add([{ startOffset: 2, endOffset: 2, collapsed: true, isActive: true }]);
+        const selection = manager.getSelectionInfo()!;
+        const state = service as unknown as { _pendingSelection: typeof selection };
+        state._pendingSelection = selection;
+        const received: Array<number | null> = [];
+        const inputSubscription = service.onInput$.subscribe((event) => received.push(event.activeRange?.startOffset ?? null));
+        const selectionSubscription = service.textSelectionInner$.subscribe((next) => {
+            if (next != null) {
+                manager.replaceSelectionInfoWithoutRefresh(next);
+            }
+        });
+        cleanup.push(() => inputSubscription.unsubscribe(), () => selectionSubscription.unsubscribe());
+        service.focus();
+
+        input.textContent = 'A';
+        input.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText', data: 'A' }));
+        expect(received[0]).toBe(2);
+
+        const event = { offsetX: 10, offsetY: 10, button: 0 } as never;
+        if (placement === 'manual') {
+            service.setCursorManually(10, 10);
+        } else if (placement === 'double') {
+            service.__handleDblClick(event);
+        } else if (placement === 'triple') {
+            service.__handleTripleClick(event);
+        } else {
+            service.__onPointDown(event);
+        }
+        input.textContent = 'B';
+        input.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText', data: 'B' }));
+
+        expect(received[1]).toBeNull();
+        expect(manager.getTextRanges()).toEqual([]);
+        expect(service.getAllTextRanges()).toEqual([]);
+        expect(document.activeElement).not.toBe(input);
     });
 
     it('keeps the editable input inside the Univer layout root and registers it as an app container', () => {
@@ -1726,6 +1770,7 @@ describe('DocSelectionRenderService', () => {
         const { renderUnit, service, univer } = createRealSelectionRenderService({ mainComponent, scene });
         cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
         TestDocSkeletonManagerService.skeleton = {
+            getLayoutProgress: () => null,
             findNodeByCoord,
             findPositionByGlyph,
         };

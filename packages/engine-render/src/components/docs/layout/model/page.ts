@@ -457,6 +457,16 @@ function isVerticallyCoveredGridColumn(table: ITable, row: number, gridColumn: n
     return false;
 }
 
+interface ICellLineGridCache {
+    body: IDocumentBody;
+    paragraphIndexes: number[];
+    enableDocumentTableLineGrid: boolean;
+}
+
+// A context owns one layout generation. Reuse only metadata from its current
+// body and line pitch; edits and sections with another pitch get fresh decisions.
+const cellLineGridCaches = new WeakMap<ILayoutContext, Map<number, ICellLineGridCache>>();
+
 function getCellLineGridOptions(
     ctx: ILayoutContext,
     cellNode: DataStreamTreeNode,
@@ -468,30 +478,44 @@ function getCellLineGridOptions(
         sectionBreakConfig.gridType === GridType.LINES_AND_CHARS;
     const documentCompatibilityPolicy = sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy();
     const isTraditionalLineGrid = isTraditionalDocumentCompatibility(documentCompatibilityPolicy) && usesLineGrid;
-    const usesNextDocumentGridLine = (paragraph: IParagraph) => {
-        const paragraphStyle = paragraph.paragraphStyle;
-        const lineSpacing = paragraphStyle?.lineSpacing;
-        return lineSpacing != null &&
-            paragraphStyle?.spacingRule === SpacingRule.AUTO &&
-            paragraphStyle.snapToGrid !== BooleanNumber.FALSE &&
-            reachesNextDocumentGridLine(lineSpacing, paragraphStyle.spaceBelow?.v ?? 0, linePitch);
+    if (!isTraditionalLineGrid || body == null) {
+        return { enableDocumentTableLineGrid: false, inheritDocumentLinePitch: false };
+    }
+
+    let cacheByPitch = cellLineGridCaches.get(ctx);
+    if (cacheByPitch == null) {
+        cacheByPitch = new Map();
+        cellLineGridCaches.set(ctx, cacheByPitch);
+    }
+    let cache = cacheByPitch.get(linePitch);
+    if (cache?.body !== body) {
+        const usesNextDocumentGridLine = (paragraph: IParagraph) => {
+            const paragraphStyle = paragraph.paragraphStyle;
+            const lineSpacing = paragraphStyle?.lineSpacing;
+            return lineSpacing != null &&
+                paragraphStyle?.spacingRule === SpacingRule.AUTO &&
+                paragraphStyle.snapToGrid !== BooleanNumber.FALSE &&
+                reachesNextDocumentGridLine(lineSpacing, paragraphStyle.spaceBelow?.v ?? 0, linePitch);
+        };
+        const paragraphIndexes = (body.paragraphs ?? [])
+            .filter(usesNextDocumentGridLine)
+            .map((paragraph) => paragraph.startIndex);
+        cache = {
+            body,
+            paragraphIndexes,
+            enableDocumentTableLineGrid: body.tables?.some((table) => paragraphIndexes.some(
+                (index) => index > table.startIndex && index < table.endIndex
+            )) === true,
+        };
+        cacheByPitch.set(linePitch, cache);
+    }
+
+    return {
+        enableDocumentTableLineGrid: cache.enableDocumentTableLineGrid,
+        inheritDocumentLinePitch: cache.paragraphIndexes.some(
+            (index) => index > cellNode.startIndex && index < cellNode.endIndex
+        ),
     };
-    const inheritDocumentLinePitch = isTraditionalLineGrid &&
-        body?.paragraphs?.some((paragraph) => {
-            if (paragraph.startIndex <= cellNode.startIndex || paragraph.startIndex >= cellNode.endIndex) {
-                return false;
-            }
-
-            return usesNextDocumentGridLine(paragraph);
-        }) === true;
-    const enableDocumentTableLineGrid = isTraditionalLineGrid &&
-        body?.tables?.some((table) => body.paragraphs?.some(
-            (paragraph) => paragraph.startIndex > table.startIndex &&
-                paragraph.startIndex < table.endIndex &&
-                usesNextDocumentGridLine(paragraph)
-        )) === true;
-
-    return { enableDocumentTableLineGrid, inheritDocumentLinePitch };
 }
 
 export function createSkeletonCellPages(
@@ -721,6 +745,18 @@ function applyTrailingCellParagraphSpaceBelow(
         return;
     }
 
+    const spaceBelow = Math.max(0, lastLine.spaceBelowApply ?? 0);
+    const linePitch = sectionBreakConfig.linePitch ?? 0;
+    const usesLineGrid = sectionBreakConfig.gridType === GridType.LINES || sectionBreakConfig.gridType === GridType.LINES_AND_CHARS;
+    if (
+        spaceBelow === 0 ||
+        !usesLineGrid ||
+        linePitch <= 0 ||
+        !isTraditionalDocumentCompatibility(sectionBreakConfig.documentCompatibilityPolicy!)
+    ) {
+        return;
+    }
+
     const paragraphIndex = lastLine.paragraphIndex;
     const hasLaterParagraph = body?.paragraphs?.some(
         (paragraph) => paragraph.startIndex > paragraphIndex && paragraph.startIndex < containerEndIndex
@@ -734,17 +770,11 @@ function applyTrailingCellParagraphSpaceBelow(
 
     const paragraphStyle = body?.paragraphs?.find((paragraph) => paragraph.startIndex === paragraphIndex)?.paragraphStyle;
     const lineSpacing = paragraphStyle?.lineSpacing;
-    const spaceBelow = Math.max(0, lastLine.spaceBelowApply ?? 0);
-    const linePitch = sectionBreakConfig.linePitch ?? 0;
-    const usesLineGrid = sectionBreakConfig.gridType === GridType.LINES || sectionBreakConfig.gridType === GridType.LINES_AND_CHARS;
     if (
         lineSpacing == null ||
         paragraphStyle?.spacingRule !== SpacingRule.AUTO ||
         paragraphStyle.snapToGrid === BooleanNumber.FALSE ||
-        !usesLineGrid ||
-        linePitch <= 0 ||
-        !reachesNextDocumentGridLine(lineSpacing, spaceBelow, linePitch) ||
-        !isTraditionalDocumentCompatibility(sectionBreakConfig.documentCompatibilityPolicy!)
+        !reachesNextDocumentGridLine(lineSpacing, spaceBelow, linePitch)
     ) {
         return;
     }

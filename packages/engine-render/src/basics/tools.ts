@@ -383,6 +383,11 @@ export function hasLatinExtendedB(text: string) {
 const segmenter = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
 
 export function getFirstGrapheme(text: string): string | null {
+    // One UTF-16 code unit cannot span multiple graphemes. CJK letter glyphs
+    // already arrive individually, so avoid allocating a segment iterator.
+    if (text.length <= 1) {
+        return text || null;
+    }
     const it = segmenter.segment(text)[Symbol.iterator]();
     return it.next().value?.segment ?? null;
 }

@@ -263,9 +263,14 @@ function _popHyphenSlice(divide: IDocumentSkeletonDivide) {
         lastGlyph = divide.glyphGroup.pop();
     }
 
+    // The separator belongs to the source stream, even when the word moves.
+    if (lastGlyph) {
+        divide.glyphGroup.push(lastGlyph);
+    }
+
     // If the hyphenated word slice is the first word slice of the divide,
     // ignore this rule and recovery divide.
-    if (divide.glyphGroup.length === 0) {
+    if (!divide.glyphGroup.some((glyph) => glyph.content !== ' ')) {
         divide.glyphGroup.push(...glyphGroup);
 
         glyphGroup.length = 0;

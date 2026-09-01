@@ -32,7 +32,6 @@ import {
 } from '../../../../../basics/tools';
 import { getDocsCustomBlockRenderViewport } from '../../../custom-block-render-viewport';
 import { Lang } from '../../hyphenation/lang';
-import { LineBreaker } from '../../line-breaker';
 import { BreakPointType } from '../../line-breaker/break';
 import { LineBreakerHyphenEnhancer } from '../../line-breaker/enhancers/hyphen-enhancer';
 import { LineBreakerLinkEnhancer } from '../../line-breaker/enhancers/link-enhancer';
@@ -40,6 +39,7 @@ import { LineBreakerWholeEntityEnhancer } from '../../line-breaker/enhancers/who
 import { customBlockLineBreakExtension } from '../../line-breaker/extensions/custom-block-linebreak-extension';
 import { eastAsianQuoteLineBreakExtension } from '../../line-breaker/extensions/east-asian-quote-linebreak-extension';
 import { tabLineBreakExtension } from '../../line-breaker/extensions/tab-linebreak-extension';
+import { LineBreaker } from '../../line-breaker/line-breaker';
 import {
     createSkeletonCustomBlockGlyph,
     createSkeletonLetterGlyph,
@@ -113,11 +113,18 @@ function addCJKLatinSpacing(shapedTextList: IShapedText[]) {
     }
 }
 
-function hyphenConfig(paragraphStyle: IParagraphStyle, sectionBreakConfig: ISectionBreakConfig) {
+export function getHyphenationLanguage(
+    ctx: ILayoutContext,
+    content: string,
+    paragraphStyle: IParagraphStyle,
+    sectionBreakConfig: ISectionBreakConfig
+): Lang {
     const { suppressHyphenation = BooleanNumber.FALSE } = paragraphStyle;
     const { autoHyphenation = BooleanNumber.FALSE } = sectionBreakConfig;
 
-    return suppressHyphenation === BooleanNumber.FALSE && autoHyphenation === BooleanNumber.TRUE;
+    return suppressHyphenation === BooleanNumber.FALSE && autoHyphenation === BooleanNumber.TRUE
+        ? ctx.languageDetector.detect(content)
+        : Lang.UNKNOWN;
 }
 
 export interface IShapedText {
@@ -224,7 +231,7 @@ export function shaping(
     let last = 0;
     let bk;
 
-    const { hyphen, languageDetector } = ctx;
+    const { hyphen } = ctx;
 
     // Add custom extension for linebreak.
     tabLineBreakExtension(lineBreaker);
@@ -235,17 +242,17 @@ export function shaping(
 
     let breaker: IBreakPoints = new LineBreakerLinkEnhancer(lineBreaker);
 
-    const lang = languageDetector.detect(content);
-
-    const needHyphen = hyphenConfig(paragraphStyle, sectionBreakConfig);
+    const lang = getHyphenationLanguage(ctx, content, paragraphStyle, sectionBreakConfig);
     const doNotHyphenateCaps = sectionBreakConfig.doNotHyphenateCaps === BooleanNumber.TRUE;
 
-    if (lang !== Lang.UNKNOWN && needHyphen) {
+    if (lang !== Lang.UNKNOWN) {
         // Use hyphen enhancer when the lang pattern is loaded.
         if (hyphen.hasPattern(lang)) {
             breaker = new LineBreakerHyphenEnhancer(breaker, hyphen, lang, doNotHyphenateCaps);
         } else {
-            hyphen.loadPattern(lang);
+            // Legacy synchronous layout cannot wait for a code-split dictionary.
+            // Incremental layout prepares it before reaching this shaping boundary.
+            hyphen.loadPattern(lang).catch((error: unknown) => console.error(error));
         }
     }
     breaker = new LineBreakerWholeEntityEnhancer(

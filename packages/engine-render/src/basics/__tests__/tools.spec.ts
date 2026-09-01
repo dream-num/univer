@@ -80,6 +80,26 @@ describe('tools extra', () => {
         vi.restoreAllMocks();
     });
 
+    it('avoids Unicode segmentation for individual code units while preserving complex graphemes', () => {
+        const segment = vi.spyOn(Intl.Segmenter.prototype, 'segment');
+        for (const text of ['', 'A', '中', ' ', '\r', '\u0301', '\uD83D']) {
+            expect(getFirstGrapheme(text)).toBe(text || null);
+        }
+        expect(segment).not.toHaveBeenCalled();
+        for (const [text, first] of [
+            ['e\u0301x', 'e\u0301'],
+            ['\r\nx', '\r\n'],
+            ['🇨🇳abc', '🇨🇳'],
+            ['👨‍👩‍👧‍👦abc', '👨‍👩‍👧‍👦'],
+            ['👍🏽abc', '👍🏽'],
+            ['1️⃣abc', '1️⃣'],
+            ['中文', '中'],
+        ]) {
+            expect(getFirstGrapheme(text)).toBe(first);
+        }
+        expect(segment).toHaveBeenCalledTimes(7);
+    });
+
     it('handles colors, unit conversion and precision helpers', () => {
         expect(getColor([1, 2, 3])).toBe('rgb(1,2,3)');
         expect(getColor([1, 2, 3], 0.5)).toBe('rgba(1,2,3,0.5)');

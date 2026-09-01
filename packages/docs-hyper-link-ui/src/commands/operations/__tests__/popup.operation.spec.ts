@@ -18,6 +18,7 @@ import type { IDocumentData } from '@univerjs/core';
 import { CustomRangeType, ICommandService, toDisposable, Univer, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
+import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { DocHyperLinkPopupService } from '../../../services/hyper-link-popup.service';
 import {
@@ -73,6 +74,7 @@ describe('doc hyperlink popup operations', () => {
         const injector = univer.__getInjector();
         injector.add([DocSelectionManagerService]);
         injector.add([DocCanvasPopManagerService, { useClass: TestDocCanvasPopManagerService as never }]);
+        injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
         injector.add([DocHyperLinkPopupService]);
 
         univer.createUnit(UniverInstanceType.UNIVER_DOC, createDocData());

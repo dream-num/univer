@@ -16,7 +16,7 @@
 
 import { DocumentEditArea } from '@univerjs/engine-render';
 import { describe, expect, it, vi } from 'vitest';
-import { CloseHeaderFooterCommand } from '../doc-header-footer.command';
+import { CloseHeaderFooterCommand, CoreHeaderFooterCommand, OpenHeaderFooterPanelCommand } from '../doc-header-footer.command';
 
 describe('CloseHeaderFooterCommand large document regression', () => {
     it('reuses already-published body pages when leaving header/footer editing', async () => {
@@ -71,5 +71,69 @@ describe('CloseHeaderFooterCommand large document regression', () => {
         expect(editArea).toBe(DocumentEditArea.BODY);
         expect(calculate).not.toHaveBeenCalled();
         expect(renderObject.mainComponent.makeDirty).toHaveBeenCalledWith(true);
+    });
+});
+
+describe('OpenHeaderFooterPanelCommand', () => {
+    function createOpenCommandTestBed(defaultHeaderId?: string) {
+        let editArea = DocumentEditArea.BODY;
+        const viewModel = {
+            getDataModel: () => ({
+                getSnapshot: () => ({ id: 'doc-1', documentStyle: { defaultHeaderId } }),
+            }),
+            setEditArea: vi.fn((next: DocumentEditArea) => {
+                editArea = next;
+            }),
+        };
+        const skeletonManager = {
+            getViewModel: () => viewModel,
+            getSkeleton: () => ({
+                getSkeletonData: () => ({ pages: [{ pageNumber: 1, pageNumberStart: 1 }] }),
+            }),
+        };
+        const selectionRenderService = {
+            getSegmentPage: vi.fn(() => 0),
+            setSegment: vi.fn(),
+            setSegmentPage: vi.fn(),
+        };
+        let dependencyIndex = 0;
+        const renderObject = {
+            with: vi.fn(() => dependencyIndex++ === 0 ? skeletonManager : selectionRenderService),
+        };
+        const commandService = { executeCommand: vi.fn() };
+        const instanceService = {
+            getCurrentUnitOfType: vi.fn(() => ({ getUnitId: () => 'doc-1' })),
+        };
+        const renderManagerService = { getRenderUnitById: vi.fn(() => renderObject) };
+        const dependencies = [commandService, instanceService, renderManagerService];
+        const accessor = { get: vi.fn(() => dependencies.shift()) };
+
+        return { accessor, commandService, selectionRenderService, viewModel, getEditArea: () => editArea };
+    }
+
+    it('rolls back header editing when creating the missing header fails', async () => {
+        const testBed = createOpenCommandTestBed();
+        testBed.commandService.executeCommand.mockResolvedValueOnce(false);
+
+        await expect(OpenHeaderFooterPanelCommand.handler(testBed.accessor as never, {})).resolves.toBe(false);
+
+        expect(testBed.commandService.executeCommand).toHaveBeenCalledWith(
+            CoreHeaderFooterCommand.id,
+            expect.objectContaining({ unitId: 'doc-1' })
+        );
+        expect(testBed.selectionRenderService.setSegment).toHaveBeenLastCalledWith('');
+        expect(testBed.selectionRenderService.setSegmentPage).toHaveBeenLastCalledWith(-1);
+        expect(testBed.getEditArea()).toBe(DocumentEditArea.BODY);
+    });
+
+    it('selects an existing header before opening the sidebar', async () => {
+        const testBed = createOpenCommandTestBed('existing-header');
+        testBed.commandService.executeCommand.mockResolvedValueOnce(true);
+
+        await expect(OpenHeaderFooterPanelCommand.handler(testBed.accessor as never, {})).resolves.toBe(true);
+
+        expect(testBed.selectionRenderService.setSegment).toHaveBeenCalledWith('existing-header');
+        expect(testBed.commandService.executeCommand).toHaveBeenCalledTimes(1);
+        expect(testBed.getEditArea()).toBe(DocumentEditArea.HEADER);
     });
 });

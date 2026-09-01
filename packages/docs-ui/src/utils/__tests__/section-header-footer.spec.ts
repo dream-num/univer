@@ -15,8 +15,10 @@
  */
 
 import { BooleanNumber } from '@univerjs/core';
+import { HeaderFooterType } from '@univerjs/docs';
+import { DocumentEditArea } from '@univerjs/engine-render';
 import { describe, expect, it } from 'vitest';
-import { getDocPageSectionContext } from '../section-header-footer';
+import { getDocPageSectionContext, getHeaderFooterTarget } from '../section-header-footer';
 
 describe('section header/footer context', () => {
     it('resolves the owning section and overlays it on document defaults', () => {
@@ -87,5 +89,59 @@ describe('section header/footer context', () => {
             sectionIndex: 1,
             config: { defaultHeaderId: 'section-header' },
         });
+    });
+
+    it('resolves existing and missing header/footer variants for the current page', () => {
+        const snapshot = {
+            id: 'header-footer-target-doc',
+            documentStyle: {
+                defaultHeaderId: 'default-header',
+                evenPageFooterId: 'even-footer',
+                evenAndOddHeaders: BooleanNumber.TRUE,
+                useFirstPageHeaderFooter: BooleanNumber.TRUE,
+            },
+            body: { dataStream: '\r\n' },
+        };
+        const viewModel = {
+            getDataModel: () => ({ getSnapshot: () => snapshot }),
+        };
+
+        expect(getHeaderFooterTarget(viewModel as never, DocumentEditArea.HEADER, 0, {
+            pageNumber: 1,
+            pageNumberStart: 1,
+        } as never)).toEqual({
+            createType: HeaderFooterType.FIRST_PAGE_HEADER,
+            headerFooterId: null,
+            sectionId: undefined,
+        });
+        expect(getHeaderFooterTarget(viewModel as never, DocumentEditArea.FOOTER, 1, {
+            pageNumber: 2,
+            pageNumberStart: 1,
+        } as never)).toEqual({
+            createType: null,
+            headerFooterId: 'even-footer',
+            sectionId: undefined,
+        });
+        expect(getHeaderFooterTarget(viewModel as never, DocumentEditArea.HEADER, 2, {
+            pageNumber: 3,
+            pageNumberStart: 1,
+        } as never)).toEqual({
+            createType: null,
+            headerFooterId: 'default-header',
+            sectionId: undefined,
+        });
+    });
+
+    it('returns no target for body editing and rejects unsupported edit areas', () => {
+        const viewModel = {
+            getDataModel: () => ({ getSnapshot: () => ({ id: 'doc', documentStyle: {} }) }),
+        };
+
+        expect(getHeaderFooterTarget(viewModel as never, DocumentEditArea.BODY, 0)).toEqual({
+            createType: null,
+            headerFooterId: null,
+            sectionId: undefined,
+        });
+        expect(() => getHeaderFooterTarget(viewModel as never, 'invalid' as never, 0)).toThrow('Invalid editArea');
     });
 });

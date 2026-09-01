@@ -89,6 +89,23 @@ describe('DocLayoutCoordinatorService', () => {
         coordinator.dispose();
     });
 
+    it('cancels the active generation when a main-thread layout step throws', () => {
+        const error = new Error('layout failed');
+        const skeleton = {
+            startIncrementalLayout: vi.fn(() => 1),
+            stepIncrementalLayout: vi.fn(() => {
+                throw error;
+            }),
+            cancelIncrementalLayout: vi.fn(),
+        } satisfies DocumentLayoutSchedulingSkeleton;
+        const coordinator = new DocLayoutCoordinatorService();
+
+        expect(() => coordinator.schedule(skeleton, { reason: 'edit', anchor: 1 }, { onProgress: vi.fn() })).toThrow(error);
+        expect(skeleton.cancelIncrementalLayout).toHaveBeenCalledWith(1);
+        expect(coordinator.hasScheduledLayout()).toBe(false);
+        coordinator.dispose();
+    });
+
     it('finishes the edited anchor synchronously one atomic block at a time', () => {
         const requestAnimationFrameSpy = vi.fn((callback: FrameRequestCallback) =>
             window.setTimeout(() => callback(performance.now()), 0));

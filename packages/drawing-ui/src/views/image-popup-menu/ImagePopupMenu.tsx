@@ -399,6 +399,7 @@ function DocImageFloatingToolbar(props: IDocImageFloatingToolbarProps) {
     return (
         <div
             data-u-comp="doc-image-floating-toolbar"
+            onPointerDown={(event) => event.stopPropagation()}
             onMouseDown={(event) => {
                 event.stopPropagation();
                 event.preventDefault();
@@ -477,6 +478,7 @@ function DocChartFloatingToolbar(props: Pick<IDocImageFloatingToolbarProps, 'men
     return (
         <div
             data-u-comp="doc-chart-floating-toolbar"
+            onPointerDown={(event) => event.stopPropagation()}
             onMouseDown={(event) => {
                 event.stopPropagation();
                 event.preventDefault();

@@ -181,7 +181,7 @@ export class DocCanvasPopManagerService extends Disposable {
             return false;
         }
 
-        const params = commandInfo.params as { unitId?: string } | undefined;
+        const params = commandInfo.params as IRichTextEditingMutationParams | undefined;
         return params?.unitId == null || params.unitId === unitId;
     }
 
@@ -275,34 +275,33 @@ export class DocCanvasPopManagerService extends Disposable {
         const positions = calcDocRangePositions(range, currentRender) ?? [];
         const positions$ = new BehaviorSubject(positions);
         const disposable = new DisposableCollection();
+        const updatePositions = () => {
+            try {
+                const position = calcDocRangePositions(range, currentRender);
+                if (position) {
+                    positions$.next(position);
+                }
+            } catch {
+                // The popup may outlive an embedded render while its host switches tabs.
+                // Keep the last anchor until the popup is disposed.
+            }
+        };
 
         disposable.add(this._commandService.onCommandExecuted((commandInfo) => {
-            if (commandInfo.id === SetDocZoomRatioOperation.id || commandInfo.id === RichTextEditingMutation.id) {
-                const params = commandInfo.params as IRichTextEditingMutationParams;
-                if (params.unitId === currentRender.unitId) {
-                    const position = calcDocRangePositions(range, currentRender);
-                    if (position) {
-                        positions$.next(position);
-                    }
-                }
+            if (this._shouldUpdateForCommand(commandInfo, currentRender.unitId)) {
+                updatePositions();
             }
         }));
 
         const viewMain = currentRender.scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
         if (viewMain) {
             disposable.add(viewMain.onScrollAfter$.subscribeEvent(() => {
-                const position = calcDocRangePositions(range, currentRender);
-                if (position) {
-                    positions$.next(position);
-                }
+                updatePositions();
             }));
         }
 
         disposable.add(currentRender.scene.onTransformChange$.subscribeEvent(() => {
-            const position = calcDocRangePositions(range, currentRender);
-            if (position) {
-                positions$.next(position);
-            }
+            updatePositions();
         }));
 
         return {

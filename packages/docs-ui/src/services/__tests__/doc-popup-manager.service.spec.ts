@@ -55,6 +55,7 @@ class TestCanvasPopupService {
 class TestRenderManagerService {
     scale = 1;
     hasViewport = true;
+    throwOnGetOffsetConfig = false;
     viewportScrollX = 0;
     viewportScrollY = 0;
     isMainScene: boolean | undefined = true;
@@ -89,10 +90,16 @@ class TestRenderManagerService {
             },
             getInjector: this.getInjector,
             mainComponent: {
-                getOffsetConfig: () => ({
-                    docsLeft: 0,
-                    docsTop: 0,
-                }),
+                getOffsetConfig: () => {
+                    if (this.throwOnGetOffsetConfig) {
+                        throw new TypeError("Cannot read properties of null (reading 'clone')");
+                    }
+
+                    return {
+                        docsLeft: 0,
+                        docsTop: 0,
+                    };
+                },
             },
             scene: this.getScene(),
             with: (token: unknown) => {
@@ -422,5 +429,32 @@ describe('DocCanvasPopManagerService', () => {
         disposable.dispose();
         rangeSpy.mockRestore();
         expect(popupService.removedIds).toContain('popup-1');
+    });
+
+    it('keeps the last range popup anchor when its render is stale during refresh', () => {
+        const { service, popupService, renderManagerService, commandService } = createService();
+        const rangeSpy = vi.spyOn(NodePositionConvertToCursor.prototype, 'getRangePointData').mockImplementation(() => ({
+            borderBoxPointGroup: [
+                [{ x: 10, y: 10 }, { x: 40, y: 10 }, { x: 40, y: 20 }, { x: 10, y: 20 }],
+            ],
+        }) as never);
+
+        const disposable = service.attachPopupToRange(
+            { startOffset: 0, endOffset: 4, collapsed: false },
+            { componentKey: 'stale-range' },
+            'doc-1'
+        );
+        const popup = popupService.popups.get('popup-1');
+        const emittedAnchors: unknown[] = [];
+        const anchorSubscription = popup?.anchorRect$?.subscribe((anchor) => emittedAnchors.push(anchor));
+
+        renderManagerService.throwOnGetOffsetConfig = true;
+
+        expect(() => commandService.emit(RichTextEditingMutation.id, { unitId: 'doc-1' })).not.toThrow();
+        expect(emittedAnchors.at(-1)).toEqual({ left: 20, right: 50, top: 30, bottom: 40 });
+
+        anchorSubscription?.unsubscribe();
+        disposable.dispose();
+        rangeSpy.mockRestore();
     });
 });

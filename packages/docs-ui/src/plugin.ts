@@ -490,6 +490,8 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocIMEInputManagerService],
             [DocRenderController],
             [DocZoomRenderController],
+            [DocBackScrollRenderController],
+            [DocSelectionRenderController],
         ] as Dependency[]).forEach((m) => {
             this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, m);
         });
@@ -500,8 +502,6 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocEventManagerService],
             [DocFloatMenuService],
             [DocParagraphMenuService],
-            [DocBackScrollRenderController],
-            [DocSelectionRenderController],
             [DocHeaderFooterController],
             [DocResizeRenderController],
             [DocParagraphPlaceholderRenderController],

@@ -47,39 +47,56 @@ export class FDocumentUIMixin extends FDocument implements IFDocumentUIMixin {
         const skeleton = render.with(DocSkeletonManagerService).getSkeleton();
         const pageIndex = skeleton.findBodyPageIndexByCharIndex(startOffset);
         const page = skeleton.getSkeletonData()?.pages[pageIndex];
+        const bodyLength = this.getDocumentDataModel().getBody()?.dataStream.length ?? 0;
+        const unresolvedBodyPage = pageIndex < 0 && startOffset >= 0 && startOffset < bodyLength;
         const segmentId = docSelectionRenderService.getSegment();
-        if (segmentId === '' && page?.isMaterializationPlaceholder) {
-            // Offscreen pages have offsets but no glyph nodes. Use the existing
-            // bounded scroll/materialization path before rebuilding the selection.
-            // Clear both caret and logical selection while that request is pending.
-            const dataStream = this.getDocumentDataModel().getBody()?.dataStream;
+        const renderInjector = render.getInjector?.();
+        const backScrollController = renderInjector?.has(DocBackScrollRenderController)
+            ? render.with(DocBackScrollRenderController)
+            : null;
+        const range = {
+            startOffset,
+            endOffset,
+            collapsed: startOffset === endOffset,
+        };
+        const applySelection = (): void => {
             docSelectionRenderService.removeAllRanges();
-            docSelectionRenderService.addDocRanges([], false, { shouldFocus: false });
-            docSelectionRenderService.blur();
-            render.with(DocBackScrollRenderController).scrollToRange({
-                startOffset,
-                endOffset,
-                collapsed: startOffset === endOffset,
-            }, () => {
+            docSelectionRenderService.addDocRanges(
+                [
+                    {
+                        startOffset,
+                        endOffset,
+                        rangeType: DOC_RANGE_TYPE.TEXT,
+                    },
+                ],
+                true
+            );
+        };
+        if (segmentId === '' && backScrollController != null &&
+            (unresolvedBodyPage || page?.isMaterializationPlaceholder || !backScrollController.isViewportReady())) {
+            // The page or viewport is not ready to own an editable caret. Hide
+            // and blur the old visual range while the bounded navigation request
+            // waits; a real pointer/scroll/new selection still cancels it.
+            const dataStream = this.getDocumentDataModel().getBody()?.dataStream;
+            backScrollController.scrollToRange(range, () => {
                 if (docSelectionRenderService.getSegment() !== segmentId ||
                     this.getDocumentDataModel().getBody()?.dataStream !== dataStream) {
                     return;
                 }
-                this.setSelection(startOffset, endOffset);
+                applySelection();
             });
+            docSelectionRenderService.removeAllRanges();
+            docSelectionRenderService.addDocRanges([], true, { shouldFocus: false });
+            docSelectionRenderService.blur();
             return;
         }
-        docSelectionRenderService.removeAllRanges();
-        docSelectionRenderService.addDocRanges(
-            [
-                {
-                    startOffset,
-                    endOffset,
-                    rangeType: DOC_RANGE_TYPE.TEXT,
-                },
-            ],
-            true
-        );
+        applySelection();
+        if (segmentId === '' && backScrollController != null) {
+            // SDK selections are imperative navigation requests. Do not rely on
+            // the deferred selection event to reveal an already-materialized
+            // offscreen page because a prior user scroll may suppress it.
+            backScrollController.scrollToRange(range);
+        }
     }
 }
 

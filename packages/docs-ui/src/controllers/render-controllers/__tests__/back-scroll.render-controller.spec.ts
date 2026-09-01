@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+// @vitest-environment jsdom
+
 import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
 import type { IPointerEvent, RenderUnit } from '@univerjs/engine-render';
 import { DocumentFlavor, ICommandService, IUniverInstanceService, Univer, UniverInstanceType } from '@univerjs/core';
@@ -213,6 +215,29 @@ describe('DocBackScrollRenderController', () => {
             pages[4] = original;
             await vi.advanceTimersByTimeAsync(20);
             expect(editor.viewport.viewportScrollY).toBe(1200);
+        } finally {
+            editor.dispose();
+        }
+    });
+
+    it('waits for a usable document viewport before revealing an SDK range', async () => {
+        const editor = createEditor();
+        try {
+            const documentComponent = editor.render.mainComponent as Documents;
+            const target = editor.skeleton.getSkeletonData()!.pages[4].st;
+            editor.select(3);
+            await vi.advanceTimersByTimeAsync(20);
+            documentComponent.translate(-10000, -10000);
+            editor.controller.scrollToRange({ startOffset: target, endOffset: target, collapsed: true });
+            // A resize/layout refresh can replay the pre-request selection while
+            // the real viewport is becoming ready. It must not steal ownership.
+            editor.select(3, false);
+            await vi.advanceTimersByTimeAsync(20);
+            expect(editor.viewport.viewportScrollY).toBe(0);
+
+            documentComponent.translate(0, 20);
+            await vi.advanceTimersByTimeAsync(20);
+            expect(editor.viewport.viewportScrollY).toBeGreaterThan(1000);
         } finally {
             editor.dispose();
         }

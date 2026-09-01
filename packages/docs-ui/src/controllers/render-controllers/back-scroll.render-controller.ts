@@ -25,10 +25,15 @@ import { NodePositionConvertToCursor } from '../../services/selection/convert-te
 import { getAnchorBounding } from '../../services/selection/text-range';
 
 const ANCHOR_WIDTH = 1.5;
+// Large imported documents can take tens of seconds to publish an offset's
+// aggregate page. The request remains cancellable by real user ownership.
+const MAX_SELECTION_SCROLL_RETRY_FRAMES = 6000;
 
 export class DocBackScrollRenderController extends RxDisposable implements EngineRender.IRenderModule {
     private _pendingSelectionScrollFrame: number | null = null;
     private _suppressedSelection: Nullable<ITextRangeParam> = null;
+    private _pendingExplicitRange: Nullable<ITextRangeParam> = null;
+    private _selectionBeforeExplicitRange: Nullable<ITextRangeParam> = null;
     private _scrollingToRange = false;
 
     constructor(
@@ -63,12 +68,16 @@ export class DocBackScrollRenderController extends RxDisposable implements Engin
             }
 
             const { isEditing, unitId } = params;
+            const range = params.textRanges.find((item) => item.isActive);
 
             if (unitId !== this._context.unitId) {
                 return;
             }
 
             if (!isEditing) {
+                if (this._ownsPendingExplicitRange(range)) {
+                    return;
+                }
                 this._suspendSelectionScroll();
                 return;
             }
@@ -77,7 +86,10 @@ export class DocBackScrollRenderController extends RxDisposable implements Engin
                 return;
             }
 
-            const range = params.textRanges.find((item) => item.isActive);
+            if (this._ownsPendingExplicitRange(range)) {
+                return;
+            }
+            this._clearExplicitRangeOwnership();
             const suppressed = this._suppressedSelection;
             if (range != null && suppressed != null &&
                 range.startOffset === suppressed.startOffset && range.endOffset === suppressed.endOffset &&
@@ -93,11 +105,13 @@ export class DocBackScrollRenderController extends RxDisposable implements Engin
     override dispose(): void {
         this._cancelPendingSelectionScroll();
         this._suppressedSelection = null;
+        this._clearExplicitRangeOwnership();
         super.dispose();
     }
 
     private _suspendSelectionScroll(): void {
         this._cancelPendingSelectionScroll();
+        this._clearExplicitRangeOwnership();
         const range = this._textSelectionManagerService.getActiveTextRange();
         // A later layout publication can refresh the same logical caret. It must
         // not reclaim a viewport the user has since scrolled or selected in.
@@ -136,17 +150,45 @@ export class DocBackScrollRenderController extends RxDisposable implements Engin
 
     scrollToRange(range: ITextRangeParam, onResolved?: () => void): void {
         this._cancelPendingSelectionScroll();
+        if (this._pendingExplicitRange == null) {
+            this._selectionBeforeExplicitRange = this._textSelectionManagerService.getActiveTextRange();
+        }
+        this._pendingExplicitRange = range;
         this._scrollingToRange = true;
         try {
             this._scrollToRange(range, onResolved);
         } finally {
             this._scrollingToRange = false;
+            if (this._pendingSelectionScrollFrame == null) {
+                this._clearExplicitRangeOwnership();
+            }
         }
+    }
+
+    private _isSameRange(left: Nullable<ITextRangeParam>, right: Nullable<ITextRangeParam>): boolean {
+        return left != null && right != null &&
+            left.startOffset === right.startOffset && left.endOffset === right.endOffset &&
+            (left.segmentId ?? '') === (right.segmentId ?? '') &&
+            (left.segmentPage ?? -1) === (right.segmentPage ?? -1);
+    }
+
+    private _ownsPendingExplicitRange(range: Nullable<ITextRangeParam>): boolean {
+        return this._pendingExplicitRange != null &&
+            (range == null || this._isSameRange(range, this._pendingExplicitRange) || this._isSameRange(range, this._selectionBeforeExplicitRange));
+    }
+
+    private _clearExplicitRangeOwnership(): void {
+        this._pendingExplicitRange = null;
+        this._selectionBeforeExplicitRange = null;
     }
 
     private _scrollToRange(range: ITextRangeParam, onResolved?: () => void): void {
         const skeleton = this._docSkeletonManagerService.getSkeleton();
         if (!skeleton) {
+            return;
+        }
+        if (!this.isViewportReady()) {
+            this._scheduleScrollToReadyRange(range, 0, onResolved);
             return;
         }
         const { startOffset, segmentId, segmentPage } = range;
@@ -157,12 +199,7 @@ export class DocBackScrollRenderController extends RxDisposable implements Engin
             segmentPage ?? -1
         );
         if (anchorNodePosition == null) {
-            const pageIndex = skeleton.findBodyPageIndexByCharIndex(startOffset);
-            const page = skeleton.getSkeletonData()?.pages[pageIndex];
-            if (page?.isMaterializationPlaceholder) {
-                this._scrollToPage(pageIndex);
-                this._scheduleScrollToMaterializedRange(range, 0, onResolved);
-            }
+            this._deferUnresolvedRange(skeleton, range, onResolved);
             return;
         }
 
@@ -181,8 +218,23 @@ export class DocBackScrollRenderController extends RxDisposable implements Engin
         onResolved?.();
     }
 
-    private _scheduleScrollToMaterializedRange(range: ITextRangeParam, attempt = 0, onResolved?: () => void): void {
-        if (typeof requestAnimationFrame === 'undefined' || attempt >= 120) {
+    private _deferUnresolvedRange(
+        skeleton: ReturnType<DocSkeletonManagerService['getSkeleton']>,
+        range: ITextRangeParam,
+        onResolved?: () => void
+    ): void {
+        const pageIndex = skeleton.findBodyPageIndexByCharIndex(range.startOffset);
+        const page = skeleton.getSkeletonData()?.pages[pageIndex];
+        if (page?.isMaterializationPlaceholder) {
+            this._scrollToPage(pageIndex);
+            this._scheduleScrollToReadyRange(range, 0, onResolved);
+        } else if (pageIndex < 0 && this._isValidBodyOffset(skeleton, range.startOffset)) {
+            this._scheduleScrollToReadyRange(range, 0, onResolved);
+        }
+    }
+
+    private _scheduleScrollToReadyRange(range: ITextRangeParam, attempt = 0, onResolved?: () => void): void {
+        if (typeof requestAnimationFrame === 'undefined' || attempt >= MAX_SELECTION_SCROLL_RETRY_FRAMES) {
             return;
         }
         if (this._pendingSelectionScrollFrame != null) {
@@ -192,12 +244,34 @@ export class DocBackScrollRenderController extends RxDisposable implements Engin
             this._pendingSelectionScrollFrame = null;
             const skeleton = this._docSkeletonManagerService.getSkeleton();
             const pageIndex = skeleton.findBodyPageIndexByCharIndex(range.startOffset);
-            if (skeleton.getSkeletonData()?.pages[pageIndex]?.isMaterializationPlaceholder) {
-                this._scheduleScrollToMaterializedRange(range, attempt + 1, onResolved);
+            if (!this.isViewportReady() || (pageIndex < 0 && this._isValidBodyOffset(skeleton, range.startOffset))) {
+                this._scheduleScrollToReadyRange(range, attempt + 1, onResolved);
                 return;
             }
             this.scrollToRange(range, onResolved);
         });
+    }
+
+    private _isValidBodyOffset(skeleton: ReturnType<DocSkeletonManagerService['getSkeleton']>, offset: number): boolean {
+        const length = skeleton.getViewModel().getDataModel().getBody()?.dataStream.length ?? 0;
+        return offset >= 0 && offset < length;
+    }
+
+    isViewportReady(): boolean {
+        const { mainComponent, scene } = this._context;
+        if (!(mainComponent instanceof EngineRender.Documents)) {
+            return true;
+        }
+        const { docsLeft, docsTop } = mainComponent.getOffsetConfig();
+        if (docsLeft <= -10000 || docsTop <= -10000) {
+            return false;
+        }
+        const viewport = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+        if (viewport == null) {
+            return true;
+        }
+        const viewBound = viewport.calcViewportInfo().viewBound;
+        return viewBound.right - viewBound.left > 1 && viewBound.bottom - viewBound.top > 1;
     }
 
     private _scrollToPage(pageIndex: number): void {

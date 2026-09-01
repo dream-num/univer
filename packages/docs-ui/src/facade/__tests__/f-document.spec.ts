@@ -96,6 +96,7 @@ function createEditor() {
         doc: FUniver.newAPI(injector).getActiveDocument()!,
         model,
         render,
+        skeleton,
         selections: injector.get(DocSelectionManagerService),
         selection: render.with(DocSelectionRenderService),
         offset: page.st + 3,
@@ -143,6 +144,21 @@ describe('docs-ui document facade', () => {
         }
     });
 
+    it('explicitly scrolls an already-materialized offscreen SDK selection into view', () => {
+        const editor = createEditor();
+        try {
+            const scrollToRange = vi.spyOn(editor.render.with(DocBackScrollRenderController), 'scrollToRange');
+            editor.doc.setSelection(editor.offset, editor.offset);
+            expect(scrollToRange).toHaveBeenCalledWith({
+                startOffset: editor.offset,
+                endOffset: editor.offset,
+                collapsed: true,
+            });
+        } finally {
+            editor.dispose();
+        }
+    });
+
     it.each([0, 3])('resolves an offscreen SDK selection of length %i after page materialization', async (length) => {
         const editor = createEditor();
         try {
@@ -154,6 +170,27 @@ describe('docs-ui document facade', () => {
             await vi.advanceTimersByTimeAsync(40);
             expect(editor.selections.getActiveTextRange()).toMatchObject({ startOffset: editor.offset, endOffset: editor.offset + length });
             expect(editor.selection.getActiveTextRange()?.startOffset).toBe(editor.offset);
+        } finally {
+            editor.dispose();
+        }
+    });
+
+    it('resolves an SDK selection whose page has not been published yet', async () => {
+        const editor = createEditor();
+        try {
+            editor.doc.setSelection(2, 2);
+            const pages = editor.skeleton.getSkeletonData()!.pages;
+            const unpublished = pages.splice(2);
+            editor.skeleton.beginExternalLayout({ reason: 'initial' });
+            editor.doc.setSelection(editor.offset, editor.offset);
+            expect(editor.selections.getActiveTextRange()?.startOffset).not.toBe(editor.offset);
+
+            pages.push(...unpublished);
+            await vi.advanceTimersByTimeAsync(40);
+            expect(editor.selections.getActiveTextRange()).toMatchObject({
+                startOffset: editor.offset,
+                endOffset: editor.offset,
+            });
         } finally {
             editor.dispose();
         }

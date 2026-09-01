@@ -15,23 +15,13 @@
  */
 
 import {
-    CommandService,
-    ConfigService,
-    ContextService,
-    DesktopLogService,
-    DocumentDataModel,
-    ICommandService,
-    IConfigService,
-    IContextService,
-    ILogService,
-    Injector,
     IPermissionService,
-    IUniverInstanceService,
-    PermissionService,
-    UniverInstanceService,
+    Univer,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, setDocumentPermissionValue } from '@univerjs/docs';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
+import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { UnitAction } from '@univerjs/protocol';
 import { describe, expect, it } from 'vitest';
 import { DocHyperLinkPopupService } from '../hyper-link-popup.service';
@@ -50,33 +40,74 @@ class CapturingDocCanvasPopManagerService {
 const CapturingDocCanvasPopManagerServiceCtor = CapturingDocCanvasPopManagerService as unknown as typeof DocCanvasPopManagerService;
 
 function createService() {
-    const injector = new Injector();
-    injector.add([ILogService, { useClass: DesktopLogService }]);
-    injector.add([IConfigService, { useClass: ConfigService }]);
-    injector.add([IContextService, { useClass: ContextService }]);
-    injector.add([ICommandService, { useClass: CommandService }]);
-    injector.add([IUniverInstanceService, { useClass: UniverInstanceService }]);
-    injector.add([IPermissionService, { useClass: PermissionService }]);
+    const univer = new Univer();
+    const injector = univer.__getInjector();
     injector.add([DocCanvasPopManagerService, { useClass: CapturingDocCanvasPopManagerServiceCtor }]);
+    injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
     injector.add([DocSelectionManagerService]);
     injector.add([DocHyperLinkPopupService]);
-    const univerInstanceService = injector.get(IUniverInstanceService) as UniverInstanceService;
-    univerInstanceService.__addUnit(new DocumentDataModel({ id: 'doc-1' }));
+    univer.createUnit(UniverInstanceType.UNIVER_DOC, { id: 'doc-1' });
     const selectionManager = injector.get(DocSelectionManagerService);
     selectionManager.__TEST_ONLY_setCurrentSelection({ unitId: 'doc-1', subUnitId: 'doc-1' });
     const popupManager = injector.get(DocCanvasPopManagerService) as unknown as CapturingDocCanvasPopManagerService;
     const permissionService = injector.get(IPermissionService);
+    const renderManagerService = injector.get(IRenderManagerService);
 
     return {
         service: injector.get(DocHyperLinkPopupService),
         selectionManager,
         attached: popupManager.attached,
         disposed: popupManager.disposed,
+        disposeRender: (unitId: string) => {
+            renderManagerService.addRender(unitId, {
+                unitId,
+                type: UniverInstanceType.UNIVER_DOC,
+                components: new Map(),
+                engine: { dispose: () => {} },
+                scene: { dispose: () => {} },
+                dispose: () => {},
+            } as never);
+            renderManagerService.removeRender(unitId);
+        },
         permissionService,
     };
 }
 
 describe('DocHyperLinkPopupService', () => {
+    it('closes link popups only when their owning Render is disposed', () => {
+        const { service, disposed, disposeRender } = createService();
+        const link = {
+            unitId: 'doc-1',
+            linkId: 'link-1',
+            startIndex: 4,
+            endIndex: 8,
+        };
+
+        service.showEditPopup('doc-1', link);
+        service.showInfoPopup(link);
+        disposeRender('doc-2');
+        expect(disposed).toEqual([]);
+
+        disposeRender('doc-1');
+        expect(disposed).toEqual([1, 2]);
+    });
+
+    it('releases owned link popups when the service is disposed', () => {
+        const { service, disposed } = createService();
+        const link = {
+            unitId: 'doc-1',
+            linkId: 'link-1',
+            startIndex: 4,
+            endIndex: 8,
+        };
+
+        service.showEditPopup('doc-1', link);
+        service.showInfoPopup(link);
+        service.dispose();
+
+        expect(disposed).toEqual([1, 2]);
+    });
+
     it('opens edit and info popups around the selected document link and disposes previous popups', () => {
         const { service, selectionManager, attached, disposed } = createService();
         const refreshes: unknown[] = [];

@@ -17,6 +17,7 @@
 import { Disposable, DocumentDataModel, Inject, IPermissionService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { canEditDocumentTargets, DocSelectionManagerService, getDocumentEntityParentPermissionObjectIds, getDocumentEntityPermissionObjectId } from '@univerjs/docs';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { BehaviorSubject } from 'rxjs';
 import { DocHyperLinkEdit } from '../views/DocHyperLinkEdit';
 import { DocLinkPopup } from '../views/DocLinkPopup';
@@ -39,6 +40,7 @@ export class DocHyperLinkPopupService extends Disposable {
     readonly showingLink$ = this._showingLink$.asObservable();
 
     private _editPopup: LinkPopupDisposable | null = null;
+    private _editPopupUnitId: string | null = null;
     private _infoPopup: LinkPopupDisposable | null = null;
     private _infoPopupSuppressed = false;
     private _infoPopupSuppressionTimer: ReturnType<typeof setTimeout> | null = null;
@@ -47,7 +49,8 @@ export class DocHyperLinkPopupService extends Disposable {
         @Inject(DocCanvasPopManagerService) private readonly _docCanvasPopupManagerService: DocCanvasPopManagerService,
         @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @IPermissionService private readonly _permissionService: IPermissionService
+        @IPermissionService private readonly _permissionService: IPermissionService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
 
@@ -69,6 +72,20 @@ export class DocHyperLinkPopupService extends Disposable {
                 this._showingLink$.next({ ...showing });
             }
         }));
+        this.disposeWithMe(this._renderManagerService.disposed$.subscribe((unitId) => {
+            if (this._editPopupUnitId === unitId) {
+                this.hideEditPopup();
+            }
+            if (this.showing?.unitId === unitId) {
+                this.hideInfoPopup();
+            }
+        }));
+    }
+
+    override dispose(): void {
+        this.hideEditPopup();
+        this.hideInfoPopup();
+        super.dispose();
     }
 
     get editing() {
@@ -85,6 +102,8 @@ export class DocHyperLinkPopupService extends Disposable {
         }
         if (this._editPopup) {
             this._editPopup.dispose();
+            this._editPopup = null;
+            this._editPopupUnitId = null;
         }
         this._editingLink$.next(linkInfo);
         const textRanges = this._textSelectionManagerService.getTextRanges({ unitId, subUnitId: unitId });
@@ -116,6 +135,7 @@ export class DocHyperLinkPopupService extends Disposable {
                 },
                 unitId
             );
+            this._editPopupUnitId = unitId;
             return this._editPopup;
         }
 
@@ -125,6 +145,8 @@ export class DocHyperLinkPopupService extends Disposable {
     hideEditPopup() {
         this._editingLink$.next(null);
         this._editPopup?.dispose();
+        this._editPopup = null;
+        this._editPopupUnitId = null;
     }
 
     showInfoPopup(info: ILinkInfo): LinkPopupDisposable | null | undefined {
@@ -146,6 +168,7 @@ export class DocHyperLinkPopupService extends Disposable {
 
         if (this._infoPopup) {
             this._infoPopup.dispose();
+            this._infoPopup = null;
         }
         const doc = this._univerInstanceService.getUnit(unitId, UniverInstanceType.UNIVER_DOC);
         if (!(doc instanceof DocumentDataModel)) {
@@ -178,6 +201,7 @@ export class DocHyperLinkPopupService extends Disposable {
     hideInfoPopup() {
         this._showingLink$.next(null);
         this._infoPopup?.dispose();
+        this._infoPopup = null;
     }
 
     hideInfoPopupOnPointerDown() {

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+// @vitest-environment jsdom
+
 import type { DocumentDataModel } from '@univerjs/core';
 import type { IRenderContext } from '@univerjs/engine-render';
 import {
@@ -30,6 +32,8 @@ import {
     DocSkeletonManagerService,
 } from '@univerjs/docs';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { NEVER } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DocHyperLinkPopupService } from '../../../services/hyper-link-popup.service';
 import { DocHyperLinkRenderController } from '../render.controller';
@@ -52,6 +56,7 @@ describe('DocHyperLinkRenderController', () => {
         injector.add([DocSelectionManagerService]);
         injector.add([DocSkeletonManagerService, { useFactory: () => injector.createInstance(DocSkeletonManagerService, context) }]);
         injector.add([DocInterceptorService, { useFactory: () => injector.createInstance(DocInterceptorService, context) }]);
+        injector.add([IRenderManagerService, { useValue: { disposed$: NEVER } as unknown as IRenderManagerService }]);
         // Canvas popup mounting is the unavailable platform boundary in this unit test.
         const disposePopup = vi.fn();
         injector.add([DocCanvasPopManagerService, { useValue: {

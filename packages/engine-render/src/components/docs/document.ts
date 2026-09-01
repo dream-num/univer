@@ -14,7 +14,15 @@
  * limitations under the License.
  */
 
-import type { ICustomRange, IDocumentRenderConfig, IScale, ITableCell, ITableCellBorder, Nullable } from '@univerjs/core';
+import type {
+    ICustomRange,
+    IDocumentRenderConfig,
+    IParagraphBorder,
+    IScale,
+    ITableCell,
+    ITableCellBorder,
+    Nullable,
+} from '@univerjs/core';
 import type {
     IDocumentSkeletonColumnGroup,
     IDocumentSkeletonColumnGroupColumn,
@@ -35,7 +43,7 @@ import type { DocumentSkeleton } from './layout/doc-skeleton';
 import type { IDocsTableRenderViewport } from './table-render-viewport';
 import { CellValueType, ColumnSeparatorType, DashStyleType, DocumentFlavor, HorizontalAlign, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { Subject } from 'rxjs';
-import { BORDER_TYPE as BORDER_LTRB, drawLineByBorderType } from '../../basics';
+import { BORDER_TYPE, COLOR_BLACK_RGB, drawLineByBorderType } from '../../basics';
 import { calculateRectRotate, getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
 import { LineType } from '../../basics/i-document-skeleton-cached';
 import { VERTICAL_ROTATE_ANGLE } from '../../basics/text-rotation';
@@ -47,6 +55,7 @@ import { DOCS_EXTENSION_TYPE } from './doc-extension';
 import { getDocumentCompatibilityPolicy, shouldAllowImportedTableMarginOverflow } from './document-compatibility';
 import { collectBackgroundGlyphRuns } from './extensions/background-runs';
 import { getTableIdAndSliceIndex } from './layout/block/table';
+import { getColorStyleForCanvas } from './layout/style/color';
 import { documentSkeletonTableIterator } from './layout/tools';
 import { Liquid } from './liquid';
 import { getDocsTableRenderViewport, getDocsTableViewportLeft, hasDocsTableHorizontalViewport } from './table-render-viewport';
@@ -632,9 +641,7 @@ export class Documents extends DocComponent {
                                 this._drawLiquid.translateRestore();
                             }
 
-                            if (line.borderBottom) {
-                                this._drawBorderBottom(ctx, page, line, column.width);
-                            }
+                            this._drawParagraphBorders(ctx, page, line, column.width);
                             this._drawLiquid.translateRestore();
                         }
                     }
@@ -990,7 +997,7 @@ export class Documents extends DocComponent {
         ctx.restore();
     }
 
-    private _drawBorderBottom(
+    private _drawParagraphBorders(
         ctx: UniverRenderingContext,
         page: IDocumentSkeletonPage,
         line: IDocumentSkeletonLine,
@@ -998,7 +1005,11 @@ export class Documents extends DocComponent {
         left = 0,
         top = 0
     ) {
-        if (this._drawLiquid == null) {
+        const bottomBorder = line.borderBetween ?? line.borderBottom;
+        if (
+            this._drawLiquid == null ||
+            (!line.borderTop && !bottomBorder && !line.borderLeft && !line.borderRight)
+        ) {
             return;
         }
         let { x, y } = this._drawLiquid;
@@ -1007,21 +1018,35 @@ export class Documents extends DocComponent {
         x += marginLeft + (left ?? 0);
         y -= line.marginTop;
         y -= line.paddingTop;
-        // Paragraph spacing is included in lineHeight, while border padding is measured from the text bottom.
-        y += marginTop + top + line.lineHeight - line.marginBottom + (line.borderBottom?.padding ?? 0);
+        y += marginTop + top;
 
-        ctx.save();
-        const border = line.borderBottom;
-        ctx.setLineWidthByPrecision(Math.max(0, border?.width ?? 1));
-        ctx.strokeStyle = border?.color.rgb ?? '#CDD0D8';
-        setDocsBorderDash(ctx, border?.dashStyle);
-        drawLineByBorderType(ctx, BORDER_LTRB.BOTTOM, 0, {
-            startX: x,
-            startY: y,
-            endX: x + width,
-            endY: y,
-        });
-        ctx.restore();
+        const startX = x + (line.paragraphPaddingLeft ?? 0) - (line.borderLeft?.padding ?? 0);
+        const endX = x + width - (line.paragraphPaddingRight ?? 0) + (line.borderRight?.padding ?? 0);
+        const startY = y + line.marginTop - (line.borderTop?.padding ?? 0);
+        const endY = y + line.lineHeight - line.marginBottom + (bottomBorder?.padding ?? 0);
+        const drawBorder = (border: IParagraphBorder, type: BORDER_TYPE) => {
+            ctx.save();
+            ctx.setLineWidthByPrecision(Math.max(0, border.width ?? 1));
+            ctx.strokeStyle = border.color.rgb === 'auto'
+                ? COLOR_BLACK_RGB
+                : getColorStyleForCanvas(border.color) ?? COLOR_BLACK_RGB;
+            setDocsBorderDash(ctx, border.dashStyle);
+            drawLineByBorderType(ctx, type, 0, { startX, startY, endX, endY });
+            ctx.restore();
+        };
+
+        if (line.borderTop) {
+            drawBorder(line.borderTop, BORDER_TYPE.TOP);
+        }
+        if (bottomBorder) {
+            drawBorder(bottomBorder, BORDER_TYPE.BOTTOM);
+        }
+        if (line.borderLeft) {
+            drawBorder(line.borderLeft, BORDER_TYPE.LEFT);
+        }
+        if (line.borderRight) {
+            drawBorder(line.borderRight, BORDER_TYPE.RIGHT);
+        }
     }
 
     private _drawGlyphGroupBackgrounds(
@@ -1316,9 +1341,14 @@ export class Documents extends DocComponent {
                             this._drawLiquid.translateRestore();
                         }
 
-                        if (line.borderBottom) {
-                            this._drawBorderBottom(ctx, nestedPage, line, column.width, parentPage.marginLeft, parentPage.marginTop);
-                        }
+                        this._drawParagraphBorders(
+                            ctx,
+                            nestedPage,
+                            line,
+                            column.width,
+                            parentPage.marginLeft,
+                            parentPage.marginTop
+                        );
 
                         this._drawLiquid.translateRestore();
                     }
@@ -1382,15 +1412,15 @@ export class Documents extends DocComponent {
 
         const rightCellSource = this._getTableCellSource(rowSke, index + 1);
         const bottomCellSource = tableSke ? this._getTableCellSource(tableSke.rows[rowIndex + 1], index) : undefined;
-        this._drawTableCellBorder(ctx, this._resolveTableCellBorder(cellSource.borderRight, rightCellSource?.borderLeft), BORDER_LTRB.RIGHT, position);
-        this._drawTableCellBorder(ctx, this._resolveTableCellBorder(cellSource.borderBottom, bottomCellSource?.borderTop), BORDER_LTRB.BOTTOM, position);
+        this._drawTableCellBorder(ctx, this._resolveTableCellBorder(cellSource.borderRight, rightCellSource?.borderLeft), BORDER_TYPE.RIGHT, position);
+        this._drawTableCellBorder(ctx, this._resolveTableCellBorder(cellSource.borderBottom, bottomCellSource?.borderTop), BORDER_TYPE.BOTTOM, position);
 
         if (rowIndex <= 0) {
-            this._drawTableCellBorder(ctx, this._resolveTableCellBorder(cellSource.borderTop), BORDER_LTRB.TOP, position);
+            this._drawTableCellBorder(ctx, this._resolveTableCellBorder(cellSource.borderTop), BORDER_TYPE.TOP, position);
         }
 
         if (index <= 0) {
-            this._drawTableCellBorder(ctx, this._resolveTableCellBorder(cellSource.borderLeft), BORDER_LTRB.LEFT, position);
+            this._drawTableCellBorder(ctx, this._resolveTableCellBorder(cellSource.borderLeft), BORDER_TYPE.LEFT, position);
         }
     }
 
@@ -1427,7 +1457,7 @@ export class Documents extends DocComponent {
     private _drawTableCellBorder(
         ctx: UniverRenderingContext,
         border: Nullable<ITableCellBorder>,
-        type: BORDER_LTRB,
+        type: BORDER_TYPE,
         position: { startX: number; startY: number; endX: number; endY: number }
     ) {
         if (!border) {
@@ -1632,9 +1662,7 @@ export class Documents extends DocComponent {
                             this._drawLiquid.translateRestore();
                         }
 
-                        if (line.borderBottom) {
-                            this._drawBorderBottom(ctx, page, line, column.width, parentPage.marginLeft);
-                        }
+                        this._drawParagraphBorders(ctx, page, line, column.width, parentPage.marginLeft);
 
                         this._drawLiquid.translateRestore();
                     }

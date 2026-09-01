@@ -854,7 +854,7 @@ describe('documents render', () => {
         documents.dispose();
     });
 
-    it('draws paragraph bottom borders with their configured width and dash style', () => {
+    it('draws all paragraph borders with their own style, padding, and paragraph indentation', () => {
         const skeleton = { getSkeletonData: () => ({ pages: [] }) } as any;
         const documents = new Documents('docs-paragraph-border', skeleton, {
             pageLayoutType: PageLayoutType.VERTICAL,
@@ -863,16 +863,35 @@ describe('documents render', () => {
         });
         const page = createPage(DocumentSkeletonPageType.BODY, '');
         const line = page.sections[0].columns[0].lines[1];
+        line.paragraphPaddingLeft = 8;
+        line.paragraphPaddingRight = 12;
+        line.borderTop = {
+            color: { rgb: 'auto' },
+            width: 1,
+            padding: 3,
+            dashStyle: DashStyleType.DOT,
+        };
         line.borderBottom = {
-            color: { rgb: '#ff0000' },
-            width: 2.5,
-            padding: 4,
+            color: { rgb: '#444444' },
+            width: 4,
+            padding: 6,
             dashStyle: DashStyleType.DASH,
         };
-        line.lineHeight += 6;
-        line.marginBottom = 6;
+        line.borderLeft = {
+            color: { rgb: '#222222' },
+            width: 2,
+            padding: 4,
+            dashStyle: DashStyleType.SOLID,
+        };
+        line.borderRight = {
+            color: { rgb: '#333333' },
+            width: 3,
+            padding: 5,
+            dashStyle: DashStyleType.DASH,
+        };
         (documents as any)._drawLiquid = { x: 0, y: 0 };
 
+        const strokeStyles: string[] = [];
         const ctx = {
             save: vi.fn(),
             restore: vi.fn(),
@@ -883,15 +902,23 @@ describe('documents render', () => {
             setLineDash: vi.fn(),
             stroke: vi.fn(),
             closePathByEnv: vi.fn(),
-            set strokeStyle(_value: string) {},
+            set strokeStyle(value: string) {
+                strokeStyles.push(value);
+            },
         } as any;
 
-        (documents as any)._drawBorderBottom(ctx, page, line, 72);
+        (documents as any)._drawParagraphBorders(ctx, page, line, 72);
 
-        expect(ctx.setLineWidthByPrecision).toHaveBeenCalledWith(2.5);
-        expect(ctx.setLineDash).toHaveBeenCalledWith([6]);
-        expect(ctx.lineToByPrecision).toHaveBeenCalledWith(82, 33);
-        expect(ctx.stroke).toHaveBeenCalledTimes(1);
+        expect(ctx.setLineWidthByPrecision.mock.calls).toEqual([[1], [4], [2], [3]]);
+        expect(ctx.setLineDash.mock.calls).toEqual([[[2]], [[6]], [[0]], [[6]]]);
+        expect(ctx.lineToByPrecision.mock.calls).toEqual([
+            [75, 7],
+            [75, 35],
+            [14, 35],
+            [75, 35],
+        ]);
+        expect(strokeStyles).toEqual(['rgb(0,0,0)', '#444444', '#222222', '#333333']);
+        expect(ctx.stroke).toHaveBeenCalledTimes(4);
 
         documents.dispose();
     });

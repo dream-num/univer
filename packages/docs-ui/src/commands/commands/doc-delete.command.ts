@@ -24,6 +24,7 @@ import {
     DataStreamTreeTokenType,
     DeleteDirection,
     getBlockRangeInterval,
+    getParagraphContentStartOffset,
     getRichTextEditPath,
     HorizontalAlign,
     ICommandService,
@@ -47,6 +48,7 @@ import {
 } from '@univerjs/docs';
 import { getParagraphByGlyph, hasListGlyph, isFirstGlyph, isIndentByGlyph } from '@univerjs/engine-render';
 import { DocAutoFormatService } from '../../services/doc-auto-format.service';
+import { isHorizontalLineParagraph } from '../../utils/horizontal-line';
 import { getCommandSkeleton } from '../util';
 import { CutContentCommand } from './clipboard.inner.command';
 import { getCurrentParagraph } from './util';
@@ -571,10 +573,14 @@ export const DeleteLeftCommand: ICommand = {
                 if (preGlyph == null) {
                     return true;
                 }
-                if (preGlyph.content === '\r') {
+                if (preGlyph.content === DataStreamTreeTokenType.PARAGRAPH) {
                     const paragraph = body.paragraphs?.find((p) => p.startIndex === startOffset - 1);
+                    const paragraphStart = paragraph == null ? 0 : getParagraphContentStartOffset(body, paragraph);
+                    const paragraphDataStream = paragraph == null
+                        ? ''
+                        : body.dataStream.slice(paragraphStart, paragraph.startIndex + 1);
 
-                    if (paragraph?.paragraphStyle?.borderBottom) {
+                    if (isHorizontalLineParagraph(paragraphDataStream, paragraph)) {
                         result = await commandService.executeCommand(RemoveHorizontalLineCommand.id);
                     } else {
                         result = await commandService.executeCommand(MergeTwoParagraphCommand.id, {

@@ -23,6 +23,7 @@ import { canEditDocumentTargets, DocSelectionManagerService, DocSkeletonManagerS
 import { DocumentEditArea } from '@univerjs/engine-render';
 import { BehaviorSubject, combineLatest, first, throttleTime } from 'rxjs';
 import { VIEWPORT_KEY } from '../basics/docs-view-key';
+import { isHorizontalLineParagraph } from '../utils/horizontal-line';
 import {
     DOC_PARAGRAPH_MENU_COMPONENT_KEY,
     DOC_TABLE_BLOCK_MENU_COMPONENT_KEY,
@@ -767,7 +768,7 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
         const paragraphDataStream = dataStream.slice(paragraph.paragraphStart, paragraph.paragraphEnd);
         const paragraphModel = body?.paragraphs?.find((item) => item.startIndex === paragraph.startIndex);
         const listIcon = getListIcon(paragraphModel?.bullet?.listType);
-        const isHorizontalRuleParagraph = paragraphDataStream.replace(/[\r\n]/g, '') === '' && !!paragraphModel?.paragraphStyle?.borderBottom;
+        const isHorizontalRuleParagraph = isHorizontalLineParagraph(paragraphDataStream, paragraphModel);
         const customBlock = body?.customBlocks?.find((item) => item.startIndex >= paragraph.paragraphStart && item.startIndex <= paragraph.paragraphEnd);
         const isCustomBlockOnly = customBlock?.blockType === BlockType.CUSTOM && paragraphDataStream.replace(/[\b\r\n]/g, '') === '';
         if (customBlock && customBlock.blockType === BlockType.CUSTOM && isCustomBlockOnly) {

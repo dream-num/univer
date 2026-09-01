@@ -20,6 +20,7 @@ import {
     ColumnSeparatorType,
     createDocumentModelWithStyle,
     CustomRangeType,
+    DashStyleType,
     DataStreamTreeTokenType,
     DocumentDataModel,
     DocumentFlavor,
@@ -1532,6 +1533,55 @@ describe('doc skeleton', () => {
 
         syncSkeleton.dispose();
         incrementalSkeleton.dispose();
+        univer.dispose();
+    });
+
+    it('resolves matching paragraph borders across incrementally finalized page boundaries', () => {
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        const paragraphToken = DataStreamTreeTokenType.PARAGRAPH;
+        const sectionToken = DataStreamTreeTokenType.SECTION_BREAK;
+        let dataStream = '';
+        const border = {
+            color: { rgb: '#555555' },
+            width: 2,
+            padding: 1,
+            dashStyle: DashStyleType.SOLID,
+        };
+        const paragraphs: IParagraph[] = Array.from({ length: 12 }, (_, index) => {
+            dataStream += `Paragraph ${index}${paragraphToken}`;
+            return {
+                startIndex: dataStream.length - 1,
+                paragraphId: `border-paragraph-${index}`,
+                paragraphStyle: {
+                    lineSpacing: 20,
+                    spacingRule: SpacingRule.EXACT,
+                    borderTop: border,
+                    borderBottom: border,
+                    borderBetween: border,
+                },
+            };
+        });
+        dataStream += sectionToken;
+        const snapshot = {
+            id: 'incremental-paragraph-borders',
+            body: {
+                dataStream,
+                paragraphs,
+                sectionBreaks: [{ sectionId: 'body-section', startIndex: dataStream.length - 1 }],
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageSize: { width: 180, height: 100 },
+                marginTop: 10,
+                marginBottom: 10,
+                marginLeft: 10,
+                marginRight: 10,
+            },
+        };
+
+        expectIncrementalSkeletonToEqualSynchronous(snapshot, localeService);
+
         univer.dispose();
     });
 

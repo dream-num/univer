@@ -72,6 +72,7 @@ import {
     setPageParent,
     updateBlockIndex,
     updateInlineDrawingCoordsAndBorder,
+    updateParagraphBorders,
 } from './tools';
 
 function getEffectiveSectionType(sectionType: SectionType | undefined): SectionType {
@@ -2180,6 +2181,23 @@ export class DocumentSkeleton extends Skeleton {
             const startIndex = ctx.skeleton.pages[state.finalizedPageCount - 1]?.ed ?? -1;
             updateBlockIndex(pages, startIndex, ctx.docsConfig.documentCompatibilityPolicy);
             updateInlineDrawingCoordsAndBorder(ctx, pages);
+            const previousPageIndex = state.finalizedPageCount - 1;
+            if (previousPageIndex >= 0 && previousPageIndex < state.stablePageCount) {
+                const previousPage = clonePageFlowForPublish(ctx.skeleton.pages[previousPageIndex]);
+                previousPage.parent = ctx.skeleton;
+                ctx.skeleton.pages[previousPageIndex] = previousPage;
+            }
+            updateParagraphBorders(
+                ctx,
+                ctx.skeleton.pages.slice(
+                    Math.max(0, state.finalizedPageCount - 1),
+                    Math.min(ctx.skeleton.pages.length, endPageIndex + 1)
+                ),
+                pages
+            );
+        }
+        if (state.complete && publishedPageCount >= ctx.skeleton.pages.length) {
+            updateParagraphBorders(ctx, ctx.skeleton.pages);
         }
         state.finalizedPageCount = state.reusedTail
             ? publishedPageCount

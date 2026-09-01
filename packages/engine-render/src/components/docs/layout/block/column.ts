@@ -145,16 +145,21 @@ function createColumnContentPage(
     const page = createSkeletonPage(ctx, columnSectionBreakConfig, ctx.skeletonResourceReference);
     page.type = DocumentSkeletonPageType.CELL;
 
-    for (const paragraphNode of getColumnParagraphNodes(columnNode)) {
-        dealWidthParagraph(ctx, viewModel, paragraphNode, page, columnSectionBreakConfig);
+    const paragraphNodes = getColumnParagraphNodes(columnNode);
+    for (let index = 0; index < paragraphNodes.length; index++) {
+        const paragraphNode = paragraphNodes[index];
+        const nextParagraphNode = paragraphNodes[index + 1]?.nodeType === DataStreamTreeNodeType.PARAGRAPH
+            ? paragraphNodes[index + 1]
+            : undefined;
+        dealWidthParagraph(ctx, viewModel, paragraphNode, page, columnSectionBreakConfig, nextParagraphNode);
     }
 
-    updateInlineDrawingCoordsAndBorder(ctx, [page]);
     updateBlockIndex(
         [page],
         columnNode.startIndex,
         sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy()
     );
+    updateInlineDrawingCoordsAndBorder(ctx, [page]);
     applyTrailingBlockRangeSpaceBelow([page], ctx.dataModel?.getBody?.(), columnNode.endIndex);
 
     return page;

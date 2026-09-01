@@ -23,6 +23,7 @@ import type {
     IObjectPositionH,
     IObjectPositionV,
     IParagraph,
+    IParagraphBorder,
     IParagraphStyle,
     ISectionBreak,
     ITextStyle,
@@ -37,6 +38,7 @@ import type {
     IDocumentSkeletonGlyph,
     IDocumentSkeletonLine,
     IDocumentSkeletonPage,
+    IDocumentSkeletonParagraphBorders,
     IDocumentSkeletonRow,
     IDocumentSkeletonSection,
     IDocumentSkeletonTable,
@@ -642,6 +644,36 @@ function collapseRedundantColumnBreakOverflow(section: IDocumentSkeletonSection)
     section.columns.splice(expectedColumnCount);
 }
 
+function isParagraphEnd(line: IDocumentSkeletonLine) {
+    const lastDivide = line.divides[line.divides.length - 1];
+    const lastGlyph = lastDivide?.glyphGroup[lastDivide.glyphGroup.length - 1];
+
+    return line.ed >= line.paragraphIndex || lastGlyph?.streamType === DataStreamTreeTokenType.PARAGRAPH;
+}
+
+function isSameParagraphBorder(first?: IParagraphBorder, second?: IParagraphBorder) {
+    if (first === second) {
+        return true;
+    }
+    if (!first || !second) {
+        return false;
+    }
+
+    return first.color.rgb === second.color.rgb &&
+        first.color.th === second.color.th &&
+        first.width === second.width &&
+        first.padding === second.padding &&
+        first.dashStyle === second.dashStyle;
+}
+
+export function hasSameParagraphBorderSet(first: IDocumentSkeletonParagraphBorders, second: IDocumentSkeletonParagraphBorders) {
+    return isSameParagraphBorder(first.borderTop, second.borderTop) &&
+        isSameParagraphBorder(first.borderBottom, second.borderBottom) &&
+        isSameParagraphBorder(first.borderLeft, second.borderLeft) &&
+        isSameParagraphBorder(first.borderRight, second.borderRight) &&
+        isSameParagraphBorder(first.borderBetween, second.borderBetween);
+}
+
 export function updateInlineDrawingCoordsAndBorder(ctx: ILayoutContext, pages: IDocumentSkeletonPage[]) {
     lineIterator(pages, (line, _, __, page) => {
         const { segmentId } = page;
@@ -666,13 +698,100 @@ export function updateInlineDrawingCoordsAndBorder(ctx: ILayoutContext, pages: I
         if (paragraphBackgroundColor) {
             line.backgroundColor = paragraphBackgroundColor;
         }
+    });
 
-        if (line.divides.length > 0) {
-            const lastDivide = line.divides[line.divides.length - 1];
-            const lastGlyph = lastDivide.glyphGroup[lastDivide.glyphGroup.length - 1];
+    updateParagraphBorders(ctx, pages);
+}
 
-            if (lastGlyph?.streamType === DataStreamTreeTokenType.PARAGRAPH && paragraphStyle?.borderBottom) {
-                line.borderBottom = paragraphStyle.borderBottom;
+export function updateParagraphBorders(
+    ctx: ILayoutContext,
+    pages: IDocumentSkeletonPage[],
+    targetPages: IDocumentSkeletonPage[] = pages
+) {
+    const targetPageSet = new Set(targetPages);
+    const renderLines: Array<{
+        line: IDocumentSkeletonLine;
+        paragraphBorders?: IDocumentSkeletonParagraphBorders;
+        segmentId?: string;
+        target: boolean;
+    }> = [];
+    const bordersByParagraphStyle = new Map<IParagraphStyle, IDocumentSkeletonParagraphBorders>();
+
+    lineIterator(pages, (line, _, __, page) => {
+        const { segmentId } = page;
+        const paragraphConfig = ctx.paragraphConfigCache.get(segmentId)?.get(line.paragraphIndex);
+        const paragraphStyle = paragraphConfig?.paragraphStyle;
+        let paragraphBorders = paragraphStyle == null ? undefined : bordersByParagraphStyle.get(paragraphStyle);
+        if (paragraphStyle && !paragraphBorders && (paragraphStyle.borderTop ||
+                paragraphStyle.borderBottom ||
+                paragraphStyle.borderLeft ||
+                paragraphStyle.borderRight ||
+                paragraphStyle.borderBetween)) {
+            paragraphBorders = {
+                borderTop: paragraphStyle.borderTop,
+                borderBottom: paragraphStyle.borderBottom,
+                borderLeft: paragraphStyle.borderLeft,
+                borderRight: paragraphStyle.borderRight,
+                borderBetween: paragraphStyle.borderBetween,
+            };
+            bordersByParagraphStyle.set(paragraphStyle, paragraphBorders);
+        }
+        const target = targetPageSet.has(page);
+        if (target && paragraphConfig) {
+            line.paragraphBorders = paragraphBorders;
+        }
+
+        renderLines.push({
+            line,
+            paragraphBorders: paragraphConfig ? paragraphBorders : line.paragraphBorders,
+            segmentId,
+            target,
+        });
+    });
+
+    renderLines.forEach(({ line, paragraphBorders, segmentId, target }, index) => {
+        const previous = renderLines[index - 1];
+        const next = renderLines[index + 1];
+        const updateTop = target || previous?.target === true;
+        const updateBottom = target || next?.target === true;
+        if (!target && !updateTop && !updateBottom) {
+            return;
+        }
+
+        const hasMatchingPrevious = line.paragraphStart &&
+            previous != null &&
+            previous.segmentId === segmentId &&
+            previous.line.paragraphIndex !== line.paragraphIndex &&
+            previous.paragraphBorders != null &&
+            paragraphBorders != null &&
+            isParagraphEnd(previous.line) &&
+            hasSameParagraphBorderSet(previous.paragraphBorders, paragraphBorders);
+        const hasMatchingNext = isParagraphEnd(line) &&
+            next != null &&
+            next.segmentId === segmentId &&
+            next.line.paragraphIndex !== line.paragraphIndex &&
+            next.paragraphBorders != null &&
+            paragraphBorders != null &&
+            hasSameParagraphBorderSet(paragraphBorders, next.paragraphBorders);
+
+        if (updateTop) {
+            line.borderTop = line.paragraphStart && !hasMatchingPrevious
+                ? paragraphBorders?.borderTop
+                : undefined;
+        }
+        if (target) {
+            line.borderLeft = paragraphBorders?.borderLeft;
+            line.borderRight = paragraphBorders?.borderRight;
+        }
+        if (updateBottom) {
+            line.borderBetween = undefined;
+            line.borderBottom = undefined;
+            if (isParagraphEnd(line)) {
+                if (hasMatchingNext && paragraphBorders?.borderBetween) {
+                    line.borderBetween = paragraphBorders.borderBetween;
+                } else if (paragraphBorders?.borderBottom) {
+                    line.borderBottom = paragraphBorders.borderBottom;
+                }
             }
         }
     });

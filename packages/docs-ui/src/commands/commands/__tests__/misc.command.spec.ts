@@ -1509,7 +1509,16 @@ describe('misc document commands', () => {
     });
 
     it('updates document page setup through the real rich text mutation flow', async () => {
-        ({ univer, get } = createCommandTestBed(createBaseDoc()));
+        const doc = createBaseDoc();
+        Object.assign(doc.body!.sectionBreaks![0], {
+            pageSize: { width: 500, height: 700 },
+            pageOrient: PageOrientType.PORTRAIT,
+            marginTop: 10,
+            marginBottom: 20,
+            marginLeft: 30,
+            marginRight: 40,
+        });
+        ({ univer, get } = createCommandTestBed(doc));
         commandService = get(ICommandService);
         commandService.registerCommand(DocPageSetupCommand);
         commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
@@ -1529,6 +1538,14 @@ describe('misc document commands', () => {
         expect(result).toBe(true);
         expect(getDoc()?.getDocumentStyle()).toEqual(expect.objectContaining({
             documentFlavor: DocumentFlavor.TRADITIONAL,
+            pageSize: PAGE_SIZE[PaperType.A3],
+            pageOrient: PageOrientType.LANDSCAPE,
+            marginTop: 36,
+            marginBottom: 42,
+            marginLeft: 48,
+            marginRight: 54,
+        }));
+        expect(getDoc()?.getBody()?.sectionBreaks?.[0]).toEqual(expect.objectContaining({
             pageSize: PAGE_SIZE[PaperType.A3],
             pageOrient: PageOrientType.LANDSCAPE,
             marginTop: 36,

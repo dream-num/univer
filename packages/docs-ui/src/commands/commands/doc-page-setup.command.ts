@@ -18,6 +18,7 @@ import type {
     DocumentDataModel,
     ICommand,
     ICommandInfo,
+    IDocumentBody,
     IDocumentStyle,
     ISize,
     ITable,
@@ -35,7 +36,7 @@ import {
     MODERN_DOCUMENT_DEFAULT_MARGIN,
     UniverInstanceType,
 } from '@univerjs/core';
-import { DocHistoryAction, RichTextEditingMutation } from '@univerjs/docs';
+import { DocHistoryAction, getTopLevelSectionBreaks, RichTextEditingMutation } from '@univerjs/docs';
 
 export interface IDocPageSetupCommandParams {
     pageSize: ISize;
@@ -110,6 +111,27 @@ function resizePageFillTables(jsonX: JSONX, rawActions: NonNullable<JSONXActions
     });
 }
 
+function updateTopLevelSectionPageSetup(
+    jsonX: JSONX,
+    rawActions: NonNullable<JSONXActions>,
+    body: IDocumentBody | null | undefined,
+    config: Pick<IDocumentStyle, 'marginBottom' | 'marginLeft' | 'marginRight' | 'marginTop' | 'pageOrient' | 'pageSize'>
+) {
+    if (!body?.sectionBreaks?.length) {
+        return;
+    }
+
+    const sectionIds = new Set(getTopLevelSectionBreaks(body).map(({ sectionId }) => sectionId));
+    body.sectionBreaks.forEach((section, index) => {
+        if (!sectionIds.has(section.sectionId)) {
+            return;
+        }
+        const nextSection = { ...section, ...config };
+        const action = jsonX.replaceOp(['body', 'sectionBreaks', index], section, nextSection);
+        action && rawActions.push(action);
+    });
+}
+
 export const DocPageSetupCommand: ICommand<IDocPageSetupCommandParams> = {
     id: 'docs.command.page-setup',
     type: CommandType.COMMAND,
@@ -152,6 +174,19 @@ export const DocPageSetupCommand: ICommand<IDocPageSetupCommandParams> = {
             getPageContentWidth(documentStyle),
             getPageContentWidth(newDocumentStyle)
         );
+        if (newDocumentStyle.documentFlavor !== DocumentFlavor.MODERN) {
+            // Imported DOCX files commonly store page geometry on every section.
+            // Updating only documentStyle leaves those explicit values in charge,
+            // so the Page Setup dialog appears to succeed without changing a page.
+            updateTopLevelSectionPageSetup(jsonX, rawActions, snapshot.body, {
+                marginBottom,
+                marginLeft,
+                marginRight,
+                marginTop,
+                pageOrient,
+                pageSize,
+            });
+        }
 
         if (documentFlavor !== undefined) {
             if (oldDocumentFlavor === undefined) {

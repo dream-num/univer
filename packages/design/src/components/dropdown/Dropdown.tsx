@@ -35,6 +35,7 @@ export function Dropdown(props: IDropdownProps) {
         disabled,
         open: controlledOpen,
         onOpenChange: controlledOnOpenChange,
+        forceMount,
         ...restProps
     } = props;
 
@@ -72,9 +73,11 @@ export function Dropdown(props: IDropdownProps) {
             <PopoverTrigger asChild>
                 {children}
             </PopoverTrigger>
-            <PopoverContent {...restProps}>
-                {overlay}
-            </PopoverContent>
+            {(open || forceMount) && (
+                <PopoverContent forceMount={forceMount} {...restProps}>
+                    {overlay}
+                </PopoverContent>
+            )}
         </PopoverPrimitive>
     );
 }

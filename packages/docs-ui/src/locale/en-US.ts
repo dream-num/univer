@@ -17,6 +17,7 @@
 const locale = {
     'docs-ui': {
         layout: {
+            progress: 'Laying out document…',
             recovering: 'Restoring document layout…',
         },
         toolbar: {

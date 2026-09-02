@@ -19,6 +19,7 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'docs-ui': {
         layout: {
+            progress: 'در حال صفحه‌آرایی سند…',
             recovering: 'در حال بازیابی صفحه‌آرایی سند…',
         },
         toolbar: {

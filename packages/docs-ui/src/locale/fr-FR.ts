@@ -19,6 +19,7 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'docs-ui': {
         layout: {
+            progress: 'Mise en page du document…',
             recovering: 'Restauration de la mise en page du document…',
         },
         toolbar: {

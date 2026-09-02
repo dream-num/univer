@@ -20,6 +20,7 @@ import { IWorkbenchService, useConfigValue, useDependency, useObservable } from 
 import { DOCS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { CountBar } from '../count-bar';
 import { DocStatistics } from '../doc-statistics/DocStatistics';
+import { DocLayoutProgress } from '../DocLayoutProgress';
 
 function DocFooterContent() {
     const config = useConfigValue<IUniverDocsUIConfig>(DOCS_UI_PLUGIN_CONFIG_KEY);
@@ -28,10 +29,12 @@ function DocFooterContent() {
     return isShow && (
         <div
             className={`
-              univer-box-border univer-flex univer-items-center univer-justify-between univer-px-5 univer-py-1.5
+              univer-relative univer-box-border univer-flex univer-items-center univer-justify-between univer-px-5
+              univer-py-1.5
             `}
         >
             {config?.wordCount !== false && <DocStatistics />}
+            <DocLayoutProgress />
             <CountBar />
         </div>
     );

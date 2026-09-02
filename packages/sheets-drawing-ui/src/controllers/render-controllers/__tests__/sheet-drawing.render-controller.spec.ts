@@ -16,7 +16,7 @@
 
 import type { ISheetDrawing } from '@univerjs/sheets-drawing';
 import { DrawingTypeEnum } from '@univerjs/core';
-import { drawingPositionToTransform } from '@univerjs/sheets-drawing';
+import { drawingPositionToTransform, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
 import { describe, expect, it, vi } from 'vitest';
 import { SheetsDrawingRenderController } from '../sheet-drawing.render-controller';
 
@@ -70,6 +70,17 @@ describe('SheetsDrawingRenderController', () => {
                 to: { row: 3, column: 4, rowOffset: 0, columnOffset: 0 },
             },
         };
+        const absoluteDrawing: Partial<ISheetDrawing> = {
+            unitId: 'unit-1',
+            subUnitId: 'sheet-1',
+            drawingId: 'drawing-6',
+            anchorType: SheetDrawingAnchorType.None,
+            transform: { left: 240, top: 96, width: 120, height: 80 },
+            sheetTransform: {
+                from: { row: 0, column: 0, rowOffset: 96, columnOffset: 240 },
+                to: { row: 0, column: 0, rowOffset: 176, columnOffset: 360 },
+            },
+        };
         const drawingData = {
             'sheet-1': {
                 data: {
@@ -77,6 +88,7 @@ describe('SheetsDrawingRenderController', () => {
                     'drawing-3': { unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'drawing-3' },
                     'drawing-4': groupedDrawing,
                     'drawing-5': drawingGroup,
+                    'drawing-6': absoluteDrawing,
                 },
             },
             'missing-sheet': {
@@ -122,6 +134,8 @@ describe('SheetsDrawingRenderController', () => {
         expect(drawingWithSheetTransform.transform).toEqual({ left: 24, top: 36, width: 120, height: 80 });
         expect(drawingGroup.transform).toEqual({ left: 14, top: 16, width: 120, height: 80 });
         expect(groupedDrawing.transform).toEqual({ left: 2, top: 3, width: 40, height: 50 });
+        expect(absoluteDrawing.transform).toEqual({ left: 240, top: 96, width: 120, height: 80 });
+        expect(drawingPositionToTransform).not.toHaveBeenCalledWith(absoluteDrawing.sheetTransform, skeletonParam);
         expect(drawingWithoutSkeleton).not.toHaveProperty('transform');
         expect(drawingManagerService.registerDrawingData).toHaveBeenCalledWith('unit-1', drawingData);
         expect(drawingManagerService.initializeNotification).toHaveBeenCalledWith('unit-1');

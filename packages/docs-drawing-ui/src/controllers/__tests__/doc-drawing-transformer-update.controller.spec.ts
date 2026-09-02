@@ -494,6 +494,28 @@ describe('DocDrawingTransformerController business methods', () => {
 
         expect(controller._getPageContentSize(drawing())).toEqual({ width: 620, height: 840 });
 
+        controller._renderManagerService.getRenderUnitById.mockReturnValue({
+            with: vi.fn(() => ({
+                getSkeleton: () => ({
+                    getSkeletonData: () => ({
+                        pages: [
+                            {
+                                isLayoutPlaceholder: true,
+                                pageWidth: 720,
+                                pageHeight: 960,
+                                marginLeft: 40,
+                                marginRight: 60,
+                                marginTop: 50,
+                                marginBottom: 70,
+                                skeDrawings: new Map([['drawing-1', {}]]),
+                            },
+                        ],
+                    }),
+                }),
+            })),
+        });
+        expect(controller._getPageContentSize(drawing())).toEqual({ width: 500, height: 500 });
+
         controller._renderManagerService.getRenderUnitById.mockReturnValue(null);
         expect(controller._getPageContentSize(drawing())).toEqual({ width: 500, height: 500 });
     });

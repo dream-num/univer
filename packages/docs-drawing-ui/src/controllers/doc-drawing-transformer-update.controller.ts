@@ -979,6 +979,10 @@ export class DocDrawingTransformerController extends Disposable {
         let page: Nullable<IDocumentSkeletonPage> = null;
 
         for (const p of pages) {
+            if (p.isLayoutPlaceholder || p.isMaterializationPlaceholder) {
+                continue;
+            }
+
             const { skeDrawings } = p;
             if (skeDrawings.has(drawing.drawingId)) {
                 page = p;

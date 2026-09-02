@@ -830,6 +830,47 @@ describe('docs drawing commands integration', () => {
         testBed.univer.dispose();
     });
 
+    it('does not move a drawing that only exists on a layout preview page', async () => {
+        const data = createDrawingDocData();
+        const originalTransform = structuredClone(data.drawings!['shape-1'].docTransform);
+        const testBed = setupDrawingTestBed(data);
+        vi.spyOn(testBed.get(DocSkeletonManagerService), 'getSkeleton').mockReturnValue({
+            getSkeletonData: () => ({
+                pages: [{
+                    footerId: '',
+                    headerId: '',
+                    isLayoutPlaceholder: true,
+                    marginBottom: 72,
+                    marginLeft: 90,
+                    marginTop: 72,
+                    pageHeight: 840,
+                    pageWidth: 594,
+                    skeDrawings: new Map([['shape-1', {
+                        aLeft: 247,
+                        aTop: 10,
+                        blockAnchorTop: 0,
+                        columnLeft: 90,
+                        lineTop: 0,
+                    }]]),
+                    skeTables: new Map(),
+                }],
+                skeFooters: new Map(),
+                skeHeaders: new Map(),
+            }),
+        } as never);
+        testBed.docDrawingService.focusDrawing([{ unitId: 'test-doc', subUnitId: 'test-doc', drawingId: 'shape-1' }]);
+
+        expect(await testBed.commandService.executeCommand(MoveDocDrawingsCommand.id, {
+            direction: Direction.RIGHT,
+        })).toBe(false);
+
+        const doc = testBed.get(IUniverInstanceService)
+            .getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC)!;
+        expect(doc.getSnapshot().drawings?.['shape-1'].docTransform).toEqual(originalTransform);
+
+        testBed.univer.dispose();
+    });
+
     it('updates drawing wrap distances through the command pipeline', async () => {
         const testBed = setupDrawingTestBed(createDrawingDocData());
 

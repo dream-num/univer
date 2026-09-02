@@ -75,9 +75,14 @@ export const MoveDocDrawingsCommand: ICommand = {
             }
 
             const { positionH, positionV } = drawingData.docTransform;
-            const anchor = skeletonData == null
-                ? null
+            const anchorLookup = skeletonData == null
+                ? { anchor: null, previewOnly: false }
                 : findDrawingAnchor(skeletonData, drawingId);
+            if (anchorLookup.previewOnly) {
+                return null;
+            }
+
+            const { anchor } = anchorLookup;
             const offsets = anchor == null
                 ? { horizontal: positionH.posOffset ?? 0, vertical: positionV.posOffset ?? 0 }
                 : resolveDrawingAnchorOffsets(anchor, positionH, positionV);
@@ -127,33 +132,34 @@ function findDrawingAnchor(
     skeletonData: IDocumentSkeletonCached,
     drawingId: string
 ) {
+    let foundInPreview = false;
+
     for (const page of skeletonData.pages) {
         const bodyAnchor = findDrawingAnchorInPage(page, drawingId, page.marginTop, page.marginLeft);
-        if (bodyAnchor) {
-            return bodyAnchor;
-        }
-
         const header = page.headerId == null
             ? undefined
             : skeletonData.skeHeaders.get(page.headerId)?.get(page.pageWidth);
-        if (header) {
-            const headerAnchor = findDrawingAnchorInPage(header, drawingId, header.marginTop, page.marginLeft);
-            if (headerAnchor) {
-                return headerAnchor;
-            }
-        }
-
+        const headerAnchor = header == null
+            ? null
+            : findDrawingAnchorInPage(header, drawingId, header.marginTop, page.marginLeft);
         const footer = page.footerId == null
             ? undefined
             : skeletonData.skeFooters.get(page.footerId)?.get(page.pageWidth);
-        if (footer) {
-            const footerTop = page.pageHeight - page.marginBottom + footer.marginTop;
-            const footerAnchor = findDrawingAnchorInPage(footer, drawingId, footerTop, page.marginLeft);
-            if (footerAnchor) {
-                return footerAnchor;
-            }
+        const footerTop = footer == null ? 0 : page.pageHeight - page.marginBottom + footer.marginTop;
+        const footerAnchor = footer == null
+            ? null
+            : findDrawingAnchorInPage(footer, drawingId, footerTop, page.marginLeft);
+        const anchor = bodyAnchor ?? headerAnchor ?? footerAnchor;
+        if (anchor == null) {
+            continue;
         }
+
+        if (!page.isLayoutPlaceholder && !page.isMaterializationPlaceholder) {
+            return { anchor, previewOnly: false };
+        }
+
+        foundInPreview = true;
     }
 
-    return null;
+    return { anchor: null, previewOnly: foundInPreview };
 }

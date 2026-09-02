@@ -52,9 +52,7 @@ export class DocHyperLinkEventRenderController extends Disposable implements IRe
         }
 
         if (this._hyperLinkPopupService.showing) {
-            this._commandService.executeCommand(
-                ToggleDocHyperLinkInfoPopupOperation.id
-            );
+            this._hyperLinkPopupService.scheduleHideInfoPopup();
         }
     }
 

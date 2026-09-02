@@ -23,7 +23,7 @@ import { DocSelectionManagerService, setDocumentPermissionValue } from '@univerj
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { UnitAction } from '@univerjs/protocol';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { DocHyperLinkPopupService } from '../hyper-link-popup.service';
 
 class CapturingDocCanvasPopManagerService {
@@ -222,6 +222,36 @@ describe('DocHyperLinkPopupService', () => {
 
         service.hideInfoPopup();
         expect(service.infoPopupPinned).toBe(false);
+    });
+
+    it('keeps a hovered popup visible while the pointer crosses to it and closes after the handoff delay', () => {
+        vi.useFakeTimers();
+        const { service, disposed } = createService();
+        const link = {
+            unitId: 'doc-1',
+            linkId: 'link-1',
+            startIndex: 4,
+            endIndex: 8,
+        };
+
+        try {
+            service.showInfoPopup(link);
+            service.scheduleHideInfoPopup();
+            vi.advanceTimersByTime(149);
+            expect(service.showing).toEqual(link);
+
+            service.cancelScheduledHideInfoPopup();
+            vi.advanceTimersByTime(1);
+            expect(service.showing).toEqual(link);
+
+            service.scheduleHideInfoPopup();
+            vi.advanceTimersByTime(150);
+            expect(service.showing).toBeNull();
+            expect(disposed).toEqual([1]);
+        } finally {
+            service.dispose();
+            vi.useRealTimers();
+        }
     });
 
     it('does not show link information when the target document is not loaded', () => {

@@ -17,7 +17,7 @@
 import { CustomRangeType } from '@univerjs/core';
 import { config, Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
-import { ClickDocHyperLinkOperation, ToggleDocHyperLinkInfoPopupOperation } from '../../../commands/operations/popup.operation';
+import { ClickDocHyperLinkOperation } from '../../../commands/operations/popup.operation';
 import { DocHyperLinkEventRenderController } from '../hyper-link-event.render-controller';
 
 describe('DocHyperLinkEventRenderController', () => {
@@ -163,25 +163,31 @@ describe('DocHyperLinkEventRenderController', () => {
         controller.dispose();
     });
 
-    it('hides hover-opened hyperlink details when the pointer leaves the link', () => {
+    it('schedules hover-opened hyperlink details to close when the pointer leaves the link', () => {
         const hoverCustomRanges$ = new Subject<unknown[]>();
         const clickCustomRanges$ = new Subject<unknown>();
         const pointerDownCustomRanges$ = new Subject<unknown[]>();
         const commandService = {
             executeCommand: vi.fn(),
         };
+        const hyperLinkPopupService = {
+            showing: { linkId: 'link-1' },
+            infoPopupPinned: false,
+            scheduleHideInfoPopup: vi.fn(),
+        };
         const controller = new DocHyperLinkEventRenderController(
             { unitId: 'doc-unit' } as never,
             { hoverCustomRanges$, clickCustomRanges$, pointerDownCustomRanges$ } as never,
             commandService as never,
-            { showing: { linkId: 'link-1' }, infoPopupPinned: false } as never,
+            hyperLinkPopupService as never,
             { getSkeleton: vi.fn() } as never,
             { getTextRanges: () => [] } as never
         );
 
         hoverCustomRanges$.next([]);
 
-        expect(commandService.executeCommand).toHaveBeenCalledWith(ToggleDocHyperLinkInfoPopupOperation.id);
+        expect(hyperLinkPopupService.scheduleHideInfoPopup).toHaveBeenCalledTimes(1);
+        expect(commandService.executeCommand).not.toHaveBeenCalled();
 
         controller.dispose();
     });

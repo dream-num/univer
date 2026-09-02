@@ -21,6 +21,20 @@ import { clsx } from '../../helper/clsx';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 import { Input } from '../input/Input';
 
+const INPUT_NUMBER_CONTROLS_END_PADDING = 28;
+
+function getInputNumberControlsInputStyle(controls: boolean, direction: 'ltr' | 'rtl' | undefined) {
+    if (!controls) {
+        return undefined;
+    }
+
+    if (direction === 'rtl') {
+        return { paddingLeft: INPUT_NUMBER_CONTROLS_END_PADDING };
+    }
+
+    return { paddingRight: INPUT_NUMBER_CONTROLS_END_PADDING };
+}
+
 export interface IInputNumberProps
     extends Omit<InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value' | 'defaultValue' | 'size'> {
     value?: number | null;
@@ -70,7 +84,7 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
         },
         ref
     ) => {
-        const { locale } = useContext(ConfigContext);
+        const { direction, locale } = useContext(ConfigContext);
         const [internalValue, setInternalValue] = useState<number | null>(
             value !== undefined ? value : defaultValue !== undefined ? defaultValue : null
         );
@@ -338,6 +352,7 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
                     <Input
                         ref={mergedRef}
                         className={clsx('univer-box-border', inputClassName)}
+                        inputStyle={getInputNumberControlsInputStyle(controls, direction)}
                         size={size}
                         value={inputValue}
                         allowClear={allowClear}

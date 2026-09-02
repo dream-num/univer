@@ -33,113 +33,153 @@ import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { DrawingPopupMenuController } from '../drawing-popup-menu.controller';
 
+function createControllerHarness(initialDrawingType: DrawingTypeEnum) {
+    const injector = new Injector();
+    const createControl$ = new Subject<void>();
+    const clearControl$ = new Subject<void>();
+    const changing$ = new Subject<void>();
+    const imageIoChange$ = new Subject<number>();
+    const currentWorkbook$ = new Subject<never>();
+    const disposedWorkbook$ = new Subject<never>();
+    const dialogs$ = new Subject<never>();
+    const drawingObject = { oKey: 'drawing-1' };
+    const popupDisposable = {
+        dispose: vi.fn(),
+        canDispose: () => true,
+    };
+    let drawingType = initialDrawingType;
+    let attachedPopup: { extraProps?: Record<string, unknown> } | undefined;
+    const attachPopupToObject = vi.fn((_targetObject: unknown, popup: { extraProps?: Record<string, unknown> }) => {
+        attachedPopup = popup;
+        return popupDisposable;
+    });
+
+    injector.add([LocaleService]);
+    injector.add([IDialogService, {
+        useValue: {
+            open: () => toDisposable(() => undefined),
+            close: () => undefined,
+            closeAll: () => undefined,
+            getDialogs$: () => dialogs$,
+        },
+    }]);
+    injector.add([IDrawingManagerService, {
+        useValue: {
+            getDrawingOKey: () => ({
+                unitId: 'unit-1',
+                subUnitId: 'sheet-1',
+                drawingId: 'drawing-1',
+                drawingType,
+            }),
+        } as never,
+    }]);
+    injector.add([SheetCanvasPopManagerService, {
+        useValue: {
+            attachPopupToObject,
+            getFeatureMenu: () => undefined,
+        } as never,
+    }]);
+    injector.add([IRenderManagerService, {
+        useValue: {
+            has: () => true,
+            getRenderUnitById: () => ({
+                scene: {
+                    getAllObjectsByOrder: () => [],
+                    getTransformerByCreate: () => ({
+                        createControl$,
+                        clearControl$,
+                        changing$,
+                        getSelectedObjectMap: () => new Map([['drawing-1', drawingObject]]),
+                    }),
+                },
+            }),
+        } as never,
+    }]);
+    injector.add([IUniverInstanceService, {
+        useValue: {
+            getCurrentTypeOfUnit$: () => currentWorkbook$,
+            getTypeOfUnitDisposed$: () => disposedWorkbook$,
+            getAllUnitsForType: () => [{ getUnitId: () => 'unit-1' }],
+        } as never,
+    }]);
+    injector.add([IMessageService, { useValue: { show: () => toDisposable(() => {}) } as never }]);
+    injector.add([IMenuManagerService, {
+        useValue: {
+            getFlatMenuByPositionKey: () => [{
+                key: 'add-comment',
+                order: 0,
+                item: {
+                    id: 'sheet.operation.add-drawing-comment',
+                    type: MenuItemType.BUTTON,
+                    title: 'sheets-thread-comment-ui.menu.addComment',
+                },
+            }],
+        } as never,
+    }]);
+    injector.add([IContextService, { useValue: new ContextService() }]);
+    injector.add([IImageIoService, { useValue: { change$: imageIoChange$ } as never }]);
+    injector.add([ICommandService, { useValue: { syncExecuteCommand: vi.fn() } as never }]);
+    injector.add([DrawingPopupMenuController]);
+
+    const controller = injector.get(DrawingPopupMenuController);
+
+    return {
+        attachPopupToObject,
+        controller,
+        createControl$,
+        drawingObject,
+        getAttachedPopup: () => attachedPopup,
+        injector,
+        popupDisposable,
+        setDrawingType: (nextDrawingType: DrawingTypeEnum) => {
+            drawingType = nextDrawingType;
+        },
+    };
+}
+
 describe('DrawingPopupMenuController', () => {
     it.each([
         { drawingType: DrawingTypeEnum.DRAWING_IMAGE, label: 'image' },
         { drawingType: DrawingTypeEnum.DRAWING_DOM, label: 'Float DOM' },
     ])('constrains the $label popup to the canvas and places it on the left in RTL', ({ drawingType }) => {
-        const injector = new Injector();
-        const createControl$ = new Subject<void>();
-        const clearControl$ = new Subject<void>();
-        const changing$ = new Subject<void>();
-        const imageIoChange$ = new Subject<number>();
-        const currentWorkbook$ = new Subject<never>();
-        const disposedWorkbook$ = new Subject<never>();
-        const dialogs$ = new Subject<never>();
-        const imageObject = { oKey: 'image-1' };
-        let attachedPopup: { extraProps?: Record<string, unknown> } | undefined;
-        const attachPopupToObject = vi.fn((_targetObject: unknown, popup: { extraProps?: Record<string, unknown> }) => {
-            attachedPopup = popup;
-            return {
-                dispose: vi.fn(),
-                canDispose: () => true,
-            };
-        });
-
-        injector.add([LocaleService]);
-        injector.add([IDialogService, {
-            useValue: {
-                open: () => toDisposable(() => undefined),
-                close: () => undefined,
-                closeAll: () => undefined,
-                getDialogs$: () => dialogs$,
-            },
-        }]);
-        injector.add([IDrawingManagerService, {
-            useValue: {
-                getDrawingOKey: () => ({
-                    unitId: 'unit-1',
-                    subUnitId: 'sheet-1',
-                    drawingId: 'image-1',
-                    drawingType,
-                }),
-            } as never,
-        }]);
-        injector.add([SheetCanvasPopManagerService, {
-            useValue: {
-                attachPopupToObject,
-                getFeatureMenu: () => undefined,
-            } as never,
-        }]);
-        injector.add([IRenderManagerService, {
-            useValue: {
-                has: () => true,
-                getRenderUnitById: () => ({
-                    scene: {
-                        getAllObjectsByOrder: () => [],
-                        getTransformerByCreate: () => ({
-                            createControl$,
-                            clearControl$,
-                            changing$,
-                            getSelectedObjectMap: () => new Map([['image-1', imageObject]]),
-                        }),
-                    },
-                }),
-            } as never,
-        }]);
-        injector.add([IUniverInstanceService, {
-            useValue: {
-                getCurrentTypeOfUnit$: () => currentWorkbook$,
-                getTypeOfUnitDisposed$: () => disposedWorkbook$,
-                getAllUnitsForType: () => [{ getUnitId: () => 'unit-1' }],
-            } as never,
-        }]);
-        injector.add([IMessageService, { useValue: { show: () => toDisposable(() => {}) } as never }]);
-        injector.add([IMenuManagerService, {
-            useValue: {
-                getFlatMenuByPositionKey: () => [{
-                    key: 'add-comment',
-                    order: 0,
-                    item: {
-                        id: 'sheet.operation.add-drawing-comment',
-                        type: MenuItemType.BUTTON,
-                        title: 'sheets-thread-comment-ui.menu.addComment',
-                    },
-                }],
-            } as never,
-        }]);
-        injector.add([IContextService, { useValue: new ContextService() }]);
-        injector.add([IImageIoService, { useValue: { change$: imageIoChange$ } as never }]);
-        injector.add([ICommandService, { useValue: { syncExecuteCommand: vi.fn() } as never }]);
-        injector.add([DrawingPopupMenuController]);
-
+        const { attachPopupToObject, controller, createControl$, drawingObject, getAttachedPopup, injector } = createControllerHarness(drawingType);
         injector.get(LocaleService).setDirection('rtl');
-        const controller = injector.get(DrawingPopupMenuController);
         createControl$.next();
 
         expect(attachPopupToObject).toHaveBeenCalledWith(
-            imageObject,
+            drawingObject,
             expect.objectContaining({
                 constrainToCanvas: true,
                 direction: 'left',
             })
         );
-        expect(attachedPopup?.extraProps?.menuItems).toEqual(expect.arrayContaining([
+        expect(getAttachedPopup()?.extraProps?.menuItems).toEqual(expect.arrayContaining([
             expect.objectContaining({
                 commandId: 'sheet.operation.add-drawing-comment',
                 label: 'sheets-thread-comment-ui.menu.addComment',
             }),
         ]));
+
+        controller.dispose();
+        injector.dispose();
+    });
+
+    it('removes a chart popup when focus moves to a shape', () => {
+        const {
+            attachPopupToObject,
+            controller,
+            createControl$,
+            injector,
+            popupDisposable,
+            setDrawingType,
+        } = createControllerHarness(DrawingTypeEnum.DRAWING_CHART);
+        createControl$.next();
+
+        setDrawingType(DrawingTypeEnum.DRAWING_SHAPE);
+        createControl$.next();
+
+        expect(popupDisposable.dispose).toHaveBeenCalledOnce();
+        expect(attachPopupToObject).toHaveBeenCalledOnce();
 
         controller.dispose();
         injector.dispose();

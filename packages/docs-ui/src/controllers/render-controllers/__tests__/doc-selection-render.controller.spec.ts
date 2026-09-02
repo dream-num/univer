@@ -18,7 +18,11 @@
 
 import type { EmbedInteractionBoundaryService } from '../../../services/doc-embed-integration.service';
 import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY } from '@univerjs/core';
-import { CURSOR_TYPE, DocumentEditArea } from '@univerjs/engine-render';
+import {
+    CURSOR_TYPE,
+    DocumentEditArea,
+    NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+} from '@univerjs/engine-render';
 import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { SetDocZoomRatioOperation } from '../../../commands/operations/set-doc-zoom-ratio.operation';
@@ -108,6 +112,7 @@ function createController(options: { readonly?: boolean; hasEditor?: boolean; pr
         __handleDblClick: vi.fn(),
         __handleTripleClick: vi.fn(),
         setCursorManually: vi.fn(),
+        getActiveTextRange: vi.fn(() => ({ startOffset: 0, endOffset: 0 })),
         isOnPointerEvent: false,
     };
     const docSelectionManagerService = {
@@ -116,6 +121,7 @@ function createController(options: { readonly?: boolean; hasEditor?: boolean; pr
         __getCurrentSelection: vi.fn(() => ({ unitId: options.currentSelectionUnitId ?? options.unitId ?? 'doc-1' })),
         refreshSelection: vi.fn(),
         replaceDocRanges: vi.fn(),
+        replaceSelectionInfoWithoutRefresh: vi.fn(),
     };
     const editor = options.hasEditor
         ? { isReadOnly: vi.fn(() => options.readonly ?? false) }
@@ -211,12 +217,28 @@ describe('DocSelectionRenderController', () => {
         commandHandlers[0]({ id: SetDocZoomRatioOperation.id, params: { unitId: 'doc-1' } });
 
         expect(docSelectionRenderService.focus).toHaveBeenCalled();
-        expect(docSelectionManagerService.replaceDocRanges).toHaveBeenCalledWith(
-            [{ startOffset: 3, endOffset: 3 }],
+        expect(docSelectionManagerService.replaceSelectionInfoWithoutRefresh).toHaveBeenCalledWith(
+            {
+                textRanges: [{
+                    startOffset: 3,
+                    endOffset: 3,
+                    collapsed: true,
+                    isActive: true,
+                }],
+                rectRanges: [],
+                segmentId: '',
+                segmentPage: -1,
+                isEditing: false,
+                style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+            },
+            { unitId: 'doc-1', subUnitId: 'doc-1' }
+        );
+        expect(docSelectionManagerService.refreshSelection).toHaveBeenNthCalledWith(
+            1,
             { unitId: 'doc-1', subUnitId: 'doc-1' },
             false
         );
-        expect(docSelectionManagerService.refreshSelection).toHaveBeenCalledTimes(1);
+        expect(docSelectionManagerService.refreshSelection).toHaveBeenNthCalledWith(2);
 
         controller.dispose();
     });
@@ -349,6 +371,7 @@ describe('DocSelectionRenderController', () => {
 
         expect(docSelectionRenderService.focus).not.toHaveBeenCalled();
         expect(docSelectionManagerService.replaceDocRanges).not.toHaveBeenCalled();
+        expect(docSelectionManagerService.replaceSelectionInfoWithoutRefresh).not.toHaveBeenCalled();
 
         lease.dispose();
         controller.dispose();

@@ -24,6 +24,7 @@ import { DOC_INTERCEPTOR_POINT } from '../interceptor-const';
 
 function createViewModel(unitId = 'doc-1') {
     let interceptor: { getCustomRange: (index: number) => ICustomRangeForInterceptor | null } | null = null;
+    const body = { dataStream: 'Body\r\n' };
     return {
         segmentViewModels$: new BehaviorSubject([]),
         registerCustomRangeInterceptor: (value: typeof interceptor) => {
@@ -43,6 +44,7 @@ function createViewModel(unitId = 'doc-1') {
         getCustomDecorationRaw: () => null,
         getDataModel: () => ({
             getUnitId: () => unitId,
+            getBody: () => body,
             getCustomRanges: () => [],
             getCustomDecorations: () => [],
         }),
@@ -67,9 +69,11 @@ describe('DocInterceptorService', () => {
         const viewModel = (injector.get(DocSkeletonManagerService) as unknown as TestDocSkeletonManagerService).viewModel;
 
         const service = injector.createInstance(DocInterceptorService, {} as never);
+        let interceptedBody: unknown;
         service.intercept(DOC_INTERCEPTOR_POINT.CUSTOM_RANGE, {
             priority: 1,
-            handler: (range, _context, next) => {
+            handler: (range, context, next) => {
+                interceptedBody = context.body;
                 const baseRange = next(range);
                 return baseRange == null ? baseRange : { ...baseRange, user: 'u1' };
             },
@@ -82,5 +86,6 @@ describe('DocInterceptorService', () => {
             rangeType: 1,
             user: 'u1',
         });
+        expect(interceptedBody).toEqual({ dataStream: 'Body\r\n' });
     });
 });

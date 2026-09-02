@@ -17,10 +17,9 @@
 import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
 import type { IDocLayoutExecutor, IDocLayoutMountIdentity, IDocLayoutStartResult } from '../doc-layout-executor.service';
 import {
-
+    CustomRangeType,
     DocumentFlavor,
     ICommandService,
-
     IUniverInstanceService,
     JSONX,
     LifecycleService,
@@ -208,6 +207,7 @@ describe('DocLayoutExecutorService', () => {
             modelRevision: 0,
             mutations: [],
             customBlockViewports: {},
+            customRangePresentations: [],
             reason: 'initial',
             budgetMs: 32,
         });
@@ -445,6 +445,7 @@ describe('DocLayoutExecutorService', () => {
                 expect.objectContaining({ baseRevision: 1, modelRevision: 2 }),
             ],
             customBlockViewports: {},
+            customRangePresentations: [],
             reason: 'edit',
             anchor: 5,
             budgetMs: 32,
@@ -658,6 +659,85 @@ describe('DocLayoutExecutorService', () => {
             },
         }));
         unregister();
+    });
+
+    it('serializes custom range presentations for the body, headers, and footers without range id collisions', async () => {
+        const injector = univer.__getInjector();
+        const service = injector.get(DocLayoutExecutorService);
+        const executor = createExecutor();
+        service.register(executor);
+        service.registerCustomRangePresentationProvider((_unitId, range) => ({
+            glyphWidthEm: range.startIndex + 1,
+        }));
+        const documentData = createDocumentData('traditional-doc', DocumentFlavor.TRADITIONAL);
+        documentData.body!.customRanges = [
+            {
+                startIndex: 0,
+                endIndex: 0,
+                rangeId: 'shared-range',
+                rangeType: CustomRangeType.CUSTOM,
+            },
+            {
+                startIndex: 3,
+                endIndex: 3,
+                rangeId: 'shared-range',
+                rangeType: CustomRangeType.CUSTOM,
+            },
+        ];
+        documentData.headers = {
+            'header-1': {
+                headerId: 'header-1',
+                body: {
+                    dataStream: 'Header\r\n',
+                    paragraphs: [{ paragraphId: 'header-paragraph', startIndex: 6 }],
+                    customRanges: [{
+                        startIndex: 1,
+                        endIndex: 1,
+                        rangeId: 'shared-range',
+                        rangeType: CustomRangeType.CUSTOM,
+                    }],
+                },
+            },
+        };
+        documentData.footers = {
+            'footer-1': {
+                footerId: 'footer-1',
+                body: {
+                    dataStream: 'Footer\r\n',
+                    paragraphs: [{ paragraphId: 'footer-paragraph', startIndex: 6 }],
+                    customRanges: [{
+                        startIndex: 2,
+                        endIndex: 2,
+                        rangeId: 'shared-range',
+                        rangeType: CustomRangeType.CUSTOM,
+                    }],
+                },
+            },
+        };
+        univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, documentData);
+        await Promise.resolve();
+
+        await service.startLayout(createMountIdentity(), { reason: 'initial' }, 32);
+
+        expect(executor.startLayout).toHaveBeenCalledWith(expect.objectContaining({
+            customRangePresentations: [
+                {
+                    segmentId: '',
+                    rangeId: 'shared-range',
+                    presentation: { glyphWidthEm: 1 },
+                },
+                {
+                    segmentId: 'header-1',
+                    rangeId: 'shared-range',
+                    presentation: { glyphWidthEm: 2 },
+                },
+                {
+                    segmentId: 'footer-1',
+                    rangeId: 'shared-range',
+                    presentation: { glyphWidthEm: 3 },
+                },
+            ],
+        }));
     });
 
     it('skips queued layout starts that a newer edit superseded', async () => {

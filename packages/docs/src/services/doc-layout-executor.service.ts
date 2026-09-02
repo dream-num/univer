@@ -14,8 +14,23 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDisposable, IDocumentData, ILanguagePack, JSONXActions, LocaleType, Nullable } from '@univerjs/core';
-import type { IDocsCustomBlockRenderViewport, IDocumentLayoutPagePublication, IDocumentLayoutSessionStartOptions, IDocumentLayoutStepResult } from '@univerjs/engine-render';
+import type {
+    DocumentDataModel,
+    ICustomRange,
+    IDisposable,
+    IDocumentBody,
+    IDocumentData,
+    ILanguagePack,
+    JSONXActions,
+    LocaleType,
+    Nullable,
+} from '@univerjs/core';
+import type {
+    IDocsCustomBlockRenderViewport,
+    IDocumentLayoutPagePublication,
+    IDocumentLayoutSessionStartOptions,
+    IDocumentLayoutStepResult,
+} from '@univerjs/engine-render';
 import type { IRichTextEditingMutationParams } from '../commands/mutations/core-editing.mutation';
 import {
     Disposable,
@@ -112,8 +127,34 @@ export interface IDocLayoutStartRequest extends IDocLayoutMountIdentity {
     priorityAnchor?: number;
     invalidation?: IDocumentLayoutSessionStartOptions['invalidation'];
     customBlockViewports: Record<string, IDocsCustomBlockRenderViewport>;
+    customRangePresentations?: IDocLayoutCustomRangePresentationEntry[];
     budgetMs: number;
 }
+
+export interface IDocLayoutCustomRangePresentation {
+    active?: boolean;
+    glyphAscentEm?: number;
+    glyphDescentEm?: number;
+    glyphWidthEm?: number;
+    show?: boolean;
+}
+
+export interface IDocLayoutCustomRangePresentationEntry {
+    segmentId: string;
+    rangeId: string;
+    presentation: IDocLayoutCustomRangePresentation;
+}
+
+export interface IDocLayoutCustomRangePresentationContext {
+    segmentId: string;
+    body: IDocumentBody;
+}
+
+type DocLayoutCustomRangePresentationProvider = (
+    unitId: string,
+    range: ICustomRange,
+    context: IDocLayoutCustomRangePresentationContext
+) => IDocLayoutCustomRangePresentation | null | undefined;
 
 export type IDocLayoutStartResult =
     | { status: DocLayoutSessionStatus.ACCEPTED; step: IDocLayoutStepResult }
@@ -231,6 +272,7 @@ export class DocLayoutExecutorService extends Disposable {
     private _sessionEpoch = 0;
     private readonly _sessions = new Map<string, IDocLayoutManagedSession>();
     private readonly _hydrationSamples = new Map<string, number[]>();
+    private readonly _customRangePresentationProviders = new Set<DocLayoutCustomRangePresentationProvider>();
     private readonly _executorStatus$ = new BehaviorSubject<IDocLayoutExecutorStatus>({
         state: DocLayoutExecutorState.UNREGISTERED,
         executor: null,
@@ -349,6 +391,11 @@ export class DocLayoutExecutorService extends Disposable {
 
     getExecutorStatus(): IDocLayoutExecutorStatus {
         return this._executorStatus$.value;
+    }
+
+    registerCustomRangePresentationProvider(provider: DocLayoutCustomRangePresentationProvider): IDisposable {
+        this._customRangePresentationProviders.add(provider);
+        return toDisposable(() => this._customRangePresentationProviders.delete(provider));
     }
 
     async getPerformanceMetrics(unitId: string): Promise<IDocLayoutPerformanceMetrics> {
@@ -500,6 +547,7 @@ export class DocLayoutExecutorService extends Disposable {
         this._executorReady = null;
         this._recoveryFailure = null;
         this._executorStatus$.complete();
+        this._customRangePresentationProviders.clear();
         super.dispose();
     }
 
@@ -593,6 +641,7 @@ export class DocLayoutExecutorService extends Disposable {
                 modelRevision: session.modelRevision,
                 mutations,
                 customBlockViewports: collectCustomBlockViewports(this._getRequiredModel(unitId)),
+                customRangePresentations: this._collectCustomRangePresentations(this._getRequiredModel(unitId)),
                 budgetMs,
                 ...options,
             };
@@ -676,6 +725,45 @@ export class DocLayoutExecutorService extends Disposable {
             throw new Error(`Eligible document model not found for Worker layout: "${unitId}".`);
         }
         return dataModel;
+    }
+
+    private _collectCustomRangePresentations(
+        dataModel: DocumentDataModel
+    ): IDocLayoutCustomRangePresentationEntry[] {
+        const presentations: IDocLayoutCustomRangePresentationEntry[] = [];
+        const providers = Array.from(this._customRangePresentationProviders).reverse();
+        if (providers.length === 0) {
+            return presentations;
+        }
+
+        const collectSegment = (segmentId: string, body: IDocumentBody | null | undefined): void => {
+            if (body == null) {
+                return;
+            }
+            const seenRangeIds = new Set<string>();
+            for (const range of body.customRanges ?? []) {
+                if (seenRangeIds.has(range.rangeId)) {
+                    continue;
+                }
+                seenRangeIds.add(range.rangeId);
+                for (const provider of providers) {
+                    const presentation = provider(dataModel.getUnitId(), range, { segmentId, body });
+                    if (presentation != null) {
+                        presentations.push({ segmentId, rangeId: range.rangeId, presentation });
+                        break;
+                    }
+                }
+            }
+        };
+        collectSegment('', dataModel.getBody());
+        for (const [segmentId, headerModel] of dataModel.headerModelMap) {
+            collectSegment(segmentId, headerModel.getBody());
+        }
+        for (const [segmentId, footerModel] of dataModel.footerModelMap) {
+            collectSegment(segmentId, footerModel.getBody());
+        }
+
+        return presentations;
     }
 
     private _isEligible(dataModel: DocumentDataModel): boolean {

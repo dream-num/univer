@@ -33,7 +33,14 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
-import { CURSOR_TYPE, DocumentEditArea, PageLayoutType, Vector2 } from '@univerjs/engine-render';
+import {
+    CURSOR_TYPE,
+    DocumentEditArea,
+    NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+    PageLayoutType,
+    Vector2,
+} from '@univerjs/engine-render';
+import { filter, take } from 'rxjs';
 import { neoGetDocObject } from '../../basics/component-tools';
 import { findFirstCursorOffset } from '../../basics/selection';
 import { SetDocZoomRatioOperation } from '../../commands/operations/set-doc-zoom-ratio.operation';
@@ -63,10 +70,10 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
 
     private _initialize() {
         this._init();
-        this._skeletonListener();
-        this._commandExecutedListener();
         this._refreshListener();
         this._syncSelection();
+        this._skeletonListener();
+        this._commandExecutedListener();
     }
 
     private _init() {
@@ -339,16 +346,32 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
                 const docDataModel = this._context.unit;
                 const snapshot = docDataModel.getSnapshot();
                 const offset = findFirstCursorOffset(snapshot);
-
-                this._docSelectionManagerService.replaceDocRanges([
-                    {
-                        startOffset: offset,
-                        endOffset: offset,
-                    },
-                ], {
+                const selectionTarget = {
                     unitId,
                     subUnitId: unitId,
-                }, false);
+                };
+                this._docSelectionManagerService.replaceSelectionInfoWithoutRefresh({
+                    textRanges: [{
+                        startOffset: offset,
+                        endOffset: offset,
+                        collapsed: true,
+                        isActive: true,
+                    }],
+                    rectRanges: [],
+                    segmentId: '',
+                    segmentPage: -1,
+                    isEditing: false,
+                    style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+                }, selectionTarget);
+                this._docSelectionManagerService.refreshSelection(selectionTarget, false);
+                if (this._docSelectionRenderService.getActiveTextRange() == null) {
+                    this.disposeWithMe(skeleton.layoutProgress$
+                        .pipe(
+                            filter((progress) => progress?.anchorReady === true || progress?.complete === true),
+                            take(1)
+                        )
+                        .subscribe(() => this._docSelectionManagerService.refreshSelection(selectionTarget, false)));
+                }
             }
         }));
     }

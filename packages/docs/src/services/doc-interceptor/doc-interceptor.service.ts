@@ -89,6 +89,7 @@ export class DocInterceptorService extends Disposable implements IRenderModule {
                     {
                         index,
                         unitId: viewModel.getDataModel().getUnitId(),
+                        body: viewModel.getDataModel().getBody(),
                         customRanges: viewModel.getDataModel().getCustomRanges() ?? [],
                     }
                 );

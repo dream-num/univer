@@ -233,6 +233,25 @@ describe('DocRenderController bounded input publication', () => {
         }
     });
 
+    it('publishes the initial caret as soon as the first foreground page is ready', async () => {
+        const editor = createEditor(500, false, true);
+        try {
+            expect(editor.selection.getActiveTextRange()).toBeUndefined();
+            expect(document.activeElement).toBe(editor.input);
+
+            await vi.advanceTimersByTimeAsync(1_000);
+
+            expect(editor.skeleton.hasCompleteLayout()).toBe(false);
+            expect(editor.skeleton.getSkeletonData()!.pages.length).toBeLessThanOrEqual(5);
+            expect(editor.selection.getActiveTextRange()).toMatchObject({
+                startOffset: 0,
+                endOffset: 0,
+            });
+        } finally {
+            editor.dispose();
+        }
+    });
+
     it.each(['A', '中'])('publishes the %s caret with its page without an intermediate wrong coordinate', async (text) => {
         const editor = createEditor();
         try {

@@ -87,6 +87,9 @@ export {
 export type {
     IDocLayoutCancelRequest,
     IDocLayoutCreateSessionRequest,
+    IDocLayoutCustomRangePresentation,
+    IDocLayoutCustomRangePresentationContext,
+    IDocLayoutCustomRangePresentationEntry,
     IDocLayoutDisposeMountRequest,
     IDocLayoutDisposeSessionRequest,
     IDocLayoutExecutor,

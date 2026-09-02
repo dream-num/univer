@@ -213,8 +213,9 @@ describe('DocHyperLinkPopupService', () => {
         service.showInfoPopup(firstLink, { pinned: true });
         expect(service.infoPopupPinned).toBe(true);
 
-        service.showInfoPopup(firstLink);
+        service.showInfoPopup({ ...firstLink, segmentId: '' });
         expect(service.infoPopupPinned).toBe(true);
+        expect(service.showing).toEqual(firstLink);
 
         service.showInfoPopup(secondLink);
         expect(service.infoPopupPinned).toBe(false);

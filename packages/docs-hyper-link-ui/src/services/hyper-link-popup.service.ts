@@ -33,6 +33,15 @@ export interface ILinkInfo {
 
 type LinkPopupDisposable = ReturnType<DocCanvasPopManagerService['attachPopupToRange']>;
 
+function isSameLinkInfo(current: ILinkInfo | null, next: ILinkInfo): boolean {
+    return current?.linkId === next.linkId &&
+        current.unitId === next.unitId &&
+        (current.segmentId ?? '') === (next.segmentId ?? '') &&
+        current.segmentPage === next.segmentPage &&
+        current.startIndex === next.startIndex &&
+        current.endIndex === next.endIndex;
+}
+
 export class DocHyperLinkPopupService extends Disposable {
     private readonly _editingLink$ = new BehaviorSubject<ILinkInfo | null>(null);
     private readonly _showingLink$ = new BehaviorSubject<ILinkInfo | null>(null);
@@ -160,13 +169,7 @@ export class DocHyperLinkPopupService extends Disposable {
         }
 
         const { linkId, unitId, segmentId, segmentPage, startIndex, endIndex } = info;
-        const isSameLink =
-            this.showing?.linkId === linkId &&
-            this.showing?.unitId === unitId &&
-            this.showing?.segmentId === segmentId &&
-            this.showing?.segmentPage === segmentPage &&
-            this.showing?.startIndex === startIndex &&
-            this.showing?.endIndex === endIndex;
+        const isSameLink = isSameLinkInfo(this.showing, info);
         if (isSameLink) {
             if (options?.pinned) {
                 this._infoPopupPinned = true;

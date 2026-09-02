@@ -121,11 +121,8 @@ function createControllerHarness(initialDrawingType: DrawingTypeEnum) {
     injector.add([ICommandService, { useValue: { syncExecuteCommand: vi.fn() } as never }]);
     injector.add([DrawingPopupMenuController]);
 
-    const controller = injector.get(DrawingPopupMenuController);
-
     return {
         attachPopupToObject,
-        controller,
         createControl$,
         drawingObject,
         getAttachedPopup: () => attachedPopup,
@@ -142,8 +139,9 @@ describe('DrawingPopupMenuController', () => {
         { drawingType: DrawingTypeEnum.DRAWING_IMAGE, label: 'image' },
         { drawingType: DrawingTypeEnum.DRAWING_DOM, label: 'Float DOM' },
     ])('constrains the $label popup to the canvas and places it on the left in RTL', ({ drawingType }) => {
-        const { attachPopupToObject, controller, createControl$, drawingObject, getAttachedPopup, injector } = createControllerHarness(drawingType);
+        const { attachPopupToObject, createControl$, drawingObject, getAttachedPopup, injector } = createControllerHarness(drawingType);
         injector.get(LocaleService).setDirection('rtl');
+        const controller = injector.get(DrawingPopupMenuController);
         createControl$.next();
 
         expect(attachPopupToObject).toHaveBeenCalledWith(
@@ -167,12 +165,12 @@ describe('DrawingPopupMenuController', () => {
     it('removes a chart popup when focus moves to a shape', () => {
         const {
             attachPopupToObject,
-            controller,
             createControl$,
             injector,
             popupDisposable,
             setDrawingType,
         } = createControllerHarness(DrawingTypeEnum.DRAWING_CHART);
+        const controller = injector.get(DrawingPopupMenuController);
         createControl$.next();
 
         setDrawingType(DrawingTypeEnum.DRAWING_SHAPE);

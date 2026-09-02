@@ -131,8 +131,8 @@ export const Input = forwardRef<HTMLInputElement, IInputProps>(
         const mergedInputStyle = shouldOmitDefaultPadding
             ? inputStyle
             : direction === 'rtl'
-                ? { paddingLeft: paddingRight, ...inputStyle }
-                : { paddingRight, ...inputStyle };
+                ? { ...inputStyle, paddingLeft: paddingRight }
+                : { ...inputStyle, paddingRight };
 
         return (
             <div

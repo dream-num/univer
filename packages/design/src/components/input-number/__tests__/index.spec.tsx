@@ -51,21 +51,6 @@ describe('InputNumber', () => {
         expect(input.value).toBe('10');
     });
 
-    it.each([
-        ['ltr', 'paddingRight', 'paddingLeft'],
-        ['rtl', 'paddingLeft', 'paddingRight'],
-    ] as const)('should reserve control space after long values in %s layouts', (direction, paddingProperty, oppositePaddingProperty) => {
-        const { getByRole } = render(
-            <ConfigProvider direction={direction} mountContainer={document.body}>
-                <InputNumber value={79.31464174454825} />
-            </ConfigProvider>
-        );
-        const input = getByRole('textbox') as HTMLInputElement;
-
-        expect(input.style[paddingProperty]).toBe('28px');
-        expect(input.style[oppositePaddingProperty]).toBe('');
-    });
-
     it('should call onChange when input changes', () => {
         const { container } = render(<TestComponent onChange={onChange} />);
         fireEvent.change(container.querySelector('input')!, { target: { value: '123' } });

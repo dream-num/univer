@@ -149,76 +149,11 @@ export class DrawingPopupMenuController extends RxDisposable {
             return;
         }
 
-        let singletonPopupDisposer: IDisposable;
+        let singletonPopupDisposer: IDisposable | undefined;
         this.disposeWithMe(transformer.createControl$.subscribe(() => {
             singletonPopupDisposer?.dispose();
-            this._contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, true);
-
-            if (this._hasCropObject(scene)) {
-                return;
-            }
-
-            const selectedObjects = transformer.getSelectedObjectMap();
-            if (selectedObjects.size > 1) {
-                return;
-            }
-
-            const object = selectedObjects.values().next().value as Nullable<BaseObject>;
-            if (!object) {
-                return;
-            }
-
-            const oKey = object.oKey;
-            const drawingParam = this._drawingManagerService.getDrawingOKey(oKey);
-            if (!drawingParam || drawingParam.drawingType === DrawingTypeEnum.DRAWING_SHAPE) {
-                return;
-            }
-
-            const { unitId, subUnitId, drawingId, drawingType } = drawingParam;
-            // drawingParam should be  ICanvasFloatDom, use for disable popup dialog
-            const data = (drawingParam as ISheetFloatDom).data as Record<string, unknown> | undefined;
-            if (data && (data.disablePopup || (data.version === 1 && typeof data.embedId === 'string'))) {
-                return;
-            }
-
-            const menus = this._canvasPopManagerService.getFeatureMenu(unitId, subUnitId, drawingId, drawingType);
-            const menuItems = [
-                ...(menus || this._getImageMenuItems(unitId, subUnitId, drawingId, drawingType)),
-                ...this._getFloatingObjectMenuItems(),
-            ];
-            const mobileDialogService = this._getMobileDialogService();
-            if (mobileDialogService) {
-                mobileDialogService.open({
-                    id: MOBILE_IMAGE_ACTIONS_DIALOG_ID,
-                    title: { title: 'sheets-drawing-ui.image-popup.edit' },
-                    children: {
-                        label: {
-                            name: COMPONENT_IMAGE_POPUP_MENU,
-                            props: {
-                                popup: {
-                                    extraProps: {
-                                        menuItems,
-                                        dialogId: MOBILE_IMAGE_ACTIONS_DIALOG_ID,
-                                    },
-                                },
-                            },
-                        },
-                    },
-                });
-                singletonPopupDisposer = toDisposable(() => mobileDialogService.close(MOBILE_IMAGE_ACTIONS_DIALOG_ID));
-                return;
-            }
-            singletonPopupDisposer = this.disposeWithMe(this._canvasPopManagerService.attachPopupToObject(object, {
-                componentKey: COMPONENT_IMAGE_POPUP_MENU,
-                constrainToCanvas: true,
-                direction: this._localeService.getDirection() === 'rtl' ? 'left' : 'horizontal',
-                offset: [2, 0],
-                extraProps: {
-                    menuItems,
-                },
-            }));
-        })
-        );
+            singletonPopupDisposer = this._createPopup(scene, transformer);
+        }));
         this.disposeWithMe(
             transformer.clearControl$.subscribe(() => {
                 singletonPopupDisposer?.dispose();
@@ -238,6 +173,72 @@ export class DrawingPopupMenuController extends RxDisposable {
                 singletonPopupDisposer?.dispose();
             })
         );
+    }
+
+    private _createPopup(scene: Scene, transformer: ReturnType<Scene['getTransformerByCreate']>): IDisposable | undefined {
+        this._contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, true);
+
+        if (this._hasCropObject(scene)) {
+            return;
+        }
+
+        const selectedObjects = transformer.getSelectedObjectMap();
+        if (selectedObjects.size > 1) {
+            return;
+        }
+
+        const object = selectedObjects.values().next().value as Nullable<BaseObject>;
+        if (!object) {
+            return;
+        }
+
+        const drawingParam = this._drawingManagerService.getDrawingOKey(object.oKey);
+        if (!drawingParam || drawingParam.drawingType === DrawingTypeEnum.DRAWING_SHAPE) {
+            return;
+        }
+
+        const { unitId, subUnitId, drawingId, drawingType } = drawingParam;
+        const data = (drawingParam as ISheetFloatDom).data as Record<string, unknown> | undefined;
+        if (data && (data.disablePopup || (data.version === 1 && typeof data.embedId === 'string'))) {
+            return;
+        }
+
+        const menus = this._canvasPopManagerService.getFeatureMenu(unitId, subUnitId, drawingId, drawingType);
+        const menuItems = [
+            ...(menus || this._getImageMenuItems(unitId, subUnitId, drawingId, drawingType)),
+            ...this._getFloatingObjectMenuItems(),
+        ];
+        const mobileDialogService = this._getMobileDialogService();
+        if (mobileDialogService) {
+            mobileDialogService.open({
+                id: MOBILE_IMAGE_ACTIONS_DIALOG_ID,
+                title: { title: 'sheets-drawing-ui.image-popup.edit' },
+                children: {
+                    label: {
+                        name: COMPONENT_IMAGE_POPUP_MENU,
+                        props: {
+                            popup: {
+                                extraProps: {
+                                    menuItems,
+                                    dialogId: MOBILE_IMAGE_ACTIONS_DIALOG_ID,
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+            return toDisposable(() => mobileDialogService.close(MOBILE_IMAGE_ACTIONS_DIALOG_ID));
+        }
+
+        return this.disposeWithMe(this._canvasPopManagerService.attachPopupToObject(object, {
+            componentKey: COMPONENT_IMAGE_POPUP_MENU,
+            constrainToCanvas: true,
+            direction: this._localeService.getDirection() === 'rtl' ? 'left' : 'horizontal',
+            offset: [2, 0],
+            extraProps: {
+                menuItems,
+            },
+        }));
     }
 
     private _getMobileDialogService(): IDialogService | null {

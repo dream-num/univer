@@ -47,6 +47,10 @@ export class DocHyperLinkEventRenderController extends Disposable implements IRe
     }
 
     private _hideInfoPopup() {
+        if (this._hyperLinkPopupService.infoPopupPinned) {
+            return;
+        }
+
         if (this._hyperLinkPopupService.showing) {
             this._commandService.executeCommand(
                 ToggleDocHyperLinkInfoPopupOperation.id
@@ -104,14 +108,17 @@ export class DocHyperLinkEventRenderController extends Disposable implements IRe
                 }
 
                 if (!range.ctrlKey && !range.metaKey) {
-                    this._hyperLinkPopupService.showInfoPopup({
-                        unitId: this._context.unitId,
-                        linkId: link.rangeId,
-                        segmentId: range.segmentId,
-                        segmentPage: range.segmentPageIndex,
-                        startIndex: link.startIndex,
-                        endIndex: link.endIndex,
-                    });
+                    this._hyperLinkPopupService.showInfoPopup(
+                        {
+                            unitId: this._context.unitId,
+                            linkId: link.rangeId,
+                            segmentId: range.segmentId,
+                            segmentPage: range.segmentPageIndex,
+                            startIndex: link.startIndex,
+                            endIndex: link.endIndex,
+                        },
+                        { pinned: true }
+                    );
                     return;
                 }
 

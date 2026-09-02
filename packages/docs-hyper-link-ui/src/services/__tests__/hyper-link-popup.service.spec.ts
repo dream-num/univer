@@ -195,6 +195,34 @@ describe('DocHyperLinkPopupService', () => {
         expect(disposed).toEqual([1]);
     });
 
+    it('keeps a click-pinned popup pinned until another link replaces it or it closes', () => {
+        const { service } = createService();
+        const firstLink = {
+            unitId: 'doc-1',
+            linkId: 'link-1',
+            startIndex: 4,
+            endIndex: 8,
+        };
+        const secondLink = {
+            unitId: 'doc-1',
+            linkId: 'link-2',
+            startIndex: 0,
+            endIndex: 3,
+        };
+
+        service.showInfoPopup(firstLink, { pinned: true });
+        expect(service.infoPopupPinned).toBe(true);
+
+        service.showInfoPopup(firstLink);
+        expect(service.infoPopupPinned).toBe(true);
+
+        service.showInfoPopup(secondLink);
+        expect(service.infoPopupPinned).toBe(false);
+
+        service.hideInfoPopup();
+        expect(service.infoPopupPinned).toBe(false);
+    });
+
     it('does not show link information when the target document is not loaded', () => {
         const { service, attached } = createService();
 

@@ -251,6 +251,28 @@ describe('DocBackground', () => {
         }
     );
 
+    it('keeps a visual layout preview free of skeleton lines', () => {
+        const background = DocBackground.create(
+            'visual-layout-preview-background',
+            createSkeleton([createPage({ isLayoutPlaceholder: true, sections: [{} as never] })])
+        );
+        background.resize(240, 1000);
+        const ctx = Object.assign(createCtx(), {
+            beginPath: vi.fn(),
+            createLinearGradient: vi.fn(() => ({ addColorStop: vi.fn() })),
+            fill: vi.fn(),
+            roundRect: vi.fn(),
+            fillStyle: '',
+        });
+        vi.spyOn(Rect, 'drawWith').mockImplementation(() => {});
+        vi.spyOn(Path, 'drawWith').mockImplementation(() => {});
+
+        background.draw(ctx);
+
+        expect(ctx.roundRect).not.toHaveBeenCalled();
+        background.dispose();
+    });
+
     it('does not draw layout skeleton lines inside the current published traditional page', () => {
         const background = DocBackground.create(
             'incremental-current-page-background',

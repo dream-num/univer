@@ -570,7 +570,7 @@ describe('doc skeleton', () => {
             const placeholder = {
                 ...readyPage,
                 [placeholderFlag]: true,
-                sections: [],
+                sections: placeholderFlag === 'isLayoutPlaceholder' ? readyPage.sections : [],
                 skeTables: new Map(),
                 skeColumnGroups: new Map(),
             };
@@ -1689,6 +1689,78 @@ describe('doc skeleton', () => {
         univer.dispose();
     });
 
+    it('keeps already-published adjacent pages visible when editing before first-open layout completes', () => {
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        const content = Array.from(
+            { length: 180 },
+            (_, index) => `Opening paragraph ${index} wraps onto compact physical pages.\r`
+        ).join('');
+        const documentModel = createDocumentModelWithStyle(content, {});
+        documentModel.updateDocumentDataPageSize(160, 180);
+        const viewModel = new DocumentViewModel(documentModel);
+        const skeleton = DocumentSkeleton.create(viewModel, localeService);
+
+        const initialGeneration = skeleton.startIncrementalLayout({ reason: 'initial' });
+        let initialProgress = skeleton.stepIncrementalLayout(initialGeneration, 10_000);
+        for (let index = 0; index < 8 && initialProgress.publishedPageCount < 6; index++) {
+            initialProgress = skeleton.publishIncrementalLayoutBacklog(initialGeneration);
+        }
+
+        expect(initialProgress.complete).toBe(false);
+        expect(skeleton.hasCompleteLayout()).toBe(false);
+        const initiallyPublishedPages = skeleton.getSkeletonData()?.pages ?? [];
+        expect(initiallyPublishedPages.length).toBeGreaterThanOrEqual(6);
+        const anchorLine = initiallyPublishedPages[0].sections[0]?.columns[0]?.lines.at(-2);
+        if (anchorLine == null) {
+            throw new Error('Expected an editable line near the end of the first published page.');
+        }
+        const anchor = anchorLine.ed;
+        const insertion = 'A long inserted phrase '.repeat(20);
+        const nextSnapshot = structuredClone(documentModel.getSnapshot());
+        const previousDataStream = nextSnapshot.body!.dataStream;
+        nextSnapshot.body!.dataStream = `${previousDataStream.slice(0, anchor)}${insertion}${previousDataStream.slice(anchor)}`;
+        for (const paragraph of nextSnapshot.body!.paragraphs ?? []) {
+            if (paragraph.startIndex >= anchor) {
+                paragraph.startIndex += insertion.length;
+            }
+        }
+        for (const sectionBreak of nextSnapshot.body!.sectionBreaks ?? []) {
+            if (sectionBreak.startIndex >= anchor) {
+                sectionBreak.startIndex += insertion.length;
+            }
+        }
+        const nextModel = new DocumentDataModel(nextSnapshot);
+        viewModel.reset(nextModel);
+
+        const editGeneration = skeleton.startIncrementalLayout({
+            reason: 'edit',
+            anchor,
+            priorityAnchor: anchor + insertion.length,
+            invalidation: {
+                oldStart: anchor,
+                oldEnd: anchor,
+                newEnd: anchor + insertion.length,
+            },
+            reuseUnaffectedTail: false,
+        });
+        let editProgress = skeleton.stepIncrementalLayout(editGeneration, 0);
+        for (let index = 0; index < 100 && !editProgress.anchorReady; index++) {
+            editProgress = skeleton.stepIncrementalLayout(editGeneration, 0);
+        }
+
+        expect(editProgress.anchorReady).toBe(true);
+        const adjacentPage = skeleton.getSkeletonData()?.pages[editProgress.publishedPageCount];
+        expect(adjacentPage).toBeDefined();
+        expect(adjacentPage?.isMaterializationPlaceholder).not.toBe(true);
+        expect(adjacentPage?.sections.length).toBeGreaterThan(0);
+
+        nextModel.dispose();
+        skeleton.dispose();
+        documentModel.dispose();
+        univer.dispose();
+    });
+
     it('publishes computed page backlog without advancing layout work', () => {
         const univer = new Univer();
         const localeService = univer.__getInjector().get(LocaleService);
@@ -2676,6 +2748,19 @@ describe('doc skeleton', () => {
             .toEqual(normalizeSkeleton(firstExpected.getSkeletonData()?.pages[anchorPageIndex]));
         firstExpected.dispose();
 
+        const foregroundPages = skeleton.getSkeletonData()?.pages ?? [];
+        const retainedInteractionPages = foregroundPages.slice(
+            anchorPageIndex + 1,
+            Math.min(initialPages.length, anchorPageIndex + 5)
+        );
+        expect(retainedInteractionPages.every((page) => !page.isLayoutPlaceholder)).toBe(true);
+        retainedInteractionPages.forEach((page, index) => {
+            const previousPage = initialPages[anchorPageIndex + index + 1];
+            expect(page.st).toBe(previousPage.st + 1);
+            expect(page.ed).toBe(previousPage.ed + 1);
+            expect(page.sections.length).toBeGreaterThan(0);
+        });
+
         skeleton.cancelIncrementalLayout(generation);
         const secondInsertionOffset = anchor + 1;
         const secondSnapshot = structuredClone(nextModel.getSnapshot());
@@ -2756,6 +2841,16 @@ describe('doc skeleton', () => {
             reuseUnaffectedTail: false,
         });
         let progress = skeleton.stepIncrementalLayout(generation, 0);
+        for (let step = 0; step < 100 && !progress.anchorReady; step++) {
+            progress = skeleton.stepIncrementalLayout(generation, 0);
+        }
+        expect(progress.anchorReady).toBe(true);
+        if (!continuation) {
+            const recoveryPage = skeleton.getSkeletonData()?.pages[progress.publishedPageCount];
+            expect(recoveryPage).toBeDefined();
+            expect(recoveryPage?.isMaterializationPlaceholder).not.toBe(true);
+            expect(recoveryPage?.sections.length).toBeGreaterThan(0);
+        }
         for (let step = 0; step < 2_000 && !progress.complete; step++) {
             progress = skeleton.stepIncrementalLayout(generation, 0);
         }

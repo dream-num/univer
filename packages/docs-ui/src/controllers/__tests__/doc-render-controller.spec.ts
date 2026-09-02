@@ -851,6 +851,50 @@ describe('doc render controller', () => {
         controller.dispose();
     });
 
+    it('protects retained interaction pages when Main publishes only the edited page', async () => {
+        const { commandCallbacks, controller, skeletonManager } = createControllerFixture({
+            useWorker: true,
+            pages: Array.from({ length: 8 }, () => ({
+                pageWidth: 640,
+                pageHeight: 900,
+                sections: [{}],
+                skeDrawings: new Map(),
+                skeTables: new Map(),
+            })),
+            layoutProgress: [{
+                complete: false,
+                anchorReady: true,
+                didPublishAnchor: true,
+                interactionWindowComplete: true,
+                elapsedTime: 1,
+                pageCount: 20,
+                publishedPageCount: 1,
+            }],
+        });
+        const skeleton = skeletonManager.getSkeleton();
+
+        commandCallbacks[0]({
+            id: RichTextEditingMutation.id,
+            params: {
+                unitId: 'doc-unit',
+                actions: [],
+            },
+        } satisfies ICommandInfo);
+
+        await vi.waitFor(() => {
+            expect(skeleton.beginExternalLayout).toHaveBeenCalledWith({
+                reason: 'edit',
+                protectedRange: {
+                    mode: 'paginated',
+                    startPageIndex: 0,
+                    endPageIndex: 4,
+                },
+            });
+        });
+
+        controller.dispose();
+    });
+
     it('does not rebuild the active Main selection when the Worker only publishes the unprotected tail', async () => {
         const { commandCallbacks, controller, selectionManager } = createControllerFixture({
             useWorker: true,

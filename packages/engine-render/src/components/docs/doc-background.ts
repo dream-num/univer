@@ -181,7 +181,10 @@ export class DocBackground extends DocComponent {
             Path.drawWith(ctx, marginIdentification);
             ctx.restore();
 
-            if (page.isLayoutPlaceholder || page.isMaterializationPlaceholder) {
+            if (
+                page.isMaterializationPlaceholder ||
+                (page.isLayoutPlaceholder && page.sections.length === 0)
+            ) {
                 const contentWidth = Math.max(80, pageWidth - marginLeft - marginRight);
                 const contentHeight = Math.max(160, pageHeight - originMarginTop - originMarginBottom - 48);
                 this._drawSkeletonLines(

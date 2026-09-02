@@ -75,6 +75,8 @@ import {
     updateParagraphBorders,
 } from './tools';
 
+const INTERACTION_PAGE_WINDOW_SIZE = 5;
+
 function getEffectiveSectionType(sectionType: SectionType | undefined): SectionType {
     return sectionType == null || sectionType === SectionType.SECTION_TYPE_UNSPECIFIED
         ? SectionType.NEXT_PAGE
@@ -276,6 +278,7 @@ interface IIncrementalLayoutState {
     generation: number;
     reason: DocumentLayoutReason;
     mode: DocumentLayoutMode;
+    publicationBaseSkeleton: Nullable<IDocumentSkeletonCached>;
     ctx: ILayoutContext;
     sectionIndex: number;
     paragraphIndex: number;
@@ -607,6 +610,16 @@ function clonePageLayoutPlaceholderForPublish(source: IDocumentSkeletonPage): ID
     };
 }
 
+function clonePageLayoutPreviewForPublish(
+    source: IDocumentSkeletonPage,
+    mutationDelta: number
+): IDocumentSkeletonPage {
+    const preview = clonePageFlowForPublish(source);
+    preview.isLayoutPlaceholder = true;
+    shiftPageCharacterOffsets(preview, mutationDelta);
+    return preview;
+}
+
 function clonePageMaterializationPlaceholderForPublish(source: IDocumentSkeletonPage): IDocumentSkeletonPage {
     const placeholder = clonePageLayoutPlaceholderForPublish(source);
     delete placeholder.isLayoutPlaceholder;
@@ -682,6 +695,30 @@ function hasReusablePageDrawings(
         }
     }
     return true;
+}
+
+function hasReusablePaginatedTailBoundary(
+    previousPage: IDocumentSkeletonPage,
+    currentPage: IDocumentSkeletonPage,
+    invalidation: IDocumentLayoutInvalidation,
+    allowMetadataOnlyStructuralTailReuse: boolean
+): boolean {
+    const mutationDelta = invalidation.newEnd - invalidation.oldEnd;
+    const hasStructuralContainers = previousPage.skeTables.size > 0 ||
+        previousPage.skeColumnGroups.size > 0 ||
+        currentPage.skeTables.size > 0 ||
+        currentPage.skeColumnGroups.size > 0;
+
+    return invalidation.oldEnd <= previousPage.ed &&
+        (!hasStructuralContainers || (
+            allowMetadataOnlyStructuralTailReuse &&
+            mutationDelta === 0 &&
+            previousPage.st === currentPage.st
+        )) &&
+        hasReusablePageDrawings(previousPage, currentPage, invalidation) &&
+        hasSamePageExitGeometry(previousPage, currentPage) &&
+        invalidation.newEnd <= currentPage.ed &&
+        currentPage.ed === previousPage.ed + mutationDelta;
 }
 
 function removeDupPages(ctx: ILayoutContext) {
@@ -1227,6 +1264,7 @@ export class DocumentSkeleton extends Skeleton {
             generation,
             reason,
             mode,
+            publicationBaseSkeleton: previousSkeleton,
             ctx: incrementalStart.ctx,
             sectionIndex: incrementalStart.sectionIndex,
             paragraphIndex: incrementalStart.paragraphIndex,
@@ -2028,7 +2066,7 @@ export class DocumentSkeleton extends Skeleton {
         publishedPageCount: number
     ): IDocumentSkeletonCached {
         const source = state.ctx.skeleton;
-        const previous = this._lastCompleteSkeletonData;
+        const previous = state.publicationBaseSkeleton;
         const preservesPreviousPagination =
             state.mode === 'paginated' &&
             state.priorityAnchor != null &&
@@ -2055,6 +2093,7 @@ export class DocumentSkeleton extends Skeleton {
         const currentPriorityPageIndex = state.priorityAnchor == null
             ? -1
             : this._findBodyPageIndex(flowPages, state.priorityAnchor);
+        const previousPriorityPage = previous?.pages[state.priorityPageIndex];
         let publishedFlowPages = flowPages;
         if (
             preservesPreviousPagination &&
@@ -2072,7 +2111,6 @@ export class DocumentSkeleton extends Skeleton {
                 .slice(state.stablePageCount, state.priorityPageIndex)
                 .map(clonePageFlowForPublish);
             const priorityPage = clonePageFlowForPublish(flowPages[currentPriorityPageIndex]);
-            const previousPriorityPage = previous.pages[state.priorityPageIndex];
             const priorityPageStartIndex = retainedBridgePages.at(-1)?.ed ?? stablePages.at(-1)?.ed ?? -1;
 
             updateBlockIndex(
@@ -2085,17 +2123,75 @@ export class DocumentSkeleton extends Skeleton {
             }
             publishedFlowPages = [...stablePages, ...retainedBridgePages, priorityPage];
         }
+        const unpublishedPageStart = Math.max(state.priorityPageIndex + 1, publishedPageCount);
+        const currentPriorityPage = publishedFlowPages[state.priorityPageIndex];
+        const mutationDelta = state.invalidation == null ? 0 : state.invalidation.newEnd - state.invalidation.oldEnd;
+        const canRetainInteractionPages =
+            preservesPreviousPagination &&
+            state.reason === 'edit' &&
+            state.reuseUnaffectedTail === false &&
+            state.invalidation != null &&
+            previousPriorityPage != null &&
+            currentPriorityPage != null &&
+            hasReusablePaginatedTailBoundary(
+                previousPriorityPage,
+                currentPriorityPage,
+                state.invalidation,
+                state.allowMetadataOnlyStructuralTailReuse
+            );
+        // Main publishes the edited page immediately so text input paints in the
+        // command turn. When that page exits with the same pagination geometry,
+        // keep only the nearby previous pages on screen until Worker handoff.
+        // This is bounded O(1) presentation reuse, not the O(document pages)
+        // canonical tail reuse deliberately disabled for the input path.
+        const interactionPageSources = previous?.pages.slice(
+            unpublishedPageStart,
+            Math.min(previous.pages.length, state.priorityPageIndex + INTERACTION_PAGE_WINDOW_SIZE)
+        ) ?? [];
+        const retainedInteractionPages = canRetainInteractionPages
+            ? interactionPageSources
+                .map((page) => {
+                    const retainedPage = clonePageFlowForPublish(page);
+                    shiftPageCharacterOffsets(retainedPage, mutationDelta);
+                    return retainedPage;
+                })
+            : [];
+        // A wrap or paragraph split invalidates the next page's caret geometry,
+        // but replacing its already-visible content with skeleton lines in the
+        // input frame is unnecessarily disruptive. Keep a cloned, explicitly
+        // non-interactive visual preview until Main or Worker publishes that page.
+        const previewInteractionPages = !canRetainInteractionPages &&
+            preservesPreviousPagination &&
+            state.reason === 'edit' &&
+            state.reuseUnaffectedTail === false &&
+            state.invalidation != null
+            ? interactionPageSources.map((page) => clonePageLayoutPreviewForPublish(page, mutationDelta))
+            : [];
         const placeholderPages = preservesPreviousPagination
             ? previous.pages
-                .slice(Math.max(state.priorityPageIndex + 1, publishedPageCount))
+                .slice(
+                    unpublishedPageStart +
+                    retainedInteractionPages.length +
+                    previewInteractionPages.length
+                )
                 .map(clonePageLayoutPlaceholderForPublish)
             : [];
         const published: IDocumentSkeletonCached = {
             ...source,
-            pages: [...publishedFlowPages, ...placeholderPages],
+            pages: [
+                ...publishedFlowPages,
+                ...retainedInteractionPages,
+                ...previewInteractionPages,
+                ...placeholderPages,
+            ],
         };
         const publishedActivePages = publishedFlowPages.slice(stablePages.length);
-        setPageParent([...publishedActivePages, ...placeholderPages], published);
+        setPageParent([
+            ...publishedActivePages,
+            ...retainedInteractionPages,
+            ...previewInteractionPages,
+            ...placeholderPages,
+        ], published);
 
         return published;
     }
@@ -2105,7 +2201,7 @@ export class DocumentSkeleton extends Skeleton {
         publishedPageCount: number
     ): IDocumentSkeletonCached {
         const source = state.ctx.skeleton;
-        const previous = this._lastCompleteSkeletonData;
+        const previous = state.publicationBaseSkeleton;
         let publishedPages = source.pages.slice(0, publishedPageCount);
         if (
             state.priorityAnchor == null ||
@@ -3759,27 +3855,14 @@ export class DocumentSkeleton extends Skeleton {
             : state.priorityPageIndex;
         const previousPage = previous.pages[previousPageIndex];
         const mutationDelta = invalidation.newEnd - invalidation.oldEnd;
-        const hasStructuralContainers = (previousPage?.skeTables.size ?? 0) > 0 ||
-            (previousPage?.skeColumnGroups.size ?? 0) > 0 ||
-            (currentPage.skeTables.size ?? 0) > 0 ||
-            (currentPage.skeColumnGroups.size ?? 0) > 0;
         if (
             previousPage == null ||
-            invalidation.oldEnd > previousPage.ed ||
-            (hasStructuralContainers && (
-                !state.allowMetadataOnlyStructuralTailReuse ||
-                mutationDelta !== 0 ||
-                previousPage.st !== currentPage.st
-            )) ||
-            !hasReusablePageDrawings(previousPage, currentPage, invalidation) ||
-            !hasSamePageExitGeometry(previousPage, currentPage)
-        ) {
-            return false;
-        }
-
-        if (
-            invalidation.newEnd > currentPageEnd ||
-            currentPageEnd !== previousPage.ed + mutationDelta
+            !hasReusablePaginatedTailBoundary(
+                previousPage,
+                currentPage,
+                invalidation,
+                state.allowMetadataOnlyStructuralTailReuse
+            )
         ) {
             return false;
         }

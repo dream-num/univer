@@ -89,7 +89,8 @@ export enum DocumentSkeletonPageType {
 export interface IDocumentSkeletonPage {
     /**
      * Preserves page geometry while incremental pagination rebuilds a later page.
-     * Layout placeholders intentionally contain no editable flow nodes.
+     * A placeholder can retain cloned flow nodes as a non-interactive visual preview;
+     * coordinate lookup must still treat the page as non-editable.
      */
     isLayoutPlaceholder?: boolean;
     /** Canonical page geometry is available in the layout executor but not materialized on Main. */

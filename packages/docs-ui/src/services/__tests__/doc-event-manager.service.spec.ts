@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-import { CustomRangeType, EventState, EventSubject, Injector, PresetListType } from '@univerjs/core';
-import { DocSkeletonManagerService } from '@univerjs/docs';
-import { setDocsTableRenderViewportProvider, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
-import { afterEach, describe, expect, it } from 'vitest';
+import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
+import type { IPointerEvent, RenderUnit } from '@univerjs/engine-render';
+import { BooleanNumber, CustomRangeType, DocumentFlavor, EventState, EventSubject, Injector, PresetListType, Univer, UniverInstanceType } from '@univerjs/core';
+import { DocLayoutExecutorService, DocSkeletonManagerService } from '@univerjs/docs';
+import { CanvasColorService, Documents, ICanvasColorService, IRenderManagerService, RenderManagerService, setDocsTableRenderViewportProvider, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
+    calcDocGlyphPosition,
     DocEventManagerService,
     getListMarkerFallbackBound,
     getListMarkerFallbackHit,
@@ -28,6 +31,85 @@ import {
     getTableHorizontalViewportGeometry,
     isChecklistListType,
 } from '../doc-event-manager.service';
+
+describe('custom-range hit testing with real document layout', () => {
+    beforeEach(() => {
+        const context = new Proxy({
+            font: '',
+            webkitBackingStorePixelRatio: 1,
+            measureText: (text: string) => ({
+                width: text.length * 8,
+                actualBoundingBoxAscent: 8,
+                actualBoundingBoxDescent: 2,
+                fontBoundingBoxAscent: 8,
+                fontBoundingBoxDescent: 2,
+            }),
+        }, { get: (target, key) => key in target ? Reflect.get(target, key) : () => {} });
+        vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(context as never);
+    });
+
+    afterEach(() => vi.restoreAllMocks());
+
+    it.each([1, 3])('includes the final glyph of a %i-character link without hitting adjacent text', (length) => {
+        const univer = new Univer();
+        try {
+            const injector = univer.__getInjector();
+            injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+            injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
+            injector.add([DocLayoutExecutorService]);
+            const model = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, {
+                id: 'custom-range-hit-test',
+                body: {
+                    dataStream: 'A目CDZ\r\n',
+                    paragraphs: [{ startIndex: 5, paragraphId: 'paragraph-1' }],
+                    sectionBreaks: [{ startIndex: 6, sectionId: 'body' }],
+                    customRanges: [{ startIndex: 1, endIndex: length, rangeId: 'link', rangeType: CustomRangeType.HYPERLINK }],
+                },
+                documentStyle: {
+                    documentFlavor: DocumentFlavor.TRADITIONAL,
+                    autoHyphenation: BooleanNumber.FALSE,
+                    pageSize: { width: 300, height: 400 },
+                    marginTop: 20,
+                    marginBottom: 20,
+                    marginLeft: 20,
+                    marginRight: 20,
+                },
+            });
+            const render = injector.get(IRenderManagerService).createRender(model.getUnitId()) as RenderUnit;
+            render.deactivate();
+            render.addRenderDependencies([[DocSkeletonManagerService]]);
+            const skeleton = render.with(DocSkeletonManagerService).getSkeleton();
+            const documents = new Documents('custom-range-document', skeleton);
+            render.mainComponent = documents;
+            render.scene.addObject(documents);
+            render.addRenderDependencies([[DocEventManagerService]]);
+            const service = render.with(DocEventManagerService);
+            const clicks: string[] = [];
+            const subscription = service.clickCustomRanges$.subscribe((event) => clicks.push(event.range.rangeId));
+            const glyph = skeleton.findNodeByCharIndex(length)!;
+            const bounds = calcDocGlyphPosition(glyph, documents, skeleton)!;
+            expect(bounds.right - bounds.left).toBeGreaterThan(0);
+            const click = (x: number): void => {
+                const event = {
+                    button: 0,
+                    offsetX: x,
+                    offsetY: (bounds.top + bounds.bottom) / 2,
+                    target: documents,
+                    timeStamp: 100,
+                } as unknown as IPointerEvent;
+                documents.onPointerDown$.emitEvent(event);
+                render.scene.onPointerUp$.emitEvent({ ...event, timeStamp: 180 });
+            };
+            click(bounds.left + (bounds.right - bounds.left) * 0.75);
+            expect(clicks).toEqual(['link']);
+            click(bounds.right + 1);
+            expect(clicks).toEqual(['link']);
+            subscription.unsubscribe();
+        } finally {
+            univer.dispose();
+        }
+    });
+});
 
 class TestDocSkeletonManagerService {
     readonly dirty$ = new EventSubject();

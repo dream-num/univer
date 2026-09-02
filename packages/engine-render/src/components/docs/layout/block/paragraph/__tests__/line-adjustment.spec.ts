@@ -22,6 +22,48 @@ import { shaping } from '../shaping';
 import { createParagraphLayoutTestBed } from './create-paragraph-layout-test-bed';
 
 describe('line-adjustment', () => {
+    it.each([0, 1024])('adjusts a late paragraph without revisiting unrelated cell lines (%i following lines)', (followingLineCount) => {
+        const prefixCount = 1024;
+        const prefix = 'A\r'.repeat(prefixCount);
+        const dataStream = `${prefix}Hello\r${'B\r'.repeat(followingLineCount)}\n`;
+        const paragraphIndex = prefix.length + 5;
+        const { viewModel, ctx, sectionBreakConfig, curPage } = createParagraphLayoutTestBed('Hello', {
+            body: {
+                dataStream,
+                textRuns: [],
+                paragraphs: [...dataStream.matchAll(/\r/g)].map((match) => ({
+                    startIndex: match.index!,
+                    paragraphId: `paragraph-${match.index}`,
+                    paragraphStyle: { horizontalAlign: HorizontalAlign.CENTER },
+                })),
+                sectionBreaks: [{ sectionId: 'long-cell', startIndex: dataStream.length - 1 }],
+            },
+        });
+        const paragraphNode = viewModel.getChildren()[0].children.find((node) => node.endIndex === paragraphIndex)!;
+        const shaped = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+        const pages = lineBreaking(ctx, viewModel, shaped, curPage, paragraphNode, sectionBreakConfig, null);
+        const column = pages[0].sections[0].columns[0];
+        const currentLine = column.lines[0];
+        let earlierLineReads = 0;
+        column.lines.unshift(...Array.from({ length: prefixCount }, (_, index) => ({
+            ...currentLine,
+            divides: [],
+            get paragraphIndex() {
+                earlierLineReads++;
+                return index * 2 + 1;
+            },
+        })));
+        column.lines.push(...Array.from({ length: followingLineCount }, (_, index) => ({
+            ...currentLine,
+            divides: [],
+            paragraphIndex: paragraphIndex + 2 + index * 2,
+        })));
+        lineAdjustment(pages, viewModel, paragraphNode, sectionBreakConfig);
+        expect(currentLine.divides[0].paddingLeft).toBeGreaterThan(0);
+        expect(earlierLineReads).toBeLessThan(20);
+        viewModel.dispose();
+    });
+
     function createGlyph(content: string, width: number, overrides: Record<string, unknown> = {}) {
         return {
             content,

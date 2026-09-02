@@ -58,6 +58,7 @@ import {
 } from '@univerjs/engine-render';
 import { animationFrames, debounceTime, EMPTY, filter, map, merge, startWith, switchMap, take } from 'rxjs';
 import { DocRefreshDrawingsService } from '../../services/doc-refresh-drawings.service';
+import { getDocMutationAffectedDrawingIds } from './doc-drawing-mutation';
 
 interface IDrawingParamsWithBehindText {
     unitId: string;
@@ -65,6 +66,7 @@ interface IDrawingParamsWithBehindText {
     drawingId: string;
     behindText: boolean;
     hidden?: boolean;
+    selectable: boolean;
     transform: ITransformState;
     transforms: ITransformState[];
     customBlockRenderViewport?: Partial<Pick<IDocsCustomBlockRenderViewport, 'bleedLeft' | 'bleedWidth' | 'contentHeight' | 'contentWidth' | 'height' | 'pageContentWidth' | 'viewportHeight'>>;
@@ -80,8 +82,49 @@ interface IDrawingClipBounds {
     height: number;
 }
 
+function mergePublishedDrawing(
+    drawings: Record<string, IDrawingParamsWithBehindText>,
+    next: IDrawingParamsWithBehindText
+): void {
+    const current = drawings[next.drawingId];
+    if (current == null) {
+        drawings[next.drawingId] = next;
+        return;
+    }
+
+    if (next.selectable && !current.selectable) {
+        current.selectable = true;
+        current.transform = next.transform;
+    }
+    if (next.isMultiTransform === BooleanNumber.TRUE) {
+        current.transforms.push(next.transform);
+    }
+}
+
 interface IDrawingTransformStateWithClipBounds extends ITransformState {
     clipBounds?: IDrawingClipBounds;
+}
+
+type DrawingRefreshParam = Partial<IDrawingParam & IDrawingParamsWithBehindText>;
+
+function isSameTransformValue(left: unknown, right: unknown): boolean {
+    return left === right || JSON.stringify(left) === JSON.stringify(right);
+}
+
+export function shouldRefreshDocDrawingTransform(
+    current: DrawingRefreshParam | null | undefined,
+    next: DrawingRefreshParam
+): boolean {
+    if (!current || next.customBlockRenderViewport != null) {
+        return true;
+    }
+
+    return !isSameTransformValue(current.transform, next.transform)
+        || !isSameTransformValue(current.transforms, next.transforms)
+        || current.isMultiTransform !== next.isMultiTransform
+        || current.hidden !== next.hidden
+        || current.behindText !== next.behindText
+        || current.selectable !== next.selectable;
 }
 
 interface IDrawingPositionContext {
@@ -92,6 +135,7 @@ interface IDrawingPositionContext {
     pageOffsetLeft: number;
     pageOffsetTop: number;
     updateDrawingMap: Record<string, IDrawingParamsWithBehindText>;
+    selectable: boolean;
     hostPage?: IDocumentSkeletonPage;
     clipOffset?: { left: number; top: number };
 }
@@ -543,12 +587,19 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
                         return;
                     }
 
+                    const drawingIds = command.id === RichTextEditingMutation.id
+                        ? getDocMutationAffectedDrawingIds(params.actions)
+                        : null;
+                    if (drawingIds?.size === 0) {
+                        return;
+                    }
+
                     if (command.id === RichTextEditingMutation.id && options?.fromChangeset) {
                         this._scheduleChangesetDrawingRefresh();
                         return;
                     }
 
-                    this._refreshCurrentDrawing();
+                    this._refreshCurrentDrawing(drawingIds ?? undefined);
                 }
             })
         );
@@ -572,7 +623,7 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
         });
     }
 
-    private _refreshCurrentDrawing(): void {
+    private _refreshCurrentDrawing(drawingIds?: ReadonlySet<string>): void {
         const skeleton = this._docSkeletonManagerService.getSkeleton();
         if (skeleton == null) {
             return;
@@ -585,7 +636,7 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
             return;
         }
 
-        this._refreshDrawing(skeleton);
+        this._refreshDrawing(skeleton, drawingIds);
     }
 
     private _initTransformRefresh() {
@@ -609,7 +660,7 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
         );
     }
 
-    private _refreshDrawing(skeleton: DocumentSkeleton) {
+    private _refreshDrawing(skeleton: DocumentSkeleton, drawingIds?: ReadonlySet<string>) {
         const skeletonData = skeleton?.getSkeletonData();
         const { mainComponent, unitId } = this._context;
         const documentComponent = mainComponent as Documents;
@@ -644,23 +695,39 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
             this._liquid.translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
         }
 
-        const updateDrawings = Object.values(updateDrawingMap);
+        const updateDrawings = Object.values(updateDrawingMap)
+            .filter((drawing) => drawingIds == null || drawingIds.has(drawing.drawingId));
 
         for (const drawing of updateDrawings) {
             drawing.hidden = false;
         }
 
-        const staleNonMultiDrawings = this._getStaleNonMultiDrawings(unitId, updateDrawingMap);
+        const staleNonMultiDrawings = this._getStaleNonMultiDrawings(unitId, updateDrawingMap, drawingIds);
         const nonMultiDrawings = updateDrawings
             .filter((drawing) => !drawing.isMultiTransform)
-            .concat(staleNonMultiDrawings);
-        const multiDrawings = updateDrawings.filter((drawing) => drawing.isMultiTransform);
+            .concat(staleNonMultiDrawings)
+            .filter((drawing) => shouldRefreshDocDrawingTransform(
+                this._drawingManagerService.getDrawingByParam({
+                    unitId,
+                    subUnitId: unitId,
+                    drawingId: drawing.drawingId,
+                }) as DrawingRefreshParam | undefined,
+                drawing as DrawingRefreshParam
+            ));
         if (nonMultiDrawings.length > 0) {
             this._drawingManagerService.refreshTransform(nonMultiDrawings as unknown as IDrawingParam[]);
         }
 
-        // if multiDrawings length is 0, also need to remove current multi drawings.
-        this._handleMultiDrawingsTransform(multiDrawings as unknown as IDrawingParam[]);
+        const targetedMultiDrawing = drawingIds != null && [...drawingIds].some((drawingId) =>
+            updateDrawingMap[drawingId]?.isMultiTransform === BooleanNumber.TRUE ||
+            this._drawingManagerService.getDrawingByParam({ unitId, subUnitId: unitId, drawingId })?.isMultiTransform === BooleanNumber.TRUE);
+        if (drawingIds == null || targetedMultiDrawing) {
+            // Multi-transform drawings are recreated as a group so repeated
+            // header/footer occurrences stay consistent.
+            const allMultiDrawings = Object.values(updateDrawingMap)
+                .filter((drawing) => drawing.isMultiTransform);
+            this._handleMultiDrawingsTransform(allMultiDrawings as unknown as IDrawingParam[]);
+        }
     }
 
     private _collectPublishedPageDrawingPositions(
@@ -672,6 +739,7 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
         docsTop: number,
         updateDrawingMap: Record<string, IDrawingParamsWithBehindText>
     ): void {
+        const selectable = !page.isLayoutPlaceholder && !page.isMaterializationPlaceholder;
         const { headerId, footerId, pageWidth } = page;
         const headerPage = headerId ? skeHeaders.get(headerId)?.get(pageWidth) : undefined;
         if (headerPage != null) {
@@ -683,7 +751,8 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
                 updateDrawingMap,
                 headerPage.marginTop,
                 page.marginLeft,
-                page
+                page,
+                selectable
             );
         }
 
@@ -698,7 +767,8 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
                 updateDrawingMap,
                 footerTop,
                 page.marginLeft,
-                page
+                page,
+                selectable
             );
         }
 
@@ -709,7 +779,9 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
             docsTop,
             updateDrawingMap,
             page.marginTop,
-            page.marginLeft
+            page.marginLeft,
+            undefined,
+            selectable
         );
     }
 
@@ -721,7 +793,8 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
         updateDrawingMap: Record<string, IDrawingParamsWithBehindText>,
         marginTop: number,
         marginLeft: number,
-        hostPage?: IDocumentSkeletonPage
+        hostPage: IDocumentSkeletonPage | undefined,
+        selectable: boolean
     ): void {
         this._calculateDrawingPosition(
             unitId,
@@ -731,7 +804,8 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
             updateDrawingMap,
             marginTop,
             marginLeft,
-            hostPage
+            hostPage,
+            selectable
         );
         this._calculateTableCellDrawingPositions(
             unitId,
@@ -740,7 +814,8 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
             docsTop,
             updateDrawingMap,
             marginTop,
-            marginLeft
+            marginLeft,
+            selectable
         );
         this._calculateColumnGroupDrawingPositions(
             unitId,
@@ -749,18 +824,21 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
             docsTop,
             updateDrawingMap,
             marginTop,
-            marginLeft
+            marginLeft,
+            selectable
         );
     }
 
     private _getStaleNonMultiDrawings(
         unitId: string,
-        updateDrawingMap: Record<string, IDrawingParamsWithBehindText>
+        updateDrawingMap: Record<string, IDrawingParamsWithBehindText>,
+        drawingIds?: ReadonlySet<string>
     ): IDrawingParamsWithBehindText[] {
         const drawingData = this._drawingManagerService.getDrawingData(unitId, unitId) ?? {};
 
         return Object.values(drawingData)
             .filter((drawing) => drawing.isMultiTransform !== BooleanNumber.TRUE)
+            .filter((drawing) => drawingIds == null || drawingIds.has(drawing.drawingId))
             .filter((drawing) => updateDrawingMap[drawing.drawingId] == null)
             .map((drawing) => ({
                 unitId,
@@ -768,6 +846,7 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
                 drawingId: drawing.drawingId,
                 behindText: false,
                 hidden: true,
+                selectable: true,
                 transform: drawing.transform,
                 transforms: drawing.transforms ?? [],
                 isMultiTransform: drawing.isMultiTransform ?? BooleanNumber.FALSE,
@@ -821,6 +900,7 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
         marginTop: number,
         marginLeft: number,
         hostPage?: IDocumentSkeletonPage,
+        selectable = true,
         clipOffset?: { left: number; top: number }
     ) {
         const { skeDrawings } = page;
@@ -840,6 +920,7 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
             pageOffsetTop,
             updateDrawingMap,
             hostPage,
+            selectable,
             clipOffset,
         };
         skeDrawings.forEach((drawing) => this._collectDrawingPosition(drawing, drawingPositionContext));
@@ -910,21 +991,17 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
             flipY: runtimeDrawing.docTransform.flipY,
             clipBounds,
         };
-        const existingDrawing = context.updateDrawingMap[drawingId];
-        if (existingDrawing == null) {
-            context.updateDrawingMap[drawingId] = {
-                unitId: context.unitId,
-                subUnitId: context.unitId,
-                drawingId,
-                behindText,
-                transform,
-                transforms: [transform],
-                customBlockRenderViewport: drawing.customBlockRenderViewport,
-                isMultiTransform,
-            };
-        } else if (isMultiTransform === BooleanNumber.TRUE) {
-            existingDrawing.transforms.push(transform);
-        }
+        mergePublishedDrawing(context.updateDrawingMap, {
+            unitId: context.unitId,
+            subUnitId: context.unitId,
+            drawingId,
+            behindText,
+            selectable: context.selectable,
+            transform,
+            transforms: [transform],
+            customBlockRenderViewport: drawing.customBlockRenderViewport,
+            isMultiTransform,
+        });
     }
 
     private _calculateTableCellDrawingPositions(
@@ -934,7 +1011,8 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
         docsTop: number,
         updateDrawingMap: Record<string, IDrawingParamsWithBehindText>,
         baseMarginTop: number,
-        baseMarginLeft: number
+        baseMarginLeft: number,
+        selectable: boolean
     ) {
         page.skeTables?.forEach((table) => {
             table.rows.forEach((row) => {
@@ -960,6 +1038,7 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
                         marginTop,
                         marginLeft,
                         undefined,
+                        selectable,
                         { left: marginLeft, top: marginTop }
                     );
                     this._calculateTableCellDrawingPositions(
@@ -969,7 +1048,8 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
                         docsTop,
                         updateDrawingMap,
                         marginTop,
-                        marginLeft
+                        marginLeft,
+                        selectable
                     );
                     this._calculateColumnGroupDrawingPositions(
                         unitId,
@@ -978,7 +1058,8 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
                         docsTop,
                         updateDrawingMap,
                         marginTop,
-                        marginLeft
+                        marginLeft,
+                        selectable
                     );
                 });
             });
@@ -992,7 +1073,8 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
         docsTop: number,
         updateDrawingMap: Record<string, IDrawingParamsWithBehindText>,
         baseMarginTop: number,
-        baseMarginLeft: number
+        baseMarginLeft: number,
+        selectable: boolean
     ): void {
         page.skeColumnGroups?.forEach((columnGroup) => {
             columnGroup.columns.forEach((column) => {
@@ -1010,6 +1092,7 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
                     marginTop,
                     marginLeft,
                     undefined,
+                    selectable,
                     clipOffset
                 );
                 this._calculateTableCellDrawingPositions(
@@ -1019,7 +1102,8 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
                     docsTop,
                     updateDrawingMap,
                     marginTop,
-                    marginLeft
+                    marginLeft,
+                    selectable
                 );
                 this._calculateColumnGroupDrawingPositions(
                     unitId,
@@ -1028,7 +1112,8 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
                     docsTop,
                     updateDrawingMap,
                     marginTop,
-                    marginLeft
+                    marginLeft,
+                    selectable
                 );
             });
         });

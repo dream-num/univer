@@ -76,6 +76,16 @@ function paginationSignature(pages: IDocumentSkeletonPage[]) {
     }));
 }
 
+function pageText(page: IDocumentSkeletonPage) {
+    return page.sections
+        .flatMap((section) => section.columns)
+        .flatMap((column) => column.lines)
+        .flatMap((line) => line.divides)
+        .flatMap((divide) => divide.glyphGroup)
+        .map((glyph) => glyph.content)
+        .join('');
+}
+
 describe('linebreaking', () => {
     beforeEach(() => {
         vi.stubGlobal('document', {
@@ -367,6 +377,99 @@ describe('linebreaking', () => {
         );
 
         expect(result).toHaveLength(1);
+    });
+
+    it('keeps the entry contract for empty shaped text while initializing paragraph caches', () => {
+        const testBed = createParagraphLayoutTestBed('Empty contract');
+
+        const result = lineBreaking(
+            testBed.ctx,
+            testBed.viewModel,
+            [],
+            testBed.curPage,
+            testBed.paragraphNode,
+            testBed.sectionBreakConfig,
+            null
+        );
+
+        expect(result).toEqual([testBed.curPage]);
+        expect(result[0]).toBe(testBed.curPage);
+        expect(testBed.ctx.paragraphConfigCache.get(testBed.curPage.segmentId)?.get(testBed.paragraphNode.endIndex))
+            .toMatchObject({
+                paragraphIndex: testBed.paragraphNode.endIndex,
+                isInsideTable: false,
+            });
+        expect(testBed.ctx.skeletonResourceReference.drawingAnchor?.get(testBed.curPage.segmentId))
+            .toBeInstanceOf(Map);
+    });
+
+    it('keeps page order, list state, and cache state across an explicit page boundary', () => {
+        const content = `Item${DataStreamTreeTokenType.PAGE_BREAK}Tail`;
+        const testBed = createParagraphLayoutTestBed(content, {
+            documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
+            body: {
+                paragraphs: [{
+                    startIndex: content.length,
+                    paragraphId: 'entry-contract',
+                    bullet: { listId: 'entry-list', listType: 'entry-list-type', nestingLevel: 0 },
+                }],
+            },
+            lists: {
+                'entry-list-type': {
+                    listType: 'entry-list-type',
+                    nestingLevel: [{
+                        bulletAlignment: 1,
+                        glyphFormat: '%1.',
+                        startNumber: 1,
+                        glyphType: 0,
+                    }],
+                },
+            },
+        });
+        const shapedTextList = shaping(
+            testBed.ctx,
+            testBed.paragraphNode.content!,
+            testBed.viewModel,
+            testBed.paragraphNode,
+            testBed.sectionBreakConfig
+        );
+
+        const result = lineBreaking(
+            testBed.ctx,
+            testBed.viewModel,
+            shapedTextList,
+            testBed.curPage,
+            testBed.paragraphNode,
+            testBed.sectionBreakConfig,
+            null
+        );
+
+        const listGlyphCounts = result.map((page) => page.sections
+            .flatMap((section) => section.columns)
+            .flatMap((column) => column.lines)
+            .flatMap((line) => line.divides)
+            .flatMap((divide) => divide.glyphGroup)
+            .filter((glyph) => glyph.glyphType === GlyphType.LIST)
+            .length);
+        const cachedConfig = testBed.ctx.paragraphConfigCache
+            .get(testBed.curPage.segmentId)
+            ?.get(testBed.paragraphNode.endIndex);
+
+        expect(result).toHaveLength(2);
+        expect(result[0]).toBe(testBed.curPage);
+        expect(result[1].isExplicitPageBreak).toBe(true);
+        expect(pageText(result[0])).toContain('Item');
+        expect(pageText(result[0])).not.toContain('Tail');
+        expect(pageText(result[1])).toContain('Tail');
+        expect(listGlyphCounts).toEqual([1, 0]);
+        expect(cachedConfig?.bulletSkeleton).toBeDefined();
+        expect(testBed.ctx.paragraphConfigCache.get(testBed.curPage.segmentId)).toHaveLength(1);
+        expect(testBed.ctx.paginationMetrics).toMatchObject({
+            constrainedParagraphs: 0,
+            noConstraintParagraphs: 1,
+            retryCount: 0,
+            movedLineCount: 0,
+        });
     });
 
     it('renders a list marker only once when a bullet paragraph ends with a manual page break', () => {

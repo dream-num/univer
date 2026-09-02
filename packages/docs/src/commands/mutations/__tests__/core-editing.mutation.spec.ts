@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
-import { transformDocumentTextRanges } from '../core-editing.mutation';
+import { ICommandService, JSONX } from '@univerjs/core';
+import { describe, expect, it, vi } from 'vitest';
+import { createTestBed } from '../../../facade/__tests__/create-test-bed';
+import { DocSelectionManagerService } from '../../../services/doc-selection-manager.service';
+import { RichTextEditingMutation, transformDocumentTextRanges } from '../core-editing.mutation';
 
 describe('transformDocumentTextRanges', () => {
     it('moves an active body caret through an insertion with right priority', () => {
@@ -69,5 +72,31 @@ describe('transformDocumentTextRanges', () => {
             et: 'text-x',
             e: [{ t: 'i', len: 6, body: { dataStream: 'REMOTE' } }],
         }], [range])).toEqual([range]);
+    });
+});
+
+describe('RichTextEditingMutation selection scheduling', () => {
+    it('does not refresh selection for metadata changes without ranges', async () => {
+        const testBed = createTestBed();
+        const selectionManager = testBed.get(DocSelectionManagerService);
+        const refreshSelection = vi.spyOn(selectionManager, 'refreshSelection');
+        const documentStyle = testBed.doc.getDocumentStyle();
+        const previousMargin = documentStyle.marginTop;
+        const actions = JSONX.getInstance().replaceOp(
+            ['documentStyle', 'marginTop'],
+            previousMargin,
+            (previousMargin ?? 0) + 1
+        );
+
+        testBed.get(ICommandService).syncExecuteCommand(RichTextEditingMutation.id, {
+            unitId: testBed.doc.getUnitId(),
+            actions,
+            textRanges: [],
+            trigger: 'test.metadata-command',
+        });
+        await Promise.resolve();
+
+        expect(refreshSelection).not.toHaveBeenCalled();
+        testBed.univer.dispose();
     });
 });

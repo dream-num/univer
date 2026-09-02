@@ -16,6 +16,7 @@
 
 import type { DocumentDataModel, IAccessor, ICommand, IObjectPositionH, IObjectPositionV } from '@univerjs/core';
 import type { IDocDrawing, IDrawingDocTransform, IUpdateDrawingDocTransformCommandParams } from '@univerjs/docs-drawing';
+import type { IDocumentSkeletonCached } from '@univerjs/engine-render';
 import {
     CommandType,
     Direction,
@@ -24,8 +25,10 @@ import {
     PositionedObjectLayoutType,
     UniverInstanceType,
 } from '@univerjs/core';
+import { DocSkeletonManagerService } from '@univerjs/docs';
 import { IDocDrawingService, UpdateDrawingDocTransformCommand } from '@univerjs/docs-drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { findDrawingAnchorInPage, resolveDrawingAnchorOffsets } from '../../utils/drawing-anchor-position';
 
 export interface IMoveDrawingsCommandParams {
     direction: Direction;
@@ -58,6 +61,7 @@ export const MoveDocDrawingsCommand: ICommand = {
             return false;
         }
         const transformer = scene.getTransformerByCreate();
+        const skeletonData = renderObject?.with(DocSkeletonManagerService).getSkeleton()?.getSkeletonData();
 
         const documentDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
 
@@ -71,9 +75,25 @@ export const MoveDocDrawingsCommand: ICommand = {
             }
 
             const { positionH, positionV } = drawingData.docTransform;
+            const anchorLookup = skeletonData == null
+                ? { anchor: null, previewOnly: false }
+                : findDrawingAnchor(skeletonData, drawingId);
+            if (anchorLookup.previewOnly) {
+                return null;
+            }
 
-            const newPositionH: IObjectPositionH = { ...positionH };
-            const newPositionV: IObjectPositionV = { ...positionV };
+            const { anchor } = anchorLookup;
+            const offsets = anchor == null
+                ? { horizontal: positionH.posOffset ?? 0, vertical: positionV.posOffset ?? 0 }
+                : resolveDrawingAnchorOffsets(anchor, positionH, positionV);
+            const newPositionH = {
+                ...(positionH.relativeFrom == null ? {} : { relativeFrom: positionH.relativeFrom }),
+                posOffset: offsets.horizontal,
+            } as IObjectPositionH;
+            const newPositionV = {
+                ...(positionV.relativeFrom == null ? {} : { relativeFrom: positionV.relativeFrom }),
+                posOffset: offsets.vertical,
+            } as IObjectPositionV;
 
             if (direction === Direction.UP) {
                 newPositionV.posOffset = (newPositionV.posOffset ?? 0) - 2;
@@ -107,3 +127,39 @@ export const MoveDocDrawingsCommand: ICommand = {
         return Boolean(result);
     },
 };
+
+function findDrawingAnchor(
+    skeletonData: IDocumentSkeletonCached,
+    drawingId: string
+) {
+    let foundInPreview = false;
+
+    for (const page of skeletonData.pages) {
+        const bodyAnchor = findDrawingAnchorInPage(page, drawingId, page.marginTop, page.marginLeft);
+        const header = page.headerId == null
+            ? undefined
+            : skeletonData.skeHeaders.get(page.headerId)?.get(page.pageWidth);
+        const headerAnchor = header == null
+            ? null
+            : findDrawingAnchorInPage(header, drawingId, header.marginTop, page.marginLeft);
+        const footer = page.footerId == null
+            ? undefined
+            : skeletonData.skeFooters.get(page.footerId)?.get(page.pageWidth);
+        const footerTop = footer == null ? 0 : page.pageHeight - page.marginBottom + footer.marginTop;
+        const footerAnchor = footer == null
+            ? null
+            : findDrawingAnchorInPage(footer, drawingId, footerTop, page.marginLeft);
+        const anchor = bodyAnchor ?? headerAnchor ?? footerAnchor;
+        if (anchor == null) {
+            continue;
+        }
+
+        if (!page.isLayoutPlaceholder && !page.isMaterializationPlaceholder) {
+            return { anchor, previewOnly: false };
+        }
+
+        foundInPreview = true;
+    }
+
+    return { anchor: null, previewOnly: foundInPreview };
+}

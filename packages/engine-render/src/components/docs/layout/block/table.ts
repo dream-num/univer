@@ -20,19 +20,18 @@ import type {
     IDocumentSkeletonRow,
     IDocumentSkeletonTable,
     IParagraphList,
-    ISectionBreakConfig,
-} from '../../../../basics';
+} from '../../../../basics/i-document-skeleton-cached';
+import type { ISectionBreakConfig } from '../../../../basics/interfaces';
 import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../view-model/document-view-model';
 import type { ICellSkeletonBuildState } from '../model/page';
 import type { ILayoutContext } from '../tools';
 import { BooleanNumber, TableAlignmentType, TableRowHeightRule, VerticalAlignmentType } from '@univerjs/core';
-import { DocumentSkeletonPageType } from '../../../../basics';
+import { DocumentSkeletonPageType } from '../../../../basics/i-document-skeleton-cached';
 import { getDocumentCompatibilityPolicy } from '../../document-compatibility';
 import {
     createNullCellPage,
     createSkeletonCellPages,
-
     startSkeletonCellPagesBuild,
     stepSkeletonCellPagesBuild,
 } from '../model/page';
@@ -405,7 +404,11 @@ export function stepTableSkeletonsBuild(state: ISlicedTableSkeletonBuildState): 
     const cellNode = rowNode.children[state.columnIndex];
     const rowSource = state.table.tableRows[state.rowIndex];
     const cellConfig = rowSource.tableCells[state.columnIndex];
-    if (cellNode != null && !isCoveredTableCell(cellConfig)) {
+    const precomputedRow = precomputedTableSkeletons.get(state.ctx)?.get(state.tableNode.startIndex)?.rows[state.rowIndex];
+    // Pagination uses the same current-generation measurements as the synchronous
+    // path. Only cells in rows that actually need splitting must be laid out again.
+    const reusePrecomputedRow = canReusePrecomputedTableRow(state.curPage, state.createCache, rowSource, precomputedRow);
+    if (!reusePrecomputedRow && cellNode != null && !isCoveredTableCell(cellConfig)) {
         const pageContentHeight = getAvailableHeight(state.curPage, state.createCache, false);
         const availableHeight = getAvailableHeight(state.curPage, state.createCache, true);
         const canRowSplit =
@@ -447,7 +450,7 @@ export function stepTableSkeletonsBuild(state: ISlicedTableSkeletonBuildState): 
     }
 
     state.columnIndex++;
-    if (state.columnIndex < rowNode.children.length) {
+    if (!reusePrecomputedRow && state.columnIndex < rowNode.children.length) {
         return false;
     }
 
@@ -462,7 +465,7 @@ export function stepTableSkeletonsBuild(state: ISlicedTableSkeletonBuildState): 
         state.table,
         state.createCache,
         false,
-        undefined,
+        precomputedRow,
         state.preparedCellPages
     );
     state.rowIndex++;
@@ -639,6 +642,18 @@ function getAvailableHeight(curPage: IDocumentSkeletonPage, cache: ICreateTableC
     return pageContentHeight;
 }
 
+function canReusePrecomputedTableRow(
+    curPage: IDocumentSkeletonPage,
+    cache: ICreateTableCache,
+    rowSource: ITableRow,
+    precomputedRow?: IDocumentSkeletonRow
+): precomputedRow is IDocumentSkeletonRow {
+    const canRowSplit = rowSource.cantSplit !== BooleanNumber.TRUE && rowSource.trHeight.hRule !== TableRowHeightRule.EXACT;
+    return precomputedRow != null &&
+        precomputedRow.height <= getAvailableHeight(curPage, cache, false) &&
+        (cache.remainHeight <= 0 || !canRowSplit || precomputedRow.height <= cache.remainHeight);
+}
+
 function dealWithTableRow(
     ctx: ILayoutContext,
     curPage: IDocumentSkeletonPage,
@@ -662,11 +677,7 @@ function dealWithTableRow(
     const { hRule, val } = trHeight;
     const canRowSplit = cantSplit !== BooleanNumber.TRUE && trHeight.hRule !== TableRowHeightRule.EXACT;
     const needOpenNewTable = cache.remainHeight <= 0;
-    const precomputedRowFits =
-        !isRepeatRow &&
-        precomputedRow != null &&
-        precomputedRow.height <= pageContentHeight &&
-        (needOpenNewTable || !canRowSplit || precomputedRow.height <= cache.remainHeight);
+    const precomputedRowFits = !isRepeatRow && canReusePrecomputedTableRow(curPage, cache, rowSource, precomputedRow);
     const rowSkeletons: IDocumentSkeletonRow[] = precomputedRowFits ? [precomputedRow] : [];
     let curTableSkeleton = getCurTableSkeleton(skeTables);
 

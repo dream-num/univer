@@ -655,3 +655,55 @@ describe('EditorService', () => {
         expect(service.getEditorRenderConfig(EDITOR_ID)).toBeNull();
     });
 });
+describe('EditorService preserved host focus regression', () => {
+    afterEach(() => {
+        vi.unstubAllGlobals();
+    });
+
+    it('restores the focused host document after disposing the current comment editor', () => {
+        vi.stubGlobal('window', new EventTarget());
+        const editorUnitId = '__INTERNAL_EDITOR__COMMENT_EDITOR_PANEL_doc-1';
+        const hostUnitId = 'doc-1';
+        let currentUnitId: string | null = editorUnitId;
+        const setCurrentUnitForType = vi.fn((unitId: string) => {
+            currentUnitId = unitId;
+        });
+        const instanceService = {
+            getCurrentUnitOfType: vi.fn(() => currentUnitId == null ? null : { getUnitId: () => currentUnitId }),
+            getFocusedUnit: vi.fn(() => ({ getUnitId: () => hostUnitId })),
+            getUnitType: vi.fn(() => UniverInstanceType.UNIVER_DOC),
+            disposeUnit: vi.fn(() => {
+                currentUnitId = null;
+                return true;
+            }),
+            setCurrentUnitForType,
+        };
+        const removeRender = vi.fn();
+        const editorDispose = vi.fn();
+        const service = new EditorService(
+            instanceService as never,
+            { removeRender } as never,
+            {} as never,
+            {} as never,
+            {} as never,
+            {} as never,
+            {} as never
+        );
+        (service as unknown as { _editors: Map<string, unknown> })._editors.set(editorUnitId, {
+            dispose: editorDispose,
+        });
+        (service as unknown as { _editorRenderConfigs: Map<string, unknown> })._editorRenderConfigs.set(editorUnitId, {
+            preserveHostFocus: true,
+        });
+
+        (service as unknown as { _unRegister: (unitId: string) => void })._unRegister(editorUnitId);
+
+        expect(removeRender).toHaveBeenCalledWith(editorUnitId);
+        expect(editorDispose).toHaveBeenCalledTimes(1);
+        expect(instanceService.disposeUnit).toHaveBeenCalledWith(editorUnitId);
+        expect(setCurrentUnitForType).toHaveBeenCalledWith(hostUnitId);
+        expect(currentUnitId).toBe(hostUnitId);
+
+        service.dispose();
+    });
+});

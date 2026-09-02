@@ -26,6 +26,7 @@ import {
 import { Liquid, setDocsTableRenderViewportProvider } from '@univerjs/engine-render';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { getDocsTableCellAnchorContext } from '../../doc-drawing-transformer-update.controller';
+import { doesDocMutationAffectDrawingPresentation, getDocMutationAffectedDrawingIds } from '../doc-drawing-mutation';
 import {
     DocDrawingPublicationTracker,
     DocDrawingTransformUpdateController,
@@ -37,11 +38,129 @@ import {
     getDocsPageRelativeDrawingLeft,
     getDocsPageRelativeDrawingTop,
     getDocsTableCellDrawingOffset,
+    shouldRefreshDocDrawingTransform,
 } from '../doc-drawing-transform-update.controller';
 
 describe('DocDrawingTransformUpdateController', () => {
     afterEach(() => {
         setDocsTableRenderViewportProvider(null);
+    });
+
+    it('does not eagerly refresh drawings for table metadata mutations', () => {
+        expect(doesDocMutationAffectDrawingPresentation([
+            'tableSource',
+            'table-1',
+            'tableColumns',
+            0,
+            'size',
+            'width',
+            'v',
+            { r: 28, i: 32 },
+        ] as never)).toBe(false);
+        expect(doesDocMutationAffectDrawingPresentation([
+            'drawings',
+            'drawing-1',
+            'docTransform',
+            { r: {}, i: { angle: 1 } },
+        ] as never)).toBe(true);
+        expect([...getDocMutationAffectedDrawingIds([
+            'drawings',
+            'drawing-1',
+            'docTransform',
+            { r: {}, i: { angle: 1 } },
+        ] as never)!]).toEqual(['drawing-1']);
+        expect(getDocMutationAffectedDrawingIds([
+            'drawingsOrder',
+            { r: [], i: ['drawing-1'] },
+        ] as never)).toBeNull();
+    });
+
+    it('filters unchanged drawing transform notifications but preserves viewport refreshes', () => {
+        const current = {
+            unitId: 'doc-1',
+            subUnitId: 'doc-1',
+            drawingId: 'drawing-1',
+            drawingType: 0,
+            behindText: false,
+            hidden: false,
+            isMultiTransform: BooleanNumber.FALSE,
+            transform: { left: 10, top: 20, width: 30, height: 40 },
+            transforms: [],
+        };
+
+        expect(shouldRefreshDocDrawingTransform(current as never, { ...current } as never)).toBe(false);
+        expect(shouldRefreshDocDrawingTransform(current as never, {
+            ...current,
+            transform: { ...current.transform, left: 11 },
+        } as never)).toBe(true);
+        expect(shouldRefreshDocDrawingTransform(current as never, {
+            ...current,
+            customBlockRenderViewport: { contentWidth: 100 },
+        } as never)).toBe(true);
+        expect(shouldRefreshDocDrawingTransform(current as never, {
+            ...current,
+            selectable: false,
+        } as never)).toBe(true);
+    });
+
+    it('publishes preview-only drawings as non-selectable and restores canonical drawings', () => {
+        const controller = Object.create(DocDrawingTransformUpdateController.prototype);
+        controller._context = {
+            unit: { getSnapshot: () => ({ drawings: {} }) },
+        };
+        controller._liquid = new Liquid();
+        const drawing = {
+            aLeft: 10,
+            aTop: 20,
+            width: 30,
+            height: 40,
+            angle: 0,
+            drawingId: 'drawing-1',
+            drawingOrigin: {
+                layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
+                behindDoc: BooleanNumber.FALSE,
+                docTransform: { positionH: {}, positionV: {} },
+            },
+        };
+        const page = {
+            footerId: '',
+            headerId: '',
+            isLayoutPlaceholder: true,
+            marginBottom: 10,
+            marginLeft: 10,
+            marginRight: 10,
+            marginTop: 10,
+            pageHeight: 300,
+            pageWidth: 200,
+            skeColumnGroups: new Map(),
+            skeDrawings: new Map([['drawing-1', drawing]]),
+            skeTables: new Map(),
+        };
+        const previewDrawings = {} as Record<string, { selectable: boolean }>;
+
+        controller._collectPublishedPageDrawingPositions(
+            'doc-1',
+            page,
+            new Map(),
+            new Map(),
+            0,
+            0,
+            previewDrawings
+        );
+        expect(previewDrawings['drawing-1']).toMatchObject({ selectable: false });
+
+        page.isLayoutPlaceholder = false;
+        const canonicalDrawings = {} as Record<string, { selectable: boolean }>;
+        controller._collectPublishedPageDrawingPositions(
+            'doc-1',
+            page,
+            new Map(),
+            new Map(),
+            0,
+            0,
+            canonicalDrawings
+        );
+        expect(canonicalDrawings['drawing-1']).toMatchObject({ selectable: true });
     });
 
     it('refreshes only incremental publications that can change drawing transforms', () => {

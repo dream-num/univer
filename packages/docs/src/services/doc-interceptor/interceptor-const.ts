@@ -14,11 +14,23 @@
  * limitations under the License.
  */
 
-import type { ICustomDecoration, ICustomDecorationForInterceptor, ICustomRange, ICustomRangeForInterceptor } from '@univerjs/core';
+import type {
+    ICustomDecoration,
+    ICustomDecorationForInterceptor,
+    ICustomRange,
+    ICustomRangeForInterceptor,
+    IDocumentBody,
+} from '@univerjs/core';
 import { createInterceptorKey } from '@univerjs/core';
 
-const CUSTOM_RANGE = createInterceptorKey<ICustomRangeForInterceptor, { index: number; unitId: string; customRanges: ICustomRange[] }>('CUSTOM_RANGE');
-const CUSTOM_DECORATION = createInterceptorKey<ICustomDecorationForInterceptor, { index: number; unitId: string; customDecorations: ICustomDecoration[] }>('CUSTOM_DECORATION');
+const CUSTOM_RANGE = createInterceptorKey<
+    ICustomRangeForInterceptor,
+    { index: number; unitId: string; body: IDocumentBody | undefined; customRanges: ICustomRange[] }
+>('CUSTOM_RANGE');
+const CUSTOM_DECORATION = createInterceptorKey<
+    ICustomDecorationForInterceptor,
+    { index: number; unitId: string; customDecorations: ICustomDecoration[] }
+>('CUSTOM_DECORATION');
 
 export const DOC_INTERCEPTOR_POINT = {
     CUSTOM_RANGE,

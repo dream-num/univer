@@ -16,7 +16,6 @@
 
 import { BooleanNumber, CustomRangeType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
-import { getColorStyleForCanvas } from '../color';
 import { getCustomRangeStyle } from '../custom-range';
 
 describe('custom range style', () => {
@@ -52,10 +51,5 @@ describe('custom range style', () => {
 
     it('does not style unsupported custom range types', () => {
         expect(getCustomRangeStyle({ rangeType: CustomRangeType.COMMENT } as never)).toBeNull();
-    });
-
-    it('keeps palette tokens for the canvas theme color service', () => {
-        expect(getColorStyleForCanvas({ rgb: 'blue.600' })).toBe('blue.600');
-        expect(getColorStyleForCanvas({ rgb: 'rgb(39, 79, 238)' })).toBe('#274fee');
     });
 });

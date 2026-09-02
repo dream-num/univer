@@ -217,6 +217,62 @@ describe('DocBackground', () => {
         background.dispose();
     });
 
+    it.each(['isLayoutPlaceholder', 'isMaterializationPlaceholder'] as const)(
+        'draws visible skeleton lines below the first twelve rows for %s',
+        (placeholderFlag) => {
+            const background = DocBackground.create(
+                'scrolled-placeholder-background',
+                createSkeleton([createPage({ pageHeight: 1000, [placeholderFlag]: true })])
+            );
+            background.resize(240, 1000);
+            const ctx = Object.assign(createCtx(), {
+                beginPath: vi.fn(),
+                createLinearGradient: vi.fn(() => ({ addColorStop: vi.fn() })),
+                fill: vi.fn(),
+                roundRect: vi.fn(),
+                fillStyle: '',
+            });
+            vi.spyOn(Rect, 'drawWith').mockImplementation(() => {});
+            vi.spyOn(Path, 'drawWith').mockImplementation(() => {});
+
+            background.draw(ctx, {
+                viewBound: { left: 0, top: 600, right: 240, bottom: 900 },
+                cacheBound: { left: 0, top: 600, right: 240, bottom: 900 },
+            } as any);
+
+            expect(ctx.roundRect.mock.calls.length).toBeGreaterThan(0);
+            // Work is bounded by visible rows, not the full page height.
+            expect(ctx.roundRect.mock.calls.length).toBeLessThanOrEqual(13);
+            for (const [, y, , height] of ctx.roundRect.mock.calls) {
+                expect(y + height).toBeGreaterThanOrEqual(600);
+                expect(y).toBeLessThanOrEqual(900);
+            }
+            background.dispose();
+        }
+    );
+
+    it('keeps a visual layout preview free of skeleton lines', () => {
+        const background = DocBackground.create(
+            'visual-layout-preview-background',
+            createSkeleton([createPage({ isLayoutPlaceholder: true, sections: [{} as never] })])
+        );
+        background.resize(240, 1000);
+        const ctx = Object.assign(createCtx(), {
+            beginPath: vi.fn(),
+            createLinearGradient: vi.fn(() => ({ addColorStop: vi.fn() })),
+            fill: vi.fn(),
+            roundRect: vi.fn(),
+            fillStyle: '',
+        });
+        vi.spyOn(Rect, 'drawWith').mockImplementation(() => {});
+        vi.spyOn(Path, 'drawWith').mockImplementation(() => {});
+
+        background.draw(ctx);
+
+        expect(ctx.roundRect).not.toHaveBeenCalled();
+        background.dispose();
+    });
+
     it('does not draw layout skeleton lines inside the current published traditional page', () => {
         const background = DocBackground.create(
             'incremental-current-page-background',

@@ -85,6 +85,8 @@ export function transformOffset2Bound(offsetX: number, offsetY: number, scene: S
 }
 
 export interface IDocCanvasPopup extends Omit<IPopup, 'anchorRect$' | 'children' | 'unitId' | 'subUnitId' | 'canvasElement'> {
+    /** Defaults to true. Passive hover affordances can track layout without holding it. */
+    requiresStableLayout?: boolean;
     mask?: boolean;
     extraProps?: Record<string, unknown>;
     multipleDirection?: IPopup['direction'];
@@ -95,7 +97,8 @@ export const calcDocRangePositions = (range: ITextRangeParam, currentRender: IRe
     const skeleton = currentRender.with(DocSkeletonManagerService).getSkeleton();
     const startPosition = skeleton.findNodePositionByCharIndex(range.startOffset, true, range.segmentId, range.segmentPage);
     const endIndex = range.collapsed ? range.startOffset : range.endOffset - 1;
-    const endPosition = skeleton.findNodePositionByCharIndex(endIndex, true, range.segmentId, range.segmentPage);
+    // Include the last glyph in the anchor and its outside-click exclusion.
+    const endPosition = skeleton.findNodePositionByCharIndex(endIndex, range.collapsed === true, range.segmentId, range.segmentPage);
     const document = mainComponent as Documents;
 
     if (!endPosition || !startPosition) {
@@ -329,14 +332,14 @@ export class DocCanvasPopManagerService extends Disposable {
             anchorRect$: position$,
             canvasElement: currentRender.engine.getCanvasElement(),
         });
-        const popupActivity = this._beginPopupActivity(unitId);
+        const popupActivity = popup.requiresStableLayout === false ? null : this._beginPopupActivity(unitId);
 
         return {
             dispose: () => {
                 popupManagerService.removePopup(id);
                 position$.complete();
                 disposable.dispose();
-                popupActivity.dispose();
+                popupActivity?.dispose();
             },
             canDispose: () => popupManagerService.activePopupId !== id,
         };
@@ -367,14 +370,14 @@ export class DocCanvasPopManagerService extends Disposable {
             anchorRect$: position$,
             canvasElement: currentRender.engine.getCanvasElement(),
         });
-        const popupActivity = this._beginPopupActivity(unitId);
+        const popupActivity = popup.requiresStableLayout === false ? null : this._beginPopupActivity(unitId);
 
         return {
             dispose: () => {
                 popupManagerService.removePopup(id);
                 position$.complete();
                 disposable.dispose();
-                popupActivity.dispose();
+                popupActivity?.dispose();
             },
             canDispose: () => popupManagerService.activePopupId !== id,
         };
@@ -421,14 +424,14 @@ export class DocCanvasPopManagerService extends Disposable {
                 : direction,
             canvasElement: currentRender.engine.getCanvasElement(),
         });
-        const popupActivity = this._beginPopupActivity(unitId);
+        const popupActivity = popup.requiresStableLayout === false ? null : this._beginPopupActivity(unitId);
 
         return {
             dispose: () => {
                 popupManagerService.removePopup(id);
                 bounds$.complete();
                 disposable.dispose();
-                popupActivity.dispose();
+                popupActivity?.dispose();
             },
             canDispose: () => popupManagerService.activePopupId !== id,
         };

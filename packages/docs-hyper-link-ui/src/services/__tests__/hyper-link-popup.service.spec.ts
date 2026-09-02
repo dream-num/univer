@@ -23,7 +23,7 @@ import { DocSelectionManagerService, setDocumentPermissionValue } from '@univerj
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { UnitAction } from '@univerjs/protocol';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { DocHyperLinkPopupService } from '../hyper-link-popup.service';
 
 class CapturingDocCanvasPopManagerService {
@@ -193,6 +193,65 @@ describe('DocHyperLinkPopupService', () => {
         expect(attached).toHaveLength(2);
         expect(service.showing).toEqual(secondLink);
         expect(disposed).toEqual([1]);
+    });
+
+    it('keeps a click-pinned popup pinned until another link replaces it or it closes', () => {
+        const { service } = createService();
+        const firstLink = {
+            unitId: 'doc-1',
+            linkId: 'link-1',
+            startIndex: 4,
+            endIndex: 8,
+        };
+        const secondLink = {
+            unitId: 'doc-1',
+            linkId: 'link-2',
+            startIndex: 0,
+            endIndex: 3,
+        };
+
+        service.showInfoPopup(firstLink, { pinned: true });
+        expect(service.infoPopupPinned).toBe(true);
+
+        service.showInfoPopup({ ...firstLink, segmentId: '' });
+        expect(service.infoPopupPinned).toBe(true);
+        expect(service.showing).toEqual(firstLink);
+
+        service.showInfoPopup(secondLink);
+        expect(service.infoPopupPinned).toBe(false);
+
+        service.hideInfoPopup();
+        expect(service.infoPopupPinned).toBe(false);
+    });
+
+    it('keeps a hovered popup visible while the pointer crosses to it and closes after the handoff delay', () => {
+        vi.useFakeTimers();
+        const { service, disposed } = createService();
+        const link = {
+            unitId: 'doc-1',
+            linkId: 'link-1',
+            startIndex: 4,
+            endIndex: 8,
+        };
+
+        try {
+            service.showInfoPopup(link);
+            service.scheduleHideInfoPopup();
+            vi.advanceTimersByTime(149);
+            expect(service.showing).toEqual(link);
+
+            service.cancelScheduledHideInfoPopup();
+            vi.advanceTimersByTime(1);
+            expect(service.showing).toEqual(link);
+
+            service.scheduleHideInfoPopup();
+            vi.advanceTimersByTime(150);
+            expect(service.showing).toBeNull();
+            expect(disposed).toEqual([1]);
+        } finally {
+            service.dispose();
+            vi.useRealTimers();
+        }
     });
 
     it('does not show link information when the target document is not loaded', () => {

@@ -36,6 +36,7 @@ import type {
     IParagraphList,
 } from '../../../../../basics/i-document-skeleton-cached';
 import type { IParagraphConfig, ISectionBreakConfig } from '../../../../../basics/interfaces';
+import type { IDocumentCompatibilityPolicy } from '../../../document-compatibility';
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../../view-model/document-view-model';
 import type { ILayoutContext } from '../../tools';
@@ -299,8 +300,8 @@ function _updateListLevelAncestors(
 
     // [[nestingLevel, bulletSkeleton]];
 
-    if (cacheItem[nestingLevel] == null) {
-        cacheItem[nestingLevel] = [];
+    while (cacheItem.length <= nestingLevel) {
+        cacheItem.push([]);
     }
     cacheItem[nestingLevel].push({
         bullet: bulletSkeleton,
@@ -745,29 +746,35 @@ function _applyWidowControl(
     return 0;
 }
 
-export function lineBreaking(
+interface IPreparedLineBreaking {
+    documentCompatibilityPolicy: IDocumentCompatibilityPolicy;
+    paragraphConfig: IParagraphConfig;
+    paragraphNonInlineSkeDrawings: Map<string, IDocumentSkeletonDrawing>;
+    paragraphInlineSkeDrawings: Map<string, IDocumentSkeletonDrawing>;
+    paragraphNonInlineSkeDrawingsByBlockId: Map<string, IDocumentSkeletonDrawing>;
+    paragraphInlineSkeDrawingsByBlockId: Map<string, IDocumentSkeletonDrawing>;
+    resolvedParagraphStyle: IParagraphStyle;
+    segmentParagraphCache: Map<number, IParagraphConfig>;
+}
+
+function _prepareLineBreaking(
     ctx: ILayoutContext,
     viewModel: DocumentViewModel,
-    shapedTextList: IShapedText[],
     curPage: IDocumentSkeletonPage,
     paragraphNode: DataStreamTreeNode,
     sectionBreakConfig: ISectionBreakConfig,
     tableSkeleton: Nullable<IDocumentSkeletonTable>,
-    tablePageBreakBefore = false,
     nextParagraphNode?: DataStreamTreeNode
-): IDocumentSkeletonPage[] {
+): IPreparedLineBreaking {
     const { skeletonResourceReference } = ctx;
     const {
         lists,
         drawings = {},
         localeService,
     } = sectionBreakConfig;
-
     const { endIndex, blocks = [], children } = paragraphNode;
     const { segmentId } = curPage;
-
     const paragraph = viewModel.getParagraph(endIndex) || { startIndex: 0, paragraphId: 'para_render_fallback' };
-
     const { paragraphStyle = {}, bullet } = paragraph;
     const documentSnapshot = viewModel.getSnapshot?.();
     const documentStyle = documentSnapshot?.documentStyle;
@@ -775,14 +782,11 @@ export function lineBreaking(
         getDocumentCompatibilityPolicy(documentStyle?.documentFlavor);
     const shouldApplyDocumentDefaults = documentCompatibilityPolicy.applyDocumentDefaultParagraphStyle;
     const useWordStyleLineHeight = documentCompatibilityPolicy.useWordStyleLineHeight;
-
     const { skeHeaders, skeFooters, skeListLevel, drawingAnchor } = skeletonResourceReference;
-
     const paragraphNonInlineSkeDrawings: Map<string, IDocumentSkeletonDrawing> = new Map();
     const paragraphInlineSkeDrawings: Map<string, IDocumentSkeletonDrawing> = new Map();
     const paragraphNonInlineSkeDrawingsByBlockId: Map<string, IDocumentSkeletonDrawing> = new Map();
     const paragraphInlineSkeDrawingsByBlockId: Map<string, IDocumentSkeletonDrawing> = new Map();
-
     let segmentDrawingAnchorCache = drawingAnchor?.get(segmentId);
 
     if (segmentDrawingAnchorCache == null) {
@@ -868,7 +872,6 @@ export function lineBreaking(
         skeFooters,
         pDrawingAnchor: segmentDrawingAnchorCache,
     };
-
     let segmentParagraphCache = ctx.paragraphConfigCache.get(segmentId);
 
     if (segmentParagraphCache == null) {
@@ -913,32 +916,59 @@ export function lineBreaking(
 
     segmentParagraphCache.set(endIndex, paragraphConfig);
 
-    let allPages = [curPage];
+    return {
+        documentCompatibilityPolicy,
+        paragraphConfig,
+        paragraphNonInlineSkeDrawings,
+        paragraphInlineSkeDrawings,
+        paragraphNonInlineSkeDrawingsByBlockId,
+        paragraphInlineSkeDrawingsByBlockId,
+        resolvedParagraphStyle,
+        segmentParagraphCache,
+    };
+}
+
+interface ILayoutShapedTextsParams {
+    ctx: ILayoutContext;
+    viewModel: DocumentViewModel;
+    shapedTextList: IShapedText[];
+    allPages: IDocumentSkeletonPage[];
+    curPage: IDocumentSkeletonPage;
+    paragraphNode: DataStreamTreeNode;
+    sectionBreakConfig: ISectionBreakConfig;
+    paragraphConfig: IParagraphConfig;
+    documentCompatibilityPolicy: IDocumentCompatibilityPolicy;
+    paragraphNonInlineSkeDrawings: Map<string, IDocumentSkeletonDrawing>;
+    paragraphInlineSkeDrawings: Map<string, IDocumentSkeletonDrawing>;
+    paragraphNonInlineSkeDrawingsByBlockId: Map<string, IDocumentSkeletonDrawing>;
+    paragraphInlineSkeDrawingsByBlockId: Map<string, IDocumentSkeletonDrawing>;
+}
+
+function _layoutShapedTexts({
+    ctx,
+    viewModel,
+    shapedTextList,
+    allPages: initialPages,
+    curPage,
+    paragraphNode,
+    sectionBreakConfig,
+    paragraphConfig,
+    documentCompatibilityPolicy,
+    paragraphNonInlineSkeDrawings,
+    paragraphInlineSkeDrawings,
+    paragraphNonInlineSkeDrawingsByBlockId,
+    paragraphInlineSkeDrawingsByBlockId,
+}: ILayoutShapedTextsParams): IDocumentSkeletonPage[] {
+    const { skeletonResourceReference } = ctx;
     const traditionalPagination = isTraditionalDocumentCompatibility(documentCompatibilityPolicy);
-    const explicitStructuralBreak = _hasExplicitStructuralBreak(shapedTextList);
-    const forcePageBreakBefore =
-        traditionalPagination &&
-        (resolvedParagraphStyle.pageBreakBefore === BooleanNumber.TRUE || tablePageBreakBefore) &&
-        _hasPageContent(curPage) &&
-        !_hasOnlyExplicitPageBoundaryMarkers(curPage);
-    if (forcePageBreakBefore) {
-        const nextPage = createSkeletonPage(
-            ctx,
-            sectionBreakConfig,
-            skeletonResourceReference,
-            _getNextPageNumber(curPage),
-            BreakType.PAGE
-        );
-        nextPage.isExplicitPageBreak = true;
-        allPages.push(nextPage);
-        ctx.paragraphsOpenNewPage.add(endIndex);
-    }
+    let allPages = initialPages;
     let isParagraphFirstShapedText = true; // First shaped text
     let renderParagraphBullet = true;
     let shapedTextOffset = 0;
     let renderedPageBreakAnchorPage = curPage;
     const mergedShapedTextList = _mergeAdjacentCustomBlockShapedTexts(shapedTextList, paragraphNonInlineSkeDrawingsByBlockId);
-    for (const [index, { text, glyphs, breakPointType }] of mergedShapedTextList.entries()) {
+
+    for (const { text, glyphs, breakPointType } of mergedShapedTextList) {
         const textStartIndex = paragraphNode.startIndex + shapedTextOffset;
         const textGlyphCount = _glyphCount(glyphs);
         const textEndIndex = textStartIndex + textGlyphCount;
@@ -1008,7 +1038,7 @@ export function lineBreaking(
             continue;
         } else if (
             _endsWithToken(text, glyphs, DataStreamTreeTokenType.COLUMN_BREAK) &&
-            (!isTraditionalDocumentCompatibility(documentCompatibilityPolicy) || _isMarkedColumnBreak(viewModel, textEndIndex - 1))
+            (!traditionalPagination || _isMarkedColumnBreak(viewModel, textEndIndex - 1))
         ) {
             pushPending();
             // Column break mark, still within the same section
@@ -1020,11 +1050,11 @@ export function lineBreaking(
             } else if (
                 columnInfo &&
                 columnInfo.isLast &&
-                isTraditionalDocumentCompatibility(documentCompatibilityPolicy) &&
+                traditionalPagination &&
                 (isBlankColumn(columnInfo.column) || _isDocxColumnBreakVisuallyBlankColumn(columnInfo.column))
             ) {
                 // Word treats a DOCX column break at the start of the final column as redundant.
-            } else if (isTraditionalDocumentCompatibility(documentCompatibilityPolicy)) {
+            } else if (traditionalPagination) {
                 const lastColumn = getLastSection(lastPage)?.columns.slice(-1)[0];
                 if (lastColumn && (isBlankColumn(lastColumn) || _isDocxColumnBreakVisuallyBlankColumn(lastColumn))) {
                     setColumnFullState(lastColumn, false);
@@ -1058,6 +1088,36 @@ export function lineBreaking(
         shapedTextOffset += textGlyphCount;
     }
 
+    return allPages;
+}
+
+interface IApplyPaginationConstraintsParams {
+    ctx: ILayoutContext;
+    allPages: IDocumentSkeletonPage[];
+    curPage: IDocumentSkeletonPage;
+    endIndex: number;
+    explicitStructuralBreak: boolean;
+    forcePageBreakBefore: boolean;
+    tableSkeleton: Nullable<IDocumentSkeletonTable>;
+    paragraphNonInlineSkeDrawingsByBlockId: Map<string, IDocumentSkeletonDrawing>;
+    resolvedParagraphStyle: IParagraphStyle;
+    segmentParagraphCache: Map<number, IParagraphConfig>;
+    traditionalPagination: boolean;
+}
+
+function _applyPaginationConstraints({
+    ctx,
+    allPages,
+    curPage,
+    endIndex,
+    explicitStructuralBreak,
+    forcePageBreakBefore,
+    tableSkeleton,
+    paragraphNonInlineSkeDrawingsByBlockId,
+    resolvedParagraphStyle,
+    segmentParagraphCache,
+    traditionalPagination,
+}: IApplyPaginationConstraintsParams): void {
     const needsPaginationCheckpoint =
         forcePageBreakBefore ||
         (
@@ -1115,6 +1175,89 @@ export function lineBreaking(
             ctx.paragraphsOpenNewPage.add(endIndex);
         }
     }
+}
+
+export function lineBreaking(
+    ctx: ILayoutContext,
+    viewModel: DocumentViewModel,
+    shapedTextList: IShapedText[],
+    curPage: IDocumentSkeletonPage,
+    paragraphNode: DataStreamTreeNode,
+    sectionBreakConfig: ISectionBreakConfig,
+    tableSkeleton: Nullable<IDocumentSkeletonTable>,
+    tablePageBreakBefore = false,
+    nextParagraphNode?: DataStreamTreeNode
+): IDocumentSkeletonPage[] {
+    const { endIndex } = paragraphNode;
+    const {
+        documentCompatibilityPolicy,
+        paragraphConfig,
+        paragraphNonInlineSkeDrawings,
+        paragraphInlineSkeDrawings,
+        paragraphNonInlineSkeDrawingsByBlockId,
+        paragraphInlineSkeDrawingsByBlockId,
+        resolvedParagraphStyle,
+        segmentParagraphCache,
+    } = _prepareLineBreaking(
+        ctx,
+        viewModel,
+        curPage,
+        paragraphNode,
+        sectionBreakConfig,
+        tableSkeleton,
+        nextParagraphNode
+    );
+    const traditionalPagination = isTraditionalDocumentCompatibility(documentCompatibilityPolicy);
+    const explicitStructuralBreak = _hasExplicitStructuralBreak(shapedTextList);
+    const forcePageBreakBefore =
+        traditionalPagination &&
+        (resolvedParagraphStyle.pageBreakBefore === BooleanNumber.TRUE || tablePageBreakBefore) &&
+        _hasPageContent(curPage) &&
+        !_hasOnlyExplicitPageBoundaryMarkers(curPage);
+    let allPages = [curPage];
+
+    if (forcePageBreakBefore) {
+        const nextPage = createSkeletonPage(
+            ctx,
+            sectionBreakConfig,
+            ctx.skeletonResourceReference,
+            _getNextPageNumber(curPage),
+            BreakType.PAGE
+        );
+        nextPage.isExplicitPageBreak = true;
+        allPages.push(nextPage);
+        ctx.paragraphsOpenNewPage.add(endIndex);
+    }
+
+    allPages = _layoutShapedTexts({
+        ctx,
+        viewModel,
+        shapedTextList,
+        allPages,
+        curPage,
+        paragraphNode,
+        sectionBreakConfig,
+        paragraphConfig,
+        documentCompatibilityPolicy,
+        paragraphNonInlineSkeDrawings,
+        paragraphInlineSkeDrawings,
+        paragraphNonInlineSkeDrawingsByBlockId,
+        paragraphInlineSkeDrawingsByBlockId,
+    });
+
+    _applyPaginationConstraints({
+        ctx,
+        allPages,
+        curPage,
+        endIndex,
+        explicitStructuralBreak,
+        forcePageBreakBefore,
+        tableSkeleton,
+        paragraphNonInlineSkeDrawingsByBlockId,
+        resolvedParagraphStyle,
+        segmentParagraphCache,
+        traditionalPagination,
+    });
 
     return allPages;
 }

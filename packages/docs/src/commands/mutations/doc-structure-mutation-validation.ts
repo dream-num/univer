@@ -55,6 +55,19 @@ const STRUCTURAL_DATA_STREAM_TOKENS = new Set<string>([
     DataStreamTreeTokenType.BLOCK_END,
     DataStreamTreeTokenType.CUSTOM_BLOCK,
 ]);
+const NON_STRUCTURAL_ROOT_FIELDS = new Set<string>([
+    'disabled',
+    'documentStyle',
+    'drawings',
+    'drawingsOrder',
+    'lists',
+    'locale',
+    'resources',
+    'rev',
+    'settings',
+    'tableSource',
+    'title',
+]);
 function isRecord(value: unknown): value is Record<string, unknown> {
     return typeof value === 'object' && value != null && !Array.isArray(value);
 }
@@ -114,7 +127,7 @@ function pathsEqual(left: JSONXPath, right: JSONXPath): boolean {
 
 function isStructurePreservingJSONXEdit(actions: JSONXActions, expectedPath: JSONXPath): boolean {
     const cursor = JSON1.type.readCursor(actions);
-    let hasTextEdit = false;
+    let hasComponent = false;
     let isStructurePreserving = true;
 
     cursor.traverse(null, (component) => {
@@ -122,22 +135,23 @@ function isStructurePreservingJSONXEdit(actions: JSONXActions, expectedPath: JSO
             return;
         }
 
+        const path = cursor.getPath();
+        hasComponent = true;
+        if (NON_STRUCTURAL_ROOT_FIELDS.has(String(path[0]))) {
+            return;
+        }
+
         const componentKeys = Object.keys(component);
-        if (
-            component.et !== TextX.id ||
-            componentKeys.some((key) => key !== 'et' && key !== 'e') ||
-            !pathsEqual(cursor.getPath(), expectedPath)
-        ) {
+        if (component.et !== TextX.id || componentKeys.some((key) => key !== 'et' && key !== 'e') || !pathsEqual(path, expectedPath)) {
             isStructurePreserving = false;
             return;
         }
 
         const edit: unknown = component.e;
-        hasTextEdit = true;
         isStructurePreserving = isStructurePreservingTextXEdit(edit);
     });
 
-    return hasTextEdit && isStructurePreserving;
+    return hasComponent && isStructurePreserving;
 }
 
 function getSegmentType(documentDataModel: DocumentDataModel, segmentId: string): 'body' | 'header' | 'footer' {

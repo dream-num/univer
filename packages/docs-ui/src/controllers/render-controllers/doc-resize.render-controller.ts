@@ -20,7 +20,6 @@ import { DocSelectionManagerService } from '@univerjs/docs';
 import { ISidebarService } from '@univerjs/ui';
 import { animationFrameScheduler, observeOn, throttleTime } from 'rxjs';
 import { DocPageLayoutService } from '../../services/doc-page-layout.service';
-import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 
 export function hasRenderableDocSkeleton(component: unknown): boolean {
     if (typeof component !== 'object' || component == null ||
@@ -45,13 +44,14 @@ export class DocResizeRenderController extends Disposable implements IRenderModu
         private _context: IRenderContext,
         @Inject(DocPageLayoutService) private readonly _docPageLayoutService: DocPageLayoutService,
         @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService,
-        @Inject(DocSelectionRenderService) private readonly _docSelectionRenderService: DocSelectionRenderService,
         @ISidebarService private readonly _sidebarService: ISidebarService
     ) {
         super();
 
         const unitId = this._context.unitId;
-        if (isInternalEditorID(unitId)) return this;
+        if (isInternalEditorID(unitId)) {
+            return this;
+        }
 
         this._initResize();
     }
@@ -82,7 +82,10 @@ export class DocResizeRenderController extends Disposable implements IRenderModu
         }
 
         this._docPageLayoutService.calculatePagePosition();
-        this._docSelectionRenderService.refreshRanges();
-        this._textSelectionManagerService.refreshSelection();
+        // Sidebar changes can run after a new layout checkpoint. Rebuild from
+        // this document's logical offsets, not physical nodes from the old page.
+        // The current global selection may belong to the comment editor instead.
+        const unitId = this._context.unitId;
+        this._textSelectionManagerService.refreshSelection({ unitId, subUnitId: unitId });
     }
 }

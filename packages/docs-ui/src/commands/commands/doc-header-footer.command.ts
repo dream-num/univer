@@ -19,6 +19,7 @@ import type { ICreateHeaderFooterCommandParams, IHeaderFooterProps } from '@univ
 import {
     BooleanNumber,
     CommandType,
+    generateRandomId,
     ICommandService,
     IUniverInstanceService,
     resolveSectionHeaderFooterReferences,
@@ -28,6 +29,7 @@ import { CreateHeaderFooterCommand, DocSelectionManagerService, DocSkeletonManag
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 import { findFirstCursorOffset } from '../../basics/selection';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
+import { getHeaderFooterTarget } from '../../utils/section-header-footer';
 import { SidebarDocHeaderFooterPanelOperation } from '../operations/doc-header-footer-panel.operation';
 
 export interface ICoreHeaderFooterParams {
@@ -111,6 +113,53 @@ export const OpenHeaderFooterPanelCommand: ICommand<IOpenHeaderFooterPanelParams
 
     handler: async (accessor, _params: IOpenHeaderFooterPanelParams) => {
         const commandService = accessor.get(ICommandService);
+        const instanceService = accessor.get(IUniverInstanceService);
+        const renderManagerService = accessor.get(IRenderManagerService);
+        const docDataModel = instanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        if (docDataModel == null) {
+            return false;
+        }
+        const unitId = docDataModel.getUnitId();
+        const renderObject = renderManagerService.getRenderUnitById(unitId);
+        const skeletonManager = renderObject?.with(DocSkeletonManagerService);
+        const viewModel = skeletonManager?.getViewModel();
+        const skeleton = skeletonManager?.getSkeleton();
+        const selectionRenderService = renderObject?.with(DocSelectionRenderService);
+        const pages = skeleton?.getSkeletonData()?.pages;
+        if (viewModel == null || selectionRenderService == null || !pages?.length) {
+            return false;
+        }
+
+        const currentPage = selectionRenderService.getSegmentPage();
+        const pageNumber = currentPage >= 0 && currentPage < pages.length ? currentPage : 0;
+        const page = pages[pageNumber];
+        viewModel.setEditArea(DocumentEditArea.HEADER);
+        const { createType, headerFooterId, sectionId } = getHeaderFooterTarget(
+            viewModel,
+            DocumentEditArea.HEADER,
+            pageNumber,
+            page
+        );
+
+        selectionRenderService.setSegmentPage(pageNumber);
+        if (createType != null) {
+            const segmentId = generateRandomId(6);
+            selectionRenderService.setSegment(segmentId);
+            const created = await commandService.executeCommand(CoreHeaderFooterCommand.id, {
+                unitId,
+                createType,
+                segmentId,
+                sectionId,
+            });
+            if (!created) {
+                selectionRenderService.setSegment('');
+                selectionRenderService.setSegmentPage(-1);
+                viewModel.setEditArea(DocumentEditArea.BODY);
+                return false;
+            }
+        } else if (headerFooterId != null) {
+            selectionRenderService.setSegment(headerFooterId);
+        }
 
         return commandService.executeCommand(SidebarDocHeaderFooterPanelOperation.id, { value: 'open' });
     },
@@ -168,7 +217,16 @@ export const CloseHeaderFooterCommand: ICommand<ICloseHeaderFooterParams> = {
         docSelectionRenderService.setSegment('');
         docSelectionRenderService.setSegmentPage(-1);
         viewModel.setEditArea(DocumentEditArea.BODY);
-        skeleton.calculate();
+        // Switching edit areas does not change document content. Reuse the
+        // published body pages instead of synchronously paginating a large
+        // document again. An uninitialized skeleton still needs its first
+        // calculation.
+        const publishedPageCount = typeof skeleton.getSkeletonData === 'function'
+            ? skeleton.getSkeletonData()?.pages.length ?? 0
+            : 0;
+        if (publishedPageCount === 0) {
+            skeleton.calculate();
+        }
         renderObject.mainComponent?.makeDirty(true);
 
         queueMicrotask(() => {

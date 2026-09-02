@@ -161,6 +161,7 @@ import { DocContextMenuRenderController } from './controllers/render-controllers
 import { DocEditorBridgeController } from './controllers/render-controllers/doc-editor-bridge.controller';
 import { DocIMEInputController } from './controllers/render-controllers/doc-ime-input.controller';
 import { DocInputController } from './controllers/render-controllers/doc-input.controller';
+import { DocLayoutProgressRenderController } from './controllers/render-controllers/doc-layout-progress.render-controller';
 import { DocLayoutRecoveryRenderController } from './controllers/render-controllers/doc-layout-recovery.render-controller';
 import {
     DocParagraphPlaceholderRenderController,
@@ -181,6 +182,7 @@ import { DocEventManagerService } from './services/doc-event-manager.service';
 import { DocIMEInputManagerService } from './services/doc-ime-input-manager.service';
 import { DocIMEStateChangeInterceptorService } from './services/doc-ime-state-change-interceptor.service';
 import { DocLayoutInteractionService } from './services/doc-layout-interaction.service';
+import { DocLayoutProgressService } from './services/doc-layout-progress.service';
 import { DocMenuStyleService, SetDocInputStyleCommand } from './services/doc-menu-style.service';
 import { DocPageLayoutService } from './services/doc-page-layout.service';
 import { DocParagraphMenuService } from './services/doc-paragraph-menu.service';
@@ -454,6 +456,7 @@ export class UniverDocsUIPlugin extends Plugin {
             [IDocClipboardPasteAdapterService, { useClass: DocClipboardPasteAdapterService }],
             [DocHtmlExportService],
             [DocCanvasPopManagerService],
+            [DocLayoutProgressService],
             [DocsRenderService],
             [IDocStateChangeInterceptorService, { useClass: DocIMEStateChangeInterceptorService }],
             [DocAutoFormatService],
@@ -488,8 +491,11 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocLayoutInteractionService],
             [DocCanvasPopupLayoutInteractionController],
             [DocIMEInputManagerService],
+            [DocLayoutProgressRenderController],
             [DocRenderController],
             [DocZoomRenderController],
+            [DocBackScrollRenderController],
+            [DocSelectionRenderController],
         ] as Dependency[]).forEach((m) => {
             this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, m);
         });
@@ -500,8 +506,6 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocEventManagerService],
             [DocFloatMenuService],
             [DocParagraphMenuService],
-            [DocBackScrollRenderController],
-            [DocSelectionRenderController],
             [DocHeaderFooterController],
             [DocResizeRenderController],
             [DocParagraphPlaceholderRenderController],

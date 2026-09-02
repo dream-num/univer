@@ -42,9 +42,25 @@ export class DocHyperLinkSelectionController extends Disposable {
                     const primary = ranges[0];
                     if (primary?.collapsed && doc) {
                         const { startOffset, endOffset, segmentPage } = primary;
-                        const customRange = doc.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.customRanges?.find((value) => (
+                        const customRanges = doc.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.customRanges;
+                        const showing = this._docHyperLinkService.showing;
+                        // Pointer-up opens the clicked link before selection completes.
+                        // Preserve that link at its trailing edge without claiming the
+                        // leading edge of an adjacent link for a fresh caret selection.
+                        const trailingLink = showing?.unitId === unitId &&
+                            (showing.segmentId ?? '') === segmentId &&
+                            showing.segmentPage === segmentPage &&
+                            showing.endIndex === endOffset - 1
+                            ? customRanges?.find((value) => (
+                                value.rangeId === showing.linkId &&
+                                value.rangeType === CustomRangeType.HYPERLINK &&
+                                value.startIndex <= startOffset &&
+                                value.endIndex === endOffset - 1
+                            ))
+                            : undefined;
+                        const customRange = trailingLink ?? customRanges?.find((value) => (
                             value.rangeType === CustomRangeType.HYPERLINK &&
-                            value.startIndex < startOffset &&
+                            value.startIndex <= startOffset &&
                             value.endIndex > endOffset - 1
                         ));
                         if (customRange) {

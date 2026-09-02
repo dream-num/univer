@@ -19,6 +19,7 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'docs-ui': {
         layout: {
+            progress: 'Menata dokumen…',
             recovering: 'Memulihkan tata letak dokumen…',
         },
         toolbar: {

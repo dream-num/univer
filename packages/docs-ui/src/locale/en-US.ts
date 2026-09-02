@@ -17,6 +17,7 @@
 const locale = {
     'docs-ui': {
         layout: {
+            progress: 'Laying out document…',
             recovering: 'Restoring document layout…',
         },
         toolbar: {
@@ -190,7 +191,7 @@ const locale = {
             noBackground: 'No background',
         },
         'page-settings': {
-            'document-setting': 'Document Setting',
+            'document-setting': 'Page Setup',
             'modern-width': 'Content width',
             'modern-width-narrow': 'Narrow',
             'modern-width-medium': 'Medium',

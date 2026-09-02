@@ -124,6 +124,131 @@ describe('worker document layout session', () => {
         vi.unstubAllGlobals();
     });
 
+    it('publishes list nesting jumps and tolerates legacy sparse list caches', () => {
+        vi.stubGlobal('document', undefined);
+        vi.stubGlobal('OffscreenCanvas', class {
+            getContext() {
+                return {
+                    font: '',
+                    textBaseline: 'alphabetic',
+                    measureText(content: string) {
+                        return {
+                            width: content.length * 7,
+                            fontBoundingBoxAscent: 9,
+                            fontBoundingBoxDescent: 3,
+                            actualBoundingBoxAscent: 8,
+                            actualBoundingBoxDescent: 2,
+                        };
+                    },
+                };
+            }
+        });
+
+        const rootText = 'Root item';
+        const deepText = 'Deep item';
+        const rootEnd = rootText.length;
+        const deepEnd = rootEnd + DataStreamTreeTokenType.PARAGRAPH.length + deepText.length;
+        const dataModel = new DocumentDataModel({
+            id: 'sparse-list-document',
+            body: {
+                dataStream: `${rootText}${DataStreamTreeTokenType.PARAGRAPH}${deepText}${DataStreamTreeTokenType.PARAGRAPH}${DataStreamTreeTokenType.SECTION_BREAK}`,
+                paragraphs: [
+                    { startIndex: rootEnd, paragraphId: 'sparse-list-root' },
+                    { startIndex: deepEnd, paragraphId: 'sparse-list-deep' },
+                ],
+                sectionBreaks: [{
+                    startIndex: deepEnd + DataStreamTreeTokenType.PARAGRAPH.length,
+                    sectionId: 'sparse-list-section',
+                }],
+            },
+            documentStyle: {
+                documentFlavor: DocumentFlavor.TRADITIONAL,
+                pageSize: { width: 240, height: 180 },
+                marginTop: 20,
+                marginBottom: 20,
+                marginLeft: 20,
+                marginRight: 20,
+            },
+        });
+        const paragraphs = dataModel.getBody()?.paragraphs;
+        if (!paragraphs || paragraphs.length < 2) {
+            throw new Error('Expected two list paragraphs.');
+        }
+        paragraphs[0].bullet = {
+            listId: 'sparse-list',
+            listType: PresetListType.ORDER_LIST,
+            nestingLevel: 0,
+        };
+        paragraphs[1].bullet = {
+            listId: 'sparse-list',
+            listType: PresetListType.ORDER_LIST,
+            nestingLevel: 6,
+        };
+        const session = new DocumentLayoutSession(dataModel, new LocaleService());
+        const targetModel = new DocumentDataModel(structuredClone(dataModel.getSnapshot()));
+        const targetSkeleton = DocumentSkeleton.create(new DocumentViewModel(targetModel), new LocaleService());
+        targetSkeleton.beginExternalLayout({ reason: 'initial' });
+
+        const initialGeneration = session.start({ reason: 'initial' });
+        let initialResult = session.step(initialGeneration, 0);
+        for (let step = 0; step < 1_000 && !initialResult.progress.complete; step++) {
+            if (initialResult.publication) {
+                targetSkeleton.applyLayoutPublication(
+                    structuredClone(initialResult.publication),
+                    initialResult.progress
+                );
+            }
+            initialResult = session.step(initialGeneration, 0);
+        }
+        if (initialResult.publication) {
+            targetSkeleton.applyLayoutPublication(
+                structuredClone(initialResult.publication),
+                initialResult.progress
+            );
+        }
+
+        expect(initialResult.progress.complete).toBe(true);
+        const initialLevels = targetSkeleton.getSkeletonData()?.skeListLevel?.get('sparse-list');
+        expect(initialLevels).toHaveLength(7);
+        expect(initialLevels?.every((level) => Array.isArray(level))).toBe(true);
+
+        const sessionSkeleton = (session as unknown as { _skeleton: DocumentSkeleton })._skeleton;
+        const legacyLevels = sessionSkeleton.getSkeletonData()?.skeListLevel?.get('sparse-list');
+        if (!legacyLevels) {
+            throw new Error('Expected the Worker list cache.');
+        }
+        delete legacyLevels[3];
+
+        // Regression: ISSUE-001 — sparse imported list levels crashed incremental publication after unrelated edits.
+        // Found by /qa on 2026-08-29.
+        // Report: .gstack/qa-reports/qa-report-docs-regressions-2026-08-29.md
+        targetSkeleton.beginExternalLayout({ reason: 'edit' });
+        const editGeneration = session.start({ reason: 'edit', anchor: paragraphs[1].startIndex });
+        let editResult = session.step(editGeneration, 0);
+        for (let step = 0; step < 1_000 && !editResult.progress.complete; step++) {
+            if (editResult.publication) {
+                targetSkeleton.applyLayoutPublication(
+                    structuredClone(editResult.publication),
+                    editResult.progress
+                );
+            }
+            editResult = session.step(editGeneration, 0);
+        }
+        if (editResult.publication) {
+            targetSkeleton.applyLayoutPublication(structuredClone(editResult.publication), editResult.progress);
+        }
+
+        expect(editResult.progress).toMatchObject({ complete: true, cancelled: false });
+        const publishedLevels = targetSkeleton.getSkeletonData()?.skeListLevel?.get('sparse-list');
+        expect(publishedLevels).toHaveLength(7);
+        expect(publishedLevels?.every((level) => Array.isArray(level))).toBe(true);
+
+        session.dispose();
+        targetSkeleton.dispose();
+        dataModel.dispose();
+        targetModel.dispose();
+    });
+
     it('publishes structured-cloneable pages without a DOM', () => {
         vi.stubGlobal('document', undefined);
         vi.stubGlobal('OffscreenCanvas', class {

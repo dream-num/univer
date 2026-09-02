@@ -33,6 +33,17 @@ export interface ILinkInfo {
 
 type LinkPopupDisposable = ReturnType<DocCanvasPopManagerService['attachPopupToRange']>;
 
+const INFO_POPUP_HIDE_DELAY = 150;
+
+function isSameLinkInfo(current: ILinkInfo | null, next: ILinkInfo): boolean {
+    return current?.linkId === next.linkId &&
+        current.unitId === next.unitId &&
+        (current.segmentId ?? '') === (next.segmentId ?? '') &&
+        current.segmentPage === next.segmentPage &&
+        current.startIndex === next.startIndex &&
+        current.endIndex === next.endIndex;
+}
+
 export class DocHyperLinkPopupService extends Disposable {
     private readonly _editingLink$ = new BehaviorSubject<ILinkInfo | null>(null);
     private readonly _showingLink$ = new BehaviorSubject<ILinkInfo | null>(null);
@@ -42,6 +53,8 @@ export class DocHyperLinkPopupService extends Disposable {
     private _editPopup: LinkPopupDisposable | null = null;
     private _editPopupUnitId: string | null = null;
     private _infoPopup: LinkPopupDisposable | null = null;
+    private _infoPopupPinned = false;
+    private _infoPopupHideTimer: ReturnType<typeof setTimeout> | null = null;
     private _infoPopupSuppressed = false;
     private _infoPopupSuppressionTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -55,6 +68,7 @@ export class DocHyperLinkPopupService extends Disposable {
         super();
 
         this.disposeWithMe(() => {
+            this.cancelScheduledHideInfoPopup();
             if (this._infoPopupSuppressionTimer !== null) {
                 clearTimeout(this._infoPopupSuppressionTimer);
             }
@@ -94,6 +108,10 @@ export class DocHyperLinkPopupService extends Disposable {
 
     get showing() {
         return this._showingLink$.value;
+    }
+
+    get infoPopupPinned() {
+        return this._infoPopupPinned;
     }
 
     showEditPopup(unitId: string, linkInfo: ILinkInfo | null): LinkPopupDisposable | null {
@@ -149,20 +167,18 @@ export class DocHyperLinkPopupService extends Disposable {
         this._editPopupUnitId = null;
     }
 
-    showInfoPopup(info: ILinkInfo): LinkPopupDisposable | null | undefined {
+    showInfoPopup(info: ILinkInfo, options?: { pinned?: boolean }): LinkPopupDisposable | null | undefined {
+        this.cancelScheduledHideInfoPopup();
         if (this._infoPopupSuppressed) {
             return;
         }
 
         const { linkId, unitId, segmentId, segmentPage, startIndex, endIndex } = info;
-        if (
-            this.showing?.linkId === linkId &&
-            this.showing?.unitId === unitId &&
-            this.showing?.segmentId === segmentId &&
-            this.showing?.segmentPage === segmentPage &&
-            this.showing?.startIndex === startIndex &&
-            this.showing?.endIndex === endIndex
-        ) {
+        const isSameLink = isSameLinkInfo(this.showing, info);
+        if (isSameLink) {
+            if (options?.pinned) {
+                this._infoPopupPinned = true;
+            }
             return;
         }
 
@@ -174,6 +190,7 @@ export class DocHyperLinkPopupService extends Disposable {
         if (!(doc instanceof DocumentDataModel)) {
             return;
         }
+        this._infoPopupPinned = options?.pinned ?? false;
         this._showingLink$.next({ unitId, linkId, segmentId, segmentPage, startIndex, endIndex });
 
         this._infoPopup = this._docCanvasPopupManagerService.attachPopupToRange(
@@ -199,9 +216,32 @@ export class DocHyperLinkPopupService extends Disposable {
     }
 
     hideInfoPopup() {
+        this.cancelScheduledHideInfoPopup();
+        this._infoPopupPinned = false;
         this._showingLink$.next(null);
         this._infoPopup?.dispose();
         this._infoPopup = null;
+    }
+
+    scheduleHideInfoPopup() {
+        if (this._infoPopupPinned || !this.showing) {
+            return;
+        }
+
+        this.cancelScheduledHideInfoPopup();
+        this._infoPopupHideTimer = setTimeout(() => {
+            this._infoPopupHideTimer = null;
+            if (!this._infoPopupPinned) {
+                this.hideInfoPopup();
+            }
+        }, INFO_POPUP_HIDE_DELAY);
+    }
+
+    cancelScheduledHideInfoPopup() {
+        if (this._infoPopupHideTimer !== null) {
+            clearTimeout(this._infoPopupHideTimer);
+            this._infoPopupHideTimer = null;
+        }
     }
 
     hideInfoPopupOnPointerDown() {

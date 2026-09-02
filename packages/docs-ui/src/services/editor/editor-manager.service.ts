@@ -298,11 +298,25 @@ export class EditorService extends Disposable implements IEditorService, IDispos
             return;
         }
 
+        const preserveHostFocus = this._editorRenderConfigs.get(editorUnitId)?.preserveHostFocus === true;
+        const currentDoc = this._univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        const focusedHost = preserveHostFocus ? this._univerInstanceService.getFocusedUnit() : null;
+        const focusedHostId = focusedHost?.getUnitId();
+        const restoreHostUnitId = currentDoc?.getUnitId() === editorUnitId
+            && focusedHostId != null
+            && focusedHostId !== editorUnitId
+            && this._univerInstanceService.getUnitType(focusedHostId) === UniverInstanceType.UNIVER_DOC
+            ? focusedHostId
+            : null;
+
         this._renderManagerService.removeRender(editorUnitId);
         editor.dispose();
         this._editors.delete(editorUnitId);
         this._editorRenderConfigs.delete(editorUnitId);
         this._univerInstanceService.disposeUnit(editorUnitId);
+        if (restoreHostUnitId != null) {
+            this._univerInstanceService.setCurrentUnitForType(restoreHostUnitId);
+        }
     }
 
     private _getCurrentEditorUnitId() {

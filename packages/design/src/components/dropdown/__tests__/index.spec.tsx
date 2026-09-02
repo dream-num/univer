@@ -46,6 +46,23 @@ describe('Dropdown', () => {
         expect(getByText('Overlay Content')).toBeTruthy();
     });
 
+    it('should stop intercepting pointer input as soon as the overlay closes', () => {
+        const { rerender } = render(
+            <Dropdown overlay={<div>Overlay Content</div>} open>
+                <button type="button">Trigger</button>
+            </Dropdown>
+        );
+
+        expect(screen.getByText('Overlay Content').closest('[data-slot="popover-content"]')?.classList.contains('data-[state=closed]:univer-pointer-events-none')).toBe(true);
+
+        rerender(
+            <Dropdown overlay={<div>Overlay Content</div>} open={false}>
+                <button type="button">Trigger</button>
+            </Dropdown>
+        );
+        expect(screen.queryByText('Overlay Content')).toBeNull();
+    });
+
     it('should call onOpenChange when trigger is clicked', () => {
         const handleOpenChange = vi.fn();
         const { getByText } = render(

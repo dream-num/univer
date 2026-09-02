@@ -531,6 +531,8 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
             getFirstLine,
             {
                 componentKey: DOC_PARAGRAPH_MENU_COMPONENT_KEY,
+                // Hovering is passive; opened menus and drags hold their own interaction lease.
+                requiresStableLayout: false,
                 direction: 'left-center',
                 onClickOutside: () => {
                     if (this._isSlashMenuActive) {
@@ -618,6 +620,7 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
             getFirstLine,
             {
                 componentKey: DOC_TABLE_BLOCK_MENU_COMPONENT_KEY,
+                requiresStableLayout: false,
                 direction: 'top-right',
                 onClickOutside: () => {
                     this.hideParagraphMenu(true);

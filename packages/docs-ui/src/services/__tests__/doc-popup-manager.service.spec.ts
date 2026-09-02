@@ -14,20 +14,90 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
+import type { RenderUnit } from '@univerjs/engine-render';
 import type { IPopup } from '@univerjs/ui';
-import { EventSubject, ICommandService, Injector, IUniverInstanceService } from '@univerjs/core';
-import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { BooleanNumber, DocumentFlavor, EventSubject, ICommandService, Injector, IUniverInstanceService, Univer, UniverInstanceType } from '@univerjs/core';
+import { DocLayoutExecutorService, DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { CanvasColorService, Documents, ICanvasColorService, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { ICanvasPopupService } from '@univerjs/ui';
 import { describe, expect, it, vi } from 'vitest';
 import { SetDocZoomRatioOperation } from '../../commands/operations/set-doc-zoom-ratio.operation';
+import { DocCanvasPopupLayoutInteractionController } from '../../controllers/render-controllers/doc-canvas-popup-layout-interaction.controller';
+import { calcDocGlyphPosition } from '../doc-event-manager.service';
+import { DocLayoutInteractionService } from '../doc-layout-interaction.service';
 import {
+    calcDocRangePositions,
     DocCanvasPopManagerService,
     transformBound2OffsetBound,
     transformOffset2Bound,
     transformPosition2Offset,
 } from '../doc-popup-manager.service';
 import { NodePositionConvertToCursor } from '../selection/convert-text-range';
+
+describe('popup anchors with real document layout', () => {
+    it.each([0, 1, 3])('covers a %i-character range through its trailing edge', (length) => {
+        const context = new Proxy({
+            font: '',
+            webkitBackingStorePixelRatio: 1,
+            measureText: (text: string) => ({
+                width: text.length * 8,
+                actualBoundingBoxAscent: 8,
+                actualBoundingBoxDescent: 2,
+                fontBoundingBoxAscent: 8,
+                fontBoundingBoxDescent: 2,
+            }),
+        }, { get: (target, key) => key in target ? Reflect.get(target, key) : () => {} });
+        vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(context as never);
+        const univer = new Univer();
+        try {
+            const injector = univer.__getInjector();
+            injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+            injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
+            injector.add([DocLayoutExecutorService]);
+            const model = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, {
+                id: 'popup-anchor-test',
+                body: {
+                    dataStream: 'A目CDZ\r\n',
+                    paragraphs: [{ startIndex: 5, paragraphId: 'paragraph-1' }],
+                    sectionBreaks: [{ startIndex: 6, sectionId: 'body' }],
+                },
+                documentStyle: {
+                    documentFlavor: DocumentFlavor.TRADITIONAL,
+                    autoHyphenation: BooleanNumber.FALSE,
+                    pageSize: { width: 300, height: 400 },
+                    marginTop: 20,
+                    marginBottom: 20,
+                    marginLeft: 20,
+                    marginRight: 20,
+                },
+            });
+            const render = injector.get(IRenderManagerService).createRender(model.getUnitId()) as RenderUnit;
+            render.deactivate();
+            render.engine.resizeBySize(300, 400);
+            const canvas = render.engine.getCanvasElement()!;
+            vi.spyOn(canvas, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 300, 400));
+            render.addRenderDependencies([[DocSkeletonManagerService]]);
+            const skeleton = render.with(DocSkeletonManagerService).getSkeleton();
+            const documents = new Documents('popup-anchor-document', skeleton);
+            render.mainComponent = documents;
+            render.scene.addObject(documents);
+            const bounds = calcDocRangePositions({ startOffset: 1, endOffset: 1 + length, collapsed: length === 0 }, render)!;
+            const lastGlyph = skeleton.findNodeByCharIndex(Math.max(1, length))!;
+            const lastGlyphBounds = calcDocGlyphPosition(lastGlyph, documents, skeleton)!;
+            expect(bounds).toHaveLength(1);
+            if (length === 0) {
+                expect(bounds[0].right).toBe(bounds[0].left);
+            } else {
+                expect(bounds[0].right).toBeCloseTo(lastGlyphBounds.right);
+                expect(bounds[0].right).toBeGreaterThan(bounds[0].left);
+            }
+        } finally {
+            univer.dispose();
+            vi.restoreAllMocks();
+        }
+    });
+});
 
 class TestCanvasPopupService {
     activePopupId = '';
@@ -171,6 +241,7 @@ function createService() {
     injector.add([DocCanvasPopManagerService]);
 
     return {
+        injector,
         service: injector.get(DocCanvasPopManagerService),
         popupService: injector.get(ICanvasPopupService) as unknown as TestCanvasPopupService,
         renderManagerService: injector.get(IRenderManagerService) as unknown as TestRenderManagerService,
@@ -180,6 +251,32 @@ function createService() {
 }
 
 describe('DocCanvasPopManagerService', () => {
+    it('keeps passive hover popups mounted without pausing layout or releasing an active menu lock', () => {
+        const { injector, service, popupService } = createService();
+        injector.add([DocLayoutInteractionService]);
+        injector.add([DocCanvasPopupLayoutInteractionController, {
+            useFactory: () => injector.createInstance(DocCanvasPopupLayoutInteractionController, { unitId: 'doc-1' }),
+        }]);
+        injector.get(DocCanvasPopupLayoutInteractionController);
+        const interaction = injector.get(DocLayoutInteractionService);
+        const rect = { left: 10, right: 110, top: 20, bottom: 40 };
+        const hover = service.attachPopupToRect(rect, {
+            componentKey: 'passive-hover',
+            requiresStableLayout: false,
+        }, 'doc-1');
+
+        expect(popupService.popups.size).toBe(1);
+        expect(interaction.isActive).toBe(false);
+        const menu = service.attachPopupToRect(rect, { componentKey: 'active-menu' }, 'doc-1');
+        expect(interaction.isActive).toBe(true);
+        hover.dispose();
+        hover.dispose();
+        expect(interaction.isActive).toBe(true);
+        menu.dispose();
+        expect(interaction.isActive).toBe(false);
+        injector.dispose();
+    });
+
     it('converts between document bounds and viewport offsets with scroll and scale', () => {
         const renderManagerService = new TestRenderManagerService();
         renderManagerService.scale = 2;

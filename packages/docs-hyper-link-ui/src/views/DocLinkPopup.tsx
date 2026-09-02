@@ -66,6 +66,12 @@ export const DocLinkPopup = () => {
               univer-overflow-hidden univer-rounded-lg univer-bg-gray-0 univer-p-3 univer-shadow
               dark:!univer-bg-gray-900
             `, borderClassName)}
+            onPointerEnter={() => {
+                hyperLinkService.cancelScheduledHideInfoPopup();
+            }}
+            onPointerLeave={() => {
+                hyperLinkService.scheduleHideInfoPopup();
+            }}
             onClick={() => {
                 hyperLinkService.hideInfoPopup();
             }}

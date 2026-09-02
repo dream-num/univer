@@ -19,6 +19,7 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'docs-ui': {
         layout: {
+            progress: '正在排版文档…',
             recovering: '正在恢复文档排版…',
         },
         toolbar: {
@@ -192,7 +193,7 @@ const locale: typeof enUS = {
             noBackground: '无背景色',
         },
         'page-settings': {
-            'document-setting': '文档设置',
+            'document-setting': '页面设置',
             'modern-width': '内容宽度',
             'modern-width-narrow': '窄',
             'modern-width-medium': '适中',

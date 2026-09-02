@@ -59,21 +59,26 @@ function createController(options: {
         resetProps: vi.fn(),
     };
     const shapeByDrawingId = new Map<string, any>();
+    const getShape = (drawingId: string) => {
+        if (!shapeByDrawingId.has(drawingId)) {
+            shapeByDrawingId.set(drawingId, {
+                drawingId,
+                evented: true,
+                oKey: `doc-1#-#doc-1#-#${drawingId}`,
+                setOpacity: vi.fn(),
+                transformerConfig: {},
+            });
+        }
+        return shapeByDrawingId.get(drawingId);
+    };
+    Object.keys(options.drawings ?? {}).forEach(getShape);
     const scene = {
         getTransformerByCreate: vi.fn(() => transformer),
         fuzzyMathObjects: vi.fn((objectKey: string) => {
             const drawingId = objectKey.split('#-#').at(-1) ?? objectKey;
-            if (!shapeByDrawingId.has(drawingId)) {
-                shapeByDrawingId.set(drawingId, {
-                    drawingId,
-                    evented: true,
-                    oKey: drawingId,
-                    setOpacity: vi.fn(),
-                    transformerConfig: {},
-                });
-            }
-            return [shapeByDrawingId.get(drawingId)];
+            return [getShape(drawingId)];
         }),
+        getAllObjects: vi.fn(() => [...shapeByDrawingId.values()]),
         attachTransformerTo: vi.fn(),
         detachTransformerFrom: vi.fn(),
         getTransformer: vi.fn(() => transformer),
@@ -120,6 +125,7 @@ function createController(options: {
         unitId: 'doc-1',
         unit: {
             getDrawings: vi.fn(() => snapshot.drawings),
+            getMutationRevision: vi.fn(() => 0),
             getSnapshot: vi.fn(() => snapshot),
             getBody: vi.fn(() => snapshot.body),
             getSelfOrHeaderFooterModel: vi.fn((segmentId: string) => ({
@@ -499,7 +505,7 @@ describe('DocDrawingUpdateRenderController', () => {
         setDocumentPermissionValue(permissionService, 'doc-1', 'doc-1', UnitAction.Edit, false);
 
         expect(getShape('body-drawing').evented).toBe(false);
-        expect(transformer.clearControlByIds).toHaveBeenCalledWith(['body-drawing']);
+        expect(transformer.clearControlByIds).toHaveBeenCalledWith(['doc-1#-#doc-1#-#body-drawing']);
         expect(getShape('body-drawing').transformerConfig).toMatchObject({
             moveEnabled: false,
             resizeEnabled: false,
@@ -572,6 +578,33 @@ describe('DocDrawingUpdateRenderController', () => {
 
         expect(getShape('body-drawing').setOpacity).toHaveBeenLastCalledWith(1);
         expect(getShape('header-drawing').setOpacity).toHaveBeenLastCalledWith(1);
+    });
+
+    it('indexes scene drawings once and ignores duplicate focus notifications', () => {
+        const { getShape, onFocus$, scene } = createController({
+            drawings: {
+                'body-drawing': {
+                    drawingId: 'body-drawing',
+                    isMultiTransform: BooleanNumber.FALSE,
+                },
+                'header-drawing': {
+                    drawingId: 'header-drawing',
+                    isMultiTransform: BooleanNumber.TRUE,
+                },
+            },
+            isFocusing: true,
+        });
+
+        expect(scene.getAllObjects).toHaveBeenCalledTimes(1);
+        expect(scene.fuzzyMathObjects).not.toHaveBeenCalled();
+        getShape('body-drawing').setOpacity.mockClear();
+        getShape('header-drawing').setOpacity.mockClear();
+
+        onFocus$.next({});
+
+        expect(scene.getAllObjects).toHaveBeenCalledTimes(1);
+        expect(getShape('body-drawing').setOpacity).not.toHaveBeenCalled();
+        expect(getShape('header-drawing').setOpacity).not.toHaveBeenCalled();
     });
 
     it('keeps peer drawings interactive while a drawing owns focus', () => {

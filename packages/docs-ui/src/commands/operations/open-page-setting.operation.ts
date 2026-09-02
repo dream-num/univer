@@ -49,8 +49,7 @@ export const DocOpenPageSettingCommand: ICommand = {
             onClose: () => {
                 disposable.dispose();
             },
-            onConfirm: (result) => {
-                disposable.dispose();
+            onConfirm: async (result) => {
                 if (!result) return;
 
                 const paperSize = result.mode === DocumentFlavor.MODERN
@@ -60,7 +59,7 @@ export const DocOpenPageSettingCommand: ICommand = {
                     }
                     : PAGE_SIZE[result.paperSize as PaperType];
 
-                commandService.executeCommand(DocPageSetupCommand.id, {
+                const applied = await commandService.executeCommand(DocPageSetupCommand.id, {
                     documentFlavor: result.mode,
                     pageOrient: result.orientation,
                     marginTop: result.margins.top,
@@ -69,6 +68,9 @@ export const DocOpenPageSettingCommand: ICommand = {
                     marginRight: result.margins.right,
                     pageSize: paperSize,
                 } as IDocPageSetupCommandParams);
+                if (applied) {
+                    disposable.dispose();
+                }
             },
             confirmText: localeService.t<LocaleKey>('docs-ui.page-settings.confirm'),
             cancelText: localeService.t<LocaleKey>('docs-ui.page-settings.cancel'),

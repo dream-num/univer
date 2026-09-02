@@ -1626,7 +1626,16 @@ describe('misc document commands', () => {
     });
 
     it('updates document page setup through the real rich text mutation flow', async () => {
-        ({ univer, get } = createCommandTestBed(createBaseDoc()));
+        const doc = createBaseDoc();
+        Object.assign(doc.body!.sectionBreaks![0], {
+            pageSize: { width: 500, height: 700 },
+            pageOrient: PageOrientType.PORTRAIT,
+            marginTop: 10,
+            marginBottom: 20,
+            marginLeft: 30,
+            marginRight: 40,
+        });
+        ({ univer, get } = createCommandTestBed(doc));
         commandService = get(ICommandService);
         commandService.registerCommand(DocPageSetupCommand);
         commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
@@ -1646,6 +1655,14 @@ describe('misc document commands', () => {
         expect(result).toBe(true);
         expect(getDoc()?.getDocumentStyle()).toEqual(expect.objectContaining({
             documentFlavor: DocumentFlavor.TRADITIONAL,
+            pageSize: PAGE_SIZE[PaperType.A3],
+            pageOrient: PageOrientType.LANDSCAPE,
+            marginTop: 36,
+            marginBottom: 42,
+            marginLeft: 48,
+            marginRight: 54,
+        }));
+        expect(getDoc()?.getBody()?.sectionBreaks?.[0]).toEqual(expect.objectContaining({
             pageSize: PAGE_SIZE[PaperType.A3],
             pageOrient: PageOrientType.LANDSCAPE,
             marginTop: 36,
@@ -2034,18 +2051,60 @@ describe('misc document commands', () => {
     });
 
     it('opens and closes the header footer sidebar panel through commands and operations', async () => {
-        ({ univer, get } = createCommandTestBed(createBaseDoc(), [
+        ({ univer, get } = createCommandTestBed(createHeaderFooterDoc(), [
             [ISidebarService, { useClass: TestSidebarService }],
         ]));
         loadTestLocale();
         commandService = get(ICommandService);
         commandService.registerCommand(OpenHeaderFooterPanelCommand);
+        commandService.registerCommand(CoreHeaderFooterCommand);
+        commandService.registerCommand(CreateHeaderFooterCommand);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
         commandService.registerCommand(SidebarDocHeaderFooterPanelOperation);
 
         const sidebarService = get(ISidebarService) as TestSidebarService;
+        const render = get(IRenderManagerService).getRenderUnitById('test-doc')!;
+        const mutableRender = render as unknown as {
+            with: (dependency: unknown) => unknown;
+        };
+        const skeletonManager = get(DocSkeletonManagerService) as unknown as {
+            getSkeleton: () => unknown;
+            getViewModel: () => { getEditArea: () => DocumentEditArea; setEditArea: (area: DocumentEditArea) => void };
+        };
+        skeletonManager.getSkeleton = () => ({
+            getSkeletonData: () => ({
+                pages: [{ pageNumber: 1, pageNumberStart: 1 }],
+            }),
+        });
+        let segment = '';
+        let segmentPage = -1;
+        const selectionRenderService = {
+            getSegment: () => segment,
+            setSegment: (next: string) => {
+                segment = next;
+            },
+            getSegmentPage: () => segmentPage,
+            setSegmentPage: (next: number) => {
+                segmentPage = next;
+            },
+        };
+        const originalWith = mutableRender.with.bind(mutableRender);
+        mutableRender.with = (dependency: unknown) => {
+            if (dependency === DocSkeletonManagerService) {
+                return skeletonManager;
+            }
+            if (dependency === DocSelectionRenderService) {
+                return selectionRenderService;
+            }
+            return originalWith(dependency);
+        };
 
         expect(await commandService.executeCommand(OpenHeaderFooterPanelCommand.id)).toBe(true);
         expect(sidebarService.visible).toBe(true);
+        expect(skeletonManager.getViewModel().getEditArea()).toBe(DocumentEditArea.HEADER);
+        expect(segmentPage).toBe(0);
+        expect(segment).not.toBe('');
+        expect(getDoc()?.getSnapshot().documentStyle.defaultHeaderId).toBe(segment);
         expect(sidebarService.options).toEqual(expect.objectContaining({
             width: 400,
             children: { label: COMPONENT_DOC_HEADER_FOOTER_PANEL },

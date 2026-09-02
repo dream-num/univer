@@ -54,18 +54,22 @@ describe('DocHyperLinkEventRenderController', () => {
         }
     });
 
-    it('opens document hyperlinks only with Ctrl or Command click', () => {
+    it('shows hyperlink details on click and opens only with Ctrl or Command click', () => {
         const hoverCustomRanges$ = new Subject<unknown[]>();
         const clickCustomRanges$ = new Subject<unknown>();
         const pointerDownCustomRanges$ = new Subject<unknown[]>();
         const commandService = {
             executeCommand: vi.fn(),
         };
+        const hyperLinkPopupService = {
+            showing: false,
+            showInfoPopup: vi.fn(),
+        };
         const controller = new DocHyperLinkEventRenderController(
             { unitId: 'doc-unit' } as never,
             { hoverCustomRanges$, clickCustomRanges$, pointerDownCustomRanges$ } as never,
             commandService as never,
-            { showing: false } as never,
+            hyperLinkPopupService as never,
             { getSkeleton: vi.fn() } as never,
             { getTextRanges: () => [] } as never
         );
@@ -73,6 +77,8 @@ describe('DocHyperLinkEventRenderController', () => {
             range: {
                 rangeId: 'link-1',
                 rangeType: CustomRangeType.HYPERLINK,
+                startIndex: 4,
+                endIndex: 10,
             },
             segmentId: 'header-1',
             segmentPageIndex: 0,
@@ -81,6 +87,17 @@ describe('DocHyperLinkEventRenderController', () => {
 
         clickCustomRanges$.next({ ...clickedRange, ctrlKey: false, metaKey: false });
         expect(commandService.executeCommand).not.toHaveBeenCalled();
+        expect(hyperLinkPopupService.showInfoPopup).toHaveBeenCalledWith(
+            {
+                unitId: 'doc-unit',
+                linkId: 'link-1',
+                segmentId: 'header-1',
+                segmentPage: 0,
+                startIndex: 4,
+                endIndex: 10,
+            },
+            { pinned: true }
+        );
 
         clickCustomRanges$.next({ ...clickedRange, ctrlKey: true, metaKey: false });
         expect(commandService.executeCommand).toHaveBeenLastCalledWith(ClickDocHyperLinkOperation.id, {
@@ -96,6 +113,81 @@ describe('DocHyperLinkEventRenderController', () => {
             linkId: 'link-1',
             segmentId: 'header-1',
         });
+
+        controller.dispose();
+    });
+
+    it('keeps click-pinned hyperlink details visible when the pointer leaves the link', () => {
+        const hoverCustomRanges$ = new Subject<unknown[]>();
+        const clickCustomRanges$ = new Subject<unknown>();
+        const pointerDownCustomRanges$ = new Subject<unknown[]>();
+        const commandService = {
+            executeCommand: vi.fn(),
+        };
+        const hyperLinkPopupService = {
+            showing: false as false | { linkId: string },
+            infoPopupPinned: false,
+            showInfoPopup: vi.fn(function (this: { showing: false | { linkId: string }; infoPopupPinned: boolean }, _info, options?: { pinned?: boolean }) {
+                this.showing = { linkId: 'link-1' };
+                this.infoPopupPinned = options?.pinned ?? false;
+            }),
+        };
+        const controller = new DocHyperLinkEventRenderController(
+            { unitId: 'doc-unit' } as never,
+            { hoverCustomRanges$, clickCustomRanges$, pointerDownCustomRanges$ } as never,
+            commandService as never,
+            hyperLinkPopupService as never,
+            { getSkeleton: vi.fn() } as never,
+            { getTextRanges: () => [] } as never
+        );
+        const clickedRange = {
+            range: {
+                rangeId: 'link-1',
+                rangeType: CustomRangeType.HYPERLINK,
+                startIndex: 4,
+                endIndex: 10,
+            },
+            segmentId: '',
+            segmentPageIndex: 0,
+            rects: [],
+            ctrlKey: false,
+            metaKey: false,
+        };
+
+        clickCustomRanges$.next(clickedRange);
+        hoverCustomRanges$.next([]);
+
+        expect(hyperLinkPopupService.infoPopupPinned).toBe(true);
+        expect(commandService.executeCommand).not.toHaveBeenCalled();
+
+        controller.dispose();
+    });
+
+    it('schedules hover-opened hyperlink details to close when the pointer leaves the link', () => {
+        const hoverCustomRanges$ = new Subject<unknown[]>();
+        const clickCustomRanges$ = new Subject<unknown>();
+        const pointerDownCustomRanges$ = new Subject<unknown[]>();
+        const commandService = {
+            executeCommand: vi.fn(),
+        };
+        const hyperLinkPopupService = {
+            showing: { linkId: 'link-1' },
+            infoPopupPinned: false,
+            scheduleHideInfoPopup: vi.fn(),
+        };
+        const controller = new DocHyperLinkEventRenderController(
+            { unitId: 'doc-unit' } as never,
+            { hoverCustomRanges$, clickCustomRanges$, pointerDownCustomRanges$ } as never,
+            commandService as never,
+            hyperLinkPopupService as never,
+            { getSkeleton: vi.fn() } as never,
+            { getTextRanges: () => [] } as never
+        );
+
+        hoverCustomRanges$.next([]);
+
+        expect(hyperLinkPopupService.scheduleHideInfoPopup).toHaveBeenCalledTimes(1);
+        expect(commandService.executeCommand).not.toHaveBeenCalled();
 
         controller.dispose();
     });

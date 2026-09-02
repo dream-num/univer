@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { ICustomRangeForInterceptor } from '@univerjs/core';
 import type { IDocsCustomBlockRenderViewport } from '@univerjs/engine-render';
 import type { IMessageProtocol } from '@univerjs/rpc';
 import type { IDocLayoutCancelRequest, IDocLayoutCreateSessionRequest, IDocLayoutDisposeMountRequest, IDocLayoutDisposeSessionRequest, IDocLayoutMountIdentity, IDocLayoutPageRequest, IDocLayoutPageResult, IDocLayoutPerformanceMetrics, IDocLayoutStartRequest, IDocLayoutStartResult, IDocLayoutStepRequest, IDocLayoutStepResult } from '../services/doc-layout-executor.service';
@@ -157,6 +158,8 @@ export class DocsLayoutWorkerRuntime implements IDocsLayoutWorkerRuntime {
             };
         }
 
+        this._applyCustomRangePresentations(session.dataModel, request.customRangePresentations ?? []);
+
         let mount = session.layoutSessions.get(request.mountId);
         if (
             mount != null && (
@@ -189,6 +192,7 @@ export class DocsLayoutWorkerRuntime implements IDocsLayoutWorkerRuntime {
             mount.viewportEpoch = request.viewportEpoch;
         }
         const generation = mount.layoutSession.start({
+            waitForHyphenationPatterns: true,
             reason: request.reason,
             anchor: request.anchor,
             priorityAnchor: request.priorityAnchor,
@@ -227,6 +231,41 @@ export class DocsLayoutWorkerRuntime implements IDocsLayoutWorkerRuntime {
             }
         }
         return true;
+    }
+
+    private _applyCustomRangePresentations(
+        dataModel: DocumentDataModel,
+        presentations: IDocLayoutStartRequest['customRangePresentations']
+    ): void {
+        const rangeMaps = new Map<string, Map<string, ICustomRangeForInterceptor>>();
+        const segmentModels = [
+            ['', dataModel] as const,
+            ...dataModel.headerModelMap,
+            ...dataModel.footerModelMap,
+        ];
+        for (const [segmentId, segmentModel] of segmentModels) {
+            const rangeMap = new Map<string, ICustomRangeForInterceptor>();
+            for (const range of segmentModel.getBody()?.customRanges ?? []) {
+                const workerRange = range as ICustomRangeForInterceptor;
+                delete workerRange.active;
+                delete workerRange.glyphAscentEm;
+                delete workerRange.glyphDescentEm;
+                delete workerRange.glyphWidthEm;
+                delete workerRange.show;
+                if (!rangeMap.has(range.rangeId)) {
+                    rangeMap.set(range.rangeId, workerRange);
+                }
+            }
+            rangeMaps.set(segmentId, rangeMap);
+        }
+        for (const { segmentId, rangeId, presentation } of presentations ?? []) {
+            const rangeMap = rangeMaps.get(segmentId);
+            const range = rangeMap?.get(rangeId);
+            if (range != null) {
+                Object.assign(range, presentation);
+                rangeMap?.delete(rangeId);
+            }
+        }
     }
 
     async stepLayout(request: IDocLayoutStepRequest): Promise<IDocLayoutStepResult> {

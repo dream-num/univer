@@ -33,6 +33,7 @@ export interface IDocumentLayoutSessionStartOptions {
     anchor?: number;
     priorityAnchor?: number;
     invalidation?: IDocumentLayoutInvalidation;
+    waitForHyphenationPatterns?: boolean;
 }
 
 export interface IDocumentLayoutStepResult {
@@ -306,7 +307,10 @@ export class DocumentLayoutSession extends Disposable {
             skeListLevel: complete
                 ? [...(skeletonData.skeListLevel ?? [])].map(([listId, levels]) => [
                     listId,
-                    levels.map((level) => level.map(({ bullet, paragraph }) => ({ bullet, paragraph }))),
+                    Array.from(
+                        levels,
+                        (level) => (level ?? []).map(({ bullet, paragraph }) => ({ bullet, paragraph }))
+                    ),
                 ])
                 : null,
             drawingAnchor: complete

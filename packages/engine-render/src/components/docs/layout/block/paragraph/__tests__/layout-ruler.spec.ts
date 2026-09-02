@@ -32,6 +32,8 @@ import {
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { GlyphType, LineType } from '../../../../../../basics/i-document-skeleton-cached';
 import { setDocsCustomBlockRenderViewportProvider } from '../../../../custom-block-render-viewport';
+import { Lang } from '../../../hyphenation/lang';
+import { BreakPointType } from '../../../line-breaker/break';
 import { createSkeletonCustomBlockGlyph } from '../../../model/glyph';
 import { __testing, getLineHeightMetrics, layoutParagraph, updateInlineDrawingPosition } from '../layout-ruler';
 import { lineBreaking } from '../linebreaking';
@@ -227,6 +229,42 @@ describe('layout-ruler', () => {
             expect(bulletGlyph?.fontStyle?.fontFamily, snapshotCase.name).toBe(expected.fontFamily);
             expect(bulletGlyph?.fontStyle?.originFontSize, snapshotCase.name).toBe(expected.fontSize);
         }
+    });
+
+    it.each([' ', '  '])('preserves source spaces when limiting consecutive hyphens (%j)', async (separator) => {
+        const content = `Further text keeps the${separator}paragraph flowing. `.repeat(100);
+        const { ctx, paragraphNode, sectionBreakConfig, curPage, viewModel } = createParagraphLayoutTestBed(content, {
+            documentStyle: {
+                autoHyphenation: BooleanNumber.TRUE,
+                consecutiveHyphenLimit: 0,
+                pageSize: { width: 400, height: 600 },
+            },
+        });
+        await ctx.hyphen.loadPattern(Lang.Es);
+        await ctx.hyphen.loadPattern(Lang.EnGb);
+        const shaped = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+        const pages = lineBreaking(ctx, viewModel, shaped, curPage, paragraphNode, sectionBreakConfig, null);
+        const glyphs = pages.flatMap((page) => page.sections.flatMap((section) => section.columns
+            .flatMap((column) => column.lines.flatMap((line) => line.divides.flatMap((divide) => divide.glyphGroup)))));
+        const sourceGlyphs = glyphs.filter((glyph) => glyph.count > 0);
+
+        expect(sourceGlyphs.map((glyph) => glyph.raw).join('')).toBe(paragraphNode.content);
+        expect(sourceGlyphs.reduce((count, glyph) => count + glyph.count, 0)).toBe(paragraphNode.content!.length);
+    });
+
+    it.each(['', ' ', '  '])('keeps a first word slice and its leading spaces (%j)', (prefix) => {
+        const { ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed(`${prefix}abcdef`, {
+            documentStyle: { consecutiveHyphenLimit: 0 },
+        });
+        const config = { paragraphIndex: paragraphNode.endIndex, paragraphStyle: {} } as IParagraphConfig;
+        const first = `${prefix}abc`.split('').map((char) => createGlyph(char, 50));
+        let pages = layoutParagraph(ctx, first, [curPage], sectionBreakConfig, config, true, BreakPointType.Hyphen);
+        pages = layoutParagraph(ctx, 'def'.split('').map((char) => createGlyph(char, 80)), pages, sectionBreakConfig, config, false);
+        const lines = pages.flatMap((page) => page.sections.flatMap((section) => section.columns.flatMap((column) => column.lines)));
+        const text = lines.map((line) => line.divides.flatMap((divide) => divide.glyphGroup).map((glyph) => glyph.raw).join(''));
+
+        expect(text.join('')).toBe(`${prefix}abcdef`);
+        expect(text[0]).toBe(`${prefix}abc`);
     });
 
     it('aligns following text to an explicit end tab stop', () => {

@@ -25,5 +25,11 @@ export function getColorStyleForCanvas(color: Nullable<IColorStyle>): Nullable<s
         return rgb;
     }
 
+    // Older imported snapshots retain OOXML's bare RRGGBB form. ColorKit
+    // treats it as invalid/transparent; normalize only this unambiguous form.
+    if (rgb && /^[\da-f]{6}$/i.test(rgb)) {
+        return `#${rgb.toLowerCase()}`;
+    }
+
     return getColorStyle(color);
 }

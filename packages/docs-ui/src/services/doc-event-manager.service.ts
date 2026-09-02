@@ -61,7 +61,9 @@ const calcDocRangePositions = (range: ITextRangeParam, documents: Documents, ske
             end = Math.min(root.ed, end);
         }
     }
-    const endPosition = skeleton.findNodePositionByCharIndex(end, true, range.segmentId, pageIndex);
+    // `end` is inclusive: a non-collapsed range covers the final glyph,
+    // not just its leading caret edge (which gives single-glyph links no area).
+    const endPosition = skeleton.findNodePositionByCharIndex(end, range.collapsed === true, range.segmentId, pageIndex);
     if (!endPosition || !startPosition) {
         return;
     }

@@ -15,11 +15,37 @@
  */
 
 import type { DocumentDataModel, Nullable } from '@univerjs/core';
-import type { Documents, DocumentSkeleton, Engine, IDocSelectionInnerParam, IFindNodeRestrictions, IMouseEvent, INodeInfo, INodePosition, IPointerEvent, IRenderContext, IRenderModule, IScrollObserverParam, ISuccinctDocRangeParam, ITextRangeWithStyle, ITextSelectionStyle } from '@univerjs/engine-render';
+import type {
+    Documents,
+    DocumentSkeleton,
+    Engine,
+    IDocSelectionInnerParam,
+    IFindNodeRestrictions,
+    IMouseEvent,
+    INodeInfo,
+    INodePosition,
+    IPointerEvent,
+    IRenderContext,
+    IRenderModule,
+    IScrollObserverParam,
+    ISuccinctDocRangeParam,
+    ITextRangeWithStyle,
+    ITextSelectionStyle,
+} from '@univerjs/engine-render';
 import type { Subscription } from 'rxjs';
 import type { RectRange } from './rect-range';
-import { DataStreamTreeTokenType, DOC_RANGE_TYPE, ILogService, Inject, isInternalEditorID, IUniverInstanceService, Optional, RxDisposable, UniverInstanceType } from '@univerjs/core';
-import { DocSkeletonManagerService } from '@univerjs/docs';
+import {
+    DataStreamTreeTokenType,
+    DOC_RANGE_TYPE,
+    ILogService,
+    Inject,
+    isInternalEditorID,
+    IUniverInstanceService,
+    Optional,
+    RxDisposable,
+    UniverInstanceType,
+} from '@univerjs/core';
+import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import {
     CURSOR_TYPE,
     getSystemHighlightColor,
@@ -31,7 +57,11 @@ import {
 } from '@univerjs/engine-render';
 import { ILayoutService, KeyCode } from '@univerjs/ui';
 import { BehaviorSubject, filter, fromEvent, merge, Subject, takeUntil } from 'rxjs';
-import { DOC_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, IDocEmbedInteractionBoundaryService, IDocEmbedRuntimeFocusCoordinator } from '../doc-embed-integration.service';
+import {
+    DOC_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE,
+    IDocEmbedInteractionBoundaryService,
+    IDocEmbedRuntimeFocusCoordinator,
+} from '../doc-embed-integration.service';
 import { compareNodePositionLogic } from './convert-text-range';
 import {
     getCanvasOffsetByEngine,
@@ -130,6 +160,11 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     private _scenePointerUpSubs: Array<Subscription> = [];
     // When the user switches editors, whether to clear the doc ranges.
     private _reserveRanges = false;
+    private _pendingSelection: Nullable<IDocSelectionInnerParam> = null;
+
+    get hasPendingSelection(): boolean {
+        return this._getPendingSelection() != null;
+    }
 
     get isOnPointerEvent() {
         return this._onPointerEvent;
@@ -174,6 +209,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         @ILogService private readonly _logService: ILogService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
+        @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService,
         @Optional(IDocEmbedInteractionBoundaryService) private readonly _embedInteractionBoundaryService?: IDocEmbedInteractionBoundaryService,
         @Optional(IDocEmbedRuntimeFocusCoordinator) private readonly _embedRuntimeFocusCoordinator?: IDocEmbedRuntimeFocusCoordinator
     ) {
@@ -242,7 +278,41 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     }
 
     replaceDocRanges(ranges: ISuccinctDocRangeParam[], isEditing = true, options?: { [key: string]: boolean }): boolean {
+        // A drag owns its in-progress ranges until pointerup publishes them.
+        if (this._onPointerEvent) {
+            this._pendingSelection = null;
+            return false;
+        }
+        if (this._currentSegmentId === '' && ranges.length > 0) {
+            const progress = this._docSkeletonManagerService.getSkeleton().getLayoutProgress();
+            if (progress?.reason === 'edit' && !progress.anchorReady && !progress.complete && !progress.cancelled) {
+                const { unitId } = this._context;
+                const selection = this._docSelectionManagerService.getSelectionInfo({ unitId, subUnitId: unitId });
+                // Only a refresh of the current logical selection belongs to this
+                // publication. A new pointer/programmatic selection takes over.
+                if (
+                    selection != null &&
+                    ranges.length === selection.textRanges.length &&
+                    ranges.every((range, index) => range === selection.textRanges[index])
+                ) {
+                    this._pendingSelection = selection;
+                    return false;
+                }
+            }
+        }
+        this._pendingSelection = null;
         return this.addDocRanges(ranges, isEditing, options, true);
+    }
+
+    private _getPendingSelection(): Nullable<IDocSelectionInnerParam> {
+        if (this._pendingSelection == null) {
+            return null;
+        }
+        const { unitId } = this._context;
+        if (this._docSelectionManagerService.getSelectionInfo({ unitId, subUnitId: unitId }) !== this._pendingSelection) {
+            this._pendingSelection = null;
+        }
+        return this._pendingSelection;
     }
 
     private _canResolveCollapsedRanges(
@@ -436,7 +506,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         const position = this._getNodePosition(startNode);
 
         if (position == null) {
-            this._removeAllRanges();
+            this._clearUnresolvedSelection();
 
             return;
         }
@@ -524,6 +594,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
             segmentPage: this._currentSegmentPage,
         });
         if (startNode == null || startNode.node == null) {
+            this._clearUnresolvedSelection();
             return;
         }
 
@@ -562,6 +633,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
             segmentPage: this._currentSegmentPage,
         });
         if (startNode == null || startNode.node == null) {
+            this._clearUnresolvedSelection();
             return;
         }
 
@@ -601,7 +673,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         const position = this._getNodePosition(startNode);
 
         if (position == null || startNode == null) {
-            this._removeAllRanges();
+            this._clearUnresolvedSelection();
 
             return;
         }
@@ -622,6 +694,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
             }
         }
 
+        this._pendingSelection = null;
         const { segmentId, segmentPage } = startNode;
 
         if (segmentId && this._currentSegmentId && segmentId !== this._currentSegmentId) {
@@ -730,7 +803,19 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         }));
     }
 
+    private _clearUnresolvedSelection(): void {
+        // A new pointer target takes ownership even before its page is ready.
+        // Clear the logical selection as well as its geometry so a later layout
+        // publication or native input cannot restore the previous caret.
+        this._anchorNodePosition = null;
+        this._focusNodePosition = null;
+        this._removeAllCacheRanges();
+        this.addDocRanges([], false, { shouldFocus: false }, true);
+        this.blur();
+    }
+
     removeAllRanges() {
+        this._pendingSelection = null;
         this._removeAllRanges();
         this.deactivate();
     }
@@ -798,6 +883,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     }
 
     override dispose() {
+        this._pendingSelection = null;
         super.dispose();
         this._detachEvent();
         this._removeAllRanges();
@@ -1449,8 +1535,19 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
         this._input.innerHTML = '';
 
-        const activeRange = this._getActiveRange();
-        const rangeList = this._getAllTextRanges();
+        // Geometry remains on the previous page until the edited page is ready.
+        // Continue native input from the existing logical selection only while
+        // that exact selection is waiting for publication.
+        const pendingSelection = this._getPendingSelection();
+        const rangeList = pendingSelection?.textRanges.map((range) => ({
+            segmentId: pendingSelection.segmentId,
+            segmentPage: pendingSelection.segmentPage,
+            style: pendingSelection.style,
+            ...range,
+        })) ?? this._getAllTextRanges();
+        const activeRange = pendingSelection == null
+            ? this._getActiveRange()
+            : rangeList.find((range) => range.isActive);
 
         func({
             event: e,

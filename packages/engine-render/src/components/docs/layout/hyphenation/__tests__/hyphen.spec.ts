@@ -15,7 +15,7 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Hyphen } from '../hyphen';
 import { Lang } from '../lang';
 import { PATTERN_LOADERS } from '../pattern-loaders.gen';
@@ -53,6 +53,33 @@ describe('test hyphenation', () => {
     });
 
     describe('test async load pattern', () => {
+        it('shares in-flight loads, retries failures and ignores completion after disposal', async () => {
+            const loader = PATTERN_LOADERS[Lang.Es]!;
+            const pattern = await loader();
+            let resolveLoad!: (value: unknown) => void;
+            const delayed = vi.spyOn(PATTERN_LOADERS, Lang.Es)
+                .mockRejectedValueOnce(new Error('pattern unavailable'))
+                .mockImplementation(() => new Promise((resolve) => { resolveLoad = resolve; }));
+            try {
+                await expect(hyphen!.loadPattern(Lang.Es)).rejects.toThrow('pattern unavailable');
+                const first = hyphen!.loadPattern(Lang.Es);
+                expect(hyphen!.loadPattern(Lang.Es)).toBe(first);
+                expect(delayed).toHaveBeenCalledTimes(2);
+                hyphen!.dispose();
+                resolveLoad(pattern);
+                await first;
+                expect(hyphen!.hasPattern(Lang.Es)).toBe(false);
+                const retry = hyphen!.loadPattern(Lang.Es);
+                resolveLoad(pattern);
+                await retry;
+                expect(hyphen!.hasPattern(Lang.Es)).toBe(true);
+                await hyphen!.loadPattern(Lang.Es);
+                expect(delayed).toHaveBeenCalledTimes(3);
+            } finally {
+                delayed.mockRestore();
+            }
+        });
+
         it('should load lang Af pattern async', async () => {
             await hyphen?.loadPattern(Lang.Af);
 

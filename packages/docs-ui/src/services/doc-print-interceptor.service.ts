@@ -15,11 +15,20 @@
  */
 
 import type { DisposableCollection } from '@univerjs/core';
-import type { Documents, DocumentSkeleton, Engine, IBoundRectNoAngle, Scene } from '@univerjs/engine-render';
+import type {
+    Documents,
+    DocumentSkeleton,
+    Engine,
+    IBoundRectNoAngle,
+    IDocumentSkeletonHeaderFooter,
+    IDocumentSkeletonPage,
+    Scene,
+} from '@univerjs/engine-render';
 import { createInterceptorKey, Disposable, InterceptorManager } from '@univerjs/core';
 
 export interface IDocPrintContext {
     unitId: string;
+    pageIndex?: number;
     scene: Scene;
     engine: Engine;
     root: HTMLElement;
@@ -73,6 +82,30 @@ export class DocPrintInterceptorService extends Disposable {
         return this._printComponentMap.get(componentKey);
     }
 
+    getPageDrawingIds(skeleton: DocumentSkeleton, pageIndex?: number): ReadonlySet<string> | null {
+        const data = skeleton.getSkeletonData();
+        if (!data || data.pages.length <= 1 || pageIndex == null) {
+            return null;
+        }
+
+        const drawingIds = new Set<string>();
+        const page = data.pages[pageIndex];
+        if (!page) {
+            return drawingIds;
+        }
+
+        collectPageDrawingIds(page, drawingIds);
+        const header = data.skeHeaders.get(page.headerId)?.get(page.pageWidth);
+        const footer = data.skeFooters.get(page.footerId)?.get(page.pageWidth);
+        if (header) {
+            collectPageDrawingIds(header, drawingIds);
+        }
+        if (footer) {
+            collectPageDrawingIds(footer, drawingIds);
+        }
+        return drawingIds;
+    }
+
     registerPrintPreparation(handler: (context: IDocPrintPreparationContext) => Promise<void>) {
         this._printPreparationHandlers.add(handler);
         return () => this._printPreparationHandlers.delete(handler);
@@ -85,5 +118,19 @@ export class DocPrintInterceptorService extends Disposable {
     override dispose(): void {
         this._printPreparationHandlers.clear();
         super.dispose();
+    }
+}
+
+function collectPageDrawingIds(page: IDocumentSkeletonPage | IDocumentSkeletonHeaderFooter, drawingIds: Set<string>): void {
+    for (const drawingId of page.skeDrawings.keys()) {
+        drawingIds.add(drawingId);
+    }
+    // Cell drawings belong to their cell skeleton, not the host page's map.
+    for (const table of page.skeTables.values()) {
+        for (const row of table.rows) {
+            for (const cell of row.cells) {
+                collectPageDrawingIds(cell, drawingIds);
+            }
+        }
     }
 }

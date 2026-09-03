@@ -823,7 +823,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             }
         }));
 
-        return doc.documentElement.outerHTML;
+        return /<(?:html|head)\b/i.test(html) ? doc.documentElement.outerHTML : doc.body.innerHTML;
     }
 
     private async _createImagePasteHtml(files: File[]) {

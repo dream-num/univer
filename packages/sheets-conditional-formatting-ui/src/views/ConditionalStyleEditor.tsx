@@ -19,84 +19,47 @@ import { BooleanNumber } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
 import { BoldIcon, FontColorDoubleIcon, ItalicIcon, StrikethroughIcon, UnderlineIcon } from '@univerjs/icons';
 import { removeUndefinedAttr } from '@univerjs/sheets-conditional-formatting';
-import { useEffect, useState } from 'react';
+import { useRef, useState } from 'react';
+
 import { ColorPicker } from './ColorPicker';
 
 interface IConditionalStyleEditorProps {
     className?: string;
     style?: IHighlightCell['style'];
     onChange: (style: IHighlightCell['style']) => void;
-};
+}
+
+export function createDefaultConditionalStyle(style?: IHighlightCell['style']): IHighlightCell['style'] {
+    return {
+        ...style,
+        cl: { rgb: style?.cl?.rgb ?? '#2f56ef' },
+        bg: { rgb: style?.bg?.rgb ?? '#e8ecfc' },
+    };
+}
 
 const getAnotherBooleanNumber = (v: BooleanNumber | undefined) => {
     return [BooleanNumber.FALSE, undefined].includes(v) ? BooleanNumber.TRUE : BooleanNumber.FALSE;
 };
 const getBooleanFromNumber = (v: BooleanNumber) => v !== BooleanNumber.FALSE;
 export const ConditionalStyleEditor = (props: IConditionalStyleEditorProps) => {
-    const { style, onChange, className } = props;
+    const { style: providedStyle, onChange, className } = props;
+    const [style, setStyle] = useState(() => createDefaultConditionalStyle(providedStyle));
+    const [previousProvidedStyle, setPreviousProvidedStyle] = useState(providedStyle);
+    const styleRef = useRef(style);
 
-    const [isBold, setIsBold] = useState<BooleanNumber | undefined>(() => {
-        const defaultV = undefined;
-        if (!style?.bl) {
-            return defaultV;
-        }
-        return style.bl;
-    });
-    const [isItalic, setIsItalic] = useState<BooleanNumber | undefined>(() => {
-        const defaultV = undefined;
-        if (!style?.it) {
-            return defaultV;
-        }
-        return style.it;
-    });
-    const [isUnderline, setIsUnderline] = useState<BooleanNumber | undefined>(() => {
-        const defaultV = undefined;
-        if (!style?.ul) {
-            return defaultV;
-        }
-        return style.ul.s;
-    });
-    const [isStrikethrough, setIsStrikethrough] = useState<BooleanNumber | undefined>(() => {
-        const defaultV = undefined;
-        if (!style?.st) {
-            return defaultV;
-        }
-        return style.st.s;
-    });
-    const [fontColor, setFontColor] = useState(() => {
-        const defaultV = '#2f56ef';
-        if (!style?.cl?.rgb) {
-            return defaultV;
-        }
-        return style.cl.rgb;
-    });
-    const [bgColor, setBgColor] = useState(() => {
-        const defaultV = '#e8ecfc';
-        if (!style?.bg?.rgb) {
-            return defaultV;
-        }
-        return style.bg.rgb;
-    });
+    if (providedStyle !== previousProvidedStyle) {
+        const nextStyle = createDefaultConditionalStyle(providedStyle);
+        setPreviousProvidedStyle(providedStyle);
+        setStyle(nextStyle);
+        styleRef.current = nextStyle;
+    }
 
-    useEffect(() => {
-        const resultStyle: IHighlightCell['style'] = {
-            bl: isBold,
-            it: isItalic,
-        };
-        if (fontColor !== undefined) {
-            resultStyle.cl = { rgb: fontColor };
-        }
-        if (bgColor !== undefined) {
-            resultStyle.bg = { rgb: bgColor };
-        }
-        if (isStrikethrough !== undefined) {
-            resultStyle.st = { s: isStrikethrough };
-        }
-        if (isUnderline !== undefined) {
-            resultStyle.ul = { s: isUnderline };
-        }
-        onChange(removeUndefinedAttr(resultStyle));
-    }, [isBold, isItalic, isUnderline, isStrikethrough, fontColor, bgColor]);
+    const updateStyle = (patch: IHighlightCell['style']) => {
+        const nextStyle = removeUndefinedAttr({ ...styleRef.current, ...patch });
+        styleRef.current = nextStyle;
+        setStyle(nextStyle);
+        onChange(nextStyle);
+    };
 
     const buttonItemClassName = 'univer-flex univer-cursor-pointer univer-items-center univer-rounded univer-px-1';
 
@@ -104,38 +67,45 @@ export const ConditionalStyleEditor = (props: IConditionalStyleEditorProps) => {
         <div className={clsx('univer-my-2.5 univer-flex univer-justify-between', className)}>
             <div
                 className={clsx(buttonItemClassName, {
-                    'univer-bg-gray-100 dark:!univer-bg-gray-700': getBooleanFromNumber(isBold || BooleanNumber.FALSE),
+                    'univer-bg-gray-100 dark:!univer-bg-gray-700': getBooleanFromNumber(style.bl || BooleanNumber.FALSE),
                 })}
-                onClick={() => setIsBold(getAnotherBooleanNumber(isBold))}
+                onClick={() => updateStyle({ bl: getAnotherBooleanNumber(styleRef.current.bl) })}
             >
                 <BoldIcon />
             </div>
             <div
                 className={clsx(buttonItemClassName, {
-                    'univer-bg-gray-100 dark:!univer-bg-gray-700': getBooleanFromNumber(isItalic || BooleanNumber.FALSE),
+                    'univer-bg-gray-100 dark:!univer-bg-gray-700': getBooleanFromNumber(style.it || BooleanNumber.FALSE),
                 })}
-                onClick={() => setIsItalic(getAnotherBooleanNumber(isItalic))}
+                onClick={() => updateStyle({ it: getAnotherBooleanNumber(styleRef.current.it) })}
             >
                 <ItalicIcon />
             </div>
             <div
                 className={clsx(buttonItemClassName, {
-                    'univer-bg-gray-100 dark:!univer-bg-gray-700': getBooleanFromNumber(isUnderline || BooleanNumber.FALSE),
+                    'univer-bg-gray-100 dark:!univer-bg-gray-700': getBooleanFromNumber(style.ul?.s || BooleanNumber.FALSE),
                 })}
-                onClick={() => setIsUnderline(getAnotherBooleanNumber(isUnderline))}
+                onClick={() => updateStyle({ ul: { s: getAnotherBooleanNumber(styleRef.current.ul?.s) } })}
             >
                 <UnderlineIcon />
             </div>
             <div
                 className={clsx(buttonItemClassName, {
-                    'univer-bg-gray-100 dark:!univer-bg-gray-700': getBooleanFromNumber(isStrikethrough || BooleanNumber.FALSE),
+                    'univer-bg-gray-100 dark:!univer-bg-gray-700': getBooleanFromNumber(style.st?.s || BooleanNumber.FALSE),
                 })}
-                onClick={() => setIsStrikethrough(getAnotherBooleanNumber(isStrikethrough))}
+                onClick={() => updateStyle({ st: { s: getAnotherBooleanNumber(styleRef.current.st?.s) } })}
             >
                 <StrikethroughIcon />
             </div>
-            <ColorPicker color={fontColor} onChange={setFontColor} Icon={FontColorDoubleIcon} />
-            <ColorPicker color={bgColor} onChange={setBgColor} />
+            <ColorPicker
+                color={style.cl?.rgb ?? '#2f56ef'}
+                onChange={(color) => updateStyle({ cl: { rgb: color } })}
+                Icon={FontColorDoubleIcon}
+            />
+            <ColorPicker
+                color={style.bg?.rgb ?? '#e8ecfc'}
+                onChange={(color) => updateStyle({ bg: { rgb: color } })}
+            />
         </div>
     );
 };

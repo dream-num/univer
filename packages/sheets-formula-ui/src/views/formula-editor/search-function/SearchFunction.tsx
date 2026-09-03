@@ -20,13 +20,13 @@ import { CommandType, DisposableCollection, ICommandService, noop } from '@unive
 import { borderClassName, clsx, scrollbarClassName } from '@univerjs/design';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { IShortcutService, KeyCode, RectPopup, useDependency } from '@univerjs/ui';
-import { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
+import { forwardRef, useEffect, useRef, useState } from 'react';
+
 import { useEditorPosition } from '../hooks/use-editor-position';
 import { useFormulaSearch } from '../hooks/use-formula-search';
 import { useStateRef } from '../hooks/use-state-ref';
 
 interface ISearchFunctionProps {
-    isFocus: boolean;
     sequenceNodes: (string | ISequenceNode)[];
     onSelect: (data: {
         text: string;
@@ -36,18 +36,19 @@ interface ISearchFunctionProps {
     editor: Editor;
     onClose?: () => void;
     mobile?: boolean;
-};
+}
 export const SearchFunction = forwardRef<HTMLElement, ISearchFunctionProps>(SearchFunctionFactory);
 function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
-    const { isFocus, sequenceNodes, onSelect, editor, onClose = noop, mobile = false } = props;
+    const { sequenceNodes, onSelect, editor, onClose = noop, mobile = false } = props;
     const editorId = editor.getEditorId();
     const shortcutService = useDependency(IShortcutService);
     const commandService = useDependency(ICommandService);
-    const { searchList, searchText, handlerFormulaReplace, reset: resetFormulaSearch } = useFormulaSearch(isFocus, sequenceNodes, editor);
+    const { searchList, searchText, handlerFormulaReplace, reset: resetFormulaSearch } = useFormulaSearch(sequenceNodes, editor);
     const visible = searchList.length > 0;
     const ulRef = useRef<HTMLUListElement>(undefined);
     const [active, setActive] = useState(0);
     const isEnableMouseEnterOrOut = useRef(false);
+    const resetMouseStateTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
     const [position$] = useEditorPosition(editorId, visible, [searchText, searchList]);
     const stateRef = useStateRef({ searchList, active });
 
@@ -71,6 +72,40 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
             return;
         }
         setActive(-1);
+    }
+
+    function scrollToVisible(liIndex: number) {
+        const ulElement = ulRef.current;
+        if (!ulElement) return;
+
+        const liElement = ulElement.children[liIndex] as HTMLLIElement;
+        if (!liElement) return;
+
+        const ulRect = ulElement.getBoundingClientRect();
+        const ulTop = ulRect.top;
+        const ulHeight = ulElement.offsetHeight;
+        const liRect = liElement.getBoundingClientRect();
+        const liTop = liRect.top;
+        const liHeight = liRect.height;
+
+        if (liTop >= 0 && liTop > ulTop && liTop - ulTop + liHeight <= ulHeight) {
+            return;
+        }
+
+        ulElement.scrollTo({
+            top: liElement.offsetTop - (ulHeight - liHeight) / 2,
+            behavior: 'smooth',
+        });
+    }
+
+    function debounceResetMouseState() {
+        if (resetMouseStateTimerRef.current !== undefined) {
+            clearTimeout(resetMouseStateTimerRef.current);
+        }
+        isEnableMouseEnterOrOut.current = true;
+        resetMouseStateTimerRef.current = setTimeout(() => {
+            isEnableMouseEnterOrOut.current = false;
+        }, 300);
     }
 
     useEffect(() => {
@@ -140,52 +175,11 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
 
         return () => {
             d.dispose();
+            if (resetMouseStateTimerRef.current !== undefined) {
+                clearTimeout(resetMouseStateTimerRef.current);
+            }
         };
     }, [searchList]);
-
-    function scrollToVisible(liIndex: number) {
-        // Get the <li> element directly from children
-        const ulElement = ulRef.current;
-        if (!ulElement) return;
-
-        const liElement = ulElement.children[liIndex] as HTMLLIElement;
-        if (!liElement) return;
-
-        // Get the height of the <ul> element
-        const ulRect = ulElement.getBoundingClientRect();
-        const ulTop = ulRect.top;
-        const ulHeight = ulElement.offsetHeight;
-
-        // Get the position and height of the <li> element
-        const liRect = liElement.getBoundingClientRect();
-        const liTop = liRect.top;
-        const liHeight = liRect.height;
-
-        // If the <li> element is within the visible area, no scrolling operation is performed
-        if (liTop >= 0 && liTop > ulTop && liTop - ulTop + liHeight <= ulHeight) {
-            return;
-        }
-
-        // Calculate scroll position
-        const scrollTo = liElement.offsetTop - (ulHeight - liHeight) / 2;
-
-        // Perform scrolling operation
-        ulElement.scrollTo({
-            top: scrollTo,
-            behavior: 'smooth',
-        });
-    }
-
-    const debounceResetMouseState = useMemo(() => {
-        let time = '' as any;
-        return () => {
-            clearTimeout(time);
-            isEnableMouseEnterOrOut.current = true;
-            time = setTimeout(() => {
-                isEnableMouseEnterOrOut.current = false;
-            }, 300);
-        };
-    }, []);
 
     return searchList.length > 0 && visible && (
         <RectPopup portal anchorRect$={position$} direction="vertical">

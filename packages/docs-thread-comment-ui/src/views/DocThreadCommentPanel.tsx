@@ -23,7 +23,7 @@ import { DEFAULT_DOC_SUBUNIT_ID } from '@univerjs/docs-thread-comment';
 import { deserializeThreadCommentAnchor, serializeThreadCommentAnchor, ThreadCommentAnchorKind, ThreadCommentModel } from '@univerjs/thread-comment';
 import { ThreadCommentDraftService, ThreadCommentPanel } from '@univerjs/thread-comment-ui';
 import { useDependency, useObservable } from '@univerjs/ui';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { debounceTime, filter, map, merge, Observable } from 'rxjs';
 import { AddDocCommentComment } from '../commands/commands/add-doc-comment.command';
 import { DeleteDocCommentComment } from '../commands/commands/delete-doc-comment.command';
@@ -92,32 +92,32 @@ export const DocThreadCommentPanel = () => {
             .filter((thread) => isDrawingComment(thread.root))
             .map((thread) => thread.root.id)
         : [];
-    const [commentIds, setCommentIds] = useState<string[]>([]);
+    const getCommentIds = useCallback(() => {
+        const ids = new Set<string>();
+        return doc?.getCustomDecorations()?.map((range) => range.id).filter((id) => {
+            const hasRepeat = ids.has(id);
+            ids.add(id);
+            return !hasRepeat;
+        }) ?? [];
+    }, [doc]);
+    const [commentIds, setCommentIds] = useState(getCommentIds);
+    const [previousDoc, setPreviousDoc] = useState(doc);
+
+    if (doc !== previousDoc) {
+        setPreviousDoc(doc);
+        setCommentIds(getCommentIds());
+    }
 
     useEffect(() => {
-        const set = new Set<string>();
-        const customRanges = doc?.getCustomDecorations();
-        setCommentIds(customRanges?.map((r) => r.id).filter((i) => {
-            const hasRepeat = set.has(i);
-            set.add(i);
-            return !hasRepeat;
-        }) ?? []);
-
         const dispose = commandService.onCommandExecuted((command) => {
             if (command.id === RichTextEditingMutation.id) {
-                const set = new Set<string>();
-                const customRanges = doc?.getCustomDecorations();
-                setCommentIds(customRanges?.map((r) => r.id).filter((i) => {
-                    const hasRepeat = set.has(i);
-                    set.add(i);
-                    return !hasRepeat;
-                }) ?? []);
+                setCommentIds(getCommentIds());
             }
         });
         return () => {
             dispose.dispose();
         };
-    }, [commandService, doc]);
+    }, [commandService, getCommentIds]);
 
     if (!doc) {
         return null;

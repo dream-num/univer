@@ -50,8 +50,25 @@ export function MobileSheetBar() {
 function MobileSheetBarImpl(props: { workbook: Workbook }) {
     const { workbook } = props;
 
-    const [sheetList, setSheetList] = useState<IBaseSheetBarProps[]>([]);
-    const [activeKey, setActiveKey] = useState('');
+    function getSheetState() {
+        const activeSheet = workbook.getActiveSheet();
+        return {
+            activeKey: activeSheet!.getSheetId(),
+            sheetList: workbook.getSheets()
+                .filter((sheet) => !sheet.isSheetHidden())
+                .map((sheet, index) => ({
+                    sheetId: sheet.getSheetId(),
+                    label: sheet.getName(),
+                    index,
+                    selected: activeSheet === sheet,
+                    color: sheet.getTabColor() ?? undefined,
+                })),
+        };
+    }
+
+    const [sheetList, setSheetList] = useState<IBaseSheetBarProps[]>(() => getSheetState().sheetList);
+    const [activeKey, setActiveKey] = useState(() => getSheetState().activeKey);
+    const [previousWorkbook, setPreviousWorkbook] = useState(workbook);
     const [renameSheetId, setRenameSheetId] = useState<string | null>(null);
     const [renameValue, setRenameValue] = useState('');
     const [renameError, setRenameError] = useState('');
@@ -64,27 +81,21 @@ function MobileSheetBarImpl(props: { workbook: Workbook }) {
     const localeService = useDependency(LocaleService);
     const sheetBarService = useDependency(ISheetBarService);
 
+    if (workbook !== previousWorkbook) {
+        const nextSheetState = getSheetState();
+        setPreviousWorkbook(workbook);
+        setSheetList(nextSheetState.sheetList);
+        setActiveKey(nextSheetState.activeKey);
+    }
+
     const updateSheetItems = useCallback(() => {
-        const currentSubUnitId = workbook.getActiveSheet()!.getSheetId();
-        const sheets = workbook.getSheets();
-        const activeSheet = workbook.getActiveSheet();
-        const sheetListItems = sheets
-            .filter((sheet) => !sheet.isSheetHidden())
-            .map((sheet, index) => {
-                return {
-                    sheetId: sheet.getSheetId(),
-                    label: sheet.getName(),
-                    index,
-                    selected: activeSheet === sheet,
-                    color: sheet.getTabColor() ?? undefined,
-                };
-            });
+        const nextSheetState = getSheetState();
 
-        setSheetList(sheetListItems);
-        setActiveKey(currentSubUnitId);
+        setSheetList(nextSheetState.sheetList);
+        setActiveKey(nextSheetState.activeKey);
 
-        if (tabMapRef.current.has(currentSubUnitId)) {
-            const element = tabMapRef.current.get(currentSubUnitId);
+        if (tabMapRef.current.has(nextSheetState.activeKey)) {
+            const element = tabMapRef.current.get(nextSheetState.activeKey);
             if (element && containerRef.current) {
                 const containerWidth = containerRef.current.clientWidth;
                 const elementWidth = element.clientWidth;
@@ -96,8 +107,6 @@ function MobileSheetBarImpl(props: { workbook: Workbook }) {
 
         tabMapRef.current.clear();
     }, [workbook]);
-
-    useEffect(() => updateSheetItems(), [updateSheetItems]);
 
     useEffect(() => {
         const subscription = sheetBarService.renameId$.subscribe((sheetId) => {

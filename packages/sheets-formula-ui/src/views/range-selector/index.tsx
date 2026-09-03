@@ -100,12 +100,17 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
     } = props;
     const localeService = useDependency(LocaleService);
     const lexerTreeBuilder = useDependency(LexerTreeBuilder);
-    const [ranges, setRanges] = useState<string[]>([]);
-    const [focusIndex, setFocusIndex] = useState(0);
+    const initialRanges = visible && initialValue.length
+        ? initialValue.map((range) => range.sheetName ? serializeRangeWithSheet(range.sheetName, range.range) : serializeRange(range.range))
+        : [''];
+    const [ranges, setRanges] = useState(initialRanges);
+    const [focusIndex, setFocusIndex] = useState(initialRanges.length - 1);
     const [drawerSnap, setDrawerSnap] = useState<MobileDrawerSnap>('compact');
     const scrollbarRef = useRef<HTMLDivElement>(null);
+    const [previousVisible, setPreviousVisible] = useState(visible);
 
-    useEffect(() => {
+    if (visible !== previousVisible) {
+        setPreviousVisible(visible);
         if (visible && initialValue.length) {
             const newRanges = initialValue.map((range) => range.sheetName ? serializeRangeWithSheet(range.sheetName, range.range) : serializeRange(range.range));
             setRanges(newRanges);
@@ -114,7 +119,7 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
             setRanges(['']);
             setFocusIndex(0);
         }
-    }, [visible]);
+    }
 
     const handleRangeInput = (index: number, value: string) => {
         const newRanges = [...ranges];
@@ -315,6 +320,10 @@ export function RangeSelector(props: IRangeSelectorProps) {
     const { sequenceNodes } = useRangesHighlight(editor, focusing, unitId, subUnitId);
     const sequenceNodesRef = useStateRef(sequenceNodes);
     const commandService = useDependency(ICommandService);
+    const changePopupVisibility = useEvent((visible: boolean) => {
+        setPopupVisible(visible);
+        onRangeSelectorDialogVisibleChange?.(visible);
+    });
 
     const blurEditor = useEvent(() => {
         editor?.setSelectionRanges([]);
@@ -325,7 +334,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
     const handleOpenModal = useEvent(() => {
         blurEditor();
         setRangeSelectorRanges(parseRanges(editor?.getDocumentDataModel()?.getPlainText() ?? ''));
-        setPopupVisible(true);
+        changePopupVisibility(true);
     });
 
     useEffect(() => {
@@ -342,23 +351,19 @@ export function RangeSelector(props: IRangeSelectorProps) {
             showDialog: (ranges) => {
                 blurEditor();
                 setRangeSelectorRanges(ranges);
-                setPopupVisible(true);
+                changePopupVisibility(true);
             },
             hideDialog: () => {
                 setRangeSelectorRanges([]);
-                setPopupVisible(false);
+                changePopupVisibility(false);
             },
             getValue: () => editor?.getDocumentDataModel()?.getPlainText() ?? '',
         };
-    }, [blurEditor, editor, editorService, selectorRef, sequenceNodesRef]);
+    }, [blurEditor, changePopupVisibility, editor, editorService, selectorRef, sequenceNodesRef]);
 
     useEffect(() => {
         onVerify?.(verifyRange(sequenceNodes), editor?.getDocumentDataModel()?.getPlainText() ?? '');
     }, [sequenceNodes]);
-
-    useEffect(() => {
-        onRangeSelectorDialogVisibleChange?.(popupVisible);
-    }, [popupVisible]);
 
     useEffect(() => {
         if (popupVisible && resetRange) {
@@ -418,14 +423,14 @@ export function RangeSelector(props: IRangeSelectorProps) {
                     const documentData = RichTextBuilder.create().insertText(resultStr).getData();
                     editor?.replaceText(resultStr, false);
                     onChange?.(documentData, resultStr);
-                    setPopupVisible(false);
+                    changePopupVisibility(false);
                     setRangeSelectorRanges([]);
                     requestAnimationFrame(() => {
                         blurEditor();
                     });
                 }}
                 onClose={() => {
-                    setPopupVisible(false);
+                    changePopupVisibility(false);
                     setRangeSelectorRanges([]);
                     onClose?.();
                 }}
@@ -434,7 +439,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
                 onShowBySelection={(ranges: IUnitRangeName[]) => {
                     if (focusing || forceShowDialogWhenSelectionChanged) {
                         setRangeSelectorRanges(ranges);
-                        setPopupVisible(true);
+                        changePopupVisibility(true);
                         return false;
                     } else {
                         return true;

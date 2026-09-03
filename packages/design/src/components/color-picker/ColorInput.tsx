@@ -15,7 +15,7 @@
  */
 
 import type { ChangeEvent } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { borderClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
 import { hexToHsv, hsvToHex, hsvToRgb, rgbToHsv } from './color-conversion';
@@ -35,12 +35,15 @@ interface IInputProps {
 }
 
 function HexInput({ hsv, onChange }: IInputProps) {
-    const [inputValue, setInputValue] = useState('');
     const hexValue = useMemo(() => hsvToHex(hsv[0], hsv[1], hsv[2]), [hsv]);
+    const normalizedHexValue = hexValue.replace(/^#/, '');
+    const [inputValue, setInputValue] = useState(normalizedHexValue);
+    const [previousHexValue, setPreviousHexValue] = useState(hexValue);
 
-    useEffect(() => {
-        setInputValue(hexValue.replace(/^#/, ''));
-    }, [hexValue]);
+    if (hexValue !== previousHexValue) {
+        setPreviousHexValue(hexValue);
+        setInputValue(normalizedHexValue);
+    }
 
     const isValidHex = (hex: string) => {
         return /^[0-9A-Fa-f]{6}$/.test(hex);
@@ -65,7 +68,7 @@ function HexInput({ hsv, onChange }: IInputProps) {
 
     const handleBlur = () => {
         if (!isValidHex(inputValue)) {
-            setInputValue(hexValue.replace(/^#/, ''));
+            setInputValue(normalizedHexValue);
         }
     };
 
@@ -98,17 +101,21 @@ function HexInput({ hsv, onChange }: IInputProps) {
 }
 
 function RgbInput({ hsv, alpha, format, onChange }: IInputProps) {
-    const [localValues, setLocalValues] = useState({ r: 0, g: 0, b: 0, a: 1 });
+    const [r, g, b] = hsvToRgb(hsv[0], hsv[1], hsv[2]);
+    const sourceValue = `${Math.round(r)},${Math.round(g)},${Math.round(b)},${alpha ?? 1}`;
+    const nextLocalValues = {
+        r: Math.round(r),
+        g: Math.round(g),
+        b: Math.round(b),
+        a: alpha ?? 1,
+    };
+    const [localValues, setLocalValues] = useState(nextLocalValues);
+    const [previousSourceValue, setPreviousSourceValue] = useState(sourceValue);
 
-    useEffect(() => {
-        const [r, g, b] = hsvToRgb(hsv[0], hsv[1], hsv[2]);
-        setLocalValues({
-            r: Math.round(r),
-            g: Math.round(g),
-            b: Math.round(b),
-            a: alpha ?? 1,
-        });
-    }, [hsv, alpha]);
+    if (sourceValue !== previousSourceValue) {
+        setPreviousSourceValue(sourceValue);
+        setLocalValues(nextLocalValues);
+    }
 
     const handleChange = (color: 'r' | 'g' | 'b' | 'a', value: string) => {
         if (color === 'a') {
@@ -139,13 +146,7 @@ function RgbInput({ hsv, alpha, format, onChange }: IInputProps) {
     };
 
     const handleBlur = () => {
-        const [r, g, b] = hsvToRgb(hsv[0], hsv[1], hsv[2]);
-        setLocalValues({
-            r: Math.round(r),
-            g: Math.round(g),
-            b: Math.round(b),
-            a: alpha ?? 1,
-        });
+        setLocalValues(nextLocalValues);
     };
 
     return (

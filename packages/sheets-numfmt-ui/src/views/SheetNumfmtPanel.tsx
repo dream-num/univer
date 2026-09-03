@@ -22,7 +22,7 @@ import { LocaleService } from '@univerjs/core';
 import { Button, clsx, scrollbarClassName, Select } from '@univerjs/design';
 import { getCurrencyType } from '@univerjs/sheets-numfmt';
 import { useDependency } from '@univerjs/ui';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { UserHabitCurrencyContext } from '../controllers/user-habit.controller';
 import { AccountingPanel, isAccountingPanel } from './components/Accounting';
 import { CurrencyPanel, isCurrencyPanel } from './components/Currency';
@@ -60,8 +60,16 @@ export function SheetNumfmtPanel(props: ISheetNumfmtPanelProps) {
         [localeService]
     );
     const [type, setType] = useState(findDefaultType);
-    const [key, setKey] = useState(() => `${row}_${col}_${defaultPattern}`);
+    const sourceKey = `${row}_${col}_${defaultPattern}`;
+    const [previousSourceKey, setPreviousSourceKey] = useState(sourceKey);
+    const [key, setKey] = useState(sourceKey);
     const { mark, userHabitCurrency } = useCurrencyOptions(() => setKey(`${row}_${col}_${defaultPattern}_userCurrency`));
+
+    if (sourceKey !== previousSourceKey) {
+        setPreviousSourceKey(sourceKey);
+        setType(findDefaultType());
+        setKey(sourceKey);
+    }
 
     const BusinessComponent = typeOptions.find((item) => item.label === type)?.component;
 
@@ -111,11 +119,6 @@ export function SheetNumfmtPanel(props: ISheetNumfmtPanelProps) {
         defaultValue,
         defaultPattern,
     };
-
-    useEffect(() => {
-        setType(findDefaultType());
-        setKey(`${row}_${col}_${defaultPattern}`);
-    }, [row, col, defaultPattern]);
 
     return (
         <div

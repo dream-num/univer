@@ -245,7 +245,6 @@ describe('HelpFunction', () => {
             root,
             injector, (
                 <HelpFunction
-                    isFocus
                     editor={editor}
                     formulaText="=SUM("
                     onParamsSwitch={(index) => HelpState.switched.push(index)}
@@ -281,7 +280,6 @@ describe('HelpFunction', () => {
             root,
             injector, (
                 <HelpFunction
-                    isFocus
                     editor={editor}
                     formulaText="=SUM("
                     onClose={() => {
@@ -322,7 +320,6 @@ describe('HelpFunction', () => {
             root,
             injector, (
                 <HelpFunction
-                    isFocus
                     editor={editor}
                     formulaText="=SUM("
                 />

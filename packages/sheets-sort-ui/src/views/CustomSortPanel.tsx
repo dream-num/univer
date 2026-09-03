@@ -32,7 +32,8 @@ import {
 import { CheckMarkIcon, DeleteEmptyIcon, GripVerticalIcon, IncreaseIcon, MoreDownIcon } from '@univerjs/icons';
 import { SheetsSortService, SortType } from '@univerjs/sheets-sort';
 import { useDependency, useObservable } from '@univerjs/ui';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
 import { SheetsSortUIService } from '../services/sheets-sort-ui.service';
 
 export interface ICustomSortPanelProps {
@@ -57,7 +58,7 @@ function CustomSortPanelImpl({ state }: { state: ICustomSortState }) {
     const sheetsSortUIService = useDependency(SheetsSortUIService);
 
     const [hasTitle, setHasTitle] = useState(false);
-    const [scrollPosition, setScrollPosition] = useState(0);
+    const [openSortColumn, setOpenSortColumn] = useState<number | null>(null);
     const listEndRef = useRef<HTMLDivElement>(null);
 
     const { range, unitId, subUnitId } = state.location!;
@@ -79,8 +80,8 @@ function CustomSortPanelImpl({ state }: { state: ICustomSortState }) {
         setList(newList as IOrderRule[]);
     }, [list]);
 
-    const newItem = useCallback(
-        throttle(() => {
+    const newItem = useMemo(
+        () => throttle(() => {
             const newList = [...list];
             const nextColIndex = findNextColIndex(range, list);
             if (nextColIndex !== null) {
@@ -157,10 +158,7 @@ function CustomSortPanelImpl({ state }: { state: ICustomSortState }) {
                 <div
                     ref={listEndRef}
                     className={clsx('univer-max-h-[310px] univer-overflow-y-auto univer-overflow-x-hidden', scrollbarClassName)}
-                    onScroll={(e) => {
-                        const position = e.currentTarget.scrollTop;
-                        setScrollPosition(position);
-                    }}
+                    onScroll={() => setOpenSortColumn(null)}
                 >
                     <DraggableList
                         list={dragList}
@@ -173,7 +171,8 @@ function CustomSortPanelImpl({ state }: { state: ICustomSortState }) {
                                 list={dragList}
                                 item={item}
                                 onChange={(value, index) => onItemChange(index, value)}
-                                scrollPosition={scrollPosition}
+                                open={openSortColumn === item.colIndex}
+                                onOpenChange={(open) => setOpenSortColumn(open ? item.colIndex : null)}
                             />
                         )}
                         rowHeight={32}
@@ -204,12 +203,13 @@ interface ISortOptionItemProps {
     titles: { index: number; label: string }[];
     list: IOrderRule[];
     item: IOrderRule;
-    scrollPosition: number;
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
     onChange: (value: Nullable<IOrderRule>, index: number) => void;
 }
 
 export function SortOptionItem(props: ISortOptionItemProps) {
-    const { list, item, titles, onChange, scrollPosition } = props;
+    const { list, item, titles, open, onOpenChange, onChange } = props;
     const localeService = useDependency(LocaleService);
 
     const availableMenu = titles.filter((title) => (!list.some((item) => item.colIndex === title.index)) || title.index === item.colIndex);
@@ -217,18 +217,8 @@ export function SortOptionItem(props: ISortOptionItemProps) {
 
     const handleChangeColIndex = useCallback((menuItem: { index: number; label: string }) => {
         onChange({ ...item, colIndex: menuItem.index }, currentIndex);
-        setVisible(false);
-    }, [currentIndex, item, onChange]);
-
-    const [visible, setVisible] = useState(false);
-
-    const onVisibleChange = (visible: boolean) => {
-        setVisible(visible);
-    };
-
-    useEffect(() => {
-        setVisible(false);
-    }, [scrollPosition]);
+        onOpenChange(false);
+    }, [currentIndex, item, onChange, onOpenChange]);
 
     const showDelete = list.length > 1;
     const itemLabel = titles.find((title) => title.index === item.colIndex)?.label;
@@ -280,8 +270,8 @@ export function SortOptionItem(props: ISortOptionItemProps) {
                             ))}
                         </ul>
                     )}
-                    open={visible}
-                    onOpenChange={onVisibleChange}
+                    open={open}
+                    onOpenChange={onOpenChange}
                 >
                     <div
                         className={clsx(`

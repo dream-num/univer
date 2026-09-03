@@ -87,11 +87,10 @@ export function HelpFunction(props: {
     onParamsSwitch?: (index: number) => void;
     onClose?: () => void;
     editor: Editor;
-    isFocus: boolean;
     formulaText: string;
 }) {
-    const { onParamsSwitch = noop, onClose: propColose = noop, isFocus, editor, formulaText } = props;
-    const { functionInfo, paramIndex, reset } = useFormulaDescribe(isFocus, formulaText, editor);
+    const { onParamsSwitch = noop, onClose: propColose = noop, editor, formulaText } = props;
+    const { functionInfo, paramIndex, reset } = useFormulaDescribe(formulaText, editor);
     const editorBridgeService = useDependency(IEditorBridgeService);
     const hidden = !useObservable(editorBridgeService.helpFunctionVisible$);
     const [contentVisible, setContentVisible] = useState(false);

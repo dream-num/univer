@@ -23,7 +23,6 @@ interface IQuickInsertMenuProps {
     menus: DocPopupMenu[];
     focusedMenuIndex: number;
     onFocusedMenuIndexChange: (index: number) => void;
-    onFocusedMenuChange: (menu: IDocPopupMenuItem | null) => void;
     onSelect: (menu: IDocPopupMenuItem) => void;
 }
 
@@ -31,18 +30,14 @@ function isMenuGroup(menu: DocPopupMenu): menu is DocPopupMenu & { children: IDo
     return 'children' in menu;
 }
 
-function flattenMenuItems(menus: DocPopupMenu[]): IDocPopupMenuItem[] {
+export function getQuickInsertMenuItems(menus: DocPopupMenu[]): IDocPopupMenuItem[] {
     return menus.flatMap((menu) => {
         if (isMenuGroup(menu)) {
-            return flattenMenuItems(menu.children);
+            return getQuickInsertMenuItems(menu.children);
         }
 
         return menu;
     });
-}
-
-export function getQuickInsertMenuLeafCount(menus: DocPopupMenu[]) {
-    return flattenMenuItems(menus).length;
 }
 
 export function QuickInsertMenu(props: IQuickInsertMenuProps) {
@@ -50,20 +45,17 @@ export function QuickInsertMenu(props: IQuickInsertMenuProps) {
         menus,
         focusedMenuIndex,
         onFocusedMenuIndexChange,
-        onFocusedMenuChange,
         onSelect,
     } = props;
 
     const iconManager = useDependency(IconManager);
-    const flatMenus = useMemo(() => flattenMenuItems(menus), [menus]);
+    const flatMenus = useMemo(() => getQuickInsertMenuItems(menus), [menus]);
     const menuNodeMapRef = useRef(new Map<string, HTMLElement>());
 
     useEffect(() => {
         const focusedMenu = Number.isNaN(focusedMenuIndex)
             ? null
             : flatMenus[focusedMenuIndex] ?? null;
-
-        onFocusedMenuChange(focusedMenu);
 
         if (!focusedMenu) {
             return;
@@ -72,7 +64,7 @@ export function QuickInsertMenu(props: IQuickInsertMenuProps) {
         menuNodeMapRef.current.get(focusedMenu.id)?.scrollIntoView({
             block: 'nearest',
         });
-    }, [flatMenus, focusedMenuIndex, onFocusedMenuChange]);
+    }, [flatMenus, focusedMenuIndex]);
 
     useEffect(() => {
         const menuNodeMap = menuNodeMapRef.current;

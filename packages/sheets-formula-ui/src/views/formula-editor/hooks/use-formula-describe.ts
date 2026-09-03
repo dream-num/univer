@@ -23,8 +23,7 @@ import { debounceTime, distinctUntilChanged, filter, map } from 'rxjs';
 import { IFormulaPromptService } from '../../../services/prompt.service';
 import { useStateRef } from './use-state-ref';
 
-// eslint-disable-next-line max-lines-per-function
-export const useFormulaDescribe = (isNeed: boolean, formulaText: string, editor?: Editor) => {
+export const useFormulaDescribe = (formulaText: string, editor?: Editor) => {
     const formulaPromptService = useDependency(IFormulaPromptService);
     const descriptionService = useDependency(IDescriptionService);
     const lexerTreeBuilder = useDependency(LexerTreeBuilder);
@@ -48,7 +47,7 @@ export const useFormulaDescribe = (isNeed: boolean, formulaText: string, editor?
     }, [formulaText]);
 
     useEffect(() => {
-        if (editor && isNeed) {
+        if (editor) {
             const d = editor.selectionChange$.pipe(debounceTime(50)).subscribe((e) => {
                 if (e.textRanges.length === 1) {
                     const [range] = e.textRanges;
@@ -99,13 +98,7 @@ export const useFormulaDescribe = (isNeed: boolean, formulaText: string, editor?
                 d2.unsubscribe();
             };
         }
-    }, [editor, isNeed]);
-
-    useEffect(() => {
-        if (!isNeed) {
-            reset();
-        }
-    }, [isNeed]);
+    }, [editor]);
 
     return {
         functionInfo,

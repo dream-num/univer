@@ -21,28 +21,21 @@ import { ColorKit, DisposableCollection, IUniverInstanceService, UniverInstanceT
 import { deserializeRangeWithSheet, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { IMarkSelectionService } from '@univerjs/sheets-ui';
 import { useDependency, useObservable } from '@univerjs/ui';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useDocHight } from '../../formula-editor/hooks/use-highlight';
 
 export function useRangesHighlight(editor: Nullable<Editor>, focusing: boolean, unitId: string, subUnitId: string) {
     const lexerTreeBuilder = useDependency(LexerTreeBuilder);
     const highlightDoc = useDocHight('');
-    const change = useObservable(editor?.getDocumentDataModel()?.change$);
-    const [sequenceNodes, setSequenceNodes] = useState<(string | ISequenceNode)[]>([]);
+    useObservable(editor?.getDocumentDataModel()?.change$);
     const markSelectionService = useDependency(IMarkSelectionService);
-    const last = useRef('');
     const univerInstanceService = useDependency(IUniverInstanceService);
+    const text = editor?.getDocumentDataModel()?.getPlainText() ?? '';
 
-    useEffect(() => {
-        if (!editor) return;
-        const text = editor.getDocumentDataModel()!.getPlainText();
-        if (last.current === text) {
-            return;
-        }
-        last.current = text;
-        const nodes = lexerTreeBuilder.sequenceNodesBuilder(text);
-        setSequenceNodes(nodes ?? []);
-    }, [change, editor, lexerTreeBuilder]);
+    const sequenceNodes = useMemo<(string | ISequenceNode)[]>(() => {
+        if (!text) return [];
+        return lexerTreeBuilder.sequenceNodesBuilder(text) ?? [];
+    }, [lexerTreeBuilder, text]);
 
     useEffect(() => {
         if (!editor) return;

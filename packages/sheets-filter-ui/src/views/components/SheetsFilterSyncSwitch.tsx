@@ -49,7 +49,7 @@ export function FilterSyncSwitch() {
                 </Tooltip>
             </div>
             <Switch
-                defaultChecked={enabled}
+                checked={enabled}
                 onChange={(checked) => {
                     const message = checked
                         ? localeService.t<LocaleKey>('sheets-filter-ui.sync.switchTips.on')

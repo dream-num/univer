@@ -25,25 +25,44 @@ import {
 } from '@univerjs/core';
 import { Button } from '@univerjs/design';
 import { IEditorService } from '@univerjs/docs-ui';
+import { IDescriptionService } from '@univerjs/engine-formula';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { getSheetCommandTarget } from '@univerjs/sheets';
 import { IEditorBridgeService, SetCellEditVisibleOperation, useActiveWorkbook } from '@univerjs/sheets-ui';
-import { useDependency } from '@univerjs/ui';
+import { ISidebarService, useDependency, useObservable } from '@univerjs/ui';
 import { useState } from 'react';
 import { InputParams } from './input-params/InputParams';
 import { SelectFunction } from './select-function/SelectFunction';
 
 export function MoreFunctions() {
     const workbook = useActiveWorkbook();
-    const [selectFunction, setSelectFunction] = useState<boolean>(true);
-    const [inputParams, setInputParams] = useState<boolean>(false);
-    // const [params, setParams] = useState<string[]>([]); // TODO@Dushusir: bind setParams to InputParams's onChange
-    const [functionInfo, setFunctionInfo] = useState<IFunctionInfo | null>(null);
+    const descriptionService = useDependency(IDescriptionService);
+    const sidebarService = useDependency(ISidebarService);
+    const sidebarOptions = useObservable(sidebarService.sidebarOptions$);
+    const sidebarVisible = Boolean(sidebarOptions?.visible);
     const editorBridgeService = useDependency(IEditorBridgeService);
     const localeService = useDependency(LocaleService);
     const editorService = useDependency(IEditorService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const commandService = useDependency(ICommandService);
+
+    function getInitialFunctionInfo() {
+        const firstFunction = descriptionService.getSearchListByType(-1)[0];
+        return firstFunction ? descriptionService.getFunctionInfo(firstFunction.name) ?? null : null;
+    }
+
+    const [selectFunction, setSelectFunction] = useState<boolean>(true);
+    const [inputParams, setInputParams] = useState<boolean>(false);
+    // const [params, setParams] = useState<string[]>([]); // TODO@Dushusir: bind setParams to InputParams's onChange
+    const [functionInfo, setFunctionInfo] = useState<IFunctionInfo | null>(getInitialFunctionInfo);
+    const [previousSidebarVisible, setPreviousSidebarVisible] = useState(sidebarVisible);
+
+    if (sidebarVisible !== previousSidebarVisible) {
+        setPreviousSidebarVisible(sidebarVisible);
+        setSelectFunction(true);
+        setInputParams(false);
+        setFunctionInfo(getInitialFunctionInfo());
+    }
 
     function handleClickNextPrev() {
         if (selectFunction) {
@@ -74,7 +93,7 @@ export function MoreFunctions() {
             data-u-comp="sheets-formula-functions-panel"
             className="univer-box-border univer-flex univer-h-full univer-flex-col univer-justify-between univer-py-2"
         >
-            {selectFunction && <SelectFunction onChange={setFunctionInfo} />}
+            {selectFunction && <SelectFunction key={String(sidebarVisible)} onChange={setFunctionInfo} />}
             {inputParams && <InputParams functionInfo={functionInfo} onChange={() => {}} />}
             <div className="univer-flex univer-justify-end">
                 {/* TODO@Dushusir: open input params after range selector refactor */}

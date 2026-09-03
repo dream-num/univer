@@ -265,8 +265,117 @@ describe('LocalUndoRedoService', () => {
         expect(top?.redoMutations).toHaveLength(2);
 
         undoRedoService.rollback('batch');
-        expect(mutationLog).toEqual(['undo-batch-1', 'undo-batch-2']);
+        // undo mutations of batched items replay in reverse chronological order
+        expect(mutationLog).toEqual(['undo-batch-2', 'undo-batch-1']);
         expect(undoRedoService.pitchTopUndoElement()).toBeNull();
+    });
+
+    it('should restore both stacks and the status when a transaction is rolled back', () => {
+        // build up a redo history before the transaction starts
+        undoRedoService.pushUndoRedo({
+            unitID: 'unit-1',
+            undoMutations: [{ id: MUTATION_ID, params: { label: 'undo-first' } }],
+            redoMutations: [{ id: MUTATION_ID, params: { label: 'redo-first' } }],
+            id: 'first',
+        });
+        expect(commandService.syncExecuteCommand(UndoCommandId)).toBe(true);
+        expect(undoRedoService.pitchTopRedoElement()?.id).toBe('first');
+
+        const statuses: Array<{ undos: number; redos: number }> = [];
+        undoRedoService.undoRedoStatus$.subscribe((status) => {
+            statuses.push(status);
+        });
+
+        const transaction = undoRedoService.__tempUndoRedoTransaction('unit-1');
+        undoRedoService.pushUndoRedo({
+            unitID: 'unit-1',
+            undoMutations: [{ id: MUTATION_ID, params: { label: 'undo-txn-1' } }],
+            redoMutations: [{ id: MUTATION_ID, params: { label: 'redo-txn-1' } }],
+            id: 'txn',
+        });
+        undoRedoService.pushUndoRedo({
+            unitID: 'unit-1',
+            undoMutations: [{ id: MUTATION_ID, params: { label: 'undo-txn-2' } }],
+            redoMutations: [{ id: MUTATION_ID, params: { label: 'redo-txn-2' } }],
+            id: 'txn',
+        });
+        // pushing inside the transaction clears the redo stack as usual
+        expect(undoRedoService.pitchTopRedoElement()).toBeNull();
+
+        mutationLog.length = 0;
+        transaction.rollback();
+
+        // the batched undo mutations replay in reverse chronological order
+        expect(mutationLog).toEqual(['undo-txn-2', 'undo-txn-1']);
+        // the undo stack is back to empty and the redo history is restored
+        expect(undoRedoService.pitchTopUndoElement()).toBeNull();
+        expect(undoRedoService.pitchTopRedoElement()?.id).toBe('first');
+        expect(statuses.at(-1)).toEqual({ undos: 0, redos: 1 });
+        // rolling back twice has no further effect
+        transaction.rollback();
+        expect(mutationLog).toEqual(['undo-txn-2', 'undo-txn-1']);
+    });
+
+    it('should roll back a transaction when the undo stack is at capacity', () => {
+        // fill the undo stack up to its capacity of 20 elements
+        for (let i = 0; i < 20; i++) {
+            undoRedoService.pushUndoRedo({
+                unitID: 'unit-1',
+                undoMutations: [{ id: MUTATION_ID, params: { label: `undo-pre-${i}` } }],
+                redoMutations: [{ id: MUTATION_ID, params: { label: `redo-pre-${i}` } }],
+                id: `pre-${i}`,
+            });
+        }
+        expect(undoRedoService.pitchTopUndoElement()?.id).toBe('pre-19');
+
+        const statuses: Array<{ undos: number; redos: number }> = [];
+        undoRedoService.undoRedoStatus$.subscribe((status) => {
+            statuses.push(status);
+        });
+
+        const transaction = undoRedoService.__tempUndoRedoTransaction('unit-1');
+        // pushing on a full stack evicts the oldest element, keeping the stack length at 20
+        undoRedoService.pushUndoRedo({
+            unitID: 'unit-1',
+            undoMutations: [{ id: MUTATION_ID, params: { label: 'undo-txn' } }],
+            redoMutations: [{ id: MUTATION_ID, params: { label: 'redo-txn' } }],
+            id: 'txn',
+        });
+        expect(undoRedoService.pitchTopUndoElement()?.id).toBe('txn');
+
+        mutationLog.length = 0;
+        transaction.rollback();
+
+        // the transaction mutations are undone even though the stack length did not grow
+        expect(mutationLog).toEqual(['undo-txn']);
+        // the full 20 element history is restored, including the evicted oldest element
+        expect(undoRedoService.pitchTopUndoElement()?.id).toBe('pre-19');
+        expect(statuses.at(-1)).toEqual({ undos: 20, redos: 0 });
+    });
+
+    it('should keep the batched element when a transaction is committed', () => {
+        const transaction = undoRedoService.__tempUndoRedoTransaction('unit-1');
+        undoRedoService.pushUndoRedo({
+            unitID: 'unit-1',
+            undoMutations: [{ id: MUTATION_ID, params: { label: 'undo-commit-1' } }],
+            redoMutations: [{ id: MUTATION_ID, params: { label: 'redo-commit-1' } }],
+            id: 'commit',
+        });
+        undoRedoService.pushUndoRedo({
+            unitID: 'unit-1',
+            undoMutations: [{ id: MUTATION_ID, params: { label: 'undo-commit-2' } }],
+            redoMutations: [{ id: MUTATION_ID, params: { label: 'redo-commit-2' } }],
+            id: 'commit',
+        });
+        transaction.commit();
+
+        const top = undoRedoService.pitchTopUndoElement();
+        expect(top?.undoMutations).toHaveLength(2);
+        expect(top?.redoMutations).toHaveLength(2);
+
+        // rolling back after committing has no effect
+        transaction.rollback();
+        expect(undoRedoService.pitchTopUndoElement()?.undoMutations).toHaveLength(2);
     });
 
     it('should resolve focused unit id from sheet editor contexts and clear unit stacks', () => {

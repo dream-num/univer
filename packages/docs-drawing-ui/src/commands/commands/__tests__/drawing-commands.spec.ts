@@ -723,9 +723,11 @@ describe('docs drawing commands integration', () => {
             removeResourceMutation.id,
             RichTextEditingMutation.id,
         ]);
+        // undo mutations replay in reverse chronological order: the resource is removed before
+        // the rich-text mutation on execution, so it is restored after it on undo
         expect(undoItem?.undoMutations.map((mutation) => mutation.id)).toEqual([
-            restoreResourceMutation.id,
             RichTextEditingMutation.id,
+            restoreResourceMutation.id,
         ]);
 
         testBed.univer.dispose();

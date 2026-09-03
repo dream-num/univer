@@ -18,7 +18,7 @@ import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { Disposable, DrawingTypeEnum, Inject } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { SheetSkeletonService } from '@univerjs/sheets';
-import { drawingPositionToTransform, ISheetDrawingService } from '@univerjs/sheets-drawing';
+import { drawingPositionToTransform, ISheetDrawingService, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
 
 export class SheetsDrawingRenderController extends Disposable implements IRenderModule {
     constructor(
@@ -47,7 +47,12 @@ export class SheetsDrawingRenderController extends Disposable implements IRender
                 const { unitId, subUnitId } = drawingData;
                 const skeletonParam = this._sheetSkeletonService.getSkeletonParam(unitId, subUnitId);
 
-                if (skeletonParam && drawingData.sheetTransform && !drawingData.groupId) {
+                if (
+                    skeletonParam &&
+                    drawingData.sheetTransform &&
+                    !drawingData.groupId &&
+                    drawingData.anchorType !== SheetDrawingAnchorType.None
+                ) {
                     const transform = drawingPositionToTransform(drawingData.sheetTransform, skeletonParam);
                     drawingData.transform = transform && drawingData.drawingType === DrawingTypeEnum.DRAWING_GROUP
                         ? {

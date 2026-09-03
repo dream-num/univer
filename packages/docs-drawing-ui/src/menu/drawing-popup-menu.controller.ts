@@ -221,16 +221,47 @@ export class DocDrawingPopupMenuController extends RxDisposable {
         return false;
     }
 
-    // eslint-disable-next-line max-lines-per-function
+    private _handleClearControl(
+        unitId: string,
+        transformer: ReturnType<Scene['getTransformerByCreate']>,
+        changeSelf: boolean
+    ): void {
+        this._clearPopups(unitId, changeSelf);
+        queueMicrotask(() => {
+            if (transformer.getSelectedObjectMap().size > 0) {
+                return;
+            }
+            this._contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, false);
+            this._drawingManagerService.focusDrawing(null);
+        });
+    }
+
+    private _registerDrawingPopup(
+        unitId: string,
+        popup: INeedCheckDisposable,
+        drawing: { unitId: string; subUnitId: string; drawingId: string }
+    ): void {
+        this.disposeWithMe(popup);
+        this._getDisposePopups(unitId).push(popup);
+        this._popupTargetKeys.set(unitId, `${drawing.unitId}:${drawing.subUnitId}:${drawing.drawingId}`);
+
+        const focusDrawings = this._drawingManagerService.getFocusDrawings();
+        const alreadyFocused = focusDrawings.find((focusedDrawing) =>
+            focusedDrawing.unitId === drawing.unitId &&
+            focusedDrawing.subUnitId === drawing.subUnitId &&
+            focusedDrawing.drawingId === drawing.drawingId
+        );
+        if (!alreadyFocused) {
+            this._drawingManagerService.focusDrawing([drawing]);
+        }
+    }
+
     private _popupMenuListener(unitId: string): IDisposable | undefined {
         const scene = this._renderManagerService.getRenderUnitById(unitId)?.scene;
         if (!scene) {
             return;
         }
         const transformer = scene.getTransformerByCreate();
-        if (!transformer) {
-            return;
-        }
 
         const subscriptions = [
             transformer.createControl$.subscribe(() => {
@@ -294,26 +325,9 @@ export class DocDrawingPopupMenuController extends RxDisposable {
                     drawingUnitId
                 );
 
-                this.disposeWithMe(popup);
-                this._getDisposePopups(unitId).push(popup);
-                this._popupTargetKeys.set(unitId, popupTargetKey);
-
-                const focusDrawings = this._drawingManagerService.getFocusDrawings();
-                const alreadyFocused = focusDrawings.find((drawing) => drawing.unitId === drawingUnitId && drawing.subUnitId === subUnitId && drawing.drawingId === drawingId);
-                if (!alreadyFocused) {
-                    this._drawingManagerService.focusDrawing([{ unitId: drawingUnitId, subUnitId, drawingId }]);
-                }
+                this._registerDrawingPopup(unitId, popup, { unitId: drawingUnitId, subUnitId, drawingId });
             }),
-            transformer.clearControl$.subscribe(() => {
-                this._clearPopups(unitId);
-                queueMicrotask(() => {
-                    if (transformer.getSelectedObjectMap().size > 0) {
-                        return;
-                    }
-                    this._contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, false);
-                    this._drawingManagerService.focusDrawing(null);
-                });
-            }),
+            transformer.clearControl$.subscribe((changeSelf) => this._handleClearControl(unitId, transformer, changeSelf)),
             transformer.changing$.subscribe(() => {
                 this._clearPopups(unitId, true);
             }),

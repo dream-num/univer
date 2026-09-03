@@ -2774,7 +2774,11 @@ export class DocumentSkeleton extends Skeleton {
                 mainBoundaryLine.st !== workerBoundaryLine.st ||
                 mainBoundaryLine.ed !== workerBoundaryLine.ed
             ) {
-                throw new Error(`Continuous layout Main and Worker boundaries do not share the same continuation checkpoint: Main ${mainBoundaryLine?.st}:${mainBoundaryLine?.ed}@${mainBoundaryLine?.top}/${mainBoundaryLine?.lineHeight}/${mainBoundaryLine?.width}, Worker ${workerBoundaryLine.st}:${workerBoundaryLine.ed}@${workerBoundaryLine.top}/${workerBoundaryLine.lineHeight}/${workerBoundaryLine.width}.`);
+                // Async Custom Block measurement can change wrapping while the
+                // Worker is already computing the suffix. A different logical
+                // boundary cannot be spliced safely, so retain Main's interaction
+                // window and apply the queued canonical Worker result at completion.
+                return null;
             }
             if (
                 mainBoundaryLine.top !== workerBoundaryLine.top ||

@@ -280,6 +280,33 @@ describe('Test set range values commands', () => {
                 expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
             });
 
+            it('keeps complex cell data independent from command parameters across undo and redo', async () => {
+                const richText: IDocumentData = {
+                    id: 'rich-text',
+                    body: {
+                        dataStream: 'rich text\r\n',
+                        textRuns: [{ st: 5, ed: 9, ts: { bl: BooleanNumber.TRUE } }],
+                    },
+                    documentStyle: {},
+                };
+                const params: ISetRangeValuesCommandParams = {
+                    value: { p: richText, v: null },
+                };
+
+                expect(await commandService.executeCommand(SetRangeValuesCommand.id, params)).toBeTruthy();
+                expect(getValue()?.p).not.toBe(richText);
+                richText.body!.textRuns = [];
+                expect(getValue()?.p?.body?.textRuns).toEqual([
+                    { st: 5, ed: 9, ts: { bl: BooleanNumber.TRUE } },
+                ]);
+
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+                expect(getValue()?.p?.body?.textRuns).toEqual([
+                    { st: 5, ed: 9, ts: { bl: BooleanNumber.TRUE } },
+                ]);
+            });
+
             it('will set range values when there is a selected range, includes custom property', async () => {
                 function getParams() {
                     const params: ISetRangeValuesCommandParams = {

@@ -901,8 +901,6 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
     // eslint-disable-next-line max-lines-per-function
     private async _pasteInternal(copyId: string, pasteType: IPasteHookValueType): Promise<boolean> {
-        // const target = this._getPastingTarget();
-        // const { selection, unitId, subUnitId } = target;
         const cachedData = this._copyContentCache.get(copyId);
         const { range, matrix: cachedMatrix, unitId: copyUnitId, subUnitId: copySubUnitId, skipCellCopy } = cachedData || {};
         if (!cachedMatrix || !cachedData || !range || !copyUnitId || !copySubUnitId) {
@@ -1005,9 +1003,11 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             }
         );
 
-        if (cachedData.copyType === COPY_TYPE.CUT) {
+        if (pasteRes && cachedData.copyType === COPY_TYPE.CUT) {
             this._copyContentCache.set(copyId, { ...cachedData, matrix: null });
-            this._copyMarkId && this._markSelectionService.removeShape(this._copyMarkId);
+            if (this._copyMarkId) {
+                this._markSelectionService.removeShape(this._copyMarkId);
+            }
             this._copyMarkId = null;
         }
 

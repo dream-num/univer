@@ -297,6 +297,25 @@ describe('EditingRenderController business methods', () => {
         expect(controller._undoRedoService.rollback).toHaveBeenCalledWith(expect.any(String), 'unit-1');
     });
 
+    it('captures rich-text cell data independently from the reusable editor snapshot', async () => {
+        const { controller } = createController();
+        const snapshot = {
+            body: {
+                dataStream: 'rich text\r\n',
+                textRuns: [{ st: 5, ed: 9, ts: { bl: 1 } }],
+            },
+            documentStyle: {},
+        };
+
+        await controller._submitEdit(snapshot);
+        const submitted = controller._commandService.syncExecuteCommand.mock.calls
+            .find(([id]: [string]) => id === SetRangeValuesCommand.id)?.[1];
+        snapshot.body.textRuns = [];
+
+        expect(submitted?.value.p).not.toBe(snapshot);
+        expect(submitted?.value.p?.body?.textRuns).toEqual([{ st: 5, ed: 9, ts: { bl: 1 } }]);
+    });
+
     it('uses the whole current selection when committing an array edit', async () => {
         const { controller } = createController();
 

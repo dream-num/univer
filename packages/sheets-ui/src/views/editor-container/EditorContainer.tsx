@@ -36,6 +36,7 @@ import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-re
 import {
     ComponentManager,
     DISABLE_AUTO_FOCUS_KEY,
+    getEmbedBoundaryOwner,
     MetaKeys,
     useDependency,
     useEvent,
@@ -146,7 +147,7 @@ function isEmbedRuntimeInteractiveElement(element: HTMLElement): boolean {
         role === 'floating-menu';
 }
 
-function shouldPreserveEmbedPopupFocus(embedId: string | undefined, ownerDocument: Document): boolean {
+export function shouldPreserveEmbedControlFocus(embedId: string | undefined, ownerDocument: Document): boolean {
     if (!embedId) {
         return false;
     }
@@ -156,18 +157,18 @@ function shouldPreserveEmbedPopupFocus(embedId: string | undefined, ownerDocumen
         return false;
     }
 
-    const ownerElement = activeElement.closest(`[${SHEET_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}="${embedId}"]`);
-    if (!ownerElement) {
+    if (getEmbedBoundaryOwner(activeElement) !== embedId) {
         return false;
     }
 
     const role = activeElement.getAttribute(SHEET_EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE) ??
         activeElement.closest(`[${SHEET_EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE}]`)?.getAttribute(SHEET_EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE);
 
-    return role === 'child-popup' || role === 'floating-menu';
+    // Native controls such as the Name Box inherit the runtime role, not a popup role.
+    return activeElement.matches('input, textarea, select') || role === 'child-popup' || role === 'floating-menu';
 }
 
-function shouldPreserveEmbedInteractiveFocus(embedId: string | undefined, ownerDocument: Document): boolean {
+export function shouldPreserveEmbedInteractiveFocus(embedId: string | undefined, ownerDocument: Document): boolean {
     if (!embedId) {
         return false;
     }
@@ -177,15 +178,15 @@ function shouldPreserveEmbedInteractiveFocus(embedId: string | undefined, ownerD
         return false;
     }
 
-    const ownerElement = activeElement.closest(`[${SHEET_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE}="${embedId}"]`);
-    if (!ownerElement) {
+    if (getEmbedBoundaryOwner(activeElement) !== embedId) {
         return false;
     }
 
     const role = activeElement.getAttribute(SHEET_EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE) ??
         activeElement.closest(`[${SHEET_EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE}]`)?.getAttribute(SHEET_EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE);
 
-    return (role == null && activeElement.tagName !== 'CANVAS') ||
+    return activeElement.matches('input, textarea, select') ||
+        (role == null && activeElement.tagName !== 'CANVAS') ||
         role === 'child-editor' ||
         role === 'child-popup' ||
         role === 'floating-menu';
@@ -404,7 +405,7 @@ export function EditorContainer() {
             const scope = rootRef.current
                 ? resolveSheetEmbedRuntimeDomScope(rootRef.current) ?? resolveActiveSheetEmbedRuntimeDomScope(ownerDocument)
                 : resolveActiveSheetEmbedRuntimeDomScope(ownerDocument);
-            if (shouldPreserveEmbedPopupFocus(scope?.embedId, ownerDocument)) {
+            if (shouldPreserveEmbedControlFocus(scope?.embedId, ownerDocument)) {
                 return;
             }
 
@@ -493,7 +494,7 @@ export function EditorContainer() {
             const ownerDocument = rootRef.current.ownerDocument;
             let pointerRetryFrame = 0;
             const focusEditor = () => {
-                if (contextService.getContextValue(FOCUSING_FX_BAR_EDITOR) || shouldPreserveEmbedPopupFocus(scope.embedId, ownerDocument)) {
+                if (contextService.getContextValue(FOCUSING_FX_BAR_EDITOR) || shouldPreserveEmbedControlFocus(scope.embedId, ownerDocument)) {
                     return;
                 }
 
@@ -579,7 +580,7 @@ export function EditorContainer() {
             }, 0);
         };
         const focusHiddenEditor = () => {
-            if (shouldPreserveEmbedPopupFocus(activeSessionScope.embedId, ownerDocument)) {
+            if (shouldPreserveEmbedControlFocus(activeSessionScope.embedId, ownerDocument)) {
                 return;
             }
 

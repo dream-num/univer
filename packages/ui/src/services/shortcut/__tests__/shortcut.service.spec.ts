@@ -18,12 +18,23 @@
  * @vitest-environment jsdom
  */
 
-import { ICommandService, IContextService, Injector } from '@univerjs/core';
+import {
+    CommandService,
+    CommandType,
+    ConfigService,
+    ContextService,
+    DesktopLogService,
+    ICommandService,
+    IConfigService,
+    IContextService,
+    ILogService,
+    Injector,
+} from '@univerjs/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { EMBED_CHILD_UNIT_ID_ATTRIBUTE } from '../../../utils/embed-boundary';
 import { ILayoutService } from '../../layout/layout.service';
-import { IPlatformService } from '../../platform/platform.service';
-import { IUIRuntimeScopeService } from '../../runtime-scope/ui-runtime-scope.service';
+import { IPlatformService, PlatformService } from '../../platform/platform.service';
+import { IUIRuntimeScopeService, UIRuntimeScopeService } from '../../runtime-scope/ui-runtime-scope.service';
 import { KeyCode, MetaKeys } from '../keycode';
 import { NativeTextEditorShortcutBehavior, ShortcutService } from '../shortcut.service';
 
@@ -119,6 +130,72 @@ describe('ShortcutService', () => {
         vi.unstubAllGlobals();
     });
 
+    it.each([
+        ['Enter', KeyCode.ENTER],
+        ['Escape', KeyCode.ESC],
+        ['ArrowLeft', KeyCode.ARROW_LEFT],
+        ['ArrowRight', KeyCode.ARROW_RIGHT],
+        ['Backspace', KeyCode.BACKSPACE],
+        ['Tab', KeyCode.TAB],
+    ])('yields composing %s to the IME and resumes the shortcut after composition', async (key, keyCode) => {
+        const injector = new Injector();
+        injector.add([ICommandService, { useClass: CommandService }]);
+        injector.add([IConfigService, { useClass: ConfigService }]);
+        injector.add([IContextService, { useClass: ContextService }]);
+        injector.add([ILogService, { useClass: DesktopLogService }]);
+        injector.add([IPlatformService, { useClass: PlatformService }]);
+        injector.add([IUIRuntimeScopeService, { useClass: UIRuntimeScopeService }]);
+        injector.add([ShortcutService]);
+        try {
+            const service = injector.get(ShortcutService);
+            const commandService = injector.get(ICommandService);
+            let executionCount = 0;
+            commandService.registerCommand({
+                id: 'test.ime-shortcut',
+                type: CommandType.OPERATION,
+                handler: () => {
+                    executionCount += 1;
+                    return true;
+                },
+            });
+            service.registerShortcut({
+                id: 'test.ime-shortcut',
+                binding: keyCode,
+                nativeTextEditorBehavior: NativeTextEditorShortcutBehavior.OVERRIDE_NATIVE,
+            });
+            const composingEvent = new KeyboardEvent('keydown', {
+                bubbles: true,
+                cancelable: true,
+                isComposing: true,
+                key,
+                keyCode,
+            });
+            expect(service.dispatch(composingEvent)).toBeUndefined();
+            window.dispatchEvent(composingEvent);
+            expect(executionCount).toBe(0);
+            expect(composingEvent.defaultPrevented).toBe(false);
+
+            // Safari may deliver the IME confirmation key after compositionend with keyCode 229.
+            const confirmationEvent = new KeyboardEvent('keydown', {
+                bubbles: true,
+                cancelable: true,
+                isComposing: false,
+                key,
+                keyCode: 229,
+            });
+            window.dispatchEvent(confirmationEvent);
+            expect(executionCount).toBe(0);
+            expect(confirmationEvent.defaultPrevented).toBe(false);
+
+            const regularEvent = new KeyboardEvent('keydown', { bubbles: true, cancelable: true, key, keyCode });
+            window.dispatchEvent(regularEvent);
+            await expect.poll(() => executionCount).toBe(1);
+            expect(regularEvent.defaultPrevented).toBe(true);
+        } finally {
+            injector.dispose();
+        }
+    });
+
     it('should register and unregister shortcuts', () => {
         const { service } = createService();
         const changed = vi.fn();
@@ -196,8 +273,12 @@ describe('ShortcutService', () => {
             binding: KeyCode.A | MetaKeys.CTRL_COMMAND,
         });
         const escapedDisposable = escapedService.forceEscape();
+        const nestedEscapedDisposable = escapedService.forceEscape();
         expect(escapedService.dispatch(createKeyboardEvent(KeyCode.A, { ctrlKey: true }))).toBeUndefined();
         escapedDisposable.dispose();
+        expect(escapedService.dispatch(createKeyboardEvent(KeyCode.A, { ctrlKey: true }))).toBeUndefined();
+        nestedEscapedDisposable.dispose();
+        expect(escapedService.dispatch(createKeyboardEvent(KeyCode.A, { ctrlKey: true }))?.id).toBe('cmd.esc');
         escapedService.dispose();
 
         const disabledService = createService().service;

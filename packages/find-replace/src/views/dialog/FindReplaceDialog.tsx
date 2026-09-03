@@ -47,9 +47,17 @@ const FIND_BY_OPTIONS: Array<{ label: LocaleKey; value: FindBy }> = [
 ];
 
 function useFindInputFocus(findReplaceService: IFindReplaceService, ref: Parameters<typeof useImperativeHandle>[0]) {
+    const pendingFocusFrameRef = useRef<number | null>(null);
     const focus = useCallback(() => {
         (document.querySelector('.univer-find-input input') as HTMLInputElement | null)?.focus();
     }, []);
+    const focusAfterDialogClose = useCallback(() => {
+        focus();
+        pendingFocusFrameRef.current = requestAnimationFrame(() => {
+            pendingFocusFrameRef.current = null;
+            focus();
+        });
+    }, [focus]);
 
     const selectHasFocus = useCallback(() => {
         const allInputs = document.querySelectorAll('[data-u-comp=find-replace-dialog] [data-u-comp=search-input]');
@@ -60,10 +68,15 @@ function useFindInputFocus(findReplaceService: IFindReplaceService, ref: Paramet
 
     useEffect(() => {
         const subscription = findReplaceService.focusSignal$.subscribe(() => focus());
-        return () => subscription.unsubscribe();
+        return () => {
+            subscription.unsubscribe();
+            if (pendingFocusFrameRef.current !== null) {
+                cancelAnimationFrame(pendingFocusFrameRef.current);
+            }
+        };
     }, [findReplaceService, focus]);
 
-    return { focus, selectHasFocus };
+    return { focus, focusAfterDialogClose, selectHasFocus };
 }
 
 export const FindDialog = forwardRef(function FindDialogImpl(_props, ref) {
@@ -147,7 +160,7 @@ export const ReplaceDialog = forwardRef(function ReplaceDialogImpl(_props, ref) 
         [findReplaceService]
     );
 
-    const { focus } = useFindInputFocus(findReplaceService, ref);
+    const { focusAfterDialogClose } = useFindInputFocus(findReplaceService, ref);
 
     const onClickFindButton = useCallback(() => {
         if (findString === inputtingFindString) {
@@ -160,8 +173,8 @@ export const ReplaceDialog = forwardRef(function ReplaceDialogImpl(_props, ref) 
     const onClickReplaceButton = useCallback(() => commandService.executeCommand(ReplaceCurrentMatchCommand.id), [commandService]);
     const onClickReplaceAllButton = useCallback(async () => {
         await commandService.executeCommand(ReplaceAllMatchesCommand.id);
-        focus();
-    }, [commandService, focus]);
+        focusAfterDialogClose();
+    }, [commandService, focusAfterDialogClose]);
 
     const onChangeFindDirection = useCallback((findDirection: string) => {
         findReplaceService.changeFindDirection(findDirection as FindDirection);

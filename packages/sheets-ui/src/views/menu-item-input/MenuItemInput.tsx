@@ -19,7 +19,7 @@ import type { IMenuItemInputProps } from './interface';
 import { LocaleService } from '@univerjs/core';
 import { InputNumber } from '@univerjs/design';
 import { IContextMenuService, useDependency, useObservable } from '@univerjs/ui';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export const MenuItemInput = (props: IMenuItemInputProps) => {
     const {
@@ -36,6 +36,14 @@ export const MenuItemInput = (props: IMenuItemInputProps) => {
     const contextMenuService = useDependency(IContextMenuService);
     const disabled = useObservable(disabled$ ?? null, false);
     const [inputValue, setInputValue] = useState<string>(); // Initialized to an empty string
+    const composingRef = useRef(false);
+    const compositionEndTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    useEffect(() => () => {
+        if (compositionEndTimerRef.current !== null) {
+            clearTimeout(compositionEndTimerRef.current);
+        }
+    }, []);
 
     const handleChange = (value: number | null) => {
         if (!value) {
@@ -71,13 +79,42 @@ export const MenuItemInput = (props: IMenuItemInputProps) => {
     }
 
     function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+        if (event.key === 'Escape' && !event.nativeEvent.isComposing && !composingRef.current) {
+            return;
+        }
         event.stopPropagation();
+    }
+
+    function resetComposition() {
+        if (compositionEndTimerRef.current !== null) {
+            clearTimeout(compositionEndTimerRef.current);
+            compositionEndTimerRef.current = null;
+        }
+        composingRef.current = false;
+    }
+
+    function handleCompositionStart() {
+        resetComposition();
+        composingRef.current = true;
+    }
+
+    function handleCompositionEnd() {
+        resetComposition();
+        composingRef.current = true;
+        // Safari may dispatch the ending key after compositionend in the same task.
+        compositionEndTimerRef.current = setTimeout(resetComposition, 0);
     }
 
     return (
         <div className="univer-inline-flex univer-items-center univer-gap-1">
             {localeService.t(prefix)}
-            <div className="univer-w-16" onClick={(e) => e.stopPropagation()}>
+            <div
+                className="univer-w-16"
+                onClick={(e) => e.stopPropagation()}
+                onCompositionStart={handleCompositionStart}
+                onCompositionEnd={handleCompositionEnd}
+                onBlur={resetComposition}
+            >
                 <InputNumber
                     value={Number(inputValue)}
                     size="mini"

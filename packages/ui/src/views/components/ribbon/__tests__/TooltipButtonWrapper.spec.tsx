@@ -19,16 +19,29 @@
  */
 
 import type { ComponentType, ReactElement } from 'react';
-import { cleanup, fireEvent, render } from '@testing-library/react';
-import { ILogService, Injector, LocaleService } from '@univerjs/core';
+import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
+import {
+    CommandService,
+    ConfigService,
+    ContextService,
+    DesktopLogService,
+    ICommandService,
+    IConfigService,
+    IContextService,
+    ILogService,
+    Injector,
+    LocaleService,
+    LocaleType,
+} from '@univerjs/core';
 import { ConfigProvider } from '@univerjs/design';
-import { of } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-
 import { ComponentManager } from '../../../../common/component-manager';
 import { IconManager } from '../../../../common/icon-manager';
 import { MenuItemType } from '../../../../services/menu/menu';
-import { IMenuManagerService } from '../../../../services/menu/menu-manager.service';
+import { IMenuManagerService, MenuManagerService } from '../../../../services/menu/menu-manager.service';
+import { IPlatformService, PlatformService } from '../../../../services/platform/platform.service';
+import { IUIRuntimeScopeService, UIRuntimeScopeService } from '../../../../services/runtime-scope/ui-runtime-scope.service';
+import { IShortcutService, ShortcutService } from '../../../../services/shortcut/shortcut.service';
 import { connectInjector } from '../../../../utils/di';
 import {
     DropdownMenuLabel,
@@ -39,43 +52,49 @@ import {
     TooltipWrapper,
 } from '../TooltipButtonWrapper';
 
-class TestLocaleService {
-    t(key: string) {
-        return key;
-    }
-}
-
-class TestLogService {
-    warn(): void {}
-}
+const testInjectors: Injector[] = [];
 
 function renderWithDependencies(
     element: ReactElement,
     menuItems: ReturnType<IMenuManagerService['getMenuByPositionKey']> = []
 ) {
     const injector = new Injector();
-    injector.add([LocaleService, { useClass: TestLocaleService as never }]);
-    injector.add([ILogService, { useClass: TestLogService as never }]);
+    testInjectors.push(injector);
+    injector.add([LocaleService]);
+    injector.add([ILogService, { useClass: DesktopLogService }]);
     injector.add([ComponentManager]);
     injector.add([IconManager]);
-    injector.add([IMenuManagerService, {
-        useValue: {
-            menuChanged$: of(undefined),
-            mergeMenu: () => {},
-            appendRootMenu: () => {},
-            getMenuByPositionKey: () => menuItems,
-            getFlatMenuByPositionKey: () => [],
-        },
-    }]);
+    injector.add([IMenuManagerService, { useClass: MenuManagerService }]);
+    injector.add([ICommandService, { useClass: CommandService }]);
+    injector.add([IConfigService, { useClass: ConfigService }]);
+    injector.add([IContextService, { useClass: ContextService }]);
+    injector.add([IPlatformService, { useClass: PlatformService }]);
+    injector.add([IUIRuntimeScopeService, { useClass: UIRuntimeScopeService }]);
+    injector.add([IShortcutService, { useClass: ShortcutService }]);
+    const localeService = injector.get(LocaleService);
+    localeService.load({ [LocaleType.EN_US]: { Reset: 'Reset' } });
+    localeService.setLocale(LocaleType.EN_US);
+    localeService.setDirection('ltr');
+    injector.get(IMenuManagerService).appendRootMenu({
+        'test-menu': Object.fromEntries(menuItems.map((item) => [item.key, {
+            order: item.order,
+            menuItemFactory: () => item.item!,
+        }])),
+    });
+    const forceEscape = vi.spyOn(injector.get(IShortcutService), 'forceEscape');
     injector.get(ComponentManager).register('TestDynamicOption', ({ onChange }: { onChange: (value: string) => void }) => (
         <button type="button" onClick={() => onChange('dynamic-value')}>Choose dynamic value</button>
     ));
 
     const ConnectedTestRoot = connectInjector(() => element, injector) as ComponentType;
-    return render(<ConnectedTestRoot />);
+    return { ...render(<ConnectedTestRoot />), forceEscape };
 }
 
-afterEach(cleanup);
+afterEach(() => {
+    cleanup();
+    testInjectors.forEach((injector) => injector.dispose());
+    testInjectors.length = 0;
+});
 
 describe('ToolbarTooltip', () => {
     it('stays hidden after its popup closes until a new trigger interaction', () => {
@@ -197,8 +216,72 @@ describe('DropdownWrapper', () => {
 });
 
 describe('DropdownMenuWrapper', () => {
+    it.each([undefined, 'embed-1'].flatMap((owner) => (
+        ['select', 'escape', 'outside', 'owner-change', 'command-focus'].map((closeAction) => ({ owner, closeAction }))
+    )))(
+        'restores the editor with boundary $owner after $closeAction only while it still owns the interaction',
+        async ({ owner, closeAction }) => {
+            const editor = document.createElement('div');
+            editor.tabIndex = 0;
+            editor.dataset.uComp = 'editor';
+            if (owner) {
+                editor.dataset.embedInteractionBoundaryOwner = owner;
+            }
+            const outside = document.createElement('input');
+            document.body.append(editor, outside);
+            try {
+                const { findByRole, getByRole } = renderWithDependencies(
+                    <ToolbarDropdownProvider>
+                        <TooltipWrapper dropdownKey="test-editor-focus">
+                            <DropdownMenuWrapper
+                                menuId="test-menu"
+                                options={[{ label: { name: 'TestDynamicOption', hoverable: false, selectable: false } }]}
+                                onOptionSelect={() => {
+                                    if (closeAction === 'command-focus') {
+                                        editor.focus();
+                                    }
+                                }}
+                            >
+                                <button type="button">Open editor menu</button>
+                            </DropdownMenuWrapper>
+                        </TooltipWrapper>
+                    </ToolbarDropdownProvider>
+                );
+                const trigger = getByRole('button', { name: 'Open editor menu' });
+                editor.focus();
+                fireEvent.pointerDown(trigger, { button: 0, ctrlKey: false });
+                const option = await findByRole('button', { name: 'Choose dynamic value' });
+                option.focus();
+
+                if (closeAction === 'outside') {
+                    fireEvent.pointerDown(outside, { button: 0, ctrlKey: false });
+                    outside.focus();
+                } else if (closeAction === 'escape') {
+                    fireEvent.keyDown(option, { key: 'Escape', keyCode: 27 });
+                } else {
+                    if (closeAction === 'owner-change') {
+                        editor.dataset.embedInteractionBoundaryOwner = 'embed-2';
+                    }
+                    fireEvent.click(option);
+                }
+
+                await waitFor(() => expect(trigger.getAttribute('aria-expanded')).toBe('false'));
+                if (closeAction === 'outside') {
+                    await waitFor(() => expect(document.activeElement).toBe(outside));
+                } else if (closeAction === 'owner-change') {
+                    await waitFor(() => expect(document.activeElement).toBe(trigger));
+                } else {
+                    await waitFor(() => expect(document.activeElement).toBe(editor));
+                }
+            } finally {
+                editor.remove();
+                outside.remove();
+            }
+        }
+    );
+
     it('renders a single embedded custom panel flush with the dropdown edge', async () => {
-        const { findByRole, getByRole } = renderWithDependencies(
+        const { findByRole, forceEscape, getByRole } = renderWithDependencies(
             <ToolbarDropdownProvider>
                 <TooltipWrapper dropdownKey="test-custom-panel">
                     <DropdownMenuWrapper
@@ -226,6 +309,11 @@ describe('DropdownMenuWrapper', () => {
 
         expect(menuItem?.className).toContain('!univer-p-0');
         expect(menuContent?.className).toContain('!univer-p-0');
+        expect(forceEscape).toHaveBeenCalledOnce();
+        const disposeShortcutEscape = vi.spyOn(forceEscape.mock.results[0].value, 'dispose');
+
+        fireEvent.click(option);
+        await waitFor(() => expect(disposeShortcutEscape).toHaveBeenCalledOnce());
     });
 
     it('keeps padding around a non-embedded custom panel', async () => {

@@ -38,7 +38,7 @@ vi.mock('../DialogPrimitive', async () => {
                 ref={ref}
                 role="dialog"
                 tabIndex={0}
-                onKeyDown={(e) => onEscapeKeyDown?.(e)}
+                onKeyDown={(e) => onEscapeKeyDown?.(e.nativeEvent)}
                 onPointerDown={(e) => onPointerDownOutside?.(e)}
             >
                 <button type="button" data-slot="close" onClick={onClickClose}>
@@ -106,6 +106,29 @@ describe('Dialog logic branches', () => {
         fireEvent.pointerDown(dialog);
         expect(onOpenChange).toHaveBeenCalledWith(false);
         expect(onClose).toHaveBeenCalled();
+    });
+
+    it('should keep the dialog open when escape is used to cancel an IME composition', () => {
+        const onOpenChange = vi.fn();
+        const onClose = vi.fn();
+
+        render(
+            <Dialog open keyboard onOpenChange={onOpenChange} onClose={onClose}>
+                content
+            </Dialog>
+        );
+
+        const event = new KeyboardEvent('keydown', {
+            bubbles: true,
+            cancelable: true,
+            isComposing: true,
+            key: 'Escape',
+        });
+        screen.getByRole('dialog').dispatchEvent(event);
+
+        expect(event.defaultPrevented).toBe(true);
+        expect(onOpenChange).not.toHaveBeenCalled();
+        expect(onClose).not.toHaveBeenCalled();
     });
 
     it('should not close from pointer outside when maskClosable is false', () => {

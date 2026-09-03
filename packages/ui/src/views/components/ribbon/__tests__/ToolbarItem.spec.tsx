@@ -17,7 +17,7 @@
 import type { ComponentType, ReactElement } from 'react';
 import type { IIconProps } from '../../../../common/icon-manager';
 import { act, cleanup, fireEvent, render, waitFor } from '@testing-library/react';
-import { ICommandService, ILogService, Injector, LocaleService } from '@univerjs/core';
+import { ContextService, ICommandService, IContextService, ILogService, Injector, LocaleService } from '@univerjs/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { afterEach, describe, expect, it } from 'vitest';
 import { ComponentManager } from '../../../../common/component-manager';
@@ -25,7 +25,9 @@ import { IconManager } from '../../../../common/icon-manager';
 import { ILayoutService } from '../../../../services/layout/layout.service';
 import { MenuItemType } from '../../../../services/menu/menu';
 import { IMenuManagerService } from '../../../../services/menu/menu-manager.service';
-import { IShortcutService } from '../../../../services/shortcut/shortcut.service';
+import { IPlatformService, PlatformService } from '../../../../services/platform/platform.service';
+import { IUIRuntimeScopeService, UIRuntimeScopeService } from '../../../../services/runtime-scope/ui-runtime-scope.service';
+import { IShortcutService, ShortcutService } from '../../../../services/shortcut/shortcut.service';
 import { connectInjector } from '../../../../utils/di';
 import { ToolbarItem } from '../ToolbarItem';
 
@@ -47,14 +49,6 @@ class TestLayoutService {
     focus(): void {}
 }
 
-class TestShortcutService {
-    readonly shortcutChanged$ = new Subject<void>();
-
-    getShortcutDisplayOfCommand(): null {
-        return null;
-    }
-}
-
 class TestMenuManagerService {
     readonly menuChanged$ = new Subject<void>();
 
@@ -67,12 +61,18 @@ class TestLogService {
     warn(): void {}
 }
 
+const testInjectors: Injector[] = [];
+
 function renderWithDependencies(element: ReactElement) {
     const injector = new Injector();
+    testInjectors.push(injector);
     injector.add([LocaleService, { useClass: TestLocaleService as never }]);
     injector.add([ICommandService, { useClass: TestCommandService as never }]);
     injector.add([ILayoutService, { useClass: TestLayoutService as never }]);
-    injector.add([IShortcutService, { useClass: TestShortcutService as never }]);
+    injector.add([IContextService, { useClass: ContextService }]);
+    injector.add([IPlatformService, { useClass: PlatformService }]);
+    injector.add([IUIRuntimeScopeService, { useClass: UIRuntimeScopeService }]);
+    injector.add([IShortcutService, { useClass: ShortcutService }]);
     injector.add([IMenuManagerService, { useClass: TestMenuManagerService as never }]);
     injector.add([ILogService, { useClass: TestLogService as never }]);
     injector.add([ComponentManager]);
@@ -94,7 +94,11 @@ function renderWithDependencies(element: ReactElement) {
     };
 }
 
-afterEach(cleanup);
+afterEach(() => {
+    cleanup();
+    testInjectors.forEach((injector) => injector.dispose());
+    testInjectors.length = 0;
+});
 
 describe('ToolbarItem', () => {
     it('closes open selector options when the parent becomes disabled', async () => {

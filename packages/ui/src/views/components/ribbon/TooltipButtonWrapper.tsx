@@ -38,8 +38,9 @@ import {
 } from 'react';
 import { combineLatest, map, merge, of, scan, startWith } from 'rxjs';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
+import { IShortcutService } from '../../../services/shortcut/shortcut.service';
 import { useDependency, useObservable } from '../../../utils/di';
-import { keepInteractionInsideSameEmbedBoundary } from '../../../utils/embed-boundary';
+import { getEmbedBoundaryOwner, keepInteractionInsideSameEmbedBoundary } from '../../../utils/embed-boundary';
 import { CustomLabel } from '../../custom-label/CustomLabel';
 
 const TooltipWrapperContext = createContext({
@@ -268,6 +269,17 @@ export function DropdownMenuWrapper({
     onOptionSelect: (option: IValueOption) => void;
 }) {
     const { dropdownVisible, setDropdownVisible } = useContext(TooltipWrapperContext);
+    const shortcutService = useDependency(IShortcutService);
+    const editorFocusRef = useRef<{ element: HTMLElement; owner?: string } | null>(null);
+
+    useEffect(() => {
+        if (!dropdownVisible) {
+            return undefined;
+        }
+
+        const shortcutEscape = shortcutService.forceEscape();
+        return () => shortcutEscape.dispose();
+    }, [dropdownVisible, shortcutService]);
 
     useEffect(() => {
         if (disabled && dropdownVisible) {
@@ -313,7 +325,38 @@ export function DropdownMenuWrapper({
     }, [menuItems, hiddenStates]);
 
     function handleVisibleChange(visible: boolean) {
+        if (visible) {
+            const element = document.activeElement;
+            const owner = getEmbedBoundaryOwner(element);
+            editorFocusRef.current = element instanceof HTMLElement && element.dataset.uComp === 'editor'
+                ? { element, owner }
+                : null;
+        }
         setDropdownVisible(visible);
+    }
+
+    function handleCloseAutoFocus(event: Event) {
+        const editorFocus = editorFocusRef.current;
+        editorFocusRef.current = null;
+        if (!editorFocus?.element.isConnected || getEmbedBoundaryOwner(editorFocus.element) !== editorFocus.owner) {
+            return;
+        }
+
+        const activeElement = editorFocus.element.ownerDocument.activeElement;
+        const focusInClosingMenu = event.target instanceof HTMLElement && event.target.contains(activeElement);
+        if (activeElement !== editorFocus.element.ownerDocument.body && activeElement !== editorFocus.element && !focusInClosingMenu) {
+            return;
+        }
+
+        event.preventDefault();
+        editorFocus.element.focus({ preventScroll: true });
+    }
+
+    function handlePointerDownOutside(event: { currentTarget: EventTarget | null; target: EventTarget | null; preventDefault: () => void }) {
+        if (editorFocusRef.current && (!editorFocusRef.current.owner || getEmbedBoundaryOwner(event.target) !== editorFocusRef.current.owner)) {
+            editorFocusRef.current = null;
+        }
+        keepInteractionInsideSameEmbedBoundary(event);
     }
 
     function handleEmbedBoundaryFocusOutside(event: { currentTarget: EventTarget | null; target: EventTarget | null; preventDefault: () => void }) {
@@ -424,6 +467,8 @@ export function DropdownMenuWrapper({
                 disabled={disabled}
                 open={dropdownVisible}
                 onOpenChange={handleVisibleChange}
+                onCloseAutoFocus={handleCloseAutoFocus}
+                onPointerDownOutside={handlePointerDownOutside}
                 onFocusOutside={handleEmbedBoundaryFocusOutside}
                 onInteractOutside={handleEmbedBoundaryFocusOutside}
             >
@@ -475,6 +520,8 @@ export function DropdownMenuWrapper({
                 disabled={disabled}
                 open={dropdownVisible}
                 onOpenChange={handleVisibleChange}
+                onCloseAutoFocus={handleCloseAutoFocus}
+                onPointerDownOutside={handlePointerDownOutside}
                 onFocusOutside={handleEmbedBoundaryFocusOutside}
                 onInteractOutside={handleEmbedBoundaryFocusOutside}
             >

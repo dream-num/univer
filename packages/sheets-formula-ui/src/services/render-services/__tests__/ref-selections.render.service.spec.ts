@@ -15,7 +15,7 @@
  */
 
 import type { IDisposable, IWorkbookData, Workbook } from '@univerjs/core';
-import type { IRenderContext } from '@univerjs/engine-render';
+import type { IPointerEvent, IRenderContext } from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import {
     IContextService,
@@ -33,20 +33,132 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-import { SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
+import {
+    CanvasColorService,
+    ICanvasColorService,
+    IRenderManagerService,
+    RenderManagerService,
+    SHEET_VIEWPORT_KEY,
+    Spreadsheet,
+    Viewport,
+} from '@univerjs/engine-render';
 import {
     IRefSelectionsService,
     REF_SELECTIONS_ENABLED,
     RefSelectionsService,
     SelectionMoveType,
     SELECTIONS_ENABLED,
+    SheetInterceptorService,
+    SheetSkeletonService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { SHEET_VIEW_KEY, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
-import { IShortcutService } from '@univerjs/ui';
+import {
+    IPlatformService,
+    IShortcutService,
+    IUIRuntimeScopeService,
+    PlatformService,
+    ShortcutService,
+    UIRuntimeScopeService,
+} from '@univerjs/ui';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { RefSelectionsRenderService } from '../ref-selections.render.service';
+
+describe('RefSelectionsRenderService additive modifiers with real render providers', () => {
+    let univer: Univer;
+
+    beforeEach(() => {
+        vi.useFakeTimers();
+        // Only the unavailable canvas backend is substituted.
+        vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(function (this: HTMLCanvasElement) {
+            return { canvas: this, setTransform: vi.fn(), clearRect: vi.fn() } as unknown as CanvasRenderingContext2D;
+        });
+        univer = new Univer();
+        const injector = univer.__getInjector();
+        injector.get(LocaleService).setLocale(LocaleType.EN_US);
+        injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
+        injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+        injector.add([SheetSkeletonService]);
+        injector.add([SheetInterceptorService]);
+        injector.add([SheetsSelectionsService]);
+        injector.add([IRefSelectionsService, { useClass: RefSelectionsService }]);
+        injector.add([IPlatformService, { useClass: PlatformService }]);
+        injector.add([IUIRuntimeScopeService, { useClass: UIRuntimeScopeService }]);
+        injector.add([IShortcutService, { useClass: ShortcutService }]);
+        injector.get(SheetSkeletonService);
+        injector.get(SheetInterceptorService);
+        injector.get(IRenderManagerService).registerRenderModule(UniverInstanceType.UNIVER_SHEET, [SheetSkeletonManagerService]);
+    });
+
+    afterEach(() => {
+        vi.clearAllTimers();
+        univer.dispose();
+        vi.restoreAllMocks();
+        vi.useRealTimers();
+    });
+
+    for (const remainLast of [false, true]) {
+        for (const modifier of ['none', 'ctrlKey', 'metaKey'] as const) {
+            it(`keeps reference ownership with ${modifier} and remain-last ${remainLast}`, () => {
+                const injector = univer.__getInjector();
+                const workbook = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {
+                    id: 'ref-modifiers',
+                    name: 'Reference modifiers',
+                    sheetOrder: ['sheet1'],
+                    sheets: { sheet1: { id: 'sheet1', name: 'Sheet 1', rowCount: 20, columnCount: 10, cellData: {} } },
+                });
+                const renderManager = injector.get(IRenderManagerService);
+                const render = renderManager.createRender(workbook.getUnitId());
+                render.engine.resizeBySize(800, 600);
+                new Viewport(SHEET_VIEWPORT_KEY.VIEW_MAIN, render.scene, { left: 0, top: 0, right: 0, bottom: 0 });
+                const spreadsheet = new Spreadsheet(SHEET_VIEW_KEY.MAIN);
+                render.mainComponent = spreadsheet;
+                render.components.set(SHEET_VIEW_KEY.MAIN, spreadsheet);
+                render.scene.addObject(spreadsheet);
+                const skeletonManager = render.with(SheetSkeletonManagerService);
+                skeletonManager.setCurrent({ sheetId: 'sheet1' });
+                renderManager.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [RefSelectionsRenderService]);
+                const service = render.with(RefSelectionsRenderService);
+                service.setRemainLastEnabled(remainLast);
+                injector.get(IContextService).setContextValue(REF_SELECTIONS_ENABLED, true);
+                service.enableSelectionChanging();
+                const skeleton = skeletonManager.getCurrentSkeleton()!;
+
+                for (const index of [0, 2]) {
+                    const cell = skeleton.getNoMergeCellWithCoordByIndex(index, index);
+                    const event = {
+                        offsetX: (cell.startX + cell.endX) / 2,
+                        offsetY: (cell.startY + cell.endY) / 2,
+                        button: 0,
+                        ...(index === 2 && modifier !== 'none' ? { [modifier]: true } : {}),
+                    } as IPointerEvent;
+                    spreadsheet.onPointerDown$.emitEvent(event);
+                    render.scene.onPointerUp$.emitEvent(event);
+                }
+
+                const selections = injector.get(IRefSelectionsService)
+                    .getWorkbookSelections(workbook.getUnitId())
+                    .getCurrentSelections();
+                const ranges = selections.map(({ range }) => ({
+                    startRow: range.startRow,
+                    startColumn: range.startColumn,
+                    endRow: range.endRow,
+                    endColumn: range.endColumn,
+                }));
+                if (modifier === 'none') {
+                    expect(ranges).toEqual([{ startRow: 2, startColumn: 2, endRow: 2, endColumn: 2 }]);
+                } else {
+                    expect(ranges).toEqual([
+                        { startRow: 0, startColumn: 0, endRow: 0, endColumn: 0 },
+                        { startRow: 2, startColumn: 2, endRow: 2, endColumn: 2 },
+                    ]);
+                }
+                expect(service.getSelectionControls()).toHaveLength(ranges.length);
+            });
+        }
+    }
+});
 
 function createTestEvent<TEvent, TState = { stopPropagation: () => void }>() {
     const handlers = new Set<(evt: TEvent, state: TState) => void>();

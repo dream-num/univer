@@ -31,13 +31,19 @@ function createRange() {
     };
 }
 
+interface ITestEditorInputConfig {
+    activeRange: ReturnType<typeof createRange>;
+    event?: { data: string };
+    rangeList?: ReturnType<typeof createRange>[];
+}
+
 describe('doc ime input controller', () => {
     it('skips duplicate writes when compositionend data matches the last update', async () => {
-        const onCompositionstart$ = new Subject<any>();
-        const onCompositionupdate$ = new Subject<any>();
-        const onCompositionend$ = new Subject<any>();
+        const onCompositionstart$ = new Subject<ITestEditorInputConfig>();
+        const onCompositionupdate$ = new Subject<ITestEditorInputConfig>();
+        const onCompositionend$ = new Subject<ITestEditorInputConfig>();
         const activeRange = createRange();
-        let storedActiveRange: any = null;
+        let storedActiveRange: ReturnType<typeof createRange> | null = null;
 
         const docSelectionRenderService = {
             onCompositionstart$,
@@ -66,7 +72,7 @@ describe('doc ime input controller', () => {
             getSelectionInfo: vi.fn(() => ({ options: null })),
         };
 
-        new DocIMEInputController(
+        const controller = new DocIMEInputController(
             {
                 unitId: 'doc-unit',
             } as never,
@@ -119,14 +125,15 @@ describe('doc ime input controller', () => {
         });
         expect(docImeInputManagerService.clearUndoRedoMutationParamsCache).toHaveBeenCalledTimes(2);
         expect(docImeInputManagerService.setActiveRange).toHaveBeenLastCalledWith(null);
+        controller.dispose();
     });
 
     it('keeps the compositionend write when the final data differs from the latest update', async () => {
-        const onCompositionstart$ = new Subject<any>();
-        const onCompositionupdate$ = new Subject<any>();
-        const onCompositionend$ = new Subject<any>();
+        const onCompositionstart$ = new Subject<ITestEditorInputConfig>();
+        const onCompositionupdate$ = new Subject<ITestEditorInputConfig>();
+        const onCompositionend$ = new Subject<ITestEditorInputConfig>();
         const activeRange = createRange();
-        let storedActiveRange: any = null;
+        let storedActiveRange: ReturnType<typeof createRange> | null = null;
 
         const docSelectionRenderService = {
             onCompositionstart$,
@@ -155,7 +162,7 @@ describe('doc ime input controller', () => {
             getSelectionInfo: vi.fn(() => ({ options: null })),
         };
 
-        new DocIMEInputController(
+        const controller = new DocIMEInputController(
             {
                 unitId: 'doc-unit',
             } as never,
@@ -192,5 +199,111 @@ describe('doc ime input controller', () => {
             isCompositionEnd: true,
         });
         expect(docStateEmitService.emitStateChangeInfo).not.toHaveBeenCalled();
+        controller.dispose();
+    });
+
+    it('rolls back an active composition when compositionend data is empty', async () => {
+        const onCompositionstart$ = new Subject<ITestEditorInputConfig>();
+        const onCompositionupdate$ = new Subject<ITestEditorInputConfig>();
+        const onCompositionend$ = new Subject<ITestEditorInputConfig>();
+        const activeRange = createRange();
+
+        const docSelectionRenderService = {
+            onCompositionstart$,
+            onCompositionupdate$,
+            onCompositionend$,
+            getAllRectRanges: vi.fn(() => []),
+        };
+        const docImeInputManagerService = {
+            setActiveRange: vi.fn(),
+            getActiveRange: vi.fn(() => activeRange),
+            getPreviousDocRanges: vi.fn(() => []),
+            getPreviousSelectionOptions: vi.fn(() => null),
+            setPreviousDocRanges: vi.fn(),
+            setPreviousSelectionOptions: vi.fn(),
+            clearUndoRedoMutationParamsCache: vi.fn(),
+        };
+        const commandService = {
+            executeCommand: vi.fn(() => Promise.resolve(true)),
+        };
+        const docStateEmitService = {
+            emitStateChangeInfo: vi.fn(),
+        };
+
+        const controller = new DocIMEInputController(
+            { unitId: 'doc-unit' } as never,
+            docSelectionRenderService as never,
+            docImeInputManagerService as never,
+            { getSkeleton: vi.fn(() => ({})) } as never,
+            docStateEmitService as never,
+            { getSelectionInfo: vi.fn(() => ({ options: null })) } as never,
+            commandService as never
+        );
+
+        onCompositionstart$.next({ activeRange });
+        onCompositionupdate$.next({ event: { data: 'nihao' }, activeRange });
+        await awaitTime(0);
+        onCompositionupdate$.next({ event: { data: '' }, activeRange });
+        await awaitTime(0);
+        onCompositionend$.next({ event: { data: '' }, activeRange });
+        await awaitTime(0);
+
+        expect(commandService.executeCommand).toHaveBeenCalledTimes(2);
+        expect(commandService.executeCommand).toHaveBeenNthCalledWith(2, IMEInputCommand.id, {
+            unitId: 'doc-unit',
+            newText: '',
+            oldTextLen: 5,
+            isCompositionStart: false,
+            isCompositionEnd: true,
+            isCompositionCanceled: true,
+        });
+        expect(docStateEmitService.emitStateChangeInfo).not.toHaveBeenCalled();
+        expect(docImeInputManagerService.clearUndoRedoMutationParamsCache).toHaveBeenCalledTimes(2);
+        expect(docImeInputManagerService.setActiveRange).toHaveBeenLastCalledWith(null);
+        controller.dispose();
+    });
+
+    it('ends an empty composition without creating a history entry', async () => {
+        const onCompositionstart$ = new Subject<ITestEditorInputConfig>();
+        const onCompositionupdate$ = new Subject<ITestEditorInputConfig>();
+        const onCompositionend$ = new Subject<ITestEditorInputConfig>();
+        const activeRange = createRange();
+        const commandService = {
+            executeCommand: vi.fn(() => Promise.resolve(true)),
+        };
+        const docStateEmitService = {
+            emitStateChangeInfo: vi.fn(),
+        };
+
+        const controller = new DocIMEInputController(
+            { unitId: 'doc-unit' } as never,
+            {
+                onCompositionstart$,
+                onCompositionupdate$,
+                onCompositionend$,
+                getAllRectRanges: vi.fn(() => []),
+            } as never,
+            {
+                setActiveRange: vi.fn(),
+                getActiveRange: vi.fn(() => activeRange),
+                getPreviousDocRanges: vi.fn(() => []),
+                getPreviousSelectionOptions: vi.fn(() => null),
+                setPreviousDocRanges: vi.fn(),
+                setPreviousSelectionOptions: vi.fn(),
+                clearUndoRedoMutationParamsCache: vi.fn(),
+            } as never,
+            { getSkeleton: vi.fn(() => ({})) } as never,
+            docStateEmitService as never,
+            { getSelectionInfo: vi.fn(() => ({ options: null })) } as never,
+            commandService as never
+        );
+
+        onCompositionstart$.next({ activeRange });
+        onCompositionend$.next({ event: { data: '' }, activeRange });
+        await awaitTime(0);
+
+        expect(commandService.executeCommand).not.toHaveBeenCalled();
+        expect(docStateEmitService.emitStateChangeInfo).not.toHaveBeenCalled();
+        controller.dispose();
     });
 });

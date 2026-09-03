@@ -122,6 +122,8 @@ function createController(options?: {
         ]),
     };
     const docSelectionRenderService = {
+        focus: vi.fn(),
+        isFocusing: false,
         onInputBefore$: inputBefore$,
         setInputPosition: vi.fn(),
     };
@@ -174,6 +176,9 @@ function createController(options?: {
             selectionMoveStart$,
             selectionSet$,
             getWorkbookSelections: vi.fn(() => ({
+                selectionMoveEnd$,
+                selectionMoveStart$,
+                selectionSet$,
                 getCurrentSelections: vi.fn(() => [{
                     primary: {
                         actualRow: 3,
@@ -400,6 +405,19 @@ describe('EditorBridgeRenderController business flows', () => {
             unitId: 'unit-1',
         });
 
+        controller.dispose();
+    });
+
+    it('focuses the hidden input when an active embedded sheet clicks the unchanged cell', () => {
+        const { controller, docSelectionRenderService, spreadsheet } = createController({
+            focusedUnitId: 'host-unit',
+            focusingSheet: false,
+            isEmbedActiveSession: true,
+        });
+
+        spreadsheet.onPointerDown$.emit({});
+
+        expect(docSelectionRenderService.focus).toHaveBeenCalledTimes(1);
         controller.dispose();
     });
 

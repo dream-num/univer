@@ -98,7 +98,11 @@ export const SetRangeValuesCommand: ICommand = {
             ranges = realCellValue ? [new ObjectMatrix(realCellValue).getStartEndScope()] : [];
         }
 
-        const setRangeValuesMutationRedoParams = { unitId, subUnitId, cellValue: realCellValue ?? cellValue.getMatrix() };
+        const setRangeValuesMutationRedoParams = {
+            unitId,
+            subUnitId,
+            cellValue: Tools.deepClone(realCellValue ?? cellValue.getMatrix()),
+        };
         const setRangeValuesMutationUndoParams = SetRangeValuesUndoMutationFactory(accessor, setRangeValuesMutationRedoParams);
         const cellHeights = mapObjectMatrix(setRangeValuesMutationRedoParams.cellValue, (row, col) => worksheet.getCellHeight(row, col) || undefined);
 

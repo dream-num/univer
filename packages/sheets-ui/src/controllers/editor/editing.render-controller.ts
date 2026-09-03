@@ -504,8 +504,12 @@ export class EditingRenderController extends Disposable {
                  * the up, down, left, and right keys can no longer switch editing cells,
                  * but move the cursor within the editor instead.
                  */
-                if (keycode != null &&
-                    (this._cursorChange === CursorChange.CursorChange || this._contextService.getContextValue(FOCUSING_FX_BAR_EDITOR))) {
+                // Shift+arrows select text even when typing opened the editor without a pointer or F2.
+                if (keycode != null && (
+                    isShift ||
+                    this._cursorChange === CursorChange.CursorChange ||
+                    this._contextService.getContextValue(FOCUSING_FX_BAR_EDITOR)
+                )) {
                     this._moveInEditor(keycode, isShift);
                     return;
                 }
@@ -732,6 +736,8 @@ export class EditingRenderController extends Disposable {
                 this._editorBridgeService.disableForceKeepVisible();
             }
             this._refreshCurrentSelections(sheetId);
+            // An unchanged selection does not reload the editor; discard the canceled draft explicitly.
+            this._editorBridgeService.refreshEditCellState();
             return;
         }
 
@@ -837,7 +843,7 @@ export class EditingRenderController extends Disposable {
             subUnitId: sheetId,
             unitId,
             range,
-            value: finalCell,
+            value: Tools.deepClone(finalCell),
             redoUndoId,
         });
 

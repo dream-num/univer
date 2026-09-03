@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable max-lines-per-function */
-
 import type {
     ICommandInfo,
     IMutationInfo,
@@ -29,7 +27,8 @@ import type {
     IRemoveRowsMutationParams,
     IRemoveWorksheetMergeMutationParams,
 } from '../basics/interfaces/mutation-interface';
-
+import type { IClearSelectionAllCommandParams } from '../commands/commands/clear-selection-all.command';
+import type { IClearSelectionFormatCommandParams } from '../commands/commands/clear-selection-format.command';
 import type { IDeleteRangeMoveLeftCommandParams } from '../commands/commands/delete-range-move-left.command';
 import type { IDeleteRangeMoveUpCommandParams } from '../commands/commands/delete-range-move-up.command';
 import type { IInsertRangeMoveDownCommandParams } from '../commands/commands/insert-range-move-down.command';
@@ -51,10 +50,11 @@ import {
     InterceptorManager,
     IUniverInstanceService,
     Rectangle,
+    toDisposable,
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
-import { first } from 'rxjs';
+import { filter, take } from 'rxjs';
 import { ClearSelectionAllCommand } from '../commands/commands/clear-selection-all.command';
 import { ClearSelectionFormatCommand } from '../commands/commands/clear-selection-format.command';
 import { DeleteRangeMoveLeftCommand } from '../commands/commands/delete-range-move-left.command';
@@ -143,29 +143,27 @@ export class MergeCellController extends Disposable {
         @Inject(SheetsSelectionsService) private _selectionManagerService: SheetsSelectionsService
     ) {
         super();
+        this.disposeWithMe(this.disposableCollection);
         this._onRefRangeChange();
         this._initCommandInterceptor();
         this._commandExecutedListener();
     }
 
     private _initCommandInterceptor() {
-        const self = this;
-        this._sheetInterceptorService.interceptCommand({
-            getMutations(commandInfo) {
+        this.disposeWithMe(this._sheetInterceptorService.interceptCommand({
+            getMutations: (commandInfo) => {
                 switch (commandInfo.id) {
                     case ClearSelectionAllCommand.id:
                     case ClearSelectionFormatCommand.id: {
-                        // TODO@Gggpound: get by unit id and subUnitId
-                        const workbook = self._univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-                        const unitId = workbook.getUnitId();
-                        const worksheet = workbook?.getActiveSheet();
-                        if (!worksheet) {
+                        const params = commandInfo.params as IClearSelectionAllCommandParams | IClearSelectionFormatCommandParams | undefined;
+                        const target = getSheetCommandTarget(this._univerInstanceService, params);
+                        if (!target) {
                             return { redos: [], undos: [] };
                         }
 
-                        const subUnitId = worksheet.getSheetId();
+                        const { unitId, subUnitId, worksheet } = target;
                         const mergeData = worksheet.getConfig().mergeData;
-                        const selections = self._selectionManagerService.getCurrentSelections()?.map((s) => s.range);
+                        const selections = params?.ranges ?? this._selectionManagerService.getCurrentSelections()?.map((s) => s.range);
                         if (selections && selections.length > 0) {
                             const isHasMerge = selections.some((range) =>
                                 mergeData.some((item) => Rectangle.intersects(item, range))
@@ -177,7 +175,7 @@ export class MergeCellController extends Disposable {
                                     ranges: selections,
                                 };
                                 const undoRemoveMergeParams: IAddWorksheetMergeMutationParams =
-                                    RemoveMergeUndoMutationFactory(self._injector, removeMergeParams);
+                                    RemoveMergeUndoMutationFactory(this._injector, removeMergeParams);
                                 const redos: IMutationInfo[] = [
                                     { id: RemoveWorksheetMergeMutation.id, params: removeMergeParams },
                                 ];
@@ -192,9 +190,9 @@ export class MergeCellController extends Disposable {
 
                 return { redos: [], undos: [] };
             },
-        });
+        }));
 
-        this._sheetInterceptorService.interceptRanges({
+        this.disposeWithMe(this._sheetInterceptorService.interceptRanges({
             getMutations: ({ unitId, subUnitId, ranges }) => {
                 const redos: IMutationInfo[] = [];
                 const undos: IMutationInfo[] = [];
@@ -231,7 +229,7 @@ export class MergeCellController extends Disposable {
 
                 return emptyInterceptorArr;
             },
-        });
+        }));
     }
 
     refRangeHandle(config: EffectRefRangeParams, unitId: string, subUnitId: string) {
@@ -333,12 +331,18 @@ export class MergeCellController extends Disposable {
             })
         );
 
-        this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(first((workbook) => !!workbook)).subscribe((workbook) => {
-            const sheet = workbook!.getActiveSheet();
-            if (!sheet) return;
-
-            registerRefRange(workbook!.getUnitId(), sheet.getSheetId());
-        });
+        this.disposeWithMe(toDisposable(
+            this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(
+                filter((workbook): workbook is Workbook => !!workbook),
+                take(1)
+            ).subscribe((workbook) => {
+                const sheet = workbook.getActiveSheet();
+                if (!sheet) {
+                    return;
+                }
+                registerRefRange(workbook.getUnitId(), sheet.getSheetId());
+            })
+        ));
     }
 
     private _handleMoveRowsCommand(params: IMoveRowsCommandParams, unitId: string, subUnitId: string) {

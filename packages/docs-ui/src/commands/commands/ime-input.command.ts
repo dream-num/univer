@@ -31,6 +31,7 @@ export interface IIMEInputCommandParams {
     oldTextLen: number;
     isCompositionStart: boolean;
     isCompositionEnd: boolean;
+    isCompositionCanceled?: boolean;
 }
 
 export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
@@ -40,7 +41,7 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
 
     // eslint-disable-next-line max-lines-per-function
     handler: async (accessor, params: IIMEInputCommandParams) => {
-        const { unitId, newText, oldTextLen, isCompositionEnd, isCompositionStart } = params;
+        const { unitId, newText, oldTextLen, isCompositionEnd, isCompositionStart, isCompositionCanceled } = params;
         const commandService = accessor.get(ICommandService);
         const renderManagerService = accessor.get(IRenderManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -56,6 +57,32 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
         const previousActiveRange = imeInputManagerService.getCompositionRange();
         if (previousActiveRange == null) {
             return false;
+        }
+
+        if (isCompositionCanceled) {
+            const historyParams = imeInputManagerService.fetchComposedUndoRedoMutationParams();
+            if (historyParams == null) {
+                return true;
+            }
+
+            const {
+                undoMutationParams,
+                previousActiveRange,
+                previousDocRanges,
+                previousSelectionOptions,
+            } = historyParams;
+            const rollbackMutationParams: IRichTextEditingMutationParams = {
+                ...undoMutationParams,
+                textRanges: previousDocRanges.length ? previousDocRanges : [previousActiveRange],
+                options: previousSelectionOptions ?? undefined,
+                noHistory: true,
+                trigger: IMEInputCommand.id,
+            };
+
+            return Boolean(commandService.syncExecuteCommand<
+                IRichTextEditingMutationParams,
+                IRichTextEditingMutationParams
+            >(RichTextEditingMutation.id, rollbackMutationParams));
         }
 
         const { style, segmentId } = previousActiveRange;

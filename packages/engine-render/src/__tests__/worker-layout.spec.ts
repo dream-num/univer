@@ -1687,6 +1687,50 @@ describe('worker document layout session', () => {
             protectedRange: {
                 mode: 'continuous',
                 startOffset: anchor,
+                endOffset: probeProtectedEndOffset,
+            },
+        });
+        const logicalMismatchGeneration = session.start({
+            reason: 'edit',
+            anchor,
+            invalidation: {
+                oldStart: anchor,
+                oldEnd: anchor,
+                newEnd: anchor + insertedText.length,
+            },
+        });
+        let logicalMismatchResult = session.step(logicalMismatchGeneration, 0);
+        let deferredBoundaryLogicalMismatch = false;
+        for (let step = 0; step < 1_000 && !logicalMismatchResult.progress.complete; step++) {
+            const publication = logicalMismatchResult.publication;
+            if (publication?.kind === 'block') {
+                const transferredPublication = structuredClone(publication);
+                const firstUnprotectedLineIndex = transferredPublication.block.flow.lines.findIndex(
+                    (line) => line.st > probeProtectedEndOffset
+                );
+                const workerBoundaryLine = transferredPublication.block.flow.lines[firstUnprotectedLineIndex - 1];
+                if (workerBoundaryLine != null) {
+                    workerBoundaryLine.st++;
+                    workerBoundaryLine.ed++;
+                    expect(() => targetSkeleton.applyLayoutPublication(
+                        transferredPublication,
+                        logicalMismatchResult.progress
+                    )).not.toThrow();
+                    deferredBoundaryLogicalMismatch = true;
+                    break;
+                }
+            }
+            logicalMismatchResult = session.step(logicalMismatchGeneration, 0);
+        }
+        expect(deferredBoundaryLogicalMismatch).toBe(true);
+        expect(targetSkeleton.getSkeletonData()?.pages[0]).toBe(protectedContinuousPage);
+        targetSkeleton.cancelExternalLayout();
+
+        targetSkeleton.beginExternalLayout({
+            reason: 'edit',
+            protectedRange: {
+                mode: 'continuous',
+                startOffset: anchor,
                 endOffset: mainEditProgress.stableLaidOutThrough,
             },
         });

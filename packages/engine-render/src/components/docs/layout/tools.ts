@@ -440,9 +440,9 @@ export function updateBlockIndex(
     let prePageStartIndex = start;
     const paragraphLogicalStartAnchors = getParagraphLogicalStartAnchors(pages);
     // Real docs declare a classic/modern compatibility mode, so their measured layout column
-    // width can be reused. Embedded editors keep the mode unspecified and must fall back to
+    // width can be reused. Embedded editors (including DrawingML text) must fall back to
     // content width; otherwise a sheet cell editor may stretch to the far edge of the canvas.
-    const shouldUseLayoutColumnWidth = documentCompatibilityPolicy?.mode !== 'unspecified';
+    const shouldUseLayoutColumnWidth = documentCompatibilityPolicy?.mode !== 'unspecified' && documentCompatibilityPolicy?.mode !== 'drawingml';
 
     for (const page of pages) {
         const { sections, skeTables, skeColumnGroups = new Map() } = page;
@@ -1593,7 +1593,6 @@ interface IFontCreateConfig {
     gridType: GridType;
     snapToGrid: BooleanNumber;
     pageWidth: number;
-    glyphAdvanceStep?: number;
 }
 
 const fontCreateConfigCache = new ObjectMatrix<IFontCreateConfig>();
@@ -1627,7 +1626,7 @@ export function getFontConfigFromLastGlyph(
         charSpace,
         gridType,
         snapToGrid,
-        glyphAdvanceStep: sectionBreakConfig.renderConfig?.glyphAdvanceStep,
+        documentCompatibilityPolicy: sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy(),
         pageWidth,
     };
 
@@ -1721,7 +1720,6 @@ export function getFontCreateConfig(
         charSpace,
         gridType,
         snapToGrid,
-        glyphAdvanceStep: renderConfig.glyphAdvanceStep,
         documentCompatibilityPolicy: sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy(),
         pageWidth,
     };

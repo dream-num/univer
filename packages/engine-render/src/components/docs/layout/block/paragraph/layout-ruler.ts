@@ -89,6 +89,7 @@ const RELATIVE_LINE_WIDTH_TOLERANCE = 0.01;
 interface IDefaultSpanMetrics {
     lineHeight: number;
     hasInlineCustomBlock: boolean;
+    drawingMLLineHeight?: number;
 }
 
 function isBeyondDivideWidth(width: number, divideWidth: number, lineWrapTolerance?: number) {
@@ -310,7 +311,8 @@ function _divideOperator(
         const preOffsetLeft = lastWidth + lastLeft;
         const { hyphenationZone } = sectionBreakConfig;
         const hangingPunctuation = paragraphConfig.paragraphStyle?.hangingPunctuation === BooleanNumber.TRUE;
-        const lineWrapTolerance = sectionBreakConfig.renderConfig?.lineWrapTolerance;
+        const lineWrapTolerance = sectionBreakConfig.renderConfig?.lineWrapTolerance ??
+            (sectionBreakConfig.documentCompatibilityPolicy?.mode === 'drawingml' ? 0 : undefined);
         if (isGlyphGroupBeyondDivideWidth(glyphGroup, preOffsetLeft, divide.width, hangingPunctuation, lineWrapTolerance)) {
             if (
                 divide?.glyphGroup.length === 0 &&
@@ -495,7 +497,12 @@ function _divideOperator(
                     getLineHeightConfig(sectionBreakConfig, paragraphConfig);
                 const { boundingBoxAscent, boundingBoxDescent } = maxBox;
                 const spanLineHeight = boundingBoxAscent + boundingBoxDescent;
-                const { contentHeight } = getLineHeightMetrics(
+                const combinedGlyphs = [...__getGlyphGroupByLine(currentLine), ...glyphGroup];
+                const hasInlineCustomBlock = combinedGlyphs.some((glyph) =>
+                    glyph.streamType === DataStreamTreeTokenType.CUSTOM_BLOCK && glyph.width !== 0
+                );
+                const drawingMLLineHeight = getDrawingMLNominalLineHeight(combinedGlyphs, sectionBreakConfig, hasInlineCustomBlock);
+                const { contentHeight, lineSpacingApply } = getLineHeightMetrics(
                     spanLineHeight,
                     paragraphLineGapDefault,
                     linePitch,
@@ -504,13 +511,15 @@ function _divideOperator(
                     spacingRule,
                     snapToGrid,
                     paragraphConfig.useWordStyleLineHeight,
-                    true,
+                    !hasInlineCustomBlock,
                     undefined,
                     false,
-                    getShapeTextNominalLineHeight(glyphGroup, sectionBreakConfig)
+                    drawingMLLineHeight
                 );
 
-                if (contentHeight - currentLine.contentHeight > LINE_LAYOUT_OVERFLOW_TOLERANCE) {
+                const growsDrawingMLLine = drawingMLLineHeight != null &&
+                    lineSpacingApply > currentLine.paddingTop + currentLine.contentHeight + currentLine.paddingBottom + 1e-6;
+                if (contentHeight - currentLine.contentHeight > LINE_LAYOUT_OVERFLOW_TOLERANCE || growsDrawingMLLine) {
                     // If the height of the new content exceeds the height of the line it joins, for mixed text and graphics layout, the entire line needs to be recalculated according to the new height
                     // If the height of the new content exceeds the height of the added row,
                     // the entire row needs to be recalculated according to the new height
@@ -541,9 +550,8 @@ function _divideOperator(
                         breakPointType,
                         {
                             lineHeight: boundingBoxAscent + boundingBoxDescent,
-                            hasInlineCustomBlock: glyphGroup.some((glyph) =>
-                                glyph.streamType === DataStreamTreeTokenType.CUSTOM_BLOCK && glyph.width !== 0
-                            ),
+                            hasInlineCustomBlock,
+                            drawingMLLineHeight,
                         }
                     );
 
@@ -763,7 +771,7 @@ function _lineOperator(
         !hasInlineCustomBlock,
         normalLineHeight,
         snapMultilineParagraphToWholeGrid,
-        getShapeTextNominalLineHeight(glyphGroup, sectionBreakConfig, hasInlineCustomBlock)
+        defaultSpanMetrics?.drawingMLLineHeight ?? getDrawingMLNominalLineHeight(glyphGroup, sectionBreakConfig, hasInlineCustomBlock)
     );
 
     if (snapMultilineParagraphToWholeGrid && preLine?.paragraphIndex === paragraphIndex) {
@@ -1746,12 +1754,12 @@ function __getParagraphAnchorLeft(
     return getNumberUnitValue(paragraphConfig.docxFallbackAnchorLeft, charSpaceApply);
 }
 
-function getShapeTextNominalLineHeight(
+function getDrawingMLNominalLineHeight(
     glyphGroup: IDocumentSkeletonGlyph[],
     sectionBreakConfig: ISectionBreakConfig,
     hasInlineCustomBlock = false
 ): number | undefined {
-    if (sectionBreakConfig.renderConfig?.shapeTextAutoLineSpacing !== BooleanNumber.TRUE || hasInlineCustomBlock ||
+    if (sectionBreakConfig.documentCompatibilityPolicy?.mode !== 'drawingml' || hasInlineCustomBlock ||
         glyphGroup.some((glyph) => glyph.streamType === DataStreamTreeTokenType.CUSTOM_BLOCK && glyph.width !== 0)) {
         return undefined;
     }
@@ -1761,7 +1769,8 @@ function getShapeTextNominalLineHeight(
     const fontSize = Math.max(0, ...(textGlyphs.length ? textGlyphs : glyphGroup)
         .map((glyph) => glyph.fontStyle?.originFontSize ?? 0)
         .filter((size) => Number.isFinite(size) && size > 0));
-    // PowerPoint's nominal line is 1.2 em. Font sizes are points; canvas layout is CSS pixels.
+    // PowerPoint resolves DrawingML percentage spacing against a 1.2-em nominal line,
+    // independently of Canvas ink/font bounds. Font sizes are points; layout uses CSS pixels.
     return fontSize > 0 ? fontSize * 1.2 * (96 / 72) : undefined;
 }
 
@@ -1777,14 +1786,15 @@ export function getLineHeightMetrics(
     scaleAutoLineSpacingByGlyphHeight = true,
     normalLineHeight?: number,
     snapAutoLineSpacingToWholeGridLines = false,
-    shapeTextLineHeight?: number
+    drawingMLLineHeight?: number
 ) {
     const usesLineGridType = gridType === GridType.LINES || gridType === GridType.LINES_AND_CHARS;
-    if (shapeTextLineHeight != null && (
-        spacingRule === SpacingRule.EXACT ||
-        (spacingRule === SpacingRule.AUTO && (!usesLineGridType || snapToGrid === BooleanNumber.FALSE))
-    )) {
-        const lineSpacingApply = spacingRule === SpacingRule.EXACT ? lineSpacing : lineSpacing * shapeTextLineHeight;
+    const hasNoLineGrid = !usesLineGridType || snapToGrid === BooleanNumber.FALSE;
+    if (hasNoLineGrid && (spacingRule === SpacingRule.EXACT ||
+        (drawingMLLineHeight != null && spacingRule === SpacingRule.AUTO))) {
+        const lineSpacingApply = spacingRule === SpacingRule.EXACT
+            ? scaleAutoLineSpacingByGlyphHeight ? lineSpacing : Math.max(lineSpacing, glyphLineHeight)
+            : lineSpacing * drawingMLLineHeight!;
         const padding = (lineSpacingApply - glyphLineHeight) / 2;
         return {
             paddingTop: padding,

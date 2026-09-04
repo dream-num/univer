@@ -44,7 +44,7 @@ import {
     RichTextEditingMutation,
     SetTextSelectionsOperation,
 } from '@univerjs/docs';
-import { IRenderManagerService, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, RenderManagerService } from '@univerjs/engine-render';
+import { DocumentLayoutType, IRenderManagerService, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, RenderManagerService } from '@univerjs/engine-render';
 import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ReplaceSnapshotCommand } from '../../../commands/commands/replace-content.command';
@@ -87,9 +87,14 @@ class TestDocSelectionRenderService {
 }
 
 class TestRender {
+    readonly skeleton = { setLayoutType: vi.fn() };
+    readonly skeletonManager = { getSkeleton: () => this.skeleton, recalculate: vi.fn() };
     constructor(private readonly _selectionRenderService: TestDocSelectionRenderService) {}
 
     with(service: unknown) {
+        if (service === DocSkeletonManagerService) {
+            return this.skeletonManager;
+        }
         if (service === DocSelectionRenderService) {
             return this._selectionRenderService;
         }
@@ -490,11 +495,12 @@ describe('EditorService', () => {
         commentEditor.dispose();
     });
 
-    it('registers an editor render and cleans it up with the returned disposable', () => {
+    it.each([undefined, DocumentLayoutType.DRAWINGML])('registers an editor with runtime layout %s and cleans it up', (layoutType) => {
         const { service, univerInstanceService } = createService(TestRegisterRenderManagerService);
         const editorUnitId = EDITOR_ID;
         const container = document.createElement('div');
         const disposable = service.register({
+            layoutType,
             initialSnapshot: {
                 id: editorUnitId,
                 body: {
@@ -513,6 +519,15 @@ describe('EditorService', () => {
             preserveHostFocus: true,
         }, container);
         const render = TestRegisterRenderManagerService.renders.get(editorUnitId)!;
+
+        if (layoutType == null) {
+            expect(render.skeleton.setLayoutType).not.toHaveBeenCalled();
+            expect(render.skeletonManager.recalculate).not.toHaveBeenCalled();
+        } else {
+            expect(render.skeleton.setLayoutType).toHaveBeenCalledWith(layoutType);
+            expect(render.skeletonManager.recalculate).toHaveBeenCalledOnce();
+        }
+        expect(service.getEditor(editorUnitId)?.getDocumentData()).not.toHaveProperty('layoutType');
 
         expect(service.isEditor(editorUnitId)).toBe(true);
         expect(service.getEditor(editorUnitId)?.getEditorId()).toBe(editorUnitId);

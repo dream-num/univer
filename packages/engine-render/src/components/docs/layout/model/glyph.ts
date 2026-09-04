@@ -267,12 +267,10 @@ export function _createSkeletonWordOrLetter(
         bBox = { ...bBox, width: 0 };
     }
 
-    const { glyphAdvanceStep } = config;
-    if (glyphWidth == null && glyphAdvanceStep != null && Number.isFinite(glyphAdvanceStep) && glyphAdvanceStep > 0) {
-        const roundedWidth = Math.round(bBox.width / glyphAdvanceStep) * glyphAdvanceStep;
-        if (Number.isFinite(roundedWidth)) {
-            bBox = { ...bBox, width: roundedWidth };
-        }
+    if (glyphWidth == null && documentCompatibilityPolicy.mode === 'drawingml') {
+        // Match PowerPoint's measured advances (1/8 of a slide-layout unit).
+        // This is a renderer metric convention, not an OOXML attribute or a font-specific correction.
+        bBox = { ...bBox, width: Math.round(bBox.width * 8) / 8 };
     }
     const { width: contentWidth = 0 } = bBox;
     let width = glyphWidth ?? contentWidth;

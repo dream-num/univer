@@ -15,6 +15,7 @@
  */
 
 import type { IDocumentData, Nullable } from '@univerjs/core';
+import type { DocumentLayoutType } from '@univerjs/engine-render';
 import type { RefObject } from 'react';
 import type { Editor, IEditorCanvasStyle } from '../../../services/editor/editor';
 import { createParagraphId, RichTextBuilder, Tools } from '@univerjs/core';
@@ -25,6 +26,7 @@ import { IEditorService } from '../../../services/editor/editor-manager.service'
 export interface IUseEditorProps {
     editorId: string;
     initialValue: Nullable<IDocumentData | string>;
+    layoutType?: DocumentLayoutType;
     container: RefObject<HTMLDivElement>;
     preserveHostFocus?: boolean;
     autoFocus?: boolean;
@@ -72,6 +74,7 @@ export function useEditor(opts: IUseEditorProps) {
                     canvasStyle,
                     editorUnitId: editorId,
                     initialSnapshot: snapshot,
+                    layoutType: opts.layoutType,
                     preserveHostFocus,
                 },
                 container.current

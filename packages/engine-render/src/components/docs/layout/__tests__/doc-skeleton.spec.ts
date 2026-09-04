@@ -51,6 +51,7 @@ import {
 } from '../../../../basics/i-document-skeleton-cached';
 import { Vector2 } from '../../../../basics/vector2';
 import { setDocsCustomBlockRenderViewportProvider } from '../../custom-block-render-viewport';
+import { DocumentLayoutType } from '../../document-compatibility';
 import { setDocsTableRenderViewportProvider } from '../../table-render-viewport';
 import { DocumentViewModel } from '../../view-model/document-view-model';
 import { DocumentSkeleton } from '../doc-skeleton';
@@ -219,6 +220,55 @@ function createPage(type: DocumentSkeletonPageType, st: number, tableId = '') {
 }
 
 describe('doc skeleton', () => {
+    it('uses the largest DrawingML text size across runs, without changing snapshots or document defaults', () => {
+        const measure = vi.spyOn(FontCache, 'getMeasureText').mockReturnValue({
+            width: 6.1572265625,
+            fontBoundingBoxAscent: 15,
+            fontBoundingBoxDescent: 4,
+            actualBoundingBoxAscent: 15,
+            actualBoundingBoxDescent: 4,
+        });
+        const dataModel = new DocumentDataModel({
+            id: 'drawingml-runtime-layout',
+            body: {
+                dataStream: 'a b\r\n',
+                textRuns: [{ st: 0, ed: 2, ts: { fs: 10.5 } }, { st: 2, ed: 3, ts: { fs: 18 } }],
+                paragraphs: [{ startIndex: 3, paragraphId: 'mixed-sizes', paragraphStyle: {
+                    lineSpacing: 1.5,
+                    spacingRule: SpacingRule.AUTO,
+                    snapToGrid: BooleanNumber.FALSE,
+                } }],
+                sectionBreaks: [{ sectionId: 'drawingml-section', startIndex: 4, gridType: GridType.DEFAULT }],
+            },
+            documentStyle: { pageSize: { width: 300, height: 300 } },
+        });
+        const snapshot = structuredClone(dataModel.getSnapshot());
+        const univer = new Univer();
+        const locale = univer.__getInjector().get(LocaleService);
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(dataModel), locale);
+        const firstLine = () => skeleton.getSkeletonData()!.pages[0].sections[0].columns[0].lines[0];
+        try {
+            skeleton.calculate();
+            const documentHeight = firstLine().lineHeight;
+            expect(documentHeight).toBeCloseTo(28.5);
+            skeleton.setLayoutType(DocumentLayoutType.DRAWINGML);
+            skeleton.calculate();
+            expect(firstLine().lineHeight).toBeCloseTo(43.2);
+            expect(firstLine().divides[0].glyphGroup.find((glyph) => glyph.content === 'a')?.width).toBe(6.125);
+            const fresh = DocumentSkeleton.create(new DocumentViewModel(new DocumentDataModel(snapshot)), locale, { layoutType: DocumentLayoutType.DRAWINGML });
+            fresh.calculate();
+            expect(normalizeSkeleton(skeleton.getSkeletonData())).toEqual(normalizeSkeleton(fresh.getSkeletonData()));
+            fresh.dispose();
+            skeleton.setLayoutType(DocumentLayoutType.DOCUMENT);
+            skeleton.calculate();
+            expect(firstLine().lineHeight).toBeCloseTo(documentHeight);
+            expect(dataModel.getSnapshot()).toEqual(snapshot);
+        } finally {
+            skeleton.dispose();
+            univer.dispose();
+            measure.mockRestore();
+        }
+    });
     it.each(['ready', 'cancel', 'failure', 'header', 'footer'])('waits for cold hyphenation rules and matches a warm executor (%s)', async (scenario) => {
         const univer = new Univer();
         const content = scenario === 'header' || scenario === 'footer'

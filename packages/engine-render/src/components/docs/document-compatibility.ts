@@ -29,8 +29,14 @@ interface IFontMetricScaleRule {
     widthScale?: number;
 }
 
+/** Runtime text-layout semantics. This is not part of a document snapshot. */
+export enum DocumentLayoutType {
+    DOCUMENT = 'document',
+    DRAWINGML = 'drawingml',
+}
+
 export interface IDocumentCompatibilityPolicy {
-    mode: 'modern' | 'traditional' | 'unspecified';
+    mode: 'modern' | 'traditional' | 'unspecified' | 'drawingml';
     applyDocumentDefaultParagraphStyle: boolean;
     useWordStyleLineHeight: boolean;
     font: {
@@ -104,7 +110,18 @@ const UNSPECIFIED_DOCUMENT_COMPATIBILITY_POLICY: IDocumentCompatibilityPolicy = 
     },
 };
 
-export function getDocumentCompatibilityPolicy(documentFlavor?: DocumentFlavor): IDocumentCompatibilityPolicy {
+const DRAWINGML_COMPATIBILITY_POLICY: IDocumentCompatibilityPolicy = {
+    ...UNSPECIFIED_DOCUMENT_COMPATIBILITY_POLICY,
+    mode: 'drawingml',
+};
+
+export function getDocumentCompatibilityPolicy(
+    documentFlavor?: DocumentFlavor,
+    layoutType = DocumentLayoutType.DOCUMENT
+): IDocumentCompatibilityPolicy {
+    if (layoutType === DocumentLayoutType.DRAWINGML) {
+        return DRAWINGML_COMPATIBILITY_POLICY;
+    }
     if (documentFlavor === DocumentFlavor.MODERN) {
         return MODERN_DOCUMENT_COMPATIBILITY_POLICY;
     }

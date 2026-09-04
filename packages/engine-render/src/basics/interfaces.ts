@@ -163,6 +163,7 @@ export interface IFontCreateConfig {
     charSpace: number;
     snapToGrid: BooleanNumber;
     documentCompatibilityPolicy?: IDocumentCompatibilityPolicy;
+    glyphAdvanceStep?: number;
     gridType?: GridType;
     pageWidth?: number;
 }

@@ -19,8 +19,8 @@ import { BreakPointType } from '../../break';
 import { LineBreaker } from '../../line-breaker';
 import { LineBreakerLinkEnhancer } from '../link-enhancer';
 
-function collectBreaks(content: string) {
-    const enhancer = new LineBreakerLinkEnhancer(new LineBreaker(content));
+function collectBreaks(content: string, allowLinkBreaks = true) {
+    const enhancer = new LineBreakerLinkEnhancer(new LineBreaker(content), allowLinkBreaks);
     const points: Array<{ position: number; type: BreakPointType }> = [];
     while (true) {
         const bk = enhancer.nextBreakPoint();
@@ -36,6 +36,18 @@ function collectBreaks(content: string) {
 }
 
 describe('link enhancer', () => {
+    it.each([
+        ['需以本公司', 'http://www.swsresearch.com', '网站刊载为准'],
+        ['visit ', 'https://foo123bar.example/path-now', ' and continue'],
+        ['', `www.${'a'.repeat(40)}.com`, ''],
+    ])('keeps a link intact when character-level wrapping is disabled: %s%s%s', (prefix, link, suffix) => {
+        const content = prefix + link + suffix;
+        const breaks = collectBreaks(content, false);
+        expect(breaks.some((point) => point.position > prefix.length && point.position < prefix.length + link.length)).toBe(false);
+        expect(breaks[breaks.length - 1].position).toBe(content.length);
+        expect(breaks.every((point, index) => index === 0 || point.position > breaks[index - 1].position)).toBe(true);
+    });
+
     it('keeps normal text breaking behavior without links', () => {
         const breaks = collectBreaks('hello world');
         expect(breaks.length).toBeGreaterThan(0);

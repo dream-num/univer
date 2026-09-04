@@ -287,6 +287,18 @@ describe('layout-ruler', () => {
         expect(tab.tabLeader).toBe(2);
     });
 
+    it.each([
+        [undefined, false],
+        [0, true],
+        [-1, false],
+        [Number.NaN, false],
+    ] as const)('honors explicit line-wrap tolerance without changing legacy defaults (%s)', (tolerance, overflow) => {
+        const glyph = createGlyph('外', 10);
+        // The extra CJK character fits within the legacy 3px allowance, but not within the box.
+        expect(__testing.isGlyphGroupBeyondDivideWidth([glyph], 840, 847.428, false, tolerance)).toBe(overflow);
+        expect(__testing.isGlyphGroupBeyondDivideWidth([glyph], 837.428, 847.428, false, tolerance)).toBe(false);
+    });
+
     it('uses trailing CJK punctuation shrinkability when deciding line overflow', () => {
         const text = createGlyph('字', 10);
         const punctuation = createGlyph('，', 10);
@@ -297,13 +309,17 @@ describe('layout-ruler', () => {
         expect(__testing.isGlyphGroupBeyondDivideWidth([text, punctuation], 85, 100)).toBe(true);
     });
 
-    it('allows explicit hanging punctuation to extend beyond the line end', () => {
+    it.each(['', '\r', '\u2028'])('allows explicit hanging punctuation before a terminal control (%j)', (control) => {
         const text = createGlyph('字', 10);
         const punctuation = createGlyph('。', 10);
         punctuation.adjustability.shrinkability = [0, 0];
+        const glyphs = [text, punctuation];
+        if (control) {
+            glyphs.push(createGlyph(control, 0), createGlyph('', 0));
+        }
 
-        expect(__testing.isGlyphGroupBeyondDivideWidth([text, punctuation], 85, 100)).toBe(true);
-        expect(__testing.isGlyphGroupBeyondDivideWidth([text, punctuation], 85, 100, true)).toBe(false);
+        expect(__testing.isGlyphGroupBeyondDivideWidth(glyphs, 85, 100)).toBe(true);
+        expect(__testing.isGlyphGroupBeyondDivideWidth(glyphs, 85, 100, true)).toBe(false);
     });
 
     it('keeps direct paragraph indents before bullet list defaults', () => {
@@ -635,6 +651,47 @@ describe('layout-ruler', () => {
         const metrics = getLineHeightMetrics(16, 0, 15.6, GridType.LINES, 1.5, SpacingRule.AUTO, BooleanNumber.FALSE, true);
 
         expect(getLineBoxHeight(metrics)).toBeCloseTo(24, 4);
+    });
+
+    it.each([
+        { fontSize: 10.5, lineSpacing: 1.5, spacingRule: SpacingRule.AUTO, expectedHeight: 25.2 },
+        { fontSize: 9, lineSpacing: 1.5, spacingRule: SpacingRule.AUTO, expectedHeight: 21.6 },
+        { fontSize: 10.5, lineSpacing: 12, spacingRule: SpacingRule.EXACT, expectedHeight: 12 },
+        { fontSize: 9, lineSpacing: 11, spacingRule: SpacingRule.EXACT, expectedHeight: 11 },
+    ])('preserves PowerPoint shape line spacing $lineSpacing / $spacingRule at $fontSize pt', ({ fontSize, lineSpacing, spacingRule, expectedHeight }) => {
+        const { ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed('ab', {
+            body: {
+                sectionBreaks: [{ startIndex: 3, renderConfig: { shapeTextAutoLineSpacing: BooleanNumber.TRUE } }],
+            },
+            documentStyle: {
+                pageSize: { width: 300, height: 300 },
+                marginTop: 0,
+                marginBottom: 0,
+                paragraphLineGapDefault: 0,
+                renderConfig: { shapeTextAutoLineSpacing: BooleanNumber.TRUE },
+            },
+        });
+        const glyphs = ['a', 'b', '\r'].map((character) => {
+            const glyph = createGlyph(character, character === '\r' ? 0 : 12);
+            glyph.fontStyle!.originFontSize = character === '\r' ? 14 : fontSize;
+            glyph.bBox.ba = 15;
+            glyph.bBox.bd = 4;
+            if (character === '\r') {
+                glyph.streamType = DataStreamTreeTokenType.PARAGRAPH;
+            }
+            return glyph;
+        });
+        const paragraphConfig: IParagraphConfig = {
+            paragraphIndex: paragraphNode.endIndex,
+            paragraphStyle: { lineSpacing, spacingRule, snapToGrid: BooleanNumber.FALSE },
+            useWordStyleLineHeight: false,
+            skeHeaders: ctx.skeletonResourceReference.skeHeaders,
+            skeFooters: ctx.skeletonResourceReference.skeFooters,
+        };
+        const result = layoutParagraph(ctx, glyphs, [curPage], sectionBreakConfig, paragraphConfig, true);
+        const lines = result[0].sections[0].columns[0].lines;
+        expect(lines).toHaveLength(1);
+        expect(lines[0].lineHeight).toBeCloseTo(expectedHeight, 4);
     });
 
     it('uses the font normal line height as the base for Word auto spacing', () => {

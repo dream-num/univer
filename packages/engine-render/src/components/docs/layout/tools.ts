@@ -1593,6 +1593,7 @@ interface IFontCreateConfig {
     gridType: GridType;
     snapToGrid: BooleanNumber;
     pageWidth: number;
+    glyphAdvanceStep?: number;
 }
 
 const fontCreateConfigCache = new ObjectMatrix<IFontCreateConfig>();
@@ -1626,6 +1627,7 @@ export function getFontConfigFromLastGlyph(
         charSpace,
         gridType,
         snapToGrid,
+        glyphAdvanceStep: sectionBreakConfig.renderConfig?.glyphAdvanceStep,
         pageWidth,
     };
 
@@ -1719,6 +1721,7 @@ export function getFontCreateConfig(
         charSpace,
         gridType,
         snapToGrid,
+        glyphAdvanceStep: renderConfig.glyphAdvanceStep,
         documentCompatibilityPolicy: sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy(),
         pageWidth,
     };
@@ -1998,6 +2001,7 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
         marginFooter: global_marginFooter = 0,
 
         autoHyphenation = BooleanNumber.FALSE,
+        spaceWidthEastAsian,
         doNotHyphenateCaps = BooleanNumber.FALSE,
         consecutiveHyphenLimit = Number.POSITIVE_INFINITY,
         hyphenationZone,
@@ -2093,6 +2097,7 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
         renderConfig,
 
         autoHyphenation,
+        spaceWidthEastAsian,
         doNotHyphenateCaps,
         consecutiveHyphenLimit,
         hyphenationZone,

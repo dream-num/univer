@@ -594,6 +594,9 @@ export interface IDocumentRenderConfig {
     isRenderStyle?: BooleanNumber; // Whether to render the style(textRuns), used in formula bar editor. the default value is TRUE.
     zeroWidthParagraphBreak?: BooleanNumber; // Whether to render the paragraph \r to zero width. the default value is false.
     shapeTextOpticalVerticalAlign?: BooleanNumber; // Align shape text by visible glyph bounds instead of the font line box.
+    shapeTextAutoLineSpacing?: BooleanNumber; // PowerPoint spacing: percentages use a 1.2-em nominal line; exact spacing may be smaller than glyph bounds.
+    lineWrapTolerance?: number; // Allowed line-width overflow in layout pixels; 0 enforces the content-box boundary.
+    glyphAdvanceStep?: number; // Positive finite quantum for measured glyph advances, in layout pixels; omitted keeps full precision.
 }
 
 export interface ISectionBreakBase {

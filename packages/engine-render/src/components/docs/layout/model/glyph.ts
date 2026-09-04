@@ -267,6 +267,13 @@ export function _createSkeletonWordOrLetter(
         bBox = { ...bBox, width: 0 };
     }
 
+    const { glyphAdvanceStep } = config;
+    if (glyphWidth == null && glyphAdvanceStep != null && Number.isFinite(glyphAdvanceStep) && glyphAdvanceStep > 0) {
+        const roundedWidth = Math.round(bBox.width / glyphAdvanceStep) * glyphAdvanceStep;
+        if (Number.isFinite(roundedWidth)) {
+            bBox = { ...bBox, width: roundedWidth };
+        }
+    }
     const { width: contentWidth = 0 } = bBox;
     let width = glyphWidth ?? contentWidth;
 

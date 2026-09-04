@@ -15,14 +15,104 @@
  */
 
 import type { ICustomRangeForInterceptor } from '@univerjs/core';
-import { BooleanNumber, CustomRangeType, DataStreamTreeTokenType, PositionedObjectLayoutType } from '@univerjs/core';
+import {
+    BooleanNumber,
+    CustomRangeType,
+    DataStreamTreeTokenType,
+    DocumentFlavor,
+    PositionedObjectLayoutType,
+} from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { Lang } from '../../../hyphenation/lang';
 import { createSkeletonLetterGlyph } from '../../../model/glyph';
+import { FontCache } from '../../../shaping-engine/font-cache';
+import { clearFontCreateConfigCache } from '../../../tools';
 import { shaping } from '../shaping';
 import { createParagraphLayoutTestBed } from './create-paragraph-layout-test-bed';
 
 describe('shaping', () => {
+    it.each([undefined, 0, -1, Number.NaN, Number.POSITIVE_INFINITY, Number.MIN_VALUE, 0.125])('uses only a valid glyph advance step: %s', (glyphAdvanceStep) => {
+        const measuredWidth = 6.1572265625;
+        const measure = vi.spyOn(FontCache, 'getMeasureText').mockReturnValue({
+            width: measuredWidth,
+            fontBoundingBoxAscent: 11,
+            fontBoundingBoxDescent: 3,
+            actualBoundingBoxAscent: 11,
+            actualBoundingBoxDescent: 3,
+        });
+        try {
+            clearFontCreateConfigCache();
+            const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('h', {
+                documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL, renderConfig: { glyphAdvanceStep } },
+            });
+            const glyph = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig)
+                .flatMap((item) => item.glyphs)
+                .find((item) => item.content === 'h')!;
+            expect(glyph.width).toBe(glyphAdvanceStep === 0.125 ? 6.125 : measuredWidth);
+            expect(glyph.bBox.width).toBe(glyph.width);
+            const explicit = createSkeletonLetterGlyph('h', {
+                fontStyle: glyph.fontStyle!,
+                textStyle: {},
+                charSpace: 0,
+                snapToGrid: BooleanNumber.FALSE,
+                glyphAdvanceStep,
+            }, 6.157);
+            expect(explicit.width).toBe(6.157);
+        } finally {
+            measure.mockRestore();
+        }
+    });
+
+    it.each([
+        [undefined, undefined, true],
+        [BooleanNumber.FALSE, undefined, false],
+        [BooleanNumber.FALSE, BooleanNumber.TRUE, true],
+        [BooleanNumber.TRUE, BooleanNumber.FALSE, false],
+    ] as const)('resolves link wrapping from document %s and paragraph %s', (defaultWordWrap, wordWrap, allowBreaks) => {
+        const link = 'http://www.swsresearch.com';
+        const content = `公司${link}网站`;
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed(content, {
+            documentStyle: { defaultParagraphStyle: { wordWrap: defaultWordWrap } },
+            body: { paragraphs: [{ startIndex: content.length, paragraphId: 'link', paragraphStyle: { wordWrap } }] },
+        });
+        const result = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+        expect(result.map((item) => item.text).join('')).toBe(`${content}\r`);
+        expect(result.some((item) => item.text === link)).toBe(!allowBreaks);
+    });
+
+    it('honors disabled East Asian spacing while preserving the default and explicit enabled spacing', () => {
+        // Node has no canvas font measurements; keep the browser boundary deterministic.
+        const measure = vi.spyOn(FontCache, 'getMeasureText').mockReturnValue({
+            width: 24,
+            fontBoundingBoxAscent: 20,
+            fontBoundingBoxDescent: 4,
+            actualBoundingBoxAscent: 20,
+            actualBoundingBoxDescent: 4,
+        });
+        const shape = (spaceWidthEastAsian?: BooleanNumber) => {
+            const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('中A文2字 文 A', {
+                documentStyle: { spaceWidthEastAsian },
+            });
+            return shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig)
+                .flatMap((item) => item.glyphs)
+                .map(({ content, width, xOffset, adjustability }) => ({ content, width, xOffset, adjustability }));
+        };
+        try {
+            const disabled = shape(BooleanNumber.FALSE);
+            const enabled = shape(BooleanNumber.TRUE);
+            expect(shape()).toEqual(enabled);
+            expect(disabled.map((glyph) => glyph.content)).toEqual(enabled.map((glyph) => glyph.content));
+            const plainWidth = disabled[0].width;
+            expect(plainWidth).toBeGreaterThan(0);
+            expect(enabled[0].width - disabled[0].width).toBeCloseTo(plainWidth / 4);
+            expect(enabled[2].width - disabled[2].width).toBeCloseTo(plainWidth / 2);
+            expect(enabled[4].xOffset - disabled[4].xOffset).toBeCloseTo(plainWidth / 4);
+            expect(enabled.slice(5)).toEqual(disabled.slice(5));
+        } finally {
+            measure.mockRestore();
+        }
+    });
+
     it('uses paragraph text style for an empty traditional paragraph mark', () => {
         const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('', {
             documentStyle: {

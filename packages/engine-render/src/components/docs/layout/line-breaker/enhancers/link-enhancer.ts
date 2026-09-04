@@ -114,7 +114,8 @@ export class LineBreakerLinkEnhancer implements IBreakPoints {
     public content = '';
 
     constructor(
-        private _lineBreaker: IBreakPoints
+        private _lineBreaker: IBreakPoints,
+        private _allowLinkBreaks = true
     ) {
         this.content = _lineBreaker.content;
     }
@@ -135,7 +136,7 @@ export class LineBreakerLinkEnhancer implements IBreakPoints {
                 this._isInLink = true;
                 this._link = extractLink(this.content, this._curBreak.position);
                 // get link slice.
-                this._linkSlice = linebreakLink(this._link);
+                this._linkSlice = this._allowLinkBreaks ? linebreakLink(this._link) : [this._link];
                 this._index = 0;
 
                 while (this._nextBreak && this._nextBreak.position < this._curBreak.position + this._link.length) {

@@ -127,6 +127,22 @@ describe('ToolbarItem', () => {
         expect(await findByText('Format rows')).toBeTruthy();
     });
 
+    it('keeps a custom selector label as the only keyboard focus target', () => {
+        const { container } = renderWithDependencies(
+            <ToolbarItem
+                id="test-custom-selector"
+                type={MenuItemType.SELECTOR}
+                label={{ name: 'TestDynamicOption' }}
+                selections={[{ label: 'Format rows', value: 'row' }]}
+            />
+        );
+        const trigger = container.querySelector('.univer-toolbar-selector-root') as HTMLElement;
+
+        expect(trigger.getAttribute('role')).toBeNull();
+        expect(trigger.getAttribute('tabindex')).toBeNull();
+        expect(trigger.querySelector('button')).toBeTruthy();
+    });
+
     it('closes open selector options when the parent becomes disabled', async () => {
         const disabled$ = new BehaviorSubject(false);
         const { container, findByText, queryByText } = renderWithDependencies(

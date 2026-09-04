@@ -17,7 +17,7 @@
 import type { ICustomRangeForInterceptor } from '@univerjs/core';
 import type { IDocsCustomBlockRenderViewport } from '@univerjs/engine-render';
 import type { IMessageProtocol } from '@univerjs/rpc';
-import type { IDocLayoutCancelRequest, IDocLayoutCreateSessionRequest, IDocLayoutDisposeMountRequest, IDocLayoutDisposeSessionRequest, IDocLayoutMountIdentity, IDocLayoutPageRequest, IDocLayoutPageResult, IDocLayoutPerformanceMetrics, IDocLayoutStartRequest, IDocLayoutStartResult, IDocLayoutStepRequest, IDocLayoutStepResult } from '../services/doc-layout-executor.service';
+import type { IDocLayoutCancelRequest, IDocLayoutCreateSessionRequest, IDocLayoutCustomRangePresentationEntry, IDocLayoutDisposeMountRequest, IDocLayoutDisposeSessionRequest, IDocLayoutMountIdentity, IDocLayoutPageRequest, IDocLayoutPageResult, IDocLayoutPerformanceMetrics, IDocLayoutStartRequest, IDocLayoutStartResult, IDocLayoutStepRequest, IDocLayoutStepResult } from '../services/doc-layout-executor.service';
 import type { IDocsLayoutWorkerCapabilities, IDocsLayoutWorkerRuntime } from './protocol';
 import { DocumentDataModel, LocaleService, requestImmediateMacroTask, Tools } from '@univerjs/core';
 import { DocumentLayoutSession, FontCache, setDocsCustomBlockRenderViewportProvider } from '@univerjs/engine-render';
@@ -43,6 +43,7 @@ interface IDocsLayoutWorkerSession {
     layoutSessions: Map<string, IDocsLayoutWorkerMount>;
     localeService: LocaleService;
     modelRevision: number;
+    customRangePresentations: Map<string, IDocLayoutCustomRangePresentationEntry>;
 }
 
 interface IDocsLayoutWorkerMount {
@@ -71,6 +72,25 @@ function createDocsLayoutWorkerMessageProtocol(
             return () => removeEventListener('message', handler);
         }).pipe(shareReplay({ bufferSize: 1, refCount: true })),
     };
+}
+
+function getCustomRangePresentationKey(
+    entry: Pick<IDocLayoutCustomRangePresentationEntry, 'segmentId' | 'rangeId'>
+): string {
+    return JSON.stringify([entry.segmentId, entry.rangeId]);
+}
+
+function applyRecordPatch<T>(
+    target: Record<string, T>,
+    patch: { removals: string[]; upserts: Record<string, T> } | undefined
+): void {
+    if (patch == null) {
+        return;
+    }
+    for (const key of patch.removals) {
+        delete target[key];
+    }
+    Object.assign(target, patch.upserts);
 }
 
 export class DocsLayoutWorkerRuntime implements IDocsLayoutWorkerRuntime {
@@ -135,6 +155,7 @@ export class DocsLayoutWorkerRuntime implements IDocsLayoutWorkerRuntime {
             layoutSessions: new Map(),
             localeService,
             modelRevision: request.modelRevision,
+            customRangePresentations: new Map(),
         });
     }
 
@@ -158,7 +179,8 @@ export class DocsLayoutWorkerRuntime implements IDocsLayoutWorkerRuntime {
             };
         }
 
-        this._applyCustomRangePresentations(session.dataModel, request.customRangePresentations ?? []);
+        this._updateCustomRangePresentations(session, request);
+        this._applyCustomRangePresentations(session.dataModel, Array.from(session.customRangePresentations.values()));
 
         let mount = session.layoutSessions.get(request.mountId);
         if (
@@ -175,10 +197,12 @@ export class DocsLayoutWorkerRuntime implements IDocsLayoutWorkerRuntime {
             mount = undefined;
         }
         if (mount == null) {
+            const customBlockViewports = { ...(request.customBlockViewports ?? {}) };
+            applyRecordPatch(customBlockViewports, request.customBlockViewportPatch);
             mount = {
                 mountId: request.mountId,
                 layoutSession: new DocumentLayoutSession(session.dataModel, session.localeService),
-                customBlockViewports: request.customBlockViewports,
+                customBlockViewports,
                 metricsRevision: request.metricsRevision,
                 mountEpoch: request.mountEpoch,
                 viewportEpoch: request.viewportEpoch,
@@ -187,7 +211,10 @@ export class DocsLayoutWorkerRuntime implements IDocsLayoutWorkerRuntime {
             };
             session.layoutSessions.set(request.mountId, mount);
         } else {
-            mount.customBlockViewports = request.customBlockViewports;
+            if (request.customBlockViewports != null) {
+                mount.customBlockViewports = { ...request.customBlockViewports };
+            }
+            applyRecordPatch(mount.customBlockViewports, request.customBlockViewportPatch);
             mount.metricsRevision = request.metricsRevision;
             mount.viewportEpoch = request.viewportEpoch;
         }
@@ -265,6 +292,27 @@ export class DocsLayoutWorkerRuntime implements IDocsLayoutWorkerRuntime {
                 Object.assign(range, presentation);
                 rangeMap?.delete(rangeId);
             }
+        }
+    }
+
+    private _updateCustomRangePresentations(
+        session: IDocsLayoutWorkerSession,
+        request: IDocLayoutStartRequest
+    ): void {
+        if (request.customRangePresentations != null) {
+            session.customRangePresentations.clear();
+            for (const entry of request.customRangePresentations) {
+                const key = getCustomRangePresentationKey(entry);
+                if (!session.customRangePresentations.has(key)) {
+                    session.customRangePresentations.set(key, entry);
+                }
+            }
+        }
+        for (const removal of request.customRangePresentationPatch?.removals ?? []) {
+            session.customRangePresentations.delete(getCustomRangePresentationKey(removal));
+        }
+        for (const entry of request.customRangePresentationPatch?.upserts ?? []) {
+            session.customRangePresentations.set(getCustomRangePresentationKey(entry), entry);
         }
     }
 

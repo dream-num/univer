@@ -611,12 +611,13 @@ describe('DocLayoutExecutorService', () => {
         const service = injector.get(DocLayoutExecutorService);
         const executor = createExecutor();
         service.register(executor);
+        let extraWidth = 10;
         const unregister = setDocsCustomBlockRenderViewportProvider((unitId, blockId, input) => {
             if (unitId !== 'traditional-doc' || blockId !== 'embed-1') {
                 return null;
             }
             return {
-                width: input.fallbackWidth + 10,
+                width: input.fallbackWidth + extraWidth,
                 height: input.fallbackHeight + 20,
                 contentWidth: 640,
                 contentHeight: 480,
@@ -655,6 +656,26 @@ describe('DocLayoutExecutorService', () => {
                     height: 100,
                     contentWidth: 640,
                     contentHeight: 480,
+                },
+            },
+        }));
+
+        await service.startLayout(createMountIdentity(), { reason: 'edit' }, 32);
+        expect(vi.mocked(executor.startLayout).mock.lastCall?.[0]).not.toHaveProperty('customBlockViewportPatch');
+        expect(vi.mocked(executor.startLayout).mock.lastCall?.[0]).not.toHaveProperty('customBlockViewports');
+
+        extraWidth = 20;
+        await service.startLayout(createMountIdentity(), { reason: 'edit' }, 32);
+        expect(vi.mocked(executor.startLayout).mock.lastCall?.[0]).toEqual(expect.objectContaining({
+            customBlockViewportPatch: {
+                removals: [],
+                upserts: {
+                    'embed-1': {
+                        width: 120,
+                        height: 100,
+                        contentWidth: 640,
+                        contentHeight: 480,
+                    },
                 },
             },
         }));
@@ -738,6 +759,10 @@ describe('DocLayoutExecutorService', () => {
                 },
             ],
         }));
+
+        await service.startLayout(createMountIdentity(), { reason: 'edit' }, 32);
+        expect(vi.mocked(executor.startLayout).mock.lastCall?.[0]).not.toHaveProperty('customRangePresentationPatch');
+        expect(vi.mocked(executor.startLayout).mock.lastCall?.[0]).not.toHaveProperty('customRangePresentations');
     });
 
     it('skips queued layout starts that a newer edit superseded', async () => {

@@ -123,6 +123,32 @@ describe('DocsLayoutWorkerRuntime', () => {
         expect(dataModel.getBody()?.customRanges?.[0]).toMatchObject({ glyphWidthEm: 1 });
         expect(dataModel.getSelfOrHeaderFooterModel('header-1')?.getBody()?.customRanges?.[0]).toMatchObject({ glyphWidthEm: 2 });
         expect(dataModel.getSelfOrHeaderFooterModel('footer-1')?.getBody()?.customRanges?.[0]).toMatchObject({ glyphWidthEm: 3 });
+
+        await runtime.startLayout({
+            unitId,
+            mountId: 'mount-1',
+            mountEpoch: 1,
+            viewportEpoch: 1,
+            metricsRevision: 2,
+            baseRevision: 0,
+            modelRevision: 0,
+            mutations: [],
+            customBlockViewportPatch: { removals: [], upserts: {} },
+            customRangePresentationPatch: {
+                removals: [{ segmentId: '', rangeId: 'shared-range' }],
+                upserts: [{
+                    segmentId: 'header-1',
+                    rangeId: 'shared-range',
+                    presentation: { glyphWidthEm: 4 },
+                }],
+            },
+            reason: 'edit',
+            budgetMs: 0,
+        });
+
+        expect((dataModel.getBody()?.customRanges?.[0] as { glyphWidthEm?: number }).glyphWidthEm).toBeUndefined();
+        expect(dataModel.getSelfOrHeaderFooterModel('header-1')?.getBody()?.customRanges?.[0]).toMatchObject({ glyphWidthEm: 4 });
+        expect(dataModel.getSelfOrHeaderFooterModel('footer-1')?.getBody()?.customRanges?.[0]).toMatchObject({ glyphWidthEm: 3 });
     });
 
     it('applies many presentations with one bounded pass over each segment range list', () => {
@@ -187,7 +213,7 @@ describe('DocsLayoutWorkerRuntime', () => {
         });
 
         await expect(runtime.getCapabilities()).resolves.toMatchObject({
-            protocolVersion: 3,
+            protocolVersion: 4,
             executor: 'worker',
             offscreenCanvas: true,
             structuredClone: true,
@@ -296,6 +322,26 @@ describe('DocsLayoutWorkerRuntime', () => {
             throw new Error('Expected the custom block layout session to start.');
         }
         expect(JSON.stringify(customBlockStart.step.publication)).toContain('"width":222');
+
+        const updatedCustomBlockStart = await runtime.startLayout({
+            ...mountIdentity,
+            unitId: customBlockSnapshot.id,
+            mountId: 'custom-block-mount',
+            metricsRevision: 2,
+            baseRevision: 0,
+            modelRevision: 0,
+            mutations: [],
+            customBlockViewportPatch: {
+                removals: [],
+                upserts: { 'embed-1': { width: 333, height: 111, layoutWidth: 333 } },
+            },
+            reason: 'edit',
+            budgetMs: 32,
+        });
+        if (updatedCustomBlockStart.status !== DocLayoutSessionStatus.ACCEPTED) {
+            throw new Error('Expected the updated custom block layout session to start.');
+        }
+        expect(JSON.stringify(updatedCustomBlockStart.step.publication)).toContain('"width":333');
 
         const secondMountStart = await runtime.startLayout({
             ...mountIdentity,

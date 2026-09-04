@@ -298,6 +298,10 @@ export class EditorService extends Disposable implements IEditorService, IDispos
             return;
         }
 
+        if (this._focusEditorUnitId === editorUnitId) {
+            this.blur(true);
+        }
+
         const preserveHostFocus = this._editorRenderConfigs.get(editorUnitId)?.preserveHostFocus === true;
         const currentDoc = this._univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         const focusedHost = preserveHostFocus ? this._univerInstanceService.getFocusedUnit() : null;

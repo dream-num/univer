@@ -343,6 +343,26 @@ describe('DocsLayoutWorkerRuntime', () => {
         }
         expect(JSON.stringify(updatedCustomBlockStart.step.publication)).toContain('"width":333');
 
+        const resetCustomBlockStart = await runtime.startLayout({
+            ...mountIdentity,
+            unitId: customBlockSnapshot.id,
+            mountId: 'custom-block-mount',
+            metricsRevision: 3,
+            baseRevision: 0,
+            modelRevision: 0,
+            mutations: [],
+            customBlockViewportPatch: {
+                removals: ['embed-1'],
+                upserts: {},
+            },
+            reason: 'edit',
+            budgetMs: 32,
+        });
+        if (resetCustomBlockStart.status !== DocLayoutSessionStatus.ACCEPTED) {
+            throw new Error('Expected the reset custom block layout session to start.');
+        }
+        expect(JSON.stringify(resetCustomBlockStart.step.publication)).toContain('"width":100');
+
         const secondMountStart = await runtime.startLayout({
             ...mountIdentity,
             unitId,

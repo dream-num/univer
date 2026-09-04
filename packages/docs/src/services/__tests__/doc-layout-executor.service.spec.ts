@@ -612,8 +612,9 @@ describe('DocLayoutExecutorService', () => {
         const executor = createExecutor();
         service.register(executor);
         let extraWidth = 10;
+        let viewportEnabled = true;
         const unregister = setDocsCustomBlockRenderViewportProvider((unitId, blockId, input) => {
-            if (unitId !== 'traditional-doc' || blockId !== 'embed-1') {
+            if (!viewportEnabled || unitId !== 'traditional-doc' || blockId !== 'embed-1') {
                 return null;
             }
             return {
@@ -627,7 +628,10 @@ describe('DocLayoutExecutorService', () => {
         documentData.body = {
             dataStream: '\b\r\n',
             paragraphs: [{ paragraphId: 'paragraph-1', startIndex: 1 }],
-            customBlocks: [{ startIndex: 0, blockId: 'embed-1' }],
+            customBlocks: [
+                { startIndex: 0, blockId: 'embed-1' },
+                { startIndex: 0, blockId: 'missing-drawing' },
+            ],
         };
         documentData.drawings = {
             'embed-1': {
@@ -679,6 +683,15 @@ describe('DocLayoutExecutorService', () => {
                 },
             },
         }));
+
+        viewportEnabled = false;
+        await service.startLayout(createMountIdentity(), { reason: 'edit' }, 32);
+        expect(vi.mocked(executor.startLayout).mock.lastCall?.[0]).toEqual(expect.objectContaining({
+            customBlockViewportPatch: {
+                removals: ['embed-1'],
+                upserts: {},
+            },
+        }));
         unregister();
     });
 
@@ -687,8 +700,9 @@ describe('DocLayoutExecutorService', () => {
         const service = injector.get(DocLayoutExecutorService);
         const executor = createExecutor();
         service.register(executor);
-        service.registerCustomRangePresentationProvider((_unitId, range) => ({
-            glyphWidthEm: range.startIndex + 1,
+        let glyphWidthOffset = 1;
+        const registration = service.registerCustomRangePresentationProvider((_unitId, range) => ({
+            glyphWidthEm: range.startIndex + glyphWidthOffset,
         }));
         const documentData = createDocumentData('traditional-doc', DocumentFlavor.TRADITIONAL);
         documentData.body!.customRanges = [
@@ -763,6 +777,22 @@ describe('DocLayoutExecutorService', () => {
         await service.startLayout(createMountIdentity(), { reason: 'edit' }, 32);
         expect(vi.mocked(executor.startLayout).mock.lastCall?.[0]).not.toHaveProperty('customRangePresentationPatch');
         expect(vi.mocked(executor.startLayout).mock.lastCall?.[0]).not.toHaveProperty('customRangePresentations');
+
+        glyphWidthOffset = 10;
+        await service.startLayout(createMountIdentity(), { reason: 'edit' }, 32);
+        expect(vi.mocked(executor.startLayout).mock.lastCall?.[0]?.customRangePresentationPatch?.upserts).toEqual([
+            { segmentId: '', rangeId: 'shared-range', presentation: { glyphWidthEm: 10 } },
+            { segmentId: 'header-1', rangeId: 'shared-range', presentation: { glyphWidthEm: 11 } },
+            { segmentId: 'footer-1', rangeId: 'shared-range', presentation: { glyphWidthEm: 12 } },
+        ]);
+
+        registration.dispose();
+        await service.startLayout(createMountIdentity(), { reason: 'edit' }, 32);
+        expect(vi.mocked(executor.startLayout).mock.lastCall?.[0]?.customRangePresentationPatch?.removals).toEqual([
+            { segmentId: '', rangeId: 'shared-range' },
+            { segmentId: 'header-1', rangeId: 'shared-range' },
+            { segmentId: 'footer-1', rangeId: 'shared-range' },
+        ]);
     });
 
     it('skips queued layout starts that a newer edit superseded', async () => {

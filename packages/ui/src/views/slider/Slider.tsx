@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { PointerEvent as ReactPointerEvent } from 'react';
+import type { KeyboardEvent as ReactKeyboardEvent, PointerEvent as ReactPointerEvent } from 'react';
 import { LocaleService } from '@univerjs/core';
 import { borderClassName, Button, clsx } from '@univerjs/design';
 import { useEffect, useRef, useState } from 'react';
@@ -103,6 +103,25 @@ export function Slider(props: ISliderProps) {
             result = max;
         }
         onChange && onChange(result);
+    }
+
+    function handleSliderKeyDown(e: ReactKeyboardEvent<HTMLButtonElement>) {
+        let nextValue: number | null = null;
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowDown' || e.key === 'PageDown') {
+            nextValue = e.key === 'PageDown' ? value - 100 : value - 10;
+        } else if (e.key === 'ArrowRight' || e.key === 'ArrowUp' || e.key === 'PageUp') {
+            nextValue = e.key === 'PageUp' ? value + 100 : value + 10;
+        } else if (e.key === 'Home') {
+            nextValue = min;
+        } else if (e.key === 'End') {
+            nextValue = max;
+        }
+        if (nextValue === null || disabled) {
+            return;
+        }
+        e.preventDefault();
+        e.stopPropagation();
+        onChange?.(clampValue(nextValue));
     }
 
     function getSliderOffset(sliderValue: number) {
@@ -251,6 +270,7 @@ export function Slider(props: ISliderProps) {
                 className="univer-size-6 univer-p-0"
                 size="small"
                 variant="text"
+                aria-label={localeService.t('design.Accessibility.zoomOut')}
                 disabled={value <= min || disabled}
                 onClick={() => handleStep(-10)}
             >
@@ -301,7 +321,18 @@ export function Slider(props: ISliderProps) {
                               dark:!univer-border-gray-700 dark:!univer-bg-gray-300
                             `}
                             role="button"
+                            tabIndex={disabled ? -1 : 0}
+                            aria-label={localeService.t('design.Accessibility.resetZoom')}
+                            aria-disabled={disabled}
                             onClick={handleReset}
+                            onKeyDown={(e) => {
+                                if (e.key !== 'Enter' && e.key !== ' ') {
+                                    return;
+                                }
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleReset();
+                            }}
                         />
 
                         <button
@@ -318,14 +349,18 @@ export function Slider(props: ISliderProps) {
                                 'univer-scale-105 univer-border-primary-600 univer-shadow-md': isDragging,
                             })}
                             role="slider"
+                            aria-label={localeService.t('design.Accessibility.zoom')}
                             aria-valuemin={min}
                             aria-valuemax={max}
                             aria-valuenow={visualValue}
+                            aria-valuetext={`${visualValue}%`}
+                            disabled={disabled}
                             type="button"
                             style={{
                                 left: `${handleOffset}%`,
                             }}
                             onPointerDown={handlePointerDown}
+                            onKeyDown={handleSliderKeyDown}
                         />
                     </div>
                 </div>
@@ -335,6 +370,7 @@ export function Slider(props: ISliderProps) {
                 className="univer-size-6 univer-p-0"
                 size="small"
                 variant="text"
+                aria-label={localeService.t('design.Accessibility.zoomIn')}
                 disabled={value >= max || disabled}
                 onClick={() => handleStep(10)}
             >

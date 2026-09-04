@@ -182,6 +182,19 @@ describe('ToolbarItem', () => {
         expect(getByText('Format')).toBeTruthy();
     });
 
+    it('uses the tooltip as the accessible name for an icon-only button', () => {
+        const { getByRole } = renderWithDependencies(
+            <ToolbarItem
+                id="test-icon-button"
+                type={MenuItemType.BUTTON}
+                icon="TestIcon"
+                tooltip="Undo"
+            />
+        );
+
+        expect(getByRole('button', { name: 'Undo' })).toBeTruthy();
+    });
+
     it('shows a title for a large Grid button selector', () => {
         const { getByText } = renderWithDependencies(
             <ToolbarItem

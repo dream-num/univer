@@ -26,6 +26,7 @@ const locale: typeof enUS = {
             next: 'Tiếp theo',
             imageGallery: 'Thư viện ảnh',
             image: 'Ảnh {0} trên {1}',
+            zoom: 'Thu phóng',
             zoomIn: 'Phóng to',
             zoomOut: 'Thu nhỏ',
             resetZoom: 'Đặt lại thu phóng',

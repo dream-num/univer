@@ -401,6 +401,11 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
 
     function renderButtonType() {
         const isCustomComponent = componentManager.get(typeof label === 'string' ? label : label?.name ?? '');
+        const buttonAriaLabel = tooltip
+            ? localeService.t(tooltip)
+            : typeof title === 'string'
+                ? localeService.t(title)
+                : undefined;
         const buttonClassName = clsx(grid && !large && `
           univer-h-full univer-min-w-8
           [&>svg]:univer-size-4
@@ -445,6 +450,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
         return (
             <ToolbarButton
                 data-u-command={id}
+                aria-label={buttonAriaLabel}
                 className={buttonClassName}
                 style={buttonStyle}
                 noIcon={!icon}

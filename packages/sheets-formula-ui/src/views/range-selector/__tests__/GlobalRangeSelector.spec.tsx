@@ -32,7 +32,7 @@ import { IEditorService } from '@univerjs/docs-ui';
 import { IDescriptionService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { IMarkSelectionService } from '@univerjs/sheets-ui';
-import { IDialogService, RediContext } from '@univerjs/ui';
+import { IDialogService, ILayoutService, RediContext } from '@univerjs/ui';
 import { act, createRef } from 'react';
 import { createRoot } from 'react-dom/client';
 import { of, Subject } from 'rxjs';
@@ -100,13 +100,17 @@ class TestEditorService {
     readonly blur$ = new Subject<void>();
     readonly focus$ = new Subject<{ unitId: string }>();
 
-    blur(): void {
+    readonly blur = vi.fn(() => {
         this.blur$.next();
-    }
+    });
 
-    focus(unitId: string): void {
+    readonly focus = vi.fn((unitId: string) => {
         this.focus$.next({ unitId });
-    }
+    });
+}
+
+class TestLayoutService {
+    readonly focus = vi.fn();
 }
 
 class TestDescriptionService {
@@ -168,6 +172,7 @@ function createGlobalRangeSelectorTestBed() {
     injector.add([IDescriptionService, { useClass: TestDescriptionService as never }]);
     injector.add([ICommandService, { useClass: TestCommandService as never }]);
     injector.add([IEditorService, { useClass: TestEditorService as never }]);
+    injector.add([ILayoutService, { useClass: TestLayoutService as never }]);
     injector.add([IMarkSelectionService, { useClass: TestMarkSelectionService as never }]);
     injector.add([SheetsSelectionsService, { useClass: TestSheetsSelectionsService as never }]);
     injector.add([IUniverInstanceService, { useClass: TestUniverInstanceService as never }]);
@@ -193,6 +198,8 @@ function createGlobalRangeSelectorTestBed() {
         injector,
         service: injector.get(GlobalRangeSelectorService),
         commandService: injector.get(ICommandService) as unknown as TestCommandService,
+        editorService: injector.get(IEditorService) as unknown as TestEditorService,
+        layoutService: injector.get(ILayoutService) as unknown as TestLayoutService,
     };
 }
 
@@ -392,7 +399,7 @@ describe('GlobalRangeSelector', () => {
     });
 
     it('confirms the typed range without leaving the temporary range selection active', async () => {
-        const { commandService, injector } = createGlobalRangeSelectorTestBed();
+        const { commandService, editorService, injector, layoutService } = createGlobalRangeSelectorTestBed();
         const selectorRef = createRef<IRangeSelectorInstance | null>();
         const resetRange: ISelectionWithStyle[] = [{
             range: {
@@ -404,6 +411,7 @@ describe('GlobalRangeSelector', () => {
             primary: null,
         } as ISelectionWithStyle];
         const changes: string[] = [];
+        const confirmations: string[] = [];
 
         await act(async () => {
             root.render(
@@ -415,6 +423,7 @@ describe('GlobalRangeSelector', () => {
                         selectorRef={selectorRef}
                         resetRange={resetRange}
                         onChange={(_, value) => changes.push(value)}
+                        onConfirm={(_, value) => confirmations.push(value)}
                     />
                 </RediContext.Provider>
             );
@@ -434,9 +443,19 @@ describe('GlobalRangeSelector', () => {
             await Promise.resolve();
         });
 
+        editorService.blur.mockClear();
+        layoutService.focus.mockClear();
         await clickButton('Confirm');
+        await act(async () => {
+            await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+        });
 
         expect(changes).toEqual(['D4:E5']);
+        expect(confirmations).toEqual(['D4:E5']);
+        expect(editorService.blur).toHaveBeenCalledOnce();
+        expect(layoutService.focus).toHaveBeenCalledOnce();
+        expect(editorService.blur.mock.invocationCallOrder[0])
+            .toBeLessThan(layoutService.focus.mock.invocationCallOrder[0]);
         expect(commandService.executed).toEqual([
             {
                 id: SetSelectionsOperation.id,

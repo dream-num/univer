@@ -33,7 +33,7 @@ import {
 } from '@univerjs/engine-formula';
 import { DeleteIcon, IncreaseIcon, SelectRangeIcon } from '@univerjs/icons';
 import { SetSelectionsOperation } from '@univerjs/sheets';
-import { useDependency, useEvent } from '@univerjs/ui';
+import { ILayoutService, useDependency, useEvent } from '@univerjs/ui';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { useStateRef } from '../formula-editor/hooks/use-state-ref';
 import { useRangesHighlight } from './hooks/use-ranges-highlight';
@@ -63,6 +63,7 @@ export interface IRangeSelectorProps extends IRichTextEditorProps {
     keepSheetReference?: boolean;
     selectorRef?: RefObject<IRangeSelectorInstance | null>;
     onVerify?: (res: boolean, rangeText: string) => void;
+    onConfirm?: (ranges: IUnitRangeName[], rangeText: string) => void;
     onRangeSelectorDialogVisibleChange?: (visible: boolean) => void;
     hideEditor?: boolean;
     forceShowDialogWhenSelectionChanged?: boolean;
@@ -299,6 +300,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
         keepSheetReference,
         autoFocus,
         onChange,
+        onConfirm,
         onRangeSelectorDialogVisibleChange,
         onClickOutside,
         onFocusChange,
@@ -312,6 +314,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
     const [rangeSelectorRanges, setRangeSelectorRanges] = useState<IUnitRangeName[]>([]);
     const localeService = useDependency(LocaleService);
     const editorService = useDependency(IEditorService);
+    const layoutService = useDependency(ILayoutService);
     const { sequenceNodes } = useRangesHighlight(editor, focusing, unitId, subUnitId);
     const sequenceNodesRef = useStateRef(sequenceNodes);
     const commandService = useDependency(ICommandService);
@@ -418,10 +421,12 @@ export function RangeSelector(props: IRangeSelectorProps) {
                     const documentData = RichTextBuilder.create().insertText(resultStr).getData();
                     editor?.replaceText(resultStr, false);
                     onChange?.(documentData, resultStr);
+                    onConfirm?.(ranges, resultStr);
                     setPopupVisible(false);
                     setRangeSelectorRanges([]);
                     requestAnimationFrame(() => {
                         blurEditor();
+                        layoutService.focus();
                     });
                 }}
                 onClose={() => {

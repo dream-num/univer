@@ -403,6 +403,33 @@ describe('DocumentViewModel', () => {
             expect(viewModel.getTableByStartIndex(0)?.tableSource).toEqual({ id: 'after' });
         });
 
+        it('refreshes named styles without rebuilding the document tree', () => {
+            const model = createDocumentDataModel({
+                snapshot: {
+                    styles: {
+                        'heading-1': {
+                            name: 'Heading 1',
+                            type: 1,
+                            paragraphStyle: { spaceBelow: { v: 0 } },
+                        },
+                    },
+                },
+            });
+            const viewModel = new DocumentViewModel(model);
+            const children = viewModel.getChildren();
+            const snapshot = model.getSnapshot();
+            snapshot.styles!['heading-1'].paragraphStyle!.spaceBelow = { v: 12 };
+            const actions = JSONX.getInstance().replaceOp(
+                ['styles', 'heading-1', 'paragraphStyle', 'spaceBelow', 'v'],
+                0,
+                12
+            );
+
+            expect(viewModel.resetByValidatedMetadataMutation(model, actions)).toBe(true);
+            expect(viewModel.getChildren()).toBe(children);
+            expect(viewModel.getSnapshot()?.styles?.['heading-1'].paragraphStyle?.spaceBelow).toEqual({ v: 12 });
+        });
+
         it('updates nested table-cell and column-group paragraphs without rebuilding their element trees', () => {
             const T = DataStreamTreeTokenType;
             const tableStream = [

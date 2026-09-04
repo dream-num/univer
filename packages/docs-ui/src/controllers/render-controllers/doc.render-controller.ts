@@ -47,7 +47,6 @@ import {
     JSON1,
     PositionedObjectLayoutType,
     RxDisposable,
-    TextX,
     TextXActionType,
     ThemeService,
     Tools,
@@ -86,26 +85,7 @@ import { IEditorService } from '../../services/editor/editor-manager.service';
 import { NodePositionConvertToCursor } from '../../services/selection/convert-text-range';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 import { getAnchorBounding } from '../../services/selection/text-range';
-
-function getBodyTextXActions(actions: JSONXActions, segmentId?: string): unknown[] | undefined {
-    if (segmentId || actions == null || actions.length !== 2 || actions[0] !== 'body') {
-        return undefined;
-    }
-
-    const editComponent = actions[1];
-    if (
-        typeof editComponent !== 'object' ||
-        editComponent == null ||
-        !('et' in editComponent) ||
-        editComponent.et !== TextX.name ||
-        !('e' in editComponent) ||
-        !Array.isArray(editComponent.e)
-    ) {
-        return undefined;
-    }
-
-    return editComponent.e;
-}
+import { getBodyTextXActions, getDocumentMutationLayoutImpact, getSingleBodyTextXActions, resolveMutationLayoutRequest } from './doc-mutation-layout';
 
 function getTextXActionLength(action: unknown): number | undefined {
     if (typeof action !== 'object' || action == null || !('t' in action) || !('len' in action)) {
@@ -153,7 +133,7 @@ function omitLayoutMetadata(value: Record<string, unknown>): Record<string, unkn
 }
 
 function isLayoutMetadataOnlyMutation(actions: JSONXActions, segmentId?: string): boolean {
-    const textActions = getBodyTextXActions(actions, segmentId);
+    const textActions = getSingleBodyTextXActions(actions, segmentId);
     return textActions != null && textActions.length > 0 && textActions.every((action) => {
         if (typeof action !== 'object' || action == null || !('t' in action) || action.t !== TextXActionType.RETAIN) {
             return false;
@@ -419,13 +399,15 @@ function findContinuousLayoutEndOffset(
 }
 
 type DocLayoutCoordinatorCallbacks = Parameters<DocLayoutCoordinatorService['schedule']>[2];
+const DRAWING_METADATA_FIELDS = new Set(['title', 'description']);
 
 /**
- * Returns false only when a mutation is proven to touch overlay-only drawings.
+ * Returns false only when a mutation is proven not to affect text layout.
  *
  * WRAP_NONE drawings are positioned independently from text, so moving, resizing,
  * rotating, or switching them between front/behind text must refresh drawing
- * geometry without starting a document layout generation. Every uncertain case
+ * geometry without starting a document layout generation. Accessibility metadata
+ * never participates in layout, regardless of wrapping mode. Every uncertain case
  * remains conservative and reflows.
  */
 export function doesDocMutationRequireLayout(
@@ -445,9 +427,15 @@ export function doesDocMutationRequireLayout(
         cursor.traverse(null, (component) => {
             sawComponent = true;
             const path = cursor.getPath();
+            if (path[0] === 'drawingsOrder') {
+                return;
+            }
             const drawingId = path[1];
             if (path[0] !== 'drawings' || typeof drawingId !== 'string') {
                 drawingOnly = false;
+                return;
+            }
+            if (path.length >= 3 && DRAWING_METADATA_FIELDS.has(String(path[2]))) {
                 return;
             }
 
@@ -469,8 +457,12 @@ export function doesDocMutationRequireLayout(
         return true;
     }
 
-    if (!sawComponent || !drawingOnly || transitions.size === 0) {
+    if (!sawComponent || !drawingOnly) {
         return true;
+    }
+
+    if (transitions.size === 0) {
+        return false;
     }
 
     for (const [drawingId, transition] of transitions) {
@@ -492,6 +484,7 @@ export function doesDocMutationRequireLayout(
 
 export class DocRenderController extends RxDisposable implements IRenderModule {
     private _changesetRenderScheduled = false;
+    private _pendingChangesetLayoutRequest: IDocLayoutWorkerEditBatch | null = null;
     private readonly _layoutCoordinator: DocLayoutCoordinatorService;
     private _layoutRequestId = 0;
     private _workerHandoffTimer: ReturnType<typeof setTimeout> | null = null;
@@ -629,6 +622,7 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         }
         this._pendingWorkerHandoff = null;
         this._pendingWorkerEditBatch = null;
+        this._pendingChangesetLayoutRequest = null;
         this._latestLayoutRestart = null;
         this._pendingImeLayoutRestart = null;
         this._pendingMaterializedPageRange = null;
@@ -1728,19 +1722,25 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
                 return;
             }
 
-            if (executionOptions?.fromChangeset) {
-                this._scheduleChangesetRender();
-                return;
-            }
-
-            if (!doesDocMutationRequireLayout(params.actions, this._context.unit.getSnapshot().drawings)) {
+            const snapshot = this._context.unit.getSnapshot();
+            if (!doesDocMutationRequireLayout(params.actions, snapshot.drawings)) {
                 return;
             }
             const bodyRanges = textRanges?.filter((range) => !range.segmentId) ?? [];
-            const invalidation = getBodyMutationInvalidation(params.actions, params.segmentId);
-            const anchor = invalidation?.oldStart ?? (bodyRanges.length > 0
-                ? Math.min(...bodyRanges.map((range) => range.startOffset))
-                : undefined);
+            const textInvalidation = getBodyMutationInvalidation(params.actions, params.segmentId);
+            const mutationLayoutImpact = getDocumentMutationLayoutImpact(
+                params.actions,
+                snapshot
+            );
+            const { anchor, invalidation } = resolveMutationLayoutRequest(
+                textInvalidation,
+                mutationLayoutImpact,
+                bodyRanges.map((range) => range.startOffset)
+            );
+            if (executionOptions?.fromChangeset) {
+                this._scheduleChangesetRender(anchor, invalidation);
+                return;
+            }
             const activeRange = this._getActiveEditingRange(unitId);
             const isRemoteMutation = params.isSync === true || executionOptions?.fromCollab === true;
             // Local mutations carry the post-edit selection. Prefer it over the
@@ -1813,7 +1813,19 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         }));
     }
 
-    private _scheduleChangesetRender(): void {
+    private _scheduleChangesetRender(
+        anchor: number | undefined,
+        invalidation: IDocumentLayoutInvalidation | undefined
+    ): void {
+        const pending = this._pendingChangesetLayoutRequest;
+        this._pendingChangesetLayoutRequest = pending == null
+            ? { anchor, invalidation }
+            : {
+                anchor: pending.anchor == null || anchor == null
+                    ? undefined
+                    : Math.min(pending.anchor, anchor),
+                invalidation: mergeDocumentLayoutInvalidations(pending.invalidation, invalidation),
+            };
         if (this._changesetRenderScheduled) {
             return;
         }
@@ -1825,7 +1837,13 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
                 return;
             }
 
-            this.reRender(this._context.unitId);
+            const request = this._pendingChangesetLayoutRequest;
+            this._pendingChangesetLayoutRequest = null;
+            this.reRender(
+                this._context.unitId,
+                request?.anchor,
+                request?.invalidation
+            );
         });
     }
 

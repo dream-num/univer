@@ -47,6 +47,10 @@ class TestCommandService {
 
 class TestLayoutService {
     focus(): void {}
+
+    checkElementInCurrentContainers(): boolean {
+        return true;
+    }
 }
 
 class TestMenuManagerService {
@@ -101,6 +105,28 @@ afterEach(() => {
 });
 
 describe('ToolbarItem', () => {
+    it('opens a selector menu from its keyboard-focusable trigger', async () => {
+        const { container, findByText } = renderWithDependencies(
+            <ToolbarItem
+                id="test-keyboard-selector"
+                type={MenuItemType.SELECTOR}
+                tooltip="Format"
+                icon="TestIcon"
+                selections={[{ label: 'Format rows', value: 'row' }]}
+            />
+        );
+        const trigger = container.querySelector('.univer-toolbar-selector-root') as HTMLElement;
+
+        expect(trigger.getAttribute('role')).toBe('button');
+        expect(trigger.getAttribute('tabindex')).toBe('0');
+        expect(trigger.getAttribute('aria-label')).toBe('Format');
+        trigger.focus();
+        expect(document.activeElement).toBe(trigger);
+        fireEvent.keyDown(trigger, { key: 'Enter' });
+
+        expect(await findByText('Format rows')).toBeTruthy();
+    });
+
     it('closes open selector options when the parent becomes disabled', async () => {
         const disabled$ = new BehaviorSubject(false);
         const { container, findByText, queryByText } = renderWithDependencies(

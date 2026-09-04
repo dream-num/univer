@@ -242,6 +242,13 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
         const bId = commandId ?? id;
         const sId = selectionsCommandId ?? commandId ?? id;
         const titleToDisplay = grid ? (showLabel ? gridLabel : large ? undefined : title) : title;
+        const customLabelName = typeof label === 'string' ? label : label?.name ?? '';
+        const hasCustomLabel = Boolean(componentManager.get(customLabelName));
+        const selectorAriaLabel = tooltip
+            ? localeService.t(tooltip)
+            : typeof titleToDisplay === 'string'
+                ? localeService.t(titleToDisplay)
+                : undefined;
 
         function handleSelect(option: IValueOption) {
             if (disabled) return;
@@ -331,6 +338,10 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                 >
                     <div
                         data-u-command={id}
+                        role={hasCustomLabel ? undefined : 'button'}
+                        tabIndex={hasCustomLabel ? undefined : disabled ? -1 : 0}
+                        aria-disabled={hasCustomLabel ? undefined : disabled}
+                        aria-label={hasCustomLabel ? undefined : selectorAriaLabel}
                         className={clsx(toolbarSelectorRootVariants({ disabled, active: activated }), {
                             'univer-box-border univer-h-full univer-min-w-14 univer-flex-col univer-justify-center univer-gap-1 univer-px-1.5 univer-py-1 univer-text-xs [&>svg]:univer-size-8': grid && large,
                             'univer-box-border univer-h-full': grid && !large,

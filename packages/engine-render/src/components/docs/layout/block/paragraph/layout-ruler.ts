@@ -507,9 +507,7 @@ function _divideOperator(
                     true,
                     undefined,
                     false,
-                    sectionBreakConfig.renderConfig?.shapeTextAutoLineSpacing === BooleanNumber.TRUE
-                        ? getShapeTextNominalLineHeight(glyphGroup)
-                        : undefined
+                    getShapeTextNominalLineHeight(glyphGroup, sectionBreakConfig)
                 );
 
                 if (contentHeight - currentLine.contentHeight > LINE_LAYOUT_OVERFLOW_TOLERANCE) {
@@ -731,9 +729,6 @@ function _lineOperator(
     );
     const hasInlineCustomBlock = defaultSpanMetrics?.hasInlineCustomBlock ||
         glyphGroup.some((glyph) => glyph.streamType === DataStreamTreeTokenType.CUSTOM_BLOCK && glyph.width !== 0);
-    const shapeTextLineHeight = sectionBreakConfig.renderConfig?.shapeTextAutoLineSpacing === BooleanNumber.TRUE && !hasInlineCustomBlock
-        ? getShapeTextNominalLineHeight(glyphGroup)
-        : undefined;
     const snapMultilineParagraphToWholeGrid = snapToGrid === BooleanNumber.TRUE &&
         !isParagraphFirstShapedText &&
         !hasInlineCustomBlock &&
@@ -768,7 +763,7 @@ function _lineOperator(
         !hasInlineCustomBlock,
         normalLineHeight,
         snapMultilineParagraphToWholeGrid,
-        shapeTextLineHeight
+        getShapeTextNominalLineHeight(glyphGroup, sectionBreakConfig, hasInlineCustomBlock)
     );
 
     if (snapMultilineParagraphToWholeGrid && preLine?.paragraphIndex === paragraphIndex) {
@@ -1751,8 +1746,13 @@ function __getParagraphAnchorLeft(
     return getNumberUnitValue(paragraphConfig.docxFallbackAnchorLeft, charSpaceApply);
 }
 
-function getShapeTextNominalLineHeight(glyphGroup: IDocumentSkeletonGlyph[]): number | undefined {
-    if (glyphGroup.some((glyph) => glyph.streamType === DataStreamTreeTokenType.CUSTOM_BLOCK && glyph.width !== 0)) {
+function getShapeTextNominalLineHeight(
+    glyphGroup: IDocumentSkeletonGlyph[],
+    sectionBreakConfig: ISectionBreakConfig,
+    hasInlineCustomBlock = false
+): number | undefined {
+    if (sectionBreakConfig.renderConfig?.shapeTextAutoLineSpacing !== BooleanNumber.TRUE || hasInlineCustomBlock ||
+        glyphGroup.some((glyph) => glyph.streamType === DataStreamTreeTokenType.CUSTOM_BLOCK && glyph.width !== 0)) {
         return undefined;
     }
     const textGlyphs = glyphGroup.filter((glyph) =>

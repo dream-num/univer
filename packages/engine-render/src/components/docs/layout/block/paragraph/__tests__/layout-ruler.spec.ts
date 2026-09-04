@@ -658,17 +658,21 @@ describe('layout-ruler', () => {
         { fontSize: 9, lineSpacing: 1.5, spacingRule: SpacingRule.AUTO, expectedHeight: 21.6 },
         { fontSize: 10.5, lineSpacing: 12, spacingRule: SpacingRule.EXACT, expectedHeight: 12 },
         { fontSize: 9, lineSpacing: 11, spacingRule: SpacingRule.EXACT, expectedHeight: 11 },
-    ])('preserves PowerPoint shape line spacing $lineSpacing / $spacingRule at $fontSize pt', ({ fontSize, lineSpacing, spacingRule, expectedHeight }) => {
+    ].map((entry) => ({ ...entry, shapeTextAutoLineSpacing: BooleanNumber.TRUE as BooleanNumber | undefined, inlineBlock: false })).concat([
+        { fontSize: 10.5, lineSpacing: 1.5, spacingRule: SpacingRule.AUTO, expectedHeight: 28.5, shapeTextAutoLineSpacing: BooleanNumber.FALSE, inlineBlock: false },
+        { fontSize: 10.5, lineSpacing: 12, spacingRule: SpacingRule.EXACT, expectedHeight: 19, shapeTextAutoLineSpacing: undefined, inlineBlock: false },
+        { fontSize: 10.5, lineSpacing: 12, spacingRule: SpacingRule.EXACT, expectedHeight: 19, shapeTextAutoLineSpacing: BooleanNumber.TRUE, inlineBlock: true },
+    ]))('preserves shape line spacing $lineSpacing / $spacingRule at $fontSize pt with opt-in $shapeTextAutoLineSpacing and inline block $inlineBlock', ({ fontSize, lineSpacing, spacingRule, expectedHeight, shapeTextAutoLineSpacing, inlineBlock }) => {
         const { ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed('ab', {
             body: {
-                sectionBreaks: [{ startIndex: 3, renderConfig: { shapeTextAutoLineSpacing: BooleanNumber.TRUE } }],
+                sectionBreaks: [{ startIndex: 3, renderConfig: { shapeTextAutoLineSpacing } }],
             },
             documentStyle: {
                 pageSize: { width: 300, height: 300 },
                 marginTop: 0,
                 marginBottom: 0,
                 paragraphLineGapDefault: 0,
-                renderConfig: { shapeTextAutoLineSpacing: BooleanNumber.TRUE },
+                renderConfig: { shapeTextAutoLineSpacing },
             },
         });
         const glyphs = ['a', 'b', '\r'].map((character) => {
@@ -678,6 +682,8 @@ describe('layout-ruler', () => {
             glyph.bBox.bd = 4;
             if (character === '\r') {
                 glyph.streamType = DataStreamTreeTokenType.PARAGRAPH;
+            } else if (inlineBlock && character === 'b') {
+                glyph.streamType = DataStreamTreeTokenType.CUSTOM_BLOCK;
             }
             return glyph;
         });

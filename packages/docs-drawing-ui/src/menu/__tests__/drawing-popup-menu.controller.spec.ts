@@ -26,10 +26,12 @@ import {
     PermissionService,
     toDisposable,
 } from '@univerjs/core';
+import { setDocumentPermissionValue } from '@univerjs/docs';
 import { IDocDrawingAdapterService } from '@univerjs/docs-drawing';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { UnitAction } from '@univerjs/protocol';
 import { IMenuManagerService } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
@@ -151,6 +153,23 @@ describe('DocDrawingPopupMenuController', () => {
 
             selectedObjects.clear();
             clearControl$.next(true);
+
+            expect(popupDisposable.dispose).toHaveBeenCalledOnce();
+        } finally {
+            controller.dispose();
+            injector.dispose();
+        }
+    });
+
+    it('removes an active popup when document editing is revoked even if drawing focus is empty', () => {
+        const { createControl$, injector, popupDisposable } = createControllerHarness();
+        const controller = injector.get(DocDrawingPopupMenuController);
+
+        try {
+            createControl$.next();
+            expect(popupDisposable.dispose).not.toHaveBeenCalled();
+
+            setDocumentPermissionValue(injector.get(IPermissionService), 'doc-1', 'doc-1', UnitAction.Edit, false);
 
             expect(popupDisposable.dispose).toHaveBeenCalledOnce();
         } finally {

@@ -31,8 +31,7 @@ import {
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
-import { DocSelectionManagerService, getDocumentPermissionValue } from '@univerjs/docs';
-import { UnitAction } from '@univerjs/protocol';
+import { canEditDocumentTargets, DocSelectionManagerService, getDocumentEditTargetObjectIds } from '@univerjs/docs';
 import { FLOAT_MENU_COMPONENT_KEY } from '../views/float-toolbar/FloatToolbar';
 import { IDocEmbedRuntimeFocusCoordinator } from './doc-embed-integration.service';
 import { DocLayoutInteractionService } from './doc-layout-interaction.service';
@@ -55,7 +54,7 @@ const SKIP_SYMBOLS: string[] = [
 ];
 
 export class DocFloatMenuService extends Disposable implements IRenderModule {
-    private _floatMenu: Nullable<{ disposable: IDisposable; start: number; end: number }> = null;
+    private _floatMenu: Nullable<{ disposable: IDisposable; start: number; end: number; segmentId: string }> = null;
     private _suppressed = false;
     private _embedSuppressed = false;
     private _invalidatedSelection: Nullable<string> = null;
@@ -129,7 +128,11 @@ export class DocFloatMenuService extends Disposable implements IRenderModule {
                     return;
                 }
                 this._invalidatedSelection = null;
-                if (range.startOffset === this._floatMenu?.start && range.endOffset === this._floatMenu?.end) {
+                if (
+                    range.startOffset === this._floatMenu?.start &&
+                    range.endOffset === this._floatMenu?.end &&
+                    (range.segmentId ?? '') === this._floatMenu?.segmentId
+                ) {
                     return;
                 }
                 this._hideFloatMenu();
@@ -144,18 +147,31 @@ export class DocFloatMenuService extends Disposable implements IRenderModule {
 
     private _initPermissionLifecycle(): void {
         this.disposeWithMe(this._permissionService.permissionPointUpdate$.subscribe(() => {
-            if (!this._canEditDocument()) {
+            if (this._floatMenu && !this._canEditDocument({
+                startOffset: this._floatMenu.start,
+                endOffset: this._floatMenu.end,
+            }, this._floatMenu.segmentId)) {
                 this._hideFloatMenu();
             }
         }));
     }
 
-    private _canEditDocument(): boolean {
-        return getDocumentPermissionValue(
+    private _canEditDocument(
+        range?: Pick<ITextRangeParam, 'startOffset' | 'endOffset'>,
+        segmentId = ''
+    ): boolean {
+        const documentDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(
+            this._context.unitId,
+            UniverInstanceType.UNIVER_DOC
+        );
+        if (!documentDataModel) {
+            return false;
+        }
+
+        return canEditDocumentTargets(
             this._permissionService,
             this._context.unitId,
-            this._context.unitId,
-            UnitAction.Edit
+            range ? getDocumentEditTargetObjectIds(documentDataModel, segmentId, range) : []
         );
     }
 
@@ -180,7 +196,11 @@ export class DocFloatMenuService extends Disposable implements IRenderModule {
                 ?.find((range) => !range.collapsed);
             this._invalidatedSelection = expandedRange
                 ? this._getSelectionKey(expandedRange)
-                : this._floatMenu && `${this._floatMenu.start}:${this._floatMenu.end}`;
+                : this._floatMenu && this._getSelectionKey({
+                    startOffset: this._floatMenu.start,
+                    endOffset: this._floatMenu.end,
+                    segmentId: this._floatMenu.segmentId,
+                });
             this._hideFloatMenu();
         };
 
@@ -188,8 +208,8 @@ export class DocFloatMenuService extends Disposable implements IRenderModule {
         syncSuppressedState();
     }
 
-    private _getSelectionKey(range: Pick<ITextRangeParam, 'startOffset' | 'endOffset'>): string {
-        return `${range.startOffset}:${range.endOffset}`;
+    private _getSelectionKey(range: Pick<ITextRangeParam, 'startOffset' | 'endOffset' | 'segmentId'>): string {
+        return `${range.segmentId ?? ''}:${range.startOffset}:${range.endOffset}`;
     }
 
     private _hideFloatMenu() {
@@ -199,7 +219,8 @@ export class DocFloatMenuService extends Disposable implements IRenderModule {
 
     private _showFloatMenu(unitId: string, range: ITextRangeParam) {
         const documentDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
-        if (!documentDataModel || documentDataModel.getDisabled() || !this._canEditDocument()) {
+        const segmentId = range.segmentId ?? '';
+        if (!documentDataModel || documentDataModel.getDisabled() || !this._canEditDocument(range, segmentId)) {
             return;
         }
 
@@ -233,6 +254,7 @@ export class DocFloatMenuService extends Disposable implements IRenderModule {
             }),
             start: range.startOffset,
             end: range.endOffset,
+            segmentId,
         };
 
         return toDisposable(() => this._hideFloatMenu());

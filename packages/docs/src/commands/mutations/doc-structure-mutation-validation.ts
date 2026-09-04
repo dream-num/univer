@@ -65,6 +65,7 @@ const NON_STRUCTURAL_ROOT_FIELDS = new Set<string>([
     'resources',
     'rev',
     'settings',
+    'styles',
     'tableSource',
     'title',
 ]);

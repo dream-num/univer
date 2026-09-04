@@ -17,7 +17,7 @@
 import type { DocLayoutExecutorType, IDocLayoutExecutor } from '../services/doc-layout-executor.service';
 
 export const DOCS_LAYOUT_WORKER_CHANNEL = 'univer.docs-layout-worker';
-export const DOCS_LAYOUT_WORKER_PROTOCOL_VERSION = 3;
+export const DOCS_LAYOUT_WORKER_PROTOCOL_VERSION = 4;
 
 export interface IDocsLayoutWorkerFontProbe {
     content: string;

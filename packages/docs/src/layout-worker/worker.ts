@@ -197,7 +197,7 @@ export class DocsLayoutWorkerRuntime implements IDocsLayoutWorkerRuntime {
             mount = undefined;
         }
         if (mount == null) {
-            const customBlockViewports = { ...(request.customBlockViewports ?? {}) };
+            const customBlockViewports = { ...request.customBlockViewports };
             applyRecordPatch(customBlockViewports, request.customBlockViewportPatch);
             mount = {
                 mountId: request.mountId,

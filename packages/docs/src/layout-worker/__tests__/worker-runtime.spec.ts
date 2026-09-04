@@ -146,7 +146,7 @@ describe('DocsLayoutWorkerRuntime', () => {
             budgetMs: 0,
         });
 
-        expect((dataModel.getBody()?.customRanges?.[0] as { glyphWidthEm?: number }).glyphWidthEm).toBeUndefined();
+        expect(dataModel.getBody()?.customRanges?.[0]).not.toHaveProperty('glyphWidthEm');
         expect(dataModel.getSelfOrHeaderFooterModel('header-1')?.getBody()?.customRanges?.[0]).toMatchObject({ glyphWidthEm: 4 });
         expect(dataModel.getSelfOrHeaderFooterModel('footer-1')?.getBody()?.customRanges?.[0]).toMatchObject({ glyphWidthEm: 3 });
     });

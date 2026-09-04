@@ -76,17 +76,41 @@ export function Sidebar() {
     const scrollRef = useRef<HTMLDivElement>(null);
     const sidebarRef = useRef<HTMLElement>(null);
     const closeButtonRef = useRef<HTMLButtonElement>(null);
+    const returnFocusElementRef = useRef<HTMLElement | null>(null);
+    const previousSidebarIdRef = useRef<string | undefined>(undefined);
+    const wasVisibleRef = useRef(false);
     const [isDragging, setIsDragging] = useState(false);
     const dragWidthRef = useRef<number | null>(null);
 
     const options = useMemo(() => renderSidebarOptions(sidebarOptions), [sidebarOptions]);
 
-    // Focus management: move focus into the sidebar when it opens
     useEffect(() => {
-        if (options?.visible && closeButtonRef.current) {
-            closeButtonRef.current.focus();
+        const isVisible = !!options?.visible;
+        const isNewPanel = isVisible && (!wasVisibleRef.current || previousSidebarIdRef.current !== options?.id);
+
+        if (isNewPanel) {
+            const activeElement = document.activeElement;
+            if (
+                activeElement instanceof HTMLElement &&
+                activeElement !== document.body &&
+                !sidebarRef.current?.contains(activeElement)
+            ) {
+                returnFocusElementRef.current = activeElement;
+            }
+            closeButtonRef.current?.focus();
+        } else if (!isVisible && wasVisibleRef.current) {
+            const activeElement = document.activeElement;
+            const shouldRestoreFocus = activeElement === document.body || !!sidebarRef.current?.contains(activeElement);
+            const returnFocusElement = returnFocusElementRef.current;
+            if (shouldRestoreFocus && returnFocusElement?.isConnected) {
+                returnFocusElement.focus({ preventScroll: true });
+            }
+            returnFocusElementRef.current = null;
         }
-    }, [options?.visible]);
+
+        wasVisibleRef.current = isVisible;
+        previousSidebarIdRef.current = options?.id;
+    }, [options?.id, options?.visible]);
 
     // ESC key to close sidebar
     useEffect(() => {
@@ -192,13 +216,14 @@ export function Sidebar() {
             data-u-comp="sidebar"
             role="complementary"
             aria-expanded={!!options?.visible}
+            aria-hidden={!options?.visible}
             aria-label={localeService.t<LocaleKey>('ui.sidebar.panel')}
             className={clsx(`
               univer-relative univer-h-full univer-flex-shrink-0 univer-bg-gray-0 univer-text-gray-900
               dark:!univer-bg-gray-900 dark:!univer-text-gray-0
             `, {
                 'univer-w-96 univer-translate-x-0': options?.visible,
-                'univer-w-0 univer-translate-x-full': !options?.visible,
+                'univer-pointer-events-none univer-invisible univer-w-0 univer-translate-x-full': !options?.visible,
             })}
             style={{ width: isDragging ? undefined : width }}
         >

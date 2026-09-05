@@ -282,6 +282,52 @@ describe('DocClipboardService table copy helpers', () => {
         testBed.univer.dispose();
     });
 
+    it.each([SliceBodyType.copy, SliceBodyType.cut])('copies cell text without a partial table resource (%s)', async (sliceType) => {
+        const tokens = DataStreamTreeTokenType;
+        const tableStream = `${tokens.TABLE_START}${tokens.TABLE_ROW_START}${tokens.TABLE_CELL_START}Alpha\r\n${tokens.TABLE_CELL_END}${tokens.TABLE_ROW_END}${tokens.TABLE_END}`;
+        const documentData: IDocumentData = {
+            id: 'copy-cell-text',
+            body: {
+                dataStream: `${tableStream}\r\n`,
+                paragraphs: [{ paragraphId: 'cell-alpha', startIndex: 8 }],
+                tables: [{ startIndex: 0, endIndex: tableStream.length, tableId: 'source-table' }],
+                textRuns: [{ st: 3, ed: 8, ts: { bl: BooleanNumber.TRUE } }],
+            },
+            documentStyle: {},
+        };
+        const testBed = createCommandTestBed(documentData, [
+            [IClipboardInterfaceService, { useClass: TestClipboardInterfaceService }],
+            [IDocClipboardService, { useClass: DocClipboardService }],
+        ]);
+        try {
+            const service = testBed.get(IDocClipboardService);
+            const clipboard = testBed.get(IClipboardInterfaceService) as unknown as TestClipboardInterfaceService;
+            expect(await service.copy(sliceType, [{
+                startOffset: 3,
+                endOffset: 8,
+                collapsed: false,
+                segmentId: '',
+            }])).toBe(true);
+            const fragment = parseInternalClipboardFragment(clipboard.writes[0].custom?.[DOC_INTERNAL_FRAGMENT_MIME]);
+            expect(clipboard.writes[0].text).toBe('Alpha');
+            expect(fragment?.body?.dataStream).toBe('Alpha');
+            expect(fragment?.body?.tables ?? []).toEqual([]);
+            expect(fragment?.tableSource).toBeUndefined();
+            expect(fragment?.body?.textRuns).toEqual([{ st: 0, ed: 5, ts: { bl: BooleanNumber.TRUE } }]);
+
+            expect(await service.copy(sliceType, [{
+                startOffset: 0,
+                endOffset: tableStream.length,
+                collapsed: false,
+                segmentId: '',
+            }])).toBe(true);
+            const wholeTable = parseInternalClipboardFragment(clipboard.writes[1].custom?.[DOC_INTERNAL_FRAGMENT_MIME]);
+            expect(wholeTable?.body?.tables).toEqual(documentData.body!.tables);
+        } finally {
+            testBed.univer.dispose();
+        }
+    });
+
     it('returns false when writing copied content to the clipboard fails', async () => {
         const documentData: IDocumentData = {
             id: 'failed-copy-doc',

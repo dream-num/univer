@@ -685,6 +685,14 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
                 continue;
             }
 
+            // Text inside a cell is not a nested table. Keep only completely copied table structures.
+            if (docBody.tables?.length) {
+                const completeTableIds = new Set(body.tables?.filter((table) => (
+                    table.startIndex >= startOffset && table.endIndex <= endOffset
+                )).map((table) => table.tableId));
+                docBody.tables = docBody.tables.filter((table) => completeTableIds.has(table.tableId));
+            }
+
             results.push(docBody);
             plainTextResults.push(
                 copyContentHook?.(

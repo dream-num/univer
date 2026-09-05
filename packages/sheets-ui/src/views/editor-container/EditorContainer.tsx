@@ -609,6 +609,9 @@ export function EditorContainer() {
             }
 
             cancelAnimationFrame(pointerRetryFrame);
+            if (event.type === 'click') {
+                focusHiddenEditor();
+            }
             pointerRetryFrame = requestAnimationFrame(focusHiddenEditor);
         };
         ownerDocument.addEventListener('pointerdown', refocusHiddenEditorAfterRuntimePointer, true);

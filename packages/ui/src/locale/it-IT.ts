@@ -20,6 +20,13 @@ import emojiLocale from './emoji-locale/it-IT.generated';
 const locale: typeof enUS = {
     ui: {
         objectPermission: {
+            addPeople: 'Add people',
+            searchPeople: 'Search people',
+            noPeople: 'No people selected',
+            noMatchingPeople: 'No matching people',
+            canEdit: 'Can edit',
+            removePerson: 'Remove',
+            confirmPeople: 'Confirm',
             document: 'Document',
             section: 'Section',
             paragraph: 'Paragraph',

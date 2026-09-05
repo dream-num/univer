@@ -15,8 +15,8 @@
  */
 
 import type { IObjectPermissionPolicy } from '@univerjs/core';
-import type { IAllowedRequest, IListPermPointResponse, IUpdatePermPointRequest } from '@univerjs/protocol';
-import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import type { IAllowedRequest, ICollaborator, IListPermPointResponse, IUpdatePermPointRequest } from '@univerjs/protocol';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { CommandType, IAuthzIoService, ICommandService, LocaleType, ObjectPermissionService, Univer, UniverInstanceType } from '@univerjs/core';
 import { UnitAction, UnitObject, UnitRole } from '@univerjs/protocol';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -36,16 +36,20 @@ afterEach(() => {
     univers.splice(0).forEach((univer) => univer.dispose());
 });
 
-function setup(options: { capable?: boolean; manage?: boolean } = {}) {
+function setup(options: { capable?: boolean; manage?: boolean; collaborators?: ICollaborator[] } = {}) {
     let policies: IListPermPointResponse['objects'] = [];
+    let members: ICollaborator[] = [];
     const update = vi.fn(async (request: IUpdatePermPointRequest) => {
+        members = request.collaborators?.collaborators ?? [];
         policies = [{ ...request, shareOn: false, shareRole: UnitRole.Reader, shareScope: 0, creator: undefined, actions: [] }];
     });
     const authz = {
         supportsObjectPermissionManagement: () => options.capable !== false,
         listUnitPermissions: async () => policies,
         list: async () => policies,
-        listCollaborators: async () => [{ id: 'editor', role: UnitRole.Editor, subject: { userID: 'editor', name: 'Editor', avatar: '' } }],
+        listCollaborators: async ({ objectID }: { objectID: string }) => objectID === 'doc'
+            ? options.collaborators ?? [{ id: 'editor', role: UnitRole.Editor, subject: { userID: 'editor', name: 'Editor', avatar: '' } }]
+            : members,
         allowed: async () => [{ action: UnitAction.ManageCollaborator, allowed: options.manage !== false }],
         batchAllowed: async (requests: IAllowedRequest[]) => requests.map(({ unitID, objectID, actions }) => ({ unitID, objectID, actions: actions.map((action) => ({ action, allowed: true })) })),
         update,
@@ -93,6 +97,63 @@ describe('ObjectPermissionButton', () => {
         await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
         expect(service.hasPolicy(target)).toBe(true);
         expect(screen.getByRole('button', { name: 'Permission settings' }).className).toContain('text-primary');
+    });
+
+    it('searches eligible people, keeps hidden selections, and persists only after confirmation and Save', async () => {
+        const { update } = setup({ collaborators: [
+            { id: 'alice', role: UnitRole.Editor, subject: { userID: 'alice', name: 'Alice', avatar: '' } },
+            { id: 'bob', role: UnitRole.Editor, subject: { userID: 'bob', name: 'Bob', avatar: '' } },
+            { id: 'reader', role: UnitRole.Reader, subject: { userID: 'reader', name: 'Reader', avatar: '' } },
+        ] });
+        fireEvent.click(screen.getByRole('button', { name: 'Permission settings' }));
+        fireEvent.click(await screen.findByText('Selected members'));
+        expect(screen.getByRole('button', { name: 'Save' }).hasAttribute('disabled')).toBe(true);
+        fireEvent.click(screen.getByRole('button', { name: 'Add people' }));
+        const picker = within(await screen.findByRole('dialog', { name: 'Add people' }));
+        expect(picker.queryByText('Reader')).toBeNull();
+        fireEvent.change(picker.getByRole('textbox', { name: 'Search people' }), { target: { value: '  ALICE  ' } });
+        expect(picker.queryByText('Bob')).toBeNull();
+        fireEvent.click(picker.getByRole('checkbox', { name: 'Alice' }));
+        fireEvent.change(picker.getByRole('textbox', { name: 'Search people' }), { target: { value: 'missing' } });
+        expect(picker.getByText('No matching people')).toBeTruthy();
+        fireEvent.change(picker.getByRole('textbox', { name: 'Search people' }), { target: { value: 'bob' } });
+        fireEvent.click(picker.getByRole('checkbox', { name: 'Bob' }));
+        expect(update).not.toHaveBeenCalled();
+        fireEvent.click(picker.getByRole('button', { name: 'Confirm' }));
+        await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Add people' })).toBeNull());
+        expect(screen.getByRole('group', { name: 'Alice' })).toBeTruthy();
+        expect(screen.getByRole('group', { name: 'Bob' })).toBeTruthy();
+        expect(update).not.toHaveBeenCalled();
+        fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+        await waitFor(() => expect(update).toHaveBeenCalledTimes(1));
+        expect(update.mock.calls[0][0].collaborators?.collaborators.map((user) => user.id)).toEqual(['alice', 'bob']);
+        await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+        fireEvent.click(screen.getByRole('button', { name: 'Permission settings' }));
+        expect(await screen.findByRole('group', { name: 'Alice' })).toBeTruthy();
+        expect(screen.getByRole('group', { name: 'Bob' })).toBeTruthy();
+    });
+
+    it('discards cancelled picker choices and allows removing confirmed people', async () => {
+        setup();
+        fireEvent.click(screen.getByRole('button', { name: 'Permission settings' }));
+        fireEvent.click(await screen.findByText('Selected members'));
+        fireEvent.click(screen.getByRole('button', { name: 'Add people' }));
+        let picker = within(await screen.findByRole('dialog', { name: 'Add people' }));
+        fireEvent.click(picker.getByRole('checkbox', { name: 'Editor' }));
+        fireEvent.click(picker.getByRole('button', { name: 'Cancel' }));
+        await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Add people' })).toBeNull());
+        expect(screen.getByText('No people selected')).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'Save' }).hasAttribute('disabled')).toBe(true);
+        fireEvent.click(screen.getByRole('button', { name: 'Add people' }));
+        picker = within(await screen.findByRole('dialog', { name: 'Add people' }));
+        expect((picker.getByRole('checkbox', { name: 'Editor' }) as HTMLInputElement).checked).toBe(false);
+        fireEvent.click(picker.getByRole('checkbox', { name: 'Editor' }));
+        fireEvent.click(picker.getByRole('button', { name: 'Confirm' }));
+        await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Add people' })).toBeNull());
+        fireEvent.pointerDown(within(screen.getByRole('group', { name: 'Editor' })).getByText('Can edit'), { button: 0, ctrlKey: false });
+        fireEvent.click(await screen.findByText('Remove'));
+        expect(screen.queryByRole('group', { name: 'Editor' })).toBeNull();
+        expect(screen.getByRole('button', { name: 'Save' }).hasAttribute('disabled')).toBe(true);
     });
 
     it('keeps the dialog and draft open when saving fails', async () => {
@@ -157,6 +218,20 @@ describe('workbench object permission dialog', () => {
         fireEvent.click(screen.getByRole('button', { name: 'Save' }));
         await waitFor(() => expect(update).toHaveBeenCalledTimes(1));
         await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    });
+
+    it('searches and confirms people from a hosted toolbar dialog', async () => {
+        const { update } = openHostedDialog();
+        fireEvent.click(await screen.findByText('Selected members'));
+        fireEvent.click(screen.getByRole('button', { name: 'Add people' }));
+        const picker = within(await screen.findByRole('dialog', { name: 'Add people' }));
+        fireEvent.change(picker.getByRole('textbox', { name: 'Search people' }), { target: { value: 'editor' } });
+        fireEvent.click(picker.getByRole('checkbox', { name: 'Editor' }));
+        fireEvent.click(picker.getByRole('button', { name: 'Confirm' }));
+        await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Add people' })).toBeNull());
+        fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+        await waitFor(() => expect(update).toHaveBeenCalledTimes(1));
+        expect(update.mock.calls[0][0].collaborators?.collaborators.map((user) => user.id)).toEqual(['editor']);
     });
 
     it('rejects saving if the original element was deleted while the dialog was open', async () => {

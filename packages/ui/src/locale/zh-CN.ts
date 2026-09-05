@@ -20,6 +20,13 @@ import emojiLocale from './emoji-locale/zh-CN.generated';
 const locale: typeof enUS = {
     ui: {
         objectPermission: {
+            addPeople: '添加人员',
+            searchPeople: '搜索人员',
+            noPeople: '尚未选择人员',
+            noMatchingPeople: '没有匹配的人员',
+            canEdit: '可编辑',
+            removePerson: '移除',
+            confirmPeople: '确认',
             document: '文档',
             section: '节',
             paragraph: '段落',

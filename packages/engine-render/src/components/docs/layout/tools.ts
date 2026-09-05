@@ -1968,13 +1968,16 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
     // In modern mode, there are no pages, no sections, no columns. There are no headers and footers, and margins are all defaults.
     if (documentFlavor === DocumentFlavor.MODERN) {
         const modernPageWidth = documentStyle.pageSize?.width ?? DEFAULT_MODERN_DOCUMENT_STYLE.pageSize!.width;
-        sectionBreak = Object.assign({}, sectionBreak, DEFAULT_MODERN_SECTION_BREAK);
-        documentStyle = Object.assign({}, documentStyle, DEFAULT_MODERN_DOCUMENT_STYLE, {
-            pageSize: {
-                ...DEFAULT_MODERN_DOCUMENT_STYLE.pageSize!,
-                width: modernPageWidth,
-            },
-        });
+        const modernPageSize = {
+            ...DEFAULT_MODERN_DOCUMENT_STYLE.pageSize!,
+            width: modernPageWidth,
+        };
+        // Imported sections can retain their own paper size. It must not
+        // override the continuous page when the document switches to modern
+        // mode, otherwise layout still paginates and pointer bounds stop at
+        // the first sheet of paper while rendering merges the entire document.
+        sectionBreak = Object.assign({}, sectionBreak, DEFAULT_MODERN_SECTION_BREAK, { pageSize: modernPageSize });
+        documentStyle = Object.assign({}, documentStyle, DEFAULT_MODERN_DOCUMENT_STYLE, { pageSize: modernPageSize });
     }
 
     const {

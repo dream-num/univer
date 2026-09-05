@@ -2502,7 +2502,21 @@ export class DocumentSkeleton extends Skeleton {
             ? this._externalProtectedContinuousLayout
             : null;
         if (publication.kind === 'block' && protectedContinuousLayout != null) {
-            protectedContinuousLayout.pendingPublications.push(publication);
+            // Flow patches are deltas, but embedded objects are a full snapshot
+            // on every publication. Retaining every table snapshot while Main's
+            // interaction window is protected grows quadratically with layout
+            // progress. Only the final snapshot is needed when replaying deltas.
+            protectedContinuousLayout.pendingPublications.push(progress.complete
+                ? publication
+                : {
+                    ...publication,
+                    block: {
+                        ...publication.block,
+                        skeTables: [],
+                        skeDrawings: [],
+                        skeColumnGroups: [],
+                    },
+                });
         }
         const commitsProtectedContinuousLayout = progress.complete && protectedContinuousLayout != null;
         const publicationToApply = publication.kind === 'block' && protectedContinuousLayout != null && !commitsProtectedContinuousLayout
@@ -3162,6 +3176,28 @@ export class DocumentSkeleton extends Skeleton {
         pageMarginTop: number,
         restrictions?: IFindNodeRestrictions
     ): Nullable<INodeInfo> {
+        const hit = this._findNodeByCoord(coord, pageLayoutType, pageMarginLeft, pageMarginTop, restrictions);
+        const layout = this._activeLayout;
+        if (hit != null && layout?.mode === 'continuous' && layout.reason === 'edit' && !layout.complete && !layout.anchorPublished) {
+            // A continuous document has only one physical page. Its unaffected
+            // paragraphs remain editable while the changed paragraph is laid out;
+            // the page-based preview guard would otherwise disable the whole Doc.
+            const dirtyStart = layout.invalidation?.oldStart ?? layout.priorityAnchor ?? 0;
+            const paragraphEnd = hit.node.parent?.parent?.paragraphIndex;
+            if (paragraphEnd == null || paragraphEnd >= dirtyStart) {
+                return null;
+            }
+        }
+        return hit;
+    }
+
+    private _findNodeByCoord(
+        coord: Vector2,
+        pageLayoutType: PageLayoutType,
+        pageMarginLeft: number,
+        pageMarginTop: number,
+        restrictions?: IFindNodeRestrictions
+    ): Nullable<INodeInfo> {
         const { x, y } = coord;
 
         const skeletonData = this.getSkeletonData();
@@ -3188,7 +3224,7 @@ export class DocumentSkeleton extends Skeleton {
         // Before Main publishes the edited page, retained geometry is only a
         // visual preview. Only its unaffected prefix still accepts new pointers;
         // ongoing native input continues through the logical selection instead.
-        if (layout?.reason === 'edit' && !layout.complete && !layout.anchorPublished && pageNumber >= layout.stablePageCount) {
+        if (layout?.mode === 'paginated' && layout.reason === 'edit' && !layout.complete && !layout.anchorPublished && pageNumber >= layout.stablePageCount) {
             return null;
         }
         const pageLength = pages.length;

@@ -19,6 +19,7 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'docs-ui': {
         objectPermission: {
+            paragraphPermission: '段落权限…',
             title: '权限设置',
             paragraph: '段落',
             section: '节',

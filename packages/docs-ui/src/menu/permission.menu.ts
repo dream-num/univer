@@ -19,8 +19,17 @@ import type { IMenuButtonItem } from '@univerjs/ui';
 import { UniverInstanceType } from '@univerjs/core';
 import { UnitObject } from '@univerjs/protocol';
 import { objectPermissionMenuItemFactory } from '@univerjs/ui';
+import { OpenDocParagraphPermissionOperation } from '../commands/operations/paragraph-permission.operation';
 import { OpenDocPermissionPanelOperation } from '../commands/operations/permission-panel.operation';
 
 export function DocPermissionMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return objectPermissionMenuItemFactory(accessor, OpenDocPermissionPanelOperation.id, UniverInstanceType.UNIVER_DOC, UnitObject.Document);
+}
+
+export function DocParagraphPermissionMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        ...objectPermissionMenuItemFactory(accessor, OpenDocParagraphPermissionOperation.id, UniverInstanceType.UNIVER_DOC, UnitObject.DocumentParagraph),
+        icon: undefined,
+        title: 'docs-ui.objectPermission.paragraphPermission',
+    };
 }

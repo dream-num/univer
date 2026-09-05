@@ -17,11 +17,11 @@
 import type { IAccessor, IObjectPermissionTarget } from '@univerjs/core';
 import type { LocaleKey } from '../../locale/types';
 import type { IObjectPermissionButtonProps } from './ObjectPermissionButton';
-import { ICommandService, Injector, IUniverInstanceService, LocaleService, ObjectPermissionService } from '@univerjs/core';
-import { Input, StateIconButton } from '@univerjs/design';
+import { Injector, IUniverInstanceService, LocaleService, ObjectPermissionService } from '@univerjs/core';
+import { Button, Input, StateIconButton } from '@univerjs/design';
 import { ProtectIcon } from '@univerjs/icons';
 import { UnitObject } from '@univerjs/protocol';
-import { useEffect, useReducer, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ISidebarService } from '../../services/sidebar/sidebar.service';
 import { useDependency, useObservable } from '../../utils/di';
 import { ObjectPermissionButton } from './ObjectPermissionButton';
@@ -30,6 +30,7 @@ export const OBJECT_PERMISSION_PANEL = 'ui.object-permission-panel';
 
 export interface IObjectPermissionPanelProps {
     unitId: string;
+    expandable?: UnitObject;
     /** A lazy iterator avoids materializing all records in large Bases. */
     getTargets: () => Iterable<IObjectPermissionButtonProps>;
 }
@@ -45,7 +46,7 @@ export function openObjectPermissionPanel(
         id: OBJECT_PERMISSION_PANEL,
         width: 330,
         header: { title: accessor.get(LocaleService).t<LocaleKey>('ui.objectPermission.title') },
-        children: { label: { name: OBJECT_PERMISSION_PANEL, props: { unitId: props.unitId, getTargets: props.getTargets } } },
+        children: { label: { name: OBJECT_PERMISSION_PANEL, props: { unitId: props.unitId, getTargets: props.getTargets, expandable: props.expandable } } },
     });
     return true;
 }
@@ -70,17 +71,13 @@ export function ObjectPermissionPanelButton(props: IObjectPermissionPanelProps &
     );
 }
 
-export function ObjectPermissionPanel({ unitId, getTargets }: IObjectPermissionPanelProps) {
+export function ObjectPermissionPanel({ unitId, getTargets, expandable }: IObjectPermissionPanelProps) {
     const localeService = useDependency(LocaleService);
-    const commandService = useDependency(ICommandService);
     const permissions = useDependency(ObjectPermissionService);
     const [query, setQuery] = useState('');
-    const [, refresh] = useReducer((value) => value + 1, 0);
+    const [expanded, setExpanded] = useState(false);
+    const [limit, setLimit] = useState(50);
     useObservable(permissions.changed$, 0);
-    useEffect(() => {
-        const subscription = commandService.onCommandExecuted(() => refresh());
-        return () => subscription.dispose();
-    }, [commandService]);
     const instances = useDependency(IUniverInstanceService);
     const sidebar = useDependency(ISidebarService);
     useEffect(() => {
@@ -111,13 +108,22 @@ export function ObjectPermissionPanel({ unitId, getTargets }: IObjectPermissionP
     const items: IObjectPermissionButtonProps[] = [];
     let more = false;
     let ordinal = 0;
-    for (const item of getTargets()) {
+    const iterator = getTargets()[Symbol.iterator]();
+    while (true) {
+        if (expandable && !expanded && ordinal === 1) {
+            break;
+        }
+        const next = iterator.next();
+        if (next.done) {
+            break;
+        }
+        const item = next.value;
         ordinal++;
         const name = localeService.t<LocaleKey>('ui.objectPermission.objectName', localeService.t<LocaleKey>(kinds[item.target.objectType] ?? 'ui.objectPermission.entity'), item.name || String(ordinal));
-        if (!permissions.supports(item.target) || !name.toLocaleLowerCase().includes(query.toLocaleLowerCase())) {
+        if (!permissions.supports(item.target) || ((!expandable || expanded) && !name.toLocaleLowerCase().includes(query.toLocaleLowerCase()))) {
             continue;
         }
-        if (items.length === 100) {
+        if (items.length === limit) {
             more = true;
             break;
         }
@@ -125,7 +131,18 @@ export function ObjectPermissionPanel({ unitId, getTargets }: IObjectPermissionP
     }
     return (
         <div className="univer-flex univer-h-full univer-flex-col univer-gap-3 univer-p-4">
-            <Input value={query} onChange={setQuery} placeholder={localeService.t<LocaleKey>('ui.objectPermission.search')} aria-label={localeService.t<LocaleKey>('ui.objectPermission.search')} />
+            {expandable && <Button aria-expanded={expanded} onClick={() => setExpanded((value) => !value)}>{localeService.t<LocaleKey>(kinds[expandable] ?? 'ui.objectPermission.entity')}</Button>}
+            {(!expandable || expanded) && (
+                <Input
+                    value={query}
+                    onChange={(value) => {
+                        setQuery(value);
+                        setLimit(50);
+                    }}
+                    placeholder={localeService.t<LocaleKey>('ui.objectPermission.search')}
+                    aria-label={localeService.t<LocaleKey>('ui.objectPermission.search')}
+                />
+            )}
             <div className="univer-flex-1 univer-overflow-auto">
                 {items.map((item) => (
                     <div
@@ -137,7 +154,7 @@ export function ObjectPermissionPanel({ unitId, getTargets }: IObjectPermissionP
                     </div>
                 ))}
                 {!items.length && <p>{localeService.t<LocaleKey>('ui.objectPermission.empty')}</p>}
-                {more && <p>{localeService.t<LocaleKey>('ui.objectPermission.more')}</p>}
+                {more && <Button onClick={() => setLimit((value) => value + 50)}>{localeService.t<LocaleKey>('ui.objectPermission.loadMore')}</Button>}
             </div>
         </div>
     );

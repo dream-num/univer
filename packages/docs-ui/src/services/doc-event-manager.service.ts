@@ -1112,6 +1112,12 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
         return paragraphBounds;
     }
 
+    contextMenuParagraph: { unitId: string; segmentId: string; paragraphId: string } | null = null;
+
+    getParagraphByOffset(offsetX: number, offsetY: number): Nullable<IMutiPageParagraphBound> {
+        return this._calcActiveParagraph(transformOffset2Bound(offsetX, offsetY, this._context.scene));
+    }
+
     private _calcActiveParagraph(evt: { x: number; y: number }): Nullable<IMutiPageParagraphBound> {
         const { x, y } = evt;
         this._buildTableBounds();

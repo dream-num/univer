@@ -45,6 +45,33 @@ function createService() {
 }
 
 describe('DocSelectionManagerService', () => {
+    it('retains explicitly owned render selections before a global Doc becomes current', () => {
+        const service = createService();
+        const target = { unitId: 'embedded-doc', subUnitId: 'embedded-doc' };
+        const ranges = [{ startOffset: 4, endOffset: 14, collapsed: false, isActive: true }];
+        try {
+            service.__replaceTextRangesWithNoRefresh({
+                textRanges: ranges,
+                rectRanges: [],
+                segmentId: '',
+                segmentPage: -1,
+                isEditing: false,
+                style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+            }, target);
+
+            expect(service.getDocRanges(target)).toEqual(ranges);
+            expect(service.__getCurrentSelection()).toBeNull();
+            expect(service.getDocRanges()).toEqual([]);
+            service.__TEST_ONLY_setCurrentSelection({ unitId: 'peer-doc', subUnitId: 'peer-doc' });
+            expect(service.getDocRanges()).toEqual([]);
+            expect(service.getDocRanges(target)).toEqual(ranges);
+            service.__TEST_ONLY_setCurrentSelection(target);
+            expect(service.getActiveTextRange()).toEqual(ranges[0]);
+        } finally {
+            service.dispose();
+        }
+    });
+
     it('stores document text selections and exposes active/doc range ordering', () => {
         const service = createService();
         service.__TEST_ONLY_setCurrentSelection({ unitId: 'doc-1', subUnitId: 'doc-1' });

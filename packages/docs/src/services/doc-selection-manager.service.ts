@@ -220,10 +220,7 @@ export class DocSelectionManagerService extends RxDisposable {
 
     // Only use in doc-selection-render.controller.ts
     __replaceTextRangesWithNoRefresh(textSelectionInfo: IDocSelectionInnerParam, search: IDocSelectionManagerSearchParam) {
-        if (this._currentSelection == null) {
-            return;
-        }
-
+        // Embedded render selections have an explicit owner even while the host retains global focus.
         const params = {
             ...textSelectionInfo,
             ...search,

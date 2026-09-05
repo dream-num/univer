@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel } from '@univerjs/core';
 import type { ReactNode } from 'react';
 import type { LocaleKey } from '../../locale/types';
-import { HorizontalAlign, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
+import { HorizontalAlign, LocaleService } from '@univerjs/core';
 import { borderClassName, Button, clsx, InputNumber, Select, Tooltip } from '@univerjs/design';
-import { DocSelectionManagerService } from '@univerjs/docs';
 import { AlignTextBothIcon, HorizontallyIcon, LeftJustifyingIcon, RightJustifyingIcon } from '@univerjs/icons';
-import { UnitObject } from '@univerjs/protocol';
 import { useDependency } from '@univerjs/ui';
 import { useMemo, useRef } from 'react';
-import { DocObjectPermissionEntry } from '../permission/DocObjectPermissionEntry';
 import {
     useCurrentParagraph,
     useFirstParagraphHorizontalAlign,
@@ -122,9 +118,6 @@ const AutoFocusInputNumber = (props: {
     );
 };
 export function ParagraphSetting() {
-    const instances = useDependency(IUniverInstanceService);
-    const selections = useDependency(DocSelectionManagerService);
-    const model = instances.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
     const localeService = useDependency(LocaleService);
 
     const currentParagraph = useCurrentParagraph();
@@ -223,12 +216,6 @@ export function ParagraphSetting() {
                     </ParagraphSettingRow>
                 </div>
             </ParagraphSettingSection>
-            <DocObjectPermissionEntry
-                unitId={model?.getUnitId()}
-                id={currentParagraph.length === 1 ? currentParagraph[0].paragraphId : undefined}
-                objectType={UnitObject.DocumentParagraph}
-                segmentId={selections.getDocRanges()[0]?.segmentId}
-            />
         </div>
     );
 }

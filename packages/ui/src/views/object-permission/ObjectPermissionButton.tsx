@@ -15,12 +15,11 @@
  */
 
 import type { IAccessor, IObjectPermissionPolicy, IObjectPermissionTarget } from '@univerjs/core';
-import type { ICollaborator } from '@univerjs/protocol';
 import type { LocaleKey } from '../../locale/types';
-import { IAuthzIoService, ICommandService, IUniverInstanceService, LocaleService, ObjectPermissionService } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, LocaleService, ObjectPermissionService } from '@univerjs/core';
 import { Button, Checkbox, Dialog, FormLayout, Radio, RadioGroup, StateIconButton } from '@univerjs/design';
 import { ProtectIcon } from '@univerjs/icons';
-import { UnitAction, UnitRole } from '@univerjs/protocol';
+import { UnitAction, UnitObject, UnitRole } from '@univerjs/protocol';
 import { useEffect, useState } from 'react';
 import { IDialogService } from '../../services/dialog/dialog.service';
 import { useDependency, useObservable } from '../../utils/di';
@@ -87,11 +86,9 @@ const DEFAULT_ACTIONS = [UnitAction.Edit] as const;
 export function ObjectPermissionDialog({ target, name, commandId, actions = DEFAULT_ACTIONS, exists, onClose, hosted = false }: IObjectPermissionButtonProps & { onClose: () => void; hosted?: boolean }) {
     const localeService = useDependency(LocaleService);
     const permissions = useDependency(ObjectPermissionService);
-    const authz = useDependency(IAuthzIoService);
     const commandService = useDependency(ICommandService);
     const instances = useDependency(IUniverInstanceService);
     const [policy, setPolicy] = useState<IObjectPermissionPolicy | null>(null);
-    const [candidates, setCandidates] = useState<ICollaborator[]>([]);
     const [canManage, setCanManage] = useState(false);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState(false);
@@ -116,12 +113,10 @@ export function ObjectPermissionDialog({ target, name, commandId, actions = DEFA
         Promise.all([
             permissions.read({ unitId, objectId, objectType }),
             permissions.canManage({ unitId, objectId, objectType }),
-            authz.listCollaborators({ unitID: unitId, objectID: unitId }),
-        ]).then(([loaded, allowed, users]) => {
+        ]).then(([loaded, allowed]) => {
             if (!cancelled) {
                 setPolicy(loaded);
                 setCanManage(allowed);
-                setCandidates(users);
                 setDirty(false);
                 setConflict(false);
                 setError(false);
@@ -136,7 +131,7 @@ export function ObjectPermissionDialog({ target, name, commandId, actions = DEFA
         return () => {
             cancelled = true;
         };
-    }, [permissions, authz, unitId, objectId, objectType, attempt]);
+    }, [permissions, unitId, objectId, objectType, attempt]);
 
     useEffect(() => {
         const subscription = permissions.unitChanges$.subscribe((changedUnitId) => {
@@ -180,6 +175,20 @@ export function ObjectPermissionDialog({ target, name, commandId, actions = DEFA
         } finally {
             setSaving(false);
         }
+    };
+    const parentHints: Partial<Record<UnitObject, LocaleKey>> = {
+        [UnitObject.DocumentSection]: 'ui.objectPermission.documentParent',
+        [UnitObject.DocumentParagraph]: 'ui.objectPermission.paragraphParent',
+        [UnitObject.DocumentEntity]: 'ui.objectPermission.documentObjectParent',
+        [UnitObject.SlidePage]: 'ui.objectPermission.slideParent',
+        [UnitObject.SlideMaster]: 'ui.objectPermission.slideParent',
+        [UnitObject.SlideElement]: 'ui.objectPermission.slideObjectParent',
+        [UnitObject.BaseTable]: 'ui.objectPermission.baseParent',
+        [UnitObject.BaseDashboard]: 'ui.objectPermission.baseParent',
+        [UnitObject.BaseField]: 'ui.objectPermission.baseObjectParent',
+        [UnitObject.BaseView]: 'ui.objectPermission.baseObjectParent',
+        [UnitObject.BaseRecord]: 'ui.objectPermission.recordParent',
+        [UnitObject.BoardElement]: 'ui.objectPermission.boardParent',
     };
     const actionLabels: Partial<Record<UnitAction, LocaleKey>> = {
         [UnitAction.Copy]: 'ui.objectPermission.copy',
@@ -226,7 +235,7 @@ export function ObjectPermissionDialog({ target, name, commandId, actions = DEFA
                     </FormLayout>
                     {objectId !== unitId && policy.edit === 'members' && (
                         <ObjectPermissionMembers
-                            candidates={candidates}
+                            unitId={unitId}
                             value={policy.collaborators}
                             disabled={!canManage || loading || saving || conflict}
                             onEditStart={() => setDirty(true)}
@@ -249,7 +258,7 @@ export function ObjectPermissionDialog({ target, name, commandId, actions = DEFA
                             {localeService.t<LocaleKey>(actionLabels[action]!)}
                         </Checkbox>
                     ))}
-                    <p className="univer-text-sm univer-text-gray-500">{localeService.t<LocaleKey>('ui.objectPermission.parentHint')}</p>
+                    <p className="univer-text-sm univer-text-gray-500">{localeService.t<LocaleKey>(objectId === unitId ? 'ui.objectPermission.fileHint' : parentHints[objectType] ?? 'ui.objectPermission.parentHint')}</p>
                 </>
             )}
         </div>

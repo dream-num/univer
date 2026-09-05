@@ -122,7 +122,7 @@ export class ObjectPermissionService extends Disposable {
     async read(target: IObjectPermissionTarget): Promise<IObjectPermissionPolicy> {
         const [objects, collaborators] = await Promise.all([
             this._authz.list({ unitID: target.unitId, objectIDs: [target.objectId], actions: [] }),
-            this._authz.listCollaborators({ unitID: target.unitId, objectID: target.objectId }),
+            target.objectId === target.unitId ? [] : this._authz.listCollaborators({ unitID: target.unitId, objectID: target.objectId }),
         ]);
         const object = objects.find((item) => item.objectID === target.objectId && item.objectType === target.objectType);
         let edit: IObjectPermissionPolicy['edit'] = 'all';

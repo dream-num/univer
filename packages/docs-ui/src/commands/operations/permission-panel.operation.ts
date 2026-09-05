@@ -17,8 +17,8 @@
 import type { DocumentDataModel, ICommand } from '@univerjs/core';
 import type { IObjectPermissionButtonProps } from '@univerjs/ui';
 import { CommandType, isInternalEditorID, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { createDocumentPermissionPoint, DOCUMENT_UNIT_PERMISSION_ACTIONS, getDocumentEditTargetObjectIds, SetDocumentPermissionCommand } from '@univerjs/docs';
-import { UnitAction, UnitObject } from '@univerjs/protocol';
+import { DOCUMENT_UNIT_PERMISSION_ACTIONS, getDocumentSectionPermissionObjectId, SetDocumentPermissionCommand } from '@univerjs/docs';
+import { UnitObject } from '@univerjs/protocol';
 import { openObjectPermissionPanel } from '@univerjs/ui';
 
 export const OpenDocPermissionPanelOperation: ICommand = {
@@ -36,22 +36,22 @@ export const OpenDocPermissionPanelOperation: ICommand = {
             const commandId = SetDocumentPermissionCommand.id;
             yield { target: { unitId, objectId: unitId, objectType: UnitObject.Document }, name: snapshot.title ?? '', commandId, actions: DOCUMENT_UNIT_PERMISSION_ACTIONS };
             const segments = new Set(['', ...Object.keys(snapshot.headers ?? {}), ...Object.keys(snapshot.footers ?? {})]);
-            const seen = new Set<string>();
             for (const segmentId of segments) {
                 const body = segmentId ? snapshot.headers?.[segmentId]?.body ?? snapshot.footers?.[segmentId]?.body : snapshot.body;
-                for (const objectId of getDocumentEditTargetObjectIds(model, segmentId, { startOffset: 0, endOffset: body?.dataStream.length ?? 0 })) {
-                    if (seen.has(objectId)) {
+                for (const section of body?.sectionBreaks ?? []) {
+                    if (!section.sectionId) {
                         continue;
                     }
-                    seen.add(objectId);
-                    const point = createDocumentPermissionPoint(unitId, objectId, UnitAction.Edit);
-                    const id = decodeURIComponent(objectId.split('/').pop() ?? '');
-                    const paragraph = body?.paragraphs?.find((item) => item.paragraphId === id);
-                    const name = paragraph ? body!.dataStream.slice(Math.max(0, paragraph.startIndex - 50), paragraph.startIndex).replace(/[\r\n]/g, ' ').trim() : '';
-                    yield { target: { unitId, objectId, objectType: point.type }, name, commandId, exists: () => getDocumentEditTargetObjectIds(model, segmentId, { startOffset: 0, endOffset: Number.MAX_SAFE_INTEGER }).includes(objectId) };
+                    const objectId = getDocumentSectionPermissionObjectId(segmentId, section.sectionId);
+                    yield {
+                        target: { unitId, objectId, objectType: UnitObject.DocumentSection },
+                        name: '',
+                        commandId,
+                        exists: () => model.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.sectionBreaks?.some((item) => item.sectionId === section.sectionId) === true,
+                    };
                 }
             }
         }
-        return openObjectPermissionPanel(accessor, { unitId, target: { unitId, objectId: unitId, objectType: UnitObject.Document }, getTargets });
+        return openObjectPermissionPanel(accessor, { unitId, target: { unitId, objectId: unitId, objectType: UnitObject.Document }, getTargets, expandable: UnitObject.DocumentSection });
     },
 };

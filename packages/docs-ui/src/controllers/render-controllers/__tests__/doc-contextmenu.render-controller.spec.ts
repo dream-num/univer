@@ -59,12 +59,13 @@ function createController(options?: {
                 return { dispose: vi.fn() };
             }),
         } as never,
-        { isPointerOnNonChecklistBullet: vi.fn(() => options?.pointerOnBullet ?? false) } as never,
+        { getParagraphByOffset: () => null, isPointerOnNonChecklistBullet: vi.fn(() => options?.pointerOnBullet ?? false) } as never,
         { getTextRanges: vi.fn(() => options?.textRanges ?? []) } as never,
         {
             getContextValue: vi.fn((key) => key === FOCUSING_COMMON_DRAWINGS && (options?.focusingDrawing ?? false)),
         } as never,
         {
+            getUnit: () => null,
             getCurrentUnitOfType: vi.fn((type) => type === UniverInstanceType.UNIVER_DOC
                 ? { getBody: () => ({ blockRanges: options?.blockRanges ?? [] }) }
                 : null),

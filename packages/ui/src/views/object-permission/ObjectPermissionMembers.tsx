@@ -16,24 +16,53 @@
 
 import type { ICollaborator } from '@univerjs/protocol';
 import type { LocaleKey } from '../../locale/types';
-import { LocaleService } from '@univerjs/core';
+import { IAuthzIoService, LocaleService, UserManagerService } from '@univerjs/core';
 import { Avatar, borderClassName, Button, Checkbox, clsx, Dialog, Input, Select, Separator } from '@univerjs/design';
 import { UnitRole } from '@univerjs/protocol';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDependency } from '../../utils/di';
 
 interface IObjectPermissionMembersProps {
-    candidates: ICollaborator[];
+    unitId: string;
     value: ICollaborator[];
     disabled: boolean;
     onEditStart: () => void;
     onChange: (value: ICollaborator[]) => void;
 }
 
-export function ObjectPermissionMembers({ candidates, value, disabled, onEditStart, onChange }: IObjectPermissionMembersProps) {
+export function ObjectPermissionMembers({ unitId, value, disabled, onEditStart, onChange }: IObjectPermissionMembersProps) {
     const locale = useDependency(LocaleService);
     const [draft, setDraft] = useState<ICollaborator[] | null>(null);
     const [query, setQuery] = useState('');
+    const authz = useDependency(IAuthzIoService);
+    const userManager = useDependency(UserManagerService);
+    const [candidates, setCandidates] = useState<ICollaborator[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(false);
+    const [attempt, setAttempt] = useState(0);
+    const inheritOwner = authz.getCfgEnableObjInherit?.() ?? false;
+    const open = draft != null;
+    useEffect(() => {
+        if (!open) {
+            return;
+        }
+        let cancelled = false;
+        authz.listCollaborators({ unitID: unitId, objectID: unitId }).then((users) => {
+            if (!cancelled) {
+                const currentUser = userManager.getCurrentUser();
+                setCandidates(users.filter((user) => user.subject?.userID !== currentUser.userID));
+                setLoading(false);
+            }
+        }).catch(() => {
+            if (!cancelled) {
+                setError(true);
+                setLoading(false);
+            }
+        });
+        return () => {
+            cancelled = true;
+        };
+    }, [authz, userManager, unitId, open, attempt]);
     const search = query.trim().toLocaleLowerCase();
     const users = candidates.filter((user) => (
         (user.role === UnitRole.Owner || user.role === UnitRole.Editor) &&
@@ -47,6 +76,8 @@ export function ObjectPermissionMembers({ candidates, value, disabled, onEditSta
                     variant="link"
                     disabled={disabled}
                     onClick={() => {
+                        setLoading(true);
+                        setError(false);
                         setQuery('');
                         setDraft([...value]);
                         onEditStart();
@@ -96,7 +127,7 @@ export function ObjectPermissionMembers({ candidates, value, disabled, onEditSta
                             <Button onClick={() => setDraft(null)}>{locale.t<LocaleKey>('ui.objectPermission.cancel')}</Button>
                             <Button
                                 variant="primary"
-                                disabled={disabled}
+                                disabled={disabled || loading || error}
                                 onClick={() => {
                                     onChange(draft.map((user) => ({ ...user, role: UnitRole.Editor })));
                                     setDraft(null);
@@ -119,11 +150,33 @@ export function ObjectPermissionMembers({ candidates, value, disabled, onEditSta
                           univer-mt-3 univer-flex univer-h-60 univer-flex-col univer-gap-3 univer-overflow-auto
                         "
                     >
-                        {users.length === 0 && <p role="status" className="univer-text-sm univer-text-gray-500">{locale.t<LocaleKey>('ui.objectPermission.noMatchingPeople')}</p>}
-                        {users.map((user) => (
+                        {loading && <p role="status">{locale.t<LocaleKey>('ui.objectPermission.loading')}</p>}
+                        {error && (
+                            <div role="alert">
+                                {locale.t<LocaleKey>('ui.objectPermission.peopleError')}
+                                <Button
+                                    onClick={() => {
+                                        setLoading(true);
+                                        setError(false);
+                                        setAttempt((value) => value + 1);
+                                    }}
+                                >
+                                    {locale.t<LocaleKey>('ui.objectPermission.reload')}
+                                </Button>
+                            </div>
+                        )}
+                        {!loading && !error && users.length === 0 && (
+                            <p
+                                role="status"
+                                className="univer-text-sm univer-text-gray-500"
+                            >
+                                {locale.t<LocaleKey>('ui.objectPermission.noMatchingPeople')}
+                            </p>
+                        )}
+                        {!loading && !error && users.map((user) => (
                             <Checkbox
                                 key={user.id}
-                                disabled={disabled}
+                                disabled={disabled || (inheritOwner && user.role === UnitRole.Owner)}
                                 checked={draft.some((member) => member.id === user.id)}
                                 onChange={(checked) => setDraft(checked
                                     ? [...draft.filter((member) => member.id !== user.id), user]
@@ -132,6 +185,13 @@ export function ObjectPermissionMembers({ candidates, value, disabled, onEditSta
                                 <span className="univer-flex univer-items-center univer-gap-2">
                                     <Avatar size={24} src={user.subject?.avatar} />
                                     <span>{user.subject?.name || user.id}</span>
+                                    {inheritOwner && user.role === UnitRole.Owner && (
+                                        <span
+                                            className="univer-text-xs univer-text-gray-500"
+                                        >
+                                            {locale.t<LocaleKey>('ui.objectPermission.ownerInherit')}
+                                        </span>
+                                    )}
                                 </span>
                             </Checkbox>
                         ))}

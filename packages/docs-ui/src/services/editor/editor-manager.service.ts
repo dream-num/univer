@@ -19,7 +19,7 @@ import type { DocBackground, ISuccinctDocRangeParam, Scene } from '@univerjs/eng
 import type { Observable } from 'rxjs';
 import type { IEditorCanvasStyle, IEditorConfigParams } from './editor';
 import { createIdentifier, createParagraphId, DEFAULT_EMPTY_DOCUMENT_VALUE, Disposable, EDITOR_ACTIVATED, FOCUSING_COMMENT_EDITOR, FOCUSING_EDITOR_STANDALONE, HorizontalAlign, ICommandService, IContextService, Inject, Injector, isCommentEditorID, isInternalEditorID, IUndoRedoService, IUniverInstanceService, toDisposable, UniverInstanceType, VerticalAlign } from '@univerjs/core';
-import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
+import { DocSelectionManagerService } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { fromEvent, Subject } from 'rxjs';
 import { DOCS_VIEW_KEY } from '../../basics/docs-view-key';
@@ -247,11 +247,6 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         }
 
         if (render) {
-            if (config.layoutType != null) {
-                const skeletonManager = render.with(DocSkeletonManagerService);
-                skeletonManager.getSkeleton().setLayoutType(config.layoutType);
-                skeletonManager.recalculate();
-            }
             render.engine.mount(container);
 
             const editor = new Editor(

@@ -51,7 +51,6 @@ import {
 } from '../../../../basics/i-document-skeleton-cached';
 import { Vector2 } from '../../../../basics/vector2';
 import { setDocsCustomBlockRenderViewportProvider } from '../../custom-block-render-viewport';
-import { DocumentLayoutType } from '../../document-compatibility';
 import { setDocsTableRenderViewportProvider } from '../../table-render-viewport';
 import { DocumentViewModel } from '../../view-model/document-view-model';
 import { DocumentSkeleton } from '../doc-skeleton';
@@ -251,15 +250,17 @@ describe('doc skeleton', () => {
             skeleton.calculate();
             const documentHeight = firstLine().lineHeight;
             expect(documentHeight).toBeCloseTo(28.5);
-            skeleton.setLayoutType(DocumentLayoutType.DRAWINGML);
+            dataModel.updateDocumentStyle({ documentFlavor: DocumentFlavor.DRAWINGML });
+            skeleton.makeDirty(true);
             skeleton.calculate();
             expect(firstLine().lineHeight).toBeCloseTo(43.2);
             expect(firstLine().divides[0].glyphGroup.find((glyph) => glyph.content === 'a')?.width).toBe(6.125);
-            const fresh = DocumentSkeleton.create(new DocumentViewModel(new DocumentDataModel(snapshot)), locale, { layoutType: DocumentLayoutType.DRAWINGML });
+            const fresh = DocumentSkeleton.create(new DocumentViewModel(new DocumentDataModel(dataModel.getSnapshot())), locale);
             fresh.calculate();
             expect(normalizeSkeleton(skeleton.getSkeletonData())).toEqual(normalizeSkeleton(fresh.getSkeletonData()));
             fresh.dispose();
-            skeleton.setLayoutType(DocumentLayoutType.DOCUMENT);
+            dataModel.updateDocumentStyle({ documentFlavor: snapshot.documentStyle.documentFlavor });
+            skeleton.makeDirty(true);
             skeleton.calculate();
             expect(firstLine().lineHeight).toBeCloseTo(documentHeight);
             expect(dataModel.getSnapshot()).toEqual(snapshot);

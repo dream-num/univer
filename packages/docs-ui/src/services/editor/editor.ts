@@ -26,7 +26,6 @@ import type {
 } from '@univerjs/core';
 import type { DocSelectionManagerService } from '@univerjs/docs';
 import type {
-    DocumentLayoutType,
     IDocSelectionInnerParam,
     IRender,
     ISuccinctDocRangeParam,
@@ -104,8 +103,6 @@ export interface IEditorCanvasStyle {
 
 export interface IEditorConfigParams {
     initialSnapshot: IDocumentData;
-    /** Runtime host semantics; never serialized into the editor's document. */
-    layoutType?: DocumentLayoutType;
     /** Keep the globally focused unit on the editor's host while this editor receives input focus. */
     preserveHostFocus?: boolean;
     cancelDefaultResizeListener?: boolean;

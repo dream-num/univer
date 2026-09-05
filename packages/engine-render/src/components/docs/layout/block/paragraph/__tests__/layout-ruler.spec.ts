@@ -32,7 +32,7 @@ import {
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { GlyphType, LineType } from '../../../../../../basics/i-document-skeleton-cached';
 import { setDocsCustomBlockRenderViewportProvider } from '../../../../custom-block-render-viewport';
-import { DocumentLayoutType, getDocumentCompatibilityPolicy } from '../../../../document-compatibility';
+import { getDocumentCompatibilityPolicy } from '../../../../document-compatibility';
 import { Lang } from '../../../hyphenation/lang';
 import { BreakPointType } from '../../../line-breaker/break';
 import { createSkeletonCustomBlockGlyph } from '../../../model/glyph';
@@ -617,10 +617,10 @@ describe('layout-ruler', () => {
     });
 
     it.each([
-        [DocumentLayoutType.DOCUMENT, undefined, 1],
-        [DocumentLayoutType.DRAWINGML, undefined, 2],
-        [DocumentLayoutType.DRAWINGML, 1, 1],
-    ] as const)('uses the host wrapping default with an optional explicit tolerance (%s, %s)', (layoutType, lineWrapTolerance, expectedLines) => {
+        [DocumentFlavor.UNSPECIFIED, undefined, 1],
+        [DocumentFlavor.DRAWINGML, undefined, 2],
+        [DocumentFlavor.DRAWINGML, 1, 1],
+    ] as const)('uses the host wrapping default with an optional explicit tolerance (%s, %s)', (documentFlavor, lineWrapTolerance, expectedLines) => {
         const { viewModel, ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed('甲乙', {
             documentStyle: {
                 documentFlavor: DocumentFlavor.UNSPECIFIED,
@@ -634,7 +634,7 @@ describe('layout-ruler', () => {
             },
             body: { paragraphs: [{ startIndex: 2, paragraphId: 'host-wrapping', paragraphStyle: { snapToGrid: BooleanNumber.FALSE } }] },
         });
-        sectionBreakConfig.documentCompatibilityPolicy = getDocumentCompatibilityPolicy(undefined, layoutType);
+        sectionBreakConfig.documentCompatibilityPolicy = getDocumentCompatibilityPolicy(documentFlavor);
         const shaped = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
         const pages = lineBreaking(ctx, viewModel, shaped, curPage, paragraphNode, sectionBreakConfig, null);
         expect(pages.flatMap((page) => page.sections.flatMap((section) => section.columns.flatMap((column) => column.lines)))).toHaveLength(expectedLines);
@@ -683,11 +683,11 @@ describe('layout-ruler', () => {
         { fontSize: 9, lineSpacing: 1.5, spacingRule: SpacingRule.AUTO, expectedHeight: 21.6 },
         { fontSize: 10.5, lineSpacing: 12, spacingRule: SpacingRule.EXACT, expectedHeight: 12 },
         { fontSize: 9, lineSpacing: 11, spacingRule: SpacingRule.EXACT, expectedHeight: 11 },
-    ].map((entry) => ({ ...entry, layoutType: DocumentLayoutType.DRAWINGML, inlineBlock: false })).concat([
-        { fontSize: 10.5, lineSpacing: 1.5, spacingRule: SpacingRule.AUTO, expectedHeight: 28.5, layoutType: DocumentLayoutType.DOCUMENT, inlineBlock: false },
-        { fontSize: 10.5, lineSpacing: 12, spacingRule: SpacingRule.EXACT, expectedHeight: 12, layoutType: DocumentLayoutType.DOCUMENT, inlineBlock: false },
-        { fontSize: 10.5, lineSpacing: 12, spacingRule: SpacingRule.EXACT, expectedHeight: 19, layoutType: DocumentLayoutType.DRAWINGML, inlineBlock: true },
-    ]))('preserves line spacing $lineSpacing / $spacingRule at $fontSize pt with layout $layoutType and inline block $inlineBlock', ({ fontSize, lineSpacing, spacingRule, expectedHeight, layoutType, inlineBlock }) => {
+    ].map((entry) => ({ ...entry, documentFlavor: DocumentFlavor.DRAWINGML, inlineBlock: false })).concat([
+        { fontSize: 10.5, lineSpacing: 1.5, spacingRule: SpacingRule.AUTO, expectedHeight: 28.5, documentFlavor: DocumentFlavor.UNSPECIFIED, inlineBlock: false },
+        { fontSize: 10.5, lineSpacing: 12, spacingRule: SpacingRule.EXACT, expectedHeight: 12, documentFlavor: DocumentFlavor.UNSPECIFIED, inlineBlock: false },
+        { fontSize: 10.5, lineSpacing: 12, spacingRule: SpacingRule.EXACT, expectedHeight: 19, documentFlavor: DocumentFlavor.DRAWINGML, inlineBlock: true },
+    ]))('preserves line spacing $lineSpacing / $spacingRule at $fontSize pt with layout $documentFlavor and inline block $inlineBlock', ({ fontSize, lineSpacing, spacingRule, expectedHeight, documentFlavor, inlineBlock }) => {
         const { ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed('ab', {
             documentStyle: {
                 pageSize: { width: 300, height: 300 },
@@ -696,7 +696,7 @@ describe('layout-ruler', () => {
                 paragraphLineGapDefault: 0,
             },
         });
-        sectionBreakConfig.documentCompatibilityPolicy = getDocumentCompatibilityPolicy(undefined, layoutType);
+        sectionBreakConfig.documentCompatibilityPolicy = getDocumentCompatibilityPolicy(documentFlavor);
         const glyphs = ['a', 'b', '\r'].map((character) => {
             const glyph = createGlyph(character, character === '\r' ? 0 : 12);
             glyph.fontStyle!.originFontSize = character === '\r' ? 14 : fontSize;

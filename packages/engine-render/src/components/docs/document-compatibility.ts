@@ -29,12 +29,6 @@ interface IFontMetricScaleRule {
     widthScale?: number;
 }
 
-/** Runtime text-layout semantics. This is not part of a document snapshot. */
-export enum DocumentLayoutType {
-    DOCUMENT = 'document',
-    DRAWINGML = 'drawingml',
-}
-
 export interface IDocumentCompatibilityPolicy {
     mode: 'modern' | 'traditional' | 'unspecified' | 'drawingml';
     applyDocumentDefaultParagraphStyle: boolean;
@@ -115,11 +109,8 @@ const DRAWINGML_COMPATIBILITY_POLICY: IDocumentCompatibilityPolicy = {
     mode: 'drawingml',
 };
 
-export function getDocumentCompatibilityPolicy(
-    documentFlavor?: DocumentFlavor,
-    layoutType = DocumentLayoutType.DOCUMENT
-): IDocumentCompatibilityPolicy {
-    if (layoutType === DocumentLayoutType.DRAWINGML) {
+export function getDocumentCompatibilityPolicy(documentFlavor?: DocumentFlavor): IDocumentCompatibilityPolicy {
+    if (documentFlavor === DocumentFlavor.DRAWINGML) {
         return DRAWINGML_COMPATIBILITY_POLICY;
     }
     if (documentFlavor === DocumentFlavor.MODERN) {
@@ -139,6 +130,10 @@ export function applyFontMetricCompatibility(
     bBox: IDocumentSkeletonBoundingBox,
     policy: IDocumentCompatibilityPolicy
 ): IDocumentSkeletonBoundingBox {
+    if (policy.mode === 'drawingml') {
+        // PowerPoint's measured advances use eighths of a slide-layout unit.
+        return { ...bBox, width: Math.round(bBox.width * 8) / 8 };
+    }
     const fontFamilies = fontStyle.fontFamily
         .split(',')
         .map((item) => item.trim().replace(/^['"]|['"]$/g, ''));
@@ -158,6 +153,12 @@ export function applyFontMetricCompatibility(
         ...bBox,
         width: bBox.width * rule.widthScale,
     };
+}
+
+export function getNominalFontLineHeight(fontSize: number, policy?: IDocumentCompatibilityPolicy): number | undefined {
+    // Office renderer compatibility, not an OOXML-specified font metric.
+    // Font sizes are points; the layout engine uses 96-DPI pixels.
+    return policy?.mode === 'drawingml' && fontSize > 0 ? fontSize * 1.2 * (96 / 72) : undefined;
 }
 
 export function isTraditionalDocumentCompatibility(policy?: IDocumentCompatibilityPolicy): boolean {

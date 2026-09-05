@@ -510,6 +510,8 @@ export enum DocumentFlavor {
     UNSPECIFIED,
     TRADITIONAL,
     MODERN,
+    /** DrawingML text semantics for host-prepared shape and slide text models. */
+    DRAWINGML,
 }
 
 /**
@@ -522,7 +524,7 @@ export interface IDocStyleBase extends IMargin {
 
     pageOrient?: PageOrientType;
 
-    documentFlavor?: DocumentFlavor; // DocumentFlavor: TRADITIONAL, MODERN
+    documentFlavor?: DocumentFlavor;
 
     /** Distance from the page edge to the header, in 96-DPI layout pixels. */
     marginHeader?: number;

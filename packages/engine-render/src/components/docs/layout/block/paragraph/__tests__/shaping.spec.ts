@@ -23,7 +23,7 @@ import {
     PositionedObjectLayoutType,
 } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
-import { DocumentLayoutType, getDocumentCompatibilityPolicy } from '../../../../document-compatibility';
+import { getDocumentCompatibilityPolicy } from '../../../../document-compatibility';
 import { Lang } from '../../../hyphenation/lang';
 import { createSkeletonLetterGlyph } from '../../../model/glyph';
 import { FontCache } from '../../../shaping-engine/font-cache';
@@ -32,7 +32,7 @@ import { shaping } from '../shaping';
 import { createParagraphLayoutTestBed } from './create-paragraph-layout-test-bed';
 
 describe('shaping', () => {
-    it.each([DocumentLayoutType.DOCUMENT, DocumentLayoutType.DRAWINGML])('selects font metrics from runtime layout semantics: %s', (layoutType) => {
+    it.each([DocumentFlavor.UNSPECIFIED, DocumentFlavor.DRAWINGML])('selects font metrics from runtime layout semantics: %s', (documentFlavor) => {
         const measuredWidth = 6.1572265625;
         const measure = vi.spyOn(FontCache, 'getMeasureText').mockReturnValue({
             width: measuredWidth,
@@ -46,11 +46,11 @@ describe('shaping', () => {
             const { viewModel, ctx, paragraphNode, sectionBreakConfig } = createParagraphLayoutTestBed('h', {
                 documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
             });
-            sectionBreakConfig.documentCompatibilityPolicy = getDocumentCompatibilityPolicy(undefined, layoutType);
+            sectionBreakConfig.documentCompatibilityPolicy = getDocumentCompatibilityPolicy(documentFlavor);
             const glyph = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig)
                 .flatMap((item) => item.glyphs)
                 .find((item) => item.content === 'h')!;
-            expect(glyph.width).toBe(layoutType === DocumentLayoutType.DRAWINGML ? 6.125 : measuredWidth);
+            expect(glyph.width).toBe(documentFlavor === DocumentFlavor.DRAWINGML ? 6.125 : measuredWidth);
             expect(glyph.bBox.width).toBe(glyph.width);
             const explicit = createSkeletonLetterGlyph('h', {
                 fontStyle: glyph.fontStyle!,

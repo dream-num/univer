@@ -50,7 +50,6 @@ export { DOCS_EXTENSION_TYPE } from './components/docs/doc-extension';
 export { Documents } from './components/docs/document';
 export type { IPageRenderConfig } from './components/docs/document';
 export type { IDocumentOffsetConfig } from './components/docs/document';
-export { DocumentLayoutType } from './components/docs/document-compatibility';
 export { getTableIdAndSliceIndex } from './components/docs/layout/block/table';
 export {
     measureDocumentNoWrapTextRangeWidth,

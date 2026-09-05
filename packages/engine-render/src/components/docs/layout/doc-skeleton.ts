@@ -39,7 +39,7 @@ import {
 import { Subject } from 'rxjs';
 import { BreakType, DocumentSkeletonPageType, GlyphType, LineType, PageLayoutType } from '../../../basics/i-document-skeleton-cached';
 import { getDocsCustomBlockRenderViewport } from '../custom-block-render-viewport';
-import { DocumentLayoutType, getDocumentCompatibilityPolicy } from '../document-compatibility';
+import { getDocumentCompatibilityPolicy } from '../document-compatibility';
 import { Liquid } from '../liquid';
 import { getDocsTableRenderViewport, hasDocsTableHorizontalViewport } from '../table-render-viewport';
 import { DocumentEditArea } from '../view-model/document-view-model';
@@ -1126,22 +1126,19 @@ export class DocumentSkeleton extends Skeleton {
 
     private readonly _isolateIncrementalPublications: boolean;
 
-    private _layoutType: DocumentLayoutType;
-
     constructor(
         private _docViewModel: DocumentViewModel,
         localeService: LocaleService,
-        options: { isolateIncrementalPublications?: boolean; layoutType?: DocumentLayoutType } = {}
+        options: { isolateIncrementalPublications?: boolean } = {}
     ) {
         super(localeService);
         this._isolateIncrementalPublications = options.isolateIncrementalPublications !== false;
-        this._layoutType = options.layoutType ?? DocumentLayoutType.DOCUMENT;
     }
 
     static create(
         docViewModel: DocumentViewModel,
         localeService: LocaleService,
-        options?: { isolateIncrementalPublications?: boolean; layoutType?: DocumentLayoutType }
+        options?: { isolateIncrementalPublications?: boolean }
     ) {
         return new DocumentSkeleton(docViewModel, localeService, options);
     }
@@ -1164,16 +1161,6 @@ export class DocumentSkeleton extends Skeleton {
 
     getViewModel() {
         return this._docViewModel;
-    }
-
-    /** Select the host's text semantics without modifying the document or its undo history. */
-    setLayoutType(layoutType: DocumentLayoutType): void {
-        if (this._layoutType === layoutType) {
-            return;
-        }
-        this.cancelIncrementalLayout();
-        this._layoutType = layoutType;
-        this.makeDirty(true);
     }
 
     /**
@@ -4780,7 +4767,7 @@ export class DocumentSkeleton extends Skeleton {
             drawings,
 
             localeService: this._localeService,
-            documentCompatibilityPolicy: getDocumentCompatibilityPolicy(documentStyle.documentFlavor, this._layoutType),
+            documentCompatibilityPolicy: getDocumentCompatibilityPolicy(documentStyle.documentFlavor),
             paragraphLineGapDefault,
             defaultTabStop,
             documentTextStyle: textStyle,

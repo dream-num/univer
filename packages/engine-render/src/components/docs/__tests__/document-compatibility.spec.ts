@@ -17,7 +17,7 @@
 import type { IDocumentSkeletonBoundingBox, IDocumentSkeletonFontStyle } from '../../../basics/i-document-skeleton-cached';
 import { DocumentFlavor } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
-import { applyFontMetricCompatibility, DocumentLayoutType, getDocumentCompatibilityPolicy } from '../document-compatibility';
+import { applyFontMetricCompatibility, getDocumentCompatibilityPolicy } from '../document-compatibility';
 
 const fontStyle = {
     fontString: 'normal bold 24pt "Calibri", Arial',
@@ -41,11 +41,13 @@ const bBox = {
 } as IDocumentSkeletonBoundingBox;
 
 describe('document compatibility policy', () => {
-    it.each([undefined, DocumentFlavor.UNSPECIFIED, DocumentFlavor.MODERN, DocumentFlavor.TRADITIONAL])('selects DrawingML independently of document flavor %s', (flavor) => {
-        const policy = getDocumentCompatibilityPolicy(flavor, DocumentLayoutType.DRAWINGML);
+    it('selects DrawingML font metrics without changing existing document flavors', () => {
+        const policy = getDocumentCompatibilityPolicy(DocumentFlavor.DRAWINGML);
         expect(policy.mode).toBe('drawingml');
         expect(applyFontMetricCompatibility('5', fontStyle, bBox, policy)).toEqual(bBox);
-        expect(getDocumentCompatibilityPolicy(flavor).mode).not.toBe('drawingml');
+        for (const flavor of [undefined, DocumentFlavor.UNSPECIFIED, DocumentFlavor.MODERN, DocumentFlavor.TRADITIONAL]) {
+            expect(getDocumentCompatibilityPolicy(flavor).mode).not.toBe('drawingml');
+        }
     });
     it('applies traditional Word font metric width rules without changing modern documents', () => {
         const traditional = getDocumentCompatibilityPolicy(DocumentFlavor.TRADITIONAL);

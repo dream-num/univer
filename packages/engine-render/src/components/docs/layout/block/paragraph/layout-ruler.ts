@@ -47,7 +47,7 @@ import {
 import { GlyphType, LineType } from '../../../../../basics/i-document-skeleton-cached';
 import { isCjkLeftAlignedPunctuation } from '../../../../../basics/tools';
 import { getDocsCustomBlockRenderViewport } from '../../../custom-block-render-viewport';
-import { isTraditionalDocumentCompatibility } from '../../../document-compatibility';
+import { getNominalFontLineHeight, isTraditionalDocumentCompatibility } from '../../../document-compatibility';
 import { BreakPointType } from '../../line-breaker/break';
 import { addGlyphToDivide, createSkeletonBulletGlyph } from '../../model/glyph';
 import {
@@ -1769,9 +1769,7 @@ function getDrawingMLNominalLineHeight(
     const fontSize = Math.max(0, ...(textGlyphs.length ? textGlyphs : glyphGroup)
         .map((glyph) => glyph.fontStyle?.originFontSize ?? 0)
         .filter((size) => Number.isFinite(size) && size > 0));
-    // PowerPoint resolves DrawingML percentage spacing against a 1.2-em nominal line,
-    // independently of Canvas ink/font bounds. Font sizes are points; layout uses CSS pixels.
-    return fontSize > 0 ? fontSize * 1.2 * (96 / 72) : undefined;
+    return getNominalFontLineHeight(fontSize, sectionBreakConfig.documentCompatibilityPolicy);
 }
 
 export function getLineHeightMetrics(

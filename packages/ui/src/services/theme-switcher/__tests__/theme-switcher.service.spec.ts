@@ -16,7 +16,8 @@
 
 import type { Theme } from '@univerjs/themes';
 import { Injector } from '@univerjs/core';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
+
 import { ThemeSwitcherService } from '../theme-switcher.service';
 
 function createService(): ThemeSwitcherService {
@@ -27,78 +28,26 @@ function createService(): ThemeSwitcherService {
 
 describe('ThemeSwitcherService', () => {
     afterEach(() => {
-        vi.unstubAllGlobals();
+        document.documentElement.style.removeProperty('--univer-primary-color');
+        document.getElementById('univer-theme-css-variables')?.remove();
     });
 
-    it('injects theme tokens as CSS variables and replaces previous theme style', () => {
-        interface IStyleElementStub {
-            id?: string;
-            textContent?: string;
-            setAttribute: (key: string, value: string) => void;
-            remove: () => void;
+    it('applies theme variables only to the supplied Univer roots', () => {
+        const workbenchRoot = document.createElement('div');
+        const portalRoot = document.createElement('div');
+        document.documentElement.style.setProperty('--univer-primary-color', 'host');
+        const service = createService();
+
+        service.applyTheme(
+            { primary: { color: 'red' }, radius: 4 } as unknown as Theme,
+            [workbenchRoot, portalRoot]
+        );
+
+        for (const root of [workbenchRoot, portalRoot]) {
+            expect(root.style.getPropertyValue('--univer-primary-color')).toBe('red');
+            expect(root.style.getPropertyValue('--univer-radius')).toBe('4');
         }
-        const appended: IStyleElementStub[] = [];
-        const existing = { remove: vi.fn() };
-        vi.stubGlobal('document', {
-            getElementById: () => existing,
-            createElement: () => ({
-                setAttribute(key: string, value: string) {
-                    if (key === 'id') {
-                        this.id = value;
-                    }
-                },
-                remove: vi.fn(),
-                textContent: '',
-            } as IStyleElementStub),
-            head: {
-                appendChild: (element: IStyleElementStub) => appended.push(element),
-            },
-        });
-        const service = createService();
-
-        service.injectThemeToHead({ primary: { color: 'red' }, radius: 4 } as unknown as Theme);
-
-        expect(existing.remove).toHaveBeenCalledTimes(1);
-        expect(appended[0].id).toBe('univer-theme-css-variables');
-        expect(appended[0].textContent).toContain('--univer-primary-color: red;');
-        expect(appended[0].textContent).toContain('--univer-radius: 4;');
-    });
-
-    it('injects a theme when no previous style element exists', () => {
-        const appended: Array<{ textContent?: string }> = [];
-        vi.stubGlobal('document', {
-            getElementById: () => null,
-            createElement: () => ({
-                setAttribute: vi.fn(),
-                textContent: '',
-            }),
-            head: {
-                appendChild: (element: { textContent?: string }) => appended.push(element),
-            },
-        });
-        const service = createService();
-
-        service.injectThemeToHead({ color: { text: '#111' } } as unknown as Theme);
-
-        expect(appended[0].textContent).toContain('--univer-color-text: #111;');
-    });
-
-    it('disposes without removing the active theme style element', () => {
-        const existing = { remove: vi.fn() };
-        vi.stubGlobal('document', {
-            getElementById: () => existing,
-            createElement: () => ({
-                setAttribute: vi.fn(),
-                textContent: '',
-            }),
-            head: {
-                appendChild: vi.fn(),
-            },
-        });
-        const service = createService();
-
-        service.dispose();
-
-        expect(existing.remove).not.toHaveBeenCalled();
+        expect(document.documentElement.style.getPropertyValue('--univer-primary-color')).toBe('host');
+        expect(document.getElementById('univer-theme-css-variables')).toBeNull();
     });
 });

@@ -16,11 +16,10 @@
 
 import type { MouseEventHandler, ReactNode, RefObject } from 'react';
 import type { Observable } from 'rxjs';
-import { IConfigService, LocaleService } from '@univerjs/core';
-import { clsx } from '@univerjs/design';
+import { LocaleService } from '@univerjs/core';
+import { clsx, ConfigContext } from '@univerjs/design';
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { defaultPluginConfig, UI_PLUGIN_CONFIG_KEY } from '../../../config/config';
 import { useDependency, useObservable } from '../../../utils/di';
 import { useEvent } from '../../hooks/event';
 
@@ -241,11 +240,9 @@ function RectPopup(props: IRectPopupProps) {
         left: -9999,
     });
     const excludeRectsRef = excludeRects;
-    const configService = useDependency(IConfigService);
     const anchorRectRef = useRef<IAbsolutePosition | undefined>(undefined);
     const [resolvedDirection, setResolvedDirection] = useState<RectPopupDirection>(direction);
-    const uiConfig = configService.getConfig<typeof defaultPluginConfig>(UI_PLUGIN_CONFIG_KEY) ?? defaultPluginConfig;
-    const popupRootId = uiConfig?.popupRootId ?? 'univer-popup-portal';
+    const { mountContainer } = useContext(ConfigContext);
 
     const updatePosition = useEvent((position: IAbsolutePosition) => {
         requestAnimationFrame(() => {
@@ -401,7 +398,7 @@ function RectPopup(props: IRectPopupProps) {
         </>
     );
 
-    return !portal ? ele : document.getElementById(popupRootId) ? createPortal(ele, document.getElementById(popupRootId)!) : null;
+    return !portal ? ele : mountContainer ? createPortal(ele, mountContainer) : null;
 }
 
 RectPopup.calcPopupPosition = calcPopupPosition;

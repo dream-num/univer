@@ -29,7 +29,7 @@ import {
     SetWorksheetActiveOperation,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { DISABLE_AUTO_FOCUS_KEY } from '@univerjs/ui';
+import { DISABLE_AUTO_FOCUS_KEY, getEmbedChildUnitId } from '@univerjs/ui';
 import { filter, merge } from 'rxjs';
 import { SetZoomRatioCommand } from '../../commands/commands/set-zoom-ratio.command';
 import { SetActivateCellEditOperation } from '../../commands/operations/activate-cell-edit.operation';
@@ -297,7 +297,10 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
     }
 
     private _focusCellEditorInput(): void {
+        // Restoring the host context after a child command must not reclaim the child's keyboard focus.
+        const focusedChildUnitId = getEmbedChildUnitId(typeof document === 'undefined' ? null : document.activeElement);
         if (
+            (focusedChildUnitId != null && focusedChildUnitId !== this._context.unitId) ||
             !this._isCurrentSheetFocused() ||
             this._contextService.getContextValue(FOCUSING_FX_BAR_EDITOR) ||
             this._editorBridgeService.isVisible().visible

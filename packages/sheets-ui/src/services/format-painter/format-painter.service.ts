@@ -24,6 +24,7 @@ import {
     Inject,
     IUndoRedoService,
     ObjectMatrix,
+    sequenceExecute,
     ThemeService,
 } from '@univerjs/core';
 import { SetRangeValuesMutation, SheetsSelectionsService } from '@univerjs/sheets';
@@ -179,7 +180,7 @@ export class FormatPainterService extends Disposable implements IFormatPainterSe
             redoMutationsInfo,
         });
 
-        const result = redoMutationsInfo.every((m) => this._commandService.executeCommand(m.id, m.params));
+        const { result } = sequenceExecute(redoMutationsInfo, this._commandService);
         if (result) {
             // add to undo redo services
             this._undoRedoService.pushUndoRedo({

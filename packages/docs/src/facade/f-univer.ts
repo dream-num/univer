@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
+import type { DocumentDataModel, ICreateUnitOptions, IDocumentData } from '@univerjs/core';
 import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { FUniver } from '@univerjs/core/facade';
 import { FDocument } from './f-document';
@@ -26,6 +26,7 @@ export interface IFUniverDocsMixin {
     /**
      * Create a new document and get the API handler of that document.
      * @param {Partial<IDocumentData>} data The snapshot of the document.
+     * @param {ICreateUnitOptions} options The options of creating the document.
      * @returns {FDocument} The document API instance.
      * @example
      * ```typescript
@@ -33,7 +34,7 @@ export interface IFUniverDocsMixin {
      * console.log(fDocument);
      * ```
      */
-    createDocument(data: Partial<IDocumentData>): FDocument;
+    createDocument(data: Partial<IDocumentData>, options?: ICreateUnitOptions): FDocument;
 
     /**
      * Get the currently focused Univer document.
@@ -60,9 +61,13 @@ export interface IFUniverDocsMixin {
 }
 
 export class FUniverDocsMixin extends FUniver implements IFUniverDocsMixin {
-    override createDocument(data: Partial<IDocumentData>): FDocument {
+    override createDocument(data: Partial<IDocumentData>, options?: ICreateUnitOptions): FDocument {
         const instanceService = this._injector.get(IUniverInstanceService);
-        const document = instanceService.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, data);
+        const document = instanceService.createUnit<IDocumentData, DocumentDataModel>(
+            UniverInstanceType.UNIVER_DOC,
+            data,
+            options
+        );
         return this._injector.createInstance(FDocument, document);
     }
 

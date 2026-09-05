@@ -19,6 +19,8 @@ import { BehaviorSubject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY } from '../../../common/const';
 import { Injector } from '../../../common/di';
+import { DocumentDataModel } from '../../../docs/data-model/document-data-model';
+import { Univer } from '../../../univer';
 import { CommandService, CommandType, ICommandService } from '../../command/command.service';
 import { ConfigService, IConfigService } from '../../config/config.service';
 import { EDITOR_ACTIVATED, FOCUSING_FX_BAR_EDITOR, FOCUSING_SHEET } from '../../context/context';
@@ -34,6 +36,46 @@ import {
 } from '../undoredo.service';
 
 const MUTATION_ID = 'test.mutation';
+
+describe('unit-specific undo redo status', () => {
+    it('tracks an unfocused unit without changing focus or consuming either history', () => {
+        const univer = new Univer();
+        const injector = univer.__getInjector();
+        const instanceService = injector.get(IUniverInstanceService);
+        const historyService = injector.get(IUndoRedoService);
+        const host = injector.createInstance(DocumentDataModel, { id: 'host' });
+        const child = injector.createInstance(DocumentDataModel, { id: 'child' });
+        instanceService.__addUnit(host);
+        instanceService.__addUnit(child);
+        instanceService.focusUnit(host.getUnitId());
+        const focusedStatuses: Array<{ undos: number; redos: number }> = [];
+        const subscription = historyService.undoRedoStatus$.subscribe((status) => focusedStatuses.push(status));
+        try {
+            expect(historyService.getUndoRedoStatus('missing')).toEqual({ undos: 0, redos: 0 });
+            historyService.pushUndoRedo({ unitID: host.getUnitId(), undoMutations: [{ id: MUTATION_ID, params: {} }], redoMutations: [{ id: MUTATION_ID, params: {} }] });
+            historyService.pushUndoRedo({ unitID: child.getUnitId(), undoMutations: [{ id: MUTATION_ID, params: {} }], redoMutations: [{ id: MUTATION_ID, params: {} }] });
+            historyService.pushUndoRedo({ unitID: child.getUnitId(), undoMutations: [{ id: MUTATION_ID, params: {} }], redoMutations: [{ id: MUTATION_ID, params: {} }] });
+            const notificationCount = focusedStatuses.length;
+            expect(historyService.getUndoRedoStatus(child.getUnitId())).toEqual({ undos: 2, redos: 0 });
+            expect(historyService.getUndoRedoStatus(host.getUnitId())).toEqual({ undos: 1, redos: 0 });
+            expect(instanceService.getFocusedUnit()).toBe(host);
+            expect(focusedStatuses).toHaveLength(notificationCount);
+            expect(focusedStatuses[notificationCount - 1]).toEqual({ undos: 1, redos: 0 });
+
+            instanceService.focusUnit(child.getUnitId());
+            historyService.popUndoToRedo();
+            instanceService.focusUnit(host.getUnitId());
+            expect(historyService.getUndoRedoStatus(child.getUnitId())).toEqual({ undos: 1, redos: 1 });
+            historyService.clearUndoRedo(child.getUnitId());
+            expect(historyService.getUndoRedoStatus(child.getUnitId())).toEqual({ undos: 0, redos: 0 });
+            expect(historyService.getUndoRedoStatus(host.getUnitId())).toEqual({ undos: 1, redos: 0 });
+            expect(instanceService.getFocusedUnit()).toBe(host);
+        } finally {
+            subscription.unsubscribe();
+            univer.dispose();
+        }
+    });
+});
 
 class FocusedUnit {
     constructor(private readonly _unitId: string) {}

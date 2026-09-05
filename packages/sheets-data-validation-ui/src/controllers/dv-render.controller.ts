@@ -15,14 +15,26 @@
  */
 
 import type { CellValue, ICellRenderContext, IRange, Nullable, Workbook } from '@univerjs/core';
-import { DataValidationStatus, DataValidationType, ICommandService, Inject, InterceptorEffectEnum, IUniverInstanceService, Optional, RxDisposable, sequenceExecute, UniverInstanceType } from '@univerjs/core';
+import type { IRuleChange } from '@univerjs/data-validation';
+import {
+    DataValidationStatus,
+    DataValidationType,
+    ICommandService,
+    Inject,
+    InterceptorEffectEnum,
+    IUniverInstanceService,
+    Optional,
+    RxDisposable,
+    sequenceExecute,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { DataValidatorRegistryService } from '@univerjs/data-validation';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { InterceptCellContentPriority, INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { DataValidationCacheService, getCellValueOrigin, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
 import { AutoHeightController, IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { IMenuManagerService } from '@univerjs/ui';
-import { bufferTime, filter } from 'rxjs';
+import { bufferTime, filter, takeUntil } from 'rxjs';
 import { menuSchema } from '../menu/schema';
 import { DataValidationDropdownManagerService } from '../services/dropdown-manager.service';
 
@@ -250,26 +262,11 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                 // patched data-validation change don't need to re-calc row height
                 // re-calc of row height will be triggered precisely by the origin command
                 filter((change) => change.source === 'command'),
-                bufferTime(100)
+                bufferTime(100),
+                takeUntil(this.dispose$)
             )
             .subscribe((infos) => {
-                if (infos.length === 0) {
-                    return;
-                }
-
-                const ranges: IRange[] = [];
-                infos.forEach((info) => {
-                    if (info.rule.type === DataValidationType.LIST_MULTIPLE || info.rule.type === DataValidationType.LIST) {
-                        if (info.rule?.ranges) {
-                            ranges.push(...info.rule.ranges);
-                        }
-                    }
-                });
-
-                if (ranges.length) {
-                    const mutations = this._autoHeightController.getUndoRedoParamsOfAutoHeight(ranges);
-                    sequenceExecute(mutations.redos, this._commandService);
-                }
+                recalculateAutoHeight(infos, this._autoHeightController, this._commandService);
             });
     }
 }
@@ -402,22 +399,42 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
         this._sheetDataValidationModel.ruleChange$
             .pipe(
                 filter((change) => change.source === 'command'),
-                bufferTime(16)
+                bufferTime(16),
+                takeUntil(this.dispose$)
             )
             .subscribe((infos) => {
-                const ranges: IRange[] = [];
-                infos.forEach((info) => {
-                    if (info.rule.type === DataValidationType.LIST_MULTIPLE || info.rule.type === DataValidationType.LIST) {
-                        if (info.rule?.ranges) {
-                            ranges.push(...info.rule.ranges);
-                        }
-                    }
-                });
-
-                if (ranges.length) {
-                    const mutations = this._autoHeightController.getUndoRedoParamsOfAutoHeight(ranges);
-                    sequenceExecute(mutations.redos, this._commandService);
-                }
+                recalculateAutoHeight(infos, this._autoHeightController, this._commandService);
             });
+    }
+}
+
+function recalculateAutoHeight(
+    infos: IRuleChange[],
+    autoHeightController: AutoHeightController,
+    commandService: ICommandService
+) {
+    const rangesByUnit = new Map<string, Map<string, IRange[]>>();
+    for (const { unitId, subUnitId, rule } of infos) {
+        if (rule.type !== DataValidationType.LIST && rule.type !== DataValidationType.LIST_MULTIPLE) {
+            continue;
+        }
+        if (!rule.ranges?.length) {
+            continue;
+        }
+        let rangesBySheet = rangesByUnit.get(unitId);
+        if (!rangesBySheet) {
+            rangesBySheet = new Map();
+            rangesByUnit.set(unitId, rangesBySheet);
+        }
+        const ranges = rangesBySheet.get(subUnitId) ?? [];
+        ranges.push(...rule.ranges);
+        rangesBySheet.set(subUnitId, ranges);
+    }
+
+    for (const [unitId, rangesBySheet] of rangesByUnit) {
+        for (const [subUnitId, ranges] of rangesBySheet) {
+            const mutations = autoHeightController.getUndoRedoParamsOfAutoHeight(ranges, subUnitId, undefined, unitId);
+            sequenceExecute(mutations.redos, commandService);
+        }
     }
 }

@@ -46,6 +46,7 @@ import {
     DEFAULT_WORKSHEET_COLUMN_WIDTH,
     DEFAULT_WORKSHEET_COLUMN_WIDTH_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    EDITOR_ACTIVATED,
     extractPureTextFromCell,
     getNumfmtLocaleTag,
     getNumfmtParseValueFilter,
@@ -59,6 +60,7 @@ import {
     IUniverInstanceService,
     LocaleService,
     ObjectMatrix,
+    Optional,
     RxDisposable,
     Tools,
     UniverInstanceType,
@@ -103,6 +105,7 @@ import {
     PREDEFINED_HOOK_NAME_COPY,
     PREDEFINED_HOOK_NAME_PASTE,
 } from '../../services/clipboard/clipboard.service';
+import { ISheetEmbedRuntimeFocusCoordinator } from '../../services/sheet-embed-integration.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { ClipboardPopupMenu } from '../../views/clipboard/ClipboardPopupMenu';
 import { whenSheetEditorFocused } from '../shortcuts/utils';
@@ -145,7 +148,9 @@ export class SheetClipboardController extends RxDisposable {
         @IClipboardInterfaceService private readonly _clipboardInterfaceService: IClipboardInterfaceService,
         @IMessageService private readonly _messageService: IMessageService,
         @Inject(LocaleService) private readonly _localService: LocaleService,
-        @IUIPartsService protected readonly _uiPartsService: IUIPartsService
+        @IUIPartsService protected readonly _uiPartsService: IUIPartsService,
+        @Optional(ISheetEmbedRuntimeFocusCoordinator)
+        private readonly _embedRuntimeFocusCoordinator?: ISheetEmbedRuntimeFocusCoordinator
     ) {
         super();
         this._init();
@@ -161,7 +166,7 @@ export class SheetClipboardController extends RxDisposable {
     private _pasteWithDoc() {
         const sheetPasteShortKeyFn = (docSelectionRenderService: DocSelectionRenderService) => {
             docSelectionRenderService.onPaste$.pipe(takeUntil(this.dispose$)).subscribe(async (config) => {
-                if (!whenSheetEditorFocused(this._contextService)) {
+                if (!this._isSheetGridPasteTarget()) {
                     return;
                 }
 
@@ -206,6 +211,25 @@ export class SheetClipboardController extends RxDisposable {
                 }
             }
         });
+    }
+
+    private _isSheetGridPasteTarget(): boolean {
+        if (whenSheetEditorFocused(this._contextService)) {
+            return true;
+        }
+
+        const activeRuntime = this._embedRuntimeFocusCoordinator?.resolveActiveChildSessionRuntimeScope();
+        if (
+            activeRuntime?.childType !== UniverInstanceType.UNIVER_SHEET ||
+            !activeRuntime.childUnitId ||
+            this._contextService.getContextValue(EDITOR_ACTIVATED)
+        ) {
+            return false;
+        }
+
+        return this._instanceService
+            .getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)
+            ?.getUnitId() === activeRuntime.childUnitId;
     }
 
     private _resolveClipboardFiles(clipboardData: DataTransfer | null) {

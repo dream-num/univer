@@ -24,6 +24,7 @@ const locale = {
             next: 'Next',
             imageGallery: 'Image gallery',
             image: 'Image {0} of {1}',
+            zoom: 'Zoom',
             zoomIn: 'Zoom in',
             zoomOut: 'Zoom out',
             resetZoom: 'Reset zoom',

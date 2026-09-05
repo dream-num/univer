@@ -32,6 +32,7 @@ interface IBreakLineCommandParams {
     horizontalLine?: IParagraphBorder;
     insertionMode?: BreakLineInsertionMode;
     textRange?: ITextRangeParam;
+    unitId?: string;
 }
 
 export const BreakLineCommand: ICommand<IBreakLineCommandParams> = {
@@ -45,8 +46,14 @@ export const BreakLineCommand: ICommand<IBreakLineCommandParams> = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
         const docMenuStyleService = accessor.get(DocMenuStyleService);
-        const activeTextRange = params?.textRange ?? docSelectionManagerService.getActiveTextRange();
-        const rectRanges = docSelectionManagerService.getRectRanges();
+        const selectionParams = params?.unitId
+            ? { unitId: params.unitId, subUnitId: params.unitId }
+            : undefined;
+        const targetTextRanges = docSelectionManagerService.getTextRanges(selectionParams) ?? [];
+        const activeTextRange = params?.textRange ?? (selectionParams
+            ? targetTextRanges.find((range) => range.isActive)
+            : docSelectionManagerService.getActiveTextRange());
+        const rectRanges = docSelectionManagerService.getRectRanges(selectionParams);
         if (activeTextRange == null) {
             return false;
         }
@@ -58,14 +65,16 @@ export const BreakLineCommand: ICommand<IBreakLineCommandParams> = {
             docSelectionManagerService.replaceDocRanges([{
                 startOffset,
                 endOffset: startOffset,
-            }]);
+            }], selectionParams);
 
             return true;
         }
 
         const { horizontalLine, insertionMode = BreakLineInsertionMode.SplitParagraph } = params ?? {};
         const { segmentId } = activeTextRange;
-        const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        const docDataModel = params?.unitId
+            ? univerInstanceService.getUnit<DocumentDataModel>(params.unitId, UniverInstanceType.UNIVER_DOC)
+            : univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         const originBody = docDataModel?.getSelfOrHeaderFooterModel(segmentId ?? '')?.getBody();
 
         if (docDataModel == null || originBody == null) {
@@ -112,7 +121,9 @@ export const BreakLineCommand: ICommand<IBreakLineCommandParams> = {
             return false;
         }
 
-        const activeRange = docSelectionManagerService.getActiveTextRange();
+        const activeRange = selectionParams
+            ? targetTextRanges.find((range) => range.isActive)
+            : docSelectionManagerService.getActiveTextRange();
 
         if (originBody == null) {
             return false;

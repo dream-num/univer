@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IUniverInstanceService, Workbook } from '@univerjs/core';
+import type { IUniverInstanceService, Workbook, Worksheet } from '@univerjs/core';
 import type {
     IDefinedNamesService,
     IDefinedNamesServiceParam,
@@ -23,8 +23,12 @@ import type {
     LexerTreeBuilder,
 } from '@univerjs/engine-formula';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
-import { AbsoluteRefType } from '@univerjs/core';
-import { isReferenceStringWithEffectiveColumn, serializeRangeWithSheet } from '@univerjs/engine-formula';
+import { AbsoluteRefType, isValidRange } from '@univerjs/core';
+import {
+    deserializeRangeWithSheet,
+    isReferenceStringWithEffectiveColumn,
+    serializeRangeWithSheet,
+} from '@univerjs/engine-formula';
 import { validateDefinedName } from '@univerjs/sheets';
 
 export enum DefinedNameBoxActionType {
@@ -40,6 +44,7 @@ interface IResolveDefinedNameBoxActionParams {
     rangeString: string;
     unitId: string;
     formulaOrRefString: string;
+    worksheet: Worksheet | null;
     univerInstanceService: IUniverInstanceService;
     definedNamesService: IDefinedNamesService;
     superTableService: ISuperTableService;
@@ -54,7 +59,17 @@ type DefinedNameBoxAction =
     | { type: DefinedNameBoxActionType.Reset };
 
 export function resolveDefinedNameBoxAction(params: IResolveDefinedNameBoxActionParams): DefinedNameBoxAction {
-    const { inputValue, rangeString, unitId, formulaOrRefString, univerInstanceService, definedNamesService, superTableService, functionService } = params;
+    const {
+        inputValue,
+        rangeString,
+        unitId,
+        formulaOrRefString,
+        worksheet,
+        univerInstanceService,
+        definedNamesService,
+        superTableService,
+        functionService,
+    } = params;
 
     if (inputValue === rangeString) {
         return { type: DefinedNameBoxActionType.Noop };
@@ -69,6 +84,11 @@ export function resolveDefinedNameBoxAction(params: IResolveDefinedNameBoxAction
     }
 
     if (isReferenceStringWithEffectiveColumn(inputValue)) {
+        const { range } = deserializeRangeWithSheet(inputValue);
+        if (!worksheet || !isValidRange(range, worksheet)) {
+            return { type: DefinedNameBoxActionType.Reset };
+        }
+
         return {
             type: DefinedNameBoxActionType.FocusSelection,
             refString: inputValue,

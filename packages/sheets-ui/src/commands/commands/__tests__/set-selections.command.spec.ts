@@ -885,6 +885,22 @@ describe('Test commands used for change selections', () => {
             expectSelectionToBe(19, 19, 19, 19);
         });
 
+        it('should preserve the primary selection when shift-tab moves a single-cell selection left', async () => {
+            selectTopLeft();
+
+            await commandService.executeCommand<IMoveSelectionEnterAndTabCommandParams>(MoveSelectionEnterAndTabCommand.id, {
+                direction: Direction.RIGHT,
+                keycode: KeyCode.TAB,
+            });
+            expectSelectionToBe(0, 1, 0, 1);
+
+            await commandService.executeCommand<IMoveSelectionEnterAndTabCommandParams>(MoveSelectionEnterAndTabCommand.id, {
+                direction: Direction.LEFT,
+                keycode: KeyCode.TAB,
+            });
+            expectSelectionToBe(0, 0, 0, 0);
+        });
+
         it('should keep the original tab anchor across repeated tab moves before enter', async () => {
             selectTopLeft();
 

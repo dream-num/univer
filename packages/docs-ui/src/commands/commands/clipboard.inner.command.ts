@@ -55,6 +55,7 @@ function hasRangeInTable(ranges: readonly ITextRangeWithStyle[]): boolean {
 }
 
 export interface IInnerPasteCommandParams {
+    unitId?: string;
     segmentId: string;
     doc: Partial<IDocumentData>;
     textRanges: ITextRangeWithStyle[];
@@ -74,21 +75,31 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
             segmentId,
             textRanges,
             doc,
+            unitId: targetUnitId,
         } = params;
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const pasteAdapterService = getPasteAdapterService(accessor);
-        const selections = docSelectionManagerService.getTextRanges() ?? [];
-        const rectRanges = docSelectionManagerService.getRectRanges() ?? [];
-        const selectionInfo = docSelectionManagerService.getSelectionInfo();
+        const currentSelection = docSelectionManagerService.__getCurrentSelection();
+        let selectionParams;
+        if (targetUnitId) {
+            selectionParams = currentSelection?.unitId === targetUnitId
+                ? currentSelection
+                : { unitId: targetUnitId, subUnitId: targetUnitId };
+        }
+        const selections = docSelectionManagerService.getTextRanges(selectionParams) ?? [];
+        const rectRanges = docSelectionManagerService.getRectRanges(selectionParams) ?? [];
+        const selectionInfo = docSelectionManagerService.getSelectionInfo(selectionParams);
         const { body, tableSource, drawings } = doc;
         if ((selections.length === 0 && rectRanges.length === 0) || body == null) {
             return false;
         }
 
-        const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        const docDataModel = targetUnitId
+            ? univerInstanceService.getUnit<DocumentDataModel>(targetUnitId, UniverInstanceType.UNIVER_DOC)
+            : univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         const originBody = docDataModel?.getSelfOrHeaderFooterModel(segmentId)?.getBody();
         if (docDataModel == null || originBody == null) {
             return false;

@@ -86,11 +86,12 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
     }
 
     private _initSelectionChangeListener(d: DisposableCollection) {
+        const selections = this._selectionManagerService.getWorkbookSelections(this._context.unitId);
         d.add(merge(
-            this._selectionManagerService.selectionSet$,
-            this._selectionManagerService.selectionMoveStart$
+            selections.selectionSet$,
+            selections.selectionMoveStart$
         ).subscribe((params) => this._updateEditorPosition(params)));
-        d.add(this._selectionManagerService.selectionMoveEnd$.subscribe((params) => {
+        d.add(selections.selectionMoveEnd$.subscribe((params) => {
             if (
                 this._contextService.getContextValue(MOBILE_KEYBOARD_VISIBLE) &&
                 !this._editorBridgeService.isForceKeepVisible()
@@ -115,7 +116,6 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
                 });
                 return;
             }
-
             this._updateEditorPosition(params);
             if (params?.[params.length - 1]?.primary) {
                 this._updateInputPosition();
@@ -217,7 +217,10 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
         }));
 
         d.add(spreadsheet.onPointerDown$.subscribeEvent({
-            next: (payload) => this._tryHideEditor(resolvePointerEventPayload(payload)),
+            next: (payload) => {
+                this._tryHideEditor(resolvePointerEventPayload(payload));
+                this._focusCellEditorInput();
+            },
             priority: -1,
         }));
         d.add(spreadsheetColumnHeader.onPointerDown$.subscribeEvent({
@@ -294,6 +297,14 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
     }
 
     private _focusCellEditorInput(): void {
+        if (
+            !this._isCurrentSheetFocused() ||
+            this._contextService.getContextValue(FOCUSING_FX_BAR_EDITOR) ||
+            this._editorBridgeService.isVisible().visible
+        ) {
+            return;
+        }
+
         const render = this._renderManagerService.getRenderUnitById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
         const docSelectionRenderService = render?.with(DocSelectionRenderService);
 

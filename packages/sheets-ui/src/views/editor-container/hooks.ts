@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { ICommandService } from '@univerjs/core';
+import { ICommandService, Injector } from '@univerjs/core';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
-import { KeyCode, useDependency, useObservable } from '@univerjs/ui';
+import { IUIRuntimeScopeService, KeyCode, MetaKeys, useDependency, useObservable } from '@univerjs/ui';
 import { useMemo } from 'react';
 import { map, merge } from 'rxjs';
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
@@ -26,29 +26,40 @@ import { IEditorBridgeService } from '../../services/editor-bridge.service';
 export function useKeyEventConfig(unitId?: string) {
     const editorBridgeService = useDependency(IEditorBridgeService);
     const commandService = useDependency(ICommandService);
+    const injector = useDependency(Injector);
 
     const keyCodeConfig = useMemo(() => ({
         keyCodes: [
             { keyCode: KeyCode.ENTER },
+            { keyCode: KeyCode.ENTER, metaKey: MetaKeys.SHIFT },
             { keyCode: KeyCode.ESC },
             { keyCode: KeyCode.TAB },
+            { keyCode: KeyCode.TAB, metaKey: MetaKeys.SHIFT },
         ],
-        handler: (keycode: KeyCode) => {
+        handler: (keycode: KeyCode, metaKey?: MetaKeys) => {
             if (keycode === KeyCode.ENTER || keycode === KeyCode.ESC || keycode === KeyCode.TAB) {
                 if (unitId == null) {
                     return;
                 }
 
                 editorBridgeService.disableForceKeepVisible();
-                commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, {
+                // The shared editor can outlive the child runtime that first mounted it.
+                const runtimeScope = injector.has(IUIRuntimeScopeService)
+                    ? injector.get(IUIRuntimeScopeService).get(unitId)
+                    : undefined;
+                const targetCommandService = runtimeScope?.has(ICommandService)
+                    ? runtimeScope.get<ICommandService>(ICommandService)
+                    : commandService;
+                targetCommandService.syncExecuteCommand(SetCellEditVisibleOperation.id, {
                     visible: false,
                     eventType: DeviceInputEventType.Keyboard,
                     keycode,
+                    isShift: metaKey === MetaKeys.SHIFT,
                     unitId,
                 });
             }
         },
-    }), [commandService, editorBridgeService, unitId]);
+    }), [commandService, editorBridgeService, injector, unitId]);
 
     return keyCodeConfig;
 }

@@ -20,7 +20,8 @@
 
 import type { ISliderProps } from '../Slider';
 import { cleanup, fireEvent, render } from '@testing-library/react';
-import { DesktopLogService, ILogService, Injector, LocaleService } from '@univerjs/core';
+import { DesktopLogService, ILogService, Injector, LocaleService, LocaleType } from '@univerjs/core';
+import designEnUS from '@univerjs/design/locale/en-US';
 import { afterEach, describe, expect, it } from 'vitest';
 import { ComponentManager, IconManager } from '../../../common';
 import { RediProvider } from '../../../utils/di';
@@ -42,7 +43,10 @@ describe('Slider', () => {
             [ComponentManager],
             [IconManager],
         ]);
-        injector.get(LocaleService).setDirection(direction);
+        const localeService = injector.get(LocaleService);
+        localeService.load({ [LocaleType.EN_US]: designEnUS });
+        localeService.setLocale(LocaleType.EN_US);
+        localeService.setDirection(direction);
         const { onChange = () => {}, ...sliderProps } = props;
 
         return render(
@@ -160,6 +164,25 @@ describe('Slider', () => {
         fireEvent.click(increaseButton);
 
         expect(changes).toEqual([115, 100, 135]);
+    });
+
+    it('exposes named zoom controls and supports slider keyboard input', () => {
+        const changes: number[] = [];
+        const { getByRole } = renderSlider({ value: 125, min: 10, max: 400, onChange: (value) => changes.push(value) });
+        const slider = getByRole('slider', { name: designEnUS.design.Accessibility.zoom });
+
+        expect(getByRole('button', { name: designEnUS.design.Accessibility.zoomOut })).toBeTruthy();
+        expect(getByRole('button', { name: designEnUS.design.Accessibility.zoomIn })).toBeTruthy();
+        expect(getByRole('button', { name: designEnUS.design.Accessibility.resetZoom })).toBeTruthy();
+        expect(getByRole('textbox', { name: designEnUS.design.Accessibility.zoom })).toBeTruthy();
+        expect(getByRole('button', { name: designEnUS.design.Accessibility.menu })).toBeTruthy();
+
+        fireEvent.keyDown(slider, { key: 'ArrowRight' });
+        fireEvent.keyDown(slider, { key: 'PageUp' });
+        fireEvent.keyDown(slider, { key: 'Home' });
+        fireEvent.keyDown(slider, { key: 'End' });
+
+        expect(changes).toEqual([135, 225, 10, 400]);
     });
 
     it('clamps step buttons at the min and max boundaries', () => {

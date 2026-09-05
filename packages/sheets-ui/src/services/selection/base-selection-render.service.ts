@@ -855,11 +855,12 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
 
     protected _checkClearPreviousControls(evt: IPointerEvent | IMouseEvent): void {
         const curControls = this.getSelectionControls();
-        if (curControls.length === 0) return;
+        if (curControls.length === 0) {
+            return;
+        }
 
-        // In addition to pressing the ctrl or shift key, we must clear the previous selection.
         if (
-            (!evt.ctrlKey && !evt.shiftKey && !this._remainLastEnabled) ||
+            (!evt.ctrlKey && !evt.metaKey && !evt.shiftKey && !this._remainLastEnabled) ||
             (this._singleSelectionEnabled && !evt.shiftKey)
         ) {
             this._clearAllSelectionControls();

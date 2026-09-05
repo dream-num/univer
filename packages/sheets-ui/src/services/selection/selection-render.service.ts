@@ -409,6 +409,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
         const expandByShiftKey = evt.shiftKey && currentCell;
         const remainLastEnable = this._remainLastEnabled &&
             !evt.ctrlKey &&
+            !evt.metaKey &&
             !evt.shiftKey &&
             !this._skipLastEnabled &&
             !this._singleSelectionEnabled;

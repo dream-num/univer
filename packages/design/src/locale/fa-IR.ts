@@ -26,6 +26,7 @@ const locale: typeof enUS = {
             next: 'بعدی',
             imageGallery: 'گالری تصاویر',
             image: 'تصویر {0} از {1}',
+            zoom: 'بزرگ‌نمایی',
             zoomIn: 'بزرگ‌نمایی',
             zoomOut: 'کوچک‌نمایی',
             resetZoom: 'بازنشانی بزرگ‌نمایی',

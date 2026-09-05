@@ -55,9 +55,59 @@ import {
     ISheetEmbedInteractionBoundaryService,
     ISheetEmbedRuntimeFocusCoordinator,
 } from '../../../services/sheet-embed-integration.service';
-import { EditorContainer, shouldRefocusCellEditorAfterPointerDown } from '../EditorContainer';
+import {
+    EditorContainer,
+    shouldPreserveEmbedControlFocus,
+    shouldPreserveEmbedInteractiveFocus,
+    shouldRefocusCellEditorAfterPointerDown,
+} from '../EditorContainer';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+
+describe('embed editor focus handoff', () => {
+    it.each([
+        { name: 'Name Box input', tag: 'input', role: 'runtime', control: true, interactive: true },
+        { name: 'textarea', tag: 'textarea', role: 'runtime', control: true, interactive: true },
+        { name: 'native select', tag: 'select', role: 'runtime', control: true, interactive: true },
+        { name: 'popup input', tag: 'input', role: 'child-popup', control: true, interactive: true },
+        { name: 'floating menu', tag: 'button', role: 'floating-menu', control: true, interactive: true },
+        { name: 'cell editor', tag: 'div', id: `__editor_${DOCS_NORMAL_EDITOR_UNIT_ID_KEY}`, role: 'child-editor', control: false, interactive: true },
+        { name: 'Shape text editor', tag: 'div', id: '__editor_shape-text', role: 'child-editor', control: true, interactive: true },
+        { name: 'nested Shape text editor', tag: 'div', id: '__editor_shape-text', role: 'child-editor', nested: true, control: false, interactive: false },
+        { name: 'canvas', tag: 'canvas', role: 'runtime', control: false, interactive: false },
+        { name: 'runtime', tag: 'div', role: 'runtime', control: false, interactive: false },
+        { name: 'nested foreign input', tag: 'input', role: 'runtime', nested: true, control: false, interactive: false },
+        { name: 'nested foreign popup', tag: 'input', role: 'child-popup', nested: true, control: false, interactive: false },
+    ])('preserves the intended focus owner for $name', ({ tag, id, role, nested, control, interactive }) => {
+        const runtime = document.createElement('div');
+        runtime.setAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, 'embed-1');
+        runtime.setAttribute(EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE, role);
+        const activeElement = document.createElement(tag);
+        activeElement.tabIndex = 0;
+        if (id) {
+            activeElement.id = id;
+            activeElement.contentEditable = 'true';
+        }
+        if (nested) {
+            activeElement.setAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, 'embed-2');
+        }
+        runtime.appendChild(activeElement);
+        document.body.appendChild(runtime);
+
+        try {
+            activeElement.focus();
+            expect(document.activeElement).toBe(activeElement);
+            expect(shouldPreserveEmbedControlFocus('embed-1', document)).toBe(control);
+            expect(shouldPreserveEmbedInteractiveFocus('embed-1', document)).toBe(interactive);
+            expect(shouldPreserveEmbedControlFocus('another-embed', document)).toBe(false);
+            expect(shouldPreserveEmbedInteractiveFocus('another-embed', document)).toBe(false);
+            expect(shouldPreserveEmbedControlFocus(undefined, document)).toBe(false);
+            expect(shouldPreserveEmbedInteractiveFocus(undefined, document)).toBe(false);
+        } finally {
+            runtime.remove();
+        }
+    });
+});
 
 let latestFormulaEditorProps: {
     disableSelectionOnClick?: boolean;

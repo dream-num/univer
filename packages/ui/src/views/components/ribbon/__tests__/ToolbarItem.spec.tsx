@@ -17,7 +17,7 @@
 import type { ComponentType, ReactElement } from 'react';
 import type { IIconProps } from '../../../../common/icon-manager';
 import { act, cleanup, fireEvent, render, waitFor } from '@testing-library/react';
-import { ICommandService, ILogService, Injector, LocaleService } from '@univerjs/core';
+import { ContextService, ICommandService, IContextService, ILogService, Injector, LocaleService } from '@univerjs/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { afterEach, describe, expect, it } from 'vitest';
 import { ComponentManager } from '../../../../common/component-manager';
@@ -25,7 +25,9 @@ import { IconManager } from '../../../../common/icon-manager';
 import { ILayoutService } from '../../../../services/layout/layout.service';
 import { MenuItemType } from '../../../../services/menu/menu';
 import { IMenuManagerService } from '../../../../services/menu/menu-manager.service';
-import { IShortcutService } from '../../../../services/shortcut/shortcut.service';
+import { IPlatformService, PlatformService } from '../../../../services/platform/platform.service';
+import { IUIRuntimeScopeService, UIRuntimeScopeService } from '../../../../services/runtime-scope/ui-runtime-scope.service';
+import { IShortcutService, ShortcutService } from '../../../../services/shortcut/shortcut.service';
 import { connectInjector } from '../../../../utils/di';
 import { ToolbarItem } from '../ToolbarItem';
 
@@ -45,13 +47,9 @@ class TestCommandService {
 
 class TestLayoutService {
     focus(): void {}
-}
 
-class TestShortcutService {
-    readonly shortcutChanged$ = new Subject<void>();
-
-    getShortcutDisplayOfCommand(): null {
-        return null;
+    checkElementInCurrentContainers(): boolean {
+        return true;
     }
 }
 
@@ -67,12 +65,18 @@ class TestLogService {
     warn(): void {}
 }
 
+const testInjectors: Injector[] = [];
+
 function renderWithDependencies(element: ReactElement) {
     const injector = new Injector();
+    testInjectors.push(injector);
     injector.add([LocaleService, { useClass: TestLocaleService as never }]);
     injector.add([ICommandService, { useClass: TestCommandService as never }]);
     injector.add([ILayoutService, { useClass: TestLayoutService as never }]);
-    injector.add([IShortcutService, { useClass: TestShortcutService as never }]);
+    injector.add([IContextService, { useClass: ContextService }]);
+    injector.add([IPlatformService, { useClass: PlatformService }]);
+    injector.add([IUIRuntimeScopeService, { useClass: UIRuntimeScopeService }]);
+    injector.add([IShortcutService, { useClass: ShortcutService }]);
     injector.add([IMenuManagerService, { useClass: TestMenuManagerService as never }]);
     injector.add([ILogService, { useClass: TestLogService as never }]);
     injector.add([ComponentManager]);
@@ -94,9 +98,51 @@ function renderWithDependencies(element: ReactElement) {
     };
 }
 
-afterEach(cleanup);
+afterEach(() => {
+    cleanup();
+    testInjectors.forEach((injector) => injector.dispose());
+    testInjectors.length = 0;
+});
 
 describe('ToolbarItem', () => {
+    it('opens a selector menu from its keyboard-focusable trigger', async () => {
+        const { container, findByText } = renderWithDependencies(
+            <ToolbarItem
+                id="test-keyboard-selector"
+                type={MenuItemType.SELECTOR}
+                tooltip="Format"
+                icon="TestIcon"
+                selections={[{ label: 'Format rows', value: 'row' }]}
+            />
+        );
+        const trigger = container.querySelector('.univer-toolbar-selector-root') as HTMLElement;
+
+        expect(trigger.getAttribute('role')).toBe('button');
+        expect(trigger.getAttribute('tabindex')).toBe('0');
+        expect(trigger.getAttribute('aria-label')).toBe('Format');
+        trigger.focus();
+        expect(document.activeElement).toBe(trigger);
+        fireEvent.keyDown(trigger, { key: 'Enter' });
+
+        expect(await findByText('Format rows')).toBeTruthy();
+    });
+
+    it('keeps a custom selector label as the only keyboard focus target', () => {
+        const { container } = renderWithDependencies(
+            <ToolbarItem
+                id="test-custom-selector"
+                type={MenuItemType.SELECTOR}
+                label={{ name: 'TestDynamicOption' }}
+                selections={[{ label: 'Format rows', value: 'row' }]}
+            />
+        );
+        const trigger = container.querySelector('.univer-toolbar-selector-root') as HTMLElement;
+
+        expect(trigger.getAttribute('role')).toBeNull();
+        expect(trigger.getAttribute('tabindex')).toBeNull();
+        expect(trigger.querySelector('button')).toBeTruthy();
+    });
+
     it('closes open selector options when the parent becomes disabled', async () => {
         const disabled$ = new BehaviorSubject(false);
         const { container, findByText, queryByText } = renderWithDependencies(
@@ -134,6 +180,19 @@ describe('ToolbarItem', () => {
         );
 
         expect(getByText('Format')).toBeTruthy();
+    });
+
+    it('uses the tooltip as the accessible name for an icon-only button', () => {
+        const { getByRole } = renderWithDependencies(
+            <ToolbarItem
+                id="test-icon-button"
+                type={MenuItemType.BUTTON}
+                icon="TestIcon"
+                tooltip="Undo"
+            />
+        );
+
+        expect(getByRole('button', { name: 'Undo' })).toBeTruthy();
     });
 
     it('shows a title for a large Grid button selector', () => {

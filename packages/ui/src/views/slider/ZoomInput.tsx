@@ -15,6 +15,7 @@
  */
 
 import type { IDropdownMenuProps } from '@univerjs/design';
+import { LocaleService } from '@univerjs/core';
 import { Button, clsx, DropdownMenu, Input } from '@univerjs/design';
 import { useEffect, useRef, useState } from 'react';
 import { IconManager } from '../../common';
@@ -32,6 +33,7 @@ export interface IZoomInputProps {
 
 export function ZoomInput(props: IZoomInputProps) {
     const iconManager = useDependency(IconManager);
+    const localeService = useDependency(LocaleService);
     const {
         value = 100,
         min = 0,
@@ -135,6 +137,7 @@ export function ZoomInput(props: IZoomInputProps) {
                 `}
                 inputClass="univer-w-full"
                 size="mini"
+                aria-label={localeService.t('design.Accessibility.zoom')}
                 value={inputValue}
                 disabled={disabled}
                 type="text"
@@ -155,6 +158,7 @@ export function ZoomInput(props: IZoomInputProps) {
                     className="univer-h-6 univer-w-4 univer-rounded-none univer-p-0"
                     size="small"
                     variant="text"
+                    aria-label={localeService.t('design.Accessibility.menu')}
                     disabled={disabled}
                 >
                     <MoreDownIcon

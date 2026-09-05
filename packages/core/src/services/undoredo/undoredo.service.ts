@@ -44,6 +44,9 @@ export interface IUndoRedoItem {
 export interface IUndoRedoService {
     undoRedoStatus$: Observable<IUndoRedoStatus>;
 
+    /** Read a unit's history counts without changing the focused unit. */
+    getUndoRedoStatus(unitId: string): IUndoRedoStatus;
+
     pushUndoRedo(item: IUndoRedoItem): void;
 
     /**
@@ -203,6 +206,13 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
 
         this.disposeWithMe(toDisposable(() => this._undoRedoStatus$.complete()));
         this.disposeWithMe(toDisposable(this._univerInstanceService.focused$.subscribe(() => this._updateStatus())));
+    }
+
+    getUndoRedoStatus(unitId: string): IUndoRedoStatus {
+        return {
+            undos: this._undoStacks.get(unitId)?.length ?? 0,
+            redos: this._redoStacks.get(unitId)?.length ?? 0,
+        };
     }
 
     pushUndoRedo(item: IUndoRedoItem): void {

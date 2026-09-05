@@ -47,8 +47,8 @@ export interface ILayoutService {
     readonly isFocused: boolean;
 
     get rootContainerElement(): Nullable<HTMLElement>;
-    /** Re-focus the currently focused Univer business instance. */
-    focus(): void;
+    /** Re-focus a specific Univer business instance, or the currently focused one when omitted. */
+    focus(unitId?: string): void;
 
     /** Register a focus handler to focus on certain type of Univer unit. */
     registerFocusHandler(type: UniverInstanceType, handler: FocusHandlerFn): IDisposable;
@@ -98,8 +98,10 @@ export class DesktopLayoutService extends Disposable implements ILayoutService {
         return this._rootContainerElement;
     }
 
-    focus(): void {
-        const currentFocused = this._univerInstanceService.getFocusedUnit();
+    focus(unitId?: string): void {
+        const currentFocused = unitId === undefined
+            ? this._univerInstanceService.getFocusedUnit()
+            : this._univerInstanceService.getUnit(unitId);
         if (!currentFocused) {
             return;
         }

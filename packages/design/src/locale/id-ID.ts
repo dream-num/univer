@@ -26,6 +26,7 @@ const locale: typeof enUS = {
             next: 'Berikutnya',
             imageGallery: 'Galeri gambar',
             image: 'Gambar {0} dari {1}',
+            zoom: 'Zoom',
             zoomIn: 'Perbesar',
             zoomOut: 'Perkecil',
             resetZoom: 'Atur ulang zoom',

@@ -15,12 +15,13 @@
  */
 
 import type { Injector, Univer, Workbook } from '@univerjs/core';
-import type { ISelectionWithCoord } from '@univerjs/sheets';
+import type { ISelectionWithCoord, ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import {
     Disposable,
     ICommandService,
     IUniverInstanceService,
     LocaleType,
+    ObjectMatrix,
     RedoCommand,
     set,
     ThemeService,
@@ -36,7 +37,7 @@ import {
     SetSelectionsOperation,
 } from '@univerjs/sheets';
 import { BehaviorSubject } from 'rxjs';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { FormatPainterController } from '../../../controllers/format-painter/format-painter.controller';
 import {
     FormatPainterService,
@@ -237,6 +238,8 @@ describe('Test format painter rules in controller', () => {
         commandService.registerCommand(AddWorksheetMergeMutation);
     });
 
+    afterEach(() => univer?.dispose());
+
     describe('format painter', () => {
         it('toggles toolbar commands between active mode and off', async () => {
             const formatPainterService = get(IFormatPainterService);
@@ -350,6 +353,65 @@ describe('Test format painter rules in controller', () => {
         });
 
         describe('format painter to single cell', () => {
+            it('changes only styles and preserves target formulas through undo and redo', async () => {
+                const workbook = get(IUniverInstanceService).getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+                const worksheet = workbook.getSheetBySheetId('sheet-0011')!;
+                const originalCell = { ...worksheet.getCell(0, 3)! };
+                get(IUniverInstanceService).focusUnit(workbook.getUnitId());
+                expect(await commandService.executeCommand(SetSelectionsOperation.id, {
+                    unitId: 'workbook-01',
+                    subUnitId: 'sheet-0011',
+
+                    selections: [
+                        {
+                            range: {
+                                startRow: 0,
+                                endRow: 0,
+                                startColumn: 0,
+                                endColumn: 0,
+                            },
+                        },
+                    ],
+                })).toBeTruthy();
+
+                expect(await commandService.executeCommand(SetOnceFormatPainterCommand.id)).toBeTruthy();
+
+                const setRangeValuesParams: ISetRangeValuesMutationParams[] = [];
+                const disposable = commandService.onCommandExecuted((command) => {
+                    if (command.id === SetRangeValuesMutation.id) {
+                        setRangeValuesParams.push(command.params as ISetRangeValuesMutationParams);
+                    }
+                });
+
+                expect(await commandService.executeCommand(ApplyFormatPainterCommand.id, {
+                    range: {
+                        startRow: 0,
+                        endRow: 0,
+                        startColumn: 3,
+                        endColumn: 3,
+                    },
+                    unitId: 'workbook-01',
+                    subUnitId: 'sheet-0011',
+                })).toBeTruthy();
+
+                disposable.dispose();
+
+                expect(setRangeValuesParams.length).toBeGreaterThan(0);
+                for (const params of setRangeValuesParams) {
+                    expect(params.trigger).toBe(ApplyFormatPainterCommand.id);
+                    new ObjectMatrix(params.cellValue).forValue((_row, _column, cell) => {
+                        expect(Object.keys(cell!)).toEqual(['s']);
+                    });
+                }
+                expect(worksheet.getCell(0, 3)).toMatchObject({ ...originalCell, s: 'yifA1t' });
+
+                expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+                expect(worksheet.getCell(0, 3)).toMatchObject(originalCell);
+                expect(worksheet.getCell(0, 3)?.s).toBeUndefined();
+
+                expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+                expect(worksheet.getCell(0, 3)).toMatchObject({ ...originalCell, s: 'yifA1t' });
+            });
             it('will copy whole original styles', async () => {
                 expect(await commandService.executeCommand(SetSelectionsOperation.id, {
                     unitId: 'workbook-01',

@@ -31,8 +31,10 @@ import {
     Injector,
     IUniverInstanceService,
     LocaleService,
+    LocaleType,
     UniverInstanceService,
 } from '@univerjs/core';
+import designEnUS from '@univerjs/design/locale/en-US';
 import { ComponentManager, IconManager, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -57,6 +59,10 @@ function createZoomSliderTestBed() {
     injector.add([LocaleService]);
     injector.add([ComponentManager]);
     injector.add([IconManager]);
+    const localeService = injector.get(LocaleService);
+    localeService.load({ [LocaleType.EN_US]: designEnUS });
+    localeService.setLocale(LocaleType.EN_US);
+    localeService.setDirection('ltr');
 
     const doc = new DocumentDataModel({
         id: 'zoom-slider-doc',
@@ -111,11 +117,11 @@ describe('ZoomSlider', () => {
         root = rendered.root;
         container = rendered.container;
 
-        const buttons = Array.from(container.querySelectorAll('button'));
-        const increaseButton = buttons[2];
+        const increaseButton = container.querySelector<HTMLButtonElement>('button[aria-label="Zoom in"]');
+        expect(increaseButton).not.toBeNull();
 
         act(() => {
-            increaseButton.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            increaseButton!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
         });
 
         expect(rendered.doc.zoomRatio).toBe(1.1);

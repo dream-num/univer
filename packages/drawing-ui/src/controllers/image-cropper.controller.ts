@@ -338,6 +338,7 @@ export class ImageCropperController extends Disposable {
                 if (cropSession == null) {
                     return;
                 }
+                this._activeCropSession = null;
                 const { scene, imageShape, imageCropperObject } = cropSession;
 
                 const transformer = scene.getTransformerByCreate();
@@ -373,7 +374,6 @@ export class ImageCropperController extends Disposable {
 
                 this._cropSnapshots.delete(imageCropperObject);
                 imageCropperObject.dispose();
-                this._activeCropSession = null;
                 this._cropShortcutDisposables.dispose();
             })
         );
@@ -385,7 +385,9 @@ export class ImageCropperController extends Disposable {
             );
 
         this.disposeWithMe(sheetUnit$.subscribe(() => {
-            this._commandService.syncExecuteCommand(CloseImageCropOperation.id);
+            if (this._activeCropSession != null) {
+                this._commandService.syncExecuteCommand(CloseImageCropOperation.id);
+            }
         }));
     }
 

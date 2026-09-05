@@ -411,6 +411,7 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
             dispose = editorService.register({
                 autofocus,
                 editorUnitId: editorId,
+                preserveHostFocus: editorId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
                 initialSnapshot: {
                     id: editorId,
                     body: {

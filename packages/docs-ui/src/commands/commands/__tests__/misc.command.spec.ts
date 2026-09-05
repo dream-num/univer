@@ -2280,6 +2280,44 @@ describe('misc document commands', () => {
         expect(get(DocIMEInputManagerService).getUndoRedoMutationParamsCache().redoCache[0].noHistory).toBe(true);
     });
 
+    it('restores selected text when an IME composition is canceled', async () => {
+        ({ univer, get } = createCommandTestBed(createBaseDoc('Hello\r\n')));
+        commandService = get(ICommandService);
+        commandService.registerCommand(IMEInputCommand);
+        commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
+
+        const imeInputManagerService = get(DocIMEInputManagerService);
+        const activeRange = {
+            startOffset: 1,
+            endOffset: 4,
+            collapsed: false,
+            segmentId: '',
+        };
+        imeInputManagerService.setActiveRange(activeRange);
+        imeInputManagerService.setPreviousDocRanges([activeRange]);
+
+        expect(await commandService.executeCommand(IMEInputCommand.id, {
+            unitId: 'test-doc',
+            newText: 'nihao',
+            oldTextLen: 0,
+            isCompositionStart: true,
+            isCompositionEnd: false,
+        })).toBe(true);
+        expect(getBody()?.dataStream).toBe('Hnihaoo\r\n');
+
+        expect(await commandService.executeCommand(IMEInputCommand.id, {
+            unitId: 'test-doc',
+            newText: '',
+            oldTextLen: 5,
+            isCompositionStart: false,
+            isCompositionEnd: true,
+            isCompositionCanceled: true,
+        })).toBe(true);
+        await awaitTime(0);
+
+        expect(getBody()?.dataStream).toBe('Hello\r\n');
+    });
+
     it('opens the create-table confirm flow and forwards the confirmed size to the table command', async () => {
         ({ univer, get } = createCommandTestBed(createBaseDoc(), [
             [IConfirmService, { useClass: TestConfirmService }],

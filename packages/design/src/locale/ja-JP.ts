@@ -26,6 +26,7 @@ const locale: typeof enUS = {
             next: '次へ',
             imageGallery: '画像ギャラリー',
             image: '画像 {0}/{1}',
+            zoom: 'ズーム',
             zoomIn: '拡大',
             zoomOut: '縮小',
             resetZoom: 'ズームをリセット',

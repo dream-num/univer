@@ -1704,6 +1704,12 @@ importers:
       '@univerjs-infra/shared':
         specifier: workspace:*
         version: link:../../common/shared
+      '@univerjs/docs':
+        specifier: workspace:*
+        version: link:../docs
+      '@univerjs/docs-ui':
+        specifier: workspace:*
+        version: link:../docs-ui
       postcss:
         specifier: ^8.5.26
         version: 8.5.26

@@ -531,10 +531,13 @@ describe('EditorService', () => {
             viewportScrollY: 0,
         });
         expect(univerInstanceService.getUnit<DocumentDataModel>(editorUnitId)?.getBody()?.dataStream).toBe('abc\r\n');
+        service.focus(editorUnitId);
+        expect(service.getFocusId()).toBe(editorUnitId);
 
         disposable.dispose();
 
         expect(service.isEditor(editorUnitId)).toBe(false);
+        expect(service.getFocusId()).toBeNull();
         expect(TestRegisterRenderManagerService.removedRenderIds).toEqual([editorUnitId]);
         expect(univerInstanceService.getUnit<DocumentDataModel>(editorUnitId)).toBeUndefined();
     });

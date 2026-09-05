@@ -15,7 +15,7 @@
  */
 
 import type { ChangeEvent } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { borderClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
 import { hexToHsv, hsvToHex, hsvToRgb, rgbToHsv } from './color-conversion';
@@ -35,25 +35,47 @@ interface IInputProps {
 }
 
 function HexInput({ hsv, onChange }: IInputProps) {
-    const [inputValue, setInputValue] = useState('');
+    const inputRef = useRef<HTMLInputElement>(null);
+    const isComposingRef = useRef(false);
+    const lastInputValueRef = useRef('');
+    const finishCompositionRef = useRef<(value: string) => void>(() => {});
+    const removeNativeListenersRef = useRef<() => void>(() => {});
     const hexValue = useMemo(() => hsvToHex(hsv[0], hsv[1], hsv[2]), [hsv]);
 
     useEffect(() => {
-        setInputValue(hexValue.replace(/^#/, ''));
+        if (isComposingRef.current) {
+            return;
+        }
+
+        const nextValue = hexValue.replace(/^#/, '');
+        // A casing-only DOM value rewrite breaks the native input's undo history and text selection.
+        const input = inputRef.current;
+        if (input && input.value.toLowerCase() !== nextValue) {
+            input.value = nextValue;
+        }
+        lastInputValueRef.current = input?.value ?? nextValue;
     }, [hexValue]);
 
     const isValidHex = (hex: string) => {
         return /^[0-9A-Fa-f]{6}$/.test(hex);
     };
 
-    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-        const newValue = e.target.value.trim();
+    const updateInputValue = (newValue: string) => {
+        if (newValue.length > 6) {
+            if (inputRef.current) {
+                inputRef.current.value = lastInputValueRef.current;
+            }
+            return;
+        }
 
-        if (newValue.length > 6) return;
+        if (newValue !== '' && !/^[0-9A-Fa-f]*$/.test(newValue)) {
+            if (inputRef.current) {
+                inputRef.current.value = lastInputValueRef.current;
+            }
+            return;
+        }
 
-        if (newValue !== '' && !/^[0-9A-Fa-f]*$/.test(newValue)) return;
-
-        setInputValue(newValue);
+        lastInputValueRef.current = newValue;
 
         if (isValidHex(newValue)) {
             const hsvValue = hexToHsv(newValue);
@@ -63,22 +85,78 @@ function HexInput({ hsv, onChange }: IInputProps) {
         }
     };
 
+    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+        const newValue = e.target.value.trim();
+        if (isComposingRef.current || (e.nativeEvent as InputEvent).isComposing) {
+            return;
+        }
+
+        updateInputValue(newValue);
+    };
+
+    finishCompositionRef.current = (newValue) => {
+        if (newValue !== '' && !isValidHex(newValue)) {
+            const nextValue = hexValue.replace(/^#/, '');
+            if (inputRef.current) {
+                inputRef.current.value = nextValue;
+            }
+            lastInputValueRef.current = nextValue;
+            return;
+        }
+
+        updateInputValue(newValue);
+    };
+
+    const setInputElement = useCallback((input: HTMLInputElement | null) => {
+        removeNativeListenersRef.current();
+        inputRef.current = input;
+        if (!input) {
+            return;
+        }
+
+        const handleCompositionStart = (event: CompositionEvent) => {
+            event.stopPropagation();
+            isComposingRef.current = true;
+        };
+        const handleCompositionUpdate = (event: CompositionEvent) => {
+            event.stopPropagation();
+        };
+        const handleCompositionEnd = (event: CompositionEvent) => {
+            event.stopPropagation();
+            isComposingRef.current = false;
+            finishCompositionRef.current(input.value.trim());
+        };
+
+        input.addEventListener('compositionstart', handleCompositionStart);
+        input.addEventListener('compositionupdate', handleCompositionUpdate);
+        input.addEventListener('compositionend', handleCompositionEnd);
+        removeNativeListenersRef.current = () => {
+            input.removeEventListener('compositionstart', handleCompositionStart);
+            input.removeEventListener('compositionupdate', handleCompositionUpdate);
+            input.removeEventListener('compositionend', handleCompositionEnd);
+        };
+    }, []);
+
     const handleBlur = () => {
-        if (!isValidHex(inputValue)) {
-            setInputValue(hexValue.replace(/^#/, ''));
+        if (!isValidHex(inputRef.current?.value ?? '')) {
+            const nextValue = hexValue.replace(/^#/, '');
+            if (inputRef.current) {
+                inputRef.current.value = nextValue;
+            }
+            lastInputValueRef.current = nextValue;
         }
     };
 
     return (
         <>
             <input
+                ref={setInputElement}
                 className={clsx(`
                   univer-w-full univer-px-2 !univer-pl-4 univer-uppercase
                   focus:univer-border-primary-500 focus:univer-outline-none
                   rtl:!univer-pl-2 rtl:!univer-pr-4
                   dark:!univer-text-gray-0
                 `, borderClassName)}
-                value={inputValue}
                 onChange={handleChange}
                 onBlur={handleBlur}
                 maxLength={6}

@@ -176,7 +176,7 @@ export class ShortcutService extends Disposable implements IShortcutService {
     private readonly _shortcutChanged$ = new Subject<void>();
     readonly shortcutChanged$ = this._shortcutChanged$.asObservable();
 
-    private _forceEscaped = false;
+    private _forceEscapeCount = 0;
 
     private _forceDisabled = false;
 
@@ -277,8 +277,10 @@ export class ShortcutService extends Disposable implements IShortcutService {
     }
 
     forceEscape(): IDisposable {
-        this._forceEscaped = true;
-        return toDisposable(() => (this._forceEscaped = false));
+        this._forceEscapeCount += 1;
+        return toDisposable(() => {
+            this._forceEscapeCount = Math.max(0, this._forceEscapeCount - 1);
+        });
     }
 
     forceDisable(): IDisposable {
@@ -298,12 +300,17 @@ export class ShortcutService extends Disposable implements IShortcutService {
     }
 
     dispatch(e: KeyboardEvent): IShortcutItem<object> | undefined {
+        // The capture listener runs before the editor can handle IME candidate keys.
+        if (e.isComposing) {
+            return;
+        }
+
         // Should get the container element of the Univer instance and see if
         // the event target is a descendant of the container element.
         // Also we should check through escape list and force catching list.
         // if the target is not focused on the univer instance we should ignore the keyboard event.
         // Maybe the user has forcibly disabled the shortcut keys, and the shortcut keys should not be processed at this time.
-        if (this._forceEscaped || this._forceDisabled) return;
+        if (this._forceEscapeCount > 0 || this._forceDisabled) return;
 
         if (
             this._layoutService &&

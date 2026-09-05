@@ -1439,6 +1439,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
                 this._eventHandle(e, (config) => {
                     this._onInputBefore$.next(config);
+                    this._refreshMissingInputRange(config);
                     this._onInput$.next(config);
                 });
             })
@@ -1483,6 +1484,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
                 }
                 this._eventHandle(e, (config) => {
                     this._onInputBefore$.next(config);
+                    this._refreshMissingInputRange(config);
                     this._onCompositionupdate$.next(config);
                 });
             })
@@ -1528,6 +1530,14 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
                 });
             })
         );
+    }
+
+    private _refreshMissingInputRange(config: IEditorInputConfig): void {
+        // Opening a Sheet editor in before-input can establish its first caret after the event snapshot was captured.
+        if (config.activeRange == null) {
+            config.activeRange = this._getActiveRange();
+            config.rangeList = this._getAllTextRanges();
+        }
     }
 
     private _eventHandle(e: Event | CompositionEvent | KeyboardEvent, func: (config: IEditorInputConfig) => void) {

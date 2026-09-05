@@ -21,6 +21,26 @@ import { Dialog } from '../Dialog';
 afterEach(cleanup);
 
 describe('Dialog focus recovery', () => {
+    it('honors a caller override instead of restoring the transient opener', async () => {
+        const opener = document.createElement('button');
+        const returnTarget = document.createElement('button');
+        document.body.append(opener, returnTarget);
+        const restoreFocus = (event: Event) => {
+            event.preventDefault();
+            returnTarget.focus();
+        };
+        try {
+            opener.focus();
+            const { rerender, getByRole } = render(<Dialog open title="Validation" onCloseAutoFocus={restoreFocus}><button>OK</button></Dialog>);
+            await waitFor(() => expect(document.activeElement).toBe(getByRole('button', { name: 'OK' })));
+            rerender(<Dialog open={false} title="Validation" onCloseAutoFocus={restoreFocus}><button>OK</button></Dialog>);
+            await waitFor(() => expect(document.activeElement).toBe(returnTarget));
+        } finally {
+            opener.remove();
+            returnTarget.remove();
+        }
+    });
+
     it('returns focus through the parent modal before returning to the editor', async () => {
         const editor = document.createElement('input');
         document.body.appendChild(editor);

@@ -118,6 +118,9 @@ export interface IDialogProps {
      */
     onClose?: () => void;
 
+    /** Prevent default to provide a caller-owned focus destination when the dialog closes. */
+    onCloseAutoFocus?: (event: Event) => void;
+
     showOk?: boolean;
     showCancel?: boolean;
 
@@ -267,6 +270,7 @@ export function Dialog(props: IDialogProps) {
         showCancel,
         onOpenChange,
         onClose,
+        onCloseAutoFocus,
         onOk,
         onCancel,
     } = props;
@@ -357,6 +361,10 @@ export function Dialog(props: IDialogProps) {
                 onCloseAutoFocus={(event) => {
                     const returnFocus = returnFocusRef.current;
                     returnFocusRef.current = null;
+                    onCloseAutoFocus?.(event);
+                    if (event.defaultPrevented) {
+                        return;
+                    }
                     if (mask && returnFocus?.isConnected) {
                         // Controlled dialogs have no Radix Trigger to receive focus on close.
                         event.preventDefault();

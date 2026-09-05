@@ -272,6 +272,7 @@ export function Dialog(props: IDialogProps) {
     } = props;
 
     const { locale, mountContainer, direction, mobile } = useContext(ConfigContext);
+    const returnFocusRef = useRef<HTMLElement | null>(null);
 
     const { position, isDragging, setElementRef, handleMouseDown } = useDraggable({ defaultPosition, enabled: draggable });
 
@@ -349,6 +350,19 @@ export function Dialog(props: IDialogProps) {
                 overlayClassName={overlayClassName}
                 dir={direction}
                 onClickClose={handleClickClose}
+                onOpenAutoFocus={() => {
+                    const activeElement = document.activeElement;
+                    returnFocusRef.current = activeElement instanceof HTMLElement ? activeElement : null;
+                }}
+                onCloseAutoFocus={(event) => {
+                    const returnFocus = returnFocusRef.current;
+                    returnFocusRef.current = null;
+                    if (mask && returnFocus?.isConnected) {
+                        // Controlled dialogs have no Radix Trigger to receive focus on close.
+                        event.preventDefault();
+                        returnFocus.focus({ preventScroll: true });
+                    }
+                }}
                 onEscapeKeyDown={(e) => {
                     if (e.isComposing) {
                         e.preventDefault();

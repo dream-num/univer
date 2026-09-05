@@ -28,7 +28,6 @@ export function AlphaSlider({ hsv, alpha, onChange, onChanged }: IAlphaSliderPro
     const [isDragging, setIsDragging] = useState(false);
     const sliderRef = useRef<HTMLDivElement>(null);
     const thumbRef = useRef<HTMLDivElement>(null);
-    const alphaRef = useRef(alpha);
 
     const calculateAlpha = useCallback((clientX: number) => {
         const slider = sliderRef.current;
@@ -52,14 +51,10 @@ export function AlphaSlider({ hsv, alpha, onChange, onChanged }: IAlphaSliderPro
         calculateAlpha(e.clientX);
     }, [isDragging, calculateAlpha]);
 
-    useEffect(() => {
-        alphaRef.current = alpha;
-    }, [alpha]);
-
     const handlePointerUp = useCallback(() => {
         setIsDragging(false);
-        onChanged?.(alphaRef.current);
-    }, [onChanged]);
+        onChanged?.(alpha);
+    }, [alpha, onChanged]);
 
     useEffect(() => {
         if (isDragging) {

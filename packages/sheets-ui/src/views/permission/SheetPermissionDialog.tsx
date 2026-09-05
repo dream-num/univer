@@ -80,12 +80,16 @@ export const SheetPermissionDialog = () => {
     useEffect(() => {
         let cancelled = false;
 
-        void authzIoService.listCollaborators({
+        authzIoService.listCollaborators({
             objectID: unitId,
             unitID: unitId,
         }).then((collaborators) => {
             if (!cancelled) {
                 setCollaborators(collaborators);
+            }
+        }).catch(() => {
+            if (!cancelled) {
+                setCollaborators([]);
             }
         });
 
@@ -102,7 +106,7 @@ export const SheetPermissionDialog = () => {
         if (worksheetPointRule) {
             setLoading(true);
 
-            void authzIoService.list({
+            authzIoService.list({
                 unitID: unitId,
                 objectIDs: [worksheetPointRule.permissionId],
                 actions: defaultWorksheetUnitActionList,
@@ -124,6 +128,10 @@ export const SheetPermissionDialog = () => {
                 loadingTimer = setTimeout(() => {
                     setLoading(false);
                 }, 100);
+            }).catch(() => {
+                if (!cancelled) {
+                    setLoading(false);
+                }
             });
         }
 
@@ -215,7 +223,7 @@ export const SheetPermissionDialog = () => {
                         >
                             <span className="univer-text-sm">{text}</span>
                             <Switch
-                                defaultChecked={allowed}
+                                checked={allowed}
                                 onChange={() => {
                                     setPermissionMap({
                                         ...permissionMap,

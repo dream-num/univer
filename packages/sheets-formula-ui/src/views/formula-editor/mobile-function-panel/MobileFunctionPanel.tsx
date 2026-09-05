@@ -20,7 +20,7 @@ import { LocaleService } from '@univerjs/core';
 import { clsx, scrollbarClassName } from '@univerjs/design';
 import { FunctionType, IDescriptionService } from '@univerjs/engine-formula';
 import { useDependency } from '@univerjs/ui';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { getFunctionTypeValues } from '../../../services/utils';
 
 const RECENT_FUNCTIONS_KEY = 'univer-mobile-recent-formula-functions';
@@ -46,11 +46,10 @@ function rememberFunction(name: string): void {
 }
 
 export function MobileFunctionPanel(props: {
-    open: boolean;
     onClose: () => void;
     onInsert: (name: string) => void;
 }) {
-    const { open, onClose, onInsert } = props;
+    const { onClose, onInsert } = props;
     const descriptionService = useDependency(IDescriptionService);
     const localeService = useDependency(LocaleService);
     const copy = {
@@ -71,16 +70,7 @@ export function MobileFunctionPanel(props: {
     const [details, setDetails] = useState<IFunctionInfo | null>(null);
     const [recentVersion, setRecentVersion] = useState(0);
 
-    useEffect(() => {
-        if (!open) return;
-        setQuery('');
-        setCategory('recommended');
-        setDetails(null);
-    }, [open]);
-
     const categories = useMemo(() => {
-        if (!open) return [];
-
         return [
             { label: copy.recommended, value: 'recommended' as const },
             { label: copy.recent, value: 'recent' as const },
@@ -91,10 +81,9 @@ export function MobileFunctionPanel(props: {
             item.value !== FunctionType.Table &&
             descriptionService.getSearchListByType(item.value).length > 0
         ));
-    }, [copy.all, copy.recent, copy.recommended, descriptionService, localeService, open]);
+    }, [copy.all, copy.recent, copy.recommended, descriptionService, localeService]);
 
     const functions = useMemo<ISearchItem[]>(() => {
-        if (!open) return [];
         if (query.trim()) return descriptionService.getSearchListByName(query).slice(0, 60);
 
         if (category === 'recommended') {
@@ -112,15 +101,13 @@ export function MobileFunctionPanel(props: {
         }
 
         return descriptionService.getSearchListByType(category === 'all' ? -1 : category).slice(0, 100);
-    }, [category, descriptionService, open, query, recentVersion]);
+    }, [category, descriptionService, query, recentVersion]);
 
     const handleInsert = (name: string) => {
         rememberFunction(name);
         setRecentVersion((value) => value + 1);
         onInsert(name);
     };
-
-    if (!open) return null;
 
     return (
         <div

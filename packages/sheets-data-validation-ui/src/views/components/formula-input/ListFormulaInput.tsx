@@ -178,6 +178,7 @@ export function ListFormulaInput(props: IFormulaInputProps) {
     const [isFormulaStr, setIsFormulaStr] = useState(() => isFormulaString(formula1) ? '1' : '0');
     const [formulaStr, setFormulaStr] = useState(isFormulaStr === '1' ? formula1 : '=');
     const [formulaStrCopy, setFormulaStrCopy] = useState(isFormulaStr === '1' ? formula1 : '=');
+    const [previousFormula1, setPreviousFormula1] = useState(formula1);
     const localeService = useDependency(LocaleService);
     const dataValidatorRegistryService = useDependency(DataValidatorRegistryService);
     const dataValidationModel = useDependency(DataValidationModel);
@@ -192,6 +193,14 @@ export function ListFormulaInput(props: IFormulaInputProps) {
     const ruleChange = useObservable(ruleChange$);
 
     const onChange = useEvent(_onChange);
+
+    if (formula1 !== previousFormula1) {
+        setPreviousFormula1(formula1);
+        if (isFormulaString(formula1)) {
+            setFormulaStr(formula1);
+            setFormulaStrCopy(formula1);
+        }
+    }
 
     useEffect(() => {
         let cancelled = false;
@@ -213,13 +222,6 @@ export function ListFormulaInput(props: IFormulaInputProps) {
         };
     }, [dataValidationModel, ruleChange, listValidator, ruleId, subUnitId, unitId]);
 
-    useEffect(() => {
-        if (isFormulaString(formula1) && formula1 !== formulaStrCopy) {
-            setFormulaStr(formula1);
-            setFormulaStrCopy(formula1);
-        }
-    }, [formulaStrCopy, formula1]);
-
     const [strList, setStrList] = useState<IDropdownItem[]>(() => {
         const strOptions = isFormulaStr !== '1' ? deserializeListOptions(formula1) : [];
         const strColors = formula2.split(',');
@@ -231,23 +233,28 @@ export function ListFormulaInput(props: IFormulaInputProps) {
         }));
     });
 
+    const commitStrList = (nextList: IDropdownItem[]) => {
+        setStrList(nextList);
+        if (isFormulaStr !== '1') {
+            onChange(buildCustomListFormulaPayload(nextList, DROP_DOWN_DEFAULT_COLOR));
+        }
+    };
+
     const handleStrItemChange = (id: string, value: string, color: string) => {
-        const item = strList.find((i) => i.id === id);
-        if (!item) {
+        const index = strList.findIndex((item) => item.id === id);
+        if (index === -1) {
             return;
         }
 
-        item.label = value;
-        item.color = color;
-
-        setStrList([...strList]);
+        const nextList = [...strList];
+        nextList[index] = { ...nextList[index], label: value, color };
+        commitStrList(nextList);
     };
 
     const handleStrItemDelete = (id: string) => {
         const index = strList.findIndex((i) => i.id === id);
         if (index !== -1) {
-            strList.splice(index, 1);
-            setStrList([...strList]);
+            commitStrList(strList.filter((item) => item.id !== id));
         }
     };
 
@@ -270,7 +277,7 @@ export function ListFormulaInput(props: IFormulaInputProps) {
     };
 
     const handleAdd = () => {
-        setStrList([
+        commitStrList([
             ...strList,
             {
                 label: '',
@@ -280,13 +287,6 @@ export function ListFormulaInput(props: IFormulaInputProps) {
             },
         ]);
     };
-
-    useEffect(() => {
-        if (isFormulaStr === '1') {
-            return;
-        }
-        onChange(buildCustomListFormulaPayload(strList, DROP_DOWN_DEFAULT_COLOR));
-    }, [strList, onChange, isFormulaStr]);
 
     const updateFormula = useEvent(async (str: string) => {
         if (!isFormulaString(str)) {
@@ -341,6 +341,8 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                                 formula1: formulaStrCopy === '=' ? '' : formulaStrCopy,
                                 formula2: refColors.join(','),
                             });
+                        } else {
+                            onChange(buildCustomListFormulaPayload(strList, DROP_DOWN_DEFAULT_COLOR));
                         }
                     }}
                 >
@@ -394,7 +396,7 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                         <div>
                             <DraggableList
                                 list={strList}
-                                onListChange={setStrList}
+                                onListChange={commitStrList}
                                 rowHeight={28}
                                 margin={[0, 12]}
                                 draggableHandle=".draggableHandle"

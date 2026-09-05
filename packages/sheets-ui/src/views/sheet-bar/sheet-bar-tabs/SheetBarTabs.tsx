@@ -54,7 +54,7 @@ import {
     WorkbookRenameSheetPermission,
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
-import { UI_PLUGIN_CONFIG_KEY, useConfigValue, useDependency, useObservable } from '@univerjs/ui';
+import { UI_PLUGIN_CONFIG_KEY, useConfigValue, useDependency, useEvent, useObservable } from '@univerjs/ui';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { merge } from 'rxjs';
 import { getEmbedSheetsTabCustomData } from '../../../embed-tab-anchor';
@@ -137,15 +137,12 @@ function shouldRefreshSheetTabs(commandInfo: ICommandInfo) {
 
 export function SheetBarTabs() {
     const injector = useDependency(Injector);
-    const [sheetList, setSheetList] = useState<IBaseSheetBarProps[]>([]);
-    const [activeSheetId, setActiveSheetId] = useState('');
     const [scrollShadow, setScrollShadow] = useState('');
     const [contextMenuVisible, setContextMenuVisible] = useState(false);
     const [contextMenuAnchorRect, setContextMenuAnchorRect] = useState<IContextMenuAnchorRect | null>(null);
 
     const slideTabBarRef = useRef<SlideTabBar | null>(null);
     const slideTabBarContainerRef = useRef<HTMLDivElement>(null);
-    const activeSheetIdRef = useRef(activeSheetId);
 
     const commandService = useDependency(ICommandService);
     const renderManagerService = useDependency(IRenderManagerService);
@@ -158,7 +155,6 @@ export function SheetBarTabs() {
     const permissionService = useDependency(IPermissionService);
 
     const workbook = useActiveWorkbook()!;
-    const workbookRef = useRef(workbook);
     const resetOrder = useObservable(worksheetProtectionRuleModel.resetOrder$);
     const config = useConfigValue<IUniverUIConfig>(UI_PLUGIN_CONFIG_KEY);
     const showContextMenu = config?.contextMenu ?? true;
@@ -277,7 +273,7 @@ export function SheetBarTabs() {
         return permissionService.getPermissionPoint(new WorkbookRenameSheetPermission(unitId).id)?.value ?? false;
     }, [permissionService, rangeProtectionRuleModel, workbook, worksheetProtectionRuleModel]);
 
-    const updateSheetItems = useCallback(() => {
+    const getSheetItems = useCallback(() => {
         const activeSheet = workbook.getActiveSheet();
         const currentSubUnitId = activeSheet?.getSheetId() ?? '';
         const embedRuntimeService = injector.has(ISheetEmbedRuntimeService)
@@ -315,11 +311,24 @@ export function SheetBarTabs() {
                 } satisfies IBaseSheetBarProps;
             });
 
-        // eslint-disable-next-line react/set-state-in-effect
-        setSheetList(sheetListItems);
-        // eslint-disable-next-line react/set-state-in-effect
-        setActiveSheetId(currentSubUnitId);
+        return { activeSheetId: currentSubUnitId, sheetList: sheetListItems };
     }, [injector, rangeProtectionRuleModel, workbook, worksheetProtectionRuleModel]);
+    const [sheetList, setSheetList] = useState<IBaseSheetBarProps[]>(() => getSheetItems().sheetList);
+    const [activeSheetId, setActiveSheetId] = useState(() => getSheetItems().activeSheetId);
+    const [previousWorkbook, setPreviousWorkbook] = useState(workbook);
+
+    if (workbook !== previousWorkbook) {
+        const nextSheetItems = getSheetItems();
+        setPreviousWorkbook(workbook);
+        setSheetList(nextSheetItems.sheetList);
+        setActiveSheetId(nextSheetItems.activeSheetId);
+    }
+
+    const updateSheetItems = useCallback(() => {
+        const nextSheetItems = getSheetItems();
+        setSheetList(nextSheetItems.sheetList);
+        setActiveSheetId(nextSheetItems.activeSheetId);
+    }, [getSheetItems]);
 
     const setTabEditor = useCallback(() => {
         slideTabBarRef.current?.getActiveItem()?.setEditor();
@@ -342,16 +351,8 @@ export function SheetBarTabs() {
         });
     }, [sheetBarService]);
 
-    useEffect(() => {
-        activeSheetIdRef.current = activeSheetId;
-    }, [activeSheetId]);
-
-    useEffect(() => {
-        workbookRef.current = workbook;
-    }, [workbook]);
-
-    const syncActiveSheetRender = useCallback((subUnitId: string) => {
-        const render = renderManagerService.getRenderUnitById(workbookRef.current.getUnitId());
+    const syncActiveSheetRender = useEvent((subUnitId: string) => {
+        const render = renderManagerService.getRenderUnitById(workbook.getUnitId());
         try {
             render?.with(SheetSkeletonManagerService).setCurrent({ sheetId: subUnitId });
             render?.scene.makeDirty(true);
@@ -359,28 +360,28 @@ export function SheetBarTabs() {
         } catch {
             // The normal command path owns render updates. This fallback only runs when that path was skipped.
         }
-    }, [renderManagerService]);
+    });
 
-    const activateSheetTab = useCallback((subUnitId?: string) => {
-        if (!subUnitId || subUnitId === activeSheetIdRef.current) {
+    const activateSheetTab = useEvent((subUnitId?: string) => {
+        if (!subUnitId || subUnitId === activeSheetId) {
             return;
         }
 
         commandService.executeCommand(SetWorksheetActiveOperation.id, {
             subUnitId,
-            unitId: workbookRef.current.getUnitId(),
+            unitId: workbook.getUnitId(),
         }).then((result) => {
             if (result !== false) {
                 return;
             }
 
-            const worksheet = workbookRef.current.getSheetBySheetId(subUnitId);
+            const worksheet = workbook.getSheetBySheetId(subUnitId);
             if (worksheet) {
-                workbookRef.current.setActiveSheet(worksheet);
+                workbook.setActiveSheet(worksheet);
                 syncActiveSheetRender(subUnitId);
             }
         });
-    }, [commandService, syncActiveSheetRender]);
+    });
 
     const observeResize = useCallback((slideTabBar: SlideTabBar) => {
         const slideTabBarContainer = slideTabBarContainerRef.current?.querySelector('[data-u-comp=slide-tab-bar]');
@@ -596,8 +597,6 @@ export function SheetBarTabs() {
     ]);
 
     useEffect(() => {
-        updateSheetItems();
-
         const { slideTabBar, disconnectResizeObserver } = initializeSlideTabBar();
         const commandDisposable = commandService.onCommandExecuted((commandInfo) => {
             if (shouldRefreshSheetTabs(commandInfo)) {
@@ -670,12 +669,9 @@ export function SheetBarTabs() {
         };
     }, [rangeProtectionRuleModel, updateSheetItems, worksheetProtectionRuleModel]);
 
-    useEffect(() => {
-        if (!showContextMenu && contextMenuVisible) {
-            // eslint-disable-next-line react/set-state-in-effect
-            setContextMenuVisible(false);
-        }
-    }, [contextMenuVisible, showContextMenu]);
+    if (!showContextMenu && contextMenuVisible) {
+        setContextMenuVisible(false);
+    }
 
     return (
         <SheetBarTabsContextMenu

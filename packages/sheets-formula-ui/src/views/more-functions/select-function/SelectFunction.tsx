@@ -16,7 +16,6 @@
 
 import type { IFunctionInfo, IFunctionParam, ISearchItem } from '@univerjs/engine-formula';
 import type { IUniverSheetsFormulaBaseConfig } from '@univerjs/sheets-formula';
-import type { ISidebarMethodOptions } from '@univerjs/ui';
 import type { KeyboardEvent } from 'react';
 import type { LocaleKey } from '../../../locale/types';
 import { IConfigService, LocaleService } from '@univerjs/core';
@@ -24,8 +23,8 @@ import { borderClassName, clsx, divideYClassName, Input, scrollbarClassName, Sel
 import { IDescriptionService } from '@univerjs/engine-formula';
 import { CheckMarkIcon } from '@univerjs/icons';
 import { PLUGIN_CONFIG_KEY_BASE } from '@univerjs/sheets-formula';
-import { ISidebarService, useDependency, useObservable } from '@univerjs/ui';
-import { useEffect, useState } from 'react';
+import { useDependency } from '@univerjs/ui';
+import { useState } from 'react';
 import { getFunctionTypeValues } from '../../../services/utils';
 import { FunctionHelp } from '../function-help/FunctionHelp';
 
@@ -38,18 +37,20 @@ export function SelectFunction(props: ISelectFunctionProps) {
     const customFunction = configService.getConfig<IUniverSheetsFormulaBaseConfig>(PLUGIN_CONFIG_KEY_BASE)?.function;
 
     const { onChange } = props;
+    const descriptionService = useDependency(IDescriptionService);
+    const localeService = useDependency(LocaleService);
 
     const allTypeValue = '-1';
+    const initialSelectList = descriptionService.getSearchListByType(Number(allTypeValue));
     const [searchText, setSearchText] = useState<string>('');
-    const [selectList, setSelectList] = useState<ISearchItem[]>([]);
+    const [selectList, setSelectList] = useState<ISearchItem[]>(initialSelectList);
     const [active, setActive] = useState(0);
     const [typeSelected, setTypeSelected] = useState(allTypeValue);
     const [nameSelected, setNameSelected] = useState(0);
-    const [functionInfo, setFunctionInfo] = useState<IFunctionInfo | null>(null);
-    const descriptionService = useDependency(IDescriptionService);
-    const localeService = useDependency(LocaleService);
-    const sidebarService = useDependency(ISidebarService);
-    const sidebarOptions = useObservable<ISidebarMethodOptions>(sidebarService.sidebarOptions$);
+    const [functionInfo, setFunctionInfo] = useState<IFunctionInfo | null>(() => {
+        const firstFunction = initialSelectList[0];
+        return firstFunction ? descriptionService.getFunctionInfo(firstFunction.name) ?? null : null;
+    });
 
     const options = getFunctionTypeValues(localeService, Boolean(customFunction))
         .filter(
@@ -63,27 +64,6 @@ export function SelectFunction(props: ISelectFunctionProps) {
 
     const required = localeService.t<LocaleKey>('sheets-formula-ui.prompt.required');
     const optional = localeService.t<LocaleKey>('sheets-formula-ui.prompt.optional');
-
-    useEffect(() => {
-        handleSelectChange(allTypeValue);
-    }, []);
-
-    useEffect(() => {
-        setCurrentFunctionInfo(0);
-    }, [selectList]);
-
-    // Reset data when the component enters again
-    useEffect(() => {
-        if (sidebarOptions?.visible) {
-            setSearchText('');
-            setSelectList([]);
-            setActive(0);
-            setTypeSelected(allTypeValue);
-            setNameSelected(0);
-            setFunctionInfo(null);
-            handleSelectChange(allTypeValue);
-        }
-    }, [sidebarOptions]);
 
     const highlightSearchText = (text: string) => {
         if (searchText.trim() === '') return text;
@@ -103,15 +83,16 @@ export function SelectFunction(props: ISelectFunctionProps) {
         });
     };
 
-    const setCurrentFunctionInfo = (selectedIndex: number) => {
-        if (selectList.length === 0) {
+    const setCurrentFunctionInfo = (selectedIndex: number, list = selectList) => {
+        if (list.length === 0) {
+            setNameSelected(0);
             setFunctionInfo(null);
             onChange(null);
             return;
         }
 
         setNameSelected(selectedIndex);
-        const functionInfo = descriptionService.getFunctionInfo(selectList[selectedIndex].name);
+        const functionInfo = descriptionService.getFunctionInfo(list[selectedIndex].name);
         if (!functionInfo) {
             setFunctionInfo(null);
             onChange(null);
@@ -124,15 +105,19 @@ export function SelectFunction(props: ISelectFunctionProps) {
 
     function handleSelectChange(value: string) {
         setTypeSelected(value);
-        const selectList = descriptionService.getSearchListByType(+value);
-        setSelectList(selectList);
+        const nextSelectList = descriptionService.getSearchListByType(+value);
+        setSelectList(nextSelectList);
+        setActive(0);
+        setCurrentFunctionInfo(0, nextSelectList);
     }
 
     // TODO@Dushusir: debounce
     function handleSearchInputChange(value: string) {
         setSearchText(value);
-        const selectList = descriptionService.getSearchListByName(value);
-        setSelectList(selectList);
+        const nextSelectList = descriptionService.getSearchListByName(value);
+        setSelectList(nextSelectList);
+        setActive(0);
+        setCurrentFunctionInfo(0, nextSelectList);
     }
 
     function handleSelectListKeyDown(e: KeyboardEvent<HTMLUListElement> | KeyboardEvent<HTMLInputElement>) {

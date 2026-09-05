@@ -19,7 +19,7 @@ import type { IMenuItemInputProps } from './interface';
 import { LocaleService } from '@univerjs/core';
 import { InputNumber } from '@univerjs/design';
 import { IContextMenuService, useDependency, useObservable } from '@univerjs/ui';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 export const MenuItemInput = (props: IMenuItemInputProps) => {
     const {
@@ -35,34 +35,34 @@ export const MenuItemInput = (props: IMenuItemInputProps) => {
     const localeService = useDependency(LocaleService);
     const contextMenuService = useDependency(IContextMenuService);
     const disabled = useObservable(disabled$ ?? null, false);
-    const [inputValue, setInputValue] = useState<string>(); // Initialized to an empty string
+    const numericValue = Number(value);
+    const normalizedValue = numericValue < min
+        ? min.toString()
+        : numericValue > max ? max.toString() : value;
+    const [inputValue, setInputValue] = useState(normalizedValue);
+    const [previousSource, setPreviousSource] = useState({
+        value,
+        visible: contextMenuService.visible,
+    });
+
+    if (value !== previousSource.value || contextMenuService.visible !== previousSource.visible) {
+        const menuClosed = previousSource.visible && !contextMenuService.visible;
+        setPreviousSource({ value, visible: contextMenuService.visible });
+        if (value !== previousSource.value || menuClosed) {
+            setInputValue(normalizedValue);
+        }
+    }
 
     const handleChange = (value: number | null) => {
-        if (!value) {
+        if (value === null) {
             setInputValue(min.toString());
             return;
         }
 
-        const inputValue = value.toString();
-        setInputValue(inputValue);
-        onChange(inputValue);
+        const nextValue = value.toString();
+        setInputValue(nextValue);
+        onChange(nextValue);
     };
-
-    useEffect(() => {
-        if (!contextMenuService.visible) {
-            setInputValue(value);
-        }
-    }, [contextMenuService.visible]);
-
-    useEffect(() => {
-        if (+value < min) {
-            setInputValue(min.toString());
-        } else if (+value > max) {
-            setInputValue(max.toString());
-        } else {
-            setInputValue(value);
-        }
-    }, [value]);
 
     function handlePressEnter() {
         if (inputValue) {

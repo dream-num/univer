@@ -15,7 +15,7 @@
  */
 
 import type { CSSProperties, Key, ReactNode } from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 
 export interface IVirtualListProps<T extends object> {
     data: T[];
@@ -33,15 +33,15 @@ export function VirtualList<T extends object>(props: IVirtualListProps<T>) {
     const { data, itemKey, children, height, itemHeight, initialScrollIndex = 0, overscan = 2, className, style } = props;
     const initialScrollTop = height && itemHeight ? initialScrollIndex * itemHeight : 0;
     const scrollerRef = useRef<HTMLDivElement>(null);
-    const [scrollTop, setScrollTop] = useState(initialScrollTop);
+    const scrollSource = `${height ?? ''}:${itemHeight ?? ''}:${initialScrollIndex}`;
+    const [scrollState, setScrollState] = useState({ source: scrollSource, top: initialScrollTop });
+    const scrollTop = scrollState.source === scrollSource ? scrollState.top : initialScrollTop;
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         const scroller = scrollerRef.current;
         if (!scroller || !height || !itemHeight) return;
 
-        const nextScrollTop = initialScrollIndex * itemHeight;
-        scroller.scrollTop = nextScrollTop;
-        setScrollTop(nextScrollTop);
+        scroller.scrollTop = initialScrollTop;
     }, [height, initialScrollIndex, itemHeight]);
 
     if (!height || !itemHeight || itemHeight <= 0) {
@@ -76,7 +76,7 @@ export function VirtualList<T extends object>(props: IVirtualListProps<T>) {
                 height,
                 overflowY: 'auto',
             }}
-            onScroll={(e) => setScrollTop(e.currentTarget.scrollTop)}
+            onScroll={(e) => setScrollState({ source: scrollSource, top: e.currentTarget.scrollTop })}
         >
             <div style={{ height: totalHeight, position: 'relative' }}>
                 <div style={{ transform: `translateY(${offsetY}px)` }}>

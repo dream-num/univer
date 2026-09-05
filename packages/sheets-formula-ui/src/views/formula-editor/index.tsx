@@ -17,7 +17,7 @@
 import type { DocumentDataModel, IDisposable, ITextRange } from '@univerjs/core';
 import type { Editor, IKeyboardEventConfig } from '@univerjs/docs-ui';
 import type { KeyCode, MetaKeys } from '@univerjs/ui';
-import type { CSSProperties, ReactNode, Ref } from 'react';
+import type { ReactNode, Ref } from 'react';
 import type { IUniverSheetsFormulaUIConfig } from '../../config/config';
 import type { FormulaSelectingType } from './hooks/use-formula-selection';
 import type { IRefSelection } from './hooks/use-highlight';
@@ -103,7 +103,6 @@ export interface IFormulaEditorProps {
      */
     disableSelectionOnClick?: boolean;
     disableContextMenu?: boolean;
-    style?: CSSProperties;
     borderless?: boolean;
     canvasStyle?: {
         backgroundColor?: string;
@@ -194,7 +193,7 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
         initValue,
         unitId,
         subUnitId,
-        isFocus: _isFocus = true,
+        isFocus: controlledIsFocus,
         isSupportAcrossSheet = false,
         onFocus = noop,
         onBlur = noop,
@@ -212,7 +211,6 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
         disableSelectionOnClick = false,
         autofocus = true,
         disableContextMenu,
-        style,
         borderless = false,
         canvasStyle,
         mobile = false,
@@ -240,7 +238,8 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
     const searchFunctionRef = useRef<HTMLElement>(null);
     const editorRef = useRef<Editor>(undefined);
     const [editor, setEditor] = useState<Editor>();
-    const [isFocus, setIsFocus] = useState(_isFocus);
+    const [internalIsFocus, setInternalIsFocus] = useState(controlledIsFocus ?? true);
+    const isFocus = controlledIsFocus ?? internalIsFocus;
     const formulaEditorContainerRef = useRef<HTMLDivElement>(null);
     const editorId = useMemo(() => propEditorId ?? createInternalEditorID(`${EMBEDDING_FORMULA_EDITOR}-${generateRandomId(4)}`), []);
     const isError = errorText !== undefined;
@@ -502,13 +501,12 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
         let finalFocusRetryFrame = 0;
 
         const retryFocus = () => {
-            if (_isFocus && !docSelectionRenderService?.isFocusing) {
+            if (isFocus && !docSelectionRenderService?.isFocusing) {
                 focus();
             }
         };
 
-        if (_isFocus) {
-            setIsFocus(_isFocus);
+        if (isFocus) {
             focus();
             // In Shadow DOM hosts, canvas dblclick can steal focus back after the editor becomes visible.
             focusRetryFrame = requestAnimationFrame(() => {
@@ -520,14 +518,13 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
                 editor?.blur();
                 resetSelection();
             }
-            setIsFocus(_isFocus);
         }
 
         return () => {
             cancelAnimationFrame(focusRetryFrame);
             cancelAnimationFrame(finalFocusRetryFrame);
         };
-    }, [_isFocus, docSelectionRenderService, editor, focus, resetSelection, resetSelectionOnBlur]);
+    }, [docSelectionRenderService, editor, focus, isFocus, resetSelection, resetSelectionOnBlur]);
 
     const { checkScrollBar } = useResize(editor, isSingle, autoScrollbar);
     useRefactorEffect(isFocus, isSelecting, unitId, editorId, disableContextMenu, mobile);
@@ -570,7 +567,7 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
         handleSelectionChange,
         mobile
     );
-    useSwitchSheet(isFocus && Boolean(isSelecting && docFocusing), unitId, isSupportAcrossSheet, setIsFocus, onBlur, () => {
+    useSwitchSheet(isFocus && Boolean(isSelecting && docFocusing), unitId, isSupportAcrossSheet, setInternalIsFocus, onBlur, () => {
         highlight(formulaTextRef.current, false, true);
     });
 
@@ -663,7 +660,7 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
         })) {
             return;
         }
-        setIsFocus(true);
+        setInternalIsFocus(true);
         onFocus();
         focus();
     };
@@ -693,17 +690,15 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
                     {errorText}
                 </div>
             )}
-            {(!mobile && functionScreenTips && editor && formulaWithoutEqualSymbol !== '') && (
+            {(!mobile && functionScreenTips && editor && formulaWithoutEqualSymbol !== '' && isFocus) && (
                 <HelpFunction
                     editor={editor}
-                    isFocus={isFocus}
                     formulaText={formulaText}
                     onClose={() => focus()}
                 />
             )}
-            {(functionScreenTips && !!editor) && (
+            {(functionScreenTips && !!editor && isFocus) && (
                 <SearchFunction
-                    isFocus={isFocus}
                     sequenceNodes={sequenceNodes}
                     onSelect={handleFunctionSelect}
                     ref={searchFunctionRef}
@@ -711,11 +706,12 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
                     mobile={mobile}
                 />
             )}
-            <MobileFunctionPanel
-                open={mobile && mobileFunctionPanelOpen}
-                onClose={closeMobileFunctionPanel}
-                onInsert={handleMobileFunctionInsert}
-            />
+            {mobile && mobileFunctionPanelOpen && (
+                <MobileFunctionPanel
+                    onClose={closeMobileFunctionPanel}
+                    onInsert={handleMobileFunctionInsert}
+                />
+            )}
         </div>
     );
 });

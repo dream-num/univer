@@ -496,8 +496,6 @@ describe('formula function picker views', () => {
         });
 
         const input = container.querySelector('input') as HTMLInputElement;
-        expect(SelectionState.values.at(-1)?.functionName).toBe('SUM');
-
         await act(async () => {
             pressKey(input, 'ArrowDown');
             await Promise.resolve();
@@ -668,7 +666,8 @@ describe('formula function picker views', () => {
             await Promise.resolve();
         });
 
-        expect(input.value).toBe('');
+        const reopenedInput = container.querySelector('input') as HTMLInputElement;
+        expect(reopenedInput.value).toBe('');
         expect(container.textContent).toContain('SUM');
         expect(container.textContent).toContain('AVERAGE');
         expect(container.textContent).toContain('Adds values together.');

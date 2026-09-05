@@ -48,10 +48,14 @@ export function ZoomSlider() {
     }, [workbook]);
 
     const [zoom, setZoom] = useState(() => getCurrentZoom());
+    const [previousWorkbook, setPreviousWorkbook] = useState(workbook);
+
+    if (workbook !== previousWorkbook) {
+        setPreviousWorkbook(workbook);
+        setZoom(getCurrentZoom());
+    }
 
     useEffect(() => {
-        setZoom(getCurrentZoom());
-
         const disposable = commandService.onCommandExecuted((commandInfo) => {
             if (commandInfo.id === SetZoomRatioOperation.id || commandInfo.id === SetWorksheetActiveOperation.id) {
                 const currentZoom = getCurrentZoom();

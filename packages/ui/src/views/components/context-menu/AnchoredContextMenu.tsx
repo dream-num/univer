@@ -21,6 +21,7 @@ import { Popup } from '@univerjs/design';
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { IContextMenuHostService } from '../../../services/contextmenu/contextmenu-host.service';
 import { useDependency } from '../../../utils/di';
+import { useEvent } from '../../hooks/event';
 import { CONTEXT_MENU_SUBMENU_PORTAL_ATTR, ContextMenuPanel } from './ContextMenuPanel';
 
 export interface IContextMenuAnchorRect {
@@ -59,15 +60,11 @@ export function AnchoredContextMenu(props: IAnchoredContextMenuProps) {
     } = props;
     const contentRef = useRef<HTMLDivElement>(null);
     const contextMenuHostService = useDependency(IContextMenuHostService);
-    const onRequestCloseRef = useRef(onRequestClose);
+    const requestClose = useEvent(onRequestClose);
     const menuSessionVersionRef = useRef(0);
     const visibleRef = useRef(visible);
     const menuTypeRef = useRef(menuType);
     const focusReturnTargetRef = useRef<HTMLElement | null>(null);
-
-    useEffect(() => {
-        onRequestCloseRef.current = onRequestClose;
-    }, [onRequestClose]);
 
     if (visible && (!visibleRef.current || menuType !== menuTypeRef.current)) {
         menuSessionVersionRef.current += 1;
@@ -77,14 +74,14 @@ export function AnchoredContextMenu(props: IAnchoredContextMenuProps) {
 
     useEffect(() => {
         const disposable = contextMenuHostService.registerMenu(hostId, () => {
-            onRequestCloseRef.current();
+            requestClose();
         });
 
         return () => {
             disposable.dispose();
             contextMenuHostService.deactivateMenu(hostId);
         };
-    }, [contextMenuHostService, hostId]);
+    }, [contextMenuHostService, hostId, requestClose]);
 
     useLayoutEffect(() => {
         if (visible) {
@@ -133,13 +130,13 @@ export function AnchoredContextMenu(props: IAnchoredContextMenuProps) {
             }
 
             if (contentRef.current && !contentRef.current.contains(event.target as Node)) {
-                onRequestCloseRef.current();
+                requestClose();
             }
         };
 
         const handleEscape = (event: KeyboardEvent) => {
             if (event.key === 'Escape') {
-                onRequestCloseRef.current();
+                requestClose();
             }
         };
 
@@ -167,7 +164,7 @@ export function AnchoredContextMenu(props: IAnchoredContextMenuProps) {
             document.removeEventListener('keydown', handleEscape);
             document.removeEventListener('wheel', handleWheel, true);
         };
-    }, [visible]);
+    }, [requestClose, visible]);
 
     const offset = useMemo<[number, number]>(() => {
         if (!anchorRect) {

@@ -26,7 +26,7 @@ import { Checkbox, InputNumber, Select } from '@univerjs/design';
 import { CFNumberOperator, CFRuleType, CFSubRuleType } from '@univerjs/sheets-conditional-formatting';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
-import { ConditionalStyleEditor } from '../../ConditionalStyleEditor';
+import { ConditionalStyleEditor, createDefaultConditionalStyle } from '../../ConditionalStyleEditor';
 import { Preview } from '../../Preview';
 import { previewClassName } from './styles';
 
@@ -107,7 +107,7 @@ export const RankStyleEditor = (props: IStyleEditorProps) => {
         return defaultV;
     });
 
-    const [style, setStyle] = useState<IHighlightCell['style']>({});
+    const [style, setStyle] = useState<IHighlightCell['style']>(() => createDefaultConditionalStyle(rule?.style));
 
     const getResult = (config: {
         type: IRankRuleType;
@@ -206,7 +206,7 @@ export const RankStyleEditor = (props: IStyleEditorProps) => {
                 />
             </div>
             <ConditionalStyleEditor
-                style={rule?.style}
+                style={style}
                 className="univer-mt-3"
                 onChange={(v) => {
                     setStyle(v);

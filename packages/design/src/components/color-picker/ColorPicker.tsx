@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { memo, useCallback, useContext, useEffect, useState } from 'react';
+import { memo, useContext, useState } from 'react';
 import { clsx } from '../../helper/clsx';
 import { isBrowser } from '../../helper/is-browser';
 import { Button } from '../button/Button';
@@ -44,49 +44,49 @@ export interface IColorPickerProps {
 export function ColorPicker({ format = 'hex', value, onChange }: IColorPickerProps) {
     const { direction, locale, mobile } = useContext(ConfigContext);
 
-    const [hsv, setHsv] = useState<[number, number, number]>([0, 100, 100]);
-    const [alpha, setAlpha] = useState(1);
-    const [visible, setVisible] = useState(false);
-
-    const getRgb = useCallback((h: number, s: number, v: number) => {
-        return hsvToRgb(h, s, v);
-    }, []);
-
-    useEffect(() => {
+    function getDraftColor(): { hsv: [number, number, number]; alpha: number } {
         try {
             const actualValue = value || (format === 'hex' ? '#000000' : 'rgba(0, 0, 0, 1)');
             if (format === 'hex') {
-                const [h, s, v] = hexToHsv(actualValue);
-                setHsv([h, s, v]);
-                setAlpha(1);
-            } else if (format === 'rgba') {
-                const [r, g, b, a] = parseRgba(actualValue);
-                const [h, s, v] = rgbToHsv(r, g, b);
-                setHsv([h, s, v]);
-                setAlpha(a);
+                return { hsv: hexToHsv(actualValue), alpha: 1 };
             }
+
+            const [r, g, b, alpha] = parseRgba(actualValue);
+            return { hsv: rgbToHsv(r, g, b), alpha };
         } catch (error) {
             console.error('Invalid value:', error);
+            return { hsv: [0, 100, 100], alpha: 1 };
         }
-    }, [value, format]);
+    }
+
+    const [draftColor, setDraftColor] = useState(getDraftColor);
+    const [previousSource, setPreviousSource] = useState({ format, value });
+    const [visible, setVisible] = useState(false);
+
+    if (format !== previousSource.format || value !== previousSource.value) {
+        setPreviousSource({ format, value });
+        setDraftColor(getDraftColor());
+    }
+
+    const { hsv, alpha } = draftColor;
 
     if (!isBrowser) return null;
 
     function handleColorChange(h: number, s: number, v: number) {
-        setHsv([h, s, v]);
+        setDraftColor((current) => ({ ...current, hsv: [h, s, v] }));
     }
 
     function handleAlphaChange(a: number) {
-        setAlpha(a);
+        setDraftColor((current) => ({ ...current, alpha: a }));
     }
 
     function handleColorChanged(h: number, s: number, v: number, a: number = alpha) {
         if (format === 'hex') {
-            const [r, g, b] = getRgb(h, s, v);
+            const [r, g, b] = hsvToRgb(h, s, v);
             const hex = rgbToHex(r, g, b);
             onChange?.(hex);
         } else if (format === 'rgba') {
-            const [r, g, b] = getRgb(h, s, v);
+            const [r, g, b] = hsvToRgb(h, s, v);
             onChange?.(`rgba(${r}, ${g}, ${b}, ${a})`);
         }
     }
@@ -97,7 +97,7 @@ export function ColorPicker({ format = 'hex', value, onChange }: IColorPickerPro
             const hex = hsvToHex(h, s, v);
             onChange?.(hex);
         } else if (format === 'rgba') {
-            const [r, g, b] = getRgb(h, s, v);
+            const [r, g, b] = hsvToRgb(h, s, v);
             onChange?.(`rgba(${r}, ${g}, ${b}, ${alpha})`);
         }
         setVisible(false);

@@ -105,32 +105,20 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
     const { locale } = useContext(ConfigContext);
     const [draftValue, setDraftValue] = useState<IGradientValue>(value);
     const [selectedIndex, setSelectedIndex] = useState<number>(0);
+    const [previousValue, setPreviousValue] = useState(value);
     const barRef = useRef<HTMLDivElement>(null);
-    const valueRef = useRef<IGradientValue>(value);
     const cleanupRef = useRef<(() => void) | null>(null);
 
-    useEffect(() => {
-        valueRef.current = draftValue;
-    }, [draftValue]);
-
-    useEffect(() => {
+    if (value !== previousValue) {
+        setPreviousValue(value);
         setDraftValue(value);
-    }, [value]);
+        setSelectedIndex((currentIndex) => Math.min(currentIndex, Math.max(0, value.stops.length - 1)));
+    }
 
     const emitChange = (nextValue: IGradientValue) => {
-        valueRef.current = nextValue;
         setDraftValue(nextValue);
         onChange?.(nextValue);
     };
-
-    useEffect(() => {
-        setSelectedIndex((prev) => {
-            if (prev >= draftValue.stops.length) {
-                return Math.max(0, draftValue.stops.length - 1);
-            }
-            return prev;
-        });
-    }, [draftValue.stops.length]);
 
     useEffect(() => {
         return () => {
@@ -143,43 +131,35 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
     }, [draftValue.stops]);
 
     const handleTypeChange = (type: GradientType) => {
-        emitChange({ ...valueRef.current, type });
+        emitChange({ ...draftValue, type });
     };
 
     const handleAngleChange = (angle: number | null) => {
-        emitChange({ ...valueRef.current, angle: angle ?? 0 });
+        emitChange({ ...draftValue, angle: angle ?? 0 });
     };
 
     const handleStopColorChange = (color: string) => {
-        const newStops = [...valueRef.current.stops];
+        const newStops = [...draftValue.stops];
         newStops[selectedIndex] = { ...newStops[selectedIndex], color };
-        emitChange({ ...valueRef.current, stops: newStops });
+        emitChange({ ...draftValue, stops: newStops });
     };
 
     const handleStopOffsetChange = (offset: number | null) => {
         if (offset === null) return;
-        const newStops = [...valueRef.current.stops];
+        const newStops = [...draftValue.stops];
         newStops[selectedIndex] = { ...newStops[selectedIndex], offset };
-        emitChange({ ...valueRef.current, stops: newStops });
+        emitChange({ ...draftValue, stops: newStops });
     };
 
     const handleStopTransparencyChange = (transparency: number | null) => {
         const nextTransparency = clamp(transparency ?? 0, 0, 100);
-        const newStops = [...valueRef.current.stops];
+        const newStops = [...draftValue.stops];
         newStops[selectedIndex] = {
             ...newStops[selectedIndex],
             opacity: (100 - nextTransparency) / 100,
         };
-        emitChange({ ...valueRef.current, stops: newStops });
+        emitChange({ ...draftValue, stops: newStops });
     };
-
-    // const handleFlip = () => {
-    //     const newStops = value.stops.map((stop) => ({
-    //         ...stop,
-    //         offset: 100 - stop.offset,
-    //     }));
-    //     onChange?.({ ...value, stops: newStops });
-    // };
 
     const handleAddStop = (e: React.MouseEvent<HTMLDivElement>) => {
         if (!barRef.current) return;
@@ -191,15 +171,15 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
         // const rightStop = stops.find((s) => s.offset >= offset) || stops[stops.length - 1];
 
         const newStop = { color: leftStop.color, offset, opacity: getStopOpacity(leftStop) };
-        const newStops = [...valueRef.current.stops, newStop];
-        emitChange({ ...valueRef.current, stops: newStops });
+        const newStops = [...draftValue.stops, newStop];
+        emitChange({ ...draftValue, stops: newStops });
         setSelectedIndex(newStops.length - 1);
     };
 
     const handleRemoveStop = () => {
         if (draftValue.stops.length <= 2) return;
-        const newStops = valueRef.current.stops.filter((_, i) => i !== selectedIndex);
-        emitChange({ ...valueRef.current, stops: newStops });
+        const newStops = draftValue.stops.filter((_, i) => i !== selectedIndex);
+        emitChange({ ...draftValue, stops: newStops });
         setSelectedIndex(0);
     };
 
@@ -380,6 +360,7 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
                             e.stopPropagation();
                             const startX = e.clientX;
                             const startOffset = stop.offset;
+                            let currentValue = draftValue;
                             setSelectedIndex(index);
 
                             const handlePointerMove = (moveEvent: PointerEvent) => {
@@ -390,9 +371,10 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
                                 const deltaOffset = (deltaX / rect.width) * 100;
                                 const newOffset = Math.max(0, Math.min(100, Math.round(startOffset + deltaOffset)));
 
-                                const newStops = [...valueRef.current.stops];
+                                const newStops = [...currentValue.stops];
                                 newStops[index] = { ...newStops[index], offset: newOffset };
-                                emitChange({ ...valueRef.current, stops: newStops });
+                                currentValue = { ...currentValue, stops: newStops };
+                                emitChange(currentValue);
                             };
 
                             const handlePointerUp = () => {

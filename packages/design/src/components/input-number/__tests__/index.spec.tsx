@@ -46,9 +46,12 @@ describe('InputNumber', () => {
     });
 
     it('should render with value (controlled)', () => {
-        const { getByRole } = render(<InputNumber value={10} />);
+        const { getByRole, rerender } = render(<InputNumber value={10} />);
         const input = getByRole('textbox') as HTMLInputElement;
         expect(input.value).toBe('10');
+
+        rerender(<InputNumber value={20} />);
+        expect(input.value).toBe('20');
     });
 
     it('should call onChange when input changes', () => {

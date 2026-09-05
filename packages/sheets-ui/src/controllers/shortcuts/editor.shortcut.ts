@@ -15,7 +15,14 @@
  */
 
 import type { IShortcutItem } from '@univerjs/ui';
-import { BreakLineCommand, DeleteLeftCommand, DeleteRightCommand } from '@univerjs/docs-ui';
+import { Direction } from '@univerjs/core';
+import {
+    BreakLineCommand,
+    DeleteLeftCommand,
+    DeleteRightCommand,
+    MoveCursorOperation,
+    MoveSelectionOperation,
+} from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { KeyCode, MetaKeys } from '@univerjs/ui';
 import { RepeatLastActionCommand } from '../../commands/commands/repeat-last-action.command';
@@ -68,6 +75,23 @@ export function generateArrowSelectionShortCutItem() {
                 isShift: true,
             },
         });
+    }
+
+    // Sheet editors own focus, so Doc-only line navigation shortcuts do not apply here.
+    for (const [binding, macArrow, direction] of [
+        [KeyCode.HOME, KeyCode.ARROW_LEFT, Direction.LEFT],
+        [KeyCode.END, KeyCode.ARROW_RIGHT, Direction.RIGHT],
+    ]) {
+        for (const extend of [false, true]) {
+            const shift = extend ? MetaKeys.SHIFT : 0;
+            shortcutList.push({
+                id: extend ? MoveSelectionOperation.id : MoveCursorOperation.id,
+                binding: binding | shift,
+                mac: macArrow | MetaKeys.CTRL_COMMAND | shift,
+                preconditions: whenEditorDidNotInputFormulaActivated,
+                staticParameters: { direction, granularity: 'line' },
+            });
+        }
     }
 
     return shortcutList;

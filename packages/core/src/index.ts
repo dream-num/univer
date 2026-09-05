@@ -106,6 +106,8 @@ export { DesktopLogService, ILogService, LogLevel } from './services/log/log.ser
 export { MentionIOLocalService } from './services/mention-io/mention-io-local.service';
 export { IMentionIOService } from './services/mention-io/type';
 export type { IListMentionParam, IListMentionResponse, ITypeMentionList } from './services/mention-io/type';
+export { ObjectPermissionService } from './services/permission/object-permission.service';
+export type { IObjectPermissionPolicy, IObjectPermissionTarget } from './services/permission/object-permission.service';
 export { PermissionService } from './services/permission/permission.service';
 export { IPermissionService, PermissionStatus } from './services/permission/type';
 export type { IPermissionParam } from './services/permission/type';
@@ -181,5 +183,6 @@ export type {
     IDataValidationRuleOptions,
     ISheetDataValidationRule,
 } from './types/interfaces/i-data-validation';
+
 export { Univer } from './univer';
 export type { IUniverConfig } from './univer';

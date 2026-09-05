@@ -31,13 +31,22 @@ import type {
     IPutCollaboratorsRequest,
     IUpdateCollaboratorRequest,
     IUpdatePermPointRequest,
+    UnitObject,
 } from '@univerjs/protocol';
+import type { Observable } from 'rxjs';
 import type { ILogContext } from '../log/context';
 import { createIdentifier } from '../../common/di';
 
 // FIXME: should not import ILogContext here
 
 export interface IAuthzIoService {
+    /** Optional notification channel for custom providers; collaboration providers use UPDATE_PERMISSION_OBJ. */
+    objectPermissionChanges$?: Observable<{ unitID: string }>;
+    /** Opt in only when stable object IDs support policy read/write and Unit enumeration. */
+    supportsObjectPermissionManagement?(objectType: UnitObject): boolean;
+    /** All explicitly configured object policies in this Unit, including objects absent from the local viewport. */
+    listUnitPermissions?(unitID: string): Promise<IListPermPointResponse['objects']>;
+
     create(config: ICreateRequest, context?: ILogContext): Promise<ICreateResponse['objectID']>;
     allowed(config: IAllowedRequest, context?: ILogContext): Promise<IAllowedResponse['actions']>;
     batchAllowed(config: IAllowedRequest[], context?: ILogContext): Promise<IBatchAllowedResponse['objectActions']>;

@@ -199,6 +199,7 @@ export function useSectionSetting() {
     );
 
     return {
+        unitId: documentDataModel?.getUnitId(),
         valid: Boolean(documentDataModel && sections.length > 0),
         selectedCount: sections.length,
         sectionOptions: allSections.map((section, index) => ({

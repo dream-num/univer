@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
+import type { ICommand, IObjectPermissionPolicy } from '@univerjs/core';
 import type { DocumentUnitPermissionAction } from '../../services/permission/document-permission';
-import { CommandType, IPermissionService } from '@univerjs/core';
+import { CommandType, ObjectPermissionService } from '@univerjs/core';
 import { UnitAction } from '@univerjs/protocol';
 import {
+    createDocumentPermissionPoint,
     DOCUMENT_UNIT_PERMISSION_ACTIONS,
-    setDocumentPermissionValue,
 } from '../../services/permission/document-permission';
 
 export interface ISetDocumentPermissionCommandParams {
@@ -28,12 +28,13 @@ export interface ISetDocumentPermissionCommandParams {
     objectId: string;
     action: DocumentUnitPermissionAction;
     value: boolean;
+    policy?: IObjectPermissionPolicy;
 }
 
 export const SetDocumentPermissionCommand: ICommand<ISetDocumentPermissionCommandParams> = {
     type: CommandType.COMMAND,
     id: 'doc.command.set-permission',
-    handler(accessor, params) {
+    async handler(accessor, params) {
         if (!params || !DOCUMENT_UNIT_PERMISSION_ACTIONS.includes(params.action)) {
             return false;
         }
@@ -41,13 +42,19 @@ export const SetDocumentPermissionCommand: ICommand<ISetDocumentPermissionComman
             return false;
         }
 
-        setDocumentPermissionValue(
-            accessor.get(IPermissionService),
-            params.unitId,
-            params.objectId,
-            params.action,
-            params.value
-        );
+        if (params.policy && (!['all', 'owner', 'members'].includes(params.policy.edit) ||
+            params.policy.strategies.some((strategy) => !DOCUMENT_UNIT_PERMISSION_ACTIONS.includes(strategy.action as typeof params.action) ||
+                (params.objectId !== params.unitId && strategy.action !== UnitAction.Edit)))) {
+            return false;
+        }
+        const point = createDocumentPermissionPoint(params.unitId, params.objectId, params.action);
+        const target = { unitId: params.unitId, objectId: params.objectId, objectType: point.type };
+        const service = accessor.get(ObjectPermissionService);
+        if (params.policy) {
+            await service.save(target, params.policy);
+        } else {
+            await service.setPoint(target, point, params.value);
+        }
         return true;
     },
 };

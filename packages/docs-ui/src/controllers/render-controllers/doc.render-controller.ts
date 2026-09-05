@@ -845,7 +845,9 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
                         workerOptions,
                         protectedRange,
                         mainThreadCallbacks,
-                        preserveInactiveViewportAnchor
+                        preserveInactiveViewportAnchor,
+                        true,
+                        progress.mode === 'continuous' && progress.complete
                     );
                 });
             },
@@ -1059,7 +1061,8 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         protectedRange: IDocumentLayoutProtectedRange | undefined,
         mainThreadCallbacks: DocLayoutCoordinatorCallbacks,
         preserveInactiveViewportAnchor: boolean,
-        allowRecovery = true
+        allowRecovery = true,
+        preserveCompletedLayout = false
     ): void {
         if (layoutRequestId !== this._layoutRequestId) {
             return;
@@ -1098,8 +1101,10 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
                 mainThreadCallbacks,
                 preserveInactiveViewportAnchor,
                 allowRecovery,
-                error
-            )
+                error,
+                preserveCompletedLayout
+            ),
+            preserveCompletedLayout
         );
     }
 
@@ -1113,7 +1118,8 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         mainThreadCallbacks: DocLayoutCoordinatorCallbacks,
         preserveInactiveViewportAnchor: boolean,
         allowRecovery: boolean,
-        error: unknown
+        error: unknown,
+        preserveCompletedLayout: boolean
     ): void {
         if (!allowRecovery) {
             this._logService.error('[DocRenderController]: Worker layout failed; using main-thread layout.', error);
@@ -1138,7 +1144,8 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
                 protectedRange,
                 mainThreadCallbacks,
                 preserveInactiveViewportAnchor,
-                false
+                false,
+                preserveCompletedLayout
             );
         }).catch((recoveryError: unknown) => {
             this._logService.error('[DocRenderController]: document layout Worker recovery failed; using main-thread layout.', recoveryError);

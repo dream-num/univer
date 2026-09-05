@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { DragEvent, FocusEvent, KeyboardEvent, MouseEvent } from 'react';
-import { Button, clsx, Input } from '@univerjs/design';
+import type { DragEvent, FocusEvent, KeyboardEvent, MouseEvent, ReactNode } from 'react';
+import { Button, clsx, Input, StateIconButton } from '@univerjs/design';
 import {
     ArrowDownIcon,
     ArrowUpIcon,
@@ -155,6 +155,7 @@ export interface IObjectListPanelBaseProps {
     selectedIds: string[];
     allObjectIds?: string[];
     focusedId?: string | null;
+    renderPermissionAction?: (item: IObjectListPanelItem) => ReactNode;
     labels: IObjectListPanelLabels;
     showHeader?: boolean;
     capabilities?: IObjectListPanelCapabilities;
@@ -216,6 +217,7 @@ export function ObjectListPanelBase(props: IObjectListPanelBaseProps) {
         onToggleSelectable,
         onLocate,
         onReorder,
+        renderPermissionAction,
     } = props;
     const selectedIdSet = useMemo(() => new Set(selectedIds), [selectedIds]);
     const [draggingId, setDraggingId] = useState<string | null>(null);
@@ -508,6 +510,7 @@ export function ObjectListPanelBase(props: IObjectListPanelBaseProps) {
                                             item={item}
                                             selected={selectedIdSet.has(item.id)}
                                             labels={labels}
+                                            permissionAction={renderPermissionAction?.(item)}
                                             showLock={!!onToggleSelectable && hasCapability(capabilities, item, 'selectable')}
                                             showName={hasCapability(capabilities, item, 'name')}
                                             showVisible={hasCapability(capabilities, item, 'visible')}
@@ -542,6 +545,7 @@ export function ObjectListPanelBase(props: IObjectListPanelBaseProps) {
 }
 
 function ObjectListRow(props: {
+    permissionAction?: ReactNode;
     item: IObjectListPanelItem;
     selected: boolean;
     labels: IObjectListPanelLabels;
@@ -559,7 +563,7 @@ function ObjectListRow(props: {
     onDragEnd: () => void;
     onDrop: () => void;
 }) {
-    const { item, selected, labels, showLock, showName, showVisible, draggable, dragging, onSelect, onToggleExpanded, onToggleVisible, onToggleSelectable, onCommitName, onDragStart, onDragEnd, onDrop } = props;
+    const { permissionAction, item, selected, labels, showLock, showName, showVisible, draggable, dragging, onSelect, onToggleExpanded, onToggleVisible, onToggleSelectable, onCommitName, onDragStart, onDragEnd, onDrop } = props;
     const [draftName, setDraftName] = useState(item.name);
     const skipCommitOnBlurRef = useRef(false);
     const disabled = item.disabled === true;
@@ -708,10 +712,12 @@ function ObjectListRow(props: {
                     />
                 )
                 : <span className="univer-min-w-0 univer-flex-1 univer-truncate univer-px-1 univer-text-sm">{item.name}</span>}
+            {permissionAction}
             {showLock && (
-                <button
+                <StateIconButton
+                    active={locked}
+                    aria-pressed={locked}
                     type="button"
-                    className={iconButtonClassName}
                     disabled={disabled}
                     title={locked ? labels.unlock : labels.lock}
                     aria-label={locked ? labels.unlock : labels.lock}
@@ -721,12 +727,13 @@ function ObjectListRow(props: {
                     }}
                 >
                     {locked ? <LockIcon /> : <UnlockIcon />}
-                </button>
+                </StateIconButton>
             )}
             {showVisible && (
-                <button
+                <StateIconButton
+                    active={!item.visible}
+                    aria-pressed={!item.visible}
                     type="button"
-                    className={iconButtonClassName}
                     disabled={disabled}
                     title={item.visible ? labels.hide : labels.show}
                     aria-label={item.visible ? labels.hide : labels.show}
@@ -736,7 +743,7 @@ function ObjectListRow(props: {
                     }}
                 >
                     {item.visible ? <EyeIcon /> : <EyelashIcon />}
-                </button>
+                </StateIconButton>
             )}
         </div>
     );

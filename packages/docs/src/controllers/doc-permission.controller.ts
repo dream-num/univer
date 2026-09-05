@@ -35,11 +35,14 @@ import {
     DeleteDirection,
     Disposable,
     ICommandService,
+    Inject,
+    Injector,
     IPermissionService,
     IUniverInstanceService,
+    ObjectPermissionService,
     UniverInstanceType,
 } from '@univerjs/core';
-import { UnitAction } from '@univerjs/protocol';
+import { UnitAction, UnitObject } from '@univerjs/protocol';
 import { DeleteTextCommand, InsertTextCommand, UpdateTextCommand } from '../commands/commands/core-editing.command';
 import { CreateHeaderFooterCommand } from '../commands/commands/create-header-footer.command';
 import { SetDocumentPermissionCommand } from '../commands/commands/set-document-permission.command';
@@ -86,6 +89,7 @@ const DERIVED_DOCUMENT_MUTATION_IDS = new Set([
 
 export class DocPermissionController extends Disposable {
     constructor(
+        @Inject(Injector) private readonly _injector: Injector,
         @ICommandService private readonly _commandService: ICommandService,
         @IPermissionService private readonly _permissionService: IPermissionService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
@@ -101,10 +105,13 @@ export class DocPermissionController extends Disposable {
         }));
         this.disposeWithMe(this._univerInstanceService
             .getTypeOfUnitDisposed$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)
-            .subscribe((unit) => clearDocumentPermissionValuesForUnit(
-                this._permissionService,
-                unit.getUnitId()
-            )));
+            .subscribe((unit) => {
+                this._injector.get(ObjectPermissionService).clearUnit(unit.getUnitId());
+                clearDocumentPermissionValuesForUnit(
+                    this._permissionService,
+                    unit.getUnitId()
+                );
+            }));
     }
 
     private _registerUnitPermissionPoints(unitId: string): void {
@@ -114,6 +121,7 @@ export class DocPermissionController extends Disposable {
                 this._permissionService.addPermissionPoint(point);
             }
         });
+        this._injector.get(ObjectPermissionService).initializeUnit({ unitId, objectId: unitId, objectType: UnitObject.Document });
     }
 
     private _check(commandInfo: Readonly<ICommandInfo>, options?: IExecutionOptions): void {

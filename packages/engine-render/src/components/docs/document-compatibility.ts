@@ -30,7 +30,7 @@ interface IFontMetricScaleRule {
 }
 
 export interface IDocumentCompatibilityPolicy {
-    mode: 'modern' | 'traditional' | 'unspecified';
+    mode: 'modern' | 'traditional' | 'unspecified' | 'drawingml';
     applyDocumentDefaultParagraphStyle: boolean;
     useWordStyleLineHeight: boolean;
     font: {
@@ -104,7 +104,15 @@ const UNSPECIFIED_DOCUMENT_COMPATIBILITY_POLICY: IDocumentCompatibilityPolicy = 
     },
 };
 
+const DRAWINGML_COMPATIBILITY_POLICY: IDocumentCompatibilityPolicy = {
+    ...UNSPECIFIED_DOCUMENT_COMPATIBILITY_POLICY,
+    mode: 'drawingml',
+};
+
 export function getDocumentCompatibilityPolicy(documentFlavor?: DocumentFlavor): IDocumentCompatibilityPolicy {
+    if (documentFlavor === DocumentFlavor.DRAWINGML) {
+        return DRAWINGML_COMPATIBILITY_POLICY;
+    }
     if (documentFlavor === DocumentFlavor.MODERN) {
         return MODERN_DOCUMENT_COMPATIBILITY_POLICY;
     }
@@ -122,6 +130,10 @@ export function applyFontMetricCompatibility(
     bBox: IDocumentSkeletonBoundingBox,
     policy: IDocumentCompatibilityPolicy
 ): IDocumentSkeletonBoundingBox {
+    if (policy.mode === 'drawingml') {
+        // PowerPoint's measured advances use eighths of a slide-layout unit.
+        return { ...bBox, width: Math.round(bBox.width * 8) / 8 };
+    }
     const fontFamilies = fontStyle.fontFamily
         .split(',')
         .map((item) => item.trim().replace(/^['"]|['"]$/g, ''));
@@ -141,6 +153,12 @@ export function applyFontMetricCompatibility(
         ...bBox,
         width: bBox.width * rule.widthScale,
     };
+}
+
+export function getNominalFontLineHeight(fontSize: number, policy?: IDocumentCompatibilityPolicy): number | undefined {
+    // Office renderer compatibility, not an OOXML-specified font metric.
+    // Font sizes are points; the layout engine uses 96-DPI pixels.
+    return policy?.mode === 'drawingml' && fontSize > 0 ? fontSize * 1.2 * (96 / 72) : undefined;
 }
 
 export function isTraditionalDocumentCompatibility(policy?: IDocumentCompatibilityPolicy): boolean {

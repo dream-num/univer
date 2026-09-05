@@ -21,7 +21,13 @@ import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-no
 import type { DocumentViewModel } from '../../../view-model/document-view-model';
 import type { IBreakPoints } from '../../line-breaker/line-breaker';
 import type { ILayoutContext } from '../../tools';
-import { BooleanNumber, DataStreamTreeTokenType, GridType, PositionedObjectLayoutType } from '@univerjs/core';
+import {
+    BooleanNumber,
+    DataStreamTreeTokenType,
+    GridType,
+    PositionedObjectLayoutType,
+    resolveDocumentParagraphStyle,
+} from '@univerjs/core';
 import { cjk } from '../../../../../basics/cjk-regexp';
 import { GlyphType } from '../../../../../basics/i-document-skeleton-cached';
 import {
@@ -240,7 +246,12 @@ export function shaping(
         eastAsianQuoteLineBreakExtension(lineBreaker);
     }
 
-    let breaker: IBreakPoints = new LineBreakerLinkEnhancer(lineBreaker);
+    const documentSnapshot = viewModel.getSnapshot();
+    const { wordWrap } = resolveDocumentParagraphStyle(documentSnapshot.documentStyle, paragraphStyle, {
+        styles: documentSnapshot.styles,
+        paragraphStyleId: paragraph.styleId,
+    });
+    let breaker: IBreakPoints = new LineBreakerLinkEnhancer(lineBreaker, wordWrap !== BooleanNumber.FALSE);
 
     const lang = getHyphenationLanguage(ctx, content, paragraphStyle, sectionBreakConfig);
     const doNotHyphenateCaps = sectionBreakConfig.doNotHyphenateCaps === BooleanNumber.TRUE;
@@ -478,8 +489,10 @@ export function shaping(
         last = bk.position;
     }
 
-    // Add some spacing between Han characters and western characters.
-    addCJKLatinSpacing(shapedTextList);
+    // Preserve the legacy default, but honor documents that explicitly disable mixed-script spacing.
+    if (sectionBreakConfig.spaceWidthEastAsian !== BooleanNumber.FALSE) {
+        addCJKLatinSpacing(shapedTextList);
+    }
 
     return shapedTextList;
 }

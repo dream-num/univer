@@ -440,9 +440,9 @@ export function updateBlockIndex(
     let prePageStartIndex = start;
     const paragraphLogicalStartAnchors = getParagraphLogicalStartAnchors(pages);
     // Real docs declare a classic/modern compatibility mode, so their measured layout column
-    // width can be reused. Embedded editors keep the mode unspecified and must fall back to
+    // width can be reused. Embedded editors (including DrawingML text) must fall back to
     // content width; otherwise a sheet cell editor may stretch to the far edge of the canvas.
-    const shouldUseLayoutColumnWidth = documentCompatibilityPolicy?.mode !== 'unspecified';
+    const shouldUseLayoutColumnWidth = documentCompatibilityPolicy?.mode !== 'unspecified' && documentCompatibilityPolicy?.mode !== 'drawingml';
 
     for (const page of pages) {
         const { sections, skeTables, skeColumnGroups = new Map() } = page;
@@ -1626,6 +1626,7 @@ export function getFontConfigFromLastGlyph(
         charSpace,
         gridType,
         snapToGrid,
+        documentCompatibilityPolicy: sectionBreakConfig.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy(),
         pageWidth,
     };
 
@@ -1998,6 +1999,7 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
         marginFooter: global_marginFooter = 0,
 
         autoHyphenation = BooleanNumber.FALSE,
+        spaceWidthEastAsian,
         doNotHyphenateCaps = BooleanNumber.FALSE,
         consecutiveHyphenLimit = Number.POSITIVE_INFINITY,
         hyphenationZone,
@@ -2093,6 +2095,7 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
         renderConfig,
 
         autoHyphenation,
+        spaceWidthEastAsian,
         doNotHyphenateCaps,
         consecutiveHyphenLimit,
         hyphenationZone,

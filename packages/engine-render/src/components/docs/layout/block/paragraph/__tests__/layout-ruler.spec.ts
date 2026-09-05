@@ -32,6 +32,7 @@ import {
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { GlyphType, LineType } from '../../../../../../basics/i-document-skeleton-cached';
 import { setDocsCustomBlockRenderViewportProvider } from '../../../../custom-block-render-viewport';
+import { getDocumentCompatibilityPolicy } from '../../../../document-compatibility';
 import { Lang } from '../../../hyphenation/lang';
 import { BreakPointType } from '../../../line-breaker/break';
 import { createSkeletonCustomBlockGlyph } from '../../../model/glyph';
@@ -287,6 +288,18 @@ describe('layout-ruler', () => {
         expect(tab.tabLeader).toBe(2);
     });
 
+    it.each([
+        [undefined, false],
+        [0, true],
+        [-1, false],
+        [Number.NaN, false],
+    ] as const)('honors explicit line-wrap tolerance without changing legacy defaults (%s)', (tolerance, overflow) => {
+        const glyph = createGlyph('外', 10);
+        // The extra CJK character fits within the legacy 3px allowance, but not within the box.
+        expect(__testing.isGlyphGroupBeyondDivideWidth([glyph], 840, 847.428, false, tolerance)).toBe(overflow);
+        expect(__testing.isGlyphGroupBeyondDivideWidth([glyph], 837.428, 847.428, false, tolerance)).toBe(false);
+    });
+
     it('uses trailing CJK punctuation shrinkability when deciding line overflow', () => {
         const text = createGlyph('字', 10);
         const punctuation = createGlyph('，', 10);
@@ -297,13 +310,17 @@ describe('layout-ruler', () => {
         expect(__testing.isGlyphGroupBeyondDivideWidth([text, punctuation], 85, 100)).toBe(true);
     });
 
-    it('allows explicit hanging punctuation to extend beyond the line end', () => {
+    it.each(['', '\r', '\u2028'])('allows explicit hanging punctuation before a terminal control (%j)', (control) => {
         const text = createGlyph('字', 10);
         const punctuation = createGlyph('。', 10);
         punctuation.adjustability.shrinkability = [0, 0];
+        const glyphs = [text, punctuation];
+        if (control) {
+            glyphs.push(createGlyph(control, 0), createGlyph('', 0));
+        }
 
-        expect(__testing.isGlyphGroupBeyondDivideWidth([text, punctuation], 85, 100)).toBe(true);
-        expect(__testing.isGlyphGroupBeyondDivideWidth([text, punctuation], 85, 100, true)).toBe(false);
+        expect(__testing.isGlyphGroupBeyondDivideWidth(glyphs, 85, 100)).toBe(true);
+        expect(__testing.isGlyphGroupBeyondDivideWidth(glyphs, 85, 100, true)).toBe(false);
     });
 
     it('keeps direct paragraph indents before bullet list defaults', () => {
@@ -599,6 +616,30 @@ describe('layout-ruler', () => {
         expect(lastPage.sections.length).toBeGreaterThan(0);
     });
 
+    it.each([
+        [DocumentFlavor.UNSPECIFIED, undefined, 1],
+        [DocumentFlavor.DRAWINGML, undefined, 2],
+        [DocumentFlavor.DRAWINGML, 1, 1],
+    ] as const)('uses the host wrapping default with an optional explicit tolerance (%s, %s)', (documentFlavor, lineWrapTolerance, expectedLines) => {
+        const { viewModel, ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed('甲乙', {
+            documentStyle: {
+                documentFlavor: DocumentFlavor.UNSPECIFIED,
+                pageSize: { width: 55.5, height: 300 },
+                marginLeft: 20,
+                marginRight: 20,
+                marginTop: 0,
+                marginBottom: 0,
+                spaceWidthEastAsian: BooleanNumber.FALSE,
+                renderConfig: { lineWrapTolerance, zeroWidthParagraphBreak: BooleanNumber.TRUE },
+            },
+            body: { paragraphs: [{ startIndex: 2, paragraphId: 'host-wrapping', paragraphStyle: { snapToGrid: BooleanNumber.FALSE } }] },
+        });
+        sectionBreakConfig.documentCompatibilityPolicy = getDocumentCompatibilityPolicy(documentFlavor);
+        const shaped = shaping(ctx, paragraphNode.content!, viewModel, paragraphNode, sectionBreakConfig);
+        const pages = lineBreaking(ctx, viewModel, shaped, curPage, paragraphNode, sectionBreakConfig, null);
+        expect(pages.flatMap((page) => page.sections.flatMap((section) => section.columns.flatMap((column) => column.lines)))).toHaveLength(expectedLines);
+    });
+
     it('keeps imported shape text on one line when browser glyph bboxes slightly exceed the box', () => {
         const text = '\u4F01\u4E1A\u6587\u5316\u5EFA\u8BBE';
         const { ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed(text, {
@@ -635,6 +676,50 @@ describe('layout-ruler', () => {
         const metrics = getLineHeightMetrics(16, 0, 15.6, GridType.LINES, 1.5, SpacingRule.AUTO, BooleanNumber.FALSE, true);
 
         expect(getLineBoxHeight(metrics)).toBeCloseTo(24, 4);
+    });
+
+    it.each([
+        { fontSize: 10.5, lineSpacing: 1.5, spacingRule: SpacingRule.AUTO, expectedHeight: 25.2 },
+        { fontSize: 9, lineSpacing: 1.5, spacingRule: SpacingRule.AUTO, expectedHeight: 21.6 },
+        { fontSize: 10.5, lineSpacing: 12, spacingRule: SpacingRule.EXACT, expectedHeight: 12 },
+        { fontSize: 9, lineSpacing: 11, spacingRule: SpacingRule.EXACT, expectedHeight: 11 },
+    ].map((entry) => ({ ...entry, documentFlavor: DocumentFlavor.DRAWINGML, inlineBlock: false })).concat([
+        { fontSize: 10.5, lineSpacing: 1.5, spacingRule: SpacingRule.AUTO, expectedHeight: 28.5, documentFlavor: DocumentFlavor.UNSPECIFIED, inlineBlock: false },
+        { fontSize: 10.5, lineSpacing: 12, spacingRule: SpacingRule.EXACT, expectedHeight: 12, documentFlavor: DocumentFlavor.UNSPECIFIED, inlineBlock: false },
+        { fontSize: 10.5, lineSpacing: 12, spacingRule: SpacingRule.EXACT, expectedHeight: 19, documentFlavor: DocumentFlavor.DRAWINGML, inlineBlock: true },
+    ]))('preserves line spacing $lineSpacing / $spacingRule at $fontSize pt with layout $documentFlavor and inline block $inlineBlock', ({ fontSize, lineSpacing, spacingRule, expectedHeight, documentFlavor, inlineBlock }) => {
+        const { ctx, paragraphNode, sectionBreakConfig, curPage } = createParagraphLayoutTestBed('ab', {
+            documentStyle: {
+                pageSize: { width: 300, height: 300 },
+                marginTop: 0,
+                marginBottom: 0,
+                paragraphLineGapDefault: 0,
+            },
+        });
+        sectionBreakConfig.documentCompatibilityPolicy = getDocumentCompatibilityPolicy(documentFlavor);
+        const glyphs = ['a', 'b', '\r'].map((character) => {
+            const glyph = createGlyph(character, character === '\r' ? 0 : 12);
+            glyph.fontStyle!.originFontSize = character === '\r' ? 14 : fontSize;
+            glyph.bBox.ba = 15;
+            glyph.bBox.bd = 4;
+            if (character === '\r') {
+                glyph.streamType = DataStreamTreeTokenType.PARAGRAPH;
+            } else if (inlineBlock && character === 'b') {
+                glyph.streamType = DataStreamTreeTokenType.CUSTOM_BLOCK;
+            }
+            return glyph;
+        });
+        const paragraphConfig: IParagraphConfig = {
+            paragraphIndex: paragraphNode.endIndex,
+            paragraphStyle: { lineSpacing, spacingRule, snapToGrid: BooleanNumber.FALSE },
+            useWordStyleLineHeight: false,
+            skeHeaders: ctx.skeletonResourceReference.skeHeaders,
+            skeFooters: ctx.skeletonResourceReference.skeFooters,
+        };
+        const result = layoutParagraph(ctx, glyphs, [curPage], sectionBreakConfig, paragraphConfig, true);
+        const lines = result[0].sections[0].columns[0].lines;
+        expect(lines).toHaveLength(1);
+        expect(lines[0].lineHeight).toBeCloseTo(expectedHeight, 4);
     });
 
     it('uses the font normal line height as the base for Word auto spacing', () => {

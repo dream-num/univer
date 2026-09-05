@@ -510,6 +510,8 @@ export enum DocumentFlavor {
     UNSPECIFIED,
     TRADITIONAL,
     MODERN,
+    /** DrawingML text semantics for host-prepared shape and slide text models. */
+    DRAWINGML,
 }
 
 /**
@@ -522,7 +524,7 @@ export interface IDocStyleBase extends IMargin {
 
     pageOrient?: PageOrientType;
 
-    documentFlavor?: DocumentFlavor; // DocumentFlavor: TRADITIONAL, MODERN
+    documentFlavor?: DocumentFlavor;
 
     /** Distance from the page edge to the header, in 96-DPI layout pixels. */
     marginHeader?: number;
@@ -594,6 +596,7 @@ export interface IDocumentRenderConfig {
     isRenderStyle?: BooleanNumber; // Whether to render the style(textRuns), used in formula bar editor. the default value is TRUE.
     zeroWidthParagraphBreak?: BooleanNumber; // Whether to render the paragraph \r to zero width. the default value is false.
     shapeTextOpticalVerticalAlign?: BooleanNumber; // Align shape text by visible glyph bounds instead of the font line box.
+    lineWrapTolerance?: number; // Allowed line-width overflow in layout pixels; 0 enforces the content-box boundary.
 }
 
 export interface ISectionBreakBase {

@@ -47,7 +47,7 @@ import {
 import { GlyphType, LineType } from '../../../../../basics/i-document-skeleton-cached';
 import { isCjkLeftAlignedPunctuation } from '../../../../../basics/tools';
 import { getDocsCustomBlockRenderViewport } from '../../../custom-block-render-viewport';
-import { isTraditionalDocumentCompatibility } from '../../../document-compatibility';
+import { getNominalFontLineHeight, isTraditionalDocumentCompatibility } from '../../../document-compatibility';
 import { BreakPointType } from '../../line-breaker/break';
 import { addGlyphToDivide, createSkeletonBulletGlyph } from '../../model/glyph';
 import {
@@ -89,13 +89,18 @@ const RELATIVE_LINE_WIDTH_TOLERANCE = 0.01;
 interface IDefaultSpanMetrics {
     lineHeight: number;
     hasInlineCustomBlock: boolean;
+    drawingMLLineHeight?: number;
 }
 
-function isBeyondDivideWidth(width: number, divideWidth: number) {
-    const tolerance = Math.min(
+function isBeyondDivideWidth(width: number, divideWidth: number, lineWrapTolerance?: number) {
+    const defaultTolerance = Math.min(
         MAX_LINE_WIDTH_TOLERANCE,
         Math.max(MIN_LINE_WIDTH_TOLERANCE, divideWidth * RELATIVE_LINE_WIDTH_TOLERANCE)
     );
+
+    const tolerance = lineWrapTolerance != null && Number.isFinite(lineWrapTolerance) && lineWrapTolerance >= 0
+        ? lineWrapTolerance
+        : defaultTolerance;
 
     return width - divideWidth > tolerance;
 }
@@ -104,16 +109,22 @@ function isGlyphGroupBeyondDivideWidth(
     glyphGroup: IDocumentSkeletonGlyph[],
     offsetLeft: number,
     divideWidth: number,
-    hangingPunctuation = false
+    hangingPunctuation = false,
+    lineWrapTolerance?: number
 ) {
     const width = __getGlyphGroupWidth(glyphGroup);
-    const trailingGlyph = glyphGroup[glyphGroup.length - 1];
+    let trailingIndex = glyphGroup.length - 1;
+    // Paragraph/soft-break controls do not change the visible punctuation at the line edge.
+    while (trailingIndex >= 0 && glyphGroup[trailingIndex].width === 0) {
+        trailingIndex--;
+    }
+    const trailingGlyph = glyphGroup[trailingIndex];
     const trailingShrinkability = trailingGlyph?.adjustability?.shrinkability?.[1] ?? 0;
     const trailingHangingWidth = hangingPunctuation && trailingGlyph && isCjkLeftAlignedPunctuation(trailingGlyph.content)
         ? trailingGlyph.width
         : 0;
 
-    return isBeyondDivideWidth(offsetLeft + width - Math.max(trailingShrinkability, trailingHangingWidth), divideWidth);
+    return isBeyondDivideWidth(offsetLeft + width - Math.max(trailingShrinkability, trailingHangingWidth), divideWidth, lineWrapTolerance);
 }
 
 export function layoutParagraph(
@@ -300,7 +311,9 @@ function _divideOperator(
         const preOffsetLeft = lastWidth + lastLeft;
         const { hyphenationZone } = sectionBreakConfig;
         const hangingPunctuation = paragraphConfig.paragraphStyle?.hangingPunctuation === BooleanNumber.TRUE;
-        if (isGlyphGroupBeyondDivideWidth(glyphGroup, preOffsetLeft, divide.width, hangingPunctuation)) {
+        const lineWrapTolerance = sectionBreakConfig.renderConfig?.lineWrapTolerance ??
+            (sectionBreakConfig.documentCompatibilityPolicy?.mode === 'drawingml' ? 0 : undefined);
+        if (isGlyphGroupBeyondDivideWidth(glyphGroup, preOffsetLeft, divide.width, hangingPunctuation, lineWrapTolerance)) {
             if (
                 divide?.glyphGroup.length === 0 &&
                 glyphGroup.length > 0 &&
@@ -369,7 +382,7 @@ function _divideOperator(
                 while (glyphGroup.length) {
                     sliceGlyphGroup.push(glyphGroup.shift()!);
 
-                    if (isGlyphGroupBeyondDivideWidth(sliceGlyphGroup, 0, divide.width, hangingPunctuation)) {
+                    if (isGlyphGroupBeyondDivideWidth(sliceGlyphGroup, 0, divide.width, hangingPunctuation, lineWrapTolerance)) {
                         // To avoid infinity loop when width is less than one char's width.
                         if (sliceGlyphGroup.length > 1) { // || (sliceGlyphGroup.length > 0 && sliceGlyphGroup[sliceGlyphGroup.length - 1].drawingId)) {
                             glyphGroup.unshift(sliceGlyphGroup.pop()!);
@@ -484,7 +497,12 @@ function _divideOperator(
                     getLineHeightConfig(sectionBreakConfig, paragraphConfig);
                 const { boundingBoxAscent, boundingBoxDescent } = maxBox;
                 const spanLineHeight = boundingBoxAscent + boundingBoxDescent;
-                const { contentHeight } = getLineHeightMetrics(
+                const combinedGlyphs = [...__getGlyphGroupByLine(currentLine), ...glyphGroup];
+                const hasInlineCustomBlock = combinedGlyphs.some((glyph) =>
+                    glyph.streamType === DataStreamTreeTokenType.CUSTOM_BLOCK && glyph.width !== 0
+                );
+                const drawingMLLineHeight = getDrawingMLNominalLineHeight(combinedGlyphs, sectionBreakConfig, hasInlineCustomBlock);
+                const { contentHeight, lineSpacingApply } = getLineHeightMetrics(
                     spanLineHeight,
                     paragraphLineGapDefault,
                     linePitch,
@@ -492,10 +510,16 @@ function _divideOperator(
                     lineSpacing,
                     spacingRule,
                     snapToGrid,
-                    paragraphConfig.useWordStyleLineHeight
+                    paragraphConfig.useWordStyleLineHeight,
+                    !hasInlineCustomBlock,
+                    undefined,
+                    false,
+                    drawingMLLineHeight
                 );
 
-                if (contentHeight - currentLine.contentHeight > LINE_LAYOUT_OVERFLOW_TOLERANCE) {
+                const growsDrawingMLLine = drawingMLLineHeight != null &&
+                    lineSpacingApply > currentLine.paddingTop + currentLine.contentHeight + currentLine.paddingBottom + 1e-6;
+                if (contentHeight - currentLine.contentHeight > LINE_LAYOUT_OVERFLOW_TOLERANCE || growsDrawingMLLine) {
                     // If the height of the new content exceeds the height of the line it joins, for mixed text and graphics layout, the entire line needs to be recalculated according to the new height
                     // If the height of the new content exceeds the height of the added row,
                     // the entire row needs to be recalculated according to the new height
@@ -526,9 +550,8 @@ function _divideOperator(
                         breakPointType,
                         {
                             lineHeight: boundingBoxAscent + boundingBoxDescent,
-                            hasInlineCustomBlock: glyphGroup.some((glyph) =>
-                                glyph.streamType === DataStreamTreeTokenType.CUSTOM_BLOCK && glyph.width !== 0
-                            ),
+                            hasInlineCustomBlock,
+                            drawingMLLineHeight,
                         }
                     );
 
@@ -747,7 +770,8 @@ function _lineOperator(
         paragraphConfig.useWordStyleLineHeight,
         !hasInlineCustomBlock,
         normalLineHeight,
-        snapMultilineParagraphToWholeGrid
+        snapMultilineParagraphToWholeGrid,
+        defaultSpanMetrics?.drawingMLLineHeight ?? getDrawingMLNominalLineHeight(glyphGroup, sectionBreakConfig, hasInlineCustomBlock)
     );
 
     if (snapMultilineParagraphToWholeGrid && preLine?.paragraphIndex === paragraphIndex) {
@@ -1730,6 +1754,24 @@ function __getParagraphAnchorLeft(
     return getNumberUnitValue(paragraphConfig.docxFallbackAnchorLeft, charSpaceApply);
 }
 
+function getDrawingMLNominalLineHeight(
+    glyphGroup: IDocumentSkeletonGlyph[],
+    sectionBreakConfig: ISectionBreakConfig,
+    hasInlineCustomBlock = false
+): number | undefined {
+    if (sectionBreakConfig.documentCompatibilityPolicy?.mode !== 'drawingml' || hasInlineCustomBlock ||
+        glyphGroup.some((glyph) => glyph.streamType === DataStreamTreeTokenType.CUSTOM_BLOCK && glyph.width !== 0)) {
+        return undefined;
+    }
+    const textGlyphs = glyphGroup.filter((glyph) =>
+        glyph.content && glyph.streamType !== DataStreamTreeTokenType.PARAGRAPH && glyph.glyphType !== GlyphType.LIST
+    );
+    const fontSize = Math.max(0, ...(textGlyphs.length ? textGlyphs : glyphGroup)
+        .map((glyph) => glyph.fontStyle?.originFontSize ?? 0)
+        .filter((size) => Number.isFinite(size) && size > 0));
+    return getNominalFontLineHeight(fontSize, sectionBreakConfig.documentCompatibilityPolicy);
+}
+
 export function getLineHeightMetrics(
     glyphLineHeight: number,
     paragraphLineGapDefault: number,
@@ -1741,9 +1783,24 @@ export function getLineHeightMetrics(
     useWordStyleLineHeight = true,
     scaleAutoLineSpacingByGlyphHeight = true,
     normalLineHeight?: number,
-    snapAutoLineSpacingToWholeGridLines = false
+    snapAutoLineSpacingToWholeGridLines = false,
+    drawingMLLineHeight?: number
 ) {
     const usesLineGridType = gridType === GridType.LINES || gridType === GridType.LINES_AND_CHARS;
+    const hasNoLineGrid = !usesLineGridType || snapToGrid === BooleanNumber.FALSE;
+    if (hasNoLineGrid && (spacingRule === SpacingRule.EXACT ||
+        (drawingMLLineHeight != null && spacingRule === SpacingRule.AUTO))) {
+        const lineSpacingApply = spacingRule === SpacingRule.EXACT
+            ? scaleAutoLineSpacingByGlyphHeight ? lineSpacing : Math.max(lineSpacing, glyphLineHeight)
+            : lineSpacing * drawingMLLineHeight!;
+        const padding = (lineSpacingApply - glyphLineHeight) / 2;
+        return {
+            paddingTop: padding,
+            paddingBottom: padding,
+            contentHeight: glyphLineHeight,
+            lineSpacingApply,
+        };
+    }
     if (!useWordStyleLineHeight) {
         let paddingTop = paragraphLineGapDefault;
         let paddingBottom = paragraphLineGapDefault;

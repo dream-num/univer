@@ -41,6 +41,14 @@ const bBox = {
 } as IDocumentSkeletonBoundingBox;
 
 describe('document compatibility policy', () => {
+    it('selects DrawingML font metrics without changing existing document flavors', () => {
+        const policy = getDocumentCompatibilityPolicy(DocumentFlavor.DRAWINGML);
+        expect(policy.mode).toBe('drawingml');
+        expect(applyFontMetricCompatibility('5', fontStyle, bBox, policy)).toEqual(bBox);
+        for (const flavor of [undefined, DocumentFlavor.UNSPECIFIED, DocumentFlavor.MODERN, DocumentFlavor.TRADITIONAL]) {
+            expect(getDocumentCompatibilityPolicy(flavor).mode).not.toBe('drawingml');
+        }
+    });
     it('applies traditional Word font metric width rules without changing modern documents', () => {
         const traditional = getDocumentCompatibilityPolicy(DocumentFlavor.TRADITIONAL);
         const modern = getDocumentCompatibilityPolicy(DocumentFlavor.MODERN);

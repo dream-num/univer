@@ -24,6 +24,7 @@ import { UnitAction, UnitRole } from '@univerjs/protocol';
 import { useEffect, useState } from 'react';
 import { IDialogService } from '../../services/dialog/dialog.service';
 import { useDependency, useObservable } from '../../utils/di';
+import { ObjectPermissionMembers } from './ObjectPermissionMembers';
 
 export interface IObjectPermissionButtonProps {
     target: IObjectPermissionTarget;
@@ -224,27 +225,16 @@ export function ObjectPermissionDialog({ target, name, commandId, actions = DEFA
                         </RadioGroup>
                     </FormLayout>
                     {objectId !== unitId && policy.edit === 'members' && (
-                        <div
-                            className="univer-flex univer-max-h-60 univer-flex-col univer-gap-2 univer-overflow-auto"
-                        >
-                            {candidates.map((user) => (
-                                <Checkbox
-                                    key={user.id}
-                                    disabled={!canManage || saving}
-                                    checked={policy.collaborators.some((member) => member.id === user.id)}
-                                    onChange={(checked) => {
-                                        const collaborators = policy.collaborators.filter((member) => member.id !== user.id);
-                                        if (checked) {
-                                            collaborators.push({ ...user, role: UnitRole.Editor });
-                                        }
-                                        setPolicy({ ...policy, collaborators });
-                                        setDirty(true);
-                                    }}
-                                >
-                                    {user.subject?.name ?? user.id}
-                                </Checkbox>
-                            ))}
-                        </div>
+                        <ObjectPermissionMembers
+                            candidates={candidates}
+                            value={policy.collaborators}
+                            disabled={!canManage || loading || saving || conflict}
+                            onEditStart={() => setDirty(true)}
+                            onChange={(collaborators) => {
+                                setPolicy({ ...policy, collaborators });
+                                setDirty(true);
+                            }}
+                        />
                     )}
                     {actions.filter((action) => action !== UnitAction.Edit && actionLabels[action]).map((action) => (
                         <Checkbox

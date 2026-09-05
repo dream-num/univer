@@ -19,6 +19,13 @@ import emojiLocale from './emoji-locale/en-US.generated';
 const locale = {
     ui: {
         objectPermission: {
+            addPeople: 'Add people',
+            searchPeople: 'Search people',
+            noPeople: 'No people selected',
+            noMatchingPeople: 'No matching people',
+            canEdit: 'Can edit',
+            removePerson: 'Remove',
+            confirmPeople: 'Confirm',
             document: 'Document',
             section: 'Section',
             paragraph: 'Paragraph',

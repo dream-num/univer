@@ -1350,23 +1350,13 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
             return undefined;
         }
 
-        let endPageIndex = publishedEndPageIndex;
-        const maximumProtectedEndPageIndex = Math.min(
-            pages.length - 1,
-            startPageIndex + MATERIALIZED_PAGE_WINDOW_SIZE - 1
-        );
-        while (endPageIndex < maximumProtectedEndPageIndex) {
-            const nextPage = pages[endPageIndex + 1];
-            if (nextPage == null || nextPage.isLayoutPlaceholder || nextPage.isMaterializationPlaceholder) {
-                break;
-            }
-            endPageIndex++;
-        }
-
+        // Pages beyond Main's published boundary are retained previews. Keeping
+        // them in the protected range would reject fresh Worker geometry until
+        // the entire document completes, leaving the next page visibly stale.
         return {
             mode: 'paginated',
             startPageIndex,
-            endPageIndex,
+            endPageIndex: publishedEndPageIndex,
         };
     }
 

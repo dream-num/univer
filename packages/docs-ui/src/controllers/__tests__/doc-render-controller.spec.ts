@@ -927,7 +927,7 @@ describe('doc render controller', () => {
         controller.dispose();
     });
 
-    it('protects retained interaction pages when Main publishes only the edited page', async () => {
+    it('allows Worker pages beyond the published Main window to refresh progressively', async () => {
         const { commandCallbacks, controller, skeletonManager } = createControllerFixture({
             useWorker: true,
             pages: Array.from({ length: 8 }, () => ({
@@ -963,7 +963,7 @@ describe('doc render controller', () => {
                 protectedRange: {
                     mode: 'paginated',
                     startPageIndex: 0,
-                    endPageIndex: 4,
+                    endPageIndex: 0,
                 },
             });
         });

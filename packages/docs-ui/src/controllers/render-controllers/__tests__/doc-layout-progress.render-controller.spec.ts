@@ -94,7 +94,7 @@ describe('document layout progress', () => {
         controller.dispose();
     });
 
-    it('does not flash for fast initial layout or later edits', () => {
+    it('does not flash for fast initial layout or fast edits', () => {
         vi.useFakeTimers();
         const { controller, layoutProgress$, setProgress } = createController();
 
@@ -103,9 +103,28 @@ describe('document layout progress', () => {
         layoutProgress$.next(createProgress({ complete: true, processedBlockCount: 100 }));
         vi.advanceTimersByTime(DOC_LAYOUT_PROGRESS_DELAY_MS);
         layoutProgress$.next(createProgress({ reason: 'edit' }));
+        vi.advanceTimersByTime(500);
+        layoutProgress$.next(createProgress({ reason: 'edit', complete: true }));
         vi.advanceTimersByTime(DOC_LAYOUT_PROGRESS_DELAY_MS);
 
         expect(setProgress).not.toHaveBeenCalled();
+        controller.dispose();
+    });
+
+    it('shows progress for a slow edit after the initial layout has completed', () => {
+        vi.useFakeTimers();
+        const { controller, layoutProgress$, setProgress, clearProgress } = createController(true);
+
+        layoutProgress$.next(createProgress({ reason: 'edit', processedBlockCount: 10, publishedPageCount: 1 }));
+        vi.advanceTimersByTime(DOC_LAYOUT_PROGRESS_DELAY_MS - 1);
+        expect(setProgress).not.toHaveBeenCalled();
+        vi.advanceTimersByTime(1);
+        expect(setProgress).toHaveBeenLastCalledWith('doc-1', 10);
+
+        layoutProgress$.next(createProgress({ reason: 'edit', processedBlockCount: 60 }));
+        expect(setProgress).toHaveBeenLastCalledWith('doc-1', 60);
+        layoutProgress$.next(createProgress({ reason: 'edit', complete: true }));
+        expect(clearProgress).toHaveBeenCalledOnce();
         controller.dispose();
     });
 
@@ -139,6 +158,37 @@ describe('document layout progress', () => {
         expect(clearProgress).toHaveBeenCalledOnce();
 
         controller.dispose();
+    });
+
+    it('starts a fresh delay after an abandoned edit without a successor', () => {
+        vi.useFakeTimers();
+        const { controller, layoutProgress$, setProgress } = createController(true);
+        layoutProgress$.next(createProgress({ reason: 'edit' }));
+        vi.advanceTimersByTime(500);
+        layoutProgress$.next(createProgress({ reason: 'edit', cancelled: true }));
+        vi.advanceTimersByTime(DOC_LAYOUT_PROGRESS_CANCEL_GRACE_MS + DOC_LAYOUT_PROGRESS_DELAY_MS);
+
+        layoutProgress$.next(createProgress({ reason: 'edit', generation: 2 }));
+        vi.advanceTimersByTime(DOC_LAYOUT_PROGRESS_DELAY_MS - 1);
+        expect(setProgress).not.toHaveBeenCalled();
+        vi.advanceTimersByTime(1);
+        expect(setProgress).toHaveBeenCalledOnce();
+        controller.dispose();
+    });
+
+    it('advances with reused page publications without treating a continuous page as completed work', () => {
+        expect(resolveDocLayoutProgressPercent(createProgress({
+            reason: 'edit',
+            processedBlockCount: 1,
+            publishedPageCount: 8,
+        }))).toBe(80);
+        expect(resolveDocLayoutProgressPercent(createProgress({
+            mode: 'continuous',
+            processedBlockCount: 1,
+            publishedPageCount: 1,
+            pageCount: 1,
+            estimatedPageCount: 1,
+        }))).toBe(1);
     });
 
     it('calculates bounded progress from blocks and falls back to pages', () => {

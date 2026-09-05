@@ -40,6 +40,7 @@ import {
     PageOrientType,
     PaperType,
     PositionedObjectLayoutType,
+    RANGE_DIRECTION,
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -55,11 +56,13 @@ import {
     SetTextSelectionsOperation,
     UpdateTextCommand,
 } from '@univerjs/docs';
-import { DocumentEditArea, GlyphType, IRenderManagerService } from '@univerjs/engine-render';
+import { DocumentEditArea, DocumentSkeleton, GlyphType, IRenderManagerService } from '@univerjs/engine-render';
 import { ISidebarService } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { DocMoveCursorController } from '../../../controllers/doc-move-cursor.controller';
 import { DocParagraphSettingController } from '../../../controllers/doc-paragraph-setting.controller';
+import { DocBackScrollRenderController } from '../../../controllers/render-controllers/back-scroll.render-controller';
 import { DocAutoFormatService } from '../../../services/doc-auto-format.service';
 import { DocIMEInputManagerService } from '../../../services/doc-ime-input-manager.service';
 import { DocSelectionRenderService } from '../../../services/selection/doc-selection-render.service';
@@ -2193,6 +2196,52 @@ describe('misc document commands', () => {
             relativeFrom: ObjectRelativeFromV.PARAGRAPH,
             posOffset: 38,
         }));
+    });
+
+    it('extends and contracts a selection across a section break without selecting its invisible delimiter', async () => {
+        const data = createBaseDoc('A\r\nBC\r\n');
+        data.body!.paragraphs = [{ startIndex: 1, paragraphId: 'first' }, { startIndex: 5, paragraphId: 'second' }];
+        data.body!.sectionBreaks = [{ startIndex: 2, sectionId: 'first' }, { startIndex: 6, sectionId: 'second' }];
+        ({ univer, get } = createCommandTestBed(data, [
+            [DocMoveCursorController],
+            [DocBackScrollRenderController, { useValue: { scrollToRange: vi.fn() } }],
+        ]));
+        commandService = get(ICommandService);
+        commandService.registerCommand(MoveSelectionOperation);
+        commandService.registerCommand(SetTextSelectionsOperation);
+        get(DocMoveCursorController);
+        const skeletonManager = get(DocSkeletonManagerService);
+        const skeleton = DocumentSkeleton.create(skeletonManager.getViewModel(), get(LocaleService));
+        skeleton.calculate();
+        vi.spyOn(skeletonManager, 'getSkeleton').mockReturnValue(skeleton);
+        const selectionManager = get(DocSelectionManagerService);
+        selectionManager.__TEST_ONLY_setCurrentSelection({ unitId: data.id, subUnitId: data.id });
+        const refresh = vi.fn();
+        const subscription = selectionManager.refreshSelection$.subscribe(refresh);
+        selectionManager.__TEST_ONLY_add([{
+            startOffset: 1,
+            endOffset: 1,
+            collapsed: true,
+            isActive: true,
+        }]);
+        await commandService.executeCommand(MoveSelectionOperation.id, { direction: Direction.RIGHT });
+        expect(refresh).toHaveBeenLastCalledWith(expect.objectContaining({
+            docRanges: [expect.objectContaining({ startOffset: 1, endOffset: 3 })],
+        }));
+        selectionManager.__replaceTextRangesWithNoRefresh({
+            ...selectionManager.getSelectionInfo()!,
+            textRanges: [{ startOffset: 1, endOffset: 3, collapsed: false, isActive: true, direction: RANGE_DIRECTION.FORWARD }],
+            rectRanges: [],
+            segmentId: '',
+            segmentPage: -1,
+            isEditing: true,
+        }, { unitId: data.id, subUnitId: data.id });
+        await commandService.executeCommand(MoveSelectionOperation.id, { direction: Direction.LEFT });
+        expect(refresh).toHaveBeenLastCalledWith(expect.objectContaining({
+            docRanges: [expect.objectContaining({ startOffset: 1, endOffset: 1 })],
+        }));
+        subscription.unsubscribe();
+        skeleton.dispose();
     });
 
     it('reports cursor operations only when movement params are provided', async () => {

@@ -17,3 +17,4 @@
 export * from './component-manager';
 export * from './icon-manager';
 export * from './z-index-manager';
+export * from "./teleport";

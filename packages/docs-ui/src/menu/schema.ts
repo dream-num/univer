@@ -79,6 +79,7 @@ import { DocParagraphSettingPanelOperation } from '../commands/operations/doc-pa
 import { DocSectionSettingPanelOperation } from '../commands/operations/doc-section-setting-panel.operation';
 import { InsertDocumentColumnBreakOperation } from '../commands/operations/insert-break.operation';
 import { DocOpenPageSettingCommand } from '../commands/operations/open-page-setting.operation';
+import { OpenDocPermissionPanelOperation } from '../commands/operations/permission-panel.operation';
 import {
     CopyMenuFactory,
     CutMenuFactory,
@@ -210,6 +211,7 @@ import {
     TableBlockPasteMenuItemFactory,
     TitleHeadingMenuItemFactory,
 } from './paragraph-menu';
+import { DocPermissionMenuItemFactory } from './permission.menu';
 
 export const floatToolbarMenuSchema: MenuSchemaType = {
     [FLOAT_TOOLBAR_MENU_POSITION]: {
@@ -222,6 +224,13 @@ export const floatToolbarMenuSchema: MenuSchemaType = {
 
 export const menuSchema: MenuSchemaType = {
     ...floatToolbarMenuSchema,
+    [RibbonStartGroup.OTHERS]: {
+        [OpenDocPermissionPanelOperation.id]: {
+            order: 0,
+            gridLayout: { row: 1, column: 1, rowSpan: 2, showLabel: true },
+            menuItemFactory: DocPermissionMenuItemFactory,
+        },
+    },
     [RibbonStartGroup.FORMAT]: {
         [SetInlineFormatBoldCommand.id]: {
             order: 0,

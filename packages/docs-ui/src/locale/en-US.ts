@@ -16,6 +16,11 @@
 
 const locale = {
     'docs-ui': {
+        objectPermission: {
+            title: 'Permission settings',
+            paragraph: 'Paragraph',
+            section: 'Section',
+        },
         layout: {
             progress: 'Laying out document…',
             recovering: 'Restoring document layout…',

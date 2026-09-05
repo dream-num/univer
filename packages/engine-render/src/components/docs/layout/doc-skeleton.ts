@@ -396,6 +396,35 @@ function mapPreviousOffsetToCurrent(
     return offset + (invalidation.newEnd - invalidation.oldEnd);
 }
 
+function cloneLineFlowForPublish(
+    source: IDocumentSkeletonLine,
+    parent?: IDocumentSkeletonColumn
+): IDocumentSkeletonLine {
+    const line: IDocumentSkeletonLine = {
+        ...source,
+        divides: [],
+        parent,
+    };
+    if (source.bullet != null) {
+        line.bullet = { ...source.bullet };
+    }
+    // A retained or published line must own its full parent graph. Sharing
+    // divides leaves hit-tested glyphs pointing at a page in the old skeleton.
+    line.divides = source.divides.map((sourceDivide): IDocumentSkeletonDivide => {
+        const divide: IDocumentSkeletonDivide = {
+            ...sourceDivide,
+            glyphGroup: [],
+            parent: line,
+        };
+        divide.glyphGroup = sourceDivide.glyphGroup.map((glyph) => ({
+            ...glyph,
+            parent: divide,
+        }));
+        return divide;
+    });
+    return line;
+}
+
 function clonePageFlowForPublish(source: IDocumentSkeletonPage): IDocumentSkeletonPage {
     const page: IDocumentSkeletonPage = {
         ...source,
@@ -431,31 +460,7 @@ function clonePageFlowForPublish(source: IDocumentSkeletonPage): IDocumentSkelet
                     lines: [],
                     parent: section,
                 };
-                column.lines = sourceColumn.lines.map((sourceLine) => {
-                    const line: IDocumentSkeletonLine = {
-                        ...sourceLine,
-                        divides: [],
-                        parent: column,
-                    };
-                    if (sourceLine.bullet != null) {
-                        line.bullet = { ...sourceLine.bullet };
-                    }
-                    line.divides = sourceLine.divides.map((sourceDivide): IDocumentSkeletonDivide => {
-                        const divide: IDocumentSkeletonDivide = {
-                            ...sourceDivide,
-                            glyphGroup: [],
-                            parent: line,
-                        };
-                        // Published flow nodes own a separate parent graph. Clone glyph containers
-                        // so selection hit testing resolves positions against the published page.
-                        divide.glyphGroup = sourceDivide.glyphGroup.map((glyph) => ({
-                            ...glyph,
-                            parent: divide,
-                        }));
-                        return divide;
-                    });
-                    return line;
-                });
+                column.lines = sourceColumn.lines.map((sourceLine) => cloneLineFlowForPublish(sourceLine, column));
                 return column;
             });
             return section;
@@ -1388,7 +1393,9 @@ export class DocumentSkeleton extends Skeleton {
         );
         const canResumePlainParagraph = blocks[anchorBlockIndex].block.nodeType === DataStreamTreeNodeType.PARAGRAPH &&
             blocks[anchorBlockIndex].block.children.length === 0;
-        if (reuseInteractionPagePrefix && canResumePlainParagraph) {
+        // A Modern page can contain the entire document. Paginated tail reuse
+        // deep-clones that page in one atomic step, bypassing the slice budget.
+        if (mode === 'paginated' && reuseInteractionPagePrefix && canResumePlainParagraph) {
             const interactionPreviousAnchor = mapCurrentOffsetToPrevious(anchor, invalidation);
             const interactionPageIndex = interactionSkeleton == null
                 ? -1
@@ -1573,7 +1580,7 @@ export class DocumentSkeleton extends Skeleton {
         }
         const retainedLines = previousColumn.lines
             .filter((line) => line.ed < previousAnchorStart)
-            .map((line) => ({ ...line }));
+            .map((line) => cloneLineFlowForPublish(line));
         if (retainedLines.length === 0 && previousAnchorStart < getFirstBodyFlowCharIndex(previousPage)) {
             // A continued paragraph must be rebuilt from the page where it starts.
             return null;
@@ -1734,7 +1741,7 @@ export class DocumentSkeleton extends Skeleton {
 
         const retainedLines = previousColumn.lines
             .filter((line) => line.ed < anchorBlock.startIndex)
-            .map((line) => ({ ...line }));
+            .map((line) => cloneLineFlowForPublish(line));
         if (retainedLines.length === 0) {
             return null;
         }

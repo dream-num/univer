@@ -128,6 +128,7 @@ export type {
 export {
     canEditDocumentTargets,
     createDocumentPermissionPoint,
+    DOCUMENT_UNIT_PERMISSION_ACTIONS,
     getDocumentEntityPermissionObjectId,
     getDocumentParagraphPermissionObjectId,
     getDocumentPermissionValue,

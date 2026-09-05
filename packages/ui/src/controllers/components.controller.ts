@@ -22,6 +22,7 @@ import {
     IncreaseIcon,
     KeyboardIcon,
     MoreDownIcon,
+    ProtectIcon,
     RedoIcon,
     ReduceIcon,
     ShortcutIcon,
@@ -44,6 +45,8 @@ import {
 import { FontSize } from '../views/font-size/FontSize';
 import { FONT_SIZE_COMPONENT } from '../views/font-size/interface';
 import { HEADING_ITEM_COMPONENT, HeadingItem } from '../views/index';
+import { OBJECT_PERMISSION_DIALOG, ObjectPermissionDialog } from '../views/object-permission/ObjectPermissionButton';
+import { OBJECT_PERMISSION_PANEL, ObjectPermissionPanel } from '../views/object-permission/ObjectPermissionPanel';
 import { SYMBOL_PICKER_COMPONENT, SymbolPicker } from '../views/symbol-picker/index';
 
 export class ComponentsController extends Disposable {
@@ -63,6 +66,7 @@ export class ComponentsController extends Disposable {
             IncreaseIcon,
             KeyboardIcon,
             MoreDownIcon,
+            ProtectIcon,
             RedoIcon,
             ReduceIcon,
             FeatureSearchIcon,
@@ -75,6 +79,8 @@ export class ComponentsController extends Disposable {
     private _registerComponents(): void {
         ([
             [COMMON_LABEL_COMPONENT, CommonLabel],
+            [OBJECT_PERMISSION_DIALOG, ObjectPermissionDialog],
+            [OBJECT_PERMISSION_PANEL, ObjectPermissionPanel],
             [HEADING_ITEM_COMPONENT, HeadingItem],
             [FONT_FAMILY_COMPONENT, FontFamily],
             [FONT_FAMILY_ITEM_COMPONENT, FontFamilyItem],

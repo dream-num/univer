@@ -18,9 +18,11 @@ import type { ReactNode } from 'react';
 import type { LocaleKey } from '../../locale/types';
 import { ColumnSeparatorType, LocaleService, PageOrientType, SectionType } from '@univerjs/core';
 import { InputNumber, Select } from '@univerjs/design';
+import { UnitObject } from '@univerjs/protocol';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useEffect } from 'react';
 import { DocSectionSettingController } from '../../controllers/doc-section-setting.controller';
+import { DocObjectPermissionEntry } from '../permission/DocObjectPermissionEntry';
 import { useSectionSetting } from './use-section-setting';
 
 function SettingRow(props: { label: ReactNode; unit?: string; children: ReactNode }) {
@@ -249,6 +251,11 @@ export function SectionSetting() {
                     />
                 </SettingRow>
             </div>
+            <DocObjectPermissionEntry
+                unitId={setting.unitId}
+                id={setting.selectedSectionId}
+                objectType={UnitObject.DocumentSection}
+            />
         </div>
     );
 }

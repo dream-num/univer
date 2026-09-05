@@ -16,8 +16,11 @@
 
 import type { ComponentProps } from 'react';
 import { Anchor, Content, Portal, Root, Trigger } from '@radix-ui/react-popover';
+import { useContext } from 'react';
+
 import { borderClassName, scrollbarClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
+import { ConfigContext } from '../config-provider/ConfigProvider';
 
 function PopoverPrimitive({
     ...props
@@ -37,8 +40,10 @@ function PopoverContent({
     sideOffset = 4,
     ...props
 }: ComponentProps<typeof Content>) {
+    const { mountContainer } = useContext(ConfigContext);
+
     return (
-        <Portal>
+        <Portal container={mountContainer ?? undefined}>
             <Content
                 data-slot="popover-content"
                 align={align}

@@ -238,7 +238,6 @@ async function runFormulaSearchKeyboardCommand(commandService: TestCommandServic
 
 describe('SearchFunction', () => {
     let container: HTMLDivElement;
-    let popupRoot: HTMLDivElement;
     let root: Root;
     let resizeObserver: typeof ResizeObserver | undefined;
     let scrollToDescriptor: PropertyDescriptor | undefined;
@@ -253,10 +252,7 @@ describe('SearchFunction', () => {
             value() {},
         });
         container = document.createElement('div');
-        popupRoot = document.createElement('div');
-        popupRoot.id = 'univer-popup-portal';
         document.body.appendChild(container);
-        document.body.appendChild(popupRoot);
         root = createRoot(container);
     });
 
@@ -265,7 +261,6 @@ describe('SearchFunction', () => {
             root.unmount();
         });
         container.remove();
-        popupRoot.remove();
         if (resizeObserver) {
             globalThis.ResizeObserver = resizeObserver;
         } else {

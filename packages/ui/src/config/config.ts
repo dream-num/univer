@@ -30,8 +30,6 @@ export interface IUniverUIConfig extends IWorkbenchOptions {
 
     menu?: MenuConfig;
 
-    popupRootId?: string;
-
     /**
      * The fallback avatar for user.
      */

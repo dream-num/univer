@@ -38,12 +38,16 @@ describe('Dropdown', () => {
     });
 
     it('should show overlay when open is true', () => {
-        const { getByText } = render(
-            <Dropdown overlay={<div>Overlay Content</div>} open>
-                <button type="button">Trigger</button>
-            </Dropdown>
+        const mountContainer = document.createElement('div');
+        render(
+            <ConfigProvider mountContainer={mountContainer}>
+                <Dropdown overlay={<div>Overlay Content</div>} open>
+                    <button type="button">Trigger</button>
+                </Dropdown>
+            </ConfigProvider>
         );
-        expect(getByText('Overlay Content')).toBeTruthy();
+
+        expect(mountContainer.textContent).toContain('Overlay Content');
     });
 
     it('should stop intercepting pointer input as soon as the overlay closes', () => {

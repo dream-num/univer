@@ -25,9 +25,9 @@ import type {
 } from '../../../services/menu/menu';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import { isRealNum, LocaleService } from '@univerjs/core';
-import { borderBottomClassName, borderClassName, clsx, cva, scrollbarClassName } from '@univerjs/design';
+import { borderBottomClassName, borderClassName, clsx, ConfigContext, cva, scrollbarClassName } from '@univerjs/design';
 import { CheckMarkIcon, MoreLeftIcon, MoreRightIcon } from '@univerjs/icons';
-import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { combineLatest, isObservable, map, merge, of, scan, startWith } from 'rxjs';
 import { ILayoutService } from '../../../services/layout/layout.service';
@@ -108,6 +108,7 @@ interface IContextMenuSchemaRenderGroup {
 const menuViewportPadding = 8;
 const submenuOverlapOffset = 2;
 const submenuVisualGap = 20;
+const EMPTY_MENU_ITEM_IDS: string[] = [];
 export const CONTEXT_MENU_SUBMENU_CLOSE_DELAY = 500;
 export const CONTEXT_MENU_SUBMENU_PORTAL_ATTR = 'data-u-context-menu-submenu';
 const CONTEXT_MENU_CONNECTED_QUICK_GROUP_KEYS = new Set(['quickTop', 'quickBottom']);
@@ -679,6 +680,7 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
     const rootLayoutService = useDependency(ILayoutService);
     const menuManagerService = providedMenuManagerService ?? rootMenuManagerService;
     const layoutService = providedLayoutService ?? rootLayoutService;
+    const { mountContainer } = useContext(ConfigContext);
     const [menuElement, setMenuElement] = useState<HTMLDivElement | null>(null);
     const [maxMenuHeight, setMaxMenuHeight] = useState(() => {
         if (typeof window === 'undefined') {
@@ -687,19 +689,20 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
 
         return Math.max(120, window.innerHeight - menuViewportPadding * 2);
     });
-    const [hoverSuppressed, setHoverSuppressed] = useState(suppressHoverUntilPointerMove);
+    const hoverSuppressionSession = useMemo(
+        () => ({ menuSessionVersion, menuType, suppressHoverUntilPointerMove }),
+        [menuSessionVersion, menuType, suppressHoverUntilPointerMove]
+    );
+    const [releasedHoverSuppression, setReleasedHoverSuppression] = useState<typeof hoverSuppressionSession | null>(null);
+    const hoverSuppressed = suppressHoverUntilPointerMove && releasedHoverSuppression !== hoverSuppressionSession;
     const menuSchemaVersion$ = useMemo(
         () => menuManagerService.menuChanged$.pipe(startWith(undefined), scan((version) => version + 1, 0)),
         [menuManagerService]
     );
     const menuSchemaVersion = useObservable(menuSchemaVersion$, 0);
 
-    const menuItems = useMemo(
-        () => (menuType ? menuManagerService.getMenuByPositionKey(menuType) : []),
-        [menuManagerService, menuType, menuSchemaVersion, menuSessionVersion]
-    );
-    const submenuPortalContainer = layoutService.rootContainerElement?.ownerDocument?.body
-        ?? (typeof document !== 'undefined' ? document.body : null);
+    const menuItems = menuType ? menuManagerService.getMenuByPositionKey(menuType) : [];
+    const submenuPortalContainer = mountContainer;
 
     useScrollYOverContainer(menuElement, layoutService.rootContainerElement);
 
@@ -737,11 +740,7 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
         });
 
         return () => view.cancelAnimationFrame(frameId);
-    }, [autoFocus, autoFocusTarget, getFocusableMenuButtons, menuElement, menuItems]);
-
-    useEffect(() => {
-        setHoverSuppressed(suppressHoverUntilPointerMove);
-    }, [menuSessionVersion, menuType, suppressHoverUntilPointerMove]);
+    }, [autoFocus, autoFocusTarget, getFocusableMenuButtons, menuElement, menuSchemaVersion, menuSessionVersion]);
 
     const handleKeyDown = useCallback((event: KeyboardEvent<HTMLDivElement>) => {
         if (event.key === 'Escape') {
@@ -831,7 +830,7 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
             onKeyDown={handleKeyDown}
             onPointerMove={() => {
                 if (hoverSuppressed) {
-                    setHoverSuppressed(false);
+                    setReleasedHoverSuppression(hoverSuppressionSession);
                 }
             }}
             onWheel={(event) => event.stopPropagation()}
@@ -1113,7 +1112,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
         activeSubmenuKey,
         setActiveSubmenuKey,
         activeItemIds,
-        hiddenItemIds = [],
+        hiddenItemIds = EMPTY_MENU_ITEM_IDS,
         hoverSuppressed = false,
         compact = false,
         headerAction = false,
@@ -1132,7 +1131,14 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
     const selectionsFromObservable = useObservable(
         isObservable(selectorItem.selections) ? selectorItem.selections : undefined
     );
-    const [inputValue, setInputValue] = useState(value);
+    const inputValueSource = useMemo(() => ({ value }), [value]);
+    const [inputValueOverride, setInputValueOverride] = useState<{
+        source: typeof inputValueSource;
+        value: MenuItemDefaultValueType;
+    } | null>(null);
+    const inputValue = inputValueOverride?.source === inputValueSource
+        ? inputValueOverride.value
+        : value;
     const [submenuPosition, setSubmenuPosition] = useState<{
         left: number;
         top: number;
@@ -1161,13 +1167,9 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
         return Array.isArray(selectorItem.selections) ? selectorItem.selections : [];
     }, [menuItem.type, selectionsFromObservable, selectorItem.selections]);
 
-    const subMenuItems = useMemo(() => {
-        if (menuItem.type !== MenuItemType.SUBITEMS || !menuItem.id) {
-            return [];
-        }
-
-        return menuManagerService.getMenuByPositionKey(menuItem.id);
-    }, [menuItem.id, menuItem.type, menuManagerService, menuSessionVersion]);
+    const subMenuItems = menuItem.type === MenuItemType.SUBITEMS && menuItem.id
+        ? menuManagerService.getMenuByPositionKey(menuItem.id)
+        : [];
 
     const hasSelectionSubmenu = selections.length > 0;
     const hasSubItemSubmenu = subMenuItems.length > 0;
@@ -1197,10 +1199,6 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
         }, CONTEXT_MENU_SUBMENU_CLOSE_DELAY);
     }, [clearSubmenuCloseTimer, closeSubmenu]);
 
-    useEffect(() => {
-        setInputValue(value);
-    }, [value]);
-
     useEffect(() => () => clearSubmenuCloseTimer(), [clearSubmenuCloseTimer]);
 
     useEffect(() => {
@@ -1229,7 +1227,6 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
 
     useEffect(() => {
         if (!submenuVisible) {
-            setSubmenuPositionReady(false);
             return;
         }
 
@@ -1282,7 +1279,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
 
     const onChange = (v: string | number) => {
         const newValue = isRealNum(v) && typeof v === 'string' ? Number.parseInt(v) : v;
-        setInputValue(newValue);
+        setInputValueOverride({ source: inputValueSource, value: newValue });
     };
 
     const onSubmenuOptionSelect = (option: IValueOption) => {

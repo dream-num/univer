@@ -21,6 +21,7 @@ import { LifecycleService, LifecycleStages, LocaleService, ThemeService } from '
 import { borderBottomClassName, clsx, ConfigProvider, render } from '@univerjs/design';
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { map } from 'rxjs';
+
 import { BuiltInUIPart } from '../../services/parts/parts.service';
 import { ThemeSwitcherService } from '../../services/theme-switcher/theme-switcher.service';
 import { IWorkbenchService } from '../../services/workbench/workbench.service';
@@ -74,6 +75,7 @@ export function MobileWorkbench(props: IUniverAppProps) {
 
     const contentRef = useRef<HTMLDivElement>(null);
     const viewportRef = useRef<HTMLDivElement>(null);
+    const globalRootRef = useRef<HTMLDivElement>(null);
 
     const footerComponents = useComponentsOfPart(BuiltInUIPart.FOOTER);
     const headerComponents = useComponentsOfPart(BuiltInUIPart.HEADER);
@@ -102,34 +104,39 @@ export function MobileWorkbench(props: IUniverAppProps) {
     );
     const direction = useObservable(localeService.direction$, localeService.getDirection());
 
-    // Create a portal container for injecting global component themes.
-    const portalContainer = useMemo<HTMLElement>(() => document.createElement('div'), []);
+    const portalContainer = useMemo<HTMLElement>(() => {
+        const container = mountContainer.ownerDocument.createElement('div');
+        container.setAttribute('data-univer-root', '');
+        return container;
+    }, [mountContainer]);
 
     useLayoutEffect(() => {
         const sub = themeService.currentTheme$.subscribe((theme) => {
-            themeSwitcherService.injectThemeToHead(theme);
+            const roots = [viewportRef.current, globalRootRef.current, portalContainer]
+                .filter((root): root is HTMLElement => root !== null);
+            themeSwitcherService.applyTheme(theme, roots);
         });
 
         return () => {
             sub.unsubscribe();
         };
-    }, []);
+    }, [portalContainer, themeService, themeSwitcherService]);
 
     useEffect(() => {
-        document.body.appendChild(portalContainer);
+        mountContainer.ownerDocument.body.appendChild(portalContainer);
 
         return () => {
-            document.body.removeChild(portalContainer);
+            portalContainer.remove();
         };
     }, [mountContainer, portalContainer]);
 
     useEffect(() => {
-        portalContainer.dir = direction;
+        portalContainer.setAttribute('dir', direction);
     }, [direction, portalContainer]);
 
     useLayoutEffect(() => {
-        document.documentElement.classList.toggle('univer-dark', darkMode);
-    }, [darkMode]);
+        portalContainer.classList.toggle('univer-dark', darkMode);
+    }, [darkMode, portalContainer]);
 
     useEffect(() => {
         const visualViewport = window.visualViewport;
@@ -189,20 +196,21 @@ export function MobileWorkbench(props: IUniverAppProps) {
         >
             <div
                 ref={viewportRef}
-                className="
+                data-univer-root
+                className={clsx(`
                   univer-relative univer-h-full univer-min-h-0
                   [&_button:active]:!univer-opacity-70
                   [&_button]:univer-touch-manipulation
-                "
+                `, {
+                    'univer-dark': darkMode,
+                })}
             >
                 <div
                     data-u-comp="app-layout"
-                    className={clsx(`
+                    className={`
                       univer-relative univer-flex univer-h-full univer-min-h-0 univer-flex-col univer-bg-gray-0
                       dark:!univer-bg-gray-800
-                    `, {
-                        'univer-dark': darkMode,
-                    })}
+                    `}
                     tabIndex={-1}
                     onBlur={(e) => e.stopPropagation()}
                     onContextMenu={(e) => e.preventDefault()}
@@ -275,10 +283,14 @@ export function MobileWorkbench(props: IUniverAppProps) {
                 )}
             </div>
             <div
-                className="
+                ref={globalRootRef}
+                data-univer-root
+                className={clsx(`
                   [&_button:active]:!univer-opacity-70
                   [&_button]:univer-touch-manipulation
-                "
+                `, {
+                    'univer-dark': darkMode,
+                })}
                 dir={direction}
             >
                 <ComponentContainer key="global" components={globalComponents} />

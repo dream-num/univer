@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { LocaleKey } from '../locale/types';
 import { LocaleService } from '@univerjs/core';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { DocLayoutProgressService } from '../services/doc-layout-progress.service';
@@ -26,7 +27,7 @@ export function DocLayoutProgress() {
     }
 
     const { progress } = progressState;
-    const label = localeService.t('docs-ui.layout.progress');
+    const label = localeService.t<LocaleKey>('docs-ui.layout.progress');
 
     return (
         <div

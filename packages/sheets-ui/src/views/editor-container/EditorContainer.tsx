@@ -164,8 +164,10 @@ export function shouldPreserveEmbedControlFocus(embedId: string | undefined, own
     const role = activeElement.getAttribute(SHEET_EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE) ??
         activeElement.closest(`[${SHEET_EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE}]`)?.getAttribute(SHEET_EMBED_RUNTIME_FOCUS_ROLE_ATTRIBUTE);
 
+    // The cell input still needs selection synchronization; other owned editors must keep their focus.
+    const isAnotherEditor = role === 'child-editor' && activeElement.id !== `__editor_${DOCS_NORMAL_EDITOR_UNIT_ID_KEY}`;
     // Native controls such as the Name Box inherit the runtime role, not a popup role.
-    return activeElement.matches('input, textarea, select') || role === 'child-popup' || role === 'floating-menu';
+    return activeElement.matches('input, textarea, select') || isAnotherEditor || role === 'child-popup' || role === 'floating-menu';
 }
 
 export function shouldPreserveEmbedInteractiveFocus(embedId: string | undefined, ownerDocument: Document): boolean {

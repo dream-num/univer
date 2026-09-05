@@ -890,6 +890,86 @@ describe('doc skeleton', () => {
         expect(docViewModel.dispose).toHaveBeenCalled();
     });
 
+    it('hit-tests imported sections throughout a modern page while Worker layout is pending', () => {
+        const univer = new Univer();
+        const content = 'Modern paragraph with an empty paragraph below.\r\r'.repeat(30);
+        const model = createDocumentModelWithStyle(content, {});
+        model.updateDocumentStyle({ documentFlavor: DocumentFlavor.MODERN });
+        model.updateDocumentDataPageSize(240, 180);
+        const importedSection = model.getBody()!.sectionBreaks![0];
+        importedSection.pageSize = { width: 240, height: 180 };
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), univer.__getInjector().get(LocaleService));
+        skeleton.calculate();
+        const page = skeleton.getSkeletonData()!.pages[0];
+        const section = page.sections[page.sections.length - 1];
+        const column = section.columns[0];
+        const line = column.lines[column.lines.length - 2];
+        const divide = line.divides[0];
+        const glyph = divide.glyphGroup[0];
+        const coord = Vector2.FromArray([
+            page.marginLeft + column.left + divide.left + glyph.left + glyph.width / 2,
+            page.marginTop + section.top + line.top + line.lineHeight / 2,
+        ]);
+        expect(coord.y).toBeGreaterThan(180);
+        expect(page.pageHeight).toBe(Number.POSITIVE_INFINITY);
+        expect(importedSection.pageSize).toEqual({ width: 240, height: 180 });
+        skeleton.beginExternalLayout({
+            reason: 'edit',
+            protectedRange: { mode: 'continuous', startOffset: 0, endOffset: content.length },
+        });
+        expect(skeleton.getLayoutProgress()?.complete).toBe(false);
+        expect(skeleton.findEditAreaByCoord(coord, PageLayoutType.VERTICAL, 0, 0)).toMatchObject({
+            editArea: 'BODY',
+            pageNumber: 0,
+        });
+        const hit = skeleton.findNodeByCoord(coord, PageLayoutType.VERTICAL, 0, 0, {
+            strict: false,
+            segmentId: '',
+            segmentPage: -1,
+        });
+        expect(hit?.node).toBe(glyph);
+        expect(skeleton.findPositionByGlyph(hit!.node, -1)?.page).toBe(0);
+        skeleton.dispose();
+        model.dispose();
+        univer.dispose();
+    });
+
+    it('keeps unaffected modern paragraphs clickable before the edited paragraph is ready', () => {
+        const univer = new Univer();
+        const text = 'Unchanged paragraph.\r\rChanged paragraph.\r';
+        const model = createDocumentModelWithStyle(text, {});
+        model.updateDocumentStyle({ documentFlavor: DocumentFlavor.MODERN });
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), univer.__getInjector().get(LocaleService));
+        skeleton.calculate();
+        const page = skeleton.getSkeletonData()!.pages[0];
+        const section = page.sections[0];
+        const column = section.columns[0];
+        const pointForLine = (index: number) => {
+            const line = column.lines[index];
+            const divide = line.divides[0];
+            const glyph = divide.glyphGroup[0];
+            return Vector2.FromArray([
+                page.marginLeft + column.left + divide.left + glyph.left + glyph.width / 2,
+                page.marginTop + section.top + line.top + line.lineHeight / 2,
+            ]);
+        };
+        const prefixPoint = pointForLine(0);
+        const changedPoint = pointForLine(column.lines.length - 1);
+        const anchor = text.indexOf('Changed');
+        skeleton.startIncrementalLayout({
+            reason: 'edit',
+            anchor,
+            priorityAnchor: anchor + 1,
+            invalidation: { oldStart: anchor, oldEnd: anchor, newEnd: anchor + 1 },
+        });
+        expect(skeleton.getLayoutProgress()?.anchorReady).toBe(false);
+        expect(skeleton.findNodeByCoord(prefixPoint, PageLayoutType.VERTICAL, 0, 0)?.node.content).toBe('U');
+        expect(skeleton.findNodeByCoord(changedPoint, PageLayoutType.VERTICAL, 0, 0)).toBeNull();
+        skeleton.dispose();
+        model.dispose();
+        univer.dispose();
+    });
+
     it('covers coordinate search helpers and nearest-node strategies', () => {
         const body = createPage(DocumentSkeletonPageType.BODY, 0);
         const header = createPage(DocumentSkeletonPageType.HEADER, 200);

@@ -236,6 +236,19 @@ export class DocMoveCursorController extends Disposable {
                 direction === Direction.RIGHT ? focusOffset + curGlyph.count : focusOffset - (preGlyph?.count ?? 0);
 
             focusOffset = Math.min(dataStreamLength - 2, Math.max(0, focusOffset));
+            const normalizedFocusOffset = this._normalizeRenderableCursorOffset(
+                skeleton,
+                body.dataStream,
+                customRanges,
+                focusOffset,
+                direction,
+                normalizedSegmentId,
+                normalizedSegmentPage
+            );
+            if (normalizedFocusOffset == null) {
+                return;
+            }
+            focusOffset = normalizedFocusOffset;
 
             this._textSelectionManagerService.replaceDocRanges([
                 {

@@ -192,14 +192,14 @@ A package MUST NOT reference a key whose first segment is another package's name
 ```typescript
 // In @univerjs/sheets-filter
 // 🚫 references a key from the UI package
-localeService.t('sheets-filter-ui.panel.empty')
+localeService.t<LocaleKey>('sheets-filter-ui.panel.empty')
 
 // In @univerjs/sheets-filter-ui
 // 🚫 references a key from a common/utility package
-localeService.t('sheets-ui.permission.dialog.filterErr')
+localeService.t<LocaleKey>('sheets-ui.permission.dialog.filterErr')
 
 // ✅ sink the key into your own locale file
-localeService.t('sheets-filter-ui.permission.filterErr')
+localeService.t<LocaleKey>('sheets-filter-ui.permission.filterErr')
 ```
 
 ### Namespace must be the single root key

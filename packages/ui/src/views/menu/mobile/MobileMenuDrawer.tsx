@@ -15,6 +15,7 @@
  */
 
 import type { ComponentProps } from 'react';
+import type { LocaleKey } from '../../../locale/types';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import type { MobileDrawerSnap } from '../../components/mobile-drawer/MobileDrawer';
 import { LocaleService } from '@univerjs/core';
@@ -62,7 +63,7 @@ function MobileMenuDrawerContent(props: IMobileMenuDrawerProps) {
         <div dir={direction} className="univer-fixed univer-inset-0 univer-z-[1080] univer-flex univer-items-end">
             <button
                 type="button"
-                aria-label={localeService.t('ui.rangeSelector.cancel')}
+                aria-label={localeService.t<LocaleKey>('ui.rangeSelector.cancel')}
                 className={clsx(resetButtonClassName, `
                   !univer-absolute !univer-inset-0 !univer-m-0 !univer-block !univer-appearance-none
                   !univer-rounded-none !univer-border-0 !univer-bg-black/35 !univer-p-0 univer-backdrop-blur-[2px]
@@ -72,8 +73,8 @@ function MobileMenuDrawerContent(props: IMobileMenuDrawerProps) {
             <MobileDrawer
                 componentName="mobile-menu-drawer"
                 snap={drawerSnap}
-                expandLabel={localeService.t('ui.ribbon.more')}
-                collapseLabel={localeService.t('ui.ribbon.more')}
+                expandLabel={localeService.t<LocaleKey>('ui.ribbon.more')}
+                collapseLabel={localeService.t<LocaleKey>('ui.ribbon.more')}
                 onSnapChange={setDrawerSnap}
                 onClose={onClose}
                 role="dialog"
@@ -90,7 +91,7 @@ function MobileMenuDrawerContent(props: IMobileMenuDrawerProps) {
                             ? (
                                 <button
                                     type="button"
-                                    aria-label={localeService.t('ui.navigation.back')}
+                                    aria-label={localeService.t<LocaleKey>('ui.navigation.back')}
                                     className={clsx(resetButtonClassName, `
                                       univer-size-10 univer-rounded-xl univer-text-gray-700
                                       active:univer-bg-gray-200
@@ -114,7 +115,7 @@ function MobileMenuDrawerContent(props: IMobileMenuDrawerProps) {
                         </div>
                         <button
                             type="button"
-                            aria-label={localeService.t('ui.rangeSelector.cancel')}
+                            aria-label={localeService.t<LocaleKey>('ui.rangeSelector.cancel')}
                             className={clsx(resetButtonClassName, `
                               univer-size-10 univer-rounded-xl univer-text-gray-700
                               active:univer-bg-gray-200

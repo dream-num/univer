@@ -35,6 +35,8 @@ import {
 } from '@univerjs/ui';
 import { CoreHeaderFooterCommand, OpenHeaderFooterPanelCommand } from '../commands/commands/doc-header-footer.command';
 import { SidebarDocHeaderFooterPanelOperation } from '../commands/operations/doc-header-footer-panel.operation';
+import { OpenDocParagraphPermissionOperation } from '../commands/operations/paragraph-permission.operation';
+import { OpenDocPermissionPanelOperation } from '../commands/operations/permission-panel.operation';
 import { floatToolbarMenuSchema, menuSchema } from '../menu/schema';
 import { IDocEmbedInteractionBoundaryService, IDocEmbedRuntimeFocusCoordinator } from '../services/doc-embed-integration.service';
 import { DocSelectionRenderService } from '../services/selection/doc-selection-render.service';
@@ -114,6 +116,8 @@ export class DocUIController extends Disposable {
 
     private _initCommands(): void {
         [
+            OpenDocPermissionPanelOperation,
+            OpenDocParagraphPermissionOperation,
             CoreHeaderFooterCommand,
             OpenHeaderFooterPanelCommand,
             SidebarDocHeaderFooterPanelOperation,

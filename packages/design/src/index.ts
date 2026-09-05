@@ -28,6 +28,7 @@ export { Button } from './components/button/Button';
 export type { IButtonProps } from './components/button/Button';
 export { ButtonGroup } from './components/button/ButtonGroup';
 export type { IButtonGroupProps } from './components/button/ButtonGroup';
+export { StateIconButton } from './components/button/StateIconButton';
 export { Calendar } from './components/calendar/Calendar';
 export { CascaderList } from './components/cascader-list/CascaderList';
 export type { ICascaderListProps, ICascaderOption } from './components/cascader-list/CascaderList';
@@ -138,4 +139,5 @@ export {
 export { clsx } from './helper/clsx';
 export { isBrowser } from './helper/is-browser';
 export { render, unmount } from './helper/react-dom';
+
 export { cva } from 'class-variance-authority';

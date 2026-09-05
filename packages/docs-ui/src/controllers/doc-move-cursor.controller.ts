@@ -230,11 +230,14 @@ export class DocMoveCursorController extends Disposable {
 
         if (direction === Direction.LEFT || direction === Direction.RIGHT) {
             const preGlyph = skeleton.findNodeByCharIndex(focusOffset - 1, segmentId, segmentPage);
-            const curGlyph = skeleton.findNodeByCharIndex(focusOffset, segmentId, segmentPage)!;
+            const curGlyph = skeleton.findNodeByCharIndex(focusOffset, segmentId, segmentPage);
 
             focusOffset =
-                direction === Direction.RIGHT ? focusOffset + curGlyph.count : focusOffset - (preGlyph?.count ?? 0);
+                direction === Direction.RIGHT ? focusOffset + (curGlyph?.count ?? 1) : focusOffset - (preGlyph?.count ?? 1);
 
+            // Section and table delimiters have no caret geometry. Shift+Arrow
+            // must skip them in both directions, as ordinary cursor movement does.
+            focusOffset = this._normalizeCursorOffset(body.dataStream, customRanges, focusOffset, direction);
             focusOffset = Math.min(dataStreamLength - 2, Math.max(0, focusOffset));
 
             this._textSelectionManagerService.replaceDocRanges([

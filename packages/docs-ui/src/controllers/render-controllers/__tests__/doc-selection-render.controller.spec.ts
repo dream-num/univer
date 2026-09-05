@@ -16,21 +16,49 @@
 
 // @vitest-environment jsdom
 
+import type { IDocumentData } from '@univerjs/core';
+import type { RenderUnit } from '@univerjs/engine-render';
 import type { EmbedInteractionBoundaryService } from '../../../services/doc-embed-integration.service';
-import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY } from '@univerjs/core';
 import {
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    DocumentFlavor,
+    ICommandService,
+    IUniverInstanceService,
+    Univer,
+    UniverInstanceType,
+} from '@univerjs/core';
+import {
+    DocLayoutExecutorService,
+    DocSelectionManagerService,
+    DocSkeletonManagerService,
+    SetTextSelectionsOperation,
+} from '@univerjs/docs';
+import {
+    CanvasColorService,
     CURSOR_TYPE,
     DocumentEditArea,
+    Documents,
+    ICanvasColorService,
+    IRenderManagerService,
     NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+    RenderManagerService,
+    Viewport,
 } from '@univerjs/engine-render';
+import { DesktopLayoutService, ILayoutService } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { VIEWPORT_KEY } from '../../../basics/docs-view-key';
 import { SetDocZoomRatioOperation } from '../../../commands/operations/set-doc-zoom-ratio.operation';
-import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, EmbedRuntimeFocusCoordinator } from '../../../services/doc-embed-integration.service';
+import {
+    EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE,
+    EmbedRuntimeFocusCoordinator,
+} from '../../../services/doc-embed-integration.service';
+import { EditorService, IEditorService } from '../../../services/editor/editor-manager.service';
+import { DocSelectionRenderService } from '../../../services/selection/doc-selection-render.service';
 import { DocSelectionRenderController } from '../doc-selection-render.controller';
 
 const neoGetDocObjectMock = vi.hoisted(() => vi.fn());
-const findFirstCursorOffsetMock = vi.hoisted(() => vi.fn(() => 3));
+const findFirstCursorOffsetMock = vi.hoisted(() => vi.fn<(snapshot: IDocumentData) => number>(() => 3));
 
 vi.mock('../../../basics/component-tools', async (importOriginal) => {
     const actual = await importOriginal<typeof import('../../../basics/component-tools')>();
@@ -190,6 +218,81 @@ describe('DocSelectionRenderController', () => {
         vi.restoreAllMocks();
         neoGetDocObjectMock.mockReset();
         findFirstCursorOffsetMock.mockClear();
+    });
+
+    it.each([DocumentFlavor.MODERN, DocumentFlavor.TRADITIONAL])('preserves the editing selection across synchronous layout publications (flavor %s)', async (documentFlavor) => {
+        const componentTools = await vi.importActual<typeof import('../../../basics/component-tools')>('../../../basics/component-tools');
+        const selectionTools = await vi.importActual<typeof import('../../../basics/selection')>('../../../basics/selection');
+        neoGetDocObjectMock.mockImplementation(componentTools.neoGetDocObject);
+        findFirstCursorOffsetMock.mockImplementation(selectionTools.findFirstCursorOffset);
+        vi.useFakeTimers();
+        const univer = new Univer();
+        const root = document.createElement('div');
+        document.body.appendChild(root);
+        try {
+            const injector = univer.__getInjector();
+            injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+            injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
+            injector.add([DocLayoutExecutorService]);
+            injector.add([DocSelectionManagerService]);
+            injector.add([IEditorService, { useClass: EditorService }]);
+            injector.add([ILayoutService, { useClass: DesktopLayoutService }]);
+            injector.get(ILayoutService).registerRootContainerElement(root);
+            injector.get(ICommandService).registerCommand(SetTextSelectionsOperation);
+            const dataStream = 'First paragraph\r\r\rLast paragraph\r\n';
+            const unit = univer.createUnit(UniverInstanceType.UNIVER_DOC, {
+                id: 'selection-layout-test',
+                body: {
+                    dataStream,
+                    paragraphs: [...dataStream.matchAll(/\r/g)].map((match, index) => ({
+                        startIndex: match.index!,
+                        paragraphId: `paragraph-${index}`,
+                    })),
+                    sectionBreaks: [{ startIndex: dataStream.length - 1, sectionId: 'body' }],
+                },
+                documentStyle: {
+                    documentFlavor,
+                    pageSize: { width: 400, height: 600 },
+                    marginLeft: 20,
+                    marginRight: 20,
+                    marginTop: 20,
+                    marginBottom: 20,
+                },
+            });
+            const unitId = unit.getUnitId();
+            injector.get(IUniverInstanceService).setCurrentUnitForType(unitId);
+            const render = injector.get(IRenderManagerService).createRender(unitId) as RenderUnit;
+            render.deactivate();
+            render.engine.resizeBySize(400, 600);
+            render.addRenderDependencies([[DocSkeletonManagerService]]);
+            const skeletonManager = render.with(DocSkeletonManagerService);
+            expect(skeletonManager.supportsIncrementalLayout()).toBe(false);
+            const documents = new Documents('doc-main', skeletonManager.getSkeleton(), { pageMarginTop: 20, pageMarginLeft: 0 });
+            documents.resize(400, 600);
+            render.mainComponent = documents;
+            render.scene.addObject(documents);
+            const viewport = new Viewport(VIEWPORT_KEY.VIEW_MAIN, render.scene, { left: 0, top: 0, width: 400, height: 600, active: true });
+            viewport.resetCanvasSizeAndUpdateScroll();
+            render.addRenderDependencies([[DocSelectionRenderService], [DocSelectionRenderController]]);
+            render.with(DocSelectionRenderController);
+            const selections = injector.get(DocSelectionManagerService);
+            expect(selections.getActiveTextRange()?.startOffset).toBe(0);
+
+            for (const [startOffset, endOffset] of [[1, 1], [2, 2], [3, 3], [5, 9]]) {
+                selections.replaceSelectionInfoWithoutRefresh({
+                    ...selections.getSelectionInfo()!,
+                    textRanges: [{ startOffset, endOffset, collapsed: startOffset === endOffset, isActive: true }],
+                    isEditing: true,
+                }, { unitId, subUnitId: unitId });
+                skeletonManager.recalculate();
+                expect(selections.getActiveTextRange()).toMatchObject({ startOffset, endOffset });
+                expect(selections.getSelectionInfo()?.isEditing).toBe(true);
+            }
+        } finally {
+            univer.dispose();
+            root.remove();
+            findFirstCursorOffsetMock.mockImplementation(() => 3);
+        }
     });
 
     it('syncs selection manager refreshes and inner render selections', () => {

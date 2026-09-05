@@ -124,6 +124,7 @@ interface IScheduledWorkerLayout extends IScheduledLayoutBase {
     viewportEpoch: number;
     skeleton: ExternalLayoutPresentation;
     executorService: DocLayoutSchedulingExecutor;
+    preserveCompletedLayout: boolean;
     options: IDocLayoutStartOptions;
     generation: number | null;
     modelRevision: number | null;
@@ -225,18 +226,17 @@ export class DocLayoutCoordinatorService extends Disposable {
                 synchronousStepCount++;
             }
             const foregroundLayout = this._scheduledLayout;
-            const shouldYieldContinuationToVisualFrame = foregroundLayout?.executor === 'main-thread' && (
-                !foregroundLayout.anchorReady || foregroundLayout.callbacks.onForegroundReady != null
-            );
             if (
                 foregroundLayout?.executor === 'main-thread' &&
-                !shouldYieldContinuationToVisualFrame &&
                 foregroundLayout.anchorReady &&
                 foregroundLayout.foregroundEndOffset != null &&
                 foregroundLayout.foregroundElapsedMs < foregroundLayout.foregroundBudgetMs
             ) {
+                // Modern has no retained page preview below the edited paragraph.
+                // Spend at most one foreground slice filling its visible suffix so
+                // short documents finish before Canvas paints a truncated prefix.
                 this._runSlice(
-                    foregroundLayout.foregroundBudgetMs - foregroundLayout.foregroundElapsedMs,
+                    Math.min(FOREGROUND_BUDGET_MS, foregroundLayout.foregroundBudgetMs - foregroundLayout.foregroundElapsedMs),
                     false,
                     false
                 );
@@ -277,7 +277,8 @@ export class DocLayoutCoordinatorService extends Disposable {
         options: IDocLayoutStartOptions,
         protectedRange: IDocumentLayoutProtectedRange | undefined,
         callbacks: IDocLayoutCoordinatorCallbacks,
-        onError: (error: unknown) => void
+        onError: (error: unknown) => void,
+        preserveCompletedLayout = false
     ): void {
         this.cancel();
         const previousMount = this._workerMount;
@@ -307,10 +308,12 @@ export class DocLayoutCoordinatorService extends Disposable {
             mountEpoch: this._mountEpoch,
             viewportEpoch,
         };
-        skeleton.beginExternalLayout({
-            reason: options.reason,
-            protectedRange,
-        });
+        if (!preserveCompletedLayout) {
+            skeleton.beginExternalLayout({
+                reason: options.reason,
+                protectedRange,
+            });
+        }
         const backgroundResumeDelayMs = getBackgroundResumeDelay(options.reason);
         this._scheduledLayout = {
             executor: 'worker',
@@ -320,6 +323,7 @@ export class DocLayoutCoordinatorService extends Disposable {
             viewportEpoch,
             skeleton,
             executorService,
+            preserveCompletedLayout,
             options,
             generation: null,
             modelRevision: null,
@@ -407,7 +411,7 @@ export class DocLayoutCoordinatorService extends Disposable {
                     generation: scheduledLayout.generation,
                 }).catch(scheduledLayout.onError);
             }
-            if (scheduledLayout.executor === 'worker') {
+            if (scheduledLayout.executor === 'worker' && !scheduledLayout.preserveCompletedLayout) {
                 scheduledLayout.skeleton.cancelExternalLayout();
             }
         }
@@ -554,7 +558,9 @@ export class DocLayoutCoordinatorService extends Disposable {
                 if (this._scheduledLayout !== scheduledLayout) {
                     return;
                 }
-                scheduledLayout.skeleton.cancelExternalLayout();
+                if (!scheduledLayout.preserveCompletedLayout) {
+                    scheduledLayout.skeleton.cancelExternalLayout();
+                }
                 this._scheduledLayout = null;
                 this._cancelCallbacks();
                 scheduledLayout.onError(error);
@@ -598,7 +604,7 @@ export class DocLayoutCoordinatorService extends Disposable {
         }
 
         scheduledLayout.anchorReady = progress.anchorReady;
-        const publishedProgress = progress.complete && scheduledLayout.callbacks.onForegroundReady != null
+        const publishedProgress = progress.complete && progress.mode !== 'continuous' && scheduledLayout.callbacks.onForegroundReady != null
             ? { ...progress, complete: false }
             : progress;
         scheduledLayout.callbacks.onProgress(publishedProgress);
@@ -903,7 +909,12 @@ export class DocLayoutCoordinatorService extends Disposable {
 
                     try {
                         scheduledLayout.anchorReady = result.progress.anchorReady;
-                        scheduledLayout.callbacks.onProgress(result.progress, result.publication);
+                        // Main already finalized this Modern revision. Keep its
+                        // geometry and selection while Worker catches up its model
+                        // and layout baseline; partial Worker blocks would hide text.
+                        if (!scheduledLayout.preserveCompletedLayout) {
+                            scheduledLayout.callbacks.onProgress(result.progress, result.publication);
+                        }
                         if (result.progress.complete) {
                             this._scheduledLayout = null;
                             scheduledLayout.callbacks.onComplete?.(result.progress);

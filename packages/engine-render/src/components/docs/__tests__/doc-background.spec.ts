@@ -15,11 +15,13 @@
  */
 
 import type { IDocumentSkeletonPage } from '../../../basics/i-document-skeleton-cached';
-import { DocumentFlavor } from '@univerjs/core';
+import { createDocumentModelWithStyle, DocumentFlavor, LocaleService, Univer } from '@univerjs/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { PageLayoutType } from '../../../basics/i-document-skeleton-cached';
 import { Path, Rect } from '../../../shape';
 import { DocBackground } from '../doc-background';
+import { DocumentSkeleton } from '../layout/doc-skeleton';
+import { DocumentViewModel } from '../view-model/document-view-model';
 
 function createCtx() {
     return {
@@ -62,9 +64,93 @@ function createSkeleton(pages: IDocumentSkeletonPage[], documentFlavor = Documen
     } as any;
 }
 
+function createModernLayout() {
+    const univer = new Univer();
+    const model = createDocumentModelWithStyle('First paragraph\r\rLast paragraph\r', {});
+    model.updateDocumentStyle({ documentFlavor: DocumentFlavor.MODERN, pageSize: { width: 400, height: 600 } });
+    const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), univer.__getInjector().get(LocaleService));
+    skeleton.calculate();
+    const background = DocBackground.create('modern-delayed-skeleton', skeleton);
+    background.resize(400, 600);
+    const ctx = Object.assign(createCtx(), {
+        beginPath: vi.fn(),
+        createLinearGradient: vi.fn(() => ({ addColorStop: vi.fn() })),
+        fill: vi.fn(),
+        roundRect: vi.fn(),
+        fillStyle: '',
+    });
+    vi.spyOn(Rect, 'drawWith').mockImplementation(() => {});
+    return { skeleton, background, ctx, dispose: () => {
+        background.dispose();
+        skeleton.dispose();
+        univer.dispose();
+    } };
+}
+
 describe('DocBackground', () => {
     afterEach(() => {
         vi.restoreAllMocks();
+        vi.useRealTimers();
+    });
+
+    it.each(['initial', 'edit'] as const)('delays modern skeleton lines for two seconds during %s layout', (reason) => {
+        vi.useFakeTimers();
+        const fixture = createModernLayout();
+        const { skeleton, background, ctx } = fixture;
+        try {
+            skeleton.beginExternalLayout({ reason });
+            background.draw(ctx);
+            expect(ctx.roundRect).not.toHaveBeenCalled();
+            vi.advanceTimersByTime(1_999);
+            background.draw(ctx);
+            expect(ctx.roundRect).not.toHaveBeenCalled();
+            vi.advanceTimersByTime(1);
+            background.draw(ctx);
+            expect(ctx.roundRect).toHaveBeenCalled();
+        } finally {
+            fixture.dispose();
+        }
+    });
+
+    it('never flashes modern skeleton lines for edits completed within two seconds', () => {
+        vi.useFakeTimers();
+        const fixture = createModernLayout();
+        const { skeleton, background, ctx } = fixture;
+        try {
+            for (let edit = 0; edit < 3; edit++) {
+                const generation = skeleton.startIncrementalLayout({ reason: 'edit', anchor: 0 });
+                background.draw(ctx);
+                vi.advanceTimersByTime(300);
+                expect(skeleton.stepIncrementalLayout(generation, Number.POSITIVE_INFINITY).complete).toBe(true);
+                background.draw(ctx);
+                vi.advanceTimersByTime(2_000);
+                background.draw(ctx);
+            }
+            expect(ctx.roundRect).not.toHaveBeenCalled();
+        } finally {
+            fixture.dispose();
+        }
+    });
+
+    it('starts a fresh delay after cancellation and cancels the pending timer on disposal', () => {
+        vi.useFakeTimers();
+        const fixture = createModernLayout();
+        const { skeleton, background, ctx } = fixture;
+        try {
+            skeleton.beginExternalLayout({ reason: 'edit' });
+            background.draw(ctx);
+            vi.advanceTimersByTime(1_500);
+            skeleton.cancelExternalLayout();
+            skeleton.beginExternalLayout({ reason: 'edit' });
+            background.draw(ctx);
+            vi.advanceTimersByTime(500);
+            background.draw(ctx);
+            expect(ctx.roundRect).not.toHaveBeenCalled();
+            background.dispose();
+            expect(vi.getTimerCount()).toBe(0);
+        } finally {
+            fixture.dispose();
+        }
     });
 
     it('draws traditional workspaces with gray 100 and pages with the gray 0 theme token', () => {

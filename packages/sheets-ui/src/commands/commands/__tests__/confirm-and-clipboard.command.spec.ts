@@ -21,6 +21,7 @@ import {
     IConfirmService,
     Injector,
     IPermissionService,
+    IUndoRedoService,
     IUniverInstanceService,
     LocaleService,
     RedoCommand,
@@ -43,6 +44,8 @@ import {
     SheetsSelectionsService,
     WorkbookCopyPermission,
     WorkbookEditablePermission,
+    WorksheetSetCellStylePermission,
+    WorksheetSetCellValuePermission,
 } from '@univerjs/sheets';
 import * as sheets from '@univerjs/sheets';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -348,6 +351,55 @@ describe('clipboard command branches', () => {
             expect(worksheet.getCell(0, 2)?.v).toBeUndefined();
             expect(await commands.executeCommand(UndoCommand.id)).toBe(true);
             expect(worksheet.getCell(0, 1)?.v).toBeUndefined();
+        } finally {
+            releaseRead();
+            univer.dispose();
+        }
+    });
+
+    it.each([
+        { name: 'cell value', PermissionPoint: WorksheetSetCellValuePermission },
+        { name: 'cell style', PermissionPoint: WorksheetSetCellStylePermission },
+    ])('rejects menu paste when $name permission is revoked during the system read', async ({ PermissionPoint }) => {
+        let releaseRead = () => {};
+        const readGate = new Promise<void>((resolve) => {
+            releaseRead = resolve;
+        });
+        const getType = vi.fn(async () => new Blob(['forbidden'], { type: 'text/plain' }));
+        const boundary: IClipboardInterfaceService = {
+            supportClipboard: true,
+            write: vi.fn(async () => {}),
+            writeText: vi.fn(async () => {}),
+            readText: vi.fn(async () => ''),
+            read: vi.fn(async () => {
+                await readGate;
+                return [{ presentationStyle: 'unspecified' as const, types: ['text/plain'], getType }];
+            }),
+        };
+        const { univer, get, sheet } = clipboardTestBed(undefined, undefined, boundary);
+        try {
+            get(SheetsSelectionsService).setSelections('test', 'sheet1', [{
+                range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
+                primary: null,
+                style: null,
+            }]);
+            const permissions = get(IPermissionService);
+            const point = new PermissionPoint('test', 'sheet1');
+            if (!permissions.getPermissionPoint(point.id)) {
+                permissions.addPermissionPoint(point);
+            }
+            permissions.updatePermissionPoint(point.id, true);
+            const before = JSON.stringify(sheet.getSnapshot());
+            const history = get(IUndoRedoService);
+            const beforeHistory = history.getUndoRedoStatus('test');
+            const pendingPaste = SheetPasteCommand.handler(get(Injector), { value: PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE });
+            expect(boundary.read).toHaveBeenCalledOnce();
+            permissions.updatePermissionPoint(point.id, false);
+            releaseRead();
+            await expect(pendingPaste).rejects.toThrow('have no permission');
+            expect(getType).not.toHaveBeenCalled();
+            expect(JSON.stringify(sheet.getSnapshot())).toBe(before);
+            expect(history.getUndoRedoStatus('test')).toEqual(beforeHistory);
         } finally {
             releaseRead();
             univer.dispose();

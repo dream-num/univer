@@ -87,7 +87,11 @@ import {
     MergeTwoParagraphCommand,
     RemoveHorizontalLineCommand,
 } from '../doc-delete.command';
-import { CloseHeaderFooterCommand, CoreHeaderFooterCommand, OpenHeaderFooterPanelCommand } from '../doc-header-footer.command';
+import {
+    CloseHeaderFooterCommand,
+    CoreHeaderFooterCommand,
+    OpenHeaderFooterPanelCommand,
+} from '../doc-header-footer.command';
 import { HorizontalLineCommand, InsertHorizontalLineBellowCommand } from '../doc-horizontal-line.command';
 import { DocPageSetupCommand } from '../doc-page-setup.command';
 import { DocParagraphSettingCommand } from '../doc-paragraph-setting.command';

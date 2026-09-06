@@ -17,13 +17,31 @@
 import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
 import type { RenderUnit } from '@univerjs/engine-render';
 import type { IPopup } from '@univerjs/ui';
-import { BooleanNumber, DocumentFlavor, EventSubject, ICommandService, Injector, IUniverInstanceService, RANGE_DIRECTION, Univer, UniverInstanceType } from '@univerjs/core';
+import {
+    BooleanNumber,
+    DocumentFlavor,
+    EventSubject,
+    ICommandService,
+    Injector,
+    IUniverInstanceService,
+    RANGE_DIRECTION,
+    Univer,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { DocLayoutExecutorService, DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import { CanvasColorService, Documents, ICanvasColorService, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
+import {
+    CanvasColorService,
+    Documents,
+    ICanvasColorService,
+    IRenderManagerService,
+    RenderManagerService,
+} from '@univerjs/engine-render';
 import { ICanvasPopupService } from '@univerjs/ui';
 import { describe, expect, it, vi } from 'vitest';
 import { SetDocZoomRatioOperation } from '../../commands/operations/set-doc-zoom-ratio.operation';
-import { DocCanvasPopupLayoutInteractionController } from '../../controllers/render-controllers/doc-canvas-popup-layout-interaction.controller';
+import {
+    DocCanvasPopupLayoutInteractionController,
+} from '../../controllers/render-controllers/doc-canvas-popup-layout-interaction.controller';
 import { calcDocGlyphPosition } from '../doc-event-manager.service';
 import { DocLayoutInteractionService } from '../doc-layout-interaction.service';
 import {

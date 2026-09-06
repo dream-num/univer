@@ -21,8 +21,8 @@ const locale: typeof enUS = {
         objectPermission: {
             paragraphPermission: 'Права доступа',
             title: 'Права доступа',
-            paragraph: 'Paragraph',
-            section: 'Section',
+            paragraph: 'Абзац',
+            section: 'Раздел',
         },
         layout: {
             progress: 'Выполняется разметка документа…',

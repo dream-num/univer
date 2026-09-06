@@ -21,8 +21,12 @@ import type {
     IUpdateTextCommandParams,
 } from '../commands/commands/core-editing.command';
 import type { ICreateHeaderFooterCommandParams } from '../commands/commands/create-header-footer.command';
-import type { ISetSectionHeaderFooterLinkCommandParams } from '../commands/commands/set-section-header-footer-link.command';
-import type { IUpdateDocumentParagraphStyleCommandParams } from '../commands/commands/update-document-paragraph-style.command';
+import type {
+    ISetSectionHeaderFooterLinkCommandParams,
+} from '../commands/commands/set-section-header-footer-link.command';
+import type {
+    IUpdateDocumentParagraphStyleCommandParams,
+} from '../commands/commands/update-document-paragraph-style.command';
 import type {
     IDeleteDocumentSectionBreakCommandParams,
     IInsertDocumentColumnBreakCommandParams,

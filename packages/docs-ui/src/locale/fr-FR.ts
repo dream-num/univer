@@ -21,7 +21,7 @@ const locale: typeof enUS = {
         objectPermission: {
             paragraphPermission: 'Autorisations',
             title: 'Autorisations',
-            paragraph: 'Paragraph',
+            paragraph: 'Paragraphe',
             section: 'Section',
         },
         layout: {

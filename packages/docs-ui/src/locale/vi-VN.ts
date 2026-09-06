@@ -21,8 +21,8 @@ const locale: typeof enUS = {
         objectPermission: {
             paragraphPermission: 'Quyền',
             title: 'Quyền',
-            paragraph: 'Paragraph',
-            section: 'Section',
+            paragraph: 'Đoạn văn',
+            section: 'Phần',
         },
         layout: {
             progress: 'Đang dàn trang tài liệu…',

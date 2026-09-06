@@ -85,7 +85,12 @@ import { IEditorService } from '../../services/editor/editor-manager.service';
 import { NodePositionConvertToCursor } from '../../services/selection/convert-text-range';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 import { getAnchorBounding } from '../../services/selection/text-range';
-import { getBodyTextXActions, getDocumentMutationLayoutImpact, getSingleBodyTextXActions, resolveMutationLayoutRequest } from './doc-mutation-layout';
+import {
+    getBodyTextXActions,
+    getDocumentMutationLayoutImpact,
+    getSingleBodyTextXActions,
+    resolveMutationLayoutRequest,
+} from './doc-mutation-layout';
 
 function getTextXActionLength(action: unknown): number | undefined {
     if (typeof action !== 'object' || action == null || !('t' in action) || !('len' in action)) {

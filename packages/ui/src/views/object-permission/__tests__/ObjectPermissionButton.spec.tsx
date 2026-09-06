@@ -15,9 +15,25 @@
  */
 
 import type { IObjectPermissionPolicy } from '@univerjs/core';
-import type { IAllowedRequest, ICollaborator, IListPermPointResponse, IUpdatePermPointRequest } from '@univerjs/protocol';
+import type {
+    IAllowedRequest,
+    ICollaborator,
+    IListPermPointResponse,
+    IUpdatePermPointRequest,
+} from '@univerjs/protocol';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { CommandType, IAuthzIoService, ICommandService, IPermissionService, LocaleType, ObjectPermissionService, PermissionStatus, Univer, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import {
+    CommandType,
+    IAuthzIoService,
+    ICommandService,
+    IPermissionService,
+    LocaleType,
+    ObjectPermissionService,
+    PermissionStatus,
+    Univer,
+    UniverInstanceType,
+    UserManagerService,
+} from '@univerjs/core';
 import { UnitAction, UnitObject, UnitRole } from '@univerjs/protocol';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ComponentManager } from '../../../common/component-manager';
@@ -28,7 +44,12 @@ import { IDialogService } from '../../../services/dialog/dialog.service';
 import { IUIPartsService, UIPartsService } from '../../../services/parts/parts.service';
 import { RediProvider } from '../../../utils/di';
 import { DialogPart } from '../../components/dialog-part/DialogPart';
-import { OBJECT_PERMISSION_DIALOG, ObjectPermissionButton, ObjectPermissionDialog, openObjectPermissionDialog } from '../ObjectPermissionButton';
+import {
+    OBJECT_PERMISSION_DIALOG,
+    ObjectPermissionButton,
+    ObjectPermissionDialog,
+    openObjectPermissionDialog,
+} from '../ObjectPermissionButton';
 
 const univers: Univer[] = [];
 afterEach(() => {

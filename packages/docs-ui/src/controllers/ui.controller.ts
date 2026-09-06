@@ -38,7 +38,10 @@ import { SidebarDocHeaderFooterPanelOperation } from '../commands/operations/doc
 import { OpenDocParagraphPermissionOperation } from '../commands/operations/paragraph-permission.operation';
 import { OpenDocPermissionPanelOperation } from '../commands/operations/permission-panel.operation';
 import { floatToolbarMenuSchema, menuSchema } from '../menu/schema';
-import { IDocEmbedInteractionBoundaryService, IDocEmbedRuntimeFocusCoordinator } from '../services/doc-embed-integration.service';
+import {
+    IDocEmbedInteractionBoundaryService,
+    IDocEmbedRuntimeFocusCoordinator,
+} from '../services/doc-embed-integration.service';
 import { DocSelectionRenderService } from '../services/selection/doc-selection-render.service';
 import { TabShortCut } from '../shortcuts/format.shortcut';
 import {

@@ -30,7 +30,14 @@ import type {
 } from '@univerjs/engine-render';
 import { Disposable, fromEventSubject, Inject, PresetListType } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
-import { CURSOR_TYPE, documentSkeletonLineIterator, documentSkeletonTableIterator, getDocsTableRenderViewport, getTableIdAndSliceIndex, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
+import {
+    CURSOR_TYPE,
+    documentSkeletonLineIterator,
+    documentSkeletonTableIterator,
+    getDocsTableRenderViewport,
+    getTableIdAndSliceIndex,
+    TRANSFORM_CHANGE_OBSERVABLE_TYPE,
+} from '@univerjs/engine-render';
 import { BehaviorSubject, distinctUntilChanged, filter, map, Subject, switchMap, take, tap, throttleTime } from 'rxjs';
 import { DOC_VERTICAL_PADDING } from '../types/const/padding';
 import { transformOffset2Bound } from './doc-popup-manager.service';

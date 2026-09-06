@@ -15,16 +15,52 @@
  */
 
 import type { ColumnSeparatorType, ISectionColumnProperties, LocaleService, Nullable } from '@univerjs/core';
-import type { IDocumentSkeletonCached, IDocumentSkeletonColumn, IDocumentSkeletonColumnGroup, IDocumentSkeletonColumnGroupColumn, IDocumentSkeletonDivide, IDocumentSkeletonDrawing, IDocumentSkeletonDrawingAnchor, IDocumentSkeletonGlyph, IDocumentSkeletonLine, IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonSection, IDocumentSkeletonTable, ISkeletonResourceReference } from '../../../basics/i-document-skeleton-cached';
-import type { IDocsConfig, INodeInfo, INodePosition, INodeSearch, ISectionBreakConfig } from '../../../basics/interfaces';
+import type {
+    IDocumentSkeletonCached,
+    IDocumentSkeletonColumn,
+    IDocumentSkeletonColumnGroup,
+    IDocumentSkeletonColumnGroupColumn,
+    IDocumentSkeletonDivide,
+    IDocumentSkeletonDrawing,
+    IDocumentSkeletonDrawingAnchor,
+    IDocumentSkeletonGlyph,
+    IDocumentSkeletonLine,
+    IDocumentSkeletonPage,
+    IDocumentSkeletonRow,
+    IDocumentSkeletonSection,
+    IDocumentSkeletonTable,
+    ISkeletonResourceReference,
+} from '../../../basics/i-document-skeleton-cached';
+import type {
+    IDocsConfig,
+    INodeInfo,
+    INodePosition,
+    INodeSearch,
+    ISectionBreakConfig,
+} from '../../../basics/interfaces';
 import type { IViewportInfo, Vector2 } from '../../../basics/vector2';
 import type { IDocsCustomBlockRenderViewport } from '../custom-block-render-viewport';
 import type { DataStreamTreeNode } from '../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../view-model/document-view-model';
 import type { ISlicedTableSkeletonBuildState, ITableSkeletonBuildState } from './block/table';
 import type { IDocumentSkeletonPagePatch } from './document-layout-page-patch';
-import type { IDocumentLayoutBlockGeometryPublication, IDocumentLayoutDrawingAnchorPublication, IDocumentLayoutGeometryPublication, IDocumentLayoutPagePublication, IDocumentLayoutResourcePublication } from './document-layout-publication';
-import type { DocumentLayoutMode, DocumentLayoutReason, IDocumentLayoutApplyResult, IDocumentLayoutInvalidation, IDocumentLayoutPageRange, IDocumentLayoutProgress, IDocumentLayoutProtectedPageRange, IDocumentLayoutProtectedRange } from './document-layout-types';
+import type {
+    IDocumentLayoutBlockGeometryPublication,
+    IDocumentLayoutDrawingAnchorPublication,
+    IDocumentLayoutGeometryPublication,
+    IDocumentLayoutPagePublication,
+    IDocumentLayoutResourcePublication,
+} from './document-layout-publication';
+import type {
+    DocumentLayoutMode,
+    DocumentLayoutReason,
+    IDocumentLayoutApplyResult,
+    IDocumentLayoutInvalidation,
+    IDocumentLayoutPageRange,
+    IDocumentLayoutProgress,
+    IDocumentLayoutProtectedPageRange,
+    IDocumentLayoutProtectedRange,
+} from './document-layout-types';
 import type { IDocumentPaginationMetrics, ILayoutContext } from './tools';
 import {
     BooleanNumber,
@@ -37,7 +73,13 @@ import {
     Skeleton,
 } from '@univerjs/core';
 import { Subject } from 'rxjs';
-import { BreakType, DocumentSkeletonPageType, GlyphType, LineType, PageLayoutType } from '../../../basics/i-document-skeleton-cached';
+import {
+    BreakType,
+    DocumentSkeletonPageType,
+    GlyphType,
+    LineType,
+    PageLayoutType,
+} from '../../../basics/i-document-skeleton-cached';
 import { getDocsCustomBlockRenderViewport } from '../custom-block-render-viewport';
 import { getDocumentCompatibilityPolicy } from '../document-compatibility';
 import { Liquid } from '../liquid';
@@ -55,7 +97,12 @@ import {
     stepTableSkeletonBuild,
     stepTableSkeletonsBuild,
 } from './block/table';
-import { applyDocumentSkeletonContinuousBlock, hydrateDocumentSkeletonPage, hydrateDocumentSkeletonPageMaterializationPlaceholder, serializeDocumentSkeletonPage } from './document-layout-page-patch';
+import {
+    applyDocumentSkeletonContinuousBlock,
+    hydrateDocumentSkeletonPage,
+    hydrateDocumentSkeletonPageMaterializationPlaceholder,
+    serializeDocumentSkeletonPage,
+} from './document-layout-page-patch';
 import { Hyphen } from './hyphenation/hyphen';
 import { Lang } from './hyphenation/lang';
 import { LanguageDetector } from './hyphenation/language-detector';

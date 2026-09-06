@@ -21,8 +21,8 @@ const locale: typeof enUS = {
         objectPermission: {
             paragraphPermission: 'الأذونات',
             title: 'الأذونات',
-            paragraph: 'Paragraph',
-            section: 'Section',
+            paragraph: 'الفقرة',
+            section: 'القسم',
         },
         layout: {
             progress: 'جارٍ تنسيق المستند…',

@@ -21,8 +21,8 @@ const locale: typeof enUS = {
         objectPermission: {
             paragraphPermission: 'Oprávnenia',
             title: 'Oprávnenia',
-            paragraph: 'Paragraph',
-            section: 'Section',
+            paragraph: 'Odsek',
+            section: 'Sekcia',
         },
         layout: {
             progress: 'Rozkladá sa dokument…',

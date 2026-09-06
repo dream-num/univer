@@ -21,8 +21,8 @@ const locale: typeof enUS = {
         objectPermission: {
             paragraphPermission: 'Autorizzazioni',
             title: 'Autorizzazioni',
-            paragraph: 'Paragraph',
-            section: 'Section',
+            paragraph: 'Paragrafo',
+            section: 'Sezione',
         },
         layout: {
             progress: 'Impaginazione del documento…',

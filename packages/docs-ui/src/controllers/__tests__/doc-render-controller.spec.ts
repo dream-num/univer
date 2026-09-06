@@ -18,7 +18,15 @@
 
 import type { ICommandInfo, IDocumentData, IExecutionOptions } from '@univerjs/core';
 import type { IDocLayoutMountIdentity } from '@univerjs/docs';
-import { CustomDecorationType, CustomRangeType, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DocumentFlavor, JSONX, PositionedObjectLayoutType, TextXActionType } from '@univerjs/core';
+import {
+    CustomDecorationType,
+    CustomRangeType,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    DocumentFlavor,
+    JSONX,
+    PositionedObjectLayoutType,
+    TextXActionType,
+} from '@univerjs/core';
 import { DocLayoutSessionStatus, RichTextEditingMutation } from '@univerjs/docs';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';

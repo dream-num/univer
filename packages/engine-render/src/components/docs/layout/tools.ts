@@ -81,7 +81,11 @@ import { DEFAULT_DOCUMENT_FONTSIZE } from '../../../basics/const';
 import { GlyphType, LineType } from '../../../basics/i-document-skeleton-cached';
 import { getFontStyleString, isFunction, ptToPixel } from '../../../basics/tools';
 import { getDocumentCompatibilityPolicy } from '../document-compatibility';
-import { getDocsTableRenderViewport, getDocsTableViewportLeft, hasDocsTableHorizontalViewport } from '../table-render-viewport';
+import {
+    getDocsTableRenderViewport,
+    getDocsTableViewportLeft,
+    hasDocsTableHorizontalViewport,
+} from '../table-render-viewport';
 import { updateInlineDrawingPosition } from './block/paragraph/layout-ruler';
 import { getCustomDecorationStyle } from './style/custom-decoration';
 import { getCustomRangeStyle } from './style/custom-range';

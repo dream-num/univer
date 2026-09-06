@@ -16,7 +16,20 @@
 
 import type { IDocumentData, Univer } from '@univerjs/core';
 import type { FDocument } from '../f-document';
-import { BlockType, ColumnSeparatorType, DataStreamTreeTokenType, DocumentFlavor, DrawingTypeEnum, ICommandService, IResourceManagerService, IUndoRedoService, PageOrientType, PositionedObjectLayoutType, SectionType, UniverInstanceType } from '@univerjs/core';
+import {
+    BlockType,
+    ColumnSeparatorType,
+    DataStreamTreeTokenType,
+    DocumentFlavor,
+    DrawingTypeEnum,
+    ICommandService,
+    IResourceManagerService,
+    IUndoRedoService,
+    PageOrientType,
+    PositionedObjectLayoutType,
+    SectionType,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { DocSelectionManagerService, InsertTextCommand } from '@univerjs/docs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createDocumentData, createSimpleDocument, createTestBed } from './create-test-bed';

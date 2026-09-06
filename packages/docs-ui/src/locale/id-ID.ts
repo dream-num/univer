@@ -21,8 +21,8 @@ const locale: typeof enUS = {
         objectPermission: {
             paragraphPermission: 'Izin',
             title: 'Izin',
-            paragraph: 'Paragraph',
-            section: 'Section',
+            paragraph: 'Paragraf',
+            section: 'Bagian',
         },
         layout: {
             progress: 'Menata dokumen…',

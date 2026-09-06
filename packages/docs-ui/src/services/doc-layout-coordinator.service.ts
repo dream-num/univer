@@ -14,8 +14,19 @@
  * limitations under the License.
  */
 
-import type { DocLayoutExecutorService, IDocLayoutMountIdentity, IDocLayoutPageResult, IDocLayoutStartOptions, IDocLayoutStepResult } from '@univerjs/docs';
-import type { DocumentLayoutReason, DocumentSkeleton, IDocumentLayoutProgress, IDocumentLayoutProtectedRange } from '@univerjs/engine-render';
+import type {
+    DocLayoutExecutorService,
+    IDocLayoutMountIdentity,
+    IDocLayoutPageResult,
+    IDocLayoutStartOptions,
+    IDocLayoutStepResult,
+} from '@univerjs/docs';
+import type {
+    DocumentLayoutReason,
+    DocumentSkeleton,
+    IDocumentLayoutProgress,
+    IDocumentLayoutProtectedRange,
+} from '@univerjs/engine-render';
 import { Disposable } from '@univerjs/core';
 import { DocLayoutSessionStatus } from '@univerjs/docs';
 

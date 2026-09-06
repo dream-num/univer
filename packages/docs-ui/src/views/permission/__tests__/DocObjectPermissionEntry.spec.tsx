@@ -16,7 +16,15 @@
 
 import type { IDialogPartMethodOptions, IObjectPermissionButtonProps } from '@univerjs/ui';
 import type { ReactNode } from 'react';
-import { IAuthzIoService, IPermissionService, IUniverInstanceService, LocaleType, PermissionStatus, Univer, UniverInstanceType } from '@univerjs/core';
+import {
+    IAuthzIoService,
+    IPermissionService,
+    IUniverInstanceService,
+    LocaleType,
+    PermissionStatus,
+    Univer,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { SetDocumentPermissionCommand } from '@univerjs/docs';
 import { UnitAction, UnitObject } from '@univerjs/protocol';
 import { DesktopDialogService, IDialogService, IUIPartsService, RediProvider, UIPartsService } from '@univerjs/ui';

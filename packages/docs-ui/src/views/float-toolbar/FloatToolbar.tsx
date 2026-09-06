@@ -14,9 +14,15 @@
  * limitations under the License.
  */
 
-import type { IMenuManagerService as IMenuManagerServiceType, IMenuSchema } from '@univerjs/ui';
+import type { IMenuSchema } from '@univerjs/ui';
 import { borderClassName, clsx } from '@univerjs/design';
-import { IMenuManagerService, MenuManagerPosition, preventBrowserZoomInContainers, ToolbarItem, useDependency } from '@univerjs/ui';
+import {
+    IMenuManagerService,
+    MenuManagerPosition,
+    preventBrowserZoomInContainers,
+    ToolbarItem,
+    useDependency,
+} from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
 import {
     SetInlineFormatBoldCommand,
@@ -64,7 +70,7 @@ const DEFAULT_AVALIABLE_MENUS: Array<string | IFloatToolbarMenuConfig> = [
 ];
 
 export function resolveFloatToolbarMenus(
-    menuManagerService: IMenuManagerServiceType,
+    menuManagerService: IMenuManagerService,
     avaliableMenus: Array<string | IFloatToolbarMenuConfig>
 ): { menus: IFloatToolbarMenuSchema[]; extraMenus: IMenuSchema[] } {
     const floatToolbarMenus = menuManagerService.getMenuByPositionKey(FLOAT_TOOLBAR_MENU_POSITION);

@@ -21,8 +21,8 @@ const locale: typeof enUS = {
         objectPermission: {
             paragraphPermission: '権限',
             title: '権限',
-            paragraph: 'Paragraph',
-            section: 'Section',
+            paragraph: '段落',
+            section: 'セクション',
         },
         layout: {
             progress: 'ドキュメントをレイアウトしています…',

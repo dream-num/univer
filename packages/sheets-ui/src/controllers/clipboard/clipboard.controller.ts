@@ -177,13 +177,18 @@ export class SheetClipboardController extends RxDisposable {
                 const htmlContent = clipboardEvent.clipboardData?.getData('text/html');
                 const textContent = clipboardEvent.clipboardData?.getData('text/plain');
                 const files = this._resolveClipboardFiles(clipboardEvent.clipboardData);
+                const target = this._sheetClipboardService.capturePasteTarget();
+                if (!target) {
+                    return;
+                }
                 const formulaClipboardPayload = await this._readFormulaClipboardPayload();
 
-                this._commandService.executeCommand(SheetPasteShortKeyCommand.id, {
+                await this._commandService.executeCommand(SheetPasteShortKeyCommand.id, {
                     htmlContent,
                     textContent,
                     files,
                     formulaClipboardPayload,
+                    target,
                 });
             });
 

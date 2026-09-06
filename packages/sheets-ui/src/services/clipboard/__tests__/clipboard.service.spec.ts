@@ -16,7 +16,7 @@
 
 import type { ICellData, Injector, IRange, IStyleData, Nullable, Univer, Workbook } from '@univerjs/core';
 import type { IClipboardItem } from './mock-clipboard';
-import { ICommandService, IUniverInstanceService, RANGE_TYPE, Rectangle, RedoCommand, UndoCommand, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, IPermissionService, IUniverInstanceService, RANGE_TYPE, Rectangle, RedoCommand, Tools, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import {
     AddWorksheetMergeMutation,
     discreteRangeToRange,
@@ -29,8 +29,10 @@ import {
     SetWorksheetRowAutoHeightMutation,
     SetWorksheetRowHeightMutation,
     SheetsSelectionsService,
+    WorkbookEditablePermission,
 } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { SheetPermissionInterceptorClipboardController } from '../../../controllers/permission/sheet-permission-interceptor-clipboard.controller';
 import { ISheetClipboardService, PREDEFINED_HOOK_NAME_PASTE } from '../clipboard.service';
 import { COPY_TYPE } from '../type';
 import { clipboardTestBed } from './clipboard-test-bed';
@@ -73,7 +75,7 @@ describe('Test clipboard', () => {
     ) => Array<Array<Nullable<IStyleData>>> | undefined;
 
     beforeEach(async () => {
-        const testBed = clipboardTestBed();
+        const testBed = clipboardTestBed(undefined, [[SheetPermissionInterceptorClipboardController]]);
         univer = testBed.univer;
         get = testBed.get;
 
@@ -141,6 +143,87 @@ describe('Test clipboard', () => {
 
     afterEach(() => {
         univer?.dispose();
+    });
+
+    it('keeps the original selection while clipboard data is read asynchronously', async () => {
+        const clipboardService = get(ISheetClipboardService);
+        const selections = get(SheetsSelectionsService);
+        const selectColumn = (column: number) => selections.setSelections('test', 'sheet1', [{
+            range: { startRow: 0, endRow: 0, startColumn: column, endColumn: column },
+            primary: null,
+            style: null,
+        }]);
+        selectColumn(0);
+        const originalSource = getValues(0, 0, 0, 0);
+        const originalPeer = getValues(0, 1, 0, 1);
+        let releaseRead = () => {};
+        const readGate = new Promise<void>((resolve) => {
+            releaseRead = resolve;
+        });
+        const item: IClipboardItem = {
+            presentationStyle: 'unspecified',
+            types: ['text/plain'],
+            getType: async () => {
+                await readGate;
+                return new Blob(['DEFERRED_PASTE'], { type: 'text/plain' });
+            },
+        };
+        const pendingPaste = clipboardService.paste(item);
+        selectColumn(1);
+        releaseRead();
+        expect(await pendingPaste).toBe(true);
+        expect(getValues(0, 0, 0, 0)?.[0][0]?.v).toBe('DEFERRED_PASTE');
+        expect(getValues(0, 1, 0, 1)).toEqual(originalPeer);
+        expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+        expect(getValues(0, 0, 0, 0)).toEqual(originalSource);
+        expect(getValues(0, 1, 0, 1)).toEqual(originalPeer);
+    });
+
+    it.each(['disposed', 'read-only'] as const)('does not redirect a delayed paste when its source becomes %s', async (state) => {
+        const clipboardService = get(ISheetClipboardService);
+        get(SheetPermissionInterceptorClipboardController);
+        const instances = get(IUniverInstanceService);
+        const source = instances.getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)!;
+        const snapshot = Tools.deepClone(source.getSnapshot());
+        const peer = instances.createUnit(UniverInstanceType.UNIVER_SHEET, { ...snapshot, id: 'paste-peer' }, { makeCurrent: false });
+        const peerBefore = Tools.deepClone(peer.getSnapshot());
+        const selections = get(SheetsSelectionsService);
+        const selection = [{
+            range: { startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 },
+            primary: null,
+            style: null,
+        }];
+        selections.setSelections('test', 'sheet1', selection);
+        let releaseRead = () => {};
+        const readGate = new Promise<void>((resolve) => {
+            releaseRead = resolve;
+        });
+        const pendingPaste = clipboardService.paste({
+            presentationStyle: 'unspecified',
+            types: ['text/plain'],
+            getType: async () => {
+                await readGate;
+                return new Blob(['MUST_NOT_WRITE'], { type: 'text/plain' });
+            },
+        });
+        if (state === 'disposed') {
+            instances.disposeUnit('test');
+        } else {
+            const permissions = get(IPermissionService);
+            const point = new WorkbookEditablePermission('test');
+            if (!permissions.getPermissionPoint(point.id)) {
+                permissions.addPermissionPoint(point);
+            }
+            permissions.updatePermissionPoint(point.id, false);
+        }
+        instances.setCurrentUnitForType('paste-peer');
+        selections.setSelections('paste-peer', 'sheet1', selection);
+        releaseRead();
+        expect(await pendingPaste).toBe(false);
+        expect(peer.getSnapshot()).toEqual(peerBefore);
+        if (state === 'read-only') {
+            expect(source.getSnapshot()).toEqual(snapshot);
+        }
     });
 
     describe('Test paste, the original data is a merged cell of 1 row and 2 columns, the current selection consists only of ordinary cells', () => {

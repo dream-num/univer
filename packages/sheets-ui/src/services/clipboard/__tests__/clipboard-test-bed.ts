@@ -27,6 +27,7 @@ import {
     LocaleType,
     LogLevel,
     Plugin,
+    Tools,
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -557,7 +558,7 @@ export class testPlatformService {
 }
 
 // eslint-disable-next-line max-lines-per-function
-export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: Dependency[]) {
+export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: Dependency[], clipboardBoundary?: IClipboardInterfaceService) {
     const univer = new Univer();
     const injector = univer.__getInjector();
     const get = injector.get.bind(injector);
@@ -583,7 +584,9 @@ export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: De
             injector.add([WorksheetProtectionRuleModel]);
             injector.add([RangeProtectionRuleModel]);
             injector.add([SheetPermissionCheckController]);
-            injector.add([IClipboardInterfaceService, { useClass: BrowserClipboardService, lazy: true }]);
+            injector.add(clipboardBoundary
+                ? [IClipboardInterfaceService, { useValue: clipboardBoundary }]
+                : [IClipboardInterfaceService, { useClass: BrowserClipboardService, lazy: true }]);
             injector.add([ISheetClipboardService, { useClass: SheetClipboardService }]);
             injector.add([IMessageService, { useClass: DesktopMessageService, lazy: true }]);
             injector.add([
@@ -621,7 +624,7 @@ export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: De
     }
 
     univer.registerPlugin(TestPlugin);
-    const sheet = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, workbookData || TEST_WORKBOOK_DATA_DEMO);
+    const sheet = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, Tools.deepClone(workbookData || TEST_WORKBOOK_DATA_DEMO));
 
     const univerInstanceService = get(IUniverInstanceService);
     univerInstanceService.focusUnit('test');

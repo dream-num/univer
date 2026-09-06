@@ -23,6 +23,7 @@ import {
     FOCUSING_EDITOR_INPUT_FORMULA,
     FOCUSING_FX_BAR_EDITOR,
     LocaleType,
+    Styles,
     UniverInstanceType,
 } from '@univerjs/core';
 import { InsertTextCommand } from '@univerjs/docs';
@@ -77,7 +78,7 @@ function createController(initialDataStream = 'new value\r\n', isPercentFormat =
         getCellRaw: vi.fn(() => ({ v: 'old' })),
         getComposedCellStyleWithoutSelf: vi.fn(() => ({})),
     };
-    const styles = { get: vi.fn(() => undefined) };
+    const styles = new Styles();
     const workbook = {
         getUnitId: vi.fn(() => 'unit-1'),
         getActiveSheet: vi.fn(() => worksheet),

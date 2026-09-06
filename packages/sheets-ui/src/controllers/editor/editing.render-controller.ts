@@ -89,6 +89,8 @@ import { convertTextRotation, DeviceInputEventType, IRenderManagerService } from
 import {
     adjustRangeOnMutation,
     COMMAND_LISTENER_SKELETON_CHANGE,
+    getCellType,
+    getCellValue,
     InsertColMutation,
     InsertRowMutation,
     isCellImage,
@@ -817,14 +819,9 @@ export class EditingRenderController extends Disposable {
         const finalCell = this._sheetInterceptorService.onWriteCell(workbook, worksheet, row, column, cellData) as ICellData;
 
         // If the cell data after interceptor is the same as the raw cell data, there is no need to execute setRangeValue command, just return directly.
-        const finalCellCleaned = cleanCellDataObject(finalCell);
-        if (finalCellCleaned?.s) {
-            finalCellCleaned.s = workbook.getStyles().get(finalCellCleaned.s);
-        }
-        const rawCellCleaned = cleanCellDataObject(worksheet.getCellRaw(row, column));
-        if (rawCellCleaned?.s) {
-            rawCellCleaned.s = workbook.getStyles().get(rawCellCleaned.s);
-        }
+        const rawCell = worksheet.getCellRaw(row, column);
+        const finalCellCleaned = getComparableCellData(finalCell, workbook.getStyles(), rawCell);
+        const rawCellCleaned = getComparableCellData(rawCell, workbook.getStyles(), rawCell);
         if (Tools.diffValue(finalCellCleaned, rawCellCleaned)) {
             return true;
         }
@@ -1231,13 +1228,35 @@ export function emptyBody(body: IDocumentBody, removeStyle = false) {
     }
 }
 
-function cleanCellDataObject(cellData: Nullable<ICellData>): Nullable<ICellData> {
-    if (!cellData) return cellData;
+export function getComparableCellData(
+    cellData: Nullable<ICellData>,
+    styles: Styles,
+    originalCell: Nullable<ICellData>
+): Nullable<ICellData> {
+    if (!cellData) {
+        return cellData;
+    }
+    const normalized = { ...cellData };
+    if (cellData.v != null) {
+        // Compare the value that SetRangeValuesMutation will persist, including its inferred type.
+        const type = getCellType(styles, cellData, originalCell ?? {});
+        normalized.t = type;
+        normalized.v = getCellValue(type, cellData);
+    }
+    if (normalized.s) {
+        normalized.s = styles.get(normalized.s);
+    }
     return Object.fromEntries(
-        Object.entries(cellData).filter(([_, value]) => {
-            if (value === undefined || value === null) return false;
-            if (Array.isArray(value) && value.length === 0) return false;
-            if (typeof value === 'object' && Object.keys(value).length === 0) return false;
+        Object.entries(normalized).filter(([_, value]) => {
+            if (value === undefined || value === null) {
+                return false;
+            }
+            if (Array.isArray(value) && value.length === 0) {
+                return false;
+            }
+            if (typeof value === 'object' && Object.keys(value).length === 0) {
+                return false;
+            }
             return true;
         })
     );

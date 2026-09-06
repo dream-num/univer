@@ -16,7 +16,7 @@
 
 import type { IObjectPermissionPolicy } from '@univerjs/core';
 import type { IAllowedRequest, ICollaborator, IListPermPointResponse, IUpdatePermPointRequest } from '@univerjs/protocol';
-import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { CommandType, IAuthzIoService, ICommandService, LocaleType, ObjectPermissionService, Univer, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { UnitAction, UnitObject, UnitRole } from '@univerjs/protocol';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -104,7 +104,7 @@ describe('ObjectPermissionButton', () => {
         expect(screen.getByRole('button', { name: 'Permission settings' }).className).toContain('text-primary');
     });
 
-    it('searches eligible people, keeps hidden selections, and persists only after confirmation and Save', async () => {
+    it('searches people inline, preserves hidden selections, and persists with one Save', async () => {
         const { update } = setup({ collaborators: [
             { id: 'alice', role: UnitRole.Editor, subject: { userID: 'alice', name: 'Alice', avatar: '' } },
             { id: 'bob', role: UnitRole.Editor, subject: { userID: 'bob', name: 'Bob', avatar: '' } },
@@ -113,94 +113,113 @@ describe('ObjectPermissionButton', () => {
         fireEvent.click(screen.getByRole('button', { name: 'Permission settings' }));
         fireEvent.click(await screen.findByText('Selected members'));
         expect(screen.getByRole('button', { name: 'Save' }).hasAttribute('disabled')).toBe(true);
-        fireEvent.click(screen.getByRole('button', { name: 'Add people' }));
-        const picker = within(await screen.findByRole('dialog', { name: 'Add people' }));
-        await picker.findByRole('checkbox', { name: 'Alice' });
-        expect(picker.queryByText('Reader')).toBeNull();
-        fireEvent.change(picker.getByRole('textbox', { name: 'Search people' }), { target: { value: '  ALICE  ' } });
-        expect(picker.queryByText('Bob')).toBeNull();
-        fireEvent.click(await picker.findByRole('checkbox', { name: 'Alice' }));
-        fireEvent.change(picker.getByRole('textbox', { name: 'Search people' }), { target: { value: 'missing' } });
-        expect(picker.getByText('No matching people')).toBeTruthy();
-        fireEvent.change(picker.getByRole('textbox', { name: 'Search people' }), { target: { value: 'bob' } });
-        fireEvent.click(await picker.findByRole('checkbox', { name: 'Bob' }));
-        expect(update).not.toHaveBeenCalled();
-        fireEvent.click(picker.getByRole('button', { name: 'Confirm' }));
-        await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Add people' })).toBeNull());
-        expect(screen.getByRole('group', { name: 'Alice' })).toBeTruthy();
-        expect(screen.getByRole('group', { name: 'Bob' })).toBeTruthy();
+        await screen.findByRole('checkbox', { name: /^Alice / });
+        expect(screen.getAllByRole('dialog')).toHaveLength(1);
+        expect(screen.queryByText('Reader')).toBeNull();
+        const search = screen.getByRole('textbox', { name: 'Search people' });
+        fireEvent.change(search, { target: { value: '  ALICE  ' } });
+        expect(screen.queryByText('Bob')).toBeNull();
+        fireEvent.click(screen.getByRole('checkbox', { name: /^Alice / }));
+        fireEvent.change(search, { target: { value: 'missing' } });
+        expect(screen.getByText('No matching people')).toBeTruthy();
+        expect(screen.getByText('Selected: 1')).toBeTruthy();
+        fireEvent.change(search, { target: { value: 'bob' } });
+        fireEvent.click(screen.getByRole('checkbox', { name: /^Bob / }));
         expect(update).not.toHaveBeenCalled();
         fireEvent.click(screen.getByRole('button', { name: 'Save' }));
         await waitFor(() => expect(update).toHaveBeenCalledTimes(1));
         expect(update.mock.calls[0][0].collaborators?.collaborators.map((user) => user.id)).toEqual(['alice', 'bob']);
         await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
         fireEvent.click(screen.getByRole('button', { name: 'Permission settings' }));
-        expect(await screen.findByRole('group', { name: 'Alice' })).toBeTruthy();
-        expect(screen.getByRole('group', { name: 'Bob' })).toBeTruthy();
+        await waitFor(() => expect((screen.getByRole('checkbox', { name: /^Alice / }) as HTMLInputElement).checked).toBe(true));
+        expect((screen.getByRole('checkbox', { name: /^Bob / }) as HTMLInputElement).checked).toBe(true);
     });
 
-    it('discards cancelled picker choices and allows removing confirmed people', async () => {
-        setup();
+    it('discards unsaved choices on Cancel and supports deselecting a person inline', async () => {
+        const { update } = setup();
         fireEvent.click(screen.getByRole('button', { name: 'Permission settings' }));
         fireEvent.click(await screen.findByText('Selected members'));
-        fireEvent.click(screen.getByRole('button', { name: 'Add people' }));
-        let picker = within(await screen.findByRole('dialog', { name: 'Add people' }));
-        fireEvent.click(await picker.findByRole('checkbox', { name: 'Editor' }));
-        fireEvent.click(picker.getByRole('button', { name: 'Cancel' }));
-        await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Add people' })).toBeNull());
-        expect(screen.getByText('No people selected')).toBeTruthy();
-        expect(screen.getByRole('button', { name: 'Save' }).hasAttribute('disabled')).toBe(true);
-        fireEvent.click(screen.getByRole('button', { name: 'Add people' }));
-        picker = within(await screen.findByRole('dialog', { name: 'Add people' }));
-        expect((await picker.findByRole('checkbox', { name: 'Editor' }) as HTMLInputElement).checked).toBe(false);
-        fireEvent.click(await picker.findByRole('checkbox', { name: 'Editor' }));
-        fireEvent.click(picker.getByRole('button', { name: 'Confirm' }));
-        await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Add people' })).toBeNull());
-        fireEvent.pointerDown(within(screen.getByRole('group', { name: 'Editor' })).getByText('Can edit'), { button: 0, ctrlKey: false });
-        fireEvent.click(await screen.findByText('Remove'));
-        expect(screen.queryByRole('group', { name: 'Editor' })).toBeNull();
+        fireEvent.click(await screen.findByRole('checkbox', { name: /^Editor / }));
+        fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+        await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+        expect(update).not.toHaveBeenCalled();
+        fireEvent.click(screen.getByRole('button', { name: 'Permission settings' }));
+        fireEvent.click(await screen.findByText('Selected members'));
+        const editor = await screen.findByRole('checkbox', { name: /^Editor / });
+        expect((editor as HTMLInputElement).checked).toBe(false);
+        fireEvent.click(editor);
+        expect(screen.getByRole('button', { name: 'Save' }).hasAttribute('disabled')).toBe(false);
+        fireEvent.click(editor);
+        expect(screen.getByText('Selected: 0')).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Save' }).hasAttribute('disabled')).toBe(true);
     });
 
-    it('loads file candidates only when Add people opens and retries without losing the policy draft', async () => {
+    it('loads candidates only for selected-member policies and supports retrying inline', async () => {
         const { listCollaborators, update } = setup();
         fireEvent.click(screen.getByRole('button', { name: 'Permission settings' }));
-        fireEvent.click(await screen.findByText('Selected members'));
+        await screen.findByText('Selected members');
         expect(listCollaborators.mock.calls.map(([request]) => request.objectID)).toEqual(['entity//drawing/image']);
         listCollaborators.mockRejectedValueOnce(new Error('Offline'));
-        fireEvent.click(screen.getByRole('button', { name: 'Add people' }));
-        const picker = within(await screen.findByRole('dialog', { name: 'Add people' }));
-        expect(await picker.findByRole('alert')).toBeTruthy();
-        expect(picker.getByRole('button', { name: 'Confirm' }).hasAttribute('disabled')).toBe(true);
-        fireEvent.click(picker.getByRole('button', { name: 'Reload' }));
-        expect(await picker.findByRole('checkbox', { name: 'Editor' })).toBeTruthy();
+        fireEvent.click(screen.getByText('Selected members'));
+        expect(await screen.findByRole('alert')).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'Save' }).hasAttribute('disabled')).toBe(true);
+        fireEvent.click(screen.getByRole('button', { name: 'Reload' }));
+        expect(await screen.findByRole('checkbox', { name: /^Editor / })).toBeTruthy();
+        fireEvent.change(screen.getByRole('textbox', { name: 'Search people' }), { target: { value: 'edi' } });
         expect(listCollaborators.mock.calls.map(([request]) => request.objectID)).toEqual(['entity//drawing/image', 'doc', 'doc']);
         expect(update).not.toHaveBeenCalled();
     });
 
-    it('uses the current user service and respects inherited file-owner access like Sheet', async () => {
+    it('separates names from file roles and respects inherited owner access', async () => {
         setup({ currentUser: 'me', inherit: true, collaborators: [
             { id: 'me', role: UnitRole.Editor, subject: { userID: 'me', name: 'Me', avatar: '' } },
-            { id: 'owner', role: UnitRole.Owner, subject: { userID: 'owner', name: 'Owner', avatar: '' } },
+            { id: 'owner', role: UnitRole.Owner, subject: { userID: 'owner', name: 'Alice', avatar: '' } },
+            { id: 'editor', role: UnitRole.Editor, subject: { userID: 'editor', name: 'Bob', avatar: '' } },
         ] });
         fireEvent.click(screen.getByRole('button', { name: 'Permission settings' }));
         fireEvent.click(await screen.findByText('Selected members'));
-        fireEvent.click(screen.getByRole('button', { name: 'Add people' }));
-        const picker = within(await screen.findByRole('dialog', { name: 'Add people' }));
-        const owner = await picker.findByRole('checkbox', { name: /Owner/ });
+        const owner = await screen.findByRole('checkbox', { name: /^Alice / });
         expect(owner.hasAttribute('disabled')).toBe(true);
-        expect(picker.queryByText('Me')).toBeNull();
+        expect(screen.getByText('File owner, inherited access')).toBeTruthy();
+        expect(screen.getByText('File editor')).toBeTruthy();
+        expect(screen.queryByText('Me')).toBeNull();
     });
 
-    it('keeps the dialog and draft open when saving fails', async () => {
+    it('preserves members omitted by the candidate service and matches candidates by user ID', async () => {
+        const { service, target } = setup({ collaborators: [
+            { id: 'file-alice', role: UnitRole.Owner, subject: { userID: 'alice', name: 'Alice', avatar: '' } },
+        ] });
+        await act(() => service.save(target, {
+            edit: 'members',
+            strategies: [],
+            collaborators: [
+                { id: 'object-alice', role: UnitRole.Editor, subject: { userID: 'alice', name: 'Alice', avatar: '' } },
+                { id: 'bob', role: UnitRole.Editor, subject: { userID: 'bob', name: 'Bob', avatar: '' } },
+            ],
+        }));
+        fireEvent.click(screen.getByRole('button', { name: 'Permission settings' }));
+        await screen.findByText('File owner');
+        expect(screen.getAllByRole('checkbox', { name: /^Alice / })).toHaveLength(1);
+        expect((screen.getByRole('checkbox', { name: /^Alice / }) as HTMLInputElement).checked).toBe(true);
+        expect((screen.getByRole('checkbox', { name: /^Bob / }) as HTMLInputElement).checked).toBe(true);
+        fireEvent.click(screen.getByRole('checkbox', { name: /^Alice / }));
+        expect(screen.getByText('Selected: 1')).toBeTruthy();
+    });
+
+    it('keeps selected people when saving fails and supports retrying Save', async () => {
         const { update } = setup();
         update.mockRejectedValueOnce(new Error('Offline'));
         fireEvent.click(screen.getByRole('button', { name: 'Permission settings' }));
-        fireEvent.click(await screen.findByText('Object owner only'));
+        fireEvent.click(await screen.findByText('Selected members'));
+        fireEvent.click(await screen.findByRole('checkbox', { name: /^Editor / }));
         fireEvent.click(screen.getByRole('button', { name: 'Save' }));
         await screen.findByRole('alert');
-        expect(screen.getByRole('dialog')).toBeTruthy();
+        expect((screen.getByRole('checkbox', { name: /^Editor / }) as HTMLInputElement).checked).toBe(true);
         expect(screen.getByRole('button', { name: 'Save' }).hasAttribute('disabled')).toBe(false);
+        fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+        await waitFor(() => expect(update).toHaveBeenCalledTimes(2));
+        await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+        expect(update.mock.calls[1][0].collaborators?.collaborators.map((user) => user.id)).toEqual(['editor']);
     });
 
     it('requires reloading when remote policy changes while a draft is being edited', async () => {
@@ -256,15 +275,13 @@ describe('workbench object permission dialog', () => {
         await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
     });
 
-    it('searches and confirms people from a hosted toolbar dialog', async () => {
+    it('selects people inline in a hosted toolbar dialog and saves once', async () => {
         const { update } = openHostedDialog();
         fireEvent.click(await screen.findByText('Selected members'));
-        fireEvent.click(screen.getByRole('button', { name: 'Add people' }));
-        const picker = within(await screen.findByRole('dialog', { name: 'Add people' }));
-        fireEvent.change(picker.getByRole('textbox', { name: 'Search people' }), { target: { value: 'editor' } });
-        fireEvent.click(await picker.findByRole('checkbox', { name: 'Editor' }));
-        fireEvent.click(picker.getByRole('button', { name: 'Confirm' }));
-        await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Add people' })).toBeNull());
+        fireEvent.change(screen.getByRole('textbox', { name: 'Search people' }), { target: { value: 'editor' } });
+        fireEvent.click(await screen.findByRole('checkbox', { name: /^Editor / }));
+        expect(screen.getAllByRole('dialog')).toHaveLength(1);
+        expect(update).not.toHaveBeenCalled();
         fireEvent.click(screen.getByRole('button', { name: 'Save' }));
         await waitFor(() => expect(update).toHaveBeenCalledTimes(1));
         expect(update.mock.calls[0][0].collaborators?.collaborators.map((user) => user.id)).toEqual(['editor']);

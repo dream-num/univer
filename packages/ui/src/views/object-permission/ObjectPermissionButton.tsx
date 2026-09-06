@@ -235,10 +235,10 @@ export function ObjectPermissionDialog({ target, name, commandId, actions = DEFA
                     </FormLayout>
                     {objectId !== unitId && policy.edit === 'members' && (
                         <ObjectPermissionMembers
+                            key={`${unitId}/${objectType}/${objectId}`}
                             unitId={unitId}
                             value={policy.collaborators}
                             disabled={!canManage || loading || saving || conflict}
-                            onEditStart={() => setDirty(true)}
                             onChange={(collaborators) => {
                                 setPolicy({ ...policy, collaborators });
                                 setDirty(true);

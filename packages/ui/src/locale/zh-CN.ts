@@ -20,12 +20,11 @@ import emojiLocale from './emoji-locale/zh-CN.generated';
 const locale: typeof enUS = {
     ui: {
         objectPermission: {
-            addPeople: '添加人员',
+            roleOwner: '文件所有者',
+            roleEditor: '文件编辑者',
+            selectedCount: '已选择 {0} 人',
             searchPeople: '搜索人员',
-            noPeople: '尚未选择人员',
             noMatchingPeople: '没有匹配的人员',
-            canEdit: '可编辑',
-            removePerson: '移除',
             loadMore: '加载更多',
             fileHint: '文件成员由分享功能管理；此处设置成员可以执行的操作。',
             documentParent: '此节同时受整文档编辑权限限制。',
@@ -39,7 +38,6 @@ const locale: typeof enUS = {
             boardParent: '此对象同时受整个白板的编辑权限限制。',
             ownerInherit: '文件所有者，继承权限',
             peopleError: '人员列表加载失败，请重试。',
-            confirmPeople: '确认',
             document: '文档',
             section: '节',
             paragraph: '段落',

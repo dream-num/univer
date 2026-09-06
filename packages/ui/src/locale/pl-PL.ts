@@ -20,12 +20,11 @@ import emojiLocale from './emoji-locale/pl-PL.generated';
 const locale: typeof enUS = {
     ui: {
         objectPermission: {
-            addPeople: 'Add people',
+            roleOwner: 'File owner',
+            roleEditor: 'File editor',
+            selectedCount: 'Selected: {0}',
             searchPeople: 'Search people',
-            noPeople: 'No people selected',
             noMatchingPeople: 'No matching people',
-            canEdit: 'Can edit',
-            removePerson: 'Remove',
             loadMore: 'Load more',
             fileHint: 'File sharing controls membership. These settings restrict actions within that membership.',
             documentParent: 'Document editing restrictions also apply to this section.',
@@ -39,7 +38,6 @@ const locale: typeof enUS = {
             boardParent: 'Board editing restrictions also apply to this object.',
             ownerInherit: 'File owner, inherited access',
             peopleError: 'Could not load people. Please retry.',
-            confirmPeople: 'Confirm',
             document: 'Document',
             section: 'Section',
             paragraph: 'Paragraph',

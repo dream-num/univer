@@ -934,6 +934,11 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             return false;
         }
 
+        // MoveRange only supports one workbook. Reject before resource hooks can apply a partial cut.
+        if (!skipCellCopy && cachedData.copyType === COPY_TYPE.CUT && copyUnitId !== target.unitId) {
+            return false;
+        }
+
         const { mapFunc } = virtualizeDiscreteRanges([range]);
         const worksheet = this._univerInstanceService.getUnit<Workbook>(copyUnitId, UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetId(copySubUnitId);
 

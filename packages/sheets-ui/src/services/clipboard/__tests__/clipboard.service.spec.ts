@@ -16,7 +16,19 @@
 
 import type { ICellData, Injector, IRange, IStyleData, Nullable, Univer, Workbook } from '@univerjs/core';
 import type { IClipboardItem } from './mock-clipboard';
-import { ICommandService, IPermissionService, IUniverInstanceService, RANGE_TYPE, Rectangle, RedoCommand, Tools, UndoCommand, UniverInstanceType } from '@univerjs/core';
+import {
+    ICommandService,
+    IPermissionService,
+    IUndoRedoService,
+    IUniverInstanceService,
+    ObjectMatrix,
+    RANGE_TYPE,
+    Rectangle,
+    RedoCommand,
+    Tools,
+    UndoCommand,
+    UniverInstanceType,
+} from '@univerjs/core';
 import {
     AddWorksheetMergeMutation,
     discreteRangeToRange,
@@ -756,13 +768,112 @@ describe('Test clipboard', () => {
     });
 
     describe('Test cut command in single selection', () => {
+        it('rejects cross-workbook cuts before running resource hooks and retains the cut for a valid retry', async () => {
+            const instances = get(IUniverInstanceService);
+            const source = instances.getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)!;
+            const sourceBefore = Tools.deepClone(source.getSnapshot());
+            const peer = instances.createUnit(UniverInstanceType.UNIVER_SHEET, {
+                ...Tools.deepClone(sourceBefore),
+                id: 'cut-peer',
+            }, { makeCurrent: false });
+            const peerBefore = Tools.deepClone(peer.getSnapshot());
+            const history = get(IUndoRedoService);
+            const peerHistory = history.getUndoRedoStatus('cut-peer');
+            const sourceHistory = history.getUndoRedoStatus('test');
+            const copyId = 'cross-workbook-cut';
+            const matrix = new ObjectMatrix<ICellData>();
+            matrix.setValue(0, 0, { v: 'A25' });
+            sheetClipboardService.copyContentCache().set(copyId, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                range: { rows: [24], cols: [0] },
+                matrix,
+                copyType: COPY_TYPE.CUT,
+            });
+            let beforePasteCalls = 0;
+            const hook = sheetClipboardService.addClipboardHook({
+                id: 'cross-workbook-cut-resource-boundary',
+                onBeforePaste: () => {
+                    beforePasteCalls += 1;
+                    return true;
+                },
+            });
+            const range = { startRow: 24, endRow: 24, startColumn: 1, endColumn: 1 };
+            expect(await sheetClipboardService.pasteByCopyId(copyId, undefined, {
+                unitId: 'cut-peer',
+                subUnitId: 'sheet1',
+                range,
+            })).toBe(false);
+            expect(beforePasteCalls).toBe(0);
+            expect(source.getSnapshot()).toEqual(sourceBefore);
+            expect(peer.getSnapshot()).toEqual(peerBefore);
+            expect(history.getUndoRedoStatus('test')).toEqual(sourceHistory);
+            expect(history.getUndoRedoStatus('cut-peer')).toEqual(peerHistory);
+            expect(sheetClipboardService.copyContentCache().get(copyId)?.matrix).toBe(matrix);
+            hook.dispose();
+            instances.setCurrentUnitForType('test');
+            expect(await sheetClipboardService.pasteByCopyId(copyId, undefined, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                range,
+            })).toBe(true);
+            expect(getValues(24, 0, 24, 1)?.[0].map((cell) => cell?.v ?? null)).toEqual([null, 'A25']);
+            expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+            expect(getValues(24, 0, 24, 1)?.[0].map((cell) => cell?.v ?? null)).toEqual(['A25', 'B25']);
+            expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+            expect(getValues(24, 0, 24, 1)?.[0].map((cell) => cell?.v ?? null)).toEqual([null, 'A25']);
+            expect(peer.getSnapshot()).toEqual(peerBefore);
+        });
+
+        it.each([COPY_TYPE.COPY, COPY_TYPE.CUT])('delegates cross-workbook focused-object %s to its hook without moving cells', async (copyType) => {
+            const instances = get(IUniverInstanceService);
+            const source = instances.getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)!;
+            const sourceBefore = Tools.deepClone(source.getSnapshot());
+            const peer = instances.createUnit(UniverInstanceType.UNIVER_SHEET, {
+                ...Tools.deepClone(sourceBefore),
+                id: 'object-peer',
+            }, { makeCurrent: false });
+            const peerBefore = Tools.deepClone(peer.getSnapshot());
+            const copyId = 'focused-object';
+            sheetClipboardService.copyContentCache().set(copyId, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                range: { rows: [24], cols: [0] },
+                matrix: new ObjectMatrix({ 0: { 0: { v: '' } } }),
+                copyType,
+                skipCellCopy: true,
+            });
+            const handled: Array<{ source: string | undefined; target: string; copyType: COPY_TYPE | undefined }> = [];
+            const hook = sheetClipboardService.addClipboardHook({
+                id: 'focused-object-owner',
+                onBeforeCopyFocusedObject: () => true,
+                onPasteCells: (from, to, _data, payload) => {
+                    handled.push({ source: from?.unitId, target: to.unitId, copyType: payload.copyType });
+                    return { redos: [], undos: [] };
+                },
+            });
+            expect(await sheetClipboardService.pasteByCopyId(copyId, undefined, {
+                unitId: 'object-peer',
+                subUnitId: 'sheet1',
+                range: { startRow: 24, endRow: 24, startColumn: 1, endColumn: 1 },
+            })).toBe(true);
+            expect(handled).toEqual([{ source: 'test', target: 'object-peer', copyType }]);
+            expect(source.getSnapshot()).toEqual(sourceBefore);
+            expect(peer.getSnapshot()).toEqual(peerBefore);
+            hook.dispose();
+        });
+
         it('cut value from A25 to B25', async () => {
             const unitId = 'test';
             const subUnitId = 'sheet1';
             const fromRange = { rows: [24], cols: [0] };
             const toRange = { startRow: 24, startColumn: 1, endRow: 24, endColumn: 1 };
             const copyContentCache = sheetClipboardService.copyContentCache();
-            const { matrixFragment, copyId } = (sheetClipboardService as any)._generateCopyContent(unitId, subUnitId, discreteRangeToRange(fromRange), []);
+            const { matrixFragment, copyId } = sheetClipboardService.generateCopyContent(
+                unitId,
+                subUnitId,
+                discreteRangeToRange(fromRange)
+            )!;
 
             // cache the copy content for internal paste
             copyContentCache.set(copyId, {
@@ -783,7 +894,7 @@ describe('Test clipboard', () => {
                 },
             ]);
 
-            (sheetClipboardService as any)._pasteInternal(copyId, PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE);
+            expect(await sheetClipboardService.pasteByCopyId(copyId, PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE)).toBe(true);
 
             expect(getValues(24, 0, 24, 0)![0][0]).toBe(null);
             expect(getValues(24, 1, 24, 1)![0][0]!.v).toBe('A25');

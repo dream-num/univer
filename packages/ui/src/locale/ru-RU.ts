@@ -20,6 +20,8 @@ import emojiLocale from './emoji-locale/ru-RU.generated';
 const locale: typeof enUS = {
     ui: {
         objectPermission: {
+            operationDenied: 'Этот контент защищён. Действие недоступно.',
+            remove: 'Удалить защиту',
             roleOwner: 'File owner',
             roleEditor: 'File editor',
             selectedCount: 'Selected: {0}',
@@ -56,7 +58,7 @@ const locale: typeof enUS = {
             search: 'Search objects',
             empty: 'No matching objects',
             more: 'Showing the first 100 objects. Search to narrow the list.',
-            title: 'Permission settings',
+            title: 'Права доступа',
             cancel: 'Cancel',
             save: 'Save',
             saving: 'Saving…',

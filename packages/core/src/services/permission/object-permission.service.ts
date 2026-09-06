@@ -16,11 +16,13 @@
 
 import type { IBatchAllowedResponse, ICollaborator, IListPermPointResponse } from '@univerjs/protocol';
 import type { IPermissionPoint } from './type';
-import { ObjectScope, UnitAction, UnitRole } from '@univerjs/protocol';
+import { ObjectScope, UnitAction, UnitObject, UnitRole } from '@univerjs/protocol';
 import { BehaviorSubject, Subject } from 'rxjs';
+import { Inject } from '../../common/di';
 import { Disposable } from '../../shared/lifecycle';
 import { IAuthzIoService } from '../authz-io/type';
 import { ILogService } from '../log/log.service';
+import { UserManagerService } from '../user-manager/user-manager.service';
 import { IPermissionService, PermissionStatus } from './type';
 
 export interface IObjectPermissionTarget {
@@ -36,6 +38,25 @@ export interface IObjectPermissionPolicy {
     strategies: IListPermPointResponse['objects'][number]['strategies'];
 }
 
+const ROOT_OBJECT_TYPES: Partial<Record<UnitObject, UnitObject>> = {
+    [UnitObject.Document]: UnitObject.Document,
+    [UnitObject.DocumentSection]: UnitObject.Document,
+    [UnitObject.DocumentParagraph]: UnitObject.Document,
+    [UnitObject.DocumentEntity]: UnitObject.Document,
+    [UnitObject.Slide]: UnitObject.Slide,
+    [UnitObject.SlidePage]: UnitObject.Slide,
+    [UnitObject.SlideElement]: UnitObject.Slide,
+    [UnitObject.SlideMaster]: UnitObject.Slide,
+    [UnitObject.Base]: UnitObject.Base,
+    [UnitObject.BaseTable]: UnitObject.Base,
+    [UnitObject.BaseField]: UnitObject.Base,
+    [UnitObject.BaseRecord]: UnitObject.Base,
+    [UnitObject.BaseView]: UnitObject.Base,
+    [UnitObject.BaseDashboard]: UnitObject.Base,
+    [UnitObject.Board]: UnitObject.Board,
+    [UnitObject.BoardElement]: UnitObject.Board,
+};
+
 /** Coordinates Authz policy writes and the current user's effective permission cache. */
 export class ObjectPermissionService extends Disposable {
     private readonly _initialized = new Set<string>();
@@ -50,9 +71,15 @@ export class ObjectPermissionService extends Disposable {
     constructor(
         @IAuthzIoService private readonly _authz: IAuthzIoService,
         @IPermissionService private readonly _permissions: IPermissionService,
-        @ILogService private readonly _logService: ILogService
+        @ILogService private readonly _logService: ILogService,
+        @Inject(UserManagerService) private readonly _users: UserManagerService
     ) {
         super();
+        this.disposeWithMe(this._permissions.permissionPointUpdate$.subscribe((point) => {
+            if (point.subType === UnitAction.Edit && ROOT_OBJECT_TYPES[point.type] === point.type) {
+                this._revision.next(this._revision.value + 1);
+            }
+        }));
         if (this._authz.objectPermissionChanges$) {
             this.disposeWithMe(this._authz.objectPermissionChanges$.subscribe(({ unitID }) => {
                 if (this._initialized.has(unitID)) {
@@ -106,17 +133,59 @@ export class ObjectPermissionService extends Disposable {
             policy.strategies.some((strategy) => strategy.role === UnitRole.Owner));
     }
 
+    /** Match Sheet's permission-list entry: require effective file editing, not child editing. */
+    canView(target: IObjectPermissionTarget): boolean {
+        const rootType = ROOT_OBJECT_TYPES[target.objectType];
+        return this.supports(target) && rootType !== undefined &&
+            this._permissions.getPermissionPoint(`${rootType}.${UnitAction.Edit}_${target.unitId}`)?.value === true;
+    }
+
     async canManage(target: IObjectPermissionTarget): Promise<boolean> {
         if (!this.supports(target)) {
             return false;
         }
-        const actions = await this._authz.allowed({
-            unitID: target.unitId,
-            objectID: target.objectId,
-            objectType: target.objectType,
-            actions: [UnitAction.ManageCollaborator],
-        });
-        return actions.some((action) => action.action === UnitAction.ManageCollaborator && action.allowed === true);
+        const object = await this._getPolicy(target);
+        if (!object && target.objectId !== target.unitId) {
+            const rootType = ROOT_OBJECT_TYPES[target.objectType];
+            return rootType !== undefined && this._allowed({ ...target, objectId: target.unitId, objectType: rootType }, UnitAction.CreatePermissionObject);
+        }
+        return this._canChangeRule(target, object, UnitAction.ManageCollaborator);
+    }
+
+    async canDelete(target: IObjectPermissionTarget): Promise<boolean> {
+        if (!this.supports(target) || !this._authz.deleteObjectPermission || target.objectId === target.unitId) {
+            return false;
+        }
+        const object = await this._getPolicy(target);
+        return !!object && this._canChangeRule(target, object, UnitAction.Delete);
+    }
+
+    /** Must be called from a product permission Command; removal restores server-computed inheritance. */
+    async remove(target: IObjectPermissionTarget): Promise<void> {
+        if (!await this.canDelete(target) || !this._authz.deleteObjectPermission) {
+            throw new Error('Object permission deletion denied.');
+        }
+        await this._authz.deleteObjectPermission({ unitID: target.unitId, objectID: target.objectId, objectType: target.objectType });
+        await this.refreshUnit(target.unitId);
+    }
+
+    private async _getPolicy(target: IObjectPermissionTarget) {
+        const objects = await this._authz.list({ unitID: target.unitId, objectIDs: [target.objectId], actions: [] });
+        return objects.find((item) => item.unitID === target.unitId && item.objectID === target.objectId && item.objectType === target.objectType);
+    }
+
+    private async _allowed(target: IObjectPermissionTarget, action: UnitAction): Promise<boolean> {
+        const actions = await this._authz.allowed({ unitID: target.unitId, objectID: target.objectId, objectType: target.objectType, actions: [action] });
+        return actions.some((item) => item.action === action && item.allowed === true);
+    }
+
+    private async _canChangeRule(target: IObjectPermissionTarget, object: IListPermPointResponse['objects'][number] | undefined, action: UnitAction): Promise<boolean> {
+        if (await this._allowed(target, action)) {
+            return true;
+        }
+        // Match Sheet's rule-creator access using server metadata, never the local object's author.
+        const creatorId = object?.creator?.userID;
+        return !!creatorId && creatorId === this._users.getCurrentUser().userID;
     }
 
     async read(target: IObjectPermissionTarget): Promise<IObjectPermissionPolicy> {

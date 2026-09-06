@@ -20,6 +20,7 @@ import {
     CommandType,
     DocumentFlavor,
     DrawingTypeEnum,
+    ErrorService,
     ICommandService,
     IPermissionService,
     IUndoRedoService,
@@ -142,9 +143,19 @@ describe('DocPermissionController', () => {
     it('enforces document edit permission through the facade and command pipeline', async () => {
         await document.getPermission().setReadOnly();
 
+        const targets: Array<string | undefined> = [];
+        const subscription = get(ErrorService).error$.subscribe((error) => targets.push(error.permissionTarget));
         expect(document.getPermission().canEdit()).toBe(false);
         expect(document.getParagraph('paragraph-one')!.setText('Denied')).toBe(false);
+        expect(document.getParagraph('paragraph-two')!.setText('Also denied')).toBe(false);
+        expect(document.getParagraph('paragraph-one')!.setText('Denied again')).toBe(false);
+        expect(targets).toHaveLength(3);
+        expect(targets[0]).toBeDefined();
+        expect(targets[1]).not.toBe(targets[0]);
+        expect(targets[2]).toBe(targets[0]);
         expect(document.getParagraph('paragraph-one')!.getText()).toBe('One');
+        expect(document.getParagraph('paragraph-two')!.getText()).toBe('Two');
+        subscription.unsubscribe();
     });
 
     it('uses section and paragraph ids as hierarchical edit boundaries', async () => {
@@ -194,12 +205,22 @@ describe('DocPermissionController', () => {
 
     it('accepts collaboration mutations despite local edit permission', async () => {
         await document.getPermission().setReadOnly();
+        const errors: string[] = [];
+        const subscription = get(ErrorService).error$.subscribe((error) => errors.push(error.code ?? ''));
+        expect(get(ICommandService).syncExecuteCommand(DocsRenameMutation.id, {
+            unitId: document.getId(),
+            name: 'Blocked local name',
+        })).toBe(false);
+        expect(errors).toEqual(['PERMISSION_DENIED']);
+        errors.length = 0;
 
         await expect(get(ICommandService).executeCommand(DocsRenameMutation.id, {
             unitId: document.getId(),
             name: 'Remote name',
         }, { fromCollab: true })).resolves.toBe(true);
         expect(document.getName()).toBe('Remote name');
+        expect(errors).toEqual([]);
+        subscription.unsubscribe();
     });
 
     it('applies incoming changesets without creating local Undo history', async () => {

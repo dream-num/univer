@@ -20,6 +20,8 @@ import emojiLocale from './emoji-locale/fa-IR.generated';
 const locale: typeof enUS = {
     ui: {
         objectPermission: {
+            operationDenied: 'این محتوا محافظت شده است. انجام این عملیات مجاز نیست.',
+            remove: 'حذف محافظت',
             roleOwner: 'File owner',
             roleEditor: 'File editor',
             selectedCount: 'Selected: {0}',
@@ -56,7 +58,7 @@ const locale: typeof enUS = {
             search: 'Search objects',
             empty: 'No matching objects',
             more: 'Showing the first 100 objects. Search to narrow the list.',
-            title: 'Permission settings',
+            title: 'مجوزها',
             cancel: 'Cancel',
             save: 'Save',
             saving: 'Saving…',

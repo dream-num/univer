@@ -51,7 +51,7 @@ it('does not enumerate collapsed scopes or rescan them on editing commands, and 
     expect(enumerated).toBe(0);
     fireEvent.click(screen.getByRole('button', { name: 'Section' }));
     expect(enumerated).toBeLessThanOrEqual(51);
-    expect(screen.getAllByRole('button', { name: 'Permission settings' })).toHaveLength(50);
+    expect(screen.getAllByRole('button', { name: 'Permissions' })).toHaveLength(50);
     const count = enumerated;
     injector.get(ICommandService).registerCommand({ id: 'test.edit', type: CommandType.COMMAND, handler: () => true });
     act(() => {
@@ -59,6 +59,6 @@ it('does not enumerate collapsed scopes or rescan them on editing commands, and 
     });
     expect(enumerated).toBe(count);
     fireEvent.click(screen.getByRole('button', { name: 'Load more' }));
-    expect(screen.getAllByRole('button', { name: 'Permission settings' })).toHaveLength(100);
+    expect(screen.getAllByRole('button', { name: 'Permissions' })).toHaveLength(100);
     expect(list).not.toHaveBeenCalled();
 });

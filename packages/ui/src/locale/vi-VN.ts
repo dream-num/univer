@@ -20,6 +20,8 @@ import emojiLocale from './emoji-locale/vi-VN.generated';
 const locale: typeof enUS = {
     ui: {
         objectPermission: {
+            operationDenied: 'Nội dung này được bảo vệ. Không thể thực hiện thao tác này.',
+            remove: 'Xóa bảo vệ',
             roleOwner: 'File owner',
             roleEditor: 'File editor',
             selectedCount: 'Selected: {0}',
@@ -56,7 +58,7 @@ const locale: typeof enUS = {
             search: 'Search objects',
             empty: 'No matching objects',
             more: 'Showing the first 100 objects. Search to narrow the list.',
-            title: 'Permission settings',
+            title: 'Quyền',
             cancel: 'Cancel',
             save: 'Save',
             saving: 'Saving…',

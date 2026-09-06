@@ -20,6 +20,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Injector } from '../../../common/di';
 import { IAuthzIoService } from '../../authz-io/type';
 import { DesktopLogService, ILogService } from '../../log/log.service';
+import { UserManagerService } from '../../user-manager/user-manager.service';
 import { ObjectPermissionService } from '../object-permission.service';
 import { PermissionService } from '../permission.service';
 import { IPermissionService, PermissionStatus } from '../type';
@@ -35,9 +36,10 @@ function createAuthz() {
         listUnitPermissions: vi.fn(async () => policies),
         list: vi.fn(async () => policies),
         listCollaborators: vi.fn(async () => []),
-        allowed: vi.fn(async () => [{ action: UnitAction.ManageCollaborator, allowed: true }]),
+        allowed: vi.fn(async ({ actions }: { actions: UnitAction[] }) => actions.map((action) => ({ action, allowed: true }))),
         batchAllowed: vi.fn(async (requests: Array<{ unitID: string; objectID: string; actions: UnitAction[] }>) =>
             requests.map((request) => ({ ...request, actions: request.actions.map((action) => ({ action, allowed: editorAllowed })) }))),
+        deleteObjectPermission: vi.fn(async () => { policies = []; }),
         update: vi.fn(async (request: IUpdatePermPointRequest) => {
             policies = [{ ...request, creator: undefined, actions: [], shareOn: false, shareRole: UnitRole.Reader, shareScope: 0 }];
         }),
@@ -52,12 +54,13 @@ function createAuthz() {
 function createClient(authz: ReturnType<typeof createAuthz>['authz']) {
     const injector = new Injector([
         [ObjectPermissionService],
+        [UserManagerService],
         [IPermissionService, { useClass: PermissionService }],
         [IAuthzIoService, { useValue: authz }],
         [ILogService, { useClass: DesktopLogService }],
     ]);
     injectors.push(injector);
-    return { service: injector.get(ObjectPermissionService), permissions: injector.get(IPermissionService) };
+    return { service: injector.get(ObjectPermissionService), permissions: injector.get(IPermissionService), users: injector.get(UserManagerService) };
 }
 
 function target(objectType: UnitObject, objectId = 'element/page/a') {
@@ -118,6 +121,75 @@ describe('ObjectPermissionService', () => {
         const client = createClient(backend.authz);
         await expect(client.service.setPoint(target(UnitObject.BoardElement), point(UnitObject.BoardElement), false)).rejects.toThrow('denied');
         expect(backend.authz.update).not.toHaveBeenCalled();
+    });
+
+    it('allows the server-declared rule creator like Sheet, while leaving write authorization to Authz', async () => {
+        const backend = createAuthz();
+        const client = createClient(backend.authz);
+        client.users.setCurrentUser({ userID: 'creator', name: 'Creator' });
+        await client.service.setPoint(target(UnitObject.BoardElement), point(UnitObject.BoardElement), false);
+        const policy = (await backend.authz.list())[0];
+        backend.authz.list.mockResolvedValue([{ ...policy, creator: { userID: 'creator', name: 'Creator', avatar: '' } }]);
+        backend.authz.allowed.mockResolvedValue([{ action: UnitAction.ManageCollaborator, allowed: false }]);
+        expect(await client.service.canManage(target(UnitObject.BoardElement))).toBe(true);
+        backend.authz.update.mockRejectedValueOnce(new Error('Forbidden'));
+        await expect(client.service.save(target(UnitObject.BoardElement), { edit: 'all', strategies: [], collaborators: [] })).rejects.toThrow('Forbidden');
+        client.users.setCurrentUser({ userID: 'editor', name: 'Editor' });
+        expect(await client.service.canManage(target(UnitObject.BoardElement))).toBe(false);
+        await expect(client.service.save(target(UnitObject.BoardElement), { edit: 'all', strategies: [], collaborators: [] })).rejects.toThrow('denied');
+        expect(backend.authz.update).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not use a creator from another object or trust a previous management check', async () => {
+        const backend = createAuthz();
+        const client = createClient(backend.authz);
+        client.users.setCurrentUser({ userID: 'creator', name: 'Creator' });
+        await client.service.setPoint(target(UnitObject.BoardElement), point(UnitObject.BoardElement), false);
+        const policy = (await backend.authz.list())[0];
+        backend.authz.list.mockResolvedValue([{ ...policy, objectID: 'another-object', creator: { userID: 'creator', name: 'Creator', avatar: '' } }]);
+        expect(await client.service.canManage(target(UnitObject.BoardElement))).toBe(true);
+        backend.authz.allowed.mockResolvedValue([{ action: UnitAction.ManageCollaborator, allowed: false }]);
+        await expect(client.service.save(target(UnitObject.BoardElement), { edit: 'all', strategies: [], collaborators: [] })).rejects.toThrow('denied');
+        expect(backend.authz.update).toHaveBeenCalledTimes(1);
+    });
+
+    it.each([
+        [UnitObject.DocumentParagraph, UnitObject.Document],
+        [UnitObject.SlidePage, UnitObject.Slide],
+        [UnitObject.BaseRecord, UnitObject.Base],
+        [UnitObject.BoardElement, UnitObject.Board],
+    ])('separates creation on the root Unit from management on the existing rule (%s)', async (objectType, rootType) => {
+        const backend = createAuthz();
+        const client = createClient(backend.authz);
+        backend.authz.allowed.mockImplementation(async ({ actions }) => actions.map((action) => ({ action, allowed: action === UnitAction.CreatePermissionObject })));
+        await client.service.save(target(objectType), { edit: 'owner', strategies: [], collaborators: [] });
+        expect(backend.authz.allowed).toHaveBeenCalledWith({ unitID: 'unit', objectID: 'unit', objectType: rootType, actions: [UnitAction.CreatePermissionObject] });
+        await expect(client.service.save(target(objectType), { edit: 'all', strategies: [], collaborators: [] })).rejects.toThrow('denied');
+        expect(backend.authz.update).toHaveBeenCalledTimes(1);
+        client.permissions.addPermissionPoint({ ...point(rootType), id: `${rootType}.${UnitAction.Edit}_unit`, value: false });
+        expect(client.service.canView(target(objectType))).toBe(false);
+        client.permissions.updatePermissionPoint(`${rootType}.${UnitAction.Edit}_unit`, true);
+        expect(client.service.canView(target(objectType))).toBe(true);
+    });
+
+    it('requires Delete separately, preserves policies after failure, and reloads inherited rights after removal', async () => {
+        const backend = createAuthz();
+        const client = createClient(backend.authz);
+        backend.setAllowed(false);
+        await client.service.setPoint(target(UnitObject.BoardElement), point(UnitObject.BoardElement), false);
+        backend.authz.allowed.mockImplementation(async ({ actions }) => actions.map((action) => ({ action, allowed: action === UnitAction.ManageCollaborator })));
+        await expect(client.service.remove(target(UnitObject.BoardElement))).rejects.toThrow('denied');
+        expect(backend.authz.deleteObjectPermission).not.toHaveBeenCalled();
+        backend.authz.allowed.mockImplementation(async ({ actions }) => actions.map((action) => ({ action, allowed: action === UnitAction.Delete })));
+        backend.authz.deleteObjectPermission.mockRejectedValueOnce(new Error('Forbidden'));
+        await expect(client.service.remove(target(UnitObject.BoardElement))).rejects.toThrow('Forbidden');
+        expect(client.service.hasPolicy(target(UnitObject.BoardElement))).toBe(true);
+        backend.setAllowed(true);
+        await client.service.remove(target(UnitObject.BoardElement));
+        expect(client.service.hasPolicy(target(UnitObject.BoardElement))).toBe(false);
+        expect(client.permissions.getPermissionPoint(point(UnitObject.BoardElement).id)?.value).toBe(true);
+        await expect(client.service.remove(target(UnitObject.Board, 'unit'))).rejects.toThrow('denied');
+        expect(backend.authz.deleteObjectPermission).toHaveBeenCalledTimes(2);
     });
 
     it('preserves unrelated strategies and read scope when updating one point', async () => {

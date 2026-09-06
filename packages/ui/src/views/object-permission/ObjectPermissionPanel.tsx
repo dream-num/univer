@@ -18,7 +18,7 @@ import type { IAccessor, IObjectPermissionTarget } from '@univerjs/core';
 import type { LocaleKey } from '../../locale/types';
 import type { IObjectPermissionButtonProps } from './ObjectPermissionButton';
 import { Injector, IUniverInstanceService, LocaleService, ObjectPermissionService } from '@univerjs/core';
-import { Button, Input, StateIconButton } from '@univerjs/design';
+import { Button, Input } from '@univerjs/design';
 import { ProtectIcon } from '@univerjs/icons';
 import { UnitObject } from '@univerjs/protocol';
 import { useEffect, useState } from 'react';
@@ -39,7 +39,7 @@ export function openObjectPermissionPanel(
     accessor: IAccessor,
     props: IObjectPermissionPanelProps & { target: IObjectPermissionTarget }
 ): boolean {
-    if (!accessor.get(ObjectPermissionService).supports(props.target)) {
+    if (!accessor.get(ObjectPermissionService).canView(props.target)) {
         return false;
     }
     accessor.get(ISidebarService).open({
@@ -60,14 +60,17 @@ export function ObjectPermissionPanelButton(props: IObjectPermissionPanelProps &
         return null;
     }
     return (
-        <StateIconButton
-            active={permissions.getPolicies(props.unitId).some((policy) => permissions.hasPolicy({ unitId: props.unitId, objectId: policy.objectID, objectType: policy.objectType }))}
+        <Button
+            variant="ghost"
+            size="icon"
+            className="univer-size-7 univer-shrink-0"
+            disabled={!permissions.canView(props.target)}
             title={localeService.t<LocaleKey>('ui.objectPermission.title')}
             aria-label={localeService.t<LocaleKey>('ui.objectPermission.title')}
             onClick={() => openObjectPermissionPanel(accessor, props)}
         >
             <ProtectIcon />
-        </StateIconButton>
+        </Button>
     );
 }
 

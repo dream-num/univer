@@ -19,6 +19,8 @@ import emojiLocale from './emoji-locale/en-US.generated';
 const locale = {
     ui: {
         objectPermission: {
+            operationDenied: 'This content is protected. This action is not allowed.',
+            remove: 'Remove protection',
             roleOwner: 'File owner',
             roleEditor: 'File editor',
             selectedCount: 'Selected: {0}',
@@ -55,7 +57,7 @@ const locale = {
             search: 'Search objects',
             empty: 'No matching objects',
             more: 'Showing the first 100 objects. Search to narrow the list.',
-            title: 'Permission settings',
+            title: 'Permissions',
             cancel: 'Cancel',
             save: 'Save',
             saving: 'Saving…',

@@ -34,14 +34,14 @@ export function objectPermissionMenuItemFactory(
         instances.getCurrentTypeOfUnit$(unitType),
     ]).pipe(switchMap(([rootType, model]) => {
         if (rootType !== unitType || !model || isInternalEditorID(model.getUnitId())) {
-            return of({ hidden: true, activated: false });
+            return of({ hidden: true, disabled: true });
         }
         // Resolve only after a product unit exists so late Authz overrides can register first.
         const permissions = accessor.get(ObjectPermissionService);
         const unitId = model.getUnitId();
         return permissions.changed$.pipe(map(() => ({
+            disabled: !permissions.canView({ unitId, objectId: unitId, objectType }),
             hidden: !permissions.supports({ unitId, objectId: unitId, objectType }),
-            activated: permissions.getPolicies(unitId).some((policy) => permissions.hasPolicy({ unitId, objectId: policy.objectID, objectType: policy.objectType })),
         })));
     }));
     return {
@@ -50,7 +50,7 @@ export function objectPermissionMenuItemFactory(
         icon: 'ProtectIcon',
         title: 'ui.objectPermission.title',
         tooltip: 'ui.objectPermission.title',
+        disabled$: state$.pipe(map((state) => state.disabled)),
         hidden$: state$.pipe(map((state) => state.hidden)),
-        activated$: state$.pipe(map((state) => state.activated)),
     };
 }

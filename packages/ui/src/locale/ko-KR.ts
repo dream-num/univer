@@ -20,6 +20,8 @@ import emojiLocale from './emoji-locale/ko-KR.generated';
 const locale: typeof enUS = {
     ui: {
         objectPermission: {
+            operationDenied: '이 콘텐츠는 보호되어 있어 작업을 수행할 수 없습니다.',
+            remove: '보호 삭제',
             roleOwner: 'File owner',
             roleEditor: 'File editor',
             selectedCount: 'Selected: {0}',
@@ -56,7 +58,7 @@ const locale: typeof enUS = {
             search: 'Search objects',
             empty: 'No matching objects',
             more: 'Showing the first 100 objects. Search to narrow the list.',
-            title: 'Permission settings',
+            title: '권한',
             cancel: 'Cancel',
             save: 'Save',
             saving: 'Saving…',

@@ -16,9 +16,9 @@
 
 import type { IDialogPartMethodOptions, IObjectPermissionButtonProps } from '@univerjs/ui';
 import type { ReactNode } from 'react';
-import { IAuthzIoService, IUniverInstanceService, LocaleType, Univer, UniverInstanceType } from '@univerjs/core';
+import { IAuthzIoService, IPermissionService, IUniverInstanceService, LocaleType, PermissionStatus, Univer, UniverInstanceType } from '@univerjs/core';
 import { SetDocumentPermissionCommand } from '@univerjs/docs';
-import { UnitObject } from '@univerjs/protocol';
+import { UnitAction, UnitObject } from '@univerjs/protocol';
 import { DesktopDialogService, IDialogService, IUIPartsService, RediProvider, UIPartsService } from '@univerjs/ui';
 import uiEnUS from '@univerjs/ui/locale/en-US';
 import { act } from 'react';
@@ -74,6 +74,7 @@ function setup(supportedTypes: UnitObject[] = []) {
         },
     });
     const injector = univer.__getInjector();
+    injector.get(IPermissionService).addPermissionPoint({ id: `${UnitObject.Document}.${UnitAction.Edit}_doc`, type: UnitObject.Document, subType: UnitAction.Edit, value: true, status: PermissionStatus.DONE });
     injector.add([IUIPartsService, { useClass: UIPartsService }]);
     injector.add([IDialogService, { useClass: DesktopDialogService }]);
     return { injector, dialogs: injector.get(IDialogService) };
@@ -112,7 +113,7 @@ describe('DocObjectPermissionEntry', () => {
         expect(view.container.querySelector('[data-u-comp="separator"]')).not.toBeNull();
         const opened = firstValueFrom(dialogs.getDialogs$());
         const button = view.container.querySelector('button')!;
-        expect(button.textContent).toBe('Permission settings');
+        expect(button.textContent).toBe('Permissions');
         act(() => button.click());
         const [dialog] = await opened;
         view.unmount();

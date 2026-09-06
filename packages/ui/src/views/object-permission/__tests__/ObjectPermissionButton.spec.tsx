@@ -17,7 +17,7 @@
 import type { IObjectPermissionPolicy } from '@univerjs/core';
 import type { IAllowedRequest, ICollaborator, IListPermPointResponse, IUpdatePermPointRequest } from '@univerjs/protocol';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { CommandType, IAuthzIoService, ICommandService, LocaleType, ObjectPermissionService, Univer, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import { CommandType, IAuthzIoService, ICommandService, IPermissionService, LocaleType, ObjectPermissionService, PermissionStatus, Univer, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { UnitAction, UnitObject, UnitRole } from '@univerjs/protocol';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ComponentManager } from '../../../common/component-manager';
@@ -36,7 +36,7 @@ afterEach(() => {
     univers.splice(0).forEach((univer) => univer.dispose());
 });
 
-function setup(options: { capable?: boolean; manage?: boolean; collaborators?: ICollaborator[]; inherit?: boolean; currentUser?: string } = {}) {
+function setup(options: { capable?: boolean; manage?: boolean; delete?: boolean; collaborators?: ICollaborator[]; inherit?: boolean; currentUser?: string } = {}) {
     let policies: IListPermPointResponse['objects'] = [];
     let members: ICollaborator[] = [];
     const update = vi.fn(async (request: IUpdatePermPointRequest) => {
@@ -52,7 +52,11 @@ function setup(options: { capable?: boolean; manage?: boolean; collaborators?: I
         listUnitPermissions: async () => policies,
         list: async () => policies,
         listCollaborators,
-        allowed: async () => [{ action: UnitAction.ManageCollaborator, allowed: options.manage !== false }],
+        allowed: async ({ actions }: IAllowedRequest) => actions.map((action) => ({ action, allowed: action === UnitAction.Delete ? options.delete === true : options.manage !== false })),
+        deleteObjectPermission: vi.fn(async () => {
+            policies = [];
+            members = [];
+        }),
         batchAllowed: async (requests: IAllowedRequest[]) => requests.map(({ unitID, objectID, actions }) => ({ unitID, objectID, actions: actions.map((action) => ({ action, allowed: true })) })),
         update,
     };
@@ -63,45 +67,83 @@ function setup(options: { capable?: boolean; manage?: boolean; collaborators?: I
     if (options.currentUser) {
         injector.get(UserManagerService).setCurrentUser({ userID: options.currentUser, name: options.currentUser });
     }
+    injector.get(IPermissionService).addPermissionPoint({ id: `${UnitObject.Document}.${UnitAction.Edit}_doc`, type: UnitObject.Document, subType: UnitAction.Edit, value: true, status: PermissionStatus.DONE });
     const service = injector.get(ObjectPermissionService);
     injector.get(ICommandService).registerCommand({
         id: 'test.command.set-permission',
         type: CommandType.COMMAND,
-        handler: async (_, params: { policy: IObjectPermissionPolicy } | undefined) => {
+        handler: async (_, params: { policy: IObjectPermissionPolicy; remove?: boolean } | undefined) => {
             if (!params) {
                 return false;
             }
-            await service.save({ unitId: 'doc', objectId: 'entity//drawing/image', objectType: UnitObject.DocumentEntity }, params.policy);
+            const target = { unitId: 'doc', objectId: 'entity//drawing/image', objectType: UnitObject.DocumentEntity };
+            if (params.remove) {
+                await service.remove(target);
+            } else {
+                await service.save(target, params.policy);
+            }
             return true;
         },
     });
     const target = { unitId: 'doc', objectId: 'entity//drawing/image', objectType: UnitObject.DocumentEntity };
     const view = render(<RediProvider value={{ injector }}><ObjectPermissionButton target={target} name="Image" commandId="test.command.set-permission" /></RediProvider>);
-    return { update, listCollaborators, service, target, injector, view };
+    return { remove: authz.deleteObjectPermission, update, listCollaborators, service, target, injector, view };
 }
 
 describe('ObjectPermissionButton', () => {
     it('hides the action for a provider without object management', () => {
         setup({ capable: false });
-        expect(screen.queryByRole('button', { name: 'Permission settings' })).toBeNull();
+        expect(screen.queryByRole('button', { name: 'Permissions' })).toBeNull();
     });
 
     it('shows a read-only dialog when the user cannot manage the object', async () => {
         setup({ manage: false });
-        fireEvent.click(screen.getByRole('button', { name: 'Permission settings' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Permissions' }));
         await screen.findByText('You cannot manage permissions for this object.');
         expect(screen.getByRole('button', { name: 'Save' }).hasAttribute('disabled')).toBe(true);
     });
 
+    it('rechecks an open dialog when the current user changes', async () => {
+        const options = { manage: true, currentUser: 'manager' };
+        const { injector, update } = setup(options);
+        fireEvent.click(screen.getByRole('button', { name: 'Permissions' }));
+        fireEvent.click(await screen.findByText('Object owner only'));
+        expect(screen.getByRole('button', { name: 'Save' }).hasAttribute('disabled')).toBe(false);
+        options.manage = false;
+        act(() => injector.get(UserManagerService).setCurrentUser({ userID: 'editor', name: 'Editor' }));
+        await screen.findByText('You cannot manage permissions for this object.');
+        expect(screen.getByRole('button', { name: 'Save' }).hasAttribute('disabled')).toBe(true);
+        expect(screen.getByRole('radio', { name: 'Object owner only' }).hasAttribute('disabled')).toBe(true);
+        expect(update).not.toHaveBeenCalled();
+    });
+
+    it('disables the permission entry when file editing is revoked', () => {
+        const { injector } = setup();
+        act(() => injector.get(IPermissionService).updatePermissionPoint(`${UnitObject.Document}.${UnitAction.Edit}_doc`, false));
+        expect(screen.getByRole('button', { name: 'Permissions' }).hasAttribute('disabled')).toBe(true);
+        fireEvent.click(screen.getByRole('button', { name: 'Permissions' }));
+        expect(screen.queryByRole('dialog')).toBeNull();
+    });
+
+    it('removes an existing rule through the product command and restores inheritance', async () => {
+        const { service, target, remove } = setup({ delete: true });
+        await act(() => service.save(target, { edit: 'owner', strategies: [], collaborators: [] }));
+        fireEvent.click(screen.getByRole('button', { name: 'Permissions' }));
+        fireEvent.click(await screen.findByRole('button', { name: 'Remove protection' }));
+        await waitFor(() => expect(remove).toHaveBeenCalledTimes(1));
+        await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+        expect(service.hasPolicy(target)).toBe(false);
+    });
+
     it('saves a restriction through a Command and shows primary even when the owner can still edit', async () => {
         const { update, service, target } = setup();
-        fireEvent.click(screen.getByRole('button', { name: 'Permission settings' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Permissions' }));
         fireEvent.click(await screen.findByText('Object owner only'));
         fireEvent.click(screen.getByRole('button', { name: 'Save' }));
         await waitFor(() => expect(update).toHaveBeenCalledTimes(1));
         await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
         expect(service.hasPolicy(target)).toBe(true);
-        expect(screen.getByRole('button', { name: 'Permission settings' }).className).toContain('text-primary');
+        expect(screen.getByRole('button', { name: 'Permissions' }).className).toContain('text-primary');
     });
 
     it('searches people inline, preserves hidden selections, and persists with one Save', async () => {
@@ -110,7 +152,7 @@ describe('ObjectPermissionButton', () => {
             { id: 'bob', role: UnitRole.Editor, subject: { userID: 'bob', name: 'Bob', avatar: '' } },
             { id: 'reader', role: UnitRole.Reader, subject: { userID: 'reader', name: 'Reader', avatar: '' } },
         ] });
-        fireEvent.click(screen.getByRole('button', { name: 'Permission settings' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Permissions' }));
         fireEvent.click(await screen.findByText('Selected members'));
         expect(screen.getByRole('button', { name: 'Save' }).hasAttribute('disabled')).toBe(true);
         await screen.findByRole('checkbox', { name: /^Alice / });
@@ -130,20 +172,20 @@ describe('ObjectPermissionButton', () => {
         await waitFor(() => expect(update).toHaveBeenCalledTimes(1));
         expect(update.mock.calls[0][0].collaborators?.collaborators.map((user) => user.id)).toEqual(['alice', 'bob']);
         await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
-        fireEvent.click(screen.getByRole('button', { name: 'Permission settings' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Permissions' }));
         await waitFor(() => expect((screen.getByRole('checkbox', { name: /^Alice / }) as HTMLInputElement).checked).toBe(true));
         expect((screen.getByRole('checkbox', { name: /^Bob / }) as HTMLInputElement).checked).toBe(true);
     });
 
     it('discards unsaved choices on Cancel and supports deselecting a person inline', async () => {
         const { update } = setup();
-        fireEvent.click(screen.getByRole('button', { name: 'Permission settings' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Permissions' }));
         fireEvent.click(await screen.findByText('Selected members'));
         fireEvent.click(await screen.findByRole('checkbox', { name: /^Editor / }));
         fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
         await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
         expect(update).not.toHaveBeenCalled();
-        fireEvent.click(screen.getByRole('button', { name: 'Permission settings' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Permissions' }));
         fireEvent.click(await screen.findByText('Selected members'));
         const editor = await screen.findByRole('checkbox', { name: /^Editor / });
         expect((editor as HTMLInputElement).checked).toBe(false);
@@ -156,7 +198,7 @@ describe('ObjectPermissionButton', () => {
 
     it('loads candidates only for selected-member policies and supports retrying inline', async () => {
         const { listCollaborators, update } = setup();
-        fireEvent.click(screen.getByRole('button', { name: 'Permission settings' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Permissions' }));
         await screen.findByText('Selected members');
         expect(listCollaborators.mock.calls.map(([request]) => request.objectID)).toEqual(['entity//drawing/image']);
         listCollaborators.mockRejectedValueOnce(new Error('Offline'));
@@ -176,7 +218,7 @@ describe('ObjectPermissionButton', () => {
             { id: 'owner', role: UnitRole.Owner, subject: { userID: 'owner', name: 'Alice', avatar: '' } },
             { id: 'editor', role: UnitRole.Editor, subject: { userID: 'editor', name: 'Bob', avatar: '' } },
         ] });
-        fireEvent.click(screen.getByRole('button', { name: 'Permission settings' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Permissions' }));
         fireEvent.click(await screen.findByText('Selected members'));
         const owner = await screen.findByRole('checkbox', { name: /^Alice / });
         expect(owner.hasAttribute('disabled')).toBe(true);
@@ -197,7 +239,7 @@ describe('ObjectPermissionButton', () => {
                 { id: 'bob', role: UnitRole.Editor, subject: { userID: 'bob', name: 'Bob', avatar: '' } },
             ],
         }));
-        fireEvent.click(screen.getByRole('button', { name: 'Permission settings' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Permissions' }));
         await screen.findByText('File owner');
         expect(screen.getAllByRole('checkbox', { name: /^Alice / })).toHaveLength(1);
         expect((screen.getByRole('checkbox', { name: /^Alice / }) as HTMLInputElement).checked).toBe(true);
@@ -209,7 +251,7 @@ describe('ObjectPermissionButton', () => {
     it('keeps selected people when saving fails and supports retrying Save', async () => {
         const { update } = setup();
         update.mockRejectedValueOnce(new Error('Offline'));
-        fireEvent.click(screen.getByRole('button', { name: 'Permission settings' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Permissions' }));
         fireEvent.click(await screen.findByText('Selected members'));
         fireEvent.click(await screen.findByRole('checkbox', { name: /^Editor / }));
         fireEvent.click(screen.getByRole('button', { name: 'Save' }));
@@ -224,7 +266,7 @@ describe('ObjectPermissionButton', () => {
 
     it('requires reloading when remote policy changes while a draft is being edited', async () => {
         const { service } = setup();
-        fireEvent.click(screen.getByRole('button', { name: 'Permission settings' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Permissions' }));
         fireEvent.click(await screen.findByText('Object owner only'));
         await act(() => service.refreshUnit('doc'));
         await screen.findByText('Permissions changed. Reload before saving.');

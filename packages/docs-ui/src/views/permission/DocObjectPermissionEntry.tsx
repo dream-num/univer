@@ -64,6 +64,7 @@ export function DocObjectPermissionEntry({ unitId, id, objectType, segmentId = '
         <div className="univer-mt-5">
             <Separator className="univer-mb-3" />
             <Button
+                disabled={!permissions.canView(target)}
                 type="button"
                 variant="text"
                 className="univer-w-full univer-justify-start"

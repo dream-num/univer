@@ -24,15 +24,20 @@ afterEach(() => univers.splice(0).forEach((univer) => univer.dispose()));
 
 describe('SetDocumentPermissionCommand', () => {
     it('awaits the Authz write and propagates failure without changing effective permissions', async () => {
+        const list = vi.fn(async () => [] as Array<{ unitID: string; objectID: string; objectType: UnitObject }>);
+        const remove = vi.fn(async () => {
+            throw new Error('Authz removal rejected');
+        });
         const update = vi.fn(async () => {
             throw new Error('Authz rejected');
         });
         const univer = new Univer({ override: [[IAuthzIoService, { useValue: {
             supportsObjectPermissionManagement: () => true,
             listUnitPermissions: async () => [],
-            list: async () => [],
+            list,
+            deleteObjectPermission: remove,
             listCollaborators: async () => [],
-            allowed: async () => [{ action: UnitAction.ManageCollaborator, allowed: true }],
+            allowed: async ({ actions }: { actions: UnitAction[] }) => actions.map((action) => ({ action, allowed: true })),
             update,
         } }]] });
         univers.push(univer);
@@ -41,6 +46,10 @@ describe('SetDocumentPermissionCommand', () => {
         commands.registerCommand(SetDocumentPermissionCommand);
         await expect(commands.executeCommand(SetDocumentPermissionCommand.id, { unitId: 'unit', objectId: 'paragraph//a', action: UnitAction.Edit, value: false })).rejects.toThrow('Authz rejected');
         expect(update).toHaveBeenCalledWith(expect.objectContaining({ unitID: 'unit', objectID: 'paragraph//a', objectType: UnitObject.DocumentParagraph }));
+        list.mockResolvedValue([{ unitID: 'unit', objectID: 'paragraph//a', objectType: UnitObject.DocumentParagraph }]);
+        await expect(commands.executeCommand(SetDocumentPermissionCommand.id, { unitId: 'unit', objectId: 'paragraph//a', action: UnitAction.Edit, value: true, remove: true })).rejects.toThrow('Authz removal rejected');
+        expect(remove).toHaveBeenCalledWith({ unitID: 'unit', objectID: 'paragraph//a', objectType: UnitObject.DocumentParagraph });
+        expect(update).toHaveBeenCalledTimes(1);
         expect(injector.get(IPermissionService).getPermissionPoint(`${UnitObject.DocumentParagraph}.${UnitAction.Edit}_unit_paragraph//a`)).toBeUndefined();
     });
 

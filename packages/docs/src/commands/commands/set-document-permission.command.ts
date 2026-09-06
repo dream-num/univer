@@ -29,6 +29,8 @@ export interface ISetDocumentPermissionCommandParams {
     action: DocumentUnitPermissionAction;
     value: boolean;
     policy?: IObjectPermissionPolicy;
+    /** Remove the child permission rule and restore inherited rights; never deletes content. */
+    remove?: boolean;
 }
 
 export const SetDocumentPermissionCommand: ICommand<ISetDocumentPermissionCommandParams> = {
@@ -50,7 +52,9 @@ export const SetDocumentPermissionCommand: ICommand<ISetDocumentPermissionComman
         const point = createDocumentPermissionPoint(params.unitId, params.objectId, params.action);
         const target = { unitId: params.unitId, objectId: params.objectId, objectType: point.type };
         const service = accessor.get(ObjectPermissionService);
-        if (params.policy) {
+        if (params.remove) {
+            await service.remove(target);
+        } else if (params.policy) {
             await service.save(target, params.policy);
         } else {
             await service.setPoint(target, point, params.value);

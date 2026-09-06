@@ -20,6 +20,8 @@ import emojiLocale from './emoji-locale/ja-JP.generated';
 const locale: typeof enUS = {
     ui: {
         objectPermission: {
+            operationDenied: 'このコンテンツは保護されているため、操作できません。',
+            remove: '保護を削除',
             roleOwner: 'File owner',
             roleEditor: 'File editor',
             selectedCount: 'Selected: {0}',
@@ -56,7 +58,7 @@ const locale: typeof enUS = {
             search: 'Search objects',
             empty: 'No matching objects',
             more: 'Showing the first 100 objects. Search to narrow the list.',
-            title: 'Permission settings',
+            title: '権限',
             cancel: 'Cancel',
             save: 'Save',
             saving: 'Saving…',

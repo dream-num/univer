@@ -14,22 +14,54 @@
  * limitations under the License.
  */
 
-import { Disposable, ErrorService, Inject } from '@univerjs/core';
+import { Disposable, ErrorService, Inject, IPermissionService, LocaleService } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import { IMessageService } from '../../services/message/message.service';
 
+const PERMISSION_MESSAGE_ID = 'ui.permission-denied';
+const PERMISSION_MESSAGE_DURATION = 3000;
+
 export class ErrorController extends Disposable {
+    private _lastPermissionAttempt = Number.NEGATIVE_INFINITY;
+    private _lastPermissionTarget: string | undefined;
+
     constructor(
         @Inject(ErrorService) private readonly _errorService: ErrorService,
-        @IMessageService private readonly _messageService: IMessageService
+        @IMessageService private readonly _messageService: IMessageService,
+        @IPermissionService private readonly _permissionService: IPermissionService,
+        @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         super();
 
         this.disposeWithMe(this._errorService.error$.subscribe((error) => {
+            if (error.code === 'PERMISSION_DENIED') {
+                if (!this._permissionService.getShowComponents()) {
+                    return;
+                }
+                const now = Date.now();
+                const repeated = error.permissionTarget === this._lastPermissionTarget
+                    && now - this._lastPermissionAttempt < PERMISSION_MESSAGE_DURATION;
+                this._lastPermissionAttempt = now;
+                this._lastPermissionTarget = error.permissionTarget;
+                if (!repeated) {
+                    this._messageService.show({
+                        id: PERMISSION_MESSAGE_ID,
+                        content: this._localeService.t('ui.objectPermission.operationDenied'),
+                        type: MessageType.Warning,
+                        duration: PERMISSION_MESSAGE_DURATION,
+                    });
+                }
+                return;
+            }
             this._messageService.show({
                 content: error.errorKey,
                 type: MessageType.Error,
             });
         }));
+    }
+
+    override dispose(): void {
+        this._messageService.remove(PERMISSION_MESSAGE_ID);
+        super.dispose();
     }
 }

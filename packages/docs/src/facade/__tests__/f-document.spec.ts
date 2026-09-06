@@ -99,7 +99,8 @@ describe('FDocument', () => {
             parseJson: (bytes: string) => JSON.parse(bytes),
         });
 
-        expect(document.save().resources).toEqual([
+        const resources = document.save().resources ?? [];
+        expect(resources.filter((resource) => resource.name === 'DOC_TEST_RESOURCE_PLUGIN')).toEqual([
             {
                 name: 'DOC_TEST_RESOURCE_PLUGIN',
                 data: '{"value":1}',

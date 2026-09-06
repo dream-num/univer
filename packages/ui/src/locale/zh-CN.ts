@@ -20,6 +20,8 @@ import emojiLocale from './emoji-locale/zh-CN.generated';
 const locale: typeof enUS = {
     ui: {
         objectPermission: {
+            operationDenied: '该内容已受保护，无法执行此操作。',
+            remove: '删除保护',
             roleOwner: '文件所有者',
             roleEditor: '文件编辑者',
             selectedCount: '已选择 {0} 人',
@@ -56,7 +58,7 @@ const locale: typeof enUS = {
             search: '搜索对象',
             empty: '没有匹配的对象',
             more: '显示前 100 个对象，请搜索以缩小范围。',
-            title: '权限设置',
+            title: '权限',
             cancel: '取消',
             save: '保存',
             saving: '正在保存…',

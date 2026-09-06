@@ -34,6 +34,7 @@ import {
     CustomCommandExecutionError,
     DeleteDirection,
     Disposable,
+    ErrorService,
     ICommandService,
     Inject,
     Injector,
@@ -137,6 +138,7 @@ export class DocPermissionController extends Disposable {
         }
         if (unitAction) {
             if (!getDocumentPermissionValue(this._permissionService, unitId, unitId, unitAction)) {
+                this._injector.get(ErrorService).emitPermissionDenied(unitId);
                 throw new CustomCommandExecutionError(`Document ${UnitAction[unitAction]} permission denied.`);
             }
             return;
@@ -153,6 +155,7 @@ export class DocPermissionController extends Disposable {
             return;
         }
         if (!canEditDocumentTargets(this._permissionService, unitId, targetObjectIds)) {
+            this._injector.get(ErrorService).emitPermissionDenied(unitId, targetObjectIds);
             throw new CustomCommandExecutionError('Document edit permission denied.');
         }
     }

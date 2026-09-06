@@ -17,8 +17,8 @@
 const locale = {
     'docs-ui': {
         objectPermission: {
-            paragraphPermission: 'Paragraph permissions…',
-            title: 'Permission settings',
+            paragraphPermission: 'Permissions',
+            title: 'Permissions',
             paragraph: 'Paragraph',
             section: 'Section',
         },

@@ -30,7 +30,8 @@ import {
     UndoIcon,
 } from '@univerjs/icons';
 import { ShortcutPanelComponentName } from '../commands/operations/toggle-shortcut-panel.operation';
-import { ComponentManager, IconManager } from '../common';
+import { ComponentManager } from '../common/component-manager';
+import { IconManager } from '../common/icon-manager';
 import { COLOR_PICKER_COMPONENT } from '../views/color-picker/interface';
 import { COMMON_LABEL_COMPONENT, CommonLabel } from '../views/CommonLabel';
 import { FEATURE_SEARCH_COMPONENT, FeatureSearch } from '../views/components/feature-search/FeatureSearch';

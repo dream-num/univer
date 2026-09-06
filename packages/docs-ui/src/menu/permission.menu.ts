@@ -29,7 +29,6 @@ export function DocPermissionMenuItemFactory(accessor: IAccessor): IMenuButtonIt
 export function DocParagraphPermissionMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         ...objectPermissionMenuItemFactory(accessor, OpenDocParagraphPermissionOperation.id, UniverInstanceType.UNIVER_DOC, UnitObject.DocumentParagraph),
-        icon: undefined,
         title: 'docs-ui.objectPermission.paragraphPermission',
     };
 }

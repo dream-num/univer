@@ -16,7 +16,13 @@
 
 import type { IAccessor, IObjectPermissionPolicy, IObjectPermissionTarget } from '@univerjs/core';
 import type { LocaleKey } from '../../locale/types';
-import { ICommandService, IUniverInstanceService, LocaleService, ObjectPermissionService } from '@univerjs/core';
+import {
+    ICommandService,
+    IUniverInstanceService,
+    LocaleService,
+    ObjectPermissionService,
+    UserManagerService,
+} from '@univerjs/core';
 import { Button, Checkbox, Dialog, FormLayout, Radio, RadioGroup, StateIconButton } from '@univerjs/design';
 import { ProtectIcon } from '@univerjs/icons';
 import { UnitAction, UnitObject, UnitRole } from '@univerjs/protocol';
@@ -38,7 +44,7 @@ export const OBJECT_PERMISSION_DIALOG = 'ui.object-permission-dialog';
 
 /** Mount outside transient toolbars and context menus, retaining the original target until close. */
 export function openObjectPermissionDialog(accessor: IAccessor, props: IObjectPermissionButtonProps): boolean {
-    if (!accessor.get(ObjectPermissionService).supports(props.target) || (props.exists && !props.exists())) {
+    if (!accessor.get(ObjectPermissionService).canView(props.target) || (props.exists && !props.exists())) {
         return false;
     }
     const dialogs = accessor.get(IDialogService);
@@ -66,7 +72,9 @@ export function ObjectPermissionButton(props: IObjectPermissionButtonProps) {
     return (
         <>
             <StateIconButton
+                disabled={!permissions.canView(props.target)}
                 active={permissions.hasPolicy(props.target)}
+                emphasizeActive
                 title={localeService.t<LocaleKey>('ui.objectPermission.title')}
                 aria-label={localeService.t<LocaleKey>('ui.objectPermission.title')}
                 onClick={(event) => {
@@ -88,8 +96,13 @@ export function ObjectPermissionDialog({ target, name, commandId, actions = DEFA
     const permissions = useDependency(ObjectPermissionService);
     const commandService = useDependency(ICommandService);
     const instances = useDependency(IUniverInstanceService);
+    const users = useDependency(UserManagerService);
+    const currentUser = useObservable(users.currentUser$, users.getCurrentUser());
     const [policy, setPolicy] = useState<IObjectPermissionPolicy | null>(null);
+    useObservable(permissions.changed$, 0);
+    const canView = permissions.canView(target);
     const [canManage, setCanManage] = useState(false);
+    const [canDelete, setCanDelete] = useState(false);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState(false);
     const [attempt, setAttempt] = useState(0);
@@ -113,10 +126,12 @@ export function ObjectPermissionDialog({ target, name, commandId, actions = DEFA
         Promise.all([
             permissions.read({ unitId, objectId, objectType }),
             permissions.canManage({ unitId, objectId, objectType }),
-        ]).then(([loaded, allowed]) => {
+            permissions.canDelete({ unitId, objectId, objectType }),
+        ]).then(([loaded, allowed, deletable]) => {
             if (!cancelled) {
                 setPolicy(loaded);
                 setCanManage(allowed);
+                setCanDelete(deletable);
                 setDirty(false);
                 setConflict(false);
                 setError(false);
@@ -131,7 +146,7 @@ export function ObjectPermissionDialog({ target, name, commandId, actions = DEFA
         return () => {
             cancelled = true;
         };
-    }, [permissions, unitId, objectId, objectType, attempt]);
+    }, [permissions, unitId, objectId, objectType, attempt, currentUser.userID]);
 
     useEffect(() => {
         const subscription = permissions.unitChanges$.subscribe((changedUnitId) => {
@@ -149,8 +164,8 @@ export function ObjectPermissionDialog({ target, name, commandId, actions = DEFA
         return () => subscription.unsubscribe();
     }, [permissions, unitId, dirty, saving]);
 
-    const save = async () => {
-        if (!policy || loading || saving || !canManage || conflict) {
+    const save = async (remove = false) => {
+        if (!policy || !canView || loading || saving || !(remove ? canDelete : canManage) || conflict) {
             return;
         }
         setSaving(true);
@@ -164,7 +179,8 @@ export function ObjectPermissionDialog({ target, name, commandId, actions = DEFA
                 objectId,
                 action: UnitAction.Edit,
                 value: policy.edit === 'all',
-                policy,
+                policy: remove ? undefined : policy,
+                remove,
             });
             if (!result) {
                 throw new Error('Permission command rejected.');
@@ -198,8 +214,13 @@ export function ObjectPermissionDialog({ target, name, commandId, actions = DEFA
     };
     const footer = (
         <div className="univer-flex univer-justify-end univer-gap-2">
+            {canDelete && (
+                <Button disabled={!canView || loading || saving || conflict} onClick={() => save(true)}>
+                    {localeService.t<LocaleKey>('ui.objectPermission.remove')}
+                </Button>
+            )}
             <Button disabled={saving} onClick={onClose}>{localeService.t<LocaleKey>('ui.objectPermission.cancel')}</Button>
-            <Button variant="primary" disabled={!policy || !canManage || loading || saving || conflict || (policy.edit === 'members' && !policy.collaborators.length)} onClick={save}>
+            <Button variant="primary" disabled={!policy || !canManage || !canView || loading || saving || conflict || (policy.edit === 'members' && !policy.collaborators.length)} onClick={() => save()}>
                 {localeService.t<LocaleKey>(saving ? 'ui.objectPermission.saving' : 'ui.objectPermission.save')}
             </Button>
         </div>
@@ -216,10 +237,11 @@ export function ObjectPermissionDialog({ target, name, commandId, actions = DEFA
             )}
             {policy && (
                 <>
-                    {!canManage && <p>{localeService.t<LocaleKey>('ui.objectPermission.denied')}</p>}
+                    {(!canManage || !canView) && <p>{localeService.t<LocaleKey>('ui.objectPermission.denied')}</p>}
                     <FormLayout label={localeService.t<LocaleKey>('ui.objectPermission.edit')}>
                         <RadioGroup
                             value={policy.edit}
+                            disabled={!canManage || !canView || loading || saving || conflict}
                             onChange={(value) => {
                                 setPolicy({ ...policy, edit: value as IObjectPermissionPolicy['edit'] });
                                 setDirty(true);
@@ -227,7 +249,7 @@ export function ObjectPermissionDialog({ target, name, commandId, actions = DEFA
                             className="univer-flex univer-flex-col univer-gap-2"
                         >
                             {editOptions.map((value) => (
-                                <Radio key={value} value={value} disabled={!canManage || saving}>
+                                <Radio key={value} value={value}>
                                     {localeService.t<LocaleKey>(`ui.objectPermission.${value}`)}
                                 </Radio>
                             ))}
@@ -235,10 +257,10 @@ export function ObjectPermissionDialog({ target, name, commandId, actions = DEFA
                     </FormLayout>
                     {objectId !== unitId && policy.edit === 'members' && (
                         <ObjectPermissionMembers
-                            key={`${unitId}/${objectType}/${objectId}`}
+                            key={`${unitId}/${objectType}/${objectId}/${currentUser.userID}`}
                             unitId={unitId}
                             value={policy.collaborators}
-                            disabled={!canManage || loading || saving || conflict}
+                            disabled={!canManage || !canView || loading || saving || conflict}
                             onChange={(collaborators) => {
                                 setPolicy({ ...policy, collaborators });
                                 setDirty(true);
@@ -248,7 +270,7 @@ export function ObjectPermissionDialog({ target, name, commandId, actions = DEFA
                     {actions.filter((action) => action !== UnitAction.Edit && actionLabels[action]).map((action) => (
                         <Checkbox
                             key={action}
-                            disabled={!canManage || saving}
+                            disabled={!canManage || !canView || loading || saving || conflict}
                             checked={!policy.strategies.some((strategy) => strategy.action === action && strategy.role === UnitRole.Owner)}
                             onChange={(checked) => {
                                 setPolicy({ ...policy, strategies: [...policy.strategies.filter((strategy) => strategy.action !== action), { action, role: checked ? UnitRole.Editor : UnitRole.Owner }] });

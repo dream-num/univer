@@ -109,9 +109,12 @@ export class DocDrawingPopupMenuController extends RxDisposable {
         );
         this.disposeWithMe(this._drawingManagerService.remove$.subscribe((drawings) => {
             for (const drawing of drawings) {
-                const key = `${drawing.unitId}:${drawing.subUnitId}:${drawing.drawingId}`;
-                for (const [unitId, targetKey] of this._popupTargetKeys) {
-                    if (targetKey === key) {
+                for (const [unitId, target] of this._popupTargetsByUnit) {
+                    if (
+                        target.unitId === drawing.unitId &&
+                        target.subUnitId === drawing.subUnitId &&
+                        target.drawingId === drawing.drawingId
+                    ) {
                         this._clearPopups(unitId, true);
                         this._renderManagerService.getRenderUnitById(unitId)?.scene.getTransformerByCreate().clearSelectedObjects();
                     }

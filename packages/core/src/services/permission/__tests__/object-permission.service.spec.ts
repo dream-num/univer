@@ -14,216 +14,254 @@
  * limitations under the License.
  */
 
-import type { IListPermPointResponse, IUpdatePermPointRequest } from '@univerjs/protocol';
+import type {
+    IAllowedRequest,
+    ICreateRequest,
+    IListPermPointResponse,
+    IUpdatePermPointRequest,
+} from '@univerjs/protocol';
+import type { ISetObjectPermissionRuleMutationParams } from '../object-permission-rule.model';
 import { ObjectScope, UnitAction, UnitObject, UnitRole } from '@univerjs/protocol';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { Injector } from '../../../common/di';
+import { UniverInstanceType } from '../../../common/unit';
+import { Univer } from '../../../univer';
 import { IAuthzIoService } from '../../authz-io/type';
-import { DesktopLogService, ILogService } from '../../log/log.service';
+import { CommandType, ICommandService } from '../../command/command.service';
+import { IConfigService } from '../../config/config.service';
+import { IUniverInstanceService } from '../../instance/instance.service';
+import { IResourceManagerService } from '../../resource-manager/type';
+import { IUndoRedoService } from '../../undoredo/undoredo.service';
 import { UserManagerService } from '../../user-manager/user-manager.service';
-import { ObjectPermissionService } from '../object-permission.service';
-import { PermissionService } from '../permission.service';
+import { ObjectPermissionRuleModel } from '../object-permission-rule.model';
+import { OBJECT_PERMISSION_CONFIG_KEY, ObjectPermissionService } from '../object-permission.service';
 import { IPermissionService, PermissionStatus } from '../type';
 
-const injectors: Injector[] = [];
-afterEach(() => injectors.splice(0).forEach((injector) => injector.dispose()));
-
+const univers: Univer[] = [];
+afterEach(() => univers.splice(0).forEach((univer) => univer.dispose()));
+const types = [UnitObject.DocumentParagraph, UnitObject.SlideElement, UnitObject.BaseField, UnitObject.BoardElement];
+const roots = [UnitObject.Document, UnitObject.Slide, UnitObject.Base, UnitObject.Board];
+class TestRuleModel extends ObjectPermissionRuleModel {
+    constructor(@IResourceManagerService resources: IResourceManagerService) {
+        super(resources, 'UNIVER_TEST_PERMISSION_PLUGIN', UniverInstanceType.UNIVER_DOC, types);
+    }
+}
 function createAuthz() {
     let policies: IListPermPointResponse['objects'] = [];
     let editorAllowed = true;
+    let sequence = 0;
     const authz = {
-        supportsObjectPermissionManagement: () => true,
-        listUnitPermissions: vi.fn(async () => policies),
-        list: vi.fn(async () => policies),
+        create: vi.fn(async (request: ICreateRequest) => {
+            const payload = request.documentObject ?? request.slideObject ?? request.baseObject ?? request.boardObject!;
+            const objectID = `permission-${++sequence}`;
+            policies.push({ ...payload, objectID, objectType: request.objectType, creator: undefined, actions: [], shareOn: false, shareRole: UnitRole.Reader, shareScope: 0 });
+            return objectID;
+        }),
+        list: vi.fn(async ({ objectIDs }: { objectIDs: string[] }) => policies.filter((policy) => objectIDs.includes(policy.objectID))),
         listCollaborators: vi.fn(async () => []),
-        allowed: vi.fn(async ({ actions }: { actions: UnitAction[] }) => actions.map((action) => ({ action, allowed: true }))),
-        batchAllowed: vi.fn(async (requests: Array<{ unitID: string; objectID: string; actions: UnitAction[] }>) =>
-            requests.map((request) => ({ ...request, actions: request.actions.map((action) => ({ action, allowed: editorAllowed })) }))),
-        deleteObjectPermission: vi.fn(async () => { policies = []; }),
+        allowed: vi.fn(async ({ actions }: IAllowedRequest) => actions.map((action) => ({ action, allowed: true }))),
+        batchAllowed: vi.fn(async (requests: IAllowedRequest[]) => requests.map((request) => ({ ...request, actions: request.actions.map((action) => ({ action, allowed: editorAllowed })) }))),
         update: vi.fn(async (request: IUpdatePermPointRequest) => {
-            policies = [{ ...request, creator: undefined, actions: [], shareOn: false, shareRole: UnitRole.Reader, shareScope: 0 }];
+            policies = policies.filter((policy) => policy.objectID !== request.objectID);
+            policies.push({ ...request, creator: undefined, actions: [], shareOn: false, shareRole: UnitRole.Reader, shareScope: 0 });
         }),
     };
     return { authz, setAllowed: (allowed: boolean) => {
         editorAllowed = allowed;
-    }, clear: () => {
-        policies = [];
     } };
 }
-
-function createClient(authz: ReturnType<typeof createAuthz>['authz']) {
-    const injector = new Injector([
-        [ObjectPermissionService],
-        [UserManagerService],
-        [IPermissionService, { useClass: PermissionService }],
-        [IAuthzIoService, { useValue: authz }],
-        [ILogService, { useClass: DesktopLogService }],
-    ]);
-    injectors.push(injector);
-    return { service: injector.get(ObjectPermissionService), permissions: injector.get(IPermissionService), users: injector.get(UserManagerService) };
+function createClient(authz: ReturnType<typeof createAuthz>['authz'], enabled = true) {
+    const univer = new Univer({ override: [[IAuthzIoService, { useValue: authz }]] });
+    univers.push(univer);
+    const injector = univer.__getInjector();
+    injector.add([TestRuleModel]);
+    const model = injector.get(TestRuleModel);
+    const service = injector.get(ObjectPermissionService);
+    const commands = injector.get(ICommandService);
+    commands.registerCommand({ id: 'test.mutation.permission', type: CommandType.MUTATION, handler: (_, params: ISetObjectPermissionRuleMutationParams) => model.setRule(params.unitId, params.objectType, params.objectId, params.rule) });
+    roots.forEach((root) => service.registerRuleModel(root, model, 'test.mutation.permission'));
+    injector.get(IConfigService).setConfig(OBJECT_PERMISSION_CONFIG_KEY, enabled ? [...types, ...roots] : []);
+    univer.createUnit(UniverInstanceType.UNIVER_DOC, { id: 'unit', body: { dataStream: '\r\n' } });
+    injector.get(IUniverInstanceService).focusUnit('unit');
+    return { service, model, commands, resources: injector.get(IResourceManagerService), history: injector.get(IUndoRedoService), permissions: injector.get(IPermissionService), users: injector.get(UserManagerService) };
 }
-
 function target(objectType: UnitObject, objectId = 'element/page/a') {
     return { unitId: 'unit', objectId, objectType };
 }
 function point(objectType: UnitObject) {
-    return { id: `${objectType}.${UnitAction.Edit}_unit_element/page/a`, type: objectType, subType: UnitAction.Edit, value: true, status: PermissionStatus.INIT };
+    return { id: `${objectType}.${UnitAction.Edit}_unit_element/page/a`, unitId: 'unit', objectId: 'element/page/a', type: objectType, subType: UnitAction.Edit, value: true, status: PermissionStatus.INIT };
 }
+const restriction = { edit: 'owner' as const, collaborators: [], strategies: [] };
 
 describe('ObjectPermissionService', () => {
-    it.each([UnitObject.DocumentParagraph, UnitObject.SlideElement, UnitObject.BaseField, UnitObject.BoardElement])('preserves local overrides without remote opt-in (%s)', async (objectType) => {
+    it.each(types)('preserves local overrides without remote opt-in (%s)', async (objectType) => {
         const backend = createAuthz();
-        backend.authz.supportsObjectPermissionManagement = () => false;
-        const client = createClient(backend.authz);
-        const permissionPoint = point(objectType);
-
-        await client.service.setPoint(target(objectType), permissionPoint, false);
-        expect(client.permissions.getPermissionPoint(permissionPoint.id)?.value).toBe(false);
-        await client.service.setPoint(target(objectType), permissionPoint, true);
-        expect(client.permissions.getPermissionPoint(permissionPoint.id)?.value).toBe(true);
-        expect(client.service.supports(target(objectType))).toBe(false);
-        await expect(client.service.save(target(objectType), { edit: 'owner', collaborators: [], strategies: [] })).rejects.toThrow('not supported');
+        const client = createClient(backend.authz, false);
+        await client.service.setPoint(target(objectType), point(objectType), false);
+        expect(client.permissions.getPermissionPoint(point(objectType).id)?.value).toBe(false);
+        await client.service.setPoint(target(objectType), point(objectType), true);
+        expect(client.permissions.getPermissionPoint(point(objectType).id)?.value).toBe(true);
+        await expect(client.service.save(target(objectType), restriction)).rejects.toThrow('not supported');
+        expect(backend.authz.create).not.toHaveBeenCalled();
         expect(backend.authz.list).not.toHaveBeenCalled();
-        expect(backend.authz.allowed).not.toHaveBeenCalled();
         expect(backend.authz.update).not.toHaveBeenCalled();
-        expect(backend.authz.listUnitPermissions).not.toHaveBeenCalled();
-        expect(backend.authz.batchAllowed).not.toHaveBeenCalled();
     });
 
-    it.each([UnitObject.DocumentParagraph, UnitObject.SlideElement, UnitObject.BaseField, UnitObject.BoardElement])('persists stable objects and reloads effective rights in another client (%s)', async (objectType) => {
+    it.each(types)('persists server-issued IDs in resources and resolves effective rights after reload (%s)', async (objectType) => {
         const backend = createAuthz();
         const first = createClient(backend.authz);
-        const second = createClient(backend.authz);
         backend.setAllowed(false);
         await first.service.setPoint(target(objectType), point(objectType), false);
-        expect(backend.authz.update).toHaveBeenCalledWith(expect.objectContaining({ objectID: 'element/page/a', objectType, unitID: 'unit' }));
+        const rule = first.model.getRule('unit', objectType, 'element/page/a')!;
+        expect(rule.permissionId).toBe('permission-1');
+        expect(backend.authz.update).not.toHaveBeenCalled();
+        expect(first.permissions.getPermissionPoint(point(objectType).id)?.value).toBe(false);
+        const second = createClient(backend.authz);
+        second.resources.loadResources('unit', first.resources.getResources('unit', UniverInstanceType.UNIVER_DOC));
         await second.service.refreshUnit('unit');
+        expect(second.model.getRules('unit')).toEqual([rule]);
         expect(second.permissions.getPermissionPoint(point(objectType).id)?.value).toBe(false);
         expect(second.service.hasPolicy(target(objectType))).toBe(true);
-        backend.clear();
-        backend.setAllowed(true);
-        await second.service.refreshUnit('unit');
-        expect(second.permissions.getPermissionPoint(point(objectType).id)?.value).toBe(true);
-        expect(second.service.hasPolicy(target(objectType))).toBe(false);
+        expect(backend.authz.list.mock.calls.every(([request]) => request.objectIDs.length > 0 && !request.objectIDs.includes('element/page/a'))).toBe(true);
+        await second.service.save(target(objectType), restriction);
+        expect(backend.authz.update).toHaveBeenCalledWith(expect.objectContaining({ objectID: rule.permissionId, objectType, unitID: 'unit' }));
+        expect(backend.authz.create).toHaveBeenCalledTimes(1);
     });
 
-    it('preserves file membership when changing file operation permissions', async () => {
+    it('removes only the binding and reuses the Authz rule on undo and collaboration replay', async () => {
         const backend = createAuthz();
+        backend.setAllowed(false);
         const client = createClient(backend.authz);
-        await client.service.save(target(UnitObject.Board, 'unit'), { edit: 'owner', strategies: [], collaborators: [] });
-        expect(backend.authz.update).toHaveBeenCalledWith(expect.objectContaining({ objectID: 'unit', collaborators: undefined }));
-        await expect(client.service.save(target(UnitObject.Board, 'unit'), { edit: 'members', strategies: [], collaborators: [] })).rejects.toThrow('sharing service');
-        expect(backend.authz.update).toHaveBeenCalledTimes(1);
-    });
-
-    it('keeps the owner effective permission separate from the saved restriction', async () => {
-        const backend = createAuthz();
-        const client = createClient(backend.authz);
-        await client.service.setPoint(target(UnitObject.BoardElement), point(UnitObject.BoardElement), false);
-        expect(client.permissions.getPermissionPoint(point(UnitObject.BoardElement).id)?.value).toBe(true);
-        expect(client.service.hasPolicy(target(UnitObject.BoardElement))).toBe(true);
-    });
-
-    it('does not change the cache or create a policy when the server rejects a write', async () => {
-        const backend = createAuthz();
-        const client = createClient(backend.authz);
-        client.permissions.addPermissionPoint(point(UnitObject.BoardElement));
-        backend.authz.update.mockRejectedValueOnce(new Error('Forbidden'));
-        await expect(client.service.setPoint(target(UnitObject.BoardElement), point(UnitObject.BoardElement), false)).rejects.toThrow('Forbidden');
-        expect(client.permissions.getPermissionPoint(point(UnitObject.BoardElement).id)?.value).toBe(true);
-        expect(client.service.hasPolicy(target(UnitObject.BoardElement))).toBe(false);
-    });
-
-    it('checks management permission before writing', async () => {
-        const backend = createAuthz();
-        backend.authz.allowed.mockResolvedValueOnce([{ action: UnitAction.ManageCollaborator, allowed: false }]);
-        const client = createClient(backend.authz);
-        await expect(client.service.setPoint(target(UnitObject.BoardElement), point(UnitObject.BoardElement), false)).rejects.toThrow('denied');
+        const object = target(UnitObject.BoardElement);
+        await client.service.save(object, restriction);
+        await client.service.remove(object);
+        expect(client.model.getRules('unit')).toEqual([]);
+        expect(client.permissions.getPermissionPoint(point(object.objectType).id)?.value).toBe(true);
+        const undo = client.history.pitchTopUndoElement()!;
+        expect(undo.undoMutations).toHaveLength(1);
+        await client.commands.executeCommand(undo.undoMutations[0].id, undo.undoMutations[0].params);
+        await client.service.refreshUnit('unit');
+        expect(client.service.hasPolicy(object)).toBe(true);
+        expect(client.permissions.getPermissionPoint(point(object.objectType).id)?.value).toBe(false);
+        const peer = createClient(backend.authz);
+        await peer.commands.executeCommand(undo.undoMutations[0].id, undo.undoMutations[0].params);
+        await peer.service.refreshUnit('unit');
+        expect(peer.model.getRules('unit')).toEqual(client.model.getRules('unit'));
+        await client.commands.executeCommand(undo.redoMutations[0].id, undo.redoMutations[0].params);
+        expect(client.model.getRules('unit')).toEqual([]);
+        expect(backend.authz.create).toHaveBeenCalledTimes(1);
         expect(backend.authz.update).not.toHaveBeenCalled();
     });
 
-    it('allows the server-declared rule creator like Sheet, while leaving write authorization to Authz', async () => {
+    it('does not publish a binding or undo entry when creation fails', async () => {
         const backend = createAuthz();
         const client = createClient(backend.authz);
-        client.users.setCurrentUser({ userID: 'creator', name: 'Creator' });
-        await client.service.setPoint(target(UnitObject.BoardElement), point(UnitObject.BoardElement), false);
-        const policy = (await backend.authz.list())[0];
-        backend.authz.list.mockResolvedValue([{ ...policy, creator: { userID: 'creator', name: 'Creator', avatar: '' } }]);
-        backend.authz.allowed.mockResolvedValue([{ action: UnitAction.ManageCollaborator, allowed: false }]);
-        expect(await client.service.canManage(target(UnitObject.BoardElement))).toBe(true);
+        backend.authz.create.mockRejectedValueOnce(new Error('Forbidden'));
+        await expect(client.service.save(target(UnitObject.BoardElement), restriction)).rejects.toThrow('Forbidden');
+        expect(client.model.getRules('unit')).toEqual([]);
+        expect(client.history.pitchTopUndoElement()).toBeNull();
+    });
+
+    it('keeps owner effective access distinct from the saved policy and rejects failed updates', async () => {
+        const backend = createAuthz();
+        const client = createClient(backend.authz);
+        const object = target(UnitObject.BoardElement);
+        await client.service.save(object, restriction);
+        expect(client.permissions.getPermissionPoint(point(object.objectType).id)?.value).toBe(true);
+        expect(client.service.hasPolicy(object)).toBe(true);
         backend.authz.update.mockRejectedValueOnce(new Error('Forbidden'));
-        await expect(client.service.save(target(UnitObject.BoardElement), { edit: 'all', strategies: [], collaborators: [] })).rejects.toThrow('Forbidden');
-        client.users.setCurrentUser({ userID: 'editor', name: 'Editor' });
-        expect(await client.service.canManage(target(UnitObject.BoardElement))).toBe(false);
-        await expect(client.service.save(target(UnitObject.BoardElement), { edit: 'all', strategies: [], collaborators: [] })).rejects.toThrow('denied');
-        expect(backend.authz.update).toHaveBeenCalledTimes(2);
+        await expect(client.service.save(object, { ...restriction, edit: 'all' })).rejects.toThrow('Forbidden');
+        expect(client.service.hasPolicy(object)).toBe(true);
     });
 
-    it('does not use a creator from another object or trust a previous management check', async () => {
-        const backend = createAuthz();
-        const client = createClient(backend.authz);
-        client.users.setCurrentUser({ userID: 'creator', name: 'Creator' });
-        await client.service.setPoint(target(UnitObject.BoardElement), point(UnitObject.BoardElement), false);
-        const policy = (await backend.authz.list())[0];
-        backend.authz.list.mockResolvedValue([{ ...policy, objectID: 'another-object', creator: { userID: 'creator', name: 'Creator', avatar: '' } }]);
-        expect(await client.service.canManage(target(UnitObject.BoardElement))).toBe(true);
-        backend.authz.allowed.mockResolvedValue([{ action: UnitAction.ManageCollaborator, allowed: false }]);
-        await expect(client.service.save(target(UnitObject.BoardElement), { edit: 'all', strategies: [], collaborators: [] })).rejects.toThrow('denied');
-        expect(backend.authz.update).toHaveBeenCalledTimes(1);
-    });
-
-    it.each([
-        [UnitObject.DocumentParagraph, UnitObject.Document],
-        [UnitObject.SlidePage, UnitObject.Slide],
-        [UnitObject.BaseRecord, UnitObject.Base],
-        [UnitObject.BoardElement, UnitObject.Board],
-    ])('separates creation on the root Unit from management on the existing rule (%s)', async (objectType, rootType) => {
+    it.each(types)('checks Create on the file, Manage and Delete on the persisted rule (%s)', async (objectType) => {
         const backend = createAuthz();
         const client = createClient(backend.authz);
         backend.authz.allowed.mockImplementation(async ({ actions }) => actions.map((action) => ({ action, allowed: action === UnitAction.CreatePermissionObject })));
-        await client.service.save(target(objectType), { edit: 'owner', strategies: [], collaborators: [] });
-        expect(backend.authz.allowed).toHaveBeenCalledWith({ unitID: 'unit', objectID: 'unit', objectType: rootType, actions: [UnitAction.CreatePermissionObject] });
-        await expect(client.service.save(target(objectType), { edit: 'all', strategies: [], collaborators: [] })).rejects.toThrow('denied');
-        expect(backend.authz.update).toHaveBeenCalledTimes(1);
-        client.permissions.addPermissionPoint({ ...point(rootType), id: `${rootType}.${UnitAction.Edit}_unit`, value: false });
-        expect(client.service.canView(target(objectType))).toBe(false);
-        client.permissions.updatePermissionPoint(`${rootType}.${UnitAction.Edit}_unit`, true);
-        expect(client.service.canView(target(objectType))).toBe(true);
+        await client.service.save(target(objectType), restriction);
+        expect(backend.authz.allowed).toHaveBeenCalledWith({ unitID: 'unit', objectID: 'unit', objectType: roots[types.indexOf(objectType)], actions: [UnitAction.CreatePermissionObject] });
+        await expect(client.service.save(target(objectType), restriction)).rejects.toThrow('denied');
+        await expect(client.service.remove(target(objectType))).rejects.toThrow('denied');
+        expect(backend.authz.allowed).toHaveBeenLastCalledWith({ unitID: 'unit', objectID: 'permission-1', objectType, actions: [UnitAction.Delete] });
+        expect(client.model.getRules('unit')).toHaveLength(1);
     });
 
-    it('requires Delete separately, preserves policies after failure, and reloads inherited rights after removal', async () => {
+    it('allows the server-declared creator while keeping Authz write enforcement', async () => {
         const backend = createAuthz();
         const client = createClient(backend.authz);
-        backend.setAllowed(false);
-        await client.service.setPoint(target(UnitObject.BoardElement), point(UnitObject.BoardElement), false);
-        backend.authz.allowed.mockImplementation(async ({ actions }) => actions.map((action) => ({ action, allowed: action === UnitAction.ManageCollaborator })));
-        await expect(client.service.remove(target(UnitObject.BoardElement))).rejects.toThrow('denied');
-        expect(backend.authz.deleteObjectPermission).not.toHaveBeenCalled();
-        backend.authz.allowed.mockImplementation(async ({ actions }) => actions.map((action) => ({ action, allowed: action === UnitAction.Delete })));
-        backend.authz.deleteObjectPermission.mockRejectedValueOnce(new Error('Forbidden'));
-        await expect(client.service.remove(target(UnitObject.BoardElement))).rejects.toThrow('Forbidden');
-        expect(client.service.hasPolicy(target(UnitObject.BoardElement))).toBe(true);
-        backend.setAllowed(true);
-        await client.service.remove(target(UnitObject.BoardElement));
-        expect(client.service.hasPolicy(target(UnitObject.BoardElement))).toBe(false);
-        expect(client.permissions.getPermissionPoint(point(UnitObject.BoardElement).id)?.value).toBe(true);
-        await expect(client.service.remove(target(UnitObject.Board, 'unit'))).rejects.toThrow('denied');
-        expect(backend.authz.deleteObjectPermission).toHaveBeenCalledTimes(2);
+        const object = target(UnitObject.BoardElement);
+        await client.service.save(object, restriction);
+        const [policy] = await backend.authz.list({ objectIDs: ['permission-1'] });
+        backend.authz.list.mockResolvedValue([{ ...policy, creator: { userID: 'creator', name: 'Creator', avatar: '' } }]);
+        backend.authz.allowed.mockResolvedValue([{ action: UnitAction.ManageCollaborator, allowed: false }]);
+        client.users.setCurrentUser({ userID: 'creator', name: 'Creator' });
+        expect(await client.service.canManage(object)).toBe(true);
+        backend.authz.update.mockRejectedValueOnce(new Error('Forbidden'));
+        await expect(client.service.save(object, restriction)).rejects.toThrow('Forbidden');
+        client.users.setCurrentUser({ userID: 'editor', name: 'Editor' });
+        expect(await client.service.canManage(object)).toBe(false);
     });
 
     it('preserves unrelated strategies and read scope when updating one point', async () => {
         const backend = createAuthz();
-        await backend.authz.update({ unitID: 'unit', objectID: 'element/page/a', objectType: UnitObject.BoardElement, name: 'Object', share: undefined, strategies: [{ action: UnitAction.Copy, role: UnitRole.Owner }], scope: { edit: ObjectScope.AllCollaborator, read: ObjectScope.SomeCollaborator }, collaborators: undefined });
         const client = createClient(backend.authz);
-        await client.service.setPoint(target(UnitObject.BoardElement), point(UnitObject.BoardElement), false);
+        const object = target(UnitObject.BoardElement);
+        await client.service.save(object, restriction);
+        await backend.authz.update({ unitID: 'unit', objectID: 'permission-1', objectType: object.objectType, name: 'Object', share: undefined, strategies: [{ action: UnitAction.Copy, role: UnitRole.Owner }], scope: { edit: ObjectScope.AllCollaborator, read: ObjectScope.SomeCollaborator }, collaborators: undefined });
+        await client.service.setPoint(object, point(object.objectType), false);
         expect(backend.authz.update).toHaveBeenLastCalledWith(expect.objectContaining({ name: 'Object', strategies: expect.arrayContaining([{ action: UnitAction.Copy, role: UnitRole.Owner }]), scope: { edit: ObjectScope.OneSelf, read: ObjectScope.SomeCollaborator } }));
+    });
+
+    it('does not overwrite a concurrent binding while Authz creation is pending', async () => {
+        const backend = createAuthz();
+        const client = createClient(backend.authz);
+        const object = target(UnitObject.BoardElement);
+        let finish!: (id: string) => void;
+        backend.authz.create.mockImplementationOnce(() => new Promise((resolve) => {
+            finish = resolve;
+        }));
+        const save = client.service.save(object, restriction);
+        const rejected = expect(save).rejects.toThrow('binding changed');
+        await vi.waitFor(() => expect(backend.authz.create).toHaveBeenCalledTimes(1));
+        const rule = { objectId: object.objectId, objectType: object.objectType, permissionId: 'remote-rule' };
+        await client.commands.executeCommand('test.mutation.permission', { ...object, rule });
+        expect(client.permissions.getPermissionPoint(point(object.objectType).id)?.value).toBe(false);
+        finish('local-rule');
+        await rejected;
+        expect(client.model.getRules('unit')).toEqual([rule]);
+        expect(client.history.pitchTopUndoElement()).toBeNull();
+        expect(client.commands.syncExecuteCommand('test.mutation.permission', { ...object })).toBe(false);
+        expect(client.model.getRules('unit')).toEqual([rule]);
+    });
+
+    it('does not reinterpret an unresolved persisted rule as permission to create a replacement', async () => {
+        const backend = createAuthz();
+        const client = createClient(backend.authz);
+        const object = target(UnitObject.BoardElement);
+        await client.service.save(object, restriction);
+        backend.authz.list.mockResolvedValue([]);
+        expect(await client.service.canManage(object)).toBe(false);
+        await expect(client.service.save(object, restriction)).rejects.toThrow('denied');
+        expect(backend.authz.create).toHaveBeenCalledTimes(1);
+        expect(client.model.getRules('unit')[0].permissionId).toBe('permission-1');
+    });
+
+    it('preserves file membership when changing root operation permissions', async () => {
+        const backend = createAuthz();
+        const client = createClient(backend.authz);
+        const object = target(UnitObject.Board, 'unit');
+        await client.service.save(object, restriction);
+        expect(backend.authz.update).toHaveBeenCalledWith(expect.objectContaining({ objectID: 'unit', collaborators: undefined }));
+        await expect(client.service.save(object, { ...restriction, edit: 'members' })).rejects.toThrow('sharing service');
+        expect(client.model.getRules('unit')).toEqual([]);
+        expect(backend.authz.create).not.toHaveBeenCalled();
     });
 
     it('discards a refresh completed after the Unit was disposed', async () => {
         const backend = createAuthz();
         const client = createClient(backend.authz);
+        await client.service.save(target(UnitObject.BoardElement), restriction);
         let finish!: (policies: IListPermPointResponse['objects']) => void;
-        backend.authz.listUnitPermissions.mockImplementationOnce(() => new Promise((resolve) => {
+        backend.authz.list.mockImplementationOnce(() => new Promise((resolve) => {
             finish = resolve;
         }));
         const refresh = client.service.refreshUnit('unit');

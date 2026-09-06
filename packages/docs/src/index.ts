@@ -42,6 +42,7 @@ export { DeleteDocumentSectionBreakCommand, InsertDocumentColumnBreakCommand, In
 export type { IDeleteDocumentSectionBreakCommandParams, IDocumentSectionConfig, IDocumentSectionUpdate, IInsertDocumentColumnBreakCommandParams, IInsertDocumentSectionBreakCommandParams, IUpdateDocumentSectionCommandParams } from './commands/commands/update-document-section.command';
 export { DocHistoryAction, RichTextEditingMutation, transformDocumentTextRanges } from './commands/mutations/core-editing.mutation';
 export type { IRichTextEditingMutationParams } from './commands/mutations/core-editing.mutation';
+export { SetDocumentPermissionRuleMutation } from './commands/mutations/set-document-permission-rule.mutation';
 export { SetTextSelectionsOperation } from './commands/operations/text-selection.operation';
 export type { ISetTextSelectionsOperationParams } from './commands/operations/text-selection.operation';
 export type { IUniverDocsConfig } from './config/config';

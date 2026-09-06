@@ -17,15 +17,16 @@
 import type { IDialogPartMethodOptions, IObjectPermissionButtonProps } from '@univerjs/ui';
 import type { ReactNode } from 'react';
 import {
-    IAuthzIoService,
+    IConfigService,
     IPermissionService,
     IUniverInstanceService,
     LocaleType,
+    OBJECT_PERMISSION_CONFIG_KEY,
     PermissionStatus,
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-import { SetDocumentPermissionCommand } from '@univerjs/docs';
+import { SetDocumentPermissionCommand, UniverDocsPlugin } from '@univerjs/docs';
 import { UnitAction, UnitObject } from '@univerjs/protocol';
 import { DesktopDialogService, IDialogService, IUIPartsService, RediProvider, UIPartsService } from '@univerjs/ui';
 import uiEnUS from '@univerjs/ui/locale/en-US';
@@ -61,12 +62,10 @@ function setup(supportedTypes: UnitObject[] = []) {
     const univer = new Univer({
         locale: LocaleType.EN_US,
         locales: { [LocaleType.EN_US]: { ...uiEnUS, ...enUS } },
-        override: [[IAuthzIoService, { useValue: {
-            supportsObjectPermissionManagement: (type: UnitObject) => supportedTypes.includes(type),
-            listUnitPermissions: async () => [],
-        } }]],
     });
     univers.push(univer);
+    univer.__getInjector().get(IConfigService).setConfig(OBJECT_PERMISSION_CONFIG_KEY, supportedTypes);
+    univer.registerPlugin(UniverDocsPlugin);
     univer.createUnit(UniverInstanceType.UNIVER_DOC, {
         id: 'doc',
         body: {

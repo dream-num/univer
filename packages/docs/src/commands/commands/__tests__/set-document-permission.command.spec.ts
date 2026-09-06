@@ -14,9 +14,20 @@
  * limitations under the License.
  */
 
-import { IAuthzIoService, ICommandService, IPermissionService, Univer } from '@univerjs/core';
+import {
+    IAuthzIoService,
+    ICommandService,
+    IConfigService,
+    IPermissionService,
+    OBJECT_PERMISSION_CONFIG_KEY,
+    ObjectPermissionService,
+    Univer,
+} from '@univerjs/core';
 import { UnitAction, UnitObject } from '@univerjs/protocol';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { DocumentPermissionRuleModel } from '../../../services/permission/document-permission-rule.model';
+
+import { SetDocumentPermissionRuleMutation } from '../../mutations/set-document-permission-rule.mutation';
 import { SetDocumentPermissionCommand } from '../set-document-permission.command';
 
 const univers: Univer[] = [];
@@ -25,31 +36,26 @@ afterEach(() => univers.splice(0).forEach((univer) => univer.dispose()));
 describe('SetDocumentPermissionCommand', () => {
     it('awaits the Authz write and propagates failure without changing effective permissions', async () => {
         const list = vi.fn(async () => [] as Array<{ unitID: string; objectID: string; objectType: UnitObject }>);
-        const remove = vi.fn(async () => {
-            throw new Error('Authz removal rejected');
-        });
-        const update = vi.fn(async () => {
+        const create = vi.fn(async () => {
             throw new Error('Authz rejected');
         });
         const univer = new Univer({ override: [[IAuthzIoService, { useValue: {
-            supportsObjectPermissionManagement: () => true,
-            listUnitPermissions: async () => [],
             list,
-            deleteObjectPermission: remove,
             listCollaborators: async () => [],
             allowed: async ({ actions }: { actions: UnitAction[] }) => actions.map((action) => ({ action, allowed: true })),
-            update,
+            create,
         } }]] });
         univers.push(univer);
         const injector = univer.__getInjector();
         const commands = injector.get(ICommandService);
+        injector.add([DocumentPermissionRuleModel]);
+        injector.get(IConfigService).setConfig(OBJECT_PERMISSION_CONFIG_KEY, [UnitObject.Document, UnitObject.DocumentParagraph]);
+        injector.get(ObjectPermissionService).registerRuleModel(UnitObject.Document, injector.get(DocumentPermissionRuleModel), SetDocumentPermissionRuleMutation.id);
+        commands.registerCommand(SetDocumentPermissionRuleMutation);
         commands.registerCommand(SetDocumentPermissionCommand);
         await expect(commands.executeCommand(SetDocumentPermissionCommand.id, { unitId: 'unit', objectId: 'paragraph//a', action: UnitAction.Edit, value: false })).rejects.toThrow('Authz rejected');
-        expect(update).toHaveBeenCalledWith(expect.objectContaining({ unitID: 'unit', objectID: 'paragraph//a', objectType: UnitObject.DocumentParagraph }));
-        list.mockResolvedValue([{ unitID: 'unit', objectID: 'paragraph//a', objectType: UnitObject.DocumentParagraph }]);
-        await expect(commands.executeCommand(SetDocumentPermissionCommand.id, { unitId: 'unit', objectId: 'paragraph//a', action: UnitAction.Edit, value: true, remove: true })).rejects.toThrow('Authz removal rejected');
-        expect(remove).toHaveBeenCalledWith({ unitID: 'unit', objectID: 'paragraph//a', objectType: UnitObject.DocumentParagraph });
-        expect(update).toHaveBeenCalledTimes(1);
+        expect(create).toHaveBeenCalledWith(expect.objectContaining({ objectType: UnitObject.DocumentParagraph, documentObject: expect.objectContaining({ unitID: 'unit' }) }));
+        expect(injector.get(DocumentPermissionRuleModel).getRules('unit')).toEqual([]);
         expect(injector.get(IPermissionService).getPermissionPoint(`${UnitObject.DocumentParagraph}.${UnitAction.Edit}_unit_paragraph//a`)).toBeUndefined();
     });
 

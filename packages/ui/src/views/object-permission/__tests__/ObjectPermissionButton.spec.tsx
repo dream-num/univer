@@ -18,16 +18,20 @@ import type { IObjectPermissionPolicy } from '@univerjs/core';
 import type {
     IAllowedRequest,
     ICollaborator,
+    ICreateRequest,
     IListPermPointResponse,
-    IUpdatePermPointRequest,
 } from '@univerjs/protocol';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import {
     CommandType,
     IAuthzIoService,
     ICommandService,
+    IConfigService,
     IPermissionService,
+    IResourceManagerService,
     LocaleType,
+    OBJECT_PERMISSION_CONFIG_KEY,
+    ObjectPermissionRuleModel,
     ObjectPermissionService,
     PermissionStatus,
     Univer,
@@ -51,6 +55,12 @@ import {
     openObjectPermissionDialog,
 } from '../ObjectPermissionButton';
 
+class TestRuleModel extends ObjectPermissionRuleModel {
+    constructor(@IResourceManagerService resources: IResourceManagerService) {
+        super(resources, 'DOC_TEST_PERMISSION_PLUGIN', UniverInstanceType.UNIVER_DOC, [UnitObject.DocumentEntity, UnitObject.DocumentSection]);
+    }
+}
+
 const univers: Univer[] = [];
 afterEach(() => {
     cleanup();
@@ -60,36 +70,37 @@ afterEach(() => {
 function setup(options: { capable?: boolean; manage?: boolean; delete?: boolean; collaborators?: ICollaborator[]; inherit?: boolean; currentUser?: string } = {}) {
     let policies: IListPermPointResponse['objects'] = [];
     let members: ICollaborator[] = [];
-    const update = vi.fn(async (request: IUpdatePermPointRequest) => {
-        members = request.collaborators?.collaborators ?? [];
-        policies = [{ ...request, shareOn: false, shareRole: UnitRole.Reader, shareScope: 0, creator: undefined, actions: [] }];
+    const create = vi.fn(async (request: ICreateRequest) => {
+        const payload = request.documentObject!;
+        members = payload.collaborators;
+        policies = [{ ...payload, objectID: 'permission-1', objectType: request.objectType, shareOn: false, shareRole: UnitRole.Reader, shareScope: 0, creator: undefined, actions: [] }];
+        return 'permission-1';
     });
     const listCollaborators = vi.fn(async ({ objectID }: { objectID: string }) => objectID === 'doc'
         ? options.collaborators ?? [{ id: 'editor', role: UnitRole.Editor, subject: { userID: 'editor', name: 'Editor', avatar: '' } }]
         : members);
     const authz = {
         getCfgEnableObjInherit: () => options.inherit ?? false,
-        supportsObjectPermissionManagement: () => options.capable !== false,
-        listUnitPermissions: async () => policies,
         list: async () => policies,
         listCollaborators,
         allowed: async ({ actions }: IAllowedRequest) => actions.map((action) => ({ action, allowed: action === UnitAction.Delete ? options.delete === true : options.manage !== false })),
-        deleteObjectPermission: vi.fn(async () => {
-            policies = [];
-            members = [];
-        }),
         batchAllowed: async (requests: IAllowedRequest[]) => requests.map(({ unitID, objectID, actions }) => ({ unitID, objectID, actions: actions.map((action) => ({ action, allowed: true })) })),
-        update,
+        create,
     };
     const univer = new Univer({ locale: LocaleType.EN_US, locales: { [LocaleType.EN_US]: enUS }, override: [[IAuthzIoService, { useValue: authz }]] });
     univers.push(univer);
     univer.createUnit(UniverInstanceType.UNIVER_DOC, { id: 'doc', title: 'Document', body: { dataStream: '\r\n' } });
     const injector = univer.__getInjector();
+    injector.add([TestRuleModel]);
+    const rules = injector.get(TestRuleModel);
+    injector.get(IConfigService).setConfig(OBJECT_PERMISSION_CONFIG_KEY, options.capable === false ? [] : [UnitObject.Document, UnitObject.DocumentEntity]);
+    injector.get(ObjectPermissionService).registerRuleModel(UnitObject.Document, rules, 'test.mutation.permission');
     if (options.currentUser) {
         injector.get(UserManagerService).setCurrentUser({ userID: options.currentUser, name: options.currentUser });
     }
     injector.get(IPermissionService).addPermissionPoint({ id: `${UnitObject.Document}.${UnitAction.Edit}_doc`, type: UnitObject.Document, subType: UnitAction.Edit, value: true, status: PermissionStatus.DONE });
     const service = injector.get(ObjectPermissionService);
+    injector.get(ICommandService).registerCommand({ id: 'test.mutation.permission', type: CommandType.MUTATION, handler: (_, params: { unitId: string; objectId: string; objectType: UnitObject; rule: { objectId: string; objectType: UnitObject; permissionId: string } | null }) => rules.setRule(params.unitId, params.objectType, params.objectId, params.rule) });
     injector.get(ICommandService).registerCommand({
         id: 'test.command.set-permission',
         type: CommandType.COMMAND,
@@ -108,7 +119,7 @@ function setup(options: { capable?: boolean; manage?: boolean; delete?: boolean;
     });
     const target = { unitId: 'doc', objectId: 'entity//drawing/image', objectType: UnitObject.DocumentEntity };
     const view = render(<RediProvider value={{ injector }}><ObjectPermissionButton target={target} name="Image" commandId="test.command.set-permission" /></RediProvider>);
-    return { remove: authz.deleteObjectPermission, update, listCollaborators, service, target, injector, view };
+    return { rules, create, listCollaborators, service, target, injector, view };
 }
 
 describe('ObjectPermissionButton', () => {
@@ -126,7 +137,7 @@ describe('ObjectPermissionButton', () => {
 
     it('rechecks an open dialog when the current user changes', async () => {
         const options = { manage: true, currentUser: 'manager' };
-        const { injector, update } = setup(options);
+        const { injector, create } = setup(options);
         fireEvent.click(screen.getByRole('button', { name: 'Permissions' }));
         fireEvent.click(await screen.findByText('Object owner only'));
         expect(screen.getByRole('button', { name: 'Save' }).hasAttribute('disabled')).toBe(false);
@@ -135,7 +146,7 @@ describe('ObjectPermissionButton', () => {
         await screen.findByText('You cannot manage permissions for this object.');
         expect(screen.getByRole('button', { name: 'Save' }).hasAttribute('disabled')).toBe(true);
         expect(screen.getByRole('radio', { name: 'Object owner only' }).hasAttribute('disabled')).toBe(true);
-        expect(update).not.toHaveBeenCalled();
+        expect(create).not.toHaveBeenCalled();
     });
 
     it('disables the permission entry when file editing is revoked', () => {
@@ -147,28 +158,28 @@ describe('ObjectPermissionButton', () => {
     });
 
     it('removes an existing rule through the product command and restores inheritance', async () => {
-        const { service, target, remove } = setup({ delete: true });
+        const { service, target, rules } = setup({ delete: true });
         await act(() => service.save(target, { edit: 'owner', strategies: [], collaborators: [] }));
         fireEvent.click(screen.getByRole('button', { name: 'Permissions' }));
         fireEvent.click(await screen.findByRole('button', { name: 'Remove protection' }));
-        await waitFor(() => expect(remove).toHaveBeenCalledTimes(1));
+        await waitFor(() => expect(rules.getRules('doc')).toEqual([]));
         await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
         expect(service.hasPolicy(target)).toBe(false);
     });
 
     it('saves a restriction through a Command and shows primary even when the owner can still edit', async () => {
-        const { update, service, target } = setup();
+        const { create, service, target } = setup();
         fireEvent.click(screen.getByRole('button', { name: 'Permissions' }));
         fireEvent.click(await screen.findByText('Object owner only'));
         fireEvent.click(screen.getByRole('button', { name: 'Save' }));
-        await waitFor(() => expect(update).toHaveBeenCalledTimes(1));
+        await waitFor(() => expect(create).toHaveBeenCalledTimes(1));
         await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
         expect(service.hasPolicy(target)).toBe(true);
         expect(screen.getByRole('button', { name: 'Permissions' }).className).toContain('text-primary');
     });
 
     it('searches people inline, preserves hidden selections, and persists with one Save', async () => {
-        const { update } = setup({ collaborators: [
+        const { create } = setup({ collaborators: [
             { id: 'alice', role: UnitRole.Editor, subject: { userID: 'alice', name: 'Alice', avatar: '' } },
             { id: 'bob', role: UnitRole.Editor, subject: { userID: 'bob', name: 'Bob', avatar: '' } },
             { id: 'reader', role: UnitRole.Reader, subject: { userID: 'reader', name: 'Reader', avatar: '' } },
@@ -188,10 +199,10 @@ describe('ObjectPermissionButton', () => {
         expect(screen.getByText('Selected: 1')).toBeTruthy();
         fireEvent.change(search, { target: { value: 'bob' } });
         fireEvent.click(screen.getByRole('checkbox', { name: /^Bob / }));
-        expect(update).not.toHaveBeenCalled();
+        expect(create).not.toHaveBeenCalled();
         fireEvent.click(screen.getByRole('button', { name: 'Save' }));
-        await waitFor(() => expect(update).toHaveBeenCalledTimes(1));
-        expect(update.mock.calls[0][0].collaborators?.collaborators.map((user) => user.id)).toEqual(['alice', 'bob']);
+        await waitFor(() => expect(create).toHaveBeenCalledTimes(1));
+        expect(create.mock.calls[0][0].documentObject?.collaborators.map((user) => user.id)).toEqual(['alice', 'bob']);
         await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
         fireEvent.click(screen.getByRole('button', { name: 'Permissions' }));
         await waitFor(() => expect((screen.getByRole('checkbox', { name: /^Alice / }) as HTMLInputElement).checked).toBe(true));
@@ -199,13 +210,13 @@ describe('ObjectPermissionButton', () => {
     });
 
     it('discards unsaved choices on Cancel and supports deselecting a person inline', async () => {
-        const { update } = setup();
+        const { create } = setup();
         fireEvent.click(screen.getByRole('button', { name: 'Permissions' }));
         fireEvent.click(await screen.findByText('Selected members'));
         fireEvent.click(await screen.findByRole('checkbox', { name: /^Editor / }));
         fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
         await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
-        expect(update).not.toHaveBeenCalled();
+        expect(create).not.toHaveBeenCalled();
         fireEvent.click(screen.getByRole('button', { name: 'Permissions' }));
         fireEvent.click(await screen.findByText('Selected members'));
         const editor = await screen.findByRole('checkbox', { name: /^Editor / });
@@ -218,10 +229,10 @@ describe('ObjectPermissionButton', () => {
     });
 
     it('loads candidates only for selected-member policies and supports retrying inline', async () => {
-        const { listCollaborators, update } = setup();
+        const { listCollaborators, create } = setup();
         fireEvent.click(screen.getByRole('button', { name: 'Permissions' }));
         await screen.findByText('Selected members');
-        expect(listCollaborators.mock.calls.map(([request]) => request.objectID)).toEqual(['entity//drawing/image']);
+        expect(listCollaborators.mock.calls.map(([request]) => request.objectID)).toEqual([]);
         listCollaborators.mockRejectedValueOnce(new Error('Offline'));
         fireEvent.click(screen.getByText('Selected members'));
         expect(await screen.findByRole('alert')).toBeTruthy();
@@ -229,8 +240,8 @@ describe('ObjectPermissionButton', () => {
         fireEvent.click(screen.getByRole('button', { name: 'Reload' }));
         expect(await screen.findByRole('checkbox', { name: /^Editor / })).toBeTruthy();
         fireEvent.change(screen.getByRole('textbox', { name: 'Search people' }), { target: { value: 'edi' } });
-        expect(listCollaborators.mock.calls.map(([request]) => request.objectID)).toEqual(['entity//drawing/image', 'doc', 'doc']);
-        expect(update).not.toHaveBeenCalled();
+        expect(listCollaborators.mock.calls.map(([request]) => request.objectID)).toEqual(['doc', 'doc']);
+        expect(create).not.toHaveBeenCalled();
     });
 
     it('separates names from file roles and respects inherited owner access', async () => {
@@ -270,8 +281,8 @@ describe('ObjectPermissionButton', () => {
     });
 
     it('keeps selected people when saving fails and supports retrying Save', async () => {
-        const { update } = setup();
-        update.mockRejectedValueOnce(new Error('Offline'));
+        const { create } = setup();
+        create.mockRejectedValueOnce(new Error('Offline'));
         fireEvent.click(screen.getByRole('button', { name: 'Permissions' }));
         fireEvent.click(await screen.findByText('Selected members'));
         fireEvent.click(await screen.findByRole('checkbox', { name: /^Editor / }));
@@ -280,9 +291,9 @@ describe('ObjectPermissionButton', () => {
         expect((screen.getByRole('checkbox', { name: /^Editor / }) as HTMLInputElement).checked).toBe(true);
         expect(screen.getByRole('button', { name: 'Save' }).hasAttribute('disabled')).toBe(false);
         fireEvent.click(screen.getByRole('button', { name: 'Save' }));
-        await waitFor(() => expect(update).toHaveBeenCalledTimes(2));
+        await waitFor(() => expect(create).toHaveBeenCalledTimes(2));
         await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
-        expect(update.mock.calls[1][0].collaborators?.collaborators.map((user) => user.id)).toEqual(['editor']);
+        expect(create.mock.calls[1][0].documentObject?.collaborators.map((user) => user.id)).toEqual(['editor']);
     });
 
     it('requires reloading when remote policy changes while a draft is being edited', async () => {
@@ -330,34 +341,34 @@ describe('workbench object permission dialog', () => {
     }
 
     it('saves through the shared dialog after the originating toolbar unmounts', async () => {
-        const { update } = openHostedDialog();
+        const { create } = openHostedDialog();
         await screen.findByText('Original image');
         fireEvent.click(await screen.findByText('Object owner only'));
         fireEvent.click(screen.getByRole('button', { name: 'Save' }));
-        await waitFor(() => expect(update).toHaveBeenCalledTimes(1));
+        await waitFor(() => expect(create).toHaveBeenCalledTimes(1));
         await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
     });
 
     it('selects people inline in a hosted toolbar dialog and saves once', async () => {
-        const { update } = openHostedDialog();
+        const { create } = openHostedDialog();
         fireEvent.click(await screen.findByText('Selected members'));
         fireEvent.change(screen.getByRole('textbox', { name: 'Search people' }), { target: { value: 'editor' } });
         fireEvent.click(await screen.findByRole('checkbox', { name: /^Editor / }));
         expect(screen.getAllByRole('dialog')).toHaveLength(1);
-        expect(update).not.toHaveBeenCalled();
+        expect(create).not.toHaveBeenCalled();
         fireEvent.click(screen.getByRole('button', { name: 'Save' }));
-        await waitFor(() => expect(update).toHaveBeenCalledTimes(1));
-        expect(update.mock.calls[0][0].collaborators?.collaborators.map((user) => user.id)).toEqual(['editor']);
+        await waitFor(() => expect(create).toHaveBeenCalledTimes(1));
+        expect(create.mock.calls[0][0].documentObject?.collaborators.map((user) => user.id)).toEqual(['editor']);
     });
 
     it('rejects saving if the original element was deleted while the dialog was open', async () => {
         let exists = true;
-        const { update } = openHostedDialog(() => exists);
+        const { create } = openHostedDialog(() => exists);
         fireEvent.click(await screen.findByText('Object owner only'));
         exists = false;
         fireEvent.click(screen.getByRole('button', { name: 'Save' }));
         await screen.findByRole('alert');
-        expect(update).not.toHaveBeenCalled();
+        expect(create).not.toHaveBeenCalled();
         expect(screen.getByRole('dialog')).toBeTruthy();
     });
 });

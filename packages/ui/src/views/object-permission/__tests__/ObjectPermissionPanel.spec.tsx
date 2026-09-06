@@ -16,7 +16,19 @@
 
 import type { IObjectPermissionButtonProps } from '../ObjectPermissionButton';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { CommandType, IAuthzIoService, ICommandService, LocaleType, Univer, UniverInstanceType } from '@univerjs/core';
+import {
+    CommandType,
+    IAuthzIoService,
+    ICommandService,
+    IConfigService,
+    IResourceManagerService,
+    LocaleType,
+    OBJECT_PERMISSION_CONFIG_KEY,
+    ObjectPermissionRuleModel,
+    ObjectPermissionService,
+    Univer,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { UnitObject } from '@univerjs/protocol';
 import { afterEach, expect, it, vi } from 'vitest';
 import enUS from '../../../locale/en-US';
@@ -24,6 +36,12 @@ import { DesktopSidebarService } from '../../../services/sidebar/desktop-sidebar
 import { ISidebarService } from '../../../services/sidebar/sidebar.service';
 import { RediProvider } from '../../../utils/di';
 import { ObjectPermissionPanel } from '../ObjectPermissionPanel';
+
+class TestRuleModel extends ObjectPermissionRuleModel {
+    constructor(@IResourceManagerService resources: IResourceManagerService) {
+        super(resources, 'DOC_TEST_PERMISSION_PLUGIN', UniverInstanceType.UNIVER_DOC, [UnitObject.DocumentEntity, UnitObject.DocumentSection]);
+    }
+}
 
 let univer: Univer;
 afterEach(() => {
@@ -33,11 +51,14 @@ afterEach(() => {
 it('does not enumerate collapsed scopes or rescan them on editing commands, and loads more on demand', () => {
     const list = vi.fn();
     univer = new Univer({ locale: LocaleType.EN_US, locales: { [LocaleType.EN_US]: enUS }, override: [[IAuthzIoService, { useValue: {
-        supportsObjectPermissionManagement: () => true,
-        listUnitPermissions: list,
+        list,
     } }]] });
     univer.createUnit(UniverInstanceType.UNIVER_DOC, { id: 'doc', body: { dataStream: '\r\n' } });
     const injector = univer.__getInjector();
+    injector.add([TestRuleModel]);
+    const rules = injector.get(TestRuleModel);
+    injector.get(IConfigService).setConfig(OBJECT_PERMISSION_CONFIG_KEY, [UnitObject.Document, UnitObject.DocumentSection]);
+    injector.get(ObjectPermissionService).registerRuleModel(UnitObject.Document, rules, 'test.mutation.permission');
     injector.add([ISidebarService, { useClass: DesktopSidebarService }]);
     let enumerated = 0;
     function* getTargets(): Iterable<IObjectPermissionButtonProps> {

@@ -14,14 +14,19 @@
  * limitations under the License.
  */
 
-import type { IBatchAllowedResponse, ICollaborator, IListPermPointResponse } from '@univerjs/protocol';
+import type { IBatchAllowedResponse, ICollaborator, ICreateRequest, IListPermPointResponse } from '@univerjs/protocol';
+import type { IDisposable } from '../../common/di';
+import type { IObjectPermissionRule, ObjectPermissionRuleModel } from './object-permission-rule.model';
 import type { IPermissionPoint } from './type';
 import { ObjectScope, UnitAction, UnitObject, UnitRole } from '@univerjs/protocol';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { Inject } from '../../common/di';
-import { Disposable } from '../../shared/lifecycle';
+import { Inject, Injector } from '../../common/di';
+import { Disposable, toDisposable } from '../../shared/lifecycle';
 import { IAuthzIoService } from '../authz-io/type';
+import { ICommandService } from '../command/command.service';
+import { IConfigService } from '../config/config.service';
 import { ILogService } from '../log/log.service';
+import { IUndoRedoService } from '../undoredo/undoredo.service';
 import { UserManagerService } from '../user-manager/user-manager.service';
 import { IPermissionService, PermissionStatus } from './type';
 
@@ -37,6 +42,9 @@ export interface IObjectPermissionPolicy {
     collaborators: ICollaborator[];
     strategies: IListPermPointResponse['objects'][number]['strategies'];
 }
+
+/** Frontend opt-in; does not change the Authz service interface or existing local setters. */
+export const OBJECT_PERMISSION_CONFIG_KEY = 'objectPermissionTypes';
 
 const ROOT_OBJECT_TYPES: Partial<Record<UnitObject, UnitObject>> = {
     [UnitObject.Document]: UnitObject.Document,
@@ -59,6 +67,7 @@ const ROOT_OBJECT_TYPES: Partial<Record<UnitObject, UnitObject>> = {
 
 /** Coordinates Authz policy writes and the current user's effective permission cache. */
 export class ObjectPermissionService extends Disposable {
+    private readonly _models = new Map<UnitObject, { model: ObjectPermissionRuleModel; mutationId: string }>();
     private readonly _initialized = new Set<string>();
     private readonly _policies = new Map<string, IListPermPointResponse['objects'][number][]>();
     private readonly _generations = new Map<string, number>();
@@ -69,10 +78,12 @@ export class ObjectPermissionService extends Disposable {
     readonly unitChanges$ = this._unitChanges.asObservable();
 
     constructor(
-        @IAuthzIoService private readonly _authz: IAuthzIoService,
+        @Inject(Injector) private readonly _injector: Injector,
         @IPermissionService private readonly _permissions: IPermissionService,
         @ILogService private readonly _logService: ILogService,
-        @Inject(UserManagerService) private readonly _users: UserManagerService
+        @Inject(UserManagerService) private readonly _users: UserManagerService,
+        @IConfigService private readonly _config: IConfigService,
+        @ICommandService private readonly _commands: ICommandService
     ) {
         super();
         this.disposeWithMe(this._permissions.permissionPointUpdate$.subscribe((point) => {
@@ -80,13 +91,6 @@ export class ObjectPermissionService extends Disposable {
                 this._revision.next(this._revision.value + 1);
             }
         }));
-        if (this._authz.objectPermissionChanges$) {
-            this.disposeWithMe(this._authz.objectPermissionChanges$.subscribe(({ unitID }) => {
-                if (this._initialized.has(unitID)) {
-                    this.refreshUnit(unitID).catch((error: unknown) => this._logService.error(error));
-                }
-            }));
-        }
         this.disposeWithMe(() => {
             this._initialized.clear();
             this._policies.clear();
@@ -94,6 +98,49 @@ export class ObjectPermissionService extends Disposable {
             this._revision.complete();
             this._unitChanges.complete();
         });
+    }
+
+    private get _authz(): IAuthzIoService {
+        return this._injector.get(IAuthzIoService);
+    }
+
+    registerRuleModel(rootType: UnitObject, model: ObjectPermissionRuleModel, mutationId: string): IDisposable {
+        if (this._models.has(rootType)) {
+            throw new Error('Object permission rule model already registered.');
+        }
+        this._models.set(rootType, { model, mutationId });
+        const subscription = model.changed$.subscribe((unitId) => {
+            this._generations.delete(unitId);
+            this._policies.delete(unitId);
+            // A replayed binding takes effect immediately; do not leave old editable rights while Authz loads.
+            model.getRules(unitId).forEach((rule) => {
+                if (!this.supports({ unitId, objectId: rule.objectId, objectType: rule.objectType })) {
+                    return;
+                }
+                const id = `${rule.objectType}.${UnitAction.Edit}_${unitId}_${rule.objectId}`;
+                if (!this._permissions.getPermissionPoint(id)) {
+                    this._permissions.addPermissionPoint({ id, type: rule.objectType, subType: UnitAction.Edit, value: false, status: PermissionStatus.INIT, unitId, objectId: rule.objectId } as IPermissionPoint);
+                } else {
+                    this._permissions.updatePermissionPoint(id, false);
+                }
+            });
+            this._revision.next(this._revision.value + 1);
+            if (this._initialized.has(unitId)) {
+                this.refreshUnit(unitId).catch((error: unknown) => this._logService.error(error));
+            }
+        });
+        return this.disposeWithMe(toDisposable(() => {
+            subscription.unsubscribe();
+            this._models.delete(rootType);
+        }));
+    }
+
+    private _getRule(target: IObjectPermissionTarget): IObjectPermissionRule | undefined {
+        return this._models.get(ROOT_OBJECT_TYPES[target.objectType]!)?.model.getRule(target.unitId, target.objectType, target.objectId);
+    }
+
+    private _getAuthzId(target: IObjectPermissionTarget): string | undefined {
+        return target.objectId === target.unitId ? target.unitId : this._getRule(target)?.permissionId;
     }
 
     initializeUnit(target: IObjectPermissionTarget): void {
@@ -117,8 +164,8 @@ export class ObjectPermissionService extends Disposable {
     }
 
     supports(target: IObjectPermissionTarget): boolean {
-        return !!this._authz.listUnitPermissions &&
-            this._authz.supportsObjectPermissionManagement?.(target.objectType) === true;
+        return this._config.getConfig<UnitObject[]>(OBJECT_PERMISSION_CONFIG_KEY)?.includes(target.objectType) === true &&
+            this._models.has(ROOT_OBJECT_TYPES[target.objectType]!);
     }
 
     getPolicies(unitId: string): readonly IListPermPointResponse['objects'][number][] {
@@ -145,37 +192,63 @@ export class ObjectPermissionService extends Disposable {
             return false;
         }
         const object = await this._getPolicy(target);
-        if (!object && target.objectId !== target.unitId) {
+        if (!this._getRule(target) && target.objectId !== target.unitId) {
             const rootType = ROOT_OBJECT_TYPES[target.objectType];
             return rootType !== undefined && this._allowed({ ...target, objectId: target.unitId, objectType: rootType }, UnitAction.CreatePermissionObject);
         }
-        return this._canChangeRule(target, object, UnitAction.ManageCollaborator);
+        return (target.objectId === target.unitId || !!object) && this._canChangeRule(target, object, UnitAction.ManageCollaborator);
     }
 
     async canDelete(target: IObjectPermissionTarget): Promise<boolean> {
-        if (!this.supports(target) || !this._authz.deleteObjectPermission || target.objectId === target.unitId) {
+        if (!this.supports(target) || target.objectId === target.unitId) {
             return false;
         }
         const object = await this._getPolicy(target);
         return !!object && this._canChangeRule(target, object, UnitAction.Delete);
     }
 
-    /** Must be called from a product permission Command; removal restores server-computed inheritance. */
+    /** Must be called from a product permission Command; removal restores inheritance by detaching the rule. */
     async remove(target: IObjectPermissionTarget): Promise<void> {
-        if (!await this.canDelete(target) || !this._authz.deleteObjectPermission) {
+        const permissionId = this._getRule(target)?.permissionId;
+        if (!await this.canDelete(target)) {
             throw new Error('Object permission deletion denied.');
         }
-        await this._authz.deleteObjectPermission({ unitID: target.unitId, objectID: target.objectId, objectType: target.objectType });
+        await this._commitRule(target, null, permissionId);
         await this.refreshUnit(target.unitId);
     }
 
+    private async _commitRule(target: IObjectPermissionTarget, rule: IObjectPermissionRule | null, expectedId: string | undefined): Promise<void> {
+        const registration = this._models.get(ROOT_OBJECT_TYPES[target.objectType]!);
+        if (!registration) {
+            throw new Error('Object permission rule model is not registered.');
+        }
+        const previous = this._getRule(target) ?? null;
+        if (previous?.permissionId !== expectedId) {
+            throw new Error('Object permission binding changed during the request.');
+        }
+        const redo = { id: registration.mutationId, params: { ...target, rule } };
+        const undo = { id: registration.mutationId, params: { ...target, rule: previous } };
+        if (!await this._commands.executeCommand(redo.id, redo.params)) {
+            throw new Error('Could not update the object permission binding.');
+        }
+        this._injector.get(IUndoRedoService).pushUndoRedo({ unitID: target.unitId, redoMutations: [redo], undoMutations: [undo] });
+    }
+
     private async _getPolicy(target: IObjectPermissionTarget) {
-        const objects = await this._authz.list({ unitID: target.unitId, objectIDs: [target.objectId], actions: [] });
-        return objects.find((item) => item.unitID === target.unitId && item.objectID === target.objectId && item.objectType === target.objectType);
+        const objectID = this._getAuthzId(target);
+        if (!objectID) {
+            return undefined;
+        }
+        const objects = await this._authz.list({ unitID: target.unitId, objectIDs: [objectID], actions: [] });
+        return objects.find((item) => item.unitID === target.unitId && item.objectID === objectID && item.objectType === target.objectType);
     }
 
     private async _allowed(target: IObjectPermissionTarget, action: UnitAction): Promise<boolean> {
-        const actions = await this._authz.allowed({ unitID: target.unitId, objectID: target.objectId, objectType: target.objectType, actions: [action] });
+        const objectID = this._getAuthzId(target);
+        if (!objectID) {
+            return false;
+        }
+        const actions = await this._authz.allowed({ unitID: target.unitId, objectID, objectType: target.objectType, actions: [action] });
         return actions.some((item) => item.action === action && item.allowed === true);
     }
 
@@ -189,11 +262,14 @@ export class ObjectPermissionService extends Disposable {
     }
 
     async read(target: IObjectPermissionTarget): Promise<IObjectPermissionPolicy> {
-        const [objects, collaborators] = await Promise.all([
-            this._authz.list({ unitID: target.unitId, objectIDs: [target.objectId], actions: [] }),
-            target.objectId === target.unitId ? [] : this._authz.listCollaborators({ unitID: target.unitId, objectID: target.objectId }),
+        const objectID = this._getAuthzId(target);
+        if (!objectID) {
+            return { edit: 'all', collaborators: [], strategies: [] };
+        }
+        const [object, collaborators] = await Promise.all([
+            this._getPolicy(target),
+            target.objectId === target.unitId ? [] : this._authz.listCollaborators({ unitID: target.unitId, objectID }),
         ]);
-        const object = objects.find((item) => item.objectID === target.objectId && item.objectType === target.objectType);
         let edit: IObjectPermissionPolicy['edit'] = 'all';
         if (object?.scope?.edit === ObjectScope.OneSelf) {
             edit = 'owner';
@@ -207,7 +283,7 @@ export class ObjectPermissionService extends Disposable {
 
     async setPoint(target: IObjectPermissionTarget, point: IPermissionPoint, value: boolean): Promise<void> {
         // Preserve local overrides until the provider opts this object type into remote management.
-        if (!this._authz.supportsObjectPermissionManagement?.(target.objectType)) {
+        if (!this.supports(target)) {
             if (!this._permissions.getPermissionPoint(point.id)) {
                 this._permissions.addPermissionPoint(point);
             }
@@ -227,6 +303,7 @@ export class ObjectPermissionService extends Disposable {
     /** Must be called from a product permission Command. */
     async save(target: IObjectPermissionTarget, policy: IObjectPermissionPolicy): Promise<void> {
         this._assertSupported(target);
+        const permissionId = this._getRule(target)?.permissionId;
         if (!await this.canManage(target)) {
             throw new Error('Object permission management denied.');
         }
@@ -236,8 +313,7 @@ export class ObjectPermissionService extends Disposable {
         if (policy.edit === 'members' && !policy.collaborators.length) {
             throw new Error('Select at least one collaborator.');
         }
-        const objects = await this._authz.list({ unitID: target.unitId, objectIDs: [target.objectId], actions: [] });
-        const previous = objects.find((item) => item.objectID === target.objectId && item.objectType === target.objectType);
+        const previous = await this._getPolicy(target);
         const strategies = policy.strategies.filter((strategy) => strategy.action !== UnitAction.Edit);
         strategies.push({ action: UnitAction.Edit, role: policy.edit === 'owner' ? UnitRole.Owner : UnitRole.Editor });
         let editScope = ObjectScope.AllCollaborator;
@@ -246,70 +322,131 @@ export class ObjectPermissionService extends Disposable {
         } else if (policy.edit === 'owner') {
             editScope = ObjectScope.OneSelf;
         }
-        await this._authz.update({
-            unitID: target.unitId,
-            objectID: target.objectId,
-            objectType: target.objectType,
-            name: previous?.name ?? '',
-            share: undefined,
-            strategies,
-            scope: {
-                read: previous?.scope?.read ?? ObjectScope.AllCollaborator,
-                edit: editScope,
-            },
-            collaborators: target.objectId === target.unitId ? undefined : { collaborators: policy.edit === 'members' ? policy.collaborators : [] },
-        });
+        const scope = { read: previous?.scope?.read ?? ObjectScope.AllCollaborator, edit: editScope };
+        let objectID = this._getAuthzId(target);
+        if (!objectID) {
+            const payload = {
+                unitID: target.unitId,
+                name: target.objectId,
+                strategies,
+                scope,
+                collaborators: policy.edit === 'members' ? policy.collaborators : [],
+            };
+            const request: ICreateRequest = { objectType: target.objectType };
+            switch (ROOT_OBJECT_TYPES[target.objectType]) {
+                case UnitObject.Document:
+                    request.documentObject = payload;
+                    break;
+                case UnitObject.Slide:
+                    request.slideObject = payload;
+                    break;
+                case UnitObject.Base:
+                    request.baseObject = payload;
+                    break;
+                case UnitObject.Board:
+                    request.boardObject = payload;
+                    break;
+                default: throw new Error('Unsupported object permission type.');
+            }
+            objectID = await this._authz.create(request);
+            if (!objectID) {
+                throw new Error('Authz did not return a permission ID.');
+            }
+            await this._commitRule(target, { objectId: target.objectId, objectType: target.objectType, permissionId: objectID }, permissionId);
+        } else {
+            if (this._getRule(target)?.permissionId !== permissionId) {
+                throw new Error('Object permission binding changed during the request.');
+            }
+            await this._authz.update({
+                unitID: target.unitId,
+                objectID,
+                objectType: target.objectType,
+                name: previous?.name ?? target.objectId,
+                share: undefined,
+                strategies,
+                scope,
+                collaborators: target.objectId === target.unitId ? undefined : { collaborators: policy.edit === 'members' ? policy.collaborators : [] },
+            });
+        }
         // Never use the requested boolean as this user's result: owners and collaborators differ.
         await this.refreshUnit(target.unitId);
     }
 
     async refreshUnit(unitId: string): Promise<void> {
-        if (!this._authz.listUnitPermissions || this._disposed) {
+        if (this._disposed) {
             return;
         }
-        const generation = ++this._nextGeneration;
-        this._generations.set(unitId, generation);
-        const policies = await this._authz.listUnitPermissions(unitId);
-        const requests = new Map<string, { unitID: string; objectID: string; objectType: IPermissionPoint['type']; actions: UnitAction[] }>();
-        const include = (objectID: string, objectType: IPermissionPoint['type'], actions: UnitAction[]) => {
-            if (!this._authz.supportsObjectPermissionManagement?.(objectType)) {
+        const bindings = [...this._models.values()].flatMap(({ model }) => model.getRules(unitId));
+        const bindingMap = new Map(bindings.map((rule) => [`${rule.objectType}/${rule.objectId}`, rule]));
+        const requests = new Map<string, { unitID: string; objectID: string; objectType: UnitObject; actions: UnitAction[]; targetId: string }>();
+        const include = (objectID: string, objectType: UnitObject, targetId: string, actions: UnitAction[]) => {
+            if (!this.supports({ unitId, objectId: targetId, objectType })) {
                 return;
             }
             const key = `${objectType}/${objectID}`;
             const previous = requests.get(key);
-            requests.set(key, { unitID: unitId, objectID, objectType, actions: [...new Set([...(previous?.actions ?? []), ...actions])] });
+            requests.set(key, { unitID: unitId, objectID, objectType, targetId, actions: [...new Set([...(previous?.actions ?? []), ...actions])] });
         };
-        policies.filter((policy) => policy.unitID === unitId).forEach((policy) =>
-            include(policy.objectID, policy.objectType, [UnitAction.Edit, ...policy.strategies.map((strategy) => strategy.action)]));
-        // Include old points as well: removing a policy must restore the server's inherited result.
+        const inheritedPoints: string[] = [];
+        bindings.forEach((rule) => include(rule.permissionId, rule.objectType, rule.objectId, [UnitAction.Edit]));
         this._permissions.getAllPermissionPoint().forEach((point$) => {
             const subscription = point$.subscribe((point) => {
-                if ('unitId' in point && point.unitId === unitId) {
-                    const objectId = 'objectId' in point && typeof point.objectId === 'string' ? point.objectId : unitId;
-                    include(objectId, point.type, [point.subType]);
+                if (!('unitId' in point) || point.unitId !== unitId) {
+                    return;
+                }
+                const objectId = 'objectId' in point && typeof point.objectId === 'string' ? point.objectId : unitId;
+                const binding = bindingMap.get(`${point.type}/${objectId}`);
+                if (objectId === unitId) {
+                    include(unitId, point.type, unitId, [point.subType]);
+                } else if (binding) {
+                    include(binding.permissionId, point.type, objectId, [point.subType]);
+                } else if (this.supports({ unitId, objectId, objectType: point.type })) {
+                    // Unbound objects inherit. Business checks still enforce all containing-object restrictions.
+                    inheritedPoints.push(point.id);
                 }
             });
             subscription.unsubscribe();
         });
+        inheritedPoints.forEach((id) => this._permissions.updatePermissionPoint(id, true));
+        const generation = ++this._nextGeneration;
+        this._generations.set(unitId, generation);
         const values = [...requests.values()];
+        if (values.length) {
+            this._initialized.add(unitId);
+        }
+        const policies: IListPermPointResponse['objects'] = [];
         const results: IBatchAllowedResponse['objectActions'] = [];
         for (let offset = 0; offset < values.length; offset += 100) {
-            results.push(...await this._authz.batchAllowed(values.slice(offset, offset + 100)));
+            const batch = values.slice(offset, offset + 100);
+            const batchPolicies = await this._authz.list({ unitID: unitId, objectIDs: batch.map((item) => item.objectID), actions: [] });
+            policies.push(...batchPolicies);
+            batch.forEach((request) => {
+                const policy = batchPolicies.find((item) => item.objectID === request.objectID && item.objectType === request.objectType);
+                request.actions = [...new Set([...request.actions, ...(policy?.strategies.map((strategy) => strategy.action) ?? [])])];
+            });
+            results.push(...await this._authz.batchAllowed(batch.map(({ targetId, ...request }) => request)));
         }
         if (this._disposed || this._generations.get(unitId) !== generation) {
             return;
         }
+        const resultMap = new Map(results.filter((item) => item.unitID === unitId).map((item) => [item.objectID, item]));
+        const policyMap = new Map(policies.filter((item) => item.unitID === unitId).map((item) => [`${item.objectType}/${item.objectID}`, item]));
         values.forEach((request) => {
-            const result = results.find((item) => item.unitID === unitId && item.objectID === request.objectID);
-            request.actions.forEach((action) => {
-                const id = `${request.objectType}.${action}_${unitId}${request.objectID === unitId ? '' : `_${request.objectID}`}`;
+            const result = resultMap.get(request.objectID);
+            const policy = policyMap.get(`${request.objectType}/${request.objectID}`);
+            const actions = [...new Set([...request.actions, ...(policy?.strategies.map((strategy) => strategy.action) ?? [])])];
+            actions.forEach((action) => {
+                const id = `${request.objectType}.${action}_${unitId}${request.targetId === unitId ? '' : `_${request.targetId}`}`;
                 if (!this._permissions.getPermissionPoint(id)) {
-                    this._permissions.addPermissionPoint({ id, type: request.objectType, subType: action, status: PermissionStatus.DONE, value: false, unitId, objectId: request.objectID } as IPermissionPoint);
+                    this._permissions.addPermissionPoint({ id, type: request.objectType, subType: action, status: PermissionStatus.DONE, value: false, unitId, objectId: request.targetId } as IPermissionPoint);
                 }
                 this._permissions.updatePermissionPoint(id, result?.actions.some((item) => item.action === action && item.allowed === true) ?? false);
             });
         });
-        this._policies.set(unitId, policies.filter((policy) => policy.unitID === unitId));
+        this._policies.set(unitId, policies.filter((policy) => policy.unitID === unitId).map((policy) => ({
+            ...policy,
+            objectID: requests.get(`${policy.objectType}/${policy.objectID}`)?.targetId ?? policy.objectID,
+        })));
         this._revision.next(this._revision.value + 1);
         this._unitChanges.next(unitId);
     }

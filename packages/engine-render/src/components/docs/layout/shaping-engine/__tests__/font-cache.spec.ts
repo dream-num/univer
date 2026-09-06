@@ -54,19 +54,28 @@ describe('font cache', () => {
             toJSON: () => ({}),
         }));
         const first = FontCache.getMeasureText('Agent', '14px FontChange');
+        const unrelated = FontCache.getMeasureText('Agent', '14px Unrelated');
+        const unrelatedHeight = FontCache.getTextSizeByDom('Agent', '14px Unrelated');
+        const domOnly = FontCache.getTextSizeByDom('Agent', '14px DOMOnly');
         expect(first).toMatchObject({ width: 12, fontBoundingBoxAscent: 20 });
         width = 24;
         height = 40;
         expect(FontCache.getMeasureText('Agent', '14px FontChange')).toBe(first);
         expect(FontCache.getTextSizeByDom('Agent', '14px FontChange').height).toBe(20);
 
-        invalidateDocumentFontMetrics();
+        expect(invalidateDocumentFontMetrics((font) => font === '14px FontChange')).toBe(true);
         const next = FontCache.getMeasureText('Agent', '14px FontChange');
         expect(next).toMatchObject({ width: 24, fontBoundingBoxAscent: 40 });
         expect(next).not.toBe(first);
         expect(FontCache.getTextSizeByDom('Agent', '14px FontChange').height).toBe(40);
-        invalidateDocumentFontMetrics();
-        invalidateDocumentFontMetrics();
+        expect(FontCache.getMeasureText('Agent', '14px Unrelated')).toBe(unrelated);
+        expect(FontCache.getTextSizeByDom('Agent', '14px Unrelated')).toBe(unrelatedHeight);
+        expect(invalidateDocumentFontMetrics((font) => font === '14px DOMOnly')).toBe(true);
+        expect(FontCache.getTextSizeByDom('Agent', '14px DOMOnly')).not.toBe(domOnly);
+        expect(FontCache.getTextSizeByDom('Agent', '14px DOMOnly').height).toBe(40);
+        expect(invalidateDocumentFontMetrics(() => false)).toBe(false);
+        expect(invalidateDocumentFontMetrics((font) => font === '14px FontChange')).toBe(true);
+        expect(invalidateDocumentFontMetrics((font) => font === '14px FontChange')).toBe(false);
         expect(FontCache.getMeasureText('Agent', '14px FontChange')).toEqual(next);
     });
 
@@ -235,7 +244,7 @@ describe('font cache', () => {
             }],
         ]);
 
-        invalidateDocumentFontMetrics();
+        invalidateDocumentFontMetrics((font) => font === '12px Local Font');
         const byFont = FontCache.getTextSize('A', {
             fontString: '12px Local Font',
             fontSize: 12,

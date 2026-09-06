@@ -19,6 +19,9 @@ import { BehaviorSubject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY } from '../../../common/const';
 import { Injector } from '../../../common/di';
+import { UniverInstanceType } from '../../../common/unit';
+import { Workbook } from '../../../sheets/workbook';
+import { Univer } from '../../../univer';
 import { CommandService, CommandType, ICommandService } from '../../command/command.service';
 import { ConfigService, IConfigService } from '../../config/config.service';
 import { EDITOR_ACTIVATED, FOCUSING_FX_BAR_EDITOR, FOCUSING_SHEET } from '../../context/context';
@@ -34,6 +37,46 @@ import {
 } from '../undoredo.service';
 
 const MUTATION_ID = 'test.mutation';
+
+describe('unit-targeted history', () => {
+    it.each([false, true])('keeps the selected history stack when mutations change focus: %s', (changesFocus) => {
+        const univer = new Univer();
+        try {
+            const injector = univer.__getInjector();
+            const instances = injector.get(IUniverInstanceService);
+            instances.registerCtorForType(UniverInstanceType.UNIVER_SHEET, Workbook);
+            univer.createUnit(UniverInstanceType.UNIVER_SHEET, { id: 'host' });
+            univer.createUnit(UniverInstanceType.UNIVER_SHEET, { id: 'child' });
+            const commands = injector.get(ICommandService);
+            const history = injector.get(IUndoRedoService);
+            const applied: string[] = [];
+            commands.registerCommand({ id: MUTATION_ID, type: CommandType.MUTATION, handler: (_accessor, params?: { label: string }) => {
+                applied.push(params!.label);
+                if (changesFocus) {
+                    instances.focusUnit('host');
+                }
+                return true;
+            } });
+            for (const unitID of ['host', 'child']) {
+                history.pushUndoRedo({ unitID, id: unitID, undoMutations: [{ id: MUTATION_ID, params: { label: `undo-${unitID}` } }], redoMutations: [{ id: MUTATION_ID, params: { label: `redo-${unitID}` } }] });
+            }
+            instances.focusUnit(changesFocus ? 'child' : 'host');
+            expect(commands.syncExecuteCommand(UndoCommandId, changesFocus ? undefined : { unitId: 'child' })).toBe(true);
+            expect(history.pitchTopUndoElement('host')?.id).toBe('host');
+            expect(history.pitchTopUndoElement('child')).toBeNull();
+            expect(history.pitchTopRedoElement('child')?.id).toBe('child');
+            expect(commands.syncExecuteCommand(RedoCommandId, { unitId: 'child' })).toBe(true);
+            expect(applied).toEqual(['undo-child', 'redo-child']);
+            expect(instances.getFocusedUnit()?.getUnitId()).toBe('host');
+            expect(history.pitchTopUndoElement('child')?.id).toBe('child');
+            expect(history.pitchTopRedoElement('child')).toBeNull();
+            expect(commands.syncExecuteCommand(UndoCommandId, { unitId: 'missing' })).toBe(false);
+            expect(history.pitchTopUndoElement('host')?.id).toBe('host');
+        } finally {
+            univer.dispose();
+        }
+    });
+});
 
 class FocusedUnit {
     constructor(private readonly _unitId: string) {}

@@ -58,6 +58,11 @@ interface IGlyphHorizonData {
     pixelsPerEm?: number[];
 }
 
+/** Invalidates measured glyph and DOM-height metrics after available fonts change; registered font data is retained. */
+export function invalidateDocumentFontMetrics(): void {
+    FontCache.invalidateMetrics();
+}
+
 export class FontCache {
     private static _getTextHeightCache: { [key: string]: { width: number; height: number } } = {};
 
@@ -69,6 +74,11 @@ export class FontCache {
 
     static get globalFontMeasureCache() {
         return this._globalFontMeasureCache;
+    }
+
+    static invalidateMetrics(): void {
+        this._globalFontMeasureCache.clear();
+        this._getTextHeightCache = {};
     }
 
     static setFontMeasureCache(fontStyle: string, content: string, tm: IMeasureTextCache) {

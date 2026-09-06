@@ -15,7 +15,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { FontCache } from '../font-cache';
+import { FontCache, invalidateDocumentFontMetrics } from '../font-cache';
 
 describe('font cache', () => {
     beforeEach(() => {
@@ -27,6 +27,47 @@ describe('font cache', () => {
 
     afterEach(() => {
         vi.unstubAllGlobals();
+        vi.restoreAllMocks();
+    });
+
+    it('remeasures glyph widths and DOM fallback heights after font metrics are invalidated', () => {
+        let width = 12;
+        let height = 20;
+        vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({
+            font: '',
+            textBaseline: 'alphabetic',
+            measureText: () => ({
+                width,
+                actualBoundingBoxAscent: height,
+                actualBoundingBoxDescent: 0,
+            }),
+        } as unknown as CanvasRenderingContext2D);
+        vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(() => ({
+            left: 0,
+            top: 0,
+            right: width,
+            bottom: height,
+            x: 0,
+            y: 0,
+            width,
+            height,
+            toJSON: () => ({}),
+        }));
+        const first = FontCache.getMeasureText('Agent', '14px FontChange');
+        expect(first).toMatchObject({ width: 12, fontBoundingBoxAscent: 20 });
+        width = 24;
+        height = 40;
+        expect(FontCache.getMeasureText('Agent', '14px FontChange')).toBe(first);
+        expect(FontCache.getTextSizeByDom('Agent', '14px FontChange').height).toBe(20);
+
+        invalidateDocumentFontMetrics();
+        const next = FontCache.getMeasureText('Agent', '14px FontChange');
+        expect(next).toMatchObject({ width: 24, fontBoundingBoxAscent: 40 });
+        expect(next).not.toBe(first);
+        expect(FontCache.getTextSizeByDom('Agent', '14px FontChange').height).toBe(40);
+        invalidateDocumentFontMetrics();
+        invalidateDocumentFontMetrics();
+        expect(FontCache.getMeasureText('Agent', '14px FontChange')).toEqual(next);
     });
 
     it('measures text with OffscreenCanvas when the DOM is unavailable', () => {
@@ -194,6 +235,7 @@ describe('font cache', () => {
             }],
         ]);
 
+        invalidateDocumentFontMetrics();
         const byFont = FontCache.getTextSize('A', {
             fontString: '12px Local Font',
             fontSize: 12,

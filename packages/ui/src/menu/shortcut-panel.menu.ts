@@ -14,17 +14,23 @@
  * limitations under the License.
  */
 
+import type { IAccessor } from '@univerjs/core';
 import type { LocaleKey } from '../locale/types';
 import type { IMenuButtonItem } from '../services/menu/menu';
+import { IContextService } from '@univerjs/core';
 import { ToggleShortcutPanelOperation } from '../commands/operations/toggle-shortcut-panel.operation';
+import { MOBILE_UI_MODE } from '../const';
 import { MenuItemType } from '../services/menu/menu';
 
-export function ShortcutPanelMenuItemFactory(): IMenuButtonItem<LocaleKey> {
+export function ShortcutPanelMenuItemFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
+    const contextService = accessor.get(IContextService);
+
     return {
         id: ToggleShortcutPanelOperation.id,
         title: 'ui.toggle-shortcut-panel',
         tooltip: 'ui.toggle-shortcut-panel',
         icon: 'KeyboardIcon',
         type: MenuItemType.BUTTON,
+        hidden$: contextService.subscribeContextValue$(MOBILE_UI_MODE),
     };
 }

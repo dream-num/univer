@@ -15,9 +15,9 @@
  */
 
 import type { DocPopupMenu, IDocPopupMenuItem } from '../services/doc-quick-insert-popup.service';
-import { borderBottomClassName, borderClassName, clsx, scrollbarClassName, Tooltip } from '@univerjs/design';
+import { borderBottomClassName, borderClassName, clsx, ConfigContext, scrollbarClassName, Tooltip } from '@univerjs/design';
 import { IconManager, useDependency } from '@univerjs/ui';
-import { useEffect, useMemo, useRef } from 'react';
+import { useContext, useEffect, useMemo, useRef } from 'react';
 
 interface IQuickInsertMenuProps {
     menus: DocPopupMenu[];
@@ -55,6 +55,7 @@ export function QuickInsertMenu(props: IQuickInsertMenuProps) {
     } = props;
 
     const iconManager = useDependency(IconManager);
+    const { mobile } = useContext(ConfigContext);
     const flatMenus = useMemo(() => flattenMenuItems(menus), [menus]);
     const menuNodeMapRef = useRef(new Map<string, HTMLElement>());
 
@@ -63,16 +64,16 @@ export function QuickInsertMenu(props: IQuickInsertMenuProps) {
             ? null
             : flatMenus[focusedMenuIndex] ?? null;
 
-        onFocusedMenuChange(focusedMenu);
+        onFocusedMenuChange(mobile ? null : focusedMenu);
 
-        if (!focusedMenu) {
+        if (mobile || !focusedMenu) {
             return;
         }
 
         menuNodeMapRef.current.get(focusedMenu.id)?.scrollIntoView({
             block: 'nearest',
         });
-    }, [flatMenus, focusedMenuIndex, onFocusedMenuChange]);
+    }, [flatMenus, focusedMenuIndex, mobile, onFocusedMenuChange]);
 
     useEffect(() => {
         const menuNodeMap = menuNodeMapRef.current;
@@ -131,26 +132,30 @@ export function QuickInsertMenu(props: IQuickInsertMenuProps) {
                     role="button"
                     tabIndex={-1}
                     className={clsx(`
-                      univer-relative univer-box-border univer-flex univer-min-h-8 univer-w-full univer-cursor-pointer
+                      univer-relative univer-box-border univer-flex univer-w-full univer-cursor-pointer
                       univer-items-center univer-justify-between univer-gap-3 univer-rounded-md univer-border-none
                       univer-bg-transparent univer-px-2 univer-text-left univer-text-sm univer-text-gray-900
                       univer-outline-none
-                      hover:univer-bg-gray-50
                       dark:!univer-text-gray-0
-                      dark:hover:!univer-bg-gray-600
                     `, {
-                        'hover:univer-bg-transparent': !isFocused,
-                        'univer-bg-gray-50 dark:!univer-bg-gray-600': isFocused,
+                        'univer-min-h-12 univer-rounded-xl univer-px-3 univer-text-base active:univer-bg-gray-100 dark:active:!univer-bg-gray-600': mobile,
+                        'univer-min-h-8 hover:univer-bg-gray-50 dark:hover:!univer-bg-gray-600': !mobile,
+                        'hover:univer-bg-transparent': !mobile && !isFocused,
+                        'univer-bg-gray-50 dark:!univer-bg-gray-600': !mobile && isFocused,
                     })}
-                    onMouseEnter={() => onFocusedMenuIndexChange(currentMenuIndex)}
-                    onMouseLeave={() => onFocusedMenuIndexChange(Number.NaN)}
+                    onMouseEnter={mobile ? undefined : () => onFocusedMenuIndexChange(currentMenuIndex)}
+                    onMouseLeave={mobile ? undefined : () => onFocusedMenuIndexChange(Number.NaN)}
                     onClick={() => onSelect(menu)}
                 >
                     <div className="univer-inline-flex univer-w-full univer-items-center univer-gap-2">
                         {Icon && <span className="univer-inline-flex univer-text-base"><Icon /></span>}
-                        <Tooltip showIfEllipsis title={menu.title} placement="right">
-                            <span className="univer-truncate">{menu.title}</span>
-                        </Tooltip>
+                        {mobile
+                            ? <span className="univer-truncate">{menu.title}</span>
+                            : (
+                                <Tooltip showIfEllipsis title={menu.title} placement="right">
+                                    <span className="univer-truncate">{menu.title}</span>
+                                </Tooltip>
+                            )}
                     </div>
                 </div>
             );
@@ -160,11 +165,13 @@ export function QuickInsertMenu(props: IQuickInsertMenuProps) {
     return (
         <div
             className={clsx(`
-              univer-box-border univer-grid univer-max-h-[360px] univer-gap-1 univer-overflow-y-auto
-              univer-overflow-x-hidden univer-overscroll-contain univer-rounded-md univer-bg-gray-0 univer-px-2
-              univer-py-1 univer-text-sm univer-text-gray-900 univer-shadow-md
+              univer-box-border univer-grid univer-gap-1 univer-overflow-y-auto univer-overflow-x-hidden
+              univer-overscroll-contain univer-bg-gray-0 univer-px-2 univer-text-gray-900 univer-shadow-md
               dark:!univer-bg-gray-700 dark:!univer-text-gray-0
-            `, borderClassName, scrollbarClassName)}
+            `, borderClassName, scrollbarClassName, {
+                'univer-max-h-[min(42dvh,360px)] univer-w-[min(360px,calc(100vw-24px))] univer-rounded-2xl univer-py-2': mobile,
+                'univer-max-h-[360px] univer-rounded-md univer-py-1 univer-text-sm': !mobile,
+            })}
             onWheel={(event) => event.stopPropagation()}
         >
             {renderMenus(menus)}

@@ -17,17 +17,24 @@
 import type { ReactNode } from 'react';
 import type { LocaleKey } from '../../locale/types';
 import { ColumnSeparatorType, LocaleService, PageOrientType, SectionType } from '@univerjs/core';
-import { InputNumber, Select } from '@univerjs/design';
+import { ConfigContext, InputNumber, Select } from '@univerjs/design';
 import { UnitObject } from '@univerjs/protocol';
 import { useDependency, useObservable } from '@univerjs/ui';
-import { useEffect } from 'react';
+import { useContext, useEffect } from 'react';
 import { DocSectionSettingController } from '../../controllers/doc-section-setting.controller';
 import { DocObjectPermissionEntry } from '../permission/DocObjectPermissionEntry';
 import { useSectionSetting } from './use-section-setting';
 
 function SettingRow(props: { label: ReactNode; unit?: string; children: ReactNode }) {
+    const { mobile } = useContext(ConfigContext);
+
     return (
-        <div className="univer-grid univer-min-h-8 univer-items-center univer-gap-3" style={{ gridTemplateColumns: 'minmax(0, 1fr) minmax(140px, 160px)' }}>
+        <div
+            className={mobile
+                ? 'univer-flex univer-min-h-12 univer-flex-col univer-gap-2'
+                : 'univer-grid univer-min-h-8 univer-items-center univer-gap-3'}
+            style={mobile ? undefined : { gridTemplateColumns: 'minmax(0, 1fr) minmax(140px, 160px)' }}
+        >
             <div
                 className="
                   univer-min-w-0 univer-text-xs univer-leading-5 univer-text-gray-900
@@ -44,6 +51,7 @@ function SettingRow(props: { label: ReactNode; unit?: string; children: ReactNod
 
 export function SectionSetting() {
     const localeService = useDependency(LocaleService);
+    const { mobile } = useContext(ConfigContext);
     const controller = useDependency(DocSectionSettingController);
     const setting = useSectionSetting();
     useObservable(localeService.currentLocale$);
@@ -73,7 +81,7 @@ export function SectionSetting() {
             <div className="univer-grid univer-gap-3">
                 <SettingRow label={localeService.t<LocaleKey>('docs-ui.doc.slider.sectionSetting')}>
                     <Select
-                        className="univer-w-full"
+                        className={mobile ? 'univer-h-12 univer-w-full' : 'univer-w-full'}
                         value={setting.selectedSectionId ?? ''}
                         options={[
                             ...(setting.selectedSectionId == null
@@ -91,7 +99,7 @@ export function SectionSetting() {
                 <SettingRow label={localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.columnCount')}>
                     <InputNumber
                         aria-label={localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.columnCount')}
-                        className="univer-w-full"
+                        className={mobile ? 'univer-h-12 univer-w-full' : 'univer-w-full'}
                         min={1}
                         max={12}
                         step={1}
@@ -103,7 +111,7 @@ export function SectionSetting() {
                 <SettingRow label={localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.columnGap')} unit=" (px)">
                     <InputNumber
                         aria-label={localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.columnGap')}
-                        className="univer-w-full"
+                        className={mobile ? 'univer-h-12 univer-w-full' : 'univer-w-full'}
                         min={0}
                         max={1000}
                         step={1}
@@ -114,7 +122,7 @@ export function SectionSetting() {
                 </SettingRow>
                 <SettingRow label={localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.columnSeparator')}>
                     <Select
-                        className="univer-w-full"
+                        className={mobile ? 'univer-h-12 univer-w-full' : 'univer-w-full'}
                         value={setting.separatorType == null ? '' : `${setting.separatorType}`}
                         options={[
                             ...(setting.separatorType == null
@@ -132,7 +140,7 @@ export function SectionSetting() {
                 </SettingRow>
                 <SettingRow label={localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.sectionStart')}>
                     <Select
-                        className="univer-w-full"
+                        className={mobile ? 'univer-h-12 univer-w-full' : 'univer-w-full'}
                         value={setting.sectionType == null ? '' : `${setting.sectionType}`}
                         options={[
                             ...(setting.sectionType == null
@@ -158,7 +166,7 @@ export function SectionSetting() {
                 <SettingRow label={localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.pageWidth')} unit=" (px)">
                     <InputNumber
                         aria-label={localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.pageWidth')}
-                        className="univer-w-full"
+                        className={mobile ? 'univer-h-12 univer-w-full' : 'univer-w-full'}
                         min={1}
                         step={1}
                         precision={1}
@@ -169,7 +177,7 @@ export function SectionSetting() {
                 <SettingRow label={localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.pageHeight')} unit=" (px)">
                     <InputNumber
                         aria-label={localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.pageHeight')}
-                        className="univer-w-full"
+                        className={mobile ? 'univer-h-12 univer-w-full' : 'univer-w-full'}
                         min={1}
                         step={1}
                         precision={1}
@@ -179,7 +187,7 @@ export function SectionSetting() {
                 </SettingRow>
                 <SettingRow label={localeService.t<LocaleKey>('docs-ui.page-settings.orientation')}>
                     <Select
-                        className="univer-w-full"
+                        className={mobile ? 'univer-h-12 univer-w-full' : 'univer-w-full'}
                         value={setting.pageOrient == null ? '' : `${setting.pageOrient}`}
                         options={[
                             ...(setting.pageOrient == null
@@ -198,7 +206,7 @@ export function SectionSetting() {
                 <SettingRow label={localeService.t<LocaleKey>('docs-ui.page-settings.top')} unit=" (px)">
                     <InputNumber
                         aria-label={localeService.t<LocaleKey>('docs-ui.page-settings.top')}
-                        className="univer-w-full"
+                        className={mobile ? 'univer-h-12 univer-w-full' : 'univer-w-full'}
                         min={0}
                         step={1}
                         precision={1}
@@ -209,7 +217,7 @@ export function SectionSetting() {
                 <SettingRow label={localeService.t<LocaleKey>('docs-ui.page-settings.bottom')} unit=" (px)">
                     <InputNumber
                         aria-label={localeService.t<LocaleKey>('docs-ui.page-settings.bottom')}
-                        className="univer-w-full"
+                        className={mobile ? 'univer-h-12 univer-w-full' : 'univer-w-full'}
                         min={0}
                         step={1}
                         precision={1}
@@ -220,7 +228,7 @@ export function SectionSetting() {
                 <SettingRow label={localeService.t<LocaleKey>('docs-ui.page-settings.left')} unit=" (px)">
                     <InputNumber
                         aria-label={localeService.t<LocaleKey>('docs-ui.page-settings.left')}
-                        className="univer-w-full"
+                        className={mobile ? 'univer-h-12 univer-w-full' : 'univer-w-full'}
                         min={0}
                         step={1}
                         precision={1}
@@ -231,7 +239,7 @@ export function SectionSetting() {
                 <SettingRow label={localeService.t<LocaleKey>('docs-ui.page-settings.right')} unit=" (px)">
                     <InputNumber
                         aria-label={localeService.t<LocaleKey>('docs-ui.page-settings.right')}
-                        className="univer-w-full"
+                        className={mobile ? 'univer-h-12 univer-w-full' : 'univer-w-full'}
                         min={0}
                         step={1}
                         precision={1}
@@ -242,7 +250,7 @@ export function SectionSetting() {
                 <SettingRow label={localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.pageNumberStart')}>
                     <InputNumber
                         aria-label={localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.pageNumberStart')}
-                        className="univer-w-full"
+                        className={mobile ? 'univer-h-12 univer-w-full' : 'univer-w-full'}
                         min={1}
                         step={1}
                         precision={0}

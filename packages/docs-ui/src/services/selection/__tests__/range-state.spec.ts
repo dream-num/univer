@@ -80,6 +80,7 @@ function createTextRangeHarness(backgroundColor?: string, themeColors: Record<st
                 getRenderColor: (color: string) => themeColors[color] ?? color,
             },
         }),
+        getAncestorScale: () => ({ scaleX: 1, scaleY: 1 }),
     };
     const document = {
         getOffsetConfig: () => ({
@@ -222,6 +223,72 @@ describe('selection range state', () => {
         rangePointSpy.mockRestore();
     });
 
+    it('renders draggable mobile controls at both ends of an expanded text range', () => {
+        const { addedObjects, document, scene, skeleton } = createTextRangeHarness();
+        const rangePointSpy = vi.spyOn(NodePositionConvertToCursor.prototype, 'getRangePointData').mockImplementation((anchor, focus) => {
+            if (anchor?.glyph === focus?.glyph) {
+                return {
+                    contentBoxPointGroup: [[
+                        { x: anchor?.glyph === 1 ? 10 : 60, y: 20 },
+                        { x: anchor?.glyph === 1 ? 12 : 62, y: 20 },
+                        { x: anchor?.glyph === 1 ? 12 : 62, y: 36 },
+                        { x: anchor?.glyph === 1 ? 10 : 60, y: 36 },
+                    ]],
+                    borderBoxPointGroup: [],
+                    cursorList: [],
+                } as never;
+            }
+
+            return {
+                contentBoxPointGroup: [],
+                borderBoxPointGroup: [[
+                    { x: 10, y: 20 },
+                    { x: 60, y: 20 },
+                    { x: 60, y: 36 },
+                    { x: 10, y: 36 },
+                ]],
+                cursorList: [{ startOffset: 1, endOffset: 4, collapsed: false }],
+            } as never;
+        });
+        const range = new TextRange(
+            scene as never,
+            document as never,
+            skeleton as never,
+            createNodePosition(1) as never,
+            createNodePosition(4) as never,
+            undefined,
+            '',
+            -1
+        );
+
+        range.showMobileHandles('#0f6bdc', vi.fn());
+
+        expect(addedObjects).toHaveLength(5);
+        expect(addedObjects[1]).toMatchObject({ left: 14, top: 27, width: 2, height: 16, visible: true });
+        expect(addedObjects[2]).toMatchObject({ left: 64, top: 27, width: 2, height: 16, visible: true });
+        expect(addedObjects[3]).toMatchObject({
+            left: -1,
+            top: 11,
+            width: 32,
+            height: 32,
+            visualWidth: 12,
+            visualHeight: 12,
+            visible: true,
+        });
+        expect(addedObjects[4]).toMatchObject({
+            left: 49,
+            top: 27,
+            width: 32,
+            height: 32,
+            visualWidth: 12,
+            visualHeight: 12,
+            visible: true,
+        });
+
+        range.dispose();
+        rangePointSpy.mockRestore();
+    });
+
     it('returns empty positions for empty ranges and reports backward document selections', () => {
         const { document, scene, skeleton } = createTextRangeHarness();
         const emptyRange = new TextRange(scene as never, document as never, skeleton as never, null, null);
@@ -266,6 +333,8 @@ describe('selection range state', () => {
             _segmentId: '',
             _segmentPage: -1,
             _current: false,
+            _caretVisible: true,
+            _mobileHandlesVisible: false,
             _rangeShape: { dispose: vi.fn() },
             _anchorShape: { dispose: vi.fn(), hide: vi.fn(), show: vi.fn(), setProps: vi.fn() },
             _docSkeleton: {

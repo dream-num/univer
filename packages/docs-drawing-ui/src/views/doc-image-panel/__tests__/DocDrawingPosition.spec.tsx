@@ -16,7 +16,9 @@
 
 import type { DependencyIdentifier, DocumentDataModel, ICommand, IDocumentData } from '@univerjs/core';
 import type { Root } from 'react-dom/client';
+import { within } from '@testing-library/react';
 import {
+    DocumentFlavor,
     ICommandService,
     IUniverInstanceService,
     LocaleService,
@@ -27,6 +29,7 @@ import {
     UniverInstanceType,
     WrapTextType,
 } from '@univerjs/core';
+import { ConfigProvider } from '@univerjs/design';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { DocDrawingController, DocDrawingService, IDocDrawingService } from '@univerjs/docs-drawing';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
@@ -209,6 +212,7 @@ function createDocData(): IDocumentData {
         },
         drawingsOrder: [DRAWING_ID],
         documentStyle: {
+            documentFlavor: DocumentFlavor.TRADITIONAL,
             pageSize: {
                 width: 594.3,
                 height: 840.51,
@@ -252,13 +256,15 @@ function createPositionTestBed() {
     return testBed;
 }
 
-function renderPanel(root: Root, testBed: ReturnType<typeof createPositionTestBed>) {
+function renderPanel(root: Root, testBed: ReturnType<typeof createPositionTestBed>, mobile = false) {
     const drawing = testBed.doc.getSnapshot().drawings![DRAWING_ID];
 
     act(() => {
         root.render(
             <RediContext.Provider value={{ injector: testBed.injector }}>
-                <DocDrawingPosition drawings={[drawing as never]} />
+                <ConfigProvider mobile={mobile} mountContainer={document.body}>
+                    <DocDrawingPosition drawings={[drawing as never]} />
+                </ConfigProvider>
             </RediContext.Provider>
         );
     });
@@ -309,6 +315,32 @@ describe('DocDrawingPosition', () => {
     let root: Root | undefined;
     let container: HTMLDivElement | undefined;
     let currentTestBed: ReturnType<typeof createPositionTestBed> | undefined;
+
+    it('applies mobile position options without a dropdown and keeps selected state in sync', async () => {
+        const testBed = createPositionTestBed();
+        currentTestBed = testBed;
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        renderPanel(root, testBed, true);
+        const view = within(container);
+        const marginButton = view.getAllByRole('button', { name: 'Margin' })[0];
+
+        await act(async () => marginButton.click());
+        expect(currentDrawing(testBed).docTransform.positionH).toEqual({
+            relativeFrom: ObjectRelativeFromH.MARGIN,
+            posOffset: -90,
+        });
+        expect(marginButton.getAttribute('aria-pressed')).toBe('true');
+
+        await act(async () => setInputValue(getNumberInput(container!, 0), '36.5'));
+        expect(currentDrawing(testBed).docTransform.positionH.posOffset).toBe(36.5);
+
+        const follow = view.getByRole('switch');
+        await act(async () => follow.click());
+        expect(follow.getAttribute('aria-checked')).toBe('false');
+        expect(currentDrawing(testBed).docTransform.positionV.relativeFrom).toBe(ObjectRelativeFromV.PAGE);
+    });
 
     afterEach(() => {
         act(() => {

@@ -63,6 +63,12 @@ interface IMobileMenuProps extends IBaseMenuProps {
 }
 
 export function MobileMenu(props: IMobileMenuProps) {
+    const schemaKey = props.schemas?.map((schema) => schema.key).join('|') ?? '';
+
+    return <MobileMenuContent key={`${props.menuType ?? ''}:${schemaKey}`} {...props} />;
+}
+
+function MobileMenuContent(props: IMobileMenuProps) {
     const {
         menuType,
         onOptionSelect,
@@ -76,7 +82,6 @@ export function MobileMenu(props: IMobileMenuProps) {
     const localeService = useDependency(LocaleService);
     const menuManagerService = providedMenuManagerService ?? rootMenuManagerService;
     const [viewStack, setViewStack] = useState<MobileMenuView[]>([]);
-    const providedSchemaKey = providedSchemas?.map((schema) => schema.key).join('|');
 
     const menuSchemaVersion$ = useMemo(() => {
         return menuManagerService.menuChanged$.pipe(
@@ -84,23 +89,11 @@ export function MobileMenu(props: IMobileMenuProps) {
             startWith(0)
         );
     }, [menuManagerService]);
-    const menuSchemaVersion = useObservable(menuSchemaVersion$, 0);
+    useObservable(menuSchemaVersion$, 0);
 
-    const menuSchemas = useMemo(() => {
-        if (providedSchemas) {
-            return providedSchemas;
-        }
-
-        if (!menuType) {
-            return [];
-        }
-
-        return menuManagerService.getMenuByPositionKey(menuType);
-    }, [providedSchemas, menuManagerService, menuSchemaVersion, menuType]);
-
-    useEffect(() => {
-        setViewStack([]);
-    }, [menuType, providedSchemaKey]);
+    const menuSchemas = providedSchemas ?? (menuType
+        ? menuManagerService.getMenuByPositionKey(menuType)
+        : []);
 
     const currentView = viewStack[viewStack.length - 1] ?? null;
     const closeView = useCallback(() => setViewStack((stack) => stack.slice(0, -1)), []);
@@ -147,10 +140,8 @@ export function MobileMenu(props: IMobileMenuProps) {
                         className="
                           univer-flex univer-size-8 univer-appearance-none univer-items-center univer-justify-center
                           univer-rounded-full univer-border-0 univer-bg-transparent univer-p-0 univer-text-gray-700
-                          hover:univer-bg-gray-100
                           active:univer-bg-gray-200
                           dark:!univer-text-gray-300
-                          dark:hover:!univer-bg-gray-700
                           dark:active:!univer-bg-gray-600
                         "
                         onClick={closeView}
@@ -256,9 +247,10 @@ function MobileContextMenuBar(props: {
         <div
             role="menu"
             data-u-comp="mobile-context-menu-bar"
+            style={{ maxWidth: 'min(100%, calc(100vw - 16px))' }}
             className="
-              univer-flex univer-h-12 univer-max-w-full univer-items-stretch univer-overflow-hidden univer-rounded-lg
-              univer-bg-gray-0 univer-text-sm univer-text-gray-900 univer-shadow-lg
+              univer-flex univer-h-10 univer-max-w-full univer-items-stretch univer-overflow-hidden univer-rounded-lg
+              univer-bg-gray-0 univer-text-xs univer-text-gray-900 univer-shadow-lg
               dark:!univer-bg-gray-700 dark:!univer-text-gray-0
             "
         >
@@ -267,7 +259,7 @@ function MobileContextMenuBar(props: {
                     type="button"
                     aria-label={localeService.t<LocaleKey>('ui.navigation.back')}
                     className="
-                      univer-flex univer-w-11 univer-shrink-0 univer-items-center univer-justify-center univer-border-0
+                      univer-flex univer-w-9 univer-shrink-0 univer-items-center univer-justify-center univer-border-0
                       univer-border-r univer-border-solid univer-border-gray-200 univer-bg-transparent univer-text-base
                       univer-text-gray-700 univer-outline-none
                       focus-visible:univer-ring-2 focus-visible:univer-ring-inset focus-visible:univer-ring-primary-500
@@ -317,7 +309,7 @@ function MobileContextMenuBar(props: {
                     type="button"
                     aria-label={localeService.t<LocaleKey>('ui.navigation.next')}
                     className="
-                      univer-flex univer-w-11 univer-shrink-0 univer-items-center univer-justify-center univer-border-0
+                      univer-flex univer-w-9 univer-shrink-0 univer-items-center univer-justify-center univer-border-0
                       univer-border-l univer-border-solid univer-border-gray-200 univer-bg-transparent univer-text-base
                       univer-text-gray-700 univer-outline-none
                       focus-visible:univer-ring-2 focus-visible:univer-ring-inset focus-visible:univer-ring-primary-500
@@ -355,9 +347,9 @@ function MobileContextMenuItem(props: {
             role="menuitem"
             disabled={interaction.disabled}
             className="
-              univer-flex univer-min-w-[72px] univer-shrink-0 univer-snap-start univer-items-center
+              univer-flex univer-min-w-[60px] univer-shrink-0 univer-snap-start univer-items-center
               univer-justify-center univer-border-0 univer-border-r univer-border-solid univer-border-gray-200
-              univer-bg-transparent univer-px-4 univer-text-sm univer-text-gray-900 univer-outline-none
+              univer-bg-transparent univer-px-3 univer-text-xs univer-text-gray-900 univer-outline-none
               focus-visible:univer-ring-2 focus-visible:univer-ring-inset focus-visible:univer-ring-primary-500
               enabled:active:univer-bg-gray-100
               disabled:univer-opacity-40
@@ -392,9 +384,9 @@ function MobileContextMenuOption(props: {
             aria-pressed={displayValue === currentValue}
             disabled={disabled}
             className="
-              univer-flex univer-min-w-[72px] univer-shrink-0 univer-snap-start univer-items-center
+              univer-flex univer-min-w-[60px] univer-shrink-0 univer-snap-start univer-items-center
               univer-justify-center univer-border-0 univer-border-r univer-border-solid univer-border-gray-200
-              univer-bg-transparent univer-px-4 univer-text-sm univer-text-gray-900 univer-outline-none
+              univer-bg-transparent univer-px-3 univer-text-xs univer-text-gray-900 univer-outline-none
               focus-visible:univer-ring-2 focus-visible:univer-ring-inset focus-visible:univer-ring-primary-500
               enabled:active:univer-bg-gray-100
               disabled:univer-opacity-40
@@ -464,6 +456,20 @@ function MobileSchemaList(props: {
                     return null;
                 }
 
+                if (schema.quickLayout) {
+                    return (
+                        <MobileQuickSchemaGroup
+                            key={schema.key}
+                            schema={schema}
+                            menuManagerService={menuManagerService}
+                            onExecute={onExecute}
+                            onOpenView={onOpenView}
+                            inheritedDisabled$={inheritedDisabled$}
+                            bordered={index !== visibleSchemas.length - 1}
+                        />
+                    );
+                }
+
                 return (
                     <section
                         key={schema.key}
@@ -498,6 +504,102 @@ function MobileSchemaList(props: {
                 );
             })}
         </>
+    );
+}
+
+function MobileQuickSchemaGroup(props: {
+    schema: IMenuSchema;
+    menuManagerService: IMenuManagerService;
+    onExecute?: IBaseMenuProps['onOptionSelect'];
+    onOpenView: (view: MobileMenuView) => void;
+    inheritedDisabled$?: Observable<boolean>;
+    bordered: boolean;
+}) {
+    const { schema, menuManagerService, onExecute, onOpenView, inheritedDisabled$, bordered } = props;
+    const localeService = useDependency(LocaleService);
+    const columns = Math.max(2, Math.min(schema.quickColumns ?? 4, 5));
+
+    return (
+        <section className={clsx('univer-p-3', bordered && borderBottomClassName)}>
+            {schema.title && (
+                <div
+                    className="
+                      univer-px-1 univer-pb-2 univer-text-sm univer-font-semibold univer-text-gray-900
+                      dark:!univer-text-gray-100
+                    "
+                >
+                    {localeService.t(schema.title)}
+                </div>
+            )}
+            <div
+                className="univer-grid univer-gap-2"
+                style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}
+            >
+                {schema.children?.map((childSchema) => (
+                    <MobileQuickSchemaItem
+                        key={childSchema.key}
+                        schema={childSchema}
+                        menuManagerService={menuManagerService}
+                        onExecute={onExecute}
+                        onOpenView={onOpenView}
+                        inheritedDisabled$={inheritedDisabled$}
+                        compact={schema.quickLayoutVariant === 'compact'}
+                    />
+                ))}
+            </div>
+        </section>
+    );
+}
+
+function MobileQuickSchemaItem(props: {
+    schema: IMenuSchema;
+    menuManagerService: IMenuManagerService;
+    onExecute?: IBaseMenuProps['onOptionSelect'];
+    onOpenView: (view: MobileMenuView) => void;
+    inheritedDisabled$?: Observable<boolean>;
+    compact: boolean;
+}) {
+    const { schema, menuManagerService, onExecute, onOpenView, inheritedDisabled$, compact } = props;
+    const interaction = useMobileSchemaInteraction({ schema, menuManagerService, onOpenView, inheritedDisabled$ });
+
+    if (!interaction || interaction.hidden) {
+        return null;
+    }
+
+    const { menuItem, activated, disabled, value, onPress } = interaction;
+
+    return (
+        <button
+            type="button"
+            disabled={disabled}
+            aria-pressed={menuItem.type === MenuItemType.BUTTON_SELECTOR ? activated : undefined}
+            className={clsx(`
+              univer-relative univer-flex univer-w-full univer-appearance-none univer-flex-col univer-items-center
+              univer-justify-center univer-gap-1 univer-rounded-xl univer-border-0 univer-bg-gray-50 univer-p-2
+              univer-text-center univer-text-gray-900 univer-outline-none
+              focus-visible:univer-ring-2 focus-visible:univer-ring-inset focus-visible:univer-ring-primary-500
+              enabled:active:univer-scale-[0.98] enabled:active:univer-bg-gray-100
+              disabled:univer-opacity-40
+              dark:!univer-bg-gray-700 dark:!univer-text-gray-100
+              dark:enabled:active:!univer-bg-gray-600
+              [&>span]:univer-line-clamp-2 [&>span]:univer-text-xs [&>span]:univer-font-medium
+              [&>svg]:univer-size-6 [&>svg]:univer-shrink-0
+            `, compact ? 'univer-min-h-12' : 'univer-min-h-20', activated && `
+              univer-bg-primary-50 univer-text-primary-600
+              dark:!univer-bg-primary-900 dark:!univer-text-primary-300
+            `)}
+            onClick={() => onPress(onExecute)}
+        >
+            <CustomLabel
+                value={value}
+                title={menuItem.title ?? menuItem.tooltip}
+                label={menuItem.label}
+                icon={menuItem.icon}
+            />
+            {activated && (
+                <CheckMarkIcon className="univer-absolute univer-right-1.5 univer-top-1.5 univer-size-3.5" />
+            )}
+        </button>
     );
 }
 
@@ -575,11 +677,9 @@ function MobileSchemaRow(props: {
                   univer-border-0 univer-bg-gray-0 univer-px-4 univer-py-2 univer-text-left univer-outline-none
                   univer-transition-colors
                   focus-visible:univer-ring-2 focus-visible:univer-ring-inset focus-visible:univer-ring-primary-500
-                  enabled:hover:univer-bg-gray-50
                   enabled:active:univer-bg-gray-100
                   disabled:univer-cursor-not-allowed disabled:univer-opacity-40
                   dark:!univer-bg-gray-800
-                  dark:hover:!univer-bg-gray-700
                   dark:active:!univer-bg-gray-600
                 `,
                 bordered && borderBottomClassName
@@ -721,11 +821,9 @@ function MobileSelectionOptionRow(props: {
                   univer-gap-3 univer-border-0 univer-bg-gray-0 univer-px-4 univer-py-2 univer-text-left
                   univer-outline-none univer-transition-colors
                   focus-visible:univer-ring-2 focus-visible:univer-ring-inset focus-visible:univer-ring-primary-500
-                  enabled:hover:univer-bg-gray-50
                   enabled:active:univer-bg-gray-100
                   disabled:univer-cursor-not-allowed disabled:univer-opacity-40
                   dark:!univer-bg-gray-800
-                  dark:hover:!univer-bg-gray-700
                   dark:active:!univer-bg-gray-600
                 `,
                 bordered && borderBottomClassName
@@ -832,7 +930,7 @@ function useMobileSchemaInteraction(props: {
         }
 
         if (schemaChildren.length > 0) {
-            const schemas = menuItem.type === MenuItemType.BUTTON_SELECTOR && selections.length === 0
+            const schemas = menuItem.type === MenuItemType.BUTTON_SELECTOR
                 ? [{ ...schema, children: undefined }, ...schemaChildren]
                 : schemaChildren;
             onOpenView({

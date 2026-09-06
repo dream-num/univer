@@ -14,23 +14,26 @@
  * limitations under the License.
  */
 
-import type { IDrawingParam } from '@univerjs/core';
+import type { ICommandInfo, IDrawingParam } from '@univerjs/core';
+import type { ICloseImageCropOperationParams } from '../../commands/operations/image-crop.operation';
 import type { LocaleKey } from '../../locale/types';
 import { ICommandService, LocaleService } from '@univerjs/core';
-import { Button, clsx, Select } from '@univerjs/design';
+import { Button, clsx, ConfigContext, Select } from '@univerjs/design';
 import { CreateCopyIcon } from '@univerjs/icons';
 import { ComponentManager, useDependency, useObservable } from '@univerjs/ui';
-import { useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import {
     AutoImageCropOperation,
     CloseImageCropOperation,
     CropType,
 } from '../../commands/operations/image-crop.operation';
 import { DrawingImageClipService, IMAGE_CLIP_SHAPE_PICKER_COMPONENT } from '../../services/drawing-image-clip.service';
+import { MobileImageCropper } from './MobileImageCropper';
 
 export interface IImageCropperProps {
     drawings: IDrawingParam[];
     cropperShow: boolean;
+    onCropStart?: () => void;
 }
 
 export const ImageCropper = (props: IImageCropperProps) => {
@@ -39,11 +42,12 @@ export const ImageCropper = (props: IImageCropperProps) => {
     const clipService = useDependency(DrawingImageClipService);
     const componentManager = useDependency(ComponentManager);
     const canUseShapeClip = useObservable(clipService.canUseShapeClip$, false);
+    const { mobile } = useContext(ConfigContext);
 
     const { drawings, cropperShow } = props;
 
     const drawingParam = drawings[0];
-    const [cropValue, setCropValue] = useState<string>(CropType.FREE as string);
+    const [cropValue, setCropValue] = useState(CropType.FREE);
     const cropStateRef = useRef(false);
 
     const cropOptions = [
@@ -90,9 +94,9 @@ export const ImageCropper = (props: IImageCropperProps) => {
     ];
 
     useEffect(() => {
-        const onChangeStartObserver = commandService.onCommandExecuted((command) => {
+        const onChangeStartObserver = commandService.onCommandExecuted((command: ICommandInfo<ICloseImageCropOperationParams>) => {
             if (command.id === CloseImageCropOperation.id) {
-                const params = command.params as { isAuto?: boolean };
+                const params = command.params;
                 if (!params?.isAuto) {
                     cropStateRef.current = false;
                 }
@@ -102,27 +106,49 @@ export const ImageCropper = (props: IImageCropperProps) => {
         return () => {
             onChangeStartObserver?.dispose();
         };
-    }, []);
+    }, [commandService]);
 
     if (drawingParam == null) {
         return null;
     }
 
     function handleCropChange(value: string | number | boolean) {
-        setCropValue((value as string));
+        const cropType = cropOptions.find((option) => option.value === value)?.value;
+        if (cropType == null) {
+            return;
+        }
+        setCropValue(cropType);
         if (cropStateRef.current) {
             commandService.executeCommand(AutoImageCropOperation.id, {
-                cropType: value as CropType,
+                cropType,
             });
         }
     }
 
-    const onCropperBtnClick = (val: CropType) => {
-        commandService.executeCommand(AutoImageCropOperation.id, {
+    const onCropperBtnClick = async (val: CropType) => {
+        await commandService.executeCommand(AutoImageCropOperation.id, {
             cropType: val,
         });
         cropStateRef.current = true;
+        props.onCropStart?.();
     };
+
+    const ShapeClipPicker = canUseShapeClip ? componentManager.get(IMAGE_CLIP_SHAPE_PICKER_COMPONENT) : undefined;
+
+    if (mobile) {
+        return cropperShow
+            ? (
+                <MobileImageCropper
+                    cropValue={cropValue}
+                    cropOptions={cropOptions}
+                    onCropChange={handleCropChange}
+                    onStartCrop={() => onCropperBtnClick(cropValue)}
+                >
+                    {ShapeClipPicker && <ShapeClipPicker />}
+                </MobileImageCropper>
+            )
+            : null;
+    }
 
     return (
         <div
@@ -140,7 +166,7 @@ export const ImageCropper = (props: IImageCropperProps) => {
             </header>
 
             <div className="univer-flex univer-items-center univer-justify-center univer-gap-2">
-                <Button onClick={() => { onCropperBtnClick(cropValue as CropType); }}>
+                <Button onClick={() => onCropperBtnClick(cropValue)}>
                     <CreateCopyIcon />
                     {localeService.t<LocaleKey>('drawing-ui.image-panel.crop.start')}
                 </Button>
@@ -148,12 +174,7 @@ export const ImageCropper = (props: IImageCropperProps) => {
                 <Select value={cropValue} options={cropOptions} onChange={handleCropChange} />
             </div>
 
-            {canUseShapeClip && (() => {
-                const ShapeClipPicker = componentManager.get(IMAGE_CLIP_SHAPE_PICKER_COMPONENT);
-                return ShapeClipPicker
-                    ? <ShapeClipPicker />
-                    : null;
-            })()}
+            {ShapeClipPicker && <ShapeClipPicker />}
         </div>
     );
 };

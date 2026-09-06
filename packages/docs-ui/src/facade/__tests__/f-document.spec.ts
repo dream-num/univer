@@ -22,14 +22,16 @@ import { BooleanNumber, DocumentFlavor, ICommandService, IUniverInstanceService,
 import { FUniver } from '@univerjs/core/facade';
 import { DocLayoutExecutorService, DocSelectionManagerService, DocSkeletonManagerService, DocStateEmitService, SetTextSelectionsOperation } from '@univerjs/docs';
 import { CanvasColorService, ICanvasColorService, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
-import { ILayoutService } from '@univerjs/ui';
+import { CanvasPopupService, ContextMenuService, ICanvasPopupService, IContextMenuService, ILayoutService } from '@univerjs/ui';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DocBackScrollRenderController } from '../../controllers/render-controllers/back-scroll.render-controller';
 import { DocSelectionRenderController } from '../../controllers/render-controllers/doc-selection-render.controller';
 import { DocRenderController } from '../../controllers/render-controllers/doc.render-controller';
 import { DocLayoutInteractionService } from '../../services/doc-layout-interaction.service';
 import { DocMenuStyleService } from '../../services/doc-menu-style.service';
+import { DocMobileElementMenuService } from '../../services/doc-mobile-element-menu.service';
 import { DocPageLayoutService } from '../../services/doc-page-layout.service';
+import { DocCanvasPopManagerService } from '../../services/doc-popup-manager.service';
 import { DocViewScaleService } from '../../services/doc-view-scale';
 import { EditorService, IEditorService } from '../../services/editor/editor-manager.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
@@ -46,6 +48,10 @@ function createEditor() {
         registerContainerElement: () => ({ dispose() {} }),
     } as unknown as ILayoutService }]);
     injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+    injector.add([ICanvasPopupService, { useClass: CanvasPopupService }]);
+    injector.add([IContextMenuService, { useClass: ContextMenuService }]);
+    injector.add([DocCanvasPopManagerService]);
+    injector.add([DocMobileElementMenuService]);
     injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
     injector.add([DocLayoutExecutorService]);
     injector.add([DocSelectionManagerService]);

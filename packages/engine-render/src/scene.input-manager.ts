@@ -126,7 +126,7 @@ export class InputManager extends Disposable {
             (evt as unknown as PointerEvent).pointerId = 0;
         }
 
-        const currentObject = this._getObjectAtPos(evt.offsetX, evt.offsetY);
+        const currentObject = this._getObjectAtEvent(evt);
         const isStop = currentObject?.triggerClick(evt);
 
         if (!isStop && this._shouldDispatchEventToScene(currentObject)) {
@@ -139,7 +139,7 @@ export class InputManager extends Disposable {
             (evt as unknown as PointerEvent).pointerId = 0;
         }
 
-        const currentObject = this._getObjectAtPos(evt.offsetX, evt.offsetY);
+        const currentObject = this._getObjectAtEvent(evt);
         const isStop = currentObject?.triggerDblclick(evt);
 
         if (!isStop && this._shouldDispatchEventToScene(currentObject)) {
@@ -153,7 +153,7 @@ export class InputManager extends Disposable {
             evt.pointerId = 0;
         }
 
-        this._currentObject = this._getObjectAtPos(evt.offsetX, evt.offsetY);
+        this._currentObject = this._getObjectAtEvent(evt);
         this.mouseLeaveEnterHandler(evt);
     }
 
@@ -176,7 +176,7 @@ export class InputManager extends Disposable {
         if (this._pointerDownPosition && this._isPointerSwiping(evt.clientX, evt.clientY, this._pointerDownPosition)) {
             this._pointerDragged = true;
         }
-        const currentObject = this._currentObject = this._getObjectAtPos(evt.offsetX, evt.offsetY);
+        const currentObject = this._currentObject = this._getObjectAtEvent(evt);
 
         const isStop = (currentObject || this.capturedObject)?.triggerPointerMove(evt);
 
@@ -200,7 +200,7 @@ export class InputManager extends Disposable {
             this._resetClickSequence();
         }
 
-        const currentObject = this._getObjectAtPos(evt.offsetX, evt.offsetY);
+        const currentObject = this._getObjectAtEvent(evt);
         const isStop = currentObject?.triggerPointerDown(evt);
 
         if (!isStop && this._shouldDispatchEventToScene(currentObject)) {
@@ -218,7 +218,7 @@ export class InputManager extends Disposable {
             !this._isPointerSwiping(evt.clientX, evt.clientY, this._pointerDownPosition);
         this._pointerDownPosition = null;
 
-        const currentObject = this._getObjectAtPos(evt.offsetX, evt.offsetY);
+        const currentObject = this._getObjectAtEvent(evt);
         const isStop = currentObject?.triggerPointerUp(evt);
 
         if (!isStop && this._shouldDispatchEventToScene(currentObject)) {
@@ -236,13 +236,13 @@ export class InputManager extends Disposable {
         this._pointerDownPosition = null;
         this._resetClickSequence();
         this._scene.onPointerCancel$.emitEvent(evt);
-        const currentObject = this._getObjectAtPos(evt.offsetX, evt.offsetY);
+        const currentObject = this._getObjectAtEvent(evt);
         currentObject?.triggerPointerCancel(evt);
     }
 
     _onPointerOut(evt: IPointerEvent) {
         this._scene.onPointerOut$.emitEvent(evt);
-        const currentObject = this._getObjectAtPos(evt.offsetX, evt.offsetY);
+        const currentObject = this._getObjectAtEvent(evt);
         currentObject?.triggerPointerOut(evt);
     }
 
@@ -414,6 +414,28 @@ export class InputManager extends Disposable {
         return this._scene?.pick(Vector2.FromArray([offsetX, offsetY]));
     }
 
+    private _getObjectAtEvent(evt: IMouseEvent) {
+        if (evt.deviceType !== DeviceType.Touch) {
+            return this._getObjectAtPos(evt.offsetX, evt.offsetY);
+        }
+
+        const engine = this._scene.getEngine();
+        const canvas = engine?.getCanvasElement();
+        if (!engine || !canvas || !Number.isFinite(evt.clientX) || !Number.isFinite(evt.clientY)) {
+            return this._getObjectAtPos(evt.offsetX, evt.offsetY);
+        }
+
+        const rect = canvas.getBoundingClientRect();
+        if (rect.width <= 0 || rect.height <= 0) {
+            return this._getObjectAtPos(evt.offsetX, evt.offsetY);
+        }
+
+        return this._getObjectAtPos(
+            (evt.clientX - rect.left) * engine.width / rect.width,
+            (evt.clientY - rect.top) * engine.height / rect.height
+        );
+    }
+
     /**
      *
      * If currentObject is null, return true
@@ -504,13 +526,13 @@ export class InputManager extends Disposable {
         this._doubleClickOccurred += 1;
 
         if (this._tripleClickState) {
-            this._scene?.pick(Vector2.FromArray([evt.offsetX, evt.offsetY]))?.triggerTripleClick(evt);
+            this._getObjectAtEvent(evt)?.triggerTripleClick(evt);
 
             this._scene.onTripleClick$.emitEvent(evt);
         }
 
         if (this._doubleClickOccurred === 2) {
-            this._scene?.pick(Vector2.FromArray([evt.offsetX, evt.offsetY]))?.triggerDblclick(evt);
+            this._getObjectAtEvent(evt)?.triggerDblclick(evt);
 
             this._scene.onDblclick$.emitEvent(evt);
             this._resetDoubleClickParam();

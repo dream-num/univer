@@ -18,6 +18,7 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'drawing-ui': {
+        mobile: { close: 'Đóng', more: 'Thêm' },
         'image-cropper': {
             error: 'Không thể cắt phần tử không phải hình ảnh',
         },
@@ -88,6 +89,8 @@ const locale: typeof enUS = {
                 lock: 'Khóa tỷ lệ (%)',
             },
             crop: {
+                cancel: 'Hủy',
+                apply: 'Xong',
                 title: 'Cắt',
                 start: 'Bắt đầu cắt',
                 mode: 'Cắt tự do tỷ lệ',

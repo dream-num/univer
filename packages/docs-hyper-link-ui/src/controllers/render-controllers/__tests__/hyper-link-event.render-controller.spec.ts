@@ -14,11 +14,42 @@
  * limitations under the License.
  */
 
-import { CustomRangeType } from '@univerjs/core';
+import type { DocumentDataModel } from '@univerjs/core';
+import type { IRenderContext } from '@univerjs/engine-render';
+import { CustomRangeType, ICommandService, Univer } from '@univerjs/core';
+import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
+import { DocCanvasPopManagerService, DocEventManagerService, DocMobileElementMenuService } from '@univerjs/docs-ui';
+import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
+import { CanvasPopupService, ICanvasPopupService } from '@univerjs/ui';
 import { config, Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { ClickDocHyperLinkOperation } from '../../../commands/operations/popup.operation';
+import { DocHyperLinkPopupService } from '../../../services/hyper-link-popup.service';
 import { DocHyperLinkEventRenderController } from '../hyper-link-event.render-controller';
+
+function createController(
+    context: IRenderContext<DocumentDataModel>,
+    events: DocEventManagerService,
+    commands: ICommandService,
+    popup: DocHyperLinkPopupService,
+    skeleton: DocSkeletonManagerService,
+    selection: DocSelectionManagerService
+) {
+    const univer = new Univer();
+    const injector = univer.__getInjector();
+    injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+    injector.add([ICanvasPopupService, { useClass: CanvasPopupService }]);
+    injector.add([DocCanvasPopManagerService]);
+    injector.add([DocMobileElementMenuService]);
+    injector.add([DocEventManagerService, { useValue: events }]);
+    injector.add([DocHyperLinkPopupService, { useValue: popup }]);
+    injector.add([DocSkeletonManagerService, { useValue: skeleton }]);
+    injector.add([DocSelectionManagerService, { useValue: selection }]);
+    const child = injector.createChild([[ICommandService, { useValue: commands }]]);
+    const controller = child.createInstance(DocHyperLinkEventRenderController, context);
+    controller.disposeWithMe(() => univer.dispose());
+    return controller;
+}
 
 describe('DocHyperLinkEventRenderController', () => {
     it('ignores hover ranges when the current selection has no text ranges', async () => {
@@ -33,7 +64,7 @@ describe('DocHyperLinkEventRenderController', () => {
         config.onUnhandledError = onUnhandledError;
 
         try {
-            const controller = new DocHyperLinkEventRenderController(
+            const controller = createController(
                 { unitId: 'doc-unit' } as never,
                 { hoverCustomRanges$, clickCustomRanges$, pointerDownCustomRanges$ } as never,
                 commandService as never,
@@ -65,7 +96,7 @@ describe('DocHyperLinkEventRenderController', () => {
             showing: false,
             showInfoPopup: vi.fn(),
         };
-        const controller = new DocHyperLinkEventRenderController(
+        const controller = createController(
             { unitId: 'doc-unit' } as never,
             { hoverCustomRanges$, clickCustomRanges$, pointerDownCustomRanges$ } as never,
             commandService as never,
@@ -132,7 +163,7 @@ describe('DocHyperLinkEventRenderController', () => {
                 this.infoPopupPinned = options?.pinned ?? false;
             }),
         };
-        const controller = new DocHyperLinkEventRenderController(
+        const controller = createController(
             { unitId: 'doc-unit' } as never,
             { hoverCustomRanges$, clickCustomRanges$, pointerDownCustomRanges$ } as never,
             commandService as never,
@@ -175,7 +206,7 @@ describe('DocHyperLinkEventRenderController', () => {
             infoPopupPinned: false,
             scheduleHideInfoPopup: vi.fn(),
         };
-        const controller = new DocHyperLinkEventRenderController(
+        const controller = createController(
             { unitId: 'doc-unit' } as never,
             { hoverCustomRanges$, clickCustomRanges$, pointerDownCustomRanges$ } as never,
             commandService as never,
@@ -203,7 +234,7 @@ describe('DocHyperLinkEventRenderController', () => {
             showing: { linkId: 'link-1' },
             hideInfoPopupOnPointerDown: vi.fn(),
         };
-        const controller = new DocHyperLinkEventRenderController(
+        const controller = createController(
             { unitId: 'doc-unit' } as never,
             { hoverCustomRanges$, clickCustomRanges$, pointerDownCustomRanges$ } as never,
             commandService as never,

@@ -215,11 +215,16 @@ export function MobileDrawer(props: {
                 aria-label={ariaLabel}
                 data-u-comp={componentName}
                 data-snap={snap}
+                // Small form text triggers iOS focus zoom. Keep this local to mobile
+                // drawers, without overriding document/contenteditable text styles.
                 className={clsx(`
                   univer-absolute univer-inset-x-0 univer-bottom-0 univer-z-20 univer-flex univer-flex-col
                   univer-overflow-hidden univer-rounded-t-[24px] univer-bg-gray-50 univer-shadow-2xl
                   univer-transition-[height] univer-duration-200
                   dark:!univer-bg-gray-900
+                  [&_input]:!univer-text-base
+                  [&_select]:!univer-text-base
+                  [&_textarea]:!univer-text-base
                 `, dragPercent != null && '!univer-transition-none', panelClassName)}
                 style={{
                     height: `${drawerPercent}${viewportHeightUnit}`,

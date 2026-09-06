@@ -48,10 +48,14 @@ function transformUrl(urlStr: string) {
     return hasProtocol(urlStr) ? urlStr : isEmail(urlStr) ? `mailto://${urlStr}` : `https://${urlStr}`;
 }
 
-export const DocHyperLinkEdit = () => {
+interface IDocHyperLinkEditProps {
+    mobile?: boolean;
+}
+
+export const DocHyperLinkEdit = (props: IDocHyperLinkEditProps = {}) => {
     const hyperLinkService = useDependency(DocHyperLinkPopupService);
     const localeService = useDependency(LocaleService);
-    const editing = useObservable(hyperLinkService.editingLink$);
+    const editing = useObservable(hyperLinkService.editingLink$, hyperLinkService.editing);
     const commandService = useDependency(ICommandService);
     const univerInstanceService = useDependency(IUniverInstanceService);
 
@@ -102,7 +106,7 @@ export const DocHyperLinkEdit = () => {
             commandService.executeCommand(AddDocHyperLinkCommand.id, {
                 unitId: doc.getUnitId(),
                 payload: linkFinal,
-            });
+            }).catch(() => undefined);
         } else {
             if (isBlankInput(label)) {
                 return;
@@ -114,7 +118,7 @@ export const DocHyperLinkEdit = () => {
                 linkId: editing.linkId,
                 label,
                 segmentId: editing.segmentId,
-            });
+            }).catch(() => undefined);
         }
         hyperLinkService.hideEditPopup();
     };
@@ -125,11 +129,18 @@ export const DocHyperLinkEdit = () => {
 
     return (
         <div
-            className={clsx(`
-              univer-box-border univer-w-[328px] univer-rounded-xl univer-bg-gray-0 univer-px-6 univer-py-5
-              univer-shadow
-              dark:!univer-bg-gray-900
-            `, borderClassName)}
+            className={clsx(
+                `
+                  univer-box-border univer-bg-gray-0
+                  dark:!univer-bg-gray-900
+                `,
+                props.mobile
+                    ? 'univer-w-full univer-py-2'
+                    : `
+                      univer-w-[328px] univer-rounded-xl univer-px-6 univer-py-5 univer-shadow
+                      ${borderClassName}
+                    `
+            )}
         >
             <div>
                 {editing
@@ -158,7 +169,7 @@ export const DocHyperLinkEdit = () => {
                     <Input
                         value={link}
                         onChange={setLink}
-                        autoFocus
+                        autoFocus={!props.mobile || !editing}
                         onKeyDown={(evt) => {
                             if (evt.keyCode === KeyCode.ENTER) {
                                 handleConfirm();
@@ -167,12 +178,13 @@ export const DocHyperLinkEdit = () => {
                     />
                 </FormLayout>
             </div>
-            <div className="univer-flex univer-justify-end univer-gap-3">
-                <Button onClick={handleCancel}>
+            <div className={clsx('univer-flex univer-gap-3', props.mobile ? 'univer-mt-5' : 'univer-justify-end')}>
+                <Button className={props.mobile ? 'univer-h-12 univer-flex-1' : undefined} onClick={handleCancel}>
                     {localeService.t<LocaleKey>('docs-hyper-link-ui.edit.cancel')}
                 </Button>
                 <Button
                     variant="primary"
+                    className={props.mobile ? 'univer-h-12 univer-flex-1' : undefined}
                     disabled={isBlankInput(link)}
                     onClick={handleConfirm}
                 >

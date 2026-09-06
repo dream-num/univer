@@ -31,6 +31,7 @@ import {
 } from '@univerjs/core';
 import { IRenderManagerService, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import { ScrollToCellOperation, SheetsSelectionsService } from '@univerjs/sheets';
+import { MobileZoomIndicator } from '@univerjs/ui';
 import { ScrollCommand, SetScrollRelativeCommand } from '../../../commands/commands/set-scroll.command';
 import { ExpandSelectionCommand, MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../../commands/commands/set-selection.command';
 import { SetZoomRatioCommand } from '../../../commands/commands/set-zoom-ratio.command';
@@ -533,7 +534,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
         let pinchSheetPos: { x: number; y: number } | null = null;
 
         // Create zoom indicator overlay
-        const zoomIndicator = this._createZoomIndicator(canvasElement);
+        const zoomIndicator = new MobileZoomIndicator(canvasElement);
 
         /**
          * Convert touch event to offset coordinates relative to canvas
@@ -754,7 +755,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
                 initializePinchZoom(touch1, touch2);
 
                 // Show zoom indicator
-                this._showZoomIndicator(zoomIndicator, Math.round(initialZoomRatio * 100));
+                zoomIndicator.show(Math.round(initialZoomRatio * 100));
 
                 e.preventDefault();
                 return;
@@ -834,7 +835,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
                     applyZoomWithFocus(newZoomRatio, currentZoom);
 
                     // Update zoom indicator
-                    this._showZoomIndicator(zoomIndicator, Math.round(newZoomRatio * 100));
+                    zoomIndicator.show(Math.round(newZoomRatio * 100));
                 }
 
                 e.preventDefault();
@@ -929,7 +930,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
                     cancelInertiaAnimation();
                     velocityHistory.length = 0;
                     // Hide zoom indicator with delay
-                    this._hideZoomIndicator(zoomIndicator);
+                    zoomIndicator.hide();
                 }
                 return;
             }
@@ -984,7 +985,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
                 pinchCenterCellInfo = null;
                 pinchStartScrollPos = null;
                 pinchSheetPos = null;
-                this._hideZoomIndicator(zoomIndicator);
+                zoomIndicator.hide();
             }
             if (_touchScrolling) {
                 _touchScrolling = false;
@@ -1006,77 +1007,13 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
             canvasElement.removeEventListener('touchmove', handleTouchMove);
             canvasElement.removeEventListener('touchend', handleTouchEnd);
             canvasElement.removeEventListener('touchcancel', handleTouchCancel);
-            // Remove zoom indicator
-            if (zoomIndicator && zoomIndicator.parentElement) {
-                zoomIndicator.parentElement.removeChild(zoomIndicator);
-            }
+            zoomIndicator.dispose();
         }));
 
         // Note: We intentionally do NOT add handleScrollEnd listeners for onPointerLeave$/onPointerOut$
         // When using native touch events, the touch can move outside the spreadsheet area (into headers)
         // but the scroll should continue. The scroll will only end on touchend/touchcancel events.
         // This fixes the issue where scrolling would stop when finger moves over row/column headers.
-    }
-
-    /**
-     * Create zoom indicator overlay element
-     */
-    private _createZoomIndicator(canvasElement: HTMLCanvasElement): HTMLDivElement {
-        const container = canvasElement.parentElement;
-        if (!container) {
-            // Fallback: create a detached element
-            const div = document.createElement('div');
-            div.style.display = 'none';
-            return div;
-        }
-
-        const indicator = document.createElement('div');
-        indicator.style.cssText = `
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 24px;
-            font-weight: bold;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.15s ease-in-out;
-            z-index: 10000;
-            user-select: none;
-            -webkit-user-select: none;
-        `;
-
-        // Ensure container has relative positioning for absolute child
-        const containerPosition = window.getComputedStyle(container).position;
-        if (containerPosition === 'static') {
-            container.style.position = 'relative';
-        }
-
-        container.appendChild(indicator);
-        return indicator;
-    }
-
-    /**
-     * Show zoom indicator with percentage
-     */
-    private _showZoomIndicator(indicator: HTMLDivElement, percentage: number): void {
-        indicator.textContent = `${percentage}%`;
-        indicator.style.opacity = '1';
-    }
-
-    /**
-     * Hide zoom indicator with fade out
-     */
-    private _hideZoomIndicator(indicator: HTMLDivElement): void {
-        // Delay hiding to show final zoom value briefly
-        setTimeout(() => {
-            indicator.style.opacity = '0';
-        }, 300);
     }
 
     private _updateSceneSize(param: ISheetSkeletonManagerParam) {

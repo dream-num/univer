@@ -31,6 +31,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { canEditDocumentTargets, DocSelectionManagerService, getDocumentEditTargetObjectIds } from '@univerjs/docs';
+import { ContextMenuPosition, IContextMenuService, MOBILE_UI_MODE } from '@univerjs/ui';
 import { FLOAT_MENU_COMPONENT_KEY } from '../views/float-toolbar/FloatToolbar';
 import { IDocEmbedRuntimeFocusCoordinator } from './doc-embed-integration.service';
 import { DocLayoutInteractionService } from './doc-layout-interaction.service';
@@ -55,6 +56,7 @@ export class DocFloatMenuService extends Disposable implements IRenderModule {
         @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(DocSelectionRenderService) private readonly _docSelectionRenderService: DocSelectionRenderService,
         @IContextService private readonly _contextService: IContextService,
+        @IContextMenuService private readonly _contextMenuService: IContextMenuService,
         @IPermissionService private readonly _permissionService: IPermissionService,
         @Inject(DocLayoutInteractionService) private readonly _docLayoutInteractionService: DocLayoutInteractionService,
         @Optional(IDocEmbedRuntimeFocusCoordinator) private readonly _embedRuntimeFocusCoordinator?: IDocEmbedRuntimeFocusCoordinator
@@ -223,6 +225,26 @@ export class DocFloatMenuService extends Disposable implements IRenderModule {
         }
         const wholeCustomRanges = documentDataModel.getBody()?.customRanges?.filter((range) => range.wholeEntity);
         if (wholeCustomRanges?.some((customRange) => customRange.startIndex === range.startOffset && customRange.endIndex === range.endOffset - 1)) {
+            return;
+        }
+
+        if (this._contextService.getContextValue(MOBILE_UI_MODE)) {
+            const [anchor] = this._docCanvasPopManagerService.getRangeBounds(range, unitId) ?? [];
+            if (!anchor) {
+                return;
+            }
+
+            this._contextMenuService.triggerContextMenu({
+                clientX: (anchor.left + anchor.right) / 2,
+                clientY: anchor.top,
+                stopPropagation() {},
+            }, ContextMenuPosition.MAIN_AREA, { unitId, subUnitId: unitId });
+            this._floatMenu = {
+                disposable: toDisposable(() => this._contextMenuService.hideContextMenu()),
+                start: range.startOffset,
+                end: range.endOffset,
+                segmentId,
+            };
             return;
         }
 

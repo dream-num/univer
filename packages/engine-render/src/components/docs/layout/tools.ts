@@ -1880,6 +1880,8 @@ export interface ILayoutContext {
     // documentStyle: IDocumentStyle;
     // Configuration for document layout.
     docsConfig: IDocsConfig;
+    modernPageWidth?: number;
+    modernHorizontalMargin?: number;
     // The initial layout skeleton, it will be the empty skeleton if it's the first layout.
     skeleton: IDocumentSkeletonCached;
     // The position coordinates of the layout,
@@ -1989,17 +1991,19 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
     // If the configuration is in modern mode, use the style configuration of modern mode to overwrite the original configuration.
     // In modern mode, there are no pages, no sections, no columns. There are no headers and footers, and margins are all defaults.
     if (documentFlavor === DocumentFlavor.MODERN) {
-        const modernPageWidth = documentStyle.pageSize?.width ?? DEFAULT_MODERN_DOCUMENT_STYLE.pageSize!.width;
+        const modernPageWidth = ctx.modernPageWidth ?? documentStyle.pageSize?.width ?? DEFAULT_MODERN_DOCUMENT_STYLE.pageSize!.width;
         const modernPageSize = {
             ...DEFAULT_MODERN_DOCUMENT_STYLE.pageSize!,
             width: modernPageWidth,
         };
+        const modernHorizontalMargin = ctx.modernHorizontalMargin ?? DEFAULT_MODERN_DOCUMENT_STYLE.marginLeft;
+        const mobileMargins = { marginLeft: modernHorizontalMargin, marginRight: modernHorizontalMargin };
         // Imported sections can retain their own paper size. It must not
         // override the continuous page when the document switches to modern
         // mode, otherwise layout still paginates and pointer bounds stop at
         // the first sheet of paper while rendering merges the entire document.
-        sectionBreak = Object.assign({}, sectionBreak, DEFAULT_MODERN_SECTION_BREAK, { pageSize: modernPageSize });
-        documentStyle = Object.assign({}, documentStyle, DEFAULT_MODERN_DOCUMENT_STYLE, { pageSize: modernPageSize });
+        sectionBreak = Object.assign({}, sectionBreak, DEFAULT_MODERN_SECTION_BREAK, { pageSize: modernPageSize, ...mobileMargins });
+        documentStyle = Object.assign({}, documentStyle, DEFAULT_MODERN_DOCUMENT_STYLE, { pageSize: modernPageSize, ...mobileMargins });
     }
 
     const {

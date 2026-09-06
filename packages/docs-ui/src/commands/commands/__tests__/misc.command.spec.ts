@@ -95,7 +95,7 @@ import {
 import { HorizontalLineCommand, InsertHorizontalLineBellowCommand } from '../doc-horizontal-line.command';
 import { DocPageSetupCommand } from '../doc-page-setup.command';
 import { DocParagraphSettingCommand } from '../doc-paragraph-setting.command';
-import { DocSelectAllCommand } from '../doc-select-all.command';
+import { DocSelectAllCommand, DocSelectWordCommand } from '../doc-select-all.command';
 import { IMEInputCommand } from '../ime-input.command';
 import { InsertCustomRangeCommand } from '../insert-custom-range.command';
 import {
@@ -866,6 +866,30 @@ describe('misc document commands', () => {
                 startOffset: 0,
                 endOffset: 11,
             })],
+        }));
+
+        subscription.unsubscribe();
+    });
+
+    it('selects the word at a collapsed mobile caret', async () => {
+        ({ univer, get } = createCommandTestBed(createBaseDoc()));
+        commandService = get(ICommandService);
+        commandService.registerCommand(DocSelectWordCommand);
+        setCollapsedSelection(1);
+
+        const selectionManager = get(DocSelectionManagerService);
+        const refreshEvents: Array<unknown> = [];
+        const subscription = selectionManager.refreshSelection$.subscribe((event) => event && refreshEvents.push(event));
+
+        const result = await commandService.executeCommand(DocSelectWordCommand.id);
+        await awaitTime(0);
+
+        expect(result).toBe(true);
+        expect(refreshEvents.at(-1)).toEqual(expect.objectContaining({
+            unitId: 'test-doc',
+            subUnitId: 'test-doc',
+            isEditing: false,
+            docRanges: [expect.objectContaining({ startOffset: 0, endOffset: 5 })],
         }));
 
         subscription.unsubscribe();

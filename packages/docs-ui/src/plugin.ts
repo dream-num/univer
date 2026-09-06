@@ -64,7 +64,7 @@ import {
 } from './commands/commands/doc-horizontal-line.command';
 import { DocPageSetupCommand } from './commands/commands/doc-page-setup.command';
 import { DocParagraphSettingCommand } from './commands/commands/doc-paragraph-setting.command';
-import { DocSelectAllCommand } from './commands/commands/doc-select-all.command';
+import { DocSelectAllCommand, DocSelectWordCommand } from './commands/commands/doc-select-all.command';
 import { IMEInputCommand } from './commands/commands/ime-input.command';
 import {
     ResetInlineFormatTextBackgroundColorCommand,
@@ -184,6 +184,7 @@ import { DocIMEStateChangeInterceptorService } from './services/doc-ime-state-ch
 import { DocLayoutInteractionService } from './services/doc-layout-interaction.service';
 import { DocLayoutProgressService } from './services/doc-layout-progress.service';
 import { DocMenuStyleService, SetDocInputStyleCommand } from './services/doc-menu-style.service';
+import { DocMobileElementMenuService } from './services/doc-mobile-element-menu.service';
 import { DocPageLayoutService } from './services/doc-page-layout.service';
 import { DocParagraphMenuService } from './services/doc-paragraph-menu.service';
 import { DocCanvasPopManagerService } from './services/doc-popup-manager.service';
@@ -359,6 +360,7 @@ export class UniverDocsUIPlugin extends Plugin {
             CoverContentCommand,
             SetDocZoomRatioCommand,
             DocSelectAllCommand,
+            DocSelectWordCommand,
             DocParagraphSettingPanelOperation,
             DocSectionSettingPanelOperation,
             InsertDocumentColumnBreakOperation,
@@ -457,6 +459,7 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocHtmlExportService],
             [DocCanvasPopManagerService],
             [DocLayoutProgressService],
+            [DocMobileElementMenuService],
             [DocsRenderService],
             [IDocStateChangeInterceptorService, { useClass: DocIMEStateChangeInterceptorService }],
             [DocAutoFormatService],

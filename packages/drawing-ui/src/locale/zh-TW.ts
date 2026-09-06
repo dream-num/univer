@@ -18,6 +18,7 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'drawing-ui': {
+        mobile: { close: '關閉', more: '更多' },
         'image-cropper': {
             error: '無法裁切非圖片元素',
         },
@@ -88,6 +89,8 @@ const locale: typeof enUS = {
                 lock: '鎖定比例 (%)',
             },
             crop: {
+                cancel: '取消',
+                apply: '完成',
                 title: '裁切',
                 start: '開始裁切',
                 mode: '自由比例裁切',

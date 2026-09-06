@@ -36,6 +36,7 @@ export interface IDrawingCommonPanelProps {
     hasAlign?: boolean;
     hasCropper?: boolean;
     hasGroup?: boolean;
+    onCropStart?: () => void;
 }
 
 function getPanelShowState(drawings: IDrawingParam[]) {
@@ -124,7 +125,7 @@ export const DrawingCommonPanel = (props: IDrawingCommonPanelProps) => {
             <DrawingArrange arrangeShow={hasArrange === true ? arrangeShow : false} drawings={drawings} />
             <DrawingTransform transformShow={hasTransform === true ? transformShow : false} drawings={drawings} />
             <DrawingAlign alignShow={hasAlign === true ? alignShow : false} drawings={drawings} />
-            <ImageCropper cropperShow={hasCropper === true ? cropperShow : false} drawings={drawings} />
+            <ImageCropper cropperShow={hasCropper === true ? cropperShow : false} drawings={drawings} onCropStart={props.onCropStart} />
             <DrawingGroup hasGroup={hasGroup} drawings={drawings} />
         </>
     );

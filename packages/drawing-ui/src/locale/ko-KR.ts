@@ -18,6 +18,7 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'drawing-ui': {
+        mobile: { close: '닫기', more: '더 보기' },
         'image-cropper': {
             error: '이미지가 아닌 객체는 자를 수 없습니다.',
         },
@@ -88,6 +89,8 @@ const locale: typeof enUS = {
                 lock: '비율 고정 (%)',
             },
             crop: {
+                cancel: '취소',
+                apply: '완료',
                 title: '자르기',
                 start: '자르기 시작',
                 mode: '자유 모드',

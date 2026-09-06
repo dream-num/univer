@@ -34,6 +34,8 @@ export interface IDocumentLayoutSessionStartOptions {
     priorityAnchor?: number;
     invalidation?: IDocumentLayoutInvalidation;
     waitForHyphenationPatterns?: boolean;
+    modernPageWidth?: number;
+    modernHorizontalMargin?: number;
 }
 
 export interface IDocumentLayoutStepResult {

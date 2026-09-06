@@ -18,7 +18,9 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'thread-comment-ui': {
+        mobile: { back: 'بازگشت' },
         panel: {
+            title: 'مدیریت نظرات',
             empty: 'هنوز نظری وجود ندارد',
             reset: 'بازنشانی فیلتر',
             addComment: 'افزودن نظر',

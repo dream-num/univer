@@ -75,6 +75,33 @@ function renderWithDependencies(
 afterEach(cleanup);
 
 describe('MobileMenu', () => {
+    it('renders quick-layout groups as touch-friendly tiles', () => {
+        const onOptionSelect = vi.fn();
+        renderWithDependencies([{
+            key: 'common',
+            order: 0,
+            title: 'Common',
+            quickLayout: 'tile',
+            quickColumns: 3,
+            children: [{
+                key: 'image',
+                order: 0,
+                item: { id: 'image', type: MenuItemType.BUTTON, title: 'Image' },
+            }, {
+                key: 'table',
+                order: 1,
+                item: { id: 'table', type: MenuItemType.BUTTON, title: 'Table' },
+            }],
+        }], onOptionSelect);
+
+        expect(screen.getByText('Common')).toBeTruthy();
+        const image = screen.getByRole('button', { name: 'Image' });
+        expect(image.className).toContain('univer-min-h-20');
+        expect(image.parentElement?.getAttribute('style')).toContain('repeat(3');
+        fireEvent.click(image);
+        expect(onOptionSelect).toHaveBeenCalledWith(expect.objectContaining({ id: 'image' }));
+    });
+
     it('renders grouped context menu items as a horizontal text-only bar', () => {
         const onOptionSelect = vi.fn();
         renderWithDependencies([{
@@ -99,7 +126,11 @@ describe('MobileMenu', () => {
         const bar = document.querySelector('[data-u-comp="mobile-context-menu-bar"]');
         const copy = screen.getByRole('menuitem', { name: 'Copy' });
         expect(bar).toBeTruthy();
+        expect(bar?.className).toContain('univer-h-10');
+        expect(bar?.className).toContain('univer-text-xs');
         expect(copy.querySelector('svg')).toBeNull();
+        expect(copy.className).toContain('univer-min-w-[60px]');
+        expect(copy.className).toContain('univer-px-3');
         expect(copy.className).toContain('univer-snap-start');
         expect(copy.className).toContain('univer-outline-none');
 
@@ -324,6 +355,37 @@ describe('MobileMenu', () => {
 
         act(() => activated$.next(true));
         expect(toggle.getAttribute('aria-pressed')).toBe('true');
+    });
+
+    it('keeps button-selector choices available beside auxiliary submenu items', () => {
+        const onOptionSelect = vi.fn();
+
+        renderWithDependencies([{
+            key: 'color',
+            order: 0,
+            item: {
+                id: 'color.menu',
+                type: MenuItemType.BUTTON_SELECTOR,
+                title: 'Color',
+                value$: new BehaviorSubject('black'),
+                selections: [{ label: 'Black', value: 'black', commandId: 'color.command' }],
+            },
+            children: [{
+                key: 'color.reset',
+                order: 0,
+                item: { id: 'color.reset', type: MenuItemType.BUTTON, title: 'Reset' },
+            }],
+        }], onOptionSelect);
+
+        fireEvent.click(screen.getByRole('button', { name: /Color/ }));
+        fireEvent.click(screen.getByRole('button', { name: /Color/ }));
+        fireEvent.click(screen.getByRole('button', { name: 'Black' }));
+
+        expect(onOptionSelect).toHaveBeenCalledWith(expect.objectContaining({
+            id: 'color.menu',
+            commandId: 'color.command',
+            value: 'black',
+        }));
     });
 
     it('executes every supported actionable menu type with its command metadata', () => {

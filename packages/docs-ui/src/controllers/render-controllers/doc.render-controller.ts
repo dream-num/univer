@@ -39,7 +39,9 @@ import {
     CustomDecorationType,
     CustomRangeType,
     DocumentFlavor,
+    fromEventSubject,
     ICommandService,
+    IContextService,
     ILogService,
     Inject,
     isInternalEditorID,
@@ -67,7 +69,8 @@ import {
     ScrollBar,
     Viewport,
 } from '@univerjs/engine-render';
-import { combineLatest, fromEvent, merge, take, takeUntil } from 'rxjs';
+import { MOBILE_UI_MODE } from '@univerjs/ui';
+import { animationFrameScheduler, combineLatest, fromEvent, merge, take, takeUntil, throttleTime } from 'rxjs';
 import {
     DOCS_COMPONENT_BACKGROUND_LAYER_INDEX,
     DOCS_COMPONENT_DEFAULT_Z_INDEX,
@@ -91,6 +94,9 @@ import {
     getSingleBodyTextXActions,
     resolveMutationLayoutRequest,
 } from './doc-mutation-layout';
+
+const DOC_PAGE_MARGIN = 20;
+const MOBILE_DOC_OUTER_MARGIN = 12;
 
 function getTextXActionLength(action: unknown): number | undefined {
     if (typeof action !== 'object' || action == null || !('t' in action) || !('len' in action)) {
@@ -328,6 +334,8 @@ interface IDocLayoutScheduleOptions {
     anchor?: number;
     priorityAnchor?: number;
     invalidation?: IDocumentLayoutInvalidation;
+    modernPageWidth?: number;
+    modernHorizontalMargin?: number;
 }
 
 function mapPreviousOffsetToCurrent(
@@ -504,6 +512,7 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
     private _isMaterializingPages = false;
     private _reservedLayoutWidth = 0;
     private _reservedLayoutHeight = 0;
+    private _mobileModernPageWidth: number | undefined;
 
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
@@ -519,6 +528,7 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         @Inject(ThemeService) private readonly _themeService: ThemeService,
         @Inject(DocLayoutExecutorService) private readonly _docLayoutExecutorService: DocLayoutExecutorService,
         @Inject(DocLayoutInteractionService) private readonly _docLayoutInteractionService: DocLayoutInteractionService,
+        @IContextService private readonly _contextService: IContextService,
         @ILogService private readonly _logService: ILogService
     ) {
         super();
@@ -529,6 +539,7 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
 
         this._addNewRender();
         this._initRenderRefresh();
+        this._initMobileResponsiveLayout();
         this._initCommandListener();
         this._initInteractionLayoutProtection();
         this._initThemeListener();
@@ -670,9 +681,14 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
             // continue instead of replaying the stale pre-composition request.
             this._pendingImeLayoutRestart = null;
         }
+        const layoutOptions = {
+            ...options,
+            ...this._getMobileModernLayoutOptions(),
+        };
+        this._mobileModernPageWidth = layoutOptions.modernPageWidth;
         const layoutRequestId = ++this._layoutRequestId;
         this._cancelWorkerHandoff();
-        const isInitialLayout = options.reason === 'initial';
+        const isInitialLayout = layoutOptions.reason === 'initial';
         const docsComponent = this._context.mainComponent;
         if (!(docsComponent instanceof Documents)) {
             return;
@@ -682,35 +698,35 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         const mainThreadCallbacks = this._createLayoutCallbacks(
             unitId,
             skeleton,
-            options,
+            layoutOptions,
             refreshMainSelection,
             true,
             preserveInactiveViewportAnchor,
             undefined,
             false
         );
-        if (options.reuseMainBaseline) {
+        if (layoutOptions.reuseMainBaseline) {
             // Offset-preserving render metadata does not change Worker geometry.
             // Keep any older pending batch intact, but do not create a false
             // background-layout task for this Main-only publication.
-            this._layoutCoordinator.schedule(skeleton, options, mainThreadCallbacks);
+            this._layoutCoordinator.schedule(skeleton, layoutOptions, mainThreadCallbacks);
             return;
         }
         if (this._docLayoutExecutorService.getExecutor() == null) {
             this._pendingWorkerEditBatch = null;
-            this._layoutCoordinator.schedule(skeleton, options, mainThreadCallbacks);
+            this._layoutCoordinator.schedule(skeleton, layoutOptions, mainThreadCallbacks);
             return;
         }
         const workerOptions = isInitialLayout
-            ? options
-            : this._accumulateWorkerEditBatch(options);
+            ? layoutOptions
+            : this._accumulateWorkerEditBatch(layoutOptions);
         if (isInitialLayout) {
             this._pendingWorkerEditBatch = null;
             this._scheduleInitialInteractionWindow(
                 layoutRequestId,
                 unitId,
                 skeleton,
-                options,
+                layoutOptions,
                 workerOptions,
                 mainThreadCallbacks,
                 preserveInactiveViewportAnchor
@@ -722,7 +738,7 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
             layoutRequestId,
             unitId,
             skeleton,
-            options,
+            layoutOptions,
             workerOptions,
             mainThreadCallbacks,
             refreshMainSelection,
@@ -1640,14 +1656,74 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
     }
 
     private _shouldEnableHorizontalScrollBar(): boolean {
+        if (
+            this._contextService.getContextValue(MOBILE_UI_MODE) &&
+            this._context.unit.getSnapshot().documentStyle.documentFlavor === DocumentFlavor.MODERN
+        ) {
+            return false;
+        }
+
         const options = this._docViewScaleService.getOptions();
         return !(options.mode === 'fit-width' && options.target === 'container' && options.align === 'start');
     }
 
+    private _getMobileModernLayoutOptions(): Pick<IDocLayoutScheduleOptions, 'modernPageWidth' | 'modernHorizontalMargin'> {
+        if (
+            !this._contextService.getContextValue(MOBILE_UI_MODE) ||
+            this._context.unit.getSnapshot().documentStyle.documentFlavor !== DocumentFlavor.MODERN
+        ) {
+            return {};
+        }
+
+        const parentWidth = this._context.scene.getParent()?.width;
+        const availableWidth = parentWidth != null && parentWidth > 1
+            ? parentWidth
+            : this._context.engine.width;
+        if (!Number.isFinite(availableWidth) || availableWidth <= MOBILE_DOC_OUTER_MARGIN * 2) {
+            return {};
+        }
+
+        return {
+            modernPageWidth: availableWidth - MOBILE_DOC_OUTER_MARGIN * 2,
+            modernHorizontalMargin: DOC_PAGE_MARGIN,
+        };
+    }
+
+    private _initMobileResponsiveLayout(): void {
+        if (
+            !this._contextService.getContextValue(MOBILE_UI_MODE) ||
+            this._context.unit.getSnapshot().documentStyle.documentFlavor !== DocumentFlavor.MODERN
+        ) {
+            return;
+        }
+
+        this.disposeWithMe(fromEventSubject(this._context.engine.onTransformChange$).pipe(
+            throttleTime(0, animationFrameScheduler),
+            takeUntil(this.dispose$)
+        ).subscribe(() => {
+            const modernPageWidth = this._getMobileModernLayoutOptions().modernPageWidth;
+            if (
+                modernPageWidth == null ||
+                Math.abs(modernPageWidth - (this._mobileModernPageWidth ?? 0)) < 1
+            ) {
+                return;
+            }
+
+            const skeleton = this._docSkeletonManagerService.getSkeleton();
+            if (skeleton == null) {
+                return;
+            }
+
+            this._scheduleLayout(this._context.unitId, skeleton, { reason: 'initial' });
+        }));
+    }
+
     private _addComponent() {
         const { scene, unit: documentModel, components } = this._context;
-        const DEFAULT_PAGE_MARGIN_LEFT = 20;
-        const DEFAULT_PAGE_MARGIN_TOP = 20;
+        const DEFAULT_PAGE_MARGIN_LEFT = this._contextService.getContextValue(MOBILE_UI_MODE)
+            ? MOBILE_DOC_OUTER_MARGIN
+            : DOC_PAGE_MARGIN;
+        const DEFAULT_PAGE_MARGIN_TOP = DOC_PAGE_MARGIN;
         const config = {
             pageMarginLeft: DEFAULT_PAGE_MARGIN_LEFT,
             pageMarginTop: DEFAULT_PAGE_MARGIN_TOP,
@@ -1707,7 +1783,7 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         }
 
         this._recalculateSizeBySkeleton(skeleton);
-        this._refreshPagePositionAndSelection();
+        this._refreshPagePositionAndSelection(this._getActiveEditingRange(unitId) != null);
     }
 
     private _initCommandListener() {
@@ -1955,6 +2031,7 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
             documentFlavor,
             layoutProgress
         );
+        const sceneHeight = this._docPageLayoutService.resolveSceneHeight(height);
 
         docsComponent.resize(width, height);
         docBackground.resize(width, height);
@@ -1962,9 +2039,9 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         const editorRenderConfig = this._editorService.getEditorRenderConfig(unitId);
         if (
             (!editorRenderConfig || editorRenderConfig.scrollBar) &&
-            (scene.width !== width || scene.height !== height)
+            (scene.width !== width || scene.height !== sceneHeight)
         ) {
-            scene.transformByState({ width, height });
+            scene.transformByState({ width, height: sceneHeight });
         }
     }
 

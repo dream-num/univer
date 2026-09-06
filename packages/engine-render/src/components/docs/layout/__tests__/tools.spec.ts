@@ -692,6 +692,8 @@ describe('docs layout tools extra', () => {
 
         const ctx = {
             docsConfig: { locale: 'zh-CN' },
+            modernPageWidth: 390,
+            modernHorizontalMargin: 20,
             viewModel: {
                 getChildren: () => [{ endIndex: 9 }, { endIndex: 19 }],
                 getSectionBreak: vi.fn((endIndex: number) => {
@@ -729,7 +731,9 @@ describe('docs layout tools extra', () => {
         };
 
         const sectionConfig = prepareSectionBreakConfig(ctx as any, 0);
-        expect(sectionConfig.pageSize?.width).toBeGreaterThan(0);
+        expect(sectionConfig.pageSize?.width).toBe(390);
+        expect(sectionConfig.marginLeft).toBe(20);
+        expect(sectionConfig.marginRight).toBe(20);
         expect(sectionConfig.headerIds).toEqual({
             defaultHeaderId: '',
             evenPageHeaderId: '',

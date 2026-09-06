@@ -18,6 +18,7 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'drawing-ui': {
+        mobile: { close: 'إغلاق', more: 'المزيد' },
         'image-cropper': {
             error: 'لا يمكن قص الكائنات غير الصورية.',
         },
@@ -88,6 +89,8 @@ const locale: typeof enUS = {
                 lock: 'قفل النسبة (%)',
             },
             crop: {
+                cancel: 'إلغاء',
+                apply: 'تم',
                 title: 'قص',
                 start: 'بدء القص',
                 mode: 'حر',

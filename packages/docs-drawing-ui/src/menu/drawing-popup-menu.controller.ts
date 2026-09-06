@@ -15,7 +15,6 @@
  */
 
 import type { DocumentDataModel, IDisposable, INeedCheckDisposable, Nullable } from '@univerjs/core';
-import type { IDocDrawing } from '@univerjs/docs-drawing';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
 import {
     DrawingTypeEnum,
@@ -36,17 +35,18 @@ import {
     getDocumentEntityParentPermissionObjectIds,
     getDocumentEntityPermissionObjectId,
 } from '@univerjs/docs';
-import { IDocDrawingAdapterService, RemoveDocDrawingCommand } from '@univerjs/docs-drawing';
-import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
+import { IDocDrawingAdapterService, IDocDrawingService, RemoveDocDrawingCommand } from '@univerjs/docs-drawing';
+import { DocCanvasPopManagerService, MOBILE_DOC_ELEMENT_MENU } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import {
     COMPONENT_IMAGE_POPUP_MENU,
+    COMPONENT_MOBILE_IMAGE_POPUP_MENU,
     ImageCropperObject,
     ImageResetSizeOperation,
     OpenImageCropOperation,
 } from '@univerjs/drawing-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { FloatingObjectToolbarPosition, IMenuManagerService, MenuItemType } from '@univerjs/ui';
+import { FloatingObjectToolbarPosition, IMenuManagerService, MenuItemType, MOBILE_UI_MODE } from '@univerjs/ui';
 import { takeUntil } from 'rxjs';
 import { EditDocDrawingOperation } from '../commands/operations/edit-doc-drawing.operation';
 import { SidebarDocDrawingOperation } from '../commands/operations/open-drawing-panel.operation';
@@ -73,6 +73,7 @@ export class DocDrawingPopupMenuController extends RxDisposable {
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IContextService private readonly _contextService: IContextService,
         @IDocDrawingAdapterService private readonly _drawingAdapterService: IDocDrawingAdapterService,
+        @IDocDrawingService private readonly _docDrawingService: IDocDrawingService,
         @Inject(DocDrawingFloatingToolbarAdapterService) private readonly _floatingToolbarAdapterService: DocDrawingFloatingToolbarAdapterService,
         @ICommandService private readonly _commandService: ICommandService,
         @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
@@ -106,6 +107,17 @@ export class DocDrawingPopupMenuController extends RxDisposable {
                 }
             })
         );
+        this.disposeWithMe(this._drawingManagerService.remove$.subscribe((drawings) => {
+            for (const drawing of drawings) {
+                const key = `${drawing.unitId}:${drawing.subUnitId}:${drawing.drawingId}`;
+                for (const [unitId, targetKey] of this._popupTargetKeys) {
+                    if (targetKey === key) {
+                        this._clearPopups(unitId, true);
+                        this._renderManagerService.getRenderUnitById(unitId)?.scene.getTransformerByCreate().clearSelectedObjects();
+                    }
+                }
+            }
+        }));
         this.disposeWithMe(this._permissionService.permissionPointUpdate$.subscribe(() => {
             for (const [popupUnitId, drawing] of this._popupTargetsByUnit) {
                 if (!this._canEditDrawing(drawing.unitId, drawing.drawingId)) {
@@ -319,16 +331,34 @@ export class DocDrawingPopupMenuController extends RxDisposable {
                 const isImage = drawingType === DrawingTypeEnum.DRAWING_IMAGE;
                 // Charts use the document toolbar placement, while retaining chart-specific actions and controls.
                 const isChart = drawingType === DrawingTypeEnum.DRAWING_CHART;
+                const mobile = this._contextService.getContextValue(MOBILE_UI_MODE);
                 const popup = this._canvasPopManagerService.attachPopupToObject(
                     object,
                     {
-                        componentKey: COMPONENT_IMAGE_POPUP_MENU,
-                        // Object anchors follow transform updates. Keeping this toolbar
-                        // open must not suspend publication after a resize or move.
+                        componentKey: mobile
+                            ? (isImage || isChart ? COMPONENT_MOBILE_IMAGE_POPUP_MENU : MOBILE_DOC_ELEMENT_MENU)
+                            : COMPONENT_IMAGE_POPUP_MENU,
                         requiresStableLayout: false,
                         direction: isImage || isChart ? 'top-center' : 'horizontal',
                         offset: isImage || isChart ? [0, 8] : [2, 0],
                         extraProps: {
+                            onEdit: () => {
+                                const drawing = this._docDrawingService.getDrawingByParam(drawingParam);
+                                const edit = drawing && this._drawingAdapterService.getEditDrawingCommandInfo({
+                                    unitId: drawingUnitId,
+                                    subUnitId,
+                                    drawing,
+                                });
+                                this._clearPopups(unitId, true);
+                                return this._commandService.executeCommand(edit?.commandId ?? EditDocDrawingOperation.id, edit?.commandParams ?? { unitId: drawingUnitId, subUnitId, drawingId });
+                            },
+                            onDelete: () => {
+                                this._clearPopups(unitId, true);
+                                return this._commandService.executeCommand(RemoveDocDrawingCommand.id, {
+                                    unitId: drawingUnitId,
+                                    drawings: [{ unitId: drawingUnitId, subUnitId, drawingId }],
+                                });
+                            },
                             menuItems: this._getDrawingPopupMenuItems(drawingUnitId, subUnitId, drawingId, drawingType),
                             variant: isImage ? 'doc-floating-toolbar' : isChart ? 'doc-chart-floating-toolbar' : undefined,
                             unitId: drawingUnitId,
@@ -367,7 +397,7 @@ export class DocDrawingPopupMenuController extends RxDisposable {
     }
 
     private _getDrawingPopupMenuItems(unitId: string, subUnitId: string, drawingId: string, drawingType: number) {
-        const drawing = this._drawingManagerService.getDrawingByParam({ unitId, subUnitId, drawingId }) as IDocDrawing | null;
+        const drawing = this._docDrawingService.getDrawingByParam({ unitId, subUnitId, drawingId });
         const floatingToolbarMenuItems = drawing
             ? this._floatingToolbarAdapterService.getItems({ unitId, subUnitId, drawing })
             : null;
@@ -409,6 +439,18 @@ export class DocDrawingPopupMenuController extends RxDisposable {
                 disable: true, // TODO: @JOCS, feature is not ready.
             },
         ];
+
+        if (this._contextService.getContextValue(MOBILE_UI_MODE)) {
+            if (drawingType === DrawingTypeEnum.DRAWING_IMAGE) {
+                return defaultItems.slice(0, 3);
+            }
+            if (drawingType === DrawingTypeEnum.DRAWING_CHART) {
+                return [
+                    { ...defaultItems[0], label: 'docs-drawing-ui.image-popup.edit' },
+                    defaultItems[2],
+                ];
+            }
+        }
 
         return [
             ...(floatingToolbarMenuItems ?? defaultItems),

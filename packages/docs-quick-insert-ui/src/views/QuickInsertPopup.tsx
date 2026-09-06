@@ -24,8 +24,9 @@ import {
     LocaleService,
     toDisposable,
 } from '@univerjs/core';
+import { ConfigContext } from '@univerjs/design';
 import { IShortcutService, KeyCode, useDependency, useObservable } from '@univerjs/ui';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { CloseQuickInsertPopupOperation } from '../commands/operations/quick-insert-popup.operation';
 import { DocQuickInsertPopupService } from '../services/doc-quick-insert-popup.service';
 import { getQuickInsertMenuLeafCount, QuickInsertMenu } from './QuickInsertMenu';
@@ -77,6 +78,7 @@ export const QuickInsertPopup = () => {
     const docQuickInsertPopupService = useDependency(DocQuickInsertPopupService);
     const shortcutService = useDependency(IShortcutService);
     const commandService = useDependency(ICommandService);
+    const { mobile } = useContext(ConfigContext);
 
     const id = useMemo(() => generateRandomId(), []);
 
@@ -121,6 +123,10 @@ export const QuickInsertPopup = () => {
     }, []);
 
     useEffect(() => {
+        if (mobile) {
+            return;
+        }
+
         /** Use up or down to navigate the focused menu instead of moving the cursor in documents. */
         const disposableCollection = new DisposableCollection();
 
@@ -214,7 +220,7 @@ export const QuickInsertPopup = () => {
         return () => {
             disposableCollection.dispose();
         };
-    }, [commandService, id, shortcutService]);
+    }, [commandService, id, mobile, shortcutService]);
 
     useEffect(() => {
         setFocusedMenuIndex(0);
@@ -225,7 +231,7 @@ export const QuickInsertPopup = () => {
     const Placeholder = currentPopup?.popup.Placeholder || QuickInsertPlaceholder;
 
     return (
-        <div className="univer-mt-2">
+        <div className={mobile ? 'univer-mt-1' : 'univer-mt-2'}>
             {hasMenus
                 ? (
                     <QuickInsertMenu

@@ -24,17 +24,19 @@ export function getDocImageCropUpdates(
     renderDrawing: IImageData | undefined | null
 ): IDrawingDocTransform[] {
     const { drawingId, transform } = param;
-    // Transformer updates also carry an undefined srcRect for uncropped images.
-    // Their size is already persisted by the document transformer controller.
-    if (transform == null || param.srcRect === undefined) {
-        return [];
-    }
-
     if (docDrawing?.drawingType !== DrawingTypeEnum.DRAWING_IMAGE || renderDrawing?.transform == null) {
         return [];
     }
+    const shapeKeys: Array<'prstGeom' | 'adjustValues'> = ['prstGeom', 'adjustValues'];
+    const drawings: IDrawingDocTransform[] = shapeKeys
+        .filter((key) => Object.prototype.hasOwnProperty.call(param, key))
+        .map((key) => ({ drawingId, key, value: param[key] ?? null }));
+    // Transformer updates without crop data already persist size through the transformer controller.
+    if (transform == null || param.srcRect === undefined) {
+        return drawings;
+    }
     const nextTransform = { ...renderDrawing.transform, ...transform };
-    const drawings: IDrawingDocTransform[] = [{ drawingId, key: 'srcRect', value: param.srcRect }];
+    drawings.push({ drawingId, key: 'srcRect', value: param.srcRect });
 
     if (nextTransform.width != null && nextTransform.height != null) {
         drawings.push({

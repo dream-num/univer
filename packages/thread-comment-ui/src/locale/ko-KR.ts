@@ -18,7 +18,9 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'thread-comment-ui': {
+        mobile: { back: '뒤로' },
         panel: {
+            title: '댓글 관리',
             empty: '아직 댓글이 없습니다',
             reset: '필터 초기화',
             addComment: '댓글 추가',

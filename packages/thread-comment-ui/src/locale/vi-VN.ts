@@ -18,7 +18,9 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'thread-comment-ui': {
+        mobile: { back: 'Quay lại' },
         panel: {
+            title: 'Quản lý Bình luận',
             empty: 'Chưa có bình luận',
             reset: 'Đặt lại',
             addComment: 'Thêm bình luận',

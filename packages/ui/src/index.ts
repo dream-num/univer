@@ -168,6 +168,7 @@ export { PrintFloatDomSingle } from './views/components/dom/Print';
 export { HOVER_TRACK_HOST_CLASS_NAME, HoverTrack } from './views/components/hover-track/HoverTrack';
 export { MobileDrawer } from './views/components/mobile-drawer/MobileDrawer';
 export type { MobileDrawerSnap } from './views/components/mobile-drawer/MobileDrawer';
+export { MobileZoomIndicator } from './views/components/mobile-zoom-indicator/mobile-zoom-indicator';
 export { CanvasPopup, SingleCanvasPopup } from './views/components/popup/CanvasPopup';
 export { RectPopup } from './views/components/popup/RectPopup';
 export type { RectPopupDirection } from './views/components/popup/RectPopup';

@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, ICommandInfo, IDrawingParam, IObjectPositionH, IObjectPositionV, Nullable } from '@univerjs/core';
-import type { IDocDrawing, IUpdateDrawingDocTransformCommandParams } from '@univerjs/docs-drawing';
+import type { IUpdateDrawingDocTransformCommandParams } from '@univerjs/docs-drawing';
 import type { IDocumentSkeletonDrawing } from '@univerjs/engine-render';
 import type { LocaleKey } from '../../locale/types';
 import {
@@ -28,14 +28,15 @@ import {
     PositionedObjectLayoutType,
     UniverInstanceType,
 } from '@univerjs/core';
-import { Checkbox, clsx, InputNumber, Select } from '@univerjs/design';
+import { Checkbox, clsx, ConfigContext, InputNumber, Select } from '@univerjs/design';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { UpdateDrawingDocTransformCommand } from '@univerjs/docs-drawing';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useDependency } from '@univerjs/ui';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
+import { MobileDocDrawingPosition } from './MobileDocDrawingPosition';
 
 const MIN_OFFSET = -1000;
 const MAX_OFFSET = 1000;
@@ -58,10 +59,11 @@ function DocDrawingPositionContent(props: IDocDrawingPositionProps) {
     const drawingManagerService = useDependency(IDrawingManagerService);
     const renderManagerService = useDependency(IRenderManagerService);
     const univerInstanceService = useDependency(IUniverInstanceService);
+    const { mobile } = useContext(ConfigContext);
 
     const { drawings } = props;
 
-    const drawingParam = drawings[0] as IDocDrawing;
+    const drawingParam = drawings[0];
 
     const { unitId } = drawingParam;
 
@@ -117,12 +119,6 @@ function DocDrawingPositionContent(props: IDocDrawingPositionProps) {
         direction: 'positionH' | 'positionV',
         value: IObjectPositionH | IObjectPositionV
     ) {
-        if (direction === 'positionH') {
-            setHPosition(value as IObjectPositionH);
-        } else {
-            setVPosition(value as IObjectPositionV);
-        }
-
         const focusDrawings = drawingManagerService.getFocusDrawings();
         if (focusDrawings.length === 0) {
             return;
@@ -138,7 +134,7 @@ function DocDrawingPositionContent(props: IDocDrawingPositionProps) {
 
         commandService.executeCommand<IUpdateDrawingDocTransformCommandParams>(UpdateDrawingDocTransformCommand.id, {
             unitId: focusDrawings[0].unitId,
-            subUnitId: focusDrawings[0].unitId,
+            subUnitId: focusDrawings[0].subUnitId,
             drawings: drawings.map((drawing) => ({
                 drawingId: drawing.drawingId,
                 key: direction,
@@ -158,7 +154,11 @@ function DocDrawingPositionContent(props: IDocDrawingPositionProps) {
     function handleHorizontalRelativeFromChange(value: string) {
         const prevRelativeFrom = hPosition.relativeFrom;
         const prevPosOffset = hPosition.posOffset;
-        const relativeFrom = Number(value) as ObjectRelativeFromH;
+        const relativeFrom = [ObjectRelativeFromH.COLUMN, ObjectRelativeFromH.PAGE, ObjectRelativeFromH.MARGIN]
+            .find((reference) => String(reference) === value);
+        if (relativeFrom == null) {
+            return;
+        }
 
         if (prevRelativeFrom === relativeFrom) {
             return;
@@ -241,7 +241,11 @@ function DocDrawingPositionContent(props: IDocDrawingPositionProps) {
     function handleVerticalRelativeFromChange(value: string) {
         const prevRelativeFrom = vPosition.relativeFrom;
         const prevPosOffset = vPosition.posOffset;
-        const relativeFrom = Number(value) as ObjectRelativeFromV;
+        const relativeFrom = [ObjectRelativeFromV.LINE, ObjectRelativeFromV.PAGE, ObjectRelativeFromV.MARGIN, ObjectRelativeFromV.PARAGRAPH]
+            .find((reference) => String(reference) === value);
+        if (relativeFrom == null) {
+            return;
+        }
 
         if (prevRelativeFrom === relativeFrom) {
             return;
@@ -307,41 +311,39 @@ function DocDrawingPositionContent(props: IDocDrawingPositionProps) {
         handlePositionChange('positionV', newPositionV);
     }
 
-    function updateState(drawingParam: IDrawingParam) {
-        const snapshot = documentDataModel?.getSnapshot();
-        const drawing = snapshot?.drawings?.[drawingParam.drawingId];
-        if (drawing == null) {
-            return;
-        }
-
-        const { layoutType } = drawing;
-        const {
-            positionH,
-            positionV,
-        } = drawing.docTransform;
-
-        setHPosition(positionH);
-        setVPosition(positionV);
-        setDisabled(layoutType === PositionedObjectLayoutType.INLINE);
-        setFollowTextMove(positionV.relativeFrom === ObjectRelativeFromV.PARAGRAPH || positionV.relativeFrom === ObjectRelativeFromV.LINE);
-    }
-
-    function updateFocusDrawingState() {
-        const focusDrawings = drawingManagerService.getFocusDrawings();
-        if (focusDrawings.length === 0) {
-            return;
-        }
-
-        updateState(focusDrawings[0]);
-    }
-
     function handleFollowTextMoveCheck(val: string | number | boolean) {
-        setFollowTextMove(val as boolean);
-
         handleVerticalRelativeFromChange(val ? String(ObjectRelativeFromV.PARAGRAPH) : String(ObjectRelativeFromV.PAGE));
     }
 
     useEffect(() => {
+        function updateState(drawingParam: IDrawingParam) {
+            const snapshot = documentDataModel?.getSnapshot();
+            const drawing = snapshot?.drawings?.[drawingParam.drawingId];
+            if (drawing == null) {
+                return;
+            }
+
+            const { layoutType } = drawing;
+            const {
+                positionH,
+                positionV,
+            } = drawing.docTransform;
+
+            setHPosition(positionH);
+            setVPosition(positionV);
+            setDisabled(layoutType === PositionedObjectLayoutType.INLINE);
+            setFollowTextMove(positionV.relativeFrom === ObjectRelativeFromV.PARAGRAPH || positionV.relativeFrom === ObjectRelativeFromV.LINE);
+        }
+
+        function updateFocusDrawingState() {
+            const focusDrawings = drawingManagerService.getFocusDrawings();
+            if (focusDrawings.length === 0) {
+                return;
+            }
+
+            updateState(focusDrawings[0]);
+        }
+
         // Get the init focus drawing position.
         updateFocusDrawingState();
 
@@ -367,7 +369,30 @@ function DocDrawingPositionContent(props: IDocDrawingPositionProps) {
             subscription.unsubscribe();
             mutationListener.dispose();
         };
-    }, []);
+    }, [commandService, documentDataModel, drawingManagerService]);
+
+    if (mobile) {
+        return showPanel
+            ? (
+                <MobileDocDrawingPosition
+                    disabled={disabled}
+                    followTextMove={followTextMove}
+                    disableFollowTextMove={documentFlavor === DocumentFlavor.MODERN}
+                    hPosition={hPosition}
+                    vPosition={vPosition}
+                    horizontalOptions={HORIZONTAL_RELATIVE_FROM}
+                    verticalOptions={VERTICAL_RELATIVE_FROM}
+                    minOffset={MIN_OFFSET}
+                    maxOffset={MAX_OFFSET}
+                    onHorizontalOffsetChange={(posOffset) => handlePositionChange('positionH', { ...hPosition, posOffset })}
+                    onVerticalOffsetChange={(posOffset) => handlePositionChange('positionV', { ...vPosition, posOffset })}
+                    onHorizontalReferenceChange={handleHorizontalRelativeFromChange}
+                    onVerticalReferenceChange={handleVerticalRelativeFromChange}
+                    onFollowTextMoveChange={handleFollowTextMoveCheck}
+                />
+            )
+            : null;
+    }
 
     return (
         <div
@@ -408,9 +433,12 @@ function DocDrawingPositionContent(props: IDocDrawingPositionProps) {
                         disabled={disabled}
                         value={hPosition.posOffset}
                         onChange={(val) => {
+                            if (val == null) {
+                                return;
+                            }
                             handlePositionChange('positionH', {
                                 relativeFrom: hPosition.relativeFrom,
-                                posOffset: val as number,
+                                posOffset: val,
                             });
                         }}
                     />
@@ -450,9 +478,12 @@ function DocDrawingPositionContent(props: IDocDrawingPositionProps) {
                         disabled={disabled}
                         value={vPosition.posOffset}
                         onChange={(val) => {
+                            if (val == null) {
+                                return;
+                            }
                             handlePositionChange('positionV', {
                                 relativeFrom: vPosition.relativeFrom,
-                                posOffset: val as number,
+                                posOffset: val,
                             });
                         }}
                     />

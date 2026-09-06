@@ -199,6 +199,13 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
                     order: 3,
                 },
             },
+            [ContextMenuPosition.DOC_CARET]: {
+                order: 0,
+                [ContextMenuGroup.QUICK]: {
+                    order: -1,
+                    quickLayout: 'tile',
+                },
+            },
             [ContextMenuPosition.PARAGRAPH]: {
                 order: 0,
                 [ContextMenuGroup.QUICK]: {

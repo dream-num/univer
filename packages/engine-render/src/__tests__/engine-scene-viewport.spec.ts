@@ -657,6 +657,37 @@ describe('engine scene viewport extra', () => {
         engine.dispose();
     });
 
+    it('uses canvas-relative client coordinates to pick touch targets', () => {
+        const { engine, scene } = createFixture();
+        scene.attachControl();
+        engine.getCanvasElement().getBoundingClientRect = () => ({
+            bottom: 560,
+            height: 360,
+            left: 100,
+            right: 740,
+            top: 200,
+            width: 640,
+            x: 100,
+            y: 200,
+            toJSON: () => ({}),
+        } as DOMRect);
+        const pick = vi.spyOn(scene, 'pick');
+
+        engine.onInputChanged$.emitEvent(createInputEvent('pointerdown', {
+            clientX: 136,
+            clientY: 240,
+            deviceType: DeviceType.Touch,
+            offsetX: 18,
+            offsetY: -160,
+            pointerType: 'touch',
+        }));
+
+        expect(pick).toHaveBeenCalledWith(expect.objectContaining({ x: 18, y: 20 }));
+
+        scene.dispose();
+        engine.dispose();
+    });
+
     it('throws when subscribing clientRect$ without mounting container', () => {
         const engine = new Engine('unit-b', { elementWidth: 1, elementHeight: 1, dpr: 1 });
         const onError = vi.fn();

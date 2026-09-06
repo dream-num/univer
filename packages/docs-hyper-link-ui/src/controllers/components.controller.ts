@@ -19,6 +19,8 @@ import { LinkIcon } from '@univerjs/icons';
 import { ComponentManager, IconManager } from '@univerjs/ui';
 import { DocHyperLinkEdit } from '../views/DocHyperLinkEdit';
 import { DocLinkPopup } from '../views/DocLinkPopup';
+import { MobileDocHyperLinkEdit } from '../views/MobileDocHyperLinkEdit';
+import { MobileDocLinkPopup } from '../views/MobileDocLinkPopup';
 
 export class ComponentsController extends Disposable {
     constructor(
@@ -35,6 +37,8 @@ export class ComponentsController extends Disposable {
         ([
             [DocHyperLinkEdit.componentKey, DocHyperLinkEdit],
             [DocLinkPopup.componentKey, DocLinkPopup],
+            [MobileDocHyperLinkEdit.componentKey, MobileDocHyperLinkEdit],
+            [MobileDocLinkPopup.componentKey, MobileDocLinkPopup],
         ] as const).forEach(([key, comp]) => {
             this.disposeWithMe(
                 this._componentManager.register(key, comp)

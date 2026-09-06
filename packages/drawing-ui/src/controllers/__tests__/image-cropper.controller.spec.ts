@@ -15,13 +15,13 @@
  */
 
 import type { ICommandInfo } from '@univerjs/core';
-import { DrawingTypeEnum } from '@univerjs/core';
+import { ContextService, DrawingTypeEnum, ICommandService, IContextService, Injector, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
-import { getDrawingShapeKeyByDrawingSearch, SetDrawingSelectedOperation } from '@univerjs/drawing';
-import { CURSOR_TYPE, Image } from '@univerjs/engine-render';
-import { KeyCode } from '@univerjs/ui';
+import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService, SetDrawingSelectedOperation } from '@univerjs/drawing';
+import { CURSOR_TYPE, Image, IRenderManagerService } from '@univerjs/engine-render';
+import { ILayoutService, IMessageService, IShortcutService, KeyCode, MOBILE_UI_MODE } from '@univerjs/ui';
 import { Subject } from 'rxjs';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { AutoImageCropOperation, CloseImageCropOperation, CropType, OpenImageCropOperation } from '../../commands/operations/image-crop.operation';
 import { ImageCropperObject } from '../../views/crop/image-cropper-object';
 import { ImageCropperController } from '../image-cropper.controller';
@@ -32,6 +32,40 @@ function createImage(id: string) {
     Object.defineProperty(img, 'height', { value: 50, configurable: true });
     return new Image(id, { image: img });
 }
+
+const injectors: Injector[] = [];
+
+function createController(
+    command: ICommandService,
+    drawing: IDrawingManagerService,
+    render: IRenderManagerService,
+    instance: IUniverInstanceService,
+    message: IMessageService,
+    locale: LocaleService,
+    shortcut: IShortcutService,
+    layout: ILayoutService,
+    mobile = false
+) {
+    const injector = new Injector([
+        [ICommandService, { useValue: command }],
+        [IDrawingManagerService, { useValue: drawing }],
+        [IRenderManagerService, { useValue: render }],
+        [IUniverInstanceService, { useValue: instance }],
+        [IMessageService, { useValue: message }],
+        [LocaleService, { useValue: locale }],
+        [IShortcutService, { useValue: shortcut }],
+        [ILayoutService, { useValue: layout }],
+        [IContextService, { useClass: ContextService }],
+        [ImageCropperController],
+    ]);
+    injectors.push(injector);
+    injector.get(IContextService).setContextValue(MOBILE_UI_MODE, mobile);
+    return injector.get(ImageCropperController);
+}
+
+afterEach(() => {
+    injectors.splice(0).forEach((injector) => injector.dispose());
+});
 
 describe('ImageCropperController', () => {
     it('auto crops focused image and opens crop panel', () => {
@@ -73,7 +107,7 @@ describe('ImageCropperController', () => {
         };
         const renderManagerService = { getRenderUnitById: vi.fn(() => ({ scene })) };
 
-        const controller = new ImageCropperController(
+        const controller = createController(
             commandService as never,
             drawingManagerService as never,
             renderManagerService as never,
@@ -118,7 +152,7 @@ describe('ImageCropperController', () => {
         };
         const renderManagerService = { getRenderUnitById: vi.fn(() => ({ scene })) };
 
-        const controller = new ImageCropperController(
+        const controller = createController(
             commandService as never,
             drawingManagerService as never,
             renderManagerService as never,
@@ -138,7 +172,7 @@ describe('ImageCropperController', () => {
         controller.dispose();
     });
 
-    it('opens crop mode for image and applies hover cursor changes', () => {
+    it.each([false, true])('opens crop mode with mobile hit targets only when mobile=%s', (mobile) => {
         const focusDrawing = { unitId: 'unit-1', subUnitId: 'sheet-1', drawingId: 'd1' };
         const imageKey = getDrawingShapeKeyByDrawingSearch(focusDrawing);
         const image = createImage(imageKey);
@@ -183,7 +217,7 @@ describe('ImageCropperController', () => {
         const renderManagerService = { getRenderUnitById: vi.fn(() => ({ scene })) };
         const layoutService = { focus: vi.fn() };
 
-        const controller = new ImageCropperController(
+        const controller = createController(
             commandService as never,
             drawingManagerService as never,
             renderManagerService as never,
@@ -191,13 +225,27 @@ describe('ImageCropperController', () => {
             { show: vi.fn() } as never,
             { t: vi.fn((key: string) => key) } as never,
             { registerShortcut: vi.fn(() => ({ dispose: vi.fn() })) } as never,
-            layoutService as never
+            layoutService as never,
+            mobile
         );
 
         // OpenImageCrop handler
         commandHandlers[0]({ id: OpenImageCropOperation.id, params: focusDrawing } as never);
 
         expect(createdCropper).not.toBeNull();
+        expect(createdCropper!.transformerConfig?.cropAnchorHitSize).toBe(mobile ? 44 : undefined);
+        const cropper = createdCropper!;
+        const originalImageState = image.getState();
+        const originalCropState = cropper.getState();
+        const objects = new Map([[cropper.oKey, cropper]]);
+        for (let attempt = 0; attempt < 5; attempt++) {
+            transformer.createControlForCopper.mockClear();
+            transformer.changeStart$.next({ objects });
+            transformer.changeEnd$.next({ objects });
+            expect(transformer.createControlForCopper).toHaveBeenCalledExactlyOnceWith(cropper);
+            expect(cropper.getState()).toEqual(originalCropState);
+            expect(image.getState()).toEqual(originalImageState);
+        }
         createdCropper!.onPointerEnter$.emitEvent({} as never);
         expect(createdCropper!.cursor).toBe(CURSOR_TYPE.MOVE);
         createdCropper!.onPointerLeave$.emitEvent({} as never);
@@ -260,7 +308,7 @@ describe('ImageCropperController', () => {
         const shortcutService = {
             registerShortcut: vi.fn(() => shortcutDisposables.shift()!),
         };
-        const controller = new ImageCropperController(
+        const controller = createController(
             commandService as never,
             {
                 getDrawingByParam: vi.fn(() => ({ drawingType: DrawingTypeEnum.DRAWING_IMAGE })),
@@ -356,7 +404,7 @@ describe('ImageCropperController', () => {
                 return { attachTransformerTo: vi.fn() };
             }),
         };
-        const controller = new ImageCropperController(
+        const controller = createController(
             commandService as never,
             drawingManagerService as never,
             { getRenderUnitById: vi.fn(() => ({ scene })) } as never,

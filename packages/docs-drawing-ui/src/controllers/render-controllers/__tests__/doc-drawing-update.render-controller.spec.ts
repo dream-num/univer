@@ -19,6 +19,7 @@ import { RichTextEditingMutation, setDocumentPermissionValue } from '@univerjs/d
 import { SetDocDrawingArrangeCommand, UpdateDrawingDocTransformCommand } from '@univerjs/docs-drawing';
 import { DocumentEditArea } from '@univerjs/engine-render';
 import { UnitAction } from '@univerjs/protocol';
+import { MOBILE_UI_MODE } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { GroupDocDrawingCommand } from '../../../commands/commands/group-doc-drawing.command';
@@ -29,6 +30,7 @@ function createController(options: {
     editArea?: DocumentEditArea;
     drawings?: Record<string, unknown>;
     isFocusing?: boolean;
+    mobile?: boolean;
     openFile?: () => Promise<File[]>;
     saveImage?: (file: File) => Promise<unknown>;
 } = {}) {
@@ -169,6 +171,7 @@ function createController(options: {
         getFocusDrawings: vi.fn(() => focusDrawings),
     };
     const contextService = {
+        getContextValue: vi.fn((key) => key === MOBILE_UI_MODE && options.mobile === true),
         setContextValue: vi.fn(),
     };
     const docSelectionRenderService = {
@@ -402,6 +405,12 @@ describe('DocDrawingUpdateRenderController', () => {
 
         expect(docSelectionManagerService.refreshSelection).toHaveBeenCalledTimes(1);
         vi.useRealTimers();
+    });
+
+    it.each([false, true])('configures selection-first movement for mobile mode %s', (mobile) => {
+        const { transformer } = createController({ mobile });
+
+        expect(transformer.resetProps).toHaveBeenCalledWith({ moveOnlyWhenSelected: mobile });
     });
 
     it('cancels an image insertion when the render controller is disposed while saving', async () => {

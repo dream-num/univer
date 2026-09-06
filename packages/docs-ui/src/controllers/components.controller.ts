@@ -107,6 +107,7 @@ import {
     ORDER_LIST_TYPE_COMPONENT,
     OrderListTypePicker,
 } from '../views/list-type-picker/index';
+import { MOBILE_DOC_ELEMENT_MENU, MobileDocElementMenuPopup } from '../views/mobile-element-menu/MobileDocElementMenu';
 import { PAGE_SETTING_COMPONENT_ID, PageSettings } from '../views/PageSettings';
 import {
     DOC_PARAGRAPH_MENU_COMPONENT_KEY,
@@ -135,6 +136,7 @@ export class ComponentsController extends Disposable {
 
     private _registerParts(): void {
         const componentManager = this._componentManager;
+        this.disposeWithMe(componentManager.register(MOBILE_DOC_ELEMENT_MENU, MobileDocElementMenuPopup));
         this.disposeWithMe(componentManager.register(COMPONENT_DOC_CREATE_TABLE_CONFIRM, DocCreateTableConfirm));
     }
 

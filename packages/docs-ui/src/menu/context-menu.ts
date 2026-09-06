@@ -19,13 +19,14 @@ import type { IRectRangeWithStyle } from '@univerjs/engine-render';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import type { Subscriber } from 'rxjs';
 import type { LocaleKey } from '../locale/types';
-import { DOC_RANGE_TYPE, DocumentFlavor, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { DOC_RANGE_TYPE, DocumentFlavor, IContextService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { UnitAction } from '@univerjs/protocol';
-import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
+import { getMenuHiddenObservable, MenuItemType, MOBILE_UI_MODE } from '@univerjs/ui';
 import { combineLatest, map, Observable } from 'rxjs';
 import { DocCopyCommand, DocCutCommand, DocPasteCommand } from '../commands/commands/clipboard.command';
 import { DeleteLeftCommand } from '../commands/commands/doc-delete.command';
+import { DocSelectAllCommand, DocSelectWordCommand } from '../commands/commands/doc-select-all.command';
 import {
     DocTableDeleteColumnsCommand,
     DocTableDeleteRowsCommand,
@@ -57,6 +58,28 @@ const getDisableOnCollapsedObservable = (accessor: IAccessor) => {
         return () => observable.unsubscribe();
     });
 };
+
+const getDisableOnExpandedObservable = (accessor: IAccessor) => {
+    const docSelectionManagerService = accessor.get(DocSelectionManagerService);
+    return new Observable<boolean>((subscriber) => {
+        const emit = () => {
+            const ranges = docSelectionManagerService.getDocRanges();
+            const range = ranges[0];
+            subscriber.next(ranges.length !== 1 || !(range.collapsed === true || range.startOffset === range.endOffset));
+        };
+        emit();
+        const observable = docSelectionManagerService.textSelection$.subscribe(emit);
+        return () => observable.unsubscribe();
+    });
+};
+
+function getMobileOnlyHiddenObservable(accessor: IAccessor): Observable<boolean> {
+    const contextService = accessor.get(IContextService);
+    return combineLatest([
+        getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+        contextService.subscribeContextValue$(MOBILE_UI_MODE).pipe(map((mobile) => !mobile)),
+    ]).pipe(map((states) => states.some(Boolean)));
+}
 
 function combineMenuDisabled(...states: Observable<boolean>[]): Observable<boolean> {
     return combineLatest(states).pipe(map((values) => values.some(Boolean)));
@@ -169,6 +192,25 @@ export function PasteMenuFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 };
+
+export function SelectWordMenuFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
+    return {
+        id: DocSelectWordCommand.id,
+        type: MenuItemType.BUTTON,
+        title: 'docs-ui.rightClick.select',
+        disabled$: getDisableOnExpandedObservable(accessor),
+        hidden$: getMobileOnlyHiddenObservable(accessor),
+    };
+}
+
+export function SelectAllMenuFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
+    return {
+        id: DocSelectAllCommand.id,
+        type: MenuItemType.BUTTON,
+        title: 'docs-ui.rightClick.selectAll',
+        hidden$: getMobileOnlyHiddenObservable(accessor),
+    };
+}
 
 export function DeleteMenuFactory(accessor: IAccessor): IMenuButtonItem<LocaleKey> {
     return {

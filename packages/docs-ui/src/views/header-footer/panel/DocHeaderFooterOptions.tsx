@@ -28,11 +28,11 @@ import {
     resolveSectionHeaderFooterReference,
     UniverInstanceType,
 } from '@univerjs/core';
-import { Button, Checkbox, InputNumber } from '@univerjs/design';
+import { Button, Checkbox, ConfigContext, InputNumber } from '@univerjs/design';
 import { DocSkeletonManagerService, SetSectionHeaderFooterLinkCommand } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 import { ILayoutService, useDependency, useObservable } from '@univerjs/ui';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import {
     CloseHeaderFooterCommand,
     CoreHeaderFooterCommandId,
@@ -93,6 +93,7 @@ export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
 };
 
 function DocHeaderFooterOptionsContent(props: IDocHeaderFooterOptionsProps) {
+    const { mobile } = useContext(ConfigContext);
     const localeService = useDependency(LocaleService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const renderManagerService = useDependency(IRenderManagerService);
@@ -288,58 +289,60 @@ function DocHeaderFooterOptionsContent(props: IDocHeaderFooterOptionsProps) {
     return (
         <div className="univer-grid univer-gap-4">
             {canLinkToPrevious && (
-                <div>
-                    <Checkbox checked={linkedToPrevious} onChange={(val) => { handleLinkToPreviousChange(val as boolean); }}>
+                <div className={mobile ? 'univer-flex univer-min-h-12 univer-items-center' : undefined}>
+                    <Checkbox checked={linkedToPrevious} onChange={(val) => { handleLinkToPreviousChange(Boolean(val)); }}>
                         {localeService.t<LocaleKey>('docs-ui.headerFooter.linkToPrevious')}
                     </Checkbox>
                 </div>
             )}
             <div className="univer-grid univer-gap-2">
-                <div>
+                <div className={mobile ? 'univer-flex univer-min-h-12 univer-items-center' : undefined}>
                     <Checkbox
                         checked={options.useFirstPageHeaderFooter === BooleanNumber.TRUE}
-                        onChange={(val) => { handleCheckboxChange(val as boolean, 'useFirstPageHeaderFooter'); }}
+                        onChange={(val) => { handleCheckboxChange(Boolean(val), 'useFirstPageHeaderFooter'); }}
                     >
                         {localeService.t<LocaleKey>('docs-ui.headerFooter.firstPageCheckBox')}
                     </Checkbox>
                 </div>
-                <div>
+                <div className={mobile ? 'univer-flex univer-min-h-12 univer-items-center' : undefined}>
                     <Checkbox
                         checked={options.evenAndOddHeaders === BooleanNumber.TRUE}
-                        onChange={(val) => { handleCheckboxChange(val as boolean, 'evenAndOddHeaders'); }}
+                        onChange={(val) => { handleCheckboxChange(Boolean(val), 'evenAndOddHeaders'); }}
                     >
                         {localeService.t<LocaleKey>('docs-ui.headerFooter.oddEvenCheckBox')}
                     </Checkbox>
                 </div>
             </div>
 
-            <div className="univer-mb-1 univer-flex">
-                <div>
+            <div className={mobile ? 'univer-mb-1 univer-flex univer-flex-col univer-gap-3' : 'univer-mb-1 univer-flex'}>
+                <div className={mobile ? 'univer-flex univer-flex-col univer-gap-2' : undefined}>
                     <span>{localeService.t<LocaleKey>('docs-ui.headerFooter.headerTopMargin')}</span>
                     <InputNumber
-                        className="univer-mt-1.5 univer-w-4/5"
+                        className={mobile ? 'univer-h-12 univer-w-full' : 'univer-mt-1.5 univer-w-4/5'}
                         min={0}
                         max={200}
                         precision={1}
                         value={options.marginHeader}
-                        onChange={(val) => { handleMarginChange(val as number, 'marginHeader'); }}
+                        onChange={(val) => { handleMarginChange(val ?? 0, 'marginHeader'); }}
                     />
                 </div>
-                <div>
+                <div className={mobile ? 'univer-flex univer-flex-col univer-gap-2' : undefined}>
                     <span>{localeService.t<LocaleKey>('docs-ui.headerFooter.footerBottomMargin')}</span>
                     <InputNumber
-                        className="univer-mt-1.5 univer-w-4/5"
+                        className={mobile ? 'univer-h-12 univer-w-full' : 'univer-mt-1.5 univer-w-4/5'}
                         min={0}
                         max={200}
                         precision={1}
                         value={options.marginFooter}
-                        onChange={(val) => { handleMarginChange(val as number, 'marginFooter'); }}
+                        onChange={(val) => { handleMarginChange(val ?? 0, 'marginFooter'); }}
                     />
                 </div>
             </div>
 
-            <div className="univer-flex univer-justify-end">
-                <Button onClick={closeHeaderFooter}>{localeService.t<LocaleKey>('docs-ui.headerFooter.closeHeaderFooter')}</Button>
+            <div className={mobile ? 'univer-flex' : 'univer-flex univer-justify-end'}>
+                <Button className={mobile ? 'univer-h-12 univer-w-full' : undefined} onClick={closeHeaderFooter}>
+                    {localeService.t<LocaleKey>('docs-ui.headerFooter.closeHeaderFooter')}
+                </Button>
             </div>
         </div>
     );

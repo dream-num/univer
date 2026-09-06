@@ -181,6 +181,11 @@ export class DocCanvasPopManagerService extends Disposable {
         this._popupUnits$.next(new Set(this._popupCountByUnit.keys()));
     }
 
+    getRangeBounds(range: ITextRangeParam, unitId: string): IBoundRectNoAngle[] | undefined {
+        const currentRender = this._renderManagerService.getRenderUnitById(unitId);
+        return currentRender ? calcDocRangePositions(range, currentRender) : undefined;
+    }
+
     private _shouldUpdateForCommand(commandInfo: { id: string; params?: unknown }, unitId: string): boolean {
         if (commandInfo.id !== SetDocZoomRatioOperation.id && commandInfo.id !== RichTextEditingMutation.id) {
             return false;

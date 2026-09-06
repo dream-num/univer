@@ -15,7 +15,6 @@
  */
 
 import type { DocumentDataModel, ICommandInfo, IDrawingParam, Nullable } from '@univerjs/core';
-import type { IDocDrawing } from '@univerjs/docs-drawing';
 import type { LocaleKey } from '../../locale/types';
 import {
     BooleanNumber,
@@ -26,17 +25,18 @@ import {
     UniverInstanceType,
     WrapTextType,
 } from '@univerjs/core';
-import { clsx, InputNumber, Radio, RadioGroup } from '@univerjs/design';
+import { clsx, ConfigContext, InputNumber, Radio, RadioGroup } from '@univerjs/design';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { TextWrappingStyle, UpdateDocDrawingWrappingStyleCommand } from '@univerjs/docs-drawing';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useDependency } from '@univerjs/ui';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import {
     UpdateDocDrawingDistanceCommand,
     UpdateDocDrawingWrapTextCommand,
 } from '../../commands/commands/update-doc-drawing.command';
+import { MobileDocDrawingTextWrap } from './MobileDocDrawingTextWrap';
 
 const MIN_MARGIN = 0;
 const MAX_MARGIN = 100;
@@ -65,10 +65,11 @@ function DocDrawingTextWrapContent(props: IDocDrawingTextWrapProps) {
     const localeService = useDependency(LocaleService);
     const drawingManagerService = useDependency(IDrawingManagerService);
     const univerInstanceService = useDependency(IUniverInstanceService);
+    const { mobile } = useContext(ConfigContext);
 
     const { drawings } = props;
 
-    const drawingParam = drawings[0] as IDocDrawing;
+    const drawingParam = drawings[0];
 
     const { unitId } = drawingParam;
 
@@ -78,7 +79,7 @@ function DocDrawingTextWrapContent(props: IDocDrawingTextWrapProps) {
     const [disableDistTB, setDisableDistTB] = useState(true);
     const [disableDistLR, setDisableDistLR] = useState(true);
     const [wrappingStyle, setWrappingStyle] = useState(TextWrappingStyle.INLINE);
-    const [wrapText, setWrapText] = useState('');
+    const [wrapText, setWrapText] = useState(WrapTextType.BOTH_SIDES);
     const [distToText, setDistToText] = useState<IDistToText>({
         distT: 0,
         distL: 0,
@@ -88,7 +89,10 @@ function DocDrawingTextWrapContent(props: IDocDrawingTextWrapProps) {
     const [showPanel, setShowPanel] = useState(true);
 
     function handleWrappingStyleChange(value: number | string | boolean) {
-        setWrappingStyle(value as TextWrappingStyle);
+        const style = Object.values(TextWrappingStyle).find((style) => style === value);
+        if (style == null) {
+            return;
+        }
 
         const focusDrawings = drawingManagerService.getFocusDrawings();
         if (focusDrawings.length === 0) {
@@ -107,12 +111,15 @@ function DocDrawingTextWrapContent(props: IDocDrawingTextWrapProps) {
             unitId,
             subUnitId,
             drawings,
-            wrappingStyle: value as TextWrappingStyle,
+            wrappingStyle: style,
         });
     }
 
     function handleWrapTextChange(value: number | string | boolean) {
-        setWrapText(value as string);
+        const wrapText = [WrapTextType.BOTH_SIDES, WrapTextType.LEFT, WrapTextType.RIGHT].find((side) => String(side) === String(value));
+        if (wrapText == null) {
+            return;
+        }
 
         const focusDrawings = drawingManagerService.getFocusDrawings();
         if (focusDrawings.length === 0) {
@@ -129,9 +136,9 @@ function DocDrawingTextWrapContent(props: IDocDrawingTextWrapProps) {
 
         commandService.executeCommand(UpdateDocDrawingWrapTextCommand.id, {
             unitId: focusDrawings[0].unitId,
-            subUnitId: focusDrawings[0].unitId,
+            subUnitId: focusDrawings[0].subUnitId,
             drawings,
-            wrapText: value as WrapTextType,
+            wrapText,
         });
     }
 
@@ -139,9 +146,6 @@ function DocDrawingTextWrapContent(props: IDocDrawingTextWrapProps) {
         if (value == null) {
             return;
         }
-
-        const newDistToText = { ...distToText, [direction]: value };
-        setDistToText(newDistToText as IDistToText);
 
         const focusDrawings = drawingManagerService.getFocusDrawings();
         if (focusDrawings.length === 0) {
@@ -158,7 +162,7 @@ function DocDrawingTextWrapContent(props: IDocDrawingTextWrapProps) {
 
         commandService.executeCommand(UpdateDocDrawingDistanceCommand.id, {
             unitId: focusDrawings[0].unitId,
-            subUnitId: focusDrawings[0].unitId,
+            subUnitId: focusDrawings[0].subUnitId,
             drawings,
             dist: {
                 [direction]: value,
@@ -166,86 +170,86 @@ function DocDrawingTextWrapContent(props: IDocDrawingTextWrapProps) {
         });
     }
 
-    function updateFocusDrawingState() {
-        const focusDrawings = drawingManagerService.getFocusDrawings();
-        if (focusDrawings.length === 0) {
-            return;
+    useEffect(() => {
+        function updateFocusDrawingState() {
+            const focusDrawings = drawingManagerService.getFocusDrawings();
+            if (focusDrawings.length === 0) {
+                return;
+            }
+
+            updateState(focusDrawings[0]);
         }
 
-        updateState(focusDrawings[0]);
-    }
+        function updateState(drawingParam: IDrawingParam) {
+            const drawing = documentDataModel?.getSnapshot()?.drawings?.[drawingParam.drawingId];
+            if (drawing == null) {
+                return;
+            }
 
-    function updateState(drawingParam: IDrawingParam) {
-        const drawing = documentDataModel?.getSnapshot()?.drawings?.[drawingParam.drawingId];
-        if (drawing == null) {
-            return;
-        }
+            const {
+                distT = 0,
+                distL = 0,
+                distB = 0,
+                distR = 0,
+                layoutType = PositionedObjectLayoutType.INLINE,
+                behindDoc = BooleanNumber.FALSE,
+                wrapText = WrapTextType.BOTH_SIDES,
+            } = drawing;
+            const distToText = {
+                distT,
+                distL,
+                distB,
+                distR,
+            };
 
-        const {
-            distT = 0,
-            distL = 0,
-            distB = 0,
-            distR = 0,
-            layoutType = PositionedObjectLayoutType.INLINE,
-            behindDoc = BooleanNumber.FALSE,
-            wrapText = WrapTextType.BOTH_SIDES,
-        } = drawing;
-        const distToText = {
-            distT,
-            distL,
-            distB,
-            distR,
-        };
+            setDistToText(distToText);
 
-        setDistToText(distToText);
+            setWrapText(wrapText);
 
-        setWrapText(wrapText as unknown as string);
+            setDisableWrapText(layoutType !== PositionedObjectLayoutType.WRAP_SQUARE);
 
-        setDisableWrapText(layoutType !== PositionedObjectLayoutType.WRAP_SQUARE);
-
-        if (
-            layoutType === PositionedObjectLayoutType.WRAP_NONE ||
+            if (
+                layoutType === PositionedObjectLayoutType.WRAP_NONE ||
             layoutType === PositionedObjectLayoutType.INLINE
-        ) {
-            setDisableDistTB(true);
-        } else {
-            setDisableDistTB(false);
-        }
+            ) {
+                setDisableDistTB(true);
+            } else {
+                setDisableDistTB(false);
+            }
 
-        if (
-            layoutType === PositionedObjectLayoutType.WRAP_NONE ||
+            if (
+                layoutType === PositionedObjectLayoutType.WRAP_NONE ||
             layoutType === PositionedObjectLayoutType.INLINE ||
             layoutType === PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM
-        ) {
-            setDisableDistLR(true);
-        } else {
-            setDisableDistLR(false);
-        }
-
-        if (layoutType === PositionedObjectLayoutType.WRAP_NONE) {
-            if (behindDoc === BooleanNumber.TRUE) {
-                setWrappingStyle(TextWrappingStyle.BEHIND_TEXT);
+            ) {
+                setDisableDistLR(true);
             } else {
-                setWrappingStyle(TextWrappingStyle.IN_FRONT_OF_TEXT);
+                setDisableDistLR(false);
             }
-        } else {
-            switch (layoutType) {
-                case PositionedObjectLayoutType.INLINE:
-                    setWrappingStyle(TextWrappingStyle.INLINE);
-                    break;
-                case PositionedObjectLayoutType.WRAP_SQUARE:
-                    setWrappingStyle(TextWrappingStyle.WRAP_SQUARE);
-                    break;
-                case PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM:
-                    setWrappingStyle(TextWrappingStyle.WRAP_TOP_AND_BOTTOM);
-                    break;
-                default:
-                    throw new Error(`Unsupported layout type: ${layoutType}`);
+
+            if (layoutType === PositionedObjectLayoutType.WRAP_NONE) {
+                if (behindDoc === BooleanNumber.TRUE) {
+                    setWrappingStyle(TextWrappingStyle.BEHIND_TEXT);
+                } else {
+                    setWrappingStyle(TextWrappingStyle.IN_FRONT_OF_TEXT);
+                }
+            } else {
+                switch (layoutType) {
+                    case PositionedObjectLayoutType.INLINE:
+                        setWrappingStyle(TextWrappingStyle.INLINE);
+                        break;
+                    case PositionedObjectLayoutType.WRAP_SQUARE:
+                        setWrappingStyle(TextWrappingStyle.WRAP_SQUARE);
+                        break;
+                    case PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM:
+                        setWrappingStyle(TextWrappingStyle.WRAP_TOP_AND_BOTTOM);
+                        break;
+                    default:
+                        throw new Error(`Unsupported layout type: ${layoutType}`);
+                }
             }
         }
-    }
 
-    useEffect(() => {
         updateFocusDrawingState();
 
         const subscription = drawingManagerService.focus$.subscribe((drawingParams) => {
@@ -269,7 +273,27 @@ function DocDrawingTextWrapContent(props: IDocDrawingTextWrapProps) {
             subscription.unsubscribe();
             mutationListener.dispose();
         };
-    }, []);
+    }, [commandService, documentDataModel, drawingManagerService]);
+
+    if (mobile) {
+        return showPanel
+            ? (
+                <MobileDocDrawingTextWrap
+                    wrappingStyle={wrappingStyle}
+                    wrapText={wrapText}
+                    distToText={distToText}
+                    minMargin={MIN_MARGIN}
+                    maxMargin={MAX_MARGIN}
+                    disableWrapText={disableWrapText}
+                    disableDistTB={disableDistTB}
+                    disableDistLR={disableDistLR}
+                    onStyleChange={handleWrappingStyleChange}
+                    onWrapTextChange={handleWrapTextChange}
+                    onDistanceChange={handleDistToTextChange}
+                />
+            )
+            : null;
+    }
 
     return (
         <div
@@ -315,10 +339,10 @@ function DocDrawingTextWrapContent(props: IDocDrawingTextWrapProps) {
             </div>
 
             <div>
-                <RadioGroup disabled={disableWrapText} value={wrapText} onChange={handleWrapTextChange} direction="horizontal">
-                    <Radio value={WrapTextType.BOTH_SIDES}>{localeService.t<LocaleKey>('docs-drawing-ui.image-text-wrap.bothSide')}</Radio>
-                    <Radio value={WrapTextType.LEFT}>{localeService.t<LocaleKey>('docs-drawing-ui.image-text-wrap.leftOnly')}</Radio>
-                    <Radio value={WrapTextType.RIGHT}>{localeService.t<LocaleKey>('docs-drawing-ui.image-text-wrap.rightOnly')}</Radio>
+                <RadioGroup disabled={disableWrapText} value={String(wrapText)} onChange={handleWrapTextChange} direction="horizontal">
+                    <Radio value={String(WrapTextType.BOTH_SIDES)}>{localeService.t<LocaleKey>('docs-drawing-ui.image-text-wrap.bothSide')}</Radio>
+                    <Radio value={String(WrapTextType.LEFT)}>{localeService.t<LocaleKey>('docs-drawing-ui.image-text-wrap.leftOnly')}</Radio>
+                    <Radio value={String(WrapTextType.RIGHT)}>{localeService.t<LocaleKey>('docs-drawing-ui.image-text-wrap.rightOnly')}</Radio>
                 </RadioGroup>
             </div>
 

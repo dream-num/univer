@@ -57,6 +57,22 @@ describe('DocParagraphMenuService', () => {
         expect(attachPopupToRect).toHaveBeenCalledTimes(1);
     });
 
+    it('does not initialize the desktop paragraph menu in mobile UI mode', () => {
+        const attachPopupToRect = vi.fn(() => ({ canDispose: () => true, dispose: vi.fn() }));
+        const hoverParagraphRealTime$ = new BehaviorSubject<IMutiPageParagraphBound | null>(null);
+        const service = createService({
+            attachPopupToRect,
+            dataStream: 'Text\r',
+            hoverParagraphRealTime$,
+            mobile: true,
+        });
+
+        hoverParagraphRealTime$.next(createParagraphBound({ paragraphStart: 0, paragraphEnd: 4, startIndex: 4 }));
+        service.showParagraphMenu(createParagraphBound({ paragraphStart: 0, paragraphEnd: 4, startIndex: 4 }));
+
+        expect(attachPopupToRect).not.toHaveBeenCalled();
+    });
+
     it('does not show paragraph or table menus without document edit permission', () => {
         const attachPopupToRect = vi.fn(() => ({ canDispose: () => true, dispose: vi.fn() }));
         const service = createService({
@@ -1353,6 +1369,7 @@ function createService(options: {
     inputBefore$?: Subject<unknown>;
     keydown$?: Subject<unknown>;
     layoutInteractionService?: DocLayoutInteractionService;
+    mobile?: boolean;
     replaceDocRanges?: ReturnType<typeof vi.fn>;
     scrollAfter$?: { subscribeEvent: (callback: (event: { scrollY: number }) => void) => { dispose: () => void } };
     selectionStart$?: Subject<unknown>;
@@ -1439,7 +1456,10 @@ function createService(options: {
             }),
             permissionPointUpdate$: new Subject(),
         } as never,
-        options.layoutInteractionService ?? new DocLayoutInteractionService()
+        options.layoutInteractionService ?? new DocLayoutInteractionService(),
+        {
+            getContextValue: () => options.mobile ?? false,
+        } as never
     );
 }
 

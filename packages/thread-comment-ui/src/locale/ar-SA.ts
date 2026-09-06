@@ -18,7 +18,9 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'thread-comment-ui': {
+        mobile: { back: 'رجوع' },
         panel: {
+            title: 'إدارة التعليقات',
             empty: 'لا توجد تعليقات بعد',
             reset: 'إعادة ضبط التصفية',
             addComment: 'إضافة تعليق',

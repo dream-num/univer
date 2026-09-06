@@ -18,6 +18,7 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'drawing-ui': {
+        mobile: { close: 'Fermer', more: 'Plus' },
         'image-cropper': {
             error: 'Impossible de rogner des objets non image.',
         },
@@ -88,6 +89,8 @@ const locale: typeof enUS = {
                 lock: 'Verrouiller le ratio (%)',
             },
             crop: {
+                cancel: 'Annuler',
+                apply: 'Terminé',
                 title: 'Rogner',
                 start: 'Commencer à rogner',
                 mode: 'Libre',

@@ -17,10 +17,10 @@
 import type { ReactNode } from 'react';
 import type { LocaleKey } from '../../locale/types';
 import { HorizontalAlign, LocaleService } from '@univerjs/core';
-import { borderClassName, Button, clsx, InputNumber, Select, Tooltip } from '@univerjs/design';
+import { borderClassName, Button, clsx, ConfigContext, InputNumber, Select, Tooltip } from '@univerjs/design';
 import { AlignTextBothIcon, HorizontallyIcon, LeftJustifyingIcon, RightJustifyingIcon } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
-import { useMemo, useRef } from 'react';
+import { useContext, useMemo, useRef } from 'react';
 import {
     useCurrentParagraph,
     useFirstParagraphHorizontalAlign,
@@ -62,11 +62,14 @@ const ParagraphSettingRow = (props: {
     children: ReactNode;
 }) => {
     const { label, unit, children } = props;
+    const { mobile } = useContext(ConfigContext);
 
     return (
         <div
-            className="univer-grid univer-min-h-8 univer-items-center univer-gap-3"
-            style={{ gridTemplateColumns: 'minmax(0, 1fr) minmax(160px, 180px)' }}
+            className={mobile
+                ? 'univer-flex univer-min-h-12 univer-flex-col univer-gap-2'
+                : 'univer-grid univer-min-h-8 univer-items-center univer-gap-3'}
+            style={mobile ? undefined : { gridTemplateColumns: 'minmax(0, 1fr) minmax(160px, 180px)' }}
         >
             <div
                 className="
@@ -94,6 +97,7 @@ const AutoFocusInputNumber = (props: {
     precision?: number;
 }) => {
     const { value, onChange, className = '', min = 0, max = 100, step = 0.1, precision = 1 } = props;
+    const { mobile } = useContext(ConfigContext);
     const ref = useRef<HTMLInputElement>(null);
     return (
         <InputNumber
@@ -113,12 +117,13 @@ const AutoFocusInputNumber = (props: {
                     }, 30);
                 });
             }}
-            className={clsx('univer-w-full', className)}
+            className={clsx('univer-w-full', mobile && 'univer-h-12', className)}
         />
     );
 };
 export function ParagraphSetting() {
     const localeService = useDependency(LocaleService);
+    const { mobile } = useContext(ConfigContext);
 
     const currentParagraph = useCurrentParagraph();
     const [horizontalAlignValue, setHorizontalAlign] = useFirstParagraphHorizontalAlign(currentParagraph, ALIGNMENT_OPTIONS[0].value);
@@ -148,27 +153,53 @@ export function ParagraphSetting() {
                 >
                     {ALIGNMENT_OPTIONS.map((item) => {
                         return (
-                            <Tooltip title={localeService.t(item.label)} key={item.value} placement="bottom">
-                                <span className="univer-flex univer-w-full univer-items-center univer-justify-center">
-                                    <Button
-                                        type="button"
-                                        variant="text"
-                                        className={clsx({
-                                            '!univer-bg-gray-200 dark:!univer-bg-gray-700': horizontalAlignValue === item.value,
-                                        })}
-                                        onClick={() => setHorizontalAlign(item.value)}
-                                    >
-                                        <span
-                                            className="
-                                              univer-flex univer-size-5 univer-items-center univer-justify-center
-                                              univer-text-lg
-                                            "
+                            <span
+                                key={item.value}
+                                className="univer-flex univer-w-full univer-items-center univer-justify-center"
+                            >
+                                {mobile
+                                    ? (
+                                        <Button
+                                            type="button"
+                                            variant="text"
+                                            aria-label={localeService.t(item.label)}
+                                            className={clsx('univer-h-12 univer-w-full', {
+                                                '!univer-bg-gray-200 dark:!univer-bg-gray-700': horizontalAlignValue === item.value,
+                                            })}
+                                            onClick={() => setHorizontalAlign(item.value)}
                                         >
-                                            {item.icon}
-                                        </span>
-                                    </Button>
-                                </span>
-                            </Tooltip>
+                                            <span
+                                                className="
+                                                  univer-flex univer-size-5 univer-items-center univer-justify-center
+                                                  univer-text-lg
+                                                "
+                                            >
+                                                {item.icon}
+                                            </span>
+                                        </Button>
+                                    )
+                                    : (
+                                        <Tooltip title={localeService.t(item.label)} placement="bottom">
+                                            <Button
+                                                type="button"
+                                                variant="text"
+                                                className={clsx({
+                                                    '!univer-bg-gray-200 dark:!univer-bg-gray-700': horizontalAlignValue === item.value,
+                                                })}
+                                                onClick={() => setHorizontalAlign(item.value)}
+                                            >
+                                                <span
+                                                    className="
+                                                      univer-flex univer-size-5 univer-items-center
+                                                      univer-justify-center univer-text-lg
+                                                    "
+                                                >
+                                                    {item.icon}
+                                                </span>
+                                            </Button>
+                                        </Tooltip>
+                                    )}
+                            </span>
                         );
                     })}
                 </div>
@@ -202,7 +233,7 @@ export function ParagraphSetting() {
                     <ParagraphSettingRow label={localeService.t<LocaleKey>('docs-ui.doc.paragraphSetting.lineSpace')}>
                         <div className="univer-flex univer-w-full univer-flex-col univer-gap-2">
                             <Select
-                                className="univer-w-full"
+                                className={mobile ? 'univer-h-12 univer-w-full' : 'univer-w-full'}
                                 value={`${spacingRule}`}
                                 options={lineSpacingOptions}
                                 onChange={(v) => setSpacingRule(Number(v))}

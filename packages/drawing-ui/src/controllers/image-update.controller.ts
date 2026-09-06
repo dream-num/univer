@@ -21,18 +21,22 @@ import {
     Disposable,
     DrawingTypeEnum,
     ICommandService,
+    IContextService,
     IImageIoService,
     ImageSourceType,
     Inject,
     IUniverInstanceService,
+    ThemeService,
     toDisposable,
 } from '@univerjs/core';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService, SetDrawingSelectedOperation } from '@univerjs/drawing';
 import { CURSOR_TYPE, IRenderManagerService } from '@univerjs/engine-render';
-import { IDialogService } from '@univerjs/ui';
-import { bufferTime, filter, map } from 'rxjs';
+import { IDialogService, MOBILE_UI_MODE } from '@univerjs/ui';
+import { bufferTime, combineLatest, filter, map } from 'rxjs';
 import { ImageResetSizeOperation } from '../commands/operations/image-reset-size.operation';
 import { DrawingRenderService, ensureDrawingRenderLayer } from '../services/drawing-render.service';
+import { MobileImagePreviewButton } from '../views/image-preview/mobile-image-preview-button';
+import { ImageCropperController } from './image-cropper.controller';
 import { getCurrentUnitInfo } from './utils';
 
 export class ImageUpdateController extends Disposable {
@@ -43,7 +47,10 @@ export class ImageUpdateController extends Disposable {
         @IDialogService private readonly _dialogService: IDialogService,
         @IImageIoService private readonly _imageIoService: IImageIoService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
-        @Inject(DrawingRenderService) private readonly _drawingRenderService: DrawingRenderService
+        @Inject(DrawingRenderService) private readonly _drawingRenderService: DrawingRenderService,
+        @IContextService private readonly _contextService: IContextService,
+        @Inject(ThemeService) private readonly _themeService: ThemeService,
+        @Inject(ImageCropperController) private readonly _imageCropperController: ImageCropperController
     ) {
         super();
 
@@ -211,7 +218,7 @@ export class ImageUpdateController extends Disposable {
 
             for (const image of images) {
                 this._addHoverForImage(image);
-                this._addDialogForImage(image);
+                this._addDialogForImage(image, param);
             }
         });
     }
@@ -286,13 +293,29 @@ export class ImageUpdateController extends Disposable {
         );
     }
 
-    private _addDialogForImage(o: Image) {
+    private _addDialogForImage(o: Image, param: IDrawingSearch) {
+        const preview = () => {
+            const native = o.getNative();
+            if (native) {
+                this._drawingRenderService.previewImage(`${o.oKey}-viewer-dialog`, native.src, o.getNativeSize().width, o.getNativeSize().height);
+            }
+        };
+        const scene = o.getScene();
+        if (this._contextService.getContextValue(MOBILE_UI_MODE) && scene) {
+            const button = new MobileImagePreviewButton(o, scene, this._themeService, preview);
+            const registration = this.disposeWithMe(() => button.dispose());
+            button.disposeWithMe(() => registration.dispose());
+            button.disposeWithMe(combineLatest([
+                this._drawingManagerService.focus$,
+                this._imageCropperController.cropping$,
+            ]).subscribe(([drawings, cropping]) => {
+                button.setPreviewEnabled(!cropping && !drawings.some((drawing) =>
+                    drawing.unitId === param.unitId && drawing.subUnitId === param.subUnitId && drawing.drawingId === param.drawingId));
+            }));
+        }
         this.disposeWithMe(
             toDisposable(
-                o.onDblclick$.subscribeEvent(() => {
-                    const dialogId = `${o.oKey}-viewer-dialog`;
-                    this._drawingRenderService.previewImage(dialogId, o.getNative()!.src, o.getNativeSize().width, o.getNativeSize().height);
-                })
+                o.onDblclick$.subscribeEvent(preview)
             )
         );
     }

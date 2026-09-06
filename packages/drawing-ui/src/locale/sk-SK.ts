@@ -18,6 +18,7 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'drawing-ui': {
+        mobile: { close: 'Zavrieť', more: 'Viac' },
         'image-cropper': {
             error: 'Nedá sa orezať neobrázkový objekt.',
         },
@@ -88,6 +89,8 @@ const locale: typeof enUS = {
                 lock: 'Uzamknúť pomer (%)',
             },
             crop: {
+                cancel: 'Zrušiť',
+                apply: 'Hotovo',
                 title: 'Orezanie',
                 start: 'Začať orezanie',
                 mode: 'Voľne',

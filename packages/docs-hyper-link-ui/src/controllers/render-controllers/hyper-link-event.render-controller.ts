@@ -16,10 +16,22 @@
 
 import type { DocumentDataModel } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { CustomRangeType, Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, Inject } from '@univerjs/core';
+import {
+    CustomRangeType,
+    Disposable,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    ICommandService,
+    IContextService,
+    Inject,
+} from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
-import { DocEventManagerService } from '@univerjs/docs-ui';
-import { ClickDocHyperLinkOperation, ToggleDocHyperLinkInfoPopupOperation } from '../../commands/operations/popup.operation';
+import { DocEventManagerService, DocMobileElementMenuService } from '@univerjs/docs-ui';
+import { MOBILE_UI_MODE } from '@univerjs/ui';
+import { DeleteDocHyperLinkCommand } from '../../commands/commands/delete-link.command';
+import {
+    ClickDocHyperLinkOperation,
+    ToggleDocHyperLinkInfoPopupOperation,
+} from '../../commands/operations/popup.operation';
 import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.service';
 
 export class DocHyperLinkEventRenderController extends Disposable implements IRenderModule {
@@ -33,7 +45,9 @@ export class DocHyperLinkEventRenderController extends Disposable implements IRe
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(DocHyperLinkPopupService) private readonly _hyperLinkPopupService: DocHyperLinkPopupService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
-        @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService
+        @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService,
+        @Inject(DocMobileElementMenuService) private readonly _mobileElementMenuService: DocMobileElementMenuService,
+        @IContextService private readonly _contextService: IContextService
     ) {
         super();
 
@@ -59,8 +73,27 @@ export class DocHyperLinkEventRenderController extends Disposable implements IRe
     private _initPointerDown() {
         this.disposeWithMe(
             this._docEventManagerService.pointerDownCustomRanges$.subscribe((ranges) => {
-                if (!ranges.some((range) => range.range.rangeType === CustomRangeType.HYPERLINK)) {
+                const link = ranges.find((range) => range.range.rangeType === CustomRangeType.HYPERLINK);
+                if (!link) {
                     this._hyperLinkPopupService.hideInfoPopupOnPointerDown();
+                    return;
+                }
+                const info = {
+                    unitId: this._context.unitId,
+                    linkId: link.range.rangeId,
+                    segmentId: link.segmentId,
+                    segmentPage: link.segmentPageIndex,
+                    startIndex: link.range.startIndex,
+                    endIndex: link.range.endIndex,
+                };
+                const rect = link.rects[0];
+                if (rect && this._hyperLinkPopupService.canEditLink(info.unitId, info)) {
+                    this._mobileElementMenuService.capture({
+                        unitId: info.unitId,
+                        rect,
+                        onEdit: () => this._hyperLinkPopupService.showEditPopup(info.unitId, info),
+                        onDelete: () => this._commandService.executeCommand(DeleteDocHyperLinkCommand.id, info),
+                    });
                 }
             })
         );
@@ -78,17 +111,20 @@ export class DocHyperLinkEventRenderController extends Disposable implements IRe
                 }
 
                 if (link) {
+                    const info = {
+                        unitId: this._context.unitId,
+                        linkId: link.range.rangeId,
+                        segmentId: link.segmentId,
+                        segmentPage: link.segmentPageIndex,
+                        startIndex: link.range.startIndex,
+                        endIndex: link.range.endIndex,
+                    };
+                    if (this._contextService.getContextValue(MOBILE_UI_MODE) && this._hyperLinkPopupService.canEditLink(info.unitId, info)) {
+                        return;
+                    }
                     this._commandService.executeCommand(
                         ToggleDocHyperLinkInfoPopupOperation.id,
-                        {
-                            unitId: this._context.unitId,
-                            linkId: link.range.rangeId,
-                            segmentId: link.segmentId,
-                            segmentPage: link.segmentPageIndex,
-                            rangeId: link.range.rangeId,
-                            startIndex: link.range.startIndex,
-                            endIndex: link.range.endIndex,
-                        }
+                        info
                     );
                 } else {
                     this._hideInfoPopup();

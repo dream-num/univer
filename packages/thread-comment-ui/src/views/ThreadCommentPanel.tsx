@@ -21,11 +21,11 @@ import type { LocaleKey } from '../locale/types';
 import type { ThreadCommentPanelSection } from './thread-comment-panel/util';
 import type { IThreadCommentTreeProps } from './ThreadCommentTree';
 import { ICommandService, LocaleService, UniverInstanceType, UserManagerService } from '@univerjs/core';
-import { ActionRow, Button, Select } from '@univerjs/design';
-import { IncreaseIcon } from '@univerjs/icons';
+import { ActionRow, Button, clsx, ConfigContext, resetButtonClassName, Select } from '@univerjs/design';
+import { IncreaseIcon, MoreLeftIcon } from '@univerjs/icons';
 import { ThreadCommentModel } from '@univerjs/thread-comment';
 import { useDependency, useObservable } from '@univerjs/ui';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { SetActiveCommentOperation } from '../commands/operations/comment.operations';
 import { ThreadCommentPanelService } from '../services/thread-comment-panel.service';
 import { getThreadCommentPanelItemKey, isSameThreadCommentTarget, shouldClearThreadCommentTarget } from './thread-comment-panel/util';
@@ -59,6 +59,44 @@ interface IThreadCommentWithUsers extends IThreadComment {
     users: Set<string>;
 }
 
+function MobileCommentFilter({
+    value,
+    options,
+    onChange,
+}: {
+    value: string;
+    options: Array<{ label: string; value: string }>;
+    onChange: (value: string) => void;
+}) {
+    return (
+        <div
+            className="
+              univer-flex univer-gap-1 univer-overflow-x-auto univer-rounded-xl univer-bg-gray-100 univer-p-1
+              dark:!univer-bg-gray-800
+            "
+        >
+            {options.map((option) => (
+                <button
+                    key={option.value}
+                    type="button"
+                    aria-pressed={option.value === value}
+                    className={clsx(resetButtonClassName, `
+                      univer-h-10 univer-shrink-0 univer-rounded-lg univer-px-3 univer-text-sm univer-text-gray-700
+                      active:univer-scale-95
+                      dark:!univer-text-gray-200
+                    `, option.value === value && `
+                      univer-bg-gray-0 univer-font-medium univer-text-primary-600 univer-shadow-sm
+                      dark:!univer-bg-gray-700 dark:!univer-text-primary-300
+                    `)}
+                    onClick={() => onChange(option.value)}
+                >
+                    {option.label}
+                </button>
+            ))}
+        </div>
+    );
+}
+
 export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
     const {
         unitId,
@@ -85,6 +123,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
     } = props;
     const [unit, setUnit] = useState('all');
     const [status, setStatus] = useState('all');
+    const { mobile } = useContext(ConfigContext);
     const localeService = useDependency(LocaleService);
     const userService = useDependency(UserManagerService);
     const threadCommentModel = useDependency(ThreadCommentModel);
@@ -153,10 +192,43 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
         ? [scopedTempComment, ...statuedComments]
         : statuedComments;
 
-    const unSolvedComments = renderComments.filter((comment) => !comment.resolved);
-    const solvedComments = renderComments.filter((comment) => comment.resolved);
+    const activeComment = mobile && activeCommentId
+        ? renderComments.find((comment) => isSameThreadCommentTarget(activeCommentId, comment))
+        : undefined;
+    const visibleComments = activeComment ? [activeComment] : renderComments;
+
+    const unSolvedComments = visibleComments.filter((comment) => !comment.resolved);
+    const solvedComments = visibleComments.filter((comment) => comment.resolved);
 
     const isFiltering = status !== 'all' || unit !== 'all';
+    const unitFilterOptions = [
+        {
+            value: 'current',
+            label: localeService.t<LocaleKey>('thread-comment-ui.filter.sheet.current'),
+        },
+        {
+            value: 'all',
+            label: localeService.t<LocaleKey>('thread-comment-ui.filter.sheet.all'),
+        },
+    ];
+    const statusFilterOptions = [
+        {
+            value: 'all',
+            label: localeService.t<LocaleKey>('thread-comment-ui.filter.status.all'),
+        },
+        {
+            value: 'resolved',
+            label: localeService.t<LocaleKey>('thread-comment-ui.filter.status.resolved'),
+        },
+        {
+            value: 'unsolved',
+            label: localeService.t<LocaleKey>('thread-comment-ui.filter.status.unsolved'),
+        },
+        {
+            value: 'concern_me',
+            label: localeService.t<LocaleKey>('thread-comment-ui.filter.status.concernMe'),
+        },
+    ];
 
     const onReset = () => {
         setStatus('all');
@@ -276,51 +348,91 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
 
     return (
         <div className="univer-flex univer-min-h-full univer-flex-col univer-pb-3">
-            <div className="univer-mt-3 univer-flex univer-flex-row univer-justify-between">
-                {type === UniverInstanceType.UNIVER_SHEET
+            {activeComment && (
+                <div
+                    className="
+                      univer-mt-2 univer-flex univer-min-h-12 univer-items-center univer-gap-2 univer-border-0
+                      univer-border-b univer-border-solid univer-border-gray-200 univer-pb-2
+                      dark:!univer-border-gray-700
+                    "
+                >
+                    <button
+                        type="button"
+                        aria-label={localeService.t<LocaleKey>('thread-comment-ui.mobile.back')}
+                        className={`
+                          ${resetButtonClassName}
+                          univer-flex univer-size-12 univer-shrink-0 univer-items-center univer-justify-center
+                          univer-rounded-xl univer-text-2xl univer-text-gray-700
+                          active:univer-bg-gray-100
+                          dark:!univer-text-gray-200
+                          dark:active:!univer-bg-gray-700
+                        `}
+                        onClick={() => commandService.executeCommand(SetActiveCommentOperation.id).catch(() => undefined)}
+                    >
+                        <MoreLeftIcon />
+                    </button>
+                    <div className="univer-min-w-0 univer-flex-1">
+                        <div
+                            className="
+                              univer-truncate univer-text-base univer-font-semibold univer-text-gray-900
+                              dark:!univer-text-gray-0
+                            "
+                        >
+                            {localeService.t<LocaleKey>('thread-comment-ui.panel.title')}
+                        </div>
+                        {activeComment.ref && (
+                            <div
+                                className="
+                                  univer-truncate univer-text-xs univer-text-gray-500
+                                  dark:!univer-text-gray-400
+                                "
+                            >
+                                {formatRef?.(activeComment) ?? activeComment.ref}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+            {!activeComment && (
+                mobile
                     ? (
-                        <SelectComponent
-                            borderless
-                            value={unit}
-                            options={[
-                                {
-                                    value: 'current',
-                                    label: localeService.t<LocaleKey>('thread-comment-ui.filter.sheet.current'),
-                                },
-                                {
-                                    value: 'all',
-                                    label: localeService.t<LocaleKey>('thread-comment-ui.filter.sheet.all'),
-                                },
-                            ]}
-                            onChange={setUnit}
-                        />
+                        <div className="univer-mt-3 univer-flex univer-flex-col univer-gap-2">
+                            {type === UniverInstanceType.UNIVER_SHEET && (
+                                <MobileCommentFilter value={unit} options={unitFilterOptions} onChange={setUnit} />
+                            )}
+                            <MobileCommentFilter value={status} options={statusFilterOptions} onChange={setStatus} />
+                        </div>
                     )
-                    : null}
-                <SelectComponent
-                    borderless
-                    value={status}
-                    options={[
-                        {
-                            value: 'all',
-                            label: localeService.t<LocaleKey>('thread-comment-ui.filter.status.all'),
-                        },
-                        {
-                            value: 'resolved',
-                            label: localeService.t<LocaleKey>('thread-comment-ui.filter.status.resolved'),
-                        },
-                        {
-                            value: 'unsolved',
-                            label: localeService.t<LocaleKey>('thread-comment-ui.filter.status.unsolved'),
-                        },
-                        {
-                            value: 'concern_me',
-                            label: localeService.t<LocaleKey>('thread-comment-ui.filter.status.concernMe'),
-                        },
-                    ]}
-                    onChange={setStatus}
-                />
-            </div>
-            {renderComments.length === 0
+                    : (
+                        <div className="univer-mt-3 univer-flex univer-flex-row univer-justify-between">
+                            {type === UniverInstanceType.UNIVER_SHEET
+                                ? (
+                                    <Select
+                                        borderless
+                                        value={unit}
+                                        options={unitFilterOptions}
+                                        onChange={setUnit}
+                                    />
+                                )
+                                : null}
+                            <Select
+                                borderless
+                                value={status}
+                                options={statusFilterOptions}
+                                onChange={setStatus}
+                            />
+                        </div>
+                    )
+            )}
+            {mobile && !activeComment && !disableAdd && !scopedTempComment && (
+                <ActionRowComponent className="univer-mt-3">
+                    <Button className="univer-w-full" onClick={onAdd}>
+                        <IncreaseIcon className="univer-mr-1.5" />
+                        {localeService.t<LocaleKey>('thread-comment-ui.panel.addComment')}
+                    </Button>
+                </ActionRowComponent>
+            )}
+            {visibleComments.length === 0
                 ? (
                     <div
                         className={`
@@ -338,7 +450,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                                     </Button>
                                 </ActionRowComponent>
                             )
-                            : !disableAdd
+                            : !disableAdd && !mobile
                                 ? (
                                     <ActionRowComponent
                                         className="univer-mt-2 univer-flex univer-flex-row"

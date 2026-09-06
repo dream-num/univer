@@ -38,7 +38,7 @@ export const DocLinkPopup = () => {
     const commandService = useDependency(ICommandService);
     const messageService = useDependency(IMessageService);
     const localeService = useDependency(LocaleService);
-    const currentPopup = useObservable(hyperLinkService.showingLink$);
+    const currentPopup = useObservable(hyperLinkService.showingLink$, hyperLinkService.showing);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const permissionService = useDependency(IPermissionService);
     if (!currentPopup) {

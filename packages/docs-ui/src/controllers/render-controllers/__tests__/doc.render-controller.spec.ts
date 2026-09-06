@@ -27,6 +27,7 @@ import {
     DrawingTypeEnum,
     HorizontalAlign,
     ICommandService,
+    IContextService,
     IUniverInstanceService,
     ObjectRelativeFromH,
     ObjectRelativeFromV,
@@ -49,7 +50,7 @@ import {
     IRenderManagerService,
     RenderManagerService,
 } from '@univerjs/engine-render';
-import { ILayoutService } from '@univerjs/ui';
+import { CanvasPopupService, ContextMenuService, ICanvasPopupService, IContextMenuService, ILayoutService, MOBILE_UI_MODE } from '@univerjs/ui';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { VIEWPORT_KEY } from '../../../basics/docs-view-key';
 import { AfterSpaceCommand } from '../../../commands/commands/auto-format.command';
@@ -59,7 +60,9 @@ import { DocAutoFormatService } from '../../../services/doc-auto-format.service'
 import { DocIMEInputManagerService } from '../../../services/doc-ime-input-manager.service';
 import { DocLayoutInteractionService } from '../../../services/doc-layout-interaction.service';
 import { DocMenuStyleService } from '../../../services/doc-menu-style.service';
+import { DocMobileElementMenuService } from '../../../services/doc-mobile-element-menu.service';
 import { DocPageLayoutService } from '../../../services/doc-page-layout.service';
+import { DocCanvasPopManagerService } from '../../../services/doc-popup-manager.service';
 import { DocViewScaleService } from '../../../services/doc-view-scale';
 import { EditorService, IEditorService } from '../../../services/editor/editor-manager.service';
 import { DocSelectionRenderService } from '../../../services/selection/doc-selection-render.service';
@@ -70,7 +73,7 @@ import { DocInputController } from '../doc-input.controller';
 import { DocSelectionRenderController } from '../doc-selection-render.controller';
 import { DocRenderController } from '../doc.render-controller';
 
-function createEditor(paragraphCount = 8, withDrawing = true, workerBeforeLayout = false, documentFlavor = DocumentFlavor.TRADITIONAL, withFootnote = false) {
+function createEditor(paragraphCount = 8, withDrawing = true, workerBeforeLayout = false, documentFlavor = DocumentFlavor.TRADITIONAL, withFootnote = false, mobile = false) {
     if (workerBeforeLayout) {
         // Model computation cost separately from fake timers so foreground work yields before Worker handoff.
         let elapsed = 0;
@@ -85,7 +88,12 @@ function createEditor(paragraphCount = 8, withDrawing = true, workerBeforeLayout
         registerContainerElement: () => ({ dispose() {} }),
     } as unknown as ILayoutService }]);
     injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+    injector.add([ICanvasPopupService, { useClass: CanvasPopupService }]);
+    injector.add([IContextMenuService, { useClass: ContextMenuService }]);
+    injector.add([DocCanvasPopManagerService]);
+    injector.add([DocMobileElementMenuService]);
     injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
+    injector.get(IContextService).setContextValue(MOBILE_UI_MODE, mobile);
     injector.add([DocLayoutExecutorService]);
     // The transport boundary stays pending; the real controller and coordinator
     // must still hand off before Main paginates the entire document.
@@ -189,7 +197,8 @@ function createEditor(paragraphCount = 8, withDrawing = true, workerBeforeLayout
     ]);
     const selection = render.with(DocSelectionRenderService);
     const selectionManager = injector.get(DocSelectionManagerService);
-    const skeleton = render.with(DocSkeletonManagerService).getSkeleton();
+    const skeletonManager = render.with(DocSkeletonManagerService);
+    const skeleton = skeletonManager.getSkeleton();
     if (!workerBeforeLayout) {
         const firstLine = skeleton.getSkeletonData()!.pages[0].sections[0].columns[0].lines[0];
         expect(firstLine.ed).toBe(firstParagraph.length);
@@ -211,6 +220,7 @@ function createEditor(paragraphCount = 8, withDrawing = true, workerBeforeLayout
         selection,
         selectionManager,
         skeleton,
+        skeletonManager,
         startWorkerLayout,
         unitId,
         dispose(): void {
@@ -505,29 +515,60 @@ describe('DocRenderController bounded input publication', () => {
         }
     });
 
-    it('starts IME from a pending logical caret and commits the composed text once', async () => {
-        const editor = createEditor();
+    it.each([
+        { label: 'desktop', mobile: false },
+        { label: 'mobile', mobile: true },
+    ])('keeps $label IME focused across repeated space confirmations and layout refreshes', async ({ mobile }) => {
+        const editor = createEditor(8, true, false, DocumentFlavor.TRADITIONAL, false, mobile);
         try {
+            if (mobile) {
+                editor.selection.enterMobileEditMode();
+            }
+            editor.selection.focus();
             editor.input.textContent = 'A';
             editor.input.dispatchEvent(new InputEvent('input', { data: 'A', inputType: 'insertText' }));
             await Promise.resolve();
             await Promise.resolve();
             expect(editor.skeleton.getLayoutProgress()?.anchorReady).toBe(false);
-            editor.input.dispatchEvent(new CompositionEvent('compositionstart', { data: '' }));
-            for (const text of ['n', 'ni', '你']) {
-                editor.input.dispatchEvent(new CompositionEvent('compositionupdate', { data: text }));
+
+            const compositions = [
+                { updates: ['n', 'ni', '你'], result: '你' },
+                { updates: ['h', 'ha', 'hao', '好'], result: '好' },
+                { updates: ['s', 'sh', 'shi', '世'], result: '世' },
+                { updates: ['j', 'jie', '界'], result: '界' },
+                { updates: ['a', '啊'], result: '啊' },
+            ];
+
+            for (const [index, composition] of compositions.entries()) {
+                editor.input.dispatchEvent(new CompositionEvent('compositionstart', { data: '' }));
+                for (const text of composition.updates) {
+                    editor.input.textContent = text;
+                    editor.input.dispatchEvent(new CompositionEvent('compositionupdate', { data: text }));
+                    for (let microtask = 0; microtask < 8; microtask++) {
+                        await Promise.resolve();
+                    }
+                }
+                editor.input.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', code: 'Space', bubbles: true }));
+                editor.input.dispatchEvent(new CompositionEvent('compositionend', { data: composition.result }));
                 for (let index = 0; index < 8; index++) {
                     await Promise.resolve();
                 }
+
+                const committed = compositions.slice(0, index + 1).map(({ result }) => result).join('');
+                const expectedOffset = 6 + index + 1;
+                expect(editor.model.getBody()?.dataStream.startsWith(`HelloA${committed} world`)).toBe(true);
+                await vi.advanceTimersByTimeAsync(20);
+                expect(editor.selectionManager.getActiveTextRange()?.endOffset).toBe(expectedOffset);
+                expect(editor.selection.getActiveTextRange()?.endOffset).toBe(expectedOffset);
+                expect(editor.selection.isEditing).toBe(true);
+                expect(document.activeElement).toBe(editor.input);
+
+                editor.skeletonManager.recalculate();
+
+                expect(editor.selectionManager.getActiveTextRange()?.endOffset).toBe(expectedOffset);
+                expect(editor.selection.isEditing).toBe(true);
+                expect(document.activeElement).toBe(editor.input);
             }
-            editor.input.dispatchEvent(new CompositionEvent('compositionend', { data: '你' }));
-            for (let index = 0; index < 8; index++) {
-                await Promise.resolve();
-            }
-            expect(editor.model.getBody()?.dataStream.startsWith('HelloA你 world')).toBe(true);
-            await vi.advanceTimersByTimeAsync(20);
-            expect(editor.selectionManager.getActiveTextRange()?.endOffset).toBe(7);
-            expect(editor.selection.getActiveTextRange()?.endOffset).toBe(7);
         } finally {
             editor.dispose();
         }

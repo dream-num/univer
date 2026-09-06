@@ -17,11 +17,12 @@
 import type { IImagePopupMenuExtraProps, IImagePopupMenuItem } from './ImagePopupMenu';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { MobileActionRow } from '@univerjs/design';
-import { IDialogService, useDependency } from '@univerjs/ui';
+import { IDialogService, MenuItemType, MobileMenu, useDependency } from '@univerjs/ui';
+import { of } from 'rxjs';
 
 interface IMobileImagePopupMenuProps {
     popup: {
-        extraProps?: Pick<IImagePopupMenuExtraProps, 'menuItems'> & { dialogId?: string };
+        extraProps?: Pick<IImagePopupMenuExtraProps, 'menuItems' | 'variant'> & { dialogId?: string };
     };
 }
 
@@ -41,6 +42,30 @@ export function MobileImagePopupMenu({ popup }: IMobileImagePopupMenuProps) {
             dialogService.close(popup.extraProps.dialogId);
         }
     };
+
+    if (popup.extraProps?.variant === 'doc-floating-toolbar' || popup.extraProps?.variant === 'doc-chart-floating-toolbar') {
+        return (
+            <MobileMenu
+                presentation="context-bar"
+                schemas={menuItems.map((item) => ({
+                    key: item.commandId,
+                    order: item.index,
+                    item: {
+                        id: item.commandId,
+                        type: MenuItemType.BUTTON,
+                        title: item.label,
+                        disabled$: of(item.disable),
+                    },
+                }))}
+                onOptionSelect={async ({ id }) => {
+                    const item = menuItems.find((item) => item.commandId === id);
+                    if (item && !item.disable) {
+                        await handleSelect(item);
+                    }
+                }}
+            />
+        );
+    }
 
     return (
         <div className="univer-flex univer-flex-col univer-gap-2">

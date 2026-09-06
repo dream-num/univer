@@ -15,20 +15,29 @@
  */
 
 import type { IAccessor } from '@univerjs/core';
-import { LocaleService } from '@univerjs/core';
+import { IContextService, LocaleService } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import { ISidebarService } from '@univerjs/ui';
+import { IDialogService, ISidebarService, MOBILE_UI_MODE } from '@univerjs/ui';
 import { describe, expect, it, vi } from 'vitest';
 import { COMPONENT_DOC_DRAWING_PANEL } from '../../../views/doc-image-panel/component-name';
 import { SidebarDocDrawingOperation } from '../open-drawing-panel.operation';
 
-function createAccessor() {
+function createAccessor(mobile = false) {
     const sidebarService = { open: vi.fn(), close: vi.fn() };
+    const dialogService = { open: vi.fn(), close: vi.fn() };
     const drawingManagerService = { focusDrawing: vi.fn() };
     const accessor = {
         get(token: unknown) {
             if (token === ISidebarService) {
                 return sidebarService;
+            }
+
+            if (token === IDialogService) {
+                return dialogService;
+            }
+
+            if (token === IContextService) {
+                return { getContextValue: (key: string) => key === MOBILE_UI_MODE && mobile };
             }
 
             if (token === LocaleService) {
@@ -43,7 +52,7 @@ function createAccessor() {
         },
     } as IAccessor;
 
-    return { accessor, sidebarService, drawingManagerService };
+    return { accessor, dialogService, sidebarService, drawingManagerService };
 }
 
 describe('SidebarDocDrawingOperation', () => {
@@ -65,5 +74,15 @@ describe('SidebarDocDrawingOperation', () => {
         await expect(SidebarDocDrawingOperation.handler(accessor, { value: 'close' })).resolves.toBe(true);
         await expect(SidebarDocDrawingOperation.handler(accessor, { value: 'anything-else' })).resolves.toBe(true);
         expect(sidebarService.close).toHaveBeenCalledTimes(2);
+    });
+
+    it('uses a mobile dialog instead of the desktop sidebar', async () => {
+        const { accessor, dialogService, sidebarService } = createAccessor(true);
+        await expect(SidebarDocDrawingOperation.handler(accessor, { value: 'open' })).resolves.toBe(true);
+        expect(dialogService.open).toHaveBeenCalledWith(expect.objectContaining({
+            children: { label: COMPONENT_DOC_DRAWING_PANEL },
+            maskClosable: true,
+        }));
+        expect(sidebarService.open).not.toHaveBeenCalled();
     });
 });

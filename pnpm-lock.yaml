@@ -874,6 +874,9 @@ importers:
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../engine-render
+      '@univerjs/icons':
+        specifier: 1.38.0
+        version: 1.38.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui

@@ -603,6 +603,36 @@ describe('EditorService', () => {
         expect(() => service.register({ initialSnapshot: snapshot }, document.createElement('div'))).toThrow('disposed');
     });
 
+    it('restores the host document when a focused embedded editor is disposed', () => {
+        const { service, univerInstanceService } = createService(TestRegisterRenderManagerService);
+        const hostUnitId = EDITOR_ID;
+        const commentEditorId = `${DOCS_COMMENT_EDITOR_UNIT_ID_KEY}_comment-1`;
+        const commentSnapshot = {
+            id: commentEditorId,
+            documentStyle: {},
+            body: {
+                dataStream: 'comment\r\n',
+                paragraphs: [{ startIndex: 7, paragraphId: createParagraphId(new Set()) }],
+            },
+        };
+        univerInstanceService.__addUnit(new DocumentDataModel(commentSnapshot));
+        univerInstanceService.setCurrentUnitForType(hostUnitId);
+        const disposable = service.register({
+            initialSnapshot: commentSnapshot,
+            preserveHostFocus: true,
+        }, document.createElement('div'));
+
+        service.focus(commentEditorId);
+        expect(univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)?.getUnitId())
+            .toBe(commentEditorId);
+
+        disposable.dispose();
+
+        expect(service.getFocusId()).toBeNull();
+        expect(univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)?.getUnitId())
+            .toBe(hostUnitId);
+    });
+
     it('keeps render config without an editor when no render is available and removes it on dispose', () => {
         const { service } = createService(TestMissingRenderManagerService);
         const disposable = service.register({

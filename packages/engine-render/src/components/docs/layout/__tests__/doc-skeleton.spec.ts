@@ -2973,6 +2973,59 @@ describe('doc skeleton', () => {
         }
     );
 
+    it('keeps mobile geometry when typing interrupts a modern viewport reflow', () => {
+        const univer = new Univer();
+        const localeService = univer.__getInjector().get(LocaleService);
+        const paragraphs = Array.from(
+            { length: 20 },
+            (_, index) => `Modern paragraph ${index} wraps at the available mobile width.\r`
+        );
+        const content = paragraphs.join('');
+        const initialModel = createDocumentModelWithStyle(content, {});
+        initialModel.updateDocumentStyle({
+            documentFlavor: DocumentFlavor.MODERN,
+            pageSize: { width: 960, height: Number.POSITIVE_INFINITY },
+        });
+        const viewModel = new DocumentViewModel(initialModel);
+        const skeleton = DocumentSkeleton.create(viewModel, localeService);
+        const mobileGeometry = { modernPageWidth: 366, modernHorizontalMargin: 20 };
+        skeleton.calculate();
+
+        const resizeGeneration = skeleton.startIncrementalLayout({ reason: 'initial', ...mobileGeometry });
+        const resizeProgress = skeleton.stepIncrementalLayout(resizeGeneration, 0);
+        expect(resizeProgress.complete).toBe(false);
+        expect(skeleton.getSkeletonData()?.pages[0].pageWidth).toBe(mobileGeometry.modernPageWidth);
+
+        const anchor = paragraphs[0].length + 5;
+        const nextModel = createDocumentModelWithStyle(`${content.slice(0, anchor)}输入${content.slice(anchor)}`, {});
+        nextModel.updateDocumentStyle({
+            documentFlavor: DocumentFlavor.MODERN,
+            pageSize: { width: 960, height: Number.POSITIVE_INFINITY },
+        });
+        viewModel.reset(nextModel);
+        const generation = skeleton.startIncrementalLayout({
+            reason: 'edit',
+            anchor,
+            invalidation: { oldStart: anchor, oldEnd: anchor, newEnd: anchor + 2 },
+            ...mobileGeometry,
+        });
+        let progress = skeleton.stepIncrementalLayout(generation, 0);
+        for (let step = 0; step < 100 && !progress.complete; step++) {
+            progress = skeleton.stepIncrementalLayout(generation, 0);
+        }
+        expect(progress.complete).toBe(true);
+        expect(skeleton.getSkeletonData()?.pages[0]).toMatchObject({
+            pageWidth: mobileGeometry.modernPageWidth,
+            marginLeft: mobileGeometry.modernHorizontalMargin,
+            marginRight: mobileGeometry.modernHorizontalMargin,
+        });
+
+        skeleton.dispose();
+        initialModel.dispose();
+        nextModel.dispose();
+        univer.dispose();
+    });
+
     it('falls back to full incremental layout for a complex modern page', () => {
         const univer = new Univer();
         const localeService = univer.__getInjector().get(LocaleService);

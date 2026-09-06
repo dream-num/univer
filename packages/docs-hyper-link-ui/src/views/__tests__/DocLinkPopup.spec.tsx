@@ -19,6 +19,7 @@ import type { Root } from 'react-dom/client';
 import {
     CustomRangeType,
     ICommandService,
+    IContextService,
     IPermissionService,
     IUniverInstanceService,
     LocaleService,
@@ -31,9 +32,10 @@ import { DocSelectionManagerService, DocStateEmitService, RichTextEditingMutatio
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { UnitAction } from '@univerjs/protocol';
-import { IMessageService, RediContext } from '@univerjs/ui';
+import { IDialogService, IMessageService, MOBILE_UI_MODE, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
+import { of } from 'rxjs';
 import { afterEach, describe, expect, it } from 'vitest';
 import { AddDocHyperLinkCommand } from '../../commands/commands/add-link.command';
 import { DeleteDocHyperLinkCommand } from '../../commands/commands/delete-link.command';
@@ -102,12 +104,21 @@ function createDocData(): IDocumentData {
 function createPopupTestBed() {
     const univer = new Univer();
     const injector = univer.__getInjector();
+    injector.get(IContextService).setContextValue(MOBILE_UI_MODE, false);
 
     injector.add([DocSelectionManagerService]);
     injector.add([DocStateEmitService]);
     injector.add([DocCanvasPopManagerService, { useClass: TestDocCanvasPopManagerService as never }]);
     injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
     injector.add([IMessageService, { useClass: TestMessageService as never }]);
+    injector.add([IDialogService, {
+        useValue: {
+            close: () => {},
+            closeAll: () => {},
+            getDialogs$: () => of([]),
+            open: () => toDisposable(() => {}),
+        },
+    }]);
     injector.add([DocHyperLinkPopupService]);
 
     const doc = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, createDocData());
@@ -176,11 +187,11 @@ function renderPopup(root: Root, container: HTMLDivElement, testBed: ReturnType<
     };
 }
 
-function renderEditPopup(root: Root, testBed: ReturnType<typeof createPopupTestBed>) {
+function renderEditPopup(root: Root, testBed: ReturnType<typeof createPopupTestBed>, mobile = false) {
     act(() => {
         root.render(
             <RediContext.Provider value={{ injector: testBed.injector }}>
-                <DocHyperLinkEdit />
+                <DocHyperLinkEdit mobile={mobile} />
             </RediContext.Provider>
         );
     });
@@ -275,7 +286,7 @@ describe('DocLinkPopup', () => {
         expect(body?.customRanges?.some((range) => range.rangeId === 'existing-link')).toBe(false);
     });
 
-    it('updates an existing document hyperlink from the edit form', async () => {
+    it.each([false, true])('updates an existing document hyperlink from the edit form (mobile: %s)', async (mobile) => {
         currentTestBed = createPopupTestBed();
         const selectionManager = currentTestBed.injector.get(DocSelectionManagerService);
         selectionManager.__TEST_ONLY_setCurrentSelection({ unitId: UNIT_ID, subUnitId: UNIT_ID });
@@ -298,11 +309,20 @@ describe('DocLinkPopup', () => {
         document.body.appendChild(container);
         root = createRoot(container);
 
-        renderEditPopup(root, currentTestBed);
+        const focusedInputs: EventTarget[] = [];
+        container.addEventListener('focusin', (event) => {
+            if (event.target instanceof HTMLInputElement) {
+                focusedInputs.push(event.target);
+            }
+        });
+        renderEditPopup(root, currentTestBed, mobile);
 
         const [labelInput, linkInput] = Array.from(container.querySelectorAll('input')) as HTMLInputElement[];
         expect(labelInput.value).toBe('world');
         expect(linkInput.value).toBe('https://univer.ai');
+        if (mobile) {
+            expect(focusedInputs).toEqual([labelInput]);
+        }
 
         await act(async () => {
             setInputText(labelInput, 'docs');

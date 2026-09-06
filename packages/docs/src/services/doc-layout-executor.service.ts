@@ -126,9 +126,16 @@ export interface IDocLayoutStartRequest extends IDocLayoutMountIdentity {
     anchor?: number;
     priorityAnchor?: number;
     invalidation?: IDocumentLayoutSessionStartOptions['invalidation'];
-    customBlockViewports: Record<string, IDocsCustomBlockRenderViewport>;
+    customBlockViewports?: Record<string, IDocsCustomBlockRenderViewport>;
+    customBlockViewportPatch?: IDocLayoutRecordPatch<IDocsCustomBlockRenderViewport>;
     customRangePresentations?: IDocLayoutCustomRangePresentationEntry[];
+    customRangePresentationPatch?: IDocLayoutCustomRangePresentationPatch;
     budgetMs: number;
+}
+
+export interface IDocLayoutRecordPatch<T> {
+    removals: string[];
+    upserts: Record<string, T>;
 }
 
 export interface IDocLayoutCustomRangePresentation {
@@ -143,6 +150,11 @@ export interface IDocLayoutCustomRangePresentationEntry {
     segmentId: string;
     rangeId: string;
     presentation: IDocLayoutCustomRangePresentation;
+}
+
+export interface IDocLayoutCustomRangePresentationPatch {
+    removals: Array<Pick<IDocLayoutCustomRangePresentationEntry, 'segmentId' | 'rangeId'>>;
+    upserts: IDocLayoutCustomRangePresentationEntry[];
 }
 
 export interface IDocLayoutCustomRangePresentationContext {
@@ -219,10 +231,89 @@ interface IDocLayoutManagedSession {
         mountEpoch: number;
         viewportEpoch: number;
     }>;
+    customBlockViewportsByMount: Map<string, {
+        mountEpoch: number;
+        value: Record<string, IDocsCustomBlockRenderViewport>;
+    }>;
+    customRangePresentations: Map<string, IDocLayoutCustomRangePresentationEntry> | null;
     queue: Promise<void>;
     needsResnapshot: boolean;
     disposed: boolean;
     cancelPendingCreateTask: (() => void) | null;
+}
+
+interface IDocLayoutProjectionPayload {
+    request: Pick<
+        IDocLayoutStartRequest,
+        'customBlockViewports' |
+        'customBlockViewportPatch' |
+        'customRangePresentations' |
+        'customRangePresentationPatch'
+    >;
+    customBlockViewports: Record<string, IDocsCustomBlockRenderViewport>;
+    customRangePresentations: Map<string, IDocLayoutCustomRangePresentationEntry>;
+}
+
+function areShallowRecordsEqual(
+    left: object,
+    right: object
+): boolean {
+    const leftRecord = left as Record<string, unknown>;
+    const rightRecord = right as Record<string, unknown>;
+    const leftKeys = Object.keys(leftRecord);
+    const rightKeys = Object.keys(rightRecord);
+    return leftKeys.length === rightKeys.length && leftKeys.every((key) => leftRecord[key] === rightRecord[key]);
+}
+
+function createRecordPatch<T extends object>(
+    previous: Record<string, T>,
+    current: Record<string, T>
+): IDocLayoutRecordPatch<T> {
+    const upserts: Record<string, T> = {};
+    const removals: string[] = [];
+    for (const [key, value] of Object.entries(current)) {
+        if (previous[key] == null || !areShallowRecordsEqual(previous[key], value)) {
+            upserts[key] = value;
+        }
+    }
+    for (const key of Object.keys(previous)) {
+        if (current[key] == null) {
+            removals.push(key);
+        }
+    }
+    return { removals, upserts };
+}
+
+function getCustomRangePresentationKey(
+    entry: Pick<IDocLayoutCustomRangePresentationEntry, 'segmentId' | 'rangeId'>
+): string {
+    return JSON.stringify([entry.segmentId, entry.rangeId]);
+}
+
+function toCustomRangePresentationMap(
+    entries: IDocLayoutCustomRangePresentationEntry[]
+): Map<string, IDocLayoutCustomRangePresentationEntry> {
+    return new Map(entries.map((entry) => [getCustomRangePresentationKey(entry), entry]));
+}
+
+function createCustomRangePresentationPatch(
+    previous: Map<string, IDocLayoutCustomRangePresentationEntry>,
+    current: Map<string, IDocLayoutCustomRangePresentationEntry>
+): IDocLayoutCustomRangePresentationPatch {
+    const upserts: IDocLayoutCustomRangePresentationEntry[] = [];
+    const removals: IDocLayoutCustomRangePresentationPatch['removals'] = [];
+    for (const [key, entry] of current) {
+        const previousEntry = previous.get(key);
+        if (previousEntry == null || !areShallowRecordsEqual(previousEntry.presentation, entry.presentation)) {
+            upserts.push(entry);
+        }
+    }
+    for (const [key, entry] of previous) {
+        if (!current.has(key)) {
+            removals.push({ segmentId: entry.segmentId, rangeId: entry.rangeId });
+        }
+    }
+    return { removals, upserts };
 }
 
 function isRichTextEditingMutationParams(value: unknown): value is IRichTextEditingMutationParams {
@@ -250,7 +341,7 @@ function collectCustomBlockViewports(dataModel: DocumentDataModel): Record<strin
             pageWidth: documentStyle.pageSize?.width,
         });
         if (viewport != null) {
-            viewports[customBlock.blockId] = viewport;
+            viewports[customBlock.blockId] = { ...viewport };
         }
     }
 
@@ -528,6 +619,7 @@ export class DocLayoutExecutorService extends Disposable {
             latestStart.viewportEpoch === request.viewportEpoch
         ) {
             session?.latestStarts.delete(request.mountId);
+            session?.customBlockViewportsByMount.delete(request.mountId);
         }
         return executor == null ? Promise.resolve() : executor.disposeLayoutMount(request);
     }
@@ -634,14 +726,18 @@ export class DocLayoutExecutorService extends Disposable {
             }
 
             const mutations = session.pendingMutations.slice();
+            const projections = this._createLayoutProjectionPayload(
+                session,
+                identity,
+                this._getRequiredModel(unitId)
+            );
             const request: IDocLayoutStartRequest = {
                 ...identity,
                 metricsRevision: startId,
                 baseRevision: session.workerRevision,
                 modelRevision: session.modelRevision,
                 mutations,
-                customBlockViewports: collectCustomBlockViewports(this._getRequiredModel(unitId)),
-                customRangePresentations: this._collectCustomRangePresentations(this._getRequiredModel(unitId)),
+                ...projections.request,
                 budgetMs,
                 ...options,
             };
@@ -649,6 +745,11 @@ export class DocLayoutExecutorService extends Disposable {
             if (result.status === DocLayoutSessionStatus.ACCEPTED) {
                 session.workerRevision = request.modelRevision;
                 session.pendingMutations.splice(0, mutations.length);
+                session.customBlockViewportsByMount.set(mountId, {
+                    mountEpoch: identity.mountEpoch,
+                    value: projections.customBlockViewports,
+                });
+                session.customRangePresentations = projections.customRangePresentations;
             } else {
                 session.needsResnapshot = true;
             }
@@ -662,6 +763,38 @@ export class DocLayoutExecutorService extends Disposable {
             }
         );
         return startTask;
+    }
+
+    private _createLayoutProjectionPayload(
+        session: IDocLayoutManagedSession,
+        identity: IDocLayoutMountIdentity,
+        dataModel: DocumentDataModel
+    ): IDocLayoutProjectionPayload {
+        const customBlockViewports = collectCustomBlockViewports(dataModel);
+        const previousCustomBlockViewports = session.customBlockViewportsByMount.get(identity.mountId);
+        const customRangePresentations = this._collectCustomRangePresentations(dataModel);
+        const customRangePresentationMap = toCustomRangePresentationMap(customRangePresentations);
+        const request: IDocLayoutProjectionPayload['request'] = {};
+        if (previousCustomBlockViewports == null || previousCustomBlockViewports.mountEpoch !== identity.mountEpoch) {
+            request.customBlockViewports = customBlockViewports;
+        } else {
+            const patch = createRecordPatch(previousCustomBlockViewports.value, customBlockViewports);
+            if (patch.removals.length > 0 || Object.keys(patch.upserts).length > 0) {
+                request.customBlockViewportPatch = patch;
+            }
+        }
+        if (session.customRangePresentations == null) {
+            request.customRangePresentations = customRangePresentations;
+        } else {
+            const patch = createCustomRangePresentationPatch(
+                session.customRangePresentations,
+                customRangePresentationMap
+            );
+            if (patch.removals.length > 0 || patch.upserts.length > 0) {
+                request.customRangePresentationPatch = patch;
+            }
+        }
+        return { request, customBlockViewports, customRangePresentations: customRangePresentationMap };
     }
 
     private async _replaceSession(dataModel: DocumentDataModel): Promise<IDocLayoutManagedSession> {
@@ -680,6 +813,8 @@ export class DocLayoutExecutorService extends Disposable {
             workerRevision: modelRevision,
             pendingMutations: [],
             latestStarts: new Map(),
+            customBlockViewportsByMount: new Map(),
+            customRangePresentations: null,
             queue: Promise.resolve(),
             needsResnapshot: false,
             disposed: false,
@@ -749,7 +884,11 @@ export class DocLayoutExecutorService extends Disposable {
                 for (const provider of providers) {
                     const presentation = provider(dataModel.getUnitId(), range, { segmentId, body });
                     if (presentation != null) {
-                        presentations.push({ segmentId, rangeId: range.rangeId, presentation });
+                        presentations.push({
+                            segmentId,
+                            rangeId: range.rangeId,
+                            presentation: { ...presentation },
+                        });
                         break;
                     }
                 }

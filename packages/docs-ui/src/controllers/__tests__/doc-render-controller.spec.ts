@@ -16,9 +16,9 @@
 
 // @vitest-environment jsdom
 
-import type { ICommandInfo, IExecutionOptions } from '@univerjs/core';
+import type { ICommandInfo, IDocumentData, IExecutionOptions } from '@univerjs/core';
 import type { IDocLayoutMountIdentity } from '@univerjs/docs';
-import { CustomDecorationType, CustomRangeType, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DocumentFlavor, JSONX, PositionedObjectLayoutType } from '@univerjs/core';
+import { CustomDecorationType, CustomRangeType, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DocumentFlavor, JSONX, PositionedObjectLayoutType, TextXActionType } from '@univerjs/core';
 import { DocLayoutSessionStatus, RichTextEditingMutation } from '@univerjs/docs';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
@@ -166,6 +166,7 @@ function createControllerFixture(options?: {
     drawings?: Record<string, {
         layoutType: PositionedObjectLayoutType;
     }>;
+    snapshot?: Partial<IDocumentData>;
     hasCompleteLayout?: boolean;
     initialSkeletonDataMissing?: boolean;
     useWorker?: boolean;
@@ -309,6 +310,7 @@ function createControllerFixture(options?: {
                     documentFlavor: options?.documentFlavor ?? DocumentFlavor.TRADITIONAL,
                 },
                 drawings: options?.drawings,
+                ...options?.snapshot,
             })),
         },
         scene: {
@@ -666,6 +668,36 @@ describe('doc render controller', () => {
         expect(skeletonManager.getSkeleton().startIncrementalLayout).toHaveBeenCalledTimes(1);
     });
 
+    it('preserves a bounded changeset invalidation instead of restarting at zero', async () => {
+        const { commandCallbacks, skeletonManager } = createControllerFixture({
+            snapshot: {
+                body: {
+                    dataStream: 'x'.repeat(10_000),
+                    tables: [{ tableId: 'table-1', startIndex: 4_000, endIndex: 8_000 }],
+                },
+            },
+        });
+        const mutation = {
+            id: RichTextEditingMutation.id,
+            params: {
+                unitId: 'doc-unit',
+                actions: JSONX.getInstance().replaceOp(
+                    ['tableSource', 'table-1', 'tableColumns', 0, 'size', 'width', 'v'],
+                    100,
+                    120
+                ),
+            },
+        } satisfies ICommandInfo;
+
+        commandCallbacks[0](mutation, { fromChangeset: true });
+        await Promise.resolve();
+
+        expect(skeletonManager.getSkeleton().startIncrementalLayout).toHaveBeenCalledWith(expect.objectContaining({
+            anchor: 4_000,
+            invalidation: { oldStart: 4_000, oldEnd: 8_000, newEnd: 8_000 },
+        }));
+    });
+
     it('does not start document layout when an overlay-only drawing moves', () => {
         const { commandCallbacks, skeletonManager } = createControllerFixture({
             drawings: {
@@ -683,6 +715,24 @@ describe('doc render controller', () => {
                     ['drawings', 'drawing-1', 'docTransform', 'positionH'],
                     { posOffset: 10 },
                     { posOffset: 20 }
+                ),
+            },
+        } satisfies ICommandInfo);
+
+        expect(skeletonManager.getSkeleton().startIncrementalLayout).not.toHaveBeenCalled();
+        expect(skeletonManager.recalculate).not.toHaveBeenCalled();
+    });
+
+    it('does not start document layout when only the drawing stacking order changes', () => {
+        const { commandCallbacks, skeletonManager } = createControllerFixture();
+
+        commandCallbacks[0]({
+            id: RichTextEditingMutation.id,
+            params: {
+                unitId: 'doc-unit',
+                actions: JSONX.getInstance().moveOp(
+                    ['drawingsOrder', 0],
+                    ['drawingsOrder', 1]
                 ),
             },
         } satisfies ICommandInfo);
@@ -718,6 +768,32 @@ describe('doc render controller', () => {
         expect(skeletonManager.getSkeleton().startIncrementalLayout).toHaveBeenCalledWith(expect.objectContaining({
             deferForeground: true,
         }));
+    });
+
+    it.each([
+        PositionedObjectLayoutType.INLINE,
+        PositionedObjectLayoutType.WRAP_SQUARE,
+    ])('does not reflow when only drawing accessibility metadata changes (layout type %s)', (layoutType) => {
+        const { commandCallbacks, skeletonManager } = createControllerFixture({
+            drawings: {
+                'drawing-1': { layoutType },
+            },
+        });
+
+        commandCallbacks[0]({
+            id: RichTextEditingMutation.id,
+            params: {
+                unitId: 'doc-unit',
+                actions: JSONX.getInstance().replaceOp(
+                    ['drawings', 'drawing-1', 'title'],
+                    'Old title',
+                    'New title'
+                ),
+            },
+        } satisfies ICommandInfo);
+
+        expect(skeletonManager.getSkeleton().startIncrementalLayout).not.toHaveBeenCalled();
+        expect(skeletonManager.recalculate).not.toHaveBeenCalled();
     });
 
     it('reflows when a drawing switches between wrapping and overlay layout', () => {
@@ -1715,6 +1791,313 @@ describe('doc render controller', () => {
         // page coordinates are not stable until the background pass reaches a page
         // boundary. Never back-scroll with those transient coordinates.
         expect(backScrollController.scrollToRange).not.toHaveBeenCalled();
+    });
+
+    it('derives the incremental invalidation from a body TextX edit composed with table metadata', () => {
+        const { commandCallbacks, skeletonManager } = createControllerFixture({
+            snapshot: {
+                body: {
+                    dataStream: 'x'.repeat(2_000),
+                    tables: [{ tableId: 'table-1', startIndex: 1_200, endIndex: 1_800 }],
+                },
+            },
+        });
+        const textAction = JSONX.getInstance().editOp([
+            { t: TextXActionType.RETAIN, len: 1_500 },
+            { t: TextXActionType.INSERT, len: 1, body: { dataStream: 'Z' } },
+        ], ['body']);
+        const tableAction = JSONX.getInstance().replaceOp(
+            ['tableSource', 'table-1', 'tableRows', 0, 'trHeight', 'val', 'v'],
+            20,
+            24
+        );
+
+        commandCallbacks[0]({
+            id: RichTextEditingMutation.id,
+            params: {
+                unitId: 'doc-unit',
+                textRanges: null,
+                actions: JSONX.compose(textAction, tableAction),
+            },
+        } satisfies ICommandInfo);
+
+        expect(skeletonManager.getSkeleton().startIncrementalLayout).toHaveBeenCalledWith(expect.objectContaining({
+            anchor: 1_200,
+            invalidation: {
+                oldStart: 1_200,
+                oldEnd: 1_799,
+                newEnd: 1_800,
+            },
+        }));
+    });
+
+    it('keeps a deleted table on its TextX invalidation instead of restarting at zero', () => {
+        const { commandCallbacks, skeletonManager } = createControllerFixture({
+            snapshot: {
+                body: {
+                    dataStream: 'x'.repeat(6_000),
+                    tables: [],
+                },
+            },
+        });
+        const textAction = JSONX.getInstance().editOp([
+            { t: TextXActionType.RETAIN, len: 4_000 },
+            { t: TextXActionType.DELETE, len: 1_000 },
+        ], ['body']);
+        const tableAction = JSONX.getInstance().removeOp(['tableSource', 'table-1'], { tableId: 'table-1' });
+
+        commandCallbacks[0]({
+            id: RichTextEditingMutation.id,
+            params: {
+                unitId: 'doc-unit',
+                textRanges: [{ startOffset: 4_000, endOffset: 4_000, collapsed: true }],
+                actions: JSONX.compose(textAction, tableAction),
+            },
+        } satisfies ICommandInfo);
+
+        expect(skeletonManager.getSkeleton().startIncrementalLayout).toHaveBeenCalledWith(expect.objectContaining({
+            anchor: 4_000,
+            invalidation: {
+                oldStart: 4_000,
+                oldEnd: 5_000,
+                newEnd: 4_000,
+            },
+        }));
+    });
+
+    it.each([
+        {
+            name: 'table metadata',
+            actions: JSONX.getInstance().replaceOp(
+                ['tableSource', 'table-1', 'tableColumns', 0, 'size', 'width', 'v'],
+                100,
+                120
+            ),
+            snapshot: {
+                body: {
+                    dataStream: 'x'.repeat(10_000),
+                    tables: [{ tableId: 'table-1', startIndex: 4_000, endIndex: 8_000 }],
+                },
+            },
+            expected: { oldStart: 4_000, oldEnd: 8_000, newEnd: 8_000 },
+        },
+        {
+            name: 'column-group metadata',
+            actions: JSONX.getInstance().replaceOp(
+                ['body', 'columnGroups', 0, 'columns', 0, 'widthRatio'],
+                1,
+                2
+            ),
+            snapshot: {
+                body: {
+                    dataStream: 'x'.repeat(10_000),
+                    columnGroups: [{
+                        columnGroupId: 'columns-1',
+                        startIndex: 3_000,
+                        endIndex: 6_999,
+                        columns: [],
+                    }],
+                },
+            },
+            expected: { oldStart: 3_000, oldEnd: 7_000, newEnd: 7_000 },
+        },
+        {
+            name: 'block-range metadata',
+            actions: JSONX.getInstance().replaceOp(
+                ['body', 'blockRanges', 0, 'blockType'],
+                'quote',
+                'code'
+            ),
+            snapshot: {
+                body: {
+                    dataStream: 'x'.repeat(10_000),
+                    blockRanges: [{
+                        blockId: 'block-1',
+                        blockType: 'code',
+                        startIndex: 2_500,
+                        endIndex: 2_999,
+                    }],
+                },
+            },
+            expected: { oldStart: 2_500, oldEnd: 3_000, newEnd: 3_000 },
+        },
+        {
+            name: 'layout-participating drawing metadata',
+            actions: JSONX.getInstance().replaceOp(
+                ['drawings', 'drawing-1', 'docTransform', 'size', 'height'],
+                100,
+                140
+            ),
+            snapshot: {
+                body: {
+                    dataStream: 'x'.repeat(10_000),
+                    customBlocks: [{ blockId: 'drawing-1', startIndex: 7_500 }],
+                },
+                drawings: {
+                    'drawing-1': {
+                        drawingId: 'drawing-1',
+                        layoutType: PositionedObjectLayoutType.INLINE,
+                    },
+                },
+            },
+            expected: { oldStart: 7_500, oldEnd: 7_501, newEnd: 7_501 },
+        },
+        {
+            name: 'list metadata',
+            actions: JSONX.getInstance().replaceOp(
+                ['lists', 'list-1', 'nestingLevel', 0, 'glyphFormat'],
+                '%1.',
+                '(%1)'
+            ),
+            snapshot: {
+                body: {
+                    dataStream: 'x'.repeat(10_000),
+                    paragraphs: [{
+                        paragraphId: 'paragraph-1',
+                        startIndex: 2_000,
+                        bullet: { listId: 'list-1', listType: 'ordered', nestingLevel: 0 },
+                    }, {
+                        paragraphId: 'paragraph-2',
+                        startIndex: 8_000,
+                        bullet: { listId: 'list-1', listType: 'ordered', nestingLevel: 0 },
+                    }],
+                },
+            },
+            expected: { oldStart: 2_000, oldEnd: 8_001, newEnd: 8_001 },
+        },
+        {
+            name: 'a rendered page break',
+            actions: JSONX.getInstance().replaceOp(
+                ['body', 'renderedPageBreaks', 0],
+                5_000,
+                5_100
+            ),
+            snapshot: {
+                body: {
+                    dataStream: 'x'.repeat(10_000),
+                    renderedPageBreaks: [5_100],
+                },
+            },
+            expected: { oldStart: 5_000, oldEnd: 5_101, newEnd: 5_101 },
+        },
+        {
+            name: 'a referenced document style and its dependent style',
+            actions: JSONX.getInstance().replaceOp(
+                ['styles', 'base-style', 'paragraphStyle', 'spaceBelow', 'v'],
+                0,
+                12
+            ),
+            snapshot: {
+                body: {
+                    dataStream: 'x'.repeat(10_000),
+                    paragraphs: [{
+                        paragraphId: 'paragraph-1',
+                        startIndex: 3_000,
+                        styleId: 'base-style',
+                    }, {
+                        paragraphId: 'paragraph-2',
+                        startIndex: 7_000,
+                        styleId: 'dependent-style',
+                    }],
+                },
+                styles: {
+                    'base-style': { name: 'Base', type: 1 },
+                    'dependent-style': { name: 'Dependent', type: 1, basedOn: 'base-style' },
+                },
+            },
+            expected: { oldStart: 3_000, oldEnd: 7_001, newEnd: 7_001 },
+        },
+    ])('derives a bounded invalidation for $name', ({ actions, expected, snapshot }) => {
+        const { commandCallbacks, skeletonManager } = createControllerFixture({
+            snapshot: snapshot as Partial<IDocumentData>,
+            drawings: snapshot.drawings as never,
+        });
+
+        commandCallbacks[0]({
+            id: RichTextEditingMutation.id,
+            params: {
+                unitId: 'doc-unit',
+                textRanges: null,
+                actions,
+            },
+        } satisfies ICommandInfo);
+
+        expect(skeletonManager.getSkeleton().startIncrementalLayout).toHaveBeenCalledWith(expect.objectContaining({
+            anchor: expected.oldStart,
+            invalidation: expected,
+        }));
+    });
+
+    it('hands the bounded table invalidation to the Worker instead of restarting at zero', async () => {
+        vi.useFakeTimers();
+        try {
+            const { commandCallbacks, controller, layoutExecutorService } = createControllerFixture({
+                useWorker: true,
+                snapshot: {
+                    body: {
+                        dataStream: 'x'.repeat(10_000),
+                        tables: [{ tableId: 'table-1', startIndex: 4_000, endIndex: 8_000 }],
+                    },
+                },
+                layoutProgress: [{
+                    complete: false,
+                    anchorReady: true,
+                    didPublishAnchor: true,
+                    interactionWindowComplete: true,
+                    elapsedTime: 1,
+                    pageCount: 20,
+                    publishedPageCount: 5,
+                }],
+            });
+
+            commandCallbacks[0]({
+                id: RichTextEditingMutation.id,
+                params: {
+                    unitId: 'doc-unit',
+                    actions: JSONX.getInstance().replaceOp(
+                        ['tableSource', 'table-1', 'tableColumns', 0, 'size', 'width', 'v'],
+                        100,
+                        120
+                    ),
+                },
+            } satisfies ICommandInfo);
+            await vi.advanceTimersByTimeAsync(150);
+
+            expect(layoutExecutorService.startLayout).toHaveBeenCalledWith(
+                expect.anything(),
+                {
+                    reason: 'edit',
+                    anchor: 4_000,
+                    priorityAnchor: 4_000,
+                    invalidation: { oldStart: 4_000, oldEnd: 8_000, newEnd: 8_000 },
+                },
+                expect.any(Number)
+            );
+            controller.dispose();
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    it('keeps document-wide mutations on the conservative document-start path', () => {
+        const { commandCallbacks, skeletonManager } = createControllerFixture();
+
+        commandCallbacks[0]({
+            id: RichTextEditingMutation.id,
+            params: {
+                unitId: 'doc-unit',
+                actions: JSONX.getInstance().replaceOp(
+                    ['documentStyle', 'marginTop'],
+                    72,
+                    96
+                ),
+            },
+        } satisfies ICommandInfo);
+
+        expect(skeletonManager.getSkeleton().startIncrementalLayout).toHaveBeenCalledWith(expect.objectContaining({
+            anchor: 0,
+            invalidation: undefined,
+        }));
     });
 
     it('marks layout-metadata-only mutations as safe for structural tail reuse', () => {

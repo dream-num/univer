@@ -44,4 +44,27 @@ describe('validateDocStructureMutation', () => {
         expect(validateDocStructureMutation(model, '', actions, undoActions)).toBe(true);
         expect(getSelfOrHeaderFooterModel).not.toHaveBeenCalled();
     });
+
+    it('skips body structure scans for named-style metadata updates', () => {
+        const getSelfOrHeaderFooterModel = vi.fn(() => {
+            throw new Error('body structure should not be scanned');
+        });
+        const model = {
+            getSnapshot: () => ({}),
+            getSelfOrHeaderFooterModel,
+        } as unknown as DocumentDataModel;
+        const actions = JSONX.getInstance().replaceOp(
+            ['styles', 'heading-1', 'paragraphStyle', 'spaceBelow', 'v'],
+            0,
+            12
+        );
+        const undoActions = JSONX.getInstance().replaceOp(
+            ['styles', 'heading-1', 'paragraphStyle', 'spaceBelow', 'v'],
+            12,
+            0
+        );
+
+        expect(validateDocStructureMutation(model, '', actions, undoActions)).toBe(true);
+        expect(getSelfOrHeaderFooterModel).not.toHaveBeenCalled();
+    });
 });

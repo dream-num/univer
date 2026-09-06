@@ -52,12 +52,18 @@ import { EditDocDrawingOperation } from '../commands/operations/edit-doc-drawing
 import { SidebarDocDrawingOperation } from '../commands/operations/open-drawing-panel.operation';
 import { DocDrawingFloatingToolbarAdapterService } from '../services/doc-drawing-floating-toolbar-adapter.service';
 
+interface IDrawingPopupTarget {
+    unitId: string;
+    subUnitId: string;
+    drawingId: string;
+}
+
 export class DocDrawingPopupMenuController extends RxDisposable {
     private _initImagePopupMenu = new Set<string>();
     private _embeddedRenderUnits = new Set<string>();
     private _popupMenuListeners = new Map<string, IDisposable>();
     private _disposePopupsByUnit = new Map<string, INeedCheckDisposable[]>();
-    private _popupTargetKeys = new Map<string, string>();
+    private _popupTargetsByUnit = new Map<string, IDrawingPopupTarget>();
     private _isDrawingPanelOpen = false;
 
     constructor(
@@ -101,11 +107,10 @@ export class DocDrawingPopupMenuController extends RxDisposable {
             })
         );
         this.disposeWithMe(this._permissionService.permissionPointUpdate$.subscribe(() => {
-            if (this._drawingManagerService.getFocusDrawings().some((drawing) =>
-                this._univerInstanceService.getUnitType(drawing.unitId) === UniverInstanceType.UNIVER_DOC &&
-                !this._canEditDrawing(drawing.unitId, drawing.drawingId)
-            )) {
-                this._clearPopups(undefined, true);
+            for (const [popupUnitId, drawing] of this._popupTargetsByUnit) {
+                if (!this._canEditDrawing(drawing.unitId, drawing.drawingId)) {
+                    this._clearPopups(popupUnitId, true);
+                }
             }
         }));
 
@@ -169,7 +174,7 @@ export class DocDrawingPopupMenuController extends RxDisposable {
 
         if (popups.length === 0) {
             this._disposePopupsByUnit.delete(unitId);
-            this._popupTargetKeys.delete(unitId);
+            this._popupTargetsByUnit.delete(unitId);
         }
     }
 
@@ -239,11 +244,11 @@ export class DocDrawingPopupMenuController extends RxDisposable {
     private _registerDrawingPopup(
         unitId: string,
         popup: INeedCheckDisposable,
-        drawing: { unitId: string; subUnitId: string; drawingId: string }
+        drawing: IDrawingPopupTarget
     ): void {
         this.disposeWithMe(popup);
         this._getDisposePopups(unitId).push(popup);
-        this._popupTargetKeys.set(unitId, `${drawing.unitId}:${drawing.subUnitId}:${drawing.drawingId}`);
+        this._popupTargetsByUnit.set(unitId, drawing);
 
         const focusDrawings = this._drawingManagerService.getFocusDrawings();
         const alreadyFocused = focusDrawings.find((focusedDrawing) =>
@@ -254,6 +259,12 @@ export class DocDrawingPopupMenuController extends RxDisposable {
         if (!alreadyFocused) {
             this._drawingManagerService.focusDrawing([drawing]);
         }
+    }
+
+    private _isSamePopupTarget(previous: IDrawingPopupTarget | undefined, next: IDrawingPopupTarget): boolean {
+        return previous?.unitId === next.unitId &&
+            previous.subUnitId === next.subUnitId &&
+            previous.drawingId === next.drawingId;
     }
 
     private _popupMenuListener(unitId: string): IDisposable | undefined {
@@ -298,13 +309,13 @@ export class DocDrawingPopupMenuController extends RxDisposable {
                     return;
                 }
                 const disposePopups = this._disposePopupsByUnit.get(unitId);
-                const popupTargetKey = `${drawingUnitId}:${subUnitId}:${drawingId}`;
-                const previousPopupTargetKey = this._popupTargetKeys.get(unitId);
-                if (previousPopupTargetKey === popupTargetKey && disposePopups && disposePopups.length > 0) {
+                const previousPopupTarget = this._popupTargetsByUnit.get(unitId);
+                const popupTarget = { unitId: drawingUnitId, subUnitId, drawingId };
+                if (this._isSamePopupTarget(previousPopupTarget, popupTarget) && disposePopups && disposePopups.length > 0) {
                     return;
                 }
 
-                this._clearPopups(unitId, previousPopupTargetKey != null);
+                this._clearPopups(unitId, previousPopupTarget != null);
                 const isImage = drawingType === DrawingTypeEnum.DRAWING_IMAGE;
                 // Charts use the document toolbar placement, while retaining chart-specific actions and controls.
                 const isChart = drawingType === DrawingTypeEnum.DRAWING_CHART;

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { LocaleKey } from '../locale/types';
 import { LocaleService } from '@univerjs/core';
 import { LoadingMultiIcon } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
@@ -37,7 +38,7 @@ export function DocLayoutRecovery() {
                 aria-hidden
                 className="univer-size-5 univer-animate-spin univer-text-violet-500"
             />
-            <span>{localeService.t('docs-ui.layout.recovering')}</span>
+            <span>{localeService.t<LocaleKey>('docs-ui.layout.recovering')}</span>
         </div>
     );
 }

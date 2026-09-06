@@ -14,13 +14,44 @@
  * limitations under the License.
  */
 
-import { act, cleanup, render, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Dialog } from '../Dialog';
 
 afterEach(cleanup);
 
 describe('Dialog focus recovery', () => {
+    it('keeps composition Escape inside the real dialog and allows ordinary Escape afterwards', async () => {
+        const onClose = vi.fn();
+        const onOpenChange = vi.fn();
+        const { getByRole } = render(
+            <Dialog open title="Color" onClose={onClose} onOpenChange={onOpenChange}>
+                <input aria-label="Hex color" />
+            </Dialog>
+        );
+        const input = getByRole('textbox', { name: 'Hex color' });
+        await waitFor(() => expect(document.activeElement).toBe(input));
+
+        fireEvent.compositionStart(input);
+        const composingEscape = new KeyboardEvent('keydown', {
+            key: 'Escape',
+            isComposing: true,
+            bubbles: true,
+            cancelable: true,
+        });
+        fireEvent(input, composingEscape);
+        expect(composingEscape.defaultPrevented).toBe(true);
+        expect(onClose).not.toHaveBeenCalled();
+        expect(onOpenChange).not.toHaveBeenCalled();
+        expect(document.activeElement).toBe(input);
+        expect(getByRole('dialog').contains(input)).toBe(true);
+
+        fireEvent.compositionEnd(input);
+        fireEvent.keyDown(input, { key: 'Escape' });
+        expect(onClose).toHaveBeenCalledOnce();
+        expect(onOpenChange).toHaveBeenCalledExactlyOnceWith(false);
+    });
+
     it('restores input before delayed teardown and preserves subsequently chosen focus', async () => {
         const editor = document.createElement('input');
         const nextTarget = document.createElement('input');

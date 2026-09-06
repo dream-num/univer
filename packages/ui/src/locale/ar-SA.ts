@@ -19,6 +19,13 @@ import emojiLocale from './emoji-locale/ar-SA.generated';
 
 const locale: typeof enUS = {
     ui: {
+        accessibility: {
+            menu: 'القائمة',
+            zoom: 'التكبير والتصغير',
+            zoomIn: 'تكبير',
+            zoomOut: 'تصغير',
+            resetZoom: 'إعادة ضبط التكبير',
+        },
         featureSearch: {
             title: 'بحث عن الميزات',
             placeholder: 'اكتب اسم ميزة أو قائمة...',

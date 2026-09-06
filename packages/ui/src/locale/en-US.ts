@@ -18,6 +18,13 @@ import emojiLocale from './emoji-locale/en-US.generated';
 
 const locale = {
     ui: {
+        accessibility: {
+            menu: 'Menu',
+            zoom: 'Zoom',
+            zoomIn: 'Zoom in',
+            zoomOut: 'Zoom out',
+            resetZoom: 'Reset zoom',
+        },
         featureSearch: {
             title: 'Search features',
             placeholder: 'Type a feature or menu name...',

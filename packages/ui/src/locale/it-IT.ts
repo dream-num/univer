@@ -19,6 +19,13 @@ import emojiLocale from './emoji-locale/it-IT.generated';
 
 const locale: typeof enUS = {
     ui: {
+        accessibility: {
+            menu: 'Menu',
+            zoom: 'Zoom',
+            zoomIn: 'Ingrandisci',
+            zoomOut: 'Riduci',
+            resetZoom: 'Reimposta zoom',
+        },
         featureSearch: {
             title: 'Cerca funzionalità',
             placeholder: 'Digita una funzionalità o il nome di un menu...',

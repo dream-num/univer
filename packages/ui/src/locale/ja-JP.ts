@@ -19,6 +19,13 @@ import emojiLocale from './emoji-locale/ja-JP.generated';
 
 const locale: typeof enUS = {
     ui: {
+        accessibility: {
+            menu: 'メニュー',
+            zoom: 'ズーム',
+            zoomIn: '拡大',
+            zoomOut: '縮小',
+            resetZoom: 'ズームをリセット',
+        },
         featureSearch: {
             title: '機能を検索',
             placeholder: '機能またはメニュー名を入力…',

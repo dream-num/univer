@@ -19,6 +19,13 @@ import emojiLocale from './emoji-locale/ko-KR.generated';
 
 const locale: typeof enUS = {
     ui: {
+        accessibility: {
+            menu: '메뉴',
+            zoom: '확대/축소',
+            zoomIn: '확대',
+            zoomOut: '축소',
+            resetZoom: '확대/축소 초기화',
+        },
         featureSearch: {
             title: '기능 검색',
             placeholder: '기능 또는 메뉴 이름 입력...',

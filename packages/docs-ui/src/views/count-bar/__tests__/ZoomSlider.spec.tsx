@@ -23,6 +23,7 @@ import {
     CommandService,
     ConfigService,
     ContextService,
+    DesktopLogService,
     DocumentDataModel,
     ICommandService,
     IConfigService,
@@ -34,8 +35,8 @@ import {
     LocaleType,
     UniverInstanceService,
 } from '@univerjs/core';
-import designEnUS from '@univerjs/design/locale/en-US';
 import { ComponentManager, IconManager, RediContext } from '@univerjs/ui';
+import uiEnUS from '@univerjs/ui/locale/en-US';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -44,14 +45,9 @@ import { ZoomSlider } from '../ZoomSlider';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
-class TestLogService {
-    debug(): void {}
-    warn(): void {}
-}
-
 function createZoomSliderTestBed() {
     const injector = new Injector();
-    injector.add([ILogService, { useClass: TestLogService as never }]);
+    injector.add([ILogService, { useClass: DesktopLogService }]);
     injector.add([IConfigService, { useClass: ConfigService }]);
     injector.add([IContextService, { useClass: ContextService }]);
     injector.add([ICommandService, { useClass: CommandService }]);
@@ -60,11 +56,11 @@ function createZoomSliderTestBed() {
     injector.add([ComponentManager]);
     injector.add([IconManager]);
     const localeService = injector.get(LocaleService);
-    localeService.load({ [LocaleType.EN_US]: designEnUS });
+    localeService.load({ [LocaleType.EN_US]: uiEnUS });
     localeService.setLocale(LocaleType.EN_US);
     localeService.setDirection('ltr');
 
-    const doc = new DocumentDataModel({
+    const doc = injector.createInstance(DocumentDataModel, {
         id: 'zoom-slider-doc',
         body: {
             dataStream: '\r\n',
@@ -82,13 +78,13 @@ function createZoomSliderTestBed() {
     return { injector, doc };
 }
 
-function renderZoomSlider() {
+async function renderZoomSlider() {
     const { injector, doc } = createZoomSliderTestBed();
     const container = document.createElement('div');
     document.body.appendChild(container);
     const root = createRoot(container);
 
-    act(() => {
+    await act(async () => {
         root.render(
             <RediContext.Provider value={{ injector }}>
                 <ZoomSlider />
@@ -96,31 +92,35 @@ function renderZoomSlider() {
         );
     });
 
-    return { container, doc, root };
+    return { container, doc, root, injector };
 }
 
 describe('ZoomSlider', () => {
     let root: Root | undefined;
     let container: HTMLElement | undefined;
+    let injector: Injector | undefined;
 
-    afterEach(() => {
+    afterEach(async () => {
         if (root) {
-            act(() => root!.unmount());
+            await act(async () => root!.unmount());
         }
+        injector?.dispose();
         container?.remove();
         root = undefined;
         container = undefined;
+        injector = undefined;
     });
 
-    it('applies toolbar zoom changes to the current document through the zoom operation', () => {
-        const rendered = renderZoomSlider();
+    it('applies toolbar zoom changes to the current document through the zoom operation', async () => {
+        const rendered = await renderZoomSlider();
         root = rendered.root;
         container = rendered.container;
+        injector = rendered.injector;
 
         const increaseButton = container.querySelector<HTMLButtonElement>('button[aria-label="Zoom in"]');
         expect(increaseButton).not.toBeNull();
 
-        act(() => {
+        await act(async () => {
             increaseButton!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
         });
 

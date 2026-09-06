@@ -19,6 +19,13 @@ import emojiLocale from './emoji-locale/zh-HK.generated';
 
 const locale: typeof enUS = {
     ui: {
+        accessibility: {
+            menu: '選單',
+            zoom: '縮放',
+            zoomIn: '放大',
+            zoomOut: '縮小',
+            resetZoom: '重設縮放',
+        },
         featureSearch: {
             title: '搜尋功能',
             placeholder: '輸入功能或選單名稱…',

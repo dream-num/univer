@@ -19,6 +19,13 @@ import emojiLocale from './emoji-locale/vi-VN.generated';
 
 const locale: typeof enUS = {
     ui: {
+        accessibility: {
+            menu: 'Trình đơn',
+            zoom: 'Thu phóng',
+            zoomIn: 'Phóng to',
+            zoomOut: 'Thu nhỏ',
+            resetZoom: 'Đặt lại thu phóng',
+        },
         featureSearch: {
             title: 'Tìm kiếm tính năng',
             placeholder: 'Nhập tên tính năng hoặc menu...',

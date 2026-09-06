@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import type { KeyboardEvent as ReactKeyboardEvent, PointerEvent as ReactPointerEvent } from 'react';
+import type { KeyboardEvent, PointerEvent } from 'react';
+import type { LocaleKey } from '../../locale/types';
 import { LocaleService } from '@univerjs/core';
 import { borderClassName, Button, clsx } from '@univerjs/design';
 import { useEffect, useRef, useState } from 'react';
-import { IconManager } from '../../common';
+import { IconManager } from '../../common/icon-manager';
 import { useDependency, useObservable } from '../../utils/di';
 import { ZoomInput } from './ZoomInput';
 
@@ -88,13 +89,17 @@ export function Slider(props: ISliderProps) {
     }
 
     function handleReset() {
-        if (disabled) return;
+        if (disabled) {
+            return;
+        }
 
         onChange && onChange(resetPoint);
     }
 
     function handleStep(offset: number) {
-        if (disabled) return;
+        if (disabled) {
+            return;
+        }
 
         let result = value + offset;
         if (value + offset <= min) {
@@ -105,7 +110,7 @@ export function Slider(props: ISliderProps) {
         onChange && onChange(result);
     }
 
-    function handleSliderKeyDown(e: ReactKeyboardEvent<HTMLButtonElement>) {
+    function handleSliderKeyDown(e: KeyboardEvent<HTMLButtonElement>) {
         let nextValue: number | null = null;
         if (e.key === 'ArrowLeft' || e.key === 'ArrowDown' || e.key === 'PageDown') {
             nextValue = e.key === 'PageDown' ? value - 100 : value - 10;
@@ -217,8 +222,10 @@ export function Slider(props: ISliderProps) {
         return nextValue;
     }
 
-    function handlePointerDown(e: ReactPointerEvent<HTMLElement>) {
-        if (disabled) return;
+    function handlePointerDown(e: PointerEvent<HTMLElement>) {
+        if (disabled) {
+            return;
+        }
         e.preventDefault();
         e.stopPropagation();
 
@@ -228,7 +235,7 @@ export function Slider(props: ISliderProps) {
         setIsDragging(true);
         scheduleDragCommit(updateDragValue(e.clientX, rail));
 
-        function onPointerMove(e: PointerEvent) {
+        function onPointerMove(e: globalThis.PointerEvent) {
             if (isDragging) {
                 scheduleDragCommit(updateDragValue(e.clientX, rail));
             }
@@ -244,7 +251,7 @@ export function Slider(props: ISliderProps) {
             flushDragCommit();
         }
 
-        function onPointerOut(e: PointerEvent) {
+        function onPointerOut(e: globalThis.PointerEvent) {
             e.relatedTarget === null && onPointerUp();
         }
 
@@ -270,7 +277,7 @@ export function Slider(props: ISliderProps) {
                 className="univer-size-6 univer-p-0"
                 size="small"
                 variant="text"
-                aria-label={localeService.t('design.Accessibility.zoomOut')}
+                aria-label={localeService.t<LocaleKey>('ui.accessibility.zoomOut')}
                 disabled={value <= min || disabled}
                 onClick={() => handleStep(-10)}
             >
@@ -322,7 +329,7 @@ export function Slider(props: ISliderProps) {
                             `}
                             role="button"
                             tabIndex={disabled ? -1 : 0}
-                            aria-label={localeService.t('design.Accessibility.resetZoom')}
+                            aria-label={localeService.t<LocaleKey>('ui.accessibility.resetZoom')}
                             aria-disabled={disabled}
                             onClick={handleReset}
                             onKeyDown={(e) => {
@@ -349,7 +356,7 @@ export function Slider(props: ISliderProps) {
                                 'univer-scale-105 univer-border-primary-600 univer-shadow-md': isDragging,
                             })}
                             role="slider"
-                            aria-label={localeService.t('design.Accessibility.zoom')}
+                            aria-label={localeService.t<LocaleKey>('ui.accessibility.zoom')}
                             aria-valuemin={min}
                             aria-valuemax={max}
                             aria-valuenow={visualValue}
@@ -370,7 +377,7 @@ export function Slider(props: ISliderProps) {
                 className="univer-size-6 univer-p-0"
                 size="small"
                 variant="text"
-                aria-label={localeService.t('design.Accessibility.zoomIn')}
+                aria-label={localeService.t<LocaleKey>('ui.accessibility.zoomIn')}
                 disabled={value >= max || disabled}
                 onClick={() => handleStep(10)}
             >

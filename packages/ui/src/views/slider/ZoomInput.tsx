@@ -15,10 +15,12 @@
  */
 
 import type { IDropdownMenuProps } from '@univerjs/design';
+import type { KeyboardEvent } from 'react';
+import type { LocaleKey } from '../../locale/types';
 import { LocaleService } from '@univerjs/core';
 import { Button, clsx, DropdownMenu, Input } from '@univerjs/design';
 import { useEffect, useRef, useState } from 'react';
-import { IconManager } from '../../common';
+import { IconManager } from '../../common/icon-manager';
 import { useDependency } from '../../utils/di';
 
 export interface IZoomInputProps {
@@ -58,7 +60,9 @@ export function ZoomInput(props: IZoomInputProps) {
     }
 
     function handleSelect(value: number) {
-        if (disabled) return;
+        if (disabled) {
+            return;
+        }
 
         setListVisible(false);
         onChange?.(value);
@@ -66,23 +70,31 @@ export function ZoomInput(props: IZoomInputProps) {
 
     function parseInput(rawValue: string) {
         const normalizedValue = rawValue.trim().replace(/%$/, '').trim();
-        if (normalizedValue === '') return null;
+        if (normalizedValue === '') {
+            return null;
+        }
 
         const parsedValue = Number(normalizedValue);
-        if (!Number.isFinite(parsedValue)) return null;
+        if (!Number.isFinite(parsedValue)) {
+            return null;
+        }
 
         return Math.round(clampValue(parsedValue));
     }
 
     function handleFocus() {
-        if (disabled) return;
+        if (disabled) {
+            return;
+        }
 
         isEditingRef.current = true;
         setInputValue(String(value));
     }
 
     function commitInput() {
-        if (disabled || !isEditingRef.current) return;
+        if (disabled || !isEditingRef.current) {
+            return;
+        }
 
         const parsedValue = parseInput(inputValue);
         isEditingRef.current = false;
@@ -98,7 +110,7 @@ export function ZoomInput(props: IZoomInputProps) {
         }
     }
 
-    function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
         e.stopPropagation();
 
         if (e.key === 'Enter') {
@@ -137,7 +149,7 @@ export function ZoomInput(props: IZoomInputProps) {
                 `}
                 inputClass="univer-w-full"
                 size="mini"
-                aria-label={localeService.t('design.Accessibility.zoom')}
+                aria-label={localeService.t<LocaleKey>('ui.accessibility.zoom')}
                 value={inputValue}
                 disabled={disabled}
                 type="text"
@@ -158,7 +170,7 @@ export function ZoomInput(props: IZoomInputProps) {
                     className="univer-h-6 univer-w-4 univer-rounded-none univer-p-0"
                     size="small"
                     variant="text"
-                    aria-label={localeService.t('design.Accessibility.menu')}
+                    aria-label={localeService.t<LocaleKey>('ui.accessibility.menu')}
                     disabled={disabled}
                 >
                     <MoreDownIcon

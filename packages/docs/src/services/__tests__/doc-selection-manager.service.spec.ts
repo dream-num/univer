@@ -154,6 +154,39 @@ describe('DocSelectionManagerService', () => {
         sub.unsubscribe();
     });
 
+    it('does not replay a previous forced focus when refreshing an inactive document selection', () => {
+        const service = createService();
+        const target = { unitId: 'doc-1', subUnitId: 'doc-1' };
+        const refreshes: unknown[] = [];
+        const sub = service.refreshSelection$.subscribe((value) => refreshes.push(value));
+        try {
+            service.__replaceTextRangesWithNoRefresh({
+                textRanges: [{ startOffset: 2, endOffset: 5, collapsed: false, isActive: true }],
+                rectRanges: [],
+                segmentId: '',
+                segmentPage: -1,
+                isEditing: false,
+                style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+                options: { forceFocus: true, preserveCaret: true },
+            }, target);
+            service.__TEST_ONLY_setCurrentSelection({ unitId: 'doc-2', subUnitId: 'doc-2' });
+
+            service.refreshSelection(target);
+
+            expect(refreshes.at(-1)).toEqual(expect.objectContaining({
+                unitId: 'doc-1',
+                docRanges: [expect.objectContaining({ startOffset: 2, endOffset: 5 })],
+                options: { forceFocus: false, preserveCaret: true },
+            }));
+            expect(service.__getCurrentSelection()?.unitId).toBe('doc-2');
+            service.replaceDocRanges([{ startOffset: 3, endOffset: 3 }], target, false, { forceFocus: true });
+            expect(refreshes.at(-1)).toEqual(expect.objectContaining({ options: { forceFocus: true } }));
+        } finally {
+            sub.unsubscribe();
+            service.dispose();
+        }
+    });
+
     it('preserves active editing state when refreshed layout geometry replaces the selection', () => {
         const service = createService();
         const refreshes: unknown[] = [];

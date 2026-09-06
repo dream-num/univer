@@ -294,7 +294,8 @@ export class DocSelectionManagerService extends RxDisposable {
             subUnitId,
             docRanges,
             isEditing,
-            options,
+            // Forced focus belongs to the original interaction, not later layout refreshes.
+            options: options?.forceFocus ? { ...options, forceFocus: false } : options,
         });
     }
 

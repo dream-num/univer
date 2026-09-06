@@ -155,6 +155,7 @@ export class InputManager extends Disposable {
     }
 
     _onPointerLeave(evt: IPointerEvent) {
+        this._resetClickSequence();
         // preserve compatibility with Safari when pointerId is not present
         if (evt.pointerId === undefined) {
             evt.pointerId = 0;

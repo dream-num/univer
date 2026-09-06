@@ -128,6 +128,20 @@ describe('InputManager click gestures', () => {
         expect(doubleClick).toHaveBeenCalledTimes(1);
     });
 
+    it.each([1, 2])('starts a fresh sequence after leaving the canvas following %s clicks', (count) => {
+        for (let index = 0; index < count; index += 1) {
+            click();
+        }
+        const previousDoubleClicks = doubleClick.mock.calls.length;
+        pointer('pointerleave');
+        pointer('pointerenter');
+        click();
+        expect(doubleClick).toHaveBeenCalledTimes(previousDoubleClicks);
+        expect(tripleClick).not.toHaveBeenCalled();
+        click();
+        expect(doubleClick).toHaveBeenCalledTimes(previousDoubleClicks + 1);
+    });
+
     it('expires double and triple click sequences', () => {
         click();
         vi.advanceTimersByTime(InputManager.DoubleClickDelay + 1);

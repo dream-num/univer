@@ -17,7 +17,7 @@
 import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
 import type { RenderUnit } from '@univerjs/engine-render';
 import type { IPopup } from '@univerjs/ui';
-import { BooleanNumber, DocumentFlavor, EventSubject, ICommandService, Injector, IUniverInstanceService, Univer, UniverInstanceType } from '@univerjs/core';
+import { BooleanNumber, DocumentFlavor, EventSubject, ICommandService, Injector, IUniverInstanceService, RANGE_DIRECTION, Univer, UniverInstanceType } from '@univerjs/core';
 import { DocLayoutExecutorService, DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { CanvasColorService, Documents, ICanvasColorService, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { ICanvasPopupService } from '@univerjs/ui';
@@ -526,6 +526,28 @@ describe('DocCanvasPopManagerService', () => {
         disposable.dispose();
         rangeSpy.mockRestore();
         expect(popupService.removedIds).toContain('popup-1');
+    });
+
+    it.each([RANGE_DIRECTION.FORWARD, RANGE_DIRECTION.BACKWARD])('anchors at the %s selection focus while preserving all exclusion bounds', (direction) => {
+        const { service, popupService } = createService();
+        const rangeSpy = vi.spyOn(NodePositionConvertToCursor.prototype, 'getRangePointData').mockReturnValue({
+            borderBoxPointGroup: [
+                [{ x: 10, y: 10 }, { x: 40, y: 10 }, { x: 40, y: 20 }, { x: 10, y: 20 }],
+                [{ x: 12, y: 30 }, { x: 70, y: 30 }, { x: 70, y: 40 }, { x: 12, y: 40 }],
+            ],
+        } as never);
+        const disposable = service.attachPopupToRange(
+            { startOffset: 0, endOffset: 4, collapsed: false, direction },
+            { componentKey: 'focus-menu', direction: 'top-left', rangeAnchor: 'selection-end' },
+            'doc-1'
+        );
+        const popup = popupService.popups.get('popup-1');
+        expect(popup?.anchorRect).toEqual(direction === 'backward'
+            ? { left: 20, right: 20, top: 30, bottom: 40 }
+            : { left: 80, right: 80, top: 50, bottom: 60 });
+        expect(popup?.excludeRects).toHaveLength(2);
+        disposable.dispose();
+        rangeSpy.mockRestore();
     });
 
     it('keeps the last range popup anchor when its render is stale during refresh', () => {

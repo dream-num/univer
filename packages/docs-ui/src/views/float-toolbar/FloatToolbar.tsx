@@ -33,6 +33,7 @@ import { FLOAT_TEXT_STYLE_MENU_ID, FLOAT_TOOLBAR_MENU_POSITION } from '../../men
 
 interface IFloatToolbarProps {
     avaliableMenus?: Array<string | IFloatToolbarMenuConfig>;
+    popup?: { extraProps?: { onDismiss?: () => void } };
 }
 
 interface IFloatToolbarMenuConfig {
@@ -90,9 +91,12 @@ export function resolveFloatToolbarMenus(
 
 export function FloatToolbar(props: IFloatToolbarProps) {
     const { avaliableMenus = DEFAULT_AVALIABLE_MENUS } = props;
+    const onDismiss = props.popup?.extraProps?.onDismiss;
 
     const menuManagerService = useDependency(IMenuManagerService);
     const toolbarRef = useRef<HTMLDivElement>(null);
+    const hoveredRef = useRef(false);
+    const dismissedRef = useRef(false);
 
     const [menus, setMenus] = useState<IFloatToolbarMenuSchema[]>([]);
     const [extraMenus, setExtraMenus] = useState<IMenuSchema[]>([]);
@@ -122,32 +126,86 @@ export function FloatToolbar(props: IFloatToolbarProps) {
         return preventBrowserZoomInContainers([toolbar]);
     }, []);
 
+    useEffect(() => {
+        const toolbar = toolbarRef.current;
+        if (!toolbar || !onDismiss) {
+            return;
+        }
+        const onPointerMove = (event: PointerEvent) => {
+            if (hoveredRef.current || dismissedRef.current || event.pointerType === 'touch') {
+                return;
+            }
+            const rect = toolbar.getBoundingClientRect();
+            const distance = Math.max(rect.left - event.clientX, event.clientX - rect.right, rect.top - event.clientY, event.clientY - rect.bottom, 0);
+            // Give the pointer a 10px safe area, then fade over the next 80px.
+            const opacity = Math.max(0, 1 - Math.max(0, distance - 10) / 80);
+            toolbar.style.opacity = String(opacity);
+            if (opacity === 0) {
+                dismissedRef.current = true;
+                onDismiss();
+            }
+        };
+        toolbar.ownerDocument.addEventListener('pointermove', onPointerMove);
+        return () => toolbar.ownerDocument.removeEventListener('pointermove', onPointerMove);
+    }, [onDismiss]);
+
+    const retainToolbar = () => {
+        hoveredRef.current = true;
+        if (toolbarRef.current) {
+            toolbarRef.current.style.opacity = '1';
+        }
+    };
+    const selectors = menus.filter((menu) => menu.key === FLOAT_TEXT_STYLE_MENU_ID || menu.key === SetInlineFormatFontSizeCommand.id);
+    const formatting = menus.filter((menu) => !selectors.includes(menu));
+
     return (
         <div
             ref={toolbarRef}
+            data-doc-float-toolbar
+            onPointerEnter={retainToolbar}
+            onFocusCapture={retainToolbar}
             className={clsx(`
-              univer-box-border univer-flex univer-rounded univer-bg-gray-0 univer-py-1.5 univer-shadow-sm
+              univer-box-border univer-flex univer-flex-col univer-gap-1 univer-rounded univer-bg-gray-0 univer-p-1
+              univer-shadow-sm
               dark:!univer-border-gray-700 dark:!univer-bg-gray-900
             `, borderClassName)}
         >
-            {menus.map((groupItem) => groupItem.item && (
-                <div key={groupItem.key} className="univer-flex univer-flex-nowrap univer-gap-2 univer-px-2">
-                    <ToolbarItem key={groupItem.key} {...groupItem.item} iconColor={groupItem.iconColor} />
-                </div>
-            ))}
-            {extraMenus.length > 0 && (
-                <div
-                    className="
-                      univer-my-1 univer-w-px univer-bg-gray-200
-                      dark:univer-bg-gray-700
-                    "
-                />
-            )}
-            {extraMenus.map((groupItem) => groupItem.item && (
-                <div key={groupItem.key} className="univer-flex univer-flex-nowrap univer-gap-2 univer-px-2">
-                    <ToolbarItem key={groupItem.key} {...groupItem.item} />
-                </div>
-            ))}
+            <div
+                className="
+                  univer-flex univer-items-center univer-gap-1
+                  [&_.univer-toolbar-selector-root]:univer-text-xs
+                "
+            >
+                {selectors.map((menu) => menu.item && (
+                    <div
+                        key={menu.key}
+                        className={menu.key === FLOAT_TEXT_STYLE_MENU_ID
+                            ? `
+                              univer-min-w-0 univer-flex-1
+                              [&_.univer-toolbar-selector-root]:univer-box-border
+                              [&_.univer-toolbar-selector-root]:univer-w-full
+                              [&_.univer-toolbar-selector-root]:univer-justify-between
+                            `
+                            : 'univer-shrink-0'}
+                    >
+                        <ToolbarItem {...menu.item} iconSize={14} iconColor={menu.iconColor} />
+                    </div>
+                ))}
+                {selectors.length > 0 && extraMenus.length > 0 && (
+                    <div
+                        className="
+                          univer-mx-0.5 univer-h-4 univer-w-px univer-bg-gray-200
+                          dark:univer-bg-gray-700
+                        "
+                    />
+                )}
+                {extraMenus.map((menu) => menu.item && <ToolbarItem key={menu.key} {...menu.item} iconSize={14} />)}
+            </div>
+            <div className="univer-flex univer-items-center univer-gap-0.5">
+                {formatting.map((menu) => menu.item && (
+                    <ToolbarItem key={menu.key} {...menu.item} iconSize={14} iconColor={menu.iconColor} />
+                ))}
+            </div>
         </div>
     );
 }

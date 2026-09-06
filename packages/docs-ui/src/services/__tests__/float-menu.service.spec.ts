@@ -68,12 +68,14 @@ class RecordingDocCanvasPopManagerService {
     readonly ranges: string[] = [];
     readonly directions: string[] = [];
     readonly offsets: Array<[number, number] | undefined> = [];
+    onDismiss?: () => void;
     disposedCount = 0;
 
-    attachPopupToRange(range: { startOffset: number; endOffset: number }, options: { direction: string; offset?: [number, number] }) {
+    attachPopupToRange(range: { startOffset: number; endOffset: number }, options: { direction: string; offset?: [number, number]; extraProps?: { onDismiss?: () => void } }) {
         this.ranges.push(`${range.startOffset}:${range.endOffset}`);
         this.directions.push(options.direction);
         this.offsets.push(options.offset);
+        this.onDismiss = options.extraProps?.onDismiss;
 
         return {
             dispose: () => {
@@ -216,7 +218,7 @@ describe('DocFloatMenuService', () => {
         const popupService = injector.get(DocCanvasPopManagerService) as unknown as RecordingDocCanvasPopManagerService;
         const layoutInteractionService = injector.get(DocLayoutInteractionService);
         expect(popupService.ranges).toEqual(['0:5']);
-        expect(popupService.offsets).toEqual([[0, 10]]);
+        expect(popupService.offsets).toEqual([[0, 8]]);
         expect(service.floatMenu).toMatchObject({ start: 0, end: 5 });
         expect(layoutInteractionService.isActive).toBe(true);
 
@@ -639,7 +641,34 @@ describe('DocFloatMenuService', () => {
         expect(popupService.ranges).toEqual(['0:10', '0:10']);
     });
 
-    it('places the floating toolbar below a forward selection that spans multiple lines', () => {
+    it('does not restore a dismissed toolbar until a new selection gesture', () => {
+        const unitId = 'doc-dismissed-menu';
+        const { popupService, selectionManager, selectionRenderService, service, injector } = createActiveFloatMenuHarness(unitId, {
+            dataStream: 'Hello world\r\n',
+            paragraphs: [{ paragraphId: 'paragraph', startIndex: 11 }],
+        });
+        const selection = {
+            textRanges: [{ startOffset: 0, endOffset: 5, collapsed: false }],
+            rectRanges: [],
+            segmentId: '',
+            segmentPage: -1,
+            style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+            isEditing: true,
+        };
+        selectionManager.__replaceTextRangesWithNoRefresh(selection, { unitId, subUnitId: unitId });
+        popupService.onDismiss?.();
+        expect(service.floatMenu).toBeNull();
+        selectionManager.__replaceTextRangesWithNoRefresh(selection, { unitId, subUnitId: unitId });
+        expect(service.floatMenu).toBeNull();
+        expect(popupService.ranges).toHaveLength(1);
+        selectionRenderService.emitSelectionStart();
+        selectionManager.__replaceTextRangesWithNoRefresh(selection, { unitId, subUnitId: unitId });
+        expect(service.floatMenu).toMatchObject({ start: 0, end: 5 });
+        service.dispose();
+        injector.dispose();
+    });
+
+    it('places the floating toolbar above the focus end of a multiline selection', () => {
         const unitId = 'doc-direction-menu';
         const { popupService, selectionManager, service } = createActiveFloatMenuHarness(unitId, {
             dataStream: 'First line\rSecond line\r\n',
@@ -671,7 +700,7 @@ describe('DocFloatMenuService', () => {
 
         expect(service.floatMenu).toMatchObject({ start: 0, end: 18 });
         expect(popupService.ranges).toEqual(['0:18']);
-        expect(popupService.directions).toEqual(['bottom-center']);
+        expect(popupService.directions).toEqual(['top-left']);
 
         service.dispose();
         expect(popupService.disposedCount).toBe(1);

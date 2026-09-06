@@ -815,6 +815,7 @@ export function getDocRangeInsertOffset(
 }
 
 export interface IInnerCutCommandParams {
+    unitId?: string;
     segmentId: string;
     textRanges: ITextRangeWithStyle[];
     selections?: ITextRange[];
@@ -832,12 +833,20 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const selectionInfo = docSelectionManagerService.getSelectionInfo();
+        const targetUnitId = params.unitId;
+        const currentSelection = docSelectionManagerService.__getCurrentSelection();
+        let selectionParams;
+        if (targetUnitId) {
+            selectionParams = currentSelection?.unitId === targetUnitId
+                ? currentSelection
+                : { unitId: targetUnitId, subUnitId: targetUnitId };
+        }
+        const selectionInfo = docSelectionManagerService.getSelectionInfo(selectionParams);
         const {
             segmentId,
             textRanges,
-            selections = docSelectionManagerService.getTextRanges(),
-            rectRanges = docSelectionManagerService.getRectRanges(),
+            selections = docSelectionManagerService.getTextRanges(selectionParams),
+            rectRanges = docSelectionManagerService.getRectRanges(selectionParams),
             wholeBodySelected = selectionInfo?.options?.wholeDocument === true,
         } = params;
 
@@ -848,7 +857,9 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
             return false;
         }
 
-        const docDataModel = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        const docDataModel = targetUnitId
+            ? univerInstanceService.getUnit<DocumentDataModel>(targetUnitId, UniverInstanceType.UNIVER_DOC)
+            : univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         if (docDataModel == null) {
             return false;
         }

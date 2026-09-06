@@ -518,6 +518,79 @@ describe('DocClipboardService table copy helpers', () => {
         testBed.univer.dispose();
     });
 
+    it.each(['switch', 'readonly', 'dispose'] as const)('keeps a pending cut bound to its source during %s', async (action) => {
+        const source: IDocumentData = {
+            id: 'pending-cut-source',
+            body: {
+                dataStream: 'Source text\r\n',
+                paragraphs: [{ paragraphId: 'source-paragraph', startIndex: 11 }],
+                sectionBreaks: [],
+                customBlocks: [],
+                textRuns: [],
+            },
+            documentStyle: {},
+        };
+        let releaseWrite!: () => void;
+        const pendingWrite = new Promise<void>((resolve) => {
+            releaseWrite = resolve;
+        });
+        const clipboard = new TestClipboardInterfaceService();
+        vi.spyOn(clipboard, 'write').mockImplementation(async (text, html) => {
+            clipboard.writes.push({ text, html });
+            await pendingWrite;
+        });
+        const testBed = createCommandTestBed(source, [
+            [IClipboardInterfaceService, { useValue: clipboard }],
+            [IDocClipboardService, { useClass: DocClipboardService }],
+        ]);
+        try {
+            const commands = testBed.get(ICommandService);
+            commands.registerCommand(CutContentCommand);
+            commands.registerCommand(RichTextEditingMutation);
+            commands.registerCommand(SetTextSelectionsOperation);
+            const selection = testBed.get(DocSelectionManagerService);
+            selection.__TEST_ONLY_setCurrentSelection({ unitId: source.id, subUnitId: '' });
+            const ranges: ITextRangeWithStyle[] = [{
+                startOffset: 0,
+                endOffset: 6,
+                collapsed: false,
+                isActive: true,
+                segmentId: '',
+                rangeType: DOC_RANGE_TYPE.TEXT,
+            }];
+            selection.__TEST_ONLY_add(ranges);
+            const cut = testBed.get(IDocClipboardService).cut(ranges);
+            await vi.waitFor(() => expect(clipboard.writes).toHaveLength(1));
+            const instances = testBed.get(IUniverInstanceService);
+            const peer = testBed.univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, {
+                id: 'pending-cut-peer',
+                body: { dataStream: 'Peer unchanged\r\n', paragraphs: [{ paragraphId: 'peer-paragraph', startIndex: 14 }] },
+                documentStyle: {},
+            });
+            instances.focusUnit(peer.getUnitId());
+            if (action === 'readonly') {
+                setDocumentPermissionValue(testBed.get(IPermissionService), source.id, source.id, UnitAction.Edit, false);
+            } else if (action === 'dispose') {
+                instances.disposeUnit(source.id);
+            }
+            releaseWrite();
+            await expect(cut).resolves.toBe(action === 'switch');
+            expect(peer.getBody()?.dataStream).toBe('Peer unchanged\r\n');
+            expect(clipboard.writes[0].text).toBe('Source');
+            const sourceModel = instances.getUnit<DocumentDataModel>(source.id, UniverInstanceType.UNIVER_DOC);
+            if (action === 'switch') {
+                expect(sourceModel?.getBody()?.dataStream).toBe(' text\r\n');
+            } else if (action === 'readonly') {
+                expect(sourceModel?.getBody()?.dataStream).toBe('Source text\r\n');
+            } else {
+                expect(sourceModel).toBeNull();
+            }
+        } finally {
+            releaseWrite();
+            testBed.univer.dispose();
+        }
+    });
+
     it('does not write to the clipboard when Cut lacks Unit Edit permission', async () => {
         const documentData: IDocumentData = {
             id: 'copy-only-cut-doc',

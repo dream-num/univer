@@ -416,8 +416,12 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             return false;
         }
 
+        const wholeBodySelected = this._docSelectionManagerService.getSelectionInfo()?.options?.wholeDocument === true;
         // Set content to clipboard.
         if (!await this.copy(SliceBodyType.cut, ranges)) {
+            return false;
+        }
+        if (!this._canEditTargets(unitId, [...textRanges, ...rectRanges])) {
             return false;
         }
 
@@ -450,13 +454,14 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             ];
 
             return this._commandService.executeCommand(CutContentCommand.id, {
+                unitId,
                 segmentId,
                 textRanges: newTextRanges,
                 rectRanges,
                 selections: textRanges,
+                wholeBodySelected,
             });
-            // eslint-disable-next-line unused-imports/no-unused-vars
-        } catch (_e) {
+        } catch {
             this._logService.error('[DocClipboardController] cut content failed');
             return false;
         }

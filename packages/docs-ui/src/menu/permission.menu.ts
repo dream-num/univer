@@ -23,7 +23,7 @@ import { OpenDocParagraphPermissionOperation } from '../commands/operations/para
 import { OpenDocPermissionPanelOperation } from '../commands/operations/permission-panel.operation';
 
 export function DocPermissionMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
-    return objectPermissionMenuItemFactory(accessor, OpenDocPermissionPanelOperation.id, UniverInstanceType.UNIVER_DOC, UnitObject.Document);
+    return objectPermissionMenuItemFactory(accessor, OpenDocPermissionPanelOperation.id, UniverInstanceType.UNIVER_DOC, UnitObject.DocumentSection);
 }
 
 export function DocParagraphPermissionMenuItemFactory(accessor: IAccessor): IMenuButtonItem {

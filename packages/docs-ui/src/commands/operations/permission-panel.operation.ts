@@ -17,7 +17,7 @@
 import type { DocumentDataModel, ICommand } from '@univerjs/core';
 import type { IObjectPermissionButtonProps } from '@univerjs/ui';
 import { CommandType, isInternalEditorID, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { DOCUMENT_UNIT_PERMISSION_ACTIONS, getDocumentSectionPermissionObjectId, SetDocumentPermissionCommand } from '@univerjs/docs';
+import { getDocumentSectionPermissionObjectId, SetDocumentPermissionCommand } from '@univerjs/docs';
 import { UnitObject } from '@univerjs/protocol';
 import { openObjectPermissionPanel } from '@univerjs/ui';
 
@@ -34,7 +34,6 @@ export const OpenDocPermissionPanelOperation: ICommand = {
         function* getTargets(): Iterable<IObjectPermissionButtonProps> {
             const snapshot = model.getSnapshot();
             const commandId = SetDocumentPermissionCommand.id;
-            yield { target: { unitId, objectId: unitId, objectType: UnitObject.Document }, name: snapshot.title ?? '', commandId, actions: DOCUMENT_UNIT_PERMISSION_ACTIONS };
             const segments = new Set(['', ...Object.keys(snapshot.headers ?? {}), ...Object.keys(snapshot.footers ?? {})]);
             for (const segmentId of segments) {
                 const body = segmentId ? snapshot.headers?.[segmentId]?.body ?? snapshot.footers?.[segmentId]?.body : snapshot.body;
@@ -52,6 +51,6 @@ export const OpenDocPermissionPanelOperation: ICommand = {
                 }
             }
         }
-        return openObjectPermissionPanel(accessor, { unitId, target: { unitId, objectId: unitId, objectType: UnitObject.Document }, getTargets, expandable: UnitObject.DocumentSection });
+        return openObjectPermissionPanel(accessor, { unitId, target: { unitId, objectId: unitId, objectType: UnitObject.DocumentSection }, getTargets });
     },
 };

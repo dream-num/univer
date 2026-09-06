@@ -206,8 +206,8 @@ export class ObjectPermissionService extends Disposable {
     }
 
     async setPoint(target: IObjectPermissionTarget, point: IPermissionPoint, value: boolean): Promise<void> {
-        // The default local service preserves the existing local override API. Remote providers opt in explicitly.
-        if (!this._authz.supportsObjectPermissionManagement) {
+        // Preserve local overrides until the provider opts this object type into remote management.
+        if (!this._authz.supportsObjectPermissionManagement?.(target.objectType)) {
             if (!this._permissions.getPermissionPoint(point.id)) {
                 this._permissions.addPermissionPoint(point);
             }

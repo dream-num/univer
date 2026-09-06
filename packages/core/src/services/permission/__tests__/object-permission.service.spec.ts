@@ -71,6 +71,25 @@ function point(objectType: UnitObject) {
 }
 
 describe('ObjectPermissionService', () => {
+    it.each([UnitObject.DocumentParagraph, UnitObject.SlideElement, UnitObject.BaseField, UnitObject.BoardElement])('preserves local overrides without remote opt-in (%s)', async (objectType) => {
+        const backend = createAuthz();
+        backend.authz.supportsObjectPermissionManagement = () => false;
+        const client = createClient(backend.authz);
+        const permissionPoint = point(objectType);
+
+        await client.service.setPoint(target(objectType), permissionPoint, false);
+        expect(client.permissions.getPermissionPoint(permissionPoint.id)?.value).toBe(false);
+        await client.service.setPoint(target(objectType), permissionPoint, true);
+        expect(client.permissions.getPermissionPoint(permissionPoint.id)?.value).toBe(true);
+        expect(client.service.supports(target(objectType))).toBe(false);
+        await expect(client.service.save(target(objectType), { edit: 'owner', collaborators: [], strategies: [] })).rejects.toThrow('not supported');
+        expect(backend.authz.list).not.toHaveBeenCalled();
+        expect(backend.authz.allowed).not.toHaveBeenCalled();
+        expect(backend.authz.update).not.toHaveBeenCalled();
+        expect(backend.authz.listUnitPermissions).not.toHaveBeenCalled();
+        expect(backend.authz.batchAllowed).not.toHaveBeenCalled();
+    });
+
     it.each([UnitObject.DocumentParagraph, UnitObject.SlideElement, UnitObject.BaseField, UnitObject.BoardElement])('persists stable objects and reloads effective rights in another client (%s)', async (objectType) => {
         const backend = createAuthz();
         const first = createClient(backend.authz);

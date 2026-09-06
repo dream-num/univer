@@ -15,6 +15,7 @@
  */
 
 import type { Univer } from '@univerjs/core';
+import { IUniverInstanceService } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createTestBed, DOCUMENT_STYLE } from './create-test-bed';
 
@@ -30,6 +31,20 @@ describe('FUniver docs facade', () => {
 
     afterEach(() => {
         univer.dispose();
+    });
+
+    it('creates an embedded document without replacing the current host', () => {
+        const instances = univer.__getInjector().get(IUniverInstanceService);
+        const focusedId = instances.getFocusedUnit()?.getUnitId();
+        const created = univerAPI.createDocument({
+            id: 'embedded-doc',
+            title: 'Embedded',
+            body: { dataStream: 'Agent review\r\n' },
+            documentStyle: DOCUMENT_STYLE,
+        }, { embeddedRender: true, makeCurrent: false, skipAutoRender: true });
+        expect(created.getId()).toBe('embedded-doc');
+        expect(instances.getFocusedUnit()?.getUnitId()).toBe(focusedId);
+        expect(univerAPI.getActiveDocument()?.getId()).toBe('test');
     });
 
     it('should create, focus and resolve document facades by document id', () => {

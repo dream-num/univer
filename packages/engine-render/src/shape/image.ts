@@ -444,7 +444,7 @@ export class Image extends Shape<IImageProps> {
 
     protected override _draw(ctx: UniverRenderingContext, _bounds?: IViewportInfo, renderWidth?: number, renderHeight?: number) {
         const native = this._native;
-        if (native == null) {
+        if (native == null || !native.complete || native.naturalWidth === 0) {
             return;
         }
         const w = renderWidth ?? this.width;

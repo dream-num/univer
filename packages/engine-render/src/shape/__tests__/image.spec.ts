@@ -25,6 +25,7 @@ function createNativeImage(width = 120, height = 80, source?: string) {
     Object.defineProperty(img, 'width', { value: width, configurable: true });
     Object.defineProperty(img, 'height', { value: height, configurable: true });
     Object.defineProperty(img, 'complete', { value: true, configurable: true });
+    Object.defineProperty(img, 'naturalWidth', { value: width, configurable: true });
     if (source) {
         img.src = source;
     }
@@ -49,6 +50,23 @@ function createCtxMock() {
 }
 
 describe('image extra', () => {
+    it('does not draw pending or broken images and resumes after successful decoding', () => {
+        const native = createNativeImage();
+        const image = new Image('loading', { image: native, width: 120, height: 80 });
+        const context = createCtxMock();
+        Object.defineProperty(native, 'complete', { value: false, configurable: true });
+        image.render(context);
+        expect(context.drawImage).not.toHaveBeenCalled();
+        Object.defineProperty(native, 'complete', { value: true, configurable: true });
+        Object.defineProperty(native, 'naturalWidth', { value: 0, configurable: true });
+        image.render(context);
+        expect(context.drawImage).not.toHaveBeenCalled();
+        Object.defineProperty(native, 'naturalWidth', { value: 120, configurable: true });
+        image.render(context);
+        expect(context.drawImage).toHaveBeenCalledOnce();
+        image.dispose();
+    });
+
     it('preserves the request mode of an already-loaded native image', () => {
         const native = createNativeImage();
         native.crossOrigin = 'use-credentials';

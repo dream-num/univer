@@ -494,6 +494,12 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             }
         });
 
+        // Copy fragments retain trailing paragraph styles for HTML export even when the paragraph mark is not selected.
+        // Only actual paragraph marks can become metadata in the inserted document body.
+        if (body.paragraphs) {
+            body.paragraphs = body.paragraphs.filter((paragraph) => body.dataStream[paragraph.startIndex] === '\r');
+        }
+
         // copy custom ranges
         const customRangeMappings = body.customRanges?.map((sourceRange) => {
             const targetRange = BuildTextUtils.customRange.copyCustomRange(sourceRange);

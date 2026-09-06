@@ -26,7 +26,10 @@ import {
     ImageSourceType,
     IPermissionService,
     IUniverInstanceService,
+    RedoCommand,
     SliceBodyType,
+    Tools,
+    UndoCommand,
     UniverInstanceType,
     validateDocBodyStructure,
 } from '@univerjs/core';
@@ -280,6 +283,77 @@ describe('DocClipboardService table copy helpers', () => {
         expect(internalDoc?.body?.dataStream).toBe('Alpha');
 
         testBed.univer.dispose();
+    });
+
+    it.each([5, 6])('pastes copied text with or without its paragraph mark and preserves history (end=%i)', async (endOffset) => {
+        const documentData: IDocumentData = {
+            id: 'partial-paragraph-paste',
+            body: {
+                dataStream: 'Alpha\rBeta\r\n',
+                paragraphs: [
+                    { startIndex: 5, paragraphId: 'source-paragraph', paragraphStyle: { spaceAbove: { v: 12 } } },
+                    { startIndex: 10, paragraphId: 'target-paragraph', paragraphStyle: { spaceAbove: { v: 3 } } },
+                ],
+                textRuns: [{ st: 0, ed: 5, ts: { bl: BooleanNumber.TRUE } }],
+            },
+            documentStyle: {},
+        };
+        const testBed = createCommandTestBed(documentData, [
+            [IClipboardInterfaceService, { useClass: TestClipboardInterfaceService }],
+            [IDocClipboardService, { useClass: DocClipboardService }],
+        ]);
+        try {
+            const commandService = testBed.get(ICommandService);
+            [InnerPasteCommand, RichTextEditingMutation, SetTextSelectionsOperation]
+                .forEach((command) => commandService.registerCommand(command));
+            const selectionManager = testBed.get(DocSelectionManagerService);
+            selectionManager.__TEST_ONLY_setCurrentSelection({ unitId: documentData.id, subUnitId: '' });
+            selectionManager.__TEST_ONLY_add([{
+                startOffset: 0,
+                endOffset,
+                collapsed: false,
+                isActive: true,
+                segmentId: '',
+            }]);
+            const service = testBed.get(IDocClipboardService);
+            expect(await service.copy()).toBe(true);
+            const clipboard = testBed.get(IClipboardInterfaceService) as unknown as TestClipboardInterfaceService;
+            const copied = clipboard.writes[0];
+            const model = testBed.get(IUniverInstanceService).getUnit<DocumentDataModel>(documentData.id)!;
+            const readContent = () => {
+                const body = model.getBody()!;
+                return Tools.deepClone({
+                    dataStream: body.dataStream,
+                    textRuns: body.textRuns,
+                    paragraphs: body.paragraphs?.map(({ paragraphId, ...paragraph }) => paragraph),
+                });
+            };
+            const before = Tools.deepClone(model.getBody());
+            const beforeContent = readContent();
+            selectionManager.__TEST_ONLY_add([{
+                startOffset: 7,
+                endOffset: 7,
+                collapsed: true,
+                isActive: true,
+                segmentId: '',
+            }]);
+            expect(await service.legacyPaste({ html: copied.html, text: copied.text, files: [] })).toBe(true);
+            const after = Tools.deepClone(model.getBody())!;
+            expect(after.dataStream).toBe(`Alpha\rB${'Alpha\r'.slice(0, endOffset)}eta\r\n`);
+            expect(validateDocBodyStructure(after)).toEqual([]);
+            expect(after.textRuns).toContainEqual(expect.objectContaining({ st: 7, ed: 12, ts: { bl: BooleanNumber.TRUE } }));
+            expect(after.paragraphs?.find((paragraph) => paragraph.startIndex === 10 + endOffset)?.paragraphStyle)
+                .toEqual(before?.paragraphs?.[1].paragraphStyle);
+            const afterContent = readContent();
+            expect(await commandService.executeCommand(UndoCommand.id)).toBe(true);
+            expect(readContent()).toEqual(beforeContent);
+            expect(validateDocBodyStructure(model.getBody()!)).toEqual([]);
+            expect(await commandService.executeCommand(RedoCommand.id)).toBe(true);
+            expect(readContent()).toEqual(afterContent);
+            expect(validateDocBodyStructure(model.getBody()!)).toEqual([]);
+        } finally {
+            testBed.univer.dispose();
+        }
     });
 
     it.each([SliceBodyType.copy, SliceBodyType.cut])('copies cell text without a partial table resource (%s)', async (sliceType) => {

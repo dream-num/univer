@@ -503,6 +503,11 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
         let finalFocusRetryFrame = 0;
 
         const retryFocus = () => {
+            // A delayed retry must not reclaim focus after another editor takes over.
+            const focusedEditor = editorService.getFocusEditor();
+            if (focusedEditor && focusedEditor.getEditorId() !== editorId) {
+                return;
+            }
             if (_isFocus && !docSelectionRenderService?.isFocusing) {
                 focus();
             }
@@ -528,7 +533,7 @@ export const FormulaEditor = forwardRef((props: IFormulaEditorProps, ref: Ref<IF
             cancelAnimationFrame(focusRetryFrame);
             cancelAnimationFrame(finalFocusRetryFrame);
         };
-    }, [_isFocus, docSelectionRenderService, editor, focus, resetSelection, resetSelectionOnBlur]);
+    }, [_isFocus, docSelectionRenderService, editor, editorId, editorService, focus, resetSelection, resetSelectionOnBlur]);
 
     const { checkScrollBar } = useResize(editor, isSingle, autoScrollbar);
     useRefactorEffect(isFocus, isSelecting, unitId, editorId, disableContextMenu, mobile);

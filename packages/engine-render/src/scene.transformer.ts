@@ -269,8 +269,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
     private _viewportScrollX: number = -1;
     private _viewportScrollY: number = -1;
 
-    private _topScenePointerMoveSub: Nullable<Subscription>;
-    private _topScenePointerUpSub: Nullable<Subscription>;
+    private _finishGesture: (() => void) | null = null;
     private _cancelFocusSubscription: Nullable<Subscription>;
 
     private _transformerControlMap = new Map<string, Group>();
@@ -308,6 +307,35 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
     getSelectedObjectMap() {
         return this._selectedObjectMap;
+    }
+
+    /** Complete the current object transform before another gesture takes ownership of the scene. */
+    finishTransform(): void {
+        this._finishGesture?.();
+    }
+
+    isControlObject(object: BaseObject): boolean {
+        const group = this._findGroupObject(object);
+        return group === this._copperControl || Array.from(this._transformerControlMap.values()).some((control) => control === group);
+    }
+
+    private _bindGestureEnd(scene: Scene, initialEvent: IPointerEvent | IMouseEvent, onEnd: (event: IPointerEvent | IMouseEvent) => void): void {
+        let latestEvent = initialEvent;
+        const subscriptions: Subscription[] = [];
+        subscriptions.push(scene.onPointerMove$.subscribeEvent((event) => {
+            latestEvent = event;
+        }));
+        const finish = (event = latestEvent) => {
+            if (this._finishGesture !== finish) {
+                return;
+            }
+            this._finishGesture = null;
+            subscriptions.forEach((subscription) => subscription.unsubscribe());
+            onEnd(event);
+        };
+        subscriptions.push(scene.onPointerUp$.subscribeEvent((event) => finish(event)));
+        subscriptions.push(scene.onPointerCancel$.subscribeEvent(() => finish()));
+        this._finishGesture = finish;
     }
 
     resetProps(config?: ITransformerConfig) {
@@ -531,6 +559,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
         // eslint-disable-next-line max-lines-per-function
         const observer = applyObject.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
+            this.finishTransform();
             const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
             this._startOffsetX = evtOffsetX;
             this._startOffsetY = evtOffsetY;
@@ -619,9 +648,8 @@ export class Transformer extends Disposable implements ITransformerConfig {
                 });
             });
 
-            const scenePointerUpSub = scene.onPointerUp$.subscribeEvent((event) => {
+            this._bindGestureEnd(scene, evt, (event) => {
                 scenePointerMoveSub?.unsubscribe();
-                scenePointerUpSub?.unsubscribe();
                 scene.enableObjectsEvent();
                 !isCropper && this.refreshControls();
                 scrollTimer.dispose();
@@ -671,19 +699,15 @@ export class Transformer extends Disposable implements ITransformerConfig {
     }
 
     override dispose() {
+        this.finishTransform();
         super.dispose();
 
         this._subscriptionObjectMap.forEach((subscription) => subscription?.unsubscribe());
         this._subscriptionObjectMap.clear();
 
-        this._topScenePointerMoveSub?.unsubscribe();
-        this._topScenePointerUpSub?.unsubscribe();
-
         this._cancelFocusSubscription?.unsubscribe();
         this._cancelFocusSubscription = null;
 
-        this._topScenePointerMoveSub = null;
-        this._topScenePointerUpSub = null;
         this._cancelFocusSubscription = null;
 
         this._transformerControlMap.forEach((control) => control.dispose());
@@ -1156,6 +1180,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
             toDisposable(
                 // eslint-disable-next-line max-lines-per-function
                 anchor.onPointerDown$.subscribeEvent((evt, state) => {
+                    this.finishTransform();
                     const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
                     this._startOffsetX = evtOffsetX;
                     this._startOffsetY = evtOffsetY;
@@ -1195,7 +1220,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
                     }
 
                     this._moveBufferSkip = false;
-                    this._topScenePointerMoveSub = topScene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
+                    const moveSubscription = topScene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
                         const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
                         this._anchorMoving(type, moveOffsetX, moveOffsetY, scrollTimer, keepRatio, isCropper, applyObject);
 
@@ -1205,11 +1230,8 @@ export class Transformer extends Disposable implements ITransformerConfig {
                         topScene.setCursor(cursor);
                     });
 
-                    this._topScenePointerUpSub = topScene.onPointerUp$.subscribeEvent((event) => {
-                        // topScene.onPointerMove$.remove(this._moveObserver);
-                        // topScene.onPointerUp$.remove(this._topScenePointerUpSub);
-                        this._topScenePointerMoveSub?.unsubscribe();
-                        this._topScenePointerUpSub?.unsubscribe();
+                    this._bindGestureEnd(topScene, evt, (event) => {
+                        moveSubscription.unsubscribe();
                         topScene.enableObjectsEvent();
                         topScene.resetCursor();
                         scrollTimer.dispose();
@@ -1275,6 +1297,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
         this.disposeWithMe(
             toDisposable(
                 rotateControl.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
+                    this.finishTransform();
                     const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
 
                     this._startOffsetX = evtOffsetX;
@@ -1313,11 +1336,8 @@ export class Transformer extends Disposable implements ITransformerConfig {
                         topScene.setCursor(cursor);
                     });
 
-                    const topScenePointerUpSub = topScene.onPointerUp$.subscribeEvent((event) => {
-                        // topScenePointerMoveSub?.dispose();
-                        // topScenePointerUpSub?.dispose();
+                    this._bindGestureEnd(topScene, evt, (event) => {
                         topScenePointerMoveSub?.unsubscribe();
-                        topScenePointerUpSub?.unsubscribe();
                         topScene.enableObjectsEvent();
                         topScene.resetCursor();
                         this.refreshControls();

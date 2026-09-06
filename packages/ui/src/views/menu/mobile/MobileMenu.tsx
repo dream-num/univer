@@ -398,7 +398,7 @@ function MobileContextMenuOption(props: {
                 value: displayValue,
                 id: menuItem.id,
                 label: menuKey,
-                commandId: option.commandId,
+                commandId: option.commandId ?? menuItem.selectionsCommandId,
             })}
         >
             <CustomLabel value$={option.value$} value={displayValue} label={option.label} />
@@ -803,7 +803,7 @@ function MobileSelectionOptionRow(props: {
                             value: nextValue,
                             id: menuItem.id,
                             label: menuKey,
-                            commandId: option.commandId,
+                            commandId: option.commandId ?? menuItem.selectionsCommandId,
                         });
                     }}
                 />
@@ -839,7 +839,7 @@ function MobileSelectionOptionRow(props: {
                     value: displayValue,
                     id: menuItem.id,
                     label: menuKey,
-                    commandId: option.commandId,
+                    commandId: option.commandId ?? menuItem.selectionsCommandId,
                 });
             }}
         >
@@ -922,7 +922,13 @@ function useMobileSchemaInteraction(props: {
 
     const hasSubmenu = visibleSchemaChildren > 0 || selections.length > 0 || subMenuItems.length > 0;
     const effectivelyDisabled = disabled || (menuItem.type === MenuItemType.SUBITEMS && !hasSubmenu);
-    const currentValueText = typeof value === 'string' || typeof value === 'number' ? String(value) : '';
+    const selectedOption = selections.find((option) => option.value === value);
+    let currentValueText = '';
+    if (typeof selectedOption?.label === 'string') {
+        currentValueText = localeService.t(selectedOption.label);
+    } else if (selections.length === 0 && (typeof value === 'string' || typeof value === 'number')) {
+        currentValueText = String(value);
+    }
 
     const onPress = (onExecute?: IBaseMenuProps['onOptionSelect']) => {
         if (effectivelyDisabled) {

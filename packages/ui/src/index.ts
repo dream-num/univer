@@ -151,6 +151,7 @@ export { ThemeSwitcherService } from './services/theme-switcher/theme-switcher.s
 export { UndoRedoGroupService } from './services/undo-redo/undo-redo-group.service';
 export { IWorkbenchService, WorkbenchService } from './services/workbench/workbench.service';
 export * from './utils';
+export { MobileCanvasGesture } from './utils/mobile-canvas-gesture';
 export { COLOR_PICKER_COMPONENT } from './views/color-picker/interface';
 export { ComponentContainer, useComponentsOfPart } from './views/components/ComponentContainer';
 export type { IComponentContainerProps } from './views/components/ComponentContainer';

@@ -112,6 +112,44 @@ describe('Transformer', () => {
         }
     });
 
+    it.each(['takeover', 'pointercancel'])('finishes a move once on %s and releases the scene for viewport gestures', (reason) => {
+        const engine = new Engine('gesture-engine', { elementWidth: 800, elementHeight: 800, dpr: 1 });
+        const scene = new Scene('gesture-scene', engine, { width: 800, height: 800 });
+        const viewport = new Viewport('gesture-viewport', scene, { left: 0, top: 0, width: 800, height: 800 });
+        const rect = new Rect('gesture-object', { left: 100, top: 100, width: 100, height: 100 });
+        scene.addObject(rect);
+        const transformer = new Transformer(scene);
+        const ended = vi.fn();
+        const subscription = transformer.changeEnd$.subscribe(ended);
+        try {
+            transformer.attachTo(rect);
+            transformer.setSelectedControl(rect);
+            rect.onPointerDown$.emitEvent(createPointerEvent('pointerdown', 120, 120));
+            scene.onPointerMove$.emitEvent(createPointerEvent('pointermove', 160, 150));
+            if (reason === 'takeover') {
+                transformer.finishTransform();
+            } else {
+                scene.onPointerCancel$.emitEvent(createPointerEvent('pointercancel', 0, 0));
+            }
+            expect(ended).toHaveBeenCalledTimes(1);
+            expect(ended.mock.calls[0][0]).toMatchObject({ offsetX: 160, offsetY: 150 });
+            expect(rect.left).toBe(140);
+            expect(rect.top).toBe(130);
+            scene.onPointerMove$.emitEvent(createPointerEvent('pointermove', 300, 300));
+            scene.onPointerUp$.emitEvent(createPointerEvent('pointerup', 300, 300));
+            transformer.finishTransform();
+            expect(ended).toHaveBeenCalledTimes(1);
+            expect(rect.left).toBe(140);
+            expect(scene.pick(new Vector2(170, 160))).toBe(rect);
+        } finally {
+            subscription.unsubscribe();
+            transformer.dispose();
+            viewport.dispose();
+            scene.dispose();
+            engine.dispose();
+        }
+    });
+
     it('releases hover subscriptions with its object subscription', () => {
         const engine = new Engine('transformer-engine', { elementWidth: 100, elementHeight: 100, dpr: 1 });
         const scene = new Scene('transformer-scene', engine);
@@ -135,6 +173,44 @@ describe('Transformer', () => {
         rect.dispose();
         scene.dispose();
         engine.dispose();
+    });
+
+    it.each(['ResizeRB', 'Rotate__'])('releases %s controls when a pinch takes ownership', (controlKey) => {
+        const engine = new Engine('control-gesture-engine', { elementWidth: 800, elementHeight: 800, dpr: 1 });
+        const scene = new Scene('control-gesture-scene', engine, { width: 800, height: 800 });
+        const viewport = new Viewport('control-gesture-viewport', scene, { left: 0, top: 0, width: 800, height: 800 });
+        const rect = new Rect('control-gesture-object', { left: 100, top: 100, width: 100, height: 100 });
+        scene.addObject(rect);
+        const transformer = new Transformer(scene, { rotateEnabled: true });
+        const ended = vi.fn();
+        const subscription = transformer.changeEnd$.subscribe(ended);
+        try {
+            transformer.setSelectedControl(rect);
+            const anchor = scene.getAllObjectsByOrderForPick().find((object) => object.oKey.includes(controlKey));
+            if (!anchor) {
+                throw new Error(`Missing ${controlKey} control`);
+            }
+            expect(transformer.isControlObject(anchor)).toBe(true);
+            expect(transformer.isControlObject(rect)).toBe(false);
+            const initial = rect.getState();
+            const point = anchor.ancestorTransform.applyPoint(new Vector2(anchor.width / 2, anchor.height / 2));
+            anchor.onPointerDown$.emitEvent(createPointerEvent('pointerdown', point.x, point.y));
+            scene.onPointerMove$.emitEvent(createPointerEvent('pointermove', point.x + 60, point.y + 40));
+            transformer.finishTransform();
+            expect(ended).toHaveBeenCalledTimes(1);
+            const transformed = rect.getState();
+            expect(transformed).not.toEqual(initial);
+            scene.onPointerMove$.emitEvent(createPointerEvent('pointermove', 500, 500));
+            scene.onPointerUp$.emitEvent(createPointerEvent('pointerup', 500, 500));
+            expect(ended).toHaveBeenCalledTimes(1);
+            expect(rect.getState()).toEqual(transformed);
+        } finally {
+            subscription.unsubscribe();
+            transformer.dispose();
+            viewport.dispose();
+            scene.dispose();
+            engine.dispose();
+        }
     });
 
     it('renders controls on the configured layer without moving the selected object', () => {

@@ -25,6 +25,8 @@ import type {
 import type { ISetDocZoomRatioOperationParams } from '../../commands/operations/set-doc-zoom-ratio.operation';
 import {
     Disposable,
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     ICommandService,
     Inject,
     isInternalEditorID,
@@ -156,7 +158,8 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
                 this._instanceSrv.setCurrentUnitForType(unitId);
             }
             // Host-owned editors need the current Doc unit for editing commands without replacing the host's global focus.
-            if (!this._editorService.getEditorRenderConfig(unitId)?.preserveHostFocus) {
+            const isSheetEditor = unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY || unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY;
+            if (!isSheetEditor && !this._editorService.getEditorRenderConfig(unitId)?.preserveHostFocus) {
                 this._instanceSrv.focusUnit(unitId);
             }
 

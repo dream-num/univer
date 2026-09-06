@@ -277,6 +277,7 @@ export function Dialog(props: IDialogProps) {
 
     const { locale, mountContainer, direction, mobile } = useContext(ConfigContext);
     const returnFocusRef = useRef<HTMLElement | null>(null);
+    const contentRef = useRef<HTMLDivElement | null>(null);
 
     const { position, isDragging, setElementRef, handleMouseDown } = useDraggable({ defaultPosition, enabled: draggable });
 
@@ -298,10 +299,22 @@ export function Dialog(props: IDialogProps) {
         : null);
 
     const handleContentRef = useCallback((node: HTMLDivElement | null) => {
+        const previousContent = contentRef.current;
+        contentRef.current = node;
         if (node && draggable) {
             setElementRef(node);
         }
-    }, [draggable, setElementRef]);
+        if (!node && previousContent && mask && !onCloseAutoFocus) {
+            // Wait for DOM removal, but restore input before FocusScope's deferred unmount timer.
+            Promise.resolve().then(() => {
+                const returnFocus = returnFocusRef.current;
+                if (!contentRef.current && !previousContent.isConnected && returnFocus?.isConnected &&
+                    returnFocus.ownerDocument.activeElement === returnFocus.ownerDocument.body) {
+                    returnFocus.focus({ preventScroll: true });
+                }
+            });
+        }
+    }, [draggable, mask, onCloseAutoFocus, setElementRef]);
 
     const handleOpenChange = useCallback((isOpen: boolean) => {
         if (!mask && !isOpen) {
@@ -368,7 +381,11 @@ export function Dialog(props: IDialogProps) {
                     if (mask && returnFocus?.isConnected) {
                         // Controlled dialogs have no Radix Trigger to receive focus on close.
                         event.preventDefault();
-                        returnFocus.focus({ preventScroll: true });
+                        const activeElement = returnFocus.ownerDocument.activeElement;
+                        const focusInClosingDialog = event.target instanceof HTMLElement && event.target.contains(activeElement);
+                        if (activeElement === returnFocus.ownerDocument.body || activeElement === returnFocus || focusInClosingDialog) {
+                            returnFocus.focus({ preventScroll: true });
+                        }
                     }
                 }}
                 onEscapeKeyDown={(e) => {

@@ -14,13 +14,40 @@
  * limitations under the License.
  */
 
-import { cleanup, render, waitFor } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { act, cleanup, render, waitFor } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Dialog } from '../Dialog';
 
 afterEach(cleanup);
 
 describe('Dialog focus recovery', () => {
+    it('restores input before delayed teardown and preserves subsequently chosen focus', async () => {
+        const editor = document.createElement('input');
+        const nextTarget = document.createElement('input');
+        document.body.append(editor, nextTarget);
+        try {
+            editor.focus();
+            const { rerender, getByRole } = render(<Dialog open title="Validation"><button>OK</button></Dialog>);
+            await waitFor(() => expect(document.activeElement).toBe(getByRole('button', { name: 'OK' })));
+            vi.useFakeTimers();
+            await act(async () => {
+                rerender(<Dialog open={false} title="Validation"><button>OK</button></Dialog>);
+                await Promise.resolve();
+            });
+            expect(document.activeElement).toBe(editor);
+            nextTarget.focus();
+            act(() => vi.runOnlyPendingTimers());
+            expect(document.activeElement).toBe(nextTarget);
+        } finally {
+            if (vi.isFakeTimers()) {
+                act(() => vi.runOnlyPendingTimers());
+                vi.useRealTimers();
+            }
+            editor.remove();
+            nextTarget.remove();
+        }
+    });
+
     it('honors a caller override instead of restoring the transient opener', async () => {
         const opener = document.createElement('button');
         const returnTarget = document.createElement('button');

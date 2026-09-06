@@ -241,18 +241,20 @@ describe('DocsLayoutWorkerRuntime', () => {
 
         let result = start.step;
         const publications = [result.publication];
-        for (let step = 0; step < 1_000 && !result.progress.complete; step++) {
-            result = await runtime.stepLayout({
-                ...mountIdentity,
-                unitId,
-                mountId: 'mount-1',
-                generation: start.step.progress.generation,
-                budgetMs: 0,
-            });
-            publications.push(result.publication);
-        }
-
-        expect(result.progress.complete).toBe(true);
+        // Hyphenation patterns load asynchronously; slice count is not a loading deadline.
+        await expect.poll(async () => {
+            if (!result.progress.complete) {
+                result = await runtime.stepLayout({
+                    ...mountIdentity,
+                    unitId,
+                    mountId: 'mount-1',
+                    generation: start.step.progress.generation,
+                    budgetMs: 0,
+                });
+                publications.push(result.publication);
+            }
+            return result.progress.complete;
+        }, { timeout: 5_000, interval: 5 }).toBe(true);
         expect(result.modelRevision).toBe(1);
         expect(publications.flatMap((publication) =>
             publication?.kind === 'page' ? publication.pages : []

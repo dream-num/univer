@@ -17,7 +17,16 @@
 import type { ComponentType, ReactElement } from 'react';
 import type { IIconProps } from '../../../../common/icon-manager';
 import { act, cleanup, fireEvent, render, waitFor } from '@testing-library/react';
-import { ContextService, ICommandService, IContextService, ILogService, Injector, LocaleService } from '@univerjs/core';
+import {
+    ContextService,
+    ICommandService,
+    IContextService,
+    ILogService,
+    Injector,
+    IUniverInstanceService,
+    LocaleService,
+    UniverInstanceService,
+} from '@univerjs/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { afterEach, describe, expect, it } from 'vitest';
 import { ComponentManager } from '../../../../common/component-manager';
@@ -74,6 +83,7 @@ function renderWithDependencies(element: ReactElement) {
     injector.add([ICommandService, { useClass: TestCommandService as never }]);
     injector.add([ILayoutService, { useClass: TestLayoutService as never }]);
     injector.add([IContextService, { useClass: ContextService }]);
+    injector.add([IUniverInstanceService, { useClass: UniverInstanceService }]);
     injector.add([IPlatformService, { useClass: PlatformService }]);
     injector.add([IUIRuntimeScopeService, { useClass: UIRuntimeScopeService }]);
     injector.add([IShortcutService, { useClass: ShortcutService }]);

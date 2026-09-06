@@ -19,24 +19,29 @@
  */
 
 import type { ComponentType, ReactElement } from 'react';
-import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import {
     CommandService,
     ConfigService,
     ContextService,
     DesktopLogService,
+    FOCUSING_SHEET,
     ICommandService,
     IConfigService,
     IContextService,
     ILogService,
     Injector,
+    IUniverInstanceService,
     LocaleService,
     LocaleType,
+    UniverInstanceService,
+    Workbook,
 } from '@univerjs/core';
 import { ConfigProvider } from '@univerjs/design';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ComponentManager } from '../../../../common/component-manager';
 import { IconManager } from '../../../../common/icon-manager';
+import { DesktopLayoutService, ILayoutService } from '../../../../services/layout/layout.service';
 import { MenuItemType } from '../../../../services/menu/menu';
 import { IMenuManagerService, MenuManagerService } from '../../../../services/menu/menu-manager.service';
 import { IPlatformService, PlatformService } from '../../../../services/platform/platform.service';
@@ -68,6 +73,8 @@ function renderWithDependencies(
     injector.add([ICommandService, { useClass: CommandService }]);
     injector.add([IConfigService, { useClass: ConfigService }]);
     injector.add([IContextService, { useClass: ContextService }]);
+    injector.add([IUniverInstanceService, { useClass: UniverInstanceService }]);
+    injector.add([ILayoutService, { useClass: DesktopLayoutService }]);
     injector.add([IPlatformService, { useClass: PlatformService }]);
     injector.add([IUIRuntimeScopeService, { useClass: UIRuntimeScopeService }]);
     injector.add([IShortcutService, { useClass: ShortcutService }]);
@@ -87,7 +94,7 @@ function renderWithDependencies(
     ));
 
     const ConnectedTestRoot = connectInjector(() => element, injector) as ComponentType;
-    return { ...render(<ConnectedTestRoot />), forceEscape };
+    return { ...render(<ConnectedTestRoot />), forceEscape, injector };
 }
 
 afterEach(() => {
@@ -216,6 +223,77 @@ describe('DropdownWrapper', () => {
 });
 
 describe('DropdownMenuWrapper', () => {
+    it.each(['worksheet', 'workbook'])(
+        'invalidates an open Sheet menu when its %s changes',
+        async (change) => {
+            const onOptionSelect = vi.fn();
+            const { injector, getByRole, findByRole, queryByRole } = renderWithDependencies(
+                <TooltipWrapper>
+                    <DropdownMenuWrapper
+                        menuId="test-menu"
+                        options={[{ label: { name: 'RetainedOption', selectable: false } }]}
+                        onOptionSelect={onOptionSelect}
+                    >
+                        <button type="button">Open scoped menu</button>
+                    </DropdownMenuWrapper>
+                </TooltipWrapper>
+            );
+            let retainedChange: ((value: string) => void) | undefined;
+            const registration = injector.get(ComponentManager).register('RetainedOption', ({ onChange }: {
+                onChange: (value: string) => void;
+            }) => {
+                retainedChange = onChange;
+                return <button type="button">Retained option</button>;
+            });
+            const editor = document.createElement('input');
+            document.body.appendChild(editor);
+            const workbook = injector.createInstance(Workbook, {
+                id: 'original',
+                sheetOrder: ['first', 'second'],
+                sheets: { first: { id: 'first', name: 'First' }, second: { id: 'second', name: 'Second' } },
+            });
+            const peer = injector.createInstance(Workbook, {
+                id: 'peer',
+                sheetOrder: ['peer-sheet'],
+                sheets: { 'peer-sheet': { id: 'peer-sheet', name: 'Peer' } },
+            });
+            const instances = injector.get(IUniverInstanceService);
+            instances.__addUnit(workbook);
+            instances.__addUnit(peer);
+            instances.setCurrentUnitForType(workbook.getUnitId());
+            injector.get(IContextService).setContextValue(FOCUSING_SHEET, true);
+            editor.focus();
+            fireEvent.pointerDown(getByRole('button', { name: 'Open scoped menu' }), { button: 0, ctrlKey: false });
+            await findByRole('button', { name: 'Retained option' });
+            const callback = retainedChange;
+            act(() => workbook.setActiveSheet(workbook.getActiveSheet()));
+            expect(queryByRole('button', { name: 'Retained option' })).not.toBeNull();
+            act(() => {
+                if (change === 'worksheet') {
+                    workbook.setActiveSheet(workbook.getSheetBySheetId('second')!);
+                } else {
+                    instances.setCurrentUnitForType(peer.getUnitId());
+                }
+                callback?.('stale-value');
+            });
+            await waitFor(() => expect(queryByRole('button', { name: 'Retained option' })).toBeNull());
+            expect(onOptionSelect).not.toHaveBeenCalled();
+            act(() => {
+                instances.setCurrentUnitForType(workbook.getUnitId());
+                workbook.setActiveSheet(workbook.getSheetBySheetId('first')!);
+            });
+            fireEvent.pointerDown(getByRole('button', { name: 'Open scoped menu' }), { button: 0, ctrlKey: false });
+            await findByRole('button', { name: 'Retained option' });
+            act(() => callback?.('late-value-after-reopen'));
+            expect(onOptionSelect).not.toHaveBeenCalled();
+            expect(queryByRole('button', { name: 'Retained option' })).not.toBeNull();
+            registration.dispose();
+            editor.remove();
+            workbook.dispose();
+            peer.dispose();
+        }
+    );
+
     it.each([undefined, 'embed-1'].flatMap((owner) => (
         ['select', 'escape', 'outside', 'owner-change', 'command-focus'].map((closeAction) => ({ owner, closeAction }))
     )))(

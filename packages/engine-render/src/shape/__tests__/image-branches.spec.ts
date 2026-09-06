@@ -22,7 +22,6 @@ function createNativeImage(width = 120, height = 80) {
     Object.defineProperty(img, 'width', { value: width, configurable: true });
     Object.defineProperty(img, 'height', { value: height, configurable: true });
     Object.defineProperty(img, 'complete', { value: true, configurable: true });
-    Object.defineProperty(img, 'naturalWidth', { value: width, configurable: true });
     return img;
 }
 

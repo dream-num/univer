@@ -53,13 +53,13 @@ export interface IUndoRedoService {
      */
     beginUndoRedoGroup(unitId: string, groupId: string, mode?: 'replace' | 'append'): IDisposable;
 
-    /** Read the top undo item for a unit, defaulting to the focused document. */
-    pitchTopUndoElement(unitId?: string): Nullable<IUndoRedoItem>;
-    /** Read the top redo item for a unit, defaulting to the focused document. */
-    pitchTopRedoElement(unitId?: string): Nullable<IUndoRedoItem>;
+    /** Pitch the top redo element of the currently focused Univer document instance. */
+    pitchTopUndoElement(): Nullable<IUndoRedoItem>;
+    /** Pitch the top undo element of the currently focused Univer document instance. */
+    pitchTopRedoElement(): Nullable<IUndoRedoItem>;
 
-    popUndoToRedo(unitId?: string): void;
-    popRedoToUndo(unitId?: string): void;
+    popUndoToRedo(): void;
+    popRedoToUndo(): void;
 
     rollback(id: string, unitId?: string): void;
 
@@ -126,9 +126,9 @@ export const UndoCommand = new (class extends MultiImplementationCommand impleme
 
     readonly id = UndoCommandId;
 
-    handler(accessor: IAccessor, params?: { unitId?: string }) {
+    handler(accessor: IAccessor) {
         const undoRedoService = accessor.get(IUndoRedoService);
-        const element = undoRedoService.pitchTopUndoElement(params?.unitId);
+        const element = undoRedoService.pitchTopUndoElement();
 
         if (!element) {
             return false;
@@ -137,7 +137,7 @@ export const UndoCommand = new (class extends MultiImplementationCommand impleme
         const commandService = accessor.get(ICommandService);
         const result = sequenceExecute(element.undoMutations, commandService);
         if (result.result) {
-            undoRedoService.popUndoToRedo(element.unitID);
+            undoRedoService.popUndoToRedo();
 
             return true;
         }
@@ -151,9 +151,9 @@ export const RedoCommand = new (class extends MultiImplementationCommand impleme
 
     readonly id = RedoCommandId;
 
-    handler(accessor: IAccessor, params?: { unitId?: string }) {
+    handler(accessor: IAccessor) {
         const undoRedoService = accessor.get(IUndoRedoService);
-        const element = undoRedoService.pitchTopRedoElement(params?.unitId);
+        const element = undoRedoService.pitchTopRedoElement();
         if (!element) {
             return false;
         }
@@ -161,7 +161,7 @@ export const RedoCommand = new (class extends MultiImplementationCommand impleme
         const commandService = accessor.get(ICommandService);
         const result = sequenceExecute(element.redoMutations, commandService);
         if (result.result) {
-            undoRedoService.popRedoToUndo(element.unitID);
+            undoRedoService.popRedoToUndo();
 
             return true;
         }
@@ -279,11 +279,13 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
         this._updateStatus();
     }
 
-    pitchTopUndoElement(unitID = this._getFocusedUnitId()): Nullable<IUndoRedoItem> {
+    pitchTopUndoElement(): Nullable<IUndoRedoItem> {
+        const unitID = this._getFocusedUnitId();
         return this._pitchUndoElement(unitID);
     }
 
-    pitchTopRedoElement(unitID = this._getFocusedUnitId()): Nullable<IUndoRedoItem> {
+    pitchTopRedoElement(): Nullable<IUndoRedoItem> {
+        const unitID = this._getFocusedUnitId();
         return this._pitchRedoElement(unitID);
     }
 
@@ -297,32 +299,26 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
         return stack?.length ? stack[stack.length - 1] : null;
     }
 
-    popUndoToRedo(unitID = this._getFocusedUnitId()): void {
-        if (!unitID) {
-            throw new Error('No focused univer instance!');
-        }
-        const undoStack = this._getUndoStack(unitID, true);
+    popUndoToRedo(): void {
+        const undoStack = this._getUndoStackForFocused();
         const element = undoStack.pop();
         if (element) {
             this._itemGroups.delete(element);
             // Only push to redo stack if redoMutations is not empty
             if (element.redoMutations.length > 0) {
-                const redoStack = this._getRedoStack(unitID, true);
+                const redoStack = this._getRedoStackForFocused();
                 redoStack.push(element);
             }
             this._updateStatus();
         }
     }
 
-    popRedoToUndo(unitID = this._getFocusedUnitId()): void {
-        if (!unitID) {
-            throw new Error('No focused univer instance!');
-        }
-        const redoStack = this._getRedoStack(unitID, true);
+    popRedoToUndo(): void {
+        const redoStack = this._getRedoStackForFocused();
         const element = redoStack.pop();
         if (element) {
             this._itemGroups.delete(element);
-            const undoStack = this._getUndoStack(unitID, true);
+            const undoStack = this._getUndoStackForFocused();
             undoStack.push(element);
             this._updateStatus();
         }

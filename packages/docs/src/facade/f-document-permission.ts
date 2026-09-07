@@ -14,9 +14,20 @@
  * limitations under the License.
  */
 
-import type { ICommandService, IPermissionService } from '@univerjs/core';
+import type {
+    ICommandService,
+    IObjectPermissionBatchResult,
+    IObjectPermissionChange,
+    IPermissionService,
+    ISetObjectPermissionsCommandParams,
+} from '@univerjs/core';
 import type { DocumentUnitPermissionAction } from '@univerjs/docs';
-import { canEditDocumentTargets, getDocumentPermissionValue, SetDocumentPermissionCommand } from '@univerjs/docs';
+import {
+    canEditDocumentTargets,
+    getDocumentPermissionValue,
+    SetDocumentPermissionCommand,
+    SetDocumentPermissionsCommand,
+} from '@univerjs/docs';
 import { UnitAction } from '@univerjs/protocol';
 
 /**
@@ -29,6 +40,20 @@ export class FDocumentPermission {
         private readonly _commandService: ICommandService,
         private readonly _permissionService: IPermissionService
     ) {}
+
+    /**
+     * Creates or updates object policies in this unit; use policy: null to remove protection.
+     * Authz writes can partially succeed. Inspect both result lists before retrying failed objects.
+     * Successful binding changes share one undo entry; existing remote policy edits are not undoable.
+     * @param {IObjectPermissionChange[]} changes Stable object IDs and policies to apply.
+     * @returns {Promise<IObjectPermissionBatchResult>} Per-object successes and failures.
+     */
+    async setObjectPermissions(changes: IObjectPermissionChange[]): Promise<IObjectPermissionBatchResult> {
+        return this._commandService.executeCommand<ISetObjectPermissionsCommandParams, IObjectPermissionBatchResult>(
+            SetDocumentPermissionsCommand.id,
+            { unitId: this._unitId, changes }
+        );
+    }
 
     /**
      * Sets one Document unit permission through the command system.

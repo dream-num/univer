@@ -34,6 +34,7 @@ import {
 } from './commands/commands/set-document-default-paragraph-style.command';
 import { SetDocumentNameCommand } from './commands/commands/set-document-name.command';
 import { SetDocumentPermissionCommand } from './commands/commands/set-document-permission.command';
+import { SetDocumentPermissionsCommand } from './commands/commands/set-document-permissions.command';
 import { SetSectionHeaderFooterLinkCommand } from './commands/commands/set-section-header-footer-link.command';
 import { UpdateDocumentParagraphStyleCommand } from './commands/commands/update-document-paragraph-style.command';
 import {
@@ -45,6 +46,7 @@ import {
 import { RichTextEditingMutation } from './commands/mutations/core-editing.mutation';
 import { DocsRenameMutation } from './commands/mutations/docs-rename.mutation';
 import { SetDocumentPermissionRuleMutation } from './commands/mutations/set-document-permission-rule.mutation';
+import { SetDocumentPermissionRulesMutation } from './commands/mutations/set-document-permission-rules.mutation';
 import { SetTextSelectionsOperation } from './commands/operations/text-selection.operation';
 import { defaultPluginConfig, DOCS_PLUGIN_CONFIG_KEY } from './config/config';
 import { DocCustomRangeController } from './controllers/custom-range.controller';
@@ -83,10 +85,12 @@ export class UniverDocsPlugin extends Plugin {
     override onStarting(): void {
         this._injector.add([DocumentPermissionRuleModel]);
         this.disposeWithMe(this._injector.get(ICommandService).registerCommand(SetDocumentPermissionRuleMutation));
+        this.disposeWithMe(this._injector.get(ICommandService).registerCommand(SetDocumentPermissionRulesMutation));
         this.disposeWithMe(this._injector.get(ObjectPermissionService).registerRuleModel(
             UnitObject.Document,
             this._injector.get(DocumentPermissionRuleModel),
-            SetDocumentPermissionRuleMutation.id
+            SetDocumentPermissionRuleMutation.id,
+            SetDocumentPermissionRulesMutation.id
         ));
         this._initializeDependencies();
         this._initializeCommands();
@@ -100,6 +104,7 @@ export class UniverDocsPlugin extends Plugin {
                 UpdateTextCommand,
                 CreateHeaderFooterCommand,
                 SetDocumentPermissionCommand,
+                SetDocumentPermissionsCommand,
                 SetDocumentDefaultParagraphStyleCommand,
                 SetDocumentNameCommand,
                 SetSectionHeaderFooterLinkCommand,

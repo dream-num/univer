@@ -20,7 +20,10 @@ import type {
     IListPermPointResponse,
     IUpdatePermPointRequest,
 } from '@univerjs/protocol';
-import type { ISetObjectPermissionRuleMutationParams } from '../object-permission-rule.model';
+import type {
+    ISetObjectPermissionRuleMutationParams,
+    ISetObjectPermissionRulesMutationParams,
+} from '../object-permission-rule.model';
 import { ObjectScope, UnitAction, UnitObject, UnitRole } from '@univerjs/protocol';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { UniverInstanceType } from '../../../common/unit';
@@ -78,7 +81,8 @@ function createClient(authz: ReturnType<typeof createAuthz>['authz'], enabled = 
     const service = injector.get(ObjectPermissionService);
     const commands = injector.get(ICommandService);
     commands.registerCommand({ id: 'test.mutation.permission', type: CommandType.MUTATION, handler: (_, params: ISetObjectPermissionRuleMutationParams) => model.setRule(params.unitId, params.objectType, params.objectId, params.rule) });
-    roots.forEach((root) => service.registerRuleModel(root, model, 'test.mutation.permission'));
+    commands.registerCommand({ id: 'test.mutation.permissions', type: CommandType.MUTATION, handler: (_, params: ISetObjectPermissionRulesMutationParams) => model.setRules(params.unitId, params.rules) });
+    roots.forEach((root) => service.registerRuleModel(root, model, 'test.mutation.permission', 'test.mutation.permissions'));
     injector.get(IConfigService).setConfig(OBJECT_PERMISSION_CONFIG_KEY, enabled ? [...types, ...roots] : []);
     univer.createUnit(UniverInstanceType.UNIVER_DOC, { id: 'unit', body: { dataStream: '\r\n' } });
     injector.get(IUniverInstanceService).focusUnit('unit');
@@ -270,4 +274,91 @@ describe('ObjectPermissionService', () => {
         await refresh;
         expect(client.service.getPolicies('unit')).toEqual([]);
     });
+});
+
+describe('ObjectPermissionService batches', () => {
+    it.each(types)('creates multiple policies, edits and removes them, and undoes only the binding changes (%s)', async (objectType) => {
+        const backend = createAuthz();
+        const client = createClient(backend.authz);
+        const a = target(objectType, 'a');
+        const b = target(objectType, 'b');
+        expect(await client.service.saveMany([{ ...a, policy: restriction }, { ...b, policy: restriction }])).toEqual({ succeeded: ['a', 'b'], failed: [] });
+        const original = client.model.getRules('unit');
+        const creation = client.history.pitchTopUndoElement()!;
+        expect(creation.undoMutations).toHaveLength(1);
+        await client.commands.executeCommand(creation.undoMutations[0].id, creation.undoMutations[0].params);
+        expect(client.model.getRules('unit')).toEqual([]);
+        await client.commands.executeCommand(creation.redoMutations[0].id, creation.redoMutations[0].params);
+        expect(client.model.getRules('unit')).toEqual(original);
+        const peer = createClient(backend.authz);
+        peer.resources.loadResources('unit', client.resources.getResources('unit', UniverInstanceType.UNIVER_DOC));
+        expect(peer.model.getRules('unit')).toEqual(original);
+        expect(await client.service.saveMany([{ ...a, policy: { ...restriction, edit: 'all' } }, { ...b, policy: null }])).toEqual({ succeeded: ['a', 'b'], failed: [] });
+        expect(backend.authz.update).toHaveBeenCalledWith(expect.objectContaining({ objectID: original[0].permissionId }));
+        expect(client.model.getRules('unit')).toEqual([original[0]]);
+        const removal = client.history.pitchTopUndoElement()!;
+        await client.commands.executeCommand(removal.undoMutations[0].id, removal.undoMutations[0].params);
+        expect(client.model.getRules('unit')).toEqual(original);
+        expect((await client.service.read(a)).edit).toBe('all');
+        expect(backend.authz.create).toHaveBeenCalledTimes(2);
+    });
+
+    it('reports failed writes without losing successful bindings or their undo entry', async () => {
+        const backend = createAuthz();
+        const client = createClient(backend.authz);
+        backend.authz.create.mockRejectedValueOnce(new Error('Offline'));
+        const result = await client.service.saveMany(['a', 'b', 'c'].map((id) => ({ ...target(UnitObject.BoardElement, id), policy: restriction })));
+        expect(result.succeeded).toEqual(['b', 'c']);
+        expect(result.failed).toEqual([{ objectId: 'a', error: expect.any(Error) }]);
+        expect(client.model.getRules('unit').map((rule) => rule.objectId)).toEqual(['b', 'c']);
+        const undo = client.history.pitchTopUndoElement()!;
+        expect(undo.undoMutations).toHaveLength(1);
+        await client.commands.executeCommand(undo.undoMutations[0].id, undo.undoMutations[0].params);
+        expect(client.model.getRules('unit')).toEqual([]);
+    });
+
+    it('does not overwrite a concurrent binding while the batch waits for Authz', async () => {
+        const backend = createAuthz();
+        const client = createClient(backend.authz);
+        const a = target(UnitObject.BoardElement, 'a');
+        let finish!: (id: string) => void;
+        backend.authz.create.mockImplementationOnce(() => new Promise((resolve) => {
+            finish = resolve;
+        }));
+        const pending = client.service.saveMany([{ ...a, policy: restriction }, { ...target(UnitObject.BoardElement, 'b'), policy: restriction }]);
+        await vi.waitFor(() => expect(finish).toBeTypeOf('function'));
+        const concurrent = { objectId: a.objectId, objectType: a.objectType, permissionId: 'concurrent' };
+        client.model.setRule('unit', a.objectType, a.objectId, concurrent);
+        finish('late-response');
+        const result = await pending;
+        expect(result.succeeded).toEqual(['b']);
+        expect(result.failed).toEqual([{ objectId: 'a', error: expect.any(Error) }]);
+        expect(client.model.getRule('unit', a.objectType, a.objectId)).toEqual(concurrent);
+    });
+
+    it('rejects duplicate targets before writing and checks authorization per object', async () => {
+        const backend = createAuthz();
+        const client = createClient(backend.authz);
+        const change = { ...target(UnitObject.BoardElement), policy: restriction };
+        await expect(client.service.saveMany([change, change])).rejects.toThrow('Invalid');
+        expect(backend.authz.create).not.toHaveBeenCalled();
+        backend.authz.allowed.mockResolvedValue([{ action: UnitAction.CreatePermissionObject, allowed: false }]);
+        const result = await client.service.saveMany([change]);
+        expect(result.succeeded).toEqual([]);
+        expect(result.failed).toEqual([{ objectId: change.objectId, error: expect.any(Error) }]);
+        expect(backend.authz.create).not.toHaveBeenCalled();
+        expect(client.history.pitchTopUndoElement()).toBeNull();
+    });
+});
+
+it('returns successful writes when the final permission refresh fails', async () => {
+    const backend = createAuthz();
+    const client = createClient(backend.authz);
+    backend.authz.batchAllowed.mockRejectedValue(new Error('Readback offline'));
+    const result = await client.service.saveMany([{ ...target(UnitObject.BoardElement, 'a'), policy: restriction }]);
+    expect(result.succeeded).toEqual(['a']);
+    expect(result.failed).toEqual([]);
+    expect(result.refreshError).toEqual(expect.any(Error));
+    expect(client.model.getRules('unit')).toHaveLength(1);
+    expect(backend.authz.create).toHaveBeenCalledTimes(1);
 });

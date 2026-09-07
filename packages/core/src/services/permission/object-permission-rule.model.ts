@@ -34,6 +34,11 @@ export interface ISetObjectPermissionRuleMutationParams {
     rule: IObjectPermissionRule | null;
 }
 
+export interface ISetObjectPermissionRulesMutationParams {
+    unitId: string;
+    rules: Omit<ISetObjectPermissionRuleMutationParams, 'unitId'>[];
+}
+
 /** Shared storage only; each product owns its rule type, resource name and mutation. */
 export abstract class ObjectPermissionRuleModel<T extends IObjectPermissionRule = IObjectPermissionRule> extends Disposable {
     private readonly _rules = new Map<string, Map<string, T>>();
@@ -79,20 +84,38 @@ export abstract class ObjectPermissionRuleModel<T extends IObjectPermissionRule 
     }
 
     setRule(unitId: string, objectType: UnitObject, objectId: string, rule: T | null): boolean {
-        if (!unitId || !objectId || !this._objectTypes.includes(objectType) || (rule !== null &&
-            (!rule || rule.objectId !== objectId || rule.objectType !== objectType || typeof rule.permissionId !== 'string' || !rule.permissionId))) {
+        return this.setRules(unitId, [{ objectId, objectType, rule }]);
+    }
+
+    /** Validate the whole batch before changing any binding or publishing a resource change. */
+    setRules(unitId: string, updates: { objectId: string; objectType: UnitObject; rule: T | null }[]): boolean {
+        if (typeof unitId !== 'string' || !unitId || !Array.isArray(updates) || updates.length === 0) {
             return false;
         }
-        let rules = this._rules.get(unitId);
-        if (!rules) {
-            rules = new Map();
-            this._rules.set(unitId, rules);
+        const keys = new Set<string>();
+        for (const update of updates) {
+            if (!update) {
+                return false;
+            }
+            const { objectId, objectType, rule } = update;
+            const key = this._key(objectType, objectId);
+            if (typeof objectId !== 'string' || !objectId || !this._objectTypes.includes(objectType) || keys.has(key) || (rule !== null &&
+                (!rule || rule.objectId !== objectId || rule.objectType !== objectType ||
+                    typeof rule.permissionId !== 'string' || !rule.permissionId))) {
+                return false;
+            }
+            keys.add(key);
         }
-        if (rule) {
-            rules.set(this._key(objectType, objectId), Tools.deepClone(rule));
-        } else {
-            rules.delete(this._key(objectType, objectId));
+        const clonedUpdates = Tools.deepClone(updates);
+        const rules = this._rules.get(unitId) ?? new Map<string, T>();
+        for (const { objectId, objectType, rule } of clonedUpdates) {
+            if (rule) {
+                rules.set(this._key(objectType, objectId), rule);
+            } else {
+                rules.delete(this._key(objectType, objectId));
+            }
         }
+        this._rules.set(unitId, rules);
         this._changes.next(unitId);
         return true;
     }

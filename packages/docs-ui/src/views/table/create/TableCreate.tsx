@@ -18,7 +18,8 @@ import type { LocaleKey } from '../../../locale/types';
 import { LocaleService } from '@univerjs/core';
 import { InputNumber } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
-import { useEffect, useState } from 'react';
+
+import { useState } from 'react';
 
 interface IDocCreateTableConfirmProps {
     handleRowColChange: (rowCount: number, colCount: number) => void;
@@ -33,20 +34,24 @@ export const DocCreateTableConfirm = ({
     tableCreateParams,
 }: IDocCreateTableConfirmProps) => {
     const localeService = useDependency(LocaleService);
+    const [rowCount, setRowCount] = useState(tableCreateParams.rowCount);
+    const [colCount, setColCount] = useState(tableCreateParams.colCount);
+    const [previousParams, setPreviousParams] = useState(tableCreateParams);
 
-    const [rowCount, setRowCount] = useState(3);
-    const [colCount, setColCount] = useState(5);
-
-    function handleInputChange(rowCount: number, colCount: number) {
-        setRowCount(rowCount);
-        setColCount(colCount);
-        handleRowColChange(rowCount, colCount);
-    }
-
-    useEffect(() => {
+    if (
+        previousParams.rowCount !== tableCreateParams.rowCount ||
+        previousParams.colCount !== tableCreateParams.colCount
+    ) {
+        setPreviousParams(tableCreateParams);
         setRowCount(tableCreateParams.rowCount);
         setColCount(tableCreateParams.colCount);
-    }, [tableCreateParams]);
+    }
+
+    function handleInputChange(nextRowCount: number, nextColCount: number) {
+        setRowCount(nextRowCount);
+        setColCount(nextColCount);
+        handleRowColChange(nextRowCount, nextColCount);
+    }
 
     return (
         <div className="univer-flex univer-items-center univer-justify-between univer-gap-2">

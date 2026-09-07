@@ -15,7 +15,7 @@
  */
 
 import type { CSSProperties, HTMLAttributes, PointerEvent, ReactNode } from 'react';
-import { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { clsx } from '../../helper/clsx';
 import { ConfigContext } from '../config-provider/ConfigProvider';
@@ -49,7 +49,9 @@ function moveItemByIndex<T>(list: T[], fromIndex: number, toIndex: number) {
     return next;
 }
 
-export function DraggableList<T = any>(props: IDraggableListProps<T>) {
+const DEFAULT_MARGIN: [number, number] = [0, 0];
+
+export function DraggableList<T>(props: IDraggableListProps<T>) {
     const {
         list,
         onListChange,
@@ -59,7 +61,7 @@ export function DraggableList<T = any>(props: IDraggableListProps<T>) {
         style,
         draggableHandle,
         rowHeight,
-        margin = [0, 0],
+        margin = DEFAULT_MARGIN,
         onDragStart,
         onDragStop,
         ...restProps
@@ -71,7 +73,6 @@ export function DraggableList<T = any>(props: IDraggableListProps<T>) {
     const [dragOverId, setDragOverId] = useState<string | null>(null);
     const [ghostElement, setGhostElement] = useState<HTMLElement | null>(null);
     const [ghostPosition, setGhostPosition] = useState<{ x: number; y: number } | null>(null);
-    const [canUsePortal, setCanUsePortal] = useState(false);
     const pointerIdRef = useRef<number | null>(null);
     const dragPointerOffsetRef = useRef({ x: 0, y: 0 });
     const dragItemSizeRef = useRef({ width: 0, height: 0 });
@@ -82,17 +83,7 @@ export function DraggableList<T = any>(props: IDraggableListProps<T>) {
     const dragStartIndexRef = useRef(-1);
 
     const { direction } = useContext(ConfigContext);
-
-    useEffect(() => {
-        if (!draggingId) {
-            setDisplayList(list);
-            displayListRef.current = list;
-        }
-    }, [draggingId, list]);
-
-    useEffect(() => {
-        setCanUsePortal(typeof document !== 'undefined');
-    }, []);
+    const getItemId = useCallback((item: T) => String(item[idKey]), [idKey]);
 
     useEffect(() => {
         const container = ghostContainerRef.current;
@@ -111,7 +102,7 @@ export function DraggableList<T = any>(props: IDraggableListProps<T>) {
             return;
         }
 
-        const handlePointerMove = (evt: PointerEvent | globalThis.PointerEvent) => {
+        const handlePointerMove = (evt: globalThis.PointerEvent) => {
             const sourceId = dragSourceIdRef.current;
             if (!sourceId || pointerIdRef.current !== evt.pointerId) {
                 return;
@@ -166,16 +157,16 @@ export function DraggableList<T = any>(props: IDraggableListProps<T>) {
             setDraggingId(null);
         };
 
-        window.addEventListener('pointermove', handlePointerMove as any);
+        window.addEventListener('pointermove', handlePointerMove);
         window.addEventListener('pointerup', handlePointerUp);
         window.addEventListener('pointercancel', handlePointerUp);
 
         return () => {
-            window.removeEventListener('pointermove', handlePointerMove as any);
+            window.removeEventListener('pointermove', handlePointerMove);
             window.removeEventListener('pointerup', handlePointerUp);
             window.removeEventListener('pointercancel', handlePointerUp);
         };
-    }, [draggingId, onDragStop, onListChange]);
+    }, [draggingId, getItemId, onDragStop, onListChange]);
 
     const gapStyle: CSSProperties = useMemo(() => {
         const [horizontal, vertical] = margin;
@@ -187,8 +178,8 @@ export function DraggableList<T = any>(props: IDraggableListProps<T>) {
         };
     }, [margin, style]);
 
-    const getItemId = (item: T) => String(item[idKey]);
-    const draggingItem = draggingId ? displayList.find((item) => getItemId(item) === draggingId) : null;
+    const renderedList = draggingId ? displayList : list;
+    const draggingItem = draggingId ? renderedList.find((item) => getItemId(item) === draggingId) : null;
 
     return (
         <>
@@ -197,7 +188,7 @@ export function DraggableList<T = any>(props: IDraggableListProps<T>) {
                 className={clsx('univer-flex univer-flex-col', draggingId && 'univer-cursor-grabbing univer-select-none', className)}
                 style={gapStyle}
             >
-                {displayList.map((item, index) => {
+                {renderedList.map((item, index) => {
                     const itemId = getItemId(item);
                     const isDraggingItem = draggingId === itemId;
                     const isDragOverItem = dragOverId === itemId && !isDraggingItem;
@@ -246,8 +237,9 @@ export function DraggableList<T = any>(props: IDraggableListProps<T>) {
                                 pointerIdRef.current = e.pointerId;
                                 dragSourceIdRef.current = itemId;
                                 dragStartIndexRef.current = index;
+                                setDisplayList(list);
                                 setDraggingId(itemId);
-                                displayListRef.current = displayList;
+                                displayListRef.current = list;
                                 onDragStart?.(undefined, { y: index });
                                 e.preventDefault();
                                 (e.currentTarget as HTMLDivElement).setPointerCapture(e.pointerId);
@@ -270,7 +262,7 @@ export function DraggableList<T = any>(props: IDraggableListProps<T>) {
                     );
                 })}
             </div>
-            {canUsePortal && draggingItem && ghostPosition && createPortal((
+            {draggingItem && ghostPosition && typeof document !== 'undefined' && createPortal((
                 <div
                     dir={direction}
                     className={clsx(`
@@ -289,7 +281,7 @@ export function DraggableList<T = any>(props: IDraggableListProps<T>) {
                 >
                     {ghostElement
                         ? <div ref={ghostContainerRef} />
-                        : itemRender(draggingItem, displayList.findIndex((item) => getItemId(item) === getItemId(draggingItem)))}
+                        : itemRender(draggingItem, renderedList.findIndex((item) => getItemId(item) === getItemId(draggingItem)))}
                 </div>
             ), document.body
             )}

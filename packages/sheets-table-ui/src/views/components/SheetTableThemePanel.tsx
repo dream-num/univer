@@ -30,7 +30,6 @@ import {
     TableManager,
 } from '@univerjs/sheets-table';
 import { useDependency, useObservable } from '@univerjs/ui';
-import { useEffect, useState } from 'react';
 import {
     TABLE_BORDER_DEFAULT,
     TABLE_BORDER_NONE,
@@ -63,12 +62,10 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
     const rangeThemeModel = useDependency(SheetRangeThemeModel);
     const sheetTableThemeUIController = useDependency(SheetTableThemeUIController);
 
-    const rangeThemeMapChanged = useObservable(rangeThemeModel.rangeThemeMapChange$);
-    const tableRefresh = useObservable(sheetTableThemeUIController.refreshTable$);
+    useObservable(rangeThemeModel.rangeThemeMapChange$);
+    useObservable(sheetTableThemeUIController.refreshTable$);
 
     const errorService = useDependency(ErrorService);
-
-    const [, setRefresh] = useState(Math.random);
 
     const themeConfig = useObservable(tableManager.tableThemeChanged$, {
         theme: table?.getTableStyleId(),
@@ -133,10 +130,6 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
             themeName,
         });
     };
-
-    useEffect(() => {
-        setRefresh(Math.random());
-    }, [rangeThemeMapChanged, tableRefresh]);
 
     if (!table) return null;
 

@@ -25,7 +25,7 @@ import { IDefinedNamesService, IFunctionService, isReferenceStrings, ISuperTable
 import { ErrorIcon } from '@univerjs/icons';
 import { SCOPE_WORKBOOK_VALUE_DEFINED_NAME, validateDefinedName } from '@univerjs/sheets';
 import { ComponentManager, useDependency, useSidebarClick } from '@univerjs/ui';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, RANGE_SELECTOR_COMPONENT_KEY } from '../../common/keys';
 
 export interface IDefinedNameInputProps extends Omit<IDefinedNamesServiceParam, 'id'> {
@@ -41,14 +41,12 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET);
 
-    return workbook ? <DefinedNameInputContent {...props} /> : null;
+    return workbook && props.state ? <DefinedNameInputContent {...props} /> : null;
 };
 
 function DefinedNameInputContent(props: IDefinedNameInputProps) {
     const {
         inputId,
-        state = false,
-        type = 'range',
         confirm,
         cancel,
         name,
@@ -74,7 +72,12 @@ function DefinedNameInputContent(props: IDefinedNameInputProps) {
 
     const [nameValue, setNameValue] = useState(name);
 
-    const [formulaOrRefStringValue, setFormulaOrRefStringValue] = useState(formulaOrRefString);
+    const formulaOrRefStringCache = formulaOrRefString.startsWith(operatorToken.EQUALS) || !isReferenceStrings(formulaOrRefString)
+        ? formulaOrRefString.startsWith(operatorToken.EQUALS) ? formulaOrRefString : operatorToken.EQUALS + formulaOrRefString
+        : formulaOrRefString;
+    const initialType = formulaOrRefStringCache.startsWith(operatorToken.EQUALS) ? 'formula' : 'range';
+
+    const [formulaOrRefStringValue, setFormulaOrRefStringValue] = useState(formulaOrRefStringCache);
 
     const [commentValue, setCommentValue] = useState(comment);
 
@@ -82,7 +85,7 @@ function DefinedNameInputContent(props: IDefinedNameInputProps) {
 
     const [validString, setValidString] = useState('');
 
-    const [typeValue, setTypeValue] = useState(type);
+    const [typeValue, setTypeValue] = useState(initialType);
 
     const [validFormulaOrRange, setValidFormulaOrRange] = useState(true);
 
@@ -90,30 +93,6 @@ function DefinedNameInputContent(props: IDefinedNameInputProps) {
         label: localeService.t<LocaleKey>('sheets-ui.definedName.scopeWorkbook'),
         value: SCOPE_WORKBOOK_VALUE_DEFINED_NAME,
     }];
-
-    const isFormula = (token: string) => {
-        return !isReferenceStrings(token);
-    };
-
-    useEffect(() => {
-        setValidFormulaOrRange(true);
-        setNameValue(name);
-        setCommentValue(comment);
-        setLocalSheetIdValue(localSheetId);
-        let formulaOrRefStringCache = formulaOrRefString;
-        if (formulaOrRefString.substring(0, 1) === operatorToken.EQUALS) {
-            setTypeValue('formula');
-        } else if (isFormula(formulaOrRefString)) {
-            setTypeValue('formula');
-            formulaOrRefStringCache = operatorToken.EQUALS + formulaOrRefString;
-        } else {
-            setTypeValue('range');
-        }
-
-        setFormulaOrRefStringValue(formulaOrRefStringCache);
-
-        setValidString('');
-    }, [state]);
 
     workbook.getSheetOrders().forEach((sheetId) => {
         const sheet = workbook.getSheetBySheetId(sheetId);
@@ -190,9 +169,7 @@ function DefinedNameInputContent(props: IDefinedNameInputProps) {
 
     return (
         <div
-            className={clsx('univer-grid univer-space-y-2 univer-pb-1', borderBottomClassName, {
-                'univer-hidden': !state,
-            })}
+            className={clsx('univer-grid univer-space-y-2 univer-pb-1', borderBottomClassName)}
         >
             <div>
                 <Input

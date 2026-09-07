@@ -26,7 +26,6 @@ export function HueSlider({ hsv, onChange, onChanged }: IHueSliderProps) {
     const [isDragging, setIsDragging] = useState(false);
     const sliderRef = useRef<HTMLDivElement>(null);
     const thumbRef = useRef<HTMLDivElement>(null);
-    const hsvRef = useRef(hsv);
 
     const calculateHue = useCallback((clientX: number) => {
         const slider = sliderRef.current;
@@ -53,15 +52,11 @@ export function HueSlider({ hsv, onChange, onChanged }: IHueSliderProps) {
         calculateHue(e.clientX);
     }, [isDragging, calculateHue]);
 
-    useEffect(() => {
-        hsvRef.current = hsv;
-    }, [hsv]);
-
     const handlePointerUp = useCallback(() => {
         setIsDragging(false);
-        const [h, s, v] = hsvRef.current;
+        const [h, s, v] = hsv;
         onChanged?.(h, s, v);
-    }, [onChanged]);
+    }, [hsv, onChanged]);
 
     useEffect(() => {
         if (isDragging) {

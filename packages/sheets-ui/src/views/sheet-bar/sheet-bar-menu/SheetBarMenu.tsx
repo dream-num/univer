@@ -33,7 +33,6 @@ import {
     SetWorksheetNameMutation,
     SetWorksheetOrderMutation,
     SetWorksheetShowCommand,
-    WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -49,14 +48,31 @@ export interface ISheetBarMenuItem {
 }
 
 export function SheetBarMenu() {
-    const [menu, setMenu] = useState<ISheetBarMenuItem[]>([]);
-    const [visible, setVisible] = useState(false);
-
     const univerInstanceService = useDependency(IUniverInstanceService);
     const commandService = useDependency(ICommandService);
     const sheetBarService = useDependency(ISheetBarService);
-    const worksheetProtectionRuleModel = useDependency(WorksheetProtectionRuleModel);
     const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), null, false, []);
+    const getMenuItems = useCallback(() => {
+        if (!workbook) return [];
+
+        const sheets = workbook.getSheets();
+        const activeSheet = workbook.getActiveSheet();
+        return sheets.map((sheet, index) => ({
+            label: sheet.getName(),
+            index: `${index}`,
+            sheetId: sheet.getSheetId(),
+            hidden: sheet.isSheetHidden() === BooleanNumber.TRUE,
+            selected: activeSheet === sheet,
+        }));
+    }, [workbook]);
+    const [menu, setMenu] = useState<ISheetBarMenuItem[]>(getMenuItems);
+    const [visible, setVisible] = useState(false);
+    const [previousWorkbook, setPreviousWorkbook] = useState(workbook);
+
+    if (workbook !== previousWorkbook) {
+        setPreviousWorkbook(workbook);
+        setMenu(getMenuItems());
+    }
 
     const handleClick = (item: ISheetBarMenuItem) => {
         const { sheetId } = item;
@@ -78,22 +94,8 @@ export function SheetBarMenu() {
     };
 
     const statusInit = useCallback(() => {
-        if (!workbook) return;
-
-        const sheets = workbook.getSheets();
-        const activeSheet = workbook.getActiveSheet();
-        const worksheetMenuItems = sheets.map((sheet, index) => {
-            return {
-                label: sheet.getName(),
-                index: `${index}`,
-                sheetId: sheet.getSheetId(),
-                hidden: sheet.isSheetHidden() === BooleanNumber.TRUE,
-                selected: activeSheet === sheet,
-            };
-        });
-
-        setMenu(worksheetMenuItems);
-    }, [workbook, worksheetProtectionRuleModel]);
+        setMenu(getMenuItems());
+    }, [getMenuItems]);
 
     const setupStatusUpdate = useCallback(() =>
         commandService.onCommandExecuted((commandInfo: ICommandInfo) => {
@@ -120,8 +122,6 @@ export function SheetBarMenu() {
     };
 
     useEffect(() => {
-        statusInit();
-
         const disposables = new DisposableCollection();
         disposables.add(setupStatusUpdate());
         disposables.add(sheetBarService.registerSheetBarMenuHandler({ handleSheetBarMenu }));

@@ -16,11 +16,11 @@
 
 import type { CSSProperties, ReactNode } from 'react';
 import { DownIcon } from '@univerjs/icons';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { clsx } from '../../helper/clsx';
 import { Checkbox } from '../checkbox/Checkbox';
 import { Tooltip } from '../tooltip/Tooltip';
-import { VirtualList } from '../virtual-list';
+import { VirtualList } from '../virtual-list/VirtualList';
 import { createCacheWithFindNodePathFromTree, isIntermediated } from './util';
 
 export enum TreeSelectionMode {
@@ -86,10 +86,20 @@ function flattenTree(items: ITreeItemProps[], expandedKeys: Set<string>, level =
  */
 export function Tree(props: ITreeProps) {
     const { data = [], defaultCache, style, defaultExpandAll = false, selectionMode = TreeSelectionMode.ALL, valueGroup = [], onChange, onExpend, height = 200, itemHeight = 32, attachRender } = props;
-    const [update, forceUpdate] = useState({});
-    const expandKeySet = useMemo(() => {
-        return new Set<string>();
-    }, []);
+    const [expandKeySet, setExpandKeySet] = useState(() => {
+        const expandedKeys = new Set<string>();
+
+        function walkData(item: ITreeNodeProps) {
+            expandedKeys.add(item.key);
+            item.children?.forEach(walkData);
+        }
+
+        if (defaultExpandAll) {
+            data.forEach(walkData);
+        }
+
+        return expandedKeys;
+    });
 
     const findNode = useMemo(() => createCacheWithFindNodePathFromTree(data, defaultCache), [data, defaultCache]);
 
@@ -102,27 +112,19 @@ export function Tree(props: ITreeProps) {
         return set;
     }, [valueGroup, findNode]);
 
-    useEffect(() => {
-        function walkData(item: ITreeNodeProps) {
-            expandKeySet.add(item.key);
-            item.children?.forEach(walkData);
-        }
-        if (defaultExpandAll) {
-            data.forEach(walkData);
-        }
-        forceUpdate({});
-    }, [defaultExpandAll, data]);
-
-    const flatData = useMemo(() => flattenTree(data, expandKeySet), [data, update, expandKeySet]);
+    const flatData = useMemo(() => flattenTree(data, expandKeySet), [data, expandKeySet]);
 
     function handleExpendItem(treeItem: ITreeItemProps) {
         if (treeItem.children?.length) {
-            if (expandKeySet.has(treeItem.key)) {
-                expandKeySet.delete(treeItem.key);
-            } else {
-                expandKeySet.add(treeItem.key);
-            }
-            forceUpdate({});
+            setExpandKeySet((expandedKeys) => {
+                const nextExpandedKeys = new Set(expandedKeys);
+                if (nextExpandedKeys.has(treeItem.key)) {
+                    nextExpandedKeys.delete(treeItem.key);
+                } else {
+                    nextExpandedKeys.add(treeItem.key);
+                }
+                return nextExpandedKeys;
+            });
         }
         if (selectionMode === TreeSelectionMode.ONLY_LEAF_NODE) {
             if (treeItem.children) {

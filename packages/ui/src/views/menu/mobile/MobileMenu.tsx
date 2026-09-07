@@ -35,7 +35,7 @@ import { ComponentManager } from '../../../common/component-manager';
 import { MenuItemType } from '../../../services/menu/menu';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
 import { useDependency, useObservable } from '../../../utils/di';
-import { CustomLabel } from '../../custom-label/index';
+import { CustomLabel } from '../../custom-label/CustomLabel';
 
 type MobileMenuView =
     | {
@@ -77,6 +77,12 @@ export function MobileMenu(props: IMobileMenuProps) {
     const menuManagerService = providedMenuManagerService ?? rootMenuManagerService;
     const [viewStack, setViewStack] = useState<MobileMenuView[]>([]);
     const providedSchemaKey = providedSchemas?.map((schema) => schema.key).join('|');
+    const [previousMenuSource, setPreviousMenuSource] = useState({ menuType, providedSchemaKey });
+
+    if (menuType !== previousMenuSource.menuType || providedSchemaKey !== previousMenuSource.providedSchemaKey) {
+        setPreviousMenuSource({ menuType, providedSchemaKey });
+        setViewStack([]);
+    }
 
     const menuSchemaVersion$ = useMemo(() => {
         return menuManagerService.menuChanged$.pipe(
@@ -97,10 +103,6 @@ export function MobileMenu(props: IMobileMenuProps) {
 
         return menuManagerService.getMenuByPositionKey(menuType);
     }, [providedSchemas, menuManagerService, menuSchemaVersion, menuType]);
-
-    useEffect(() => {
-        setViewStack([]);
-    }, [menuType, providedSchemaKey]);
 
     const currentView = viewStack[viewStack.length - 1] ?? null;
     const closeView = useCallback(() => setViewStack((stack) => stack.slice(0, -1)), []);

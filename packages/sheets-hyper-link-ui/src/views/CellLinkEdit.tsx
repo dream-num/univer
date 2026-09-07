@@ -100,6 +100,10 @@ export const CellLinkEdit = () => {
     const [showError, setShowError] = useState(false);
 
     const [isFocusRangeSelector, setIsFocusRangeSelector] = useState(false);
+    const changeType = (nextType: SheetHyperLinkType | string) => {
+        setType(nextType);
+        setIsFocusRangeSelector(nextType === SheetHyperLinkType.RANGE);
+    };
 
     const isDisplaySyncedWithPayloadRef = useRef(false);
     const getIsDisplaySyncedWithPayload = useEvent(() => isDisplaySyncedWithPayloadRef.current);
@@ -172,14 +176,14 @@ export const CellLinkEdit = () => {
             const customLink = sidePanelService.findCustomHyperLink(link);
             if (customLink) {
                 const customLinkInfo = customLink.convert(link);
-                setType(customLinkInfo.type);
+                changeType(customLinkInfo.type);
                 setPayload(customLinkInfo.payload);
                 setDisplay(customLinkInfo.display);
                 return;
             }
             setDisplay(link.display);
             const linkInfo = parserService.parseHyperLink(link.payload);
-            setType(linkInfo.type === SheetHyperLinkType.INVALID ? SheetHyperLinkType.RANGE : linkInfo.type);
+            changeType(linkInfo.type === SheetHyperLinkType.INVALID ? SheetHyperLinkType.RANGE : linkInfo.type);
             switch (linkInfo.type) {
                 case SheetHyperLinkType.URL: {
                     setPayload(linkInfo.url);
@@ -255,10 +259,6 @@ export const CellLinkEdit = () => {
             }
         };
     }, [editing, markSelectionService, themeService, univerInstanceService]);
-
-    useEffect(() => {
-        setIsFocusRangeSelector(type === SheetHyperLinkType.RANGE);
-    }, [type]);
 
     useEffect(() => {
         const render = renderManagerService.getRenderUnitById(editorBridgeService.getCurrentEditorId());
@@ -466,7 +466,7 @@ export const CellLinkEdit = () => {
                     options={linkTypeOptions}
                     value={type}
                     onChange={(newType) => {
-                        setType(newType as SheetHyperLinkType);
+                        changeType(newType as SheetHyperLinkType);
                         setPayload('');
                     }}
                 />

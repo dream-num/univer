@@ -38,4 +38,13 @@ describe('Switch', () => {
 
         expect(checkboxElement.checked).toBeFalsy();
     });
+
+    it('follows the controlled checked value', () => {
+        const { container, rerender } = render(<Switch checked />);
+        const checkboxElement = container.querySelector('[type="checkbox"]')! as HTMLInputElement;
+
+        rerender(<Switch checked={false} />);
+
+        expect(checkboxElement.checked).toBeFalsy();
+    });
 });

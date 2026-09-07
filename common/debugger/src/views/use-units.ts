@@ -1,7 +1,6 @@
 import type { Workbook } from '@univerjs/core';
 import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { useDependency, useObservable } from '@univerjs/ui';
-import { useEffect, useState } from 'react';
 
 const defaultMenu = [
     {
@@ -12,22 +11,17 @@ const defaultMenu = [
 
 export function useUnits() {
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const [menu, setMenu] = useState<{ label: string; value: string }[]>([...defaultMenu]);
-    const unitAdded = useObservable(univerInstanceService.unitAdded$);
-    const unitDisposed = useObservable(univerInstanceService.unitDisposed$);
+    useObservable(univerInstanceService.unitAdded$);
+    useObservable(univerInstanceService.unitDisposed$);
 
-    useEffect(() => {
-        const sheets = univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-        const options = sheets.map((sheet) => ({
+    const sheets = univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+    const menu = [
+        ...defaultMenu,
+        ...sheets.map((sheet) => ({
             label: sheet.name || sheet.getUnitId(),
             value: sheet.getUnitId(),
-        }));
-
-        setMenu([
-            ...defaultMenu,
-            ...(options as any[]),
-        ]);
-    }, [unitAdded, unitDisposed]);
+        })),
+    ];
 
     const onSelect = (value: string) => {
         if (value === 'create') {

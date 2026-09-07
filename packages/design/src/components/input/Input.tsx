@@ -121,18 +121,15 @@ export const Input = forwardRef<HTMLInputElement, IInputProps>(
             }
 
             return () => observer?.disconnect();
-        }, [slotRef.current]);
+        }, [slot]);
 
-        useEffect(() => {
-            if (allowClear && !(slot && slotRef.current)) setPaddingRight(26);
-        }, []); // only enough for init, otherwise it works again when you click it
-
-        const shouldOmitDefaultPadding = direction === 'rtl' && paddingRight === 0;
+        const resolvedPaddingRight = slot ? paddingRight : allowClear ? 26 : 0;
+        const shouldOmitDefaultPadding = direction === 'rtl' && resolvedPaddingRight === 0;
         const mergedInputStyle = shouldOmitDefaultPadding
             ? inputStyle
             : direction === 'rtl'
-                ? { ...inputStyle, paddingLeft: paddingRight }
-                : { ...inputStyle, paddingRight };
+                ? { ...inputStyle, paddingLeft: resolvedPaddingRight }
+                : { ...inputStyle, paddingRight: resolvedPaddingRight };
 
         return (
             <div

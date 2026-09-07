@@ -26,7 +26,7 @@ import {
     MoreDownIcon,
     UnlockIcon,
 } from '@univerjs/icons';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { OBJECT_LIST_CANVAS_SECTION_ID, OBJECT_LIST_FLOATING_SECTION_ID } from './object-list-panel-layer';
 
 export interface IObjectListPanelCapabilities {
@@ -561,14 +561,16 @@ function ObjectListRow(props: {
 }) {
     const { item, selected, labels, showLock, showName, showVisible, draggable, dragging, onSelect, onToggleExpanded, onToggleVisible, onToggleSelectable, onCommitName, onDragStart, onDragEnd, onDrop } = props;
     const [draftName, setDraftName] = useState(item.name);
+    const [previousName, setPreviousName] = useState(item.name);
     const skipCommitOnBlurRef = useRef(false);
     const disabled = item.disabled === true;
     const level = item.level ?? 0;
     const locked = item.selectable === false;
 
-    useEffect(() => {
+    if (item.name !== previousName) {
+        setPreviousName(item.name);
         setDraftName(item.name);
-    }, [item.name]);
+    }
 
     const handleBlur = (event: FocusEvent<HTMLInputElement>) => {
         if (disabled) {
@@ -753,12 +755,18 @@ function ObjectDetailsEditor(props: {
     const { item, labels, showName, showDescription, onCommitName, onCommitDescription } = props;
     const [draftName, setDraftName] = useState(item?.name ?? '');
     const [draftDescription, setDraftDescription] = useState(item?.description ?? '');
+    const [previousItem, setPreviousItem] = useState({
+        description: item?.description,
+        id: item?.id,
+        name: item?.name,
+    });
     const disabled = item?.disabled === true;
 
-    useEffect(() => {
+    if (item?.description !== previousItem.description || item?.id !== previousItem.id || item?.name !== previousItem.name) {
+        setPreviousItem({ description: item?.description, id: item?.id, name: item?.name });
         setDraftName(item?.name ?? '');
         setDraftDescription(item?.description ?? '');
-    }, [item?.description, item?.id, item?.name]);
+    }
 
     if (!item) {
         return (

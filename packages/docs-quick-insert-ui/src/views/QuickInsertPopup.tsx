@@ -24,11 +24,11 @@ import {
     LocaleService,
     toDisposable,
 } from '@univerjs/core';
-import { IShortcutService, KeyCode, useDependency, useObservable } from '@univerjs/ui';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { IShortcutService, KeyCode, useDependency, useEvent, useObservable } from '@univerjs/ui';
+import { useDeferredValue, useEffect, useMemo, useState } from 'react';
 import { CloseQuickInsertPopupOperation } from '../commands/operations/quick-insert-popup.operation';
 import { DocQuickInsertPopupService } from '../services/doc-quick-insert-popup.service';
-import { getQuickInsertMenuLeafCount, QuickInsertMenu } from './QuickInsertMenu';
+import { getQuickInsertMenuItems, QuickInsertMenu } from './QuickInsertMenu';
 import { QuickInsertPlaceholder } from './QuickInsertPlaceholder';
 
 function filterMenusByKeyword(menus: DocPopupMenu[], keyword: string) {
@@ -81,7 +81,6 @@ export const QuickInsertPopup = () => {
     const id = useMemo(() => generateRandomId(), []);
 
     const [focusedMenuIndex, setFocusedMenuIndex] = useState(0);
-    const focusedMenuRef = useRef<IDocPopupMenuItem | null>(null);
 
     const filterKeyword = useObservable(docQuickInsertPopupService.filterKeyword$, '');
     const currentPopup = useObservable(docQuickInsertPopupService.editPopup$);
@@ -89,36 +88,42 @@ export const QuickInsertPopup = () => {
 
     const translatedMenus = useMemo(() => {
         return translateMenus(menus, localeService);
-    }, [menus]);
+    }, [localeService, menus]);
 
-    const [filteredMenus, setFilteredMenus] = useState<DocPopupMenu[]>(() => {
-        return filterMenusByKeyword(translatedMenus, filterKeyword.toLowerCase());
-    });
-    const filteredMenuCount = useMemo(() => getQuickInsertMenuLeafCount(filteredMenus), [filteredMenus]);
-    const filteredMenuCountRef = useRef(filteredMenuCount);
+    const deferredFilterKeyword = useDeferredValue(filterKeyword);
+    const filteredMenus = useMemo(
+        () => filterMenusByKeyword(translatedMenus, deferredFilterKeyword.toLowerCase()),
+        [deferredFilterKeyword, translatedMenus]
+    );
+    const filteredMenuItems = useMemo(() => getQuickInsertMenuItems(filteredMenus), [filteredMenus]);
+    const [previousFilteredMenus, setPreviousFilteredMenus] = useState(filteredMenus);
 
-    useEffect(() => {
-        filteredMenuCountRef.current = filteredMenuCount;
-    }, [filteredMenuCount]);
+    if (filteredMenus !== previousFilteredMenus) {
+        setPreviousFilteredMenus(filteredMenus);
+        setFocusedMenuIndex(0);
+    }
 
-    useEffect(() => {
-        const id = requestIdleCallback(() => {
-            setFilteredMenus(filterMenusByKeyword(translatedMenus, filterKeyword.toLowerCase()));
-        });
-
-        return () => {
-            cancelIdleCallback(id);
-        };
-    }, [translatedMenus, filterKeyword]);
-
-    const handleMenuSelect = (menu: IDocPopupMenuItem) => {
+    const handleMenuSelect = useEvent((menu: IDocPopupMenuItem) => {
         docQuickInsertPopupService.emitMenuSelected(menu);
         commandService.executeCommand(CloseQuickInsertPopupOperation.id);
-    };
+    });
 
-    const handleFocusedMenuChange = useCallback((menu: IDocPopupMenuItem | null) => {
-        focusedMenuRef.current = menu;
-    }, []);
+    const moveFocusedMenu = useEvent((offset: number) => {
+        setFocusedMenuIndex((index) => {
+            if (filteredMenuItems.length === 0) {
+                return 0;
+            }
+
+            return (index + offset + filteredMenuItems.length) % filteredMenuItems.length;
+        });
+    });
+
+    const selectFocusedMenu = useEvent(() => {
+        const menu = filteredMenuItems[focusedMenuIndex];
+        if (menu) {
+            handleMenuSelect(menu);
+        }
+    });
 
     useEffect(() => {
         /** Use up or down to navigate the focused menu instead of moving the cursor in documents. */
@@ -141,43 +146,18 @@ export const QuickInsertPopup = () => {
         const enterCommand = {
             id: `quick.insert.popup.enter.${id}`,
             type: CommandType.OPERATION,
-            handler: () => {
-                const menu = focusedMenuRef.current;
-                if (menu) {
-                    handleMenuSelect(menu);
-                }
-            },
+            handler: selectFocusedMenu,
         };
 
         const moveCursorUpCommand = {
             id: `quick.insert.popup.move.cursor.up.${id}`,
             type: CommandType.OPERATION,
-            handler: () => {
-                setFocusedMenuIndex((index) => {
-                    if (filteredMenuCountRef.current <= 0) {
-                        return 0;
-                    }
-
-                    const nextIndex = (index - 1);
-
-                    return nextIndex >= 0 ? nextIndex : filteredMenuCountRef.current - 1;
-                });
-            },
+            handler: () => moveFocusedMenu(-1),
         };
         const moveCursorDownCommand = {
             id: `quick.insert.popup.move.cursor.down.${id}`,
             type: CommandType.OPERATION,
-            handler: () => {
-                setFocusedMenuIndex((index) => {
-                    if (filteredMenuCountRef.current <= 0) {
-                        return 0;
-                    }
-
-                    const nextIndex = (index + 1);
-
-                    return nextIndex <= (filteredMenuCountRef.current - 1) ? nextIndex : 0;
-                });
-            },
+            handler: () => moveFocusedMenu(1),
         };
 
         // register the commands of moving the focused menu up and down
@@ -214,11 +194,7 @@ export const QuickInsertPopup = () => {
         return () => {
             disposableCollection.dispose();
         };
-    }, [commandService, id, shortcutService]);
-
-    useEffect(() => {
-        setFocusedMenuIndex(0);
-    }, [filteredMenus]);
+    }, [commandService, id, moveFocusedMenu, selectFocusedMenu, shortcutService]);
 
     const hasMenus = filteredMenus.length > 0;
 
@@ -232,7 +208,6 @@ export const QuickInsertPopup = () => {
                         menus={filteredMenus}
                         focusedMenuIndex={focusedMenuIndex}
                         onFocusedMenuIndexChange={setFocusedMenuIndex}
-                        onFocusedMenuChange={handleFocusedMenuChange}
                         onSelect={handleMenuSelect}
                     />
                 )

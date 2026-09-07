@@ -16,8 +16,8 @@
 
 import type { IDropdownMenuProps } from '@univerjs/design';
 import { Button, clsx, DropdownMenu, Input } from '@univerjs/design';
-import { useEffect, useRef, useState } from 'react';
-import { IconManager } from '../../common';
+import { useRef, useState } from 'react';
+import { IconManager } from '../../common/icon-manager';
 import { useDependency } from '../../utils/di';
 
 export interface IZoomInputProps {
@@ -44,12 +44,14 @@ export function ZoomInput(props: IZoomInputProps) {
     const isEditingRef = useRef(false);
     const [listVisible, setListVisible] = useState(false);
     const [inputValue, setInputValue] = useState(() => `${value}%`);
+    const [previousValue, setPreviousValue] = useState(value);
 
-    useEffect(() => {
+    if (value !== previousValue) {
+        setPreviousValue(value);
         if (!isEditingRef.current) {
             setInputValue(`${value}%`);
         }
-    }, [value]);
+    }
 
     function clampValue(value: number) {
         return Math.min(Math.max(value, min), max);

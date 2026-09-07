@@ -244,6 +244,15 @@ export function EditorContainer() {
     const activeSheet = useActiveWorksheet(workbook);
     const darkMode = useObservable(themeService.darkMode$, themeService.darkMode);
     const [showEditCellAddress, setShowEditCellAddress] = useState(false);
+    const editSessionKey = visible?.visible && editState?.unitId
+        ? `${editState.unitId}:${editState.sheetId}:${editState.row}:${editState.column}`
+        : '';
+    const [previousEditSessionKey, setPreviousEditSessionKey] = useState(editSessionKey);
+
+    if (editSessionKey !== previousEditSessionKey) {
+        setPreviousEditSessionKey(editSessionKey);
+        setShowEditCellAddress(false);
+    }
     const editSheetName = editState ? workbook?.getSheetBySheetId(editState.sheetId)?.getName() : null;
     const editCellAddress = editState
         ? `${activeSheet && editSheetName && activeSheet.getSheetId() !== editState.sheetId
@@ -274,7 +283,6 @@ export function EditorContainer() {
     );
 
     useEffect(() => {
-        setShowEditCellAddress(false);
         if (!visible?.visible || !editState?.unitId) {
             return undefined;
         }

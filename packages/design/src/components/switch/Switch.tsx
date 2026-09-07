@@ -14,26 +14,25 @@
  * limitations under the License.
  */
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { clsx } from '../../helper/clsx';
 
 export interface ISwitchProps {
+    checked?: boolean;
     defaultChecked?: boolean;
     onChange?: (checked: boolean) => void;
 }
 
 const Switch = (props: ISwitchProps) => {
-    const { defaultChecked = false, onChange } = props;
-    const [checked, setChecked] = useState(defaultChecked);
+    const { checked, defaultChecked = false, onChange } = props;
+    const [internalChecked, setInternalChecked] = useState(defaultChecked);
+    const mergedChecked = checked ?? internalChecked;
 
     const handleChange = () => {
-        setChecked(!checked);
-        onChange?.(!checked);
+        const nextChecked = !mergedChecked;
+        setInternalChecked(nextChecked);
+        onChange?.(nextChecked);
     };
-
-    useEffect(() => {
-        setChecked(defaultChecked);
-    }, [defaultChecked]);
 
     return (
         <div className="univer-h-4">
@@ -41,7 +40,7 @@ const Switch = (props: ISwitchProps) => {
                 <input
                     className="univer-size-0 univer-opacity-0"
                     type="checkbox"
-                    checked={checked}
+                    checked={mergedChecked}
                     onChange={handleChange}
                 />
                 <span
@@ -49,8 +48,8 @@ const Switch = (props: ISwitchProps) => {
                       univer-absolute univer-inset-0 univer-cursor-pointer univer-rounded-2xl univer-transition-colors
                       univer-duration-200
                     `, {
-                        'univer-bg-primary-600': checked,
-                        'univer-bg-gray-200 dark:!univer-bg-gray-600': !checked,
+                        'univer-bg-primary-600': mergedChecked,
+                        'univer-bg-gray-200 dark:!univer-bg-gray-600': !mergedChecked,
                     })}
                 >
                     <span
@@ -58,7 +57,7 @@ const Switch = (props: ISwitchProps) => {
                           univer-absolute univer-bottom-0.5 univer-left-0.5 univer-size-3 univer-rounded-full
                           univer-bg-gray-0 univer-transition-transform univer-duration-200
                         `, {
-                            'univer-translate-x-3': checked,
+                            'univer-translate-x-3': mergedChecked,
                         })}
                     />
                 </span>

@@ -15,7 +15,7 @@
  */
 
 import type { FocusEvent, InputHTMLAttributes, KeyboardEvent } from 'react';
-import { forwardRef, useContext, useEffect, useRef, useState } from 'react';
+import { forwardRef, useContext, useRef, useState } from 'react';
 import { borderLeftClassName, borderLeftRTLClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
 import { ConfigContext } from '../config-provider/ConfigProvider';
@@ -74,11 +74,10 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
         const [internalValue, setInternalValue] = useState<number | null>(
             value !== undefined ? value : defaultValue !== undefined ? defaultValue : null
         );
-        const lastValidValueRef = useRef<number | null>(internalValue);
+        const [lastValidValue, setLastValidValue] = useState<number | null>(internalValue);
         const [inputValue, setInputValue] = useState<string>(() => formatValue(internalValue));
+        const [previousValue, setPreviousValue] = useState(value);
         const inputRef = useRef<HTMLInputElement>(null);
-        const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
-        const longPressIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
         const mergedRef = (node: HTMLInputElement) => {
             if (ref) {
@@ -91,33 +90,14 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
             inputRef.current = node;
         };
 
-        // Update internal value when value prop changes
-        useEffect(() => {
-            if (value !== undefined && value !== internalValue) {
+        if (!Object.is(value, previousValue)) {
+            setPreviousValue(value);
+            if (value !== undefined) {
                 setInternalValue(value);
-                lastValidValueRef.current = value;
+                setLastValidValue(value);
                 setInputValue(formatValue(value));
             }
-        }, [value]);
-
-        // When the internal value changes, if it's a valid value, update lastValidValue
-        useEffect(() => {
-            if (internalValue !== null) {
-                lastValidValueRef.current = internalValue;
-            }
-        }, [internalValue]);
-
-        // Clean up timers when component unmounts
-        useEffect(() => {
-            return () => {
-                if (longPressTimerRef.current) {
-                    clearTimeout(longPressTimerRef.current);
-                }
-                if (longPressIntervalRef.current) {
-                    clearInterval(longPressIntervalRef.current);
-                }
-            };
-        }, []);
+        }
 
         function formatValue(val: number | null): string {
             if (val === null || val === undefined) return '';
@@ -183,7 +163,7 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
                 }
 
                 return result;
-            } catch (e) {
+            } catch {
                 return null;
             }
         }
@@ -201,10 +181,6 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
             return val;
         }
 
-        function parseValue(val: string): number | null {
-            return clampValue(parseNumberValue(val));
-        }
-
         function handleInputChange(value: string) {
             if (allowEmpty && value === '') {
                 setInputValue(value);
@@ -219,6 +195,9 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
 
             setInputValue(isOutOfRange ? formatValue(parsedValue) : value);
             setInternalValue(parsedValue);
+            if (parsedValue !== null) {
+                setLastValidValue(parsedValue);
+            }
 
             onChange?.(parsedValue);
         }
@@ -233,7 +212,7 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
                     }
                 } else {
                     // If the input is not empty, restore the last valid value
-                    const valueToRestore = lastValidValueRef.current;
+                    const valueToRestore = lastValidValue;
                     setInternalValue(valueToRestore);
                     setInputValue(formatValue(valueToRestore));
 
@@ -258,6 +237,7 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
 
             if (valueInRange !== internalValue) {
                 setInternalValue(valueInRange);
+                setLastValidValue(valueInRange);
                 setInputValue(formatValue(valueInRange));
 
                 onChange?.(valueInRange);
@@ -279,8 +259,8 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
 
             if (internalValue !== null) {
                 currentValue = internalValue;
-            } else if (lastValidValueRef.current !== null) {
-                currentValue = lastValidValueRef.current;
+            } else if (lastValidValue !== null) {
+                currentValue = lastValidValue;
             } else {
                 // If there's no valid previous value, start from 0 or the minimum value
                 currentValue = (min > 0) ? min : 0;
@@ -298,7 +278,7 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>(
             // If we've hit a limit, don't change the value
             if (newValue === currentValue) return;
             setInternalValue(newValue);
-            lastValidValueRef.current = newValue;
+            setLastValidValue(newValue);
             setInputValue(formatValue(newValue));
 
             onChange?.(newValue);

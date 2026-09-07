@@ -40,9 +40,13 @@ export function ZoomSlider() {
         if (!docModel) return 100;
         return Math.round(getDocEffectiveZoomRatio(docModel) * 100);
     }, [documentDataModel]);
-    const [zoom, setZoom] = useState(100);
+    const [zoom, setZoom] = useState(() => getCurrentZoom(documentDataModel));
+    const [previousDocument, setPreviousDocument] = useState(documentDataModel);
 
-    useEffect(() => setZoom(getCurrentZoom(documentDataModel)), [documentDataModel, getCurrentZoom]);
+    if (documentDataModel !== previousDocument) {
+        setPreviousDocument(documentDataModel);
+        setZoom(getCurrentZoom(documentDataModel));
+    }
 
     useEffect(() => {
         const disposable = commandService.onCommandExecuted((commandInfo) => {

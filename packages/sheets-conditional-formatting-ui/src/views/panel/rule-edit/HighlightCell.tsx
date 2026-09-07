@@ -36,7 +36,7 @@ import {
 } from '@univerjs/sheets-conditional-formatting';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useMemo, useState } from 'react';
-import { ConditionalStyleEditor } from '../../ConditionalStyleEditor';
+import { ConditionalStyleEditor, createDefaultConditionalStyle } from '../../ConditionalStyleEditor';
 import { Preview } from '../../Preview';
 import { WrapperError } from '../../wrapper-error/WrapperError';
 import { previewClassName } from './styles';
@@ -63,7 +63,6 @@ function HighlightCellInput(props: {
     type: IEditableSubType;
     operator?: IEditableOperator;
     interceptorManager: IStyleEditorProps['interceptorManager'];
-    rule?: IHighlightCell;
     value: IValue;
     onChange: (value: IValue) => void;
 }) {
@@ -80,26 +79,6 @@ function HighlightCellInput(props: {
 
     const [inputNumberMax, setInputNumberMax] = useState(() => Array.isArray(value) ? value[1] === undefined ? 100 : value[1] : 100);
     const [numberMaxError, setNumberMaxError] = useState('');
-
-    useEffect(() => {
-        switch (type) {
-            case CFSubRuleType.text: {
-                if ([CFTextOperator.beginsWith, CFTextOperator.endsWith, CFTextOperator.containsText, CFTextOperator.notContainsText, CFTextOperator.equal, CFTextOperator.notEqual].includes(operator as CFTextOperator)) {
-                    onChange(inputTextValue);
-                }
-                break;
-            }
-            case CFSubRuleType.number: {
-                if ([CFNumberOperator.equal, CFNumberOperator.notEqual, CFNumberOperator.greaterThan, CFNumberOperator.greaterThanOrEqual, CFNumberOperator.lessThan, CFNumberOperator.lessThanOrEqual].includes(operator as CFNumberOperator)) {
-                    onChange(inputNumberValue);
-                }
-                if ([CFNumberOperator.between, CFNumberOperator.notBetween].includes(operator as CFNumberOperator)) {
-                    onChange([inputNumberMin, inputNumberMax]);
-                }
-                break;
-            }
-        }
-    }, [type]);
 
     useEffect(() => {
         const dispose = interceptorManager.intercept(interceptorManager.getInterceptPoints().beforeSubmit, {
@@ -299,7 +278,7 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, IEditable
         return 'operator' in rule ? createDefaultValue(rule.subType, rule.operator) : defaultV;
     });
 
-    const [style, setStyle] = useState<IHighlightCell['style']>({});
+    const [style, setStyle] = useState<IHighlightCell['style']>(() => createDefaultConditionalStyle(rule?.style));
 
     const getResult = useMemo(() => (option: { subType?: IEditableSubType; operator?: IEditableOperator; value?: IValue; style?: IHighlightCell['style'] }): IEditableHighlightCell => {
         const nextSubType = option.subType ?? subType;
@@ -370,12 +349,6 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, IEditable
         return dispose as () => void;
     }, [getResult, interceptorManager]);
 
-    useEffect(() => {
-        if (!typeOptions.some((item) => item.value === subType)) {
-            setSubType(typeOptions[0].value as CFSubRuleType.text);
-        }
-    }, [typeOptions]);
-
     const onTypeChange = (v: string) => {
         const _subType = typeOptions.find((item) => item.value === v)?.value;
         if (!_subType) {
@@ -383,10 +356,11 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, IEditable
         }
         const operatorList = getOperatorOptions(_subType).map((option) => ({ ...option, label: localeService.t(option.label) }));
         const _operator = operatorList[0]?.value;
+        const nextValue = _operator ? createDefaultValue(_subType, _operator) : value;
         setSubType(_subType);
         setOperator(_operator);
-        _operator && setValue(createDefaultValue(_subType, _operator));
-        onChange(getResult({ subType: _subType, operator: _operator }));
+        setValue(nextValue);
+        onChange(getResult({ subType: _subType, operator: _operator, value: nextValue }));
     };
 
     const onOperatorChange = (v: string) => {
@@ -394,8 +368,13 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, IEditable
         if (!_operator) {
             return;
         }
+        const defaultValue = createDefaultValue(subType, _operator);
+        const nextValue = Array.isArray(defaultValue)
+            ? Array.isArray(value) ? value : defaultValue
+            : typeof defaultValue === typeof value && !Array.isArray(value) ? value : defaultValue;
         setOperator(_operator);
-        onChange(getResult({ operator: _operator }));
+        setValue(nextValue);
+        onChange(getResult({ operator: _operator, value: nextValue }));
     };
 
     const onInputChange = (value: number | string | [number, number]) => {
@@ -435,14 +414,13 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, IEditable
                 interceptorManager={interceptorManager}
                 type={subType}
                 operator={operator}
-                rule={rule}
                 onChange={onInputChange}
             />
             <div className={previewClassName}>
                 <Preview rule={getResult({})} />
             </div>
             <ConditionalStyleEditor
-                style={rule?.style}
+                style={style}
                 className="univer-ml-1"
                 onChange={(v) => {
                     setStyle(v);

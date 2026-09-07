@@ -83,7 +83,6 @@ export function Popup(props: IPopupProps) {
 
     useLayoutEffect(() => {
         if (!visible) {
-            setRealOffset(HIDDEN_POPUP_OFFSET);
             return;
         }
 
@@ -115,6 +114,8 @@ export function Popup(props: IPopupProps) {
         event.preventDefault();
     }
 
+    const displayedOffset = visible ? realOffset : HIDDEN_POPUP_OFFSET;
+
     return createPortal(
         <section
             ref={nodeRef}
@@ -138,8 +139,8 @@ export function Popup(props: IPopupProps) {
                 // Fix #1089. If the popup does not have this 2px offset, the pointerup event's target would
                 // become the popup itself not the canvas element, hence the selection gesture is not terminated.
                 // It should be considered as debt of the rendering engine.
-                left: realOffset[0] + POPUP_POINTER_OFFSET,
-                top: realOffset[1] + POPUP_POINTER_OFFSET,
+                left: displayedOffset[0] + POPUP_POINTER_OFFSET,
+                top: displayedOffset[1] + POPUP_POINTER_OFFSET,
                 overflow: overflowVisible ? 'visible' : undefined,
             }}
             onContextMenu={preventDefault}

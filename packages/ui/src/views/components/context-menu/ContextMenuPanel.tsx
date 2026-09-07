@@ -688,6 +688,11 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
         return Math.max(120, window.innerHeight - menuViewportPadding * 2);
     });
     const [hoverSuppressed, setHoverSuppressed] = useState(suppressHoverUntilPointerMove);
+    const [previousHoverSource, setPreviousHoverSource] = useState({
+        menuSessionVersion,
+        menuType,
+        suppressHoverUntilPointerMove,
+    });
     const menuSchemaVersion$ = useMemo(
         () => menuManagerService.menuChanged$.pipe(startWith(undefined), scan((version) => version + 1, 0)),
         [menuManagerService]
@@ -739,9 +744,14 @@ export function ContextMenuPanel(props: IContextMenuPanelProps) {
         return () => view.cancelAnimationFrame(frameId);
     }, [autoFocus, autoFocusTarget, getFocusableMenuButtons, menuElement, menuItems]);
 
-    useEffect(() => {
+    if (
+        menuSessionVersion !== previousHoverSource.menuSessionVersion ||
+        menuType !== previousHoverSource.menuType ||
+        suppressHoverUntilPointerMove !== previousHoverSource.suppressHoverUntilPointerMove
+    ) {
+        setPreviousHoverSource({ menuSessionVersion, menuType, suppressHoverUntilPointerMove });
         setHoverSuppressed(suppressHoverUntilPointerMove);
-    }, [menuSessionVersion, menuType, suppressHoverUntilPointerMove]);
+    }
 
     const handleKeyDown = useCallback((event: KeyboardEvent<HTMLDivElement>) => {
         if (event.key === 'Escape') {
@@ -1133,6 +1143,7 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
         isObservable(selectorItem.selections) ? selectorItem.selections : undefined
     );
     const [inputValue, setInputValue] = useState(value);
+    const [previousValue, setPreviousValue] = useState(value);
     const [submenuPosition, setSubmenuPosition] = useState<{
         left: number;
         top: number;
@@ -1197,9 +1208,10 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
         }, CONTEXT_MENU_SUBMENU_CLOSE_DELAY);
     }, [clearSubmenuCloseTimer, closeSubmenu]);
 
-    useEffect(() => {
+    if (!Object.is(value, previousValue)) {
+        setPreviousValue(value);
         setInputValue(value);
-    }, [value]);
+    }
 
     useEffect(() => () => clearSubmenuCloseTimer(), [clearSubmenuCloseTimer]);
 
@@ -1227,9 +1239,8 @@ function ContextMenuMenuItem(props: IContextMenuMenuItemProps) {
         firstEnabledButton?.focus();
     }, [keyboardSubmenuFocusRequested, submenuPositionReady, submenuVisible]);
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         if (!submenuVisible) {
-            setSubmenuPositionReady(false);
             return;
         }
 

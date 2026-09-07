@@ -285,7 +285,6 @@ describe('SearchFunction', () => {
             root.render(
                 <RediContext.Provider value={{ injector }}>
                     <SearchFunction
-                        isFocus
                         editor={editor}
                         sequenceNodes={[{ nodeType: sequenceNodeType.FUNCTION, token: 'SU' } as never]}
                         onSelect={(result) => SearchFunctionState.selected.push(result)}
@@ -318,7 +317,6 @@ describe('SearchFunction', () => {
             root.render(
                 <RediContext.Provider value={{ injector }}>
                     <SearchFunction
-                        isFocus
                         editor={editor}
                         sequenceNodes={[{ nodeType: sequenceNodeType.FUNCTION, token: 'SU' } as never]}
                         onSelect={(result) => SearchFunctionState.selected.push(result)}
@@ -344,7 +342,6 @@ describe('SearchFunction', () => {
             root.render(
                 <RediContext.Provider value={{ injector }}>
                     <SearchFunction
-                        isFocus
                         editor={editor}
                         sequenceNodes={[{ nodeType: sequenceNodeType.FUNCTION, token: 'SU' } as never]}
                         onSelect={(result) => SearchFunctionState.selected.push(result)}
@@ -372,7 +369,6 @@ describe('SearchFunction', () => {
             root.render(
                 <RediContext.Provider value={{ injector }}>
                     <SearchFunction
-                        isFocus
                         editor={editor}
                         sequenceNodes={[{ nodeType: sequenceNodeType.FUNCTION, token: 'SU' } as never]}
                         onSelect={(result) => SearchFunctionState.selected.push(result)}
@@ -398,7 +394,6 @@ describe('SearchFunction', () => {
             root.render(
                 <RediContext.Provider value={{ injector }}>
                     <SearchFunction
-                        isFocus
                         editor={editor}
                         sequenceNodes={[{ nodeType: sequenceNodeType.FUNCTION, token: 'SU' } as never]}
                         onSelect={(result) => SearchFunctionState.selected.push(result)}

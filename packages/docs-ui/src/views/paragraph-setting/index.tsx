@@ -58,14 +58,11 @@ export function ParagraphSettingIndex() {
                 }
             }
         });
-        return () => dispose.dispose();
-    }, [debounceReset]);
+        return () => {
+            dispose.dispose();
+            debounceReset.cancel();
+        };
+    }, [commandService, debounceReset]);
 
-    useEffect(() => {
-        setKey(generateRandomId(4));
-    }, [currentLocale]);
-
-    useEffect(() => () => debounceReset.cancel(), [debounceReset]);
-
-    return <ParagraphSetting key={key} />;
+    return <ParagraphSetting key={`${currentLocale}-${key}`} />;
 }

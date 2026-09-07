@@ -15,7 +15,7 @@
  */
 
 import type { CSSProperties, ReactNode } from 'react';
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { clsx } from '../../helper/clsx';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 
@@ -43,23 +43,17 @@ export function Segmented<T extends ItemValue = ItemValue>({
     className = '',
 }: ISegmentedProps<T>) {
     const { direction } = useContext(ConfigContext);
-    const [selectedItem, setSelectedItem] = useState<T>(
+    const [internalSelectedItem, setInternalSelectedItem] = useState<T>(
         value !== undefined ? value : (defaultValue || items[0].value)
     );
+    const selectedItem = value ?? internalSelectedItem;
     const [slideStyle, setSlideStyle] = useState({});
-    const itemRefs = useRef<Map<T, HTMLButtonElement>>(new Map());
+    const itemMapRef = useRef<Map<T, HTMLButtonElement>>(new Map());
     const containerRef = useRef<HTMLDivElement>(null);
 
-    // Update internal state when controlled value changes
-    useEffect(() => {
-        if (value !== undefined && value !== selectedItem) {
-            setSelectedItem(value);
-        }
-    }, [value]);
-
-    const updateSliderPosition = (newValue: T, oldValue?: T) => {
-        const newItemElement = itemRefs.current.get(newValue);
-        const oldItemElement = oldValue ? itemRefs.current.get(oldValue) : null;
+    const updateSliderPosition = useCallback((newValue: T, oldValue?: T) => {
+        const newItemElement = itemMapRef.current.get(newValue);
+        const oldItemElement = oldValue !== undefined ? itemMapRef.current.get(oldValue) : null;
 
         if (newItemElement && containerRef.current) {
             const containerRect = containerRef.current.getBoundingClientRect();
@@ -87,17 +81,18 @@ export function Segmented<T extends ItemValue = ItemValue>({
                 } as CSSProperties);
             }
         }
-    };
+    }, []);
 
     useEffect(() => {
         updateSliderPosition(selectedItem);
-    }, [direction, selectedItem]);
+    }, [direction, selectedItem, updateSliderPosition]);
 
     const handleClick = (itemValue: T) => {
-        const oldValue = selectedItem;
-        setSelectedItem(itemValue);
+        if (value === undefined) {
+            setInternalSelectedItem(itemValue);
+            updateSliderPosition(itemValue, selectedItem);
+        }
         onChange?.(itemValue);
-        updateSliderPosition(itemValue, oldValue);
     };
 
     return (
@@ -124,7 +119,7 @@ export function Segmented<T extends ItemValue = ItemValue>({
                 <button
                     key={String(item.value)}
                     ref={(el) => {
-                        if (el) itemRefs.current.set(item.value, el);
+                        if (el) itemMapRef.current.set(item.value, el);
                     }}
                     className={clsx(`
                       univer-relative univer-box-border univer-min-w-0 univer-flex-1 univer-cursor-pointer

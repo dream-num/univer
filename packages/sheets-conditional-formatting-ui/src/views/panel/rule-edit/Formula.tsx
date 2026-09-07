@@ -29,7 +29,7 @@ import { CFRuleType, CFSubRuleType } from '@univerjs/sheets-conditional-formatti
 import { FormulaEditor } from '@univerjs/sheets-formula-ui';
 import { useDependency, useSidebarClick } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
-import { ConditionalStyleEditor } from '../../ConditionalStyleEditor';
+import { ConditionalStyleEditor, createDefaultConditionalStyle } from '../../ConditionalStyleEditor';
 import { Preview } from '../../Preview';
 import { previewClassName } from './styles';
 
@@ -46,7 +46,7 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
     const divEleRef = useRef<HTMLDivElement>(null);
     const [isFocusFormulaEditor, setIsFocusFormulaEditor] = useState(false);
     const formulaEditorRef = useRef<IFormulaEditorRef>(null);
-    const [style, setStyle] = useState<IHighlightCell['style']>({});
+    const [style, setStyle] = useState<IHighlightCell['style']>(() => createDefaultConditionalStyle(rule?.style));
     const [formula, setFormula] = useState(() => {
         if (rule?.subType === CFSubRuleType.formula) {
             return rule.value;
@@ -161,7 +161,7 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
                 />
             </div>
             <ConditionalStyleEditor
-                style={rule?.style}
+                style={style}
                 className="univer-mt-3"
                 onChange={(v) => {
                     setStyle(v);

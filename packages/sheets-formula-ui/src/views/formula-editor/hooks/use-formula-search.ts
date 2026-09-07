@@ -33,7 +33,7 @@ function getFormulaReplaceResult(nodes: INode[], index: number, formulaName: str
     return getSharedFormulaReplaceResult(nodes, index, formulaName, functionType);
 }
 
-export const useFormulaSearch = (isNeed: boolean, nodes: INode[] = [], editor?: Editor) => {
+export const useFormulaSearch = (nodes: INode[] = [], editor?: Editor) => {
     const descriptionService = useDependency(IDescriptionService);
 
     const [searchList, setSearchList] = useState<ISearchItemWithType[]>([]);
@@ -48,7 +48,7 @@ export const useFormulaSearch = (isNeed: boolean, nodes: INode[] = [], editor?: 
     };
 
     useEffect(() => {
-        if (editor && isNeed) {
+        if (editor) {
             const d = editor.input$.pipe(debounceTime(300)).subscribe(() => {
                 const selections = editor.getSelectionRanges();
                 if (selections.length === 1) {
@@ -83,13 +83,7 @@ export const useFormulaSearch = (isNeed: boolean, nodes: INode[] = [], editor?: 
                 d.unsubscribe();
             };
         };
-    }, [editor, isNeed]);
-
-    useEffect(() => {
-        if (!isNeed) {
-            reset();
-        }
-    }, [isNeed]);
+    }, [editor]);
 
     const handlerFormulaReplace = (formulaName: string, functionType: FunctionType) => {
         return getFormulaReplaceResult(stateRef.current.nodes, indexRef.current, formulaName, functionType);

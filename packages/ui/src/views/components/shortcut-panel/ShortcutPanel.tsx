@@ -16,7 +16,6 @@
 
 import { dedupeBy, LocaleService } from '@univerjs/core';
 import { clsx, divideYClassName, KBD } from '@univerjs/design';
-import { useCallback, useEffect, useState } from 'react';
 import { IShortcutService } from '../../../services/shortcut/shortcut.service';
 import { useDependency, useObservable } from '../../../utils/di';
 
@@ -37,64 +36,52 @@ interface IShortcutGroup {
 export function ShortcutPanel() {
     const shortcutService = useDependency(IShortcutService);
     const localeService = useDependency(LocaleService);
-    const currentLocale = useObservable(localeService.currentLocale$);
+    useObservable(localeService.currentLocale$);
+    useObservable(shortcutService.shortcutChanged$);
 
-    const [shortcutItems, setShortcutItems] = useState<IShortcutGroup[]>([]);
+    const shortcutGroups = new Map<string, IRenderShortcutItem[]>();
 
-    const updateShortcuts = useCallback(() => {
-        const shortcutGroups = new Map<string, IRenderShortcutItem[]>();
+    const shortcuts = shortcutService.getAllShortcuts().filter((item) => !!item.group);
+    const groupTitles = new Map<string, string>();
 
-        const shortcuts = shortcutService.getAllShortcuts().filter((item) => !!item.group);
-        const groupTitles = new Map<string, string>();
+    for (const shortcut of shortcuts) {
+        const group = shortcut.group!;
+        const shortcutItem: IRenderShortcutItem = {
+            title: localeService.t(shortcut.description ?? shortcut.id),
+            shortcut: shortcutService.getShortcutDisplay(shortcut),
+        };
 
-        for (const shortcut of shortcuts) {
-            const group = shortcut.group!;
-            const shortcutItem: IRenderShortcutItem = {
-                title: localeService.t(shortcut.description ?? shortcut.id),
-                shortcut: shortcutService.getShortcutDisplay(shortcut),
-            };
-
-            if (!/^\d+_/.test(group)) {
-                throw new Error(`[ShortcutPanel]: Invalid shortcut group: ${group}!`);
-            }
-
-            if (!shortcut.groupTitle) {
-                throw new Error(`[ShortcutPanel]: Shortcut group "${group}" must provide a groupTitle!`);
-            }
-
-            if (!groupTitles.has(group)) {
-                groupTitles.set(group, shortcut.groupTitle);
-            }
-
-            if (!shortcutGroups.has(group)) {
-                shortcutGroups.set(group, []);
-            }
-
-            shortcutGroups.get(group)!.push(shortcutItem);
+        if (!/^\d+_/.test(group)) {
+            throw new Error(`[ShortcutPanel]: Invalid shortcut group: ${group}!`);
         }
 
-        const toRender = Array.from(shortcutGroups.entries())
-            .map(([name, items]) => {
-                const groupSequence = name.split('_')[0];
-                const localeKey = groupTitles.get(name)!;
+        if (!shortcut.groupTitle) {
+            throw new Error(`[ShortcutPanel]: Shortcut group "${group}" must provide a groupTitle!`);
+        }
 
-                return {
-                    sequence: +groupSequence,
-                    name: localeService.t(localeKey),
-                    items: dedupeBy(items, (item) => item.title + item.shortcut),
-                };
-            })
-            .sort((a, b) => a.sequence - b.sequence);
+        if (!groupTitles.has(group)) {
+            groupTitles.set(group, shortcut.groupTitle);
+        }
 
-        setShortcutItems(toRender);
-    }, [shortcutService, localeService, currentLocale]);
+        if (!shortcutGroups.has(group)) {
+            shortcutGroups.set(group, []);
+        }
 
-    useEffect(() => {
-        updateShortcuts();
+        shortcutGroups.get(group)!.push(shortcutItem);
+    }
 
-        const subscription = shortcutService.shortcutChanged$.subscribe(() => updateShortcuts());
-        return () => subscription.unsubscribe();
-    }, [shortcutService, updateShortcuts]);
+    const shortcutItems: IShortcutGroup[] = Array.from(shortcutGroups.entries())
+        .map(([name, items]) => {
+            const groupSequence = name.split('_')[0];
+            const localeKey = groupTitles.get(name)!;
+
+            return {
+                sequence: +groupSequence,
+                name: localeService.t(localeKey),
+                items: dedupeBy(items, (item) => item.title + item.shortcut),
+            };
+        })
+        .sort((a, b) => a.sequence - b.sequence);
 
     return (
         <ul

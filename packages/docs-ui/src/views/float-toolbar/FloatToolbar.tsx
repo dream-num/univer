@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { IMenuManagerService as IMenuManagerServiceType, IMenuSchema } from '@univerjs/ui';
+import type { IMenuSchema } from '@univerjs/ui';
 import { borderClassName, clsx } from '@univerjs/design';
-import { IMenuManagerService, MenuManagerPosition, preventBrowserZoomInContainers, ToolbarItem, useDependency } from '@univerjs/ui';
-import { useEffect, useRef, useState } from 'react';
+import { IMenuManagerService, MenuManagerPosition, preventBrowserZoomInContainers, ToolbarItem, useDependency, useObservable } from '@univerjs/ui';
+import { useEffect, useRef } from 'react';
 import {
     SetInlineFormatBoldCommand,
     SetInlineFormatFontSizeCommand,
@@ -63,7 +63,7 @@ const DEFAULT_AVALIABLE_MENUS: Array<string | IFloatToolbarMenuConfig> = [
 ];
 
 export function resolveFloatToolbarMenus(
-    menuManagerService: IMenuManagerServiceType,
+    menuManagerService: IMenuManagerService,
     avaliableMenus: Array<string | IFloatToolbarMenuConfig>
 ): { menus: IFloatToolbarMenuSchema[]; extraMenus: IMenuSchema[] } {
     const floatToolbarMenus = menuManagerService.getMenuByPositionKey(FLOAT_TOOLBAR_MENU_POSITION);
@@ -94,24 +94,8 @@ export function FloatToolbar(props: IFloatToolbarProps) {
     const menuManagerService = useDependency(IMenuManagerService);
     const toolbarRef = useRef<HTMLDivElement>(null);
 
-    const [menus, setMenus] = useState<IFloatToolbarMenuSchema[]>([]);
-    const [extraMenus, setExtraMenus] = useState<IMenuSchema[]>([]);
-
-    // subscribe to menu changes
-    useEffect(() => {
-        function getRibbon(): void {
-            const { menus, extraMenus } = resolveFloatToolbarMenus(menuManagerService, avaliableMenus);
-            setMenus(menus);
-            setExtraMenus(extraMenus);
-        }
-        getRibbon();
-
-        const subscription = menuManagerService.menuChanged$.subscribe(getRibbon);
-
-        return () => {
-            subscription.unsubscribe();
-        };
-    }, [avaliableMenus, menuManagerService]);
+    useObservable(menuManagerService.menuChanged$);
+    const { menus, extraMenus } = resolveFloatToolbarMenus(menuManagerService, avaliableMenus);
 
     useEffect(() => {
         const toolbar = toolbarRef.current;

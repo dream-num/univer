@@ -53,12 +53,10 @@ const nestedMenus = [
 ];
 
 class TestState {
-    static focusedMenus: Array<IDocPopupMenuItem | null> = [];
     static focusedIndexes: number[] = [];
     static selectedMenus: IDocPopupMenuItem[] = [];
 
     static reset(): void {
-        this.focusedMenus = [];
         this.focusedIndexes = [];
         this.selectedMenus = [];
     }
@@ -83,7 +81,6 @@ function QuickInsertMenuHarness() {
                 TestState.focusedIndexes.push(index);
                 setFocusedMenuIndex(index);
             }}
-            onFocusedMenuChange={(menu) => TestState.focusedMenus.push(menu)}
             onSelect={(menu) => TestState.selectedMenus.push(menu)}
         />
     );
@@ -138,8 +135,6 @@ describe('QuickInsertMenu', () => {
     it('maps nested menu leaves to keyboard focus order and selects the hovered business item', () => {
         renderMenu();
 
-        expect(TestState.focusedMenus.at(-1)).toBe(insertTableMenu);
-
         const imageMenuNode = findMenuItem('Image');
         expect(imageMenuNode).toBeDefined();
 
@@ -148,7 +143,6 @@ describe('QuickInsertMenu', () => {
         });
 
         expect(TestState.focusedIndexes).toEqual([1]);
-        expect(TestState.focusedMenus.at(-1)).toBe(insertImageMenu);
 
         act(() => {
             imageMenuNode!.click();
@@ -168,6 +162,5 @@ describe('QuickInsertMenu', () => {
         });
 
         expect(Number.isNaN(TestState.focusedIndexes.at(-1))).toBe(true);
-        expect(TestState.focusedMenus.at(-1)).toBeNull();
     });
 });

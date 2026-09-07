@@ -30,27 +30,32 @@ export function ProgressBar(props: IProgressBarProps) {
     const { count, done, label = '' } = progress;
 
     const progressBarInnerRef = useRef<HTMLDivElement>(null!);
-    const [visible, setVisible] = useState(false);
+    const progressKey = `${done}/${count}`;
+    const [hiddenProgressKey, setHiddenProgressKey] = useState<string | null>(null);
+    const visible = count > 0 && hiddenProgressKey !== progressKey;
+
+    if (count === 0 && hiddenProgressKey !== null) {
+        setHiddenProgressKey(null);
+    }
 
     useEffect(() => {
         const progressBarInner = progressBarInnerRef.current;
+        let animationFrame = 0;
+        let finalAnimationFrame = 0;
 
         // Hide immediately if both count and done are zero
         if (count === 0 && done === 0) {
-            setVisible(false);
             progressBarInner.style.width = '0%';
             return;
-        }
-        // Update the width of the progress bar
-        else if (count > 0) {
-            setVisible(true);
+        } else if (count > 0) {
+            // Update the width of the progress bar
             const width = Math.floor((done / count) * 100);
 
             // Trigger the animation to prevent the progress bar from not being closed due to reaching 100% too quickly without animation
             if (done === count) {
-                requestAnimationFrame(() => {
+                animationFrame = requestAnimationFrame(() => {
                     progressBarInner.style.width = `${width - 1}%`; // Set a width slightly smaller than the target
-                    requestAnimationFrame(() => {
+                    finalAnimationFrame = requestAnimationFrame(() => {
                         progressBarInner.style.width = `${width}%`; // Then set the target width
                     });
                 });
@@ -64,11 +69,11 @@ export function ProgressBar(props: IProgressBarProps) {
         const handleTransitionEnd = () => {
             if (done === count) {
                 // Hide the progress bar after the animation finishes
-                setVisible(false);
+                setHiddenProgressKey(progressKey);
 
                 // Notify the parent component to reset the progress after the animation ends
                 // After the progress bar is completed 100%, the upper props data source may not be reset, resulting in count and done still being the previous values (displaying 100%) when the progress bar is triggered next time, so a message is reported here to trigger clearing.
-                onClearProgress && onClearProgress();
+                onClearProgress?.();
             }
         };
 
@@ -76,9 +81,11 @@ export function ProgressBar(props: IProgressBarProps) {
 
         // Clean up the event listener on unmount or when dependencies change
         return () => {
+            cancelAnimationFrame(animationFrame);
+            cancelAnimationFrame(finalAnimationFrame);
             progressBarInner.removeEventListener('transitionend', handleTransitionEnd);
         };
-    }, [count, done]);
+    }, [count, done, onClearProgress, progressKey]);
 
     return (
         <div

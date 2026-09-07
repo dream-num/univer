@@ -15,16 +15,26 @@
  */
 
 import type { Univer, Workbook } from '@univerjs/core';
-import { IPermissionService, IUniverInstanceService, Tools, UniverInstanceType } from '@univerjs/core';
+import {
+    CustomCommandExecutionError,
+    IPermissionService,
+    IUniverInstanceService,
+    LocaleService,
+    LocaleType,
+    Tools,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { UnitObject } from '@univerjs/protocol';
 import {
     EditStateEnum,
     RangeProtectionPermissionEditPoint,
     RangeProtectionRuleModel,
+    SheetPermissionCheckController,
     SheetsSelectionsService,
     ViewStateEnum,
 } from '@univerjs/sheets';
 import { afterEach, describe, expect, it } from 'vitest';
+import enUS from '../../../locale/en-US';
 import { clipboardTestBed } from '../../../services/clipboard/__tests__/clipboard-test-bed';
 import { ISheetClipboardService } from '../../../services/clipboard/clipboard.service';
 import { SHEET_PERMISSION_PASTE_PLUGIN, SheetPermissionInterceptorClipboardController } from '../sheet-permission-interceptor-clipboard.controller';
@@ -38,6 +48,9 @@ describe('SheetPermissionInterceptorClipboardController', () => {
         const testBed = clipboardTestBed(undefined, [[SheetPermissionInterceptorClipboardController]]);
         univer = testBed.univer;
         const { get } = testBed;
+        const localeService = get(LocaleService);
+        localeService.load({ [LocaleType.EN_US]: enUS });
+        localeService.setLocale(LocaleType.EN_US);
         const controller = get(SheetPermissionInterceptorClipboardController);
         const instances = get(IUniverInstanceService);
         const source = instances.getUnit<Workbook>('test', UniverInstanceType.UNIVER_SHEET)!;
@@ -67,11 +80,21 @@ describe('SheetPermissionInterceptorClipboardController', () => {
         }
         const clipboard = get(ISheetClipboardService);
         const hook = clipboard.getClipboardHooks().find((item) => item.id === SHEET_PERMISSION_PASTE_PLUGIN)!;
-        expect(hook.onBeforePaste!({
+        const messages: string[] = [];
+        const subscription = get(SheetPermissionCheckController).triggerPermissionUIEvent$.subscribe((message) => messages.push(message));
+        const paste = () => hook.onBeforePaste!({
             unitId: 'test',
             subUnitId: 'sheet1',
             range: { rows: [5, 6], cols: [7, 8] },
-        })).toBe(protectedTarget !== 'source');
+        });
+        if (protectedTarget === 'source') {
+            expect(paste).toThrow(CustomCommandExecutionError);
+            expect(messages).toEqual([enUS['sheets-ui'].permission.dialog.pasteErr]);
+        } else {
+            expect(paste()).toBe(true);
+            expect(messages).toEqual([]);
+        }
+        subscription.unsubscribe();
         controller.dispose();
         expect(clipboard.getClipboardHooks().some((item) => item.id === SHEET_PERMISSION_PASTE_PLUGIN)).toBe(false);
     });

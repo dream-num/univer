@@ -238,6 +238,7 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
 
         touchDependencies(this._injector, [
             [SheetPermissionPanelModel],
+            [SheetPermissionInterceptorClipboardController],
             [SheetClipboardController],
             [FormulaEditorController],
             [SheetsDefinedNameController],
@@ -254,7 +255,6 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
         touchDependencies(this._injector, [
             [FormatPainterController],
             [AutoFillUIController],
-            [SheetPermissionInterceptorClipboardController],
         ]);
     }
 

@@ -17,6 +17,7 @@
 import type { ICellData, Injector, IRange, IStyleData, Nullable, Univer, Workbook } from '@univerjs/core';
 import type { IClipboardItem } from './mock-clipboard';
 import {
+    CustomCommandExecutionError,
     ICommandService,
     IPermissionService,
     IUndoRedoService,
@@ -231,7 +232,11 @@ describe('Test clipboard', () => {
         instances.setCurrentUnitForType('paste-peer');
         selections.setSelections('paste-peer', 'sheet1', selection);
         releaseRead();
-        expect(await pendingPaste).toBe(false);
+        if (state === 'read-only') {
+            await expect(pendingPaste).rejects.toThrow(CustomCommandExecutionError);
+        } else {
+            expect(await pendingPaste).toBe(false);
+        }
         expect(peer.getSnapshot()).toEqual(peerBefore);
         if (state === 'read-only') {
             expect(source.getSnapshot()).toEqual(snapshot);

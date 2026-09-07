@@ -64,6 +64,9 @@ export class SheetPermissionInterceptorClipboardController extends Disposable {
                         worksheetTypes: [WorksheetEditPermission],
                         rangeTypes: [RangeProtectionPermissionEditPoint],
                     }, [discreteRangeToRange(range)], unitId, subUnitId)) {
+                        this._sheetPermissionCheckController.blockExecuteWithoutPermission(
+                            this._localService.t<LocaleKey>('sheets-ui.permission.dialog.pasteErr')
+                        );
                         return false;
                     }
 

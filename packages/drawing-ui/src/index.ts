@@ -60,6 +60,7 @@ export {
     writeImageSourceToClipboard,
 } from './utils/clipboard-image';
 export { getUpdateParams } from './utils/get-update-params';
+export { getImageCropRect } from './utils/image-crop-transform';
 export { ImageCropperObject } from './views/crop/image-cropper-object';
 export {
     COMPONENT_IMAGE_POPUP_MENU,

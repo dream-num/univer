@@ -16,7 +16,7 @@
 
 import type { ICommandInfo, IDrawingSearch, ISrcRect, ITransformState, Nullable, Workbook } from '@univerjs/core';
 import type { IImageData } from '@univerjs/drawing';
-import type { BaseObject, Scene } from '@univerjs/engine-render';
+import type { Scene } from '@univerjs/engine-render';
 import type { ICloseImageCropOperationParams, IOpenImageCropOperationBySrcRectParams } from '../commands/operations/image-crop.operation';
 import type { LocaleKey } from '../locale/types';
 import {
@@ -36,7 +36,7 @@ import {
     IDrawingManagerService,
     SetDrawingSelectedOperation,
 } from '@univerjs/drawing';
-import { CURSOR_TYPE, degToRad, Image, IRenderManagerService, precisionTo, Vector2 } from '@univerjs/engine-render';
+import { CURSOR_TYPE, Image, IRenderManagerService, precisionTo } from '@univerjs/engine-render';
 import { ILayoutService, IMessageService, IShortcutService, KeyCode, MOBILE_UI_MODE } from '@univerjs/ui';
 import { BehaviorSubject, of, switchMap } from 'rxjs';
 import {
@@ -45,6 +45,7 @@ import {
     CropType,
     OpenImageCropOperation,
 } from '../commands/operations/image-crop.operation';
+import { getImageCropRect } from '../utils/image-crop-transform';
 import { ImageCropperObject } from '../views/crop/image-cropper-object';
 
 interface IImageCropSnapshot {
@@ -353,7 +354,7 @@ export class ImageCropperController extends Disposable {
                 if (params?.isCancel) {
                     this._restoreCropSnapshot(imageShape, imageCropperObject);
                 } else {
-                    const srcRect = this._getSrcRectByTransformState(imageShape, imageCropperObject);
+                    const srcRect = getImageCropRect(imageShape, imageCropperObject);
                     const drawingParam = this._drawingManagerService.getDrawingOKey(imageShape.oKey);
                     if (drawingParam != null) {
                         const { left, top, height, width } = imageCropperObject;
@@ -486,7 +487,7 @@ export class ImageCropperController extends Disposable {
                     return;
                 }
 
-                const srcRect = this._getSrcRectByTransformState(applyObject, cropObject);
+                const srcRect = getImageCropRect(applyObject, cropObject);
 
                 cropObject.refreshSrcRect(srcRect.srcRect, applyObject.getState());
 
@@ -525,56 +526,5 @@ export class ImageCropperController extends Disposable {
                 }
             })
         );
-    }
-
-    private _getSrcRectByTransformState(applyObject: BaseObject, imageCropperObject: ImageCropperObject) {
-        const { left, top, height, width } = imageCropperObject;
-
-        const { left: applyLeft, top: applyTop, width: applyWidth, height: applyHeight, angle: applyAngle } = applyObject;
-
-        const newLeft = left - applyLeft;
-        const newTop = top - applyTop;
-
-        const srcRect = {
-            left: newLeft,
-            top: newTop,
-            right: applyWidth - newLeft - width,
-            bottom: applyHeight - newTop - height,
-        };
-
-        const srcRectAngle = { ...srcRect };
-
-        // const offsetPoint = new Vector2(0, 0);
-        if (applyAngle !== 0) {
-            /**
-             * Calculate the offset of the center rotation to correctly position the object entering the cropping.
-             */
-            const cx = left + width / 2;
-            const cy = top + height / 2;
-            const centerPoint = new Vector2(cx, cy);
-
-            const newCx = applyWidth / 2 + applyLeft;
-            const newCy = applyHeight / 2 + applyTop;
-            const newCenterPoint = new Vector2(newCx, newCy);
-
-            const vertexPoint = new Vector2(applyLeft, applyTop);
-            vertexPoint.rotateByPoint(degToRad(applyAngle), newCenterPoint);
-
-            const applyFinalPoint = vertexPoint.clone();
-            applyFinalPoint.rotateByPoint(degToRad(-applyAngle), centerPoint);
-
-            const newAngleLeft = left - applyFinalPoint.x;
-            const newAngleTop = top - applyFinalPoint.y;
-
-            srcRectAngle.left = newAngleLeft;
-            srcRectAngle.top = newAngleTop;
-            srcRectAngle.right = applyWidth - newAngleLeft - width;
-            srcRectAngle.bottom = applyHeight - newAngleTop - height;
-        }
-
-        return {
-            srcRect,
-            srcRectAngle,
-        };
     }
 }

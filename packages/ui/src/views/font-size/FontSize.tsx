@@ -24,7 +24,7 @@ export const FontSize = (props: IFontSizeProps) => {
     const { value, min, max, onChange, disabled$ } = props;
     const disabled = useObservable(disabled$);
     const [draft, setDraft] = useState<{ source: number; value: number | null } | null>(null);
-    const inputValue = draft?.source === value ? draft.value : Number(value ?? 0);
+    const inputValue = draft !== null && draft.source === value ? draft.value : Number(value ?? 0);
 
     function handleChange(nextValue: number | null) {
         setDraft({ source: value, value: nextValue });

@@ -15,12 +15,61 @@
  */
 
 import { cleanup, createEvent, fireEvent, render } from '@testing-library/react';
+import { LocaleService, LocaleType, Univer } from '@univerjs/core';
 import { DropdownMenu } from '@univerjs/design';
 import { afterEach, describe, expect, it } from 'vitest';
+import { ComponentManager } from '../../../common/component-manager';
+import { IconManager } from '../../../common/icon-manager';
+import { RediProvider } from '../../../utils/di';
+import { CustomLabel } from '../../custom-label/CustomLabel';
 import { FontSize } from '../FontSize';
+import { FONT_SIZE_COMPONENT } from '../interface';
 
 describe('FontSize input ownership', () => {
     afterEach(cleanup);
+
+    it('keeps the toolbar mounted before its selected font size becomes available', () => {
+        const univer = new Univer();
+        const injector = univer.__getInjector();
+        injector.add([ComponentManager]);
+        injector.add([IconManager]);
+        injector.get(LocaleService).setLocale(LocaleType.EN_US);
+        injector.get(LocaleService).setDirection('ltr');
+        const registration = injector.get(ComponentManager).register(FONT_SIZE_COMPONENT, FontSize);
+        const changes: Array<string | number> = [];
+        const label = { name: FONT_SIZE_COMPONENT, props: { min: 1, max: 400 } };
+        const onChange = (value: string | number) => changes.push(value);
+        try {
+            const rendered = render(
+                <RediProvider value={{ injector }}>
+                    <CustomLabel label={label} onChange={onChange} />
+                </RediProvider>
+            );
+            const input = rendered.container.querySelector('input')!;
+            expect(input).not.toBeNull();
+            expect(changes).toEqual([]);
+            rendered.rerender(
+                <RediProvider value={{ injector }}>
+                    <CustomLabel label={label} value={18} onChange={onChange} />
+                </RediProvider>
+            );
+            expect(input.value).toBe('18');
+            fireEvent.change(input, { target: { value: '24' } });
+            fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+            expect(changes).toEqual([24]);
+            rendered.rerender(
+                <RediProvider value={{ injector }}>
+                    <CustomLabel label={label} onChange={onChange} />
+                </RediProvider>
+            );
+            expect(rendered.container.querySelector('input')).toBe(input);
+            expect(changes).toEqual([24]);
+        } finally {
+            cleanup();
+            registration.dispose();
+            univer.dispose();
+        }
+    });
 
     it('preserves native pointer focus without opening the surrounding dropdown', () => {
         const changes: number[] = [];

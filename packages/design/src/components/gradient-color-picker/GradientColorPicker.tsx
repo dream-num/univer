@@ -23,6 +23,7 @@ import { ConfigContext } from '../config-provider/ConfigProvider';
 import { InputNumber } from '../input-number/InputNumber';
 import { Segmented } from '../segmented/Segmented';
 import { Tooltip } from '../tooltip/Tooltip';
+import { MobileGradientColorPicker } from './MobileGradientColorPicker';
 
 export type GradientType = 'linear' | 'radial' | 'angular' | 'diamond';
 
@@ -43,6 +44,7 @@ export interface IGradientColorPickerProps {
     compact?: boolean;
     value?: IGradientValue;
     onChange?: (value: IGradientValue) => void;
+    types?: readonly GradientType[];
 }
 
 const DEFAULT_VALUE: IGradientValue = {
@@ -101,6 +103,13 @@ function getCssLinearGradientAngle(value: IGradientValue): number {
 }
 
 export function GradientColorPicker(props: IGradientColorPickerProps) {
+    const { mobile } = useContext(ConfigContext);
+    return mobile
+        ? <MobileGradientColorPicker {...props} value={props.value ?? DEFAULT_VALUE} />
+        : <DesktopGradientColorPicker {...props} />;
+}
+
+function DesktopGradientColorPicker(props: IGradientColorPickerProps) {
     const { className, compact = false, value = DEFAULT_VALUE, onChange } = props;
     const { locale } = useContext(ConfigContext);
     const [draftValue, setDraftValue] = useState<IGradientValue>(value);
@@ -260,7 +269,7 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
                             { label: locale?.GradientColorPicker.radial, value: 'radial' },
                             { label: locale?.GradientColorPicker.angular, value: 'angular' },
                             { label: locale?.GradientColorPicker.diamond, value: 'diamond' },
-                        ].map((item) => {
+                        ].filter((item) => !props.types || props.types.some((type) => type === item.value)).map((item) => {
                             const selected = draftValue.type === item.value;
 
                             return (
@@ -309,7 +318,7 @@ export function GradientColorPicker(props: IGradientColorPickerProps) {
                             { label: locale?.GradientColorPicker.radial, value: 'radial' },
                             { label: locale?.GradientColorPicker.angular, value: 'angular' },
                             { label: locale?.GradientColorPicker.diamond, value: 'diamond' },
-                        ]}
+                        ].filter((item) => !props.types || props.types.some((type) => type === item.value))}
                         value={draftValue.type}
                         onChange={(v) => handleTypeChange(v as GradientType)}
                     />

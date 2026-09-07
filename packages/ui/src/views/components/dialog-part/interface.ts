@@ -16,8 +16,10 @@
 
 import type { IDialogProps } from '@univerjs/design';
 import type { ICustomLabelProps } from '../../custom-label/CustomLabel';
+import type { MobilePanelLayout } from '../../mobile-workbench/MobileCanvasLayout';
 
 export type IDialogPartMethodOptions = {
+    mobileLayout?: MobilePanelLayout;
     id: string;
     children?: ICustomLabelProps;
     title?: ICustomLabelProps;

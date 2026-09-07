@@ -90,8 +90,30 @@ describe('Dropdown', () => {
 
         const dialog = screen.getByRole('dialog');
         expect(dialog.textContent).toContain('Overlay Content');
-        expect(dialog.classList.contains('!univer-bottom-0')).toBe(true);
+        expect(dialog.style.bottom).toBe('0px');
         expect(dialog.style.maxHeight).toBe('80vh');
         expect(screen.getByText(enUS.design.Accessibility.menu)).toBeTruthy();
+    });
+
+    it('registers a non-modal object surface and releases it when closed', () => {
+        const release = vi.fn();
+        const onMount = vi.fn((_element: HTMLElement) => release);
+        const overlay = { modal: false, onMount };
+        const app = (open: boolean) => (
+            <ConfigProvider locale={enUS.design} mountContainer={document.body} mobile mobileOverlay={overlay}>
+                <button type="button">Canvas action</button>
+                <Dropdown overlay={<div>Object options</div>} open={open}>
+                    <button type="button">Trigger</button>
+                </Dropdown>
+            </ConfigProvider>
+        );
+        const view = render(app(true));
+        const dialog = screen.getByRole('dialog');
+        expect(onMount).toHaveBeenCalledWith(dialog);
+        expect(dialog.getAttribute('aria-modal')).not.toBe('true');
+        expect(screen.getByRole('button', { name: 'Canvas action' })).toBeTruthy();
+        expect(dialog.style.height).toBe('40dvh');
+        view.rerender(app(false));
+        expect(release).toHaveBeenCalledTimes(1);
     });
 });

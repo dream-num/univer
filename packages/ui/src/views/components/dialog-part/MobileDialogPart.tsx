@@ -52,13 +52,14 @@ export function MobileDialogPart() {
         const active = activeDialogs[activeDialogs.length - 1];
         return active ? toMobileDialogOptions(active) : null;
     }, [dialogOptions]);
-    const [drawerSnap, setDrawerSnap] = useState<MobileDrawerSnap>('expanded');
+    const [snapOverride, setSnapOverride] = useState<{ id: string; snap: MobileDrawerSnap } | null>(null);
     const layerRef = useRef<HTMLDivElement>(null);
     const backdropPointerIdRef = useRef<number | null>(null);
 
     if (!options) {
         return null;
     }
+    const defaultSnap = options.mobileLayout === 'canvas' ? 'compact' : 'expanded';
 
     const close = () => {
         dialogService.close(options.id);
@@ -69,14 +70,14 @@ export function MobileDialogPart() {
     return (
         <div
             ref={layerRef}
-            className="univer-fixed univer-inset-0 univer-z-[1200]"
+            className="univer-pointer-events-none univer-fixed univer-inset-0 univer-z-[1200]"
             data-u-comp="mobile-dialog"
         >
-            <button
+            {options.mobileLayout !== 'canvas' && (<button
                 type="button"
                 aria-label={localeService.t<LocaleKey>('ui.sidebar.close')}
                 className="
-                  univer-absolute univer-inset-0 univer-m-0 univer-appearance-none univer-rounded-none univer-border-0
+                  univer-pointer-events-auto univer-absolute univer-inset-0 univer-m-0 univer-appearance-none univer-rounded-none univer-border-0
                   univer-bg-black/35 univer-p-0
                 "
                 onPointerDown={options.maskClosable === false
@@ -97,14 +98,15 @@ export function MobileDialogPart() {
                 onPointerCancel={() => {
                     backdropPointerIdRef.current = null;
                 }}
-            />
+            />)}
             <MobileDrawer
                 layerRef={layerRef}
+                layout={options.mobileLayout}
                 componentName="mobile-dialog-drawer"
-                snap={drawerSnap}
+                snap={snapOverride?.id === options.id ? snapOverride.snap : defaultSnap}
                 expandLabel={localeService.t<LocaleKey>('ui.sidebar.resize')}
                 collapseLabel={localeService.t<LocaleKey>('ui.sidebar.resize')}
-                onSnapChange={setDrawerSnap}
+                onSnapChange={(snap) => setSnapOverride({ id: options.id, snap })}
                 onClose={close}
                 role="dialog"
                 panelClassName="

@@ -15,7 +15,7 @@
  */
 
 import type { ReactNode } from 'react';
-import { useContext } from 'react';
+import { useContext, useLayoutEffect, useState } from 'react';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 import {
     Dialog,
@@ -33,20 +33,28 @@ export function MobileDropdownSurface(props: {
     onOpenChange: (open: boolean) => void;
 }) {
     const { children, content, open, disabled, onOpenChange } = props;
-    const { locale, mountContainer } = useContext(ConfigContext);
-    const maxHeight = globalThis.CSS?.supports('height', '1dvh') ? '80dvh' : '80vh';
+    const { locale, mountContainer, mobileOverlay } = useContext(ConfigContext);
+    const [surface, setSurface] = useState<HTMLDivElement | null>(null);
+    const modal = mobileOverlay?.modal ?? true;
+    useLayoutEffect(() => {
+        if (open && surface) {
+            return mobileOverlay?.onMount(surface);
+        }
+    }, [open, surface, mobileOverlay]);
+    const viewportHeightUnit = globalThis.CSS?.supports('height', '1dvh') ? 'dvh' : 'vh';
 
     return (
-        <Dialog open={open} onOpenChange={onOpenChange} modal>
+        <Dialog open={open} onOpenChange={onOpenChange} modal={modal}>
             <DialogTrigger asChild disabled={disabled}>
                 {children}
             </DialogTrigger>
             <DialogContent
+                ref={setSurface}
                 mountContainer={mountContainer}
                 overlayClassName="!univer-z-[1390]"
                 className="
-                  !univer-bottom-0 !univer-left-0 !univer-right-0 !univer-top-auto !univer-z-[1400] !univer-block
-                  !univer-w-full !univer-max-w-none !univer-translate-x-0 !univer-translate-y-0 !univer-overflow-y-auto
+                  !univer-left-0 !univer-right-0 !univer-top-auto !univer-z-[1400] !univer-block !univer-w-full
+                  !univer-max-w-none !univer-translate-x-0 !univer-translate-y-0 !univer-overflow-y-auto
                   !univer-rounded-t-2xl !univer-border-0 !univer-bg-gray-50 !univer-p-4 !univer-pt-14
                   dark:!univer-bg-gray-900
                   [&_button[data-slot='close']]:!univer-right-3 [&_button[data-slot='close']]:!univer-top-3
@@ -58,11 +66,14 @@ export function MobileDropdownSurface(props: {
                     insetInline: 0,
                     top: 'auto',
                     bottom: 0,
+                    maxHeight: `${modal ? 80 : 40}${viewportHeightUnit}`,
+                    height: modal ? undefined : `40${viewportHeightUnit}`,
                     width: '100%',
-                    maxHeight,
                     maxWidth: 'none',
                     transform: 'none',
                 }}
+                onOpenAutoFocus={modal ? undefined : (event) => event.preventDefault()}
+                onCloseAutoFocus={modal ? undefined : (event) => event.preventDefault()}
             >
                 <div
                     aria-hidden="true"

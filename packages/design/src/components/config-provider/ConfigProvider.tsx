@@ -16,7 +16,7 @@
 
 import type { ReactNode } from 'react';
 import { DirectionProvider } from '@radix-ui/react-direction';
-import { createContext, useMemo } from 'react';
+import { createContext, useContext, useMemo } from 'react';
 import { isBrowser } from '../../helper/is-browser';
 
 export interface IConfigProviderProps {
@@ -24,6 +24,15 @@ export interface IConfigProviderProps {
     locale?: any;
     direction?: 'ltr' | 'rtl';
     mountContainer: HTMLElement | null;
+    /** Disable tooltip popovers for this provider subtree. */
+    disableTooltips?: boolean;
+    /** Use touch-first presentation for overlays in this provider subtree. */
+    mobile?: boolean;
+    /** The workbench can coordinate mobile overlays without coupling design to its renderer. */
+    mobileOverlay?: {
+        modal: boolean;
+        onMount: (element: HTMLElement) => void | (() => void);
+    };
 }
 
 export const ConfigContext = createContext<Omit<IConfigProviderProps, 'children'>>({
@@ -31,15 +40,22 @@ export const ConfigContext = createContext<Omit<IConfigProviderProps, 'children'
 });
 
 export function ConfigProvider(props: IConfigProviderProps) {
-    const { children, locale, mountContainer, direction } = props;
+    const { children, locale, mountContainer, direction, disableTooltips, mobile, mobileOverlay } = props;
+    const parentConfig = useContext(ConfigContext);
+    const resolvedDisableTooltips = disableTooltips ?? parentConfig.disableTooltips;
+    const resolvedMobile = mobile ?? parentConfig.mobile;
+    const resolvedMobileOverlay = mobileOverlay ?? parentConfig.mobileOverlay;
 
     const value = useMemo(() => {
         return {
             locale,
             direction,
             mountContainer,
+            disableTooltips: resolvedDisableTooltips,
+            mobile: resolvedMobile,
+            mobileOverlay: resolvedMobileOverlay,
         };
-    }, [locale, direction, mountContainer]);
+    }, [locale, direction, mountContainer, resolvedDisableTooltips, resolvedMobile, resolvedMobileOverlay]);
 
     return (
         <ConfigContext.Provider value={value}>

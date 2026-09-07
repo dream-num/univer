@@ -31,6 +31,7 @@ import { MobileDrawerCoordinatorProvider } from '../components/mobile-drawer/Mob
 import { MobileSidebar } from '../components/sidebar/MobileSidebar';
 import { WorkbenchSkeleton } from '../components/workbench-skeleton/WorkbenchSkeleton';
 import { MobileKeyboardInsetContext } from './mobile-keyboard-inset-context';
+import { MobileCanvasLayoutProvider } from './MobileCanvasLayout';
 
 const MOBILE_KEYBOARD_THRESHOLD = 80;
 
@@ -241,6 +242,7 @@ export function MobileWorkbench(props: IUniverAppProps) {
             direction={direction}
             mountContainer={portalContainer}
         >
+            <MobileCanvasLayoutProvider>
             <MobileKeyboardInsetContext.Provider value={keyboardInset}>
                 <MobileDrawerCoordinatorProvider>
                     <div
@@ -345,6 +347,7 @@ export function MobileWorkbench(props: IUniverAppProps) {
                     </div>
                 </MobileDrawerCoordinatorProvider>
             </MobileKeyboardInsetContext.Provider>
+            </MobileCanvasLayoutProvider>
         </ConfigProvider>
     );
 }

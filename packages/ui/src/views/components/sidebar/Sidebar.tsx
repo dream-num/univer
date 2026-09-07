@@ -17,6 +17,7 @@
 import type { Attributes, ReactNode } from 'react';
 import type { LocaleKey } from '../../../locale/types';
 import type { ICustomLabelProps } from '../../custom-label/CustomLabel';
+import type { MobilePanelLayout } from '../../mobile-workbench/MobileCanvasLayout';
 import { LocaleService } from '@univerjs/core';
 import { borderLeftBottomClassName, clsx, scrollbarClassName } from '@univerjs/design';
 import { CloseIcon } from '@univerjs/icons';
@@ -28,6 +29,7 @@ import { CustomLabel } from '../../custom-label/CustomLabel';
 type SidebarCustomLabelProps = ICustomLabelProps & Attributes;
 
 export interface ISidebarMethodOptions {
+    mobileLayout?: MobilePanelLayout;
     id?: string;
     header?: SidebarCustomLabelProps;
     children?: SidebarCustomLabelProps;

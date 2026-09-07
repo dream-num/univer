@@ -15,8 +15,10 @@
  */
 
 import type { AriaRole, PointerEvent, ReactNode, RefObject } from 'react';
-import { clsx, resetButtonClassName, scrollbarClassName } from '@univerjs/design';
-import { useContext, useImperativeHandle, useLayoutEffect, useRef, useState } from 'react';
+import type { MobilePanelLayout } from '../../mobile-workbench/MobileCanvasLayout';
+import { clsx, ConfigContext, resetButtonClassName, scrollbarClassName } from '@univerjs/design';
+import { createContext, useCallback, useContext, useMemo, useLayoutEffect, useRef, useState } from 'react';
+import { useMobileCanvasPanel, useMobileOverlayRegistration } from '../../mobile-workbench/MobileCanvasLayout';
 import { MobileDrawerCoordinatorContext } from './MobileDrawerCoordinator';
 
 export type MobileDrawerSnap = 'compact' | 'expanded';
@@ -24,8 +26,17 @@ export type MobileDrawerRelease = MobileDrawerSnap | 'closed';
 export type MobileDrawerOpenMode = 'replace' | 'push';
 type MobileDrawerRef<T> = { current: T | null } | ((instance: T | null) => void) | null;
 
+function assignDrawerRef<T>(ref: MobileDrawerRef<T> | undefined, element: T | null) {
+    if (typeof ref === 'function') {
+        ref(element);
+    } else if (ref) {
+        ref.current = element;
+    }
+}
+
 const MOBILE_DRAWER_COMPACT_PERCENT = 40;
 const MOBILE_DRAWER_EXPANDED_PERCENT = 80;
+const MobileDrawerLayoutContext = createContext<MobilePanelLayout>('modal');
 
 export function resolveMobileDrawerRelease(params: {
     snap: MobileDrawerSnap;
@@ -60,6 +71,7 @@ export function MobileDrawer(props: {
     footer?: ReactNode;
     role?: AriaRole;
     ariaLabel?: string;
+    layout?: MobilePanelLayout;
 }) {
     const {
         snap,
@@ -80,6 +92,7 @@ export function MobileDrawer(props: {
         footer,
         role,
         ariaLabel,
+        layout: requestedLayout,
     } = props;
     const coordinator = useContext(MobileDrawerCoordinatorContext);
     const registerDrawer = coordinator?.register;
@@ -93,7 +106,19 @@ export function MobileDrawer(props: {
     }
     const drawerId = drawerIdRef.current;
     const active = !coordinator || coordinator.activeDrawerId === drawerId;
+    const inheritedLayout = useContext(MobileDrawerLayoutContext);
+    const layout = requestedLayout ?? inheritedLayout;
+    const parentConfig = useContext(ConfigContext);
+    const registerOverlay = useMobileOverlayRegistration(layout);
+    const config = useMemo(() => ({ ...parentConfig, mobileOverlay: { modal: layout === 'modal', onMount: registerOverlay } }), [parentConfig, layout, registerOverlay]);
     const [dragPercent, setDragPercent] = useState<number | null>(null);
+    const surfaceRef = useRef<HTMLElement>(null);
+    const setPanelRef = useCallback((element: HTMLElement | null) => {
+        surfaceRef.current = element;
+        panelElementRef.current = element;
+        assignDrawerRef(panelRef, element);
+    }, [panelRef]);
+    useMobileCanvasPanel(surfaceRef, layout, dragPercent !== null);
     const suppressHandleClickRef = useRef(false);
     const dragRef = useRef<{
         startY: number;
@@ -107,7 +132,6 @@ export function MobileDrawer(props: {
         : MOBILE_DRAWER_EXPANDED_PERCENT);
     const viewportHeightUnit = globalThis.CSS?.supports('height', '1dvh') ? 'dvh' : 'vh';
 
-    useImperativeHandle(panelRef, () => panelElementRef.current!);
 
     useLayoutEffect(() => {
         if (!registerDrawer || !unregisterDrawer) {
@@ -198,86 +222,88 @@ export function MobileDrawer(props: {
     }
 
     return (
-        <>
-            {floatingActions && (
-                <div
-                    className="univer-pointer-events-none univer-absolute univer-right-4 univer-z-30"
-                    style={{ bottom: `calc(${drawerPercent}${viewportHeightUnit} + 12px)` }}
-                >
-                    {floatingActions}
-                </div>
-            )}
-            <section
-                ref={panelElementRef}
-                hidden={!active}
-                role={role}
-                aria-modal={role === 'dialog' || undefined}
-                aria-label={ariaLabel}
-                data-u-comp={componentName}
-                data-snap={snap}
+        <MobileDrawerLayoutContext.Provider value={layout}>
+            <ConfigContext.Provider value={config}>
+                {floatingActions && (
+                    <div
+                        className="univer-pointer-events-none univer-absolute univer-right-4 univer-z-30"
+                        style={{ bottom: `calc(${drawerPercent}${viewportHeightUnit} + 12px)` }}
+                    >
+                        {floatingActions}
+                    </div>
+                )}
+                <section
+                    ref={setPanelRef}
+                    hidden={!active}
+                    role={role}
+                    aria-modal={(layout === 'modal' && role === 'dialog') || undefined}
+                    aria-label={ariaLabel}
+                    data-u-comp={componentName}
+                    data-snap={snap}
                 // Small form text triggers iOS focus zoom. Keep this local to mobile
                 // drawers, without overriding document/contenteditable text styles.
-                className={clsx(`
-                  univer-absolute univer-inset-x-0 univer-bottom-0 univer-z-20 univer-flex univer-flex-col
-                  univer-overflow-hidden univer-rounded-t-[24px] univer-bg-gray-50 univer-shadow-2xl
-                  univer-transition-[height] univer-duration-200
-                  dark:!univer-bg-gray-900
-                  [&_input]:!univer-text-base
-                  [&_select]:!univer-text-base
-                  [&_textarea]:!univer-text-base
-                `, dragPercent != null && '!univer-transition-none', panelClassName)}
-                style={{
-                    height: `${drawerPercent}${viewportHeightUnit}`,
-                    paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-                }}
-            >
-                <div
-                    className="
-                      univer-relative univer-flex univer-h-14 univer-shrink-0 univer-items-end univer-bg-gray-0
-                      dark:!univer-bg-gray-800
-                    "
+                    className={clsx(`
+                      univer-absolute univer-inset-x-0 univer-bottom-0 univer-z-20 univer-flex univer-flex-col
+                      univer-overflow-hidden univer-rounded-t-[24px] univer-bg-gray-50 univer-shadow-2xl
+                      univer-transition-[height] univer-duration-200
+                      dark:!univer-bg-gray-900
+                      [&_input]:!univer-text-base
+                      [&_select]:!univer-text-base
+                      [&_textarea]:!univer-text-base
+                    `, 'univer-pointer-events-auto', dragPercent != null && '!univer-transition-none', panelClassName)}
+                    style={{
+                        height: `${drawerPercent}${viewportHeightUnit}`,
+                        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+                    }}
                 >
-                    <button
-                        type="button"
-                        aria-label={snap === 'compact' ? expandLabel : collapseLabel}
-                        className={clsx(resetButtonClassName, `
-                          univer-absolute univer-left-1/2 univer-top-0 univer-z-10 univer-flex univer-h-6 univer-w-16
-                          -univer-translate-x-1/2 univer-touch-none univer-items-center univer-justify-center
-                        `)}
-                        style={{ touchAction: 'none' }}
-                        onPointerDown={handlePointerDown}
-                        onPointerMove={handlePointerMove}
-                        onPointerUp={handlePointerUp}
-                        onPointerCancel={handlePointerCancel}
-                        onClick={() => {
-                            if (suppressHandleClickRef.current) {
-                                suppressHandleClickRef.current = false;
-                                return;
-                            }
-                            onSnapChange(snap === 'compact' ? 'expanded' : 'compact');
-                        }}
+                    <div
+                        className="
+                          univer-relative univer-flex univer-h-14 univer-shrink-0 univer-items-end univer-bg-gray-0
+                          dark:!univer-bg-gray-800
+                        "
                     >
-                        <span
-                            className="
-                              univer-h-1 univer-w-10 univer-rounded-full univer-bg-gray-300
-                              dark:!univer-bg-gray-600
-                            "
-                        />
-                    </button>
-                    {header}
-                </div>
-                <div
-                    ref={contentRef}
-                    className={clsx(
-                        'univer-flex-1 univer-overflow-y-auto univer-overflow-x-hidden univer-p-3',
-                        scrollbarClassName,
-                        contentClassName
-                    )}
-                >
-                    {children}
-                </div>
-                {footer}
-            </section>
-        </>
+                        <button
+                            type="button"
+                            aria-label={snap === 'compact' ? expandLabel : collapseLabel}
+                            className={clsx(resetButtonClassName, `
+                              univer-absolute univer-left-1/2 univer-top-0 univer-z-10 univer-flex univer-h-6
+                              univer-w-16 -univer-translate-x-1/2 univer-touch-none univer-items-center
+                              univer-justify-center
+                            `)}
+                            onPointerDown={handlePointerDown}
+                            onPointerMove={handlePointerMove}
+                            onPointerUp={handlePointerUp}
+                            onPointerCancel={handlePointerCancel}
+                            onClick={() => {
+                                if (suppressHandleClickRef.current) {
+                                    suppressHandleClickRef.current = false;
+                                    return;
+                                }
+                                onSnapChange(snap === 'compact' ? 'expanded' : 'compact');
+                            }}
+                        >
+                            <span
+                                className="
+                                  univer-h-1 univer-w-10 univer-rounded-full univer-bg-gray-300
+                                  dark:!univer-bg-gray-600
+                                "
+                            />
+                        </button>
+                        {header}
+                    </div>
+                    <div
+                        ref={contentRef}
+                        className={clsx(
+                            'univer-flex-1 univer-overflow-y-auto univer-overflow-x-hidden univer-p-3',
+                            scrollbarClassName,
+                            contentClassName
+                        )}
+                    >
+                        {children}
+                    </div>
+                    {footer}
+                </section>
+            </ConfigContext.Provider>
+        </MobileDrawerLayoutContext.Provider>
     );
 }

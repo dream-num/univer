@@ -197,4 +197,6 @@ export { ObjectPermissionButton, openObjectPermissionDialog } from './views/obje
 export type { IObjectPermissionButtonProps } from './views/object-permission/ObjectPermissionButton';
 export { ObjectPermissionPanelButton, openObjectPermissionPanel } from './views/object-permission/ObjectPermissionPanel';
 
+export { getMobileCanvasPanDelta, useMobileCanvasPanel, useMobileCanvasViewport } from './views/mobile-workbench/MobileCanvasLayout';
+export type { MobilePanelLayout } from './views/mobile-workbench/MobileCanvasLayout';
 export { ProgressBar } from './views/progress-bar/ProgressBar';

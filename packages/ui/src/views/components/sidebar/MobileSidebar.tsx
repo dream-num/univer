@@ -33,14 +33,14 @@ export function MobileSidebar() {
     const layerRef = useRef<HTMLDivElement>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
     const closeButtonRef = useRef<HTMLButtonElement>(null);
-    const [drawerSnap, setDrawerSnap] = useState<MobileDrawerSnap>('expanded');
+    const [snapOverride, setSnapOverride] = useState<{ id?: string; snap: MobileDrawerSnap } | null>(null);
     const options = useMemo(() => renderSidebarOptions(sidebarOptions), [sidebarOptions]);
 
     useEffect(() => {
-        if (options?.visible) {
+        if (options?.visible && options.mobileLayout !== 'canvas') {
             closeButtonRef.current?.focus();
         }
-    }, [options?.visible]);
+    }, [options?.visible, options?.mobileLayout, options?.id]);
 
     useEffect(() => {
         const scrollElement = scrollRef.current;
@@ -56,31 +56,31 @@ export function MobileSidebar() {
     if (!options?.visible) {
         return null;
     }
+    const defaultSnap = options.mobileLayout === 'canvas' ? 'compact' : 'expanded';
 
     const close = () => sidebarService.close(sidebarOptions?.id);
 
     return (
-        <div
-            ref={layerRef}
-            className="univer-fixed univer-inset-0 univer-z-[1100]"
-            data-u-comp="mobile-sidebar"
-        >
-            <button
-                type="button"
-                aria-label={localeService.t<LocaleKey>('ui.sidebar.close')}
-                className="
-                  univer-absolute univer-inset-0 univer-m-0 univer-appearance-none univer-rounded-none univer-border-0
-                  univer-bg-black/35 univer-p-0
-                "
-                onClick={close}
-            />
+        <div ref={layerRef} className="univer-pointer-events-none univer-fixed univer-inset-0 univer-z-[1100]" data-u-comp="mobile-sidebar">
+            {options.mobileLayout !== 'canvas' && (
+                <button
+                    type="button"
+                    aria-label={localeService.t<LocaleKey>('ui.sidebar.close')}
+                    className="
+                      univer-pointer-events-auto univer-absolute univer-inset-0 univer-m-0 univer-appearance-none
+                      univer-rounded-none univer-border-0 univer-bg-black/35 univer-p-0
+                    "
+                    onClick={close}
+                />
+            )}
             <MobileDrawer
                 layerRef={layerRef}
+                layout={options.mobileLayout}
                 componentName="mobile-sidebar-drawer"
-                snap={drawerSnap}
+                snap={snapOverride && snapOverride.id === options.id ? snapOverride.snap : defaultSnap}
                 expandLabel={localeService.t<LocaleKey>('ui.ribbon.more')}
                 collapseLabel={localeService.t<LocaleKey>('ui.ribbon.more')}
-                onSnapChange={setDrawerSnap}
+                onSnapChange={(snap) => setSnapOverride({ id: options.id, snap })}
                 onClose={close}
                 role="dialog"
                 ariaLabel={localeService.t<LocaleKey>('ui.sidebar.panel')}

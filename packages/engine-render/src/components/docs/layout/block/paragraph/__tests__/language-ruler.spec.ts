@@ -67,6 +67,19 @@ function createSectionBreakConfig(): ISectionBreakConfig {
 
 describe('language-ruler', () => {
     describe('otherHandler', () => {
+        it.each(['é', 'ä́'])('keeps the combining sequence %s in one cursor-addressable glyph', (cluster) => {
+            const text = `${cluster}x`;
+            const { viewModel } = createViewModel(text);
+            const paragraphNode = getParagraphNode(viewModel);
+            const result = otherHandler(0, text, viewModel, paragraphNode, createSectionBreakConfig(), getParagraph(viewModel));
+
+            expect(result.step).toBe(text.length);
+            expect(result.glyphGroup.map((glyph) => ({ content: glyph.content, count: glyph.count }))).toEqual([
+                { content: cluster, count: cluster.length },
+                { content: 'x', count: 1 },
+            ]);
+        });
+
         it('processes English characters and stops at space', () => {
             const { viewModel } = createViewModel('Hello world');
             const paragraphNode = getParagraphNode(viewModel);

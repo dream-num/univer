@@ -614,7 +614,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
                     const shouldResetX = startXY.x !== endXY.x && isCrossingX && xCrossTime % 2 === 1;
                     const shouldResetY = startXY.y !== endXY.y && isCrossingY && yCrossTime % 2 === 1;
 
-                    if (shouldResetX || shouldResetY) {
+                    if (rangeType !== RANGE_TYPE.NORMAL && (shouldResetX || shouldResetY)) {
                         viewportMain.scrollToBarPos({
                             x: shouldResetX ? startXY.x : undefined,
                             y: shouldResetY ? startXY.y : undefined,
@@ -694,8 +694,8 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         const targetViewport = this._getViewportByCell(currSelectionRange.endRow, currSelectionRange.endColumn) ?? viewportMain;
 
         const scrollXY = scene.getScrollXYInfoByViewport(
-            Vector2.FromArray([this._startViewportPosX, this._startViewportPosY]),
-            targetViewport
+            Vector2.FromArray([offsetX, offsetY]),
+            rangeType === RANGE_TYPE.NORMAL ? undefined : targetViewport
         );
 
         const { scaleX, scaleY } = scene.getAncestorScale();

@@ -90,6 +90,8 @@ export interface IDocCanvasPopup extends Omit<IPopup, 'anchorRect$' | 'children'
     mask?: boolean;
     extraProps?: Record<string, unknown>;
     multipleDirection?: IPopup['direction'];
+    /** Anchor at the focus end while retaining the entire selection for outside-click exclusion. */
+    rangeAnchor?: 'selection-end';
 }
 
 export const calcDocRangePositions = (range: ITextRangeParam, currentRender: IRender): IBoundRectNoAngle[] | undefined => {
@@ -406,14 +408,23 @@ export class DocCanvasPopManagerService extends Disposable {
         const popupManagerService = this._resolvePopupManagerService(popupInjector);
 
         const { positions: bounds, positions$: bounds$, disposable } = this._createRangePositionObserver(range, currentRender);
-        const position$ = bounds$.pipe(map((bounds) => direction.includes('top') ? bounds[0] : bounds[bounds.length - 1]));
+        const getAnchor = (bounds: IBoundRectNoAngle[]) => {
+            if (popup.rangeAnchor === 'selection-end') {
+                const backward = range.direction === 'backward';
+                const bound = backward ? bounds[0] : bounds[bounds.length - 1];
+                const x = backward ? bound.left : bound.right;
+                return { ...bound, left: x, right: x };
+            }
+            return direction.includes('top') ? bounds[0] : bounds[bounds.length - 1];
+        };
+        const position$ = bounds$.pipe(map(getAnchor));
 
         const id = popupManagerService.addPopup({
             ...popup,
             unitId,
             subUnitId: 'default',
             connectorInjector: popupInjector,
-            anchorRect: direction.includes('top') ? bounds[0] : bounds[bounds.length - 1],
+            anchorRect: getAnchor(bounds),
             anchorRect$: position$,
             excludeRects: bounds,
             excludeRects$: bounds$,

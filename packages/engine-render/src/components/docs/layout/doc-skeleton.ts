@@ -15,16 +15,52 @@
  */
 
 import type { ColumnSeparatorType, ISectionColumnProperties, LocaleService, Nullable } from '@univerjs/core';
-import type { IDocumentSkeletonCached, IDocumentSkeletonColumn, IDocumentSkeletonColumnGroup, IDocumentSkeletonColumnGroupColumn, IDocumentSkeletonDivide, IDocumentSkeletonDrawing, IDocumentSkeletonDrawingAnchor, IDocumentSkeletonGlyph, IDocumentSkeletonLine, IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonSection, IDocumentSkeletonTable, ISkeletonResourceReference } from '../../../basics/i-document-skeleton-cached';
-import type { IDocsConfig, INodeInfo, INodePosition, INodeSearch, ISectionBreakConfig } from '../../../basics/interfaces';
+import type {
+    IDocumentSkeletonCached,
+    IDocumentSkeletonColumn,
+    IDocumentSkeletonColumnGroup,
+    IDocumentSkeletonColumnGroupColumn,
+    IDocumentSkeletonDivide,
+    IDocumentSkeletonDrawing,
+    IDocumentSkeletonDrawingAnchor,
+    IDocumentSkeletonGlyph,
+    IDocumentSkeletonLine,
+    IDocumentSkeletonPage,
+    IDocumentSkeletonRow,
+    IDocumentSkeletonSection,
+    IDocumentSkeletonTable,
+    ISkeletonResourceReference,
+} from '../../../basics/i-document-skeleton-cached';
+import type {
+    IDocsConfig,
+    INodeInfo,
+    INodePosition,
+    INodeSearch,
+    ISectionBreakConfig,
+} from '../../../basics/interfaces';
 import type { IViewportInfo, Vector2 } from '../../../basics/vector2';
 import type { IDocsCustomBlockRenderViewport } from '../custom-block-render-viewport';
 import type { DataStreamTreeNode } from '../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../view-model/document-view-model';
 import type { ISlicedTableSkeletonBuildState, ITableSkeletonBuildState } from './block/table';
 import type { IDocumentSkeletonPagePatch } from './document-layout-page-patch';
-import type { IDocumentLayoutBlockGeometryPublication, IDocumentLayoutDrawingAnchorPublication, IDocumentLayoutGeometryPublication, IDocumentLayoutPagePublication, IDocumentLayoutResourcePublication } from './document-layout-publication';
-import type { DocumentLayoutMode, DocumentLayoutReason, IDocumentLayoutApplyResult, IDocumentLayoutInvalidation, IDocumentLayoutPageRange, IDocumentLayoutProgress, IDocumentLayoutProtectedPageRange, IDocumentLayoutProtectedRange } from './document-layout-types';
+import type {
+    IDocumentLayoutBlockGeometryPublication,
+    IDocumentLayoutDrawingAnchorPublication,
+    IDocumentLayoutGeometryPublication,
+    IDocumentLayoutPagePublication,
+    IDocumentLayoutResourcePublication,
+} from './document-layout-publication';
+import type {
+    DocumentLayoutMode,
+    DocumentLayoutReason,
+    IDocumentLayoutApplyResult,
+    IDocumentLayoutInvalidation,
+    IDocumentLayoutPageRange,
+    IDocumentLayoutProgress,
+    IDocumentLayoutProtectedPageRange,
+    IDocumentLayoutProtectedRange,
+} from './document-layout-types';
 import type { IDocumentPaginationMetrics, ILayoutContext } from './tools';
 import {
     BooleanNumber,
@@ -37,7 +73,13 @@ import {
     Skeleton,
 } from '@univerjs/core';
 import { Subject } from 'rxjs';
-import { BreakType, DocumentSkeletonPageType, GlyphType, LineType, PageLayoutType } from '../../../basics/i-document-skeleton-cached';
+import {
+    BreakType,
+    DocumentSkeletonPageType,
+    GlyphType,
+    LineType,
+    PageLayoutType,
+} from '../../../basics/i-document-skeleton-cached';
 import { getDocsCustomBlockRenderViewport } from '../custom-block-render-viewport';
 import { getDocumentCompatibilityPolicy } from '../document-compatibility';
 import { Liquid } from '../liquid';
@@ -55,7 +97,12 @@ import {
     stepTableSkeletonBuild,
     stepTableSkeletonsBuild,
 } from './block/table';
-import { applyDocumentSkeletonContinuousBlock, hydrateDocumentSkeletonPage, hydrateDocumentSkeletonPageMaterializationPlaceholder, serializeDocumentSkeletonPage } from './document-layout-page-patch';
+import {
+    applyDocumentSkeletonContinuousBlock,
+    hydrateDocumentSkeletonPage,
+    hydrateDocumentSkeletonPageMaterializationPlaceholder,
+    serializeDocumentSkeletonPage,
+} from './document-layout-page-patch';
 import { Hyphen } from './hyphenation/hyphen';
 import { Lang } from './hyphenation/lang';
 import { LanguageDetector } from './hyphenation/language-detector';
@@ -396,6 +443,35 @@ function mapPreviousOffsetToCurrent(
     return offset + (invalidation.newEnd - invalidation.oldEnd);
 }
 
+function cloneLineFlowForPublish(
+    source: IDocumentSkeletonLine,
+    parent?: IDocumentSkeletonColumn
+): IDocumentSkeletonLine {
+    const line: IDocumentSkeletonLine = {
+        ...source,
+        divides: [],
+        parent,
+    };
+    if (source.bullet != null) {
+        line.bullet = { ...source.bullet };
+    }
+    // A retained or published line must own its full parent graph. Sharing
+    // divides leaves hit-tested glyphs pointing at a page in the old skeleton.
+    line.divides = source.divides.map((sourceDivide): IDocumentSkeletonDivide => {
+        const divide: IDocumentSkeletonDivide = {
+            ...sourceDivide,
+            glyphGroup: [],
+            parent: line,
+        };
+        divide.glyphGroup = sourceDivide.glyphGroup.map((glyph) => ({
+            ...glyph,
+            parent: divide,
+        }));
+        return divide;
+    });
+    return line;
+}
+
 function clonePageFlowForPublish(source: IDocumentSkeletonPage): IDocumentSkeletonPage {
     const page: IDocumentSkeletonPage = {
         ...source,
@@ -431,31 +507,7 @@ function clonePageFlowForPublish(source: IDocumentSkeletonPage): IDocumentSkelet
                     lines: [],
                     parent: section,
                 };
-                column.lines = sourceColumn.lines.map((sourceLine) => {
-                    const line: IDocumentSkeletonLine = {
-                        ...sourceLine,
-                        divides: [],
-                        parent: column,
-                    };
-                    if (sourceLine.bullet != null) {
-                        line.bullet = { ...sourceLine.bullet };
-                    }
-                    line.divides = sourceLine.divides.map((sourceDivide): IDocumentSkeletonDivide => {
-                        const divide: IDocumentSkeletonDivide = {
-                            ...sourceDivide,
-                            glyphGroup: [],
-                            parent: line,
-                        };
-                        // Published flow nodes own a separate parent graph. Clone glyph containers
-                        // so selection hit testing resolves positions against the published page.
-                        divide.glyphGroup = sourceDivide.glyphGroup.map((glyph) => ({
-                            ...glyph,
-                            parent: divide,
-                        }));
-                        return divide;
-                    });
-                    return line;
-                });
+                column.lines = sourceColumn.lines.map((sourceLine) => cloneLineFlowForPublish(sourceLine, column));
                 return column;
             });
             return section;
@@ -1388,7 +1440,9 @@ export class DocumentSkeleton extends Skeleton {
         );
         const canResumePlainParagraph = blocks[anchorBlockIndex].block.nodeType === DataStreamTreeNodeType.PARAGRAPH &&
             blocks[anchorBlockIndex].block.children.length === 0;
-        if (reuseInteractionPagePrefix && canResumePlainParagraph) {
+        // A Modern page can contain the entire document. Paginated tail reuse
+        // deep-clones that page in one atomic step, bypassing the slice budget.
+        if (mode === 'paginated' && reuseInteractionPagePrefix && canResumePlainParagraph) {
             const interactionPreviousAnchor = mapCurrentOffsetToPrevious(anchor, invalidation);
             const interactionPageIndex = interactionSkeleton == null
                 ? -1
@@ -1573,7 +1627,7 @@ export class DocumentSkeleton extends Skeleton {
         }
         const retainedLines = previousColumn.lines
             .filter((line) => line.ed < previousAnchorStart)
-            .map((line) => ({ ...line }));
+            .map((line) => cloneLineFlowForPublish(line));
         if (retainedLines.length === 0 && previousAnchorStart < getFirstBodyFlowCharIndex(previousPage)) {
             // A continued paragraph must be rebuilt from the page where it starts.
             return null;
@@ -1734,7 +1788,7 @@ export class DocumentSkeleton extends Skeleton {
 
         const retainedLines = previousColumn.lines
             .filter((line) => line.ed < anchorBlock.startIndex)
-            .map((line) => ({ ...line }));
+            .map((line) => cloneLineFlowForPublish(line));
         if (retainedLines.length === 0) {
             return null;
         }
@@ -2495,7 +2549,21 @@ export class DocumentSkeleton extends Skeleton {
             ? this._externalProtectedContinuousLayout
             : null;
         if (publication.kind === 'block' && protectedContinuousLayout != null) {
-            protectedContinuousLayout.pendingPublications.push(publication);
+            // Flow patches are deltas, but embedded objects are a full snapshot
+            // on every publication. Retaining every table snapshot while Main's
+            // interaction window is protected grows quadratically with layout
+            // progress. Only the final snapshot is needed when replaying deltas.
+            protectedContinuousLayout.pendingPublications.push(progress.complete
+                ? publication
+                : {
+                    ...publication,
+                    block: {
+                        ...publication.block,
+                        skeTables: [],
+                        skeDrawings: [],
+                        skeColumnGroups: [],
+                    },
+                });
         }
         const commitsProtectedContinuousLayout = progress.complete && protectedContinuousLayout != null;
         const publicationToApply = publication.kind === 'block' && protectedContinuousLayout != null && !commitsProtectedContinuousLayout
@@ -3155,6 +3223,28 @@ export class DocumentSkeleton extends Skeleton {
         pageMarginTop: number,
         restrictions?: IFindNodeRestrictions
     ): Nullable<INodeInfo> {
+        const hit = this._findNodeByCoord(coord, pageLayoutType, pageMarginLeft, pageMarginTop, restrictions);
+        const layout = this._activeLayout;
+        if (hit != null && layout?.mode === 'continuous' && layout.reason === 'edit' && !layout.complete && !layout.anchorPublished) {
+            // A continuous document has only one physical page. Its unaffected
+            // paragraphs remain editable while the changed paragraph is laid out;
+            // the page-based preview guard would otherwise disable the whole Doc.
+            const dirtyStart = layout.invalidation?.oldStart ?? layout.priorityAnchor ?? 0;
+            const paragraphEnd = hit.node.parent?.parent?.paragraphIndex;
+            if (paragraphEnd == null || paragraphEnd >= dirtyStart) {
+                return null;
+            }
+        }
+        return hit;
+    }
+
+    private _findNodeByCoord(
+        coord: Vector2,
+        pageLayoutType: PageLayoutType,
+        pageMarginLeft: number,
+        pageMarginTop: number,
+        restrictions?: IFindNodeRestrictions
+    ): Nullable<INodeInfo> {
         const { x, y } = coord;
 
         const skeletonData = this.getSkeletonData();
@@ -3181,7 +3271,7 @@ export class DocumentSkeleton extends Skeleton {
         // Before Main publishes the edited page, retained geometry is only a
         // visual preview. Only its unaffected prefix still accepts new pointers;
         // ongoing native input continues through the logical selection instead.
-        if (layout?.reason === 'edit' && !layout.complete && !layout.anchorPublished && pageNumber >= layout.stablePageCount) {
+        if (layout?.mode === 'paginated' && layout.reason === 'edit' && !layout.complete && !layout.anchorPublished && pageNumber >= layout.stablePageCount) {
             return null;
         }
         const pageLength = pages.length;

@@ -34,6 +34,7 @@ const SKELETON_BASE_COLOR = 'rgba(148, 163, 184, 0.18)';
 const SKELETON_HIGHLIGHT_COLOR = 'rgba(255, 255, 255, 0.5)';
 const SKELETON_LINE_HEIGHT = 12;
 const SKELETON_LINE_GAP = 14;
+const CONTINUOUS_SKELETON_DELAY_MS = 2_000;
 
 export class DocBackground extends DocComponent {
     private _drawLiquid: Liquid;
@@ -43,6 +44,9 @@ export class DocBackground extends DocComponent {
     private _marginStrokeColor?: string;
     private _pageBackgroundSource?: string;
     private _pageBackgroundImage?: HTMLImageElement;
+    private _continuousSkeletonGeneration: number | undefined;
+    private _continuousSkeletonTimer: ReturnType<typeof setTimeout> | null = null;
+    private _continuousSkeletonVisible = false;
 
     constructor(oKey: string, documentSkeleton?: DocumentSkeleton, config?: IDocumentsConfig) {
         super(oKey, documentSkeleton, config);
@@ -58,6 +62,11 @@ export class DocBackground extends DocComponent {
 
     static create(oKey: string, documentSkeleton?: DocumentSkeleton, config?: IDocumentsConfig) {
         return new DocBackground(oKey, documentSkeleton, config);
+    }
+
+    override dispose(): void {
+        this._resetContinuousSkeleton();
+        super.dispose();
     }
 
     setFillColors(backgroundFillColor?: string, pageFillColor?: string, pageStrokeColor?: string, marginStrokeColor?: string) {
@@ -299,7 +308,27 @@ export class DocBackground extends DocComponent {
         const skeleton = this.getSkeleton();
         const progress = skeleton?.getLayoutProgress?.();
         const page = skeleton?.getSkeletonData()?.pages[0];
-        if (progress == null || progress.complete || page == null) {
+        if (progress == null || progress.complete || progress.cancelled || page == null) {
+            this._resetContinuousSkeleton();
+            return;
+        }
+
+        if (this._continuousSkeletonGeneration !== progress.generation) {
+            this._resetContinuousSkeleton();
+            this._continuousSkeletonGeneration = progress.generation;
+            // Short edits finish without painting a loading overlay or animating the background.
+            this._continuousSkeletonTimer = setTimeout(() => {
+                this._continuousSkeletonTimer = null;
+                const latest = this.getSkeleton()?.getLayoutProgress?.();
+                if (this.getSkeleton() !== skeleton || latest == null || latest.generation !== progress.generation || latest.complete || latest.cancelled) {
+                    this._resetContinuousSkeleton();
+                    return;
+                }
+                this._continuousSkeletonVisible = true;
+                this.makeDirty(true);
+            }, CONTINUOUS_SKELETON_DELAY_MS);
+        }
+        if (!this._continuousSkeletonVisible) {
             return;
         }
 
@@ -309,6 +338,15 @@ export class DocBackground extends DocComponent {
         const width = Math.max(80, page.pageWidth - page.marginLeft - page.marginRight);
         const visibleBottom = visibleBound?.bottom ?? startY + 320;
         this._drawSkeletonLines(ctx, startX, startY, width, Math.max(160, visibleBottom - startY), bounds);
+    }
+
+    private _resetContinuousSkeleton(): void {
+        if (this._continuousSkeletonTimer != null) {
+            clearTimeout(this._continuousSkeletonTimer);
+            this._continuousSkeletonTimer = null;
+        }
+        this._continuousSkeletonGeneration = undefined;
+        this._continuousSkeletonVisible = false;
     }
 
     private _drawSkeletonLines(
@@ -386,6 +424,9 @@ export class DocBackground extends DocComponent {
     }
 
     changeSkeleton(newSkeleton: DocumentSkeleton) {
+        if (newSkeleton !== this.getSkeleton()) {
+            this._resetContinuousSkeleton();
+        }
         this.setSkeleton(newSkeleton);
 
         return this;

@@ -15,10 +15,9 @@
  */
 
 import type { DocumentDataModel, IDisposable, ITextRangeParam, Nullable } from '@univerjs/core';
-import type { INodePosition, IRenderContext, IRenderModule, ITextRangeWithStyle } from '@univerjs/engine-render';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import {
     DataStreamTreeTokenType,
-    deepCompare,
     Disposable,
     DocumentBlockRangeType,
     FOCUSING_COMMON_DRAWINGS,
@@ -37,16 +36,6 @@ import { IDocEmbedRuntimeFocusCoordinator } from './doc-embed-integration.servic
 import { DocLayoutInteractionService } from './doc-layout-interaction.service';
 import { DocCanvasPopManagerService } from './doc-popup-manager.service';
 import { DocSelectionRenderService } from './selection/doc-selection-render.service';
-
-function isInSameLine(startNodePosition: Nullable<INodePosition>, endNodePosition: Nullable<INodePosition>) {
-    if (startNodePosition == null || endNodePosition == null) {
-        return false;
-    }
-    const { glyph: _startGlyph, ...startRest } = startNodePosition;
-    const { glyph: _endGlyph, ...endRest } = endNodePosition;
-
-    return deepCompare(startRest, endRest);
-}
 
 const SKIP_SYMBOLS: string[] = [
     DataStreamTreeTokenType.CUSTOM_BLOCK,
@@ -241,8 +230,15 @@ export class DocFloatMenuService extends Disposable implements IRenderModule {
             range,
             {
                 componentKey: FLOAT_MENU_COMPONENT_KEY,
-                direction: range.direction === 'backward' || isInSameLine((range as ITextRangeWithStyle).startNodePosition, (range as ITextRangeWithStyle).endNodePosition) ? 'top-center' : 'bottom-center',
-                offset: [0, 10],
+                direction: 'top-left',
+                rangeAnchor: 'selection-end',
+                offset: [0, 8],
+                extraProps: {
+                    onDismiss: () => {
+                        this._invalidatedSelection = this._getSelectionKey(range);
+                        this._hideFloatMenu();
+                    },
+                },
             },
             unitId
         );

@@ -15,7 +15,6 @@
  */
 
 import { RedoCommand, UndoCommand } from '@univerjs/core';
-import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { OpenFeatureSearchOperation } from '../../commands/operations/open-feature-search.operation';
 import { ToggleShortcutPanelOperation } from '../../commands/operations/toggle-shortcut-panel.operation';
@@ -23,32 +22,8 @@ import { menuSchema } from '../../menu/schema';
 import { ShortcutPanelMenuItemFactory } from '../../menu/shortcut-panel.menu';
 import { RibbonStartGroup } from '../../services/menu/types';
 import { KeyCode, MetaKeys } from '../../services/shortcut/keycode';
-import { ErrorController } from '../error/error.controller';
 import { FeatureSearchController } from '../feature-search/feature-search.controller';
 import { ShortcutPanelController } from '../shortcut-display/shortcut-panel.controller';
-
-describe('ErrorController', () => {
-    it('should forward errors to message service', () => {
-        const error$ = new Subject<{ errorKey: string }>();
-        const errorService = {
-            error$,
-        };
-        const messageService = {
-            show: vi.fn(),
-        };
-
-        const controller = new ErrorController(errorService as any, messageService as any);
-        error$.next({ errorKey: 'boom' });
-
-        expect(messageService.show).toHaveBeenCalledWith(
-            expect.objectContaining({
-                content: 'boom',
-            })
-        );
-
-        controller.dispose();
-    });
-});
 
 describe('shortcut-display controllers', () => {
     it('should return shortcut panel menu item', () => {

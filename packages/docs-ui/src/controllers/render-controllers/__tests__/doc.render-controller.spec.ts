@@ -51,7 +51,10 @@ import {
 import { ILayoutService } from '@univerjs/ui';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { VIEWPORT_KEY } from '../../../basics/docs-view-key';
+import { AfterSpaceCommand } from '../../../commands/commands/auto-format.command';
+import { BreakLineCommand } from '../../../commands/commands/break-line.command';
 import { IMEInputCommand } from '../../../commands/commands/ime-input.command';
+import { DocAutoFormatService } from '../../../services/doc-auto-format.service';
 import { DocIMEInputManagerService } from '../../../services/doc-ime-input-manager.service';
 import { DocLayoutInteractionService } from '../../../services/doc-layout-interaction.service';
 import { DocMenuStyleService } from '../../../services/doc-menu-style.service';
@@ -66,7 +69,7 @@ import { DocInputController } from '../doc-input.controller';
 import { DocSelectionRenderController } from '../doc-selection-render.controller';
 import { DocRenderController } from '../doc.render-controller';
 
-function createEditor(paragraphCount = 8, withDrawing = true, workerBeforeLayout = false) {
+function createEditor(paragraphCount = 8, withDrawing = true, workerBeforeLayout = false, documentFlavor = DocumentFlavor.TRADITIONAL) {
     const univer = new Univer();
     const injector = univer.__getInjector();
     const root = document.createElement('div');
@@ -88,15 +91,17 @@ function createEditor(paragraphCount = 8, withDrawing = true, workerBeforeLayout
     let registration = workerBeforeLayout ? registerWorker() : undefined;
     const startWorkerLayout = vi.spyOn(injector.get(DocLayoutExecutorService), 'startLayout');
     injector.add([DocSelectionManagerService]);
+    injector.add([DocAutoFormatService]);
     injector.add([DocStateEmitService]);
     injector.add([DocMenuStyleService]);
     injector.add([IEditorService, { useClass: EditorService }]);
     const commands = injector.get(ICommandService);
-    [InsertTextCommand, IMEInputCommand, RichTextEditingMutation, SetTextSelectionsOperation]
+    [InsertTextCommand, AfterSpaceCommand, BreakLineCommand, IMEInputCommand, RichTextEditingMutation, SetTextSelectionsOperation]
         .forEach((command) => commands.registerCommand(command));
     const firstParagraph = 'Hello world';
     const drawingToken = withDrawing ? DataStreamTreeTokenType.CUSTOM_BLOCK : '';
-    const dataStream = `${firstParagraph}\r${drawingToken}${Array.from({ length: paragraphCount }, (_, i) => `Paragraph ${i} has enough words to wrap across several lines.\r`).join('')}\n`;
+    const separator = documentFlavor === DocumentFlavor.MODERN ? '\r\r' : '\r';
+    const dataStream = `${firstParagraph}\r${drawingToken}${Array.from({ length: paragraphCount }, (_, i) => `Paragraph ${i} has enough words to wrap across several lines.${separator}`).join('')}\n`;
     const model = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, {
         id: 'bounded-caret-test',
         // A drawing on the edited page deliberately keeps the conservative
@@ -130,7 +135,7 @@ function createEditor(paragraphCount = 8, withDrawing = true, workerBeforeLayout
         },
         documentStyle: {
             ...(workerBeforeLayout ? { autoHyphenation: BooleanNumber.FALSE } : {}),
-            documentFlavor: DocumentFlavor.TRADITIONAL,
+            documentFlavor,
             pageSize: { width: 300, height: 700 },
             textStyle: { ff: 'Arial', fs: 14 },
             marginLeft: 20,
@@ -213,6 +218,41 @@ describe('DocRenderController bounded input publication', () => {
         vi.restoreAllMocks();
         vi.unstubAllGlobals();
         vi.useRealTimers();
+    });
+
+    it('keeps short Modern edits and spaces complete while Worker initialization is pending', async () => {
+        const editor = createEditor(3, false, false, DocumentFlavor.MODERN);
+        try {
+            await vi.dynamicImportSettled();
+            const beginExternalLayout = vi.spyOn(editor.skeleton, 'beginExternalLayout');
+            const applyLayoutPublication = vi.spyOn(editor.skeleton, 'applyLayoutPublication');
+            for (const [index, text] of ['A', ' ', '中', 'B'].entries()) {
+                editor.input.textContent = text;
+                editor.input.dispatchEvent(new InputEvent('input', { data: text, inputType: 'insertText' }));
+                await Promise.resolve();
+                await Promise.resolve();
+                expect(editor.selectionManager.getActiveTextRange()?.endOffset).toBe(6 + index);
+                expect(editor.selection.getActiveTextRange()?.endOffset).toBe(6 + index);
+                expect(editor.skeleton.getLayoutProgress()?.complete ?? true).toBe(true);
+                expect(editor.skeleton.findNodeByCharIndex(editor.model.getBody()!.dataStream.length - 3)).toBeDefined();
+            }
+            expect(editor.model.getBody()?.dataStream.startsWith('HelloA 中B world')).toBe(true);
+            expect(await editor.commands.executeCommand(BreakLineCommand.id)).toBe(true);
+            expect(editor.selection.getActiveTextRange()?.endOffset).toBe(10);
+            editor.input.textContent = 'C';
+            editor.input.dispatchEvent(new InputEvent('input', { data: 'C', inputType: 'insertText' }));
+            await Promise.resolve();
+            await Promise.resolve();
+            expect(editor.model.getBody()?.dataStream.startsWith('HelloA 中B\rC world')).toBe(true);
+            expect(editor.skeleton.getLayoutProgress()?.complete ?? true).toBe(true);
+            await vi.advanceTimersByTimeAsync(1_000);
+            expect(editor.startWorkerLayout).toHaveBeenCalledTimes(1);
+            expect(beginExternalLayout).not.toHaveBeenCalled();
+            expect(applyLayoutPublication).not.toHaveBeenCalled();
+            expect(editor.selection.getActiveTextRange()?.endOffset).toBe(11);
+        } finally {
+            editor.dispose();
+        }
     });
 
     it.each([1, 500])('opens %i paragraphs without waiting for full Main pagination', async (paragraphCount) => {

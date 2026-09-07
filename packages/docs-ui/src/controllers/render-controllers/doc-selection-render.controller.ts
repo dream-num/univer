@@ -46,7 +46,11 @@ import { filter, take } from 'rxjs';
 import { neoGetDocObject } from '../../basics/component-tools';
 import { findFirstCursorOffset } from '../../basics/selection';
 import { SetDocZoomRatioOperation } from '../../commands/operations/set-doc-zoom-ratio.operation';
-import { DOC_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, IDocEmbedInteractionBoundaryService, IDocEmbedRuntimeFocusCoordinator } from '../../services/doc-embed-integration.service';
+import {
+    DOC_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE,
+    IDocEmbedInteractionBoundaryService,
+    IDocEmbedRuntimeFocusCoordinator,
+} from '../../services/doc-embed-integration.service';
 import { IEditorService } from '../../services/editor/editor-manager.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 
@@ -329,6 +333,7 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
     }
 
     private _skeletonListener() {
+        let selectionInitialized = false;
         // Change text selection runtime(skeleton, scene) and update text selection manager current selection.
         this.disposeWithMe(this._docSkeletonManagerService.currentSkeleton$.subscribe((skeleton) => {
             if (!skeleton) return;
@@ -343,6 +348,12 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
                 if (this._isEmbedChildInteractionActive(unitId)) {
                     return;
                 }
+
+                // Synchronous layout publishes after every edit. Preserve the post-edit selection.
+                if (selectionInitialized) {
+                    return;
+                }
+                selectionInitialized = true;
 
                 //TODO: @JOCS Only for docs. move to docs in the future.
                 this._docSelectionRenderService.focus();

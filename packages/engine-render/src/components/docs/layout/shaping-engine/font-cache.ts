@@ -58,6 +58,11 @@ interface IGlyphHorizonData {
     pixelsPerEm?: number[];
 }
 
+/** Invalidates selected CSS font keys in both measurement caches; registered font data is retained. */
+export function invalidateDocumentFontMetrics(matches: (fontStyle: string) => boolean): boolean {
+    return FontCache.invalidateMetrics(matches);
+}
+
 export class FontCache {
     private static _getTextHeightCache: { [key: string]: { width: number; height: number } } = {};
 
@@ -69,6 +74,19 @@ export class FontCache {
 
     static get globalFontMeasureCache() {
         return this._globalFontMeasureCache;
+    }
+
+    static invalidateMetrics(matches: (fontStyle: string) => boolean): boolean {
+        let changed = false;
+        const keys = new Set([...this._globalFontMeasureCache.keys(), ...Object.keys(this._getTextHeightCache)]);
+        for (const key of keys) {
+            if (matches(key)) {
+                this._globalFontMeasureCache.delete(key);
+                delete this._getTextHeightCache[key];
+                changed = true;
+            }
+        }
+        return changed;
     }
 
     static setFontMeasureCache(fontStyle: string, content: string, tm: IMeasureTextCache) {

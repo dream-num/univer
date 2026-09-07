@@ -73,6 +73,13 @@ export class DocContextMenuRenderController extends Disposable implements IRende
                     return;
                 }
 
+                const bound = this._docEventManagerService.getParagraphByOffset(event.offsetX, event.offsetY);
+                const model = this._univerInstanceService.getUnit<DocumentDataModel>(this._context.unitId);
+                const segmentId = bound?.segmentId ?? '';
+                const paragraph = bound && model?.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.paragraphs?.find((item) => item.startIndex === bound.startIndex);
+                this._docEventManagerService.contextMenuParagraph = paragraph?.paragraphId
+                    ? { unitId: this._context.unitId, segmentId, paragraphId: paragraph.paragraphId }
+                    : null;
                 const position = this._contextService.getContextValue(FOCUSING_COMMON_DRAWINGS)
                     ? ContextMenuPosition.DRAWING
                     : ContextMenuPosition.MAIN_AREA;

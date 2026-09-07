@@ -18,6 +18,12 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'docs-ui': {
+        objectPermission: {
+            paragraphPermission: 'Autorizzazioni',
+            title: 'Autorizzazioni',
+            paragraph: 'Paragrafo',
+            section: 'Sezione',
+        },
         layout: {
             progress: 'Impaginazione del documento…',
             recovering: 'Ripristino del layout del documento…',

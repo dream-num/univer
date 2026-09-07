@@ -110,9 +110,16 @@ export { ObjectPermissionRuleModel } from './services/permission/object-permissi
 export type {
     IObjectPermissionRule,
     ISetObjectPermissionRuleMutationParams,
+    ISetObjectPermissionRulesMutationParams,
 } from './services/permission/object-permission-rule.model';
 export { OBJECT_PERMISSION_CONFIG_KEY, ObjectPermissionService } from './services/permission/object-permission.service';
-export type { IObjectPermissionPolicy, IObjectPermissionTarget } from './services/permission/object-permission.service';
+export type {
+    IObjectPermissionBatchResult,
+    IObjectPermissionChange,
+    IObjectPermissionPolicy,
+    IObjectPermissionTarget,
+    ISetObjectPermissionsCommandParams,
+} from './services/permission/object-permission.service';
 export { PermissionService } from './services/permission/permission.service';
 export { IPermissionService, PermissionStatus } from './services/permission/type';
 export type { IPermissionParam } from './services/permission/type';

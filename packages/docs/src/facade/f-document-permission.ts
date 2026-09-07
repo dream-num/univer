@@ -14,9 +14,20 @@
  * limitations under the License.
  */
 
-import type { ICommandService, IPermissionService } from '@univerjs/core';
+import type {
+    ICommandService,
+    IObjectPermissionBatchResult,
+    IObjectPermissionChange,
+    IPermissionService,
+    ISetObjectPermissionsCommandParams,
+} from '@univerjs/core';
 import type { DocumentUnitPermissionAction } from '@univerjs/docs';
-import { canEditDocumentTargets, getDocumentPermissionValue, SetDocumentPermissionCommand } from '@univerjs/docs';
+import {
+    canEditDocumentTargets,
+    getDocumentPermissionValue,
+    SetDocumentPermissionCommand,
+    SetDocumentPermissionsCommand,
+} from '@univerjs/docs';
 import { UnitAction } from '@univerjs/protocol';
 
 /**
@@ -29,6 +40,61 @@ export class FDocumentPermission {
         private readonly _commandService: ICommandService,
         private readonly _permissionService: IPermissionService
     ) {}
+
+    /**
+     * Creates or updates child-object edit policies in this unit; policy: null removes protection and restores inheritance.
+     *
+     * Requires Authz support and objectPermissionTypes configured for every target type. File and parent restrictions
+     * still apply. Use the exported permission object ID helpers, not raw object IDs or server permission IDs.
+     * The batch must be nonempty, contain distinct objects, and belong to this unit; file-wide policies are excluded.
+     * Other targets use getDocumentSectionPermissionObjectId and getDocumentEntityPermissionObjectId.
+     *
+     * edit: 'all' allows Unit editors, 'owner' restricts editing to the object owner, and 'members' selects existing
+     * Unit collaborators. Pass their collaborator records from the member service; this does not invite new users.
+     * Use strategies: [] for the default Edit strategy; child-object strategies support only UnitAction.Edit.
+     *
+     * Authz writes execute per object and can partially succeed. Inspect failed before retrying only those objects.
+     * refreshError means writes finished but permission readback failed; do not retry succeeded objects for that error.
+     * Successful binding changes share one undo entry; existing remote policy edits are not undoable.
+     * @param {IObjectPermissionChange[]} changes Permission object IDs and policies to apply.
+     * @returns {Promise<IObjectPermissionBatchResult>} Successful object IDs, per-object failures, and optional readback error.
+     * @throws {Error} Invalid batches or unsupported object types are rejected before Authz writes.
+     * @example Set owner/member editing and remove protection in one batch
+     * ```ts
+     * import type { ICollaborator } from '@univerjs/protocol';
+     * import { getDocumentParagraphPermissionObjectId } from '@univerjs/docs';
+     *
+     * // selectedMembers comes from the existing Unit collaborator picker/service.
+     * async function applyPermissions(selectedMembers: ICollaborator[]) {
+     *     if (!selectedMembers.length) throw new Error('Select at least one Unit collaborator.');
+     *     const document = univerAPI.getActiveDocument();
+     *     if (!document) throw new Error('No active document.');
+     *     const objects = document.getParagraphs().slice(0, 3);
+     *     const objectIds = objects.map((paragraph) =>
+     *         getDocumentParagraphPermissionObjectId(paragraph.getSegmentId(), paragraph.getId()));
+     *     if (objectIds.length < 3) throw new Error('This example requires three paragraphs.');
+     *     const result = await document.getPermission().setObjectPermissions([
+     *         { objectId: objectIds[0], policy: { edit: 'owner', collaborators: [], strategies: [] } },
+     *         { objectId: objectIds[1], policy: { edit: 'members', collaborators: selectedMembers, strategies: [] } },
+     *         { objectId: objectIds[2], policy: null },
+     *     ]);
+     *     // A policy creates protection if absent, or updates the existing policy when already configured.
+     *     for (const failure of result.failed) {
+     *         console.error(failure.objectId, failure.error);
+     *     }
+     *     if (result.refreshError) {
+     *         console.error(result.refreshError);
+     *     }
+     *     return result;
+     * }
+     * ```
+     */
+    async setObjectPermissions(changes: IObjectPermissionChange[]): Promise<IObjectPermissionBatchResult> {
+        return this._commandService.executeCommand<ISetObjectPermissionsCommandParams, IObjectPermissionBatchResult>(
+            SetDocumentPermissionsCommand.id,
+            { unitId: this._unitId, changes }
+        );
+    }
 
     /**
      * Sets one Document unit permission through the command system.

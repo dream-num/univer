@@ -16,7 +16,11 @@
 
 import type { IBatchAllowedResponse, ICollaborator, ICreateRequest, IListPermPointResponse } from '@univerjs/protocol';
 import type { IDisposable } from '../../common/di';
-import type { IObjectPermissionRule, ObjectPermissionRuleModel } from './object-permission-rule.model';
+import type {
+    IObjectPermissionRule,
+    ISetObjectPermissionRulesMutationParams,
+    ObjectPermissionRuleModel,
+} from './object-permission-rule.model';
 import type { IPermissionPoint } from './type';
 import { ObjectScope, UnitAction, UnitObject, UnitRole } from '@univerjs/protocol';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -43,6 +47,24 @@ export interface IObjectPermissionPolicy {
     strategies: IListPermPointResponse['objects'][number]['strategies'];
 }
 
+export interface IObjectPermissionChange {
+    objectId: string;
+    /** null removes protection and restores inheritance; it never deletes the object. */
+    policy: IObjectPermissionPolicy | null;
+}
+
+export interface ISetObjectPermissionsCommandParams {
+    unitId: string;
+    changes: IObjectPermissionChange[];
+}
+
+export interface IObjectPermissionBatchResult {
+    succeeded: string[];
+    failed: { objectId: string; error: unknown }[];
+    /** Writes have already completed; a refresh failure must not cause successful objects to be retried. */
+    refreshError?: unknown;
+}
+
 /** Frontend opt-in; does not change the Authz service interface or existing local setters. */
 export const OBJECT_PERMISSION_CONFIG_KEY = 'objectPermissionTypes';
 
@@ -67,7 +89,7 @@ const ROOT_OBJECT_TYPES: Partial<Record<UnitObject, UnitObject>> = {
 
 /** Coordinates Authz policy writes and the current user's effective permission cache. */
 export class ObjectPermissionService extends Disposable {
-    private readonly _models = new Map<UnitObject, { model: ObjectPermissionRuleModel; mutationId: string }>();
+    private readonly _models = new Map<UnitObject, { model: ObjectPermissionRuleModel; mutationId: string; batchMutationId?: string }>();
     private readonly _initialized = new Set<string>();
     private readonly _policies = new Map<string, IListPermPointResponse['objects'][number][]>();
     private readonly _generations = new Map<string, number>();
@@ -104,11 +126,11 @@ export class ObjectPermissionService extends Disposable {
         return this._injector.get(IAuthzIoService);
     }
 
-    registerRuleModel(rootType: UnitObject, model: ObjectPermissionRuleModel, mutationId: string): IDisposable {
+    registerRuleModel(rootType: UnitObject, model: ObjectPermissionRuleModel, mutationId: string, batchMutationId?: string): IDisposable {
         if (this._models.has(rootType)) {
             throw new Error('Object permission rule model already registered.');
         }
-        this._models.set(rootType, { model, mutationId });
+        this._models.set(rootType, { model, mutationId, batchMutationId });
         const subscription = model.changed$.subscribe((unitId) => {
             this._generations.delete(unitId);
             this._policies.delete(unitId);
@@ -302,8 +324,16 @@ export class ObjectPermissionService extends Disposable {
 
     /** Must be called from a product permission Command. */
     async save(target: IObjectPermissionTarget, policy: IObjectPermissionPolicy): Promise<void> {
-        this._assertSupported(target);
         const permissionId = this._getRule(target)?.permissionId;
+        const rule = await this._writePolicy(target, policy, permissionId);
+        if (rule) {
+            await this._commitRule(target, rule, permissionId);
+        }
+        await this.refreshUnit(target.unitId);
+    }
+
+    private async _writePolicy(target: IObjectPermissionTarget, policy: IObjectPermissionPolicy, permissionId: string | undefined): Promise<IObjectPermissionRule | undefined> {
+        this._assertSupported(target);
         if (!await this.canManage(target)) {
             throw new Error('Object permission management denied.');
         }
@@ -323,6 +353,9 @@ export class ObjectPermissionService extends Disposable {
             editScope = ObjectScope.OneSelf;
         }
         const scope = { read: previous?.scope?.read ?? ObjectScope.AllCollaborator, edit: editScope };
+        if (this._getRule(target)?.permissionId !== permissionId) {
+            throw new Error('Object permission binding changed during the request.');
+        }
         let objectID = this._getAuthzId(target);
         if (!objectID) {
             const payload = {
@@ -352,11 +385,8 @@ export class ObjectPermissionService extends Disposable {
             if (!objectID) {
                 throw new Error('Authz did not return a permission ID.');
             }
-            await this._commitRule(target, { objectId: target.objectId, objectType: target.objectType, permissionId: objectID }, permissionId);
+            return { objectId: target.objectId, objectType: target.objectType, permissionId: objectID };
         } else {
-            if (this._getRule(target)?.permissionId !== permissionId) {
-                throw new Error('Object permission binding changed during the request.');
-            }
             await this._authz.update({
                 unitID: target.unitId,
                 objectID,
@@ -368,8 +398,85 @@ export class ObjectPermissionService extends Disposable {
                 collaborators: target.objectId === target.unitId ? undefined : { collaborators: policy.edit === 'members' ? policy.collaborators : [] },
             });
         }
-        // Never use the requested boolean as this user's result: owners and collaborators differ.
-        await this.refreshUnit(target.unitId);
+        return undefined;
+    }
+
+    /**
+     * Called by product Commands. Authz writes remain per object, so failures are reported per object.
+     * Successful binding changes share one undo entry; updates to existing remote policies are not undoable.
+     */
+    async saveMany(changes: (IObjectPermissionTarget & { policy: IObjectPermissionPolicy | null })[]): Promise<IObjectPermissionBatchResult> {
+        const first = changes[0];
+        const registration = first && this._models.get(ROOT_OBJECT_TYPES[first.objectType]!);
+        if (!first || !registration?.batchMutationId || changes.some((target) =>
+            target.unitId !== first.unitId || target.objectId === first.unitId ||
+            ROOT_OBJECT_TYPES[target.objectType] !== ROOT_OBJECT_TYPES[first.objectType] || !this.supports(target)) ||
+            new Set(changes.map((target) => `${target.objectType}/${target.objectId}`)).size !== changes.length) {
+            throw new Error('Invalid object permission batch.');
+        }
+        const result: IObjectPermissionBatchResult = { succeeded: [], failed: [] };
+        const pending: { target: IObjectPermissionTarget; rule: IObjectPermissionRule | null; previous: IObjectPermissionRule | null }[] = [];
+        for (const target of changes) {
+            const previous = this._getRule(target) ?? null;
+            try {
+                let rule: IObjectPermissionRule | null | undefined;
+                if (target.policy === null) {
+                    if (!await this.canDelete(target)) {
+                        throw new Error('Object permission deletion denied.');
+                    }
+                    rule = null;
+                } else {
+                    rule = await this._writePolicy(target, target.policy, previous?.permissionId);
+                }
+                if (rule === undefined) {
+                    if (this._getRule(target)?.permissionId !== previous?.permissionId) {
+                        throw new Error('Object permission binding changed during the request.');
+                    }
+                    result.succeeded.push(target.objectId);
+                } else {
+                    pending.push({ target, rule, previous });
+                }
+            } catch (error) {
+                result.failed.push({ objectId: target.objectId, error });
+            }
+        }
+        // A concurrent binding write must not be overwritten by a late network response.
+        const applicable = pending.filter(({ target, previous }) => {
+            if (this._getRule(target)?.permissionId === previous?.permissionId) {
+                return true;
+            }
+            result.failed.push({ objectId: target.objectId, error: new Error('Object permission binding changed during the request.') });
+            return false;
+        });
+        if (applicable.length) {
+            const params: ISetObjectPermissionRulesMutationParams = {
+                unitId: first.unitId,
+                rules: applicable.map(({ target, rule }) => ({ objectId: target.objectId, objectType: target.objectType, rule })),
+            };
+            const undoParams: ISetObjectPermissionRulesMutationParams = {
+                unitId: first.unitId,
+                rules: applicable.map(({ target, previous }) => ({ objectId: target.objectId, objectType: target.objectType, rule: previous })),
+            };
+            try {
+                if (!await this._commands.executeCommand(registration.batchMutationId, params)) {
+                    throw new Error('Could not update the object permission bindings.');
+                }
+                this._injector.get(IUndoRedoService).pushUndoRedo({
+                    unitID: first.unitId,
+                    redoMutations: [{ id: registration.batchMutationId, params }],
+                    undoMutations: [{ id: registration.batchMutationId, params: undoParams }],
+                });
+                result.succeeded.push(...applicable.map(({ target }) => target.objectId));
+            } catch (error) {
+                result.failed.push(...applicable.map(({ target }) => ({ objectId: target.objectId, error })));
+            }
+        }
+        try {
+            await this.refreshUnit(first.unitId);
+        } catch (error) {
+            result.refreshError = error;
+        }
+        return result;
     }
 
     async refreshUnit(unitId: string): Promise<void> {

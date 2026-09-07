@@ -24,7 +24,6 @@ import { act, cleanup, render } from '@testing-library/react';
 import {
     ContextService,
     DesktopLogService,
-    IConfigService,
     IContextService,
     ILogService,
     Injector,
@@ -37,6 +36,7 @@ import {
 } from '@univerjs/core';
 import { BehaviorSubject, of, Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+
 import { IUIPartsService, UIPartsService } from '../../../services/parts/parts.service';
 import { ISidebarService } from '../../../services/sidebar/sidebar.service';
 import { ThemeSwitcherService } from '../../../services/theme-switcher/theme-switcher.service';
@@ -45,9 +45,13 @@ import { connectInjector } from '../../../utils/di';
 import { DesktopWorkbenchContent } from '../Workbench';
 
 describe('DesktopWorkbenchContent lifecycle', () => {
-    afterEach(cleanup);
+    afterEach(() => {
+        cleanup();
+        document.documentElement.classList.remove('univer-dark');
+        document.getElementById('univer-theme-css-variables')?.remove();
+    });
 
-    it('renders lifecycle and externally requested skeletons without unmounting ready content', () => {
+    it('keeps lifecycle UI and instance styles scoped to the workbench', () => {
         const lifecycle$ = new BehaviorSubject(LifecycleStages.Starting);
         const lifecycleService = {
             lifecycle$: lifecycle$.asObservable(),
@@ -66,13 +70,12 @@ describe('DesktopWorkbenchContent lifecycle', () => {
             }],
             [ThemeService, {
                 useValue: {
-                    currentTheme$: of({}),
-                    darkMode$: of(false),
-                    darkMode: false,
+                    currentTheme$: of({ primary: { color: 'red' } }),
+                    darkMode$: of(true),
+                    darkMode: true,
                 },
             }],
-            [ThemeSwitcherService, { useValue: { injectThemeToHead: () => {} } }],
-            [IConfigService, { useValue: { getConfig: () => ({ popupRootId: 'test-popup-root' }) } }],
+            [ThemeSwitcherService],
             [IContextService, { useClass: ContextService }],
             [ILogService, { useClass: DesktopLogService }],
             [IUniverInstanceService, { useClass: UniverInstanceService }],
@@ -108,6 +111,18 @@ describe('DesktopWorkbenchContent lifecycle', () => {
         expect(result.container.querySelector('[data-u-comp="workbench-layout"]')).not.toBeNull();
         expect(onRendered).not.toHaveBeenCalled();
 
+        const workbenchRoots = Array.from(result.container.querySelectorAll<HTMLElement>('[data-univer-root]'));
+        const portalRoot = Array.from(document.body.children)
+            .find((element): element is HTMLElement => element instanceof HTMLElement && element.hasAttribute('data-univer-root'));
+        expect(workbenchRoots).toHaveLength(2);
+        expect(portalRoot).toBeDefined();
+        expect(document.documentElement.classList.contains('univer-dark')).toBe(false);
+        expect(document.getElementById('univer-theme-css-variables')).toBeNull();
+        for (const root of [...workbenchRoots, portalRoot!]) {
+            expect(root.classList.contains('univer-dark')).toBe(true);
+            expect(root.style.getPropertyValue('--univer-primary-color')).toBe('red');
+        }
+
         lifecycleService.stage = LifecycleStages.Ready;
         act(() => lifecycle$.next(LifecycleStages.Ready));
 
@@ -133,5 +148,8 @@ describe('DesktopWorkbenchContent lifecycle', () => {
 
         expect(result.container.querySelector('[aria-busy="true"]')).toBeNull();
         expect(result.container.querySelector('[data-u-comp="workbench-layout"]')).not.toBeNull();
+
+        result.unmount();
+        expect(portalRoot?.isConnected).toBe(false);
     });
 });

@@ -209,7 +209,6 @@ function getTextElement(text: string, classNamePart?: string): HTMLElement {
 
 describe('HelpFunction', () => {
     let container: HTMLDivElement;
-    let popupRoot: HTMLDivElement;
     let root: Root;
     let resizeObserver: typeof ResizeObserver | undefined;
 
@@ -218,10 +217,7 @@ describe('HelpFunction', () => {
         resizeObserver = globalThis.ResizeObserver;
         globalThis.ResizeObserver = HelpResizeObserver as typeof ResizeObserver;
         container = document.createElement('div');
-        popupRoot = document.createElement('div');
-        popupRoot.id = 'univer-popup-portal';
         document.body.appendChild(container);
-        document.body.appendChild(popupRoot);
         root = createRoot(container);
     });
 
@@ -230,7 +226,6 @@ describe('HelpFunction', () => {
             root.unmount();
         });
         container.remove();
-        popupRoot.remove();
         if (resizeObserver) {
             globalThis.ResizeObserver = resizeObserver;
         } else {

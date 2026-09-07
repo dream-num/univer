@@ -18,48 +18,22 @@ import type { Theme } from '@univerjs/themes';
 import { Disposable } from '@univerjs/core';
 
 export class ThemeSwitcherService extends Disposable {
-    private _styleSheetId = 'univer-theme-css-variables';
-
-    injectThemeToHead(theme: Theme) {
-        function generateCSSVariables(theme: any, prefix = '--univer') {
-            const variables: string[] = [];
-
-            function traverse(obj: any, path = '') {
-                for (const key in obj) {
-                    const value = obj[key];
-                    const currentPath = path ? `${path}-${key}` : key;
-
-                    if (typeof value === 'object' && value !== null) {
-                        traverse(value, currentPath);
-                    } else {
-                        variables.push(`${prefix}-${currentPath}: ${value};`);
-                    }
+    applyTheme(theme: Theme, roots: HTMLElement[]): void {
+        function applyCSSVariables(value: unknown, path: string[] = []) {
+            if (typeof value === 'object' && value !== null) {
+                for (const [key, child] of Object.entries(value)) {
+                    applyCSSVariables(child, [...path, key]);
                 }
+
+                return;
             }
 
-            traverse(theme);
-            return variables.join('\n');
+            const property = `--univer-${path.join('-')}`;
+            for (const root of roots) {
+                root.style.setProperty(property, String(value));
+            }
         }
 
-        const cssVariables = generateCSSVariables(theme);
-
-        const existingStyleElement = document.getElementById(this._styleSheetId);
-        if (existingStyleElement) {
-            existingStyleElement.remove();
-        }
-
-        const styleElement = document.createElement('style');
-        styleElement.setAttribute('id', this._styleSheetId);
-        styleElement.textContent = `:root {\n${cssVariables}\n}`;
-        document.head.appendChild(styleElement);
-    }
-
-    override dispose() {
-        super.dispose();
-
-        // const existingStyleElement = document.getElementById(this._styleSheetId);
-        // if (existingStyleElement) {
-        //     document.head.removeChild(existingStyleElement);
-        // }
+        applyCSSVariables(theme);
     }
 }

@@ -69,6 +69,17 @@ describe('Gallery', () => {
         expect(img).toHaveAttribute('alt', 'Image 1 of 3');
     });
 
+    it('renders in the configured portal container', () => {
+        const mountContainer = document.createElement('div');
+        render(
+            <ConfigProvider locale={enUS.design} mountContainer={mountContainer}>
+                <Gallery images={images} open />
+            </ConfigProvider>
+        );
+
+        expect(mountContainer.querySelector('[data-u-comp="gallery"]')).not.toBeNull();
+    });
+
     it('calls onOpenChange(false) when clicking the overlay', () => {
         const onOpenChange = vi.fn();
         renderGallery({ images, open: true, onOpenChange });

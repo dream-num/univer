@@ -16,13 +16,19 @@
 
 import type { ComponentPropsWithoutRef, ElementRef } from 'react';
 import { Content, Portal, Root, Trigger } from '@radix-ui/react-hover-card';
-import { forwardRef } from 'react';
+import { forwardRef, useContext } from 'react';
+
 import { borderClassName } from '../../helper/class-utilities';
 import { clsx } from '../../helper/clsx';
+import { ConfigContext } from '../config-provider/ConfigProvider';
 
 const HoverCardPrimitive = Root;
 
-const HoverCardPortal = Portal;
+function HoverCardPortal(props: ComponentPropsWithoutRef<typeof Portal>) {
+    const { mountContainer } = useContext(ConfigContext);
+
+    return <Portal container={mountContainer ?? undefined} {...props} />;
+}
 
 const HoverCardTrigger = Trigger;
 

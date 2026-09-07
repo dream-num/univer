@@ -14,8 +14,76 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
+/**
+ * @vitest-environment jsdom
+ */
+
+import type { ComponentType } from 'react';
+import type { IRectPopupProps } from '../RectPopup';
+import { cleanup, render } from '@testing-library/react';
+import { IConfigService, Injector, LocaleService } from '@univerjs/core';
+import { ConfigProvider } from '@univerjs/design';
+import { BehaviorSubject } from 'rxjs';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
+import { connectInjector } from '../../../../utils/di';
 import { RectPopup } from '../RectPopup';
+
+afterEach(() => {
+    cleanup();
+    document.body.replaceChildren();
+    vi.unstubAllGlobals();
+});
+
+function renderPortalInFrame() {
+    vi.stubGlobal('ResizeObserver', class {
+        observe(): void {}
+        disconnect(): void {}
+    });
+    vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
+        callback(0);
+        return 0;
+    });
+
+    const iframe = document.createElement('iframe');
+    const hostPopupRoot = document.createElement('div');
+    hostPopupRoot.id = 'frame-popup-root';
+    document.body.append(iframe, hostPopupRoot);
+
+    const frameDocument = iframe.contentDocument!;
+    const renderRoot = frameDocument.createElement('div');
+    const mountContainer = frameDocument.createElement('div');
+    frameDocument.body.append(renderRoot, mountContainer);
+
+    const direction$ = new BehaviorSubject('ltr');
+    const injector = new Injector([
+        [IConfigService, { useValue: { getConfig: () => ({ popupRootId: hostPopupRoot.id }) } }],
+        [LocaleService, { useValue: { direction$ } }],
+    ]);
+    const ConnectedRectPopup = connectInjector(RectPopup, injector) as ComponentType<IRectPopupProps>;
+    render(
+        <ConfigProvider mountContainer={mountContainer}>
+            <ConnectedRectPopup
+                anchorRect$={new BehaviorSubject({ left: 0, top: 0, right: 10, bottom: 10 })}
+                portal
+            >
+                Frame popup
+            </ConnectedRectPopup>
+        </ConfigProvider>,
+        { container: renderRoot }
+    );
+
+    return { hostPopupRoot, mountContainer };
+}
+
+describe('RectPopup portal', () => {
+    it('uses the ConfigProvider mount container', () => {
+        const { hostPopupRoot, mountContainer } = renderPortalInFrame();
+
+        expect(mountContainer.querySelector('[data-u-comp="rect-popup"]')?.textContent).toBe('Frame popup');
+        expect(hostPopupRoot.childElementCount).toBe(0);
+    });
+});
 
 describe('RectPopup adaptive vertical placement', () => {
     it('keeps a horizontal popup inside an offset container', () => {

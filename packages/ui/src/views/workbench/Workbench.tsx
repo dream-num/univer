@@ -18,11 +18,12 @@ import type { Injector } from '@univerjs/core';
 import type { ComponentType } from 'react';
 import type { IUniverUIConfig } from '../../config/config';
 import type { IWorkbenchOptions } from '../../controllers/ui/ui.controller';
-import { IConfigService, LifecycleService, LifecycleStages, LocaleService, ThemeService } from '@univerjs/core';
+import { LifecycleService, LifecycleStages, LocaleService, ThemeService } from '@univerjs/core';
 import { borderBottomClassName, clsx, ConfigContext, ConfigProvider, render } from '@univerjs/design';
 import { useContext, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { map } from 'rxjs';
+
 import { UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { BuiltInUIPart } from '../../services/parts/parts.service';
 import { ThemeSwitcherService } from '../../services/theme-switcher/theme-switcher.service';
@@ -81,8 +82,8 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
     const themeService = useDependency(ThemeService);
     const themeSwitcherService = useDependency(ThemeSwitcherService);
     const contentRef = useRef<HTMLDivElement>(null);
-    const configService = useDependency(IConfigService);
-    const uiConfig = configService.getConfig(UI_PLUGIN_CONFIG_KEY) as IUniverUIConfig;
+    const workbenchRootRef = useRef<HTMLDivElement>(null);
+    const globalRootRef = useRef<HTMLDivElement>(null);
     const customHeaderComponents = useComponentsOfPart(BuiltInUIPart.CUSTOM_HEADER);
     const footerComponents = useComponentsOfPart(BuiltInUIPart.FOOTER);
     const headerComponents = useComponentsOfPart(BuiltInUIPart.HEADER);
@@ -95,26 +96,28 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
     const externalSkeletonVisible = useObservable(workbenchService.skeletonVisible$, undefined, true);
     const ready = lifecycleStage >= LifecycleStages.Ready;
 
-    const popupRootId = uiConfig?.popupRootId ?? 'univer-popup-portal';
+    const portalContainer = useMemo<HTMLElement>(() => {
+        const container = mountContainer.ownerDocument.createElement('div');
+        container.setAttribute('data-univer-root', '');
+        return container;
+    }, [mountContainer]);
 
     useLayoutEffect(() => {
         const sub = themeService.currentTheme$.subscribe((theme) => {
-            themeSwitcherService.injectThemeToHead(theme);
+            const roots = [workbenchRootRef.current, globalRootRef.current, portalContainer]
+                .filter((root): root is HTMLElement => root !== null);
+            themeSwitcherService.applyTheme(theme, roots);
         });
 
         return () => {
             sub.unsubscribe();
         };
-    }, []);
+    }, [portalContainer, themeService, themeSwitcherService]);
 
     const darkMode = useObservable(themeService.darkMode$, themeService.darkMode);
     useLayoutEffect(() => {
-        if (darkMode) {
-            document.documentElement.classList.add('univer-dark');
-        } else {
-            document.documentElement.classList.remove('univer-dark');
-        }
-    }, [darkMode]);
+        portalContainer.classList.toggle('univer-dark', darkMode);
+    }, [darkMode, portalContainer]);
 
     useEffect(() => {
         if (ready && contentRef.current) {
@@ -130,37 +133,34 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
     );
     const direction = useObservable(localeService.direction$, localeService.getDirection());
 
-    // Create a portal container for injecting global component themes.
-    const portalContainer = useMemo<HTMLElement>(() => document.createElement('div'), []);
-
     useEffect(() => {
-        document.body.appendChild(portalContainer);
+        mountContainer.ownerDocument.body.appendChild(portalContainer);
 
         return () => {
-            document.body.removeChild(portalContainer);
+            portalContainer.remove();
         };
     }, [mountContainer, portalContainer]);
 
     useEffect(() => {
-        portalContainer.dir = direction;
+        portalContainer.setAttribute('dir', direction);
     }, [direction, portalContainer]);
 
     return (
         <ConfigProvider locale={locale?.design} direction={direction} mountContainer={portalContainer}>
-            <div className="univer-relative univer-h-full univer-min-h-0">
-                {/**
-                  * IMPORTANT! This `tabIndex` should not be moved. This attribute allows the element to catch
-                  * all focusin event merged from its descendants. The DesktopLayoutService would listen to focusin events
-                  * bubbled to this element and refocus the input element.
-                  */}
+            <div
+                ref={workbenchRootRef}
+                data-univer-root
+                className={clsx('univer-relative univer-h-full univer-min-h-0', {
+                    'univer-dark': darkMode,
+                })}
+            >
+                {/* Keep tabIndex here so DesktopLayoutService can handle descendant focusin events. */}
                 <div
                     data-u-comp="workbench-layout"
-                    className={clsx(`
+                    className={`
                       univer-flex univer-h-full univer-min-h-0 univer-flex-col univer-bg-gray-0
                       dark:!univer-bg-gray-800
-                    `, {
-                        'univer-dark': darkMode,
-                    })}
+                    `}
                     tabIndex={-1}
                     onBlur={(e) => e.stopPropagation()}
                     onContextMenu={(e) => e.preventDefault()}
@@ -249,11 +249,15 @@ export function DesktopWorkbenchContent(props: IUniverWorkbenchProps) {
                 )}
             </div>
 
-            <div dir={direction}>
+            <div
+                ref={globalRootRef}
+                data-univer-root
+                className={darkMode ? 'univer-dark' : undefined}
+                dir={direction}
+            >
                 <ComponentContainer key="global" components={globalComponents} />
                 {contextMenu && <DesktopContextMenu />}
                 <FloatingContainer />
-                <div id={popupRootId} />
             </div>
         </ConfigProvider>
     );

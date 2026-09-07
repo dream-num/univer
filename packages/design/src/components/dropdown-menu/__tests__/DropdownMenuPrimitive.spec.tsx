@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import { render } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { cleanup, render } from '@testing-library/react';
+import { afterEach, describe, expect, it } from 'vitest';
+import { ConfigProvider } from '../../config-provider/ConfigProvider';
 import {
     DropdownMenuCheckboxItem,
     DropdownMenuContent,
@@ -33,6 +34,8 @@ import {
     DropdownMenuTrigger,
 } from '../DropdownMenuPrimitive';
 import '@testing-library/jest-dom/vitest';
+
+afterEach(cleanup);
 
 describe('DropdownMenuPrimitive', () => {
     it('should render primitive wrappers and variants', () => {
@@ -65,5 +68,20 @@ describe('DropdownMenuPrimitive', () => {
         );
 
         expect(container).toBeInTheDocument();
+    });
+
+    it('should portal content into the configured mount container', () => {
+        const mountContainer = document.createElement('div');
+
+        render(
+            <ConfigProvider mountContainer={mountContainer}>
+                <DropdownMenuPrimitive open>
+                    <DropdownMenuTrigger>Trigger</DropdownMenuTrigger>
+                    <DropdownMenuContent>Scoped content</DropdownMenuContent>
+                </DropdownMenuPrimitive>
+            </ConfigProvider>
+        );
+
+        expect(mountContainer.querySelector('[data-slot="dropdown-menu-content"]')).toHaveTextContent('Scoped content');
     });
 });

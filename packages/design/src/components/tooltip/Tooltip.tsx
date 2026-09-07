@@ -15,8 +15,9 @@
  */
 
 import type { ReactElement, ReactNode } from 'react';
-import { useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+
 import { clsx } from '../../helper/clsx';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 
@@ -72,7 +73,7 @@ export function Tooltip(props: ITooltipProps) {
         onVisibleChange,
     } = props;
 
-    const { direction, disableTooltips } = useContext(ConfigContext);
+    const { direction, disableTooltips, mountContainer } = useContext(ConfigContext);
 
     // Internal state for uncontrolled mode
     const [uncontrolledVisible, setUncontrolledVisible] = useState(false);
@@ -84,9 +85,6 @@ export function Tooltip(props: ITooltipProps) {
     const triggerRef = useRef<HTMLElement | null>(null);
     const tooltipRef = useRef<HTMLDivElement | null>(null);
     const arrowRef = useRef<HTMLDivElement | null>(null);
-
-    const [coords, setCoords] = useState<{ top: number; left: number } | null>(null);
-    const [currentPlacement, setCurrentPlacement] = useState(placement);
 
     function isContentOverflowing(element: HTMLElement): boolean {
         return Math.abs(element.scrollWidth - element.clientWidth) > 1;
@@ -112,25 +110,25 @@ export function Tooltip(props: ITooltipProps) {
         }
     }
 
-    // compute position when visible changes
-    useLayoutEffect(() => {
-        if (!visible) return;
+    const updatePosition = useCallback(() => {
         const trigger = triggerRef.current;
         const tip = tooltipRef.current;
-        if (!trigger || !tip) return;
+        const ownerWindow = mountContainer?.ownerDocument.defaultView;
+        if (!trigger || !tip || !ownerWindow) return;
 
         const triggerRect = trigger.getBoundingClientRect();
         const tipRect = tip.getBoundingClientRect();
         const offset = 8; // gap between trigger and tooltip
 
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
+        const viewportWidth = ownerWindow.innerWidth;
+        const viewportHeight = ownerWindow.innerHeight;
 
         const placements = [placement, 'bottom', 'top', 'right', 'left'] as const;
 
         let chosen: typeof placement = placement;
         let top = 0;
         let left = 0;
+        let found = false;
 
         const computeFor = (p: typeof placement) => {
             let t = 0;
@@ -160,58 +158,65 @@ export function Tooltip(props: ITooltipProps) {
                 chosen = p;
                 top = t;
                 left = l;
+                found = true;
                 break;
             }
         }
 
         // fallback to preferred placement computation if none fully fits
-        if (!top && !left) {
+        if (!found) {
             const c = computeFor(placement);
             top = Math.min(Math.max(0, c.t), viewportHeight - tipRect.height);
             left = Math.min(Math.max(0, c.l), viewportWidth - tipRect.width);
         }
 
-        setCurrentPlacement(chosen);
-        setCoords({ top: Math.round(top + window.scrollY), left: Math.round(left + window.scrollX) });
-    }, [visible, placement]);
+        tip.style.top = `${Math.round(top + ownerWindow.scrollY)}px`;
+        tip.style.left = `${Math.round(left + ownerWindow.scrollX)}px`;
+
+        const arrow = arrowRef.current;
+        if (!arrow) return;
+
+        arrow.style.top = '';
+        arrow.style.right = '';
+        arrow.style.bottom = '';
+        arrow.style.left = '';
+        if (chosen === 'bottom') {
+            arrow.style.top = '-5px';
+            arrow.style.left = '50%';
+            arrow.style.transform = 'translateX(-50%) rotate(45deg)';
+        } else if (chosen === 'top') {
+            arrow.style.bottom = '-5px';
+            arrow.style.left = '50%';
+            arrow.style.transform = 'translateX(-50%) rotate(45deg)';
+        } else if (chosen === 'left') {
+            arrow.style.top = '50%';
+            arrow.style.right = '-5px';
+            arrow.style.transform = 'translateY(-50%) rotate(45deg)';
+        } else {
+            arrow.style.top = '50%';
+            arrow.style.left = '-5px';
+            arrow.style.transform = 'translateY(-50%) rotate(45deg)';
+        }
+    }, [mountContainer, placement]);
+
+    // Positioning is an external DOM synchronization and must complete before paint.
+    useLayoutEffect(() => {
+        if (visible) updatePosition();
+    }, [updatePosition, visible]);
 
     // update position on scroll/resize while visible
     useEffect(() => {
         if (!visible) return;
-        const handler = () => {
-            if (!triggerRef.current || !tooltipRef.current) return;
-            // trigger a layout effect recompute by toggling a state - here simply call the same logic by forcing effect run
-            // easiest: call the layout effect by updating a small state; but we'll just recompute coords directly here
-            const triggerRect = triggerRef.current.getBoundingClientRect();
-            const tipRect = tooltipRef.current.getBoundingClientRect();
-            const offset = 8;
+        const ownerWindow = mountContainer?.ownerDocument.defaultView;
+        if (!ownerWindow) return;
 
-            let top = 0;
-            let left = 0;
-            if (currentPlacement === 'bottom') {
-                top = triggerRect.bottom + offset;
-                left = triggerRect.left + triggerRect.width / 2 - tipRect.width / 2;
-            } else if (currentPlacement === 'top') {
-                top = triggerRect.top - tipRect.height - offset;
-                left = triggerRect.left + triggerRect.width / 2 - tipRect.width / 2;
-            } else if (currentPlacement === 'left') {
-                top = triggerRect.top + triggerRect.height / 2 - tipRect.height / 2;
-                left = triggerRect.left - tipRect.width - offset;
-            } else {
-                top = triggerRect.top + triggerRect.height / 2 - tipRect.height / 2;
-                left = triggerRect.right + offset;
-            }
-
-            setCoords({ top: Math.round(top + window.scrollY), left: Math.round(left + window.scrollX) });
-        };
-
-        window.addEventListener('scroll', handler, true);
-        window.addEventListener('resize', handler);
+        ownerWindow.addEventListener('scroll', updatePosition, true);
+        ownerWindow.addEventListener('resize', updatePosition);
         return () => {
-            window.removeEventListener('scroll', handler, true);
-            window.removeEventListener('resize', handler);
+            ownerWindow.removeEventListener('scroll', updatePosition, true);
+            ownerWindow.removeEventListener('resize', updatePosition);
         };
-    }, [visible, currentPlacement]);
+    }, [mountContainer, updatePosition, visible]);
 
     // build trigger element: wrap children in an element that holds ref and handlers.
     // Note: we always wrap rather than attempting to forward refs into arbitrary child components.
@@ -242,7 +247,7 @@ export function Tooltip(props: ITooltipProps) {
 
     // tooltip node
     let tooltipNode: ReactElement | null = null;
-    if (typeof document !== 'undefined' && visible && title && document.body) {
+    if (visible && title && mountContainer) {
         tooltipNode = createPortal(
             <div
                 ref={tooltipRef}
@@ -256,8 +261,8 @@ export function Tooltip(props: ITooltipProps) {
                   dark:!univer-bg-gray-100 dark:!univer-text-gray-900
                 `, className)}
                 style={{
-                    top: coords?.top ?? -9999,
-                    left: coords?.left ?? -9999,
+                    top: -9999,
+                    left: -9999,
                 }}
                 onMouseEnter={() => showTooltip()}
                 onMouseLeave={() => hideTooltip()}
@@ -271,14 +276,14 @@ export function Tooltip(props: ITooltipProps) {
                     `}
                     style={{
                         // position arrow based on placement
-                        ...(currentPlacement === 'bottom' && { top: -5, left: '50%', transform: 'translateX(-50%) rotate(45deg)' }),
-                        ...(currentPlacement === 'top' && { bottom: -5, left: '50%', transform: 'translateX(-50%) rotate(45deg)' }),
-                        ...(currentPlacement === 'left' && { right: -5, top: '50%', transform: 'translateY(-50%) rotate(45deg)' }),
-                        ...(currentPlacement === 'right' && { left: -5, top: '50%', transform: 'translateY(-50%) rotate(45deg)' }),
+                        ...(placement === 'bottom' && { top: -5, left: '50%', transform: 'translateX(-50%) rotate(45deg)' }),
+                        ...(placement === 'top' && { bottom: -5, left: '50%', transform: 'translateX(-50%) rotate(45deg)' }),
+                        ...(placement === 'left' && { right: -5, top: '50%', transform: 'translateY(-50%) rotate(45deg)' }),
+                        ...(placement === 'right' && { left: -5, top: '50%', transform: 'translateY(-50%) rotate(45deg)' }),
                     }}
                 />
             </div>,
-            document.body
+            mountContainer
         );
     }
 

@@ -16,6 +16,7 @@
 
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { ConfigProvider } from '../../config-provider/ConfigProvider';
 import { Tooltip } from '../Tooltip';
 import '@testing-library/jest-dom/vitest';
@@ -71,6 +72,19 @@ describe('Tooltip', () => {
         await waitFor(() => {
             expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
         });
+    });
+
+    it('renders in the configured portal container', () => {
+        const mountContainer = document.createElement('div');
+        render(
+            <ConfigProvider mountContainer={mountContainer}>
+                <Tooltip title="Scoped tip" visible>
+                    Trigger
+                </Tooltip>
+            </ConfigProvider>
+        );
+
+        expect(mountContainer.querySelector('[role="tooltip"]')).toHaveTextContent('Scoped tip');
     });
 
     it('should notify visibility changes in controlled mode', () => {

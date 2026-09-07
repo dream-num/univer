@@ -17,7 +17,6 @@
 import type { IUniverUIConfig } from './config/config';
 import {
     DependentOn,
-    generateRandomId,
     IConfigService,
     IConfirmService,
     IContextService,
@@ -102,10 +101,7 @@ export class UniverMobileUIPlugin extends Plugin {
 
         // Manage the plugin configuration.
         const { menu, ...rest } = merge(
-            {
-                popupRootId: `univer-popup-portal-${generateRandomId(6)}`,
-                disableAutoFocus: true,
-            },
+            { disableAutoFocus: true },
             defaultPluginConfig,
             this._config
         );

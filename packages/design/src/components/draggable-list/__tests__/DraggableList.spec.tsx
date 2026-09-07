@@ -14,21 +14,27 @@
  * limitations under the License.
  */
 
+import type { ReactNode } from 'react';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+
+import { ConfigProvider } from '../../config-provider/ConfigProvider';
 import { DraggableList } from '../DraggableList';
 import '@testing-library/jest-dom/vitest';
+
+const createPortalMock = vi.hoisted(() => vi.fn((node: ReactNode) => node));
 
 vi.mock('react-dom', async () => {
     const actual = await vi.importActual<typeof import('react-dom')>('react-dom');
     return {
         ...actual,
-        createPortal: (node: any) => node,
+        createPortal: createPortalMock,
     };
 });
 
 afterEach(() => {
     cleanup();
+    createPortalMock.mockClear();
     vi.restoreAllMocks();
 });
 
@@ -62,18 +68,21 @@ describe('DraggableList', () => {
         const onListChange = vi.fn();
         const onDragStart = vi.fn();
         const onDragStop = vi.fn();
+        const mountContainer = document.createElement('div');
 
         const { container } = render(
-            <DraggableList<IItem>
-                list={BASE_LIST}
-                idKey="id"
-                rowHeight={36}
-                margin={[4, 6]}
-                onListChange={onListChange}
-                onDragStart={onDragStart}
-                onDragStop={onDragStop}
-                itemRender={(item) => <div>{item.label}</div>}
-            />
+            <ConfigProvider mountContainer={mountContainer}>
+                <DraggableList<IItem>
+                    list={BASE_LIST}
+                    idKey="id"
+                    rowHeight={36}
+                    margin={[4, 6]}
+                    onListChange={onListChange}
+                    onDragStart={onDragStart}
+                    onDragStop={onDragStop}
+                    itemRender={(item) => <div>{item.label}</div>}
+                />
+            </ConfigProvider>
         );
 
         const listRoot = container.querySelector('.univer-flex-col') as HTMLElement;
@@ -104,6 +113,7 @@ describe('DraggableList', () => {
         });
 
         expect(container.querySelector('.univer-pointer-events-none')).toBeInTheDocument();
+        expect(createPortalMock).toHaveBeenCalledWith(expect.anything(), mountContainer);
 
         fireEvent.pointerMove(window, {
             pointerId: 1,

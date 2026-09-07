@@ -17,6 +17,7 @@
 import { CloseIcon, OneToOneIcon, ZoomInIcon, ZoomOutIcon } from '@univerjs/icons';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+
 import { clsx } from '../../helper/clsx';
 import { Button } from '../button/Button';
 import { ConfigContext } from '../config-provider/ConfigProvider';
@@ -45,7 +46,7 @@ export function Gallery(props: IGalleryProps) {
     const [isVisible, setIsVisible] = useState(Boolean(open));
     const [activeImageIndex, setActiveImageIndex] = useState(0);
     const [zoomLevel, setZoomLevel] = useState(1);
-    const { direction, locale } = useContext(ConfigContext);
+    const { direction, locale, mountContainer } = useContext(ConfigContext);
 
     const dialogRef = useRef<HTMLDivElement>(null);
     const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -147,7 +148,7 @@ export function Gallery(props: IGalleryProps) {
         };
     }, [open]);
 
-    if (!open && !isVisible) return null;
+    if ((!open && !isVisible) || !mountContainer) return null;
 
     function handleToggleZoom(ratio: number | 'reset') {
         if (ratio === 'reset') {
@@ -290,6 +291,6 @@ export function Gallery(props: IGalleryProps) {
                 </Button>
             </footer>
         </div>,
-        document.body
+        mountContainer
     );
 }

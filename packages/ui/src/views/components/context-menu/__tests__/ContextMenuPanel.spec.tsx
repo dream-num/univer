@@ -19,6 +19,7 @@ import type { IValueOption } from '../../../../services/menu/menu';
 import type { IMenuSchema } from '../../../../services/menu/menu-manager.service';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { ILogService, Injector, LocaleService } from '@univerjs/core';
+import { ConfigProvider } from '@univerjs/design';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ComponentManager, IconManager } from '../../../../common';
@@ -387,23 +388,30 @@ describe('ContextMenuPanel', () => {
     });
 
     it('enters, navigates, and exits a submenu with arrow keys', async () => {
-        renderWithDependencies(<ContextMenuPanel menuType="root" />, {
-            root: [
-                {
-                    key: 'arrange',
-                    order: 0,
-                    item: {
-                        id: 'arrange',
-                        type: MenuItemType.SUBITEMS,
-                        title: 'Arrange',
+        const mountContainer = document.createElement('div');
+        document.body.appendChild(mountContainer);
+        renderWithDependencies(
+            <ConfigProvider mountContainer={mountContainer}>
+                <ContextMenuPanel menuType="root" />
+            </ConfigProvider>,
+            {
+                root: [
+                    {
+                        key: 'arrange',
+                        order: 0,
+                        item: {
+                            id: 'arrange',
+                            type: MenuItemType.SUBITEMS,
+                            title: 'Arrange',
+                        },
                     },
-                },
-            ],
-            arrange: [
-                createButtonItem('bring-front', { title: 'Bring to Front' }),
-                createButtonItem('send-back', { title: 'Send to Back' }),
-            ],
-        });
+                ],
+                arrange: [
+                    createButtonItem('bring-front', { title: 'Bring to Front' }),
+                    createButtonItem('send-back', { title: 'Send to Back' }),
+                ],
+            }
+        );
         const trigger = screen.getByRole('button', { name: 'translated:Arrange' });
         trigger.focus();
 
@@ -411,6 +419,7 @@ describe('ContextMenuPanel', () => {
         const first = await screen.findByRole('button', { name: 'translated:Bring to Front' });
         await nextFrame();
         await waitFor(() => expect(document.activeElement).toBe(first));
+        expect(mountContainer.contains(first)).toBe(true);
 
         fireEvent.keyDown(first, { key: 'ArrowDown' });
         const second = screen.getByRole('button', { name: 'translated:Send to Back' });
@@ -418,6 +427,7 @@ describe('ContextMenuPanel', () => {
 
         fireEvent.keyDown(second, { key: 'ArrowLeft' });
         expect(document.activeElement).toBe(trigger);
+        mountContainer.remove();
     });
 
     it('selects an option from a selector submenu with the selector command id', () => {

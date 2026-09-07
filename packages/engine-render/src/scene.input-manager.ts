@@ -410,29 +410,30 @@ export class InputManager extends Disposable {
      * @param offsetX
      * @param offsetY
      */
-    private _getObjectAtPos(offsetX: number, offsetY: number) {
-        return this._scene?.pick(Vector2.FromArray([offsetX, offsetY]));
+    private _getObjectAtPos(offsetX: number, offsetY: number, deviceType?: DeviceType) {
+        return this._scene?.pick(Vector2.FromArray([offsetX, offsetY]), deviceType);
     }
 
     private _getObjectAtEvent(evt: IMouseEvent) {
         if (evt.deviceType !== DeviceType.Touch) {
-            return this._getObjectAtPos(evt.offsetX, evt.offsetY);
+            return this._getObjectAtPos(evt.offsetX, evt.offsetY, evt.deviceType);
         }
 
         const engine = this._scene.getEngine();
         const canvas = engine?.getCanvasElement();
         if (!engine || !canvas || !Number.isFinite(evt.clientX) || !Number.isFinite(evt.clientY)) {
-            return this._getObjectAtPos(evt.offsetX, evt.offsetY);
+            return this._getObjectAtPos(evt.offsetX, evt.offsetY, evt.deviceType);
         }
 
         const rect = canvas.getBoundingClientRect();
         if (rect.width <= 0 || rect.height <= 0) {
-            return this._getObjectAtPos(evt.offsetX, evt.offsetY);
+            return this._getObjectAtPos(evt.offsetX, evt.offsetY, evt.deviceType);
         }
 
         return this._getObjectAtPos(
             (evt.clientX - rect.left) * engine.width / rect.width,
-            (evt.clientY - rect.top) * engine.height / rect.height
+            (evt.clientY - rect.top) * engine.height / rect.height,
+            evt.deviceType
         );
     }
 

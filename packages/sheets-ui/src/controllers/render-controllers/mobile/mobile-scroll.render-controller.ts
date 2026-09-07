@@ -29,7 +29,7 @@ import {
     RANGE_TYPE,
     toDisposable,
 } from '@univerjs/core';
-import { IRenderManagerService, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
+import { DeviceType, IRenderManagerService, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import { ScrollToCellOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { MobileZoomIndicator } from '@univerjs/ui';
 import { ScrollCommand, SetScrollRelativeCommand } from '../../../commands/commands/set-scroll.command';
@@ -779,7 +779,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
             // A drawing, selection handle, or another canvas overlay owns this gesture.
             // Native touch listeners bypass the render event propagation chain, so the
             // sheet scroller must explicitly yield to the picked overlay object.
-            const pickedObject = scene.pick(Vector2.FromArray([offsetX, offsetY]));
+            const pickedObject = scene.pick(Vector2.FromArray([offsetX, offsetY]), DeviceType.Touch);
             if (pickedObject && pickedObject !== spreadsheet) return;
 
             lastTouchPos.x = offsetX;

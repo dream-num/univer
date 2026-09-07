@@ -20,6 +20,7 @@ import { Vector2 } from '../basics/vector2';
 import { Engine } from '../engine';
 import { Scene } from '../scene';
 import { Transformer } from '../scene.transformer';
+import { Control } from '../shape/control';
 import { Rect } from '../shape/rect';
 import { Viewport } from '../viewport';
 import { setupRenderTestEnv } from './render-test-utils';
@@ -52,6 +53,71 @@ describe('Transformer', () => {
         env.restore();
     });
 
+    it.each([0.35, 1, 2])('keeps resize and rotation touch targets in screen pixels at scale %s', (scale) => {
+        const engine = new Engine('touch-controls-engine', { elementWidth: 1600, elementHeight: 1600, dpr: 1 });
+        const scene = new Scene('touch-controls-scene', engine);
+        const viewport = new Viewport('touch-controls-viewport', scene, { left: 0, top: 0, width: 1600, height: 1600 });
+        scene.scale(scale, scale);
+        const rect = new Rect('touch-object', { left: 200, top: 200, width: 400, height: 300 });
+        scene.addObject(rect);
+        const transformer = new Transformer(scene, { rotateEnabled: true });
+        try {
+            transformer.setSelectedControl(rect);
+            for (const key of ['ResizeRB', 'Rotate__']) {
+                const anchor = scene.getAllObjectsByOrderForPick().find((object) => object.oKey.includes(key));
+                if (!(anchor instanceof Control)) {
+                    throw new TypeError(`Missing ${key} control`);
+                }
+                const artwork = anchor.getState();
+                const center = anchor.ancestorTransform.applyPoint(new Vector2(anchor.width / 2, anchor.height / 2));
+                const point = new Vector2(center.x * scale + 20, center.y * scale);
+                expect(scene.pick(point, DeviceType.Touch)).toBe(anchor);
+                expect(scene.pick(point, DeviceType.Mouse)).not.toBe(anchor);
+                expect(anchor.getState()).toEqual(artwork);
+            }
+        } finally {
+            transformer.dispose();
+            viewport.dispose();
+            scene.dispose();
+            engine.dispose();
+        }
+    });
+
+    it('chooses the nearest touch control and leaves mouse, hidden controls and overlays precise', () => {
+        const engine = new Engine('adjust-hit-engine', { elementWidth: 800, elementHeight: 800, dpr: 1 });
+        const scene = new Scene('adjust-hit-scene', engine);
+        const viewport = new Viewport('adjust-hit-viewport', scene, { left: 0, top: 0, width: 800, height: 800 });
+        const object = new Rect('object', { left: 0, top: 0, width: 400, height: 300 });
+        const a = new Control('adjust-a', { left: 100, top: 100, width: 8, height: 8, angle: 45 });
+        const b = new Control('adjust-b', { left: 120, top: 100, width: 8, height: 8 });
+        scene.addObject(object, 1);
+        scene.addObjects([a, b], 2);
+        scene.attachControl();
+        const down = vi.fn();
+        const subscription = a.onPointerDown$.subscribeEvent(down);
+        try {
+            const point = new Vector2(112, 110);
+            expect(scene.pick(point, DeviceType.Touch)).toBe(a);
+            expect(scene.pick(point, DeviceType.Mouse)).toBe(object);
+            engine.getCanvasElement().dispatchEvent(createPointerEvent('pointerdown', point.x, point.y));
+            expect(down).toHaveBeenCalledTimes(1);
+            engine.getCanvasElement().dispatchEvent(createPointerEvent('pointerup', point.x, point.y));
+            a.hide();
+            expect(scene.pick(point, DeviceType.Touch)).toBe(b);
+            b.evented = false;
+            expect(scene.pick(point, DeviceType.Touch)).toBe(object);
+            b.evented = true;
+            const overlay = new Rect('overlay', { left: 100, top: 100, width: 40, height: 40 });
+            scene.addObject(overlay, 3);
+            expect(scene.pick(point, DeviceType.Touch)).toBe(overlay);
+        } finally {
+            subscription.unsubscribe();
+            viewport.dispose();
+            scene.dispose();
+            engine.dispose();
+        }
+    });
+
     it.each([0.5, 1, 2])('keeps all eight crop hit targets usable at scale %s without enlarging their artwork', (scale) => {
         const engine = new Engine('crop-hit-engine', { elementWidth: 800, elementHeight: 800, dpr: 1 });
         const scene = new Scene('crop-hit-scene', engine);
@@ -82,6 +148,7 @@ describe('Transformer', () => {
                 expect(hit(halfWidth + 1 / scale, 0)).toBe(false);
                 const point = anchor.ancestorTransform.applyPoint(new Vector2(anchor.width / 2, anchor.height / 2));
                 expect(scene.pick(new Vector2(point.x * scale, point.y * scale))).toBe(anchor);
+                expect(scene.pick(new Vector2(point.x * scale, point.y * scale), DeviceType.Touch)).toBe(anchor);
             }
         } finally {
             viewport.dispose();

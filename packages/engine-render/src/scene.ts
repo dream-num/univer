@@ -29,12 +29,14 @@ import type { Viewport } from './viewport';
 import { Disposable, EventSubject, sortRules, sortRulesByDesc, toDisposable, Tools } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
 import { CURSOR_TYPE, RENDER_CLASS_TYPE } from './basics/const';
+import { DeviceType } from './basics/i-events';
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './basics/interfaces';
 import { precisionTo, requestNewFrame } from './basics/tools';
 import { Transform } from './basics/transform';
 import { Layer, scrollAndClearCanvas } from './layer';
 import { InputManager } from './scene.input-manager';
 import { Transformer } from './scene.transformer';
+import { Control } from './shape/control';
 
 export const MAIN_VIEW_PORT_KEY = 'viewMain';
 
@@ -1276,7 +1278,7 @@ export class Scene extends Disposable {
      * @param {Vector2} coord
      * @return {Nullable<BaseObject | Scene>} object under the pointer
      */
-    pick(coord: Vector2): Nullable<BaseObject | Scene> {
+    pick(coord: Vector2, deviceType?: DeviceType): Nullable<BaseObject | Scene> {
         let pickedViewport = this.getActiveViewportByCoord(coord);
 
         if (!pickedViewport) {
@@ -1299,12 +1301,24 @@ export class Scene extends Disposable {
         const objectOrder = this.getAllObjectsByOrderForPick().reverse();
         const objectLength = objectOrder.length;
 
+        let nearestControl: Control | null = null;
+        let controlDistance = Number.POSITIVE_INFINITY;
+
         for (let i = 0; i < objectLength; i++) {
             const testObject = objectOrder[i];
             if (!testObject.visible || !testObject.evented || (testObject.isInGroup && testObject.parent?.classType === RENDER_CLASS_TYPE.GROUP && testObject.isDrawingObject)) {
                 continue;
             }
             const svCoord = vecFromSheetContent;
+            // Resolve overlapping touch targets by distance, without reaching through a higher overlay.
+            if (deviceType === DeviceType.Touch && testObject instanceof Control) {
+                const distance = testObject.getTouchHitDistance(svCoord);
+                if (distance < controlDistance) {
+                    nearestControl = testObject;
+                    controlDistance = distance;
+                }
+                continue;
+            }
             // if (o.isInGroup && o.parent?.classType === RENDER_CLASS_TYPE.GROUP) {
             //     const { cumLeft, cumTop } = this._getGroupCumLeftRight(o);
             //     svCoord = svCoord.clone().add(Vector2.FromArray([-cumLeft, -cumTop]));
@@ -1312,7 +1326,7 @@ export class Scene extends Disposable {
 
             if (testObject.isHit(svCoord)) {
                 if (testObject.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
-                    const pickedObject = (testObject as SceneViewer).pick(svCoord);
+                    const pickedObject = (testObject as SceneViewer).pick(svCoord, deviceType);
                     if (pickedObject) {
                         isPickedObject = pickedObject;
                     } else {
@@ -1326,12 +1340,16 @@ export class Scene extends Disposable {
                 testObject.classType === RENDER_CLASS_TYPE.SCENE_VIEWER &&
                 (testObject as SceneViewer).allowSelectedClipElement()
             ) {
-                const pickedObject = (testObject as SceneViewer).pick(svCoord);
+                const pickedObject = (testObject as SceneViewer).pick(svCoord, deviceType);
                 if (pickedObject) {
                     isPickedObject = pickedObject;
                     break;
                 }
             }
+        }
+
+        if (nearestControl) {
+            return nearestControl;
         }
 
         if (!isPickedObject && this._parent.classType === RENDER_CLASS_TYPE.ENGINE) {

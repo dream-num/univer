@@ -34,6 +34,7 @@ import { DEFAULT_TRANSFORMER_CONFIG } from './basics/transformer-config';
 import { Vector2 } from './basics/vector2';
 import { Group } from './group';
 import { ScrollTimer } from './scroll-timer';
+import { Control } from './shape/control';
 import { Line } from './shape/line';
 import { Rect } from './shape/rect';
 import { RegularPolygon } from './shape/regular-polygon';
@@ -146,7 +147,7 @@ class TransformerCropAnchor extends RegularPolygon {
     }
 }
 
-class TransformerAnchor extends Rect {
+class TransformerAnchor extends Control {
     protected override _draw(ctx: UniverRenderingContext) {
         if (!this.shadowColor || (!this.shadowBlur && !this.shadowOffsetX && !this.shadowOffsetY)) {
             Rect.drawWith(ctx, this as IRectProps);

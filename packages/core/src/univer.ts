@@ -38,6 +38,7 @@ import { LocaleService } from './services/locale/locale.service';
 import { DesktopLogService, ILogService } from './services/log/log.service';
 import { MentionIOLocalService } from './services/mention-io/mention-io-local.service';
 import { IMentionIOService } from './services/mention-io/type';
+import { ObjectPermissionService } from './services/permission/object-permission.service';
 import { PermissionService } from './services/permission/permission.service';
 import { IPermissionService } from './services/permission/type';
 import { mergeOverrideWithDependencies } from './services/plugin/plugin-override';
@@ -283,6 +284,7 @@ function createUniverInjector(parentInjector?: Injector, override?: DependencyOv
         // abstract services
         [IUniverInstanceService, { useClass: UniverInstanceService }],
         [IPermissionService, { useClass: PermissionService }],
+        [ObjectPermissionService],
         [ILogService, { useClass: DesktopLogService, lazy: true }],
         [ICommandService, { useClass: CommandService }],
         [IUndoRedoService, { useClass: LocalUndoRedoService, lazy: true }],

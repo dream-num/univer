@@ -19,7 +19,9 @@
 import type { IDocLayoutMountIdentity, IDocLayoutStartResult } from '@univerjs/docs';
 import type { IDocumentLayoutProgress } from '@univerjs/engine-render';
 import type { DocumentLayoutSchedulingSkeleton } from '../doc-layout-coordinator.service';
+import { createDocumentModelWithStyle, DocumentFlavor, LocaleService, Univer } from '@univerjs/core';
 import { DocLayoutSessionStatus } from '@univerjs/docs';
+import { DocumentSkeleton, DocumentViewModel } from '@univerjs/engine-render';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DocLayoutCoordinatorService } from '../doc-layout-coordinator.service';
 
@@ -63,6 +65,150 @@ describe('DocLayoutCoordinatorService', () => {
     afterEach(() => {
         vi.unstubAllGlobals();
         vi.useRealTimers();
+    });
+
+    it('finishes a short Modern edit with empty paragraphs before yielding the input frame', async () => {
+        const univer = new Univer();
+        const injector = univer.__getInjector();
+        injector.add([DocLayoutCoordinatorService]);
+        const coordinator = injector.get(DocLayoutCoordinatorService);
+        const content = 'First paragraph\r\rSecond paragraph\r\rThird paragraph\r\rLast paragraph\r';
+        const model = createDocumentModelWithStyle(content, {});
+        model.updateDocumentStyle({ documentFlavor: DocumentFlavor.MODERN, pageSize: { width: 600, height: 800 } });
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), injector.get(LocaleService));
+        skeleton.calculate();
+        await vi.dynamicImportSettled();
+        const onProgress = vi.fn();
+        const onForegroundReady = vi.fn();
+        try {
+            coordinator.schedule(skeleton, {
+                reason: 'edit',
+                anchor: 0,
+                foregroundEndOffset: model.getBody()!.dataStream.length - 2,
+                reuseUnaffectedTail: false,
+            }, { onProgress, onForegroundReady });
+
+            expect(onForegroundReady).toHaveBeenCalledWith(expect.objectContaining({ complete: true }));
+            expect(onProgress).toHaveBeenLastCalledWith(expect.objectContaining({ complete: true }));
+            expect(skeleton.getLayoutProgress()?.complete ?? true).toBe(true);
+            expect(coordinator.hasScheduledLayout()).toBe(false);
+        } finally {
+            skeleton.dispose();
+            univer.dispose();
+        }
+    });
+
+    it('keeps completed Main geometry while Worker synchronizes its revision', async () => {
+        const univer = new Univer();
+        const injector = univer.__getInjector();
+        injector.add([DocLayoutCoordinatorService]);
+        const coordinator = injector.get(DocLayoutCoordinatorService);
+        const model = createDocumentModelWithStyle('First\r\rLast\r', {});
+        model.updateDocumentStyle({ documentFlavor: DocumentFlavor.MODERN });
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), injector.get(LocaleService));
+        skeleton.calculate();
+        const completedGeometry = skeleton.getSkeletonData();
+        const beginExternalLayout = vi.spyOn(skeleton, 'beginExternalLayout');
+        const cancelExternalLayout = vi.spyOn(skeleton, 'cancelExternalLayout');
+        let identity: IDocLayoutMountIdentity;
+        const step = (overrides: Partial<IDocumentLayoutProgress>) => ({
+            ...identity,
+            modelRevision: 2,
+            metricsRevision: 1,
+            publication: null,
+            progress: createProgress({ mode: 'continuous', anchorReady: true, ...overrides }),
+        });
+        const executor = {
+            startLayout: vi.fn(async (request: IDocLayoutMountIdentity): Promise<IDocLayoutStartResult> => {
+                identity = request;
+                return { status: DocLayoutSessionStatus.ACCEPTED, step: step({ didPublish: true }) };
+            }),
+            publishBacklog: vi.fn(async () => step({ didPublish: false })),
+            stepLayout: vi.fn(async () => step({ didPublish: true, complete: true })),
+            getLayoutPage: vi.fn(),
+            cancelLayout: vi.fn(async () => {}),
+            disposeLayoutMount: vi.fn(async () => {}),
+        };
+        const onProgress = vi.fn();
+        const onComplete = vi.fn();
+        const onError = vi.fn();
+        try {
+            coordinator.scheduleWorker(
+                model.getUnitId(),
+                skeleton,
+                executor,
+                { reason: 'edit' },
+                undefined,
+                { onProgress, onComplete },
+                onError,
+                true
+            );
+            expect(beginExternalLayout).not.toHaveBeenCalled();
+            await vi.runAllTimersAsync();
+            expect(executor.startLayout).toHaveBeenCalledTimes(1);
+            expect(executor.stepLayout).toHaveBeenCalledTimes(1);
+            expect(onComplete).toHaveBeenCalledWith(expect.objectContaining({ complete: true }));
+            expect(onProgress).not.toHaveBeenCalled();
+            expect(onError).not.toHaveBeenCalled();
+            expect(skeleton.getSkeletonData()).toBe(completedGeometry);
+            expect(coordinator.hasScheduledLayout()).toBe(false);
+
+            coordinator.scheduleWorker(
+                model.getUnitId(),
+                skeleton,
+                executor,
+                { reason: 'edit' },
+                undefined,
+                { onProgress },
+                onError,
+                true
+            );
+            coordinator.cancel();
+            await vi.runAllTimersAsync();
+            expect(executor.cancelLayout).toHaveBeenCalledTimes(1);
+            expect(cancelExternalLayout).not.toHaveBeenCalled();
+            expect(onProgress).not.toHaveBeenCalled();
+            expect(skeleton.getSkeletonData()).toBe(completedGeometry);
+        } finally {
+            skeleton.dispose();
+            univer.dispose();
+        }
+    });
+
+    it('yields the remaining Modern paragraphs when the synchronous budget is exhausted', async () => {
+        const univer = new Univer();
+        const injector = univer.__getInjector();
+        injector.add([DocLayoutCoordinatorService]);
+        const coordinator = injector.get(DocLayoutCoordinatorService);
+        const model = createDocumentModelWithStyle('Text\r\r'.repeat(100), {});
+        model.updateDocumentStyle({ documentFlavor: DocumentFlavor.MODERN });
+        const skeleton = DocumentSkeleton.create(new DocumentViewModel(model), injector.get(LocaleService));
+        skeleton.calculate();
+        await vi.dynamicImportSettled();
+        const onForegroundReady = vi.fn();
+        // A monotonic platform clock makes budget exhaustion independent of CI speed.
+        let elapsed = 0;
+        const now = vi.spyOn(performance, 'now').mockImplementation(() => ++elapsed);
+        try {
+            coordinator.schedule(skeleton, {
+                reason: 'edit',
+                anchor: 0,
+                foregroundEndOffset: model.getBody()!.dataStream.length - 2,
+                foregroundBudgetMs: 1,
+                reuseUnaffectedTail: false,
+            }, { onProgress: vi.fn(), onForegroundReady });
+            expect(onForegroundReady).not.toHaveBeenCalled();
+            expect(coordinator.hasScheduledLayout()).toBe(true);
+            expect(skeleton.getLayoutProgress()).toMatchObject({ complete: false, anchorReady: true });
+            expect(skeleton.getLayoutProgress()!.processedBlockCount).toBeLessThan(10);
+            now.mockRestore();
+            await vi.runAllTimersAsync();
+            expect(onForegroundReady).toHaveBeenCalledWith(expect.objectContaining({ complete: true }));
+        } finally {
+            now.mockRestore();
+            skeleton.dispose();
+            univer.dispose();
+        }
     });
 
     it('uses foreground slices until the anchor is ready and then finishes in idle slices', () => {

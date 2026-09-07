@@ -21,8 +21,12 @@ import type {
     IUpdateTextCommandParams,
 } from '../commands/commands/core-editing.command';
 import type { ICreateHeaderFooterCommandParams } from '../commands/commands/create-header-footer.command';
-import type { ISetSectionHeaderFooterLinkCommandParams } from '../commands/commands/set-section-header-footer-link.command';
-import type { IUpdateDocumentParagraphStyleCommandParams } from '../commands/commands/update-document-paragraph-style.command';
+import type {
+    ISetSectionHeaderFooterLinkCommandParams,
+} from '../commands/commands/set-section-header-footer-link.command';
+import type {
+    IUpdateDocumentParagraphStyleCommandParams,
+} from '../commands/commands/update-document-paragraph-style.command';
 import type {
     IDeleteDocumentSectionBreakCommandParams,
     IInsertDocumentColumnBreakCommandParams,
@@ -34,12 +38,16 @@ import {
     CustomCommandExecutionError,
     DeleteDirection,
     Disposable,
+    ErrorService,
     ICommandService,
+    Inject,
+    Injector,
     IPermissionService,
     IUniverInstanceService,
+    ObjectPermissionService,
     UniverInstanceType,
 } from '@univerjs/core';
-import { UnitAction } from '@univerjs/protocol';
+import { UnitAction, UnitObject } from '@univerjs/protocol';
 import { DeleteTextCommand, InsertTextCommand, UpdateTextCommand } from '../commands/commands/core-editing.command';
 import { CreateHeaderFooterCommand } from '../commands/commands/create-header-footer.command';
 import { SetDocumentPermissionCommand } from '../commands/commands/set-document-permission.command';
@@ -86,6 +94,7 @@ const DERIVED_DOCUMENT_MUTATION_IDS = new Set([
 
 export class DocPermissionController extends Disposable {
     constructor(
+        @Inject(Injector) private readonly _injector: Injector,
         @ICommandService private readonly _commandService: ICommandService,
         @IPermissionService private readonly _permissionService: IPermissionService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
@@ -101,10 +110,13 @@ export class DocPermissionController extends Disposable {
         }));
         this.disposeWithMe(this._univerInstanceService
             .getTypeOfUnitDisposed$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)
-            .subscribe((unit) => clearDocumentPermissionValuesForUnit(
-                this._permissionService,
-                unit.getUnitId()
-            )));
+            .subscribe((unit) => {
+                this._injector.get(ObjectPermissionService).clearUnit(unit.getUnitId());
+                clearDocumentPermissionValuesForUnit(
+                    this._permissionService,
+                    unit.getUnitId()
+                );
+            }));
     }
 
     private _registerUnitPermissionPoints(unitId: string): void {
@@ -114,6 +126,7 @@ export class DocPermissionController extends Disposable {
                 this._permissionService.addPermissionPoint(point);
             }
         });
+        this._injector.get(ObjectPermissionService).initializeUnit({ unitId, objectId: unitId, objectType: UnitObject.Document });
     }
 
     private _check(commandInfo: Readonly<ICommandInfo>, options?: IExecutionOptions): void {
@@ -129,6 +142,7 @@ export class DocPermissionController extends Disposable {
         }
         if (unitAction) {
             if (!getDocumentPermissionValue(this._permissionService, unitId, unitId, unitAction)) {
+                this._injector.get(ErrorService).emitPermissionDenied(unitId);
                 throw new CustomCommandExecutionError(`Document ${UnitAction[unitAction]} permission denied.`);
             }
             return;
@@ -145,6 +159,7 @@ export class DocPermissionController extends Disposable {
             return;
         }
         if (!canEditDocumentTargets(this._permissionService, unitId, targetObjectIds)) {
+            this._injector.get(ErrorService).emitPermissionDenied(unitId, targetObjectIds);
             throw new CustomCommandExecutionError('Document edit permission denied.');
         }
     }

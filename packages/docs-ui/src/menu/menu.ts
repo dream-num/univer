@@ -61,7 +61,7 @@ import {
     SYMBOL_PICKER_COMPONENT,
 } from '@univerjs/ui';
 
-import { combineLatest, distinctUntilChanged, map, Observable, shareReplay, startWith } from 'rxjs';
+import { combineLatest, distinctUntilChanged, map, Observable, of, shareReplay, startWith } from 'rxjs';
 import { OpenHeaderFooterPanelCommand } from '../commands/commands/doc-header-footer.command';
 import { HorizontalLineCommand } from '../commands/commands/doc-horizontal-line.command';
 import {
@@ -959,7 +959,11 @@ export function FloatTextStyleMenuItemFactory(accessor: IAccessor): IMenuSelecto
         id: FLOAT_TEXT_STYLE_MENU_ID,
         commandId: SetParagraphNamedStyleCommand.id,
         type: MenuItemType.SELECTOR,
-        icon: 'TextTypeIcon',
+        icon: of(''),
+        label: {
+            name: COMMON_LABEL_COMPONENT,
+            props: { selections: FLOAT_TEXT_STYLE_OPTIONS },
+        },
         tooltip: 'docs-ui.toolbar.heading.tooltip',
         selections: FLOAT_TEXT_STYLE_OPTIONS,
         value$: new Observable((subscriber) => {

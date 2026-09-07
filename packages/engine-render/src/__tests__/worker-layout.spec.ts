@@ -1113,7 +1113,7 @@ describe('worker document layout session', () => {
         sourceModel.dispose();
     });
 
-    it('preserves tables, column groups, drawings, lists, headers and footers across Worker transport', () => {
+    it.each([DocumentFlavor.TRADITIONAL, DocumentFlavor.MODERN])('preserves rich elements with bounded deferred snapshots across Worker transport (%s)', (flavor) => {
         vi.stubGlobal('document', undefined);
         vi.stubGlobal('OffscreenCanvas', class {
             getContext() {
@@ -1385,7 +1385,7 @@ describe('worker document layout session', () => {
                 },
             },
             documentStyle: {
-                documentFlavor: DocumentFlavor.TRADITIONAL,
+                documentFlavor: flavor,
                 pageSize: { width: 280, height: 220 },
                 marginTop: 20,
                 marginBottom: 20,
@@ -1420,7 +1420,15 @@ describe('worker document layout session', () => {
             incrementalProgress = incrementalSkeleton.stepIncrementalLayout(incrementalGeneration, 0);
         }
         expect(incrementalProgress.complete).toBe(true);
-        targetSkeleton.beginExternalLayout({ reason: 'initial' });
+        if (flavor === DocumentFlavor.MODERN) {
+            targetSkeleton.calculate();
+        }
+        targetSkeleton.beginExternalLayout({
+            reason: 'initial',
+            protectedRange: flavor === DocumentFlavor.MODERN
+                ? { mode: 'continuous', startOffset: 0, endOffset: dataStream.length }
+                : undefined,
+        });
 
         const generation = session.start({ reason: 'initial' });
         const publicationPayloads: string[] = [];
@@ -1429,6 +1437,21 @@ describe('worker document layout session', () => {
             if (result.publication != null) {
                 publicationPayloads.push(JSON.stringify(result.publication));
                 targetSkeleton.applyLayoutPublication(structuredClone(result.publication), result.progress);
+                if (result.publication.kind === 'block' && !result.progress.complete) {
+                    const deferred = (targetSkeleton as unknown as {
+                        _externalProtectedContinuousLayout: {
+                            pendingPublications: Array<Extract<NonNullable<LayoutPublication>, { kind: 'block' }>>;
+                        };
+                    })._externalProtectedContinuousLayout.pendingPublications;
+                    // Repeated snapshots must not retain one copy of all previous
+                    // tables, drawings and nested columns per published text delta.
+                    const retainedObjects = deferred.reduce((count, { block }) => count +
+                        block.skeTables.length + block.skeDrawings.length + block.skeColumnGroups.length, 0);
+                    const latest = result.publication.block;
+                    expect(retainedObjects).toBeLessThanOrEqual(
+                        latest.skeTables.length + latest.skeDrawings.length + latest.skeColumnGroups.length
+                    );
+                }
             }
             if (result.progress.complete) {
                 break;
@@ -1437,7 +1460,11 @@ describe('worker document layout session', () => {
         }
 
         expect(result.progress).toMatchObject({ complete: true, cancelled: false });
-        expect(result.progress.pageCount).toBeGreaterThan(1);
+        if (flavor === DocumentFlavor.MODERN) {
+            expect(result.progress.pageCount).toBe(1);
+        } else {
+            expect(result.progress.pageCount).toBeGreaterThan(1);
+        }
         expect(publicationPayloads.join('')).toContain(bodyDrawingId);
         expect(publicationPayloads.join('')).toContain(tableId);
         expect(publicationPayloads.join('')).not.toContain('"drawingOrigin"');
@@ -1495,23 +1522,22 @@ describe('worker document layout session', () => {
 
         const targetData = targetSkeleton.getSkeletonData();
         const nestedElementIds = collectNestedElementIds(targetData);
-        expect(targetData?.skeHeaders.size).toBeGreaterThan(0);
-        expect(targetData?.skeFooters.size).toBeGreaterThan(0);
+        expect(targetData?.skeHeaders.size).toBe(flavor === DocumentFlavor.MODERN ? 0 : 1);
+        expect(targetData?.skeFooters.size).toBe(flavor === DocumentFlavor.MODERN ? 0 : 1);
         expect(targetData?.skeListLevel?.size).toBeGreaterThan(0);
         expect(nestedElementIds.drawingIds).toEqual(new Set([
             bodyDrawingId,
             tableDrawingId,
             columnDrawingId,
-            headerDrawingId,
-            footerDrawingId,
+            ...(flavor === DocumentFlavor.MODERN ? [] : [headerDrawingId, footerDrawingId]),
         ]));
         expect(nestedElementIds.tableIds.has(tableId)).toBe(true);
         expect(nestedElementIds.tableIds.has(columnTableId)).toBe(true);
         expect(nestedElementIds.columnGroupIds.has(columnGroupId)).toBe(true);
         const headerPages = [...targetData?.skeHeaders.get('worker-rich-elements-header')?.values() ?? []];
         const footerPages = [...targetData?.skeFooters.get('worker-rich-elements-footer')?.values() ?? []];
-        expect(headerPages.some((page) => page.skeDrawings.has(headerDrawingId))).toBe(true);
-        expect(footerPages.some((page) => page.skeDrawings.has(footerDrawingId))).toBe(true);
+        expect(headerPages.some((page) => page.skeDrawings.has(headerDrawingId))).toBe(flavor === DocumentFlavor.TRADITIONAL);
+        expect(footerPages.some((page) => page.skeDrawings.has(footerDrawingId))).toBe(flavor === DocumentFlavor.TRADITIONAL);
 
         session.dispose();
         targetSkeleton.dispose();

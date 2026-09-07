@@ -85,7 +85,12 @@ import { IEditorService } from '../../services/editor/editor-manager.service';
 import { NodePositionConvertToCursor } from '../../services/selection/convert-text-range';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 import { getAnchorBounding } from '../../services/selection/text-range';
-import { getBodyTextXActions, getDocumentMutationLayoutImpact, getSingleBodyTextXActions, resolveMutationLayoutRequest } from './doc-mutation-layout';
+import {
+    getBodyTextXActions,
+    getDocumentMutationLayoutImpact,
+    getSingleBodyTextXActions,
+    resolveMutationLayoutRequest,
+} from './doc-mutation-layout';
 
 function getTextXActionLength(action: unknown): number | undefined {
     if (typeof action !== 'object' || action == null || !('t' in action) || !('len' in action)) {
@@ -845,7 +850,9 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
                         workerOptions,
                         protectedRange,
                         mainThreadCallbacks,
-                        preserveInactiveViewportAnchor
+                        preserveInactiveViewportAnchor,
+                        true,
+                        progress.mode === 'continuous' && progress.complete
                     );
                 });
             },
@@ -1059,7 +1066,8 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         protectedRange: IDocumentLayoutProtectedRange | undefined,
         mainThreadCallbacks: DocLayoutCoordinatorCallbacks,
         preserveInactiveViewportAnchor: boolean,
-        allowRecovery = true
+        allowRecovery = true,
+        preserveCompletedLayout = false
     ): void {
         if (layoutRequestId !== this._layoutRequestId) {
             return;
@@ -1098,8 +1106,10 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
                 mainThreadCallbacks,
                 preserveInactiveViewportAnchor,
                 allowRecovery,
-                error
-            )
+                error,
+                preserveCompletedLayout
+            ),
+            preserveCompletedLayout
         );
     }
 
@@ -1113,7 +1123,8 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         mainThreadCallbacks: DocLayoutCoordinatorCallbacks,
         preserveInactiveViewportAnchor: boolean,
         allowRecovery: boolean,
-        error: unknown
+        error: unknown,
+        preserveCompletedLayout: boolean
     ): void {
         if (!allowRecovery) {
             this._logService.error('[DocRenderController]: Worker layout failed; using main-thread layout.', error);
@@ -1138,7 +1149,8 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
                 protectedRange,
                 mainThreadCallbacks,
                 preserveInactiveViewportAnchor,
-                false
+                false,
+                preserveCompletedLayout
             );
         }).catch((recoveryError: unknown) => {
             this._logService.error('[DocRenderController]: document layout Worker recovery failed; using main-thread layout.', recoveryError);
@@ -1343,23 +1355,13 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
             return undefined;
         }
 
-        let endPageIndex = publishedEndPageIndex;
-        const maximumProtectedEndPageIndex = Math.min(
-            pages.length - 1,
-            startPageIndex + MATERIALIZED_PAGE_WINDOW_SIZE - 1
-        );
-        while (endPageIndex < maximumProtectedEndPageIndex) {
-            const nextPage = pages[endPageIndex + 1];
-            if (nextPage == null || nextPage.isLayoutPlaceholder || nextPage.isMaterializationPlaceholder) {
-                break;
-            }
-            endPageIndex++;
-        }
-
+        // Pages beyond Main's published boundary are retained previews. Keeping
+        // them in the protected range would reject fresh Worker geometry until
+        // the entire document completes, leaving the next page visibly stale.
         return {
             mode: 'paginated',
             startPageIndex,
-            endPageIndex,
+            endPageIndex: publishedEndPageIndex,
         };
     }
 

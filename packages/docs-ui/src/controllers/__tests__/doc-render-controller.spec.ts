@@ -18,7 +18,15 @@
 
 import type { ICommandInfo, IDocumentData, IExecutionOptions } from '@univerjs/core';
 import type { IDocLayoutMountIdentity } from '@univerjs/docs';
-import { CustomDecorationType, CustomRangeType, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DocumentFlavor, JSONX, PositionedObjectLayoutType, TextXActionType } from '@univerjs/core';
+import {
+    CustomDecorationType,
+    CustomRangeType,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    DocumentFlavor,
+    JSONX,
+    PositionedObjectLayoutType,
+    TextXActionType,
+} from '@univerjs/core';
 import { DocLayoutSessionStatus, RichTextEditingMutation } from '@univerjs/docs';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
@@ -927,7 +935,7 @@ describe('doc render controller', () => {
         controller.dispose();
     });
 
-    it('protects retained interaction pages when Main publishes only the edited page', async () => {
+    it('allows Worker pages beyond the published Main window to refresh progressively', async () => {
         const { commandCallbacks, controller, skeletonManager } = createControllerFixture({
             useWorker: true,
             pages: Array.from({ length: 8 }, () => ({
@@ -963,7 +971,7 @@ describe('doc render controller', () => {
                 protectedRange: {
                     mode: 'paginated',
                     startPageIndex: 0,
-                    endPageIndex: 4,
+                    endPageIndex: 0,
                 },
             });
         });

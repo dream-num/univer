@@ -18,6 +18,12 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     'docs-ui': {
+        objectPermission: {
+            paragraphPermission: '권한',
+            title: '권한',
+            paragraph: '단락',
+            section: '섹션',
+        },
         layout: {
             progress: '문서 레이아웃을 처리하는 중…',
             recovering: '문서 레이아웃을 복구하는 중…',

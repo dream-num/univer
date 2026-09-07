@@ -29,16 +29,17 @@ export function resolveDocLayoutProgressPercent(progress: IDocumentLayoutProgres
         return 100;
     }
 
-    if (progress.totalBlockCount > 0) {
-        return Math.min(99, Math.max(0, Math.floor(progress.processedBlockCount / progress.totalBlockCount * 100)));
-    }
-
+    const blockProgress = progress.totalBlockCount > 0
+        ? progress.processedBlockCount / progress.totalBlockCount
+        : 0;
     const estimatedPageCount = Math.max(progress.estimatedPageCount, progress.pageCount);
-    if (estimatedPageCount > 0) {
-        return Math.min(99, Math.max(0, Math.floor(progress.publishedPageCount / estimatedPageCount * 100)));
-    }
-
-    return 0;
+    // A reused paginated tail still publishes page by page after block layout
+    // stops advancing. Continuous mode has one physical page, so only its block
+    // progress represents remaining work.
+    const pageProgress = progress.mode === 'paginated' && estimatedPageCount > 0
+        ? progress.publishedPageCount / estimatedPageCount
+        : 0;
+    return Math.min(99, Math.max(0, Math.floor(Math.max(blockProgress, pageProgress) * 100)));
 }
 
 export class DocLayoutProgressRenderController extends RxDisposable implements IRenderModule {
@@ -48,7 +49,6 @@ export class DocLayoutProgressRenderController extends RxDisposable implements I
     private _latestProgress: Nullable<IDocumentLayoutProgress> = null;
     private _layoutStartedAt: Nullable<number> = null;
     private _maxProgress = 0;
-    private _hasCompletedInitialLayout = false;
 
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
@@ -59,7 +59,7 @@ export class DocLayoutProgressRenderController extends RxDisposable implements I
 
         this._docSkeletonManagerService.currentSkeleton$.pipe(
             switchMap((skeleton) => {
-                this._reset(skeleton?.hasCompleteLayout() ?? false);
+                this._reset();
                 return skeleton?.layoutProgress$ ?? EMPTY;
             }),
             takeUntil(this.dispose$)
@@ -67,7 +67,7 @@ export class DocLayoutProgressRenderController extends RxDisposable implements I
     }
 
     override dispose(): void {
-        this._reset(true);
+        this._reset();
         super.dispose();
     }
 
@@ -81,11 +81,7 @@ export class DocLayoutProgressRenderController extends RxDisposable implements I
         this._clearCancelTimer();
 
         if (progress.complete) {
-            this._reset(true);
-            return;
-        }
-
-        if (this._hasCompletedInitialLayout) {
+            this._reset();
             return;
         }
 
@@ -119,8 +115,7 @@ export class DocLayoutProgressRenderController extends RxDisposable implements I
         if (
             this._visible ||
             this._latestProgress == null ||
-            this._latestProgress.complete ||
-            this._hasCompletedInitialLayout
+            this._latestProgress.complete
         ) {
             return;
         }
@@ -130,7 +125,7 @@ export class DocLayoutProgressRenderController extends RxDisposable implements I
     }
 
     private _scheduleCancelledClear(): void {
-        if (!this._visible || this._cancelTimer != null) {
+        if (this._cancelTimer != null) {
             return;
         }
 
@@ -139,8 +134,7 @@ export class DocLayoutProgressRenderController extends RxDisposable implements I
             if (this._latestProgress != null) {
                 return;
             }
-            this._visible = false;
-            this._docLayoutProgressService.clearProgress(this._context.unitId);
+            this._reset();
         }, DOC_LAYOUT_PROGRESS_CANCEL_GRACE_MS);
     }
 
@@ -151,7 +145,7 @@ export class DocLayoutProgressRenderController extends RxDisposable implements I
         }
     }
 
-    private _reset(hasCompletedInitialLayout: boolean): void {
+    private _reset(): void {
         if (this._delayTimer != null) {
             clearTimeout(this._delayTimer);
             this._delayTimer = null;
@@ -162,6 +156,5 @@ export class DocLayoutProgressRenderController extends RxDisposable implements I
         this._latestProgress = null;
         this._layoutStartedAt = null;
         this._maxProgress = 0;
-        this._hasCompletedInitialLayout = hasCompletedInitialLayout;
     }
 }

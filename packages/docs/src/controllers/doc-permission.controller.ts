@@ -51,6 +51,7 @@ import { UnitAction, UnitObject } from '@univerjs/protocol';
 import { DeleteTextCommand, InsertTextCommand, UpdateTextCommand } from '../commands/commands/core-editing.command';
 import { CreateHeaderFooterCommand } from '../commands/commands/create-header-footer.command';
 import { SetDocumentPermissionCommand } from '../commands/commands/set-document-permission.command';
+import { SetDocumentPermissionsCommand } from '../commands/commands/set-document-permissions.command';
 import { SetSectionHeaderFooterLinkCommand } from '../commands/commands/set-section-header-footer-link.command';
 import { UpdateDocumentParagraphStyleCommand } from '../commands/commands/update-document-paragraph-style.command';
 import {
@@ -82,6 +83,7 @@ import { getTopLevelSectionBreaks } from '../utils/sections';
 
 const NON_EDIT_DOCUMENT_COMMAND_IDS = new Set([
     SetDocumentPermissionCommand.id,
+    SetDocumentPermissionsCommand.id,
     'doc.command.open-header-footer-panel',
     'doc.command.close-header-footer',
     'doc.command.select-all',

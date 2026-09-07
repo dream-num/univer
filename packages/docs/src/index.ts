@@ -35,6 +35,7 @@ export { SetDocumentNameCommand } from './commands/commands/set-document-name.co
 export type { ISetDocumentNameCommandParams } from './commands/commands/set-document-name.command';
 export { SetDocumentPermissionCommand } from './commands/commands/set-document-permission.command';
 export type { ISetDocumentPermissionCommandParams } from './commands/commands/set-document-permission.command';
+export { SetDocumentPermissionsCommand } from './commands/commands/set-document-permissions.command';
 export { SetSectionHeaderFooterLinkCommand } from './commands/commands/set-section-header-footer-link.command';
 export type { ISetSectionHeaderFooterLinkCommandParams } from './commands/commands/set-section-header-footer-link.command';
 export { UpdateDocumentParagraphStyleCommand } from './commands/commands/update-document-paragraph-style.command';
@@ -43,6 +44,7 @@ export type { IDeleteDocumentSectionBreakCommandParams, IDocumentSectionConfig, 
 export { DocHistoryAction, RichTextEditingMutation, transformDocumentTextRanges } from './commands/mutations/core-editing.mutation';
 export type { IRichTextEditingMutationParams } from './commands/mutations/core-editing.mutation';
 export { SetDocumentPermissionRuleMutation } from './commands/mutations/set-document-permission-rule.mutation';
+export { SetDocumentPermissionRulesMutation } from './commands/mutations/set-document-permission-rules.mutation';
 export { SetTextSelectionsOperation } from './commands/operations/text-selection.operation';
 export type { ISetTextSelectionsOperationParams } from './commands/operations/text-selection.operation';
 export type { IUniverDocsConfig } from './config/config';

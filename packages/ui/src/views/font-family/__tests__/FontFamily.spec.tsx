@@ -16,8 +16,9 @@
 
 import type { ICommand } from '@univerjs/core';
 import type { ReactElement } from 'react';
-import { fireEvent, render } from '@testing-library/react';
+import { createEvent, fireEvent, render } from '@testing-library/react';
 import { CommandType, ICommandService, LocaleService, LocaleType, Univer } from '@univerjs/core';
+import { DropdownMenu } from '@univerjs/design';
 import { BehaviorSubject } from 'rxjs';
 import { afterEach, describe, expect, it } from 'vitest';
 import { FontService, IFontService } from '../../../services/font.service';
@@ -51,6 +52,7 @@ function renderWithDependencies(element: ReactElement, direction: 'ltr' | 'rtl' 
     const univer = new Univer();
     const injector = univer.__getInjector();
     injector.add([IFontService, { useClass: FontService }]);
+    injector.get(LocaleService).setLocale(LocaleType.ZH_CN);
     injector.get(LocaleService).setDirection(direction);
     injector.get(LocaleService).load({
         [LocaleType.ZH_CN]: {
@@ -93,6 +95,44 @@ function renderWithDependencies(element: ReactElement, direction: 'ltr' | 'rtl' 
 describe('font input views', () => {
     afterEach(() => {
         TestState.reset();
+    });
+
+    it('keeps input pointer actions out of the surrounding menu trigger while the arrow still opens it', () => {
+        const rendered = renderWithDependencies(
+            <DropdownMenu items={[{ type: 'item', children: 'Font choice' }]}>
+                <div>
+                    <FontFamily value="Arial" onChange={(value) => TestState.familyChanges.push(value)} />
+                    <span>Open fonts</span>
+                </div>
+            </DropdownMenu>
+        );
+        try {
+            const input = rendered.container.querySelector('input')!;
+            const inputPointer = createEvent.pointerDown(input, { bubbles: true, cancelable: true });
+            Object.defineProperties(inputPointer, {
+                button: { value: 0 },
+                pointerType: { value: 'mouse' },
+                ctrlKey: { value: false },
+            });
+            fireEvent(input, inputPointer);
+            expect(inputPointer.defaultPrevented).toBe(false);
+            expect(rendered.queryByRole('menu')).toBeNull();
+            fireEvent.change(input, { target: { value: 'Times New Roman' } });
+            expect(TestState.familyChanges).toEqual([]);
+            fireEvent.keyDown(input, { key: 'Enter' });
+            expect(TestState.familyChanges).toEqual(['Times New Roman']);
+            const arrow = rendered.getByText('Open fonts');
+            const arrowPointer = createEvent.pointerDown(arrow, { bubbles: true, cancelable: true });
+            Object.defineProperties(arrowPointer, {
+                button: { value: 0 },
+                pointerType: { value: 'mouse' },
+                ctrlKey: { value: false },
+            });
+            fireEvent(arrow, arrowPointer);
+            expect(rendered.getByRole('menu')).toBeTruthy();
+        } finally {
+            rendered.dispose();
+        }
     });
 
     it('emits onChange when the typed text matches a known font', () => {

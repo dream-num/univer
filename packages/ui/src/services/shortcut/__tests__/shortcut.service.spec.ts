@@ -158,8 +158,12 @@ describe('ShortcutService', () => {
                 floatingMenu.setAttribute('data-embed-floating-menu', 'true');
                 const compactTrigger = document.createElement('button');
                 floatingMenu.appendChild(compactTrigger);
-                container.append(trigger, menu, floatingMenu);
-                for (const target of [trigger, item, compactTrigger]) {
+                const fontControl = document.createElement('div');
+                fontControl.dataset.uCommand = 'sheet.command.set-range-font-family';
+                const fontInput = document.createElement('input');
+                fontControl.appendChild(fontInput);
+                container.append(trigger, menu, floatingMenu, fontControl);
+                for (const target of [trigger, item, compactTrigger, fontInput]) {
                     const event = new KeyboardEvent('navigation-test', { keyCode, cancelable: true });
                     target.dispatchEvent(event);
                     expect(service.dispatch(event)).toBeUndefined();

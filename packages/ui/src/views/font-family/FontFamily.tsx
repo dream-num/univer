@@ -19,7 +19,6 @@ import type { Observable } from 'rxjs';
 import type { ICustomComponentProps } from '../../services/menu/menu';
 import { LocaleService } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
-
 import { useMemo, useState } from 'react';
 import { useDependency, useObservable } from '../../utils/di';
 import { useFontList } from './use-font-list';
@@ -120,6 +119,7 @@ export const FontFamily = ({ className, disabled: disabledProp, value, disabled$
                 `}
                 type="text"
                 value={inputValue}
+                onPointerDown={(event) => event.stopPropagation()}
                 onChange={handleChangeSelection}
                 onKeyDown={handleKeyDown}
                 onBlur={handleBlur}

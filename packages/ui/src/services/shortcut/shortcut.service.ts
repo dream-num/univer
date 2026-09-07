@@ -322,7 +322,7 @@ export class ShortcutService extends Disposable implements IShortcutService {
         if (
             !e.ctrlKey && !e.metaKey && !e.altKey && MENU_NAVIGATION_KEYS.has(e.keyCode) &&
             e.target instanceof HTMLElement &&
-            (e.target.matches('button[data-u-command], [data-u-command][role="button"], [data-embed-floating-menu="true"] button') ||
+            (e.target.matches('button[data-u-command], [data-u-command][role="button"], [data-embed-floating-menu="true"] button, [data-u-command] input') ||
                 e.target.closest('[role="menu"]'))
         ) {
             return;

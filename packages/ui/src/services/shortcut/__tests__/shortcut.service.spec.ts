@@ -154,8 +154,12 @@ describe('ShortcutService', () => {
                 const item = document.createElement('button');
                 item.setAttribute('role', 'menuitem');
                 menu.appendChild(item);
-                container.append(trigger, menu);
-                for (const target of [trigger, item]) {
+                const floatingMenu = document.createElement('div');
+                floatingMenu.setAttribute('data-embed-floating-menu', 'true');
+                const compactTrigger = document.createElement('button');
+                floatingMenu.appendChild(compactTrigger);
+                container.append(trigger, menu, floatingMenu);
+                for (const target of [trigger, item, compactTrigger]) {
                     const event = new KeyboardEvent('navigation-test', { keyCode, cancelable: true });
                     target.dispatchEvent(event);
                     expect(service.dispatch(event)).toBeUndefined();

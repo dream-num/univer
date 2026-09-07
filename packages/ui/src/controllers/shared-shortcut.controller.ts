@@ -135,7 +135,7 @@ export class SharedController extends Disposable {
                     return target instanceof HTMLElement &&
                         target === target.ownerDocument.activeElement &&
                         !target.isContentEditable &&
-                        target.matches('button[data-u-command], [data-u-command][role="button"]');
+                        target.matches('button[data-u-command], [data-u-command][role="button"], [data-embed-floating-menu="true"] button');
                 },
                 preconditions: (contextService) => !(
                     contextService.getContextValue(EDITOR_ACTIVATED) ||

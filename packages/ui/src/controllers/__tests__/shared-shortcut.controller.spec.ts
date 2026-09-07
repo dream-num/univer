@@ -130,14 +130,23 @@ describe('shared shortcut items', () => {
 });
 
 describe('SharedController', () => {
-    it.each(['mac', 'windows', 'linux'] as const)('routes history from a focused command selector on %s', (platform) => {
+    it.each((['mac', 'windows', 'linux'] as const).flatMap((platform) => [
+        { platform, compact: false },
+        { platform, compact: true },
+    ]))('routes history from a focused command selector on $platform (compact: $compact)', ({ platform, compact }) => {
         const { controller, shortcutService, context } = createControllerTestBed(platform);
         context.setContextValue(FOCUSING_UNIVER_EDITOR, false);
-        const trigger = document.createElement('div');
-        trigger.dataset.uCommand = 'sheet.command.set-horizontal-text-align';
-        trigger.setAttribute('role', 'button');
+        const container = document.createElement('div');
+        const trigger = document.createElement(compact ? 'button' : 'div');
+        if (compact) {
+            container.setAttribute('data-embed-floating-menu', 'true');
+        } else {
+            trigger.dataset.uCommand = 'sheet.command.set-horizontal-text-align';
+            trigger.setAttribute('role', 'button');
+        }
         trigger.tabIndex = 0;
-        document.body.appendChild(trigger);
+        container.appendChild(trigger);
+        document.body.appendChild(container);
         trigger.focus();
         const undo = new KeyboardEvent('history-test', {
             keyCode: KeyCode.Z,
@@ -174,8 +183,13 @@ describe('SharedController', () => {
         expect(shortcutService.dispatch(undo)).toBeUndefined();
         trigger.focus();
         trigger.removeAttribute('data-u-command');
+        container.removeAttribute('data-embed-floating-menu');
         expect(shortcutService.dispatch(undo)).toBeUndefined();
-        trigger.dataset.uCommand = 'sheet.command.set-horizontal-text-align';
+        if (compact) {
+            container.setAttribute('data-embed-floating-menu', 'true');
+        } else {
+            trigger.dataset.uCommand = 'sheet.command.set-horizontal-text-align';
+        }
         controller.dispose();
         expect(shortcutService.dispatch(undo)).toBeUndefined();
     });

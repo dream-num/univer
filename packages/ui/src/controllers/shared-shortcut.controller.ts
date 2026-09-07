@@ -126,6 +126,23 @@ export class SharedController extends Disposable {
 
     private _registerShortcuts(): void {
         const shortcutItems = [UndoShortcutItem, RedoShortcutItem, RedoMacShortcutItem];
+        for (const shortcut of shortcutItems) {
+            // Keyboard menu dismissal restores its command trigger, not the editor focus context.
+            this.disposeWithMe(this._shortcutService.registerShortcut({
+                ...shortcut,
+                eventPreconditions: (event) => {
+                    const target = event.target;
+                    return target instanceof HTMLElement &&
+                        target === target.ownerDocument.activeElement &&
+                        !target.isContentEditable &&
+                        target.matches('button[data-u-command], [data-u-command][role="button"]');
+                },
+                preconditions: (contextService) => !(
+                    contextService.getContextValue(EDITOR_ACTIVATED) ||
+                    contextService.getContextValue(FOCUSING_FX_BAR_EDITOR)
+                ),
+            }));
+        }
         shortcutItems.push(CutShortcutItem, CopyShortcutItem, OnlyDisplayPasteShortcutItem);
 
         shortcutItems.forEach((shortcut) => this.disposeWithMe(this._shortcutService.registerShortcut(shortcut)));

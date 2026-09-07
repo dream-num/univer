@@ -52,7 +52,10 @@ import {
 
 const injectors: Injector[] = [];
 
-afterEach(() => injectors.splice(0).forEach((injector) => injector.dispose()));
+afterEach(() => {
+    injectors.splice(0).forEach((injector) => injector.dispose());
+    document.body.replaceChildren();
+});
 
 function createInjector(): Injector {
     const injector = new Injector();
@@ -127,6 +130,56 @@ describe('shared shortcut items', () => {
 });
 
 describe('SharedController', () => {
+    it.each(['mac', 'windows', 'linux'] as const)('routes history from a focused command selector on %s', (platform) => {
+        const { controller, shortcutService, context } = createControllerTestBed(platform);
+        context.setContextValue(FOCUSING_UNIVER_EDITOR, false);
+        const trigger = document.createElement('div');
+        trigger.dataset.uCommand = 'sheet.command.set-horizontal-text-align';
+        trigger.setAttribute('role', 'button');
+        trigger.tabIndex = 0;
+        document.body.appendChild(trigger);
+        trigger.focus();
+        const undo = new KeyboardEvent('history-test', {
+            keyCode: KeyCode.Z,
+            metaKey: platform === 'mac',
+            ctrlKey: platform !== 'mac',
+        });
+        const redo = new KeyboardEvent('history-test', {
+            keyCode: platform === 'mac' ? KeyCode.Z : KeyCode.Y,
+            shiftKey: platform === 'mac',
+            metaKey: platform === 'mac',
+            ctrlKey: platform !== 'mac',
+        });
+        trigger.dispatchEvent(undo);
+        trigger.dispatchEvent(redo);
+        expect(shortcutService.dispatch(undo)?.id).toBe(UndoCommand.id);
+        expect(shortcutService.dispatch(redo)?.id).toBe(RedoCommand.id);
+
+        for (const key of [EDITOR_ACTIVATED, FOCUSING_FX_BAR_EDITOR]) {
+            context.setContextValue(key, true);
+            expect(shortcutService.dispatch(undo)).toBeUndefined();
+            expect(shortcutService.dispatch(redo)).toBeUndefined();
+            context.setContextValue(key, false);
+        }
+        const input = document.createElement('input');
+        trigger.appendChild(input);
+        input.focus();
+        input.dispatchEvent(undo);
+        input.dispatchEvent(redo);
+        expect(shortcutService.dispatch(undo)).toBeUndefined();
+        expect(shortcutService.dispatch(redo)).toBeUndefined();
+        trigger.focus();
+        trigger.dispatchEvent(undo);
+        trigger.blur();
+        expect(shortcutService.dispatch(undo)).toBeUndefined();
+        trigger.focus();
+        trigger.removeAttribute('data-u-command');
+        expect(shortcutService.dispatch(undo)).toBeUndefined();
+        trigger.dataset.uCommand = 'sheet.command.set-horizontal-text-align';
+        controller.dispose();
+        expect(shortcutService.dispatch(undo)).toBeUndefined();
+    });
+
     it('registers working clipboard/history shortcuts and releases its registrations', () => {
         const { controller, commandService, shortcutService } = createControllerTestBed('windows');
         const copy = new KeyboardEvent('keydown', { keyCode: KeyCode.C, ctrlKey: true });

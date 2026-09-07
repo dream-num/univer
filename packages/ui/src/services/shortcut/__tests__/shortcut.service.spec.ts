@@ -130,6 +130,49 @@ describe('ShortcutService', () => {
         vi.unstubAllGlobals();
     });
 
+    it.each([KeyCode.ENTER, KeyCode.SPACE, KeyCode.TAB, KeyCode.ESC, KeyCode.ARROW_DOWN, KeyCode.ARROW_UP, KeyCode.ARROW_LEFT, KeyCode.ARROW_RIGHT, KeyCode.HOME, KeyCode.END])(
+        'yields menu navigation key %s while retaining canvas shortcuts',
+        (keyCode) => {
+            const injector = new Injector();
+            injector.add([ICommandService, { useClass: CommandService }]);
+            injector.add([IConfigService, { useClass: ConfigService }]);
+            injector.add([IContextService, { useClass: ContextService }]);
+            injector.add([ILogService, { useClass: DesktopLogService }]);
+            injector.add([IPlatformService, { useClass: PlatformService }]);
+            injector.add([IUIRuntimeScopeService, { useClass: UIRuntimeScopeService }]);
+            injector.add([ShortcutService]);
+            const container = document.createElement('div');
+            document.body.appendChild(container);
+            try {
+                const service = injector.get(ShortcutService);
+                service.registerShortcut({ id: 'test.grid-navigation', binding: keyCode });
+                const trigger = document.createElement('div');
+                trigger.dataset.uCommand = 'sheet.command.set-horizontal-text-align';
+                trigger.setAttribute('role', 'button');
+                const menu = document.createElement('div');
+                menu.setAttribute('role', 'menu');
+                const item = document.createElement('button');
+                item.setAttribute('role', 'menuitem');
+                menu.appendChild(item);
+                container.append(trigger, menu);
+                for (const target of [trigger, item]) {
+                    const event = new KeyboardEvent('navigation-test', { keyCode, cancelable: true });
+                    target.dispatchEvent(event);
+                    expect(service.dispatch(event)).toBeUndefined();
+                    expect(event.defaultPrevented).toBe(false);
+                }
+                const canvas = document.createElement('canvas');
+                container.appendChild(canvas);
+                const event = new KeyboardEvent('navigation-test', { keyCode });
+                canvas.dispatchEvent(event);
+                expect(service.dispatch(event)?.id).toBe('test.grid-navigation');
+            } finally {
+                container.remove();
+                injector.dispose();
+            }
+        }
+    );
+
     it.each([
         ['Enter', KeyCode.ENTER],
         ['Escape', KeyCode.ESC],

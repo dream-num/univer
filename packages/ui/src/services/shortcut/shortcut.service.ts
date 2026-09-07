@@ -25,6 +25,19 @@ import { IPlatformService } from '../platform/platform.service';
 import { IUIRuntimeScopeService } from '../runtime-scope/ui-runtime-scope.service';
 import { KeyCode, KeyCodeToChar, MetaKeys } from './keycode';
 
+const MENU_NAVIGATION_KEYS = new Set([
+    KeyCode.ENTER,
+    KeyCode.SPACE,
+    KeyCode.TAB,
+    KeyCode.ESC,
+    KeyCode.ARROW_DOWN,
+    KeyCode.ARROW_UP,
+    KeyCode.ARROW_LEFT,
+    KeyCode.ARROW_RIGHT,
+    KeyCode.HOME,
+    KeyCode.END,
+]);
+
 /**
  * Defines whether a Univer shortcut should yield to the browser's native behavior
  * when the keyboard event originates from an editable text element.
@@ -302,6 +315,16 @@ export class ShortcutService extends Disposable implements IShortcutService {
     dispatch(e: KeyboardEvent): IShortcutItem<object> | undefined {
         // The capture listener runs before the editor can handle IME candidate keys.
         if (e.isComposing) {
+            return;
+        }
+
+        // Scoped editor context can remain active while a portalled menu owns DOM focus.
+        if (
+            !e.ctrlKey && !e.metaKey && !e.altKey && MENU_NAVIGATION_KEYS.has(e.keyCode) &&
+            e.target instanceof HTMLElement &&
+            (e.target.matches('button[data-u-command], [data-u-command][role="button"]') ||
+                e.target.closest('[role="menu"]'))
+        ) {
             return;
         }
 

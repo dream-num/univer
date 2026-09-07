@@ -130,6 +130,38 @@ describe('ShortcutService', () => {
         vi.unstubAllGlobals();
     });
 
+    it.each([KeyCode.BACKSPACE, KeyCode.DELETE])('keeps toolbar input deletion key %s out of grid shortcuts', (keyCode) => {
+        const injector = new Injector([
+            [ICommandService, { useClass: CommandService }],
+            [IConfigService, { useClass: ConfigService }],
+            [IContextService, { useClass: ContextService }],
+            [ILogService, { useClass: DesktopLogService }],
+            [IPlatformService, { useClass: PlatformService }],
+            [IUIRuntimeScopeService, { useClass: UIRuntimeScopeService }],
+            [ShortcutService],
+        ]);
+        const control = document.createElement('div');
+        control.dataset.uCommand = 'sheet.command.set-range-fontsize';
+        const input = document.createElement('input');
+        control.appendChild(input);
+        document.body.appendChild(control);
+        try {
+            const service = injector.get(ShortcutService);
+            service.registerShortcut({ id: 'test.grid-delete', binding: keyCode });
+            const event = new KeyboardEvent('input-delete-test', { keyCode, cancelable: true });
+            input.dispatchEvent(event);
+            expect(service.dispatch(event)).toBeUndefined();
+            expect(event.defaultPrevented).toBe(false);
+            const canvas = document.createElement('canvas');
+            const canvasEvent = new KeyboardEvent('input-delete-test', { keyCode });
+            canvas.dispatchEvent(canvasEvent);
+            expect(service.dispatch(canvasEvent)?.id).toBe('test.grid-delete');
+        } finally {
+            control.remove();
+            injector.dispose();
+        }
+    });
+
     it.each([KeyCode.ENTER, KeyCode.SPACE, KeyCode.TAB, KeyCode.ESC, KeyCode.ARROW_DOWN, KeyCode.ARROW_UP, KeyCode.ARROW_LEFT, KeyCode.ARROW_RIGHT, KeyCode.HOME, KeyCode.END])(
         'yields menu navigation key %s while retaining canvas shortcuts',
         (keyCode) => {

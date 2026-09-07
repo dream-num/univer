@@ -318,6 +318,13 @@ export class ShortcutService extends Disposable implements IShortcutService {
             return;
         }
 
+        if (
+            (e.keyCode === KeyCode.BACKSPACE || e.keyCode === KeyCode.DELETE) &&
+            e.target instanceof HTMLInputElement && e.target.closest('[data-u-command]')
+        ) {
+            return;
+        }
+
         // Scoped editor context can remain active while a portalled menu owns DOM focus.
         if (
             !e.ctrlKey && !e.metaKey && !e.altKey && MENU_NAVIGATION_KEYS.has(e.keyCode) &&

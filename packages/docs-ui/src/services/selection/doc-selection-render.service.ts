@@ -491,8 +491,10 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
             options,
         });
 
-        if (!ranges.length || options?.shouldFocus === false) return true;
-        this._updateInputPosition(options?.forceFocus);
+        if (!ranges.length || options?.shouldFocus === false) {
+            return true;
+        }
+        this._updateInputPosition({ forceFocus: options?.forceFocus });
         return true;
     }
 
@@ -799,7 +801,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
             this._disposeScrollTimers();
 
-            this._updateInputPosition(true);
+            this._updateInputPosition({ forceFocus: true });
         }));
     }
 
@@ -1193,12 +1195,12 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         return getCanvasOffsetByEngine(engine);
     }
 
-    private _updateInputPosition(forceFocus = false) {
+    private _updateInputPosition({ forceFocus = false, preserveFocus = false } = {}) {
         const activeRangeInstance = this._getActiveRangeInstance();
         const anchor = activeRangeInstance?.getAnchor();
 
         if (!anchor || (anchor && !anchor.visible) || this.activeViewPort == null) {
-            if (this._shouldPreserveExternalFocus() || (!forceFocus && this._isAnotherEditorFocused())) {
+            if (preserveFocus || this._shouldPreserveExternalFocus() || (!forceFocus && this._isAnotherEditorFocused())) {
                 return;
             }
             this.focus();
@@ -1217,7 +1219,11 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
         canvasTop += y;
 
-        this.activate(canvasLeft, canvasTop, forceFocus);
+        if (preserveFocus) {
+            this._positionInput(canvasLeft, canvasTop);
+        } else {
+            this.activate(canvasLeft, canvasTop, forceFocus);
+        }
     }
 
     private _tryMoving(moveOffsetX: number, moveOffsetY: number) {
@@ -1391,7 +1397,8 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
                 }
             }
 
-            this._updateInputPosition();
+            // A delayed scroll completion must not reclaim focus from a menu or another editor.
+            this._updateInputPosition({ preserveFocus: true });
         });
 
         this._viewPortObserverMap.set(unitId, {

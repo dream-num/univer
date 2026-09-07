@@ -1647,7 +1647,7 @@ describe('DocSelectionRenderService', () => {
         expect(container.style.top).toBe('-153px');
     });
 
-    it('parks the active selection while scrolling and restores the editor when the selection remains in view', () => {
+    it.each(['editor', 'button', 'input'] as const)('updates the caret position after scrolling without moving focus from the %s', (target) => {
         getCanvasOffsetByEngineMock.mockReturnValue({ left: 1, top: 2 });
         const scrollAfter$ = new TestRenderEvent<{ viewport: unknown }>();
         const scrollEnd$ = new TestRenderEvent<{ viewport: unknown }>();
@@ -1670,8 +1670,17 @@ describe('DocSelectionRenderService', () => {
             getViewports: () => [viewport],
             getEngine: () => ({ name: 'engine' }),
         };
-        const { renderUnit, service, univer } = createRealSelectionRenderService({ scene });
+        const { input, renderUnit, service, univer } = createRealSelectionRenderService({ scene });
         cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
+        TestLayoutService.root.setAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, 'embed-1');
+        const focusTarget = target === 'editor' ? input : document.createElement(target);
+        if (focusTarget !== input) {
+            TestLayoutService.root.appendChild(focusTarget);
+            focusTarget.focus();
+        } else {
+            service.focus();
+        }
+        expect(document.activeElement).toBe(focusTarget);
         const activeRange = {
             isActive: () => true,
             activeStatic,
@@ -1685,6 +1694,7 @@ describe('DocSelectionRenderService', () => {
         scrollAfter$.emit({ viewport });
         scrollEnd$.emit({ viewport });
 
+        expect(document.activeElement).toBe(focusTarget);
         const container = document.getElementById('univer-doc-selection-container-selection-render-doc')!;
         expect(activeStatic).toHaveBeenCalledTimes(1);
         expect(deactivateStatic).not.toHaveBeenCalled();

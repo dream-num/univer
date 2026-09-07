@@ -170,6 +170,38 @@ describe('font input views', () => {
         rendered.dispose();
     });
 
+    it.each(['', '   '])('rejects a blank font-family draft %j without emitting a format command', (draft) => {
+        const rendered = renderWithDependencies(
+            <FontFamily value="Times New Roman" onChange={(value) => TestState.familyChanges.push(value)} />
+        );
+        try {
+            const input = rendered.container.querySelector('input')!;
+            fireEvent.change(input, { target: { value: draft } });
+            fireEvent.keyDown(input, { key: 'Enter' });
+            expect(TestState.familyChanges).toEqual([]);
+            expect(input.value).toBe('Times New Roman');
+        } finally {
+            rendered.dispose();
+        }
+    });
+
+    it.each(['Enter', 'Escape'])('leaves the font-family draft intact during composing %s', (key) => {
+        const rendered = renderWithDependencies(
+            <FontFamily value="Arial" onChange={(value) => TestState.familyChanges.push(value)} />
+        );
+        try {
+            const input = rendered.container.querySelector('input')!;
+            fireEvent.change(input, { target: { value: 'Times New Roman' } });
+            fireEvent.keyDown(input, { key, isComposing: true });
+            expect(TestState.familyChanges).toEqual([]);
+            expect(input.value).toBe('Times New Roman');
+            fireEvent.keyDown(input, { key: 'Enter' });
+            expect(TestState.familyChanges).toEqual(['Times New Roman']);
+        } finally {
+            rendered.dispose();
+        }
+    });
+
     it('emits onChange when a font-family menu item is selected', () => {
         const rendered = renderWithDependencies(
             <FontFamilyItem

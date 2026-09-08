@@ -542,6 +542,67 @@ describe('EditorService', () => {
         expect(univerInstanceService.getUnit<DocumentDataModel>(editorUnitId)).toBeUndefined();
     });
 
+    it.each([false, true])('keeps replacement resources and releases old listeners (old container disposed first: %s)', (previousFirst) => {
+        const { service, univerInstanceService } = createService(TestRegisterRenderManagerService);
+        const snapshot = univerInstanceService.getUnit<DocumentDataModel>(EDITOR_ID)!.getSnapshot();
+        const previousLease = service.register({ initialSnapshot: snapshot }, document.createElement('div'));
+        const previousEditor = service.getEditor(EDITOR_ID)!;
+        const oldInputs: string[] = [];
+        previousEditor.input$.subscribe(({ content }) => oldInputs.push(content));
+        service.focus(EDITOR_ID);
+        const currentContainer = document.createElement('div');
+        const currentLease = service.register({ initialSnapshot: snapshot }, currentContainer);
+        const currentEditor = service.getEditor(EDITOR_ID)!;
+        expect(currentEditor).not.toBe(previousEditor);
+        const model = univerInstanceService.getUnit<DocumentDataModel>(EDITOR_ID)!;
+        const currentInputs: string[] = [];
+        currentEditor.input$.subscribe(({ content }) => currentInputs.push(content));
+        const render = TestRegisterRenderManagerService.renders.get(EDITOR_ID)!;
+        render.with(DocSelectionRenderService).onInput$.next({ event: new InputEvent('input'), content: 'new input' });
+        expect(oldInputs).toEqual([]);
+        expect(currentInputs).toEqual(['new input']);
+        if (previousFirst) {
+            previousLease.dispose();
+        }
+        expect(service.getEditor(EDITOR_ID)).toBe(currentEditor);
+        expect(univerInstanceService.getUnit(EDITOR_ID)).toBe(model);
+        expect(model.getSnapshot()).toEqual(snapshot);
+        expect(TestRegisterRenderManagerService.renders.get(EDITOR_ID)?.container).toBe(currentContainer);
+        expect(TestRegisterRenderManagerService.removedRenderIds).toEqual([]);
+        service.focus(EDITOR_ID);
+        expect(service.getFocusEditor()).toBe(currentEditor);
+        currentLease.dispose();
+        previousLease.dispose();
+        currentLease.dispose();
+        expect(service.getEditor(EDITOR_ID)).toBeUndefined();
+        expect(univerInstanceService.getUnit(EDITOR_ID)).toBeUndefined();
+        expect(TestRegisterRenderManagerService.removedRenderIds).toEqual([EDITOR_ID]);
+    });
+
+    it('releases registered editor listeners and units when the service is disposed', () => {
+        const { injector, univerInstanceService } = createService(TestRegisterRenderManagerService);
+        const service = injector.get(IEditorService) as EditorService;
+        const snapshot = univerInstanceService.getUnit<DocumentDataModel>(EDITOR_ID)!.getSnapshot();
+        const lease = service.register({ initialSnapshot: snapshot }, document.createElement('div'));
+        const editor = service.getEditor(EDITOR_ID)!;
+        let completed = false;
+        editor.input$.subscribe({
+            complete: () => {
+                completed = true;
+            },
+        });
+
+        service.dispose();
+        service.dispose();
+        lease.dispose();
+
+        expect(completed).toBe(true);
+        expect(service.getAllEditor().size).toBe(0);
+        expect(univerInstanceService.getUnit(EDITOR_ID)).toBeUndefined();
+        expect(TestRegisterRenderManagerService.removedRenderIds).toEqual([EDITOR_ID]);
+        expect(() => service.register({ initialSnapshot: snapshot }, document.createElement('div'))).toThrow('disposed');
+    });
+
     it('keeps render config without an editor when no render is available and removes it on dispose', () => {
         const { service } = createService(TestMissingRenderManagerService);
         const disposable = service.register({

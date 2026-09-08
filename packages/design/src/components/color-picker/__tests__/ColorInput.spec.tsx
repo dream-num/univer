@@ -111,4 +111,56 @@ describe('ColorInput', () => {
         expect(onChange).toHaveBeenCalledOnce();
         expect(onChange).toHaveBeenCalledWith(...hexToHsv('F05252')!);
     });
+
+    it.each(['F05252', 'ni'])('keeps composition %s local and uses current props after a rerender', (value) => {
+        const previousOnChange = vi.fn();
+        const onChange = vi.fn();
+        const hostComposition = vi.fn();
+        const { container, rerender, unmount } = render(
+            <ColorInput hsv={[0, 100, 100]} alpha={1} format="hex" onChange={previousOnChange} />
+        );
+        const input = container.querySelector('input[maxlength="6"]') as HTMLInputElement;
+        const events = ['compositionstart', 'compositionupdate', 'compositionend'];
+        for (const event of events) {
+            container.addEventListener(event, hostComposition);
+        }
+        try {
+            fireEvent.compositionStart(input);
+            fireEvent.compositionUpdate(input, { data: value });
+            fireEvent.input(input, { isComposing: true, target: { value } });
+            rerender(<ColorInput hsv={[120, 100, 100]} alpha={1} format="hex" onChange={onChange} />);
+            expect(input.value).toBe(value);
+            fireEvent.compositionEnd(input);
+
+            expect(hostComposition).not.toHaveBeenCalled();
+            expect(previousOnChange).not.toHaveBeenCalled();
+            if (value === 'F05252') {
+                expect(onChange).toHaveBeenCalledExactlyOnceWith(...hexToHsv(value)!);
+            } else {
+                expect(input.value).toBe('00ff00');
+                expect(onChange).not.toHaveBeenCalled();
+            }
+
+            onChange.mockClear();
+            unmount();
+            fireEvent.compositionEnd(input);
+            expect(onChange).not.toHaveBeenCalled();
+        } finally {
+            for (const event of events) {
+                container.removeEventListener(event, hostComposition);
+            }
+        }
+    });
+
+    it.each(['F0!', 'F012345'])('rejects invalid draft %s without committing a color', (value) => {
+        const onChange = vi.fn();
+        const { container } = render(
+            <ColorInput hsv={[0, 100, 100]} alpha={1} format="hex" onChange={onChange} />
+        );
+        const input = container.querySelector('input[maxlength="6"]') as HTMLInputElement;
+        fireEvent.change(input, { target: { value: 'F0' } });
+        fireEvent.change(input, { target: { value } });
+        expect(input.value).toBe('F0');
+        expect(onChange).not.toHaveBeenCalled();
+    });
 });

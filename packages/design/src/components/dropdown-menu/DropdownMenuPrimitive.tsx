@@ -184,7 +184,7 @@ function DropdownMenuContent({
     }, [ref]);
 
     return (
-        <Portal forceMount={props.forceMount}>
+        <Portal>
             <Content
                 data-slot="dropdown-menu-content"
                 sideOffset={sideOffset}
@@ -215,7 +215,7 @@ function DropdownMenuContent({
                     const triggerId = content?.getAttribute('aria-labelledby');
                     const trigger = triggerId ? content?.ownerDocument.getElementById(triggerId) : null;
                     if (trigger?.contains(event.detail.originalEvent.target as Node)) {
-                        // The trigger already toggles this menu; retained content must not toggle it again.
+                        // The trigger already toggles this menu, including while its exit animation is running.
                         event.preventDefault();
                     }
                 }}

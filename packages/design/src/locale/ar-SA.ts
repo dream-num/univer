@@ -26,7 +26,6 @@ const locale: typeof enUS = {
             next: 'التالي',
             imageGallery: 'معرض الصور',
             image: 'الصورة {0} من {1}',
-            zoom: 'التكبير والتصغير',
             zoomIn: 'تكبير',
             zoomOut: 'تصغير',
             resetZoom: 'إعادة ضبط التكبير',

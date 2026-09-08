@@ -23,12 +23,51 @@ import '@testing-library/jest-dom/vitest';
 
 afterEach(cleanup);
 
-describe('retained dropdown trigger ownership', () => {
-    it('opens on its own trigger while a closed menu remains mounted', async () => {
+describe('dropdown trigger ownership', () => {
+    it('reopens on its trigger before the closing animation finishes', async () => {
+        const getComputedStyle = window.getComputedStyle.bind(window);
+        const styleSpy = vi.spyOn(window, 'getComputedStyle').mockImplementation((element, pseudoElement) => {
+            const styles = getComputedStyle(element, pseudoElement);
+            if (element.getAttribute('data-slot') !== 'dropdown-menu-content') {
+                return styles;
+            }
+            // Presence needs the browser's live animation style, which the test DOM does not animate.
+            return new Proxy(styles, {
+                get(target, property) {
+                    if (property === 'animationName') {
+                        return element.getAttribute('data-state') === 'closed' ? 'menu-exit' : 'none';
+                    }
+                    return Reflect.get(target, property);
+                },
+            });
+        });
+        try {
+            render(
+                <DropdownMenuPrimitive defaultOpen modal={false}>
+                    <DropdownMenuTrigger>Open</DropdownMenuTrigger>
+                    <DropdownMenuContent><DropdownMenuItem>Action</DropdownMenuItem></DropdownMenuContent>
+                </DropdownMenuPrimitive>
+            );
+            const trigger = screen.getByRole('button', { name: 'Open' });
+            for (const open of [false, true]) {
+                await act(async () => new Promise((resolve) => setTimeout(resolve, 0)));
+                const event = createEvent.pointerDown(trigger, { bubbles: true, cancelable: true });
+                Object.defineProperties(event, { button: { value: 0 }, pointerType: { value: 'mouse' }, ctrlKey: { value: false } });
+                fireEvent(trigger, event);
+                expect(trigger).toHaveAttribute('aria-expanded', String(open));
+                expect(screen.getByText('Action').closest('[data-radix-menu-content]')).toHaveAttribute('data-state', open ? 'open' : 'closed');
+            }
+        } finally {
+            cleanup();
+            styleSpy.mockRestore();
+        }
+    });
+
+    it('opens and closes on its own trigger', async () => {
         render(
             <DropdownMenuPrimitive modal={false}>
                 <DropdownMenuTrigger><span>Open</span></DropdownMenuTrigger>
-                <DropdownMenuContent forceMount>
+                <DropdownMenuContent>
                     <DropdownMenuItem>Action</DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenuPrimitive>
@@ -39,6 +78,7 @@ describe('retained dropdown trigger ownership', () => {
         Object.defineProperties(event, { button: { value: 0 }, pointerType: { value: 'mouse' }, ctrlKey: { value: false } });
         fireEvent(screen.getByText('Open'), event);
         expect(screen.getByRole('button', { name: 'Open' })).toHaveAttribute('aria-expanded', 'true');
+        await act(async () => new Promise((resolve) => setTimeout(resolve, 0)));
         const closeEvent = createEvent.pointerDown(screen.getByText('Open'), { bubbles: true, cancelable: true });
         Object.defineProperties(closeEvent, { button: { value: 0 }, pointerType: { value: 'mouse' }, ctrlKey: { value: false } });
         fireEvent(screen.getByText('Open'), closeEvent);
@@ -53,7 +93,7 @@ describe('retained dropdown trigger ownership', () => {
                 {['First', 'Second'].map((name) => (
                     <DropdownMenuPrimitive key={name} modal={false}>
                         <DropdownMenuTrigger>{name}</DropdownMenuTrigger>
-                        <DropdownMenuContent forceMount onPointerDownOutside={onOutside}>
+                        <DropdownMenuContent onPointerDownOutside={onOutside}>
                             <DropdownMenuItem>
                                 {name}
                                 {' '}
@@ -70,6 +110,7 @@ describe('retained dropdown trigger ownership', () => {
             const event = createEvent.pointerDown(button, { bubbles: true, cancelable: true });
             Object.defineProperties(event, { button: { value: 0 }, pointerType: { value: 'mouse' }, ctrlKey: { value: false } });
             fireEvent(button, event);
+            await act(async () => new Promise((resolve) => setTimeout(resolve, 0)));
             expect(screen.getByRole('button', { name: 'First' })).toHaveAttribute('aria-expanded', String(name === 'First'));
             expect(screen.getByRole('button', { name: 'Second' })).toHaveAttribute('aria-expanded', String(name === 'Second'));
         }

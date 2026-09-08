@@ -34,12 +34,12 @@ interface IInputProps {
     onChange?: (h: number, s: number, v: number, a?: number) => void;
 }
 
+const FULL_HEX_COLOR_PATTERN = /^[0-9a-f]{6}$/i;
+
 function HexInput({ hsv, onChange }: IInputProps) {
     const inputRef = useRef<HTMLInputElement>(null);
     const isComposingRef = useRef(false);
     const lastInputValueRef = useRef('');
-    const finishCompositionRef = useRef<(value: string) => void>(() => {});
-    const removeNativeListenersRef = useRef<() => void>(() => {});
     const hexValue = useMemo(() => hsvToHex(hsv[0], hsv[1], hsv[2]), [hsv]);
 
     useEffect(() => {
@@ -56,19 +56,8 @@ function HexInput({ hsv, onChange }: IInputProps) {
         lastInputValueRef.current = input?.value ?? nextValue;
     }, [hexValue]);
 
-    const isValidHex = (hex: string) => {
-        return /^[0-9A-Fa-f]{6}$/.test(hex);
-    };
-
-    const updateInputValue = (newValue: string) => {
-        if (newValue.length > 6) {
-            if (inputRef.current) {
-                inputRef.current.value = lastInputValueRef.current;
-            }
-            return;
-        }
-
-        if (newValue !== '' && !/^[0-9A-Fa-f]*$/.test(newValue)) {
+    const updateInputValue = useCallback((newValue: string) => {
+        if (!/^[0-9a-f]{0,6}$/i.test(newValue)) {
             if (inputRef.current) {
                 inputRef.current.value = lastInputValueRef.current;
             }
@@ -77,13 +66,13 @@ function HexInput({ hsv, onChange }: IInputProps) {
 
         lastInputValueRef.current = newValue;
 
-        if (isValidHex(newValue)) {
+        if (FULL_HEX_COLOR_PATTERN.test(newValue)) {
             const hsvValue = hexToHsv(newValue);
             if (hsvValue && onChange) {
                 onChange(...hsvValue);
             }
         }
-    };
+    }, [onChange]);
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         const newValue = e.target.value.trim();
@@ -94,22 +83,8 @@ function HexInput({ hsv, onChange }: IInputProps) {
         updateInputValue(newValue);
     };
 
-    finishCompositionRef.current = (newValue) => {
-        if (newValue !== '' && !isValidHex(newValue)) {
-            const nextValue = hexValue.replace(/^#/, '');
-            if (inputRef.current) {
-                inputRef.current.value = nextValue;
-            }
-            lastInputValueRef.current = nextValue;
-            return;
-        }
-
-        updateInputValue(newValue);
-    };
-
-    const setInputElement = useCallback((input: HTMLInputElement | null) => {
-        removeNativeListenersRef.current();
-        inputRef.current = input;
+    useEffect(() => {
+        const input = inputRef.current;
         if (!input) {
             return;
         }
@@ -124,21 +99,28 @@ function HexInput({ hsv, onChange }: IInputProps) {
         const handleCompositionEnd = (event: CompositionEvent) => {
             event.stopPropagation();
             isComposingRef.current = false;
-            finishCompositionRef.current(input.value.trim());
+            const value = input.value.trim();
+            if (value !== '' && !FULL_HEX_COLOR_PATTERN.test(value)) {
+                input.value = hexValue.replace(/^#/, '');
+                lastInputValueRef.current = input.value;
+                return;
+            }
+            updateInputValue(value);
         };
 
+        // Stop native composition before it reaches the host editor's DOM listeners.
         input.addEventListener('compositionstart', handleCompositionStart);
         input.addEventListener('compositionupdate', handleCompositionUpdate);
         input.addEventListener('compositionend', handleCompositionEnd);
-        removeNativeListenersRef.current = () => {
+        return () => {
             input.removeEventListener('compositionstart', handleCompositionStart);
             input.removeEventListener('compositionupdate', handleCompositionUpdate);
             input.removeEventListener('compositionend', handleCompositionEnd);
         };
-    }, []);
+    }, [hexValue, updateInputValue]);
 
     const handleBlur = () => {
-        if (!isValidHex(inputRef.current?.value ?? '')) {
+        if (!FULL_HEX_COLOR_PATTERN.test(inputRef.current?.value ?? '')) {
             const nextValue = hexValue.replace(/^#/, '');
             if (inputRef.current) {
                 inputRef.current.value = nextValue;
@@ -150,7 +132,7 @@ function HexInput({ hsv, onChange }: IInputProps) {
     return (
         <>
             <input
-                ref={setInputElement}
+                ref={inputRef}
                 className={clsx(`
                   univer-w-full univer-px-2 !univer-pl-4 univer-uppercase
                   focus:univer-border-primary-500 focus:univer-outline-none

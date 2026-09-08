@@ -26,7 +26,6 @@ const locale: typeof enUS = {
             next: 'Следующее',
             imageGallery: 'Галерея изображений',
             image: 'Изображение {0} из {1}',
-            zoom: 'Масштаб',
             zoomIn: 'Увеличить',
             zoomOut: 'Уменьшить',
             resetZoom: 'Сбросить масштаб',

@@ -26,7 +26,6 @@ const locale: typeof enUS = {
             next: 'Nasledujúci',
             imageGallery: 'Galéria obrázkov',
             image: 'Obrázok {0} z {1}',
-            zoom: 'Priblíženie',
             zoomIn: 'Priblížiť',
             zoomOut: 'Oddialiť',
             resetZoom: 'Obnoviť priblíženie',

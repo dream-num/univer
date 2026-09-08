@@ -26,7 +26,6 @@ const locale: typeof enUS = {
             next: '下一個',
             imageGallery: '圖片庫',
             image: '第 {0} 張圖片，共 {1} 張',
-            zoom: '縮放',
             zoomIn: '放大',
             zoomOut: '縮小',
             resetZoom: '重設縮放',

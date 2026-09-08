@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand, IMultiCommand } from '@univerjs/core';
+import type { IAccessor, ICommand, IMultiCommand, Workbook } from '@univerjs/core';
 import type { ISheetRangeLocation } from '@univerjs/sheets';
 import type { LocaleKey } from '../../locale/types';
 import type { IPasteHookKeyType } from '../../services/clipboard/type';
@@ -92,6 +92,12 @@ export const SheetPasteCommand: IMultiCommand = {
         if (!target) {
             return false;
         }
+        const instanceService = accessor.get(IUniverInstanceService);
+        const workbook = instanceService.getUnit<Workbook>(target.unitId);
+        const worksheet = workbook?.getSheetBySheetId(target.subUnitId);
+        if (!workbook || !worksheet) {
+            return false;
+        }
         const pasteParams = { value: params?.value, target };
         checkSheetClipboardPermission(accessor, PasteCommand.id, pasteParams);
         // const messageService = accessor.get(IMessageService);
@@ -102,6 +108,10 @@ export const SheetPasteCommand: IMultiCommand = {
         const clipboardInterfaceService = accessor.get(IClipboardInterfaceService);
         if (clipboardInterfaceService.supportClipboard) {
             const clipboardItems = await clipboardInterfaceService.read();
+            // A restored unit may reuse the same IDs but must not inherit an old clipboard request.
+            if (instanceService.getUnit(target.unitId) !== workbook || workbook.getSheetBySheetId(target.subUnitId) !== worksheet) {
+                return false;
+            }
             if (clipboardItems.length !== 0) {
                 checkSheetClipboardPermission(accessor, PasteCommand.id, pasteParams);
                 return sheetClipboardService.paste(clipboardItems[0], params?.value, target);

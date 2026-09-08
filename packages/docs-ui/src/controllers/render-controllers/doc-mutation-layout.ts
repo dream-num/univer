@@ -226,12 +226,12 @@ function getComponentLayoutImpact(
     if (root === 'body') {
         return getBodyComponentLayoutImpact(path, component, body);
     }
-    if (root === 'footnotes') {
+    if (root === 'notes') {
         const ids = getChangedRecordKeys(path, component);
         let range: IDocumentLayoutRange | undefined;
         for (const reference of body?.customRanges ?? []) {
-            const id = reference.properties?.footnoteId;
-            if (reference.rangeType === CustomRangeType.FOOTNOTE && typeof id === 'string' && ids.has(id)) {
+            const id = reference.properties?.noteId;
+            if ((reference.rangeType === CustomRangeType.FOOTNOTE || reference.rangeType === CustomRangeType.ENDNOTE) && typeof id === 'string' && ids.has(id)) {
                 range = mergeLayoutRange(range, { start: reference.startIndex, end: reference.endIndex + 1 });
             }
         }

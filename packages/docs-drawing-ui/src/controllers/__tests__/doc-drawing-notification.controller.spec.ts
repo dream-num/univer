@@ -257,21 +257,16 @@ describe('DocDrawingAddRemoveController with real commands and services', () => 
                 startIndex: 0,
                 endIndex: 0,
                 wholeEntity: true,
-                properties: { footnoteId: 'note' },
+                properties: { noteId: 'note' },
             }],
         };
-        const note = {
-            footnoteId: 'note',
-            body: {
-                dataStream: '\b\r\n',
-                paragraphs: [{ startIndex: 1, paragraphId: 'np' }],
-                customBlocks: [{ startIndex: 0, blockId: 'note-image' }],
-            },
-            drawings: { 'note-image': { ...drawing('note-image'), layoutType: PositionedObjectLayoutType.INLINE } },
-            drawingsOrder: ['note-image'],
-        };
+        const note = { type: 'footnote' as const, noteId: 'note', body: {
+            dataStream: '\b\r\n',
+            paragraphs: [{ startIndex: 1, paragraphId: 'np' }],
+            customBlocks: [{ startIndex: 0, blockId: 'note-image' }],
+        }, drawings: { 'note-image': { ...drawing('note-image'), layoutType: PositionedObjectLayoutType.INLINE } }, drawingsOrder: ['note-image'] };
         const jsonX = JSONX.getInstance();
-        mutate(JSONX.compose(jsonX.replaceOp(['body'], body, referencedBody), jsonX.insertOp(['footnotes'], { note })));
+        mutate(JSONX.compose(jsonX.replaceOp(['body'], body, referencedBody), jsonX.insertOp(['notes', 'note'], note)));
         const search = { unitId, subUnitId: unitId, drawingId: 'note-image' };
         expect(manager.getDrawingByParam(search)?.drawingId).toBe('note-image');
         expect(docDrawings.getDrawingOrder(unitId, unitId)).toEqual(['a', 'b', 'note-image']);
@@ -283,7 +278,7 @@ describe('DocDrawingAddRemoveController with real commands and services', () => 
         expect(manager.getDrawingByParam(search)).toMatchObject({ docTransform: { size: { width: 70, height: 35 } } });
         expect(model.getDrawings()).not.toHaveProperty('note-image');
         mutate(jsonX.replaceOp(['body'], model.getBody(), body));
-        expect(model.getSnapshot().footnotes?.note).toBeUndefined();
+        expect(model.getSnapshot().notes?.note).toBeUndefined();
         expect(manager.getDrawingByParam(search)).toBeUndefined();
         expect(docDrawings.getDrawingByParam(search)).toBeUndefined();
         expect(manager.getDrawingByParam({ ...search, drawingId: 'a' })).toBeDefined();

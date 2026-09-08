@@ -103,6 +103,7 @@ import {
     hydrateDocumentSkeletonPageMaterializationPlaceholder,
     serializeDocumentSkeletonPage,
 } from './document-layout-page-patch';
+import { DocumentEndnoteLayout, getEndnoteFlowBottom } from './endnote-layout';
 import { DocumentFootnoteLayout } from './footnote-layout';
 import { resolveFootnoteReferences } from './footnote-numbering';
 import { Hyphen } from './hyphenation/hyphen';
@@ -593,7 +594,7 @@ function copyPageBoundaryMetadata(
 }
 
 function shiftPageCharacterOffsets(page: IDocumentSkeletonPage, delta: number): void {
-    for (const note of page.footnotes ?? []) {
+    for (const note of page.notes ?? []) {
         note.referenceIndex += delta;
     }
     if (delta === 0) {
@@ -760,7 +761,7 @@ function hasReusablePaginatedTailBoundary(
     invalidation: IDocumentLayoutInvalidation,
     allowMetadataOnlyStructuralTailReuse: boolean
 ): boolean {
-    if (previousPage.footnotes?.length || currentPage.footnotes?.length) {
+    if (previousPage.notes?.length || currentPage.notes?.length) {
         return false;
     }
     const mutationDelta = invalidation.newEnd - invalidation.oldEnd;
@@ -859,10 +860,10 @@ function getPagePath(page: IDocumentSkeletonPage) {
     // eslint-disable-next-line ts/no-explicit-any
     let parent: any = skeNode.parent;
     while (parent) {
-        if (parent.page === skeNode && parent.footnoteId && parent.parent?.footnotes) {
-            const index = parent.parent.footnotes.indexOf(parent);
+        if (parent.page === skeNode && parent.noteId && parent.parent?.notes) {
+            const index = parent.parent.notes.indexOf(parent);
             if (index !== -1) {
-                path.unshift('footnotes', index, 'page');
+                path.unshift('notes', index, 'page');
             }
             skeNode = parent.parent;
             parent = skeNode.parent;
@@ -1014,8 +1015,8 @@ function serializePaginatedContinuationCheckpoint(page: IDocumentSkeletonPagePat
         // protected range are complete, self-contained page publications. The
         // checkpoint only needs to prove that the next page starts at the same
         // logical offset and with the same paginated section configuration.
-        footnotes: page.footnotes?.map((note) => ({
-            footnoteId: note.footnoteId,
+        notes: page.notes?.map((note) => ({
+            noteId: note.noteId,
             referenceIndex: note.referenceIndex,
             continued: note.continued,
             page: serializePaginatedContinuationCheckpoint(note.page),
@@ -1464,7 +1465,7 @@ export class DocumentSkeleton extends Skeleton {
         // A Modern page can contain the entire document. Paginated tail reuse
         // deep-clones that page in one atomic step, bypassing the slice budget.
         if (mode === 'paginated' && reuseInteractionPagePrefix && canResumePlainParagraph &&
-            !previousSkeleton.pages[anchorPageIndex]?.footnotes?.length) {
+            !previousSkeleton.pages[anchorPageIndex]?.notes?.length) {
             const interactionPreviousAnchor = mapCurrentOffsetToPrevious(anchor, invalidation);
             const interactionPageIndex = interactionSkeleton == null
                 ? -1
@@ -1517,7 +1518,7 @@ export class DocumentSkeleton extends Skeleton {
         // while still pointing past the cover content that must also be rebuilt.
         while (startPageIndex >= 0) {
             const previousPage = previousSkeleton.pages[startPageIndex];
-            const pageStart = Math.min(getFirstBodyFlowCharIndex(previousPage), ...(previousPage.footnotes ?? []).map((note) => note.referenceIndex));
+            const pageStart = Math.min(getFirstBodyFlowCharIndex(previousPage), ...(previousPage.notes ?? []).map((note) => note.referenceIndex));
             const currentPageStart = mapPreviousOffsetToCurrent(pageStart, invalidation);
             const firstPageBlockIndex = blocks.findIndex(({ block }) => blockContainsOffset(block, currentPageStart));
             if (firstPageBlockIndex < 0 || firstPageBlockIndex >= startBlockIndex) {
@@ -3306,7 +3307,7 @@ export class DocumentSkeleton extends Skeleton {
             for (let pi = 0; pi < pageLength; pi++) {
                 const page = pages[pi];
                 let insideFootnoteArea = false;
-                for (const note of page.footnotes ?? []) {
+                for (const note of page.notes ?? []) {
                     const left = this._findLiquid.x + note.left;
                     const top = this._findLiquid.y + note.top;
                     if (x < left || x > left + note.page.pageWidth || y < top || y > top + note.page.height) {
@@ -3314,7 +3315,7 @@ export class DocumentSkeleton extends Skeleton {
                     }
                     insideFootnoteArea = true;
                     const noteCache: INearestCache = { nearestNodeList: [], nearestNodeDistanceList: [] };
-                    const match = this._collectNearestNode(note.page, DocumentSkeletonPageType.FOOTNOTE, page, note.footnoteId, pi, noteCache, x, y, pageLength);
+                    const match = this._collectNearestNode(note.page, DocumentSkeletonPageType.FOOTNOTE, page, note.noteId, pi, noteCache, x, y, pageLength);
                     if (match) {
                         return match;
                     }
@@ -3392,11 +3393,11 @@ export class DocumentSkeleton extends Skeleton {
             const { segmentId, segmentPage, strict } = restrictions;
             let exactMatch = null;
 
-            if (strict && this._docViewModel.getFootnoteTreeMap().has(segmentId)) {
+            if (strict && this._docViewModel.getNoteTreeMap().has(segmentId)) {
                 for (let pi = 0; pi < pageLength; pi++) {
                     const page = pages[pi];
-                    for (const note of page.footnotes ?? []) {
-                        if (note.footnoteId === segmentId) {
+                    for (const note of page.notes ?? []) {
+                        if (note.noteId === segmentId) {
                             exactMatch = this._collectNearestNode(note.page, DocumentSkeletonPageType.FOOTNOTE, page, segmentId, pi, cache, x, y, pageLength);
                         }
                     }
@@ -3410,7 +3411,7 @@ export class DocumentSkeleton extends Skeleton {
                     const page = pages[pi];
                     const { headerId, footerId, pageWidth } = page;
 
-                    if (segmentId !== '' && !this._docViewModel.getFootnoteTreeMap().has(segmentId)) {
+                    if (segmentId !== '' && !this._docViewModel.getNoteTreeMap().has(segmentId)) {
                         const headerSke = skeHeaders.get(headerId)?.get(pageWidth) as IDocumentSkeletonPage;
 
                         if (headerSke) {
@@ -3533,7 +3534,7 @@ export class DocumentSkeleton extends Skeleton {
         this._findLiquid.translateSave();
 
         const footnote = pageType === DocumentSkeletonPageType.FOOTNOTE
-            ? page.footnotes?.find((fragment) => fragment.page === segmentPage)
+            ? page.notes?.find((fragment) => fragment.page === segmentPage)
             : undefined;
         const pageLeft = this._findLiquid.x + (footnote?.left ?? 0);
         const pageRight = pageLeft + (footnote ? segmentPage.pageWidth : page.pageWidth);
@@ -4511,6 +4512,7 @@ export class DocumentSkeleton extends Skeleton {
         }
 
         if (result.complete) {
+            ctx.endnoteLayout?.finishSection(ctx.skeleton.pages, state.sectionIndex, sectionBreakConfig);
             const nextColumnProperties = state.sectionIndex + 1 < sections.length
                 ? prepareSectionBreakConfig(ctx, state.sectionIndex + 1).columnProperties ?? []
                 : [];
@@ -4980,6 +4982,7 @@ export class DocumentSkeleton extends Skeleton {
         };
         if (ctx.footnoteReferences?.size) {
             ctx.footnoteLayout = new DocumentFootnoteLayout(ctx);
+            ctx.endnoteLayout = new DocumentEndnoteLayout(ctx);
         }
         return ctx;
     }
@@ -5209,6 +5212,7 @@ export class DocumentSkeleton extends Skeleton {
             }
 
             allSkeletonPages.push(...pages);
+            ctx.endnoteLayout?.finishSection(allSkeletonPages, i, sectionBreakConfig);
 
             // The page needs to be reflowed due to floating objects.
             if (ctx.isDirty) {
@@ -5235,7 +5239,7 @@ export class DocumentSkeleton extends Skeleton {
         } = curSkeletonPage;
         const pageContentWidth = pageWidth - curPageML - curPageMR;
         const pageContentHeight = pageHeight - curPageMT - curPageMB;
-        const lastSectionBottom = (lastSection?.top || 0) + (lastSection?.height || 0);
+        const lastSectionBottom = Math.max((lastSection?.top || 0) + (lastSection?.height || 0), getEndnoteFlowBottom(curSkeletonPage));
         const newSection = createSkeletonSection(
             columnProperties,
             columnSeparatorType,
@@ -5338,7 +5342,7 @@ export class DocumentSkeleton extends Skeleton {
             if (segmentId) {
                 const maybeHeaderSke = skeHeaders.get(segmentId)?.get(pageWidth);
                 const maybeFooterSke = skeFooters.get(segmentId)?.get(pageWidth);
-                const note = page.footnotes?.find((fragment) => fragment.footnoteId === segmentId &&
+                const note = page.notes?.find((fragment) => fragment.noteId === segmentId &&
                     fragment.page.st <= charIndex && charIndex <= fragment.page.ed);
                 if (note) {
                     segmentPage = note.page;

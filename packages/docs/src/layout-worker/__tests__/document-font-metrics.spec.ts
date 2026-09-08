@@ -24,7 +24,7 @@ describe('document font metrics', () => {
         collectDocumentFontFamilies({
             documentStyle: { textStyle: { ff: 'Body Font' } },
             headers: { first: { body: { textRuns: [{ ts: { ff: 'Header Font' } }] } } },
-            footnotes: { first: { body: { textRuns: [{ ts: { ff: 'Note Font' } }] } } },
+            notes: { first: { body: { textRuns: [{ ts: { ff: 'Note Font' } }] } } },
             body: { dataStream: '{"ff":"Not a font"}', textRuns: [{ ts: { ff: 'Body Font' } }] },
         }, families);
         collectDocumentFontFamilies(JSONX.getInstance().replaceOp(

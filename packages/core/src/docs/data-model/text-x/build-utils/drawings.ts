@@ -56,7 +56,7 @@ export function getCustomBlockIdsInSelections(body: IDocumentBody, selections: I
 }
 
 export function removeDrawingReferences(
-    documentData: Pick<IDocumentData, 'body' | 'drawings' | 'drawingsOrder' | 'footnotes'>,
+    documentData: Pick<IDocumentData, 'body' | 'drawings' | 'drawingsOrder' | 'notes'>,
     selections: ITextRange[],
     body: IDocumentBody | undefined = documentData.body,
     segmentId = ''
@@ -65,9 +65,9 @@ export function removeDrawingReferences(
         return [];
     }
 
-    const footnote = documentData.footnotes?.[segmentId];
+    const footnote = documentData.notes?.[segmentId];
     const source = footnote ?? documentData;
-    const prefix = footnote ? ['footnotes', segmentId] : [];
+    const prefix = footnote ? ['notes', segmentId] : [];
     const drawings = source.drawings ?? {};
     const drawingOrder = source.drawingsOrder ?? [];
     const blockIds = [...new Set(getCustomBlockIdsInSelections(body, selections))]
@@ -109,9 +109,9 @@ export const addDrawing = (param: IAddDrawingParam) => {
     }
 
     const snapshot = documentDataModel.getSnapshot();
-    const footnote = snapshot.footnotes?.[segmentId ?? ''];
+    const footnote = snapshot.notes?.[segmentId ?? ''];
     const source = footnote ?? snapshot;
-    const prefix = footnote ? ['footnotes', segmentId!] : [];
+    const prefix = footnote ? ['notes', segmentId!] : [];
     const drawingOrder = source.drawingsOrder ?? [];
     let insertDrawingIndex = drawingOrder.length;
     if (source.drawings == null) {

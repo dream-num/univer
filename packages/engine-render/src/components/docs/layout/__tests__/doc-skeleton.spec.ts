@@ -322,10 +322,10 @@ describe('doc skeleton', () => {
                     wholeEntity: true,
                     startIndex: referenceIndex,
                     endIndex: referenceIndex,
-                    properties: { footnoteId: 'note' },
+                    properties: { noteId: 'note' },
                 }],
             },
-            footnotes: { note: { footnoteId: 'note', body: {
+            notes: { note: { type: 'footnote' as const, noteId: 'note', body: {
                 dataStream: noteStream,
                 paragraphs: [...noteStream.matchAll(/\r/g)].map((match, i) => ({ startIndex: match.index!, paragraphId: `n-${i}` })),
                 sectionBreaks: [{ startIndex: noteStream.length - 1, sectionId: 'note' }],
@@ -343,14 +343,14 @@ describe('doc skeleton', () => {
         try {
             skeleton.calculate();
             const pages = skeleton.getSkeletonData()!.pages;
-            const fragments = pages.flatMap((page) => page.footnotes ?? []);
+            const fragments = pages.flatMap((page) => page.notes ?? []);
             expect(fragments.length).toBeGreaterThan(1);
             const referencePage = pages.find((page) => page.st <= referenceIndex && page.ed >= referenceIndex)!;
-            expect(referencePage.footnotes?.[0]).toMatchObject({ footnoteId: 'note', continued: false });
+            expect(referencePage.notes?.[0]).toMatchObject({ noteId: 'note', continued: false });
             expect(fragments.slice(1).every((fragment) => fragment.continued)).toBe(true);
             const firstPosition = skeleton.findNodePositionByCharIndex(0, true, 'note');
             expect(firstPosition?.pageType).toBe(DocumentSkeletonPageType.FOOTNOTE);
-            expect(firstPosition?.path).toContain('footnotes');
+            expect(firstPosition?.path).toContain('notes');
             expect(skeleton.findCharIndexByPosition(firstPosition!)).toBe(0);
             expect(skeleton.findGlyphByPosition(firstPosition)).toBe(skeleton.findNodeByCharIndex(0, 'note'));
             const referencePageIndex = pages.indexOf(referencePage);
@@ -359,12 +359,12 @@ describe('doc skeleton', () => {
             expect(continuationPosition?.page).toBeGreaterThan(referencePageIndex);
             expect(skeleton.findCharIndexByPosition(continuationPosition!)).toBe(continuation.page.st);
             const pageTop = pages.slice(0, referencePageIndex).reduce((top, page) => top + page.pageHeight, 0);
-            const firstFragment = referencePage.footnotes![0];
+            const firstFragment = referencePage.notes![0];
             const hit = skeleton.findNodeByCoord(Vector2.create(firstFragment.left + 20, pageTop + firstFragment.top + 5), PageLayoutType.VERTICAL, 0, 0);
             expect(hit?.segmentId).toBe('note');
             expect(hit?.segmentPage).toBe(referencePageIndex);
             for (const page of pages) {
-                const firstNote = page.footnotes?.[0];
+                const firstNote = page.notes?.[0];
                 if (!firstNote) {
                     continue;
                 }
@@ -377,7 +377,7 @@ describe('doc skeleton', () => {
             expectIncrementalSkeletonToEqualSynchronous(snapshot, univer.__getInjector().get(LocaleService));
             const edited = structuredClone(snapshot);
             const added = 'Expanded note content.\r'.repeat(3);
-            const editedBody = edited.footnotes!.note.body;
+            const editedBody = edited.notes!.note.body;
             editedBody.dataStream = added + noteStream;
             editedBody.paragraphs = [...editedBody.dataStream.matchAll(/\r/g)].map((match, index) => ({
                 paragraphId: `edited-note-${index}`,
@@ -400,7 +400,7 @@ describe('doc skeleton', () => {
                 expected.calculate();
                 expect(normalizeSkeleton(skeleton.getSkeletonData())).toEqual(normalizeSkeleton(expected.getSkeletonData()));
                 const data = skeleton.getSkeletonData()!;
-                const notePageIndex = data.pages.findIndex((page) => page.footnotes?.length);
+                const notePageIndex = data.pages.findIndex((page) => page.notes?.length);
                 const protectedPage = data.pages[notePageIndex];
                 const publication: IDocumentLayoutPageGeometryPublication = {
                     kind: 'page',
@@ -416,13 +416,13 @@ describe('doc skeleton', () => {
                 });
                 // A Worker can agree on body pagination but move a footnote line
                 // to the next page. That boundary must take part in the merge.
-                publication.pages[notePageIndex].page.footnotes![0].page.ed -= 1;
+                publication.pages[notePageIndex].page.notes![0].page.ed -= 1;
                 const partial = { ...progress, complete: false };
                 expect(skeleton.applyLayoutPublication(publication, partial).didReplaceProtectedPages).toBe(false);
                 expect(skeleton.getSkeletonData()!.pages[notePageIndex]).toBe(protectedPage);
                 expect(skeleton.applyLayoutPublication({ ...publication, pages: [] }, progress).didReplaceProtectedPages).toBe(true);
-                expect(skeleton.getSkeletonData()!.pages[notePageIndex].footnotes![0].page.ed)
-                    .toBe(protectedPage.footnotes![0].page.ed - 1);
+                expect(skeleton.getSkeletonData()!.pages[notePageIndex].notes![0].page.ed)
+                    .toBe(protectedPage.notes![0].page.ed - 1);
             } finally {
                 expected.dispose();
             }
@@ -448,15 +448,15 @@ describe('doc skeleton', () => {
                     startIndex: 1,
                     endIndex: 1,
                     wholeEntity: true,
-                    properties: { footnoteId: 'note' },
+                    properties: { noteId: 'note' },
                 }],
             },
-            footnotes: { note: { footnoteId: 'note', body: {
+            notes: { note: { type: 'footnote' as const, noteId: 'note', body: {
                 dataStream: 'Explanation\r\n',
                 paragraphs: [{ startIndex: 11, paragraphId: 'note-paragraph' }],
                 sectionBreaks: [{ startIndex: 12, sectionId: 'note-section' }],
             } } },
-            footnoteSettings: { startNumber: 8, numberFormat: 'upperRoman' },
+            noteSettings: { footnote: { startNumber: 8, numberFormat: 'upperRoman' } },
         };
         const model = new DocumentDataModel(snapshot);
         const viewModel = new DocumentViewModel(model);

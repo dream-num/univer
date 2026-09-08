@@ -342,7 +342,7 @@ export function shaping(
                 const glyph = createSkeletonLetterGlyph(footnote.label, config);
                 glyph.raw = '\uFFFC';
                 glyph.count = 1;
-                glyph.footnoteId = footnote.footnoteId;
+                glyph.noteId = footnote.noteId;
                 shapedGlyphs.push(glyph);
                 i++;
                 src = src.substring(1);

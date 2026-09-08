@@ -35,8 +35,8 @@ it('keeps typing in the footnote after inserting a paragraph', async () => {
     const doc = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, {
         id: 'note-input',
         documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
-        body: { dataStream: 'Body\uFFFC\r\n', paragraphs: [{ paragraphId: 'p', startIndex: 5 }], sectionBreaks: [{ sectionId: 's', startIndex: 6 }], customRanges: [{ rangeId: 'reference', rangeType: CustomRangeType.FOOTNOTE, startIndex: 4, endIndex: 4, properties: { footnoteId: 'note' } }] },
-        footnotes: { note: { footnoteId: 'note', body: { dataStream: '\r\n', paragraphs: [{ paragraphId: 'np', startIndex: 0 }] } } },
+        body: { dataStream: 'Body\uFFFC\r\n', paragraphs: [{ paragraphId: 'p', startIndex: 5 }], sectionBreaks: [{ sectionId: 's', startIndex: 6 }], customRanges: [{ rangeId: 'reference', rangeType: CustomRangeType.FOOTNOTE, startIndex: 4, endIndex: 4, properties: { noteId: 'note' } }] },
+        notes: { note: { type: 'footnote' as const, noteId: 'note', body: { dataStream: '\r\n', paragraphs: [{ paragraphId: 'np', startIndex: 0 }] } } },
     });
     injector.get(IUniverInstanceService).focusUnit(doc.getUnitId());
     const commands = injector.get(ICommandService);
@@ -53,7 +53,7 @@ it('keeps typing in the footnote after inserting a paragraph', async () => {
         style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
     });
     try {
-        const noteId = Object.keys(doc.getSnapshot().footnotes!)[0];
+        const noteId = Object.keys(doc.getSnapshot().notes!)[0];
         for (const text of ['First', ' ', 'line', '\r', 'Next', ' ', 'line']) {
             const range = selections.getActiveTextRange()!;
             expect(range.segmentId).toBe(noteId);
@@ -70,7 +70,7 @@ it('keeps typing in the footnote after inserting a paragraph', async () => {
         }
         expect(selections.getActiveTextRange()).toMatchObject({ segmentId: noteId, startOffset: 20 });
         expect(doc.getBody()?.dataStream).toBe('Body\uFFFC\r\n');
-        expect(doc.getSnapshot().footnotes?.[noteId].body.dataStream).toBe('First line\rNext line\r\n');
+        expect(doc.getSnapshot().notes?.[noteId].body.dataStream).toBe('First line\rNext line\r\n');
     } finally {
         univer.dispose();
     }

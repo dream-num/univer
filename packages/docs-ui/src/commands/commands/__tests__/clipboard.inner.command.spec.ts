@@ -28,24 +28,19 @@ const SOURCE: IDocumentData = {
     body: {
         dataStream: 'A\uFFFCB',
         textRuns: [{ st: 2, ed: 3, ts: { bl: 1 } }],
-        customRanges: [{ startIndex: 1, endIndex: 1, wholeEntity: true, rangeId: 'reference', rangeType: CustomRangeType.FOOTNOTE, properties: { footnoteId: 'note' } }],
+        customRanges: [{ startIndex: 1, endIndex: 1, wholeEntity: true, rangeId: 'reference', rangeType: CustomRangeType.FOOTNOTE, properties: { noteId: 'note' } }],
     },
-    footnotes: {
-        note: {
-            footnoteId: 'note',
-            customMark: '†',
-            referenceTextStyle: { fs: 8, va: 3 },
-            body: {
-                dataStream: 'Explanation\r\n',
-                paragraphs: [{ startIndex: 11, paragraphId: 'source-paragraph' }],
-                sectionBreaks: [{ startIndex: 12, sectionId: 'source-section' }],
-                textRuns: [{ st: 0, ed: 11, ts: { fs: 9.5 } }],
-            },
-        },
+    notes: {
+        note: { type: 'footnote' as const, noteId: 'note', customMark: '†', referenceTextStyle: { fs: 8, va: 3 }, body: {
+            dataStream: 'Explanation\r\n',
+            paragraphs: [{ startIndex: 11, paragraphId: 'source-paragraph' }],
+            sectionBreaks: [{ startIndex: 12, sectionId: 'source-section' }],
+            textRuns: [{ st: 0, ed: 11, ts: { fs: 9.5 } }],
+        } },
     },
 };
 
-describe('InnerPasteCommand footnotes', () => {
+describe('InnerPasteCommand notes', () => {
     let univer: Univer;
     let document: DocumentDataModel;
     let commands: ICommandService;
@@ -91,21 +86,21 @@ describe('InnerPasteCommand footnotes', () => {
         const before = structuredClone(document.getSnapshot());
         expect(await paste(0)).toBe(true);
         const first = structuredClone(document.getSnapshot());
-        const firstId = Object.keys(first.footnotes!)[0];
+        const firstId = Object.keys(first.notes!)[0];
         expect(firstId).not.toBe('note');
-        expect(first.footnotes![firstId]).toMatchObject({ customMark: '†', referenceTextStyle: { fs: 8, va: 3 } });
-        expect(first.footnotes![firstId].body.textRuns).toEqual(SOURCE.footnotes!.note.body.textRuns);
+        expect(first.notes![firstId]).toMatchObject({ customMark: '†', referenceTextStyle: { fs: 8, va: 3 } });
+        expect(first.notes![firstId].body.textRuns).toEqual(SOURCE.notes!.note.body.textRuns);
         commands.syncExecuteCommand(UndoCommand.id);
         expect(document.getSnapshot()).toEqual(before);
         commands.syncExecuteCommand(RedoCommand.id);
         expect(document.getSnapshot()).toEqual(first);
         expect(await paste(3)).toBe(true);
         const second = document.getSnapshot();
-        const ids = second.body!.customRanges!.map((range) => range.properties!.footnoteId);
+        const ids = second.body!.customRanges!.map((range) => range.properties!.noteId);
         expect(new Set(ids).size).toBe(2);
-        expect(Object.keys(second.footnotes!)).toHaveLength(2);
+        expect(Object.keys(second.notes!)).toHaveLength(2);
         expect(validateDocumentStructure(second)).toEqual([]);
-        expect(SOURCE.footnotes!.note.body.paragraphs![0].paragraphId).toBe('source-paragraph');
+        expect(SOURCE.notes!.note.body.paragraphs![0].paragraphId).toBe('source-paragraph');
     });
 
     it('drops references in modern mode and adjusts following text styles', async () => {
@@ -113,14 +108,14 @@ describe('InnerPasteCommand footnotes', () => {
         expect(await paste(0)).toBe(true);
         expect(document.getBody()!.dataStream).toBe('AB\r\n');
         expect(document.getBody()!.textRuns).toContainEqual(expect.objectContaining({ st: 1, ed: 2, ts: { bl: 1 } }));
-        expect(document.getSnapshot().footnotes).toBeUndefined();
+        expect(document.getSnapshot().notes).toEqual({});
         expect(validateDocumentStructure(document.getSnapshot())).toEqual([]);
     });
 
     it('rejects nested references without leaving orphan note resources', async () => {
         await paste(0);
         const before = structuredClone(document.getSnapshot());
-        const id = Object.keys(before.footnotes!)[0];
+        const id = Object.keys(before.notes!)[0];
         expect(await paste(0, id)).toBe(false);
         expect(document.getSnapshot()).toEqual(before);
     });

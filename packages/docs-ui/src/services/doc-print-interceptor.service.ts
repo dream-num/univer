@@ -125,7 +125,7 @@ function collectPageDrawingIds(page: IDocumentSkeletonPage | IDocumentSkeletonHe
     for (const drawingId of page.skeDrawings.keys()) {
         drawingIds.add(drawingId);
     }
-    for (const note of page.footnotes ?? []) {
+    for (const note of page.notes ?? []) {
         collectPageDrawingIds(note.page, drawingIds);
     }
     for (const group of page.skeColumnGroups?.values() ?? []) {

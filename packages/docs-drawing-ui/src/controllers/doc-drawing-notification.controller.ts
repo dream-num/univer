@@ -230,7 +230,7 @@ export class DocDrawingAddRemoveController extends Disposable {
                 if (!JSONX.isNoop(actions)) {
                     const cursor = JSON1.type.readCursor(actions);
                     cursor.traverse(null, () => {
-                        changedFootnotes ||= cursor.getPath()[0] === 'footnotes';
+                        changedFootnotes ||= cursor.getPath()[0] === 'notes';
                     });
                 }
                 if (changedFootnotes) {

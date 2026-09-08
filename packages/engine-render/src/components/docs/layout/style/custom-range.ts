@@ -20,7 +20,7 @@ import { BaselineOffset, BooleanNumber, CustomRangeType } from '@univerjs/core';
 const CUSTOM_RANGE_COLOR_TOKEN = 'blue.600';
 
 export function getCustomRangeStyle(customRange: ICustomRangeForInterceptor): Nullable<ITextStyle> {
-    if (customRange.rangeType === CustomRangeType.FOOTNOTE) {
+    if ((customRange.rangeType === CustomRangeType.FOOTNOTE || customRange.rangeType === CustomRangeType.ENDNOTE)) {
         return { va: BaselineOffset.SUPERSCRIPT };
     }
     if (

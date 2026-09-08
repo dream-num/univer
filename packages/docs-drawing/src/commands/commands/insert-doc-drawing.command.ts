@@ -76,7 +76,7 @@ export const InsertDocDrawingCommand: ICommand = {
         }
 
         const snapshot = documentDataModel.getSnapshot();
-        const isFootnote = !!snapshot.footnotes?.[segmentId];
+        const isFootnote = !!snapshot.notes?.[segmentId];
         if (isFootnote && drawings.some((drawing) => drawing.drawingType !== DrawingTypeEnum.DRAWING_IMAGE)) {
             return false;
         }

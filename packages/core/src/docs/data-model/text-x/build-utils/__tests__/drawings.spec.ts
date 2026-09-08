@@ -258,7 +258,7 @@ describe('drawing build utils', () => {
         const doc = new DocumentDataModel({
             id: 'doc-note-images',
             body: { dataStream: 'Main\r\n' },
-            footnotes: { note: { footnoteId: 'note', body: { dataStream: 'Note\r\n' } } },
+            notes: { note: { type: 'footnote' as const, noteId: 'note', body: { dataStream: 'Note\r\n' } } },
         });
         const before = doc.getSnapshot();
         const drawings = ['image-1', 'image-2'].map((drawingId) => ({
@@ -285,9 +285,9 @@ describe('drawing build utils', () => {
             const undoInsert = JSONX.invertWithDoc(insert, before);
             doc.apply(insert);
             const inserted = doc.getSnapshot();
-            expect(inserted.footnotes?.note.body.dataStream).toBe('Note\b\b\r\n');
-            expect(inserted.footnotes?.note.drawingsOrder).toEqual(['image-1', 'image-2']);
-            expect(inserted.footnotes?.note.drawings).toMatchObject({ 'image-1': drawings[0], 'image-2': drawings[1] });
+            expect(inserted.notes?.note.body.dataStream).toBe('Note\b\b\r\n');
+            expect(inserted.notes?.note.drawingsOrder).toEqual(['image-1', 'image-2']);
+            expect(inserted.notes?.note.drawings).toMatchObject({ 'image-1': drawings[0], 'image-2': drawings[1] });
             expect(inserted.body).toEqual(before.body);
             expect(inserted.drawings).toEqual(before.drawings);
             expect(inserted.drawingsOrder).toEqual(before.drawingsOrder);
@@ -302,9 +302,9 @@ describe('drawing build utils', () => {
             }
             const undoReplace = JSONX.invertWithDoc(replace, inserted);
             doc.apply(replace);
-            expect(doc.getSnapshot().footnotes?.note.drawingsOrder).toEqual(['replacement']);
-            expect(Object.keys(doc.getSnapshot().footnotes?.note.drawings ?? {})).toEqual(['replacement']);
-            expect(doc.getSnapshot().footnotes?.note.body.dataStream).toBe('Note\b\r\n');
+            expect(doc.getSnapshot().notes?.note.drawingsOrder).toEqual(['replacement']);
+            expect(Object.keys(doc.getSnapshot().notes?.note.drawings ?? {})).toEqual(['replacement']);
+            expect(doc.getSnapshot().notes?.note.body.dataStream).toBe('Note\b\r\n');
             doc.apply(undoReplace);
             expect(doc.getSnapshot()).toEqual(inserted);
             doc.apply(undoInsert);

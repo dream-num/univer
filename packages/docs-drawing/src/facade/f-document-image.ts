@@ -454,12 +454,12 @@ export class FDocumentImage extends FBase {
 
     private _getTextRange(): ITextRangeParam | null {
         const snapshot = this._document.getDocumentDataModel().getSnapshot();
-        const { body, headers = {}, footers = {}, footnotes = {} } = snapshot;
+        const { body, headers = {}, footers = {}, notes = {} } = snapshot;
         const segments = [
             { segmentId: '', body },
             ...Object.entries(headers).map(([segmentId, header]) => ({ segmentId, body: header.body })),
             ...Object.entries(footers).map(([segmentId, footer]) => ({ segmentId, body: footer.body })),
-            ...Object.entries(footnotes).map(([segmentId, note]) => ({ segmentId, body: note.body })),
+            ...Object.entries(notes).map(([segmentId, note]) => ({ segmentId, body: note.body })),
         ];
 
         for (const { segmentId, body } of segments) {

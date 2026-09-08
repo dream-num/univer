@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import type { IDocumentData, IFootnoteData, IFootnoteProperties } from '@univerjs/core';
+import type { IDocumentData, IDocumentNote, IFootnoteProperties } from '@univerjs/core';
 import { CustomRangeType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { formatFootnoteNumber, resolveFootnoteReferences } from '../footnote-numbering';
 
-function createSnapshot(restart: IFootnoteProperties['restart']): Pick<IDocumentData, 'body' | 'footnotes' | 'footnoteSettings'> {
-    const footnotes: Record<string, IFootnoteData> = {};
+function createSnapshot(restart: IFootnoteProperties['restart']): Pick<IDocumentData, 'body' | 'notes' | 'noteSettings'> {
+    const notes: Record<string, IDocumentNote> = {};
     for (let index = 0; index < 5; index++) {
-        const footnoteId = `note-${index}`;
-        footnotes[footnoteId] = { footnoteId, body: { dataStream: 'Explanation\r\n' } };
+        const noteId = `note-${index}`;
+        notes[noteId] = { type: 'footnote' as const, noteId, body: { dataStream: 'Explanation\r\n' } };
     }
-    footnotes['note-1'].customMark = '†';
+    notes['note-1'].customMark = '†';
     return {
         body: {
             dataStream: '\uFFFC\uFFFC\uFFFC\r\n\uFFFC\uFFFC\r\n',
@@ -35,15 +35,15 @@ function createSnapshot(restart: IFootnoteProperties['restart']): Pick<IDocument
                 startIndex: offset,
                 endIndex: offset,
                 wholeEntity: true,
-                properties: { footnoteId: `note-${index}` },
+                properties: { noteId: `note-${index}` },
             })),
             sectionBreaks: [
                 { sectionId: 'section-1', startIndex: 4 },
                 { sectionId: 'section-2', startIndex: 8 },
             ],
         },
-        footnotes,
-        footnoteSettings: { restart, startNumber: 3, numberFormat: 'lowerRoman' },
+        notes,
+        noteSettings: { footnote: { restart, startNumber: 3, numberFormat: 'lowerRoman' } },
     };
 }
 
@@ -58,7 +58,7 @@ describe('footnote numbering', () => {
 
     it('restarts at section boundaries and inherits the document number format', () => {
         const snapshot = createSnapshot('eachSect');
-        snapshot.body!.sectionBreaks![1].footnoteProperties = { startNumber: 9 };
+        snapshot.body!.sectionBreaks![1].noteProperties = { footnote: { startNumber: 9 } };
         expect([...resolveFootnoteReferences(snapshot).values()].map((reference) => reference.label))
             .toEqual(['iii', '†', 'iv', 'ix', 'x']);
     });
@@ -70,7 +70,7 @@ describe('footnote numbering', () => {
             .toEqual(['iii', '†', 'iii', 'iii', 'iv']);
         pages.set('note-4', 3);
         const references = resolveFootnoteReferences(snapshot, pages);
-        expect(references.get(6)).toMatchObject({ footnoteId: 'note-4', label: 'iii' });
+        expect(references.get(6)).toMatchObject({ noteId: 'note-4', label: 'iii' });
         expect(snapshot.body!.customRanges![4].startIndex).toBe(6);
     });
 

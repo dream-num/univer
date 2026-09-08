@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IFootnoteData } from '@univerjs/core';
+import type { IDocumentNote } from '@univerjs/core';
 import type { IDocumentSkeletonPage } from '../../../../basics/i-document-skeleton-cached';
 import { BaselineOffset, BooleanNumber, CustomRangeType, DataStreamTreeTokenType, DocumentFlavor } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -27,7 +27,7 @@ import { layoutFootnoteBody } from '../footnote-layout';
 import { resolveFootnoteReferences } from '../footnote-numbering';
 import { FontCache } from '../shaping-engine/font-cache';
 
-function createNoteTestBed(pageHeight = 600, noteOverrides: Partial<IFootnoteData> = {}) {
+function createNoteTestBed(pageHeight = 600, noteOverrides: Partial<IDocumentNote> = {}) {
     const dataStream = `${Array.from({ length: 30 }, (_, i) => `Explanation ${i + 1} with enough text to wrap onto another line.\r`).join('')}\n`;
     const paragraphs = [...dataStream.matchAll(/\r/g)].map((match, i) => ({
         paragraphId: `note-paragraph-${i}`,
@@ -42,20 +42,16 @@ function createNoteTestBed(pageHeight = 600, noteOverrides: Partial<IFootnoteDat
                 startIndex: 9,
                 endIndex: 9,
                 wholeEntity: true,
-                properties: { footnoteId: 'note' },
+                properties: { noteId: 'note' },
             }],
         },
-        footnoteSettings: { numberFormat: 'upperRoman', startNumber: 8 },
-        footnotes: {
-            note: {
-                footnoteId: 'note',
-                body: {
-                    dataStream,
-                    paragraphs,
-                    sectionBreaks: [{ sectionId: 'note-body', startIndex: dataStream.length - 1 }],
-                },
-                ...noteOverrides,
-            },
+        noteSettings: { footnote: { numberFormat: 'upperRoman', startNumber: 8 } },
+        notes: {
+            note: { type: 'footnote' as const, noteId: 'note', body: {
+                dataStream,
+                paragraphs,
+                sectionBreaks: [{ sectionId: 'note-body', startIndex: dataStream.length - 1 }],
+            }, ...noteOverrides },
         },
     });
 }
@@ -90,7 +86,7 @@ describe('footnote body layout', () => {
                 paragraphs: [...dataStream.matchAll(/\r/g)].filter((match) => match.index !== prefix.length + tableStream.length).map((match, index) => ({ paragraphId: `p-${index}`, startIndex: match.index })),
                 sectionBreaks: [...dataStream.matchAll(/\n/g)].map((match, index) => ({ sectionId: `s-${index}`, startIndex: match.index })),
                 tables: [{ tableId: 'table', startIndex: prefix.length, endIndex: prefix.length + tableStream.length }],
-                customRanges: [{ rangeId: 'ref', rangeType: CustomRangeType.FOOTNOTE, startIndex: 9, endIndex: 9, wholeEntity: true, properties: { footnoteId: 'note' } }],
+                customRanges: [{ rangeId: 'ref', rangeType: CustomRangeType.FOOTNOTE, startIndex: 9, endIndex: 9, wholeEntity: true, properties: { noteId: 'note' } }],
             },
             tableSource: { table: {
                 tableId: 'table',
@@ -102,7 +98,7 @@ describe('footnote body layout', () => {
                 tableColumns: [{ size: { type: 0, width: { v: 200 } } }],
                 tableRows: Array.from({ length: 10 }, () => ({ tableCells: [{}], trHeight: { val: { v: 0 }, hRule: 0 } })),
             } },
-            footnotes: { note: { footnoteId: 'note', body: { dataStream: 'Explanation\r\n', paragraphs: [{ paragraphId: 'note-p', startIndex: 11 }], sectionBreaks: [{ sectionId: 'note-section', startIndex: 12 }] } } },
+            notes: { note: { type: 'footnote' as const, noteId: 'note', body: { dataStream: 'Explanation\r\n', paragraphs: [{ paragraphId: 'note-p', startIndex: 11 }], sectionBreaks: [{ sectionId: 'note-section', startIndex: 12 }] } } },
         });
         const skeleton = DocumentSkeleton.create(bed.viewModel, bed.ctx.docsConfig.localeService);
         try {
@@ -117,7 +113,7 @@ describe('footnote body layout', () => {
                 skeleton.calculate();
             }
             const pages = skeleton.getSkeletonData()!.pages;
-            expect(pages[0].footnotes?.map((note) => note.footnoteId)).toEqual(['note']);
+            expect(pages[0].notes?.map((note) => note.noteId)).toEqual(['note']);
             const firstTable = [...pages[0].skeTables.values()][0];
             expect(firstTable).toBeDefined();
             expect(firstTable.rows[0].index).toBe(0);
@@ -145,10 +141,10 @@ describe('footnote body layout', () => {
                     ? { keepNext: index % 3 === 1 ? BooleanNumber.TRUE : BooleanNumber.FALSE, keepLines: index % 3 === 2 ? BooleanNumber.TRUE : BooleanNumber.FALSE }
                     : { [constraint]: index % 2 === 1 ? BooleanNumber.TRUE : BooleanNumber.FALSE } })),
                 sectionBreaks: [{ sectionId: 'main', startIndex: dataStream.length - 1 }],
-                customRanges: references.map(({ index, id }) => ({ rangeId: `ref-${id}`, rangeType: CustomRangeType.FOOTNOTE, startIndex: index, endIndex: index, wholeEntity: true, properties: { footnoteId: id } })),
+                customRanges: references.map(({ index, id }) => ({ rangeId: `ref-${id}`, rangeType: CustomRangeType.FOOTNOTE, startIndex: index, endIndex: index, wholeEntity: true, properties: { noteId: id } })),
             },
-            footnoteSettings: { restart: 'eachPage', startNumber: 9 },
-            footnotes: Object.fromEntries(references.map(({ id }) => [id, { footnoteId: id, body: { dataStream: 'Note\r\n', paragraphs: [{ startIndex: 4, paragraphId: 'note-text' }], sectionBreaks: [{ startIndex: 5, sectionId: 'note-section' }] } }])),
+            noteSettings: { footnote: { restart: 'eachPage', startNumber: 9 } },
+            notes: Object.fromEntries(references.map(({ id }) => [id, { type: 'footnote' as const, noteId: id, body: { dataStream: 'Note\r\n', paragraphs: [{ startIndex: 4, paragraphId: 'note-text' }], sectionBreaks: [{ startIndex: 5, sectionId: 'note-section' }] } }])),
         });
         try {
             const skeleton = DocumentSkeleton.create(bed.viewModel, bed.ctx.docsConfig.localeService);
@@ -164,15 +160,15 @@ describe('footnote body layout', () => {
             }
             const pages = skeleton.getSkeletonData()!.pages;
             expect(pages.flatMap(getPageGlyphs).filter((glyph) => glyph.count > 0).map((glyph) => glyph.raw).join('')).toBe(dataStream);
-            const referenceWidth = pages.flatMap(getPageGlyphs).find((glyph) => glyph.footnoteId === 'note-0')!.bBox.width;
+            const referenceWidth = pages.flatMap(getPageGlyphs).find((glyph) => glyph.noteId === 'note-0')!.bBox.width;
             for (const page of pages) {
-                const refs = getPageGlyphs(page).filter((glyph) => glyph.footnoteId);
+                const refs = getPageGlyphs(page).filter((glyph) => glyph.noteId);
                 expect(refs.map((glyph) => glyph.content)).toEqual(refs.map((_, index) => String(9 + index)));
                 for (const glyph of refs) {
                     if (glyph.content === '9') {
                         expect(glyph.bBox.width).toBeCloseTo(referenceWidth);
                     }
-                    const note = page.footnotes?.find((fragment) => fragment.footnoteId === glyph.footnoteId && !fragment.continued);
+                    const note = page.notes?.find((fragment) => fragment.noteId === glyph.noteId && !fragment.continued);
                     expect(note).toBeDefined();
                     expect(getPageGlyphs(note!.page).find((item) => item.count === 0)?.content).toBe(glyph.content);
                 }
@@ -191,8 +187,8 @@ describe('footnote body layout', () => {
             }
             if (constraint === 'keepNext') {
                 for (let index = 0; index < references.length; index += 2) {
-                    const headingPage = pages.find((page) => getPageGlyphs(page).some((glyph) => glyph.footnoteId === references[index].id));
-                    const followingPage = pages.find((page) => getPageGlyphs(page).some((glyph) => glyph.footnoteId === references[index + 1].id));
+                    const headingPage = pages.find((page) => getPageGlyphs(page).some((glyph) => glyph.noteId === references[index].id));
+                    const followingPage = pages.find((page) => getPageGlyphs(page).some((glyph) => glyph.noteId === references[index + 1].id));
                     expect(headingPage).toBe(followingPage);
                 }
             }
@@ -297,32 +293,32 @@ describe('footnote body layout', () => {
         const firstBody = { dataStream: `${firstText}\r\n`, paragraphs: [{ paragraphId: 'first', startIndex: firstText.length }], sectionBreaks: [{ sectionId: 'first-section', startIndex: firstText.length + 1 }] };
         const bed = createParagraphLayoutTestBed('\uFFFC\uFFFC', {
             documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
-            footnoteSettings: { columnCount: 2 },
+            noteSettings: { footnote: { columnCount: 2 } },
             body: { customRanges: [0, 1].map((index) => ({
                 rangeType: CustomRangeType.FOOTNOTE,
                 rangeId: `ref-${index}`,
                 startIndex: index,
                 endIndex: index,
                 wholeEntity: true,
-                properties: { footnoteId: `note-${index}` },
+                properties: { noteId: `note-${index}` },
             })) },
-            footnotes: {
-                'note-0': { footnoteId: 'note-0', body: firstBody },
-                'note-1': { footnoteId: 'note-1', body: structuredClone(body) },
+            notes: {
+                'note-0': { type: 'footnote' as const, noteId: 'note-0', body: firstBody },
+                'note-1': { type: 'footnote' as const, noteId: 'note-1', body: structuredClone(body) },
             },
         });
         const skeleton = DocumentSkeleton.create(bed.viewModel, bed.ctx.docsConfig.localeService);
         try {
             skeleton.calculate();
             const pages = skeleton.getSkeletonData()!.pages;
-            const notes = pages[0].footnotes!;
+            const notes = pages[0].notes!;
             if (repeatCount > 1) {
-                const allNotes = pages.flatMap((page) => page.footnotes ?? []);
+                const allNotes = pages.flatMap((page) => page.notes ?? []);
                 expect(allNotes.length).toBeGreaterThan(2);
-                expect(allNotes[allNotes.length - 1].footnoteId).toBe('note-1');
+                expect(allNotes[allNotes.length - 1].noteId).toBe('note-1');
                 expect(allNotes[allNotes.length - 1].continued).toBe(false);
                 for (const [id, expected] of [['note-0', firstBody.dataStream], ['note-1', body.dataStream]]) {
-                    const raw = allNotes.filter((note) => note.footnoteId === id).flatMap((note) =>
+                    const raw = allNotes.filter((note) => note.noteId === id).flatMap((note) =>
                         note.page.sections.flatMap((section) => section.columns.flatMap((column) =>
                             column.lines.flatMap((line) => line.divides.flatMap((divide) => divide.glyphGroup.filter((glyph) => glyph.count > 0).map((glyph) => glyph.raw)))))).join('');
                     expect(raw).toBe(expected);
@@ -370,12 +366,12 @@ describe('footnote body layout', () => {
             (column) => column.lines.flatMap((line) => line.divides.flatMap((divide) => divide.glyphGroup))
         )));
         expect(glyphs[0]).toMatchObject({ content: 'VIII', raw: '', count: 0 });
-        expect(glyphs.filter((glyph) => glyph.count > 0).map((glyph) => glyph.raw).join('')).toBe(snapshot.footnotes!.note.body.dataStream);
+        expect(glyphs.filter((glyph) => glyph.count > 0).map((glyph) => glyph.raw).join('')).toBe(snapshot.notes!.note.body.dataStream);
         expect(pages[0].st).toBe(0);
         for (let index = 1; index < pages.length; index++) {
             expect(pages[index].st).toBe(pages[index - 1].ed + 1);
         }
-        expect(snapshot.footnotes!.note.body.dataStream.startsWith('Explanation')).toBe(true);
+        expect(snapshot.notes!.note.body.dataStream.startsWith('Explanation')).toBe(true);
         bed.viewModel.dispose();
         bed.dataModel.dispose();
     });
@@ -400,7 +396,7 @@ describe('footnote body layout', () => {
         { prefixCount: 7, rowCount: 12, referenceRow: 0, referenceRows: [0, 3, 6, 9, 11], restartEachPage: true, cantSplit: true, noteParagraphs: 1, exactRowHeight: 30 },
         { prefixCount: 0, rowCount: 1, referenceRow: 0, cellParagraphs: 20, referenceParagraphs: [0, 10, 19], referenceColumns: [0, 1], columnCount: 2, restartEachPage: true, noteParagraphs: 1 },
         { prefixCount: 0, rowCount: 1, referenceRow: 0, cellParagraphs: 20, columnCount: 2, referenceColumns: [0, 1] },
-    ].flatMap((sample, caseIndex) => [false, true].map((incremental) => ({ ...sample, incremental, caseIndex }))))('keeps table references with their footnotes (case $caseIndex, incremental: $incremental)', ({ prefixCount, rowCount, referenceRow, incremental, noteParagraphs = 4, cellParagraphs = 1, referenceParagraph = 0, columnCount = 1, referenceColumn = 0, referenceParagraphs = [referenceParagraph], referenceColumns = [referenceColumn], restartEachPage = false, startNumber = 1, cantSplit = false, referenceRows = [referenceRow], exactRowHeight = 0 }) => {
+    ].flatMap((sample, caseIndex) => [false, true].map((incremental) => ({ ...sample, incremental, caseIndex }))))('keeps table references with their notes (case $caseIndex, incremental: $incremental)', ({ prefixCount, rowCount, referenceRow, incremental, noteParagraphs = 4, cellParagraphs = 1, referenceParagraph = 0, columnCount = 1, referenceColumn = 0, referenceParagraphs = [referenceParagraph], referenceColumns = [referenceColumn], restartEachPage = false, startNumber = 1, cantSplit = false, referenceRows = [referenceRow], exactRowHeight = 0 }) => {
         const T = DataStreamTreeTokenType;
         const cellText = (row: number, column: number) => `${Array.from({ length: cellParagraphs }, (_, paragraph) =>
             `Cell${referenceRows.includes(row) && referenceColumns.includes(column) && referenceParagraphs.includes(paragraph) ? '\uFFFC' : ''}${T.PARAGRAPH}`).join('')}${T.SECTION_BREAK}`;
@@ -416,7 +412,7 @@ describe('footnote body layout', () => {
                 paragraphs: [...dataStream.matchAll(/\r/g)].map((match, index) => ({ startIndex: match.index!, paragraphId: `p-${index}` })),
                 sectionBreaks: [{ sectionId: 'main', startIndex: dataStream.length - 1 }],
                 tables: [{ tableId: 'table', startIndex: prefix.length, endIndex: prefix.length + tableStream.length }],
-                customRanges: references.map(({ index, id }) => ({ rangeId: `ref-${id}`, rangeType: CustomRangeType.FOOTNOTE, startIndex: index, endIndex: index, wholeEntity: true, properties: { footnoteId: id } })),
+                customRanges: references.map(({ index, id }) => ({ rangeId: `ref-${id}`, rangeType: CustomRangeType.FOOTNOTE, startIndex: index, endIndex: index, wholeEntity: true, properties: { noteId: id } })),
             },
             tableSource: {
                 table: {
@@ -429,8 +425,8 @@ describe('footnote body layout', () => {
                     tableColumns: Array.from({ length: columnCount }, () => ({ size: { type: 0, width: { v: 300 / columnCount } } })),
                 },
             },
-            footnoteSettings: restartEachPage ? { restart: 'eachPage', startNumber } : undefined,
-            footnotes: Object.fromEntries(references.map(({ id }) => [id, { footnoteId: id, body: {
+            noteSettings: { footnote: restartEachPage ? { restart: 'eachPage', startNumber } : undefined },
+            notes: Object.fromEntries(references.map(({ id }) => [id, { type: 'footnote' as const, noteId: id, body: {
                 dataStream: noteStream,
                 paragraphs: [...noteStream.matchAll(/\r/g)].map((match, index) => ({ paragraphId: `note-${index}`, startIndex: match.index! })),
                 sectionBreaks: [{ sectionId: 'note-section', startIndex: noteStream.length - 1 }],
@@ -458,7 +454,7 @@ describe('footnote body layout', () => {
             if (restartEachPage) {
                 const markerWidths = new Map<string, number>();
                 for (const page of tablePages) {
-                    const refs = [...page.skeTables.values()].flatMap((table) => table.rows.flatMap((row) => row.cells.flatMap(getPageGlyphs))).filter((glyph) => glyph.footnoteId);
+                    const refs = [...page.skeTables.values()].flatMap((table) => table.rows.flatMap((row) => row.cells.flatMap(getPageGlyphs))).filter((glyph) => glyph.noteId);
                     expect(refs.map((glyph) => glyph.content)).toEqual(refs.map((_, index) => String(index + startNumber)));
                     for (const glyph of refs) {
                         const previousWidth = markerWidths.get(glyph.content);
@@ -466,7 +462,7 @@ describe('footnote body layout', () => {
                             expect(glyph.width).toBeCloseTo(previousWidth);
                         }
                         markerWidths.set(glyph.content, glyph.width);
-                        const note = page.footnotes?.find((fragment) => fragment.footnoteId === glyph.footnoteId && !fragment.continued);
+                        const note = page.notes?.find((fragment) => fragment.noteId === glyph.noteId && !fragment.continued);
                         expect(note).toBeDefined();
                         expect(getPageGlyphs(note!.page).find((item) => item.count === 0)?.content).toBe(glyph.content);
                     }
@@ -480,12 +476,12 @@ describe('footnote body layout', () => {
                 expect(text).toBe(Array.from({ length: rowCount }, (_, row) => cellText(row, column)).join(''));
             }
             const page = tablePages.find((page) => [...page.skeTables.values()].some((table) =>
-                table.rows.some((row) => row.cells.some((cell) => getPageGlyphs(cell).some((glyph) => glyph.footnoteId === 'note-0')))))!;
-            expect(page.footnotes!.some((note) => note.footnoteId === 'note-0')).toBe(true);
-            const fragments = pages.flatMap((page) => page.footnotes ?? []);
+                table.rows.some((row) => row.cells.some((cell) => getPageGlyphs(cell).some((glyph) => glyph.noteId === 'note-0')))))!;
+            expect(page.notes!.some((note) => note.noteId === 'note-0')).toBe(true);
+            const fragments = pages.flatMap((page) => page.notes ?? []);
             expect(fragments[0].continued).toBe(false);
             for (const { id } of references) {
-                const noteFragments = fragments.filter((fragment) => fragment.footnoteId === id);
+                const noteFragments = fragments.filter((fragment) => fragment.noteId === id);
                 expect(noteFragments[0].continued).toBe(false);
                 expect(noteFragments.slice(1).every((fragment) => fragment.continued)).toBe(true);
                 expect(noteFragments.flatMap((fragment) => getPageGlyphs(fragment.page)).filter((glyph) => glyph.count > 0).map((glyph) => glyph.raw).join('')).toBe(noteStream);
@@ -511,14 +507,14 @@ describe('footnote body layout', () => {
             sectionBreaks: [{ sectionId: 'ns', startIndex: 12 }],
         };
         const bed = createNoteTestBed(600, { body });
-        bed.dataModel.getSnapshot().footnoteSettings = { position };
+        bed.dataModel.getSnapshot().noteSettings = { footnote: { position } };
         const skeleton = DocumentSkeleton.create(bed.viewModel, bed.ctx.docsConfig.localeService);
         try {
             skeleton.calculate();
             const pages = skeleton.getSkeletonData()!.pages;
             expect(pages).toHaveLength(1);
             const page = pages[0];
-            const note = page.footnotes![0];
+            const note = page.notes![0];
             const separator = page.footnoteDecorations![0];
             const bodyLine = page.sections[0].columns[0].lines[0];
             const bodyBottom = page.marginTop + bodyLine.top + bodyLine.lineHeight;
@@ -544,11 +540,11 @@ describe('footnote body layout', () => {
             paragraphs: [{ paragraphId: 'decoration', startIndex: text.length, paragraphStyle: { spaceBelow: { v: 17 } } }],
             sectionBreaks: [{ sectionId: 'decoration', startIndex: text.length + 1 }],
         });
-        bed.dataModel.getSnapshot().footnoteSettings = {
+        bed.dataModel.getSnapshot().noteSettings = { footnote: {
             separator: makeBody('Notes'),
             continuationSeparator: makeBody('Notes continued'),
             continuationNotice: makeBody('Continued on the following page'),
-        };
+        } };
         const skeleton = DocumentSkeleton.create(bed.viewModel, bed.ctx.docsConfig.localeService);
         try {
             skeleton.calculate();
@@ -560,13 +556,13 @@ describe('footnote body layout', () => {
                 const separator = decorations[0];
                 expect(separator.kind).toBe(index === 0 ? 'separator' : 'continuationSeparator');
                 expect(getPageGlyphs(separator.page).map((glyph) => glyph.raw).join('')).toBe(index === 0 ? 'Notes\r\n' : 'Notes continued\r\n');
-                expect(page.footnotes![0].top).toBeCloseTo(separator.top + separator.page.height);
+                expect(page.notes![0].top).toBeCloseTo(separator.top + separator.page.height);
                 const lastLine = separator.page.sections[0].columns[0].lines.slice(-1)[0];
                 expect(separator.page.height).toBeCloseTo(lastLine.top + lastLine.lineHeight + 17);
                 const notice = decorations.find((decoration) => decoration.kind === 'continuationNotice');
                 expect(Boolean(notice)).toBe(index < pages.length - 1);
                 if (notice) {
-                    const noteBottom = Math.max(...page.footnotes!.map((note) => note.top + note.page.height));
+                    const noteBottom = Math.max(...page.notes!.map((note) => note.top + note.page.height));
                     expect(notice.top).toBeCloseTo(noteBottom);
                     expect(notice.top + notice.page.height).toBeLessThanOrEqual(page.pageHeight - page.marginBottom + 0.01);
                 }
@@ -593,9 +589,9 @@ describe('footnote body layout', () => {
                 dataStream,
                 paragraphs: [...dataStream.matchAll(/\r/g)].map((match, index) => ({ startIndex: match.index!, paragraphId: `p-${index}` })),
                 sectionBreaks: [{ sectionId: 'main', startIndex: dataStream.length - 1 }],
-                customRanges: [{ rangeId: 'ref', rangeType: CustomRangeType.FOOTNOTE, startIndex: prefix.length, endIndex: prefix.length, wholeEntity: true, properties: { footnoteId: 'note' } }],
+                customRanges: [{ rangeId: 'ref', rangeType: CustomRangeType.FOOTNOTE, startIndex: prefix.length, endIndex: prefix.length, wholeEntity: true, properties: { noteId: 'note' } }],
             },
-            footnotes: { note: { footnoteId: 'note', body: {
+            notes: { note: { type: 'footnote' as const, noteId: 'note', body: {
                 dataStream: noteStream,
                 paragraphs: [{ paragraphId: 'note-text', startIndex: noteStream.length - 2 }],
                 sectionBreaks: [{ sectionId: 'note-section', startIndex: noteStream.length - 1 }],
@@ -605,10 +601,10 @@ describe('footnote body layout', () => {
         try {
             skeleton.calculate();
             const pages = skeleton.getSkeletonData()!.pages;
-            const fragments = pages.flatMap((page) => page.footnotes ?? []);
+            const fragments = pages.flatMap((page) => page.notes ?? []);
             expect(fragments).toHaveLength(1);
             expect(fragments.flatMap((fragment) => getPageGlyphs(fragment.page)).filter((glyph) => glyph.count > 0).map((glyph) => glyph.raw).join('')).toBe(noteStream);
-            expect(pages.find((page) => getPageGlyphs(page).some((glyph) => glyph.footnoteId === 'note'))?.footnotes).toHaveLength(1);
+            expect(pages.find((page) => getPageGlyphs(page).some((glyph) => glyph.noteId === 'note'))?.notes).toHaveLength(1);
         } finally {
             bed.viewModel.dispose();
             bed.dataModel.dispose();
@@ -643,8 +639,8 @@ describe('footnote body layout', () => {
             firstPageHeight: 100,
             continuationPageHeight: 100,
         });
-        bed.curPage.footnotes = [{
-            footnoteId: 'note',
+        bed.curPage.notes = [{
+            noteId: 'note',
             referenceIndex: 9,
             continued: false,
             left: 20,
@@ -654,7 +650,7 @@ describe('footnote body layout', () => {
         const patch = serializeDocumentSkeletonPage(bed.curPage, true);
         expect(() => JSON.stringify(patch)).not.toThrow();
         const restored = hydrateDocumentSkeletonPage(patch, undefined, bed.dataModel.getSnapshot());
-        const notePage = restored.footnotes![0].page;
+        const notePage = restored.notes![0].page;
         const section = notePage.sections[0];
         const column = section.columns[0];
         const line = column.lines[0];
@@ -664,7 +660,7 @@ describe('footnote body layout', () => {
         expect(line.parent).toBe(column);
         expect(divide.glyphGroup[0].parent).toBe(divide);
         expect(notePage.st).toBe(0);
-        expect(restored.footnotes![0].top).toBe(400);
+        expect(restored.notes![0].top).toBe(400);
         bed.viewModel.dispose();
         bed.dataModel.dispose();
     });

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody, IDocumentData, IFootnoteData } from '@univerjs/core';
+import type { IDocumentBody, IDocumentData, IDocumentNote } from '@univerjs/core';
 import { BuildTextUtils, createParagraphId, createSectionId, CustomRangeType, generateRandomId, TextX, Tools } from '@univerjs/core';
 
 export const DOC_INTERNAL_FRAGMENT_MIME = 'application/x-doc-fragment+json';
@@ -51,13 +51,13 @@ export function parseInternalClipboardFragment(value?: string): Partial<IDocumen
     return null;
 }
 
-function copyReferencedFootnotes(doc: IDocumentData): IDocumentData['footnotes'] {
-    let copied: IDocumentData['footnotes'];
+function copyReferencedFootnotes(doc: IDocumentData): IDocumentData['notes'] {
+    let copied: IDocumentData['notes'];
     for (const range of doc.body?.customRanges ?? []) {
-        const id = range.rangeType === CustomRangeType.FOOTNOTE ? range.properties?.footnoteId : undefined;
-        if (typeof id === 'string' && doc.footnotes?.[id]) {
+        const id = (range.rangeType === CustomRangeType.FOOTNOTE || range.rangeType === CustomRangeType.ENDNOTE) ? range.properties?.noteId : undefined;
+        if (typeof id === 'string' && doc.notes?.[id]) {
             copied ??= {};
-            copied[id] = Tools.deepClone(doc.footnotes[id]);
+            copied[id] = Tools.deepClone(doc.notes[id]);
         }
     }
     return copied;
@@ -67,9 +67,9 @@ export function createInternalClipboardDocData(doc: IDocumentData): Partial<IDoc
     const body = Tools.deepClone(doc.body);
     const internalDocData: Partial<IDocumentData> = { body };
 
-    const footnotes = copyReferencedFootnotes(doc);
-    if (footnotes) {
-        internalDocData.footnotes = footnotes;
+    const notes = copyReferencedFootnotes(doc);
+    if (notes) {
+        internalDocData.notes = notes;
     }
 
     if (body?.tables?.length && doc.tableSource) {
@@ -155,9 +155,9 @@ export function createInternalClipboardDocDataList(docs: IDocumentData[]): Parti
             merged.drawings ??= {};
             Object.assign(merged.drawings, part.drawings);
         }
-        if (part.footnotes) {
-            merged.footnotes ??= {};
-            Object.assign(merged.footnotes, part.footnotes);
+        if (part.notes) {
+            merged.notes ??= {};
+            Object.assign(merged.notes, part.notes);
         }
     }
 
@@ -166,7 +166,7 @@ export function createInternalClipboardDocDataList(docs: IDocumentData[]): Parti
 
 /** Removes reference characters through TextX so every following clipboard offset stays valid. */
 export function omitClipboardFootnotes(body: IDocumentBody): IDocumentBody {
-    const references = body.customRanges?.filter((range) => range.rangeType === CustomRangeType.FOOTNOTE) ?? [];
+    const references = body.customRanges?.filter((range) => (range.rangeType === CustomRangeType.FOOTNOTE || range.rangeType === CustomRangeType.ENDNOTE)) ?? [];
     if (references.length === 0) {
         return body;
     }
@@ -180,21 +180,21 @@ export function omitClipboardFootnotes(body: IDocumentBody): IDocumentBody {
 }
 
 /** Each pasted reference owns a new rich segment, including its drawing and table identities. */
-export function cloneClipboardFootnotes(body: IDocumentBody, notes: IDocumentData['footnotes']): Record<string, IFootnoteData> {
-    const copied: Record<string, IFootnoteData> = {};
+export function cloneClipboardFootnotes(body: IDocumentBody, notes: IDocumentData['notes']): Record<string, IDocumentNote> {
+    const copied: Record<string, IDocumentNote> = {};
     for (const range of body.customRanges ?? []) {
-        if (range.rangeType !== CustomRangeType.FOOTNOTE) {
+        if ((range.rangeType !== CustomRangeType.FOOTNOTE && range.rangeType !== CustomRangeType.ENDNOTE)) {
             continue;
         }
-        const sourceId = range.properties?.footnoteId;
+        const sourceId = range.properties?.noteId;
         const source = typeof sourceId === 'string' ? notes?.[sourceId] : undefined;
         if (!source) {
             continue;
         }
         const note = Tools.deepClone(source);
-        note.footnoteId = generateRandomId(12);
+        note.noteId = generateRandomId(12);
         range.rangeId = generateRandomId(12);
-        range.properties = { ...range.properties, footnoteId: note.footnoteId };
+        range.properties = { ...range.properties, noteId: note.noteId };
         const paragraphIds = new Set<string>();
         const sectionIds = new Set<string>();
         note.body.paragraphs?.forEach((paragraph) => {
@@ -205,12 +205,12 @@ export function cloneClipboardFootnotes(body: IDocumentBody, notes: IDocumentDat
         });
         note.body.customRanges = note.body.customRanges?.map((item) => BuildTextUtils.customRange.copyCustomRange(item));
         resetFootnoteResourceIds(note);
-        copied[note.footnoteId] = note;
+        copied[note.noteId] = note;
     }
     return copied;
 }
 
-function resetFootnoteResourceIds(note: IFootnoteData): void {
+function resetFootnoteResourceIds(note: IDocumentNote): void {
     for (const range of note.body.tables ?? []) {
         const previousId = range.tableId;
         const table = note.tableSource?.[previousId];

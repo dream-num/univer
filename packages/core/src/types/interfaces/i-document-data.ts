@@ -34,8 +34,12 @@ export interface IDocumentData extends IReferenceSource {
     locale?: LocaleType;
     title?: string;
     body?: IDocumentBody; // Rich text.
-    /** Independent rich-text segments addressed by FOOTNOTE references in the main body. */
-    footnotes?: Record<string, IFootnoteData>;
+    /** Independent rich-text segments addressed by footnote or endnote references in the main body. */
+    notes?: Record<string, IDocumentNote>;
+    noteSettings?: INoteSettings;
+    /** Read compatibility for snapshots produced before the unified note model. */
+    footnotes?: Record<string, Omit<IDocumentNote, 'noteId' | 'type'> & { footnoteId: string }>;
+    /** Read compatibility; new snapshots use noteSettings.footnote. */
     footnoteSettings?: IFootnoteSettings;
     documentStyle: IDocumentStyle;
     /** OOXML-compatible named document styles keyed by stable style id. */
@@ -77,9 +81,33 @@ export interface IFootnoteSettings extends IFootnoteProperties {
     continuationNotice?: IDocumentBody;
 }
 
-/** A footnote has editable content, but no independent page setup or nested notes. */
-export interface IFootnoteData {
-    footnoteId: string;
+export type DocumentNoteType = 'footnote' | 'endnote';
+
+export interface IEndnoteProperties extends Omit<IFootnoteProperties, 'position' | 'restart' | 'columnCount'> {
+    position?: 'docEnd' | 'sectEnd';
+    restart?: 'continuous' | 'eachSect';
+}
+
+export interface IEndnoteSettings extends IEndnoteProperties {
+    separator?: IDocumentBody;
+    continuationSeparator?: IDocumentBody;
+    continuationNotice?: IDocumentBody;
+}
+
+export interface INoteSettings {
+    footnote?: IFootnoteSettings;
+    endnote?: IEndnoteSettings;
+}
+
+export interface INoteProperties {
+    footnote?: IFootnoteProperties;
+    endnote?: IEndnoteProperties;
+}
+
+/** Notes have editable content, but no independent page setup or nested notes. */
+export interface IDocumentNote {
+    noteId: string;
+    type: DocumentNoteType;
     body: IDocumentBody;
     tableSource?: ITables;
     drawings?: IDrawings;
@@ -91,7 +119,7 @@ export interface IFootnoteData {
     referenceTextStyle?: ITextStyle;
 }
 
-export type IFootnoteCustomRange = ICustomRange<{ footnoteId: string }>;
+export type IFootnoteCustomRange = ICustomRange<{ noteId: string }>;
 
 /**
  * Set of headers
@@ -474,6 +502,7 @@ export enum CustomRangeType {
     MENTION,
     UNI_FORMULA,
     FOOTNOTE,
+    ENDNOTE,
 
     DELTED = 9999,
 }
@@ -636,6 +665,10 @@ export interface IDocumentRenderConfig {
 }
 
 export interface ISectionBreakBase {
+    noteProperties?: INoteProperties;
+    /** Defer section-end notes to the next section that does not suppress them. */
+    suppressEndnotes?: boolean;
+    /** Read compatibility; new snapshots use noteProperties.footnote. */
     footnoteProperties?: IFootnoteProperties;
     // docGrid (Document Grid), open xml $17.6.5
     charSpace?: number; // charSpace

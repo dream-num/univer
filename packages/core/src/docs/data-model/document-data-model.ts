@@ -84,6 +84,51 @@ function normalizeLegacyPageBreakSectionMetadata(body: IDocumentBody | undefined
     return didChange ? { ...body, sectionBreaks } : body;
 }
 
+function normalizeDocumentNotes(snapshot: IDocumentData): void {
+    if (snapshot.footnotes) {
+        const notes = { ...snapshot.notes };
+        for (const [id, legacy] of Object.entries(snapshot.footnotes)) {
+            const { footnoteId, ...content } = legacy;
+            notes[id] ??= { ...content, noteId: footnoteId, type: 'footnote' };
+        }
+        snapshot.notes = notes;
+        delete snapshot.footnotes;
+    }
+    if (snapshot.footnoteSettings) {
+        snapshot.noteSettings = { footnote: snapshot.footnoteSettings, ...snapshot.noteSettings };
+        delete snapshot.footnoteSettings;
+    }
+    const body = snapshot.body;
+    if (!body) {
+        return;
+    }
+    const legacyReferences = body.customRanges?.some((range) => range.properties?.footnoteId != null);
+    const legacySections = body.sectionBreaks?.some((section) => section.footnoteProperties != null);
+    if (legacyReferences || legacySections) {
+        snapshot.body = { ...body };
+        if (legacyReferences) {
+            snapshot.body.customRanges = body.customRanges?.map((range) => {
+                if (range.properties?.footnoteId == null) {
+                    return range;
+                }
+                const { footnoteId, ...properties } = range.properties;
+                return { ...range, properties: { noteId: footnoteId, ...properties } };
+            });
+        }
+        if (legacySections) {
+            snapshot.body.sectionBreaks = body.sectionBreaks?.map((section) => {
+                const { footnoteProperties, ...properties } = section;
+                return footnoteProperties == null
+                    ? section
+                    : {
+                        ...properties,
+                        noteProperties: { footnote: footnoteProperties, ...section.noteProperties },
+                    };
+            });
+        }
+    }
+}
+
 function createDocumentSnapshot(snapshot: Partial<IDocumentData>): IDocumentData {
     if (snapshot.id != null && isInternalEditorID(snapshot.id)) {
         return { ...DEFAULT_DOC, ...snapshot } as IDocumentData;
@@ -111,6 +156,7 @@ function createDocumentSnapshot(snapshot: Partial<IDocumentData>): IDocumentData
         delete mergedSnapshot.documentStyle.defaultParagraphStyle;
     }
 
+    normalizeDocumentNotes(mergedSnapshot);
     mergedSnapshot.body = normalizeLegacyPageBreakSectionMetadata(mergedSnapshot.body);
 
     return mergedSnapshot;
@@ -337,7 +383,7 @@ export class DocumentDataModel extends DocumentDataModelSimple {
     headerModelMap: Map<string, DocumentDataModel> = new Map();
 
     footerModelMap: Map<string, DocumentDataModel> = new Map();
-    footnoteModelMap: Map<string, DocumentDataModel> = new Map();
+    noteModelMap: Map<string, DocumentDataModel> = new Map();
     change$ = new BehaviorSubject<number>(0);
 
     constructor(snapshot: Partial<IDocumentData>) {
@@ -360,8 +406,8 @@ export class DocumentDataModel extends DocumentDataModelSimple {
         this.footerModelMap.forEach((footer) => {
             footer.dispose();
         });
-        this.footnoteModelMap.forEach((footnote) => footnote.dispose());
-        this.footnoteModelMap.clear();
+        this.noteModelMap.forEach((footnote) => footnote.dispose());
+        this.noteModelMap.clear();
 
         this._name$.complete();
     }
@@ -411,8 +457,8 @@ export class DocumentDataModel extends DocumentDataModelSimple {
             return this.footerModelMap.get(segmentId)!;
         }
 
-        if (this.footnoteModelMap.has(segmentId)) {
-            return this.footnoteModelMap.get(segmentId)!;
+        if (this.noteModelMap.has(segmentId)) {
+            return this.noteModelMap.get(segmentId)!;
         }
 
         return null;
@@ -427,13 +473,13 @@ export class DocumentDataModel extends DocumentDataModelSimple {
             return;
         }
 
-        const previousFootnotes = this.snapshot.footnotes;
+        const previousFootnotes = this.snapshot.notes;
         const changedFootnotes = new Set<string>();
         let changedInheritedNoteStyles = false;
         const cursor = JSON1.type.readCursor(actions);
         cursor.traverse(null, () => {
             const path = cursor.getPath();
-            if (path[0] === 'footnotes' && typeof path[1] === 'string') {
+            if (path[0] === 'notes' && typeof path[1] === 'string') {
                 changedFootnotes.add(path[1]);
             }
             if (path[0] === 'styles' || path[0] === 'documentStyle') {
@@ -442,7 +488,7 @@ export class DocumentDataModel extends DocumentDataModelSimple {
         });
         this.snapshot = JSONX.apply(this.snapshot, actions) as unknown as IDocumentData;
         this._markMutation();
-        if (changedInheritedNoteStyles || previousFootnotes !== this.snapshot.footnotes || changedFootnotes.size > 0) {
+        if (changedInheritedNoteStyles || previousFootnotes !== this.snapshot.notes || changedFootnotes.size > 0) {
             this._initializeFootnoteModels(changedInheritedNoteStyles ? undefined : previousFootnotes, changedFootnotes);
         }
 
@@ -488,15 +534,15 @@ export class DocumentDataModel extends DocumentDataModelSimple {
         }
     }
 
-    private _initializeFootnoteModels(previousFootnotes?: IDocumentData['footnotes'], changedFootnotes?: ReadonlySet<string>): void {
-        for (const [id, model] of this.footnoteModelMap) {
-            if (changedFootnotes?.has(id) || previousFootnotes?.[id] !== this.snapshot.footnotes?.[id] || !previousFootnotes?.[id]) {
+    private _initializeFootnoteModels(previousFootnotes?: IDocumentData['notes'], changedFootnotes?: ReadonlySet<string>): void {
+        for (const [id, model] of this.noteModelMap) {
+            if (changedFootnotes?.has(id) || previousFootnotes?.[id] !== this.snapshot.notes?.[id] || !previousFootnotes?.[id]) {
                 model.dispose();
-                this.footnoteModelMap.delete(id);
+                this.noteModelMap.delete(id);
             }
         }
-        for (const [id, footnote] of Object.entries(this.snapshot.footnotes ?? {})) {
-            if (this.footnoteModelMap.has(id)) {
+        for (const [id, footnote] of Object.entries(this.snapshot.notes ?? {})) {
+            if (this.noteModelMap.has(id)) {
                 continue;
             }
             const model = new DocumentDataModel({
@@ -505,7 +551,7 @@ export class DocumentDataModel extends DocumentDataModelSimple {
                 documentStyle: this.snapshot.documentStyle,
                 styles: this.snapshot.styles,
             });
-            this.footnoteModelMap.set(id, model);
+            this.noteModelMap.set(id, model);
         }
     }
 

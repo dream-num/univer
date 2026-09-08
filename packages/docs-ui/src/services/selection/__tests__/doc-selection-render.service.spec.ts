@@ -910,7 +910,7 @@ describe('DocSelectionRenderService', () => {
             id: 'pending-input',
             documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
             body: { dataStream: 'Body\r\n', paragraphs: [{ paragraphId: 'p', startIndex: 4 }] },
-            footnotes: { note: { footnoteId: 'note', body: {
+            notes: { note: { type: 'footnote' as const, noteId: 'note', body: {
                 dataStream: 'Note\r\n',
                 paragraphs: [{ paragraphId: 'np', startIndex: 4 }],
             } } },

@@ -118,7 +118,7 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
         const textX = new TextX();
         const jsonX = JSONX.getInstance();
         const rawActions: JSONXActions = [];
-        const pastedFootnotes: NonNullable<IDocumentData['footnotes']> = {};
+        const pastedFootnotes: NonNullable<IDocumentData['notes']> = {};
         const resourceRedoMutations: IMutationInfo[] = [];
         const resourceUndoMutations: IMutationInfo[] = [];
         const resourceMutationGroups: Array<{ redoMutations: IMutationInfo[]; undoMutations: IMutationInfo[] }> = [];
@@ -196,7 +196,7 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
                 );
             }
             if (docDataModel.getDocumentStyle().documentFlavor === DocumentFlavor.TRADITIONAL) {
-                Object.assign(pastedFootnotes, cloneClipboardFootnotes(cloneBody, doc.footnotes));
+                Object.assign(pastedFootnotes, cloneClipboardFootnotes(cloneBody, doc.notes));
             }
 
             if (hasBlockRange) {
@@ -321,12 +321,12 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
             if (segmentId) {
                 return false;
             }
-            const existing = docDataModel.getSnapshot().footnotes;
+            const existing = docDataModel.getSnapshot().notes;
             if (existing == null) {
-                rawActions.push(jsonX.insertOp(['footnotes'], pastedFootnotes)!);
+                rawActions.push(jsonX.insertOp(['notes'], pastedFootnotes)!);
             } else {
                 for (const [id, note] of Object.entries(pastedFootnotes)) {
-                    rawActions.push(jsonX.insertOp(['footnotes', id], note)!);
+                    rawActions.push(jsonX.insertOp(['notes', id], note)!);
                 }
             }
         }

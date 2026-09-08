@@ -770,8 +770,8 @@ export function getRichTextEditPath(docDataModel: DocumentDataModel, segmentId =
     }
 
     const { headers, footers } = docDataModel.getSnapshot();
-    if (docDataModel.getSnapshot().footnotes?.[segmentId] != null) {
-        return ['footnotes', segmentId, 'body'];
+    if (docDataModel.getSnapshot().notes?.[segmentId] != null) {
+        return ['notes', segmentId, 'body'];
     }
 
     if (headers == null && footers == null) {

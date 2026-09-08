@@ -252,7 +252,7 @@ describe('DocDrawingTransformUpdateController', () => {
                     columns: [{ page: nestedPage }],
                 }]]
                 : []),
-            footnotes: scope === 'footnote' ? [{ page: nestedPage }] : [],
+            notes: scope === 'footnote' ? [{ page: nestedPage }] : [],
         }];
         const skeleton = {
             getSkeletonData: () => ({

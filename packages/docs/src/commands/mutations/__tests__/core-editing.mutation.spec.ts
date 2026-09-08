@@ -97,10 +97,7 @@ describe('RichTextEditingMutation selection scheduling', () => {
                 unitId: snapshot.id,
                 segmentId: '',
                 textRanges: null,
-                actions: JSONX.getInstance().insertOp(['footnotes'], { shared: {
-                    footnoteId: 'shared',
-                    body: { dataStream: '\r\n', paragraphs: [{ paragraphId: 'np', startIndex: 0 }], sectionBreaks: [{ sectionId: 'ns', startIndex: 1 }] },
-                } }),
+                actions: JSONX.getInstance().insertOp(['notes', 'shared'], { type: 'footnote' as const, noteId: 'shared', body: { dataStream: '\r\n', paragraphs: [{ paragraphId: 'np', startIndex: 0 }], sectionBreaks: [{ sectionId: 'ns', startIndex: 1 }] } }),
             }, { fromCollab: true })).toThrow('invalid-footnote-id');
             expect(bed.doc.getSnapshot()).toEqual(before);
             expect(bed.doc.getSelfOrHeaderFooterModel('shared')?.getBody()?.dataStream).toBe('Header\r\n');
@@ -114,10 +111,10 @@ describe('RichTextEditingMutation selection scheduling', () => {
             dataStream: 'A\uFFFCB\r\n',
             paragraphs: [{ paragraphId: 'p', startIndex: 3 }],
             sectionBreaks: [{ sectionId: 's', startIndex: 4 }],
-            customRanges: [{ rangeId: 'ref', rangeType: CustomRangeType.FOOTNOTE, startIndex: 1, endIndex: 1, wholeEntity: true, properties: { footnoteId: 'note' } }],
+            customRanges: [{ rangeId: 'ref', rangeType: CustomRangeType.FOOTNOTE, startIndex: 1, endIndex: 1, wholeEntity: true, properties: { noteId: 'note' } }],
         });
         snapshot.documentStyle = { ...snapshot.documentStyle, documentFlavor: DocumentFlavor.TRADITIONAL };
-        snapshot.footnotes = { note: { footnoteId: 'note', body: {
+        snapshot.notes = { note: { type: 'footnote' as const, noteId: 'note', body: {
             dataStream: '\r\n',
             paragraphs: [{ paragraphId: 'np', startIndex: 0 }],
             sectionBreaks: [{ sectionId: 'ns', startIndex: 1 }],
@@ -148,7 +145,7 @@ describe('RichTextEditingMutation selection scheduling', () => {
                 await Promise.resolve();
                 expect(selectionManager.getSelectionInfo()?.segmentId).toBe('note');
             }
-            expect(bed.doc.getSnapshot().footnotes?.note.body.dataStream).toBe('First line\rNext line\r\n');
+            expect(bed.doc.getSnapshot().notes?.note.body.dataStream).toBe('First line\rNext line\r\n');
             expect(bed.doc.getBody()?.dataStream).toBe('A\uFFFCB\r\n');
         } finally {
             bed.univer.dispose();
@@ -161,10 +158,10 @@ describe('RichTextEditingMutation selection scheduling', () => {
             customDecorations: [],
             paragraphs: [{ paragraphId: 'p', startIndex: 3 }],
             sectionBreaks: [{ sectionId: 's', startIndex: 4 }],
-            customRanges: [{ rangeId: 'ref', rangeType: CustomRangeType.FOOTNOTE, startIndex: 1, endIndex: 1, wholeEntity: true, properties: { footnoteId: 'note' } }],
+            customRanges: [{ rangeId: 'ref', rangeType: CustomRangeType.FOOTNOTE, startIndex: 1, endIndex: 1, wholeEntity: true, properties: { noteId: 'note' } }],
         });
         snapshot.documentStyle = { ...snapshot.documentStyle, documentFlavor: DocumentFlavor.TRADITIONAL };
-        snapshot.footnotes = { note: { footnoteId: 'note', body: {
+        snapshot.notes = { note: { type: 'footnote' as const, noteId: 'note', body: {
             dataStream: 'Explanation\r\n',
             paragraphs: [{ paragraphId: 'np', startIndex: 11 }],
             sectionBreaks: [{ sectionId: 'ns', startIndex: 12 }],
@@ -184,7 +181,7 @@ describe('RichTextEditingMutation selection scheduling', () => {
             const observed: Array<{ text?: string; noteExists: boolean }> = [];
             const subscription = bed.doc.change$.subscribe(() => observed.push({
                 text: bed.doc.getBody()?.dataStream,
-                noteExists: bed.doc.getSnapshot().footnotes?.note != null,
+                noteExists: bed.doc.getSnapshot().notes?.note != null,
             }));
             observed.length = 0;
             const apply = vi.spyOn(JSONX, 'apply');
@@ -192,7 +189,7 @@ describe('RichTextEditingMutation selection scheduling', () => {
             expect(apply).toHaveBeenCalledTimes(offset === 1 ? 2 : 1);
             apply.mockRestore();
             expect(bed.doc.getBody()?.dataStream).toBe(expectedText);
-            expect(bed.doc.getSnapshot().footnotes?.note != null).toBe(noteExists);
+            expect(bed.doc.getSnapshot().notes?.note != null).toBe(noteExists);
             expect(observed).toEqual([{ text: expectedText, noteExists }]);
             peer.get(ICommandService).syncExecuteCommand(RichTextEditingMutation.id, params, { fromCollab: true });
             expect(peer.doc.getSnapshot()).toEqual(bed.doc.getSnapshot());

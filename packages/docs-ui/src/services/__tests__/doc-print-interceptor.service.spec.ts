@@ -58,9 +58,9 @@ describe('DocPrintInterceptorService', () => {
                     paragraphStyle: { pageBreakBefore: 1 },
                 }],
                 sectionBreaks: [{ startIndex: 5, sectionId: 's' }],
-                customRanges: [{ rangeId: 'ref', rangeType: CustomRangeType.FOOTNOTE, startIndex: 1, endIndex: 1, wholeEntity: true, properties: { footnoteId: 'note' } }],
+                customRanges: [{ rangeId: 'ref', rangeType: CustomRangeType.FOOTNOTE, startIndex: 1, endIndex: 1, wholeEntity: true, properties: { noteId: 'note' } }],
             },
-            footnotes: { note: { footnoteId: 'note', body: {
+            notes: { note: { type: 'footnote' as const, noteId: 'note', body: {
                 dataStream: '\b\r\n',
                 paragraphs: [{ startIndex: 1, paragraphId: 'np' }],
                 customBlocks: [{ startIndex: 0, blockId: 'note-image' }],

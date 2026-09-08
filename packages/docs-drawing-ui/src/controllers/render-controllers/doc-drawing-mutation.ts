@@ -37,7 +37,7 @@ export function getDocMutationAffectedDrawingIds(actions: JSONXActions): DocMuta
             sawComponent = true;
             const path = cursor.getPath();
             const root = String(path[0]);
-            const drawingIndex = root === 'footnotes' ? 2 : 0;
+            const drawingIndex = root === 'notes' ? 2 : 0;
             if (path[drawingIndex] === 'drawings') {
                 const drawingId = path[drawingIndex + 1];
                 if (typeof drawingId === 'string' && drawingId.length > 0) {
@@ -45,7 +45,7 @@ export function getDocMutationAffectedDrawingIds(actions: JSONXActions): DocMuta
                 } else {
                     needsFullRefresh = true;
                 }
-            } else if (path[drawingIndex] === 'drawingsOrder' || (root === 'footnotes' && path.length <= 2) || path.includes('customBlocks')) {
+            } else if (path[drawingIndex] === 'drawingsOrder' || (root === 'notes' && path.length <= 2) || path.includes('customBlocks')) {
                 needsFullRefresh = true;
             }
         });

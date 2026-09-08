@@ -166,23 +166,23 @@ function canRemoveFootnoteReference(actions: JSONXActions, references: ICustomRa
 }
 
 function includeFootnoteCleanup(before: IDocumentData, actions: JSONXActions): JSONXActions {
-    if (!before.footnotes) {
+    if (!before.notes) {
         return actions;
     }
-    const references = before.body?.customRanges?.filter((range) => range.rangeType === CustomRangeType.FOOTNOTE) ?? [];
+    const references = before.body?.customRanges?.filter((range) => (range.rangeType === CustomRangeType.FOOTNOTE || range.rangeType === CustomRangeType.ENDNOTE)) ?? [];
     if (references.length === 0 || !canRemoveFootnoteReference(actions, references)) {
         return actions;
     }
     // TextX edits mutate their body. Isolate the cleanup preview, and only run it
     // for edits that can remove a reference; ordinary typing keeps the fast path.
     const after = JSONX.apply(Tools.deepClone(before), actions) as unknown as IDocumentData;
-    const remaining = new Set(after.body?.customRanges?.filter((range) => range.rangeType === CustomRangeType.FOOTNOTE)
-        .map((range) => range.properties?.footnoteId));
+    const remaining = new Set(after.body?.customRanges?.filter((range) => (range.rangeType === CustomRangeType.FOOTNOTE || range.rangeType === CustomRangeType.ENDNOTE))
+        .map((range) => range.properties?.noteId));
     let cleanup: JSONXActions = null;
-    const previousIds = new Set(references.map((reference) => reference.properties?.footnoteId));
+    const previousIds = new Set(references.map((reference) => reference.properties?.noteId));
     for (const id of previousIds) {
-        if (typeof id === 'string' && !remaining.has(id) && after.footnotes?.[id]) {
-            cleanup = JSONX.compose(cleanup, JSONX.getInstance().removeOp(['footnotes', id], after.footnotes[id]));
+        if (typeof id === 'string' && !remaining.has(id) && after.notes?.[id]) {
+            cleanup = JSONX.compose(cleanup, JSONX.getInstance().removeOp(['notes', id], after.notes[id]));
         }
     }
     return JSONX.isNoop(cleanup) ? actions : JSONX.compose(actions, cleanup);

@@ -125,8 +125,8 @@ function createEditor(paragraphCount = 8, withDrawing = true, workerBeforeLayout
                 },
             }
             : {},
-        footnotes: withFootnote
-            ? { note: { footnoteId: 'note', body: {
+        notes: withFootnote
+            ? { note: { type: 'footnote' as const, noteId: 'note', body: {
                 dataStream: noteStream,
                 paragraphs: [...noteStream.matchAll(/\r/g)].map((match, index) => ({ startIndex: match.index!, paragraphId: `note-${index}` })),
             } } }
@@ -140,7 +140,7 @@ function createEditor(paragraphCount = 8, withDrawing = true, workerBeforeLayout
                     wholeEntity: true,
                     startIndex: 12,
                     endIndex: 12,
-                    properties: { footnoteId: 'note' },
+                    properties: { noteId: 'note' },
                 }]
                 : [],
             customBlocks: withDrawing ? [{ blockId: 'inline-drawing', startIndex: firstParagraph.length + 1 }] : [],
@@ -243,8 +243,8 @@ describe('DocRenderController bounded input publication', () => {
         try {
             await vi.dynamicImportSettled();
             const pages = editor.skeleton.getSkeletonData()!.pages;
-            const oldPage = pages.findIndex((page) => page.footnotes?.some((note) => note.footnoteId === 'note'));
-            const boundary = pages[oldPage].footnotes![0].page.ed;
+            const oldPage = pages.findIndex((page) => page.notes?.some((note) => note.noteId === 'note'));
+            const boundary = pages[oldPage].notes![0].page.ed;
             editor.selectionManager.replaceDocRanges([{
                 startOffset: boundary,
                 endOffset: boundary,
@@ -260,7 +260,7 @@ describe('DocRenderController bounded input publication', () => {
             }
             await vi.advanceTimersByTimeAsync(1_000);
             const offset = boundary + 5;
-            expect(editor.model.getSnapshot().footnotes!.note.body.dataStream.slice(boundary, offset)).toBe('\rA 中B');
+            expect(editor.model.getSnapshot().notes!.note.body.dataStream.slice(boundary, offset)).toBe('\rA 中B');
             expect(editor.selectionManager.getActiveTextRange()?.endOffset).toBe(offset);
             const position = editor.skeleton.findNodePositionByCharIndex(offset, true, 'note');
             expect(position?.page).toBeGreaterThan(oldPage);
@@ -279,7 +279,7 @@ describe('DocRenderController bounded input publication', () => {
             await Promise.resolve();
             await Promise.resolve();
             expect(editor.model.getBody()!.dataStream.startsWith('HelloZ world')).toBe(true);
-            expect(editor.model.getSnapshot().footnotes!.note.body.dataStream.slice(boundary, offset)).toBe('\rA 中B');
+            expect(editor.model.getSnapshot().notes!.note.body.dataStream.slice(boundary, offset)).toBe('\rA 中B');
         } finally {
             editor.dispose();
         }

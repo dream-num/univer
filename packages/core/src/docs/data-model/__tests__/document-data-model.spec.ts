@@ -39,30 +39,53 @@ function createDocument(): DocumentDataModel {
         id: 'doc',
         body: {
             ...body('A\uFFFCB'),
-            customRanges: [{ startIndex: 1, endIndex: 1, rangeId: 'ref', rangeType: CustomRangeType.FOOTNOTE, wholeEntity: true, properties: { footnoteId: 'note' } }],
+            customRanges: [{ startIndex: 1, endIndex: 1, rangeId: 'ref', rangeType: CustomRangeType.FOOTNOTE, wholeEntity: true, properties: { noteId: 'note' } }],
         },
-        footnotes: { note: { footnoteId: 'note', body: body('Explanation') } },
-        footnoteSettings: { position: 'pageBottom', restart: 'eachSect', numberFormat: 'lowerRoman', startNumber: 3 },
+        notes: { note: { type: 'footnote' as const, noteId: 'note', body: body('Explanation') } },
+        noteSettings: { footnote: { position: 'pageBottom', restart: 'eachSect', numberFormat: 'lowerRoman', startNumber: 3 } },
     });
 }
 
 describe('document footnote segments', () => {
+    it('reads legacy footnotes without mutating the input and saves the unified notes contract', () => {
+        const input = {
+            id: 'legacy',
+            body: { ...body('A\uFFFCB'), customRanges: [{ rangeId: 'ref', rangeType: CustomRangeType.FOOTNOTE, wholeEntity: true, startIndex: 1, endIndex: 1, properties: { footnoteId: 'old' } }], sectionBreaks: [{ sectionId: 'section', startIndex: 4, footnoteProperties: { startNumber: 3 } }] },
+            footnotes: { old: { footnoteId: 'old', body: body('Legacy explanation') } },
+            footnoteSettings: { startNumber: 2 },
+        };
+        const before = structuredClone(input);
+        const document = new DocumentDataModel(input);
+        try {
+            const saved = document.getSnapshot();
+            expect(input).toEqual(before);
+            expect(saved.footnotes).toBeUndefined();
+            expect(saved.footnoteSettings).toBeUndefined();
+            expect(saved.notes?.old).toMatchObject({ noteId: 'old', type: 'footnote' });
+            expect(saved.noteSettings?.footnote?.startNumber).toBe(2);
+            expect(saved.body?.customRanges?.[0].properties).toEqual({ noteId: 'old' });
+            expect(saved.body?.sectionBreaks?.[0].noteProperties?.footnote?.startNumber).toBe(3);
+            expect(document.getSelfOrHeaderFooterModel('old')?.getBody()?.dataStream).toBe('Legacy explanation\r\n');
+            expect(validateDocumentStructure(saved)).toEqual([]);
+        } finally { document.dispose(); }
+    });
+
     it('inherits document styles and refreshes them without persisting duplicate styles in each note', () => {
         const document = createDocument();
         const jsonX = JSONX.getInstance();
         try {
             document.apply(jsonX.insertOp(['styles'], { FootnoteText: { name: 'Footnote Text', type: DocStyleType.paragraph, textStyle: { fs: 10 } } }));
-            const note = document.footnoteModelMap.get('note');
+            const note = document.noteModelMap.get('note');
             expect(note?.getSnapshot().styles?.FootnoteText.textStyle?.fs).toBe(10);
             document.apply(jsonX.replaceOp(['styles', 'FootnoteText', 'textStyle', 'fs'], 10, 12));
-            expect(document.footnoteModelMap.get('note')).not.toBe(note);
-            expect(document.footnoteModelMap.get('note')?.getSnapshot().styles?.FootnoteText.textStyle?.fs).toBe(12);
+            expect(document.noteModelMap.get('note')).not.toBe(note);
+            expect(document.noteModelMap.get('note')?.getSnapshot().styles?.FootnoteText.textStyle?.fs).toBe(12);
             document.updateDocumentStyle({ textStyle: { fs: 14 }, marginLeft: 40 });
-            expect(document.footnoteModelMap.get('note')?.getDocumentStyle()).toMatchObject({
+            expect(document.noteModelMap.get('note')?.getDocumentStyle()).toMatchObject({
                 textStyle: { fs: 14 },
                 marginLeft: 40,
             });
-            expect(Object.keys(document.getSnapshot().footnotes!.note)).toEqual(['footnoteId', 'body']);
+            expect(Object.keys(document.getSnapshot().notes!.note)).toEqual(['type', 'noteId', 'body']);
         } finally {
             document.dispose();
         }
@@ -87,10 +110,10 @@ describe('document footnote segments', () => {
         const document = createDocument();
         const edit = JSONX.getInstance().editOp(new TextX().insert(2, { dataStream: '前文' }).serialize(), ['body']);
         document.apply(edit);
-        expect(document.getBody()?.customRanges?.[0]).toMatchObject({ startIndex: 3, endIndex: 3, properties: { footnoteId: 'note' } });
+        expect(document.getBody()?.customRanges?.[0]).toMatchObject({ startIndex: 3, endIndex: 3, properties: { noteId: 'note' } });
         const restored = new DocumentDataModel(document.getSnapshot());
-        expect(restored.getSelfOrHeaderFooterModel('note')?.getBody()).toEqual(document.getSnapshot().footnotes?.note.body);
-        expect(restored.getSnapshot().footnoteSettings).toEqual(document.getSnapshot().footnoteSettings);
+        expect(restored.getSelfOrHeaderFooterModel('note')?.getBody()).toEqual(document.getSnapshot().notes?.note.body);
+        expect(restored.getSnapshot().noteSettings?.footnote).toEqual(document.getSnapshot().noteSettings?.footnote);
         expect(validateDocumentStructure(restored.getSnapshot())).toEqual([]);
         restored.dispose();
         document.dispose();
@@ -99,18 +122,18 @@ describe('document footnote segments', () => {
     it('keeps unrelated note models when one note is edited', () => {
         const document = createDocument();
         const jsonX = JSONX.getInstance();
-        document.apply(jsonX.insertOp(['footnotes', 'other'], { footnoteId: 'other', body: body('Other explanation') }));
-        const other = document.footnoteModelMap.get('other');
-        const edit = jsonX.editOp(new TextX().insert(4, { dataStream: 'New ' }).serialize(), ['footnotes', 'note', 'body']);
+        document.apply(jsonX.insertOp(['notes', 'other'], { type: 'footnote' as const, noteId: 'other', body: body('Other explanation') }));
+        const other = document.noteModelMap.get('other');
+        const edit = jsonX.editOp(new TextX().insert(4, { dataStream: 'New ' }).serialize(), ['notes', 'note', 'body']);
         document.apply(edit);
-        expect(document.footnoteModelMap.get('other')).toBe(other);
-        expect(document.footnoteModelMap.get('note')?.getBody()?.dataStream).toBe('New Explanation\r\n');
+        expect(document.noteModelMap.get('other')).toBe(other);
+        expect(document.noteModelMap.get('note')?.getBody()?.dataStream).toBe('New Explanation\r\n');
         document.dispose();
     });
 
     it('removes a disposed note segment from the model after a persisted deletion', () => {
         const document = createDocument();
-        const edit = JSONX.getInstance().removeOp(['footnotes', 'note'], document.getSnapshot().footnotes?.note);
+        const edit = JSONX.getInstance().removeOp(['notes', 'note'], document.getSnapshot().notes?.note);
         document.apply(edit);
         expect(document.getSelfOrHeaderFooterModel('note')).toBeNull();
         expect(validateDocumentStructure(document.getSnapshot()).map((issue) => issue.code)).toContain('missing-footnote');

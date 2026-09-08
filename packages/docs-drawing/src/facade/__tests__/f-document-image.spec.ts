@@ -127,10 +127,10 @@ describe('FDocument image facade', () => {
                     startIndex: 1,
                     endIndex: 1,
                     wholeEntity: true,
-                    properties: { footnoteId: 'note' },
+                    properties: { noteId: 'note' },
                 }],
             },
-            footnotes: { note: { footnoteId: 'note', body: {
+            notes: { note: { type: 'footnote' as const, noteId: 'note', body: {
                 dataStream: 'Note\r\n',
                 paragraphs: [{ startIndex: 4, paragraphId: 'np' }],
             } } },
@@ -154,16 +154,16 @@ describe('FDocument image facade', () => {
         expect(image.getSize()).toEqual({ width: 30, height: 15 });
         expect(image.setWrappingStyle(TextWrappingStyle.WRAP_SQUARE)).toBe(false);
         const inserted = testBed.document.save();
-        expect(inserted.footnotes?.note.body.dataStream).toBe('Note\b\r\n');
-        expect(inserted.footnotes?.note.drawingsOrder).toEqual([image.getId()]);
+        expect(inserted.notes?.note.body.dataStream).toBe('Note\b\r\n');
+        expect(inserted.notes?.note.drawingsOrder).toEqual([image.getId()]);
         expect(inserted.drawings).toEqual(before.drawings);
         expect(inserted.body).toEqual(before.body);
         expect(image.remove()).toBe(true);
-        expect(testBed.document.save().footnotes?.note.body.dataStream).toBe('Note\r\n');
-        expect(testBed.document.save().footnotes?.note.drawingsOrder).toEqual([]);
+        expect(testBed.document.save().notes?.note.body.dataStream).toBe('Note\r\n');
+        expect(testBed.document.save().notes?.note.drawingsOrder).toEqual([]);
         expect(testBed.document.getImage(image.getId())).toBeNull();
         expect(testBed.document.undo()).toBe(true);
-        expect(testBed.document.save().footnotes?.note).toEqual(inserted.footnotes?.note);
+        expect(testBed.document.save().notes?.note).toEqual(inserted.notes?.note);
     });
 
     it('resolves the insertion range only once', async () => {

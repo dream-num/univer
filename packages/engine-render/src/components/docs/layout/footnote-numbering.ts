@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDocumentData, IFootnoteProperties } from '@univerjs/core';
+import type { DocumentNoteType, IDocumentData, IFootnoteProperties, ISectionBreak } from '@univerjs/core';
 import { CustomRangeType, ListGlyphType } from '@univerjs/core';
 import { getBulletOrderedSymbol } from './block/paragraph/bullet-ruler';
 
@@ -28,13 +28,18 @@ const NUMBER_FORMATS: Record<string, ListGlyphType> = {
     chineseCounting: ListGlyphType.CHINESE_COUNTING,
 };
 
+export interface INoteLayoutProperties extends Omit<IFootnoteProperties, 'position'> {
+    position?: 'pageBottom' | 'beneathText' | 'docEnd' | 'sectEnd';
+}
+
 export interface IFootnoteReferenceLayout {
-    footnoteId: string;
+    noteId: string;
+    type: DocumentNoteType;
     referenceIndex: number;
     sectionId: string;
     label: string;
     number?: number;
-    properties: IFootnoteProperties;
+    properties: INoteLayoutProperties;
 }
 
 export function formatFootnoteNumber(number: number, format = 'decimal'): string {
@@ -86,49 +91,56 @@ export function formatFootnoteNumber(number: number, format = 'decimal'): string
 }
 
 /** Page keys are physical page indices, independent of the printed page-number format. */
+/** Cell section sentinels cannot own document-level note numbering or placement. */
+export function getNoteSections(snapshot: Pick<IDocumentData, 'body'>): ISectionBreak[] {
+    const sections = snapshot.body?.sectionBreaks ?? [];
+    const tables = [...snapshot.body?.tables ?? []].sort((a, b) => a.startIndex - b.startIndex);
+    let tableIndex = 0;
+    let tableEnd = -1;
+    return sections.filter((section) => {
+        while (tableIndex < tables.length && tables[tableIndex].startIndex <= section.startIndex) {
+            tableEnd = Math.max(tableEnd, tables[tableIndex++].endIndex);
+        }
+        return section.startIndex > tableEnd;
+    });
+}
+
 export function resolveFootnoteReferences(
-    snapshot: Pick<IDocumentData, 'body' | 'footnotes' | 'footnoteSettings'>,
+    snapshot: Pick<IDocumentData, 'body' | 'notes' | 'noteSettings'>,
     referencePages: ReadonlyMap<string, number> = new Map()
 ): Map<number, IFootnoteReferenceLayout> {
-    const references = snapshot.body?.customRanges?.filter((range) => range.rangeType === CustomRangeType.FOOTNOTE) ?? [];
-    const sections = snapshot.body?.sectionBreaks ?? [];
+    const references = snapshot.body?.customRanges?.filter((range) => (range.rangeType === CustomRangeType.FOOTNOTE || range.rangeType === CustomRangeType.ENDNOTE)) ?? [];
+    const sections = getNoteSections(snapshot);
     const result = new Map<number, IFootnoteReferenceLayout>();
     let sectionIndex = 0;
-    let previousSectionId: string | undefined;
-    let previousPage: number | undefined;
-    let nextNumber: number | undefined;
+    const counters = new Map<DocumentNoteType, { sectionId: string; page?: number; nextNumber: number }>();
     for (const reference of references) {
-        const footnoteId = reference.properties?.footnoteId;
-        if (typeof footnoteId !== 'string' || !snapshot.footnotes?.[footnoteId]) {
+        const noteId = reference.properties?.noteId;
+        if (typeof noteId !== 'string' || !snapshot.notes?.[noteId]) {
             continue;
         }
         while (sectionIndex < sections.length - 1 && sections[sectionIndex].startIndex < reference.startIndex) {
             sectionIndex++;
         }
         const section = sections[sectionIndex];
-        const mergedProperties = { ...snapshot.footnoteSettings, ...section?.footnoteProperties };
-        const properties: IFootnoteProperties = {
-            position: mergedProperties.position,
-            numberFormat: mergedProperties.numberFormat,
-            startNumber: mergedProperties.startNumber,
-            restart: mergedProperties.restart,
-            columnCount: mergedProperties.columnCount,
-        };
+        const note = snapshot.notes[noteId];
+        const type = note.type;
+        const properties: INoteLayoutProperties = { ...snapshot.noteSettings?.[type], ...section?.noteProperties?.[type] };
         const sectionId = section?.sectionId ?? '';
-        const page = referencePages.get(footnoteId);
-        const note = snapshot.footnotes[footnoteId];
-        if (nextNumber == null || (properties.restart === 'eachSect' && previousSectionId !== sectionId) ||
-            (properties.restart === 'eachPage' && page != null && previousPage !== page)) {
+        const page = referencePages.get(noteId);
+        const previous = counters.get(type);
+        let nextNumber = previous?.nextNumber;
+        if (nextNumber == null || (properties.restart === 'eachSect' && previous?.sectionId !== sectionId) ||
+            (properties.restart === 'eachPage' && page != null && previous?.page !== page)) {
             nextNumber = properties.startNumber ?? 1;
         }
         const number = note.customMark == null ? nextNumber : undefined;
-        const label = note.customMark ?? formatFootnoteNumber(nextNumber, properties.numberFormat);
-        result.set(reference.startIndex, { footnoteId, referenceIndex: reference.startIndex, sectionId, properties, number, label });
+        const label = note.customMark ?? formatFootnoteNumber(nextNumber, properties.numberFormat ?? (type === 'endnote' ? 'lowerRoman' : 'decimal'));
+        result.set(reference.startIndex, { noteId, type, referenceIndex: reference.startIndex, sectionId, properties, number, label });
         if (number != null) {
             nextNumber++;
         }
-        previousSectionId = sectionId;
-        previousPage = page;
+        counters.set(type, { sectionId, page, nextNumber });
     }
     return result;
 }

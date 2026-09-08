@@ -26,10 +26,10 @@ export function findDocDrawing(snapshot: IDocumentData, drawingId: string): {
     if (drawing) {
         return { drawing, path: ['drawings', drawingId], segmentId: '' };
     }
-    for (const [segmentId, note] of Object.entries(snapshot.footnotes ?? {})) {
+    for (const [segmentId, note] of Object.entries(snapshot.notes ?? {})) {
         const drawing = note.drawings?.[drawingId];
         if (drawing) {
-            return { drawing, path: ['footnotes', segmentId, 'drawings', drawingId], segmentId };
+            return { drawing, path: ['notes', segmentId, 'drawings', drawingId], segmentId };
         }
     }
 }
@@ -39,7 +39,7 @@ export function collectDocDrawings(snapshot: IDocumentData): { drawings: IDrawin
     let drawings = snapshot.drawings ?? {};
     let drawingsOrder = snapshot.drawingsOrder ?? Object.keys(drawings);
     let copied = false;
-    for (const note of Object.values(snapshot.footnotes ?? {})) {
+    for (const note of Object.values(snapshot.notes ?? {})) {
         if (!note.drawings || Object.keys(note.drawings).length === 0) {
             continue;
         }

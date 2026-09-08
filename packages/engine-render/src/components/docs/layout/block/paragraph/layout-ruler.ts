@@ -474,7 +474,7 @@ function _divideOperator(
         } else {
             // w does not exceed divide width, add it to divide
             const currentLine = divide.parent;
-            if (currentLine?.parent?.parent && ctx.footnoteLayout && glyphGroup.some((glyph) => glyph.footnoteId)) {
+            if (currentLine?.parent?.parent && ctx.footnoteLayout && glyphGroup.some((glyph) => glyph.noteId)) {
                 const bodyBottom = currentLine.parent.parent.top + currentLine.top + currentLine.lineHeight;
                 const bodyLimit = ctx.footnoteLayout.getBodyLimit(lastPage, pages, sectionBreakConfig, bodyBottom, glyphGroup);
                 if (bodyBottom > bodyLimit + LINE_LAYOUT_OVERFLOW_TOLERANCE) {

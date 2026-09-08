@@ -21,13 +21,13 @@ import { getDocumentMutationLayoutImpact } from '../render-controllers/doc-mutat
 
 describe('document mutation layout range index', () => {
     it.each(['first-note', 'another-note', 'edit-note'])('starts %s layout at the body reference instead of the start of the document', (operation) => {
-        const note = { footnoteId: 'note', body: { dataStream: 'Explanation\r\n' } };
+        const note = { type: 'footnote' as const, noteId: 'note', body: { dataStream: 'Explanation\r\n' } };
         const jsonX = JSONX.getInstance();
-        let actions = jsonX.insertOp(['footnotes'], { note });
+        let actions = jsonX.insertOp(['notes'], { note });
         if (operation === 'another-note') {
-            actions = jsonX.insertOp(['footnotes', 'note'], note);
+            actions = jsonX.insertOp(['notes', 'note'], note);
         } else if (operation === 'edit-note') {
-            actions = jsonX.editOp(new TextX().insert(1, { dataStream: 'X' }).serialize(), ['footnotes', 'note', 'body']);
+            actions = jsonX.editOp(new TextX().insert(1, { dataStream: 'X' }).serialize(), ['notes', 'note', 'body']);
         }
         const impact = getDocumentMutationLayoutImpact(actions, {
             body: { dataStream: '', customRanges: [{
@@ -35,7 +35,7 @@ describe('document mutation layout range index', () => {
                 rangeType: CustomRangeType.FOOTNOTE,
                 startIndex: 90_000,
                 endIndex: 90_000,
-                properties: { footnoteId: 'note' },
+                properties: { noteId: 'note' },
             }] },
         });
         expect(impact).toEqual({ global: false, range: { start: 90_000, end: 90_001 }, unresolvedLocal: false });

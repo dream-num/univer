@@ -96,11 +96,11 @@ function getDocumentPermissionResolverIndex(documentDataModel: DocumentDataModel
     addDrawingSegments(snapshot.body, '');
     Object.entries(snapshot.headers ?? {}).forEach(([segmentId, header]) => addDrawingSegments(header.body, segmentId));
     Object.entries(snapshot.footers ?? {}).forEach(([segmentId, footer]) => addDrawingSegments(footer.body, segmentId));
-    Object.entries(snapshot.footnotes ?? {}).forEach(([segmentId, footnote]) => addDrawingSegments(footnote.body, segmentId));
+    Object.entries(snapshot.notes ?? {}).forEach(([segmentId, footnote]) => addDrawingSegments(footnote.body, segmentId));
     const footnoteReferenceRanges = new Map<string, IDocumentPermissionRange>();
     for (const reference of snapshot.body?.customRanges ?? []) {
-        if (reference.rangeType === CustomRangeType.FOOTNOTE && typeof reference.properties?.footnoteId === 'string') {
-            footnoteReferenceRanges.set(reference.properties.footnoteId, {
+        if ((reference.rangeType === CustomRangeType.FOOTNOTE || reference.rangeType === CustomRangeType.ENDNOTE) && typeof reference.properties?.noteId === 'string') {
+            footnoteReferenceRanges.set(reference.properties.noteId, {
                 startOffset: reference.startIndex,
                 endOffset: reference.endIndex + 1,
             });
@@ -130,7 +130,7 @@ function getDocumentPermissionSegmentIndex(
 
     const body = documentDataModel.getSelfOrHeaderFooterModel(segmentId)?.getBody() ?? null;
     const snapshot = documentDataModel.getSnapshot();
-    const note = snapshot.footnotes?.[segmentId];
+    const note = snapshot.notes?.[segmentId];
     const drawings = (note ? note.drawings : snapshot.drawings) ?? {};
     const entities: IDocumentPermissionEntityRange[] = body == null
         ? []
@@ -203,19 +203,19 @@ export function getDocumentEditTargetObjectIdsFromActions(
     cursor.traverse(null, () => {
         const path = cursor.getPath();
         const edit = cursor.getComponent();
-        const scopedSegment = ['headers', 'footers', 'footnotes'].includes(String(path[0])) && typeof path[1] === 'string'
+        const scopedSegment = ['headers', 'footers', 'notes'].includes(String(path[0])) && typeof path[1] === 'string'
             ? path[1]
             : segmentId;
-        if (path[0] === 'footnotes' && typeof path[1] === 'string') {
+        if (path[0] === 'notes' && typeof path[1] === 'string') {
             getSectionPermissionObjectIds(documentDataModel, path[1], { startOffset: 0, endOffset: 0 })
                 .forEach((objectId) => result.add(objectId));
         }
-        if (path[0] === 'footnoteSettings') {
+        if (path[0] === 'noteSettings') {
             getDocumentPermissionResolverIndex(documentDataModel).topLevelSections.forEach((section) => {
                 result.add(getDocumentSectionPermissionObjectId('', section.sectionId));
             });
         }
-        if (path[0] === 'body' && path[1] === 'sectionBreaks' && typeof path[2] === 'number' && path[3] === 'footnoteProperties') {
+        if (path[0] === 'body' && path[1] === 'sectionBreaks' && typeof path[2] === 'number' && (path[3] === 'noteProperties' || path[3] === 'suppressEndnotes')) {
             const sectionId = documentDataModel.getBody()?.sectionBreaks?.[path[2]]?.sectionId;
             if (sectionId) {
                 result.add(getDocumentSectionPermissionObjectId('', sectionId));

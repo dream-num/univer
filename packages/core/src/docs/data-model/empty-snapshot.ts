@@ -46,6 +46,9 @@ export function getEmptySnapshot(
         drawingsOrder: [],
         headers: {},
         footers: {},
+        // Stable containers let concurrent first-note mutations address distinct child IDs.
+        notes: {},
+        noteSettings: {},
         body: {
             dataStream: '\r\n',
             textRuns: [],

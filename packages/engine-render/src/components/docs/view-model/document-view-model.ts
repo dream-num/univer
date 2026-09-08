@@ -597,7 +597,7 @@ export class DocumentViewModel implements IDisposable {
         };
     }
 
-    getFootnoteTreeMap(): ReadonlyMap<string, DocumentViewModel> {
+    getNoteTreeMap(): ReadonlyMap<string, DocumentViewModel> {
         return this._footnoteTreeMap;
     }
 
@@ -1148,10 +1148,10 @@ export class DocumentViewModel implements IDisposable {
     }
 
     private _buildHeaderFooterViewModel() {
-        for (const [footnoteId, viewModel] of this._footnoteTreeMap) {
-            if (viewModel.getDataModel() !== this._documentDataModel.footnoteModelMap.get(footnoteId)) {
+        for (const [noteId, viewModel] of this._footnoteTreeMap) {
+            if (viewModel.getDataModel() !== this._documentDataModel.noteModelMap.get(noteId)) {
                 viewModel.dispose();
-                this._footnoteTreeMap.delete(footnoteId);
+                this._footnoteTreeMap.delete(noteId);
             }
         }
         const { headerModelMap, footerModelMap } = this._documentDataModel;
@@ -1173,10 +1173,10 @@ export class DocumentViewModel implements IDisposable {
             viewModels.push(this._footerTreeMap.get(footerId)!);
         }
 
-        for (const [footnoteId, model] of this._documentDataModel.footnoteModelMap) {
-            const viewModel = this._footnoteTreeMap.get(footnoteId)
+        for (const [noteId, model] of this._documentDataModel.noteModelMap) {
+            const viewModel = this._footnoteTreeMap.get(noteId)
                 ?? new DocumentViewModel(model, { ...rootTableSource, ...model.getSnapshot().tableSource });
-            this._footnoteTreeMap.set(footnoteId, viewModel);
+            this._footnoteTreeMap.set(noteId, viewModel);
             viewModels.push(viewModel);
         }
         this._segmentViewModels$.next(viewModels);

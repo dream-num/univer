@@ -357,7 +357,7 @@ interface ICreateTableCache {
     remainHeight: number;
     repeatRows: DataStreamTreeNode[];
     repeatRowsHeight: number;
-    footnotes?: ReturnType<DocumentFootnoteLayout['createTablePagination']>;
+    notes?: ReturnType<DocumentFootnoteLayout['createTablePagination']>;
     fromCurrentPage?: boolean;
 }
 
@@ -391,7 +391,7 @@ export function startTableSkeletonsBuild(
             remainHeight: availableHeight,
             repeatRows: getLeadingRepeatHeaderRows(table, rowNodes),
             repeatRowsHeight: 0,
-            footnotes: ctx.footnoteLayout?.createTablePagination(curPage, sectionBreakConfig, availableHeight),
+            notes: ctx.footnoteLayout?.createTablePagination(curPage, sectionBreakConfig, availableHeight),
         },
         rowIndex: 0,
         columnIndex: 0,
@@ -586,7 +586,7 @@ export function createTableSkeletons(
         remainHeight: availableHeight,
         repeatRows,
         repeatRowsHeight: 0,
-        footnotes: ctx.footnoteLayout?.createTablePagination(curPage, sectionBreakConfig, availableHeight),
+        notes: ctx.footnoteLayout?.createTablePagination(curPage, sectionBreakConfig, availableHeight),
     };
 
     skeTables.push(curTableSkeleton);
@@ -818,11 +818,11 @@ function dealWithTableRow(
         rowSke.height = rowHeights[rowIndex];
     }
 
-    if (!isRepeatRow && cache.footnotes) {
+    if (!isRepeatRow && cache.notes) {
         let nextHeights: number[] | undefined;
         if (canRowSplit) {
-            nextHeights = cache.footnotes.measureRow(curTableSkeleton, rowSkeletons, cellPageHeights);
-        } else if (cache.footnotes.renumberWholeRow(curTableSkeleton, rowSkeletons, cache.remainHeight)) {
+            nextHeights = cache.notes.measureRow(curTableSkeleton, rowSkeletons, cellPageHeights);
+        } else if (cache.notes.renumberWholeRow(curTableSkeleton, rowSkeletons, cache.remainHeight)) {
             nextHeights = [];
         }
         if (nextHeights) {
@@ -852,12 +852,12 @@ function dealWithTableRow(
             cache.remainHeight <= 0 ||
             forcedPageBreakRows.has(rowSkeleton) ||
             rowOverflowHeight > documentCompatibilityPolicy.table.rowOverflowTolerance;
-        let remainingWithNotes = geometryOverflow ? undefined : cache.footnotes?.append(curTableSkeleton, rowSkeleton);
-        const shouldOpenNewTable = geometryOverflow || (cache.footnotes != null && remainingWithNotes == null);
+        let remainingWithNotes = geometryOverflow ? undefined : cache.notes?.append(curTableSkeleton, rowSkeleton);
+        const shouldOpenNewTable = geometryOverflow || (cache.notes != null && remainingWithNotes == null);
 
         if (shouldOpenNewTable) {
-            cache.footnotes?.nextPage();
-            if (cache.footnotes && skeTables.length === 1 && curTableSkeleton.rows.length === 0) {
+            cache.notes?.nextPage();
+            if (cache.notes && skeTables.length === 1 && curTableSkeleton.rows.length === 0) {
                 cache.fromCurrentPage = false;
             }
             cache.remainHeight = getAvailableHeight(curPage, cache, row !== 0 && rowSkeleton.index !== lastRow?.index);
@@ -887,10 +887,10 @@ function dealWithTableRow(
                     });
                 }
             }
-            remainingWithNotes = cache.footnotes?.append(getCurTableSkeleton(skeTables), rowSkeleton);
-            while (remainingWithNotes == null && cache.footnotes?.hasContinuation()) {
-                cache.footnotes.nextPage();
-                remainingWithNotes = cache.footnotes.append(getCurTableSkeleton(skeTables), rowSkeleton);
+            remainingWithNotes = cache.notes?.append(getCurTableSkeleton(skeTables), rowSkeleton);
+            while (remainingWithNotes == null && cache.notes?.hasContinuation()) {
+                cache.notes.nextPage();
+                remainingWithNotes = cache.notes.append(getCurTableSkeleton(skeTables), rowSkeleton);
             }
         }
 

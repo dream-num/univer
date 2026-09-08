@@ -1000,7 +1000,7 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         } else if ((progress.didPublishAnchor && (
             refreshIncompleteAnchorSelection || this._docSelectionRenderService.hasPendingSelection
         )) || (publication != null &&
-            this._context.unit.getSnapshot().footnotes?.[this._getActiveRange(unitId)?.segmentId ?? ''] != null)) {
+            this._context.unit.getSnapshot().notes?.[this._getActiveRange(unitId)?.segmentId ?? ''] != null)) {
             // The foreground pass replaces edited line and glyph objects. Rebuild
             // the caret from stable document offsets without moving the viewport.
             // A footnote can continue beyond the body anchor, so later Worker

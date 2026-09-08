@@ -80,7 +80,7 @@ describe('DocDrawingController', () => {
             body: { dataStream: '\r\n' },
             drawings: { image: drawing('image') },
             drawingsOrder: ['image'],
-            footnotes: { note: { footnoteId: 'note', body: { dataStream: '\b\r\n' }, drawings: { 'note-image': { ...drawing('note-image'), layoutType: PositionedObjectLayoutType.INLINE } }, drawingsOrder: ['note-image'] } },
+            notes: { note: { type: 'footnote' as const, noteId: 'note', body: { dataStream: '\b\r\n' }, drawings: { 'note-image': { ...drawing('note-image'), layoutType: PositionedObjectLayoutType.INLINE } }, drawingsOrder: ['note-image'] } },
         });
         try {
             const controller = bed.injector.get(DocDrawingController);
@@ -93,7 +93,7 @@ describe('DocDrawingController', () => {
                 });
             }
             expect(bed.documentDataModel.getDrawings()).not.toHaveProperty('note-image');
-            expect(bed.documentDataModel.getSnapshot().footnotes?.note.drawings?.['note-image'].subUnitId).toBe('stale-import-unit');
+            expect(bed.documentDataModel.getSnapshot().notes?.note.drawings?.['note-image'].subUnitId).toBe('stale-import-unit');
         } finally {
             bed.univer.dispose();
         }

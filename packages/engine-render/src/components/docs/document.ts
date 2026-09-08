@@ -671,7 +671,7 @@ export class Documents extends DocComponent {
 
             this._resetRotation(ctx, finalAngle);
 
-            for (const footnote of [...page.footnoteDecorations ?? [], ...page.footnotes ?? []]) {
+            for (const footnote of [...page.footnoteDecorations ?? [], ...page.notes ?? []]) {
                 this._drawHeaderFooter(
                     footnote.page,
                     ctx,
@@ -688,7 +688,7 @@ export class Documents extends DocComponent {
                     false,
                     pages.length,
                     'kind' in footnote
-                        ? this.getSkeleton()?.getViewModel().getSnapshot().footnoteSettings?.[footnote.kind]?.customRanges ?? []
+                        ? this.getSkeleton()?.getViewModel().getSnapshot().noteSettings?.footnote?.[footnote.kind]?.customRanges ?? []
                         : undefined
                 );
             }

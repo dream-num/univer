@@ -285,7 +285,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         }
         this._syncFootnoteSegment(ranges[0]);
         const isBodyOrFootnote = this._currentSegmentId === '' ||
-            this._context.unit.getSnapshot().footnotes?.[this._currentSegmentId] != null;
+            this._context.unit.getSnapshot().notes?.[this._currentSegmentId] != null;
         let currentLogicalSelection: Nullable<IDocSelectionInnerParam> = null;
         if (isBodyOrFootnote && ranges.length > 0) {
             const { unitId } = this._context;
@@ -315,13 +315,13 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         if (targetSegment == null) {
             return;
         }
-        const footnotes = this._context.unit.getSnapshot().footnotes;
+        const notes = this._context.unit.getSnapshot().notes;
         if (targetSegment !== this._currentSegmentId &&
-            (footnotes?.[targetSegment] || footnotes?.[this._currentSegmentId])) {
+            (notes?.[targetSegment] || notes?.[this._currentSegmentId])) {
             this.setSegment(targetSegment);
             this.setSegmentPage(range?.segmentPage ?? -1);
         }
-        if (footnotes?.[targetSegment] && range != null) {
+        if (notes?.[targetSegment] && range != null) {
             const position = this._docSkeletonManagerService.getSkeleton()
                 .findNodePositionByCharIndex(range.endOffset, true, targetSegment);
             if (position != null && position.page !== this._currentSegmentPage) {
@@ -723,9 +723,9 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._pendingSelection = null;
         const { segmentId, segmentPage } = startNode;
 
-        const footnotes = this._context.unit.getSnapshot().footnotes;
+        const notes = this._context.unit.getSnapshot().notes;
         if (segmentId !== this._currentSegmentId &&
-            ((segmentId && this._currentSegmentId) || footnotes?.[segmentId] || footnotes?.[this._currentSegmentId])) {
+            ((segmentId && this._currentSegmentId) || notes?.[segmentId] || notes?.[this._currentSegmentId])) {
             this.setSegment(segmentId);
         }
 

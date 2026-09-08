@@ -32,7 +32,7 @@ describe('MergeTwoParagraphCommand segment selection', () => {
             id: 'note-merge',
             documentStyle: { documentFlavor: DocumentFlavor.TRADITIONAL },
             body: { dataStream: 'Body\r\n', paragraphs: [{ startIndex: 4, paragraphId: 'body' }] },
-            footnotes: { note: { footnoteId: 'note', body: {
+            notes: { note: { type: 'footnote' as const, noteId: 'note', body: {
                 dataStream: 'First\rSecond\r\n',
                 paragraphs: [{ startIndex: 5, paragraphId: 'first' }, { startIndex: 12, paragraphId: 'second' }],
             } } },
@@ -55,7 +55,7 @@ describe('MergeTwoParagraphCommand segment selection', () => {
                 style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
             });
             expect(await commands.executeCommand(MergeTwoParagraphCommand.id, { direction, range })).toBe(true);
-            expect(model.getSnapshot().footnotes!.note.body.dataStream).toBe('FirstSecond\r\n');
+            expect(model.getSnapshot().notes!.note.body.dataStream).toBe('FirstSecond\r\n');
             expect(model.getSnapshot().body!.dataStream).toBe('Body\r\n');
             expect(selections.getActiveTextRange()).toMatchObject({ segmentId: 'note', startOffset: 5, endOffset: 5 });
         } finally {

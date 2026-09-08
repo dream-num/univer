@@ -127,7 +127,7 @@ export interface IDocumentSkeletonPage {
     /** Internal layout provenance for a page opened because content exhausted the previous page. */
     isNaturalPageOverflow?: boolean;
     /** Footnote fragments use their own segment offsets, independent of body character indices. */
-    footnotes?: IDocumentSkeletonFootnote[];
+    notes?: IDocumentSkeletonFootnote[];
     footnoteHeight?: number;
     footnoteDecorations?: IDocumentSkeletonFootnoteDecoration[];
     st: number; // startIndex
@@ -144,6 +144,7 @@ export interface IDocumentSkeletonPage {
 }
 
 export interface IDocumentSkeletonFootnoteDecoration {
+    noteType?: 'footnote' | 'endnote';
     kind: 'separator' | 'continuationSeparator' | 'continuationNotice';
     left: number;
     top: number;
@@ -151,7 +152,8 @@ export interface IDocumentSkeletonFootnoteDecoration {
 }
 
 export interface IDocumentSkeletonFootnote {
-    footnoteId: string;
+    noteType?: 'footnote' | 'endnote';
+    noteId: string;
     referenceIndex: number;
     continued: boolean;
     left: number;
@@ -319,7 +321,7 @@ export interface IDocumentSkeletonGlyph {
     url?: string; // image url
     featureId?: string; // support interaction for feature ,eg. hyperLine person
     drawingId?: string; // drawing.drawingId
-    footnoteId?: string;
+    noteId?: string;
     footnoteSeparator?: boolean;
     fauxBoldStrokeWidth?: number;
     tabLeader?: TabStopLeader;

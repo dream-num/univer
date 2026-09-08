@@ -84,7 +84,7 @@ function createDocumentDataModel(overrides?: {
         getSnapshot: vi.fn(() => snapshot),
         headerModelMap: overrides?.headerModelMap ?? new Map(),
         footerModelMap: overrides?.footerModelMap ?? new Map(),
-        footnoteModelMap: new Map(),
+        noteModelMap: new Map(),
     } as any;
 }
 
@@ -108,20 +108,20 @@ describe('DocumentViewModel', () => {
         const model = new DocumentDataModel({
             id: 'notes',
             body: noteBody('Body'),
-            footnotes: {
-                first: { footnoteId: 'first', body: noteBody('First') },
-                second: { footnoteId: 'second', body: noteBody('Second') },
+            notes: {
+                first: { type: 'footnote' as const, noteId: 'first', body: noteBody('First') },
+                second: { type: 'footnote' as const, noteId: 'second', body: noteBody('Second') },
             },
         });
         const view = new DocumentViewModel(model);
-        const first = view.getFootnoteTreeMap().get('first');
-        const second = view.getFootnoteTreeMap().get('second');
+        const first = view.getNoteTreeMap().get('first');
+        const second = view.getNoteTreeMap().get('second');
         try {
-            model.apply(JSONX.getInstance().editOp(new TextX().insert(4, { dataStream: 'New ' }).serialize(), ['footnotes', 'first', 'body']));
+            model.apply(JSONX.getInstance().editOp(new TextX().insert(4, { dataStream: 'New ' }).serialize(), ['notes', 'first', 'body']));
             view.reset(model);
-            expect(view.getFootnoteTreeMap().get('first')).not.toBe(first);
-            expect(view.getFootnoteTreeMap().get('second')).toBe(second);
-            expect(view.getFootnoteTreeMap().get('first')?.getChildren()[0].children[0].content).toBe('New First\r\n');
+            expect(view.getNoteTreeMap().get('first')).not.toBe(first);
+            expect(view.getNoteTreeMap().get('second')).toBe(second);
+            expect(view.getNoteTreeMap().get('first')?.getChildren()[0].children[0].content).toBe('New First\r\n');
         } finally {
             view.dispose();
             model.dispose();

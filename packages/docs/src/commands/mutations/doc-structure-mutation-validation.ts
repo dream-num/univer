@@ -171,7 +171,7 @@ function getSegmentType(documentDataModel: DocumentDataModel, segmentId: string)
         return 'footer';
     }
 
-    if (documentDataModel.getSnapshot().footnotes?.[segmentId]) {
+    if (documentDataModel.getSnapshot().notes?.[segmentId]) {
         return 'footnote';
     }
 
@@ -186,9 +186,9 @@ function assertValidDocBodyStructure(documentDataModel: DocumentDataModel, segme
     }
 
     const segmentType = getSegmentType(documentDataModel, segmentId);
-    const footnote = documentDataModel.getSnapshot().footnotes?.[segmentId];
+    const footnote = documentDataModel.getSnapshot().notes?.[segmentId];
     const issues = footnote
-        ? validateDocumentStructure({ footnotes: { [segmentId]: footnote } })
+        ? validateDocumentStructure({ notes: { [segmentId]: footnote } })
         : validateDocBodyStructure(body, { segmentType, segmentId: segmentId || undefined });
     if (!issues.length) {
         return;
@@ -214,13 +214,13 @@ export function validateDocStructureMutation(
     const cursor = JSON1.type.readCursor(actions);
     cursor.traverse(null, (component) => {
         const path = cursor.getPath();
-        if ((path[0] === 'footnotes' && (path.length <= 2 || path[2] !== 'body')) || path.includes('customRanges')) {
+        if ((path[0] === 'notes' && (path.length <= 2 || path[2] !== 'body')) || path.includes('customRanges')) {
             changesFootnoteStructure = true;
         }
         if (component.et === TextX.id && Array.isArray(component.e)) {
             for (const action of component.e) {
                 const ranges: unknown = isRecord(action) && isRecord(action.body) ? action.body.customRanges : undefined;
-                if (Array.isArray(ranges) && ranges.some((range) => isRecord(range) && range.rangeType === CustomRangeType.FOOTNOTE)) {
+                if (Array.isArray(ranges) && ranges.some((range) => isRecord(range) && (range.rangeType === CustomRangeType.FOOTNOTE || range.rangeType === CustomRangeType.ENDNOTE))) {
                     changesFootnoteStructure = true;
                 }
             }

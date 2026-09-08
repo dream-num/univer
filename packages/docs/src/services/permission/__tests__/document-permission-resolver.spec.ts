@@ -27,33 +27,29 @@ describe('document permission resolver', () => {
                 dataStream: 'A\uFFFC\r\n',
                 paragraphs: [{ startIndex: 2, paragraphId: 'body-paragraph' }],
                 sectionBreaks: [{ startIndex: 3, sectionId: 'body-section' }],
-                customRanges: [{ startIndex: 1, endIndex: 1, rangeId: 'note-ref', rangeType: CustomRangeType.FOOTNOTE, properties: { footnoteId: 'note' } }],
+                customRanges: [{ startIndex: 1, endIndex: 1, rangeId: 'note-ref', rangeType: CustomRangeType.FOOTNOTE, properties: { noteId: 'note' } }],
             },
-            footnotes: {
-                note: {
-                    footnoteId: 'note',
-                    body: {
-                        dataStream: '\b\r\n',
-                        customBlocks: [{ startIndex: 0, blockId: 'image' }],
-                        paragraphs: [{ startIndex: 1, paragraphId: 'note-paragraph' }],
-                        sectionBreaks: [{ startIndex: 2, sectionId: 'note-section' }],
-                    },
-                    drawings: {
-                        image: {
-                            unitId: 'note-permission',
-                            subUnitId: 'note-permission',
-                            drawingId: 'image',
-                            drawingType: DrawingTypeEnum.DRAWING_IMAGE,
-                            layoutType: PositionedObjectLayoutType.INLINE,
-                            docTransform: {
-                                size: { width: 100, height: 40 },
-                                angle: 0,
-                                positionH: { relativeFrom: ObjectRelativeFromH.PAGE, posOffset: 0 },
-                                positionV: { relativeFrom: ObjectRelativeFromV.PAGE, posOffset: 0 },
-                            },
+            notes: {
+                note: { type: 'footnote' as const, noteId: 'note', body: {
+                    dataStream: '\b\r\n',
+                    customBlocks: [{ startIndex: 0, blockId: 'image' }],
+                    paragraphs: [{ startIndex: 1, paragraphId: 'note-paragraph' }],
+                    sectionBreaks: [{ startIndex: 2, sectionId: 'note-section' }],
+                }, drawings: {
+                    image: {
+                        unitId: 'note-permission',
+                        subUnitId: 'note-permission',
+                        drawingId: 'image',
+                        drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+                        layoutType: PositionedObjectLayoutType.INLINE,
+                        docTransform: {
+                            size: { width: 100, height: 40 },
+                            angle: 0,
+                            positionH: { relativeFrom: ObjectRelativeFromH.PAGE, posOffset: 0 },
+                            positionV: { relativeFrom: ObjectRelativeFromV.PAGE, posOffset: 0 },
                         },
                     },
-                },
+                } },
             },
         });
         try {

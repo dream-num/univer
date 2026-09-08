@@ -76,9 +76,9 @@ export const RemoveDocDrawingCommand: ICommand = {
             return false;
         }
         const segmentId = noteSegments[0] || (contentInsertRange?.segmentId ?? activeTextRange?.segmentId ?? '');
-        const footnote = snapshot.footnotes?.[segmentId];
+        const footnote = snapshot.notes?.[segmentId];
         const source = footnote ?? snapshot;
-        const prefix = footnote ? ['footnotes', segmentId] : [];
+        const prefix = footnote ? ['notes', segmentId] : [];
 
         const textX = new TextX();
         const jsonX = JSONX.getInstance();

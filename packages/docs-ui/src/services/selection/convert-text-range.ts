@@ -616,7 +616,7 @@ export class NodePositionConvertToCursor {
                 segmentPage = skeFooters.get(footerId)?.get(pageWidth);
             } else if (pageType === DocumentSkeletonPageType.FOOTNOTE) {
                 const noteId = getPageFromPath(skeletonData, path)?.segmentId;
-                segmentPage = page.footnotes?.find((note) => note.footnoteId === noteId)?.page;
+                segmentPage = page.notes?.find((note) => note.noteId === noteId)?.page;
             } else if (pageType === DocumentSkeletonPageType.CELL) {
                 segmentPage = path[0] === 'pages'
                     ? getPageFromPath(skeletonData, path)
@@ -643,7 +643,7 @@ export class NodePositionConvertToCursor {
 
             switch (pageType) {
                 case DocumentSkeletonPageType.FOOTNOTE: {
-                    const note = page.footnotes?.find((fragment) => fragment.page === segmentPage);
+                    const note = page.notes?.find((fragment) => fragment.page === segmentPage);
                     this._liquid.translate(note?.left ?? page.marginLeft, note?.top ?? page.marginTop);
                     break;
                 }
@@ -688,7 +688,7 @@ export class NodePositionConvertToCursor {
                         const footerTop = page.pageHeight - tablePage.height - tablePage.marginBottom;
                         this._liquid.translate(page.marginLeft, footerTop);
                     } else if (tablePage?.type === DocumentSkeletonPageType.FOOTNOTE) {
-                        const note = page.footnotes?.find((fragment) => fragment.page === tablePage);
+                        const note = page.notes?.find((fragment) => fragment.page === tablePage);
                         this._liquid.translate(note?.left ?? page.marginLeft, note?.top ?? page.marginTop);
                     } else {
                         this._liquid.translatePagePadding(page);

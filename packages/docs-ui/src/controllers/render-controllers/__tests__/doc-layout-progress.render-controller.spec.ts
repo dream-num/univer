@@ -203,4 +203,17 @@ describe('document layout progress', () => {
         }))).toBe(25);
         expect(resolveDocLayoutProgressPercent(createProgress({ complete: true }))).toBe(100);
     });
+
+    it('does not report the initial interaction window as a completed document', () => {
+        const handoff = createProgress({
+            processedBlockCount: 0,
+            totalBlockCount: 6_264,
+            pageCount: 2,
+            publishedPageCount: 2,
+            estimatedPageCount: 2,
+        });
+        expect(resolveDocLayoutProgressPercent(handoff)).toBe(0);
+        expect(resolveDocLayoutProgressPercent({ ...handoff, processedBlockCount: 64, estimatedPageCount: 314 })).toBe(1);
+        expect(resolveDocLayoutProgressPercent({ ...handoff, processedBlockCount: 3_132, publishedPageCount: 140, estimatedPageCount: 314 })).toBe(50);
+    });
 });

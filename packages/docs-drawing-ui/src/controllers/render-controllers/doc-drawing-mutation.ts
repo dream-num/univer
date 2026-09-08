@@ -37,14 +37,15 @@ export function getDocMutationAffectedDrawingIds(actions: JSONXActions): DocMuta
             sawComponent = true;
             const path = cursor.getPath();
             const root = String(path[0]);
-            if (root === 'drawings') {
-                const drawingId = path[1];
+            const drawingIndex = root === 'notes' ? 2 : 0;
+            if (path[drawingIndex] === 'drawings') {
+                const drawingId = path[drawingIndex + 1];
                 if (typeof drawingId === 'string' && drawingId.length > 0) {
                     drawingIds.add(drawingId);
                 } else {
                     needsFullRefresh = true;
                 }
-            } else if (root === 'drawingsOrder' || path.includes('customBlocks')) {
+            } else if (path[drawingIndex] === 'drawingsOrder' || (root === 'notes' && path.length <= 2) || path.includes('customBlocks')) {
                 needsFullRefresh = true;
             }
         });

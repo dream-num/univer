@@ -134,7 +134,7 @@ function buildInsertTextActions(
     const textActions = JSONX.getInstance().editOp(textX.serialize(), getRichTextEditPath(documentDataModel, segmentId));
     return collapsed
         ? textActions
-        : appendRemovedDrawingActions(textActions, documentDataModel, originBody, startOffset, endOffset);
+        : appendRemovedDrawingActions(textActions, documentDataModel, originBody, startOffset, endOffset, segmentId);
 }
 
 function appendRemovedDrawingActions(
@@ -142,13 +142,14 @@ function appendRemovedDrawingActions(
     documentDataModel: DocumentDataModel,
     body: IDocumentBody,
     startOffset: number,
-    endOffset: number
+    endOffset: number,
+    segmentId?: string
 ): IRichTextEditingMutationParams['actions'] {
     const drawingActions = BuildTextUtils.drawing.remove(documentDataModel.getSnapshot(), [{
         startOffset,
         endOffset,
         collapsed: false,
-    }], body);
+    }], body, segmentId);
     const rawActions = [textActions, ...drawingActions];
 
     return rawActions.reduce((accumulator, action) => JSONX.compose(accumulator, action));
@@ -221,7 +222,8 @@ export const DeleteTextCommand: ICommand<IDeleteTextCommandParams> = {
             docDataModel,
             body,
             start,
-            end + 1
+            end + 1,
+            segmentId
         );
 
         const result = commandService.syncExecuteCommand<

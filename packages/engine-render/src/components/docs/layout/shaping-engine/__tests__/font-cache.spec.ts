@@ -19,6 +19,7 @@ import { FontCache, invalidateDocumentFontMetrics } from '../font-cache';
 
 describe('font cache', () => {
     beforeEach(() => {
+        invalidateDocumentFontMetrics(() => true);
         (FontCache as any)._globalFontMeasureCache = new Map();
         (FontCache as any)._fontDataMap = new Map();
         (FontCache as any)._getTextHeightCache = {};
@@ -26,6 +27,7 @@ describe('font cache', () => {
     });
 
     afterEach(() => {
+        invalidateDocumentFontMetrics(() => true);
         vi.unstubAllGlobals();
         vi.restoreAllMocks();
     });
@@ -77,6 +79,51 @@ describe('font cache', () => {
         expect(invalidateDocumentFontMetrics((font) => font === '14px FontChange')).toBe(true);
         expect(invalidateDocumentFontMetrics((font) => font === '14px FontChange')).toBe(false);
         expect(FontCache.getMeasureText('Agent', '14px FontChange')).toEqual(next);
+    });
+
+    it('preserves fractional normal spacing across font sizes and transfers it to a DOM-free Worker', () => {
+        let normalHeight = 3066;
+        const measureRect = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(() => ({
+            height: normalHeight,
+        } as DOMRect));
+        vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({
+            font: '',
+            measureText: () => ({
+                width: 8,
+                fontBoundingBoxAscent: 14,
+                fontBoundingBoxDescent: 3,
+                actualBoundingBoxAscent: 11,
+                actualBoundingBoxDescent: 2,
+            }),
+        } as unknown as CanvasRenderingContext2D);
+        const style = {
+            fontString: '12pt FixtureFont',
+            fontCache: '12pt FixtureFont',
+            fontFamily: 'FixtureFont',
+            fontSize: 12,
+            originFontSize: 12,
+        };
+        const originalChildCount = document.body.childElementCount;
+        const main = FontCache.getTextSize('A', style, true);
+        expect(main.normalLineHeight).toBeCloseTo(18.396);
+        expect(FontCache.getTextSize('A', style).normalLineHeight).toBe(17);
+        expect(FontCache.getNormalLineHeight({ ...style, originFontSize: 10 })).toBeCloseTo(15.33);
+        expect(measureRect).toHaveBeenCalledTimes(1);
+        expect(document.body.childElementCount).toBe(originalChildCount);
+
+        const transferred = FontCache.getNormalLineHeightCache();
+        // Superscript keeps the paragraph's original font size for normal spacing.
+        expect(FontCache.getNormalLineHeight({ ...style, fontSize: 7.2, fontString: '7.2pt FixtureFont' }))
+            .toBeCloseTo(main.normalLineHeight!);
+        invalidateDocumentFontMetrics((font) => font === style.fontString);
+        normalHeight = 3200;
+        expect(FontCache.getTextSize('A', style, true).normalLineHeight).toBeCloseTo(19.2);
+
+        vi.stubGlobal('document', undefined);
+        invalidateDocumentFontMetrics(() => true);
+        FontCache.setNormalLineHeightCache(transferred);
+        expect(FontCache.getTextSize('A', style, true)).toEqual(main);
+        expect(measureRect).toHaveBeenCalledTimes(2);
     });
 
     it('measures text with OffscreenCanvas when the DOM is unavailable', () => {

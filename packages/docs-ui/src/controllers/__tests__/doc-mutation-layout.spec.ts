@@ -15,11 +15,32 @@
  */
 
 import type { IDocumentData } from '@univerjs/core';
-import { JSONX } from '@univerjs/core';
+import { CustomRangeType, JSONX, TextX } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { getDocumentMutationLayoutImpact } from '../render-controllers/doc-mutation-layout';
 
 describe('document mutation layout range index', () => {
+    it.each(['first-note', 'another-note', 'edit-note'])('starts %s layout at the body reference instead of the start of the document', (operation) => {
+        const note = { type: 'footnote' as const, noteId: 'note', body: { dataStream: 'Explanation\r\n' } };
+        const jsonX = JSONX.getInstance();
+        let actions = jsonX.insertOp(['notes'], { note });
+        if (operation === 'another-note') {
+            actions = jsonX.insertOp(['notes', 'note'], note);
+        } else if (operation === 'edit-note') {
+            actions = jsonX.editOp(new TextX().insert(1, { dataStream: 'X' }).serialize(), ['notes', 'note', 'body']);
+        }
+        const impact = getDocumentMutationLayoutImpact(actions, {
+            body: { dataStream: '', customRanges: [{
+                rangeId: 'ref',
+                rangeType: CustomRangeType.FOOTNOTE,
+                startIndex: 90_000,
+                endIndex: 90_000,
+                properties: { noteId: 'note' },
+            }] },
+        });
+        expect(impact).toEqual({ global: false, range: { start: 90_000, end: 90_001 }, unresolvedLocal: false });
+    });
+
     it('indexes table ranges once for a composed table mutation', () => {
         const tableCount = 1_000;
         let indexedReads = 0;

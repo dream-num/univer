@@ -84,6 +84,7 @@ export enum DocumentSkeletonPageType {
     HEADER,
     FOOTER,
     CELL,
+    NOTE,
 };
 
 export interface IDocumentSkeletonPage {
@@ -125,6 +126,12 @@ export interface IDocumentSkeletonPage {
     isExplicitPageBreak?: boolean;
     /** Internal layout provenance for a page opened because content exhausted the previous page. */
     isNaturalPageOverflow?: boolean;
+    /** Note fragments use their own segment offsets, independent of body character indices. */
+    notes?: IDocumentSkeletonNote[];
+    /** Space reserved on this body page for footnotes, including separators and continuation notices. */
+    footnoteHeight?: number;
+    /** Positioned separators and continuation notices for both footnotes and endnotes. */
+    noteDecorations?: IDocumentSkeletonNoteDecoration[];
     st: number; // startIndex
     ed: number; // endIndex
     /** Whether this cell page is only a layout placeholder covered by a merged cell. */
@@ -135,7 +142,26 @@ export interface IDocumentSkeletonPage {
     segmentId: string; // header/footer id if header/footer, empty string if body page
     type: DocumentSkeletonPageType; // page type: header, footer, body, or cell
     renderConfig?: IDocumentRenderConfig;
-    parent?: IDocumentSkeletonCached | IDocumentSkeletonRow | IDocumentSkeletonColumnGroupColumn;
+    parent?: IDocumentSkeletonCached | IDocumentSkeletonRow | IDocumentSkeletonColumnGroupColumn | IDocumentSkeletonNote;
+}
+
+export interface IDocumentSkeletonNoteDecoration {
+    noteType?: 'footnote' | 'endnote';
+    kind: 'separator' | 'continuationSeparator' | 'continuationNotice';
+    left: number;
+    top: number;
+    page: IDocumentSkeletonPage;
+}
+
+export interface IDocumentSkeletonNote {
+    noteType?: 'footnote' | 'endnote';
+    noteId: string;
+    referenceIndex: number;
+    continued: boolean;
+    left: number;
+    top: number;
+    page: IDocumentSkeletonPage;
+    parent?: IDocumentSkeletonPage;
 }
 
 export interface IDocumentSkeletonHeaderFooter extends IDocumentSkeletonPage {}
@@ -297,6 +323,8 @@ export interface IDocumentSkeletonGlyph {
     url?: string; // image url
     featureId?: string; // support interaction for feature ,eg. hyperLine person
     drawingId?: string; // drawing.drawingId
+    noteId?: string;
+    noteSeparator?: boolean;
     fauxBoldStrokeWidth?: number;
     tabLeader?: TabStopLeader;
 }
@@ -359,7 +387,7 @@ export interface IDocumentSkeletonBoundingBox {
     width: number; // width
     ba: number; // boundingBoxAscent
     bd: number; // boundingBoxDescent
-    normalLineHeight?: number; // Canvas font bounding-box height, used as the base for Word AUTO spacing
+    normalLineHeight?: number; // Normal font spacing, including leading when available, for Word AUTO spacing.
     aba: number; // actualBoundingBoxAscent
     abd: number; // actualBoundingBoxDescent
     sp: number; // strikeoutPosition

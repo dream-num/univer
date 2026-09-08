@@ -210,6 +210,7 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
             id: RichTextEditingMutation.id,
             params: {
                 unitId,
+                segmentId,
                 actions: [],
                 textRanges,
                 prevTextRanges: [range],

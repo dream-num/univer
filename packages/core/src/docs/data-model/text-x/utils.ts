@@ -770,6 +770,9 @@ export function getRichTextEditPath(docDataModel: DocumentDataModel, segmentId =
     }
 
     const { headers, footers } = docDataModel.getSnapshot();
+    if (docDataModel.getSnapshot().notes?.[segmentId] != null) {
+        return ['notes', segmentId, 'body'];
+    }
 
     if (headers == null && footers == null) {
         throw new Error('Document data model must have headers or footers when update by segment id');

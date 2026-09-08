@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IDocumentSkeletonPage } from '../../../../../basics/i-document-skeleton-cached';
 import { BooleanNumber, PositionedObjectLayoutType, TableTextWrapType, WrapTextType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 import { LineType } from '../../../../../basics/i-document-skeleton-cached';
@@ -43,6 +44,27 @@ function createTopBottomDrawing(top: number, height: number, angle = 0) {
 }
 
 describe('line model', () => {
+    it.each([
+        { gap: 24, minimumWidth: 24, expectedTop: 130 },
+        { gap: 25, minimumWidth: 24, expectedTop: 20 },
+        { gap: 30, minimumWidth: 56, expectedTop: 130 },
+        { gap: 80, minimumWidth: 56, expectedTop: 20 },
+    ])('clears floating tables when side gaps cannot accommodate text ($gap, $minimumWidth)', ({ gap, minimumWidth, expectedTop }) => {
+        const page = {
+            skeDrawings: new Map(),
+            skeTables: new Map([['table', {
+                left: gap,
+                top: 10,
+                width: 300 - gap * 2,
+                height: 120,
+                tableSource: { textWrap: TableTextWrapType.WRAP, dist: {} },
+            }]]),
+        } as unknown as IDocumentSkeletonPage;
+        expect(calculateLineTopByDrawings(16, 20, page, null, null, 0, 300, 0, minimumWidth)).toBe(expectedTop);
+        expect(calculateLineTopByDrawings(16, 140, page, null, null, 0, 300, 0, minimumWidth)).toBe(140);
+        expect(calculateLineTopByDrawings(16, 20, page, null, null, 400, 300, 0, minimumWidth)).toBe(20);
+    });
+
     it('creates line skeleton and divides with drawing/table layout data', () => {
         const page = {
             marginTop: 8,

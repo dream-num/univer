@@ -34,9 +34,10 @@ import {
     Documents,
     ICanvasColorService,
     IRenderManagerService,
+    Rect,
     RenderManagerService,
 } from '@univerjs/engine-render';
-import { ICanvasPopupService } from '@univerjs/ui';
+import { CanvasPopupService, ICanvasPopupService } from '@univerjs/ui';
 import { describe, expect, it, vi } from 'vitest';
 import { SetDocZoomRatioOperation } from '../../commands/operations/set-doc-zoom-ratio.operation';
 import {
@@ -54,6 +55,60 @@ import {
 import { NodePositionConvertToCursor } from '../selection/convert-text-range';
 
 describe('popup anchors with real document layout', () => {
+    it('lets an object toolbar follow layout transforms without holding a document layout lock', () => {
+        const context = new Proxy({}, { get: () => () => {} });
+        vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(context as never);
+        const univer = new Univer();
+        try {
+            const injector = univer.__getInjector();
+            injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+            injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
+            injector.add([ICanvasPopupService, { useClass: CanvasPopupService }]);
+            injector.add([DocCanvasPopManagerService]);
+            const model = univer.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, {
+                id: 'object-popup-test',
+                body: { dataStream: '\r\n' },
+            });
+            const render = injector.get(IRenderManagerService).createRender(model.getUnitId()) as RenderUnit;
+            render.deactivate();
+            render.engine.resizeBySize(300, 400);
+            const canvas = render.engine.getCanvasElement()!;
+            canvas.style.width = '300px';
+            vi.spyOn(canvas, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 300, 400));
+            render.addRenderDependencies([[DocLayoutInteractionService], [DocCanvasPopupLayoutInteractionController]]);
+            render.with(DocCanvasPopupLayoutInteractionController);
+            const interaction = render.with(DocLayoutInteractionService);
+            const shape = new Rect('note-image', { left: 20, top: 300, width: 100, height: 40 });
+            render.scene.addObject(shape);
+            const popupManager = injector.get(DocCanvasPopManagerService);
+            const popup = popupManager.attachPopupToObject(shape, {
+                componentKey: 'object-toolbar',
+                requiresStableLayout: false,
+            }, model.getUnitId());
+            const popupService = injector.get(ICanvasPopupService);
+            const anchors: unknown[] = [];
+            let completed = false;
+            const subscription = popupService.popups[0][1].anchorRect$.subscribe({
+                next: (anchor) => anchors.push(anchor),
+                complete: () => { completed = true; },
+            });
+            expect(interaction.isActive).toBe(false);
+            shape.transformByState({ top: 280, width: 150, height: 60 });
+            expect(anchors[anchors.length - 1]).toMatchObject({ left: 20, right: 170, top: 280, bottom: 340 });
+            expect(interaction.isActive).toBe(false);
+            popup.dispose();
+            expect(completed).toBe(true);
+            const count = anchors.length;
+            shape.transformByState({ top: 260 });
+            expect(anchors).toHaveLength(count);
+            expect(popupService.popups).toHaveLength(0);
+            subscription.unsubscribe();
+        } finally {
+            univer.dispose();
+            vi.restoreAllMocks();
+        }
+    });
+
     it.each([0, 1, 3])('covers a %i-character range through its trailing edge', (length) => {
         const context = new Proxy({
             font: '',
@@ -467,15 +522,14 @@ describe('DocCanvasPopManagerService', () => {
 
     it('updates object anchored popups after zoom commands and removes popup on dispose', () => {
         const { service, popupService, commandService } = createService();
-        const targetObject = { left: 30, top: 40, width: 50, height: 60 };
+        const targetObject = new Rect('popup-target', { left: 30, top: 40, width: 50, height: 60 });
 
-        const disposable = service.attachPopupToObject(targetObject as never, { componentKey: 'object-menu' }, 'doc-1');
+        const disposable = service.attachPopupToObject(targetObject, { componentKey: 'object-menu' }, 'doc-1');
         const popup = popupService.popups.get('popup-1');
         expect(popup?.anchorRect).toEqual({ left: 40, right: 90, top: 60, bottom: 120 });
         expect(disposable.canDispose()).toBe(false);
 
-        targetObject.left = 60;
-        targetObject.top = 80;
+        targetObject.transformByState({ left: 60, top: 80 });
         commandService.emit(SetDocZoomRatioOperation.id);
         const anchorRect$ = popup?.anchorRect$ as { value?: unknown } | undefined;
         expect(anchorRect$?.value).toEqual({ left: 70, right: 120, top: 100, bottom: 160 });

@@ -256,7 +256,7 @@ export function _createSkeletonWordOrLetter(
     let xOffset = 0;
 
     const documentCompatibilityPolicy = config.documentCompatibilityPolicy ?? getDocumentCompatibilityPolicy();
-    bBox = FontCache.getTextSize(content, fontStyle);
+    bBox = FontCache.getTextSize(content, fontStyle, isTraditionalDocumentCompatibility(documentCompatibilityPolicy));
     bBox = applyFontMetricCompatibility(
         content,
         fontStyle,

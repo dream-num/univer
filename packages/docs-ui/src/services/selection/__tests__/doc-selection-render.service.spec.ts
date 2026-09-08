@@ -1224,6 +1224,22 @@ describe('DocSelectionRenderService', () => {
         expect(document.activeElement).toBe(input);
     });
 
+    it.each(['input', 'textarea', 'select'])('preserves an embed-owned %s during selection synchronization', (tagName) => {
+        const { input, renderUnit, service, univer } = createRealSelectionRenderService();
+        cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
+        TestLayoutService.root.setAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, 'embed-1');
+        input.setAttribute(EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, 'embed-1');
+        const control = document.createElement(tagName);
+        TestLayoutService.root.appendChild(control);
+        control.focus();
+        expect(document.activeElement).toBe(control);
+        expect(service.canFocusing).toBe(false);
+        service.sync();
+        expect(document.activeElement).toBe(control);
+        service.activate(12, 34, true);
+        expect(document.activeElement).toBe(control);
+    });
+
     it('allows the internal sheet cell editor to refocus from an embed-owned canvas', () => {
         const focusCoordinator = new EmbedRuntimeFocusCoordinator();
         const { input, renderUnit, service, univer } = createRealSelectionRenderService({

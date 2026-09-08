@@ -1668,6 +1668,11 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         const ownerDocument = this._getOwnerDocument();
         const activeElement = ownerDocument.activeElement;
         const currentEmbedOwner = this._getCurrentEmbedOwner();
+        // Sharing an embed runtime does not transfer focus away from its native controls.
+        if (activeElement?.matches('input, textarea, select')) {
+            return true;
+        }
+
         if (this._embedRuntimeFocusCoordinator?.isChildUnitInActiveSession(this._context.unitId)) {
             return false;
         }

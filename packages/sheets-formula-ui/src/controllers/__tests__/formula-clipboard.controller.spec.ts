@@ -100,7 +100,6 @@ interface ITestSheetClipboardService extends ISheetClipboardService {
         matrixFragment: Nullable<ObjectMatrix<ICellDataWithSpanInfo>>;
         copyId: string;
     };
-    _pasteInternal: (copyId: string, pasteType: string) => Promise<boolean>;
 }
 
 class testMarkSelectionService {
@@ -595,7 +594,7 @@ describe('Test cut command with formulas', () => {
             },
         ]);
 
-        await testSheetClipboardService._pasteInternal(copyId, PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE);
+        expect(await sheetClipboardService.pasteByCopyId(copyId, PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE)).toBe(true);
     }
 
     it('cut-moving a referenced value range updates direct, range, mixed-absolute, cross-sheet, and shared formulas', async () => {

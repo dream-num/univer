@@ -484,8 +484,8 @@ export class UniverDocsUIPlugin extends Plugin {
         }));
     }
 
-    private _initRenderBasics(): void {
-        ([
+    protected _getRenderBasics(): Dependency[] {
+        return [
             [DocSkeletonManagerService],
             [DocSelectionRenderService],
             [DocInterceptorService],
@@ -499,13 +499,17 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocZoomRenderController],
             [DocBackScrollRenderController],
             [DocSelectionRenderController],
-        ] as Dependency[]).forEach((m) => {
+        ];
+    }
+
+    private _initRenderBasics(): void {
+        this._getRenderBasics().forEach((m) => {
             this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, m);
         });
     }
 
-    private _initRenderModules(): void {
-        ([
+    protected _getRenderModules(): Dependency[] {
+        return [
             [DocEventManagerService],
             [DocFloatMenuService],
             [DocParagraphMenuService],
@@ -519,7 +523,11 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocIMEInputController],
             [DocLayoutRecoveryRenderController],
             [DocEditorBridgeController],
-        ] as Dependency[]).forEach((m) => {
+        ];
+    }
+
+    private _initRenderModules(): void {
+        this._getRenderModules().forEach((m) => {
             this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, m);
         });
     }

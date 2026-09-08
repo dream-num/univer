@@ -16,6 +16,7 @@
 
 import type { IDisposable } from '@univerjs/core';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
+import type { IValueOption } from '@univerjs/ui';
 import { toDisposable } from '@univerjs/core';
 
 export interface IDocDrawingFloatingToolbarParams {
@@ -26,7 +27,7 @@ export interface IDocDrawingFloatingToolbarParams {
 
 export interface IDocDrawingFloatingToolbarOption {
     icon?: string;
-    label: unknown;
+    label: IValueOption['label'];
     value: string;
 }
 

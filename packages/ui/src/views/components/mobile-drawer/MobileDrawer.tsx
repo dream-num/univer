@@ -16,8 +16,8 @@
 
 import type { AriaRole, PointerEvent, ReactNode, RefObject } from 'react';
 import type { MobilePanelLayout } from '../../mobile-workbench/MobileCanvasLayout';
-import { clsx, ConfigContext, resetButtonClassName, scrollbarClassName } from '@univerjs/design';
-import { createContext, useCallback, useContext, useMemo, useLayoutEffect, useRef, useState } from 'react';
+import { clsx, MobileOverlayContext, resetButtonClassName, scrollbarClassName } from '@univerjs/design';
+import { createContext, useCallback, useContext, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useMobileCanvasPanel, useMobileOverlayRegistration } from '../../mobile-workbench/MobileCanvasLayout';
 import { MobileDrawerCoordinatorContext } from './MobileDrawerCoordinator';
 
@@ -108,9 +108,8 @@ export function MobileDrawer(props: {
     const active = !coordinator || coordinator.activeDrawerId === drawerId;
     const inheritedLayout = useContext(MobileDrawerLayoutContext);
     const layout = requestedLayout ?? inheritedLayout;
-    const parentConfig = useContext(ConfigContext);
     const registerOverlay = useMobileOverlayRegistration(layout);
-    const config = useMemo(() => ({ ...parentConfig, mobileOverlay: { modal: layout === 'modal', onMount: registerOverlay } }), [parentConfig, layout, registerOverlay]);
+    const overlay = useMemo(() => ({ modal: layout === 'modal', onMount: registerOverlay }), [layout, registerOverlay]);
     const [dragPercent, setDragPercent] = useState<number | null>(null);
     const surfaceRef = useRef<HTMLElement>(null);
     const setPanelRef = useCallback((element: HTMLElement | null) => {
@@ -131,7 +130,6 @@ export function MobileDrawer(props: {
         ? MOBILE_DRAWER_COMPACT_PERCENT
         : MOBILE_DRAWER_EXPANDED_PERCENT);
     const viewportHeightUnit = globalThis.CSS?.supports('height', '1dvh') ? 'dvh' : 'vh';
-
 
     useLayoutEffect(() => {
         if (!registerDrawer || !unregisterDrawer) {
@@ -223,7 +221,7 @@ export function MobileDrawer(props: {
 
     return (
         <MobileDrawerLayoutContext.Provider value={layout}>
-            <ConfigContext.Provider value={config}>
+            <MobileOverlayContext.Provider value={overlay}>
                 {floatingActions && (
                     <div
                         className="univer-pointer-events-none univer-absolute univer-right-4 univer-z-30"
@@ -303,7 +301,7 @@ export function MobileDrawer(props: {
                     </div>
                     {footer}
                 </section>
-            </ConfigContext.Provider>
+            </MobileOverlayContext.Provider>
         </MobileDrawerLayoutContext.Provider>
     );
 }

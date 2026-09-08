@@ -14,28 +14,20 @@
  * limitations under the License.
  */
 
-import { ConfigContext } from '@univerjs/design';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { DrawingCommonPanel } from '@univerjs/drawing-ui';
 import { useDependency, useObservable } from '@univerjs/ui';
-import { useContext } from 'react';
 import { DocDrawingPosition } from './DocDrawingPosition';
 import { DocDrawingTextWrap } from './DocDrawingTextWrap';
-import { MobileDocDrawingPanel } from './MobileDocDrawingPanel';
 
 export const DocDrawingPanel = () => {
     const drawingManagerService = useDependency(IDrawingManagerService);
-    const { mobile } = useContext(ConfigContext);
     const drawings = useObservable(
         () => drawingManagerService.focus$,
         drawingManagerService.getFocusDrawings(),
         false,
         [drawingManagerService]
     );
-
-    if (mobile) {
-        return drawings?.length ? <MobileDocDrawingPanel drawings={drawings} /> : null;
-    }
 
     return !!drawings?.length && (
         <div className="univer-text-sm">

@@ -58,7 +58,7 @@ import {
     ScrollTimer,
     Vector2,
 } from '@univerjs/engine-render';
-import { ILayoutService, KeyCode, MOBILE_UI_MODE } from '@univerjs/ui';
+import { ILayoutService, KeyCode } from '@univerjs/ui';
 import { BehaviorSubject, distinctUntilChanged, filter, fromEvent, map, merge, Subject, takeUntil } from 'rxjs';
 import { DOC_EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE, IDocEmbedInteractionBoundaryService, IDocEmbedRuntimeFocusCoordinator } from '../doc-embed-integration.service';
 import { compareNodePositionLogic } from './convert-text-range';
@@ -128,11 +128,11 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     private readonly _onPointerDown$ = new Subject<void>();
     readonly onPointerDown$ = this._onPointerDown$.asObservable();
 
-    private _container!: HTMLDivElement;
+    protected _container!: HTMLDivElement;
     private _inputParent!: HTMLDivElement;
     private _input!: HTMLDivElement;
     private _scrollTimers: ScrollTimer[] = [];
-    private _rangeList: TextRange[] = [];
+    protected _rangeList: TextRange[] = [];
     // Use to cache range list in moving.
     private _rangeListCache: TextRange[] = [];
     // Rect range list.
@@ -162,13 +162,13 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     private _scenePointerUpSubs: Array<Subscription> = [];
     // When the user switches editors, whether to clear the doc ranges.
     private _reserveRanges = false;
-    private _mobileSelectionHandleColor = '';
+    protected _mobileSelectionHandleColor = '';
     private readonly _mobileHandleDragDisposables = new DisposableCollection();
     private readonly _mobileKeyboardState$ = new BehaviorSubject({ visible: false, inset: 0 });
-    private _mobileViewportBaselineHeight = 0;
-    private _mobileViewportBaselineBottom = 0;
-    private _mobileViewportBaselineWidth = 0;
-    private _pendingMobileBlurEvent: Event | null = null;
+    protected _mobileViewportBaselineHeight = 0;
+    protected _mobileViewportBaselineBottom = 0;
+    protected _mobileViewportBaselineWidth = 0;
+    protected _pendingMobileBlurEvent: Event | null = null;
     private readonly _mobileEditMode$ = new BehaviorSubject(false);
     readonly mobileKeyboardState$ = this._mobileKeyboardState$.asObservable();
     readonly mobileKeyboardVisible$ = this.mobileKeyboardState$.pipe(
@@ -230,7 +230,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     }
 
     constructor(
-        private readonly _context: IRenderContext<DocumentDataModel>,
+        protected readonly _context: IRenderContext<DocumentDataModel>,
         @ILayoutService private readonly _layoutService: ILayoutService,
         @ILogService private readonly _logService: ILogService,
         @IContextService private readonly _contextService: IContextService,
@@ -614,27 +614,13 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         }
     }
 
-    private _positionInput(x: number, y: number) {
-        // Keep the hidden editor inside the Portal subtree when possible to avoid focus-trap loops,
-        // then compensate coordinates if a transformed ancestor changes the fixed containing block.
+    protected _positionInput(x: number, y: number) {
         this._ensureHostContainer();
         this._container.style.position = 'fixed';
-        const isMobile = this._contextService.getContextValue(MOBILE_UI_MODE);
-        const visualViewport = typeof window === 'undefined' ? null : window.visualViewport;
-        let left = isMobile ? MOBILE_INPUT_VIEWPORT_INSET : x;
-        let top = isMobile ? MOBILE_INPUT_VIEWPORT_INSET : y;
         const fixedContainer = this._container.offsetParent;
-        if (fixedContainer) {
-            const rect = fixedContainer.getBoundingClientRect();
-            left -= rect.left;
-            top -= rect.top;
-        } else if (isMobile) {
-            left += visualViewport?.offsetLeft ?? 0;
-            top += visualViewport?.offsetTop ?? 0;
-        }
-
-        this._container.style.left = `${left}px`;
-        this._container.style.top = `${top}px`;
+        const rect = fixedContainer?.getBoundingClientRect();
+        this._container.style.left = `${x - (rect?.left ?? 0)}px`;
+        this._container.style.top = `${y - (rect?.top ?? 0)}px`;
         this._container.style.zIndex = '1000';
     }
 
@@ -946,28 +932,9 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._syncMobileSelectionVisuals();
     }
 
-    private _syncMobileSelectionVisuals(): void {
-        if (!this._contextService.getContextValue(MOBILE_UI_MODE)) {
-            return;
-        }
+    protected _syncMobileSelectionVisuals(): void {}
 
-        const activeRange = this._getActiveRangeInstance();
-        for (const range of this._rangeList) {
-            range.setCaretVisible(this.isEditing && range === activeRange);
-            range.hideMobileHandles();
-        }
-
-        if (!activeRange || activeRange.collapsed || this.isEditing) {
-            return;
-        }
-
-        activeRange.showMobileHandles(
-            this._mobileSelectionHandleColor,
-            (handle, event) => this._startMobileSelectionHandleDrag(handle, event)
-        );
-    }
-
-    private _startMobileSelectionHandleDrag(
+    protected _startMobileSelectionHandleDrag(
         handle: TextRangeHandleType,
         event: IPointerEvent | IMouseEvent
     ): void {
@@ -1100,7 +1067,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         return serializeTextRange(activeRange);
     }
 
-    private _getActiveRangeInstance() {
+    protected _getActiveRangeInstance() {
         return this._rangeList.find((range) => range.isActive());
     }
 
@@ -1146,31 +1113,9 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         );
     }
 
-    private _initMobileKeyboardViewport(): void {
-        if (
-            !this._contextService.getContextValue(MOBILE_UI_MODE) ||
-            typeof window === 'undefined' ||
-            !window.visualViewport
-        ) {
-            return;
-        }
+    protected _initMobileKeyboardViewport(): void {}
 
-        const visualViewport = window.visualViewport;
-        this._mobileViewportBaselineHeight = visualViewport.height;
-        this._mobileViewportBaselineBottom = visualViewport.offsetTop + visualViewport.height;
-        this._mobileViewportBaselineWidth = visualViewport.width;
-        const update = () => this._updateMobileKeyboardState(visualViewport);
-        visualViewport.addEventListener('resize', update);
-        visualViewport.addEventListener('scroll', update);
-        this.disposeWithMe({
-            dispose: () => {
-                visualViewport.removeEventListener('resize', update);
-                visualViewport.removeEventListener('scroll', update);
-            },
-        });
-    }
-
-    private _updateMobileKeyboardState(visualViewport: VisualViewport): void {
+    protected _updateMobileKeyboardState(visualViewport: VisualViewport): void {
         const visibleBottom = visualViewport.offsetTop + visualViewport.height;
         if (Math.abs(this._mobileViewportBaselineWidth - visualViewport.width) > 1) {
             this._mobileViewportBaselineHeight = visualViewport.height;
@@ -1249,7 +1194,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         `;
     }
 
-    private _ensureHostContainer(): void {
+    protected _ensureHostContainer(): void {
         // Prefer the Univer root container (often inside a Portal) so focus stays within the modal subtree.
         const host = this._layoutService.rootContainerElement;
         if (host?.isConnected) {
@@ -1491,13 +1436,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         return getCanvasOffsetByEngine(engine);
     }
 
-    private _updateInputPosition({ forceFocus = false, preserveFocus = false } = {}) {
-        if (!forceFocus && this._contextService.getContextValue(MOBILE_UI_MODE) && !isInternalEditorID(this._context.unitId)) {
-            // Formatting refreshes the selection, but only a canvas gesture or the
-            // keyboard button should open the mobile document's input again.
-            this._positionInput(0, 0);
-            return;
-        }
+    protected _updateInputPosition({ forceFocus = false, preserveFocus = false } = {}) {
         const activeRangeInstance = this._getActiveRangeInstance();
         const anchor = activeRangeInstance?.getAnchor();
 
@@ -1835,14 +1774,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
                 if (this._shouldSuppressHostHiddenEditorEvent(e)) {
                     return;
                 }
-                if (this._contextService.getContextValue(MOBILE_UI_MODE) && this.isEditing) {
-                    this._pendingMobileBlurEvent = e;
-                    return;
-                }
-                this._setEditing(false);
-                this._eventHandle(e, (config) => {
-                    this._onBlur$.next(config);
-                });
+                this._handleInputBlur(e);
             })
         );
     }
@@ -1853,6 +1785,13 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
             config.activeRange = this._getActiveRange();
             config.rangeList = this._getAllTextRanges();
         }
+    }
+
+    protected _handleInputBlur(event: Event): void {
+        this._setEditing(false);
+        this._eventHandle(event, (config) => {
+            this._onBlur$.next(config);
+        });
     }
 
     private _eventHandle(

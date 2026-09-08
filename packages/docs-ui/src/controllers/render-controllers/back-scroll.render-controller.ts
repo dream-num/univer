@@ -15,10 +15,9 @@
  */
 
 import type { DocumentDataModel, ITextRangeParam, Nullable } from '@univerjs/core';
-import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, IContextService, Inject, RxDisposable } from '@univerjs/core';
+import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, Inject, RxDisposable } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import * as EngineRender from '@univerjs/engine-render';
-import { MOBILE_UI_MODE } from '@univerjs/ui';
 import { takeUntil } from 'rxjs';
 import { VIEWPORT_KEY } from '../../basics/docs-view-key';
 import { DocPageLayoutService } from '../../services/doc-page-layout.service';
@@ -28,34 +27,30 @@ import { DocSelectionRenderService } from '../../services/selection/doc-selectio
 import { getAnchorBounding } from '../../services/selection/text-range';
 
 const ANCHOR_WIDTH = 1.5;
-const MOBILE_CARET_MARGIN = 32;
-const MOBILE_TOOLBAR_HEIGHT = 48;
-const MOBILE_CARET_VIEWPORT_RATIO = 0.4;
 // Large imported documents can take tens of seconds to publish an offset's
 // aggregate page. The request remains cancellable by real user ownership.
 const MAX_SELECTION_SCROLL_RETRY_FRAMES = 6000;
 
 export class DocBackScrollRenderController extends RxDisposable implements EngineRender.IRenderModule {
-    private _pendingSelectionScrollFrame: number | null = null;
+    protected _pendingSelectionScrollFrame: number | null = null;
     private _suppressedSelection: Nullable<ITextRangeParam> = null;
     private _pendingExplicitRange: Nullable<ITextRangeParam> = null;
     private _selectionBeforeExplicitRange: Nullable<ITextRangeParam> = null;
     private _scrollingToRange = false;
-    private _mobileKeyboardInset = 0;
+    protected _mobileKeyboardInset = 0;
 
     constructor(
-        private readonly _context: EngineRender.IRenderContext<DocumentDataModel>,
+        protected readonly _context: EngineRender.IRenderContext<DocumentDataModel>,
         @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService,
-        @Inject(DocSelectionRenderService) private readonly _docSelectionRenderService: DocSelectionRenderService,
+        @Inject(DocSelectionRenderService) protected readonly _docSelectionRenderService: DocSelectionRenderService,
         @IEditorService private readonly _editorService: IEditorService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
-        @Inject(DocPageLayoutService) private readonly _docPageLayoutService: DocPageLayoutService,
-        @IContextService private readonly _contextService: IContextService
+        @Inject(DocPageLayoutService) protected readonly _docPageLayoutService: DocPageLayoutService
     ) {
         super();
 
         this._init();
-        this._initMobileKeyboardVisibility();
+        this._initViewportOcclusion();
     }
 
     private _init() {
@@ -145,27 +140,7 @@ export class DocBackScrollRenderController extends RxDisposable implements Engin
         this._pendingSelectionScrollFrame = null;
     }
 
-    private _initMobileKeyboardVisibility(): void {
-        if (!this._contextService.getContextValue(MOBILE_UI_MODE)) {
-            return;
-        }
-
-        this.disposeWithMe(this._docSelectionRenderService.mobileKeyboardState$.subscribe(({ visible, inset }) => {
-            const previousInset = this._mobileKeyboardInset;
-            this._mobileKeyboardInset = visible ? inset + MOBILE_TOOLBAR_HEIGHT : 0;
-            this._docPageLayoutService.setBottomReserve(
-                visible ? this._mobileKeyboardInset + MOBILE_CARET_MARGIN : 0
-            );
-            if (this._mobileKeyboardInset > previousInset) {
-                // Apply occlusion and caret scrolling before the same viewport change is painted.
-                if (this._pendingSelectionScrollFrame != null && typeof cancelAnimationFrame !== 'undefined') {
-                    cancelAnimationFrame(this._pendingSelectionScrollFrame);
-                    this._pendingSelectionScrollFrame = null;
-                }
-                this._scrollToSelection();
-            }
-        }));
-    }
+    protected _initViewportOcclusion(): void {}
 
     private _scheduleScrollToSelection(): void {
         if (typeof requestAnimationFrame === 'undefined') {
@@ -388,25 +363,8 @@ export class DocBackScrollRenderController extends RxDisposable implements Engin
         let offsetX = 0;
 
         const editorRenderConfig = this._editorService.getEditorRenderConfig(unitId);
-        const isMobile = this._contextService.getContextValue(MOBILE_UI_MODE);
-        const safeScaleY = isMobile
-            ? Math.max(scene.getAncestorScale().scaleY, 0.01)
-            : 1;
         const delta = editorRenderConfig ? editorRenderConfig.backScrollOffset ?? 0 : 100;
-        const visibleBoundBottom = isMobile
-            ? boundBottom - this._mobileKeyboardInset / safeScaleY
-            : boundBottom;
-
-        if (isMobile) {
-            if (top < boundTop || top + height > visibleBoundBottom) {
-                const targetOffset = Math.max(0, visibleBoundBottom - boundTop - height) * MOBILE_CARET_VIEWPORT_RATIO;
-                offsetY = top - boundTop - targetOffset;
-            }
-        } else if (top < boundTop) {
-            offsetY = top - boundTop - delta;
-        } else if (top > visibleBoundBottom - height) {
-            offsetY = top - visibleBoundBottom + height + delta;
-        }
+        offsetY = this._getVerticalScrollDelta(top, height, boundTop, boundBottom, delta);
 
         if (left < boundLeft) {
             offsetX = left - boundLeft;
@@ -422,8 +380,18 @@ export class DocBackScrollRenderController extends RxDisposable implements Engin
         viewportMain.scrollByBarDeltaValue(config);
     }
 
+    protected _getVerticalScrollDelta(top: number, height: number, boundTop: number, boundBottom: number, delta: number): number {
+        if (top < boundTop) {
+            return top - boundTop - delta;
+        }
+        if (top > boundBottom - height) {
+            return top - boundBottom + height + delta;
+        }
+        return 0;
+    }
+
     // Let the selection show on the current screen.
-    private _scrollToSelection() {
+    protected _scrollToSelection() {
         const activeTextRange = this._textSelectionManagerService.getActiveTextRange();
         if (activeTextRange == null) {
             return;

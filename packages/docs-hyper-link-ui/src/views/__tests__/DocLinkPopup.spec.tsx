@@ -19,7 +19,6 @@ import type { Root } from 'react-dom/client';
 import {
     CustomRangeType,
     ICommandService,
-    IContextService,
     IPermissionService,
     IUniverInstanceService,
     LocaleService,
@@ -32,7 +31,7 @@ import { DocSelectionManagerService, DocStateEmitService, RichTextEditingMutatio
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { UnitAction } from '@univerjs/protocol';
-import { IDialogService, IMessageService, MOBILE_UI_MODE, RediContext } from '@univerjs/ui';
+import { IDialogService, IMessageService, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { of } from 'rxjs';
@@ -104,7 +103,6 @@ function createDocData(): IDocumentData {
 function createPopupTestBed() {
     const univer = new Univer();
     const injector = univer.__getInjector();
-    injector.get(IContextService).setContextValue(MOBILE_UI_MODE, false);
 
     injector.add([DocSelectionManagerService]);
     injector.add([DocStateEmitService]);

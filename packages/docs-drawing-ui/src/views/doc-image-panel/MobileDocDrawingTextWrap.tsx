@@ -16,11 +16,14 @@
 
 import type { IDocDrawingBase } from '@univerjs/core';
 import type { LocaleKey } from '../../locale/types';
+import type { IDocDrawingTextWrapProps } from './DocDrawingTextWrap';
 import { LocaleService, WrapTextType } from '@univerjs/core';
 import { InputNumber, MobileActionRow } from '@univerjs/design';
 import { TextWrappingStyle } from '@univerjs/docs-drawing';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { CheckMarkIcon } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
+import { useDocDrawingTextWrap } from './use-doc-drawing-text-wrap';
 
 const styles: { value: TextWrappingStyle; label: LocaleKey }[] = [
     { value: TextWrappingStyle.INLINE, label: 'docs-drawing-ui.image-text-wrap.inline' },
@@ -56,7 +59,7 @@ interface IMobileDocDrawingTextWrapProps {
     onDistanceChange: (value: number | null, direction: DistanceKey) => void;
 }
 
-export function MobileDocDrawingTextWrap(props: IMobileDocDrawingTextWrapProps) {
+function MobileDocDrawingTextWrapControls(props: IMobileDocDrawingTextWrapProps) {
     const localeService = useDependency(LocaleService);
 
     return (
@@ -122,4 +125,31 @@ export function MobileDocDrawingTextWrap(props: IMobileDocDrawingTextWrapProps) 
             )}
         </div>
     );
+}
+export function MobileDocDrawingTextWrap(props: IDocDrawingTextWrapProps) {
+    const renderManagerService = useDependency(IRenderManagerService);
+    const drawing = props.drawings[0];
+    return drawing && renderManagerService.getRenderUnitById(drawing.unitId)?.scene
+        ? <MobileDocDrawingTextWrapContent {...props} />
+        : null;
+}
+function MobileDocDrawingTextWrapContent(props: IDocDrawingTextWrapProps) {
+    const { showPanel, wrappingStyle, wrapText, distToText, disableWrapText, disableDistTB, disableDistLR, handleWrappingStyleChange, handleWrapTextChange, handleDistToTextChange, MIN_MARGIN, MAX_MARGIN } = useDocDrawingTextWrap(props);
+    return showPanel
+        ? (
+            <MobileDocDrawingTextWrapControls
+                wrappingStyle={wrappingStyle}
+                wrapText={wrapText}
+                distToText={distToText}
+                minMargin={MIN_MARGIN}
+                maxMargin={MAX_MARGIN}
+                disableWrapText={disableWrapText}
+                disableDistTB={disableDistTB}
+                disableDistLR={disableDistLR}
+                onStyleChange={handleWrappingStyleChange}
+                onWrapTextChange={handleWrapTextChange}
+                onDistanceChange={handleDistToTextChange}
+            />
+        )
+        : null;
 }

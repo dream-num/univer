@@ -185,6 +185,7 @@ export { FontFamilyDropdown } from './views/font-family/FontFamilyDropdown';
 export type { IFontFamilyDropdownProps } from './views/font-family/FontFamilyDropdown';
 export { FONT_FAMILY_ITEM_COMPONENT, FontFamilyItem } from './views/font-family/FontFamilyItem';
 export type { IFontFamilyItemProps } from './views/font-family/FontFamilyItem';
+export { MobileFontFamilyDropdown } from './views/font-family/MobileFontFamilyDropdown';
 export { FontSize } from './views/font-size/FontSize';
 export { FONT_SIZE_COMPONENT, FONT_SIZE_LIST, HEADING_LIST } from './views/font-size/interface';
 export * from './views/hooks/index';
@@ -192,11 +193,11 @@ export { preventBrowserZoomInContainers } from './views/hooks/prevent-browser-zo
 export * from './views/index';
 export { MobileMenu } from './views/menu/mobile/MobileMenu';
 export { MobileKeyboardInsetContext } from './views/mobile-workbench/mobile-keyboard-inset-context';
-export type { INotificationOptions } from './views/notification/Notification';
-export { ObjectPermissionButton, openObjectPermissionDialog } from './views/object-permission/ObjectPermissionButton';
-export type { IObjectPermissionButtonProps } from './views/object-permission/ObjectPermissionButton';
-export { ObjectPermissionPanelButton, openObjectPermissionPanel } from './views/object-permission/ObjectPermissionPanel';
-
 export { getMobileCanvasPanDelta, useMobileCanvasPanel, useMobileCanvasViewport } from './views/mobile-workbench/MobileCanvasLayout';
 export type { MobilePanelLayout } from './views/mobile-workbench/MobileCanvasLayout';
+export type { INotificationOptions } from './views/notification/Notification';
+export { ObjectPermissionButton, openObjectPermissionDialog } from './views/object-permission/ObjectPermissionButton';
+
+export type { IObjectPermissionButtonProps } from './views/object-permission/ObjectPermissionButton';
+export { ObjectPermissionPanelButton, openObjectPermissionPanel } from './views/object-permission/ObjectPermissionPanel';
 export { ProgressBar } from './views/progress-bar/ProgressBar';

@@ -15,7 +15,7 @@
  */
 
 import { Disposable, ICommandService, Inject, Injector } from '@univerjs/core';
-import { BuiltInUIPart, connectInjector, IMenuManagerService, IUIPartsService } from '@univerjs/ui';
+import { IMenuManagerService, IUIPartsService } from '@univerjs/ui';
 import {
     SetDrawingAlignBottomOperation,
     SetDrawingAlignCenterOperation,
@@ -38,20 +38,21 @@ import { CancelDrawingGroupOperation, SetDrawingGroupOperation } from '../comman
 import { AutoImageCropOperation, CloseImageCropOperation, OpenImageCropOperation } from '../commands/operations/image-crop.operation';
 import { ImageResetSizeOperation } from '../commands/operations/image-reset-size.operation';
 import { menuSchema } from '../menu/schema';
-import { MobileCropActions } from '../views/crop/MobileCropActions';
 
 export class DrawingUIController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
-        @IUIPartsService uiPartsService: IUIPartsService,
-        @Inject(Injector) injector: Injector
+        @IUIPartsService protected readonly _uiPartsService: IUIPartsService,
+        @Inject(Injector) protected readonly _injector: Injector
     ) {
         super();
 
         this._init();
-        this.disposeWithMe(uiPartsService.registerComponent(BuiltInUIPart.CONTENT, () => connectInjector(MobileCropActions, injector)));
+        this._initUiParts();
     }
+
+    protected _initUiParts(): void {}
 
     private _init(): void {
         this._initMenus();

@@ -44,8 +44,8 @@ import {
     PageLayoutType,
     Vector2,
 } from '@univerjs/engine-render';
-import { ContextMenuPosition, IContextMenuService, MOBILE_UI_MODE } from '@univerjs/ui';
-import { filter, fromEvent, take } from 'rxjs';
+import { ContextMenuPosition, IContextMenuService } from '@univerjs/ui';
+import { filter, take } from 'rxjs';
 import { neoGetDocObject } from '../../basics/component-tools';
 import { VIEWPORT_KEY } from '../../basics/docs-view-key';
 import { findFirstCursorOffset } from '../../basics/selection';
@@ -78,11 +78,11 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
     private _initialSelectionReady = false;
 
     constructor(
-        private readonly _context: IRenderContext<DocumentDataModel>,
+        protected readonly _context: IRenderContext<DocumentDataModel>,
         @ICommandService private readonly _commandService: ICommandService,
-        @IEditorService private readonly _editorService: IEditorService,
-        @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService,
-        @Inject(DocSelectionRenderService) private readonly _docSelectionRenderService: DocSelectionRenderService,
+        @IEditorService protected readonly _editorService: IEditorService,
+        @IUniverInstanceService protected readonly _instanceSrv: IUniverInstanceService,
+        @Inject(DocSelectionRenderService) protected readonly _docSelectionRenderService: DocSelectionRenderService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService,
         @IContextService private readonly _contextService: IContextService,
@@ -154,38 +154,9 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
         );
     }
 
-    private _initialMain(unitId: string) {
+    protected _initialMain(unitId: string) {
         const docObject = neoGetDocObject(this._context);
         const { document, scene } = docObject;
-        // Internal editors (comments, links, etc.) are inputs, not documents with a reading mode.
-        const isMobile = this._contextService.getContextValue(MOBILE_UI_MODE) && !isInternalEditorID(unitId);
-        if (isMobile) {
-            this._docSelectionRenderService.exitMobileEditMode();
-        }
-        if (this._contextService.getContextValue(MOBILE_UI_MODE)) {
-            this.disposeWithMe(fromEvent<MouseEvent>(this._context.engine.getCanvasElement(), 'mousedown').subscribe((event) => {
-                // WebKit can dispatch a compatibility mousedown after the touch tap
-                // focuses the input. Keep its default action from focusing the canvas.
-                if (event.button === 0 && this._docSelectionRenderService.isFocusing) {
-                    event.preventDefault();
-                }
-            }));
-        }
-        if (isMobile) {
-            this.disposeWithMe(scene.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
-                if (evt.cancelable) {
-                    evt.preventDefault();
-                }
-                const { offsetX, offsetY } = this._getMobileDocumentOffset(evt);
-                this._startMobileGesture(
-                    evt,
-                    this._docSelectionRenderService.isMobileEditMode,
-                    { offsetX, offsetY },
-                    false
-                );
-                state.stopPropagation();
-            }));
-        }
         this.disposeWithMe(document.onPointerEnter$.subscribeEvent(() => {
             if (this._isEditorReadOnly(unitId)) {
                 return;
@@ -217,28 +188,12 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
                 this._instanceSrv.focusUnit(unitId);
             }
 
-            const { offsetX, offsetY } = isMobile ? this._getMobileDocumentOffset(evt) : evt;
+            const { offsetX, offsetY } = evt;
             this._syncEditArea(offsetX, offsetY);
 
-            if (isMobile) {
-                if (evt.cancelable) {
-                    evt.preventDefault();
-                }
-                this._startMobileGesture(
-                    evt,
-                    this._docSelectionRenderService.isMobileEditMode,
-                    { offsetX, offsetY }
-                );
-                if (evt.button !== 2) {
-                    state.stopPropagation();
-                }
-                return;
-            }
+            this._docSelectionRenderService.__onPointDown(evt, true);
 
-            const shouldFocusInput = !isMobile || this._docSelectionRenderService.isEditing;
-            this._docSelectionRenderService.__onPointDown(evt, shouldFocusInput);
-
-            if (shouldFocusInput && this._editorService.getEditor(unitId)) {
+            if (this._editorService.getEditor(unitId)) {
                 /**
                  * To accommodate focus switching between different editors.
                  * Since the editor for Univer is canvas-based,
@@ -276,11 +231,6 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
                 return;
             }
 
-            if (isMobile) {
-                // Mobile taps are handled on pointer up, including double-tap editing.
-                return;
-            }
-
             if (this._editorService.getEditor(unitId)) {
                 this._setEditorFocus(unitId);
             }
@@ -288,7 +238,7 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
         }));
 
         this.disposeWithMe(document.onTripleClick$.subscribeEvent((evt: IPointerEvent | IMouseEvent) => {
-            if (isMobile || this._isEditorReadOnly(unitId)) {
+            if (this._isEditorReadOnly(unitId)) {
                 return;
             }
             if (this._isEmbedInteractionEvent(evt, unitId)) {
@@ -309,7 +259,7 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
         super.dispose();
     }
 
-    private _syncEditArea(offsetX: number, offsetY: number): void {
+    protected _syncEditArea(offsetX: number, offsetY: number): void {
         const coord = this._getTransformCoordForDocumentOffset(offsetX, offsetY);
         if (coord == null) {
             return;
@@ -336,7 +286,7 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
         }
     }
 
-    private _startMobileGesture(
+    protected _startMobileGesture(
         evt: IPointerEvent | IMouseEvent,
         startedWhileEditing: boolean,
         documentOffset: { offsetX: number; offsetY: number },
@@ -545,7 +495,7 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
         this._docSelectionRenderService.setCursorManually(offsetX, offsetY, true, true, { strict: false });
     }
 
-    private _getMobileDocumentOffset(evt: IPointerEvent | IMouseEvent): { offsetX: number; offsetY: number } {
+    protected _getMobileDocumentOffset(evt: IPointerEvent | IMouseEvent): { offsetX: number; offsetY: number } {
         const engine = this._context.scene.getEngine();
         const canvas = engine?.getCanvasElement();
         if (!engine || !canvas || !Number.isFinite(evt.clientX) || !Number.isFinite(evt.clientY)) {
@@ -604,7 +554,7 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
         return documentTransform.clone().invert().applyPoint(originCoord);
     }
 
-    private _isEditorReadOnly(unitId: string) {
+    protected _isEditorReadOnly(unitId: string) {
         const editor = this._editorService.getEditor(unitId);
         if (!editor) {
             return false;
@@ -617,7 +567,7 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
         this._editorService.focus(unitId);
     }
 
-    private _isEmbedInteractionEvent(evt: IPointerEvent | IMouseEvent, unitId: string): boolean {
+    protected _isEmbedInteractionEvent(evt: IPointerEvent | IMouseEvent, unitId: string): boolean {
         if (isInternalEditorID(unitId)) {
             return false;
         }
@@ -670,6 +620,10 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
         );
     }
 
+    protected _focusInitialSelection(): void {
+        this._docSelectionRenderService.focus();
+    }
+
     private _skeletonListener() {
         // Change text selection runtime(skeleton, scene) and update text selection manager current selection.
         this.disposeWithMe(this._docSkeletonManagerService.currentSkeleton$.subscribe((skeleton) => {
@@ -688,9 +642,7 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
                 this._initialSelectionReady = true;
 
                 //TODO: @JOCS Only for docs. move to docs in the future.
-                if (!this._contextService.getContextValue(MOBILE_UI_MODE)) {
-                    this._docSelectionRenderService.focus();
-                }
+                this._focusInitialSelection();
                 const docDataModel = this._context.unit;
                 const snapshot = docDataModel.getSnapshot();
                 const offset = findFirstCursorOffset(snapshot);

@@ -17,14 +17,14 @@
 import type { IDrawingParam } from '@univerjs/core';
 import type { LocaleKey } from '../../locale/types';
 import { ArrangeTypeEnum, ICommandService, LocaleService } from '@univerjs/core';
-import { Button, clsx, ConfigContext } from '@univerjs/design';
+import { Button, clsx } from '@univerjs/design';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IconManager, useDependency, useObservable } from '@univerjs/ui';
-import { useContext } from 'react';
 import { SetDrawingArrangeOperation } from '../../commands/operations/drawing-arrange.operation';
 
 export interface IDrawingArrangeProps {
     arrangeShow: boolean;
+    actionClassName?: string;
     drawings: IDrawingParam[];
 }
 
@@ -35,7 +35,6 @@ export const DrawingArrange = (props: IDrawingArrangeProps) => {
     const drawingManagerService = useDependency(IDrawingManagerService);
     const commandService = useDependency(ICommandService);
     const iconManager = useDependency(IconManager);
-    const { mobile } = useContext(ConfigContext);
 
     const MoveUpIcon = iconManager.get('MoveUpIcon');
     const MoveDownIcon = iconManager.get('MoveDownIcon');
@@ -69,19 +68,19 @@ export const DrawingArrange = (props: IDrawingArrangeProps) => {
             </header>
 
             <div className="univer-grid univer-grid-cols-2 univer-gap-2">
-                <Button className={mobile ? 'univer-h-12 univer-w-full' : undefined} onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.forward); }}>
+                <Button className={props.actionClassName} onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.forward); }}>
                     <MoveUpIcon />
                     {localeService.t<LocaleKey>('drawing-ui.image-panel.arrange.forward')}
                 </Button>
-                <Button className={mobile ? 'univer-h-12 univer-w-full' : undefined} onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.backward); }}>
+                <Button className={props.actionClassName} onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.backward); }}>
                     <MoveDownIcon />
                     {localeService.t<LocaleKey>('drawing-ui.image-panel.arrange.backward')}
                 </Button>
-                <Button className={mobile ? 'univer-h-12 univer-w-full' : undefined} onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.front); }}>
+                <Button className={props.actionClassName} onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.front); }}>
                     <TopmostIcon />
                     {localeService.t<LocaleKey>('drawing-ui.image-panel.arrange.front')}
                 </Button>
-                <Button className={mobile ? 'univer-h-12 univer-w-full' : undefined} onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.back); }}>
+                <Button className={props.actionClassName} onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.back); }}>
                     <BottomIcon />
                     {localeService.t<LocaleKey>('drawing-ui.image-panel.arrange.back')}
                 </Button>

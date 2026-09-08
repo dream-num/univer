@@ -18,7 +18,7 @@
 
 import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
 import type { IPointerEvent } from '@univerjs/engine-render';
-import { DocumentFlavor, getDocsEmptySnapshot, ICommandService, IContextService, IUniverInstanceService, LocaleType, RichTextBuilder, Univer, UniverInstanceType } from '@univerjs/core';
+import { DocumentFlavor, getDocsEmptySnapshot, ICommandService, IUniverInstanceService, LocaleType, RichTextBuilder, Univer, UniverInstanceType } from '@univerjs/core';
 import { DocLayoutExecutorService, DocSelectionManagerService, DocSkeletonManagerService, SetTextSelectionsOperation } from '@univerjs/docs';
 import {
     CanvasColorService,
@@ -33,16 +33,19 @@ import {
     ScrollBar,
     Viewport,
 } from '@univerjs/engine-render';
-import { DesktopLayoutService, ILayoutService, MOBILE_UI_MODE } from '@univerjs/ui';
+import { DesktopLayoutService, ILayoutService } from '@univerjs/ui';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DOCS_VIEW_KEY, VIEWPORT_KEY } from '../../../basics/docs-view-key';
 import { DocPageLayoutService } from '../../../services/doc-page-layout.service';
 import { DocViewScaleService } from '../../../services/doc-view-scale';
 import { EditorService, IEditorService } from '../../../services/editor/editor-manager.service';
+import { MobileDocSelectionRenderService } from '../../../services/mobile/doc-selection-render.service';
+import { MobileDocViewScaleService } from '../../../services/mobile/doc-view-scale';
 import { NodePositionConvertToCursor } from '../../../services/selection/convert-text-range';
 import { DocSelectionRenderService } from '../../../services/selection/doc-selection-render.service';
 import { getAnchorBounding } from '../../../services/selection/text-range';
 import { DocBackScrollRenderController } from '../back-scroll.render-controller';
+import { MobileDocBackScrollRenderController } from '../mobile/back-scroll.render-controller';
 
 function createEditor() {
     const univer = new Univer();
@@ -294,7 +297,6 @@ function createRender(mobile = true, documentFlavor = DocumentFlavor.MODERN, zoo
     injector.add([IEditorService, { useClass: EditorService }]);
     injector.add([DocLayoutExecutorService]);
     injector.add([DocSelectionManagerService]);
-    injector.get(IContextService).setContextValue(MOBILE_UI_MODE, mobile);
 
     const data = getDocsEmptySnapshot('keyboard-doc', LocaleType.EN_US, 'Keyboard', documentFlavor);
     data.settings = { ...data.settings, zoomRatio };
@@ -327,9 +329,9 @@ function createRender(mobile = true, documentFlavor = DocumentFlavor.MODERN, zoo
     cleanup.push(() => render.dispose());
     render.addRenderDependencies([
         [DocSkeletonManagerService],
-        [DocViewScaleService],
+        [DocViewScaleService, { useClass: mobile ? MobileDocViewScaleService : DocViewScaleService }],
         [DocPageLayoutService],
-        [DocSelectionRenderService],
+        [DocSelectionRenderService, { useClass: mobile ? MobileDocSelectionRenderService : DocSelectionRenderService }],
     ]);
     const skeleton = render.with(DocSkeletonManagerService).getSkeleton();
     const documents = new Documents(DOCS_VIEW_KEY.MAIN, skeleton);
@@ -342,7 +344,7 @@ function createRender(mobile = true, documentFlavor = DocumentFlavor.MODERN, zoo
     const scrollbar = new ScrollBar(viewport);
     cleanup.push(() => scrollbar.dispose());
     render.with(DocPageLayoutService).calculatePagePosition();
-    render.addRenderDependencies([[DocBackScrollRenderController]]);
+    render.addRenderDependencies([[DocBackScrollRenderController, { useClass: mobile ? MobileDocBackScrollRenderController : DocBackScrollRenderController }]]);
     render.with(DocBackScrollRenderController);
     const selection = render.with(DocSelectionRenderService);
     selection.enterMobileEditMode();

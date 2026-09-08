@@ -29,7 +29,6 @@ import {
     HorizontalLineCommand,
     InsertHorizontalLineBellowCommand,
 } from '../commands/commands/doc-horizontal-line.command';
-import { DocSelectAllCommand, DocSelectWordCommand } from '../commands/commands/doc-select-all.command';
 import {
     ResetInlineFormatTextBackgroundColorCommand,
     ResetInlineFormatTextColorCommand,
@@ -96,8 +95,6 @@ import {
     ParagraphSettingMenuFactory,
     PasteMenuFactory,
     SectionSettingMenuFactory,
-    SelectAllMenuFactory,
-    SelectWordMenuFactory,
     TABLE_DELETE_MENU_ID,
     TABLE_INSERT_MENU_ID,
     TableDeleteMenuItemFactory,
@@ -411,14 +408,6 @@ export const menuSchema: MenuSchemaType = {
                 order: 2,
                 menuItemFactory: PasteMenuFactory,
             },
-            [DocSelectWordCommand.id]: {
-                order: 3,
-                menuItemFactory: SelectWordMenuFactory,
-            },
-            [DocSelectAllCommand.id]: {
-                order: 4,
-                menuItemFactory: SelectAllMenuFactory,
-            },
         } as MenuSchemaType),
         [ContextMenuGroup.FORMAT]: {
             [DeleteLeftCommand.id]: {
@@ -470,23 +459,6 @@ export const menuSchema: MenuSchemaType = {
                     order: 3,
                     menuItemFactory: DeleteTableMenuItemFactory,
                 },
-            },
-        },
-    },
-    [ContextMenuPosition.DOC_CARET]: {
-        [ContextMenuGroup.QUICK]: {
-            quickLayout: 'tile',
-            [DocPasteCommand.id]: {
-                order: 0,
-                menuItemFactory: PasteMenuFactory,
-            },
-            [DocSelectWordCommand.id]: {
-                order: 1,
-                menuItemFactory: SelectWordMenuFactory,
-            },
-            [DocSelectAllCommand.id]: {
-                order: 2,
-                menuItemFactory: SelectAllMenuFactory,
             },
         },
     },

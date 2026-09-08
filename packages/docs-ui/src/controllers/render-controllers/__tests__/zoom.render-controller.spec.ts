@@ -16,9 +16,9 @@
 
 import { DocumentFlavor } from '@univerjs/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { resolveMobileDocPinchZoomRatio } from '../mobile/doc-pinch-zoom';
 import {
     DocZoomRenderController,
-    resolveMobileDocPinchZoomRatio,
     shouldHandleDocWheelZoom,
 } from '../zoom.render-controller';
 

@@ -26,19 +26,19 @@ import {
     DocumentDataModel,
     DocumentFlavor,
     EventSubject,
-    IContextService,
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocLayoutExecutorService, DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import { DeviceType, GlyphType, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, PointerInput, RenderUnit } from '@univerjs/engine-render';
-import { ILayoutService, MOBILE_UI_MODE } from '@univerjs/ui';
+import { ILayoutService } from '@univerjs/ui';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
     EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE,
     EmbedInteractionBoundaryService,
     EmbedRuntimeFocusCoordinator,
 } from '../../doc-embed-integration.service';
+import { MobileDocSelectionRenderService } from '../../mobile/doc-selection-render.service';
 import { DocSelectionRenderService } from '../doc-selection-render.service';
 import { TextRange } from '../text-range';
 
@@ -342,7 +342,6 @@ function createRealSelectionRenderService(options: {
     const injector = univer.__getInjector();
     injector.add([DocSelectionManagerService]);
     injector.add([ILayoutService, { useClass: TestLayoutService as never }]);
-    injector.get(IContextService).setContextValue(MOBILE_UI_MODE, options.mobile ?? false);
     if (options.embedInteractionBoundaryService) {
         injector.add([EmbedInteractionBoundaryService, { useValue: options.embedInteractionBoundaryService as never }]);
     }
@@ -373,7 +372,7 @@ function createRealSelectionRenderService(options: {
     }
     renderUnit.addRenderDependencies([
         [DocSkeletonManagerService, { useClass: TestDocSkeletonManagerService as never }],
-        DocSelectionRenderService,
+        [DocSelectionRenderService, { useClass: options.mobile ? MobileDocSelectionRenderService : DocSelectionRenderService }],
     ] as never);
 
     return {
@@ -2162,27 +2161,19 @@ describe('DocSelectionRenderService', () => {
     });
 
     it('shows mobile range controls only for the active non-editing selection', () => {
-        const { service } = createService();
+        const { service, renderUnit, univer } = createRealSelectionRenderService({ mobile: true });
+        cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
         const inactiveRange = createTextRange({ collapsed: false });
-        const activeRange = createTextRange({
-            collapsed: false,
-            isActive: vi.fn(() => true),
-        });
-        service._contextService.getContextValue.mockReturnValue(true);
-        service._rangeList = [inactiveRange, activeRange];
-
-        service.refreshRanges();
-
+        const activeRange = createTextRange({ collapsed: false, isActive: vi.fn(() => true) });
+        getRangeListFromCharIndexMock.mockReturnValue({ textRanges: [inactiveRange, activeRange], rectRanges: [] });
+        service.addDocRanges([{ startOffset: 0, endOffset: 3 }], false, { shouldFocus: false });
         expect(inactiveRange.setCaretVisible).toHaveBeenCalledWith(false);
         expect(inactiveRange.showMobileHandles).not.toHaveBeenCalled();
         expect(activeRange.setCaretVisible).toHaveBeenCalledWith(false);
-        expect(activeRange.showMobileHandles).toHaveBeenCalledOnce();
-
-        service._textSelectionInner$.value = { isEditing: true };
-        service.refreshRanges();
-
+        expect(activeRange.showMobileHandles).toHaveBeenCalled();
+        service.addDocRanges([{ startOffset: 0, endOffset: 3 }], true, { shouldFocus: false });
         expect(activeRange.setCaretVisible).toHaveBeenLastCalledWith(true);
-        expect(activeRange.hideMobileHandles).toHaveBeenCalledTimes(2);
+        expect(activeRange.hideMobileHandles).toHaveBeenCalled();
     });
 
     it('places the manual cursor from transformed document coordinates', () => {

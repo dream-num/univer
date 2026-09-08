@@ -31,18 +31,19 @@ import { setDocumentPermissionValue } from '@univerjs/docs';
 import { DocDrawingService, IDocDrawingAdapterService, IDocDrawingService, RemoveDocDrawingCommand } from '@univerjs/docs-drawing';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import { COMPONENT_IMAGE_POPUP_MENU, OpenImageCropOperation } from '@univerjs/drawing-ui';
+import { COMPONENT_MOBILE_IMAGE_POPUP_MENU, OpenImageCropOperation } from '@univerjs/drawing-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { UnitAction } from '@univerjs/protocol';
-import { IMenuManagerService, MOBILE_UI_MODE } from '@univerjs/ui';
+import { IMenuManagerService } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 
 import { EditDocDrawingOperation } from '../../commands/operations/edit-doc-drawing.operation';
+import { MobileDocDrawingPopupMenuController } from '../../controllers/mobile/drawing-popup-menu.controller';
 import { DocDrawingFloatingToolbarAdapterService } from '../../services/doc-drawing-floating-toolbar-adapter.service';
 import { DocDrawingPopupMenuController } from '../drawing-popup-menu.controller';
 
-function createControllerHarness(drawingType = DrawingTypeEnum.DRAWING_IMAGE) {
+function createControllerHarness(drawingType = DrawingTypeEnum.DRAWING_IMAGE, mobile = false) {
     const unitId = 'doc-1';
     const drawingId = 'drawing-1';
     const injector = new Injector();
@@ -139,7 +140,7 @@ function createControllerHarness(drawingType = DrawingTypeEnum.DRAWING_IMAGE) {
         } as never,
     }]);
     injector.add([DocDrawingFloatingToolbarAdapterService]);
-    injector.add([DocDrawingPopupMenuController]);
+    injector.add([DocDrawingPopupMenuController, { useClass: mobile ? MobileDocDrawingPopupMenuController : DocDrawingPopupMenuController }]);
 
     return {
         clearControl$,
@@ -207,8 +208,7 @@ describe('DocDrawingPopupMenuController', () => {
     });
 
     it('uses the mobile drawing menu for images and charts', () => {
-        const imageHarness = createControllerHarness();
-        imageHarness.contextService.setContextValue(MOBILE_UI_MODE, true);
+        const imageHarness = createControllerHarness(DrawingTypeEnum.DRAWING_IMAGE, true);
         const imageController = imageHarness.injector.get(DocDrawingPopupMenuController);
 
         try {
@@ -216,7 +216,7 @@ describe('DocDrawingPopupMenuController', () => {
             expect(imageHarness.attachPopupToObject).toHaveBeenCalledWith(
                 expect.anything(),
                 expect.objectContaining({
-                    componentKey: COMPONENT_IMAGE_POPUP_MENU,
+                    componentKey: COMPONENT_MOBILE_IMAGE_POPUP_MENU,
                     extraProps: expect.objectContaining({
                         variant: 'doc-floating-toolbar',
                         menuItems: [
@@ -233,8 +233,7 @@ describe('DocDrawingPopupMenuController', () => {
             imageHarness.injector.dispose();
         }
 
-        const chartHarness = createControllerHarness(DrawingTypeEnum.DRAWING_CHART);
-        chartHarness.contextService.setContextValue(MOBILE_UI_MODE, true);
+        const chartHarness = createControllerHarness(DrawingTypeEnum.DRAWING_CHART, true);
         const chartController = chartHarness.injector.get(DocDrawingPopupMenuController);
 
         try {
@@ -242,7 +241,7 @@ describe('DocDrawingPopupMenuController', () => {
             expect(chartHarness.attachPopupToObject).toHaveBeenCalledWith(
                 expect.anything(),
                 expect.objectContaining({
-                    componentKey: COMPONENT_IMAGE_POPUP_MENU,
+                    componentKey: COMPONENT_MOBILE_IMAGE_POPUP_MENU,
                     extraProps: expect.objectContaining({
                         variant: 'doc-chart-floating-toolbar',
                         menuItems: [

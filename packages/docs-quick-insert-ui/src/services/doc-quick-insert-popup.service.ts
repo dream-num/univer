@@ -126,12 +126,18 @@ export class DocQuickInsertPopupService extends Disposable {
         @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(ICommandService) private readonly _commandService: ICommandService,
         @Inject(IRenderManagerService) private readonly _renderManagerService: IRenderManagerService,
-        @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService,
-        @Inject(DocLayoutInteractionService) private readonly _docLayoutInteractionService: DocLayoutInteractionService
+        @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService
     ) {
         super();
 
         this.disposeWithMe(this._editPopup$);
+        this.disposeWithMe(this._isComposing$);
+        this.disposeWithMe(this._inputOffset$);
+        this.disposeWithMe(this._renderManagerService.disposed$.subscribe((unitId) => {
+            if (this.editPopup?.unitId === unitId) {
+                this.closePopup();
+            }
+        }));
 
         const getBodySlice = (start: number, end: number) => this._univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)?.getBody()?.dataStream.slice(start, end);
 
@@ -171,6 +177,16 @@ export class DocQuickInsertPopupService extends Disposable {
                 }
             })),
         ]).subscribe());
+    }
+
+    override dispose(): void {
+        if (this._disposed) {
+            return;
+        }
+        this.closePopup();
+        this._menuSelectedCallbacks.clear();
+        this._popups.clear();
+        super.dispose();
     }
 
     resolvePopup(keyword: string) {
@@ -306,6 +322,10 @@ export class DocQuickInsertPopupService extends Disposable {
     showPopup(options: { popup: IDocPopup; index: number; unitId: string }) {
         const { popup, index, unitId } = options;
         this.closePopup();
+        const render = this._renderManagerService.getRenderUnitById(unitId);
+        if (!render) {
+            return;
+        }
         const paragraphBound = this._getParagraphBound(unitId, index);
         if (!paragraphBound) {
             return;
@@ -314,7 +334,7 @@ export class DocQuickInsertPopupService extends Disposable {
         this._inputPlaceholderRenderRoot = this._createInputPlaceholderRenderRoot(() => this._mountInputPlaceholder(unitId, paragraphBound.firstLine));
         this._inputPlaceholderRenderRoot.mount();
 
-        const layoutInteraction = this._docLayoutInteractionService.beginInteraction();
+        const layoutInteraction = render.with(DocLayoutInteractionService).beginInteraction();
         const popupDisposable = this._docCanvasPopupManagerService.attachPopupToRect(
             paragraphBound.firstLine,
             {

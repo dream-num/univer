@@ -68,17 +68,18 @@ export class UniverDocsQuickInsertUIPlugin extends Plugin {
     }
 
     override onStarting(): void {
-        this._injector.add([ComponentsController]);
+        this._getDependencies().forEach((dependency) => this._injector.add(dependency));
         this._injector.get(ComponentsController);
-        const dependencies: Dependency[] = [
+        this._injector.get(DocQuickInsertUIController);
+    }
+
+    protected _getDependencies(): Dependency[] {
+        return [
+            [ComponentsController],
             [DocQuickInsertUIController],
             [DocQuickInsertTriggerController],
             [DocQuickInsertPopupService],
         ];
-
-        dependencies.forEach((dependency) => this._injector.add(dependency));
-
-        this._injector.get(DocQuickInsertUIController);
     }
 
     override onRendered(): void {

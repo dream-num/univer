@@ -16,10 +16,13 @@
 
 import type { IObjectPositionH, IObjectPositionV } from '@univerjs/core';
 import type { LocaleKey } from '../../locale/types';
-import { LocaleService } from '@univerjs/core';
+import type { IDocDrawingPositionProps } from './DocDrawingPosition';
+import { DocumentFlavor, LocaleService } from '@univerjs/core';
 import { InputNumber, MobileActionRow } from '@univerjs/design';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { CheckMarkIcon } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
+import { useDocDrawingPosition } from './use-doc-drawing-position';
 
 interface IMobileDocDrawingPositionProps {
     disabled: boolean;
@@ -38,7 +41,7 @@ interface IMobileDocDrawingPositionProps {
     onFollowTextMoveChange: (value: boolean) => void;
 }
 
-export function MobileDocDrawingPosition(props: IMobileDocDrawingPositionProps) {
+function MobileDocDrawingPositionControls(props: IMobileDocDrawingPositionProps) {
     const localeService = useDependency(LocaleService);
     const axes: {
         title: LocaleKey;
@@ -118,4 +121,34 @@ export function MobileDocDrawingPosition(props: IMobileDocDrawingPositionProps) 
             />
         </div>
     );
+}
+export function MobileDocDrawingPosition(props: IDocDrawingPositionProps) {
+    const renderManagerService = useDependency(IRenderManagerService);
+    const drawing = props.drawings[0];
+    return drawing && renderManagerService.getRenderUnitById(drawing.unitId)?.scene
+        ? <MobileDocDrawingPositionContent {...props} />
+        : null;
+}
+function MobileDocDrawingPositionContent(props: IDocDrawingPositionProps) {
+    const { showPanel, disabled, hPosition, vPosition, followTextMove, documentFlavor, HORIZONTAL_RELATIVE_FROM, VERTICAL_RELATIVE_FROM, handlePositionChange, handleHorizontalRelativeFromChange, handleVerticalRelativeFromChange, handleFollowTextMoveCheck, MIN_OFFSET, MAX_OFFSET } = useDocDrawingPosition(props);
+    return showPanel
+        ? (
+            <MobileDocDrawingPositionControls
+                disabled={disabled}
+                followTextMove={followTextMove}
+                disableFollowTextMove={documentFlavor === DocumentFlavor.MODERN}
+                hPosition={hPosition}
+                vPosition={vPosition}
+                horizontalOptions={HORIZONTAL_RELATIVE_FROM}
+                verticalOptions={VERTICAL_RELATIVE_FROM}
+                minOffset={MIN_OFFSET}
+                maxOffset={MAX_OFFSET}
+                onHorizontalOffsetChange={(posOffset) => handlePositionChange('positionH', { ...hPosition, posOffset })}
+                onVerticalOffsetChange={(posOffset) => handlePositionChange('positionV', { ...vPosition, posOffset })}
+                onHorizontalReferenceChange={handleHorizontalRelativeFromChange}
+                onVerticalReferenceChange={handleVerticalRelativeFromChange}
+                onFollowTextMoveChange={handleFollowTextMoveCheck}
+            />
+        )
+        : null;
 }

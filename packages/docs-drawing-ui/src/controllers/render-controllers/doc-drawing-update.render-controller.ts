@@ -61,7 +61,7 @@ import {
     IDrawingManagerService,
 } from '@univerjs/drawing';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
-import { ILocalFileService, IMessageService, MOBILE_UI_MODE } from '@univerjs/ui';
+import { ILocalFileService, IMessageService } from '@univerjs/ui';
 import { debounceTime } from 'rxjs';
 import { GroupDocDrawingCommand } from '../../commands/commands/group-doc-drawing.command';
 import { UngroupDocDrawingCommand } from '../../commands/commands/ungroup-doc-drawing.command';
@@ -389,12 +389,19 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
         return { scene, transformer, docsLeft, docsTop };
     }
 
+    protected _getTransformerInteractionOptions(): ITransformerConfig {
+        return { moveOnlyWhenSelected: false };
+    }
+
+    protected _isDocumentInteractionFocusing(unitId: string): boolean {
+        return this._docSelectionRenderService.isFocusing
+            || this._drawingManagerService.getFocusDrawings().some((drawing) => drawing.unitId === unitId);
+    }
+
     private _transformDrawingListener() {
         const res = this._getCurrentSceneAndTransformer();
         if (res && res.transformer) {
-            res.transformer.resetProps({
-                moveOnlyWhenSelected: this._contextService.getContextValue(MOBILE_UI_MODE),
-            });
+            res.transformer.resetProps(this._getTransformerInteractionOptions());
             this.disposeWithMe(res.transformer.changeEnd$.pipe(debounceTime(30)).subscribe(() => {
                 this._docSelectionManagerService.refreshSelection();
             }));
@@ -458,9 +465,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
         const snapshot = docDataModel.getSnapshot();
         const { drawings } = collectDocDrawings(snapshot);
         const isEditBody = viewModel.getEditArea() === DocumentEditArea.BODY;
-        const isDocInteractionFocusing = this._contextService.getContextValue(MOBILE_UI_MODE)
-            || this._docSelectionRenderService.isFocusing
-            || this._drawingManagerService.getFocusDrawings().some((drawing) => drawing.unitId === unitId);
+        const isDocInteractionFocusing = this._isDocumentInteractionFocusing(unitId);
         const contextKey = `${viewModel.getEditArea()}:${isDocInteractionFocusing}`;
         const effectiveDrawingIds = drawingIds != null && contextKey === this._lastEditStatusContextKey
             ? drawingIds

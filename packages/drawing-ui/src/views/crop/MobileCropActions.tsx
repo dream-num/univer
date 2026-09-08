@@ -16,21 +16,19 @@
 
 import type { LocaleKey } from '../../locale/types';
 import { ICommandService, LocaleService } from '@univerjs/core';
-import { ConfigContext, MobileActionRow } from '@univerjs/design';
+import { MobileActionRow } from '@univerjs/design';
 import { CheckMarkIcon, CloseIcon } from '@univerjs/icons';
 import { useDependency, useObservable } from '@univerjs/ui';
-import { useContext } from 'react';
 import { CloseImageCropOperation } from '../../commands/operations/image-crop.operation';
 import { ImageCropperController } from '../../controllers/image-cropper.controller';
 
 export function MobileCropActions() {
-    const { mobile } = useContext(ConfigContext);
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const cropperController = useDependency(ImageCropperController);
     const cropping = useObservable(cropperController.cropping$, false);
 
-    if (!mobile || !cropping) {
+    if (!cropping) {
         return null;
     }
 

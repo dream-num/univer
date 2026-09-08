@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { GradientType, IGradientColorPickerProps, IGradientStop, IGradientValue } from './GradientColorPicker';
+import type { GradientType, IGradientColorPickerProps, IGradientStop } from './GradientColorPicker';
 import { DeleteIcon, IncreaseIcon } from '@univerjs/icons';
 import { useContext, useState } from 'react';
 import { clsx } from '../../helper/clsx';
 import { Button } from '../button/Button';
-import { ColorPicker } from '../color-picker/ColorPicker';
+import { MobileColorPicker } from '../color-picker/MobileColorPicker';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 import { InputNumber } from '../input-number/InputNumber';
 import { MobileActionRow } from '../mobile-action-row/MobileActionRow';
@@ -27,7 +27,7 @@ import { MobileActionRow } from '../mobile-action-row/MobileActionRow';
 const GRADIENT_TYPES: readonly GradientType[] = ['linear', 'radial', 'angular', 'diamond'];
 const NUMBER_CLASS = 'univer-w-full [&_input]:!univer-h-12 [&_input]:!univer-text-base';
 
-export function MobileGradientColorPicker({ value, onChange, types = GRADIENT_TYPES, className }: IGradientColorPickerProps & { value: IGradientValue }) {
+export function MobileGradientColorPicker({ value = { type: 'linear', stops: [{ color: '#ffffff', offset: 0 }, { color: '#000000', offset: 100 }], angle: 0 }, onChange, types = GRADIENT_TYPES, className }: IGradientColorPickerProps) {
     const { locale } = useContext(ConfigContext);
     const [selectedIndex, setSelectedIndex] = useState(0);
     const index = Math.min(selectedIndex, Math.max(0, value.stops.length - 1));
@@ -110,7 +110,7 @@ export function MobileGradientColorPicker({ value, onChange, types = GRADIENT_TY
                             <InputNumber className={NUMBER_CLASS} controls={false} value={Math.round((1 - (selectedStop.opacity ?? 1)) * 100)} min={0} max={100} onChange={(transparency) => updateStop({ opacity: 1 - (transparency ?? 0) / 100 })} />
                         </label>
                     </div>
-                    <ColorPicker value={selectedStop.color} onChange={(color) => updateStop({ color })} />
+                    <MobileColorPicker value={selectedStop.color} onChange={(color) => updateStop({ color })} />
                 </>
             )}
         </div>

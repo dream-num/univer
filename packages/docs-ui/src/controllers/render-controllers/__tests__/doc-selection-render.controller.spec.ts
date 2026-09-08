@@ -18,7 +18,6 @@
 
 import type { IDocumentData } from '@univerjs/core';
 import type { RenderUnit } from '@univerjs/engine-render';
-import type { EmbedInteractionBoundaryService } from '../../../services/doc-embed-integration.service';
 import {
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     DocumentFlavor,
@@ -45,7 +44,7 @@ import {
     RenderManagerService,
     Viewport,
 } from '@univerjs/engine-render';
-import { CanvasPopupService, ContextMenuPosition, DesktopLayoutService, ICanvasPopupService, IContextMenuService, ILayoutService, MOBILE_UI_MODE } from '@univerjs/ui';
+import { CanvasPopupService, ContextMenuPosition, ContextMenuService, DesktopLayoutService, ICanvasPopupService, IContextMenuService, ILayoutService } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { VIEWPORT_KEY } from '../../../basics/docs-view-key';
@@ -56,11 +55,12 @@ import {
     IDocEmbedInteractionBoundaryService,
     IDocEmbedRuntimeFocusCoordinator,
 } from '../../../services/doc-embed-integration.service';
-import { EditorService, IEditorService } from '../../../services/editor/editor-manager.service';
 import { DocMobileElementMenuService } from '../../../services/doc-mobile-element-menu.service';
 import { DocCanvasPopManagerService } from '../../../services/doc-popup-manager.service';
+import { EditorService, IEditorService } from '../../../services/editor/editor-manager.service';
 import { DocSelectionRenderService } from '../../../services/selection/doc-selection-render.service';
 import { DocSelectionRenderController } from '../doc-selection-render.controller';
+import { MobileDocSelectionRenderController } from '../mobile/doc-selection-render.controller';
 
 const neoGetDocObjectMock = vi.hoisted(() => vi.fn());
 const findFirstCursorOffsetMock = vi.hoisted(() => vi.fn<(snapshot: IDocumentData) => number>(() => 3));
@@ -225,7 +225,6 @@ function createController(options: { readonly?: boolean; hasEditor?: boolean; pr
     };
     const univer = new Univer();
     const injector = univer.__getInjector();
-    injector.get(IContextService).setContextValue(MOBILE_UI_MODE, options.mobile ?? false);
     injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
     injector.add([ICanvasPopupService, { useClass: CanvasPopupService }]);
     injector.add([DocCanvasPopManagerService]);
@@ -247,7 +246,7 @@ function createController(options: { readonly?: boolean; hasEditor?: boolean; pr
         } }],
         [DocSelectionManagerService, { useValue: docSelectionManagerService }],
         [IContextService, { useValue: {
-            getContextValue: vi.fn((key) => key === MOBILE_UI_MODE && (options.mobile ?? false)),
+            getContextValue: vi.fn(() => false),
         } }],
         [IContextMenuService, { useValue: contextMenuService }],
         [IDocEmbedInteractionBoundaryService, { useValue: embedInteractionBoundaryService }],
@@ -255,7 +254,7 @@ function createController(options: { readonly?: boolean; hasEditor?: boolean; pr
     if (options.embedRuntimeFocusCoordinator) {
         child.add([IDocEmbedRuntimeFocusCoordinator, { useValue: options.embedRuntimeFocusCoordinator }]);
     }
-    const controller = child.createInstance(DocSelectionRenderController, {
+    const controller = child.createInstance(options.mobile ? MobileDocSelectionRenderController : DocSelectionRenderController, {
         unitId: options.unitId ?? 'doc-1',
         unit: {
             getSnapshot: vi.fn(() => ({
@@ -293,6 +292,9 @@ function createController(options: { readonly?: boolean; hasEditor?: boolean; pr
         embedInteractionBoundaryService,
     };
 }
+
+const originalRequestAnimationFrame = globalThis.requestAnimationFrame;
+const originalCancelAnimationFrame = globalThis.cancelAnimationFrame;
 
 describe('DocSelectionRenderController', () => {
     it.each([
@@ -342,7 +344,8 @@ describe('DocSelectionRenderController', () => {
     afterEach(() => {
         vi.useRealTimers();
         vi.restoreAllMocks();
-        vi.unstubAllGlobals();
+        vi.stubGlobal('requestAnimationFrame', originalRequestAnimationFrame);
+        vi.stubGlobal('cancelAnimationFrame', originalCancelAnimationFrame);
         neoGetDocObjectMock.mockReset();
         findFirstCursorOffsetMock.mockClear();
     });
@@ -360,6 +363,10 @@ describe('DocSelectionRenderController', () => {
             const injector = univer.__getInjector();
             injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
             injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
+            injector.add([IContextMenuService, { useClass: ContextMenuService }]);
+            injector.add([ICanvasPopupService, { useClass: CanvasPopupService }]);
+            injector.add([DocCanvasPopManagerService]);
+            injector.add([DocMobileElementMenuService]);
             injector.add([DocLayoutExecutorService]);
             injector.add([DocSelectionManagerService]);
             injector.add([IEditorService, { useClass: EditorService }]);

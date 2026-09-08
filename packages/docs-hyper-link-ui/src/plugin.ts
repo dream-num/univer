@@ -64,18 +64,18 @@ export class UniverDocsHyperLinkUIPlugin extends Plugin {
     }
 
     override onStarting(): void {
-        this._injector.add([ComponentsController]);
+        this._getDependencies().forEach((dep) => this._injector.add(dep));
         this._injector.get(ComponentsController);
-        const deps: Dependency[] = [
+        this._injector.get(DocHyperLinkUIController);
+    }
+
+    protected _getDependencies(): Dependency[] {
+        return [
+            [ComponentsController],
             [DocHyperLinkPopupService],
             [DocHyperLinkUIController],
             [DocHyperLinkSelectionController],
         ];
-        deps.forEach((dep) => {
-            this._injector.add(dep);
-        });
-
-        this._injector.get(DocHyperLinkUIController);
     }
 
     override onReady(): void {
@@ -86,11 +86,12 @@ export class UniverDocsHyperLinkUIPlugin extends Plugin {
         this._initRenderModule();
     }
 
+    protected _getRenderModules(): Dependency[] {
+        return [[DocHyperLinkRenderController], [DocHyperLinkEventRenderController]];
+    }
+
     private _initRenderModule() {
-        ([
-            [DocHyperLinkRenderController],
-            [DocHyperLinkEventRenderController],
-        ] as Dependency[]).forEach((dep) => {
+        this._getRenderModules().forEach((dep) => {
             this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, dep);
         });
     }

@@ -24,6 +24,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '../dialog/DialogPrimitive';
+import { MobileOverlayContext } from './mobile-overlay-context';
 
 export function MobileDropdownSurface(props: {
     children: ReactNode;
@@ -33,7 +34,8 @@ export function MobileDropdownSurface(props: {
     onOpenChange: (open: boolean) => void;
 }) {
     const { children, content, open, disabled, onOpenChange } = props;
-    const { locale, mountContainer, mobileOverlay } = useContext(ConfigContext);
+    const { locale, mountContainer } = useContext(ConfigContext);
+    const mobileOverlay = useContext(MobileOverlayContext);
     const [surface, setSurface] = useState<HTMLDivElement | null>(null);
     const modal = mobileOverlay?.modal ?? true;
     useLayoutEffect(() => {

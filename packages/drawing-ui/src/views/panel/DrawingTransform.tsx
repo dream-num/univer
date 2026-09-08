@@ -16,6 +16,7 @@
 
 import type { IDrawingParam, Nullable } from '@univerjs/core';
 import type { IChangeObserverConfig, Scene } from '@univerjs/engine-render';
+import type { ComponentProps, ComponentType } from 'react';
 import type { LocaleKey } from '../../locale/types';
 import { debounce, LocaleService } from '@univerjs/core';
 import { Checkbox, clsx, InputNumber } from '@univerjs/design';
@@ -30,6 +31,8 @@ import { createDrawingTransformRotationChangeHandler, isDrawingTransformRotation
 
 export interface IDrawingTransformProps {
     transformShow: boolean;
+    InputNumberComponent?: ComponentType<ComponentProps<typeof InputNumber>>;
+    CheckboxComponent?: ComponentType<ComponentProps<typeof Checkbox>>;
     drawings: IDrawingParam[];
 }
 
@@ -53,7 +56,7 @@ function DrawingTransformContent(props: IDrawingTransformProps) {
     const drawingManagerService = useDependency(IDrawingManagerService);
     const renderManagerService = useDependency(IRenderManagerService);
 
-    const { drawings, transformShow } = props;
+    const { drawings, transformShow, InputNumberComponent = InputNumber, CheckboxComponent = Checkbox } = props;
 
     const drawingParam = drawings[0]!;
     const transform = drawingParam.transform!;
@@ -343,8 +346,11 @@ function DrawingTransformContent(props: IDrawingTransformProps) {
     });
 
     const handleLockRatioChange = (val: string | number | boolean) => {
-        setLockRatio(val as boolean);
-        transformer.keepRatio = val as boolean;
+        if (typeof val !== 'boolean') {
+            return;
+        }
+        setLockRatio(val);
+        transformer.keepRatio = val;
     };
 
     return (
@@ -370,7 +376,7 @@ function DrawingTransformContent(props: IDrawingTransformProps) {
             >
                 <div>
                     <span>{localeService.t<LocaleKey>('drawing-ui.image-panel.transform.width')}</span>
-                    <InputNumber
+                    <InputNumberComponent
                         precision={1}
                         value={width}
                         min={MIN_DRAWING_WIDTH_LIMIT}
@@ -379,7 +385,7 @@ function DrawingTransformContent(props: IDrawingTransformProps) {
                 </div>
                 <div>
                     <span>{localeService.t<LocaleKey>('drawing-ui.image-panel.transform.height')}</span>
-                    <InputNumber
+                    <InputNumberComponent
                         precision={1}
                         value={height}
                         min={MIN_DRAWING_HEIGHT_LIMIT}
@@ -389,7 +395,7 @@ function DrawingTransformContent(props: IDrawingTransformProps) {
                 <div>
                     <span>{localeService.t<LocaleKey>('drawing-ui.image-panel.transform.lock')}</span>
                     <div className="univer-text-center">
-                        <Checkbox checked={lockRatio} onChange={handleLockRatioChange} />
+                        <CheckboxComponent checked={lockRatio} onChange={handleLockRatioChange} />
                     </div>
                 </div>
             </div>
@@ -402,15 +408,15 @@ function DrawingTransformContent(props: IDrawingTransformProps) {
             >
                 <div>
                     <span>{localeService.t<LocaleKey>('drawing-ui.image-panel.transform.x')}</span>
-                    <InputNumber precision={1} value={xPosition} onChange={(val) => { handleXChange(val); }} />
+                    <InputNumberComponent precision={1} value={xPosition} onChange={(val) => { handleXChange(val); }} />
                 </div>
                 <div>
                     <span>{localeService.t<LocaleKey>('drawing-ui.image-panel.transform.y')}</span>
-                    <InputNumber precision={1} value={yPosition} onChange={(val) => { handleYChange(val); }} />
+                    <InputNumberComponent precision={1} value={yPosition} onChange={(val) => { handleYChange(val); }} />
                 </div>
                 <div>
                     <span>{localeService.t<LocaleKey>('drawing-ui.image-panel.transform.rotate')}</span>
-                    <InputNumber
+                    <InputNumberComponent
                         precision={1}
                         value={rotation}
                         min={RANGE_DRAWING_ROTATION_LIMIT[0]}

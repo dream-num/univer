@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import type { IDrawingParam } from '@univerjs/core';
 import type { LocaleKey } from '../../locale/types';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { MobileActionRow } from '@univerjs/design';
+import { IDrawingManagerService } from '@univerjs/drawing';
 import { DrawingCommonPanel } from '@univerjs/drawing-ui';
-import { useDependency } from '@univerjs/ui';
+import { useDependency, useObservable } from '@univerjs/ui';
 import { useState } from 'react';
 import { SidebarDocDrawingOperation } from '../../commands/operations/open-drawing-panel.operation';
-import { DocDrawingPosition } from './DocDrawingPosition';
-import { DocDrawingTextWrap } from './DocDrawingTextWrap';
+import { MobileDocDrawingPosition } from './MobileDocDrawingPosition';
+import { MobileDocDrawingTextWrap } from './MobileDocDrawingTextWrap';
 
 const tabs: { value: 'image' | 'wrap' | 'position'; label: LocaleKey }[] = [
     { value: 'image', label: 'docs-drawing-ui.title' },
@@ -31,7 +31,9 @@ const tabs: { value: 'image' | 'wrap' | 'position'; label: LocaleKey }[] = [
     { value: 'position', label: 'docs-drawing-ui.image-position.title' },
 ];
 
-export function MobileDocDrawingPanel({ drawings }: { drawings: IDrawingParam[] }) {
+export function MobileDocDrawingPanel() {
+    const drawingManagerService = useDependency(IDrawingManagerService);
+    const drawings = useObservable(drawingManagerService.focus$, drawingManagerService.getFocusDrawings()) ?? [];
     const localeService = useDependency(LocaleService);
     const commandService = useDependency(ICommandService);
     const [tab, setTab] = useState<'image' | 'wrap' | 'position'>('image');
@@ -64,8 +66,8 @@ export function MobileDocDrawingPanel({ drawings }: { drawings: IDrawingParam[] 
                         onCropStart={() => commandService.executeCommand(SidebarDocDrawingOperation.id, { value: 'close' })}
                     />
                 )}
-                {tab === 'wrap' && <DocDrawingTextWrap drawings={drawings} />}
-                {tab === 'position' && <DocDrawingPosition drawings={drawings} />}
+                {tab === 'wrap' && <MobileDocDrawingTextWrap drawings={drawings} />}
+                {tab === 'position' && <MobileDocDrawingPosition drawings={drawings} />}
             </div>
         </div>
     );

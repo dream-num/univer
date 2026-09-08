@@ -25,6 +25,9 @@ import { DrawingUpdateController } from './controllers/drawing-update.controller
 import { ImageCropperController } from './controllers/image-cropper.controller';
 import { ImageUpdateController } from './controllers/image-update.controller';
 import { MobileComponentsController } from './controllers/mobile/components.controller';
+import { MobileImageCropperController } from './controllers/mobile/image-cropper.controller';
+import { MobileImageUpdateController } from './controllers/mobile/image-update.controller';
+import { MobileDrawingUIController } from './controllers/mobile/ui.controller';
 import { DrawingUIController } from './controllers/ui.controller';
 import { DrawingImageClipService } from './services/drawing-image-clip.service';
 import { DrawingRenderService } from './services/drawing-render.service';
@@ -67,9 +70,9 @@ export class UniverDrawingMobileUIPlugin extends Plugin {
             [DrawingImageClipService],
             [DrawingRenderService],
             [DrawingUpdateController],
-            [DrawingUIController],
-            [ImageCropperController],
-            [ImageUpdateController],
+            [DrawingUIController, { useClass: MobileDrawingUIController }],
+            [ImageCropperController, { useClass: MobileImageCropperController }],
+            [ImageUpdateController, { useClass: MobileImageUpdateController }],
         ];
 
         dependencies.forEach((dependency) => this._injector.add(dependency));

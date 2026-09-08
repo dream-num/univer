@@ -29,9 +29,9 @@ import {
     PAPER_TYPES,
     UniverInstanceType,
 } from '@univerjs/core';
-import { borderClassName, clsx, ConfigContext, InputNumber, resetButtonClassName, Select } from '@univerjs/design';
+import { borderClassName, clsx, InputNumber, resetButtonClassName, Select } from '@univerjs/design';
 import { useDependency } from '@univerjs/ui';
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export interface IPageSettingsProps {
     onClose: () => void;
@@ -104,9 +104,8 @@ function SettingsLabel(props: { children: ReactNode; muted?: boolean }) {
     );
 }
 
-export function PageSettings(props: IConfirmChildrenProps) {
-    const { hooks } = props;
-    const { mobile } = useContext(ConfigContext);
+export function PageSettings(props: IConfirmChildrenProps & { InputNumberComponent?: typeof InputNumber; SelectComponent?: typeof Select }) {
+    const { hooks, InputNumberComponent = InputNumber, SelectComponent = Select } = props;
     const univerInstanceService = useDependency(IUniverInstanceService);
     const currentDoc = univerInstanceService.getCurrentUnitOfType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)!;
     const documentStyle = currentDoc.getDocumentStyle();
@@ -152,41 +151,12 @@ export function PageSettings(props: IConfirmChildrenProps) {
         }));
     };
 
-    // const handleModeChange = (mode: IPageSettings['mode']) => {
-    //     setSettings((prev) => ({ ...prev, mode }));
-    // };
-
     const handleModernWidthChange = (modernWidth: ModernDocumentWidthMode) => {
         setSettings((prev) => ({ ...prev, modernWidth }));
     };
 
     return (
         <div className="univer-flex univer-flex-col univer-gap-4">
-            {/* <div
-                className="
-                  univer-grid univer-grid-cols-2 univer-rounded-lg univer-bg-gray-100 univer-p-1
-                  dark:!univer-bg-gray-800
-                "
-            >
-                {([DocumentFlavor.MODERN, DocumentFlavor.TRADITIONAL] as const).map((mode) => (
-                    <button
-                        key={mode}
-                        type="button"
-                        className={clsx(`
-                          univer-h-8 univer-cursor-pointer univer-rounded-md univer-border-none univer-bg-transparent
-                          univer-text-sm univer-font-medium univer-text-gray-600 univer-transition-colors
-                          hover:univer-bg-gray-0 hover:univer-text-gray-900
-                          dark:!univer-text-gray-200
-                          dark:hover:!univer-bg-gray-700
-                        `, {
-                            'univer-bg-gray-0 univer-text-gray-900 univer-shadow-sm dark:!univer-bg-gray-700 dark:!univer-text-gray-0': settings.mode === mode,
-                        })}
-                        onClick={() => handleModeChange(mode)}
-                    >
-                        {localeService.t<LocaleKey>(mode === DocumentFlavor.MODERN ? 'docs-ui.page-settings.modern-mode' : 'docs-ui.page-settings.classic-mode')}
-                    </button>
-                ))}
-            </div> */}
 
             {settings.mode === DocumentFlavor.MODERN
                 ? (
@@ -223,8 +193,8 @@ export function PageSettings(props: IConfirmChildrenProps) {
                             <SettingsLabel>
                                 {localeService.t<LocaleKey>('docs-ui.page-settings.paper-size')}
                             </SettingsLabel>
-                            <Select
-                                className={mobile ? 'univer-h-12 univer-w-full' : 'univer-w-full'}
+                            <SelectComponent
+                                className="univer-w-full"
                                 value={settings.paperSize}
                                 onChange={handlePaperSizeChange}
                                 options={PAPER_TYPES.map((p) => ({
@@ -242,8 +212,8 @@ export function PageSettings(props: IConfirmChildrenProps) {
                                         <SettingsLabel muted>
                                             {localeService.t<LocaleKey>('docs-ui.page-settings.top')}
                                         </SettingsLabel>
-                                        <InputNumber
-                                            className={mobile ? 'univer-h-12 univer-w-full' : 'univer-w-full'}
+                                        <InputNumberComponent
+                                            className="univer-w-full"
                                             precision={2}
                                             min={0}
                                             max={settings.pageSize.height / 2}
@@ -255,8 +225,8 @@ export function PageSettings(props: IConfirmChildrenProps) {
                                         <SettingsLabel muted>
                                             {localeService.t<LocaleKey>('docs-ui.page-settings.bottom')}
                                         </SettingsLabel>
-                                        <InputNumber
-                                            className={mobile ? 'univer-h-12 univer-w-full' : 'univer-w-full'}
+                                        <InputNumberComponent
+                                            className="univer-w-full"
                                             precision={2}
                                             min={0}
                                             max={settings.pageSize.height / 2}
@@ -270,8 +240,8 @@ export function PageSettings(props: IConfirmChildrenProps) {
                                         <SettingsLabel muted>
                                             {localeService.t<LocaleKey>('docs-ui.page-settings.left')}
                                         </SettingsLabel>
-                                        <InputNumber
-                                            className={mobile ? 'univer-h-12 univer-w-full' : 'univer-w-full'}
+                                        <InputNumberComponent
+                                            className="univer-w-full"
                                             precision={2}
                                             min={0}
                                             max={settings.pageSize.width / 2}
@@ -283,8 +253,8 @@ export function PageSettings(props: IConfirmChildrenProps) {
                                         <SettingsLabel muted>
                                             {localeService.t<LocaleKey>('docs-ui.page-settings.right')}
                                         </SettingsLabel>
-                                        <InputNumber
-                                            className={mobile ? 'univer-h-12 univer-w-full' : 'univer-w-full'}
+                                        <InputNumberComponent
+                                            className="univer-w-full"
                                             precision={2}
                                             min={0}
                                             max={settings.pageSize.width / 2}

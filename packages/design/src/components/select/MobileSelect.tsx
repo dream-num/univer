@@ -93,9 +93,12 @@ export function MobileSelect(props: IMobileSelectProps) {
             disabled={disabled}
             onOpenChange={setOpen}
         >
-            <div
+            <button
+                type="button"
+                disabled={disabled}
+                aria-expanded={open}
                 data-u-comp="mobile-select"
-                className={clsx(selectClassName, {
+                className={clsx(selectClassName, '!univer-h-auto !univer-min-h-12 univer-text-left', {
                     'univer-border-primary-600 univer-outline-none univer-ring-2 univer-ring-primary-50 dark:!univer-ring-primary-900': open && !borderless,
                     'univer-border-transparent univer-bg-transparent': borderless,
                     'univer-cursor-not-allowed': disabled,
@@ -104,7 +107,7 @@ export function MobileSelect(props: IMobileSelectProps) {
             >
                 <div
                     className="
-                      univer-flex-1 univer-truncate univer-text-sm univer-text-gray-500
+                      univer-flex-1 univer-truncate univer-text-base univer-text-gray-500
                       dark:!univer-text-gray-0
                     "
                 >
@@ -116,7 +119,7 @@ export function MobileSelect(props: IMobileSelectProps) {
                       dark:!univer-text-gray-0
                     "
                 />
-            </div>
+            </button>
         </MobileDropdownMenu>
     );
 }

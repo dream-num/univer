@@ -19,10 +19,10 @@ import type { IRectRangeWithStyle } from '@univerjs/engine-render';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import type { Subscriber } from 'rxjs';
 import type { LocaleKey } from '../locale/types';
-import { DOC_RANGE_TYPE, DocumentFlavor, IContextService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { DOC_RANGE_TYPE, DocumentFlavor, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { UnitAction } from '@univerjs/protocol';
-import { getMenuHiddenObservable, MenuItemType, MOBILE_UI_MODE } from '@univerjs/ui';
+import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { combineLatest, map, Observable } from 'rxjs';
 import { DocCopyCommand, DocCutCommand, DocPasteCommand } from '../commands/commands/clipboard.command';
 import { DeleteLeftCommand } from '../commands/commands/doc-delete.command';
@@ -72,14 +72,6 @@ const getDisableOnExpandedObservable = (accessor: IAccessor) => {
         return () => observable.unsubscribe();
     });
 };
-
-function getMobileOnlyHiddenObservable(accessor: IAccessor): Observable<boolean> {
-    const contextService = accessor.get(IContextService);
-    return combineLatest([
-        getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
-        contextService.subscribeContextValue$(MOBILE_UI_MODE).pipe(map((mobile) => !mobile)),
-    ]).pipe(map((states) => states.some(Boolean)));
-}
 
 function combineMenuDisabled(...states: Observable<boolean>[]): Observable<boolean> {
     return combineLatest(states).pipe(map((values) => values.some(Boolean)));
@@ -199,7 +191,7 @@ export function SelectWordMenuFactory(accessor: IAccessor): IMenuButtonItem<Loca
         type: MenuItemType.BUTTON,
         title: 'docs-ui.rightClick.select',
         disabled$: getDisableOnExpandedObservable(accessor),
-        hidden$: getMobileOnlyHiddenObservable(accessor),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
 
@@ -208,7 +200,7 @@ export function SelectAllMenuFactory(accessor: IAccessor): IMenuButtonItem<Local
         id: DocSelectAllCommand.id,
         type: MenuItemType.BUTTON,
         title: 'docs-ui.rightClick.selectAll',
-        hidden$: getMobileOnlyHiddenObservable(accessor),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
 

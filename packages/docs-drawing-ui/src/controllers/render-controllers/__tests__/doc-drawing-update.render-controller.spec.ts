@@ -14,17 +14,21 @@
  * limitations under the License.
  */
 
-import { BooleanNumber, DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, ObjectRelativeFromH, ObjectRelativeFromV, PermissionService, PositionedObjectLayoutType } from '@univerjs/core';
-import { RichTextEditingMutation, setDocumentPermissionValue } from '@univerjs/docs';
-import { SetDocDrawingArrangeCommand, UpdateDrawingDocTransformCommand } from '@univerjs/docs-drawing';
-import { DocumentEditArea } from '@univerjs/engine-render';
+import { BooleanNumber, DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, IImageIoService, Injector, IPermissionService, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, PermissionService, PositionedObjectLayoutType } from '@univerjs/core';
+import { DocSelectionManagerService, RichTextEditingMutation, setDocumentPermissionValue } from '@univerjs/docs';
+import { IDocDrawingService, SetDocDrawingArrangeCommand, UpdateDrawingDocTransformCommand } from '@univerjs/docs-drawing';
+import { DocSelectionRenderService } from '@univerjs/docs-ui';
+import { IDrawingManagerService } from '@univerjs/drawing';
+import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 import { UnitAction } from '@univerjs/protocol';
-import { MOBILE_UI_MODE } from '@univerjs/ui';
+import { ILocalFileService, IMessageService } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { GroupDocDrawingCommand } from '../../../commands/commands/group-doc-drawing.command';
 import { UngroupDocDrawingCommand } from '../../../commands/commands/ungroup-doc-drawing.command';
+import { DocRefreshDrawingsService } from '../../../services/doc-refresh-drawings.service';
 import { DocDrawingUpdateRenderController } from '../doc-drawing-update.render-controller';
+import { MobileDocDrawingUpdateRenderController } from '../mobile/doc-drawing-update.render-controller';
 
 function createController(options: {
     editArea?: DocumentEditArea;
@@ -171,7 +175,7 @@ function createController(options: {
         getFocusDrawings: vi.fn(() => focusDrawings),
     };
     const contextService = {
-        getContextValue: vi.fn((key) => key === MOBILE_UI_MODE && options.mobile === true),
+        getContextValue: vi.fn(() => false),
         setContextValue: vi.fn(),
     };
     const docSelectionRenderService = {
@@ -193,22 +197,25 @@ function createController(options: {
         openFile: vi.fn(options.openFile ?? (async () => [])),
     };
 
-    const permissionService = new PermissionService();
-    const controller = new DocDrawingUpdateRenderController(
-        context as never,
-        commandService as never,
-        docSelectionManagerService as never,
-        renderManagerSrv as never,
-        imageIoService as never,
-        docDrawingService as never,
-        drawingManagerService as never,
-        permissionService,
-        contextService as never,
-        { show: vi.fn() } as never,
-        { t: vi.fn((key: string) => key) } as never,
-        docSelectionRenderService as never,
-        { refreshDrawings$ } as never,
-        fileOpenerService as never
+    const injector = new Injector([
+        [IPermissionService, { useClass: PermissionService }],
+        [ICommandService, { useValue: commandService }],
+        [DocSelectionManagerService, { useValue: docSelectionManagerService }],
+        [IRenderManagerService, { useValue: renderManagerSrv }],
+        [IImageIoService, { useValue: imageIoService }],
+        [IDocDrawingService, { useValue: docDrawingService }],
+        [IDrawingManagerService, { useValue: drawingManagerService }],
+        [IContextService, { useValue: contextService }],
+        [IMessageService, { useValue: { show: vi.fn() } }],
+        [LocaleService],
+        [DocSelectionRenderService, { useValue: docSelectionRenderService }],
+        [DocRefreshDrawingsService, { useValue: { refreshDrawings$ } }],
+        [ILocalFileService, { useValue: fileOpenerService }],
+    ]);
+    const permissionService = injector.get(IPermissionService);
+    const controller = injector.createInstance(
+        options.mobile ? MobileDocDrawingUpdateRenderController : DocDrawingUpdateRenderController,
+        context as never
     );
 
     return {

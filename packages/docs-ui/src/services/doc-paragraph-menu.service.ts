@@ -21,7 +21,6 @@ import type { IEditorInputConfig } from './selection/doc-selection-render.servic
 import { BlockType, DataStreamTreeTokenType, Disposable, DOC_RANGE_TYPE, DocumentBlockType, getParagraphContentStartOffset, IContextService, Inject, IPermissionService, isInternalEditorID, PresetListType } from '@univerjs/core';
 import { canEditDocumentTargets, DocSelectionManagerService, DocSkeletonManagerService, getDocumentEditTargetObjectIds } from '@univerjs/docs';
 import { DocumentEditArea } from '@univerjs/engine-render';
-import { MOBILE_UI_MODE } from '@univerjs/ui';
 import { BehaviorSubject, combineLatest, first, throttleTime } from 'rxjs';
 import { VIEWPORT_KEY } from '../basics/docs-view-key';
 import { isHorizontalLineParagraph } from '../utils/horizontal-line';
@@ -169,7 +168,7 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
     ) {
         super();
 
-        if (isInternalEditorID(this._context.unitId) || this._contextService.getContextValue(MOBILE_UI_MODE)) {
+        if (isInternalEditorID(this._context.unitId)) {
             return;
         }
 
@@ -255,7 +254,7 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
         }
     }
 
-    private _init() {
+    protected _init() {
         const handleHoverTarget = (paragraph: Nullable<IMutiPageParagraphBound>, tableBound: Nullable<ITableBound>) => {
             if (this._isBlockMenuDragging) {
                 return;
@@ -497,10 +496,6 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
     }
 
     showParagraphMenu(paragraph: IMutiPageParagraphBound) {
-        if (this._contextService.getContextValue(MOBILE_UI_MODE)) {
-            return;
-        }
-
         if (this._hasExpandedSelection()) {
             this.hideParagraphMenu(true);
             return;
@@ -568,10 +563,6 @@ export class DocParagraphMenuService extends Disposable implements IRenderModule
     }
 
     showTableMenu(tableBound: ITableBound) {
-        if (this._contextService.getContextValue(MOBILE_UI_MODE)) {
-            return;
-        }
-
         if (this._hasExpandedTextSelection()) {
             this.hideParagraphMenu(true);
             return;

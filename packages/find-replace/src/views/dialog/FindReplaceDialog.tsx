@@ -16,9 +16,9 @@
 
 import type { LocaleKey } from '../../locale/types';
 import { ICommandService, IContextService, LocaleService } from '@univerjs/core';
-import { Button, Checkbox, ConfigContext, FormDualColumnLayout, FormLayout, Input, MessageType, Select } from '@univerjs/design';
+import { Button, Checkbox, FormDualColumnLayout, FormLayout, Input, MessageType, Select } from '@univerjs/design';
 import { ILayoutService, IMessageService, useDebounceFn, useDependency, useObservable } from '@univerjs/ui';
-import { forwardRef, useCallback, useContext, useEffect, useImperativeHandle, useRef } from 'react';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef } from 'react';
 import { fromEvent } from 'rxjs';
 import { ReplaceAllMatchesCommand, ReplaceCurrentMatchCommand } from '../../commands/commands/replace.command';
 import { OpenReplaceDialogOperation } from '../../commands/operations/find-replace.operation';
@@ -127,7 +127,6 @@ export const ReplaceDialog = forwardRef(function ReplaceDialogImpl(_props, ref) 
     const localeService = useDependency(LocaleService);
     const commandService = useDependency(ICommandService);
     const messageService = useDependency(IMessageService);
-    const { mobile } = useContext(ConfigContext);
 
     const currentMatch = useObservable(findReplaceService.currentMatch$, undefined, true);
     const replaceables = useObservable(findReplaceService.replaceables$, undefined, true);
@@ -279,29 +278,19 @@ export const ReplaceDialog = forwardRef(function ReplaceDialogImpl(_props, ref) 
                     <Select value={findDirection} options={findDirectionOptions} onChange={onChangeFindDirection} />
                 </FormLayout>
             )}
-            {(capabilities?.findScope || capabilities?.findBy) && (
-                mobile
-                    ? <div>{providerFields}</div>
-                    : <FormDualColumnLayout>{providerFields}</FormDualColumnLayout>
+            {(capabilities?.findScope || capabilities?.findBy) && (<FormDualColumnLayout>{providerFields}</FormDualColumnLayout>
             )}
-            {(capabilities?.caseSensitive || capabilities?.matchesTheWholeCell || capabilities?.matchesTheWholeWord) && (
-                mobile
-                    ? <div>{matchFields}</div>
-                    : <FormDualColumnLayout>{matchFields}</FormDualColumnLayout>
+            {(capabilities?.caseSensitive || capabilities?.matchesTheWholeCell || capabilities?.matchesTheWholeWord) && (<FormDualColumnLayout>{matchFields}</FormDualColumnLayout>
             )}
             <div
-                className={mobile
-                    ? 'univer-mt-3 univer-grid univer-gap-3'
-                    : 'univer-mt-6 univer-flex univer-justify-between'}
+                className="univer-mt-6 univer-flex univer-justify-between"
             >
-                <Button className={mobile ? 'univer-h-12 univer-w-full' : undefined} variant="primary" onClick={onClickFindButton} disabled={findDisabled}>{localeService.t<LocaleKey>('find-replace.dialog.find')}</Button>
+                <Button variant="primary" onClick={onClickFindButton} disabled={findDisabled}>{localeService.t<LocaleKey>('find-replace.dialog.find')}</Button>
                 <span
-                    className={mobile
-                        ? 'univer-grid univer-grid-cols-2 univer-gap-3'
-                        : 'univer-inline-flex univer-gap-2'}
+                    className="univer-inline-flex univer-gap-2"
                 >
-                    <Button className={mobile ? 'univer-h-12 univer-w-full' : undefined} disabled={replaceDisabled} onClick={onClickReplaceButton}>{localeService.t<LocaleKey>('find-replace.dialog.replace')}</Button>
-                    <Button className={mobile ? 'univer-h-12 univer-w-full' : undefined} disabled={replaceAllDisabled} onClick={onClickReplaceAllButton}>{localeService.t<LocaleKey>('find-replace.dialog.replace-all')}</Button>
+                    <Button disabled={replaceDisabled} onClick={onClickReplaceButton}>{localeService.t<LocaleKey>('find-replace.dialog.replace')}</Button>
+                    <Button disabled={replaceAllDisabled} onClick={onClickReplaceAllButton}>{localeService.t<LocaleKey>('find-replace.dialog.replace-all')}</Button>
                 </span>
             </div>
         </div>

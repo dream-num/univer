@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import type { DragEvent, FocusEvent, KeyboardEvent, MouseEvent, ReactNode } from 'react';
-import { Button, clsx, ConfigContext, Input, StateIconButton } from '@univerjs/design';
+import type { LocaleService } from '@univerjs/core';
+import type { ComponentProps, ComponentType, DragEvent, FocusEvent, KeyboardEvent, MouseEvent, ReactNode } from 'react';
+import { Button, clsx, Input, StateIconButton } from '@univerjs/design';
 import {
     ArrowDownIcon,
     ArrowUpIcon,
@@ -26,7 +27,7 @@ import {
     MoreDownIcon,
     UnlockIcon,
 } from '@univerjs/icons';
-import { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { OBJECT_LIST_CANVAS_SECTION_ID, OBJECT_LIST_FLOATING_SECTION_ID } from './object-list-panel-layer';
 
 export interface IObjectListPanelCapabilities {
@@ -110,51 +111,43 @@ export type ObjectListPanelTypeNameKey =
     | 'unit'
     | 'video';
 
-interface IObjectListPanelLocaleService {
-    t: (key: string) => string;
+export function getObjectListPanelLabels(localeService: LocaleService): IObjectListPanelLabels {
+    return {
+        title: localeService.t('drawing-ui.objectListPanel.title'),
+        empty: localeService.t('drawing-ui.objectListPanel.empty'),
+        showAll: localeService.t('drawing-ui.objectListPanel.showAll'),
+        hideAll: localeService.t('drawing-ui.objectListPanel.hideAll'),
+        lockAll: localeService.t('drawing-ui.objectListPanel.lockAll'),
+        unlockAll: localeService.t('drawing-ui.objectListPanel.unlockAll'),
+        moveForward: localeService.t('drawing-ui.objectListPanel.moveForward'),
+        moveBackward: localeService.t('drawing-ui.objectListPanel.moveBackward'),
+        close: localeService.t('drawing-ui.objectListPanel.close'),
+        show: localeService.t('drawing-ui.objectListPanel.show'),
+        hide: localeService.t('drawing-ui.objectListPanel.hide'),
+        lock: localeService.t('drawing-ui.objectListPanel.lock'),
+        unlock: localeService.t('drawing-ui.objectListPanel.unlock'),
+        lockHint: localeService.t('drawing-ui.objectListPanel.lockHint'),
+        unlockHint: localeService.t('drawing-ui.objectListPanel.unlockHint'),
+        name: localeService.t('drawing-ui.objectListPanel.name'),
+        nameInput: localeService.t('drawing-ui.objectListPanel.nameInput'),
+        description: localeService.t('drawing-ui.objectListPanel.description'),
+        descriptionPlaceholder: localeService.t('drawing-ui.objectListPanel.descriptionPlaceholder'),
+        details: localeService.t('drawing-ui.objectListPanel.details'),
+        noSelection: localeService.t('drawing-ui.objectListPanel.noSelection'),
+        locate: localeService.t('drawing-ui.objectListPanel.locate'),
+        expand: localeService.t('drawing-ui.objectListPanel.expand'),
+        collapse: localeService.t('drawing-ui.objectListPanel.collapse'),
+        dragToReorder: localeService.t('drawing-ui.objectListPanel.dragToReorder'),
+        search: localeService.t('drawing-ui.objectListPanel.search'),
+        filterAll: localeService.t('drawing-ui.objectListPanel.filterAll'),
+        filterHidden: localeService.t('drawing-ui.objectListPanel.filterHidden'),
+        filterLocked: localeService.t('drawing-ui.objectListPanel.filterLocked'),
+        sectionCanvas: localeService.t('drawing-ui.objectListPanel.sectionCanvas'),
+        sectionFloating: localeService.t('drawing-ui.objectListPanel.sectionFloating'),
+    };
 }
 
-const objectListPanelLabelKeys: Record<keyof IObjectListPanelLabels, string> = {
-    title: 'drawing-ui.objectListPanel.title',
-    empty: 'drawing-ui.objectListPanel.empty',
-    showAll: 'drawing-ui.objectListPanel.showAll',
-    hideAll: 'drawing-ui.objectListPanel.hideAll',
-    lockAll: 'drawing-ui.objectListPanel.lockAll',
-    unlockAll: 'drawing-ui.objectListPanel.unlockAll',
-    moveForward: 'drawing-ui.objectListPanel.moveForward',
-    moveBackward: 'drawing-ui.objectListPanel.moveBackward',
-    close: 'drawing-ui.objectListPanel.close',
-    show: 'drawing-ui.objectListPanel.show',
-    hide: 'drawing-ui.objectListPanel.hide',
-    lock: 'drawing-ui.objectListPanel.lock',
-    unlock: 'drawing-ui.objectListPanel.unlock',
-    lockHint: 'drawing-ui.objectListPanel.lockHint',
-    unlockHint: 'drawing-ui.objectListPanel.unlockHint',
-    name: 'drawing-ui.objectListPanel.name',
-    nameInput: 'drawing-ui.objectListPanel.nameInput',
-    description: 'drawing-ui.objectListPanel.description',
-    descriptionPlaceholder: 'drawing-ui.objectListPanel.descriptionPlaceholder',
-    details: 'drawing-ui.objectListPanel.details',
-    noSelection: 'drawing-ui.objectListPanel.noSelection',
-    locate: 'drawing-ui.objectListPanel.locate',
-    expand: 'drawing-ui.objectListPanel.expand',
-    collapse: 'drawing-ui.objectListPanel.collapse',
-    dragToReorder: 'drawing-ui.objectListPanel.dragToReorder',
-    search: 'drawing-ui.objectListPanel.search',
-    filterAll: 'drawing-ui.objectListPanel.filterAll',
-    filterHidden: 'drawing-ui.objectListPanel.filterHidden',
-    filterLocked: 'drawing-ui.objectListPanel.filterLocked',
-    sectionCanvas: 'drawing-ui.objectListPanel.sectionCanvas',
-    sectionFloating: 'drawing-ui.objectListPanel.sectionFloating',
-};
-
-export function getObjectListPanelLabels(localeService: IObjectListPanelLocaleService): IObjectListPanelLabels {
-    return Object.fromEntries(
-        Object.entries(objectListPanelLabelKeys).map(([labelKey, localeKey]) => [labelKey, localeService.t(localeKey)])
-    ) as unknown as IObjectListPanelLabels;
-}
-
-export function getObjectListPanelTypeName(localeService: IObjectListPanelLocaleService, typeName: ObjectListPanelTypeNameKey): string {
+export function getObjectListPanelTypeName(localeService: LocaleService, typeName: ObjectListPanelTypeNameKey): string {
     return localeService.t(`drawing-ui.objectListPanel.typeNames.${typeName}`);
 }
 
@@ -189,14 +182,6 @@ const iconButtonClassName = `
   dark:!univer-text-gray-300 dark:hover:!univer-bg-gray-800 dark:hover:!univer-text-gray-100
 `;
 
-const mobileIconButtonClassName = `
-  univer-flex univer-size-11 univer-shrink-0 univer-items-center univer-justify-center univer-rounded-xl
-  univer-border-0 univer-bg-gray-100 univer-p-0 univer-text-lg univer-text-gray-600 univer-outline-none
-  active:univer-scale-95 active:univer-bg-primary-100 active:univer-text-primary-600
-  disabled:univer-opacity-40
-  dark:!univer-bg-gray-800 dark:!univer-text-gray-200
-`;
-
 const sectionOrder = new Map([
     [OBJECT_LIST_FLOATING_SECTION_ID, 0],
     [OBJECT_LIST_CANVAS_SECTION_ID, 1],
@@ -207,7 +192,7 @@ function normalizeText(value: string): string {
     return value.trim();
 }
 
-function hasCapability(
+export function hasCapability(
     panelCapabilities: IObjectListPanelCapabilities | undefined,
     item: Pick<IObjectListPanelItem, 'capabilities'> | null | undefined,
     key: keyof IObjectListPanelCapabilities,
@@ -216,31 +201,19 @@ function hasCapability(
     return item?.capabilities?.[key] ?? panelCapabilities?.[key] ?? fallback;
 }
 
-export function ObjectListPanelBase(props: IObjectListPanelBaseProps) {
+export function useObjectListPanel(props: IObjectListPanelBaseProps) {
     const {
         items,
         selectedIds,
         allObjectIds,
         allItems = items,
         focusedId,
-        labels,
-        showHeader = true,
         capabilities,
-        onSelect,
-        onSetVisible,
-        onCommitName,
-        onCommitDescription,
         onMoveForward,
         onMoveBackward,
-        onToggleExpanded,
-        onToggleSelectable,
-        onSetSelectable,
         onLocate,
         onReorder,
-        renderPermissionAction,
     } = props;
-    const { mobile: configuredMobile } = useContext(ConfigContext);
-    const mobile = configuredMobile === true;
     const selectedIdSet = useMemo(() => new Set(selectedIds), [selectedIds]);
     const [draggingId, setDraggingId] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
@@ -352,16 +325,22 @@ export function ObjectListPanelBase(props: IObjectListPanelBaseProps) {
         });
     };
 
+    return { selectedIdSet, draggingId, setDraggingId, searchQuery, setSearchQuery, filterMode, setFilterMode, collapsedSectionIds, selectedItem, visibleItems, visibleItemSections, showSectionHeaders, visibilityItems, selectableItems, allVisible, allLocked, canMoveForward, canMoveBackward, showArrangeControls, showLocateControl, canReorder, handleDrop, toggleSectionCollapsed };
+}
+
+export function ObjectListPanelBase(props: IObjectListPanelBaseProps) {
+    const { labels, showHeader = true, capabilities, onSelect, onSetVisible, onCommitName, onCommitDescription, onMoveForward, onMoveBackward, onToggleExpanded, onToggleSelectable, onSetSelectable, onLocate, renderPermissionAction } = props;
+    const { selectedIdSet, draggingId, setDraggingId, searchQuery, setSearchQuery, filterMode, setFilterMode, collapsedSectionIds, selectedItem, visibleItems, visibleItemSections, showSectionHeaders, visibilityItems, selectableItems, allVisible, allLocked, canMoveForward, canMoveBackward, showArrangeControls, showLocateControl, canReorder, handleDrop, toggleSectionCollapsed } = useObjectListPanel(props);
     return (
         <div
             className={clsx(`
               univer-box-border univer-flex univer-min-w-0 univer-max-w-full univer-flex-col univer-gap-3 univer-py-2
               univer-text-gray-700
               dark:!univer-text-gray-200
-            `, mobile ? 'univer-h-auto univer-overflow-visible univer-pb-4' : 'univer-size-full univer-overflow-hidden')}
+            `, 'univer-size-full univer-overflow-hidden')}
             data-drawing-object-list-panel="true"
         >
-            {showHeader && !mobile && (
+            {showHeader && (
                 <div className="univer-flex univer-h-8 univer-shrink-0 univer-items-center univer-gap-2">
                     <div
                         className="
@@ -378,8 +357,8 @@ export function ObjectListPanelBase(props: IObjectListPanelBaseProps) {
             <div className="univer-flex univer-min-w-0 univer-items-center univer-justify-between univer-gap-2">
                 <div className="univer-flex univer-min-w-0 univer-flex-1 univer-gap-2">
                     <Button
-                        className={mobile ? 'univer-h-12 univer-flex-1' : undefined}
-                        size={mobile ? 'middle' : 'small'}
+
+                        size="small"
                         disabled={visibilityItems.length === 0}
                         onClick={() => onSetVisible(visibilityItems.map((item) => item.id), !allVisible)}
                     >
@@ -399,8 +378,8 @@ export function ObjectListPanelBase(props: IObjectListPanelBaseProps) {
                     {showLocateControl && (
                         <button
                             type="button"
-                            className={mobile ? mobileIconButtonClassName : iconButtonClassName}
-                            title={mobile ? undefined : labels.locate}
+                            className={iconButtonClassName}
+                            title={labels.locate}
                             aria-label={labels.locate}
                             disabled={!selectedItem?.id}
                             onClick={() => selectedItem && onLocate?.(selectedItem.id)}
@@ -412,8 +391,8 @@ export function ObjectListPanelBase(props: IObjectListPanelBaseProps) {
                         <>
                             <button
                                 type="button"
-                                className={mobile ? mobileIconButtonClassName : iconButtonClassName}
-                                title={mobile ? undefined : labels.moveForward}
+                                className={iconButtonClassName}
+                                title={labels.moveForward}
                                 aria-label={labels.moveForward}
                                 disabled={!canMoveForward}
                                 onClick={() => selectedItem && onMoveForward?.(selectedItem.id)}
@@ -422,8 +401,8 @@ export function ObjectListPanelBase(props: IObjectListPanelBaseProps) {
                             </button>
                             <button
                                 type="button"
-                                className={mobile ? mobileIconButtonClassName : iconButtonClassName}
-                                title={mobile ? undefined : labels.moveBackward}
+                                className={iconButtonClassName}
+                                title={labels.moveBackward}
                                 aria-label={labels.moveBackward}
                                 disabled={!canMoveBackward}
                                 onClick={() => selectedItem && onMoveBackward?.(selectedItem.id)}
@@ -437,7 +416,7 @@ export function ObjectListPanelBase(props: IObjectListPanelBaseProps) {
 
             <div className="univer-flex univer-shrink-0 univer-flex-col univer-gap-2">
                 <Input
-                    className={mobile ? 'univer-h-12' : undefined}
+
                     value={searchQuery}
                     aria-label={labels.search}
                     placeholder={labels.search}
@@ -458,7 +437,7 @@ export function ObjectListPanelBase(props: IObjectListPanelBaseProps) {
                                   univer-px-2 univer-text-xs univer-outline-none univer-transition-colors
                                   dark:!univer-border-gray-700
                                 `,
-                                mobile ? 'univer-h-11 univer-text-sm' : 'univer-h-7',
+                                'univer-h-7',
                                 filterMode === mode
                                     ? `
                                       dark:!univer-bg-primary-900/30
@@ -468,7 +447,7 @@ export function ObjectListPanelBase(props: IObjectListPanelBaseProps) {
                                     : clsx(`
                                       univer-border-gray-200 univer-bg-gray-0 univer-text-gray-600
                                       dark:!univer-bg-gray-900 dark:!univer-text-gray-300
-                                    `, !mobile && `
+                                    `, `
                                       hover:univer-bg-gray-50
                                       dark:hover:!univer-bg-gray-800
                                     `)
@@ -483,9 +462,7 @@ export function ObjectListPanelBase(props: IObjectListPanelBaseProps) {
             </div>
 
             <div
-                className={mobile
-                    ? 'univer-flex-none univer-overflow-visible'
-                    : 'univer-min-h-0 univer-flex-1 univer-overflow-y-auto univer-overflow-x-hidden'}
+                className="univer-min-h-0 univer-flex-1 univer-overflow-y-auto univer-overflow-x-hidden"
             >
                 {visibleItems.length === 0
                     ? <div className="univer-py-6 univer-text-center univer-text-sm univer-text-gray-500">{labels.empty}</div>
@@ -510,7 +487,7 @@ export function ObjectListPanelBase(props: IObjectListPanelBaseProps) {
                                                   univer-outline-none
                                                   disabled:univer-cursor-default
                                                   dark:!univer-text-gray-500
-                                                `, !mobile && `
+                                                `, `
                                                   hover:univer-bg-gray-50 hover:univer-text-gray-600
                                                   disabled:hover:univer-bg-transparent
                                                   dark:hover:!univer-bg-gray-800 dark:hover:!univer-text-gray-300
@@ -566,7 +543,6 @@ export function ObjectListPanelBase(props: IObjectListPanelBaseProps) {
                                             showVisible={hasCapability(capabilities, item, 'visible')}
                                             draggable={canReorder && hasCapability(capabilities, item, 'reorder') && !item.disabled && item.canReorder !== false}
                                             dragging={draggingId === item.id}
-                                            mobile={mobile}
                                             onSelect={(multiSelect) => onSelect(item.id, multiSelect)}
                                             onToggleExpanded={() => onToggleExpanded?.(item.id)}
                                             onToggleVisible={() => onSetVisible([item.id], !item.visible)}
@@ -585,7 +561,6 @@ export function ObjectListPanelBase(props: IObjectListPanelBaseProps) {
 
             <ObjectDetailsEditor
                 item={selectedItem}
-                mobile={mobile}
                 labels={labels}
                 showName={hasCapability(capabilities, selectedItem, 'name')}
                 showDescription={hasCapability(capabilities, selectedItem, 'description')}
@@ -596,7 +571,7 @@ export function ObjectListPanelBase(props: IObjectListPanelBaseProps) {
     );
 }
 
-function ObjectListRow(props: {
+export interface IObjectListRowProps {
     permissionAction?: ReactNode;
     item: IObjectListPanelItem;
     selected: boolean;
@@ -606,7 +581,6 @@ function ObjectListRow(props: {
     showVisible: boolean;
     draggable: boolean;
     dragging: boolean;
-    mobile: boolean;
     onSelect: (multiSelect: boolean) => void;
     onToggleExpanded: () => void;
     onToggleVisible: () => void;
@@ -615,42 +589,11 @@ function ObjectListRow(props: {
     onDragStart: () => void;
     onDragEnd: () => void;
     onDrop: () => void;
-}) {
-    const { permissionAction, item, selected, labels, showLock, showName, showVisible, draggable, dragging, mobile, onSelect, onToggleExpanded, onToggleVisible, onToggleSelectable, onCommitName, onDragStart, onDragEnd, onDrop } = props;
-    const [draftName, setDraftName] = useState(item.name);
-    const skipCommitOnBlurRef = useRef(false);
-    const disabled = item.disabled === true;
-    const level = item.level ?? 0;
-    const locked = item.selectable === false;
+}
 
-    useEffect(() => {
-        setDraftName(item.name);
-    }, [item.name]);
-
-    const handleBlur = (event: FocusEvent<HTMLInputElement>) => {
-        if (disabled) {
-            return;
-        }
-        if (skipCommitOnBlurRef.current) {
-            skipCommitOnBlurRef.current = false;
-            return;
-        }
-        if (event.currentTarget.value !== item.name) {
-            onCommitName(event.currentTarget.value);
-        }
-    };
-
-    const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
-        if (event.key === 'Enter') {
-            event.currentTarget.blur();
-            return;
-        }
-        if (event.key === 'Escape') {
-            skipCommitOnBlurRef.current = true;
-            setDraftName(item.name);
-            event.currentTarget.blur();
-        }
-    };
+function ObjectListRow(props: IObjectListRowProps) {
+    const { permissionAction, item, selected, labels, showLock, showName, showVisible, draggable, dragging, onSelect, onToggleExpanded, onToggleVisible, onToggleSelectable, onDragStart, onDragEnd, onDrop } = props;
+    const { draftName, setDraftName, disabled, level, locked, handleBlur, handleKeyDown } = useObjectListRow(props);
 
     return (
         <div
@@ -659,13 +602,8 @@ function ObjectListRow(props: {
                   univer-box-border univer-flex univer-w-full univer-min-w-0 univer-max-w-full univer-items-center
                   univer-gap-1.5 univer-overflow-hidden univer-rounded-md univer-pr-1.5 univer-transition-colors
                 `,
-                mobile
-                    ? `
-                      univer-min-h-12 univer-rounded-xl univer-bg-gray-50
-                      dark:!univer-bg-gray-800
-                    `
-                    : 'univer-h-8',
-                !mobile && !disabled && `
+                'univer-h-8',
+                !disabled && `
                   hover:univer-bg-gray-100
                   dark:hover:!univer-bg-gray-800
                 `,
@@ -680,8 +618,8 @@ function ObjectListRow(props: {
                 dragging && 'univer-opacity-50'
             )}
             style={{ paddingLeft: level * 14 + 4 }}
-            draggable={draggable && !mobile}
-            title={!mobile && draggable ? labels.dragToReorder : undefined}
+            draggable={draggable}
+            title={draggable ? labels.dragToReorder : undefined}
             onClick={disabled ? undefined : (event: MouseEvent<HTMLDivElement>) => onSelect(event.ctrlKey || event.metaKey)}
             onDragStart={(event: DragEvent<HTMLDivElement>) => {
                 if (!draggable) {
@@ -713,14 +651,12 @@ function ObjectListRow(props: {
                           univer-border-0 univer-bg-transparent univer-p-0 univer-text-gray-500 univer-outline-none
                           univer-transition-transform
                           dark:!univer-text-gray-300
-                        `, mobile
-                            ? 'univer-size-10'
-                            : `
-                              univer-size-5
-                              hover:univer-bg-gray-100 hover:univer-text-gray-900
-                              dark:hover:!univer-bg-gray-800 dark:hover:!univer-text-gray-100
-                            `)}
-                        title={mobile ? undefined : item.expanded ? labels.collapse : labels.expand}
+                        `, `
+                          univer-size-5
+                          hover:univer-bg-gray-100 hover:univer-text-gray-900
+                          dark:hover:!univer-bg-gray-800 dark:hover:!univer-text-gray-100
+                        `)}
+                        title={item.expanded ? labels.collapse : labels.expand}
                         aria-label={item.expanded ? labels.collapse : labels.expand}
                         onClick={(event) => {
                             event.stopPropagation();
@@ -734,16 +670,14 @@ function ObjectListRow(props: {
                         />
                     </button>
                 )
-                : <span className={mobile ? 'univer-size-10 univer-shrink-0' : 'univer-size-5 univer-shrink-0'} />}
+                : <span className="univer-size-5 univer-shrink-0" />}
             {showName
                 ? (
                     <Input
                         key={item.name}
-                        className={clsx(mobile
-                            ? 'univer-h-10 univer-w-0 univer-min-w-0 univer-flex-1'
-                            : 'univer-h-7 univer-w-0 univer-min-w-0 univer-flex-1', disabled && `
-                              univer-cursor-not-allowed
-                            `)}
+                        className={clsx('univer-h-7 univer-w-0 univer-min-w-0 univer-flex-1', disabled && `
+                          univer-cursor-not-allowed
+                        `)}
                         inputClass={clsx(
                             `
                               univer-min-w-0 univer-overflow-hidden univer-text-ellipsis univer-whitespace-nowrap
@@ -755,7 +689,7 @@ function ObjectListRow(props: {
                               dark:!univer-text-gray-100
                               dark:focus:!univer-bg-gray-900 dark:focus:!univer-ring-primary-900
                             `,
-                            mobile ? '!univer-h-10' : '!univer-h-7',
+                            '!univer-h-7',
                             disabled && `
                               univer-text-gray-400
                               dark:!univer-text-gray-500
@@ -784,9 +718,9 @@ function ObjectListRow(props: {
                     emphasizeActive
                     aria-pressed={locked}
                     type="button"
-                    className={mobile ? mobileIconButtonClassName : undefined}
+
                     disabled={disabled}
-                    title={mobile ? undefined : locked ? (labels.unlockHint ?? labels.unlock) : (labels.lockHint ?? labels.lock)}
+                    title={locked ? (labels.unlockHint ?? labels.unlock) : (labels.lockHint ?? labels.lock)}
                     aria-label={locked ? labels.unlock : labels.lock}
                     onClick={(event) => {
                         event.stopPropagation();
@@ -801,9 +735,9 @@ function ObjectListRow(props: {
                     active={!item.visible}
                     aria-pressed={!item.visible}
                     type="button"
-                    className={mobile ? mobileIconButtonClassName : undefined}
+
                     disabled={disabled}
-                    title={mobile ? undefined : item.visible ? labels.hide : labels.show}
+                    title={item.visible ? labels.hide : labels.show}
                     aria-label={item.visible ? labels.hide : labels.show}
                     onClick={(event) => {
                         event.stopPropagation();
@@ -817,16 +751,17 @@ function ObjectListRow(props: {
     );
 }
 
-function ObjectDetailsEditor(props: {
+export function ObjectDetailsEditor(props: {
     item: IObjectListPanelItem | null;
-    mobile: boolean;
+    InputComponent?: ComponentType<ComponentProps<typeof Input>>;
+    descriptionClassName?: string;
     labels: IObjectListPanelLabels;
     showName: boolean;
     showDescription: boolean;
     onCommitName: (value: string) => void;
     onCommitDescription: (value: string) => void;
 }) {
-    const { item, mobile, labels, showName, showDescription, onCommitName, onCommitDescription } = props;
+    const { item, InputComponent = Input, descriptionClassName, labels, showName, showDescription, onCommitName, onCommitDescription } = props;
     const [draftName, setDraftName] = useState(item?.name ?? '');
     const [draftDescription, setDraftDescription] = useState(item?.description ?? '');
     const disabled = item?.disabled === true;
@@ -876,8 +811,8 @@ function ObjectDetailsEditor(props: {
                     >
                         {labels.name}
                     </span>
-                    <Input
-                        className={mobile ? 'univer-h-12' : undefined}
+                    <InputComponent
+
                         value={draftName}
                         aria-label={labels.nameInput}
                         disabled={disabled}
@@ -906,7 +841,7 @@ function ObjectDetailsEditor(props: {
                         {labels.description}
                     </span>
                     <textarea
-                        className="
+                        className={clsx(descriptionClassName, `
                           univer-box-border univer-min-h-16 univer-w-full univer-resize-none univer-rounded-md
                           univer-border univer-border-solid univer-border-gray-200 univer-bg-gray-0 univer-p-2
                           univer-text-sm univer-text-gray-900 univer-outline-none
@@ -914,7 +849,7 @@ function ObjectDetailsEditor(props: {
                           disabled:univer-cursor-not-allowed disabled:univer-opacity-70
                           dark:!univer-border-gray-700 dark:!univer-bg-gray-900 dark:!univer-text-gray-100
                           dark:focus:!univer-ring-primary-900
-                        "
+                        `)}
                         value={draftDescription}
                         disabled={disabled}
                         placeholder={labels.descriptionPlaceholder}
@@ -935,3 +870,41 @@ function ObjectDetailsEditor(props: {
 export type IDrawingObjectListItem = IObjectListPanelItem;
 export type IDrawingObjectListPanelLabels = IObjectListPanelLabels;
 export type IDrawingObjectListPanelProps = IObjectListPanelBaseProps;
+export function useObjectListRow({ item, onCommitName }: Pick<IObjectListRowProps, 'item' | 'onCommitName'>) {
+    const [draftName, setDraftName] = useState(item.name);
+    const skipCommitOnBlurRef = useRef(false);
+    const disabled = item.disabled === true;
+    const level = item.level ?? 0;
+    const locked = item.selectable === false;
+
+    useEffect(() => {
+        setDraftName(item.name);
+    }, [item.name]);
+
+    const handleBlur = (event: FocusEvent<HTMLInputElement>) => {
+        if (disabled) {
+            return;
+        }
+        if (skipCommitOnBlurRef.current) {
+            skipCommitOnBlurRef.current = false;
+            return;
+        }
+        if (event.currentTarget.value !== item.name) {
+            onCommitName(event.currentTarget.value);
+        }
+    };
+
+    const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === 'Enter') {
+            event.currentTarget.blur();
+            return;
+        }
+        if (event.key === 'Escape') {
+            skipCommitOnBlurRef.current = true;
+            setDraftName(item.name);
+            event.currentTarget.blur();
+        }
+    };
+
+    return { draftName, setDraftName, disabled, level, locked, handleBlur, handleKeyDown };
+}

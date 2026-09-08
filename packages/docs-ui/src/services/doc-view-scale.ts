@@ -21,12 +21,9 @@ import {
     Disposable,
     DocumentFlavor,
     IConfigService,
-    IContextService,
-    isInternalEditorID,
     MODERN_DOCUMENT_WIDTH,
     ModernDocumentWidthMode,
 } from '@univerjs/core';
-import { MOBILE_UI_MODE } from '@univerjs/ui';
 import { DEFAULT_DOC_FIT_TO_WIDTH_OPTIONS, DOCS_UI_PLUGIN_CONFIG_KEY } from '../config/config';
 import { getDocEffectiveZoomRatio } from './doc-zoom';
 
@@ -105,9 +102,8 @@ export function resolveDocViewScale(userZoomRatio: number, fitToWidthScale: numb
 
 export class DocViewScaleService extends Disposable implements IRenderModule {
     constructor(
-        private readonly _context: IRenderContext<DocumentDataModel>,
-        @IConfigService private readonly _configService: IConfigService,
-        @IContextService private readonly _contextService: IContextService
+        protected readonly _context: IRenderContext<DocumentDataModel>,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
     }
@@ -151,17 +147,6 @@ export class DocViewScaleService extends Disposable implements IRenderModule {
     }
 
     getFitToWidthScale(): number {
-        if (
-            this._contextService.getContextValue(MOBILE_UI_MODE) &&
-            (
-                isInternalEditorID(this._context.unitId ?? '') ||
-                this._context.unit?.getSnapshot?.()?.documentStyle.documentFlavor === DocumentFlavor.MODERN
-            )
-        ) {
-            // Inline editors lay out their own content; they are not full pages to fit to the phone.
-            return 1;
-        }
-
         return calcDocFitToWidthScale({
             availableWidth: this.getAvailableWidth(),
             baseWidth: this.getBaseWidth(),

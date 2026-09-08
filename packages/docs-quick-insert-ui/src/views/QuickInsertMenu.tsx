@@ -15,9 +15,9 @@
  */
 
 import type { DocPopupMenu, IDocPopupMenuItem } from '../services/doc-quick-insert-popup.service';
-import { borderBottomClassName, borderClassName, clsx, ConfigContext, scrollbarClassName, Tooltip } from '@univerjs/design';
+import { borderBottomClassName, borderClassName, clsx, scrollbarClassName, Tooltip } from '@univerjs/design';
 import { IconManager, useDependency } from '@univerjs/ui';
-import { useContext, useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 
 interface IQuickInsertMenuProps {
     menus: DocPopupMenu[];
@@ -55,7 +55,6 @@ export function QuickInsertMenu(props: IQuickInsertMenuProps) {
     } = props;
 
     const iconManager = useDependency(IconManager);
-    const { mobile } = useContext(ConfigContext);
     const flatMenus = useMemo(() => flattenMenuItems(menus), [menus]);
     const menuNodeMapRef = useRef(new Map<string, HTMLElement>());
 
@@ -64,16 +63,16 @@ export function QuickInsertMenu(props: IQuickInsertMenuProps) {
             ? null
             : flatMenus[focusedMenuIndex] ?? null;
 
-        onFocusedMenuChange(mobile ? null : focusedMenu);
+        onFocusedMenuChange(focusedMenu);
 
-        if (mobile || !focusedMenu) {
+        if (!focusedMenu) {
             return;
         }
 
         menuNodeMapRef.current.get(focusedMenu.id)?.scrollIntoView({
             block: 'nearest',
         });
-    }, [flatMenus, focusedMenuIndex, mobile, onFocusedMenuChange]);
+    }, [flatMenus, focusedMenuIndex, onFocusedMenuChange]);
 
     useEffect(() => {
         const menuNodeMap = menuNodeMapRef.current;
@@ -138,24 +137,19 @@ export function QuickInsertMenu(props: IQuickInsertMenuProps) {
                       univer-outline-none
                       dark:!univer-text-gray-0
                     `, {
-                        'univer-min-h-12 univer-rounded-xl univer-px-3 univer-text-base active:univer-bg-gray-100 dark:active:!univer-bg-gray-600': mobile,
-                        'univer-min-h-8 hover:univer-bg-gray-50 dark:hover:!univer-bg-gray-600': !mobile,
-                        'hover:univer-bg-transparent': !mobile && !isFocused,
-                        'univer-bg-gray-50 dark:!univer-bg-gray-600': !mobile && isFocused,
+                        'univer-min-h-8 hover:univer-bg-gray-50 dark:hover:!univer-bg-gray-600': true,
+                        'hover:univer-bg-transparent': !isFocused,
+                        'univer-bg-gray-50 dark:!univer-bg-gray-600': isFocused,
                     })}
-                    onMouseEnter={mobile ? undefined : () => onFocusedMenuIndexChange(currentMenuIndex)}
-                    onMouseLeave={mobile ? undefined : () => onFocusedMenuIndexChange(Number.NaN)}
+                    onMouseEnter={() => onFocusedMenuIndexChange(currentMenuIndex)}
+                    onMouseLeave={() => onFocusedMenuIndexChange(Number.NaN)}
                     onClick={() => onSelect(menu)}
                 >
                     <div className="univer-inline-flex univer-w-full univer-items-center univer-gap-2">
                         {Icon && <span className="univer-inline-flex univer-text-base"><Icon /></span>}
-                        {mobile
-                            ? <span className="univer-truncate">{menu.title}</span>
-                            : (
-                                <Tooltip showIfEllipsis title={menu.title} placement="right">
-                                    <span className="univer-truncate">{menu.title}</span>
-                                </Tooltip>
-                            )}
+                        <Tooltip showIfEllipsis title={menu.title} placement="right">
+                            <span className="univer-truncate">{menu.title}</span>
+                        </Tooltip>
                     </div>
                 </div>
             );
@@ -169,8 +163,7 @@ export function QuickInsertMenu(props: IQuickInsertMenuProps) {
               univer-overscroll-contain univer-bg-gray-0 univer-px-2 univer-text-gray-900 univer-shadow-md
               dark:!univer-bg-gray-700 dark:!univer-text-gray-0
             `, borderClassName, scrollbarClassName, {
-                'univer-max-h-[min(42dvh,360px)] univer-w-[min(360px,calc(100vw-24px))] univer-rounded-2xl univer-py-2': mobile,
-                'univer-max-h-[360px] univer-rounded-md univer-py-1 univer-text-sm': !mobile,
+                'univer-max-h-[360px] univer-rounded-md univer-py-1 univer-text-sm': true,
             })}
             onWheel={(event) => event.stopPropagation()}
         >

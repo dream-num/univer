@@ -15,6 +15,7 @@
  */
 
 import type { DocumentDataModel, IDisposable, INeedCheckDisposable, Nullable } from '@univerjs/core';
+import type { IImagePopupMenuItem } from '@univerjs/drawing-ui';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
 import {
     DrawingTypeEnum,
@@ -36,17 +37,16 @@ import {
     getDocumentEntityPermissionObjectId,
 } from '@univerjs/docs';
 import { IDocDrawingAdapterService, IDocDrawingService, RemoveDocDrawingCommand } from '@univerjs/docs-drawing';
-import { DocCanvasPopManagerService, MOBILE_DOC_ELEMENT_MENU } from '@univerjs/docs-ui';
+import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import {
     COMPONENT_IMAGE_POPUP_MENU,
-    COMPONENT_MOBILE_IMAGE_POPUP_MENU,
     ImageCropperObject,
     ImageResetSizeOperation,
     OpenImageCropOperation,
 } from '@univerjs/drawing-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { FloatingObjectToolbarPosition, IMenuManagerService, MenuItemType, MOBILE_UI_MODE } from '@univerjs/ui';
+import { FloatingObjectToolbarPosition, IMenuManagerService, MenuItemType } from '@univerjs/ui';
 import { takeUntil } from 'rxjs';
 import { EditDocDrawingOperation } from '../commands/operations/edit-doc-drawing.operation';
 import { SidebarDocDrawingOperation } from '../commands/operations/open-drawing-panel.operation';
@@ -334,13 +334,10 @@ export class DocDrawingPopupMenuController extends RxDisposable {
                 const isImage = drawingType === DrawingTypeEnum.DRAWING_IMAGE;
                 // Charts use the document toolbar placement, while retaining chart-specific actions and controls.
                 const isChart = drawingType === DrawingTypeEnum.DRAWING_CHART;
-                const mobile = this._contextService.getContextValue(MOBILE_UI_MODE);
                 const popup = this._canvasPopManagerService.attachPopupToObject(
                     object,
                     {
-                        componentKey: mobile
-                            ? (isImage || isChart ? COMPONENT_MOBILE_IMAGE_POPUP_MENU : MOBILE_DOC_ELEMENT_MENU)
-                            : COMPONENT_IMAGE_POPUP_MENU,
+                        componentKey: this._getPopupComponent(drawingType),
                         requiresStableLayout: false,
                         direction: isImage || isChart ? 'top-center' : 'horizontal',
                         offset: isImage || isChart ? [0, 8] : [2, 0],
@@ -399,6 +396,10 @@ export class DocDrawingPopupMenuController extends RxDisposable {
         ]);
     }
 
+    protected _getPopupComponent(_drawingType: number): string {
+        return COMPONENT_IMAGE_POPUP_MENU;
+    }
+
     private _getDrawingPopupMenuItems(unitId: string, subUnitId: string, drawingId: string, drawingType: number) {
         const drawing = this._docDrawingService.getDrawingByParam({ unitId, subUnitId, drawingId });
         const floatingToolbarMenuItems = drawing
@@ -443,22 +444,11 @@ export class DocDrawingPopupMenuController extends RxDisposable {
             },
         ];
 
-        if (this._contextService.getContextValue(MOBILE_UI_MODE)) {
-            if (drawingType === DrawingTypeEnum.DRAWING_IMAGE) {
-                return defaultItems.slice(0, 3);
-            }
-            if (drawingType === DrawingTypeEnum.DRAWING_CHART) {
-                return [
-                    { ...defaultItems[0], label: 'docs-drawing-ui.image-popup.edit' },
-                    defaultItems[2],
-                ];
-            }
-        }
+        return this._resolvePopupMenuItems(defaultItems, floatingToolbarMenuItems, drawingType);
+    }
 
-        return [
-            ...(floatingToolbarMenuItems ?? defaultItems),
-            ...this._getFloatingObjectMenuItems(),
-        ];
+    protected _resolvePopupMenuItems(defaultItems: IImagePopupMenuItem[], customItems: IImagePopupMenuItem[] | null, _drawingType: number): IImagePopupMenuItem[] {
+        return [...(customItems ?? defaultItems), ...this._getFloatingObjectMenuItems()];
     }
 
     private _getFloatingObjectMenuItems() {

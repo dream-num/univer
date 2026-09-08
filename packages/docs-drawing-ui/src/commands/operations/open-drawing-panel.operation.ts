@@ -16,12 +16,11 @@
 
 import type { IAccessor, ICommand } from '@univerjs/core';
 import type { LocaleKey } from '../../locale/types';
-import { CommandType, IContextService, LocaleService } from '@univerjs/core';
+import { CommandType, LocaleService } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import { IDialogService, ISidebarService, MOBILE_UI_MODE } from '@univerjs/ui';
+import { ISidebarService } from '@univerjs/ui';
 import {
     COMPONENT_DOC_DRAWING_PANEL,
-    MOBILE_DOC_DRAWING_PANEL_DIALOG_ID,
 } from '../../views/doc-image-panel/component-name';
 
 export interface IUIComponentCommandParams {
@@ -33,28 +32,11 @@ export const SidebarDocDrawingOperation: ICommand = {
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor, params: IUIComponentCommandParams) => {
         const sidebarService = accessor.get(ISidebarService);
-        const contextService = accessor.get(IContextService);
-        const dialogService = accessor.get(IDialogService);
         const localeService = accessor.get(LocaleService);
         const drawingManagerService = accessor.get(IDrawingManagerService);
-        const mobile = contextService.getContextValue(MOBILE_UI_MODE);
 
         switch (params.value) {
             case 'open':
-                if (mobile) {
-                    dialogService.open({
-                        id: MOBILE_DOC_DRAWING_PANEL_DIALOG_ID,
-                        title: { title: localeService.t<LocaleKey>('docs-drawing-ui.panel.title') },
-                        draggable: false,
-                        mask: true,
-                        maskClosable: true,
-                        children: { label: COMPONENT_DOC_DRAWING_PANEL },
-                        onClose: () => {
-                            drawingManagerService.focusDrawing(null);
-                        },
-                    });
-                    break;
-                }
                 sidebarService.open({
                     header: { title: localeService.t<LocaleKey>('docs-drawing-ui.panel.title') },
                     children: { label: COMPONENT_DOC_DRAWING_PANEL },
@@ -66,11 +48,7 @@ export const SidebarDocDrawingOperation: ICommand = {
                 break;
             case 'close':
             default:
-                if (mobile) {
-                    dialogService.close(MOBILE_DOC_DRAWING_PANEL_DIALOG_ID);
-                } else {
-                    sidebarService.close();
-                }
+                sidebarService.close();
                 break;
         }
         return true;

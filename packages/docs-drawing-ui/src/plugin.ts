@@ -73,7 +73,13 @@ export class UniverDocsDrawingUIPlugin extends Plugin {
     }
 
     override onStarting(): void {
-        const dependencies: Dependency[] = [
+        const dependencies = this._getDependencies();
+        dependencies.forEach((dependency) => this._injector.add(dependency));
+        this._injector.get(ComponentsController);
+    }
+
+    protected _getDependencies(): Dependency[] {
+        return [
             [ComponentsController],
             [DocDrawingUIController],
             [DocDrawingPopupMenuController],
@@ -84,16 +90,14 @@ export class UniverDocsDrawingUIPlugin extends Plugin {
             [DocFloatDomController],
             [DocDrawingPrintingController],
         ];
+    }
 
-        dependencies.forEach((dependency) => this._injector.add(dependency));
-        this._injector.get(ComponentsController);
+    protected _getRenderModules(): Dependency[] {
+        return [[DocDrawingUpdateRenderController], [DocDrawingTransformUpdateController]];
     }
 
     override onReady(): void {
-        ([
-            [DocDrawingUpdateRenderController],
-            [DocDrawingTransformUpdateController],
-        ] as Dependency[]).forEach((m) => this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, m));
+        this._getRenderModules().forEach((m) => this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, m));
 
         this._injector.get(DocDrawingAddRemoveController);
         this._injector.get(DocDrawingUIController);

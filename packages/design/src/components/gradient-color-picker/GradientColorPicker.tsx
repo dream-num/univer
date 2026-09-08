@@ -23,7 +23,6 @@ import { ConfigContext } from '../config-provider/ConfigProvider';
 import { InputNumber } from '../input-number/InputNumber';
 import { Segmented } from '../segmented/Segmented';
 import { Tooltip } from '../tooltip/Tooltip';
-import { MobileGradientColorPicker } from './MobileGradientColorPicker';
 
 export type GradientType = 'linear' | 'radial' | 'angular' | 'diamond';
 
@@ -103,13 +102,6 @@ function getCssLinearGradientAngle(value: IGradientValue): number {
 }
 
 export function GradientColorPicker(props: IGradientColorPickerProps) {
-    const { mobile } = useContext(ConfigContext);
-    return mobile
-        ? <MobileGradientColorPicker {...props} value={props.value ?? DEFAULT_VALUE} />
-        : <DesktopGradientColorPicker {...props} />;
-}
-
-function DesktopGradientColorPicker(props: IGradientColorPickerProps) {
     const { className, compact = false, value = DEFAULT_VALUE, onChange } = props;
     const { locale } = useContext(ConfigContext);
     const [draftValue, setDraftValue] = useState<IGradientValue>(value);

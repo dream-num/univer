@@ -39,7 +39,6 @@ import {
     CustomDecorationType,
     CustomRangeType,
     DocumentFlavor,
-    fromEventSubject,
     ICommandService,
     IContextService,
     ILogService,
@@ -69,8 +68,7 @@ import {
     ScrollBar,
     Viewport,
 } from '@univerjs/engine-render';
-import { MOBILE_UI_MODE } from '@univerjs/ui';
-import { animationFrameScheduler, combineLatest, fromEvent, merge, take, takeUntil, throttleTime } from 'rxjs';
+import { combineLatest, fromEvent, merge, take, takeUntil } from 'rxjs';
 import {
     DOCS_COMPONENT_BACKGROUND_LAYER_INDEX,
     DOCS_COMPONENT_DEFAULT_Z_INDEX,
@@ -512,13 +510,13 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
     private _isMaterializingPages = false;
     private _reservedLayoutWidth = 0;
     private _reservedLayoutHeight = 0;
-    private _mobileModernPageWidth: number | undefined;
+    protected _mobileModernPageWidth: number | undefined;
 
     constructor(
-        private readonly _context: IRenderContext<DocumentDataModel>,
+        protected readonly _context: IRenderContext<DocumentDataModel>,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(DocSelectionRenderService) private readonly _docSelectionRenderService: DocSelectionRenderService,
-        @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
+        @Inject(DocSkeletonManagerService) protected readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @IEditorService private readonly _editorService: IEditorService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
@@ -661,7 +659,7 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         return !result.requiresLayout;
     }
 
-    private _scheduleLayout(
+    protected _scheduleLayout(
         unitId: string,
         skeleton: DocumentSkeleton,
         options: IDocLayoutScheduleOptions,
@@ -1655,74 +1653,24 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         });
     }
 
-    private _shouldEnableHorizontalScrollBar(): boolean {
-        if (
-            this._contextService.getContextValue(MOBILE_UI_MODE) &&
-            this._context.unit.getSnapshot().documentStyle.documentFlavor === DocumentFlavor.MODERN
-        ) {
-            return false;
-        }
-
+    protected _shouldEnableHorizontalScrollBar(): boolean {
         const options = this._docViewScaleService.getOptions();
         return !(options.mode === 'fit-width' && options.target === 'container' && options.align === 'start');
     }
 
-    private _getMobileModernLayoutOptions(): Pick<IDocLayoutScheduleOptions, 'modernPageWidth' | 'modernHorizontalMargin'> {
-        if (
-            !this._contextService.getContextValue(MOBILE_UI_MODE) ||
-            this._context.unit.getSnapshot().documentStyle.documentFlavor !== DocumentFlavor.MODERN
-        ) {
-            return {};
-        }
-
-        const parentWidth = this._context.scene.getParent()?.width;
-        const availableWidth = parentWidth != null && parentWidth > 1
-            ? parentWidth
-            : this._context.engine.width;
-        if (!Number.isFinite(availableWidth) || availableWidth <= MOBILE_DOC_OUTER_MARGIN * 2) {
-            return {};
-        }
-
-        return {
-            modernPageWidth: availableWidth - MOBILE_DOC_OUTER_MARGIN * 2,
-            modernHorizontalMargin: DOC_PAGE_MARGIN,
-        };
+    protected _getMobileModernLayoutOptions(): Pick<IDocLayoutScheduleOptions, 'modernPageWidth' | 'modernHorizontalMargin'> {
+        return {};
     }
 
-    private _initMobileResponsiveLayout(): void {
-        if (
-            !this._contextService.getContextValue(MOBILE_UI_MODE) ||
-            this._context.unit.getSnapshot().documentStyle.documentFlavor !== DocumentFlavor.MODERN
-        ) {
-            return;
-        }
+    protected _initMobileResponsiveLayout(): void {}
 
-        this.disposeWithMe(fromEventSubject(this._context.engine.onTransformChange$).pipe(
-            throttleTime(0, animationFrameScheduler),
-            takeUntil(this.dispose$)
-        ).subscribe(() => {
-            const modernPageWidth = this._getMobileModernLayoutOptions().modernPageWidth;
-            if (
-                modernPageWidth == null ||
-                Math.abs(modernPageWidth - (this._mobileModernPageWidth ?? 0)) < 1
-            ) {
-                return;
-            }
-
-            const skeleton = this._docSkeletonManagerService.getSkeleton();
-            if (skeleton == null) {
-                return;
-            }
-
-            this._scheduleLayout(this._context.unitId, skeleton, { reason: 'initial' });
-        }));
+    protected _getHorizontalPageMargin(): number {
+        return DOC_PAGE_MARGIN;
     }
 
     private _addComponent() {
         const { scene, unit: documentModel, components } = this._context;
-        const DEFAULT_PAGE_MARGIN_LEFT = this._contextService.getContextValue(MOBILE_UI_MODE)
-            ? MOBILE_DOC_OUTER_MARGIN
-            : DOC_PAGE_MARGIN;
+        const DEFAULT_PAGE_MARGIN_LEFT = this._getHorizontalPageMargin();
         const DEFAULT_PAGE_MARGIN_TOP = DOC_PAGE_MARGIN;
         const config = {
             pageMarginLeft: DEFAULT_PAGE_MARGIN_LEFT,

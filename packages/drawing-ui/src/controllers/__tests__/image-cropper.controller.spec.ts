@@ -19,12 +19,13 @@ import { ContextService, DrawingTypeEnum, ICommandService, IContextService, Inje
 import { MessageType } from '@univerjs/design';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService, SetDrawingSelectedOperation } from '@univerjs/drawing';
 import { CURSOR_TYPE, Image, IRenderManagerService } from '@univerjs/engine-render';
-import { ILayoutService, IMessageService, IShortcutService, KeyCode, MOBILE_UI_MODE } from '@univerjs/ui';
+import { ILayoutService, IMessageService, IShortcutService, KeyCode } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { AutoImageCropOperation, CloseImageCropOperation, CropType, OpenImageCropOperation } from '../../commands/operations/image-crop.operation';
 import { ImageCropperObject } from '../../views/crop/image-cropper-object';
 import { ImageCropperController } from '../image-cropper.controller';
+import { MobileImageCropperController } from '../mobile/image-cropper.controller';
 
 function createImage(id: string) {
     const img = document.createElement('img');
@@ -56,10 +57,9 @@ function createController(
         [IShortcutService, { useValue: shortcut }],
         [ILayoutService, { useValue: layout }],
         [IContextService, { useClass: ContextService }],
-        [ImageCropperController],
+        [ImageCropperController, { useClass: mobile ? MobileImageCropperController : ImageCropperController }],
     ]);
     injectors.push(injector);
-    injector.get(IContextService).setContextValue(MOBILE_UI_MODE, mobile);
     return injector.get(ImageCropperController);
 }
 

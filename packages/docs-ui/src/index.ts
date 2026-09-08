@@ -254,6 +254,7 @@ export type { ISetDocInputStyleCommandParams } from './services/doc-menu-style.s
 export { DocMobileElementMenuService } from './services/doc-mobile-element-menu.service';
 export { DocPageLayoutService } from './services/doc-page-layout.service';
 export { DocParagraphMenuService } from './services/doc-paragraph-menu.service';
+export type { IDocCanvasPopup } from './services/doc-popup-manager.service';
 export { calcDocRangePositions, DocCanvasPopManagerService } from './services/doc-popup-manager.service';
 export type { IDocPrintPreparationContext } from './services/doc-print-interceptor.service';
 export { DocPrintInterceptorService } from './services/doc-print-interceptor.service';

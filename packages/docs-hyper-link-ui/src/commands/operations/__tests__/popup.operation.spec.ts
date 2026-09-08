@@ -15,11 +15,11 @@
  */
 
 import type { IDocumentData } from '@univerjs/core';
-import { CustomRangeType, ICommandService, IContextService, toDisposable, Univer, UniverInstanceType } from '@univerjs/core';
+import { CustomRangeType, ICommandService, toDisposable, Univer, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
-import { IDialogService, MOBILE_UI_MODE } from '@univerjs/ui';
+import { IDialogService } from '@univerjs/ui';
 import { of } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { DocHyperLinkPopupService } from '../../../services/hyper-link-popup.service';
@@ -74,7 +74,6 @@ describe('doc hyperlink popup operations', () => {
     beforeEach(() => {
         univer = new Univer();
         const injector = univer.__getInjector();
-        injector.get(IContextService).setContextValue(MOBILE_UI_MODE, false);
         injector.add([DocSelectionManagerService]);
         injector.add([DocCanvasPopManagerService, { useClass: TestDocCanvasPopManagerService as never }]);
         injector.add([IRenderManagerService, { useClass: RenderManagerService }]);

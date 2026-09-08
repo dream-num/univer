@@ -49,7 +49,6 @@ import {
     ComponentManager,
     ContextMenuPosition,
     IContextMenuService,
-    MOBILE_UI_MODE,
 } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { describe, expect, it } from 'vitest';
@@ -57,6 +56,7 @@ import { EmbedRuntimeFocusCoordinator, IDocEmbedRuntimeFocusCoordinator } from '
 import { DocLayoutInteractionService } from '../doc-layout-interaction.service';
 import { DocCanvasPopManagerService } from '../doc-popup-manager.service';
 import { DocFloatMenuService } from '../float-menu.service';
+import { MobileDocFloatMenuService } from '../mobile/float-menu.service';
 import { DocSelectionRenderService } from '../selection/doc-selection-render.service';
 
 class InertDocCanvasPopManagerService {
@@ -142,7 +142,8 @@ function createActiveFloatMenuHarness(
     unitId: string,
     body: ConstructorParameters<typeof DocumentDataModel>[0]['body'],
     runtimeFocusCoordinator?: EmbedRuntimeFocusCoordinator,
-    headers?: ConstructorParameters<typeof DocumentDataModel>[0]['headers']
+    headers?: ConstructorParameters<typeof DocumentDataModel>[0]['headers'],
+    mobile = false
 ) {
     const injector = new Injector();
     const contextMenuService = new RecordingContextMenuService();
@@ -164,7 +165,7 @@ function createActiveFloatMenuHarness(
     injector.get(ICommandService).registerCommand(SetTextSelectionsOperation);
     const univerInstanceService = injector.get(IUniverInstanceService) as UniverInstanceService;
     univerInstanceService.__addUnit(new DocumentDataModel({ id: unitId, body, headers }));
-    const service = injector.createInstance(DocFloatMenuService, { unitId } as never);
+    const service = injector.createInstance(mobile ? MobileDocFloatMenuService : DocFloatMenuService, { unitId } as never);
     const selectionManager = injector.get(DocSelectionManagerService);
     selectionManager.__TEST_ONLY_setCurrentSelection({ unitId, subUnitId: unitId });
 
@@ -282,8 +283,7 @@ describe('DocFloatMenuService', () => {
             customRanges: [],
             tables: [],
             textRuns: [],
-        });
-        harness.injector.get(IContextService).setContextValue(MOBILE_UI_MODE, true);
+        }, undefined, undefined, true);
 
         harness.selectionManager.__replaceTextRangesWithNoRefresh({
             textRanges: [{ startOffset: 0, endOffset: 6, collapsed: false }],

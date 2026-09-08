@@ -21,13 +21,18 @@
 import type { IGradientValue } from '../GradientColorPicker';
 import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import { useState } from 'react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import enUS from '../../../locale/en-US';
 import { ConfigProvider } from '../../config-provider/ConfigProvider';
 import { GradientColorPicker } from '../GradientColorPicker';
+import { MobileGradientColorPicker } from '../MobileGradientColorPicker';
 import '@testing-library/jest-dom/vitest';
 
-afterEach(cleanup);
+beforeEach(() => vi.stubGlobal('CSS', { ...globalThis.CSS, supports: () => false }));
+afterEach(() => {
+    cleanup();
+    vi.unstubAllGlobals();
+});
 
 const defaultValue: IGradientValue = {
     type: 'linear',
@@ -44,8 +49,8 @@ describe('mobile GradientColorPicker', () => {
         function Editor() {
             const [value, setValue] = useState(defaultValue);
             return (
-                <ConfigProvider mobile locale={enUS.design}>
-                    <GradientColorPicker
+                <ConfigProvider mountContainer={document.body} locale={enUS.design}>
+                    <MobileGradientColorPicker
                         value={value}
                         types={['linear']}
                         onChange={(next) => {
@@ -72,12 +77,12 @@ describe('mobile GradientColorPicker', () => {
 
     it('supports every registered gradient type and controlled value updates', () => {
         const onChange = vi.fn();
-        const view = render(<ConfigProvider mobile locale={enUS.design}><GradientColorPicker value={defaultValue} onChange={onChange} /></ConfigProvider>);
+        const view = render(<ConfigProvider mountContainer={document.body} locale={enUS.design}><MobileGradientColorPicker value={defaultValue} onChange={onChange} /></ConfigProvider>);
         for (const type of ['linear', 'radial', 'angular', 'diamond'] as const) {
             fireEvent.click(view.getByRole('button', { name: enUS.design.GradientColorPicker[type] }));
             expect(onChange).toHaveBeenLastCalledWith({ ...defaultValue, type });
         }
-        view.rerender(<ConfigProvider mobile locale={enUS.design}><GradientColorPicker value={{ ...defaultValue, type: 'radial' }} onChange={onChange} /></ConfigProvider>);
+        view.rerender(<ConfigProvider mountContainer={document.body} locale={enUS.design}><MobileGradientColorPicker value={{ ...defaultValue, type: 'radial' }} onChange={onChange} /></ConfigProvider>);
         expect(view.getByRole('button', { name: enUS.design.GradientColorPicker.radial })).toHaveAttribute('aria-pressed', 'true');
         expect(view.queryByLabelText(enUS.design.GradientColorPicker.angle)).toBeNull();
     });

@@ -19,8 +19,8 @@ import type { IRichTextEditorProps } from '../RichTextEditor';
 import { Button, clsx } from '@univerjs/design';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { CheckMarkIcon, CloseIcon, DownIcon } from '@univerjs/icons';
-import { useEvent, useMobileCanvasPanel } from '@univerjs/ui';
-import { useEffect, useRef, useState } from 'react';
+import { MobileKeyboardInsetContext, useEvent, useMobileCanvasPanel } from '@univerjs/ui';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { MobileRichTextToolbar } from '../mobile-rich-text-toolbar/MobileRichTextToolbar';
 import { RichTextEditor } from '../RichTextEditor';
 
@@ -38,7 +38,8 @@ export function MobileRichTextEditor(props: IMobileRichTextEditorProps) {
     const { expanded, onExpandedChange, onCancel, onConfirm, labels } = props;
     const containerRef = useRef<HTMLElement>(null);
     const pointerStartedInsideRef = useRef(false);
-    const [keyboardInset, setKeyboardInset] = useState(0);
+    const keyboardInset = useContext(MobileKeyboardInsetContext);
+    const keyboardWasVisibleRef = useRef(false);
     const [editor, setEditor] = useState<Editor | null>(null);
     const [contentHeight, setContentHeight] = useState(0);
     const confirmOnDismiss = useEvent(onConfirm);
@@ -54,32 +55,12 @@ export function MobileRichTextEditor(props: IMobileRichTextEditorProps) {
     }, [editor]);
 
     useEffect(() => {
-        const viewport = window.visualViewport;
-        let frame = 0;
-        let wasVisible = false;
-        const update = () => {
-            cancelAnimationFrame(frame);
-            frame = requestAnimationFrame(() => {
-                const inset = viewport ? Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop) : 0;
-                const visible = inset > 80;
-                setKeyboardInset(inset);
-                if (wasVisible && !visible) {
-                    confirmOnDismiss();
-                }
-                wasVisible = visible;
-            });
-        };
-        update();
-        window.addEventListener('resize', update);
-        viewport?.addEventListener('resize', update);
-        viewport?.addEventListener('scroll', update);
-        return () => {
-            cancelAnimationFrame(frame);
-            window.removeEventListener('resize', update);
-            viewport?.removeEventListener('resize', update);
-            viewport?.removeEventListener('scroll', update);
-        };
-    }, [confirmOnDismiss]);
+        const visible = keyboardInset > 80;
+        if (keyboardWasVisibleRef.current && !visible) {
+            confirmOnDismiss();
+        }
+        keyboardWasVisibleRef.current = visible;
+    }, [confirmOnDismiss, keyboardInset]);
 
     const buttonClassName = clsx('univer-h-12 univer-shrink-0 univer-text-lg', expanded
         ? 'univer-flex-1'

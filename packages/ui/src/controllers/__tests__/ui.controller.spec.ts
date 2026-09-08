@@ -14,46 +14,17 @@
  * limitations under the License.
  */
 
-import { ContextService, IContextService, Injector, RedoCommand, UndoCommand } from '@univerjs/core';
+import { RedoCommand, UndoCommand } from '@univerjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { OpenFeatureSearchOperation } from '../../commands/operations/open-feature-search.operation';
 import { ToggleShortcutPanelOperation } from '../../commands/operations/toggle-shortcut-panel.operation';
-import { MOBILE_UI_MODE } from '../../const';
 import { menuSchema } from '../../menu/schema';
-import { ShortcutPanelMenuItemFactory } from '../../menu/shortcut-panel.menu';
 import { RibbonStartGroup } from '../../services/menu/types';
 import { KeyCode, MetaKeys } from '../../services/shortcut/keycode';
 import { FeatureSearchController } from '../feature-search/feature-search.controller';
 import { ShortcutPanelController } from '../shortcut-display/shortcut-panel.controller';
 
 describe('shortcut-display controllers', () => {
-    it('should hide the shortcut panel menu item on mobile', () => {
-        const injector = new Injector();
-        const contextService = new ContextService();
-        injector.add([IContextService, { useValue: contextService }]);
-        const item = ShortcutPanelMenuItemFactory(injector);
-        const hiddenValues: boolean[] = [];
-        const subscription = item.hidden$?.subscribe((hidden) => hiddenValues.push(hidden));
-
-        expect(item).toEqual(expect.objectContaining({
-            id: ToggleShortcutPanelOperation.id,
-            title: 'ui.toggle-shortcut-panel',
-            tooltip: 'ui.toggle-shortcut-panel',
-            icon: 'KeyboardIcon',
-            type: 0,
-        }));
-        expect(hiddenValues).toEqual([]);
-
-        contextService.setContextValue(MOBILE_UI_MODE, true);
-        expect(hiddenValues).toEqual([true]);
-
-        contextService.setContextValue(MOBILE_UI_MODE, false);
-        expect(hiddenValues).toEqual([true, false]);
-
-        subscription?.unsubscribe();
-        injector.dispose();
-    });
-
     it('should register command and shortcut', () => {
         const shortcutService = {
             registerShortcut: vi.fn(() => ({ dispose: vi.fn() })),

@@ -17,10 +17,12 @@
 import type { ReactNode } from 'react';
 import type { CropType } from '../../commands/operations/image-crop.operation';
 import type { LocaleKey } from '../../locale/types';
+import type { IImageCropperProps } from './ImageCropper';
 import { LocaleService } from '@univerjs/core';
 import { MobileActionRow } from '@univerjs/design';
 import { CropIcon } from '@univerjs/icons';
 import { useDependency } from '@univerjs/ui';
+import { useImageCropper } from './use-image-cropper';
 
 interface IMobileImageCropperProps {
     cropValue: CropType;
@@ -30,7 +32,7 @@ interface IMobileImageCropperProps {
     children?: ReactNode;
 }
 
-export function MobileImageCropper(props: IMobileImageCropperProps) {
+function MobileImageCropperControls(props: IMobileImageCropperProps) {
     const localeService = useDependency(LocaleService);
 
     return (
@@ -61,5 +63,21 @@ export function MobileImageCropper(props: IMobileImageCropperProps) {
             />
             {props.children}
         </section>
+    );
+}
+export function MobileImageCropper(props: IImageCropperProps) {
+    const { drawingParam, cropperShow, cropValue, cropOptions, handleCropChange, onCropperBtnClick, ShapeClipPicker } = useImageCropper(props);
+    if (!drawingParam || !cropperShow) {
+        return null;
+    }
+    return (
+        <MobileImageCropperControls
+            cropValue={cropValue}
+            cropOptions={cropOptions}
+            onCropChange={handleCropChange}
+            onStartCrop={() => onCropperBtnClick(cropValue)}
+        >
+            {ShapeClipPicker && <ShapeClipPicker />}
+        </MobileImageCropperControls>
     );
 }

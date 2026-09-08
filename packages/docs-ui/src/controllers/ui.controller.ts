@@ -33,7 +33,6 @@ import {
     IMenuManagerService,
     IShortcutService,
     IUIPartsService,
-    MOBILE_UI_MODE,
 } from '@univerjs/ui';
 import { CoreHeaderFooterCommand, OpenHeaderFooterPanelCommand } from '../commands/commands/doc-header-footer.command';
 import { SidebarDocHeaderFooterPanelOperation } from '../commands/operations/doc-header-footer-panel.operation';
@@ -62,10 +61,6 @@ import {
 } from '../shortcuts/toolbar.shortcut';
 import { DocFooter } from '../views/doc-footer';
 import { DocSideMenu } from '../views/DocSideMenu';
-import {
-    MobileDocEditDoneButton,
-    MobileDocToolbar,
-} from '../views/mobile-doc-toolbar/MobileDocToolbar';
 
 export class DocUIController extends Disposable {
     constructor(
@@ -87,24 +82,12 @@ export class DocUIController extends Disposable {
         this._init();
     }
 
-    private _initUiParts() {
-        if (this._contextService.getContextValue(MOBILE_UI_MODE)) {
-            this.disposeWithMe(this._uiPartsService.registerComponent(
-                BuiltInUIPart.FOOTER,
-                () => connectInjector(MobileDocToolbar, this._injector)
-            ));
-            this.disposeWithMe(this._uiPartsService.registerComponent(
-                BuiltInUIPart.HEADER_MENU,
-                () => connectInjector(MobileDocEditDoneButton, this._injector)
-            ));
-            return;
-        }
-
+    protected _initUiParts() {
         this.disposeWithMe(this._uiPartsService.registerComponent(BuiltInUIPart.FOOTER, () => connectInjector(DocFooter, this._injector)));
         this.disposeWithMe(this._uiPartsService.registerComponent(BuiltInUIPart.CONTENT, () => connectInjector(DocSideMenu, this._injector)));
     }
 
-    private _initMenus(): void {
+    protected _initMenus(): void {
         this._menuManagerService.appendRootMenu(floatToolbarMenuSchema);
         this._menuManagerService.mergeMenu(menuSchema);
     }
@@ -147,14 +130,9 @@ export class DocUIController extends Disposable {
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 
-    private _initFocusHandler(): void {
+    protected _initFocusHandler(): void {
         this.disposeWithMe(
             this._layoutService.registerFocusHandler(UniverInstanceType.UNIVER_DOC, (unitId: string) => {
-                // Mobile canvas gestures explicitly focus the input. Returning focus from a
-                // menu to the layout must not reopen the software keyboard.
-                if (this._contextService.getContextValue(MOBILE_UI_MODE)) {
-                    return;
-                }
                 if (this._shouldPreserveEmbedFocus(unitId)) {
                     return;
                 }

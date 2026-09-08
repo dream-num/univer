@@ -1,3 +1,31 @@
+
+import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
+import type { IDocLayoutExecutor } from '@univerjs/docs';
+import type { Documents, IPointerEvent, RenderUnit } from '@univerjs/engine-render';
+import {
+    BooleanNumber,
+    CustomRangeType,
+    DataStreamTreeTokenType,
+    DocumentFlavor,
+    DrawingTypeEnum,
+    HorizontalAlign,
+    ICommandService,
+    IUniverInstanceService,
+    ObjectRelativeFromH,
+    ObjectRelativeFromV,
+    PositionedObjectLayoutType,
+    Univer,
+    UniverInstanceType,
+} from '@univerjs/core';
+import {
+    DocLayoutExecutorService,
+    DocSelectionManagerService,
+    DocSkeletonManagerService,
+    DocStateEmitService,
+    InsertTextCommand,
+    RichTextEditingMutation,
+    SetTextSelectionsOperation,
+} from '@univerjs/docs';
 /**
  * Copyright 2023-present DreamNum Co., Ltd.
  *
@@ -16,41 +44,13 @@
 
 // @vitest-environment jsdom
 
-import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
-import type { IDocLayoutExecutor } from '@univerjs/docs';
-import type { Documents, IPointerEvent, RenderUnit } from '@univerjs/engine-render';
-import {
-    BooleanNumber,
-    CustomRangeType,
-    DataStreamTreeTokenType,
-    DocumentFlavor,
-    DrawingTypeEnum,
-    HorizontalAlign,
-    ICommandService,
-    IContextService,
-    IUniverInstanceService,
-    ObjectRelativeFromH,
-    ObjectRelativeFromV,
-    PositionedObjectLayoutType,
-    Univer,
-    UniverInstanceType,
-} from '@univerjs/core';
-import {
-    DocLayoutExecutorService,
-    DocSelectionManagerService,
-    DocSkeletonManagerService,
-    DocStateEmitService,
-    InsertTextCommand,
-    RichTextEditingMutation,
-    SetTextSelectionsOperation,
-} from '@univerjs/docs';
 import {
     CanvasColorService,
     ICanvasColorService,
     IRenderManagerService,
     RenderManagerService,
 } from '@univerjs/engine-render';
-import { CanvasPopupService, ContextMenuService, ICanvasPopupService, IContextMenuService, ILayoutService, MOBILE_UI_MODE } from '@univerjs/ui';
+import { CanvasPopupService, ContextMenuService, ICanvasPopupService, IContextMenuService, ILayoutService } from '@univerjs/ui';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { VIEWPORT_KEY } from '../../../basics/docs-view-key';
 import { AfterSpaceCommand } from '../../../commands/commands/auto-format.command';
@@ -65,6 +65,8 @@ import { DocPageLayoutService } from '../../../services/doc-page-layout.service'
 import { DocCanvasPopManagerService } from '../../../services/doc-popup-manager.service';
 import { DocViewScaleService } from '../../../services/doc-view-scale';
 import { EditorService, IEditorService } from '../../../services/editor/editor-manager.service';
+import { MobileDocSelectionRenderService } from '../../../services/mobile/doc-selection-render.service';
+import { MobileDocViewScaleService } from '../../../services/mobile/doc-view-scale';
 import { DocSelectionRenderService } from '../../../services/selection/doc-selection-render.service';
 import { cursorConvertToTextRange } from '../../../services/selection/text-range';
 import { DocBackScrollRenderController } from '../back-scroll.render-controller';
@@ -72,6 +74,9 @@ import { DocIMEInputController } from '../doc-ime-input.controller';
 import { DocInputController } from '../doc-input.controller';
 import { DocSelectionRenderController } from '../doc-selection-render.controller';
 import { DocRenderController } from '../doc.render-controller';
+import { MobileDocBackScrollRenderController } from '../mobile/back-scroll.render-controller';
+import { MobileDocSelectionRenderController } from '../mobile/doc-selection-render.controller';
+import { MobileDocRenderController } from '../mobile/doc.render-controller';
 
 function createEditor(paragraphCount = 8, withDrawing = true, workerBeforeLayout = false, documentFlavor = DocumentFlavor.TRADITIONAL, withFootnote = false, mobile = false) {
     if (workerBeforeLayout) {
@@ -93,7 +98,6 @@ function createEditor(paragraphCount = 8, withDrawing = true, workerBeforeLayout
     injector.add([DocCanvasPopManagerService]);
     injector.add([DocMobileElementMenuService]);
     injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
-    injector.get(IContextService).setContextValue(MOBILE_UI_MODE, mobile);
     injector.add([DocLayoutExecutorService]);
     // The transport boundary stays pending; the real controller and coordinator
     // must still hand off before Main paginates the entire document.
@@ -184,13 +188,13 @@ function createEditor(paragraphCount = 8, withDrawing = true, workerBeforeLayout
     render.deactivate();
     render.addRenderDependencies([
         [DocSkeletonManagerService],
-        [DocSelectionRenderService],
-        [DocViewScaleService],
+        [DocSelectionRenderService, { useClass: mobile ? MobileDocSelectionRenderService : DocSelectionRenderService }],
+        [DocViewScaleService, { useClass: mobile ? MobileDocViewScaleService : DocViewScaleService }],
         [DocPageLayoutService],
         [DocLayoutInteractionService],
-        [DocRenderController],
-        [DocBackScrollRenderController],
-        [DocSelectionRenderController],
+        [DocRenderController, { useClass: mobile ? MobileDocRenderController : DocRenderController }],
+        [DocBackScrollRenderController, { useClass: mobile ? MobileDocBackScrollRenderController : DocBackScrollRenderController }],
+        [DocSelectionRenderController, { useClass: mobile ? MobileDocSelectionRenderController : DocSelectionRenderController }],
         [DocInputController],
         [DocIMEInputManagerService],
         [DocIMEInputController],

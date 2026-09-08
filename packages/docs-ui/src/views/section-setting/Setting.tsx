@@ -14,26 +14,22 @@
  * limitations under the License.
  */
 
-import type { ReactNode } from 'react';
+import type { ComponentType, ReactNode } from 'react';
 import type { LocaleKey } from '../../locale/types';
 import { ColumnSeparatorType, LocaleService, PageOrientType, SectionType } from '@univerjs/core';
-import { ConfigContext, InputNumber, Select } from '@univerjs/design';
+import { InputNumber, Select } from '@univerjs/design';
 import { UnitObject } from '@univerjs/protocol';
 import { useDependency, useObservable } from '@univerjs/ui';
-import { useContext, useEffect } from 'react';
+import { useEffect } from 'react';
 import { DocSectionSettingController } from '../../controllers/doc-section-setting.controller';
 import { DocObjectPermissionEntry } from '../permission/DocObjectPermissionEntry';
 import { useSectionSetting } from './use-section-setting';
 
 function SettingRow(props: { label: ReactNode; unit?: string; children: ReactNode }) {
-    const { mobile } = useContext(ConfigContext);
-
     return (
         <div
-            className={mobile
-                ? 'univer-flex univer-min-h-12 univer-flex-col univer-gap-2'
-                : 'univer-grid univer-min-h-8 univer-items-center univer-gap-3'}
-            style={mobile ? undefined : { gridTemplateColumns: 'minmax(0, 1fr) minmax(140px, 160px)' }}
+            className="univer-grid univer-min-h-8 univer-items-center univer-gap-3"
+            style={{ gridTemplateColumns: 'minmax(0, 1fr) minmax(140px, 160px)' }}
         >
             <div
                 className="
@@ -49,9 +45,14 @@ function SettingRow(props: { label: ReactNode; unit?: string; children: ReactNod
     );
 }
 
-export function SectionSetting() {
+export interface ISectionSettingProps {
+    RowComponent?: ComponentType<{ label: ReactNode; unit?: string; children: ReactNode }>;
+    InputNumberComponent?: typeof InputNumber;
+    SelectComponent?: typeof Select;
+}
+
+export function SectionSetting({ RowComponent = SettingRow, InputNumberComponent = InputNumber, SelectComponent = Select }: ISectionSettingProps) {
     const localeService = useDependency(LocaleService);
-    const { mobile } = useContext(ConfigContext);
     const controller = useDependency(DocSectionSettingController);
     const setting = useSectionSetting();
     useObservable(localeService.currentLocale$);
@@ -79,9 +80,9 @@ export function SectionSetting() {
                 </div>
             )}
             <div className="univer-grid univer-gap-3">
-                <SettingRow label={localeService.t<LocaleKey>('docs-ui.doc.slider.sectionSetting')}>
-                    <Select
-                        className={mobile ? 'univer-h-12 univer-w-full' : 'univer-w-full'}
+                <RowComponent label={localeService.t<LocaleKey>('docs-ui.doc.slider.sectionSetting')}>
+                    <SelectComponent
+                        className="univer-w-full"
                         value={setting.selectedSectionId ?? ''}
                         options={[
                             ...(setting.selectedSectionId == null
@@ -95,11 +96,11 @@ export function SectionSetting() {
                         ]}
                         onChange={setting.selectSection}
                     />
-                </SettingRow>
-                <SettingRow label={localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.columnCount')}>
-                    <InputNumber
+                </RowComponent>
+                <RowComponent label={localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.columnCount')}>
+                    <InputNumberComponent
                         aria-label={localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.columnCount')}
-                        className={mobile ? 'univer-h-12 univer-w-full' : 'univer-w-full'}
+                        className="univer-w-full"
                         min={1}
                         max={12}
                         step={1}
@@ -107,11 +108,11 @@ export function SectionSetting() {
                         value={setting.columnCount}
                         onChange={(value) => value != null && setting.setColumnCount(value)}
                     />
-                </SettingRow>
-                <SettingRow label={localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.columnGap')} unit=" (px)">
-                    <InputNumber
+                </RowComponent>
+                <RowComponent label={localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.columnGap')} unit=" (px)">
+                    <InputNumberComponent
                         aria-label={localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.columnGap')}
-                        className={mobile ? 'univer-h-12 univer-w-full' : 'univer-w-full'}
+                        className="univer-w-full"
                         min={0}
                         max={1000}
                         step={1}
@@ -119,10 +120,10 @@ export function SectionSetting() {
                         value={setting.columnGap}
                         onChange={(value) => value != null && setting.setColumnGap(value)}
                     />
-                </SettingRow>
-                <SettingRow label={localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.columnSeparator')}>
-                    <Select
-                        className={mobile ? 'univer-h-12 univer-w-full' : 'univer-w-full'}
+                </RowComponent>
+                <RowComponent label={localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.columnSeparator')}>
+                    <SelectComponent
+                        className="univer-w-full"
                         value={setting.separatorType == null ? '' : `${setting.separatorType}`}
                         options={[
                             ...(setting.separatorType == null
@@ -137,10 +138,10 @@ export function SectionSetting() {
                         ]}
                         onChange={(value) => setting.setSeparatorType(Number(value))}
                     />
-                </SettingRow>
-                <SettingRow label={localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.sectionStart')}>
-                    <Select
-                        className={mobile ? 'univer-h-12 univer-w-full' : 'univer-w-full'}
+                </RowComponent>
+                <RowComponent label={localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.sectionStart')}>
+                    <SelectComponent
+                        className="univer-w-full"
                         value={setting.sectionType == null ? '' : `${setting.sectionType}`}
                         options={[
                             ...(setting.sectionType == null
@@ -159,35 +160,35 @@ export function SectionSetting() {
                         ]}
                         onChange={(value) => setting.setSectionType(Number(value))}
                     />
-                </SettingRow>
+                </RowComponent>
                 <div className="univer-pt-2 univer-text-sm univer-font-medium">
                     {localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.pageSetup')}
                 </div>
-                <SettingRow label={localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.pageWidth')} unit=" (px)">
-                    <InputNumber
+                <RowComponent label={localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.pageWidth')} unit=" (px)">
+                    <InputNumberComponent
                         aria-label={localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.pageWidth')}
-                        className={mobile ? 'univer-h-12 univer-w-full' : 'univer-w-full'}
+                        className="univer-w-full"
                         min={1}
                         step={1}
                         precision={1}
                         value={setting.pageWidth}
                         onChange={(value) => value != null && setting.setPageWidth(value)}
                     />
-                </SettingRow>
-                <SettingRow label={localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.pageHeight')} unit=" (px)">
-                    <InputNumber
+                </RowComponent>
+                <RowComponent label={localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.pageHeight')} unit=" (px)">
+                    <InputNumberComponent
                         aria-label={localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.pageHeight')}
-                        className={mobile ? 'univer-h-12 univer-w-full' : 'univer-w-full'}
+                        className="univer-w-full"
                         min={1}
                         step={1}
                         precision={1}
                         value={setting.pageHeight}
                         onChange={(value) => value != null && setting.setPageHeight(value)}
                     />
-                </SettingRow>
-                <SettingRow label={localeService.t<LocaleKey>('docs-ui.page-settings.orientation')}>
-                    <Select
-                        className={mobile ? 'univer-h-12 univer-w-full' : 'univer-w-full'}
+                </RowComponent>
+                <RowComponent label={localeService.t<LocaleKey>('docs-ui.page-settings.orientation')}>
+                    <SelectComponent
+                        className="univer-w-full"
                         value={setting.pageOrient == null ? '' : `${setting.pageOrient}`}
                         options={[
                             ...(setting.pageOrient == null
@@ -202,62 +203,62 @@ export function SectionSetting() {
                         ]}
                         onChange={(value) => setting.setPageOrient(Number(value))}
                     />
-                </SettingRow>
-                <SettingRow label={localeService.t<LocaleKey>('docs-ui.page-settings.top')} unit=" (px)">
-                    <InputNumber
+                </RowComponent>
+                <RowComponent label={localeService.t<LocaleKey>('docs-ui.page-settings.top')} unit=" (px)">
+                    <InputNumberComponent
                         aria-label={localeService.t<LocaleKey>('docs-ui.page-settings.top')}
-                        className={mobile ? 'univer-h-12 univer-w-full' : 'univer-w-full'}
+                        className="univer-w-full"
                         min={0}
                         step={1}
                         precision={1}
                         value={setting.marginTop}
                         onChange={(value) => value != null && setting.setMarginTop(value)}
                     />
-                </SettingRow>
-                <SettingRow label={localeService.t<LocaleKey>('docs-ui.page-settings.bottom')} unit=" (px)">
-                    <InputNumber
+                </RowComponent>
+                <RowComponent label={localeService.t<LocaleKey>('docs-ui.page-settings.bottom')} unit=" (px)">
+                    <InputNumberComponent
                         aria-label={localeService.t<LocaleKey>('docs-ui.page-settings.bottom')}
-                        className={mobile ? 'univer-h-12 univer-w-full' : 'univer-w-full'}
+                        className="univer-w-full"
                         min={0}
                         step={1}
                         precision={1}
                         value={setting.marginBottom}
                         onChange={(value) => value != null && setting.setMarginBottom(value)}
                     />
-                </SettingRow>
-                <SettingRow label={localeService.t<LocaleKey>('docs-ui.page-settings.left')} unit=" (px)">
-                    <InputNumber
+                </RowComponent>
+                <RowComponent label={localeService.t<LocaleKey>('docs-ui.page-settings.left')} unit=" (px)">
+                    <InputNumberComponent
                         aria-label={localeService.t<LocaleKey>('docs-ui.page-settings.left')}
-                        className={mobile ? 'univer-h-12 univer-w-full' : 'univer-w-full'}
+                        className="univer-w-full"
                         min={0}
                         step={1}
                         precision={1}
                         value={setting.marginLeft}
                         onChange={(value) => value != null && setting.setMarginLeft(value)}
                     />
-                </SettingRow>
-                <SettingRow label={localeService.t<LocaleKey>('docs-ui.page-settings.right')} unit=" (px)">
-                    <InputNumber
+                </RowComponent>
+                <RowComponent label={localeService.t<LocaleKey>('docs-ui.page-settings.right')} unit=" (px)">
+                    <InputNumberComponent
                         aria-label={localeService.t<LocaleKey>('docs-ui.page-settings.right')}
-                        className={mobile ? 'univer-h-12 univer-w-full' : 'univer-w-full'}
+                        className="univer-w-full"
                         min={0}
                         step={1}
                         precision={1}
                         value={setting.marginRight}
                         onChange={(value) => value != null && setting.setMarginRight(value)}
                     />
-                </SettingRow>
-                <SettingRow label={localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.pageNumberStart')}>
-                    <InputNumber
+                </RowComponent>
+                <RowComponent label={localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.pageNumberStart')}>
+                    <InputNumberComponent
                         aria-label={localeService.t<LocaleKey>('docs-ui.doc.sectionSetting.pageNumberStart')}
-                        className={mobile ? 'univer-h-12 univer-w-full' : 'univer-w-full'}
+                        className="univer-w-full"
                         min={1}
                         step={1}
                         precision={0}
                         value={setting.pageNumberStart}
                         onChange={(value) => value != null && setting.setPageNumberStart(value)}
                     />
-                </SettingRow>
+                </RowComponent>
             </div>
             <DocObjectPermissionEntry
                 unitId={setting.unitId}

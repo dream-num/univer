@@ -48,6 +48,7 @@ import { DocDrawingAddRemoveController } from '../../../controllers/doc-drawing-
 import locale from '../../../locale/en-US';
 import { DocRefreshDrawingsService } from '../../../services/doc-refresh-drawings.service';
 import { DocDrawingTextWrap } from '../DocDrawingTextWrap';
+import { MobileDocDrawingTextWrap } from '../MobileDocDrawingTextWrap';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -243,13 +244,14 @@ function createPanelTestBed() {
 }
 
 function renderPanel(root: Root, testBed: ReturnType<typeof createPanelTestBed>, mobile = false) {
+    const Panel = mobile ? MobileDocDrawingTextWrap : DocDrawingTextWrap;
     const drawing = testBed.doc.getSnapshot().drawings![DRAWING_ID];
 
     act(() => {
         root.render(
             <RediContext.Provider value={{ injector: testBed.injector }}>
-                <ConfigProvider mobile={mobile} mountContainer={document.body}>
-                    <DocDrawingTextWrap drawings={[drawing as never]} />
+                <ConfigProvider mountContainer={document.body}>
+                    <Panel drawings={[drawing as never]} />
                 </ConfigProvider>
             </RediContext.Provider>
         );

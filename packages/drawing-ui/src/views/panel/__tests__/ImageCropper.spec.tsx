@@ -25,7 +25,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { AutoImageCropOperation, CloseImageCropOperation, CropType } from '../../../commands/operations/image-crop.operation';
 import locale from '../../../locale/en-US';
 import { DrawingImageClipService } from '../../../services/drawing-image-clip.service';
-import { ImageCropper } from '../ImageCropper';
+import { MobileImageCropper } from '../MobileImageCropper';
 
 describe('ImageCropper mobile', () => {
     let univer: Univer | undefined;
@@ -57,8 +57,8 @@ describe('ImageCropper mobile', () => {
         root = createRoot(container);
         act(() => root?.render(
             <RediContext.Provider value={{ injector }}>
-                <ConfigProvider mobile mountContainer={document.body}>
-                    <ImageCropper
+                <ConfigProvider mountContainer={document.body}>
+                    <MobileImageCropper
                         drawings={[{ unitId: 'doc', subUnitId: 'doc', drawingId: 'image', drawingType: DrawingTypeEnum.DRAWING_IMAGE }]}
                         cropperShow
                         onCropStart={() => { cropStarts++; }}

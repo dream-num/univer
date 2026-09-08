@@ -66,6 +66,8 @@ export {
     COMPONENT_IMAGE_POPUP_MENU,
     COMPONENT_MOBILE_IMAGE_POPUP_MENU,
 } from './views/image-popup-menu/component-name';
+export type { IImagePopupMenuItem } from './views/image-popup-menu/ImagePopupMenu';
+export { MobileObjectListPanel } from './views/object-list-panel/MobileObjectListPanel';
 export {
     getObjectListPanelSectionIdForDrawingType,
     isFloatingObjectListDrawingType,

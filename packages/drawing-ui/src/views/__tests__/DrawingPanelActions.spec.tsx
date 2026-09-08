@@ -21,10 +21,9 @@ import type { Root } from 'react-dom/client';
 import { ArrangeTypeEnum, CommandType, DrawingTypeEnum, ICommandService, LocaleType, Univer } from '@univerjs/core';
 import { ConfigProvider } from '@univerjs/design';
 import { DrawingManagerService, IDrawingManagerService } from '@univerjs/drawing';
-import { ComponentManager, IconManager, IDialogService, IMenuManagerService, MenuManagerService, RediContext } from '@univerjs/ui';
+import { ComponentManager, IconManager, IDialogService, IMenuManagerService, IUIPartsService, MenuManagerService, MobileDialogService, RediContext, UIPartsService } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
-import { of } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SetDrawingArrangeOperation } from '../../commands/operations/drawing-arrange.operation';
 import {
@@ -34,10 +33,11 @@ import {
 } from '../../commands/operations/image-crop.operation';
 import { DrawingImageClipService } from '../../services/drawing-image-clip.service';
 import { ImagePopupMenu } from '../image-popup-menu/ImagePopupMenu';
+import { MobileImagePopupMenu } from '../image-popup-menu/MobileImagePopupMenu';
 import { DrawingArrange } from '../panel/DrawingArrange';
 import { ImageCropper } from '../panel/ImageCropper';
 
-(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+Reflect.set(globalThis, 'IS_REACT_ACT_ENVIRONMENT', true);
 
 const unitId = 'drawing-panel-unit';
 const subUnitId = 'drawing-panel-subunit';
@@ -121,14 +121,8 @@ describe('drawing panel actions', () => {
         injector.add([ComponentManager]);
         injector.add([IMenuManagerService, { useClass: MenuManagerService }]);
         injector.add([DrawingImageClipService]);
-        injector.add([IDialogService, {
-            useValue: {
-                open: () => ({ dispose: () => undefined }),
-                close: () => undefined,
-                closeAll: () => undefined,
-                getDialogs$: () => of([]),
-            },
-        }]);
+        injector.add([IUIPartsService, { useClass: UIPartsService }]);
+        injector.add([IDialogService, { useClass: MobileDialogService }]);
         injector.get(IconManager).register({ DrawingEditIcon: () => <span /> });
 
         commandService = injector.get(ICommandService);
@@ -405,8 +399,8 @@ describe('drawing panel actions', () => {
 
         const rendered = renderWithRediContext(
             univer.__getInjector(),
-            <ConfigProvider mountContainer={document.body} mobile>
-                <ImagePopupMenu
+            <ConfigProvider mountContainer={document.body}>
+                <MobileImagePopupMenu
                     popup={{
                         extraProps: {
                             variant: 'doc-floating-toolbar',
@@ -447,8 +441,8 @@ describe('drawing panel actions', () => {
 
         const rendered = renderWithRediContext(
             univer.__getInjector(),
-            <ConfigProvider mountContainer={document.body} mobile>
-                <ImagePopupMenu
+            <ConfigProvider mountContainer={document.body}>
+                <MobileImagePopupMenu
                     popup={{
                         extraProps: {
                             menuItems: [{
@@ -472,7 +466,11 @@ describe('drawing panel actions', () => {
         root = rendered.root;
         container = rendered.container;
 
-        clickElement(container.querySelector('button[aria-label="drawing-ui.mobile.more"]')!);
+        const select = Array.from(container.querySelectorAll('button')).find((button) => button.textContent?.includes('chart.type'));
+        if (!select) {
+            throw new Error('Mobile chart selector was not found');
+        }
+        clickElement(select);
         const option = Array.from(document.querySelectorAll<HTMLButtonElement>('button[aria-pressed]'))
             .find((button) => button.textContent === 'Column');
         if (!option) {

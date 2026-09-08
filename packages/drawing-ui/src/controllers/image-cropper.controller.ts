@@ -24,7 +24,6 @@ import {
     Disposable,
     DisposableCollection,
     ICommandService,
-    IContextService,
     Inject,
     IUniverInstanceService,
     LocaleService,
@@ -37,7 +36,7 @@ import {
     SetDrawingSelectedOperation,
 } from '@univerjs/drawing';
 import { CURSOR_TYPE, Image, IRenderManagerService, precisionTo } from '@univerjs/engine-render';
-import { ILayoutService, IMessageService, IShortcutService, KeyCode, MOBILE_UI_MODE } from '@univerjs/ui';
+import { ILayoutService, IMessageService, IShortcutService, KeyCode } from '@univerjs/ui';
 import { BehaviorSubject, of, switchMap } from 'rxjs';
 import {
     AutoImageCropOperation,
@@ -76,8 +75,7 @@ export class ImageCropperController extends Disposable {
         @IMessageService private readonly _messageService: IMessageService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @IShortcutService private readonly _shortcutService: IShortcutService,
-        @ILayoutService private readonly _layoutService: ILayoutService,
-        @IContextService private readonly _contextService: IContextService
+        @ILayoutService private readonly _layoutService: ILayoutService
     ) {
         super();
 
@@ -242,6 +240,8 @@ export class ImageCropperController extends Disposable {
         });
     }
 
+    protected _configureCropControls(_cropper: ImageCropperObject): void {}
+
     private _initOpenCrop() {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
@@ -299,9 +299,7 @@ export class ImageCropperController extends Disposable {
                     prstGeom: imageShape.prstGeom,
                     applyTransform: imageShape.calculateTransformWithSrcRect(),
                 });
-                if (this._contextService.getContextValue(MOBILE_UI_MODE)) {
-                    imageCropperObject.transformerConfig = { ...imageCropperObject.transformerConfig, cropAnchorHitSize: 44 };
-                }
+                this._configureCropControls(imageCropperObject);
                 this._cropSnapshots.set(imageCropperObject, this._pendingCropSnapshot ?? this._captureCropSnapshot(imageShape));
                 this._pendingCropSnapshot = null;
 

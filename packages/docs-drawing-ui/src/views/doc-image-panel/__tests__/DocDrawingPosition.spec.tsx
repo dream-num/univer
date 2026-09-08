@@ -42,6 +42,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { createDocUiTestBed } from '../../../__tests__/create-doc-ui-test-bed';
 import locale from '../../../locale/en-US';
 import { DocDrawingPosition } from '../DocDrawingPosition';
+import { MobileDocDrawingPosition } from '../MobileDocDrawingPosition';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -257,13 +258,14 @@ function createPositionTestBed() {
 }
 
 function renderPanel(root: Root, testBed: ReturnType<typeof createPositionTestBed>, mobile = false) {
+    const Panel = mobile ? MobileDocDrawingPosition : DocDrawingPosition;
     const drawing = testBed.doc.getSnapshot().drawings![DRAWING_ID];
 
     act(() => {
         root.render(
             <RediContext.Provider value={{ injector: testBed.injector }}>
-                <ConfigProvider mobile={mobile} mountContainer={document.body}>
-                    <DocDrawingPosition drawings={[drawing as never]} />
+                <ConfigProvider mountContainer={document.body}>
+                    <Panel drawings={[drawing as never]} />
                 </ConfigProvider>
             </RediContext.Provider>
         );

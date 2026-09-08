@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import type { IDisposable } from '@univerjs/core';
+import type { IDisposable, ITextRangeParam } from '@univerjs/core';
 import {
     Disposable,
     DocumentDataModel,
     ICommandService,
-    IContextService,
     Inject,
     IPermissionService,
     IUniverInstanceService,
@@ -27,15 +26,13 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { canEditDocumentTargets, DocSelectionManagerService, getDocumentEntityParentPermissionObjectIds, getDocumentEntityPermissionObjectId } from '@univerjs/docs';
-import { DocCanvasPopManagerService, MOBILE_DOC_ELEMENT_MENU } from '@univerjs/docs-ui';
+import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { IDialogService, MOBILE_UI_MODE } from '@univerjs/ui';
+import { IDialogService } from '@univerjs/ui';
 import { BehaviorSubject } from 'rxjs';
 import { DeleteDocHyperLinkCommand } from '../commands/commands/delete-link.command';
 import { DocHyperLinkEdit } from '../views/DocHyperLinkEdit';
 import { DocLinkPopup } from '../views/DocLinkPopup';
-import { MobileDocHyperLinkEdit } from '../views/MobileDocHyperLinkEdit';
-import { MobileDocLinkPopup } from '../views/MobileDocLinkPopup';
 
 export interface ILinkInfo {
     unitId: string;
@@ -45,9 +42,6 @@ export interface ILinkInfo {
     startIndex: number;
     endIndex: number;
 }
-
-const MOBILE_DOC_HYPER_LINK_EDITOR_DIALOG_ID = 'doc-mobile-hyper-link-editor';
-const MOBILE_DOC_HYPER_LINK_VIEWER_DIALOG_ID = 'doc-mobile-hyper-link-viewer';
 
 const INFO_POPUP_HIDE_DELAY = 150;
 
@@ -75,14 +69,13 @@ export class DocHyperLinkPopupService extends Disposable {
     private _infoPopupSuppressionTimer: ReturnType<typeof setTimeout> | null = null;
 
     constructor(
-        @Inject(DocCanvasPopManagerService) private readonly _docCanvasPopupManagerService: DocCanvasPopManagerService,
+        @Inject(DocCanvasPopManagerService) protected readonly _docCanvasPopupManagerService: DocCanvasPopManagerService,
         @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IPermissionService private readonly _permissionService: IPermissionService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @IContextService private readonly _contextService: IContextService,
-        @IDialogService private readonly _dialogService: IDialogService,
-        @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @IDialogService protected readonly _dialogService: IDialogService,
+        @Inject(LocaleService) protected readonly _localeService: LocaleService,
         @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
@@ -164,27 +157,7 @@ export class DocHyperLinkPopupService extends Disposable {
         }
 
         if (activeRange) {
-            const mobileDialogService = this._getMobileDialogService();
-            if (mobileDialogService) {
-                this._editPopup = mobileDialogService.open({
-                    id: MOBILE_DOC_HYPER_LINK_EDITOR_DIALOG_ID,
-                    title: { title: this._localeService.t('docs-hyper-link-ui.menu.tooltip') },
-                    children: { label: MobileDocHyperLinkEdit.componentKey },
-                    maskClosable: false,
-                    onClose: () => this.hideEditPopup(),
-                });
-                return this._editPopup;
-            }
-
-            this._editPopup = this._docCanvasPopupManagerService.attachPopupToRange(
-                activeRange,
-                {
-                    componentKey: DocHyperLinkEdit.componentKey,
-                    direction: 'bottom',
-                    offset: [0, 10],
-                },
-                unitId
-            );
+            this._editPopup = this._openEditSurface(activeRange, unitId);
             this._editPopupUnitId = unitId;
             return this._editPopup;
         }
@@ -194,9 +167,9 @@ export class DocHyperLinkPopupService extends Disposable {
 
     hideEditPopup() {
         this._editingLink$.next(null);
-        this._getMobileDialogService()?.close(MOBILE_DOC_HYPER_LINK_EDITOR_DIALOG_ID);
-        this._editPopup?.dispose();
+        const popup = this._editPopup;
         this._editPopup = null;
+        popup?.dispose();
         this._editPopupUnitId = null;
     }
 
@@ -226,18 +199,21 @@ export class DocHyperLinkPopupService extends Disposable {
         this._infoPopupPinned = options?.pinned ?? false;
         this._showingLink$.next({ unitId, linkId, segmentId, segmentPage, startIndex, endIndex });
 
-        const mobileDialogService = this._getMobileDialogService();
-        if (mobileDialogService && !this.canEditLink(unitId, info)) {
-            this._infoPopup = mobileDialogService.open({
-                id: MOBILE_DOC_HYPER_LINK_VIEWER_DIALOG_ID,
-                title: { title: this._localeService.t('docs-hyper-link-ui.menu.tooltip') },
-                children: { label: MobileDocLinkPopup.componentKey },
-                onClose: () => this.hideInfoPopup(),
-            });
-            return this._infoPopup;
-        }
+        this._infoPopup = this._openInfoSurface(info);
+        return this._infoPopup;
+    }
 
-        this._infoPopup = this._docCanvasPopupManagerService.attachPopupToRange(
+    protected _openEditSurface(activeRange: ITextRangeParam, unitId: string): IDisposable {
+        return this._docCanvasPopupManagerService.attachPopupToRange(activeRange, {
+            componentKey: DocHyperLinkEdit.componentKey,
+            direction: 'bottom',
+            offset: [0, 10],
+        }, unitId);
+    }
+
+    protected _openInfoSurface(info: ILinkInfo, componentKey = DocLinkPopup.componentKey): IDisposable {
+        const { unitId, linkId, segmentId, segmentPage, startIndex, endIndex } = info;
+        return this._docCanvasPopupManagerService.attachPopupToRange(
             {
                 collapsed: false,
                 startOffset: startIndex,
@@ -246,7 +222,7 @@ export class DocHyperLinkPopupService extends Disposable {
                 segmentPage,
             },
             {
-                componentKey: mobileDialogService ? MOBILE_DOC_ELEMENT_MENU : DocLinkPopup.componentKey,
+                componentKey,
                 extraProps: {
                     onEdit: () => {
                         this.hideInfoPopup();
@@ -267,16 +243,15 @@ export class DocHyperLinkPopupService extends Disposable {
             },
             unitId
         );
-        return this._infoPopup;
     }
 
     hideInfoPopup() {
         this.cancelScheduledHideInfoPopup();
         this._infoPopupPinned = false;
         this._showingLink$.next(null);
-        this._getMobileDialogService()?.close(MOBILE_DOC_HYPER_LINK_VIEWER_DIALOG_ID);
-        this._infoPopup?.dispose();
+        const popup = this._infoPopup;
         this._infoPopup = null;
+        popup?.dispose();
     }
 
     scheduleHideInfoPopup() {
@@ -326,9 +301,5 @@ export class DocHyperLinkPopupService extends Disposable {
             ...getDocumentEntityParentPermissionObjectIds(document, segmentId, 'custom-range', linkInfo.linkId),
             getDocumentEntityPermissionObjectId(segmentId, 'custom-range', linkInfo.linkId),
         ]);
-    }
-
-    private _getMobileDialogService(): IDialogService | null {
-        return this._contextService.getContextValue(MOBILE_UI_MODE) ? this._dialogService : null;
     }
 }

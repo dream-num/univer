@@ -17,8 +17,7 @@
 import type { IDisposable } from '@univerjs/core';
 import type { IBoundRectNoAngle, IMouseEvent, IPointerEvent } from '@univerjs/engine-render';
 import type { IMobileDocElementMenuProps } from '../views/mobile-element-menu/MobileDocElementMenu';
-import { Disposable, IContextService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { MOBILE_UI_MODE } from '@univerjs/ui';
+import { Disposable, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { MOBILE_DOC_ELEMENT_MENU } from '../views/mobile-element-menu/MobileDocElementMenu';
 import { DocCanvasPopManagerService } from './doc-popup-manager.service';
 
@@ -36,7 +35,6 @@ export class DocMobileElementMenuService extends Disposable {
     private _unitId: string | null = null;
 
     constructor(
-        @IContextService private readonly _contextService: IContextService,
         @Inject(DocCanvasPopManagerService) private readonly _popupService: DocCanvasPopManagerService,
         @IUniverInstanceService instanceService: IUniverInstanceService
     ) {
@@ -52,9 +50,6 @@ export class DocMobileElementMenuService extends Disposable {
     }
 
     capture(target: IDocMobileElementTarget): boolean {
-        if (!this._contextService.getContextValue(MOBILE_UI_MODE)) {
-            return false;
-        }
         this._pending = target;
         // A hit not consumed by the document gesture must not leak into the next touch.
         queueMicrotask(() => {

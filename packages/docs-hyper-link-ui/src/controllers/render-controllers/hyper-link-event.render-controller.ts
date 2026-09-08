@@ -21,13 +21,10 @@ import {
     Disposable,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     ICommandService,
-    IContextService,
     Inject,
 } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import { DocEventManagerService, DocMobileElementMenuService } from '@univerjs/docs-ui';
-import { MOBILE_UI_MODE } from '@univerjs/ui';
-import { DeleteDocHyperLinkCommand } from '../../commands/commands/delete-link.command';
 import {
     ClickDocHyperLinkOperation,
     ToggleDocHyperLinkInfoPopupOperation,
@@ -40,14 +37,13 @@ export class DocHyperLinkEventRenderController extends Disposable implements IRe
     }
 
     constructor(
-        private readonly _context: IRenderContext<DocumentDataModel>,
-        @Inject(DocEventManagerService) private readonly _docEventManagerService: DocEventManagerService,
-        @ICommandService private readonly _commandService: ICommandService,
-        @Inject(DocHyperLinkPopupService) private readonly _hyperLinkPopupService: DocHyperLinkPopupService,
+        protected readonly _context: IRenderContext<DocumentDataModel>,
+        @Inject(DocEventManagerService) protected readonly _docEventManagerService: DocEventManagerService,
+        @ICommandService protected readonly _commandService: ICommandService,
+        @Inject(DocHyperLinkPopupService) protected readonly _hyperLinkPopupService: DocHyperLinkPopupService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService,
-        @Inject(DocMobileElementMenuService) private readonly _mobileElementMenuService: DocMobileElementMenuService,
-        @IContextService private readonly _contextService: IContextService
+        @Inject(DocMobileElementMenuService) protected readonly _mobileElementMenuService: DocMobileElementMenuService
     ) {
         super();
 
@@ -70,36 +66,18 @@ export class DocHyperLinkEventRenderController extends Disposable implements IRe
         }
     }
 
-    private _initPointerDown() {
+    protected _initPointerDown() {
         this.disposeWithMe(
             this._docEventManagerService.pointerDownCustomRanges$.subscribe((ranges) => {
                 const link = ranges.find((range) => range.range.rangeType === CustomRangeType.HYPERLINK);
                 if (!link) {
                     this._hyperLinkPopupService.hideInfoPopupOnPointerDown();
-                    return;
-                }
-                const info = {
-                    unitId: this._context.unitId,
-                    linkId: link.range.rangeId,
-                    segmentId: link.segmentId,
-                    segmentPage: link.segmentPageIndex,
-                    startIndex: link.range.startIndex,
-                    endIndex: link.range.endIndex,
-                };
-                const rect = link.rects[0];
-                if (rect && this._hyperLinkPopupService.canEditLink(info.unitId, info)) {
-                    this._mobileElementMenuService.capture({
-                        unitId: info.unitId,
-                        rect,
-                        onEdit: () => this._hyperLinkPopupService.showEditPopup(info.unitId, info),
-                        onDelete: () => this._commandService.executeCommand(DeleteDocHyperLinkCommand.id, info),
-                    });
                 }
             })
         );
     }
 
-    private _initHover() {
+    protected _initHover() {
         this.disposeWithMe(
             this._docEventManagerService.hoverCustomRanges$.subscribe((ranges) => {
                 const link = ranges.find((range) => range.range.rangeType === CustomRangeType.HYPERLINK);
@@ -119,9 +97,6 @@ export class DocHyperLinkEventRenderController extends Disposable implements IRe
                         startIndex: link.range.startIndex,
                         endIndex: link.range.endIndex,
                     };
-                    if (this._contextService.getContextValue(MOBILE_UI_MODE) && this._hyperLinkPopupService.canEditLink(info.unitId, info)) {
-                        return;
-                    }
                     this._commandService.executeCommand(
                         ToggleDocHyperLinkInfoPopupOperation.id,
                         info

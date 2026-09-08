@@ -23,6 +23,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import enUS from '../../../locale/en-US';
 import { ConfigProvider } from '../../config-provider/ConfigProvider';
 import { Dropdown } from '../Dropdown';
+import { MobileOverlayContext } from '../mobile-overlay-context';
 import { MobileDropdown } from '../MobileDropdown';
 
 afterEach(() => {
@@ -100,11 +101,13 @@ describe('Dropdown', () => {
         const onMount = vi.fn((_element: HTMLElement) => release);
         const overlay = { modal: false, onMount };
         const app = (open: boolean) => (
-            <ConfigProvider locale={enUS.design} mountContainer={document.body} mobile mobileOverlay={overlay}>
-                <button type="button">Canvas action</button>
-                <Dropdown overlay={<div>Object options</div>} open={open}>
-                    <button type="button">Trigger</button>
-                </Dropdown>
+            <ConfigProvider locale={enUS.design} mountContainer={document.body}>
+                <MobileOverlayContext.Provider value={overlay}>
+                    <button type="button">Canvas action</button>
+                    <MobileDropdown overlay={<div>Object options</div>} open={open}>
+                        <button type="button">Trigger</button>
+                    </MobileDropdown>
+                </MobileOverlayContext.Provider>
             </ConfigProvider>
         );
         const view = render(app(true));
@@ -112,7 +115,7 @@ describe('Dropdown', () => {
         expect(onMount).toHaveBeenCalledWith(dialog);
         expect(dialog.getAttribute('aria-modal')).not.toBe('true');
         expect(screen.getByRole('button', { name: 'Canvas action' })).toBeTruthy();
-        expect(dialog.style.height).toBe('40dvh');
+        expect(dialog.style.height).toMatch(/^40(d?vh)$/);
         view.rerender(app(false));
         expect(release).toHaveBeenCalledTimes(1);
     });

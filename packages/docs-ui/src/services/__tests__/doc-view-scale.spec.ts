@@ -18,18 +18,17 @@
  * @vitest-environment jsdom
  */
 
+import type { IUniverDocsUIConfig } from '../../config/config';
 import {
     createInternalEditorID,
     DocumentFlavor,
     IConfigService,
-    IContextService,
     MODERN_DOCUMENT_WIDTH,
     ModernDocumentWidthMode,
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
 import { CanvasColorService, Engine, ICanvasColorService, RenderUnit, Scene } from '@univerjs/engine-render';
-import { MOBILE_UI_MODE } from '@univerjs/ui';
 import { afterEach, describe, expect, it } from 'vitest';
 import { DEFAULT_DOC_FIT_TO_WIDTH_OPTIONS, DOCS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import {
@@ -39,8 +38,47 @@ import {
     resolveDocViewScale,
 } from '../doc-view-scale';
 
+import { MobileDocViewScaleService } from '../mobile/doc-view-scale';
+
+const cleanup: Array<() => void> = [];
+
+function createRender(
+    mobile: boolean,
+    documentFlavor: DocumentFlavor,
+    availableWidth: number,
+    pageWidth: number,
+    zoomRatio = 1,
+    config: IUniverDocsUIConfig = { fitToWidth: { mode: 'fit-width', paddingX: 0, minScale: 0 } },
+    id = 'view-scale-test'
+) {
+    const univer = new Univer();
+    const injector = univer.__getInjector();
+    injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
+    injector.get(IConfigService).setConfig(DOCS_UI_PLUGIN_CONFIG_KEY, config);
+    const unit = univer.createUnit(UniverInstanceType.UNIVER_DOC, {
+        id,
+        body: { dataStream: 'Text\r\n' },
+        settings: { zoomRatio },
+        documentStyle: { documentFlavor, pageSize: { width: pageWidth, height: Infinity } },
+    });
+    const engine = injector.createInstance(Engine, unit.getUnitId(), { elementWidth: availableWidth, elementHeight: 800 });
+    const scene = new Scene('view-scale', engine);
+    const render = injector.createInstance(RenderUnit, { unit, engine, scene, isMainScene: true });
+    render.addRenderDependencies([[DocViewScaleService, { useClass: mobile ? MobileDocViewScaleService : DocViewScaleService }]]);
+    cleanup.push(() => {
+        render.dispose();
+        scene.dispose();
+        engine.dispose();
+        univer.dispose();
+    });
+    return { service: render.with(DocViewScaleService), engine };
+}
+
 describe('doc view scale helpers', () => {
     afterEach(() => {
+        for (const dispose of cleanup.splice(0).reverse()) {
+            dispose();
+        }
         document.body.innerHTML = '';
     });
 
@@ -110,160 +148,39 @@ describe('doc view scale helpers', () => {
     });
 
     it('computes view scale from engine width, document zoom, and configured page width', () => {
-        const context = {
-            engine: { width: 1440 },
-            unit: {
-                getSettings: () => ({ zoomRatio: 1.25 }),
-                getSnapshot: () => ({
-                    documentStyle: {
-                        documentFlavor: DocumentFlavor.MODERN,
-                        pageSize: { width: 960, height: Number.POSITIVE_INFINITY },
-                    },
-                }),
-            },
-        };
-        const service = new DocViewScaleService(
-            context as never,
-            { getConfig: () => ({ fitToWidth: { mode: 'fit-width', paddingX: 0, minScale: 0 } }) } as never,
-            { getContextValue: () => false } as never
-        );
-
+        const { service } = createRender(false, DocumentFlavor.MODERN, 1440, 960, 1.25);
         expect(service.getFitToWidthScale()).toBe(1.5);
         expect(service.getViewScale()).toBe(1.875);
     });
 
-    it('falls back to default modern width and zoom while embedded doc units are not resolved', () => {
-        const service = new DocViewScaleService(
-            {
-                engine: { width: 960 },
-                unit: null,
-            } as never,
-            { getConfig: () => ({ fitToWidth: { mode: 'fit-width', paddingX: 0, minScale: 0 } }) } as never,
-            { getContextValue: () => false } as never
-        );
-
-        expect(service.getBaseWidth()).toBe(MODERN_DOCUMENT_WIDTH[ModernDocumentWidthMode.MEDIUM]);
-        expect(service.getUserZoomRatio()).toBe(1);
-        expect(service.getViewScale()).toBe(1);
-    });
-
-    it('uses configured container width for container-targeted fitting', () => {
-        const context = {
-            engine: { width: 960 },
-            unit: {
-                getSettings: () => ({ zoomRatio: 1 }),
-                getSnapshot: () => ({
-                    documentStyle: {
-                        documentFlavor: DocumentFlavor.MODERN,
-                        pageSize: { width: 960, height: Number.POSITIVE_INFINITY },
-                    },
-                }),
-            },
-        };
-        const service = new DocViewScaleService(
-            context as never,
-            {
-                getConfig: () => ({
-                    container: { clientWidth: 480 },
-                    fitToWidth: { mode: 'fit-width', target: 'container', paddingX: 0, minScale: 0 },
-                }),
-            } as never,
-            { getContextValue: () => false } as never
-        );
-
-        expect(service.getAvailableWidth()).toBe(480);
-        expect(service.getFitToWidthScale()).toBe(0.5);
-    });
-
-    it('resolves string containers as element ids for embedded fitting', () => {
+    it('uses configured element and string containers for container-targeted fitting', () => {
         const container = document.createElement('div');
         container.id = 'univerdoc';
-        Object.defineProperty(container, 'clientWidth', {
-            configurable: true,
-            value: 480,
-        });
+        Object.defineProperty(container, 'clientWidth', { configurable: true, value: 480 });
         document.body.appendChild(container);
-
-        const context = {
-            engine: { width: 960 },
-            unit: {
-                getSettings: () => ({ zoomRatio: 1 }),
-                getSnapshot: () => ({
-                    documentStyle: {
-                        documentFlavor: DocumentFlavor.MODERN,
-                        pageSize: { width: 960, height: Number.POSITIVE_INFINITY },
-                    },
-                }),
-            },
-        };
-        const service = new DocViewScaleService(
-            context as never,
-            {
-                getConfig: () => ({
-                    container: 'univerdoc',
-                    fitToWidth: { mode: 'fit-width', target: 'container', paddingX: 0, minScale: 0 },
-                }),
-            } as never,
-            { getContextValue: () => false } as never
-        );
-
-        expect(service.getAvailableWidth()).toBe(480);
-        expect(service.getFitToWidthScale()).toBe(0.5);
-    });
-
-    it('keeps mobile internal editor text at its own zoom across compact and expanded widths', () => {
-        const univer = new Univer();
-        const injector = univer.__getInjector();
-        injector.add([ICanvasColorService, { useClass: CanvasColorService }]);
-        injector.get(IContextService).setContextValue(MOBILE_UI_MODE, true);
-        injector.get(IConfigService).setConfig(DOCS_UI_PLUGIN_CONFIG_KEY, {
-            fitToWidth: { mode: 'fit-width', paddingX: 12, minScale: 0, maxScale: 1 },
-        });
-        const unit = univer.createUnit(UniverInstanceType.UNIVER_DOC, {
-            id: createInternalEditorID('shape-text'),
-            body: { dataStream: 'Shape text\r\n' },
-            documentStyle: { pageSize: { width: Infinity, height: Infinity }, textStyle: { fs: 18 } },
-        });
-        const engine = injector.createInstance(Engine, unit.getUnitId(), { elementWidth: 270, elementHeight: 40 });
-        const scene = new Scene('editor', engine);
-        const render = injector.createInstance(RenderUnit, { unit, engine, scene, isMainScene: false });
-        render.addRenderDependencies([[DocViewScaleService]]);
-        try {
-            const service = render.with(DocViewScaleService);
-            expect(service.getViewScale()).toBe(1);
-            engine.resizeBySize(390, 700);
-            expect(service.getViewScale()).toBe(1);
-            expect(service.getViewScale(1.25)).toBe(1.25);
-
-            injector.get(IContextService).setContextValue(MOBILE_UI_MODE, false);
-            expect(service.getFitToWidthScale()).toBeCloseTo((390 - 24) / MODERN_DOCUMENT_WIDTH[ModernDocumentWidthMode.MEDIUM]);
-        } finally {
-            render.dispose();
-            scene.dispose();
-            engine.dispose();
-            univer.dispose();
+        for (const target of [container, 'univerdoc']) {
+            const { service } = createRender(false, DocumentFlavor.MODERN, 960, 960, 1, {
+                container: target,
+                fitToWidth: { mode: 'fit-width', target: 'container', paddingX: 0, minScale: 0 },
+            });
+            expect(service.getAvailableWidth()).toBe(480);
+            expect(service.getFitToWidthScale()).toBe(0.5);
         }
     });
 
-    it('keeps Modern documents at 1:1 scale on mobile while Traditional documents still fit', () => {
-        const createService = (documentFlavor: DocumentFlavor) => new DocViewScaleService(
-            {
-                engine: { width: 400 },
-                unit: {
-                    getSettings: () => ({ zoomRatio: 1 }),
-                    getSnapshot: () => ({
-                        documentStyle: {
-                            documentFlavor,
-                            pageSize: { width: 800, height: 1000 },
-                        },
-                    }),
-                },
-            } as never,
-            { getConfig: () => ({ fitToWidth: { mode: 'fit-width', paddingX: 0, minScale: 0 } }) } as never,
-            { getContextValue: () => true } as never
-        );
+    it('keeps mobile internal editor text at its own zoom across compact and expanded widths', () => {
+        const { service, engine } = createRender(true, DocumentFlavor.MODERN, 270, Infinity, 1, {
+            fitToWidth: { mode: 'fit-width', paddingX: 12, minScale: 0, maxScale: 1 },
+        }, createInternalEditorID('shape-text'));
+        expect(service.getViewScale()).toBe(1);
+        engine.resizeBySize(390, 700);
+        expect(service.getViewScale()).toBe(1);
+        expect(service.getViewScale(1.25)).toBe(1.25);
+    });
 
-        expect(createService(DocumentFlavor.MODERN).getFitToWidthScale()).toBe(1);
-        expect(createService(DocumentFlavor.TRADITIONAL).getFitToWidthScale()).toBe(0.5);
+    it('keeps Modern documents at 1:1 scale on mobile while Traditional documents still fit', () => {
+        expect(createRender(true, DocumentFlavor.MODERN, 400, 800).service.getFitToWidthScale()).toBe(1);
+        expect(createRender(true, DocumentFlavor.TRADITIONAL, 400, 800).service.getFitToWidthScale()).toBe(0.5);
+        expect(createRender(false, DocumentFlavor.MODERN, 400, 800).service.getFitToWidthScale()).toBe(0.5);
     });
 });

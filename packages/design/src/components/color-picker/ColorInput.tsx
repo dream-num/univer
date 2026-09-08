@@ -39,7 +39,7 @@ const FULL_HEX_COLOR_PATTERN = /^[0-9a-f]{6}$/i;
 function HexInput({ hsv, onChange }: IInputProps) {
     const inputRef = useRef<HTMLInputElement>(null);
     const isComposingRef = useRef(false);
-    const lastInputValueRef = useRef('');
+    const [inputValue, setInputValue] = useState('');
     const hexValue = useMemo(() => hsvToHex(hsv[0], hsv[1], hsv[2]), [hsv]);
 
     useEffect(() => {
@@ -48,23 +48,16 @@ function HexInput({ hsv, onChange }: IInputProps) {
         }
 
         const nextValue = hexValue.replace(/^#/, '');
-        // A casing-only DOM value rewrite breaks the native input's undo history and text selection.
-        const input = inputRef.current;
-        if (input && input.value.toLowerCase() !== nextValue) {
-            input.value = nextValue;
-        }
-        lastInputValueRef.current = input?.value ?? nextValue;
+        // Preserve the user's casing so color echoes do not rewrite native selection or undo history.
+        setInputValue((previous) => previous.toLowerCase() === nextValue ? previous : nextValue);
     }, [hexValue]);
 
     const updateInputValue = useCallback((newValue: string) => {
         if (!/^[0-9a-f]{0,6}$/i.test(newValue)) {
-            if (inputRef.current) {
-                inputRef.current.value = lastInputValueRef.current;
-            }
             return;
         }
 
-        lastInputValueRef.current = newValue;
+        setInputValue(newValue);
 
         if (FULL_HEX_COLOR_PATTERN.test(newValue)) {
             const hsvValue = hexToHsv(newValue);
@@ -77,6 +70,7 @@ function HexInput({ hsv, onChange }: IInputProps) {
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         const newValue = e.target.value.trim();
         if (isComposingRef.current || (e.nativeEvent as InputEvent).isComposing) {
+            setInputValue(newValue);
             return;
         }
 
@@ -101,8 +95,7 @@ function HexInput({ hsv, onChange }: IInputProps) {
             isComposingRef.current = false;
             const value = input.value.trim();
             if (value !== '' && !FULL_HEX_COLOR_PATTERN.test(value)) {
-                input.value = hexValue.replace(/^#/, '');
-                lastInputValueRef.current = input.value;
+                setInputValue(hexValue.replace(/^#/, ''));
                 return;
             }
             updateInputValue(value);
@@ -122,10 +115,7 @@ function HexInput({ hsv, onChange }: IInputProps) {
     const handleBlur = () => {
         if (!FULL_HEX_COLOR_PATTERN.test(inputRef.current?.value ?? '')) {
             const nextValue = hexValue.replace(/^#/, '');
-            if (inputRef.current) {
-                inputRef.current.value = nextValue;
-            }
-            lastInputValueRef.current = nextValue;
+            setInputValue(nextValue);
         }
     };
 
@@ -133,6 +123,7 @@ function HexInput({ hsv, onChange }: IInputProps) {
         <>
             <input
                 ref={inputRef}
+                value={inputValue}
                 className={clsx(`
                   univer-w-full univer-px-2 !univer-pl-4 univer-uppercase
                   focus:univer-border-primary-500 focus:univer-outline-none

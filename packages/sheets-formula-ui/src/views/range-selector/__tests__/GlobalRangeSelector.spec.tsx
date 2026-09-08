@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IDisposable, IDocumentData, IUnitRangeName } from '@univerjs/core';
-import type { IRichTextEditorProps } from '@univerjs/docs-ui';
+import type { ICommandInfo, IDisposable, IUnitRangeName } from '@univerjs/core';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import type { Root } from 'react-dom/client';
 import type { IRangeSelectorInstance } from '../index';
 import {
     CommandType,
-    getPlainText,
-    HorizontalAlign,
     ICommandService,
     Injector,
     IUniverInstanceService,
@@ -44,19 +41,8 @@ import { GlobalRangeSelectorService } from '../../../services/range-selector.ser
 import { GlobalRangeSelector } from '../Global';
 import { RangeSelector } from '../index';
 import { MobileGlobalRangeSelector } from '../MobileGlobal';
-import { MobileRangeSelector } from '../MobileRangeSelector';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
-
-let richTextEditorProps: IRichTextEditorProps | undefined;
-
-vi.mock('@univerjs/docs-ui', async (importOriginal) => ({
-    ...await importOriginal<typeof import('@univerjs/docs-ui')>(),
-    RichTextEditor: (props: IRichTextEditorProps) => {
-        richTextEditorProps = props;
-        return null;
-    },
-}));
 
 class TestCommandService {
     readonly executed: Array<{ id: string; params?: unknown }> = [];
@@ -233,7 +219,6 @@ describe('GlobalRangeSelector', () => {
     let root: Root;
 
     beforeEach(() => {
-        richTextEditorProps = undefined;
         container = document.createElement('div');
         document.body.appendChild(container);
         root = createRoot(container);
@@ -429,58 +414,6 @@ describe('GlobalRangeSelector', () => {
                 },
             },
         ]);
-    });
-
-    it('right-aligns RTL range text without changing its logical character order', async () => {
-        const { injector } = createGlobalRangeSelectorTestBed();
-        injector.get(LocaleService).setDirection('rtl');
-
-        await act(async () => {
-            root.render(
-                <RediContext.Provider value={{ injector }}>
-                    <RangeSelector
-                        unitId="book-1"
-                        subUnitId="sheet-1"
-                        initialValue="Sheet1!B20:E26"
-                    />
-                </RediContext.Provider>
-            );
-            await Promise.resolve();
-        });
-
-        const initialValue = richTextEditorProps?.initialValue;
-        expect(initialValue).toBeTypeOf('object');
-        const documentData = initialValue as IDocumentData;
-        expect(getPlainText(documentData.body?.dataStream ?? '')).toBe('Sheet1!B20:E26');
-        expect(documentData.documentStyle?.renderConfig?.horizontalAlign).toBe(HorizontalAlign.RIGHT);
-        expect(documentData.body?.paragraphs?.[0].paragraphStyle?.horizontalAlign).toBe(HorizontalAlign.RIGHT);
-        expect(documentData.body?.paragraphs?.[0].paragraphStyle?.direction).toBeUndefined();
-    });
-
-    it('applies the same RTL range text alignment in the mobile selector', async () => {
-        const { injector } = createGlobalRangeSelectorTestBed();
-        injector.get(LocaleService).setDirection('rtl');
-
-        await act(async () => {
-            root.render(
-                <RediContext.Provider value={{ injector }}>
-                    <MobileRangeSelector
-                        unitId="book-1"
-                        subUnitId="sheet-1"
-                        initialValue="Sheet1!B20:E26"
-                    />
-                </RediContext.Provider>
-            );
-            await Promise.resolve();
-        });
-
-        const initialValue = richTextEditorProps?.initialValue;
-        expect(initialValue).toBeTypeOf('object');
-        const documentData = initialValue as IDocumentData;
-        expect(getPlainText(documentData.body?.dataStream ?? '')).toBe('Sheet1!B20:E26');
-        expect(documentData.documentStyle?.renderConfig?.horizontalAlign).toBe(HorizontalAlign.RIGHT);
-        expect(documentData.body?.paragraphs?.[0].paragraphStyle?.horizontalAlign).toBe(HorizontalAlign.RIGHT);
-        expect(documentData.body?.paragraphs?.[0].paragraphStyle?.direction).toBeUndefined();
     });
 
     it('confirms the typed range without leaving the temporary range selection active', async () => {

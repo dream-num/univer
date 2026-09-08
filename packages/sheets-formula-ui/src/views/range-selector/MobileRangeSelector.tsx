@@ -61,7 +61,7 @@ export function MobileRangeSelector(props: IRangeSelectorProps) {
     const commandService = useDependency(ICommandService);
     const { sequenceNodes } = useRangesHighlight(editor, focusing, unitId, subUnitId);
     const sequenceNodesRef = useStateRef(sequenceNodes);
-    const { initialDocument, replaceText } = useRangeSelectorEditorDocument(editor, props.initialValue);
+    useRangeSelectorEditorDocument(editor);
     const blurEditor = useEvent(() => {
         editor?.setSelectionRanges([]);
         editor?.blur();
@@ -128,7 +128,6 @@ export function MobileRangeSelector(props: IRangeSelectorProps) {
                     isSingle
                     {...props}
                     className={clsx(props.className, 'rtl:[&>div]:univer-flex-row-reverse')}
-                    initialValue={initialDocument}
                     preserveHostFocus
                     onFocusChange={(isFocusing, newValue) => {
                         setFocusing(isFocusing);
@@ -161,7 +160,7 @@ export function MobileRangeSelector(props: IRangeSelectorProps) {
                 onConfirm={(ranges) => {
                     const resultStr = stringifyRanges(ranges);
                     const documentData = RichTextBuilder.create().insertText(resultStr).getData();
-                    replaceText(resultStr);
+                    editor?.replaceText(resultStr, false);
                     onChange?.(documentData, resultStr);
                     setPopupVisible(false);
                     setRangeSelectorRanges([]);

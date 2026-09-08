@@ -15,7 +15,15 @@
  */
 
 import type { Injector, IRange, IWorkbookData, Nullable, Univer, Workbook } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, LocaleType, Tools, UniverInstanceType } from '@univerjs/core';
+import {
+    ICommandService,
+    IUniverInstanceService,
+    LocaleType,
+    RedoCommand,
+    Tools,
+    UndoCommand,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { MergeCellController } from '../../../controllers/merge-cell.controller';
 import { RefRangeService } from '../../../services/ref-range/ref-range.service';
@@ -128,6 +136,37 @@ describe('Test move range commands', () => {
             expect(selections.length).toBe(1);
             const selection = selections[0];
             expect(selection.range).toEqual(toRange);
+        });
+
+        it('keeps the source merge when moving it onto an equivalent target merge', async () => {
+            const fromRange: IRange = {
+                startRow: 2,
+                endRow: 3,
+                startColumn: 2,
+                endColumn: 2,
+            };
+            const toRange: IRange = {
+                startRow: 5,
+                endRow: 6,
+                startColumn: 2,
+                endColumn: 2,
+            };
+            await commandService.executeCommand(AddWorksheetMergeMutation.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                ranges: [toRange],
+            });
+
+            expect(await commandService.executeCommand(MoveRangeCommand.id, { fromRange, toRange })).toBeTruthy();
+            expect(getMergedInfo(toRange.startRow, toRange.startColumn)).toEqual(toRange);
+
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+            expect(getMergedInfo(fromRange.startRow, fromRange.startColumn)).toEqual(fromRange);
+            expect(getMergedInfo(toRange.startRow, toRange.startColumn)).toEqual(toRange);
+
+            expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+            expect(getMergedInfo(fromRange.startRow, fromRange.startColumn)).toBeNull();
+            expect(getMergedInfo(toRange.startRow, toRange.startColumn)).toEqual(toRange);
         });
 
         it('move c1:d2 to c3 ,should be replace', async () => {

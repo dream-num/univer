@@ -69,6 +69,7 @@ import {
 } from '../../commands/commands/inline-format.command';
 import { InsertRangeMoveDownConfirmCommand } from '../../commands/commands/insert-range-move-down-confirm.command';
 import { InsertRangeMoveRightConfirmCommand } from '../../commands/commands/insert-range-move-right-confirm.command';
+import { MoveRangeConfirmCommand } from '../../commands/commands/move-range-confirm.command';
 import { AddRangeProtectionFromContextMenuCommand, AddRangeProtectionFromSheetBarCommand, AddRangeProtectionFromToolbarCommand, DeleteRangeProtectionFromContextMenuCommand, SetRangeProtectionFromContextMenuCommand, ViewSheetPermissionFromContextMenuCommand, ViewSheetPermissionFromSheetBarCommand } from '../../commands/commands/range-protection.command';
 import { RemoveColConfirmCommand, RemoveRowConfirmCommand } from '../../commands/commands/remove-row-col-confirm.command';
 import { RemoveSheetConfirmCommand } from '../../commands/commands/remove-sheet-confirm.command';
@@ -282,6 +283,7 @@ export class SheetUIMobileController extends Disposable {
             DeleteRangeMoveUpConfirmCommand,
             InsertRangeMoveRightConfirmCommand,
             DeleteRangeMoveLeftConfirmCommand,
+            MoveRangeConfirmCommand,
             SidebarDefinedNameOperation,
 
             // permission

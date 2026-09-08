@@ -220,6 +220,7 @@ const locale: typeof enUS = {
             error: '오류',
             forceStringInfo: '숫자가 텍스트로 저장되었습니다',
             convertToNumber: '숫자로 변환',
+            overwriteCellContent: '대상 범위에 이미 데이터가 있습니다. 기존 데이터를 덮어쓰시겠습니까?',
         },
         clipboard: {
             paste: {

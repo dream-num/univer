@@ -220,6 +220,7 @@ const locale: typeof enUS = {
             error: 'Chyba',
             forceStringInfo: 'Číslo uložené ako text',
             convertToNumber: 'Konvertovať na číslo',
+            overwriteCellContent: 'V cieľovej oblasti už sú údaje. Táto akcia prepíše existujúce údaje. Chcete pokračovať?',
         },
         clipboard: {
             paste: {

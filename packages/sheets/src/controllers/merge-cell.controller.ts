@@ -429,13 +429,16 @@ export class MergeCellController extends Disposable {
 
         const fromMergeRanges = sourceWorksheet.getMergeData().filter((item) => Rectangle.intersects(item, params.fromRange));
         const toMergeRanges = targetWorksheet.getMergeData().filter((item) => Rectangle.intersects(item, params.toRange));
+        const remainingTargetMergeRanges = targetWorksheet.getMergeData().filter(
+            (item) => !Rectangle.intersects(item, params.toRange)
+        );
 
         const willMoveToMergeRanges = fromMergeRanges
             .map((mergeRange) => Rectangle.getRelativeRange(mergeRange, params.fromRange))
             .map((relativeRange) => Rectangle.getPositionRange(relativeRange, params.toRange));
 
         const addMergeCellRanges = getAddMergeMutationRangeByType(willMoveToMergeRanges).filter(
-            (range) => !targetWorksheet.getMergeData().some((mergeRange) => Rectangle.equals(range, mergeRange))
+            (range) => !remainingTargetMergeRanges.some((mergeRange) => Rectangle.equals(range, mergeRange))
         );
 
         const redos: Array<{

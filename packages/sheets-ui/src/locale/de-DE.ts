@@ -220,6 +220,7 @@ const locale: typeof enUS = {
             error: 'Fehler',
             forceStringInfo: 'Zahl als Text gespeichert',
             convertToNumber: 'In Zahl konvertieren',
+            overwriteCellContent: 'Im Zielbereich befinden sich bereits Daten. Diese Aktion überschreibt die vorhandenen Daten. Möchten Sie fortfahren?',
         },
         clipboard: {
             paste: {

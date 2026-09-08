@@ -84,51 +84,6 @@ function normalizeLegacyPageBreakSectionMetadata(body: IDocumentBody | undefined
     return didChange ? { ...body, sectionBreaks } : body;
 }
 
-function normalizeDocumentNotes(snapshot: IDocumentData): void {
-    if (snapshot.footnotes) {
-        const notes = { ...snapshot.notes };
-        for (const [id, legacy] of Object.entries(snapshot.footnotes)) {
-            const { footnoteId, ...content } = legacy;
-            notes[id] ??= { ...content, noteId: footnoteId, type: 'footnote' };
-        }
-        snapshot.notes = notes;
-        delete snapshot.footnotes;
-    }
-    if (snapshot.footnoteSettings) {
-        snapshot.noteSettings = { footnote: snapshot.footnoteSettings, ...snapshot.noteSettings };
-        delete snapshot.footnoteSettings;
-    }
-    const body = snapshot.body;
-    if (!body) {
-        return;
-    }
-    const legacyReferences = body.customRanges?.some((range) => range.properties?.footnoteId != null);
-    const legacySections = body.sectionBreaks?.some((section) => section.footnoteProperties != null);
-    if (legacyReferences || legacySections) {
-        snapshot.body = { ...body };
-        if (legacyReferences) {
-            snapshot.body.customRanges = body.customRanges?.map((range) => {
-                if (range.properties?.footnoteId == null) {
-                    return range;
-                }
-                const { footnoteId, ...properties } = range.properties;
-                return { ...range, properties: { noteId: footnoteId, ...properties } };
-            });
-        }
-        if (legacySections) {
-            snapshot.body.sectionBreaks = body.sectionBreaks?.map((section) => {
-                const { footnoteProperties, ...properties } = section;
-                return footnoteProperties == null
-                    ? section
-                    : {
-                        ...properties,
-                        noteProperties: { footnote: footnoteProperties, ...section.noteProperties },
-                    };
-            });
-        }
-    }
-}
-
 function createDocumentSnapshot(snapshot: Partial<IDocumentData>): IDocumentData {
     if (snapshot.id != null && isInternalEditorID(snapshot.id)) {
         return { ...DEFAULT_DOC, ...snapshot } as IDocumentData;
@@ -156,7 +111,6 @@ function createDocumentSnapshot(snapshot: Partial<IDocumentData>): IDocumentData
         delete mergedSnapshot.documentStyle.defaultParagraphStyle;
     }
 
-    normalizeDocumentNotes(mergedSnapshot);
     mergedSnapshot.body = normalizeLegacyPageBreakSectionMetadata(mergedSnapshot.body);
 
     return mergedSnapshot;

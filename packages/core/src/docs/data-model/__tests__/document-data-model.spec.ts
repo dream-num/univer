@@ -47,29 +47,6 @@ function createDocument(): DocumentDataModel {
 }
 
 describe('document footnote segments', () => {
-    it('reads legacy footnotes without mutating the input and saves the unified notes contract', () => {
-        const input = {
-            id: 'legacy',
-            body: { ...body('A\uFFFCB'), customRanges: [{ rangeId: 'ref', rangeType: CustomRangeType.FOOTNOTE, wholeEntity: true, startIndex: 1, endIndex: 1, properties: { footnoteId: 'old' } }], sectionBreaks: [{ sectionId: 'section', startIndex: 4, footnoteProperties: { startNumber: 3 } }] },
-            footnotes: { old: { footnoteId: 'old', body: body('Legacy explanation') } },
-            footnoteSettings: { startNumber: 2 },
-        };
-        const before = structuredClone(input);
-        const document = new DocumentDataModel(input);
-        try {
-            const saved = document.getSnapshot();
-            expect(input).toEqual(before);
-            expect(saved.footnotes).toBeUndefined();
-            expect(saved.footnoteSettings).toBeUndefined();
-            expect(saved.notes?.old).toMatchObject({ noteId: 'old', type: 'footnote' });
-            expect(saved.noteSettings?.footnote?.startNumber).toBe(2);
-            expect(saved.body?.customRanges?.[0].properties).toEqual({ noteId: 'old' });
-            expect(saved.body?.sectionBreaks?.[0].noteProperties?.footnote?.startNumber).toBe(3);
-            expect(document.getSelfOrHeaderFooterModel('old')?.getBody()?.dataStream).toBe('Legacy explanation\r\n');
-            expect(validateDocumentStructure(saved)).toEqual([]);
-        } finally { document.dispose(); }
-    });
-
     it('inherits document styles and refreshes them without persisting duplicate styles in each note', () => {
         const document = createDocument();
         const jsonX = JSONX.getInstance();

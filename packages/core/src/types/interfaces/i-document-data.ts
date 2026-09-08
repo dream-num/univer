@@ -37,10 +37,6 @@ export interface IDocumentData extends IReferenceSource {
     /** Independent rich-text segments addressed by footnote or endnote references in the main body. */
     notes?: Record<string, IDocumentNote>;
     noteSettings?: INoteSettings;
-    /** Read compatibility for snapshots produced before the unified note model. */
-    footnotes?: Record<string, Omit<IDocumentNote, 'noteId' | 'type'> & { footnoteId: string }>;
-    /** Read compatibility; new snapshots use noteSettings.footnote. */
-    footnoteSettings?: IFootnoteSettings;
     documentStyle: IDocumentStyle;
     /** OOXML-compatible named document styles keyed by stable style id. */
     styles?: IDocStyles;
@@ -668,8 +664,6 @@ export interface ISectionBreakBase {
     noteProperties?: INoteProperties;
     /** Defer section-end notes to the next section that does not suppress them. */
     suppressEndnotes?: boolean;
-    /** Read compatibility; new snapshots use noteProperties.footnote. */
-    footnoteProperties?: IFootnoteProperties;
     // docGrid (Document Grid), open xml $17.6.5
     charSpace?: number; // charSpace
     linePitch?: number; // linePitch

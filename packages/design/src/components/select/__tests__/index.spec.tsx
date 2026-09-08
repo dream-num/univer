@@ -52,11 +52,13 @@ describe('Select', () => {
     });
 
     it('does not open a disabled mobile select', () => {
-        render(<MobileSelect value="1" options={options} disabled />);
+        const onChange = vi.fn();
+        render(<MobileSelect value="1" options={options} disabled onChange={onChange} />);
         const trigger = screen.getByRole('button', { name: 'Option 1' });
         expect(trigger).toBeDisabled();
         fireEvent.click(trigger);
         expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+        expect(onChange).not.toHaveBeenCalled();
     });
 
     it('should fall back to the mobile select value when its option label is empty', () => {

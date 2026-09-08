@@ -113,7 +113,7 @@ describe('document footnote segments', () => {
         const edit = JSONX.getInstance().removeOp(['notes', 'note'], document.getSnapshot().notes?.note);
         document.apply(edit);
         expect(document.getSelfOrHeaderFooterModel('note')).toBeNull();
-        expect(validateDocumentStructure(document.getSnapshot()).map((issue) => issue.code)).toContain('missing-footnote');
+        expect(validateDocumentStructure(document.getSnapshot()).map((issue) => issue.code)).toContain('missing-note');
         document.dispose();
     });
 });

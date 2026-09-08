@@ -28,18 +28,18 @@ function noteBody(text: string): IDocumentBody {
 }
 
 describe('validateDocumentStructure notes', () => {
-    it('rejects independent page setup while accepting a normal rich note body', () => {
-        const note: IDocumentNote = { type: 'footnote' as const, noteId: 'note', body: noteBody('Explanation') };
+    it.each(['footnote', 'endnote'] as const)('rejects independent page setup in a %s while accepting a normal rich note body', (type) => {
+        const note: IDocumentNote = { type, noteId: 'note', body: noteBody('Explanation') };
         note.body.textRuns = [{ st: 0, ed: 3, ts: { bl: 1 } }];
         expect(validateDocumentStructure({ notes: { note } })).toEqual([]);
         note.body.sectionBreaks![0].marginTop = 50;
-        expect(validateDocumentStructure({ notes: { note } }).map((issue) => issue.code)).toEqual(['invalid-footnote-body']);
+        expect(validateDocumentStructure({ notes: { note } }).map((issue) => issue.code)).toEqual(['invalid-note-body']);
         note.body = {
             dataStream: 'A\r\nB\r\n',
             paragraphs: [{ paragraphId: 'a', startIndex: 1 }, { paragraphId: 'b', startIndex: 4 }],
             sectionBreaks: [{ sectionId: 'a', startIndex: 2 }, { sectionId: 'b', startIndex: 5 }],
         };
-        expect(validateDocumentStructure({ notes: { note } }).map((issue) => issue.code)).toContain('invalid-footnote-body');
+        expect(validateDocumentStructure({ notes: { note } }).map((issue) => issue.code)).toContain('invalid-note-body');
     });
 
     it('rejects duplicate references and mismatched segment identities', () => {
@@ -53,9 +53,9 @@ describe('validateDocumentStructure notes', () => {
             properties: { noteId: 'note' },
         }));
         const notes = { note: { type: 'footnote' as const, noteId: 'note', body: noteBody('Explanation') } };
-        expect(validateDocumentStructure({ body, notes }).map((issue) => issue.code)).toEqual(['duplicate-footnote-reference']);
+        expect(validateDocumentStructure({ body, notes }).map((issue) => issue.code)).toEqual(['duplicate-note-reference']);
         notes.note.noteId = 'other';
-        expect(validateDocumentStructure({ notes }).map((issue) => issue.code)).toEqual(['invalid-footnote-id']);
+        expect(validateDocumentStructure({ notes }).map((issue) => issue.code)).toEqual(['invalid-note-id']);
     });
 
     it('rejects nested references even when the referenced note exists', () => {
@@ -64,7 +64,7 @@ describe('validateDocumentStructure notes', () => {
         expect(validateDocumentStructure({ notes: {
             first: { type: 'footnote' as const, noteId: 'first', body },
             second: { type: 'footnote' as const, noteId: 'second', body: noteBody('Second') },
-        } }).map((issue) => issue.code)).toEqual(['nested-footnote']);
+        } }).map((issue) => issue.code)).toEqual(['nested-note']);
     });
 
     it.each(['headers', 'footers'] as const)('rejects references in %s and ambiguous note segment identities', (kind) => {
@@ -73,11 +73,11 @@ describe('validateDocumentStructure notes', () => {
         const notes = { note: { type: 'footnote' as const, noteId: 'note', body: noteBody('Explanation') } };
         const running = { headerId: 'running', footerId: 'running', body };
         expect(validateDocumentStructure({ [kind]: { running }, notes })).toEqual([
-            expect.objectContaining({ code: 'invalid-footnote-reference', segmentId: 'running', index: 0 }),
+            expect.objectContaining({ code: 'invalid-note-reference', segmentId: 'running', index: 0 }),
         ]);
         const colliding = { headerId: 'note', footerId: 'note', body: noteBody('Running text') };
         expect(validateDocumentStructure({ [kind]: { note: colliding }, notes })).toEqual([
-            expect.objectContaining({ code: 'invalid-footnote-id', segmentType: 'footnote', segmentId: 'note' }),
+            expect.objectContaining({ code: 'invalid-note-id', segmentType: 'note', segmentId: 'note' }),
         ]);
     });
 });

@@ -700,7 +700,7 @@ export class Documents extends DocComponent {
                     false,
                     pages.length,
                     'kind' in note
-                        ? this.getSkeleton()?.getViewModel().getSnapshot().noteSettings?.footnote?.[note.kind]?.customRanges ?? []
+                        ? this.getSkeleton()?.getViewModel().getSnapshot().noteSettings?.[note.noteType ?? 'footnote']?.[note.kind]?.customRanges ?? []
                         : undefined
                 );
             }

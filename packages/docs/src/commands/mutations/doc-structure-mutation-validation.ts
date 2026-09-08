@@ -157,7 +157,7 @@ function isStructurePreservingJSONXEdit(actions: JSONXActions, expectedPath: JSO
     return hasComponent && isStructurePreserving;
 }
 
-function getSegmentType(documentDataModel: DocumentDataModel, segmentId: string): 'body' | 'header' | 'footer' | 'footnote' {
+function getSegmentType(documentDataModel: DocumentDataModel, segmentId: string): 'body' | 'header' | 'footer' | 'note' {
     if (!segmentId) {
         return 'body';
     }
@@ -172,7 +172,7 @@ function getSegmentType(documentDataModel: DocumentDataModel, segmentId: string)
     }
 
     if (documentDataModel.getSnapshot().notes?.[segmentId]) {
-        return 'footnote';
+        return 'note';
     }
 
     return 'body';
@@ -186,9 +186,9 @@ function assertValidDocBodyStructure(documentDataModel: DocumentDataModel, segme
     }
 
     const segmentType = getSegmentType(documentDataModel, segmentId);
-    const footnote = documentDataModel.getSnapshot().notes?.[segmentId];
-    const issues = footnote
-        ? validateDocumentStructure({ notes: { [segmentId]: footnote } })
+    const note = documentDataModel.getSnapshot().notes?.[segmentId];
+    const issues = note
+        ? validateDocumentStructure({ notes: { [segmentId]: note } })
         : validateDocBodyStructure(body, { segmentType, segmentId: segmentId || undefined });
     if (!issues.length) {
         return;

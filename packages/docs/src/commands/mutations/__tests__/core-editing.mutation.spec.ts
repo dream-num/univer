@@ -98,7 +98,7 @@ describe('RichTextEditingMutation selection scheduling', () => {
                 segmentId: '',
                 textRanges: null,
                 actions: JSONX.getInstance().insertOp(['notes', 'shared'], { type: 'footnote' as const, noteId: 'shared', body: { dataStream: '\r\n', paragraphs: [{ paragraphId: 'np', startIndex: 0 }], sectionBreaks: [{ sectionId: 'ns', startIndex: 1 }] } }),
-            }, { fromCollab: true })).toThrow('invalid-footnote-id');
+            }, { fromCollab: true })).toThrow('invalid-note-id');
             expect(bed.doc.getSnapshot()).toEqual(before);
             expect(bed.doc.getSelfOrHeaderFooterModel('shared')?.getBody()?.dataStream).toBe('Header\r\n');
         } finally {

@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+import type { Editor } from '../../services/editor/editor';
 import type { IRichTextEditorProps } from '../RichTextEditor';
 import { Button, clsx } from '@univerjs/design';
+import { DocSkeletonManagerService } from '@univerjs/docs';
 import { CheckMarkIcon, CloseIcon, DownIcon } from '@univerjs/icons';
 import { useEvent, useMobileCanvasPanel } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
@@ -37,8 +39,19 @@ export function MobileRichTextEditor(props: IMobileRichTextEditorProps) {
     const containerRef = useRef<HTMLElement>(null);
     const pointerStartedInsideRef = useRef(false);
     const [keyboardInset, setKeyboardInset] = useState(0);
+    const [editor, setEditor] = useState<Editor | null>(null);
+    const [contentHeight, setContentHeight] = useState(0);
     const confirmOnDismiss = useEvent(onConfirm);
     useMobileCanvasPanel(containerRef, expanded ? 'modal' : 'canvas');
+
+    useEffect(() => {
+        const subscription = editor?.render.with(DocSkeletonManagerService).currentSkeleton$.subscribe((skeleton) => {
+            if (skeleton) {
+                setContentHeight(skeleton.getActualSize().actualHeight);
+            }
+        });
+        return () => subscription?.unsubscribe();
+    }, [editor]);
 
     useEffect(() => {
         const viewport = window.visualViewport;
@@ -90,10 +103,12 @@ export function MobileRichTextEditor(props: IMobileRichTextEditorProps) {
             role="region"
             aria-label={labels.title}
             className={clsx(`
-              univer-pointer-events-auto univer-absolute univer-inset-x-0 univer-z-40 univer-flex univer-items-stretch
-              univer-bg-gray-0 univer-shadow-lg
+              univer-pointer-events-auto univer-absolute univer-inset-x-0 univer-z-40 univer-flex univer-bg-gray-0
+              univer-shadow-lg
               dark:!univer-bg-gray-800
-            `, expanded ? 'univer-inset-0 univer-z-50 univer-size-full' : 'univer-min-h-12')}
+            `, expanded
+                ? 'univer-inset-0 univer-z-50 univer-size-full univer-flex-col'
+                : 'univer-min-h-12 univer-items-center')}
             style={{
                 backgroundColor: props.canvasStyle?.backgroundColor,
                 bottom: expanded ? undefined : keyboardInset,
@@ -115,8 +130,8 @@ export function MobileRichTextEditor(props: IMobileRichTextEditorProps) {
             onPointerUp={(event) => event.stopPropagation()}
         >
             <div
-                className={clsx('univer-flex', expanded && `
-                  univer-absolute univer-inset-x-0 univer-top-0 univer-z-20 univer-h-12 univer-bg-gray-0
+                className={clsx('univer-flex univer-shrink-0 univer-items-center', expanded && `
+                  univer-h-12 univer-bg-gray-0
                   dark:!univer-bg-gray-800
                 `)}
             >
@@ -131,16 +146,21 @@ export function MobileRichTextEditor(props: IMobileRichTextEditorProps) {
             {expanded && (
                 <MobileRichTextToolbar
                     editorId={props.editorId}
-                    className="univer-absolute univer-inset-x-0 univer-top-12 univer-z-10"
+                    className="univer-shrink-0"
                 />
             )}
             <div
-                className={clsx('univer-min-w-0 univer-flex-1 univer-py-1', expanded && `
-                  univer-h-full univer-overflow-hidden univer-pt-24
-                `)}
+                className={clsx('univer-min-w-0 univer-flex-1', expanded
+                    ? 'univer-min-h-0 univer-overflow-hidden univer-p-3'
+                    : 'univer-py-2')}
             >
                 <RichTextEditor
-                    className={clsx('univer-size-full univer-text-base', expanded && '[&>div]:!univer-h-full')}
+                    className="
+                      univer-w-full univer-text-base
+                      [&>div]:!univer-h-full
+                    "
+                    style={{ height: expanded ? '100%' : Math.min(120, Math.ceil(contentHeight) + 8) }}
+                    editorRef={setEditor}
                     editorId={props.editorId}
                     initialValue={props.initialValue}
                     autoFocus={props.autoFocus}

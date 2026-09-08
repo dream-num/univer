@@ -15,7 +15,7 @@
  */
 
 import type { IDropdownMenuProps, IDropdownProps, ITooltipProps } from '@univerjs/design';
-import type { ReactNode } from 'react';
+import type { ComponentType, ReactNode } from 'react';
 import type { IMenuItem, IValueOption } from '../../../services/menu/menu';
 import {
     clsx,
@@ -151,8 +151,12 @@ export const TooltipWrapper = forwardRef<ITooltipWrapperRef, ITooltipProps & { d
         : content;
 });
 
-export function DropdownWrapper(props: Omit<Partial<IDropdownProps>, 'overlay'> & { overlay: ReactNode; align?: 'start' | 'end' | 'center' }) {
-    const { children, overlay, disabled, align } = props;
+export function DropdownWrapper(props: Omit<Partial<IDropdownProps>, 'overlay'> & {
+    overlay: ReactNode;
+    align?: 'start' | 'end' | 'center';
+    dropdownComponent?: ComponentType<IDropdownProps>;
+}) {
+    const { children, overlay, disabled, align, dropdownComponent: DropdownComponent = Dropdown } = props;
     const { direction } = useContext(ConfigContext);
     const { dropdownVisible, setDropdownVisible } = useContext(TooltipWrapperContext);
     const triggerRef = useRef<HTMLDivElement>(null);
@@ -166,11 +170,22 @@ export function DropdownWrapper(props: Omit<Partial<IDropdownProps>, 'overlay'> 
 
     useEffect(() => {
         const ownerDocument = triggerRef.current?.ownerDocument;
-        if (!dropdownVisible || !ownerDocument) return;
+        if (!dropdownVisible || !ownerDocument) {
+            return;
+        }
 
         const handlePointerDown = (event: PointerEvent) => {
-            const target = event.target as Node | null;
-            if (!target || triggerRef.current?.contains(target) || overlayRef.current?.contains(target)) return;
+            const target = event.target as (Node & Partial<Pick<Element, 'closest'>>) | null;
+            const isPortaledOverlay = typeof target?.closest === 'function' &&
+                target.closest('[data-slot="popover-content"], [role="dialog"]') != null;
+            if (
+                !target ||
+                triggerRef.current?.contains(target) ||
+                overlayRef.current?.contains(target) ||
+                isPortaledOverlay
+            ) {
+                return;
+            }
 
             setDropdownVisible(false);
         };
@@ -184,7 +199,7 @@ export function DropdownWrapper(props: Omit<Partial<IDropdownProps>, 'overlay'> 
     }
 
     return (
-        <Dropdown
+        <DropdownComponent
             align={align ?? (direction === 'rtl' ? 'end' : 'start')}
             overlay={(
                 <div ref={overlayRef} className="univer-grid univer-gap-2">
@@ -198,7 +213,7 @@ export function DropdownWrapper(props: Omit<Partial<IDropdownProps>, 'overlay'> 
             <div ref={triggerRef} className="univer-h-full" onClick={(e) => e.stopPropagation()}>
                 {children}
             </div>
-        </Dropdown>
+        </DropdownComponent>
     );
 }
 
@@ -256,6 +271,8 @@ export function DropdownMenuWrapper({
     disabled,
     preserveStrokeWidth,
     onOptionSelect,
+    dropdownComponent,
+    dropdownMenuComponent: DropdownMenuComponent = DropdownMenu,
 }: {
     menuId: string;
     slot?: boolean;
@@ -265,6 +282,8 @@ export function DropdownMenuWrapper({
     disabled?: boolean;
     preserveStrokeWidth?: boolean;
     onOptionSelect: (option: IValueOption) => void;
+    dropdownComponent?: ComponentType<IDropdownProps>;
+    dropdownMenuComponent?: ComponentType<IDropdownMenuProps>;
 }) {
     const { dropdownVisible, setDropdownVisible } = useContext(TooltipWrapperContext);
 
@@ -328,6 +347,7 @@ export function DropdownMenuWrapper({
         return (
             <DropdownWrapper
                 disabled={disabled}
+                dropdownComponent={dropdownComponent}
                 overlay={options.map((option) => (
                     <DropdownMenuLabel
                         key={getOptionKey(option)}
@@ -416,7 +436,7 @@ export function DropdownMenuWrapper({
         }
 
         return (
-            <DropdownMenu
+            <DropdownMenuComponent
                 align="start"
                 className={clsx({ '!univer-p-0': isSingleEmbeddedCustomPanel })}
                 items={items}
@@ -427,7 +447,7 @@ export function DropdownMenuWrapper({
                 onInteractOutside={handleEmbedBoundaryFocusOutside}
             >
                 {children}
-            </DropdownMenu>
+            </DropdownMenuComponent>
         );
     } else {
         const items: IDropdownMenuProps['items'] = [];
@@ -468,7 +488,7 @@ export function DropdownMenuWrapper({
         }
 
         return (
-            <DropdownMenu
+            <DropdownMenuComponent
                 align="start"
                 items={items}
                 disabled={disabled}
@@ -478,7 +498,7 @@ export function DropdownMenuWrapper({
                 onInteractOutside={handleEmbedBoundaryFocusOutside}
             >
                 {children}
-            </DropdownMenu>
+            </DropdownMenuComponent>
         );
     }
 }

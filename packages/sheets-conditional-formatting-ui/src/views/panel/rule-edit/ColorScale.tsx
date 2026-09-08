@@ -34,8 +34,15 @@ const createOptionItem = (text: CFValueType | 'none'): { label: LocaleKey; value
     value: text,
 });
 
-const TextInput = (props: { id: string; type: CFValueType | 'none'; value: number | string; onChange: (v: number | string) => void; className?: string }) => {
-    const { type, className, onChange, value } = props;
+const TextInput = (props: {
+    id: string;
+    type: CFValueType | 'none';
+    value: number | string;
+    onChange: (v: number | string) => void;
+    className?: string;
+    FormulaEditorComponent: NonNullable<IStyleEditorProps['FormulaEditorComponent']>;
+}) => {
+    const { type, className, onChange, value, FormulaEditorComponent } = props;
     const univerInstanceService = useDependency(IUniverInstanceService);
     const unitId = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
     const subUnitId = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()?.getSheetId();
@@ -70,7 +77,7 @@ const TextInput = (props: { id: string; type: CFValueType | 'none'; value: numbe
     if (type === CFValueType.formula) {
         return (
             <div className="univer-w-full">
-                <FormulaEditor
+                <FormulaEditorComponent
                     ref={formulaEditorRef}
                     className={clsx(`
                       univer-box-border univer-h-8 univer-w-full univer-cursor-pointer univer-items-center
@@ -97,7 +104,12 @@ const TextInput = (props: { id: string; type: CFValueType | 'none'; value: numbe
     }
 };
 export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
-    const { interceptorManager } = props;
+    const {
+        interceptorManager,
+        SelectComponent = Select,
+        ColorPickerComponent = ColorPicker,
+        FormulaEditorComponent = FormulaEditor,
+    } = props;
     const localeService = useDependency(LocaleService);
 
     const rule = props.rule?.type === CFRuleType.colorScale ? props.rule : undefined as IColorScale | undefined;
@@ -260,7 +272,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                 {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.valueType.min')}
             </div>
             <div className="univer-mt-3 univer-flex univer-h-8 univer-items-center univer-gap-2">
-                <Select
+                <SelectComponent
                     className="univer-flex-shrink-0"
                     options={minOptions}
                     value={minType}
@@ -285,6 +297,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                     id="min"
                     value={minValue}
                     type={minType}
+                    FormulaEditorComponent={FormulaEditorComponent}
                     onChange={(v) => {
                         setMinValue(v);
                         handleChange({
@@ -300,7 +313,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                         });
                     }}
                 />
-                <ColorPicker
+                <ColorPickerComponent
                     color={minColor}
                     onChange={(v) => {
                         setMinColor(v);
@@ -327,7 +340,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                 {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.medianValue')}
             </div>
             <div className="univer-mt-3 univer-flex univer-h-8 univer-items-center univer-gap-2">
-                <Select
+                <SelectComponent
                     className="univer-flex-shrink-0"
                     options={medianOptions}
                     value={medianType}
@@ -353,6 +366,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                     id="median"
                     value={medianValue}
                     type={medianType}
+                    FormulaEditorComponent={FormulaEditorComponent}
                     onChange={(v) => {
                         setMedianValue(v);
                         handleChange({
@@ -370,7 +384,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                 />
                 {medianType !== 'none'
                     ? (
-                        <ColorPicker
+                        <ColorPickerComponent
                             color={medianColor}
                             onChange={(v) => {
                                 setMedianColor(v);
@@ -400,7 +414,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                 {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.valueType.max')}
             </div>
             <div className="univer-mt-3 univer-flex univer-h-8 univer-items-center univer-gap-2">
-                <Select
+                <SelectComponent
                     className="univer-flex-shrink-0"
                     options={maxOptions}
                     value={maxType}
@@ -425,6 +439,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                     id="max"
                     value={maxValue}
                     type={maxType}
+                    FormulaEditorComponent={FormulaEditorComponent}
                     onChange={(v) => {
                         setMaxValue(v);
                         handleChange({
@@ -440,7 +455,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                         });
                     }}
                 />
-                <ColorPicker
+                <ColorPickerComponent
                     color={maxColor}
                     onChange={(v) => {
                         setMaxColor(v);

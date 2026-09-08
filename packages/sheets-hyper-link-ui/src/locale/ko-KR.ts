@@ -47,6 +47,8 @@ const locale: typeof enUS = {
             coped: '링크가 클립보드에 복사되었습니다',
         },
         popup: {
+            title: '하이퍼링크',
+            open: '링크 열기',
             copy: '링크 복사',
             edit: '링크 편집',
             cancel: '링크 취소',

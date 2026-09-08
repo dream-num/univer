@@ -17,6 +17,13 @@
 const locale = {
     'find-replace': {
         toolbar: 'Find & Replace',
+        mobile: {
+            settings: 'Find and replace settings',
+            'settings-title': 'Find and Replace Settings',
+            'previous-match': 'Previous match',
+            'next-match': 'Next match',
+            close: 'Close find and replace',
+        },
         shortcut: {
             'open-find-dialog': 'Open Find Dialog',
             'open-replace-dialog': 'Open Replace Dialog',

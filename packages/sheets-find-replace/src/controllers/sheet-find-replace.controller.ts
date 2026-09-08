@@ -65,7 +65,14 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { IRenderManagerService, RENDER_RAW_FORMULA_KEY } from '@univerjs/engine-render';
-import { FindBy, FindDirection, FindModel, FindReplaceController, FindScope, IFindReplaceService } from '@univerjs/find-replace';
+import {
+    CloseFindDialogOperation,
+    FindBy,
+    FindDirection,
+    FindModel,
+    FindScope,
+    IFindReplaceService,
+} from '@univerjs/find-replace';
 import {
     SelectRangeCommand,
     SetRangeValuesCommand,
@@ -92,7 +99,6 @@ export class SheetsFindReplaceController extends Disposable implements IDisposab
 
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
-        @Inject(FindReplaceController) private readonly _findReplaceController: FindReplaceController,
         @IContextService private readonly _contextService: IContextService,
         @IFindReplaceService private readonly _findReplaceService: IFindReplaceService,
         @ICommandService private readonly _commandService: ICommandService
@@ -106,7 +112,7 @@ export class SheetsFindReplaceController extends Disposable implements IDisposab
     override dispose(): void {
         super.dispose();
 
-        this._findReplaceController.closePanel();
+        this._findReplaceService.terminate();
         this._provider.dispose();
     }
 
@@ -119,7 +125,9 @@ export class SheetsFindReplaceController extends Disposable implements IDisposab
         // The find replace panel should be closed when sheet cell editor is activated, or the formula editor is focused.
         this.disposeWithMe(this._contextService.subscribeContextValue$(EDITOR_ACTIVATED)
             .pipe(filter((v) => !!v))
-            .subscribe(() => this._findReplaceController.closePanel()));
+            .subscribe(() => {
+                this._commandService.executeCommand(CloseFindDialogOperation.id).catch(() => undefined);
+            }));
     }
 
     private _initCommands(): void {

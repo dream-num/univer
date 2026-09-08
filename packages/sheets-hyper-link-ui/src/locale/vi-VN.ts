@@ -47,6 +47,8 @@ const locale: typeof enUS = {
             coped: 'Liên kết đã được sao chép vào clipboard',
         },
         popup: {
+            title: 'Siêu liên kết',
+            open: 'Mở liên kết',
             copy: 'Sao chép',
             edit: 'Chỉnh sửa',
             cancel: 'Hủy liên kết',

@@ -43,6 +43,7 @@ export interface IThreadCommentEditorProps {
     subUnitId: string;
     type: UniverInstanceType;
     editorId: string;
+    ActionRowComponent?: typeof ActionRow;
 }
 
 export interface IThreadCommentEditorInstance {
@@ -58,7 +59,7 @@ function getSnapshot(body: IDocumentBody): IDocumentData {
 }
 
 export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThreadCommentEditorProps>((props, ref) => {
-    const { comment, onSave, id, onCancel, autoFocus, unitId, type, editorId } = props;
+    const { comment, onSave, id, onCancel, autoFocus, unitId, type, editorId, ActionRowComponent = ActionRow } = props;
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const [editing, setEditing] = useState(false);
@@ -209,7 +210,7 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
             </div>
             {editing
                 ? (
-                    <ActionRow
+                    <ActionRowComponent
                         className="univer-mt-3 univer-flex univer-flex-row univer-justify-end univer-gap-2"
                     >
                         <Button
@@ -235,7 +236,7 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
                         >
                             {localeService.t<LocaleKey>(id ? 'thread-comment-ui.editor.save' : 'thread-comment-ui.editor.reply')}
                         </Button>
-                    </ActionRow>
+                    </ActionRowComponent>
                 )
                 : null}
         </div>

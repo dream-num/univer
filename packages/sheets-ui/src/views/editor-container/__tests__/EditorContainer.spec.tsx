@@ -61,6 +61,7 @@ import { EditorContainer, shouldRefocusCellEditorAfterPointerDown } from '../Edi
 
 let latestFormulaEditorProps: {
     disableSelectionOnClick?: boolean;
+    isFocus?: boolean;
     onFormulaSelectingChange?: (isSelecting: number, isFocusing: boolean) => void;
 } | undefined;
 
@@ -236,9 +237,9 @@ function createTestBed(options: { disableAutoFocus?: boolean; docSelectionIsFocu
     return { injector, editorBridgeService, focusCoordinator, interactionBoundaryService, docSelectionRenderService, cellEditorManagerService, cellEditorResizeService, validViewportScrollInfo$, activeSheet$, otherSheet };
 }
 
-function renderEditorContainer(root: Root, injector: Injector): void {
-    const ConnectedTestRoot = connectInjector(EditorContainer, injector) as ComponentType;
-    root.render(<ConnectedTestRoot />);
+function renderEditorContainer(root: Root, injector: Injector, props: { hidden?: boolean } = {}): void {
+    const ConnectedTestRoot = connectInjector(EditorContainer, injector) as ComponentType<{ hidden?: boolean }>;
+    root.render(<ConnectedTestRoot {...props} />);
 }
 
 describe('EditorContainer embed focus lease', () => {
@@ -253,6 +254,24 @@ describe('EditorContainer embed focus lease', () => {
         vi.useRealTimers();
         root = undefined;
         container = undefined;
+    });
+
+    it('keeps the cell editor mounted but non-interactive when hidden', async () => {
+        const { injector } = createTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+
+        await act(async () => {
+            renderEditorContainer(root!, injector, { hidden: true });
+            await Promise.resolve();
+        });
+
+        const editor = container.querySelector<HTMLElement>('[data-u-comp="editor"]');
+        expect(editor).not.toBeNull();
+        expect(editor?.style.opacity).toBe('0');
+        expect(editor?.style.pointerEvents).toBe('none');
+        expect(latestFormulaEditorProps?.isFocus).toBe(false);
     });
 
     it('holds a child-editor lease while the embedded sheet cell editor is visible', async () => {

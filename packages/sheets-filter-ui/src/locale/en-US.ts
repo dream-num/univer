@@ -31,6 +31,13 @@ const locale = {
             'clear-filter': 'Clear Filter',
             cancel: 'Cancel',
             confirm: 'Confirm',
+            mobile: {
+                resize: 'Resize filter panel',
+                back: 'Back',
+                column: 'Column {0}',
+                'previous-column': 'Previous column',
+                'next-column': 'Next column',
+            },
             'by-values': 'By Values',
             'by-colors': 'By Colors',
             'filter-by-cell-fill-color': 'Filter by cell fill color',

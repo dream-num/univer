@@ -33,6 +33,13 @@ const locale: typeof enUS = {
             'clear-filter': '필터 지우기',
             cancel: '취소',
             confirm: '확인',
+            mobile: {
+                resize: '필터 패널 크기 조정',
+                back: '뒤로',
+                column: '{0} 열',
+                'previous-column': '이전 열',
+                'next-column': '다음 열',
+            },
             'by-values': '값으로 필터',
             'by-colors': '색상으로 필터',
             'filter-by-cell-fill-color': '셀 채우기 색상으로 필터',

@@ -33,6 +33,13 @@ const locale: typeof enUS = {
             'clear-filter': 'Hapus Filter',
             cancel: 'Batal',
             confirm: 'Konfirmasi',
+            mobile: {
+                resize: 'Ubah ukuran panel filter',
+                back: 'Kembali',
+                column: 'Kolom {0}',
+                'previous-column': 'Kolom sebelumnya',
+                'next-column': 'Kolom berikutnya',
+            },
             'by-values': 'Berdasarkan Nilai',
             'by-colors': 'Berdasarkan Warna',
             'filter-by-cell-fill-color': 'Filter berdasarkan warna isi sel',

@@ -20,11 +20,13 @@ import { useState } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import enUS from '../../../locale/en-US';
 import { ConfigProvider } from '../../config-provider/ConfigProvider';
+import { MobileDropdown } from '../../dropdown/MobileDropdown';
 import { ColorInput } from '../ColorInput';
 import { ColorPicker } from '../ColorPicker';
 import { ColorPickerPanel } from '../ColorPickerPanel';
 import { ColorSpectrum } from '../ColorSpectrum';
 import { HueSlider } from '../HueSlider';
+import { MobileColorPicker } from '../MobileColorPicker';
 import { MobileColorPresets } from '../MobileColorPresets';
 import { colorPresets } from '../presets';
 import '@testing-library/jest-dom/vitest';
@@ -138,6 +140,107 @@ describe('ColorPicker', () => {
 });
 
 describe('mobile color picker views', () => {
+    it('renders the touch-first picker explicitly', () => {
+        const { container } = render(
+            <ConfigProvider locale={enUS.design} mountContainer={document.body}>
+                <MobileColorPicker value="#FFFFFF" />
+            </ConfigProvider>
+        );
+
+        expect(container.querySelector('[data-u-comp="color-picker"][data-presentation="mobile"]')).toBeInTheDocument();
+        expect(getMoreColorButton(container)).toHaveClass('univer-h-11');
+    });
+
+    it('uses the mobile action layout for custom color actions', () => {
+        const { container } = render(
+            <ConfigProvider locale={enUS.design} mountContainer={document.body}>
+                <MobileColorPicker value="#FFFFFF" />
+            </ConfigProvider>
+        );
+
+        fireEvent.click(getMoreColorButton(container));
+
+        const confirmButton = Array.from(document.querySelectorAll('button'))
+            .find((button) => button.textContent === enUS.design.ColorPicker.confirm);
+        expect(confirmButton?.parentElement).toHaveClass('univer-w-full');
+    });
+
+    it('opens custom colors above the containing mobile dropdown', () => {
+        render(
+            <ConfigProvider locale={enUS.design} mountContainer={document.body}>
+                <MobileDropdown open overlay={<MobileColorPicker value="#FFFFFF" />}>
+                    <button type="button">Color</button>
+                </MobileDropdown>
+            </ConfigProvider>
+        );
+
+        fireEvent.click(getMoreColorButton(document.body));
+
+        const dialogs = Array.from(document.querySelectorAll<HTMLElement>('[role="dialog"]'));
+        const customColorDialog = dialogs
+            .find((dialog) => dialog.className.includes('!univer-z-[1420]'));
+        const customColorOverlay = Array.from(document.querySelectorAll<HTMLElement>('[data-state="open"].univer-fixed.univer-inset-0'))
+            .find((overlay) => overlay.className.includes('!univer-z-[1410]'));
+        const customColorContent = customColorDialog?.querySelector<HTMLElement>('[data-u-comp="mobile-color-picker-custom"]');
+        const spectrum = customColorContent?.querySelector<HTMLElement>('[data-u-comp="color-picker-spectrum"]');
+        const spectrumContainer = spectrum?.parentElement;
+
+        expect(dialogs).toHaveLength(2);
+        expect(customColorDialog).toBeInTheDocument();
+        expect(customColorOverlay).toBeInTheDocument();
+        expect(customColorContent).toHaveClass('univer-w-full');
+        expect(spectrumContainer).toHaveClass('univer-h-44', 'univer-w-full');
+        expect(spectrum).toHaveClass('univer-size-full');
+    });
+
+    it('closes the containing mobile dropdown after selecting a preset color', () => {
+        render(
+            <ConfigProvider locale={enUS.design} mountContainer={document.body}>
+                <MobileDropdown overlay={<MobileColorPicker value="#FFFFFF" />}>
+                    <button type="button">Color</button>
+                </MobileDropdown>
+            </ConfigProvider>
+        );
+
+        fireEvent.click(document.querySelector('button')!);
+        fireEvent.click(document.querySelectorAll('[data-u-comp="color-picker"] button')[1]);
+
+        expect(document.querySelector('[role="dialog"]')).not.toBeInTheDocument();
+    });
+
+    it('closes both color dialogs after confirming a custom color', () => {
+        render(
+            <ConfigProvider locale={enUS.design} mountContainer={document.body}>
+                <MobileDropdown overlay={<MobileColorPicker value="#FFFFFF" />}>
+                    <button type="button">Color</button>
+                </MobileDropdown>
+            </ConfigProvider>
+        );
+
+        fireEvent.click(document.querySelector('button')!);
+        fireEvent.click(getMoreColorButton(document.body));
+        fireEvent.click(document.querySelector<HTMLButtonElement>('[data-u-comp="mobile-color-picker-custom"] button:last-child')!);
+
+        expect(document.querySelector('[role="dialog"]')).not.toBeInTheDocument();
+    });
+
+    it('keeps the containing mobile dropdown open after cancelling a custom color', () => {
+        render(
+            <ConfigProvider locale={enUS.design} mountContainer={document.body}>
+                <MobileDropdown overlay={<MobileColorPicker value="#FFFFFF" />}>
+                    <button type="button">Color</button>
+                </MobileDropdown>
+            </ConfigProvider>
+        );
+
+        fireEvent.click(document.querySelector('button')!);
+        fireEvent.click(getMoreColorButton(document.body));
+        fireEvent.click(document.querySelector<HTMLButtonElement>('[data-u-comp="mobile-color-picker-custom"] button')!);
+
+        expect(document.querySelectorAll('[role="dialog"]')).toHaveLength(1);
+        expect(document.querySelector('[data-u-comp="color-picker"]')).toBeInTheDocument();
+    });
+
     it('renders large preset targets and applies the selected color', () => {
         const onSelect = vi.fn();
         const { container } = render(<MobileColorPresets value="#FFFFFF" onSelect={onSelect} />);

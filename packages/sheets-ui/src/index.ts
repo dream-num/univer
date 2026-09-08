@@ -115,6 +115,11 @@ export { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, RANGE_SELECTOR_COMPONENT_KEY, S
 export { getCellRealRange, getViewportByCell } from './common/utils';
 export type { IUniverSheetsUIConfig } from './config/config';
 export { SHEETS_UI_PLUGIN_CONFIG_KEY } from './config/config';
+export {
+    MOBILE_EXPANDING_SELECTION,
+    MOBILE_FORMULA_FUNCTION_PANEL_OPEN,
+    MOBILE_PINCH_ZOOMING,
+} from './consts/mobile-context';
 export { UNIVER_SHEET_PERMISSION_USER_PART } from './consts/permission';
 export { SHEET_UI_PLUGIN_NAME } from './consts/plugin-name';
 export { SheetsUIPart } from './consts/ui-name';
@@ -140,6 +145,13 @@ export {
     HEADER_UNHIDE_RANGE_VISIBLE_CHECK,
     HeaderUnhideRenderController,
 } from './controllers/render-controllers/header-unhide.render-controller';
+export {
+    MOBILE_CONTEXT_MENU,
+    SheetContextMenuMobileRenderController,
+} from './controllers/render-controllers/mobile/mobile-contextmenu.render-controller';
+export type {
+    IMobileContextMenuInterceptorContext,
+} from './controllers/render-controllers/mobile/mobile-contextmenu.render-controller';
 export { SheetsScrollRenderController } from './controllers/render-controllers/scroll.render-controller';
 export { SheetRenderController } from './controllers/render-controllers/sheet.render-controller';
 export type { ITelemetryData } from './controllers/render-controllers/sheet.render-controller';
@@ -248,6 +260,7 @@ export {
 } from './services/selection/base-selection-render.service';
 export { genNormalSelectionStyle } from './services/selection/const';
 export { SELECTION_SHAPE_DEPTH } from './services/selection/const';
+export { MobileSelectionControl } from './services/selection/mobile-selection-shape';
 export { SelectionControl, SelectionControl as SelectionShape } from './services/selection/selection-control';
 export { SheetSelectionRenderService } from './services/selection/selection-render.service';
 export { SelectionShapeExtension } from './services/selection/selection-shape-extension';

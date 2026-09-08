@@ -17,11 +17,10 @@
 import type { IUnitRangeName, Nullable } from '@univerjs/core';
 import type { Editor, IRichTextEditorProps } from '@univerjs/docs-ui';
 import type { ISelectionWithStyle, ISetSelectionsOperationParams } from '@univerjs/sheets';
-import type { MobileDrawerSnap } from '@univerjs/ui';
 import type { RefObject } from 'react';
 import type { LocaleKey } from '../../locale/types';
 import { ICommandService, LocaleService, RichTextBuilder } from '@univerjs/core';
-import { Button, clsx, ConfigContext, Dialog, Input, scrollbarClassName, Tooltip } from '@univerjs/design';
+import { Button, clsx, Dialog, Input, scrollbarClassName, Tooltip } from '@univerjs/design';
 import { IEditorService, RichTextEditor } from '@univerjs/docs-ui';
 import {
     deserializeRangeWithSheet,
@@ -34,11 +33,10 @@ import {
 import { DeleteIcon, IncreaseIcon, SelectRangeIcon } from '@univerjs/icons';
 import { SetSelectionsOperation } from '@univerjs/sheets';
 import { useDependency, useEvent } from '@univerjs/ui';
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useStateRef } from '../formula-editor/hooks/use-state-ref';
 import { useRangesHighlight } from './hooks/use-ranges-highlight';
 import { useRangeSelectorSelectionChange } from './hooks/use-selection-change';
-import { MobileRangeSelectorDialog } from './MobileRangeSelectorDialog';
 import { rangePreProcess } from './utils/range-pre-process';
 import { verifyRange } from './utils/verify-range';
 
@@ -81,7 +79,6 @@ export interface IRangeSelectorDialogProps {
     onConfirm: (ranges: IUnitRangeName[]) => void;
     onClose: () => void;
     onShowBySelection?: (ranges: IUnitRangeName[]) => boolean;
-    mobile?: boolean;
 }
 
 export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
@@ -96,13 +93,11 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
         onConfirm,
         onClose,
         onShowBySelection,
-        mobile = false,
     } = props;
     const localeService = useDependency(LocaleService);
     const lexerTreeBuilder = useDependency(LexerTreeBuilder);
     const [ranges, setRanges] = useState<string[]>([]);
     const [focusIndex, setFocusIndex] = useState(0);
-    const [drawerSnap, setDrawerSnap] = useState<MobileDrawerSnap>('compact');
     const scrollbarRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -145,7 +140,9 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
             const current = new Set(ranges);
             const addedRangesOrigin = selections.map((range) => !range.sheetName ? serializeRange(range.range) : serializeRangeWithSheet(range.sheetName, range.range));
             const addedRanges = addedRangesOrigin.filter((item) => !current.has(item));
-            if (!addedRanges.length) return;
+            if (!addedRanges.length) {
+                return;
+            }
             const newRanges = [...ranges];
 
             if (addedRangesOrigin.length > 1) {
@@ -182,21 +179,15 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
         );
     };
 
-    const rangeInputs = (mobileLayout = false) => (
+    const rangeInputs = () => (
         <div
             ref={scrollbarRef}
-            className={clsx(
-                'univer-overflow-y-auto',
-                scrollbarClassName,
-                mobileLayout ? 'univer-max-h-[22dvh]' : '-univer-mx-6 univer-max-h-60 univer-px-6'
-            )}
+            className={clsx('-univer-mx-6 univer-max-h-60 univer-overflow-y-auto univer-px-6', scrollbarClassName)}
         >
             {ranges.map((text, index) => (
                 <div
                     key={index}
-                    className={clsx('univer-mb-2 univer-flex univer-items-center', mobileLayout
-                        ? 'univer-gap-2'
-                        : 'univer-gap-4')}
+                    className="univer-mb-2 univer-flex univer-items-center univer-gap-4"
                 >
                     <Input
                         className={clsx('univer-box-border univer-h-10 univer-w-full', {
@@ -225,30 +216,13 @@ export function RangeSelectorDialog(props: IRangeSelectorDialogProps) {
                 </div>
             ))}
             {ranges.length < maxRangeCount && (
-                <Button className={mobileLayout ? 'univer-h-10 univer-w-full' : undefined} variant="link" onClick={handleRangeAdd}>
+                <Button variant="link" onClick={handleRangeAdd}>
                     <IncreaseIcon />
                     <span>{localeService.t<LocaleKey>('sheets-formula-ui.rangeSelector.addAnotherRange')}</span>
                 </Button>
             )}
         </div>
     );
-
-    if (mobile) {
-        return (
-            <MobileRangeSelectorDialog
-                visible={visible}
-                snap={drawerSnap}
-                title={localeService.t<LocaleKey>('sheets-formula-ui.rangeSelector.title')}
-                cancelText={localeService.t<LocaleKey>('sheets-formula-ui.rangeSelector.cancel')}
-                confirmText={localeService.t<LocaleKey>('sheets-formula-ui.rangeSelector.confirm')}
-                onSnapChange={setDrawerSnap}
-                onClose={onClose}
-                onConfirm={confirmRanges}
-            >
-                {rangeInputs(true)}
-            </MobileRangeSelectorDialog>
-        );
-    }
 
     return (
         <Dialog
@@ -288,7 +262,6 @@ export function stringifyRanges(ranges: IUnitRangeName[]) {
 
 export function RangeSelector(props: IRangeSelectorProps) {
     const [editor, setEditor] = useState<Editor | null>(null);
-    const { mobile = false } = useContext(ConfigContext);
     const {
         onVerify,
         selectorRef,
@@ -329,7 +302,9 @@ export function RangeSelector(props: IRangeSelectorProps) {
     });
 
     useEffect(() => {
-        if (!selectorRef) return;
+        if (!selectorRef) {
+            return;
+        }
         selectorRef.current = {
             get editor() {
                 return editor;
@@ -411,7 +386,6 @@ export function RangeSelector(props: IRangeSelectorProps) {
                 unitId={unitId}
                 subUnitId={subUnitId}
                 visible={popupVisible}
-                mobile={mobile}
                 maxRangeCount={maxRangeCount}
                 onConfirm={(ranges) => {
                     const resultStr = stringifyRanges(ranges);

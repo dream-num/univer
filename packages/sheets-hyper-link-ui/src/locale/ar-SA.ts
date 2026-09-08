@@ -47,6 +47,8 @@ const locale: typeof enUS = {
             coped: 'تم نسخ الرابط إلى الحافظة',
         },
         popup: {
+            title: 'ارتباط تشعبي',
+            open: 'فتح الرابط',
             copy: 'نسخ الرابط',
             edit: 'تحرير الرابط',
             cancel: 'إلغاء الارتباط',

@@ -34,7 +34,7 @@ import { Preview } from '../../Preview';
 import { previewClassName } from './styles';
 
 export const FormulaStyleEditor = (props: IStyleEditorProps) => {
-    const { onChange, interceptorManager } = props;
+    const { onChange, interceptorManager, ColorPickerComponent, FormulaEditorComponent = FormulaEditor } = props;
     const localeService = useDependency(LocaleService);
     const lexerTreeBuilder = useDependency(LexerTreeBuilder);
     const univerInstanceService = useDependency(IUniverInstanceService);
@@ -122,7 +122,7 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
                 {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.styleRule')}
             </div>
             <div className="univer-mt-3">
-                <FormulaEditor
+                <FormulaEditorComponent
                     ref={formulaEditorRef}
                     className={clsx(`
                       univer-box-border univer-h-8 univer-w-full univer-cursor-pointer univer-items-center
@@ -161,6 +161,7 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
                 />
             </div>
             <ConditionalStyleEditor
+                ColorPickerComponent={ColorPickerComponent}
                 style={rule?.style}
                 className="univer-mt-3"
                 onChange={(v) => {

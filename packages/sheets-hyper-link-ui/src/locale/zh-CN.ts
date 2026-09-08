@@ -47,6 +47,8 @@ const locale: typeof enUS = {
             coped: '链接已被复制到剪贴板',
         },
         popup: {
+            title: '超链接',
+            open: '打开链接',
             copy: '复制',
             edit: '编辑',
             cancel: '取消链接',

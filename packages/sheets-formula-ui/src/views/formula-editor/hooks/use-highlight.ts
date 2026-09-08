@@ -270,7 +270,7 @@ export function useDocHight(_leadingCharacter: string = '') {
             }
 
             const highlightDataStream = getFormulaHighlightDataStream(_leadingCharacter, sequenceNodes, sourceText);
-            const highlightTextRuns = [{ st: 0, ed: 1, ts: { fs: 11 } }, ...textRuns];
+            const highlightTextRuns = createHighlightTextRuns(textRuns, leadingCharacterLength);
             let selections;
             if (isNeedResetSelection) {
                 // Switching between uppercase and lowercase will trigger a reflow, causing the cursor to be misplaced. Let's refresh the cursor position here.
@@ -300,6 +300,12 @@ export function useDocHight(_leadingCharacter: string = '') {
  */
 export function createFormulaHighlightBody(dataStream: string, textRuns: ITextRun[]): IDocumentBody {
     return { dataStream, textRuns };
+}
+
+export function createHighlightTextRuns(textRuns: ITextRun[], leadingCharacterLength: number): ITextRun[] {
+    return leadingCharacterLength
+        ? [{ st: 0, ed: leadingCharacterLength, ts: { fs: 11 } }, ...textRuns]
+        : textRuns;
 }
 
 interface IColorMap {

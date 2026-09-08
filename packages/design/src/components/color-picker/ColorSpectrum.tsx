@@ -86,18 +86,11 @@ export function ColorSpectrum({ hsv, onChange, onChanged }: IColorSpectrumProps)
 
     // Calculate the position of the indicator
     const getIndicatorStyles = () => {
-        const indicatorSize = 16; // 4rem = 16px
-        const halfIndicatorSize = indicatorSize / 2;
-
-        const w = containerRef.current?.clientWidth ?? 0;
-        const h = containerRef.current?.clientHeight ?? 0;
-
-        const x = (hsv[1] / 100) * w - halfIndicatorSize;
-        const y = (100 - hsv[2]) / 100 * h - halfIndicatorSize;
-
         return {
-            transform: `translate(${x}px, ${y}px)`,
-            transition: isDragging ? 'none' : 'transform 0.1s ease-out',
+            left: `${hsv[1]}%`,
+            top: `${100 - hsv[2]}%`,
+            transform: 'translate(-50%, -50%)',
+            transition: isDragging ? 'none' : 'left 0.1s ease-out, top 0.1s ease-out',
         };
     };
 
@@ -119,7 +112,7 @@ export function ColorSpectrum({ hsv, onChange, onChanged }: IColorSpectrumProps)
         <div
             data-u-comp="color-picker-spectrum"
             ref={containerRef}
-            className="univer-relative univer-overflow-hidden"
+            className="univer-relative univer-size-full univer-overflow-hidden"
         >
             <canvas
                 ref={canvasRef}

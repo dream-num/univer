@@ -36,7 +36,7 @@ export class ComponentsController extends Disposable {
             [CellLinkPopup.componentKey, CellLinkPopup],
             [CellLinkEdit.componentKey, CellLinkEdit],
         ] as const).forEach(([key, comp]) => {
-            this._componentManager.register(key, comp);
+            this.disposeWithMe(this._componentManager.register(key, comp));
         });
     }
 

@@ -43,7 +43,6 @@ import { ReplaceSnapshotCommand } from '@univerjs/docs-ui';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import { MoveRangeMutation, RangeProtectionRuleModel, SetRangeValuesMutation, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { skip } from 'rxjs';
-import { MOBILE_SHEET_FX_EDITOR } from '../../consts/mobile-context';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
 import { FormulaEditorController } from './formula-editor.controller';
@@ -279,9 +278,12 @@ export class EditorDataSyncController extends Disposable {
             return;
         }
 
-        docDataModel.getSnapshot().body = body;
-        docDataModel.getSnapshot().drawings = drawings ?? {};
-        docDataModel.getSnapshot().drawingsOrder = drawingsOrder ?? [];
+        docDataModel.reset({
+            ...docDataModel.getSnapshot(),
+            body,
+            drawings: drawings ?? {},
+            drawingsOrder: drawingsOrder ?? [],
+        });
 
         this._checkAndSetRenderStyleConfig(docDataModel);
         docViewModel.reset(docDataModel);
@@ -377,15 +379,16 @@ export class EditorDataSyncController extends Disposable {
 
         const isFormula = (snapshot.body?.dataStream ?? '').startsWith('=');
         if (!isFormula) {
-            renderConfig.isRenderStyle = shouldRenderSourceStyle(
-                isFormulaBar,
-                this._contextService.getContextValue(MOBILE_SHEET_FX_EDITOR)
-            );
+            renderConfig.isRenderStyle = this._getSourceStyleRenderValue(isFormulaBar);
             return;
         }
 
         const isFocusFxBar = this._contextService.getContextValue(FOCUSING_FX_BAR_EDITOR);
         renderConfig.isRenderStyle = isFormulaBar === isFocusFxBar ? BooleanNumber.TRUE : BooleanNumber.FALSE;
+    }
+
+    protected _getSourceStyleRenderValue(isFormulaBar: boolean): BooleanNumber {
+        return isFormulaBar ? BooleanNumber.FALSE : BooleanNumber.TRUE;
     }
 
     private _clearParagraph(paragraphs: IParagraph[]) {
@@ -398,8 +401,4 @@ export class EditorDataSyncController extends Disposable {
 
         return newParagraphs;
     }
-}
-
-function shouldRenderSourceStyle(isFormulaBar: boolean, mobile: boolean): BooleanNumber {
-    return isFormulaBar && !mobile ? BooleanNumber.FALSE : BooleanNumber.TRUE;
 }

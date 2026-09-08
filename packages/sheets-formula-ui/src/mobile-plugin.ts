@@ -1,0 +1,144 @@
+/**
+ * Copyright 2023-present DreamNum Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import type { Dependency } from '@univerjs/core';
+import type { IUniverSheetsFormulaUIConfig } from './config/config';
+import {
+    DependentOn,
+    IConfigService,
+    Inject,
+    Injector,
+    merge,
+    Plugin,
+    registerDependencies,
+    touchDependencies,
+    UniverInstanceType,
+} from '@univerjs/core';
+import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
+import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
+import { UniverSheetsPlugin } from '@univerjs/sheets';
+import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
+import { UniverSheetsMobileUIPlugin } from '@univerjs/sheets-ui';
+import { BuiltInUIPart, connectInjector, IUIPartsService, UniverMobileUIPlugin } from '@univerjs/ui';
+import pkg from '../package.json';
+import { FORMULA_UI_PLUGIN_NAME } from './common/plugin-name';
+import {
+    defaultPluginConfig,
+    PLUGIN_CONFIG_KEY_BASE,
+} from './config/config';
+import { FormulaAlertRenderController } from './controllers/formula-alert-render.controller';
+import { FormulaClipboardController } from './controllers/formula-clipboard.controller';
+import { FormulaEditorShowController } from './controllers/formula-editor-show.controller';
+import { FormulaRenderManagerController } from './controllers/formula-render.controller';
+import { FormulaReorderController } from './controllers/formula-reorder.controller';
+import { ImageFormulaRenderController } from './controllers/image-formula-render.controller';
+import { MobileComponentsController } from './controllers/mobile/components.controller';
+import { FormulaUIController } from './controllers/ui.controller';
+import { FormulaPromptService, IFormulaPromptService } from './services/prompt.service';
+import { GlobalRangeSelectorService } from './services/range-selector.service';
+import { MobileRefSelectionsRenderService } from './services/render-services/mobile-ref-selections.render.service';
+import { RefSelectionsRenderService } from './services/render-services/ref-selections.render.service';
+import { MobileGlobalRangeSelector } from './views/range-selector/MobileGlobal';
+
+/**
+ * The configuration of the formula UI plugin.
+ */
+@DependentOn(
+    UniverFormulaEnginePlugin,
+    UniverRenderEnginePlugin,
+    UniverSheetsPlugin,
+    UniverSheetsFormulaPlugin,
+    UniverSheetsMobileUIPlugin,
+    UniverMobileUIPlugin
+)
+export class UniverSheetsFormulaMobileUIPlugin extends Plugin {
+    static override pluginName = FORMULA_UI_PLUGIN_NAME;
+    static override packageName = pkg.name;
+    static override version = pkg.version;
+    static override type = UniverInstanceType.UNIVER_SHEET;
+
+    constructor(
+        private readonly _config: Partial<IUniverSheetsFormulaUIConfig> = defaultPluginConfig,
+        @Inject(Injector) override readonly _injector: Injector,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @IConfigService private readonly _configService: IConfigService,
+        @IUIPartsService private readonly _uiPartsService: IUIPartsService
+    ) {
+        super();
+
+        // Manage the plugin configuration.
+        const { menu, ...rest } = merge(
+            defaultPluginConfig,
+            this._config
+        );
+        if (menu) {
+            this._configService.setConfig('menu', menu, { merge: true });
+        }
+        this._configService.setConfig(PLUGIN_CONFIG_KEY_BASE, rest, { merge: true });
+    }
+
+    override onStarting(): void {
+        this._injector.add([MobileComponentsController]);
+        this._injector.get(MobileComponentsController);
+        registerDependencies(this._injector, [
+            [IFormulaPromptService, { useClass: FormulaPromptService }],
+            [GlobalRangeSelectorService],
+            [FormulaUIController],
+            [FormulaClipboardController],
+            [FormulaEditorShowController],
+            [FormulaRenderManagerController],
+            [FormulaReorderController],
+            [ImageFormulaRenderController],
+        ]);
+
+        this._initUIPart();
+    }
+
+    override onReady(): void {
+        // render basics
+        ([
+            [RefSelectionsRenderService, { useClass: MobileRefSelectionsRenderService }],
+        ] as Dependency[]).forEach((dep) => {
+            this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, dep));
+        });
+    }
+
+    override onRendered(): void {
+        ([
+            [FormulaAlertRenderController],
+        ] as Dependency[]).forEach((dep) => {
+            this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, dep));
+        });
+
+        touchDependencies(this._injector, [
+            [FormulaUIController], // FormulaProgressBar relies on TriggerCalculationController, but it is necessary to ensure that the formula calculation is done after rendered.
+            [FormulaClipboardController],
+            [FormulaRenderManagerController],
+            [ImageFormulaRenderController],
+        ]);
+    }
+
+    override onSteady(): void {
+        this._injector.get(FormulaReorderController);
+    }
+
+    private _initUIPart(): void {
+        this.disposeWithMe(this._uiPartsService.registerComponent(
+            BuiltInUIPart.GLOBAL,
+            () => connectInjector(MobileGlobalRangeSelector, this._injector)
+        ));
+    }
+}

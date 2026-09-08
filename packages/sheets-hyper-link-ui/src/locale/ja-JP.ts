@@ -47,6 +47,8 @@ const locale: typeof enUS = {
             coped: 'リンクがクリップボードにコピーされました',
         },
         popup: {
+            title: 'ハイパーリンク',
+            open: 'リンクを開く',
             copy: 'リンクをコピー',
             edit: 'リンクの編集',
             cancel: 'リンク解除',

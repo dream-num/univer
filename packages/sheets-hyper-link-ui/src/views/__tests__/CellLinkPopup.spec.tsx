@@ -64,6 +64,7 @@ import { SheetsHyperLinkSidePanelService } from '../../services/side-panel.servi
 import { HyperLinkEditSourceType } from '../../types/enums/edit-source';
 import { CellLinkEdit } from '../CellLinkEdit';
 import { CellLinkPopupPure } from '../CellLinkPopup';
+import { MobileCellLinkPopupPure } from '../MobileCellLinkPopup';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -277,6 +278,7 @@ function createPopupTestBed() {
         [LocaleType.EN_US]: {
             'sheets-hyper-link-ui': {
                 popup: {
+                    open: 'Open link',
                     edit: 'Edit',
                     cancel: 'Remove link',
                 },
@@ -306,7 +308,6 @@ function createPopupTestBed() {
             },
         },
     });
-
     const commandService = injector.get(ICommandService);
     commandService.registerCommand(SetRangeValuesMutation);
     commandService.registerCommand(AddHyperLinkMutation);
@@ -421,6 +422,33 @@ describe('CellLinkPopupPure', () => {
                 type: HyperLinkEditSourceType.VIEWING,
             },
         });
+    });
+
+    it('labels the mobile navigation action and shows the hyperlink name', () => {
+        currentTestBed = createPopupTestBed();
+        container = document.createElement('div');
+        document.body.appendChild(container);
+        root = createRoot(container);
+        currentTestBed.injector.get(LocaleService).setLocale(LocaleType.EN_US);
+
+        act(() => {
+            root!.render(
+                <RediContext.Provider value={{ injector: currentTestBed!.injector }}>
+                    <MobileCellLinkPopupPure
+                        unitId={UNIT_ID}
+                        subUnitId={SUB_UNIT_ID}
+                        row={0}
+                        col={0}
+                        customRange={currentTestBed!.customRange}
+                        type={HyperLinkEditSourceType.VIEWING}
+                    />
+                </RediContext.Provider>
+            );
+        });
+
+        const openLinkButton = container.querySelector('button');
+        expect(openLinkButton?.textContent).toContain('Open link');
+        expect(openLinkButton?.textContent).toContain('https://univer.ai');
     });
 
     it('removes the hyperlink custom range from the sheet cell', () => {

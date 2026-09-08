@@ -183,7 +183,7 @@ export class MobileHeaderResizeRenderController extends Disposable implements IR
 
         // Position button at the bottom of the selected row(s)
         const rowEndOffset = skeleton.getOffsetByRow(endRow);
-        const { rowHeaderWidth } = skeleton;
+        const { rowHeaderWidth, rowHeaderWidthAndMarginLeft } = skeleton;
 
         const { scaleX, scaleY } = scene.getAncestorScale();
         const scale = Math.max(scaleX, scaleY);
@@ -191,7 +191,7 @@ export class MobileHeaderResizeRenderController extends Disposable implements IR
 
         // Position button in the row header area, centered horizontally, aligned to bottom of row
         this._rowResizeButton.transformByState({
-            left: rowHeaderWidth / 2 - buttonSize / 2,
+            left: rowHeaderWidthAndMarginLeft - rowHeaderWidth / 2 - buttonSize / 2,
             top: rowEndOffset - buttonSize / 2,
         });
 
@@ -245,10 +245,10 @@ export class MobileHeaderResizeRenderController extends Disposable implements IR
         // Update row button position if visible - keep it at the row's bottom edge
         if (this._rowResizeButton?.visible && this._currentRow >= 0) {
             const rowEndOffset = skeleton.getOffsetByRow(this._currentRow);
-            const { rowHeaderWidth } = skeleton;
+            const { rowHeaderWidth, rowHeaderWidthAndMarginLeft } = skeleton;
 
             this._rowResizeButton.transformByState({
-                left: rowHeaderWidth / 2 - buttonSize / 2,
+                left: rowHeaderWidthAndMarginLeft - rowHeaderWidth / 2 - buttonSize / 2,
                 top: rowEndOffset - buttonSize / 2,
             });
         }

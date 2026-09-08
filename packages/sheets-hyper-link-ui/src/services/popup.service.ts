@@ -18,12 +18,13 @@ import type { ICustomRange, IDisposable, INeedCheckDisposable, ITextRange, Nulla
 import type { IBoundRectNoAngle } from '@univerjs/engine-render';
 import type { ISheetLocationBase } from '@univerjs/sheets';
 import type { ICanvasPopup } from '@univerjs/sheets-ui';
+import type { Observable } from 'rxjs';
 import {
     BuildTextUtils,
+    createIdentifier,
     CustomRangeType,
     Disposable,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-    IContextService,
     Inject,
     Injector,
     IUniverInstanceService,
@@ -33,7 +34,7 @@ import { DocSelectionManagerService } from '@univerjs/docs';
 import { calcDocRangePositions } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { getCustomRangePosition, getEditingCustomRangePosition, IEditorBridgeService, SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
-import { IDialogService, MOBILE_UI_MODE } from '@univerjs/ui';
+import { IDialogService } from '@univerjs/ui';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { HyperLinkEditSourceType } from '../types/enums/edit-source';
 import { CellLinkEdit } from '../views/CellLinkEdit';
@@ -52,7 +53,7 @@ export interface IHyperLinkPopup {
     showAll?: boolean;
 }
 
-interface IHyperLinkEditing {
+export interface IHyperLinkEditing {
     unitId: string;
     subUnitId: string;
     row: number;
@@ -61,8 +62,21 @@ interface IHyperLinkEditing {
     type: HyperLinkEditSourceType;
 }
 
-const MOBILE_HYPER_LINK_EDITOR_DIALOG_ID = 'sheet-mobile-hyper-link-editor';
-const MOBILE_HYPER_LINK_VIEWER_DIALOG_ID = 'sheet-mobile-hyper-link-viewer';
+export interface ISheetsHyperLinkPopupService {
+    readonly currentPopup: IHyperLinkPopup | null;
+    readonly currentPopup$: Observable<IHyperLinkPopup | null>;
+    readonly currentEditing: (IHyperLinkEditing & { customRange?: ICustomRange; label?: string }) | null;
+    readonly currentEditing$: Observable<(IHyperLinkEditing & { customRange?: ICustomRange; label?: string }) | null>;
+    setIsKeepVisible(value: boolean): void;
+    getIsKeepVisible(): boolean;
+    showPopup(location: IHyperLinkPopupOptions): void;
+    hideCurrentPopup(type?: HyperLinkEditSourceType, force?: boolean): void;
+    startAddEditing(link: IHyperLinkEditing): void;
+    startEditing(link: Required<IHyperLinkEditing>): void;
+    endEditing(type?: HyperLinkEditSourceType): void;
+}
+
+export const ISheetsHyperLinkPopupService = createIdentifier<ISheetsHyperLinkPopupService>('sheets-hyper-link-ui.popup.service');
 
 const isEqualLink = (a: IHyperLinkPopupOptions, b: Omit<IHyperLinkPopup, 'disposable' | 'editPermission'>) => {
     return (
@@ -75,7 +89,7 @@ const isEqualLink = (a: IHyperLinkPopupOptions, b: Omit<IHyperLinkPopup, 'dispos
     );
 };
 
-interface IHyperLinkPopupOptions extends ISheetLocationBase {
+export interface IHyperLinkPopupOptions extends ISheetLocationBase {
     editPermission?: boolean;
     copyPermission?: boolean;
     customRange?: Nullable<ICustomRange>;
@@ -84,13 +98,13 @@ interface IHyperLinkPopupOptions extends ISheetLocationBase {
     type: HyperLinkEditSourceType;
 }
 
-export class SheetsHyperLinkPopupService extends Disposable {
-    private _currentPopup: IHyperLinkPopup | null = null;
-    private _currentPopup$ = new Subject<IHyperLinkPopup | null>();
+export class SheetsHyperLinkPopupService extends Disposable implements ISheetsHyperLinkPopupService {
+    protected _currentPopup: IHyperLinkPopup | null = null;
+    protected _currentPopup$ = new Subject<IHyperLinkPopup | null>();
     currentPopup$ = this._currentPopup$.asObservable();
-    private _currentEditingPopup: Nullable<IDisposable> = null;
+    protected _currentEditingPopup: Nullable<IDisposable> = null;
 
-    private _currentEditing$ = new BehaviorSubject<(IHyperLinkEditing & { customRange?: ICustomRange; label?: string }) | null>(null);
+    protected _currentEditing$ = new BehaviorSubject<(IHyperLinkEditing & { customRange?: ICustomRange; label?: string }) | null>(null);
     currentEditing$ = this._currentEditing$.asObservable();
 
     private _isKeepVisible: boolean = false;
@@ -104,14 +118,13 @@ export class SheetsHyperLinkPopupService extends Disposable {
     }
 
     constructor(
-        @Inject(SheetCanvasPopManagerService) private readonly _sheetCanvasPopManagerService: SheetCanvasPopManagerService,
-        @Inject(Injector) private readonly _injector: Injector,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @Inject(SheetCanvasPopManagerService) protected readonly _sheetCanvasPopManagerService: SheetCanvasPopManagerService,
+        @Inject(Injector) protected readonly _injector: Injector,
+        @IUniverInstanceService protected readonly _univerInstanceService: IUniverInstanceService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
-        @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @IContextService private readonly _contextService: IContextService,
-        @IDialogService private readonly _dialogService: IDialogService
+        @Inject(DocSelectionManagerService) protected readonly _textSelectionManagerService: DocSelectionManagerService,
+        @IRenderManagerService protected readonly _renderManagerService: IRenderManagerService,
+        @IDialogService protected readonly _dialogService: IDialogService
     ) {
         super();
 
@@ -144,36 +157,6 @@ export class SheetsHyperLinkPopupService extends Disposable {
         }
 
         const { unitId, subUnitId, row, col, customRangeRect, customRange } = location;
-        const mobileDialogService = this._getMobileDialogService();
-        if (mobileDialogService) {
-            if (!location.showAll && !customRange) {
-                return;
-            }
-            const disposable: INeedCheckDisposable = {
-                canDispose: () => true,
-                dispose: () => mobileDialogService.close(MOBILE_HYPER_LINK_VIEWER_DIALOG_ID),
-            };
-            this._currentPopup = {
-                unitId,
-                subUnitId,
-                disposable,
-                row,
-                col,
-                editPermission: !!location.editPermission,
-                copyPermission: !!location.copyPermission,
-                customRange,
-                type: location.type,
-                showAll: location.showAll,
-            };
-            this._currentPopup$.next(this._currentPopup);
-            mobileDialogService.open({
-                id: MOBILE_HYPER_LINK_VIEWER_DIALOG_ID,
-                title: { title: 'sheets-hyper-link-ui.form.addTitle' },
-                children: { label: CellLinkPopup.componentKey },
-                onClose: () => this.hideCurrentPopup(undefined, true),
-            });
-            return;
-        }
         let disposable: Nullable<INeedCheckDisposable>;
         const popup: ICanvasPopup = {
             componentKey: CellLinkPopup.componentKey,
@@ -249,7 +232,7 @@ export class SheetsHyperLinkPopupService extends Disposable {
         this._currentEditing$.complete();
     }
 
-    private _getEditingRange(): Nullable<ITextRange & { label: string }> {
+    protected _getEditingRange(): Nullable<ITextRange & { label: string }> {
         const visible = this._editorBridgeService.isVisible().visible;
         const state = this._editorBridgeService.getEditCellState();
         if (visible && state) {
@@ -299,23 +282,6 @@ export class SheetsHyperLinkPopupService extends Disposable {
         return popup;
     }
 
-    private _openMobileEditor(editing: IHyperLinkEditing & { customRange?: ICustomRange; label?: string }): void {
-        const dialogService = this._getMobileDialogService();
-        if (!dialogService) return;
-        this._currentEditing$.next(editing);
-        dialogService.open({
-            id: MOBILE_HYPER_LINK_EDITOR_DIALOG_ID,
-            title: { title: 'sheets-hyper-link-ui.form.addTitle' },
-            children: { label: CellLinkEdit.componentKey },
-            maskClosable: false,
-            onClose: () => this.endEditing(editing.type),
-        });
-    }
-
-    private _getMobileDialogService(): IDialogService | null {
-        return this._contextService.getContextValue(MOBILE_UI_MODE) ? this._dialogService : null;
-    }
-
     startAddEditing(link: IHyperLinkEditing) {
         const { unitId, subUnitId, type } = link;
         if (type === HyperLinkEditSourceType.EDITING) {
@@ -326,10 +292,6 @@ export class SheetsHyperLinkPopupService extends Disposable {
             }
 
             this._textSelectionManagerService.replaceDocRanges([{ ...range }], { unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY, subUnitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY });
-            if (this._getMobileDialogService()) {
-                this._openMobileEditor({ ...link, label: range.label });
-                return;
-            }
             const currentRender = this._renderManagerService.getRenderUnitById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
             if (!currentRender) {
                 return;
@@ -354,10 +316,6 @@ export class SheetsHyperLinkPopupService extends Disposable {
             const worksheet = workbook?.getSheetBySheetId(subUnitId);
             const cell = worksheet?.getCellRaw(link.row, link.col);
             const label = cell?.p ? BuildTextUtils.transform.getPlainText(cell.p.body?.dataStream ?? '') : (cell?.v ?? '').toString();
-            if (this._getMobileDialogService()) {
-                this._openMobileEditor({ ...link, label });
-                return;
-            }
             this._currentEditingPopup = this._sheetCanvasPopManagerService.attachPopupToCell(
                 link.row,
                 link.col,
@@ -377,7 +335,6 @@ export class SheetsHyperLinkPopupService extends Disposable {
         this.hideCurrentPopup(undefined, true);
 
         const { unitId, subUnitId } = link;
-        const mobile = Boolean(this._getMobileDialogService());
         let customRange;
         let label;
         if (link.type === HyperLinkEditSourceType.EDITING) {
@@ -393,14 +350,12 @@ export class SheetsHyperLinkPopupService extends Disposable {
                     endOffset: customRange.endIndex + 1,
                 },
             ]);
-            if (!mobile) {
-                this._currentEditingPopup = this._sheetCanvasPopManagerService.attachPopupToAbsolutePosition(
-                    customRangeInfo.rects.pop()!,
-                    this._editPopup,
-                    unitId,
-                    subUnitId
-                );
-            }
+            this._currentEditingPopup = this._sheetCanvasPopManagerService.attachPopupToAbsolutePosition(
+                customRangeInfo.rects.pop()!,
+                this._editPopup,
+                unitId,
+                subUnitId
+            );
         } else {
             const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
             const worksheet = workbook?.getSheetBySheetId(subUnitId);
@@ -414,27 +369,25 @@ export class SheetsHyperLinkPopupService extends Disposable {
             }
             customRange = customRangeInfo.customRange;
             label = customRangeInfo.label;
-            if (!mobile) {
-                if (tr) {
-                    this._currentEditingPopup = this._sheetCanvasPopManagerService.attachPopupToCell(
-                        link.row,
-                        link.col,
-                        this._editPopup,
+            if (tr) {
+                this._currentEditingPopup = this._sheetCanvasPopManagerService.attachPopupToCell(
+                    link.row,
+                    link.col,
+                    this._editPopup,
+                    unitId,
+                    subUnitId
+                );
+            } else {
+                this._currentEditingPopup = this._sheetCanvasPopManagerService.attachPopupByPosition(
+                    customRangeInfo.rects.pop()!,
+                    this._editPopup,
+                    {
                         unitId,
-                        subUnitId
-                    );
-                } else {
-                    this._currentEditingPopup = this._sheetCanvasPopManagerService.attachPopupByPosition(
-                        customRangeInfo.rects.pop()!,
-                        this._editPopup,
-                        {
-                            unitId,
-                            subUnitId,
-                            row: link.row,
-                            col: link.col,
-                        }
-                    );
-                }
+                        subUnitId,
+                        row: link.row,
+                        col: link.col,
+                    }
+                );
             }
         }
         const editing = {
@@ -442,10 +395,6 @@ export class SheetsHyperLinkPopupService extends Disposable {
             customRange,
             label,
         };
-        if (mobile) {
-            this._openMobileEditor(editing);
-            return;
-        }
         this._currentEditing$.next(editing);
     }
 
@@ -456,7 +405,6 @@ export class SheetsHyperLinkPopupService extends Disposable {
         const current = this._currentEditing$.getValue();
         if (current && (!type || type === current.type)) {
             this._currentEditingPopup?.dispose();
-            this._getMobileDialogService()?.close(MOBILE_HYPER_LINK_EDITOR_DIALOG_ID);
             this._currentEditing$.next(null);
         }
     }

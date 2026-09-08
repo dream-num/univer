@@ -31,6 +31,7 @@ import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { SHEET_CONDITIONAL_FORMATTING_PLUGIN, UniverSheetsConditionalFormattingPlugin } from '@univerjs/sheets-conditional-formatting';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
+import { UniverSheetsFormulaMobileUIPlugin } from '@univerjs/sheets-formula-ui';
 import { UniverSheetsMobileUIPlugin } from '@univerjs/sheets-ui';
 import pkg from '../package.json';
 import { AddAverageCfCommand } from './commands/commands/add-average-cf.command';
@@ -51,18 +52,19 @@ import { ConditionalFormattingI18nController } from './controllers/cf.i18n.contr
 import { ConditionalFormattingPanelController } from './controllers/cf.panel.controller';
 import { ConditionalFormattingPermissionController } from './controllers/cf.permission.controller';
 import { SheetsCfRenderController } from './controllers/cf.render.controller';
-import { ComponentsController } from './controllers/components.controller';
-import { ConditionalFormattingMenuController } from './menu/cf.menu.controller';
+import { MobileComponentsController } from './controllers/mobile/components.controller';
+import { ConditionalFormattingMobileMenuController } from './menu/mobile-cf.menu.controller';
 
 @DependentOn(
     UniverRenderEnginePlugin,
     UniverSheetsPlugin,
     UniverSheetsFormulaPlugin,
+    UniverSheetsFormulaMobileUIPlugin,
     UniverSheetsConditionalFormattingPlugin,
     UniverSheetsMobileUIPlugin
 )
 export class UniverSheetsConditionalFormattingMobileUIPlugin extends Plugin {
-    static override pluginName = `${SHEET_CONDITIONAL_FORMATTING_PLUGIN}_MOBILE_UI_PLUGIN`;
+    static override pluginName = `${SHEET_CONDITIONAL_FORMATTING_PLUGIN}_UI_PLUGIN`;
     static override packageName = pkg.name;
     static override version = pkg.version;
     static override type = UniverInstanceType.UNIVER_SHEET;
@@ -91,17 +93,17 @@ export class UniverSheetsConditionalFormattingMobileUIPlugin extends Plugin {
 
     override onStarting(): void {
         registerDependencies(this._injector, [
-            [ComponentsController],
+            [MobileComponentsController],
             [SheetsCfRenderController],
             [ConditionalFormattingCopyPasteController],
             [ConditionalFormattingPermissionController],
             [ConditionalFormattingI18nController],
             [ConditionalFormattingFormulaRefRangeController],
             [ConditionalFormattingPanelController],
-            [ConditionalFormattingMenuController],
+            [ConditionalFormattingMobileMenuController],
         ]);
         touchDependencies(this._injector, [
-            [ComponentsController],
+            [MobileComponentsController],
             [SheetsCfRenderController],
             [ConditionalFormattingFormulaRefRangeController],
         ]);
@@ -109,7 +111,7 @@ export class UniverSheetsConditionalFormattingMobileUIPlugin extends Plugin {
 
     override onReady(): void {
         touchDependencies(this._injector, [
-            [ConditionalFormattingMenuController],
+            [ConditionalFormattingMobileMenuController],
             [ConditionalFormattingPanelController],
         ]);
     }

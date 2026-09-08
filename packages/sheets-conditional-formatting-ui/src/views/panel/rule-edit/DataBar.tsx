@@ -40,8 +40,16 @@ const createOptionItem = (text: CFValueType): { label: LocaleKey; value: CFValue
     value: text,
 });
 
-const InputText = (props: { disabled?: boolean; id: string; className?: string; type: CFValueType; value: string | number; onChange: (v: string | number) => void }) => {
-    const { onChange, className, value, type, id, disabled = false } = props;
+const InputText = (props: {
+    disabled?: boolean;
+    id: string;
+    className?: string;
+    type: CFValueType;
+    value: string | number;
+    onChange: (v: string | number) => void;
+    FormulaEditorComponent: NonNullable<IStyleEditorProps['FormulaEditorComponent']>;
+}) => {
+    const { onChange, className, value, type, disabled = false, FormulaEditorComponent } = props;
     const univerInstanceService = useDependency(IUniverInstanceService);
     const unitId = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
     const subUnitId = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()?.getSheetId();
@@ -72,7 +80,7 @@ const InputText = (props: { disabled?: boolean; id: string; className?: string; 
         const v = String(_value.current).startsWith('=') ? String(_value.current) || '' : '=';
         return (
             <div className="univer-w-full">
-                <FormulaEditor
+                <FormulaEditorComponent
                     ref={formulaEditorRef}
                     className={clsx(`
                       univer-box-border univer-h-8 univer-w-full univer-cursor-pointer univer-items-center
@@ -108,7 +116,12 @@ const InputText = (props: { disabled?: boolean; id: string; className?: string; 
     );
 };
 export const DataBarStyleEditor = (props: IStyleEditorProps) => {
-    const { interceptorManager } = props;
+    const {
+        interceptorManager,
+        SelectComponent = Select,
+        ColorPickerComponent = ColorPicker,
+        FormulaEditorComponent = FormulaEditor,
+    } = props;
     const localeService = useDependency(LocaleService);
 
     const rule = props.rule?.type === CFRuleType.dataBar ? props.rule : undefined;
@@ -356,7 +369,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                         <div className="univer-text-xs">
                             {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.native')}
                         </div>
-                        <ColorPicker
+                        <ColorPickerComponent
                             color={nativeColor}
                             onChange={handleNativeColorChange}
                         />
@@ -365,7 +378,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                         <div className="univer-text-xs">
                             {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.positive')}
                         </div>
-                        <ColorPicker
+                        <ColorPickerComponent
                             color={positiveColor}
                             onChange={handlePositiveColorChange}
                         />
@@ -383,7 +396,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                     {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.valueType.min')}
                 </div>
                 <div className="univer-mt-3 univer-flex univer-items-center univer-gap-2">
-                    <Select
+                    <SelectComponent
                         className="univer-w-1/2 univer-flex-shrink-0"
                         options={minOptions}
                         value={minValueType}
@@ -409,6 +422,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                         disabled={!isShowInput(minValueType)}
                         type={minValueType}
                         value={minValue}
+                        FormulaEditorComponent={FormulaEditorComponent}
                         onChange={(v) => {
                             setMinValue(v || 0);
                             handleChange({
@@ -433,7 +447,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                     {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.valueType.max')}
                 </div>
                 <div className="univer-mt-3 univer-flex univer-items-center univer-gap-2">
-                    <Select
+                    <SelectComponent
                         className="univer-w-1/2 univer-flex-shrink-0"
                         options={maxOptions}
                         value={maxValueType}
@@ -458,6 +472,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                         id="max"
                         type={maxValueType}
                         value={maxValue}
+                        FormulaEditorComponent={FormulaEditorComponent}
                         onChange={(v) => {
                             setMaxValue(v || 0);
                             handleChange({

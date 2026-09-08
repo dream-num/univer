@@ -1459,7 +1459,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
                 this._eventHandle(e, (config) => {
                     this._onCompositionstart$.next(config);
-                });
+                }, true);
             })
         );
 
@@ -1484,7 +1484,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
                 this._eventHandle(e, (config) => {
                     this._onInputBefore$.next(config);
                     this._onCompositionupdate$.next(config);
-                });
+                }, true);
             })
         );
 
@@ -1530,10 +1530,16 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         );
     }
 
-    private _eventHandle(e: Event | CompositionEvent | KeyboardEvent, func: (config: IEditorInputConfig) => void) {
+    private _eventHandle(
+        e: Event | CompositionEvent | KeyboardEvent,
+        func: (config: IEditorInputConfig) => void,
+        preserveInput = false
+    ) {
         const content = this._input.textContent || '';
 
-        this._input.innerHTML = '';
+        if (!preserveInput) {
+            this._input.innerHTML = '';
+        }
 
         // Geometry remains on the previous page until the edited page is ready.
         // Continue native input from the existing logical selection only while

@@ -40,6 +40,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { GlobalRangeSelectorService } from '../../../services/range-selector.service';
 import { GlobalRangeSelector } from '../Global';
 import { RangeSelector } from '../index';
+import { MobileGlobalRangeSelector } from '../MobileGlobal';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -313,6 +314,30 @@ describe('GlobalRangeSelector', () => {
         });
 
         expect(document.body.textContent).not.toContain('Add range');
+    });
+
+    it('opens the mobile global selector with the mobile range surface', async () => {
+        const { injector, service } = createGlobalRangeSelectorTestBed();
+
+        await act(async () => {
+            root.render(
+                <RediContext.Provider value={{ injector }}>
+                    <MobileGlobalRangeSelector />
+                </RediContext.Provider>
+            );
+            await Promise.resolve();
+        });
+
+        await act(async () => {
+            service.showRangeSelectorDialog({
+                unitId: 'book-1',
+                subUnitId: 'sheet-1',
+                callback: vi.fn(),
+            });
+            await Promise.resolve();
+        });
+
+        expect(document.body.querySelector('[data-u-comp="mobile-range-selector-drawer"]')).toBeTruthy();
     });
 
     it('calls the callback with an empty range when the global selector dialog is cancelled', async () => {

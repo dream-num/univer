@@ -34,7 +34,7 @@ import { SheetsHyperLinkPopupController } from './controllers/popup.controller';
 import { SheetsHyperLinkRenderController } from './controllers/render-controllers/render.controller';
 import { SheetsHyperLinkUIController } from './controllers/ui.controller';
 import { SheetHyperLinkUrlController } from './controllers/url.controller';
-import { SheetsHyperLinkPopupService } from './services/popup.service';
+import { ISheetsHyperLinkPopupService, SheetsHyperLinkPopupService } from './services/popup.service';
 import { SheetsHyperLinkResolverService } from './services/resolver.service';
 import { SheetsHyperLinkSidePanelService } from './services/side-panel.service';
 import { SHEET_HYPER_LINK_UI_PLUGIN } from './types/const';
@@ -78,7 +78,8 @@ export class UniverSheetsHyperLinkUIPlugin extends Plugin {
         this._injector.get(ComponentsController);
         const dependencies: Dependency[] = [
             [SheetsHyperLinkResolverService],
-            [SheetsHyperLinkPopupService],
+            [ISheetsHyperLinkPopupService, { useClass: SheetsHyperLinkPopupService }],
+            [SheetsHyperLinkPopupService, { useExisting: ISheetsHyperLinkPopupService }],
             [SheetsHyperLinkSidePanelService],
 
             [SheetsHyperLinkPopupController],

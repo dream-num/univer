@@ -32,7 +32,6 @@ import {
     isEventTargetInSameFormulaEmbedInteractionBoundary,
     registerFormulaEditorRuntimePortal,
 } from '../../formula-embed-integration.service';
-import { buildFormulaFunctionInsertion, buildFormulaOperatorInsertion } from '../../index';
 import {
     focusFormulaEditor,
     hasActiveFormulaEmbedInteraction,
@@ -48,7 +47,7 @@ import {
     shouldAddFormulaReference,
     shouldSkipReferenceEditingByPointer,
 } from '../use-formula-selection';
-import { calcHighlightRanges, createFormulaHighlightBody } from '../use-highlight';
+import { calcHighlightRanges, createFormulaHighlightBody, createHighlightTextRuns } from '../use-highlight';
 import {
     isFormulaEditorInteractionOwner,
     shouldMoveFormulaSelectionFromCurrentSelection,
@@ -232,7 +231,7 @@ describe('formula selection update helpers', () => {
         })).toBe(true);
     });
 
-    it('lets the mobile fx bar own formula selection when the canvas leaves no focused editor', () => {
+    it('lets the fx bar own formula selection when the canvas leaves no focused editor', () => {
         expect(isFormulaEditorInteractionOwner(null, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, {
             fxBarFocused: true,
             allowMissingFocus: true,
@@ -318,7 +317,7 @@ describe('formula selection update helpers', () => {
         expect(resolveFormulaSelectingIntent(false, false)).toBe(FormulaSelectingType.NOT_SELECT);
     });
 
-    it('only arms mobile reference picking after formula delimiters and operators', () => {
+    it('only arms reference picking after formula delimiters and operators', () => {
         expect(shouldAddFormulaReference('=', 1)).toBe(true);
         expect(shouldAddFormulaReference('=SUM(', 5)).toBe(true);
         expect(shouldAddFormulaReference('=SUM(A1,', 8)).toBe(true);
@@ -326,32 +325,6 @@ describe('formula selection update helpers', () => {
         expect(shouldAddFormulaReference('=Sheet1!', 8)).toBe(true);
         expect(shouldAddFormulaReference('=SUM', 4)).toBe(false);
         expect(shouldAddFormulaReference('=A1', 3)).toBe(false);
-    });
-
-    it('inserts a mobile function at the caret and leaves the caret inside its brackets', () => {
-        expect(buildFormulaFunctionInsertion('=', { startOffset: 1, endOffset: 1 }, 'SUM')).toEqual({
-            text: '=SUM()',
-            caretOffset: 5,
-        });
-        expect(buildFormulaFunctionInsertion('=A1+', { startOffset: 4, endOffset: 4 }, 'AVERAGE')).toEqual({
-            text: '=A1+AVERAGE()',
-            caretOffset: 12,
-        });
-        expect(buildFormulaFunctionInsertion('plain', { startOffset: 5, endOffset: 5 }, 'COUNT')).toEqual({
-            text: '=plainCOUNT()',
-            caretOffset: 12,
-        });
-    });
-
-    it('inserts a mobile formula operator at the caret or over selected text', () => {
-        expect(buildFormulaOperatorInsertion('=A1B1', { startOffset: 3, endOffset: 3 }, '+')).toEqual({
-            text: '=A1+B1',
-            caretOffset: 4,
-        });
-        expect(buildFormulaOperatorInsertion('=A1+B1', { startOffset: 3, endOffset: 4 }, '*')).toEqual({
-            text: '=A1*B1',
-            caretOffset: 4,
-        });
     });
 
     it('reorders the active selection into the formula reference being edited and keeps ctrl-added ranges separate', () => {
@@ -666,6 +639,12 @@ describe('formula selection update helpers', () => {
 });
 
 describe('formula highlight helpers', () => {
+    it('does not cover the first highlighted character when there is no leading marker', () => {
+        const textRuns = [{ st: 0, ed: 12, ts: { cl: { rgb: '#ff0000' } } }];
+
+        expect(createHighlightTextRuns(textRuns, 0)).toEqual(textRuns);
+    });
+
     it('does not copy stale paragraph metadata into a formula text replacement', () => {
         const body = createFormulaHighlightBody('=F40', [
             { st: 0, ed: 1, ts: { fs: 11 } },

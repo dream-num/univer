@@ -89,26 +89,6 @@ describe('Tooltip', () => {
         expect(onVisibleChange).toHaveBeenCalledWith(false);
     });
 
-    it('should stay hidden when tooltips are disabled by the config provider', () => {
-        const onVisibleChange = vi.fn();
-        render(
-            <ConfigProvider mountContainer={document.body} disableTooltips>
-                <ConfigProvider mountContainer={document.body}>
-                    <Tooltip title="Disabled tip" visible={false} onVisibleChange={onVisibleChange}>
-                        Trigger
-                    </Tooltip>
-                </ConfigProvider>
-            </ConfigProvider>
-        );
-
-        const trigger = screen.getByText('Trigger');
-        fireEvent.mouseEnter(trigger);
-        fireEvent.focus(trigger);
-
-        expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
-        expect(onVisibleChange).not.toHaveBeenCalled();
-    });
-
     it('should support non-asChild trigger and focus/blur events', async () => {
         render(
             <Tooltip title="From button" asChild={false}>

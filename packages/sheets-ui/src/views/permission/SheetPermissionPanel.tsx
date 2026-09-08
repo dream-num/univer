@@ -23,14 +23,23 @@ import { SheetPermissionPanelModel } from '../../services/permission/sheet-permi
 import { SheetPermissionPanelDetail } from './panel-detail/PermissionDetailPanel';
 import { SheetPermissionPanelList } from './SheetPermissionPanelList';
 
-interface ISheetPermissionPanelProps {
+export interface ISheetPermissionPanelProps {
     showDetail: boolean;
     fromSheetBar: boolean;
     rule?: IPermissionPanelRule;
     oldRule?: IPermissionPanelRule;
+    DetailComponent?: typeof SheetPermissionPanelDetail;
+    ListComponent?: typeof SheetPermissionPanelList;
 };
 
-export const SheetPermissionPanel = ({ showDetail, fromSheetBar, rule, oldRule }: ISheetPermissionPanelProps) => {
+export const SheetPermissionPanel = ({
+    showDetail,
+    fromSheetBar,
+    rule,
+    oldRule,
+    DetailComponent = SheetPermissionPanelDetail,
+    ListComponent = SheetPermissionPanelList,
+}: ISheetPermissionPanelProps) => {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const sheetsSelectionsService = useDependency(SheetsSelectionsService);
     const sheetPermissionPanelModel = useDependency(SheetPermissionPanelModel);
@@ -47,13 +56,13 @@ export const SheetPermissionPanel = ({ showDetail, fromSheetBar, rule, oldRule }
     return (
         showDetail
             ? (
-                <SheetPermissionPanelDetail
+                <DetailComponent
                     fromSheetBar={fromSheetBar}
                     rule={rule}
                     oldRule={oldRule}
                     key={fromSheetBar ? 'sheet-bar' : 'normal'}
                 />
             )
-            : <SheetPermissionPanelList key={key} />
+            : <ListComponent key={key} />
     );
 };

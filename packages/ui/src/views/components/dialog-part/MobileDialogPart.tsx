@@ -19,9 +19,9 @@ import type { LocaleKey } from '../../../locale/types';
 import type { MobileDrawerSnap } from '../mobile-drawer/MobileDrawer';
 import type { IDialogPartMethodOptions } from './interface';
 import { LocaleService } from '@univerjs/core';
-import { ActionRow } from '@univerjs/design';
+import { MobileActionRowGroup } from '@univerjs/design';
 import { CloseIcon } from '@univerjs/icons';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { IDialogService } from '../../../services/dialog/dialog.service';
 import { useDependency, useObservable } from '../../../utils/di';
 import { CustomLabel } from '../../custom-label/CustomLabel';
@@ -53,8 +53,12 @@ export function MobileDialogPart() {
         return active ? toMobileDialogOptions(active) : null;
     }, [dialogOptions]);
     const [drawerSnap, setDrawerSnap] = useState<MobileDrawerSnap>('expanded');
+    const layerRef = useRef<HTMLDivElement>(null);
+    const backdropPointerIdRef = useRef<number | null>(null);
 
-    if (!options) return null;
+    if (!options) {
+        return null;
+    }
 
     const close = () => {
         dialogService.close(options.id);
@@ -63,7 +67,11 @@ export function MobileDialogPart() {
     };
 
     return (
-        <div className="univer-fixed univer-inset-0 univer-z-[1200]" data-u-comp="mobile-dialog">
+        <div
+            ref={layerRef}
+            className="univer-fixed univer-inset-0 univer-z-[1200]"
+            data-u-comp="mobile-dialog"
+        >
             <button
                 type="button"
                 aria-label={localeService.t<LocaleKey>('ui.sidebar.close')}
@@ -71,9 +79,27 @@ export function MobileDialogPart() {
                   univer-absolute univer-inset-0 univer-m-0 univer-appearance-none univer-rounded-none univer-border-0
                   univer-bg-black/35 univer-p-0
                 "
-                onClick={options.maskClosable === false ? undefined : close}
+                onPointerDown={options.maskClosable === false
+                    ? undefined
+                    : (event) => {
+                        backdropPointerIdRef.current = event.pointerId;
+                    }}
+                onPointerUp={options.maskClosable === false
+                    ? undefined
+                    : (event) => {
+                        if (backdropPointerIdRef.current !== event.pointerId) {
+                            return;
+                        }
+
+                        backdropPointerIdRef.current = null;
+                        close();
+                    }}
+                onPointerCancel={() => {
+                    backdropPointerIdRef.current = null;
+                }}
             />
             <MobileDrawer
+                layerRef={layerRef}
                 componentName="mobile-dialog-drawer"
                 snap={drawerSnap}
                 expandLabel={localeService.t<LocaleKey>('ui.sidebar.resize')}
@@ -82,9 +108,9 @@ export function MobileDialogPart() {
                 onClose={close}
                 role="dialog"
                 panelClassName="
-                  univer-bg-gray-0 univer-text-gray-900
-                  dark:!univer-bg-gray-900 dark:!univer-text-gray-0
-                "
+                      univer-bg-gray-0 univer-text-gray-900
+                      dark:!univer-bg-gray-900 dark:!univer-text-gray-0
+                    "
                 contentClassName="univer-min-h-0 univer-px-4 univer-pb-4"
                 header={(
                     <header
@@ -121,7 +147,7 @@ export function MobileDialogPart() {
                               dark:!univer-border-gray-700
                             "
                         >
-                            <ActionRow>{options.footer}</ActionRow>
+                            <MobileActionRowGroup>{options.footer}</MobileActionRowGroup>
                         </footer>
                     )
                     : undefined}

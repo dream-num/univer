@@ -24,11 +24,11 @@ import { ThreadCommentAnchorKind } from '@univerjs/thread-comment';
 import { ThreadCommentDraftService, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import { ISidebarService } from '@univerjs/ui';
 import { SheetsThreadCommentPopupService } from '../../services/sheets-thread-comment-popup.service';
-import { SHEETS_THREAD_COMMENT_PANEL } from '../../types/const';
+import { SHEETS_THREAD_COMMENT_PANEL, SHOW_ADD_SHEET_COMMENT_OPERATION_ID } from '../../types/const';
 
 export const ShowAddSheetCommentModalOperation: IOperation = {
     type: CommandType.OPERATION,
-    id: 'sheet.operation.show-comment-modal',
+    id: SHOW_ADD_SHEET_COMMENT_OPERATION_ID,
     handler(accessor) {
         const selectionManagerService = accessor.get(SheetsSelectionsService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -101,7 +101,7 @@ export const OpenSheetCommentPanelOperation: IOperation = {
     },
 };
 
-function openSheetCommentPanel(
+export function openSheetCommentPanel(
     sidebarService: ISidebarService,
     panelService: ThreadCommentPanelService
 ): void {

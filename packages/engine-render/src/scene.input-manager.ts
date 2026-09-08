@@ -35,6 +35,9 @@ export class InputManager extends Disposable {
     /** Time in milliseconds with two consecutive clicks will be considered as a double or triple click */
     static DoubleClickDelay = 500; // in milliseconds
 
+    /** The allowed distance between two consecutive touch taps. */
+    static TouchDoubleClickMovementThreshold = 10; // in pixels
+
     static TripleClickDelay = 300; // in milliseconds
 
     /** If you need to check double click without raising a single click at first click, enable this flag */
@@ -279,7 +282,7 @@ export class InputManager extends Disposable {
         const engine = this._scene.getEngine();
         if (!engine) return;
 
-        // eslint-disable-next-line complexity, max-lines-per-function
+        // eslint-disable-next-line complexity
         this._onInput$ = engine.onInputChanged$.subscribeEvent((eventData: IEvent) => {
             const evt: IEvent = eventData;
             // Pointer Events
@@ -445,17 +448,20 @@ export class InputManager extends Disposable {
      * @hidden
      * @returns Boolean if delta for pointer exceeds drag movement threshold
      */
-    private _isPointerSwiping(pointerX: number, pointerY: number): boolean {
+    private _isPointerSwiping(pointerX: number, pointerY: number, threshold = InputManager.DragMovementThreshold): boolean {
         return (
-            Math.abs(this._startingPosition.x - pointerX) > InputManager.DragMovementThreshold ||
-            Math.abs(this._startingPosition.y - pointerY) > InputManager.DragMovementThreshold
+            Math.abs(this._startingPosition.x - pointerX) > threshold ||
+            Math.abs(this._startingPosition.y - pointerY) > threshold
         );
     }
 
     private _prePointerDoubleOrTripleClick(evt: IPointerEvent) {
         const { clientX, clientY } = evt;
+        const movementThreshold = evt.deviceType === DeviceType.Touch
+            ? InputManager.TouchDoubleClickMovementThreshold
+            : InputManager.DragMovementThreshold;
 
-        const isMoveThreshold = this._isPointerSwiping(clientX, clientY);
+        const isMoveThreshold = this._isPointerSwiping(clientX, clientY, movementThreshold);
 
         if (isMoveThreshold) {
             this._resetDoubleClickParam();

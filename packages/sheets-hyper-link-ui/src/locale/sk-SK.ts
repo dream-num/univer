@@ -47,6 +47,8 @@ const locale: typeof enUS = {
             coped: 'Odkaz skopírovaný do schránky',
         },
         popup: {
+            title: 'Hypertextový odkaz',
+            open: 'Otvoriť odkaz',
             copy: 'Kopírovať odkaz',
             edit: 'Upraviť odkaz',
             cancel: 'Zrušiť odkaz',

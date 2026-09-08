@@ -97,6 +97,21 @@ describe('SheetPermissionCheckUIController', () => {
     });
 
     it.each([
+        DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+        DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+    ])('checks the current workbook when visibility is requested by internal sheet editor %s', (unitId) => {
+        const { controller, executeBefore, permissionCheckWithoutRange } = createController();
+
+        executeBefore({
+            id: SetCellEditVisibleOperation.id,
+            params: { visible: true, unitId },
+        });
+
+        expect(permissionCheckWithoutRange).toHaveBeenCalledWith(expect.any(Object), undefined);
+        controller.dispose();
+    });
+
+    it.each([
         [InsertTextCommand.id, DOCS_NORMAL_EDITOR_UNIT_ID_KEY],
         [IMEInputCommand.id, DOCS_NORMAL_EDITOR_UNIT_ID_KEY],
         [InsertTextCommand.id, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY],

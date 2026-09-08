@@ -49,7 +49,7 @@ interface IMarkSelectionInfo {
     exits: string[];
 }
 
-const DEFAULT_Z_INDEX = SELECTION_SHAPE_DEPTH.MARK_SELECTION; ;
+const DEFAULT_Z_INDEX = SELECTION_SHAPE_DEPTH.MARK_SELECTION;
 export const IMarkSelectionService = createIdentifier<IMarkSelectionService>('univer.mark-selection-service');
 
 /**
@@ -136,6 +136,7 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
             });
             const selectionWithCoord = attachSelectionWithCoord(selection, skeleton);
             control.updateRangeBySelectionWithCoord(selectionWithCoord);
+            control.setEvent(false);
             shape.control = control;
         });
     }

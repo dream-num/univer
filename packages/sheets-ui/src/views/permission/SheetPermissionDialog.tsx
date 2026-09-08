@@ -48,7 +48,11 @@ interface IPermissionMap {
     };
 }
 
-export const SheetPermissionDialog = () => {
+export interface ISheetPermissionDialogProps {
+    ActionRowComponent?: typeof ActionRow;
+}
+
+export const SheetPermissionDialog = ({ ActionRowComponent = ActionRow }: ISheetPermissionDialogProps = {}) => {
     const localeService = useDependency(LocaleService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const authzIoService = useDependency(IAuthzIoService);
@@ -230,7 +234,7 @@ export const SheetPermissionDialog = () => {
                     );
                 })}
 
-                <ActionRow
+                <ActionRowComponent
                     className={clsx(`
                       univer-flex univer-h-9 univer-items-center univer-justify-end univer-gap-2 univer-pt-2
                     `, borderTopClassName)}
@@ -251,7 +255,7 @@ export const SheetPermissionDialog = () => {
                     >
                         {localeService.t<LocaleKey>('sheets-ui.permission.button.confirm')}
                     </Button>
-                </ActionRow>
+                </ActionRowComponent>
             </div>
         </Spin>
     );

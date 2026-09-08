@@ -47,6 +47,8 @@ const locale: typeof enUS = {
             coped: '連結已複製到剪貼簿',
         },
         popup: {
+            title: '超連結',
+            open: '開啟連結',
             copy: '複製',
             edit: '編輯',
             cancel: '取消連結',

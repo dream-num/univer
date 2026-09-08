@@ -31,8 +31,9 @@ import { RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Subject } from 'rxjs';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { RangeSelectorDialog } from '../index';
+import { MobileRangeSelectorDialog } from '../MobileRangeSelectorDialog';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -165,6 +166,7 @@ describe('RangeSelectorDialog', () => {
             root.unmount();
         });
         container.remove();
+        vi.unstubAllGlobals();
     });
 
     it('confirms only valid range inputs and normalizes reversed coordinates', async () => {
@@ -479,13 +481,13 @@ describe('RangeSelectorDialog', () => {
     });
 
     it('renders a compact mobile range picker and keeps the canvas area unmasked', async () => {
+        vi.stubGlobal('CSS', { supports: () => false });
         const injector = createRangeDialogTestBed();
         act(() => {
             root.render(
                 <RediContext.Provider value={{ injector }}>
-                    <RangeSelectorDialog
+                    <MobileRangeSelectorDialog
                         visible
-                        mobile
                         initialValue={[{
                             unitId: 'book-1',
                             sheetName: 'Sheet1',
@@ -512,6 +514,8 @@ describe('RangeSelectorDialog', () => {
         const dialog = document.body.querySelector('[role="dialog"]');
         const picker = dialog?.parentElement;
         expect(picker).toBeTruthy();
+        expect(container.querySelector('[role="dialog"]')).toBeNull();
+        expect(picker?.parentElement).toBe(document.body);
         expect(picker?.className).toContain('univer-pointer-events-none');
         expect(dialog?.className).toContain('univer-pointer-events-auto');
         const input = picker?.querySelector('input');
@@ -520,6 +524,7 @@ describe('RangeSelectorDialog', () => {
             throw new TypeError('Mobile range selector input was not rendered.');
         }
         expect(input.value).toBe('Sheet1!A1:B2');
+        expect(input.parentElement?.parentElement?.parentElement?.getAttribute('style')).toContain('max-height: 22vh');
 
         await emitSelection(injector, {
             startRow: 3,

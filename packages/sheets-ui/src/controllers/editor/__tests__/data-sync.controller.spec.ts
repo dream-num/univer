@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommandInfo, IDocumentData } from '@univerjs/core';
+import type { ICommandInfo, IDocumentBody, IDocumentData, IDrawings, Nullable } from '@univerjs/core';
 import {
     BooleanNumber,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    DocumentDataModel,
     FOCUSING_FX_BAR_EDITOR,
     ICommandService,
     IContextService,
@@ -35,7 +36,6 @@ import {
 } from '@univerjs/sheets';
 import { BehaviorSubject, EMPTY } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { MOBILE_SHEET_FX_EDITOR } from '../../../consts/mobile-context';
 import { IEditorBridgeService } from '../../../services/editor-bridge.service';
 import { IFormulaEditorManagerService } from '../../../services/editor/formula-editor-manager.service';
 import { EditorDataSyncController } from '../data-sync.controller';
@@ -43,6 +43,12 @@ import { FormulaEditorController } from '../formula-editor.controller';
 
 interface ITestableEditorDataSyncController {
     _checkAndSetRenderStyleConfig: (documentDataModel: Pick<DocumentDataModel, 'getSnapshot'>) => void;
+    _syncContentAndRender: (
+        unitId: string,
+        body: IDocumentBody,
+        drawings: Nullable<IDrawings>,
+        drawingsOrder: Nullable<string[]>
+    ) => void;
 }
 
 class TestCommandService {
@@ -70,9 +76,9 @@ describe('EditorDataSyncController', () => {
 
     function createController(options: {
         isFocusFxBar?: boolean;
-        mobile?: boolean;
         themeTextColor?: string;
         formulaBarPosition?: { width: number; height: number } | null;
+        documentDataModel?: DocumentDataModel;
     } = {}) {
         const commandService = new TestCommandService();
         const editorBridgeService = {
@@ -87,16 +93,28 @@ describe('EditorDataSyncController', () => {
         const contextService = {
             getContextValue: vi.fn((key: string) => {
                 if (key === FOCUSING_FX_BAR_EDITOR) return options.isFocusFxBar ?? false;
-                if (key === MOBILE_SHEET_FX_EDITOR) return options.mobile ?? false;
                 return false;
             }),
             subscribeContextValue$: vi.fn(() => EMPTY),
         };
         const currentTheme$ = new BehaviorSubject({});
+        const skeleton = { calculate: vi.fn() };
+        const documentViewModel = { reset: vi.fn() };
+        const currentRender = {
+            mainComponent: { makeDirty: vi.fn() },
+            with: vi.fn(() => ({
+                getSkeleton: () => skeleton,
+                getViewModel: () => documentViewModel,
+            })),
+        };
 
         const injector = new Injector();
-        injector.add([IUniverInstanceService, { useValue: {} as never }]);
-        injector.add([IRenderManagerService, { useValue: {} as never }]);
+        injector.add([IUniverInstanceService, {
+            useValue: { getUnit: () => options.documentDataModel } as never,
+        }]);
+        injector.add([IRenderManagerService, {
+            useValue: { getRenderUnitById: () => options.documentDataModel ? currentRender : undefined } as never,
+        }]);
         injector.add([IEditorBridgeService, { useValue: editorBridgeService as never }]);
         injector.add([ICommandService, { useValue: commandService as never }]);
         injector.add([RangeProtectionRuleModel, { useValue: { getRangeRuleInitState: () => true } as never }]);
@@ -131,6 +149,14 @@ describe('EditorDataSyncController', () => {
         (controller as unknown as ITestableEditorDataSyncController)._checkAndSetRenderStyleConfig({
             getSnapshot: vi.fn(() => snapshot),
         });
+    }
+
+    function syncContentAndRender(
+        controller: EditorDataSyncController,
+        body: IDocumentBody
+    ) {
+        const testableController = controller as unknown as ITestableEditorDataSyncController;
+        testableController._syncContentAndRender(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, body, null, null);
     }
 
     it('ignores a zero-width formula bar position', () => {
@@ -179,6 +205,29 @@ describe('EditorDataSyncController', () => {
         checkAndSetRenderStyleConfig(controller, formulaBarSnapshot);
 
         expect(formulaBarSnapshot.documentStyle.pageSize?.width).toBe(320);
+    });
+
+    it('notifies formula bar content observers when the selected cell changes', () => {
+        const documentDataModel = new DocumentDataModel({
+            id: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+            documentStyle: {},
+            body: {
+                dataStream: '=SUM(A1)\r\n',
+            },
+        });
+        const { controller } = createController({ documentDataModel });
+        let observedDataStream = '';
+        const subscription = documentDataModel.change$.subscribe(() => {
+            observedDataStream = documentDataModel.getBody()?.dataStream ?? '';
+        });
+
+        syncContentAndRender(controller, { dataStream: '\r\n' });
+
+        expect(documentDataModel.getBody()?.dataStream).toBe('\r\n');
+        expect(observedDataStream).toBe('\r\n');
+
+        subscription.unsubscribe();
+        documentDataModel.dispose();
     });
 
     it('refreshes the current edit cell when set-values updates the edited cell', () => {
@@ -282,30 +331,6 @@ describe('EditorDataSyncController', () => {
         checkAndSetRenderStyleConfig(controller, formulaBarSnapshot);
 
         expect(formulaBarSnapshot.documentStyle.textStyle?.cl?.rgb).toBe('#f7f9fc');
-    });
-
-    it('renders source rich-text styles in the mobile formula bar without changing the desktop behavior', () => {
-        const desktop = createController().controller;
-        const mobile = createController({ mobile: true }).controller;
-        const createSnapshot = (): IDocumentData => ({
-            id: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
-            body: {
-                dataStream: 'Rich text\r\n',
-                textRuns: [{ st: 0, ed: 4, ts: { bl: BooleanNumber.TRUE, cl: { rgb: '#ef4444' } } }],
-            },
-            documentStyle: {},
-        });
-        const desktopSnapshot = createSnapshot();
-        const mobileSnapshot = createSnapshot();
-
-        checkAndSetRenderStyleConfig(desktop, desktopSnapshot);
-        checkAndSetRenderStyleConfig(mobile, mobileSnapshot);
-
-        expect(desktopSnapshot.documentStyle.renderConfig?.isRenderStyle).toBe(BooleanNumber.FALSE);
-        expect(mobileSnapshot.documentStyle.renderConfig?.isRenderStyle).toBe(BooleanNumber.TRUE);
-        expect(mobileSnapshot.body?.textRuns).toEqual([
-            { st: 0, ed: 4, ts: { bl: BooleanNumber.TRUE, cl: { rgb: '#ef4444' } } },
-        ]);
     });
 
     it('renders formula reference styles in the formula bar when the formula bar is focused', () => {

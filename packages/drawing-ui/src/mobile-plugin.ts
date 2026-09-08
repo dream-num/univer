@@ -1,0 +1,77 @@
+/**
+ * Copyright 2023-present DreamNum Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import type { Dependency } from '@univerjs/core';
+import type { IUniverDrawingUIConfig } from './config/config';
+import { DependentOn, IConfigService, Inject, Injector, merge, Plugin } from '@univerjs/core';
+import { UniverDrawingPlugin } from '@univerjs/drawing';
+import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
+import pkg from '../package.json';
+import { defaultPluginConfig, DRAWING_UI_PLUGIN_CONFIG_KEY } from './config/config';
+import { DrawingUpdateController } from './controllers/drawing-update.controller';
+import { ImageCropperController } from './controllers/image-cropper.controller';
+import { ImageUpdateController } from './controllers/image-update.controller';
+import { MobileComponentsController } from './controllers/mobile/components.controller';
+import { DrawingUIController } from './controllers/ui.controller';
+import { DrawingImageClipService } from './services/drawing-image-clip.service';
+import { DrawingRenderService } from './services/drawing-render.service';
+
+@DependentOn(UniverDrawingPlugin, UniverRenderEnginePlugin)
+export class UniverDrawingMobileUIPlugin extends Plugin {
+    static override pluginName = 'UNIVER_DRAWING_UI_PLUGIN';
+    static override packageName = pkg.name;
+    static override version = pkg.version;
+
+    constructor(
+        private readonly _config: Partial<IUniverDrawingUIConfig> = defaultPluginConfig,
+        @Inject(Injector) protected readonly _injector: Injector,
+        @IConfigService private readonly _configService: IConfigService
+    ) {
+        super();
+
+        const { menu, ...rest } = merge({}, defaultPluginConfig, this._config);
+        if (menu) {
+            this._configService.setConfig('menu', menu, { merge: true });
+        }
+        this._configService.setConfig(DRAWING_UI_PLUGIN_CONFIG_KEY, rest);
+    }
+
+    override onStarting(): void {
+        this._injector.add([MobileComponentsController]);
+        this._injector.get(MobileComponentsController);
+        this._initDependencies();
+    }
+
+    override onRendered(): void {
+        this._injector.get(DrawingUpdateController);
+        this._injector.get(DrawingUIController);
+        this._injector.get(ImageCropperController);
+        this._injector.get(ImageUpdateController);
+    }
+
+    private _initDependencies(): void {
+        const dependencies: Dependency[] = [
+            [DrawingImageClipService],
+            [DrawingRenderService],
+            [DrawingUpdateController],
+            [DrawingUIController],
+            [ImageCropperController],
+            [ImageUpdateController],
+        ];
+
+        dependencies.forEach((dependency) => this._injector.add(dependency));
+    }
+}

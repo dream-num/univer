@@ -18,5 +18,3 @@
  * @ignore
  */
 export const UNI_DISABLE_CHANGING_FOCUS_KEY = 'UNI_DISABLE_CHANGING_FOCUS';
-
-export const MOBILE_UI_MODE = 'MOBILE_UI_MODE';

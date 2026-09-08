@@ -525,11 +525,13 @@ function MobileSchemaRow(props: {
                 aria-disabled={disabled}
                 className={clsx(
                     `
-                      univer-flex univer-min-h-12 univer-w-full univer-items-center univer-bg-gray-0 univer-px-4
-                      univer-py-2
+                      univer-flex univer-min-h-12 univer-w-full univer-items-center univer-gap-3 univer-bg-gray-0
+                      univer-px-4 univer-py-2
                       aria-disabled:univer-pointer-events-none aria-disabled:univer-opacity-40
                       dark:!univer-bg-gray-800
-                      [&>div]:univer-box-border [&>div]:!univer-w-full
+                      [&>div]:univer-box-border [&>div]:univer-min-w-0 [&>div]:univer-flex-1
+                      [&>svg]:univer-shrink-0 [&>svg]:univer-text-lg [&>svg]:univer-text-gray-700
+                      dark:[&>svg]:!univer-text-gray-300
                     `,
                     bordered && borderBottomClassName
                 )}

@@ -241,10 +241,11 @@ export class SheetsDrawingCopyPasteController extends Disposable {
             if (drawing.drawingType !== DrawingTypeEnum.DRAWING_IMAGE) {
                 return;
             }
-            const { transform } = drawing;
-            if ((drawing as ISheetDrawing).anchorType !== SheetDrawingAnchorType.Both) {
+            const anchorType = (drawing as ISheetDrawing).anchorType ?? SheetDrawingAnchorType.Position;
+            if (anchorType === SheetDrawingAnchorType.None) {
                 return;
             }
+            const { transform } = drawing;
             if (!transform) {
                 return;
             }

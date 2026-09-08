@@ -106,7 +106,11 @@ const useMenuPosition = (range?: IDiscreteRange) => {
     };
 };
 
-export const ClipboardPopupMenu = () => {
+export interface IClipboardPopupMenuProps {
+    DropdownMenuComponent?: typeof DropdownMenu;
+}
+
+export const ClipboardPopupMenu = ({ DropdownMenuComponent = DropdownMenu }: IClipboardPopupMenuProps = {}) => {
     const clipboardService = useDependency(ISheetClipboardService);
     const showMenu = useObservable(clipboardService.showMenu$, false);
     // const clipboardController = useDependency(SheetClipboardController);
@@ -145,7 +149,7 @@ export const ClipboardPopupMenu = () => {
                 onMouseEnter={() => setMenuHovered(true)}
                 onMouseLeave={() => setMenuHovered(false)}
             >
-                <DropdownMenu
+                <DropdownMenuComponent
                     align="start"
                     items={SheetPasteOptions.map((item) => ({
                         type: 'checkbox',
@@ -175,7 +179,7 @@ export const ClipboardPopupMenu = () => {
                         />
                         {showMore && <MoreDownIcon className="dark:!univer-text-gray-0" />}
                     </div>
-                </DropdownMenu>
+                </DropdownMenuComponent>
             </div>
         </div>
     );

@@ -26,7 +26,12 @@ import { CellAlertType } from '../../services/cell-alert-manager.service';
  * @param root0
  * @param root0.popup
  */
-export function CellAlert({ popup }: { popup: ICanvasPopup }) {
+export interface ICellAlertProps {
+    popup: ICanvasPopup;
+    DropdownMenuComponent?: typeof DropdownMenu;
+}
+
+export function CellAlert({ popup, DropdownMenuComponent = DropdownMenu }: ICellAlertProps) {
     const [visible, setVisible] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
     const alert = popup.extraProps?.alert;
@@ -47,7 +52,7 @@ export function CellAlert({ popup }: { popup: ICanvasPopup }) {
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
             >
-                <DropdownMenu
+                <DropdownMenuComponent
                     align="start"
                     open={visible}
                     onOpenChange={setVisible}
@@ -92,7 +97,7 @@ export function CellAlert({ popup }: { popup: ICanvasPopup }) {
                             />
                         )}
                     </button>
-                </DropdownMenu>
+                </DropdownMenuComponent>
             </div>
         );
     }

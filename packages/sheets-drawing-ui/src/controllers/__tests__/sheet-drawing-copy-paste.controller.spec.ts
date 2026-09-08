@@ -123,6 +123,48 @@ function createController(options?: { focusedDrawings?: IImageDrawing[]; drawing
 }
 
 describe('SheetsDrawingCopyPasteController', () => {
+    it('copies default position-anchored images contained in a cell range', () => {
+        const positionOnlyDrawing = createImageDrawing({
+            drawingId: 'position-only',
+            anchorType: undefined,
+        });
+        const { controller, hook, drawingService } = createController({
+            drawingData: {
+                [positionOnlyDrawing.drawingId]: positionOnlyDrawing,
+            },
+        });
+
+        hook.onBeforeCopy('unit-1', 'sheet-1', {
+            startRow: 0,
+            endRow: 1,
+            startColumn: 0,
+            endColumn: 1,
+        }, COPY_TYPE.COPY);
+        hook.onPasteCells(
+            {
+                unitId: 'unit-1',
+                subUnitId: 'sheet-1',
+                range: { rows: [0, 1], cols: [0, 1] },
+            },
+            {
+                unitId: 'unit-2',
+                subUnitId: 'sheet-2',
+                range: { rows: [2, 3], cols: [3, 4] },
+            },
+            new ObjectMatrix(),
+            { copyId: 'range-copy', copyType: COPY_TYPE.COPY, pasteType: PREDEFINED_HOOK_NAME_PASTE.DEFAULT_PASTE }
+        );
+
+        expect(drawingService.getBatchAddOp).toHaveBeenCalledTimes(1);
+        expect(drawingService.getBatchAddOp.mock.calls[0][0]).toMatchObject([{
+            unitId: 'unit-2',
+            subUnitId: 'sheet-2',
+            transform: { left: 35, top: 45, width: 10, height: 20 },
+        }]);
+
+        controller.dispose();
+    });
+
     it('copies drawings contained in a cell range and pastes them with the range offset', () => {
         const containedDrawing = createImageDrawing();
         const outsideDrawing = createImageDrawing({
@@ -132,6 +174,11 @@ describe('SheetsDrawingCopyPasteController', () => {
         const positionOnlyDrawing = createImageDrawing({
             drawingId: 'position-only',
             anchorType: SheetDrawingAnchorType.Position,
+            transform: { left: 50, top: 50, width: 10, height: 20 },
+        });
+        const unanchoredDrawing = createImageDrawing({
+            drawingId: 'unanchored',
+            anchorType: SheetDrawingAnchorType.None,
         });
         const { controller, hook, drawingService } = createController({
             focusedDrawings: [outsideDrawing],
@@ -139,6 +186,7 @@ describe('SheetsDrawingCopyPasteController', () => {
                 [containedDrawing.drawingId]: containedDrawing,
                 [outsideDrawing.drawingId]: outsideDrawing,
                 [positionOnlyDrawing.drawingId]: positionOnlyDrawing,
+                [unanchoredDrawing.drawingId]: unanchoredDrawing,
                 chart: { drawingId: 'chart', drawingType: DrawingTypeEnum.DRAWING_CHART },
             },
         });

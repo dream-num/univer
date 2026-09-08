@@ -20,7 +20,7 @@ import type { IUIController, IWorkbenchOptions } from './ui.controller';
 import { Inject, Injector, IUniverInstanceService, LifecycleService, toDisposable } from '@univerjs/core';
 import { unmount } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { menuSchema } from '../../menu/schema';
+import { mobileMenuSchema } from '../../menu/mobile-schema';
 import { ILayoutService } from '../../services/layout/layout.service';
 import { IMenuManagerService } from '../../services/menu/menu-manager.service';
 import { BuiltInUIPart, IUIPartsService } from '../../services/parts/parts.service';
@@ -44,7 +44,7 @@ export class MobileUIController extends SingleUnitUIController implements IUICon
     ) {
         super(injector, instanceService, layoutService, lifecycleService, renderManagerService);
 
-        menuManagerService.mergeMenu(menuSchema);
+        menuManagerService.mergeMenu(mobileMenuSchema);
         this._initBuiltinComponents(uiPartsService);
         this._bootstrapWorkbench();
     }

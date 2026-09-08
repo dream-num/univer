@@ -30,7 +30,11 @@ import { Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { EditorBridgeService, IEditorBridgeService } from '../editor-bridge.service';
 
-function createService(options?: { disableAutoFocus?: boolean; hasFocusEditor?: boolean }) {
+function createService(options?: {
+    disableAutoFocus?: boolean;
+    hasFocusEditor?: boolean;
+    hasInternalEditorDocument?: boolean;
+}) {
     const unitDisposed$ = new Subject<any>();
     const workbook = {
         getUnitId: () => 'unit-1',
@@ -55,9 +59,15 @@ function createService(options?: { disableAutoFocus?: boolean; hasFocusEditor?: 
         univerInstanceService: {
             getTypeOfUnitDisposed$: vi.fn(() => unitDisposed$.asObservable()),
             getCurrentUnitOfType: vi.fn((_type?: UniverInstanceType) => workbook),
-            getUnit: vi.fn((unitId: string, type?: UniverInstanceType) => unitId === 'unit-1'
-                ? mocks.univerInstanceService.getCurrentUnitOfType(type as never)
-                : null),
+            getUnit: vi.fn((unitId: string, type?: UniverInstanceType) => {
+                if (unitId === 'unit-1') {
+                    return mocks.univerInstanceService.getCurrentUnitOfType(type as never);
+                }
+
+                return unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY && options?.hasInternalEditorDocument
+                    ? { getUnitId: () => DOCS_NORMAL_EDITOR_UNIT_ID_KEY }
+                    : null;
+            }),
             setCurrentUnitForType: vi.fn(),
         },
         editorService: {
@@ -224,7 +234,10 @@ describe('EditorBridgeService', () => {
     });
 
     it('selects the internal editor without focusing its DOM input when automatic focus is disabled', () => {
-        const { service, mocks } = createService({ disableAutoFocus: true });
+        const { service, mocks } = createService({
+            disableAutoFocus: true,
+            hasInternalEditorDocument: true,
+        });
         vi.spyOn(service, 'getLatestEditCellState').mockReturnValue(undefined);
 
         service.setEditCell(createEditCellParam());
@@ -232,6 +245,16 @@ describe('EditorBridgeService', () => {
         expect(mocks.univerInstanceService.setCurrentUnitForType).toHaveBeenCalledWith(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
         expect(mocks.editorService.focus).not.toHaveBeenCalled();
         expect(mocks.contextService.setContextValue).not.toHaveBeenCalled();
+    });
+
+    it('does not select the internal editor before its document is registered', () => {
+        const { service, mocks } = createService({ disableAutoFocus: true });
+        vi.spyOn(service, 'getLatestEditCellState').mockReturnValue(undefined);
+
+        service.setEditCell(createEditCellParam());
+
+        expect(mocks.univerInstanceService.setCurrentUnitForType).not.toHaveBeenCalled();
+        expect(mocks.editorService.focus).not.toHaveBeenCalled();
     });
 
     it('manages visible/dirty/force-keep states and null-latest branches', () => {

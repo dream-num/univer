@@ -20,6 +20,7 @@ import type { LocaleKey } from '../../locale/types';
 import type { IConditionCompareTypeEnum } from './type';
 import { LocaleService } from '@univerjs/core';
 import {
+    TableColumnFilterTypeEnum,
     TableConditionTypeEnum,
     TableDateCompareTypeEnum,
     TableNumberCompareTypeEnum,
@@ -324,7 +325,7 @@ export function getSubComponentType(type: TableConditionTypeEnum, compare?: Tabl
 
 // eslint-disable-next-line complexity
 export function getInitConditionInfo(tableFilter?: ITableFilterItem) {
-    if (!tableFilter || tableFilter.filterType !== 'condition') {
+    if (!tableFilter || tableFilter.filterType !== TableColumnFilterTypeEnum.condition) {
         return {
             type: TableConditionTypeEnum.String,
             compare: TableStringCompareTypeEnum.Equal,

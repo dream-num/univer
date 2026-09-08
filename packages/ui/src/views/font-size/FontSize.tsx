@@ -26,6 +26,10 @@ export const FontSize = (props: IFontSizeProps) => {
     const [draft, setDraft] = useState<{ source: number; value: number | null } | null>(null);
     const inputValue = draft !== null && draft.source === value ? draft.value : Number(value ?? 0);
 
+    if (draft !== null && draft.source !== value) {
+        setDraft(null);
+    }
+
     function handleChange(nextValue: number | null) {
         setDraft({ source: value, value: nextValue });
     }

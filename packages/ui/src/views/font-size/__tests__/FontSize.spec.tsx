@@ -134,6 +134,24 @@ describe('FontSize input ownership', () => {
         expect(changes).toEqual([18]);
     });
 
+    it.each(['24', ''])('does not revive draft "%s" when the controlled size returns to its original value', (draft) => {
+        const changes: number[] = [];
+        const onChange = (value: number) => changes.push(value);
+        const rendered = render(<FontSize value={11} min={6} max={400} onChange={onChange} />);
+        const input = rendered.container.querySelector('input')!;
+        input.focus();
+        fireEvent.change(input, { target: { value: draft } });
+        expect(input.value).toBe(draft);
+        rendered.rerender(<FontSize value={18} min={6} max={400} onChange={onChange} />);
+        expect(input.value).toBe('18');
+        rendered.rerender(<FontSize value={11} min={6} max={400} onChange={onChange} />);
+        expect(document.activeElement).toBe(input);
+        expect(input.value).toBe('11');
+        expect(changes).toEqual([]);
+        fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+        expect(changes).toEqual([11]);
+    });
+
     it.each([['2', 6], ['999', 400]] as const)('commits bounded size %s only after confirmation', (text, expected) => {
         const changes: number[] = [];
         const rendered = render(<FontSize value={11} min={6} max={400} onChange={(value) => changes.push(value)} />);

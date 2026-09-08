@@ -220,6 +220,7 @@ const locale: typeof enUS = {
             error: '错误',
             forceStringInfo: '以文本形式存储的数字',
             convertToNumber: '转换为数字',
+            overwriteCellContent: '目标区域中已有数据，该操作将覆盖原有数据，是否继续？',
         },
         clipboard: {
             paste: {

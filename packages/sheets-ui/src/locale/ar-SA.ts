@@ -220,6 +220,7 @@ const locale: typeof enUS = {
             error: 'خطأ',
             forceStringInfo: 'رقم مخزن كنص',
             convertToNumber: 'تحويل إلى رقم',
+            overwriteCellContent: 'يوجد بالفعل بيانات في المنطقة المستهدفة. سيؤدي هذا الإجراء إلى الكتابة فوق البيانات الموجودة. هل تريد المتابعة؟',
         },
         clipboard: {
             paste: {

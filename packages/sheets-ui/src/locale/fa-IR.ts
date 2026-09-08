@@ -220,6 +220,7 @@ const locale: typeof enUS = {
             error: 'خطا',
             forceStringInfo: 'عدد به عنوان متن ذخیره شده',
             convertToNumber: 'تبدیل به عدد',
+            overwriteCellContent: 'داده ها در منطقه مقصد وجود دارد. این عملیات داده های موجود را جایگزین می کند. آیا می خواهید ادامه دهید؟',
         },
         clipboard: {
             paste: {

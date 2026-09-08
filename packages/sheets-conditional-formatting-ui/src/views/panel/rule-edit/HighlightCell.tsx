@@ -249,7 +249,7 @@ const getOperatorOptions = (type: IEditableSubType) => {
     }
 };
 export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, IEditableHighlightCell>) => {
-    const { interceptorManager, onChange } = props;
+    const { interceptorManager, onChange, SelectComponent = Select, ColorPickerComponent } = props;
     const localeService = useDependency(LocaleService);
 
     const rule = props.rule?.type === CFRuleType.highlightCell ? props.rule : undefined;
@@ -414,14 +414,14 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, IEditable
                 {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.styleRule')}
             </div>
             <div className="univer-flex univer-justify-between univer-gap-4">
-                <Select
+                <SelectComponent
                     className="univer-mt-3 univer-w-full"
                     onChange={onTypeChange}
                     value={subType}
                     options={typeOptions}
                 />
                 {operatorOptions?.length && (
-                    <Select
+                    <SelectComponent
                         className="univer-mt-3 univer-w-full"
                         onChange={onOperatorChange}
                         value={operator || ''}
@@ -442,6 +442,7 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, IEditable
                 <Preview rule={getResult({})} />
             </div>
             <ConditionalStyleEditor
+                ColorPickerComponent={ColorPickerComponent}
                 style={rule?.style}
                 className="univer-ml-1"
                 onChange={(v) => {

@@ -19,6 +19,13 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'find-replace': {
         toolbar: 'Cerca i reemplaça',
+        mobile: {
+            settings: 'Configuració de cerca i reemplaçament',
+            'settings-title': 'Configuració de cerca i reemplaçament',
+            'previous-match': 'Coincidència anterior',
+            'next-match': 'Coincidència següent',
+            close: 'Tanca la cerca i el reemplaçament',
+        },
         shortcut: {
             'open-find-dialog': 'Obrir el diàleg de cerca',
             'open-replace-dialog': 'Obrir el diàleg de reemplaçament',

@@ -37,16 +37,14 @@ import { IconManager } from './common/icon-manager';
 import { ZIndexManager } from './common/z-index-manager';
 import { defaultPluginConfig, UI_PLUGIN_CONFIG_KEY } from './config/config';
 import { MOBILE_UI_MODE } from './const';
-import { ComponentsController } from './controllers/components.controller';
 import { ErrorController } from './controllers/error/error.controller';
-import { FeatureSearchController } from './controllers/feature-search/feature-search.controller';
+import { MobileComponentsController } from './controllers/mobile/components.controller';
 import { SharedController } from './controllers/shared-shortcut.controller';
-import { ShortcutPanelController } from './controllers/shortcut-display/shortcut-panel.controller';
 import { MobileUIController } from './controllers/ui/ui-mobile.controller';
 import { IUIController } from './controllers/ui/ui.controller';
 import { DesktopBeforeCloseService, IBeforeCloseService } from './services/before-close/before-close.service';
 import { BrowserClipboardService, IClipboardInterfaceService } from './services/clipboard/clipboard-interface.service';
-import { DesktopConfirmService } from './services/confirm/desktop-confirm.service';
+import { MobileConfirmService } from './services/confirm/mobile-confirm.service';
 import { ContextMenuHostService, IContextMenuHostService } from './services/contextmenu/contextmenu-host.service';
 import { ContextMenuService, IContextMenuService } from './services/contextmenu/contextmenu.service';
 import { IDialogService } from './services/dialog/dialog.service';
@@ -73,7 +71,6 @@ import {
 } from './services/presence/unit-presence-ui-adapter.service';
 import { DesktopRibbonService, IRibbonService } from './services/ribbon/ribbon.service';
 import { IUIRuntimeScopeService, UIRuntimeScopeService } from './services/runtime-scope/ui-runtime-scope.service';
-import { ShortcutPanelService } from './services/shortcut/shortcut-panel.service';
 import { IShortcutService, ShortcutService } from './services/shortcut/shortcut.service';
 import { DesktopSidebarService } from './services/sidebar/desktop-sidebar.service';
 import { ISidebarService } from './services/sidebar/sidebar.service';
@@ -124,12 +121,11 @@ export class UniverMobileUIPlugin extends Plugin {
         registerDependencies(this._injector, mergeOverrideWithDependencies([
             [ComponentManager],
             [IconManager],
-            [ComponentsController],
+            [MobileComponentsController],
             [ThemeSwitcherService],
             [UndoRedoGroupService],
             [IWorkbenchService, { useClass: WorkbenchService }],
             [ZIndexManager],
-            [ShortcutPanelService],
             [IUIPartsService, { useClass: UIPartsService }],
             [ILayoutService, { useClass: DesktopLayoutService }],
             [IRibbonService, { useClass: DesktopRibbonService }],
@@ -144,7 +140,7 @@ export class UniverMobileUIPlugin extends Plugin {
             [INotificationService, { useClass: DesktopNotificationService, lazy: true }],
             [IGalleryService, { useClass: DesktopGalleryService, lazy: true }],
             [IDialogService, { useClass: MobileDialogService, lazy: true }],
-            [IConfirmService, { useClass: DesktopConfirmService, lazy: true }],
+            [IConfirmService, { useClass: MobileConfirmService, lazy: true }],
             [ISidebarService, { useClass: DesktopSidebarService, lazy: true }],
             [IMessageService, { useClass: DesktopMessageService, lazy: true }],
             [ILocalStorageService, { useClass: DesktopLocalStorageService, lazy: true }],
@@ -164,12 +160,10 @@ export class UniverMobileUIPlugin extends Plugin {
             ],
             [SharedController],
             [ErrorController],
-            [FeatureSearchController],
-            [ShortcutPanelController],
         ], this._config.override));
 
         touchDependencies(this._injector, [
-            [ComponentsController],
+            [MobileComponentsController],
             [IUIController],
             [ErrorController],
         ]);
@@ -178,13 +172,6 @@ export class UniverMobileUIPlugin extends Plugin {
     override onReady(): void {
         touchDependencies(this._injector, [
             [SharedController],
-            [FeatureSearchController],
-        ]);
-    }
-
-    override onSteady(): void {
-        touchDependencies(this._injector, [
-            [ShortcutPanelController],
         ]);
     }
 }

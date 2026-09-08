@@ -19,6 +19,13 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'find-replace': {
         toolbar: 'Hľadať a nahradiť',
+        mobile: {
+            settings: 'Nastavenia hľadania a nahrádzania',
+            'settings-title': 'Nastavenia hľadania a nahrádzania',
+            'previous-match': 'Predchádzajúca zhoda',
+            'next-match': 'Nasledujúca zhoda',
+            close: 'Zavrieť hľadanie a nahrádzanie',
+        },
         shortcut: {
             'open-find-dialog': 'Otvoriť dialógové okno hľadania',
             'open-replace-dialog': 'Otvoriť dialógové okno nahradenia',

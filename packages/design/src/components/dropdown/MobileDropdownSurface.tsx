@@ -34,6 +34,7 @@ export function MobileDropdownSurface(props: {
 }) {
     const { children, content, open, disabled, onOpenChange } = props;
     const { locale, mountContainer } = useContext(ConfigContext);
+    const maxHeight = globalThis.CSS?.supports('height', '1dvh') ? '80dvh' : '80vh';
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange} modal>
@@ -45,9 +46,8 @@ export function MobileDropdownSurface(props: {
                 overlayClassName="!univer-z-[1390]"
                 className="
                   !univer-bottom-0 !univer-left-0 !univer-right-0 !univer-top-auto !univer-z-[1400] !univer-block
-                  !univer-max-h-[80dvh] !univer-w-full !univer-max-w-none !univer-translate-x-0 !univer-translate-y-0
-                  !univer-overflow-y-auto !univer-rounded-t-2xl !univer-border-0 !univer-bg-gray-50 !univer-p-4
-                  !univer-pt-14
+                  !univer-w-full !univer-max-w-none !univer-translate-x-0 !univer-translate-y-0 !univer-overflow-y-auto
+                  !univer-rounded-t-2xl !univer-border-0 !univer-bg-gray-50 !univer-p-4 !univer-pt-14
                   dark:!univer-bg-gray-900
                   [&_button[data-slot='close']]:!univer-right-3 [&_button[data-slot='close']]:!univer-top-3
                   [&_button[data-slot='close']]:!univer-size-10
@@ -59,6 +59,7 @@ export function MobileDropdownSurface(props: {
                     top: 'auto',
                     bottom: 0,
                     width: '100%',
+                    maxHeight,
                     maxWidth: 'none',
                     transform: 'none',
                 }}

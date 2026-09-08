@@ -15,13 +15,16 @@
  */
 
 import type { IRange, Workbook } from '@univerjs/core';
+import type { IDropdownProps, ISelectProps } from '@univerjs/design';
 import type { IRemoveSheetMutationParams } from '@univerjs/sheets';
 import type {
     IAddCfCommandParams,
     IConditionFormattingRule,
     ISetCfCommandParams,
 } from '@univerjs/sheets-conditional-formatting';
+import type { ComponentType } from 'react';
 import type { LocaleKey } from '../../locale/types';
+import type { IConditionalColorPickerProps } from '../ColorPicker';
 import type { IStyleEditorProps } from './rule-edit/type';
 import {
     ICommandService,
@@ -45,7 +48,7 @@ import {
     ConditionalFormattingRuleModel,
     SetCfCommand,
 } from '@univerjs/sheets-conditional-formatting';
-import { RangeSelector } from '@univerjs/sheets-formula-ui';
+import { FormulaEditor, RangeSelector } from '@univerjs/sheets-formula-ui';
 import { useDependency } from '@univerjs/ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ColorScaleStyleEditor } from './rule-edit/ColorScale';
@@ -56,15 +59,27 @@ import { IconSet } from './rule-edit/IconSet';
 import { RankStyleEditor } from './rule-edit/Rank';
 import { beforeSubmit, submit } from './rule-edit/type';
 
-interface IRuleEditProps {
+export interface IRuleEditProps {
     rule?: IConditionFormattingRule;
     onCancel: () => void;
+    SelectComponent?: ComponentType<ISelectProps>;
+    DropdownComponent?: ComponentType<IDropdownProps>;
+    ColorPickerComponent?: ComponentType<IConditionalColorPickerProps>;
+    RangeSelectorComponent?: typeof RangeSelector;
+    FormulaEditorComponent?: typeof FormulaEditor;
 }
 
 const getUnitId = (univerInstanceService: IUniverInstanceService) => univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
 const getSubUnitId = (univerInstanceService: IUniverInstanceService) => univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()?.getSheetId();
 
 export const RuleEdit = (props: IRuleEditProps) => {
+    const {
+        SelectComponent = Select,
+        DropdownComponent,
+        ColorPickerComponent,
+        RangeSelectorComponent = RangeSelector,
+        FormulaEditorComponent = FormulaEditor,
+    } = props;
     const localeService = useDependency(LocaleService);
     const commandService = useDependency(ICommandService);
     const univerInstanceService = useDependency(IUniverInstanceService);
@@ -273,7 +288,7 @@ export const RuleEdit = (props: IRuleEditProps) => {
                 {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.range')}
             </div>
             <div className="univer-mt-4">
-                <RangeSelector
+                <RangeSelectorComponent
                     unitId={unitId}
                     subUnitId={subUnitId}
                     initialValue={rangeString}
@@ -290,7 +305,7 @@ export const RuleEdit = (props: IRuleEditProps) => {
             >
                 {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.styleType')}
             </div>
-            <Select
+            <SelectComponent
                 className="univer-mt-4 univer-w-full"
                 value={ruleType}
                 options={options}
@@ -300,6 +315,10 @@ export const RuleEdit = (props: IRuleEditProps) => {
                 interceptorManager={interceptorManager}
                 rule={props.rule?.rule as any}
                 onChange={onStyleChange}
+                SelectComponent={SelectComponent}
+                DropdownComponent={DropdownComponent}
+                ColorPickerComponent={ColorPickerComponent}
+                FormulaEditorComponent={FormulaEditorComponent}
             />
             <div className="univer-mt-4 univer-flex univer-justify-end univer-gap-2">
                 <Button onClick={handleCancel}>{localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.cancel')}</Button>

@@ -37,7 +37,15 @@ import { useRef, useState } from 'react';
 import { map, startWith } from 'rxjs';
 import { DefinedNameInput } from './DefinedNameInput';
 
-export const DefinedNameContainer = () => {
+export interface IDefinedNameContainerProps {
+    ConfirmComponent?: typeof Confirm;
+    DefinedNameInputComponent?: typeof DefinedNameInput;
+}
+
+export const DefinedNameContainer = ({
+    ConfirmComponent = Confirm,
+    DefinedNameInputComponent = DefinedNameInput,
+}: IDefinedNameContainerProps = {}) => {
     const commandService = useDependency(ICommandService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const localeService = useDependency(LocaleService);
@@ -254,7 +262,7 @@ export const DefinedNameContainer = () => {
                     <span className="univer-ml-1">{localeService.t<LocaleKey>('sheets-ui.definedName.addButton')}</span>
                 </Button>
                 {editState && (
-                    <DefinedNameInput
+                    <DefinedNameInputComponent
                         confirm={insertConfirm}
                         cancel={closeInput}
                         state={editState}
@@ -364,16 +372,16 @@ export const DefinedNameContainer = () => {
                                     )}
                                 </div>
 
-                                <Confirm
+                                <ConfirmComponent
                                     visible={deleteConformKey === definedName.id}
                                     onClose={handleDeleteClose}
                                     onConfirm={() => { handleDeleteConfirm(definedName.id); }}
                                 >
                                     {localeService.t<LocaleKey>('sheets-ui.definedName.deleteConfirmText')}
-                                </Confirm>
+                                </ConfirmComponent>
 
                                 {definedName.id === editorKey && (
-                                    <DefinedNameInput
+                                    <DefinedNameInputComponent
                                         confirm={insertConfirm}
                                         cancel={closeInput}
                                         state={definedName.id === editorKey}

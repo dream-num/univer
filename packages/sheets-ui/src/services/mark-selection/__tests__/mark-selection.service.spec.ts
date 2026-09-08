@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+// @vitest-environment jsdom
+
 import {
     ContextService,
     DesktopLogService,
@@ -109,12 +111,17 @@ describe('MarkSelectionService', () => {
             primary: null,
         } as never);
 
-        expect(service.getShapeMap().get(firstId!)?.control?.getRange()).toMatchObject({
+        const firstControl = service.getShapeMap().get(firstId!)?.control;
+        expect(firstControl?.getRange()).toMatchObject({
             startRow: 1,
             endRow: 2,
             startColumn: 3,
             endColumn: 4,
         });
+        expect(firstControl?.leftControl.evented).toBe(false);
+        expect(firstControl?.rightControl.evented).toBe(false);
+        expect(firstControl?.topControl.evented).toBe(false);
+        expect(firstControl?.bottomControl.evented).toBe(false);
         expect(service.getShapeMap().get(secondId!)?.control).toBeNull();
 
         service.refreshShapes();

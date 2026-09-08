@@ -35,6 +35,9 @@ export class InputManager extends Disposable {
     /** Time in milliseconds with two consecutive clicks will be considered as a double or triple click */
     static DoubleClickDelay = 500; // in milliseconds
 
+    /** The allowed distance between two consecutive touch taps. */
+    static TouchDoubleClickMovementThreshold = 10; // in pixels
+
     static TripleClickDelay = 300; // in milliseconds
 
     /** If you need to check double click without raising a single click at first click, enable this flag */
@@ -469,17 +472,25 @@ export class InputManager extends Disposable {
      * @hidden
      * @returns Boolean if delta for pointer exceeds drag movement threshold
      */
-    private _isPointerSwiping(pointerX: number, pointerY: number, origin = this._startingPosition): boolean {
+    private _isPointerSwiping(
+        pointerX: number,
+        pointerY: number,
+        origin = this._startingPosition,
+        threshold = InputManager.DragMovementThreshold
+    ): boolean {
         return (
-            Math.abs(origin.x - pointerX) > InputManager.DragMovementThreshold ||
-            Math.abs(origin.y - pointerY) > InputManager.DragMovementThreshold
+            Math.abs(origin.x - pointerX) > threshold ||
+            Math.abs(origin.y - pointerY) > threshold
         );
     }
 
     private _prePointerDoubleOrTripleClick(evt: IPointerEvent) {
         const { clientX, clientY } = evt;
+        const movementThreshold = evt.deviceType === DeviceType.Touch
+            ? InputManager.TouchDoubleClickMovementThreshold
+            : InputManager.DragMovementThreshold;
 
-        const isMoveThreshold = this._isPointerSwiping(clientX, clientY);
+        const isMoveThreshold = this._isPointerSwiping(clientX, clientY, this._startingPosition, movementThreshold);
 
         if (isMoveThreshold) {
             this._resetClickSequence();

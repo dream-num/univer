@@ -74,6 +74,8 @@ export interface IThreadCommentTreeProps {
     onAfterDeleteComment?: (comment: IThreadComment) => void | Promise<void>;
     onResolve?: (resolved: boolean) => void;
     style?: React.CSSProperties;
+    DropdownComponent?: typeof Dropdown;
+    EditorComponent?: typeof ThreadCommentEditor;
 }
 
 export interface IThreadCommentItemProps {
@@ -91,6 +93,8 @@ export interface IThreadCommentItemProps {
     onAfterDeleteComment?: (comment: IThreadComment) => void | Promise<void>;
     type: UniverInstanceType;
     threadCommentEditorId: string;
+    DropdownComponent: typeof Dropdown;
+    EditorComponent: typeof ThreadCommentEditor;
 }
 
 const MOCK_ID = '__mock__';
@@ -125,6 +129,8 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
         onAfterDeleteComment,
         type,
         threadCommentEditorId,
+        DropdownComponent,
+        EditorComponent,
     } = props;
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
@@ -221,7 +227,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                                 )}
                             {isCommentBySelf && !isMock && !resolved
                                 ? (
-                                    <Dropdown
+                                    <DropdownComponent
                                         overlay={(
                                             <div dir={direction} className="univer-rounded-lg">
                                                 <ul
@@ -273,7 +279,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                                         >
                                             <MoreHorizontalIcon />
                                         </button>
-                                    </Dropdown>
+                                    </DropdownComponent>
                                 )
                                 : null}
                         </div>
@@ -293,7 +299,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
             )}
             {editing
                 ? (
-                    <ThreadCommentEditor
+                    <EditorComponent
                         type={type}
                         id={item.id}
                         comment={item}
@@ -385,6 +391,8 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
         type,
         style,
         full,
+        DropdownComponent = Dropdown,
+        EditorComponent = ThreadCommentEditor,
     } = props;
     const threadCommentModel = useDependency(ThreadCommentModel);
     const [isHover, setIsHover] = useState(false);
@@ -610,6 +618,8 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                             resolved={comments?.root.resolved}
                             type={type}
                             threadCommentEditorId={threadCommentEditorId}
+                            DropdownComponent={DropdownComponent}
+                            EditorComponent={EditorComponent}
                             onClose={onClose}
                             onEditingChange={(editing) => {
                                 if (editing) {
@@ -646,7 +656,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
             </div>
             {editorVisible && (
                 <div>
-                    <ThreadCommentEditor
+                    <EditorComponent
                         key={`${autoFocus}`}
                         ref={editorRef}
                         type={type}

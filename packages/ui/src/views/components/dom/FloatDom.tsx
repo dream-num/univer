@@ -19,7 +19,7 @@ import type { IFloatDom } from '../../../services/dom/canvas-dom-layer.service';
 import { DocumentDataModel, IUniverInstanceService } from '@univerjs/core';
 import { memo, useEffect, useMemo, useRef } from 'react';
 import { first } from 'rxjs';
-import { ComponentManager } from '../../../common';
+import { ComponentManager } from '../../../common/component-manager';
 import { CanvasFloatDomService, shouldForwardFloatDomEvents, shouldRenderFloatDomLayer } from '../../../services/dom/canvas-dom-layer.service';
 import { useDependency, useObservable } from '../../../utils/di';
 import { resolveFloatDomLayout } from './float-dom-layout';
@@ -76,6 +76,7 @@ function FloatDomSingleContent(props: { layer: IFloatDom; id: string; Component?
     const floatDomOverflow = resolveFloatDomOverflow(layerProps);
     const wrapperInset = layer.contentBox?.wrapperInset;
     const contentInset = layer.contentBox?.contentInset;
+    const forwardEvents = shouldForwardFloatDomEvents(layer);
 
     useEffect(() => {
         const subscription = layer.position$.subscribe((position) => {
@@ -119,24 +120,51 @@ function FloatDomSingleContent(props: { layer: IFloatDom; id: string; Component?
             style={{
                 ...layout.wrapper,
                 overflow: floatDomOverflow.outerOverflow,
+                touchAction: forwardEvents ? 'none' : undefined,
             }}
             onPointerMove={(e) => {
-                if (shouldForwardFloatDomEvents(layer)) {
+                if (forwardEvents) {
                     layer.onPointerMove(e.nativeEvent);
                 }
             }}
             onPointerDown={(e) => {
-                if (shouldForwardFloatDomEvents(layer)) {
+                if (forwardEvents) {
+                    // Keep pointerup on the original descendant so its activation handler still runs.
+                    if (e.target instanceof Element) {
+                        e.target.setPointerCapture?.(e.pointerId);
+                    }
                     layer.onPointerDown(e.nativeEvent);
                 }
             }}
             onPointerUp={(e) => {
-                if (shouldForwardFloatDomEvents(layer)) {
+                if (!forwardEvents) {
+                    return;
+                }
+
+                try {
                     layer.onPointerUp(e.nativeEvent);
+                } finally {
+                    if (e.target instanceof Element && e.target.hasPointerCapture?.(e.pointerId)) {
+                        e.target.releasePointerCapture?.(e.pointerId);
+                    }
+                }
+            }}
+            onPointerCancel={(e) => {
+                if (!forwardEvents) {
+                    return;
+                }
+
+                try {
+                    // The layer forwards the original event type, so the canvas receives pointercancel rather than pointerup.
+                    layer.onPointerUp(e.nativeEvent);
+                } finally {
+                    if (e.target instanceof Element && e.target.hasPointerCapture?.(e.pointerId)) {
+                        e.target.releasePointerCapture?.(e.pointerId);
+                    }
                 }
             }}
             onWheel={(e) => {
-                if (shouldForwardFloatDomEvents(layer)) {
+                if (forwardEvents) {
                     layer.onWheel(e.nativeEvent);
                 }
             }}

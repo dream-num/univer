@@ -26,14 +26,22 @@ import { PermissionDetailFooterPart } from './PermissionDetailFooterPart';
 import { PermissionDetailMainPart } from './PermissionDetailMainPart';
 import { PermissionDetailUserPart } from './PermissionDetailUserPart';
 
-interface ISheetPermissionPanelDetailProps {
+export interface ISheetPermissionPanelDetailProps {
     fromSheetBar: boolean;
     rule?: IPermissionPanelRule;
     oldRule?: IPermissionPanelRule;
+    FooterComponent?: typeof PermissionDetailFooterPart;
+    UserComponent?: typeof PermissionDetailUserPart;
 }
 
 export const SheetPermissionPanelDetail = (props: ISheetPermissionPanelDetailProps) => {
-    const { fromSheetBar, rule, oldRule } = props;
+    const {
+        fromSheetBar,
+        rule,
+        oldRule,
+        FooterComponent = PermissionDetailFooterPart,
+        UserComponent = PermissionDetailUserPart,
+    } = props;
     const injector = useDependency(Injector);
     const componentManager = useDependency(ComponentManager);
     const activeRule: IPermissionPanelRule = rule ? generateRuleByUnitType(injector, rule) : generateDefaultRule(injector, fromSheetBar);
@@ -46,7 +54,7 @@ export const SheetPermissionPanelDetail = (props: ISheetPermissionPanelDetailPro
     const [editState, setEditState] = useState<EditStateEnum>(activeRule.editState ?? EditStateEnum.OnlyMe);
     const [viewState, setViewState] = useState<ViewStateEnum>(activeRule.viewState ?? ViewStateEnum.OthersCanView);
     const CustomPermissionDetailUserPart = componentManager.get(UNIVER_SHEET_PERMISSION_USER_PART);
-    const PermissionDetailUser = CustomPermissionDetailUserPart ?? PermissionDetailUserPart;
+    const PermissionDetailUser = CustomPermissionDetailUserPart ?? UserComponent;
 
     useEffect(() => {
         const univerInstanceService = injector.get(IUniverInstanceService);
@@ -88,7 +96,7 @@ export const SheetPermissionPanelDetail = (props: ISheetPermissionPanelDetailPro
                     permissionId: activeRule.permissionId,
                 }}
             />
-            <PermissionDetailFooterPart
+            <FooterComponent
                 permissionId={activeRule.permissionId}
                 id={activeRule.id}
                 ranges={ranges}

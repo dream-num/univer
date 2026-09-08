@@ -17,9 +17,8 @@
 import { Disposable, Inject } from '@univerjs/core';
 import { ConditionsDoubleIcon, DataBarIcon, RatingIcon } from '@univerjs/icons';
 import { ComponentManager, IconManager } from '@univerjs/ui';
+import { CF_PANEL_KEY } from '../const';
 import { ConditionFormattingPanel } from '../views/ConditionFormattingPanel';
-
-const CF_PANEL_KEY = 'sheet.conditional.formatting.panel';
 
 export class ComponentsController extends Disposable {
     constructor(

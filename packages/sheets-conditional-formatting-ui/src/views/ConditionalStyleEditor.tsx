@@ -15,6 +15,8 @@
  */
 
 import type { IHighlightCell } from '@univerjs/sheets-conditional-formatting';
+import type { ComponentType } from 'react';
+import type { IConditionalColorPickerProps } from './ColorPicker';
 import { BooleanNumber } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
 import { BoldIcon, FontColorDoubleIcon, ItalicIcon, StrikethroughIcon, UnderlineIcon } from '@univerjs/icons';
@@ -22,10 +24,11 @@ import { removeUndefinedAttr } from '@univerjs/sheets-conditional-formatting';
 import { useEffect, useState } from 'react';
 import { ColorPicker } from './ColorPicker';
 
-interface IConditionalStyleEditorProps {
+export interface IConditionalStyleEditorProps {
     className?: string;
     style?: IHighlightCell['style'];
     onChange: (style: IHighlightCell['style']) => void;
+    ColorPickerComponent?: ComponentType<IConditionalColorPickerProps>;
 };
 
 const getAnotherBooleanNumber = (v: BooleanNumber | undefined) => {
@@ -33,7 +36,7 @@ const getAnotherBooleanNumber = (v: BooleanNumber | undefined) => {
 };
 const getBooleanFromNumber = (v: BooleanNumber) => v !== BooleanNumber.FALSE;
 export const ConditionalStyleEditor = (props: IConditionalStyleEditorProps) => {
-    const { style, onChange, className } = props;
+    const { style, onChange, className, ColorPickerComponent = ColorPicker } = props;
 
     const [isBold, setIsBold] = useState<BooleanNumber | undefined>(() => {
         const defaultV = undefined;
@@ -134,8 +137,8 @@ export const ConditionalStyleEditor = (props: IConditionalStyleEditorProps) => {
             >
                 <StrikethroughIcon />
             </div>
-            <ColorPicker color={fontColor} onChange={setFontColor} Icon={FontColorDoubleIcon} />
-            <ColorPicker color={bgColor} onChange={setBgColor} />
+            <ColorPickerComponent color={fontColor} onChange={setFontColor} Icon={FontColorDoubleIcon} />
+            <ColorPickerComponent color={bgColor} onChange={setBgColor} />
         </div>
     );
 };

@@ -47,6 +47,8 @@ const locale: typeof enUS = {
             coped: 'Link copiado para a área de transferência',
         },
         popup: {
+            title: 'Hiperlink',
+            open: 'Abrir Link',
             copy: 'Copiar Link',
             edit: 'Editar Link',
             cancel: 'Cancelar Link',

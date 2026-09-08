@@ -53,7 +53,7 @@ export function isSelectionRangeChanged(previous: Nullable<IRange>, current: Nul
  *
  */
 export class RefSelectionsRenderService extends BaseSelectionRenderService implements IRenderModule {
-    private readonly _workbookSelections: WorkbookSelectionModel;
+    protected readonly _workbookSelections: WorkbookSelectionModel;
 
     private _eventDisposables: Nullable<IDisposable>;
 
@@ -128,7 +128,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         this._disableSelectionChanging();
     }
 
-    private _initCanvasEventListeners(): IDisposable {
+    protected _initCanvasEventListeners(): IDisposable {
         const sheetObject = this._getSheetObject();
         const { spreadsheetRowHeader, spreadsheetColumnHeader, spreadsheet, spreadsheetLeftTopPlaceholder } = sheetObject;
         const { scene } = this._context;
@@ -276,12 +276,12 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         }));
     }
 
-    private _getActiveViewport(evt: IPointerEvent | IMouseEvent): Nullable<Viewport> {
+    protected _getActiveViewport(evt: IPointerEvent | IMouseEvent): Nullable<Viewport> {
         const sheetObject = this._getSheetObject();
         return sheetObject?.scene.getActiveViewportByCoord(Vector2.FromArray([evt.offsetX, evt.offsetY]));
     }
 
-    private _getSheetObject() {
+    protected _getSheetObject() {
         return getSheetObject(this._context.unit, this._context)!;
     }
 
@@ -483,7 +483,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
      * Diff between normal selection, no highlightHeader for ref selections.
      * @param scene
      * @param skeleton
-     * @param selectionWithCoord
+     * @param selection
      * @returns {SelectionControl} selectionControl just created
      */
     override newSelectionControl(scene: Scene, skeleton: SpreadsheetSkeleton, selection: ISelectionWithStyle): SelectionControl {

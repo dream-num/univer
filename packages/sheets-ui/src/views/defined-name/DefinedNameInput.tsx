@@ -35,6 +35,7 @@ export interface IDefinedNameInputProps extends Omit<IDefinedNamesServiceParam, 
     confirm?: (param: IDefinedNamesServiceParam) => void;
     cancel?: () => void;
     id?: string;
+    SelectComponent?: typeof Select;
 }
 
 export const DefinedNameInput = (props: IDefinedNameInputProps) => {
@@ -57,6 +58,7 @@ function DefinedNameInputContent(props: IDefinedNameInputProps) {
         localSheetId = SCOPE_WORKBOOK_VALUE_DEFINED_NAME,
         hidden = false, // Whether to hide from users, compatible with Excel, not used for now.
         id,
+        SelectComponent = Select,
     } = props;
     const univerInstanceService = useDependency(IUniverInstanceService);
     const workbook = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
@@ -252,7 +254,7 @@ function DefinedNameInputContent(props: IDefinedNameInputProps) {
                     </div>
                 ))}
             <div>
-                <Select
+                <SelectComponent
                     className="univer-w-full"
                     value={localSheetIdValue}
                     options={options}

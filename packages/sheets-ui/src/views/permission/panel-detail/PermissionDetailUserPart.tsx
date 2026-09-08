@@ -42,10 +42,20 @@ export interface IPermissionDetailUserPartProps {
     viewState: ViewStateEnum;
     onViewStateChange: (v: ViewStateEnum) => void;
     permissionId: string;
+    SelectComponent?: typeof Select;
+    userListClassName?: string;
 }
 
 export const PermissionDetailUserPart = (props: IPermissionDetailUserPartProps) => {
-    const { editState, onEditStateChange, viewState, onViewStateChange, permissionId } = props;
+    const {
+        editState,
+        onEditStateChange,
+        viewState,
+        onViewStateChange,
+        permissionId,
+        SelectComponent = Select,
+        userListClassName,
+    } = props;
     const localeService = useDependency(LocaleService);
     const dialogService = useDependency(IDialogService);
     const authzIoService = useDependency(IAuthzIoService);
@@ -144,7 +154,7 @@ export const PermissionDetailUserPart = (props: IPermissionDetailUserPartProps) 
                     className={clsx(`
                       univer-mb-2 univer-flex univer-h-[270px] univer-flex-col univer-overflow-y-auto univer-rounded-lg
                       univer-p-3
-                    `, borderClassName)}
+                    `, borderClassName, userListClassName)}
                 >
                     <div className="univer-flex univer-items-center univer-justify-between univer-text-sm">
                         <span>{localeService.t<LocaleKey>('sheets-ui.permission.panel.designedPerson')}</span>
@@ -171,7 +181,7 @@ export const PermissionDetailUserPart = (props: IPermissionDetailUserPartProps) 
                                         >
                                             {item.subject?.name}
                                         </span>
-                                        <Select
+                                        <SelectComponent
                                             className="!univer-w-[90px] univer-min-w-0 univer-cursor-pointer"
                                             borderless
                                             value="edit"

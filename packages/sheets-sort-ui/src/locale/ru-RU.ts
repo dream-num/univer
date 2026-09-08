@@ -41,6 +41,7 @@ const locale: typeof enUS = {
             'sort-reminder-no': 'Оставить сортировку диапазона',
             'first-row-check': 'Первая строка контента не участвует в сортировке',
             'add-condition': 'Добавить условие',
+            'delete-condition': 'Удалить условие',
             cancel: 'Отмена',
             confirm: 'Подтвердить',
         },

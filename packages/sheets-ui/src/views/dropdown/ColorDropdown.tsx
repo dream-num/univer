@@ -25,13 +25,14 @@ export interface IColorDropdownProps {
 
 export function ColorDropdown(props: {
     popup: IPopupWithExtraProps<IColorDropdownProps & IBaseDropdownProps>;
+    ColorPickerComponent?: typeof ColorPicker;
 }) {
-    const { popup } = props;
+    const { popup, ColorPickerComponent = ColorPicker } = props;
     const { extraProps } = popup;
     const { defaultValue, onChange } = extraProps;
 
     return (
-        <ColorPicker
+        <ColorPickerComponent
             value={defaultValue}
             onChange={onChange}
         />

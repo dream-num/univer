@@ -14,14 +14,294 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
+import type { IMenuSchema } from '@univerjs/ui';
+import type { Root } from 'react-dom/client';
+import type { MobileNumberFormatItem } from '../MobileStylePanel';
+import {
+    CommandType,
+    FOCUSING_COMMON_DRAWINGS,
+    getSheetsEmptySnapshot,
+    ICommandService,
+    IContextService,
+    IUniverInstanceService,
+    LocaleService,
+    LocaleType,
+    Univer,
+    UniverInstanceType,
+} from '@univerjs/core';
+import { IEditorService } from '@univerjs/docs-ui';
+import { SheetsSelectionsService } from '@univerjs/sheets';
+import {
+    ComponentManager,
+    IconManager,
+    ILayoutService,
+    IMenuManagerService,
+    IRibbonService,
+    MenuItemType,
+    RediContext,
+    RibbonInsertGroup,
+    RibbonPosition,
+    RibbonStartGroup,
+} from '@univerjs/ui';
+import { act, createElement } from 'react';
+import { createRoot } from 'react-dom/client';
+import { BehaviorSubject, EMPTY } from 'rxjs';
+import { describe, expect, it, vi } from 'vitest';
+import enUS from '../../../../locale/en-US';
+import { IEditorBridgeService } from '../../../../services/editor-bridge.service';
 import {
     getMobileCellCenterOffset,
     getMobileCellRevealOffset,
     getMobileEditingMenuBottomOffset,
     getMobileMenuCommand,
+    MobileSheetActionPanel,
     normalizeMobileSelectionPrimary,
 } from '../MobileSheetActionPanel';
+
+Object.defineProperty(globalThis, 'IS_REACT_ACT_ENVIRONMENT', { configurable: true, value: true, writable: true });
+
+const TEST_INSERT_MENU_ID = 'test.menu.insert-image';
+const TEST_INSERT_COMMAND_ID = 'test.command.insert-image';
+const TEST_NUMFMT_MENU_ID = 'test.menu.number-format';
+const TEST_NUMFMT_COMMAND_ID = 'test.command.set-number-format';
+const TEST_CUSTOM_NUMFMT_COMPONENT = 'test.component.custom-number-format';
+
+function createNumberFormatRibbon(): IMenuSchema[] {
+    const numberFormatItem: MobileNumberFormatItem = {
+        id: TEST_NUMFMT_MENU_ID,
+        type: MenuItemType.SELECTOR,
+        title: 'Number format',
+        selections: [],
+        value$: new BehaviorSubject('General'),
+        mobileNumberFormat: {
+            kind: 'number-format',
+            title: 'Number format',
+            commandId: TEST_NUMFMT_COMMAND_ID,
+            detailTitle: 'More formats',
+            customTitle: 'Custom format',
+            customComponent: TEST_CUSTOM_NUMFMT_COMPONENT,
+            quickOptions: [],
+            decimalOptions: [],
+            detailOptions: [
+                { label: 'General', value: null },
+                { label: 'Custom format', custom: true },
+            ],
+            customPatterns: ['0.00'],
+        },
+    };
+
+    return [{
+        key: RibbonPosition.START,
+        order: 0,
+        children: [{
+            key: RibbonStartGroup.NUMBER,
+            order: 0,
+            children: [{
+                key: TEST_NUMFMT_MENU_ID,
+                order: 0,
+                item: numberFormatItem,
+            }],
+        }],
+    }];
+}
+
+function renderMobileSheetActionPanel(ribbon: IMenuSchema[] = []) {
+    const univer = new Univer();
+    const injector = univer.__getInjector();
+    const contextService = injector.get(IContextService);
+
+    injector.get(LocaleService).load({ [LocaleType.EN_US]: enUS });
+    injector.get(LocaleService).setLocale(LocaleType.EN_US);
+    univer.createUnit(UniverInstanceType.UNIVER_SHEET, getSheetsEmptySnapshot('mobile-sheet'));
+    injector.get(IUniverInstanceService).focusUnit('mobile-sheet');
+    injector.add([IEditorBridgeService, {
+        useValue: {
+            visible$: new BehaviorSubject({ visible: false }),
+            getEditCellState: () => null,
+            refreshEditCellPosition: vi.fn(),
+        } as unknown as IEditorBridgeService,
+    }]);
+    injector.add([IEditorService, { useValue: { focus: vi.fn() } as unknown as IEditorService }]);
+    injector.add([ILayoutService, { useValue: { focus: vi.fn() } as unknown as ILayoutService }]);
+    injector.add([ComponentManager]);
+    injector.add([IconManager]);
+    injector.add([IMenuManagerService, {
+        useValue: {
+            menuChanged$: EMPTY,
+            getMenuByPositionKey: () => [],
+        } as unknown as IMenuManagerService,
+    }]);
+    injector.add([IRibbonService, {
+        useValue: { ribbon$: new BehaviorSubject(ribbon) } as unknown as IRibbonService,
+    }]);
+    injector.add([SheetsSelectionsService, {
+        useValue: {
+            selectionMoveEnd$: EMPTY,
+            getCurrentSelections: () => [],
+            getCurrentLastSelection: () => null,
+            setSelections: vi.fn(),
+        } as unknown as SheetsSelectionsService,
+    }]);
+
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const root = createRoot(container);
+    act(() => {
+        root.render(createElement(
+            RediContext.Provider,
+            { value: { injector } },
+            createElement(MobileSheetActionPanel)
+        ));
+    });
+
+    return { commandService: injector.get(ICommandService), container, contextService, root, univer };
+}
+
+function clickButton(container: HTMLElement, name: string) {
+    const button = Array.from(container.querySelectorAll('button')).find((item) =>
+        item.getAttribute('aria-label') === name || item.textContent?.includes(name));
+    if (!button) {
+        throw new Error(`Button "${name}" was not rendered.`);
+    }
+
+    act(() => button.dispatchEvent(new MouseEvent('click', { bubbles: true })));
+}
+
+function clickCommand(container: HTMLElement, commandId: string) {
+    const button = container.querySelector(`[data-u-command="${commandId}"]`);
+    if (!button) {
+        throw new Error(`Command "${commandId}" was not rendered.`);
+    }
+
+    act(() => button.dispatchEvent(new MouseEvent('click', { bubbles: true })));
+}
+
+function disposeRenderedPanel(root: Root, container: HTMLElement, univer: Univer) {
+    act(() => root.unmount());
+    container.remove();
+    univer.dispose();
+}
+
+describe('mobile sheet action panel visibility', () => {
+    it('does not reopen the previous sheet drawer after drawing focus ends', () => {
+        const { container, contextService, root, univer } = renderMobileSheetActionPanel();
+
+        try {
+            clickButton(container, 'Open sheet tools');
+            expect(container.querySelector('[data-u-comp="mobile-sheet-action-panel"]')).not.toBeNull();
+
+            act(() => contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, true));
+            expect(container.querySelector('[data-u-comp="mobile-sheet-action-panel"]')).toBeNull();
+
+            act(() => contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, false));
+            expect(container.querySelector('[data-u-comp="mobile-sheet-action-panel"]')).toBeNull();
+        } finally {
+            disposeRenderedPanel(root, container, univer);
+        }
+    });
+
+    it('closes the sheet drawer after executing a nested insert menu command', () => {
+        const execute = vi.fn(() => true);
+        const ribbon: IMenuSchema[] = [{
+            key: RibbonPosition.INSERT,
+            order: 0,
+            children: [{
+                key: RibbonInsertGroup.MEDIA,
+                order: 0,
+                children: [{
+                    key: TEST_INSERT_MENU_ID,
+                    order: 0,
+                    item: {
+                        id: TEST_INSERT_MENU_ID,
+                        type: MenuItemType.SUBITEMS,
+                        title: 'Insert image',
+                    },
+                    children: [{
+                        key: TEST_INSERT_COMMAND_ID,
+                        order: 0,
+                        item: {
+                            id: TEST_INSERT_COMMAND_ID,
+                            type: MenuItemType.BUTTON,
+                            title: 'Floating image',
+                        },
+                    }],
+                }],
+            }],
+        }];
+        const { commandService, container, root, univer } = renderMobileSheetActionPanel(ribbon);
+        commandService.registerCommand({
+            id: TEST_INSERT_COMMAND_ID,
+            type: CommandType.COMMAND,
+            handler: execute,
+        });
+
+        try {
+            clickButton(container, 'Open sheet tools');
+            clickCommand(container, TEST_INSERT_MENU_ID);
+            expect(container.querySelector('[data-u-comp="mobile-sheet-action-panel"]')).not.toBeNull();
+
+            clickCommand(container, TEST_INSERT_COMMAND_ID);
+
+            expect(execute).toHaveBeenCalledOnce();
+            expect(container.querySelector('[data-u-comp="mobile-sheet-action-panel"]')).toBeNull();
+        } finally {
+            disposeRenderedPanel(root, container, univer);
+        }
+    });
+
+    it('closes the sheet drawer after selecting a detailed number format', () => {
+        const execute = vi.fn(() => true);
+        const { commandService, container, root, univer } = renderMobileSheetActionPanel(createNumberFormatRibbon());
+        commandService.registerCommand({
+            id: TEST_NUMFMT_COMMAND_ID,
+            type: CommandType.COMMAND,
+            handler: execute,
+        });
+
+        try {
+            clickButton(container, 'Open sheet tools');
+            clickButton(container, 'Style');
+            clickButton(container, 'More formats');
+            clickButton(container, 'General');
+
+            expect(execute).toHaveBeenCalledOnce();
+            expect(container.querySelector('[data-u-comp="mobile-sheet-action-panel"]')).toBeNull();
+        } finally {
+            disposeRenderedPanel(root, container, univer);
+        }
+    });
+
+    it('closes the sheet drawer after confirming a custom number format', () => {
+        const execute = vi.fn(() => true);
+        const { commandService, container, root, univer } = renderMobileSheetActionPanel(createNumberFormatRibbon());
+        commandService.registerCommand({
+            id: TEST_NUMFMT_COMMAND_ID,
+            type: CommandType.COMMAND,
+            handler: execute,
+        });
+        univer.__getInjector().get(ComponentManager).register(
+            TEST_CUSTOM_NUMFMT_COMPONENT,
+            (props: { onConfirm: (pattern: string) => void }) => createElement('button', {
+                type: 'button',
+                'aria-label': 'Confirm custom format',
+                onClick: () => props.onConfirm('0.00'),
+            })
+        );
+
+        try {
+            clickButton(container, 'Open sheet tools');
+            clickButton(container, 'Style');
+            clickButton(container, 'More formats');
+            clickButton(container, 'Custom format');
+            clickButton(container, 'Confirm custom format');
+
+            expect(execute).toHaveBeenCalledOnce();
+            expect(container.querySelector('[data-u-comp="mobile-sheet-action-panel"]')).toBeNull();
+        } finally {
+            disposeRenderedPanel(root, container, univer);
+        }
+    });
+});
 
 describe('mobile active-cell reveal offset', () => {
     it('moves only the distance outside the padded visible area', () => {

@@ -41,7 +41,11 @@ export interface IAutoFillPopupMenuItem {
     disable: boolean;
 }
 
-export function AutoFillPopupMenu() {
+export interface IAutoFillPopupMenuProps {
+    DropdownMenuComponent?: typeof DropdownMenu;
+}
+
+export function AutoFillPopupMenu({ DropdownMenuComponent = DropdownMenu }: IAutoFillPopupMenuProps = {}) {
     const commandService = useDependency(ICommandService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const renderManagerService = useDependency(IRenderManagerService);
@@ -168,7 +172,7 @@ export function AutoFillPopupMenu() {
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
             >
-                <DropdownMenu
+                <DropdownMenuComponent
                     align="start"
                     onCloseAutoFocus={(event) => {
                         event.preventDefault();
@@ -201,7 +205,7 @@ export function AutoFillPopupMenu() {
                         />
                         {showMore && <MoreDownIcon className="dark:!univer-text-gray-0" />}
                     </div>
-                </DropdownMenu>
+                </DropdownMenuComponent>
             </div>
         </div>
     );

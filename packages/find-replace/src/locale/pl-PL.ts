@@ -19,6 +19,13 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'find-replace': {
         toolbar: 'Znajdź i zamień',
+        mobile: {
+            settings: 'Ustawienia znajdowania i zamiany',
+            'settings-title': 'Ustawienia znajdowania i zamiany',
+            'previous-match': 'Poprzednie dopasowanie',
+            'next-match': 'Następne dopasowanie',
+            close: 'Zamknij znajdowanie i zamianę',
+        },
         shortcut: {
             'open-find-dialog': 'Otwórz okno Znajdź',
             'open-replace-dialog': 'Otwórz okno Zamień',

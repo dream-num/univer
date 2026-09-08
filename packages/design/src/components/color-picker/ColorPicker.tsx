@@ -15,7 +15,6 @@
  */
 
 import { memo, useCallback, useContext, useEffect, useState } from 'react';
-import { clsx } from '../../helper/clsx';
 import { isBrowser } from '../../helper/is-browser';
 import { Button } from '../button/Button';
 import { ConfigContext } from '../config-provider/ConfigProvider';
@@ -26,14 +25,12 @@ import { ColorInput } from './ColorInput';
 import { ColorPresets } from './ColorPresets';
 import { ColorSpectrum } from './ColorSpectrum';
 import { HueSlider } from './HueSlider';
-import { MobileColorPresets } from './MobileColorPresets';
 
 const MemoizedColorSpectrum = memo(ColorSpectrum);
 const MemoizedHueSlider = memo(HueSlider);
 const MemoizedAlphaSlider = memo(AlphaSlider);
 const MemoizedColorInput = memo(ColorInput);
 const MemoizedColorPresets = memo(ColorPresets);
-const MemoizedMobileColorPresets = memo(MobileColorPresets);
 
 export interface IColorPickerProps {
     format?: 'hex' | 'rgba';
@@ -42,7 +39,7 @@ export interface IColorPickerProps {
 }
 
 export function ColorPicker({ format = 'hex', value, onChange }: IColorPickerProps) {
-    const { direction, locale, mobile } = useContext(ConfigContext);
+    const { direction, locale } = useContext(ConfigContext);
 
     const [hsv, setHsv] = useState<[number, number, number]>([0, 100, 100]);
     const [alpha, setAlpha] = useState(1);
@@ -70,7 +67,9 @@ export function ColorPicker({ format = 'hex', value, onChange }: IColorPickerPro
         }
     }, [value, format]);
 
-    if (!isBrowser) return null;
+    if (!isBrowser) {
+        return null;
+    }
 
     function handleColorChange(h: number, s: number, v: number) {
         setHsv([h, s, v]);
@@ -110,46 +109,24 @@ export function ColorPicker({ format = 'hex', value, onChange }: IColorPickerPro
             className="univer-cursor-default univer-space-y-2 univer-rounded-lg"
             onClick={(e) => e.stopPropagation()}
         >
-            {mobile
-                ? (
-                    <MemoizedMobileColorPresets
-                        value={hsvToHex(...hsv)}
-                        onSelect={(color) => {
-                            const [h, s, v] = hexToHsv(color);
-                            handleColorChange(h, s, v);
-                            handleAlphaChange(1);
-                            handleColorChanged(h, s, v, 1);
-                        }}
-                    />
-                )
-                : (
-                    <MemoizedColorPresets
-                        hsv={hsv}
-                        onChange={(h, s, v) => {
-                            handleColorChange(h, s, v);
-                            handleAlphaChange(1);
-                            handleColorChanged(h, s, v, 1);
-                        }}
-                    />
-                )}
+            <MemoizedColorPresets
+                hsv={hsv}
+                onChange={(h, s, v) => {
+                    handleColorChange(h, s, v);
+                    handleAlphaChange(1);
+                    handleColorChanged(h, s, v, 1);
+                }}
+            />
 
-            <div className={clsx('univer-flex univer-items-center', mobile ? 'univer-h-12' : 'univer-h-7')}>
+            <div className="univer-flex univer-h-7 univer-items-center">
                 <button
                     type="button"
-                    className={clsx(`
-                      univer-cursor-pointer univer-border-0 univer-text-sm univer-text-gray-900
+                    className="
+                      univer-cursor-pointer univer-border-0 univer-bg-transparent univer-p-0 univer-text-sm
+                      univer-text-gray-900 univer-transition-opacity
+                      hover:univer-opacity-80
                       dark:!univer-text-gray-0
-                    `, mobile
-                        ? `
-                          univer-h-11 univer-w-full univer-rounded-xl univer-bg-gray-100 univer-font-medium
-                          active:univer-bg-gray-200
-                          dark:!univer-bg-gray-800
-                          dark:active:!univer-bg-gray-700
-                        `
-                        : `
-                          univer-bg-transparent univer-p-0 univer-transition-opacity
-                          hover:univer-opacity-80
-                        `)}
+                    "
                     onClick={() => setVisible(true)}
                 >
                     {locale?.ColorPicker.more}
@@ -198,7 +175,9 @@ export function ColorPicker({ format = 'hex', value, onChange }: IColorPickerPro
                         format={format}
                         onChange={(h, s, v, a) => {
                             handleColorChange(h, s, v);
-                            if (a !== undefined) handleAlphaChange(a);
+                            if (a !== undefined) {
+                                handleAlphaChange(a);
+                            }
                         }}
                     />
 

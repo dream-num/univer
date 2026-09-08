@@ -33,7 +33,11 @@ import { useState } from 'react';
 import { InputParams } from './input-params/InputParams';
 import { SelectFunction } from './select-function/SelectFunction';
 
-export function MoreFunctions() {
+export interface IMoreFunctionsProps {
+    SelectFunctionComponent?: typeof SelectFunction;
+}
+
+export function MoreFunctions({ SelectFunctionComponent = SelectFunction }: IMoreFunctionsProps = {}) {
     const workbook = useActiveWorkbook();
     const [selectFunction, setSelectFunction] = useState<boolean>(true);
     const [inputParams, setInputParams] = useState<boolean>(false);
@@ -74,7 +78,7 @@ export function MoreFunctions() {
             data-u-comp="sheets-formula-functions-panel"
             className="univer-box-border univer-flex univer-h-full univer-flex-col univer-justify-between univer-py-2"
         >
-            {selectFunction && <SelectFunction onChange={setFunctionInfo} />}
+            {selectFunction && <SelectFunctionComponent onChange={setFunctionInfo} />}
             {inputParams && <InputParams functionInfo={functionInfo} onChange={() => {}} />}
             <div className="univer-flex univer-justify-end">
                 {/* TODO@Dushusir: open input params after range selector refactor */}

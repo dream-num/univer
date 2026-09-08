@@ -31,6 +31,7 @@ export { SheetDrawingUpdateController } from './controllers/sheet-drawing-update
 export { registerSheetsDrawingFloatingHostCapability, SHEETS_DRAWING_FLOATING_HOST_DEPENDENCIES } from './embed';
 export { SHEETS_IMAGE_MENU_ID } from './menu/image.menu';
 export { menuSchema as SheetsDrawingUIMenuSchema } from './menu/schema';
+export { UniverSheetsDrawingMobileUIPlugin } from './mobile-plugin';
 export { UniverSheetsDrawingUIPlugin } from './plugin';
 export { BatchSaveImagesService, FileNamePart, IBatchSaveImagesService } from './services/batch-save-images.service';
 export type { IBatchSaveImagesConfig, ICellImageInfo } from './services/batch-save-images.service';

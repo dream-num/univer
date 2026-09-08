@@ -127,6 +127,7 @@ const DialogFooter = ({
     ...props
 }: HTMLAttributes<HTMLDivElement>) => (
     <div
+        data-slot="dialog-footer"
         className={clsx(
             `
               univer-flex univer-flex-col-reverse

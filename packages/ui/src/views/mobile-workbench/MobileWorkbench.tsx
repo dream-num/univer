@@ -19,7 +19,7 @@ import type { ComponentType } from 'react';
 import type { IWorkbenchOptions } from '../../controllers/ui/ui.controller';
 import { LifecycleService, LifecycleStages, LocaleService, ThemeService } from '@univerjs/core';
 import { borderBottomClassName, clsx, ConfigProvider, render } from '@univerjs/design';
-import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { map } from 'rxjs';
 import { BuiltInUIPart } from '../../services/parts/parts.service';
 import { ThemeSwitcherService } from '../../services/theme-switcher/theme-switcher.service';
@@ -27,8 +27,10 @@ import { IWorkbenchService } from '../../services/workbench/workbench.service';
 import { connectInjector, useDependency, useObservable } from '../../utils/di';
 import { ComponentContainer, useComponentsOfPart } from '../components/ComponentContainer';
 import { MobileContextMenu } from '../components/context-menu/MobileContextMenu';
+import { MobileDrawerCoordinatorProvider } from '../components/mobile-drawer/MobileDrawerCoordinator';
 import { MobileSidebar } from '../components/sidebar/MobileSidebar';
 import { WorkbenchSkeleton } from '../components/workbench-skeleton/WorkbenchSkeleton';
+import { MobileKeyboardInsetContext } from './MobileKeyboardInsetContext';
 
 export interface IUniverAppProps extends IWorkbenchOptions {
     mountContainer: HTMLElement;
@@ -74,6 +76,7 @@ export function MobileWorkbench(props: IUniverAppProps) {
 
     const contentRef = useRef<HTMLDivElement>(null);
     const viewportRef = useRef<HTMLDivElement>(null);
+    const [keyboardInset, setKeyboardInset] = useState(0);
 
     const footerComponents = useComponentsOfPart(BuiltInUIPart.FOOTER);
     const headerComponents = useComponentsOfPart(BuiltInUIPart.HEADER);
@@ -113,7 +116,7 @@ export function MobileWorkbench(props: IUniverAppProps) {
         return () => {
             sub.unsubscribe();
         };
-    }, []);
+    }, [themeService.currentTheme$, themeSwitcherService]);
 
     useEffect(() => {
         document.body.appendChild(portalContainer);
@@ -124,7 +127,7 @@ export function MobileWorkbench(props: IUniverAppProps) {
     }, [mountContainer, portalContainer]);
 
     useEffect(() => {
-        portalContainer.dir = direction;
+        portalContainer.setAttribute('dir', direction);
     }, [direction, portalContainer]);
 
     useLayoutEffect(() => {
@@ -145,10 +148,7 @@ export function MobileWorkbench(props: IUniverAppProps) {
             const visibleBottom = visualViewport
                 ? visualViewport.offsetTop + visualViewport.height
                 : window.innerHeight;
-            viewportElement.style.setProperty(
-                '--univer-mobile-keyboard-inset',
-                `${Math.max(0, Math.round(stableHeight - visibleBottom))}px`
-            );
+            setKeyboardInset(Math.max(0, Math.round(stableHeight - visibleBottom)));
         };
         const updateStableViewport = () => {
             const width = Math.round(mountContainer.getBoundingClientRect().width || window.innerWidth);
@@ -184,107 +184,111 @@ export function MobileWorkbench(props: IUniverAppProps) {
             locale={locale?.design}
             direction={direction}
             mountContainer={portalContainer}
-            disableTooltips
-            mobile
         >
-            <div
-                ref={viewportRef}
-                className="
-                  univer-relative univer-h-full univer-min-h-0
-                  [&_button:active]:!univer-opacity-70
-                  [&_button]:univer-touch-manipulation
-                "
-            >
-                <div
-                    data-u-comp="app-layout"
-                    className={clsx(`
-                      univer-relative univer-flex univer-h-full univer-min-h-0 univer-flex-col univer-bg-gray-0
-                      dark:!univer-bg-gray-800
-                    `, {
-                        'univer-dark': darkMode,
-                    })}
-                    tabIndex={-1}
-                    onBlur={(e) => e.stopPropagation()}
-                    onContextMenu={(e) => e.preventDefault()}
-                    dir={direction}
-                >
-                    {/* header */}
-                    {header && toolbar && (
-                        <header
-                            data-u-comp="headerbar"
-                            className="univer-relative univer-z-10 univer-w-full univer-overflow-hidden"
-                        >
-                            <ComponentContainer
-                                key="toolbar"
-                                components={toolbarComponents}
-                                sharedProps={{
-                                    ribbonType,
-                                    headerMenuComponents,
-                                    headerMenu,
-                                }}
-                            />
-                        </header>
-                    )}
-
-                    {/* content */}
-                    <section className="univer-relative univer-flex univer-min-h-0 univer-flex-1 univer-flex-col">
+            <MobileKeyboardInsetContext.Provider value={keyboardInset}>
+                <MobileDrawerCoordinatorProvider>
+                    <div
+                        ref={viewportRef}
+                        className="
+                          univer-relative univer-h-full univer-min-h-0
+                          [&_button:active]:!univer-opacity-70
+                          [&_button]:univer-touch-manipulation
+                        "
+                    >
                         <div
-                            className={`
-                              univer-grid univer-h-full univer-grid-cols-[auto_1fr_auto] univer-grid-rows-[100%]
-                              univer-overflow-hidden
-                            `}
+                            data-u-comp="app-layout"
+                            className={clsx(`
+                              univer-relative univer-flex univer-h-full univer-min-h-0 univer-flex-col univer-bg-gray-0
+                              dark:!univer-bg-gray-800
+                            `, {
+                                'univer-dark': darkMode,
+                            })}
+                            tabIndex={-1}
+                            onBlur={(e) => e.stopPropagation()}
+                            onContextMenu={(e) => e.preventDefault()}
+                            dir={direction}
                         >
-                            <aside className="univer-h-full">
-                                <ComponentContainer key="left-sidebar" components={leftSidebarComponents} />
-                            </aside>
-
-                            <section
-                                className={clsx(`
-                                  univer-relative univer-grid univer-flex-1 univer-grid-rows-[auto_1fr]
-                                  univer-overflow-hidden univer-bg-gray-0
-                                  dark:!univer-bg-gray-800
-                                `, borderBottomClassName)}
-                            >
-                                <header className="univer-w-screen">
-                                    {header && <ComponentContainer key="header" components={headerComponents} />}
-                                </header>
-
-                                <section
-                                    ref={contentRef}
-                                    className="univer-relative univer-overflow-hidden"
-                                    data-range-selector
-                                    onContextMenu={(e) => e.preventDefault()}
+                            {/* header */}
+                            {header && toolbar && (
+                                <header
+                                    data-u-comp="headerbar"
+                                    className="univer-relative univer-z-10 univer-w-full univer-overflow-hidden"
                                 >
-                                    <ComponentContainer key="content" components={contentComponents} />
-                                </section>
+                                    <ComponentContainer
+                                        key="toolbar"
+                                        components={toolbarComponents}
+                                        sharedProps={{
+                                            ribbonType,
+                                            headerMenuComponents,
+                                            headerMenu,
+                                        }}
+                                    />
+                                </header>
+                            )}
+
+                            {/* content */}
+                            <section
+                                className="univer-relative univer-flex univer-min-h-0 univer-flex-1 univer-flex-col"
+                            >
+                                <div
+                                    className={`
+                                      univer-grid univer-h-full univer-grid-cols-[auto_1fr_auto] univer-grid-rows-[100%]
+                                      univer-overflow-hidden
+                                    `}
+                                >
+                                    <aside className="univer-h-full">
+                                        <ComponentContainer key="left-sidebar" components={leftSidebarComponents} />
+                                    </aside>
+
+                                    <section
+                                        className={clsx(`
+                                          univer-relative univer-grid univer-flex-1 univer-grid-rows-[auto_1fr]
+                                          univer-overflow-hidden univer-bg-gray-0
+                                          dark:!univer-bg-gray-800
+                                        `, borderBottomClassName)}
+                                    >
+                                        <header className="univer-w-screen">
+                                            {header && <ComponentContainer key="header" components={headerComponents} />}
+                                        </header>
+
+                                        <section
+                                            ref={contentRef}
+                                            className="univer-relative univer-overflow-hidden"
+                                            data-range-selector
+                                            onContextMenu={(e) => e.preventDefault()}
+                                        >
+                                            <ComponentContainer key="content" components={contentComponents} />
+                                        </section>
+                                    </section>
+
+                                    <aside className="univer-h-full" />
+                                </div>
+
+                                {/* footer */}
+                                {footer && (
+                                    <footer>
+                                        <ComponentContainer key="footer" components={footerComponents} />
+                                    </footer>
+                                )}
                             </section>
-
-                            <aside className="univer-h-full" />
                         </div>
-
-                        {/* footer */}
-                        {footer && (
-                            <footer>
-                                <ComponentContainer key="footer" components={footerComponents} />
-                            </footer>
+                        {(!ready || externalSkeletonVisible) && (
+                            <WorkbenchSkeleton darkMode={darkMode} direction={direction} overlay />
                         )}
-                    </section>
-                </div>
-                {(!ready || externalSkeletonVisible) && (
-                    <WorkbenchSkeleton darkMode={darkMode} direction={direction} overlay />
-                )}
-            </div>
-            <div
-                className="
-                  [&_button:active]:!univer-opacity-70
-                  [&_button]:univer-touch-manipulation
-                "
-                dir={direction}
-            >
-                <ComponentContainer key="global" components={globalComponents} />
-                {contextMenu && <MobileContextMenu />}
-                <MobileSidebar />
-            </div>
+                    </div>
+                    <div
+                        className="
+                          [&_button:active]:!univer-opacity-70
+                          [&_button]:univer-touch-manipulation
+                        "
+                        dir={direction}
+                    >
+                        <ComponentContainer key="global" components={globalComponents} />
+                        {contextMenu && <MobileContextMenu />}
+                        <MobileSidebar />
+                    </div>
+                </MobileDrawerCoordinatorProvider>
+            </MobileKeyboardInsetContext.Provider>
         </ConfigProvider>
     );
 }

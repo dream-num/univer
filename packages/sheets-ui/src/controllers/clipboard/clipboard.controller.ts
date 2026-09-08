@@ -83,7 +83,7 @@ import {
     SetWorksheetColWidthMutation,
     SetWorksheetColWidthMutationFactory,
 } from '@univerjs/sheets';
-import { BuiltInUIPart, connectInjector, IClipboardInterfaceService, IMessageService, IUIPartsService } from '@univerjs/ui';
+import { IClipboardInterfaceService, IMessageService } from '@univerjs/ui';
 import { Subject, takeUntil } from 'rxjs';
 import {
     SheetCopyCommand,
@@ -107,7 +107,6 @@ import {
 } from '../../services/clipboard/clipboard.service';
 import { ISheetEmbedRuntimeFocusCoordinator } from '../../services/sheet-embed-integration.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
-import { ClipboardPopupMenu } from '../../views/clipboard/ClipboardPopupMenu';
 import { whenSheetEditorFocused } from '../shortcuts/utils';
 import { RemovePasteMenuCommands } from './const';
 import {
@@ -148,14 +147,12 @@ export class SheetClipboardController extends RxDisposable {
         @IClipboardInterfaceService private readonly _clipboardInterfaceService: IClipboardInterfaceService,
         @IMessageService private readonly _messageService: IMessageService,
         @Inject(LocaleService) private readonly _localService: LocaleService,
-        @IUIPartsService protected readonly _uiPartsService: IUIPartsService,
         @Optional(ISheetEmbedRuntimeFocusCoordinator)
         private readonly _embedRuntimeFocusCoordinator?: ISheetEmbedRuntimeFocusCoordinator
     ) {
         super();
         this._init();
         this._initCommandListener();
-        this._initUIComponents();
         this._pasteWithDoc();
     }
 
@@ -914,17 +911,6 @@ export class SheetClipboardController extends RxDisposable {
                     }
                 }
             })
-        );
-    }
-
-    private _initUIComponents() {
-        const sheetsUIConfig = this._configService.getConfig<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
-        if (sheetsUIConfig?.clipboardConfig?.hidePasteOptions) {
-            return;
-        }
-
-        this.disposeWithMe(
-            this._uiPartsService.registerComponent(BuiltInUIPart.CONTENT, () => connectInjector(ClipboardPopupMenu, this._injector))
         );
     }
 }

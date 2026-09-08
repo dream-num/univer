@@ -33,6 +33,13 @@ const locale: typeof enUS = {
             'clear-filter': '清除筛选',
             cancel: '取消',
             confirm: '确认',
+            mobile: {
+                resize: '调整筛选面板',
+                back: '返回',
+                column: '{0} 列',
+                'previous-column': '上一列',
+                'next-column': '下一列',
+            },
             'by-values': '按值',
             'by-colors': '按颜色',
             'filter-by-cell-fill-color': '按单元格填充颜色筛选',

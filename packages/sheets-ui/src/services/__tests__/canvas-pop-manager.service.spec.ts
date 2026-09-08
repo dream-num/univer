@@ -289,15 +289,18 @@ describe('SheetCanvasPopManagerService', () => {
             disable: false,
         }]);
 
-        service.registerFeatureMenu('image' as never, callback);
+        service.registerFeatureMenu('image' as never, callback, 'feature.image.title');
 
         expect(service.getFeatureMenu('unit-1', 'sheet-1', 'drawing-1', 'image' as never)).toEqual([
             { label: 'unit-1/sheet-1/drawing-1/image', index: 0, commandId: 'open', commandParams: { drawingId: 'drawing-1' }, disable: false },
         ]);
         expect(service.getFeatureMenu('unit-1', 'sheet-1', 'drawing-1', 'chart' as never)).toBeUndefined();
+        expect(service.getFeatureMenuTitle('image' as never)).toBe('feature.image.title');
+        expect(service.getFeatureMenuTitle('chart' as never)).toBeUndefined();
 
         service.dispose();
         expect(service.getFeatureMenu('unit-1', 'sheet-1', 'drawing-1', 'image' as never)).toBeUndefined();
+        expect(service.getFeatureMenuTitle('image' as never)).toBeUndefined();
     });
 
     it('anchors a drawing popup with the registered menu offset and removes it when closed', () => {

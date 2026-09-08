@@ -19,7 +19,16 @@ import type { MouseEvent } from 'react';
 import type { LocaleKey } from '../../../locale/types';
 import type { IBaseSheetBarProps } from '../../sheet-bar/sheet-bar-tabs/SheetBarItem';
 import { ICommandService, LocaleService, nameCharacterCheck } from '@univerjs/core';
-import { borderBottomClassName, borderLeftClassName, borderRightClassName, clsx, Dialog, Input, resetButtonClassName, scrollbarClassName } from '@univerjs/design';
+import {
+    borderBottomClassName,
+    borderLeftClassName,
+    borderRightClassName,
+    clsx,
+    Input,
+    MobileDialog,
+    resetButtonClassName,
+    scrollbarClassName,
+} from '@univerjs/design';
 import { IncreaseIcon, MoreDownIcon } from '@univerjs/icons';
 import {
     InsertSheetCommand,
@@ -102,7 +111,9 @@ function MobileSheetBarImpl(props: { workbook: Workbook }) {
     useEffect(() => {
         const subscription = sheetBarService.renameId$.subscribe((sheetId) => {
             const sheet = workbook.getSheetBySheetId(sheetId);
-            if (!sheet) return;
+            if (!sheet) {
+                return;
+            }
 
             setRenameSheetId(sheetId);
             setRenameValue(sheet.getName());
@@ -138,7 +149,9 @@ function MobileSheetBarImpl(props: { workbook: Workbook }) {
     }, [commandService, workbook]);
 
     const confirmRename = useCallback(() => {
-        if (!renameSheetId) return;
+        if (!renameSheetId) {
+            return;
+        }
 
         const name = renameValue.trim();
         if (!name) {
@@ -278,7 +291,7 @@ function MobileSheetBarImpl(props: { workbook: Workbook }) {
                     <IncreaseIcon />
                 </button>
             </div>
-            <Dialog
+            <MobileDialog
                 open={Boolean(renameSheetId)}
                 title={localeService.t<LocaleKey>('sheets-ui.sheetConfig.rename')}
                 showCancel
@@ -286,7 +299,9 @@ function MobileSheetBarImpl(props: { workbook: Workbook }) {
                 onCancel={() => setRenameSheetId(null)}
                 onOk={confirmRename}
                 onOpenChange={(open) => {
-                    if (!open) setRenameSheetId(null);
+                    if (!open) {
+                        setRenameSheetId(null);
+                    }
                 }}
             >
                 <div className="univer-grid univer-gap-2">
@@ -299,7 +314,9 @@ function MobileSheetBarImpl(props: { workbook: Workbook }) {
                             setRenameError('');
                         }}
                         onKeyDown={(event) => {
-                            if (event.key === 'Enter') confirmRename();
+                            if (event.key === 'Enter') {
+                                confirmRename();
+                            }
                         }}
                     />
                     {renameError && (
@@ -313,8 +330,8 @@ function MobileSheetBarImpl(props: { workbook: Workbook }) {
                         </div>
                     )}
                 </div>
-            </Dialog>
-            <Dialog
+            </MobileDialog>
+            <MobileDialog
                 open={unhideVisible}
                 title={localeService.t<LocaleKey>('sheets-ui.sheetConfig.unhide')}
                 footer={null}
@@ -349,7 +366,7 @@ function MobileSheetBarImpl(props: { workbook: Workbook }) {
                         </button>
                     ))}
                 </div>
-            </Dialog>
+            </MobileDialog>
         </>
     );
 }

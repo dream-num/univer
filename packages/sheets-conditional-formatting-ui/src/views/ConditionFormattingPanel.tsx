@@ -19,9 +19,14 @@ import { useState } from 'react';
 import { RuleEdit } from './panel/RuleEdit';
 import { RuleList } from './panel/RuleList';
 
-interface IConditionFormattingPanelProps { rule?: IConditionFormattingRule };
+export interface IConditionFormattingPanelProps {
+    rule?: IConditionFormattingRule;
+    RuleEditComponent?: typeof RuleEdit;
+    RuleListComponent?: typeof RuleList;
+}
 
 export const ConditionFormattingPanel = (props: IConditionFormattingPanelProps) => {
+    const { RuleEditComponent = RuleEdit, RuleListComponent = RuleList } = props;
     const [currentEditRule, setCurrentEditRule] = useState<IConditionFormattingRule | undefined>(props.rule);
     const [isShowRuleEditor, setIsShowRuleEditor] = useState(!!props.rule);
 
@@ -43,10 +48,10 @@ export const ConditionFormattingPanel = (props: IConditionFormattingPanelProps) 
         <div className="univer-flex univer-h-full univer-flex-col univer-justify-between univer-py-4">
             {isShowRuleEditor
                 ? (
-                    <RuleEdit onCancel={handleCancel} rule={currentEditRule} />
+                    <RuleEditComponent onCancel={handleCancel} rule={currentEditRule} />
                 )
                 : (
-                    <RuleList onClick={handleRuleClick} onCreate={createCfRule} />
+                    <RuleListComponent onClick={handleRuleClick} onCreate={createCfRule} />
                 )}
         </div>
     );

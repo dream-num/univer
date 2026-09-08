@@ -23,6 +23,7 @@ export { RemoveTableThemeCommand } from './commands/commands/remove-table-theme.
 export { SetSheetTableCommand } from './commands/commands/set-sheet-table.command';
 export type { ISetSheetTableCommandParams } from './commands/commands/set-sheet-table.command';
 export { SetSheetTableFilterCommand } from './commands/commands/set-table-filter.command';
+export { SetSheetTableSortStateCommand } from './commands/commands/set-table-sort-state.command';
 export {
     SheetTableInsertColCommand,
     SheetTableInsertColumnAtCommand,
@@ -59,6 +60,7 @@ export {
     TableStringCompareTypeEnum,
 } from './types/enum';
 export type {
+    ITableColorFilterItem,
     ITableColumnJson,
     ITableConditionFilterItem,
     ITableData,
@@ -73,6 +75,6 @@ export type {
     TableRelationTupleType,
 } from './types/type';
 export type { ITableJson, ITableSetConfig } from './types/type';
-export { getExistingNamesSet, isConditionFilter, isManualTableFilter } from './util';
+export { getExistingNamesSet, isColorTableFilter, isConditionFilter, isManualTableFilter } from './util';
 export { validateSheetTableName } from './util/table-name';
 export type { ISheetTableNameValidationResult, SheetTableNameValidationReason } from './util/table-name';

@@ -47,6 +47,8 @@ const locale: typeof enUS = {
             coped: 'Enllaç copiat al porta-retalls',
         },
         popup: {
+            title: 'Enllaç',
+            open: 'Obre l\'enllaç',
             copy: 'Copia l\'enllaç',
             edit: 'Edita l\'enllaç',
             cancel: 'Cancel·la l\'enllaç',

@@ -17,17 +17,18 @@
 import { act, cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Dialog } from '../Dialog';
+import { MobileDialog } from '../MobileDialog';
 
 afterEach(cleanup);
 
-describe('Dialog focus recovery', () => {
+describe.each([['Dialog', Dialog], ['MobileDialog', MobileDialog]] as const)('%s focus recovery', (_name, DialogComponent) => {
     it('keeps composition Escape inside the real dialog and allows ordinary Escape afterwards', async () => {
         const onClose = vi.fn();
         const onOpenChange = vi.fn();
         const { getByRole } = render(
-            <Dialog open title="Color" onClose={onClose} onOpenChange={onOpenChange}>
+            <DialogComponent open title="Color" onClose={onClose} onOpenChange={onOpenChange}>
                 <input aria-label="Hex color" />
-            </Dialog>
+            </DialogComponent>
         );
         const input = getByRole('textbox', { name: 'Hex color' });
         await waitFor(() => expect(document.activeElement).toBe(input));
@@ -58,11 +59,11 @@ describe('Dialog focus recovery', () => {
         document.body.append(editor, nextTarget);
         try {
             editor.focus();
-            const { rerender, getByRole } = render(<Dialog open title="Validation"><button>OK</button></Dialog>);
+            const { rerender, getByRole } = render(<DialogComponent open title="Validation"><button>OK</button></DialogComponent>);
             await waitFor(() => expect(document.activeElement).toBe(getByRole('button', { name: 'OK' })));
             vi.useFakeTimers();
             await act(async () => {
-                rerender(<Dialog open={false} title="Validation"><button>OK</button></Dialog>);
+                rerender(<DialogComponent open={false} title="Validation"><button>OK</button></DialogComponent>);
                 await Promise.resolve();
             });
             expect(document.activeElement).toBe(editor);
@@ -89,9 +90,9 @@ describe('Dialog focus recovery', () => {
         };
         try {
             opener.focus();
-            const { rerender, getByRole } = render(<Dialog open title="Validation" onCloseAutoFocus={restoreFocus}><button>OK</button></Dialog>);
+            const { rerender, getByRole } = render(<DialogComponent open title="Validation" onCloseAutoFocus={restoreFocus}><button>OK</button></DialogComponent>);
             await waitFor(() => expect(document.activeElement).toBe(getByRole('button', { name: 'OK' })));
-            rerender(<Dialog open={false} title="Validation" onCloseAutoFocus={restoreFocus}><button>OK</button></Dialog>);
+            rerender(<DialogComponent open={false} title="Validation" onCloseAutoFocus={restoreFocus}><button>OK</button></DialogComponent>);
             await waitFor(() => expect(document.activeElement).toBe(returnTarget));
         } finally {
             opener.remove();
@@ -105,28 +106,28 @@ describe('Dialog focus recovery', () => {
         try {
             editor.focus();
             const { rerender, getByRole } = render(
-                <Dialog open title="Parent">
+                <DialogComponent open title="Parent">
                     <button>Parent action</button>
-                    <Dialog open={false} title="Child"><button>Child action</button></Dialog>
-                </Dialog>
+                    <DialogComponent open={false} title="Child"><button>Child action</button></DialogComponent>
+                </DialogComponent>
             );
             const parentAction = getByRole('button', { name: 'Parent action' });
             await waitFor(() => expect(document.activeElement).toBe(parentAction));
             rerender(
-                <Dialog open title="Parent">
+                <DialogComponent open title="Parent">
                     <button>Parent action</button>
-                    <Dialog open title="Child"><button>Child action</button></Dialog>
-                </Dialog>
+                    <DialogComponent open title="Child"><button>Child action</button></DialogComponent>
+                </DialogComponent>
             );
             await waitFor(() => expect(document.activeElement).toBe(getByRole('button', { name: 'Child action' })));
             rerender(
-                <Dialog open title="Parent">
+                <DialogComponent open title="Parent">
                     <button>Parent action</button>
-                    <Dialog open={false} title="Child"><button>Child action</button></Dialog>
-                </Dialog>
+                    <DialogComponent open={false} title="Child"><button>Child action</button></DialogComponent>
+                </DialogComponent>
             );
             await waitFor(() => expect(document.activeElement).toBe(parentAction));
-            rerender(<Dialog open={false} title="Parent"><button>Parent action</button></Dialog>);
+            rerender(<DialogComponent open={false} title="Parent"><button>Parent action</button></DialogComponent>);
             await waitFor(() => expect(document.activeElement).toBe(editor));
         } finally {
             editor.remove();
@@ -138,12 +139,12 @@ describe('Dialog focus recovery', () => {
         const second = document.createElement('input');
         document.body.append(first, second);
         try {
-            const { rerender, getByRole } = render(<Dialog open={false} title="Validation"><button>OK</button></Dialog>);
+            const { rerender, getByRole } = render(<DialogComponent open={false} title="Validation"><button>OK</button></DialogComponent>);
             for (const editor of [first, second]) {
                 editor.focus();
-                rerender(<Dialog open title="Validation"><button>OK</button></Dialog>);
+                rerender(<DialogComponent open title="Validation"><button>OK</button></DialogComponent>);
                 await waitFor(() => expect(document.activeElement).toBe(getByRole('button', { name: 'OK' })));
-                rerender(<Dialog open={false} title="Validation"><button>OK</button></Dialog>);
+                rerender(<DialogComponent open={false} title="Validation"><button>OK</button></DialogComponent>);
                 await waitFor(() => expect(document.activeElement).toBe(editor));
             }
         } finally {
@@ -156,10 +157,10 @@ describe('Dialog focus recovery', () => {
         const editor = document.createElement('input');
         document.body.appendChild(editor);
         editor.focus();
-        const { rerender, getByRole, queryByRole } = render(<Dialog open title="Validation"><button>OK</button></Dialog>);
+        const { rerender, getByRole, queryByRole } = render(<DialogComponent open title="Validation"><button>OK</button></DialogComponent>);
         await waitFor(() => expect(document.activeElement).toBe(getByRole('button', { name: 'OK' })));
         editor.remove();
-        rerender(<Dialog open={false} title="Validation"><button>OK</button></Dialog>);
+        rerender(<DialogComponent open={false} title="Validation"><button>OK</button></DialogComponent>);
         await waitFor(() => expect(queryByRole('dialog')).toBeNull());
         expect(document.activeElement).toBe(document.body);
     });
@@ -169,9 +170,9 @@ describe('Dialog focus recovery', () => {
         document.body.appendChild(editor);
         try {
             editor.focus();
-            const { rerender, getByRole } = render(<Dialog open title="Validation"><button>OK</button></Dialog>);
+            const { rerender, getByRole } = render(<DialogComponent open title="Validation"><button>OK</button></DialogComponent>);
             await waitFor(() => expect(document.activeElement).toBe(getByRole('button', { name: 'OK' })));
-            rerender(<Dialog open={false} title="Validation"><button>OK</button></Dialog>);
+            rerender(<DialogComponent open={false} title="Validation"><button>OK</button></DialogComponent>);
             await waitFor(() => expect(document.activeElement).toBe(editor));
         } finally {
             editor.remove();

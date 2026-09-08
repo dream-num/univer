@@ -50,6 +50,15 @@ export const OpenReplaceDialogOperation: IOperation = {
     },
 };
 
+export const CloseFindDialogOperation: IOperation = {
+    id: 'ui.operation.close-find-dialog',
+    type: CommandType.OPERATION,
+    handler: (accessor) => {
+        accessor.get(IFindReplaceService).terminate();
+        return true;
+    },
+};
+
 export const GoToNextMatchOperation: IOperation = {
     type: CommandType.OPERATION,
     id: 'ui.operation.go-to-next-match',

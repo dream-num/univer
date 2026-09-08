@@ -208,10 +208,17 @@ class TestLayoutService {
 }
 
 function TestFormulaEditor(props: {
+    canvasStyle?: { backgroundColor?: string };
     editorId: string;
     unitId?: string;
 }) {
-    return <div data-editor-id={props.editorId} data-unit-id={props.unitId} />;
+    return (
+        <div
+            data-canvas-background={props.canvasStyle?.backgroundColor}
+            data-editor-id={props.editorId}
+            data-unit-id={props.unitId}
+        />
+    );
 }
 
 function createWorkbookData(cellStyle?: IStyleData): IWorkbookData {
@@ -446,9 +453,25 @@ describe('FormulaBar', () => {
         });
     });
 
+    it('enters formula mode when the desktop fx button is clicked', async () => {
+        currentBed = createFormulaBarTestBed();
+        const forceFormulaMode: boolean[] = [];
+        const subscription = currentBed.injector.get(IFormulaEditorManagerService).fxBtnClick$.subscribe((value) => {
+            forceFormulaMode.push(value);
+        });
+        const rendered = renderWithDependencies(<FormulaBar disableDefinedName />, currentBed.injector);
+        root = rendered.root;
+        container = rendered.container;
+
+        await clickElement(getActionElement(rendered.container, 2));
+
+        expect(forceFormulaMode).toEqual([true]);
+        subscription.unsubscribe();
+    });
+
     it('commits and moves down from the compact mobile formula bar', async () => {
         currentBed = createFormulaBarTestBed();
-        const rendered = renderWithDependencies(<FormulaBar disableDefinedName mobile />, currentBed.injector);
+        const rendered = renderWithDependencies(<MobileFormulaBar />, currentBed.injector);
         root = rendered.root;
         container = rendered.container;
 
@@ -461,26 +484,23 @@ describe('FormulaBar', () => {
         expect(currentBed.editorBridgeService.visibleHistory.at(-1)?.visible).toBe(true);
     });
 
-    it('inherits the selected cell background in the mobile editor', () => {
+    it('renders the selected cell background on the mobile editor host without locking the canvas color', () => {
         currentBed = createFormulaBarTestBed({
             bg: { rgb: '#000000' },
             cl: { rgb: '#0000FF' },
         });
-        const rendered = renderWithDependencies(<FormulaBar disableDefinedName mobile />, currentBed.injector);
+        const rendered = renderWithDependencies(<MobileFormulaBar />, currentBed.injector);
         root = rendered.root;
         container = rendered.container;
 
         const editorHost = rendered.container.querySelector('[data-editor-id]')?.parentElement;
         expect(editorHost?.style.backgroundColor).toBe('#000000');
+        expect(rendered.container.querySelector('[data-editor-id]')?.getAttribute('data-canvas-background')).toBeNull();
     });
 
     it('opens immersive mobile editing from the compact up arrow', async () => {
         currentBed = createFormulaBarTestBed();
-        const onExpandedChange = vi.fn();
-        const rendered = renderWithDependencies(
-            <FormulaBar disableDefinedName mobile onExpandedChange={onExpandedChange} />,
-            currentBed.injector
-        );
+        const rendered = renderWithDependencies(<MobileFormulaBar />, currentBed.injector);
         root = rendered.root;
         container = rendered.container;
 
@@ -491,35 +511,34 @@ describe('FormulaBar', () => {
 
         if (!expandButton) throw new Error('Expected the formula bar expand button to be rendered.');
         await clickElement(expandButton);
-        expect(onExpandedChange).toHaveBeenCalledWith(true);
+        expect(rendered.container.querySelector('[data-u-comp="mobile-formula-bar"]')?.getAttribute('data-expanded')).toBe('true');
     });
 
     it('commits, moves down, and collapses immersive mobile editing', async () => {
         currentBed = createFormulaBarTestBed();
-        const onExpandedChange = vi.fn();
-        const rendered = renderWithDependencies(
-            <FormulaBar disableDefinedName expanded mobile onExpandedChange={onExpandedChange} />,
-            currentBed.injector
-        );
+        const rendered = renderWithDependencies(<MobileFormulaBar />, currentBed.injector);
         root = rendered.root;
         container = rendered.container;
 
+        const expandButton = rendered.container.querySelector<HTMLElement>('[data-u-comp="formula-bar-expand"]');
+        if (!expandButton) throw new Error('Expected the formula bar expand button to be rendered.');
+        await clickElement(expandButton);
         await clickElement(getActionElement(rendered.container, 1));
 
         expect(currentBed.mobileSubmit).toHaveBeenCalledOnce();
         expect(currentBed.editorBridgeService.visibleHistory.at(-1)?.visible).toBe(true);
-        expect(onExpandedChange).toHaveBeenCalledWith(false);
+        expect(rendered.container.querySelector('[data-u-comp="mobile-formula-bar"]')?.getAttribute('data-expanded')).toBe('false');
     });
 
-    it('fills the mobile viewport while the formula bar is expanded', () => {
+    it('fills the mobile viewport while the formula bar is expanded', async () => {
         currentBed = createFormulaBarTestBed();
-        const onExpandedChange = vi.fn();
-        const rendered = renderWithDependencies(
-            <FormulaBar disableDefinedName expanded mobile onExpandedChange={onExpandedChange} />,
-            currentBed.injector
-        );
+        const rendered = renderWithDependencies(<MobileFormulaBar />, currentBed.injector);
         root = rendered.root;
         container = rendered.container;
+
+        const expandButton = rendered.container.querySelector<HTMLElement>('[data-u-comp="formula-bar-expand"]');
+        if (!expandButton) throw new Error('Expected the formula bar expand button to be rendered.');
+        await clickElement(expandButton);
 
         const formulaBar = rendered.container.querySelector('[data-u-comp="formula-bar"]');
         const editorHost = rendered.container.querySelector('[data-editor-id]')?.parentElement;

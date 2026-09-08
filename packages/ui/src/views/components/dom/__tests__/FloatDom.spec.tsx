@@ -173,11 +173,64 @@ describe('FloatDomSingle', () => {
         const wrapper = inner.parentElement as HTMLDivElement;
         expect(wrapper.className).toBe('univer-absolute univer-z-10 univer-origin-center');
         expect(inner.className).toBe('univer-absolute univer-overflow-hidden');
-        expect(wrapper.style.cssText).toBe('top: 20px; left: 10px; width: 98px; height: 98px; transform: rotate(0deg); opacity: 1; overflow: hidden;');
+        expect(wrapper.style.cssText).toBe('top: 20px; left: 10px; width: 98px; height: 98px; transform: rotate(0deg); opacity: 1; overflow: hidden; touch-action: none;');
         expect(inner.style.cssText).toBe('width: 96px; height: 96px; left: 0px; top: 0px; right: auto; bottom: auto; overflow: hidden;');
 
         fireEvent.pointerDown(inner);
         expect(onPointerDown).toHaveBeenCalledOnce();
+    });
+
+    it('captures forwarded pointers on the original descendant and finishes cancelled canvas gestures', async () => {
+        const onPointerDown = vi.fn();
+        const onPointerUp = vi.fn();
+        const layer = { ...createFloatDom(), onPointerDown, onPointerUp };
+
+        renderWithDependencies(<FloatDomSingle id="dom-1" layer={layer} />);
+
+        const inner = await waitFor(() => document.getElementById('dom-1') as HTMLDivElement);
+        const wrapper = inner.parentElement as HTMLDivElement;
+        const setPointerCapture = vi.fn();
+        const releasePointerCapture = vi.fn();
+        const captureOnWrapper = vi.fn();
+        Object.defineProperty(wrapper, 'setPointerCapture', { configurable: true, value: captureOnWrapper });
+        Object.defineProperties(inner, {
+            hasPointerCapture: { configurable: true, value: () => true },
+            releasePointerCapture: { configurable: true, value: releasePointerCapture },
+            setPointerCapture: { configurable: true, value: setPointerCapture },
+        });
+
+        fireEvent.pointerDown(inner, { pointerId: 7 });
+        fireEvent.pointerUp(inner, { pointerId: 7 });
+        fireEvent.pointerDown(inner, { pointerId: 8 });
+        fireEvent.pointerCancel(inner, { pointerId: 8 });
+
+        expect(wrapper.style.touchAction).toBe('none');
+        expect(setPointerCapture).toHaveBeenCalledWith(7);
+        expect(setPointerCapture).toHaveBeenCalledWith(8);
+        expect(captureOnWrapper).not.toHaveBeenCalled();
+        expect(onPointerDown).toHaveBeenCalledTimes(2);
+        expect(onPointerUp).toHaveBeenCalledWith(expect.objectContaining({ type: 'pointerup' }));
+        expect(onPointerUp).toHaveBeenCalledWith(expect.objectContaining({ type: 'pointercancel' }));
+        expect(releasePointerCapture).toHaveBeenCalledWith(7);
+        expect(releasePointerCapture).toHaveBeenCalledWith(8);
+    });
+
+    it('does not capture pointers owned by an interactive float dom', async () => {
+        const onPointerDown = vi.fn();
+        const layer = { ...createFloatDom(), eventPassThrough: false, onPointerDown };
+
+        renderWithDependencies(<FloatDomSingle id="dom-1" layer={layer} />);
+
+        const inner = await waitFor(() => document.getElementById('dom-1') as HTMLDivElement);
+        const wrapper = inner.parentElement as HTMLDivElement;
+        const setPointerCapture = vi.fn();
+        Object.defineProperty(wrapper, 'setPointerCapture', { configurable: true, value: setPointerCapture });
+
+        fireEvent.pointerDown(inner, { pointerId: 7 });
+
+        expect(wrapper.style.touchAction).toBe('');
+        expect(setPointerCapture).not.toHaveBeenCalled();
+        expect(onPointerDown).not.toHaveBeenCalled();
     });
 
     it('updates clipped placement, full content size, and anchors through position$', async () => {

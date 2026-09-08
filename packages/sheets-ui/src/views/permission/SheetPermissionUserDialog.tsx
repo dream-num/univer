@@ -26,7 +26,11 @@ import { UNIVER_SHEET_PERMISSION_USER_DIALOG_ID } from '../../consts/permission'
 import { SheetPermissionUserManagerService } from '../../services/permission/sheet-permission-user-list.service';
 import { UserEmptyBase64 } from './user-dialog/constant';
 
-export const SheetPermissionUserDialog = () => {
+export interface ISheetPermissionUserDialogProps {
+    ActionRowComponent?: typeof ActionRow;
+}
+
+export const SheetPermissionUserDialog = ({ ActionRowComponent = ActionRow }: ISheetPermissionUserDialogProps = {}) => {
     const [inputValue, setInputValue] = useState('');
     const localeService = useDependency(LocaleService);
     const dialogService = useDependency(IDialogService);
@@ -120,7 +124,7 @@ export const SheetPermissionUserDialog = () => {
                     )}
             </div>
             <div className="univer-h-px univer-w-full univer-bg-gray-200" />
-            <ActionRow
+            <ActionRowComponent
                 className="univer-flex univer-items-center univer-justify-end univer-gap-1 univer-py-2"
             >
                 <Button
@@ -137,7 +141,7 @@ export const SheetPermissionUserDialog = () => {
                 >
                     {localeService.t<LocaleKey>('sheets-ui.permission.button.confirm')}
                 </Button>
-            </ActionRow>
+            </ActionRowComponent>
         </div>
     );
 };

@@ -73,10 +73,11 @@ interface IEmojiPickerPopupProps {
     recentStorageKey?: string;
 }
 
-interface IEmojiPickerProps {
+export interface IEmojiPickerProps {
     embedded?: boolean;
     onChange?: (emoji: string) => void;
     popup?: IPopup<IEmojiPickerPopupProps>;
+    DropdownComponent?: typeof Dropdown;
 }
 
 type EmojiSectionKey = 'recent' | EmojiCategory;
@@ -87,6 +88,7 @@ type EmojiVirtualRow =
     | { items: IEmojiItem[]; key: string; type: 'emojis' };
 
 export function EmojiPicker(props: IEmojiPickerProps) {
+    const { DropdownComponent = Dropdown } = props;
     const extraProps = props.popup?.extraProps;
     const localeService = useDependency(LocaleService);
     const localStorageService = useDependency(ILocalStorageService);
@@ -265,6 +267,7 @@ export function EmojiPicker(props: IEmojiPickerProps) {
                     <RandomIcon />
                 </Button>
                 <SkinToneDropdown
+                    DropdownComponent={DropdownComponent}
                     emojiTitles={emojiLocaleData.emojiTitles}
                     open={skinToneMenuOpen}
                     skinTone={skinTone}
@@ -299,6 +302,7 @@ export function EmojiPicker(props: IEmojiPickerProps) {
                                 )
                                 : (
                                     <EmojiGrid
+                                        DropdownComponent={DropdownComponent}
                                         key={row.key}
                                         activeEmoji={activeEmoji}
                                         emojiTitles={emojiLocaleData.emojiTitles}
@@ -358,6 +362,7 @@ function EmojiGrid(props: {
     keyPrefix: string;
     moreTitle: string;
     onSelect: (item: IEmojiItem, options?: { keepOpen?: boolean }) => void;
+    DropdownComponent: typeof Dropdown;
 }) {
     return (
         <div
@@ -367,6 +372,7 @@ function EmojiGrid(props: {
             {props.items.map((item) => {
                 return (
                     <EmojiButton
+                        DropdownComponent={props.DropdownComponent}
                         key={`${props.keyPrefix}-${item.emoji}-${item.title}`}
                         activeEmoji={props.activeEmoji}
                         emojiTitles={props.emojiTitles}
@@ -386,6 +392,7 @@ function EmojiButton(props: {
     item: IEmojiItem;
     moreTitle: string;
     onSelect: (item: IEmojiItem, options?: { keepOpen?: boolean }) => void;
+    DropdownComponent: typeof Dropdown;
 }) {
     const [variantsOpen, setVariantsOpen] = useState(false);
     const title = getLocalizedEmojiTitle(props.item, props.emojiTitles);
@@ -428,7 +435,7 @@ function EmojiButton(props: {
     return (
         <div className="univer-relative univer-size-7">
             {button}
-            <Dropdown
+            <props.DropdownComponent
                 align="end"
                 open={variantsOpen}
                 onOpenChange={setVariantsOpen}
@@ -471,7 +478,7 @@ function EmojiButton(props: {
                 >
                     <MoreDownIcon className="!univer-size-2.5" />
                 </button>
-            </Dropdown>
+            </props.DropdownComponent>
         </div>
     );
 }
@@ -512,6 +519,7 @@ function SkinToneDropdown(props: {
     skinTone: EmojiSkinTone;
     onChange: (skinTone: EmojiSkinTone) => void;
     onOpenChange: (open: boolean) => void;
+    DropdownComponent: typeof Dropdown;
 }) {
     const currentOption = EMOJI_SKIN_TONE_OPTIONS.find((option) => option.value === props.skinTone)
         ?? EMOJI_SKIN_TONE_OPTIONS[0];
@@ -538,7 +546,7 @@ function SkinToneDropdown(props: {
 
     return (
         <div className="univer-flex-shrink-0" onClick={(event) => event.stopPropagation()}>
-            <Dropdown
+            <props.DropdownComponent
                 align="end"
                 open={props.open}
                 onOpenChange={props.onOpenChange}
@@ -600,7 +608,7 @@ function SkinToneDropdown(props: {
                         "
                     />
                 </Button>
-            </Dropdown>
+            </props.DropdownComponent>
         </div>
     );
 }

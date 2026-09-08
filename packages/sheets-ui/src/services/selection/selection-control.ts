@@ -43,11 +43,8 @@ export enum SELECTION_MANAGER_KEY {
     backgroundBottom = '__SpreadsheetSelectionBackgroundControlBottom__',
     fill = '__SpreadsheetSelectionFillControl__',
 
-    // fillTopLeft & fillBottomRight are used for mobile selection
-    fillTopLeft = '__SpreadsheetSelectionFillControlTopLeft__',
-    fillBottomRight = '__SpreadsheetSelectionFillControlBottomRight__',
-    fillTopLeftInner = '__SpreadsheetSelectionFillControlTopLeftInner__',
-    fillBottomRightInner = '__SpreadsheetSelectionFillControlBottomRightInner__',
+    expandTopLeft = '__SpreadsheetSelectionExpandControlTopLeft__',
+    expandBottomRight = '__SpreadsheetSelectionExpandControlBottomRight__',
 
     lineMain = '__SpreadsheetDragLineMainControl__',
     lineContent = '__SpreadsheetDragLineContentControl__',

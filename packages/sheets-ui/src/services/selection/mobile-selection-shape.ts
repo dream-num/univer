@@ -27,11 +27,11 @@ export class MobileSelectionControl extends SelectionControl {
     /**
      * topLeft controlPointer, it is not visible, just transparent, for handling event.
      */
-    private _fillControlTopLeft: Rect | null;
+    private _expandControlTopLeft: Rect | null;
     /**
      * bottomRight controlPointer, it is not visible, just transparent, for handling event.
      */
-    private _fillControlBottomRight: Rect | null;
+    private _expandControlBottomRight: Rect | null;
 
     protected _rangeType: RANGE_TYPE = RANGE_TYPE.NORMAL;
 
@@ -39,9 +39,8 @@ export class MobileSelectionControl extends SelectionControl {
         protected override _scene: Scene,
         protected override _zIndex: number,
         protected override readonly _themeService: ThemeService,
-        options?: {
+        options: {
             highlightHeader?: boolean;
-            enableAutoFill?: boolean;
             rowHeaderWidth: number;
             columnHeaderHeight: number;
             rowHeaderOffsetX?: number;
@@ -49,7 +48,7 @@ export class MobileSelectionControl extends SelectionControl {
             rangeType?: RANGE_TYPE;
         }
     ) {
-        super(_scene, _zIndex, _themeService, options);
+        super(_scene, _zIndex, _themeService, { ...options, enableAutoFill: false });
         this._rangeType = options?.rangeType || RANGE_TYPE.NORMAL;
         this.initControlPoints();
     }
@@ -58,43 +57,43 @@ export class MobileSelectionControl extends SelectionControl {
         const defaultStyle = this.currentStyle;
         const expandCornerSize = defaultStyle.expandCornerSize || 0;
         const expandCornerInnerSize = (defaultStyle.expandCornerSize || 0) / 4;
-        const AutofillStrokeWidth = defaultStyle.autofillStrokeWidth || 0;
+        const controlStrokeWidth = defaultStyle.autofillStrokeWidth || 0;
         const stroke = defaultStyle.stroke!;
-        const AutofillStroke = defaultStyle.autofillStroke!;
+        const controlStroke = defaultStyle.autofillStroke!;
         const zIndex = this.zIndex;
         // @transformControlPoint takes care of left & top
-        this._fillControlTopLeft = new Rect(SELECTION_MANAGER_KEY.fillTopLeft + zIndex, {
+        this._expandControlTopLeft = new Rect(SELECTION_MANAGER_KEY.expandTopLeft + zIndex, {
             zIndex: zIndex + 2,
             width: expandCornerSize,
             height: expandCornerSize,
             radius: expandCornerSize / 2,
             visualWidth: expandCornerInnerSize,
             visualHeight: expandCornerInnerSize,
-            strokeWidth: AutofillStrokeWidth,
+            strokeWidth: controlStrokeWidth,
         });
 
-        this._fillControlBottomRight = new Rect(SELECTION_MANAGER_KEY.fillBottomRight + zIndex, {
+        this._expandControlBottomRight = new Rect(SELECTION_MANAGER_KEY.expandBottomRight + zIndex, {
             zIndex: zIndex + 2,
             width: expandCornerSize,
             height: expandCornerSize,
             radius: expandCornerSize / 2,
             visualHeight: expandCornerInnerSize,
             visualWidth: expandCornerInnerSize,
-            strokeWidth: AutofillStrokeWidth,
+            strokeWidth: controlStrokeWidth,
         });
 
-        const fillProps: IRectProps = {
+        const controlProps: IRectProps = {
             fill: stroke,
-            stroke: AutofillStroke,
+            stroke: controlStroke,
             strokeScaleEnabled: false,
         };
-        this._fillControlTopLeft!.setProps({ ...fillProps });
-        this._fillControlBottomRight!.setProps({ ...fillProps });
+        this._expandControlTopLeft!.setProps({ ...controlProps });
+        this._expandControlBottomRight!.setProps({ ...controlProps });
 
         // put into scene
         const objs = [
-            this._fillControlTopLeft,
-            this._fillControlBottomRight,
+            this._expandControlTopLeft,
+            this._expandControlBottomRight,
         ] as BaseObject[];
 
         // do not use this.model.rangeType, model has not been initialized yet
@@ -113,20 +112,20 @@ export class MobileSelectionControl extends SelectionControl {
         scene.addObjects(objs, SHEET_COMPONENT_SELECTION_LAYER_INDEX);
     }
 
-    get fillControlTopLeft(): Rect<IRectProps> | null {
-        return this._fillControlTopLeft;
+    get expandControlTopLeft(): Rect<IRectProps> | null {
+        return this._expandControlTopLeft;
     }
 
-    set fillControlTopLeft(value: Rect) {
-        this._fillControlTopLeft = value;
+    set expandControlTopLeft(value: Rect) {
+        this._expandControlTopLeft = value;
     }
 
-    get fillControlBottomRight(): Rect<IRectProps> | null {
-        return this._fillControlBottomRight;
+    get expandControlBottomRight(): Rect<IRectProps> | null {
+        return this._expandControlBottomRight;
     }
 
-    set fillControlBottomRight(value: Rect) {
-        this._fillControlBottomRight = value;
+    set expandControlBottomRight(value: Rect) {
+        this._expandControlBottomRight = value;
     }
 
     get rangeType(): RANGE_TYPE {
@@ -138,8 +137,8 @@ export class MobileSelectionControl extends SelectionControl {
     }
 
     override dispose(): void {
-        this._fillControlBottomRight?.dispose();
-        this._fillControlTopLeft?.dispose();
+        this._expandControlBottomRight?.dispose();
+        this._expandControlTopLeft?.dispose();
         super.dispose();
     }
 
@@ -160,16 +159,16 @@ export class MobileSelectionControl extends SelectionControl {
         this.currentStyle = style;
 
         // this condition is derived from selection-shape, I do not understand.
-        if (this._enableAutoFill === true && !super._hasWidgets(widgets)) {
+        if (!super._hasWidgets(widgets)) {
             const { viewportScrollX, viewportScrollY } = this.getViewportMainScrollInfo();
             const { endX, endY } = this.selectionModel;
             this.transformControlPoint(viewportScrollX, viewportScrollY, endX, endY);
 
-            this.fillControlTopLeft!.show();
-            this.fillControlBottomRight!.show();
+            this.expandControlTopLeft!.show();
+            this.expandControlBottomRight!.show();
         } else {
-            this.fillControlTopLeft?.hide();
-            this.fillControlBottomRight?.hide();
+            this.expandControlTopLeft?.hide();
+            this.expandControlBottomRight?.hide();
         }
     }
 
@@ -203,11 +202,11 @@ export class MobileSelectionControl extends SelectionControl {
 
         switch (rangeType) {
             case RANGE_TYPE.NORMAL:
-                this.fillControlTopLeft!.transformByState({
+                this.expandControlTopLeft!.transformByState({
                     left: -expandCornerSize / 2,
                     top: -expandCornerSize / 2,
                 });
-                this.fillControlBottomRight!.transformByState({
+                this.expandControlBottomRight!.transformByState({
                     left: endX - startX - expandCornerSize / 2,
                     top: endY - startY - expandCornerSize / 2,
                 });
@@ -216,11 +215,11 @@ export class MobileSelectionControl extends SelectionControl {
             case RANGE_TYPE.ROW: {
                 const left = Math.min(viewportW / 2 + viewportScrollX, sheetContentWidth);
                 const controlLeft = -expandCornerSize / 2 + left;
-                this.fillControlTopLeft!.transformByState({
+                this.expandControlTopLeft!.transformByState({
                     left: controlLeft,
                     top: -expandCornerSize / 2,
                 });
-                this.fillControlBottomRight!.transformByState({
+                this.expandControlBottomRight!.transformByState({
                     left: controlLeft,
                     top: -expandCornerSize / 2 + endY - startY,
                 });
@@ -231,11 +230,11 @@ export class MobileSelectionControl extends SelectionControl {
                     const top = Math.min(+viewportH / 2 + viewportScrollY, sheetContentHeight);
                     const controlTop = -expandCornerSize / 2 + top;
 
-                    this.fillControlTopLeft!.transformByState({
+                    this.expandControlTopLeft!.transformByState({
                         left: -expandCornerSize / 2,
                         top: controlTop,
                     });
-                    this.fillControlBottomRight!.transformByState({
+                    this.expandControlBottomRight!.transformByState({
                         left: -expandCornerSize / 2 + endX - startX,
                         top: controlTop,
                     });

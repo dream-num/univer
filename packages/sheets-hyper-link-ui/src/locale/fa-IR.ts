@@ -47,6 +47,8 @@ const locale: typeof enUS = {
             coped: 'لینک به کلیپ بورد کپی شد',
         },
         popup: {
+            title: 'ابرپیوند',
+            open: 'باز کردن لینک',
             copy: 'کپی لینک',
             edit: 'ویرایش لینک',
             cancel: 'لینک را لغو کنید',

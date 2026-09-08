@@ -31,7 +31,7 @@ import {
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
-import { ActionRow, borderClassName, Button, clsx, ConfigContext, FormLayout, Input, Select } from '@univerjs/design';
+import { ActionRow, borderClassName, Button, clsx, FormLayout, Input, Select } from '@univerjs/design';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import {
@@ -53,7 +53,7 @@ import {
 } from '@univerjs/sheets-hyper-link';
 import { IEditorBridgeService, IMarkSelectionService, ScrollToRangeOperation } from '@univerjs/sheets-ui';
 import { KeyCode, useDependency, useEvent, useObservable } from '@univerjs/ui';
-import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CloseHyperLinkPopupOperation } from '../commands/operations/popup.operations';
 import { isLegalLink, serializeUrl } from '../common/util';
 import { SheetsHyperLinkPopupService } from '../services/popup.service';
@@ -64,14 +64,12 @@ import { isBlankInput, resolveRangePayload } from './CellLinkEdit/utils';
 
 export const CellLinkEdit = () => {
     const [id, setId] = useState('');
-    const [hide, setHide] = useState(false);
-    const [display, _setDisplay] = useState('');
+    const [display, setDisplay] = useState('');
     const [showLabel, setShowLabel] = useState(true);
     const [type, setType] = useState<SheetHyperLinkType | string>(SheetHyperLinkType.URL);
     const [payload, setPayload] = useState('');
 
     const localeService = useDependency(LocaleService);
-    const { mobile } = useContext(ConfigContext);
     const definedNameService = useDependency(IDefinedNamesService);
     const editorBridgeService = useDependency(IEditorBridgeService);
     const univerInstanceService = useDependency(IUniverInstanceService);
@@ -112,9 +110,9 @@ export const CellLinkEdit = () => {
     const subUnitId = workbook?.getActiveSheet().getSheetId() || '';
     // to polyfill the display value on old version data
     // case split tag is no longer needed
-    const setDisplay = useCallback((value: string) => {
-        _setDisplay(value.replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_START, '').replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_END, ''));
-    }, [_setDisplay]);
+    const setNormalizedDisplay = useCallback((value: string) => {
+        setDisplay(value.replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_START, '').replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_END, ''));
+    }, [setDisplay]);
 
     useEffect(() => {
         if (editing?.row !== undefined && editing.col !== undefined) {
@@ -174,10 +172,10 @@ export const CellLinkEdit = () => {
                 const customLinkInfo = customLink.convert(link);
                 setType(customLinkInfo.type);
                 setPayload(customLinkInfo.payload);
-                setDisplay(customLinkInfo.display);
+                setNormalizedDisplay(customLinkInfo.display);
                 return;
             }
-            setDisplay(link.display);
+            setNormalizedDisplay(link.display);
             const linkInfo = parserService.parseHyperLink(link.payload);
             setType(linkInfo.type === SheetHyperLinkType.INVALID ? SheetHyperLinkType.RANGE : linkInfo.type);
             switch (linkInfo.type) {
@@ -332,7 +330,7 @@ export const CellLinkEdit = () => {
         setPayload(newPayload);
 
         if (getIsDisplaySyncedWithPayload() || !display) {
-            setDisplay(newPayload);
+            setNormalizedDisplay(newPayload);
             setDisplaySyncedWithPayload(true);
         }
     });
@@ -418,7 +416,7 @@ export const CellLinkEdit = () => {
             });
         }
 
-        commandService.executeCommand(CloseHyperLinkPopupOperation.id);
+        await commandService.executeCommand(CloseHyperLinkPopupOperation.id);
     };
 
     if (!editing) {
@@ -429,12 +427,10 @@ export const CellLinkEdit = () => {
         <div
             className={clsx(
                 `
-                  univer-box-border univer-bg-gray-0
+                  univer-box-border univer-w-[296px] univer-rounded-xl univer-bg-gray-0 univer-p-4 univer-shadow-md
                   dark:!univer-bg-gray-900
                 `,
-                mobile
-                    ? 'univer-w-full univer-p-0'
-                    : clsx('univer-w-[296px] univer-rounded-xl univer-p-4 univer-shadow-md', borderClassName)
+                borderClassName
             )}
         >
             {showLabel
@@ -446,7 +442,7 @@ export const CellLinkEdit = () => {
                         <Input
                             value={display}
                             onChange={(v) => {
-                                setDisplay(v);
+                                setNormalizedDisplay(v);
                                 setDisplaySyncedWithPayload(false);
                             }}
                             placeholder={localeService.t<LocaleKey>('sheets-hyper-link-ui.form.labelPlaceholder')}
@@ -480,7 +476,7 @@ export const CellLinkEdit = () => {
                         onChange={(newLink) => {
                             setPayload(newLink);
                             if (newLink && (getIsDisplaySyncedWithPayload() || !display || display === newLink)) {
-                                setDisplay(newLink);
+                                setNormalizedDisplay(newLink);
                                 setDisplaySyncedWithPayload(true);
                             }
                         }}
@@ -510,11 +506,9 @@ export const CellLinkEdit = () => {
                                 if (editing.type !== HyperLinkEditSourceType.VIEWING) {
                                     editorBridgeService.enableForceKeepVisible();
                                 }
-                                setHide(true);
                             } else {
                                 await resolverService.navigateToRange(editing.unitId, editing.subUnitId, { startRow: editing.row, endRow: editing.row, startColumn: editing.col, endColumn: editing.col }, true);
                                 editorBridgeService.disableForceKeepVisible();
-                                setHide(false);
                             }
                         }}
                         onFocusChange={(focus) => setIsFocusRangeSelector(focus)}
@@ -532,7 +526,7 @@ export const CellLinkEdit = () => {
                             const label = sheetsOption.find((i) => i.value === newPayload)?.label;
                             const oldLabel = sheetsOption.find((i) => i.value === payload)?.label;
                             if (label && (getIsDisplaySyncedWithPayload() || !display || display === oldLabel)) {
-                                setDisplay(label);
+                                setNormalizedDisplay(label);
                                 setDisplaySyncedWithPayload(true);
                             }
                         }}
@@ -550,7 +544,7 @@ export const CellLinkEdit = () => {
                             const label = definedNames.find((i) => i.value === newValue)?.label;
                             const oldLabel = definedNames.find((i) => i.value === payload)?.label;
                             if (label && (getIsDisplaySyncedWithPayload() || !display || display === oldLabel)) {
-                                setDisplay(label);
+                                setNormalizedDisplay(label);
                                 setDisplaySyncedWithPayload(true);
                             }
                         }}
@@ -566,33 +560,26 @@ export const CellLinkEdit = () => {
                     getIsDisplaySyncedWithPayload={getIsDisplaySyncedWithPayload}
                     setDisplaySyncedWithPayload={setDisplaySyncedWithPayload}
                     setDisplay={(newLink) => {
-                        setDisplay(newLink);
+                        setNormalizedDisplay(newLink);
                         setDisplaySyncedWithPayload(true);
                     }}
                     setPayload={setPayload}
                 />
             )}
-            <ActionRow
-                className={clsx(
-                    'univer-flex univer-flex-row univer-justify-end univer-gap-2',
-                    mobile && 'univer-mt-5 univer-w-full'
-                )}
-            >
+            <ActionRow className="univer-flex univer-flex-row univer-justify-end univer-gap-2">
                 <Button
-                    onClick={() => {
+                    onClick={async () => {
                         if (editing) {
-                            resolverService.navigateToRange(editing.unitId, editing.subUnitId, { startRow: editing.row, endRow: editing.row, startColumn: editing.col, endColumn: editing.col }, true);
+                            await resolverService.navigateToRange(editing.unitId, editing.subUnitId, { startRow: editing.row, endRow: editing.row, startColumn: editing.col, endColumn: editing.col }, true);
                         }
-                        commandService.executeCommand(CloseHyperLinkPopupOperation.id);
+                        await commandService.executeCommand(CloseHyperLinkPopupOperation.id);
                     }}
                 >
                     {localeService.t<LocaleKey>('sheets-hyper-link-ui.form.cancel')}
                 </Button>
                 <Button
                     variant="primary"
-                    onClick={async () => {
-                        handleSubmit();
-                    }}
+                    onClick={handleSubmit}
                 >
                     {localeService.t<LocaleKey>('sheets-hyper-link-ui.form.ok')}
                 </Button>

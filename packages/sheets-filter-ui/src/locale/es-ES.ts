@@ -33,6 +33,13 @@ const locale: typeof enUS = {
             'clear-filter': 'Borrar filtro',
             cancel: 'Cancelar',
             confirm: 'Confirmar',
+            mobile: {
+                resize: 'Cambiar el tamaño del panel de filtro',
+                back: 'Volver',
+                column: 'Columna {0}',
+                'previous-column': 'Columna anterior',
+                'next-column': 'Columna siguiente',
+            },
             'by-values': 'Por valores',
             'by-colors': 'Por colores',
             'filter-by-cell-fill-color': 'Filtrar por color de relleno de celda',

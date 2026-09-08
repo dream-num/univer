@@ -30,9 +30,9 @@ describe('InputManager click gestures', () => {
     let doubleClick: ReturnType<typeof vi.fn<() => void>>;
     let tripleClick: ReturnType<typeof vi.fn<() => void>>;
 
-    function pointer(type: string, x = 20, y = 20, button = 0) {
+    function pointer(type: string, x = 20, y = 20, button = 0, deviceType = DeviceType.Mouse) {
         engine.onInputChanged$.emitEvent(Object.assign(new MouseEvent(type, { clientX: x, clientY: y, button }), {
-            deviceType: DeviceType.Mouse,
+            deviceType,
             inputIndex: PointerInput.LeftClick + button,
             previousState: null,
             currentState: null,
@@ -159,5 +159,14 @@ describe('InputManager click gestures', () => {
         pointer('pointermove', 21, 21);
         pointer('pointerup', 21, 21);
         expect(doubleClick).toHaveBeenCalledTimes(1);
+    });
+
+    it.each([DeviceType.Touch, DeviceType.Mouse])('uses the device-specific double-click threshold for %s', (deviceType) => {
+        pointer('pointerdown', 20, 20, 0, deviceType);
+        pointer('pointerup', 20, 20, 0, deviceType);
+        pointer('pointerdown', 26, 20, 0, deviceType);
+        pointer('pointerup', 26, 20, 0, deviceType);
+
+        expect(doubleClick).toHaveBeenCalledTimes(deviceType === DeviceType.Touch ? 1 : 0);
     });
 });

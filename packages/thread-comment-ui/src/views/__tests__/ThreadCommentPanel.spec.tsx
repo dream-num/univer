@@ -19,6 +19,7 @@ import type { ISuccinctDocRangeParam } from '@univerjs/engine-render';
 import type { IThreadComment } from '@univerjs/thread-comment';
 import type { IShortcutItem } from '@univerjs/ui';
 import type { Root } from 'react-dom/client';
+import type { IThreadCommentTreeProps } from '../ThreadCommentTree';
 import {
     CommandService,
     ConfigService,
@@ -71,6 +72,12 @@ import { ThreadCommentPanel } from '../ThreadCommentPanel';
 const UNIT_ID = 'unit-1';
 const SHEET_ID = 'sheet-1';
 const IRenderManagerService = createIdentifier<TestRenderManagerService>('engine-render.render-manager.service');
+let renderedTreeProps: IThreadCommentTreeProps[] = [];
+
+function TestThreadCommentTree(props: IThreadCommentTreeProps) {
+    renderedTreeProps.push(props);
+    return <div data-comment-id={props.id} />;
+}
 
 interface IEditorRecord {
     id: string;
@@ -442,6 +449,7 @@ describe('ThreadCommentPanel', () => {
 
     beforeEach(() => {
         document.body.innerHTML = '';
+        renderedTreeProps = [];
     });
 
     afterEach(() => {
@@ -487,6 +495,31 @@ describe('ThreadCommentPanel', () => {
         expect(panelText.indexOf('Resolved comment')).toBeGreaterThan(-1);
         expect(panelText.indexOf('Open comment')).toBeLessThan(panelText.indexOf('thread-comment-ui.panel.solved'));
         expect(panelText.indexOf('thread-comment-ui.panel.solved')).toBeLessThan(panelText.indexOf('Resolved comment'));
+    });
+
+    it('auto-focuses the active comment when requested by the host panel', () => {
+        const testBed = createPanelTestBed();
+        addRootComment(testBed.threadCommentModel, createComment({ id: 'comment-1', ref: 'A1' }));
+        testBed.panelService.setActiveComment({
+            unitId: UNIT_ID,
+            subUnitId: SHEET_ID,
+            commentId: 'comment-1',
+        });
+
+        ({ container, root } = renderPanel(
+            testBed.injector,
+            <ThreadCommentPanel
+                unitId={UNIT_ID}
+                subUnitId$={new BehaviorSubject<string | undefined>(SHEET_ID)}
+                type={UniverInstanceType.UNIVER_SHEET}
+                onAdd={() => undefined}
+                getSubUnitName={(subUnitId) => subUnitId}
+                autoFocusActiveComment
+                ThreadCommentTreeComponent={TestThreadCommentTree}
+            />
+        ));
+
+        expect(renderedTreeProps.find((props) => props.id === 'comment-1')?.autoFocus).toBe(true);
     });
 
     it('keeps an empty-id temporary target active and shows its editor', () => {

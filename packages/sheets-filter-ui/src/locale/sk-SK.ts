@@ -33,6 +33,13 @@ const locale: typeof enUS = {
             'clear-filter': 'Vymazať filter',
             cancel: 'Zrušiť',
             confirm: 'Potvrdiť',
+            mobile: {
+                resize: 'Zmeniť veľkosť panela filtra',
+                back: 'Späť',
+                column: 'Stĺpec {0}',
+                'previous-column': 'Predchádzajúci stĺpec',
+                'next-column': 'Nasledujúci stĺpec',
+            },
             'by-values': 'Podľa hodnôt',
             'by-colors': 'Podľa farieb',
             'filter-by-cell-fill-color': 'Filtrovať podľa farby výplne bunky',

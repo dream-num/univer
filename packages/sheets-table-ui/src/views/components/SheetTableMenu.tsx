@@ -15,9 +15,7 @@
  */
 
 import type { ICanvasPopup } from '@univerjs/sheets-ui';
-import { ConfigContext, DropdownMenu } from '@univerjs/design';
-import { useContext } from 'react';
-import { MobileSheetTableMenu } from './MobileSheetTableMenu';
+import { DropdownMenu } from '@univerjs/design';
 
 export type SheetTableMenuAction = 'rename' | 'update-range' | 'set-theme' | 'delete';
 
@@ -35,14 +33,9 @@ interface ISheetTableMenuProps {
 
 export function SheetTableMenu({ popup }: ISheetTableMenuProps) {
     const menu = popup.extraProps as unknown as ISheetTableMenuExtraProps | undefined;
-    const { mobile } = useContext(ConfigContext);
 
     if (!menu) {
         return null;
-    }
-
-    if (mobile) {
-        return <MobileSheetTableMenu menu={menu} />;
     }
 
     return (

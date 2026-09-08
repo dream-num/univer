@@ -62,7 +62,8 @@ import { CanvasPopupService, ICanvasPopupService, IMenuManagerService, MenuManag
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import enUS from '../../locale/en-US';
 import { DataValidationDropdownManagerService } from '../../services/dropdown-manager.service';
-import { SheetsDataValidationMobileRenderController, SheetsDataValidationRenderController } from '../dv-render.controller';
+import { SheetsDataValidationRenderController } from '../dv-render.controller';
+import { SheetsDataValidationMobileRenderController } from '../mobile/dv-render.controller';
 import { SheetsDataValidationUIController } from '../ui.controller';
 
 vi.hoisted(() => {

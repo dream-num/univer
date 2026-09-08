@@ -31,13 +31,14 @@ import { FunctionHelp } from '../function-help/FunctionHelp';
 
 export interface ISelectFunctionProps {
     onChange: (functionInfo: IFunctionInfo | null) => void;
+    SelectComponent?: typeof Select;
 }
 
 export function SelectFunction(props: ISelectFunctionProps) {
     const configService = useDependency(IConfigService);
     const customFunction = configService.getConfig<IUniverSheetsFormulaBaseConfig>(PLUGIN_CONFIG_KEY_BASE)?.function;
 
-    const { onChange } = props;
+    const { onChange, SelectComponent = Select } = props;
 
     const allTypeValue = '-1';
     const [searchText, setSearchText] = useState<string>('');
@@ -159,7 +160,7 @@ export function SelectFunction(props: ISelectFunctionProps) {
     return (
         <div>
             <div className="univer-flex univer-items-center univer-justify-between univer-gap-2">
-                <Select value={typeSelected} options={options} onChange={handleSelectChange} />
+                <SelectComponent value={typeSelected} options={options} onChange={handleSelectChange} />
 
                 <Input
                     placeholder={localeService.t<LocaleKey>('sheets-formula-ui.moreFunctions.searchFunctionPlaceholder')}

@@ -17,6 +17,7 @@
 import type { ICommand, IMutationInfo } from '@univerjs/core';
 import type { ISetSheetTableParams } from '../mutations/set-table-filter.mutation';
 import { CommandType, generateRandomId, ICommandService, IUndoRedoService, sequenceExecute } from '@univerjs/core';
+import { TableManager } from '../../models/table-manager';
 import { SetSheetTableFilterMutation } from '../mutations/set-table-filter.mutation';
 
 export const SetSheetTableFilterCommand: ICommand<ISetSheetTableParams> = {
@@ -28,13 +29,15 @@ export const SetSheetTableFilterCommand: ICommand<ISetSheetTableParams> = {
         }
         const undoRedoService = accessor.get(IUndoRedoService);
         const commandService = accessor.get(ICommandService);
+        const tableManager = accessor.get(TableManager);
         const tableId = params.tableId || generateRandomId();
+        const previousFilter = tableManager.getTable(params.unitId, tableId)?.getTableFilterColumn(params.column);
 
         const redos: IMutationInfo[] = [];
         const undos: IMutationInfo[] = [];
 
         redos.push({ id: SetSheetTableFilterMutation.id, params: { ...params, tableId } });
-        undos.push({ id: SetSheetTableFilterMutation.id, params: { ...params, tableId, tableFilter: undefined } });
+        undos.push({ id: SetSheetTableFilterMutation.id, params: { ...params, tableId, tableFilter: previousFilter } });
 
         const res = sequenceExecute(redos, commandService);
 

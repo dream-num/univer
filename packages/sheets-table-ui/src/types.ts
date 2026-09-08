@@ -16,7 +16,18 @@
 
 export enum FilterByEnum {
     Items = 'items',
+    Color = 'color',
     Condition = 'condition',
+}
+
+export interface ITableFilterColorItem {
+    color: string | null;
+    checked: boolean;
+}
+
+export interface ITableFilterColorList {
+    cellFillColors: ITableFilterColorItem[];
+    cellTextColors: ITableFilterColorItem[];
 }
 
 export interface IFilterByValueWithTreeItem {

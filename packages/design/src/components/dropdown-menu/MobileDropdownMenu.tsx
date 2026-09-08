@@ -15,20 +15,30 @@
  */
 
 import type { ReactNode } from 'react';
-import type { DropdownMenuType } from './DropdownMenu';
+import type { DropdownMenuType, IDropdownMenuProps } from './DropdownMenu';
+import { useState } from 'react';
 import { clsx } from '../../helper/clsx';
 import { MobileDropdownSurface } from '../dropdown/MobileDropdownSurface';
 
-interface IMobileDropdownMenuProps {
-    children: ReactNode;
-    items: DropdownMenuType[];
-    disabled?: boolean;
-    open: boolean;
-    onOpenChange: (open: boolean) => void;
-}
+export type IMobileDropdownMenuProps = IDropdownMenuProps;
 
 export function MobileDropdownMenu(props: IMobileDropdownMenuProps) {
-    const { children, items, disabled, open, onOpenChange } = props;
+    const { children, items, disabled, open: controlledOpen, onOpenChange: controlledOnOpenChange } = props;
+    const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+    const isControlled = controlledOpen !== undefined;
+    const open = isControlled ? controlledOpen : uncontrolledOpen;
+
+    function handleChangeOpen(newOpen: boolean) {
+        if (disabled) {
+            return;
+        }
+
+        if (!isControlled) {
+            setUncontrolledOpen(newOpen);
+        }
+
+        controlledOnOpenChange?.(newOpen);
+    }
 
     function renderMenuItem(item: DropdownMenuType, index: number): ReactNode {
         if (item.type === 'separator') {
@@ -64,7 +74,7 @@ export function MobileDropdownMenu(props: IMobileDropdownMenuProps) {
                         className={mobileRowClassName(value === item.value)}
                         onClick={() => {
                             item.onSelect?.(value);
-                            onOpenChange(false);
+                            handleChangeOpen(false);
                         }}
                     >
                         {option.label}
@@ -81,7 +91,7 @@ export function MobileDropdownMenu(props: IMobileDropdownMenuProps) {
                     className={clsx(mobileRowClassName(Boolean(item.checked)), item.className)}
                     onClick={() => {
                         item.onSelect?.(item.value);
-                        onOpenChange(false);
+                        handleChangeOpen(false);
                     }}
                 >
                     {item.label}
@@ -99,7 +109,7 @@ export function MobileDropdownMenu(props: IMobileDropdownMenuProps) {
                     })}
                     onClick={() => {
                         item.onSelect?.(item);
-                        onOpenChange(false);
+                        handleChangeOpen(false);
                     }}
                 >
                     {item.children}
@@ -120,7 +130,7 @@ export function MobileDropdownMenu(props: IMobileDropdownMenuProps) {
         <MobileDropdownSurface
             open={open}
             disabled={disabled}
-            onOpenChange={onOpenChange}
+            onOpenChange={handleChangeOpen}
             content={<div className="univer-flex univer-flex-col univer-gap-2">{items.map(renderMenuItem)}</div>}
         >
             {children}

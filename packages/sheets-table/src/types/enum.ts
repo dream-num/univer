@@ -27,6 +27,7 @@ export enum TableColumnDataTypeEnum {
 export enum TableColumnFilterTypeEnum {
     manual = 'manual',
     condition = 'condition',
+    color = 'color',
 }
 
 export enum TableConditionTypeEnum {

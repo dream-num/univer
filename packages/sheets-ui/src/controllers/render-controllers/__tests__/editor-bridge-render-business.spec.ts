@@ -28,7 +28,6 @@ import { SetZoomRatioCommand } from '../../../commands/commands/set-zoom-ratio.c
 import { SetActivateCellEditOperation } from '../../../commands/operations/activate-cell-edit.operation';
 import { SetCellEditVisibleOperation } from '../../../commands/operations/cell-edit.operation';
 import { SHEET_VIEW_KEY } from '../../../common/keys';
-import { MOBILE_KEYBOARD_VISIBLE } from '../../../consts/mobile-context';
 import { EMBED_INTERACTION_BOUNDARY_OWNER_ATTRIBUTE } from '../../../services/sheet-embed-integration.service';
 import { EditorBridgeRenderController } from '../editor-bridge.render-controller';
 
@@ -75,7 +74,6 @@ function createController(options?: {
     isEmbedActiveSession?: boolean;
     focusingSheet?: boolean;
     disableAutoFocus?: boolean;
-    keyboardVisible?: boolean;
     isEmbedRuntimeEventImpl?: (unitId: string | undefined, target?: EventTarget | null, event?: Event) => boolean;
 }) {
     const workbook$ = new Subject<any>();
@@ -105,7 +103,6 @@ function createController(options?: {
         [FOCUSING_SHEET, options?.focusingSheet ?? true],
         [FOCUSING_FX_BAR_EDITOR, false],
         [DISABLE_AUTO_FOCUS_KEY, options?.disableAutoFocus ?? false],
-        [MOBILE_KEYBOARD_VISIBLE, options?.keyboardVisible ?? false],
     ]);
     const focusingSheet$ = new Subject<boolean>();
     const context = {
@@ -136,7 +133,7 @@ function createController(options?: {
             }
             : null),
     };
-    let editorVisible = options?.editorVisible ?? false;
+    const editorVisible = options?.editorVisible ?? false;
     const editorBridgeService = {
         getEditCellState: vi.fn(() => options?.currentEditCellState ?? null),
         getEditCellLayout: vi.fn(() => ({
@@ -148,16 +145,7 @@ function createController(options?: {
         isForceKeepVisible: vi.fn(() => options?.forceKeepVisible ?? false),
         refreshEditCellState: vi.fn(),
     };
-    commandService.syncExecuteCommand.mockImplementation((commandId: string, params?: { visible?: boolean }) => {
-        if (
-            options?.keyboardVisible &&
-            commandId === SetCellEditVisibleOperation.id &&
-            typeof params?.visible === 'boolean'
-        ) {
-            editorVisible = params.visible;
-        }
-        return true;
-    });
+    commandService.syncExecuteCommand.mockReturnValue(true);
     const controller = new EditorBridgeRenderController(
         context as any,
         {
@@ -373,14 +361,18 @@ describe('EditorBridgeRenderController business flows', () => {
         controller.dispose();
     });
 
-    it('commits and reopens editing on the selected cell while the mobile keyboard stays visible', () => {
+    it('does not reopen mobile editing implicitly when a selection changes', () => {
         const { commandService, controller, selectionMoveEnd$, spreadsheet } = createController({
             editorVisible: true,
-            keyboardVisible: true,
+            disableAutoFocus: true,
         });
 
         spreadsheet.onPointerDown$.emit({});
-        expect(commandService.syncExecuteCommand).not.toHaveBeenCalled();
+        expect(commandService.syncExecuteCommand).toHaveBeenCalledWith(SetCellEditVisibleOperation.id, {
+            visible: false,
+            eventType: DeviceInputEventType.PointerDown,
+            unitId: 'unit-1',
+        });
 
         selectionMoveEnd$.next([{
             primary: {
@@ -393,17 +385,8 @@ describe('EditorBridgeRenderController business flows', () => {
             },
         }]);
 
-        expect(commandService.syncExecuteCommand).toHaveBeenNthCalledWith(1, SetCellEditVisibleOperation.id, {
-            visible: false,
-            eventType: DeviceInputEventType.PointerDown,
-            unitId: 'unit-1',
-        });
-        expect(commandService.executeCommand).toHaveBeenCalledWith(SetActivateCellEditOperation.id, expect.anything());
-        expect(commandService.syncExecuteCommand).toHaveBeenNthCalledWith(2, SetCellEditVisibleOperation.id, {
-            visible: true,
-            eventType: DeviceInputEventType.PointerDown,
-            unitId: 'unit-1',
-        });
+        expect(commandService.syncExecuteCommand).toHaveBeenCalledTimes(1);
+        expect(commandService.executeCommand).not.toHaveBeenCalled();
 
         controller.dispose();
     });

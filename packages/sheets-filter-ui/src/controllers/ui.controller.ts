@@ -14,11 +14,18 @@
  * limitations under the License.
  */
 
-import type { IDisposable, Nullable } from '@univerjs/core';
-import { ICommandService, IContextService, Inject, Injector, LocaleService } from '@univerjs/core';
+import type { Dependency, IDisposable, Nullable } from '@univerjs/core';
+import { ICommandService, IContextService, Inject, Injector, LocaleService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { SheetsFilterService, SmartToggleSheetsFilterCommand } from '@univerjs/sheets-filter';
+import {
+    ReCalcSheetsFilterMutation,
+    RemoveSheetsFilterMutation,
+    SetSheetsFilterCriteriaMutation,
+    SetSheetsFilterRangeMutation,
+    SheetsFilterService,
+    SmartToggleSheetsFilterCommand,
+} from '@univerjs/sheets-filter';
 import { SheetCanvasPopManagerService, SheetsRenderService } from '@univerjs/sheets-ui';
 import { IMenuManagerService, IMessageService, IShortcutService } from '@univerjs/ui';
 import { distinctUntilChanged } from 'rxjs';
@@ -31,13 +38,13 @@ import {
 import { menuSchema } from '../menu/schema';
 import { ISheetsFilterPanelService } from '../services/sheets-filter-panel.service';
 import { FILTER_PANEL_POPUP_KEY } from '../views/components/SheetsFilterPanel';
+import { SheetsFilterRenderController } from '../views/render-modules/sheets-filter.render-controller';
 import { SmartToggleFilterShortcut } from './sheets-filter.shortcut';
-import { SheetsFilterUIMobileController } from './ui-mobile.controller';
 
 /**
  * This controller controls the UI of "filter" features. Menus, commands and filter panel etc. Except for the rendering.
  */
-export class SheetsFilterUIDesktopController extends SheetsFilterUIMobileController {
+export class SheetsFilterUIDesktopController extends RxDisposable {
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
         @ISheetsFilterPanelService private readonly _sheetsFilterPanelService: ISheetsFilterPanelService,
@@ -52,7 +59,20 @@ export class SheetsFilterUIDesktopController extends SheetsFilterUIMobileControl
         @Inject(SheetsRenderService) sheetsRenderService: SheetsRenderService,
         @IRenderManagerService renderManagerService: IRenderManagerService
     ) {
-        super(renderManagerService, sheetsRenderService);
+        super();
+
+        [
+            SetSheetsFilterRangeMutation,
+            SetSheetsFilterCriteriaMutation,
+            RemoveSheetsFilterMutation,
+            ReCalcSheetsFilterMutation,
+        ].forEach((mutation) => {
+            this.disposeWithMe(sheetsRenderService.registerSkeletonChangingMutations(mutation.id));
+        });
+        this.disposeWithMe(renderManagerService.registerRenderModule(
+            UniverInstanceType.UNIVER_SHEET,
+            [SheetsFilterRenderController] as Dependency
+        ));
 
         this._initCommands();
         this._initShortcuts();

@@ -47,6 +47,8 @@ const locale: typeof enUS = {
             coped: 'Tautan disalin ke clipboard',
         },
         popup: {
+            title: 'Tautan',
+            open: 'Buka Tautan',
             copy: 'Salin Tautan',
             edit: 'Edit Tautan',
             cancel: 'Batalkan Tautan',

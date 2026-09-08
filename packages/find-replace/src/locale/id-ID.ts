@@ -19,6 +19,13 @@ import type enUS from './en-US';
 const locale: typeof enUS = {
     'find-replace': {
         toolbar: 'Cari & Ganti',
+        mobile: {
+            settings: 'Pengaturan cari dan ganti',
+            'settings-title': 'Pengaturan Cari dan Ganti',
+            'previous-match': 'Kecocokan sebelumnya',
+            'next-match': 'Kecocokan berikutnya',
+            close: 'Tutup cari dan ganti',
+        },
         shortcut: {
             'open-find-dialog': 'Buka Dialog Cari',
             'open-replace-dialog': 'Buka Dialog Ganti',

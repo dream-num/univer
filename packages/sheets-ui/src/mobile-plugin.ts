@@ -39,24 +39,23 @@ import { UI_PLUGIN_CONFIG_KEY, UniverMobileUIPlugin } from '@univerjs/ui';
 import { filter } from 'rxjs/operators';
 import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_UI_PLUGIN_CONFIG_KEY } from './config/config';
-import { AutoFillRenderController, AutoFillUIController } from './controllers/auto-fill-ui.controller';
 import { AutoHeightController } from './controllers/auto-height.controller';
 import { AutoWidthController } from './controllers/auto-width.controller';
 import { CellCustomRenderController } from './controllers/cell-custom-render.controller';
 import { CellPopupEditorController } from './controllers/cell-popup-editor.controller';
 import { SheetCheckboxController } from './controllers/checkbox.controller';
 import { SheetClipboardController } from './controllers/clipboard/clipboard.controller';
-import { ComponentsController } from './controllers/components.controller';
 import { SheetsDefinedNameController } from './controllers/defined-name/defined-name.controller';
 import { DragRenderController } from './controllers/drag-render.controller';
-import { EditorDataSyncController } from './controllers/editor/data-sync.controller';
 import { EditingRenderController } from './controllers/editor/editing.render-controller';
 import { FormulaEditorController } from './controllers/editor/formula-editor.controller';
 import { ForceStringAlertRenderController } from './controllers/force-string-alert-render.controller';
 import { ForceStringRenderController } from './controllers/force-string-render.controller';
 import { FormatPainterController } from './controllers/format-painter/format-painter.controller';
-import { HoverRenderController } from './controllers/hover-render.controller';
 import { MarkSelectionRenderController } from './controllers/mark-selection.controller';
+import { SheetClipboardMobileUIController } from './controllers/mobile/clipboard-ui.controller';
+import { MobileComponentsController } from './controllers/mobile/components.controller';
+import { MobileEditorDataSyncController } from './controllers/mobile/editor-data-sync.controller';
 import { SheetUIMobileController } from './controllers/mobile/ui-mobile.controller';
 import { MoveRangeRenderController } from './controllers/move-range.controller';
 import { SheetPermissionCheckUIController } from './controllers/permission/sheet-permission-check-ui.controller';
@@ -87,6 +86,7 @@ import {
 import {
     MobileHeaderResizeRenderController,
 } from './controllers/render-controllers/mobile/mobile-header-resize.render-controller';
+import { MobileHoverRenderController } from './controllers/render-controllers/mobile/mobile-hover.render-controller';
 import {
     MobileSheetsScrollRenderController,
 } from './controllers/render-controllers/mobile/mobile-scroll.render-controller';
@@ -168,8 +168,8 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
     }
 
     override onStarting(): void {
-        this._injector.add([ComponentsController]);
-        this._injector.get(ComponentsController);
+        this._injector.add([MobileComponentsController]);
+        this._injector.get(MobileComponentsController);
         registerDependencies(this._injector, mergeOverrideWithDependencies([
             [ShortcutExperienceService],
             [IEditorBridgeService, { useClass: EditorBridgeService }],
@@ -198,10 +198,9 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
             [SheetsRenderService],
             [SheetUIMobileController],
             [StatusBarController],
-            [AutoFillUIController],
             [FormatPainterController],
             [SheetsDefinedNameController],
-            [EditorDataSyncController],
+            [MobileEditorDataSyncController],
             [SheetCheckboxController],
             [EditingRenderController],
 
@@ -221,6 +220,7 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
 
         registerDependencies(this._injector, [
             [SheetClipboardController],
+            [SheetClipboardMobileUIController],
         ]);
 
         this._registerRenderBasics();
@@ -240,12 +240,13 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
             [SheetPermissionPanelModel],
             [SheetPermissionInterceptorClipboardController],
             [SheetClipboardController],
+            [SheetClipboardMobileUIController],
             [FormulaEditorController],
             [SheetsDefinedNameController],
             [StatusBarController],
             [AutoHeightController],
             [AutoWidthController],
-            [EditorDataSyncController],
+            [MobileEditorDataSyncController],
             [SheetCheckboxController],
             [EditingRenderController],
         ]);
@@ -254,7 +255,6 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
     override onSteady(): void {
         touchDependencies(this._injector, [
             [FormatPainterController],
-            [AutoFillUIController],
         ]);
     }
 
@@ -288,14 +288,12 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
             [CellPopupEditorController],
             [ForceStringAlertRenderController],
             [MarkSelectionRenderController],
-            [HoverRenderController],
+            [MobileHoverRenderController],
             [DragRenderController],
             [ForceStringRenderController],
             [CellCustomRenderController],
-            [SheetContextMenuMobileRenderController],
             [MobileHeaderResizeRenderController],
             [MoveRangeRenderController],
-            [AutoFillRenderController],
 
             // editor
             [EditorBridgeRenderController],
@@ -311,6 +309,7 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
         const config = this._configService.getConfig<IUniverUIConfig>(UI_PLUGIN_CONFIG_KEY);
         const showContextMenu = config?.contextMenu ?? true;
         if (showContextMenu) {
+            modules.push([SheetContextMenuMobileRenderController]);
             modules.push([HeaderMenuRenderController]);
         }
 

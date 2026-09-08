@@ -25,11 +25,14 @@ import { TableManager } from '@univerjs/sheets-table';
 import { useDependency } from '@univerjs/ui';
 import { useState } from 'react';
 
-export const SheetTableSelector = (props: ITableSelectionInfo & {
+export interface ISheetTableSelectorProps extends ITableSelectionInfo {
     onConfirm: (info: ITableSelectionInfo) => void;
     onCancel: () => void;
-}) => {
-    const { unitId, subUnitId, range, onCancel, onConfirm, tableId } = props;
+    ActionRowComponent?: typeof ActionRow;
+}
+
+export const SheetTableSelector = (props: ISheetTableSelectorProps) => {
+    const { unitId, subUnitId, range, onCancel, onConfirm, tableId, ActionRowComponent = ActionRow } = props;
 
     const tableManager = useDependency(TableManager);
     const [selectedRange, setSelectedRange] = useState(range);
@@ -116,7 +119,7 @@ export const SheetTableSelector = (props: ITableSelectionInfo & {
                 </div>
             )}
 
-            <ActionRow className="univer-mt-4 univer-flex univer-justify-end univer-gap-2">
+            <ActionRowComponent className="univer-mt-4 univer-flex univer-justify-end univer-gap-2">
                 <Button onClick={onCancel}>{localeService.t<LocaleKey>('sheets-table-ui.cancel')}</Button>
                 <Button
                     variant="primary"
@@ -133,7 +136,7 @@ export const SheetTableSelector = (props: ITableSelectionInfo & {
                 >
                     {localeService.t<LocaleKey>('sheets-table-ui.confirm')}
                 </Button>
-            </ActionRow>
+            </ActionRowComponent>
         </>
     );
 };

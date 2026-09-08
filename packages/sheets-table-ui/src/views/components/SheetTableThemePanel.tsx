@@ -45,6 +45,8 @@ export interface ISheetTableThemePanelProps {
     subUnitId: string;
     tableId: string;
     oldConfig: ITableSetConfig;
+    ColorPickerComponent?: typeof ColorPicker;
+    DropdownComponent?: typeof Dropdown;
 }
 
 interface ITableThemeStyle {
@@ -55,7 +57,13 @@ interface ITableThemeStyle {
 }
 
 export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
-    const { unitId, subUnitId, tableId } = props;
+    const {
+        unitId,
+        subUnitId,
+        tableId,
+        ColorPickerComponent = ColorPicker,
+        DropdownComponent = Dropdown,
+    } = props;
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const tableManager = useDependency(TableManager);
@@ -384,10 +392,10 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                                 >
                                     <span className="univer-truncate">{row.label}</span>
                                 </div>
-                                <Dropdown
+                                <DropdownComponent
                                     overlay={(
                                         <div dir={direction} className="univer-p-2">
-                                            <ColorPicker
+                                            <ColorPickerComponent
                                                 value={new ColorKit(row.background).toHexString()}
                                                 onChange={row.onChange}
                                             />
@@ -412,7 +420,7 @@ export const SheetTableThemePanel = (props: ISheetTableThemePanelProps) => {
                                         />
                                         <DownIcon className="univer-size-3" />
                                     </button>
-                                </Dropdown>
+                                </DropdownComponent>
                             </div>
                         ))}
                     </div>

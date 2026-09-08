@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { CSSProperties, ReactNode } from 'react';
-import { useContext, useEffect, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
+import { useContext, useLayoutEffect, useRef, useState } from 'react';
 import { clsx } from '../../helper/clsx';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 
@@ -43,61 +43,26 @@ export function Segmented<T extends ItemValue = ItemValue>({
     className = '',
 }: ISegmentedProps<T>) {
     const { direction } = useContext(ConfigContext);
-    const [selectedItem, setSelectedItem] = useState<T>(
-        value !== undefined ? value : (defaultValue || items[0].value)
-    );
-    const [slideStyle, setSlideStyle] = useState({});
-    const itemRefs = useRef<Map<T, HTMLButtonElement>>(new Map());
+    const [internalValue, setInternalValue] = useState<T>(defaultValue ?? items[0].value);
+    const selectedItem = value ?? internalValue;
+    const itemsRef = useRef<Map<T, HTMLButtonElement>>(new Map());
     const containerRef = useRef<HTMLDivElement>(null);
+    const sliderRef = useRef<HTMLDivElement>(null);
 
-    // Update internal state when controlled value changes
-    useEffect(() => {
-        if (value !== undefined && value !== selectedItem) {
-            setSelectedItem(value);
-        }
-    }, [value]);
-
-    const updateSliderPosition = (newValue: T, oldValue?: T) => {
-        const newItemElement = itemRefs.current.get(newValue);
-        const oldItemElement = oldValue ? itemRefs.current.get(oldValue) : null;
-
-        if (newItemElement && containerRef.current) {
+    useLayoutEffect(() => {
+        const selectedElement = itemsRef.current.get(selectedItem);
+        const slider = sliderRef.current;
+        if (selectedElement && containerRef.current && slider) {
             const containerRect = containerRef.current.getBoundingClientRect();
-            const newRect = newItemElement.getBoundingClientRect();
-
-            // Calculate position relative to the fixed physical-left slider origin.
-            const newLeft = newRect.left - containerRect.left - SEGMENTED_PADDING;
-
-            if (oldItemElement) {
-                const oldRect = oldItemElement.getBoundingClientRect();
-                const oldLeft = oldRect.left - containerRect.left - SEGMENTED_PADDING;
-
-                setSlideStyle({
-                    '--slide-from': `${oldLeft}px`,
-                    '--slide-to': `${newLeft}px`,
-                    left: `${SEGMENTED_PADDING}px`,
-                    width: `${newRect.width}px`,
-                    transform: `translateX(${newLeft}px)`,
-                } as CSSProperties);
-            } else {
-                setSlideStyle({
-                    left: `${SEGMENTED_PADDING}px`,
-                    width: `${newRect.width}px`,
-                    transform: `translateX(${newLeft}px)`,
-                } as CSSProperties);
-            }
+            const selectedRect = selectedElement.getBoundingClientRect();
+            slider.style.width = `${selectedRect.width}px`;
+            slider.style.transform = `translateX(${selectedRect.left - containerRect.left - SEGMENTED_PADDING}px)`;
         }
-    };
-
-    useEffect(() => {
-        updateSliderPosition(selectedItem);
-    }, [direction, selectedItem]);
+    }, [direction, items, selectedItem]);
 
     const handleClick = (itemValue: T) => {
-        const oldValue = selectedItem;
-        setSelectedItem(itemValue);
+        setInternalValue(itemValue);
         onChange?.(itemValue);
-        updateSliderPosition(itemValue, oldValue);
     };
 
     return (
@@ -113,18 +78,19 @@ export function Segmented<T extends ItemValue = ItemValue>({
         >
             <div
                 className={`
-                  univer-animate-univer-slide univer-absolute univer-h-6 univer-rounded-md univer-bg-gray-0
-                  univer-shadow-sm univer-transition-all univer-duration-200
+                  univer-absolute univer-h-6 univer-rounded-md univer-bg-gray-0 univer-shadow-sm univer-transition-all
+                  univer-duration-200
                   dark:!univer-bg-gray-700 dark:!univer-text-gray-400
                 `}
-                style={slideStyle}
+                ref={sliderRef}
+                style={{ left: SEGMENTED_PADDING }}
             />
 
             {items.map((item) => (
                 <button
                     key={String(item.value)}
                     ref={(el) => {
-                        if (el) itemRefs.current.set(item.value, el);
+                        if (el) itemsRef.current.set(item.value, el);
                     }}
                     className={clsx(`
                       univer-relative univer-box-border univer-min-w-0 univer-flex-1 univer-cursor-pointer

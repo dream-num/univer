@@ -258,7 +258,13 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
          */
         if (!this._editorService.getFocusEditor()) {
             if (this._contextService.getContextValue(DISABLE_AUTO_FOCUS_KEY)) {
-                this._univerInstanceService.setCurrentUnitForType(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+                const editorDocument = this._univerInstanceService.getUnit(
+                    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+                    UniverInstanceType.UNIVER_DOC
+                );
+                if (editorDocument) {
+                    this._univerInstanceService.setCurrentUnitForType(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+                }
             } else {
                 this._editorService.focus(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
                 /**

@@ -22,6 +22,16 @@ import { OpenConditionalFormattingOperator } from '../commands/operations/open-c
 import { FactoryManageConditionalFormattingRule } from './manage-rule';
 import { quickDataBarMenuFactory, quickIconSetMenuFactory } from './quick-insert.menu';
 
+export const conditionalFormattingRuleMenuSchema: MenuSchemaType = {
+    [RibbonDataGroup.RULES]: {
+        [OpenConditionalFormattingOperator.id]: {
+            order: 1,
+            gridLayout: { row: 2, column: 1, showLabel: true },
+            menuItemFactory: FactoryManageConditionalFormattingRule,
+        },
+    },
+};
+
 export const menuSchema: MenuSchemaType = {
     [RibbonInsertGroup.CELL]: {
         [AddDataBarConditionalRuleCommand.id]: {
@@ -33,11 +43,5 @@ export const menuSchema: MenuSchemaType = {
             menuItemFactory: quickIconSetMenuFactory,
         },
     },
-    [RibbonDataGroup.RULES]: {
-        [OpenConditionalFormattingOperator.id]: {
-            order: 1,
-            gridLayout: { row: 2, column: 1, showLabel: true },
-            menuItemFactory: FactoryManageConditionalFormattingRule,
-        },
-    },
+    ...conditionalFormattingRuleMenuSchema,
 };

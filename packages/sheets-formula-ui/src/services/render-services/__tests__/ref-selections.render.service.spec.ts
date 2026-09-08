@@ -52,7 +52,12 @@ import {
     SheetSkeletonService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { SHEET_VIEW_KEY, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import {
+    MOBILE_EXPANDING_SELECTION,
+    MobileSelectionControl,
+    SHEET_VIEW_KEY,
+    SheetSkeletonManagerService,
+} from '@univerjs/sheets-ui';
 import {
     IPlatformService,
     IShortcutService,
@@ -63,6 +68,7 @@ import {
 } from '@univerjs/ui';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { MobileRefSelectionsRenderService } from '../mobile-ref-selections.render.service';
 import { RefSelectionsRenderService } from '../ref-selections.render.service';
 
 describe('RefSelectionsRenderService additive modifiers with real render providers', () => {
@@ -306,10 +312,28 @@ function createFakeSkeleton(options?: {
         rowHeaderWidthAndMarginLeft: 46,
         columnHeaderHeightAndMarginTop: 20,
         getCellWithCoordByIndex: (row: number, col: number) => ({
+            startRow: row,
+            endRow: row,
+            startColumn: col,
+            endColumn: col,
+            actualRow: row,
+            actualColumn: col,
+            isMerged: false,
+            isMergedMainCell: false,
             startX: col * colWidth,
             startY: row * rowHeight,
             endX: (col + 1) * colWidth,
             endY: (row + 1) * rowHeight,
+            mergeInfo: {
+                startRow: row,
+                endRow: row,
+                startColumn: col,
+                endColumn: col,
+                startX: col * colWidth,
+                startY: row * rowHeight,
+                endX: (col + 1) * colWidth,
+                endY: (row + 1) * rowHeight,
+            },
         }),
         getNoMergeCellWithCoordByIndex: (row: number, col: number) => ({
             startX: col * colWidth,
@@ -337,6 +361,7 @@ function createFakeSkeleton(options?: {
         },
         getColumnCount: () => 20,
         getRowCount: () => 20,
+        expandRangeByMerge: <TRange>(range: TRange) => range,
         getLocation: options?.getLocation ?? (() => ['test', 'sheet1'] as [string, string]),
         worksheet: options?.worksheet ?? {
             getFreeze: () => ({ startRow: 0, startColumn: 0, xSplit: 0, ySplit: 0 }),
@@ -432,7 +457,7 @@ function createSelection(startRow: number, startColumn: number): ISelectionWithS
     };
 }
 
-function createRefSelectionTestBed() {
+function createRefSelectionTestBed(mobile = false) {
     const univer = new Univer();
     const injector = univer.__getInjector();
 
@@ -489,6 +514,7 @@ function createRefSelectionTestBed() {
     const mainComponent = {
         zIndex: 1,
         onPointerDown$: createTestEvent<unknown>(),
+        onPointerUp$: createTestEvent<unknown>(),
         makeForceDirty: () => undefined,
     };
     const context = {
@@ -506,7 +532,9 @@ function createRefSelectionTestBed() {
     } as unknown as IRenderContext<Workbook>;
     const skeleton = createFakeSkeleton();
     const skeletonManager = injector.get(SheetSkeletonManagerService) as unknown as TestSheetSkeletonManagerService;
-    const service = injector.createInstance(RefSelectionsRenderService, context);
+    const service = mobile
+        ? injector.createInstance(MobileRefSelectionsRenderService, context)
+        : injector.createInstance(RefSelectionsRenderService, context);
 
     skeletonManager.emitCurrentSkeleton({
         unitId: workbook.getUnitId(),
@@ -526,6 +554,7 @@ function createRefSelectionTestBed() {
         leftTop: components.get(SHEET_VIEW_KEY.LEFT_TOP) as { onPointerDown$: ReturnType<typeof createTestEvent<unknown>> },
         skeleton,
         skeletonManager,
+        contextService,
         refSelectionsService: injector.get(IRefSelectionsService),
     };
 }
@@ -747,6 +776,189 @@ describe('RefSelectionsRenderService', () => {
         scene.onPointerUp$.emit({}, { stopPropagation: () => undefined });
 
         expect(stoppedEvents).toEqual(['row', 'column', 'all']);
+        selectionChanging.dispose();
+    });
+});
+
+describe('MobileRefSelectionsRenderService', () => {
+    const disposables: Array<ReturnType<typeof createRefSelectionTestBed>> = [];
+
+    afterEach(() => {
+        while (disposables.length > 0) {
+            disposables.pop()!.univer.dispose();
+        }
+    });
+
+    it('renders only the two mobile corner handles and disables dragging the selection border', () => {
+        const testBed = createRefSelectionTestBed(true);
+        disposables.push(testBed);
+        const { service } = testBed;
+        const selection = createSelection(1, 1);
+        selection.style = {
+            stroke: '#00aa00',
+            fill: 'rgba(0, 170, 0, 0.05)',
+            widgets: { tl: true, tc: true, tr: true, ml: true, mr: true, bl: true, bc: true, br: true },
+            widgetSize: 6,
+        };
+
+        service.resetSelectionsByModelData([selection]);
+        const control = service.getActiveSelectionControl<MobileSelectionControl>()!;
+
+        expect(control).toBeInstanceOf(MobileSelectionControl);
+        expect(control.currentStyle.stroke).toBe(selection.style.stroke);
+        expect(control.currentStyle.fill).toBe(selection.style.fill);
+        expect(control.currentStyle.widgets).toEqual({});
+        expect(control.currentStyle.expandCornerSize).toBe(48);
+        expect(control.fillControl.visible).toBe(false);
+        expect(control.expandControlTopLeft?.visible).toBe(true);
+        expect(control.expandControlBottomRight?.visible).toBe(true);
+        expect(control.expandControlTopLeft?.width).toBe(48);
+        expect(control.expandControlTopLeft?.visualWidth).toBe(12);
+        expect(control.expandControlTopLeft?.fill).toBe(selection.style.stroke);
+        expect(control.expandControlBottomRight?.width).toBe(48);
+        expect(control.expandControlBottomRight?.visualWidth).toBe(12);
+        expect(control.expandControlBottomRight?.fill).toBe(selection.style.stroke);
+        expect(control.topLeftWidget.visible).toBe(false);
+        expect(control.bottomRightWidget.visible).toBe(false);
+        expect(control.topCenterWidget.visible).toBe(false);
+        expect(control.topRightWidget.visible).toBe(false);
+        expect(control.middleLeftWidget.visible).toBe(false);
+        expect(control.middleRightWidget.visible).toBe(false);
+        expect(control.bottomLeftWidget.visible).toBe(false);
+        expect(control.bottomCenterWidget.visible).toBe(false);
+        expect(control.leftControl.evented).toBe(false);
+        expect(control.rightControl.evented).toBe(false);
+        expect(control.topControl.evented).toBe(false);
+        expect(control.bottomControl.evented).toBe(false);
+    });
+
+    it('expands a formula reference selection only from a mobile corner handle', () => {
+        const testBed = createRefSelectionTestBed(true);
+        disposables.push(testBed);
+        const { service, scene, contextService } = testBed;
+
+        service.resetSelectionsByModelData([createSelection(1, 1)]);
+        const control = service.getActiveSelectionControl<MobileSelectionControl>()!;
+
+        control.expandControlBottomRight!.onPointerDown$.emitEvent({ offsetX: 150, offsetY: 30 } as never);
+        expect(contextService.getContextValue(MOBILE_EXPANDING_SELECTION)).toBe(true);
+
+        scene.onPointerMove$.emit({ offsetX: 350, offsetY: 90 }, { stopPropagation: () => undefined });
+        expect(service.getActiveRange()).toEqual({
+            startRow: 1,
+            endRow: 4,
+            startColumn: 1,
+            endColumn: 3,
+        });
+
+        scene.onPointerUp$.emit({ offsetX: 350, offsetY: 90 }, { stopPropagation: () => undefined });
+        expect(contextService.getContextValue(MOBILE_EXPANDING_SELECTION)).toBe(false);
+    });
+
+    it('expands a formula reference selection from the top-left mobile corner handle', () => {
+        const testBed = createRefSelectionTestBed(true);
+        disposables.push(testBed);
+        const { service, scene } = testBed;
+        const selection = createSelection(2, 1);
+        selection.range.endRow = 4;
+        selection.range.endColumn = 3;
+
+        service.resetSelectionsByModelData([selection]);
+        const control = service.getActiveSelectionControl<MobileSelectionControl>()!;
+
+        control.expandControlTopLeft!.onPointerDown$.emitEvent({ offsetX: 150, offsetY: 50 } as never);
+        scene.onPointerMove$.emit({ offsetX: 50, offsetY: 10 }, { stopPropagation: () => undefined });
+
+        expect(service.getActiveRange()).toEqual({
+            startRow: 0,
+            endRow: 4,
+            startColumn: 0,
+            endColumn: 3,
+        });
+
+        scene.onPointerUp$.emit({ offsetX: 50, offsetY: 10 }, { stopPropagation: () => undefined });
+    });
+
+    it('expands the formula reference whose mobile corner handle is dragged', () => {
+        const testBed = createRefSelectionTestBed(true);
+        disposables.push(testBed);
+        const { service, scene } = testBed;
+
+        service.resetSelectionsByModelData([createSelection(1, 1), createSelection(5, 5)]);
+        const [firstControl] = service.getSelectionControls() as MobileSelectionControl[];
+
+        firstControl.expandControlBottomRight!.onPointerDown$.emitEvent({ offsetX: 150, offsetY: 30 } as never);
+        scene.onPointerMove$.emit({ offsetX: 350, offsetY: 90 }, { stopPropagation: () => undefined });
+
+        expect(service.getSelectionDataWithStyle().map(({ rangeWithCoord }) => ({
+            startRow: rangeWithCoord.startRow,
+            endRow: rangeWithCoord.endRow,
+            startColumn: rangeWithCoord.startColumn,
+            endColumn: rangeWithCoord.endColumn,
+        }))).toEqual([
+            { startRow: 1, endRow: 4, startColumn: 1, endColumn: 3 },
+            { startRow: 5, endRow: 5, startColumn: 5, endColumn: 5 },
+        ]);
+
+        scene.onPointerUp$.emit({ offsetX: 350, offsetY: 90 }, { stopPropagation: () => undefined });
+    });
+
+    it('keeps the formula reference selection unchanged when dragging the spreadsheet', () => {
+        const testBed = createRefSelectionTestBed(true);
+        disposables.push(testBed);
+        const { service, mainComponent, scene } = testBed;
+        const state = { stopPropagation: () => undefined };
+
+        service.resetSelectionsByModelData([createSelection(1, 1)]);
+        const selectionChanging = service.enableSelectionChanging();
+        mainComponent.onPointerDown$.emit({
+            offsetX: 150,
+            offsetY: 30,
+            button: 0,
+        }, state);
+        scene.onPointerMove$.emit({ offsetX: 350, offsetY: 90 }, state);
+        mainComponent.onPointerUp$.emit({
+            offsetX: 350,
+            offsetY: 90,
+            button: 0,
+        }, state);
+
+        expect(service.getActiveRange()).toEqual({
+            startRow: 1,
+            endRow: 1,
+            startColumn: 1,
+            endColumn: 1,
+        });
+
+        selectionChanging.dispose();
+    });
+
+    it('updates the formula reference selection when tapping the spreadsheet', () => {
+        const testBed = createRefSelectionTestBed(true);
+        disposables.push(testBed);
+        const { service, mainComponent } = testBed;
+        const state = { stopPropagation: () => undefined };
+
+        service.resetSelectionsByModelData([createSelection(1, 1)]);
+        const selectionChanging = service.enableSelectionChanging();
+        mainComponent.onPointerDown$.emit({
+            offsetX: 350,
+            offsetY: 90,
+            button: 0,
+        }, state);
+        mainComponent.onPointerUp$.emit({
+            offsetX: 350,
+            offsetY: 90,
+            button: 0,
+        }, state);
+
+        expect(service.getActiveRange()).toEqual({
+            startRow: 4,
+            endRow: 4,
+            startColumn: 3,
+            endColumn: 3,
+        });
+
         selectionChanging.dispose();
     });
 });

@@ -19,7 +19,7 @@ import type { IDisplayMenuItem, IFontConfig, IMenuItem, IMenuSchema, IMenuSelect
 import type { LocaleKey } from '../../../locale/types';
 import { BorderStyleTypes, BorderType, LocaleService, ThemeService } from '@univerjs/core';
 import { borderBottomClassName, clsx, ColorPickerPanel, MobileActionRow, MobileColorPresets, resetButtonClassName } from '@univerjs/design';
-import { CheckMarkIcon, MoreRightIcon, NoColorDoubleIcon } from '@univerjs/icons';
+import { CheckMarkIcon, MoreDownIcon, MoreRightIcon, NoColorDoubleIcon } from '@univerjs/icons';
 import {
     AddWorksheetMergeCommand,
     ResetBackgroundColorCommand,
@@ -32,6 +32,7 @@ import {
     SetVerticalTextAlignCommand,
 } from '@univerjs/sheets';
 import {
+    ComponentManager,
     IconManager,
     IFontService,
     MenuItemType,
@@ -93,6 +94,7 @@ interface IMobileNumberFormatMenuConfig {
     commandId: string;
     detailTitle: string;
     customTitle: string;
+    customComponent: string;
     quickOptions: IMobileNumberFormatOption[];
     decimalOptions: IMobileNumberFormatOption[];
     detailOptions: IMobileNumberFormatOption[];
@@ -100,11 +102,11 @@ interface IMobileNumberFormatMenuConfig {
 }
 
 export type MobileNumberFormatItem = IDisplayMenuItem<IMenuSelectorItem<string, MenuItemDefaultValueType, unknown>> & {
-    mobileStyle?: IMobileNumberFormatMenuConfig;
+    mobileNumberFormat?: IMobileNumberFormatMenuConfig;
 };
 
 type ConfiguredMobileNumberFormatItem = MobileNumberFormatItem & {
-    mobileStyle: IMobileNumberFormatMenuConfig;
+    mobileNumberFormat: IMobileNumberFormatMenuConfig;
 };
 
 type MenuSchemaWithItem = IMenuSchema & {
@@ -298,7 +300,7 @@ function MobileStyleRoot(props: {
                     schema.item.id === SetTextRotationCommand.id && isMobileSelectorItem(schema.item));
                 const mergeSchema = items.find((schema) => schema.item.id === AddWorksheetMergeCommand.id);
                 const numberFormatSchema = items.find(isMobileNumberFormatSchema);
-                const numberFormatConfig = numberFormatSchema?.item.mobileStyle;
+                const numberFormatConfig = numberFormatSchema?.item.mobileNumberFormat;
                 const numberFormatCommandIds = new Set([
                     ...(numberFormatConfig?.quickOptions ?? []),
                     ...(numberFormatConfig?.decimalOptions ?? []),
@@ -506,7 +508,7 @@ function MobileNumberFormatGroup(props: {
 }) {
     const { schemas, schema, onOpenView, onExecute } = props;
     const item = schema.item;
-    const config = item.mobileStyle;
+    const config = item.mobileNumberFormat;
     const localeService = useDependency(LocaleService);
     const status = useToolbarItemStatus(item);
 
@@ -705,88 +707,21 @@ function MobileCustomNumberFormat(props: {
     onExecute: (params: IMobileStyleCommand) => void;
 }) {
     const { config, onBack, onExecute } = props;
-    const localeService = useDependency(LocaleService);
-    const [pattern, setPattern] = useState('');
-    const title = localeService.t(config.customTitle);
+    const componentManager = useDependency(ComponentManager);
+    const CustomFormat = componentManager.get(config.customComponent);
+
+    if (!CustomFormat) {
+        return null;
+    }
 
     return (
-        <div className="univer-grid univer-gap-3">
-            <div className="univer-grid univer-gap-2">
-                <label
-                    className="
-                      univer-px-1 univer-text-xs univer-font-medium univer-text-gray-500
-                      dark:!univer-text-gray-400
-                    "
-                >
-                    {title}
-                </label>
-                <input
-                    aria-label={title}
-                    value={pattern}
-                    placeholder={title}
-                    className="
-                      univer-h-11 univer-w-full univer-rounded-xl univer-border univer-border-solid
-                      univer-border-gray-200 univer-bg-gray-0 univer-px-3 univer-text-sm univer-text-gray-900
-                      univer-outline-none
-                      focus:univer-border-primary-500
-                      dark:!univer-border-gray-700 dark:!univer-bg-gray-800 dark:!univer-text-gray-100
-                    "
-                    onChange={(event) => setPattern(event.target.value)}
-                />
-            </div>
-            <div
-                className="
-                  univer-overflow-hidden univer-rounded-xl univer-bg-gray-0
-                  dark:!univer-bg-gray-800
-                "
-            >
-                {config.customPatterns.map((item, index) => (
-                    <button
-                        key={item}
-                        type="button"
-                        aria-label={item}
-                        aria-pressed={pattern === item}
-                        className={clsx(resetButtonClassName, `
-                          univer-flex univer-min-h-11 univer-w-full univer-items-center univer-gap-3 univer-px-4
-                          univer-text-left univer-text-gray-900
-                          active:univer-bg-gray-100
-                          dark:!univer-text-gray-100
-                          dark:active:!univer-bg-gray-700
-                        `, index !== config.customPatterns.length - 1 && borderBottomClassName)}
-                        onClick={() => setPattern(item)}
-                    >
-                        <span className="univer-min-w-0 univer-flex-1 univer-truncate univer-font-mono univer-text-xs">
-                            {item}
-                        </span>
-                        {pattern === item && <CheckMarkIcon className="univer-shrink-0 univer-text-primary-600" />}
-                    </button>
-                ))}
-            </div>
-            <button
-                type="button"
-                disabled={!pattern.trim()}
-                className={clsx(resetButtonClassName, `
-                  univer-min-h-11 univer-w-full univer-rounded-xl univer-bg-primary-600 univer-px-4 univer-text-sm
-                  univer-font-medium univer-text-gray-0
-                  active:univer-bg-primary-700
-                  disabled:univer-opacity-40
-                `)}
-                onClick={() => {
-                    onExecute({ id: config.commandId, value: pattern.trim() });
-                    onBack();
-                }}
-            >
-                {localeService.t<LocaleKey>('sheets-ui.mobile.confirm')}
-            </button>
-            <div
-                className="
-                  univer-px-1 univer-text-xs univer-text-gray-500
-                  dark:!univer-text-gray-400
-                "
-            >
-                {localeService.t<LocaleKey>('sheets-ui.mobile.customFormatDescription')}
-            </div>
-        </div>
+        <CustomFormat
+            patterns={config.customPatterns}
+            onConfirm={(pattern: string) => {
+                onExecute({ id: config.commandId, value: pattern });
+                onBack();
+            }}
+        />
     );
 }
 
@@ -974,8 +909,8 @@ function MobileStyleRootItem(props: { schema: MenuSchemaWithItem; onOpenView: (v
                 aria-label={title}
                 disabled={status.disabled}
                 className={clsx(resetButtonClassName, `
-                  univer-flex univer-min-h-12 univer-items-center univer-justify-center univer-rounded
-                  univer-text-gray-900
+                  univer-flex univer-min-h-12 univer-items-center univer-justify-center univer-gap-1 univer-rounded
+                  univer-px-2 univer-text-gray-900
                   active:univer-bg-gray-100
                   disabled:univer-opacity-40
                   dark:!univer-text-gray-100
@@ -991,10 +926,16 @@ function MobileStyleRootItem(props: { schema: MenuSchemaWithItem; onOpenView: (v
                 {Icon
                     ? <Icon />
                     : (
-                        <span className="univer-max-w-full univer-truncate univer-px-1 univer-text-sm">
+                        <span className="univer-min-w-0 univer-truncate univer-text-sm">
                             {String(displayValue ?? title)}
                         </span>
                     )}
+                <MoreDownIcon
+                    className="
+                      univer-shrink-0 univer-text-gray-500
+                      dark:!univer-text-gray-400
+                    "
+                />
             </button>
         );
     }
@@ -1445,9 +1386,9 @@ function isMobileSelectorSchema(schema: MenuSchemaWithItem): schema is SelectorM
 function isMobileNumberFormatSchema(
     schema: MenuSchemaWithItem
 ): schema is MenuSchemaWithItem & { item: ConfiguredMobileNumberFormatItem } {
-    if (!isMobileSelectorItem(schema.item) || !('mobileStyle' in schema.item)) return false;
+    if (!isMobileSelectorItem(schema.item) || !('mobileNumberFormat' in schema.item)) return false;
 
-    const config = schema.item.mobileStyle;
+    const config = schema.item.mobileNumberFormat;
     if (!config || typeof config !== 'object') return false;
 
     return 'kind' in config
@@ -1460,6 +1401,8 @@ function isMobileNumberFormatSchema(
         && typeof config.detailTitle === 'string'
         && 'customTitle' in config
         && typeof config.customTitle === 'string'
+        && 'customComponent' in config
+        && typeof config.customComponent === 'string'
         && 'quickOptions' in config
         && Array.isArray(config.quickOptions)
         && 'decimalOptions' in config

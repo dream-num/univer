@@ -34,7 +34,7 @@ import { IRibbonService } from '../../../services/ribbon/ribbon.service';
 import { IWorkbenchService } from '../../../services/workbench/workbench.service';
 import { useDependency, useObservable } from '../../../utils/di';
 import { ComponentContainer } from '../ComponentContainer';
-import { ToolbarItem } from './ToolbarItem';
+import { MobileToolbarItem } from './MobileToolbarItem';
 
 interface IMobileRibbonProps {
     headerMenuComponents?: Set<ComponentType>;
@@ -358,7 +358,7 @@ function MobileRibbonToolbar(props: IMobileRibbonProps & { ribbon: IMenuSchema[]
                                               [&_input]:!univer-outline-none
                                             `)}
                                         >
-                                            <ToolbarItem {...child.item} preserveStrokeWidth />
+                                            <MobileToolbarItem {...child.item} preserveStrokeWidth />
                                         </div>
                                     )
                                 ))}
@@ -442,7 +442,7 @@ function MobileSheetTopBar(props: IMobileRibbonProps & { ribbon: IMenuSchema[] }
                         "
                         onClick={() => setMoreOpen(false)}
                     >
-                        <ToolbarItem {...schema.item!} grid showLabel preserveStrokeWidth />
+                        <MobileToolbarItem {...schema.item!} grid showLabel preserveStrokeWidth />
                     </div>
                 ))}
             </div>
@@ -468,7 +468,7 @@ function MobileSheetTopBar(props: IMobileRibbonProps & { ribbon: IMenuSchema[] }
                     "
                 >
                     {items.map((schema) => (
-                        <ToolbarItem
+                        <MobileToolbarItem
                             key={schema.key}
                             {...schema.item!}
                         />

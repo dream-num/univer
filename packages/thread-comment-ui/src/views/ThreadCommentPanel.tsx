@@ -49,6 +49,10 @@ export interface IThreadCommentPanelProps {
     showComments?: string[];
     formatRef?: (comment: IThreadComment) => string;
     onTempCommentClose?: () => void;
+    autoFocusActiveComment?: boolean;
+    ActionRowComponent?: typeof ActionRow;
+    SelectComponent?: typeof Select;
+    ThreadCommentTreeComponent?: typeof ThreadCommentTree;
 }
 
 interface IThreadCommentWithUsers extends IThreadComment {
@@ -74,6 +78,10 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
         showComments,
         formatRef,
         onTempCommentClose,
+        autoFocusActiveComment = false,
+        ActionRowComponent = ActionRow,
+        SelectComponent = Select,
+        ThreadCommentTreeComponent = ThreadCommentTree,
     } = props;
     const [unit, setUnit] = useState('all');
     const [status, setStatus] = useState('all');
@@ -213,7 +221,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
     }, [activeCommentId, location]);
 
     const renderComment = (section: ThreadCommentPanelSection) => (comment: IThreadComment, index: number) => (
-        <ThreadCommentTree
+        <ThreadCommentTreeComponent
             full
             location={location}
             getSubUnitName={getSubUnitName}
@@ -226,6 +234,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
             type={type}
             showEdit={!comment.id || isSameThreadCommentTarget(activeCommentId, comment)}
             showHighlight={isSameThreadCommentTarget(activeCommentId, comment)}
+            autoFocus={autoFocusActiveComment && isSameThreadCommentTarget(activeCommentId, comment)}
             onClick={() => {
                 shouldScrollRef.current = false;
                 if (!comment.resolved) {
@@ -270,7 +279,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
             <div className="univer-mt-3 univer-flex univer-flex-row univer-justify-between">
                 {type === UniverInstanceType.UNIVER_SHEET
                     ? (
-                        <Select
+                        <SelectComponent
                             borderless
                             value={unit}
                             options={[
@@ -287,7 +296,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                         />
                     )
                     : null}
-                <Select
+                <SelectComponent
                     borderless
                     value={status}
                     options={[
@@ -323,22 +332,22 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                         {localeService.t<LocaleKey>('thread-comment-ui.panel.empty')}
                         {isFiltering
                             ? (
-                                <ActionRow className="univer-mt-2 univer-flex univer-flex-row">
+                                <ActionRowComponent className="univer-mt-2 univer-flex univer-flex-row">
                                     <Button onClick={onReset}>
                                         {localeService.t<LocaleKey>('thread-comment-ui.panel.reset')}
                                     </Button>
-                                </ActionRow>
+                                </ActionRowComponent>
                             )
                             : !disableAdd
                                 ? (
-                                    <ActionRow
+                                    <ActionRowComponent
                                         className="univer-mt-2 univer-flex univer-flex-row"
                                     >
                                         <Button onClick={onAdd}>
                                             <IncreaseIcon className="univer-mr-1.5" />
                                             {localeService.t<LocaleKey>('thread-comment-ui.panel.addComment')}
                                         </Button>
-                                    </ActionRow>
+                                    </ActionRowComponent>
                                 )
                                 : null}
                     </div>

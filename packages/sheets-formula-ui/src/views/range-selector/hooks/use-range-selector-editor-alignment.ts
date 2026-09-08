@@ -28,7 +28,7 @@ export function alignRangeSelectorDocument(documentData: IDocumentData, directio
         .getData();
 }
 
-export function useRangeSelectorEditorDocument(editor: Editor | null) {
+export function useRangeSelectorEditorAlignment(editor: Editor | null) {
     const localeService = useDependency(LocaleService);
     const direction = useObservable(localeService.direction$, localeService.getDirection());
 

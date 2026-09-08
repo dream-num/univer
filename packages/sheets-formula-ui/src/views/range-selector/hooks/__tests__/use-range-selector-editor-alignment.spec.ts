@@ -16,7 +16,7 @@
 
 import { HorizontalAlign, RichTextBuilder } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
-import { alignRangeSelectorDocument } from '../use-range-selector-editor-document';
+import { alignRangeSelectorDocument } from '../use-range-selector-editor-alignment';
 
 describe('alignRangeSelectorDocument', () => {
     it.each([

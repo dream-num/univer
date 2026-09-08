@@ -35,7 +35,7 @@ import { SetSelectionsOperation } from '@univerjs/sheets';
 import { useDependency, useEvent } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
 import { useStateRef } from '../formula-editor/hooks/use-state-ref';
-import { useRangeSelectorEditorDocument } from './hooks/use-range-selector-editor-document';
+import { useRangeSelectorEditorAlignment } from './hooks/use-range-selector-editor-alignment';
 import { useRangesHighlight } from './hooks/use-ranges-highlight';
 import { useRangeSelectorSelectionChange } from './hooks/use-selection-change';
 import { rangePreProcess } from './utils/range-pre-process';
@@ -289,7 +289,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
     const { sequenceNodes } = useRangesHighlight(editor, focusing, unitId, subUnitId);
     const sequenceNodesRef = useStateRef(sequenceNodes);
     const commandService = useDependency(ICommandService);
-    useRangeSelectorEditorDocument(editor);
+    useRangeSelectorEditorAlignment(editor);
 
     const blurEditor = useEvent(() => {
         editor?.setSelectionRanges([]);

@@ -27,7 +27,7 @@ import { SetSelectionsOperation } from '@univerjs/sheets';
 import { useDependency, useEvent } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 import { useStateRef } from '../formula-editor/hooks/use-state-ref';
-import { useRangeSelectorEditorDocument } from './hooks/use-range-selector-editor-document';
+import { useRangeSelectorEditorAlignment } from './hooks/use-range-selector-editor-alignment';
 import { useRangesHighlight } from './hooks/use-ranges-highlight';
 import { parseRanges, stringifyRanges } from './index';
 import { MobileRangeSelectorDialog } from './MobileRangeSelectorDialog';
@@ -61,7 +61,7 @@ export function MobileRangeSelector(props: IRangeSelectorProps) {
     const commandService = useDependency(ICommandService);
     const { sequenceNodes } = useRangesHighlight(editor, focusing, unitId, subUnitId);
     const sequenceNodesRef = useStateRef(sequenceNodes);
-    useRangeSelectorEditorDocument(editor);
+    useRangeSelectorEditorAlignment(editor);
     const blurEditor = useEvent(() => {
         editor?.setSelectionRanges([]);
         editor?.blur();

@@ -279,6 +279,7 @@ export { whenDocAndEditorFocused } from './shortcuts/utils';
 export { DOC_VERTICAL_PADDING } from './types/const/padding';
 export { BulletListTypePicker, OrderListTypePicker } from './views/list-type-picker/Picker';
 export { MOBILE_DOC_ELEMENT_MENU, MobileDocElementMenu } from './views/mobile-element-menu/MobileDocElementMenu';
+export { MobileRichTextEditor } from './views/mobile-rich-text-editor/MobileRichTextEditor';
 export { MobileRichTextToolbar } from './views/mobile-rich-text-toolbar/MobileRichTextToolbar';
 export type { IMobileRichTextToolbarProps } from './views/mobile-rich-text-toolbar/MobileRichTextToolbar';
 export {

@@ -22,7 +22,7 @@ import {
     SetGridlinesColorUndoMutationFactory,
 } from '../set-gridlines-color.mutation';
 import { SetWorksheetHideMutation, SetWorksheetHideMutationFactory } from '../set-worksheet-hide.mutation';
-import { SetWorksheetNameMutation, SetWorksheetNameMutationFactory } from '../set-worksheet-name.mutation';
+import { SetWorksheetNameMutation, SetWorksheetNameUndoMutationFactory } from '../set-worksheet-name.mutation';
 import {
     SetWorksheetRowAutoHeightMutation,
     SetWorksheetRowAutoHeightMutationFactory,
@@ -141,7 +141,7 @@ describe('worksheet meta mutations', () => {
         const worksheet = testBed.sheet.getSheetBySheetId('sheet-1')!;
 
         expect(
-            SetWorksheetNameMutationFactory(testBed, {
+            SetWorksheetNameUndoMutationFactory(testBed, {
                 unitId: 'unit-1',
                 subUnitId: 'sheet-1',
                 name: 'new-name',
@@ -150,14 +150,15 @@ describe('worksheet meta mutations', () => {
             unitId: 'unit-1',
             subUnitId: 'sheet-1',
             name: 'old-name',
+            oldName: 'new-name',
         });
 
         expect(SetWorksheetNameMutation.handler(testBed, { unitId: 'unit-1', subUnitId: 'sheet-1', name: 'new-name' })).toBe(true);
         expect(worksheet.getConfig().name).toBe('new-name');
         expect(SetWorksheetNameMutation.handler(testBed, { unitId: 'missing', subUnitId: 'sheet-1', name: 'new-name' })).toBe(false);
         expect(SetWorksheetNameMutation.handler(testBed, { unitId: 'unit-1', subUnitId: 'missing', name: 'new-name' })).toBe(false);
-        expect(() => SetWorksheetNameMutationFactory(testBed, { unitId: 'missing', subUnitId: 'sheet-1', name: 'new-name' }))
-            .toThrowError('[SetWorksheetNameMutationFactory]: worksheet is null error!');
+        expect(() => SetWorksheetNameUndoMutationFactory(testBed, { unitId: 'missing', subUnitId: 'sheet-1', name: 'new-name' }))
+            .toThrowError('[SetWorksheetNameUndoMutationFactory]: worksheet is null error!');
     });
 
     it('row height mutations should update height, auto-height flag, and measured auto height', () => {

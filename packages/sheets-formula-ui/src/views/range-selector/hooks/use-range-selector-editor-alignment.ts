@@ -16,14 +16,14 @@
 
 import type { IDocumentData } from '@univerjs/core';
 import type { Editor } from '@univerjs/docs-ui';
-import { HorizontalAlign, LocaleService, RichTextBuilder } from '@univerjs/core';
+import { HorizontalAlign, LocaleService, RichTextBuilder, Tools } from '@univerjs/core';
 import { useDependency, useObservable } from '@univerjs/ui';
 import { useEffect } from 'react';
 
 type LocaleDirection = ReturnType<LocaleService['getDirection']>;
 
 export function alignRangeSelectorDocument(documentData: IDocumentData, direction: LocaleDirection): IDocumentData {
-    return RichTextBuilder.create(documentData)
+    return RichTextBuilder.create(Tools.deepClone(documentData))
         .align({ horizontal: direction === 'rtl' ? HorizontalAlign.RIGHT : HorizontalAlign.LEFT })
         .getData();
 }

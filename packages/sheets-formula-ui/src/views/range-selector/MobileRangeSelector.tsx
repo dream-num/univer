@@ -20,7 +20,6 @@ import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import type { LocaleKey } from '../../locale/types';
 import type { IRangeSelectorProps } from './index';
 import { ICommandService, LocaleService, RichTextBuilder } from '@univerjs/core';
-import { clsx } from '@univerjs/design';
 import { IEditorService, RichTextEditor } from '@univerjs/docs-ui';
 import { SelectRangeIcon } from '@univerjs/icons';
 import { SetSelectionsOperation } from '@univerjs/sheets';
@@ -127,7 +126,7 @@ export function MobileRangeSelector(props: IRangeSelectorProps) {
                 <RichTextEditor
                     isSingle
                     {...props}
-                    className={clsx(props.className, 'rtl:[&>div]:univer-flex-row-reverse')}
+                    className={props.className}
                     preserveHostFocus
                     onFocusChange={(isFocusing, newValue) => {
                         setFocusing(isFocusing);

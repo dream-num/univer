@@ -357,7 +357,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
                     <RichTextEditor
                         isSingle
                         {...props}
-                        className={clsx(props.className, 'rtl:[&>div]:univer-flex-row-reverse')}
+                        className={props.className}
                         preserveHostFocus
                         onFocusChange={(focusing, newValue) => {
                             setFocusing(focusing);

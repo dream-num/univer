@@ -29,4 +29,15 @@ describe('alignRangeSelectorDocument', () => {
 
         expect(alignedDocument.documentStyle?.renderConfig?.horizontalAlign).toBe(expected);
     });
+
+    it('keeps previous snapshots unchanged when the locale direction changes', () => {
+        const initialDocument = RichTextBuilder.create().insertText('Sheet1!B20:E26').getData();
+
+        const rtlDocument = alignRangeSelectorDocument(initialDocument, 'rtl');
+        const ltrDocument = alignRangeSelectorDocument(rtlDocument, 'ltr');
+
+        expect(initialDocument.documentStyle?.renderConfig?.horizontalAlign).toBeUndefined();
+        expect(rtlDocument.documentStyle?.renderConfig?.horizontalAlign).toBe(HorizontalAlign.RIGHT);
+        expect(ltrDocument.documentStyle?.renderConfig?.horizontalAlign).toBe(HorizontalAlign.LEFT);
+    });
 });

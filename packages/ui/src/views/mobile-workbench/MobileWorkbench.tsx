@@ -19,18 +19,18 @@ import type { ComponentType } from 'react';
 import type { IWorkbenchOptions } from '../../controllers/ui/ui.controller';
 import { LifecycleService, LifecycleStages, LocaleService, ThemeService } from '@univerjs/core';
 import { borderBottomClassName, clsx, ConfigProvider, render } from '@univerjs/design';
+import { connectInjector, useDependency, useObservable } from '@wendellhu/redi/react-bindings';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { map } from 'rxjs';
 import { BuiltInUIPart } from '../../services/parts/parts.service';
 import { ThemeSwitcherService } from '../../services/theme-switcher/theme-switcher.service';
 import { IWorkbenchService } from '../../services/workbench/workbench.service';
-import { connectInjector, useDependency, useObservable } from '../../utils/di';
 import { ComponentContainer, useComponentsOfPart } from '../components/ComponentContainer';
 import { MobileContextMenu } from '../components/context-menu/MobileContextMenu';
 import { MobileDrawerCoordinatorProvider } from '../components/mobile-drawer/MobileDrawerCoordinator';
 import { MobileSidebar } from '../components/sidebar/MobileSidebar';
 import { WorkbenchSkeleton } from '../components/workbench-skeleton/WorkbenchSkeleton';
-import { MobileKeyboardInsetContext } from './MobileKeyboardInsetContext';
+import { MobileKeyboardInsetContext } from './mobile-keyboard-inset-context';
 
 export interface IUniverAppProps extends IWorkbenchOptions {
     mountContainer: HTMLElement;

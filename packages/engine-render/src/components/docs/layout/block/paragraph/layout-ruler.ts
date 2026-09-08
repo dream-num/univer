@@ -665,52 +665,17 @@ function _adjustExplicitTabStop(
     tabGlyph.tabLeader = tabStop.leader;
 }
 
-function _lineOperator(
+function _getParagraphLineMetrics(
     ctx: ILayoutContext,
     glyphGroup: IDocumentSkeletonGlyph[],
-    pages: IDocumentSkeletonPage[],
+    lastPage: IDocumentSkeletonPage,
+    column: IDocumentSkeletonColumn,
     sectionBreakConfig: ISectionBreakConfig,
     paragraphConfig: IParagraphConfig,
     isParagraphFirstShapedText: boolean,
-    breakPointType: BreakPointType = BreakPointType.Normal,
     defaultSpanMetrics?: IDefaultSpanMetrics
 ) {
-    let lastPage = getLastPage(pages);
-    ctx.footnoteLayout?.updateReferenceGlyphs(lastPage, glyphGroup, sectionBreakConfig, paragraphConfig);
-    let columnInfo = getLastNotFullColumnInfo(lastPage);
-    if (!columnInfo || !columnInfo.column) {
-        const lastSection = getLastSection(lastPage);
-        const lastColumnIndex = lastSection.columns.length - 1;
-        const lastColumn = lastSection.columns[lastColumnIndex];
-        if (lastColumn && isBlankColumn(lastColumn)) {
-            setColumnFullState(lastColumn, false);
-            columnInfo = {
-                column: lastColumn,
-                index: lastColumnIndex,
-                isLast: true,
-            };
-        }
-    }
-    if (!columnInfo || !columnInfo.column) {
-        // If the column does not exist, use a fallback strategy and add a new page.
-        _pageOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, true, breakPointType);
-        lastPage = getLastPage(pages);
-        columnInfo = getLastNotFullColumnInfo(lastPage);
-    }
-    // Todo: columnInfo does not exist when demo4 is imported, return first
-    if (!columnInfo) return;
-
-    const column = columnInfo!.column;
-
-    // If the page width < marginLeft + marginRight, will trigger infinity loop, so return it first.
-    // The best solution is to do data checks and data repairs, and pass the correct data to the render layer.
-    if (column.width <= 0) {
-        console.error('The column width is less than 0, need to adjust page width to make it great than 0');
-        return;
-    }
-
     const preLine = getLastLineByColumn(column);
-
     const ascent = Math.max(...glyphGroup.map((glyph) => glyph.bBox.ba));
     const descent = Math.max(...glyphGroup.map((glyph) => glyph.bBox.bd));
     const glyphLineHeight = defaultSpanMetrics?.lineHeight || (ascent + descent);
@@ -720,9 +685,6 @@ function _lineOperator(
         paragraphStyle: originParagraphStyle = {},
         paragraphNonInlineSkeDrawings,
         skeTablesInParagraph,
-        skeHeaders,
-        skeFooters,
-        pDrawingAnchor,
         paragraphIndex,
     } = paragraphConfig;
     const isZeroWidthNonFlowFloatingAnchorLine = __isZeroWidthNonFlowFloatingAnchorLine(glyphGroup, paragraphNonInlineSkeDrawings);
@@ -739,13 +701,8 @@ function _lineOperator(
     };
 
     const {
-        // direction,
         spaceAbove,
         spaceBelow,
-        indentFirstLine,
-        hanging,
-        indentStart,
-        indentEnd,
     } = paragraphStyle;
 
     const {
@@ -780,9 +737,6 @@ function _lineOperator(
 
             return glyph.streamType === DataStreamTreeTokenType.PARAGRAPH || glyph.raw === DataStreamTreeTokenType.PARAGRAPH;
         });
-    const glyphGroupCustomBlockIds = new Set(glyphGroup
-        .filter((glyph) => glyph.streamType === DataStreamTreeTokenType.CUSTOM_BLOCK && glyph.drawingId != null)
-        .map((glyph) => glyph.drawingId!));
     let { paddingTop, paddingBottom, contentHeight, lineSpacingApply } = getLineHeightMetrics(
         glyphLineHeight,
         paragraphLineGapDefault,
@@ -860,29 +814,38 @@ function _lineOperator(
         spaceBelowApply = 0;
     }
 
-    const lineHeight = marginTop + paddingTop + contentHeight + paddingBottom;
-    const { charSpace, defaultTabStop } = getCharSpaceConfig(sectionBreakConfig, paragraphConfig);
-    const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
-    const paragraphAnchorLeft = __getParagraphAnchorLeft(sectionBreakConfig, paragraphConfig, indentStart);
+    return {
+        paragraphStyle,
+        gridType,
+        snapToGrid,
+        hasInlineCustomBlock,
+        positionedCustomBlockOnly,
+        paddingTop,
+        paddingBottom,
+        contentHeight,
+        marginTop,
+        spaceBelowApply,
+    };
+}
 
-    let section = column.parent;
-    if (!section) {
-        // Fallback, point to the last section of the current page
-        section = getLastSection(lastPage);
-    }
-    const preLineHeight = preLine?.lineHeight || 0;
-    const initialFootnoteTop = lastPage.type === DocumentSkeletonPageType.FOOTNOTE && lastPage.pageNumber === 1 && columnInfo.index === ctx.footnoteFirstColumn?.index
-        ? ctx.footnoteFirstColumn.top
-        : 0;
-    const preTop = preLine?.top ?? initialFootnoteTop;
-    const lineTop = preLineHeight + preTop;
-
-    const { pageWidth, headerId, footerId, segmentId } = lastPage;
-    const headerPage = skeHeaders?.get(headerId)?.get(pageWidth);
-    const footerPage = skeFooters?.get(footerId)?.get(pageWidth);
-
-    let needOpenNewPageByTableLayout = false;
-
+function _positionLineDrawings(
+    ctx: ILayoutContext,
+    glyphGroup: IDocumentSkeletonGlyph[],
+    column: IDocumentSkeletonColumn,
+    lastPage: IDocumentSkeletonPage,
+    paragraphConfig: IParagraphConfig,
+    lineTop: number,
+    lineHeight: number,
+    paragraphAnchorLeft: number,
+    hasInlineCustomBlock: boolean,
+    isParagraphFirstShapedText: boolean
+) {
+    const preLine = getLastLineByColumn(column);
+    const { segmentId } = lastPage;
+    const { paragraphNonInlineSkeDrawings, pDrawingAnchor, paragraphIndex } = paragraphConfig;
+    const glyphGroupCustomBlockIds = new Set(glyphGroup
+        .filter((glyph) => glyph.streamType === DataStreamTreeTokenType.CUSTOM_BLOCK && glyph.drawingId != null)
+        .map((glyph) => glyph.drawingId!));
     // Handle float object relative to line.
     // FIXME: @jocs, it will not update the last line's drawings.
     if (preLine) {
@@ -923,6 +886,151 @@ function _lineOperator(
 
         __updateAndPositionDrawings(ctx, lineTop, lineHeight, column, targetDrawings, paragraphConfig.paragraphIndex, isParagraphFirstShapedText, pDrawingAnchor?.get(paragraphIndex)?.top, paragraphAnchorLeft, false, deferredTopBottomAnchorDrawings.length > 0);
     }
+
+    return { deferredInlineGroupAnchorDrawings, deferredTopBottomAnchorDrawings };
+}
+
+function _getOrCreateLineColumn(
+    ctx: ILayoutContext,
+    glyphGroup: IDocumentSkeletonGlyph[],
+    pages: IDocumentSkeletonPage[],
+    sectionBreakConfig: ISectionBreakConfig,
+    paragraphConfig: IParagraphConfig,
+    breakPointType: BreakPointType
+) {
+    let lastPage = getLastPage(pages);
+    let columnInfo = getLastNotFullColumnInfo(lastPage);
+    if (!columnInfo || !columnInfo.column) {
+        const lastSection = getLastSection(lastPage);
+        const lastColumnIndex = lastSection.columns.length - 1;
+        const lastColumn = lastSection.columns[lastColumnIndex];
+        if (lastColumn && isBlankColumn(lastColumn)) {
+            setColumnFullState(lastColumn, false);
+            columnInfo = {
+                column: lastColumn,
+                index: lastColumnIndex,
+                isLast: true,
+            };
+        }
+    }
+    if (!columnInfo || !columnInfo.column) {
+        // If the column does not exist, use a fallback strategy and add a new page.
+        _pageOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, true, breakPointType);
+        lastPage = getLastPage(pages);
+        columnInfo = getLastNotFullColumnInfo(lastPage);
+    }
+    return columnInfo;
+}
+
+function _clearOverflowedParagraphDrawings(
+    ctx: ILayoutContext,
+    lastPage: IDocumentSkeletonPage,
+    paragraphNonInlineSkeDrawings: IParagraphConfig['paragraphNonInlineSkeDrawings'],
+    isParagraphFirstShapedText: boolean
+): void {
+    const { segmentId } = lastPage;
+    if (isParagraphFirstShapedText && paragraphNonInlineSkeDrawings && paragraphNonInlineSkeDrawings.size > 0) {
+        for (const drawing of paragraphNonInlineSkeDrawings.values()) {
+            if (lastPage.skeDrawings.has(drawing.drawingId)) {
+                lastPage.skeDrawings.delete(drawing.drawingId);
+            }
+
+            if (ctx.floatObjectsCache.has(drawing.drawingId)) {
+                ctx.floatObjectsCache.delete(drawing.drawingId);
+                ctx.isDirty = false;
+                ctx.layoutStartPointer[segmentId] = null;
+            }
+        }
+    }
+}
+
+function _lineOperator(
+    ctx: ILayoutContext,
+    glyphGroup: IDocumentSkeletonGlyph[],
+    pages: IDocumentSkeletonPage[],
+    sectionBreakConfig: ISectionBreakConfig,
+    paragraphConfig: IParagraphConfig,
+    isParagraphFirstShapedText: boolean,
+    breakPointType: BreakPointType = BreakPointType.Normal,
+    defaultSpanMetrics?: IDefaultSpanMetrics
+) {
+    let lastPage = getLastPage(pages);
+    ctx.footnoteLayout?.updateReferenceGlyphs(lastPage, glyphGroup, sectionBreakConfig, paragraphConfig);
+    const columnInfo = _getOrCreateLineColumn(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, breakPointType);
+    lastPage = getLastPage(pages);
+    // Todo: columnInfo does not exist when demo4 is imported, return first
+    if (!columnInfo) {
+        return;
+    }
+
+    const column = columnInfo.column;
+
+    // If the page width < marginLeft + marginRight, will trigger infinity loop, so return it first.
+    // The best solution is to do data checks and data repairs, and pass the correct data to the render layer.
+    if (column.width <= 0) {
+        console.error('The column width is less than 0, need to adjust page width to make it great than 0');
+        return;
+    }
+
+    const preLine = getLastLineByColumn(column);
+
+    const {
+        paragraphNonInlineSkeDrawings,
+        skeTablesInParagraph,
+        skeHeaders,
+        skeFooters,
+        pDrawingAnchor,
+        paragraphIndex,
+    } = paragraphConfig;
+    const {
+        paragraphStyle,
+        gridType,
+        snapToGrid,
+        hasInlineCustomBlock,
+        positionedCustomBlockOnly,
+        paddingTop,
+        paddingBottom,
+        contentHeight,
+        marginTop,
+        spaceBelowApply,
+    } = _getParagraphLineMetrics(ctx, glyphGroup, lastPage, column, sectionBreakConfig, paragraphConfig, isParagraphFirstShapedText, defaultSpanMetrics);
+    const { indentFirstLine, hanging, indentStart, indentEnd } = paragraphStyle;
+
+    const lineHeight = marginTop + paddingTop + contentHeight + paddingBottom;
+    const { charSpace, defaultTabStop } = getCharSpaceConfig(sectionBreakConfig, paragraphConfig);
+    const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
+    const paragraphAnchorLeft = __getParagraphAnchorLeft(sectionBreakConfig, paragraphConfig, indentStart);
+
+    let section = column.parent;
+    if (!section) {
+        // Fallback, point to the last section of the current page
+        section = getLastSection(lastPage);
+    }
+    const preLineHeight = preLine?.lineHeight || 0;
+    const initialFootnoteTop = lastPage.type === DocumentSkeletonPageType.FOOTNOTE && lastPage.pageNumber === 1 && columnInfo.index === ctx.footnoteFirstColumn?.index
+        ? ctx.footnoteFirstColumn.top
+        : 0;
+    const preTop = preLine?.top ?? initialFootnoteTop;
+    const lineTop = preLineHeight + preTop;
+
+    const { pageWidth, headerId, footerId } = lastPage;
+    const headerPage = skeHeaders?.get(headerId)?.get(pageWidth);
+    const footerPage = skeFooters?.get(footerId)?.get(pageWidth);
+
+    let needOpenNewPageByTableLayout = false;
+
+    const { deferredInlineGroupAnchorDrawings, deferredTopBottomAnchorDrawings } = _positionLineDrawings(
+        ctx,
+        glyphGroup,
+        column,
+        lastPage,
+        paragraphConfig,
+        lineTop,
+        lineHeight,
+        paragraphAnchorLeft,
+        hasInlineCustomBlock,
+        isParagraphFirstShapedText
+    );
 
     if (skeTablesInParagraph != null && skeTablesInParagraph.length > 0) {
         needOpenNewPageByTableLayout = _updateAndPositionTable(ctx, lineTop, lineHeight, lastPage, pages, column, section, skeTablesInParagraph, paragraphConfig.paragraphIndex, sectionBreakConfig, pDrawingAnchor?.get(paragraphIndex)?.top);
@@ -989,19 +1097,7 @@ function _lineOperator(
             defaultSpanMetrics
         );
 
-        if (isParagraphFirstShapedText && paragraphNonInlineSkeDrawings && paragraphNonInlineSkeDrawings.size > 0) {
-            for (const drawing of paragraphNonInlineSkeDrawings.values()) {
-                if (lastPage.skeDrawings.has(drawing.drawingId)) {
-                    lastPage.skeDrawings.delete(drawing.drawingId);
-                }
-
-                if (ctx.floatObjectsCache.has(drawing.drawingId)) {
-                    ctx.floatObjectsCache.delete(drawing.drawingId);
-                    ctx.isDirty = false;
-                    ctx.layoutStartPointer[segmentId] = null;
-                }
-            }
-        }
+        _clearOverflowedParagraphDrawings(ctx, lastPage, paragraphNonInlineSkeDrawings, isParagraphFirstShapedText);
 
         return;
     }

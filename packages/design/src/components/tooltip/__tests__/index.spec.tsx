@@ -16,7 +16,6 @@
 
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { ConfigProvider } from '../../config-provider/ConfigProvider';
 import { Tooltip } from '../Tooltip';
 import '@testing-library/jest-dom/vitest';
 

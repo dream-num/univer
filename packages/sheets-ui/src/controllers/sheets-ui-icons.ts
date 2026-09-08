@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IconMap } from '@univerjs/ui';
 import {
     AddImageIcon,
     AdjustHeightDoubleIcon,
@@ -100,7 +101,7 @@ import {
     WriteIcon,
 } from '@univerjs/icons';
 
-export const sheetsUIIcons = {
+export const sheetsUIIcons: IconMap = {
     AddImageIcon,
     AdjustHeightDoubleIcon,
     AdjustWidthDoubleIcon,

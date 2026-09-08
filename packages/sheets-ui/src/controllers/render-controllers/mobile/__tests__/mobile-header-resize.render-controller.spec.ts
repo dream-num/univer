@@ -58,6 +58,7 @@ function createController() {
     };
     const skeleton = {
         rowHeaderWidth: 48,
+        rowHeaderWidthAndMarginLeft: 48,
         columnHeaderHeight: 24,
         columnTotalWidth: 1000,
         rowTotalHeight: 2000,
@@ -148,6 +149,26 @@ describe('MobileHeaderResizeRenderController business methods', () => {
         expect(controller._commandService.executeCommand).toHaveBeenCalledWith(DeltaColumnWidthCommand.id, {
             deltaX: 20,
             anchorCol: 1,
+        });
+    });
+
+    it('centers the row resize handle inside the row header when an outline gutter is present', () => {
+        const { controller, skeleton } = createController();
+        skeleton.rowHeaderWidthAndMarginLeft = 72;
+
+        controller._handleSelectionChange([{
+            range: { startRow: 2, endRow: 2, startColumn: 0, endColumn: 0, rangeType: RANGE_TYPE.ROW },
+        }]);
+
+        expect(controller._rowResizeButton.transformByState).toHaveBeenCalledWith({
+            left: 42,
+            top: 54,
+        });
+
+        controller._updateButtonPositionOnScroll();
+        expect(controller._rowResizeButton.transformByState).toHaveBeenLastCalledWith({
+            left: 42,
+            top: 54,
         });
     });
 });

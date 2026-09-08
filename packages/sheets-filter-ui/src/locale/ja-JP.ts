@@ -33,6 +33,13 @@ const locale: typeof enUS = {
             'clear-filter': 'フィルタをクリア',
             cancel: 'キャンセル',
             confirm: '確認',
+            mobile: {
+                resize: 'フィルターパネルのサイズを変更',
+                back: '戻る',
+                column: '{0} 列',
+                'previous-column': '前の列',
+                'next-column': '次の列',
+            },
             'by-values': '値でフィルタ',
             'by-colors': '色でフィルタ',
             'filter-by-cell-fill-color': 'セルの塗りつぶし色でフィルタ',

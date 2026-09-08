@@ -41,6 +41,7 @@ const locale: typeof enUS = {
             'sort-reminder-no': 'Pertahankan pengurutan rentang',
             'first-row-check': 'Baris pertama tidak ikut dalam pengurutan',
             'add-condition': 'Tambah kondisi',
+            'delete-condition': 'Hapus kondisi',
             cancel: 'Batal',
             confirm: 'Konfirmasi',
         },

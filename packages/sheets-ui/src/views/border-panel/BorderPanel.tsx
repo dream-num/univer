@@ -42,7 +42,12 @@ function getBorderStyle(borderData: Nullable<IBorderData>): BorderStyleTypes | u
     }
 }
 
-export function BorderPanel(props: IBorderPanelProps) {
+export interface IResponsiveBorderPanelProps extends IBorderPanelProps {
+    ColorPickerComponent?: typeof ColorPicker;
+    DropdownComponent?: typeof Dropdown;
+}
+
+export function BorderPanel(props: IResponsiveBorderPanelProps) {
     const iconManager = useDependency(IconManager);
     const borderStyleManagerService = useDependency(BorderStyleManagerService);
     const selectionManagerService = useDependency(SheetsSelectionsService);
@@ -52,7 +57,7 @@ export function BorderPanel(props: IBorderPanelProps) {
     const color = isAllValuesSame ? getBorderColor(currentValue as Nullable<IBorderData>) : undefined;
     const type = isAllValuesSame ? getBorderStyle(currentValue as Nullable<IBorderData>) : undefined;
 
-    const { onChange, value } = props;
+    const { onChange, value, ColorPickerComponent = ColorPicker, DropdownComponent = Dropdown } = props;
 
     function handleClick(v: string | number, type: keyof IBorderInfo) {
         onChange?.({
@@ -100,10 +105,10 @@ export function BorderPanel(props: IBorderPanelProps) {
 
             <div className="univer-flex univer-items-center univer-gap-2">
                 <div>
-                    <Dropdown
+                    <DropdownComponent
                         overlay={(
                             <div className="univer-rounded-lg univer-p-4">
-                                <ColorPicker value={color} onChange={(value) => handleClick(value, 'color')} />
+                                <ColorPickerComponent value={color} onChange={(value) => handleClick(value, 'color')} />
                             </div>
                         )}
                     >
@@ -125,11 +130,11 @@ export function BorderPanel(props: IBorderPanelProps) {
                             />
                             <MoreDownIcon className="dark:!univer-text-gray-0" />
                         </button>
-                    </Dropdown>
+                    </DropdownComponent>
                 </div>
 
                 <div>
-                    <Dropdown
+                    <DropdownComponent
                         overlay={(
                             <section className="univer-rounded-lg univer-p-1.5">
                                 <ul className="univer-m-0 univer-grid univer-list-none univer-gap-1 univer-p-0">
@@ -180,7 +185,7 @@ export function BorderPanel(props: IBorderPanelProps) {
                             />
                             <MoreDownIcon className="dark:!univer-text-gray-0" />
                         </button>
-                    </Dropdown>
+                    </DropdownComponent>
                 </div>
             </div>
         </section>

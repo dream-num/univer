@@ -15,23 +15,9 @@
  */
 
 import type { HTMLAttributes } from 'react';
-import { useContext } from 'react';
-import { clsx } from '../../helper/clsx';
-import { ConfigContext } from '../config-provider/ConfigProvider';
 
 export type IActionRowProps = HTMLAttributes<HTMLDivElement>;
 
 export function ActionRow({ className, ...props }: IActionRowProps) {
-    const { mobile } = useContext(ConfigContext);
-
-    return (
-        <div
-            className={clsx(className, mobile && `
-              univer-flex univer-w-full univer-justify-stretch univer-gap-3
-              [&>button]:!univer-m-0 [&>button]:!univer-h-12 [&>button]:!univer-min-w-0 [&>button]:!univer-flex-1
-              [&>button]:!univer-rounded-xl
-            `)}
-            {...props}
-        />
-    );
+    return <div className={className} {...props} />;
 }

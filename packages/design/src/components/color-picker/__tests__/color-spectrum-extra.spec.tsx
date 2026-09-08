@@ -66,4 +66,14 @@ describe('ColorSpectrum extra', () => {
         expect(onChange).toHaveBeenCalled();
         expect(onChanged).toHaveBeenCalledWith(120, 20, 80);
     });
+
+    it('positions the initial indicator from hsv without waiting for container measurements', () => {
+        const { container } = render(<ColorSpectrum hsv={[120, 20, 80]} onChange={vi.fn()} />);
+
+        const indicator = container.querySelector('[data-u-comp="color-picker-spectrum"] > div') as HTMLDivElement;
+
+        expect(indicator.style.left).toBe('20%');
+        expect(indicator.style.top).toBe('20%');
+        expect(indicator.style.transform).toBe('translate(-50%, -50%)');
+    });
 });

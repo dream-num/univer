@@ -41,6 +41,7 @@ const locale: typeof enUS = {
             'sort-reminder-no': 'Manter ordenação do intervalo',
             'first-row-check': 'A primeira linha não participa da ordenação',
             'add-condition': 'Adicionar condição',
+            'delete-condition': 'Excluir condição',
             cancel: 'Cancelar',
             confirm: 'Confirmar',
         },

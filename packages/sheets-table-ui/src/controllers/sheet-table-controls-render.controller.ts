@@ -65,7 +65,7 @@ import {
     SheetCanvasPopManagerService,
     SheetSkeletonManagerService,
 } from '@univerjs/sheets-ui';
-import { IDialogService, ISidebarService, MOBILE_UI_MODE } from '@univerjs/ui';
+import { IDialogService, ISidebarService } from '@univerjs/ui';
 import { filter, merge } from 'rxjs';
 import { openRangeSelector } from '../commands/operations/open-table-selector.operation';
 import {
@@ -81,8 +81,6 @@ import { SheetTableThemeUIController } from './sheet-table-theme-ui.controller';
 
 const TABLE_CONTROLS_LAYER_INDEX = 5002;
 const TABLE_CONTROL_GAP_ROW = 0;
-const SHEET_TABLE_MOBILE_MENU_DIALOG_ID = 'sheet-table-mobile-menu';
-
 const TABLE_RENDER_REFRESH_COMMANDS = new Set([
     SetScrollOperation.id,
     SetZoomRatioOperation.id,
@@ -106,27 +104,27 @@ function isSameTopGap(left: TopGapSnapshot, right: TopGapSnapshot): boolean {
 }
 
 export class SheetTableControlsRenderController extends Disposable implements IRenderModule {
-    private readonly _shape: SheetTableControlsShape;
+    protected readonly _shape: SheetTableControlsShape;
     private readonly _topGapBaseBySkeleton = new WeakMap<SpreadsheetSkeleton, TopGapSnapshot>();
-    private _menuPopup: IDisposable | null = null;
+    protected _menuPopup: IDisposable | null = null;
 
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(TableManager) private readonly _tableManager: TableManager,
+        @Inject(TableManager) protected readonly _tableManager: TableManager,
         @Inject(SheetRangeThemeModel) private readonly _rangeThemeModel: SheetRangeThemeModel,
         @Inject(WorkbookPermissionService) private readonly _workbookPermissionService: WorkbookPermissionService,
         @Inject(IPermissionService) private readonly _permissionService: IPermissionService,
         @Inject(SheetsSelectionsService) private readonly _sheetsSelectionsService: SheetsSelectionsService,
         @ISheetSelectionRenderService private readonly _selectionRenderService: ISheetSelectionRenderService,
         @Inject(SheetTableThemeUIController) private readonly _sheetTableThemeUIController: SheetTableThemeUIController,
-        @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @Inject(LocaleService) protected readonly _localeService: LocaleService,
         @IContextService private readonly _contextService: IContextService,
-        @IDialogService private readonly _dialogService: IDialogService,
+        @IDialogService protected readonly _dialogService: IDialogService,
         @ISidebarService private readonly _sidebarService: ISidebarService,
-        @Inject(SheetCanvasPopManagerService) private readonly _sheetCanvasPopupService: SheetCanvasPopManagerService
+        @Inject(SheetCanvasPopManagerService) protected readonly _sheetCanvasPopupService: SheetCanvasPopManagerService
     ) {
         super();
         this._shape = new SheetTableControlsShape(
@@ -326,7 +324,7 @@ export class SheetTableControlsRenderController extends Disposable implements IR
         }
     }
 
-    private _toggleTableMenu(unitId: string, subUnitId: string, tableId: string): void {
+    protected _toggleTableMenu(unitId: string, subUnitId: string, tableId: string): void {
         if (this._shape.getOpenedMenuTableId() === tableId) {
             this._closeFloatingControls();
             return;
@@ -354,22 +352,6 @@ export class SheetTableControlsRenderController extends Disposable implements IR
             onClose: () => this._closeFloatingControls(),
         };
 
-        if (this._contextService.getContextValue(MOBILE_UI_MODE)) {
-            this._dialogService.open({
-                id: SHEET_TABLE_MOBILE_MENU_DIALOG_ID,
-                title: { title: table.getDisplayName() },
-                children: {
-                    label: {
-                        name: SHEET_TABLE_MENU,
-                        props: { popup: { extraProps } },
-                    },
-                },
-                onClose: () => this._closeFloatingControls(),
-            });
-            this._menuPopup = toDisposable(() => this._dialogService.close(SHEET_TABLE_MOBILE_MENU_DIALOG_ID));
-            return;
-        }
-
         this._menuPopup = this._sheetCanvasPopupService.attachPopupByPosition(
             {
                 left: anchor.left,
@@ -395,7 +377,7 @@ export class SheetTableControlsRenderController extends Disposable implements IR
         }
     }
 
-    private _handleTableMenuAction(action: SheetTableMenuAction, unitId: string, subUnitId: string, tableId: string): void | Promise<void> {
+    protected _handleTableMenuAction(action: SheetTableMenuAction, unitId: string, subUnitId: string, tableId: string): void | Promise<void> {
         this._closeFloatingControls();
 
         switch (action) {
@@ -595,7 +577,7 @@ export class SheetTableControlsRenderController extends Disposable implements IR
         this._selectionRenderService.resetSelectionsByModelData(this._sheetsSelectionsService.getCurrentSelections());
     }
 
-    private _closeFloatingControls(): void {
+    protected _closeFloatingControls(): void {
         const menuPopup = this._menuPopup;
         this._menuPopup = null;
         menuPopup?.dispose();

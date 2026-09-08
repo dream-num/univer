@@ -25,6 +25,7 @@ import { DesktopConfirmService } from '../../../../services/confirm/desktop-conf
 import { IUIPartsService, UIPartsService } from '../../../../services/parts/parts.service';
 import { RediProvider } from '../../../../utils/di';
 import { ConfirmPart } from '../ConfirmPart';
+import { MobileConfirmPart } from '../MobileConfirmPart';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -157,6 +158,24 @@ describe('ConfirmPart', () => {
         expect(TestState.confirmResults).toEqual([{ cancel: false, rowCount: 3 }]);
 
         disposable.dispose();
+        rendered.dispose();
+    });
+
+    it('renders service confirmations with the mobile confirm surface', async () => {
+        const rendered = renderWithDependencies(<MobileConfirmPart />);
+        const confirmService = rendered.injector.get(IConfirmService) as IConfirmService<IConfirmPartMethodOptions>;
+
+        act(() => {
+            confirmService.open({
+                id: 'mobile-confirm',
+                children: { title: <span>Mobile confirmation</span> },
+                confirmText: 'Confirm',
+            });
+        });
+
+        expect(await screen.findByText('Mobile confirmation')).toBeTruthy();
+        expect(screen.getByRole('dialog').classList.contains('!univer-bottom-0')).toBe(true);
+
         rendered.dispose();
     });
 });

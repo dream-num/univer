@@ -47,6 +47,8 @@ const locale: typeof enUS = {
             coped: 'Collegamento copiato negli appunti',
         },
         popup: {
+            title: 'Collegamento ipertestuale',
+            open: 'Apri collegamento',
             copy: 'Copia collegamento',
             edit: 'Modifica collegamento',
             cancel: 'Annulla collegamento',

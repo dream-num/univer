@@ -25,6 +25,7 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { ComponentManager, ContextMenuPosition, IMenuManagerService, IWorkbenchService, ToolbarItem, useConfigValue, useDependency, useObservable } from '@univerjs/ui';
 import { useEffect, useMemo } from 'react';
 import { EMPTY, merge } from 'rxjs';
+import { EMBEDDING_CELL_EDITOR_COMPONENT_KEY } from '../../common/keys';
 import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../../config/config';
 import { getEmbedSheetsTabCustomData } from '../../embed-tab-anchor';
 import { ISheetEmbedRuntimeFocusCoordinator } from '../../services/sheet-embed-integration.service';
@@ -115,7 +116,11 @@ export function RenderSheetHeader() {
 /**
  * We should not write into this component anymore.
  */
-export function RenderSheetContent() {
+export interface IRenderSheetContentProps {
+    AutoFillPopupMenuComponent?: typeof AutoFillPopupMenu | null;
+}
+
+export function RenderSheetContent({ AutoFillPopupMenuComponent = AutoFillPopupMenu }: IRenderSheetContentProps = {}) {
     const config = useConfigValue<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
     const componentManager = useDependency(ComponentManager);
     const workbook = useRootWorkbenchWorkbook();
@@ -127,6 +132,7 @@ export function RenderSheetContent() {
 
     // We use string keys to avoid a hard dependency on sheets-shape-ui.
     const ShapeTextEditorContainer = componentManager.get('SheetShapeTextEditorContainer') ?? componentManager.get('ShapeTextEditorContainer');
+    const CellEditorContainer = componentManager.get(EMBEDDING_CELL_EDITOR_COMPONENT_KEY) ?? EditorContainer;
 
     useEffect(() => {
         if (!workbook || activeEmbedTab || activeWorkbookEmbeddedRender || !rootWorkbenchOwnsSheet) {
@@ -149,8 +155,8 @@ export function RenderSheetContent() {
     return (
         <>
             {ShapeTextEditorContainer && <ShapeTextEditorContainer />}
-            {!config?.disableEdit && <EditorContainer />}
-            <AutoFillPopupMenu />
+            {!config?.disableEdit && <CellEditorContainer />}
+            {AutoFillPopupMenuComponent && <AutoFillPopupMenuComponent />}
         </>
     );
 }

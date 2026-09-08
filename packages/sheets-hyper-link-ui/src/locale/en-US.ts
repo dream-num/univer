@@ -45,6 +45,8 @@ const locale = {
             coped: 'Link copied to clipboard',
         },
         popup: {
+            title: 'Hyperlink',
+            open: 'Open Link',
             copy: 'Copy Link',
             edit: 'Edit Link',
             cancel: 'Cancel Link',

@@ -260,6 +260,22 @@ describe('FindReplaceService', () => {
         service.dispose();
     });
 
+    it('should hide replacement controls without terminating the find session', () => {
+        const { service, contextService } = createService();
+
+        expect(service.start(true)).toBe(true);
+        service.changeInputtingFindString('invoice');
+        service.hideReplace();
+
+        expect(service.revealed).toBe(true);
+        expect(service.replaceRevealed).toBe(false);
+        expect(service.getFindString()).toBe('invoice');
+        expect(contextService.values.at(-1)?.value).toBe(false);
+
+        service.terminate();
+        service.dispose();
+    });
+
     it('should navigate across find models when the current unit has no next or previous match', async () => {
         const { service, provider } = createService();
         const match1: IFindMatch = { provider: 'p', unitId: 'u1', range: { row: 1 }, replaceable: true } as any;

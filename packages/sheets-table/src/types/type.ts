@@ -60,7 +60,7 @@ export interface ITableFilterJSON {
     tableSortInfo?: { columnIndex: number; sortState: SheetsTableSortStateEnum };
 }
 
-export type ITableFilterItem = ITableManualFilterItem | ITableConditionFilterItem;
+export type ITableFilterItem = ITableManualFilterItem | ITableConditionFilterItem | ITableColorFilterItem;
 export type TableMetaType = Record<string, any>;
 
 /**
@@ -78,6 +78,15 @@ export interface ITableManualFilterItem {
 export interface ITableConditionFilterItem {
     filterType: TableColumnFilterTypeEnum.condition;
     filterInfo: ITableDateFilterInfo | ITableStringFilterInfo | ITableNumberFilterInfo | ITableLogicFilterInfo;
+}
+
+/**
+ * Represents the table filter item, filter data by cell fill or text colors.
+ */
+export interface ITableColorFilterItem {
+    filterType: TableColumnFilterTypeEnum.color;
+    cellFillColors?: Array<string | null>;
+    cellTextColors?: Array<string | null>;
 }
 
 export interface ITableDateFilterInfo {
@@ -142,6 +151,7 @@ export interface ITableSetConfig {
     updateRange?: ITableRangeUpdate;
     rowColOperation?: ITableRangeRowColOperation;
     theme?: string;
+    sortInfo?: ITableFilterJSON['tableSortInfo'];
     options?: {
         showHeader?: boolean;
     };

@@ -31,10 +31,11 @@ export interface ISheetTableRenameDialogProps {
     unitId: string;
     tableId: string;
     onClose: () => void;
+    ActionRowComponent?: typeof ActionRow;
 }
 
 export function SheetTableRenameDialog(props: ISheetTableRenameDialogProps) {
-    const { unitId, tableId, onClose } = props;
+    const { unitId, tableId, onClose, ActionRowComponent = ActionRow } = props;
     const localeService = useDependency(LocaleService);
     const commandService = useDependency(ICommandService);
     const tableManager = useDependency<TableManager>(TableManager);
@@ -102,12 +103,12 @@ export function SheetTableRenameDialog(props: ISheetTableRenameDialogProps) {
                 autoFocus
             />
             {error ? <div className="-univer-mt-2 univer-text-sm univer-text-red-500">{error}</div> : null}
-            <ActionRow
+            <ActionRowComponent
                 className="univer-flex univer-w-full univer-items-center univer-justify-end univer-gap-2"
             >
                 <Button className="univer-min-w-16" onClick={onClose}>{localeService.t<LocaleKey>('sheets-table-ui.cancel')}</Button>
                 <Button className="univer-min-w-16" variant="primary" onClick={handleConfirm}>{localeService.t<LocaleKey>('sheets-table-ui.confirm')}</Button>
-            </ActionRow>
+            </ActionRowComponent>
         </div>
     );
 }

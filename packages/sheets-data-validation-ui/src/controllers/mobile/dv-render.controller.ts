@@ -1,0 +1,187 @@
+/**
+ * Copyright 2023-present DreamNum Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import type { ICellRenderContext, IRange } from '@univerjs/core';
+import {
+    DataValidationStatus,
+    DataValidationType,
+    ICommandService,
+    Inject,
+    InterceptorEffectEnum,
+    RxDisposable,
+    sequenceExecute,
+} from '@univerjs/core';
+import { DataValidatorRegistryService } from '@univerjs/data-validation';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { InterceptCellContentPriority, INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
+import { DataValidationCacheService, getCellValueOrigin, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
+import { AutoHeightController, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { bufferTime, filter } from 'rxjs';
+
+const INVALID_MARK = {
+    tr: {
+        size: 6,
+        color: '#fe4b4b',
+    },
+};
+
+// The mobile version does not provide the ability to change data validation model.
+export class SheetsDataValidationMobileRenderController extends RxDisposable {
+    constructor(
+        @ICommandService private readonly _commandService: ICommandService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @Inject(AutoHeightController) private readonly _autoHeightController: AutoHeightController,
+        @Inject(DataValidatorRegistryService) private readonly _dataValidatorRegistryService: DataValidatorRegistryService,
+        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
+        @Inject(SheetDataValidationModel) private readonly _sheetDataValidationModel: SheetDataValidationModel,
+        @Inject(DataValidationCacheService) private readonly _dataValidationCacheService: DataValidationCacheService
+    ) {
+        super();
+
+        this._initViewModelIntercept();
+        this._initAutoHeight();
+    }
+
+    // eslint-disable-next-line max-lines-per-function
+    private _initViewModelIntercept() {
+        this.disposeWithMe(
+            this._sheetInterceptorService.intercept(
+                INTERCEPTOR_POINT.CELL_CONTENT,
+                {
+                    effect: InterceptorEffectEnum.Style,
+                    // must be after numfmt
+                    priority: InterceptCellContentPriority.DATA_VALIDATION,
+                    // eslint-disable-next-line complexity, max-lines-per-function
+                    handler: (cell, pos, next) => {
+                        const { row, col, unitId, subUnitId, workbook, worksheet } = pos;
+
+                        const ruleId = this._sheetDataValidationModel.getRuleIdByLocation(unitId, subUnitId, row, col);
+                        if (!ruleId) {
+                            return next(cell);
+                        }
+                        const rule = this._sheetDataValidationModel.getRuleById(unitId, subUnitId, ruleId);
+                        if (!rule) {
+                            return next(cell);
+                        }
+                        const validStatus = this._dataValidationCacheService.getValue(unitId, subUnitId, row, col) ?? DataValidationStatus.VALID;
+                        const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);
+                        const cellOrigin = worksheet.getCellRaw(row, col);
+                        const cellValue = getCellValueOrigin(cellOrigin);
+                        const valueStr = `${cellValue ?? ''}`;
+
+                        if (!cell || cell === pos.rawData) {
+                            cell = { ...pos.rawData };
+                        }
+
+                        cell.markers = {
+                            ...cell?.markers,
+                            ...validStatus === DataValidationStatus.INVALID ? INVALID_MARK : null,
+                        };
+                        cell.customRender = [
+                            ...(cell?.customRender ?? []),
+                            ...(validator?.canvasRender ? [validator.canvasRender] : []),
+                        ];
+                        cell.fontRenderExtension = {
+                            ...cell?.fontRenderExtension,
+                            isSkip: cell?.fontRenderExtension?.isSkip || validator?.skipDefaultFontRender?.(rule, cellValue, pos),
+                        };
+                        cell.interceptorStyle = {
+                            ...cell?.interceptorStyle,
+                            ...validator?.getExtraStyle(rule, valueStr, {
+                                get style() {
+                                    const styleMap = workbook.getStyles();
+                                    return (typeof cell?.s === 'string' ? styleMap.get(cell?.s) : cell?.s) || {};
+                                },
+                            }, row, col),
+                        };
+                        cell.interceptorAutoHeight = () => {
+                            const skeleton = this._renderManagerService.getRenderUnitById(unitId)
+                                ?.with(SheetSkeletonManagerService)
+                                .getSkeletonParam(subUnitId)
+                                ?.skeleton;
+                            if (!skeleton) {
+                                return undefined;
+                            }
+                            const mergeCell = skeleton.worksheet.getMergedCell(row, col);
+
+                            const info: ICellRenderContext = {
+                                data: cell,
+                                style: workbook.getStyles().getStyleByCell(cell),
+                                primaryWithCoord: skeleton.getCellWithCoordByIndex(mergeCell?.startRow ?? row, mergeCell?.startColumn ?? col),
+                                unitId,
+                                subUnitId,
+                                row,
+                                col,
+                                workbook,
+                                worksheet,
+                            };
+                            return validator?.canvasRender?.calcCellAutoHeight?.(info);
+                        };
+                        cell.interceptorAutoWidth = () => {
+                            const skeleton = this._renderManagerService.getRenderUnitById(unitId)
+                                ?.with(SheetSkeletonManagerService)
+                                .getSkeletonParam(subUnitId)
+                                ?.skeleton;
+                            if (!skeleton) {
+                                return undefined;
+                            }
+                            const mergeCell = skeleton.worksheet.getMergedCell(row, col);
+
+                            const info: ICellRenderContext = {
+                                data: cell,
+                                style: workbook.getStyles().getStyleByCell(cell),
+                                primaryWithCoord: skeleton.getCellWithCoordByIndex(mergeCell?.startRow ?? row, mergeCell?.startColumn ?? col),
+                                unitId,
+                                subUnitId,
+                                row,
+                                col,
+                                workbook,
+                                worksheet,
+                            };
+                            return validator?.canvasRender?.calcCellAutoWidth?.(info);
+                        };
+                        cell.coverable = (cell?.coverable ?? true) && !(rule.type === DataValidationType.LIST || rule.type === DataValidationType.LIST_MULTIPLE);
+
+                        return next(cell);
+                    },
+                }
+            )
+        );
+    }
+
+    private _initAutoHeight() {
+        this._sheetDataValidationModel.ruleChange$
+            .pipe(
+                filter((change) => change.source === 'command'),
+                bufferTime(16)
+            )
+            .subscribe((infos) => {
+                const ranges: IRange[] = [];
+                infos.forEach((info) => {
+                    if (info.rule.type === DataValidationType.LIST_MULTIPLE || info.rule.type === DataValidationType.LIST) {
+                        if (info.rule?.ranges) {
+                            ranges.push(...info.rule.ranges);
+                        }
+                    }
+                });
+
+                if (ranges.length) {
+                    const mutations = this._autoHeightController.getUndoRedoParamsOfAutoHeight(ranges);
+                    sequenceExecute(mutations.redos, this._commandService);
+                }
+            });
+    }
+}

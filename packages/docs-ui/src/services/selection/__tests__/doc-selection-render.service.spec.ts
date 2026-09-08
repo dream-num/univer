@@ -1415,6 +1415,22 @@ describe('DocSelectionRenderService', () => {
         ]);
     });
 
+    it('preserves the browser composing DOM until composition ends', () => {
+        const { input, renderUnit, univer } = createRealSelectionRenderService();
+        cleanup.push(() => renderUnit.dispose(), () => univer.dispose());
+
+        input.textContent = 'n';
+        input.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true, data: '' }));
+        expect(input.textContent).toBe('n');
+
+        input.textContent = '你';
+        input.dispatchEvent(new CompositionEvent('compositionupdate', { bubbles: true, data: '你' }));
+        expect(input.textContent).toBe('你');
+
+        input.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true, data: '你' }));
+        expect(input.textContent).toBe('');
+    });
+
     it('keeps embed-owned select-all keydown inside the child editor without blocking editor input handling', () => {
         const { input, renderUnit, service, univer } = createRealSelectionRenderService();
         cleanup.push(() => renderUnit.dispose(), () => univer.dispose());

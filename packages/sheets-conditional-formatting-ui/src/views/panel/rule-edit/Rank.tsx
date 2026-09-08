@@ -33,7 +33,7 @@ import { previewClassName } from './styles';
 type IRankRuleType = 'isNotBottom' | 'isBottom' | 'greaterThanAverage' | 'lessThanAverage';
 
 export const RankStyleEditor = (props: IStyleEditorProps) => {
-    const { onChange, interceptorManager } = props;
+    const { onChange, interceptorManager, SelectComponent = Select, ColorPickerComponent } = props;
     const localeService = useDependency(LocaleService);
 
     const rule = props.rule?.type === CFRuleType.highlightCell ? props.rule : undefined;
@@ -156,7 +156,7 @@ export const RankStyleEditor = (props: IStyleEditorProps) => {
             >
                 {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.styleRule')}
             </div>
-            <Select
+            <SelectComponent
                 className="univer-mt-3 univer-w-full"
                 value={type}
                 options={options}
@@ -206,6 +206,7 @@ export const RankStyleEditor = (props: IStyleEditorProps) => {
                 />
             </div>
             <ConditionalStyleEditor
+                ColorPickerComponent={ColorPickerComponent}
                 style={rule?.style}
                 className="univer-mt-3"
                 onChange={(v) => {

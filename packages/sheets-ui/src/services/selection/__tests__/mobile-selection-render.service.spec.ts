@@ -29,7 +29,7 @@ import {
     createTestEvent,
 } from '../../../controllers/render-controllers/__tests__/render-test-bed';
 import { SheetScrollManagerService } from '../../scroll-manager.service';
-import { MobileSheetsSelectionRenderService, shouldKeepCurrentSelectionOnMobileTap } from '../mobile-selection-render.service';
+import { MobileSheetsSelectionRenderService } from '../mobile-selection-render.service';
 import { MobileSelectionControl } from '../mobile-selection-shape';
 
 class TestThemeService {
@@ -154,7 +154,7 @@ function installCellLookupForMobileSelection(skeleton: ReturnType<typeof createF
     (skeleton as never as { expandRangeByMerge: <T>(range: T) => T }).expandRangeByMerge = (range) => range;
 }
 
-describe('shouldKeepCurrentSelectionOnMobileTap', () => {
+describe('MobileSheetsSelectionRenderService', () => {
     beforeAll(() => {
         globalThis.window = {
             cancelAnimationFrame: () => { },
@@ -231,74 +231,14 @@ describe('shouldKeepCurrentSelectionOnMobileTap', () => {
         testBed.univer.dispose();
     });
 
-    it('keeps the existing selection when a tap is inside it', () => {
-        expect(shouldKeepCurrentSelectionOnMobileTap([
-            {
-                startRow: 1,
-                endRow: 3,
-                startColumn: 2,
-                endColumn: 4,
-                rangeType: RANGE_TYPE.NORMAL,
-            },
-        ], {
-            startRow: 2,
-            endRow: 2,
-            startColumn: 3,
-            endColumn: 3,
-            rangeType: RANGE_TYPE.NORMAL,
-        })).toBe(true);
-    });
-
-    it('does not keep the existing selection when a tap is outside it', () => {
-        expect(shouldKeepCurrentSelectionOnMobileTap([
-            {
-                startRow: 1,
-                endRow: 3,
-                startColumn: 2,
-                endColumn: 4,
-                rangeType: RANGE_TYPE.NORMAL,
-            },
-        ], {
-            startRow: 5,
-            endRow: 5,
-            startColumn: 5,
-            endColumn: 5,
-            rangeType: RANGE_TYPE.NORMAL,
-        })).toBe(false);
-    });
-
-    it('checks all existing selections', () => {
-        expect(shouldKeepCurrentSelectionOnMobileTap([
-            {
-                startRow: 1,
-                endRow: 1,
-                startColumn: 1,
-                endColumn: 1,
-                rangeType: RANGE_TYPE.NORMAL,
-            },
-            {
-                startRow: 4,
-                endRow: 6,
-                startColumn: 4,
-                endColumn: 6,
-                rangeType: RANGE_TYPE.NORMAL,
-            },
-        ], {
-            startRow: 5,
-            endRow: 5,
-            startColumn: 5,
-            endColumn: 5,
-            rangeType: RANGE_TYPE.NORMAL,
-        })).toBe(true);
-    });
-
     it('positions mobile expand handles on normal selections', () => {
         const control = createMobileControl(RANGE_TYPE.NORMAL);
 
-        expect(control.fillControlTopLeft?.visible).toBe(true);
-        expect(control.fillControlBottomRight?.visible).toBe(true);
-        expect(control.fillControlTopLeft?.left).toBeLessThan(0);
-        expect(control.fillControlBottomRight?.left).toBeGreaterThan(0);
+        expect(control.fillControl.visible).toBe(false);
+        expect(control.expandControlTopLeft?.visible).toBe(true);
+        expect(control.expandControlBottomRight?.visible).toBe(true);
+        expect(control.expandControlTopLeft?.left).toBeLessThan(0);
+        expect(control.expandControlBottomRight?.left).toBeGreaterThan(0);
         expect(control.getViewportMainScrollInfo()).toMatchObject({
             viewportScrollX: 0,
             viewportScrollY: 0,
@@ -311,27 +251,27 @@ describe('shouldKeepCurrentSelectionOnMobileTap', () => {
         const rowControl = createMobileControl(RANGE_TYPE.ROW);
         rowControl.transformControlPoint(900, 0, 500, 500);
         expect(rowControl.rangeType).toBe(RANGE_TYPE.ROW);
-        expect(rowControl.fillControlTopLeft?.left).toBeLessThanOrEqual(500);
-        expect(rowControl.fillControlBottomRight?.top).toBeGreaterThan(rowControl.fillControlTopLeft?.top ?? 0);
+        expect(rowControl.expandControlTopLeft?.left).toBeLessThanOrEqual(500);
+        expect(rowControl.expandControlBottomRight?.top).toBeGreaterThan(rowControl.expandControlTopLeft?.top ?? 0);
 
         const columnControl = createMobileControl(RANGE_TYPE.COLUMN);
         columnControl.transformControlPoint(0, 900, 500, 300);
         expect(columnControl.rangeType).toBe(RANGE_TYPE.COLUMN);
-        expect(columnControl.fillControlTopLeft?.top).toBeLessThanOrEqual(300);
-        expect(columnControl.fillControlBottomRight?.left).toBeGreaterThan(columnControl.fillControlTopLeft?.left ?? 0);
+        expect(columnControl.expandControlTopLeft?.top).toBeLessThanOrEqual(300);
+        expect(columnControl.expandControlBottomRight?.left).toBeGreaterThan(columnControl.expandControlTopLeft?.left ?? 0);
     });
 
     it('keeps replacement mobile handles wired through disposal', () => {
         const control = createMobileControl(RANGE_TYPE.NORMAL);
-        const topLeft = control.fillControlTopLeft!;
-        const bottomRight = control.fillControlBottomRight!;
+        const topLeft = control.expandControlTopLeft!;
+        const bottomRight = control.expandControlBottomRight!;
 
-        control.fillControlTopLeft = topLeft;
-        control.fillControlBottomRight = bottomRight;
+        control.expandControlTopLeft = topLeft;
+        control.expandControlBottomRight = bottomRight;
         control.rangeType = RANGE_TYPE.ALL;
 
-        expect(control.fillControlTopLeft).toBe(topLeft);
-        expect(control.fillControlBottomRight).toBe(bottomRight);
+        expect(control.expandControlTopLeft).toBe(topLeft);
+        expect(control.expandControlBottomRight).toBe(bottomRight);
         expect(control.rangeType).toBe(RANGE_TYPE.ALL);
 
         control.dispose();
@@ -399,7 +339,7 @@ describe('shouldKeepCurrentSelectionOnMobileTap', () => {
 
         const scrollManager = injector.get(SheetScrollManagerService) as never as TestSheetScrollManagerService;
         scrollManager.validViewportScrollInfo$.next({ viewportScrollX: 240, viewportScrollY: 180 });
-        expect(service.getActiveSelectionControl<MobileSelectionControl>()?.fillControlTopLeft?.left).toBeGreaterThan(0);
+        expect(service.getActiveSelectionControl<MobileSelectionControl>()?.expandControlTopLeft?.left).toBeGreaterThan(0);
 
         const leftTopPlaceholder = context.components.get(SHEET_VIEW_KEY.LEFT_TOP)!;
         let stopped = false;
@@ -446,7 +386,7 @@ describe('shouldKeepCurrentSelectionOnMobileTap', () => {
         service.selectionMoving$.subscribe((selection) => movingSelections.push(selection));
         const activeControl = service.getActiveSelectionControl<MobileSelectionControl>()!;
 
-        activeControl.fillControlBottomRight!.onPointerDown$.emitEvent({ offsetX: 150, offsetY: 45 } as never);
+        activeControl.expandControlBottomRight!.onPointerDown$.emitEvent({ offsetX: 150, offsetY: 45 } as never);
         expect(contextService.getContextValue('MOBILE_EXPANDING_SELECTION')).toBe(true);
 
         (scene.onPointerMove$ as unknown as { emit: (evt: unknown, state?: unknown) => void }).emit({ offsetX: 360, offsetY: 90 });
@@ -455,6 +395,10 @@ describe('shouldKeepCurrentSelectionOnMobileTap', () => {
             endRow: 4,
             startColumn: 1,
             endColumn: 3,
+        });
+        expect(service.getSelectionDataWithStyle()[0].primaryWithCoord).toMatchObject({
+            actualRow: 2,
+            actualColumn: 1,
         });
         expect(movingSelections.length).toBeGreaterThan(0);
 
@@ -553,21 +497,21 @@ describe('shouldKeepCurrentSelectionOnMobileTap', () => {
             primary: null,
             style: null,
         }], SelectionMoveType.MOVE_END);
-        spreadsheet.onPointerDown$.emit({ offsetX: 154, offsetY: 49, button: 0 }, {
+        spreadsheet.onPointerDown$.emit({ offsetX: 250, offsetY: 65, button: 0 }, {
             stopPropagation: () => {
                 stopped = true;
             },
         });
-        spreadsheet.onPointerUp$.emit({ offsetX: 154, offsetY: 49, button: 0 }, {
+        spreadsheet.onPointerUp$.emit({ offsetX: 250, offsetY: 65, button: 0 }, {
             stopPropagation: () => {
                 stopped = true;
             },
         });
         expect(service.getActiveRange()).toEqual({
-            startRow: 2,
-            endRow: 4,
-            startColumn: 1,
-            endColumn: 3,
+            startRow: 3,
+            endRow: 3,
+            startColumn: 2,
+            endColumn: 2,
         });
         expect(clearSelectedObjectsCount).toBe(2);
 
@@ -583,10 +527,10 @@ describe('shouldKeepCurrentSelectionOnMobileTap', () => {
             },
         });
         expect(service.getActiveRange()).toEqual({
-            startRow: 2,
-            endRow: 4,
-            startColumn: 1,
-            endColumn: 3,
+            startRow: 3,
+            endRow: 3,
+            startColumn: 2,
+            endColumn: 2,
         });
         expect(clearSelectedObjectsCount).toBe(2);
         contextService.setContextValue('MOBILE_PINCH_ZOOMING', false);

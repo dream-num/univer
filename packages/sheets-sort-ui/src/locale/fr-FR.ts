@@ -41,6 +41,7 @@ const locale: typeof enUS = {
             'sort-reminder-no': 'Conserver le tri de la plage',
             'first-row-check': 'La première ligne ne participe pas au tri',
             'add-condition': 'Ajouter une condition',
+            'delete-condition': 'Supprimer la condition',
             cancel: 'Annuler',
             confirm: 'Confirmer',
         },

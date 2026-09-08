@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
+import type { ITableManualFilterItem } from '../../../types/type';
 import { ICommandService, ILogService, IUndoRedoService, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
 import { AddRangeThemeMutation, RemoveRangeThemeMutation, SheetInterceptorService, SheetRangeThemeModel } from '@univerjs/sheets';
 import { describe, expect, it, vi } from 'vitest';
 import { TableManager } from '../../../models/table-manager';
+import { TableColumnFilterTypeEnum } from '../../../types/enum';
 import { IRangeOperationTypeEnum, IRowColTypeEnum } from '../../../types/type';
 import { AddSheetTableMutation } from '../../mutations/add-sheet-table.mutation';
 import { DeleteSheetTableMutation } from '../../mutations/delete-sheet-table.mutation';
@@ -288,19 +290,28 @@ describe('sheets-table commands', () => {
         }));
     });
 
-    it('SetSheetTableFilterCommand should execute mutation with generated table id', () => {
+    it('SetSheetTableFilterCommand should restore the previous filter on undo', () => {
         const syncExecuteCommand = vi.fn(() => true);
         const pushUndoRedo = vi.fn();
+        const previousFilter: ITableManualFilterItem = {
+            filterType: TableColumnFilterTypeEnum.manual,
+            values: ['Old'],
+        };
         const accessor = createAccessor([
             [IUndoRedoService, { pushUndoRedo }],
             [ICommandService, { syncExecuteCommand }],
+            [TableManager, {
+                getTable: () => ({
+                    getTableFilterColumn: () => previousFilter,
+                }),
+            }],
         ]);
 
         const result = SetSheetTableFilterCommand.handler(accessor, {
             unitId: 'u1',
-            tableId: undefined as any,
+            tableId: 't1',
             column: 1,
-            tableFilter: { filterType: 'manual', values: ['A'] } as any,
+            tableFilter: { filterType: TableColumnFilterTypeEnum.manual, values: ['A'] },
         });
 
         expect(result).toBe(true);
@@ -308,16 +319,23 @@ describe('sheets-table commands', () => {
             SetSheetTableFilterMutation.id,
             expect.objectContaining({
                 unitId: 'u1',
+                tableId: 't1',
                 column: 1,
-                tableFilter: { filterType: 'manual', values: ['A'] },
+                tableFilter: { filterType: TableColumnFilterTypeEnum.manual, values: ['A'] },
             }),
             undefined
         );
-        const firstCall = syncExecuteCommand.mock.calls[0] as Array<any> | undefined;
-        const tableId = (firstCall?.[1] as { tableId?: string } | undefined)?.tableId;
-        expect(typeof tableId).toBe('string');
-        expect((tableId ?? '').length).toBeGreaterThan(0);
-        expect(pushUndoRedo).toHaveBeenCalled();
+        expect(pushUndoRedo).toHaveBeenCalledWith(expect.objectContaining({
+            undoMutations: [{
+                id: SetSheetTableFilterMutation.id,
+                params: {
+                    unitId: 'u1',
+                    tableId: 't1',
+                    column: 1,
+                    tableFilter: previousFilter,
+                },
+            }],
+        }));
     });
 
     it('AddTableThemeCommand should register theme and update table style', () => {

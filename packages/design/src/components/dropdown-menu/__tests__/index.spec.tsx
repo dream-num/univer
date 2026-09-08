@@ -16,8 +16,8 @@
 
 import { cleanup, fireEvent, render } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { ConfigProvider } from '../../config-provider/ConfigProvider';
 import { DropdownMenu } from '../DropdownMenu';
+import { MobileDropdownMenu } from '../MobileDropdownMenu';
 import '@testing-library/jest-dom/vitest';
 
 afterEach(cleanup);
@@ -191,17 +191,16 @@ describe('DropdownMenu', () => {
         ).toThrow('[DropdownMenu]: `value` is required');
     });
 
-    it('should render full-width actionable rows under a mobile provider', () => {
+    it('should render full-width actionable rows from MobileDropdownMenu', () => {
         const onSelect = vi.fn();
         const { getByText } = render(
-            <ConfigProvider mountContainer={document.body} mobile>
-                <DropdownMenu
-                    open
-                    items={[{ type: 'item', children: 'Mobile item', onSelect }]}
-                >
-                    <button type="button">Trigger</button>
-                </DropdownMenu>
-            </ConfigProvider>
+            <MobileDropdownMenu
+                open
+                items={[{ type: 'item', children: 'Mobile item', onSelect }]}
+                onOpenChange={() => {}}
+            >
+                <button type="button">Trigger</button>
+            </MobileDropdownMenu>
         );
 
         const item = getByText('Mobile item');

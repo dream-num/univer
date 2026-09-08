@@ -43,8 +43,15 @@ const getIcon = (iconType: IIconSetType, iconId: string | number) => {
     return arr[Number(iconId)] || '';
 };
 
-const TextInput = (props: { id: number; type: CFValueType; value: number | string; onChange: (v: number | string) => void; error?: string }) => {
-    const { error, type, onChange } = props;
+const TextInput = (props: {
+    id: number;
+    type: CFValueType;
+    value: number | string;
+    onChange: (v: number | string) => void;
+    error?: string;
+    FormulaEditorComponent: NonNullable<IStyleEditorProps['FormulaEditorComponent']>;
+}) => {
+    const { error, type, onChange, FormulaEditorComponent } = props;
 
     const univerInstanceService = useDependency(IUniverInstanceService);
     const unitId = univerInstanceService.getCurrentUnitOfType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
@@ -78,7 +85,7 @@ const TextInput = (props: { id: number; type: CFValueType; value: number | strin
                 )
                 : (
                     <div className="univer-w-full">
-                        <FormulaEditor
+                        <FormulaEditorComponent
                             ref={formulaEditorRef}
                             className={clsx(`
                               univer-box-border univer-h-8 univer-w-full univer-cursor-pointer univer-items-center
@@ -259,8 +266,18 @@ const IconSetRuleEdit = (props: {
     configList: IIconSet['config'];
     onChange: (keys: string[], value: unknown) => void;
     errorMap?: Record<string, string>;
+    DropdownComponent: NonNullable<IStyleEditorProps['DropdownComponent']>;
+    SelectComponent: NonNullable<IStyleEditorProps['SelectComponent']>;
+    FormulaEditorComponent: NonNullable<IStyleEditorProps['FormulaEditorComponent']>;
 }) => {
-    const { onChange, configList, errorMap = {} } = props;
+    const {
+        onChange,
+        configList,
+        errorMap = {},
+        DropdownComponent,
+        SelectComponent,
+        FormulaEditorComponent,
+    } = props;
     const localeService = useDependency(LocaleService);
 
     const options = [{
@@ -365,7 +382,7 @@ const IconSetRuleEdit = (props: {
                         "
                     >
                         <div className="univer-flex univer-items-center">
-                            <Dropdown
+                            <DropdownComponent
                                 overlay={(
                                     <div className="univer-rounded-lg univer-p-4">
                                         <IconItemList onClick={handleIconClick} iconId={item.iconId} iconType={item.iconType} />
@@ -386,11 +403,11 @@ const IconSetRuleEdit = (props: {
                                         : <SlashDoubleIcon />}
                                     <MoreDownIcon />
                                 </div>
-                            </Dropdown>
+                            </DropdownComponent>
                         </div>
                         {!isEnd
                             ? (
-                                <Select
+                                <SelectComponent
                                     options={options}
                                     value={item.operator}
                                     onChange={(v) => { handleOperatorChange(v as CFNumberOperator, index); }}
@@ -430,7 +447,7 @@ const IconSetRuleEdit = (props: {
                                 <div
                                     className="univer-mt-3 univer-grid univer-grid-cols-2 univer-gap-4"
                                 >
-                                    <Select
+                                    <SelectComponent
                                         options={valueTypeOptions}
                                         value={item.value.type}
                                         onChange={(v) => {
@@ -442,6 +459,7 @@ const IconSetRuleEdit = (props: {
                                         type={item.value.type}
                                         error={error}
                                         value={item.value.value || ''}
+                                        FormulaEditorComponent={FormulaEditorComponent}
                                         onChange={(v) => {
                                             handleValueValueChange(v, index);
                                         }}
@@ -453,11 +471,16 @@ const IconSetRuleEdit = (props: {
                 </div>
             );
         });
-    }, [configList, errorMap]);
+    }, [configList, DropdownComponent, errorMap, FormulaEditorComponent, SelectComponent]);
     return render;
 };
 export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
-    const { interceptorManager } = props;
+    const {
+        interceptorManager,
+        DropdownComponent = Dropdown,
+        SelectComponent = Select,
+        FormulaEditorComponent = FormulaEditor,
+    } = props;
     const rule = props.rule?.type === CFRuleType.iconSet ? props.rule : undefined;
     const localeService = useDependency(LocaleService);
     const direction = useObservable(localeService.direction$, localeService.getDirection());
@@ -624,7 +647,7 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
                 {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.panel.styleRule')}
             </div>
             <div className="univer-mt-3">
-                <Dropdown
+                <DropdownComponent
                     overlay={(
                         <div dir={direction} className="univer-rounded-lg univer-p-3">
                             <IconGroupList
@@ -645,7 +668,7 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
                         {previewIcon}
                         <MoreDownIcon />
                     </div>
-                </Dropdown>
+                </DropdownComponent>
             </div>
             <div
                 className="
@@ -668,7 +691,14 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
                     {localeService.t<LocaleKey>('sheets-conditional-formatting-ui.iconSet.onlyShowIcon')}
                 </div>
             </div>
-            <IconSetRuleEdit errorMap={errorMap} onChange={handleChange} configList={configList} />
+            <IconSetRuleEdit
+                errorMap={errorMap}
+                onChange={handleChange}
+                configList={configList}
+                DropdownComponent={DropdownComponent}
+                SelectComponent={SelectComponent}
+                FormulaEditorComponent={FormulaEditorComponent}
+            />
         </div>
     );
 };

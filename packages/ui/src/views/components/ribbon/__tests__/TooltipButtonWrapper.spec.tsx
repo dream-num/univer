@@ -21,7 +21,8 @@
 import type { ComponentType, ReactElement } from 'react';
 import { cleanup, fireEvent, render } from '@testing-library/react';
 import { ILogService, Injector, LocaleService } from '@univerjs/core';
-import { ConfigProvider } from '@univerjs/design';
+import { ConfigProvider, Dialog, Dropdown } from '@univerjs/design';
+import { useState } from 'react';
 import { of } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -47,6 +48,19 @@ class TestLocaleService {
 
 class TestLogService {
     warn(): void {}
+}
+
+function NestedDialogDropdown() {
+    const [open, setOpen] = useState(false);
+
+    return (
+        <>
+            <Dropdown overlay={<button type="button" onClick={() => setOpen(true)}>More colors</button>}>
+                <button type="button">Border color</button>
+            </Dropdown>
+            <Dialog open={open}>Custom color</Dialog>
+        </>
+    );
 }
 
 function renderWithDependencies(
@@ -191,6 +205,30 @@ describe('DropdownWrapper', () => {
         fireEvent.pointerDown(document.body);
 
         expect(queryByText('Dropdown content')).toBeNull();
+    });
+
+    it('keeps the toolbar dropdown open when interacting with a nested portaled dropdown', () => {
+        const { getByRole } = render(
+            <ConfigProvider mountContainer={document.body}>
+                <ToolbarDropdownProvider>
+                    <TooltipWrapper dropdownKey="border-dropdown">
+                        <DropdownWrapper
+                            overlay={<NestedDialogDropdown />}
+                        >
+                            <button type="button">Border</button>
+                        </DropdownWrapper>
+                    </TooltipWrapper>
+                </ToolbarDropdownProvider>
+            </ConfigProvider>
+        );
+
+        fireEvent.click(getByRole('button', { name: 'Border' }));
+        fireEvent.click(getByRole('button', { name: 'Border color' }));
+        const moreColorButton = getByRole('button', { name: 'More colors' });
+        fireEvent.pointerDown(moreColorButton);
+        fireEvent.click(moreColorButton);
+
+        expect(document.querySelector('[role="dialog"]')).not.toBeNull();
     });
 });
 

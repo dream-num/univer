@@ -27,7 +27,13 @@ import { map } from 'rxjs';
 import { ShowAddSheetCommentModalOperation } from '../commands/operations/comment.operation';
 import { SheetsThreadCommentPopupService } from '../services/sheets-thread-comment-popup.service';
 
-export const SheetsThreadCommentPanel = () => {
+export interface ISheetsThreadCommentPanelProps {
+    ThreadCommentPanelComponent?: typeof ThreadCommentPanel;
+}
+
+export const SheetsThreadCommentPanel = ({
+    ThreadCommentPanelComponent = ThreadCommentPanel,
+}: ISheetsThreadCommentPanelProps = {}) => {
     const markSelectionService = useDependency(IMarkSelectionService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const sheetsThreadCommentPopupService = useDependency(SheetsThreadCommentPopupService);
@@ -166,7 +172,7 @@ export const SheetsThreadCommentPanel = () => {
     }, [markSelectionService, panelVisible]);
 
     return (
-        <ThreadCommentPanel
+        <ThreadCommentPanelComponent
             unitId={unitId}
             subUnitId$={subUnitId$}
             type={UniverInstanceType.UNIVER_SHEET}

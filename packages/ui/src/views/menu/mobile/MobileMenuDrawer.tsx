@@ -21,7 +21,7 @@ import type { MobileDrawerSnap } from '../../components/mobile-drawer/MobileDraw
 import { LocaleService } from '@univerjs/core';
 import { clsx, ConfigContext, resetButtonClassName } from '@univerjs/design';
 import { CloseIcon, MoreLeftIcon } from '@univerjs/icons';
-import { useContext, useState } from 'react';
+import { useContext, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
 import { useDependency, useObservable } from '../../../utils/di';
@@ -54,13 +54,18 @@ function MobileMenuDrawerContent(props: IMobileMenuDrawerProps) {
     const rootMenuManagerService = useDependency(IMenuManagerService);
     const direction = useObservable(localeService.direction$);
     const { mountContainer } = useContext(ConfigContext);
+    const layerRef = useRef<HTMLDivElement>(null);
 
     if (!mountContainer) {
         return null;
     }
 
     return createPortal(
-        <div dir={direction} className="univer-fixed univer-inset-0 univer-z-[1080] univer-flex univer-items-end">
+        <div
+            ref={layerRef}
+            dir={direction}
+            className="univer-fixed univer-inset-0 univer-z-[1080] univer-flex univer-items-end"
+        >
             <button
                 type="button"
                 aria-label={localeService.t<LocaleKey>('ui.rangeSelector.cancel')}
@@ -71,6 +76,7 @@ function MobileMenuDrawerContent(props: IMobileMenuDrawerProps) {
                 onClick={onClose}
             />
             <MobileDrawer
+                layerRef={layerRef}
                 componentName="mobile-menu-drawer"
                 snap={drawerSnap}
                 expandLabel={localeService.t<LocaleKey>('ui.ribbon.more')}

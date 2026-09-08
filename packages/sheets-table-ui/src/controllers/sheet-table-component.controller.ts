@@ -17,11 +17,11 @@
 import type { IDisposable, Nullable } from '@univerjs/core';
 import { Disposable, IContextService, Inject } from '@univerjs/core';
 import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
-import { IDialogService, MOBILE_UI_MODE } from '@univerjs/ui';
+import { IDialogService } from '@univerjs/ui';
 import { distinctUntilChanged, startWith } from 'rxjs';
 import { SHEETS_TABLE_FILTER_PANEL_OPENED_KEY, UNIVER_SHEET_TABLE_FILTER_PANEL_ID } from '../const';
 
-interface ITableFilterPanelInfo {
+export interface ITableFilterPanelInfo {
     unitId: string;
     subUnitId: string;
     tableId: string;
@@ -32,9 +32,9 @@ export class SheetsTableComponentController extends Disposable {
     private _popupDisposable?: Nullable<IDisposable>;
     private _currentTableFilterInfo: Nullable<ITableFilterPanelInfo> = null;
     constructor(
-        @IContextService private readonly _contextService: IContextService,
+        @IContextService protected readonly _contextService: IContextService,
         @Inject(SheetCanvasPopManagerService) private _sheetCanvasPopupService: SheetCanvasPopManagerService,
-        @Inject(IDialogService) private readonly _dialogService: IDialogService
+        @Inject(IDialogService) protected readonly _dialogService: IDialogService
 
     ) {
         super();
@@ -90,24 +90,13 @@ export class SheetsTableComponentController extends Disposable {
         this._contextService.setContextValue(SHEETS_TABLE_FILTER_PANEL_OPENED_KEY, false);
     }
 
-    private _openFilterPopup(): void {
+    protected _openFilterPopup(): void {
         const currentFilterModel = this._currentTableFilterInfo;
         if (!currentFilterModel) {
             throw new Error('[SheetsFilterUIController]: no filter model when opening filter popup!');
         }
 
         const { row: startRow, column: col } = currentFilterModel;
-        if (this._contextService.getContextValue(MOBILE_UI_MODE)) {
-            this._dialogService.open({
-                id: UNIVER_SHEET_TABLE_FILTER_PANEL_ID,
-                title: { title: 'sheets-table-ui.filter.by-values' },
-                children: { label: SHEETS_TABLE_FILTER_PANEL_OPENED_KEY },
-                onClose: () => {
-                    this._contextService.setContextValue(SHEETS_TABLE_FILTER_PANEL_OPENED_KEY, false);
-                },
-            });
-            return;
-        }
         this._popupDisposable = this._sheetCanvasPopupService.attachPopupToCell(startRow, col, {
             componentKey: SHEETS_TABLE_FILTER_PANEL_OPENED_KEY,
             direction: 'horizontal',

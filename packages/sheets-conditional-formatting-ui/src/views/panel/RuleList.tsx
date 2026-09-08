@@ -15,11 +15,13 @@
  */
 
 import type { IRange, Workbook } from '@univerjs/core';
+import type { ISelectProps } from '@univerjs/design';
 import type {
     IConditionFormattingRule,
     IDeleteCfCommandParams,
     IMoveCfCommandParams,
 } from '@univerjs/sheets-conditional-formatting';
+import type { ComponentType } from 'react';
 import type { LocaleKey } from '../../locale/types';
 import {
     ICommandService,
@@ -57,9 +59,10 @@ import { debounceTime, filter, map, merge, Observable, share, startWith } from '
 import { ConditionalFormattingI18nController } from '../../controllers/cf.i18n.controller';
 import { Preview } from '../Preview';
 
-interface IRuleListProps {
+export interface IRuleListProps {
     onClick: (rule: IConditionFormattingRule) => void;
     onCreate: () => void;
+    SelectComponent?: ComponentType<ISelectProps>;
 };
 const getRuleDescribe = (rule: IConditionFormattingRule, localeService: LocaleService) => {
     const ruleConfig = rule.rule;
@@ -122,6 +125,7 @@ const getRuleDescribe = (rule: IConditionFormattingRule, localeService: LocaleSe
 };
 
 export function RuleList(props: IRuleListProps) {
+    const { SelectComponent = Select } = props;
     const { onClick } = props;
     const conditionalFormattingRuleModel = useDependency(ConditionalFormattingRuleModel);
     const univerInstanceService = useDependency(IUniverInstanceService);
@@ -296,7 +300,7 @@ export function RuleList(props: IRuleListProps) {
                 <div className="univer-flex univer-items-center univer-gap-2">
                     {conditionalFormattingI18nController.tWithReactNode(
                         'sheets-conditional-formatting-ui.panel.managerRuleSelect',
-                        <Select
+                        <SelectComponent
                             className="univer-w-36"
                             options={selectOption}
                             value={selectValue}

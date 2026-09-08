@@ -47,6 +47,8 @@ const locale: typeof enUS = {
             coped: 'Enlace copiado al portapapeles',
         },
         popup: {
+            title: 'Hipervínculo',
+            open: 'Abrir enlace',
             copy: 'Copiar enlace',
             edit: 'Editar enlace',
             cancel: 'Cancelar enlace',

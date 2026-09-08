@@ -24,10 +24,11 @@ import { UniverSheetsMobileUIPlugin } from '@univerjs/sheets-ui';
 import { UniverMobileUIPlugin } from '@univerjs/ui';
 import pkg from '../package.json';
 import { defaultPluginConfig, SHEETS_FILTER_UI_PLUGIN_CONFIG_KEY } from './config/config';
-import { ComponentsController } from './controllers/components.controller';
 import { SheetsFilterMobileMenuController } from './controllers/mobile-menu.controller';
+import { MobileComponentsController } from './controllers/mobile/components.controller';
+import { SheetsFilterUIMobileController } from './controllers/mobile/ui.controller';
 import { SheetsFilterPermissionController } from './controllers/sheets-filter-permission.controller';
-import { SheetsFilterUIMobileController } from './controllers/ui-mobile.controller';
+import { ISheetsFilterPanelService, SheetsFilterPanelService } from './services/sheets-filter-panel.service';
 
 @DependentOn(
     UniverRenderEnginePlugin,
@@ -62,9 +63,10 @@ export class UniverSheetsFilterMobileUIPlugin extends Plugin {
     }
 
     override onStarting(): void {
-        this._injector.add([ComponentsController]);
-        this._injector.get(ComponentsController);
+        this._injector.add([MobileComponentsController]);
+        this._injector.get(MobileComponentsController);
         ([
+            [ISheetsFilterPanelService, { useClass: SheetsFilterPanelService }],
             [SheetsFilterPermissionController],
             [SheetsFilterMobileMenuController],
             [SheetsFilterUIMobileController],

@@ -45,6 +45,7 @@ import { AutoWidthController } from './controllers/auto-width.controller';
 import { CellCustomRenderController } from './controllers/cell-custom-render.controller';
 import { CellPopupEditorController } from './controllers/cell-popup-editor.controller';
 import { SheetCheckboxController } from './controllers/checkbox.controller';
+import { SheetClipboardUIController } from './controllers/clipboard/clipboard-ui.controller';
 import { SheetClipboardController } from './controllers/clipboard/clipboard.controller';
 import { ComponentsController } from './controllers/components.controller';
 import { SheetsDefinedNameController } from './controllers/defined-name/defined-name.controller';
@@ -223,6 +224,7 @@ export class UniverSheetsUIPlugin extends Plugin {
 
         registerDependencies(this._injector, [
             [SheetClipboardController],
+            [SheetClipboardUIController],
         ]);
 
         touchDependencies(this._injector, [
@@ -239,6 +241,7 @@ export class UniverSheetsUIPlugin extends Plugin {
         touchDependencies(this._injector, [
             [SheetPermissionPanelModel],
             [SheetClipboardController],
+            [SheetClipboardUIController],
             [FormulaEditorController],
             [SheetsDefinedNameController],
             [StatusBarController],

@@ -24,28 +24,20 @@ import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validati
 import { UniverSheetsMobileUIPlugin } from '@univerjs/sheets-ui';
 import { UniverMobileUIPlugin } from '@univerjs/ui';
 import pkg from '../package.json';
+import { ClearQuickSheetDataValidationCommand, InsertQuickSheetDataValidationCommand } from './commands/commands/data-validation-ui.command';
 import {
-    AddSheetDataValidationAndOpenCommand,
-    ClearQuickSheetDataValidationCommand,
-    InsertQuickSheetDataValidationCommand,
-} from './commands/commands/data-validation-ui.command';
-import {
-    CloseValidationPanelOperation,
     HideDataValidationDropdown,
-    OpenValidationPanelOperation,
     ShowDataValidationDropdown,
-    ToggleValidationPanelOperation,
 } from './commands/operations/data-validation.operation';
 import { defaultPluginConfig, SHEETS_DATA_VALIDATION_UI_PLUGIN_CONFIG_KEY } from './config/config';
-import { ComponentsController } from './controllers/components.controller';
 import { DataValidationAlertController } from './controllers/dv-alert.controller';
 import { DataValidationAutoFillController } from './controllers/dv-auto-fill.controller';
 import { DataValidationCopyPasteController } from './controllers/dv-copy-paste.controller';
 import { DataValidationPermissionController } from './controllers/dv-permission.controller';
-import { SheetsDataValidationRenderController } from './controllers/dv-render.controller';
 import { SheetsDataValidationReRenderController } from './controllers/dv-rerender.controller';
+import { MobileComponentsController } from './controllers/mobile/components.controller';
+import { SheetsDataValidationMobileRenderController } from './controllers/mobile/dv-render.controller';
 import { SheetsDataValidationUIController } from './controllers/ui.controller';
-import { DataValidationPanelService } from './services/data-validation-panel.service';
 import { DataValidationDropdownManagerService } from './services/dropdown-manager.service';
 
 @DependentOn(
@@ -83,14 +75,13 @@ export class UniverSheetsDataValidationMobileUIPlugin extends Plugin {
     }
 
     override onStarting(): void {
-        this._injector.add([ComponentsController]);
-        this._injector.get(ComponentsController);
+        this._injector.add([MobileComponentsController]);
+        this._injector.get(MobileComponentsController);
         ([
-            [DataValidationPanelService],
             [DataValidationDropdownManagerService],
             [DataValidationAlertController],
             [DataValidationAutoFillController],
-            [SheetsDataValidationRenderController],
+            [SheetsDataValidationMobileRenderController],
             [DataValidationPermissionController],
             [DataValidationCopyPasteController],
             [SheetsDataValidationUIController],
@@ -99,14 +90,10 @@ export class UniverSheetsDataValidationMobileUIPlugin extends Plugin {
         });
 
         [
-            AddSheetDataValidationAndOpenCommand,
             InsertQuickSheetDataValidationCommand,
             ClearQuickSheetDataValidationCommand,
             ShowDataValidationDropdown,
             HideDataValidationDropdown,
-            CloseValidationPanelOperation,
-            OpenValidationPanelOperation,
-            ToggleValidationPanelOperation,
         ].forEach((command) => {
             this._commandService.registerCommand(command);
         });
@@ -125,7 +112,7 @@ export class UniverSheetsDataValidationMobileUIPlugin extends Plugin {
 
     override onRendered(): void {
         this._injector.get(SheetsDataValidationUIController);
-        this._injector.get(SheetsDataValidationRenderController);
+        this._injector.get(SheetsDataValidationMobileRenderController);
     }
 
     override onSteady(): void {

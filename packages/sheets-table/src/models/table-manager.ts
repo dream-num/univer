@@ -369,7 +369,7 @@ export class TableManager extends Disposable {
         const table = unitMap?.get(tableId);
         if (!table) return;
         const subUnitId = table.getSubunitId();
-        const { name, updateRange, rowColOperation, theme, options } = config;
+        const { name, updateRange, rowColOperation, theme, sortInfo, options } = config;
         if (name) {
             const oldTableName = table.getDisplayName();
             table.setDisplayName(name);
@@ -397,6 +397,10 @@ export class TableManager extends Disposable {
                 theme,
                 oldTheme,
             });
+        }
+
+        if ('sortInfo' in config) {
+            table.getTableFilters().setSortInfo(sortInfo);
         }
 
         if (options) {

@@ -14,22 +14,33 @@
  * limitations under the License.
  */
 
-import type { FC } from 'react';
+import type { IColorPickerProps, IDropdownProps } from '@univerjs/design';
+import type { ComponentType, FC } from 'react';
 import { ColorKit } from '@univerjs/core';
 import { clsx, Dropdown, ColorPicker as OriginColorPicker } from '@univerjs/design';
 import { PaintBucketDoubleIcon } from '@univerjs/icons';
 import { useMemo } from 'react';
 
-interface IColorPickerProps {
+export interface IConditionalColorPickerProps {
     color: string;
     onChange: (color: string) => void;
     disable?: boolean;
     Icon?: FC;
     className?: string;
+    DropdownComponent?: ComponentType<IDropdownProps>;
+    PickerComponent?: ComponentType<IColorPickerProps>;
 };
 
-export const ColorPicker = (props: IColorPickerProps) => {
-    const { color, onChange, disable = false, Icon = PaintBucketDoubleIcon, className } = props;
+export const ColorPicker = (props: IConditionalColorPickerProps) => {
+    const {
+        color,
+        onChange,
+        disable = false,
+        Icon = PaintBucketDoubleIcon,
+        className,
+        DropdownComponent = Dropdown,
+        PickerComponent = OriginColorPicker,
+    } = props;
 
     const colorKit = useMemo(() => new ColorKit(color), [color]);
 
@@ -46,10 +57,10 @@ export const ColorPicker = (props: IColorPickerProps) => {
 
     return !disable
         ? (
-            <Dropdown
+            <DropdownComponent
                 overlay={(
                     <div className="univer-rounded-lg univer-p-4">
-                        <OriginColorPicker value={color} onChange={onChange} />
+                        <PickerComponent value={color} onChange={onChange} />
                     </div>
                 )}
             >
@@ -62,7 +73,7 @@ export const ColorPicker = (props: IColorPickerProps) => {
                 >
                     {renderIcon()}
                 </span>
-            </Dropdown>
+            </DropdownComponent>
         )
         : renderIcon();
 };

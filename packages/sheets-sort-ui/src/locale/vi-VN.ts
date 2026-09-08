@@ -41,6 +41,7 @@ const locale: typeof enUS = {
             'sort-reminder-no': 'Giữ nguyên phạm vi sắp xếp được chọn',
             'first-row-check': 'Hàng đầu tiên không tham gia sắp xếp',
             'add-condition': 'Thêm điều kiện sắp xếp',
+            'delete-condition': 'Xóa điều kiện',
             cancel: 'Hủy bỏ',
             confirm: 'Xác nhận',
         },

@@ -17,6 +17,8 @@
 import type { ReactElement } from 'react';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { DesktopLogService, ILogService, Injector, LocaleService, LocaleType } from '@univerjs/core';
+import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ComponentManager, IconManager } from '../../../../common';
 import enUS from '../../../../locale/en-US';
@@ -25,6 +27,8 @@ import { IDialogService } from '../../../../services/dialog/dialog.service';
 import { MobileDialogService } from '../../../../services/dialog/mobile-dialog.service';
 import { IUIPartsService, UIPartsService } from '../../../../services/parts/parts.service';
 import { RediProvider } from '../../../../utils/di';
+import { MobileDrawer } from '../../mobile-drawer/MobileDrawer';
+import { MobileDrawerCoordinatorProvider } from '../../mobile-drawer/MobileDrawerCoordinator';
 import { MobileDialogPart } from '../MobileDialogPart';
 
 Object.defineProperty(globalThis, 'IS_REACT_ACT_ENVIRONMENT', { configurable: true, value: true, writable: true });
@@ -41,9 +45,40 @@ function renderWithDependencies(element: ReactElement, mobileService = false) {
     injector.add([IconManager]);
 
     return {
-        ...render(<RediProvider value={{ injector }}>{element}</RediProvider>),
+        ...render(
+            <RediProvider value={{ injector }}>
+                <MobileDrawerCoordinatorProvider>{element}</MobileDrawerCoordinatorProvider>
+            </RediProvider>
+        ),
         injector,
     };
+}
+
+function NestedMobileLayer() {
+    const [open, setOpen] = useState(false);
+
+    return (
+        <>
+            <button type="button" onClick={() => setOpen(true)}>
+                Open nested layer
+            </button>
+            {open && createPortal(
+                <MobileDrawer
+                    openMode="push"
+                    snap="compact"
+                    expandLabel="Nested drawer"
+                    collapseLabel="Nested drawer"
+                    onSnapChange={vi.fn()}
+                    onClose={() => setOpen(false)}
+                    role="dialog"
+                    ariaLabel="Nested drawer"
+                >
+                    <button type="button" onClick={() => setOpen(false)}>Close nested layer</button>
+                </MobileDrawer>,
+                document.body
+            )}
+        </>
+    );
 }
 
 describe('MobileDialogPart', () => {
@@ -111,6 +146,35 @@ describe('MobileDialogPart', () => {
         expect(screen.getByRole('dialog')).toBeTruthy();
     });
 
+    it('ignores the release of the pointer that opened the dialog before accepting a backdrop tap', () => {
+        const rendered = renderWithDependencies(
+            <>
+                <button type="button">Open on pointer down</button>
+                <MobileDialogPart />
+            </>
+        );
+        const dialogService = rendered.injector.get(IDialogService);
+        const trigger = screen.getByRole('button', { name: 'Open on pointer down' });
+        trigger.addEventListener('pointerdown', () => {
+            dialogService.open({
+                id: 'pointer-down-dialog',
+                children: { title: <span>Pointer down dialog</span> },
+            });
+        });
+
+        fireEvent.pointerDown(trigger, { pointerId: 1 });
+        const backdrop = screen.getAllByRole('button', { name: 'Close sidebar' })[0];
+        fireEvent.pointerUp(backdrop, { pointerId: 1 });
+        fireEvent.click(backdrop, { detail: 0 });
+
+        expect(screen.getByRole('dialog')).toBeTruthy();
+
+        fireEvent.pointerDown(backdrop, { pointerId: 2 });
+        fireEvent.pointerUp(backdrop, { pointerId: 2 });
+
+        expect(screen.queryByRole('dialog')).toBeNull();
+    });
+
     it('makes re-entrant business close callbacks idempotent', () => {
         const rendered = renderWithDependencies(<MobileDialogPart />, true);
         const dialogService = rendered.injector.get(IDialogService);
@@ -127,5 +191,31 @@ describe('MobileDialogPart', () => {
         expect(() => fireEvent.click(screen.getAllByRole('button', { name: 'Close sidebar' })[1])).not.toThrow();
         expect(onClose).toHaveBeenCalledOnce();
         expect(screen.queryByRole('dialog')).toBeNull();
+    });
+
+    it('hides a parent dialog while a pushed drawer is open and restores it after close', () => {
+        const rendered = renderWithDependencies(<MobileDialogPart />, true);
+        const dialogService = rendered.injector.get(IDialogService);
+        rendered.injector.get(ComponentManager).register('nested-mobile-layer', NestedMobileLayer);
+
+        act(() => {
+            dialogService.open({
+                id: 'parent-dialog',
+                children: { label: 'nested-mobile-layer' },
+            });
+        });
+
+        const dialogShell = document.querySelector<HTMLElement>('[data-u-comp="mobile-dialog"]');
+        expect(dialogShell?.hidden).toBe(false);
+
+        fireEvent.click(screen.getByRole('button', { name: 'Open nested layer' }));
+
+        expect(dialogShell?.hidden).toBe(true);
+        expect(screen.getByRole('dialog', { name: 'Nested drawer' })).toBeTruthy();
+
+        fireEvent.click(screen.getByRole('button', { name: 'Close nested layer' }));
+
+        expect(dialogShell?.hidden).toBe(false);
+        expect(screen.getByRole('button', { name: 'Open nested layer' })).toBeTruthy();
     });
 });

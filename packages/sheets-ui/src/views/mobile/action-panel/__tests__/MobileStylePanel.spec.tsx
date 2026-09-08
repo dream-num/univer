@@ -47,7 +47,7 @@ import {
     SetTextWrapCommand,
     SetVerticalTextAlignCommand,
 } from '@univerjs/sheets';
-import { FontService, IconManager, IFontService, MenuItemType, RediContext } from '@univerjs/ui';
+import { ComponentManager, FontService, IconManager, IFontService, MenuItemType, RediContext } from '@univerjs/ui';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BehaviorSubject } from 'rxjs';
@@ -64,15 +64,20 @@ import {
 import { BORDER_LINE_CHILDREN, BORDER_SIZE_CHILDREN } from '../../../border-panel/interface';
 import { MobileStylePanel } from '../MobileStylePanel';
 
-function renderStylePanel(props: Partial<ComponentProps<typeof MobileStylePanel>> = {}) {
+function renderStylePanel(
+    props: Partial<ComponentProps<typeof MobileStylePanel>> = {},
+    configureInjector?: (injector: Injector) => void
+) {
     const injector = new Injector();
     injector.add([LocaleService]);
     injector.add([ThemeService]);
     injector.add([ILogService, { useClass: DesktopLogService }]);
     injector.add([IConfigService, { useClass: ConfigService }]);
     injector.add([IconManager]);
+    injector.add([ComponentManager]);
     injector.add([IFontService, { useClass: FontService }]);
     injector.get(LocaleService).load({ [LocaleType.ZH_CN]: {} });
+    configureInjector?.(injector);
     const resolvedProps: ComponentProps<typeof MobileStylePanel> = {
         groups: [],
         currentView: null,
@@ -221,8 +226,12 @@ describe('MobileStylePanel', () => {
         root = rendered.root;
         container = rendered.container;
 
-        expect(getButton(rendered.container, 'Font family').textContent).toContain('Arial');
-        expect(getButton(rendered.container, 'Font size').textContent).toContain('10');
+        const fontFamilyButton = getButton(rendered.container, 'Font family');
+        const fontSizeButton = getButton(rendered.container, 'Font size');
+        expect(fontFamilyButton.textContent).toContain('Arial');
+        expect(fontSizeButton.textContent).toContain('10');
+        expect(fontFamilyButton.querySelector('svg')).not.toBeNull();
+        expect(fontSizeButton.querySelector('svg')).not.toBeNull();
         clickButton(rendered.container, 'Font family');
         expect(onOpenView).toHaveBeenCalledWith(expect.objectContaining({ kind: 'options', title: 'Font family' }));
     });
@@ -357,6 +366,7 @@ describe('MobileStylePanel', () => {
             commandId: 'set-pattern',
             detailTitle: 'More formats',
             customTitle: 'Custom format',
+            customComponent: 'test-mobile-custom-number-format',
             quickOptions: [
                 { label: 'Percent', commandId: 'percent' },
                 { label: 'Currency', commandId: 'currency' },
@@ -381,7 +391,7 @@ describe('MobileStylePanel', () => {
             type: MenuItemType.SELECTOR,
             selections: [],
             value$: new BehaviorSubject('General'),
-            mobileStyle: numfmtConfig,
+            mobileNumberFormat: numfmtConfig,
         };
         const groups: IMenuSchema[] = [{
             key: 'layout',
@@ -566,6 +576,7 @@ describe('MobileStylePanel', () => {
             commandId: 'set-pattern',
             detailTitle: 'More formats',
             customTitle: 'Custom format',
+            customComponent: 'test-mobile-custom-number-format',
             quickOptions: [],
             decimalOptions: [],
             detailOptions: [
@@ -581,7 +592,7 @@ describe('MobileStylePanel', () => {
             type: MenuItemType.SELECTOR,
             selections: [],
             value$: new BehaviorSubject('Date'),
-            mobileStyle: config,
+            mobileNumberFormat: config,
         };
         const rendered = renderStylePanel({
             currentView: { kind: 'number-format', title: 'More formats', item, config },
@@ -601,12 +612,14 @@ describe('MobileStylePanel', () => {
     it('applies a custom number format from the third-level view', () => {
         const onExecute = vi.fn();
         const onBack = vi.fn();
+        const customComponent = 'test-mobile-custom-number-format';
         const config = {
             kind: 'number-format' as const,
             title: 'Number format',
             commandId: 'set-pattern',
             detailTitle: 'More formats',
             customTitle: 'Custom format',
+            customComponent,
             quickOptions: [],
             decimalOptions: [],
             detailOptions: [],
@@ -617,12 +630,17 @@ describe('MobileStylePanel', () => {
             currentView: { kind: 'custom-number-format', title: 'Custom format', item, config },
             onExecute,
             onBack,
+        }, (injector) => {
+            injector.get(ComponentManager).register(customComponent, (props: { onConfirm: (pattern: string) => void }) => (
+                <button type="button" aria-label="Registered custom format" onClick={() => props.onConfirm('0.00')}>
+                    Registered custom format
+                </button>
+            ));
         });
         root = rendered.root;
         container = rendered.container;
 
-        clickButton(rendered.container, '0.00');
-        clickButton(rendered.container, 'sheets-ui.mobile.confirm');
+        clickButton(rendered.container, 'Registered custom format');
         expect(onExecute).toHaveBeenCalledWith({ id: 'set-pattern', value: '0.00' });
         expect(onBack).toHaveBeenCalledOnce();
     });

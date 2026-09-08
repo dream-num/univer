@@ -23,8 +23,12 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import enUS from '../../../locale/en-US';
 import { ConfigProvider } from '../../config-provider/ConfigProvider';
 import { Dropdown } from '../Dropdown';
+import { MobileDropdown } from '../MobileDropdown';
 
-afterEach(cleanup);
+afterEach(() => {
+    cleanup();
+    vi.unstubAllGlobals();
+});
 
 describe('Dropdown', () => {
     it('should render trigger and not show overlay by default', () => {
@@ -74,18 +78,20 @@ describe('Dropdown', () => {
         expect(handleOpenChange).toHaveBeenCalled();
     });
 
-    it('should render a touch-first dialog surface under a mobile provider', () => {
+    it('should render a touch-first dialog surface from MobileDropdown', () => {
+        vi.stubGlobal('CSS', { supports: () => false });
         render(
-            <ConfigProvider locale={enUS.design} mountContainer={document.body} mobile>
-                <Dropdown overlay={<div>Overlay Content</div>} open>
+            <ConfigProvider locale={enUS.design} mountContainer={document.body}>
+                <MobileDropdown overlay={<div>Overlay Content</div>} open>
                     <button type="button">Trigger</button>
-                </Dropdown>
+                </MobileDropdown>
             </ConfigProvider>
         );
 
         const dialog = screen.getByRole('dialog');
         expect(dialog.textContent).toContain('Overlay Content');
         expect(dialog.classList.contains('!univer-bottom-0')).toBe(true);
+        expect(dialog.style.maxHeight).toBe('80vh');
         expect(screen.getByText(enUS.design.Accessibility.menu)).toBeTruthy();
     });
 });

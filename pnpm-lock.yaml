@@ -1992,6 +1992,9 @@ importers:
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
+      react-dom:
+        specifier: 19.2.8
+        version: 19.2.8(react@19.2.8)
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
@@ -2404,6 +2407,9 @@ importers:
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
+      react-dom:
+        specifier: 19.2.8
+        version: 19.2.8(react@19.2.8)
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*

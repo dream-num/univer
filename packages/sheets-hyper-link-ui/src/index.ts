@@ -26,8 +26,12 @@ export type { IUniverSheetsHyperLinkUIConfig } from './config/config';
 export { SheetsHyperLinkCopyPasteController } from './controllers/copy-paste.controller';
 export { InsertLinkShortcut } from './menu/menu';
 export { menuSchema as SheetsHyperLinkUIMenuSchema } from './menu/schema';
+export { UniverSheetsHyperLinkMobileUIPlugin } from './mobile-plugin';
 export { UniverSheetsHyperLinkUIPlugin } from './plugin';
-export { SheetsHyperLinkPopupService } from './services/popup.service';
+export {
+    ISheetsHyperLinkPopupService,
+    SheetsHyperLinkPopupService,
+} from './services/popup.service';
 export { SheetsHyperLinkResolverService } from './services/resolver.service';
 export { SheetsHyperLinkSidePanelService } from './services/side-panel.service';
 export type { ICustomHyperLinkView } from './services/side-panel.service';

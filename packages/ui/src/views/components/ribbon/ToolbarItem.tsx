@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { IDropdownMenuProps, IDropdownProps } from '@univerjs/design';
+import type { ComponentType } from 'react';
 import type { IDisplayMenuItem, IMenuItem, IMenuSelectorItem, IValueOption } from '../../../services/menu/menu';
 import type { ITooltipWrapperRef } from './TooltipButtonWrapper';
 import { ICommandService, LocaleService } from '@univerjs/core';
@@ -30,7 +32,7 @@ import { useToolbarItemStatus, useToolbarShortcutDisplay } from './hook';
 import { ToolbarButton, toolbarButtonVariants } from './ToolbarButton';
 import { DropdownMenuWrapper, TooltipWrapper } from './TooltipButtonWrapper';
 
-type IToolbarItemProps = IDisplayMenuItem<IMenuItem> & {
+export type IToolbarItemProps = IDisplayMenuItem<IMenuItem> & {
     grid?: boolean;
     large?: boolean;
     showLabel?: boolean;
@@ -38,6 +40,8 @@ type IToolbarItemProps = IDisplayMenuItem<IMenuItem> & {
     iconColor?: string;
     fullWidth?: boolean;
     preserveStrokeWidth?: boolean;
+    dropdownComponent?: ComponentType<IDropdownProps>;
+    dropdownMenuComponent?: ComponentType<IDropdownMenuProps>;
 };
 
 const toolbarDisabledClassName = 'univer-pointer-events-none univer-cursor-not-allowed univer-text-gray-300 dark:!univer-text-gray-600';
@@ -202,7 +206,27 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
         commandService.executeCommand(commandId, params);
     };
 
-    const { tooltip, shortcut, icon, title, label, id, commandId, type, slot, params, grid, large, showLabel, iconSize, iconColor, fullWidth, preserveStrokeWidth } = props;
+    const {
+        tooltip,
+        shortcut,
+        icon,
+        title,
+        label,
+        id,
+        commandId,
+        type,
+        slot,
+        params,
+        grid,
+        large,
+        showLabel,
+        iconSize,
+        iconColor,
+        fullWidth,
+        preserveStrokeWidth,
+        dropdownComponent,
+        dropdownMenuComponent,
+    } = props;
     const gridLabel = title ?? tooltip;
 
     const shortcutDisplay = useToolbarShortcutDisplay({ id, commandId, shortcut });
@@ -305,6 +329,8 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                         disabled={disabled}
                         preserveStrokeWidth={preserveStrokeWidth}
                         onOptionSelect={handleSelect}
+                        dropdownComponent={dropdownComponent}
+                        dropdownMenuComponent={dropdownMenuComponent}
                     >
                         <div
                             className={clsx(toolbarButtonSelectorTriggerVariants({ disabled, active: activated }), {
@@ -328,6 +354,8 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IToolbarItemProps>((pr
                     disabled={disabled}
                     preserveStrokeWidth={preserveStrokeWidth}
                     onOptionSelect={handleSelect}
+                    dropdownComponent={dropdownComponent}
+                    dropdownMenuComponent={dropdownMenuComponent}
                 >
                     <div
                         data-u-command={id}

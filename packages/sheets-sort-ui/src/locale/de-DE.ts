@@ -41,6 +41,7 @@ const locale: typeof enUS = {
             'sort-reminder-no': 'Bereichssortierung beibehalten',
             'first-row-check': 'Erste Zeile nimmt nicht am Sortieren teil',
             'add-condition': 'Bedingung hinzufügen',
+            'delete-condition': 'Bedingung löschen',
             cancel: 'Abbrechen',
             confirm: 'Bestätigen',
         },

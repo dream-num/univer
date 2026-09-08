@@ -33,6 +33,13 @@ const locale: typeof enUS = {
             'clear-filter': 'Xóa lọc',
             cancel: 'Hủy bỏ',
             confirm: 'Xác nhận',
+            mobile: {
+                resize: 'Thay đổi kích thước bảng lọc',
+                back: 'Quay lại',
+                column: 'Cột {0}',
+                'previous-column': 'Cột trước',
+                'next-column': 'Cột tiếp theo',
+            },
             'by-values': 'Theo giá trị',
             'by-colors': 'Theo màu sắc',
             'filter-by-cell-fill-color': 'Lọc theo màu nền ô',

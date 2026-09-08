@@ -19,9 +19,13 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import enUS from '../../../locale/en-US';
 import { ConfigProvider } from '../../config-provider/ConfigProvider';
 import { Dialog } from '../Dialog';
+import { MobileDialog } from '../MobileDialog';
 import '@testing-library/jest-dom/vitest';
 
-afterEach(cleanup);
+afterEach(() => {
+    cleanup();
+    vi.unstubAllGlobals();
+});
 
 describe('Dialog', () => {
     it('should not render when open is false', () => {
@@ -139,5 +143,20 @@ describe('Dialog', () => {
         expect(dialog.dir).toBe('rtl');
 
         mountContainer.remove();
+    });
+
+    it('should render a touch-first bottom surface from MobileDialog', () => {
+        vi.stubGlobal('CSS', { supports: () => false });
+        render(
+            <ConfigProvider locale={enUS.design} mountContainer={document.body}>
+                <MobileDialog open title="Mobile title" showOk>content</MobileDialog>
+            </ConfigProvider>
+        );
+
+        const dialog = document.querySelector('[role="dialog"]') as HTMLElement;
+        expect(dialog).toHaveClass('!univer-bottom-0');
+        expect(dialog).toHaveStyle({ bottom: '0px', position: 'fixed', width: '100%' });
+        expect(dialog.style.maxHeight).toBe('80vh');
+        expect(dialog.querySelector('[data-slot="dialog-footer"]')).toBeInTheDocument();
     });
 });

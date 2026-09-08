@@ -21,7 +21,13 @@ import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-no
 import type { DocumentViewModel } from '../../../view-model/document-view-model';
 import type { IBreakPoints } from '../../line-breaker/line-breaker';
 import type { ILayoutContext } from '../../tools';
-import { BaselineOffset, BooleanNumber, DataStreamTreeTokenType, GridType, PositionedObjectLayoutType } from '@univerjs/core';
+import {
+    BaselineOffset,
+    BooleanNumber,
+    DataStreamTreeTokenType,
+    GridType,
+    PositionedObjectLayoutType,
+} from '@univerjs/core';
 import { cjk } from '../../../../../basics/cjk-regexp';
 import { GlyphType } from '../../../../../basics/i-document-skeleton-cached';
 import {
@@ -268,11 +274,11 @@ export function shaping(
         const word = content.slice(last, bk.position);
         const shapedGlyphs: IDocumentSkeletonGlyph[] = [];
 
-        if (last === 0 && ctx.footnoteLabel != null && viewModel === ctx.viewModel &&
+        if (last === 0 && ctx.noteLabel != null && viewModel === ctx.viewModel &&
             paragraphNode.endIndex === viewModel.getBody()?.paragraphs?.[0]?.startIndex) {
             const config = getFontCreateConfig(0, viewModel, paragraphNode, sectionBreakConfig, paragraph);
-            const textStyle = { ...config.textStyle, va: BaselineOffset.SUPERSCRIPT, ...ctx.footnoteReferenceTextStyle };
-            const marker = createSkeletonLetterGlyph(ctx.footnoteLabel, {
+            const textStyle = { ...config.textStyle, va: BaselineOffset.SUPERSCRIPT, ...ctx.noteReferenceTextStyle };
+            const marker = createSkeletonLetterGlyph(ctx.noteLabel, {
                 ...config,
                 textStyle,
                 fontStyle: getFontStyleString({ ...textStyle, ff: [textStyle.ff, textStyle.eastAsiaFontFamily].filter(Boolean).join(', ') }),
@@ -323,8 +329,8 @@ export function shaping(
                 ? viewModel.getCustomRangeRaw(paragraphNode.startIndex + i)?.properties?.fieldType
                 : undefined;
             const isSeparator = fieldType === 'FOOTNOTE_SEPARATOR' || fieldType === 'FOOTNOTE_CONTINUATION_SEPARATOR';
-            const footnote = viewModel === ctx.viewModel && char === '\uFFFC'
-                ? ctx.footnoteReferences?.get(paragraphNode.startIndex + i)
+            const note = viewModel === ctx.viewModel && char === '\uFFFC'
+                ? ctx.noteReferences?.get(paragraphNode.startIndex + i)
                 : undefined;
             if (isSeparator) {
                 const config = getFontCreateConfig(i, viewModel, paragraphNode, sectionBreakConfig, paragraph);
@@ -333,16 +339,16 @@ export function shaping(
                 const width = fieldType === 'FOOTNOTE_SEPARATOR' ? Math.min(192, textWidth) : textWidth;
                 const glyph = createSkeletonLetterGlyph(' ', config, width);
                 glyph.raw = '\uFFFC';
-                glyph.footnoteSeparator = true;
+                glyph.noteSeparator = true;
                 shapedGlyphs.push(glyph);
                 i++;
                 src = src.substring(1);
-            } else if (footnote) {
+            } else if (note) {
                 const config = getFontCreateConfig(i, viewModel, paragraphNode, sectionBreakConfig, paragraph);
-                const glyph = createSkeletonLetterGlyph(footnote.label, config);
+                const glyph = createSkeletonLetterGlyph(note.label, config);
                 glyph.raw = '\uFFFC';
                 glyph.count = 1;
-                glyph.noteId = footnote.noteId;
+                glyph.noteId = note.noteId;
                 shapedGlyphs.push(glyph);
                 i++;
                 src = src.substring(1);

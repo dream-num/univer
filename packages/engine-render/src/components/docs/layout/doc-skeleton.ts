@@ -105,12 +105,12 @@ import {
 } from './document-layout-page-patch';
 import { DocumentEndnoteLayout, getEndnoteFlowBottom } from './endnote-layout';
 import { DocumentFootnoteLayout } from './footnote-layout';
-import { resolveFootnoteReferences } from './footnote-numbering';
 import { Hyphen } from './hyphenation/hyphen';
 import { Lang } from './hyphenation/lang';
 import { LanguageDetector } from './hyphenation/language-detector';
 import { createSkeletonPage } from './model/page';
 import { createSkeletonSection } from './model/section';
+import { resolveNoteReferences } from './note-numbering';
 import {
     getLastNotFullColumnInfo,
     getLastPage,
@@ -2994,7 +2994,7 @@ export class DocumentSkeleton extends Skeleton {
                 break;
             }
 
-            case DocumentSkeletonPageType.FOOTNOTE:
+            case DocumentSkeletonPageType.NOTE:
             case DocumentSkeletonPageType.CELL: {
                 pageIndex = typeof path[1] === 'number' ? path[1] : segmentPage;
                 break;
@@ -3074,7 +3074,7 @@ export class DocumentSkeleton extends Skeleton {
                 break;
             }
 
-            case DocumentSkeletonPageType.FOOTNOTE:
+            case DocumentSkeletonPageType.NOTE:
             case DocumentSkeletonPageType.CELL: {
                 pageIndex = typeof path[1] === 'number' ? path[1] : segmentPageIndex;
                 break;
@@ -3306,23 +3306,23 @@ export class DocumentSkeleton extends Skeleton {
         if (restrictions == null || restrictions.strict === false) {
             for (let pi = 0; pi < pageLength; pi++) {
                 const page = pages[pi];
-                let insideFootnoteArea = false;
+                let insideNoteArea = false;
                 for (const note of page.notes ?? []) {
                     const left = this._findLiquid.x + note.left;
                     const top = this._findLiquid.y + note.top;
                     if (x < left || x > left + note.page.pageWidth || y < top || y > top + note.page.height) {
                         continue;
                     }
-                    insideFootnoteArea = true;
+                    insideNoteArea = true;
                     const noteCache: INearestCache = { nearestNodeList: [], nearestNodeDistanceList: [] };
-                    const match = this._collectNearestNode(note.page, DocumentSkeletonPageType.FOOTNOTE, page, note.noteId, pi, noteCache, x, y, pageLength);
+                    const match = this._collectNearestNode(note.page, DocumentSkeletonPageType.NOTE, page, note.noteId, pi, noteCache, x, y, pageLength);
                     if (match) {
                         return match;
                     }
                     cache.nearestNodeList.push(...noteCache.nearestNodeList);
                     cache.nearestNodeDistanceList.push(...noteCache.nearestNodeDistanceList);
                 }
-                if (insideFootnoteArea) {
+                if (insideNoteArea) {
                     return this._getNearestNode(cache.nearestNodeList, cache.nearestNodeDistanceList);
                 }
                 this._translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
@@ -3398,7 +3398,7 @@ export class DocumentSkeleton extends Skeleton {
                     const page = pages[pi];
                     for (const note of page.notes ?? []) {
                         if (note.noteId === segmentId) {
-                            exactMatch = this._collectNearestNode(note.page, DocumentSkeletonPageType.FOOTNOTE, page, segmentId, pi, cache, x, y, pageLength);
+                            exactMatch = this._collectNearestNode(note.page, DocumentSkeletonPageType.NOTE, page, segmentId, pi, cache, x, y, pageLength);
                         }
                     }
                     this._translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
@@ -3533,13 +3533,13 @@ export class DocumentSkeleton extends Skeleton {
         const { sections, skeTables, skeColumnGroups = new Map() } = segmentPage;
         this._findLiquid.translateSave();
 
-        const footnote = pageType === DocumentSkeletonPageType.FOOTNOTE
+        const note = pageType === DocumentSkeletonPageType.NOTE
             ? page.notes?.find((fragment) => fragment.page === segmentPage)
             : undefined;
-        const pageLeft = this._findLiquid.x + (footnote?.left ?? 0);
-        const pageRight = pageLeft + (footnote ? segmentPage.pageWidth : page.pageWidth);
-        const pageTop = this._findLiquid.y + (footnote?.top ?? (pageType === DocumentSkeletonPageType.FOOTER ? page.pageHeight - segmentPage.pageHeight : 0));
-        const pageBottom = pageTop + (footnote ? segmentPage.height : segmentPage.pageHeight);
+        const pageLeft = this._findLiquid.x + (note?.left ?? 0);
+        const pageRight = pageLeft + (note ? segmentPage.pageWidth : page.pageWidth);
+        const pageTop = this._findLiquid.y + (note?.top ?? (pageType === DocumentSkeletonPageType.FOOTER ? page.pageHeight - segmentPage.pageHeight : 0));
+        const pageBottom = pageTop + (note ? segmentPage.height : segmentPage.pageHeight);
 
         let pointInPage = x >= pageLeft
             && x <= pageRight
@@ -3566,8 +3566,8 @@ export class DocumentSkeleton extends Skeleton {
         }
 
         switch (pageType) {
-            case DocumentSkeletonPageType.FOOTNOTE: {
-                this._findLiquid.translate(footnote?.left ?? page.marginLeft, footnote?.top ?? page.marginTop);
+            case DocumentSkeletonPageType.NOTE: {
+                this._findLiquid.translate(note?.left ?? page.marginLeft, note?.top ?? page.marginTop);
                 break;
             }
             case DocumentSkeletonPageType.HEADER: {
@@ -4954,8 +4954,8 @@ export class DocumentSkeleton extends Skeleton {
         const ctx: ILayoutContext = {
             viewModel,
             dataModel,
-            footnoteReferences: documentStyle.documentFlavor === DocumentFlavor.TRADITIONAL
-                ? resolveFootnoteReferences(dataModel.getSnapshot())
+            noteReferences: documentStyle.documentFlavor === DocumentFlavor.TRADITIONAL
+                ? resolveNoteReferences(dataModel.getSnapshot())
                 : undefined,
             skeleton,
             skeletonResourceReference,
@@ -4980,7 +4980,7 @@ export class DocumentSkeleton extends Skeleton {
             hyphen: this._hyphen,
             languageDetector: this._languageDetector,
         };
-        if (ctx.footnoteReferences?.size) {
+        if (ctx.noteReferences?.size) {
             ctx.footnoteLayout = new DocumentFootnoteLayout(ctx);
             ctx.endnoteLayout = new DocumentEndnoteLayout(ctx);
         }
@@ -5326,7 +5326,7 @@ export class DocumentSkeleton extends Skeleton {
         }
 
         const { pages, skeFooters, skeHeaders } = skeletonData;
-        // Unlike repeated headers/footers, a footnote offset identifies one
+        // Unlike repeated headers/footers, a note offset identifies one
         // fragment. Its previous physical page is only a presentation hint.
         const isRepeatedSegment = segmentId !== '' && (skeHeaders.has(segmentId) || skeFooters.has(segmentId));
 

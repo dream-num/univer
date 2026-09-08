@@ -78,7 +78,7 @@ import {
     DOC_INTERNAL_FRAGMENT_MIME,
     embedInternalClipboardFragment,
     extractInternalClipboardFragmentFromHtml,
-    omitClipboardFootnotes,
+    omitClipboardNotes,
     parseInternalClipboardFragment,
     wrapClipboardHtml,
 } from './internal-fragment';
@@ -482,7 +482,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         }
 
         if (currentDocument.getDocumentStyle().documentFlavor !== DocumentFlavor.TRADITIONAL) {
-            body = omitClipboardFootnotes(body);
+            body = omitClipboardNotes(body);
         }
 
         this._clipboardHooks.forEach((hook) => {

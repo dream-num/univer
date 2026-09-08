@@ -226,15 +226,15 @@ export class DocDrawingAddRemoveController extends Disposable {
 
                 const params = command.params as IRichTextEditingMutationParams;
                 const { unitId, actions } = params;
-                let changedFootnotes = false;
+                let changedNotes = false;
                 if (!JSONX.isNoop(actions)) {
                     const cursor = JSON1.type.readCursor(actions);
                     cursor.traverse(null, () => {
-                        changedFootnotes ||= cursor.getPath()[0] === 'notes';
+                        changedNotes ||= cursor.getPath()[0] === 'notes';
                     });
                 }
-                if (changedFootnotes) {
-                    this._syncFootnoteDrawings(unitId);
+                if (changedNotes) {
+                    this._syncNoteDrawings(unitId);
                 }
                 const reOrderedDrawings = getReOrderedDrawings(actions);
 
@@ -453,7 +453,7 @@ export class DocDrawingAddRemoveController extends Disposable {
         });
     }
 
-    private _syncFootnoteDrawings(unitId: string): void {
+    private _syncNoteDrawings(unitId: string): void {
         const model = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
         if (!model) {
             return;

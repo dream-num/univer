@@ -20,7 +20,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createParagraphLayoutTestBed } from '../block/paragraph/__tests__/create-paragraph-layout-test-bed';
 import { DocumentSkeleton } from '../doc-skeleton';
 import { hydrateDocumentSkeletonPage, serializeDocumentSkeletonPage } from '../document-layout-page-patch';
-import { resolveFootnoteReferences } from '../footnote-numbering';
+import { resolveNoteReferences } from '../note-numbering';
 import { FontCache } from '../shaping-engine/font-cache';
 
 function body(text: string) {
@@ -47,7 +47,7 @@ describe('endnote pagination', () => {
     afterEach(() => vi.restoreAllMocks());
 
     it('numbers footnotes and endnotes independently', () => {
-        const refs = [...resolveFootnoteReferences(snapshot('docEnd')).values()];
+        const refs = [...resolveNoteReferences(snapshot('docEnd')).values()];
         expect(refs.map((ref) => ref.label)).toEqual(['i', '3', 'ii']);
     });
 

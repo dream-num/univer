@@ -432,7 +432,7 @@ export class NodePositionConvertToCursor {
         if (startPageType === DocumentSkeletonPageType.HEADER || startPageType === DocumentSkeletonPageType.FOOTER) {
             return startPage === endPage;
         }
-        if (startPageType === DocumentSkeletonPageType.FOOTNOTE) {
+        if (startPageType === DocumentSkeletonPageType.NOTE) {
             const skeleton = this._docSkeleton.getSkeletonData();
             return skeleton != null && getPageFromPath(skeleton, startOrigin.path)?.segmentId ===
                 getPageFromPath(skeleton, endOrigin.path)?.segmentId;
@@ -614,7 +614,7 @@ export class NodePositionConvertToCursor {
                 segmentPage = skeHeaders.get(headerId)?.get(pageWidth);
             } else if (pageType === DocumentSkeletonPageType.FOOTER) {
                 segmentPage = skeFooters.get(footerId)?.get(pageWidth);
-            } else if (pageType === DocumentSkeletonPageType.FOOTNOTE) {
+            } else if (pageType === DocumentSkeletonPageType.NOTE) {
                 const noteId = getPageFromPath(skeletonData, path)?.segmentId;
                 segmentPage = page.notes?.find((note) => note.noteId === noteId)?.page;
             } else if (pageType === DocumentSkeletonPageType.CELL) {
@@ -635,14 +635,14 @@ export class NodePositionConvertToCursor {
                 startPosition,
                 endPosition,
                 sections.length - 1,
-                pageType === DocumentSkeletonPageType.BODY || pageType === DocumentSkeletonPageType.CELL || pageType === DocumentSkeletonPageType.FOOTNOTE ? p : 0
+                pageType === DocumentSkeletonPageType.BODY || pageType === DocumentSkeletonPageType.CELL || pageType === DocumentSkeletonPageType.NOTE ? p : 0
             );
             this._liquid.translateSave();
             const previousHorizontalClip = this._horizontalClip;
             this._horizontalClip = null;
 
             switch (pageType) {
-                case DocumentSkeletonPageType.FOOTNOTE: {
+                case DocumentSkeletonPageType.NOTE: {
                     const note = page.notes?.find((fragment) => fragment.page === segmentPage);
                     this._liquid.translate(note?.left ?? page.marginLeft, note?.top ?? page.marginTop);
                     break;
@@ -687,7 +687,7 @@ export class NodePositionConvertToCursor {
                     } else if (tablePage?.type === DocumentSkeletonPageType.FOOTER) {
                         const footerTop = page.pageHeight - tablePage.height - tablePage.marginBottom;
                         this._liquid.translate(page.marginLeft, footerTop);
-                    } else if (tablePage?.type === DocumentSkeletonPageType.FOOTNOTE) {
+                    } else if (tablePage?.type === DocumentSkeletonPageType.NOTE) {
                         const note = page.notes?.find((fragment) => fragment.page === tablePage);
                         this._liquid.translate(note?.left ?? page.marginLeft, note?.top ?? page.marginTop);
                     } else {

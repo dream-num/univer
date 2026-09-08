@@ -1007,7 +1007,7 @@ function _lineOperator(
         section = getLastSection(lastPage);
     }
     const preLineHeight = preLine?.lineHeight || 0;
-    const initialFootnoteTop = lastPage.type === DocumentSkeletonPageType.FOOTNOTE && lastPage.pageNumber === 1 && columnInfo.index === ctx.footnoteFirstColumn?.index
+    const initialFootnoteTop = lastPage.type === DocumentSkeletonPageType.NOTE && lastPage.pageNumber === 1 && columnInfo.index === ctx.footnoteFirstColumn?.index
         ? ctx.footnoteFirstColumn.top
         : 0;
     const preTop = preLine?.top ?? initialFootnoteTop;

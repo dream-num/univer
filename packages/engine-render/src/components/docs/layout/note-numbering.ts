@@ -32,7 +32,7 @@ export interface INoteLayoutProperties extends Omit<IFootnoteProperties, 'positi
     position?: 'pageBottom' | 'beneathText' | 'docEnd' | 'sectEnd';
 }
 
-export interface IFootnoteReferenceLayout {
+export interface INoteReferenceLayout {
     noteId: string;
     type: DocumentNoteType;
     referenceIndex: number;
@@ -42,7 +42,7 @@ export interface IFootnoteReferenceLayout {
     properties: INoteLayoutProperties;
 }
 
-export function formatFootnoteNumber(number: number, format = 'decimal'): string {
+export function formatNoteNumber(number: number, format = 'decimal'): string {
     if (format === 'none') {
         return '';
     }
@@ -105,13 +105,13 @@ export function getNoteSections(snapshot: Pick<IDocumentData, 'body'>): ISection
     });
 }
 
-export function resolveFootnoteReferences(
+export function resolveNoteReferences(
     snapshot: Pick<IDocumentData, 'body' | 'notes' | 'noteSettings'>,
     referencePages: ReadonlyMap<string, number> = new Map()
-): Map<number, IFootnoteReferenceLayout> {
+): Map<number, INoteReferenceLayout> {
     const references = snapshot.body?.customRanges?.filter((range) => (range.rangeType === CustomRangeType.FOOTNOTE || range.rangeType === CustomRangeType.ENDNOTE)) ?? [];
     const sections = getNoteSections(snapshot);
-    const result = new Map<number, IFootnoteReferenceLayout>();
+    const result = new Map<number, INoteReferenceLayout>();
     let sectionIndex = 0;
     const counters = new Map<DocumentNoteType, { sectionId: string; page?: number; nextNumber: number }>();
     for (const reference of references) {
@@ -135,7 +135,7 @@ export function resolveFootnoteReferences(
             nextNumber = properties.startNumber ?? 1;
         }
         const number = note.customMark == null ? nextNumber : undefined;
-        const label = note.customMark ?? formatFootnoteNumber(nextNumber, properties.numberFormat ?? (type === 'endnote' ? 'lowerRoman' : 'decimal'));
+        const label = note.customMark ?? formatNoteNumber(nextNumber, properties.numberFormat ?? (type === 'endnote' ? 'lowerRoman' : 'decimal'));
         result.set(reference.startIndex, { noteId, type, referenceIndex: reference.startIndex, sectionId, properties, number, label });
         if (number != null) {
             nextNumber++;

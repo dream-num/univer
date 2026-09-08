@@ -564,21 +564,21 @@ export function validateDocBodyStructure(
     return issues;
 }
 
-function validateFootnoteBody(noteId: string, footnote: IDocumentNote): IDocStructureIssue[] {
+function validateNoteBody(noteId: string, note: IDocumentNote): IDocStructureIssue[] {
     const context: IValidationContext = { segmentType: 'footnote', segmentId: noteId };
-    const issues = validateDocBodyStructure(footnote.body, context);
-    if (footnote.noteId !== noteId || noteId.length === 0 || !['footnote', 'endnote'].includes(footnote.type)) {
+    const issues = validateDocBodyStructure(note.body, context);
+    if (note.noteId !== noteId || noteId.length === 0 || !['footnote', 'endnote'].includes(note.type)) {
         issues.push({ ...context, code: 'invalid-footnote-id', message: 'Footnote identity must match its segment key.' });
     }
-    if (footnote.body.customRanges?.some((range) => (range.rangeType === CustomRangeType.FOOTNOTE || range.rangeType === CustomRangeType.ENDNOTE))) {
+    if (note.body.customRanges?.some((range) => (range.rangeType === CustomRangeType.FOOTNOTE || range.rangeType === CustomRangeType.ENDNOTE))) {
         issues.push({ ...context, code: 'nested-footnote', message: 'A footnote cannot contain another footnote reference.' });
     }
-    const rootSections = footnote.body.sectionBreaks?.filter((section) =>
-        !footnote.body.tables?.some((table) => section.startIndex >= table.startIndex && section.startIndex < table.endIndex)) ?? [];
+    const rootSections = note.body.sectionBreaks?.filter((section) =>
+        !note.body.tables?.some((table) => section.startIndex >= table.startIndex && section.startIndex < table.endIndex)) ?? [];
     const hasPageSetup = rootSections.some((section) => Object.keys(section).some((key) => key !== 'sectionId' && key !== 'startIndex'));
-    const hasFloatingDrawings = Object.values(footnote.drawings ?? {}).some((drawing) => drawing.layoutType !== PositionedObjectLayoutType.INLINE);
-    const hasFloatingTables = Object.values(footnote.tableSource ?? {}).some((table) => table.textWrap === TableTextWrapType.WRAP);
-    if (rootSections.length > 1 || hasPageSetup || footnote.body.columnGroups?.length || hasFloatingDrawings || hasFloatingTables) {
+    const hasFloatingDrawings = Object.values(note.drawings ?? {}).some((drawing) => drawing.layoutType !== PositionedObjectLayoutType.INLINE);
+    const hasFloatingTables = Object.values(note.tableSource ?? {}).some((table) => table.textWrap === TableTextWrapType.WRAP);
+    if (rootSections.length > 1 || hasPageSetup || note.body.columnGroups?.length || hasFloatingDrawings || hasFloatingTables) {
         issues.push({ ...context, code: 'invalid-footnote-body', message: 'Footnotes support paragraphs, inline drawings and flow tables without independent sections or columns.' });
     }
     return issues;
@@ -618,8 +618,8 @@ export function validateDocumentStructure(snapshot: Pick<IDocumentData, 'body' |
         issues.push(...validateDocBodyStructure(footer.body, { segmentType: 'footer', segmentId: footerId }));
     }
 
-    for (const [noteId, footnote] of Object.entries(snapshot.notes ?? {})) {
-        issues.push(...validateFootnoteBody(noteId, footnote));
+    for (const [noteId, note] of Object.entries(snapshot.notes ?? {})) {
+        issues.push(...validateNoteBody(noteId, note));
         if (snapshot.headers?.[noteId] || snapshot.footers?.[noteId]) {
             issues.push({ code: 'invalid-footnote-id', segmentType: 'footnote', segmentId: noteId, message: 'Footnotes must not share a segment identity with a header or footer.' });
         }

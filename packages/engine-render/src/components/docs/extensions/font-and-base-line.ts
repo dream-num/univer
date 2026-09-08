@@ -108,7 +108,7 @@ export class FontAndBaseLine extends docExtension {
             spanPointWithFont.y += bBox.sbo;
         }
 
-        if (glyph.footnoteSeparator) {
+        if (glyph.noteSeparator) {
             ctx.save();
             ctx.strokeStyle = fontColor;
             ctx.lineWidth = 1;

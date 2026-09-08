@@ -16,15 +16,21 @@
 
 import type { IDocumentNote } from '@univerjs/core';
 import type { IDocumentSkeletonPage } from '../../../../basics/i-document-skeleton-cached';
-import { BaselineOffset, BooleanNumber, CustomRangeType, DataStreamTreeTokenType, DocumentFlavor } from '@univerjs/core';
+import {
+    BaselineOffset,
+    BooleanNumber,
+    CustomRangeType,
+    DataStreamTreeTokenType,
+    DocumentFlavor,
+} from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DocumentSkeletonPageType, PageLayoutType } from '../../../../basics/i-document-skeleton-cached';
 import { Vector2 } from '../../../../basics/vector2';
 import { createParagraphLayoutTestBed } from '../block/paragraph/__tests__/create-paragraph-layout-test-bed';
 import { DocumentSkeleton } from '../doc-skeleton';
 import { hydrateDocumentSkeletonPage, serializeDocumentSkeletonPage } from '../document-layout-page-patch';
-import { layoutFootnoteBody } from '../footnote-layout';
-import { resolveFootnoteReferences } from '../footnote-numbering';
+import { layoutNoteBody } from '../footnote-layout';
+import { resolveNoteReferences } from '../note-numbering';
 import { FontCache } from '../shaping-engine/font-cache';
 
 function createNoteTestBed(pageHeight = 600, noteOverrides: Partial<IDocumentNote> = {}) {
@@ -118,7 +124,7 @@ describe('footnote body layout', () => {
             expect(firstTable).toBeDefined();
             expect(firstTable.rows[0].index).toBe(0);
             expect(firstTable.rows.length).toBeLessThan(10);
-            expect(pages[0].marginTop + firstTable.top + firstTable.height).toBeLessThanOrEqual(pages[0].footnoteDecorations![0].top + 0.01);
+            expect(pages[0].marginTop + firstTable.top + firstTable.height).toBeLessThanOrEqual(pages[0].noteDecorations![0].top + 0.01);
             const rows = pages.flatMap((page) => [...page.skeTables.values()].flatMap((table) => table.rows));
             expect(rows.map((row) => row.index)).toEqual(Array.from({ length: 10 }, (_, index) => index));
         } finally {
@@ -233,7 +239,7 @@ describe('footnote body layout', () => {
             },
         });
         try {
-            const pages = layoutFootnoteBody(bed.ctx, resolveFootnoteReferences(bed.dataModel.getSnapshot()).get(9)!, bed.sectionBreakConfig, {
+            const pages = layoutNoteBody(bed.ctx, resolveNoteReferences(bed.dataModel.getSnapshot()).get(9)!, bed.sectionBreakConfig, {
                 width: 320,
                 firstPageHeight: 200,
                 continuationPageHeight: 200,
@@ -262,7 +268,7 @@ describe('footnote body layout', () => {
                 textRuns: [{ st: 0, ed: 11, ts: { fs: 9.5 } }],
             },
         });
-        const pages = layoutFootnoteBody(bed.ctx, resolveFootnoteReferences(bed.dataModel.getSnapshot()).get(9)!, bed.sectionBreakConfig, {
+        const pages = layoutNoteBody(bed.ctx, resolveNoteReferences(bed.dataModel.getSnapshot()).get(9)!, bed.sectionBreakConfig, {
             width: 320,
             columnCount: 1,
             firstPageHeight: 100,
@@ -350,8 +356,8 @@ describe('footnote body layout', () => {
     it.each([1, 2, 3, 4])('continues rich paragraphs through %i columns without changing note character offsets', (columnCount) => {
         const bed = createNoteTestBed();
         const snapshot = bed.dataModel.getSnapshot();
-        const reference = resolveFootnoteReferences(snapshot).get(9)!;
-        const pages = layoutFootnoteBody(bed.ctx, reference, bed.sectionBreakConfig, {
+        const reference = resolveNoteReferences(snapshot).get(9)!;
+        const pages = layoutNoteBody(bed.ctx, reference, bed.sectionBreakConfig, {
             width: 320,
             columnCount,
             firstPageHeight: 45,
@@ -359,7 +365,7 @@ describe('footnote body layout', () => {
         });
         expect(pages.length).toBeGreaterThan(2);
         expect(pages.every((page) => page.sections[0].columns.length === columnCount)).toBe(true);
-        expect(pages.every((page) => page.type === DocumentSkeletonPageType.FOOTNOTE && page.segmentId === 'note')).toBe(true);
+        expect(pages.every((page) => page.type === DocumentSkeletonPageType.NOTE && page.segmentId === 'note')).toBe(true);
         expect(pages[0].height).toBeLessThanOrEqual(47);
         expect(pages.slice(1).every((page) => page.height <= 102)).toBe(true);
         const glyphs = pages.flatMap((page) => page.sections.flatMap((section) => section.columns.flatMap(
@@ -487,11 +493,11 @@ describe('footnote body layout', () => {
                 expect(noteFragments.flatMap((fragment) => getPageGlyphs(fragment.page)).filter((glyph) => glyph.count > 0).map((glyph) => glyph.raw).join('')).toBe(noteStream);
             }
             const table = [...page.skeTables.values()][0];
-            expect(page.marginTop + table.top + table.height).toBeLessThanOrEqual(page.footnoteDecorations![0].top + 0.01);
+            expect(page.marginTop + table.top + table.height).toBeLessThanOrEqual(page.noteDecorations![0].top + 0.01);
             for (const tablePage of tablePages) {
                 if (tablePage.footnoteHeight) {
                     const bottom = Math.max(...[...tablePage.skeTables.values()].map((table) => table.top + table.height));
-                    expect(tablePage.marginTop + bottom).toBeLessThanOrEqual(tablePage.footnoteDecorations![0].top + 0.01);
+                    expect(tablePage.marginTop + bottom).toBeLessThanOrEqual(tablePage.noteDecorations![0].top + 0.01);
                 }
             }
         } finally {
@@ -515,7 +521,7 @@ describe('footnote body layout', () => {
             expect(pages).toHaveLength(1);
             const page = pages[0];
             const note = page.notes![0];
-            const separator = page.footnoteDecorations![0];
+            const separator = page.noteDecorations![0];
             const bodyLine = page.sections[0].columns[0].lines[0];
             const bodyBottom = page.marginTop + bodyLine.top + bodyLine.lineHeight;
             expect(note.top).toBeCloseTo(separator.top + separator.page.height);
@@ -552,7 +558,7 @@ describe('footnote body layout', () => {
             expect(pages.length).toBeGreaterThan(1);
             for (let index = 0; index < pages.length; index++) {
                 const page = pages[index];
-                const decorations = page.footnoteDecorations!;
+                const decorations = page.noteDecorations!;
                 const separator = decorations[0];
                 expect(separator.kind).toBe(index === 0 ? 'separator' : 'continuationSeparator');
                 expect(getPageGlyphs(separator.page).map((glyph) => glyph.raw).join('')).toBe(index === 0 ? 'Notes\r\n' : 'Notes continued\r\n');
@@ -569,7 +575,7 @@ describe('footnote body layout', () => {
                 const patch = serializeDocumentSkeletonPage(page, true);
                 expect(() => JSON.stringify(patch)).not.toThrow();
                 const restored = hydrateDocumentSkeletonPage(patch, undefined, bed.dataModel.getSnapshot());
-                const restoredPage = restored.footnoteDecorations![0].page;
+                const restoredPage = restored.noteDecorations![0].page;
                 expect(restoredPage.sections[0].parent).toBe(restoredPage);
                 expect(getPageGlyphs(restoredPage).map((glyph) => glyph.raw)).toEqual(getPageGlyphs(separator.page).map((glyph) => glyph.raw));
             }
@@ -619,8 +625,8 @@ describe('footnote body layout', () => {
             const pages = skeleton.getSkeletonData()!.pages;
             expect(pages.length).toBeGreaterThan(1);
             for (const [index, page] of pages.entries()) {
-                const separator = page.footnoteDecorations![0];
-                const marker = getPageGlyphs(separator.page).find((glyph) => glyph.footnoteSeparator)!;
+                const separator = page.noteDecorations![0];
+                const marker = getPageGlyphs(separator.page).find((glyph) => glyph.noteSeparator)!;
                 expect(marker.raw).toBe('\uFFFC');
                 expect(marker.count).toBe(1);
                 expect(marker.width).toBe(index === 0 ? 192 : page.pageWidth - page.marginLeft - page.marginRight);
@@ -633,8 +639,8 @@ describe('footnote body layout', () => {
 
     it('publishes note fragments without parent cycles and restores their local hit-test hierarchy', () => {
         const bed = createNoteTestBed();
-        const reference = resolveFootnoteReferences(bed.dataModel.getSnapshot()).get(9)!;
-        const pages = layoutFootnoteBody(bed.ctx, reference, bed.sectionBreakConfig, {
+        const reference = resolveNoteReferences(bed.dataModel.getSnapshot()).get(9)!;
+        const pages = layoutNoteBody(bed.ctx, reference, bed.sectionBreakConfig, {
             width: 180,
             firstPageHeight: 100,
             continuationPageHeight: 100,

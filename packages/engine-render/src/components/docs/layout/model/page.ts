@@ -24,11 +24,23 @@ import type { ISectionBreakConfig } from '../../../../basics/interfaces';
 import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../view-model/document-view-model';
 import type { ILayoutContext } from '../tools';
-import { BooleanNumber, GridType, PageOrientType, PositionedObjectLayoutType, SpacingRule, TableTextWrapType } from '@univerjs/core';
+import {
+    BooleanNumber,
+    GridType,
+    PageOrientType,
+    PositionedObjectLayoutType,
+    SpacingRule,
+    TableTextWrapType,
+} from '@univerjs/core';
 import { BreakType, DocumentSkeletonPageType } from '../../../../basics/i-document-skeleton-cached';
 import { getDocumentCompatibilityPolicy, isTraditionalDocumentCompatibility } from '../../document-compatibility';
 import { dealWithSection } from '../block/section';
-import { reachesNextDocumentGridLine, resetContext, updateBlockIndex, updateInlineDrawingCoordsAndBorder } from '../tools';
+import {
+    reachesNextDocumentGridLine,
+    resetContext,
+    updateBlockIndex,
+    updateInlineDrawingCoordsAndBorder,
+} from '../tools';
 import { createSkeletonSection } from './section';
 
 function getHeaderFooterMaxHeight(pageHeight: number) {
@@ -47,8 +59,8 @@ export function createSkeletonPage(
     let page: IDocumentSkeletonPage;
     if (sectionBreakConfig.cellTableId) {
         page = _getNullPage(DocumentSkeletonPageType.CELL, sectionBreakConfig.cellTableId);
-    } else if (ctx.footnoteSegmentId) {
-        page = _getNullPage(DocumentSkeletonPageType.FOOTNOTE, ctx.footnoteSegmentId);
+    } else if (ctx.noteSegmentId) {
+        page = _getNullPage(DocumentSkeletonPageType.NOTE, ctx.noteSegmentId);
     } else {
         page = _getNullPage();
     }

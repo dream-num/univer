@@ -360,7 +360,7 @@ export class DocumentDataModel extends DocumentDataModelSimple {
         this.footerModelMap.forEach((footer) => {
             footer.dispose();
         });
-        this.noteModelMap.forEach((footnote) => footnote.dispose());
+        this.noteModelMap.forEach((note) => note.dispose());
         this.noteModelMap.clear();
 
         this._name$.complete();
@@ -427,14 +427,14 @@ export class DocumentDataModel extends DocumentDataModelSimple {
             return;
         }
 
-        const previousFootnotes = this.snapshot.notes;
-        const changedFootnotes = new Set<string>();
+        const previousNotes = this.snapshot.notes;
+        const changedNotes = new Set<string>();
         let changedInheritedNoteStyles = false;
         const cursor = JSON1.type.readCursor(actions);
         cursor.traverse(null, () => {
             const path = cursor.getPath();
             if (path[0] === 'notes' && typeof path[1] === 'string') {
-                changedFootnotes.add(path[1]);
+                changedNotes.add(path[1]);
             }
             if (path[0] === 'styles' || path[0] === 'documentStyle') {
                 changedInheritedNoteStyles = true;
@@ -442,8 +442,8 @@ export class DocumentDataModel extends DocumentDataModelSimple {
         });
         this.snapshot = JSONX.apply(this.snapshot, actions) as unknown as IDocumentData;
         this._markMutation();
-        if (changedInheritedNoteStyles || previousFootnotes !== this.snapshot.notes || changedFootnotes.size > 0) {
-            this._initializeFootnoteModels(changedInheritedNoteStyles ? undefined : previousFootnotes, changedFootnotes);
+        if (changedInheritedNoteStyles || previousNotes !== this.snapshot.notes || changedNotes.size > 0) {
+            this._initializeNoteModels(changedInheritedNoteStyles ? undefined : previousNotes, changedNotes);
         }
 
         // FIXME: @JOCS, ANY better solution to find action that create or delete header/footer?
@@ -468,7 +468,7 @@ export class DocumentDataModel extends DocumentDataModelSimple {
     }
 
     private _initializeHeaderFooterModel() {
-        this._initializeFootnoteModels();
+        this._initializeNoteModels();
         const { headers, footers } = this.getSnapshot();
 
         if (headers) {
@@ -488,19 +488,19 @@ export class DocumentDataModel extends DocumentDataModelSimple {
         }
     }
 
-    private _initializeFootnoteModels(previousFootnotes?: IDocumentData['notes'], changedFootnotes?: ReadonlySet<string>): void {
+    private _initializeNoteModels(previousNotes?: IDocumentData['notes'], changedNotes?: ReadonlySet<string>): void {
         for (const [id, model] of this.noteModelMap) {
-            if (changedFootnotes?.has(id) || previousFootnotes?.[id] !== this.snapshot.notes?.[id] || !previousFootnotes?.[id]) {
+            if (changedNotes?.has(id) || previousNotes?.[id] !== this.snapshot.notes?.[id] || !previousNotes?.[id]) {
                 model.dispose();
                 this.noteModelMap.delete(id);
             }
         }
-        for (const [id, footnote] of Object.entries(this.snapshot.notes ?? {})) {
+        for (const [id, note] of Object.entries(this.snapshot.notes ?? {})) {
             if (this.noteModelMap.has(id)) {
                 continue;
             }
             const model = new DocumentDataModel({
-                ...footnote,
+                ...note,
                 id: this.getUnitId(),
                 documentStyle: this.snapshot.documentStyle,
                 styles: this.snapshot.styles,
@@ -511,7 +511,7 @@ export class DocumentDataModel extends DocumentDataModelSimple {
 
     override updateDocumentStyle(config: IDocumentStyle) {
         super.updateDocumentStyle(config);
-        this._initializeFootnoteModels();
+        this._initializeNoteModels();
     }
 
     override updateDocumentId(unitId: string) {

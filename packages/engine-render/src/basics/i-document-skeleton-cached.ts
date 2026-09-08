@@ -84,7 +84,7 @@ export enum DocumentSkeletonPageType {
     HEADER,
     FOOTER,
     CELL,
-    FOOTNOTE,
+    NOTE,
 };
 
 export interface IDocumentSkeletonPage {
@@ -126,10 +126,12 @@ export interface IDocumentSkeletonPage {
     isExplicitPageBreak?: boolean;
     /** Internal layout provenance for a page opened because content exhausted the previous page. */
     isNaturalPageOverflow?: boolean;
-    /** Footnote fragments use their own segment offsets, independent of body character indices. */
-    notes?: IDocumentSkeletonFootnote[];
+    /** Note fragments use their own segment offsets, independent of body character indices. */
+    notes?: IDocumentSkeletonNote[];
+    /** Space reserved on this body page for footnotes, including separators and continuation notices. */
     footnoteHeight?: number;
-    footnoteDecorations?: IDocumentSkeletonFootnoteDecoration[];
+    /** Positioned separators and continuation notices for both footnotes and endnotes. */
+    noteDecorations?: IDocumentSkeletonNoteDecoration[];
     st: number; // startIndex
     ed: number; // endIndex
     /** Whether this cell page is only a layout placeholder covered by a merged cell. */
@@ -140,10 +142,10 @@ export interface IDocumentSkeletonPage {
     segmentId: string; // header/footer id if header/footer, empty string if body page
     type: DocumentSkeletonPageType; // page type: header, footer, body, or cell
     renderConfig?: IDocumentRenderConfig;
-    parent?: IDocumentSkeletonCached | IDocumentSkeletonRow | IDocumentSkeletonColumnGroupColumn | IDocumentSkeletonFootnote;
+    parent?: IDocumentSkeletonCached | IDocumentSkeletonRow | IDocumentSkeletonColumnGroupColumn | IDocumentSkeletonNote;
 }
 
-export interface IDocumentSkeletonFootnoteDecoration {
+export interface IDocumentSkeletonNoteDecoration {
     noteType?: 'footnote' | 'endnote';
     kind: 'separator' | 'continuationSeparator' | 'continuationNotice';
     left: number;
@@ -151,7 +153,7 @@ export interface IDocumentSkeletonFootnoteDecoration {
     page: IDocumentSkeletonPage;
 }
 
-export interface IDocumentSkeletonFootnote {
+export interface IDocumentSkeletonNote {
     noteType?: 'footnote' | 'endnote';
     noteId: string;
     referenceIndex: number;
@@ -322,7 +324,7 @@ export interface IDocumentSkeletonGlyph {
     featureId?: string; // support interaction for feature ,eg. hyperLine person
     drawingId?: string; // drawing.drawingId
     noteId?: string;
-    footnoteSeparator?: boolean;
+    noteSeparator?: boolean;
     fauxBoldStrokeWidth?: number;
     tabLeader?: TabStopLeader;
 }

@@ -15,21 +15,37 @@
  */
 
 import type { IDocumentBody } from '@univerjs/core';
-import type { IDocumentSkeletonFootnote, IDocumentSkeletonFootnoteDecoration, IDocumentSkeletonGlyph, IDocumentSkeletonPage, IDocumentSkeletonTable } from '../../../basics/i-document-skeleton-cached';
+import type {
+    IDocumentSkeletonGlyph,
+    IDocumentSkeletonNote,
+    IDocumentSkeletonNoteDecoration,
+    IDocumentSkeletonPage,
+    IDocumentSkeletonTable,
+} from '../../../basics/i-document-skeleton-cached';
 import type { IParagraphConfig, ISectionBreakConfig } from '../../../basics/interfaces';
-import type { IFootnoteReferenceLayout } from './footnote-numbering';
+import type { INoteReferenceLayout } from './note-numbering';
 import type { ILayoutContext } from './tools';
 import { ColumnSeparatorType, CustomRangeType, DocumentDataModel, GridType } from '@univerjs/core';
 import { DocumentSkeletonPageType } from '../../../basics/i-document-skeleton-cached';
 import { getDocumentCompatibilityPolicy } from '../document-compatibility';
 import { DocumentViewModel } from '../view-model/document-view-model';
 import { dealWithSection } from './block/section';
-import { formatFootnoteNumber } from './footnote-numbering';
 import { createSkeletonLetterGlyph } from './model/glyph';
-import { createSkeletonPage, expandCellPageHeightForFlowTables, expandCellPageHeightForInlineDrawings } from './model/page';
-import { clearFontCreateConfigCache, getFontConfigFromLastGlyph, getNullSkeleton, updateBlockIndex, updateInlineDrawingCoordsAndBorder } from './tools';
+import {
+    createSkeletonPage,
+    expandCellPageHeightForFlowTables,
+    expandCellPageHeightForInlineDrawings,
+} from './model/page';
+import { formatNoteNumber } from './note-numbering';
+import {
+    clearFontCreateConfigCache,
+    getFontConfigFromLastGlyph,
+    getNullSkeleton,
+    updateBlockIndex,
+    updateInlineDrawingCoordsAndBorder,
+} from './tools';
 
-export interface IFootnoteLayoutConstraints {
+export interface INoteLayoutConstraints {
     width: number;
     firstPageHeight: number;
     continuationPageHeight: number;
@@ -52,7 +68,7 @@ function createFootnoteColumns(config: ISectionBreakConfig, width: number, count
     }));
 }
 
-function lastFootnoteColumn(fragments: IDocumentSkeletonFootnote[]) {
+function lastFootnoteColumn(fragments: IDocumentSkeletonNote[]) {
     const page = fragments[fragments.length - 1]?.page;
     const columns = page?.sections[page.sections.length - 1]?.columns ?? [];
     for (let index = columns.length - 1; index >= 0; index--) {
@@ -65,25 +81,25 @@ function lastFootnoteColumn(fragments: IDocumentSkeletonFootnote[]) {
 }
 
 /** Uses the body layout pipeline, including table row splitting and inline drawing metrics. */
-export function layoutFootnoteBody(
+export function layoutNoteBody(
     parentContext: ILayoutContext,
-    reference: IFootnoteReferenceLayout,
+    reference: INoteReferenceLayout,
     sectionConfig: ISectionBreakConfig,
-    constraints: IFootnoteLayoutConstraints
+    constraints: INoteLayoutConstraints
 ): IDocumentSkeletonPage[] {
     const viewModel = parentContext.viewModel.getNoteTreeMap().get(reference.noteId);
     if (!viewModel) {
         return [];
     }
-    return layoutFootnoteSegment(parentContext, viewModel, reference, sectionConfig, constraints);
+    return layoutNoteSegment(parentContext, viewModel, reference, sectionConfig, constraints);
 }
 
-export function layoutFootnoteSegment(
+export function layoutNoteSegment(
     parentContext: ILayoutContext,
     viewModel: DocumentViewModel,
-    reference: Pick<IFootnoteReferenceLayout, 'noteId' | 'sectionId'> & { label?: string },
+    reference: Pick<INoteReferenceLayout, 'noteId' | 'sectionId'> & { label?: string },
     sectionConfig: ISectionBreakConfig,
-    constraints: IFootnoteLayoutConstraints
+    constraints: INoteLayoutConstraints
 ): IDocumentSkeletonPage[] {
     const skeleton = getNullSkeleton();
     const { skeHeaders, skeFooters, skeListLevel, drawingAnchor } = skeleton;
@@ -117,12 +133,12 @@ export function layoutFootnoteSegment(
         dataModel,
         skeleton,
         skeletonResourceReference: { skeHeaders, skeFooters, skeListLevel, drawingAnchor },
-        footnoteReferences: undefined,
+        noteReferences: undefined,
         footnoteLayout: undefined,
         endnoteLayout: undefined,
-        footnoteLabel: reference.label,
-        footnoteReferenceTextStyle: parentContext.dataModel.getSnapshot().notes?.[reference.noteId]?.referenceTextStyle,
-        footnoteSegmentId: reference.noteId,
+        noteLabel: reference.label,
+        noteReferenceTextStyle: parentContext.dataModel.getSnapshot().notes?.[reference.noteId]?.referenceTextStyle,
+        noteSegmentId: reference.noteId,
         footnoteFirstColumn: constraints.firstColumn,
         deferSlicedTableLayout: undefined,
         layoutStartPointer: { [reference.noteId]: null },
@@ -136,7 +152,7 @@ export function layoutFootnoteSegment(
         ...config,
         pageSize: { width: constraints.width, height: Math.max(1, constraints.firstPageHeight) },
     }, ctx.skeletonResourceReference);
-    firstPage.type = DocumentSkeletonPageType.FOOTNOTE;
+    firstPage.type = DocumentSkeletonPageType.NOTE;
     firstPage.segmentId = reference.noteId;
     for (let index = 0; index < (constraints.firstColumn?.index ?? 0); index++) {
         firstPage.sections[0].columns[index].isFull = true;
@@ -144,7 +160,7 @@ export function layoutFootnoteSegment(
     try {
         const pages = dealWithSection(ctx, viewModel, viewModel.getChildren()[0], firstPage, config, null).pages;
         for (const page of pages) {
-            page.type = DocumentSkeletonPageType.FOOTNOTE;
+            page.type = DocumentSkeletonPageType.NOTE;
             page.segmentId = reference.noteId;
         }
         updateBlockIndex(pages, -1, config.documentCompatibilityPolicy);
@@ -159,15 +175,15 @@ export function layoutFootnoteSegment(
 }
 
 interface IPageFootnoteLayout {
-    fragments: IDocumentSkeletonFootnote[];
-    following: IDocumentSkeletonFootnote[][];
+    fragments: IDocumentSkeletonNote[];
+    following: IDocumentSkeletonNote[][];
     referenceIds: string[];
     height: number;
     separator?: IDocumentSkeletonPage;
     notice?: IDocumentSkeletonPage;
 }
 
-type FootnoteDecorationKind = IDocumentSkeletonFootnoteDecoration['kind'];
+type FootnoteDecorationKind = IDocumentSkeletonNoteDecoration['kind'];
 
 export function defaultSeparatorBody(continued: boolean): IDocumentBody {
     return {
@@ -185,7 +201,7 @@ export function defaultSeparatorBody(continued: boolean): IDocumentBody {
     };
 }
 
-function footnoteContentHeight(fragments: IDocumentSkeletonFootnote[]): number {
+function footnoteContentHeight(fragments: IDocumentSkeletonNote[]): number {
     return fragments.reduce((height, fragment) => Math.max(height, fragment.page.height), 0);
 }
 
@@ -231,12 +247,12 @@ function collectCellReferenceLines(page: IDocumentSkeletonPage, offset = 0): { t
 export class DocumentFootnoteLayout {
     private readonly _pages = new WeakMap<IDocumentSkeletonPage, IPageFootnoteLayout>();
     private readonly _inherited = new WeakMap<IDocumentSkeletonPage, IPageFootnoteLayout>();
-    private readonly _references = new Map<string, IFootnoteReferenceLayout>();
+    private readonly _references = new Map<string, INoteReferenceLayout>();
     private readonly _referencePageBreaks = new Map<number, Map<number, number>>();
     private readonly _decorations = new Map<string, IDocumentSkeletonPage | undefined>();
 
     constructor(private readonly _ctx: ILayoutContext) {
-        for (const reference of _ctx.footnoteReferences?.values() ?? []) {
+        for (const reference of _ctx.noteReferences?.values() ?? []) {
             if (reference.type === 'footnote') {
                 this._references.set(reference.noteId, reference);
             }
@@ -283,7 +299,7 @@ export class DocumentFootnoteLayout {
             }
             if (reference.properties.restart === 'eachPage') {
                 const number = (reference.properties.startNumber ?? 1) + precedingCount;
-                const label = formatFootnoteNumber(number, reference.properties.numberFormat);
+                const label = formatNoteNumber(number, reference.properties.numberFormat);
                 changed ||= reference.label !== label;
                 reference.label = label;
             }
@@ -596,7 +612,7 @@ export class DocumentFootnoteLayout {
             }
             const delayed = plan.following.length > 0;
             const target = delayed ? plan.following[plan.following.length - 1] : plan.fragments;
-            const notePages = layoutFootnoteBody(this._ctx, reference, config, {
+            const notePages = layoutNoteBody(this._ctx, reference, config, {
                 width,
                 firstPageHeight: delayed ? continuationHeight : Math.max(1, available - (reserveNotice ? notice?.height ?? 0 : 0)),
                 continuationPageHeight: Math.max(1, continuationHeight),
@@ -666,7 +682,7 @@ export class DocumentFootnoteLayout {
         const model = new DocumentDataModel({ id: `footnote-${kind}`, body, documentStyle: snapshot.documentStyle, styles: snapshot.styles });
         const viewModel = new DocumentViewModel(model);
         try {
-            const pages = layoutFootnoteSegment(this._ctx, viewModel, { noteId: model.getUnitId(), sectionId: config.sectionId }, config, {
+            const pages = layoutNoteSegment(this._ctx, viewModel, { noteId: model.getUnitId(), sectionId: config.sectionId }, config, {
                 width,
                 firstPageHeight: Number.POSITIVE_INFINITY,
                 continuationPageHeight: Number.POSITIVE_INFINITY,
@@ -691,9 +707,9 @@ export class DocumentFootnoteLayout {
     }
 
     private _appendFollowing(
-        following: IDocumentSkeletonFootnote[][],
+        following: IDocumentSkeletonNote[][],
         pages: IDocumentSkeletonPage[],
-        reference: IFootnoteReferenceLayout,
+        reference: INoteReferenceLayout,
         continued: boolean
     ): void {
         for (let index = 0; index < pages.length; index++) {
@@ -747,7 +763,7 @@ export class DocumentFootnoteLayout {
         if (plan.fragments.length === 0) {
             page.notes = page.notes?.filter((note) => this._ctx.dataModel.getSnapshot().notes?.[note.noteId]?.type === 'endnote');
             delete page.footnoteHeight;
-            page.footnoteDecorations = page.footnoteDecorations?.filter((decoration) => decoration.noteType === 'endnote');
+            page.noteDecorations = page.noteDecorations?.filter((decoration) => decoration.noteType === 'endnote');
             return;
         }
         const firstReference = this._references.get(plan.fragments[0].noteId);
@@ -761,13 +777,13 @@ export class DocumentFootnoteLayout {
             return positioned;
         })];
         page.footnoteHeight = plan.height;
-        const decorations: IDocumentSkeletonFootnoteDecoration[] = [];
+        const decorations: IDocumentSkeletonNoteDecoration[] = [];
         if (plan.separator) {
             decorations.push({ kind: plan.fragments.some((fragment) => fragment.continued) ? 'continuationSeparator' : 'separator', left: page.marginLeft, top: top - separatorHeight, page: plan.separator });
         }
         if (plan.notice) {
             decorations.push({ kind: 'continuationNotice', left: page.marginLeft, top: top + footnoteContentHeight(plan.fragments), page: plan.notice });
         }
-        page.footnoteDecorations = [...page.footnoteDecorations?.filter((decoration) => decoration.noteType === 'endnote') ?? [], ...decorations];
+        page.noteDecorations = [...page.noteDecorations?.filter((decoration) => decoration.noteType === 'endnote') ?? [], ...decorations];
     }
 }

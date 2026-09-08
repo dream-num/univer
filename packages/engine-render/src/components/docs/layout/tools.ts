@@ -51,9 +51,9 @@ import type { DataStreamTreeNode } from '../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../view-model/document-view-model';
 import type { DocumentEndnoteLayout } from './endnote-layout';
 import type { DocumentFootnoteLayout } from './footnote-layout';
-import type { IFootnoteReferenceLayout } from './footnote-numbering';
 import type { Hyphen } from './hyphenation/hyphen';
 import type { LanguageDetector } from './hyphenation/language-detector';
+import type { INoteReferenceLayout } from './note-numbering';
 import {
     AlignTypeH,
     AlignTypeV,
@@ -1863,14 +1863,14 @@ export interface IDocumentPaginationMetrics {
 }
 
 export interface ILayoutContext {
-    footnoteReferences?: ReadonlyMap<number, IFootnoteReferenceLayout>;
+    noteReferences?: ReadonlyMap<number, INoteReferenceLayout>;
     footnoteLayout?: DocumentFootnoteLayout;
     endnoteLayout?: DocumentEndnoteLayout;
     /** Virtual marker in a note body; it never consumes a persisted character. */
-    footnoteLabel?: string;
-    footnoteReferenceTextStyle?: ITextStyle;
+    noteLabel?: string;
+    noteReferenceTextStyle?: ITextStyle;
     /** Preserve the local note segment when the paragraph/table pipeline opens a continuation page. */
-    footnoteSegmentId?: string;
+    noteSegmentId?: string;
     footnoteFirstColumn?: { index: number; top: number };
     // The view model of current layout document.
     viewModel: DocumentViewModel;

@@ -41,7 +41,15 @@ import type { ComponentExtension, IDrawInfo, IExtensionConfig } from '../extensi
 import type { IDocumentsConfig, IPageMarginLayout } from './doc-component';
 import type { DocumentSkeleton } from './layout/doc-skeleton';
 import type { IDocsTableRenderViewport } from './table-render-viewport';
-import { CellValueType, ColumnSeparatorType, DashStyleType, DocumentFlavor, HorizontalAlign, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import {
+    CellValueType,
+    ColumnSeparatorType,
+    DashStyleType,
+    DocumentFlavor,
+    HorizontalAlign,
+    VerticalAlign,
+    WrapStrategy,
+} from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { BORDER_TYPE, COLOR_BLACK_RGB, drawLineByBorderType } from '../../basics';
 import { calculateRectRotate, getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
@@ -58,7 +66,11 @@ import { getTableIdAndSliceIndex } from './layout/block/table';
 import { getColorStyleForCanvas } from './layout/style/color';
 import { documentSkeletonTableIterator } from './layout/tools';
 import { Liquid } from './liquid';
-import { getDocsTableRenderViewport, getDocsTableViewportLeft, hasDocsTableHorizontalViewport } from './table-render-viewport';
+import {
+    getDocsTableRenderViewport,
+    getDocsTableViewportLeft,
+    hasDocsTableHorizontalViewport,
+} from './table-render-viewport';
 import './extensions';
 
 const DEFAULT_BORDER_COLOR: ITableCellBorder = {
@@ -671,15 +683,15 @@ export class Documents extends DocComponent {
 
             this._resetRotation(ctx, finalAngle);
 
-            for (const footnote of [...page.footnoteDecorations ?? [], ...page.notes ?? []]) {
+            for (const note of [...page.noteDecorations ?? [], ...page.notes ?? []]) {
                 this._drawHeaderFooter(
-                    footnote.page,
+                    note.page,
                     ctx,
                     extensions,
                     backgroundExtension,
                     preTextBackgroundExtensions,
                     glyphExtensionsExcludeBackground,
-                    Vector2.create(horizontalOffsetNoAngle + footnote.left - page.marginLeft, footnote.top),
+                    Vector2.create(horizontalOffsetNoAngle + note.left - page.marginLeft, note.top),
                     centerAngle,
                     vertexAngle,
                     renderConfig,
@@ -687,8 +699,8 @@ export class Documents extends DocComponent {
                     page,
                     false,
                     pages.length,
-                    'kind' in footnote
-                        ? this.getSkeleton()?.getViewModel().getSnapshot().noteSettings?.footnote?.[footnote.kind]?.customRanges ?? []
+                    'kind' in note
+                        ? this.getSkeleton()?.getViewModel().getSnapshot().noteSettings?.footnote?.[note.kind]?.customRanges ?? []
                         : undefined
                 );
             }
@@ -1595,7 +1607,7 @@ export class Documents extends DocComponent {
                         this._drawLiquid.translateLine(line, true, true);
                         const { y } = this._drawLiquid;
 
-                        if (!isHeader && page.type !== DocumentSkeletonPageType.FOOTNOTE) {
+                        if (!isHeader && page.type !== DocumentSkeletonPageType.NOTE) {
                             if ((y - originY + alignOffset.y + lineHeight) < (parentPage.pageHeight - 100) / 2 + 100) {
                                 this._drawLiquid.translateRestore();
                                 continue;

@@ -167,7 +167,7 @@ describe('docs font and baseline extension', () => {
             stroke: vi.fn(),
         });
         extension.extensionOffset = { spanPointWithFont: Vector2.create(12, 20) };
-        extension.draw(SeparatorContext, DEFAULT_SCALE, createGlyph(' ', { footnoteSeparator: true, width: 192 }));
+        extension.draw(SeparatorContext, DEFAULT_SCALE, createGlyph(' ', { noteSeparator: true, width: 192 }));
         expect(SeparatorContext.moveToByPrecision).toHaveBeenCalledWith(12, 20);
         expect(SeparatorContext.lineToByPrecision).toHaveBeenCalledWith(204, 20);
         expect(SeparatorContext.strokeStyle).toBe('#223344');

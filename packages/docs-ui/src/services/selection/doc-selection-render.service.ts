@@ -283,11 +283,11 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
             this._pendingSelection = null;
             return false;
         }
-        this._syncFootnoteSegment(ranges[0]);
-        const isBodyOrFootnote = this._currentSegmentId === '' ||
+        this._syncNoteSegment(ranges[0]);
+        const isBodyOrNote = this._currentSegmentId === '' ||
             this._context.unit.getSnapshot().notes?.[this._currentSegmentId] != null;
         let currentLogicalSelection: Nullable<IDocSelectionInnerParam> = null;
-        if (isBodyOrFootnote && ranges.length > 0) {
+        if (isBodyOrNote && ranges.length > 0) {
             const { unitId } = this._context;
             const selection = this._docSelectionManagerService.getSelectionInfo({ unitId, subUnitId: unitId });
             // Only a refresh of the current logical selection belongs to this
@@ -310,7 +310,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         return replaced;
     }
 
-    private _syncFootnoteSegment(range: ISuccinctDocRangeParam | undefined): void {
+    private _syncNoteSegment(range: ISuccinctDocRangeParam | undefined): void {
         const targetSegment = range?.segmentId;
         if (targetSegment == null) {
             return;

@@ -349,7 +349,7 @@ describe('doc skeleton', () => {
             expect(referencePage.notes?.[0]).toMatchObject({ noteId: 'note', continued: false });
             expect(fragments.slice(1).every((fragment) => fragment.continued)).toBe(true);
             const firstPosition = skeleton.findNodePositionByCharIndex(0, true, 'note');
-            expect(firstPosition?.pageType).toBe(DocumentSkeletonPageType.FOOTNOTE);
+            expect(firstPosition?.pageType).toBe(DocumentSkeletonPageType.NOTE);
             expect(firstPosition?.path).toContain('notes');
             expect(skeleton.findCharIndexByPosition(firstPosition!)).toBe(0);
             expect(skeleton.findGlyphByPosition(firstPosition)).toBe(skeleton.findNodeByCharIndex(0, 'note'));

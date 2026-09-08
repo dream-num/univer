@@ -17,7 +17,7 @@
 import type { IDocumentData, IDocumentNote, IFootnoteProperties } from '@univerjs/core';
 import { CustomRangeType } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
-import { formatFootnoteNumber, resolveFootnoteReferences } from '../footnote-numbering';
+import { formatNoteNumber, resolveNoteReferences } from '../note-numbering';
 
 function createSnapshot(restart: IFootnoteProperties['restart']): Pick<IDocumentData, 'body' | 'notes' | 'noteSettings'> {
     const notes: Record<string, IDocumentNote> = {};
@@ -51,7 +51,7 @@ describe('footnote numbering', () => {
     it('keeps custom marks out of the automatic sequence without changing persisted text', () => {
         const snapshot = createSnapshot('continuous');
         const original = JSON.stringify(snapshot);
-        const references = resolveFootnoteReferences(snapshot);
+        const references = resolveNoteReferences(snapshot);
         expect([...references.values()].map((reference) => reference.label)).toEqual(['iii', '†', 'iv', 'v', 'vi']);
         expect(JSON.stringify(snapshot)).toBe(original);
     });
@@ -59,25 +59,25 @@ describe('footnote numbering', () => {
     it('restarts at section boundaries and inherits the document number format', () => {
         const snapshot = createSnapshot('eachSect');
         snapshot.body!.sectionBreaks![1].noteProperties = { footnote: { startNumber: 9 } };
-        expect([...resolveFootnoteReferences(snapshot).values()].map((reference) => reference.label))
+        expect([...resolveNoteReferences(snapshot).values()].map((reference) => reference.label))
             .toEqual(['iii', '†', 'iv', 'ix', 'x']);
     });
 
     it('renumbers after a reference moves to a new physical page without rewriting the reference', () => {
         const snapshot = createSnapshot('eachPage');
         const pages = new Map([['note-0', 0], ['note-1', 1], ['note-2', 1], ['note-3', 2], ['note-4', 2]]);
-        expect([...resolveFootnoteReferences(snapshot, pages).values()].map((reference) => reference.label))
+        expect([...resolveNoteReferences(snapshot, pages).values()].map((reference) => reference.label))
             .toEqual(['iii', '†', 'iii', 'iii', 'iv']);
         pages.set('note-4', 3);
-        const references = resolveFootnoteReferences(snapshot, pages);
+        const references = resolveNoteReferences(snapshot, pages);
         expect(references.get(6)).toMatchObject({ noteId: 'note-4', label: 'iii' });
         expect(snapshot.body!.customRanges![4].startIndex).toBe(6);
     });
 
     it('extends the symbol cycle and supports enclosed and full-width numbers', () => {
-        expect([1, 6, 7, 13].map((number) => formatFootnoteNumber(number, 'chicago'))).toEqual(['*', '¶', '**', '***']);
-        expect([1, 20, 21, 35, 36, 50].map((number) => formatFootnoteNumber(number, 'decimalEnclosedCircle')))
+        expect([1, 6, 7, 13].map((number) => formatNoteNumber(number, 'chicago'))).toEqual(['*', '¶', '**', '***']);
+        expect([1, 20, 21, 35, 36, 50].map((number) => formatNoteNumber(number, 'decimalEnclosedCircle')))
             .toEqual(['①', '⑳', '㉑', '㉟', '㊱', '㊿']);
-        expect(formatFootnoteNumber(108, 'decimalFullWidth')).toBe('１０８');
+        expect(formatNoteNumber(108, 'decimalFullWidth')).toBe('１０８');
     });
 });

@@ -19,9 +19,9 @@ import type { ISectionBreakConfig } from '../../../basics/interfaces';
 import type { ILayoutContext } from './tools';
 import { DocumentDataModel } from '@univerjs/core';
 import { DocumentViewModel } from '../view-model/document-view-model';
-import { defaultSeparatorBody, layoutFootnoteBody, layoutFootnoteSegment } from './footnote-layout';
-import { getNoteSections } from './footnote-numbering';
+import { defaultSeparatorBody, layoutNoteBody, layoutNoteSegment } from './footnote-layout';
 import { createSkeletonPage } from './model/page';
+import { getNoteSections } from './note-numbering';
 
 /** Endnotes occupy document flow after a section or the final body section. */
 export class DocumentEndnoteLayout {
@@ -33,7 +33,7 @@ export class DocumentEndnoteLayout {
         const section = sections[sectionIndex];
         const isLast = sectionIndex >= sections.length - 1;
         const placed = new Set(pages.flatMap((page) => (page.notes ?? []).map((note) => note.noteId)));
-        const references = [...this._ctx.footnoteReferences?.values() ?? []].filter((reference) => {
+        const references = [...this._ctx.noteReferences?.values() ?? []].filter((reference) => {
             if (reference.type !== 'endnote' || placed.has(reference.noteId)) {
                 return false;
             }
@@ -62,9 +62,9 @@ export class DocumentEndnoteLayout {
                 continuationPageHeight: Math.max(1, page.pageHeight - page.marginTop - page.marginBottom - (continuation?.height ?? 0) - (notice?.height ?? 0)),
                 columnCount: 1,
             };
-            let notePages = layoutFootnoteBody(this._ctx, reference, config, options);
+            let notePages = layoutNoteBody(this._ctx, reference, config, options);
             if (notice && notePages.length > 1) {
-                notePages = layoutFootnoteBody(this._ctx, reference, config, { ...options, firstPageHeight: Math.max(1, options.firstPageHeight - notice.height) });
+                notePages = layoutNoteBody(this._ctx, reference, config, { ...options, firstPageHeight: Math.max(1, options.firstPageHeight - notice.height) });
             }
             let continued = false;
             for (let index = 0; index < notePages.length; index++) {
@@ -80,8 +80,8 @@ export class DocumentEndnoteLayout {
                     continue;
                 }
                 if (needsSeparator && decoration) {
-                    page.footnoteDecorations ??= [];
-                    page.footnoteDecorations.push({
+                    page.noteDecorations ??= [];
+                    page.noteDecorations.push({
                         noteType: 'endnote',
                         kind: continued ? 'continuationSeparator' : 'separator',
                         left: page.marginLeft,
@@ -96,8 +96,8 @@ export class DocumentEndnoteLayout {
                 top += fragment.height;
                 continued = true;
                 if (notice && index < notePages.length - 1) {
-                    page.footnoteDecorations ??= [];
-                    page.footnoteDecorations.push({ noteType: 'endnote', kind: 'continuationNotice', left: page.marginLeft, top: page.marginTop + top, page: notice });
+                    page.noteDecorations ??= [];
+                    page.noteDecorations.push({ noteType: 'endnote', kind: 'continuationNotice', left: page.marginLeft, top: page.marginTop + top, page: notice });
                     top += notice.height;
                 }
             }
@@ -118,7 +118,7 @@ export class DocumentEndnoteLayout {
         const model = new DocumentDataModel({ id: `endnote-${kind}`, body, documentStyle: snapshot.documentStyle, styles: snapshot.styles });
         const viewModel = new DocumentViewModel(model);
         try {
-            return layoutFootnoteSegment(this._ctx, viewModel, { noteId: model.getUnitId(), sectionId: config.sectionId }, config, {
+            return layoutNoteSegment(this._ctx, viewModel, { noteId: model.getUnitId(), sectionId: config.sectionId }, config, {
                 width: page.pageWidth - page.marginLeft - page.marginRight,
                 firstPageHeight: Number.POSITIVE_INFINITY,
                 continuationPageHeight: Number.POSITIVE_INFINITY,

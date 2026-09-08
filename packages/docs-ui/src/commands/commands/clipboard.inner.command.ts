@@ -44,7 +44,7 @@ import { getCustomDecorationAtPosition, getCustomRangeAtPosition } from '../../b
 import {
     IDocClipboardPasteAdapterService,
 } from '../../services/clipboard/doc-paste-mutation-adapter.service';
-import { cloneClipboardFootnotes, omitClipboardFootnotes } from '../../services/clipboard/internal-fragment';
+import { cloneClipboardNotes, omitClipboardNotes } from '../../services/clipboard/internal-fragment';
 import { getCommandSkeleton } from '../util';
 import { getDeleteRowContentActionParams, getDeleteRowsActionsParams, getDeleteTableActionParams } from './table/table';
 
@@ -98,7 +98,7 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
         }
         const unitId = docDataModel.getUnitId();
         if (docDataModel.getDocumentStyle().documentFlavor !== DocumentFlavor.TRADITIONAL) {
-            body = omitClipboardFootnotes(body);
+            body = omitClipboardNotes(body);
         }
 
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
@@ -118,7 +118,7 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
         const textX = new TextX();
         const jsonX = JSONX.getInstance();
         const rawActions: JSONXActions = [];
-        const pastedFootnotes: NonNullable<IDocumentData['notes']> = {};
+        const pastedNotes: NonNullable<IDocumentData['notes']> = {};
         const resourceRedoMutations: IMutationInfo[] = [];
         const resourceUndoMutations: IMutationInfo[] = [];
         const resourceMutationGroups: Array<{ redoMutations: IMutationInfo[]; undoMutations: IMutationInfo[] }> = [];
@@ -196,7 +196,7 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
                 );
             }
             if (docDataModel.getDocumentStyle().documentFlavor === DocumentFlavor.TRADITIONAL) {
-                Object.assign(pastedFootnotes, cloneClipboardFootnotes(cloneBody, doc.notes));
+                Object.assign(pastedNotes, cloneClipboardNotes(cloneBody, doc.notes));
             }
 
             if (hasBlockRange) {
@@ -317,15 +317,15 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
 
         const path = getRichTextEditPath(docDataModel, segmentId);
 
-        if (Object.keys(pastedFootnotes).length > 0) {
+        if (Object.keys(pastedNotes).length > 0) {
             if (segmentId) {
                 return false;
             }
             const existing = docDataModel.getSnapshot().notes;
             if (existing == null) {
-                rawActions.push(jsonX.insertOp(['notes'], pastedFootnotes)!);
+                rawActions.push(jsonX.insertOp(['notes'], pastedNotes)!);
             } else {
-                for (const [id, note] of Object.entries(pastedFootnotes)) {
+                for (const [id, note] of Object.entries(pastedNotes)) {
                     rawActions.push(jsonX.insertOp(['notes', id], note)!);
                 }
             }

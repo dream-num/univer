@@ -44,12 +44,13 @@ import {
     ComponentContainer,
     ComponentManager,
     KeyCode,
+    MobileKeyboardInsetContext,
     useComponentsOfPart,
     useConfigValue,
     useDependency,
     useObservable,
 } from '@univerjs/ui';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { EMPTY, map, merge, of, switchMap } from 'rxjs';
 import { SetCellEditVisibleOperation } from '../../../commands/operations/cell-edit.operation';
 import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY } from '../../../common/keys';
@@ -109,6 +110,7 @@ export function MobileFormulaBar() {
 }
 
 function MobileFormulaBarEditor() {
+    const keyboardInset = useContext(MobileKeyboardInsetContext);
     const commandService = useDependency(ICommandService);
     const contextService = useDependency(IContextService);
     const editorBridgeService = useDependency(IEditorBridgeService);
@@ -338,7 +340,7 @@ function MobileFormulaBarEditor() {
               dark:!univer-bg-gray-800
             `, expanded ? 'univer-fixed univer-top-0 univer-z-50' : 'univer-absolute')}
             style={{
-                bottom: 'var(--univer-mobile-keyboard-inset, 0px)',
+                bottom: keyboardInset,
                 paddingBottom: expanded ? undefined : 'env(safe-area-inset-bottom, 0px)',
                 paddingTop: expanded ? 'env(safe-area-inset-top, 0px)' : undefined,
             }}

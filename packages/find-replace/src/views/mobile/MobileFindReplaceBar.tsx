@@ -19,8 +19,8 @@ import type { LocaleKey } from '../../locale/types';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { clsx, Input, resetButtonClassName } from '@univerjs/design';
 import { ArrowDownIcon, ArrowUpIcon, CloseIcon, ConfigureTabIcon, SearchIcon } from '@univerjs/icons';
-import { IDialogService, useDependency, useObservable } from '@univerjs/ui';
-import { useEffect, useRef, useState } from 'react';
+import { IDialogService, MobileKeyboardInsetContext, useDependency, useObservable } from '@univerjs/ui';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { ReplaceAllMatchesCommand, ReplaceCurrentMatchCommand } from '../../commands/commands/replace.command';
 import {
     CloseFindDialogOperation,
@@ -47,6 +47,7 @@ export function MobileFindReplaceBar() {
 }
 
 function MobileFindReplaceBarContent() {
+    const keyboardInset = useContext(MobileKeyboardInsetContext);
     const commandService = useDependency(ICommandService);
     const dialogService = useDependency(IDialogService);
     const findReplaceService = useDependency(IFindReplaceService);
@@ -165,7 +166,7 @@ function MobileFindReplaceBarContent() {
               dark:!univer-bg-gray-800
             "
             style={{
-                bottom: 'var(--univer-mobile-keyboard-inset, 0px)',
+                bottom: keyboardInset,
                 paddingBottom: 'calc(6px + env(safe-area-inset-bottom, 0px))',
             }}
         >

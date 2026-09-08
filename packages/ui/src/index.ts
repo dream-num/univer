@@ -189,11 +189,10 @@ export * from './views/hooks/index';
 export { preventBrowserZoomInContainers } from './views/hooks/prevent-browser-zoom';
 export * from './views/index';
 export { MobileMenu } from './views/menu/mobile/MobileMenu';
-export { type INotificationOptions } from './views/notification/Notification';
-
+export { MobileKeyboardInsetContext } from './views/mobile-workbench/MobileKeyboardInsetContext';
+export type { INotificationOptions } from './views/notification/Notification';
 export { ObjectPermissionButton, openObjectPermissionDialog } from './views/object-permission/ObjectPermissionButton';
 export type { IObjectPermissionButtonProps } from './views/object-permission/ObjectPermissionButton';
-
 export { ObjectPermissionPanelButton, openObjectPermissionPanel } from './views/object-permission/ObjectPermissionPanel';
 
 export { ProgressBar } from './views/progress-bar/ProgressBar';

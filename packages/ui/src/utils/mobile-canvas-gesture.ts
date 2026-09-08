@@ -30,6 +30,7 @@ export interface IMobileCanvasGestureOptions {
 export class MobileCanvasGesture extends Disposable {
     private readonly _points = new Map<number, IPoint>();
     private _objectPointerId: number | null = null;
+    private _cancellingObject = false;
     private _startPoint: IPoint | null = null;
     private _moved = false;
     private _pinching = false;
@@ -105,6 +106,7 @@ export class MobileCanvasGesture extends Disposable {
             this._points.set(event.pointerId, point);
             if (!this._pinching) {
                 this._options.finishObjectTransform();
+                this._cancelObjectPointer();
                 this._pinching = true;
                 this._moved = true;
             }
@@ -154,6 +156,9 @@ export class MobileCanvasGesture extends Disposable {
     }
 
     private _onEnd(event: PointerEvent): void {
+        if (this._cancellingObject) {
+            return;
+        }
         if (!this._points.has(event.pointerId)) {
             return;
         }
@@ -211,6 +216,7 @@ export class MobileCanvasGesture extends Disposable {
         this._stopInertia();
         if (this._objectPointerId !== null) {
             this._options.finishObjectTransform();
+            this._cancelObjectPointer();
         }
         if (this._pinching) {
             this._options.endPinch();
@@ -219,5 +225,28 @@ export class MobileCanvasGesture extends Disposable {
         this._objectPointerId = null;
         this._pinching = false;
         this._startPoint = null;
+    }
+
+    private _cancelObjectPointer(): void {
+        const pointerId = this._objectPointerId;
+        const point = pointerId === null ? null : this._points.get(pointerId);
+        if (pointerId === null || !point) {
+            return;
+        }
+        const rect = this._canvas.getBoundingClientRect();
+        this._objectPointerId = null;
+        this._cancellingObject = true;
+        try {
+            // End the canvas's single-pointer interaction before pinch owns both fingers.
+            this._canvas.dispatchEvent(new PointerEvent('pointercancel', {
+                bubbles: true,
+                pointerId,
+                pointerType: 'touch',
+                clientX: rect.left + point.x,
+                clientY: rect.top + point.y,
+            }));
+        } finally {
+            this._cancellingObject = false;
+        }
     }
 }

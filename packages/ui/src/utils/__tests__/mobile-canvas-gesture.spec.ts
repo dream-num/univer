@@ -85,10 +85,14 @@ describe('MobileCanvasGesture', () => {
     });
 
     it('hands a selected object to a centered pinch and consumes the remaining finger without jumping', () => {
-        const { pointer, options } = setup('object');
+        const { canvas, pointer, options } = setup('object');
+        const cancel = vi.fn();
+        canvas.addEventListener('pointercancel', cancel);
         pointer('pointerdown', 100, 100);
         pointer('pointerdown', 200, 100, 2);
         expect(options.finishObjectTransform).toHaveBeenCalledTimes(1);
+        expect(cancel).toHaveBeenCalledTimes(1);
+        expect(cancel.mock.calls[0][0].pointerId).toBe(1);
         expect(pointer('pointermove', 300, 100, 2).defaultPrevented).toBe(true);
         expect(options.pinch).toHaveBeenCalledExactlyOnceWith(2, { x: 150, y: 100 }, { x: 200, y: 100 });
         pointer('pointerup', 300, 100, 2);

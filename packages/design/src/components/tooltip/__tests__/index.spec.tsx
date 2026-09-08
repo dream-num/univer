@@ -187,7 +187,7 @@ describe('Tooltip', () => {
         });
     });
 
-    it('should support a noninteractive tooltip surface', async () => {
+    it('allows callers to make tooltip content pointer-transparent through className', async () => {
         render(
             <Tooltip title="pass-through-tip">
                 interactive-trigger
@@ -198,7 +198,7 @@ describe('Tooltip', () => {
 
         cleanup();
         render(
-            <Tooltip title="pass-through-tip" interactive={false}>
+            <Tooltip title="pass-through-tip" className="univer-pointer-events-none">
                 pass-through-trigger
             </Tooltip>
         );

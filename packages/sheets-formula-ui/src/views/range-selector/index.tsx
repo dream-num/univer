@@ -35,6 +35,7 @@ import { SetSelectionsOperation } from '@univerjs/sheets';
 import { useDependency, useEvent } from '@univerjs/ui';
 import { useEffect, useRef, useState } from 'react';
 import { useStateRef } from '../formula-editor/hooks/use-state-ref';
+import { useRangeSelectorEditorDocument } from './hooks/use-range-selector-editor-document';
 import { useRangesHighlight } from './hooks/use-ranges-highlight';
 import { useRangeSelectorSelectionChange } from './hooks/use-selection-change';
 import { rangePreProcess } from './utils/range-pre-process';
@@ -288,6 +289,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
     const { sequenceNodes } = useRangesHighlight(editor, focusing, unitId, subUnitId);
     const sequenceNodesRef = useStateRef(sequenceNodes);
     const commandService = useDependency(ICommandService);
+    const { initialDocument, replaceText } = useRangeSelectorEditorDocument(editor, props.initialValue);
 
     const blurEditor = useEvent(() => {
         editor?.setSelectionRanges([]);
@@ -356,6 +358,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
                         isSingle
                         {...props}
                         className={clsx(props.className, 'rtl:[&>div]:univer-flex-row-reverse')}
+                        initialValue={initialDocument}
                         preserveHostFocus
                         onFocusChange={(focusing, newValue) => {
                             setFocusing(focusing);
@@ -390,7 +393,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
                 onConfirm={(ranges) => {
                     const resultStr = stringifyRanges(ranges);
                     const documentData = RichTextBuilder.create().insertText(resultStr).getData();
-                    editor?.replaceText(resultStr, false);
+                    replaceText(resultStr);
                     onChange?.(documentData, resultStr);
                     setPopupVisible(false);
                     setRangeSelectorRanges([]);

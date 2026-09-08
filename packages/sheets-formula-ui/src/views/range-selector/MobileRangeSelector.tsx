@@ -27,6 +27,7 @@ import { SetSelectionsOperation } from '@univerjs/sheets';
 import { useDependency, useEvent } from '@univerjs/ui';
 import { useEffect, useState } from 'react';
 import { useStateRef } from '../formula-editor/hooks/use-state-ref';
+import { useRangeSelectorEditorDocument } from './hooks/use-range-selector-editor-document';
 import { useRangesHighlight } from './hooks/use-ranges-highlight';
 import { parseRanges, stringifyRanges } from './index';
 import { MobileRangeSelectorDialog } from './MobileRangeSelectorDialog';
@@ -60,6 +61,7 @@ export function MobileRangeSelector(props: IRangeSelectorProps) {
     const commandService = useDependency(ICommandService);
     const { sequenceNodes } = useRangesHighlight(editor, focusing, unitId, subUnitId);
     const sequenceNodesRef = useStateRef(sequenceNodes);
+    const { initialDocument, replaceText } = useRangeSelectorEditorDocument(editor, props.initialValue);
     const blurEditor = useEvent(() => {
         editor?.setSelectionRanges([]);
         editor?.blur();
@@ -126,6 +128,7 @@ export function MobileRangeSelector(props: IRangeSelectorProps) {
                     isSingle
                     {...props}
                     className={clsx(props.className, 'rtl:[&>div]:univer-flex-row-reverse')}
+                    initialValue={initialDocument}
                     preserveHostFocus
                     onFocusChange={(isFocusing, newValue) => {
                         setFocusing(isFocusing);
@@ -158,7 +161,7 @@ export function MobileRangeSelector(props: IRangeSelectorProps) {
                 onConfirm={(ranges) => {
                     const resultStr = stringifyRanges(ranges);
                     const documentData = RichTextBuilder.create().insertText(resultStr).getData();
-                    editor?.replaceText(resultStr, false);
+                    replaceText(resultStr);
                     onChange?.(documentData, resultStr);
                     setPopupVisible(false);
                     setRangeSelectorRanges([]);
